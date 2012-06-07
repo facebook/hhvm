@@ -101,8 +101,7 @@ bool TestExtOpenssl::test_openssl_csr_get_public_key() {
 bool TestExtOpenssl::test_openssl_csr_get_subject() {
   Variant csr = f_openssl_csr_new(null, null);
   VERIFY(!csr.isNull());
-  VERIFY((f_openssl_csr_get_subject(csr)["O"] == "My Company Ltd") ||
-         (f_openssl_csr_get_subject(csr)["O"] == "Default Company Ltd"));
+  VERIFY(f_openssl_csr_get_subject(csr)["O"] == "Internet Widgits Pty Ltd");
   return Count(true);
 }
 

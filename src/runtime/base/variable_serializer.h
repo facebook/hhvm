@@ -78,7 +78,6 @@ public:
   void write(double  v);
   void write(const char *v, int len = -1, bool isArrayKey = false);
   void write(CStrRef v);
-  void write(CArrRef v);
   void write(CObjRef v);
   void write(CVarRef v, bool isArrayKey = false);
 
@@ -125,8 +124,6 @@ private:
   int m_maxLevelDebugger;        // for max level of DebuggerSerialize
 
   struct ArrayInfo {
-    VM::Class *class_;     // The Class if an Instance.
-    const ClassInfo *class_info; // The class info if an object
     bool is_object;     // nested arrays or objects
     bool is_vector;     // whether current array is a vector
     bool first_element; // whether this is first array element
@@ -134,9 +131,7 @@ private:
   };
   std::vector<ArrayInfo> m_arrayInfos;
 
-  void writePropertyPrivacy(CStrRef prop, VM::Class *class_,
-                            const ClassInfo *cls);
-  void writeSerializedProperty(CStrRef prop, const ClassInfo *cls);
+  void writePropertyKey(CStrRef prop);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

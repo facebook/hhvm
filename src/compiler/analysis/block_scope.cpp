@@ -26,7 +26,6 @@
 #include <compiler/analysis/file_scope.h>
 
 using namespace HPHP;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -101,26 +100,23 @@ ClassScopeRawPtr BlockScope::getContainingClass() {
   return ClassScopeRawPtr((HPHP::ClassScope*)bs);
 }
 
-ClassScopePtr BlockScope::findExactClass(const std::string &className) {
-  if (ClassScopePtr currentCls = getContainingClass()) {
-    if (!strcasecmp(className.c_str(), currentCls->getName().c_str())) {
+ClassScopeRawPtr BlockScope::findExactClass(ClassScopeRawPtr cls) {
+  if (ClassScopeRawPtr currentCls = getContainingClass()) {
+    if (cls->getName() == currentCls->getName()) {
       return currentCls;
     }
   }
   if (FileScopePtr currentFile = getContainingFile()) {
-    StatementList &stmts = *currentFile->getStmt();
-    for (int i = stmts.getCount(); i--; ) {
-      StatementPtr s = stmts[i];
-      if (s && s->is(Statement::KindOfClassStatement)) {
-        ClassScopePtr scope =
-          static_pointer_cast<ClassStatement>(s)->getClassScope();
-        if (!strcasecmp(className.c_str(), scope->getName().c_str())) {
-          return scope;
-        }
-      }
-    }
+    return currentFile->resolveClass(cls);
   }
-  return ClassScopePtr();
+  return ClassScopeRawPtr();
+}
+
+FunctionScopeRawPtr BlockScope::findExactFunction(FunctionScopeRawPtr func) {
+  if (FileScopePtr currentFile = getContainingFile()) {
+    return currentFile->resolveFunction(func);
+  }
+  return FunctionScopeRawPtr();
 }
 
 bool BlockScope::hasUser(BlockScopeRawPtr user, int useKinds) const {
@@ -232,4 +228,11 @@ void BlockScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void BlockScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_constants->outputCPP(cg, ar);
   m_variables->outputCPP(cg, ar);
+}
+
+int BlockScope::ScopeCompare::cmp(const BlockScopeRawPtr &p1,
+                                  const BlockScopeRawPtr &p2) const {
+  int d1 = p1->m_kind - p2->m_kind;
+  if (d1) return d1;
+  return strcasecmp(p1->getName().c_str(), p2->getName().c_str());
 }

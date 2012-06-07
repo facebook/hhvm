@@ -119,8 +119,8 @@ array(3) {
   [2]=>
   int(3)
 }
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf__callStatic5.php on line 91
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf__callStatic5.php on line 92
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf__callStatic5.php on line 101
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf__callStatic5.php on line 102
 string(3) "foo"
 array(3) {
   [0]=>

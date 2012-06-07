@@ -25,6 +25,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+inline Variant x_gethostname() {
+  FUNCTION_INJECTION_BUILTIN(gethostname);
+  return f_gethostname();
+}
+
 inline Variant x_gethostbyaddr(CStrRef ip_address) {
   FUNCTION_INJECTION_BUILTIN(gethostbyaddr);
   return f_gethostbyaddr(ip_address);

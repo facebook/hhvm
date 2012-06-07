@@ -27,7 +27,8 @@ DECLARE_BOOST_TYPES(IncludeExpression);
 class IncludeExpression : public UnaryOpExpression, public IParseHandler {
 public:
   static std::string CheckInclude(ConstructPtr includeExp,
-                                  ExpressionPtr fileExp, bool documentRoot);
+                                  ExpressionPtr fileExp,
+                                  bool &documentRoot, bool relative);
 
 public:
   IncludeExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
@@ -43,8 +44,15 @@ public:
   void setDocumentRoot() { m_documentRoot = true;}
   bool isDocumentRoot() { return m_documentRoot;}
   void setPrivateScope() { m_privateScope = true; }
-  bool getPrivateScope() const { return m_privateScope; }
-
+  bool isPrivateScope() const { return m_privateScope; }
+  void setPrivateInclude() { m_privateInclude = true; }
+  bool isPrivateInclude() const { return m_privateInclude; }
+  void setModule() { m_module = 1; }
+  bool isModule() const { return m_module; }
+  std::string includePath() const {
+    return m_documentRoot || !m_privateScope ? m_include : "";
+  }
+  FileScopeRawPtr getIncludedFile(AnalysisResultConstPtr) const;
 private:
   /**
    * There are 3 forms of include paths:
@@ -52,10 +60,15 @@ private:
    *   1. "/<absolute_path>" starts with '/'.
    *   2. "<relative_path>" starts without '/': relative to containing file
    *   3. "<relative_path>" + m_documentRoot == true: relative to doc root
+   *
+   * privateScope means the include gets its own variable environment
+   * privateInclude means this is the *only* reference to the included file
    */
-  bool m_documentRoot;
-  bool m_privateScope;
-  bool m_depsSet;
+  unsigned m_documentRoot : 1;
+  unsigned m_privateScope : 1;
+  unsigned m_privateInclude : 1;
+  unsigned m_module : 1;
+  unsigned m_depsSet : 1;
   std::string m_include;
 
   bool analyzeInclude(AnalysisResultConstPtr ar, const std::string &include);

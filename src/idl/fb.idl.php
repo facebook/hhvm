@@ -7,6 +7,8 @@
  * any changes that are not part of schema. Use "note" field to comment on
  * schema itself, and "note" fields are not used in any code generation but
  * only staying within this file.
+ *
+ * @nolint
  */
 ///////////////////////////////////////////////////////////////////////////////
 // Preamble: C++ code inserted at beginning of ext_{name}.h
@@ -91,9 +93,6 @@ DefineConstant(
     'type'   => Int64,
   ));
 
-// The following TAINT_* constants are used for an implementation of
-// dynamic taint analysis. See runtime/base/taint/README for details.
-
 DefineConstant(
   array(
     'name'   => "TAINT_NONE",
@@ -164,6 +163,11 @@ DefineConstant(
 //        'value' => default value of the argument
 //        'desc'  => description of the argument
 //      )
+//   'taint_observer' => taint propagation information
+//     array (
+//       'set_mask' => which bits to set automatically
+//       'clear_mask' => which bits to clear automatically
+//     )
 // )
 
 DefineFunction(
@@ -183,7 +187,7 @@ DefineFunction(
       ),
     ),
     'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
+      'set_mask' => "TAINT_BIT_MUTATED",
       'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
@@ -216,7 +220,7 @@ DefineFunction(
       ),
     ),
     'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
+      'set_mask' => "TAINT_BIT_MUTATED",
       'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
@@ -238,7 +242,7 @@ DefineFunction(
       ),
     ),
     'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
+      'set_mask' => "TAINT_BIT_MUTATED",
       'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
@@ -271,7 +275,7 @@ DefineFunction(
       ),
     ),
     'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
+      'set_mask' => "TAINT_BIT_MUTATED",
       'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
@@ -303,7 +307,8 @@ DefineFunction(
         'desc'   => "Extra data to pass to the handler when intercepting",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -342,7 +347,8 @@ DefineFunction(
         'desc'   => "Will always set to TRUE.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -381,7 +387,8 @@ DefineFunction(
         'desc'   => "Will always set to TRUE.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -399,7 +406,8 @@ DefineFunction(
         'desc'   => "The functions that can be renamed.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -423,7 +431,8 @@ DefineFunction(
         'desc'   => "What is the new name.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -440,6 +449,77 @@ DefineFunction(
         'name'   => "input",
         'type'   => Variant | Reference,
         'desc'   => "What string to sanitize.",
+      ),
+    ),
+    'taint_observer' => array(
+      'set_mask' => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_utf8_strlen_deprecated",
+    'desc'   => "Count the number of UTF-8 code points in string or byte count if it's not valid UTF-8.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "Returns the count of code points if valid UTF-8 else byte count.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "input",
+        'type'   => String,
+        'desc'   => "The string.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_utf8_strlen",
+    'desc'   => "Count the number of UTF-8 code points in string, substituting U+FFFD for invalid sequences.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "Returns the number of code points interpreting string as UTF-8.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "input",
+        'type'   => String,
+        'desc'   => "The string.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_utf8_substr",
+    'desc'   => "Cuts a portion of str specified by the start and length parameters.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the portion of str specified by the start and length parameters.\n\nIf str is shorter than start characters long, FALSE will be returned.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "str",
+        'type'   => String,
+        'desc'   => "The original string.",
+      ),
+      array(
+        'name'   => "start",
+        'type'   => Int32,
+        'desc'   => "If start is non-negative, fb_utf8_substr() cuts the portion out of str beginning at start'th character, counting from zero.\n\nIf start is negative, fb_utf8_substr() cuts out the portion beginning at the position, start characters away from the end of str.",
+      ),
+      array(
+        'name'   => "length",
+        'type'   => Int32,
+        'value'  => "INT_MAX",
+        'desc'   => "If length is given and is positive, the return value will contain at most length characters of the portion that begins at start (depending on the length of string).\n\nIf negative length is passed, fb_utf8_substr() cuts the portion out of str from the start'th character up to the character that is length characters away from the end of the string. In case start is also negative, the start position is calculated beforehand according to the rule explained above.",
       ),
     ),
     'taint_observer' => array(
@@ -465,7 +545,8 @@ DefineFunction(
         'desc'   => "The callback to invoke.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -490,7 +571,8 @@ DefineFunction(
         'desc'   => "Value returned when function does not exist.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -515,13 +597,14 @@ DefineFunction(
         'desc'   => "The function parameters to invoke with.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
   array(
     'name'   => "fb_get_code_coverage",
-    'desc'   => "Returns code coverage data collected so far. Turn on code coverage by Eval.RecordCodeCoverage and call this function periodically to get results. Eval.CodeCoverageOutputFile allows you to specify an output file to store results at end of a script run from command line. Use this function in server mode to collect results instead.",
+    'desc'   => "Returns code coverage data collected so far. Turn on code coverage by Eval.RecordCodeCoverage or by using fb_enable_code_coverage and call this function periodically to get results. Eval.CodeCoverageOutputFile allows you to specify an output file to store results at end of a script run from command line. Use this function in server mode to collect results instead.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
@@ -533,7 +616,32 @@ DefineFunction(
         'desc'   => "Whether to clear data after this function call.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_enable_code_coverage",
+    'desc'   => "Enables code coverage. The coverage information is cleared.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+    ),
+    'taint_observer' => array(
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_disable_code_coverage",
+    'desc'   => "Disables and returns code coverage. The coverage information is cleared.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -558,7 +666,8 @@ DefineFunction(
         'desc'   => "Extra argument to reserve for future use.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -570,7 +679,8 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Profile result.",
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -581,7 +691,8 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -593,7 +704,8 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Profile result.",
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -611,7 +723,8 @@ DefineFunction(
         'desc'   => "The \"virtual\" function's name.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -622,7 +735,8 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -646,7 +760,8 @@ DefineFunction(
         'desc'   => "One of those XHPROF_FLAGS_ constant to specify what to profile.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -657,7 +772,8 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -668,7 +784,8 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -686,7 +803,8 @@ DefineFunction(
         'desc'   => "The map to load. The format is array(\$id1 => array('ip' => {ip address}, 'db' => {database name}, 'port' => {port number}, 'username' => {user name for login}, 'password' => {password for login}), \$id2 => ...), where \$id1 and \$ids2 are arbitrary 32-bit integers that fb_crossall_query() can use to refer to the physical databases.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -741,7 +859,8 @@ DefineFunction(
         'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -790,7 +909,8 @@ DefineFunction(
         'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -813,7 +933,8 @@ DefineFunction(
         'desc'   => "The bit to flag.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -836,7 +957,8 @@ DefineFunction(
         'desc'   => "The bit to clear.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -860,7 +982,8 @@ DefineFunction(
         'desc'   => "The bit to check against.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -872,7 +995,8 @@ DefineFunction(
       'type'   => Int64Vec,
       'desc'   => "The array of warning counts.",
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -883,7 +1007,8 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -902,9 +1027,9 @@ DefineFunction(
         'desc'   => "The key for locating the value.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
-
 
 DefineFunction(
   array(
@@ -922,7 +1047,8 @@ DefineFunction(
         'desc'   => "The new value for the compression state.",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -940,7 +1066,8 @@ DefineFunction(
         'desc'   => "The callback to invoke. An exception object will be passed to the function",
       ),
     ),
-    'taint_observer' => false,
+    'taint_observer' => array(
+    ),
   ));
 
 DefineFunction(
@@ -952,11 +1079,76 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Query result in a format of array('total' => {number of total bytes to flush}, 'sent' => {number of bytes sent out}, 'time' => {time for flushing in us}).",
     ),
-    'args'   => array(
+    'taint_observer' => array(
     ),
-    'taint_observer' => false,
   ));
 
+DefineFunction(
+  array(
+    'name'   => "fb_get_last_flush_size",
+    'desc'   => "Get stats on flushing the last data chunk from server.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "Total number of bytes flushed since last flush",
+    ),
+    'taint_observer' => array(
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_lazy_stat",
+    'desc'   => "Gathers the statistics of the file named by filename, like stat(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Same format at the normal php stat() function.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "filename",
+        'type'   => String,
+        'desc'   => "Path to the file.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_lazy_lstat",
+    'desc'   => "Gathers the statistics of the file named by filename, like lstat(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Same format as the normal php lstat() function.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "filename",
+        'type'   => String,
+        'desc'   => "Path to a file or a symbolic link.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_lazy_realpath",
+    'desc'   => "Returns a canonicalized version of the input path that contains no symbolic links, like realpath(), except uses cached information from an internal inotify-based mechanism that may not be updated during the duration of a request.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Real path of the file.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "filename",
+        'type'   => String,
+        'desc'   => "Fake path to the file.",
+      ),
+    ),
+  ));
 
 
 ///////////////////////////////////////////////////////////////////////////////

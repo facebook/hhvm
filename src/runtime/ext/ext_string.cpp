@@ -30,8 +30,6 @@
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_observer.h>
 
-using namespace std;
-
 namespace HPHP {
 
 static Mutex s_mutex;
@@ -298,7 +296,7 @@ String f_number_format(double number, int decimals /* = 0 */,
 }
 
 Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
-                         int length /* = 0 */,
+                         int length /* = INT_MAX */,
                          bool case_insensitivity /* = false */) {
   int s1_len = main_str.size();
   int s2_len = str.size();
@@ -307,15 +305,13 @@ Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
     offset = s1_len + offset;
     if (offset < 0) offset = 0;
   }
-  if (offset > s1_len || length > s1_len - offset) {
+  if (offset >= s1_len || length <= 0) {
     return false;
   }
 
-  int cmp_len = length;
-  if (length == 0) {
-    cmp_len = s1_len - offset;
-    if (cmp_len < s2_len) cmp_len = s2_len;
-  }
+  int cmp_len = s1_len - offset;
+  if (cmp_len < s2_len) cmp_len = s2_len;
+  if (cmp_len > length) cmp_len = length;
 
   const char *s1 = main_str.data();
   if (case_insensitivity) {

@@ -22,12 +22,10 @@ clobber:
 		do $(MAKE) -C $$mdir clobber; done
 	$(V)for mdir in $(INTERMEDIATE_DIRS); do rm -fR $$mdir; done
 	$(V)$(RM) *.merge-left.* *.merge-right.* *.working www.pid
-	$(V)$(RM) $(OUT_DIR)lib$(PROJECT_NAME).so $(OUT_DIR)lib$(PROJECT_NAME).a
+	$(V)$(RM) $(LIB_DIR)/lib$(PROJECT_NAME).so $(LIB_DIR)/lib$(PROJECT_NAME).a
 	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
 	$(V)find $(OUT_DIR) -name "*.[od]" -delete
 	$(V)find . -name "*~" -delete
-	$(V)rm -f runtime/base/memory/smart_allocator.inc_gen
-	$(V)rm -f $(HPHP_LIB)/tainted_build
 
 .PHONY: clean
 clean: clobber

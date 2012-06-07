@@ -18,22 +18,32 @@
 #include <runtime/eval/runtime/eval_frame_injection.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 void CmdVariable::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_frame);
-  thrift.write(m_variables);
+  {
+    String sdata;
+    DebuggerWireHelpers::WireSerialize(m_variables, sdata);
+    thrift.write(sdata);
+  }
   thrift.write(m_global);
 }
 
 void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_frame);
-  thrift.read(m_variables);
+  {
+    String sdata;
+    thrift.read(sdata);
+    if (DebuggerWireHelpers::WireUnserialize(sdata, m_variables) !=
+        DebuggerWireHelpers::NoError) {
+      m_variables = null_array;
+      m_wireError = sdata;
+    }
+  }
   thrift.read(m_global);
 }
 
@@ -127,7 +137,7 @@ void CmdVariable::setClientOutput(DebuggerClient *client) {
   Array values;
   for (ArrayIter iter(m_variables); iter; ++iter) {
     String name = iter.first().toString();
-    if (client->getDebuggerApiModeSerialize()) {
+    if (client->getDebuggerClientApiModeSerialize()) {
       values.set(name,
                  DebuggerClient::FormatVariable(iter.second(), 200));
     } else {
@@ -167,7 +177,8 @@ bool CmdVariable::onServer(DebuggerProxy *proxy) {
 }
 
 bool CmdVariable::onServerVM(DebuggerProxy *proxy) {
-  m_variables = g_context->getLocalDefinedVariables(m_frame);
+  const_assert(hhvm);
+  m_variables = g_vmContext->getLocalDefinedVariables(m_frame);
   return proxy->send(this);
 }
 

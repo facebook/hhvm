@@ -25,6 +25,7 @@
 
 #include "assert.h"
 #include "asm-x64.h"
+#include "runtime/base/runtime_option.h"
 
 namespace HPHP {
 namespace x64 {
@@ -74,19 +75,10 @@ void CodeBlock::initCodeBlock(CodeAddress start, size_t sz) {
 
 void X64Assembler::init(size_t sz) {
   code.initCodeBlock(sz);
-#ifndef NDEBUG
-  // Fill with int3 instructions so we'll fail immediately if we end up
-  // executing in uninitialized CodeBlock memory. See also: comment in
-  // DataBlock::init().
-  memset(code.base, 0xCC, sz);
-#endif
 }
 
 void X64Assembler::init(CodeAddress start, size_t sz) {
   code.initCodeBlock(start, sz);
-#ifndef NDEBUG
-  memset(start, 0xCC, sz);
-#endif
 }
 
 } }

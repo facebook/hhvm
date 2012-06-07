@@ -18,6 +18,7 @@
 #define __FUNCTION_STATEMENT_H__
 
 #include <compiler/statement/method_statement.h>
+#include <compiler/expression/unary_op_expression.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +34,8 @@ public:
                     bool ref, const std::string &name,
                     ExpressionListPtr params, StatementListPtr stmt,
                     int attr,
-                    const std::string &docComment);
+                    const std::string &docComment,
+                    ExpressionListPtr attrList);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasDecl() const { return true; }

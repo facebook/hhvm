@@ -28,7 +28,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s_Continuation("Continuation");
@@ -123,9 +123,6 @@ void VariableEnvironment::setCurrentClass(CStrRef cls) {
   m_currentClass = cls;
 }
 
-String VariableEnvironment::currentClass() const {
-  return m_currentClass;
-}
 const ClassStatement *VariableEnvironment::currentClassStatement() const {
   return NULL;
 }

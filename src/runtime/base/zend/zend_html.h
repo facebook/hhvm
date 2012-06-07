@@ -46,8 +46,22 @@ namespace HPHP {
  *    a workaround of buggy coding. I don't find a legit use for that yet.
  */
 
+struct AsciiMap {
+  uint64 map[2];
+};
+
+enum StringHtmlEncoding {
+  STRING_HTML_ENCODE_UTF8 = 1,
+  STRING_HTML_ENCODE_NBSP = 2,
+  STRING_HTML_ENCODE_HIGH = 4,
+  STRING_HTML_ENCODE_UTF8IZE_REPLACE = 8
+};
+
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
                          bool encode_single_quote, bool utf8, bool nbsp);
+char *string_html_encode_extra(const char *input, int &len,
+                               StringHtmlEncoding flags,
+                               const AsciiMap *asciiMap);
 char *string_html_decode(const char *input, int &len,
                          bool decode_double_quote, bool decode_single_quote,
                          const char *charset_hint,

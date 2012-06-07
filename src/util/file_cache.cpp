@@ -21,8 +21,6 @@
 #include "logger.h"
 #include <sys/mman.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -497,8 +495,9 @@ void FileCache::dump() {
   }
 
   // output
-  for (set<string>::const_iterator iter = files.begin(); iter != files.end();
-       ++iter) {
+  for (std::set<string>::const_iterator iter = files.begin();
+      iter != files.end();
+      ++iter) {
     printf("%s\n", iter->c_str());
   }
 }

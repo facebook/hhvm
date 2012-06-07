@@ -66,8 +66,8 @@ array(4) {
   string(1) "d"
 }
 
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 49
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 51
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 53
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 55
 string(3) "foo"
 array(4) {
   [0]=>
@@ -99,8 +99,8 @@ array(3) {
   [2]=>
   int(3)
 }
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 95
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 96
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 104
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 105
 string(3) "foo"
 array(3) {
   [0]=>
@@ -137,10 +137,10 @@ array(3) {
   [2]=>
   int(3)
 }
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 142
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 143
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 153
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 154
 E9::__call
 E9::__call
 E9::__call
 E9::__call
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 180
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf-call10.php on line 194

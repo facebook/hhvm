@@ -18,8 +18,6 @@
 #include <runtime/vm/instrumentation.h>
 #include <runtime/ext/ext_file.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

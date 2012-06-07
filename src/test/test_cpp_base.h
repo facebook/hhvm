@@ -39,7 +39,6 @@ class TestCppBase : public TestBase {
 
   // building blocks
   bool TestSmartAllocator();
-  bool TestMemoryManager();
   bool TestIpBlockMap();
 
   /**

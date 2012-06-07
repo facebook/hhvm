@@ -1,0 +1,60 @@
+
+<h2>yield and generator</h2>
+
+This feature requires the [[index.php?file=options.compiler | compiler option]]
+EnableHipHopSyntax=true, or interpreter option Eval.EnableHipHopSyntax=true.
+
+HipHop extends PHP to include Python and C#-style generators. If you're
+unfamiliar with the concept, see
+[[http://docs.python.org/tutorial/classes.html#generators | the Python docs]].
+As in Python, the <i>yield</i> keyword marks the enclosing function as a
+generator:
+
+  function foo() {
+    $a = 123;
+    yield $a;
+    $a = 456;
+    yield $a;
+  }
+
+  foreach (foo() as $a) {
+    print "$a,";
+  }
+
+The above program outputs "123,456,". To abort a generator sequence, use "yield
+break".
+
+  function bar() {
+    $a = 123;
+    // this will stop the "foreach" immediately without any value returned
+    if ($abort) yield break;
+    yield $a;
+    $a = 456;
+    yield $a;
+  }
+
+Generators must observe the following restrictions:
+
+- Generators are <b>not recursive</b>. In the above example, foo() cannot call
+  foo() while iterating.
+- Generators are <b>called once</b>: foo() cannot be called again after it's
+  done iterating.
+- Do not call the rewind() method of the objects (of class Iterator) returned by
+  iterator functions.
+
+Also, yield in HipHop also supports passing a value from outside of the
+generator.
+
+  function foo() {
+    $a = yield 5;
+    yield $a + 1;
+  }
+
+From outside the generator, instead of resuming the generator with
+Continuation::next(), one can call Continuation::send() to pass a value, which
+will be assigned to $a, back into the generator.
+
+Note that the yield expression in the above example is not really an expression;
+it can only appear on its own on the RHS of an assignment statement. This is to
+avoid the complicated evaluation order problem in bizarre expressions like
+"($a = yield 5) * (yield $a + 3) - ($a = yield 4)".

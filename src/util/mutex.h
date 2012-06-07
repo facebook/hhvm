@@ -20,6 +20,9 @@
 #include <assert.h>
 #include <pthread.h>
 #include <time.h>
+#include <tbb/concurrent_hash_map.h>
+
+#include "util/rank.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +32,8 @@ class BaseMutex {
 private:
 #ifdef DEBUG
   static const int kMagic = 0xba5eba11;
-  int m_magic;
+  int          m_magic;
+  Rank         m_rank;
   // members for keeping track of lock ownership, useful for debugging
   bool         m_hasOwner;
   pthread_t    m_owner;
@@ -43,6 +47,7 @@ private:
              pthread_equal(m_owner, pthread_self()));
       assert(m_acquires == 0 ||
              pthread_equal(m_owner, pthread_self()));
+      pushRank(m_rank);
       m_hasOwner = true;
       m_owner    = pthread_self();
       m_acquires++;
@@ -61,6 +66,7 @@ private:
   inline void recordRelease() {
 #ifdef DEBUG
     if (enableAssertions) {
+      popRank(m_rank);
       assertOwnedBySelfImpl();
       assert(m_acquires > 0);
       if (--m_acquires == 0) {
@@ -88,10 +94,7 @@ protected:
 #endif
   }
 public:
-  BaseMutex(bool reentrant = true) {
-#ifdef DEBUG
-    m_magic = kMagic;
-#endif
+  BaseMutex(bool reentrant = true, Rank r = RankUnranked) {
     pthread_mutexattr_init(&m_mutexattr);
     if (reentrant) {
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
@@ -104,6 +107,8 @@ public:
     }
     pthread_mutex_init(&m_mutex, &m_mutexattr);
 #ifdef DEBUG
+    m_rank = r;
+    m_magic = kMagic;
     invalidateOwner();
     m_reentrant = reentrant;
 #endif
@@ -150,6 +155,7 @@ public:
   void lock() {
 #ifdef DEBUG
     assert(m_magic == kMagic);
+    checkRank(m_rank);
 #endif
     int ret = pthread_mutex_lock(&m_mutex);
     if (ret != 0) {
@@ -189,8 +195,8 @@ protected:
  */
 class Mutex : public BaseMutex<false> {
 public:
-  Mutex(bool reentrant = true) :
-    BaseMutex<false>(reentrant) {}
+  Mutex(bool reentrant = true, Rank rank = RankUnranked) :
+    BaseMutex<false>(reentrant, rank) {}
   pthread_mutex_t &getRaw() { return m_mutex; }
 };
 
@@ -200,8 +206,8 @@ public:
  */
 class SimpleMutex : public BaseMutex<true> {
 public:
-  SimpleMutex(bool reentrant = true) :
-    BaseMutex<true>(reentrant) {}
+  SimpleMutex(bool reentrant = true, Rank rank = RankUnranked) :
+    BaseMutex<true>(reentrant, rank) {}
   inline void assertNotOwned() const {
     assertNotOwnedImpl();
   }
@@ -213,8 +219,15 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 class SpinLock {
+#ifdef DEBUG
+  Rank m_rank;
+#endif
 public:
-  SpinLock() {
+  SpinLock(Rank rank = RankUnranked)
+#ifdef DEBUG
+    : m_rank(rank)
+#endif
+  {
     pthread_spin_init(&m_spinlock, 0);
   }
   ~SpinLock() {
@@ -222,9 +235,11 @@ public:
   }
 
   void lock() {
+    pushRank(m_rank);
     pthread_spin_lock(&m_spinlock);
   }
   void unlock() {
+    popRank(m_rank);
     pthread_spin_unlock(&m_spinlock);
   }
 
@@ -251,6 +266,7 @@ class ReadWriteMutex {
  */
   static const pthread_t InvalidThread = (pthread_t)0;
   pthread_t m_writeOwner;
+  Rank m_rank;
 #endif
 
   void invalidateWriteOwner() {
@@ -279,7 +295,11 @@ class ReadWriteMutex {
   }
 
 public:
-  ReadWriteMutex() {
+  ReadWriteMutex(Rank rank = RankUnranked)
+#ifdef DEBUG
+    : m_rank(rank)
+#endif
+  {
     invalidateWriteOwner();
     pthread_rwlock_init(&m_rwlock, NULL);
   }
@@ -295,6 +315,7 @@ public:
      * pthreads standard. See task #528421.
      */
     assertNotWriteOwner();
+    pushRank(m_rank);
     pthread_rwlock_rdlock(&m_rwlock);
     /*
      * Again, see task #528421.
@@ -304,6 +325,7 @@ public:
 
   void acquireWrite() {
     assertNotWriteOwner();
+    pushRank(m_rank);
     pthread_rwlock_wrlock(&m_rwlock);
     assertNotWriteOwned();
     recordWriteAcquire();
@@ -313,6 +335,7 @@ public:
   bool attemptWrite() { return !pthread_rwlock_trywrlock(&m_rwlock); }
   void release() {
 #ifdef DEBUG
+    popRank(m_rank);
     if (m_writeOwner == pthread_self()) {
       invalidateWriteOwner();
     }
@@ -325,6 +348,45 @@ private:
   ReadWriteMutex &operator=(const ReadWriteMutex &); // suppress
 
   pthread_rwlock_t m_rwlock;
+};
+
+/*
+ * A ranked wrapper around tbb::concurrent_hash_map.
+ */
+template<typename K, typename V, typename H=K, Rank R=RankUnranked>
+class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
+  typedef tbb::concurrent_hash_map<K, V, H> RawCHM;
+ public:
+  class accessor : public RawCHM::accessor {
+    bool freed;
+   public:
+    accessor() : freed(false) { pushRank(R); }
+    ~accessor() { if (!freed) popRank(R); }
+    void release() {
+      RawCHM::accessor::release();
+      popRank(R);
+      freed = true;
+    }
+  };
+  class const_accessor : public RawCHM::const_accessor {
+    bool freed;
+   public:
+    const_accessor() : freed(false) { pushRank(R); }
+    ~const_accessor() { if (!freed) popRank(R); }
+    void release() {
+      RawCHM::const_accessor::release();
+      popRank(R);
+      freed = true;
+    }
+  };
+
+  bool find(const_accessor& a, const K& k) const { return RawCHM::find(a, k); }
+  bool find(accessor& a, const K& k)         { return RawCHM::find(a, k); }
+  bool insert(accessor& a, const K& k)       { return RawCHM::insert(a, k); }
+  bool insert(const_accessor& a, const K& k) { return RawCHM::insert(a, k); }
+  bool erase(accessor& a)                    { return RawCHM::erase(a); }
+  bool erase(const_accessor& a)              { return RawCHM::erase(a); }
+  bool erase(const K& k)                     { return RawCHM::erase(k); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -22,8 +22,6 @@
 #include <compiler/analysis/class_scope.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -48,6 +46,13 @@ StatementPtr UseTraitStatement::clone() {
 
 void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
                                      ClassScopePtr scope) {
+  if (scope->isInterface()) {
+    parseTimeFatal(Compiler::InvalidTraitStatement,
+                   "Interfaces cannot use traits");
+  }
+  vector<string> usedTraits;
+  getUsedTraitNames(usedTraits);
+  scope->addUsedTraits(usedTraits);
 }
 
 

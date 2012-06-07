@@ -68,12 +68,14 @@ public:
     return *m_buf;
   }
   const char *head() { return m_buf; }
+  Variant &addVar();
 
  private:
   Type m_type;
   const char *m_buf;
   const char *m_end;
   std::vector<Variant*> m_refs;
+  std::list<Variant> m_vars;
   bool m_key;
   bool m_unknownSerializable;
 

@@ -17,19 +17,31 @@
 #include <runtime/eval/debugger/cmd/cmd_where.h>
 #include <runtime/base/array/array_iterator.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 void CmdWhere::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
-  thrift.write(m_stacktrace);
+  {
+    String sdata;
+    DebuggerWireHelpers::WireSerialize(m_stacktrace, sdata);
+    thrift.write(sdata);
+  }
+  thrift.write(m_stackArgs);
 }
 
 void CmdWhere::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
-  thrift.read(m_stacktrace);
+  {
+    String sdata;
+    thrift.read(sdata);
+    if (DebuggerWireHelpers::WireUnserialize(sdata, m_stacktrace) !=
+        DebuggerWireHelpers::NoError) {
+      m_stacktrace = null_array;
+      m_wireError = sdata;
+    }
+  }
+  thrift.read(m_stackArgs);
 }
 
 bool CmdWhere::help(DebuggerClient *client) {
@@ -51,6 +63,7 @@ bool CmdWhere::help(DebuggerClient *client) {
 Array CmdWhere::fetchStackTrace(DebuggerClient *client) {
   Array st = client->getStackTrace();
   if (st.isNull()) {
+    m_stackArgs = client->getDebuggerStackArgs();
     CmdWherePtr cmd = client->xend<CmdWhere>(this);
     st = cmd->m_stacktrace;
     client->setStackTrace(st);
@@ -67,6 +80,8 @@ bool CmdWhere::onClient(DebuggerClient *client) {
   Array st = fetchStackTrace(client);
   if (st.empty()) {
     client->info("(no stacktrace to display or in global scope)");
+    client->info("if you hit serialization limit, consider do "
+                 "\"set sa off\" and then get the stack without args");
     return true;
   }
 
@@ -120,13 +135,38 @@ void CmdWhere::setClientOutput(DebuggerClient *client) {
   client->setOutputType(DebuggerClient::OTStacktrace);
 }
 
+void CmdWhere::processStackTrace() {
+  // Strip out the args from the stack
+  static StaticString s_args("args");
+  Array smallST;
+  for (ArrayIter iter(m_stacktrace); iter; ++iter) {
+    CArrRef frame(iter.secondRef());
+    Array smallFrame;
+    for (ArrayIter iter2(frame); iter2; ++iter2) {
+      if (iter2.first().equal(s_args)) {
+        continue;
+      }
+      smallFrame.set(iter2.first(), iter2.secondRef());
+    }
+    smallST.append(smallFrame);
+  }
+  m_stacktrace = smallST;
+}
+
 bool CmdWhere::onServer(DebuggerProxy *proxy) {
   m_stacktrace = FrameInjection::GetBacktrace(false, true, false);
+  if (!m_stackArgs) {
+    processStackTrace();
+  }
   return proxy->send(this);
 }
 
 bool CmdWhere::onServerVM(DebuggerProxy *proxy) {
-  m_stacktrace = g_context->debugBacktrace(false, true, false);
+  const_assert(hhvm);
+  m_stacktrace = g_vmContext->debugBacktrace(false, true, false);
+  if (!m_stackArgs) {
+    processStackTrace();
+  }
   return proxy->send(this);
 }
 

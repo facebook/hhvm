@@ -165,6 +165,12 @@ inline String f_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
   return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
                                 scharset, false);
 }
+inline String f_fb_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
+                                    CStrRef charset = "ISO-8859-1",
+                                    CArrRef extra = Array()) {
+  return StringUtil::HtmlEncodeExtra(str, (StringUtil::QuoteStyle)quote_style,
+                                     charset.data(), false, extra);
+}
 inline String f_quoted_printable_encode(CStrRef str) {
   return StringUtil::QuotedPrintableEncode(str);
 }
@@ -292,7 +298,7 @@ inline int f_strcoll(CStrRef str1, CStrRef str2) {
 }
 
 Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
-                         int length = 0, bool case_insensitivity = false);
+                         int length = INT_MAX, bool case_insensitivity = false);
 
 Variant f_strrchr(CStrRef haystack, CVarRef needle);
 Variant f_strstr(CStrRef haystack, CVarRef needle);

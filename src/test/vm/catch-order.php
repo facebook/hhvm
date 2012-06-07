@@ -8,11 +8,13 @@
 class someexception extends Exception {}
 class other extends someexception {}
 
-try {
-  throw new other;
-} catch (other $e) {
-  echo "win\n";
-} catch (someexception $e) {
-  echo "fail\n";
+function main() {
+  try {
+    throw new other;
+  } catch (other $e) {
+    echo "win\n";
+  } catch (someexception $e) {
+    echo "fail\n";
+  }
 }
-
+main();

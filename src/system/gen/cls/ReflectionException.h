@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 27 */
+/* SRC: classes/reflection.php line 18 */
 FORWARD_DECLARE_CLASS(ReflectionException);
 extern const ObjectStaticCallbacks cw_ReflectionException;
 class c_ReflectionException : public c_Exception {
@@ -36,16 +36,9 @@ class c_ReflectionException : public c_Exception {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(ReflectionException, ReflectionException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_ReflectionException(const ObjectStaticCallbacks *cb = &cw_ReflectionException) : c_Exception(cb) {}
+  c_ReflectionException(const ObjectStaticCallbacks *cb = &cw_ReflectionException) : c_Exception(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_ReflectionException() NEVER_INLINE;
 

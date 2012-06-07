@@ -22,8 +22,6 @@
 #include <runtime/base/preg.h>
 #include <util/logger.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +56,7 @@ void CmdInfo::recvImpl(DebuggerThriftBuffer &thrift) {
       if (i < DebuggerClient::AutoCompleteCount) {
         thrift.read((*m_acLiveLists)[i]);
       } else {
-        vector<String> future;
+        vector<std::string> future;
         thrift.read(future);
       }
     }
@@ -190,16 +188,17 @@ String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
 
 bool CmdInfo::onServer(DebuggerProxy *proxy) {
   if (m_type == KindOfLiveLists) {
+    std::vector<String> tmpAcLiveLists[DebuggerClient::AutoCompleteCount];
     m_acLiveLists = DebuggerClient::CreateNewLiveLists();
 
     try {
       ClassInfo::GetSymbolNames(
-        (*m_acLiveLists)[DebuggerClient::AutoCompleteClasses],
-        (*m_acLiveLists)[DebuggerClient::AutoCompleteFunctions],
-        (*m_acLiveLists)[DebuggerClient::AutoCompleteConstants],
-        &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassMethods],
-        &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassProperties],
-        &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassConstants]);
+        tmpAcLiveLists[DebuggerClient::AutoCompleteClasses],
+        tmpAcLiveLists[DebuggerClient::AutoCompleteFunctions],
+        tmpAcLiveLists[DebuggerClient::AutoCompleteConstants],
+        &tmpAcLiveLists[DebuggerClient::AutoCompleteClassMethods],
+        &tmpAcLiveLists[DebuggerClient::AutoCompleteClassProperties],
+        &tmpAcLiveLists[DebuggerClient::AutoCompleteClassConstants]);
     } catch (Exception &e) {
       Logger::Error("Caught exception %s, auto-complete lists incomplete",
                     e.getMessage().c_str());
@@ -207,9 +206,23 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
       Logger::Error("Caught unknown exception, auto-complete lists incomplete");
     }
 
+    int tempList[] = {DebuggerClient::AutoCompleteClasses,
+                      DebuggerClient::AutoCompleteFunctions,
+                      DebuggerClient::AutoCompleteConstants,
+                      DebuggerClient::AutoCompleteClassMethods,
+                      DebuggerClient::AutoCompleteClassProperties,
+                      DebuggerClient::AutoCompleteClassConstants};
+
+    for (unsigned int i = 0 ; i < sizeof(tempList)/sizeof(int); ++i) {
+      for (unsigned int j = 0 ; j < tmpAcLiveLists[tempList[i]].size(); ++j) {
+        (*m_acLiveLists)[tempList[i]].push_back(
+          tmpAcLiveLists[tempList[i]][j]->toCPPString());
+      }
+    }
+
     Array variables;
     if (hhvm) {
-      variables = g_context->getLocalDefinedVariables(0);
+      variables = g_vmContext->getLocalDefinedVariables(0);
       variables += CmdVariable::GetGlobalVariables();
     } else {
       FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
@@ -219,11 +232,11 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
         variables += CmdVariable::GetGlobalVariables();
       }
     }
-    vector<String> &vars =
+    vector<std::string> &vars =
       (*m_acLiveLists)[DebuggerClient::AutoCompleteVariables];
     vars.reserve(variables.size());
     for (ArrayIter iter(variables); iter; ++iter) {
-      vars.push_back(String("$") + iter.first().toString());
+      vars.push_back("$" + iter.first().toString()->toCPPString());
     }
 
     return proxy->send(this);

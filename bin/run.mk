@@ -24,10 +24,17 @@ endif
 
 EXTRA_LIB :=
 ifdef HPHP_EMITTER
-EXTRA_LIB := -Wl,-u,hphp_compiler_parse,$(HPHP_LIB)/libhphp_analysis.a
+EXTRA_LIB := -Wl,-u,hphp_compiler_parse,-u,hphp_build_native_func_unit,-u,hphp_build_native_class_unit,$(HPHP_LIB)/libhphp_analysis.a
+LIBS += $(HPHP_LIB)/libhphp_analysis.a
 endif
 ifdef HPHPI_THUNK
 CPPFLAGS += -DTHUNK_FILENAME='"/.hphpi-thunk"'
+endif
+ifdef HPHPI_BINARY
+CPPFLAGS += -DHPHPI_BINARY=1
+endif
+ifdef HHVM_BINARY
+CPPFLAGS += -DHHVM_BINARY=1
 endif
 
 CPPFLAGS += -I. $(SEP_EXTENSION_INCLUDE_PATHS)

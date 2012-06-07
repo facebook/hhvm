@@ -25,10 +25,14 @@ function probe($l, $r) {
   $v = (~$l);     var_dump($v);
 }
 
-$i = 0x3;
-$data = array(15, "7", "not an int. at all.");
-foreach ($data as $left) {
-  foreach ($data as $right) {
-    probe($left, $right);
+function main() {
+  $i = 0x3;
+  $data = array(15, "7", "not an int. at all.");
+  foreach ($data as $left) {
+    foreach ($data as $right) {
+      probe($left, $right);
+    }
   }
 }
+
+main();

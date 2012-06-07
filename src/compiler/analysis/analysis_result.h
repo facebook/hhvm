@@ -52,14 +52,11 @@ public:
     ParseAllFiles,
 
     // analyzeProgram
-    AnalyzeInclude,
-    AnalyzeTopLevel,
     AnalyzeAll,
     AnalyzeFinal,
 
     // pre-optimize
     FirstPreOptimize,
-    SecondPreOptimize,
 
     // inferTypes
     FirstInference,
@@ -126,7 +123,7 @@ public:
   Locker lock() const { return Locker(this); }
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
-  bool isParseOnDemand() { return m_package && m_parseOnDemand;}
+  bool isParseOnDemand() const { return m_package && m_parseOnDemand;}
   void setParseOnDemandDirs(const std::vector<std::string> &dirs) {
     ASSERT(m_package && !m_parseOnDemand);
     m_parseOnDemandDirs = dirs;
@@ -143,7 +140,6 @@ public:
 
   Phase getPhase() const { return m_phase;}
   void setPhase(Phase phase) { m_phase = phase;}
-  bool isAnalyzeInclude() const { return m_phase == AnalyzeInclude; }
 
   int getFunctionCount() const;
   int getClassCount() const;
@@ -155,6 +151,7 @@ public:
   void loadBuiltinFunctions();
   void loadBuiltins();
   void analyzeProgram(bool system = false);
+  void analyzeIncludes();
   void analyzeProgramFinal();
   void analyzePerfectVirtuals();
   void dump();
@@ -261,6 +258,7 @@ public:
   /**
    * Dependencies
    */
+  void link(FileScopePtr user, FileScopePtr provider);
   bool addClassDependency(FileScopePtr usingFile,
                           const std::string &className);
   bool addFunctionDependency(FileScopePtr usingFile,
@@ -299,8 +297,8 @@ public:
   /**
    * For function declaration parsing.
    */
-  static std::string prepareFile(const char *root,
-                                 const std::string &fileName, bool chop);
+  static std::string prepareFile(const char *root, const std::string &fileName,
+                                 bool chop, bool stripPath = true);
 
   void setOutputPath(const std::string &path) {
     m_outputPath = path;
@@ -321,8 +319,8 @@ public:
   /**
    * Literal string to String precomputation
    */
-  std::string getLiteralStringName(int64 hash, int index);
-  std::string getLitVarStringName(int64 hash, int index);
+  std::string getLiteralStringName(int64 hash, int index, bool iproxy = false);
+  std::string getLitVarStringName(int64 hash, int index, bool iproxy = false);
   int getLiteralStringId(const std::string &s, int &index);
 
   /**
@@ -370,7 +368,7 @@ public:
   void addNamedLiteralVarString(const std::string &s);
   void addNamedScalarVarArray(const std::string &s);
   StringToClassScopePtrVecMap getExtensionClasses();
-  void addInteger(int64 n) { m_allIntegers.insert(n); }
+  void addInteger(int64 n);
 private:
   Package *m_package;
   bool m_parseOnDemand;
@@ -406,6 +404,7 @@ private:
 
   Mutex m_namedScalarVarIntegersMutex;
   std::map<int, std::vector<std::string> > m_namedScalarVarIntegers;
+  Mutex m_allIntegersMutex;
   std::set<int64> m_allIntegers;
 
   Mutex m_namedScalarVarDoublesMutex;
@@ -441,7 +440,6 @@ public:
   void outputCPPScalarArrays(bool system);
   void outputCPPGlobalVariablesMethods();
   void outputCPPGlobalState();
-  void outputCPPFiberGlobalState();
 
   AnalysisResultPtr shared_from_this() {
     return boost::static_pointer_cast<AnalysisResult>
@@ -469,7 +467,6 @@ private:
   Graph m_depGraph;
   typedef std::map<vertex_descriptor, FileScopePtr> VertexToFileScopePtrMap;
   VertexToFileScopePtrMap m_fileVertMap;
-  void link(FileScopePtr user, FileScopePtr provider);
   void getTrueDeps(FileScopePtr f,
                    std::map<std::string, FileScopePtr> &trueDeps);
   void clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
@@ -550,9 +547,6 @@ private:
                                   const std::string &target, int offset);
   int getFileSize(FileScopePtr fs);
 
-  void outputCPPHashTableClassDeclaredFlagsLookup(CodeGenerator &cg);
-  void outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg);
-
   void repartitionCPP(const std::string &filename, int64 targetSize,
                       bool insideHPHP, bool force);
 
@@ -599,7 +593,7 @@ private:
   void outputCPPDynamicConstantTable(CodeGenerator::Output output);
   void outputCPPHashTableGetConstant(CodeGenerator &cg, bool system,
          const std::map<std::string, TypePtr> &constMap,
-         const hphp_const_char_map<bool> &dyns);
+         const hphp_string_map<bool> &dyns);
   void cloneRTTIFuncs(const StringToFunctionScopePtrMap &functions,
                       const StringToFunctionScopePtrVecMap *redecFunctions);
   void outputInitLiteralVarStrings(CodeGenerator &cg, int fileIndex,
@@ -607,6 +601,12 @@ private:
          std::vector<std::pair<int, int> > &litVarStrs);
 
   void outputInitLiteralVarStrings();
+  void outputStringProxyData(CodeGenerator &cg,
+    int fileIndex, std::vector<std::string> &lStrings,
+    std::vector<std::pair<std::string, int> > &bStrings);
+  void outputVarStringProxyData(CodeGenerator &cg,
+    int fileIndex, std::vector<std::pair<int, int> > &litVarStrs);
+
 
 public:
   static DECLARE_THREAD_LOCAL(BlockScopeRawPtr, s_currentScopeThreadLocal);

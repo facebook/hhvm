@@ -5,6 +5,10 @@
 #
 ################################################################################
 
+use threads;
+use threads::shared;
+use Thread::Semaphore;
+
 # Shut off buffering.
 select(STDOUT);
 $| = 1;
@@ -27,6 +31,7 @@ $opt_zero = 0;
 $opt_server = 0;
 $opt_port = 8080;
 $opt_home = ".";
+$opt_threads = `cat /proc/cpuinfo | grep '^processor' | wc -l`;
 
 $opt_retval =
 &GetOptions("h|help" => \$opt_help,
@@ -39,7 +44,8 @@ $opt_retval =
 	    "z|zero" => \$opt_zero,
             "server" => \$opt_server,
             "port:i" => \$opt_port,
-            "home:s" => \$opt_home
+            "home:s" => \$opt_home,
+            "threads=i" => \$opt_threads,
 	    );
 
 # Munge directory paths if necessary.
@@ -101,6 +107,10 @@ if ($opt_server)
   }
 }
 
+if (!$opt_threads) {
+    $opt_threads = 1;
+}
+
 #
 # Create and print header.
 #
@@ -128,6 +138,32 @@ $total_hutime = 0.0; # Total historical user time.
 $total_hstime = 0.0; # Total historical system time.
 $total_ntime = 0.0; # Total time for tests that have historical data.
 
+@test_buckets = ();
+%tests_okay = ();
+%tests_utime = ();
+%tests_stime = ();
+share(%tests_okay);
+share(%tests_utime);
+share(%tests_stime);
+# Try to construct the buckets so the test results are ready in approximately
+# alphabetical order
+for ($i = 0; $i < $opt_threads; $i++)
+{
+    push @test_buckets, [];
+}
+$i = 0;
+foreach $test (@ARGV)
+{
+    push @{$test_buckets[$i]}, $test;
+    $i = ($i + 1) % $opt_threads;
+}
+
+# Spawn off worker threads
+for ($i = 0; $i < $opt_threads; $i++)
+{
+    threads->create(\&run_tests, $test_buckets[$i]);
+}
+
 foreach $test (@ARGV)
 {
     # Strip out any whitespace in $test.
@@ -135,22 +171,37 @@ foreach $test (@ARGV)
 
     $okay = 1;
 
+    my (@TSTATS);
+    my ($t_str);
+    @TSTATS = ("--------------------------------------------------------------------------\n");
+
+    $t_str = sprintf ("%s%s", $test, ' ' x (40 - length($test)));
+    @TSTATS = (@TSTATS, $t_str);
+    if (!$opt_quiet)
+    {
+	foreach $line (@TSTATS)
+	{
+	    printf STDOUT "$line";
+	}
+    }
+
     if (-e "$opt_srcdir/$test.exp")
     {
 	# Diff mode.
 
-	($okay, $utime, $stime) = &run_test($test);
+	($okay, $utime, $stime) = wait_for_test($test);
 
 	if (-e "$opt_objdir/$test.out")
 	{
+            $diff_args = "--text -u";
             if ($opt_server)
             {
-	      `diff -I HipHop $opt_srcdir/$test.exp $opt_objdir/$test.out \\
+	      `diff $diff_args -I HipHop $opt_srcdir/$test.exp $opt_objdir/$test.out \\
                  > $opt_objdir/$test.diff 2>&1`;
             }
             else
             {
-	      `diff $opt_srcdir/$test.exp $opt_objdir/$test.out > $opt_objdir/$test.diff 2>&1`;
+	      `diff $diff_args $opt_srcdir/$test.exp $opt_objdir/$test.out > $opt_objdir/$test.diff 2>&1`;
             }
 	    if ($?)
 	    {
@@ -174,7 +225,7 @@ foreach $test (@ARGV)
     {
 	# Sequence mode.
 
-	($okay, $utime, $stime) = &run_test($test);
+	($okay, $utime, $stime) = wait_for_test($test);
 
 	if (open (STEST_OUT, "<$opt_objdir/$test.out"))
 	{
@@ -300,7 +351,14 @@ $t_str = sprintf ("Totals                                   %7.2f  %7.2f %7.2f"
 		    - ($total_hutime + $total_hstime))
 		   / ($total_hutime + $total_hstime) * 100));
 
+$thread_warning = "";
+if ($opt_threads > 1) {
+    $thread_warning = "WARNING: Multiple threads were used. CPU times "
+        . "are wildly inaccurate\n"
+}
+
 @TSTATS = ("--------------------------------------------------------------------------\n",
+           $thread_warning,
 	   $t_str,
 	   "--------------------------------------------------------------------------\n"
 	   );
@@ -310,7 +368,9 @@ if (!$opt_quiet)
     {
 	printf STDOUT "$line";
     }
-    printf STDOUT "failed tests:\n";
+    if (@FAILED_TESTS) {
+        printf STDOUT "failed tests:\n";
+    }
     foreach $fail (@FAILED_TESTS)
     {
         printf STDOUT "%50s\n", $fail;
@@ -332,27 +392,42 @@ if ($#FAILED_TESTS >= 0)
 }
 # End of main execution.
 
+sub run_tests
+{
+    foreach my $test (@{$_[0]})
+    {
+        my ($okay, $utime, $stime) = run_test($test);
+        {
+            lock(%tests_okay);
+            $tests_okay{$test} = $okay;
+            $tests_utime{$test} = $utime;
+            $tests_stime{$test} = $stime;
+            cond_signal(%tests_okay);
+        }
+    }
+}
+
+sub wait_for_test
+{
+    my ($test) = @_;
+    while (1)
+    {
+        lock(%tests_okay);
+        if (exists $tests_okay{$test}) {
+            return ($tests_okay{$test},
+                    $tests_utime{$test},
+                    $tests_stime{$test});
+        }
+        cond_wait(%tests_okay);
+    }
+}
+
 sub run_test
 {
     my ($test) = @_;
     my ($okay) = 1;
     my ($tutime, $tstime);
     my ($utime, $stime, $cutime, $cstime);
-    my (@TSTATS);
-    my ($t_str);
-
-    @TSTATS = ("--------------------------------------------------------------------------\n");
-
-    $t_str = sprintf ("%s%s", $test, ' ' x (40 - length($test)));
-    @TSTATS = (@TSTATS, $t_str);
-    @STATS = (@STATS, @TSTATS);
-    if (!$opt_quiet)
-    {
-	foreach $line (@TSTATS)
-	{
-	    printf STDOUT "$line";
-	}
-    }
 
     if ($opt_server)
     {

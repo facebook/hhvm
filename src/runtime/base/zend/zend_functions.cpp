@@ -29,6 +29,7 @@ static const char long_min_digits[] = "9223372036854775808";
 
 ///////////////////////////////////////////////////////////////////////////////
 
+HOT_FUNC
 char *
 conv_10(register int64 num, register int *is_negative, char *buf_end,
         register int *len) {

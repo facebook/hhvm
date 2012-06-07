@@ -22,8 +22,6 @@
 #include <runtime/base/util/libevent_http_client.h>
 #include <util/process.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -31,12 +29,16 @@ void CmdMachine::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_sandboxes);
   thrift.write(m_rpcConfig);
+  thrift.write(m_force);
+  thrift.write(m_succeed);
 }
 
 void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_sandboxes);
   thrift.read(m_rpcConfig);
+  thrift.read(m_force);
+  thrift.read(m_succeed);
 }
 
 void CmdMachine::list(DebuggerClient *client) {
@@ -127,34 +129,49 @@ bool CmdMachine::processList(DebuggerClient *client,
 
 bool CmdMachine::AttachSandbox(DebuggerClient *client,
                                const char *user /* = NULL */,
-                               const char *name /* = NULL */) {
+                               const char *name /* = NULL */,
+                               bool force /* = false */) {
   string login;
   if (user == NULL) {
-    login = Process::GetCurrentUser();
+    login = client->getCurrentUser();
     user = login.c_str();
+  }
+  if (client->isApiMode()) {
+    force = true;
   }
 
   DSandboxInfoPtr sandbox(new DSandboxInfo());
   sandbox->m_user = user ? user : "";
   sandbox->m_name = (name && *name) ? name : "default";
-  return AttachSandbox(client, sandbox);
+  return AttachSandbox(client, sandbox, force);
 }
 
 bool CmdMachine::AttachSandbox(DebuggerClient *client,
-                               DSandboxInfoPtr sandbox) {
+                               DSandboxInfoPtr sandbox,
+                               bool force /* = false */) {
   if (client->isLocal()) {
     client->error("Local script doesn't have sandbox to attach to.");
-    return true;
+    return false;
   }
 
   CmdMachine cmd;
   cmd.m_body = "attach";
   cmd.m_sandboxes.push_back(sandbox);
+  cmd.m_force = force;
 
-  client->send(&cmd);
-  client->info("Pre-loading %s, please wait...", sandbox->desc().c_str());
-  client->playMacro("startup");
-  throw DebuggerConsoleExitException();
+  client->info("Attaching to %s and pre-loading, please wait...",
+               sandbox->desc().c_str());
+  CmdMachinePtr cmdMachine = client->xend<CmdMachine>(&cmd);
+  if (cmdMachine->m_succeed) {
+    client->playMacro("startup");
+  } else {
+    client->error("failed to attach to sandbox, maybe another client is "
+                  "debugging, \nattach to another sandbox, exit the "
+                  "attached hphpd client, or try \n"
+                  "[m]achine [a]ttach [f]orce [%s] [%s]",
+                  sandbox->m_user.c_str(), sandbox->m_name.c_str());
+  }
+  return cmdMachine->m_succeed;
 }
 
 void CmdMachine::UpdateIntercept(DebuggerClient *client,
@@ -166,7 +183,7 @@ void CmdMachine::UpdateIntercept(DebuggerClient *client,
      "port", port ? port : RuntimeOption::DebuggerDefaultRpcPort,
      "auth", String(RuntimeOption::DebuggerDefaultRpcAuth),
      "timeout", RuntimeOption::DebuggerDefaultRpcTimeout);
-  client->send(&cmd);
+  client->xend<CmdMachine>(&cmd);
 }
 
 bool CmdMachine::onClient(DebuggerClient *client) {
@@ -233,19 +250,31 @@ bool CmdMachine::onClient(DebuggerClient *client) {
           return true;
         }
       }
-    } else if (client->argCount() == 2) {
-      sandbox = DSandboxInfoPtr(new DSandboxInfo());
-      sandbox->m_user = Process::GetCurrentUser();
-      sandbox->m_name = snum;
-    } else if (client->argCount() == 3) {
-      sandbox = DSandboxInfoPtr(new DSandboxInfo());
-      sandbox->m_user = snum;
-      sandbox->m_name = client->argValue(3);
     } else {
-      return help(client);
+      int argBase = 2;
+      if (client->argCount() >= 2 && client->arg(2, "force")) {
+        m_force = true;
+        argBase++;
+      }
+      sandbox = DSandboxInfoPtr(new DSandboxInfo());
+      if (client->argCount() < argBase) {
+        sandbox->m_user = client->getCurrentUser();
+        sandbox->m_name = "default";
+      } else if (client->argCount() == argBase) {
+        sandbox->m_user = client->getCurrentUser();
+        sandbox->m_name = client->argValue(argBase);
+      } else if (client->argCount() == argBase + 1) {
+        sandbox->m_user = client->argValue(argBase);
+        sandbox->m_name = client->argValue(argBase + 1);
+      } else {
+        return help(client);
+      }
     }
-
-    return AttachSandbox(client, sandbox);
+    if (AttachSandbox(client, sandbox, m_force)) {
+      // Attach succeed, wait for next interrupt
+      throw DebuggerConsoleExitException();
+    }
+    return true;
   }
 
   return help(client);
@@ -261,17 +290,19 @@ bool CmdMachine::onServer(DebuggerProxy *proxy) {
       LibEventHttpClient::SetCache(host.data(), port, 1);
       register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig);
     }
-    return true;
+    return proxy->send(this);
   }
   if (m_body == "list") {
     Debugger::GetRegisteredSandboxes(m_sandboxes);
     return proxy->send(this);
   }
   if (m_body == "attach" && !m_sandboxes.empty()) {
-    proxy->switchSandbox(m_sandboxes[0]->id());
-    proxy->notifyDummySandbox();
-    m_exitInterrupt = true;
-    return true;
+    m_succeed = proxy->switchSandbox(m_sandboxes[0]->id(), m_force);
+    if (m_succeed) {
+      proxy->notifyDummySandbox();
+      m_exitInterrupt = true;
+    }
+    return proxy->send(this);
   }
   return false;
 }

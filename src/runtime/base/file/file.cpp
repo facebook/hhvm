@@ -39,8 +39,6 @@
 #include <runtime/base/string_util.h>
 #include <runtime/base/array/array_iterator.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -52,8 +50,8 @@ IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
 
 String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */,
                            bool keepRelative /*= false */) {
-  String canonicalized(Util::canonicalize(string(filename.data(),
-                                                 filename.size())));
+  String canonicalized(Util::canonicalize(filename.data(),
+                                          filename.size()), AttachString);
 
   if (useFileCache) {
     String translated = TranslatePath(canonicalized, false);
@@ -179,43 +177,45 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
     return Object();
   }
 
-  if (!strncmp(filename.data(), http_prefix, sizeof(http_prefix) - 1) ||
-      !strncmp(filename.data(), https_prefix, sizeof(https_prefix) - 1)) {
-    UrlFile *file;
-    if (options.isNull()) {
-      file = NEWOBJ(UrlFile)();
-    } else {
-      Array opts = options["http"];
-      String method = "GET";
-      if (opts.exists("method")) {
-        method = opts["method"].toString();
-      }
-      Array headers;
-      if (opts.exists("header")) {
-        Array lines = StringUtil::Explode(opts["header"].toString(), "\r\n");
-        for (ArrayIter it(lines); it; ++it) {
-          Array parts = StringUtil::Explode(it.second().toString(), ": ");
-          headers.set(parts.rvalAt(0), parts.rvalAt(1));
+  if (!RuntimeOption::ServerHttpSafeMode) {
+    if (!strncmp(filename.data(), http_prefix, sizeof(http_prefix) - 1) ||
+        !strncmp(filename.data(), https_prefix, sizeof(https_prefix) - 1)) {
+      UrlFile *file;
+      if (options.isNull()) {
+        file = NEWOBJ(UrlFile)();
+      } else {
+        Array opts = options["http"];
+        String method = "GET";
+        if (opts.exists("method")) {
+          method = opts["method"].toString();
         }
-        if (opts.exists("user_agent") && !headers.exists("User-Agent")) {
-          headers.set("User_Agent", opts["user_agent"]);
+        Array headers;
+        if (opts.exists("header")) {
+          Array lines = StringUtil::Explode(opts["header"].toString(), "\r\n");
+          for (ArrayIter it(lines); it; ++it) {
+            Array parts = StringUtil::Explode(it.second().toString(), ": ");
+            headers.set(parts.rvalAt(0), parts.rvalAt(1));
+          }
+          if (opts.exists("user_agent") && !headers.exists("User-Agent")) {
+            headers.set("User_Agent", opts["user_agent"]);
+          }
         }
+        int max_redirs = 20;
+        if (opts.exists("max_redirects")) max_redirs = opts["max_redirects"];
+        int timeout = -1;
+        if (opts.exists("timeout")) timeout = opts["timeout"];
+        file = NEWOBJ(UrlFile)(method.data(), headers,
+                               opts["content"].toString(), max_redirs, timeout);
       }
-      int max_redirs = 20;
-      if (opts.exists("max_redirects")) max_redirs = opts["max_redirects"];
-      int timeout = -1;
-      if (opts.exists("timeout")) timeout = opts["timeout"];
-      file = NEWOBJ(UrlFile)(method.data(), headers, opts["content"].toString(),
-                          max_redirs, timeout);
+      Object obj(file);
+      bool ret = file->open(filename, mode);
+      if (!ret) {
+        raise_warning("Failed to open %s (%s)", filename.data(),
+                      file->getLastError().c_str());
+        return Object();
+      }
+      return obj;
     }
-    Object obj(file);
-    bool ret = file->open(filename, mode);
-    if (!ret) {
-      raise_warning("Failed to open %s (%s)", filename.data(),
-                    file->getLastError().c_str());
-      return Object();
-    }
-    return obj;
   }
 
   bool gzipped = false;
@@ -300,7 +300,7 @@ int File::getc() {
 
 String File::read(int64 length) {
   if (length <= 0) {
-    throw_invalid_argument("Invalid length %d", length);
+    raise_notice("Invalid length %lld", length);
     return "";
   }
 

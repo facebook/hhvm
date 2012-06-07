@@ -29,8 +29,6 @@
 #include <test/test_mysql_info.inc>
 #include <system/lib/systemlib.h>
 
-using namespace std;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 TestCppBase::TestCppBase() {
@@ -45,9 +43,6 @@ bool TestCppBase::RunTests(const std::string &which) {
   RUN_TEST(TestArray);
   RUN_TEST(TestObject);
   RUN_TEST(TestVariant);
-#ifndef DEBUGGING_SMART_ALLOCATOR
-  RUN_TEST(TestMemoryManager);
-#endif
   RUN_TEST(TestIpBlockMap);
   RUN_TEST(TestEqualAsStr);
   return ret;
@@ -78,9 +73,6 @@ private:
 class SomeClass {
 public:
   SomeClass() : m_data(0) {}
-  bool calculate(int &size) { return false;}
-  void backup(LinearAllocator &allocator) {}
-  void restore(const char *&data) {}
   void sweep() {}
   void dump() { printf("data: %d\n", m_data);}
   int m_data;
@@ -94,7 +86,9 @@ public:
   CStrRef o_getClassNameHook() const { return s_TestResource; }
 };
 
-typedef SmartAllocator<SomeClass, -1, SmartAllocatorImpl::NoCallbacks>
+typedef SmartAllocator<SomeClass,
+                       SmartAllocatorImpl::TestAllocator,
+                       SmartAllocatorImpl::NoCallbacks>
         SomeClassAlloc;
 
 bool TestCppBase::TestSmartAllocator() {
@@ -855,107 +849,6 @@ public:
   void dump() {}
 };
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TestGlobals);
-
-bool TestCppBase::TestMemoryManager() {
-  s_apc_store.reset();
-  MemoryManager::TheMemoryManager()->enable();
-
-  TestGlobals *globals = NEW(TestGlobals)();
-  f_apc_store("key", CREATE_VECTOR2("value", "s"));
-  f_apc_store("key2", "apple");
-  f_apc_store("key3", CREATE_MAP1("foo", "foo"));
-  globals->m_array2 = f_apc_fetch("key");
-  String apple = f_apc_fetch("key2"); // a shared string data
-  Array arr = CREATE_MAP1(apple, "jobs");
-  VS(arr[apple], "jobs");
-  globals->m_string2 = f_apc_fetch("key2");
-  globals->m_conn = f_mysql_connect(TEST_HOSTNAME, TEST_DATABASE,
-                                    TEST_PASSWORD, false, 0);
-  MemoryManager::TheMemoryManager()->checkpoint();
-  globals->m_curlconn = f_curl_init("http://localhost:8080/request");
-  f_curl_setopt(globals->m_curlconn, CURLOPT_WRITEFUNCTION,
-                String("foo", CopyString));
-  globals->m_curlMultiConn = f_curl_multi_init();
-  Variant c1 = f_curl_init("http://localhost:8080/request");
-  Variant c2 = f_curl_init("http://localhost:8080/request");
-  f_curl_multi_add_handle(globals->m_curlMultiConn, c1);
-  f_curl_multi_add_handle(globals->m_curlMultiConn, c2);
-  globals->m_conn = null;
-
-  // we do it twice, so to verify MemoryManager's rollback() is valid
-  // we do it 3rd time, so to verify LinearAllocator works under rollback.
-  // we do it 4th time, so to verify MySQL connection works under rollback.
-  for (int i = 0; i < 4; i++) {
-
-    // Circular reference between two arrays. Without sweeping, these memory
-    // will still be reachable after exit.
-    {
-      Variant arr = Array::Create();
-      arr.append(arr);
-    }
-    {
-      Variant arr = Array::Create();
-      arr.append(ref(arr));
-    }
-    {
-      Variant arr1 = Array::Create();
-      Variant arr2 = Array::Create();
-      arr1.append(ref(arr2));
-      arr2.append(ref(arr1));
-    }
-
-    // Circular reference between two objects.
-    {
-      Object obj(SystemLib::AllocStdClassObject());
-      obj->o_set("a", obj);
-      obj->o_set("f", Object(NEWOBJ(PlainFile)()));
-    }
-    {
-      Object obj1(SystemLib::AllocStdClassObject());
-      Object obj2(SystemLib::AllocStdClassObject());
-      obj1->o_set("a", obj2);
-      obj2->o_set("a", obj1);
-      obj1->o_set("f", Object(NEWOBJ(PlainFile)()));
-    }
-
-    // dangling APC variables inside circular arrays
-    {
-      Variant arr1 = Array::Create();
-      Variant arr2 = Array::Create();
-      arr1.append(ref(arr2));
-      arr2.append(ref(arr1));
-      f_apc_store("name", CREATE_VECTOR2("value", "s"));
-      Variant v = f_apc_fetch("name");
-      arr1.append(v);
-      f_apc_delete("name");
-    }
-
-    globals->m_string++; // mutating m_data internally
-    VS(globals->m_string, "appleorangf");
-
-    globals->m_array.set("a", "pear");
-    globals->m_array.set("c", "banana");
-    VS(globals->m_array["a"], "pear");
-    VS(globals->m_array["c"], "banana");
-
-    globals->m_conn = null;
-    MemoryManager::TheMemoryManager()->sweepAll();
-    MemoryManager::TheMemoryManager()->rollback();
-    VS(globals->m_array2["0"], "value");
-    VS(globals->m_array2["1"], "s");
-    VS(globals->m_string2, "apple");
-    Logger::Verbose("%s", SharedStores::ReportStats(0).c_str());
-
-    VS(globals->m_string, "appleorange");
-
-    VS(globals->m_array["a"], "apple");
-    VERIFY(!globals->m_array.exists("c"));
-
-    VS(arr[apple], "jobs");
-  }
-  DELETE(TestGlobals)(globals);
-  return Count(true);
-}
 
 bool TestCppBase::TestIpBlockMap() {
   struct in6_addr addr;

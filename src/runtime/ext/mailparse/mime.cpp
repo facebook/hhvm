@@ -947,7 +947,7 @@ int MimePart::extractImpl(int decode, File *src) {
     if (n > end - start_pos) n = end - start_pos;
     String str = src->read(n);
     if (str.empty()) {
-      raise_warning("error reading from file at offset %lld", start_pos);
+      raise_warning("error reading from file at offset %d", start_pos);
       decoderFinish();
       return false;
     }

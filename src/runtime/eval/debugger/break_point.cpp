@@ -21,9 +21,8 @@
 #include <runtime/base/preg.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/base/class_info.h>
-
-using namespace std;
-using namespace boost;
+#include <util/stat_cache.h>
+#include <runtime/vm/translator/translator-inline.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,39 +101,65 @@ const char *InterruptSiteFI::getFunction() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const VM::SourceLoc InterruptSiteVM::s_dummySourceLoc;
-
 InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
                                  CVarRef e /* = null_variant */)
-  : InterruptSite(e), m_sourceLoc(NULL) {
+  : InterruptSite(e), m_unit(NULL), m_valid(false), m_funcEntry(false) {
   const_assert(hhvm);
-  ExecutionContext* context = g_context.getNoCheck();
-  HPHP::VM::ActRec *fp = context->m_fp;
-  const uchar *pc = context->m_pc;
+  VM::Transl::VMRegAnchor _;
+#define bail_on(c) if (c) { return; }
+  VMExecutionContext* context = g_vmContext;
+  VM::ActRec *fp = context->getFP();
+  bail_on(!fp);
+  VM::Offset offset;
   if (hardBreakPoint) {
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller
-    fp = context->arGetSfp(fp);
-    // arGetSfp should be valid before returning from the extension function
+    fp = context->getPrevVMState(fp, &offset);
+    ASSERT(fp);
+    bail_on(!fp->m_func);
+    m_unit = fp->m_func->unit();
+    bail_on(!m_unit);
+  } else {
+    const uchar *pc = context->getPC();
+    bail_on(!fp->m_func);
+    m_unit = fp->m_func->unit();
+    bail_on(!m_unit);
+    offset = m_unit->offsetOf(pc);
+    if (offset == fp->m_func->base()) {
+      m_funcEntry = true;
+    }
   }
-  if (!fp || !fp->m_func->m_unit) {
-    return;
+  m_file = m_unit->filepath()->data();
+  if (m_unit->getSourceLoc(offset, m_sourceLoc)) {
+    m_line0 = m_sourceLoc.line0;
+    m_char0 = m_sourceLoc.char0;
+    m_line1 = m_sourceLoc.line1;
+    m_char1 = m_sourceLoc.char1;
+
+    if (g_context->getDebuggerSmallStep()) {
+      // get offset range for the pc only
+      VM::OffsetRange range;
+      if (m_unit->getOffsetRange(offset, range)) {
+        m_offsetRangeVec.push_back(range);
+      }
+    } else {
+      // get offset ranges for the whole line
+      // we use m_line1 here because it seems working better than m_line0
+      // in a handful of cases for our bytecode-source mapping. we probably
+      // should consider modify the mapping to make stepping easier.
+      if (!m_unit->getOffsetRanges(m_line1, m_offsetRangeVec)) {
+        m_offsetRangeVec.clear();
+      }
+    }
   }
-  HPHP::VM::Unit *unit = fp->m_func->m_unit;
-  ASSERT(unit->m_filepath);
-  m_file = unit->m_filepath->data();
-  int offset = unit->offsetOf(pc);
-  m_sourceLoc = unit->getSourceLoc(offset);
-  m_line0 = m_sourceLoc->line0;
-  m_char0 = m_sourceLoc->char0;
-  m_line1 = m_sourceLoc->line1;
-  m_char1 = m_sourceLoc->char1;
-  m_function = fp->m_func->m_name->data();
-  if (fp->m_func->m_preClass) {
-    m_class = fp->m_func->m_preClass->m_name->data();
+  m_function = fp->m_func->name()->data();
+  if (fp->m_func->preClass()) {
+    m_class = fp->m_func->preClass()->name()->data();
   } else {
     m_class = "";
   }
+#undef bail_on
+  m_valid = true;
 }
 
 const char *InterruptSiteVM::getFile() const {
@@ -261,9 +286,9 @@ void BreakPointInfo::setClause(const std::string &clause, bool check) {
 
 void BreakPointInfo::toggle() {
   switch (m_state) {
-    case Always:   m_state = Once;     break;
-    case Once:     m_state = Disabled; break;
-    case Disabled: m_state = Always;   break;
+    case Always:   setState(Once);     break;
+    case Once:     setState(Disabled); break;
+    case Disabled: setState(Always);   break;
     default:
       ASSERT(false);
       break;
@@ -274,6 +299,20 @@ bool BreakPointInfo::valid() {
   if (m_valid) {
     switch (m_interrupt) {
       case BreakPointReached:
+        if (hhvm) {
+          if (!getFuncName().empty()) {
+            if (!m_file.empty() || m_line1 != 0) {
+              return false;
+            }
+          } else {
+            if (m_file.empty() || m_line1 == 0) {
+              return false;
+            }
+          }
+          if (m_regex || m_funcs.size() > 1) {
+            return false;
+          }
+        }
         return (m_line1 && m_line2) || !m_file.empty() || !m_funcs.empty();
       case ExceptionThrown:
         return !m_class.empty();
@@ -312,7 +351,11 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
         if (siteFI) {
           match = match && checkFrame(siteFI->getFrame());
         } else {
-          match = match && checkFrame();
+          InterruptSiteVM *siteVM = dynamic_cast<InterruptSiteVM*>(&site);
+          if (!getFuncName().empty()) {
+            // function entry breakpoint
+            match = match && siteVM->funcEntry();
+          }
         }
         return match;
       }
@@ -359,6 +402,13 @@ std::string BreakPointInfo::getClass() const {
 std::string BreakPointInfo::getFunction() const {
   if (!m_funcs.empty()) {
     return m_funcs[0]->m_function;
+  }
+  return "";
+}
+
+std::string BreakPointInfo::getFuncName() const {
+  if (!m_funcs.empty()) {
+    return m_funcs[0]->getName();
   }
   return "";
 }
@@ -646,8 +696,33 @@ void BreakPointInfo::parseExceptionThrown(const std::string &exp) {
 bool BreakPointInfo::MatchFile(const char *haystack, int haystack_len,
                                const std::string &needle) {
   int pos = haystack_len - needle.size();
-  return (pos == 0 || haystack[pos - 1] == '/') &&
-    strcasecmp(haystack + pos, needle.c_str()) == 0;
+  if ((pos == 0 || haystack[pos - 1] == '/') &&
+      strcasecmp(haystack + pos, needle.c_str()) == 0) {
+    return true;
+  }
+  if (strcasecmp(StatCache::realpath(needle.c_str()).c_str(), haystack)
+      == 0) {
+    return true;
+  }
+  return false;
+}
+
+bool BreakPointInfo::MatchFile(const std::string& file,
+                               const std::string& fullPath,
+                               const std::string& relPath) {
+  if (file == fullPath || file == relPath) {
+    return true;
+  }
+  if (file.find('/') == std::string::npos &&
+      file == fullPath.substr(fullPath.rfind('/') + 1)) {
+    return true;
+  }
+  // file is possibly setup with a symlink in the path
+  if (StatCache::realpath(file.c_str()) ==
+      StatCache::realpath(fullPath.c_str())) {
+    return true;
+  }
+  return false;
 }
 
 bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
@@ -773,13 +848,6 @@ bool BreakPointInfo::checkFrame(FrameInjection *frame) {
   return true;
 }
 
-bool BreakPointInfo::checkFrame() {
-  if (!m_line1) {
-    return g_context->m_debuggerFuncEntry;
-  }
-  return true;
-}
-
 bool BreakPointInfo::checkClause() {
   if (!m_clause.empty()) {
     if (m_php.empty()) {
@@ -790,11 +858,14 @@ bool BreakPointInfo::checkClause() {
       }
     }
     String output;
-    Variant ret = hhvm
-                  ? DebuggerProxyVM::ExecutePHP(m_php, output, false, 0)
-                  : DebuggerProxy::ExecutePHP(m_php, output, false, 0);
-    if (m_check) {
-      return ret.toBoolean();
+    {
+      EvalBreakControl eval(false);
+      Variant ret = hhvm
+                    ? DebuggerProxyVM::ExecutePHP(m_php, output, false, 0)
+                    : DebuggerProxy::ExecutePHP(m_php, output, false, 0);
+      if (m_check) {
+        return ret.toBoolean();
+      }
     }
     m_output = std::string(output.data(), output.size());
     return true;

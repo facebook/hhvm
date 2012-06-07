@@ -45,6 +45,7 @@
 #include <runtime/eval/ast/temp_expression_list.h>
 #include <runtime/eval/ast/temp_expression.h>
 #include <runtime/eval/ast/closure_expression.h>
+#include <runtime/eval/ast/user_attribute.h>
 
 #include <runtime/eval/ast/break_statement.h>
 #include <runtime/eval/ast/class_statement.h>
@@ -82,8 +83,6 @@
 
 using namespace HPHP;
 using namespace HPHP::Eval;
-using namespace std;
-using namespace boost;
 
 #define NEW_EXP0(cls)                                           \
   cls##ExpressionPtr(new cls##Expression(this))
@@ -99,7 +98,8 @@ extern void prepare_generator(Parser *_p, Token &stmt, Token &params,
 extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token &name, const std::string &closureName,
                              const char *clsname, Token *modifiers,
-                             bool getArgs, Token &origGenFunc);
+                             bool getArgs, Token &origGenFunc, bool isHhvm,
+                             Token *attr);
 extern void transform_yield(Parser *_p, Token &stmts, int index,
                             Token *expr, bool assign);
 extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
@@ -172,6 +172,7 @@ GETTER(Parameter,      ParameterPtr,      params     )
 GETTER(Name,           NamePtr,           names      )
 GETTER(StaticVariable, StaticVariablePtr, staticVars )
 GETTER(Strings,        String,            strings    )
+GETTER(UserAttribute,  UserAttributePtr,  userAttributes )
 
 void Token::operator=(Token &other) {
   if (&other == this)
@@ -243,6 +244,8 @@ string Parser::errString() {
 
 void Parser::fatal(Location *loc, const char *msg) {
   m_error = msg;
+  m_loc = *loc;
+  error(m_error);
 }
 
 void Parser::error(const char* fmt, ...) {
@@ -258,7 +261,7 @@ void Parser::error(const char* fmt, ...) {
 }
 
 void Parser::error(const string &msg) {
-  error(msg.c_str());
+  error("%s", msg.c_str());
 }
 
 void Parser::warning(const char* fmt, ...) {
@@ -279,6 +282,10 @@ void Parser::warning(const string &msg) {
 
 bool Parser::enableXHP() {
   return RuntimeOption::EnableXHP;
+}
+
+bool Parser::enableHipHopSyntax() {
+  return RuntimeOption::EnableHipHopSyntax;
 }
 
 ClassStatementPtr Parser::currentClass() const {
@@ -586,7 +593,7 @@ void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
 }
 
 void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
-                    Token *className) {
+                    Token *className, bool fromCompiler /* unused */) {
   out.reset();
   NamePtr n;
   if (dynamic) {
@@ -1061,6 +1068,18 @@ void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
   out->arrayPairs().push_back(ap);
 }
 
+void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
+                             Token &value) {
+  if (attrList) {
+    out = *attrList;
+  } else {
+    out.reset();
+  }
+  UserAttributePtr ap;
+  ap = UserAttributePtr(new UserAttribute(this, name->text(), value->exp()));
+  out->userAttributes().push_back(ap);
+}
+
 void Parser::onClassConst(Token &out, Token &className, Token &name,
     bool text) {
   out.reset();
@@ -1085,7 +1104,7 @@ void Parser::onFunctionStart(Token &name) {
 }
 
 void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
-                        Token &params, Token &stmt) {
+                        Token &params, Token &stmt, Token *attr) {
   const string &retType = ret.text();
   if (!retType.empty() && !ret.check()) {
     raise_error("Return type hint is not supported yet: %s",
@@ -1122,7 +1141,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
 
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, NULL, NULL,
-                     hasCallToGetArgs, origGenFunc);
+                     hasCallToGetArgs, origGenFunc, false, attr);
     FunctionStatementPtr origFunc =
       origGenFunc->getStmt<FunctionStatement>();
     ASSERT(origFunc);
@@ -1132,6 +1151,9 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   } else {
     StatementListStatementPtr body = stmt->getStmtList();
     func->init(this, ref.num(), params->params(), body, hasCallToGetArgs);
+    if (attr) {
+      func->setUserAttributes(attr->userAttributes());
+    }
     out.reset();
     out->stmt() = func;
   }
@@ -1171,23 +1193,30 @@ void Parser::onClassStart(int type, Token &name, Token *parent) {
 }
 
 void Parser::onClass(Token &out, int type, Token &name, Token &base,
-                     Token &baseInterface, Token &stmt) {
+                     Token &baseInterface, Token &stmt, Token *attr) {
   out.reset();
   ClassStatementPtr cs = peekClass();
   popClass();
   std::vector<String> &interfaceNames = baseInterface->strings();
   cs->addBases(interfaceNames);
+  if (attr) {
+    cs->setUserAttributes(attr->userAttributes());
+  }
   cs->finish();
   out->stmt() = cs;
   m_inTrait = false;
 }
 
-void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt) {
+void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt,
+                         Token *attr) {
   out.reset();
   ClassStatementPtr cs = peekClass();
   popClass();
   std::vector<String> &interfaceNames = base->strings();
   cs->addBases(interfaceNames);
+  if (attr) {
+    cs->setUserAttributes(attr->userAttributes());
+  }
   out->stmt() = cs;
 }
 
@@ -1202,6 +1231,9 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
 
 void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {
   ClassStatementPtr cs = peekClass();
+  if (cs->isInterface()) {
+    raise_error("Cannot use traits inside of interfaces.");
+  }
   if (!rules->stmt()) {
     rules->stmt() = NEW_STMT0(StatementList);
   }
@@ -1304,7 +1336,7 @@ void Parser::onMethodStart(Token &name, Token &modifiers) {
 }
 
 void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
-                      Token &name, Token &params, Token &stmt,
+                      Token &name, Token &params, Token &stmt, Token *attr,
                       bool reloc /* = true */) {
   ClassStatementPtr cs = peekClass();
   MethodStatementPtr ms = peekFunc()->unsafe_cast<MethodStatement>();
@@ -1338,7 +1370,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     String clsname = cs->name();
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, clsname.data(),
-                     &modifiers, hasCallToGetArgs, origGenFunc);
+                     &modifiers, hasCallToGetArgs, origGenFunc, false, attr);
     MethodStatementPtr origFunc =
       origGenFunc->getStmt<MethodStatement>();
     ASSERT(origFunc);
@@ -1349,6 +1381,9 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     StatementListStatementPtr stmts = stmt->getStmtList();
     if (stmts) stmts->setLoc(&loc);
     ms->init(this, ref.num(), params->params(), stmts, hasCallToGetArgs);
+    if (attr) {
+      ms->setUserAttributes(attr->userAttributes());
+    }
     out.reset();
     out->stmt() = ms;
   }
@@ -1549,7 +1584,7 @@ void Parser::onYield(Token &out, Token *expr, bool assign) {
     return;
   }
   if (!haveFunc()) {
-    error("Yield cannot only be used inside a function: %s",
+    error("Yield can only be used inside a function: %s",
           getMessage().c_str());
     return;
   }
@@ -1561,15 +1596,27 @@ void Parser::onYield(Token &out, Token *expr, bool assign) {
     return;
   }
   if (haveClass()) {
-    if (strcasecmp(func->name().data(), peekClass()->name().data()) == 0) {
+    const char *fname = func->name().data();
+    if (strcasecmp(fname, peekClass()->name().data()) == 0) {
       error("'yield' is not allowed in potential constructors: %s",
             getMessage().c_str());
       return;
     }
-    if (func->name().substr(0, 2) == "__") {
-      error("'yield' is not allowed in constructor, destructor, or "
-            "magic methods: %s", getMessage().c_str());
-      return;
+    if (fname[0] == '_' && fname[1] == '_') {
+      fname += 2;
+      if (!strcasecmp(fname, "construct") ||
+          !strcasecmp(fname, "destruct") ||
+          !strcasecmp(fname, "get") ||
+          !strcasecmp(fname, "set") ||
+          !strcasecmp(fname, "isset") ||
+          !strcasecmp(fname, "unset") ||
+          !strcasecmp(fname, "call") ||
+          !strcasecmp(fname, "callstatic") ||
+          !strcasecmp(fname, "invoke")) {
+        error("'yield' is not allowed in constructor, destructor, or "
+              "magic methods: %s", getMessage().c_str());
+        return;
+      }
     }
   }
   int index = func->addYield();
@@ -1667,6 +1714,9 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt) {
+  if (value->exp() && name->num()) {
+    error("Key element cannot be a reference");
+  }
   if (haveFunc() && peekFunc()->hasYield()) {
     int cnt = ++m_foreaches.back();
     // TODO only transform foreach with yield in its body.
@@ -1729,8 +1779,7 @@ void Parser::onThrow(Token &out, Token &expr) {
 void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
                        Token &cparams, Token &stmts) {
   Token func, name;
-  onFunction(func, ret, ref, name, params, stmts);
-
+  onFunction(func, ret, ref, name, params, stmts, 0);
   out.reset();
   out->exp() = NEW_EXP(Closure, func->stmt()->unsafe_cast<FunctionStatement>(),
                        cparams->params());
@@ -1759,7 +1808,8 @@ void Parser::onGoto(Token &out, Token &label, bool limited) {
 }
 
 void Parser::onTypeDecl(Token &out, Token &type, Token &decl) {
-  if (!RuntimeOption::EnableHipHopExperimentalSyntax) {
+  if (!RuntimeOption::EnableHipHopExperimentalSyntax &&
+      !m_scanner.isStrictMode()) {
     error("Type hint is not enabled: %s", getMessage().c_str());
     return;
   }
@@ -1809,7 +1859,7 @@ NamePtr Parser::procStaticClassName(Token &className, bool text) {
 
 bool Parser::hasType(Token &type) {
   if (!type.text().empty()) {
-    if (!RuntimeOption::EnableHipHopSyntax) {
+    if (!RuntimeOption::EnableHipHopSyntax && !m_scanner.isStrictMode()) {
       error("Type hint is not enabled: %s", getMessage().c_str());
       return false;
     }

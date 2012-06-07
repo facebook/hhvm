@@ -28,13 +28,12 @@
 #include <util/light_process.h>
 #include <util/logger.h>
 #include <runtime/base/util/request_local.h>
+#include <runtime/vm/repo.h>
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
 #endif
 
-
-using namespace std;
 
 namespace HPHP {
 
@@ -85,10 +84,10 @@ static bool check_cmd(const char *cmd) {
     }
     if (!allow) {
       String file = hhvm
-                    ? g_context->getContainingFileName(true)
+                    ? g_vmContext->getContainingFileName(true)
                     : FrameInjection::GetContainingFileName(true);
       int line = hhvm
-                 ? g_context->getLine(true)
+                 ? g_vmContext->getLine(true)
                  : FrameInjection::GetLine(true);
       Logger::Warning("Command %s is not in the whitelist, called at %s:%d",
                       cmd_tmp, file.data(), line);
@@ -149,15 +148,15 @@ int f_pcntl_fork() {
     raise_error("forking is disallowed in server mode");
     return -1;
   }
+  if (VM::Repo::prefork()) {
+    raise_error("forking is disallowed in multi-threaded mode");
+    return -1;
+  }
 
   std::cout.flush();
   std::cerr.flush();
   pid_t pid = fork();
-  if (pid == 0) {
-    // hzhao: I haven't found a good way to restart fiber threads in a forked
-    // children without causing any problems yet.
-    FiberAsyncFunc::Disable();
-  }
+  VM::Repo::postfork(pid);
   return pid;
 }
 
@@ -568,7 +567,7 @@ public:
     mode = DESC_FILE;
     childend = dup(file->fd());
     if (childend < 0) {
-      raise_warning("unable to dup File-Handle for descriptor %ld - %s",
+      raise_warning("unable to dup File-Handle for descriptor %d - %s",
                       index, Util::safe_strerror(errno).c_str());
       return false;
     }

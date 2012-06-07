@@ -25,7 +25,7 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdWhere);
 class CmdWhere : public DebuggerCommand {
 public:
-  CmdWhere() : DebuggerCommand(KindOfWhere) {}
+  CmdWhere() : DebuggerCommand(KindOfWhere), m_stackArgs(true) {}
 
   virtual bool help(DebuggerClient *client);
 
@@ -37,10 +37,12 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
-  Array fetchStackTrace(DebuggerClient *client);
+  Array fetchStackTrace(DebuggerClient *client); // client side
+  void processStackTrace(); // server side
 
 private:
   Array m_stacktrace;
+  bool m_stackArgs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

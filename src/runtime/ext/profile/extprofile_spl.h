@@ -63,7 +63,6 @@ inline Variant x_class_parents(CVarRef obj, bool autoload = true) {
 
 inline Variant x_class_uses(CVarRef obj, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(class_uses);
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return f_class_uses(obj, autoload);
 }
 

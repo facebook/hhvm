@@ -45,22 +45,26 @@ class C implements ArrayAccess {
   public function offsetUnset($offset) {}
 }
 
-$c = new C;
+function main1() {
+  $c = new C;
 # Dereference the object returned by $c['x'], all in a single expression.  The
 # VM must retain a reference to the intermediate result for long enough to
 # complete the next dereference operation.
-$x = $c['d']['e'][0][0];
-var_dump($x);
-$c['x']['y'][0][0] = "goodbye";
+  $x = $c['d']['e'][0][0];
+  var_dump($x);
+  $c['x']['y'][0][0] = "goodbye";
+}
+
+main1();
 
 class cls implements arrayaccess {
   private $container = array();
   public function __construct() {
     $this->container = array(
-        "one"   => 1,
-        "two"   => 2,
-        "three" => 3,
-    );
+                             "one"   => 1,
+                             "two"   => 2,
+                             "three" => 3,
+                            );
   }
   public function offsetGet($offset) {
     print "In cls::offsetGet($offset)\n";
@@ -84,46 +88,66 @@ class cls implements arrayaccess {
   }
 }
 
-$obj = new cls;
+function main2() {
+  $obj = new cls;
 
-var_dump(isset($obj["two"]));
-var_dump($obj["two"]);
-unset($obj["two"]);
-$a = array($obj);
-$obj["two"] = 2;
-unset($a[0]["two"]);
-var_dump(isset($obj["two"]));
-$obj["two"] = "A value";
-var_dump($obj["two"]);
-$obj[] = 'Append 1';
-$obj[] = 'Append 2';
-$obj[] = 'Append 3';
-$obj[][0] = "lost"; # offsetGet() returns null by value, so array("lost") is
-                    # lost.
+  var_dump(isset($obj["two"]));
+  var_dump($obj["two"]);
+  unset($obj["two"]);
+  $a = array($obj);
+  $obj["two"] = 2;
+  unset($a[0]["two"]);
+  var_dump(isset($obj["two"]));
+  $obj["two"] = "A value";
+  var_dump($obj["two"]);
+  $obj[] = 'Append 1';
+  $obj[] = 'Append 2';
+  $obj[] = 'Append 3';
+  $obj[][0] = "lost"; # offsetGet() returns null by value, so array("lost") is
+  # lost.
 
-# SetOpElem.
-$obj["x"] += 1;
-var_dump($obj["x"]);
-$obj["x"] -= 1;
-var_dump($obj["x"]);
+  # SetOpElem.
+  $obj["x"] += 1;
+  var_dump($obj["x"]);
+  $obj["x"] -= 1;
+  var_dump($obj["x"]);
 
-# IncDecElem.
-$obj["x"]++;
-var_dump($obj["x"]);
-$obj["x"]--;
-var_dump($obj["x"]);
-++$obj["x"];
-var_dump($obj["x"]);
---$obj["x"];
-var_dump($obj["x"]);
+  # IncDecElem.
+  $obj["x"]++;
+  var_dump($obj["x"]);
+  $obj["x"]--;
+  var_dump($obj["x"]);
+  ++$obj["x"];
+  var_dump($obj["x"]);
+  --$obj["x"];
+  var_dump($obj["x"]);
 
-$obj[] = "SetNewElem";
-$obj[] += 1; # SetOpNewElem.
-$obj[]++; # IncDecNewElem.
+  $obj[] = "SetNewElem";
+  $obj[] += 1; # SetOpNewElem.
+  $obj[]++; # IncDecNewElem.
 
-# UnsetElem.
-print_r($obj);
-unset($obj["x"]);
-print_r($obj);
+  # UnsetElem.
+  print_r($obj);
+  unset($obj["x"]);
+  print_r($obj);
 
-print "Test end\n";
+  print "Test end\n";
+}
+main2();
+
+class stringdoubler implements ArrayAccess {
+  public function offsetExists($i) {
+    return is_string($i);
+  }
+  public function offsetGet($i) {
+    return $i . $i;
+  }
+  public function offsetSet($i, $v) {}
+  public function offsetUnset($i) {}
+}
+
+function main3($a, $b, $c) {
+  if (false) {}
+  return $a[$b][$c];
+}
+var_dump(main3(array(new stringdoubler()), 0, 'hello'));

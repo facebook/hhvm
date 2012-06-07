@@ -7,7 +7,7 @@ class C {
     print "In C::__construct()\n";
   }
   static function sMeth() {
-    print "In C::sMeth(): \$this:".$this.":\n";
+    print "In C::sMeth(): \$this:" . (isset($this) ? $this : null) . ":\n";
   }
 }
 class D {

@@ -340,7 +340,7 @@ const int64 k_DAY_7 = 131085LL;
 const int64 k_DEBUG_LOG_AGENT = 8LL;
 const int64 k_DEBUG_LOG_ALL = 65535LL;
 const int64 k_DEBUG_LOG_COOKIE = 128LL;
-const int64 k_DEBUG_LOG_DEFAULT = 111LL;
+const int64 k_DEBUG_LOG_DEFAULT = 127LL;
 const int64 k_DEBUG_LOG_IP = 64LL;
 const int64 k_DEBUG_LOG_NONE = 0LL;
 const int64 k_DEBUG_LOG_POST = 16LL;
@@ -392,6 +392,8 @@ const int64 k_ENCQUOTEDPRINTABLE = 4LL;
 const int64 k_ENT_COMPAT = 2LL;
 const int64 k_ENT_NOQUOTES = 0LL;
 const int64 k_ENT_QUOTES = 3LL;
+const int64 k_ENT_FB_UTF8 = 4LL;
+const int64 k_ENT_FB_UTF8_ONLY = 8LL;
 const int64 k_ERA = 131116LL;
 const int64 k_ERA_D_FMT = 131118LL;
 const int64 k_ERA_D_T_FMT = 131120LL;
@@ -501,6 +503,7 @@ const int64 k_IMAGETYPE_TIFF_II = 7LL;
 const int64 k_IMAGETYPE_TIFF_MM = 8LL;
 const int64 k_IMAGETYPE_WBMP = 15LL;
 const int64 k_IMAGETYPE_XBM = 16LL;
+const int64 k_IMAGETYPE_ICO = 17LL;
 const int64 k_IMAP_CLOSETIMEOUT = 4LL;
 const int64 k_IMAP_OPENTIMEOUT = 1LL;
 const int64 k_IMAP_READTIMEOUT = 2LL;
@@ -2068,7 +2071,6 @@ const int64 k_YESEXPR = 327680LL;
 const bool k_ZEND_THREAD_SAFE = false;
 
 /* preface starts */
-extern CallInfo ci_;
 /* preface finishes */
 
 ///////////////////////////////////////////////////////////////////////////////

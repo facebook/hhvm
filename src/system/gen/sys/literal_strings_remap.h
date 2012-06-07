@@ -18,8 +18,7 @@
 #ifndef __GENERATED_gen_sys_literal_strings_remap_h9a03edc3__
 #define __GENERATED_gen_sys_literal_strings_remap_h9a03edc3__
 
-#define s_sys_ss00000000 s_sys_ss0000000000000000
-#define s_sys_svs00000000 s_sys_svs0000000000000000
-#define s_sys_ss00000000_1 s_sys_ss0000000000000000_1
+#define s_sys_ssp00000000 s_sys_ssp0000000000000000
+#define s_sys_ssp00000000_1 s_sys_ssp0000000000000000_1
 
 #endif // __GENERATED_gen_sys_literal_strings_remap_h9a03edc3__

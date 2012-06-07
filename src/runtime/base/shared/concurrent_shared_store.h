@@ -25,7 +25,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/server/server_stats.h>
 #include <tbb/concurrent_hash_map.h>
-#include <queue>
+#include <tbb/concurrent_priority_queue.h>
 #include <runtime/base/shared/shared_store_stats.h>
 
 namespace HPHP {
@@ -36,12 +36,12 @@ namespace HPHP {
 
 class ConcurrentTableSharedStore : public SharedStore {
 public:
-  ConcurrentTableSharedStore(int id) : SharedStore(id), m_purgeCounter(0) {}
+  ConcurrentTableSharedStore(int id)
+    : SharedStore(id), m_lockingFlag(false), m_purgeCounter(0) {}
 
   virtual int size() {
     return m_vars.size();
   }
-  virtual void count(int &reachable, int &expired, int &persistent);
   virtual bool get(CStrRef key, Variant &value);
   virtual bool store(CStrRef key, CVarRef val, int64 ttl,
                      bool overwrite = true);
@@ -50,20 +50,16 @@ public:
   virtual bool exists(CStrRef key);
 
   virtual void prime(const std::vector<SharedStore::KeyValuePair> &vars);
+  virtual bool constructPrime(CStrRef v, KeyValuePair& item,
+                              bool serialized);
+  virtual bool constructPrime(CVarRef v, KeyValuePair& item);
+  virtual void primeDone();
 
   // debug support
-  virtual void dump(std::ostream & out);
-
-  virtual SharedVariant* construct(litstr str, int len, CStrRef v,
-                                   bool serialized) {
-    return SharedVariant::Create(v, serialized);
-  }
-  virtual SharedVariant* construct(litstr str, int len, CVarRef v) {
-    return SharedVariant::Create(v, false);
-  }
+  virtual void dump(std::ostream & out, bool keyOnly, int waitSeconds);
 
 protected:
-  virtual SharedVariant* construct(CStrRef key, CVarRef v) {
+  virtual SharedVariant* construct(CVarRef v) {
     return SharedVariant::Create(v, false);
   }
 
@@ -81,18 +77,11 @@ protected:
   typedef tbb::concurrent_hash_map<const char*, StoreValue, charHashCompare>
     Map;
 
-  virtual void clear();
+  virtual bool clear();
 
   virtual bool eraseImpl(CStrRef key, bool expired);
 
   void eraseAcc(Map::accessor &acc) {
-    acc->second.var->decRef();
-    const char *pkey = acc->first;
-    m_vars.erase(acc);
-    free((void *)pkey);
-  }
-  void eraseAcc(Map::const_accessor &acc) {
-    acc->second.var->decRef();
     const char *pkey = acc->first;
     m_vars.erase(acc);
     free((void *)pkey);
@@ -102,6 +91,7 @@ protected:
   // Read lock is acquired whenever using concurrent ops
   // Write lock is acquired for whole table operations
   ReadWriteMutex m_lock;
+  bool m_lockingFlag; // flag to enable temporary locking
 
   typedef std::pair<const char*, time_t> ExpirationPair;
   class ExpirationCompare {
@@ -111,9 +101,9 @@ protected:
     }
   };
 
-  std::priority_queue<ExpirationPair, std::vector<ExpirationPair>,
-                      ExpirationCompare> m_expirationQueue;
-  ReadWriteMutex m_expirationQueueLock;
+  tbb::concurrent_priority_queue<ExpirationPair,
+                                 ExpirationCompare> m_expQueue;
+
   uint64 m_purgeCounter;
 
   // Should be called outside m_lock
@@ -122,9 +112,11 @@ protected:
   void addToExpirationQueue(const char* key, int64 etime) {
     const char *copy = strdup(key);
     ExpirationPair p(copy, etime);
-    WriteLock lock(m_expirationQueueLock);
-    m_expirationQueue.push(p);
+    m_expQueue.push(p);
   }
+
+  bool handleUpdate(CStrRef key, SharedVariant* svar);
+  bool handlePromoteObj(CStrRef key, SharedVariant* svar, CVarRef valye);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -12,33 +12,37 @@ class E {
   public static function bar() { echo "E::bar\n"; var_dump(get_called_class()); }
 }
 
-call_user_func(array('C', 'foo'));
-call_user_func(array('C', 'C::foo'));
-call_user_func(array('C', 'D::foo')); // warns and bails returning null
-call_user_func(array('C', 'E::foo')); // warns and bails returning null
 
-call_user_func(array('C', 'bar'));
-call_user_func(array('C', 'C::bar'));
-call_user_func(array('C', 'D::bar')); // warns and bails returning null
-call_user_func(array('C', 'E::bar')); // warns and bails returning null
+function main() {
+  call_user_func(array('C', 'foo'));
+  call_user_func(array('C', 'C::foo'));
+  call_user_func(array('C', 'D::foo')); // warns and bails returning null
+  call_user_func(array('C', 'E::foo')); // warns and bails returning null
 
-call_user_func(array('D', 'foo'));
-call_user_func(array('D', 'C::foo'));
-call_user_func(array('D', 'D::foo'));
-call_user_func(array('D', 'E::foo')); // warns and bails returning null
+  call_user_func(array('C', 'bar'));
+  call_user_func(array('C', 'C::bar'));
+  call_user_func(array('C', 'D::bar')); // warns and bails returning null
+  call_user_func(array('C', 'E::bar')); // warns and bails returning null
 
-call_user_func(array('D', 'bar'));
-call_user_func(array('D', 'C::bar'));
-call_user_func(array('D', 'D::bar'));
-call_user_func(array('D', 'E::bar')); // warns and bails returning null
+  call_user_func(array('D', 'foo'));
+  call_user_func(array('D', 'C::foo'));
+  call_user_func(array('D', 'D::foo'));
+  call_user_func(array('D', 'E::foo')); // warns and bails returning null
 
-call_user_func(array('E', 'foo'));
-call_user_func(array('E', 'C::foo'));
-call_user_func(array('E', 'D::foo'));
-call_user_func(array('E', 'E::foo')); // warns and bails returning null
+  call_user_func(array('D', 'bar'));
+  call_user_func(array('D', 'C::bar'));
+  call_user_func(array('D', 'D::bar'));
+  call_user_func(array('D', 'E::bar')); // warns and bails returning null
 
-call_user_func(array('E', 'bar'));
-call_user_func(array('E', 'C::bar'));
-call_user_func(array('E', 'D::bar'));
-call_user_func(array('E', 'E::bar')); // warns and bails returning null
+  call_user_func(array('E', 'foo'));
+  call_user_func(array('E', 'C::foo'));
+  call_user_func(array('E', 'D::foo'));
+  call_user_func(array('E', 'E::foo')); // warns and bails returning null
+
+  call_user_func(array('E', 'bar'));
+  call_user_func(array('E', 'C::bar'));
+  call_user_func(array('E', 'D::bar'));
+  call_user_func(array('E', 'E::bar')); // warns and bails returning null
+}
+main();
 

@@ -37,11 +37,10 @@ void Injection::execute() const {
   ActRec *cfpSave = NULL;
   ObjectData *this_ = NULL;
   Class *cls = NULL;
-  ActRec *fp = g_context->m_fp;
+  ActRec *fp = g_vmContext->getFP();
   if (fp) {
     if (fp->m_varEnv == NULL) {
-      fp->m_varEnv = new VarEnv();
-      fp->m_varEnv->lazyAttach(fp);
+      fp->m_varEnv = VarEnv::createLazyAttach(fp);
     }
     varEnv = fp->m_varEnv;
     cfpSave = varEnv->getCfp();
@@ -53,8 +52,8 @@ void Injection::execute() const {
   }
   // Note: For now we don't merge analysis code's class and function.
   // Later we might decide to do so
-  g_context->invokeFunc(&retval, m_unit->getMain(), Array::Create(), this_,
-                        cls, varEnv, NULL, NULL);
+  g_vmContext->invokeFunc(&retval, m_unit->getMain(), Array::Create(), this_,
+                          cls, varEnv, NULL, NULL);
   if (varEnv) {
     varEnv->setCfp(cfpSave);
   }
@@ -169,7 +168,7 @@ Unit* InjectionCache::getUnit(const StringData* code) {
   // Note: caller needs to make sure the parameter code is not temporary
   UnitMap::accessor acc;
   if (m_unitCache.insert(acc, code)) {
-    Unit* unit = compile_string(code->data(), code->size(), NULL);
+    Unit* unit = compile_string(code->data(), code->size());
     // Here we save it even if unit == NULL, that at least saves us from
     // compiling same illegal string
     acc->second = unit;
@@ -280,15 +279,15 @@ void InstHelpers::InstCustomStringCallback(const StringData* hook,
   const Injection* inj = InjectionCache::GetInjection(callback, arg, desc);
   ASSERT(inj);
   const StringData* hookCached = InjectionCache::GetStringData(hook);
-  if (!g_context->m_injTables) {
-    g_context->m_injTables = new InjectionTables();
+  if (!g_vmContext->m_injTables) {
+    g_vmContext->m_injTables = new InjectionTables();
   }
-  if (!g_context->m_injTables->getSDTable(InstHookTypeCustomEvt)) {
-    g_context->m_injTables->setSDTable(InstHookTypeCustomEvt,
+  if (!g_vmContext->m_injTables->getSDTable(InstHookTypeCustomEvt)) {
+    g_vmContext->m_injTables->setSDTable(InstHookTypeCustomEvt,
                                        new InjectionTableSD());
   }
   InjectionTableSD* table =
-    g_context->m_injTables->getSDTable(InstHookTypeCustomEvt);
+    g_vmContext->m_injTables->getSDTable(InstHookTypeCustomEvt);
   (*table)[hookCached] = inj;
 }
 
@@ -298,19 +297,19 @@ void InstHelpers::PushInstToGlobal() {
     delete s_globalInjTables;
     s_globalInjTables = NULL;
   }
-  if (g_context->m_injTables) {
-    s_globalInjTables = g_context->m_injTables->clone();
+  if (g_vmContext->m_injTables) {
+    s_globalInjTables = g_vmContext->m_injTables->clone();
   }
 }
 
 void InstHelpers::PullInstFromGlobal() {
-  if (g_context->m_injTables) {
-    delete g_context->m_injTables;
-    g_context->m_injTables = NULL;
+  if (g_vmContext->m_injTables) {
+    delete g_vmContext->m_injTables;
+    g_vmContext->m_injTables = NULL;
   }
   ReadLock lock(s_globalInjTableLock);
   if (s_globalInjTables) {
-    g_context->m_injTables = s_globalInjTables->clone();
+    g_vmContext->m_injTables = s_globalInjTables->clone();
   }
 }
 

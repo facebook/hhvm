@@ -40,30 +40,34 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
   String name(m_name->get(env));
   Variant obj(m_obj->eval(env));
   if (!obj.is(KindOfObject)) {
-    raise_error("Call to a member function %s() on a non-object",
-                name.c_str());
+    throw_call_non_object(name.c_str());
   }
-  EvalFrameInjection::EvalStaticClassNameHelper helper(obj.toObject());
   Variant cobj(env.currentObject());
   const MethodStatement *ms = NULL;
+  MethodStatementWrapper tmsw;
+  const MethodStatementWrapper *msw = NULL;
   if (cobj.is(KindOfObject) && obj.getObjectData() == cobj.getObjectData()) {
     // Have to try current class first for private method
     const ClassStatement *cls = env.currentClassStatement();
-    if (cls) {
+    if (cls && !cls->isTrait()) {
       const MethodStatement *ccms = cls->findMethod(name);
-      if (ccms && ccms->getModifiers() & ClassStatement::Private) {
+      if (ccms && (ccms->getModifiers() & ClassStatement::Private) &&
+          !ccms->getClass()->isTrait()) {
         ms = ccms;
+        tmsw = MethodStatementWrapper(ms, ClassStatement::Private,
+                                      ccms->getClass()->name().get());
+        msw = &tmsw;
       }
     }
   }
-  int access = 0;
   if (!ms) {
-    ms = obj.getObjectData()->getMethodStatement(name, access);
+    msw = obj.getObjectData()->getMethodStatementWrapper(name);
+    if (msw) ms = msw->m_methodStatement;
   }
   SET_LINE;
   if (ms) {
-    return strongBind(ms->invokeInstanceDirect(toObject(obj), env, this,
-                                               access));
+    return strongBind(ms->invokeInstanceDirect(toObject(obj), name, env, this,
+                                               msw));
   }
 
   // Handle builtins
@@ -81,6 +85,7 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
     CVarRef a3 = (count > 3) ? evalParam(env, ci, 3) : null;
     CVarRef a4 = (count > 4) ? evalParam(env, ci, 4) : null;
     CVarRef a5 = (count > 5) ? evalParam(env, ci, 5) : null;
+    EvalFrameInjection::EvalStaticClassNameHelper helper(obj.toObject());
     return
       strongBind((ci->getMethFewArgs())(mcp1, count, a0, a1, a2, a3, a4, a5));
   }
@@ -94,6 +99,8 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
       ai.set(m_params[i]->eval(env));
     }
   }
+
+  EvalFrameInjection::EvalStaticClassNameHelper helper(obj.toObject());
   return strongBind((ci->getMeth())(mcp1, Array(ai.create())));
 }
 

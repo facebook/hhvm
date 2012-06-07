@@ -14,27 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/server/source_root_info.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/server/source_root_info.h>
 #include <runtime/base/preg.h>
 #include <runtime/base/server/http_request_handler.h>
 #include <runtime/base/server/transport.h>
 #include <runtime/eval/debugger/debugger.h>
+#include <system/gen/sys/system_globals.h>
 
-using namespace std;
+using std::map;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL(string, SourceRootInfo::s_path);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(string, SourceRootInfo::s_path);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(string, SourceRootInfo::s_phproot);
 
 SourceRootInfo::SourceRootInfo(const char *host)
-  : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
-  s_path->clear();
+    : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
+  s_path.destroy();
+  s_phproot.destroy();
   if (!sandboxOn()) return;
   Variant matches;
   Variant r = preg_match(String(RuntimeOption::SandboxPattern.c_str(),
-        RuntimeOption::SandboxPattern.size(), AttachLiteral), host, matches);
+                                RuntimeOption::SandboxPattern.size(),
+                                AttachLiteral), host, matches);
   if (!r.same(1)) {
     m_sandboxCond = SandboxOff;
     return;
@@ -54,18 +58,19 @@ SourceRootInfo::SourceRootInfo(const char *host)
 
     createFromUserConfig();
   }
-  *s_path = m_path.c_str();
+  *s_path.getCheck() = m_path.c_str();
 }
 
 SourceRootInfo::SourceRootInfo(const std::string &user,
                                const std::string &sandbox)
     : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
-  s_path->clear();
+  s_path.destroy();
+  s_phproot.destroy();
   if (!sandboxOn()) return;
   m_user = user;
   m_sandbox = sandbox;
   createFromUserConfig();
-  *s_path = m_path.c_str();
+  *s_path.getCheck() = m_path.c_str();
 }
 
 void SourceRootInfo::createFromCommonRoot(const String &sandboxName) {
@@ -194,17 +199,18 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
   if (!m_serverVars.empty()) {
     server += m_serverVars;
   }
+}
 
+Eval::DSandboxInfo SourceRootInfo::getSandboxInfo() const {
   Eval::DSandboxInfo sandbox;
   sandbox.m_user = m_user.data();
   sandbox.m_name = m_sandbox.data();
   sandbox.m_path = m_path.data();
-  server.set("HPHP_SANDBOX_ID", sandbox.id()); // EvalDebugger needs this
-  Eval::Debugger::RegisterSandbox(sandbox);
+  return sandbox;
 }
 
 string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
-  ostringstream res;
+  std::ostringstream res;
   bool control = false;
   for (uint i = 0; i < format.size(); i++) {
     char c = format[i];
@@ -240,6 +246,19 @@ string SourceRootInfo::path() const {
   } else {
     return RuntimeOption::SourceRoot;
   }
+}
+
+string& SourceRootInfo::initPhpRoot() {
+  SystemGlobals *g = (SystemGlobals*)get_global_variables();
+  Variant &server = g->GV(_SERVER);
+  Variant v = server.rvalAt("PHP_ROOT");
+  if (v.isString()) {
+    *s_phproot.getCheck() = string(v.asCStrRef().data()) + string("/");
+  } else {
+    // Our best guess at the source root.
+    *s_phproot.getCheck() = GetCurrentSourceRoot();
+  }
+  return *s_phproot.getCheck();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

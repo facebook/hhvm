@@ -40,7 +40,7 @@ class ArrayData : public Countable {
 
   static const ssize_t invalid_index = -1;
 
-  ArrayData() : m_pos(0) {}
+  ArrayData() : m_size(-1), m_pos(0) {}
   ArrayData(const ArrayData *src) : m_pos(src->m_pos) {}
   virtual ~ArrayData();
 
@@ -76,14 +76,22 @@ class ArrayData : public Countable {
   /**
    * Whether this array has any element.
    */
-  virtual bool empty() const {
+  bool empty() const {
     return size() == 0;
   }
 
   /**
    * Number of elements this array has.
    */
-  virtual ssize_t size() const = 0;
+  ssize_t size() const {
+    if (UNLIKELY((int)m_size) < 0) return vsize();
+    return m_size;
+  }
+
+  /**
+   * Number of elements this array has.
+   */
+  virtual ssize_t vsize() const = 0;
 
   /**
    * For ArrayIter to work. Get key or value at position "pos".
@@ -96,6 +104,7 @@ class ArrayData : public Countable {
   virtual CVarRef getValueRef(ssize_t pos) const = 0;
 
   virtual bool isVectorData() const;
+  virtual bool isVectorArray() const { return false; }
   virtual bool isGlobalArrayWrapper() const;
   virtual bool isSharedMap() const { return false; }
 
@@ -234,13 +243,6 @@ class ArrayData : public Countable {
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
-  /**
-   * Purely for reset() missing error.
-   */
-  virtual void iter_dirty_set() const {}
-  virtual void iter_dirty_reset() const {}
-  virtual void iter_dirty_check() const {}
-
   void newFullPos(FullPos &fp);
   void freeFullPos(FullPos &fp);
   virtual void getFullPos(FullPos &fp);
@@ -294,13 +296,6 @@ class ArrayData : public Countable {
    */
   virtual void renumber() {}
 
-  /**
-   * When an array data is set static, some calculated data members need to
-   * be initialized, for example, Map::getKeyVector(). More importantly, all
-   * sub elements will have to setStatic().
-   */
-  virtual void onSetStatic() { ASSERT(false);}
-
   virtual void onSetEvalScalar() { ASSERT(false);}
 
   /**
@@ -329,9 +324,14 @@ class ArrayData : public Countable {
   virtual ArrayData *escalate(bool mutableIteration = false) const {
     return const_cast<ArrayData *>(this);
   }
+  PointerList<FullPos> &getStrongIterators() {
+    return m_strongIterators;
+  }
 
-  static ArrayData *GetScalarArray(ArrayData *arr);
+  static ArrayData *GetScalarArray(ArrayData *arr,
+                                   const StringData *key = NULL);
  protected:
+  uint m_size;
   ssize_t m_pos;
   PointerList<FullPos> m_strongIterators;
 
@@ -340,12 +340,10 @@ class ArrayData : public Countable {
  private:
   void serializeImpl(VariableSerializer *serializer) const;
 
-#ifdef FAST_REFCOUNT_FOR_VARIANT
  private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(ArrayData, _count) == FAST_REFCOUNT_OFFSET);
   }
-#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////

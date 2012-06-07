@@ -23,8 +23,6 @@
 #include <util/lock.h>
 
 using namespace HPHP::JSON;
-using namespace std;
-using namespace boost;
 
 namespace HPHP { namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,7 +161,7 @@ void CodeErrors::serialize(JSON::CodeError::OutputStream &out) const {
 void CodeErrors::saveToFile(AnalysisResultPtr ar,
                             const char *filename,
                             bool varWrapper) const {
-  ofstream f(filename);
+  std::ofstream f(filename);
   if (f) {
     JSON::CodeError::OutputStream o(f, ar);
     if (varWrapper) f << "var CodeErrors = ";
@@ -180,6 +178,7 @@ void ClearErrors() {
 }
 
 void Error(ErrorType error, ConstructPtr construct) {
+  if (hhvm) return;
   ErrorInfoPtr errorInfo(new ErrorInfo());
   errorInfo->m_error = error;
   errorInfo->m_construct1 = construct;
@@ -188,6 +187,7 @@ void Error(ErrorType error, ConstructPtr construct) {
 }
 
 void Error(ErrorType error, ConstructPtr construct1, ConstructPtr construct2) {
+  if (hhvm) return;
   ErrorInfoPtr errorInfo(new ErrorInfo());
   errorInfo->m_error = error;
   errorInfo->m_construct1 = construct1;
@@ -197,6 +197,7 @@ void Error(ErrorType error, ConstructPtr construct1, ConstructPtr construct2) {
 }
 
 void Error(ErrorType error, ConstructPtr construct, const std::string &data) {
+  if (hhvm) return;
   ErrorInfoPtr errorInfo(new ErrorInfo());
   errorInfo->m_error = error;
   errorInfo->m_construct1 = construct;
@@ -215,7 +216,7 @@ void SaveErrors(AnalysisResultPtr ar,
 }
 
 void DumpErrors(AnalysisResultPtr ar) {
-  JSON::CodeError::OutputStream o(cerr, ar);
+  JSON::CodeError::OutputStream o(std::cerr, ar);
   s_code_errors.serialize(o);
 }
 

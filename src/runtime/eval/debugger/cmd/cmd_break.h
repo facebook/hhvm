@@ -49,8 +49,15 @@ private:
   BreakPointInfoPtrVec *m_breakpoints;
   BreakPointInfoPtrVec m_bps;
 
+  bool updateImpl(DebuggerClient *client);
   bool processList(DebuggerClient *client);
   bool processUpdate(DebuggerClient *client);
+
+  bool hasUpdateArg(DebuggerClient *client);
+  bool hasEnableArg(DebuggerClient *client);
+  bool hasDisableArg(DebuggerClient *client);
+  bool hasClearArg(DebuggerClient *client);
+  bool hasToggleArg(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -30,7 +30,7 @@ int ResourceData::GetMaxResourceId() {
   return *(os_max_resource_id.getCheck());
 }
 
-ResourceData::ResourceData() : ObjectData(0, true), m_static(false) {
+ResourceData::ResourceData() : ObjectData(0, true) {
   if (hhvm) {
     m_cls = SystemLib::s_resourceClass;
   }
@@ -60,30 +60,17 @@ String ResourceData::t___tostring() {
   return String("Resource id #") + String(o_getId());
 }
 
-void ResourceData::serialize(VariableSerializer *serializer) const {
-  if (serializer->incNestedLevel((void*)this, true)) {
-    serializer->writeOverflow((void*)this, true);
-  } else {
-    String saveName;
-    int saveId;
-    serializer->getResourceInfo(saveName, saveId);
-    serializer->setResourceInfo(o_getResourceName(), o_getResourceId());
-    o_toArray().serialize(serializer);
-    serializer->setResourceInfo(saveName, saveId);
-  }
-  serializer->decNestedLevel((void*)this);
+void ResourceData::serializeImpl(VariableSerializer *serializer) const {
+  String saveName;
+  int saveId;
+  serializer->getResourceInfo(saveName, saveId);
+  serializer->setResourceInfo(o_getResourceName(), o_getResourceId());
+  o_toArray().serialize(serializer);
+  serializer->setResourceInfo(saveName, saveId);
 }
 
 CStrRef ResourceData::o_getResourceName() const {
   return o_getClassName();
-}
-
-Object ResourceData::fiberMarshal(FiberReferenceMap &refMap) const {
-  return Object();
-}
-
-Object ResourceData::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  return Object();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

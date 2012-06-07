@@ -10,7 +10,7 @@ string(6) "B::FOO"
 string(6) "A::BAR"
 string(6) "B::FOO"
 string(6) "A::BAR"
-HipHop Notice:  Undefined constant: WIZ in src/test/vm/class_constants.php on line 27
+HipHop Notice:  Use of undefined constant WIZ - assumed 'WIZ' in src/test/vm/class_constants.php on line 22
 string(3) "WIZ"
 string(11) "--- WIZ ---"
 string(3) "WIZ"
@@ -21,4 +21,6 @@ int(123)
 int(123)
 int(123)
 int(123)
+int(711)
 Test end
+HipHop Fatal error: Couldn't find constant D::FakeConstant in src/test/vm/class_constants.php on line 98

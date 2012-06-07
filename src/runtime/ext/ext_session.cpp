@@ -35,8 +35,6 @@
 #include <fcntl.h>
 #include <dirent.h>
 
-using namespace std;
-
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(session);
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,7 +19,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IssetExpression::IssetExpression(EXPRESSION_ARGS,

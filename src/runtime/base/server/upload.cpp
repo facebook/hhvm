@@ -25,7 +25,7 @@
 #include <util/logger.h>
 #include <runtime/base/string_util.h>
 
-using namespace std;
+using std::set;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

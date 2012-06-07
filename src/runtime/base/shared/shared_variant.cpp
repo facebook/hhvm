@@ -20,8 +20,6 @@
 #include <runtime/base/shared/shared_map.h>
 #include <runtime/base/runtime_option.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -127,6 +125,7 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
   }
 }
 
+HOT_FUNC
 Variant SharedVariant::toLocal() {
   switch (m_type) {
   case KindOfBoolean:
@@ -250,12 +249,7 @@ SharedVariant::~SharedVariant() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t SharedVariant::arrSize() const {
-  ASSERT(is(KindOfArray));
-  if (getIsVector()) return m_data.vec->size;
-  return m_data.map->size();
-}
-
+HOT_FUNC
 int SharedVariant::getIndex(CVarRef key) {
   ASSERT(is(KindOfArray));
   switch (key.getType()) {
@@ -281,6 +275,7 @@ int SharedVariant::getIndex(CVarRef key) {
   return -1;
 }
 
+HOT_FUNC
 int SharedVariant::getIndex(CStrRef key) {
   ASSERT(is(KindOfArray));
   if (getIsVector()) return -1;
@@ -313,6 +308,7 @@ Variant SharedVariant::getKey(ssize_t pos) const {
   return m_data.map->getKeyIndex(pos)->toLocal();
 }
 
+HOT_FUNC
 SharedVariant* SharedVariant::getValue(ssize_t pos) const {
   ASSERT(is(KindOfArray));
   if (getIsVector()) {
@@ -328,11 +324,14 @@ void SharedVariant::loadElems(ArrayData *&elems,
   ASSERT(is(KindOfArray));
   uint count = arrSize();
   bool isVector = getIsVector();
-  ArrayInit ai(count, keepRef);
-  for (uint i = 0; i < count; i++) {
-    if (isVector) {
+  ArrayInit ai = isVector ?
+    ArrayInit(count, ArrayInit::vectorInit) : ArrayInit(count, keepRef);
+  if (isVector) {
+    for (uint i = 0; i < count; i++) {
       ai.set(sharedMap.getValueRef(i));
-    } else {
+    }
+  } else {
+    for (uint i = 0; i < count; i++) {
       ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValueRef(i),
              true);
     }

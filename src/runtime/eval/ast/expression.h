@@ -80,13 +80,14 @@ public:
     KindOfVariableExpression,
     KindOfThisVariableExpression,
     KindOfVectorConcatExpression,
+    KindOfUserAttribute,
   };
   Expression(KindOf kindOf, EXPRESSION_ARGS) : Construct(CONSTRUCT_PASS),
     m_kindOf(kindOf) {}
 
   Expression(KindOf kindOf, const Location *loc) : Construct(loc),
     m_kindOf(kindOf) {}
-  bool isKindOf(KindOf kindOf) { return m_kindOf == kindOf; }
+  bool isKindOf(KindOf kindOf) const { return m_kindOf == kindOf; }
   virtual ~Expression() {}
   virtual Variant eval(VariableEnvironment &env) const = 0;
   virtual bool evalScalar(VariableEnvironment &env, Variant &r) const {

@@ -36,16 +36,9 @@ class c_RangeException : public c_RuntimeException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(RangeException, RangeException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_RangeException(const ObjectStaticCallbacks *cb = &cw_RangeException) : c_RuntimeException(cb) {}
+  c_RangeException(const ObjectStaticCallbacks *cb = &cw_RangeException) : c_RuntimeException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_RangeException() NEVER_INLINE;
 

@@ -30,7 +30,7 @@
 namespace HPHP {
 
 using namespace Eval;
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
@@ -43,7 +43,7 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
                                                    variableIndices);
   Block blk(statics, variableIndices);
   // install string code container to globals
-  SmartPtr<CodeContainer> scc = new StringCodeContainer(s);
+  AtomicSmartPtr<CodeContainer> scc = new StringCodeContainer(s);
   RequestEvalState::addCodeContainer(scc);
   // todo: pass in params
   NestedVariableEnvironment env(vars, blk, Array(), self);
@@ -62,6 +62,7 @@ bool eval_get_class_var_init_hook(Variant &res, CStrRef s,
   Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s, true);
   if (ce) {
     const Eval::ClassVariable *v = ce->getClass()->findVariable(var, true);
+    if (!v) v = ce->findTraitVariable(var, true);
     if (v) {
       DummyVariableEnvironment env;
       v->eval(env, res);
@@ -74,13 +75,14 @@ ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root) {
   if (hhvm) {
     assert_not_implemented(root == NULL);
     const StringData* className = StringData::GetStaticString(s.get());
-    Object o = g_context->createObjectOnly((StringData*)className);
-    return o.detach();
+    return g_vmContext->createObjectOnly((StringData*)className);
   } else {
     Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s, true);
     if (ce) {
       Object tmp = ce->getClass()->create(*ce, root);
-      return tmp.detach();
+      ObjectData* ret = tmp.detach();
+      ret->decRefCount();
+      return ret;
     }
     return 0;
   }
@@ -93,11 +95,11 @@ bool eval_invoke_static_method_hook(Variant &res, CStrRef s,
                                     bool &foundClass) {
   assert_not_implemented(!hhvm);
   ClassEvalState *ce;
-  const MethodStatement *ms = Eval::RequestEvalState::findMethod(s, method,
-                                                                 ce, true);
+  const MethodStatementWrapper *msw =
+    Eval::RequestEvalState::findMethod(s, method, ce, true);
   foundClass = (ce != NULL);
-  if (ms) {
-    res.assignRef(ms->invokeStatic(s, params));
+  if (msw) {
+    res.assignRef(msw->m_methodStatement->invokeStatic(s, params, msw));
     ref(res);
     return true;
   }
@@ -137,8 +139,8 @@ bool eval_get_class_constant_hook(Variant &res, CStrRef s,
                                   const char* constant) {
   if (hhvm) {
     String clsName(s, strlen(s), CopyString);
-    HPHP::VM::Class* cls = g_context->lookupClass(clsName.get());
-    if (cls && !cls->m_isCppExtClass) {
+    HPHP::VM::Class* cls = HPHP::VM::Unit::lookupClass(clsName.get());
+    if (cls && !cls->clsInfo()) {
       String cnsName(constant, strlen(constant), CopyString);
       TypedValue* tv = cls->clsCnsGet(cnsName.get());
       if (tv) {
@@ -163,18 +165,16 @@ bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
   if (hhvm) {
     bool initial;
     HPHP::Eval::PhpFile* efile =
-      g_context->lookupPhpFile(path.get(), currentDir, initial);
+      g_vmContext->lookupPhpFile(path.get(), currentDir, &initial);
     HPHP::VM::Unit* u = NULL;
     if (efile) u = efile->unit();
     if (u == NULL) {
-      raise_error("File not found: %s", path->data());
       return false;
-    } else {
-      if (!once || initial) {
-        g_context->invokeUnit(u);
-      }
-      return true;
     }
+    if (!once || initial) {
+      g_vmContext->invokeUnit((TypedValue*)(&res), u);
+    }
+    return true;
   } else {
     return RequestEvalState::includeFile(res, path, once, variables,
                                          currentDir);
@@ -215,17 +215,30 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
   return false;
 }
 
+void eval_set_callee_alias(CStrRef alias) {
+  DECLARE_THREAD_INFO;
+  FrameInjection *fi;
+  for (fi = info->m_top; fi; fi= fi->getPrev()) {
+    if (fi->isEvalFrame()) {
+      break;
+    }
+  }
+  EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
+  if (efi) efi->getEnv().setCalleeAlias(alias);
+}
+
 bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
                                            bool &foundClass) {
   if (!hhvm) {
     ASSERT(!foundClass);
     ClassEvalState *ce;
-    const MethodStatement *ms =
+    const MethodStatementWrapper *msw =
       Eval::RequestEvalState::findMethod(info.rootCls, *info.name, ce, true);
     foundClass = (ce != NULL);
-    if (ms) {
-      info.ci = ms->getCallInfo();
-      info.extra = (void*)ms;
+    if (msw) {
+      info.ci = msw->m_methodStatement->getCallInfo();
+      info.extra = (void*)msw;
+      eval_set_callee_alias(*info.name);
       return true;
     }
 

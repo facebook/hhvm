@@ -10,8 +10,12 @@ class A {
   use TestTrait;
 }
 
-call_user_func('A::Test');
-call_user_func(array('A','Test'));
+function main() {
+  call_user_func('A::Test');
+  call_user_func(array('A','Test'));
 
-$obj = new A;
-call_user_func(array($obj, 'Test'));
+  $obj = new A;
+  call_user_func(array($obj, 'Test'));
+}
+main();
+

@@ -28,18 +28,21 @@ class D extends C {
   }
 }
 
-$c = new C;
-$d = new D;
+function main() {
+  $c = new C;
+  $d = new D;
 
-$c->foo();
-$d->foo();
-echo "**************\n";
-$c->bar();
-$d->bar();
-echo "**************\n";
-C::foo();
-D::bar();
-echo "**************\n";
-$d->yar();
-D::yar();
+  $c->foo();
+  $d->foo();
+  echo "**************\n";
+  $c->bar();
+  $d->bar();
+  echo "**************\n";
+  C::foo();
+  D::bar();
+  echo "**************\n";
+  $d->yar();
+  D::yar();
+}
 
+main();

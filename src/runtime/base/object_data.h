@@ -20,16 +20,18 @@
 #include <runtime/base/util/countable.h>
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/types.h>
-#include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/macros.h>
 #include <runtime/base/runtime_error.h>
+
+#include <boost/mpl/eval_if.hpp>
+#include <boost/mpl/int.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Needed for eval
 namespace Eval {
-class MethodStatement;
+class MethodStatementWrapper;
 class FunctionCallExpression;
 class VariableEnvironment;
 }
@@ -68,8 +70,7 @@ namespace VM {
 class ObjectData : public CountableNF {
  public:
   enum Attribute {
-    InConstructor = 0x0001, // __construct()
-    InDestructor  = 0x0002, // __destruct()
+    NoDestructor  = 0x0002, // __destruct()
     HasSleep      = 0x0004, // __sleep()
     UseSet        = 0x0008, // __set()
     UseGet        = 0x0010, // __get()
@@ -85,19 +86,22 @@ class ObjectData : public CountableNF {
     RealPropWrite = 2,    // Property could be modified
     RealPropNoDynamic = 4,// Dont return dynamic properties
     RealPropUnchecked = 8,// Dont check property accessibility
+    RealPropExist = 16,   // For property_exists
   };
 
-  ObjectData(const ObjectStaticCallbacks *cb = NULL, bool isResource = false,
+  ObjectData(const ObjectStaticCallbacks *cb = NULL, bool noId = false,
              VM::Class* type = NULL)
       : o_attribute(0), o_callbacks(cb)
 #ifdef HHVM
         , m_cls(type), m_propMap(NULL), m_propVec(NULL)
 #endif
         {
-    if (!isResource) {
+    if (!noId) {
       o_id = ++(*os_max_id);
     }
   }
+
+  void setId(const ObjectData *r) { if (r) o_id = r->o_id; }
 
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
@@ -118,19 +122,9 @@ class ObjectData : public CountableNF {
   bool getAttribute(Attribute attr) const { return o_attribute & attr; }
   void setAttribute(Attribute attr) const { o_attribute |= attr;}
   void clearAttribute(Attribute attr) const { o_attribute &= ~attr;}
-  bool inDtor() { return getAttribute(InDestructor); }
-  bool inCtor() { return getAttribute(InConstructor); }
-  bool inCtorDtor() { return inCtor() || inDtor(); }
-  void setInDtor() { setAttribute(InDestructor); }
-  bool gasInCtor(bool inCtor) { // get and set InConstructor
-    bool oldInCtor = getAttribute(InConstructor);
-    if (inCtor) {
-      setAttribute(InConstructor);
-    } else {
-      clearAttribute(InConstructor);
-    }
-    return oldInCtor;
-  }
+  bool noDestruct() const { return getAttribute(NoDestructor); }
+  void setNoDestruct() { setAttribute(NoDestructor); }
+  ObjectData *clearNoDestruct() { clearAttribute(NoDestructor); return this; }
 
   Object iterableObject(bool& isInstanceofIterator);
   ArrayIter begin(CStrRef context = null_string);
@@ -199,13 +193,12 @@ class ObjectData : public CountableNF {
   virtual void init() {}
   ObjectData *create() { CountableHelper h(this); init(); return this;}
   virtual void getConstructor(MethodCallPackage &mcp);
-  void release();
   virtual void destruct();
-  virtual void destructNoThrow();
 
-  virtual const Eval::MethodStatement* getConstructorStatement() const;
-  virtual const Eval::MethodStatement* getMethodStatement(CStrRef name,
-    int &access) const;
+  virtual const Eval::MethodStatementWrapper* getConstructorStatementWrapper()
+    const;
+  virtual const Eval::MethodStatementWrapper* getMethodStatementWrapper(
+    CStrRef name) const;
 
   static Variant os_invoke(CStrRef c, CStrRef s,
                            CArrRef params, int64 hash, bool fatal = true);
@@ -216,6 +209,8 @@ class ObjectData : public CountableNF {
   virtual Array o_getDynamicProperties() const;
   Variant *o_realProp(CStrRef s, int flags,
                       CStrRef context = null_string) const;
+  void *o_realPropTyped(CStrRef s, int flags,
+                        CStrRef context, int *type) const;
   Variant *o_realPropPublic(CStrRef s, int flags) const;
   virtual Variant *o_realPropHook(CStrRef s, int flags,
                                   CStrRef context = null_string) const;
@@ -259,11 +254,16 @@ class ObjectData : public CountableNF {
   virtual Variant o_setError(CStrRef prop, CStrRef context);
   /**
    * This is different from o_exists(), which is isset() semantics. This one
-   * is property_exists() semantics that check whether it was unset before.
-   * This is used for deciding what property_exists() returns and whether or
-   * not this property should be part of an iteration in foreach ($obj as ...)
+   * is property_exists() semantics. ie, accessibility is ignored, and declared
+   * but unset properties still return true.
    */
   bool o_propExists(CStrRef s, CStrRef context = null_string);
+
+  /**
+   * This is different from o_exists(), which is isset() semantics; this one
+   * returns true even if the property is set to null.
+   */
+  bool o_propForIteration(CStrRef s, CStrRef context = null_string);
 
   static Object FromArray(ArrayData *properties);
 
@@ -293,7 +293,8 @@ class ObjectData : public CountableNF {
 
   // misc
   Variant o_throw_fatal(const char *msg);
-  virtual void serialize(VariableSerializer *serializer) const;
+  void serialize(VariableSerializer *serializer) const;
+  virtual void serializeImpl(VariableSerializer *serializer) const;
   virtual void dump() const;
   virtual ObjectData *clone();
   virtual void setRoot(ObjectData *root) {}
@@ -328,12 +329,6 @@ class ObjectData : public CountableNF {
   template<typename T, int op>
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
-  /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   */
-  virtual Object fiberMarshal(FiberReferenceMap &refMap) const;
-  virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
-
   static Variant callHandler(MethodCallPackage &info, CArrRef params);
   static Variant callHandlerFewArgs(MethodCallPackage &info, int count,
       INVOKE_FEW_ARGS_IMPL_ARGS);
@@ -346,7 +341,8 @@ class ObjectData : public CountableNF {
 public:
   bool hasCall();
   bool hasCallStatic();
-
+  CArrRef getProperties() const { return o_properties; }
+  void initProperties(int nProp);
  private:
   ObjectData(const ObjectData &) { ASSERT(false);}
   inline Variant o_getImpl(CStrRef propName, int flags,
@@ -365,8 +361,8 @@ public:
   int           o_id;            // a numeric identifier of this object
  private:
   mutable int16 o_attribute;     // various flags
- protected:
-  Array         o_properties;    // dynamic properties
+ private:
+  ArrNR         o_properties;    // dynamic properties
  protected:
 #ifndef HHVM
   // For non-HHVM builds, avoid the memory overhead of HHVM-specific fields by
@@ -381,9 +377,6 @@ public:
     // reside here, so that it is possible to dynamically compute the offset of
     // the property vector that follows an "Instance", regardless of whether the
     // Instance is actually an extension class that derives from ObjectData.
-#ifdef HHVM
-   public:
-#endif
     HPHP::VM::Class* m_cls;
     HphpArray* m_propMap;
     TypedValue* m_propVec;
@@ -393,12 +386,11 @@ public:
  protected:
   void          cloneDynamic(ObjectData *orig);
 
-#ifdef FAST_REFCOUNT_FOR_VARIANT
  private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET);
   }
-#endif
+
  public:
   // true : pure user class or user class deriving from builtin
   // false: pure builtin
@@ -406,17 +398,11 @@ public:
     return getAttribute(IsInstance);
   }
 
-  template <bool canThrow>
-  void releaseImpl() {
+  void release() {
     ASSERT(getCount() == 0);
-    if (canThrow) {
-      destruct();
-    } else {
-      destructNoThrow();
-    }
+    destruct();
     if (UNLIKELY(getCount() != 0)) {
-      // Object was resurrected.  Make a note to avoid re-running __destruct()
-      setAttribute(InDestructor);
+      // Object was resurrected.
       return;
     }
     delete this;
@@ -428,11 +414,11 @@ template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 typedef ObjectData c_ObjectData; // purely for easier code generation
 
 struct MethodCallInfoTable {
-  int64       hash;
-  int         flags;
-  int         len;
-  const char *name;
-  CallInfo   *ci;
+  int64          hash;
+  int            flags;
+  int            len;
+  const char     *name;
+  const CallInfo *ci;
 };
 
 struct InstanceOfInfo {
@@ -463,7 +449,6 @@ struct ObjectStaticCallbacks {
                             MethodCallPackage &mcp, int64 hash);
 
   bool checkAttribute(int attrs) const;
-  operator const ObjectStaticCallbacks*() const { return this; }
   const ObjectStaticCallbacks* operator->() const { return this; }
   GlobalVariables *lazy_initializer(GlobalVariables *g) const;
 
@@ -486,7 +471,7 @@ struct RedeclaredObjectStaticCallbacks {
   ObjectStaticCallbacks oscb;
   int id;
 
-  operator const ObjectStaticCallbacks*() const { return &oscb; }
+  const RedeclaredObjectStaticCallbacks* operator->() const { return this; }
   int getRedeclaringId() const { return id; }
 
   Variant os_getInit(CStrRef s) const;
@@ -498,7 +483,6 @@ struct RedeclaredObjectStaticCallbacks {
   Object create(CArrRef params, bool init = true,
                 ObjectData* root = NULL) const;
   Object createOnly(ObjectData *root = NULL) const;
-  const RedeclaredObjectStaticCallbacks* operator->() const { return this; }
 };
 
 typedef const RedeclaredObjectStaticCallbacks
@@ -511,28 +495,58 @@ ObjectData *coo_ObjectData(ObjectData *);
 
 #define WORD_SIZE sizeof(void *)
 #define ALIGN_WORD(n) ((n) + (WORD_SIZE - (n) % WORD_SIZE) % WORD_SIZE)
-#define UNIT_SIZE sizeof(ObjectData)
 
-template<int M>
-class ItemSize {
- private:
+// Mapping from index to size class for objects.  Mapping in the other
+// direction is available from ObjectSizeClass<> below.
+template<int Idx> class ObjectSizeTable {
+  enum { prevSize = ObjectSizeTable<Idx - 1>::value };
+public:
   enum {
-    prev = (M + M + 3) / 3 >= UNIT_SIZE ? (M + M + 3) / 3 : UNIT_SIZE,
-    pval = ItemSize<prev>::value
-  };
- public:
-  enum {
-    index = ItemSize<prev>::index + (int)(pval < M),
-    value = (pval < M ? ALIGN_WORD(pval + (pval >> 1)) : pval)
+    value = ALIGN_WORD(prevSize + (prevSize >> 1))
   };
 };
 
-template<>
-class ItemSize<UNIT_SIZE> {
- public:
+template<> struct ObjectSizeTable<0> {
+  enum { value = sizeof(ObjectData) };
+};
+
+#undef WORD_SIZE
+#undef ALIGN_WORD
+
+/*
+ * This determines the highest size class we can have by looking for
+ * the first entry in our table that is larger than the hard coded
+ * SmartAllocator SLAB_SIZE.  This is because you can't (currently)
+ * SmartAllocate chunks that are potentially bigger than a slab. If
+ * you introduce a bigger size class, SmartAllocator will hit an
+ * assertion at runtime.  The last size class currently goes up to
+ * 97096 bytes -- enough room for 6064 TypedValues. Hopefully that's
+ * enough.
+ */
+template<int Index>
+struct DetermineLargestSizeClass {
+  typedef typename boost::mpl::eval_if_c<
+    (ObjectSizeTable<Index>::value > SLAB_SIZE),
+    boost::mpl::int_<Index>,
+    DetermineLargestSizeClass<Index + 1>
+  >::type type;
+};
+const int NumObjectSizeClasses = DetermineLargestSizeClass<0>::type::value;
+
+template<size_t Sz, int Index> struct LookupObjSizeIndex {
+  enum { index =
+    Sz <= ObjectSizeTable<Index>::value
+      ? Index : LookupObjSizeIndex<Sz,Index + 1>::index };
+};
+template<size_t Sz> struct LookupObjSizeIndex<Sz,NumObjectSizeClasses> {
+  enum { index = NumObjectSizeClasses };
+};
+
+template<size_t Sz>
+struct ObjectSizeClass {
   enum {
-    index = 0,
-    value = UNIT_SIZE
+    index = LookupObjSizeIndex<Sz,0>::index,
+    value = ObjectSizeTable<index>::value
   };
 };
 
@@ -540,7 +554,6 @@ typedef ObjectAllocatorBase *(*ObjectAllocatorBaseGetter)(void);
 
 class ObjectAllocatorCollector {
 public:
-  static int AllocSizeToIndex(int size);
   static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
     static std::map<int, ObjectAllocatorBaseGetter> wrappers;
     return wrappers;
@@ -549,14 +562,25 @@ public:
 
 template <typename T>
 void *ObjectAllocatorInitSetup() {
-  ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
+  ThreadLocalSingleton<ObjectAllocator<
+    ObjectSizeClass<sizeof(T)>::value> > tls;
   if (hhvm) {
-    ObjectAllocatorCollector::getWrappers()[ItemSize<sizeof(T)>::index] =
+    int index = ObjectSizeClass<sizeof(T)>::index;
+    ObjectAllocatorCollector::getWrappers()[index] =
       (ObjectAllocatorBaseGetter)tls.getCheck;
   }
   GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
   return (void*)tls.getNoCheck;
 }
+
+/*
+ * Return the index in ThreadInfo::m_allocators for the allocator
+ * responsible for a given object size.
+ *
+ * There is a maximum limit on the size of allocatable objects.  If
+ * this is reached, this function returns -1.
+ */
+int object_alloc_size_to_index(size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Attribute helpers

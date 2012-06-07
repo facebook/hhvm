@@ -1,2 +1,2 @@
 #!/bin/bash
-sed -e 's/\\n/\n/g' | sed -e 's/\/.*src/src/g' | sed -e 's/\(.*\)line.*/\1/g' | sort | uniq
+sed -e 's/\\n/\n/g' -e '/Destructor raised a fatal error/d' -e 's/\/.*src/src/g' -e 's/\(.*\)line.*/\1/g' | sort -fu

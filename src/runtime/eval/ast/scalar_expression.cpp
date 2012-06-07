@@ -25,7 +25,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s_trait_marker("[trait]");
@@ -134,10 +134,9 @@ Variant ScalarExpression::getValue(VariableEnvironment &env) const {
     switch (m_subtype) {
     case T_FILE:
       if (RuntimeOption::SandboxCheckMd5) {
-        return FileRepository::translateFileName(
-          string(m_value->data(), m_value->size()));
+        return FileRepository::translateFileName(m_value);
       }
-      break; 
+      break;
     case T_CLASS_C: {
       bool tm = m_value->same(s_trait_marker.get());
       bool gcm = m_value->same(s_get_class_marker.get());
@@ -145,28 +144,10 @@ Variant ScalarExpression::getValue(VariableEnvironment &env) const {
       if (tm || gcm || gpcm) {
         DECLARE_THREAD_INFO;
         FrameInjection *fi = info->m_top;
+        // T_CLASS_C is turned into "" by parser in non-class context
         ASSERT(fi->isEvalFrame());
-        const char *func = fi->getFunction();
-        ASSERT(func);
-        const char *m = strstr(func, "::");
-        const char *clsName = env.currentClass();
-        if (m) {
-          m += 2;
-          ClassEvalState *ce = RequestEvalState::findClassState(clsName);
-          do {
-            int access;
-            const ClassStatement *cls = ce->getClass();
-            clsName = cls->name().c_str();
-            if (ce->getTraitMethod(m, access)) break;
-            ce = ce->getParentClassEvalState();
-            if (!ce) {
-              cls = cls->parentStatement();
-              if (cls) {
-                ce = RequestEvalState::findClassState(cls->name());
-              }
-            }
-          } while (ce);
-        }
+        EvalFrameInjection* efi = static_cast<Eval::EvalFrameInjection*>(fi);
+        String clsName = efi->getClass();
         if (!gpcm) return clsName;
         const ClassStatement *cls = RequestEvalState::findClass(clsName);
         return cls->parent();

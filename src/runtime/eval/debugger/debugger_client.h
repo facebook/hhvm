@@ -18,10 +18,12 @@
 #define __HPHP_EVAL_DEBUGGER_CLIENT_H__
 
 #include <runtime/eval/debugger/debugger.h>
+#include <runtime/eval/debugger/debugger_client_settings.h>
 #include <runtime/eval/debugger/inst_point.h>
 #include <runtime/base/debuggable.h>
 #include <util/text_color.h>
 #include <util/hdf.h>
+#include <util/mutex.h>
 
 namespace HPHP {
 
@@ -40,6 +42,7 @@ public:
   static const char *LocalPrompt;
   static const char *ConfigFileName;
   static const char *HistoryFileName;
+  static std::string HomePrefix;
   static std::string SourceRoot;
 
   static bool UseColor;
@@ -52,7 +55,7 @@ public:
   static const char *HighlightForeColor;
   static const char *HighlightBgColor;
   static const char *DefaultCodeColors[];
-  static const int MinPrintLevel = 2;
+  static const int MinPrintLevel = 1;
 
 public:
   static void LoadColors(Hdf hdf);
@@ -86,11 +89,12 @@ public:
   };
   static const char **GetCommands();
 
-  typedef std::vector<String> LiveLists[DebuggerClient::AutoCompleteCount];
+  typedef std::vector<std::string> LiveLists[DebuggerClient::AutoCompleteCount];
   typedef boost::shared_ptr<LiveLists> LiveListsPtr;
   static LiveListsPtr CreateNewLiveLists() {
     return LiveListsPtr(new LiveLists[DebuggerClient::AutoCompleteCount]());
   }
+  std::vector<std::string> getAllCompletions(std::string const &text);
 
   /**
    * Helpers
@@ -105,7 +109,7 @@ public:
   static String FormatTitle(const char *title);
 
 public:
-  DebuggerClient();
+  DebuggerClient(std::string name = ""); // name only for api usage
   ~DebuggerClient();
   void reset();
 
@@ -184,7 +188,8 @@ public:
   template<typename T> boost::shared_ptr<T> xend(DebuggerCommand *cmd) {
     return boost::static_pointer_cast<T>(xend(cmd));
   }
-  void send(DebuggerCommand *cmd) { send(cmd, 0);}
+  void send(DebuggerCommand *cmd);
+  DebuggerCommandPtr recv(int expected);
 
   /**
    * Machine functions. True if we're switching to a machine that's not
@@ -257,7 +262,7 @@ public:
   void addCompletion(AutoComplete type);
   void addCompletion(const char **list);
   void addCompletion(const char *name);
-  void addCompletion(const std::vector<String> &items);
+  void addCompletion(const std::vector<std::string> &items);
   void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists;}
 
   /**
@@ -293,9 +298,14 @@ public:
   }
   void setOTValues(CArrRef values) { m_otValues = values; }
   void clearCachedLocal() {
+    m_otFile = "";
+    m_otLineNo = 0;
     m_stacktrace = null_array;
     m_otValues = null_array;
   }
+  bool apiGrab();
+  void apiFree();
+  const std::string& getNameApi() const { return m_nameForApi; }
 
   /**
    * Macro functions
@@ -307,6 +317,15 @@ public:
   bool deleteMacro(int index);
 
   DECLARE_DBG_SETTING_ACCESSORS
+  DECLARE_DBG_CLIENT_SETTING_ACCESSORS
+
+  std::string getLogFile () const { return m_logFile; }
+  void setLogFile (std::string inLogFile) { m_logFile = inLogFile; }
+  FILE* getLogFileHandler () const { return m_logFileHandler; }
+  void setLogFileHandler (FILE* inLogFileHandler) {
+    m_logFileHandler = inLogFileHandler;
+  }
+  std::string getCurrentUser() const { return m_options.user; }
 
 private:
   enum InputState {
@@ -327,10 +346,15 @@ private:
   std::set<std::string> m_tutorialVisited;
 
   DECLARE_DBG_SETTING
+  DECLARE_DBG_CLIENT_SETTING
+
+  std::string m_logFile;
+  FILE* m_logFileHandler;
 
   DebuggerClientOptions m_options;
   AsyncFunc<DebuggerClient> m_mainThread;
   bool m_stopped;
+  bool m_quitting;
 
   InputState m_inputState;
   RunState m_runState;
@@ -343,13 +367,14 @@ private:
   int m_acPos;
   std::vector<const char **> m_acLists;
   std::vector<const char *> m_acStrings;
-  std::vector<String> m_acItems;
+  std::vector<std::string> m_acItems;
   bool m_acLiveListsDirty;
   LiveListsPtr m_acLiveLists;
   bool m_acProtoTypePrompted;
 
   std::string m_line;
   std::string m_command;
+  std::string m_commandCanonical;
   std::string m_prevCmd;
   StringVec m_args;
   std::string m_code;
@@ -401,7 +426,7 @@ private:
 
   void updateLiveLists();
   void promptFunctionPrototype();
-  char *getCompletion(const std::vector<String> &items,
+  char *getCompletion(const std::vector<std::string> &items,
                       const char *text);
   char *getCompletion(const std::vector<const char *> &items,
                       const char *text);
@@ -417,7 +442,6 @@ private:
   SmartPtr<Socket> connectLocal();
   bool connectRemote(const std::string &host, int port);
 
-  DebuggerCommandPtr send(DebuggerCommand *cmd, int expected);
   DebuggerCommandPtr xend(DebuggerCommand *cmd);
 
   // output
@@ -425,6 +449,22 @@ private:
   std::string m_otFile;
   int m_otLineNo;
   Array m_otValues;
+  std::vector<int> m_pendingCommands;
+
+  Mutex m_inApiUseLck;
+  bool m_inApiUse;
+  std::string m_nameForApi;
+
+  // usage logging
+  FILE* m_usageLogFP;
+  std::string m_usageLogHeader;
+  void initUsageLogging();
+  void finiUsageLogging();
+  void usageLog(const std::string& cmd, const std::string& line);
+  void usageLogInit() { usageLog("init", ""); }
+  void usageLogSignal() { usageLog("signal", ""); }
+  void usageLogDone(const std::string& cmdType) { usageLog("done", cmdType); }
+  void usageLogInterrupt(DebuggerCommandPtr cmd);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

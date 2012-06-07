@@ -67,3 +67,8 @@ array(3) {
 }
 array(0) {
 }
+string(1) "A"
+string(3) "two"
+string(5) "three"
+string(3) "two"
+string(5) "three"

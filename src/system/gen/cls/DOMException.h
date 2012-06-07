@@ -36,7 +36,9 @@ class c_DOMException : public c_Exception {
 
   // Class Map
   DECLARE_CLASS_NO_SWEEP(DOMException, DOMException, Exception)
-  c_DOMException(const ObjectStaticCallbacks *cb = &cw_DOMException) : c_Exception(cb) {}
+  c_DOMException(const ObjectStaticCallbacks *cb = &cw_DOMException) : c_Exception(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_message, Variant v_code);
   public: c_DOMException *create(CVarRef v_message, CVarRef v_code);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

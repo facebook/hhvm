@@ -22,8 +22,6 @@
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/builtin_functions.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
@@ -341,6 +339,91 @@ String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
   return String(ret, len, AttachString);
 }
 
+#define A1(v, ch) ((v)|((ch) & 64 ? 0 : 1uLL<<((ch)&63)))
+#define A2(v, ch) ((v)|((ch) & 64 ? 1uLL<<((ch)&63) : 0))
+
+static const AsciiMap mapNoQuotes = {
+  {   A1(A1(A1(A1(A1(A1(0, '<'), '>'), '&'), '{'), '}'), '@'),
+      A2(A2(A2(A2(A2(A2(0, '<'), '>'), '&'), '{'), '}'), '@') }
+};
+
+static const AsciiMap mapDoubleQuotes = {
+  {   A1(A1(A1(A1(A1(A1(A1(0, '<'), '>'), '&'), '{'), '}'), '@'), '"'),
+      A2(A2(A2(A2(A2(A2(A2(0, '<'), '>'), '&'), '{'), '}'), '@'), '"') }
+};
+
+static const AsciiMap mapBothQuotes = {
+  { A1(A1(A1(A1(A1(A1(A1(A1(0, '<'), '>'), '&'), '{'), '}'), '@'), '"'), '\''),
+    A2(A2(A2(A2(A2(A2(A2(A2(0, '<'), '>'), '&'), '{'), '}'), '@'), '"'), '\'') }
+};
+
+static const AsciiMap mapNothing = {};
+
+String StringUtil::HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
+                                   const char *charset, bool nbsp,
+                                   Array extra) {
+  if (input.empty()) return input;
+
+  ASSERT(charset);
+  int flags = STRING_HTML_ENCODE_UTF8;
+  if (nbsp) {
+    flags |= STRING_HTML_ENCODE_NBSP;
+  }
+  if (RuntimeOption::Utf8izeReplace) {
+    flags |= STRING_HTML_ENCODE_UTF8IZE_REPLACE;
+  }
+  if (!*charset || strcasecmp(charset, "UTF-8") == 0) {
+  } else if (strcasecmp(charset, "ISO-8859-1") == 0) {
+    flags &= ~STRING_HTML_ENCODE_UTF8;
+  } else {
+    throw NotImplementedException(charset);
+  }
+
+  const AsciiMap *am;
+  AsciiMap tmp;
+
+  switch (quoteStyle) {
+    case FBUtf8Only:
+      am = &mapNothing;
+      flags |= STRING_HTML_ENCODE_HIGH;
+      break;
+    case FBUtf8:
+      am = &mapBothQuotes;
+      flags |= STRING_HTML_ENCODE_HIGH;
+      break;
+    case BothQuotes:
+      am = &mapBothQuotes;
+      break;
+    case DoubleQuotes:
+      am = &mapDoubleQuotes;
+      break;
+    case NoQuotes:
+      am = &mapNoQuotes;
+      break;
+    default:
+      am = &mapNothing;
+      raise_error("Unknown quote style: %d", (int)quoteStyle);
+  }
+
+  if (quoteStyle != FBUtf8Only && extra.toBoolean()) {
+    tmp = *am;
+    am = &tmp;
+    for (ArrayIter iter(extra); iter; ++iter) {
+      String item = iter.second().toString();
+      char c = item.data()[0];
+      tmp.map[c & 64 ? 1 : 0] |= 1uLL << (c & 63);
+    }
+  }
+
+  int len = input.size();
+  char *ret = string_html_encode_extra(input, len,
+                                       (StringHtmlEncoding)flags, am);
+  if (!ret) {
+    raise_error("HtmlEncode called on too large input (%d)", len);
+  }
+  return String(ret, len, AttachString);
+}
+
 String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
                               const char *charset, bool all) {
   if (input.empty()) return input;
@@ -490,11 +573,11 @@ String StringUtil::SHA1(CStrRef input, bool raw /* = false */) {
 }
 
 void StringUtil::InitLiteralStrings(StaticString literalStrings[],
-                                    int nliteralStrings,
-                                    const char *literalStringBuf,
-                                    int literalStringBufSize,
-                                    const char *literalStringLen,
-                                    int literalStringLenSize) {
+                                   int nliteralStrings,
+                                   const char *literalStringBuf,
+                                   int literalStringBufSize,
+                                   const char *literalStringLen,
+                                   int literalStringLenSize) {
   int bufSize = literalStringBufSize;
   int lenSize = literalStringLenSize;
   static char *uncompressedBuf; // permanently allocated
@@ -532,6 +615,33 @@ void StringUtil::InitLiteralStrings(StaticString literalStrings[],
     throw Exception("Bad literalStringLen %p", literalStringLen);
   }
   free(uncompressedLen);
+}
+
+int StringUtil::InitLiteralStrings(const char *input[], int nls, int nbs) {
+  assert(sizeof(StaticStringProxy) == sizeof(StaticString));
+  for (int i = 0; i < nls; i++) {
+    StaticString *ss = (StaticString *)input[2 * i];
+    const char *str = input[2 * i + 1];
+    new (ss) StaticString(str);
+  }
+  const char **binput = input + 2 * nls;
+  for (int i = 0; i < nbs; i++) {
+    StaticString *ss = (StaticString *)binput[3 * i];
+    const char *str = binput[3 * i + 1];
+    int64 length = (int64)binput[3 * i + 2];
+    new (ss) StaticString(str, length);
+  }
+  return 0;
+}
+
+int StringUtil::InitLiteralVarStrings(const char *input[], int count) {
+  assert(sizeof(VariantProxy) == sizeof(Variant));
+  for (int i = 0; i < count; i++) {
+    Variant *v = (Variant *)input[2 * i];
+    StaticString *s = (StaticString *)input[2 * i + 1];
+    new (v) Variant(*s);
+  }
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

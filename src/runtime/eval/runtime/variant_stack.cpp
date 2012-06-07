@@ -17,7 +17,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 VariantStack::VariantStack() : m_ptr(0), m_cap(400) {
@@ -40,7 +40,7 @@ Array VariantStack::pull(uint s, uint n) const {
   ASSERT(m_ptr >= s + n);
   Array r = Array::Create();
   for (uint i = 0; i < n; i++) {
-    r.append(m_stack[s + i]);
+    r.appendWithRef(m_stack[s + i]);
   }
   return r;
 }

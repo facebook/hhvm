@@ -31,8 +31,6 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 
-using namespace std;
-
 namespace HPHP {
 
 #define MIN_KEY_LENGTH          384
@@ -1389,7 +1387,7 @@ bool f_openssl_pkcs7_encrypt(CStrRef infilename, CStrRef outfilename,
   case PHP_OPENSSL_CIPHER_3DES:    cipher = EVP_des_ede3_cbc(); break;
 #endif
   default:
-    raise_warning("Invalid cipher type `%ld'", cipherid);
+    raise_warning("Invalid cipher type `%d'", cipherid);
     goto clean_exit;
   }
   if (cipher == NULL) {
@@ -2283,7 +2281,7 @@ Variant f_openssl_random_pseudo_bytes(int length,
     free(buffer);
     return false;
   } else {
-    crypto_strong = crypto_strength;
+    crypto_strong = (bool)crypto_strength;
     buffer[length] = '\0';
     return String((char *)buffer, length, AttachString);
   }
@@ -2344,14 +2342,16 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
   }
 
   int keylen = EVP_CIPHER_key_length(cipher_type);
-  unsigned char *key;
+  String key = password;
 
+  /*
+   * older openssl libraries can assert if the passed in password length is
+   * less than keylen
+   */
   if (keylen > password.size()) {
-    key = (unsigned char*)malloc(keylen);
-    memset(key, 0, keylen);
-    memcpy(key, password, password.size());
-  } else {
-    key = (unsigned char*)password.c_str();
+    char *keybuf = (char *)calloc(keylen + 1, sizeof(*keybuf));
+    memcpy(keybuf, password.data(), password.size());
+    key = String(keybuf, keylen, AttachString);
   }
 
   int max_iv_len = EVP_CIPHER_iv_length(cipher_type);
@@ -2373,13 +2373,18 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
   if (password.size() > keylen) {
     EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password.size());
   }
-  EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key,
+  EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, (unsigned char *)key.data(),
                   (unsigned char *)new_iv.data());
   if (options & k_OPENSSL_ZERO_PADDING) {
     EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
   }
-  EVP_EncryptUpdate(&cipher_ctx, outbuf, &result_len,
-                    (unsigned char *)data.data(), data.size());
+
+  // OpenSSL before 0.9.8i asserts with size < 0
+  if (data.size() > 0) {
+    EVP_EncryptUpdate(&cipher_ctx, outbuf, &result_len,
+                      (unsigned char *)data.data(), data.size());
+  }
+
   outlen = result_len;
 
   if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + result_len,
@@ -2416,14 +2421,16 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
   }
 
   int keylen = EVP_CIPHER_key_length(cipher_type);
-  unsigned char *key;
+  String key = password;
 
-  if (keylen > password.size()) {
-    key = (unsigned char*)malloc(keylen);
-    memset(key, 0, keylen);
-    memcpy(key, password, password.size());
-  } else {
-    key = (unsigned char*)password.c_str();
+  /*
+   * older openssl libraries can assert if the passed in password length is
+   * less than keylen
+   */
+   if (keylen > password.size()) {
+    char *keybuf = (char *)calloc(keylen + 1, sizeof(*keybuf));
+    memcpy(keybuf, password.data(), password.size());
+    key = String(keybuf, keylen, AttachString);
   }
 
   int result_len = 0;
@@ -2439,7 +2446,7 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
   if (password.size() > keylen) {
     EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password.size());
   }
-  EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key,
+  EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, (unsigned char *)key.data(),
                   (unsigned char *)new_iv.data());
   if (options & k_OPENSSL_ZERO_PADDING) {
     EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);

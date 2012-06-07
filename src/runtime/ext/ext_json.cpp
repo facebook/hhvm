@@ -33,6 +33,7 @@ const int64 k_JSON_UNESCAPED_SLASHES = 1<<6;
 // intentionally higher so when PHP adds more options we're fine
 const int64 k_JSON_FB_LOOSE      = 1<<20;
 const int64 k_JSON_FB_UNLIMITED  = 1<<21;
+const int64 k_JSON_FB_EXTRA_ESCAPES = 1<<22;
 
 ///////////////////////////////////////////////////////////////////////////////
 

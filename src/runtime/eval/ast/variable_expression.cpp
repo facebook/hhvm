@@ -17,6 +17,7 @@
 #include <runtime/eval/ast/variable_expression.h>
 #include <runtime/eval/ast/name.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/strings.h>
 #include <runtime/eval/strict_mode.h>
 
 namespace HPHP {
@@ -60,7 +61,7 @@ Variant &VariableExpression::getRefHelper(
 
 void VariableExpression::raiseUndefined(VariableEnvironment &env) const {
   SET_LINE_VOID;
-  raise_notice("Undefined variable: %s", m_name->get(env).c_str());
+  raise_notice(Strings::UNDEFINED_VARIABLE, m_name->get(env).c_str());
 }
 
 Expression *VariableExpression::optimize(VariableEnvironment &env) {

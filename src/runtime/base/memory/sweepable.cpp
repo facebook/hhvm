@@ -48,9 +48,7 @@ void Sweepable::SweepAll() {
 }
 
 Sweepable::Sweepable() : m_persistentCount(0) {
-  if (MemoryManager::TheMemoryManager()->afterCheckpoint()) {
-    s_sweep_data->sweepables.insert(this);
-  }
+  s_sweep_data->sweepables.insert(this);
 }
 
 Sweepable::~Sweepable() {

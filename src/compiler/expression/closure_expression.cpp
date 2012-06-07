@@ -21,10 +21,9 @@
 #include <compiler/statement/function_statement.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/function_scope.h>
+#include <compiler/analysis/file_scope.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 TypePtr ClosureExpression::s_ClosureType =
   Type::CreateObjectType("closure"); // needs lower case
@@ -42,7 +41,7 @@ ClosureExpression::ClosureExpression
     m_vars = ExpressionListPtr
       (new ExpressionList(vars->getScope(), vars->getLocation()));
     // push the vars in reverse order, not retaining duplicates
-    set<string> seenBefore;
+    std::set<string> seenBefore;
     for (int i = vars->getCount() - 1; i >= 0; i--) {
       ParameterExpressionPtr param(
         dynamic_pointer_cast<ParameterExpression>((*vars)[i]));
@@ -117,9 +116,6 @@ void ClosureExpression::setNthKid(int n, ConstructPtr cp) {
 // static analysis functions
 
 void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
-  // sanity check:
-  ASSERT(getScope() == getClosureFunction()->getScope()->getOuterScope());
-
   m_func->analyzeProgram(ar);
   if (m_vars) {
     m_values->analyzeProgram(ar);
@@ -137,11 +133,12 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
           dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
         const string &name = param->getName();
         {
-          Symbol *containingSym = containing->addSymbol(name);
+          Symbol *containingSym = containing->addDeclaredSymbol(name, param);
           containingSym->setPassClosureVar();
 
-          Symbol *sym = variables->addSymbol(name);
+          Symbol *sym = variables->addDeclaredSymbol(name, param);
           sym->setClosureVar();
+          sym->setDeclaration(ConstructPtr());
           if (param->isRef()) {
             sym->setRefClosureVar();
             sym->setUsed();
@@ -154,6 +151,9 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
       return;
     }
     if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+      if (m_func->getFileScope() != getFileScope()) {
+        getFileScope()->addUsedClosure(m_func->getFunctionScope());
+      }
       // closure function's variable table (not containing function's)
       VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
       for (int i = 0; i < m_vars->getCount(); i++) {
@@ -243,6 +243,32 @@ void ClosureExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf(")");
   }
   m_func->outputPHPBody(cg, ar);
+}
+
+bool ClosureExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                                     int state) {
+  FunctionScopeRawPtr cfunc(m_func->getFunctionScope());
+  bool output = false;
+  for (BlockScopePtr sc = cfunc->getOuterScope(); sc;
+       sc = sc->getOuterScope()) {
+    if (sc->is(BlockScope::ClassScope)) {
+      ClassScopePtr cls = boost::static_pointer_cast<ClassScope>(sc);
+      if (cls->isTrait()) {
+        output = true;
+        break;
+      }
+    }
+  }
+
+  if (!cg.inExpression()) {
+    return output || Expression::preOutputCPP(cg, ar, state);
+  }
+
+  if (output) {
+    cg.wrapExpressionBegin();
+    cfunc->outputCPPPreface(cg, ar);
+  }
+  return Expression::preOutputCPP(cg, ar, state) || output;
 }
 
 void ClosureExpression::outputCPPImpl(CodeGenerator &cg,

@@ -41,13 +41,15 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/thread_init_fini.h>
+#include <runtime/vm/repo.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <dlfcn.h>
+#include <system/lib/systemlib.h>
 
 using namespace HPHP;
-using namespace std;
 using namespace boost::program_options;
+using std::cout;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -137,7 +139,8 @@ int process(const ProgramOptions &po);
 int lintTarget(const ProgramOptions &po);
 int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar);
 int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar);
-int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar);
+int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
+               AsyncFileCacheSaver &fcThread);
 int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
               AsyncFileCacheSaver &fcThread, bool allowSys = true);
 int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
@@ -150,6 +153,9 @@ int generateSepExtCpp(const ProgramOptions &po, AnalysisResultPtr ar);
 
 int main(int argc, char **argv) {
   try {
+    Hdf empty;
+    RuntimeOption::Load(empty);
+
     ProgramOptions po;
     void (*compiler_hook_initialize)();
     compiler_hook_initialize =
@@ -223,7 +229,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "analyze: (none); \n"
      "php: trimmed (default) | inlined | pickled | typeinfo |"
      " <any combination of them by any separator>; \n"
-     "hhbc: text (default) | binary; \n"
+     "hhbc: binary (default) | text; \n"
      "cpp: cluster (default) | file | sys | exe | lib; \n"
      "run: cluster (default) | file")
     ("cluster-count", value<int>(&po.clusterCount)->default_value(0),
@@ -280,7 +286,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "Files will be created in this directory first, then sync with output "
      "directory without overwriting identical files. Great for incremental "
      "compilation and build.")
-    ("optimize-level", value<int>(&po.optimizeLevel)->default_value(1),
+    ("optimize-level", value<int>(&po.optimizeLevel)->default_value(-1),
      "optimization level")
     ("gen-stats", value<bool>(&po.genStats)->default_value(false),
      "whether to generate code errors")
@@ -354,6 +360,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 #ifdef COMPILER_ID
     ("compiler-id", "display the git hash for the compiler id")
 #endif
+    ("repo-schema", "display the repo schema id used by this app")
     ("taint-status", "check if the compiler was built with taint enabled")
     ;
 
@@ -394,6 +401,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 #ifdef COMPILER_ID
 cout << "Compiler: " << COMPILER_ID << "\n";
 #endif
+    cout << "Repo schema: " << VM::Repo::kSchemaId << "\n";
     return 1;
   }
 
@@ -404,11 +412,22 @@ cout << "Compiler: " << COMPILER_ID << "\n";
   }
 #endif
 
+  if (vm.count("repo-schema")) {
+    cout << VM::Repo::kSchemaId << "\n";
+    return 1;
+  }
+
   if (vm.count("taint-status")) {
 #ifdef TAINTED
     cout << TAINTED << "\n";
 #endif
     return 1;
+  }
+
+  if (hhvm && (po.target == "hhbc" || po.target == "run")) {
+    if (po.program == "program") {
+      po.program = "hhvm.hhbc";
+    }
   }
 
   // log level
@@ -485,19 +504,24 @@ cout << "Compiler: " << COMPILER_ID << "\n";
   }
   Option::SystemGen = (po.target == "cpp" && po.format == "sys") ;
 
-  if (po.target == "hhbc") Option::ParseTimeOpts = false;
+  if (hhvm && (po.target == "hhbc" || po.target == "run")) {
+    Option::OutputHHBC = true;
+    RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
+  }
 
   Option::ProgramName = po.program;
   Option::PreprocessedPartitionConfig = po.ppp;
 
-  if (po.target == "cpp") {
-    if (po.format.empty()) po.format = "cluster";
-  } else if (po.target == "php") {
-    if (po.format.empty()) po.format = "trimmed";
-  } else if (po.target == "run") {
-    if (po.format.empty()) po.format = "cluster";
-  } else if (po.target == "hhbc") {
-    if (po.format.empty()) po.format = "text";
+  if (po.format.empty()) {
+    if (po.target == "cpp") {
+      po.format = "cluster";
+    } else if (po.target == "php") {
+      po.format = "trimmed";
+    } else if (po.target == "run") {
+      po.format = hhvm ? "binary" : "cluster";
+    } else if (hhvm && po.target == "hhbc") {
+      po.format = "binary";
+    }
   }
 
   if (!po.docjson.empty()) {
@@ -512,12 +536,23 @@ cout << "Compiler: " << COMPILER_ID << "\n";
     }
   }
 
+  if (po.optimizeLevel == -1) {
+    if (Option::OutputHHBC) {
+      po.optimizeLevel = 1;
+    } else {
+      po.optimizeLevel = 1;
+    }
+  }
+
   // we always do pre/post opt no matter the opt level
   Option::PreOptimization = true;
   Option::PostOptimization = true;
   if (po.optimizeLevel == 0) {
     // --optimize-level=0 is equivalent to --opts=none
     po.optimizations = "none";
+    if (Option::OutputHHBC) {
+      Option::ParseTimeOpts = false;
+    }
   }
 
   if (po.generateFFI) {
@@ -573,9 +608,10 @@ int process(const ProgramOptions &po) {
 
   // load the type hints
   Type::InitTypeHintMap();
+  BuiltinSymbols::LoadSuperGlobals();
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
-  if (!isPickledPHP && po.target != "hhbc") {
+  if (!isPickledPHP) {
     if (!BuiltinSymbols::Load(ar, po.target == "cpp" && po.format == "sys")) {
       return false;
     }
@@ -584,7 +620,7 @@ int process(const ProgramOptions &po) {
 
   {
     Timer timer(Timer::WallTime, "parsing inputs");
-    if (!po.inputs.empty() && (isPickledPHP || po.target == "hhbc")) {
+    if (!po.inputs.empty() && isPickledPHP) {
       for (unsigned int i = 0; i < po.inputs.size(); i++) {
         package.addSourceFile(po.inputs[i].c_str());
       }
@@ -622,10 +658,8 @@ int process(const ProgramOptions &po) {
       }
     }
     if (po.target != "filecache") {
-      {
-        if (!package.parse(!po.force)) {
-          return 1;
-        }
+      if (!package.parse(!po.force)) {
+        return 1;
       }
       ar->analyzeProgram();
     }
@@ -646,8 +680,8 @@ int process(const ProgramOptions &po) {
     ret = analyzeTarget(po, ar);
   } else if (po.target == "php") {
     ret = phpTarget(po, ar);
-  } else if (po.target == "hhbc") {
-    ret = hhbcTarget(po, ar);
+  } else if (hhvm && po.target == "hhbc") {
+    ret = hhbcTarget(po, ar, fileCacheThread);
   } else if (po.target == "cpp") {
     ret = cppTarget(po, ar, fileCacheThread);
   } else if (po.target == "run") {
@@ -739,6 +773,12 @@ int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
     Timer timer(Timer::WallTime, "pre-optimizing");
     ar->preOptimize();
   }
+
+  if (!Option::AllVolatile) {
+    Timer timer(Timer::WallTime, "analyze includes");
+    ar->analyzeIncludes();
+  }
+
   if (Option::GenerateInferredTypes) {
     Timer timer(Timer::WallTime, "inferring types");
     ar->inferTypes();
@@ -818,33 +858,58 @@ int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
+int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
+               AsyncFileCacheSaver &fcThread) {
   int ret = 0;
 
+  if (po.syncDir.empty()) {
+    ar->setOutputPath(po.outputDir);
+  } else {
+    ar->setOutputPath(po.syncDir);
+  }
+  // Propagate relevant compiler-specific options to the runtime.
+  RuntimeOption::RepoLocalPath = ar->getOutputPath() + '/' + po.program;
+  RuntimeOption::RepoLocalMode = "rw";
+  RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
+
   int formatCount = 0;
+  const char *type = 0;
   if (po.format.find("text") != string::npos) {
     Option::GenerateTextHHBC = true;
+    type = "creating text HHBC files";
     formatCount++;
   }
   if (po.format.find("binary") != string::npos) {
     Option::GenerateBinaryHHBC = true;
+    type = "creating binary HHBC files";
     formatCount++;
   }
+
   if (formatCount == 0) {
     Logger::Error("Unknown format for HHBC target: %s", po.format.c_str());
     return 1;
   }
 
-  ar->setOutputPath(po.outputDir);
-  if (Option::GenerateTextHHBC) {
-    CodeGenerator::Output fmt = CodeGenerator::TextHHBC;
-    Logger::Info("creating text HHBC files...");
-    ar->visitFiles(Compiler::emitHHBCVisitor, &fmt);
+  Timer timer(Timer::WallTime, type);
+
+  /* without this, emitClass allows classes with interfaces to be
+     hoistable */
+  SystemLib::s_inited = true;
+
+  Option::AutoInline = -1;
+
+  if (po.optimizeLevel > 0) {
+    ret = analyzeTarget(po, ar);
   }
-  if (Option::GenerateBinaryHHBC) {
-    CodeGenerator::Output fmt = CodeGenerator::BinaryHHBC;
-    Logger::Info("creating binary HHBC files...");
-    ar->visitFiles(Compiler::emitHHBCVisitor, &fmt);
+
+  Compiler::emitAllHHBC(ar);
+
+  if (!po.syncDir.empty()) {
+    if (!po.filecache.empty()) {
+      fcThread.waitForEnd();
+    }
+    Util::syncdir(po.outputDir, po.syncDir);
+    boost::filesystem::remove_all(po.syncDir);
   }
 
   return ret;
@@ -942,7 +1007,9 @@ int buildTarget(const ProgramOptions &po) {
   } else {
     Logger::Verbose("%s", out.c_str());
   }
-  Logger::Error("%s", err.c_str());
+  if (!err.empty()) {
+    Logger::Error("%s", err.c_str());
+  }
   if (!ret) {
     return 1;
   }
@@ -953,7 +1020,11 @@ int buildTarget(const ProgramOptions &po) {
 int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
                    AsyncFileCacheSaver &fcThread) {
   // generate code
-  if (po.format != "sep" && cppTarget(po, ar, fcThread, false)) {
+  if (po.format == "sep") return 1;
+
+  if (hhvm ?
+      hhbcTarget(po, ar, fcThread) :
+      cppTarget(po, ar, fcThread, false)) {
     return 1;
   }
 
@@ -967,7 +1038,7 @@ int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
 }
 
 int runTarget(const ProgramOptions &po) {
-  int ret = buildTarget(po);
+  int ret = hhvm ? 0 : buildTarget(po);
   if (ret) {
     return ret;
   }
@@ -980,7 +1051,14 @@ int runTarget(const ProgramOptions &po) {
   }
 
   // run the executable
-  string cmd = po.outputDir + '/' + po.program + ' ' + "--file " +
+  string cmd;
+  if (hhvm) {
+    cmd += " ~/dev/hiphop-php/src/hhvm/hhvm";
+    cmd += " -vRepo.Authoritative=true -vRepo.Commit=false";
+    cmd += " -vRepo.Local.Mode=r- -vRepo.Local.Path=";
+  }
+  cmd += po.outputDir + '/' + po.program;
+  cmd += string(" --file ") +
     (po.inputs.size() == 1 ? po.inputs[0] : "") + po.programArgs;
   Logger::Info("running executable %s...", cmd.c_str());
   Util::ssystem(cmd.c_str());

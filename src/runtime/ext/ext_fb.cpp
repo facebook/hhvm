@@ -17,26 +17,31 @@
 
 #include <runtime/ext/ext_fb.h>
 #include <runtime/ext/ext_function.h>
+#include <runtime/ext/ext_mysql.h>
 #include <util/db_conn.h>
+#include <util/logger.h>
+#include <util/stat_cache.h>
 #include <netinet/in.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/string_util.h>
 #include <runtime/base/util/string_buffer.h>
-#include <runtime/eval/runtime/code_coverage.h>
+#include <runtime/base/code_coverage.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/intercept.h>
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_trace.h>
 #include <runtime/base/taint/taint_warning.h>
+#include <unicode/uchar.h>
+#include <unicode/utf8.h>
 
 #include <util/parser/parser.h>
-
-using namespace std;
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(fb);
 ///////////////////////////////////////////////////////////////////////////////
+
+static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
 
 #define FB_UNSERIALIZE_NONSTRING_VALUE           0x0001
 #define FB_UNSERIALIZE_UNEXPECTED_END            0x0002
@@ -467,9 +472,8 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
     for (int i = 0; i < ds.getColCount(); i++) {
       const char *field = ds.getField(i);
       int len = ds.getFieldLength(i);
-      if (field == NULL) field = "";
       row.set(String(fields[i].name, CopyString),
-              String(field, len, CopyString));
+              mysql_makevalue(String(field, len, CopyString), fields + i));
     }
     rows.append(row);
   }
@@ -605,158 +609,205 @@ Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
 
 bool f_fb_utf8ize(VRefParam input) {
   String s = input.toString();
-  unsigned char *str = (unsigned char *)s.data();
-  int len = s.size();
-  int idx = 0;
+  const char* const srcBuf = s.data();
+  int32_t srcLenBytes = s.size();
 
-  /*
-    This works properly and makes the algorithm about twice as fast when
-    processing very long single-byte strings, but it is only a little faster
-    (~10%) when processing short single-byte strings and obviously not an
-    optimization at all for multi-byte strings.
+  if (s.size() < 0 || s.size() > INT_MAX) {
+    return false; // Too long.
+  }
 
-    int wide_len = (len >> 3);
-    if (wide_len > 1) {
-
-        unsigned long long *s = (unsigned long long *)str;
-        unsigned long long *e = s + wide_len;
-
-        do {
-            if (//  This is a check for high bits in any byte, which means
-                //  either junk or a multibyte character.
-                (*s & ~0x7F7F7F7F7F7F7F7FULL) ||
-
-                //  This is a check for a null byte. See:
-                //      http://www-graphics.stanford.edu/~seander/bithacks.html
-                ((*s - 0x0101010101010101ULL) & ~*s & 0x8080808080808080ULL)) {
-                break;
-            }
-        } while (++s <= e);
-
-        idx += ((s - (unsigned long long *)str) - 1) << 3;
+  // Preflight to avoid malloc() if the entire input is valid.
+  int32_t srcPosBytes;
+  for (srcPosBytes = 0; srcPosBytes < srcLenBytes; /* U8_NEXT increments */) {
+    // This is lame, but gcc doesn't optimize U8_NEXT very well
+    if (srcBuf[srcPosBytes] > 0 && srcBuf[srcPosBytes] <= 0x7f) {
+      srcPosBytes++; // U8_NEXT would increment this
+      continue;
     }
-
-  */
-
-  //  Scan the string for any multibyte characters.
-  unsigned char c;
-  for (       ; idx < len; ++idx) {
-    c = str[idx];
-    if (!c || c > 0x7F) {
+    UChar32 curCodePoint;
+    // U8_NEXT() always advances srcPosBytes; save in case curCodePoint invalid
+    int32_t savedSrcPosBytes = srcPosBytes;
+    U8_NEXT(srcBuf, srcPosBytes, srcLenBytes, curCodePoint);
+    if (curCodePoint <= 0) {
+      // curCodePoint invalid; back up so we'll fix it in the loop below.
+      srcPosBytes = savedSrcPosBytes;
       break;
     }
   }
 
-  //  If we didn't encounter multibyte characters, the string is valid and
-  //  we're done.
-  if (idx == len) {
+  if (srcPosBytes == srcLenBytes) {
+    // it's all valid
     return true;
   }
 
-  //  We encountered multibyte characters. Parse the string optimistically,
-  //  assuming it contains only valid UTF-8.
-  int expect;
-  int jj;
-  for (       ; idx < len; ++idx) {
-    c = str[idx];
-    if (c && c < 0x80) {
-      continue;
-    } else if (c > 0xC1 && c < 0xE0) {
-      expect = 1;
-    } else if (c > 0xDF && c < 0xF0) {
-      expect = 2;
-    } else if (c > 0xEF && c < 0xF5) {
-      expect = 3;
+  // There are invalid bytes. Allocate memory, then copy the input, replacing
+  // invalid sequences with either the substitution character or nothing,
+  // depending on the value of RuntimeOption::Utf8izeReplace.
+  //
+  // Worst case, every remaining byte is invalid, taking a 3-byte substitution.
+  int32_t bytesRemaining = srcLenBytes - srcPosBytes;
+  uint64_t dstMaxLenBytes = srcPosBytes + (RuntimeOption::Utf8izeReplace ?
+    bytesRemaining * U8_LENGTH(SUBSTITUTION_CHARACTER) :
+    bytesRemaining);
+  if (dstMaxLenBytes > INT_MAX) {
+    return false; // Too long.
+  }
+  char *dstBuf = (char*)malloc(dstMaxLenBytes + 1);
+  if (!dstBuf) {
+    return false;
+  }
+
+  // Copy valid bytes found so far as one solid block.
+  memcpy(dstBuf, srcBuf, srcPosBytes);
+
+  // Iterate through the remaining bytes.
+  int32_t dstPosBytes = srcPosBytes; // already copied srcPosBytes
+  for (/* already init'd */; srcPosBytes < srcLenBytes; /* see U8_NEXT */) {
+    UChar32 curCodePoint;
+    // This is lame, but gcc doesn't optimize U8_NEXT very well
+    if (srcBuf[srcPosBytes] > 0 && srcBuf[srcPosBytes] <= 0x7f) {
+      curCodePoint = srcBuf[srcPosBytes++]; // U8_NEXT would increment
     } else {
-      break;
+      U8_NEXT(srcBuf, srcPosBytes, srcLenBytes, curCodePoint);
     }
-
-    for (jj = 0; jj < expect; ++jj) {
-      if (++idx == len) {
-        if (RuntimeOption::Utf8izeReplace) {
-          idx -= (jj + 1);
-        } else {
-          len -= (jj + 1);
-          idx = len;
-          input = s.substr(0, len);
-        }
-        break;
-      } else if (str[idx] < 0x80 || str[idx] > 0xBF) {
-        idx -= (jj + 1);
-        break;
+    if (curCodePoint <= 0) {
+      // Invalid UTF-8 sequence.
+      // N.B. We consider a null byte an invalid sequence.
+      if (!RuntimeOption::Utf8izeReplace) {
+        continue; // Omit invalid sequence
       }
+      curCodePoint = SUBSTITUTION_CHARACTER; // Replace invalid sequences
     }
-
-    if (jj != expect) {
-      break;
-    }
+    // We know that resultBuffer > total possible length.
+    U8_APPEND_UNSAFE(dstBuf, dstPosBytes, curCodePoint);
   }
-
-  //  If we made it through the whole string, it's valid UTF-8 with multibyte
-  //  characters. We're done.
-  if (idx == len) {
-    return true;
-  }
-
-  //  We hit an invalid character sequence and need to remove invalid byte
-  //  sequences from the string. We use a pointer `src' into the string, and
-  //  copy from `src' to `sb'. `src' skips/replaces invalid subsequences
-  //  while `sb' advances only on copy/replace.
-  //  The basic algorithm is to delete the first byte (or translate it to
-  //  a replacement character) and continue parsing with the next byte.
-  unsigned char *src = str + idx;
-  StringBuffer sb(RuntimeOption::Utf8izeReplace ? (3 * len + 1) : (len + 1));
-  const char repl[] = "\uFFFD"; // utf8 replacement character
-  int replSize = sizeof(repl) - 1;
-  if (idx) {
-    sb.append((char*)str, idx);
-  }
-  for (       ; src - str < len; ++src) {
-    c = *src;
-    if (c && c < 0x80) {
-      sb.append(*src);
-      continue;
-    } else if (c > 0xC1 && c < 0xE0) {
-      expect = 1;
-    } else if (c > 0xDF && c < 0xF0) {
-      expect = 2;
-    } else if (c > 0xEF && c < 0xF5) {
-      expect = 3;
-    } else {
-      if (RuntimeOption::Utf8izeReplace) {
-        sb.append(repl, replSize);
-      }
-      continue;
-    }
-
-    for (jj = 0; jj < expect; ++jj) {
-      if (++src - str == len) {
-        if (RuntimeOption::Utf8izeReplace) {
-          src -= (jj + 1);
-          sb.append(repl, replSize);
-          break;
-        } else {
-          input = sb.detach();
-          return true;
-        }
-      } else if (*src < 0x80 || *src > 0xBF) {
-        src -= (jj + 1);
-        if (RuntimeOption::Utf8izeReplace) {
-          sb.append(repl, replSize);
-        }
-        break;
-      }
-    }
-
-    if (jj == expect) {
-      do {
-        sb.append(*(src - expect));
-      } while (expect--);
-    }
-  }
-
-  input = sb.detach();
+  dstBuf[dstPosBytes] = '\0';
+  input = String(dstBuf, dstPosBytes, AttachString);
   return true;
+}
+
+/**
+ * Private utf8_strlen implementation.
+ *
+ * Returns count of code points in input, substituting 1 code point per invalid
+ * sequence.
+ *
+ * deprecated=true: instead return byte count on invalid UTF-8 sequence.
+ */
+static int f_fb_utf8_strlen_impl(CStrRef input, bool deprecated) {
+  // Count, don't modify.
+  int32_t sourceLength = input.size();
+  const char* const sourceBuffer = input.data();
+  int64_t num_code_points = 0;
+
+  for (int32_t sourceOffset = 0; sourceOffset < sourceLength; ) {
+    UChar32 sourceCodePoint;
+    // U8_NEXT() is guaranteed to advance sourceOffset by 1-4 each time it's
+    // invoked.
+    U8_NEXT(sourceBuffer, sourceOffset, sourceLength, sourceCodePoint);
+    if (deprecated && sourceCodePoint < 0) {
+      return sourceLength; // return byte count on invalid sequence
+    }
+    num_code_points++;
+  }
+  return num_code_points;
+}
+
+int f_fb_utf8_strlen(CStrRef input) {
+  return f_fb_utf8_strlen_impl(input, /* deprecated */ false);
+}
+
+int f_fb_utf8_strlen_deprecated(CStrRef input) {
+  return f_fb_utf8_strlen_impl(input, /* deprecated */ true);
+}
+
+/**
+ * Private helper; requires non-negative firstCodePoint and desiredCodePoints.
+ */
+static Variant f_fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
+                                       int32_t numDesiredCodePoints) {
+  const char* const srcBuf = str.data();
+  char *dstBuf;
+  int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
+  int32_t dstPosBytes = 0;
+
+  ASSERT(firstCodePoint >= 0);  // Wrapper fixes up negative starting positions.
+  ASSERT(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
+  if (str.size() <= 0 || str.size() > INT_MAX) {
+    return false;
+  }
+  srcLenBytes = str.size();
+
+  // Cannot be more code points than bytes in input.  This typically reduces
+  // the INT_MAX default value to something more reasonable.
+  numDesiredCodePoints = std::min(numDesiredCodePoints, srcLenBytes);
+
+  // Pre-allocate the result.
+  // Worst case, every byte is invalid, requiring 3 * byte length output bytes.
+  uint64_t dstMaxLenBytes =
+    (uint64_t)numDesiredCodePoints * U8_LENGTH(SUBSTITUTION_CHARACTER);
+  if (dstMaxLenBytes > INT_MAX) {
+    return false; // Too long.
+  }
+  dstBuf = (char*)malloc(dstMaxLenBytes + 1);
+  if (!dstBuf) {
+    return false;
+  }
+
+  // Iterate through src's codepoints; srcPosBytes is incremented by U8_NEXT.
+  for (int32_t srcPosBytes = 0, srcPosCodePoints = 0;
+       srcPosBytes < srcLenBytes && // more available
+       srcPosCodePoints < firstCodePoint + numDesiredCodePoints; // want more
+       srcPosCodePoints++) {
+
+    // U8_NEXT() advances sourceBytePos by 1-4 each time it's invoked.
+    UChar32 curCodePoint;
+    U8_NEXT(srcBuf, srcPosBytes, srcLenBytes, curCodePoint);
+
+    if (srcPosCodePoints >= firstCodePoint) {
+      // Copy this code point into the result.
+      if (curCodePoint < 0) {
+        curCodePoint = SUBSTITUTION_CHARACTER; // replace invalid sequences
+      }
+      // We know that resultBuffer > total possible length.
+      // U8_APPEND_UNSAFE updates dstPosBytes.
+      U8_APPEND_UNSAFE(dstBuf, dstPosBytes, curCodePoint);
+    }
+  }
+
+  if (dstPosBytes > 0) {
+    dstBuf[dstPosBytes] = '\0';
+    return String(dstBuf, dstPosBytes, AttachString);
+  }
+
+  free(dstBuf);
+  return false;
+}
+
+Variant f_fb_utf8_substr(CStrRef str, int start, int length /* = INT_MAX */) {
+  // For negative start or length, calculate start and length values
+  // based on total code points.
+  if (start < 0 || length < 0) {
+    // Get number of code points assuming we substitute invalid sequences.
+    Variant utf8StrlenResult = f_fb_utf8_strlen(str);
+    int32_t sourceNumCodePoints = utf8StrlenResult.toInt32();
+
+    if (start < 0) {
+      // Negative means first character is start'th code point from end.
+      // e.g., -1 means start with the last code point.
+      start = sourceNumCodePoints + start; // adding negative start
+    }
+    if (length < 0) {
+      // Negative means omit last abs(length) code points.
+      length = sourceNumCodePoints - start + length; // adding negative length
+    }
+  }
+
+  if (start < 0 || length <= 0) {
+    return false; // Empty result
+  }
+
+  return f_fb_utf8_substr_simple(str, start, length);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -895,14 +946,36 @@ Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_fb_get_code_coverage(bool flush) {
-  if (RuntimeOption::RecordCodeCoverage) {
-    Array ret = Eval::CodeCoverage::Report();
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  if (ti->m_reqInjectionData.coverage) {
+    Array ret = ti->m_coverage->Report();
     if (flush) {
-      Eval::CodeCoverage::Reset();
+      ti->m_coverage->Reset();
     }
     return ret;
   }
   return false;
+}
+
+void f_fb_enable_code_coverage() {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  ti->m_coverage->Reset();
+  ti->m_reqInjectionData.coverage = true;
+  if (hhvm) {
+    if (g_vmContext->isNested()) {
+      raise_notice("Calling fb_enable_code_coverage from a nested "
+                   "VM instance may cause unpredicable results");
+    }
+    throw VMSwitchModeException(true);
+  }
+}
+
+Variant f_fb_disable_code_coverage() {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  ti->m_reqInjectionData.coverage = false;
+  Array ret = ti->m_coverage->Report();
+  ti->m_coverage->Reset();
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -994,12 +1067,47 @@ void f_fb_set_exit_callback(CVarRef function) {
 Array f_fb_get_flush_stat() {
   Transport *transport = g_context->getTransport();
   if (transport) {
+    Array chunkStats(ArrayData::Create());
+    transport->getChunkSentSizes(chunkStats);
+
     int total = transport->getResponseTotalSize();
     int sent = transport->getResponseSentSize();
     int64 time = transport->getFlushTime();
-    return CREATE_MAP3("total", total, "sent", sent, "time", time);
+    return CREATE_MAP2(
+        "flush_stats", CREATE_MAP3("total", total, "sent", sent, "time", time),
+        "chunk_stats", chunkStats);
   }
   return NULL;
+}
+
+int f_fb_get_last_flush_size() {
+  Transport *transport = g_context->getTransport();
+  return transport ? transport->getLastChunkSentSize() : 0;
+}
+
+extern Array stat_impl(struct stat*); // ext_file.cpp
+
+template<class Function>
+static Variant do_lazy_stat(Function dostat, CStrRef filename) {
+  struct stat sb;
+  if (dostat(File::TranslatePath(filename, true).c_str(), &sb)) {
+    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
+                    Util::safe_strerror(errno).c_str());
+    return false;
+  }
+  return stat_impl(&sb);
+}
+
+Variant f_fb_lazy_stat(CStrRef filename) {
+  return do_lazy_stat(StatCache::stat, filename);
+}
+
+Variant f_fb_lazy_lstat(CStrRef filename) {
+  return do_lazy_stat(StatCache::lstat, filename);
+}
+
+String f_fb_lazy_realpath(CStrRef filename) {
+  return StatCache::realpath(filename.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1023,7 +1131,7 @@ KEEP_SECTION
 void const_load() {
   // after all loading
   const_load_set("zend_array_size", const_data.size());
-  const_data.setStatic();
+  const_data.setEvalScalar();
 }
 
 bool const_dump(const char *filename) {

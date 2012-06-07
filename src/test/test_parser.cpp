@@ -22,8 +22,6 @@
 #include <runtime/eval/parser/parser.h>
 #include <util/util.h>
 
-using namespace std;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static void strip_empty_block(std::string &s) {
@@ -62,7 +60,7 @@ bool TestParser::VerifyParser(const char *input, const char *output,
     AnalysisResultPtr ar(new AnalysisResult());
     Compiler::Parser::Reset();
     StatementListPtr tree = Compiler::Parser::ParseString(input, ar);
-    ostringstream code;
+    std::ostringstream code;
     CodeGenerator cg(&code);
     tree->outputPHP(cg, ar);
     if (!SameCode(code.str(), output)) {
@@ -83,7 +81,7 @@ bool TestParser::VerifyParser(const char *input, const char *output,
     Eval::StatementPtr tree = Eval::Parser::ParseString(input, NULL,
                                                         statics,
                                                         variableIndices);
-    ostringstream code;
+    std::ostringstream code;
     tree->dump(code);
     if (!SameCode(code.str(), output2)) {
       printf("======================================\n"

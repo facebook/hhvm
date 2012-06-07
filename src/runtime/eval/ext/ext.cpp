@@ -37,7 +37,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class ExtFunction : public Function {
@@ -72,9 +72,10 @@ Variant ExtFunction::directInvoke(VariableEnvironment &env,
     const CallInfo *getCallInfo() const {                              \
       return &s_ci;                                                    \
     }                                                                  \
-    static CallInfo s_ci;                                              \
+    static CallInfoWithConstructor s_ci;                               \
   };                                                                   \
-  CallInfo Eval##name::s_ci((void*)Eval##name::Invoker, NULL, 0, 0, 0);
+  CallInfoWithConstructor Eval##name::s_ci((void*)Eval##name::Invoker, \
+                                           NULL, 0, 0, 0);
 
 EVAL_EXT(Extract);
 EVAL_EXT(FuncGetArg);
@@ -99,13 +100,13 @@ public:
   const CallInfo *getCallInfo() const {
     return &s_ci;
   }
-  static CallInfo s_ci;
+  static CallInfoWithConstructor s_ci;
 private:
   static hphp_const_char_imap<bool> s_blacklist;
 };
 hphp_const_char_imap<bool> EvalFunctionExists::s_blacklist;
-CallInfo EvalFunctionExists::s_ci((void*)EvalFunctionExists::Invoker, NULL, 0,
-    0, 0);
+CallInfoWithConstructor EvalFunctionExists::s_ci(
+  (void*)EvalFunctionExists::Invoker, NULL, 0, 0, 0);
 
 EvalOverrides::EvalOverrides() {
   m_functions["extract"] = new EvalExtract();
@@ -237,20 +238,20 @@ Variant EvalCreateFunction::InvokeImpl(VariableEnvironment &env,
 
   vector<StaticStatementPtr> statics;
   Block::VariableIndices variableIndices;
-  ostringstream fnStream;
+  std::ostringstream fnStream;
   string id(RequestEvalState::unique());
   fnStream << "<?php function lambda_" << id << "(" << var.toString().data() <<
     ") {" << body.toString().data() << "}\n";
   StatementPtr bodyAst = Parser::ParseString(fnStream.str().c_str(), NULL,
                                              statics, variableIndices);
   if (!bodyAst) return false;
-  ostringstream nameStream;
+  std::ostringstream nameStream;
   nameStream << "$lambda_" << id;
   StatementListStatement *sl = bodyAst->cast<StatementListStatement>();
   FunctionStatement *f = sl->stmts()[0]->cast<FunctionStatement>();
   ASSERT(f);
   f->changeName(nameStream.str());
-  SmartPtr<CodeContainer> cc(new StringCodeContainer(bodyAst));
+  AtomicSmartPtr<CodeContainer> cc(new StringCodeContainer(bodyAst));
   RequestEvalState::addCodeContainer(cc);
   f->eval(env);
   return f->name();

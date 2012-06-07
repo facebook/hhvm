@@ -26,11 +26,22 @@ namespace HPHP {
 namespace VM {
 namespace Transl {
 
+static inline DataType
+normalizeDataType(DataType dt) {
+  // The translator treats both KindOfStaticString and KindOfString
+  // identically, and uses translation-time IS_REFCOUNTED_TYPE checks
+  // to determine how to handle refcounting. This means that an old
+  // KindOfStaticstring translation can get reused with KindOfString
+  // values. Since we emit static checks regardless, just prevent
+  // KindOfStaticString from entering into the translator's awareness.
+  return dt == KindOfStaticString ? KindOfString : dt;
+}
+
 RuntimeType::RuntimeType(DataType outer, DataType inner /* = KindOfInvalid */,
                          const Class* klass /* = NULL */)
   : m_kind(VALUE) {
-  m_value.outerType = outer;
-  m_value.innerType = inner;
+  m_value.outerType = normalizeDataType(outer);
+  m_value.innerType = normalizeDataType(inner);
   m_value.klass = klass;
   consistencyCheck();
 }
@@ -40,6 +51,16 @@ RuntimeType::RuntimeType(const StringData* sd /* = NULL */)
   m_value.outerType = KindOfString;
   m_value.innerType = KindOfInvalid;
   m_value.string = sd;
+  consistencyCheck();
+}
+
+RuntimeType::RuntimeType(bool value)
+  : m_kind(VALUE) {
+  m_value.outerType = KindOfBoolean;
+  m_value.innerType = KindOfInvalid;
+  m_value.klass = NULL;
+  m_value.boolean = value;
+  m_value.boolValid = true;
   consistencyCheck();
 }
 
@@ -53,14 +74,6 @@ RuntimeType::RuntimeType(const Class* klass)
 
 RuntimeType::RuntimeType(const RuntimeType& source) {
   *this = source;
-}
-
-RuntimeType::RuntimeType(const Location& l) : m_kind(HOME) {
-  m_value.outerType = KindOfInvalid;
-  m_value.innerType = KindOfInvalid;
-  m_value.klass = NULL;
-  m_homeLoc = l;
-  consistencyCheck();
 }
 
 RuntimeType::RuntimeType() :
@@ -125,6 +138,15 @@ RuntimeType::valueString() const {
   return m_value.string;
 }
 
+// -1 for unknown, 0 for false, 1 for true
+int
+RuntimeType::valueBoolean() const {
+  consistencyCheck();
+  ASSERT(m_kind != ITER);
+  ASSERT(isBoolean());
+  return m_value.boolValid ? m_value.boolean : -1;
+}
+
 RuntimeType
 RuntimeType::setValueType(DataType newInner) const {
   ASSERT(m_kind == VALUE);
@@ -160,11 +182,6 @@ bool RuntimeType::isValue() const {
   return m_kind == VALUE;
 }
 
-bool RuntimeType::isHome() const {
-  consistencyCheck();
-  return m_kind == HOME;
-}
-
 Iter::Type RuntimeType::iterType() const {
   ASSERT(isIter());
   return m_iter.type;
@@ -176,7 +193,6 @@ int RuntimeType::typeCheckOffset() const {
 }
 
 DataType RuntimeType::typeCheckValue() const {
-  ASSERT(m_kind != HOME);
   if (isIter()) return DataType(m_iter.type);
   return outerType();
 }
@@ -195,14 +211,12 @@ bool RuntimeType::isVagueValue() const {
   return m_kind == VALUE && outerType() == KindOfInvalid;
 }
 
-Location RuntimeType::homeLocation() const {
-  consistencyCheck();
-  ASSERT(m_kind == HOME);
-  return m_homeLoc;
-}
-
 bool RuntimeType::isRefCounted() const {
   return isValue() && IS_REFCOUNTED_TYPE(outerType());
+}
+
+bool RuntimeType::isUninit() const {
+  return isValue() && outerType() == KindOfUninit;
 }
 
 bool RuntimeType::isNull() const {
@@ -213,21 +227,38 @@ bool RuntimeType::isInt() const {
   return isValue() && IS_INT_TYPE(outerType());
 }
 
+bool RuntimeType::isDouble() const {
+  return isValue() && IS_DOUBLE_TYPE(outerType());
+}
+
+bool RuntimeType::isBoolean() const {
+  return isValue() && outerType() == KindOfBoolean;
+}
+
 bool RuntimeType::isString() const {
   return isValue() && IS_STRING_TYPE(outerType());
 }
 
+bool RuntimeType::isObject() const {
+  return isValue() && outerType() == KindOfObject;
+}
+
+bool RuntimeType::isArray() const {
+  return isValue() && outerType() == KindOfArray;
+}
+
 bool RuntimeType::operator==(const RuntimeType& r) const {
   consistencyCheck();
-  switch(m_kind) {
+  if (m_kind != r.m_kind) {
+    return false;
+  }
+  switch (m_kind) {
     case ITER:
       return r.m_iter.type == m_iter.type;
     case VALUE:
       return r.m_value.innerType == m_value.innerType &&
              r.m_value.outerType == m_value.outerType &&
              r.m_value.klass == m_value.klass;
-    case HOME:
-      return r.m_homeLoc == m_homeLoc;
     default:
       ASSERT(false);
       return false;
@@ -240,7 +271,6 @@ RuntimeType& RuntimeType::operator=(const RuntimeType& r) {
   m_value.innerType = r.m_value.innerType;
   m_value.outerType = r.m_value.outerType;
   m_value.klass     = r.m_value.klass;
-  m_homeLoc         = r.m_homeLoc;
   consistencyCheck();
   ASSERT(*this == r);
   return *this;
@@ -265,9 +295,6 @@ RuntimeType::operator()(const RuntimeType& r) const {
                                  HPHP::hash_int64_pair(m_value.outerType,
                                                        m_value.innerType));
       break;
-    case HOME:
-      p2 = m_homeLoc(m_homeLoc);
-      break;
   }
   return p1 ^ (p2 << 1);
 }
@@ -276,9 +303,6 @@ using std::string;
 
 string RuntimeType::pretty() const {
   char buf[1024];
-  if (isHome()) {
-    return Trace::prettyNode("Home", m_homeLoc);
-  }
   if (isIter()) {
     sprintf(buf, "(Iter %s)",
             m_iter.type == Iter::TypeMutableArray ? "mutableArray" : "array");
@@ -292,12 +316,12 @@ string RuntimeType::pretty() const {
   string retval = buf;
   if (valueType() == KindOfObject && valueClass() != NULL) {
     char buf2[1024];
-    sprintf(buf2, "(OfClass %s)", valueClass()->m_preClass->m_name->data());
+    sprintf(buf2, "(OfClass %s)", valueClass()->preClass()->name()->data());
     retval += string(buf2);
   }
   if (valueType() == KindOfClass && valueClass() != NULL) {
     char buf2[1024];
-    sprintf(buf2, "(Class %s)", valueClass()->m_preClass->m_name->data());
+    sprintf(buf2, "(Class %s)", valueClass()->preClass()->name()->data());
     retval += string(buf2);
   }
   return retval;

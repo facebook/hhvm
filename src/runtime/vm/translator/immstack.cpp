@@ -29,8 +29,8 @@ void ImmStack::processOpcode(const Opcode* opcode) {
     for (int i = 0; i < sti.numPushes; i++) {
       pushUnknown();
     }
-  } else if (sti.kind == StackTransInfo::PeekPoke) {
-    pokeUnknown(sti.pos);
+  } else if (sti.kind == StackTransInfo::InsertMid) {
+    insUnknown(sti.pos);
   } else {
     ASSERT(false);
   }
@@ -43,12 +43,12 @@ void ImmStack::pushUnknown() {
   m_stack.push_back(item);
 }
 
-void ImmStack::pokeUnknown(int pos) {
+void ImmStack::insUnknown(int pos) {
   int k = m_stack.size() - 1 - pos;
   if (k >= 0 && k < (int)m_stack.size()) {
     StackItem item;
     item.type = StackItem::StackType_Unknown;
-    m_stack[k] = item;
+    m_stack.insert(m_stack.begin() + k, item);
   }
 }
 

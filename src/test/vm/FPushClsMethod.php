@@ -8,7 +8,7 @@ class C {
     C::sMeth();
   }
   static function sMeth() {
-    print "In C::sMeth(): \$this:".$this.":\n";
+    print "In C::sMeth(): \$this:" . (isset($this) ? $this : null) . ":\n";
   }
 }
 class D {

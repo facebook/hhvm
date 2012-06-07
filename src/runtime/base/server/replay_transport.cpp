@@ -20,8 +20,6 @@
 #include <runtime/base/zend/zend_string.h>
 #include <util/process.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -251,6 +251,7 @@ class AliasManager {
   std::string               m_returnVar;
   int                       m_nrvoFix;
 
+  int                       m_inCall;
   bool                      m_inlineAsExpr;
   bool                      m_noAdd;
   bool                      m_preOpt;

@@ -46,7 +46,7 @@ In D::__get(s)
 NULL
 D Object
 (
-    [container:private] => Array
+    [container:D:private] => Array
         (
             [a] => D::a
             [b] => 42
@@ -102,7 +102,7 @@ In E::__set(s, )
 NULL
 E Object
 (
-    [container:private] => Array
+    [container:E:private] => Array
         (
             [a] => E::a
             [b] => 42

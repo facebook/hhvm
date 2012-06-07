@@ -40,7 +40,9 @@ class c_Directory : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(Directory, Directory, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_Directory(const ObjectStaticCallbacks *cb = &cw_Directory) : ExtObjectData(cb), m_path(Variant::nullInit), m_handle(Variant::nullInit) {}
+  c_Directory(const ObjectStaticCallbacks *cb = &cw_Directory) : ExtObjectData(cb), m_path(Variant::nullInit), m_handle(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_path);
   public: c_Directory *create(CVarRef v_path);
   public: Variant t_read();

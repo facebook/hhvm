@@ -10,11 +10,11 @@ Args: 888 500
 #2  call_user_func() called at [src/test/vm/closure.php:28]
 #3  main() called at [src/test/vm/closure.php:33]
 object(closure$$main$0)#1 (3) {
-  ["use_by_val:private"]=>
+  ["use_by_val":"closure$$main$0":private]=>
   int(123)
-  ["use_by_ref:private"]=>
+  ["use_by_ref":"closure$$main$0":private]=>
   &int(4000)
-  ["__static_locals:protected"]=>
+  ["__static_locals":protected]=>
   NULL
 }
 int(123)

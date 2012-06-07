@@ -19,8 +19,6 @@
 #include "db_dataset.h"
 #include "util.h"
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -138,7 +136,7 @@ void DBQuery::setField(const char *fmt, const char *binary, int len) {
 
   char *buffer = (char*)malloc(strlen(fmt) + escaped.size());
   if (!buffer) {
-    throw bad_alloc();
+    throw std::bad_alloc();
   }
   sprintf(buffer, fmt, escaped.c_str());
   setField(buffer);

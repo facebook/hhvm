@@ -105,7 +105,7 @@ Variant f_var_export(CVarRef expression, bool ret /* = false */) {
 }
 
 void f_var_dump(CVarRef v) {
-  VariableSerializer vs(VariableSerializer::VarDump);
+  VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
   // manipulate maxCount to match PHP behavior
   if (!v.isObject()) {
     vs.incMaxCount();
@@ -131,7 +131,12 @@ void f_debug_zval_dump(CVarRef variable) {
 
 Array f_get_defined_vars() {
   if (hhvm) {
-    return g_context->getVarEnv()->getDefinedVariables();
+    HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+    if (v) {
+      return v->getDefinedVariables();
+    } else {
+      return Array::Create();
+    }
   } else {
     return Array::Create();
   }
@@ -146,7 +151,14 @@ Array get_defined_vars(RVariableTable *variables) {
 }
 
 bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
-  throw NotSupportedException(__func__, "It is bad coding practice to remove scoping of variables just to achieve coding convenience, esp. in a language that encourages global variables. This is possible to implement though, by declaring those global variables beforehand and assign with scoped ones when this function is called.");
+  throw NotSupportedException(__func__,
+                              "It is bad coding practice to remove scoping "
+                              "of variables just to achieve coding convenience, "
+                              "esp. in a language that encourages global "
+                              "variables. This is possible to implement "
+                              "though, by declaring those global variables "
+                              "beforehand and assign with scoped ones when "
+                              "this function is called.");
 }
 
 int f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
@@ -155,7 +167,8 @@ int f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
     bool reference = extract_type & EXTR_REFS;
     extract_type &= ~EXTR_REFS;
 
-    HPHP::VM::VarEnv* v = g_context->getVarEnv();
+    HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+    if (!v) return 0;
     int count = 0;
     for (ArrayIter iter(var_array); iter; ++iter) {
       String name = iter.first();
@@ -198,7 +211,7 @@ int f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
       if (!nameData->isValidVariableName()) {
         continue;
       }
-      g_context->setVar(nameData, iter.nvSecond(), reference);
+      g_vmContext->setVar(nameData, iter.nvSecond(), reference);
       count++;
     }
     return count;

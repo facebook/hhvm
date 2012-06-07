@@ -28,8 +28,6 @@
 #include <runtime/base/complex_types.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -104,7 +102,7 @@ void ConstantTable::setValue(AnalysisResultConstPtr ar, const std::string &name,
 
 bool ConstantTable::isRecursivelyDeclared(AnalysisResultConstPtr ar,
                                           const std::string &name) const {
-  if (const Symbol *sym = getSymbol(name)) {
+  if (const Symbol *sym ATTRIBUTE_UNUSED = getSymbol(name)) {
     ASSERT(sym->isPresent() && sym->valueSet());
     return true;
   }
@@ -146,6 +144,18 @@ const {
   return ConstructPtr();
 }
 
+void ConstantTable::cleanupForError(AnalysisResultConstPtr ar) {
+  AnalysisResult::Locker lock(ar);
+
+  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
+    if (!sym->isDynamic()) {
+      sym->setDynamic();
+      sym->setDeclaration(ConstructPtr());
+      sym->setValue(ConstructPtr());
+    }
+  }
+}
+
 TypePtr ConstantTable::check(BlockScopeRawPtr context,
                              const std::string &name, TypePtr type,
                              bool coerce, AnalysisResultConstPtr ar,
@@ -161,7 +171,7 @@ TypePtr ConstantTable::check(BlockScopeRawPtr context,
   } else {
     Symbol *sym = getSymbol(name);
     if (!sym) {
-      if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
+      if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
         if (isClassScope) {
           ClassScopeRawPtr parent = findBase(ar, name, bases);
           if (parent) {

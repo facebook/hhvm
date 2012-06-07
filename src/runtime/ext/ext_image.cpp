@@ -258,8 +258,8 @@ do { \
 #define CHECK_ALLOC(ptr, size) \
 do { \
   if (!(ptr)) { \
-    raise_warning("%s/%d: failed to allocate %d bytes", \
-                    __FUNCTION__, __LINE__, (size)); \
+    raise_warning("%s/%d: failed to allocate %lu bytes", \
+                    __FUNCTION__, __LINE__, ((size_t)(size))); \
     return; \
   } \
 } while (0)
@@ -267,8 +267,8 @@ do { \
 #define CHECK_ALLOC_R(ptr, size, retcod) \
 do { \
   if (!(ptr)) { \
-    raise_warning("%s/%d: failed to allocate %d bytes", \
-                    __FUNCTION__, __LINE__, (size)); \
+    raise_warning("%s/%d: failed to allocate %lu bytes", \
+                    __FUNCTION__, __LINE__, ((size_t)(size))); \
     return retcod; \
   } \
 } while (0)
@@ -348,7 +348,8 @@ typedef enum {
   IMAGE_FILETYPE_IFF,
   IMAGE_FILETYPE_WBMP,
   /* IMAGE_FILETYPE_JPEG2000 is a userland alias for IMAGE_FILETYPE_JPC */
-  IMAGE_FILETYPE_XBM
+  IMAGE_FILETYPE_XBM,
+  IMAGE_FILETYPE_ICO
 } image_filetype;
 
 
@@ -1477,33 +1478,35 @@ static int php_getimagetype(CObjRef stream) {
 
 String f_image_type_to_mime_type(int imagetype) {
   switch( imagetype) {
-  case IMAGE_FILETYPE_GIF:
-    return "image/gif";
-  case IMAGE_FILETYPE_JPEG:
-    return "image/jpeg";
-  case IMAGE_FILETYPE_PNG:
-    return "image/png";
-  case IMAGE_FILETYPE_SWF:
-  case IMAGE_FILETYPE_SWC:
-    return "application/x-shockwave-flash";
-  case IMAGE_FILETYPE_PSD:
-    return "image/psd";
-  case IMAGE_FILETYPE_BMP:
-    return "image/bmp";
-  case IMAGE_FILETYPE_TIFF_II:
-  case IMAGE_FILETYPE_TIFF_MM:
-    return "image/tiff";
-  case IMAGE_FILETYPE_IFF:
-    return "image/iff";
-  case IMAGE_FILETYPE_WBMP:
-    return "image/vnd.wap.wbmp";
-  case IMAGE_FILETYPE_JPC:
-    return "application/octet-stream";
-  case IMAGE_FILETYPE_JP2:
-    return "image/jp2";
-  case IMAGE_FILETYPE_XBM:
-    return "image/xbm";
-  default:
+    case IMAGE_FILETYPE_GIF:
+      return "image/gif";
+    case IMAGE_FILETYPE_JPEG:
+      return "image/jpeg";
+    case IMAGE_FILETYPE_PNG:
+      return "image/png";
+    case IMAGE_FILETYPE_SWF:
+    case IMAGE_FILETYPE_SWC:
+      return "application/x-shockwave-flash";
+    case IMAGE_FILETYPE_PSD:
+      return "image/psd";
+    case IMAGE_FILETYPE_BMP:
+      return "image/x-ms-bmp";
+    case IMAGE_FILETYPE_TIFF_II:
+    case IMAGE_FILETYPE_TIFF_MM:
+      return "image/tiff";
+    case IMAGE_FILETYPE_IFF:
+      return "image/iff";
+    case IMAGE_FILETYPE_WBMP:
+      return "image/vnd.wap.wbmp";
+    case IMAGE_FILETYPE_JPC:
+      return "application/octet-stream";
+    case IMAGE_FILETYPE_JP2:
+      return "image/jp2";
+    case IMAGE_FILETYPE_XBM:
+      return "image/xbm";
+    case IMAGE_FILETYPE_ICO:
+      return "image/vnd.microsoft.icon";
+    default:
     case IMAGE_FILETYPE_UNKNOWN:
       return "application/octet-stream"; /* suppose binary format */
   }
@@ -3625,7 +3628,7 @@ Variant f_imagecolorat(CObjRef image, int x, int y) {
     if (im->tpixels && gdImageBoundsSafe(im, x, y)) {
       return gdImageTrueColorPixel(im, x, y);
     } else {
-      raise_notice("%ld,%ld is out of bounds", x, y);
+      raise_notice("%d,%d is out of bounds", x, y);
       return false;
     }
   } else {
@@ -3637,7 +3640,7 @@ Variant f_imagecolorat(CObjRef image, int x, int y) {
       return (im->pixels[x][y]);
 #endif
     } else {
-      raise_notice("%ld,%ld is out of bounds", x, y);
+      raise_notice("%d,%d is out of bounds", x, y);
       return false;
     }
 #if HAVE_LIBGD20
@@ -6272,14 +6275,14 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
           /* we can read this if offset_val > 0 */
           /* some files have their values in other parts of the file */
           raise_warning("Process tag(x%04X=%s): Illegal pointer offset"
-                          "(x%04X < x%04X)", tag,
+                          "(x%04lX < %04lX)", tag,
                           exif_get_tagname(tag, tagname, -12, tag_table),
-                          offset_val, dir_entry);
+                          offset_val, dir_entry-offset_base);
         } else {
           /* this is for sure not allowed */
           /* exception are IFD pointers */
           raise_warning("Process tag(x%04X=%s): Illegal pointer offset"
-                          "(x%04X + x%04X = x%04X > x%04X)", tag,
+                          "(x%04lX + x%04lX = x%04lX > x%04lX)", tag,
                           exif_get_tagname(tag, tagname, -12, tag_table),
                           offset_val, byte_count, offset_val+byte_count,
                           IFDlength);
@@ -6308,7 +6311,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
       fgot = ImageInfo->infile->tell();
       if (fgot!=offset_val) {
         if (outside) IM_FREE(outside);
-        raise_warning("Wrong file pointer: 0x%08X != 0x08X",
+        raise_warning("Wrong file pointer: 0x%08lX != 0x%08lX",
                         fgot, offset_val);
         return 0;
       }
@@ -6580,7 +6583,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo,
   NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
   if ((dir_start+2+NumDirEntries*12) > (offset_base+IFDlength)) {
-    raise_warning("Illegal IFD size: x%04X + 2 + x%04X*12 = x%04X > x%04X",
+    raise_warning("Illegal IFD size: x%04X + 2 + x%04X*12 = x%04X > x%04lX",
                     (int)((size_t)dir_start+2-(size_t)offset_base),
                     NumDirEntries,
                    (int)((size_t)dir_start+2+
@@ -6800,7 +6803,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
     got = str.length();
     if (got != itemlen-2) {
       raise_warning("Error reading from file: "
-                      "got=x%04X(=%d) != itemlen-2=x%04X(=%d)",
+                      "got=x%04lX(=%lu) != itemlen-2=x%04lX(=%lu)",
                       got, got, itemlen-2, itemlen-2);
       return 0;
     }
@@ -7023,8 +7026,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
           dir_offset + ImageInfo->file.list[sn].size) {
         if (ifd_size > dir_size) {
           if (dir_offset + ifd_size > ImageInfo->FileSize) {
-            raise_warning("Error in TIFF: filesize(x%04X) less than "
-                            "size of IFD(x%04X + x%04X)",
+            raise_warning("Error in TIFF: filesize(x%04lX) less than "
+                            "size of IFD(x%04lX + x%04lX)",
                             ImageInfo->FileSize, dir_offset, ifd_size);
             return 0;
           }
@@ -7128,21 +7131,21 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
         }
         return 1;
       } else {
-        raise_warning("Error in TIFF: filesize(x%04X) less than "
-                        "size of IFD(x%04X)",
+        raise_warning("Error in TIFF: filesize(x%04lX) less than "
+                        "size of IFD(x%04lX)",
                         ImageInfo->FileSize,
                         dir_offset+ImageInfo->file.list[sn].size);
         return 0;
       }
     } else {
-      raise_warning("Error in TIFF: filesize(x%04X) less than size "
-                      "of IFD dir(x%04X)",
+      raise_warning("Error in TIFF: filesize(x%04lX) less than size "
+                      "of IFD dir(x%04lX)",
                       ImageInfo->FileSize, dir_offset+dir_size);
       return 0;
     }
   } else {
-    raise_warning("Error in TIFF: filesize(x%04X) less than "
-                    "start of IFD dir(x%04X)",
+    raise_warning("Error in TIFF: filesize(x%04lX) less than "
+                    "start of IFD dir(x%04lX)",
                     ImageInfo->FileSize, dir_offset+2);
     return 0;
   }
@@ -7204,7 +7207,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo) {
       }
     }
   } else {
-    raise_warning("File too small (%d)", ImageInfo->FileSize);
+    raise_warning("File too small (%lu)", ImageInfo->FileSize);
   }
   return ret;
 }

@@ -26,8 +26,6 @@
 #include <compiler/option.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -74,6 +72,16 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
   ModifierExpressionPtr modifiers =
     scope->setModifiers(m_modifiers);
 
+  if (m_modifiers->isAbstract()) {
+    parseTimeFatal(Compiler::InvalidAttribute,
+                   "Properties cannot be declared abstract");
+  }
+
+  if (m_modifiers->isFinal()) {
+    parseTimeFatal(Compiler::InvalidAttribute,
+                   "Properties cannot be declared final");
+  }
+
   for (int i = 0; i < m_declaration->getCount(); i++) {
     VariableTablePtr variables = scope->getVariables();
     ExpressionPtr exp = (*m_declaration)[i];
@@ -84,8 +92,9 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
       const std::string &name =
         dynamic_pointer_cast<SimpleVariable>(var)->getName();
       if (variables->isPresent(name)) {
-        Compiler::Error(Compiler::DeclaredVariableTwice, exp);
-        m_declaration->removeElement(i--);
+        exp->parseTimeFatal(Compiler::DeclaredVariableTwice,
+                            "Cannot redeclare %s::$%s",
+                            scope->getOriginalName().c_str(), name.c_str());
       } else {
         assignment->onParseRecur(ar, scope);
       }
@@ -93,10 +102,11 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
       const std::string &name =
         dynamic_pointer_cast<SimpleVariable>(exp)->getName();
       if (variables->isPresent(name)) {
-        Compiler::Error(Compiler::DeclaredVariableTwice, exp);
-        m_declaration->removeElement(i--);
+        exp->parseTimeFatal(Compiler::DeclaredVariableTwice,
+                            "Cannot redeclare %s::$%s",
+                            scope->getOriginalName().c_str(), name.c_str());
       } else {
-        variables->add(name, Type::Variant, false, ar, exp, m_modifiers);
+        variables->add(name, Type::Null, false, ar, exp, m_modifiers);
       }
     }
   }
@@ -112,9 +122,6 @@ void ClassVariable::analyzeProgram(AnalysisResultPtr ar) {
   AnalysisResult::Phase phase = ar->getPhase();
   if (phase != AnalysisResult::AnalyzeAll) {
     return;
-  }
-  if (m_modifiers->isAbstract()) {
-    Compiler::Error(Compiler::AbstractProperty, shared_from_this());
   }
   ClassScopePtr scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
@@ -236,27 +243,19 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
   ASSERT(getScope().get() == getClassScope().get());
   IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
 
-  m_declaration->inferAndCheck(ar, Type::Variant, false);
+  // assignments will ignore the passed in type,
+  // but we need to ensure that Null is applied to
+  // the simple variables.
+  m_declaration->inferAndCheck(ar, Type::Null, false);
 
   if (m_modifiers->isStatic()) {
     ClassScopePtr scope = getClassScope();
     for (int i = 0; i < m_declaration->getCount(); i++) {
       ExpressionPtr exp = (*m_declaration)[i];
+      SimpleVariablePtr var;
       if (exp->is(Expression::KindOfAssignmentExpression)) {
         AssignmentExpressionPtr assignment =
           dynamic_pointer_cast<AssignmentExpression>(exp);
-        // If the class variable's type is Object, we have to
-        // force it to be a Variant, because we don't include
-        // the class header files in global_variables.h
-        SimpleVariablePtr var =
-          dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-        if (var) {
-          TypePtr type = scope->getVariables()->getFinalType(var->getName());
-          if (type->is(Type::KindOfObject)) {
-            scope->getVariables()->forceVariant(ar, var->getName(),
-                                                VariableTable::AnyVars);
-          }
-        }
         ExpressionPtr value = assignment->getValue();
         if (value->containsDynamicConstant(ar)) {
           scope->getVariables()->
@@ -377,9 +376,9 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         }
         if (isAssign) {
           if (isValueNull) {
-            cg_printf("%s%s(Variant::nullInit)",
-                      Option::PropertyPrefix,
-                      var->getName().c_str());
+            cg_printf("%s%s(%s)",
+                      Option::PropertyPrefix, var->getName().c_str(),
+                      Type::IsMappedToVariant(type) ? "Variant::nullInit" : "");
           } else {
             ASSERT(value);
             ASSERT(value->is(Expression::KindOfScalarExpression));

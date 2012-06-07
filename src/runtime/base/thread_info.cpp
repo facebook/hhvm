@@ -15,11 +15,12 @@
 */
 #include <runtime/base/types.h>
 #include <runtime/base/hphp_system.h>
+#include <runtime/base/code_coverage.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <util/lock.h>
 #include <util/alloc.h>
 
-using namespace std;
+using std::map;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,9 +28,15 @@ namespace HPHP {
 static Mutex s_thread_info_mutex;
 static std::set<ThreadInfo*> s_thread_infos;
 
+__thread char* ThreadInfo::t_stackbase = 0;
+
 IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ThreadInfo, ThreadInfo::s_threadInfo);
 
-ThreadInfo::ThreadInfo() : m_executing(Idling) {
+ThreadInfo::ThreadInfo()
+    : m_stacklimit(0), m_executing(Idling) {
+  ASSERT(!t_stackbase);
+  t_stackbase = static_cast<char*>(stack_top_ptr());
+
   if (hhvm) {
     map<int, ObjectAllocatorBaseGetter> &wrappers =
       ObjectAllocatorCollector::getWrappers();
@@ -44,6 +51,7 @@ ThreadInfo::ThreadInfo() : m_executing(Idling) {
 
   m_profiler = NULL;
   m_pendingException = false;
+  m_coverage = new CodeCoverage();
 
   onSessionInit();
 
@@ -52,8 +60,16 @@ ThreadInfo::ThreadInfo() : m_executing(Idling) {
 }
 
 ThreadInfo::~ThreadInfo() {
+  t_stackbase = 0;
+
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
+  delete m_coverage;
+}
+
+bool ThreadInfo::valid(ThreadInfo* info) {
+  Lock lock(s_thread_info_mutex);
+  return s_thread_infos.find(info) != s_thread_infos.end();
 }
 
 void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
@@ -65,7 +81,6 @@ void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
 }
 
 void ThreadInfo::onSessionInit() {
-  char marker;
   m_top = NULL;
   m_reqInjectionData.onSessionInit();
 
@@ -79,7 +94,7 @@ void ThreadInfo::onSessionInit() {
     struct rlimit rl;
 
     getrlimit(RLIMIT_STACK, &rl);
-    m_stacklimit = (char *)&marker - (rl.rlim_cur - StackSlack);
+    m_stacklimit = t_stackbase - (rl.rlim_cur - StackSlack);
   } else {
     m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
     ASSERT(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
@@ -98,15 +113,6 @@ void ThreadInfo::onSessionExit() {
   m_reqInjectionData.reset();
 }
 
-void ThreadInfo::extendInstanceSizeAllocators(unsigned size) {
-  const_assert(hhvm);
-  for (unsigned i = m_instanceSizeAllocators.size(); i <= size; ++i) {
-    int index = ObjectAllocatorCollector::AllocSizeToIndex(i);
-    ASSERT(m_allocators[index] != NULL);
-    m_instanceSizeAllocators.push_back(m_allocators[index]);
-  }
-}
-
 void RequestInjectionData::onSessionInit() {
   reset();
   started = time(0);
@@ -114,7 +120,9 @@ void RequestInjectionData::onSessionInit() {
 
 void RequestInjectionData::reset() {
   __sync_fetch_and_and(&conditionFlags, 0);
-  debugger    = false;
+  coverage = RuntimeOption::RecordCodeCoverage;
+  debugger = false;
+  debuggerIntr = false;
   while (!interrupts.empty()) interrupts.pop();
 }
 
@@ -130,11 +138,21 @@ void RequestInjectionData::setSignaledFlag() {
   __sync_fetch_and_or(&conditionFlags, RequestInjectionData::SignaledFlag);
 }
 
+void RequestInjectionData::setEventHookFlag() {
+  __sync_fetch_and_or(&conditionFlags, RequestInjectionData::EventHookFlag);
+}
+
+void RequestInjectionData::clearEventHookFlag() {
+  __sync_fetch_and_and(&conditionFlags, ~RequestInjectionData::EventHookFlag);
+}
+
 ssize_t RequestInjectionData::fetchAndClearFlags() {
   ssize_t flags;
   for (;;) {
     flags = conditionFlags;
-    if (__sync_bool_compare_and_swap(&conditionFlags, flags, 0)) {
+    const ssize_t newFlags =
+      hhvm ? (flags & RequestInjectionData::EventHookFlag) : 0;
+    if (__sync_bool_compare_and_swap(&conditionFlags, flags, newFlags)) {
       break;
     }
   }

@@ -15,9 +15,11 @@
 */
 #include <string.h>
 #include <util/hash.h>
+#include <util/util.h>
 
 namespace HPHP {
 
+HOT_FUNC
 long long hash_string_i(const char *arKey, int nKeyLength) {
   return hash_string_i_inline(arKey, nKeyLength);
 }

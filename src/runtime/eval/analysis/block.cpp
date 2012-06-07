@@ -21,7 +21,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void VariableIndex::set(CStrRef name, int idx) {

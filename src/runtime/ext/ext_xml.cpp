@@ -18,6 +18,8 @@
 #include <runtime/ext/ext_xml.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
+#include <runtime/vm/translator/translator.h>
+#include <runtime/vm/translator/translator-inline.h>
 #include <expat.h>
 
 namespace HPHP {
@@ -698,6 +700,10 @@ bool f_xml_parser_free(CObjRef parser) {
 }
 
 int f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
+  // XML_Parse can reenter the VM, and it will do so after we've lost
+  // the frame pointer by calling through the system's copy of XML_Parse
+  // in libexpat.so.
+  SYNC_VM_REGS_SCOPED();
   XmlParser * p = parser.getTyped<XmlParser>();
   int ret;
   long isFinal = is_final ? 1 : 0;

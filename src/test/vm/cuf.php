@@ -463,19 +463,21 @@ class H extends G {
   }
 }
 
-$d = new D;
-$d->testFoo1();
-D::testFoo2();
-$d->testBar1();
-D::testBar2();
 
-$b = new B;
-$g = new G;
-echo "############# doFoo ##############\n";
-$b->doFoo();
-$g->doFoo();
-echo "############# doBar ##############\n";
-$b->doBar();
-$g->doBar();
+function main() {
+  $d = new D;
+  $d->testFoo1();
+  D::testFoo2();
+  $d->testBar1();
+  D::testBar2();
 
-
+  $b = new B;
+  $g = new G;
+  echo "############# doFoo ##############\n";
+  $b->doFoo();
+  $g->doFoo();
+  echo "############# doBar ##############\n";
+  $b->doBar();
+  $g->doBar();
+}
+main();

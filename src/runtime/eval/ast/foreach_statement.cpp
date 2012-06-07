@@ -44,7 +44,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
   if (m_key) {
     TempExpressionList *texp = m_key->cast<TempExpressionList>();
     if (texp) {
-      for (ArrayIter iter = map.begin(env.currentContext(), true);
+      for (ArrayIter iter = map.begin(env.currentContext());
            !iter.end(); iter.next()) {
         {
           LOOP_COUNTER_CHECK_INFO(1);
@@ -60,7 +60,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
         EVAL_STMT_HANDLE_GOTO_END(restart1);
       }
     } else {
-      for (ArrayIter iter = map.begin(env.currentContext(), true);
+      for (ArrayIter iter = map.begin(env.currentContext());
            !iter.end(); iter.next()) {
         LOOP_COUNTER_CHECK_INFO(1);
         const Variant &value = iter.second();
@@ -74,7 +74,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
       }
     }
   } else {
-    for (ArrayIter iter = map.begin(env.currentContext(), true);
+    for (ArrayIter iter = map.begin(env.currentContext());
          !iter.end(); iter.next()) {
       LOOP_COUNTER_CHECK_INFO(1);
       m_value->set(env, iter.second());

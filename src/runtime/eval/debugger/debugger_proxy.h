@@ -56,9 +56,10 @@ public:
   const char *getThreadType() const;
   DSandboxInfo getSandbox() const;
   std::string getSandboxId() const;
+  const DSandboxInfo& getDummyInfo() const { return m_dummyInfo; }
 
   void getThreads(DThreadInfoPtrVec &threads);
-  void switchSandbox(const std::string &newId);
+  bool switchSandbox(const std::string &newId, bool force);
   void updateSandbox(DSandboxInfoPtr sandbox);
   bool switchThread(DThreadInfoPtr thread);
   void switchThreadMode(ThreadMode mode, int64 threadId = 0);
@@ -66,31 +67,47 @@ public:
   void startDummySandbox();
   void notifyDummySandbox();
 
-  void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
+  virtual void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
+  void getBreakPoints(BreakPointInfoPtrVec &breakpoints);
+  bool couldBreakEnterClsMethod(const StringData* className);
+  bool couldBreakEnterFunc(const StringData* funcFullName);
+  void getBreakClsMethods(std::vector<const StringData*>& classNames);
+  void getBreakFuncs(std::vector<const StringData*>& funcFullNames);
 
   bool needInterrupt();
+  bool needInterruptForNonBreak();
   virtual void interrupt(CmdInterrupt &cmd);
   bool send(DebuggerCommand *cmd);
 
   void startSignalThread();
   void pollSignal(); // for signal polling thread
 
+  void checkStop();
+  void forceQuit();
+
 protected:
   bool m_stopped;
 
   bool m_local;
   DebuggerThriftBuffer m_thrift;
-  DummySandboxPtr m_dummySandbox;
+  DummySandbox* m_dummySandbox;
 
   mutable Mutex m_mutex;
+  ReadWriteMutex m_breakMutex;
   bool m_hasBreakPoints;
   BreakPointInfoPtrVec m_breakpoints;
   DSandboxInfo m_sandbox;
+  DSandboxInfo m_dummyInfo;
 
   ThreadMode m_threadMode;
   int64 m_thread;
   DThreadInfoPtr m_newThread;
   std::map<int64, DThreadInfoPtr> m_threads;
+
+  typedef tbb::concurrent_hash_map<const StringData*, void*,
+                                   StringDataHashCompare> StringDataMap;
+  StringDataMap m_breaksEnterClsMethod;
+  StringDataMap m_breaksEnterFunc;
 
   CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
   CmdJumpPtr m_jump;
@@ -126,6 +143,7 @@ public:
     delete m_injTables;
   }
   virtual void interrupt(CmdInterrupt &cmd);
+  virtual void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
 
   // For instrumentation
   HPHP::VM::InjectionTables* getInjTables() const { return m_injTables; }
@@ -136,7 +154,6 @@ public:
 private:
   int getStackDepth();
 
-  virtual bool processJumpFlowBreak(CmdInterrupt &cmd);
   virtual void processFlowControl(CmdInterrupt &cmd);
   virtual bool breakByFlowControl(CmdInterrupt &cmd);
 

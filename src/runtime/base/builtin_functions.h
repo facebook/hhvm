@@ -96,12 +96,12 @@ inline Variant plus(CVarRef v1, CVarRef v2)        { return v1 + v2;}
 inline Numeric minus(CVarRef v1, CVarRef v2)       { return v1 - v2;}
 inline Numeric divide(CVarRef v1, CVarRef v2)      { return v1 / v2; }
 inline Numeric modulo(int64 v1, int64 v2) {
-  if (abs(v2) == 1) {
-    return 0;
-  }
-  if (v2 == 0) {
+  if (UNLIKELY(v2 == 0)) {
     raise_warning("Division by zero");
     return false;
+  }
+  if (UNLIKELY(uint64(v2+1) <= 2u)) {
+    return 0;
   }
   return v1 % v2;
 }
@@ -228,6 +228,10 @@ inline void echo(CStrRef s) {
 
 String get_source_filename(litstr path,bool dir_component = false);
 
+void NEVER_INLINE throw_invalid_property_name(CStrRef name) ATTRIBUTE_NORETURN;
+void NEVER_INLINE throw_null_object_prop();
+void NEVER_INLINE raise_null_object_prop();
+void throw_exception_unchecked(CObjRef e);
 void throw_exception(CObjRef e);
 bool set_line(int line0, int char0 = 0, int line1 = 0, int char1 = 0);
 
@@ -272,6 +276,9 @@ bool isset(CArrRef v, CStrRef offset, bool isString = false);
 inline Variant unset(Variant &v)               { v.unset();   return null;}
 inline Variant unset(CVarRef v)                {              return null;}
 inline Variant setNull(Variant &v)             { v.setNull(); return null;}
+inline Object setNull(Object &v)               { v.reset();   return Object();}
+inline Array setNull(Array &v)                 { v.reset();   return Array();}
+inline String setNull(String &v)               { v.reset();   return String();}
 inline Variant unset(Object &v)                { v.reset();   return null;}
 inline Variant unset(Array &v)                 { v.reset();   return null;}
 ///////////////////////////////////////////////////////////////////////////////
@@ -325,6 +332,8 @@ Variant &unsetLval(Array &v, const T &key) {
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions
 
+bool array_is_valid_callback(CArrRef arr);
+
 bool class_exists(CStrRef class_name, bool autoload = true);
 String get_static_class_name(CVarRef objOrClassName);
 
@@ -342,6 +351,8 @@ vm_decode_function(CVarRef function,
 HPHP::VM::ActRec* vm_get_previous_frame();
 Variant vm_call_user_func(CVarRef function, CArrRef params,
                           bool forwarding = false);
+
+Variant vm_default_invoke_file(bool incOnce);
 
 /**
  * The MethodCallPackage does not hold the reference of the class name or
@@ -373,7 +384,6 @@ inline Variant invoke_meth_few_handler(MethodCallPackage &mcp, CArrRef params,
 
 Variant invoke(CVarRef function, CArrRef params,
                bool tryInterp = true, bool fatal = true);
-void hhvm_throw();
 
 /**
  * Invoking an arbitrary static method.
@@ -487,7 +497,9 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop);
 void throw_infinite_recursion_exception() ATTRIBUTE_COLD;
 void generate_request_timeout_exception() ATTRIBUTE_COLD;
 void generate_memory_exceeded_exception() ATTRIBUTE_COLD;
-void throw_call_non_object() ATTRIBUTE_COLD __attribute__((noreturn));
+void throw_call_non_object() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_call_non_object(const char *methodName)
+  ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
 /**
  * Cloning an object.
@@ -562,10 +574,6 @@ public:
   virtual void requestInit();
   virtual void requestShutdown();
 
-  void fiberInit(AutoloadHandler *handler, FiberReferenceMap &refMap);
-  void fiberExit(AutoloadHandler *handler, FiberReferenceMap &refMap,
-                 FiberAsyncFunc::Strategy default_strategy);
-
   CArrRef getHandlers() { return m_handlers; }
   bool addHandler(CVarRef handler, bool prepend);
   void removeHandler(CVarRef handler);
@@ -589,16 +597,14 @@ private:
  * the autoload facility. These helpers should only be used by generated
  * code produced by hphpc.
  *
- * All of the helpers (exception checkClassExists) take a 'declared' pointer
- * which points to the flag corresponding to the given class or interface.
+ * All of the helpers take a 'declared' pointer which points to the flag
+ * corresponding to the given class or interface.
  * When the autoload handlers execute they will set the flag to true if the
  * given class or interface is found. If 'declared' is non-NULL, these helpers
  * will execute the autoload handlers and then return the value of the flag.
  * If 'declared' is NULL, these helpers will execute the autoload hanlders
  * and then return false.
  */
-
-void checkClassExists(CStrRef name, Globals *g, bool nothrow = false);
 
 bool autoloadClassThrow(CStrRef name, bool *declared);
 bool autoloadClassNoThrow(CStrRef name, bool *declared);
@@ -708,9 +714,6 @@ public:
     Protected       = 0x40,
     Private         = 0x80
   };
-  CallInfo(void *inv, void *invFa, int ac, int flags, int64 refs)
-    : m_invoker(inv), m_invokerFewArgs(invFa),
-      m_argCount(ac), m_flags(flags), m_refFlags(refs) {}
   void *m_invoker;
   void *m_invokerFewArgs; // remove in time
   int m_argCount;
@@ -881,14 +884,25 @@ public:
   }
 };
 
-class RedeclaredCallInfo : public CallInfo {
+class CallInfoWithConstructor : public CallInfo {
 public:
-  RedeclaredCallInfo(int redecId,
-                     void *inv, void *invFa, int ac, int flags, int64 refs) :
-      CallInfo(inv, invFa, ac, flags, refs),
-      redeclaredId(redecId) {}
+  CallInfoWithConstructor(void *inv, void *invFa, int ac,
+                          int flags, int64 refs) {
+    m_invoker = inv;
+    m_invokerFewArgs = invFa;
+    m_argCount = ac;
+    m_flags = flags;
+    m_refFlags = refs;
+  }
+};
+
+class RedeclaredCallInfo {
+public:
+  CallInfo ci;
   int redeclaredId;
 };
+
+typedef const RedeclaredCallInfo RedeclaredCallInfoConst;
 
 #define CALL_USER_FUNC_FEW_ARGS_COUNT 6
 #if CALL_USER_FUNC_FEW_ARGS_COUNT == 6

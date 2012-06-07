@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <algorithm>
 #include <runtime/base/util/string_buffer.h>
 #include <util/alloc.h>
 #include <runtime/base/file/file.h>
@@ -30,16 +31,24 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StringBuffer::StringBuffer(int initialSize /* = 1024 */)
-  : m_initialSize(initialSize), m_maxBytes(0), m_size(initialSize), m_pos(0) {
+  : m_initialSize(initialSize), m_maxBytes(kDefaultOutputLimit),
+    m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
   m_buffer = (char *)Util::safe_malloc(initialSize + 1);
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
 StringBuffer::StringBuffer(const char *filename)
-  : m_buffer(NULL), m_initialSize(1024), m_maxBytes(0), m_size(0), m_pos(0) {
+  : m_buffer(NULL), m_initialSize(1024), m_maxBytes(kDefaultOutputLimit),
+    m_size(0), m_pos(0) {
   struct stat sb;
   if (stat(filename, &sb) == 0) {
+    if (sb.st_size > m_maxBytes - 1) {
+      std::ostringstream out;
+      out << "file " << filename << " is too large";
+      throw StringBufferLimitException(m_maxBytes,
+                                       String(out.str().c_str()));
+    }
     m_size = sb.st_size;
     m_buffer = (char *)Util::safe_malloc(m_size + 1);
 
@@ -59,8 +68,8 @@ StringBuffer::StringBuffer(const char *filename)
 }
 
 StringBuffer::StringBuffer(char *data, int len)
-  : m_buffer(data), m_initialSize(1024), m_maxBytes(0), m_size(len),
-    m_pos(len) {
+  : m_buffer(data), m_initialSize(1024), m_maxBytes(kDefaultOutputLimit),
+    m_size(len), m_pos(len) {
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
@@ -185,7 +194,7 @@ void StringBuffer::resize(int size) {
 }
 
 char *StringBuffer::reserve(int size) {
-  if (m_size < m_pos + size) {
+  if (m_size - m_pos <  size) {
     m_size = m_pos + size;
     m_buffer = (char *)Util::safe_realloc(m_buffer, m_size + 1);
   } else if (m_buffer == NULL) {
@@ -225,14 +234,25 @@ void StringBuffer::append(int64 n) {
   append(p, len);
 }
 
+void StringBuffer::append(CVarRef v) {
+  Variant::TypedValueAccessor tva = v.getTypedAccessor();
+  if (Variant::IsString(tva)) {
+    append(Variant::GetAsString(tva));
+  } else if (IS_INT_TYPE(Variant::GetAccessorType(tva))) {
+    append(Variant::GetInt64(tva));
+  } else {
+    append(v.toString());
+  }
+}
+
 void StringBuffer::appendHelper(char ch) {
   if (m_buffer == NULL) {
     m_size = m_initialSize;
     m_buffer = (char *)Util::safe_malloc(m_size + 1);
   }
 
-  if (m_pos + 1 > m_size) {
-    grow(m_pos + 1);
+  if (m_pos == m_size) {
+    growBy(1);
   }
   m_buffer[m_pos++] = ch;
 }
@@ -256,8 +276,8 @@ void StringBuffer::appendHelper(const char *s, int len) {
   ASSERT(len >= 0);
   if (len <= 0) return;
 
-  if (m_pos + len > m_size) {
-    grow(m_pos + len);
+  if (len > m_size - m_pos) {
+    growBy(len);
   }
   memcpy(m_buffer + m_pos, s, len);
   m_pos += len;
@@ -313,7 +333,7 @@ void StringBuffer::appendJsonEscape(const char *s, int len, int options) {
       case '\r': append("\\r", 2);  break;
       case '\t': append("\\t", 2);  break;
       case '<':
-        if (options & k_JSON_HEX_TAG) {
+        if (options & k_JSON_HEX_TAG || options & k_JSON_FB_EXTRA_ESCAPES) {
           append("\\u003C", 6);
         } else {
           append('<');
@@ -338,6 +358,20 @@ void StringBuffer::appendJsonEscape(const char *s, int len, int options) {
           append("\\u0027", 6);
         } else {
           append('\'');
+        }
+        break;
+      case '@':
+        if (options & k_JSON_FB_EXTRA_ESCAPES) {
+          append("\\u0040", 6);
+        } else {
+          append('@');
+        }
+        break;
+      case '%':
+       	if (options & k_JSON_FB_EXTRA_ESCAPES) {
+          append("\\u0025", 6);
+       	} else {
+          append('%');
         }
         break;
       default:
@@ -391,7 +425,7 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
   while (true) {
     int buffer_size = m_size - m_pos;
     if (buffer_size < page_size) {
-      grow(m_pos + page_size);
+      growBy(page_size);
       buffer_size = m_size - m_pos;
     }
     int len = fread(m_buffer + m_pos, 1, buffer_size, in);
@@ -412,7 +446,7 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
   while (true) {
     int buffer_size = m_size - m_pos;
     if (buffer_size < page_size) {
-      grow(m_pos + page_size);
+      growBy(page_size);
       buffer_size = m_size - m_pos;
     }
     int len = in->readImpl(m_buffer + m_pos, buffer_size);
@@ -421,15 +455,19 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
   }
 }
 
-void StringBuffer::grow(int minSize) {
-  int new_size = m_size;
-  new_size <<= 1;
+void StringBuffer::growBy(int spaceRequired) {
+  long new_size = m_size * 2L;
+  long minSize = m_size + (long)spaceRequired;
   if (new_size < minSize) {
     new_size = minSize;
   }
 
   if (m_maxBytes > 0 && new_size > m_maxBytes) {
-    throw StringBufferLimitException(m_maxBytes, detach());
+    if (minSize > m_maxBytes) {
+      throw StringBufferLimitException(m_maxBytes, detach());
+    } else {
+      new_size = m_maxBytes;
+    }
   }
 
   char *new_buffer;

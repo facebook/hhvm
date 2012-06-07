@@ -32,9 +32,6 @@
 #include <util/parser/location.h>
 #include <util/parser/parser.h>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticGlobalInfo
@@ -73,12 +70,8 @@ void VariableTable::getLocalVariableNames(vector<string> &syms) const {
   bool dollarThisIsSpecial = (fs->getContainingClass() ||
                               fs->inPseudoMain());
 
-  for (StringToSymbolMap::const_iterator it = m_symbolMap.begin();
-       it != m_symbolMap.end(); ++it) {
-    // Not all symbols are actually local variables, thus we have to
-    // filter out certain symbols based on their flags
-    if (it->second.isSuperGlobal()) continue;
-    const string& name = it->first;
+  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
+    const string& name = m_symbolVec[i]->getName();
     if (name == "this" && dollarThisIsSpecial) {
       // The "this" variable in methods and pseudo-main is special and is
       // handled separately below.
@@ -86,6 +79,7 @@ void VariableTable::getLocalVariableNames(vector<string> &syms) const {
     }
     syms.push_back(name);
   }
+
   if (fs->containsBareThis()) {
     ASSERT(dollarThisIsSpecial);
     // We only need a local variable named "this" if the current function
@@ -319,7 +313,7 @@ bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
 TypePtr VariableTable::addParam(const string &name, TypePtr type,
                                 AnalysisResultConstPtr ar,
                                 ConstructPtr construct) {
-  Symbol *sym = addSymbol(name);
+  Symbol *sym = addDeclaredSymbol(name, construct);
   if (!sym->isParameter()) {
     sym->setParameterIndex(m_nextParam++);
   }
@@ -386,6 +380,20 @@ void VariableTable::addStaticVariable(Symbol *sym,
   }
 
   addStaticVariable(sym, ar->lock().get(), member);
+}
+
+void VariableTable::cleanupForError(AnalysisResultConstPtr ar) {
+  if (!m_hasStatic) return;
+
+  AnalysisResult::Locker lock(ar);
+  VariableTablePtr g = lock->getVariables();
+  ClassScopeRawPtr cls = getClassScope();
+
+  for (unsigned i = g->m_staticGlobalsVec.size(); i--; ) {
+    if (g->m_staticGlobalsVec[i]->cls == cls) {
+      g->m_staticGlobalsVec.erase(g->m_staticGlobalsVec.begin() + i);
+    }
+  }
 }
 
 bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
@@ -771,7 +779,7 @@ void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   }
   if (Option::ConvertSuperGlobals && !getAttribute(ContainsDynamicVariable)) {
-    set<string> convertibles;
+    std::set<string> convertibles;
     typedef std::pair<const string,Symbol> symPair;
     BOOST_FOREACH(symPair &sym, m_symbolMap) {
       if (sym.second.isSuperGlobal() && !sym.second.declarationSet()) {
@@ -780,7 +788,7 @@ void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     if (!convertibles.empty()) {
       cg_printf("/* converted super globals */ global ");
-      for (set<string>::const_iterator iter = convertibles.begin();
+      for (std::set<string>::const_iterator iter = convertibles.begin();
            iter != convertibles.end(); ++iter) {
         if (iter != convertibles.begin()) cg_printf(",");
         cg_printf("$%s", iter->c_str());
@@ -876,10 +884,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   }
 
   if (cg.getOutput() == CodeGenerator::SystemCPP) {
-    cg_printf("// HHBC global infrastructure\n");
+    cg_printf("// HHVM global infrastructure\n");
     cg_printf("Variant hg_global_storage;\n");
-    cg_printf("// HHBC Function/Method Static Variables\n");
-    cg_printf("Array hg_static_storage;\n");
   }
 
   cg_printf("\n");
@@ -905,6 +911,9 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   // Dynamic Constants
   ar->getCPPDynamicConstantDecl(cg, type2names);
 
+  string object = "Object";
+  std::map<string,string> realClass;
+
   // Function/Method Static Variables
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
@@ -912,8 +921,13 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
       TypePtr varType = sgi->sym->getFinalType();
-      type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].insert
-        (string(Option::StaticVariablePrefix) + id);
+      string s = varType->getCPPDecl(ar, sgi->func);
+      string var = Option::StaticVariablePrefix + id;
+      if (varType->isSpecificObject() && s != object) {
+        realClass[var] = s;
+        s = object;
+      }
+      type2names[s].insert(var);
     }
   }
 
@@ -943,8 +957,13 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     if (!sgi->func) {
       ASSERT(!sgi->sym->isOverride());
       TypePtr varType = sgi->sym->getFinalType();
-      type2names[varType->getCPPDecl(ar, BlockScopeRawPtr())].insert
-        (string(Option::StaticPropertyPrefix) + id);
+      string s = varType->getCPPDecl(ar, sgi->cls);
+      string var = Option::StaticPropertyPrefix + id;
+      if (varType->isSpecificObject() && s != object) {
+        // realClass[var] = s;
+        s = object;
+      }
+      type2names[s].insert(Option::StaticPropertyPrefix + id);
     }
   }
 
@@ -957,7 +976,6 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   if (!system) {
     // Volatile class declared flags
     ar->getCPPClassDeclaredFlags(cg, type2names);
-    cg_printf("virtual bool class_exists(CStrRef name);\n");
   }
 
   // Redeclared Functions
@@ -990,8 +1008,15 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
       } else if (gvmDone) {
         assert(false);
       }
-      cg_printf("#define %s %s%s[%d]\n", iterName->c_str(), prefix,
-                typeName.c_str(), i);
+      string cast;
+      if (type == object) {
+        std::map<string,string>::iterator it = realClass.find(*iterName);
+        if (it != realClass.end()) {
+          cast = ".cast<"+it->second+">()";
+        }
+      }
+      cg_printf("#define %s %s%s[%d]%s\n", iterName->c_str(), prefix,
+                typeName.c_str(), i, cast.c_str());
       i++;
     }
   }
@@ -1100,12 +1125,14 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   cg_printf("memset(&%sint64, 0, sizeof(%sint64));\n", prefix, prefix);
   cg_printf("memset(&%sdouble, 0, sizeof(%sdouble));\n", prefix, prefix);
 
-  cg_printf("memset(&%sCallInfoPtr, 0, sizeof(%sCallInfoPtr));\n",
+  cg_printf("memset(&%sRedeclaredCallInfoConstPtr, 0, "
+            "sizeof(%sRedeclaredCallInfoConstPtr));\n",
             prefix, prefix);
 
   if (system) {
+    cg_indentBegin("if (hhvm) {\n");
     cg_printf(
-      "// HHBC globals initialization\n"
+      "// HHVM globals initialization\n"
       "hg_global_storage = NEW(HphpArray)(0, true);\n"
       "hg_global_storage.set(\"GLOBALS\", hg_global_storage);\n"
       "// XXX As a hack, we strongly bind hphpc's superglobals to the matching\n"
@@ -1125,9 +1152,8 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
       "                      ref(gvm_HTTP_RAW_POST_DATA));\n"
       "hg_global_storage.set(\"http_response_header\",\n"
       "                      ref(gvm_http_response_header));\n"
-      "// HHBC function/method statics initialization\n"
-      "hg_static_storage = Array(NEW(HphpArray)());\n\n"
     );
+    cg_indentEnd("}\n");
   }
 
   cg.printSection("Redeclared Classes");
@@ -1169,6 +1195,10 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
       "  g_variables = NULL;\n"
       "  g_array_wrapper.destroy();\n"
       "}\n"
+      "void free_global_variables_after_sweep() {\n"
+      "  g_variables = NULL;\n"
+      "  g_array_wrapper.destroy();\n"
+      "}\n"
       "\n"
       "#else /* USE_GCC_FAST_TLS */\n"
       "static ThreadLocal<GlobalVariables *> g_variables;\n"
@@ -1185,6 +1215,10 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
       "  GlobalVariables *g = *(g_variables.getNoCheck());\n"
       "  if (g) DELETE(GlobalVariables)(g);\n"
       "  g_variables.destroy();\n"
+      "  g_array_wrapper.destroy();\n"
+      "}\n"
+      "void free_global_variables_after_sweep() {\n"
+      "  g_variables.nullOut();\n"
       "  g_array_wrapper.destroy();\n"
       "}\n"
       "#endif /* USE_GCC_FAST_TLS */\n"
@@ -1336,6 +1370,7 @@ void VariableTable::outputCPPGVHashTableExists(CodeGenerator &cg,
   ASSERT(cg.getCurrentIndentation() == 0);
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_EXISTS");
   const char text[] =
+    "HOT_FUNC_HPHP\n"
     "bool GlobalVariables::exists(CStrRef s) const {\n"
     "  const hashNodeGV *p = findGV(s.data(), s.size(), s->hash());\n"
     "  if (p) return isInitialized(*(Variant *)((char *)this + p->off));\n"

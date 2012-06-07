@@ -38,8 +38,6 @@
 #include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -186,11 +184,11 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           string ptype;
           if (!m_params || m_params->getCount() <= i) {
             if (i >= m_funcScope->getMinParamCount()) break;
-            fmt = "%s: parameter %d of %s() requires %s, none given";
+            fmt = "parameter %d of %s() requires %s, none given";
           } else {
             ExpressionPtr param = (*m_params)[i];
             if (!Type::Inferred(ar, param->getType(), specType)) {
-              fmt = "%s: parameter %d of %s() requires %s, called with %s";
+              fmt = "parameter %d of %s() requires %s, called with %s";
             }
             ptype = param->getType()->toString();
           }
@@ -198,8 +196,6 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
             string msg;
             Util::string_printf
               (msg, fmt,
-               Util::escapeStringForCPP(
-                 m_funcScope->getContainingFile()->getName()).c_str(),
                i + 1,
                Util::escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
                specType->toString().c_str(), ptype.c_str());
@@ -562,6 +558,9 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
           Compiler::Error(Compiler::UseVoidReturn, self);
         }
       }
+      if (!Type::IsMappedToVariant(type)) {
+        setExpectedType(type);
+      }
       m_voidWrapper = true;
     }
   } else {
@@ -705,13 +704,32 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (m_voidReturn) clearContext(RefValue);
+  TypePtr eType = getExpectedType();
   bool wrap = m_voidWrapper && m_cppTemp.empty() && !isUnused();
   if (wrap) {
     cg_printf("(");
+    setExpectedType(TypePtr());
   }
   Expression::outputCPP(cg, ar);
   if (wrap) {
-    cg_printf(", null)");
+    setExpectedType(eType);
+    if (eType && !Type::IsMappedToVariant(eType)) {
+      if (eType->is(Type::KindOfBoolean)) {
+        cg_printf(", false)");
+      } else if (eType->isInteger()) {
+        cg_printf(", 0)");
+      } else if (eType->is(Type::KindOfDouble)) {
+        cg_printf(", 0.0)");
+      } else if (eType->is(Type::KindOfString)) {
+        cg_printf(", empty_string)");
+      } else {
+        cg_printf(", ");
+        eType->outputCPPCast(cg, ar, getScope());
+        cg_printf("(null))");
+      }
+    } else {
+      cg_printf(", null)");
+    }
   }
 
   if (staticClassName) {

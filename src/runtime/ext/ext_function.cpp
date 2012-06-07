@@ -19,21 +19,22 @@
 #include <runtime/ext/ext_json.h>
 #include <runtime/ext/ext_class.h>
 #include <runtime/base/class_info.h>
-#include <runtime/base/fiber_async_func.h>
 #include <runtime/base/util/libevent_http_client.h>
 #include <runtime/base/server/http_protocol.h>
 #include <runtime/vm/runtime.h>
+#include <runtime/vm/translator/translator.h>
+#include <runtime/vm/translator/translator-inline.h>
 #include <util/exception.h>
 #include <util/util.h>
-
-using namespace std;
-using namespace boost;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s_parent("parent");
 static StaticString s_self("self");
+
+using HPHP::VM::ActRec;
+using HPHP::VM::Transl::CallerFrame;
 
 Array f_get_defined_functions() {
   Array ret;
@@ -51,11 +52,11 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
   bool ret = true;
   if (LIKELY(!syntax)) {
     if (hhvm) {
-      HPHP::VM::ActRec* ar = vm_get_previous_frame();
+      CallerFrame cf;
       ObjectData* obj = NULL;
       HPHP::VM::Class* cls = NULL;
       StringData* invName = NULL;
-      const HPHP::VM::Func* f = vm_decode_function(v, ar, false, obj, cls,
+      const HPHP::VM::Func* f = vm_decode_function(v, cf(), false, obj, cls,
                                                    invName, false);
       if (f == NULL) {
         ret = false;
@@ -153,55 +154,27 @@ Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv /* = null_ar
   return f_call_user_func_array(function, _argv);
 }
 
-static inline void throw_not_supported(const char* funcName) {
-  raise_error("%s is no longer supported", funcName);
-}
-
 Object f_call_user_func_array_async(CVarRef function, CArrRef params) {
-  if (!RuntimeOption::EnableCufAsync) {
-#ifdef CUFA_ASYNC_NOT_SUPPORTED_MSG
-    raise_error(CUFA_ASYNC_NOT_SUPPORTED_MSG);
-#else
-    throw_not_supported(__func__);
-#endif
-  }
-
-  return FiberAsyncFunc::Start(function, params);
+  raise_error("%s is no longer supported", __func__);
+  return null_object;
 }
 
 Object f_call_user_func_async(int _argc, CVarRef function,
                               CArrRef _argv /* = null_array */) {
-  if (!RuntimeOption::EnableCufAsync) {
-#ifdef CUF_ASYNC_NOT_SUPPORTED_MSG
-    raise_error(CUF_ASYNC_NOT_SUPPORTED_MSG);
-#else
-    throw_not_supported(__func__);
-#endif
-  }
-
-  return FiberAsyncFunc::Start(function, _argv);
+  raise_error("%s is no longer supported", __func__);
+  return null_object;
 }
 
 Variant f_check_user_func_async(CVarRef handles, int timeout /* = -1 */) {
-  if (!RuntimeOption::EnableCufAsync) {
-    throw_not_supported(__func__);
-  }
-  if (handles.isArray()) {
-    return FiberAsyncFunc::Status(handles, timeout);
-  }
-  Array ret = FiberAsyncFunc::Status(CREATE_VECTOR1(handles), timeout);
-  return !ret.empty();
+  raise_error("%s is no longer supported", __func__);
+  return null;
 }
 
 Variant f_end_user_func_async(CObjRef handle,
                               int default_strategy /* = k_GLOBAL_STATE_IGNORE */,
                               CVarRef additional_strategies /* = null */) {
-  if (!RuntimeOption::EnableCufAsync) {
-    throw_not_supported(__func__);
-  }
-  return FiberAsyncFunc::Result(handle,
-                                (FiberAsyncFunc::Strategy)default_strategy,
-                                additional_strategies);
+  raise_error("%s is no longer supported", __func__);
+  return null;
 }
 
 String f_call_user_func_serialized(CStrRef input) {
@@ -302,15 +275,16 @@ Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = nu
 
 Variant f_get_called_class() {
   if (hhvm) {
-    // call_user_func_array is a builtin, so m_fp points to the builtin's
-    // frame. arGetSfp get's the caller's frame.
-    HPHP::VM::ActRec* ar = g_context->arGetSfp(g_context->m_fp);
-    ASSERT(ar != NULL && ar != g_context->m_fp);
+    CallerFrame cf;
+    ActRec* ar = cf();
+    if (ar == NULL) {
+      return Variant(false);
+    }
     if (ar->hasThis()) {
       ObjectData* obj = ar->getThis();
       return obj->o_getClassName();
     } else if (ar->hasClass()) {
-      return ar->getClass()->m_preClass->m_name->data();
+      return ar->getClass()->preClass()->name()->data();
     } else {
       return Variant(false);
     }
@@ -323,51 +297,7 @@ Variant f_get_called_class() {
 
 String f_create_function(CStrRef args, CStrRef code) {
   if (hhvm) {
-    // It doesn't matter if there's a user function named __lambda_func; we
-    // only use this name during parsing, and then change it to an impossible
-    // name with a NUL byte before we merge it into the request's func map.
-    // This also has the bonus feature that the value of __FUNCTION__ inside
-    // the created function will match Zend. (Note: Zend will actually fatal if
-    // there's a user function named __lambda_func when you call
-    // create_function. Huzzah!)
-    std::ostringstream codeStr;
-    codeStr << "<?php function __lambda_func(" << args.data() << ") {";
-    codeStr << code.data() << "}\n";
-
-    StringData* evalCode = StringData::GetStaticString(codeStr.str());
-    VM::Unit* unit = VM::compile_string(evalCode->data(), evalCode->size());
-
-    // Move the function to a different name.
-    ASSERT(unit->m_funcs.size() == 2);   // lambda, plus pseudo-main.
-    VM::Func* func = unit->m_funcs[0];
-    if (func == unit->getMain()) {
-      func = unit->m_funcs[1];
-    }
-
-    std::ostringstream newNameStr;
-    newNameStr << '\0' << "lambda_" << ++g_context->m_lambdaCounter;
-
-    const StringData* oldName = func->m_name;
-    StringData* newName = StringData::GetStaticString(newNameStr.str());
-    func->m_name = newName;
-    unit->m_funcMap.erase(const_cast<StringData*>(oldName));
-    unit->m_funcMap[newName] = func;
-
-    g_context->m_evaledUnits.push_back(unit);
-    g_context->mergeUnitFuncs(unit);
-
-    // Technically we shouldn't have to eval the unit right now (it'll execute
-    // the pseudo-main, which should be empty) and could get away with just
-    // mergeUnitFuncs. However, Zend does it this way, as proven by the fact
-    // that you can inject code into the evaled unit's pseudo-main:
-    //
-    //   create_function('', '} echo "hi"; if (0) {');
-    //
-    // We have to eval now to emulate this behavior.
-    TypedValue retval;
-    g_context->invokeFunc(&retval, unit->getMain(), Array::Create());
-
-    return newName;
+    return g_vmContext->createFunction(args, code);
   } else {
     throw NotSupportedException(__func__, "dynamic coding");
   }
@@ -377,15 +307,14 @@ String f_create_function(CStrRef args, CStrRef code) {
 
 Variant f_func_get_arg(int arg_num) {
   if (hhvm) {
-    ExecutionContext* context = g_context.getNoCheck();
-    HPHP::VM::ActRec* ar = context->arGetSfp(context->m_fp);
-    ASSERT(ar != context->m_fp);
+    CallerFrame cf;
+    ActRec* ar = cf();
 
-    if (arg_num < 0 || arg_num >= ar->m_numArgs) {
+    if (ar == NULL || arg_num < 0 || arg_num >= ar->numArgs()) {
       return false;
     }
 
-    int numParams = ar->m_func->m_numParams;
+    int numParams = ar->m_func->numParams();
 
     if (arg_num < numParams) {
       // Formal parameter. Value is on the stack.
@@ -428,35 +357,37 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos) {
   return false;
 }
 
+Array hhvm_get_frame_args(ActRec* ar) {
+  if (ar == NULL) {
+    return Array();
+  }
+  HPHP::VM::VarEnv* varEnv = ar->m_varEnv;
+  int numParams = ar->m_func->numParams();
+  int numArgs = ar->numArgs();
+  HphpArray* retval = NEW(HphpArray)(numArgs);
+
+  TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
+  for (int i = 0; i < numArgs; ++i) {
+    if (i < numParams) {
+      // This corresponds to one of the function's formal parameters, so it's
+      // on the stack.
+      retval->nvAppend(local, false);
+      --local;
+    } else {
+      // This is not a formal parameter, so it's in the VarEnv.
+      ASSERT(varEnv);
+      ASSERT(i - numParams < (int)varEnv->numExtraArgs());
+      retval->nvAppend(varEnv->getExtraArg(i - numParams), false);
+    }
+  }
+
+  return Array(retval);
+}
+
 Array f_func_get_args() {
   if (hhvm) {
-    // func_get_args is a builtin, so m_fp points to the builtin's frame.
-    // arGetSfp get's the caller's frame.
-    ExecutionContext* context = g_context.getNoCheck();
-    HPHP::VM::ActRec* ar = context->arGetSfp(context->m_fp);
-    ASSERT(ar != context->m_fp);
-    HPHP::VM::VarEnv* varEnv = ar->m_varEnv;
-    int numParams = ar->m_func->m_numParams;
-    int numArgs = ar->m_numArgs;
-    HphpArray* retval = NEW(HphpArray)(numArgs);
-
-    TypedValue* local = (TypedValue*)(uintptr_t(ar) - sizeof(TypedValue));
-    for (int i = 0; i < numArgs; ++i) {
-      if (i < numParams) {
-        // This corresponds to one of the function's formal parameters, so it's
-        // on the stack.
-        retval->nvAppend(local, false);
-        --local;
-      } else {
-        // This is not a formal parameter, so it's in the VarEnv.
-        ASSERT(varEnv);
-        ASSERT(i - numParams < (int)varEnv->numExtraArgs());
-        retval->nvAppend(varEnv->getExtraArg(i - numParams), false);
-      }
-    }
-
-    retval->incRefCount();
-    return Array(retval);
+    CallerFrame cf;
+    return hhvm_get_frame_args(cf());
   } else {
     throw FatalErrorException("bad HPHP code generation");
   }
@@ -484,10 +415,12 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
 
 int f_func_num_args() {
   if (hhvm) {
-    ExecutionContext* context = g_context.getNoCheck();
-    HPHP::VM::ActRec* ar = context->arGetSfp(context->m_fp);
-    ASSERT(ar != context->m_fp);
-    return ar->m_numArgs;
+    CallerFrame cf;
+    ActRec* ar = cf();
+    if (ar == NULL) {
+      return -1;
+    }
+    return ar->numArgs();
   } else {
     // we shouldn't be here, since code generation will inline this function
     ASSERT(false);
@@ -513,12 +446,11 @@ void f_register_cleanup_function(int _argc, CVarRef function, CArrRef _argv /* =
 }
 
 bool f_register_tick_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-  g_context->registerTickFunction(function, _argv);
-  return true;
+  throw NotImplementedException(__func__);
 }
 
 void f_unregister_tick_function(CVarRef function_name) {
-  g_context->unregisterTickFunction(function_name);
+  throw NotImplementedException(__func__);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -10,8 +10,13 @@ class A {
   }
 }
 
-$a = new A();
-$a->foo = 12;
-$a->f();
+function main() {
+  $a = new A();
+  $a->foo = 12;
+  $a->f();
 
-inOtherUnit(1, 2);
+  inOtherUnit(1, 2);
+}
+
+main();
+

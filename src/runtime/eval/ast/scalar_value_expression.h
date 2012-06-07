@@ -33,6 +33,10 @@ public:
     r = m_value;
     return true;
   }
+  virtual bool evalStaticScalar(VariableEnvironment &env, Variant &r) const {
+    r = m_value;
+    return true;
+  }
   virtual Variant eval(VariableEnvironment &env) const { return m_value; }
   virtual void dump(std::ostream &out) const;
   inline static Variant &GetScalarValueByRef(Expression *exp) {

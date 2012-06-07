@@ -559,6 +559,35 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "hphp_instruction_counter",
+    'flags'  =>  NoInjection | HipHopSpecific,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "Returns the current instruction counter value."
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_get_hardware_counters",
+    'flags'  =>  NoInjection | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "An array of hardware counters",
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_NONE",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

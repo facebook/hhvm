@@ -48,8 +48,6 @@ enum {
   PHP_PCRE_BAD_UTF8_OFFSET_ERROR
 };
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // regex cache and helpers
@@ -1014,7 +1012,7 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
         String stemp;
         if (callable) {
           if (replace_var.isObject()) {
-            stemp = 
+            stemp =
               replace_var.objectForCall()->o_getClassName() + "::__invoke";
           } else {
             stemp = replace_var.toString();

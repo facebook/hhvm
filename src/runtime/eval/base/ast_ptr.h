@@ -48,19 +48,6 @@ public:
   }
 };
 
-class AtomicCountable {
-public:
-  AtomicCountable() : m_count(0) { }
-  void incRefCount() {
-    atomic_inc(m_count);
-  }
-  int decRefCount() {
-    return atomic_dec(m_count);
-  }
-private:
-  int m_count;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

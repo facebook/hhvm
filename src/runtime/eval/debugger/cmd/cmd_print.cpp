@@ -17,8 +17,7 @@
 #include <runtime/eval/debugger/cmd/cmd_print.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/string_util.h>
-
-using namespace std;
+#include <runtime/vm/debugger_hook.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,7 +126,11 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   if (m_printLevel > 0) {
     g_context->setDebuggerPrintLevel(m_printLevel);
   }
-  thrift.write(m_ret);
+  {
+    String sdata;
+    DebuggerWireHelpers::WireSerialize(m_ret, sdata);
+    thrift.write(sdata);
+  }
   if (m_printLevel > 0) {
     g_context->setDebuggerPrintLevel(-1);
   }
@@ -135,15 +138,28 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_frame);
   thrift.write(m_bypassAccessCheck);
   thrift.write(m_printLevel);
+  thrift.write(m_noBreak);
 }
 
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
-  thrift.read(m_ret);
+  {
+    String sdata;
+    thrift.read(sdata);
+    int error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
+    if (error) {
+      m_ret = null;
+    }
+    if (error == DebuggerWireHelpers::HitLimit) {
+      m_wireError = "Hit unserialization limit. "
+                    "Try with smaller print level";
+    }
+  }
   thrift.read(m_output);
   thrift.read(m_frame);
   thrift.read(m_bypassAccessCheck);
   thrift.read(m_printLevel);
+  thrift.read(m_noBreak);
 }
 
 void CmdPrint::list(DebuggerClient *client) {
@@ -254,11 +270,19 @@ Variant CmdPrint::processWatch(DebuggerClient *client, const char *format,
                             const std::string &php) {
   m_body = php;
   m_frame = client->getFrame();
+  m_noBreak = true;
   CmdPrintPtr res = client->xend<CmdPrint>(this);
   if (!res->m_output.empty()) {
     client->output(res->m_output);
   }
   return res->m_ret;
+}
+
+void CmdPrint::handleReply(DebuggerClient *client) {
+  if (!m_output.empty()) {
+    client->output(m_output);
+  }
+  client->output(m_ret);
 }
 
 bool CmdPrint::onClient(DebuggerClient *client) {
@@ -292,14 +316,27 @@ bool CmdPrint::onClient(DebuggerClient *client) {
     }
   }
   m_body = client->argRest(index);
+  if (m_isForWatch) {
+    client->addWatch(format, m_body);
+    return true;
+  }
   m_bypassAccessCheck = client->getDebuggerBypassCheck();
   m_printLevel = client->getDebuggerPrintLevel();
   ASSERT(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
-  if (m_isForWatch) {
-    client->addWatch(format, m_body);
+  m_frame = client->getFrame();
+  CmdPrintPtr res = client->xend<CmdPrint>(this);
+  if (!res->is(m_type)) {
+    ASSERT(client->isApiMode());
+    m_incomplete = true;
+    res->setClientOutput(client);
+  } else {
+    m_output = res->m_output;
+    m_ret = res->m_ret;
+    if (!m_output.empty()) {
+      client->output(m_output);
+    }
+    client->output(FormatResult(format, m_ret));
   }
-  m_ret = processWatch(client, format, m_body);
-  client->output(FormatResult(format, m_ret));
   return true;
 }
 
@@ -318,7 +355,7 @@ void CmdPrint::setClientOutput(DebuggerClient *client) {
   } else {
     // Just print an expression, do similar output as eval
     values.set("body", m_body);
-    if (client->getDebuggerApiModeSerialize()) {
+    if (client->getDebuggerClientApiModeSerialize()) {
       values.set("value_serialize",
                  DebuggerClient::FormatVariable(m_ret, 200));
     } else {
@@ -337,12 +374,17 @@ bool CmdPrint::onServer(DebuggerProxy *proxy) {
 }
 
 bool CmdPrint::onServerVM(DebuggerProxy *proxy) {
-  const HPHP::VM::SourceLoc *locSave = g_context->m_debuggerLastBreakLoc;
-  g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
-  m_ret = DebuggerProxyVM::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                      m_output, !proxy->isLocal(), m_frame);
-  g_context->setDebuggerBypassCheck(false);
-  g_context->m_debuggerLastBreakLoc = locSave;
+  VM::PCFilter* locSave = g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = new VM::PCFilter();
+  g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
+  {
+    EvalBreakControl eval(m_noBreak);
+    m_ret = DebuggerProxyVM::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
+                                        m_output, !proxy->isLocal(), m_frame);
+  }
+  g_vmContext->setDebuggerBypassCheck(false);
+  delete g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = locSave;
   return proxy->send(this);
 }
 

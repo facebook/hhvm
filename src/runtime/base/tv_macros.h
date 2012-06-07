@@ -19,31 +19,10 @@
 
 // Assumes 'tv' is live
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
-#ifdef FAST_REFCOUNT_FOR_VARIANT
 #define TV_INCREF(tv) { \
   ASSERT(IS_REFCOUNTED_TYPE((tv)->m_type)); \
   (tv)->m_data.pstr->incRefCount(); \
 }
-#else
-#define TV_INCREF(tv) { \
-  ASSERT(IS_REFCOUNTED_TYPE((tv)->m_type)); \
-  if ((tv)->m_type == KindOfString) { \
-    (tv)->m_data.pstr->incRefCount(); \
-  } else { \
-    if ((tv)->m_type < KindOfObject) { \
-      ASSERT((tv)->m_type == KindOfArray); \
-      (tv)->m_data.parr->incRefCount(); \
-    } else { \
-      if ((tv)->m_type != KindOfObject) { \
-        ASSERT((tv)->m_type == KindOfVariant); \
-        (tv)->m_data.pvar->incRefCount(); \
-      } else { \
-        (tv)->m_data.pobj->incRefCount(); \
-      } \
-    } \
-  } \
-}
-#endif
 
 // Assumes 'tv' is live
 #define TV_UNBOX(tv) { \

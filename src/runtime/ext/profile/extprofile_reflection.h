@@ -33,6 +33,10 @@ inline Array x_hphp_get_method_info(CVarRef cls, CVarRef name) {
   return f_hphp_get_method_info(cls, name);
 }
 
+inline Variant x_hphp_get_class_constant(CVarRef cls, CVarRef name) {
+  return f_hphp_get_class_constant(cls, name);
+}
+
 inline Array x_hphp_get_class_info(CVarRef name) {
   return f_hphp_get_class_info(name);
 }
@@ -75,6 +79,10 @@ inline void x_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value)
 
 inline String x_hphp_get_original_class_name(CStrRef name) {
   return f_hphp_get_original_class_name(name);
+}
+
+inline bool x_hphp_scalar_typehints_enabled() {
+  return f_hphp_scalar_typehints_enabled();
 }
 
 

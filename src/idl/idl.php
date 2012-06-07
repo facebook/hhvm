@@ -57,7 +57,9 @@ case 'extmap':
 }
 
 if (preg_match('/\.idl\.php/', $input)) {
-  $name = preg_replace('/\.idl\.php/', '', $input);
+  $full_name = preg_replace('/\.idl\.php/', '', $input);
+  $name = preg_replace('%^.*/%', '', $full_name);
+  if ($full_name != $name) $mode = 'remote';
 } else {
   throw new Exception("wrong IDL or schema file $input");
 }
@@ -125,7 +127,7 @@ EOT
 /*****************************************************************************/
 if ($impl) {
   ($f = fopen($impl, 'w')) || die("cannot open $impl");
-  if ($mode == 'sep') {
+  if ($mode == 'sep' || $mode == 'remote') {
     $inc_file = "\"ext_${name}.h\"";
   } else {
     $inc_file = "<runtime/ext/ext_${name}.h>";
@@ -237,7 +239,7 @@ EOT
 /*****************************************************************************/
 if ($test_impl) {
   ($f = fopen($test_impl, 'w')) || die("cannot open $test_impl");
-  if ($mode == 'sep') {
+  if ($mode == 'sep' || $mode == 'remote') {
     $inc_file1 = "\"$test_header\"";
     $inc_file2 = "\"ext_${name}.h\"";
   } else {
@@ -340,7 +342,7 @@ if ($format == 'param') {
 if ($format == 'profile') {
   $header = $argv[3];
   ($f = fopen($header, 'w')) || die("cannot open $header");
-  if ($mode == 'sep') {
+  if ($mode == 'sep' || $mode == 'remote') {
     $inc_file = "\"ext_${name}.h\"";
   } else {
     if ($name == "php_mcc") {

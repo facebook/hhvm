@@ -1062,6 +1062,46 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fb_htmlspecialchars",
+    'desc'   => "Certain characters have special significance in HTML, and should be represented by HTML entities if they are to preserve their meanings. This function returns a string with some of these conversions made; the translations made are those most useful for everyday web programming. If you require all HTML character entities to be translated, use htmlentities() instead. This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application.\n\nThe translations performed are: '&' (ampersand) becomes '&amp;' '\"' (double quote) becomes '&quot;' when ENT_NOQUOTES is not set. ''' (single quote) becomes '&#039;' only when ENT_QUOTES is set. '<' (less than) becomes '&lt;' '>' (greater than) becomes '&gt;'",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "The converted string.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "str",
+        'type'   => String,
+        'desc'   => "The string being converted.",
+      ),
+      array(
+        'name'   => "quote_style",
+        'type'   => Int32,
+        'value'  => "k_ENT_COMPAT",
+        'desc'   => "The optional second argument, quote_style, tells the function what to do with single and double quote characters. The default mode, ENT_COMPAT, is the backwards compatible mode which only translates the double-quote character and leaves the single-quote untranslated. If ENT_QUOTES is set, both single and double quotes are translated and if ENT_NOQUOTES is set neither single nor double quotes are translated.",
+      ),
+      array(
+        'name'   => "charset",
+        'type'   => String,
+        'value'  => "\"ISO-8859-1\"",
+        'desc'   => "Defines character set used in conversion. The default character set is ISO-8859-1.\n\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
+      ),
+      array(
+        'name'   => "extra",
+        'type'   => StringVec,
+        'value'  => "Array()",
+        'desc'   => "An array of extra ascii chars to be encoded.",
+      ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "quoted_printable_encode",
     'desc'   => "Returns a quoted printable string created according to » RFC2045, section 6.7.\n\nThis function is similar to imap_8bit(), except this one does not require the IMAP module to work.",
     'flags'  =>  HasDocComment,
@@ -1906,7 +1946,7 @@ DefineFunction(
       array(
         'name'   => "length",
         'type'   => Int32,
-        'value'  => "0",
+        'value'  => "INT_MAX",
         'desc'   => "The length of the comparison. The default value is the largest of the length of the str compared to the length of main_str less the offset.",
       ),
       array(

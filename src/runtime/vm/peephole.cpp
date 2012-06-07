@@ -20,12 +20,19 @@
 namespace HPHP {
 namespace VM {
 
-using namespace std;
+static void collapseJmp(Offset* offsetPtr, Opcode* instr, Opcode* start) {
+  if (offsetPtr) {
+    Opcode* dest = instr + *offsetPtr;
+    while (*dest == OpJmp && dest != instr) {
+      dest = start + instrJumpTarget(start, dest - start);
+    }
+    *offsetPtr = dest - instr;
+  }
+}
 
-Peephole::Peephole(Unit &unit) : m_unit(unit) {
-
+Peephole::Peephole(UnitEmitter &ue) : m_ue(ue) {
   // be careful about an empty input
-  if (unit.m_bclen == 0) {
+  if (ue.m_bclen == 0) {
     return;
   }
 
@@ -34,10 +41,16 @@ Peephole::Peephole(Unit &unit) : m_unit(unit) {
   buildJumpTargets();
 
   // Scan the bytecode linearly.
-  Opcode* start = unit.m_bc;
+  Opcode* start = ue.m_bc;
   Opcode* prev = start;
   Opcode* cur = prev + instrLen(prev);
-  Opcode* end = start + unit.m_bclen;
+  Opcode* end = start + ue.m_bclen;
+
+  /*
+   * TODO(1086005): we should try to minimize use of CGetL2/CGetL3.
+   * (When they appear in an order like "CGetL; CGetL2" we can just
+   * switch them to "CGetL; CGetL".)
+   */
 
   while (cur < end) {
     if (LIKELY(!m_jumpTargets.count(cur - start))) {
@@ -61,21 +74,26 @@ Peephole::Peephole(Unit &unit) : m_unit(unit) {
       }
 
       // IncDec* Post*,  PopC -> IncDec* Pre*,  PopC
+      ArgUnion* imm = 0;
       if (*cur == OpPopC) {
         switch (*prev) {
-        case OpIncDecH:
+        case OpIncDecL:
+          imm = getImmPtr(prev, 1);
+          goto incDecOp;
         case OpIncDecN:
         case OpIncDecG:
         case OpIncDecS:
-        case OpIncDecM: {
-          ArgUnion* imm = getImmPtr(prev, 0);
+        case OpIncDecM:
+          imm = getImmPtr(prev, 0);
+          // fallthrough
+
+        incDecOp:
           if (imm->u_OA == PostInc) {
             imm->u_OA = PreInc;
           } else if (imm->u_OA == PostDec) {
             imm->u_OA = PreDec;
           }
           break;
-          }
         default:
           break;
         }
@@ -85,16 +103,15 @@ Peephole::Peephole(Unit &unit) : m_unit(unit) {
     // Simplify jumps. Follow a jump's target until it lands on something that
     // isn't an unconditional jump. Then rewrite the offset to cut out any
     // intermediate jumps.
-    Offset destOffset = instrJumpTarget(start, prev - start);
-    if (destOffset != InvalidAbsoluteOffset) {
-      Opcode* dest = start + destOffset;
-
-      // Watch out for infinite loops
-      while (*dest == OpJmp && dest != prev) {
-        destOffset = instrJumpTarget(start, dest - start);
-        dest = start + destOffset;
+    if (*prev == OpSwitch) {
+      Offset* cur = (Offset*)(prev + 1);
+      int32_t vecLen = *(int32_t*)cur;
+      cur++;
+      for (int i = 0; i < vecLen; ++i, ++cur) {
+        collapseJmp(cur, prev, start);
       }
-      *instrJumpOffset(prev) = dest - prev;
+    } else {
+      collapseJmp(instrJumpOffset(prev), prev, start);
     }
 
     prev = cur;
@@ -102,10 +119,10 @@ Peephole::Peephole(Unit &unit) : m_unit(unit) {
   }
 }
 
-void Peephole::buildFuncTargets(Func* f) {
-  m_jumpTargets.insert(f->m_base);
-  for (vector<EHEnt>::const_iterator it = f->m_ehtab.begin();
-      it != f->m_ehtab.end(); ++it) {
+void Peephole::buildFuncTargets(FuncEmitter* fe) {
+  m_jumpTargets.insert(fe->base());
+  for (Func::EHEntVec::const_iterator it = fe->ehtab().begin();
+      it != fe->ehtab().end(); ++it) {
     m_jumpTargets.insert(it->m_base);
     m_jumpTargets.insert(it->m_past);
     for (EHEnt::CatchVec::const_iterator catchIt = it->m_catches.begin();
@@ -114,42 +131,50 @@ void Peephole::buildFuncTargets(Func* f) {
     }
     m_jumpTargets.insert(it->m_fault);
   }
-  for (uint i = 0; i < f->m_params.size(); i++) {
-    const Func::ParamInfo& pi = f->m_params[i];
+  for (uint i = 0; i < fe->params().size(); i++) {
+    const FuncEmitter::ParamInfo& pi = fe->params()[i];
     if (pi.hasDefaultValue()) {
-      m_jumpTargets.insert(pi.m_funcletOff);
+      m_jumpTargets.insert(pi.funcletOff());
     }
   }
-  for (vector<FPIEnt>::const_iterator it = f->m_fpitab.begin();
-       it != f->m_fpitab.end(); ++it) {
-    m_jumpTargets.insert(it->m_base);
-    m_jumpTargets.insert(it->m_past);
+  for (Func::FPIEntVec::const_iterator it = fe->fpitab().begin();
+       it != fe->fpitab().end(); ++it) {
+    m_jumpTargets.insert(it->m_fpushOff);
+    m_jumpTargets.insert(it->m_fcallOff);
   }
 }
 
 void Peephole::buildJumpTargets() {
   // all function start locations, exception handlers, default value funclets,
   //   and FPI regions are targets
-  for (vector<Func*>::const_iterator it = m_unit.m_funcs.begin();
-       it != m_unit.m_funcs.end(); ++it) {
-    Func *f = *it;
-    buildFuncTargets(f);
+  for (UnitEmitter::FeVec::const_iterator it = m_ue.m_fes.begin();
+       it != m_ue.m_fes.end(); ++it) {
+    FuncEmitter *fe = *it;
+    buildFuncTargets(fe);
   }
-  for (vector<PreClassPtr>::const_iterator
-       it = m_unit.m_preClasses.begin();
-       it != m_unit.m_preClasses.end(); ++it) {
-    for (PreClass::MethodVec::iterator mit = (*it)->m_methods.begin();
-         mit != (*it)->m_methods.end(); ++mit) {
-      Func* f = *mit;
-      buildFuncTargets(f);
+  for (UnitEmitter::PceVec::const_iterator it = m_ue.m_pceVec.begin();
+       it != m_ue.m_pceVec.end(); ++it) {
+    for (PreClassEmitter::MethodVec::const_iterator mit =
+         (*it)->methods().begin(); mit != (*it)->methods().end(); ++mit) {
+      FuncEmitter* fe = *mit;
+      buildFuncTargets(fe);
     }
   }
   // all jump targets are targets
-  for (Offset pos = 0; pos < (Offset)m_unit.m_bclen;
-       pos += instrLen(&m_unit.m_bc[pos])) {
-    Offset target = instrJumpTarget(m_unit.m_bc, pos);
-    if (target != InvalidAbsoluteOffset) {
-      m_jumpTargets.insert(target);
+  for (Offset pos = 0; pos < (Offset)m_ue.m_bclen;
+       pos += instrLen(&m_ue.m_bc[pos])) {
+    Opcode* absPos = (Opcode*)&m_ue.m_bc[pos];
+    if (*absPos == OpSwitch) {
+      int32_t* cur = (int32_t*)&m_ue.m_bc[pos+1];
+      int32_t vecLen = *cur++;
+      for (int i = 0; i < vecLen; ++i, ++cur) {
+        m_jumpTargets.insert((Offset)(intptr_t)(absPos + *cur));
+      }
+    } else {
+      Offset target = instrJumpTarget(m_ue.m_bc, pos);
+      if (target != InvalidAbsoluteOffset) {
+        m_jumpTargets.insert(target);
+      }
     }
   }
 }

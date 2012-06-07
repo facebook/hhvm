@@ -79,6 +79,12 @@ DefineConstant(
     'type'   => Int64,
   ));
 
+DefineConstant(
+  array(
+    'name'   => "JSON_FB_EXTRA_ESCAPES",
+    'type'   => Int64,
+  ));
+
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
 //

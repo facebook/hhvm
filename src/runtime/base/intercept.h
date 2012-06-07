@@ -34,7 +34,13 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data);
 /**
  * Check to see if it is actually intercepted for current request.
  */
-Variant get_intercept_handler(CStrRef name, char *flag);
+Variant *get_intercept_handler(CStrRef name, char* flag);
+
+/**
+ * Check to see if it is actually intercepted for current request,
+ * when we already know its flag is set
+ */
+Variant *get_enabled_intercept_handler(CStrRef name);
 
 /**
  * Call intercept handler with original parameters.
@@ -45,7 +51,7 @@ bool handle_intercept(CVarRef handler, CStrRef name, CArrRef params,
 /**
  * Removes a previously registered flag.
  */
-void unregister_intercept_flag(char *flag);
+void unregister_intercept_flag(CStrRef name, char *flag);
 
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()

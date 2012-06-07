@@ -17,12 +17,10 @@
 #include "synchronizable_multi.h"
 #include "compatibility.h"
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-SynchronizableMulti::SynchronizableMulti(int size) {
+SynchronizableMulti::SynchronizableMulti(int size) : m_mutex(RankLeaf) {
   ASSERT(size > 0);
   m_conds.resize(size);
   for (unsigned int i = 0; i < m_conds.size(); i++) {

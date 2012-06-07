@@ -28,6 +28,7 @@ AssignmentRefExpression::AssignmentRefExpression(EXPRESSION_ARGS,
   m_lhs(lhs), m_rhs(rhs) {}
 
 Expression *AssignmentRefExpression::optimize(VariableEnvironment &env) {
+  Eval::optimize(env, m_lhs);
   Eval::optimize(env, m_rhs);
   return NULL;
 }

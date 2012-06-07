@@ -22,23 +22,27 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/zend_array.h>
+#include <runtime/base/array/vector_array.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/macros.h>
 #include <util/exception.h>
 #include <tbb/concurrent_hash_map.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef tbb::concurrent_hash_map<std::string, ArrayData *,
-                                 stringHashCompare> ArrayDataMap;
+typedef tbb::concurrent_hash_map<const StringData *, ArrayData *,
+                                 StringDataHashCompare> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
 
-ArrayData *ArrayData::GetScalarArray(ArrayData *arr) {
-  String s = f_serialize(arr);
-  string key(s.data(), s.size());
+ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
+                                     const StringData *key /* = NULL */) {
+  if (key == NULL) {
+    key = StringData::GetStaticString(f_serialize(arr).get());
+  } else {
+    ASSERT(key->isStatic());
+    ASSERT(key->same(f_serialize(arr).get()));
+  }
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
     ArrayData *ad = arr->nonSmartCopy();
@@ -51,11 +55,23 @@ ArrayData *ArrayData::GetScalarArray(ArrayData *arr) {
 
 // constructors/destructors
 
+HOT_FUNC
 ArrayData *ArrayData::Create() {
+  if (enable_vector_array && RuntimeOption::UseVectorArray) {
+    return StaticEmptyVectorArray::Get();
+  }
   return ArrayInit((ssize_t)0).create();
 }
 
+HOT_FUNC
 ArrayData *ArrayData::Create(CVarRef value) {
+  if (enable_vector_array && RuntimeOption::UseVectorArray) {
+    VectorArray *va = NEW(VectorArray)(1);
+    va->m_elems[0] = NEW(Variant)(value);
+    va->m_size = 1;
+    va->m_pos = 0;
+    return va;
+  }
   ArrayInit init(1);
   init.set(value);
   return init.create();
@@ -69,6 +85,13 @@ ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
 }
 
 ArrayData *ArrayData::CreateRef(CVarRef value) {
+  if (enable_vector_array && RuntimeOption::UseVectorArray) {
+    VectorArray *va = NEW(VectorArray)(1);
+    va->m_elems[0] = NEW(Variant)(strongBind(value));
+    va->m_size = 1;
+    va->m_pos = 0;
+    return va;
+  }
   ArrayInit init(1);
   init.setRef(value);
   return init.create();
@@ -81,6 +104,7 @@ ArrayData *ArrayData::CreateRef(CVarRef name, CVarRef value) {
   return init.create();
 }
 
+HOT_FUNC
 ArrayData::~ArrayData() {
   // If there are any strong iterators pointing to this array, they need
   // to be invalidated.
@@ -362,15 +386,18 @@ Variant ArrayData::current() const {
   return false;
 }
 
+static StaticString s_value("value");
+static StaticString s_key("key");
+
 Variant ArrayData::each() {
   if (m_pos >= 0 && m_pos < size()) {
     Array ret;
     Variant key(getKey(m_pos));
     Variant value(getValue(m_pos));
     ret.set(1, value);
-    ret.set("value", value);
+    ret.set(s_value, value);
     ret.set(0, key);
-    ret.set("key", key);
+    ret.set(s_key, key);
     ++m_pos;
     return ret;
   }
@@ -407,12 +434,7 @@ ssize_t ArrayData::iter_rewind(ssize_t prev) const {
 void ArrayData::serializeImpl(VariableSerializer *serializer) const {
   serializer->writeArrayHeader(this, size());
   for (ArrayIter iter(this); iter; ++iter) {
-    Variant key(iter.first());
-    if (key.isInteger()) {
-      serializer->writeArrayKey(this, key.toInt64());
-    } else {
-      serializer->writeArrayKey(this, key.toString());
-    }
+    serializer->writeArrayKey(this, iter.first());
     serializer->writeArrayValue(this, iter.secondRef());
   }
   serializer->writeArrayFooter(this);
@@ -478,7 +500,7 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
 }
 
 void ArrayData::dump() {
-  string out; dump(out); printf("%s", out.c_str());
+  string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
 }
 
 void ArrayData::dump(std::string &out) {
@@ -487,7 +509,7 @@ void ArrayData::dump(std::string &out) {
   out += "ArrayData(";
   out += boost::lexical_cast<string>(_count);
   out += "): ";
-  out += ret.data();
+  out += string(ret.data(), ret.size());
 }
 
 void ArrayData::dump(std::ostream &out) {
@@ -503,7 +525,7 @@ void ArrayData::dump(std::ostream &out) {
     } catch (const Exception &e) {
       out << "Exception: " << e.what();
     }
-    out << endl;
+    out << std::endl;
   }
 }
 

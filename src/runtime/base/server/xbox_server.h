@@ -79,7 +79,6 @@ public:
     m_port        = RuntimeOption::XboxServerPort;
     m_maxRequest  = RuntimeOption::XboxServerInfoMaxRequest;
     m_maxDuration = RuntimeOption::XboxServerInfoDuration;
-    m_warmupDoc   = RuntimeOption::XboxServerInfoWarmupDoc;
     m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
     m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
     m_alwaysReset = RuntimeOption::XboxServerInfoAlwaysReset;

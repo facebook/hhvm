@@ -30,7 +30,7 @@ public:
 
 public:
   CmdPrint() : DebuggerCommand(KindOfPrint), m_bypassAccessCheck(false),
-               m_isForWatch(false) {}
+               m_isForWatch(false), m_noBreak(false) {}
 
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
@@ -46,6 +46,8 @@ public:
   Variant processWatch(DebuggerClient *client, const char *format,
                     const std::string &php);
 
+  virtual void handleReply(DebuggerClient *client);
+
 private:
   Variant m_ret;
   String m_output;
@@ -53,6 +55,7 @@ private:
   bool m_bypassAccessCheck;
   int m_printLevel;
   bool m_isForWatch;
+  bool m_noBreak;
 
   bool processList(DebuggerClient *client);
   bool processClear(DebuggerClient *client);

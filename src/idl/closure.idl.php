@@ -180,3 +180,20 @@ DefineFunction(
   ));
 
 EndClass();
+
+BeginClass(
+  array(
+    'name' => "DummyClosure",
+    'desc' => "Represents an invalid closure which will fatal when used.",
+  ));
+
+DefineFunction(
+  array(
+    'name'   => '__construct',
+    'args'   => array(),
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+EndClass();

@@ -22,7 +22,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 ClosureExpression::ClosureExpression(EXPRESSION_ARGS,
@@ -32,7 +32,7 @@ ClosureExpression::ClosureExpression(EXPRESSION_ARGS,
   func->setClosure(this);
 
   // push the vars in reverse order, not retaining duplicates
-  set<string> seenBefore;
+  std::set<string> seenBefore;
   for (vector<ParameterPtr>::const_reverse_iterator it(vars.rbegin());
        it != vars.rend();
        it++) {

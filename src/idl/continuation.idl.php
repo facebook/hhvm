@@ -442,6 +442,7 @@ BeginClass(
   array(
     'name'   => 'GenericContinuation',
     'parent' => 'Continuation',
+    'flags'  =>  NoDefaultSweep,
     'footer' => <<<EOT
 public:
   LVariableTable m_statics;
@@ -525,6 +526,64 @@ DefineProperty(
     'name'  => 'vars',
     'type'  => VariantMap,
     'flags' => IsPrivate,
+  ));
+
+EndClass();
+
+BeginClass(
+  array(
+    'name' => "DummyContinuation",
+    'ifaces' => array('Iterator'),
+    'desc' => "Represents an invalid continuation which will fatal when used.",
+  ));
+
+DefineFunction(
+  array(
+    'name'   => '__construct',
+    'args'   => array(),
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'current',
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'key',
+    'return' => array(
+      'type'   => Int64,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'next',
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'rewind',
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => 'valid',
+    'return' => array(
+      'type'   => Boolean,
+    ),
   ));
 
 EndClass();

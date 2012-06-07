@@ -7,3 +7,4 @@
 #include <test/test_util.h>
 #include <test/test_ext.h>
 #include <test/test_server.h>
+#include <test/test_debugger.h>

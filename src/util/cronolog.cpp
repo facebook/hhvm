@@ -18,8 +18,6 @@
 #include <util/cronolog.h>
 #include <util/util.h>
 
-using namespace std;
-
 /* Default permissions for files and directories that are created */
 
 #ifndef FILE_MODE

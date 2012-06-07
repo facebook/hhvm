@@ -21,9 +21,14 @@ class F extends D {
     echo "F::__call\n";
   }
 }
-$obj = new E;
-$obj->test();
 
-$obj->foo();
-E::foo();
+function main() {
+  $obj = new E;
+  $obj->test();
+
+  $obj->foo();
+  E::foo();
+}
+
+main();
 

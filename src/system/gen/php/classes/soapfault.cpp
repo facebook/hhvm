@@ -31,20 +31,19 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
-extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/soapfault.php line 3 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SoapFault)
-const InstanceOfInfo c_SoapFault::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_SoapFault$$instanceof_table[] = {
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
   {0x32E5C767255D2515LL,1,"SoapFault",&cw_SoapFault},
 };
-const int c_SoapFault::s_instanceof_index[] = {
+const int cw_SoapFault$$instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-CallInfo c_SoapFault::ci___tostring((void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 4, 0x0000000000000000LL);
-CallInfo c_SoapFault::ci___construct((void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000LL);
+extern const CallInfo ci_SoapFault$$__tostring = { (void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SoapFault$$__construct = { (void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000LL};
 Variant c_SoapFault::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -77,12 +76,11 @@ Variant c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("SoapFault::__toString", 0, 1);
   return (self->t___tostring());
 }
-const MethodCallInfoTable c_SoapFault::s_call_info_table[] = {
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_SoapFault::ci___construct },
-  { 0x642C2D2994B34A13LL, 0, 10, "__toString", &c_SoapFault::ci___tostring },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_SoapFault$$call_info_table[] = {
+  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &ci_SoapFault$$__construct },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_SoapFault$$__tostring },
 };
-const int c_SoapFault::s_call_info_index[] = {
+extern const int cw_SoapFault$$call_info_index[] = {
   3,
   -1,-1,-1,0,
 };
@@ -96,12 +94,16 @@ c_SoapFault *c_SoapFault::create(CVarRef v_code, CVarRef v_message, CVarRef v_ac
   t___construct(v_code, v_message, v_actor, v_detail, v_name, v_header);
   return this;
 }
+extern const MethodCallInfoTable cw_SoapFault$$call_info_table[];
+extern const int cw_SoapFault$$call_info_index[];
+extern const InstanceOfInfo cw_SoapFault$$instanceof_table[];
+extern const int cw_SoapFault$$instanceof_index[];
 const ObjectStaticCallbacks cw_SoapFault = {
   (ObjectData*(*)(ObjectData*))coo_SoapFault,
-  c_SoapFault::s_call_info_table,c_SoapFault::s_call_info_index,
-  c_SoapFault::s_instanceof_table,c_SoapFault::s_instanceof_index,
+  cw_SoapFault$$call_info_table,cw_SoapFault$$call_info_index,
+  cw_SoapFault$$instanceof_table,cw_SoapFault$$instanceof_index,
   &c_SoapFault::s_class_name,
-  &c_SoapFault::os_prop_table,&c_SoapFault::ci___construct,0,&cw_Exception,0x0,
+  &c_SoapFault::os_prop_table,&ci_SoapFault$$__construct,0,&cw_Exception,0x0,
   &c_SoapFault::s_cls
 };
 /* SRC: classes/soapfault.php line 12 */
@@ -111,7 +113,6 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
 , Variant v_header //  = null
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapFault, SoapFault::__construct);
-  bool oldInCtor = gasInCtor(true);
   Variant v_fault_ns;
   Variant v_fault_code;
   int64 v_SOAP_1_1 = 0;
@@ -120,6 +121,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
   String v_SOAP_1_2_ENV_NAMESPACE;
   int64 v_soap_version = 0;
 
+  ObjectData *obj_tmp UNUSED;
   setNull(v_fault_ns);
   setNull(v_fault_code);
   if (x_is_string(v_code)) {
@@ -154,10 +156,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
         if ((!(x_is_string(v_fault_ns)) || !(x_is_string(v_fault_code)))) {
           {
             x_hphp_throw_fatal_error(NAMSTR(s_sys_ss78960b67, "Invalid fault code"));
-            {
-              gasInCtor(oldInCtor);
-              return;
-            }
+            return;
           }
         }
       }
@@ -165,10 +164,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
     else {
       {
         x_hphp_throw_fatal_error(NAMSTR(s_sys_ss78960b67, "Invalid fault code"));
-        {
-          gasInCtor(oldInCtor);
-          return;
-        }
+        return;
       }
     }
   }
@@ -177,10 +173,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
   if (empty(m_faultcode)) {
     {
       x_hphp_throw_fatal_error(NAMSTR(s_sys_ss78960b67, "Invalid fault code"));
-      {
-        gasInCtor(oldInCtor);
-        return;
-      }
+      return;
     }
   }
   {
@@ -233,12 +226,12 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
       }
     }
   }
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/soapfault.php line 73 */
 String c_SoapFault::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapFault, SoapFault::__toString);
+  ObjectData *obj_tmp UNUSED;
   return concat4(NAMSTR(s_sys_ss5d507d08, "SoapFault exception: ["), toString(m_faultcode), NAMSTR(s_sys_ss0a81fd6d, "] "), toString(m_faultstring));
 }
 namespace hphp_impl_splitter {}

@@ -96,7 +96,8 @@ inline int64 toInt64(short   v) { return v;}
 inline int64 toInt64(int     v) { return v;}
 inline int64 toInt64(int64   v) { return v;}
 inline int64 toInt64(double  v) {
-  return ((v > LONG_MAX) ? (uint64)v : (int64)v);
+  return (v >= 0 ? v > std::numeric_limits<uint64>::max() ? 0u :
+          (uint64)v : (int64)v);
 }
 inline int64 toInt64(litstr  v) { return StringData(v).toInt64();}
 inline int64 toInt64(const StringData *v) { return v ? v->toInt64() : 0;}

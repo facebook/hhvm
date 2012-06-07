@@ -155,6 +155,16 @@ inline Variant x_snuncompress(CStrRef data) {
   return f_snuncompress(data);
 }
 
+inline Variant x_nzcompress(CStrRef uncompressed) {
+  FUNCTION_INJECTION_BUILTIN(nzcompress);
+  return f_nzcompress(uncompressed);
+}
+
+inline Variant x_nzuncompress(CStrRef compressed) {
+  FUNCTION_INJECTION_BUILTIN(nzuncompress);
+  return f_nzuncompress(compressed);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

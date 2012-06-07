@@ -13,7 +13,7 @@ In D::__get(q)
 In D::__get(r)
 D Object
 (
-    [container:private] => Array
+    [container:D:private] => Array
         (
             [a] => D::a
             [b] => 42
@@ -37,7 +37,7 @@ In E::__get(r)
 In E::__set(r, hello)
 E Object
 (
-    [container:private] => Array
+    [container:E:private] => Array
         (
             [a] => E::a<a>
             [b] => 42<b><b>

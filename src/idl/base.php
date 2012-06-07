@@ -125,6 +125,7 @@ define('IsFinal',                        1 <<  5);
 define('IsPublic',                       1 <<  6);
 define('IsProtected',                    1 <<  7);
 define('IsPrivate',                      1 <<  8);
+define('IgnoreRedefinition',             1 <<  8);
 define('IsStatic',                       1 <<  9);
 define('HasDocComment',                  1 << 14);
 define('HipHopSpecific',                 1 << 16);
@@ -139,12 +140,11 @@ define('AllowIntercept',                 1 << 24);
 define('NoProfile',                      1 << 25);
 define('ContextSensitive',               1 << 26);
 define('NoDefaultSweep',                 1 << 27);
-
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | RefVariableArguments |
                        MixedVariableArguments));
 
-function get_flag_names($arr, $name) {
+function get_flag_names($arr, $name, $global_func) {
   $flag = 0;
   if (!empty($arr[$name])) {
     $flag |= $arr[$name];
@@ -156,7 +156,11 @@ function get_flag_names($arr, $name) {
   if ($flag & IsFinal               ) $ret .= ' | IsFinal'               ;
   if ($flag & IsPublic              ) $ret .= ' | IsPublic'              ;
   if ($flag & IsProtected           ) $ret .= ' | IsProtected'           ;
-  if ($flag & IsPrivate             ) $ret .= ' | IsPrivate'             ;
+  if ($global_func) {
+    if ($flag & IgnoreRedefinition  ) $ret .= ' | IgnoreRedefinition'    ;
+  } else {
+    if ($flag & IsPrivate           ) $ret .= ' | IsPrivate'             ;
+  }
   if ($flag & IsStatic              ) $ret .= ' | IsStatic'              ;
   if ($flag & HasDocComment         ) $ret .= ' | HasDocComment'         ;
   if ($flag & HipHopSpecific        ) $ret .= ' | HipHopSpecific'        ;
@@ -366,29 +370,19 @@ function typeidlname($type, $null = '') {
 
 function param_typename($arg, $forceRef = false) {
   $type = $arg['type'];
-  $ref = idx($arg, 'ref') ?
-    ($forceRef === null ?
-     "wrap" : ($forceRef === true ? "var" : true)) :
-    ($forceRef === true ? "var" : false);
-
   if (is_string($type)) {
     return 'p_' . $type;
   }
-
   global $REFNAMES;
   $name = typename($type);
-  if ($ref && $name == "Variant") {
-    if ($ref === "wrap")
-      return "VRefParam";
-    else if ($ref === "var")
-      return "Variant";
-    else
-      return "VRefParam";
+  $ref = idx($arg, 'ref');
+  if (idx($arg, 'ref')) {
+    return ($name === "Variant") ? "VRefParam" : $name;
   }
-  if ($ref || !isset($REFNAMES[$name])) {
+  if ($forceRef) {
     return $name;
   }
-  return $REFNAMES[$name];
+  return isset($REFNAMES[$name]) ? $REFNAMES[$name] : $name;
 }
 
 function typeenum($type) {
@@ -423,7 +417,8 @@ function get_serialized_default($s) {
   if (preg_match('/^".*"$/', $s) ||
       preg_match('/^[\-0-9.]+$/', $s) ||
       preg_match('/^0x[0-9a-fA-F]+$/', $s) ||
-      preg_match('/^(true|false|null)$/', $s)
+      preg_match('/^(true|false|null)$/', $s) ||
+      $s == 'Array()'
      ) {
     return serialize(eval("return $s;"));
   }
@@ -565,7 +560,7 @@ function generateFuncArgsCPPHeader($func, $f, $forceRef = false,
   fprintf($f, ")");
 }
 
-function generateFuncArgsCall($func, $f, $forceRef = false) {
+function generateFuncArgsCall($func, $f) {
   $var_arg = ($func['flags'] & VarArgsMask);
   $args = $func['args'];
   if ($var_arg) fprintf($f, '_argc');
@@ -580,7 +575,7 @@ function generateFuncArgsCall($func, $f, $forceRef = false) {
   }
 }
 
-function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
+function generateFuncCPPHeader($func, $f, $method = false, $forceRef = false,
                                $static = false, $class = false) {
   if ($method) {
     fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
@@ -589,17 +584,17 @@ function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
   } else {
     fprintf($f, '%s f_%s', typename($func['return']), $func['name']);
   }
-  generateFuncArgsCPPHeader($func, $f, $forceref, $static);
+  generateFuncArgsCPPHeader($func, $f, $forceRef, $static);
   fprintf($f, ";\n");
 
   if ($static && $method) {
     fprintf($f, '  public: static %s t_%s', typename($func['return']),
             strtolower($func['name']));
     // for the actual static call there is no class name needed
-    generateFuncArgsCPPHeader($func, $f, $forceref, false);
+    generateFuncArgsCPPHeader($func, $f, $forceRef, false);
     fprintf($f, " {\n    return ti_%s(\"%s\"", strtolower($func['name']),
             strtolower($class['name']));
-    generateFuncArgsCall($func, $f, $forceref);
+    generateFuncArgsCall($func, $f);
     fprintf($f, ");\n  }\n");
   }
 }
@@ -609,7 +604,7 @@ function generateFuncProfileHeader($func, $f) {
   $args = $func['args'];
 
   fprintf($f, 'inline %s x_%s', typename($func['return']), $func['name']);
-  generateFuncArgsCPPHeader($func, $f, null);
+  generateFuncArgsCPPHeader($func, $f);
   fprintf($f, " {\n");
 
   if (($func['flags'] & NoProfile)) {
@@ -665,7 +660,7 @@ function generateClassCPPHeader($class, $f) {
     if ($name == 'String') {
       $name = 'StaticString';
     }
-    fprintf($f, "extern const %s q_%s_%s;\n", $name, $clsname, $k['name']);
+    fprintf($f, "extern const %s q_%s\$\$%s;\n", $name, $clsname, $k['name']);
   }
 
   fprintf($f,
@@ -744,7 +739,8 @@ EOT
   foreach ($class['methods'] as $m) {
     generatePreImplemented($m, $class, $f);
   }
-  if (!empty($class['properties'])) {
+  if (!empty($class['properties']) ||
+      !empty($class['consts'])) {
     fprintf($f, "  public: static const ClassPropTable os_prop_table;\n");
   }
   if (!empty($class['footer'])) {
@@ -981,6 +977,7 @@ function format_doc_desc($arr, $clsname) {
   } else {
     $clsname = preg_replace('#_#', '-', strtolower($clsname));
     $name = preg_replace('#_#', '-', strtolower($arr['name']));
+    $name = preg_replace('#^--#', '', $name);
     $url = "http://php.net/manual/en/$clsname.$name.php";
     $desc = "( excerpt from $url )\n";
   }

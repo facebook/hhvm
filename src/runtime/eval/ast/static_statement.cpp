@@ -21,7 +21,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticVariable::StaticVariable(CONSTRUCT_ARGS, const string &name,

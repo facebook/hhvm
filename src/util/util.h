@@ -23,6 +23,7 @@
 #include <set>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <arpa/inet.h> // For htonl().
 
 /**
  * Simple utility functions.
@@ -37,6 +38,14 @@ namespace HPHP { namespace Util {
 #define UNUSED         __attribute__((unused))
 #define FLATTEN        __attribute__((flatten))
 #define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
+
+#ifdef HHVM
+#define HOT_FUNC_VM HOT_FUNC
+#define HOT_FUNC_HPHP
+#else
+#define HOT_FUNC_VM
+#define HOT_FUNC_HPHP HOT_FUNC
+#endif
 
 /*
  * we need to keep some unreferenced functions from being removed by
@@ -222,6 +231,35 @@ void find(std::vector<std::string> &out,
  * Format a regex pattern by surrounding with slashes and escaping pattern.
  */
 std::string format_pattern(const std::string &pattern, bool prefixSlash);
+
+static inline void compiler_membar( ) {
+  asm volatile("" : : :"memory");
+}
+
+/**
+ * Given the address of a C++ function, returns that function's name
+ * or a hex string representation of the address if it can't find
+ * the function's name. Attempts to demangle C++ function names. It's
+ * the caller's responsibility to free the returned C string.
+ */
+char* getNativeFunctionName(void* codeAddr);
+
+/**
+ * 64-bit equivalents of 32-bit htonl() and ntohq().
+ */
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define htonq(a) a
+#define ntohq(a) a
+#else
+#define ntohq(a)                                                              \
+  (uint64_t)(((uint64_t) (ntohl((uint32_t) ((a) >> 32))))                     \
+             | (((uint64_t) (ntohl((uint32_t)                                 \
+                ((a) & 0x00000000ffffffff)))) << 32))
+#define htonq(a)                                                              \
+  (uint64_t) (((uint64_t) (htonl((uint32_t) ((a) >> 32))))                    \
+              | (((uint64_t) (htonl((uint32_t)                                \
+                 ((a) & 0x00000000ffffffff)))) << 32))
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

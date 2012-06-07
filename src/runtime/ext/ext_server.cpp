@@ -24,9 +24,6 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/server/rpc_request_handler.h>
 
-using namespace std;
-using namespace boost;
-
 #define DANGLING_HEADER "HPHP_DANGLING"
 
 namespace HPHP {
@@ -193,8 +190,16 @@ Variant f_xbox_process_call_message(CStrRef msg) {
     raise_error("Error decoding xbox call message");
   }
   Variant fn = arr.rvalAt(0);
+  if (fn.isArray()) {
+    Array farr = fn.toArray();
+    if (!array_is_valid_callback(farr)) {
+      raise_error("Error decoding xbox call message");
+    }
+  } else if (!fn.isString()) {
+    raise_error("Error decoding xbox call message");
+  }
   Variant args = arr.rvalAt(1);
-  if (!fn.isString() || !args.isArray()) {
+  if (!args.isArray()) {
     raise_error("Error decoding xbox call message");
   }
   return f_call_user_func_array(fn, args.toArray());

@@ -39,8 +39,6 @@
 #define PHP_NORMAL_READ 0x0001
 #define PHP_BINARY_READ 0x0002
 
-using namespace std;
-
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(sockets);
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,13 +46,13 @@ IMPLEMENT_DEFAULT_EXTENSION(sockets);
 
 static void check_socket_parameters(int &domain, int &type) {
   if (domain != AF_UNIX && domain != AF_INET6 && domain != AF_INET) {
-    raise_warning("invalid socket domain [%ld] specified for argument 1, "
+    raise_warning("invalid socket domain [%d] specified for argument 1, "
                     "assuming AF_INET", domain);
     domain = AF_INET;
   }
 
   if (type > 10) {
-    raise_warning("invalid socket type [%ld] specified for argument 2, "
+    raise_warning("invalid socket type [%d] specified for argument 2, "
                     "assuming SOCK_STREAM", type);
     type = SOCK_STREAM;
   }
@@ -342,7 +340,7 @@ Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
     return false;
   }
 
-  if (bind(sock->fd(), (struct sockaddr *)&la, sizeof(la)) < 0) {
+  if (::bind(sock->fd(), (struct sockaddr *)&la, sizeof(la)) < 0) {
     SOCKET_ERROR(sock, "unable to bind to given adress", errno);
     return false;
   }
@@ -576,7 +574,7 @@ bool f_socket_bind(CObjRef socket, CStrRef address, int port /* = 0 */) {
     return false;
   }
 
-  long retval = bind(sock->fd(), sa_ptr, sa_size);
+  long retval = ::bind(sock->fd(), sa_ptr, sa_size);
   if (retval != 0) {
     std::string msg = "unable to bind address";
     msg += addr;
@@ -672,7 +670,7 @@ Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
   if (!set_sockaddr(sa_storage, sock, name, port, sa_ptr, sa_size)) {
     return false;
   }
-  if (bind(sock->fd(), sa_ptr, sa_size) < 0) {
+  if (::bind(sock->fd(), sa_ptr, sa_size) < 0) {
     SOCKET_ERROR(sock, "unable to bind to given adress", errno);
     return false;
   }

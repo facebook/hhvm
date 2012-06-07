@@ -36,6 +36,8 @@ DECLARE_BOOST_TYPES(ListAssignment);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionCall);
+DECLARE_BOOST_TYPES(SwitchStatement);
+class StaticClassName;
 
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,11 +58,13 @@ class EmitterVisitor;
 
 class Emitter {
 public:
-  Emitter(ConstructPtr node, Unit &u, EmitterVisitor &ev)
-    : m_node(node), m_u(u), m_ev(ev) {}
-  Unit &getUnit() { return m_u; }
+  Emitter(ConstructPtr node, UnitEmitter& ue, EmitterVisitor& ev)
+    : m_node(node), m_ue(ue), m_ev(ev) {}
+  UnitEmitter& getUnitEmitter() { return m_ue; }
   ConstructPtr getNode() { return m_node; }
-  EmitterVisitor &getEmitterVisitor() { return m_ev; }
+  EmitterVisitor& getEmitterVisitor() { return m_ev; }
+  void setTempLocation(LocationPtr loc) { m_tempLoc = loc; }
+  LocationPtr getTempLocation() { return m_tempLoc; }
 
 #define O(name, imm, pop, push, flags) \
   void name(imm);
@@ -71,11 +75,14 @@ public:
   typ1 a1, typ2 a2
 #define THREE(typ1, typ2, typ3) \
   typ1 a1, typ2 a2, typ3 a3
-#define LA std::vector<uchar>
+#define MA std::vector<uchar>
+#define ILA std::vector<Label*>&
 #define IVA int32
+#define HA int32
+#define IA int32
 #define I64A int64
 #define DA double
-#define SA StringData*
+#define SA const StringData*
 #define AA ArrayData*
 #define BA Label&
 #define OA unsigned char
@@ -85,8 +92,10 @@ public:
 #undef ONE
 #undef TWO
 #undef THREE
-#undef LA
+#undef MA
 #undef IVA
+#undef HA
+#undef IA
 #undef I64A
 #undef DA
 #undef SA
@@ -95,26 +104,64 @@ public:
 #undef OA
 private:
   ConstructPtr m_node;
-  Unit &m_u;
-  EmitterVisitor &m_ev;
+  UnitEmitter& m_ue;
+  EmitterVisitor& m_ev;
+  LocationPtr m_tempLoc;
 };
 
-class SymbolicStack {
-public:
+struct SymbolicStack {
+  enum ClassBaseType {
+    CLS_INVALID,
+    CLS_LATE_BOUND,
+    CLS_UNNAMED_LOCAL, // loc is an unnamed local
+    CLS_NAMED_LOCAL,   // loc is a normal program local
+    CLS_STRING_NAME,   // name is the string to use
+    CLS_SELF,
+    CLS_PARENT
+  };
+
+private:
   /**
    * Symbolic stack (m_symStack)
    *
-   * The symbolic stack is used to keep track of the protoflavors of
-   * values along with other contextual information. Each position in
-   * the symbolic stack can encode a protoflavor and a "marker". Markers
+   * The symbolic stack is used to keep track of the flavor descriptors
+   * of values along with other contextual information. Each position in
+   * the symbolic stack can encode a "symbolic flavor" and a "marker".
+   * Most symbolic flavors correspond with flavor descriptors in the HHBC
+   * spec, but some symbolic flavors used in the symbolic stack (ex. "L")
+   * do not correspond with a flavor descriptor from the spec. Markers
    * provide contextual information and are used by the emitter in various
    * situations to determine the appropriate bytecode instruction to use.
    *
    * Note that not all positions on the symbolic stack correspond to a
    * value on the actual evaluation stack as described in the HHBC spec.
-   * Such positions have no protoflavor associated with them.
    */
-  std::vector<char> m_symStack;
+  struct SymEntry {
+    explicit SymEntry(char s = 0)
+      : sym(s)
+      , cls(false)
+      , name(NULL)
+      , loc(-1)
+      , unnamedLocalStart(InvalidAbsoluteOffset)
+      , clsBaseType(CLS_INVALID)
+    {}
+    char sym;
+    bool cls;
+    const StringData* name;
+    int loc; // local id (used with the "L" symbolic flavor)
+
+    // If loc is an unnamed local temporary, this offset is the start
+    // of the region we are using it (which we will need to have a
+    // fault funclet for).
+    Offset unnamedLocalStart;
+
+    // When class bases are emitted, we need to delay class lookup for
+    // evaluation order reasons, but may have to do some evaluation
+    // early.  How this works depends on the type of class base---see
+    // emitResolveClsBase for details.
+    ClassBaseType clsBaseType;
+  };
+  std::vector<SymEntry> m_symStack;
 
   /**
    * Actual stack (m_actualStack)
@@ -129,33 +176,55 @@ public:
   // stack.
   int m_fdescCount;
 
-  int *m_actualStackHighWaterPtr;
-  int *m_fdescHighWaterPtr;
+public:
+  int* m_actualStackHighWaterPtr;
+  int* m_fdescHighWaterPtr;
 
   SymbolicStack() : m_fdescCount(0) {}
 
+  std::string pretty() const;
+
   void push(char sym);
+  void setString(const StringData* s);
+  void setCls(const StringData* s); // XXX: rename this?
+  void setClsBaseType(ClassBaseType);
+  void setLocal(int localId);
+  void setUnnamedLocal(int index, int localId, Offset startOffset);
   void pop();
   char top() const;
   char get(int index) const;
+  const StringData* getName(int index) const;
+  bool isCls(int index) const;
   void set(int index, char sym);
   unsigned size() const;
   bool empty() const;
   void clear();
 
+  /*
+   * Erase a stack element depth below the top.  This is used for some
+   * instructions that pull elements out of the middle, and for our
+   * ClassBaseType virtual elements.
+   */
+  void consumeBelowTop(int depth);
+
+  int getActualPos(int vpos) const;
   char getActual(int index) const;
   void setActual(int index, char sym);
+  void insertAt(int depth, char sym);
   int sizeActual() const;
+
+  ClassBaseType getClsBaseType(int index) const;
+  int getLoc(int index) const;
+  Offset getUnnamedLocStart(int index) const;
 
   void pushFDesc();
   void popFDesc();
-  int fdescCount() const { return m_fdescCount; }
 };
 
 class Label {
 public:
   Label() : m_off(InvalidAbsoluteOffset) {}
-  Label(Emitter &e) : m_off(InvalidAbsoluteOffset) {
+  Label(Emitter& e) : m_off(InvalidAbsoluteOffset) {
     set(e);
   }
   Offset getAbsoluteOffset() const { return m_off; }
@@ -163,11 +232,11 @@ public:
   // fixes up any instructions that have already been
   // emitted that reference this Label, and fixes up the
   // EmitterVisitor's jump target info
-  void set(Emitter &e);
+  void set(Emitter& e);
   // If a Label is has not been set, it is the Emitter's
   // resposibility to call bind on the Label each time it
   // prepares to emit an instruction that uses the Label
-  void bind(EmitterVisitor & ev, Offset instrAddr, Offset offAddr);
+  void bind(EmitterVisitor& ev, Offset instrAddr, Offset offAddr);
   bool isSet() { return m_off != InvalidAbsoluteOffset; }
   bool isUsed();
 private:
@@ -181,19 +250,20 @@ private:
 class Thunklet {
 public:
   virtual ~Thunklet();
-  virtual void emit(Emitter &e) = 0;
+  virtual void emit(Emitter& e) = 0;
 };
 
 class Funclet {
 public:
-  Funclet(Thunklet *body, Label *entry) : m_body(body), m_entry(entry) {}
-  Thunklet *m_body;
-  Label *m_entry;
+  Funclet(Thunklet* body, Label* entry) : m_body(body), m_entry(entry) {}
+  Thunklet* m_body;
+  Label* m_entry;
 };
 
 class EmitterVisitor {
+  friend class UnsetUnnamedLocalThunklet;
 public:
-  EmitterVisitor(Unit &u);
+  EmitterVisitor(UnitEmitter& ue);
   ~EmitterVisitor();
 
   bool visit(ConstructPtr c);
@@ -206,18 +276,20 @@ public:
                               std::vector<IndexChain*>& chainList);
   void visitIfCondition(ExpressionPtr cond, Emitter& e, Label& tru, Label& fals,
                         bool truFallthrough);
-  const SymbolicStack& getEvalStack() { return m_evalStack; }
+  const SymbolicStack& getEvalStack() const { return m_evalStack; }
+  SymbolicStack& getEvalStack() { return m_evalStack; }
   void setEvalStack(const SymbolicStack& es) {
     m_evalStack = es;
     m_evalStackIsUnknown = false;
   }
   bool evalStackIsUnknown() { return m_evalStackIsUnknown; }
-  void popEvalStack(char protoflavor);
+  void popEvalStack(char symFlavor);
+  void popSymbolicLocal(Opcode opcode);
   void popEvalStackLMany();
   void popEvalStackFMany(int len);
-  void pushEvalStack(char protoflavor);
-  void peekEvalStack(char protoflavor, int depthActual);
-  void pokeEvalStack(char protoflavor, int depthActual);
+  void pushEvalStack(char symFlavor);
+  void peekEvalStack(char symFlavor, int depthActual);
+  void pokeEvalStack(char symFlavor, int depthActual);
   void prepareEvalStack();
   void recordJumpTarget(Offset target, const SymbolicStack& evalStack);
   void recordJumpTarget(Offset target) {
@@ -228,11 +300,10 @@ public:
   void setPrevOpcode(Opcode op) { m_prevOpcode = op; }
   Opcode getPrevOpcode() const { return m_prevOpcode; }
   bool currentPositionIsReachable() {
-    return (m_unit.bcPos() == m_curFunc->m_base
-            || isJumpTarget(m_unit.bcPos())
-            || (instrFlags(getPrevOpcode()) & UF) == 0);
+    return (m_ue.bcPos() == m_curFunc->base()
+            || isJumpTarget(m_ue.bcPos())
+            || (instrFlags(getPrevOpcode()) & TF) == 0);
   }
-  StringData* mangleStaticName(const std::string& varName);
 
   class IncludeTimeFatalException : public Exception {
   public:
@@ -242,68 +313,67 @@ public:
       va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
     }
     virtual ~IncludeTimeFatalException() throw() {}
-    virtual IncludeTimeFatalException* clone() {
-      return new IncludeTimeFatalException(*this);
-    }
-    virtual void throwException() { throw *this; }
+    EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
   };
 
-protected:
+private:
   typedef std::pair<StringData*, bool> ClosureUseVar;  // (name, byRef)
   typedef std::vector<ClosureUseVar> ClosureUseVarVec;
   class PostponedMeth {
   public:
-    PostponedMeth(MethodStatementPtr m, Func *f, bool top,
+    PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
                   ClosureUseVarVec* useVars)
-        : m_meth(m), m_func(f), m_top(top), m_closureUseVars(useVars) {}
+        : m_meth(m), m_fe(fe), m_top(top), m_closureUseVars(useVars) {}
     MethodStatementPtr m_meth;
-    Func *m_func;
+    FuncEmitter* m_fe;
     bool m_top;
     ClosureUseVarVec* m_closureUseVars;
   };
   class PostponedCtor {
   public:
-    PostponedCtor(InterfaceStatementPtr is, Func *f)
-      : m_is(is), m_func(f) {}
+    PostponedCtor(InterfaceStatementPtr is, FuncEmitter* fe)
+      : m_is(is), m_fe(fe) {}
     InterfaceStatementPtr m_is;
-    Func *m_func;
+    FuncEmitter* m_fe;
   };
   typedef std::pair<StringData*, ExpressionPtr> NonScalarPair;
   typedef std::vector<NonScalarPair> NonScalarVec;
   class PostponedNonScalars {
   public:
-    PostponedNonScalars(InterfaceStatementPtr is, Func *f, NonScalarVec* v)
-      : m_is(is), m_func(f), m_vec(v) {}
+    PostponedNonScalars(InterfaceStatementPtr is, FuncEmitter* fe,
+                        NonScalarVec* v)
+      : m_is(is), m_fe(fe), m_vec(v) {}
     void release() {
       delete m_vec;
     }
     InterfaceStatementPtr m_is;
-    Func *m_func;
+    FuncEmitter* m_fe;
     NonScalarVec* m_vec;
   };
   class PostponedClosureCtor {
   public:
-    PostponedClosureCtor(ClosureUseVarVec& v, ClosureExpressionPtr e, Func* f)
-        : m_useVars(v), m_expr(e), m_func(f) {}
+    PostponedClosureCtor(ClosureUseVarVec& v, ClosureExpressionPtr e,
+                         FuncEmitter* fe)
+        : m_useVars(v), m_expr(e), m_fe(fe) {}
     ClosureUseVarVec m_useVars;
     ClosureExpressionPtr m_expr;
-    Func* m_func;
+    FuncEmitter* m_fe;
   };
   class ControlTargets {
   public:
-    ControlTargets(Id itId, Label &brkTarg, Label &cntTarg, Label &brkHand,
-        Label &cntHand) : m_itId(itId), m_brkTarg(brkTarg), m_cntTarg(cntTarg),
+    ControlTargets(Id itId, Label& brkTarg, Label& cntTarg, Label& brkHand,
+        Label& cntHand) : m_itId(itId), m_brkTarg(brkTarg), m_cntTarg(cntTarg),
     m_brkHand(brkHand), m_cntHand(cntHand) {}
     Id m_itId;
-    Label &m_brkTarg;  // Jump here for "break;" (after doing IterFree)
-    Label &m_cntTarg;  // Jump here for "continue;"
-    Label &m_brkHand;  // Push N and jump here for "break N;"
-    Label &m_cntHand;  // Push N and jump here for "continue N;"
+    Label& m_brkTarg;  // Jump here for "break;" (after doing IterFree)
+    Label& m_cntTarg;  // Jump here for "continue;"
+    Label& m_brkHand;  // Push N and jump here for "break N;"
+    Label& m_cntHand;  // Push N and jump here for "continue N;"
   };
   class ControlTargetPusher {
   public:
-    ControlTargetPusher(EmitterVisitor *e, Id itId, Label &brkTarg,
-        Label &cntTarg, Label &brkHand, Label &cntHand) : m_e(e) {
+    ControlTargetPusher(EmitterVisitor* e, Id itId, Label& brkTarg,
+        Label& cntTarg, Label& brkHand, Label& cntHand) : m_e(e) {
       e->m_contTargets.push_front(ControlTargets(itId, brkTarg, cntTarg,
             brkHand, cntHand));
     }
@@ -311,7 +381,7 @@ protected:
       m_e->m_contTargets.pop_front();
     }
   private:
-    EmitterVisitor *m_e;
+    EmitterVisitor* m_e;
   };
   class ExnHandlerRegion {
   public:
@@ -330,19 +400,12 @@ protected:
   };
   class FaultRegion {
   public:
-    FaultRegion(Offset start, Offset end)
-     : m_start(start), m_end(end) {}
-    Offset m_start;
-    Offset m_end;
-    Label m_func;
-  };
-  class ForEachRegion {
-  public:
-    ForEachRegion(Offset start, Offset end, Id iterId)
-      : m_start(start), m_end(end), m_iterId(iterId) {}
+    FaultRegion(Offset start, Offset end, Id iterId)
+     : m_start(start), m_end(end), m_iterId(iterId) {}
     Offset m_start;
     Offset m_end;
     Id m_iterId;
+    Label m_func;
   };
   class FPIRegion {
     public:
@@ -352,8 +415,9 @@ protected:
       Offset m_end;
       Offset m_fpOff;
   };
-  Unit &m_unit;
-  Func *m_curFunc;
+  UnitEmitter& m_ue;
+  FuncEmitter* m_curFunc;
+  FileScopePtr m_file;
 
   Opcode m_prevOpcode;
 
@@ -363,7 +427,8 @@ protected:
   std::deque<PostponedNonScalars> m_postponedSinits;
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
-  std::map<StringData*, Label*, string_data_lt> m_methLabels;
+  typedef std::map<const StringData*, Label*, string_data_lt> LabelMap;
+  LabelMap m_methLabels;
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;
@@ -374,53 +439,73 @@ protected:
   std::deque<Funclet> m_funclets;
   std::deque<ExnHandlerRegion*> m_exnHandlers;
   std::deque<FaultRegion*> m_faultRegions;
-  std::deque<ForEachRegion*> m_feRegions;
   std::deque<FPIRegion*> m_fpiRegions;
   std::vector<HphpArray*> m_staticArrays;
 
+  LocationPtr m_tempLoc;
   std::map<StringData*, Label, string_data_lt> m_gotoLabels;
+  typedef std::vector<Unit::MetaInfo> MetaVec;
+  std::map<Offset, MetaVec> m_metaMap;
 public:
-  Label &topBreakHandler() { return m_contTargets.front().m_brkHand; }
-  Label &topContHandler() { return m_contTargets.front().m_cntHand; }
+  Label& topBreakHandler() { return m_contTargets.front().m_brkHand; }
+  Label& topContHandler() { return m_contTargets.front().m_cntHand; }
+
+  bool checkIfStackEmpty(const char* forInstruction) const;
+  void unexpectedStackSym(char sym, const char* where) const;
 
   int scanStackForLocation(int iLast);
   void buildVectorImm(std::vector<uchar>& vectorImm,
-                      int iFirst, int iLast, bool allowW, Emitter& e);
-  void emitCGet(Emitter &e);
-  void emitVGet(Emitter &e);
-  void emitIsset(Emitter &e);
-  void emitEmpty(Emitter &e);
-  void emitUnset(Emitter &e);
-  void emitSet(Emitter &e);
-  void emitSetOp(Emitter &e, int op);
-  void emitBind(Emitter &e);
-  void emitIncDec(Emitter &e, unsigned char cop);
-  void emitPop(Emitter &e);
-  void emitConvertToCell(Emitter &e);
-  void emitConvertToCellIfVar(Emitter &e);
-  void emitConvertToCellOrHome(Emitter &e);
-  void emitConvertSecondToCell(Emitter &e);
-  void emitConvertToVar(Emitter &e);
-  void emitCls(Emitter &e, int depthActual);
-  void emitClsIfSPropBase(Emitter &e);
+                      int iFirst, int iLast, bool allowW,
+                      Emitter& e);
+  void emitAGet(Emitter& e);
+  void emitCGetL2(Emitter& e);
+  void emitCGetL3(Emitter& e);
+  void emitCGet(Emitter& e);
+  void emitVGet(Emitter& e);
+  void emitIsset(Emitter& e);
+  void emitIsNull(Emitter& e);
+  void emitIsArray(Emitter& e);
+  void emitIsObject(Emitter& e);
+  void emitIsString(Emitter& e);
+  void emitIsInt(Emitter& e);
+  void emitIsDouble(Emitter& e);
+  void emitIsBool(Emitter& e);
+  void emitEmpty(Emitter& e);
+  void emitUnset(Emitter& e);
+  void emitSet(Emitter& e);
+  void emitSetOp(Emitter& e, int op);
+  void emitBind(Emitter& e);
+  void emitIncDec(Emitter& e, unsigned char cop);
+  void emitPop(Emitter& e);
+  void emitConvertToCell(Emitter& e);
+  void emitConvertToCellIfVar(Emitter& e);
+  void emitConvertToCellOrLoc(Emitter& e);
+  void emitConvertSecondToCell(Emitter& e);
+  void emitConvertToVar(Emitter& e);
+  void emitVirtualLocal(int localId);
+  template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
+  void emitResolveClsBase(Emitter& e, int pos);
+  void emitClsIfSPropBase(Emitter& e);
+  Label* getContinuationGotoLabel(StatementPtr s);
+  void emitContinuationSwitch(Emitter& e, SwitchStatementPtr s);
 
-  void markElem(Emitter &e);
-  void markNewElem(Emitter &e);
-  void markProp(Emitter &e);
-  void markSProp(Emitter &e);
-  void markName(Emitter &e);
-  void markNameSecond(Emitter &e);
-  void markGlobalName(Emitter &e);
+  void markElem(Emitter& e);
+  void markNewElem(Emitter& e);
+  void markProp(Emitter& e);
+  void markSProp(Emitter& e);
+  void markName(Emitter& e);
+  void markNameSecond(Emitter& e);
+  void markGlobalName(Emitter& e);
 
-  void emitNameString(Emitter &e, ExpressionPtr n);
-  void emitAssignment(Emitter &e, ExpressionPtr c, int op, bool bind);
-  void emitListAssignment(Emitter &e, ListAssignmentPtr lst);
-  void postponeMeth(MethodStatementPtr m, Func *f, bool top,
+  void emitNameString(Emitter& e, ExpressionPtr n);
+  void emitAssignment(Emitter& e, ExpressionPtr c, int op, bool bind);
+  void emitListAssignment(Emitter& e, ListAssignmentPtr lst);
+  void postponeMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
                     ClosureUseVarVec* useVars = NULL);
-  void postponeCtor(InterfaceStatementPtr m, Func *f);
-  void postponePinit(InterfaceStatementPtr m, Func *f, NonScalarVec* v);
-  void postponeSinit(InterfaceStatementPtr m, Func *f, NonScalarVec* v);
-  void postponeCinit(InterfaceStatementPtr m, Func *f, NonScalarVec* v);
+  void postponeCtor(InterfaceStatementPtr m, FuncEmitter* fe);
+  void postponePinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
+  void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
+  void postponeCinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void emitPostponedMeths();
   void emitPostponedCtors();
   void emitPostponedPSinit(PostponedNonScalars& p, bool pinit);
@@ -428,39 +513,45 @@ public:
   void emitPostponedSinits();
   void emitPostponedCinits();
   void emitPostponedClosureCtors();
-  void emitFuncCall(Emitter &e, FunctionCallPtr node);
+  void emitMetaData();
+  void emitFuncCall(Emitter& e, FunctionCallPtr node);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
-  void emitClass(Emitter& e, ClassScopePtr cNode, bool hoistable);
-  void emitBreakHandler(Emitter &e, Label &brkTarg, Label &cntTarg,
-      Label &brkHand, Label &cntHand, Id iter = -1);
-  void emitForeach(Emitter &e, ExpressionPtr val, ExpressionPtr key,
+  bool emitClass(Emitter& e, ClassScopePtr cNode, bool hoistable);
+  void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,
+      Label& brkHand, Label& cntHand, Id iter = -1);
+  void emitForeach(Emitter& e, ExpressionPtr val, ExpressionPtr key,
       StatementPtr body, bool strong);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e, const std::string& message);
 
-  void addFunclet(Thunklet *body, Label *entry);
-  void emitFunclets(Emitter &e);
-  void newFaultRegion(Offset start, Offset end, Thunklet *t);
-  void newForEachRegion(Offset start, Offset end, Id iterId);
+  void addFunclet(Thunklet* body, Label* entry);
+  void emitFunclets(Emitter& e);
+  void newFaultRegion(Offset start, Offset end, Thunklet* t, Id iter = -1);
   void newFPIRegion(Offset start, Offset end, Offset fpOff);
-  void copyOverExnHandlers(Func *f);
-  void copyOverFERegions(Func *f);
-  void copyOverFPIRegions(Func *f);
-  void saveMaxStackCells(Func *f);
-  void finishFunc(Emitter& e, Func* f, Offset funclets=InvalidAbsoluteOffset);
+  void copyOverExnHandlers(FuncEmitter* fe);
+  void copyOverFPIRegions(FuncEmitter* fe);
+  void saveMaxStackCells(FuncEmitter* fe);
+  void finishFunc(Emitter& e, FuncEmitter* fe);
   StringData* newClosureName();
+  void newContinuationClass(const StringData* name);
 
   void initScalar(TypedValue& tvVal, ExpressionPtr val);
 
-  void emitClassTraitPrecRule(PreClass* preClass, TraitPrecStatementPtr rule);
-  void emitClassTraitAliasRule(PreClass* preClass, TraitAliasStatementPtr rule);
-  void emitClassUseTrait(PreClass* preClass, UseTraitStatementPtr useStmt);
+  void emitClassTraitPrecRule(PreClassEmitter* pce, TraitPrecStatementPtr rule);
+  void emitClassTraitAliasRule(PreClassEmitter* pce,
+                               TraitAliasStatementPtr rule);
+  void emitClassUseTrait(PreClassEmitter* pce, UseTraitStatementPtr useStmt);
 };
 
-void emitHHBCVisitor(AnalysisResultPtr ar, StatementPtr sp, void* data);
+void emitAllHHBC(AnalysisResultPtr ar);
+
 extern "C" {
-  Unit *hphp_compiler_parse(const char* code, int codeLen,
+  Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
                             const char* filename);
+  Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
+                                    ssize_t numBuiltinFuncs);
+  Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
+                                     ssize_t numBuiltinClasses);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

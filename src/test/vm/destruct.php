@@ -1,7 +1,5 @@
 <?php
 
-print "Test begin\n";
-
 class C {
 
   public function bluh() {
@@ -17,10 +15,16 @@ class C {
 function foo() {
   $c = new C;
 }
-foo();
 
-// Tricky case: $this is the last reference
-$x = new C;
-$x->bluh();
+function main() {
+  print "Test begin\n";
 
-print "Test end\n";
+  foo();
+
+  // Tricky case: $this is the last reference
+  $x = new C;
+  $x->bluh();
+
+  print "Test end\n";
+}
+main();

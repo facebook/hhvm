@@ -24,9 +24,12 @@
 #include <runtime/base/array/array_init.h>
 #include <util/json.h>
 #include <util/compatibility.h>
+#include <util/hardware_counter.h>
 
-using namespace std;
-using namespace boost;
+using std::list;
+using std::set;
+using std::map;
+using std::ostream;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -700,7 +703,7 @@ void ServerStats::Report(string &out, Format format, int64 from, int64 to,
 void ServerStats::Report(string &output, Format format,
                          const list<TimeSlot*> &slots,
                          const std::string &prefix) {
-  ostringstream out;
+  std::ostringstream out;
   if (format == KVP) {
     bool first = true;
     for (list<TimeSlot*>::const_iterator iter = slots.begin();
@@ -764,7 +767,7 @@ void ServerStats::Report(string &output, Format format,
         w->beginObject("slot");
         w->writeEntry("time", s->m_time * RuntimeOption::StatsSlotDuration);
       }
-      w->beginObject("pages");
+      w->beginList("pages");
       for (PageStatsMap::const_iterator piter = s->m_pages.begin();
            piter != s->m_pages.end(); ++piter) {
         const PageStats &ps = piter->second;
@@ -782,7 +785,7 @@ void ServerStats::Report(string &output, Format format,
 
         w->endObject("page");
       }
-      w->endObject("pages");
+      w->endList("pages");
       if (s->m_time) {
         w->endObject("slot");
       }
@@ -822,7 +825,7 @@ static std::string format_duration(int64 duration) {
 }
 
 void ServerStats::ReportStatus(std::string &output, Format format) {
-  ostringstream out;
+  std::ostringstream out;
   Writer *w;
   if (format == XML) {
     w = new XMLWriter(out);
@@ -1198,11 +1201,14 @@ Array ServerStats::getThreadIOStatuses() {
 ///////////////////////////////////////////////////////////////////////////////
 
 ServerStatsHelper::ServerStatsHelper(const char *section,
-                                     bool trackMem /* = false */)
-  : m_section(section), m_trackMemory(trackMem) {
+                                     uint32 track /* = false */)
+  : m_section(section), m_instStart(0), m_track(track) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     gettime(CLOCK_MONOTONIC, &m_wallStart);
     gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
+    if (m_track & TRACK_HWINST) {
+      m_instStart = Util::HardwareCounter::GetInstructionCount();
+    }
   }
 }
 
@@ -1215,10 +1221,15 @@ ServerStatsHelper::~ServerStatsHelper() {
     logTime("page.wall.", m_wallStart, wallEnd);
     logTime("page.cpu.", m_cpuStart, cpuEnd);
 
-    if (m_trackMemory) {
+    if (m_track & TRACK_MEMORY) {
       MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
       int64 mem = mm->getStats(true).peakUsage;
       ServerStats::Log(string("mem.") + m_section, mem);
+    }
+
+    if (m_track & TRACK_HWINST) {
+      int64 instEnd = Util::HardwareCounter::GetInstructionCount();
+      logTime("page.inst.", m_instStart, instEnd);
     }
   }
 }
@@ -1226,6 +1237,11 @@ ServerStatsHelper::~ServerStatsHelper() {
 void ServerStatsHelper::logTime(const std::string &prefix,
                                 const timespec &start, const timespec &end) {
   ServerStats::Log(prefix + m_section, gettime_diff_us(start, end));
+}
+
+void ServerStatsHelper::logTime(const std::string &prefix,
+                                const int64 &start, const int64 &end) {
+  ServerStats::Log(prefix + m_section, end - start);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

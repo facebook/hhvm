@@ -17,6 +17,7 @@
 #ifndef __HPHP_PARSER_H__
 #define __HPHP_PARSER_H__
 
+#include <runtime/base/util/exceptions.h>
 #include <util/parser/parser.h>
 #include <compiler/construct.h>
 
@@ -28,7 +29,15 @@
 #ifdef HPHP_PARSER_ERROR
 #undef HPHP_PARSER_ERROR
 #endif
-#define HPHP_PARSER_ERROR HPHP::Logger::Error
+#define HPHP_PARSER_ERROR(fmt, p, args...)                              \
+  do {                                                                  \
+    if (!HPHP::hhvm) {                                                  \
+      HPHP::Logger::Error(fmt " %s", ##args, (p)->getMessage(true).c_str()); \
+    }                                                                   \
+    throw HPHP::ParseTimeFatalException((p)->file(), (p)->line1(),      \
+                                        fmt, ##args);                   \
+  } while (0)
+
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -90,15 +99,16 @@ public:
          AnalysisResultPtr ar, int fileSize = 0);
 
   // implementing ParserBase
-  virtual bool parse();
+  virtual bool parseImpl();
+  bool parse();
   virtual void error(const char* fmt, ...);
   virtual bool enableXHP();
+  virtual bool enableHipHopSyntax();
   IMPLEMENT_XHP_ATTRIBUTES;
 
   virtual void fatal(Location *loc, const char *msg);
   std::string errString();
 
-  void failed();
   // result
   StatementListPtr getTree() const { return m_tree;}
 
@@ -124,7 +134,7 @@ public:
   void onRefDim(Token &out, Token &var, Token &offset);
   void onCallParam(Token &out, Token *params, Token &expr, bool ref);
   void onCall(Token &out, bool dynamic, Token &name, Token &params,
-              Token *cls);
+              Token *cls, bool fromCompiler = false);
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);
   void encapRefDim(Token &out, Token &var, Token &offset);
@@ -152,17 +162,19 @@ public:
   void onArray(Token &out, Token &pairs, int op = T_ARRAY);
   void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                    bool ref);
+  void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void fixStaticVars();
   void onFunctionStart(Token &name);
   void onFunction(Token &out, Token &ret, Token &ref, Token &name,
-                  Token &params, Token &stmt);
+                  Token &params, Token &stmt, Token *attr);
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue);
   void onClassStart(int type, Token &name, Token *parent);
   void onClass(Token &out, int type, Token &name, Token &base,
-               Token &baseInterface, Token &stmt);
-  void onInterface(Token &out, Token &name, Token &base, Token &stmt);
+               Token &baseInterface, Token &stmt, Token *attr);
+  void onInterface(Token &out, Token &name, Token &base, Token &stmt,
+                   Token *attr);
   void onInterfaceName(Token &out, Token *names, Token &name);
   void onTraitUse(Token &out, Token &traits, Token &rules);
   void onTraitName(Token &out, Token *names, Token &name);
@@ -174,7 +186,8 @@ public:
                          Token &newMethodName);
   void onMethodStart(Token &name, Token &mods);
   void onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
-                Token &name, Token &params, Token &stmt, bool reloc = true);
+                Token &name, Token &params, Token &stmt, Token *attr,
+                bool reloc = true);
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
   void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);

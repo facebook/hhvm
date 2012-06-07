@@ -37,27 +37,35 @@ public:
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
-  Variant invokeInstance(CObjRef obj, CArrRef params, bool check = true)
-    const;
-  Variant invokeStatic(CStrRef cls, CArrRef params, bool check = true)
-    const;
+  Variant invokeInstance(CObjRef obj, CArrRef params,
+                         const MethodStatementWrapper *msw,
+                         bool check = true) const;
+  Variant invokeStatic(CStrRef cls, CArrRef params,
+                       const MethodStatementWrapper *msw,
+                       bool check = true) const;
   Variant invokeInstanceFewArgs(CObjRef obj, int count,
                                 INVOKE_FEW_ARGS_IMPL_ARGS,
+                                const MethodStatementWrapper *msw,
                                 bool check = true) const;
   Variant invokeStaticFewArgs(CStrRef cls, int count,
                               INVOKE_FEW_ARGS_IMPL_ARGS,
+                              const MethodStatementWrapper *msw,
                               bool check = true) const;
-  Variant invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
+  Variant invokeInstanceDirect(CObjRef obj, CStrRef alias,
+                               VariableEnvironment &env,
                                const FunctionCallExpression *caller,
-                               int access = 0, bool check = true) const;
-  Variant invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
+                               const MethodStatementWrapper *msw,
+                               bool check = true) const;
+  Variant invokeStaticDirect(CStrRef cls, CStrRef alias,
+                             VariableEnvironment &env,
                              const FunctionCallExpression *caller,
-                             bool sp, int access = 0, bool check = true) const;
+                             bool sp, const MethodStatementWrapper *msw,
+                             bool check = true) const;
   void getInfo(ClassInfo::MethodInfo &info, int access = 0) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   const ClassStatement *getClass() const { return m_class; }
   int getModifiers() const { return m_modifiers; }
-  void attemptAccess(CStrRef context, int modifiers = 0) const;
+  void attemptAccess(CStrRef context, const MethodStatementWrapper *msw) const;
   bool isAbstract() const;
 private:
   const ClassStatement *m_class;

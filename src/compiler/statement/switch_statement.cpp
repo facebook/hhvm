@@ -27,8 +27,8 @@
 #include <runtime/base/comparisons.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
+using std::string;
+using std::set;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -468,7 +468,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (stmt->getCondition()) {
           Variant v;
           int64 condHash;
-          bool hasValue = stmt->getScalarConditionValue(v);
+          bool hasValue ATTRIBUTE_UNUSED = stmt->getScalarConditionValue(v);
           ASSERT(hasValue && !v.isNull());
 
           int64 lval; double dval;
@@ -489,6 +489,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             }
             break;
           default:
+            condHash = 0; // make the compiler happy
             ASSERT(false);
             break;
           }
@@ -514,14 +515,14 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           uint64 bucket = ((uint64)condHash) % tableSize;
           MapIntToStatementPtrWithPosVec::iterator it(caseMap.find(bucket));
           if (it == caseMap.end()) {
-            shared_ptr<StatementPtrWithPosVec>
+            boost::shared_ptr<StatementPtrWithPosVec>
               list(new StatementPtrWithPosVec());
             list->push_back(StatementPtrWithPos(i, stmt));
             caseMap[bucket] = list;
           } else {
             it->second->push_back(StatementPtrWithPos(i, stmt));
           }
-          maxHashCase = max(maxHashCase, i);
+          maxHashCase = std::max(maxHashCase, i);
         } else {
           // we only care about the *last* default case, so we let it be
           // overriden each time

@@ -29,7 +29,6 @@ namespace HPHP {
 FORWARD_DECLARE_GENERIC_INTERFACE(Reflector);
 class c_Reflector {
   // public: virtual String t___tostring() = 0;
-  // public: static virtual void t_export() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

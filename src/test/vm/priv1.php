@@ -79,3 +79,15 @@ class C4 {
 }
 C4::test(new B4);
 
+
+class A5 {
+  private function __construct() {
+  }
+}
+class B5 extends A5 {
+  public static function test() {
+    return new A5;
+  }
+}
+B5::test();
+

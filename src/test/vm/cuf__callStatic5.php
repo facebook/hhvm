@@ -6,15 +6,17 @@ class C1 {
     echo "\n";
   }
 }
-// call_user_func
-call_user_func(array('C1', "__callStatic"), "a", "b", "c", "d");
-call_user_func(array('C1', "foo"), "a", "b", "c", "d");
 
-// call_user_func_array
-call_user_func_array(array('C1', "__callStatic"), array("a", "b", "c", "d"));
-call_user_func_array(array('C1', "foo"), array("a", "b", "c", "d"));
+function main1() {
+  // call_user_func
+  call_user_func(array('C1', "__callStatic"), "a", "b", "c", "d");
+  call_user_func(array('C1', "foo"), "a", "b", "c", "d");
 
-
+  // call_user_func_array
+  call_user_func_array(array('C1', "__callStatic"), array("a", "b", "c", "d"));
+  call_user_func_array(array('C1', "foo"), array("a", "b", "c", "d"));
+}
+main1();
 
 class C2 {
   public static function __callStatic($fn, $args) {
@@ -29,10 +31,12 @@ class C2 {
     call_user_func(array('self', 'foo'), "a", "b", "c", "d");
   }
 }
-$obj = new C2;
-$obj->test();
 
-
+function main2() {
+  $obj = new C2;
+  $obj->test();
+}
+main2();
 
 class C3 {
   public static function __callStatic($fn, $args) {
@@ -47,10 +51,12 @@ class C3 {
     call_user_func(array('self', 'foo'), "a", "b", "c", "d");
   }
 }
-$obj = new C3;
-$obj->test();
 
-
+function main3() {
+  $obj = new C3;
+  $obj->test();
+}
+main3();
 
 class B4 {
   public static function __callStatic($fn, $args) {
@@ -60,11 +66,13 @@ class B4 {
 }
 class C4 extends B4 {
 }
-$obj = new C4;
 
-call_user_func(array('C4', 'foo'), "a", "b", "c", "d");
+function main4() {
+  $obj = new C4;
 
-
+  call_user_func(array('C4', 'foo'), "a", "b", "c", "d");
+}
+main4();
 
 class A5 {
   public function foo($w, $x, $y, $z) {
@@ -79,10 +87,12 @@ class B5 extends A5 {
 }
 class C5 extends B5 {
 }
-$obj = new C5;
-call_user_func(array('C5', 'foo'), "a", "b", "c", "d");
 
-
+function main5() {
+  $obj = new C5;
+  call_user_func(array('C5', 'foo'), "a", "b", "c", "d");
+}
+main5();
 
 class A6 {
 }
@@ -98,13 +108,14 @@ class C6 extends B6 {
   }
 }
 
-$obj = new C6;
-$obj->test();
+function main6() {
+  $obj = new C6;
+  $obj->test();
 
-$obj = new B6;
-$obj->test();
-
-
+  $obj = new B6;
+  $obj->test();
+}
+main6();
 
 class A7 {
   public static function __callStatic($fn, $args) {
@@ -120,13 +131,14 @@ class B7 extends A7 {
 class C7 extends B7 {
 }
 
-$obj = new C7;
-$obj->test();
+function main7() {
+  $obj = new C7;
+  $obj->test();
 
-$obj = new B7;
-$obj->test();
-
-
+  $obj = new B7;
+  $obj->test();
+}
+main7();
 
 class A8 {
   public static function __callStatic($fn, $args) {
@@ -142,10 +154,11 @@ class B8 {
 class C8 extends B8 {
 }
 
-$obj = new C8;
-$obj->test();
-
-
+function main8() {
+  $obj = new C8;
+  $obj->test();
+}
+main8();
 
 class C9 {
 }
@@ -169,8 +182,12 @@ class F9 extends D9 {
     echo "F9::__callStatic\n";
   }
 }
-$obj = new E9;
-$obj->test();
 
-call_user_func(array('E9', 'foo'));
-call_user_func(array('D9', 'foo'));
+function main9() {
+  $obj = new E9;
+  $obj->test();
+
+  call_user_func(array('E9', 'foo'));
+  call_user_func(array('D9', 'foo'));
+}
+main9();

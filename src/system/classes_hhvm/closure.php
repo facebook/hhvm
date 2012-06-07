@@ -9,3 +9,7 @@ class Closure {
     return false;
   }
 }
+
+// Unused, but needed for consistency with class_map.cpp
+class GeneratorClosure extends Closure {
+}

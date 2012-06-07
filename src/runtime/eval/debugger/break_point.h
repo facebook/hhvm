@@ -109,11 +109,22 @@ public:
   virtual const char *getClass() const;
   virtual const char *getFunction() const;
   const VM::SourceLoc *getSourceLoc() const {
-    return m_sourceLoc ? m_sourceLoc : &s_dummySourceLoc;
+    return &m_sourceLoc;
   }
+  const VM::OffsetRangeVec& getCurOffsetRange() const {
+    return m_offsetRangeVec;
+  }
+  const VM::Unit* getUnit() const {
+    return m_unit;
+  }
+  bool valid() const { return m_valid; }
+  bool funcEntry() const { return m_funcEntry; }
 private:
-  const VM::SourceLoc *m_sourceLoc;
-  const static VM::SourceLoc s_dummySourceLoc;
+  VM::SourceLoc m_sourceLoc;
+  VM::OffsetRangeVec m_offsetRangeVec;
+  VM::Unit* m_unit;
+  bool m_valid;
+  bool m_funcEntry;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -133,6 +144,8 @@ public:
   static const char *GetInterruptName(InterruptType interrupt);
   static bool MatchFile(const char *haystack, int haystack_len,
                         const std::string &needle);
+  static bool MatchFile(const std::string& file, const std::string& fullPath,
+                        const std::string& relPath);
 
 public:
   BreakPointInfo() : m_index(0) {} // for thrift
@@ -145,6 +158,7 @@ public:
 
   void setClause(const std::string &clause, bool check);
   void toggle();
+  void setState(State state) { m_state = state; }
 
   bool valid();
   bool same(BreakPointInfoPtr bpi);
@@ -183,6 +197,8 @@ public:
   std::string getNamespace() const;
   std::string getClass() const;
   std::string getFunction() const;
+  std::string getFuncName() const;
+  std::string getExceptionClass() const { return m_class; }
 
   // URL
   std::string m_url;
@@ -223,7 +239,6 @@ private:
   bool checkLines(int line);
   bool checkStack(InterruptSite &site);
   bool checkFrame(FrameInjection *frame);
-  bool checkFrame();
   bool checkClause();
 };
 

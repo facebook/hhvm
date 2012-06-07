@@ -1,12 +1,10 @@
 Test begin
 In C::__construct()
-HipHop Notice:  Undefined variable: this in src/test/vm/FPushClsMethod.php on line 11
 In C::sMeth(): $this::
 In D::D()
 In E::E()
 In E::__construct()
 In C::__construct()
-HipHop Notice:  Undefined variable: this in src/test/vm/FPushClsMethod.php on line 11
 In C::sMeth(): $this::
 In D::D()
 In E::E()
@@ -18,10 +16,8 @@ In E::E()
 In K::K()
 In K::__construct()
 In C::__construct()
-HipHop Notice:  Undefined variable: this in src/test/vm/FPushClsMethod.php on line 11
 In C::sMeth(): $this::
 In C::__construct()
-HipHop Notice:  Undefined variable: this in src/test/vm/FPushClsMethod.php on line 11
 In C::sMeth(): $this::
 In D::D()
 In D::D()
@@ -31,10 +27,8 @@ In E::E()
 In E::__construct()
 In E::__construct()
 In C::__construct()
-HipHop Notice:  Undefined variable: this in src/test/vm/FPushClsMethod.php on line 11
 In C::sMeth(): $this::
 In C::__construct()
-HipHop Notice:  Undefined variable: this in src/test/vm/FPushClsMethod.php on line 11
 In C::sMeth(): $this::
 In D::D()
 In D::D()

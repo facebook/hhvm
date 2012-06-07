@@ -21,7 +21,6 @@
 #include <runtime/base/server/access_log.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/util/extended_logger.h>
-#include <runtime/base/fiber_async_func.h>
 #include <runtime/base/util/simple_counter.h>
 #include <util/util.h>
 #include <util/network.h>
@@ -32,8 +31,6 @@
 #include <runtime/base/preg.h>
 #include <util/parser/scanner.h>
 #include <runtime/base/server/access_log.h>
-
-using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,6 +53,7 @@ int RuntimeOption::InjectedStackTraceLimit = -1;
 bool RuntimeOption::NoSilencer = false;
 bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
+bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 int RuntimeOption::RuntimeErrorReportingLevel = ErrorConstants::HPHP_ALL;
 
 std::string RuntimeOption::ServerUser;
@@ -98,6 +96,8 @@ bool RuntimeOption::ServerThreadRoundRobin = false;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 bool RuntimeOption::ServerThreadJobLIFO = false;
 bool RuntimeOption::ServerThreadDropStack = false;
+bool RuntimeOption::ServerHttpSafeMode = false;
+bool RuntimeOption::ServerStatCache = true;
 int RuntimeOption::PageletServerThreadCount = 0;
 bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
@@ -121,6 +121,8 @@ bool RuntimeOption::EnableMagicQuotesGpc = false;
 bool RuntimeOption::EnableKeepAlive = true;
 bool RuntimeOption::ExposeHPHP = true;
 bool RuntimeOption::ExposeXFBServer = false;
+bool RuntimeOption::ExposeXFBDebug = false;
+std::string RuntimeOption::XFBDebugSSLKey;
 int RuntimeOption::ConnectionTimeoutSeconds = -1;
 bool RuntimeOption::EnableOutputBuffering = false;
 std::string RuntimeOption::OutputHandler;
@@ -150,6 +152,7 @@ int RuntimeOption::SSLPort = 443;
 int RuntimeOption::SSLPortFd = -1;
 std::string RuntimeOption::SSLCertificateFile;
 std::string RuntimeOption::SSLCertificateKeyFile;
+std::string RuntimeOption::SSLCertificateDir;
 
 VirtualHostPtrVec RuntimeOption::VirtualHosts;
 IpBlockMapPtr RuntimeOption::IpBlocks;
@@ -171,7 +174,7 @@ std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 std::string RuntimeOption::XboxPassword;
 std::set<std::string> RuntimeOption::XboxPasswords;
 
-std::string RuntimeOption::SourceRoot;
+std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
@@ -287,8 +290,10 @@ int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
 bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
+int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::UseHphpArray = hhvm;
-bool RuntimeOption::UseSmallArray = false;
+bool RuntimeOption::UseSmallArray = false; // deprecated & ignored.
+bool RuntimeOption::UseVectorArray = true;
 bool RuntimeOption::UseDirectCopy = false;
 bool RuntimeOption::EnableApc = true;
 bool RuntimeOption::EnableConstLoad = false;
@@ -299,13 +304,24 @@ std::set<std::string> RuntimeOption::ApcCompletionKeys;
 RuntimeOption::ApcTableTypes RuntimeOption::ApcTableType = ApcConcurrentTable;
 RuntimeOption::ApcTableLockTypes RuntimeOption::ApcTableLockType =
   ApcReadWriteLock;
+bool RuntimeOption::EnableApcSerialize = true;
 time_t RuntimeOption::ApcKeyMaturityThreshold = 20;
 size_t RuntimeOption::ApcMaximumCapacity = 0;
 int RuntimeOption::ApcKeyFrequencyUpdatePeriod = 1000;
 bool RuntimeOption::ApcExpireOnSets = false;
 int RuntimeOption::ApcPurgeFrequency = 4096;
+int RuntimeOption::ApcPurgeRate = -1;
 bool RuntimeOption::ApcAllowObj = false;
 int RuntimeOption::ApcTTLLimit = -1;
+bool RuntimeOption::ApcUseFileStorage = false;
+int64 RuntimeOption::ApcFileStorageChunkSize = 1LL << 29;
+int64 RuntimeOption::ApcFileStorageMaxSize = 1LL << 32;
+std::string RuntimeOption::ApcFileStoragePrefix;
+int RuntimeOption::ApcFileStorageAdviseOutPeriod = 1800;
+std::string RuntimeOption::ApcFileStorageFlagKey;
+bool RuntimeOption::ApcConcurrentTableLockFree = false;
+bool RuntimeOption::ApcFileStorageKeepFileLinked = false;
+std::vector<std::string> RuntimeOption::ApcNoTTLPrefix;
 
 bool RuntimeOption::EnableDnsCache = false;
 int RuntimeOption::DnsCacheTTL = 10 * 60; // 10 minutes
@@ -341,17 +357,40 @@ int RuntimeOption::TaintTraceMaxStrlen = 127;
 bool RuntimeOption::EnableStrict = false;
 int RuntimeOption::StrictLevel = 1; // StrictBasic, cf strict_mode.h
 bool RuntimeOption::StrictFatal = false;
+#ifdef VALGRIND
+#define EvalVMStackElmsDefault 0x800
+#else
+#define EvalVMStackElmsDefault 0x4000
+#endif
+uint64 RuntimeOption::EvalVMStackElms = EvalVMStackElmsDefault;
 bool RuntimeOption::EvalJit = false;
 bool RuntimeOption::EvalJitNoGdb = false;
+bool RuntimeOption::EvalProfileBC = false;
+#define JIT_TRAMPOLINES_DEFAULT true
+bool RuntimeOption::EvalJitTrampolines = JIT_TRAMPOLINES_DEFAULT;
+uint32 RuntimeOption::EvalGdbSyncChunks = 128;
 bool RuntimeOption::EvalJitStressLease = false;
 bool RuntimeOption::EvalJitKeepDbgFiles = false;
 bool RuntimeOption::EvalJitEnableRenameFunction = false;
+bool RuntimeOption::EvalJitCmovVarDeref = true;
+bool RuntimeOption::EvalJitTransCounters = false;
 bool RuntimeOption::EvalThreadingJit = false;
+bool RuntimeOption::EvalJitDisabledByHphpd = false;
 bool RuntimeOption::EvalDumpBytecode = false;
+bool RuntimeOption::EvalDumpTC = false;
 bool RuntimeOption::EvalDumpAst = false;
 bool RuntimeOption::EvalPeephole = true;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
+
+std::string RuntimeOption::RepoLocalMode;
+std::string RuntimeOption::RepoLocalPath;
+std::string RuntimeOption::RepoCentralPath;
+std::string RuntimeOption::RepoEvalMode;
+bool RuntimeOption::RepoCommit = true;
+bool RuntimeOption::RepoDebugInfo = true;
+// Missing: RuntimeOption::RepoAuthoritative's physical location is
+// perf-sensitive.
 
 bool RuntimeOption::SandboxMode = false;
 std::string RuntimeOption::SandboxPattern;
@@ -370,8 +409,9 @@ int RuntimeOption::DebuggerDefaultRpcPort = 8083;
 std::string RuntimeOption::DebuggerDefaultRpcAuth;
 std::string RuntimeOption::DebuggerRpcHostDomain;
 int RuntimeOption::DebuggerDefaultRpcTimeout = 30;
-std::string RuntimeOption::DebuggerStartupDocument;
 std::string RuntimeOption::DebuggerDefaultSandboxPath;
+std::string RuntimeOption::DebuggerStartupDocument;
+std::string RuntimeOption::DebuggerUsageLogFile;
 
 std::string RuntimeOption::SendmailPath;
 std::string RuntimeOption::MailForceExtraParameters;
@@ -385,21 +425,7 @@ int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
 int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
-///////////////////////////////////////////////////////////////////////////////
-// keep this block after all the above static variables, or we will have
-// static variable dependency problems on initialization
-
-class DefaultRuntimeOptionLoader {
-public:
-  static DefaultRuntimeOptionLoader Loader;
-
-  DefaultRuntimeOptionLoader() {
-    Hdf empty;
-    RuntimeOption::Load(empty); // so we load defaults defined in Load(Hdf)
-  }
-};
-
-DefaultRuntimeOptionLoader DefaultRuntimeOptionLoader::Loader;
+int RuntimeOption::EnableAlternative = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -444,7 +470,14 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
   return true;
 }
 
-void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
+static inline bool evalJitDefault() {
+  static const char* path = "/.hhvm-jit";
+  struct stat dummy;
+  return hhvm && stat(path, &dummy) == 0;
+}
+
+void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
+                         bool empty /* = false */) {
   // Machine metrics
   string hostname, tier, cpu;
   {
@@ -564,6 +597,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     MaxSerializedStringSize =
       error["MaxSerializedStringSize"].getInt32(64 * 1024 * 1024);
     CallUserHandlerOnFatals = error["CallUserHandlerOnFatals"].getBool(true);
+    ThrowExceptionOnBadMethodCall =
+      error["ThrowExceptionOnBadMethodCall"].getBool(true);
     MaxLoopCount = error["MaxLoopCount"].getInt32(0);
     NoInfiniteRecursionDetection =
       error["NoInfiniteRecursionDetection"].getBool();
@@ -607,6 +642,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       server["ThreadDropCacheTimeoutSeconds"].getInt32(0);
     ServerThreadJobLIFO = server["ThreadJobLIFO"].getBool();
     ServerThreadDropStack = server["ThreadDropStack"].getBool();
+    ServerHttpSafeMode = server["HttpSafeMode"].getBool();
+    ServerStatCache = server["StatCache"].getBool(true);
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
     ServerMemoryHeadRoom = server["MemoryHeadRoom"].getInt64(0);
     RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt64(-1);
@@ -631,7 +668,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     EnableMagicQuotesGpc = server["EnableMagicQuotesGpc"].getBool();
     EnableKeepAlive = server["EnableKeepAlive"].getBool(true);
     ExposeHPHP = server["ExposeHPHP"].getBool(true);
-    ExposeXFBServer = server["ExposeXFBServer"].getBool();
+    ExposeXFBServer = server["ExposeXFBServer"].getBool(false);
+    ExposeXFBDebug = server["ExposeXFBDebug"].getBool(false);
+    XFBDebugSSLKey = server["XFBDebugSSLKey"].getString("");
     ConnectionTimeoutSeconds = server["ConnectionTimeoutSeconds"].getInt16(-1);
     EnableOutputBuffering = server["EnableOutputBuffering"].getBool();
     OutputHandler = server["OutputHandler"].getString();
@@ -654,13 +693,12 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     SSLPort = server["SSLPort"].getInt16(443);
     SSLCertificateFile = server["SSLCertificateFile"].getString();
     SSLCertificateKeyFile = server["SSLCertificateKeyFile"].getString();
+    SSLCertificateDir = server["SSLCertificateDir"].getString();
 
-    SourceRoot = Util::normalizeDir(server["SourceRoot"].getString());
-    if (!SourceRoot.empty()) {
-      // Guaranteed empty on empty load so avoid setting FileCache::SourceRoot
-      // since it may not be initialized
-      FileCache::SourceRoot = SourceRoot;
-    }
+    string srcRoot = Util::normalizeDir(server["SourceRoot"].getString());
+    if (!srcRoot.empty()) SourceRoot = srcRoot;
+    FileCache::SourceRoot = SourceRoot;
+
     server["IncludeSearchPaths"].get(IncludeSearchPaths);
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
       IncludeSearchPaths[i] = Util::normalizeDir(IncludeSearchPaths[i]);
@@ -731,8 +769,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       MemoryManager::TheMemoryManager()->disable();
     }
     CheckMemory = server["CheckMemory"].getBool();
+    MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     UseHphpArray = server["UseHphpArray"].getBool(hhvm);
-    UseSmallArray = server["UseSmallArray"].getBool(false);
+    UseSmallArray = server["UseSmallArray"].getBool(false); // Deprecated, ignored.
+    UseVectorArray = server["UseVectorArray"].getBool(true);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
 
@@ -762,18 +802,30 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       throw InvalidArgumentException("apc lock type",
                                      "Invalid lock type");
     }
-
+    EnableApcSerialize = apc["EnableApcSerialize"].getBool(true);
     ApcExpireOnSets = apc["ExpireOnSets"].getBool();
     ApcPurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
+    ApcPurgeRate = apc["PurgeRate"].getInt32(-1);
 
     ApcAllowObj = apc["AllowObject"].getBool();
     ApcTTLLimit = apc["TTLLimit"].getInt32(-1);
+    Hdf fileStorage = apc["FileStorage"];
+    ApcUseFileStorage = fileStorage["Enable"].getBool();
+    ApcFileStorageChunkSize = fileStorage["ChunkSize"].getInt64(1LL << 29);
+    ApcFileStorageMaxSize = fileStorage["MaxSize"].getInt64(1LL << 32);
+    ApcFileStoragePrefix = fileStorage["Prefix"].getString("/tmp/apc_store");
+    ApcFileStorageFlagKey = fileStorage["FlagKey"].getString("_madvise_out");
+    ApcFileStorageAdviseOutPeriod =
+      fileStorage["AdviseOutPeriod"].getInt32(1800);
+    ApcFileStorageKeepFileLinked = fileStorage["KeepFileLinked"].getBool();
 
+    ApcConcurrentTableLockFree = apc["ConcurrentTableLockFree"].getBool(false);
     ApcKeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
     ApcMaximumCapacity = apc["MaximumCapacity"].getInt64(0);
     ApcKeyFrequencyUpdatePeriod = apc["KeyFrequencyUpdatePeriod"].
       getInt32(1000);
 
+    apc["NoTTLPrefix"].get(ApcNoTTLPrefix);
 
     Hdf dns = server["DnsCache"];
     EnableDnsCache = dns["Enable"].getBool();
@@ -810,7 +862,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
 
     ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
 
-    EnableCufAsync = server["EnableCufAsync"].getBool();
+    EnableCufAsync = server["EnableCufAsync"].getBool(false);
 
     ServerUser = server["User"].getString("");
   }
@@ -1046,6 +1098,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;
     else ScannerType &= ~Scanner::PreprocessXHP;
 
+    EnableAlternative = eval["EnableAlternative"].getInt32(0);
+
 #ifdef TAINTED
     EnableTaintWarnings = eval["EnableTaintWarnings"].getBool();
     TaintTraceMaxStrlen = eval["TaintTraceMaxStrlen"].getInt32(127);
@@ -1054,17 +1108,30 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     EnableStrict = eval["EnableStrict"].getBool();
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic
     StrictFatal = eval["StrictFatal"].getBool();
-    EvalJit = eval["Jit"].getBool(false);
+    EvalVMStackElms = eval["VMStackElms"].getUInt64(EvalVMStackElmsDefault);
+    EvalJit = eval["Jit"].getBool(evalJitDefault());
     EvalJitNoGdb = eval["JitNoGdb"].getBool(false);
+    EvalProfileBC = eval["ProfileBC"].getBool(false);
+    EvalJitTrampolines =
+      eval["JitTrampolines"].getBool(JIT_TRAMPOLINES_DEFAULT);
+    EvalGdbSyncChunks = eval["GdbSyncChunks"].getInt32(128);
     EvalThreadingJit = eval["ThreadingJit"].getBool(false);
     EvalJitStressLease = eval["JitStressLease"].getBool(false);
     EvalJitKeepDbgFiles = eval["JitKeepDbgFiles"].getBool(false);
     EvalJitEnableRenameFunction =
       eval["JitEnableRenameFunction"].getBool(false);
+    EvalJitDisabledByHphpd = eval["EvalJitDisabledByHphpd"].getBool(false);
+    EvalJitCmovVarDeref = eval["JitCmovVarDeref"].getBool(true);
+    EvalJitTransCounters = eval["JitTransCounters"].getBool(false);
     EvalDumpBytecode = eval["DumpBytecode"].getBool(false);
+    EvalDumpTC = eval["DumpTC"].getBool(false);
     EvalDumpAst = eval["DumpAst"].getBool(false);
     EvalPeephole = eval["Peephole"].getBool(true);
     RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();
+    if (EvalJit && RecordCodeCoverage) {
+      throw InvalidArgumentException(
+        "code coverage", "Code coverage is not supported for Eval.Jit=true");
+    }
     if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
     {
@@ -1072,14 +1139,75 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       EnableDebugger = debugger["EnableDebugger"].getBool();
       EnableDebuggerServer = debugger["EnableDebuggerServer"].getBool();
       DebuggerServerPort = debugger["Port"].getInt16(8089);
-      DebuggerStartupDocument = debugger["StartupDocument"].getString();
       DebuggerDefaultSandboxPath = debugger["DefaultSandboxPath"].getString();
+      DebuggerStartupDocument = debugger["StartupDocument"].getString();
+      DebuggerUsageLogFile = debugger["UsageLogFile"].getString();
 
       DebuggerDefaultRpcPort = debugger["RPC.DefaultPort"].getInt16(8083);
       DebuggerDefaultRpcAuth = debugger["RPC.DefaultAuth"].getString();
       DebuggerRpcHostDomain = debugger["RPC.HostDomain"].getString();
       DebuggerDefaultRpcTimeout = debugger["RPC.DefaultTimeout"].getInt32(30);
     }
+  }
+  {
+    Hdf repo = config["Repo"];
+    {
+      Hdf repoLocal = repo["Local"];
+      // Repo.Local.Mode.
+      RepoLocalMode = repoLocal["Mode"].getString();
+      if (!empty && RepoLocalMode.empty()) {
+        const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
+        if (HHVM_REPO_LOCAL_MODE != NULL) {
+          RepoLocalMode = HHVM_REPO_LOCAL_MODE;
+        }
+      }
+      if (RepoLocalMode.empty()) {
+        RepoLocalMode = "r-";
+      }
+      if (RepoLocalMode.compare("rw")
+          && RepoLocalMode.compare("r-")
+          && RepoLocalMode.compare("--")) {
+        Logger::Error("Bad config setting: Repo.Local.Mode=%s",
+                      RepoLocalMode.c_str());
+        RepoLocalMode = "rw";
+      }
+      // Repo.Local.Path.
+      RepoLocalPath = repoLocal["Path"].getString();
+      if (!empty && RepoLocalPath.empty()) {
+        const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
+        if (HHVM_REPO_LOCAL_PATH != NULL) {
+          RepoLocalPath = HHVM_REPO_LOCAL_PATH;
+        }
+      }
+    }
+    {
+      Hdf repoCentral = repo["Central"];
+      // Repo.Central.Path.
+      RepoCentralPath = repoCentral["Path"].getString();
+      if (!empty && RepoCentralPath.empty()) {
+        const char* HHVM_REPO_CENTRAL_PATH = getenv("HHVM_REPO_CENTRAL_PATH");
+        if (HHVM_REPO_CENTRAL_PATH != NULL) {
+          RepoCentralPath = HHVM_REPO_CENTRAL_PATH;
+        }
+      }
+    }
+    {
+      Hdf repoEval = repo["Eval"];
+      // Repo.Eval.Mode.
+      RepoEvalMode = repoEval["Mode"].getString();
+      if (RepoEvalMode.empty()) {
+        RepoEvalMode = "readonly";
+      } else if (RepoEvalMode.compare("local")
+                 && RepoEvalMode.compare("central")
+                 && RepoEvalMode.compare("readonly")) {
+        Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
+                      RepoEvalMode.c_str());
+        RepoEvalMode = "readonly";
+      }
+    }
+    RepoCommit = repo["Commit"].getBool(true);
+    RepoDebugInfo = repo["DebugInfo"].getBool(true);
+    RepoAuthoritative = repo["Authoritative"].getBool(false);
   }
   {
     Hdf sandbox = config["Sandbox"];

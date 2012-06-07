@@ -25,8 +25,6 @@
 #include <util/lock.h>
 #include <util/logger.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -70,6 +68,13 @@ Array ClassInfo::GetUserFunctions() {
     }
   }
   return ret;
+}
+
+const ClassInfo::MethodInfo *ClassInfo::FindSystemFunction(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
+
+  return s_systemFuncs->getMethodInfo(name);
 }
 
 const ClassInfo::MethodInfo *ClassInfo::FindFunction(CStrRef name) {
@@ -243,7 +248,7 @@ void ClassInfo::ConstantInfo::setValue(CVarRef value) {
 
 void ClassInfo::ConstantInfo::setStaticValue(CVarRef v) {
   value = v;
-  value.setStatic();
+  value.setEvalScalar();
   deferred = false;
 }
 
@@ -587,14 +592,14 @@ bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
   if (!methodInfo) return false;
   if (methodInfo->attribute & ClassInfo::IsPublic) return true;
   CStrRef ctxName = hhvm
-                    ? g_context->getContextClassName(true)
+                    ? g_vmContext->getContextClassName(true)
                     : FrameInjection::GetClassName(true);
   if (ctxName->size() == 0) {
     return false;
   }
   const ClassInfo *ctxClass = ClassInfo::FindClass(ctxName);
   bool hasObject = hasCallObject ||
-    (hhvm ? g_context->getThis(true) : FrameInjection::GetThis(true));
+    (hhvm ? g_vmContext->getThis(true) : FrameInjection::GetThis(true));
   if (ctxClass) {
     return ctxClass->checkAccess(defClass, methodInfo, staticCall, hasObject);
   }
@@ -719,15 +724,26 @@ bool ClassInfo::PropertyInfo::isVisible(const ClassInfo *context) const {
 // load functions
 
 static String makeStaticString(const char *s) {
-  if (!s) return null_string;
-  String str(s);
-  if (!str.checkStatic()) {
-    str->setStatic();
-    if (!has_eval_support) {
-      StaticString::TheStaticStringSet().insert(str.get());
-    }
+  if (!s) {
+    return null_string;
   }
-  return str;
+  if (has_eval_support) {
+    // hphpi and hhvm use GetStaticString
+    return StringData::GetStaticString(s);
+  }
+  // binaries compiled with hphpc don't use GetStaticString(), and
+  // instead they use TheStaticStringSet; see "type_string.cpp" for
+  // details
+  StringData* sd = new StringData(s, AttachLiteral);
+  sd->setStatic();
+  StringDataSet& set = StaticString::TheStaticStringSet();
+  StringDataSet::iterator it = set.find(sd);
+  if (it != set.end()) {
+    delete sd;
+    return *it;
+  }
+  set.insert(sd);
+  return sd;
 }
 
 ClassInfo::MethodInfo *ClassInfo::MethodInfo::getDeclared() {
@@ -769,7 +785,6 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       parameter->attribute = (Attribute)(int64)(*p++);
       parameter->name = *p++;
       parameter->type = *p++;
-      ASSERT(Util::toLower(parameter->type) == parameter->type);
       parameter->value = *p++;
       parameter->valueText = *p++;
 
@@ -843,7 +858,8 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     while (*p) {
       String new_name = makeStaticString(*p++);
       String old_name = makeStaticString(*p++);
-      m_traitAliasesVec.push_back(pair<String, String>(new_name, old_name));
+      m_traitAliasesVec.push_back(std::pair<String, String>(
+        new_name, old_name));
     }
     p++;
   }
@@ -1056,53 +1072,169 @@ Variant ClassPropTable::getInitVal(const ClassPropTableEntry *prop) const {
   throw FatalErrorException("Failed to get init val");
 }
 
+static const ClassPropTableEntry *FindRedeclaredProp(
+  const ObjectData *&obj, const ClassPropTableEntry *p, int &flags) {
+  const ObjectStaticCallbacks *osc = obj->o_get_callbacks();
+  const char *globals = 0;
+  ASSERT(osc);
+  const ClassPropTable *cpt = osc->cpt->m_parent;
+
+  while (true) {
+    while (cpt) {
+      if (cpt->m_size_mask >= 0) {
+        const int *ix = cpt->m_hash_entries;
+        int h = p->hash & cpt->m_size_mask;
+        int o = ix[h];
+        if (o >= 0) {
+          const ClassPropTableEntry *prop = cpt->m_entries + o;
+          do {
+            if (p->hash != prop->hash ||
+                prop->isPrivate()) {
+              continue;
+            }
+
+            if (LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
+                               p->keyName->data() + p->prop_offset))) {
+              if (prop->isOverride() && !prop->offset) {
+                flags |= prop->flags;
+                continue;
+              }
+              ASSERT(prop->type == KindOfVariant);
+              return prop;
+            }
+          } while (!prop++->isLast());
+        }
+      }
+      cpt = cpt->m_parent;
+    }
+    if (LIKELY(!osc->redeclaredParent)) break;
+    if (LIKELY(!globals)) {
+      globals = (char*)get_global_variables();
+    }
+    osc = *(ObjectStaticCallbacks**)(globals + osc->redeclaredParent);
+    obj = obj->getRedeclaredParent();
+    cpt = osc->cpt;
+  }
+
+  return NULL;
+}
+
 void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
-                         Array &props, bool pubOnly) {
-  while (ct) {
-    const ClassPropTableEntry *p = ct->m_entries;
-    int off = ct->m_offset;
-    if (off >= 0) do {
-      p += off;
-      if (!pubOnly || p->isPublic()) {
-        if (p->isOverride()) {
-          /* The actual property is stored in a base class,
-             but we need to set the entry here, to get the
-             iteration order right */
-          props.set(*p->keyName, null_variant, true);
-          continue;
-        }
-        const char *addr = ((const char *)obj) + p->offset;
-        if (LIKELY(p->type == KindOfVariant)) {
-          if (isInitialized(*(Variant*)addr)) {
-            props.lvalAt(*p->keyName, AccessFlags::Key)
-                 .setWithRef(*(Variant*)addr);
+                         Array &props, GetArrayKind kind) {
+  if (ct) {
+    Array done;
+    const ObjectData *base = 0;
+    do {
+      const ClassPropTableEntry *p = ct->m_entries;
+      int off = ct->m_offset;
+      if (off >= 0) {
+        do {
+          p += off;
+          if ((kind & GetArrayPrivate) || p->isPublic()) {
+            if (done.get() && done.get()->exists(p->offset)) continue;
+            if (p->isOverride()) {
+              /* The actual property is stored in a base class.
+                 It might have been promoted from protected,
+                 so mark here that the prop does not need to be
+                 set again.
+              */
+              if (UNLIKELY(!p->offset)) {
+                /*
+                  Its stored in a redeclared base. We have to find
+                  the value, and update it now.
+                */
+                const ObjectData *parent = obj;
+                int flags = 0;
+                if (const ClassPropTableEntry *pp =
+                    FindRedeclaredProp(parent, p, flags)) {
+
+                  if (done.get() && done.get()->exists(pp->offset)) continue;
+                  const char *addr = ((const char *)parent) + pp->offset;
+
+                  props.lvalAt(*p->keyName, AccessFlags::Key)
+                    .setWithRef(*(Variant*)addr);
+
+                  done.set(pp->offset, true_varNR);
+                  continue;
+                }
+                /*
+                  Its a dynamic property. If this is a protected prop,
+                  need to prevent it being added again when we deal
+                  with dynamic props. Otherwise, we just insert it now
+                  (to get the order right), and let it get set later.
+                */
+                if (p->isPublic() &&
+                    !(flags & ClassPropTableEntry::Protected)) {
+                  props.set(*p->keyName, null_variant, true);
+                } else {
+                  CArrRef oprop = parent->getProperties();
+                  if (oprop.get()) {
+                    String name(p->keyName->data() + p->prop_offset,
+                                p->keyName->size() - p->prop_offset,
+                                AttachLiteral);
+                    if (done.get() && done.get()->exists(name)) continue;
+
+                    CVarRef val = oprop.get()->get(name);
+                    if (val.isInitialized()) {
+                      props.lvalAt(*p->keyName, AccessFlags::Key)
+                        .setWithRef(val);
+                      base = parent;
+                      done.set(name, false_varNR);
+                    }
+                  }
+                }
+                continue;
+              }
+              done.set(p->offset, true_varNR);
+            }
+            const char *addr = ((const char *)obj) + p->offset;
+            if (LIKELY(p->type == KindOfVariant)) {
+              if (isInitialized(*(Variant*)addr)) {
+                props.lvalAt(*p->keyName, AccessFlags::Key)
+                  .setWithRef(*(Variant*)addr);
+              }
+              continue;
+            }
+            Variant v = p->getVariant(addr);
+            if (p->isPrivate()) {
+              props.add(*p->keyName, v, true);
+            } else {
+              props.set(*p->keyName, v, true);
+            }
           }
-          continue;
-        }
-        Variant v = p->getVariant(addr);
-        if (p->isPrivate()) {
-          props.add(*p->keyName, v, true);
-        } else {
-          props.set(*p->keyName, v, true);
+        } while ((off = p->next) != 0);
+      }
+      ct = ct->m_parent;
+      if (!ct) {
+        ObjectData *parent = obj->getRedeclaredParent();
+        if (parent) {
+          ASSERT(parent != obj);
+          obj = parent;
+          ct = obj->o_getClassPropTable();
         }
       }
-    } while ((off = p->next) != 0);
-    ct = ct->m_parent;
-    if (!ct) {
-      ObjectData *parent = obj->getRedeclaredParent();
-      if (parent) {
-        ASSERT(parent != obj);
-        obj = parent;
-        ct = obj->o_getClassPropTable();
+    } while (ct);
+    if (base) {
+      if (LIKELY(kind & GetArrayDynamic)) {
+        for (ArrayIter it(base->getProperties()); !it.end(); it.next()) {
+          Variant key = it.first();
+          if (!done.get()->exists(key)) {
+            CVarRef value = it.secondRef();
+            props.lvalAt(key, AccessFlags::Key).setWithRef(value);
+          }
+        }
       }
+      return;
     }
   }
-  if (hhvm) {
-    HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(
-                               const_cast<ObjectData*>(obj));
-    inst->HPHP::VM::Instance::o_getArray(props, pubOnly);
-  } else {
-    obj->o_getArray(props, pubOnly);
+  if (LIKELY(kind & GetArrayDynamic)) {
+    if (hhvm) {
+      HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(
+        const_cast<ObjectData*>(obj));
+      inst->HPHP::VM::Instance::o_getArray(props, !(kind & GetArrayPrivate));
+    } else {
+      obj->o_getArray(props, !(kind & GetArrayPrivate));
+    }
   }
 }
 
@@ -1111,24 +1243,48 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
   while (ct) {
     for (const int *ppi = ct->privates(); *ppi >= 0; ppi++) {
       const ClassPropTableEntry *p = ct->m_entries + *ppi;
-      ASSERT(p->isPrivate());
+      ASSERT(!p->isPublic());
+      CVarRef value = props->get(*p->keyName);
+      if (!value.isInitialized()) continue;
       const char *addr = ((const char *)obj) + p->offset;
+      if (UNLIKELY(!p->offset)) {
+        /*
+          Its stored in a redeclared base. We have to find
+          the value, and update it now.
+        */
+        const ObjectData *parent = obj;
+        int flags = 0;
+        if (const ClassPropTableEntry *pp =
+            FindRedeclaredProp(parent, p, flags)) {
+
+          p = pp;
+          addr = ((const char *)parent) + pp->offset;
+        } else {
+          String name(p->keyName->data() + p->prop_offset,
+                      p->keyName->size() - p->prop_offset,
+                      AttachLiteral);
+          Variant *val = parent->ObjectData::o_realPropHook(
+            name, ObjectData::RealPropCreate|ObjectData::RealPropWrite);
+          val->setWithRef(value);
+          continue;
+        }
+      }
       if (LIKELY(p->type == KindOfVariant)) {
-        props->load(*p->keyName, *(Variant*)addr);
+        ((Variant*)addr)->setWithRef(value);
         continue;
       }
-      if (!props->exists(*p->keyName)) continue;
-
-      CVarRef value = props->get(*p->keyName);
       switch (p->type) {
-      case KindOfBoolean: *(bool*)addr = value;   break;
-      case KindOfInt32:   *(int*)addr = value;    break;
-      case KindOfInt64:   *(int64*)addr = value;  break;
-      case KindOfDouble:  *(double*)addr = value; break;
-      case KindOfString:  *(String*)addr = value; break;
-      case KindOfArray:   *(Array*)addr = value;  break;
-      case KindOfObject:  *(Object*)addr = value; break;
-      default:            ASSERT(false);          break;
+        case KindOfBoolean: *(bool*)addr = value;   break;
+        case KindOfInt32:   *(int*)addr = value;    break;
+        case KindOfInt64:   *(int64*)addr = value;  break;
+        case KindOfDouble:  *(double*)addr = value; break;
+        case KindOfString:  *(String*)addr = value.isString() ?
+          value.getStringData() : NULL; break;
+        case KindOfArray:   *(Array*)addr = value.isArray() ?
+          value.getArrayData() : NULL;  break;
+        case KindOfObject:  *(Object*)addr = value.isObject() ?
+          value.getObjectData() : NULL; break;
+        default:            ASSERT(false);          break;
       }
     }
     ct = ct->m_parent;

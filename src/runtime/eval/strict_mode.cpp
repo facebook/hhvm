@@ -19,7 +19,7 @@
 namespace HPHP {
 
 using namespace Eval;
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void throw_strict(const ExtendedException &exn,

@@ -96,7 +96,7 @@ public:
 protected:
   Location m_loc;
 private:
-  int _count;
+  int32_t _count;
 
   static TypePtrMap TypeHintTypes;
   static TypePtrMap HipHopTypeHintTypes;

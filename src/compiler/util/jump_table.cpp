@@ -19,7 +19,6 @@
 #include <util/util.h>
 
 namespace HPHP {
-using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 JumpTable::JumpTable(CodeGenerator &cg,

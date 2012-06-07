@@ -53,6 +53,7 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
   int64 hash = -1);
 bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
     bool &foundClass);
+void eval_set_callee_alias(CStrRef alias);
 
 // Global state getters
 inline void eval_get_static_global_variables(Array &arr) {}

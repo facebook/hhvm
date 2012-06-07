@@ -19,18 +19,6 @@
 
 namespace HPHP {
 
-void phpDebuggerHook();
-void phpExceptionHook(const TypedValue *e);
-
-#define DEBUGGER_ATTACHED_ONLY(code) do {                             \
-  if (RuntimeOption::EnableDebugger) {                                \
-    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();         \
-    if (info->m_reqInjectionData.debugger) {                          \
-      code;                                                           \
-    }                                                                 \
-  }                                                                   \
-} while(0)                                                            \
-
 #ifdef DEBUG
 bool phpBreakpointEnabled(const char* sourceName);
 

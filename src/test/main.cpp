@@ -20,12 +20,11 @@
 #include <dlfcn.h>
 
 using namespace HPHP;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
-  string suite, which, set;
+  std::string suite, which, set;
   void (*compiler_hook_initialize)();
   compiler_hook_initialize =
     (void (*)())dlsym(NULL, "compiler_hook_initialize");
@@ -49,13 +48,7 @@ int main(int argc, char **argv) {
   // Initialize the runtime options with their default values
   {
     Hdf empty;
-    vector<string> emptyConfStrings;
-    RuntimeOption::Load(empty, &emptyConfStrings);
-  }
-
-  if (suite == "TestCodeRunJit" || suite == "TestCodeRunVM") {
-    // We don't want any fiber worker threads to try to initialize the VM.
-    RuntimeOption::FiberCount = 0;
+    RuntimeOption::Load(empty);
   }
 
   hphp_process_init();

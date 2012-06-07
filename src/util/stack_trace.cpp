@@ -32,9 +32,7 @@
 #include <util/hash.h>
 
 #include <runtime/base/execution_context.h>
-
-using namespace std;
-using namespace boost;
+#include <runtime/ext/ext_error.h>
 
 namespace HPHP {
 
@@ -80,10 +78,15 @@ static void bt_handler(int sig) {
 
   st.log(strsignal(sig), tracefn, pid);
 
-  //cerr << logmessage << endl;
+  int fd = ::open(tracefn, O_APPEND|O_WRONLY, S_IRUSR|S_IWUSR);
+  if (fd >= 0) {
+    dprintf(fd, "\nPHP Stacktrace:\n\n%s",
+            debug_string_backtrace(false).data());
+    ::close(fd);
+  }
+
   if (!StackTrace::ReportEmail.empty()) {
-    //cerr << "Emailing trace to " << StackTrace::ReportEmail << endl;
-    char format [] = "cat %s | mail -s \"Stack Trace from %s\"%s";
+    char format [] = "cat %s | mail -s \"Stack Trace from %s\" '%s'";
     char cmdline[strlen(format)+strlen(tracefn)
                  +strlen(Process::GetAppName().c_str())
                  +strlen(StackTrace::ReportEmail.c_str())+1];
@@ -98,10 +101,12 @@ static void bt_handler(int sig) {
 
   Logger::Error("Core dumped: %s", strsignal(sig));
 
-  // sync up gdb Dwarf info so that gdb can do a full backtrace
-  // from the core file. Do this at the very end as syncing needs
-  // to allocate memory for the ELF file.
-  g_context->syncGdbState();
+  if (hhvm) {
+    // sync up gdb Dwarf info so that gdb can do a full backtrace
+    // from the core file. Do this at the very end as syncing needs
+    // to allocate memory for the ELF file.
+    g_vmContext->syncGdbState();
+  }
 
   // re-raise the signal and pass it to the default handler
   // to terminate the process.
@@ -480,6 +485,7 @@ static bool slurp_symtab(asymbol ***syms, bfd *abfd) {
 
 static bool translate_addresses(bfd *abfd, const char *addr,
                                 addr2line_data *adata) {
+  if (!abfd) return false;
   adata->pc = bfd_scan_vma(addr, NULL, 16);
 
   adata->found = FALSE;

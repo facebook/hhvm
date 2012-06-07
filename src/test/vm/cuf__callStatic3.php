@@ -32,13 +32,18 @@ class B extends A {
   }
 }
 
-call_user_func(array('A', 'private_func'), "1", "2", "3");
-call_user_func(array('A', 'protected_func'), "1", "2", "3");
-call_user_func(array('A', 'public_func'), "1", "2", "3");
 
-call_user_func(array('B', 'private_func'), "1", "2", "3");
-call_user_func(array('B', 'protected_func'), "1", "2", "3");
-call_user_func(array('B', 'public_func'), "1", "2", "3");
+function main() {
+  call_user_func(array('A', 'private_func'), "1", "2", "3");
+  call_user_func(array('A', 'protected_func'), "1", "2", "3");
+  call_user_func(array('A', 'public_func'), "1", "2", "3");
 
-A::test();
-B::test();
+  call_user_func(array('B', 'private_func'), "1", "2", "3");
+  call_user_func(array('B', 'protected_func'), "1", "2", "3");
+  call_user_func(array('B', 'public_func'), "1", "2", "3");
+
+  A::test();
+  B::test();
+}
+main();
+

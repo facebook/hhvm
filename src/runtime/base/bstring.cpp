@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/bstring.h>
+#include <util/util.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +52,7 @@ char* bstrcasechr(const char* haystack, char needle, size_t haystackSize) {
   return NULL;
 }
 
+HOT_FUNC
 char* bstrcasestr(const char* haystack, size_t haystackSize,
                   const char* needle, size_t needleSize) {
   if (needleSize > haystackSize) {

@@ -595,6 +595,24 @@ DefineFunction(
     'taint_observer' => false,
   ));
 
+DefineFunction(
+  array(
+    'name'   => "hphp_process_abort",
+    'desc'   => "Causes the process to die immediately in an undefined way.",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "No value is returned.",
+    ),
+    'args'  => array(
+      array(
+        'name'   => "magic",
+        'type'   => Variant,
+        'desc'   => "You shouldn't be calling this function if you don't know the magic value.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

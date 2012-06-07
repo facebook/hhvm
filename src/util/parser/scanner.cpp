@@ -18,8 +18,7 @@
 #include <util/util.h>
 #include <util/preprocess.h>
 #include <util/logger.h>
-
-using namespace std;
+#include <runtime/base/zend/zend_string.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,7 +74,7 @@ extern char *string_html_decode(const char *input, int &len,
 
 void ScannerToken::xhpDecode() {
   int len = m_text.size();
-  char *ret = string_html_decode(m_text.data(), len, true,
+  char *ret = string_html_decode(m_text.c_str(), len, true,
                                  false, "UTF-8", true, true);
   m_text = string(ret, len);
   free(ret);
@@ -83,19 +82,21 @@ void ScannerToken::xhpDecode() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Scanner::Scanner(const char *filename, int type)
-    : m_filename(filename), m_source(NULL), m_len(0), m_pos(0),
+Scanner::Scanner(const char *filename, int type, bool md5 /* = false */)
+    : m_filename(filename), m_stream(NULL), m_source(NULL), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
       m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
-      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1) {
-  m_stream = new ifstream(filename);
+      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1),
+      m_isStrictMode(0) {
+  m_stream = new std::ifstream(filename);
   m_streamOwner = true;
-  if (m_stream->bad()) {
+  if (m_stream->fail()) {
     delete m_stream; m_stream = NULL;
     throw FileOpenException(filename);
   }
+  if (md5) computeMd5();
   if (type & PreprocessXHP) {
-    istream *is = preprocessXHP(*m_stream, m_sstream, filename);
+    std::istream *is = preprocessXHP(*m_stream, m_sstream, filename);
     if (m_stream != is) {
       delete m_stream;
       m_stream = is;
@@ -105,15 +106,19 @@ Scanner::Scanner(const char *filename, int type)
   init();
 }
 
-Scanner::Scanner(istream &stream, int type, const char *fileName /* = "" */)
+Scanner::Scanner(std::istream &stream, int type,
+                 const char *fileName /* = "" */,
+                 bool md5 /* = false */)
     : m_filename(fileName), m_source(NULL), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
       m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
-      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1) {
+      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1),
+      m_isStrictMode(0) {
   m_stream = &stream;
   m_streamOwner = false;
+  if (md5) computeMd5();
   if (type & PreprocessXHP) {
-    istream *is = preprocessXHP(*m_stream, m_sstream, fileName);
+    std::istream *is = preprocessXHP(*m_stream, m_sstream, fileName);
     if (m_stream != is) {
       m_stream = is;
     }
@@ -122,25 +127,45 @@ Scanner::Scanner(istream &stream, int type, const char *fileName /* = "" */)
 }
 
 Scanner::Scanner(const char *source, int len, int type,
-                 const char *fileName /* = "" */)
-    : m_filename(fileName), m_source(source), m_len(len), m_pos(0),
-      m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
-      m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
-      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1) {
+                 const char *fileName /* = "" */, bool md5 /* = false */)
+    : m_filename(fileName), m_stream(NULL), m_source(source), m_len(len),
+      m_pos(0), m_state(Start), m_type(type), m_yyscanner(NULL),
+      m_token(NULL), m_loc(NULL), m_lastToken(-1), m_gap(false),
+      m_inScript(false), m_xhpState(0), m_lookahead(false),
+      m_lookaheadTokid(-1),
+      m_isStrictMode(0) {
   ASSERT(m_source);
-  m_stream = NULL;
   m_streamOwner = false;
-  if (type & PreprocessXHP) {
-    m_stream = new istringstream(string(source, len));
+  if (md5 || type & PreprocessXHP) {
+    m_stream = new std::istringstream(string(source, len));
     m_streamOwner = true;
-    istream *is = preprocessXHP(*m_stream, m_sstream, fileName);
-    if (m_stream != is) {
-      delete m_stream;
-      m_stream = is;
-      m_streamOwner = false;
+    if (md5) computeMd5();
+    if (type & PreprocessXHP) {
+      std::istream *is = preprocessXHP(*m_stream, m_sstream, fileName);
+      if (m_stream != is) {
+        delete m_stream;
+        m_stream = is;
+        m_streamOwner = false;
+      }
     }
   }
+
   init();
+}
+
+void Scanner::computeMd5() {
+  int startpos = m_stream->tellg();
+  m_stream->seekg(0, std::ios::end);
+  int length = m_stream->tellg();
+  m_stream->seekg(0, std::ios::beg);
+  char *ptr = (char*)malloc(length);
+  m_stream->read(ptr, length);
+  m_stream->seekg(startpos, std::ios::beg);
+  int out_len;
+  char *md5str = string_md5(ptr, length, false, out_len);
+  free(ptr);
+  m_md5 = string(md5str, out_len);
+  free(md5str);
 }
 
 Scanner::~Scanner() {

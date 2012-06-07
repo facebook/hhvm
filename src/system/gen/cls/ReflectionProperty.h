@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1374 */
+/* SRC: classes/reflection.php line 1402 */
 FORWARD_DECLARE_CLASS(ReflectionProperty);
 extern const ObjectStaticCallbacks cw_ReflectionProperty;
 class c_ReflectionProperty : public ExtObjectData {
@@ -42,11 +42,13 @@ class c_ReflectionProperty : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionProperty, ReflectionProperty, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_ReflectionProperty(const ObjectStaticCallbacks *cb = &cw_ReflectionProperty) : ExtObjectData(cb), m_info(Variant::nullInit), m_name(Variant::nullInit), m_class(Variant::nullInit) {}
+  c_ReflectionProperty(const ObjectStaticCallbacks *cb = &cw_ReflectionProperty) : ExtObjectData(cb), m_info(Variant::nullInit), m_name(Variant::nullInit), m_class(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_cls, Variant v_name);
   public: c_ReflectionProperty *create(CVarRef v_cls, CVarRef v_name);
   public: String t___tostring();
-  public: static Variant t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret);
+  public: static Variant t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret = false_varNR);
   public: Variant t_getname();
   public: bool t_ispublic();
   public: bool t_isprivate();

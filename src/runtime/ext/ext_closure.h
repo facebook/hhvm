@@ -113,6 +113,27 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class DummyClosure
+
+FORWARD_DECLARE_CLASS_BUILTIN(DummyClosure);
+class c_DummyClosure : public ExtObjectData {
+ public:
+  DECLARE_CLASS(DummyClosure, DummyClosure, ObjectData)
+
+  // need to implement
+  public: c_DummyClosure(const ObjectStaticCallbacks *cb = &cw_DummyClosure);
+  public: ~c_DummyClosure();
+  public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
+
+  // implemented by HPHP
+  public: c_DummyClosure *create();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // __EXT_CLOSURE_H__

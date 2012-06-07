@@ -50,7 +50,7 @@ public:
   const std::string &getName() const { return m_name; }
   const std::string &getOriginalName() const { return m_origName; }
   ExpressionPtr getNameExp() const { return m_nameExp; }
-  ExpressionListPtr getParams() const { return m_params; }
+  const ExpressionListPtr& getParams() const { return m_params; }
   void setNoInline() { m_noInline = true; }
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);

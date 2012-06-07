@@ -22,7 +22,7 @@ namespace HPHP {
 
 Variant &LVariableTable::getImpl(CStrRef s) {
   // LVariableTable may have references to its values leaked, and therefore
-  // cannot support escalation from SmallArray.
+  // cannot support escalation to ZendArray.
   if (!m_px) {
     m_px = ArrayInit((ssize_t)0, true).create();
     m_px->incRefCount();

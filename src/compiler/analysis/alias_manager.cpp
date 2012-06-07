@@ -28,6 +28,7 @@
 #include <compiler/expression/simple_function_call.h>
 #include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/object_property_expression.h>
+#include <compiler/expression/object_method_expression.h>
 #include <compiler/expression/parameter_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/expression.h>
@@ -49,6 +50,7 @@
 #include <compiler/statement/do_statement.h>
 #include <compiler/statement/exp_statement.h>
 #include <compiler/statement/echo_statement.h>
+#include <compiler/statement/try_statement.h>
 #include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/control_flow.h>
 #include <compiler/analysis/variable_table.h>
@@ -72,7 +74,7 @@ using std::string;
 
 AliasManager::AliasManager(int opt) :
     m_bucketList(0), m_nextID(1), m_changes(0), m_replaced(0),
-    m_wildRefs(false), m_nrvoFix(0), m_inlineAsExpr(true),
+    m_wildRefs(false), m_nrvoFix(0), m_inCall(0), m_inlineAsExpr(true),
     m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
     m_cleared(false), m_inPseudoMain(false), m_genAttrs(false),
     m_hasDeadStore(false), m_hasChainRoot(false),
@@ -106,7 +108,7 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
     } else if (opt == "string") {
       Option::StringLoopOpts = val;
     } else if (opt == "inline") {
-      Option::AutoInline = val ? 1 : 0;
+      Option::AutoInline = val ? 1 : -1;
     } else if (opt == "cflow") {
       Option::ControlFlow = val;
     } else if (opt == "coalesce") {
@@ -115,7 +117,7 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
       val = opt == "all";
       Option::EliminateDeadCode = val;
       Option::LocalCopyProp = val;
-      Option::AutoInline = val ? 1 : 0;
+      Option::AutoInline = val ? 1 : -1;
       Option::ControlFlow = val;
       Option::CopyProp = val;
     } else {
@@ -519,7 +521,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
         }
         case Expression::KindOfIncludeExpression: {
           IncludeExpressionPtr inc(spc(IncludeExpression, e2));
-          if (!inc->getPrivateScope()) {
+          if (!inc->isPrivateScope()) {
             return InterfAccess;
           }
           goto def;
@@ -1548,7 +1550,13 @@ ExpressionPtr AliasManager::canonicalizeNode(
               }
               cur = next;
             }
-            if (ae->isUnused() && m_accessList.isLast(ae)) {
+            if ((!m_inCall || (!hhvm && !ae->getValue()->hasEffect())) &&
+                ae->isUnused() && m_accessList.isLast(ae) &&
+                !(hhvm && Option::OutputHHBC &&
+                  e->hasAnyContext(Expression::AccessContext |
+                                   Expression::ObjectContext |
+                                   Expression::ExistContext |
+                                   Expression::UnsetContext))) {
               rep = ae->clone();
               ae->setContext(Expression::DeadStore);
               ae->setNthKid(1, ae->makeConstant(m_arp, "null"));
@@ -1782,6 +1790,8 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
 
   bool delayVars = true;
   bool pushStack = false;
+  bool inCall = false;
+  bool setInCall = true;
 
   switch (e->getKindOf()) {
     case Expression::KindOfQOpExpression:
@@ -1812,13 +1822,29 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
       delayVars = false;
       break;
 
-    case Expression::KindOfObjectMethodExpression:
-    case Expression::KindOfDynamicFunctionCall:
     case Expression::KindOfSimpleFunctionCall:
+      if (!hhvm || !Option::OutputHHBC) {
+        SimpleFunctionCallPtr f(spc(SimpleFunctionCall, e));
+        if (!f->getClass()) {
+          if (f->getClassName().empty()) {
+            if (f->getFuncScope() &&
+                !f->getFuncScope()->isVolatile()) {
+              setInCall = false;
+            }
+          } else if (ClassScopePtr cls = f->resolveClass()) {
+            if (!cls->isVolatile()) {
+              setInCall = false;
+            }
+          }
+        }
+      }
+      // fall through
+    case Expression::KindOfNewObjectExpression:
+    case Expression::KindOfDynamicFunctionCall:
+      inCall = setInCall;
+    case Expression::KindOfObjectMethodExpression:
       delayVars = false;
       // fall through
-
-    case Expression::KindOfNewObjectExpression:
       pushStack = m_accessList.size() > 0;
       break;
 
@@ -1835,6 +1861,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
   int n = e->getKidCount();
   if (n < 2) delayVars = false;
 
+  m_inCall += inCall;
   for (int j = delayVars ? 0 : 1; j < 2; j++) {
     for (int i = 0; i < n; i++) {
       if (ExpressionPtr kid = e->getNthExpr(i)) {
@@ -1863,6 +1890,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
   if (pushStack) m_exprBeginStack.push_back(aBack);
   ExpressionPtr ret(canonicalizeNode(e));
   if (pushStack) m_exprBeginStack.pop_back();
+  m_inCall -= inCall;
   return ret;
 }
 
@@ -1897,7 +1925,6 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   case Statement::KindOfExpStatement:
   case Statement::KindOfStatementList:
   case Statement::KindOfBlockStatement:
-  case Statement::KindOfTryStatement:
     // No special action, just execute
     // and fall through
     break;
@@ -1971,6 +1998,18 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   case Statement::KindOfGotoStatement:
     ret = Branch;
     break;
+
+  case Statement::KindOfTryStatement: {
+    TryStatementPtr trs(spc(TryStatement, s));
+    beginScope();
+    canonicalizeKid(s, trs->getBody(), 0);
+    endScope();
+    clear();
+    canonicalizeKid(s, trs->getCatches(), 1);
+    ret = Converge;
+    start = nkid;
+    break;
+  }
 
   case Statement::KindOfCatchStatement:
     clear();
@@ -2251,7 +2290,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       case Expression::KindOfIncludeExpression:
       {
         IncludeExpressionPtr inc(spc(IncludeExpression, e));
-        if (!inc->getPrivateScope()) {
+        if (!inc->isPrivateScope()) {
           m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
         }
       }
@@ -2415,14 +2454,8 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
     if (cp == m->getStmts()) cost = c;
   }
 
-  if (func->containsThis() && !m->getClassScope()) {
-    func->setContainsThis(false);
-    func->setContainsBareThis(false);
-  }
-
   if (m_inlineAsExpr) {
-    if (!Option::AutoInline ||
-        cost > Option::AutoInline ||
+    if (cost > Option::AutoInline ||
         func->isVariableArgument() ||
         m_variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
         m_variables->getAttribute(VariableTable::ContainsExtract) ||
@@ -3234,6 +3267,18 @@ private:
 
 };
 
+static bool isNewResult(ExpressionPtr e) {
+  if (!e) return false;
+  if (e->is(Expression::KindOfNewObjectExpression)) return true;
+  if (e->is(Expression::KindOfAssignmentExpression)) {
+    return isNewResult(spc(AssignmentExpression, e)->getValue());
+  }
+  if (e->is(Expression::KindOfExpressionList)) {
+    return isNewResult(spc(ExpressionList, e)->listValue());
+  }
+  return false;
+}
+
 class ConstructTagger : public ControlFlowGraphWalker {
 public:
   ConstructTagger(ControlFlowGraph *g,
@@ -3252,28 +3297,55 @@ public:
           m_block->setBit(DataFlow::Available, id);
           e->setAnticipated();
         }
-      } else if (e->is(Expression::KindOfSimpleVariable)) {
-        SimpleVariablePtr sv = spc(SimpleVariable, e);
-        if (!sv->couldBeAliased()) {
+      } else {
+        bool set = true, cand = true;
+        SimpleVariablePtr sv;
+        if (e->is(Expression::KindOfSimpleVariable) &&
+            (e->isThis() || !e->hasContext(Expression::ObjectContext))) {
+          sv = spc(SimpleVariable, e);
+          cand = e->isThis() && e->hasContext(Expression::ObjectContext);
+        } else {
+          if (e->is(Expression::KindOfObjectMethodExpression)) {
+            ObjectMethodExpressionPtr om(spc(ObjectMethodExpression, e));
+            if (om->getObject()->is(Expression::KindOfSimpleVariable)) {
+              sv = spc(SimpleVariable, om->getObject());
+            }
+          } else if (e->is(Expression::KindOfObjectPropertyExpression)) {
+            ObjectPropertyExpressionPtr op(spc(ObjectPropertyExpression, e));
+            if (op->getObject()->is(Expression::KindOfSimpleVariable)) {
+              sv = spc(SimpleVariable, op->getObject());
+              set = false;
+            }
+          } else if (e->is(Expression::KindOfAssignmentExpression)) {
+            AssignmentExpressionPtr ae(spc(AssignmentExpression, e));
+            if (ae->getVariable()->is(Expression::KindOfSimpleVariable) &&
+                isNewResult(ae->getValue())) {
+              sv = spc(SimpleVariable, ae->getVariable());
+            }
+          }
+          if (sv && (sv->isThis() || sv->couldBeAliased())) sv.reset();
+        }
+        if (sv) {
           id = m_gidMap["v:" + sv->getName()];
           if (id) {
-            if (e->hasContext(Expression::ObjectContext)) {
-              e->setCanonID(id);
-              e->clearAnticipated();
+            if (cand) {
+              sv->setCanonID(id);
+              sv->clearAnticipated();
               if (m_block->getBit(DataFlow::Available, id)) {
-                markAvailable(e);
+                markAvailable(sv);
               } else {
                 if (!m_block->getBit(DataFlow::Altered, id)) {
-                  e->setAnticipated();
+                  sv->setAnticipated();
                 }
-                if (!e->hasContext(Expression::ExistContext)) {
+                if (set && !sv->hasAnyContext(Expression::ExistContext|
+                                             Expression::UnsetContext)) {
                   m_block->setBit(DataFlow::Available, id, true);
                 }
               }
-            } else if (e->hasAllContext(Expression::Declaration) ||
-                       e->hasAllContext(Expression::UnsetContext|
+            } else if (sv->hasAllContext(Expression::Declaration) ||
+                       sv->hasAllContext(Expression::UnsetContext|
                                         Expression::LValue) ||
-                       e->hasAnyContext(Expression::AssignmentLHS|
+                       sv->hasAnyContext(Expression::AssignmentLHS|
                                         Expression::OprLValue)) {
               m_block->setBit(DataFlow::Available, id, false);
               m_block->setBit(DataFlow::Altered, id, true);

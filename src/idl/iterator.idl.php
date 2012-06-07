@@ -564,3 +564,82 @@ DefineFunction(
 //
 // EndClass()
 
+BeginClass(
+  array(
+    'name'   => "MutableArrayIterator",
+    'bases'  => array('Sweepable'),
+    'desc'   => "Data structure used by the runtime to deal with mutable ".
+                "iteration inside yield generators.",
+    'flags'  => HasDocComment | NoDefaultSweep,
+    'footer' => <<<EOT
+
+  public: union {
+    char m_u[sizeof(MIterCtx)];
+    TypedValue m_align;
+  };
+  public: bool m_valid;
+
+  private: MIterCtx& marr() {
+    return *(MIterCtx*)(m_u);
+  }
+EOT
+,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__construct",
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "array",
+        'type'   => Variant | Reference,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "currentRef",
+    'return' => array(
+      'type'   => Variant | Reference,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "current",
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "key",
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "next",
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "valid",
+    'return' => array(
+      'type'   => Boolean,
+    ),
+  ));
+
+EndClass(
+);
+

@@ -19,8 +19,6 @@
 #include <runtime/base/zend/zend_strtod.h>
 
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -61,10 +59,15 @@ void VariableUnserializer::read(char *buf, uint n) {
      by using min(...) operation rather than complex conditional
      in a loop guard */
   const size_t BUFFER_SIZE = m_end - m_buf;
-  const size_t BUFFER_LIMIT = min(BUFFER_SIZE, size_t(n));
+  const size_t BUFFER_LIMIT = std::min(BUFFER_SIZE, size_t(n));
 
   memcpy(buf, m_buf, BUFFER_LIMIT);
   m_buf += BUFFER_LIMIT;
+}
+
+Variant &VariableUnserializer::addVar() {
+  m_vars.push_back(null);
+  return m_vars.back();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

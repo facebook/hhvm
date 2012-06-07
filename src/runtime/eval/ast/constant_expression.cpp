@@ -23,7 +23,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 ConstantExpression::ConstantExpression(EXPRESSION_ARGS,

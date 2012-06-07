@@ -17,8 +17,6 @@
 #include <runtime/eval/debugger/cmd/cmd_shell.h>
 #include <util/process.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

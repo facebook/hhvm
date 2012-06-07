@@ -27,6 +27,7 @@ class TestExtNetwork : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 
+  bool test_gethostname();
   bool test_gethostbyaddr();
   bool test_gethostbyname();
   bool test_gethostbynamel();

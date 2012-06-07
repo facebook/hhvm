@@ -17,8 +17,6 @@
 #include <runtime/base/server/ip_block_map.h>
 #include <util/logger.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

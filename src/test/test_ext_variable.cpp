@@ -376,7 +376,7 @@ bool TestExtVariable::test_unserialize() {
     VERIFY(v.is(KindOfObject));
     Object obj = v.toObject();
     VS(obj->o_getClassName(), "stdClass");
-    VS(obj.o_get("name"), "value");
+    VS(obj.o_get("name"), null);
   }
   {
     Variant v1 = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));

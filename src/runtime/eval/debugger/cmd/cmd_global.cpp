@@ -19,8 +19,6 @@
 #include <runtime/eval/runtime/eval_frame_injection.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +74,7 @@ void CmdGlobal::setClientOutput(DebuggerClient *client) {
   Array values;
   for (ArrayIter iter(m_globals); iter; ++iter) {
     String name = iter.first().toString();
-    if (client->getDebuggerApiModeSerialize()) {
+    if (client->getDebuggerClientApiModeSerialize()) {
       values.set(name,
                  DebuggerClient::FormatVariable(iter.second(), 200));
     } else {

@@ -131,14 +131,13 @@ Variant ObjectPropertyExpression::set(VariableEnvironment &env, CVarRef val)
     Variant &lv = lobj->lval(env);
     String name(m_name->get(env));
     SET_LINE;
-    lv.o_set(name, val);
+    return lv.o_set(name, val);
   } else {
     Variant obj(m_obj->eval(env));
     String name(m_name->get(env));
     SET_LINE;
-    obj.o_set(name, val);
+    return obj.o_set(name, val);
   }
-  return val;
 }
 
 Variant ObjectPropertyExpression::setRef(VariableEnvironment &env, CVarRef val)
@@ -148,14 +147,13 @@ Variant ObjectPropertyExpression::setRef(VariableEnvironment &env, CVarRef val)
     Variant &lv = lobj->lval(env);
     String name(m_name->get(env));
     SET_LINE;
-    lv.o_setRef(name, val);
+    return lv.o_setRef(name, val);
   } else {
     Variant obj(m_obj->eval(env));
     String name(m_name->get(env));
     SET_LINE;
-    obj.o_setRef(name, val);
+    return obj.o_setRef(name, val);
   }
-  return val;
 }
 
 Variant ObjectPropertyExpression::setOp(VariableEnvironment &env, int op,
@@ -298,6 +296,9 @@ Variant ThisStringPropertyExpression::set(VariableEnvironment &env,
   CVarRef val) const {
   Variant &lv = env.currentObject();
   SET_LINE;
+  if (!lv.is(KindOfObject)) {
+    raise_error("Using $this when not in an object context");
+  }
   lv.o_set(m_name, val);
   return val;
 }
@@ -306,6 +307,9 @@ Variant ThisStringPropertyExpression::setRef(VariableEnvironment &env,
   CVarRef val) const {
   Variant &lv = env.currentObject();
   SET_LINE;
+  if (!lv.is(KindOfObject)) {
+    raise_error("Using $this when not in an object context");
+  }
   lv.o_setRef(m_name, val);
   return val;
 }

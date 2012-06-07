@@ -29,8 +29,6 @@
 #include <runtime/base/util/http_client.h>
 #include <runtime/base/runtime_option.h>
 
-using namespace std;
-using namespace boost;
 using namespace HPHP;
 
 #define PORT_MIN 7300
@@ -62,7 +60,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
     }
   } else {
     string fullPath = "/unittest/rootdoc/string";
-    ofstream f(fullPath.c_str());
+    std::ofstream f(fullPath.c_str());
     if (!f) {
       printf("Unable to open %s for write. Run this test from src/.\n",
              fullPath.c_str());
@@ -444,7 +442,7 @@ static bool PreBindSocketHelper(struct addrinfo *info) {
     return false;
   }
 
-  int ret = bind(fd, info->ai_addr, info->ai_addrlen);
+  int ret = ::bind(fd, info->ai_addr, info->ai_addrlen);
   if (ret < 0) {
     printf("Error binding socket to port %d: %s\n", s_server_port,
         strerror(errno));
@@ -639,14 +637,12 @@ bool TestServer::TestRPCServer() {
   // "int(100)" is printed twice, one from warmup, and the other from include
   VSGETP("<?php\n"
          "var_dump(100);\n",
-         "int(100)\n"
          "int(100)\n",
          "?include=string&output=1&auth=test",
          8083);
 
   VSGETP("<?php\n"
          "var_dump(isset($_ENV['HPHP_RPC']));\n",
-         "bool(true)\n"
          "bool(true)\n",
          "?include=string&output=1&auth=test",
          8083);

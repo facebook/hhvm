@@ -23,7 +23,7 @@
 #include <system/gen/sys/system_globals.h>
 #include <runtime/ext_hhvm/ext_hhvm.h>
 
-using namespace std;
+using std::pair;
 
 ///////////////////////////////////////////////////////////////////////////////
 // These are normally code-generated and we are implementing them here
@@ -287,7 +287,8 @@ Variant invokeImpl(void *extra, CArrRef params) {
 
   return true;
 }
-CallInfo invokeImplCallInfo((void*)invokeImpl, NULL, 0, CallInfo::VarArgs, 0);
+CallInfoWithConstructor invokeImplCallInfo((void*)invokeImpl, NULL, 0,
+                                           CallInfo::VarArgs, 0);
 bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
                    int64 hash /* = -1 */) {
   if (!strcasecmp(s, "nontest")) {
@@ -319,7 +320,8 @@ void init_global_variables() {
   ThreadInfo::s_threadInfo->m_globals = g;
   g->initialize();
 }
-void free_global_variables() { g_variables.destroy();}
+void free_global_variables() { g_variables.destroy(); }
+void free_global_variables_after_sweep() { g_variables.nullOut(); }
 void init_literal_varstrings() {}
 bool has_eval_support = true;
 Variant invoke_file(CStrRef path, bool once /* = false */,
@@ -374,17 +376,11 @@ const ObjectStaticCallbacks * get_object_static_callbacks(CStrRef s) {
   return NULL;
 }
 
-void fiber_marshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
-                                FiberReferenceMap &refMap) {
-}
-
-void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
-                                  FiberReferenceMap &refMap,
-                                  char defstrategy,
-                                  const vector<pair<string, char> > &resolver){
-}
-
 Array get_global_state() { return Array(); }
+
+HphpBinary::Type getHphpBinaryType() {
+  return HphpBinary::test;
+}
 
 #ifdef HHVM
 const long long hhbc_ext_funcs_count = 0;

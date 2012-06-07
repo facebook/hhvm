@@ -303,5 +303,96 @@ Variant f_snuncompress(CStrRef data) {
 #endif
 }
 
+#define NZLIB_MAGIC 0x6e7a6c69 /* nzli */
+/* The new compression format stores a magic number and the size
+   of the uncompressed object.  The magic number is stored to make sure
+   bad values do not cause us to allocate bogus or extremely large amounts
+   of memory when encountering an object with the new format. */
+typedef struct nzlib_format_s {
+    uint32_t magic;
+    uint32_t uncompressed_sz;
+    Bytef buf[0];
+} nzlib_format_t;
+
+
+
+Variant f_nzcompress(CStrRef uncompressed) {
+  nzlib_format_t* format = NULL;
+  size_t len = 0;
+  char *compressed = NULL;
+  int rc;
+
+  len = compressBound(uncompressed.size());
+  format = (nzlib_format_t*)malloc(sizeof(*format) + len);
+  if (format == NULL) {
+    goto error;
+  }
+
+  format->magic = htonl(NZLIB_MAGIC);
+  format->uncompressed_sz = htonl(uncompressed.size());
+
+  rc = compress(format->buf, &len, (uint8_t*)uncompressed.data(),
+                uncompressed.size());
+  if (rc != Z_OK) {
+    goto error;
+  }
+
+  compressed = (char*)realloc(format, len + sizeof(*format) + 1);
+  if (compressed == NULL) {
+    goto error;
+  }
+  compressed[len + sizeof(*format)] = '\0';
+  return String(compressed, len + sizeof(*format), AttachString);
+
+error:
+  free(format);
+  return false;
+}
+
+Variant f_nzuncompress(CStrRef compressed) {
+  char *uncompressed = NULL;
+  size_t len = 0;
+  nzlib_format_t* format = NULL;
+  int rc;
+
+  if (compressed.size() < (ssize_t)sizeof(*format)) {
+    goto error;
+  }
+
+  format = (nzlib_format_t*)compressed.data();
+  if (ntohl(format->magic) != NZLIB_MAGIC) {
+    goto error;
+  }
+
+  len = ntohl(format->uncompressed_sz);
+  if (len == 0) {
+    return String("", AttachLiteral);
+  }
+
+  uncompressed = (char*)malloc(len + 1);
+  if (uncompressed == NULL) {
+    goto error;
+  }
+  rc = uncompress((Bytef*)uncompressed, &len, format->buf,
+                  compressed.size() - sizeof(*format));
+  if (rc != Z_OK) {
+    goto error;
+  }
+
+  if (format->uncompressed_sz == 0) {
+    char *p = (char*)realloc(uncompressed, len + 1);
+    if (p == NULL) {
+      goto error;
+    }
+    uncompressed = p;
+  }
+  uncompressed[len] = '\0';
+  return String(uncompressed, len, AttachString);
+
+error:
+  free(uncompressed);
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

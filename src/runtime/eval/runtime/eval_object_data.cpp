@@ -45,11 +45,12 @@ IMPLEMENT_OBJECT_ALLOCATION_CLS(HPHP::Eval,EvalObjectData)
 EvalObjectData::EvalObjectData(ClassEvalState &ce, const char* pname,
                                ObjectData* r /* = NULL */)
 : DynamicObjectData(0, pname, r ? r : this), m_ce(ce) {
+  setId(r);
   if (pname) setRoot(root); // For ext classes
   if (r == NULL) {
     RequestEvalState::registerObject(this);
   }
-  setAttributes(m_ce.getAttributes());
+  setAttributes(m_ce.getAttributes() | NoDestructor);
 
   // an object can never live longer than its class
   m_class_name = m_ce.getClass()->name();
@@ -85,55 +86,41 @@ EvalObjectData::EvalObjectData(EvalObjectData *original) :
   cloneDynamic(original);
 }
 
+EvalObjectData::~EvalObjectData() {
+  if (root == this) {
+    RequestEvalState::deregisterObject(this);
+  }
+}
+
 void EvalObjectData::init() {
   m_ce.getClass()->initializeObject(m_ce, this);
   DynamicObjectData::init();
 }
 
 void EvalObjectData::getConstructor(MethodCallPackage &mcp) {
-  const MethodStatement *ms = m_ce.getConstructor();
-  if (ms) {
-    mcp.extra = (void*)ms;
+  const MethodStatementWrapper *msw = &m_ce.getConstructorWrapper();
+  if (msw->m_methodStatement) {
+    mcp.extra = (void*)msw;
     mcp.obj = this;
-    mcp.ci = ms->getCallInfo();
+    mcp.ci = msw->m_methodStatement->getCallInfo();
   } else {
     DynamicObjectData::getConstructor(mcp);
   }
 }
 
-void EvalObjectData::destruct() {
-  const MethodStatement *ms;
-  incRefCount();
-  int access = 0;
-  if (!inCtorDtor() && (ms = getMethodStatement(s___destruct, access))) {
-    setInDtor();
-    try {
-      ms->invokeInstance(Object(root), Array(), false);
-    } catch (...) {
-      handle_destructor_exception();
-    }
-  }
-  decRefCount();
-  if (root == this) {
-    if (LIKELY(getCount() == 0)) {
-      RequestEvalState::deregisterObject(this);
-    }
-  }
-}
-
-Array EvalObjectData::o_toArray() const {
-  Array values(DynamicObjectData::o_toArray());
-  Array props(Array::Create());
-  m_ce.getClass()->toArray(props, values);
-  if (!values.empty()) {
-    props += values;
-  }
-  return props;
-}
-
 Variant *EvalObjectData::o_realPropHook(
   CStrRef s, int flags, CStrRef context /* = null_string */) const {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  if (UNLIKELY(flags & RealPropExist)) {
+    Variant *t = EvalObjectData::o_realPropHook(
+      s, (flags & ~RealPropExist) | RealPropUnchecked, c);
+    if (t) return t;
+    if (m_ce.getClass()->checkPropExist(s)) {
+      return (Variant*)&null_variant;
+    }
+    return NULL;
+  }
+
   if (Variant *priv =
       const_cast<Array&>(m_privates).lvalPtr(c, flags & RealPropWrite, false)) {
     if (Variant *ret = priv->lvalPtr(s, flags & RealPropWrite, false)) {
@@ -184,24 +171,22 @@ Variant EvalObjectData::o_setError(CStrRef prop, CStrRef context) {
 
 void EvalObjectData::o_getArray(Array &props, bool pubOnly /* = false */)
 const {
-  if (!pubOnly) {
-    String zero("\0", 1, AttachLiteral);
-    for (ArrayIter it(m_privates); !it.end(); it.next()) {
-      String prefix(zero);
-      prefix += it.first();
-      prefix += zero;
-      for (ArrayIter it2(it.second()); !it2.end(); it2.next()) {
-        CVarRef v = it2.secondRef();
-        if (v.isInitialized()) {
-          props.lvalAt(prefix + it2.first()).setWithRef(v);
-        }
-      }
-    }
+  Array dyn_props = (parent.get() ? parent.get() : this)->getProperties();
+  m_ce.getClass()->getArray(props, dyn_props, &m_ce, pubOnly ? 0 : &m_privates);
+
+  if (parent.get()) {
+    ClassInfo::GetArray(parent.get(), parent.get()->o_getClassPropTable(),
+                        props,
+                        pubOnly ?
+                        ClassInfo::GetArrayNone :
+                        ClassInfo::GetArrayPrivate);
   }
-  DynamicObjectData::o_getArray(props, pubOnly);
-  if (pubOnly) {
-    const ClassInfo *info = ClassInfo::FindClass(o_getClassName());
-    info->filterProperties(props, ClassInfo::IsProtected);
+  if (!dyn_props.empty()) {
+    for (ArrayIter it(dyn_props); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      props.lvalAt(key, AccessFlags::Key).setWithRef(value);
+    }
   }
 }
 
@@ -227,13 +212,14 @@ CStrRef EvalObjectData::o_getClassNameHook() const {
   return m_class_name;
 }
 
-const MethodStatement
-*EvalObjectData::getMethodStatement(CStrRef name, int &access) const {
-  return m_ce.getMethod(name, access);
+const MethodStatementWrapper *EvalObjectData::getMethodStatementWrapper(
+  CStrRef name) const {
+  return m_ce.getMethod(name);
 }
 
-const MethodStatement* EvalObjectData::getConstructorStatement() const {
-  return m_ce.getConstructor();
+const MethodStatementWrapper*
+EvalObjectData::getConstructorStatementWrapper() const {
+  return &m_ce.getConstructorWrapper();
 }
 
 bool EvalObjectData::o_instanceof_hook(CStrRef s) const {
@@ -242,12 +228,11 @@ bool EvalObjectData::o_instanceof_hook(CStrRef s) const {
 }
 
 const CallInfo *EvalObjectData::t___invokeCallInfoHelper(void *&extra) {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___invoke, access);
-  if (LIKELY(ms != NULL)) {
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___invoke);
+  if (LIKELY(msw != NULL)) {
     extra = (void*) &m_invokeMcp;
-    m_invokeMcp.extra = (void*) ms;
-    return ms->getCallInfo();
+    m_invokeMcp.extra = (void*) msw;
+    return msw->m_methodStatement->getCallInfo();
   }
   return DynamicObjectData::t___invokeCallInfoHelper(extra);
 }
@@ -260,9 +245,9 @@ bool EvalObjectData::o_get_call_info_hook(const char *clsname,
     ClassEvalState::MethodTable::const_iterator it =
       meths.find(*mcp.name);
     if (it != meths.end()) {
-      if (it->second.first) {
-        mcp.extra = (void*)it->second.first;
-        mcp.ci = it->second.first->getCallInfo();
+      if (it->second.m_methodStatement) {
+        mcp.extra = (void*)&it->second;
+        mcp.ci = it->second.m_methodStatement->getCallInfo();
         return true;
       }
     }
@@ -272,12 +257,12 @@ bool EvalObjectData::o_get_call_info_hook(const char *clsname,
   } else {
     if (m_ce.getClass()->subclassOf(clsname)) {
       ClassEvalState *ce;
-      const MethodStatement *ms =
+      const MethodStatementWrapper *msw =
         RequestEvalState::findMethod(clsname, *(mcp.name), ce);
-      if (ms) {
-        mcp.extra = (void*)ms;
+      if (msw && msw->m_methodStatement) {
+        mcp.extra = (void*)msw;
         mcp.obj = this;
-        mcp.ci = ms->getCallInfo();
+        mcp.ci = msw->m_methodStatement->getCallInfo();
         return true;
       }
     }
@@ -290,62 +275,59 @@ bool EvalObjectData::o_get_call_info_hook(const char *clsname,
 
 Variant EvalObjectData::doCall(Variant v_name, Variant v_arguments,
                                bool fatal) {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___call, access);
-  if (ms) {
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___call);
+  if (msw && msw->m_methodStatement) {
     if (v_arguments.isNull()) {
       v_arguments = Array::Create();
     }
-    return ms->invokeInstance(Object(root),
-                              CREATE_VECTOR2(v_name, v_arguments), false);
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      CREATE_VECTOR2(v_name, v_arguments), msw, false);
   } else {
     return DynamicObjectData::doCall(v_name, v_arguments, fatal);
   }
 }
 
 Variant EvalObjectData::t___destruct() {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___destruct, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root), Array(), false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___destruct);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root), Array(),
+      msw, false);
   } else {
     return DynamicObjectData::t___destruct();
   }
 }
 Variant EvalObjectData::t___set(Variant v_name, Variant v_value) {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___set, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root),
-                              CREATE_VECTOR2(v_name, withRefBind(v_value)),
-        false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___set);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      CREATE_VECTOR2(v_name, withRefBind(v_value)), msw, false);
   } else {
     return DynamicObjectData::t___set(v_name, withRefBind(v_value));
   }
 }
 Variant EvalObjectData::t___get(Variant v_name) {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___get, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name), false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___get);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      CREATE_VECTOR1(v_name), msw, false);
   } else {
     return DynamicObjectData::t___get(v_name);
   }
 }
 bool EvalObjectData::t___isset(Variant v_name) {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___isset, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name), false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___isset);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      CREATE_VECTOR1(v_name), msw, false);
   } else {
     return DynamicObjectData::t___isset(v_name);
   }
 }
 Variant EvalObjectData::t___unset(Variant v_name) {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___unset, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name), false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___unset);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      CREATE_VECTOR1(v_name), msw, false);
   } else {
     return DynamicObjectData::t___unset(v_name);
   }
@@ -353,44 +335,43 @@ Variant EvalObjectData::t___unset(Variant v_name) {
 
 bool EvalObjectData::php_sleep(Variant &ret) {
   ret = t___sleep();
-  int access = 0;
-  return getMethodStatement(s___sleep, access);
+  return getMethodStatementWrapper(s___sleep);
 }
 
 Variant EvalObjectData::t___sleep() {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___sleep, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root), Array(), false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___sleep);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      Array(), msw, false);
   } else {
     return DynamicObjectData::t___sleep();
   }
 }
 
 Variant EvalObjectData::t___wakeup() {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___wakeup, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root), Array(), false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___wakeup);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      Array(), msw, false);
   } else {
     return DynamicObjectData::t___wakeup();
   }
 }
 
 String EvalObjectData::t___tostring() {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___tostring, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root), Array(), false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___tostring);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      Array(), msw, false);
   } else {
     return DynamicObjectData::t___tostring();
   }
 }
 Variant EvalObjectData::t___clone() {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s___clone, access);
-  if (ms) {
-    return ms->invokeInstance(Object(root), Array(), false);
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s___clone);
+  if (msw && msw->m_methodStatement) {
+    return msw->m_methodStatement->invokeInstance(Object(root),
+      Array(), msw, false);
   } else {
     return DynamicObjectData::t___clone();
   }
@@ -401,35 +382,15 @@ ObjectData* EvalObjectData::clone() {
 }
 
 Variant &EvalObjectData::___offsetget_lval(Variant v_name) {
-  int access = 0;
-  const MethodStatement *ms = getMethodStatement(s_offsetget, access);
-  if (ms) {
+  const MethodStatementWrapper *msw = getMethodStatementWrapper(s_offsetget);
+  if (msw && msw->m_methodStatement) {
     Variant &v = get_globals()->__lvalProxy;
-    v = ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name), false);
+    v = msw->m_methodStatement->invokeInstance(Object(root),
+      CREATE_VECTOR1(v_name), msw, false);
     return v;
   } else {
     return DynamicObjectData::___offsetget_lval(v_name);
   }
-}
-
-Object EvalObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
-  ObjectData *px = (ObjectData *)refMap.lookup((void *)this);
-  if (px) return px;
-  Object ret = ObjectData::fiberMarshal(refMap);
-  EvalObjectData *obj = dynamic_cast<EvalObjectData*>(ret.get());
-  ASSERT(obj);
-  obj->m_privates = m_privates.fiberMarshal(refMap);
-  return ret;
-}
-
-Object EvalObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  ObjectData *px = (ObjectData *)refMap.lookup((void *)this);
-  if (px) return px;
-  Object ret = ObjectData::fiberUnmarshal(refMap);
-  EvalObjectData *obj = dynamic_cast<EvalObjectData*>(ret.get());
-  ASSERT(obj);
-  obj->m_privates = m_privates.fiberUnmarshal(refMap);
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

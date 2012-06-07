@@ -137,7 +137,7 @@ enum TError {
   ERR_BAD_VERSION = 4
 };
 
-static void thrift_error(CStrRef what, TError why) __attribute__((noreturn));
+static void thrift_error(CStrRef what, TError why) ATTRIBUTE_NORETURN;
 static void thrift_error(CStrRef what, TError why) {
   throw create_object("TProtocolException", CREATE_VECTOR2(what, why));
 }
@@ -200,7 +200,7 @@ class CompactWriter {
         TType fieldType = (TType)fieldSpec
           .rvalAt(s_type, AccessFlags::Error_Key).toByte();
 
-        Variant fieldVal = obj->o_get(fieldName);
+        Variant fieldVal = obj->o_get(fieldName, true, obj->o_getClassName());
 
         if (!fieldVal.isNull()) {
           writeFieldBegin(fieldNo, fieldType);
@@ -512,7 +512,7 @@ class CompactReader {
           if (typesAreCompatible(fieldType, expectedType)) {
             readComplete = true;
             Variant fieldValue = readField(fieldSpec, fieldType);
-            dest->set(fieldName, fieldValue);
+            dest->o_set(fieldName, fieldValue, dest->o_getClassName());
           }
         }
 

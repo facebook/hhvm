@@ -18,8 +18,6 @@
 #include <runtime/base/externals.h>
 #include <util/lock.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -118,6 +118,7 @@ struct DataBlock {
    *   allocAt supports this.
    */
   void* allocAt(size_t &frontierOff, size_t sz, size_t align = 16) {
+    align = Util::roundUpToPowerOfTwo(align);
     uint8_t* frontier = base + frontierOff;
     ASSERT(base && frontier);
     int slop = uintptr_t(frontier) & (align - 1);
@@ -146,8 +147,8 @@ struct DataBlock {
     return frontier + nBytes <= base + size;
   }
 
-  bool isValidAddress(const CodeAddress tca) {
-    return tca >= base && tca < (frontier + size);
+  bool isValidAddress(const CodeAddress tca) const {
+    return tca >= base && tca < (base + size);
   }
 
   void byte(const uint8_t byte) {
@@ -263,6 +264,13 @@ namespace reg {
 
   static const int fsPrefix = 0x64;
   static const int gsPrefix = 0x65;
+
+  /*
+   * rFlag is intended for situations where a function takes in a
+   * register name and has a use for a third state beyond the existing
+   * 'noreg' distinction.
+   */
+  static const int rFlag = 0xff;
 }
 
 enum instrFlags {
@@ -327,6 +335,7 @@ const X64Instr instr_sub =     { { 0x29,0x2B,0x81,0x05,0x2D,0xF1 }, 0x0810 };
 const X64Instr instr_and =     { { 0x21,0x23,0x81,0x04,0x25,0xF1 }, 0x0810 };
 const X64Instr instr_or  =     { { 0x09,0x0B,0x81,0x01,0x0D,0xF1 }, 0x0810 };
 const X64Instr instr_xor =     { { 0x31,0x33,0x81,0x06,0x35,0xF1 }, 0x0810 };
+const X64Instr instr_movb =    { { 0x88,0x8A,0xC6,0x00,0xF1,0xB0 }, 0x0210 };
 const X64Instr instr_mov =     { { 0x89,0x8B,0xC7,0x00,0xF1,0xB8 }, 0x0200 };
 const X64Instr instr_test =    { { 0x85,0x85,0xF7,0x00,0xA9,0xF1 }, 0x0800 };
 const X64Instr instr_cmp =     { { 0x39,0x3B,0x81,0x07,0x3D,0xF1 }, 0x0810 };
@@ -363,34 +372,45 @@ const X64Instr instr_shrd =    { { 0xAD,0xF1,0xAC,0x00,0xF1,0xF1 }, 0x0082 };
 const X64Instr instr_int3 =    { { 0xF1,0xF1,0xF1,0x00,0xF1,0xCC }, 0x0500 };
 
 enum ConditionCode {
+  CC_O    = 0x00,
+  CC_NO   = 0x01,
+
+  CC_B    = 0x02,
+  CC_NAE  = 0x02,
+  CC_AE   = 0x03,
+  CC_NB   = 0x03,
+  CC_NC   = 0x03,
+
   CC_E    = 0x04,
   CC_Z    = 0x04,
   CC_NE   = 0x05,
   CC_NZ   = 0x05,
-  CC_B    = 0x02,
-  CC_NAE  = 0x02,
+
   CC_BE   = 0x06,
   CC_NA   = 0x06,
   CC_A    = 0x07,
   CC_NBE  = 0x07,
-  CC_AE   = 0x03,
-  CC_NB   = 0x03,
-  CC_NC   = 0x03,
+
+  CC_S    = 0x08,
+  CC_NS   = 0x09,
+
+  CC_P    = 0x0A,
+  CC_NP   = 0x0B,
+
   CC_L    = 0x0C,
   CC_NGE  = 0x0C,
+  CC_GE   = 0x0D,
+  CC_NL   = 0x0D,
+
   CC_LE   = 0x0E,
   CC_NG   = 0x0E,
   CC_G    = 0x0F,
   CC_NLE  = 0x0F,
-  CC_GE   = 0x0D,
-  CC_NL   = 0x0D,
-  CC_S    = 0x08,
-  CC_NS   = 0x09,
-  CC_O    = 0x00,
-  CC_NO   = 0x01,
-  CC_P    = 0x0A,
-  CC_NP   = 0x0B
 };
+
+inline ConditionCode ccNegate(ConditionCode c) {
+  return ConditionCode(int(c) ^ 1); // And you thought x86 was irregular!
+}
 
 /*
  * When selecting encodings, we often need to assess a two's complement
@@ -465,6 +485,13 @@ struct X64Assembler {
     code.bytes(n, bs);
   }
 
+  static X64Assembler &Choose(X64Assembler &a, X64Assembler &b,
+                              const CodeAddress addr) {
+    if (a.code.isValidAddress(addr)) return a;
+    ASSERT(b.code.isValidAddress(addr));
+    return b;
+  }
+
   inline int computeImmediateSize(X64Instr op, ssize_t imm)
       __attribute__((noinline)) {
     // Most instructions take a 32-bit immediate, except
@@ -511,8 +538,8 @@ struct X64Assembler {
         qword(imm);
       }
     } else {
-      // byte immediate between 0 and 31 for shift/rotate instructions
-      byte(imm & 0x1f);
+      // we always use a byte-sized immediate for shift instructions
+      byte(imm);
     }
   }
 
@@ -772,7 +799,7 @@ struct X64Assembler {
     ASSERT(op.flags & IF_JCC);
     ssize_t delta = imm - ((ssize_t)code.frontier + 6);
     char* bdelta = (char*)&delta;
-    uint8_t instr[6] = { 0x0f, 0x80 | jcond,
+    uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
     bytes(6, instr);
   }
@@ -869,9 +896,10 @@ struct X64Assembler {
     }
     // Handle special cases for 'br'
     if (br == reg::noreg) {
-      // If 'reg::noreg' was specified for 'br', we use the
-      // encoding for the bp register, and we must set
-      // mod=0 and "upgrade" to a DWORD-sized displacement
+      // If 'reg::noreg' was specified for 'br', we use the encoding
+      // for the rbp register (or rip, if we're emitting a
+      // rip-relative instruction), and we must set mod=0 and
+      // "upgrade" to a DWORD-sized displacement
       br = 5;
       mod = 0;
       dispSize = sz::dword;
@@ -910,6 +938,11 @@ struct X64Assembler {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true, opSz);
   }
 
+  void emitIM8(X64Instr op, int br, int ir, int s, int disp, ssize_t imm)
+      ALWAYS_INLINE {
+    emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true, sz::byte);
+  }
+
   void emitIM32(X64Instr op, int br, int ir, int s, int disp, ssize_t imm)
       ALWAYS_INLINE {
     emitCMX(op, 0, br, ir, s, disp, reg::noreg, false, imm, true, sz::dword);
@@ -931,8 +964,13 @@ struct X64Assembler {
   }
 
   void emitMR(X64Instr op, int br, int ir, int s, int disp, int r,
-      int opSz = sz::qword) ALWAYS_INLINE {
-    emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, opSz);
+      int opSz = sz::qword, bool ripRelative = false) ALWAYS_INLINE {
+    emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, opSz, ripRelative);
+  }
+
+  void emitMR8(X64Instr op, int br, int ir, int s, int disp, int r)
+      ALWAYS_INLINE {
+    emitCMX(op, 0, br, ir, s, disp, r, true, 0, false, sz::byte);
   }
 
   void emitMR32(X64Instr op, int br, int ir, int s, int disp, int r)
@@ -1033,6 +1071,16 @@ struct X64Assembler {
     emitRM32(instr_mov, rdest, reg::noreg, sz::byte, off, rsrc);
   }
 
+  inline void load_reg64_disp_reg8(register_name_t rsrc, int off,
+                                   register_name_t rdest) {
+    emitMR8(instr_movb, rsrc, reg::noreg, sz::byte, off, rdest);
+  }
+
+  inline void loadzxb_reg64_disp_reg64(register_name_t rsrc, int off,
+                                       register_name_t rdest) {
+    emitMR8(instr_movzbq, rsrc, reg::noreg, sz::byte, off, rdest);
+  }
+
   inline void load_reg64_disp_reg32(register_name_t rsrc, int off,
                                     register_name_t rdest) {
     emitMR32(instr_mov, rsrc, reg::noreg, sz::byte, off, rdest);
@@ -1040,6 +1088,17 @@ struct X64Assembler {
 
   inline void load_disp32_reg64(int disp, register_name_t rdest) {
     emitMR(instr_mov, reg::noreg, reg::noreg, sz::byte, disp, rdest);
+  }
+
+  inline void load_reg64_disp_index_reg32(register_name_t rsrc,
+                                          int off,
+                                          register_name_t rindex,
+                                          register_name_t rdest) {
+    emitMR32(instr_mov, rsrc, rindex, sz::dword, off, rdest);
+  }
+
+  inline void store_imm8_disp_reg(int imm, int off, int rdest) {
+    emitIM8(instr_movb, rdest, reg::noreg, sz::byte, off, imm);
   }
 
   inline void store_imm32_disp_reg(int imm, int off, int rdest) {
@@ -1058,7 +1117,7 @@ struct X64Assembler {
     emitRR32(instr_mov, rsrc, rdest);
   }
 
-  inline void store_imm_disp_reg64(int64_t imm, int off, int rdest) {
+  inline void store_imm64_disp_reg64(int64_t imm, int off, int rdest) {
     mov_imm64_reg(imm, reg::rScratch);
     emitRM(instr_mov, rdest, reg::noreg, sz::byte, off, reg::rScratch);
   }
@@ -1074,17 +1133,29 @@ struct X64Assembler {
     emitMR(instr_mov, rsrc, reg::noreg, sz::byte, off, rdest);
   }
 
+  // mov disp(%rsrc) + S*%rindex, %rdest
+  inline void load_reg64_disp_index_reg64(register_name_t rsrc,
+                                          int off,
+                                          register_name_t rindex,
+                                          register_name_t rdest) {
+    emitMR(instr_mov, rsrc, rindex, sz::qword, off, rdest);
+  }
+
   /*
    * Control-flow directives. The labeling/patching facilities
    * available are primitive.
    */
 
+  inline bool jmpDeltaFits(CodeAddress dest) {
+    int64_t delta = dest - (code.frontier + 5);
+    return deltaFits(delta, sz::dword);
+  }
+
   /*
    * Jump to an absolute address. May emit code that stomps rScratch.
    */
   inline void jmp(CodeAddress dest) {
-    int64_t delta = dest - (code.frontier + 5);
-    if (!deltaFits(delta, sz::dword)) {
+    if (!jmpDeltaFits(dest)) {
       mov_imm64_reg   ((uint64_t)dest, reg::rScratch);
       jmp_reg        (reg::rScratch);
       return;
@@ -1100,12 +1171,33 @@ struct X64Assembler {
     emitR(instr_jmp, rn);
   }
 
+  inline void jmp_reg64_displ(register_name_t rbase, int off) {
+    emitCMX(instr_jmp, 0, rbase, reg::noreg, sz::nosize, off, reg::noreg, false,
+            0, false, sz::qword);
+  }
+
+  inline void jmp_reg64_index_displ(register_name_t rbase,
+                                    register_name_t rindex,
+                                    int off) {
+    emitCMX(instr_jmp, 0, rbase, rindex, sz::qword,  off, reg::noreg, false,
+            0, false, sz::qword);
+  }
+
+  // CMOVcc [rbase + off], rdest
+  inline void cload_reg64_disp_reg64(ConditionCode cc, register_name_t rbase,
+                                     int off, register_name_t rdest) {
+    emitCMX(instr_cmovcc, cc, rbase, reg::noreg, sz::byte, off, rdest, false,
+            0, false);
+  }
+  inline void cmov_reg64_reg64(ConditionCode cc, int rsrc, int rdest) {
+    emitCRR(instr_cmovcc, cc, rsrc, rdest);
+  }
+
   /*
    * Call an absolute address. May emit code that stomps rScratch.
    */
   inline void call(CodeAddress dest) {
-    int64_t delta = dest - (code.frontier + 5);
-    if (!deltaFits(delta, sz::dword)) {
+    if (!jmpDeltaFits(dest)) {
       mov_imm64_reg   ((int64_t)dest, reg::rScratch);
       call_reg        (reg::rScratch);
       return;
@@ -1225,6 +1317,11 @@ struct X64Assembler {
     emitMR(instr_lea, rsrc, reg::noreg, sz::byte, off, rdest);
   }
 
+  inline void lea_rip_disp_reg64(int off, int rdest) {
+    emitMR(instr_lea, reg::noreg, reg::noreg, sz::byte, off, rdest, sz::qword,
+           true);
+  }
+
   inline void not_reg64(register_name_t rn) {
     emitR(instr_not, rn);
   }
@@ -1276,7 +1373,7 @@ struct X64Assembler {
   /* opq imm, disp(rdest) */                                             \
   inline void name ## _imm64_disp_reg64(int64_t imm, int disp,           \
                                         int rdest) {                     \
-    emitIM(instr_cmp, rdest, reg::noreg, sz::byte, disp, imm);           \
+    emitIM(instr_ ## name, rdest, reg::noreg, sz::byte, disp, imm);      \
   }                                                                      \
   /* op imm64, rdest */                                                  \
   /* NOTE: This will emit multiple x64 instructions and use the */       \
@@ -1298,15 +1395,31 @@ struct X64Assembler {
     emitRM32(instr_ ## name, rdest, reg::noreg, sz::byte, disp, rsrc);   \
   }                                                                      \
 
-  SIMPLE_OP(add)
-  SIMPLE_OP(xor)
-  SIMPLE_OP(sub)
-  SIMPLE_OP(and)
-  SIMPLE_OP(or)
+  // These two do not support standard: base + index * scale + disp
   SIMPLE_OP(shl)
   SIMPLE_OP(shr)
-  SIMPLE_OP(test)
-  SIMPLE_OP(cmp)
+
+#define SCALED_OP(name)                                                  \
+  SIMPLE_OP(name)                                                        \
+  /* opl rsrc, disp(rbase, rindex, scale), rdest */                      \
+  inline void name ## _reg64_reg64_index_scale_disp(int rsrc,            \
+                      int rbase, int rindex, int scale, int disp) {      \
+    emitRM(instr_ ## name, rbase, rindex, scale, disp, rsrc);            \
+  }                                                                      \
+  /* opl disp(rbase, rindex, scale), rdest */                            \
+  inline void name ## _reg64_index_scale_disp_reg64(int rbase,           \
+                      int rindex, int scale, int disp, int rdest) {      \
+    emitMR(instr_ ## name, rbase, rindex, scale, disp, rdest);           \
+  }                                                                      \
+
+  SCALED_OP(add)
+  SCALED_OP(xor)
+  SCALED_OP(sub)
+  SCALED_OP(and)
+  SCALED_OP(or)
+  SCALED_OP(test)
+  SCALED_OP(cmp)
+#undef SCALED_OP
 #undef SIMPLE_OP
 
   // imul rsrc, rdest
@@ -1379,6 +1492,43 @@ struct X64Assembler {
   }
   inline void xchg_reg32_reg32(register_name_t rsrc, register_name_t rdest) {
     emitRR32(instr_xchg, rsrc, rdest);
+  }
+  inline int getDispSize(int disp) {
+    if (disp == 0) {
+      return sz::nosize;
+    }
+    if (disp <= 127 && disp >= -128) {
+      return sz::byte;
+    }
+    return sz::dword;
+  }
+  inline int getModFromDisp(int disp) {
+    switch (getDispSize(disp)) {
+      case sz::nosize: return 0;
+      case sz::byte:   return 1;
+      default:         return 2;
+    }
+  }
+  inline void emitDisp(int disp) {
+    int dispSize = getDispSize(disp);
+    if (dispSize == sz::dword) {
+      dword(disp);
+    } else if (dispSize == sz::byte) {
+      byte(disp & 0xff);
+    }
+  }
+  inline void emitModrmDisp(int r, int disp, register_name_t base) {
+    emitModrm(getModFromDisp(disp), r, base);
+    emitDisp(disp);
+  }
+  inline void cmp_imm8_disp_reg8(int8_t imm, int disp, register_name_t base) {
+    if (base & 8) {
+      byte(0x41); // rex (base is an extended register)
+    }
+    // 80 /7 ib
+    byte(0x80); // opcode
+    emitModrmDisp(7, disp, base);
+    byte(imm & 0xFF); // 8-bit immediate
   }
 };
 

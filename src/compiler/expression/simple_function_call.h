@@ -41,6 +41,10 @@ public:
   bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
+  void setFromCompiler() { m_fromCompiler = true; }
+  void setThrowFatal() { m_noPrefix = true; m_type = ThrowFatalFunction; }
+  int isFatalFunction() const { return m_type == ThrowFatalFunction; }
+  int isStaticCompact() const { return m_type == StaticCompactFunction; }
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
@@ -50,10 +54,6 @@ public:
   // implementing IParseHandler
   virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr fs);
 
-  // extensible analysis by defining a subclass to be RealSimpleFunctionCall
-  virtual ExpressionPtr onPreOptimize(AnalysisResultConstPtr ar) {
-    return ExpressionPtr();
-  }
   virtual void beforeCheck(AnalysisResultPtr ar) {}
 
   void addDependencies(AnalysisResultPtr ar);
@@ -71,6 +71,8 @@ public:
   bool writesLocals() const;
   void updateVtFlags();
   void setLocalThis(const std::string &name) { m_localThis = name; }
+  bool isCallToFunction(const char *name);
+  bool isCompilerCallToFunction(const char *name);
 protected:
   enum FunctionType {
     UnknownType,
@@ -89,6 +91,7 @@ protected:
     UnserializeFunction,
     GetDefinedVarsFunction,
     FBCallUserFuncSafeFunction,
+    ThrowFatalFunction,
 
     LastType, // marker, not a valid type
   };
@@ -98,8 +101,11 @@ protected:
   unsigned m_dynamicConstant : 1;
   unsigned m_builtinFunction : 1;
   unsigned m_noPrefix : 1;
+  unsigned m_fromCompiler : 1;
   unsigned m_invokeFewArgsDecision : 1;
   unsigned m_dynamicInvoke : 1;
+  unsigned m_transformed : 1;
+  unsigned m_no_volatile_check : 1;
 
   int m_safe;
   ExpressionPtr m_safeDef;

@@ -3,7 +3,7 @@ get priv
 int(1234)
 int(123)
 object(C) (2) {
-  ["priv:private"]=>
+  ["priv":"C":private]=>
   int(1234)
   ["pub"]=>
   int(123)
@@ -13,7 +13,7 @@ get priv
 int(6789)
 int(678)
 object(C) (2) {
-  ["priv:private"]=>
+  ["priv":"C":private]=>
   int(6789)
   ["pub"]=>
   int(678)
@@ -23,19 +23,19 @@ object(C) (2) {
 
 __set foo
 object(D) (1) {
-  ["foo:protected"]=>
+  ["foo":protected]=>
   NULL
 }
 __get foo
 __set foo
 object(D) (1) {
-  ["foo:protected"]=>
+  ["foo":protected]=>
   NULL
 }
 __get foo
 __set foo
 object(D) (1) {
-  ["foo:protected"]=>
+  ["foo":protected]=>
   NULL
 }
 

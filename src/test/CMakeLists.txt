@@ -1,8 +1,14 @@
 set(CXX_SOURCES)
+
+set(RECURSIVE_SOURCE_SUBDIRS vm)
+foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
+	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
+	list(APPEND CXX_SOURCES ${files})
+endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
+
 auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 
-add_definitions(-DHHVM_PATH="hphpi/hphpi")
 add_definitions(-DHPHPI_PATH="hphpi/hphpi")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_base_suite.inc ${CMAKE_CURRENT_SOURCE_DIR}/test_suite.inc COPYONLY)

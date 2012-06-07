@@ -25,6 +25,7 @@
 bool TestExtNetwork::RunTests(const std::string &which) {
   bool ret = true;
 
+  RUN_TEST(test_gethostname);
   RUN_TEST(test_gethostbyaddr);
   RUN_TEST(test_gethostbyname);
   RUN_TEST(test_gethostbynamel);
@@ -61,6 +62,11 @@ bool TestExtNetwork::RunTests(const std::string &which) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool TestExtNetwork::test_gethostname() {
+  VERIFY(f_gethostname() != Variant(false));
+  return Count(true);
+}
 
 bool TestExtNetwork::test_gethostbyaddr() {
   VS(f_gethostbyaddr("127.0.0.1"), "localhost.localdomain");

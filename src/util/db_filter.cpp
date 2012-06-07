@@ -17,8 +17,6 @@
 #include "db_filter.h"
 #include "db_conn.h"
 
-using namespace std;
-
 namespace HPHP {
 
 int DBQueryFilter::MAX_COUNT = 500;

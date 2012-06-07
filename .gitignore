@@ -1,8 +1,9 @@
 *.[oad]
+*.hhbc
 /bin*-g
 /bin*-O
 /bin/*.so
-/bin/tainted_build
+/bin/hphp_options
 /bin/systemlib.php
 .mkdir
 hphp.log
@@ -15,6 +16,7 @@ hphp.log
 /src/test/test_fast.inc
 /src/test/test_mysql_info.inc
 /src/test/test_suite.inc
+/src/test/real_mysql_info.inc
 /src/test/*.tmp
 /src/test/vm/*.out
 /src/test/vm/*.diff
@@ -23,9 +25,9 @@ hphp.log
 /src/test/vm/perf/*.diff
 /src/test/vm/perf/*.perf
 /src/runtime/ext_hhvm/xconstants.php
-/src/runtime/ext_hhvm/ext_hhvm.cpp
+/src/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
 /src/runtime/ext_hhvm/ext_noinline.cpp
-/src/runtime/ext_hhvm/ext_noinline.h
+*.ext_hhvm.cpp
 
 /src/hphp/hphp
 
@@ -33,6 +35,7 @@ hphp.log
 /src/runtime/tmp/run
 /src/runtime/tmp/run.sh
 /src/runtime/tmp/libtest.so
+/src/runtime/vm/repo_schema.h
 
 /src/hphpi/gen
 /src/hphpi/hphpi
@@ -44,6 +47,10 @@ hphp.log
 
 /src/ffi/java/classes
 /src/ffi/java/hphp_ffi_java.h
+
+# Ignore all makefiles generated for fbcode's third-party repo
+/bin/*.mk
+!/bin/run.mk
 
 /facebook/autoload_files
 /facebook/hotcold.hdf
@@ -69,14 +76,6 @@ hphp.log
 
 /facebook/extensions/gen
 /facebook/extensions/hphpi
-/facebook/extensions/*/*.so
-/facebook/extensions/remake_ext_hhvm
-/facebook/extensions/string/test_string
-/facebook/extensions/photodna/test_photodna
-/facebook/extensions/utils/test_utils
-/facebook/extensions/fbobj/test_fbobj
-/facebook/extensions/fbobj_cache/test_fbobj_cache
-/facebook/extensions/fbobj/test_fbobj
 /local/*.mk
 
 CMakeFiles
@@ -84,3 +83,16 @@ CMakeCache.txt
 cmake_install.cmake
 
 /output_gd/
+
+/src/TAGS
+
+# arcanist working-copy settings
+.arc/
+
+# fbcode output directory
+/bin/_fbcode_bin/
+
+# eclipse files
+.project
+.cproject
+.settings

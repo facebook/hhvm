@@ -38,9 +38,6 @@
 
 #include <boost/graph/depth_first_search.hpp>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -700,8 +697,8 @@ void ControlFlowBuilder::getTrueFalseBranches(
 }
 
 void ControlFlowBuilder::addCFEdge(ControlBlock *b1, ControlBlock *b2) {
-  if (!edge(b1, b2, *m_graph).second) {
-    add_edge(b1, b2, *m_graph);
+  if (!boost::edge(b1, b2, *m_graph).second) {
+    boost::add_edge(b1, b2, *m_graph);
   }
 }
 
@@ -775,20 +772,21 @@ void ControlBlock::dump(int spc, AnalysisResultConstPtr ar,
                         const ControlFlowGraph *graph) {
   printf("%08llx (%d)\n  InDegree: %d\n  OutDegree: %d\n",
          (unsigned long long)this, m_dfn,
-         (int)in_degree(this, *graph),
-         (int)out_degree(this, *graph));
+         (int)boost::in_degree(this, *graph),
+         (int)boost::out_degree(this, *graph));
 
   {
     ControlFlowGraph::graph_traits::in_edge_iterator i, end;
-    for (tie(i, end) = in_edges(this, *graph); i != end; ++i) {
-      ControlBlock *t = source(*i, *graph);
+    for (boost::tie(i, end) = boost::in_edges(this, *graph); i != end; ++i) {
+      ControlBlock *t = boost::source(*i, *graph);
       printf("    <- %08llx\n", (unsigned long long)t);
     }
   }
   {
     ControlFlowGraph::graph_traits::out_edge_iterator i, end;
-    for (tie(i, end) = out_edges(this, *graph); i != end; ++i) {
-      ControlBlock *t = target(*i, *graph);
+    for (boost::tie(i, end) = boost::out_edges(this, *graph);
+        i != end; ++i) {
+      ControlBlock *t = boost::target(*i, *graph);
       printf("    -> %08llx\n", (unsigned long long)t);
     }
   }
@@ -820,7 +818,7 @@ ControlFlowGraph *ControlFlowGraph::buildControlFlow(MethodStatementPtr m) {
   cfb.run(m->getStmts());
   graph->m_nextDfn = 1;
   depth_first_visit(*graph, cfb.head(),
-                    dfn_assign(), get(vertex_color, *graph));
+                    dfn_assign(), get(boost::vertex_color, *graph));
   return graph;
 }
 
@@ -858,7 +856,7 @@ void ControlFlowGraph::dfnAdd(ControlBlock *cb) {
 void ControlFlowGraph::allocateDataFlow(size_t width, int rows, int *rowIds) {
   m_bitSetVec.alloc(m_nextDfn, width, rows, rowIds);
   graph_traits::vertex_iterator i,e;
-  for (tie(i, e) = vertices(*this); i != e; ++i) {
+  for (boost::tie(i, e) = boost::vertices(*this); i != e; ++i) {
     ControlBlock *cb = *i;
     cb->setBlock(m_bitSetVec.getBlock(cb->getDfn()));
   }
@@ -866,5 +864,6 @@ void ControlFlowGraph::allocateDataFlow(size_t width, int rows, int *rowIds) {
 
 void ControlFlowGraph::dump(AnalysisResultConstPtr ar) {
   printf("Dumping control flow: %s\n", m_stmt->getName().c_str());
-  depth_first_search(*this, dfs_dump(ar), get(vertex_color, *this));
+  boost::depth_first_search(*this, dfs_dump(ar),
+    get(boost::vertex_color, *this));
 }

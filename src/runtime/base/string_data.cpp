@@ -31,7 +31,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
+IMPLEMENT_SMART_ALLOCATION_HOT(StringData, SmartAllocatorImpl::NeedSweep);
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
@@ -44,7 +44,7 @@ StringData *StringData::GetStaticString(const StringData *str) {
   StringDataMap::const_accessor acc;
   if (!s_stringDataMap) s_stringDataMap = new StringDataMap();
   if (s_stringDataMap->find(acc, str)) {
-    return (StringData*)acc->first;
+    return const_cast<StringData*>(acc->first);
   }
   // Lookup failed, so do the hard work of creating a StringData with its own
   // copy of the key string, so that the atomic insert() has a permanent key.
@@ -54,7 +54,7 @@ StringData *StringData::GetStaticString(const StringData *str) {
     delete sd;
   }
   ASSERT(acc->first != NULL);
-  return (StringData*)acc->first;
+  return const_cast<StringData*>(acc->first);
 }
 
 StringData *StringData::GetStaticString(const std::string &str) {
@@ -74,7 +74,7 @@ StringData::StringData(const char *data,
   ASSERT(data);
   ASSERT(mode >= 0 && mode < StringDataModeCount);
   if (len & IsMask) {
-    throw InvalidArgumentException("len>=2^29: %d", len);
+    throw InvalidArgumentException("len>=2^30", len);
   }
   m_hash = 0;
   assignHelper(data, len, mode);
@@ -82,6 +82,7 @@ StringData::StringData(const char *data,
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
+HOT_FUNC
 StringData::StringData(const char *data, int len, StringDataMode mode)
   : _count(0) {
   m_hash = 0;
@@ -89,12 +90,13 @@ StringData::StringData(const char *data, int len, StringDataMode mode)
   ASSERT(len >= 0);
   ASSERT(mode >= 0 && mode < StringDataModeCount);
   if (len < 0 || (len & IsMask)) {
-    throw InvalidArgumentException("len>=2^29: %d", len);
+    throw InvalidArgumentException("len>=2^30", len);
   }
   assignHelper(data, len, mode);
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
+HOT_FUNC
 StringData::StringData(SharedVariant *shared)
   : _count(0), m_len(0) {
   m_hash = 0;
@@ -109,8 +111,9 @@ StringData::StringData(SharedVariant *shared)
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
+HOT_FUNC
 void StringData::releaseData() {
-  if ((m_len & (IsLinear | IsLiteral)) == 0) {
+  if ((m_len & IsLiteral) == 0) {
     if (isShared()) {
       m_shared->decRef();
     } else if (m_data) {
@@ -158,7 +161,7 @@ void StringData::assignHelper(const char *data, int len, StringDataMode mode) {
 
 void StringData::assign(const char *data, int len, StringDataMode mode) {
   if (len < 0 || (len & IsMask)) {
-    throw InvalidArgumentException("len>=2^29: %d", len);
+    throw InvalidArgumentException("len>=2^30", len);
   }
   releaseData();
   assignHelper(data, len, mode);
@@ -168,7 +171,7 @@ void StringData::append(const char *s, int len) {
   if (len == 0) return;
 
   if (len < 0 || (len & IsMask)) {
-    throw InvalidArgumentException("len>=2^29: %d", len);
+    throw InvalidArgumentException("len>=2^30", len);
   }
 
   ASSERT(!isStatic()); // never mess around with static strings!
@@ -206,7 +209,7 @@ void StringData::append(const char *s, int len) {
     releaseData();
     m_data = NULL;
     m_len = 0;
-    throw FatalErrorException(0, "String length exceeded 2^29 - 1: %d", len);
+    throw FatalErrorException(0, "String length exceeded 2^30 - 1: %d", len);
   }
 
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
@@ -259,10 +262,9 @@ void StringData::dump() const {
   const char *p = m_data;
   int len = size();
 
-  printf("StringData(%d) (%s%s%s%s%d): [", _count,
+  printf("StringData(%d) (%s%s%s%d): [", _count,
          isLiteral() ? "literal " : "",
          isShared() ? "shared " : "",
-         isLinear() ? "linear " : "",
          isStatic() ? "static " : "",
          len);
   for (int i = 0; i < len; i++) {
@@ -282,6 +284,7 @@ void StringData::dump() const {
 
 // mutations
 
+HOT_FUNC
 StringData *StringData::getChar(int offset) const {
   if (offset >= 0 && offset < size()) {
     char *buf = (char *)malloc(2);
@@ -401,7 +404,7 @@ void StringData::preCompute() const {
 }
 
 void StringData::setStatic() const {
-  _count = (1 << 30);
+  _count = RefCountStaticValue;
   preCompute();
 }
 
@@ -527,6 +530,7 @@ DataType StringData::toNumeric(int64 &lval, double &dval) const {
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
+HOT_FUNC
 int StringData::numericCompare(const StringData *v2) const {
   ASSERT(v2);
 
@@ -563,6 +567,7 @@ int StringData::numericCompare(const StringData *v2) const {
   return -1;
 }
 
+HOT_FUNC
 int StringData::compare(const StringData *v2) const {
   ASSERT(v2);
 
@@ -582,38 +587,18 @@ int StringData::compare(const StringData *v2) const {
   return ret;
 }
 
+HOT_FUNC
 int64 StringData::getSharedStringHash() const {
   ASSERT(isShared());
   return m_shared->stringHash();
 }
 
+HOT_FUNC
 int64 StringData::hashHelper() const {
   // We don't want to collect taint for a hash
   int64 h = hash_string_inline(m_data, size());
   m_hash |= h;
   return h;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-bool StringData::calculate(int &totalSize) {
-  if (m_data && !isLiteral()) {
-    totalSize += (size() + 1); // ending NULL
-    return true;
-  }
-  return false;
-}
-
-void StringData::backup(LinearAllocator &allocator) {
-  allocator.backup(m_data, size() + 1);
-}
-
-void StringData::restore(const char *&data) {
-  ASSERT(!isLiteral());
-  m_data = data;
-  m_len &= LenMask;
-  m_len |= IsLinear;
-  m_hash = hash_string(m_data, size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

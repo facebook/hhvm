@@ -31,7 +31,9 @@ namespace HPHP {
  */
 class SharedMap : public ArrayData {
 public:
-  SharedMap(SharedVariant* source);
+  SharedMap(SharedVariant* source) : m_arr(source) {
+    source->incRef();
+  }
 
   ~SharedMap() {
     m_arr->decRef();
@@ -44,7 +46,7 @@ public:
     return m_arr;
   }
 
-  ssize_t size() const {
+  ssize_t vsize() const {
     return m_arr->arrSize();
   }
 
@@ -99,8 +101,6 @@ public:
   /**
    * Copy (escalate) the SharedMap without triggering local cache.
    */
-  ArrayData *fiberCopy() const;
-
   ArrayData *append(CVarRef v, bool copy);
   ArrayData *appendRef(CVarRef v, bool copy);
   ArrayData *appendWithRef(CVarRef v, bool copy);
@@ -111,12 +111,7 @@ public:
   /**
    * Memory allocator methods.
    */
-  DECLARE_SMART_ALLOCATION(SharedMap, SmartAllocatorImpl::NeedRestore);
-  bool calculate(int &size) { return true;}
-  void backup(LinearAllocator &allocator) {
-    m_arr->incRef(); // protect it
-  }
-  void restore(const char *&data) { m_arr->incRef();}
+  DECLARE_SMART_ALLOCATION(SharedMap, SmartAllocatorImpl::NeedSweep);
   void sweep() { m_arr->decRef();}
 
   virtual ArrayData *escalate(bool mutableIteration = false) const;

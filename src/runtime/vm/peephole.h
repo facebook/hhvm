@@ -41,13 +41,13 @@ namespace VM {
 
 class Peephole {
 public:
-  Peephole(Unit& unit);
+  Peephole(UnitEmitter& ue);
 
 private:
-  void buildFuncTargets(Func* f);
+  void buildFuncTargets(FuncEmitter* fe);
   void buildJumpTargets();
 
-  Unit &m_unit;
+  UnitEmitter &m_ue;
 
   hphp_hash_set<Offset> m_jumpTargets;
 };

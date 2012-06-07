@@ -45,6 +45,11 @@ inline Variant x_hphpd_get_client(CStrRef name = null) {
   return f_hphpd_get_client(name);
 }
 
+inline Variant x_hphpd_client_ctrl(CStrRef name, CStrRef op) {
+  FUNCTION_INJECTION_BUILTIN(hphpd_client_ctrl);
+  return f_hphpd_client_ctrl(name, op);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

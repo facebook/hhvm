@@ -17,8 +17,6 @@
 #include <compiler/statement/continue_statement.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors

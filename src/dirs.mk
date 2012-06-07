@@ -11,6 +11,12 @@
 # directory, not the one that make was invoked from
 CWD := $(shell readlink -f `pwd`)
 
+ifdef USE_HHVM
+ifneq ($(USE_HHVM),1)
+$(error USE_HHVM must either be unset, or equal to 1)
+endif
+endif
+
 ifeq ($(notdir $(MAKE)),emake)
 export MAKE
 override USE_CCACHE :=
@@ -50,11 +56,26 @@ MYSQL_MILLISECOND_TIMEOUT = 1
 #DEBUG_APC_LEAK = 1
 #DEBUG_RACE_CONDITION = 1
 
+ifdef VALGRIND
+
+DEBUG_MEMORY_LEAK=1
+NO_TCMALLOC=1
+
+else
+
 ifdef RELEASE
 override DEBUG=
+unexport DEBUG
 override DEBUG_MEMORY_LEAK=
 override DEBUG_RACE_CONDITION=
 override RELEASE=1
+endif
+
+endif # VALGRIND
+
+# Use jemalloc by default.
+ifndef NO_JEMALLOC
+USE_JEMALLOC = 1
 endif
 
 ifndef DEBUG_MEMORY_LEAK
@@ -68,11 +89,6 @@ endif
 
 # For hotprofiler instrumentation
 HOTPROFILER = 1
-
-# Use jemalloc by default.
-ifndef NO_JEMALLOC
-USE_JEMALLOC = 1
-endif
 
 # Only use jemalloc *or* tcmalloc.
 ifdef USE_JEMALLOC
@@ -95,8 +111,8 @@ endif
 # For GNU coverage - gcov.
 #COVERAGE = 1
 
-endif
-endif
+endif # DEBUG_RACE_CONDITION
+endif # DEBUG_MEMORY_LEAK
 
 ifndef NO_SNAPPY
 HAVE_SNAPPY = 1
@@ -117,11 +133,14 @@ OUTPUT_ROOT := bin
 endif
 OUT_EXTS := \
 	$(if $(USE_HHVM),-hhvm) \
+	$(if $(USE_HHVM_GC),-gc) \
 	$(if $(USE_LLVM),-llvm) \
 	$(if $(USE_ICC),-icc) \
 	$(if $(USE_JEMALLOC),-je) \
 	$(if $(NO_TCMALLOC),,-tc) \
 	$(if $(PROFILE),-pg) \
+	$(if $(CHECKED),-ck) \
+	$(if $(VALGRIND),-vg) \
 	$(if $(DEBUG),-g,-O)
 
 EMPTY:=
@@ -148,6 +167,7 @@ OUT_TOP := $(OUT_TOP)/
 HPHP := $(OUT_TOP)hphp
 HPHPI := $(OUT_TOP)hphpi
 HHVM := $(OUT_TOP)hhvm
+HPHP_OPTIONS := $(OUT_TOP)hphp_options
 
 else
 
@@ -165,6 +185,7 @@ endif
 HPHP := $(PROJECT_ROOT)/src/hphp/hphp
 HPHPI := $(PROJECT_ROOT)/src/hphpi/hphpi
 HHVM := $(PROJECT_ROOT)/src/hhvm/hhvm
+HPHP_OPTIONS := $(LIB_DIR)/hphp_options
 
 endif
 
@@ -183,13 +204,16 @@ endif
 
 MKDIR = mkdir -p
 RMDIR = rm -fR
-EXT_DIR = $(PROJECT_ROOT)/external-$(OS)
+EXT_DIR = /home/engshare/externals/cpp/hphp/$(OS)
 
 %/.mkdir :
 	$(V)-$(MKDIR) $(@D)
 	$(V)touch $@
 
 dirinfo:
-	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(PROFILE),P)$(if $(DEBUG),D,R)$(if $(USE_ICC),-I)$(if $(USE_LLVM),-L)
+	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) \
+$(if $(VALGRIND),VG-)$(if $(USE_HHVM),VM)\
+$(if $(USE_HHVM_GC),GC)$(if $(PROFILE),P)$(if $(DEBUG),D,R)\
+$(if $(CHECKED),C)$(if $(USE_ICC),-I)$(if $(USE_LLVM),-L)\
 
 endif

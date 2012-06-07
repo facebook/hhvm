@@ -26,22 +26,25 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 796 */
+FORWARD_DECLARE_CLASS(ArrayIterator);
+
+/* SRC: classes/iterator.php line 800 */
 FORWARD_DECLARE_CLASS(AppendIterator);
 extern const ObjectStaticCallbacks cw_AppendIterator;
 class c_AppendIterator : public ExtObjectData {
   public:
 
   // Properties
-  Variant m_iterators;
+  p_ArrayIterator m_iterators;
 
   // Destructor
   ~c_AppendIterator() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(AppendIterator, AppendIterator, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_AppendIterator(const ObjectStaticCallbacks *cb = &cw_AppendIterator) : ExtObjectData(cb), m_iterators(Variant::nullInit) {
+  c_AppendIterator(const ObjectStaticCallbacks *cb = &cw_AppendIterator) : ExtObjectData(cb) {
     setAttribute(HasCall);
+    if (!hhvm) setAttribute(NoDestructor);
   }
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct();

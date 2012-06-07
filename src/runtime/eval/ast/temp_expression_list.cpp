@@ -19,8 +19,6 @@
 #include <runtime/eval/ast/variable_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
-using namespace std;
-
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

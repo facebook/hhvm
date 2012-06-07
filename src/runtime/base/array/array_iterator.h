@@ -54,13 +54,13 @@ public:
   void operator++() { next(); }
 
   bool end() {
-    if (!m_obj) {
+    if (LIKELY(!m_obj)) {
       return m_pos == ArrayData::invalid_index;
     }
     return endHelper();
   }
   void next() {
-    if (!m_obj) {
+    if (LIKELY(!m_obj)) {
       ASSERT(m_data);
       ASSERT(m_pos != ArrayData::invalid_index);
       m_pos = m_data->iter_advance(m_pos);
@@ -69,7 +69,7 @@ public:
     return nextHelper();
   }
   Variant first() {
-    if (!m_obj) {
+    if (LIKELY(!m_obj)) {
       ASSERT(m_data);
       ASSERT(m_pos != ArrayData::invalid_index);
       return m_data->getKey(m_pos);
@@ -78,7 +78,7 @@ public:
   }
   Variant second();
   void second(Variant &v) {
-    if (!m_obj) {
+    if (LIKELY(!m_obj)) {
       ASSERT(m_data);
       ASSERT(m_pos != ArrayData::invalid_index);
       v = m_data->getValueRef(m_pos);
@@ -149,6 +149,34 @@ private:
   FullPos m_fp;
   int size();
   ArrayData* getData();
+};
+
+struct MIterCtx {
+  TypedValue m_key;
+  TypedValue m_val;
+  const Variant* m_var;
+  MutableArrayIter *m_mArray; // big! Defer allocation.
+  MIterCtx(ArrayData *ad) {
+    ASSERT(!ad->isStatic());
+    tvWriteUninit(&m_key);
+    tvWriteUninit(&m_val);
+    m_var = NULL;
+    m_mArray = new MutableArrayIter(ad, &tvAsVariant(&m_key),
+                                    tvAsVariant(&m_val));
+  }
+  MIterCtx(const Variant* var) {
+    tvWriteUninit(&m_key);
+    tvWriteUninit(&m_val);
+    // var must be an inner cell
+    ASSERT(var->_count > 0);
+    m_var = var;
+    m_var->incRefCount();
+    // Bind var to m_var
+    m_mArray = new MutableArrayIter(m_var,
+                                    &tvAsVariant(&m_key),
+                                    tvAsVariant(&m_val));
+  }
+  ~MIterCtx();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -29,15 +29,39 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern StaticString s_sys_ss7e5fc106;
-extern StaticString s_sys_ssd332baa7;
-extern StaticString s_sys_ssd59e789f;
-extern StaticString s_sys_ss0d42ecf6;
+extern StaticStringProxy s_sys_ssp7e5fc106;
+#ifndef s_sys_ss7e5fc106
+#define s_sys_ss7e5fc106 (*(StaticString *)(&s_sys_ssp7e5fc106))
+#endif
+extern StaticStringProxy s_sys_sspd332baa7;
+#ifndef s_sys_ssd332baa7
+#define s_sys_ssd332baa7 (*(StaticString *)(&s_sys_sspd332baa7))
+#endif
+extern StaticStringProxy s_sys_sspd59e789f;
+#ifndef s_sys_ssd59e789f
+#define s_sys_ssd59e789f (*(StaticString *)(&s_sys_sspd59e789f))
+#endif
+extern StaticStringProxy s_sys_ssp0d42ecf6;
+#ifndef s_sys_ss0d42ecf6
+#define s_sys_ss0d42ecf6 (*(StaticString *)(&s_sys_ssp0d42ecf6))
+#endif
 
-extern VarNR s_sys_svs7e5fc106;
-extern VarNR s_sys_svsd332baa7;
-extern VarNR s_sys_svsd59e789f;
-extern VarNR s_sys_svs0d42ecf6;
+extern VariantProxy s_sys_svsp7e5fc106;
+#ifndef s_sys_svs7e5fc106
+#define s_sys_svs7e5fc106 (*(Variant *)&s_sys_svsp7e5fc106)
+#endif
+extern VariantProxy s_sys_svspd332baa7;
+#ifndef s_sys_svsd332baa7
+#define s_sys_svsd332baa7 (*(Variant *)&s_sys_svspd332baa7)
+#endif
+extern VariantProxy s_sys_svspd59e789f;
+#ifndef s_sys_svsd59e789f
+#define s_sys_svsd59e789f (*(Variant *)&s_sys_svspd59e789f)
+#endif
+extern VariantProxy s_sys_svsp0d42ecf6;
+#ifndef s_sys_svs0d42ecf6
+#define s_sys_svs0d42ecf6 (*(Variant *)&s_sys_svsp0d42ecf6)
+#endif
 
 /* SRC: classes/splfile.php line 384 */
 FORWARD_DECLARE_CLASS(SplFileObject);
@@ -50,7 +74,9 @@ class c_SplFileObject : public c_SplFileInfo {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SplFileObject, SplFileObject, SplFileInfo)
   static const ClassPropTable os_prop_table;
-  c_SplFileObject(const ObjectStaticCallbacks *cb = &cw_SplFileObject) : c_SplFileInfo(cb) {}
+  c_SplFileObject(const ObjectStaticCallbacks *cb = &cw_SplFileObject) : c_SplFileInfo(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
   public: c_SplFileObject *create(CVarRef v_filename, CVarRef v_open_mode = NAMVAR(s_sys_svs0d42ecf6, "r"), CVarRef v_use_include_path = false_varNR, CVarRef v_context = null_variant);
   public: Variant t_current();

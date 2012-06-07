@@ -41,9 +41,6 @@
 #include <signal.h>
 #include <util/ssl_init.h>
 
-using namespace boost;
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -380,13 +377,13 @@ void HttpServer::flushLog() {
   if (!Logger::UseLogAggregator) return;
 
   ServerDataPtr database;
-  ostream *out = NULL;
+  std::ostream *out = NULL;
   if (!RuntimeOption::LogAggregatorDatabase.empty()) {
     database = ServerData::Create(RuntimeOption::LogAggregatorDatabase);
   } else if (!RuntimeOption::LogAggregatorFile.empty()) {
-    out = new ofstream(RuntimeOption::LogAggregatorFile.c_str());
+    out = new std::ofstream(RuntimeOption::LogAggregatorFile.c_str());
   } else {
-    out = &cout;
+    out = &std::cout;
   }
 
   bool stopped = false;
@@ -402,7 +399,7 @@ void HttpServer::flushLog() {
     stopped = m_stopped;
   }
 
-  if (out != &cout) {
+  if (out != &std::cout) {
     delete out;
   }
 }

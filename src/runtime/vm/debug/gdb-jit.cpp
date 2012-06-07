@@ -65,6 +65,7 @@ void unregister_gdb_chunk(DwarfChunk* d) {
 
   if (d->m_symfile != NULL) {
     delete_symfile(d->m_symfile);
+    d->m_symfile = NULL;
   }
 }
 

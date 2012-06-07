@@ -38,10 +38,24 @@ class PhpFile;
 class Function;
 class EvalObjectData;
 
+class MethodStatementWrapper {
+public:
+  const MethodStatement *m_methodStatement;
+  int m_access;
+  StringData *m_className;
+  MethodStatementWrapper() : m_methodStatement(NULL), m_access(0),
+    m_className(NULL) {}
+  MethodStatementWrapper(const MethodStatement *methodStatement, int access,
+    StringData *className) : m_methodStatement(methodStatement),
+    m_access(access), m_className(className) {
+    ASSERT(!className || className->isStatic());
+  }
+  static bool isTraitMethod(const MethodStatementWrapper *msw);
+};
+
 class ClassEvalState {
 public:
-  typedef StringIMap<std::pair<const MethodStatement*, int> >
-    MethodTable;
+  typedef StringIMap<MethodStatementWrapper> MethodTable;
   struct TraitPrecedence {
   public:
     TraitPrecedence(CStrRef trait, CStrRef method, TraitPrecStatement *prec) :
@@ -69,25 +83,25 @@ public:
     ClassEvalState *m_classEvalState;
   };
 
-  ClassEvalState() : m_class(NULL), m_parentClassEvalState(NULL), m_constructor(NULL),
+  ClassEvalState() : m_class(NULL),
+                     m_parentClassEvalState(NULL),
                      m_attributes(0),
                      m_initializedInstance(false),
                      m_initializedStatics(false),
-                     m_doneSemanticCheck(false)
+                     m_doneSemanticCheck(false),
+                     m_traitUser(NULL)
   {}
   void init(const ClassStatement *cls);
   const ClassStatement *getClass() const {
     return m_class;
   }
-  ClassEvalState *getParentClassEvalState() {
-    return m_parentClassEvalState;
-  }
+  ClassEvalState *getParentClassEvalState();
   void setParentClassEvalState(ClassEvalState *pce) {
     ASSERT(pce);
     m_parentClassEvalState = pce;
   }
-  const MethodStatement *getMethod(CStrRef m, int &access);
-  const MethodStatement *getTraitMethod(CStrRef m, int &access);
+  const MethodStatementWrapper *getMethod(CStrRef m);
+  const MethodStatementWrapper *getTraitMethod(CStrRef m);
   MethodTable &getMethodTable() {
     return m_methodTable;
   }
@@ -100,6 +114,11 @@ public:
   void setTraitVariables(const std::vector<ClassVariable *> &traitVariables) {
     m_traitVariables = traitVariables;
   }
+  void setTraitVariableMap(StringMap<ClassVariable *> &traitVariableMap) {
+    m_traitVariableMap = traitVariableMap;
+  }
+  const ClassVariable *findTraitVariable(CStrRef name,
+                                         bool recursive = false);
   std::vector<const ClassStatement *> &getTraits() {
     return m_traits;
   }
@@ -109,13 +128,14 @@ public:
   std::vector<TraitAlias> &getTraitAliases() {
     return m_traitAliases;
   }
-  void initTraits() {
+  void initTraits(const ClassStatement *traitUser) {
+    m_traitUser = traitUser;
     m_traits.clear();
     m_traitPrecedences.clear();
     m_traitAliases.clear();
   }
-  const MethodStatement* &getConstructor() {
-    return m_constructor;
+  MethodStatementWrapper &getConstructorWrapper() {
+    return m_constructorWrapper;
   }
   LVariableTable &getStatics() {
     return m_statics;
@@ -125,12 +145,6 @@ public:
   void initializeInstance();
   void initializeStatics();
   void semanticCheck();
-  void fiberInit(ClassEvalState &oces, FiberReferenceMap &refMap);
-  void fiberInitStatics(ClassEvalState &oces, FiberReferenceMap &refMap);
-  void fiberExit(ClassEvalState &oces, FiberReferenceMap &refMap,
-                 FiberAsyncFunc::Strategy default_strategy);
-  void fiberExitStatics(ClassEvalState &oces, FiberReferenceMap &refMap,
-                        FiberAsyncFunc::Strategy default_strategy);
   void implementTrait(const ClassStatement *trait);
   void compileExcludeTable(
     StringISet &excludeTable,
@@ -154,12 +168,14 @@ private:
   ClassEvalState *m_parentClassEvalState;
   MethodTable m_methodTable;
   std::vector<ClassVariable *> m_traitVariables;
-  const MethodStatement *m_constructor;
+  StringMap<ClassVariable *> m_traitVariableMap;
+  MethodStatementWrapper m_constructorWrapper;
   LVariableTable m_statics;
   int m_attributes;
   bool m_initializedInstance;
   bool m_initializedStatics;
   bool m_doneSemanticCheck;
+  const ClassStatement *m_traitUser;
   std::vector<const ClassStatement *> m_traits;
   std::vector<TraitPrecedence> m_traitPrecedences;
   std::vector<TraitAlias> m_traitAliases;
@@ -174,7 +190,7 @@ private:
 class CodeContainer : public AtomicCountable {
 public:
   virtual ~CodeContainer() {}
-  void release();
+  void atomicRelease() { delete this; }
 };
 
 class StringCodeContainer : public CodeContainer {
@@ -186,20 +202,20 @@ private:
 };
 
 class EvalConstantInfo : public ClassInfo::ConstantInfo,
-  public AtomicCountable {
+                         public AtomicCountable {
 public:
-  void release() { delete this; }
+  void atomicRelease() { delete this; }
 };
 
-class EvalMethodInfo :  public ClassInfo::MethodInfo, public AtomicCountable {
+class EvalMethodInfo : public ClassInfo::MethodInfo, public AtomicCountable {
 public:
-  void release() { delete this; }
+  void atomicRelease() { delete this; }
 };
 
 class ClassInfoEvaled : public ClassInfo, public AtomicCountable {
  public:
   ~ClassInfoEvaled();
-  void release() { delete this; }
+  void atomicRelease() { delete this; }
   virtual CStrRef getParentClass() const { return m_parentClass; }
 
   // implementing ClassInfo
@@ -235,15 +251,15 @@ class RequestEvalState {
 public:
   static void Reset();
   static void DestructObjects();
-  static void addCodeContainer(SmartPtr<CodeContainer> &cc);
+  static void addCodeContainer(AtomicSmartPtr<CodeContainer> &cc);
   static ClassEvalState &declareClass(const ClassStatement *cls);
   static void declareFunction(const FunctionStatement *cls);
   static bool declareConstant(CStrRef name, CVarRef value);
   static const ClassStatement *findClass(CStrRef name, bool autoload = false);
   static ClassEvalState *findClassState(CStrRef name, bool autoload = false);
-  static const MethodStatement *findMethod(CStrRef cname, CStrRef name,
-                                           ClassEvalState *&ce,
-                                           bool autoload = false);
+  static const MethodStatementWrapper *findMethod(CStrRef cname, CStrRef name,
+                                                  ClassEvalState *&ce,
+                                                  bool autoload = false);
   static const FunctionStatement *findUserFunction(CStrRef name);
   static const Function *findFunction(CStrRef name);
   static bool findConstant(CStrRef name, Variant &ret);
@@ -253,7 +269,7 @@ public:
                           const char *currentDir);
   static LVariableTable &getFunctionStatics(const FunctionStatement* func);
   static LVariableTable &getMethodStatics(const MethodStatement* func,
-                                          CStrRef cls);
+                                          CStrRef cls, CStrRef alias);
   static LVariableTable *getClassStatics(const ClassStatement* cls);
 
   // Class info hook methods
@@ -283,12 +299,9 @@ public:
   static void deregisterObject(EvalObjectData *obj);
 
   static RequestEvalState *Get();
-  void fiberInit(RequestEvalState *res, FiberReferenceMap &refMap);
-  void fiberExit(RequestEvalState *res, FiberReferenceMap &refMap,
-                 FiberAsyncFunc::Strategy default_strategy);
 private:
-  std::map<std::string, PhpFile*> m_evaledFiles;
-  std::list<SmartPtr<CodeContainer> > m_codeContainers;
+  EvaledFilesMap m_evaledFiles;
+  std::list<AtomicSmartPtr<CodeContainer> > m_codeContainers;
 
   StringIMap<ClassEvalState> m_classes;
   StringIMap<const FunctionStatement*> m_functions;
@@ -297,9 +310,9 @@ private:
     StringIMap<LVariableTable> > MethodStatics;
   MethodStatics m_methodStatics;
   Array m_constants;
-  StringMap<SmartPtr<EvalConstantInfo> > m_constantInfos;
-  StringIMap<SmartPtr<EvalMethodInfo> > m_methodInfos;
-  StringMap<SmartPtr<ClassInfoEvaled> > m_classInfos;
+  StringMap<AtomicSmartPtr<EvalConstantInfo> > m_constantInfos;
+  StringIMap<AtomicSmartPtr<EvalMethodInfo> > m_methodInfos;
+  StringMap<AtomicSmartPtr<ClassInfoEvaled> > m_classInfos;
   std::set<EvalObjectData*> m_livingObjects;
   int64 m_ids;
   VariantStack m_argStack;

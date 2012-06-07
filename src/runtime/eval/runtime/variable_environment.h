@@ -44,6 +44,7 @@ public:
   VariableEnvironment();
   void setCurrentObject(CObjRef co);
   void setCurrentClass(CStrRef cls);
+  void setCurrentAlias(CStrRef alias) { m_currentAlias = alias; }
   virtual void flagStatic(CStrRef name, int64 hash = -1) = 0;
   virtual void flagGlobal(CStrRef name);
   virtual void flagGlobal(CStrRef name, int idx);
@@ -52,7 +53,8 @@ public:
   bool isKindOf(KindOf kindOf) { return m_kindOf == kindOf; }
   virtual void setIdx(int idx, Variant *v);
   Variant &currentObject() { return m_currentObject; }
-  virtual String currentClass() const;
+  virtual String currentClass() const { return m_currentClass; }
+  virtual String currentAlias() const { return m_currentAlias; }
   virtual const ClassStatement *currentClassStatement() const;
   virtual String currentContext() const;
   virtual Array getParams() const = 0;
@@ -100,6 +102,8 @@ public:
   bool isEscaping() const { return isBreaking() || m_returning; }
   void *getClosure() { return m_closure;}
   void setClosure(void *closure) { m_closure = closure;}
+  CStrRef getCalleeAlias() { return m_calleeAlias;}
+  void setCalleeAlias(CStrRef alias){ m_calleeAlias = alias;}
   bool isGotoing() const { return !m_label.empty();}
   bool isLimitedGoto() const { ASSERT(isGotoing()); return m_limitedGoto;}
   void setGoto(const std::string &label, bool limited) {
@@ -119,9 +123,11 @@ public:
 protected:
   Variant m_currentObject;
   String m_currentClass;
+  String m_currentAlias;
   int m_breakLevel;
   bool m_returning;
   void *m_closure;
+  String m_calleeAlias;
   std::string m_label;
   bool m_limitedGoto;
   Variant m_ret;

@@ -26,7 +26,7 @@
 #include <runtime/ext/ext_json.h>
 #include <util/process.h>
 
-using namespace std;
+using std::set;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   m_context->setTransport(transport);
   transport->enableCompression();
 
-  ServerStatsHelper ssh("all", true);
+  ServerStatsHelper ssh("all", ServerStatsHelper::TRACK_MEMORY);
   Logger::Verbose("receiving %s", transport->getCommand().c_str());
 
   // will clear all extra logging when this function goes out of scope
@@ -86,6 +86,11 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
       transport->sendString("Unauthorized", 401);
       transport->onSendEnd();
       HttpRequestHandler::GetAccessLog().log(transport, NULL);
+      /*
+       * HPHP logs may need to access data in ServerStats, so we have to
+       * clear the hashtable after writing the log entry.
+       */
+      ServerStats::Reset();
       return;
     }
   } else {
@@ -94,8 +99,18 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
       transport->sendString("Unauthorized", 401);
       transport->onSendEnd();
       HttpRequestHandler::GetAccessLog().log(transport, NULL);
+      /*
+       * HPHP logs may need to access data in ServerStats, so we have to
+       * clear the hashtable after writing the log entry.
+       */
+      ServerStats::Reset();
       return;
     }
+  }
+
+  // return encoding type
+  if (transport->getParam("return") == "serialize") {
+    setReturnEncodeType(Serialize);
   }
 
   // resolve virtual host
@@ -129,6 +144,11 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   std::string tmpfile = HttpProtocol::RecordRequest(transport);
   bool ret = executePHPFunction(transport, sourceRootInfo);
   HttpRequestHandler::GetAccessLog().log(transport, vhost);
+  /*
+   * HPHP logs may need to access data in ServerStats, so we have to
+   * clear the hashtable after writing the log entry.
+   */
+  ServerStats::Reset();
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
@@ -190,16 +210,11 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   if (!error) {
     Variant funcRet;
     string errorMsg = "Internal Server Error";
-    string warmupDoc, reqInitFunc, reqInitDoc;
+    string reqInitFunc, reqInitDoc;
     reqInitDoc = transport->getHeader("ReqInitDoc");
     if (reqInitDoc.empty() && m_serverInfo) {
-      warmupDoc = m_serverInfo->getWarmupDoc();
       reqInitFunc = m_serverInfo->getReqInitFunc();
       reqInitDoc = m_serverInfo->getReqInitDoc();
-    }
-    if (!warmupDoc.empty()) warmupDoc = canonicalize_path(warmupDoc, "", 0);
-    if (!warmupDoc.empty()) {
-      warmupDoc = getSourceFilename(warmupDoc, sourceRootInfo);
     }
 
     if (!reqInitDoc.empty()) reqInitDoc = canonicalize_path(reqInitDoc, "", 0);
@@ -233,18 +248,15 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         rpcFile = canonicalize_path(rpcFile, "", 0);
         rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
         ret = hphp_invoke(m_context, rpcFile, false, Array(), null,
-                          warmupDoc, reqInitFunc, reqInitDoc,
-                          error, errorMsg, runOnce);
+                          reqInitFunc, reqInitDoc, error, errorMsg, runOnce);
       }
       // no need to do the initialization for a second time
-      warmupDoc.clear();
       reqInitFunc.clear();
       reqInitDoc.clear();
     }
     if (ret && !rpcFunc.empty()) {
       ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
-                        warmupDoc, reqInitFunc, reqInitDoc,
-                        error, errorMsg);
+                        reqInitFunc, reqInitDoc, error, errorMsg);
     }
     if (ret) {
       bool serializeFailed = false;

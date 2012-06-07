@@ -105,6 +105,8 @@ inline void f_hphp_set_iostatus_address(CStrRef name) {
 }
 Variant f_hphp_get_timers(bool get_as_float = true);
 Variant f_hphp_output_global_state(bool serialize = true);
+int64 f_hphp_instruction_counter(void);
+Variant f_hphp_get_hardware_counters(void);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

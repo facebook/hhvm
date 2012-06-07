@@ -17,8 +17,6 @@
 #include <runtime/eval/ast/try_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
-using namespace std;
-
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

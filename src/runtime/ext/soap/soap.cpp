@@ -18,8 +18,6 @@
 #include <runtime/ext/soap/soap.h>
 #include <runtime/ext/soap/encoding.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

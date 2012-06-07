@@ -23,11 +23,16 @@ function byRef($a1, &$va2) {
   return $va2;
 }
 
-$funcs = array("byVal", "byRef");
-$b = 2;
-$c = 3;
-foreach($randBits as $idx => $bit) {
-  $funcs[$bit]($b, $c);
-  echo "$idx: $b, $c\n";
+function main() {
+  $funcs = array("byVal", "byRef");
+  $b = 2;
+  $c = 3;
+  global $randBits;
+  foreach($randBits as $idx => $bit) {
+    $funcs[$bit]($b, $c);
+    echo "$idx: $b, $c\n";
+  }
 }
+
+main();
 

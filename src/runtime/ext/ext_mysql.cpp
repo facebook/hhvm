@@ -30,8 +30,6 @@
 
 #include <system/lib/systemlib.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -73,7 +71,7 @@ MySQLResult::~MySQLResult() {
     m_fields = NULL;
   }
   if (m_rows) {
-    for (list<vector<Variant *> >::const_iterator it = m_rows->begin();
+    for (std::list<vector<Variant *> >::const_iterator it = m_rows->begin();
          it != m_rows->end(); it++) {
       for (unsigned int i = 0; i < it->size(); i++) {
         DELETE(Variant)((*it)[i]);
@@ -688,10 +686,23 @@ Variant f_mysql_error(CVarRef link_identifier /* = null */) {
   return false;
 }
 
+Variant f_mysql_warning_count(CVarRef link_identifier /* = null */) {
+  MySQL *mySQL = MySQL::Get(link_identifier);
+  if (!mySQL) {
+    raise_warning("supplied argument is not a valid MySQL-Link resource");
+    return false;
+  }
+  MYSQL *conn = mySQL->get();
+  if (conn) {
+    return (int64)mysql_warning_count(conn);
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
 
-static Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field) {
+Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field) {
   switch (mysql_field->type) {
   case MYSQL_TYPE_DECIMAL:
   case MYSQL_TYPE_TINY:
@@ -893,7 +904,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
           if (connected) {
             string killsql = "KILL " + boost::lexical_cast<string>(tid);
             if (mysql_real_query(connected, killsql.c_str(), killsql.size())) {
-              raise_warning("Unable to kill thread %llu", tid);
+              raise_warning("Unable to kill thread %lu", tid);
             }
           }
           mysql_close(new_conn);
@@ -1180,7 +1191,7 @@ Variant f_mysql_result(CVarRef result, int row,
   } else {
     mysql_result = res->get();
     if (row < 0 || row >= (int)mysql_num_rows(mysql_result)) {
-      raise_warning("Unable to jump to row %ld on MySQL result index %ld",
+      raise_warning("Unable to jump to row %d on MySQL result index %d",
                       row, result.toObject()->o_getId());
       return false;
     }
@@ -1224,7 +1235,7 @@ Variant f_mysql_result(CVarRef result, int row,
         i++;
       }
       if (!found) { /* no match found */
-        raise_warning("%s%s%s not found in MySQL result index %ld",
+        raise_warning("%s%s%s not found in MySQL result index %d",
                         table_name.data(), (table_name.empty() ? "" : "."),
                         field_name.data(), result.toObject()->o_getId());
         return false;
@@ -1402,7 +1413,7 @@ int64 MySQLResult::getRowCount() const {
 
 bool MySQLResult::seekRow(int64 row) {
   if (row < 0 || row >= getRowCount()) {
-    raise_warning("Unable to jump to row %ld on MySQL result index %ld",
+    raise_warning("Unable to jump to row %lld on MySQL result index %d",
                     row, o_getId());
     return false;
   }
@@ -1428,7 +1439,7 @@ bool MySQLResult::fetchRow() {
 
 bool MySQLResult::seekField(int64 field) {
   if (field < 0 || field >= getFieldCount()) {
-    raise_warning("Field %ld is invalid for MySQL result index %ld",
+    raise_warning("Field %lld is invalid for MySQL result index %d",
                     field, o_getId());
     return false;
   }

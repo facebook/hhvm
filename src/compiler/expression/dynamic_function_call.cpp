@@ -26,8 +26,6 @@
 #include <compiler/analysis/variable_table.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -156,7 +154,10 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     // set m_noStatic to avoid pointlessly wrapping the call
     // in STATIC_CLASS_NAME_CALL()
     m_noStatic = true;
-    return FunctionCall::preOutputCPP(cg, ar, state);
+    cg.pushCallInfo(-1);
+    bool ret = FunctionCall::preOutputCPP(cg, ar, state);
+    cg.popCallInfo();
+    return ret;
   }
   // Short circuit out if inExpression() returns false
   if (!cg.inExpression()) return true;
@@ -164,7 +165,6 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   cg.wrapExpressionBegin();
 
   m_ciTemp = cg.createNewLocalId(shared_from_this());
-  bool lsb = false;
 
   if (!m_classScope && !m_className.empty() && m_cppTemp.empty() &&
       !isSelf() && ! isParent() && !isStatic()) {
@@ -195,17 +195,21 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       m_nameExp->outputCPP(cg, ar);
       cg_printf(")");
     }
+    cg_printf(");\n");
   } else {
     cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
     if (m_class) {
       if (m_class->is(KindOfScalarExpression)) {
         ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                           getString().c_str(), "static") == 0);
-        cg_printf("CStrRef cls%d = ", m_ciTemp);
-        cg_printString("static", ar, shared_from_this());
-        lsb = true;
+        cg_printf("CStrRef cls%d = "
+                  "FrameInjection::GetStaticClassName(fi.getThreadInfo())",
+                  m_ciTemp);
       } else {
-        cg_printf("CVarRef cls%d = ", m_ciTemp);
+        cg_printf("C%sRef cls%d = ",
+                  m_class->getActualType() &&
+                  m_class->getActualType()->is(Type::KindOfString) ?
+                  "Str" : "Var", m_ciTemp);
         m_class->outputCPP(cg, ar);
       }
     } else if (m_classScope) {
@@ -227,38 +231,56 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
     cg_printf(";\n");
 
-    if (m_class) {
-      if (m_class->is(KindOfScalarExpression)) {
-        cg_printf("mcp%d.staticMethodCall(cls%d, mth%d",
+    bool dynamic = true;
+    if (!m_class) {
+      ClassScopeRawPtr origClass = getOriginalClass();
+      if (!origClass) {
+        dynamic = false;
+      } else {
+        FunctionScopeRawPtr origFunc = getOriginalFunction();
+        if (origFunc) {
+          if (origFunc->isStatic() ||
+              (m_classScope != origClass &&
+               (m_className.empty() || !origClass->derivesFrom(
+                 ar, m_className, true, true)))) {
+            dynamic = false;
+          }
+        }
+      }
+    }
+
+    if (dynamic) {
+      if (m_class && (!m_class->getActualType() ||
+                      !m_class->getActualType()->is(Type::KindOfString))) {
+        cg_printf("mcp%d.dynamicNamedCall(cls%d, mth%d);\n",
                   m_ciTemp, m_ciTemp, m_ciTemp);
       } else {
-        cg_printf("mcp%d.dynamicNamedCall(cls%d, mth%d",
-                  m_ciTemp, m_ciTemp, m_ciTemp);
+        cg_printf("mcp%d.isObj = true;\n", m_ciTemp);
+        cg_printf("mcp%d.rootObj = this;\n", m_ciTemp);
+        cg_printf("mcp%d.name = &mth%d;\n", m_ciTemp, m_ciTemp);
+        cg_printf("o_get_call_info_ex(cls%d, mcp%d);\n", m_ciTemp, m_ciTemp);
       }
     } else {
-      cg_printf("mcp%d.staticMethodCall(cls%d, mth%d",
-                m_ciTemp, m_ciTemp, m_ciTemp);
+      cg_printf("mcp%d.staticMethodCall(cls%d, mth%d);\n",
+                m_ciTemp,
+                m_ciTemp, m_ciTemp);
+
+      if (m_classScope) {
+        cg_printf("%s%s.%sget_call_info(mcp%d);\n",
+                  Option::ClassStaticsCallbackPrefix,
+                  m_classScope->getId().c_str(),
+                  Option::ObjectStaticPrefix, m_ciTemp);
+      } else if (isRedeclared()) {
+        cg_printf("g->%s%s->%sget_call_info(mcp%d);\n",
+                  Option::ClassStaticsCallbackPrefix, m_className.c_str(),
+                  Option::ObjectStaticPrefix, m_ciTemp);
+      } else {
+        assert(false);
+      }
     }
+    cg_printf("const CallInfo *cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
   }
 
-  if (!nonStatic) {
-    cg_printf(");\n");
-    if (lsb) cg_printf("mcp%d.lateStaticBind(fi.getThreadInfo());\n", m_ciTemp);
-    cg_printf("const CallInfo *&cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
-    if (m_classScope) {
-      cg_printf("%s%s.%sget_call_info(mcp%d",
-                Option::ClassStaticsCallbackPrefix,
-                m_classScope->getId().c_str(),
-                Option::ObjectStaticPrefix, m_ciTemp);
-    } else if (isRedeclared()) {
-      cg_printf("g->%s%s->%sget_call_info(mcp%d",
-                Option::ClassStaticsCallbackPrefix, m_className.c_str(),
-                Option::ObjectStaticPrefix, m_ciTemp);
-    }
-  }
-  if (nonStatic || !m_class) {
-    cg_printf(");\n");
-  }
   if (m_params && m_params->getCount() > 0) {
     cg.pushCallInfo(m_ciTemp);
     m_params->preOutputCPP(cg, ar, 0);

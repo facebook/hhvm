@@ -22,9 +22,16 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef PHP_PATH
+#define PHP_PATH "php"
+#endif
+
+const char *php_path = PHP_PATH;
+
 int Test::s_total = 0;
 int Test::s_passed = 0;
 int Test::s_skipped = 0;
+std::string Test::s_suite;
 
 bool Test::s_quiet = false;
 

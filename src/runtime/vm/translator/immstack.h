@@ -45,7 +45,7 @@ public:
   void processOpcode(const Opcode* opcode);
 
   void pushUnknown();
-  void pokeUnknown(int pos);
+  void insUnknown(int pos);
   void pop();
 
   // By using these methods (instead of the popUknown() above) you signify that

@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_flow_control.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

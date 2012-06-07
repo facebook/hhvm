@@ -54,7 +54,7 @@ In cls::offsetSet(, 1)
 In cls::offsetGet()
 cls Object
 (
-    [container:private] => Array
+    [container:cls:private] => Array
         (
             [one] => 1
             [three] => 3
@@ -71,7 +71,7 @@ cls Object
 In cls::offsetUnset(x)
 cls Object
 (
-    [container:private] => Array
+    [container:cls:private] => Array
         (
             [one] => 1
             [three] => 3
@@ -85,3 +85,4 @@ cls Object
 
 )
 Test end
+string(10) "hellohello"

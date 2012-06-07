@@ -21,7 +21,6 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/server/transport.h>
 #include <runtime/base/resource_data.h>
-#include <runtime/base/fiber_safe.h>
 #include <runtime/base/debuggable.h>
 #include <runtime/base/server/virtual_host.h>
 #include <runtime/base/util/string_buffer.h>
@@ -43,16 +42,23 @@
 #define PHP_OUTPUT_HANDLER_END    (1<<2)
 
 namespace HPHP {
+class c_GenericContinuation;
 namespace Eval {
 class PhpFile;
 }
+
 namespace VM {
-class DynTracer;
+class EventHook;
+namespace Transl {
+class Translator;
 }
+class PCFilter;
 }
 
-namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+typedef hphp_hash_map<StringData*, HPHP::Eval::PhpFile*, string_data_hash,
+                      string_data_same> EvaledFilesMap;
 
 /**
  * Mainly designed for extensions to perform initialization and shutdown
@@ -85,17 +91,17 @@ struct VMState {
 };
 
 class MethodInfoVM : public ClassInfo::MethodInfo,
-                     public HPHP::Eval::AtomicCountable {
+                     public AtomicCountable {
  public:
   ~MethodInfoVM();
-  void release() { delete this; }
+  void atomicRelease() { delete this; }
 };
 
 class ClassInfoVM : public ClassInfo,
-                    public HPHP::Eval::AtomicCountable {
+                    public AtomicCountable {
  public:
   ~ClassInfoVM();
-  void release() { delete this; }
+  void atomicRelease() { delete this; }
   virtual CStrRef getParentClass() const { return m_parentClass; }
 
   const InterfaceSet  &getInterfaces()      const { return m_interfaces;}
@@ -132,6 +138,7 @@ namespace MethodLookup {
 enum CallType {
   ClsMethod,
   ObjMethod,
+  CtorMethod,
 };
 enum LookupResult {
   MethodFoundWithThis,
@@ -142,26 +149,46 @@ enum LookupResult {
 };
 }
 
+enum InclOpFlags {
+  InclOpDefault = 0,
+  InclOpFatal = 1,
+  InclOpOnce = 2,
+  InclOpLocal = 4,
+  InclOpDocRoot = 8,
+  InclOpRelative = 16
+};
+
+static inline InclOpFlags
+operator|(const InclOpFlags &l, const InclOpFlags &r) {
+  return InclOpFlags(int(l) | int(r));
+}
+
+static inline InclOpFlags
+operator&(const InclOpFlags &l, const InclOpFlags &r) {
+  return InclOpFlags(int(l) & int(r));
+}
+
 struct VMParserFrame {
   std::string filename;
   int lineNumber;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/**
- * Put all global variables here so we can gather them into one thread-local
- * variable for easy access.
- */
 
-class ExecutionContext : public FiberLocal, public IDebuggable {
-public:
 #define NEAR_FIELD_DECL                                                        \
   HPHP::VM::Stack m_stack;                                                     \
   HPHP::VM::ActRec* m_fp;                                                      \
   HPHP::VM::PC m_pc;                                                           \
   uint32 m_isValid; /* Debug-only: non-zero iff m_fp/m_stack are trustworthy */\
-  HPHP::VM::DynTracer* m_dynTracer;                                            \
+  HPHP::VM::EventHook* m_eventHook;                                            \
   int64_t m_currentThreadIdx;
+
+/**
+ * Put all global variables here so we can gather them into one thread-local
+ * variable for easy access.
+ */
+class BaseExecutionContext : public IDebuggable {
+public:
 #ifdef HHVM
   // These members are declared first for performance reasons: they
   // are accessed from within the TC and having their offset fit
@@ -193,16 +220,12 @@ public:
   };
 
 public:
-  ExecutionContext();
-  ~ExecutionContext();
+  BaseExecutionContext();
+  ~BaseExecutionContext();
 
   // For RPCRequestHandler
   void backupSession();
   void restoreSession();
-
-  // implementing FiberLocal
-  virtual void fiberInit(FiberLocal *src, FiberReferenceMap &refMap);
-  virtual void fiberExit(FiberLocal *src, FiberReferenceMap &refMap);
 
   // implementing IDebuggable
   virtual void debuggerInfo(InfoVec &info);
@@ -265,11 +288,6 @@ public:
   void onRequestShutdown();
   void onShutdownPreSend();
   void onShutdownPostSend();
-  void registerTickFunction(CVarRef function, Array arguments);
-  void unregisterTickFunction(CVarRef function);
-  void onTick();
-  Array backupShutdowns() const { return m_shutdowns;}
-  void restoreShutdowns(CArrRef shutdowns) { m_shutdowns = shutdowns;}
 
   /**
    * Error handling
@@ -328,12 +346,10 @@ public:
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
-  DECLARE_DBG_SETTING_ACCESSORS
+  CStrRef getSandboxId() const { return m_sandboxId; }
+  void setSandboxId(CStrRef sandboxId) { m_sandboxId = sandboxId; }
 
-  VM::Transl::Translator* __getTransl() {
-    // Only for debugging purposes; please do not abuse.
-    return m_transl;
-  }
+  DECLARE_DBG_SETTING_ACCESSORS
 
 private:
   class OutputBuffer {
@@ -343,12 +359,7 @@ private:
     Variant handler;
   };
 
-public:
-  typedef hphp_hash_set<HPHP::ObjectData*, pointer_hash<HPHP::ObjectData> >
-    LiveObjSet;
-  LiveObjSet m_liveBCObjs;
 private:
-  VM::Transl::Translator* m_transl;
   // system settings
   Transport *m_transport;
   int64 m_maxMemory;
@@ -367,7 +378,6 @@ private:
   std::set<RequestEventHandler*> m_requestEventHandlerSet;
   std::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
-  Array m_ticks;
 
   // error handling
   std::vector<std::pair<Variant,int> > m_userErrorHandlers;
@@ -397,54 +407,88 @@ private:
   // include_path configuration option
   Array m_include_paths;
 
+  // cache the sandbox id for the request
+  String m_sandboxId;
+
   const VirtualHost *m_vhost;
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
 
   DECLARE_DBG_SETTING
+};
 
-  // HHBC-related state/methods
+class VMExecutionContext : public BaseExecutionContext {
+public:
+  VMExecutionContext();
+  ~VMExecutionContext();
+
+  typedef std::set<HPHP::ObjectData*> LiveObjSet;
+  LiveObjSet m_liveBCObjs;
+
+private:
+  VM::Transl::Translator* m_transl;
+
 public:
   void requestInit();
   void requestExit();
 
+  static void getElem(TypedValue* base, TypedValue* key, TypedValue* dest);
+  static c_GenericContinuation* createContinuation(VM::ActRec* fp, bool getArgs,
+                                                   const VM::Func* origFunc,
+                                                   VM::Class* genClass,
+                                                   const VM::Func* genFunc);
+  static c_GenericContinuation* fillContinuationVars(
+    VM::ActRec* fp, const VM::Func* origFunc, const VM::Func* genFunc,
+    c_GenericContinuation* cont);
+  static int unpackContinuation(c_GenericContinuation* cont, TypedValue* dest);
+  static void packContinuation(c_GenericContinuation* cont, VM::ActRec* fp,
+                               TypedValue* value, int label);
+
 private:
-  template <bool warn, bool saveResult, unsigned mleave>
-  void getHelperPre(HPHP::VM::PC& pc, unsigned& ndiscard, TypedValue*& tvL,
+  enum VectorLeaveCode {
+    ConsumeAll,
+    LeaveLast
+  };
+  template <bool warn, bool saveResult, VectorLeaveCode mleave>
+  void getHelperPre(VM::PC& pc, unsigned& ndiscard,
                     TypedValue*& base, bool& baseStrOff, TypedValue& tvScratch,
-                    TypedValue& tvRef, TypedValue& tvRef2);
+                    TypedValue& tvRef, TypedValue& tvRef2,
+                    VM::MemberCode& mcode, TypedValue*& curMember);
   template <bool saveResult>
-  void getHelperPost(unsigned ndiscard, TypedValue* tvL, TypedValue& tvScratch,
-                     TypedValue& tvRef, TypedValue& tvRef2);
-  void getHelper(HPHP::VM::PC& pc, unsigned& ndiscard, TypedValue*& tvL,
+  void getHelperPost(unsigned ndiscard, TypedValue*& tvRet,
+                     TypedValue& tvScratch, TypedValue& tvRef,
+                     TypedValue& tvRef2);
+  void getHelper(VM::PC& pc, unsigned& ndiscard, TypedValue*& tvRet,
                  TypedValue*& base, bool& baseStrOff, TypedValue& tvScratch,
-                 TypedValue& tvRef, TypedValue& tvRef2);
+                 TypedValue& tvRef, TypedValue& tvRef2,
+                 VM::MemberCode& mcode, TypedValue*& curMember);
 
   template <bool warn, bool define, bool unset, unsigned mdepth,
-            unsigned mleave>
-  bool setHelperPre(HPHP::VM::PC& pc, unsigned& ndiscard, TypedValue*& tvL,
-                    HPHP::VM::PC& vecp, TypedValue*& base, bool& baseStrOff,
-                    TypedValue& tvScratch, TypedValue& tvRef,
-                    TypedValue& tvRef2);
+            VectorLeaveCode mleave>
+  bool setHelperPre(VM::PC& pc, unsigned& ndiscard, TypedValue*& base,
+                    bool& baseStrOff, TypedValue& tvScratch,
+                    TypedValue& tvRef, TypedValue& tvRef2,
+                    VM::MemberCode& mcode, TypedValue*& curMember);
   template <unsigned mdepth>
-  void setHelperPost(unsigned ndiscard, TypedValue* tvL, TypedValue& tvRef,
+  void setHelperPost(unsigned ndiscard, TypedValue& tvRef,
                      TypedValue& tvRef2);
-  bool cellInstanceOfStr(TypedValue* c, StringData* s);
+  bool cellInstanceOf(TypedValue* c, const HPHP::VM::NamedEntity* s);
 #define O(name, imm, pusph, pop, flags)                                       \
   void iop##name(HPHP::VM::PC& pc);
 OPCODES
 #undef O
   void pushLocalsAndIterators(const HPHP::VM::Func* f, int nparams = 0);
 
+  template<bool raise>
+  void contSendImpl();
+  void classExistsImpl(HPHP::VM::PC& pc, HPHP::VM::Attr typeAttr);
+
 public:
   HphpArray m_constants;
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
                         string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
-  typedef hphp_hash_map<const StringData*, HPHP::VM::Class*, string_data_hash,
-                        string_data_isame> DefinedClassMap;
-  DefinedClassMap m_definedClasses;
   typedef hphp_hash_map<const HPHP::VM::Class*, HphpArray*,
                         pointer_hash<HPHP::VM::Class> > ClsCnsDataMap;
   ClsCnsDataMap m_clsCnsData;
@@ -454,36 +498,13 @@ public:
   typedef hphp_hash_map<const HPHP::VM::Class*, HphpArray*,
                         pointer_hash<HPHP::VM::Class> > SPropDataMap;
   SPropDataMap m_sPropData;
-  typedef hphp_hash_map<const HPHP::VM::Class*, HphpArray*,
-                        pointer_hash<HPHP::VM::Class> > ClsStaticCtxMap;
-  ClsStaticCtxMap m_clsStaticCtx;
-
-  HPHP::VM::Class* defClass(HPHP::VM::PreClass* preClass,
-                            bool failIsFatal = true);
-
-  // lookupClass --
-  //   Get this request's understanding of the named class,
-  //   without perturbing the state of the class mapping.
-  //
-  // loadClass --
-  //   Like lookupClass, but may optionally invoke the autload
-  //   machinery.
-  //
-  // getClass --
-  //   Parameterized loadClass vs. getClass, since some code
-  //   paths need one semantic or the other from common code.
-  HPHP::VM::Class* getClass(const StringData* className,
-                            bool tryAutoload);
-  HPHP::VM::Class* loadClass(const StringData* className) {
-    return getClass(className, true);
-  }
-  HPHP::VM::Class* lookupClass(const StringData* className) {
-    return getClass(className, false);
-  }
+  typedef hphp_hash_map<const HPHP::VM::Func*, HphpArray*,
+                        pointer_hash<HPHP::VM::Func> > FuncStaticCtxMap;
+  FuncStaticCtxMap m_funcStaticCtx;
 
   const HPHP::VM::Func* lookupMethodCtx(const HPHP::VM::Class* cls,
                                         const StringData* methodName,
-                                        HPHP::VM::PreClass* pctx,
+                                        HPHP::VM::Class* pctx,
                                         MethodLookup::CallType lookupType,
                                         bool raise = false);
   MethodLookup::LookupResult lookupObjMethod(const HPHP::VM::Func*& f,
@@ -495,45 +516,23 @@ public:
                                              const StringData* methodName,
                                              ObjectData* this_,
                                              bool raise = false);
+  MethodLookup::LookupResult lookupCtorMethod(const HPHP::VM::Func*& f,
+                                              const HPHP::VM::Class* cls,
+                                              bool raise = false);
   HPHP::ObjectData* createObject(StringData* clsName,
                                  CArrRef params,
                                  bool init = true);
   HPHP::ObjectData* createObjectOnly(StringData* clsName);
-  HPHP::VM::Class::PropInitVec* getPropData(const HPHP::VM::Class* class_)
-    const {
-    PropDataMap::const_iterator it = m_propData.find(class_);
-    if (it == m_propData.end()) {
-      return NULL;
-    }
-    return it->second;
-  }
-  void setPropData(const HPHP::VM::Class* class_,
-                    HPHP::VM::Class::PropInitVec* propData) {
-    ASSERT(getSPropData(class_) == NULL);
-    m_propData[class_] = propData;
-  }
 
-  HphpArray* getSPropData(const HPHP::VM::Class* class_) const {
-    SPropDataMap::const_iterator it = m_sPropData.find(class_);
-    if (it == m_sPropData.end()) {
-      return NULL;
-    }
-    return it->second;
-  }
-  void setSPropData(const HPHP::VM::Class* class_, HphpArray* sPropData) {
-    ASSERT(getSPropData(class_) == NULL);
-    m_sPropData[class_] = sPropData;
-  }
-
-  HphpArray* getClsStaticCtx(const HPHP::VM::Class* class_) {
-    ClsStaticCtxMap::iterator it = m_clsStaticCtx.find(class_);
-    if (it != m_clsStaticCtx.end()) {
+  HphpArray* getFuncStaticCtx(const HPHP::VM::Func* f) {
+    FuncStaticCtxMap::iterator it = m_funcStaticCtx.find(f);
+    if (it != m_funcStaticCtx.end()) {
       return it->second;
     }
 
-    HphpArray* array = NEW(HphpArray)(1);
+    HphpArray* array = NEW(HphpArray)(f->numStaticLocals());
     array->incRefCount();
-    return m_clsStaticCtx[class_] = array;
+    return m_funcStaticCtx[f] = array;
   }
 
   HphpArray* getClsCnsData(const HPHP::VM::Class* class_) const {
@@ -548,35 +547,48 @@ public:
     m_clsCnsData[class_] = clsCnsData;
   }
 
+  TypedValue* lookupClsCns(const HPHP::VM::NamedEntity* ne,
+                           const StringData* cls,
+                           const StringData* cns);
+
   HPHP::VM::ActRec* arGetSfp(const HPHP::VM::ActRec* ar);
 
   std::string prettyStack(const std::string& prefix) const;
   static void DumpStack();
+  static void DumpCurUnit(int skip = 0);
 
   std::list<HPHP::VM::VarEnv*> m_varEnvs;
-  // The conceptual type of this array is
-  // [mangled Func* and variable name] => [value]
-  // Objects that need their own static local context separate from
-  // this one (Class, Closure, Continuation) are responsible for
-  // managing that on their own.
-  HphpArray* m_staticVars;
 
-  HPHP::VM::FuncDict m_funcDict;
-  typedef hphp_hash_map<StringData*, HPHP::Eval::PhpFile*, string_data_hash,
-                        string_data_same> EvaledFilesMap;
+  HPHP::VM::RenamedFuncDict m_renamedFuncs;
   EvaledFilesMap m_evaledFiles;
   typedef std::vector<HPHP::VM::Unit*> EvaledUnitsVec;
-  EvaledUnitsVec m_evaledUnits;
+  EvaledUnitsVec m_createdFuncs;
+
+  /*
+   * Accessors for VMExecutionContext state that check safety wrt
+   * whether these values may be stale due to TC.  Asserts in these
+   * usually mean the need for a VMRegAnchor somewhere in the call
+   * chain.
+   */
+
+  void checkRegStateWork() const;
+  void checkRegState() const { if (debug) checkRegStateWork(); }
+
+  const VM::ActRec* getFP()    const { checkRegState(); return m_fp; }
+        VM::ActRec* getFP()          { checkRegState(); return m_fp; }
+        VM::PC      getPC()    const { checkRegState(); return m_pc; }
+  const VM::Stack&  getStack() const { checkRegState(); return m_stack; }
+        VM::Stack&  getStack()       { checkRegState(); return m_stack; }
 
 #ifndef HHVM
   NEAR_FIELD_DECL
 #endif
-#undef NEAR_FIELD_ECL
+#undef NEAR_FIELD_DECL
   HPHP::VM::ActRec* m_firstAR;
   bool m_halted;
   std::vector<HPHP::VM::Fault> m_faults;
 
-  HPHP::VM::ActRec* getStackFrame(int level);
+  HPHP::VM::ActRec* getStackFrame();
   ObjectData* getThis(bool skipFrame = false);
   CStrRef getContextClassName(bool skipFrame = false);
   CStrRef getParentContextClassName(bool skipFrame = false);
@@ -585,19 +597,24 @@ public:
   Array getCallerInfo(bool skipFrame = false);
   bool defined(CStrRef name);
   TypedValue* getCns(StringData* cns, bool system=true, bool dynamic=true);
-  bool setCns(StringData* cns, CVarRef val);
-  HPHP::VM::Func *lookupFunc(const StringData* funcName);
+  bool setCns(StringData* cns, CVarRef val, bool dynamic = false);
   bool renameFunction(const StringData* oldName, const StringData* newName);
   bool isFunctionRenameable(const StringData* name);
   void addRenameableFunctions(ArrayData* arr);
-  void mergeUnit(HPHP::VM::Unit* unit);
-  void mergeUnitFuncs(HPHP::VM::Unit* unit);
+  bool mergeUnit(HPHP::VM::Unit* unit);
   HPHP::Eval::PhpFile* lookupPhpFile(
-      StringData* path, const char* currentDir, bool& initial);
+      StringData* path, const char* currentDir, bool* initial = NULL);
   HPHP::VM::Unit* evalInclude(StringData* path,
-                              const StringData* curUnitFilePath, bool& initial);
-  void evalUnit(HPHP::VM::Unit* unit, HPHP::VM::PC& pc);
-  void invokeUnit(HPHP::VM::Unit* unit);
+                              const StringData* curUnitFilePath, bool* initial);
+  HPHP::VM::Unit* evalIncludeRoot(StringData* path,
+                                  InclOpFlags flags, bool* initial);
+  HPHP::Eval::PhpFile* lookupIncludeRoot(StringData* path,
+                                         InclOpFlags flags, bool* initial);
+  bool evalUnit(HPHP::VM::Unit* unit, bool local,
+                HPHP::VM::PC& pc, int funcType);
+  void invokeUnit(TypedValue* retval, HPHP::VM::Unit* unit);
+  HPHP::VM::Unit* compileEvalString(StringData* code);
+  CStrRef createFunction(CStrRef args, CStrRef code);
   void evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
@@ -607,6 +624,12 @@ public:
                          const StringData *cls, const StringData *func);
   int m_lambdaCounter;
   std::vector<jmp_buf *> m_jmpBufs;
+  enum {
+    SETJMP = 0,
+    LONGJUMP_PROPAGATE,
+    LONGJUMP_RESUMEVM,
+    LONGJUMP_DEBUGGER
+  };
   std::vector<VMState> m_nestedVMs;
 
   typedef hphp_hash_map<const HPHP::VM::ActRec*, int,
@@ -618,12 +641,11 @@ public:
 
   int m_nesting;
   bool isNested() { return m_nesting != 0; }
-  void reenterVM(VMState &savedVM);
-  void exitVM();
+  void pushVMState(VMState &savedVM);
+  void popVMState();
 
-  bool m_propagateException;
-  bool m_ignoreException;
-  void hhvmThrow();
+  void hhvmThrow(int longJumpType) ATTRIBUTE_NORETURN;
+  int hhvmPrepareThrow();
   HPHP::VM::ActRec* getPrevVMState(const HPHP::VM::ActRec* fp,
                                    HPHP::VM::Offset* prevPc = NULL,
                                    TypedValue** prevSp = NULL);
@@ -631,25 +653,39 @@ public:
                        bool withSelf = false,
                        bool withThis = false,
                        VMParserFrame* parserFrame = NULL);
-  void handleUnwind(VM::UnwindStatus unwindType);
-  HPHP::VM::VarEnv* getVarEnv();
+  int handleUnwind(VM::UnwindStatus unwindType);
+  HPHP::VM::VarEnv* getVarEnv(bool skipBuiltin = true);
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
-  bool m_debuggerFuncEntry;
-  const HPHP::VM::SourceLoc *m_debuggerLastBreakLoc;
   HPHP::VM::InjectionTables* m_injTables;
+  HPHP::VM::PCFilter* m_breakPointFilter;
+  HPHP::VM::PCFilter* m_lastLocFilter;
+  bool m_interpreting;
+  bool m_dbgNoBreak;
+  int switchMode(bool unwindBuiltin);
+  template <bool handle_throw>
+  void doFCall(HPHP::VM::ActRec* ar, HPHP::VM::PC& pc);
+  CVarRef getEvaledArg(const StringData* val);
 private:
-  void shuffleMagicArgs(HPHP::VM::ActRec* ar, int nargs);
-  void callBuiltin(HPHP::VM::ActRec* ar);
-  template <bool checkOverflow>
-  bool prepareNonBuiltinEntry(HPHP::VM::ActRec *ar, HPHP::VM::PC& pc);
-  void handleExit();
-public:
-  void syncGdbState();
+  void enterVMWork(HPHP::VM::ActRec* ar, bool enterFn);
   void enterVM(TypedValue* retval,
-               const HPHP::VM::Func* f,
-               HPHP::VM::VarEnv* varEnv,
-               HPHP::VM::ActRec* ar);
+               HPHP::VM::ActRec* ar,
+               TypedValue* extraArgs);
+  void unwindBuiltinFrame();
+  template <bool reenter, bool handle_throw>
+  bool prepareFuncEntry(HPHP::VM::ActRec *ar, HPHP::VM::PC& pc);
+  void recordCodeCoverage(HPHP::VM::PC pc);
+  int m_coverPrevLine;
+  HPHP::VM::Unit* m_coverPrevUnit;
+  Array m_evaledArgs;
+public:
+  void resetCoverageCounters();
+  void shuffleMagicArgs(HPHP::VM::ActRec* ar);
+  void syncGdbState();
+  void reenterVM(TypedValue* retval,
+                 HPHP::VM::ActRec* ar,
+                 TypedValue* extraArgs,
+                 TypedValue* savedSP);
   void invokeFunc(TypedValue* retval,
                   const HPHP::VM::Func* f,
                   CArrRef params,
@@ -659,20 +695,19 @@ public:
                   StringData* invName = NULL,
                   HPHP::VM::Unit* mergeUnit = NULL);
   // VM ClassInfo support
-  StringIMap<SmartPtr<MethodInfoVM> > m_functionInfos;
-  StringIMap<SmartPtr<ClassInfoVM> >  m_classInfos;
-  StringIMap<SmartPtr<ClassInfoVM> >  m_interfaceInfos;
-  StringIMap<SmartPtr<ClassInfoVM> >  m_traitInfos;
+  StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;
+  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;
+  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_interfaceInfos;
+  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_traitInfos;
   Array getUserFunctionsInfo();
-  Array getClassesInfo();
-  Array getInterfacesInfo();
-  Array getTraitsInfo();
   Array getConstantsInfo();
   const ClassInfo::MethodInfo* findFunctionInfo(CStrRef name);
   const ClassInfo* findClassInfo(CStrRef name);
   const ClassInfo* findInterfaceInfo(CStrRef name);
   const ClassInfo* findTraitInfo(CStrRef name);
   const ClassInfo::ConstantInfo* findConstantInfo(CStrRef name);
+
+  void newPreConst(StringData* name, const TypedValue& val);
 
   // The op*() methods implement individual opcode handlers.
 #define O(name, imm, pusph, pop, flags)                                       \
@@ -693,15 +728,32 @@ OPCODES
   inline bool isHalted() { return m_halted; }
 
 private:
+  VM::PreConstVec m_preConsts;
   static Mutex s_threadIdxLock;
   static hphp_hash_map<pid_t, int64_t> s_threadIdxMap;
 
 public:
   static int64_t s_threadIdxCounter;
   inline HPHP::VM::Offset pcOff() const {
-    return m_fp->m_func->m_unit->offsetOf(m_pc);
+    return m_fp->m_func->unit()->offsetOf(m_pc);
   }
+
 };
+
+#ifdef HHVM
+class ExecutionContext : public VMExecutionContext {};
+#else
+class ExecutionContext : public BaseExecutionContext {};
+#endif
+
+#if DEBUG
+#define g_vmContext (&dynamic_cast<VMExecutionContext&>( \
+                       *g_context.getNoCheck()))
+#else
+#define g_vmContext (static_cast<VMExecutionContext*>( \
+                                   static_cast<BaseExecutionContext*>( \
+                                     g_context.getNoCheck())))
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

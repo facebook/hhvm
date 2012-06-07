@@ -23,13 +23,9 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION(SharedMap, SmartAllocatorImpl::NeedRestore);
+IMPLEMENT_SMART_ALLOCATION_HOT(SharedMap, SmartAllocatorImpl::NeedSweep);
 ///////////////////////////////////////////////////////////////////////////////
-
-SharedMap::SharedMap(SharedVariant* source) : m_arr(source) {
-  source->incRef();
-}
-
+HOT_FUNC
 CVarRef SharedMap::getValueRef(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
@@ -113,7 +109,7 @@ CVarRef SharedMap::get(int64 k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
     if (error) {
-      raise_notice("Undefined index: %ld", k);
+      raise_notice("Undefined index: %lld", k);
     }
     return null_variant;
   }
@@ -255,14 +251,6 @@ ArrayData *SharedMap::remove(CVarRef k, bool copy) {
 
 ArrayData *SharedMap::copy() const {
   return escalate();
-}
-
-ArrayData *SharedMap::fiberCopy() const {
-  ArrayInit ai(size());
-  for (int i = 0; i < size(); i++) {
-    ai.add(getKey(i), getValueUncached(i), true);
-  }
-  return ai.create();
 }
 
 ArrayData *SharedMap::append(CVarRef v, bool copy) {

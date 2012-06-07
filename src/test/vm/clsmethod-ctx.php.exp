@@ -1,0 +1,2 @@
+Private in a
+HipHop Fatal error: Call to private method a::priv from anonymous context in src/test/vm/clsmethod-ctx.php on line 15

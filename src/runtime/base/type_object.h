@@ -26,6 +26,7 @@
 #include <runtime/base/object_data.h>
 #include <runtime/base/type_string.h>
 #include <runtime/base/hphp_value.h>
+#include <runtime/base/gc_roots.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,20 +36,34 @@ namespace HPHP {
 class ArrayIter;
 class MutableArrayIter;
 
+#ifdef HHVM_GC
+typedef GCRootTracker<ObjectData> ObjectBase;
+#else
+typedef SmartPtr<ObjectData> ObjectBase;
+#endif
+
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
-class Object : public SmartPtr<ObjectData> {
+class Object : protected ObjectBase {
  public:
   Object() {}
 
   static const Object s_nullObject;
 
+  ObjectData* get() const { return m_px; }
+  void reset() { ObjectBase::reset(); }
+
+  ObjectData* operator->() const {
+    if (!m_px) throw_null_pointer_exception();
+    return m_px;
+  }
+
   /**
    * Constructors
    */
-  Object(ObjectData *data) : SmartPtr<ObjectData>(data) { }
-  Object(CObjRef src) : SmartPtr<ObjectData>(src.m_px) { }
+  Object(ObjectData *data) : ObjectBase(data) { }
+  Object(CObjRef src) : ObjectBase(src.m_px) { }
 
   ~Object();
 
@@ -86,12 +101,14 @@ class Object : public SmartPtr<ObjectData> {
   static Object CreateDummy(ObjectData*(*cooFunc)());
   static Object CreateDummy(ObjectData*(*cooFunc)(ObjectData*));
 
-  ArrayIter begin(CStrRef context = null_string,
-                  bool setIterDirty = false) const;
+  template <class T> T& cast() { return *static_cast<T*>(this); }
+  template <class T> const T& cast() const {
+    return *static_cast<const T*>(this);
+  }
+  ArrayIter begin(CStrRef context = null_string) const;
 
   MutableArrayIter begin(Variant *key, Variant &val,
-                         CStrRef context = null_string,
-                         bool setIterDirty = false) const;
+                         CStrRef context = null_string) const;
 
   /**
    * getTyped() and is() are intended for use with classes only. Using
@@ -192,19 +209,13 @@ class Object : public SmartPtr<ObjectData> {
   void serialize(VariableSerializer *serializer) const;
   bool unserialize(std::istream &in);
 
-  /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   */
-  Object fiberMarshal(FiberReferenceMap &refMap) const;
-  Object fiberUnmarshal(FiberReferenceMap &refMap) const;
-
-  /* detatch the ObjectData without freeing */
+  // Transfer ownership of our reference to this object.
   ObjectData *detach() {
     ObjectData *ret = m_px;
-    ret->decRefCount();
     m_px = NULL;
     return ret;
   }
+
  private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(Object, m_px) == offsetof(Value, m_data));
@@ -214,16 +225,24 @@ class Object : public SmartPtr<ObjectData> {
 ///////////////////////////////////////////////////////////////////////////////
 // ObjNR
 
-class ObjNR : public Object {
+class ObjNR {
 public:
-  ObjNR(ObjectData *data) {
+  explicit ObjNR(ObjectData *data) {
     m_px = data;
   }
-  ObjNR(const ObjNR &o) {
-    m_px = o.m_px;
+
+  Object& asObject() {
+    return *reinterpret_cast<Object*>(this); // XXX
   }
-  ~ObjNR() {
-    m_px = NULL;
+
+  const Object& asObject() const {
+    return const_cast<ObjNR*>(this)->asObject();
+  }
+
+private:
+  ObjectData* m_px;
+  static void compileTimeAssertions() {
+    BOOST_STATIC_ASSERT((offsetof(ObjNR, m_px) == kExpectedMPxOffset));
   }
 };
 

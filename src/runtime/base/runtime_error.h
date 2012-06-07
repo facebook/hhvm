@@ -22,8 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#undef DEPRECATED
-
 class ErrorConstants {
 public:
   enum ErrorModes {
@@ -64,17 +62,17 @@ namespace VM {
 }
 
 void raise_error(const std::string &msg);
-void raise_error(const char *fmt, ...);
+void raise_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_recoverable_error(const std::string &msg);
-void raise_recoverable_error(const char *fmt, ...);
+void raise_recoverable_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_strict_warning(const std::string &msg);
-void raise_strict_warning(const char *fmt, ...);
+void raise_strict_warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_warning(const std::string &msg);
-void raise_warning(const char *fmt, ...);
+void raise_warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_notice(const std::string &msg);
-void raise_notice(const char *fmt, ...);
+void raise_notice(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_debugging(const std::string &msg);
-void raise_debugging(const char *fmt, ...);
+void raise_debugging(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 
 template<bool Error>
 void

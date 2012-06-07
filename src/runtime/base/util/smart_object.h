@@ -50,8 +50,6 @@ public:
   SmartObject(T *data) : Object(data) { }
   template<class Y>
   SmartObject(Y *data) : Object(data) { }
-  template<class Y>
-  SmartObject(const SmartPtr<Y> &data) : Object(data.get()) { }
   SmartObject(CObjRef src) : Object(src) { }
 
   /**
@@ -65,13 +63,12 @@ public:
     Object::operator=(src);
     return *this;
   }
-  SmartObject &operator=(T *src) {
+  SmartObject &operator=(CObjRef src) {
     Object::operator=(src);
     return *this;
   }
-  template<class Y>
-  SmartObject &operator=(const SmartPtr<Y> &src) {
-    Object::operator=(src.get());
+  SmartObject &operator=(T *src) {
+    Object::operator=(src);
     return *this;
   }
 

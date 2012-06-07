@@ -21,8 +21,6 @@
 
 #define POLLING_SECONDS 1
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 // send/recv
@@ -169,7 +167,7 @@ bool DebuggerCommand::onClientD(DebuggerClient *client) {
   } else {
     ret = onClient(client);
   }
-  if (client->isApiMode()) {
+  if (client->isApiMode() && !m_incomplete) {
     setClientOutput(client);
   }
   return ret;

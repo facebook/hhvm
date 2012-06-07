@@ -29,7 +29,8 @@ namespace HPHP {
 bool f_hphpd_install_user_command(CStrRef cmd, CStrRef clsname);
 Array f_hphpd_get_user_commands();
 void f_hphpd_break(bool condition = true);
-Variant f_hphpd_get_client(CStrRef name = null);
+Variant f_hphpd_get_client(CStrRef name);
+Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerProxyCmdUser
@@ -173,8 +174,6 @@ class c_DebuggerClient : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(init);
   public: Variant t_processcmd(CVarRef cmdName, CVarRef args);
   DECLARE_METHOD_INVOKE_HELPERS(processcmd);
-  public: Variant t_interrupt();
-  DECLARE_METHOD_INVOKE_HELPERS(interrupt);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 

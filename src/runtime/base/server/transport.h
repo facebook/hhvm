@@ -21,7 +21,6 @@
 #include <util/compression.h>
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/fiber_safe.h>
 #include <runtime/base/debuggable.h>
 #include <runtime/base/runtime_option.h>
 
@@ -41,7 +40,7 @@ typedef std::map<std::string, std::string, stdltistr> CookieMap;
  * Note that one transport object is created for each request, and
  * one transport is ONLY accessed from one single thread.
  */
-class Transport : public FiberSafe, public IDebuggable {
+class Transport : public IDebuggable {
 public:
   enum Method {
     UnknownMethod,
@@ -88,6 +87,7 @@ public:
   const timespec &getQueueTime() const { return m_queueTime;}
   const timespec &getWallTime() const { return m_wallTime;}
   const timespec &getCpuTime() const { return m_cpuTime;}
+  const int64 &getInstructions() const { return m_instructions;}
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -326,8 +326,11 @@ public:
   int getResponseTotalSize() const { return m_responseTotalSize; }
   int getResponseSentSize() const { return m_responseSentSize; }
   int64 getFlushTime() const { return m_flushTimeUs; }
+  int getLastChunkSentSize();
+  void getChunkSentSizes(Array &ret);
   void onFlushBegin(int totalSize) { m_responseTotalSize = totalSize; }
   void onFlushProgress(int writtenSize, int64 delayUs);
+  void onChunkedProgress(int writtenSize);
 
   void setThreadType(ThreadType type) { m_threadType = type;}
   ThreadType getThreadType() const { return m_threadType;}
@@ -355,6 +358,8 @@ protected:
   timespec m_wallTime;
   timespec m_cpuTime;
 
+  int64 m_instructions;
+
   // input
   char *m_url;
   char *m_postData;
@@ -376,6 +381,8 @@ protected:
   int m_responseTotalSize; // including added headers
   int m_responseSentSize;
   int64 m_flushTimeUs;
+
+  std::vector<int> m_chunksSentSizes;
 
   std::string m_mimeType;
   bool m_sendContentType;

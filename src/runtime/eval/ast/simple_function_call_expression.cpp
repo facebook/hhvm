@@ -29,7 +29,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s_get_class_marker("[get_class]");

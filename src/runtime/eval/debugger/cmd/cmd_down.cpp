@@ -18,8 +18,6 @@
 #include <runtime/eval/debugger/cmd/cmd_up.h>
 #include <runtime/eval/debugger/cmd/cmd_where.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

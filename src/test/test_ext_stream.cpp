@@ -19,8 +19,6 @@
 #include <runtime/ext/ext_socket.h>
 #include <runtime/ext/ext_file.h>
 
-using namespace std;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtStream::RunTests(const std::string &which) {

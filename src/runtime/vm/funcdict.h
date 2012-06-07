@@ -25,23 +25,8 @@ namespace VM {
 /*
  * Abstraction around the Name -> Function mapping.
  */
-class FuncDict {
-public:
-  struct InterceptData : public Countable {
-    Variant m_handler;
-    Variant m_data;
-    String m_name;
-    InterceptData(CVarRef handler, CVarRef data, CStrRef name)
-        : m_handler(handler), m_data(data), m_name(name) {}
-    void release() { delete this; }
-  };
-  typedef SmartPtr<InterceptData> InterceptDataPtr;
-
+class RenamedFuncDict {
 private:
-
-  // Names to BuiltinFunction's.
-  typedef hphp_hash_map<const StringData*, Func::BuiltinFunction,
-          string_data_hash, string_data_isame> ExtFuncMap;
 
   // Names to Func's.
   typedef hphp_hash_map<const StringData*, Func*,
@@ -50,54 +35,18 @@ private:
   typedef hphp_hash_set<const StringData*, string_data_hash, string_data_isame>
           NameSet;
 
-  // Names to InterceptData.
-  typedef hphp_hash_map<const Func*, InterceptDataPtr,
-                        pointer_hash<Func> > InterceptDataMap;
-
-  // s_extFuncHash and s_builtinFuncs have Process scope.
-  static ExtFuncMap s_extFuncHash;
-  static FuncMap s_builtinFuncs;
-
-  // m_funcs: request scope.
-  FuncMap m_funcs;
-
-  // m_builtinBlackList: names that should not be looked up in s_builtinFuncs.
-  // Request scope.
-  NameSet m_builtinBlackList;
-
   // Some PHP programs opt into restricting the use of function renaming.
   bool m_restrictRenameableFunctions;
   NameSet m_renameableFunctions;
 
-  Func* getBuiltin(const StringData*) const;
-
-  // Maps intercepted names (which can include ::-style method names) to their
-  // handlers and "data" parameters.
-  InterceptDataMap m_interceptHandlers;
-
  public:
-  FuncDict();
-
-  static void ProcessInit();
-
-  void insert(const StringData* name, Func* val);
-  Func* get(const StringData* name) const {
-    Func* retval;
-    if (mapGet(m_funcs, name, &retval)) {
-      return retval;
-    }
-    return getBuiltin(name);
-  }
+  RenamedFuncDict();
 
   bool rename(const StringData* old, const StringData* n3w);
   bool isFunctionRenameable(const StringData* name);
   void addRenameableFunctions(ArrayData* arr);
 
-  bool interceptFunction(CStrRef name, CVarRef handler, CVarRef data);
-  bool hasAnyIntercepts();  // does not involve a hashtable lookup
-  InterceptDataPtr getInterceptData(const Func* func);
-
-  Array getUserFunctions();
+  //Array getUserFunctions();
 };
 
 }

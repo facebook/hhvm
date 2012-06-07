@@ -25,9 +25,6 @@
 #include <google/malloc_hook.h>
 #endif
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

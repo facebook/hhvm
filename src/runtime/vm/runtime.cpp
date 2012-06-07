@@ -19,11 +19,14 @@
 #include "runtime/base/zend/zend_string.h"
 #include "runtime/base/array/hphp_array.h"
 #include "runtime/base/builtin_functions.h"
+#include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/bytecode.h"
+#include "runtime/vm/repo.h"
 #include "util/trace.h"
 #include "runtime.h"
 #include "runtime/vm/translator/translator-inline.h"
+#include "runtime/vm/translator/translator-x64.h"
 
 #include "runtime/base/zend/zend_functions.h"
 #include "runtime/ext/profile/extprofile_string.h"
@@ -317,12 +320,16 @@ int64 same_str_str(StringData* v1, StringData* v2) {
   ASSERT(v1);
   ASSERT(v2);
   int len = v1->size();
-  if (v2->size() != len) {
-    retval = false;
-  } else if (v1->data() == v2->data()) {
+  if (v1 == v2) {
     retval = true;
   } else {
-    retval = !memcmp(v1->data(), v2->data(), len);
+    if (v2->size() != len) {
+      retval = false;
+    } else {
+      // Don't bother comparing data pointers;
+      // v1 != v2 makes it likely v1->data != v2->data.
+      retval = !memcmp(v1->data(), v2->data(), len);
+    }
   }
   if (v2->decRefCount() == 0) v2->release();
   if (v1->decRefCount() == 0) v1->release();
@@ -350,6 +357,7 @@ int64 arr0_to_bool(ArrayData* ad) {
 }
 
 int64 arr_to_bool(ArrayData* ad) {
+  ASSERT(Transl::tx64->stateIsDirty());
   int64 retval = arr0_to_bool(ad);
   if (ad->decRefCount() == 0) ad->release();
   return retval;
@@ -384,47 +392,89 @@ tv_release_str(StringData* datum) {
 
 void
 tv_release_arr(ArrayData* datum) {
+  ASSERT(Transl::tx64->stateIsDirty());
   datum->release();
 }
 
 void
 tv_release_obj(ObjectData* datum) {
+  ASSERT(Transl::tx64->stateIsDirty());
   datum->release();
 }
 
 void
 tv_release_var(Variant* datum) {
+  ASSERT(Transl::tx64->stateIsDirty());
   datum->release();
 }
 
 void
-tv_release_generic(TypedValue* tv) {
-  tvReleaseHelper(tv->m_type, tv->m_data.num);
+frame_free_locals(ActRec* fp, int numLocals) {
+  ASSERT(Transl::tx64->stateIsDirty());
+  using namespace Transl;
+#ifdef DEBUG
+  VMRegAnchor _;
+  ASSERT(vmfp() == (Cell*)fp);
+#endif
+  // At return-time, we know that the eval stack is empty except
+  // for the return value.
+  TRACE(1, "frame_free_locals: updated fp to %p\n", fp);
+  frame_free_locals_inl(fp, numLocals);
 }
 
 void
-frame_free_locals(ActRec* fp) {
+frame_free_locals_no_this(ActRec* fp, int numLocals) {
+  ASSERT(Transl::tx64->stateIsDirty());
   using namespace Transl;
-  vmfp() = (Cell*)fp; // VM can be re-entered here.
+#ifdef DEBUG
+  VMRegAnchor _;
+  ASSERT(vmfp() == (Cell*)fp);
+#endif
   // At return-time, we know that the eval stack is empty except
   // for the return value.
-  vmsp() = vmfp() - fp->m_func->numSlotsInFrame();
-  if (debug) {
-    g_context->m_isValid = 1;
-  }
-  TRACE(1, "frame_free_locals: updated fp to %p\n", fp);
-  frame_free_locals_inl(fp);
-  if (debug) {
-    g_context->m_isValid = 0;
-  }
+  TRACE(1, "frame_free_locals_no_this: updated fp to %p\n", fp);
+  frame_free_locals_no_this_inl(fp, numLocals);
 }
 
-Unit* compile_string(const char* s, size_t sz, const char* fname) {
+Unit* compile_file(const char* s, size_t sz, const MD5& md5,
+                   const char* fname) {
   static CompileStringFn compileString =
     (CompileStringFn)dlsym(NULL, "hphp_compiler_parse");
-  Unit* retval = compileString(s, sz, fname);
-  retval->setMd5(HPHP::f_md5(String(s)));
+  Unit* retval = compileString(s, sz, md5, fname);
   return retval;
+}
+
+Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
+                             ssize_t numBuiltinFuncs) {
+  static Unit*(*func)(const HhbcExtFuncInfo*, ssize_t) =
+    (Unit*(*)(const HhbcExtFuncInfo*, ssize_t))
+      dlsym(NULL, "hphp_build_native_func_unit");
+  Unit* u = func(builtinFuncs, numBuiltinFuncs);
+  return u;
+}
+
+Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
+                              ssize_t numBuiltinClasses) {
+  static Unit*(*func)(const HhbcExtClassInfo*, ssize_t) =
+    (Unit*(*)(const HhbcExtClassInfo*, ssize_t))
+      dlsym(NULL, "hphp_build_native_class_unit");
+  Unit* u = func(builtinClasses, numBuiltinClasses);
+  return u;
+}
+
+Unit* compile_string(const char* s, size_t sz) {
+  MD5 md5;
+  int out_len;
+  md5 = MD5(string_md5(s, sz, false, out_len));
+
+  VM::Unit* u = Repo::get().loadUnit("", md5);
+  if (u != NULL) {
+    return u;
+  }
+  static CompileStringFn compileString =
+    (CompileStringFn)dlsym(NULL, "hphp_compiler_parse");
+  u = compileString(s, sz, md5, NULL);
+  return u;
 }
 
 // Returned array has refcount zero! Caller must refcount.
@@ -432,59 +482,78 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
   HphpArray* argArray = NEW(HphpArray)(nargs);
   for (int i = 0; i < nargs; ++i) {
     TypedValue* tv = (TypedValue*)(ar) - (i+1);
-    argArray->nvAppend(tv, false);
+    argArray->nvAppendWithRef(tv, false);
   }
-  return argArray;
+  if (!ar->hasInvName()) {
+    // If this is not a magic call, we're done
+    return argArray;
+  }
+  // This is a magic call, so we need to shuffle the args
+  HphpArray* magicArgs = NEW(HphpArray)(2);
+  magicArgs->append(ar->getInvName(), false);
+  magicArgs->append(argArray, false);
+  return magicArgs;
 }
 
-// !!!
-// The translator relies on the fact that this function can't reenter!
-FuncDict::InterceptData* intercept_data(ActRec* ar) {
-  if (UNLIKELY(g_context->m_funcDict.hasAnyIntercepts())) {
-    return g_context->m_funcDict.getInterceptData(ar->m_func).get();
-  }
-  return NULL;
-}
-
-bool run_intercept_handler(ActRec* ar, FuncDict::InterceptData* data) {
-  ASSERT(data);
-
+bool run_intercept_handler_for_invokefunc(TypedValue* retval,
+                                          const Func* f,
+                                          CArrRef params,
+                                          ObjectData* this_,
+                                          StringData* invName,
+                                          Variant* ihandler) {
+  using namespace HPHP::VM::Transl;
+  ASSERT(ihandler);
+  ASSERT(retval);
   Variant doneFlag = true;
-  Array args =
-    CREATE_VECTOR5(data->m_name,
-                   (ar->hasThis() ? Variant(Object(ar->getThis())) : null),
-                   Array(pack_args_into_array(ar, ar->m_numArgs)),
-                   data->m_data,
-                   ref(doneFlag));
-
-  ObjectData* intThis = NULL;
-  Class* intCls = NULL;
-  StringData* intInvName = NULL;
-  const Func* handler = vm_decode_function(data->m_handler, g_context->m_fp,
-                                           false, intThis, intCls, intInvName);
-  TypedValue retval;
-  g_context->invokeFunc(&retval, handler, args,
-                        intThis, intCls, NULL, intInvName);
-
-  if (doneFlag.toBoolean()) {
-    // $done is true, meaning don't enter the intercepted function. Clean up the
-    // args and AR, move the intercept handler's return value to the right
-    // place, and get out. This code runs during the frame setup phase for a
-    // call; specifically, we haven't pushed iterators, written uninit-null for
-    // unpassed args, or moved excess args aside.
-    Stack& stack = g_context->m_stack;
-    ASSERT((TypedValue*)ar - stack.top() == ar->m_numArgs);
-
-    while (uintptr_t(stack.top()) < uintptr_t(ar)) {
-      stack.popTV();
-    }
-    stack.popAR();
-    stack.allocTV();
-    memcpy(stack.top(), &retval, sizeof(TypedValue));
-    return false;
+  Array args = params;
+  if (invName) {
+    // This is a magic call, so we need to shuffle the args
+    HphpArray* magicArgs = NEW(HphpArray)(2);
+    magicArgs->append(invName, false);
+    magicArgs->append(params, false);
+    args = magicArgs;
   }
+  Array intArgs =
+    CREATE_VECTOR5(f->fullNameRef(), (this_ ? Variant(Object(this_)) : null),
+                   args, ihandler->asCArrRef()[1], ref(doneFlag));
+  call_intercept_handler<false>(retval, intArgs, NULL, ihandler);
+  // $done is true, meaning don't enter the intercepted function.
+  return !doneFlag.toBoolean();
+}
 
-  return true;
+HphpArray* get_static_locals(const ActRec* ar) {
+  if (ar->m_func->isClosureBody()) {
+    static const StringData* s___static_locals =
+      StringData::GetStaticString("__static_locals");
+    ASSERT(ar->hasThis());
+    ObjectData* closureObj = ar->getThis();
+    ASSERT(closureObj);
+    TypedValue* prop;
+    TypedValue ref;
+    tvWriteUninit(&ref);
+    static_cast<Instance*>(closureObj)->prop(
+      prop,
+      ref,
+      closureObj->getVMClass(),
+      s___static_locals);
+    if (prop->m_type == KindOfNull) {
+      prop->m_data.parr = NEW(HphpArray)(1);
+      prop->m_data.parr->incRefCount();
+      prop->m_type = KindOfArray;
+    }
+    ASSERT(prop->m_type == KindOfArray);
+    ASSERT(HphpArray::isHphpArray(prop->m_data.parr));
+    ASSERT(ref.m_type == KindOfUninit);
+    return static_cast<HphpArray*>(prop->m_data.parr);
+  } else if (ar->m_func->isGeneratorFromClosure()) {
+    TypedValue* contLoc = frame_local(ar, 0);
+    c_GenericContinuation* cont = dynamic_cast<c_GenericContinuation*>(
+      (*(Variant*)contLoc).toObject().get());
+    ASSERT(cont != NULL);
+    return cont->getStaticLocals();
+  } else {
+    return ar->m_func->getStaticLocals();
+  }
 }
 
 } } // HPHP::VM

@@ -37,6 +37,7 @@ class TestExtMysql : public TestCppExt {
   bool test_mysql_close();
   bool test_mysql_errno();
   bool test_mysql_error();
+  bool test_mysql_warning_count();
   bool test_mysql_get_client_info();
   bool test_mysql_get_host_info();
   bool test_mysql_get_proto_info();

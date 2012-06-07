@@ -20,25 +20,100 @@
 #include "gdb-jit.h"
 #include "elfwriter.h"
 
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+
 using namespace HPHP::VM::Transl;
 
 namespace HPHP {
 namespace VM {
 namespace Debug {
 
-void DebugInfo::recordTracelet(TCA start, TCA end, const Unit *unit,
-  const Opcode *instr, bool exit, bool inPrologue) {
-  DwarfChunk* chunk = m_dwarfInfo.addTracelet(start, end, unit, instr,
-                                              exit, inPrologue);
-  if (chunk->m_functions.size() == BASE_FUNCS_PER_CHUNK) {
-    ElfWriter e = ElfWriter(chunk);
+/*
+ * Stuff to output symbol names to /tmp/perf-%d.map files.  This stuff
+ * can be read by perf top/record, etc.
+ */
+static char perfMapName[64];
+FILE* perfMap;
+
+static void deleteMap() {
+  if (perfMap) fclose(perfMap);
+  unlink(perfMapName);
+}
+
+static void openMap() {
+  snprintf(perfMapName, sizeof perfMapName, "/tmp/perf-%d.map", getpid());
+  perfMap = fopen(perfMapName, "w");
+  atexit(deleteMap);
+}
+
+void recordPerfMap(const DwarfChunk* chunk) {
+  if (!perfMap) return;
+  if (RuntimeOption::EvalProfileBC) return;
+  for (FuncPtrDB::const_iterator it = chunk->m_functions.begin();
+      it != chunk->m_functions.end();
+      ++it) {
+    if (!(*it)->perfSynced()) {
+      fprintf(perfMap, "%lx %x %s\n",
+        reinterpret_cast<uintptr_t>((*it)->start),
+        static_cast<uint32_t>((*it)->end - (*it)->start),
+        (*it)->name.c_str());
+      (*it)->setPerfSynced();
+    }
   }
+  fflush(perfMap);
+}
+
+DebugInfo::DebugInfo() {
+  ASSERT(!perfMap);
+  openMap();
+}
+
+void DebugInfo::recordTracelet(TCA start, TCA end, const Unit *unit,
+    const Opcode *instr, bool exit, bool inPrologue) {
+  m_dwarfInfo.addTracelet(start, end, unit, instr,
+                                              exit, inPrologue);
 }
 
 void DebugInfo::debugSync() {
-  if (m_dwarfInfo.m_dwarfChunks.size() != 0) {
-    ElfWriter(m_dwarfInfo.m_dwarfChunks[0]);
+  m_dwarfInfo.syncChunks();
+}
+
+std::string lookupFunction(const Unit *unit,
+                           const Opcode *instr,
+                           bool exit,
+                           bool inPrologue,
+                           bool pseudoWithFileName) {
+  // TODO: mangle the namespace and name?
+  std::string fname("PHP::");
+  if (unit == NULL || instr == NULL) {
+    fname += "#anonFunc";
+    return fname;
   }
+  const Func *f = unit->getFunc(unit->offsetOf(instr));
+  if (f != NULL) {
+    if (pseudoWithFileName) {
+      fname += f->unit()->filepath()->data();
+      fname += "::";
+    }
+    if (!strcmp(f->name()->data(), "")) {
+      if (!exit) {
+        fname += "__pseudoMain";
+      } else {
+        fname += "__exit";
+      }
+      return fname;
+    }
+    fname += f->name()->data();
+    if (inPrologue)
+      fname += "$prologue";
+    return fname;
+  }
+  fname += "#anonFunc";
+  return fname;
 }
 
 }

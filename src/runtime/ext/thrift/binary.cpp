@@ -312,7 +312,7 @@ void binary_deserialize_spec(CObjRef zthis, PHPInputTransport& transport,
 
       if (ttypes_are_compatible(ttype, expected_ttype)) {
         Variant rv = binary_deserialize(ttype, transport, fieldspec);
-        zthis->set(varname, rv);
+        zthis->o_set(varname, rv, zthis->o_getClassName());
       } else {
         skip_element(ttype, transport);
       }
@@ -441,7 +441,7 @@ void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
     int8_t ttype = fieldspec.rvalAt(s_type,
                                     AccessFlags::Error_Key).toByte();
 
-    Variant prop = zthis->o_get(varname);
+    Variant prop = zthis->o_get(varname, true, zthis->o_getClassName());
     if (!prop.isNull()) {
       transport.writeI8(ttype);
       transport.writeI16(fieldno);

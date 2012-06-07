@@ -27,7 +27,7 @@ array(4) {
   [0]=>
   object(ReflectionParameter) (1) {
     ["info"]=>
-    array(5) {
+    array(4) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -36,8 +36,6 @@ array(4) {
       string(0) ""
       ["nullable"]=>
       bool(true)
-      ["ref"]=>
-      bool(false)
     }
   }
   [1]=>
@@ -59,7 +57,7 @@ array(4) {
   [2]=>
   object(ReflectionParameter) (1) {
     ["info"]=>
-    array(7) {
+    array(6) {
       ["index"]=>
       int(2)
       ["name"]=>
@@ -72,14 +70,12 @@ array(4) {
       NULL
       ["defaultText"]=>
       string(4) "null"
-      ["ref"]=>
-      bool(false)
     }
   }
   [3]=>
   object(ReflectionParameter) (1) {
     ["info"]=>
-    array(7) {
+    array(6) {
       ["index"]=>
       int(3)
       ["name"]=>
@@ -99,8 +95,6 @@ array(4) {
       }
       ["defaultText"]=>
       string(26) "array(1, 2, SOME_CONSTANT)"
-      ["ref"]=>
-      bool(false)
     }
   }
 }
@@ -200,7 +194,7 @@ string(1) "B"
 object(ReflectionClass) (2) {
   ["name"]=>
   string(1) "A"
-  ["info:private"]=>
+  ["info":"ReflectionClass":private]=>
   NULL
 }
 
@@ -264,9 +258,9 @@ bool(true)
 
 --- newInstance() ---
 object(B) (4) {
-  ["p0:private"]=>
+  ["p0":"B":private]=>
   int(1)
-  ["p1:protected"]=>
+  ["p1":protected]=>
   int(2)
   ["p2"]=>
   int(3)
@@ -276,9 +270,9 @@ object(B) (4) {
 
 --- newInstanceArgs() ---
 object(B) (4) {
-  ["p0:private"]=>
+  ["p0":"B":private]=>
   int(1)
-  ["p1:protected"]=>
+  ["p1":protected]=>
   int(2)
   ["p2"]=>
   int(3)

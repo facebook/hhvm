@@ -16,21 +16,27 @@
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/array/hphp_array.h>
-#include <runtime/base/array/small_array.h>
+#include <runtime/base/array/vector_array.h>
 #include <runtime/base/runtime_option.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayInit
 
+HOT_FUNC
 ArrayInit::ArrayInit(ssize_t n, bool keepRef /* = false */) {
   if (n == 0) {
     if (keepRef) {
-      m_data = StaticEmptyZendArray::Get();
+      if (enable_vector_array && RuntimeOption::UseVectorArray) {
+        m_data = StaticEmptyVectorArray::Get();
+      } else {
+        m_data = StaticEmptyZendArray::Get();
+      }
     } else {
-      if (RuntimeOption::UseSmallArray) {
-        m_data = StaticEmptySmallArray::Get();
-      } else if (RuntimeOption::UseHphpArray) {
+      if (enable_vector_array && RuntimeOption::UseVectorArray) {
+        m_data = StaticEmptyVectorArray::Get();
+      } else if (hhvm || // HHVM always uses HphpArray
+                (enable_hphp_array && RuntimeOption::UseHphpArray)) {
         m_data = StaticEmptyHphpArray::Get();
       } else {
         m_data = StaticEmptyZendArray::Get();
@@ -40,9 +46,8 @@ ArrayInit::ArrayInit(ssize_t n, bool keepRef /* = false */) {
     if (keepRef) {
       m_data = NEW(ZendArray)(n);
     } else {
-      if (RuntimeOption::UseSmallArray && n <= SmallArray::SARR_SIZE) {
-        m_data = NEW(SmallArray)();
-      } else if (RuntimeOption::UseHphpArray) {
+      if (hhvm || // HHVM always uses HphpArray
+                 (enable_hphp_array && RuntimeOption::UseHphpArray)) {
         m_data = NEW(HphpArray)(n);
       } else {
         m_data = NEW(ZendArray)(n);
@@ -51,7 +56,28 @@ ArrayInit::ArrayInit(ssize_t n, bool keepRef /* = false */) {
   }
 }
 
+HOT_FUNC
+ArrayData *ArrayInit::CreateVector(ssize_t n) {
+  if (enable_vector_array && RuntimeOption::UseVectorArray) {
+    return NEW(VectorArray)(n);
+  }
+  if (hhvm || (enable_hphp_array && RuntimeOption::UseHphpArray)) {
+    return NEW(HphpArray)(n);
+  }
+  return NEW(ZendArray)(n);
+}
+
 ArrayData *ArrayInit::CreateParams(int count, ...) {
+  if (enable_vector_array && RuntimeOption::UseVectorArray) {
+    va_list ap;
+    va_start(ap, count);
+    ArrayInit ai(count, vectorInit);
+    for (int i = 0; i < count; i++) {
+      ai.setRef(*va_arg(ap, const Variant *));
+    }
+    va_end(ap);
+    return ai.create();
+  }
   va_list ap;
   va_start(ap, count);
   ArrayInit ai(count);

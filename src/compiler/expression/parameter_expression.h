@@ -40,7 +40,6 @@ public:
   bool hasRTTI() const { return m_hasRTTI;}
   void setHasRTTI() { m_hasRTTI = true;}
   const std::string &getName() const { return m_name; }
-  void defaultToNull(AnalysisResultPtr ar);
   int getLocalEffects() const { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
@@ -50,7 +49,13 @@ public:
     ASSERT(hasTypeHint());
     return m_type;
   }
+  const std::string &getOriginalTypeHint() const {
+    ASSERT(hasTypeHint());
+    return m_originalType;
+  }
   void parseHandler(ClassScopePtr cls);
+  void compatibleDefault();
+  void fixupSelfAndParentTypehints(ClassScopePtr cls);
 private:
   TypePtr getTypeSpecForClass(AnalysisResultPtr ar, bool forInference);
 

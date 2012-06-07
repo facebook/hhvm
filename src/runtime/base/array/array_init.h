@@ -23,17 +23,21 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // macros for creating vectors or maps
 
-#define CREATE_VECTOR1(e) Array(ArrayInit(1).set(e).create())
+#define CREATE_VECTOR1(e)                                               \
+  Array(ArrayInit(1, ArrayInit::vectorInit).set(e).create())
 #define CREATE_VECTOR2(e1, e2)                                          \
-  Array(ArrayInit(2).set(e1).set(e2).create())
+  Array(ArrayInit(2, ArrayInit::vectorInit).set(e1).set(e2).create())
 #define CREATE_VECTOR3(e1, e2, e3)                                      \
-  Array(ArrayInit(3).set(e1).set(e2).set(e3).create())
+  Array(ArrayInit(3, ArrayInit::vectorInit).set(e1).set(e2).set(e3).create())
 #define CREATE_VECTOR4(e1, e2, e3, e4)                                  \
-  Array(ArrayInit(4).set(e1).set(e2).set(e3).set(e4).create())
+  Array(ArrayInit(4, ArrayInit::vectorInit).set(e1).set(e2).set(e3).    \
+                                            set(e4).create())
 #define CREATE_VECTOR5(e1, e2, e3, e4, e5)                              \
-  Array(ArrayInit(5).set(e1).set(e2).set(e3).set(e4).set(e5).create())
+  Array(ArrayInit(5, ArrayInit::vectorInit).set(e1).set(e2).set(e3).    \
+                                            set(e4).set(e5).create())
 #define CREATE_VECTOR6(e1, e2, e3, e4, e5, e6)                          \
-  Array(ArrayInit(6).set(e1).set(e2).set(e3).set(e4).set(e5).set(e6).create())
+  Array(ArrayInit(6, ArrayInit::vectorInit).set(e1).set(e2).set(e3).    \
+                                            set(e4).set(e5).set(e6).create())
 
 #define CREATE_MAP1(n, e) Array(ArrayInit(1).set(n, e).create())
 #define CREATE_MAP2(n1, e1, n2, e2)                                       \
@@ -63,7 +67,12 @@ namespace HPHP {
  */
 class ArrayInit {
 public:
+  enum VectorInit{ vectorInit };
   ArrayInit(ssize_t n, bool keepRef = false);
+  ArrayInit(ssize_t n, VectorInit) {
+    m_data = CreateVector(n);
+  }
+  static ArrayData *CreateVector(ssize_t n);
   ~ArrayInit() {
     // In case an exception interrupts the initialization.
     if (m_data) m_data->release();
@@ -277,19 +286,10 @@ public:
     return ret;
   }
   operator ArrayData *() { return create(); }
-  static ArrayData *CreateParams(CVarRef a0);
-  static ArrayData *CreateParams(CVarRef a0, CVarRef a1);
-  static ArrayData *CreateParams(CVarRef a0, CVarRef a1, CVarRef a2);
-  static ArrayData *CreateParams(CVarRef a0, CVarRef a1, CVarRef a2,
-                                 CVarRef a3);
-  static ArrayData *CreateParams(CVarRef a0, CVarRef a1, CVarRef a2,
-                                 CVarRef a3, CVarRef a4);
-  static ArrayData *CreateParams(CVarRef a0, CVarRef a1, CVarRef a2,
-                                 CVarRef a3, CVarRef a4, CVarRef a5);
   static ArrayData *CreateParams(int count, ...);
   // this consructor should never be called directly, it is only called from
   // generated code.
-  ArrayInit (ArrayData *data) {  m_data = data;}
+  ArrayInit (ArrayData *data) : m_data(data) {}
 private:
   ArrayData *m_data;
 };

@@ -25,8 +25,6 @@
 #include <util/logger.h>
 #include <system/lib/systemlib.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

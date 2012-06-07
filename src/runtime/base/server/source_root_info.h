@@ -18,6 +18,7 @@
 #define __HPHP_SOURCE_ROOT_INFO_H__
 
 #include <runtime/base/complex_types.h>
+#include <runtime/eval/debugger/debugger_base.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,8 +53,14 @@ public:
   }
   void handleError(Transport *t);
   static const std::string &GetCurrentSourceRoot() {
-    return (*s_path);
+    return s_path.isNull() ? RuntimeOption::SourceRoot : *s_path;
   }
+  static const std::string &GetCurrentPhpRoot() {
+    return s_phproot.isNull() ? initPhpRoot() : *s_phproot;
+  }
+
+  Eval::DSandboxInfo getSandboxInfo() const;
+
 private:
   String m_user;
   String m_sandbox;
@@ -64,8 +71,10 @@ private:
     SandboxOff
   } m_sandboxCond;
   Array m_serverVars;
-  static DECLARE_THREAD_LOCAL(std::string, s_path);
+  static DECLARE_THREAD_LOCAL_NO_CHECK(std::string, s_path);
+  static DECLARE_THREAD_LOCAL_NO_CHECK(std::string, s_phproot);
 
+  static std::string& initPhpRoot();
   std::string parseSandboxServerVariable(const std::string &format) const;
 };
 

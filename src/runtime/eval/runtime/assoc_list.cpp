@@ -17,7 +17,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(VarAssocPair);

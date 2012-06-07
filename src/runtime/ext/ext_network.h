@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // DNS
-
+Variant f_gethostname(); 
 Variant f_gethostbyaddr(CStrRef ip_address);
 String f_gethostbyname(CStrRef hostname);
 Variant f_gethostbynamel(CStrRef hostname);

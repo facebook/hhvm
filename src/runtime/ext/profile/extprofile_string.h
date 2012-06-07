@@ -238,6 +238,12 @@ inline String x_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT, CS
   return f_htmlspecialchars(str, quote_style, charset, double_encode);
 }
 
+inline String x_fb_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "ISO-8859-1", CArrRef extra = Array()) {
+  FUNCTION_INJECTION_BUILTIN(fb_htmlspecialchars);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_fb_htmlspecialchars(str, quote_style, charset, extra);
+}
+
 inline String x_quoted_printable_encode(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(quoted_printable_encode);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
@@ -423,7 +429,7 @@ inline int x_strcoll(CStrRef str1, CStrRef str2) {
   return f_strcoll(str1, str2);
 }
 
-inline Variant x_substr_compare(CStrRef main_str, CStrRef str, int offset, int length = 0, bool case_insensitivity = false) {
+inline Variant x_substr_compare(CStrRef main_str, CStrRef str, int offset, int length = INT_MAX, bool case_insensitivity = false) {
   FUNCTION_INJECTION_BUILTIN(substr_compare);
   return f_substr_compare(main_str, str, offset, length, case_insensitivity);
 }

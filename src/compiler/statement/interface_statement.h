@@ -31,11 +31,13 @@ class InterfaceStatement : public Statement, public IParseHandler {
 protected:
   InterfaceStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
                      const std::string &name, ExpressionListPtr base,
-                     const std::string &docComment, StatementListPtr stmt);
+                     const std::string &docComment, StatementListPtr stmt,
+                     ExpressionListPtr attrList);
 public:
   InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                      const std::string &name, ExpressionListPtr base,
-                     const std::string &docComment, StatementListPtr stmt);
+                     const std::string &docComment, StatementListPtr stmt,
+                     ExpressionListPtr attrList);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
@@ -64,6 +66,7 @@ protected:
   ExpressionListPtr m_base;
   std::string m_docComment;
   StatementListPtr m_stmt;
+  ExpressionListPtr m_attrList;
   void checkVolatile(AnalysisResultConstPtr ar);
 private:
   bool checkVolatileBases(AnalysisResultConstPtr ar);

@@ -128,7 +128,7 @@ String f_spl_object_hash(CObjRef obj) {
 
 Variant f_hphp_get_this() {
   if (hhvm) {
-    return g_context->getThis(true);
+    return g_vmContext->getThis(true);
   } else {
     return FrameInjection::GetThis();
   }
@@ -144,7 +144,7 @@ static int64 hphp_get_call_info_and_extra(
     const CallInfo *cit;
     void *extrap;
     bool succ = hhvm
-                ? g_context->getCallInfo(cit, extrap, func)
+                ? g_vmContext->getCallInfo(cit, extrap, func)
                 : get_call_info(cit, extrap, func->data(), func->hash());
     if (!succ) {
       throw InvalidFunctionCallException(func.data());
@@ -156,7 +156,7 @@ static int64 hphp_get_call_info_and_extra(
     mcp.rootCls = cls.get();
     mcp.name = &func;
     bool succ = hhvm
-                ? g_context->getCallInfoStatic(mcp.ci, mcp.extra,
+                ? g_vmContext->getCallInfoStatic(mcp.ci, mcp.extra,
                                                cls.get(), func.get())
                 : get_call_info_static_method(mcp);
     if (!succ) {

@@ -26,8 +26,6 @@
 #include <imap4r1.h>  /* location of c-client quota functions */
 #undef namespace
 
-using namespace std;
-
 #define PHP_EXPUNGE 32768
 #define PHP_IMAP_ADDRESS_SIZE_BUF 10
 

@@ -20,6 +20,14 @@ function f() {
   print ":".isset($x).":\n";
   print ":".isset($$n).":\n";
   print ":".isset($$g).":\n";
+
+  $a = array();
+  $a["foo"] = null;
+  var_dump(isset($a["foo"]));
+  $q =& $a["foo"];
+  var_dump(isset($a["foo"]));
+  unset($q);
+  var_dump(isset($a["foo"]));
 }
 
 f();

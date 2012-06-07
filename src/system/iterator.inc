@@ -33,7 +33,8 @@
 #elif EXT_TYPE == 1
 
 #elif EXT_TYPE == 2
-
+"MutableArrayIterator", "", NULL, "__construct", T(Void), S(0), "array", T(Variant), NULL, NULL, S(1), NULL, S(16384), "/**\n * ( excerpt from\n * http://php.net/manual/en/mutablearrayiterator.construct.php )\n *\n *\n * @array      mixed\n */", S(16384),"currentRef", T(Variant), S(1), NULL, S(16384), "/**\n * ( excerpt from\n * http://php.net/manual/en/mutablearrayiterator.currentref.php )\n *\n *\n * @return     mixed\n */", S(16384),"current", T(Variant), S(0), NULL, S(16384), "/**\n * ( excerpt from http://php.net/manual/en/mutablearrayiterator.current.php\n * )\n *\n *\n * @return     mixed\n */", S(16384),"key", T(Variant), S(0), NULL, S(16384), "/**\n * ( excerpt from http://php.net/manual/en/mutablearrayiterator.key.php )\n *\n *\n * @return     mixed\n */", S(16384),"next", T(Void), S(0), NULL, S(16384), "/**\n * ( excerpt from http://php.net/manual/en/mutablearrayiterator.next.php )\n *\n *\n */", S(16384),"valid", T(Boolean), S(0), NULL, S(16384), "/**\n * ( excerpt from http://php.net/manual/en/mutablearrayiterator.valid.php )\n *\n *\n * @return     bool\n */", S(16384),"__destruct", T(Variant), S(0), NULL, S(16384), "/**\n * ( excerpt from\n * http://php.net/manual/en/mutablearrayiterator.destruct.php )\n *\n *\n * @return     mixed\n */", S(16384),NULL,NULL,NULL,
+S(134234112), "/**\n * ( excerpt from http://php.net/manual/en/class.mutablearrayiterator.php )\n *\n * Data structure used by the runtime to deal with mutable iteration\n * inside yield generators.\n *\n */", 
 #elif EXT_TYPE == 3
 
 #endif

@@ -32,15 +32,15 @@
 
 #include <util/logger.h>
 
-using namespace std;
 using namespace HPHP;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Symbol
 TypePtr Symbol::getFinalType() const {
   if (m_coerced &&
-      !m_coerced->is(Type::KindOfSome) && !m_coerced->is(Type::KindOfAny)) {
+      !m_coerced->is(Type::KindOfSome) &&
+      !m_coerced->is(Type::KindOfAny) &&
+      !m_coerced->is(Type::KindOfVoid)) {
     return m_coerced;
   }
   return Type::Variant;
@@ -473,6 +473,16 @@ Symbol *SymbolTable::genSymbol(const std::string &name, bool konst) {
   Symbol *sym = &m_symbolMap[name];
   sym->setName(name);
   if (konst) sym->setConstant();
+  return sym;
+}
+
+Symbol *SymbolTable::genSymbol(const std::string &name, bool konst,
+                               ConstructPtr construct) {
+  Symbol *sym = genSymbol(name, konst);
+  if (!sym->declarationSet() && construct) {
+    m_symbolVec.push_back(sym);
+    sym->setDeclaration(construct);
+  }
   return sym;
 }
 

@@ -24,7 +24,6 @@
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/translator-inline.h>
 
-using namespace std;
 using namespace HPHP::VM::Transl;
 
 namespace HPHP {
@@ -44,6 +43,7 @@ void DwarfBuf::byte(uint8_t c) {
 }
 
 void DwarfBuf::byte(int off, uint8_t c) {
+  ASSERT((size_t)off < m_buf.size());
   m_buf[off] = c;
 }
 
@@ -54,7 +54,7 @@ void DwarfBuf::word(uint16_t w) {
 
 void DwarfBuf::word(int off, uint16_t w) {
   byte(off, (w & 0xff));
-  byte(off, ((w >> 8) & 0xff));
+  byte(off + 1, ((w >> 8) & 0xff));
 }
 
 void DwarfBuf::dword(uint32_t d) {
@@ -165,45 +165,10 @@ DwarfBuf::DwarfBuf() {
 DwarfInfo::DwarfInfo() {
 }
 
-std::string DwarfInfo::lookupFunction(const Unit *unit,
-                                      const Opcode *instr,
-                                      bool exit/* = false*/,
-                                      bool inPrologue/* = false*/,
-                                      bool pseudoWithFileName/* = false*/,
-                                      bool withPHPPrefix/* = false*/) {
-  // TODO: mangle the namespace and name?
-  string fname(withPHPPrefix ? "PHP::" : "");
-  if (unit == NULL || instr == NULL) {
-    fname += "#anonFunc";
-    return fname;
-  }
-  Func *f = unit->getFunc(unit->offsetOf(instr));
-  if (f != NULL) {
-    if (!strcmp(f->name(), "")) {
-      if (pseudoWithFileName) {
-        fname += f->m_unit->m_filepath->data();
-        fname += '$';
-      }
-      if (!exit) {
-        fname += "__pseudoMain";
-      } else {
-        fname += "__exit";
-      }
-      return fname;
-    }
-    fname += f->name();
-    if (inPrologue)
-      fname += "$prologue";
-    return fname;
-  }
-  fname += "#anonFunc";
-  return fname;
-}
-
 const char *DwarfInfo::lookupFile(const Unit *unit) {
   const char *file = NULL;
-  if (unit && unit->m_filepath) {
-    file = unit->m_filepath->data();
+  if (unit && unit->filepath()) {
+    file = unit->filepath()->data();
   }
   if (file == NULL || strlen(file) == 0) {
     return "anonFile";
@@ -258,37 +223,49 @@ void DwarfInfo::compactChunks() {
   ElfWriter e = ElfWriter(chunk);
 }
 
+static Mutex s_lock(RankLeaf);
+
 DwarfChunk* DwarfInfo::addTracelet(TCA start, TCA end, const Unit *unit,
   const Opcode *instr, bool exit, bool inPrologue) {
   DwarfChunk* chunk = NULL;
   FunctionInfo* f = new FunctionInfo(start, end, exit);
-  f->name = lookupFunction(unit, instr, exit, inPrologue, true, true);
+  f->name = lookupFunction(unit, instr, exit, inPrologue, true);
   f->file = lookupFile(unit);
 
-  FuncDB::iterator it = m_functions.lower_bound(start);
-  if (it != m_functions.end() && it->second->name == f->name
-    && it->second->file == f->file
-    && start > it->second->start && end > it->second->end) {
-    // XXX: verify that overlapping address come from jmp fixups
-    start = it->second->end;
-    it->second->end = end;
-    m_functions[end] = it->second;
-    m_functions.erase(it);
-    delete(f);
-    f = m_functions[end];
-  } else {
-    m_functions[end] = f;
+  {
+    Lock lock(s_lock);
+    FuncDB::iterator it = m_functions.lower_bound(start);
+    if (it != m_functions.end() && it->second->name == f->name
+      && it->second->file == f->file
+      && start > it->second->start && end > it->second->end) {
+      // XXX: verify that overlapping address come from jmp fixups
+      start = it->second->end;
+      it->second->end = end;
+      m_functions[end] = it->second;
+      m_functions.erase(it);
+      delete(f);
+      f = m_functions[end];
+      ASSERT(f->m_chunk != NULL);
+      f->m_chunk->clearSynced();
+      f->clearPerfSynced();
+    } else {
+      m_functions[end] = f;
+    }
   }
+
   addLineEntries(start, end, unit, instr, f);
 
   if (f->m_chunk == NULL) {
+    Lock lock(s_lock);
     if (m_dwarfChunks.size() == 0 || m_dwarfChunks[0] == NULL) {
       // new chunk of base size
       chunk = new DwarfChunk();
       m_dwarfChunks.push_back(chunk);
-    } else if (m_dwarfChunks[0]->m_functions.size() < BASE_FUNCS_PER_CHUNK) {
+    } else if (m_dwarfChunks[0]->m_functions.size()
+                 < RuntimeOption::EvalGdbSyncChunks) {
       // reuse first chunk
       chunk = m_dwarfChunks[0];
+      chunk->clearSynced();
     } else {
       // compact chunks
       compactChunks();
@@ -298,7 +275,23 @@ DwarfChunk* DwarfInfo::addTracelet(TCA start, TCA end, const Unit *unit,
     f->m_chunk = chunk;
   }
 
+  if (f->m_chunk->m_functions.size() == RuntimeOption::EvalGdbSyncChunks) {
+    Lock lock(s_lock);
+    ElfWriter e = ElfWriter(f->m_chunk);
+  }
+
   return f->m_chunk;
+}
+
+void DwarfInfo::syncChunks() {
+  unsigned int i;
+  Lock lock(s_lock);
+  for (i = 0; i < m_dwarfChunks.size(); i++) {
+    if (m_dwarfChunks[i] && !m_dwarfChunks[i]->isSynced()) {
+      unregister_gdb_chunk(m_dwarfChunks[i]);
+      ElfWriter e = ElfWriter(m_dwarfChunks[i]);
+    }
+  }
 }
 
 }

@@ -63,7 +63,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/type_traits.hpp>
 
-#include <util/hash.h>
+#include "util/hash.h"
+#include "util/assert.h"
 
 #if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4))
 
@@ -108,6 +109,14 @@ struct hphp_hash_set : std::tr1::unordered_set<_T,_V,_W> {
 #endif
 
 namespace HPHP {
+  using std::string;
+  using std::vector;
+  using boost::lexical_cast;
+  using boost::dynamic_pointer_cast;
+  using boost::static_pointer_cast;
+}
+
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
 
@@ -127,45 +136,42 @@ static const bool hhvm =
 #endif
   ;
 
-#include <assert.h>
-
-#ifdef RELEASE
-#ifndef ALWAYS_ASSERT
-#define ASSERT(x)
+const bool hhvm_gc =
+#ifdef HHVM_GC
+  true
 #else
-#define ASSERT(x) assert(x)
+  false
 #endif
+  ;
+
+static const bool use_jemalloc =
+#ifdef USE_JEMALLOC
+  true
 #else
-#define ASSERT(x) assert(x)
+  false
 #endif
+  ;
 
-// Usage example: const_assert(hhvm);
-#define const_assert(c) do {                                                  \
-  if (!(c)) {                                                                 \
-    assert(false);                                                            \
-  }                                                                           \
-} while (0)
+static const bool enable_hphp_array =
+#ifdef ENABLE_HPHP_ARRAY
+  true
+#else
+  false
+#endif
+  ;
 
-#define not_reached() /* gcc-4.5 supports __builtin_unreachable() */ \
-  assert(false)
+static const bool enable_vector_array =
+#ifdef ENABLE_VECTOR_ARRAY
+  true
+#else
+  false
+#endif
+  ;
 
-#define NOT_REACHED not_reached
-
-#define not_implemented() do {                   \
-  fprintf(stderr, "not implemented: %s:%d %s\n", \
-          __FILE__, __LINE__, __FUNCTION__);     \
-  assert(false);                                 \
-  not_reached();                                 \
-} while(0)
-
-#define assert_not_implemented(pred) do {        \
-  if (! (pred) ) {                               \
-    not_implemented();                           \
-  }                                              \
-} while(0)
-
-#define ASSERT_NOT_IMPLEMENTED assert_not_implemented
-#define NOT_IMPLEMENTED        not_implemented
+/**
+ * Guard bug-for-bug hphpi compatibility code with this predicate.
+ */
+static const bool hphpiCompat = true;
 
 ///////////////////////////////////////////////////////////////////////////////
 // system includes
@@ -224,6 +230,15 @@ struct string_hash {
   }
 };
 
+struct stringHashCompare {
+  bool equal(const std::string &s1, const std::string &s2) const {
+    return s1 == s2;
+  }
+  size_t hash(const std::string &s) const {
+    return hash_string(s.c_str(), s.size());
+  }
+};
+
 template<class type, class T> struct hphp_string_hash_map :
   public hphp_hash_map<std::string, type, string_hash> {
 };
@@ -242,14 +257,14 @@ struct int64_hash {
 
 template<typename T>
 struct pointer_hash {
-  size_t operator() (const T *const &p) const {
+  size_t operator() (const T *const p) const {
     return (size_t)hash_int64(intptr_t(p));
   }
-  size_t hash(const T *const &p) const {
+  size_t hash(const T *const p) const {
     return operator()(p);
   }
-  bool equal(const T *const &lhs,
-             const T *const &rhs) const {
+  bool equal(const T *const lhs,
+             const T *const rhs) const {
     return lhs == rhs;
   }
 };
@@ -390,6 +405,17 @@ mapGetPtr(Map& m,
 }
 
 template<typename Map>
+bool
+mapGetKey(Map& m,
+          const typename Map::key_type& k,
+          typename Map::key_type* key_ptr) {
+  typename Map::iterator i = m.find(k);
+  if (i == m.end()) return false;
+  if (key_ptr) *key_ptr = i->first;
+  return true;
+}
+
+template<typename Map>
 void
 mapInsert(Map& m,
           const typename Map::key_type& k,
@@ -493,6 +519,7 @@ struct file_closer {
 ///////////////////////////////////////////////////////////////////////////////
 // Non-gcc compat
 #define ATTRIBUTE_UNUSED __attribute__((unused))
+#define ATTRIBUTE_NORETURN __attribute__((noreturn))
 #ifndef ATTRIBUTE_PRINTF
 #if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
 #define ATTRIBUTE_PRINTF(a1,a2) __attribute__((__format__ (__printf__, a1, a2)))

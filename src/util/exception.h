@@ -23,6 +23,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+#define EXCEPTION_COMMON_IMPL(cls) \
+  virtual cls* clone() { \
+    return new cls(*this); \
+  } \
+  virtual void throwException() { \
+    Deleter deleter(this); \
+    throw *this; \
+  }
+
 /**
  * Base class for all exceptions.
  */
@@ -50,11 +59,15 @@ public:
   virtual ~Exception() throw();
   virtual const char *what() const throw();
 
-  virtual Exception* clone() {
-    return new Exception(*this);
-  }
-  virtual void throwException() { throw *this; }
+  struct Deleter {
+    Exception* m_e;
+    Deleter() : m_e(NULL) {}
+    Deleter(Exception* e) : m_e(e) {}
+    ~Deleter() { delete m_e; }
+  };
 
+  EXCEPTION_COMMON_IMPL(Exception);
+  
   /**
    * Error message without stacktrace.
    */
@@ -79,6 +92,17 @@ public:
     return new FileOpenException(*this);
   }
   virtual void throwException() { throw *this; }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class VMSwitchModeException : public Exception {
+private:
+  bool m_unwindBuiltin;
+public:
+  VMSwitchModeException(bool m_unwindBuiltin)
+    : m_unwindBuiltin(m_unwindBuiltin) {}
+  bool unwindBuiltin() const { return m_unwindBuiltin; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

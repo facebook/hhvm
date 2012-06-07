@@ -51,6 +51,18 @@ CPP
 
 DefineFunction(
   array(
+    'name'   => "gethostname",
+    'desc'   => "Gets the standard host name for the local machine.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns a string with the hostname on success, otherwise FALSE is returned.",
+    ),
+    'args'   => array(),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "gethostbyaddr",
     'desc'   => "Returns the host name of the Internet host specified by ip_address.",
     'flags'  =>  HasDocComment,

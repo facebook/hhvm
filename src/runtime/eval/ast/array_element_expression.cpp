@@ -25,7 +25,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define I(exp) (static_cast<TempExpression *>(exp.get())->getExp())

@@ -18,6 +18,7 @@
 
 #include <runtime/vm/func.h>
 #include <util/util.h>
+#include <runtime/vm/translator/types.h>
 #include <runtime/vm/translator/asm-x64.h>
 #include <boost/static_assert.hpp>
 
@@ -46,25 +47,67 @@ static const int kDefaultNumLines = 4;
  * opaque handle into the request-private targetcache.
  */
 typedef ptrdiff_t CacheHandle;
-static const ptrdiff_t kNumTargetCacheBytes = (1 << 24);
+static const ptrdiff_t kNumTargetCacheBytes = (64 << 20);
 
 enum PHPNameSpace {
   NSFunction,
+  NSCtor,
+  NSFixedCall,
   NSDynFunction,
+  NSStaticMethod,
+  NSStaticMethodF,
+  NSFuncToTCA,
   NSClass,
+  NSKnownClass,
+  NSClsInitProp,
+  NSClsInitSProp,
+
+  NumInsensitive, _NS_placeholder = NumInsensitive-1,
+
   NSConstant,
+  NSClassConstant,
   NSGlobal,
   NSSProp,
+  NSProperty,
+  NSCtxProperty,
+  NSCnsBits,
 
   NumNameSpaces,
+  NumCaseSensitive = NumNameSpaces - NumInsensitive,
+  FirstCaseSensitive = NumInsensitive,
+
   NSInvalid = -1
 };
 
+template <bool sensitive>
 CacheHandle namedAlloc(PHPNameSpace where, const StringData* name,
-                       int numBytes, int align = 16);
+                       int numBytes, int align);
+
+template<PHPNameSpace where>
+CacheHandle namedAlloc(const StringData* name, int numBytes, int align) {
+  return namedAlloc<(where >= FirstCaseSensitive)>(where, name,
+                                                   numBytes, align);
+}
+
+size_t allocBit();
+size_t allocCnsBit(const StringData* name);
+CacheHandle bitOffToHandleAndMask(size_t bit, uint32 &mask);
+bool testBit(CacheHandle handle, uint32 mask);
+bool testBit(size_t bit);
+bool testAndSetBit(CacheHandle handle, uint32 mask);
+bool testAndSetBit(size_t bit);
+
 CacheHandle ptrToHandle(const void*);
-void* handleToPtr(CacheHandle h);
-void invalidateFuncName(const StringData* name);
+
+TCA fcallHelper(ActRec* ar);
+
+static inline void*
+handleToPtr(CacheHandle h) {
+  ASSERT(h < kNumTargetCacheBytes);
+  return tl_targetCaches.base + h;
+}
+
+void invalidateForRename(const StringData* name);
 
 /*
  * Some caches have a Lookup != k, because the TC passes a container
@@ -77,11 +120,10 @@ void invalidateFuncName(const StringData* name);
  */
 template<typename Key, typename Value, class LookupKey,
   PHPNameSpace NameSpace = NSInvalid,
-  int KNLines = kDefaultNumLines, int KAlign=64>
+  int KNLines = kDefaultNumLines>
 class Cache {
 public:
-  typedef Cache<Key, Value, LookupKey, NameSpace, KNLines, KAlign> Self;
-protected:
+  typedef Cache<Key, Value, LookupKey, NameSpace, KNLines> Self;
   static const int kNumLines = KNLines;
 
   struct Pair {
@@ -101,6 +143,7 @@ protected:
     return m_pairs + (hashKey(k) & (kNumLines - 1));
   }
 
+protected:
   // Each instance needs to implement this
   static int hashKey(Key k);
 
@@ -110,7 +153,9 @@ public:
   typedef Value CacheValue;
 
   static CacheHandle alloc(const StringData* name = NULL) {
-    return namedAlloc(NameSpace, name, sizeof(Self), KAlign);
+    // Each lookup should access exactly one Pair so there's no point
+    // in making sure the entire cache fits on one cache line.
+    return namedAlloc<NameSpace>(name, sizeof(Self), sizeof(Pair));
   }
   inline CacheHandle cacheHandle() const {
     return ptrToHandle(this);
@@ -119,12 +164,15 @@ public:
     Pair* pair = cacheAtHandle(chand)->keyToPair(lookup);
     memset(pair, 0, sizeof(Pair));
   }
+  static void invalidate(CacheHandle chand) {
+    Self *thiz = cacheAtHandle(chand);
+    memset(thiz, 0, sizeof(*thiz));
+  }
   static Value lookup(CacheHandle chand, LookupKey lookup,
                       const void* extraKey = NULL);
 };
 
-class FixedFuncCache {
-public:
+struct FixedFuncCache {
   const Func* m_func;
 
   static inline FixedFuncCache* cacheAtHandle(CacheHandle handle) {
@@ -132,8 +180,8 @@ public:
   }
 
   static CacheHandle alloc(const StringData* name) {
-    return namedAlloc(NSFunction, name,
-                      sizeof(FixedFuncCache), sizeof(FixedFuncCache));
+    return namedAlloc<NSFunction>(name, sizeof(FixedFuncCache),
+                                  sizeof(FixedFuncCache));
   }
 
   static void invalidate(CacheHandle handle) {
@@ -141,7 +189,27 @@ public:
     thiz->m_func = NULL;
   }
 
-  static const Func* lookup(CacheHandle chand, StringData* sd);
+  static void lookupFailed(StringData* name);
+};
+
+struct StaticMethodCache {
+  const Func* m_func;
+  const Class* m_cls;
+  static CacheHandle alloc(const StringData* cls, const StringData* meth,
+                           const char* ctxName);
+  static const Func* lookup(CacheHandle chand,
+                            const NamedEntity* ne, const StringData* cls,
+                            const StringData* meth);
+};
+
+struct StaticMethodFCache {
+  const Func* m_func;
+  int m_static;
+
+  static CacheHandle alloc(const StringData* cls, const StringData* meth,
+                           const char* ctxName);
+  static const Func* lookup(CacheHandle chand, const Class* cls,
+                            const StringData* meth);
 };
 
 struct MethodCacheEntry {
@@ -161,14 +229,126 @@ struct MethodCacheEntry {
 
 typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>
   FuncCache;
-typedef Cache<const Class*, MethodCacheEntry, ActRec*> MethodCache;
-typedef Cache<const Func*, TCA, ActRec*> CallCache;
+typedef Cache<const Class*, MethodCacheEntry, ActRec*, NSInvalid, 1>
+  MethodCache;
 typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
+
+/**
+ * PropCache --
+ *
+ *   Records offets into ObjectData for declared properties.
+ */
+static const int kPropCacheLines = 8;
+
+template<typename Key, PHPNameSpace ns = NSInvalid>
+class PropCacheBase : public Cache<Key, uintptr_t, ObjectData*, ns,
+                                   kPropCacheLines> {
+public:
+  typedef Cache<Key, uintptr_t, ObjectData*, ns, kPropCacheLines> Parent;
+
+  template<bool baseIsLocal>
+  static TypedValue* lookup(CacheHandle handle, ObjectData* base,
+                            StringData* name, TypedValue* stackPtr,
+                            ActRec* fp);
+
+  template<bool baseIsLocal>
+  static TypedValue* set(CacheHandle ch, ObjectData* base,
+                         StringData* name, int64 val,
+                         DataType type, ActRec* fp);
+
+  static inline void incStat();
+};
+
+enum HomeState {
+  BASE_CELL,
+  BASE_LOCAL,
+};
+enum CtxState {
+  STATIC_CONTEXT,
+  DYN_CONTEXT,
+};
+enum NameState {
+  STATIC_NAME,
+  DYN_NAME,
+};
+
+// These functions allocate a CacheHandle of the appropriate type and
+// return a pointer to the C++ helper to call.
+void* propLookupPrep(CacheHandle& ch, const StringData* name,
+                     HomeState hs, CtxState cs, NameState ns);
+void* propSetPrep(CacheHandle& ch, const StringData* name,
+                  HomeState hs, CtxState cs, NameState ns);
+
+struct PropKey {
+  Class* cls;
+  bool operator==(const PropKey& other) {
+    return cls == other.cls;
+  }
+  PropKey(Class* cls, ActRec* fp, StringData* name)
+      : cls(cls) {}
+  void destroy() {}
+};
+
+struct PropNameKey {
+  Class* cls;
+  StringData* name;
+  PropNameKey(Class* cls, ActRec* fp, StringData* name)
+      : cls(cls), name(name) {}
+  bool operator==(const PropNameKey& other) {
+    return cls == other.cls && name->same(other.name);
+  }
+
+  void destroy() {
+    if (name && name->decRefCount() == 0) {
+      name->release();
+    }
+  }
+};
+
+struct PropCtxKey {
+  Class* cls;
+  Class* ctx;
+  bool operator==(const PropCtxKey& other) {
+    return cls == other.cls && ctx == other.ctx;
+  }
+  PropCtxKey(Class* cls, ActRec* fp, StringData* name)
+      : cls(cls), ctx(fp->m_func->cls()) {}
+  void destroy() {}
+};
+
+struct PropCtxNameKey {
+  Class* cls;
+  Class* ctx;
+  StringData* name;
+  bool operator==(const PropCtxNameKey& other) {
+    return cls == other.cls && ctx == other.ctx && name->same(other.name);
+  }
+  PropCtxNameKey(Class* cls, ActRec* fp, StringData* name)
+      : cls(cls), ctx(fp->m_func->cls()), name(name) {}
+
+  void destroy() {
+    if (name && name->decRefCount() == 0) {
+      name->release();
+    }
+  }
+};
+
+typedef PropCacheBase<PropKey, NSProperty> PropCache;
+typedef PropCacheBase<PropNameKey> PropNameCache;
+typedef PropCacheBase<PropCtxKey, NSCtxProperty> PropCtxCache;
+typedef PropCacheBase<PropCtxNameKey> PropCtxNameCache;
 
 /*
  * GlobalCache --
  *
  *   Records offsets into the current global array.
+ *
+ *   For both GlobalCache and BoxedGlobalCache, the lookup routine may
+ *   return NULL, but lookupCreate will create new entries with
+ *   KindOfNull if the global didn't exist.
+ *
+ *   Both routines will decRef the name on behalf of the caller, but
+ *   only if the lookup was successful (or a global was created).
  */
 class GlobalCache {
   HphpArray* m_globals;
@@ -181,25 +361,49 @@ protected:
     return (GlobalCache*)(uintptr_t(tl_targetCaches.base) + handle);
   }
 
+  template<bool isBoxed>
+  TypedValue* lookupImpl(StringData *name, bool allowCreate);
+
 public:
   inline CacheHandle cacheHandle() const {
     return ptrToHandle(this);
   }
 
   static CacheHandle alloc(const StringData* sd = NULL) {
-    return namedAlloc(NSGlobal, sd, sizeof(GlobalCache));
+    return namedAlloc<NSGlobal>(sd, sizeof(GlobalCache), sizeof(GlobalCache));
   }
 
-  template<bool isBoxed>
-  TypedValue* lookupImpl(StringData *name);
-
   static TypedValue* lookup(CacheHandle handle, StringData* nm);
+  static TypedValue* lookupCreate(CacheHandle handle, StringData* nm);
 };
 
 class BoxedGlobalCache : public GlobalCache {
 public:
+  /*
+   * Note: the returned pointer is a pointer to the outer variant.
+   * You'll need to incref (or whatever) it yourself (if desired) and
+   * emitDeref if you are going to put it in a register associated
+   * with some vm location.  (Note that KindOfVariant in-register
+   * values are the pointers to inner items.)
+   */
   static TypedValue* lookup(CacheHandle handle, StringData* nm);
+  static TypedValue* lookupCreate(CacheHandle handle, StringData* nm);
 };
+
+/*
+ * Classes.
+ *
+ * The request-private Class* for a given class name. This is used when
+ * the class name is known at translation time.
+ */
+CacheHandle allocKnownClass(const StringData* name);
+template<bool checkOnly>
+Class* lookupKnownClass(Class** cache, const StringData* clsName,
+                        bool isClass);
+CacheHandle allocClassInitProp(const StringData* name);
+CacheHandle allocClassInitSProp(const StringData* name);
+
+CacheHandle allocFixedFunction(const StringData* name);
 
 /*
  * Constants.
@@ -212,9 +416,21 @@ public:
 CacheHandle allocConstant(StringData* name);
 void fillConstant(StringData* name);
 
+CacheHandle allocClassConstant(StringData* name);
+TypedValue* lookupClassConstant(TypedValue* cache,
+                                const NamedEntity* ne,
+                                const StringData* cls,
+                                const StringData* cns);
+
+/*
+ * Static locals. Each StaticLocInit we translate gets its own soft
+ * reference to the variant where it resides.
+ */
+CacheHandle allocStatic();
+
 /*
  * Static properties.  We only cache statically known property name
- * refernces from within the class.  Current statistics shows in
+ * references from within the class.  Current statistics shows in
  * class references dominating by 91.5% of all static property access.
  */
 
@@ -226,7 +442,7 @@ private:
 public:
   TypedValue* m_tv;  // public; it is used from TC and we assert the offset
   static CacheHandle alloc(const StringData* sd = NULL) {
-    return namedAlloc(NSSProp, sd, sizeof(SPropCache));
+    return namedAlloc<NSSProp>(sd, sizeof(SPropCache), sizeof(SPropCache));
   }
   static TypedValue* lookup(CacheHandle handle, const Class* cls,
                             const StringData* nm);

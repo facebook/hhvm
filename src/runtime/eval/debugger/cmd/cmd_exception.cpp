@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_exception.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

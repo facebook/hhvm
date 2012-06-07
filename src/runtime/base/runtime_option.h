@@ -31,7 +31,8 @@ class AccessLogFileData;
  */
 class RuntimeOption {
 public:
-  static void Load(Hdf &config, StringVec *overwrites = NULL);
+  static void Load(Hdf &config, StringVec *overwrites = NULL,
+                   bool empty = false);
 
   static bool Loaded;
 
@@ -51,6 +52,7 @@ public:
   static bool NoSilencer;
   static bool EnableApplicationLog;
   static bool CallUserHandlerOnFatals;
+  static bool ThrowExceptionOnBadMethodCall;
   static int RuntimeErrorReportingLevel;
 
   static std::string ServerUser; // run server under this user account
@@ -92,11 +94,14 @@ public:
   static int ServerThreadDropCacheTimeoutSeconds;
   static bool ServerThreadJobLIFO;
   static bool ServerThreadDropStack;
+  static bool ServerHttpSafeMode;
+  static bool ServerStatCache;
   static int PageletServerThreadCount;
   static bool PageletServerThreadRoundRobin;
   static int PageletServerThreadDropCacheTimeoutSeconds;
   static int PageletServerQueueLimit;
   static bool PageletServerThreadDropStack;
+
   static int FiberCount;
   static int RequestTimeoutSeconds;
   static size_t ServerMemoryHeadRoom;
@@ -115,6 +120,8 @@ public:
   static bool EnableKeepAlive;
   static bool ExposeHPHP;
   static bool ExposeXFBServer;
+  static bool ExposeXFBDebug;
+  static std::string XFBDebugSSLKey;
   static int ConnectionTimeoutSeconds;
   static bool EnableOutputBuffering;
   static std::string OutputHandler;
@@ -149,6 +156,7 @@ public:
   static int SSLPortFd;
   static std::string SSLCertificateFile;
   static std::string SSLCertificateKeyFile;
+  static std::string SSLCertificateDir;
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;
@@ -286,8 +294,10 @@ public:
   static bool LockCodeMemory;
   static bool EnableMemoryManager;
   static bool CheckMemory;
+  static int MaxArrayChain;
   static bool UseHphpArray;
   static bool UseSmallArray;
+  static bool UseVectorArray;
   static bool UseDirectCopy;
   static bool EnableApc;
   static bool EnableConstLoad;
@@ -305,14 +315,25 @@ public:
     ApcMutex,
     ApcReadWriteLock
   };
+  static bool EnableApcSerialize;
   static ApcTableLockTypes ApcTableLockType;
   static time_t ApcKeyMaturityThreshold;
   static size_t ApcMaximumCapacity;
   static int ApcKeyFrequencyUpdatePeriod;
   static bool ApcExpireOnSets;
   static int ApcPurgeFrequency;
+  static int ApcPurgeRate;
   static bool ApcAllowObj;
   static int ApcTTLLimit;
+  static bool ApcUseFileStorage;
+  static int64 ApcFileStorageChunkSize;
+  static int64 ApcFileStorageMaxSize;
+  static std::string ApcFileStoragePrefix;
+  static int ApcFileStorageAdviseOutPeriod;
+  static std::string ApcFileStorageFlagKey;
+  static bool ApcConcurrentTableLockFree;
+  static bool ApcFileStorageKeepFileLinked;
+  static std::vector<std::string> ApcNoTTLPrefix;
 
   static bool EnableDnsCache;
   static int DnsCacheTTL;
@@ -351,17 +372,34 @@ public:
   static bool EnableStrict;
   static int StrictLevel;
   static bool StrictFatal;
+  static uint64 EvalVMStackElms;
   static bool EvalJit;
   static bool EvalJitNoGdb;
+  static bool EvalProfileBC;
+  static bool EvalJitTrampolines;
+  static uint32 EvalGdbSyncChunks;
   static bool EvalJitStressLease;
   static bool EvalJitKeepDbgFiles;
   static bool EvalJitEnableRenameFunction;
+  static bool EvalJitDisabledByHphpd;
+  static bool EvalJitCmovVarDeref;
   static bool EvalThreadingJit;
+  static bool EvalJitTransCounters;
   static bool EvalDumpBytecode;
+  static bool EvalDumpTC;
   static bool EvalDumpAst;
   static bool EvalPeephole;
   static bool RecordCodeCoverage;
   static std::string CodeCoverageOutputFile;
+
+  // Repo (hhvm bytecode repository) options
+  static std::string RepoLocalMode;
+  static std::string RepoLocalPath;
+  static std::string RepoCentralPath;
+  static std::string RepoEvalMode;
+  static bool RepoCommit;
+  static bool RepoDebugInfo;
+  static bool RepoAuthoritative;
 
   // Sandbox options
   static bool SandboxMode;
@@ -385,6 +423,7 @@ public:
   static int DebuggerDefaultRpcTimeout;
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
+  static std::string DebuggerUsageLogFile;
 
   // Mail options
   static std::string SendmailPath;
@@ -394,6 +433,10 @@ public:
   static int PregBacktraceLimit;
   static int PregRecursionLimit;
   static bool EnablePregErrorLog;
+
+  // Convenience switch to turn on/off code alternatives via command-line
+  // Do not commit code guarded by this flag, for evaluation only.
+  static int EnableAlternative;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -39,6 +39,7 @@ class TestBase {
   int skip_count;
   int pass_count;
   std::string error_messages;
+  std::string test_name;
 
  protected:
   bool Count(bool result);
@@ -72,16 +73,19 @@ typedef WithOption<false> WithNoOpt;
 ///////////////////////////////////////////////////////////////////////////////
 // macros
 
-#define RUN_TEST(test)                                                  \
-  if (!which.empty() && which != #test) {                               \
-  } else if (preTest() && test() && postTest()) {                       \
-    if (!Test::s_quiet) {                                               \
-      printf(#test " passed\n");                                        \
-    }                                                                   \
-  } else {                                                              \
-    printf(#test " failed\n");                                          \
-    ret = false;                                                        \
-  }                                                                     \
+#define RUN_TEST(test)                          \
+  if (!which.empty() && which != #test) {       \
+  } else {                                      \
+    test_name = #test;                          \
+    if (preTest() && test() && postTest()) {    \
+      if (!Test::s_quiet) {                     \
+        printf(#test " passed\n");              \
+      }                                         \
+    } else {                                    \
+      printf(#test " failed\n");                \
+      ret = false;                              \
+    }                                           \
+  }                                             \
   fflush(0)
 
 #define LOG_TEST_ERROR(...)                                             \

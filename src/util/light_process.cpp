@@ -30,8 +30,6 @@
 #include <signal.h>
 #include <boost/scoped_array.hpp>
 
-using namespace std;
-
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,7 +318,7 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
                               const vector<int> &inherited_fds) {
   Lock lock(m_procMutex);
 
-  ostringstream os;
+  std::ostringstream os;
   os << prefix << "." << getpid() << "." << id;
   m_afdtFilename = os.str();
 
@@ -556,7 +554,7 @@ int LightProcess::pclose(FILE *f) {
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
 
-  map<int64, int64>::iterator it = g_procs[id].m_popenMap.find((int64)f);
+  std::map<int64, int64>::iterator it = g_procs[id].m_popenMap.find((int64)f);
   if (it == g_procs[id].m_popenMap.end()) {
     // try to close it with normal pclose
     return ::pclose(f);

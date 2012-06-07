@@ -21,8 +21,6 @@
 #include "exception.h"
 #include "logger.h"
 
-using namespace std;
-
 namespace HPHP {
 
 int LogAggregator::MaxSampleItem = 100;

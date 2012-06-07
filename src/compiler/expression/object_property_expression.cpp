@@ -20,6 +20,7 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/function_scope.h>
+#include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/option.h>
 #include <compiler/expression/simple_variable.h>
@@ -27,8 +28,6 @@
 #include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -142,13 +141,21 @@ void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_object->analyzeProgram(ar);
   m_property->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (!m_valid && m_context & (LValue|RefValue|DeepReference|UnsetContext)) {
-      FunctionScopePtr func = getFunctionScope();
-      if (func) func->setNeedsRefTemp();
+    if (m_valid && !hasLocalEffect(UnknownEffect) &&
+        !m_object->isThis() &&
+        (!m_object->is(KindOfSimpleVariable) ||
+         !static_pointer_cast<SimpleVariable>(m_object)->isGuarded())) {
+      setLocalEffect(DiagnosticEffect);
     }
-    if (getContext() & (RefValue | AssignmentLHS | OprLValue)) {
-      FunctionScopePtr func = getFunctionScope();
-      if (func) func->setNeedsCheckMem();
+    if (FunctionScopePtr func = getFunctionScope()) {
+      if (!m_valid &&
+          m_context & (LValue|RefValue|DeepReference|UnsetContext)) {
+        func->setNeedsRefTemp();
+      }
+      if (getContext() & (RefValue | AssignmentLHS | OprLValue)) {
+        func->setNeedsCheckMem();
+      }
+      if (m_valid) func->setNeedsObjTemp();
     }
   }
 }
@@ -281,6 +288,11 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
       // only check property if we could possibly do some work
       ret = t;
     } else {
+      if (coerce && type->is(Type::KindOfAutoSequence) &&
+          (!t || t->is(Type::KindOfVoid) ||
+           t->is(Type::KindOfSome) || t->is(Type::KindOfArray))) {
+        type = Type::Array;
+      }
       ASSERT(getScope()->is(BlockScope::FunctionScope));
       GET_LOCK(m_symOwner);
       ret = m_symOwner->checkProperty(getScope(), m_propSym, type, coerce, ar);
@@ -348,9 +360,33 @@ void ObjectPropertyExpression::outputCPPImpl(CodeGenerator &cg,
   outputCPPObjProperty(cg, ar, false);
 }
 
+static string nullName(AnalysisResultPtr ar, TypePtr type) {
+  if (!type || Type::IsMappedToVariant(type)) {
+    return "null_variant";
+  }
+  if (type->is(Type::KindOfArray)) {
+    return "null_array";
+  }
+  if (type->is(Type::KindOfObject)) {
+    return "null_object";
+  }
+  if (type->is(Type::KindOfString)) {
+    return "null_string";
+  }
+  return type->getCPPDecl(ar, BlockScopeRawPtr()) + "()";
+}
+
 void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                                     AnalysisResultPtr ar,
                                                     int doExist) {
+  if (m_valid) {
+    TypePtr type = m_object->getActualType();
+    if (type->isSpecificObject()) {
+      ClassScopePtr cls(type->getClass(ar, getScope()));
+      if (cls) getFileScope()->addUsedClassFullHeader(cls);
+    }
+  }
+
   string func = Option::ObjectPrefix;
   const char *error = ", true";
   std::string context = "";
@@ -371,8 +407,11 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       error = ", false";
     }
     if (m_context & InvokeArgument) {
-      ASSERT(cg.callInfoTop() != -1);
-      func += "argval";
+      if (cg.callInfoTop() != -1) {
+        func += "argval";
+      } else {
+        func += "get";
+      }
     } else if (m_context & (LValue | RefValue | DeepReference | UnsetContext)) {
       if (m_context & UnsetContext) {
         assert(!(m_context & LValue)); // handled by doUnset
@@ -391,23 +430,62 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     }
   }
 
-  if (m_valid && doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
-  bool flag = outputCPPObject(cg, ar, doUnset || (!m_valid && doExist));
+  if (m_valid && !m_object->isThis() &&
+      (!m_object->is(KindOfSimpleVariable) ||
+       !static_pointer_cast<SimpleVariable>(m_object)->isGuarded())) {
+    cg_printf("(obj_tmp = ");
+    outputCPPValidObject(cg, ar, false);
+    bool write_context = hasAnyContext(LValue | RefValue | DeepReference |
+                                       UnsetContext | OprLValue |
+                                       DeepOprLValue | DeepAssignmentLHS |
+                                       AssignmentLHS) && !doUnset;
+    cg_printf(", LIKELY(obj_tmp != 0) %s ", write_context ? "||" : "?");
+    assert(m_property->is(KindOfScalarExpression));
+    ScalarExpressionPtr name =
+      static_pointer_cast<ScalarExpression>(m_property);
+    if (doExist || doUnset) {
+      cg_printf(doUnset ? "unset" : doExist > 0 ? "isset" : "empty");
+    }
+    ClassScopePtr cls =
+      ar->findExactClass(shared_from_this(),
+                         m_object->getActualType()->getName());
+
+    if (write_context) {
+      cg_printf("(throw_null_object_prop(),false),");
+    }
+    cg_printf("(((%s%s*)obj_tmp)->%s%s)",
+              Option::ClassPrefix, cls->getId().c_str(),
+              Option::PropertyPrefix, name->getString().c_str());
+
+    if (!write_context) {
+      cg_printf(" : (raise_null_object_prop(),%s)",
+                doUnset ? "null_variant" :
+                doExist ? doExist > 0 ? "false" : "true" :
+                nullName(ar, getCPPType()).c_str());
+    }
+    cg_printf(")");
+    return;
+  }
+
+  if (m_valid && (doExist || doUnset)) {
+    cg_printf(doUnset ? "unset(" : doExist > 0 ? "isset(" : "empty(");
+  }
+  bool flag = outputCPPObject(cg, ar, !m_valid && (doUnset || doExist));
   if (flag) {
     cg_printf("id(");
     outputCPPProperty(cg, ar);
     cg_printf(")");
     if (doExist) cg_printf(", %s", doExist > 0 ? "false" : "true");
     cg_printf(")");
-  } else if (!doUnset && m_valid) {
+  } else if (m_valid) {
     assert(m_object->getType()->isSpecificObject());
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>(m_property);
     cg_printf("%s%s", Option::PropertyPrefix, name->getString().c_str());
-    if (doExist) cg_printf(")");
+    if (doExist || doUnset) cg_printf(")");
   } else {
     cg_printf("%s(", func.c_str());
-    if (hasContext(InvokeArgument)) {
+    if (hasContext(InvokeArgument) && cg.callInfoTop() != -1) {
       cg_printf("cit%d->isRef(%d), ", cg.callInfoTop(), m_argNum);
     }
     outputCPPProperty(cg, ar);
@@ -416,6 +494,37 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       context = ", " + (tmp.empty() ? "Variant()" : tmp) + context;
     }
     cg_printf("%s%s)", error, context.c_str());
+  }
+}
+
+void ObjectPropertyExpression::outputCPPValidObject(CodeGenerator &cg,
+                                                    AnalysisResultPtr ar,
+                                                    bool guarded) {
+  TypePtr act;
+  bool close = false;
+  if (!m_object->hasCPPTemp() && m_object->getImplementedType() &&
+      !Type::SameType(m_object->getImplementedType(),
+                      m_object->getActualType())) {
+    act = m_object->getActualType();
+    m_object->setActualType(m_object->getImplementedType());
+    if (guarded) {
+      ClassScopePtr cls = ar->findExactClass(shared_from_this(),
+                                             act->getName());
+      cg_printf("((%s%s*)", Option::ClassPrefix, cls->getId().c_str());
+      close = true;
+    }
+  }
+  m_object->outputCPP(cg, ar);
+  if (act) {
+    if (m_object->getImplementedType()->is(Type::KindOfObject)) {
+      cg_printf(".get()");
+    } else {
+      cg_printf(".getObjectData%s()", guarded ? "" : "OrNull");
+    }
+    if (close) cg_printf(")");
+    m_object->setActualType(act);
+  } else {
+    cg_printf(".get()");
   }
 }
 
@@ -437,8 +546,9 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
         //   ... $this->prop ...
         // }
         ClassScopePtr cls(thisActType->getClass(ar, getScope()));
-        ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
-                                                 // assertions for these
+        ASSERT(cls && cls->derivesFrom(ar, thisImplType->getName(),
+                                       true, false));
+
         cg_printf("static_cast<%s%s*>(",
                   Option::ClassPrefix,
                   cls->getId().c_str());
@@ -465,6 +575,7 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       if (close) cg_printf("this");
     } else {
       if (!getClassScope() || getClassScope()->derivedByDynamic() ||
+          (getFunctionScope() && getFunctionScope()->isStatic()) ||
           !static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
         if (close) {
           cg_printf("GET_THIS_VALID()");
@@ -477,28 +588,9 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       cg_printf(")->");
     }
   } else if (m_valid) {
-    TypePtr act;
-    if (!m_object->hasCPPTemp() && m_object->getImplementedType() &&
-        !Type::SameType(m_object->getImplementedType(),
-                         m_object->getActualType())) {
-      act = m_object->getActualType();
-      m_object->setActualType(m_object->getImplementedType());
-      ClassScopePtr cls = ar->findExactClass(shared_from_this(),
-                                             act->getName());
-      cg_printf("((%s%s*)", Option::ClassPrefix, cls->getId().c_str());
-    }
-    m_object->outputCPP(cg, ar);
-    if (act) {
-      if (m_object->getImplementedType()->is(Type::KindOfObject)) {
-        cg_printf(".get())");
-      } else {
-        cg_printf(".getObjectData())");
-      }
-      m_object->setActualType(act);
-    } else if (m_object->is(KindOfSimpleVariable) &&
-               static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
-      cg_printf(".get()");
-    }
+    ASSERT(m_object->is(KindOfSimpleVariable) &&
+           static_pointer_cast<SimpleVariable>(m_object)->isGuarded());
+    outputCPPValidObject(cg, ar, true);
     cg_printf("->");
   } else {
     TypePtr t = m_object->getType();

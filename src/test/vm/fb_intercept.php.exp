@@ -60,6 +60,12 @@ array(5) {
 }
 
 frap claptrap
+static frap Blark
+static frap Blark
+static frap SubBlark
+static frap SubBlark
+static frap SubBlark2
+static frap SubBlark2
 ----HANDLER----
 string(12) "Blark::sfrap"
 NULL
@@ -84,7 +90,6 @@ array(0) {
 NULL
 bool(true)
 ---------------
-static frap
 ----HANDLER----
 string(12) "Blark::sfrap"
 NULL
@@ -93,7 +98,40 @@ array(0) {
 NULL
 bool(true)
 ---------------
-static frap
+----HANDLER----
+string(12) "Blark::sfrap"
+NULL
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(12) "Blark::sfrap"
+NULL
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(12) "Blark::sfrap"
+NULL
+array(0) {
+}
+NULL
+bool(true)
+---------------
+static frap Blark
+----HANDLER----
+string(12) "Blark::sfrap"
+NULL
+array(0) {
+}
+NULL
+bool(true)
+---------------
+static frap Blark
 magic call! string(19) "i_dont_exist_either"
 array(5) {
   [0]=>
@@ -210,7 +248,7 @@ array(5) {
   [3]=>
   NULL
   [4]=>
-  bool(true)
+  &bool(true)
 }
 NULL
 bool(true)
@@ -226,7 +264,7 @@ NULL
 bool(true)
 ---------------
 frap claptrap
-static frap
+static frap Blark
 non-static frap
 ----HANDLER----
 string(17) "MagicCall::__call"

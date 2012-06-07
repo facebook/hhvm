@@ -23,7 +23,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IfBranch::IfBranch(CONSTRUCT_ARGS, ExpressionPtr cond, StatementPtr body)

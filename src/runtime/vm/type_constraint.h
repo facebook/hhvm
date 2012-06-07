@@ -21,38 +21,60 @@
 
 #include <runtime/base/types.h>
 #include <util/case_insensitive.h>
+#include <runtime/vm/unit.h>
 
 namespace HPHP {
 namespace VM {
 
+class Func;
+
 class TypeConstraint {
 protected:
   DataType m_baseType;
-  const StringData* m_typeName;
   bool m_nullable;
-  typedef hphp_string_imap<DataType> TypeMap;
+  const StringData* m_typeName;
+  const NamedEntity* m_namedEntity;
+  typedef hphp_hash_map<const StringData*, DataType,
+                        string_data_hash, string_data_isame> TypeMap;
   static TypeMap s_typeNamesToTypes;
 
 public:
-  // We'll need a default constructor to use this with the STL containers.
-  // We have no business using default-constructed constraints, though.
-  TypeConstraint()
-    : m_baseType(KindOfInvalid), m_typeName(NULL),
-      m_nullable(false) { }
+  void verifyFail(const Func* func, int paramNum, const TypedValue* tv) const;
 
-  TypeConstraint(const std::string& typeName, bool nullable);
+  explicit TypeConstraint(const StringData* typeName=NULL, bool nullable=false);
 
-  bool exists() const {
-    return m_typeName;
+  bool exists() const { return m_typeName; }
+
+  const StringData* typeName() const { return m_typeName; }
+
+  bool nullable() const { return m_nullable; }
+
+  bool isSelf() const {
+    return m_baseType == KindOfSelf;
   }
 
-  const char* typeName() const { return m_typeName->data(); }
+  bool isParent() const {
+    return m_baseType == KindOfParent;
+  }
 
-  // Passing a closure for ExecutionContext::lookup here gets around an annoying
-  // layering issue; without it we'd need to choose between inlining this
-  // function and a circular dependency with ExecutionContext.
-  typedef std::tr1::function<Class* (const StringData*)> ClassGetter;
+  bool isObject() const {
+    return m_baseType == KindOfObject ||
+           m_baseType == KindOfSelf || m_baseType == KindOfParent;
+  }
 
+  bool compat(const TypeConstraint& other) const {
+    if (!hphpiCompat) {
+      // php 5.4.0RC6 allows 'int' compatible to Int but not integer
+      return (m_typeName == other.m_typeName
+              || (m_typeName != NULL && other.m_typeName != NULL
+                  && m_typeName->isame(other.m_typeName)));
+    } else {
+      // For now, be compatible with hphpi: int $x != Int $x
+      return (m_typeName == other.m_typeName
+              || (m_typeName != NULL && other.m_typeName != NULL
+                  && m_typeName->same(other.m_typeName)));
+    }
+  }
 
   inline static bool equivDataTypes(DataType t1, DataType t2) {
     return
@@ -62,7 +84,7 @@ public:
       (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
   }
 
-  bool check(const TypedValue* tv, ClassGetter fLookupClass) const {
+  bool check(const TypedValue* tv, const Func* func) const {
     ASSERT(exists());
 
     // This is part of the interpreter runtime; perf matters.
@@ -72,17 +94,42 @@ public:
     if (m_nullable && IS_NULL_TYPE(tv->m_type)) return true;
 
     if (tv->m_type == KindOfObject) {
-      if (m_baseType != KindOfObject) return false;
+      if (!isObject()) return false;
       // Perfect match seems common enough to be worth skipping the hash
       // table lookup.
       if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) return true;
-      // Drat. We can't save the Class* since it moves around from request
-      // to request.
-      Class *c = fLookupClass(m_typeName);
+      const Class *c = NULL;
+      if (isSelf() || isParent()) {
+        if (isSelf()) {
+          selfToClass(func, &c);
+        } else if (isParent()) {
+          parentToClass(func, &c);
+        }
+      } else {
+        // We can't save the Class* since it moves around from request
+        // to request.
+        ASSERT(m_namedEntity);
+        c = Unit::lookupClass(m_namedEntity);
+      }
       return c && tv->m_data.pobj->instanceof(c);
     }
     return equivDataTypes(m_baseType, tv->m_type);
   }
+
+  // NB: will throw if the check fails.
+  void verify(const TypedValue* tv,
+              const Func* func, int paramNum) const {
+    if (UNLIKELY(!check(tv, func))) {
+      verifyFail(func, paramNum, tv);
+    }
+  }
+
+  // Can not be private as it needs to be used by the translator
+  void selfToClass(const Func* func, const Class **cls) const;
+  void parentToClass(const Func* func, const Class **cls) const;
+private:
+  void selfToTypeName(const Func* func, const StringData **typeName) const;
+  void parentToTypeName(const Func* func, const StringData **typeName) const;
 };
 
 }

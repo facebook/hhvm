@@ -27,6 +27,8 @@ $topics =
       ),
       'New Features' => array(
         'New functions' => 'extension.new_functions',
+        'yield and generator' => 'extension.yield',
+        'Richer type hints' => 'extension.type_hints',
         'Parallel execution' => 'threading',
         'Server documents' => 'server.documents',
         'RPC server' => 'server.rpc_server',
@@ -61,30 +63,34 @@ $topics =
 ///////////////////////////////////////////////////////////////////////////////
 // main
 
-$css = 'style'; // default
-if (isset($_GET['css'])) $css = $_GET['css'];
-echo "<link type='text/css' rel='stylesheet' href='$css.css' />";
+echo "<link type='text/css' rel='stylesheet' href='style.css' />";
 
 $file = 'coding_guideline';
 if (isset($_GET['file'])) $file = $_GET['file'];
-$doc = file_get_contents(realpath(dirname(__FILE__))."/$file");
+$title = find_topics($topics, $file);
 
+echo '<title>'.htmlspecialchars($title ? $title : 'Invalid topic').'</title>';
 echo '<table cellpadding=0 cellspacing=0 border=0>';
 echo '<tr><td valign=top width=200>';
-echo format_index($file);
+format_index($topics, $file);
 echo '</td><td valign=top bgcolor=white width=640>';
-if (preg_match('/^debugger\./', $file)) {
-  echo format_debugger_doc($doc);
+if (!$title) {
+  echo 'Topic does not exist.';
 } else {
-  echo format_document($doc);
+  $doc = file_get_contents(realpath(dirname(__FILE__))."/$file");
+  if (preg_match('/^debugger\./', $file)) {
+    echo format_debugger_doc($doc);
+  } else {
+    echo format_document($doc);
+  }
 }
 echo '</td></tr></table>';
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-function format_index($file) {
-  global $topics;
+function find_topics(&$topics, $file) {
+  $title = '';
 
   $found_files = array();
   exec('find . -type f', $found_files);
@@ -93,12 +99,20 @@ function format_index($file) {
   foreach ($found_files as $f) {
     $f = substr($f, 2); // skipping "./"
     if (!preg_match('/(~|Makefile|index\.php|style\.css|www\.pid)/', $f)) {
+      if ($f == $file) {
+        $title = $f;
+      }
       $files[$f] = $f;
     }
   }
 
+  $allowed = isset($files[$file]);
+
   foreach ($topics as $topic => $group) {
     foreach ($group as $name => $f) {
+      if ($f == $file) {
+        $title = "$topic: $name";
+      }
       unset($files[$f]);
     }
   }
@@ -106,6 +120,10 @@ function format_index($file) {
     $topics['New Topics'] = $files;
   }
 
+  return $title;
+}
+
+function format_index($topics, $file) {
   echo '<table cellpadding=1 cellspacing=3 border=1 bgcolor=white>';
   echo '<tr><td colspan=2 class="hphp">HipHopDoc</td></tr>';
   echo '<tr><td colspan=2>&nbsp;</td></tr>';
@@ -114,8 +132,6 @@ function format_index($file) {
     echo "<nobr>$topic</nobr></a></td></tr>";
 
     foreach ($group as $name => $f) {
-      unset($files[$f]);
-
       echo '<tr><td width=5></td><td><nobr>';
       $class = $f == $file ? 'current_file' : 'file';
       echo "<span class='$class'><a href='index.php?file=".
@@ -127,6 +143,8 @@ function format_index($file) {
 }
 
 function format_document($doc) {
+  $doc = preg_replace('/<(?!\/?(b|h2|i)[ >])/',
+                      '&lt;', $doc);               // unsupported tags
   $doc = preg_replace('/\n= (.*?)\n/',
                       "<h3>\\1</h3>\n", $doc);     // h3 headers
   $doc = preg_replace('/\n([0-9]+\. )(.*?)\n/',
@@ -147,8 +165,6 @@ function format_document($doc) {
                       $doc);                       // item: details
 
   $doc = preg_replace('/\n\n/', '<p>', $doc);      // paragraphs
-  $doc = preg_replace('/<T>/', '&lt;T&gt;', $doc); // C++ templates
-  $doc = preg_replace('/<\?/', '&lt;?', $doc);     // PHP start tags
   $doc = preg_replace('/\[\[[ \n]*(.*?)[ \n]*\|[ \n]*(.*?)[ \n]*\]\]/s',
                       '<a href="\\1">\\2</a>',$doc); // links
 
@@ -159,7 +175,6 @@ function format_document($doc) {
 }
 
 function format_debugger_doc($doc) {
-  $doc = preg_replace('/</', '&lt;', $doc);
   $doc = preg_replace('/ *(?:\xe2\x94\x80|\-){5,}(.*) '.
                       '(?:\xe2\x94\x80|\-){5,}/',
                       '<h2>$1</h2>', $doc);

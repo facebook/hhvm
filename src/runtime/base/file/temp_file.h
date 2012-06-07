@@ -43,6 +43,7 @@ public:
 
 private:
   bool m_autoDelete;
+  std::string m_rawName;
 
   bool closeImpl();
 };

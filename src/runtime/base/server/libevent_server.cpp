@@ -19,6 +19,7 @@
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/server/http_protocol.h>
+#include <runtime/eval/debugger/debugger.h>
 #include <util/compatibility.h>
 #include <util/logger.h>
 
@@ -135,13 +136,15 @@ void LibEventWorker::onThreadEnter() {
   ASSERT(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
   server->onThreadEnter();
+  if (RuntimeOption::EnableDebugger) {
+    Eval::Debugger::RegisterThread();
+  }
 }
 
 void LibEventWorker::onThreadExit() {
   ASSERT(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
   server->onThreadExit(m_handler);
-  MemoryManager::TheMemoryManager().getNoCheck()->cleanup();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

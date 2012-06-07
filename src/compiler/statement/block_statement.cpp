@@ -18,8 +18,6 @@
 #include <compiler/statement/statement_list.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors

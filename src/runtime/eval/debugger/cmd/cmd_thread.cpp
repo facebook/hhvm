@@ -19,8 +19,6 @@
 #include <runtime/base/string_util.h>
 #include <util/process.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

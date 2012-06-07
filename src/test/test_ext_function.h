@@ -32,9 +32,6 @@ class TestExtFunction : public TestCppExt {
   bool test_is_callable();
   bool test_call_user_func_array();
   bool test_call_user_func();
-  bool test_call_user_func_array_async();
-  bool test_call_user_func_async();
-  bool test_end_user_func_async();
   bool test_forward_static_call_array();
   bool test_forward_static_call();
   bool test_create_function();

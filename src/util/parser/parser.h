@@ -102,7 +102,7 @@ public:
    * Main function to call to start parsing the file. This function is already
    * implemented in hphp.y. Therefore, a subclass only has to declare it.
    */
-  virtual bool parse() = 0;
+  virtual bool parseImpl() = 0;
 
   /**
    * Raise a parser error.
@@ -113,6 +113,11 @@ public:
    * How to decide whether to turn on XHP.
    */
   virtual bool enableXHP() = 0;
+
+  /**
+   * Check if HipHop syntax is enabled.
+   */
+  virtual bool enableHipHopSyntax() = 0;
 
   /**
    * Public accessors.
@@ -143,6 +148,12 @@ public:
   void pushFuncLocation();
   LocationPtr popFuncLocation();
   std::string getAnonFuncName(AnonFuncKind kind);
+
+  // for typevar checking
+  void pushTypeScope();
+  void popTypeScope();
+  void addTypeVar(const std::string &name);
+  bool isTypeVar(const std::string &name);
 
   // for goto syntax checking
   void pushLabelInfo();
@@ -187,6 +198,11 @@ protected:
   };
   typedef std::map<std::string, LabelStmtInfo> LabelMap;
     // name => LabelStmtInfo
+
+  typedef std::set<std::string> TypevarScope;
+  typedef std::vector<TypevarScope> TypevarScopeStack;
+  TypevarScope m_typeVars;
+  TypevarScopeStack m_typeScopes;
 
   // for goto syntax checking
   typedef std::vector<int> LabelScopes;

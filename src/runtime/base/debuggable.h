@@ -79,46 +79,43 @@ public:
   }
 };
 
+#define HPHPD_SETTINGS \
+  HPHPD_SETTING(BypassCheck,         bool,  false)         \
+  HPHPD_SETTING(PrintLevel,          int,   -1)            \
+  HPHPD_SETTING(SmallStep,           bool,  false)         \
+  HPHPD_SETTING(StackArgs,           bool,  true)          \
+
 class DebuggerSettings {
 public:
-  bool bypassCheck;
-  int printLevel;
-  bool smallStep;
-  bool apiModeSerialize;
-  DebuggerSettings()
-    : bypassCheck(false), printLevel(-1), smallStep(false),
-      apiModeSerialize(false) {}
+#define HPHPD_SETTING(name, type, defval) type m_s##name;
+  HPHPD_SETTINGS
+#undef HPHPD_SETTING
+  bool dummy;
+
+  DebuggerSettings() :
+#define HPHPD_SETTING(name, type, defval) m_s##name(defval),
+  HPHPD_SETTINGS
+#undef HPHPD_SETTING
+  dummy(false) {}
 };
 
 #define DECLARE_DBG_SETTING                        \
   DebuggerSettings m_dbgSettings;                  \
 
-#define DECLARE_DBG_SETTING_ACCESSORS              \
-bool getDebuggerBypassCheck() const {              \
-  return m_dbgSettings.bypassCheck;                \
+#define HPHPD_SETTING(name, type, defval)          \
+type getDebugger##name () const {                  \
+  return m_dbgSettings.m_s##name;                  \
 }                                                  \
-void setDebuggerBypassCheck(bool bypass) {         \
-  m_dbgSettings.bypassCheck = bypass;              \
-}                                                  \
-int getDebuggerPrintLevel() const {                \
-  return m_dbgSettings.printLevel;                 \
-}                                                  \
-void setDebuggerPrintLevel(int level) {            \
-  m_dbgSettings.printLevel = level;                \
-}                                                  \
-bool getDebuggerSmallStep() const {                \
-  return m_dbgSettings.smallStep;                  \
-}                                                  \
-void setDebuggerSmallStep(bool smallStep) {        \
-  m_dbgSettings.smallStep = smallStep;             \
-}                                                  \
-bool getDebuggerApiModeSerialize() const {         \
-  return m_dbgSettings.apiModeSerialize;           \
-}                                                  \
-void setDebuggerApiModeSerialize(bool serialize) { \
-  m_dbgSettings.apiModeSerialize = serialize;      \
+void setDebugger##name (type in##name) {           \
+  m_dbgSettings.m_s##name = in##name;              \
 }                                                  \
 
+
+#define DECLARE_DBG_SETTING_ACCESSORS              \
+HPHPD_SETTINGS
+
+// leaving HPHPD_SETTING defined so that DECLARE_DBG_SETTING_ACCESSORS is
+// effective
 
 ///////////////////////////////////////////////////////////////////////////////
 }

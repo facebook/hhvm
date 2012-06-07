@@ -22,6 +22,11 @@ class C {
     self::foo("a", "b", "c", "d");
   }
 }
-$obj = new C;
-$obj->test();
+
+function main() {
+  $obj = new C;
+  $obj->test();
+}
+
+main();
 

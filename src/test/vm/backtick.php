@@ -1,4 +1,9 @@
 <?php
 
-$s = 'thinger';
-var_dump(`echo $s`);
+function main() {
+  $s = 'thinger';
+  var_dump(`echo $s`);
+}
+
+main();
+

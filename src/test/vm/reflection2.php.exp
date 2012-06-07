@@ -1,0 +1,207 @@
+array(6) {
+  [0]=>
+  object(ReflectionMethod) (3) {
+    ["name"]=>
+    string "my_other_override"
+    ["class"]=>
+    string "my_child"
+    ["info"]=>
+    array(10) {
+      ["name"]=>
+      string "my_other_override"
+      ["access"]=>
+      string "public"
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string "my_child"
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["file"]=>
+      string "src/test/vm/reflection2.php"
+      ["line1"]=>
+      int(20)
+      ["line2"]=>
+      int(20)
+    }
+  }
+  [1]=>
+  object(ReflectionMethod) (3) {
+    ["name"]=>
+    string "my_child_method"
+    ["class"]=>
+    string "my_child"
+    ["info"]=>
+    array(10) {
+      ["name"]=>
+      string "my_child_method"
+      ["access"]=>
+      string "public"
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string "my_child"
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["file"]=>
+      string "src/test/vm/reflection2.php"
+      ["line1"]=>
+      int(21)
+      ["line2"]=>
+      int(21)
+    }
+  }
+  [2]=>
+  object(ReflectionMethod) (3) {
+    ["name"]=>
+    string "my_method"
+    ["class"]=>
+    string "my_class"
+    ["info"]=>
+    array(10) {
+      ["name"]=>
+      string "my_method"
+      ["access"]=>
+      string "public"
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string "my_class"
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["file"]=>
+      string "src/test/vm/reflection2.php"
+      ["line1"]=>
+      int(13)
+      ["line2"]=>
+      int(13)
+    }
+  }
+  [3]=>
+  object(ReflectionMethod) (3) {
+    ["name"]=>
+    string "my_override_method"
+    ["class"]=>
+    string "my_class"
+    ["info"]=>
+    array(10) {
+      ["name"]=>
+      string "my_override_method"
+      ["access"]=>
+      string "public"
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string "my_class"
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["file"]=>
+      string "src/test/vm/reflection2.php"
+      ["line1"]=>
+      int(15)
+      ["line2"]=>
+      int(15)
+    }
+  }
+  [4]=>
+  object(ReflectionMethod) (3) {
+    ["name"]=>
+    string "my_trait_method"
+    ["class"]=>
+    string "my_class"
+    ["info"]=>
+    array(10) {
+      ["name"]=>
+      string "my_trait_method"
+      ["access"]=>
+      string "public"
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string "my_class"
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["file"]=>
+      string "src/test/vm/reflection2.php"
+      ["line1"]=>
+      int(4)
+      ["line2"]=>
+      int(4)
+    }
+  }
+  [5]=>
+  object(ReflectionMethod) (3) {
+    ["name"]=>
+    string "my_base_method"
+    ["class"]=>
+    string "my_base"
+    ["info"]=>
+    array(10) {
+      ["name"]=>
+      string "my_base_method"
+      ["access"]=>
+      string "public"
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string "my_base"
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["file"]=>
+      string "src/test/vm/reflection2.php"
+      ["line1"]=>
+      int(8)
+      ["line2"]=>
+      int(8)
+    }
+  }
+}
+object(ReflectionParameter) (1) {
+  ["info"]=>
+  array(4) {
+    ["index"]=>
+    int(0)
+    ["name"]=>
+    string "c"
+    ["type"]=>
+    string "MyClass"
+    ["class"]=>
+    string "I"
+  }
+}

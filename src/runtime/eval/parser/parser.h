@@ -36,7 +36,8 @@
 #ifdef HPHP_PARSER_ERROR
 #undef HPHP_PARSER_ERROR
 #endif
-#define HPHP_PARSER_ERROR HPHP::raise_error
+#define HPHP_PARSER_ERROR(fmt, p, args...) \
+  HPHP::raise_error(fmt ": %s", ##args, (p)->getMessage(true).c_str())
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +55,7 @@ DECLARE_AST_PTR(CatchBlock);
 DECLARE_AST_PTR(Parameter);
 DECLARE_AST_PTR(Name);
 DECLARE_AST_PTR(StaticVariable);
+DECLARE_AST_PTR(UserAttribute);
 
 class Token : public ScannerToken {
 public:
@@ -71,7 +73,8 @@ public:
     Parameter,
     Name,
     StaticVariable,
-    Strings
+    Strings,
+    UserAttribute
   };
 
   Token() : m_mode(None), m_data(NULL) {
@@ -124,6 +127,7 @@ public:
   std::vector<NamePtr           > &names      ();
   std::vector<StaticVariablePtr > &staticVars ();
   std::vector<String            > &strings    ();
+  std::vector<UserAttributePtr  > &userAttributes ();
 
 
 private:
@@ -166,7 +170,8 @@ public:
          std::vector<StaticStatementPtr> &statics);
 
   // implementing ParserBase
-  virtual bool parse();
+  bool parseImpl();
+  bool parse() { return parseImpl(); }
   virtual void error(const char* fmt, ...);
   virtual void error(const std::string &msg);
   virtual void warning(const char* fmt, ...);
@@ -175,6 +180,7 @@ public:
   std::string errString();
 
   virtual bool enableXHP();
+  virtual bool enableHipHopSyntax();
   IMPLEMENT_XHP_ATTRIBUTES;
 
   // no-ops, since the hphpi runtime takes care of this
@@ -200,7 +206,7 @@ public:
   void onRefDim(Token &out, Token &var, Token &offset);
   void onCallParam(Token &out, Token *params, Token &expr, bool ref);
   void onCall(Token &out, bool dynamic, Token &name, Token &params,
-              Token *className);
+              Token *className, bool fromCompiler = false);
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);
   void encapRefDim(Token &out, Token &var, Token &offset);
@@ -228,16 +234,18 @@ public:
   void onArray(Token &out, Token &pairs, int op = T_ARRAY);
   void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                    bool ref);
+  void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &className, Token &name, bool text);
   void onFunctionStart(Token &name);
   void onFunction(Token &out, Token &ret, Token &ref, Token &name,
-                  Token &params, Token &stmt);
+                  Token &params, Token &stmt, Token *attr);
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue);
   void onClassStart(int type, Token &name, Token *parent);
   void onClass(Token &out, int type, Token &name, Token &base,
-               Token &baseInterface, Token &stmt);
-  void onInterface(Token &out, Token &name, Token &base, Token &stmt);
+               Token &baseInterface, Token &stmt, Token *attr);
+  void onInterface(Token &out, Token &name, Token &base, Token &stmt,
+                   Token *attr);
   void onInterfaceName(Token &out, Token *names, Token &name);
   void onTraitUse(Token &out, Token &traits, Token &rules);
   void onTraitName(Token &out, Token *names, Token &name);
@@ -254,7 +262,8 @@ public:
   void onClassConstant(Token &out, Token *exprs, Token &name, Token &val);
   void onMethodStart(Token &name, Token &mods);
   void onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
-                Token &name, Token &params, Token &stmt, bool reloc = true);
+                Token &name, Token &params, Token &stmt, Token *attr,
+                bool reloc = true);
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
   void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);

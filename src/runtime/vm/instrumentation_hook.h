@@ -32,15 +32,15 @@ static inline void instHookInt64Impl(InjectionTableInt64* table, int64 val) {
 
 static inline void instHookInt64(int type, int64 val) {
   ASSERT(type < InstHookTypeInt64Count);
-  InjectionTableInt64* injTable = g_context->m_injTables ?
-    g_context->m_injTables->getInt64Table(type) : NULL;
+  InjectionTableInt64* injTable = g_vmContext->m_injTables ?
+    g_vmContext->m_injTables->getInt64Table(type) : NULL;
   instHookInt64Impl(injTable, val);
 }
 
 static inline void instHookSD(int type, const StringData* sd) {
   ASSERT(type < InstHookTypeSDCount);
-  InjectionTableSD* injTable = g_context->m_injTables ?
-    g_context->m_injTables->getSDTable(type) : NULL;
+  InjectionTableSD* injTable = g_vmContext->m_injTables ?
+    g_vmContext->m_injTables->getSDTable(type) : NULL;
   if (LIKELY(!injTable)) return;
   InjectionTableSD::const_iterator it = injTable->find(sd);
   if (LIKELY(it == injTable->end())) return;

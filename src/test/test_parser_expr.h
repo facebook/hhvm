@@ -43,6 +43,7 @@ class TestParserExpr : public TestParser {
   bool TestBinaryOpExpression();
   bool TestQOpExpression();
   bool TestArrayPairExpression();
+  bool TestShortArrayExpression();
   bool TestClassConstantExpression();
   bool TestParameterExpression();
   bool TestModifierExpression();

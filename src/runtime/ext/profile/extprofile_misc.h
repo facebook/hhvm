@@ -162,6 +162,11 @@ inline String x_token_name(int64 token) {
   return f_token_name(token);
 }
 
+inline Variant x_hphp_process_abort(CVarRef magic) {
+  FUNCTION_INJECTION_BUILTIN(hphp_process_abort);
+  return f_hphp_process_abort(magic);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

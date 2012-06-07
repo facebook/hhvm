@@ -23,7 +23,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s___construct("__construct");
@@ -63,6 +63,11 @@ void MethodStatement::setConstructor() {
 }
 
 String MethodStatement::fullName() const {
+  if (m_class->isTrait()) {
+    String fName = StringData::GetStaticString(
+      FrameInjection::GetClassName(false) + "::" + name());
+    return fName;
+  }
   return m_fullName;
 }
 
@@ -74,22 +79,35 @@ void MethodStatement::eval(VariableEnvironment &env) const {
 
 LVariableTable *MethodStatement::getStaticVars(VariableEnvironment &env)
   const {
-  return &RequestEvalState::getMethodStatics(this, env.currentClass());
+  return &RequestEvalState::getMethodStatics(this, env.currentClass(),
+                                             env.currentAlias());
+}
+
+static String get_current_alias() {
+  DECLARE_THREAD_INFO;
+  FrameInjection *fi;
+  for (fi = info->m_top; fi; fi= fi->getPrev()) {
+    if (fi->isEvalFrame()) {
+      break;
+    }
+  }
+  EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
+  return (efi) ? efi->getEnv().getCalleeAlias() : String();
 }
 
 Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
-    bool check /* = true */) const {
+  const MethodStatementWrapper *msw, bool check /* = true */) const {
+  ASSERT(msw->m_methodStatement == this);
   if (getModifiers() & ClassStatement::Static) {
-    return invokeStatic(obj->o_getClassName(), params, check);
+    return invokeStatic(obj->o_getClassName(), params, msw, check);
   }
-  if (check) attemptAccess(FrameInjection::GetClassName(false));
+  if (check) attemptAccess(FrameInjection::GetClassName(false), msw);
   // The debug frame should have been pushed at ObjectMethodExpression
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this);
   env.setCurrentObject(obj);
-  String clsName(m_class->isTrait() ? env.currentClass()
-                                    : m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName->data(), env,
+  env.setCurrentAlias(get_current_alias());
+  EvalFrameInjection fi(msw->m_className, m_fullName->data(), env,
                         loc()->file, obj.get(), FrameInjection::ObjectMethod);
   if (m_ref) {
     return strongBind(invokeImpl(env, params));
@@ -98,19 +116,20 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
 }
 
 Variant MethodStatement::invokeInstanceFewArgs(CObjRef obj, int count,
-  INVOKE_FEW_ARGS_IMPL_ARGS, bool check) const {
+  INVOKE_FEW_ARGS_IMPL_ARGS, const MethodStatementWrapper *msw, bool check)
+  const {
+  ASSERT(msw->m_methodStatement == this);
   if (getModifiers() & ClassStatement::Static) {
     return invokeStaticFewArgs(obj->o_getClassName(), count,
-                               INVOKE_FEW_ARGS_PASS_ARGS, check);
+                               INVOKE_FEW_ARGS_PASS_ARGS, msw, check);
   }
-  if (check) attemptAccess(FrameInjection::GetClassName(false));
+  if (check) attemptAccess(FrameInjection::GetClassName(false), msw);
   // The debug frame should have been pushed at ObjectMethodExpression
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this);
   env.setCurrentObject(obj);
-  String clsName(m_class->isTrait() ? env.currentClass()
-                                    : m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName->data(), env,
+  env.setCurrentAlias(get_current_alias());
+  EvalFrameInjection fi(msw->m_className, m_fullName->data(), env,
                         loc()->file, obj.get(), FrameInjection::ObjectMethod);
   if (m_ref) {
     return strongBind(invokeImplFewArgs(env, count, INVOKE_FEW_ARGS_PASS_ARGS));
@@ -119,21 +138,23 @@ Variant MethodStatement::invokeInstanceFewArgs(CObjRef obj, int count,
 }
 
 Variant MethodStatement::
-invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
+invokeInstanceDirect(CObjRef obj, CStrRef alias, VariableEnvironment &env,
                      const FunctionCallExpression *caller,
-                     int access /* = 0 */, bool check /* = true */) const {
+                     const MethodStatementWrapper *msw,
+                     bool check /* = true */) const {
+  ASSERT(msw->m_methodStatement == this);
   if (getModifiers() & ClassStatement::Static) {
-    return invokeStaticDirect(obj->o_getClassName(), env,
-                              caller, false, access, check);
+    return invokeStaticDirect(obj->o_getClassName(), alias, env,
+                              caller, false, msw, check);
   }
-  if (check) attemptAccess(FrameInjection::GetClassName(false), access);
+  if (check) attemptAccess(FrameInjection::GetClassName(false), msw);
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
-  String clsName(m_class->isTrait() ? fenv.currentClass()
-                                    : m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName->data(), fenv,
+  fenv.setCurrentAlias(alias);
+  EvalFrameInjection::EvalStaticClassNameHelper helper(obj);
+  EvalFrameInjection fi(msw->m_className, m_fullName->data(), fenv,
                         loc()->file, obj.get(), FrameInjection::ObjectMethod);
   if (m_ref) {
     return strongBind(evalBody(fenv));
@@ -142,14 +163,14 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
 }
 
 Variant MethodStatement::invokeStatic(CStrRef cls, CArrRef params,
-    bool check /* = true */) const {
-  if (check) attemptAccess(FrameInjection::GetClassName(false));
+  const MethodStatementWrapper *msw, bool check /* = true */) const {
+  ASSERT(msw->m_methodStatement == this);
+  if (check) attemptAccess(FrameInjection::GetClassName(false), msw);
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this);
   env.setCurrentClass(cls);
-  String clsName(m_class->isTrait() ? env.currentClass()
-                                    : m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName->data(), env, loc()->file,
+  env.setCurrentAlias(get_current_alias());
+  EvalFrameInjection fi(msw->m_className, m_fullName->data(), env, loc()->file,
                         NULL, FrameInjection::StaticMethod);
   if (m_ref) {
     return strongBind(invokeImpl(env, params));
@@ -158,14 +179,15 @@ Variant MethodStatement::invokeStatic(CStrRef cls, CArrRef params,
 }
 
 Variant MethodStatement::invokeStaticFewArgs(CStrRef cls, int count,
-  INVOKE_FEW_ARGS_IMPL_ARGS, bool check) const {
-  if (check) attemptAccess(FrameInjection::GetClassName(false));
+  INVOKE_FEW_ARGS_IMPL_ARGS, const MethodStatementWrapper *msw, bool check)
+  const {
+  ASSERT(msw->m_methodStatement == this);
+  if (check) attemptAccess(FrameInjection::GetClassName(false), msw);
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this);
   env.setCurrentClass(cls);
-  String clsName(m_class->isTrait() ? env.currentClass()
-                                    : m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName->data(), env, loc()->file,
+  env.setCurrentAlias(get_current_alias());
+  EvalFrameInjection fi(msw->m_className, m_fullName->data(), env, loc()->file,
                         NULL, FrameInjection::StaticMethod);
   if (m_ref) {
     return strongBind(invokeImplFewArgs(env, count, INVOKE_FEW_ARGS_PASS_ARGS));
@@ -174,19 +196,20 @@ Variant MethodStatement::invokeStaticFewArgs(CStrRef cls, int count,
 }
 
 Variant MethodStatement::
-invokeStaticDirect(CStrRef cls, VariableEnvironment &env,
+invokeStaticDirect(CStrRef cls, CStrRef alias, VariableEnvironment &env,
                    const FunctionCallExpression *caller, bool sp,
-                   int access /* = 0 */, bool check /* = true */)
+                   const MethodStatementWrapper *msw,
+                   bool check /* = true */)
   const {
-  if (check) attemptAccess(FrameInjection::GetClassName(false), access);
+  ASSERT(msw->m_methodStatement == this);
+  if (check) attemptAccess(FrameInjection::GetClassName(false), msw);
   MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
   fenv.setCurrentClass(cls);
+  fenv.setCurrentAlias(alias);
   EvalFrameInjection::EvalStaticClassNameHelper helper(cls, sp);
   DECLARE_THREAD_INFO_NOINIT
-  String clsName(m_class->isTrait() ? fenv.currentClass()
-                                    : m_class->name());
-  EvalFrameInjection fi(clsName, m_fullName->data(), fenv,
+  EvalFrameInjection fi(msw->m_className, m_fullName->data(), fenv,
                         loc()->file, NULL, FrameInjection::StaticMethod);
   if (m_ref) {
     return strongBind(evalBody(fenv));
@@ -211,7 +234,6 @@ void MethodStatement::getInfo(ClassInfo::MethodInfo &info,
   int attr = info.attribute == ClassInfo::IsNothing ? 0 : info.attribute;
   int mods = m_modifiers;
   if (access) {
-    ASSERT((access & ClassStatement::AccessMask) == access);
     mods &= ~ClassStatement::AccessMask;
     mods |= access;
   }
@@ -228,12 +250,16 @@ void MethodStatement::getInfo(ClassInfo::MethodInfo &info,
 }
 
 void MethodStatement::attemptAccess(CStrRef context,
-  int access /* = 0 */) const {
+  const MethodStatementWrapper *msw) const {
+  ASSERT(msw->m_methodStatement == this);
   if (g_context->getDebuggerBypassCheck()) {
     return;
   }
-  int mods = access ? access : getModifiers();
+  int mods = msw->m_access ? msw->m_access : getModifiers();
   const ClassStatement *cs = m_class;
+  if (cs->isTrait()) {
+    cs = RequestEvalState::findClass(msw->m_className);
+  }
   ClassStatement::Modifier level = ClassStatement::Public;
   if (mods & ClassStatement::Private) level = ClassStatement::Private;
   else if (mods & ClassStatement::Protected) level = ClassStatement::Protected;
@@ -254,15 +280,6 @@ void MethodStatement::attemptAccess(CStrRef context,
     ok = cs->hasAccess(context, level);
   }
 
-  // special case when handling parent's private constructors that are allowed
-  if (!ok) {
-    if (level == ClassStatement::Private &&
-        (strcasecmp(m_name->data(), "__construct") == 0 ||
-         strcasecmp(m_name->data(), getClass()->name().c_str()) == 0)) {
-      ok = cs->hasAccess(context, ClassStatement::Protected);
-    }
-  }
-
   if (!ok) {
     const char *mod = "protected";
     if (level == ClassStatement::Private) mod = "private";
@@ -279,7 +296,8 @@ bool MethodStatement::isAbstract() const {
 }
 
 Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
-  const MethodStatement *ms = (const MethodStatement*)mcp.extra;
+  const MethodStatementWrapper *msw = (const MethodStatementWrapper*)mcp.extra;
+  const MethodStatement *ms = msw->m_methodStatement;
   bool check = !ms->m_name->isame(s___invoke.get());
   bool isStatic = ms->getModifiers() & ClassStatement::Static;
   if (isStatic || !mcp.obj) {
@@ -292,22 +310,23 @@ Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
       cn = mcp.getClassName();
     }
     if (ms->refReturn()) {
-      return strongBind(ms->invokeStatic(cn, params, check));
+      return strongBind(ms->invokeStatic(cn, params, msw, check));
     } else {
-      return ms->invokeStatic(cn, params, check);
+      return ms->invokeStatic(cn, params, msw, check);
     }
   } else {
     if (ms->refReturn()) {
-      return strongBind(ms->invokeInstance(mcp.rootObj, params, check));
+      return strongBind(ms->invokeInstance(mcp.rootObj, params, msw, check));
     } else {
-      return ms->invokeInstance(mcp.rootObj, params, check);
+      return ms->invokeInstance(mcp.rootObj, params, msw, check);
     }
   }
 }
 
 Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
     int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const MethodStatement *ms = (const MethodStatement*)mcp.extra;
+  const MethodStatementWrapper *msw = (const MethodStatementWrapper*)mcp.extra;
+  const MethodStatement *ms = msw->m_methodStatement;
   bool check = !ms->m_name->isame(s___invoke.get());
   bool isStatic = ms->getModifiers() & ClassStatement::Static;
   if (isStatic || !mcp.obj) {
@@ -321,18 +340,18 @@ Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
     }
     if (ms->refReturn()) {
       return strongBind(ms->invokeStaticFewArgs(cn, count,
-        INVOKE_FEW_ARGS_PASS_ARGS, check));
+        INVOKE_FEW_ARGS_PASS_ARGS, msw, check));
     } else {
       return ms->invokeStaticFewArgs(cn, count,
-        INVOKE_FEW_ARGS_PASS_ARGS, check);
+        INVOKE_FEW_ARGS_PASS_ARGS, msw, check);
     }
   } else {
     if (ms->refReturn()) {
       return strongBind(ms->invokeInstanceFewArgs(mcp.rootObj, count,
-        INVOKE_FEW_ARGS_PASS_ARGS, check));
+        INVOKE_FEW_ARGS_PASS_ARGS, msw, check));
     } else {
       return ms->invokeInstanceFewArgs(mcp.rootObj, count,
-        INVOKE_FEW_ARGS_PASS_ARGS, check);
+        INVOKE_FEW_ARGS_PASS_ARGS, msw, check);
     }
   }
 }

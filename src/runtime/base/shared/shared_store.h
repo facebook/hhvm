@@ -38,7 +38,7 @@ namespace HPHP {
 class LockedSharedStore : public SharedStore {
 public:
   LockedSharedStore(int i) : SharedStore(i) {}
-  virtual void clear();
+  virtual bool clear();
   virtual bool get(CStrRef key, Variant &value);
   virtual bool store(CStrRef key, CVarRef val, int64 ttl,
                      bool overwrite = true);
@@ -77,16 +77,7 @@ public:
    * However, SharedVariantLockedRefs cannot be safely reused, because
    * it may contain a lock associated with a different key.
    */
-  inline SharedVariant* create(CStrRef key, CVarRef v) {
-    SharedVariant *wrapped = v.getSharedVariant();
-    if (wrapped) {
-      wrapped->incRef();
-      return wrapped;
-    }
-    return new SharedVariant(v, false);
-  }
-  inline SharedVariant* create(litstr str, int len, CStrRef v,
-                           bool serialized) {
+  inline SharedVariant* create(CStrRef v, bool serialized) {
     SharedVariant *wrapped = v->getSharedVariant();
     if (wrapped) {
       wrapped->incRef();
@@ -94,7 +85,7 @@ public:
     }
     return new SharedVariant(v, serialized);
   }
-  inline SharedVariant* create(litstr str, int len, CVarRef v) {
+  inline SharedVariant* create(CVarRef v) {
     SharedVariant *wrapped = v.getSharedVariant();
     if (wrapped) {
       wrapped->incRef();
@@ -186,23 +177,6 @@ public:
     unlockMap();
     return ret;
   }
-  virtual void count(int &reachable, int &expired, int &persistent) {
-    reachable = expired = persistent = 0;
-    int now = time(NULL);
-    lockMap();
-    for (StringMap::const_iterator iter = m_vars.begin();
-         iter != m_vars.end(); ++iter) {
-      reachable += iter->second.var->countReachable();
-
-      int64 expiration = iter->second.expiry;
-      if (expiration == 0) {
-        persistent++;
-      } else if (expiration <= now) {
-        expired++;
-      }
-    }
-    unlockMap();
-  }
   virtual void lockMap() {
     m_mlock.acquireWrite();
   }
@@ -215,17 +189,20 @@ public:
   virtual void readUnlockMap() {
     m_mlock.release();
   }
-  virtual SharedVariant* construct(litstr str, int len, CStrRef v,
-                                   bool serialized) {
-    return create(str, len, v, serialized);
+  virtual bool constructPrime(CStrRef v, KeyValuePair& item,
+                              bool serialized) {
+    item.value = create(v, serialized);
+    return true;
   }
-  virtual SharedVariant* construct(litstr str, int len, CVarRef v) {
-    return create(str, len, v);
+  virtual bool constructPrime(CVarRef v, KeyValuePair& item) {
+    item.value = create(v);
+    return true;
   }
 protected:
-  virtual SharedVariant* construct(CStrRef key, CVarRef v) {
-    return create(key, v);
+  virtual SharedVariant* construct(CVarRef v) {
+    return create(v);
   }
+
   ReadWriteMutex m_mlock;
   struct StringHash {
     size_t operator()(StringData *s) const {
@@ -318,8 +295,9 @@ public:
     SetUpdater updater(v, ttl);
     m_vars.atomicUpdate(key.get()->copy(true), updater, true, immortal);
   }
-  virtual void clear() {
+  virtual bool clear() {
     m_vars.clear();
+    return true;
   }
   virtual bool eraseImpl(CStrRef key, bool expired) {
     class EraseUpdater : public Map::AtomicUpdater {
@@ -348,30 +326,6 @@ public:
   virtual int size() {
     return m_vars.size();
   }
-  virtual void count(int &reachable, int &expired, int &persistent) {
-    class CountBody : public Map::AtomicReader {
-    public:
-      CountBody(int &r, int &e, int &p)
-        : now(time(NULL)), reachable(r), expired(e), persistent(p) {}
-      void read(StringData* const &k, const StoreValue &val) {
-        reachable += val.var->countReachable();
-        int64 expiration = val.expiry;
-        if (expiration == 0) {
-          persistent++;
-        } else if (expiration <= now) {
-          expired++;
-        }
-      }
-    private:
-      time_t now;
-      int &reachable;
-      int &expired;
-      int &persistent;
-    };
-    reachable = expired = persistent = 0;
-    CountBody body(reachable, expired, persistent);
-    m_vars.atomicForeach(body);
-  }
 
   virtual bool get(CStrRef key, Variant &value);
   virtual bool store(CStrRef key, CVarRef val, int64 ttl,
@@ -381,17 +335,18 @@ public:
   virtual bool check() {
     return m_vars.check();
   }
-  virtual std::string reportStats(int &reachable, int indent);
-  virtual SharedVariant* construct(litstr str, int len, CStrRef v,
-                                   bool serialized) {
-    return create(str, len, v, serialized);
+  virtual bool constructPrime(CStrRef v, KeyValuePair& item,
+                              bool serialized) {
+    item.value = create(v, serialized);
+    return true;
   }
-  virtual SharedVariant* construct(litstr str, int len, CVarRef v) {
-    return create(str, len, v);
+  virtual bool constructPrime(CVarRef v, KeyValuePair& item) {
+    item.value = create(v);
+    return true;
   }
 protected:
-  virtual SharedVariant* construct(CStrRef key, CVarRef v) {
-    return create(key, v);
+  virtual SharedVariant *construct(CVarRef v) {
+    return create(v);
   }
 private:
   struct StringHash {

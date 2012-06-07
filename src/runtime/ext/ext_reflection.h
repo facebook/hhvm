@@ -27,6 +27,7 @@ namespace HPHP {
 
 Array f_hphp_get_extension_info(CStrRef name);
 Array f_hphp_get_method_info(CVarRef cls, CVarRef name);
+Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name);
 Array f_hphp_get_class_info(CVarRef name);
 Array f_hphp_get_function_info(CStrRef name);
 Variant f_hphp_invoke(CStrRef name, CArrRef params);
@@ -38,6 +39,7 @@ void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop, CVarRef value);
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop);
 void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value);
 String f_hphp_get_original_class_name(CStrRef name);
+bool f_hphp_scalar_typehints_enabled();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

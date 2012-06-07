@@ -22,8 +22,6 @@
 #include <runtime/ext/ext_math.h>
 #include <runtime/ext/ext_json.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // compositions
@@ -640,12 +638,13 @@ Variant ArrayUtil::StringUnique(CArrRef input) {
 }
 
 Variant ArrayUtil::NumericUnique(CArrRef input) {
-  set<double> seenValues;
+  std::set<double> seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
     CVarRef entry(iter.secondRef());
     double value = entry.toDouble();
-    pair<set<double>::iterator, bool> res = seenValues.insert(value);
+    std::pair<std::set<double>::iterator, bool> res =
+      seenValues.insert(value);
     if (res.second) { // it was inserted
       ret.set(iter.first(), entry);
     }
@@ -814,7 +813,7 @@ void ArrayUtil::InitScalarArrays(Array arrs[], int nArrs,
   ASSERT(scalarArrays.size() == nArrs);
   for (int i = 0; i < nArrs; i++) {
     arrs[i] = scalarArrays[i];
-    arrs[i].setStatic();
+    arrs[i].setEvalScalar();
   }
 }
 

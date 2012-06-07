@@ -21,8 +21,6 @@
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/eval.h>
 
-using namespace std;
-
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

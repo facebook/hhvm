@@ -26,8 +26,6 @@
 #include <compiler/parser/parser.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -454,8 +452,10 @@ TypePtr ExpressionList::inferTypes(AnalysisResultPtr ar, TypePtr type,
       e->inferAndCheck(ar, t, c);
       if (commaList && i == ix) {
         e->setExpectedType(TypePtr());
-        ret = e->getExpectedType();
-        if (!ret) ret = e->getActualType();
+        ret = e->getActualType();
+        if (e->getImplementedType()) {
+          m_implementedType = e->getImplementedType();
+        }
         if (!ret) ret = Type::Variant;
       }
     }
@@ -599,7 +599,7 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
 
       if (noRef || lvSwitch || (!i && n > 1)) {
-        e->Expression::preOutputStash(cg, ar, state | FixOrder);
+        e->Expression::preOutputStash(cg, ar, state | FixOrder | StashAll);
         if (!(state & FixOrder)) {
           cg_printf("id(%s);\n", e->cppTemp().c_str());
         }
@@ -627,7 +627,7 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
 unsigned int ExpressionList::checkLitstrKeys() const {
   ASSERT(m_arrayElements);
-  set<string> keys;
+  std::set<string> keys;
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr ap =
       dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);

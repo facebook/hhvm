@@ -23,8 +23,6 @@
 #include <runtime/ext/mailparse/mime.h>
 #include <runtime/ext/mailparse/rfc822.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // utility functions
@@ -62,7 +60,7 @@ bool php_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef headers,
   // assumes we always have sendmail installed
   assert(!RuntimeOption::SendmailPath.empty());
 
-  ostringstream os;
+  std::ostringstream os;
   os << RuntimeOption::SendmailPath;
   if (!extra_cmd.empty()) {
     os << ' ' << extra_cmd.c_str();

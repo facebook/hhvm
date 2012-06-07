@@ -21,6 +21,7 @@
 #include <runtime/base/util/countable.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/macros.h>
+#include <runtime/base/bstring.h>
 #include <util/hash.h>
 #include <runtime/base/util/exceptions.h>
 #include <runtime/base/taint/taint_observer.h>
@@ -45,15 +46,18 @@ struct FilePlace {
  * nullability to avoid calling this class.
  */
 class StringData {
- private:
-    const static unsigned int IsLiteral = ((unsigned)1 << 31); // literal string
-    const static unsigned int IsShared  = (1 << 30); // shared memory string
-    const static unsigned int IsLinear  = (1 << 29); // linear allocator memory
+  StringData(const StringData&); // disable copying
+  StringData& operator=(const StringData&);
 
-    const static unsigned int IsMask = IsLiteral | IsShared | IsLinear;
+ private:
+  const static unsigned int IsLiteral = ((unsigned)1 << 31); // literal string
+  const static unsigned int IsShared  = (1 << 30); // shared memory string
+
+  const static unsigned int IsMask = IsLiteral | IsShared;
 
  public:
-    const static unsigned int LenMask = ~IsMask;
+  const static unsigned int LenMask = ~IsMask;
+  const static unsigned int MaxSize = LenMask;
 
   /**
    * StringData does not formally derive from Countable, however it has a
@@ -61,11 +65,11 @@ class StringData {
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
-  void setRefCount(int n) { _count = n;}
+  void setRefCount(int32_t n) { _count = n;}
   /* Only call preCompute() and setStatic() in a thread-neutral context! */
   void preCompute() const;
   void setStatic() const;
-  bool isStatic() const { return _count == (1 << 30); }
+  bool isStatic() const { return _count == RefCountStaticValue; }
 
   /**
    * Get the wrapped SharedVariant.
@@ -114,10 +118,9 @@ class StringData {
   bool empty() const { return size() == 0;}
   bool isLiteral() const { return m_len & IsLiteral;}
   bool isShared() const { return m_len & IsShared;}
-  bool isLinear() const { return m_len & IsLinear;}
   bool isMalloced() const { return (m_len & IsMask) == 0 && m_data;}
   bool isImmutable() const {
-    return (m_len & (IsLiteral | IsShared | IsLinear)) || isStatic();
+    return (m_len & (IsLiteral | IsShared)) || isStatic();
   }
   DataType isNumericWithVal(int64 &lval, double &dval, int allow_errors) const;
   bool isNumeric() const;
@@ -197,7 +200,7 @@ class StringData {
     int len = size();
     if (s->size() != len) return false;
     if (m_data == s->m_data) return true;
-    return !strncasecmp(m_data, s->m_data, len);
+    return !bstrcasecmp(m_data, len, s->m_data, len);
   }
 
   /**
@@ -208,12 +211,8 @@ class StringData {
   /**
    * Memory allocator methods.
    */
-  DECLARE_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
-  bool calculate(int &size);
-  void backup(LinearAllocator &allocator);
-  void restore(const char *&data);
+  DECLARE_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedSweep);
   void sweep() { releaseData();}
-
   void dump() const;
   std::string toCPPString() const;
 
@@ -228,7 +227,7 @@ class StringData {
  private:
   const char *m_data;
  protected:
-  mutable int _count;
+  mutable int32_t _count;
  private:
   mutable unsigned int m_len;
   union {
@@ -254,12 +253,10 @@ class StringData {
   void assignHelper(const char *data, int len, StringDataMode mode);
   void assign(const char *data, int len, StringDataMode mode);
 
-#ifdef FAST_REFCOUNT_FOR_VARIANT
  private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(StringData, _count) == FAST_REFCOUNT_OFFSET);
   }
-#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////

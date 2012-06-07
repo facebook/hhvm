@@ -50,7 +50,18 @@ static SplFileObject *get_splfileobject(CObjRef obj) {
 }
 
 Object f_hphp_splfileinfo___construct(CObjRef obj, CStrRef file_name) {
-  obj->o_set("rsrc", NEWOBJ(SplFileInfo)(file_name), "SplFileInfo");
+  int len = file_name.size();
+  const char *data = file_name.data();
+  ObjectData *fi;
+  if (len && data[len-1] == '/') {
+    do {
+      len--;
+    } while (len && data[len-1] == '/');
+    fi = NEWOBJ(SplFileInfo)(String(data, len, CopyString));
+  } else {
+    fi = NEWOBJ(SplFileInfo)(file_name);
+  }
+  obj->o_set("rsrc", fi, "SplFileInfo");
   return obj;
 }
 
@@ -93,7 +104,7 @@ String f_hphp_splfileinfo_getlinktarget(CObjRef obj) {
   String ret = f_readlink_internal(fileInfo->getFileName(), false);
   if (!ret.size())  {
     throw Object(SystemLib::AllocExceptionObject(Variant(
-      "Unable to read link "+fileInfo->getFileName() +
+      "Unable to read link "+std::string(fileInfo->getFileName()) +
       ", error: no such file or directory")));
   }
   return ret;

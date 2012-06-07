@@ -38,6 +38,7 @@ DECLARE_AST_PTR(FunctionStatement);
 DECLARE_AST_PTR(Expression);
 DECLARE_AST_PTR(Name);
 DECLARE_AST_PTR(StaticStatement);
+DECLARE_AST_PTR(UserAttribute);
 class FunctionCallExpression;
 class FuncScopeVariableEnvironment;
 
@@ -75,6 +76,7 @@ private:
   bool m_ref;
   bool m_nullDefault;
   bool m_correct;
+  bool m_hasDefaultValue;
 private:
   bool checkTypeHint(DataType hint, DataType type) const;
   void error(Parser *parser, const char *fmt, ...) const;
@@ -87,6 +89,10 @@ public:
   FunctionStatement(STATEMENT_ARGS, const std::string &name,
                     const std::string &doc);
   ~FunctionStatement();
+
+  typedef hphp_hash_map<const StringData*, ExpressionPtr, string_data_hash,
+                        string_data_isame> UserAttributeMap;
+
   void init(void *parser, bool ref, const std::vector<ParameterPtr> &params,
             StatementListStatementPtr body, bool has_call_to_get_args);
   String name() const { return m_name; }
@@ -155,6 +161,10 @@ public:
     return ParserBase::IsClosureName(m_name->data());
   }
 
+  const UserAttributeMap& userAttributes() { return m_userAttributes; }
+
+  void setUserAttributes(const std::vector<UserAttributePtr> &elems);
+
 protected:
   bool m_ref;
   bool m_hasCallToGetArgs;
@@ -175,10 +185,12 @@ protected:
                   FuncScopeVariableEnvironment &fenv,
                   int start = 0) const;
   Variant evalBody(VariableEnvironment &env) const;
-  CallInfo m_callInfo;
+  CallInfoWithConstructor m_callInfo;
 
   FunctionStatementPtr m_origGeneratorFunc;
   FunctionStatementPtr m_generatorFunc;
+
+  UserAttributeMap m_userAttributes;
 
 private:
   void bindParams(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
@@ -196,7 +208,7 @@ private:
 
   std::string computeInjectionName() const;
 
-  CallInfo m_closureCallInfo;
+  CallInfoWithConstructor m_closureCallInfo;
   int m_id;
 };
 

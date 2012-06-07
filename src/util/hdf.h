@@ -375,10 +375,7 @@ public:
   HdfException(const char *fmt, ...) {
     va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
   }
-  virtual HdfException *clone() {
-    return new HdfException(*this);
-  }
-  virtual void throwException() { throw *this; }
+  EXCEPTION_COMMON_IMPL(HdfException);
 };
 
 /**
@@ -390,10 +387,7 @@ public:
     : HdfException("HDF node [%s]'s value \"%s\" is not %s",
                    hdf->getFullPath().c_str(), value, type) {
   }
-  virtual HdfDataTypeException *clone() {
-    return new HdfDataTypeException(*this);
-  }
-  virtual void throwException() { throw *this; }
+  EXCEPTION_COMMON_IMPL(HdfDataTypeException);
 };
 
 /**
@@ -405,10 +399,7 @@ public:
     : HdfException("HDF node [%s]'s value \"%s\" is not expected %s",
                    hdf->getFullPath().c_str(), hdf->get(""), expected) {
   }
-  virtual HdfDataValueException *clone() {
-    return new HdfDataValueException(*this);
-  }
-  virtual void throwException() { throw *this; }
+  EXCEPTION_COMMON_IMPL(HdfDataValueException);
 };
 
 /**
@@ -419,10 +410,7 @@ public:
   HdfInvalidOperation(const char *operation)
     : HdfException("Invalid operation: %s", operation) {
   }
-  virtual HdfInvalidOperation *clone() {
-    return new HdfInvalidOperation(*this);
-  }
-  virtual void throwException() { throw *this; }
+  EXCEPTION_COMMON_IMPL(HdfInvalidOperation);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

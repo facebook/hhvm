@@ -53,22 +53,25 @@ class C extends B implements I {
   }
 }
 
-print "C::k : ".C::k."\n";
-$X = "C";
-print "$X::k : ".$X::k."\n";
+function main() {
+  print "C::k : ".C::k."\n";
+  $X = "C";
+  print "$X::k : ".$X::k."\n";
 
 # XXX Exit here to avoid unimplemented HHBC instructions.
-exit(0);
+  exit(0);
 
-C::sf();
+  C::sf();
 
 # XXX Need SProp replacement.
 #print "C::\$s : ".C::$s."\n";
 #print "\$X::\$s : ".$X::$s."\n";
 
-$c = new C();
-print "\$c->p : ".$c->p."\n";
-$c->f(43);
-var_dump($c);
+  $c = new C();
+  print "\$c->p : ".$c->p."\n";
+  $c->f(43);
+  var_dump($c);
 
-print "Test end\n";
+  print "Test end\n";
+}
+main();

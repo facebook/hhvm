@@ -269,9 +269,10 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "SimpleXMLElement",
+    'bases'  => array('Sweepable'),
     'ifaces' => array('ArrayAccess', 'IteratorAggregate', 'Countable'),
     'desc'   => "Represents an element in an XML document.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NoDefaultSweep,
     'footer' => <<<EOT
 
  public:
@@ -727,7 +728,7 @@ BeginClass(
     'ifaces' => array('Iterator'),
     'bases'  => array('Sweepable'),
     'desc'   => "",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NoDefaultSweep,
     'footer' => <<<EOT
 
 public:

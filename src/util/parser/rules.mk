@@ -2,13 +2,20 @@
 .PHONY: hphp.tab.cpp
 hphp.tab.cpp: $(PROJECT_ROOT)/src/util/parser/hphp.y
 	@echo "Generating parser code..."
-	$(V)$(EXT_DIR)/bison/bin/bison -p$(YYPREFIX) --locations -d -o$@ $<
+	export BISON_PKGDATADIR=\
+$(realpath $(EXTERNAL_TOOLS_ROOT))/bison/bison-2.4.1/share/bison
+	$(V)$(EXTERNAL_TOOLS_ROOT)/bison/bison-2.4.1/bin/bison \
+		-p$(YYPREFIX) --locations -d -o$@ $<
 	@perl -p -i -n -e "s/(T_\w+) = ([0-9]+)/YYTOKEN(\\2, \\1)/" \
 		hphp.tab.hpp
 	@php -r "file_put_contents('hphp.tab.hpp', preg_replace('/\{([ \r\n\t]+YYTOKEN\(([0-9]+),)/s', \"{\n#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \$$2\n#endif\$$1\", file_get_contents('hphp.tab.hpp')));"
 	@php -r "file_put_contents('hphp.tab.hpp', preg_replace('/(YYTOKEN\(([0-9]+), T_\w+\)[ \r\n\t]+\};)/s', \"\$$1\n#ifndef YYTOKEN_MAX\n#define YYTOKEN_MAX \$$2\n#endif\n\", file_get_contents('hphp.tab.hpp')));"
 	@perl -p -i -n -e "s/   enum yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num\n#endif\n   YYTOKEN_MAP/" hphp.tab.hpp
-	$(V)mv -f hphp.tab.hpp $(PROJECT_ROOT)/src/util/parser/
+	$(V)if ! diff -q hphp.tab.hpp $(PROJECT_ROOT)/src/util/parser/hphp.tab.hpp &>/dev/null; then \
+		mv -f hphp.tab.hpp $(PROJECT_ROOT)/src/util/parser/; \
+	else \
+		rm -f hphp.tab.hpp; \
+	fi
 	@perl -p -i -n -e "s/first_line/line0/"   $@
 	@perl -p -i -n -e "s/last_line/line1/"    $@
 	@perl -p -i -n -e "s/first_column/char0/" $@

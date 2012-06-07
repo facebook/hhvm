@@ -23,8 +23,6 @@
 #include <runtime/base/string_util.h>
 #include <util/util.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

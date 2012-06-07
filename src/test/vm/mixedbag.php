@@ -99,8 +99,7 @@ function hash2($n = 500) {
   }
   for ($i = $n; $i > 0; $i--) {
     foreach($hash1 as $key => $value) {
-      //$hash2[$key] += $value;
-      $hash2[$key] = $hash2[$key] + $value;
+      $hash2[$key] += $value;
     }
   }
   $first = "foo_0";

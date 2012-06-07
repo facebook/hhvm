@@ -22,26 +22,30 @@
 #include <runtime/eval/ast/use_trait_statement.h>
 #include <runtime/eval/ast/trait_prec_statement.h>
 #include <runtime/eval/ast/trait_alias_statement.h>
+#include <runtime/eval/ast/user_attribute.h>
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/strict_mode.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/eval/eval.h>
 #include <util/util.h>
+#include <runtime/eval/ast/scalar_expression.h>
 #include <runtime/eval/ast/array_expression.h>
 #include <runtime/ext/ext_class.h>
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s___construct("__construct");
+static StaticString s_protPrefix("\0*\0", 3);
+static StaticString s_zero("\0", 1);
 
 ClassVariable::ClassVariable(CONSTRUCT_ARGS, const string &name, int modifiers,
     ExpressionPtr value, const string &doc, ClassStatement *cls)
   : Construct(CONSTRUCT_PASS), m_name(StringData::GetStaticString(name)),
-    m_modifiers(modifiers), m_value(value), m_docComment(doc) {
+    m_modifiers(modifiers), m_value(value), m_docComment(doc), m_cls(cls) {
 }
 
 ClassVariable *ClassVariable::optimize(VariableEnvironment &env) {
@@ -127,6 +131,10 @@ void ClassStatement::finish() {
     c = findMethod(m_name->data(), false, false, false);
   }
   if (c) {
+    if (c && (c->getModifiers() & ClassStatement::Static)) {
+      raise_error("Constructor %s::%s() cannot be static",
+                  m_name->data(), c->name().data());
+    }
     const_cast<MethodStatement*>(c)->setConstructor();
   }
 }
@@ -135,34 +143,9 @@ bool ClassStatement::isHoistable(std::set<StringData *> &seen) {
   // shouldn't be called twice on the same class
   assert(m_needCheckHoist == -1);
   m_needCheckHoist = 1;
-  const ClassInfo *ci;
 
-  bool allBuiltinInterfaces = true;
-  for (unsigned int i = 0; i < m_bases.size(); i++) {
-    ci = ClassInfo::FindSystemInterface(m_bases[i]);
-    if (!ci) {
-      allBuiltinInterfaces = false;
-      break;
-    }
-  }
-  if (!allBuiltinInterfaces) return false;
-
-  bool allBuiltinTraits = true;
-  for (unsigned int i = 0; i < m_useTraitsVec.size(); i++) {
-    const std::vector<NamePtr> &traitNames = m_useTraitsVec[i]->getNames();
-    for (unsigned int j = 0; j < traitNames.size(); j++) {
-      ci = ClassInfo::FindSystemTrait(traitNames[j]->get());
-      if (!ci) {
-        allBuiltinTraits = false;
-        break;
-      } else {
-        assert(0); // there is no builtin trait
-      }
-    }
-    if (!allBuiltinTraits) break;
-  }
-  if (m_useTraitsVec.size()) assert(!allBuiltinTraits);
-  if (!allBuiltinInterfaces) return false;
+  if (!m_bases.empty()) return false;
+  if (!m_useTraitsVec.empty()) return false;
 
   if (m_parent->empty() ||
       seen.find(m_parent) != seen.end() ||
@@ -225,9 +208,8 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
         if ((*it)->attribute & ClassInfo::IsPrivate) mods |= Private;
         else if ((*it)->attribute & ClassInfo::IsProtected) mods |= Protected;
         else mods |= Public;
-        pair<const MethodStatement *, int> &p = mtable[(*it)->name];
-        p.first = NULL;
-        p.second = mods;
+        MethodStatementWrapper &p = mtable[(*it)->name];
+        p.m_access = mods;
       }
     }
   }
@@ -236,15 +218,19 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
     ClassEvalState::MethodTable::iterator mit =
       mtable.find((*it)->name());
     if (mit != mtable.end()) {
-      int mods = mit->second.second;
-      const MethodStatement *mmit = mit->second.first;
+      int mods = mit->second.m_access;
+      const MethodStatement *mmit = mit->second.m_methodStatement;
       if (mods & Final) {
-        const Location *loc = (*it).get()->loc();
-        set_line(loc->line0, loc->char0, loc->line1, loc->char1);
-        throw FatalErrorException(0,
-                                  "Cannot override final method %s::%s()",
-                                  mmit->getClass()->name().c_str(),
-                                  (*it)->name().c_str());
+        static StringData* sd___MockClass =
+          StringData::GetStaticString("__MockClass");
+        if (m_userAttributes.find(sd___MockClass) == m_userAttributes.end()) {
+          const Location *loc = (*it).get()->loc();
+          set_line(loc->line0, loc->char0, loc->line1, loc->char1);
+          throw FatalErrorException(0,
+                                    "Cannot override final method %s::%s()",
+                                    mmit->getClass()->name().c_str(),
+                                    (*it)->name().c_str());
+        }
       } else if ((mods & (Public|Protected|Private)) <
                  ((*it)->getModifiers() & (Public|Protected|Private))) {
         const char *al = "public";
@@ -263,22 +249,26 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
                                   mmit->getClass()->name().c_str() :
                                   m_parent->data());
       }
-      mit->second.first = it->get();
-      mit->second.second = (*it)->getModifiers();
+      mit->second.m_methodStatement = it->get();
+      mit->second.m_access = (*it)->getModifiers();
+      mit->second.m_className = m_name;
     } else {
-      pair<const MethodStatement *, int> &p = mtable[(*it)->name()];
-      p.first = it->get();
-      p.second = (*it)->getModifiers();
+      MethodStatementWrapper &p = mtable[(*it)->name()];
+      p.m_methodStatement = it->get();
+      p.m_access = (*it)->getModifiers();
+      p.m_className = m_name;
     }
   }
 
   StringIMap<MethodStatementPtr>::const_iterator it = m_methods.find(m_name);
   if (it != m_methods.end()) {
-    ce.getConstructor() = it->second.get();
+    ce.getConstructorWrapper() =
+      MethodStatementWrapper(it->second.get(), 0, m_name);
   }
   it = m_methods.find("__construct");
   if (it != m_methods.end()) {
-    ce.getConstructor() = it->second.get();
+    ce.getConstructorWrapper() =
+      MethodStatementWrapper(it->second.get(), 0, m_name);
   }
   addTraits(ce);
   bindTraits(ce);
@@ -327,7 +317,7 @@ void ClassStatement::addTrait(ClassEvalState &ce,
 }
 
 void ClassStatement::addTraits(ClassEvalState &ce) const {
-  ce.initTraits();
+  ce.initTraits(this);
   for (unsigned int i = 0; i < m_useTraitsVec.size(); i++) {
     addTrait(ce, m_useTraitsVec[i].get());
   }
@@ -393,24 +383,135 @@ void ClassStatement::bindMethods(ClassEvalState &ce) const {
   ce.mergeTraitMethodsToClass(resultTable, this);
 }
 
+bool ClassStatement::checkCompatible(
+  ClassEvalState &ce, const std::vector<ClassVariable *> &variableVec,
+  unsigned int currentTrait, ClassVariable *cv) const {
+  ClassVariable *colliding = NULL;
+  bool compatible = true;
+  for (unsigned i = 0; i < variableVec.size(); i++) {
+    if (!variableVec[i]->name()->same(cv->name().get())) continue;
+    colliding = variableVec[i];
+    if ((colliding->getModifiers() & (AccessMask | Static)) !=
+        (cv->getModifiers() & (AccessMask | Static))) {
+      compatible = false;
+      break;
+    }
+    const Expression *val1 = colliding->getValue();
+    const Expression *val2 = cv->getValue();
+    if (!val1 && !val2) continue;
+    if (!val1 || !val2) {
+      compatible = false;
+      break;
+    }
+    bool sc1 = val1->isKindOf(Expression::KindOfScalarExpression) ||
+               val1->isKindOf(Expression::KindOfScalarValueExpression);
+    bool sc2 = val2->isKindOf(Expression::KindOfScalarExpression) ||
+               val2->isKindOf(Expression::KindOfScalarValueExpression);
+    if (!sc1 || !sc2) {
+      compatible = false;
+      break;
+    }
+    Variant v1;
+    Variant v2;
+    DummyVariableEnvironment env;
+    bool ret ATTRIBUTE_UNUSED = val1->evalStaticScalar(env, v1);
+    ASSERT(ret);
+    ret = val2->evalStaticScalar(env, v2);
+    ASSERT(ret);
+    if (!same(v1, v2) || v1.isArray() || v2.isArray()) {
+      compatible = false;
+      break;
+    }
+  }
+  if (!colliding) {
+    ASSERT(compatible);
+    return true;
+  }
+  if (compatible) {
+    const ClassVariable *firstDef = findFirstDef(ce, currentTrait, colliding);
+    raise_strict_warning("%s and %s define the same property ($%s) in "
+      "the composition of %s. This might be incompatible, to improve "
+      "maintainability consider using accessor methods in traits "
+      "instead. Class was composed",
+      firstDef->getClass()->name().c_str(),
+      cv->getClass()->name().c_str(), cv->name().c_str(),
+      m_name->data());
+  } else {
+    const ClassVariable *firstDef = findFirstDef(ce, currentTrait, colliding);
+    raise_error("%s and %s define the same property ($%s) in the "
+                "composition of %s. However, the definition differs "
+                "and is considered incompatible. Class was composed",
+                firstDef->getClass()->name().c_str(),
+                cv->getClass()->name().c_str(), cv->name().c_str(),
+                m_name->data());
+  }
+  return compatible;
+}
+
+const ClassVariable *ClassStatement::findFirstDef(
+  ClassEvalState &ce, unsigned int currentTrait,
+  const ClassVariable *colliding) const {
+  ASSERT(colliding);
+  std::vector<const ClassStatement *> &traits = ce.getTraits();
+  for (unsigned i = 0; i < currentTrait && i < traits.size(); i++) {
+    const ClassVariable *cv = findVariable(colliding->name());
+    if (cv) return cv;
+  }
+  return colliding;
+}
+
 void ClassStatement::bindProperties(ClassEvalState &ce) const {
+  if (ce.getClass() != this) return;
   std::vector<const ClassStatement *> &traits = ce.getTraits();
   std::vector<ClassVariable *> traitVariables;
+  StringMap<ClassVariable *> traitVariableMap;
+  std::vector<ClassVariable *> variableVec;
   unsigned int numTraits =  traits.size();
 
+  // add current class variables
+  for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
+       it != m_variablesVec.end(); ++it) {
+    variableVec.push_back(it->get());
+  }
   for (unsigned int i = 0; i < numTraits; i++) {
     const ClassStatement *trait = traits[i];
     ClassEvalState *tce = RequestEvalState::findClassState(trait->name());
     tce->semanticCheck();
     const std::vector<ClassVariable *> &tvs = tce->getTraitVariables();
     for (unsigned int j = 0; j < trait->m_variablesVec.size(); j++) {
-      traitVariables.push_back(trait->m_variablesVec[j].get());
+      ClassVariable *cv = trait->m_variablesVec[j].get();
+      if (checkCompatible(ce, variableVec, i, cv)) {
+        traitVariables.push_back(cv);
+        traitVariableMap[cv->name()] = cv;
+        variableVec.push_back(cv);
+      }
     }
     for (unsigned int j = 0; j < tvs.size(); j++) {
-      traitVariables.push_back(tvs[j]);
+      ClassVariable *cv = tvs[j];
+      if (checkCompatible(ce, variableVec, numTraits, cv)) {
+        traitVariables.push_back(cv);
+        traitVariableMap[cv->name()] = cv;
+        variableVec.push_back(cv);
+      }
     }
   }
   ce.setTraitVariables(traitVariables);
+  ce.setTraitVariableMap(traitVariableMap);
+}
+
+void ClassStatement::verifyAbstractClass(ClassEvalState &ce) const {
+  if (!isAbstract() && !isTrait()) {
+    ClassEvalState::MethodTable &traitMethodTable = ce.getTraitMethodTable();
+    ASSERT(ce.getClass() == this || traitMethodTable.empty());
+    for (ClassEvalState::MethodTable::const_iterator it =
+         traitMethodTable.begin(); it != traitMethodTable.end(); it++) {
+      if (it->second.m_methodStatement->isAbstract()) {
+        raise_error("Class %s contains abstract method %s and must therefore"
+                    " be declared abstract", m_name->data(),
+                    it->second.m_methodStatement->name().c_str());
+      }
+    }
+  }
 }
 
 void ClassStatement::bindTraits(ClassEvalState &ce) const {
@@ -419,6 +520,7 @@ void ClassStatement::bindTraits(ClassEvalState &ce) const {
   initTraitStructures(ce);
   bindMethods(ce);
   bindProperties(ce);
+  verifyAbstractClass(ce);
 }
 
 Statement *ClassStatement::optimize(VariableEnvironment &env) {
@@ -582,10 +684,6 @@ void ClassStatement::initializeObject(
   const ClassStatement *cls = parentStatement();
   if (cls) {
     ClassEvalState *pce = ce.getParentClassEvalState();
-    if (!pce) {
-      pce = RequestEvalState::findClassState(cls->name());
-      ce.setParentClassEvalState(pce);
-    }
     cls->initializeObject(*pce, obj);
   }
 }
@@ -607,6 +705,17 @@ void ClassStatement::initializeStatics(ClassEvalState &ce,
 void ClassStatement::addBases(const std::vector<String> &bases) {
   for (unsigned i = 0; i < bases.size(); i++) {
     m_bases.push_back(StringData::GetStaticString(bases[i].get()));
+  }
+}
+
+void ClassStatement::setUserAttributes(
+  const std::vector<UserAttributePtr> &elems) {
+  for (unsigned i = 0; i < elems.size(); i++) {
+    const StringData* name = StringData::GetStaticString(elems[i]->getName());
+    if (m_userAttributes.find(name) != m_userAttributes.end()) {
+      throw FatalErrorException(0, "Redeclared attribute %s", name->data());
+    }
+    m_userAttributes[name] = elems[i]->getExp();
   }
 }
 
@@ -644,11 +753,14 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
       raise_error("Abstract %s::%s() cannot contain body",
                   m_name->data(), m->name().c_str());
     }
-  } else if (!m->hasBody()) {
+  }
+  if (!m->hasBody()) {
     if (!(m_modifiers & Interface)) {
-      raise_error("Non-abstract %s::%s() must contain body",
-                  m_name->data(), m->name().c_str());
-    } else if (m->getModifiers() & Protected) {
+      if (!(m->getModifiers() & Abstract)) {
+        raise_error("Non-abstract %s::%s() must contain body",
+                    m_name->data(), m->name().c_str());
+      }
+    } else if (m->getModifiers() & ~(Public | Static)) {
       raise_error("Access type for interface method %s::%s() must be "
                   "omitted", m_name->data(), m->name().c_str());
     }
@@ -714,9 +826,8 @@ const MethodStatement* ClassStatement::findMethod(CStrRef name,
   } else {
     if (trait && !m_useTraitsVec.empty()) {
       ClassEvalState *ce = RequestEvalState::findClassState(m_name);
-      int access;
-      const MethodStatement *m = ce->getTraitMethod(name, access);
-      if (m) return m;
+      const MethodStatementWrapper *msw = ce->getTraitMethod(name);
+      if (msw) return msw->m_methodStatement;
     }
     if (recursive) {
       return findParentMethod(name, interfaces);
@@ -763,22 +874,16 @@ bool ClassStatement::getConstant(Variant &res, const char *c,
 }
 
 String ClassStatement::resolveSpInTrait(
-  VariableEnvironment &env, CObjRef currentObj, Name *clsName) {
+  VariableEnvironment &env, Name *clsName) {
   bool sp = clsName->isSp();
   assert(sp);
   const std::string &originalText = clsName->getOriginalText();
   ASSERT(!originalText.empty());
   if (originalText == "self") {
-    if (currentObj.isNull()) return env.currentClass();
-    return currentObj->o_getClassName();
+    return FrameInjection::GetClassName(false);
   }
   if (originalText == "parent") {
-    if (currentObj.isNull()) {
-      const char *clsName = env.currentClass();
-      const ClassStatement *cls = RequestEvalState::findClass(clsName);
-      return cls->parent();
-    }
-    return currentObj->o_getParentName();
+    return FrameInjection::GetParentClassName(false);
   }
   assert(false);
 }
@@ -938,9 +1043,10 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
   ClassEvalState::MethodTable &traitMethodTable = ce->getTraitMethodTable();
   for (ClassEvalState::MethodTable::const_iterator it =
        traitMethodTable.begin(); it != traitMethodTable.end(); it++) {
+    const MethodStatement *ms = it->second.m_methodStatement;
+    if (ParserBase::IsAnonFunctionName(ms->name())) continue;
     ClassInfo::MethodInfo *m = new ClassInfo::MethodInfo;
-    const MethodStatement *ms = it->second.first;
-    int access = it->second.second;
+    int access = it->second.m_access;
     ms->getInfo(*m, access);
     info.m_methods[ms->name()] = m;
     info.m_methodsVec.push_back(m);
@@ -951,6 +1057,72 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
     const ClassEvalState::TraitAlias &traitAlias = traitAliases[i];
     info.m_traitAliasesVec.push_back(std::pair<String, String>(
       traitAlias.m_alias, traitAlias.getFullName()));
+  }
+}
+
+bool ClassStatement::checkPropExist(CStrRef prop) const {
+  StringMap<ClassVariablePtr>::const_iterator it = m_variables.find(prop);
+  if (it != m_variables.end()) return true;
+  const ClassStatement *par = parentStatement();
+  return par && par->checkPropExist(prop);
+}
+
+static void AddVariable(const ClassVariable *v, const Array *prv,
+                        CStrRef cname, Array &props, Array &dyn_props) {
+  if (v->getModifiers() & ClassStatement::Static) return;
+  if (v->getModifiers() & ClassStatement::Private) {
+    if (!prv) return;
+    String name = v->name();
+    CVarRef val = prv->rvalAtRef(name, AccessFlags::Key);
+    if (!val.isInitialized()) return;
+    props.lvalAt(concat4(s_zero, cname, s_zero, name), AccessFlags::Key).
+      setWithRef(val);
+    return;
+  }
+
+  String name = v->name();
+  if (v->getModifiers() & ClassStatement::Protected) {
+    if (prv) {
+      CVarRef val = dyn_props.rvalAtRef(name, AccessFlags::Key);
+      if (&val == &null_variant) return;
+      props.lvalAt(s_protPrefix + name, AccessFlags::Key).
+        setWithRef(val);
+    }
+  } else {
+    CVarRef val = dyn_props.rvalAtRef(name, AccessFlags::Key);
+    if (&val == &null_variant) return;
+    props.lvalAt(name, AccessFlags::Key).setWithRef(val);
+  }
+  dyn_props.remove(name, true);
+}
+
+void ClassStatement::getArray(Array &props, Array &dyn_props,
+                              ClassEvalState *ce,
+                              const Array *privates) const {
+  StrNR cname = StrNR(m_name);
+  Array prv, *pprv = 0;
+  if (privates) {
+    CVarRef pr = privates->rvalAtRef(cname);
+    if (pr.isArray()) {
+      prv = pr.toCArrRef();
+    }
+    pprv = &prv;
+  }
+
+  for (size_t i = 0, s = m_variablesVec.size(); i < s; i++) {
+    const ClassVariable *v = m_variablesVec[i].get();
+    AddVariable(v, pprv, cname, props, dyn_props);
+  }
+
+  const vector<ClassVariable *> &traitVariables = ce->getTraitVariables();
+  for (size_t i = 0, s = traitVariables.size(); i < s; i++) {
+    const ClassVariable *v = traitVariables[i];
+    AddVariable(v, pprv, cname, props, dyn_props);
+  }
+
+  ClassEvalState *pce = ce->getParentClassEvalState();
+  if (pce) {
+    pce->getClass()->getArray(props, dyn_props, pce, privates);
   }
 }
 
@@ -1010,32 +1182,6 @@ void ClassStatement::failPropertyAccess(CStrRef prop, CStrRef context,
       mod, m_name->data(), prop.data(),
       *context->data() ? " from " : "",
       *context->data() ? context->data() : "");
-}
-
-void ClassStatement::toArray(Array &props, Array &vals) const {
-  String zero("\0", 1, AttachLiteral);
-  for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
-       it != m_variablesVec.end(); ++it) {
-    ClassVariable *cv = it->get();
-    if ((cv->getModifiers() & Static) == 0) {
-      String pname(cv->name());
-      if (cv->getModifiers() & Private) {
-        String tmp(pname);
-        pname = zero;
-        pname += name();
-        pname += zero;
-        pname += tmp;
-      }
-      if (vals.exists(pname)) {
-        Variant &p = vals.lvalAt(pname, AccessFlags::Key);
-        props.lvalAt(pname, AccessFlags::Key).setWithRef(p);
-      }
-    }
-  }
-  const ClassStatement *parent = parentStatement();
-  if (parent) {
-    parent->toArray(props, vals);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1144,7 +1290,17 @@ public:
   }
   inline std::vector<const MethodStatement*>
   methods(const ClassStatement *cs) const {
-    return extractRawConstPointers(cs->m_methodsVec);
+    std::vector<const MethodStatement*> methods =
+      extractRawConstPointers(cs->m_methodsVec);
+    if (!cs->m_useTraitsVec.empty()) {
+      ClassEvalState *ce = RequestEvalState::findClassState(cs->m_name);
+      ClassEvalState::MethodTable &traitMethodTable = ce->getTraitMethodTable();
+      for (ClassEvalState::MethodTable::const_iterator it =
+           traitMethodTable.begin(); it != traitMethodTable.end(); it++) {
+        methods.push_back(it->second.m_methodStatement);
+      }
+    }
+    return methods;
   }
   inline std::vector<const ClassVariable*>
   variables(const ClassStatement *cs) const {
@@ -1587,7 +1743,7 @@ void MethodLevelAccessLevelCheckImpl(ClassProxyP parentClass,
                   x.name(parentClass).c_str(), x.name(parentMethod).c_str(),
                   x.name(childClass).c_str());
     }
-    if (x.isAbstract(parentMethod) || ifaceParent) {
+    if (x.isAbstract(parentMethod) && !ifaceParent) {
       raise_error("Cannot re-declare abstract method %s::%s() abstract "
                   "in class %s",
                   x.name(parentClass).c_str(), x.name(parentMethod).c_str(),
@@ -1838,17 +1994,23 @@ const {
     }
 
     // make sure a final class is not being extended
+    static const StringData* sd___MockClass =
+      StringData::GetStaticString("__MockClass");
     if (parent && s_semanticExtractor.isFinal(parent)) {
-      throw FatalErrorException(0,"Class %s may not inherit from final class "
-                                "(%s)",
-                                name().c_str(),
-                                parent->name().c_str());
+      if (m_userAttributes.find(sd___MockClass) == m_userAttributes.end()) {
+        throw FatalErrorException(0,"Class %s may not inherit from final class "
+                                  "(%s)",
+                                  name().c_str(),
+                                  parent->name().c_str());
+      }
     }
     if (builtinParent && s_semanticExtractor.isFinal(builtinParent)) {
-      throw FatalErrorException(0,"Class %s may not inherit from final class "
-                                "(%s)",
-                                name().c_str(),
-                                builtinParent->getName().c_str());
+      if (m_userAttributes.find(sd___MockClass) == m_userAttributes.end()) {
+        throw FatalErrorException(0,"Class %s may not inherit from final class "
+                                  "(%s)",
+                                  name().c_str(),
+                                  builtinParent->getName().c_str());
+      }
     }
 
     // make sure classes don't loosen the access level of
@@ -1960,10 +2122,10 @@ const MethodStatement* ClassStatement::findParentMethod(CStrRef name,
 void ClassStatement::abstractMethodCheck(
   StringIMap<String> &abstracts, bool ifaces) const {
   bool iface = getModifiers() & Interface;
-  if (iface || getModifiers() & Abstract)  {
+  if (!iface && getModifiers() & Abstract)  {
     for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
         it != m_methodsVec.end(); ++it) {
-      if (iface || (*it)->getModifiers() & Abstract) {
+      if ((*it)->getModifiers() & Abstract) {
         StringIMap<String>::const_iterator ait = abstracts.find((*it)->name());
         if (ait != abstracts.end() && ait->second != name()) {
           raise_error("Can't inherit abstract function %s::%s (previously "

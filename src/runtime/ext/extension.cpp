@@ -19,8 +19,6 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_option.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

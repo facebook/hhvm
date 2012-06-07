@@ -16,6 +16,7 @@
 
 #include <test/test_ext_string.h>
 #include <runtime/ext/ext_string.h>
+#include <runtime/ext/ext_fb.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -499,6 +500,77 @@ bool TestExtString::test_htmlspecialchars() {
   VS(f_bin2hex(f_htmlspecialchars("\xA0", k_ENT_COMPAT)), "a0");
   VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "")), "c2a0");
   VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "UTF-8")), "c2a0");
+  String zfoo = String("\0foo", 4, AttachLiteral);
+  VS(f_htmlspecialchars(zfoo, k_ENT_COMPAT), zfoo);
+  VS(f_fb_htmlspecialchars(zfoo, k_ENT_COMPAT), zfoo);
+
+  VS(f_fb_htmlspecialchars("abcdef'\"{}@gz", k_ENT_QUOTES,
+                           "", Array::Create("z")),
+     "abcdef&#039;&quot;&#123;&#125;&#064;g&#122;");
+
+  VS(f_fb_htmlspecialchars("abcdef'\"\u00a1\uabcd", k_ENT_FB_UTF8,
+                           "", Array::Create("d")),
+     "abc&#100;ef&#039;&quot;&#xa1;&#xabcd;");
+
+  VS(f_fb_htmlspecialchars("abcdef'\"\u00a1\uabcd", k_ENT_FB_UTF8_ONLY,
+                           "", Array::Create("d")),
+     "abcdef'\"&#xa1;&#xabcd;");
+
+  String input =
+    "\u00a1\xc2\x41"
+    "\u0561\xd5\xe0"
+    "\u3862\xe3\x80\xf0"
+    "\U000218a3\xf0\xa1\xa2\x41"
+    "hello\x80world"
+    "\xed\xa0\x80"
+    "\xe0\x80\xbc"
+    "\xc2";
+
+  bool s = RuntimeOption::Utf8izeReplace;
+  RuntimeOption::Utf8izeReplace = false;
+  Variant tmp = input;
+  f_fb_utf8ize(ref(tmp));
+  String sanitized = tmp.toString();
+
+  VS(f_fb_htmlspecialchars(input, k_ENT_QUOTES, "", Array()), sanitized.data());
+
+  VS(f_fb_htmlspecialchars(input,
+                           k_ENT_FB_UTF8, "", Array()),
+     "&#xa1;A"
+     "&#x561;"
+     "&#x3862;"
+     "&#x218a3;A"
+     "helloworld");
+
+  VS(f_fb_htmlspecialchars(sanitized, k_ENT_QUOTES, "", Array()),
+     sanitized.data());
+
+  VS(f_fb_htmlspecialchars(zfoo, k_ENT_COMPAT, "UTF-8"), "foo");
+
+  RuntimeOption::Utf8izeReplace = true;
+  tmp = input;
+  f_fb_utf8ize(ref(tmp));
+  sanitized = tmp.toString();
+
+  VS(f_fb_htmlspecialchars(input, k_ENT_QUOTES, "UtF-8", Array()),
+     sanitized.data());
+
+  VS(f_fb_htmlspecialchars(input, k_ENT_FB_UTF8, "utf-8", Array()),
+     "&#xa1;&#xfffd;A"
+     "&#x561;&#xfffd;&#xfffd;"
+     "&#x3862;&#xfffd;&#xfffd;"
+     "&#x218a3;&#xfffd;A"
+     "hello&#xfffd;world"
+     "&#xfffd;"
+     "&#xfffd;"
+     "&#xfffd;");
+
+  VS(f_fb_htmlspecialchars(sanitized, k_ENT_QUOTES, "", Array()),
+     sanitized.data());
+
+  VS(f_fb_htmlspecialchars(zfoo, k_ENT_COMPAT, "UTF-8"), "\ufffdfoo");
+
+  RuntimeOption::Utf8izeReplace = s;
 
   return Count(true);
 }
@@ -694,7 +766,7 @@ bool TestExtString::test_strcasecmp() {
 
   VERIFY(f_strcasecmp("@", "`") < 0);
   VERIFY(f_strcasecmp("`", "@") > 0);
-  
+
   VERIFY(f_strcasecmp("a", "a0") < 0);
   VERIFY(f_strcasecmp("a", "A0") < 0);
   VERIFY(f_strcasecmp("A", "a0") < 0);

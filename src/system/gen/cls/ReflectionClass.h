@@ -31,7 +31,7 @@ extern const VarNR &s_sys_svi5830e7c6;
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 FORWARD_DECLARE_CLASS(ReflectionProperty);
 
-/* SRC: classes/reflection.php line 540 */
+/* SRC: classes/reflection.php line 568 */
 FORWARD_DECLARE_CLASS(ReflectionClass);
 extern const ObjectStaticCallbacks cw_ReflectionClass;
 class c_ReflectionClass : public ExtObjectData {
@@ -46,7 +46,9 @@ class c_ReflectionClass : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionClass, ReflectionClass, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_ReflectionClass(const ObjectStaticCallbacks *cb = &cw_ReflectionClass) : ExtObjectData(cb), m_name(Variant::nullInit), m_info(Variant::nullInit) {}
+  c_ReflectionClass(const ObjectStaticCallbacks *cb = &cw_ReflectionClass) : ExtObjectData(cb), m_name(Variant::nullInit), m_info(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_name);
   public: c_ReflectionClass *create(CVarRef v_name);
   public: Variant t_fetch(CVarRef v_what);
@@ -54,7 +56,7 @@ class c_ReflectionClass : public ExtObjectData {
   public: bool t_check(CVarRef v_what);
   public: bool t_test(CVarRef v_what, CVarRef v_name);
   public: String t___tostring();
-  public: static Variant t_export(CVarRef v_name, CVarRef v_ret);
+  public: static Variant t_export(CVarRef v_name, CVarRef v_ret = false_varNR);
   public: Variant t_getname();
   public: bool t_isinternal();
   public: bool t_isuserdefined();

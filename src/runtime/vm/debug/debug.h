@@ -18,6 +18,7 @@
 
 #include <runtime/base/types.h>
 #include <runtime/vm/translator/translator.h>
+#include <runtime/vm/hhbc.h>
 #include "dwarf.h"
 
 namespace HPHP {
@@ -27,13 +28,62 @@ namespace Debug {
 using namespace HPHP::VM::Transl;
 
 struct DebugInfo {
+  DebugInfo();
+
   DwarfInfo m_dwarfInfo;
   void recordTracelet(TCA start, TCA end, const Unit *unit,
     const Opcode *instr, bool exit, bool inPrologue);
   void debugSync();
-  DebugInfo() {}
 };
 
+/*
+ * Gets the fake symbol name we want to use for a php function.
+ */
+std::string lookupFunction(const Unit *unit,
+                           const Opcode *instr,
+                           bool exit,
+                           bool inPrologue,
+                           bool pseudoWithFileName);
+
+extern FILE* perfMap;
+static const char* opcodeName[] = {
+#define O(name, imm, push, pop, flags) \
+  #name,
+  OPCODES
+#undef O
+};
+
+static const char* astubOpcodeName[] = {
+  "OpAstubStart",
+#define O(name, imm, push, pop, flags) \
+  #name "-Astub",
+  OPCODES
+#undef O
+};
+
+static const char* highOpcodeName[] = {
+  "OpHighStart",
+#define O(name) \
+  #name,
+  HIGH_OPCODES
+#undef O
+};
+
+static inline void recordBCInstr(uint32_t op, TCA start, TCA end) {
+  if (RuntimeOption::EvalProfileBC) {
+    if (!perfMap) return;
+    const char* name;
+    if (op < Op_count) {
+      name = opcodeName[op];
+    } else if (op < OpAstubCount) {
+      name = astubOpcodeName[op - OpAstubStart];
+    } else {
+      name = highOpcodeName[op - OpHighStart];
+    }
+    fprintf(perfMap, "%lx %x %s\n", (long unsigned int)start,
+              (unsigned int)(end - start), name);
+  }
+}
 
 }
 }

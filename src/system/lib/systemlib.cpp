@@ -44,8 +44,11 @@ namespace HPHP {
 bool SystemLib::s_inited = false;
 HPHP::Eval::PhpFile* SystemLib::s_phpFile = NULL;
 HPHP::VM::Unit* SystemLib::s_unit = NULL;
+HPHP::VM::Unit* SystemLib::s_nativeFuncUnit = NULL;
+HPHP::VM::Unit* SystemLib::s_nativeClassUnit = NULL;
 HPHP::VM::Class* SystemLib::s_stdclassClass = NULL;
 HPHP::VM::Class* SystemLib::s_ExceptionClass = NULL;
+HPHP::VM::Class* SystemLib::s_BadMethodCallExceptionClass = NULL;
 HPHP::VM::Class* SystemLib::s_pinitSentinelClass = NULL;
 HPHP::VM::Class* SystemLib::s_resourceClass = NULL;
 HPHP::VM::Class* SystemLib::s_DOMExceptionClass = NULL;
@@ -71,7 +74,7 @@ ObjectData* SystemLib::AllocPinitSentinel() {
   /* Increment refcount across call to ctor, so the object doesn't get */   \
   /* destroyed when ctor's frame is torn down */                            \
   inst->incRefCount();                                                      \
-  inst->invokeUserMethod(&sink, SystemLib::s_##clsname##Class->m_ctor.func, \
+  inst->invokeUserMethod(&sink, SystemLib::s_##clsname##Class->getCtor(),   \
                          params);                                           \
   inst->decRefCount();                                                      \
   ASSERT(inst->getCount() == 0);                                            \
@@ -83,6 +86,14 @@ ObjectData* SystemLib::AllocExceptionObject(CVarRef message) {
     CREATE_AND_CONSTRUCT(Exception, CREATE_VECTOR1(message));
   } else {
     return (NEWOBJ(c_Exception)())->create(message);
+  }
+}
+
+ObjectData* SystemLib::AllocBadMethodCallExceptionObject(CVarRef message) {
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(BadMethodCallException, CREATE_VECTOR1(message));
+  } else {
+    return (NEWOBJ(c_BadMethodCallException)())->create(message);
   }
 }
 

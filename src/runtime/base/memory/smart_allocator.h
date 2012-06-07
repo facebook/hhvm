@@ -17,13 +17,17 @@
 #ifndef __HPHP_SMART_ALLOCATOR_H__
 #define __HPHP_SMART_ALLOCATOR_H__
 
+#include <boost/noncopyable.hpp>
+#include <boost/dynamic_bitset.hpp>
+
 #include <util/base.h>
 #include <util/thread_local.h>
 #include <util/stack_trace.h>
 #include <util/chunk_list.h>
 #include <util/lock.h>
-#include <runtime/base/memory/linear_allocator.h>
-#include <boost/dynamic_bitset.hpp>
+#include <runtime/base/types.h>
+#include <runtime/base/util/countable.h>
+#include <runtime/base/memory/memory_usage_stats.h>
 
 namespace HPHP {
 
@@ -31,8 +35,9 @@ namespace HPHP {
 #define DEBUGGING_SMART_ALLOCATOR 1
 #endif
 
-// #define DEBUGGING_SMART_ALLOCATOR 1
+//#define DEBUGGING_SMART_ALLOCATOR 1
 //#define SMART_ALLOCATOR_STACKTRACE 1
+//#define SMART_ALLOCATOR_DEBUG_FREE
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
@@ -49,24 +54,26 @@ namespace HPHP {
 #define NEWOBJSZ(T,SZ) new (malloc(SZ)) T
 #define ALLOCOBJSZ(SZ) (malloc(SZ))
 #define DELETE(T) delete
-#define DELETEOBJSZ(SZ) delete
+#define DELETEOBJSZ(SZ) free
 #define DELETEOBJ(NS,T,OBJ) delete OBJ
 #define RELEASEOBJ(NS,T,OBJ) ::operator delete(OBJ)
 #define SWEEPOBJ(T) delete this
 #else
 #define NEW(T) new (T::AllocatorType::getNoCheck()) T
-#define NEWOBJ(T) new                                  \
-  (ThreadLocalSingleton                                \
-    <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
+#define NEWOBJ(T) new                                     \
+  (ThreadLocalSingleton                                   \
+    <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value> > \
     ::getNoCheck()) T
 #define NEWOBJSZ(T,SZ) new (info->instanceSizeAllocator(SZ)) T
-#define ALLOCOBJSZ(SZ) (info->instanceSizeAllocator(SZ)->alloc())
+#define ALLOCOBJSZ(SZ) (ThreadInfo::s_threadInfo.getNoCheck()->\
+                        instanceSizeAllocator(SZ)->alloc())
 #define DELETE(T) T::AllocatorType::getNoCheck()->release
-#define DELETEOBJSZ(SZ) info->instanceSizeAllocator(SZ)->release
+#define DELETEOBJSZ(SZ) (ThreadInfo::s_threadInfo.getNoCheck()->\
+                         instanceSizeAllocator(SZ)->release)
 #define DELETEOBJ(NS,T,OBJ) delete OBJ
-#define RELEASEOBJ(NS,T,OBJ)                           \
-  (ThreadLocalSingleton                                \
-    <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
+#define RELEASEOBJ(NS,T,OBJ)                              \
+  (ThreadLocalSingleton                                   \
+    <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value> > \
     ::getNoCheck())->release(OBJ)
 #define SWEEPOBJ(T) this->~T()
 #endif
@@ -102,6 +109,13 @@ void InitAllocatorThreadLocal() ATTRIBUTE_COLD;
     DELETE(T)(this);                                                    \
   }                                                                     \
 
+#define IMPLEMENT_SMART_ALLOCATION_HOT(T, F)                            \
+  void *T::SmaAllocatorInitSetup =                                      \
+    SmartAllocatorInitSetup<T, SmartAllocatorImpl::T, F>();             \
+  HOT_FUNC void T::release() {                                          \
+    DELETE(T)(this);                                                    \
+  }                                                                     \
+
 #define IMPLEMENT_SMART_ALLOCATION_CLS(C, T, F)                         \
   void *C::T::SmaAllocatorInitSetup =                                   \
     SmartAllocatorInitSetup<C::T, SmartAllocatorImpl::T, F>();          \
@@ -111,38 +125,17 @@ void InitAllocatorThreadLocal() ATTRIBUTE_COLD;
 
 #define DECLARE_SMART_ALLOCATION_NOCALLBACKS(T)                         \
   DECLARE_SMART_ALLOCATION(T, SmartAllocatorImpl::NoCallbacks);         \
-  bool calculate(int &size) {                                           \
-    ASSERT(false);                                                      \
-    return false;                                                       \
-  }                                                                     \
-  void backup(LinearAllocator &allocator) {                             \
-    ASSERT(false);                                                      \
-  }                                                                     \
-  void restore(const char *&data) {                                     \
-    ASSERT(false);                                                      \
-  }                                                                     \
   void sweep() {                                                        \
   }                                                                     \
 
 #define IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(T)                       \
   IMPLEMENT_SMART_ALLOCATION(T, SmartAllocatorImpl::NoCallbacks)        \
 
+#define IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(T)                   \
+  IMPLEMENT_SMART_ALLOCATION_HOT(T, SmartAllocatorImpl::NoCallbacks)    \
+
 #define IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_CLS(C, T)                \
   IMPLEMENT_SMART_ALLOCATION_CLS(C, T, SmartAllocatorImpl::NoCallbacks) \
-
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Usage stats, all in bytes.
- */
-struct MemoryUsageStats {
-  int64 maxBytes;   // what's request's max bytes allowed
-  int64 usage;      // how many bytes are currently being used
-  int64 alloc;      // how many bytes are currently malloc-ed
-  int64 peakUsage;  // how many bytes have been dispensed at maximum
-  int64 peakAlloc;  // how many bytes malloc-ed at maximum
-  int64 totalAlloc; // how many bytes allocated, in total.
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -157,21 +150,21 @@ typedef boost::dynamic_bitset<unsigned long long> FreeMap;
 /**
  * Just a simple free-list based memory allocator.
  */
-class SmartAllocatorImpl {
+class SmartAllocatorImpl : boost::noncopyable {
 public:
   enum Name {
+    TestAllocator = -1,
 #define SMART_ALLOCATOR_ENTRY(x) x,
 #include "runtime/base/memory/smart_allocator.inc_gen"
 #undef SMART_ALLOCATOR_ENTRY
   };
 
   enum Flag {
-    NoCallbacks = 0,     // nothing is needed from linear memory allocator
-    NeedRestore = 1,     // needs restore from linear memory allocator
-    RestoreDisabled = 2, // registered after checkpoint
-    NeedRestoreOnce = 4, // needs restore out-of-line memory only once
-    NeedSweep = 8,       // needs to collect garbage
+    NoCallbacks = 0,     // does not need to sweep
+    NeedSweep = 1,       // needs to sweep to collect garbage
   };
+
+  struct Iterator;
 
 public:
   SmartAllocatorImpl(int nameEnum, int itemCount, int itemSize, int flag);
@@ -184,6 +177,8 @@ public:
   void registerStats(MemoryUsageStats *stats) { m_stats = stats;}
   MemoryUsageStats & getStats() { return *m_stats; }
 
+  Name getAllocatorType() const { return m_nameEnum; }
+  const char* getAllocatorName() const { return m_name; }
   int getItemSize() const { return m_itemSize;}
   int getItemCount() const { return m_itemCount;}
 
@@ -216,6 +211,13 @@ public:
       StackTrace::Enabled = enabled;
     }
 #endif
+#ifdef SMART_ALLOCATOR_DEBUG_FREE
+    memset(obj, 0xfe, m_itemSize);
+#endif
+    if (hhvm_gc) {
+      int tomb = RefCountTombstoneValue;
+      memcpy((char*)obj + FAST_REFCOUNT_OFFSET, &tomb, sizeof tomb);
+    }
 
     ASSERT(m_stats);
     m_stats->usage -= m_itemSize;
@@ -225,27 +227,21 @@ public:
   /**
    * MemoryManager functions.
    */
-  int calculateObjects(LinearAllocator &allocator, int &size);
-  void backupObjects(LinearAllocator &allocator);
-  void rollbackObjects(LinearAllocator &allocator);
+  void rollbackObjects();
   void logStats();
   void checkMemory(bool detailed);
-
-  void disableRestore() { m_flag |= RestoreDisabled;}
 
   /**
    * Delegated to type T.
    */
-  virtual int calculate(void *p, int &size) = 0;
-  virtual void backup(void *p, LinearAllocator &allocator) = 0;
-  virtual void restore(void *p, const char *&data) = 0;
   virtual void sweep(void *p) = 0;
   virtual void dump(void *p) = 0;
 
 private:
-  const char *m_name;
+  const Name m_nameEnum;
+  const char* m_name;
   int m_itemCount;
-  int m_itemSize;
+  const int m_itemSize;
   int m_flag;
 
   std::vector<char *> m_blocks;
@@ -256,25 +252,12 @@ private:
 
   FreeList m_freelist;
 
-  // checkpoint members
-  std::vector<char *> m_backupBlocks;
-  FreeList m_backupFreelist;
-  int m_rowChecked;
-  int m_colChecked;
-  int m_linearSize;
-  int m_linearCount;
-
   int m_allocatedBlocks;  // how many blocks are left in the last batch
   int m_multiplier;       // allocate m_multiplier blocks at once
   int m_maxMultiplier;    // the max possible multiplier
   int m_targetMultiplier; // updated upon rollback
 
-  void copyMemoryBlocks(std::vector<char *> &dest,
-                        const std::vector<char *> &src,
-                        int lastCol, int lastBlockSize);
-
 protected:
-  bool m_linearized; // No more restore needed for rollback
 
 #ifdef SMART_ALLOCATOR_STACKTRACE
   static Mutex s_st_mutex;
@@ -284,7 +267,30 @@ protected:
 
   MemoryUsageStats *m_stats;
 
-  void prepareFreeMap(FreeMap &freeMap);
+  void prepareFreeMap(FreeMap& freeMap) const;
+};
+
+/*
+ * Object for iterating over all unfreed objects in smart allocator.
+ *
+ * It is legal to deallocate the currently pointed to element during
+ * iteration (and will not affect the iteration state).  Other changes
+ * to the allocator during iteration do not have guaranteed behavior.
+ *
+ * NOTE: This iteration support is for experimental work on GC, and
+ * only actually works when HHVM_GC is defined, to avoid the need to
+ * write back into object data when deallocating in other builds.
+ */
+struct SmartAllocatorImpl::Iterator : private boost::noncopyable {
+  explicit Iterator(const SmartAllocatorImpl*);
+
+  void* current() const; // Returns null if we're done.
+  void next();
+
+private:
+  const SmartAllocatorImpl& m_sa;
+  int m_row;
+  int m_col;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -307,21 +313,6 @@ class SmartAllocator : public SmartAllocatorImpl {
       p->~T();
       dealloc(p);
     }
-  }
-
-  virtual int calculate(void *p, int &size) {
-    ASSERT(p);
-    return ((T*)p)->calculate(size);
-  }
-
-  virtual void backup(void *p, LinearAllocator &allocator) {
-    ASSERT(p);
-    ((T*)p)->backup(allocator);
-  }
-
-  virtual void restore(void *p, const char *&data) {
-    ASSERT(p);
-    ((T*)p)->restore(data);
   }
 
   virtual void sweep(void *p) {
@@ -396,9 +387,6 @@ public:
     }
   }
 
-  virtual int calculate(void *p, int &size);
-  virtual void backup(void *p, LinearAllocator &allocator);
-  virtual void restore(void *p, const char *&data);
   virtual void sweep(void *p);
   virtual void dump(void *p);
 };

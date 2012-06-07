@@ -24,8 +24,6 @@
 #include <compiler/analysis/variable_table.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -212,39 +210,42 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
     ClassScopePtr cls = m_classScope;
 
     const string& lClassName = cls->getId();
-    bool skipCreate = cls->canSkipCreateMethod();
+    bool skipCreate = cls->canSkipCreateMethod(ar);
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
         cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
-      cg_printf("%s%s(((%s%s*)%s%s())%s",
+      cg_printf("%s%s(((%s%s*)%s%s())",
                 Option::SmartPtrPrefix, lClassName.c_str(),
                 Option::ClassPrefix, lClassName.c_str(),
-                Option::CreateObjectOnlyPrefix, lClassName.c_str(),
-                skipCreate ? "" : "->create(");
+                Option::CreateObjectOnlyPrefix, lClassName.c_str());
     } else {
-      cg_printf("((%s%s*)%s.get()%s",
+      cg_printf("((%s%s*)%s.get()",
                 Option::ClassPrefix, lClassName.c_str(),
-                m_receiverTemp.c_str(),
-                skipCreate ? "" : "->create(");
+                m_receiverTemp.c_str());
     }
+
 
     if (skipCreate) {
       ASSERT(!m_params || m_params->getOutputCount() == 0);
     } else {
+      cg_printf("->create(");
       FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,
                                         m_extraArg, m_variableArgument,
                                         m_argArrayId, m_argArrayHash,
                                         m_argArrayIndex);
+      cg_printf(")");
     }
 
+    if (cls->needsEnableDestructor(ar)) {
+      cg_printf("->clearNoDestruct()");
+    }
     if (m_receiverTemp.empty()) {
-      cg_printf(skipCreate ? ")" : "))");
+      cg_printf(")");
       if (outsideClass) {
         cls->outputVolatileCheckEnd(cg);
       }
     } else {
-      if (!skipCreate) cg_printf(")");
       if (!isUnused()) {
         cg_printf(", %s", m_receiverTemp.c_str());
       }
@@ -323,6 +324,11 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("(cit%d->", m_ciTemp);
     outputDynamicCall(cg, ar, true);
     cg_printf(";\n");
+    if (!m_classScope ||
+        m_classScope->derivesFromRedeclaring() ||
+        m_classScope->hasAttribute(ClassScope::HasDestructor, ar)) {
+      cg_printf("obj%d.get()->clearNoDestruct();\n", m_objectTemp);
+    }
 
     if (state & FixOrder) {
       cg.pushCallInfo(m_ciTemp);

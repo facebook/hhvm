@@ -143,8 +143,10 @@ void c_DateTimeZone::t___construct(CStrRef timezone) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DateTimeZone, DateTimeZone::__construct);
   m_tz = NEWOBJ(TimeZone)(timezone);
   if (!m_tz->isValid()) {
-    raise_error("DateTimeZone::__construct(): Unknown or bad timezone (%s)",
-                timezone.data());
+    std::string msg = "DateTimeZone::__construct(): Unknown or bad timezone (";
+    msg += timezone.data();
+    msg += ")";
+    throw Object(SystemLib::AllocExceptionObject(msg));
   }
 }
 

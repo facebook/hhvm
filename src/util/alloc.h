@@ -56,8 +56,7 @@ public:
   OutOfMemoryException(size_t size)
       : Exception("Unable to allocate %zu bytes of memory", size) {}
   virtual ~OutOfMemoryException() throw() {}
-  virtual OutOfMemoryException *clone() { return new OutOfMemoryException(*this); }
-  virtual void throwException() { throw *this; }
+  EXCEPTION_COMMON_IMPL(OutOfMemoryException);
 };
 
 namespace Util {

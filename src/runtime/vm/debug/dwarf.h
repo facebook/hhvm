@@ -99,20 +99,26 @@ struct FunctionInfo {
   TCA start;
   TCA end;
   bool exit;
+  bool m_perfSynced;
   std::vector<LineEntry> m_lineTable;
   DwarfChunk* m_chunk;
   FunctionInfo() : m_chunk(NULL) {}
   FunctionInfo(TCA s, TCA e, bool ex)
-    : start(s), end(e), exit(ex), m_chunk(NULL) {}
+    : start(s), end(e), exit(ex), m_perfSynced(false), m_chunk(NULL) {}
+  void setPerfSynced() { m_perfSynced = true; }
+  void clearPerfSynced() { m_perfSynced = false; }
+  bool perfSynced() const { return m_perfSynced; }
 };
-
-#define BASE_FUNCS_PER_CHUNK	128
 
 struct DwarfChunk {
   DwarfBuf m_buf;
   vector<FunctionInfo *> m_functions;
   char *m_symfile;
-  DwarfChunk() : m_symfile(NULL) {}
+  bool m_synced;
+  DwarfChunk() : m_symfile(NULL), m_synced(false) {}
+  void setSynced() { m_synced = true; }
+  void clearSynced() { m_synced = false; }
+  bool isSynced() const { return m_synced; }
 };
 
 typedef std::map<TCA, FunctionInfo* > FuncDB;
@@ -124,18 +130,13 @@ struct DwarfInfo {
   vector<DwarfChunk*> m_dwarfChunks;
   /* Array of chunks indexed by lg(#functions in chunk) + 1.
    * i.e. m_dwarfChunk[i] = pointer to chunk with
-   * 2^(i-1) * BASE_FUNCS_PER_CHUNK functions, or NULL if there is no such
-   * chunk. The first chunk m_dwarfChunks[0] is special in that it
-   * can be partially full. All other chunks are completely full.
+   * 2^(i-1) * RuntimeOption::EvalGdbSyncChunks functions, or NULL if
+   * there is no such chunk. The first chunk m_dwarfChunks[0] is special in
+   * that it can be partially full. All other chunks are completely full.
    */
   FuncDB m_functions;
   DwarfInfo();
-  std::string lookupFunction(const Unit *unit,
-                             const Opcode *instr,
-                             bool exit = false,
-                             bool inPrologue = false,
-                             bool pseudoWithFileName = false,
-                             bool withPHPPrefix = false);
+
   const char *lookupFile(const Unit *unit);
   void addLineEntries(TCA start, TCA end, const Unit *unit,
     const Opcode *instr, FunctionInfo* f);
@@ -143,6 +144,7 @@ struct DwarfInfo {
   void compactChunks();
   DwarfChunk* addTracelet(TCA start, TCA end, const Unit *unit,
     const Opcode *instr, bool exit, bool inPrologue);
+  void syncChunks();
 };
 
 }

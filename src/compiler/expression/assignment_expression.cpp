@@ -36,8 +36,6 @@
 #include <runtime/base/builtin_functions.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -475,9 +473,17 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
     return;
   }
 
-  if (m_variable->is(Expression::KindOfSimpleVariable) &&
-      m_value->isLiteralNull()) {
-    setNull = true;
+  if (m_value->isLiteralNull()) {
+    if (m_variable->is(Expression::KindOfSimpleVariable)) {
+      setNull = true;
+    } else {
+      TypePtr t = m_variable->getCPPType();
+      if (t && (t->is(Type::KindOfArray) ||
+                t->is(Type::KindOfObject) ||
+                t->is(Type::KindOfString))) {
+        setNull = true;
+      }
+    }
   }
 
   bool wrapped = true;

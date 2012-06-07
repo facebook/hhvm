@@ -34,8 +34,6 @@
 #include <compiler/parser/parser.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -73,10 +71,19 @@ inline void UnaryOpExpression::ctorInit() {
     m_localEffects = AssignEffect;
     m_exp->setContext(UnsetContext);
     break;
+  case T_CLASS:
+  case T_FUNCTION:
+    m_localEffects = CreateEffect;
+    break;
   case T_ARRAY:
   default:
     break;
   }
+}
+
+void UnaryOpExpression::setDefinedScope(BlockScopeRawPtr scope) {
+  assert(m_op == T_CLASS || m_op == T_FUNCTION);
+  m_definedScope = scope;
 }
 
 UnaryOpExpression::UnaryOpExpression
@@ -208,6 +215,10 @@ void UnaryOpExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 
 void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_exp) m_exp->analyzeProgram(ar);
+  if ((m_op == T_CLASS || m_op == T_FUNCTION) &&
+      ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    ar->link(getFileScope(), m_definedScope->getContainingFile());
+  }
 }
 
 bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
@@ -384,7 +395,8 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
     recomputeEffects();
     return CONSTANT("null");
   } else if (m_op == T_BOOL_CAST) {
-    if (m_exp->getActualType()->is(Type::KindOfBoolean)) {
+    if (m_exp->getActualType() &&
+        m_exp->getActualType()->is(Type::KindOfBoolean)) {
       return replaceValue(m_exp);
     }
   } else if (m_op != T_ARRAY &&
@@ -437,7 +449,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_OBJECT_CAST:   et = rt = Type::Object;                      break;
   case T_BOOL_CAST:     et = rt = Type::Boolean;                     break;
   case T_UNSET_CAST:    et = Type::Some;      rt = Type::Variant;    break;
-  case T_UNSET:         et = Type::Some;      rt = Type::Variant;    break;
+  case T_UNSET:         et = Type::Null;      rt = Type::Variant;    break;
   case T_EXIT:          et = Type::Primitive; rt = Type::Variant;    break;
   case T_PRINT:         et = Type::String;    rt = Type::Boolean;    break;
   case T_ISSET:         et = Type::Variant;   rt = Type::Boolean;
@@ -462,15 +474,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   }
 
   if (m_exp) {
-    bool ecoerce = false; // expected type needs m_exp to coerce to
-    switch (m_op) {
-      case T_ISSET:
-        ecoerce = true;
-      default:
-        break;
-    }
-
-    TypePtr expType = m_exp->inferAndCheck(ar, et, ecoerce);
+    TypePtr expType = m_exp->inferAndCheck(ar, et, false);
     if (Type::SameType(expType, Type::String) &&
         (m_op == T_INC || m_op == T_DEC)) {
       rt = expType = m_exp->inferAndCheck(ar, Type::Variant, true);
@@ -500,11 +504,11 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
           dynamic_pointer_cast<ExpressionList>(m_exp);
         if (exps->getListKind() == ExpressionList::ListKindParam) {
           for (int i = 0; i < exps->getCount(); i++) {
-            SetExpTypeForExistsContext((*exps)[i], m_op == T_EMPTY);
+            SetExpTypeForExistsContext(ar, (*exps)[i], m_op == T_EMPTY);
           }
         }
       } else {
-        SetExpTypeForExistsContext(m_exp, m_op == T_EMPTY);
+        SetExpTypeForExistsContext(ar, m_exp, m_op == T_EMPTY);
       }
       break;
     default:
@@ -515,19 +519,25 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return rt;
 }
 
-void UnaryOpExpression::SetExpTypeForExistsContext(ExpressionPtr e,
-    bool allowPrimitives) {
+void UnaryOpExpression::SetExpTypeForExistsContext(AnalysisResultPtr ar,
+                                                   ExpressionPtr e,
+                                                   bool allowPrimitives) {
   if (!e) return;
   TypePtr at(e->getActualType());
+  if (!allowPrimitives && at &&
+      at->isExactType() && at->isPrimitive()) {
+    at = e->inferAndCheck(ar, Type::Variant, true);
+  }
   TypePtr it(e->getImplementedType());
-  if (at && it &&
-      Type::IsMappedToVariant(it) &&
+  TypePtr et(e->getExpectedType());
+  if (et && et->is(Type::KindOfVoid)) e->setExpectedType(TypePtr());
+  if (at && (!it || Type::IsMappedToVariant(it)) &&
       ((allowPrimitives && Type::HasFastCastMethod(at)) ||
        (!allowPrimitives &&
         (at->is(Type::KindOfObject) ||
          at->is(Type::KindOfArray) ||
          at->is(Type::KindOfString))))) {
-    e->setExpectedType(at);
+    e->setExpectedType(it ? at : TypePtr());
   }
 }
 
@@ -578,6 +588,8 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_REQUIRE_ONCE:  cg_printf("require_once "); break;
     case T_FILE:          cg_printf("__FILE__");      break;
     case T_DIR:           cg_printf("__DIR__");       break;
+    case T_CLASS:         cg_printf("class ");        break;
+    case T_FUNCTION:      cg_printf("function ");     break;
     default:
       ASSERT(false);
     }
@@ -609,6 +621,11 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void UnaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                        int state) {
   if (hasCPPTemp() || m_op == T_FILE || m_op == T_DIR) return;
+  if (m_op == T_CLASS || m_op == T_FUNCTION) {
+    m_definedScope->outputCPPDef(cg);
+    setCPPTemp("id(0)");
+    return;
+  }
   if (m_exp && !getLocalEffects() &&
       m_op != '@' && m_op != T_ISSET && m_op != T_EMPTY &&
       !m_exp->is(KindOfExpressionList)) {
@@ -692,6 +709,15 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       m_cppTemp = "id(1)";
       return true;
     }
+  }
+
+  if (m_op == T_CLASS || m_op == T_FUNCTION) {
+    if (cg.inExpression()) {
+      cg.wrapExpressionBegin();
+      m_definedScope->outputCPPDef(cg);
+      setCPPTemp("id(0)");
+    }
+    return true;
   }
 
   return Expression::preOutputCPP(cg, ar, state);
@@ -793,6 +819,8 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     }
     return;
   }
+
+  ASSERT(m_op != T_CLASS && m_op != T_FUNCTION);
 
   const char *cstr = 0;
   if (m_front) {

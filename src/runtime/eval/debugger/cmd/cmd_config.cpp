@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_config.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -59,10 +57,37 @@ bool CmdConfig::onClient(DebuggerClient *client) {
     }
     return true;
   }
+  if (var == "LogFile" || var == "lf") {
+    // Close the current log file handler
+    FILE *f = client->getLogFileHandler();
+    if (f != NULL) {
+      fclose(f);
+      client->setLogFileHandler(NULL);
+    }
+
+    if (value == "off") {
+      value = "";
+    } else {
+      // Try open the log file and error if it's not working
+      f = fopen(value.c_str(), "a");
+      if (f == NULL) {
+        client->error("Cannot open log file '%s'",
+          value.c_str());
+        value = "";
+        client->setLogFileHandler(NULL);
+      } else {
+        client->setLogFileHandler(f);
+      }
+    }
+    client->print("LogFile(lf) is set to %s", value == "" ? "off"
+                                                          : value.c_str());
+    client->setLogFile(value);
+    return true;
+  }
   if (var == "PrintLevel" || var == "pl") {
     int pl = strtol(value.c_str(), NULL, 10);
     if (pl > 0 && pl < DebuggerClient::MinPrintLevel) {
-      client->error("%d is invalid for PrintLevel(pl)");
+      client->error("%d is invalid for PrintLevel(pl)", pl);
       return true;
     }
     client->setDebuggerPrintLevel(pl);
@@ -81,15 +106,41 @@ bool CmdConfig::onClient(DebuggerClient *client) {
     }
     return true;
   }
+  if (var == "StackArgs" || var == "sa") {
+    if (value == "on") {
+      client->print("StackArgs(sa) set to on.\n");
+      client->setDebuggerStackArgs(true);
+    } else if (value == "off") {
+      client->print("StackArgs(sa) set to off");
+      client->setDebuggerStackArgs(false);
+    } else {
+      return help(client);
+    }
+    return true;
+  }
   if (var == "ApiModeSerialize") {
     ASSERT(client->isApiMode());
     if (value == "on") {
-      client->setDebuggerApiModeSerialize(true);
+      client->setDebuggerClientApiModeSerialize(true);
     } else if (value == "off") {
-      client->setDebuggerApiModeSerialize(false);
+      client->setDebuggerClientApiModeSerialize(false);
     } else {
       return true;
     }
+    return true;
+  }
+  if (var == "MaxCodeLines" || var == "mcl") {
+    // MaxCodeLines: a useful configuration variable for emacs/hphpd-integration
+    // to prevent or limit code spew after each breakpoint is hit (since emacs
+    // hphpd-mode already loads the source file into a buffer and displays a
+    // pointer to the current line).
+    int mcl = strtol(value.c_str(), NULL, 10);
+    if (mcl < -1) {
+      client->error("%d is invalid for MaxCodeLines(mcl)", mcl);
+      return true;
+    }
+    client->setDebuggerClientMaxCodeLines(mcl);
+    client->print("MaxCodeLines(mcl) is set to %d", mcl);
     return true;
   }
 
@@ -101,18 +152,29 @@ void CmdConfig::setClientOutput(DebuggerClient *client) {
   client->setOutputType(DebuggerClient::OTValues);
   Array values;
   values.set("BypassAccessCheck", client->getDebuggerBypassCheck());
+  values.set("LogFile", client->getLogFile());
   values.set("PrintLevel", client->getDebuggerPrintLevel());
   values.set("SmallStep", client->getDebuggerSmallStep());
-  values.set("ApiModeSerialize", client->getDebuggerApiModeSerialize());
+  values.set("StackArgs", client->getDebuggerStackArgs());
+  values.set("ApiModeSerialize", client->getDebuggerClientApiModeSerialize());
   client->setOTValues(values);
 }
 
 void CmdConfig::listVars(DebuggerClient *client) {
-  client->print("BypassAccessCheck(bac) %s", client->getDebuggerBypassCheck() ?
-                                             "on" : "off");
+  std::string LogFile = client->getLogFile();
+  client->print("LogFile(lf) %s", LogFile == "" ?
+                                    "off" : LogFile.c_str());
+  client->print("BypassAccessCheck(bac) %s",
+                client->getDebuggerBypassCheck() ? "on" : "off");
   client->print("PrintLevel(pl) %d", client->getDebuggerPrintLevel());
-  client->print("SmallStep(ss) %s", client->getDebuggerSmallStep() ?
-                                    "on" : "off");
+  client->print("SmallStep(ss) %s",
+                client->getDebuggerSmallStep() ? "on" : "off");
+  client->print("StackArgs(sa) %s",
+                client->getDebuggerStackArgs() ? "on" : "off");
+  client->print("ApiModeSerialize %s",
+                client->getDebuggerClientApiModeSerialize() ? "on" : "off");
+  client->print("MaxCodeLines(mcl) %d",
+                client->getDebuggerClientMaxCodeLines());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

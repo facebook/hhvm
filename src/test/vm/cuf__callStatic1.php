@@ -14,14 +14,6 @@ class A {
   }
 }
 
-$obja = new A;
-
-$obja->entry();
-A::static_entry();
-
-call_user_func('A::foo');
-call_user_func(array('A', 'foo'));
-call_user_func(array($obja, 'foo')); // raises warning; no call to __callStatic
 
 function caller() {
   $obj2 = new A;
@@ -30,4 +22,16 @@ function caller() {
   call_user_func(array($obj2, 'foo')); // raises warning; no __callStatic call
 }
 
-caller();
+function main() {
+  $obja = new A;
+
+  $obja->entry();
+  A::static_entry();
+
+  call_user_func('A::foo');
+  call_user_func(array('A', 'foo'));
+  call_user_func(array($obja, 'foo')); // raises warning; no call to __callStatic
+  caller();
+}
+main();
+

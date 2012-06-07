@@ -19,12 +19,12 @@
 #include "exception.h"
 #include <xhp_preprocess.hpp>
 
-using namespace std;
+using std::istream;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-istream *preprocessXHP(istream &input, iostream &output,
+istream *preprocessXHP(istream &input, std::iostream &output,
                        const std::string &fullPath) {
   istream *is = &input;
   string code, error;
@@ -42,8 +42,8 @@ istream *preprocessXHP(istream &input, iostream &output,
 
   XHPResult res;
   {
-    stringbuf sb;
-    input >> noskipws >> &sb;
+    std::stringbuf sb;
+    input >> std::noskipws >> &sb;
     string buffer = sb.str();
     res = xhp_preprocess(buffer, code, error, errline, flags);
   }
@@ -59,7 +59,7 @@ istream *preprocessXHP(istream &input, iostream &output,
                     (int)errline, error.c_str());
   }
   is->clear();
-  is->seekg(0, ios::beg);
+  is->seekg(0, std::ios::beg);
   return is;
 }
 

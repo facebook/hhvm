@@ -157,6 +157,10 @@ public:
     return genSymbol(name, false);
   }
 
+  Symbol *addDeclaredSymbol(const std::string &name, ConstructPtr construct) {
+    return genSymbol(name, false, construct);
+  }
+
   /**
    * Add a function's parameter to this table.
    */
@@ -255,7 +259,7 @@ public:
                          bool member = false);
   void addStaticVariable(Symbol *sym, AnalysisResultPtr ar,
                          bool member = false);
-
+  void cleanupForError(AnalysisResultConstPtr ar);
 
   /**
    * Set all matching variables to variants, since l-dynamic value was used.

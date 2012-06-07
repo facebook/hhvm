@@ -24,18 +24,6 @@
 #include "util/util.h"
 #include "util/trace.h"
 
-#include <runtime/eval/debugger/debugger.h>
-namespace HPHP {
-
-void phpDebuggerHook() {
-  Eval::Debugger::InterruptVMHook();
-}
-void phpExceptionHook(const TypedValue *e) {
-  Eval::Debugger::InterruptVMHook(Eval::ExceptionThrown, tvAsCVarRef(e));
-}
-
-}
-
 #ifndef DEBUG
 /*
  * Forcefully always compile this unit with debug enabled, to permit mixing
@@ -44,13 +32,15 @@ void phpExceptionHook(const TypedValue *e) {
 #define DEBUG
 #endif
 
+using std::string;
+using std::vector;
+
 #include "php_debug.h"
 
 namespace HPHP {
 
-using namespace std;
 struct PhpDebugger {
-  set<string> enabledFunctions;
+  std::set<string> enabledFunctions;
 
   PhpDebugger() {
     const char *env = getenv("PHPBREAKPOINTS");
@@ -64,7 +54,7 @@ struct PhpDebugger {
   }
 
   bool isBpFunction(const char* nm) const {
-    set<string>::const_iterator i = enabledFunctions.find(string(nm));
+    std::set<string>::const_iterator i = enabledFunctions.find(string(nm));
     return i != enabledFunctions.end();
   }
 };

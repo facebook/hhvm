@@ -70,127 +70,189 @@ namespace VM {
   }                                                                           \
 } while (0)
 
-inline void IncDecBody(unsigned char op, TypedValue* fr, TypedValue* to) {
-  switch ((IncDecOp)op) {
-  case PreInc: {
-    if (fr->m_type == KindOfInt64) {
-      ++(fr->m_data.num);
-      tvDupCell(fr, to);
-    } else {
-      ++(tvAsVariant(fr));
-      tvReadCell(fr, to);
-    }
-    break;
-  }
-  case PostInc: {
-    if (fr->m_type == KindOfInt64) {
-      tvDupCell(fr, to);
-      ++(fr->m_data.num);
-    } else {
-      tvReadCell(fr, to);
-      ++(tvAsVariant(fr));
-    }
-    break;
-  }
-  case PreDec: {
-    if (fr->m_type == KindOfInt64) {
-      --(fr->m_data.num);
-      tvDupCell(fr, to);
-    } else {
-      --(tvAsVariant(fr));
-      tvReadCell(fr, to);
-    }
-    break;
-  }
-  case PostDec: {
-    if (fr->m_type == KindOfInt64) {
-      tvDupCell(fr, to);
-      --(fr->m_data.num);
-    } else {
-      tvReadCell(fr, to);
-      --(tvAsVariant(fr));
-    }
-    break;
-  }
-  default: ASSERT(false);
-  }
-}
-
-// Call activation record.  The order assumes that stacks grow toward lower
-// addresses.
 class Func;
+
+// Variable environment.
+//
+// A variable environment consists of the locals for the current function
+// (either pseudo-main or a normal function), plus any variables that are
+// dynamically defined.  A normal (not pseudo-main) function starts off with
+// a variable environment that contains only its locals, but a pseudo-main is
+// handed its caller's existing variable environment.  We want local variable
+// access to be fast for pseudo-mains, but we must maintain consistency with
+// the associated variable environment.
+//
+// We achieve a consistent variable environment without sacrificing locals
+// access performance by overlaying each pseudo-main's locals onto the
+// current variable environment, so that at any given time, a variable in the
+// variable environment has a canonical location (either a local variable on
+// the stack, or a dynamically defined variable), which can only change at
+// entry/exit of a pseudo-main.
+class VarEnv {
+ private:
+  ActRec* m_cfp;
+  HphpArray* m_name2info;
+  std::vector<TypedValue**> m_restoreLocations;
+
+  TypedValue* m_extraArgs;
+  unsigned m_numExtraArgs;
+  uint16_t m_depth;
+  bool m_isGlobalScope;
+
+ private:
+  explicit VarEnv(); // create global fp
+  explicit VarEnv(ActRec* fp); // attach to fp
+  VarEnv(const VarEnv&);
+  VarEnv& operator=(const VarEnv&);
+  ~VarEnv();
+
+ public:
+  /*
+   * Creates a VarEnv and attaches it to the existing frame fp.
+   *
+   * A lazy attach works by bringing all currently existing values for
+   * the names in fp->m_func into the variable environment.  This is
+   * used when we need a variable environment for some caller frame
+   * (because we're about to attach a callee frame using attach()) but
+   * don't actually have one.
+   */
+  static VarEnv* createLazyAttach(ActRec* fp, bool skipInsert = false);
+
+  // Allocate a global VarEnv.  Initially not attached to any frame.
+  static VarEnv* createGlobal();
+
+  static void destroy(VarEnv*);
+
+  void attach(ActRec* fp);
+  void detach(ActRec* fp);
+
+  void set(const StringData* name, TypedValue* tv);
+  void bind(const StringData* name, TypedValue* tv);
+  void setWithRef(const StringData* name, TypedValue* tv);
+  TypedValue* lookup(const StringData* name);
+  bool unset(const StringData* name);
+
+  void setExtraArgs(TypedValue* args, unsigned nargs);
+  void copyExtraArgs(TypedValue* args, unsigned nargs);
+  unsigned numExtraArgs() const;
+  TypedValue* getExtraArg(unsigned argInd) const;
+
+  Array getDefinedVariables() const;
+
+  // Used for save/store m_cfp for debugger
+  void setCfp(ActRec* fp) { m_cfp = fp; }
+  ActRec* getCfp() const { return m_cfp; }
+  bool isGlobalScope() const { return m_isGlobalScope; }
+};
+
+/**
+ * An "ActRec" is a call activation record. The order assumes that stacks
+ * grow toward lower addresses.
+ *
+ * For most purposes, an ActRec can be considered to be in one of three
+ * possible states:
+ *   Pre-live:
+ *     After the FPush* instruction which materialized the ActRec on the stack
+ *     but before the corresponding FCall instruction
+ *   Live:
+ *     After the corresponding FCall instruction but before the ActRec fields
+ *     and locals/iters have been decref'd (either by return or unwinding)
+ *   Post-live:
+ *     After the ActRec fields and locals/iters have been decref'd
+ *
+ * Note that when a function is invoked by the runtime via invokeFunc(), the
+ * "pre-live" state is skipped and the ActRec is materialized in the "live"
+ * state.
+ */
 struct ActRec {
-  // This pair of uint64_t's must be the first two elements in the structure
-  // so that the pointer to the ActRec can also be used for RBP chaining. Note
-  // That ActRec's are also x64 frames, so this is an implicit machine
-  // dependency.
   union {
+    // This pair of uint64_t's must be the first two elements in the structure
+    // so that the pointer to the ActRec can also be used for RBP chaining.
+    // Note that ActRec's are also x64 frames, so this is an implicit machine
+    // dependency.
     TypedValue _dummyA;
     struct {
-      uint64_t m_savedRbp;   // Previous hardware frame pointer/ActRec.
-      uint64_t m_savedRip;   // In-TC address to return to.
+      uint64_t m_savedRbp;     // Previous hardware frame pointer/ActRec.
+      uint64_t m_savedRip;     // In-TC address to return to.
     };
   };
   union {
     TypedValue _dummyB;
     struct {
-      const Func* m_func;    // Function.
-      union {
-        ObjectData* m_this;  // This.
-        Class* m_cls;        // Late bound class.
-      };
+      const Func* m_func;      // Function.
+      uint32_t m_soff;         // Saved offset of caller from beginning of
+                               //   caller's Func's bytecode.
+
+      // Bits 0-30 are the number of function args; the high bit is
+      // whether this ActRec came from FPushCtor*.
+      uint32_t m_numArgsAndCtorFlag;
     };
   };
   union {
-    TypedValue _dummyC;
+    TypedValue m_r;          // Return value teleported here when the ActRec
+                             //   is post-live.
     struct {
       union {
-        VarEnv* m_varEnv;   // Variable environment.
-        StringData* m_invName; // Invoked function name (used for __call).
+        ObjectData* m_this;    // This.
+        Class* m_cls;          // Late bound class.
       };
-      uint32_t m_soff;        // Saved offset from beginning of Func's bytecode.
-      int32 m_numArgs;        // Number of arguments passed.
-    };
-  };
-  union {
-    struct {
-      TypedValue m_r;         // Return value splatted here by interpreter.
-    };
-    struct {
-      // An array containing the "scope" of static locals in this frame. This is
-      // necessary because of some strange rules around identity of static
-      // locals. In non-private methods, each class context gets its own copy of
-      // static locals. This class context is *not* the lexical class context,
-      // and is distinct from the late-bound class in that it doesn't propagate
-      // across self:: and parent:: calls. In closures, each closure
-      // instantiation gets its own copy. In generators created from
-      // closures, each generator gets its own copy.
-      //
-      // If it's known that the function doesn't contain a static local OR (is
-      // not a non-private method AND is not a closure AND is not a generator
-      // from a closure), it's safe to leave this uninitialized.
-      HphpArray* m_staticLocalCtx;
+      union {
+        VarEnv* m_varEnv;      // Variable environment; only used when the
+                               //   ActRec is live.
+        StringData* m_invName; // Invoked function name (used for __call);
+                               //   only used when ActRec is pre-live.
+      };
     };
   };
 
-  // To conserve space, we use unions for a pairs of mutually exclusive
-  // fields (fields that are not used at the same time). We use unions for
-  // m_this/m_cls and m_varEnv/m_invName.
-  //
-  // The least significant bit is used as a marker for each pair of fields
-  // so that we can distinguish at runtime which field is valid. We define
-  // accessors below to encapsulate this logic.
-  //
-  // Note that m_invName is only used in between FPush and FCall. Thus once
-  // is activated, it is safe to directly access m_varEnv without using
-  // accessors.
+  /**
+   * Accessors for the packed m_numArgsAndCtorFlag field. We track
+   * whether ActRecs came from FPushCtor* so that during unwinding we
+   * can set the flag not to call destructors for objects whose
+   * constructors exit via an exception.
+   */
+
+  int32_t numArgs() const {
+    return m_numArgsAndCtorFlag & ~(1u << 31);
+  }
+
+  bool isFromFPushCtor() const {
+    return m_numArgsAndCtorFlag & (1u << 31);
+  }
+
+  static inline uint32_t
+  encodeNumArgs(uint32_t numArgs, bool isFPushCtor = false) {
+    ASSERT((numArgs & (1u << 31)) == 0);
+    return numArgs | (isFPushCtor << 31);
+  }
+  void initNumArgs(uint32_t numArgs, bool isFPushCtor = false) {
+    m_numArgsAndCtorFlag = encodeNumArgs(numArgs, isFPushCtor);
+  }
+
+  void setNumArgs(uint32_t numArgs) {
+    initNumArgs(numArgs, isFromFPushCtor());
+  }
+
+  /**
+   * To conserve space, we use unions for pairs of mutually exclusive
+   * fields (fields that are not used at the same time). We use unions
+   * for m_this/m_cls and m_varEnv/m_invName.
+   *
+   * The least significant bit is used as a marker for each pair of fields
+   * so that we can distinguish at runtime which field is valid. We define
+   * accessors below to encapsulate this logic.
+   *
+   * Note that m_invName is only used when the ActRec is pre-live. Thus when
+   * an ActRec is live it is safe to directly access m_varEnv without using
+   * accessors.
+   */
 
 #define UNION_FIELD_ACCESSORS(name1, type1, field1, name2, type2, field2) \
   inline bool has##name1() const { \
     return field1 && !(intptr_t(field1) & 1LL); \
   } \
   inline bool has##name2() const { \
-    return (intptr_t(field2) & 1LL); \
+    return bool(intptr_t(field2) & 1LL); \
   } \
   inline type1 get##name1() const { \
     ASSERT(has##name1()); \
@@ -228,10 +290,16 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32 offset) {
 
 inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
   CT_ASSERT(offsetof(ActRec, m_savedRbp) == 0);
+  CT_ASSERT(sizeof(ActRec*) <= sizeof(uint64_t));
   ar->m_savedRbp = (uint64_t)sfp;
 }
 
-PreClass* arGetContextPreClass(const ActRec* ar);
+void IncDecBody(unsigned char op, TypedValue* fr, TypedValue* to);
+
+template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
+#define arGetContextClass(ar)    HPHP::VM::arGetContextClassImpl<false>(ar)
+#define arGetContextClassFromBuiltin(ar) \
+  HPHP::VM::arGetContextClassImpl<true>(ar)
 
 // Used by extension functions that take a PHP "callback", since they need to
 // figure out the callback context once and call it multiple times. (e.g.
@@ -241,28 +309,6 @@ struct CallCtx {
   ObjectData* this_;
   Class* cls;
   StringData* invName;
-};
-
-struct MIterCtx {
-  TypedValue m_key;
-  TypedValue m_val;
-  MutableArrayIter *m_mArray; // big! Defer allocation.
-  MIterCtx(ArrayData *ad) {
-    ASSERT(!ad->isStatic());
-    tvWriteUninit(&m_key);
-    tvWriteUninit(&m_val);
-    m_mArray = new MutableArrayIter(ad, &tvAsVariant(&m_key),
-                                    tvAsVariant(&m_val));
-  }
-  MIterCtx(const Variant* var) {
-    tvWriteUninit(&m_key);
-    tvWriteUninit(&m_val);
-    m_mArray = new MutableArrayIter(var, &tvAsVariant(&m_key),
-                                    tvAsVariant(&m_val));
-  }
-  ~MIterCtx() {
-    delete m_mArray;
-  }
 };
 
 struct Iter {
@@ -292,22 +338,19 @@ static const size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
 
 struct Fault {
   enum FaultType {
-    KindOfThrow,
-    KindOfExit,
-    KindOfFatal,
+    KindOfUserException,
     KindOfCPPException
   };
   FaultType m_faultType;
-  TypedValue m_userException;
-  Exception *m_cppException;
+  union {
+    ObjectData* m_userException;
+    Exception* m_cppException;
+  };
 };
 
 enum UnwindStatus {
   UnwindResumeVM,
-  UnwindNextFrame,
   UnwindPropagate,
-  UnwindIgnore,
-  UnwindExit,
 };
 
 // Interpreter evaluation stack.
@@ -317,14 +360,22 @@ private:
   TypedValue* m_top;
   TypedValue* m_base; // Stack grows down, so m_base is beyond the end of
                       // m_elms.
-  size_t      m_maxElms;
 
 public:
-  void* getStackLowAddress() { return m_elms; }
-  void* getStackHighAddress() { return m_base; }
-  void toStringElm(std::ostream& os, TypedValue* vv) const;
+  void* getStackLowAddress() const { return m_elms; }
+  void* getStackHighAddress() const { return m_base; }
+  bool isValidAddress(uintptr_t v) {
+    return v >= uintptr_t(m_elms) && v < uintptr_t(m_base);
+  }
+  void toStringElm(std::ostream& os, TypedValue* vv, const ActRec* fp)
+    const;
   void toStringIter(std::ostream& os, Iter* it) const;
-  void clearEvalStack(ActRec* fp, int32 numArgs);
+  void clearEvalStack(ActRec* fp, int32 numLocals);
+  void protect();
+  void unprotect();
+  void requestInit();
+  void requestExit();
+  static void flush();
 private:
   void toStringFrag(std::ostream& os, const ActRec* fp,
                     const TypedValue* top) const;
@@ -340,16 +391,16 @@ private:
   void unwindARFrag(ActRec* ar);
   void unwindAR(ActRec* fp, int offset, const FPIEnt* fe);
 public:
-  // Note: maxelms must be a power of two
-  static const int kDefaultStackMax = 0x4000U; // Must be power of two.
-  Stack(size_t maxelms = kDefaultStackMax);
+  static const int sSurprisePageSize;
+  static const uint sMinStackElms;
+  static void ValidateStackSize();
+  Stack();
   ~Stack();
 
   std::string toString(const ActRec* fp, int offset,
                        std::string prefix="") const;
 
   UnwindStatus unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f);
-  void clear();
 
   bool wouldOverflow(int numCells) const;
 
@@ -395,49 +446,32 @@ public:
     m_top++;
   }
 
-  inline void ALWAYS_INLINE popH() {
+  inline void ALWAYS_INLINE popTV() {
     ASSERT(m_top != m_base);
-    ASSERT(m_top->m_type == KindOfHome);
-    ASSERT(m_top->m_data.ptv != NULL);
+    tvRefcountedDecRef(m_top);
     m_top++;
   }
 
-  template <bool canThrow>
-  inline void ALWAYS_INLINE popTVImpl() {
-    ASSERT(m_top != m_base);
-    tvRefcountedDecRefImpl<canThrow>(m_top);
-    m_top++;
-  }
-
-#define popTV()    popTVImpl<true>()
-
-  inline void ALWAYS_INLINE popI() {
-    ASSERT(((Iter*)m_top)->m_itype == Iter::TypeUndefined);
-    m_top += sizeof(Iter) / sizeof(TypedValue);
-    ASSERT((uintptr_t)m_top <= (uintptr_t)m_base);
-  }
-
-  template <bool canThrow>
-  inline void ALWAYS_INLINE popARImpl() {
+  // popAR() should only be used to tear down a pre-live ActRec. Once
+  // an ActRec is live, it should be torn down using frame_free_locals()
+  // followed by discardAR() or ret().
+  inline void ALWAYS_INLINE popAR() {
     ASSERT(m_top != m_base);
     ActRec* ar = (ActRec*)m_top;
     if (ar->hasThis()) {
       ObjectData* this_ = ar->getThis();
       if (this_->decRefCount() == 0) {
-        this_->releaseImpl<canThrow>();
+        this_->release();
       }
     }
     if (ar->hasInvName()) {
       StringData* invName = ar->getInvName();
       if (invName->decRefCount() == 0) {
-        invName->release();
       }
     }
     m_top += kNumActRecCells;
     ASSERT((uintptr_t)m_top <= (uintptr_t)m_base);
   }
-
-#define popAR()    popARImpl<true>()
 
   inline void ALWAYS_INLINE discardAR() {
     ASSERT(m_top != m_base);
@@ -528,11 +562,6 @@ public:
     m_top->m_type = KindOfString;
   }
 
-  inline void ALWAYS_INLINE pushString(StringData* s) {
-    pushStringNoRc(s);
-    s->incRefCount();
-  }
-
   inline void ALWAYS_INLINE pushStaticString(StringData* s) {
     ASSERT(s->isStatic()); // No need to call s->incRefCount().
     pushStringNoRc(s);
@@ -579,17 +608,10 @@ public:
     return (Cell*)m_top;
   }
 
-  // XXX Unused.
   inline Var* ALWAYS_INLINE allocV() {
     ASSERT(m_top != m_elms);
     m_top--;
     return (Var*)m_top;
-  }
-
-  inline Home* ALWAYS_INLINE allocH() {
-    ASSERT(m_top != m_elms);
-    m_top--;
-    return (Home*)m_top;
   }
 
   inline TypedValue* ALWAYS_INLINE allocTV() {
@@ -623,12 +645,6 @@ public:
     return (Var*)m_top;
   }
 
-  inline Home* ALWAYS_INLINE topH() {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top->m_type == KindOfHome);
-    return (Home*)m_top;
-  }
-
   inline TypedValue* ALWAYS_INLINE topTV() {
     ASSERT(m_top != m_base);
     return m_top;
@@ -640,21 +656,16 @@ public:
     return (Cell*)(&m_top[ind]);
   }
 
-  inline Var* ALWAYS_INLINE indV(size_t ind) {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top[ind].m_type == KindOfVariant);
-    return (Var*)(&m_top[ind]);
-  }
-
-  inline Home* ALWAYS_INLINE indH(size_t ind) {
-    ASSERT(m_top != m_base);
-    ASSERT(m_top[ind].m_type == KindOfHome);
-    return (Home*)(&m_top[ind]);
-  }
-
   inline TypedValue* ALWAYS_INLINE indTV(size_t ind) {
     ASSERT(m_top != m_base);
     return &m_top[ind];
+  }
+  inline void ALWAYS_INLINE pushClass(Class* clss) {
+    ASSERT(m_top != m_elms);
+    m_top--;
+    m_top->m_data.pcls = clss;
+    m_top->_count = 0;
+    m_top->m_type = KindOfClass;
   }
 };
 

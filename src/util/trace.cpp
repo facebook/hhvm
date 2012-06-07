@@ -20,14 +20,17 @@
 #include <string>
 
 /*
- * Forcibly undef RELEASE, so we get the debug trace.h interface included
+ * Forcibly define USE_TRACE, so we get the debug trace.h interface included
  * here. This allows mixed compilation, where some units were compiled
  * DEBUG and others compiled RELEASE, to successfully link.
  */
-#undef RELEASE
+#ifndef USE_TRACE
+#  define USE_TRACE 1
+#endif
 #include "runtime/base/complex_types.h"
 #include "runtime/vm/core_types.h"
 #include "trace.h"
+#include "ringbuffer.h"
 
 namespace HPHP {
 
@@ -52,8 +55,7 @@ string tname(DataType t) {
     CS(Variant)
     CS(Class)
 #undef CS
-    case -1: return string("Invalid");
-    case -2: return string("Home");
+    case KindOfInvalid: return string("Invalid");
 
     default: {
       char buf[128];
@@ -65,7 +67,7 @@ string tname(DataType t) {
 
 string TypedValue::pretty() const  {
   char buf[20];
-  sprintf(buf, "%lx", long(m_data.num));
+  sprintf(buf, "0x%lx", long(m_data.num));
   return Trace::prettyNode(tname(m_type).c_str(), string(buf));
 }
 
@@ -98,10 +100,12 @@ class Init {
     /* Parse the environment for flags. */
     const char *envName = "TRACE";
     const char *env = getenv(envName);
+    const char *file = getenv("HPHP_TRACE_FILE");
+    if (!file) file = "/tmp/hphp.log";
     if (env) {
-      out = fopen("/tmp/hphp.log", "w");
+      out = fopen(file, "w");
       if (!out) {
-        fprintf(stderr, "could not create log file; using stderr\n");
+        fprintf(stderr, "could not create log file (%s); using stderr\n", file);
         out = stderr;
       }
       char *e = strdup(env);
@@ -134,9 +138,16 @@ const char* moduleName(Module mod) {
 }
 
 void vtrace(const char *fmt, va_list ap) {
-  ONTRACE(1, fprintf(out, "t%#08x: ", int(pthread_self())));
-  vfprintf(out, fmt, ap);
-  fflush(out);
+  static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+  if (moduleEnabledRelease(Trace::ringbuffer, 1)) {
+    vtraceRingbuffer(fmt, ap);
+  } else {
+    vfprintf(out, fmt, ap);
+    ONTRACE(1, pthread_mutex_lock(&mtx));
+    ONTRACE(1, fprintf(out, "t%#08x: ", int(pthread_self())));
+    fflush(out);
+    ONTRACE(1, pthread_mutex_unlock(&mtx));
+  }
 }
 
 void trace(const char *fmt, ...) {

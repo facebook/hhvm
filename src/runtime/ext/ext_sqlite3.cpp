@@ -563,7 +563,7 @@ Variant c_SQLite3Stmt::t_execute() {
         if (p.value.isResource()) {
           Variant blob = f_stream_get_contents(p.value);
           if (same(blob, false)) {
-            raise_warning("Unable to read stream for parameter %ld",
+            raise_warning("Unable to read stream for parameter %d",
                           p.index);
             return false;
           }
@@ -586,7 +586,7 @@ Variant c_SQLite3Stmt::t_execute() {
       sqlite3_bind_null(m_raw_stmt, p.index);
       break;
     default:
-      raise_warning("Unknown parameter type: %ld for parameter %ld",
+      raise_warning("Unknown parameter type: %d for parameter %d",
                     p.type, p.index);
       return false;
     }

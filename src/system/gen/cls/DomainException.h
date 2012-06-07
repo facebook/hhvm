@@ -36,16 +36,9 @@ class c_DomainException : public c_LogicException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(DomainException, DomainException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_DomainException(const ObjectStaticCallbacks *cb = &cw_DomainException) : c_LogicException(cb) {}
+  c_DomainException(const ObjectStaticCallbacks *cb = &cw_DomainException) : c_LogicException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_DomainException() NEVER_INLINE;
 

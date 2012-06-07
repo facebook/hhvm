@@ -19,6 +19,8 @@
 #include <runtime/base/source_info.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/frame_injection.h>
+#include <runtime/base/hphp_system.h>
+#include <runtime/base/server/source_root_info.h>
 
 #include <runtime/eval/runtime/eval_frame_injection.h>
 
@@ -257,6 +259,19 @@ Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
     String file = t->m_prev->getFileName();
     if (!file.empty() && t->m_prev->m_line) {
       Array result = Array::Create();
+      if (getHphpBinaryType() == HphpBinary::program) {
+        // GetCallerInfo() must always return the absolute file path.
+        // getFileName() returns a relative path under hphpc, so we
+        // we convert it to an absolute path here.
+        const string& srcRoot = SourceRootInfo::GetCurrentSourceRoot();
+        ASSERT(!file.size() || file[0] != '/');
+        ASSERT(srcRoot.size() && srcRoot[srcRoot.size()-1] == '/');
+        file = srcRoot + file.data();
+      } else {
+        // If we are not under hphpc, then getFileName() should return
+        // an absolute path.
+        ASSERT(!file.size() || file[0] == '/');
+      }
       result.set(s_file, file, true);
       result.set(s_line, t->m_prev->m_line, true);
       return result;
@@ -414,15 +429,16 @@ String FrameInjection::getFileName() {
       static_cast<Eval::ParserFrameInjection*>(this);
     return pfi->getFileName();
   }
-  const char *c = strstr(m_name, "::");
-  const char *f = NULL;
-  if (c) {
-    f = SourceInfo::TheSourceInfo.getClassDeclaringFile(getClassName());
-  } else {
-    f = SourceInfo::TheSourceInfo.getFunctionDeclaringFile(m_name);
-  }
+  const char *f = SourceInfo::TheSourceInfo.getFunctionDeclaringFile(m_name);
   if (f != NULL) {
     return f;
+  }
+  const char *c = strstr(m_name, "::");
+  if (c) {
+    f = SourceInfo::TheSourceInfo.getClassDeclaringFile(getClassName());
+    if (f != NULL) {
+      return f;
+    }
   }
   return null_string;
 }
@@ -453,39 +469,39 @@ ObjectData *FrameInjectionFunction::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionMem::FIFunctionMem(const char *name)
   : FrameInjectionFunction(name, 0) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionMem::~FIFunctionMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionNoMem::FIFunctionNoMem(const char *name)
   : FrameInjectionFunction(name, 0) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionNoMem::~FIFunctionNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);
 #endif
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionFS::FIFunctionFS(const char *name, int fs)
   : FrameInjectionFunction(name, fs) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionFS::~FIFunctionFS() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
@@ -494,26 +510,26 @@ FIFunctionFS::~FIFunctionFS() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIStaticMethodMem::FIStaticMethodMem(const char *name)
   : FrameInjectionStaticMethod(name) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIStaticMethodMem::~FIStaticMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIStaticMethodNoMem::FIStaticMethodNoMem(const char *name)
   : FrameInjectionStaticMethod(name) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIStaticMethodNoMem::~FIStaticMethodNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);
@@ -522,6 +538,7 @@ FIStaticMethodNoMem::~FIStaticMethodNoMem() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+HOT_FUNC_HPHP
 ObjectData *FrameInjectionObjectMethod::getThis() const {
   if (!m_object->o_getId()) {
     return NULL;
@@ -536,26 +553,26 @@ ObjectData *FrameInjectionObjectMethod::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIObjectMethodMem::FIObjectMethodMem(const char *name, ObjectData *obj)
  : FrameInjectionObjectMethod(name, obj) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIObjectMethodMem::~FIObjectMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIObjectMethodNoMem::FIObjectMethodNoMem(const char *name, ObjectData *obj)
  : FrameInjectionObjectMethod(name, obj) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIObjectMethodNoMem::~FIObjectMethodNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);

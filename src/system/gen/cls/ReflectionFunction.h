@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 462 */
+/* SRC: classes/reflection.php line 490 */
 FORWARD_DECLARE_CLASS(ReflectionFunction);
 extern const ObjectStaticCallbacks cw_ReflectionFunction;
 class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
@@ -38,11 +38,13 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionFunction, ReflectionFunction, ReflectionFunctionAbstract)
   static const ClassPropTable os_prop_table;
-  c_ReflectionFunction(const ObjectStaticCallbacks *cb = &cw_ReflectionFunction) : c_ReflectionFunctionAbstract(cb) {}
+  c_ReflectionFunction(const ObjectStaticCallbacks *cb = &cw_ReflectionFunction) : c_ReflectionFunctionAbstract(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_name);
   public: c_ReflectionFunction *create(CVarRef v_name);
   public: String t___tostring();
-  public: static Variant t_export(CVarRef v_name, CVarRef v_ret);
+  public: static Variant t_export(CVarRef v_name, CVarRef v_ret = false_varNR);
   public: Variant t_invoke(int num_args, Array args = Array());
   public: Variant t_invokeargs(CVarRef v_args);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

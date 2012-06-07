@@ -54,18 +54,33 @@ frap('claptrap');
 
 class Blark {
   public static function sfrap() {
-    echo "static frap\n";
+    echo "static frap " . get_called_class() . "\n";
   }
   public function frap() {
     echo "non-static frap\n";
   }
 }
+
+class SubBlark extends Blark {}
+class SubBlark2 extends Blark {}
 $mc = new MagicCall();
 
 // Intercept static method
+fb_intercept('SubBlark2::sfrap', 'handler');
+Blark::sfrap();
+call_user_func(array('Blark', 'sfrap'));
+SubBlark::sfrap();
+call_user_func(array('SubBlark', 'sfrap'));
+SubBlark2::sfrap();
+call_user_func(array('SubBlark2', 'sfrap'));
+
 fb_intercept('Blark::sfrap', 'handler');
 Blark::sfrap();
 call_user_func(array('Blark', 'sfrap'));
+SubBlark::sfrap();
+call_user_func(array('SubBlark', 'sfrap'));
+SubBlark2::sfrap();
+call_user_func(array('SubBlark2', 'sfrap'));
 
 fb_intercept('Blark::sfrap', 'passthrough_handler');
 Blark::sfrap();

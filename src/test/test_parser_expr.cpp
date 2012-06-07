@@ -40,6 +40,7 @@ bool TestParserExpr::RunTests(const std::string &which) {
   RUN_TEST(TestBinaryOpExpression);
   RUN_TEST(TestQOpExpression);
   RUN_TEST(TestArrayPairExpression);
+  RUN_TEST(TestShortArrayExpression);
   RUN_TEST(TestClassConstantExpression);
   RUN_TEST(TestParameterExpression);
   RUN_TEST(TestModifierExpression);
@@ -228,6 +229,7 @@ bool TestParserExpr::TestUnaryOpExpression() {
   V("<?php exit($a);",        "exit($a);\n");
   V("<?php @$a;",             "@$a;\n");
   V("<?php array($a);",       "array($a);\n");
+  V("<?php [$a];",            "array($a);\n");
   V("<?php print $a;",        "print $a;\n");
   V("<?php isset($a);",       "isset($a);\n");
   V("<?php empty($a);",       "empty($a);\n");
@@ -315,6 +317,25 @@ bool TestParserExpr::TestArrayPairExpression() {
   return true;
 }
 
+bool TestParserExpr::TestShortArrayExpression() {
+  V("<?php [];",                     "array();\n");
+  V("<?php [$a];",                   "array($a);\n");
+  V("<?php [1];",                    "array(1);\n");
+  V("<?php [$a, $b];",               "array($a, $b);\n");
+  V("<?php [$a, $b,];",              "array($a, $b);\n");
+  V("<?php [$a => $b];",             "array($a => $b);\n");
+  V("<?php [$a => $b, $c => $d];",   "array($a => $b, $c => $d);\n");
+  V("<?php [$a => $b, $c => $d,];",  "array($a => $b, $c => $d);\n");
+
+  V("<?php [$a[1], $b[$c[4]]];",
+    "array($a[1], $b[$c[4]]);\n");
+
+  V("<?php function a($b = []) { return; }",
+    "function a($b = array()) {\nreturn;\n}\n");
+
+  return true;
+}
+
 bool TestParserExpr::TestClassConstantExpression() {
   V("<?php function a() { static $a = A::b;}",
     "function a() {\nstatic $a = A::b;\n}\n");
@@ -322,9 +343,7 @@ bool TestParserExpr::TestClassConstantExpression() {
 }
 
 bool TestParserExpr::TestParameterExpression() {
-  V2("<?php function a($a=1,$b) {}",
-     "function a($a = 1, $b) {\n}\n",
-     "function a($a = 1, $b = null) {\n}\n");
+  V("<?php function a($a=1,$b) {}",  "function a($a = 1, $b) {\n}\n");
 
   V("<?php function a() {}",         "function a() {\n}\n");
   V("<?php function a($a) {}",       "function a($a) {\n}\n");
@@ -345,11 +364,6 @@ bool TestParserExpr::TestModifierExpression() {
   V("<?php class a { private $a;}",   "class a {\nprivate $a;\n}\n");
   V("<?php class a { static $a;}",
     "class a {\npublic static $a;\n}\n");
-  V("<?php class a { abstract $a;}",
-    "class a {\npublic abstract $a;\n}\n");
-  V("<?php class a { final $a;}",
-    "class a {\npublic final $a;\n}\n");
-
   V("<?php class a { public static $a;}",
     "class a {\npublic static $a;\n}\n");
 

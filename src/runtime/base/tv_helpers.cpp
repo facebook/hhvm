@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/complex_types.h>
+#include <runtime/base/type_conversions.h>
 
 #include <system/lib/systemlib.h>
 
@@ -55,8 +56,7 @@ void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
   case KindOfInt32:
   case KindOfInt64:   tv->m_type = KindOfInt64; return;
   case KindOfDouble:  {
-    i = ((tv->m_data.dbl > LONG_MAX) ?
-      (uint64)tv->m_data.dbl : (int64)tv->m_data.dbl);
+    i = toInt64(tv->m_data.dbl);
     break;
   }
   case KindOfStaticString: i = (tv->m_data.pstr->toInt64(base)); break;

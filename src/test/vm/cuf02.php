@@ -8,15 +8,19 @@ class D extends C {
 }
 class E {
   public function foo() { echo "E::foo\n"; var_dump(get_called_class()); }
-  public static function bar() { echo "E::bar\n"; var_dump(get_called_class()); 
-}
+  public static function bar() { echo "E::bar\n"; var_dump(get_called_class());
+  }
 }
 
-call_user_func('C::foo');
-call_user_func('D::foo');
-call_user_func('E::foo');
 
-call_user_func('C::bar');
-call_user_func('D::bar');
-call_user_func('E::bar');
+function main() {
+  call_user_func('C::foo');
+  call_user_func('D::foo');
+  call_user_func('E::foo');
+
+  call_user_func('C::bar');
+  call_user_func('D::bar');
+  call_user_func('E::bar');
+}
+main();
 

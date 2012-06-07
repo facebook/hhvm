@@ -181,6 +181,16 @@ inline Variant x_hphp_output_global_state(bool serialize = true) {
   return f_hphp_output_global_state(serialize);
 }
 
+inline int64 x_hphp_instruction_counter() {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_hphp_instruction_counter();
+}
+
+inline Variant x_hphp_get_hardware_counters() {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_hphp_get_hardware_counters();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -18,8 +18,6 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_error.h>
 
-using namespace std;
-
 namespace HPHP {
 
 IMPLEMENT_OBJECT_ALLOCATION(TempFile)
@@ -42,6 +40,7 @@ TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {
   }
   m_fd = fd;
   m_name = string(path);
+  m_rawName = string(path);
 }
 
 TempFile::~TempFile() {
@@ -68,11 +67,11 @@ bool TempFile::closeImpl() {
     m_stream = NULL;
     m_fd = -1;
   }
-  if (!m_name.empty()) {
+  if (!m_rawName.empty()) {
     if (m_autoDelete) {
-      unlink(m_name.c_str());
+      unlink(m_rawName.c_str());
     }
-    m_name.clear();
+    m_rawName.clear();
   }
   File::closeImpl();
   return ret;

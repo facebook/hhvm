@@ -145,6 +145,7 @@ StringData* buildStringData(int64 n) {
   return NEW(StringData)(buf, len, AttachString);
 }
 
+HOT_FUNC
 String::String(int64 n) {
   const StringData *sd = GetIntegerStringData(n);
   if (sd) {
@@ -173,10 +174,6 @@ String::String(double n) {
 
 StringData* buildStringData(litstr s) {
   return NEW(StringData)(s, AttachLiteral);
-}
-
-String::String(const AtomicString &s) {
-  m_px = s.get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -340,7 +337,7 @@ String &String::operator=(litstr s) {
 }
 
 String &String::operator=(StringData *data) {
-  SmartPtr<StringData>::operator=(data);
+  StringBase::operator=(data);
   return *this;
 }
 
@@ -355,16 +352,12 @@ String &String::operator=(const std::string & s) {
 
 HOT_FUNC
 String &String::operator=(CStrRef str) {
-  SmartPtr<StringData>::operator=(str.m_px);
+  StringBase::operator=(str.m_px);
   return *this;
 }
 
 String &String::operator=(CVarRef var) {
   return operator=(var.toString());
-}
-
-String &String::operator=(const AtomicString &s) {
-  return operator=(s.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -394,7 +387,7 @@ String &String::operator+=(litstr s) {
 String &String::operator+=(CStrRef str) {
   if (!str.empty()) {
     if (empty()) {
-      SmartPtr<StringData>::operator=(str.m_px);
+      StringBase::operator=(str.m_px);
     } else if (m_px->getCount() == 1) {
       m_px->append(str.data(), str.size());
     } else {
@@ -524,13 +517,14 @@ String &String::operator^=(CStrRef v) {
 ///////////////////////////////////////////////////////////////////////////////
 // conversions
 
+HOT_FUNC
 VarNR String::toKey() const {
-  if (!m_px) return empty_string;
+  if (!m_px) return VarNR(empty_string);
   int64 n = 0;
   if (m_px->isStrictlyInteger(n)) {
-    return n;
+    return VarNR(n);
   } else {
-    return m_px;
+    return VarNR(m_px);
   }
 }
 
@@ -748,18 +742,11 @@ bool String::checkStatic() {
     // no need to upgrade when the initialization is done.
     StringDataSet::iterator it = set.find(m_px);
     if (it != set.end()) {
-      SmartPtr<StringData>::operator=(*it);
+      StringBase::operator=(*it);
       return true;
     }
   }
   return false;
-}
-
-String String::fiberCopy() const {
-  if (m_px) {
-    return m_px->copy();
-  }
-  return String();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -777,7 +764,7 @@ void String::dump() const {
 // StaticString
 
 StaticString::StaticString(litstr s) : m_data(s) {
-  String::operator=(&m_data);
+  m_px = &m_data;
   if (has_eval_support) {
     m_px = StringData::GetStaticString(m_px);
     return;
@@ -790,7 +777,7 @@ StaticString::StaticString(litstr s) : m_data(s) {
 
 StaticString::StaticString(litstr s, int length)
   : m_data(s, length, AttachLiteral) {
-  String::operator=(&m_data);
+  m_px = &m_data;
   if (has_eval_support) {
     m_px = StringData::GetStaticString(m_px);
     return;
@@ -879,55 +866,6 @@ public:
   }
 };
 static StaticStringUninitializer s_static_string_uninitializer;
-
-//////////////////////////////////////////////////////////////////////////////
-// AtomicString
-
-AtomicString::AtomicString(const char *s,
-                           StringDataMode mode /* = AttachLiteral */) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  m_px = s ? (new StringData(s, mode)) : NULL;
-  if (m_px) {
-    m_px->setAtomic();
-    m_px->incAtomicCount();
-    m_px->preCompute();
-  }
-}
-
-AtomicString::AtomicString(const std::string &s) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  m_px = new StringData(s.c_str(), s.size(), CopyString);
-  if (m_px) {
-    m_px->setAtomic();
-    m_px->incAtomicCount();
-    m_px->preCompute();
-  }
-}
-
-AtomicString::AtomicString(StringData *str) {
-  if (str) {
-    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-    if (str->isRefCounted()) {
-      str = new StringData(str->data(), str->size(), CopyString);
-    }
-    AtomicSmartPtr<StringData>::operator=(str);
-  }
-  if (m_px) m_px->preCompute();
-}
-
-AtomicString &AtomicString::operator=(const AtomicString &s) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  AtomicSmartPtr<StringData>::operator=(s);
-  if (m_px) m_px->preCompute();
-  return *this;
-}
-
-AtomicString &AtomicString::operator=(const std::string &s) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  AtomicSmartPtr<StringData>::operator=(new StringData(s.c_str(), s.size(),
-                                                       CopyString));
-  return *this;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 }

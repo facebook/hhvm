@@ -18,8 +18,13 @@
 #define incl_TRANSLATOR_INLINE_H_
 
 #include "translator.h"
+#include <boost/noncopyable.hpp>
 #include <runtime/base/execution_context.h>
 
+/*
+ * Because of a circular dependence with ExecutionContext, these
+ * translation-related helpers cannot live in translator.h.
+ */
 namespace HPHP   {
 namespace VM     {
 namespace Transl {
@@ -27,22 +32,93 @@ namespace Transl {
 /*
  * Accessors for the virtual machine registers, both rvalues and
  * lvalues.
+ *
+ * Note that these do not assert anything about tl_regState; use
+ * carefully.
  */
-static inline Cell*&  vmsp() { return (Cell*&)g_context->m_stack.top(); }
-static inline Cell*&  vmfp() { return (Cell*&)g_context->m_fp; }
-static inline const uchar*& vmpc() { return g_context->m_pc; }
-static inline ActRec*& vmFirstAR() { return g_context->m_firstAR; }
+static inline Cell*&  vmsp() { return (Cell*&)g_vmContext->m_stack.top(); }
+static inline Cell*&  vmfp() { return (Cell*&)g_vmContext->m_fp; }
+static inline const uchar*& vmpc() { return g_vmContext->m_pc; }
+static inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 
 static inline ActRec* curFrame()    { return (ActRec*)vmfp(); }
 static inline const Func* curFunc() { return curFrame()->m_func; }
-static inline const Unit* curUnit() { return curFunc()->m_unit; }
-
+static inline const Unit* curUnit() { return curFunc()->unit(); }
+static inline Class* curClass() {
+  const Func* func = curFunc();
+  Class* clss = func->cls();
+  if (func->isPseudoMain() || func->isTraitMethod() || clss == NULL) {
+    return NULL;
+  }
+  return clss;
+}
 
 static inline uintptr_t tlsBase() {
   uintptr_t retval;
   asm ("movq %%fs:0, %0" : "=r" (retval));
   return retval;
 }
+
+struct VMRegAnchor : private boost::noncopyable {
+  VMRegState m_old;
+  VMRegAnchor() {
+    if (debug) {
+      uint64_t sp;
+      asm volatile("movq %%rsp, %0" : "=r"(sp) ::);
+      // rsp should be octoword-aligned.
+      ASSERT((sp & 0xf) == 0);
+    }
+    m_old = tl_regState;
+    transl->sync();
+  }
+  VMRegAnchor(ActRec* ar, bool atFCall=false) {
+    // Some C++ entry points have an ActRec prepared from after a call
+    // instruction. This syncs us to right after the call instruction.
+    ASSERT(tl_regState == REGSTATE_DIRTY);
+    m_old = REGSTATE_DIRTY;
+    tl_regState = REGSTATE_CLEAN;
+    int numArgs = ar->numArgs();
+
+    const Func* prevF = ((ActRec*)(ar->m_savedRbp))->m_func;
+    vmsp() = (TypedValue*)ar - numArgs;
+    vmpc() = prevF->unit()->at(prevF->base() + ar->m_soff);
+    if (atFCall) {
+      // VMExecutionContext::doFCall expects vmfp to be the caller's
+      // ActRec, but if we call VMRegAnchor while executing the FCall
+      // sequence (in TargetCache::callAndResume), we actually have the
+      // callee's ActRec.
+      vmfp() = (TypedValue*)ar->m_savedRbp;
+    } else {
+      vmfp() = (TypedValue*)ar;
+    }
+  }
+  ~VMRegAnchor() {
+    tl_regState = m_old;
+  }
+};
+
+// VM helper to retrieve the frame pointer from the TC. This is
+// a common need for extensions.
+struct CallerFrame : public VMRegAnchor {
+  ActRec* operator()() {
+    // In builtins, m_fp points to the builtin's frame.
+    // getPrevVMState() gets the caller's frame.
+    VMExecutionContext* context = g_vmContext;
+    ActRec* cur = context->getFP();
+    if (!cur) return NULL;
+    ActRec* prev = context->getPrevVMState(cur);
+    if (prev == cur) return NULL;
+    return prev;
+  }
+};
+
+#ifdef HHVM
+#define SYNC_VM_REGS_SCOPED() \
+  HPHP::VM::Transl::VMRegAnchor _anchorUnused
+#else
+#define SYNC_VM_REGS_SCOPED() \
+  do {} while(0)
+#endif
 
 } } } // HPHP::VM::Transl
 

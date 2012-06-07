@@ -29,6 +29,7 @@
 #include <runtime/eval/ast/closure_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/ast/scalar_expression.h>
+#include <runtime/eval/ast/user_attribute.h>
 #include <runtime/eval/strict_mode.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/intercept.h>
@@ -40,9 +41,11 @@
 #include <util/logger.h>
 #include <tbb/concurrent_hash_map.h>
 
+#include <sstream>
+
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef tbb::concurrent_hash_map<StringData *, int,
@@ -160,8 +163,8 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
                      ExpressionPtr defVal, int argNum)
   : Construct(CONSTRUCT_PASS), m_type(type),
     m_name(Name::fromString(CONSTRUCT_PASS, name)), m_defVal(defVal),
-    m_idx(idx), m_kind(KindOfNull), m_argNum(argNum),
-    m_ref(ref), m_nullDefault(false), m_correct(false) {
+    m_idx(idx), m_kind(KindOfNull), m_argNum(argNum), m_ref(ref),
+    m_nullDefault(false), m_correct(false), m_hasDefaultValue((bool)defVal) {
   if (!type.empty()) {
     if (parser->haveFunc()) {
       m_fnName = parser->peekFunc()->fullName();
@@ -261,7 +264,7 @@ void Parameter::dump(std::ostream &out) const {
   out << "$";
   m_name->dump(out);
 
-  if (m_defVal) {
+  if (m_hasDefaultValue) {
     out << " = ";
     m_defVal->dump(out);
   }
@@ -285,9 +288,6 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
   if (m_ref) {
     attr |= ClassInfo::IsReference;
   }
-  if (m_defVal) {
-    attr |= ClassInfo::IsOptional;
-  }
   if (attr == 0) {
     attr = ClassInfo::IsNothing;
   }
@@ -295,8 +295,14 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
   info.name = m_name->get().c_str();
   info.type = m_type.c_str();
   info.value = NULL;
-  info.valueText = NULL; // would be great to have the original PHP code
-  if (m_defVal) {
+  info.valueText = NULL;
+
+  if (m_hasDefaultValue) {
+    {
+      std::stringstream ss;
+      m_defVal->dump(ss);
+      info.valueText = strdup(ss.str().c_str());
+    }
     Variant v;
     try {
       v = m_defVal->eval(env);
@@ -311,7 +317,7 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
 }
 
 bool Parameter::isOptional() const {
-  return m_defVal;
+  return m_hasDefaultValue;
 }
 
 void Parameter::addNullDefault(void *parser) {
@@ -331,7 +337,9 @@ FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
 }
 
 FunctionStatement::~FunctionStatement() {
-  unregister_intercept_flag(&m_maybeIntercepted);
+  if (m_maybeIntercepted >= 0) {
+    unregister_intercept_flag(fullName(), &m_maybeIntercepted);
+  }
 }
 
 void FunctionStatement::init(void *parser, bool ref,
@@ -342,15 +350,12 @@ void FunctionStatement::init(void *parser, bool ref,
   m_params = params;
   m_body = body;
   m_hasCallToGetArgs = has_call_to_get_args;
-  const CallInfo* cit1;
-  void* vt1;
-  if (get_call_info_no_eval(cit1, vt1, m_name)) {
-    m_invalid =
-      get_call_info_builtin(cit1, vt1, m_name->data(), m_name->hash()) ? -1 : 1;
+  if (const ClassInfo::MethodInfo *m = ClassInfo::FindSystemFunction(m_name)) {
+    m_invalid = m->attribute & ClassInfo::IgnoreRedefinition ? 1 : -1;
   }
 
   bool seenOptional = false;
-  set<String> names;
+  std::set<String> names;
   m_callInfo.m_argCount = m_closureCallInfo.m_argCount = m_params.size();
   for (unsigned int i = 0; i < m_params.size(); i++) {
     ParameterPtr param = m_params[i];
@@ -530,13 +535,11 @@ Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
   Variant &ret = env.getRet();
 
   if (m_maybeIntercepted) {
-    Variant handler = get_intercept_handler(fullName(), &m_maybeIntercepted);
-    if (!handler.isNull() &&
-        handle_intercept(handler, fullName(), env.getParams(), ret)) {
-      if (m_ref) {
-        return strongBind(ret);
-      }
-      return ret;
+    CStrRef name = fullName();
+    Variant *handler = get_intercept_handler(name, &m_maybeIntercepted);
+    if (handler &&
+        handle_intercept(*handler, name, env.getParams(), ret)) {
+      return withRefBind(ret);
     }
   }
 
@@ -681,7 +684,7 @@ void FunctionStatement::bindParams(FuncScopeVariableEnvironment &fenv,
                                    CArrRef params) const {
   VariantStack &as = RequestEvalState::argStack();
   for (ArrayIter iter(params); !iter.end(); iter.next()) {
-    as.push(iter.second());
+    as.pushWithRef(iter.secondRef());
     fenv.incArgc();
   }
   vector<ParameterPtr>::const_iterator piter = m_params.begin();
@@ -871,6 +874,17 @@ Variant FunctionStatement::InvokerFewArgs(void *extra, int count,
     return strongBind(ms->invokeFewArgs(count, INVOKE_FEW_ARGS_PASS_ARGS));
   }
   return ms->invokeFewArgs(count, INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
+void FunctionStatement::setUserAttributes(
+  const std::vector<UserAttributePtr> &elems) {
+  for (unsigned i = 0; i < elems.size(); i++) {
+    const StringData* name = StringData::GetStaticString(elems[i]->getName());
+    if (m_userAttributes.find(name) != m_userAttributes.end()) {
+      throw FatalErrorException(0, "Redeclared attribute %s", name->data());
+    }
+    m_userAttributes[name] = elems[i]->getExp();
+  }
 }
 
 void Parameter::error(Parser *parser, const char *fmt, ...) const {

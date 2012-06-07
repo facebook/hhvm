@@ -30,7 +30,7 @@ IMPLEMENT_DEFAULT_EXTENSION(SimpleXML);
 // it go out of scope.
 class XmlDocWrapper : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(XmlDocWrapper)
+  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(XmlDocWrapper)
 
   static StaticString s_class_name;
   // overriding ResourceData
@@ -39,16 +39,16 @@ public:
   XmlDocWrapper(xmlDocPtr doc) : m_doc(doc) {
   }
 
-  ~XmlDocWrapper() {
+  void sweep() {
     if (m_doc) {
       xmlFreeDoc(m_doc);
     }
   }
-
+  ~XmlDocWrapper() { XmlDocWrapper::sweep(); }
 private:
   xmlDocPtr m_doc;
 };
-IMPLEMENT_OBJECT_ALLOCATION(XmlDocWrapper)
+IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(XmlDocWrapper)
 
 StaticString XmlDocWrapper::s_class_name("xmlDoc");
 
@@ -268,7 +268,8 @@ c_SimpleXMLElement::c_SimpleXMLElement(const ObjectStaticCallbacks *cb) :
     ExtObjectDataFlags<ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb), m_node(NULL), m_is_text(false), m_free_text(false),
+                       ObjectData::UseUnset>(cb),
+      m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
   CPP_BUILTIN_CLASS_INIT(SimpleXMLElement);
@@ -277,6 +278,10 @@ c_SimpleXMLElement::c_SimpleXMLElement(const ObjectStaticCallbacks *cb) :
 }
 
 c_SimpleXMLElement::~c_SimpleXMLElement() {
+  c_SimpleXMLElement::sweep();
+}
+
+void c_SimpleXMLElement::sweep() {
   if (m_xpath) {
     xmlXPathFreeContext(m_xpath);
   }
@@ -797,7 +802,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
                   "(duplicate subnodes or attr detected)");
   } else if (m_is_attribute) {
     if (name.isInteger()) {
-      raise_warning("Cannot change attribute number %lld when only %d "
+      raise_warning("Cannot change attribute number %lld when only %ld "
                     "attributes exist", name.toInt64(),
                     m_attributes.toArray().size());
     } else {
@@ -828,7 +833,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 }
 
 bool c_SimpleXMLElement::o_toBoolean() const {
-  return m_node != NULL || o_properties.size();
+  return m_node != NULL || getProperties().size();
 }
 
 int64 c_SimpleXMLElement::o_toInt64() const {
@@ -856,9 +861,6 @@ Array c_SimpleXMLElement::o_toArray() const {
   Array ret;
   ret.set("@attributes", m_attributes);
   ret += m_children;
-#ifdef HHVM
-  Instance::o_getArray(ret, false);
-#endif
   return ret;
 }
 
@@ -986,6 +988,10 @@ c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(
 }
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
+  c_SimpleXMLElementIterator::sweep();
+}
+
+void c_SimpleXMLElementIterator::sweep() {
   delete m_iter1;
   delete m_iter2;
 }

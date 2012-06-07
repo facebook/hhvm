@@ -19,26 +19,26 @@
 #include <runtime/eval/debugger/cmd/cmd_flow_control.h>
 #include <runtime/eval/debugger/cmd/cmd_jump.h>
 #include <runtime/eval/debugger/cmd/cmd_signal.h>
+#include <runtime/eval/debugger/cmd/cmd_machine.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/frame_injection.h>
 #include <runtime/eval/eval.h>
+#include <runtime/vm/debugger_hook.h>
 #include <util/process.h>
 #include <util/logger.h>
-
-using namespace std;
-using namespace boost;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
-    : m_stopped(false), m_local(local), m_hasBreakPoints(false),
-      m_threadMode(Normal), m_thread(0),
+    : m_stopped(false), m_local(local), m_dummySandbox(NULL),
+      m_hasBreakPoints(false), m_threadMode(Normal), m_thread(0),
       m_signalThread(this, &DebuggerProxy::pollSignal),
       m_signum(CmdSignal::SignalNone) {
   m_thrift.create(socket);
+  m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64)this);
 }
 
 DebuggerProxy::~DebuggerProxy() {
@@ -84,8 +84,8 @@ void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
   }
 }
 
-void DebuggerProxy::switchSandbox(const std::string &newId) {
-  Debugger::SwitchSandbox(shared_from_this(), newId);
+bool DebuggerProxy::switchSandbox(const std::string &newId, bool force) {
+  return Debugger::SwitchSandbox(shared_from_this(), newId, force);
 }
 
 void DebuggerProxy::updateSandbox(DSandboxInfoPtr sandbox) {
@@ -129,9 +129,9 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
 }
 
 void DebuggerProxy::startDummySandbox() {
-  m_dummySandbox = DummySandboxPtr
-    (new DummySandbox(this, RuntimeOption::DebuggerDefaultSandboxPath,
-                      RuntimeOption::DebuggerStartupDocument));
+  m_dummySandbox =
+    new DummySandbox(this, RuntimeOption::DebuggerDefaultSandboxPath,
+                     RuntimeOption::DebuggerStartupDocument);
   m_dummySandbox->start();
 }
 
@@ -140,14 +140,75 @@ void DebuggerProxy::notifyDummySandbox() {
 }
 
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
-  Lock lock(m_mutex);
+  WriteLock lock(m_breakMutex);
   m_breakpoints = breakpoints;
   m_hasBreakPoints = !m_breakpoints.empty();
+  m_breaksEnterFunc.clear();
+  m_breaksEnterClsMethod.clear();
+  for (unsigned int i = 0; i < m_breakpoints.size(); i++) {
+    BreakPointInfoPtr bp = m_breakpoints[i];
+    std::string funcFullName = bp->getFuncName();
+    if (funcFullName.empty()) {
+      continue;
+    }
+    {
+      StringDataMap::accessor acc;
+      const StringData* sd = StringData::GetStaticString(funcFullName);
+      m_breaksEnterFunc.insert(acc, sd);
+    }
+    std::string clsName = bp->getClass();
+    if (!clsName.empty()) {
+      StringDataMap::accessor acc;
+      const StringData* sd = StringData::GetStaticString(clsName);
+      m_breaksEnterClsMethod.insert(acc, sd);
+    }
+  }
+}
+
+void DebuggerProxy::getBreakPoints(BreakPointInfoPtrVec &breakpoints) {
+  ReadLock lock(m_breakMutex);
+  breakpoints = m_breakpoints;
+}
+
+bool DebuggerProxy::couldBreakEnterClsMethod(const StringData* className) {
+  ReadLock lock(m_breakMutex);
+  StringDataMap::const_accessor acc;
+  return m_breaksEnterClsMethod.find(acc, className);
+}
+
+bool DebuggerProxy::couldBreakEnterFunc(const StringData* funcFullName) {
+  ReadLock lock(m_breakMutex);
+  StringDataMap::const_accessor acc;
+  return m_breaksEnterFunc.find(acc, funcFullName);
+}
+
+void DebuggerProxy::getBreakClsMethods(
+  std::vector<const StringData*>& classNames) {
+  classNames.clear();
+  WriteLock lock(m_breakMutex);
+  for (StringDataMap::const_iterator iter = m_breaksEnterClsMethod.begin();
+       iter != m_breaksEnterClsMethod.end(); ++iter) {
+    classNames.push_back(iter->first);
+  }
+}
+
+void DebuggerProxy::getBreakFuncs(
+  std::vector<const StringData*>& funcFullNames) {
+  funcFullNames.clear();
+  WriteLock lock(m_breakMutex);
+  for (StringDataMap::const_iterator iter = m_breaksEnterFunc.begin();
+       iter != m_breaksEnterFunc.end(); ++iter) {
+    funcFullNames.push_back(iter->first);
+  }
 }
 
 bool DebuggerProxy::needInterrupt() {
   return m_hasBreakPoints || m_flow ||
          m_signum != CmdSignal::SignalNone;
+}
+
+bool DebuggerProxy::needInterruptForNonBreak() {
+  return m_flow || m_signum != CmdSignal::SignalNone;
 }
 
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
@@ -231,7 +292,19 @@ void DebuggerProxy::pollSignal() {
     }
 
     m_signum = sig->getSignal();
+
+    if (m_signum != CmdSignal::SignalNone) {
+      Debugger::RequestInterrupt(shared_from_this());
+    }
   }
+}
+
+void DebuggerProxy::forceQuit() {
+  DSandboxInfo invalid;
+  Lock l(this);
+  m_sandbox = invalid;
+  m_stopped = true;
+  // the flag will take care of the rest
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -349,6 +422,10 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
     }
     m_threads.erase(self);
     if (m_stopped) return false;
+    if (!checkBreakPoints(cmd)) {
+      // The breakpoint might have been removed while I'm waiting
+      return false;
+    }
   } else if (check && !checkJumpFlowBreak(cmd)) {
     return false;
   }
@@ -360,7 +437,7 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 }
 
 bool DebuggerProxy::checkBreakPoints(CmdInterrupt &cmd) {
-  Lock lock(m_mutex);
+  ReadLock lock(m_breakMutex);
   return cmd.shouldBreak(m_breakpoints);
 }
 
@@ -436,18 +513,32 @@ bool DebuggerProxy::processJumpFlowBreak(CmdInterrupt &cmd) {
   return true;
 }
 
+void DebuggerProxy::checkStop() {
+  if (m_stopped) {
+    Debugger::RemoveProxy(shared_from_this());
+    m_thrift.close();
+    throw DebuggerClientExitException();
+  }
+}
+
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   if (!cmd.onServerD(this)) {
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
   }
 
+  // Once we sent an CmdInterrupt to client side, we should be considered idle
+  RequestInjectionData &rjdata = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  rjdata.debuggerIdle = 0;
+
   while (true) {
     DebuggerCommandPtr res;
     while (!DebuggerCommand::Receive(m_thrift, res,
                                      "DebuggerProxy::processInterrupt()")) {
       // we will wait forever until DebuggerClient sends us something
+      checkStop();
     }
+    checkStop();
     if (res) {
       m_flow = dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {
@@ -594,8 +685,8 @@ Variant DebuggerProxyVM::ExecutePHP(const std::string &php, String &output,
     Logger::SetThreadHook(append_stderr, &sb);
   }
   try {
-    StringData code(php.c_str(), php.size(), CopyString);
-    g_context->evalPHPDebugger((TypedValue*)&ret, &code, frame);
+    String code(php.c_str(), php.size(), CopyString);
+    g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
   } catch (InvalidFunctionCallException &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));
     sb.append(Debugger::ColorStderr(
@@ -631,34 +722,33 @@ void DebuggerProxyVM::interrupt(CmdInterrupt &cmd) {
 
   if (cmd.getInterruptType() != HardBreakPoint) {
     if (!needInterrupt()) return;
-    const HPHP::VM::SourceLoc *loc = g_context->m_debuggerLastBreakLoc;
+    // Modify m_lastLocFilter to save current location
     InterruptSiteVM *site = (InterruptSiteVM*)cmd.getSite();
-    if (loc) {
-      if (g_context->getDebuggerSmallStep() &&
-          loc->same(site->getSourceLoc())) {
-        // Small step with same source localtion
-        return;
-      }
-      if (!g_context->getDebuggerSmallStep() &&
-          loc->line0 == site->getSourceLoc()->line0) {
-        // Not small step with same line number
-        return;
+    if (g_vmContext->m_lastLocFilter) {
+      g_vmContext->m_lastLocFilter->clear();
+    } else {
+      g_vmContext->m_lastLocFilter = new VM::PCFilter();
+    }
+    if (debug && Trace::moduleEnabled(Trace::bcinterp, 5)) {
+      Trace::trace("prepare source loc filter\n");
+      const VM::OffsetRangeVec& offsets = site->getCurOffsetRange();
+      for (VM::OffsetRangeVec::const_iterator it = offsets.begin();
+           it != offsets.end(); ++it) {
+        Trace::trace("block source loc in %s:%d: unit %p offset [%d, %d)\n",
+                     site->getFile(), site->getLine0(),
+                     site->getUnit(), it->m_base, it->m_past);
       }
     }
-    // Need to unset g_context->m_debuggerLastBreakLoc so that it can break at
-    // the same location after executing somewhere else
-    g_context->m_debuggerLastBreakLoc = NULL;
+    g_vmContext->m_lastLocFilter->addRanges(site->getUnit(),
+                                            site->getCurOffsetRange());
   }
 
   DebuggerProxy::interrupt(cmd);
+}
 
-  HPHP::VM::Op op = (HPHP::VM::Op)*g_context->m_pc;
-  if (op == HPHP::VM::OpFCall) {
-    g_context->m_debuggerFuncEntry = true;
-    g_context->m_debuggerLastBreakLoc = NULL;
-  } else {
-    g_context->m_debuggerFuncEntry = false;
-  }
+void DebuggerProxyVM::setBreakPoints(BreakPointInfoPtrVec& breakpoints) {
+  DebuggerProxy::setBreakPoints(breakpoints);
+  VM::phpBreakPointHook(this);
 }
 
 void DebuggerProxyVM::readInjTablesFromThread() {
@@ -670,31 +760,27 @@ void DebuggerProxyVM::readInjTablesFromThread() {
     delete m_injTables;
     m_injTables = NULL;
   }
-  if (!g_context->m_injTables) {
+  if (!g_vmContext->m_injTables) {
     return;
   }
-  m_injTables = g_context->m_injTables->clone();
+  m_injTables = g_vmContext->m_injTables->clone();
 }
 
 void DebuggerProxyVM::writeInjTablesToThread() {
-  ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_reqInjectionData.dummySandbox) {
-    return;
-  }
-  if (g_context->m_injTables) {
-    delete g_context->m_injTables;
-    g_context->m_injTables = NULL;
+  if (g_vmContext->m_injTables) {
+    delete g_vmContext->m_injTables;
+    g_vmContext->m_injTables = NULL;
   }
   if (!m_injTables) {
     return;
   }
-  g_context->m_injTables = m_injTables->clone();
+  g_vmContext->m_injTables = m_injTables->clone();
 }
 
 int DebuggerProxyVM::getStackDepth() {
   int depth = 0;
-  ExecutionContext* context = g_context.getNoCheck();
-  HPHP::VM::ActRec *fp = context->m_fp;
+  VMExecutionContext* context = g_vmContext;
+  HPHP::VM::ActRec *fp = context->getFP();
   HPHP::VM::ActRec *prev = context->arGetSfp(fp);
   while (fp != prev) {
     fp = prev;
@@ -704,26 +790,7 @@ int DebuggerProxyVM::getStackDepth() {
   return depth;
 }
 
-bool DebuggerProxyVM::processJumpFlowBreak(CmdInterrupt &cmd) {
-  bool ret = DebuggerProxy::processJumpFlowBreak(cmd);
-  if (ret) {
-    if (cmd.getInterruptType() == BreakPointReached ||
-        cmd.getInterruptType() == HardBreakPoint) {
-      InterruptSiteVM *site = (InterruptSiteVM*)cmd.getSite();
-      g_context->m_debuggerLastBreakLoc = site->getSourceLoc();
-    } else {
-      g_context->m_debuggerLastBreakLoc = NULL;
-    }
-  }
-  return ret;
-}
-
 void DebuggerProxyVM::processFlowControl(CmdInterrupt &cmd) {
-  if (cmd.getInterruptType() != BreakPointReached &&
-      cmd.getInterruptType() != HardBreakPoint) {
-    m_flow.reset();
-    return;
-  }
   switch (m_flow->getType()) {
     case DebuggerCommand::KindOfContinue:
       if (!m_flow->decCount()) m_flow.reset();
@@ -733,7 +800,7 @@ void DebuggerProxyVM::processFlowControl(CmdInterrupt &cmd) {
     case DebuggerCommand::KindOfNext:
     case DebuggerCommand::KindOfOut:
       m_flow->setStackDepth(getStackDepth());
-      m_flow->setVMDepth(g_context->m_nesting);
+      m_flow->setVMDepth(g_vmContext->m_nesting);
       break;
     default:
       ASSERT(false);
@@ -751,7 +818,7 @@ bool DebuggerProxyVM::breakByFlowControl(CmdInterrupt &cmd) {
       break;
     }
     case DebuggerCommand::KindOfNext: {
-      int currentVMDepth = g_context->m_nesting;
+      int currentVMDepth = g_vmContext->m_nesting;
       int currentStackDepth = getStackDepth();
       if (currentVMDepth <= m_flow->getVMDepth() &&
           currentStackDepth <= m_flow->getStackDepth()) {
@@ -763,7 +830,7 @@ bool DebuggerProxyVM::breakByFlowControl(CmdInterrupt &cmd) {
       break;
     }
     case DebuggerCommand::KindOfOut: {
-      int currentVMDepth = g_context->m_nesting;
+      int currentVMDepth = g_vmContext->m_nesting;
       int currentStackDepth = getStackDepth();
       if (currentVMDepth < m_flow->getVMDepth()) {
         // Cut corner here, just break when cross VM boundary no matter how

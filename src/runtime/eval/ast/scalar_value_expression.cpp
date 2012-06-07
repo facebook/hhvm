@@ -78,7 +78,11 @@ ScalarValueExpression::~ScalarValueExpression() {
 }
 
 void ScalarValueExpression::dump(std::ostream &out) const {
-  VariableSerializer vs(VariableSerializer::Serialize);
+  if (m_value.isNull()) {
+    out << "null";
+    return;
+  }
+  VariableSerializer vs(VariableSerializer::VarExport);
   Variant ret(vs.serialize(m_value, true));
   out << ret.toString().data();
 }

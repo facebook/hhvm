@@ -27,8 +27,6 @@
 #include <compiler/expression/scalar_expression.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors

@@ -1,13 +1,13 @@
 <?php
 
 // $scriptPath should be initialized by the script that includes this file
-global $scriptPath, $outputPath;
+global $scriptPath, $ext_hhvm_path;
 
-require_once $outputPath . "/xconstants.php";
+require_once $ext_hhvm_path . "/xconstants.php";
 require_once $scriptPath . '/../../idl/base.php';
 
-function generateMangleMap($use_ext_noinline) {
-  global $scriptPath, $outputPath, $extension_lib_path, $extensions;
+function generateMangleMap() {
+  global $scriptPath, $extension_lib_path, $extensions;
 
   $mangleMap = array();
 
@@ -20,30 +20,19 @@ function generateMangleMap($use_ext_noinline) {
     'HPHP::f_var_dump(HPHP::Variant const&)' => true
   );
 
-  // builtin_functions.o is already included in libhphp_runtime.a
-  global $lib_dir;
-  $files = array($lib_dir . '/libhphp_runtime.a');
-  foreach($extensions as $ext) {
-    $files[] = $extension_lib_path . '/' . $ext . '/lib' . $ext . '.a';
-  }
-  // Include ext_noinline.o if the caller requested it
-  if ($use_ext_noinline) {
-    $files[] = $outputPath . '/ext_noinline.o';
-  }
-
   // Build the mangle map, using c++filt to demangle the mangled names
   $mlist = '';
-  foreach ($files as $file) {
-    $mangled = explode("\n", `readelf -s -W $file | grep FUNC.*GLOBAL`);
-    for ($i = 0; $i < count($mangled); $i++) {
-      $m = trim($mangled[$i]);
-      if ($m == '') continue;
-      $m = trim(preg_replace('/^.*DEFAULT[0-9 ]*/', '', $m));
-      $mlist .= $m . "\n";
-    }
+  global $current_object_file;
+  $mangled = explode("\n",
+    `readelf -s -W $current_object_file | grep FUNC.*GLOBAL`);
+  for ($i = 0; $i < count($mangled); $i++) {
+    $m = trim($mangled[$i]);
+    if ($m == '') continue;
+    $m = trim(preg_replace('/^.*DEFAULT[0-9 ]*/', '', $m));
+    $mlist .= $m . "\n";
   }
 
-  $tmpFilepath = $outputPath . '/phase1.tmp';
+  $tmpFilepath = tempnam('/tmp', 'ext_hhvm_tmp');
   $tmp_file = fopen($tmpFilepath, 'w');
   fwrite($tmp_file, $mlist);
   fclose($tmp_file);
@@ -57,8 +46,13 @@ function generateMangleMap($use_ext_noinline) {
     $d = $darr[$i];
     if ($m == '' || $d == '') continue;
     if (isset($ignoreList[$d])) continue;
-    // We only care about functions that start with "f_" or "fni_"
-    // and methods that start with "t_" ot "ti_"
+    /*
+     * We only care about functions that start with "f_" or "fni_"
+     * and methods that start with "t_" ot "ti_"
+     *
+     * fni_ are our stubs in noinline.cpp for extensions that are
+     * normally defined inline only.
+     */
     if (preg_match('/^HPHP::f(ni)?_/', $d) ||
         preg_match('/^HPHP::c_[A-Za-z0-9_]*::t(i)?_/', $d)) {
       $mangleMap[$d] = $m;
@@ -91,7 +85,7 @@ function parseIDLParams($idlFunc, $isMagicMethod = false) {
   return $params;
 }
 
-function parseIDLFunc($idlFunc, $mangleMap, $phase) {
+function parseIDLFunc($idlFunc, $mangleMap) {
   $name = $idlFunc['name'];
   $returnByRef = array_key_exists('ref', $idlFunc) && $idlFunc['ref'];
   $returnType = mapReturnType(typeidlname($idlFunc['return'], 'void'),
@@ -102,21 +96,20 @@ function parseIDLFunc($idlFunc, $mangleMap, $phase) {
   $obj = new PhpExtFunc();
   $obj->initFunc($name, $returnType, $returnByRef, $params, $isVarargs);
   $sig = $obj->getHphpSig();
+
   // The implementation of some extension functions are in the .h file,
   // so we don't have a mangled names for them.
-  if ($phase > 1) {
-    if (!isset($mangleMap[$sig])) {
-      $obj->prefix = 'fni_';
-      $sig = $obj->getHphpSig();
-    }
+  if (!isset($mangleMap[$sig])) {
+    $obj->prefix = 'fni_';
+    $sig = $obj->getHphpSig();
   }
+
   if (isset($mangleMap[$sig])) {
     $obj->mangledName = $mangleMap[$sig];
-  } else if ($phase > 1) {
-    echo "ERROR: No mangled name found for $sig\n";
-    var_dump($mangleMap);
-    throw new Exception("No mangled name found for $sig");
+  } else {
+    $obj->mangledName = null;
   }
+
   return $obj;
 }
 
@@ -141,24 +134,36 @@ function parseIDLMethod($idlFunc, $mangleMap, $className) {
   if (isset($mangleMap[$sig])) {
     $obj->mangledName = $mangleMap[$sig];
   } else {
-    echo "ERROR: No mangled name found for $sig\n";
-    var_dump($mangleMap);
-    throw new Exception("No mangled name found for $sig");
+    $obj->mangledName = null;
   }
   return $obj;
 }
 
+function findIDLFiles($idlDir) {
+  global $extra_idl;
+  $files = array_filter(
+    scandir($idlDir),
+    function ($f) {
+      return preg_match('/\.idl\.php$/', $f);
+    });
+
+  $files = array_map(function($e) use($idlDir) {
+      return $idlDir.'/'.$e;
+    }, $files);
+
+  $files = array_merge($files, $extra_idl);
+  return $files;
+}
+
 // Parse the IDL files for info about extension functions
-function parseIDLForFunctions(&$ext_func_info, $mangleMap, $idlDir, $phase) {
+function parseIDLForFunctions(&$ext_func_info, $mangleMap, $idlDir) {
   global $scriptPath;
-  $files = scandir($idlDir);
+  $files = findIDLFiles($idlDir);
   foreach ($files as $file) {
-    if (!preg_match('/\.idl\.php$/', $file)) continue;
-    $fullpath = $idlDir . '/' . $file;
-    require($fullpath);
+    require($file);
     global $funcs;
     foreach ($funcs as $func) {
-      $ext_func_info[] = parseIDLFunc($func, $mangleMap, $phase);
+      $ext_func_info[] = parseIDLFunc($func, $mangleMap);
     }
     ResetSchema();
   }
@@ -167,11 +172,9 @@ function parseIDLForFunctions(&$ext_func_info, $mangleMap, $idlDir, $phase) {
 // Parse the IDL files for info about extension methods
 function parseIDLForMethods(&$ext_class_info, $mangleMap, $idlDir) {
   global $scriptPath;
-  $files = scandir($idlDir);
+  $files = findIDLFiles($idlDir);
   foreach ($files as $file) {
-    if (!preg_match('/\.idl\.php$/', $file)) continue;
-    $fullpath = $idlDir . '/' . $file;
-    require($fullpath);
+    require($file);
     global $classes;
     foreach ($classes as $cls) {
       $cname = $cls['name'];
@@ -374,7 +377,7 @@ function mapType($t, $byRef = false) {
   }
   if (isset($typeMap[$t])) {
     $t = $typeMap[$t];
-  } else { 
+  } else {
     $tlen = strlen($t);
     if ($tlen >= 2 && $t[0] === "'" && $t[$tlen-1] === "'") {
       $t = $typeMap['Object'];
@@ -390,7 +393,7 @@ function mapReturnType($t, $byRef = false) {
   }
   if (isset($returnTypeMap[$t])) {
     $t = $returnTypeMap[$t];
-  } else { 
+  } else {
     $tlen = strlen($t);
     if ($tlen >= 2 && $t[0] === "'" && $t[$tlen-1] === "'") {
       $t = $returnTypeMap['Object'];
@@ -399,4 +402,31 @@ function mapReturnType($t, $byRef = false) {
   return $t;
 }
 
+function getUniqueFuncName($obj) {
+  if ($obj->className === null) {
+    return $obj->name;
+  } else {
+    return strlen($obj->className) . $obj->className . '_' . $obj->name;
+  }
+}
 
+function emit_include($out, $include) {
+  fwrite($out, "#include <$include>\n");
+}
+
+function emit_all_includes($out, $sepExtHeaders) {
+  // TODO: we should try to cut down on the fat dependencies here
+  // (class.h, etc)...
+  emit_include($out, "runtime/ext_hhvm/ext_hhvm.h");
+  emit_include($out, "runtime/base/builtin_functions.h");
+  emit_include($out, "runtime/base/array/array_init.h");
+  emit_include($out, "runtime/ext/ext.h");
+  emit_include($out, "runtime/vm/class.h");
+  emit_include($out, "runtime/vm/runtime.h");
+  emit_include($out, "runtime/vm/exception_gate.h");
+  emit_include($out, "exception");
+  foreach($sepExtHeaders as $header) {
+    emit_include($out, $header);
+  }
+  fwrite($out, "\n");
+}

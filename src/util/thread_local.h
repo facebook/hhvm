@@ -124,6 +124,10 @@ struct ThreadLocal {
     delete m_node.m_p;
     m_node.m_p = NULL;
   }
+  
+  void nullOut() {
+    m_node.m_p = NULL;
+  }
 
   T *operator->() const {
     return get();
@@ -366,6 +370,10 @@ public:
 
   void destroy() {
     delete (T*)pthread_getspecific(m_key);
+    pthread_setspecific(m_key, NULL);
+  }
+ 
+  void nullOut() {
     pthread_setspecific(m_key, NULL);
   }
 

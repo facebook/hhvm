@@ -87,6 +87,11 @@ inline Variant x_mysql_error(CVarRef link_identifier = null) {
   return f_mysql_error(link_identifier);
 }
 
+inline Variant x_mysql_warning_count(CVarRef link_identifier = null) {
+  FUNCTION_INJECTION_BUILTIN(mysql_warning_count);
+  return f_mysql_warning_count(link_identifier);
+}
+
 inline String x_mysql_get_client_info() {
   FUNCTION_INJECTION_BUILTIN(mysql_get_client_info);
   return f_mysql_get_client_info();

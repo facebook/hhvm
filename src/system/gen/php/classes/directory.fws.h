@@ -23,12 +23,30 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // 1. Static Strings
-extern StaticString s_sys_ssa1b87da7;
-extern StaticString s_sys_ssf052ec6b;
-extern StaticString s_sys_ss46eeef5c;
-extern StaticString s_sys_ssf362b3c4;
-extern StaticString s_sys_sse896cb09;
-extern StaticString s_sys_ss941ca25f;
+extern StaticStringProxy s_sys_sspa1b87da7;
+#ifndef s_sys_ssa1b87da7
+#define s_sys_ssa1b87da7 (*(StaticString *)(&s_sys_sspa1b87da7))
+#endif
+extern StaticStringProxy s_sys_sspf052ec6b;
+#ifndef s_sys_ssf052ec6b
+#define s_sys_ssf052ec6b (*(StaticString *)(&s_sys_sspf052ec6b))
+#endif
+extern StaticStringProxy s_sys_ssp46eeef5c;
+#ifndef s_sys_ss46eeef5c
+#define s_sys_ss46eeef5c (*(StaticString *)(&s_sys_ssp46eeef5c))
+#endif
+extern StaticStringProxy s_sys_sspf362b3c4;
+#ifndef s_sys_ssf362b3c4
+#define s_sys_ssf362b3c4 (*(StaticString *)(&s_sys_sspf362b3c4))
+#endif
+extern StaticStringProxy s_sys_sspe896cb09;
+#ifndef s_sys_sse896cb09
+#define s_sys_sse896cb09 (*(StaticString *)(&s_sys_sspe896cb09))
+#endif
+extern StaticStringProxy s_sys_ssp941ca25f;
+#ifndef s_sys_ss941ca25f
+#define s_sys_ss941ca25f (*(StaticString *)(&s_sys_ssp941ca25f))
+#endif
 
 // 2. Static Arrays
 

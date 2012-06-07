@@ -18,8 +18,6 @@
 #include <runtime/eval/ast/echo_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
-using namespace std;
-
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

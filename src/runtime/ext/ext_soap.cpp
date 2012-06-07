@@ -31,8 +31,6 @@
 
 #include <system/lib/systemlib.h>
 
-using namespace std;
-
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(soap);
 ///////////////////////////////////////////////////////////////////////////////
@@ -2246,7 +2244,7 @@ void c_SoapServer::t_setpersistence(int64 mode) {
     if (mode == SOAP_PERSISTENCE_SESSION || mode == SOAP_PERSISTENCE_REQUEST) {
       m_soap_class.persistance = mode;
     } else {
-      raise_warning("Tried to set persistence with bogus value (%ld)", mode);
+      raise_warning("Tried to set persistence with bogus value (%lld)", mode);
     }
   } else {
     raise_warning("Tried to set persistence when you are using you "
@@ -2693,8 +2691,12 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
   int code = http.post(location.data(), buffer.data(), buffer.size(), response,
                        &headers);
   if (code == 0) {
+    String msg = "Failed Sending HTTP Soap request";
+    if (!http.getLastError().empty()) {
+      msg += ": " + http.getLastError();
+    }
     m_soap_fault = Object(SystemLib::AllocSoapFaultObject(
-      "HTTP", "Failed Sending HTTP SOAP request"));
+      "HTTP", msg));
     return null;
   }
   if (code != 200) {
@@ -2775,7 +2777,7 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
   if (type.isNull()) {
     m_type = UNKNOWN_TYPE;
   } else {
-    map<int, encodePtr> &defEncIndex = SOAP_GLOBAL(defEncIndex);
+    std::map<int, encodePtr> &defEncIndex = SOAP_GLOBAL(defEncIndex);
     int64 ntype = type.toInt64();
     if (defEncIndex.find(ntype) != defEncIndex.end()) {
       m_type = ntype;

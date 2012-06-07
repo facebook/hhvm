@@ -28,6 +28,7 @@ const Object Object::s_nullObject = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
 
+HOT_FUNC
 Object::~Object() {
   if (LIKELY(m_px != 0)) {
     if (UNLIKELY(m_px->decRefCount() == 0)) {
@@ -39,15 +40,13 @@ Object::~Object() {
   }
 }
 
-ArrayIter Object::begin(CStrRef context /* = null_string */,
-                        bool setIterDirty /* = false */) const {
+ArrayIter Object::begin(CStrRef context /* = null_string */) const {
   if (!m_px) throw_null_pointer_exception();
   return m_px->begin(context);
 }
 
 MutableArrayIter Object::begin(Variant *key, Variant &val,
-                               CStrRef context /* = null_string */,
-                               bool setIterDirty /* = false */) const {
+                               CStrRef context /* = null_string */) const {
   if (!m_px) throw_null_pointer_exception();
   return m_px->begin(key, val, context);
 }
@@ -95,14 +94,19 @@ bool Object::more(CObjRef v2) const {
   return m_px != v2.m_px && toArray().more(v2.toArray());
 }
 
+static Variant warn_non_object() {
+  raise_warning("Cannot access property on non-object");
+  return null;
+}
+
 Variant Object::o_get(CStrRef propName, bool error /* = true */,
                       CStrRef context /* = null_string */) const {
-  if (!m_px) throw_null_pointer_exception();
+  if (UNLIKELY(!m_px)) return warn_non_object();
   return m_px->o_get(propName, error, context);
 }
 
 Variant Object::o_getPublic(CStrRef propName, bool error /* = true */) const {
-  if (!m_px) throw_null_pointer_exception();
+  if (UNLIKELY(!m_px)) return warn_non_object();
   return m_px->o_getPublic(propName, error);
 }
 
@@ -200,20 +204,6 @@ void Object::serialize(VariableSerializer *serializer) const {
 
 bool Object::unserialize(std::istream &in) {
   throw NotImplementedException(__func__);
-}
-
-Object Object::fiberMarshal(FiberReferenceMap &refMap) const {
-  if (m_px) {
-    return m_px->fiberMarshal(refMap);
-  }
-  return Object();
-}
-
-Object Object::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  if (m_px) {
-    return m_px->fiberUnmarshal(refMap);
-  }
-  return Object();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

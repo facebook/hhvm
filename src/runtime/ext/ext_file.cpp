@@ -82,8 +82,6 @@
 # define GLOB_FLAGMASK (~0)
 #endif
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -96,7 +94,7 @@ static bool check_error(const char *function, int line, bool ret) {
   return ret;
 }
 
-static Array stat_impl(struct stat *stat_sb) {
+Array stat_impl(struct stat *stat_sb) {
   Array ret;
 
   ret.append((int64)stat_sb->st_dev);
@@ -498,7 +496,7 @@ Variant f_parse_ini_file(CStrRef filename, bool process_sections /* = false */,
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
       String cfd = hhvm
-                   ? g_context->getContainingFileName(true)
+                   ? g_vmContext->getContainingFileName(true)
                    : FrameInjection::GetContainingFileName(true);
       if (!cfd.empty()) {
         int npos = cfd.rfind('/');
@@ -1160,6 +1158,11 @@ Variant f_glob(CStrRef pattern, int flags /* = 0 */) {
 
   if (basedir_limit && ret.empty()) {
     return false;
+  }
+  // php's glob always produces an array, but Variant::Variant(CArrRef)
+  // will produce KindOfNull if given a SmartPtr wrapped around null.
+  if (ret.isNull()) {
+    return Array::Create();
   }
   return ret;
 }

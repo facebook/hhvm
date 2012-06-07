@@ -11,7 +11,7 @@ There are two stages in profiling, collecting the profile and
 processing it into a readable format. Collection is different on the
 command line and server.
 
-<h3>Profiling from the command line</h3>
+= Profiling from the command line
 
 For building stand alone programs you need to link with libprofiler and
 libunwind:
@@ -29,7 +29,7 @@ times per second. The frequency can be changed: higher frequencies
 will impact performance but lower frequencies will require a longer
 run to collect a significant number of samples.
 
-<h3>Profiling from the server</h3>
+= Profiling from the server
 
 Run
 
@@ -43,7 +43,7 @@ A file /hphp/pprof/[host]/hphp.prof should be created. The exact path is
 configurable with the runtime option Debug.ProfilerOutputDir
 (defaults to /tmp on production).
 
-<h3>Processing the profile</h3>
+= Processing the profile
 
 Use the tool pprof to process the profile. For example:
 

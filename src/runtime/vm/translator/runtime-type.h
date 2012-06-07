@@ -98,19 +98,36 @@ struct Location {
   }
 };
 
+struct InputInfo {
+  InputInfo(const Location &l) : loc(l), dontBreak(false), dontGuard(false) {}
+
+  std::string pretty() const {
+    std::string p = loc.pretty();
+    if (dontBreak) p += ":dc";
+    if (dontGuard) p += ":dg";
+    return p;
+  }
+  Location loc;
+  /*
+   * if an input is unknowable, dont break the tracelet
+   * just to find its type. But still generate a guard
+   * if that will tell us its type.
+   */
+  bool     dontBreak;
+  /*
+   * never break the tracelet, or generate a guard on
+   * account of this input.
+   */
+  bool     dontGuard;
+};
+
 // RuntimeType --
 //
 //   Symbolic description of a root location in the runtime: e.g., a stack,
-//   local, global, etc. There is a hard-coded three level hierarchy of
-//   indirection: the most indirect types represent homes of vars pointing to
-//   primitive types. The home layer of indirection is handled a bit
-//   differently, because homes can never be referred to by other homes or
-//   vars, and because homes have associated runtime locations which can be
-//   precisely computed at runtime.
+//   local, global, etc.
 class RuntimeType {
   enum Kind {
     VALUE,
-    HOME,
     ITER
   } m_kind;
   union {
@@ -124,21 +141,21 @@ class RuntimeType {
                                   // KindOfClass: An instance of the current
                                   //   instantiation of the preClass.  The
                                   //   exact class may differ across executions
+        struct {
+          bool boolean;           // KindOfBoolean: A literal bool
+                                  // from True or False.
+          bool boolValid;
+        };
       };
     } m_value;
     struct {
       Iter::Type type;
     } m_iter;
   };
-  // Cannot be part of the union above since Location has a constructor.
-  Location m_homeLoc;
 
   inline void consistencyCheck() const {
-    ASSERT(m_kind == VALUE || m_kind == HOME || m_kind == ITER);
+    ASSERT(m_kind == VALUE || m_kind == ITER);
     if (m_kind == VALUE) {
-      ASSERT(m_homeLoc == Location());
-      ASSERT(m_value.outerType != KindOfHome);
-      ASSERT(m_value.innerType != KindOfHome);
       ASSERT(m_value.innerType != KindOfVariant);
       ASSERT(m_value.outerType == KindOfVariant ||
              m_value.innerType == KindOfInvalid);
@@ -148,7 +165,10 @@ class RuntimeType {
              m_value.innerType == KindOfClass ||
              m_value.outerType == KindOfObject ||
              m_value.innerType == KindOfObject ||
+             m_value.outerType == KindOfBoolean ||
              m_value.klass == NULL);
+      ASSERT(m_value.innerType != KindOfStaticString &&
+             m_value.outerType != KindOfStaticString);
     }
   }
 
@@ -156,14 +176,14 @@ class RuntimeType {
   RuntimeType(DataType outer, DataType inner = KindOfInvalid, const Class* = NULL);
   RuntimeType(const StringData*);
   RuntimeType(const Class*);
+  explicit RuntimeType(bool value);
   RuntimeType(const RuntimeType& copy);
-  RuntimeType(const Location& l);
   RuntimeType();
   RuntimeType(const Iter* iter);
 
+  static const int UnknownBool = -1;
+
   // Specializers
-  //   E.g., RuntimeType(KindOfInt64).box().homeAt(Location(Local, 0))
-  //     represents a home for the Int64 at location 0.
   RuntimeType box() const;
   RuntimeType unbox() const;
   RuntimeType setValueType(DataType vt) const;
@@ -174,6 +194,7 @@ class RuntimeType {
   DataType valueType() const;
   const Class* valueClass() const;
   const StringData* valueString() const;
+  int valueBoolean() const;
   Iter::Type iterType() const;
 
   // Helpers for typechecking
@@ -181,17 +202,20 @@ class RuntimeType {
   DataType typeCheckValue() const;
 
   bool isValue() const;
-  bool isHome() const;
   bool isIter() const;
 
   bool isVagueValue() const;
   bool isVariant() const;
 
-  Location homeLocation() const;
   bool isRefCounted() const;
+  bool isUninit() const;
   bool isNull() const;
   bool isInt() const;
+  bool isDouble() const;
+  bool isArray() const;
+  bool isBoolean() const;
   bool isString() const;
+  bool isObject() const;
   bool operator==(const RuntimeType& r) const;
   RuntimeType &operator=(const RuntimeType& r);
   size_t operator()(const RuntimeType& r) const; // hash function

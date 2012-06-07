@@ -21,15 +21,12 @@
 #include <runtime/base/shared/shared_string.h>
 #include <runtime/base/zend/zend_string.h>
 
-using namespace std;
-
 #define VERIFY_DUMP(map, exp)                                           \
   if (!(exp)) {                                                         \
     printf("%s:%d: [" #exp "] is false\n", __FILE__, __LINE__);         \
     map.dump();                                                         \
     return Count(false);                                                \
   }                                                                     \
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

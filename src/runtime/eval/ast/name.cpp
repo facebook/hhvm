@@ -22,7 +22,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Name::Name(CONSTRUCT_ARGS) : Construct(CONSTRUCT_PASS) {}

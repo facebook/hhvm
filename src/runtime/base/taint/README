@@ -87,8 +87,7 @@ for PHP strings. The String class is used to represent all PHP strings, but
 is also used for various other internal purposes; moreover, String is merely
 a wrapper for the StringData class which actually carries the raw char * as
 well as the fundamental string operations, and StringData is used as the
-data source for even more varied sorts of strings, such as AtomicString or
-StaticString.
+data source for even more varied sorts of strings, such as StaticString.
 
 For simplicity, taint bits are carried by only the StringData and StringBuffer
 classes (the latter of which is a completely separate string implementation
@@ -131,11 +130,6 @@ A brief overview of HPHP string representations:
       StringData ensures that tainting happens and happens correctly. For
       cases and string representations that should not involve taint, we
       need to do our work from a higher level, such as the wrapper classes.
-
-  <AtomicString>: Strings used in HPHPi only to represent tokens (such as
-      class or function names) as well as some literals. AtomicString also
-      wraps StringData, which means that it could potentially be tainted.
-      We prevent this in AtomicString's constructors.
 
   <StaticString>: Global strings that are only used internally. The entire
       set of StaticStrings is generated before any request begins. Tainting

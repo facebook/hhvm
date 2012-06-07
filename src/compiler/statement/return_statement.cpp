@@ -26,8 +26,6 @@
 #include <compiler/analysis/class_scope.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -196,13 +194,8 @@ static bool checkCopyElision(FunctionScopePtr func, ExpressionPtr exp) {
 }
 
 void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  bool braced = false;
   FunctionScopePtr func = getFunctionScope();
   ClassScopePtr cls = getClassScope();
-  if (func->isConstructor(cls)) {
-    cg_indentBegin("{\n"); braced = true;
-    cg_printf("gasInCtor(oldInCtor);\n");
-  }
   if (m_exp) {
     if (m_exp->hasContext(Expression::RefValue)) {
       m_exp->setContext(Expression::NoRefWrapper);
@@ -236,6 +229,4 @@ void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     cg_printf(";\n");
   }
-
-  if (braced) cg_indentEnd("}\n");
 }

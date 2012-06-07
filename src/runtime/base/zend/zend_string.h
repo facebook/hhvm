@@ -78,6 +78,7 @@ inline int string_strncmp(const char *s1, int len1, const char *s2, int len2,
   int retval;
 
   if (len < minlen) {
+    if (UNLIKELY(len < 0)) len = 0;
     minlen = len;
   }
   retval = memcmp(s1, s2, minlen);
@@ -96,6 +97,7 @@ inline int string_strncasecmp(const char *s1, int len1,
   int c1, c2;
 
   if (len < minlen) {
+    if (UNLIKELY(len < 0)) len = 0;
     minlen = len;
   }
   while (minlen--) {

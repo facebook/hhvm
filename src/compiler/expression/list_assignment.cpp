@@ -26,8 +26,6 @@
 #include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -69,6 +67,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     case Expression::KindOfDynamicVariable:
     case Expression::KindOfArrayElementExpression:
     case Expression::KindOfObjectPropertyExpression:
+    case Expression::KindOfStaticMemberExpression:
     case Expression::KindOfSimpleFunctionCall:
     case Expression::KindOfDynamicFunctionCall:
     case Expression::KindOfObjectMethodExpression:

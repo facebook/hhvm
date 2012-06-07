@@ -20,8 +20,6 @@
 #include <runtime/base/builtin_functions.h>
 #include <util/parser/hphp.tab.hpp>
 
-using namespace std;
-
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +34,7 @@ StaticMemberExpression::StaticMemberExpression(EXPRESSION_ARGS,
 void StaticMemberExpression::unset(VariableEnvironment &env) const {
   String cls = m_class->get(env);
   if (cls.same(s_trait_marker)) {
-    cls = ClassStatement::resolveSpInTrait(env, Object(), m_class.get());
+    cls = ClassStatement::resolveSpInTrait(env, m_class.get());
   }
   String variable(m_variable->get(env));
   throw_fatal_unset_static_property(cls.data(), variable.data());
@@ -45,7 +43,7 @@ void StaticMemberExpression::unset(VariableEnvironment &env) const {
 bool StaticMemberExpression::exist(VariableEnvironment &env, int op) const {
   String cls = m_class->get(env);
   if (cls.same(s_trait_marker)) {
-    cls = ClassStatement::resolveSpInTrait(env, Object(), m_class.get());
+    cls = ClassStatement::resolveSpInTrait(env, m_class.get());
   }
   String variable(m_variable->get(env));
   Variant *lv = get_static_property_lv(cls, variable.data());
@@ -65,7 +63,7 @@ Expression *StaticMemberExpression::optimize(VariableEnvironment &env) {
 Variant &StaticMemberExpression::lval(VariableEnvironment &env) const {
   String cls = m_class->get(env);
   if (cls.same(s_trait_marker)) {
-    cls = ClassStatement::resolveSpInTrait(env, Object(), m_class.get());
+    cls = ClassStatement::resolveSpInTrait(env, m_class.get());
   }
   String variable(m_variable->get(env));
   Variant *lv = get_static_property_lv(cls, variable.data());

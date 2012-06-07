@@ -42,7 +42,8 @@ class c_SimpleXMLElement :
       public ExtObjectDataFlags<ObjectData::UseGet|
                                 ObjectData::UseSet|
                                 ObjectData::UseIsset|
-                                ObjectData::UseUnset> {
+                                ObjectData::UseUnset>,
+      public Sweepable {
  public:
   DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
 
@@ -99,7 +100,6 @@ class c_SimpleXMLElement :
   // implemented by HPHP
   public: c_SimpleXMLElement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
 
-
  public:
   Object m_doc;
   xmlNodePtr m_node;
@@ -138,7 +138,6 @@ class c_LibXMLError : public ExtObjectData {
   // implemented by HPHP
   public: c_LibXMLError *create();
 
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -169,7 +168,6 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
 
   // implemented by HPHP
   public: c_SimpleXMLElementIterator *create();
-
 
 public:
   void set_parent(c_SimpleXMLElement* parent);

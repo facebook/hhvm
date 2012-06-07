@@ -23,7 +23,11 @@
 #include <runtime/ext/ext_function.h>
 
 #include <runtime/eval/runtime/variable_environment.h>
-#include <system/lib/systemlib.h>
+#include <runtime/eval/runtime/eval_state.h>
+#include <runtime/vm/translator/translator.h>
+#include <runtime/vm/translator/translator-inline.h>
+#include <runtime/vm/func.h>
+#include <runtime/vm/stats.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,26 +36,27 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
                                           CStrRef funcname,
                                           CStrRef origFuncName,
                                           CArrRef args /* = null_array */) {
+  if (hhvm) {
+    throw_fatal("hphp_create_continuation is not supported under hhvm");
+  }
   Array definedVariables;
   Object obj;
-  if (hhvm) {
-    definedVariables = g_context->getVarEnv()->getDefinedVariables();
-    HPHP::VM::ActRec* ar = vm_get_previous_frame();
-    if (ar && ar->hasThis()) {
-      obj = ar->getThis();
-    }
-  } else {
-    Eval::VariableEnvironment *env =
-      FrameInjection::GetVariableEnvironment(true);
-    if (UNLIKELY(!env)) {
-      throw_fatal("Cannot call hphp_create_continuation in non-eval context");
-    }
-    definedVariables = env->getDefinedVariables();
-    obj = FrameInjection::GetThis(true);
+  Eval::VariableEnvironment *env =
+    FrameInjection::GetVariableEnvironment(true);
+  if (UNLIKELY(!env)) {
+    throw_fatal("Invalid call hphp_create_continuation");
   }
+  definedVariables = env->getDefinedVariables();
+  obj = FrameInjection::GetThis(true);
   bool isMethod = !clsname.isNull() && !clsname.empty();
   int64 callInfo = f_hphp_get_call_info(clsname, funcname);
   int64 extra = f_hphp_get_call_info_extra(clsname, funcname);
+  if (has_eval_support && isMethod &&
+      Eval::MethodStatementWrapper::isTraitMethod(
+        (const Eval::MethodStatementWrapper *)extra)) {
+    extra = f_hphp_get_call_info_extra(FrameInjection::GetClassName(false),
+                                       funcname);
+  }
   p_GenericContinuation cont(
       ((c_GenericContinuation*)coo_GenericContinuation())->
         create(callInfo, extra, isMethod, origFuncName,
@@ -60,66 +65,73 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
     CStrRef cls = f_get_called_class();
     cont->setCalledClass(cls);
   }
+
   return cont;
 }
 
 void f_hphp_pack_continuation(CObjRef continuation,
-                            int64 label, CVarRef value) {
+                              int64 label, CVarRef value) {
+  if (hhvm) {
+    throw_fatal("hphp_pack_continuation is not supported under hhvm");
+  }
   if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
     throw_fatal(
         "Cannot call hphp_pack_continuation with a "
         "non-GenericContinuation object");
   }
   Array definedVariables;
-  if (hhvm) {
-    definedVariables = g_context->getVarEnv()->getDefinedVariables();
-  } else {
-    Eval::VariableEnvironment *env =
-      FrameInjection::GetVariableEnvironment(true);
-    if (UNLIKELY(!env)) {
-      throw_fatal("Cannot call hphp_pack_continuation in non-eval context");
-    }
-    definedVariables = env->getDefinedVariables();
+  Eval::VariableEnvironment *env =
+    FrameInjection::GetVariableEnvironment(true);
+  if (UNLIKELY(!env)) {
+    throw_fatal("Invalid call hphp_pack_continuation");
   }
+  definedVariables = env->getDefinedVariables();
   p_GenericContinuation c(
       static_cast<c_GenericContinuation*>(continuation.get()));
   c->t_update(label, value, definedVariables);
 }
 
 void f_hphp_unpack_continuation(CObjRef continuation) {
+  if (hhvm) {
+    throw_fatal("hphp_unpack_continuation is not supported under hhvm");
+  }
   if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
     throw_fatal(
         "Cannot call hphp_pack_continuation with a "
         "non-GenericContinuation object");
   }
-  if (hhvm) {
-    p_GenericContinuation c(
-        static_cast<c_GenericContinuation*>(continuation.get()));
-    f_extract(c->t_getvars(), 256 /* EXTR_REFS */);
-  } else {
-    Eval::VariableEnvironment *env =
-      FrameInjection::GetVariableEnvironment(true);
-    if (UNLIKELY(!env)) {
-      throw_fatal("Cannot call hphp_unpack_continuation in non-eval context");
-    }
-    p_GenericContinuation c(
-        static_cast<c_GenericContinuation*>(continuation.get()));
-    extract(env, c->t_getvars(), 256 /* EXTR_REFS */);
+  Eval::VariableEnvironment *env =
+    FrameInjection::GetVariableEnvironment(true);
+  if (UNLIKELY(!env)) {
+    throw_fatal("Invalid call hphp_unpack_continuation");
   }
+  p_GenericContinuation c(
+    static_cast<c_GenericContinuation*>(continuation.get()));
+  extract(env, c->t_getvars(), 256 /* EXTR_REFS */);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s___cont__("__cont__");
 
+#define LABEL_INIT m_label(0ll)
+
 c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb),
-    m_label(0LL), m_index(-1LL),
+#ifndef HHVM
+    LABEL_INIT,
+#endif
+    m_index(-1LL),
     m_value(Variant::nullInit), m_received(Variant::nullInit),
     m_done(false), m_running(false), m_should_throw(false),
-    m_isMethod(false), m_callInfo(NULL), m_extra(NULL) {
+    m_isMethod(false), m_callInfo(NULL), m_extra(NULL)
+#ifdef HHVM
+    ,LABEL_INIT
+#endif
+{
   CPP_BUILTIN_CLASS_INIT(Continuation);
 }
+#undef LABEL_INIT
 
 c_Continuation::~c_Continuation() {}
 
@@ -139,7 +151,6 @@ void c_Continuation::t___construct(
     ASSERT(m_obj.isNull());
   }
   m_args = args;
-
   ASSERT(m_callInfo);
 }
 
@@ -177,10 +188,8 @@ Variant c_Continuation::t_get_arg(int64 id) {
 
 Variant c_Continuation::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::current);
-  if (m_index < 0LL) {
-    throw_exception(
-      Object(SystemLib::AllocExceptionObject("Need to call next() first")));
-  }
+  const_assert(!hhvm);
+  nextCheck();
   return m_value;
 }
 
@@ -198,62 +207,52 @@ bool c_Continuation::php_sleep(Variant &ret) {
   return true;
 }
 
-#ifdef HHVM
-#define NEXT_IMPL_GET_ARGS \
-        MethodCallPackage mcp; \
-        mcp.isObj = false; \
-        mcp.obj = mcp.rootObj = NULL; \
-        mcp.extra = m_extra; \
+template<typename FI>
+inline void c_Continuation::nextImpl(FI& fi) {
+  const_assert(!hhvm);
+  preNext();
+  try {
+    if (m_isMethod) {
+      MethodCallPackage mcp;
+      mcp.isObj = hhvm || m_obj.get();
+      if (mcp.isObj) {
+        mcp.obj = mcp.rootObj = m_obj.get();
+      } else {
+        mcp.rootCls = m_called_class.get();
+      }
+      mcp.extra = m_extra;
+      if (!hhvm) {
+        fi.setStaticClassName(m_called_class);
+      }
+      (m_callInfo->getMeth1Args())(mcp, 1, this);
+    } else {
+      if (hhvm) {
+        MethodCallPackage mcp;
+        mcp.isObj = false;
+        mcp.obj = mcp.rootObj = NULL;
+        mcp.extra = m_extra;
         (m_callInfo->getMeth1Args())(mcp, 1, this);
-#define SET_STATIC_CLASS
-#else
-#define NEXT_IMPL_GET_ARGS \
-        (m_callInfo->getFunc1Args())(m_extra, 1, \
-                                     this);
-#define SET_STATIC_CLASS fi.setStaticClassName(m_called_class);
-#endif
-
-#define NEXT_IMPL \
-  if (m_done) { \
-    throw_exception(Object(SystemLib::AllocExceptionObject( \
-      "Continuation is already finished"))); \
-  } \
-  if (m_running) { \
-    throw_exception(Object(SystemLib::AllocExceptionObject( \
-      "Continuation is already running"))); \
-  } \
-  m_running = true; \
-  ++m_index; \
-  try { \
-    if (m_isMethod) { \
-      MethodCallPackage mcp; \
-      mcp.isObj = hhvm || m_obj.get(); \
-      if (mcp.isObj) {                       \
-        mcp.obj = mcp.rootObj = m_obj.get(); \
-      } else {                               \
-        mcp.rootCls = m_called_class.get(); \
-      } \
-      mcp.extra = m_extra; \
-      SET_STATIC_CLASS \
-      (m_callInfo->getMeth1Args())(mcp, 1, this); \
-    } else { \
-      NEXT_IMPL_GET_ARGS \
-    } \
-  } catch (Object e) { \
-    if (e.instanceof("exception")) { \
-      m_running = false; \
-      m_done = true; \
-      throw_exception(e); \
-    } else { \
-      throw; \
-    } \
-  } \
+      } else {
+        (m_callInfo->getFunc1Args())(m_extra, 1, this);
+      }
+    }
+  } catch (Object e) {
+    if (e.instanceof("exception")) {
+      m_running = false;
+      m_done = true;
+      throw_exception(e);
+    } else {
+      throw;
+    }
+  }
   m_running = false;
+}
 
 void c_Continuation::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::next);
+  const_assert(!hhvm);
   m_received.setNull();
-  NEXT_IMPL;
+  nextImpl(fi);
 }
 
 void c_Continuation::t_rewind() {
@@ -264,30 +263,25 @@ void c_Continuation::t_rewind() {
 
 bool c_Continuation::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::valid);
+  const_assert(!hhvm);
   return !m_done;
 }
 
 void c_Continuation::t_send(CVarRef v) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::send);
-  if (m_index < 0LL) {
-    throw_exception(
-      Object(SystemLib::AllocExceptionObject("Need to call next() first")));
-  }
-
+  const_assert(!hhvm);
+  nextCheck();
   m_received.assignVal(v);
-  NEXT_IMPL;
+  nextImpl(fi);
 }
 
 void c_Continuation::t_raise(CVarRef v) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::raise);
-  if (m_index < 0LL) {
-    throw_exception(
-      Object(SystemLib::AllocExceptionObject("Need to call next() first")));
-  }
-
+  const_assert(!hhvm);
+  nextCheck();
   m_received.assignVal(v);
   m_should_throw = true;
-  NEXT_IMPL;
+  nextImpl(fi);
 }
 
 void c_Continuation::t_raised() {
@@ -309,7 +303,27 @@ Variant c_Continuation::t_receive() {
 
 String c_Continuation::t_getorigfuncname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getorigfuncname);
-  return m_origFuncName;
+  if (hhvm) {
+    c_GenericContinuation* self = static_cast<c_GenericContinuation*>(this);
+    VM::Class* vmClass = self->getVMCalledClass();
+    if (vmClass != NULL && m_called_class.size() == 0) {
+      m_called_class = vmClass->name()->data();
+    }
+  }
+  if (m_called_class.size() == 0) {
+    return m_origFuncName;
+  }
+
+  /*
+    Replace the class name in m_origFuncName with the LSB class.  This
+    produces more useful traces.
+   */
+  size_t method_pos = m_origFuncName.find("::");
+  if (method_pos != std::string::npos) {
+    return concat3(m_called_class, "::", m_origFuncName.substr(method_pos+2));
+  } else {
+    return m_origFuncName;
+  }
 }
 
 Variant c_Continuation::t___clone() {
@@ -324,11 +338,26 @@ Variant c_Continuation::t___destruct() {
   return null;
 }
 
-#undef NEXT_IMPL
-
 c_GenericContinuation::c_GenericContinuation(const ObjectStaticCallbacks *cb) :
-    c_Continuation(cb)  {}
-c_GenericContinuation::~c_GenericContinuation() {}
+    c_Continuation(cb), m_locals(NULL), m_hasExtraVars(false), m_nLocals(0),
+    m_vmCalledClass(0ll) {}
+c_GenericContinuation::~c_GenericContinuation() {
+  if (hhvm && m_locals != NULL) {
+    for (int i = 0; i < m_nLocals; ++i) {
+      tvRefcountedDecRef(&m_locals[i]);
+    }
+  }
+  c_GenericContinuation::sweep();
+}
+
+void c_GenericContinuation::sweep() {
+  if (hhvm && m_locals != NULL) {
+    free(m_locals);
+    m_locals = NULL;
+  } else {
+    ASSERT(m_locals == NULL);
+  }
+}
 
 void
 c_GenericContinuation::t___construct(int64 func, int64 extra, bool isMethod,
@@ -337,14 +366,19 @@ c_GenericContinuation::t___construct(int64 func, int64 extra, bool isMethod,
   INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::__construct);
   c_Continuation::t___construct(func, extra, isMethod,
                                 origFuncName, obj, args);
-  m_vars = vars;
+  if (!hhvm) {
+    m_vars = vars;
+  }
 }
 
 void c_GenericContinuation::t_update(int64 label, CVarRef value, CArrRef vars) {
   INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::update);
   c_Continuation::t_update(label, value);
-  m_vars = vars;
-  m_vars.weakRemove(s___cont__, true);
+  if (!hhvm) {
+    m_vars = vars;
+    m_vars.weakRemove(s___cont__, true);
+  }
+
 }
 
 Array c_GenericContinuation::t_getvars() {
@@ -365,5 +399,50 @@ HphpArray* c_GenericContinuation::getStaticLocals() {
 
   return m_VMStatics.get();
 }
+///////////////////////////////////////////////////////////////////////////////
+
+c_DummyContinuation::c_DummyContinuation(const ObjectStaticCallbacks *cb) :
+  ExtObjectData(cb) {
+  CPP_BUILTIN_CLASS_INIT(DummyContinuation);
+}
+
+c_DummyContinuation::~c_DummyContinuation() {}
+
+void c_DummyContinuation::t___construct() {
+}
+
+Variant c_DummyContinuation::t_current() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::current);
+  throw_fatal("Tring to use a DummyContinuation");
+  return null;
+}
+
+int64 c_DummyContinuation::t_key() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::key);
+  throw_fatal("Tring to use a DummyContinuation");
+  return 0;
+}
+
+void c_DummyContinuation::t_next() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::next);
+  throw_fatal("Tring to use a DummyContinuation");
+}
+
+void c_DummyContinuation::t_rewind() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::rewind);
+  throw_fatal("Tring to use a DummyContinuation");
+}
+
+bool c_DummyContinuation::t_valid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::valid);
+  throw_fatal("Tring to use a DummyContinuation");
+  return false;
+}
+
+Variant c_DummyContinuation::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::__destruct);
+  return null;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

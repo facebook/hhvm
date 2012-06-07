@@ -34,8 +34,7 @@ class DummySandbox : public Synchronizable {
 public:
   DummySandbox(DebuggerProxy *proxy, const std::string &defaultPath,
                const std::string &startupFile);
-  ~DummySandbox();
-
+  bool waitForEnd(int seconds);
   void start();
   void stop();
 
@@ -49,8 +48,7 @@ private:
   std::string m_defaultPath;
   std::string m_startupFile;
 
-  AsyncFunc<DummySandbox> m_thread;
-  bool m_inited;
+  AsyncFunc<DummySandbox>* m_thread;
   bool m_stopped;
   int m_signum;
 

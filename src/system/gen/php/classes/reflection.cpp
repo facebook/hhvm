@@ -32,31 +32,32 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
-extern CallInfo ci_;
 /* preface finishes */
-/* SRC: classes/reflection.php line 46 */
+/* SRC: classes/reflection.php line 37 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionParameter)
-const InstanceOfInfo c_ReflectionParameter::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionParameter$$instanceof_table[] = {
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
   {0x2E7081C468A05993LL,1,"ReflectionParameter",&cw_ReflectionParameter},
 };
-const int c_ReflectionParameter::s_instanceof_index[] = {
+const int cw_ReflectionParameter$$instanceof_index[] = {
   3,
   -1,0,-1,1,
 };
-CallInfo c_ReflectionParameter::ci___tostring((void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_ispassedbyreference((void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_isarray((void*)&c_ReflectionParameter::i_isarray, (void*)&c_ReflectionParameter::ifa_isarray, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getdefaultvalue((void*)&c_ReflectionParameter::i_getdefaultvalue, (void*)&c_ReflectionParameter::ifa_getdefaultvalue, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getclass((void*)&c_ReflectionParameter::i_getclass, (void*)&c_ReflectionParameter::ifa_getclass, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getposition((void*)&c_ReflectionParameter::i_getposition, (void*)&c_ReflectionParameter::ifa_getposition, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_isoptional((void*)&c_ReflectionParameter::i_isoptional, (void*)&c_ReflectionParameter::ifa_isoptional, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getdeclaringclass((void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_isdefaultvalueavailable((void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getname((void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_export((void*)&c_ReflectionParameter::i_export, (void*)&c_ReflectionParameter::ifa_export, 3, 12, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_allowsnull((void*)&c_ReflectionParameter::i_allowsnull, (void*)&c_ReflectionParameter::ifa_allowsnull, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci___construct((void*)&c_ReflectionParameter::i___construct, (void*)&c_ReflectionParameter::ifa___construct, 2, 4, 0x0000000000000000LL);
+extern const CallInfo ci_ReflectionParameter$$__tostring = { (void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$ispassedbyreference = { (void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$isarray = { (void*)&c_ReflectionParameter::i_isarray, (void*)&c_ReflectionParameter::ifa_isarray, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getdefaultvalue = { (void*)&c_ReflectionParameter::i_getdefaultvalue, (void*)&c_ReflectionParameter::ifa_getdefaultvalue, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getclass = { (void*)&c_ReflectionParameter::i_getclass, (void*)&c_ReflectionParameter::ifa_getclass, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getposition = { (void*)&c_ReflectionParameter::i_getposition, (void*)&c_ReflectionParameter::ifa_getposition, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$gettypehinttext = { (void*)&c_ReflectionParameter::i_gettypehinttext, (void*)&c_ReflectionParameter::ifa_gettypehinttext, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$isoptional = { (void*)&c_ReflectionParameter::i_isoptional, (void*)&c_ReflectionParameter::ifa_isoptional, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getdefaultvaluetext = { (void*)&c_ReflectionParameter::i_getdefaultvaluetext, (void*)&c_ReflectionParameter::ifa_getdefaultvaluetext, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getdeclaringclass = { (void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$isdefaultvalueavailable = { (void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getname = { (void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$export = { (void*)&c_ReflectionParameter::i_export, (void*)&c_ReflectionParameter::ifa_export, 3, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$allowsnull = { (void*)&c_ReflectionParameter::i_allowsnull, (void*)&c_ReflectionParameter::ifa_allowsnull, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$__construct = { (void*)&c_ReflectionParameter::i___construct, (void*)&c_ReflectionParameter::ifa___construct, 2, 4, 0x0000000000000000LL};
 Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -78,6 +79,9 @@ Variant c_ReflectionParameter::i_getdeclaringclass(MethodCallPackage &mcp, CArrR
 Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getclass);
 }
+Variant c_ReflectionParameter::i_gettypehinttext(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_gettypehinttext);
+}
 Variant c_ReflectionParameter::i_isarray(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_isarray);
 }
@@ -92,6 +96,9 @@ Variant c_ReflectionParameter::i_isdefaultvalueavailable(MethodCallPackage &mcp,
 }
 Variant c_ReflectionParameter::i_getdefaultvalue(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getdefaultvalue);
+}
+Variant c_ReflectionParameter::i_getdefaultvaluetext(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getdefaultvaluetext);
 }
 Variant c_ReflectionParameter::i_getposition(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getposition);
@@ -115,9 +122,10 @@ Variant c_ReflectionParameter::ifa___tostring(MethodCallPackage &mcp, int count,
   return (self->t___tostring());
 }
 Variant c_ReflectionParameter::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("ReflectionParameter::export", count, 2, 3, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
+  if (count <= 2) return (c_ReflectionParameter::t_export(arg0, arg1));
   CVarRef arg2(a2);
   return (c_ReflectionParameter::t_export(arg0, arg1, arg2));
 }
@@ -152,6 +160,14 @@ Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, I
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
   return (self->t_getclass());
+}
+Variant c_ReflectionParameter::ifa_gettypehinttext(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_gettypehinttext, coo_ReflectionParameter);
+  }
+  c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getTypehintText", 0, 1);
+  return (self->t_gettypehinttext());
 }
 Variant c_ReflectionParameter::ifa_isarray(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -193,6 +209,14 @@ Variant c_ReflectionParameter::ifa_getdefaultvalue(MethodCallPackage &mcp, int c
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
   return (self->t_getdefaultvalue());
 }
+Variant c_ReflectionParameter::ifa_getdefaultvaluetext(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdefaultvaluetext, coo_ReflectionParameter);
+  }
+  c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDefaultValueText", 0, 1);
+  return (self->t_getdefaultvaluetext());
+}
 Variant c_ReflectionParameter::ifa_getposition(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getposition, coo_ReflectionParameter);
@@ -201,28 +225,29 @@ Variant c_ReflectionParameter::ifa_getposition(MethodCallPackage &mcp, int count
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
   return (self->t_getposition());
 }
-const MethodCallInfoTable c_ReflectionParameter::s_call_info_table[] = {
-  { 0x6ED51288559D6063LL, 1, 17, "getDeclaringClass", &c_ReflectionParameter::ci_getdeclaringclass },
-  { 0x23F51CDECC198965LL, 1, 7, "getName", &c_ReflectionParameter::ci_getname },
-  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &c_ReflectionParameter::ci_export },
-  { 0x4044F1EEBF3BB8C8LL, 0, 11, "getPosition", &c_ReflectionParameter::ci_getposition },
-  { 0x4F51DA0B633E9909LL, 1, 8, "getClass", &c_ReflectionParameter::ci_getclass },
-  { 0x24ED05F4504C4C09LL, 0, 10, "allowsNull", &c_ReflectionParameter::ci_allowsnull },
-  { 0x27C482A6C7951E0CLL, 1, 15, "getDefaultValue", &c_ReflectionParameter::ci_getdefaultvalue },
-  { 0x13E3F304BDD89FB1LL, 1, 19, "isPassedByReference", &c_ReflectionParameter::ci_ispassedbyreference },
-  { 0x6E34805C91257C92LL, 1, 23, "isDefaultValueAvailable", &c_ReflectionParameter::ci_isdefaultvalueavailable },
-  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_ReflectionParameter::ci___tostring },
-  { 0x2D6EF48BBAB22735LL, 1, 10, "isOptional", &c_ReflectionParameter::ci_isoptional },
-  { 0x5A9CE40C0F25871DLL, 1, 7, "isArray", &c_ReflectionParameter::ci_isarray },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_ReflectionParameter::ci___construct },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_ReflectionParameter$$call_info_table[] = {
+  { 0x6ED51288559D6063LL, 1, 17, "getDeclaringClass", &ci_ReflectionParameter$$getdeclaringclass },
+  { 0x23F51CDECC198965LL, 1, 7, "getName", &ci_ReflectionParameter$$getname },
+  { 0x0B5ABC58C98E70E8LL, 0, 6, "export", &ci_ReflectionParameter$$export },
+  { 0x4044F1EEBF3BB8C8LL, 1, 11, "getPosition", &ci_ReflectionParameter$$getposition },
+  { 0x4F51DA0B633E9909LL, 0, 8, "getClass", &ci_ReflectionParameter$$getclass },
+  { 0x24ED05F4504C4C09LL, 1, 10, "allowsNull", &ci_ReflectionParameter$$allowsnull },
+  { 0x27C482A6C7951E0CLL, 0, 15, "getDefaultValue", &ci_ReflectionParameter$$getdefaultvalue },
+  { 0x3757A0DCE79CF8ECLL, 1, 19, "getDefaultValueText", &ci_ReflectionParameter$$getdefaultvaluetext },
+  { 0x13E3F304BDD89FB1LL, 1, 19, "isPassedByReference", &ci_ReflectionParameter$$ispassedbyreference },
+  { 0x6E34805C91257C92LL, 1, 23, "isDefaultValueAvailable", &ci_ReflectionParameter$$isdefaultvalueavailable },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_ReflectionParameter$$__tostring },
+  { 0x2D6EF48BBAB22735LL, 1, 10, "isOptional", &ci_ReflectionParameter$$isoptional },
+  { 0x5A9CE40C0F25871DLL, 1, 7, "isArray", &ci_ReflectionParameter$$isarray },
+  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &ci_ReflectionParameter$$__construct },
+  { 0x4DE96DB2278083DFLL, 1, 15, "getTypehintText", &ci_ReflectionParameter$$gettypehinttext },
 };
-const int c_ReflectionParameter::s_call_info_index[] = {
+extern const int cw_ReflectionParameter$$call_info_index[] = {
   31,
   -1,-1,-1,0,-1,1,-1,-1,
   2,4,-1,-1,6,-1,-1,-1,
-  -1,7,8,9,-1,10,-1,-1,
-  -1,-1,-1,-1,-1,11,-1,12,
+  -1,8,9,10,-1,11,-1,-1,
+  -1,-1,-1,-1,-1,12,-1,13,
 
 };
 c_ReflectionParameter *c_ReflectionParameter::create(CVarRef v_func, CVarRef v_param) {
@@ -231,21 +256,25 @@ c_ReflectionParameter *c_ReflectionParameter::create(CVarRef v_func, CVarRef v_p
   t___construct(v_func, v_param);
   return this;
 }
+extern const MethodCallInfoTable cw_ReflectionParameter$$call_info_table[];
+extern const int cw_ReflectionParameter$$call_info_index[];
+extern const InstanceOfInfo cw_ReflectionParameter$$instanceof_table[];
+extern const int cw_ReflectionParameter$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionParameter = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionParameter,
-  c_ReflectionParameter::s_call_info_table,c_ReflectionParameter::s_call_info_index,
-  c_ReflectionParameter::s_instanceof_table,c_ReflectionParameter::s_instanceof_index,
+  cw_ReflectionParameter$$call_info_table,cw_ReflectionParameter$$call_info_index,
+  cw_ReflectionParameter$$instanceof_table,cw_ReflectionParameter$$instanceof_index,
   &c_ReflectionParameter::s_class_name,
-  &c_ReflectionParameter::os_prop_table,&c_ReflectionParameter::ci___construct,0,0,0x0,
+  &c_ReflectionParameter::os_prop_table,&ci_ReflectionParameter$$__construct,0,0,0x0,
   &c_ReflectionParameter::s_cls
 };
-/* SRC: classes/reflection.php line 49 */
+/* SRC: classes/reflection.php line 40 */
 void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::__construct);
-  bool oldInCtor = gasInCtor(true);
   Variant v_params;
 
   Variant tmp_ref;
+  ObjectData *obj_tmp UNUSED;
   if ((toBoolean(v_func) && toBoolean(v_param))) {
     {
       {
@@ -263,17 +292,17 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
       }
     }
   }
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 56 */
+/* SRC: classes/reflection.php line 47 */
 String c_ReflectionParameter::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 76 */
-Variant c_ReflectionParameter::t_export(CVarRef v_func, CVarRef v_param, CVarRef v_ret) {
+/* SRC: classes/reflection.php line 67 */
+Variant c_ReflectionParameter::t_export(CVarRef v_func, CVarRef v_param, CVarRef v_ret //  = false_varNR
+) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::export);
   p_ReflectionParameter v_obj;
   String v_str;
@@ -293,21 +322,24 @@ Variant c_ReflectionParameter::t_export(CVarRef v_func, CVarRef v_param, CVarRef
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 94 */
+/* SRC: classes/reflection.php line 85 */
 Variant c_ReflectionParameter::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getName);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 109 */
+/* SRC: classes/reflection.php line 100 */
 bool c_ReflectionParameter::t_ispassedbyreference() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isPassedByReference);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ss134fd5fa, "ref"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 123 */
+/* SRC: classes/reflection.php line 114 */
 Variant c_ReflectionParameter::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getDeclaringClass);
+  ObjectData *obj_tmp UNUSED;
   if (empty(m_info, NAMSTR(s_sys_ssc82dbd12, "class"), true)) {
     {
       return null;
@@ -320,10 +352,34 @@ Variant c_ReflectionParameter::t_getdeclaringclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 140 */
+/* SRC: classes/reflection.php line 131 */
 Variant c_ReflectionParameter::t_getclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getClass);
+  String v_ltype;
+  Array v_nonClassTypehints;
+
+  ObjectData *obj_tmp UNUSED;
   if (empty(m_info, NAMSTR(s_sys_ss724a760a, "type"), true)) {
+    {
+      return null;
+    }
+  }
+  {
+    const String &tmp0((toString(m_info.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key))));
+    const String &tmp1((x_strtolower(tmp0)));
+    v_ltype = tmp1;
+  }
+  if (x_hphp_scalar_typehints_enabled()) {
+    {
+      v_nonClassTypehints = s_sys_sa4a9657b8;
+      if (isset(v_nonClassTypehints, v_ltype)) {
+        {
+          return null;
+        }
+      }
+    }
+  }
+  else if (same(v_ltype, NAMSTR(s_sys_ss8c04b960, "array"))) {
     {
       return null;
     }
@@ -335,38 +391,55 @@ Variant c_ReflectionParameter::t_getclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 156 */
+/* SRC: classes/reflection.php line 157 */
+Variant c_ReflectionParameter::t_gettypehinttext() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getTypehintText);
+  ObjectData *obj_tmp UNUSED;
+  if (isset(m_info, NAMSTR(s_sys_ss724a760a, "type"), true)) {
+    {
+      return m_info.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key);
+    }
+  }
+  return NAMSTR(s_sys_ss00000000, "");
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/reflection.php line 173 */
 bool c_ReflectionParameter::t_isarray() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isArray);
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key)));
     return equal(tmp0, NAMSTR(s_sys_ss8c04b960, "array"));
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 170 */
+/* SRC: classes/reflection.php line 187 */
 bool c_ReflectionParameter::t_allowsnull() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::allowsNull);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ssedd47a43, "nullable"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 183 */
+/* SRC: classes/reflection.php line 200 */
 bool c_ReflectionParameter::t_isoptional() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isOptional);
+  ObjectData *obj_tmp UNUSED;
   return x_array_key_exists(NAMVAR(s_sys_svs570270cc, "default"), m_info);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 198 */
+/* SRC: classes/reflection.php line 215 */
 bool c_ReflectionParameter::t_isdefaultvalueavailable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isDefaultValueAvailable);
+  ObjectData *obj_tmp UNUSED;
   return x_array_key_exists(NAMVAR(s_sys_svs570270cc, "default"), m_info);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 213 */
+/* SRC: classes/reflection.php line 230 */
 Variant c_ReflectionParameter::t_getdefaultvalue() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getDefaultValue);
   Variant v_defaultValue;
 
+  ObjectData *obj_tmp UNUSED;
   if (!(t_isoptional())) {
     {
       throw_exception(p_ReflectionException(((c_ReflectionException*)coo_ReflectionException())->create(NAMSTR(s_sys_ss4ad0c110, "Parameter is not optional"))));
@@ -378,6 +451,15 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
   }
   if (instanceOf(v_defaultValue, NAMSTR(s_sys_ss41c7a197, "stdclass"))) {
     {
+      if (v_defaultValue.o_isset(NAMSTR(s_sys_ssc82dbd12, "class"))) {
+        {
+          {
+            const Variant &tmp0((v_defaultValue.o_getPublic(NAMSTR(s_sys_ssc82dbd12, "class"), true)));
+            const Variant &tmp1((v_defaultValue.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
+            return x_hphp_get_class_constant(tmp0, tmp1);
+          }
+        }
+      }
       {
         const String &tmp0((toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss309aefff, "msg"), true))));
         x_hphp_throw_fatal_error(tmp0);
@@ -387,13 +469,26 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
   return v_defaultValue;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 234 */
+/* SRC: classes/reflection.php line 245 */
+Variant c_ReflectionParameter::t_getdefaultvaluetext() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getDefaultValueText);
+  ObjectData *obj_tmp UNUSED;
+  if (isset(m_info, NAMSTR(s_sys_ssf6ac0169, "defaultText"), true)) {
+    {
+      return m_info.rvalAt(NAMSTR(s_sys_ssf6ac0169, "defaultText"), AccessFlags::Error_Key);
+    }
+  }
+  return NAMSTR(s_sys_ss00000000, "");
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/reflection.php line 262 */
 Variant c_ReflectionParameter::t_getposition() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getPosition);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ssc0ff3081, "index"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1627 */
+/* SRC: classes/reflection.php line 1655 */
 const int64 q_ReflectionMethod$$IS_STATIC = 1LL;
 const int64 q_ReflectionMethod$$IS_PUBLIC = 256LL;
 const int64 q_ReflectionMethod$$IS_PROTECTED = 512LL;
@@ -401,32 +496,32 @@ const int64 q_ReflectionMethod$$IS_PRIVATE = 1024LL;
 const int64 q_ReflectionMethod$$IS_ABSTRACT = 2LL;
 const int64 q_ReflectionMethod$$IS_FINAL = 4LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionMethod)
-const InstanceOfInfo c_ReflectionMethod::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionMethod$$instanceof_table[] = {
   {0x43BBC8F6F28E44B0LL,1,"ReflectionMethod",&cw_ReflectionMethod},
   {0x33BD46E935281082LL,1,"ReflectionFunctionAbstract",&cw_ReflectionFunctionAbstract},
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
 };
-const int c_ReflectionMethod::s_instanceof_index[] = {
+const int cw_ReflectionMethod$$instanceof_index[] = {
   7,
   0,-1,1,-1,-1,2,-1,-1,
 
 };
-CallInfo c_ReflectionMethod::ci___tostring((void*)&c_ReflectionMethod::i___tostring, (void*)&c_ReflectionMethod::ifa___tostring, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_invokeargs((void*)&c_ReflectionMethod::i_invokeargs, (void*)&c_ReflectionMethod::ifa_invokeargs, 2, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isdestructor((void*)&c_ReflectionMethod::i_isdestructor, (void*)&c_ReflectionMethod::ifa_isdestructor, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isprotected((void*)&c_ReflectionMethod::i_isprotected, (void*)&c_ReflectionMethod::ifa_isprotected, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_getclosure((void*)&c_ReflectionMethod::i_getclosure, (void*)&c_ReflectionMethod::ifa_getclosure, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_getmodifiers((void*)&c_ReflectionMethod::i_getmodifiers, (void*)&c_ReflectionMethod::ifa_getmodifiers, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_invoke((void*)&c_ReflectionMethod::i_invoke, (void*)&c_ReflectionMethod::ifa_invoke, 1, 5, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_getdeclaringclass((void*)&c_ReflectionMethod::i_getdeclaringclass, (void*)&c_ReflectionMethod::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isfinal((void*)&c_ReflectionMethod::i_isfinal, (void*)&c_ReflectionMethod::ifa_isfinal, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isprivate((void*)&c_ReflectionMethod::i_isprivate, (void*)&c_ReflectionMethod::ifa_isprivate, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_export((void*)&c_ReflectionMethod::i_export, (void*)&c_ReflectionMethod::ifa_export, 3, 12, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isstatic((void*)&c_ReflectionMethod::i_isstatic, (void*)&c_ReflectionMethod::ifa_isstatic, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isabstract((void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isconstructor((void*)&c_ReflectionMethod::i_isconstructor, (void*)&c_ReflectionMethod::ifa_isconstructor, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_ispublic((void*)&c_ReflectionMethod::i_ispublic, (void*)&c_ReflectionMethod::ifa_ispublic, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci___construct((void*)&c_ReflectionMethod::i___construct, (void*)&c_ReflectionMethod::ifa___construct, 2, 4, 0x0000000000000000LL);
+extern const CallInfo ci_ReflectionMethod$$__tostring = { (void*)&c_ReflectionMethod::i___tostring, (void*)&c_ReflectionMethod::ifa___tostring, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$invokeargs = { (void*)&c_ReflectionMethod::i_invokeargs, (void*)&c_ReflectionMethod::ifa_invokeargs, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$isdestructor = { (void*)&c_ReflectionMethod::i_isdestructor, (void*)&c_ReflectionMethod::ifa_isdestructor, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$isprotected = { (void*)&c_ReflectionMethod::i_isprotected, (void*)&c_ReflectionMethod::ifa_isprotected, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$getclosure = { (void*)&c_ReflectionMethod::i_getclosure, (void*)&c_ReflectionMethod::ifa_getclosure, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$getmodifiers = { (void*)&c_ReflectionMethod::i_getmodifiers, (void*)&c_ReflectionMethod::ifa_getmodifiers, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$invoke = { (void*)&c_ReflectionMethod::i_invoke, (void*)&c_ReflectionMethod::ifa_invoke, 1, 5, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$getdeclaringclass = { (void*)&c_ReflectionMethod::i_getdeclaringclass, (void*)&c_ReflectionMethod::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$isfinal = { (void*)&c_ReflectionMethod::i_isfinal, (void*)&c_ReflectionMethod::ifa_isfinal, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$isprivate = { (void*)&c_ReflectionMethod::i_isprivate, (void*)&c_ReflectionMethod::ifa_isprivate, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$export = { (void*)&c_ReflectionMethod::i_export, (void*)&c_ReflectionMethod::ifa_export, 3, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$isstatic = { (void*)&c_ReflectionMethod::i_isstatic, (void*)&c_ReflectionMethod::ifa_isstatic, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$isabstract = { (void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$isconstructor = { (void*)&c_ReflectionMethod::i_isconstructor, (void*)&c_ReflectionMethod::ifa_isconstructor, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$ispublic = { (void*)&c_ReflectionMethod::i_ispublic, (void*)&c_ReflectionMethod::ifa_ispublic, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionMethod$$__construct = { (void*)&c_ReflectionMethod::i___construct, (void*)&c_ReflectionMethod::ifa___construct, 2, 4, 0x0000000000000000LL};
 Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -507,9 +602,10 @@ Variant c_ReflectionMethod::ifa___tostring(MethodCallPackage &mcp, int count, IN
   return (self->t___tostring());
 }
 Variant c_ReflectionMethod::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("ReflectionMethod::export", count, 2, 3, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
+  if (count <= 2) return (c_ReflectionMethod::t_export(arg0, arg1));
   CVarRef arg2(a2);
   return (c_ReflectionMethod::t_export(arg0, arg1, arg2));
 }
@@ -626,26 +722,25 @@ Variant c_ReflectionMethod::ifa_getdeclaringclass(MethodCallPackage &mcp, int co
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
 }
-const MethodCallInfoTable c_ReflectionMethod::s_call_info_table[] = {
-  { 0x3FCE192CF6199942LL, 1, 6, "invoke", &c_ReflectionMethod::ci_invoke },
-  { 0x33A6C2CFBDB05EE2LL, 0, 10, "getClosure", &c_ReflectionMethod::ci_getclosure },
-  { 0x6ED51288559D6063LL, 1, 17, "getDeclaringClass", &c_ReflectionMethod::ci_getdeclaringclass },
-  { 0x3235AF57F23103C4LL, 1, 10, "invokeArgs", &c_ReflectionMethod::ci_invokeargs },
-  { 0x51A20EA0E327F607LL, 1, 12, "isDestructor", &c_ReflectionMethod::ci_isdestructor },
-  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &c_ReflectionMethod::ci_export },
-  { 0x2D7209A590477CEALL, 1, 11, "isProtected", &c_ReflectionMethod::ci_isprotected },
-  { 0x06FB6A7DC3D795AELL, 1, 7, "isFinal", &c_ReflectionMethod::ci_isfinal },
-  { 0x37AAE0845E2F636FLL, 1, 9, "isPrivate", &c_ReflectionMethod::ci_isprivate },
-  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_ReflectionMethod::ci___tostring },
-  { 0x24253EBA491D6014LL, 1, 12, "getModifiers", &c_ReflectionMethod::ci_getmodifiers },
-  { 0x7460D945DA32FDB7LL, 1, 10, "isAbstract", &c_ReflectionMethod::ci_isabstract },
-  { 0x7A15DC56E8CC0B19LL, 1, 8, "isStatic", &c_ReflectionMethod::ci_isstatic },
-  { 0x654B5F965C5CAC7ALL, 1, 13, "isConstructor", &c_ReflectionMethod::ci_isconstructor },
-  { 0x2820F10358723B7CLL, 1, 8, "isPublic", &c_ReflectionMethod::ci_ispublic },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_ReflectionMethod::ci___construct },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_ReflectionMethod$$call_info_table[] = {
+  { 0x3FCE192CF6199942LL, 0, 6, "invoke", &ci_ReflectionMethod$$invoke },
+  { 0x33A6C2CFBDB05EE2LL, 1, 10, "getClosure", &ci_ReflectionMethod$$getclosure },
+  { 0x6ED51288559D6063LL, 1, 17, "getDeclaringClass", &ci_ReflectionMethod$$getdeclaringclass },
+  { 0x3235AF57F23103C4LL, 1, 10, "invokeArgs", &ci_ReflectionMethod$$invokeargs },
+  { 0x51A20EA0E327F607LL, 1, 12, "isDestructor", &ci_ReflectionMethod$$isdestructor },
+  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &ci_ReflectionMethod$$export },
+  { 0x2D7209A590477CEALL, 1, 11, "isProtected", &ci_ReflectionMethod$$isprotected },
+  { 0x06FB6A7DC3D795AELL, 1, 7, "isFinal", &ci_ReflectionMethod$$isfinal },
+  { 0x37AAE0845E2F636FLL, 1, 9, "isPrivate", &ci_ReflectionMethod$$isprivate },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_ReflectionMethod$$__tostring },
+  { 0x24253EBA491D6014LL, 1, 12, "getModifiers", &ci_ReflectionMethod$$getmodifiers },
+  { 0x7460D945DA32FDB7LL, 1, 10, "isAbstract", &ci_ReflectionMethod$$isabstract },
+  { 0x7A15DC56E8CC0B19LL, 1, 8, "isStatic", &ci_ReflectionMethod$$isstatic },
+  { 0x654B5F965C5CAC7ALL, 1, 13, "isConstructor", &ci_ReflectionMethod$$isconstructor },
+  { 0x2820F10358723B7CLL, 1, 8, "isPublic", &ci_ReflectionMethod$$ispublic },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &ci_ReflectionMethod$$__construct },
 };
-const int c_ReflectionMethod::s_call_info_index[] = {
+extern const int cw_ReflectionMethod$$call_info_index[] = {
   31,
   -1,-1,0,2,3,-1,-1,4,
   5,-1,6,-1,-1,-1,7,8,
@@ -660,22 +755,26 @@ c_ReflectionMethod *c_ReflectionMethod::create(CVarRef v_cls, CVarRef v_name // 
   t___construct(v_cls, v_name);
   return this;
 }
+extern const MethodCallInfoTable cw_ReflectionMethod$$call_info_table[];
+extern const int cw_ReflectionMethod$$call_info_index[];
+extern const InstanceOfInfo cw_ReflectionMethod$$instanceof_table[];
+extern const int cw_ReflectionMethod$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionMethod = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionMethod,
-  c_ReflectionMethod::s_call_info_table,c_ReflectionMethod::s_call_info_index,
-  c_ReflectionMethod::s_instanceof_table,c_ReflectionMethod::s_instanceof_index,
+  cw_ReflectionMethod$$call_info_table,cw_ReflectionMethod$$call_info_index,
+  cw_ReflectionMethod$$instanceof_table,cw_ReflectionMethod$$instanceof_index,
   &c_ReflectionMethod::s_class_name,
-  &c_ReflectionMethod::os_prop_table,&c_ReflectionMethod::ci___construct,0,&cw_ReflectionFunctionAbstract,0x0,
+  &c_ReflectionMethod::os_prop_table,&ci_ReflectionMethod$$__construct,0,&cw_ReflectionFunctionAbstract,0x0,
   &c_ReflectionMethod::s_cls
 };
-/* SRC: classes/reflection.php line 1639 */
+/* SRC: classes/reflection.php line 1667 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::__construct);
-  bool oldInCtor = gasInCtor(true);
   Variant v_arr;
   Array v_method;
 
+  ObjectData *obj_tmp UNUSED;
   if ((!(toBoolean(v_name)) && x_is_string(v_cls))) {
     {
       {
@@ -728,17 +827,17 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
       }
     }
   }
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1659 */
+/* SRC: classes/reflection.php line 1687 */
 String c_ReflectionMethod::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1681 */
-Variant c_ReflectionMethod::t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret) {
+/* SRC: classes/reflection.php line 1709 */
+Variant c_ReflectionMethod::t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret //  = false_varNR
+) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::export);
   Variant v_obj;
   String v_str;
@@ -780,13 +879,14 @@ Variant c_ReflectionMethod::t_export(Variant v_cls, CVarRef v_name, CVarRef v_re
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1706 */
+/* SRC: classes/reflection.php line 1734 */
 Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invoke);
   Variant v_args;
 
+  ObjectData *obj_tmp UNUSED;
   {
-    const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1).set(v_obj).create()),args)));
+    const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1, ArrayInit::vectorInit).set(v_obj).create()),args)));
     v_args = tmp0;
   }
   x_array_shift(ref(v_args));
@@ -798,9 +898,10 @@ Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1727 */
+/* SRC: classes/reflection.php line 1755 */
 Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invokeArgs);
+  ObjectData *obj_tmp UNUSED;
   {
     Variant tmp0((v_obj));
     const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
@@ -810,58 +911,65 @@ Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1740 */
+/* SRC: classes/reflection.php line 1768 */
 bool c_ReflectionMethod::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isFinal);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ss2145036e, "final"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1753 */
+/* SRC: classes/reflection.php line 1781 */
 bool c_ReflectionMethod::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isAbstract);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ss12c8a8a6, "abstract"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1765 */
+/* SRC: classes/reflection.php line 1793 */
 bool c_ReflectionMethod::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPublic);
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), AccessFlags::Error_Key)));
     return equal(tmp0, NAMSTR(s_sys_ss4ce85288, "public"));
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1778 */
+/* SRC: classes/reflection.php line 1806 */
 bool c_ReflectionMethod::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPrivate);
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), AccessFlags::Error_Key)));
     return equal(tmp0, NAMSTR(s_sys_sse781f7da, "private"));
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1791 */
+/* SRC: classes/reflection.php line 1819 */
 bool c_ReflectionMethod::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isProtected);
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), AccessFlags::Error_Key)));
     return equal(tmp0, NAMSTR(s_sys_ss9fb56979, "protected"));
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1803 */
+/* SRC: classes/reflection.php line 1831 */
 bool c_ReflectionMethod::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isStatic);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ssf08d205d, "static"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1816 */
+/* SRC: classes/reflection.php line 1844 */
 bool c_ReflectionMethod::t_isconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isConstructor);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ssefecb9dd, "constructor"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1829 */
+/* SRC: classes/reflection.php line 1857 */
 bool c_ReflectionMethod::t_isdestructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isDestructor);
   {
@@ -870,21 +978,24 @@ bool c_ReflectionMethod::t_isdestructor() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1851 */
+/* SRC: classes/reflection.php line 1879 */
 Variant c_ReflectionMethod::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getModifiers);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss9f244c80, "modifiers"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1855 */
+/* SRC: classes/reflection.php line 1883 */
 Variant c_ReflectionMethod::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getClosure);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss4cd61020, "closure"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1869 */
+/* SRC: classes/reflection.php line 1897 */
 Variant c_ReflectionMethod::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getDeclaringClass);
+  ObjectData *obj_tmp UNUSED;
   if (empty(m_info, NAMSTR(s_sys_ssc82dbd12, "class"), true)) {
     {
       return null;
@@ -897,27 +1008,27 @@ Variant c_ReflectionMethod::t_getdeclaringclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1887 */
+/* SRC: classes/reflection.php line 1915 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionExtension)
-const InstanceOfInfo c_ReflectionExtension::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionExtension$$instanceof_table[] = {
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
   {0x0B61E0BFCFA06573LL,1,"ReflectionExtension",&cw_ReflectionExtension},
 };
-const int c_ReflectionExtension::s_instanceof_index[] = {
+const int cw_ReflectionExtension$$instanceof_index[] = {
   3,
   -1,0,-1,1,
 };
-CallInfo c_ReflectionExtension::ci_getclassnames((void*)&c_ReflectionExtension::i_getclassnames, (void*)&c_ReflectionExtension::ifa_getclassnames, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci___construct((void*)&c_ReflectionExtension::i___construct, (void*)&c_ReflectionExtension::ifa___construct, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_export((void*)&c_ReflectionExtension::i_export, (void*)&c_ReflectionExtension::ifa_export, 2, 12, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getconstants((void*)&c_ReflectionExtension::i_getconstants, (void*)&c_ReflectionExtension::ifa_getconstants, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getname((void*)&c_ReflectionExtension::i_getname, (void*)&c_ReflectionExtension::ifa_getname, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci___tostring((void*)&c_ReflectionExtension::i___tostring, (void*)&c_ReflectionExtension::ifa___tostring, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getclasses((void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getversion((void*)&c_ReflectionExtension::i_getversion, (void*)&c_ReflectionExtension::ifa_getversion, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_info((void*)&c_ReflectionExtension::i_info, (void*)&c_ReflectionExtension::ifa_info, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getinientries((void*)&c_ReflectionExtension::i_getinientries, (void*)&c_ReflectionExtension::ifa_getinientries, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getfunctions((void*)&c_ReflectionExtension::i_getfunctions, (void*)&c_ReflectionExtension::ifa_getfunctions, 0, 4, 0x0000000000000000LL);
+extern const CallInfo ci_ReflectionExtension$$getclassnames = { (void*)&c_ReflectionExtension::i_getclassnames, (void*)&c_ReflectionExtension::ifa_getclassnames, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$__construct = { (void*)&c_ReflectionExtension::i___construct, (void*)&c_ReflectionExtension::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$export = { (void*)&c_ReflectionExtension::i_export, (void*)&c_ReflectionExtension::ifa_export, 2, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$getconstants = { (void*)&c_ReflectionExtension::i_getconstants, (void*)&c_ReflectionExtension::ifa_getconstants, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$getname = { (void*)&c_ReflectionExtension::i_getname, (void*)&c_ReflectionExtension::ifa_getname, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$__tostring = { (void*)&c_ReflectionExtension::i___tostring, (void*)&c_ReflectionExtension::ifa___tostring, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$getclasses = { (void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$getversion = { (void*)&c_ReflectionExtension::i_getversion, (void*)&c_ReflectionExtension::ifa_getversion, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$info = { (void*)&c_ReflectionExtension::i_info, (void*)&c_ReflectionExtension::ifa_info, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$getinientries = { (void*)&c_ReflectionExtension::i_getinientries, (void*)&c_ReflectionExtension::ifa_getinientries, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionExtension$$getfunctions = { (void*)&c_ReflectionExtension::i_getfunctions, (void*)&c_ReflectionExtension::ifa_getfunctions, 0, 4, 0x0000000000000000LL};
 Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -969,8 +1080,9 @@ Variant c_ReflectionExtension::ifa___tostring(MethodCallPackage &mcp, int count,
   return (self->t___tostring());
 }
 Variant c_ReflectionExtension::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionExtension::export", count, 1, 2, 1);
   CVarRef arg0(a0);
+  if (count <= 1) return (c_ReflectionExtension::t_export(arg0));
   CVarRef arg1(a1);
   return (c_ReflectionExtension::t_export(arg0, arg1));
 }
@@ -1038,21 +1150,20 @@ Variant c_ReflectionExtension::ifa_info(MethodCallPackage &mcp, int count, INVOK
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
   return (self->t_info());
 }
-const MethodCallInfoTable c_ReflectionExtension::s_call_info_table[] = {
-  { 0x0113D73FC859EDC2LL, 1, 10, "getClasses", &c_ReflectionExtension::ci_getclasses },
-  { 0x23F51CDECC198965LL, 1, 7, "getName", &c_ReflectionExtension::ci_getname },
-  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &c_ReflectionExtension::ci_export },
-  { 0x652BDFA6E22F17AFLL, 1, 12, "getFunctions", &c_ReflectionExtension::ci_getfunctions },
-  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_ReflectionExtension::ci___tostring },
-  { 0x5CE2786E11341594LL, 1, 13, "getClassNames", &c_ReflectionExtension::ci_getclassnames },
-  { 0x1CC71CB013143955LL, 1, 12, "getConstants", &c_ReflectionExtension::ci_getconstants },
-  { 0x306B5F4D1D03D335LL, 0, 13, "getINIEntries", &c_ReflectionExtension::ci_getinientries },
-  { 0x7521E8833BE3D316LL, 1, 10, "getVersion", &c_ReflectionExtension::ci_getversion },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_ReflectionExtension::ci___construct },
-  { 0x0F2EF58F157D479FLL, 0, 4, "info", &c_ReflectionExtension::ci_info },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_ReflectionExtension$$call_info_table[] = {
+  { 0x0113D73FC859EDC2LL, 1, 10, "getClasses", &ci_ReflectionExtension$$getclasses },
+  { 0x23F51CDECC198965LL, 1, 7, "getName", &ci_ReflectionExtension$$getname },
+  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &ci_ReflectionExtension$$export },
+  { 0x652BDFA6E22F17AFLL, 1, 12, "getFunctions", &ci_ReflectionExtension$$getfunctions },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_ReflectionExtension$$__tostring },
+  { 0x5CE2786E11341594LL, 1, 13, "getClassNames", &ci_ReflectionExtension$$getclassnames },
+  { 0x1CC71CB013143955LL, 0, 12, "getConstants", &ci_ReflectionExtension$$getconstants },
+  { 0x306B5F4D1D03D335LL, 1, 13, "getINIEntries", &ci_ReflectionExtension$$getinientries },
+  { 0x7521E8833BE3D316LL, 1, 10, "getVersion", &ci_ReflectionExtension$$getversion },
+  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &ci_ReflectionExtension$$__construct },
+  { 0x0F2EF58F157D479FLL, 1, 4, "info", &ci_ReflectionExtension$$info },
 };
-const int c_ReflectionExtension::s_call_info_index[] = {
+extern const int cw_ReflectionExtension$$call_info_index[] = {
   31,
   -1,-1,0,-1,-1,1,-1,-1,
   2,-1,-1,-1,-1,-1,-1,3,
@@ -1066,33 +1177,37 @@ c_ReflectionExtension *c_ReflectionExtension::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
+extern const MethodCallInfoTable cw_ReflectionExtension$$call_info_table[];
+extern const int cw_ReflectionExtension$$call_info_index[];
+extern const InstanceOfInfo cw_ReflectionExtension$$instanceof_table[];
+extern const int cw_ReflectionExtension$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionExtension = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionExtension,
-  c_ReflectionExtension::s_call_info_table,c_ReflectionExtension::s_call_info_index,
-  c_ReflectionExtension::s_instanceof_table,c_ReflectionExtension::s_instanceof_index,
+  cw_ReflectionExtension$$call_info_table,cw_ReflectionExtension$$call_info_index,
+  cw_ReflectionExtension$$instanceof_table,cw_ReflectionExtension$$instanceof_index,
   &c_ReflectionExtension::s_class_name,
-  &c_ReflectionExtension::os_prop_table,&c_ReflectionExtension::ci___construct,0,0,0x0,
+  &c_ReflectionExtension::os_prop_table,&ci_ReflectionExtension$$__construct,0,0,0x0,
   &c_ReflectionExtension::s_cls
 };
-/* SRC: classes/reflection.php line 1891 */
+/* SRC: classes/reflection.php line 1919 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::__construct);
-  bool oldInCtor = gasInCtor(true);
+  ObjectData *obj_tmp UNUSED;
   {
     const Array &tmp0((x_hphp_get_extension_info(toString(v_name))));
     m_info = tmp0;
   }
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1895 */
+/* SRC: classes/reflection.php line 1923 */
 String c_ReflectionExtension::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1915 */
-Variant c_ReflectionExtension::t_export(CVarRef v_name, CVarRef v_ret) {
+/* SRC: classes/reflection.php line 1943 */
+Variant c_ReflectionExtension::t_export(CVarRef v_name, CVarRef v_ret //  = false_varNR
+) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::export);
   p_ReflectionExtension v_obj;
   String v_str;
@@ -1112,53 +1227,60 @@ Variant c_ReflectionExtension::t_export(CVarRef v_name, CVarRef v_ret) {
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1933 */
+/* SRC: classes/reflection.php line 1961 */
 Variant c_ReflectionExtension::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getName);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1946 */
+/* SRC: classes/reflection.php line 1974 */
 Variant c_ReflectionExtension::t_getversion() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getVersion);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss7cd91db4, "version"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1962 */
+/* SRC: classes/reflection.php line 1990 */
 Variant c_ReflectionExtension::t_getfunctions() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getFunctions);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ssc8396b02, "functions"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1975 */
+/* SRC: classes/reflection.php line 2003 */
 Variant c_ReflectionExtension::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getConstants);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss623ae369, "constants"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1989 */
+/* SRC: classes/reflection.php line 2017 */
 Variant c_ReflectionExtension::t_getinientries() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getINIEntries);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_sscedef5dc, "ini"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2004 */
+/* SRC: classes/reflection.php line 2032 */
 Variant c_ReflectionExtension::t_getclasses() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getClasses);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss0415e4a0, "classes"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2019 */
+/* SRC: classes/reflection.php line 2047 */
 Array c_ReflectionExtension::t_getclassnames() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getClassNames);
   Array v_ret;
   Variant v_cls;
 
+  ObjectData *obj_tmp UNUSED;
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss0415e4a0, "classes"), AccessFlags::Error_Key);
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_cls);
       {
@@ -1176,30 +1298,31 @@ Array c_ReflectionExtension::t_getclassnames() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2035 */
+/* SRC: classes/reflection.php line 2063 */
 Variant c_ReflectionExtension::t_info() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::info);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss33988b3e, "info"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 462 */
+/* SRC: classes/reflection.php line 490 */
 const int64 q_ReflectionFunction$$IS_DEPRECATED = 262144LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunction)
-const InstanceOfInfo c_ReflectionFunction::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionFunction$$instanceof_table[] = {
   {0x21EF70351574EC09LL,1,"ReflectionFunction",&cw_ReflectionFunction},
   {0x33BD46E935281082LL,1,"ReflectionFunctionAbstract",&cw_ReflectionFunctionAbstract},
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
 };
-const int c_ReflectionFunction::s_instanceof_index[] = {
+const int cw_ReflectionFunction$$instanceof_index[] = {
   7,
   -1,0,1,-1,-1,2,-1,-1,
 
 };
-CallInfo c_ReflectionFunction::ci_export((void*)&c_ReflectionFunction::i_export, (void*)&c_ReflectionFunction::ifa_export, 2, 12, 0x0000000000000000LL);
-CallInfo c_ReflectionFunction::ci_invoke((void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 5, 0x0000000000000000LL);
-CallInfo c_ReflectionFunction::ci_invokeargs((void*)&c_ReflectionFunction::i_invokeargs, (void*)&c_ReflectionFunction::ifa_invokeargs, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunction::ci___construct((void*)&c_ReflectionFunction::i___construct, (void*)&c_ReflectionFunction::ifa___construct, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunction::ci___tostring((void*)&c_ReflectionFunction::i___tostring, (void*)&c_ReflectionFunction::ifa___tostring, 0, 4, 0x0000000000000000LL);
+extern const CallInfo ci_ReflectionFunction$$export = { (void*)&c_ReflectionFunction::i_export, (void*)&c_ReflectionFunction::ifa_export, 2, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunction$$invoke = { (void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 5, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunction$$invokeargs = { (void*)&c_ReflectionFunction::i_invokeargs, (void*)&c_ReflectionFunction::ifa_invokeargs, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunction$$__construct = { (void*)&c_ReflectionFunction::i___construct, (void*)&c_ReflectionFunction::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunction$$__tostring = { (void*)&c_ReflectionFunction::i___tostring, (void*)&c_ReflectionFunction::ifa___tostring, 0, 4, 0x0000000000000000LL};
 Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1239,8 +1362,9 @@ Variant c_ReflectionFunction::ifa___tostring(MethodCallPackage &mcp, int count, 
   return (self->t___tostring());
 }
 Variant c_ReflectionFunction::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionFunction::export", count, 1, 2, 1);
   CVarRef arg0(a0);
+  if (count <= 1) return (c_ReflectionFunction::t_export(arg0));
   CVarRef arg1(a1);
   return (c_ReflectionFunction::t_export(arg0, arg1));
 }
@@ -1267,15 +1391,14 @@ Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, 
   CVarRef arg0(a0);
   return (self->t_invokeargs(arg0));
 }
-const MethodCallInfoTable c_ReflectionFunction::s_call_info_table[] = {
-  { 0x3FCE192CF6199942LL, 1, 6, "invoke", &c_ReflectionFunction::ci_invoke },
-  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_ReflectionFunction::ci___tostring },
-  { 0x3235AF57F23103C4LL, 1, 10, "invokeArgs", &c_ReflectionFunction::ci_invokeargs },
-  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &c_ReflectionFunction::ci_export },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_ReflectionFunction::ci___construct },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_ReflectionFunction$$call_info_table[] = {
+  { 0x3FCE192CF6199942LL, 1, 6, "invoke", &ci_ReflectionFunction$$invoke },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_ReflectionFunction$$__tostring },
+  { 0x3235AF57F23103C4LL, 1, 10, "invokeArgs", &ci_ReflectionFunction$$invokeargs },
+  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &ci_ReflectionFunction$$export },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &ci_ReflectionFunction$$__construct },
 };
-const int c_ReflectionFunction::s_call_info_index[] = {
+extern const int cw_ReflectionFunction$$call_info_index[] = {
   15,
   -1,-1,0,1,2,-1,-1,-1,
   3,-1,-1,-1,-1,-1,-1,4,
@@ -1287,18 +1410,22 @@ c_ReflectionFunction *c_ReflectionFunction::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
+extern const MethodCallInfoTable cw_ReflectionFunction$$call_info_table[];
+extern const int cw_ReflectionFunction$$call_info_index[];
+extern const InstanceOfInfo cw_ReflectionFunction$$instanceof_table[];
+extern const int cw_ReflectionFunction$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionFunction = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunction,
-  c_ReflectionFunction::s_call_info_table,c_ReflectionFunction::s_call_info_index,
-  c_ReflectionFunction::s_instanceof_table,c_ReflectionFunction::s_instanceof_index,
+  cw_ReflectionFunction$$call_info_table,cw_ReflectionFunction$$call_info_index,
+  cw_ReflectionFunction$$instanceof_table,cw_ReflectionFunction$$instanceof_index,
   &c_ReflectionFunction::s_class_name,
-  &c_ReflectionFunction::os_prop_table,&c_ReflectionFunction::ci___construct,0,&cw_ReflectionFunctionAbstract,0x0,
+  &c_ReflectionFunction::os_prop_table,&ci_ReflectionFunction$$__construct,0,&cw_ReflectionFunctionAbstract,0x0,
   &c_ReflectionFunction::s_cls
 };
-/* SRC: classes/reflection.php line 466 */
+/* SRC: classes/reflection.php line 494 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::__construct);
-  bool oldInCtor = gasInCtor(true);
+  ObjectData *obj_tmp UNUSED;
   {
     const Array &tmp0((x_hphp_get_function_info(toString(v_name))));
     m_info = tmp0;
@@ -1311,17 +1438,17 @@ void c_ReflectionFunction::t___construct(Variant v_name) {
       }
     }
   }
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 473 */
+/* SRC: classes/reflection.php line 501 */
 String c_ReflectionFunction::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 494 */
-Variant c_ReflectionFunction::t_export(CVarRef v_name, CVarRef v_ret) {
+/* SRC: classes/reflection.php line 522 */
+Variant c_ReflectionFunction::t_export(CVarRef v_name, CVarRef v_ret //  = false_varNR
+) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::export);
   p_ReflectionFunction v_obj;
   String v_str;
@@ -1341,11 +1468,12 @@ Variant c_ReflectionFunction::t_export(CVarRef v_name, CVarRef v_ret) {
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 510 */
+/* SRC: classes/reflection.php line 538 */
 Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::invoke);
   Array v_args;
 
+  ObjectData *obj_tmp UNUSED;
   {
     const Array &tmp0(((args.isNull() ? Array::Create() : args)));
     v_args = tmp0;
@@ -1356,9 +1484,10 @@ Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */)
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 525 */
+/* SRC: classes/reflection.php line 553 */
 Variant c_ReflectionFunction::t_invokeargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::invokeArgs);
+  ObjectData *obj_tmp UNUSED;
   {
     const String &tmp0((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
     const Array &tmp1((toArray(x_array_values(v_args))));
@@ -1366,35 +1495,35 @@ Variant c_ReflectionFunction::t_invokeargs(CVarRef v_args) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1374 */
+/* SRC: classes/reflection.php line 1402 */
 const int64 q_ReflectionProperty$$IS_STATIC = 1LL;
 const int64 q_ReflectionProperty$$IS_PUBLIC = 256LL;
 const int64 q_ReflectionProperty$$IS_PROTECTED = 512LL;
 const int64 q_ReflectionProperty$$IS_PRIVATE = 1024LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionProperty)
-const InstanceOfInfo c_ReflectionProperty::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionProperty$$instanceof_table[] = {
   {0x75AA2571BDB659E4LL,1,"ReflectionProperty",&cw_ReflectionProperty},
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
 };
-const int c_ReflectionProperty::s_instanceof_index[] = {
+const int cw_ReflectionProperty$$instanceof_index[] = {
   3,
   0,1,-1,-1,
 };
-CallInfo c_ReflectionProperty::ci___tostring((void*)&c_ReflectionProperty::i___tostring, (void*)&c_ReflectionProperty::ifa___tostring, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_setaccessible((void*)&c_ReflectionProperty::i_setaccessible, (void*)&c_ReflectionProperty::ifa_setaccessible, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_isprotected((void*)&c_ReflectionProperty::i_isprotected, (void*)&c_ReflectionProperty::ifa_isprotected, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getmodifiers((void*)&c_ReflectionProperty::i_getmodifiers, (void*)&c_ReflectionProperty::ifa_getmodifiers, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getvalue((void*)&c_ReflectionProperty::i_getvalue, (void*)&c_ReflectionProperty::ifa_getvalue, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getdeclaringclass((void*)&c_ReflectionProperty::i_getdeclaringclass, (void*)&c_ReflectionProperty::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_isdefault((void*)&c_ReflectionProperty::i_isdefault, (void*)&c_ReflectionProperty::ifa_isdefault, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_isprivate((void*)&c_ReflectionProperty::i_isprivate, (void*)&c_ReflectionProperty::ifa_isprivate, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getdoccomment((void*)&c_ReflectionProperty::i_getdoccomment, (void*)&c_ReflectionProperty::ifa_getdoccomment, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getname((void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_export((void*)&c_ReflectionProperty::i_export, (void*)&c_ReflectionProperty::ifa_export, 3, 12, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_isstatic((void*)&c_ReflectionProperty::i_isstatic, (void*)&c_ReflectionProperty::ifa_isstatic, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_setvalue((void*)&c_ReflectionProperty::i_setvalue, (void*)&c_ReflectionProperty::ifa_setvalue, 2, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_ispublic((void*)&c_ReflectionProperty::i_ispublic, (void*)&c_ReflectionProperty::ifa_ispublic, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci___construct((void*)&c_ReflectionProperty::i___construct, (void*)&c_ReflectionProperty::ifa___construct, 2, 4, 0x0000000000000000LL);
+extern const CallInfo ci_ReflectionProperty$$__tostring = { (void*)&c_ReflectionProperty::i___tostring, (void*)&c_ReflectionProperty::ifa___tostring, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$setaccessible = { (void*)&c_ReflectionProperty::i_setaccessible, (void*)&c_ReflectionProperty::ifa_setaccessible, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$isprotected = { (void*)&c_ReflectionProperty::i_isprotected, (void*)&c_ReflectionProperty::ifa_isprotected, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$getmodifiers = { (void*)&c_ReflectionProperty::i_getmodifiers, (void*)&c_ReflectionProperty::ifa_getmodifiers, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$getvalue = { (void*)&c_ReflectionProperty::i_getvalue, (void*)&c_ReflectionProperty::ifa_getvalue, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$getdeclaringclass = { (void*)&c_ReflectionProperty::i_getdeclaringclass, (void*)&c_ReflectionProperty::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$isdefault = { (void*)&c_ReflectionProperty::i_isdefault, (void*)&c_ReflectionProperty::ifa_isdefault, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$isprivate = { (void*)&c_ReflectionProperty::i_isprivate, (void*)&c_ReflectionProperty::ifa_isprivate, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$getdoccomment = { (void*)&c_ReflectionProperty::i_getdoccomment, (void*)&c_ReflectionProperty::ifa_getdoccomment, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$getname = { (void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$export = { (void*)&c_ReflectionProperty::i_export, (void*)&c_ReflectionProperty::ifa_export, 3, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$isstatic = { (void*)&c_ReflectionProperty::i_isstatic, (void*)&c_ReflectionProperty::ifa_isstatic, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$setvalue = { (void*)&c_ReflectionProperty::i_setvalue, (void*)&c_ReflectionProperty::ifa_setvalue, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$ispublic = { (void*)&c_ReflectionProperty::i_ispublic, (void*)&c_ReflectionProperty::ifa_ispublic, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionProperty$$__construct = { (void*)&c_ReflectionProperty::i___construct, (void*)&c_ReflectionProperty::ifa___construct, 2, 4, 0x0000000000000000LL};
 Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1459,9 +1588,10 @@ Variant c_ReflectionProperty::ifa___tostring(MethodCallPackage &mcp, int count, 
   return (self->t___tostring());
 }
 Variant c_ReflectionProperty::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 3)) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("ReflectionProperty::export", count, 2, 3, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
+  if (count <= 2) return (c_ReflectionProperty::t_export(arg0, arg1));
   CVarRef arg2(a2);
   return (c_ReflectionProperty::t_export(arg0, arg1, arg2));
 }
@@ -1566,25 +1696,24 @@ Variant c_ReflectionProperty::ifa_getdoccomment(MethodCallPackage &mcp, int coun
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
   return (self->t_getdoccomment());
 }
-const MethodCallInfoTable c_ReflectionProperty::s_call_info_table[] = {
-  { 0x791E9751F5B8C5A2LL, 1, 13, "setAccessible", &c_ReflectionProperty::ci_setaccessible },
-  { 0x56879BCEB40997E3LL, 1, 8, "getValue", &c_ReflectionProperty::ci_getvalue },
-  { 0x6ED51288559D6063LL, 0, 17, "getDeclaringClass", &c_ReflectionProperty::ci_getdeclaringclass },
-  { 0x23F51CDECC198965LL, 1, 7, "getName", &c_ReflectionProperty::ci_getname },
-  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &c_ReflectionProperty::ci_export },
-  { 0x2D7209A590477CEALL, 1, 11, "isProtected", &c_ReflectionProperty::ci_isprotected },
-  { 0x37AAE0845E2F636FLL, 1, 9, "isPrivate", &c_ReflectionProperty::ci_isprivate },
-  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_ReflectionProperty::ci___tostring },
-  { 0x24253EBA491D6014LL, 1, 12, "getModifiers", &c_ReflectionProperty::ci_getmodifiers },
-  { 0x384A52597AB11F15LL, 1, 9, "isDefault", &c_ReflectionProperty::ci_isdefault },
-  { 0x36FBED35008C8DB5LL, 0, 8, "setValue", &c_ReflectionProperty::ci_setvalue },
-  { 0x7C4F424FDA56ADF8LL, 1, 13, "getDocComment", &c_ReflectionProperty::ci_getdoccomment },
-  { 0x7A15DC56E8CC0B19LL, 1, 8, "isStatic", &c_ReflectionProperty::ci_isstatic },
-  { 0x2820F10358723B7CLL, 1, 8, "isPublic", &c_ReflectionProperty::ci_ispublic },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_ReflectionProperty::ci___construct },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_ReflectionProperty$$call_info_table[] = {
+  { 0x791E9751F5B8C5A2LL, 1, 13, "setAccessible", &ci_ReflectionProperty$$setaccessible },
+  { 0x56879BCEB40997E3LL, 0, 8, "getValue", &ci_ReflectionProperty$$getvalue },
+  { 0x6ED51288559D6063LL, 1, 17, "getDeclaringClass", &ci_ReflectionProperty$$getdeclaringclass },
+  { 0x23F51CDECC198965LL, 1, 7, "getName", &ci_ReflectionProperty$$getname },
+  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &ci_ReflectionProperty$$export },
+  { 0x2D7209A590477CEALL, 1, 11, "isProtected", &ci_ReflectionProperty$$isprotected },
+  { 0x37AAE0845E2F636FLL, 1, 9, "isPrivate", &ci_ReflectionProperty$$isprivate },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_ReflectionProperty$$__tostring },
+  { 0x24253EBA491D6014LL, 1, 12, "getModifiers", &ci_ReflectionProperty$$getmodifiers },
+  { 0x384A52597AB11F15LL, 0, 9, "isDefault", &ci_ReflectionProperty$$isdefault },
+  { 0x36FBED35008C8DB5LL, 1, 8, "setValue", &ci_ReflectionProperty$$setvalue },
+  { 0x7C4F424FDA56ADF8LL, 1, 13, "getDocComment", &ci_ReflectionProperty$$getdoccomment },
+  { 0x7A15DC56E8CC0B19LL, 1, 8, "isStatic", &ci_ReflectionProperty$$isstatic },
+  { 0x2820F10358723B7CLL, 1, 8, "isPublic", &ci_ReflectionProperty$$ispublic },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &ci_ReflectionProperty$$__construct },
 };
-const int c_ReflectionProperty::s_call_info_index[] = {
+extern const int cw_ReflectionProperty$$call_info_index[] = {
   31,
   -1,-1,0,1,-1,3,-1,-1,
   4,-1,5,-1,-1,-1,-1,6,
@@ -1598,20 +1727,24 @@ c_ReflectionProperty *c_ReflectionProperty::create(CVarRef v_cls, CVarRef v_name
   t___construct(v_cls, v_name);
   return this;
 }
+extern const MethodCallInfoTable cw_ReflectionProperty$$call_info_table[];
+extern const int cw_ReflectionProperty$$call_info_index[];
+extern const InstanceOfInfo cw_ReflectionProperty$$instanceof_table[];
+extern const int cw_ReflectionProperty$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionProperty = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionProperty,
-  c_ReflectionProperty::s_call_info_table,c_ReflectionProperty::s_call_info_index,
-  c_ReflectionProperty::s_instanceof_table,c_ReflectionProperty::s_instanceof_index,
+  cw_ReflectionProperty$$call_info_table,cw_ReflectionProperty$$call_info_index,
+  cw_ReflectionProperty$$instanceof_table,cw_ReflectionProperty$$instanceof_index,
   &c_ReflectionProperty::s_class_name,
-  &c_ReflectionProperty::os_prop_table,&c_ReflectionProperty::ci___construct,0,0,0x0,
+  &c_ReflectionProperty::os_prop_table,&ci_ReflectionProperty$$__construct,0,0,0x0,
   &c_ReflectionProperty::s_cls
 };
-/* SRC: classes/reflection.php line 1384 */
+/* SRC: classes/reflection.php line 1412 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::__construct);
-  bool oldInCtor = gasInCtor(true);
   Variant v_prop;
 
+  ObjectData *obj_tmp UNUSED;
   if ((toBoolean(v_cls) && toBoolean(v_name))) {
     {
       if (!(x_is_object(v_cls))) {
@@ -1659,17 +1792,17 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       }
     }
   }
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1400 */
+/* SRC: classes/reflection.php line 1428 */
 String c_ReflectionProperty::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1417 */
-Variant c_ReflectionProperty::t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret) {
+/* SRC: classes/reflection.php line 1445 */
+Variant c_ReflectionProperty::t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret //  = false_varNR
+) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::export);
   Variant v_obj;
   String v_str;
@@ -1711,67 +1844,75 @@ Variant c_ReflectionProperty::t_export(Variant v_cls, CVarRef v_name, CVarRef v_
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1440 */
+/* SRC: classes/reflection.php line 1468 */
 Variant c_ReflectionProperty::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getName);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1453 */
+/* SRC: classes/reflection.php line 1481 */
 bool c_ReflectionProperty::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPublic);
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), AccessFlags::Error_Key)));
     return equal(tmp0, NAMSTR(s_sys_ss4ce85288, "public"));
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1466 */
+/* SRC: classes/reflection.php line 1494 */
 bool c_ReflectionProperty::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPrivate);
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), AccessFlags::Error_Key)));
     return equal(tmp0, NAMSTR(s_sys_sse781f7da, "private"));
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1479 */
+/* SRC: classes/reflection.php line 1507 */
 bool c_ReflectionProperty::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isProtected);
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), AccessFlags::Error_Key)));
     return equal(tmp0, NAMSTR(s_sys_ss9fb56979, "protected"));
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1492 */
+/* SRC: classes/reflection.php line 1520 */
 bool c_ReflectionProperty::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isStatic);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ssf08d205d, "static"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1506 */
+/* SRC: classes/reflection.php line 1534 */
 Variant c_ReflectionProperty::t_isdefault() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isDefault);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss570270cc, "default"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1520 */
+/* SRC: classes/reflection.php line 1548 */
 void c_ReflectionProperty::t_setaccessible(CVarRef v_accessible) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::setAccessible);
   throw_exception(p_ReflectionException(((c_ReflectionException*)coo_ReflectionException())->create(NAMSTR(s_sys_ssf82f565f, "ReflectionProperty::setAccessible is not supported"))));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1534 */
+/* SRC: classes/reflection.php line 1562 */
 Variant c_ReflectionProperty::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getModifiers);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss9f244c80, "modifiers"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1550 */
+/* SRC: classes/reflection.php line 1578 */
 Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getValue);
+  ObjectData *obj_tmp UNUSED;
   if (t_isstatic()) {
     {
       {
@@ -1794,9 +1935,10 @@ Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1575 */
+/* SRC: classes/reflection.php line 1603 */
 void c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::setValue);
+  ObjectData *obj_tmp UNUSED;
   if (t_isstatic()) {
     {
       {
@@ -1818,9 +1960,10 @@ void c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1595 */
+/* SRC: classes/reflection.php line 1623 */
 Variant c_ReflectionProperty::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDeclaringClass);
+  ObjectData *obj_tmp UNUSED;
   if (empty(m_info, NAMSTR(s_sys_ssc82dbd12, "class"), true)) {
     {
       return null;
@@ -1833,34 +1976,35 @@ Variant c_ReflectionProperty::t_getdeclaringclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1612 */
+/* SRC: classes/reflection.php line 1640 */
 Variant c_ReflectionProperty::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDocComment);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss9cfa17a6, "doc"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 249 */
+/* SRC: classes/reflection.php line 277 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunctionAbstract)
-const InstanceOfInfo c_ReflectionFunctionAbstract::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionFunctionAbstract$$instanceof_table[] = {
   {0x33BD46E935281082LL,1,"ReflectionFunctionAbstract",&cw_ReflectionFunctionAbstract},
 };
-const int c_ReflectionFunctionAbstract::s_instanceof_index[] = {
+const int cw_ReflectionFunctionAbstract$$instanceof_index[] = {
   1,
   0,-1,
 };
-CallInfo c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_returnsreference((void*)&c_ReflectionFunctionAbstract::i_returnsreference, (void*)&c_ReflectionFunctionAbstract::ifa_returnsreference, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getstartline((void*)&c_ReflectionFunctionAbstract::i_getstartline, (void*)&c_ReflectionFunctionAbstract::ifa_getstartline, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getclosure((void*)&c_ReflectionFunctionAbstract::i_getclosure, (void*)&c_ReflectionFunctionAbstract::ifa_getclosure, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getparameters((void*)&c_ReflectionFunctionAbstract::i_getparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getparameters, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getstaticvariables((void*)&c_ReflectionFunctionAbstract::i_getstaticvariables, (void*)&c_ReflectionFunctionAbstract::ifa_getstaticvariables, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getnumberofparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofparameters, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_isuserdefined((void*)&c_ReflectionFunctionAbstract::i_isuserdefined, (void*)&c_ReflectionFunctionAbstract::ifa_isuserdefined, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getdoccomment((void*)&c_ReflectionFunctionAbstract::i_getdoccomment, (void*)&c_ReflectionFunctionAbstract::ifa_getdoccomment, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getfilename((void*)&c_ReflectionFunctionAbstract::i_getfilename, (void*)&c_ReflectionFunctionAbstract::ifa_getfilename, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getname((void*)&c_ReflectionFunctionAbstract::i_getname, (void*)&c_ReflectionFunctionAbstract::ifa_getname, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_isinternal((void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getendline((void*)&c_ReflectionFunctionAbstract::i_getendline, (void*)&c_ReflectionFunctionAbstract::ifa_getendline, 0, 4, 0x0000000000000000LL);
+extern const CallInfo ci_ReflectionFunctionAbstract$$getnumberofrequiredparameters = { (void*)&c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$returnsreference = { (void*)&c_ReflectionFunctionAbstract::i_returnsreference, (void*)&c_ReflectionFunctionAbstract::ifa_returnsreference, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getstartline = { (void*)&c_ReflectionFunctionAbstract::i_getstartline, (void*)&c_ReflectionFunctionAbstract::ifa_getstartline, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getclosure = { (void*)&c_ReflectionFunctionAbstract::i_getclosure, (void*)&c_ReflectionFunctionAbstract::ifa_getclosure, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getparameters = { (void*)&c_ReflectionFunctionAbstract::i_getparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getparameters, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getstaticvariables = { (void*)&c_ReflectionFunctionAbstract::i_getstaticvariables, (void*)&c_ReflectionFunctionAbstract::ifa_getstaticvariables, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getnumberofparameters = { (void*)&c_ReflectionFunctionAbstract::i_getnumberofparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofparameters, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$isuserdefined = { (void*)&c_ReflectionFunctionAbstract::i_isuserdefined, (void*)&c_ReflectionFunctionAbstract::ifa_isuserdefined, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getdoccomment = { (void*)&c_ReflectionFunctionAbstract::i_getdoccomment, (void*)&c_ReflectionFunctionAbstract::ifa_getdoccomment, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getfilename = { (void*)&c_ReflectionFunctionAbstract::i_getfilename, (void*)&c_ReflectionFunctionAbstract::ifa_getfilename, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getname = { (void*)&c_ReflectionFunctionAbstract::i_getname, (void*)&c_ReflectionFunctionAbstract::ifa_getname, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$isinternal = { (void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionFunctionAbstract$$getendline = { (void*)&c_ReflectionFunctionAbstract::i_getendline, (void*)&c_ReflectionFunctionAbstract::ifa_getendline, 0, 4, 0x0000000000000000LL};
 Variant c_ReflectionFunctionAbstract::i_getname(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getname);
 }
@@ -2004,23 +2148,22 @@ Variant c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters(MethodCa
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
   return (self->t_getnumberofrequiredparameters());
 }
-const MethodCallInfoTable c_ReflectionFunctionAbstract::s_call_info_table[] = {
-  { 0x57D8DC34C9A03560LL, 1, 21, "getNumberOfParameters", &c_ReflectionFunctionAbstract::ci_getnumberofparameters },
-  { 0x4D637DECDBFA6221LL, 1, 29, "getNumberOfRequiredParameters", &c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters },
-  { 0x33A6C2CFBDB05EE2LL, 1, 10, "getClosure", &c_ReflectionFunctionAbstract::ci_getclosure },
-  { 0x6A6B8BECAE7D4164LL, 1, 13, "isUserDefined", &c_ReflectionFunctionAbstract::ci_isuserdefined },
-  { 0x39C1BB731CB1CB04LL, 0, 12, "getStartLine", &c_ReflectionFunctionAbstract::ci_getstartline },
-  { 0x23F51CDECC198965LL, 1, 7, "getName", &c_ReflectionFunctionAbstract::ci_getname },
-  { 0x37FFB8F44A3329A8LL, 1, 18, "getStaticVariables", &c_ReflectionFunctionAbstract::ci_getstaticvariables },
-  { 0x1A3AB3B0276D2668LL, 0, 16, "returnsReference", &c_ReflectionFunctionAbstract::ci_returnsreference },
-  { 0x1930CE336D39474DLL, 1, 11, "getFileName", &c_ReflectionFunctionAbstract::ci_getfilename },
-  { 0x3E62225132C2A32DLL, 0, 13, "getParameters", &c_ReflectionFunctionAbstract::ci_getparameters },
-  { 0x48FDF6C5835C64CFLL, 1, 10, "isInternal", &c_ReflectionFunctionAbstract::ci_isinternal },
-  { 0x6C19E85007BC4570LL, 1, 10, "getEndLine", &c_ReflectionFunctionAbstract::ci_getendline },
-  { 0x7C4F424FDA56ADF8LL, 1, 13, "getDocComment", &c_ReflectionFunctionAbstract::ci_getdoccomment },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_ReflectionFunctionAbstract$$call_info_table[] = {
+  { 0x57D8DC34C9A03560LL, 1, 21, "getNumberOfParameters", &ci_ReflectionFunctionAbstract$$getnumberofparameters },
+  { 0x4D637DECDBFA6221LL, 1, 29, "getNumberOfRequiredParameters", &ci_ReflectionFunctionAbstract$$getnumberofrequiredparameters },
+  { 0x33A6C2CFBDB05EE2LL, 1, 10, "getClosure", &ci_ReflectionFunctionAbstract$$getclosure },
+  { 0x6A6B8BECAE7D4164LL, 0, 13, "isUserDefined", &ci_ReflectionFunctionAbstract$$isuserdefined },
+  { 0x39C1BB731CB1CB04LL, 1, 12, "getStartLine", &ci_ReflectionFunctionAbstract$$getstartline },
+  { 0x23F51CDECC198965LL, 1, 7, "getName", &ci_ReflectionFunctionAbstract$$getname },
+  { 0x37FFB8F44A3329A8LL, 0, 18, "getStaticVariables", &ci_ReflectionFunctionAbstract$$getstaticvariables },
+  { 0x1A3AB3B0276D2668LL, 1, 16, "returnsReference", &ci_ReflectionFunctionAbstract$$returnsreference },
+  { 0x1930CE336D39474DLL, 0, 11, "getFileName", &ci_ReflectionFunctionAbstract$$getfilename },
+  { 0x3E62225132C2A32DLL, 1, 13, "getParameters", &ci_ReflectionFunctionAbstract$$getparameters },
+  { 0x48FDF6C5835C64CFLL, 1, 10, "isInternal", &ci_ReflectionFunctionAbstract$$isinternal },
+  { 0x6C19E85007BC4570LL, 1, 10, "getEndLine", &ci_ReflectionFunctionAbstract$$getendline },
+  { 0x7C4F424FDA56ADF8LL, 1, 13, "getDocComment", &ci_ReflectionFunctionAbstract$$getdoccomment },
 };
-const int c_ReflectionFunctionAbstract::s_call_info_index[] = {
+extern const int cw_ReflectionFunctionAbstract$$call_info_index[] = {
   31,
   0,1,2,-1,3,5,-1,-1,
   6,-1,-1,-1,-1,8,-1,10,
@@ -2028,75 +2171,89 @@ const int c_ReflectionFunctionAbstract::s_call_info_index[] = {
   12,-1,-1,-1,-1,-1,-1,-1,
 
 };
+extern const MethodCallInfoTable cw_ReflectionFunctionAbstract$$call_info_table[];
+extern const int cw_ReflectionFunctionAbstract$$call_info_index[];
+extern const InstanceOfInfo cw_ReflectionFunctionAbstract$$instanceof_table[];
+extern const int cw_ReflectionFunctionAbstract$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionFunctionAbstract,
-  c_ReflectionFunctionAbstract::s_call_info_table,c_ReflectionFunctionAbstract::s_call_info_index,
-  c_ReflectionFunctionAbstract::s_instanceof_table,c_ReflectionFunctionAbstract::s_instanceof_index,
+  cw_ReflectionFunctionAbstract$$call_info_table,cw_ReflectionFunctionAbstract$$call_info_index,
+  cw_ReflectionFunctionAbstract$$instanceof_table,cw_ReflectionFunctionAbstract$$instanceof_index,
   &c_ReflectionFunctionAbstract::s_class_name,
   &c_ReflectionFunctionAbstract::os_prop_table,0,0,0,0x0,
   &c_ReflectionFunctionAbstract::s_cls
 };
-/* SRC: classes/reflection.php line 262 */
+/* SRC: classes/reflection.php line 290 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getName);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 277 */
+/* SRC: classes/reflection.php line 305 */
 bool c_ReflectionFunctionAbstract::t_isinternal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::isInternal);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ss9332a8ac, "internal"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 281 */
+/* SRC: classes/reflection.php line 309 */
 Variant c_ReflectionFunctionAbstract::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getClosure);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss4cd61020, "closure"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 296 */
+/* SRC: classes/reflection.php line 324 */
 bool c_ReflectionFunctionAbstract::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::isUserDefined);
+  ObjectData *obj_tmp UNUSED;
   return !(isset(m_info, NAMSTR(s_sys_ss9332a8ac, "internal"), true));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 310 */
+/* SRC: classes/reflection.php line 338 */
 Variant c_ReflectionFunctionAbstract::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getFileName);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 324 */
+/* SRC: classes/reflection.php line 352 */
 Variant c_ReflectionFunctionAbstract::t_getstartline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getStartLine);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ssd4c67725, "line1"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 339 */
+/* SRC: classes/reflection.php line 367 */
 Variant c_ReflectionFunctionAbstract::t_getendline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getEndLine);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ssbefe32a8, "line2"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 353 */
+/* SRC: classes/reflection.php line 381 */
 Variant c_ReflectionFunctionAbstract::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getDocComment);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss9cfa17a6, "doc"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 368 */
+/* SRC: classes/reflection.php line 396 */
 Variant c_ReflectionFunctionAbstract::t_getstaticvariables() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getStaticVariables);
+  ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss5be7a94a, "static_variables"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 383 */
+/* SRC: classes/reflection.php line 411 */
 bool c_ReflectionFunctionAbstract::t_returnsreference() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::returnsReference);
+  ObjectData *obj_tmp UNUSED;
   return isset(m_info, NAMSTR(s_sys_ss134fd5fa, "ref"), true);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 398 */
+/* SRC: classes/reflection.php line 426 */
 Array c_ReflectionFunctionAbstract::t_getparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getParameters);
   Array v_ret;
@@ -2104,11 +2261,12 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
   Variant v_info;
   p_ReflectionParameter v_param;
 
+  ObjectData *obj_tmp UNUSED;
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss1f20ac62, "params"), AccessFlags::Error_Key);
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_info);
       v_name.assignVal(iter3.first());
@@ -2117,7 +2275,9 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
           const p_ReflectionParameter &tmp0((p_ReflectionParameter(((c_ReflectionParameter*)coo_ReflectionParameter())->create(null, null))));
           v_param = tmp0;
         }
-        v_param->m_info.assignVal(v_info);
+        {
+          (obj_tmp = v_param.get(), LIKELY(obj_tmp != 0) || (throw_null_object_prop(),false),(((c_ReflectionParameter*)obj_tmp)->m_info)).assignVal(v_info);
+        }
         v_ret.append((VarNR(v_param)));
       }
     }
@@ -2125,16 +2285,17 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 420 */
+/* SRC: classes/reflection.php line 448 */
 int c_ReflectionFunctionAbstract::t_getnumberofparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfParameters);
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss1f20ac62, "params"), AccessFlags::Error_Key)));
     return x_count(tmp0);
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 436 */
+/* SRC: classes/reflection.php line 464 */
 int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfRequiredParameters);
   int64 v_count = 0;
@@ -2149,7 +2310,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   }
   {
     LOOP_COUNTER(1);
-    for (ArrayIter iter3 = v_params.begin(s_class_name, true); !iter3.end(); ++iter3) {
+    for (ArrayIter iter3 = v_params.begin(s_class_name); !iter3.end(); ++iter3) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_param);
       v_name.assignVal(iter3.first());
@@ -2176,64 +2337,73 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   return v_count;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 27 */
+/* SRC: classes/reflection.php line 18 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionException)
-const InstanceOfInfo c_ReflectionException::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionException$$instanceof_table[] = {
   {0x672AD818DDE95538LL,0,"ReflectionException",&cw_ReflectionException},
   {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
 };
-const int c_ReflectionException::s_instanceof_index[] = {
+const int cw_ReflectionException$$instanceof_index[] = {
   3,
   0,-1,-1,-1,
 };
+extern const CallInfo ci_Exception$$__construct;
+extern const InstanceOfInfo cw_ReflectionException$$instanceof_table[];
+extern const int cw_ReflectionException$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionException = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionException,
-  c_ReflectionException::s_call_info_table,c_ReflectionException::s_call_info_index,
-  c_ReflectionException::s_instanceof_table,c_ReflectionException::s_instanceof_index,
+  0,0,
+  cw_ReflectionException$$instanceof_table,cw_ReflectionException$$instanceof_index,
   &c_ReflectionException::s_class_name,
-  &c_Exception::os_prop_table,&c_Exception::ci___construct,0,&cw_Exception,0x0,
+  &c_Exception::os_prop_table,&ci_Exception$$__construct,0,&cw_Exception,0x0,
   &c_ReflectionException::s_cls
 };
-/* SRC: classes/reflection.php line 1336 */
+/* SRC: classes/reflection.php line 1364 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionObject)
-const InstanceOfInfo c_ReflectionObject::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionObject$$instanceof_table[] = {
   {0x41A9F7D81254DD7ALL,1,"ReflectionObject",&cw_ReflectionObject},
   {0x35A44A5E6AE2E71DLL,0,"ReflectionClass",&cw_ReflectionClass},
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
 };
-const int c_ReflectionObject::s_instanceof_index[] = {
+const int cw_ReflectionObject$$instanceof_index[] = {
   7,
   -1,-1,0,-1,-1,1,-1,-1,
 
 };
-CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 12, 0x0000000000000000LL);
+extern const CallInfo ci_ReflectionObject$$export = { (void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 12, 0x0000000000000000LL};
 Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_export);
 }
 Variant c_ReflectionObject::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionObject::export", count, 1, 2, 1);
   CVarRef arg0(a0);
+  if (count <= 1) return (c_ReflectionObject::t_export(arg0));
   CVarRef arg1(a1);
   return (c_ReflectionObject::t_export(arg0, arg1));
 }
-const MethodCallInfoTable c_ReflectionObject::s_call_info_table[] = {
-  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &c_ReflectionObject::ci_export },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_ReflectionObject$$call_info_table[] = {
+  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &ci_ReflectionObject$$export },
 };
-const int c_ReflectionObject::s_call_info_index[] = {
+extern const int cw_ReflectionObject$$call_info_index[] = {
   1,
   0,-1,
 };
+extern const CallInfo ci_ReflectionClass$$__construct;
+extern const MethodCallInfoTable cw_ReflectionObject$$call_info_table[];
+extern const int cw_ReflectionObject$$call_info_index[];
+extern const InstanceOfInfo cw_ReflectionObject$$instanceof_table[];
+extern const int cw_ReflectionObject$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionObject = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionObject,
-  c_ReflectionObject::s_call_info_table,c_ReflectionObject::s_call_info_index,
-  c_ReflectionObject::s_instanceof_table,c_ReflectionObject::s_instanceof_index,
+  cw_ReflectionObject$$call_info_table,cw_ReflectionObject$$call_info_index,
+  cw_ReflectionObject$$instanceof_table,cw_ReflectionObject$$instanceof_index,
   &c_ReflectionObject::s_class_name,
-  &c_ReflectionClass::os_prop_table,&c_ReflectionClass::ci___construct,0,&cw_ReflectionClass,0x0,
+  &c_ReflectionClass::os_prop_table,&ci_ReflectionClass$$__construct,0,&cw_ReflectionClass,0x0,
   &c_ReflectionObject::s_cls
 };
-/* SRC: classes/reflection.php line 1353 */
-Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
+/* SRC: classes/reflection.php line 1381 */
+Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret //  = false_varNR
+) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionObject, ReflectionObject::export);
   String v_str;
 
@@ -2252,67 +2422,67 @@ Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret) {
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 540 */
+/* SRC: classes/reflection.php line 568 */
 const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT = 16LL;
 const int64 q_ReflectionClass$$IS_EXPLICIT_ABSTRACT = 32LL;
 const int64 q_ReflectionClass$$IS_FINAL = 64LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionClass)
-const InstanceOfInfo c_ReflectionClass::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_ReflectionClass$$instanceof_table[] = {
   {0x35A44A5E6AE2E71DLL,0,"ReflectionClass",&cw_ReflectionClass},
   {0x62F7F85447C0A605LL,1,"Reflector",(const ObjectStaticCallbacks*)2},
 };
-const int c_ReflectionClass::s_instanceof_index[] = {
+const int cw_ReflectionClass$$instanceof_index[] = {
   3,
   -1,0,-1,-1,
 };
-CallInfo c_ReflectionClass::ci_getdefaultproperties((void*)&c_ReflectionClass::i_getdefaultproperties, (void*)&c_ReflectionClass::ifa_getdefaultproperties, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_gettraitnames((void*)&c_ReflectionClass::i_gettraitnames, (void*)&c_ReflectionClass::ifa_gettraitnames, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_newinstance((void*)&c_ReflectionClass::i_newinstance, (void*)&c_ReflectionClass::ifa_newinstance, 0, 5, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_newinstanceargs((void*)&c_ReflectionClass::i_newinstanceargs, (void*)&c_ReflectionClass::ifa_newinstanceargs, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_export((void*)&c_ReflectionClass::i_export, (void*)&c_ReflectionClass::ifa_export, 2, 12, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getmethods((void*)&c_ReflectionClass::i_getmethods, (void*)&c_ReflectionClass::ifa_getmethods, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getinterfacenames((void*)&c_ReflectionClass::i_getinterfacenames, (void*)&c_ReflectionClass::ifa_getinterfacenames, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getparentclass((void*)&c_ReflectionClass::i_getparentclass, (void*)&c_ReflectionClass::ifa_getparentclass, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getproperties((void*)&c_ReflectionClass::i_getproperties, (void*)&c_ReflectionClass::ifa_getproperties, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci___tostring((void*)&c_ReflectionClass::i___tostring, (void*)&c_ReflectionClass::ifa___tostring, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getconstants((void*)&c_ReflectionClass::i_getconstants, (void*)&c_ReflectionClass::ifa_getconstants, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getstaticproperties((void*)&c_ReflectionClass::i_getstaticproperties, (void*)&c_ReflectionClass::ifa_getstaticproperties, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isinstance((void*)&c_ReflectionClass::i_isinstance, (void*)&c_ReflectionClass::ifa_isinstance, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getdoccomment((void*)&c_ReflectionClass::i_getdoccomment, (void*)&c_ReflectionClass::ifa_getdoccomment, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_implementsinterface((void*)&c_ReflectionClass::i_implementsinterface, (void*)&c_ReflectionClass::ifa_implementsinterface, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getconstructor((void*)&c_ReflectionClass::i_getconstructor, (void*)&c_ReflectionClass::ifa_getconstructor, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_hasmethod((void*)&c_ReflectionClass::i_hasmethod, (void*)&c_ReflectionClass::ifa_hasmethod, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isfinal((void*)&c_ReflectionClass::i_isfinal, (void*)&c_ReflectionClass::ifa_isfinal, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getextension((void*)&c_ReflectionClass::i_getextension, (void*)&c_ReflectionClass::ifa_getextension, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getmethod((void*)&c_ReflectionClass::i_getmethod, (void*)&c_ReflectionClass::ifa_getmethod, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isinternal((void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isinterface((void*)&c_ReflectionClass::i_isinterface, (void*)&c_ReflectionClass::ifa_isinterface, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getproperty((void*)&c_ReflectionClass::i_getproperty, (void*)&c_ReflectionClass::ifa_getproperty, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getconstant((void*)&c_ReflectionClass::i_getconstant, (void*)&c_ReflectionClass::ifa_getconstant, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isiterateable((void*)&c_ReflectionClass::i_isiterateable, (void*)&c_ReflectionClass::ifa_isiterateable, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getstartline((void*)&c_ReflectionClass::i_getstartline, (void*)&c_ReflectionClass::ifa_getstartline, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_gettraitaliases((void*)&c_ReflectionClass::i_gettraitaliases, (void*)&c_ReflectionClass::ifa_gettraitaliases, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getendline((void*)&c_ReflectionClass::i_getendline, (void*)&c_ReflectionClass::ifa_getendline, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getextensionname((void*)&c_ReflectionClass::i_getextensionname, (void*)&c_ReflectionClass::ifa_getextensionname, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_fetch_recur((void*)&c_ReflectionClass::i_fetch_recur, (void*)&c_ReflectionClass::ifa_fetch_recur, 1, 140, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getstaticpropertyvalue((void*)&c_ReflectionClass::i_getstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_getstaticpropertyvalue, 2, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getfilename((void*)&c_ReflectionClass::i_getfilename, (void*)&c_ReflectionClass::ifa_getfilename, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isuserdefined((void*)&c_ReflectionClass::i_isuserdefined, (void*)&c_ReflectionClass::ifa_isuserdefined, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci___construct((void*)&c_ReflectionClass::i___construct, (void*)&c_ReflectionClass::ifa___construct, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_check((void*)&c_ReflectionClass::i_check, (void*)&c_ReflectionClass::ifa_check, 1, 132, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_hasproperty((void*)&c_ReflectionClass::i_hasproperty, (void*)&c_ReflectionClass::ifa_hasproperty, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_fetch((void*)&c_ReflectionClass::i_fetch, (void*)&c_ReflectionClass::ifa_fetch, 1, 132, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isinstantiable((void*)&c_ReflectionClass::i_isinstantiable, (void*)&c_ReflectionClass::ifa_isinstantiable, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_gettraits((void*)&c_ReflectionClass::i_gettraits, (void*)&c_ReflectionClass::ifa_gettraits, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_istrait((void*)&c_ReflectionClass::i_istrait, (void*)&c_ReflectionClass::ifa_istrait, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isabstract((void*)&c_ReflectionClass::i_isabstract, (void*)&c_ReflectionClass::ifa_isabstract, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getmodifiers((void*)&c_ReflectionClass::i_getmodifiers, (void*)&c_ReflectionClass::ifa_getmodifiers, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_setstaticpropertyvalue((void*)&c_ReflectionClass::i_setstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_setstaticpropertyvalue, 2, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_test((void*)&c_ReflectionClass::i_test, (void*)&c_ReflectionClass::ifa_test, 2, 132, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getinterfaces((void*)&c_ReflectionClass::i_getinterfaces, (void*)&c_ReflectionClass::ifa_getinterfaces, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_issubclassof((void*)&c_ReflectionClass::i_issubclassof, (void*)&c_ReflectionClass::ifa_issubclassof, 1, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getname((void*)&c_ReflectionClass::i_getname, (void*)&c_ReflectionClass::ifa_getname, 0, 4, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_hasconstant((void*)&c_ReflectionClass::i_hasconstant, (void*)&c_ReflectionClass::ifa_hasconstant, 1, 4, 0x0000000000000000LL);
+extern const CallInfo ci_ReflectionClass$$getdefaultproperties = { (void*)&c_ReflectionClass::i_getdefaultproperties, (void*)&c_ReflectionClass::ifa_getdefaultproperties, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$gettraitnames = { (void*)&c_ReflectionClass::i_gettraitnames, (void*)&c_ReflectionClass::ifa_gettraitnames, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$newinstance = { (void*)&c_ReflectionClass::i_newinstance, (void*)&c_ReflectionClass::ifa_newinstance, 0, 5, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$newinstanceargs = { (void*)&c_ReflectionClass::i_newinstanceargs, (void*)&c_ReflectionClass::ifa_newinstanceargs, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$export = { (void*)&c_ReflectionClass::i_export, (void*)&c_ReflectionClass::ifa_export, 2, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getmethods = { (void*)&c_ReflectionClass::i_getmethods, (void*)&c_ReflectionClass::ifa_getmethods, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getinterfacenames = { (void*)&c_ReflectionClass::i_getinterfacenames, (void*)&c_ReflectionClass::ifa_getinterfacenames, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getparentclass = { (void*)&c_ReflectionClass::i_getparentclass, (void*)&c_ReflectionClass::ifa_getparentclass, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getproperties = { (void*)&c_ReflectionClass::i_getproperties, (void*)&c_ReflectionClass::ifa_getproperties, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$__tostring = { (void*)&c_ReflectionClass::i___tostring, (void*)&c_ReflectionClass::ifa___tostring, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getconstants = { (void*)&c_ReflectionClass::i_getconstants, (void*)&c_ReflectionClass::ifa_getconstants, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getstaticproperties = { (void*)&c_ReflectionClass::i_getstaticproperties, (void*)&c_ReflectionClass::ifa_getstaticproperties, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$isinstance = { (void*)&c_ReflectionClass::i_isinstance, (void*)&c_ReflectionClass::ifa_isinstance, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getdoccomment = { (void*)&c_ReflectionClass::i_getdoccomment, (void*)&c_ReflectionClass::ifa_getdoccomment, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$implementsinterface = { (void*)&c_ReflectionClass::i_implementsinterface, (void*)&c_ReflectionClass::ifa_implementsinterface, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getconstructor = { (void*)&c_ReflectionClass::i_getconstructor, (void*)&c_ReflectionClass::ifa_getconstructor, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$hasmethod = { (void*)&c_ReflectionClass::i_hasmethod, (void*)&c_ReflectionClass::ifa_hasmethod, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$isfinal = { (void*)&c_ReflectionClass::i_isfinal, (void*)&c_ReflectionClass::ifa_isfinal, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getextension = { (void*)&c_ReflectionClass::i_getextension, (void*)&c_ReflectionClass::ifa_getextension, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getmethod = { (void*)&c_ReflectionClass::i_getmethod, (void*)&c_ReflectionClass::ifa_getmethod, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$isinternal = { (void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$isinterface = { (void*)&c_ReflectionClass::i_isinterface, (void*)&c_ReflectionClass::ifa_isinterface, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getproperty = { (void*)&c_ReflectionClass::i_getproperty, (void*)&c_ReflectionClass::ifa_getproperty, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getconstant = { (void*)&c_ReflectionClass::i_getconstant, (void*)&c_ReflectionClass::ifa_getconstant, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$isiterateable = { (void*)&c_ReflectionClass::i_isiterateable, (void*)&c_ReflectionClass::ifa_isiterateable, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getstartline = { (void*)&c_ReflectionClass::i_getstartline, (void*)&c_ReflectionClass::ifa_getstartline, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$gettraitaliases = { (void*)&c_ReflectionClass::i_gettraitaliases, (void*)&c_ReflectionClass::ifa_gettraitaliases, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getendline = { (void*)&c_ReflectionClass::i_getendline, (void*)&c_ReflectionClass::ifa_getendline, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getextensionname = { (void*)&c_ReflectionClass::i_getextensionname, (void*)&c_ReflectionClass::ifa_getextensionname, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$fetch_recur = { (void*)&c_ReflectionClass::i_fetch_recur, (void*)&c_ReflectionClass::ifa_fetch_recur, 1, 140, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getstaticpropertyvalue = { (void*)&c_ReflectionClass::i_getstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_getstaticpropertyvalue, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getfilename = { (void*)&c_ReflectionClass::i_getfilename, (void*)&c_ReflectionClass::ifa_getfilename, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$isuserdefined = { (void*)&c_ReflectionClass::i_isuserdefined, (void*)&c_ReflectionClass::ifa_isuserdefined, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$__construct = { (void*)&c_ReflectionClass::i___construct, (void*)&c_ReflectionClass::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$check = { (void*)&c_ReflectionClass::i_check, (void*)&c_ReflectionClass::ifa_check, 1, 132, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$hasproperty = { (void*)&c_ReflectionClass::i_hasproperty, (void*)&c_ReflectionClass::ifa_hasproperty, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$fetch = { (void*)&c_ReflectionClass::i_fetch, (void*)&c_ReflectionClass::ifa_fetch, 1, 132, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$isinstantiable = { (void*)&c_ReflectionClass::i_isinstantiable, (void*)&c_ReflectionClass::ifa_isinstantiable, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$gettraits = { (void*)&c_ReflectionClass::i_gettraits, (void*)&c_ReflectionClass::ifa_gettraits, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$istrait = { (void*)&c_ReflectionClass::i_istrait, (void*)&c_ReflectionClass::ifa_istrait, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$isabstract = { (void*)&c_ReflectionClass::i_isabstract, (void*)&c_ReflectionClass::ifa_isabstract, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getmodifiers = { (void*)&c_ReflectionClass::i_getmodifiers, (void*)&c_ReflectionClass::ifa_getmodifiers, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$setstaticpropertyvalue = { (void*)&c_ReflectionClass::i_setstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_setstaticpropertyvalue, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$test = { (void*)&c_ReflectionClass::i_test, (void*)&c_ReflectionClass::ifa_test, 2, 132, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getinterfaces = { (void*)&c_ReflectionClass::i_getinterfaces, (void*)&c_ReflectionClass::ifa_getinterfaces, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$issubclassof = { (void*)&c_ReflectionClass::i_issubclassof, (void*)&c_ReflectionClass::ifa_issubclassof, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$getname = { (void*)&c_ReflectionClass::i_getname, (void*)&c_ReflectionClass::ifa_getname, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionClass$$hasconstant = { (void*)&c_ReflectionClass::i_hasconstant, (void*)&c_ReflectionClass::ifa_hasconstant, 1, 4, 0x0000000000000000LL};
 Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -2514,8 +2684,9 @@ Variant c_ReflectionClass::ifa___tostring(MethodCallPackage &mcp, int count, INV
   return (self->t___tostring());
 }
 Variant c_ReflectionClass::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("ReflectionClass::export", count, 1, 2, 1);
   CVarRef arg0(a0);
+  if (count <= 1) return (c_ReflectionClass::t_export(arg0));
   CVarRef arg1(a1);
   return (c_ReflectionClass::t_export(arg0, arg1));
 }
@@ -2872,58 +3043,57 @@ Variant c_ReflectionClass::ifa_getextensionname(MethodCallPackage &mcp, int coun
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
   return (self->t_getextensionname());
 }
-const MethodCallInfoTable c_ReflectionClass::s_call_info_table[] = {
-  { 0x39C1BB731CB1CB04LL, 1, 12, "getStartLine", &c_ReflectionClass::ci_getstartline },
-  { 0x37DF5A8F4136C705LL, 1, 5, "check", &c_ReflectionClass::ci_check },
-  { 0x4C40EED171E86607LL, 1, 9, "getTraits", &c_ReflectionClass::ci_gettraits },
-  { 0x40C7B30DCB439C8FLL, 1, 11, "hasProperty", &c_ReflectionClass::ci_hasproperty },
-  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &c_ReflectionClass::ci___tostring },
-  { 0x24253EBA491D6014LL, 1, 12, "getModifiers", &c_ReflectionClass::ci_getmodifiers },
-  { 0x196F2AC52B12BF16LL, 1, 15, "getTraitAliases", &c_ReflectionClass::ci_gettraitaliases },
-  { 0x21820E7AA4733998LL, 1, 9, "hasMethod", &c_ReflectionClass::ci_hasmethod },
-  { 0x0F1AD0A8EC4C229BLL, 1, 20, "getDefaultProperties", &c_ReflectionClass::ci_getdefaultproperties },
-  { 0x1BC5F3D87676509ELL, 1, 11, "isInterface", &c_ReflectionClass::ci_isinterface },
-  { 0x323D9BCB05797B22LL, 1, 19, "getStaticProperties", &c_ReflectionClass::ci_getstaticproperties },
-  { 0x779C6BB1877464A7LL, 1, 13, "getTraitNames", &c_ReflectionClass::ci_gettraitnames },
-  { 0x030CE1D6142F8C29LL, 1, 10, "isInstance", &c_ReflectionClass::ci_isinstance },
-  { 0x1D6B8CA358B49929LL, 0, 16, "getExtensionName", &c_ReflectionClass::ci_getextensionname },
-  { 0x226F6E80CECD3CAALL, 1, 14, "getConstructor", &c_ReflectionClass::ci_getconstructor },
-  { 0x16BA16CE6488AAAALL, 0, 10, "getMethods", &c_ReflectionClass::ci_getmethods },
-  { 0x24596BE6D21F7CAALL, 0, 17, "getInterfaceNames", &c_ReflectionClass::ci_getinterfacenames },
-  { 0x06FB6A7DC3D795AELL, 1, 7, "isFinal", &c_ReflectionClass::ci_isfinal },
-  { 0x3C882D4A895F612ELL, 0, 22, "getStaticPropertyValue", &c_ReflectionClass::ci_getstaticpropertyvalue },
-  { 0x30A86FCA01FE7030LL, 1, 11, "newInstance", &c_ReflectionClass::ci_newinstance },
-  { 0x3DB53E1FBD3C0734LL, 1, 11, "getConstant", &c_ReflectionClass::ci_getconstant },
-  { 0x0D81ECE253A3B5B6LL, 1, 9, "getMethod", &c_ReflectionClass::ci_getmethod },
-  { 0x7460D945DA32FDB7LL, 1, 10, "isAbstract", &c_ReflectionClass::ci_isabstract },
-  { 0x638089893524223BLL, 1, 7, "isTrait", &c_ReflectionClass::ci_istrait },
-  { 0x25D24435915E6E3BLL, 0, 12, "getExtension", &c_ReflectionClass::ci_getextension },
-  { 0x0D8AAD6BA2BBCD3CLL, 1, 14, "isInstantiable", &c_ReflectionClass::ci_isinstantiable },
-  { 0x54C2DC04C4A62B3FLL, 1, 11, "hasConstant", &c_ReflectionClass::ci_hasconstant },
-  { 0x67C15E3D98C00B43LL, 1, 13, "getInterfaces", &c_ReflectionClass::ci_getinterfaces },
-  { 0x1EB679C3602F4B44LL, 1, 13, "getProperties", &c_ReflectionClass::ci_getproperties },
-  { 0x0FD73627FB023047LL, 1, 11, "getProperty", &c_ReflectionClass::ci_getproperty },
-  { 0x1930CE336D39474DLL, 1, 11, "getFileName", &c_ReflectionClass::ci_getfilename },
-  { 0x7D5A57B5370B68CELL, 1, 13, "isIterateable", &c_ReflectionClass::ci_isiterateable },
-  { 0x48FDF6C5835C64CFLL, 1, 10, "isInternal", &c_ReflectionClass::ci_isinternal },
-  { 0x1CC71CB013143955LL, 1, 12, "getConstants", &c_ReflectionClass::ci_getconstants },
-  { 0x6F19404AC27386D6LL, 1, 11, "fetch_recur", &c_ReflectionClass::ci_fetch_recur },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_ReflectionClass::ci___construct },
-  { 0x6A6B8BECAE7D4164LL, 1, 13, "isUserDefined", &c_ReflectionClass::ci_isuserdefined },
-  { 0x23F51CDECC198965LL, 1, 7, "getName", &c_ReflectionClass::ci_getname },
-  { 0x2735DCC254EE5C66LL, 1, 15, "newInstanceArgs", &c_ReflectionClass::ci_newinstanceargs },
-  { 0x37349B25A0ED29E7LL, 1, 4, "test", &c_ReflectionClass::ci_test },
-  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &c_ReflectionClass::ci_export },
-  { 0x6C19E85007BC4570LL, 1, 10, "getEndLine", &c_ReflectionClass::ci_getendline },
-  { 0x07ECA928E37717F1LL, 1, 22, "setStaticPropertyValue", &c_ReflectionClass::ci_setstaticpropertyvalue },
-  { 0x74F7FEDE16957472LL, 1, 14, "getParentClass", &c_ReflectionClass::ci_getparentclass },
-  { 0x7C4F424FDA56ADF8LL, 1, 13, "getDocComment", &c_ReflectionClass::ci_getdoccomment },
-  { 0x5E82B850BB90B0FBLL, 1, 5, "fetch", &c_ReflectionClass::ci_fetch },
-  { 0x28DC702215C7D6FBLL, 0, 19, "implementsInterface", &c_ReflectionClass::ci_implementsinterface },
-  { 0x373333991926C97ELL, 1, 12, "isSubclassOf", &c_ReflectionClass::ci_issubclassof },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_ReflectionClass$$call_info_table[] = {
+  { 0x39C1BB731CB1CB04LL, 1, 12, "getStartLine", &ci_ReflectionClass$$getstartline },
+  { 0x37DF5A8F4136C705LL, 1, 5, "check", &ci_ReflectionClass$$check },
+  { 0x4C40EED171E86607LL, 1, 9, "getTraits", &ci_ReflectionClass$$gettraits },
+  { 0x40C7B30DCB439C8FLL, 1, 11, "hasProperty", &ci_ReflectionClass$$hasproperty },
+  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_ReflectionClass$$__tostring },
+  { 0x24253EBA491D6014LL, 1, 12, "getModifiers", &ci_ReflectionClass$$getmodifiers },
+  { 0x196F2AC52B12BF16LL, 1, 15, "getTraitAliases", &ci_ReflectionClass$$gettraitaliases },
+  { 0x21820E7AA4733998LL, 1, 9, "hasMethod", &ci_ReflectionClass$$hasmethod },
+  { 0x0F1AD0A8EC4C229BLL, 1, 20, "getDefaultProperties", &ci_ReflectionClass$$getdefaultproperties },
+  { 0x1BC5F3D87676509ELL, 1, 11, "isInterface", &ci_ReflectionClass$$isinterface },
+  { 0x323D9BCB05797B22LL, 1, 19, "getStaticProperties", &ci_ReflectionClass$$getstaticproperties },
+  { 0x779C6BB1877464A7LL, 1, 13, "getTraitNames", &ci_ReflectionClass$$gettraitnames },
+  { 0x030CE1D6142F8C29LL, 0, 10, "isInstance", &ci_ReflectionClass$$isinstance },
+  { 0x1D6B8CA358B49929LL, 1, 16, "getExtensionName", &ci_ReflectionClass$$getextensionname },
+  { 0x226F6E80CECD3CAALL, 0, 14, "getConstructor", &ci_ReflectionClass$$getconstructor },
+  { 0x16BA16CE6488AAAALL, 0, 10, "getMethods", &ci_ReflectionClass$$getmethods },
+  { 0x24596BE6D21F7CAALL, 1, 17, "getInterfaceNames", &ci_ReflectionClass$$getinterfacenames },
+  { 0x06FB6A7DC3D795AELL, 0, 7, "isFinal", &ci_ReflectionClass$$isfinal },
+  { 0x3C882D4A895F612ELL, 1, 22, "getStaticPropertyValue", &ci_ReflectionClass$$getstaticpropertyvalue },
+  { 0x30A86FCA01FE7030LL, 1, 11, "newInstance", &ci_ReflectionClass$$newinstance },
+  { 0x3DB53E1FBD3C0734LL, 1, 11, "getConstant", &ci_ReflectionClass$$getconstant },
+  { 0x0D81ECE253A3B5B6LL, 1, 9, "getMethod", &ci_ReflectionClass$$getmethod },
+  { 0x7460D945DA32FDB7LL, 1, 10, "isAbstract", &ci_ReflectionClass$$isabstract },
+  { 0x638089893524223BLL, 0, 7, "isTrait", &ci_ReflectionClass$$istrait },
+  { 0x25D24435915E6E3BLL, 1, 12, "getExtension", &ci_ReflectionClass$$getextension },
+  { 0x0D8AAD6BA2BBCD3CLL, 1, 14, "isInstantiable", &ci_ReflectionClass$$isinstantiable },
+  { 0x54C2DC04C4A62B3FLL, 1, 11, "hasConstant", &ci_ReflectionClass$$hasconstant },
+  { 0x67C15E3D98C00B43LL, 1, 13, "getInterfaces", &ci_ReflectionClass$$getinterfaces },
+  { 0x1EB679C3602F4B44LL, 1, 13, "getProperties", &ci_ReflectionClass$$getproperties },
+  { 0x0FD73627FB023047LL, 1, 11, "getProperty", &ci_ReflectionClass$$getproperty },
+  { 0x1930CE336D39474DLL, 1, 11, "getFileName", &ci_ReflectionClass$$getfilename },
+  { 0x7D5A57B5370B68CELL, 1, 13, "isIterateable", &ci_ReflectionClass$$isiterateable },
+  { 0x48FDF6C5835C64CFLL, 1, 10, "isInternal", &ci_ReflectionClass$$isinternal },
+  { 0x1CC71CB013143955LL, 1, 12, "getConstants", &ci_ReflectionClass$$getconstants },
+  { 0x6F19404AC27386D6LL, 1, 11, "fetch_recur", &ci_ReflectionClass$$fetch_recur },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &ci_ReflectionClass$$__construct },
+  { 0x6A6B8BECAE7D4164LL, 1, 13, "isUserDefined", &ci_ReflectionClass$$isuserdefined },
+  { 0x23F51CDECC198965LL, 1, 7, "getName", &ci_ReflectionClass$$getname },
+  { 0x2735DCC254EE5C66LL, 1, 15, "newInstanceArgs", &ci_ReflectionClass$$newinstanceargs },
+  { 0x37349B25A0ED29E7LL, 1, 4, "test", &ci_ReflectionClass$$test },
+  { 0x0B5ABC58C98E70E8LL, 1, 6, "export", &ci_ReflectionClass$$export },
+  { 0x6C19E85007BC4570LL, 1, 10, "getEndLine", &ci_ReflectionClass$$getendline },
+  { 0x07ECA928E37717F1LL, 1, 22, "setStaticPropertyValue", &ci_ReflectionClass$$setstaticpropertyvalue },
+  { 0x74F7FEDE16957472LL, 1, 14, "getParentClass", &ci_ReflectionClass$$getparentclass },
+  { 0x7C4F424FDA56ADF8LL, 1, 13, "getDocComment", &ci_ReflectionClass$$getdoccomment },
+  { 0x5E82B850BB90B0FBLL, 0, 5, "fetch", &ci_ReflectionClass$$fetch },
+  { 0x28DC702215C7D6FBLL, 1, 19, "implementsInterface", &ci_ReflectionClass$$implementsinterface },
+  { 0x373333991926C97ELL, 1, 12, "isSubclassOf", &ci_ReflectionClass$$issubclassof },
 };
-const int c_ReflectionClass::s_call_info_index[] = {
+extern const int cw_ReflectionClass$$call_info_index[] = {
   127,
   -1,-1,-1,-1,0,1,-1,2,
   -1,-1,-1,-1,-1,-1,-1,3,
@@ -2949,18 +3119,22 @@ c_ReflectionClass *c_ReflectionClass::create(CVarRef v_name) {
   t___construct(v_name);
   return this;
 }
+extern const MethodCallInfoTable cw_ReflectionClass$$call_info_table[];
+extern const int cw_ReflectionClass$$call_info_index[];
+extern const InstanceOfInfo cw_ReflectionClass$$instanceof_table[];
+extern const int cw_ReflectionClass$$instanceof_index[];
 const ObjectStaticCallbacks cw_ReflectionClass = {
   (ObjectData*(*)(ObjectData*))coo_ReflectionClass,
-  c_ReflectionClass::s_call_info_table,c_ReflectionClass::s_call_info_index,
-  c_ReflectionClass::s_instanceof_table,c_ReflectionClass::s_instanceof_index,
+  cw_ReflectionClass$$call_info_table,cw_ReflectionClass$$call_info_index,
+  cw_ReflectionClass$$instanceof_table,cw_ReflectionClass$$instanceof_index,
   &c_ReflectionClass::s_class_name,
-  &c_ReflectionClass::os_prop_table,&c_ReflectionClass::ci___construct,0,0,0x0,
+  &c_ReflectionClass::os_prop_table,&ci_ReflectionClass$$__construct,0,0,0x0,
   &c_ReflectionClass::s_cls
 };
-/* SRC: classes/reflection.php line 549 */
+/* SRC: classes/reflection.php line 577 */
 void c_ReflectionClass::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::__construct);
-  bool oldInCtor = gasInCtor(true);
+  ObjectData *obj_tmp UNUSED;
   if (x_is_object(v_name)) {
     {
       {
@@ -2981,12 +3155,12 @@ void c_ReflectionClass::t___construct(Variant v_name) {
       }
     }
   }
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 560 */
+/* SRC: classes/reflection.php line 588 */
 Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::fetch);
+  ObjectData *obj_tmp UNUSED;
   if (!(toBoolean(m_info))) {
     {
       {
@@ -2998,7 +3172,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
   return m_info.rvalAt(v_what, AccessFlags::Error);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 567 */
+/* SRC: classes/reflection.php line 595 */
 Variant c_ReflectionClass::t_fetch_recur(CVarRef v_name) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::fetch_recur);
   Array v_info;
@@ -3027,7 +3201,7 @@ Variant c_ReflectionClass::t_fetch_recur(CVarRef v_name) {
   {
     LOOP_COUNTER(1);
     Variant map2 = v_info.rvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), AccessFlags::Error_Key);
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_interface.assignVal(iter3.first());
@@ -3096,9 +3270,10 @@ Variant c_ReflectionClass::t_fetch_recur(CVarRef v_name) {
   return v_info;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 599 */
+/* SRC: classes/reflection.php line 627 */
 bool c_ReflectionClass::t_check(CVarRef v_what) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::check);
+  ObjectData *obj_tmp UNUSED;
   if (!(toBoolean(m_info))) {
     {
       {
@@ -3110,7 +3285,7 @@ bool c_ReflectionClass::t_check(CVarRef v_what) {
   return isset(m_info, v_what);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 606 */
+/* SRC: classes/reflection.php line 634 */
 bool c_ReflectionClass::t_test(CVarRef v_what, CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::test);
   Variant v_v;
@@ -3122,14 +3297,15 @@ bool c_ReflectionClass::t_test(CVarRef v_what, CVarRef v_name) {
   return (toBoolean(v_v) && isset(v_v, v_name));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 611 */
+/* SRC: classes/reflection.php line 639 */
 String c_ReflectionClass::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 631 */
-Variant c_ReflectionClass::t_export(CVarRef v_name, CVarRef v_ret) {
+/* SRC: classes/reflection.php line 659 */
+Variant c_ReflectionClass::t_export(CVarRef v_name, CVarRef v_ret //  = false_varNR
+) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::export);
   p_ReflectionClass v_obj;
   String v_str;
@@ -3149,37 +3325,38 @@ Variant c_ReflectionClass::t_export(CVarRef v_name, CVarRef v_ret) {
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 649 */
+/* SRC: classes/reflection.php line 677 */
 Variant c_ReflectionClass::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getName);
+  ObjectData *obj_tmp UNUSED;
   return m_name;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 663 */
+/* SRC: classes/reflection.php line 691 */
 bool c_ReflectionClass::t_isinternal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInternal);
   return t_check(NAMVAR(s_sys_svs9332a8ac, "internal"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 676 */
+/* SRC: classes/reflection.php line 704 */
 bool c_ReflectionClass::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isUserDefined);
   return !(t_check(NAMVAR(s_sys_svs9332a8ac, "internal")));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 690 */
+/* SRC: classes/reflection.php line 718 */
 bool c_ReflectionClass::t_isinstantiable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInstantiable);
   return !(t_check(NAMVAR(s_sys_svs12c8a8a6, "abstract")));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 705 */
+/* SRC: classes/reflection.php line 733 */
 bool c_ReflectionClass::t_hasconstant(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasConstant);
   return t_test(NAMVAR(s_sys_svs623ae369, "constants"), v_name);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 719 */
+/* SRC: classes/reflection.php line 747 */
 bool c_ReflectionClass::t_hasmethod(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasMethod);
   {
@@ -3188,41 +3365,42 @@ bool c_ReflectionClass::t_hasmethod(CVarRef v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 734 */
+/* SRC: classes/reflection.php line 762 */
 bool c_ReflectionClass::t_hasproperty(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasProperty);
   return t_test(NAMVAR(s_sys_svs90269404, "properties"), v_name);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 749 */
+/* SRC: classes/reflection.php line 777 */
 Variant c_ReflectionClass::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getFileName);
   return t_fetch(NAMVAR(s_sys_svs8ce7db5b, "file"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 763 */
+/* SRC: classes/reflection.php line 791 */
 Variant c_ReflectionClass::t_getstartline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStartLine);
   return t_fetch(NAMVAR(s_sys_svsd4c67725, "line1"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 776 */
+/* SRC: classes/reflection.php line 804 */
 Variant c_ReflectionClass::t_getendline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getEndLine);
   return t_fetch(NAMVAR(s_sys_svsbefe32a8, "line2"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 790 */
+/* SRC: classes/reflection.php line 818 */
 Variant c_ReflectionClass::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getDocComment);
   return t_fetch(NAMVAR(s_sys_svs9cfa17a6, "doc"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 804 */
+/* SRC: classes/reflection.php line 832 */
 Variant c_ReflectionClass::t_getconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstructor);
   Variant v_name;
 
+  ObjectData *obj_tmp UNUSED;
   if (t_hasmethod(NAMVAR(s_sys_svsa1b87da7, "__construct"))) {
     {
       return t_getmethod(NAMVAR(s_sys_svsa1b87da7, "__construct"));
@@ -3246,7 +3424,7 @@ Variant c_ReflectionClass::t_getconstructor() {
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 825 */
+/* SRC: classes/reflection.php line 853 */
 p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getMethod);
   Variant v_method;
@@ -3255,6 +3433,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
   Variant v_class;
   p_ReflectionMethod v_ret;
 
+  ObjectData *obj_tmp UNUSED;
   if (!(toBoolean(m_info))) {
     {
       {
@@ -3281,7 +3460,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
       }
     }
   }
-  if (!(toBoolean(v_method))) {
+  if (empty(v_method)) {
     {
       v_class.assignVal(m_name);
       {
@@ -3294,16 +3473,21 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
     const p_ReflectionMethod &tmp0((p_ReflectionMethod(((c_ReflectionMethod*)coo_ReflectionMethod())->create(null, null))));
     v_ret = tmp0;
   }
-  v_ret->m_info.assignVal(v_method);
+  {
+    (obj_tmp = v_ret.get(), LIKELY(obj_tmp != 0) || (throw_null_object_prop(),false),(((c_ReflectionMethod*)obj_tmp)->m_info)).assignVal(v_method);
+  }
   {
     const Variant &tmp0((v_method.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-    v_ret->m_name.assignVal(tmp0);
+    (obj_tmp = v_ret.get(), LIKELY(obj_tmp != 0) || (throw_null_object_prop(),false),(((c_ReflectionMethod*)obj_tmp)->m_name)).assignVal(tmp0);
   }
-  v_ret->m_class.assignVal(m_name);
+  {
+    const Variant &tmp0((v_method.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)));
+    (obj_tmp = v_ret.get(), LIKELY(obj_tmp != 0) || (throw_null_object_prop(),false),(((c_ReflectionMethod*)obj_tmp)->m_class)).assignVal(tmp0);
+  }
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 861 */
+/* SRC: classes/reflection.php line 889 */
 Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi5830e7c6, 65535LL)
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getMethods);
@@ -3320,7 +3504,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi583
   }
   {
     LOOP_COUNTER(1);
-    for (ArrayIter iter3 = v_methods.begin(s_class_name, true); !iter3.end(); ++iter3) {
+    for (ArrayIter iter3 = v_methods.begin(s_class_name); !iter3.end(); ++iter3) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3340,13 +3524,14 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi583
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 890 */
+/* SRC: classes/reflection.php line 918 */
 p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getProperty);
   Variant v_properties;
   Variant v_class;
   p_ReflectionProperty v_ret;
 
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((t_fetch(NAMVAR(s_sys_svs90269404, "properties"))));
     v_properties.assignVal(tmp0);
@@ -3369,17 +3554,19 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   }
   {
     const Variant &tmp0((v_properties.rvalAt(v_name, AccessFlags::Error)));
-    v_ret->m_info.assignVal(tmp0);
+    (obj_tmp = v_ret.get(), LIKELY(obj_tmp != 0) || (throw_null_object_prop(),false),(((c_ReflectionProperty*)obj_tmp)->m_info)).assignVal(tmp0);
   }
-  v_ret->m_name.assignVal(v_name);
+  {
+    (obj_tmp = v_ret.get(), LIKELY(obj_tmp != 0) || (throw_null_object_prop(),false),(((c_ReflectionProperty*)obj_tmp)->m_name)).assignVal(v_name);
+  }
   {
     const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-    v_ret->m_class.assignVal(tmp0);
+    (obj_tmp = v_ret.get(), LIKELY(obj_tmp != 0) || (throw_null_object_prop(),false),(((c_ReflectionProperty*)obj_tmp)->m_class)).assignVal(tmp0);
   }
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 913 */
+/* SRC: classes/reflection.php line 941 */
 Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi5830e7c6, 65535LL)
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getProperties);
@@ -3392,7 +3579,7 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMVAR(s_sys_svs90269404, "properties"));
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3412,18 +3599,19 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 937 */
+/* SRC: classes/reflection.php line 965 */
 Variant c_ReflectionClass::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstants);
   return t_fetch(NAMVAR(s_sys_svs623ae369, "constants"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 951 */
+/* SRC: classes/reflection.php line 979 */
 Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstant);
   Variant v_constants;
   Variant v_class;
 
+  ObjectData *obj_tmp UNUSED;
   {
     const Variant &tmp0((t_fetch(NAMVAR(s_sys_svs623ae369, "constants"))));
     v_constants.assignVal(tmp0);
@@ -3443,7 +3631,7 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
   return v_constants.rvalAt(v_name, AccessFlags::Error);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 971 */
+/* SRC: classes/reflection.php line 999 */
 Array c_ReflectionClass::t_getinterfaces() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getInterfaces);
   Array v_ret;
@@ -3455,7 +3643,7 @@ Array c_ReflectionClass::t_getinterfaces() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMVAR(s_sys_svscfb8e254, "interfaces"));
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3479,7 +3667,7 @@ Array c_ReflectionClass::t_getinterfaces() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 982 */
+/* SRC: classes/reflection.php line 1010 */
 Array c_ReflectionClass::t_gettraits() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getTraits);
   Array v_ret;
@@ -3491,7 +3679,7 @@ Array c_ReflectionClass::t_gettraits() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMVAR(s_sys_svs77820fcc, "traits"));
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3515,7 +3703,7 @@ Array c_ReflectionClass::t_gettraits() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1003 */
+/* SRC: classes/reflection.php line 1031 */
 Array c_ReflectionClass::t_getinterfacenames() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getInterfaceNames);
   Array v_ret;
@@ -3527,7 +3715,7 @@ Array c_ReflectionClass::t_getinterfacenames() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMVAR(s_sys_svscfb8e254, "interfaces"));
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3551,7 +3739,7 @@ Array c_ReflectionClass::t_getinterfacenames() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1014 */
+/* SRC: classes/reflection.php line 1042 */
 Array c_ReflectionClass::t_gettraitnames() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getTraitNames);
   Array v_ret;
@@ -3563,7 +3751,7 @@ Array c_ReflectionClass::t_gettraitnames() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMVAR(s_sys_svs77820fcc, "traits"));
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3587,7 +3775,7 @@ Array c_ReflectionClass::t_gettraitnames() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1025 */
+/* SRC: classes/reflection.php line 1053 */
 Array c_ReflectionClass::t_gettraitaliases() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getTraitAliases);
   Array v_ret;
@@ -3598,7 +3786,7 @@ Array c_ReflectionClass::t_gettraitaliases() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMVAR(s_sys_svsf65d4a13, "trait_aliases"));
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_new_name);
       v_old_name.assignVal(iter3.first());
@@ -3610,47 +3798,49 @@ Array c_ReflectionClass::t_gettraitaliases() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1043 */
+/* SRC: classes/reflection.php line 1071 */
 bool c_ReflectionClass::t_isinterface() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInterface);
   return t_check(NAMVAR(s_sys_svs7228e959, "interface"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1055 */
+/* SRC: classes/reflection.php line 1083 */
 bool c_ReflectionClass::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isAbstract);
   return t_check(NAMVAR(s_sys_svs12c8a8a6, "abstract"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1067 */
+/* SRC: classes/reflection.php line 1095 */
 bool c_ReflectionClass::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isFinal);
   return t_check(NAMVAR(s_sys_svs2145036e, "final"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1071 */
+/* SRC: classes/reflection.php line 1099 */
 bool c_ReflectionClass::t_istrait() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isTrait);
   return t_check(NAMVAR(s_sys_svs22824d6b, "trait"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1084 */
+/* SRC: classes/reflection.php line 1112 */
 Variant c_ReflectionClass::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getModifiers);
   return t_fetch(NAMVAR(s_sys_svs9f244c80, "modifiers"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1098 */
+/* SRC: classes/reflection.php line 1126 */
 bool c_ReflectionClass::t_isinstance(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInstance);
+  ObjectData *obj_tmp UNUSED;
   return x_hphp_instanceof(toObject(v_obj), toString(m_name));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1111 */
+/* SRC: classes/reflection.php line 1139 */
 Object c_ReflectionClass::t_newinstance(int num_args, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::newInstance);
   Array v_args;
 
+  ObjectData *obj_tmp UNUSED;
   {
     const Array &tmp0(((args.isNull() ? Array::Create() : args)));
     v_args = tmp0;
@@ -3658,9 +3848,10 @@ Object c_ReflectionClass::t_newinstance(int num_args, Array args /* = Array() */
   return x_hphp_create_object(toString(m_name), v_args);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1130 */
+/* SRC: classes/reflection.php line 1158 */
 Object c_ReflectionClass::t_newinstanceargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::newInstanceArgs);
+  ObjectData *obj_tmp UNUSED;
   {
     const String &tmp0((toString(m_name)));
     const Array &tmp1((toArray(x_array_values(v_args))));
@@ -3668,7 +3859,7 @@ Object c_ReflectionClass::t_newinstanceargs(CVarRef v_args) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1144 */
+/* SRC: classes/reflection.php line 1172 */
 Variant c_ReflectionClass::t_getparentclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getParentClass);
   Variant v_parent;
@@ -3688,7 +3879,7 @@ Variant c_ReflectionClass::t_getparentclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1163 */
+/* SRC: classes/reflection.php line 1191 */
 Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isSubclassOf);
   Primitive v_name = 0;
@@ -3706,7 +3897,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMVAR(s_sys_svscfb8e254, "interfaces"));
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3756,7 +3947,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1192 */
+/* SRC: classes/reflection.php line 1220 */
 Array c_ReflectionClass::t_getstaticproperties() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStaticProperties);
   Array v_ret;
@@ -3766,7 +3957,7 @@ Array c_ReflectionClass::t_getstaticproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_prop);
       {
@@ -3794,10 +3985,11 @@ Array c_ReflectionClass::t_getstaticproperties() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1213 */
+/* SRC: classes/reflection.php line 1241 */
 Variant c_ReflectionClass::t_getstaticpropertyvalue(CVarRef v_name, CVarRef v_default //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStaticPropertyValue);
+  ObjectData *obj_tmp UNUSED;
   {
     bool tmp0;
     {
@@ -3817,13 +4009,14 @@ Variant c_ReflectionClass::t_getstaticpropertyvalue(CVarRef v_name, CVarRef v_de
   return v_default;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1234 */
+/* SRC: classes/reflection.php line 1262 */
 void c_ReflectionClass::t_setstaticpropertyvalue(CVarRef v_name, CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::setStaticPropertyValue);
+  ObjectData *obj_tmp UNUSED;
   x_hphp_set_static_property(toString(m_name), toString(v_name), v_value);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1248 */
+/* SRC: classes/reflection.php line 1276 */
 Array c_ReflectionClass::t_getdefaultproperties() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getDefaultProperties);
   Array v_ret;
@@ -3833,7 +4026,7 @@ Array c_ReflectionClass::t_getdefaultproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_prop);
       {
@@ -3861,13 +4054,13 @@ Array c_ReflectionClass::t_getdefaultproperties() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1267 */
+/* SRC: classes/reflection.php line 1295 */
 Variant c_ReflectionClass::t_isiterateable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isIterateable);
   return t_issubclassof(NAMSTR(s_sys_ss92306c9b, "ArrayAccess"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1282 */
+/* SRC: classes/reflection.php line 1310 */
 bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::implementsInterface);
   Primitive v_name = 0;
@@ -3892,7 +4085,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMVAR(s_sys_svscfb8e254, "interfaces"));
-    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
       v_name.assignVal(iter3.first());
@@ -3915,13 +4108,13 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   return false;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1307 */
+/* SRC: classes/reflection.php line 1335 */
 Variant c_ReflectionClass::t_getextension() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtension);
   return t_fetch(NAMVAR(s_sys_svse9bf4500, "extension"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1321 */
+/* SRC: classes/reflection.php line 1349 */
 Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
@@ -3987,7 +4180,7 @@ static const ClassPropTableEntry cpt_table_entries[] = {
   {0x0F2EF58F157D479FLL,0,4,17,65,10,GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),&NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info") },
 
   {0x5655B4FF77E35232LL,1,4,21,65,10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),&NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name") },
-  {0x0F2EF58F157D479FLL,0,4,21,65,10,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info") },
+  {0x0F2EF58F157D479FLL,0,4,21,65,8,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info") },
 
   {0x25C5A7C72E7B0EF6LL,0,5,0,100,4,0,&NAMSTR(s_sys_ss2e7b0ef6, "IS_DEPRECATED") },
 

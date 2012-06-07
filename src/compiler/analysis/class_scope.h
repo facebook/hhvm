@@ -23,6 +23,7 @@
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/trait_prec_statement.h>
 #include <compiler/statement/trait_alias_statement.h>
+#include <compiler/expression/user_attribute.h>
 #include <util/json.h>
 #include <util/case_insensitive.h>
 #include <compiler/option.h>
@@ -75,7 +76,8 @@ public:
     ClassNameConstructor          = 0x0008,
     HasDestructor                 = 0x0010,
     NotFinal                      = 0x0020,
-    DECLARE_MAGIC(Has, NotFinal),
+    UsesUnknownTrait              = 0x0040,
+    DECLARE_MAGIC(Has, UsesUnknownTrait),
     DECLARE_MAGIC(MayHave, HasArrayAccess),
     DECLARE_MAGIC(Inherits, MayHaveArrayAccess)
   };
@@ -101,8 +103,8 @@ public:
   ClassScope(KindOf kindOf, const std::string &name,
              const std::string &parent,
              const std::vector<std::string> &bases,
-             const std::string &docComment, StatementPtr stmt);
-
+             const std::string &docComment, StatementPtr stmt,
+             const std::vector<UserAttributePtr> &attrs);
 
   /**
    * Special constructor for extension classes.
@@ -178,6 +180,21 @@ public:
   void clearAttribute(Attribute attr) { m_attribute &= ~attr;}
   bool getAttribute(Attribute attr) const {
     return m_attribute & attr;
+  }
+  bool hasAttribute(Attribute attr, AnalysisResultConstPtr ar) const {
+    if (getAttribute(attr)) return true;
+    ClassScopePtr parent = getParentScope(ar);
+    return parent && !parent->isRedeclaring() && parent->hasAttribute(attr, ar);
+  }
+  void setKnownBase(int i) { ASSERT(i < 32); m_knownBases |= 1u << i; }
+  bool hasUnknownBases() const {
+    int n = m_bases.size();
+    if (!n) return false;
+    if (n >= 32) n = 0;
+    return m_knownBases != (((1u << n) - 1) & 0xffffffff);
+  }
+  bool hasKnownBase(int i) const {
+    return m_knownBases & (1u << (i < 32 ? i : 31));
   }
 
   const FunctionScopePtrVec &getFunctionsVec() const {
@@ -266,6 +283,11 @@ public:
 
   std::vector<std::string> &getBases() { return m_bases;}
 
+  typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
+    string_eqstri> UserAttributeMap;
+
+  UserAttributeMap& userAttributes() { return m_userAttributes;}
+
   ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const;
 
   void addUsedLiteralStringHeader(const std::string &s) {
@@ -312,15 +334,15 @@ public:
     m_usedConstsHeader.insert(s);
   }
 
-  void addUsedClassConstHeader(const std::string &cls, const std::string &s) {
-    m_usedClassConstsHeader.insert(UsedClassConst(cls, s));
+  void addUsedClassConstHeader(ClassScopeRawPtr cls, const std::string &s) {
+    m_usedClassConstsHeader.insert(CodeGenerator::UsedClassConst(cls, s));
   }
 
-  void addUsedClassHeader(const std::string &s) {
+  void addUsedClassHeader(ClassScopeRawPtr s) {
     m_usedClassesHeader.insert(s);
   }
 
-  void addUsedClassFullHeader(const std::string &s) {
+  void addUsedClassFullHeader(ClassScopeRawPtr s) {
     m_usedClassesFullHeader.insert(s);
   }
 
@@ -395,6 +417,7 @@ public:
   bool isTrait() const { return m_kindOf == KindOfTrait; }
   bool hasProperty(const std::string &name) const;
   bool hasConst(const std::string &name) const;
+  void outputCPPDef(CodeGenerator &cg);
   void outputCPPHeader(AnalysisResultPtr ar,
                        CodeGenerator::Output output);
   void outputCPPForwardHeader(CodeGenerator &cg,AnalysisResultPtr ar);
@@ -486,7 +509,8 @@ public:
     return m_needsInit;
   }
 
-  bool canSkipCreateMethod() const;
+  bool needsEnableDestructor(AnalysisResultConstPtr ar) const;
+  bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
   bool checkHasPropTable();
 
   struct IndexedSym {
@@ -507,15 +531,18 @@ public:
 
   typedef std::map<std::string, ClassPropTableInfo>
     ClassPropTableMap;
+
 protected:
   void findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
-                            bool staticOnly, std::vector<const char *> &funcs);
+                            std::vector<const char *> &funcs);
+  bool hasJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
   // need to maintain declaration order for ClassInfo map
   FunctionScopePtrVec m_functionsVec;
 
   std::string m_parent;
   mutable std::vector<std::string> m_bases;
+  UserAttributeMap m_userAttributes;
 
   std::set<JumpTableName> m_emptyJumpTables;
   std::set<std::string> m_usedLiteralStringsHeader;
@@ -527,10 +554,9 @@ private:
   std::set<std::string> m_usedDefaultValueScalarArrays;
   std::set<std::string> m_usedDefaultValueScalarVarArrays;
   std::set<std::string> m_usedConstsHeader;
-  typedef std::pair<std::string, std::string> UsedClassConst;
-  std::set<UsedClassConst> m_usedClassConstsHeader;
-  std::set<std::string> m_usedClassesHeader;
-  std::set<std::string> m_usedClassesFullHeader;
+  CodeGenerator::UsedClassConstSet m_usedClassConstsHeader;
+  CodeGenerator::ClassScopeSet m_usedClassesHeader;
+  CodeGenerator::ClassScopeSet m_usedClassesFullHeader;
   std::vector<std::string> m_usedTraitNames;
   // m_traitAliases is used to support ReflectionClass::getTraitAliases
   std::vector<std::pair<std::string, std::string> > m_traitAliases;
@@ -557,6 +583,7 @@ private:
 
   typedef std::list<TraitMethod> TraitMethodList;
   typedef std::map<std::string, TraitMethodList> MethodToTraitListMap;
+  typedef std::map<std::string, std::string> GeneratorRenameMap;
   MethodToTraitListMap m_importMethToTraitMap;
 
   mutable int m_attribute;
@@ -568,12 +595,18 @@ private:
     BEING_FLATTENED,
     FLATTENED
   } m_traitStatus;
-  bool m_dynamic;
-  bool m_volatile; // for class_exists
-  bool m_derivedByDynamic;
-  bool m_sep;
-  bool m_needsCppCtor;
-  bool m_needsInit;
+  unsigned m_dynamic:1;
+  unsigned m_volatile:1; // for class_exists
+  unsigned m_derivedByDynamic:1;
+  unsigned m_sep:1;
+  unsigned m_needsCppCtor:1;
+  unsigned m_needsInit:1;
+  // m_knownBases has a bit for each base class saying whether
+  // its known to exist at the point of definition of this class.
+  // for classes with more than 31 bases, bit 31 is set iff
+  // bases 32 through n are all known.
+  unsigned m_knownBases;
+  mutable unsigned m_needsEnableDestructor:2;
 
   void addImportTraitMethod(const TraitMethod &traitMethod,
                             const std::string &methName);
@@ -582,11 +615,15 @@ private:
                                      ClassScopePtr traitCls,
                                      ModifierExpressionPtr modifiers);
 
-  void importTraitMethod(const TraitMethod &traitMethod,
-                         AnalysisResultPtr ar,
-                         const std::string &methName);
+  MethodStatementPtr importTraitMethod(const TraitMethod&  traitMethod,
+                                       AnalysisResultPtr   ar,
+                                       std::string         methName,
+                                       GeneratorRenameMap& genRenameMap);
 
   void importTraitProperties(AnalysisResultPtr ar);
+
+  void relinkGeneratorMethods(AnalysisResultPtr ar,
+                        const std::list<MethodStatementPtr>& importedMethods);
 
   void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
 
@@ -604,11 +641,17 @@ private:
   ClassScopePtr findSingleTraitWithMethod(AnalysisResultPtr ar,
                                           const std::string &methodName) const;
 
-  void removeImplTraitAbstractMethods(AnalysisResultPtr ar);
+  void removeSpareTraitAbstractMethods(AnalysisResultPtr ar);
 
   bool usesTrait(const std::string &traitName) const;
 
   bool hasMethod(const std::string &methodName) const;
+
+  const std::string& getNewGeneratorName(FunctionScopePtr    genFuncScope,
+                                         GeneratorRenameMap& genRenameMap);
+
+  void renameCreateContinuationCalls(AnalysisResultPtr ar, ConstructPtr c,
+                                     GeneratorRenameMap& genRenameMap);
 
   std::string getBaseHeaderFilename();
 

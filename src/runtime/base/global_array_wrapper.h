@@ -30,7 +30,7 @@ public:
   }
 
   virtual void release();
-  virtual ssize_t size() const;
+  virtual ssize_t vsize() const;
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
   virtual CVarRef getValueRef(ssize_t pos) const;

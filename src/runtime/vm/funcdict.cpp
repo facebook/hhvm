@@ -22,30 +22,16 @@
 #include <runtime/vm/funcdict.h>
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/targetcache.h>
+#include <runtime/vm/unit.h>
+
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 namespace VM {
 
-FuncDict::FuncMap FuncDict::s_builtinFuncs;
-FuncDict::ExtFuncMap FuncDict::s_extFuncHash;
+RenamedFuncDict::RenamedFuncDict() : m_restrictRenameableFunctions(false) { }
 
-FuncDict::FuncDict() : m_restrictRenameableFunctions(false) { }
-
-void FuncDict::ProcessInit() {
-  ASSERT(s_extFuncHash.empty());
-  ASSERT(s_builtinFuncs.empty());
-  // Populate Func::s_extFuncHash
-  for (long long i = 0LL; i < hhbc_ext_funcs_count; ++i) {
-    const HhbcExtFuncInfo* info = &hhbc_ext_funcs[i];
-    StringData* s = StringData::GetStaticString(info->m_name);
-    Func::BuiltinFunction bif = (Func::BuiltinFunction)info->m_pGenericFunc;
-    const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(s->data());
-    mapInsertUnique(s_extFuncHash, s, bif);
-    mapInsertUnique(s_builtinFuncs, s, new Func(s, mi, bif));
-  }
-}
-
-bool FuncDict::rename(const StringData* old, const StringData* n3w) {
+bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
   ASSERT(isFunctionRenameable(old) ||
          isFunctionRenameable(n3w));
 
@@ -56,64 +42,50 @@ bool FuncDict::rename(const StringData* old, const StringData* n3w) {
                 "(-v Eval.JitEnableRenameFunction=true)");
   }
 
-  Func* func;
-  bool hitInBuiltinFuncs = false;
-  if (!mapGet(m_funcs, old, &func)) {
-    if (!mapGet(s_builtinFuncs, old, &func)) {
+  NamedEntity *oldNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(old));
+  NamedEntity *newNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(n3w));
+
+  Func* func = Unit::lookupFunc(oldNe, old);
+  if (!func) {
       // It's the caller's responsibility to ensure that the old function
       // exists.
       not_reached();
+  }
+
+  Func *fnew = Unit::lookupFunc(newNe, n3w);
+  if (fnew && fnew != func) {
+    // To match hphpc/hphpi, we silently ignore functions defined in
+    // user code that have the same name as a function defined in a
+    // separable extension
+    if (!fnew->isIgnoreRedefinition()) {
+      raise_error("Function already defined: %s", n3w->data());
     } else {
-      hitInBuiltinFuncs = true;
+      return false;
     }
   }
 
-  // Once we've renamed a builtin, we should never look it up in the static
-  // area again.
-  if (hitInBuiltinFuncs) {
-    // Make sure the old name, which may be a transient StringData, stays
-    // around.
-    old->setStatic();
-    m_builtinBlackList.insert(old);
+  const StringData* sNew =
+    n3w->isStatic() ? n3w : StringData::GetStaticString(n3w);
+
+  oldNe->setCachedFunc(NULL);
+  if (UNLIKELY(newNe->m_cachedFuncOffset == 0)) {
+    newNe->m_cachedFuncOffset = Transl::TargetCache::allocFixedFunction(sNew);
   }
-
-  n3w->incRefCount();
-  old->decRefCount();
-  // This can't be the last reference to it; it was passed into fb_rename()
-  ASSERT(old->getCount() > 0);
-
-  m_funcs.erase(old);
-  mapInsertUnique(m_funcs, n3w, func);
+  newNe->setCachedFunc(func);
 
   if (RuntimeOption::EvalJit) {
-    VM::Transl::TargetCache::invalidateFuncName(old);
+    VM::Transl::TargetCache::invalidateForRename(old);
   }
 
-  ASSERT(get(old) == NULL);
-  ASSERT(get(n3w) != NULL);
   return true;
 }
 
-Func* FuncDict::getBuiltin(const StringData* sd) const {
-  ASSERT(!mapContains(m_funcs, sd));
-  Func* retval;
-  if (LIKELY(mapGet(s_builtinFuncs, sd, &retval)) &&
-      !mapContains(m_builtinBlackList, sd)) {
-    return retval;
-  }
-  return NULL;
-}
-
-void FuncDict::insert(const StringData* name, Func* f) {
-  mapInsert(m_funcs, name, f);
-}
-
-bool FuncDict::isFunctionRenameable(const StringData* name) {
+bool RenamedFuncDict::isFunctionRenameable(const StringData* name) {
   return !m_restrictRenameableFunctions ||
     mapContains(m_renameableFunctions, name);
 }
 
-void FuncDict::addRenameableFunctions(ArrayData* arr) {
+void RenamedFuncDict::addRenameableFunctions(ArrayData* arr) {
   m_restrictRenameableFunctions = true;
   for (ArrayIter iter(arr); iter; ++iter) {
     String name = iter.second().toString();
@@ -121,80 +93,6 @@ void FuncDict::addRenameableFunctions(ArrayData* arr) {
       m_renameableFunctions.insert(name.get());
     }
   }
-}
-
-bool FuncDict::interceptFunction(CStrRef name, CVarRef handler,
-                                 CVarRef data) {
-  if (!handler.toBoolean() && name.empty()) {
-    // Resetting individual intercepts is handled below.
-    m_interceptHandlers.clear();
-    return true;
-  }
-
-  if (name.empty()) {
-    // This is supposed to intercept "every function". This is 100% bonkers --
-    // why would you ever, ever do that? -- and it doesn't even work in hphpi.
-    not_implemented();
-  }
-
-  int pos = name.find("::");
-  if (pos != String::npos) {
-    // Intercepting a method.
-    String classname = name.substr(0, pos);
-    String methodname = name.substr(pos + 2);
-
-    Class* cls = g_context->lookupClass(classname.get());
-    if (cls == NULL || cls->m_isCppExtClass) {
-      // Can't intercept in a nonexistent or C++ builtin class
-      return false;
-    }
-
-    const Func* original = cls->lookupMethod(methodname.get());
-    if (original == NULL) {
-      // Can't intercept nonexistent method
-      return false;
-    }
-
-    if (!handler.toBoolean()) {
-      m_interceptHandlers.erase(original);
-    } else {
-      m_interceptHandlers[original] =
-        InterceptDataPtr(new InterceptData(handler, data, name));
-    }
-  } else {
-    // Intercepting a regular function
-    const Func* original = get(name.get());
-    if (original == NULL || original->m_info != NULL) {
-      // Can't intercept nonexistent or builtin functions
-      return false;
-    }
-
-    if (!handler.toBoolean()) {
-      m_interceptHandlers.erase(original);
-    } else {
-      m_interceptHandlers[original] =
-        InterceptDataPtr(new InterceptData(handler, data, name));
-    }
-  }
-
-  return true;
-}
-
-bool FuncDict::hasAnyIntercepts() {
-  return m_interceptHandlers.size() > 0;
-}
-
-FuncDict::InterceptDataPtr FuncDict::getInterceptData(const Func* func) {
-  return mapGet(m_interceptHandlers, func);
-}
-
-Array FuncDict::getUserFunctions() {
-  Array a = Array::Create();
-  for (FuncMap::const_iterator it = m_funcs.begin(); it != m_funcs.end();
-       ++it) {
-    a.append(*(String*)(&it->second->m_name));
-  }
-  return a;
 }
 
 } } // HPHP::VM

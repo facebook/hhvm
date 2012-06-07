@@ -18,9 +18,6 @@
 #include <runtime/eval/debugger/cmd/cmd_break.h>
 #include <runtime/eval/debugger/cmd/cmd_print.h>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

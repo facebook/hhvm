@@ -42,7 +42,7 @@ private:
 public:
   virtual ~HphpArray();
 
-  virtual ssize_t size() const;
+  virtual ssize_t vsize() const;
 
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
@@ -138,7 +138,6 @@ public:
   virtual ArrayData* dequeue(Variant& value);
   virtual ArrayData* prepend(CVarRef v, bool copy);
   virtual void renumber();
-  virtual void onSetStatic();
   virtual void onSetEvalScalar();
 
   virtual void getFullPos(FullPos& fp);
@@ -159,9 +158,9 @@ public:
   TypedValue* nvGet(int64 ki, bool error=false) const;
   TypedValue* nvGet(const StringData* k, bool error=false) const;
 
-  // Hinted nvget: the caller provides an ElmInd where the key is likely
-  // to reside. We return NULL on a miss, and mutate *posHintOut if the
-  // ultimate location differs from posHint.
+  // Hinted nvget: the caller provides an ElmInd where the key is
+  // likely to reside. We fall back to a regular nvGet on a miss, and
+  // mutate *posHintOut if the ultimate location differs from posHint.
   TypedValue* nvGet(const StringData* k, int posHint,
                     int* posHintOut,
                     bool error=false) const;
@@ -170,21 +169,21 @@ public:
   // value that is KindOfVariant and return the inner cell.
   TypedValue* nvGetCell(int64 ki, bool error=false) const;
   inline TypedValue* nvGetCell(const StringData* k, bool error=false) const;
-  TypedValue* nvGetCell(int64 ki1, const StringData* ks2,
-                        bool error=false) const;
 
   inline ArrayData* nvSet(int64 ki, int64 vi, bool copy);
-  ArrayData* nvSet(int64 ki, TypedValue* v, bool copy);
-  ArrayData* nvSet(StringData* k, TypedValue* v, bool copy);
-  inline ArrayData* nvBind(int64 ki, TypedValue* v, bool copy);
-  ArrayData* nvBind(StringData* k, TypedValue* v, bool copy);
-  ArrayData* nvAppend(TypedValue* v, bool copy);
+  ArrayData* nvSet(int64 ki, const TypedValue* v, bool copy);
+  ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
+  ArrayData* nvBind(int64 ki, const TypedValue* v, bool copy);
+  ArrayData* nvBind(StringData* k, const TypedValue* v, bool copy);
+  ArrayData* nvAppend(const TypedValue* v, bool copy);
+  ArrayData* nvAppendWithRef(const TypedValue* v, bool copy);
   ArrayData* nvNew(TypedValue*& v, bool copy);
   inline ArrayData* nvRemove(int64 ki, bool copy);
   ArrayData* nvRemove(const StringData* k, bool copy);
   ssize_t nvSize() const;
   TypedValue* nvGetValueRef(ssize_t pos);
   void nvGetKey(TypedValue* out, ssize_t pos);
+  bool nvInsert(StringData* k, TypedValue *v);
 
   // Assembly linkage helpers. Do not play on or around.
   static uint offNumElems() { return offsetof(HphpArray, m_nElms); }
@@ -277,7 +276,6 @@ private:
   ElmInd  m_nElms;       // Total number of elements in array.
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
   ElmInd  m_lastE;       // Index of last used element.
-  char    m_linear;      // (true) ? m_data came from linear allocator.
   char    m_siPastEnd;   // (true) ? strong iterators possibly past end.
   char    m_suppressCow; // (true) ? suppress copy-on-write (e.g. $GLOBALS).
 #ifndef USE_JEMALLOC
@@ -333,8 +331,17 @@ private:
   HphpArray* copyImpl(HphpArray* target = NULL, bool sma = true) const;
 
   inline Elm* ALWAYS_INLINE allocElm(ElmInd* ei);
-  void reallocData(size_t maxElms, size_t tableSize);
-  void delinearize() ATTRIBUTE_COLD;
+  inline void ALWAYS_INLINE initElm(Elm* e,
+                                    size_t ki,
+                                    StringData* key,
+                                    CVarRef data,
+                                    bool byRef=false);
+  inline void ALWAYS_INLINE allocNewElm(ElmInd* ei,
+                                        size_t ki,
+                                        StringData* key,
+                                        CVarRef data,
+                                        bool byRef=false);
+  void reallocData(size_t maxElms, size_t tableSize, size_t oldDataSize);
 
   /**
    * grow() increases the hash table size and the number of slots for
@@ -363,10 +370,7 @@ private:
   inline void ALWAYS_INLINE resizeIfNeeded();
 
   // Memory allocator methods.
-  DECLARE_SMART_ALLOCATION(HphpArray, SmartAllocatorImpl::NeedRestoreOnce);
-  bool calculate(int& size);
-  void backup(LinearAllocator& allocator);
-  void restore(const char*& data);
+  DECLARE_SMART_ALLOCATION(HphpArray, SmartAllocatorImpl::NeedSweep);
   void sweep();
 };
 
@@ -420,10 +424,12 @@ ArrayData* array_getm_s_fast(void* hphpArray, StringData* sd, TypedValue* out)
   FLATTEN;
 ArrayData* array_getm_s0_fast(void* hphpArray, StringData* sd, TypedValue* out)
   FLATTEN;
-ArrayData* array_getm_is(void* dptr, int64 ik, StringData* sd,
-			 TypedValue *out) FLATTEN;
-ArrayData* array_getm_is0(void* dptr, int64 ik, StringData* sd,
-			  TypedValue *out) FLATTEN;
+void       non_array_getm_i(TypedValue* base, int64 key, TypedValue* out);
+void       non_array_getm_s(TypedValue* base, StringData* key, TypedValue* out);
+void       array_getm_is(ArrayData* ad, int64 ik, StringData* sd,
+			 TypedValue* out) FLATTEN;
+void       array_getm_is0(ArrayData* ad, int64 ik, StringData* sd,
+			  TypedValue* out) FLATTEN;
 uint64 array_issetm_s(const void* hphpArray, StringData* sd)
   FLATTEN;
 uint64 array_issetm_s0(const void* hphpArray, StringData* sd)
@@ -431,6 +437,8 @@ uint64 array_issetm_s0(const void* hphpArray, StringData* sd)
 uint64 array_issetm_s_fast(const void* hphpArray, StringData* sd)
   FLATTEN;
 uint64 array_issetm_s0_fast(const void* hphpArray, StringData* sd)
+  FLATTEN;
+uint64 array_issetm_i(const void* hphpArray, int64_t key)
   FLATTEN;
 ArrayData* array_unsetm_s(ArrayData* hphpArray, StringData* sd)
                          FLATTEN;

@@ -20,7 +20,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IncludeExpression::IncludeExpression(EXPRESSION_ARGS, bool include, bool once,

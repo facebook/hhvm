@@ -26,8 +26,6 @@
 #include <util/hash.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -277,40 +275,6 @@ void FunctionContainer::outputCPPJumpTableEvalSupport(
   }
 }
 
-void FunctionContainer::outputCPPJumpTable(
-  CodeGenerator &cg, AnalysisResultPtr ar,
-  const StringToFunctionScopePtrVecMap *redec) {
-  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-
-  vector<const char *> funcs;
-  bool needGlobals = false;
-  outputCPPJumpTableSupport(cg, ar, redec, needGlobals, &funcs);
-
-  // output invoke()
-  cg_indentBegin("Variant invoke_old%s"
-                 "(const char *s, CArrRef params, int64 hash, bool fatal) {\n",
-                 system ? "_builtin" : "");
-  if (needGlobals) cg.printDeclareGlobals();
-
-  for (JumpTable fit(cg, funcs, true, true, false); fit.ready(); fit.next()) {
-    const char *name = fit.key();
-    StringToFunctionScopePtrMap::const_iterator iterFuncs =
-      m_functions.find(name);
-    ASSERT(iterFuncs != m_functions.end());
-    FunctionScopePtr func = iterFuncs->second;
-    if (func->isRedeclaring()) {
-      cg_printf("HASH_INVOKE_REDECLARED(0x%016llXLL, %s);\n",
-                hash_string_i(name), CodeGenerator::FormatLabel(name).c_str());
-    } else {
-      cg_printf("HASH_INVOKE(0x%016llXLL, %s);\n",
-                hash_string_i(name), func->getId().c_str());
-    }
-  }
-
-  cg_printf("return invoke_failed(s, params, hash, fatal);\n");
-  cg_indentEnd("}\n");
-}
-
 void FunctionContainer::outputGetCallInfoHeader(CodeGenerator &cg,
                                                 const char *suffix,
                                                 bool needGlobals) {
@@ -459,12 +423,12 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
 }
 
 void FunctionContainer::outputCPPCodeInfoTable(
-  CodeGenerator &cg, AnalysisResultPtr ar, bool support,
+  CodeGenerator &cg, AnalysisResultPtr ar, bool useSwitch,
   const StringToFunctionScopePtrMap &functions) {
   bool needGlobals = false;
   vector<const char *> funcs;
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  if (support) {
+  if (system) {
     outputCPPCallInfoTableSupport(cg, ar, 0, needGlobals, NULL);
   }
   for (StringToFunctionScopePtrMap::const_iterator iter = functions.begin(),
@@ -473,15 +437,17 @@ void FunctionContainer::outputCPPCodeInfoTable(
     if (!func->inPseudoMain() &&
         (system || func->isDynamic() || func->isSepExtension())) {
       funcs.push_back(iter->first.c_str());
-      if (!support && !func->isRedeclaring() && !func->isSepExtension()) {
-        cg_printf("extern CallInfo %s%s;\n",
+      if (!system && !func->isRedeclaring() && !func->isSepExtension()) {
+        cg_printf("extern const CallInfo %s%s;\n",
                   Option::CallInfoPrefix, func->getId().c_str());
       }
     }
   }
-  if (!system) {
+  if (!useSwitch) {
     outputCPPHashTableGetCallInfo(cg, system, false, &functions, funcs);
-    outputCPPHashTableGetCallInfo(cg, system, true, &functions, funcs);
+    if (!system) {
+      outputCPPHashTableGetCallInfo(cg, system, true, &functions, funcs);
+    }
     return;
   }
   if (!system) cg_printf("static ");
@@ -497,7 +463,7 @@ void FunctionContainer::outputCPPCodeInfoTable(
                    CodeGenerator::EscapeLabel(name).c_str());
     if (iterFuncs->second->isRedeclaring()) {
       string lname(CodeGenerator::FormatLabel(name));
-      cg_printf("ci = g->GCI(%s);\n", lname.c_str());
+      cg_printf("ci = &g->GCI(%s)->ci;\n", lname.c_str());
     } else {
       cg_printf("ci = &%s%s;\n", Option::CallInfoPrefix,
                 iterFuncs->second->getId().c_str());

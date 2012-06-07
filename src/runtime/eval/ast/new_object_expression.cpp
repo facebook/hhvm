@@ -23,7 +23,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s_trait_marker("[trait]");
@@ -41,14 +41,15 @@ Expression *NewObjectExpression::optimize(VariableEnvironment &env) {
 Variant NewObjectExpression::eval(VariableEnvironment &env) const {
   String name(m_name->get(env));
   if (name.same(s_trait_marker)) {
-    name = ClassStatement::resolveSpInTrait(env, Object(), m_name.get());
+    name = ClassStatement::resolveSpInTrait(env, m_name.get());
   }
   Object o(create_object_only(name));
   SET_LINE;
 
-  const MethodStatement* ms = o.get()->getConstructorStatement();
-  if (ms) {
-    ms->invokeInstanceDirect(o, env, this);
+  const MethodStatementWrapper* msw = o.get()->getConstructorStatementWrapper();
+  if (msw && msw->m_methodStatement) {
+    msw->m_methodStatement->invokeInstanceDirect(o, name, env, this, msw);
+    o->clearNoDestruct();
     return o;
   }
 
@@ -67,6 +68,7 @@ Variant NewObjectExpression::eval(VariableEnvironment &env) const {
     CVarRef a4 = (count > 4) ? evalParam(env, ci, 4) : null;
     CVarRef a5 = (count > 5) ? evalParam(env, ci, 5) : null;
     (ci->getMethFewArgs())(mcp1, count, a0, a1, a2, a3, a4, a5);
+    o->clearNoDestruct();
     return o;
   }
   ArrayInit ai(count);
@@ -80,6 +82,7 @@ Variant NewObjectExpression::eval(VariableEnvironment &env) const {
     }
   }
   (ci->getMeth())(mcp1, Array(ai.create()));
+  o->clearNoDestruct();
   return o;
 }
 

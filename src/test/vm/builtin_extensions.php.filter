@@ -1,2 +1,0 @@
-#!/bin/bash
-sed -e 's/ in \/.*src/ in src/g' -e 's/^\(object([^)]\+)\)#[0-9]\+/\1/g'

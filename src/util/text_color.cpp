@@ -17,8 +17,6 @@
 #include "text_color.h"
 #include "util.h"
 
-using namespace std;
-
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 

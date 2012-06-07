@@ -51,7 +51,9 @@ public:
   enum QuoteStyle {
     DoubleQuotes = 2,  // k_ENT_COMPAT:   escape double quotes only
     BothQuotes   = 3,  // k_ENT_QUOTES:   escape both double and single quotes
-    NoQuotes     = 0   // k_ENT_NOQUOTES: leave all quotes alone
+    NoQuotes     = 0,  // k_ENT_NOQUOTES: leave all quotes alone
+    FBUtf8       = 4,
+    FBUtf8Only   = 8
   };
 
 public:
@@ -92,6 +94,8 @@ public:
   static String RegExEncode(CStrRef input);
   static String HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
                            const char *charset, bool nbsp);
+  static String HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
+                                const char *charset, bool nbsp, Array extra);
   static String HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
                            const char *charset, bool all);
   static String QuotedPrintableEncode(CStrRef input);
@@ -129,6 +133,11 @@ public:
                                  int literalStringBufSize,
                                  const char *literalStringLen,
                                  int literalStringLenSize);
+
+  static int InitLiteralStrings(const char *input[], int nls, int nbs)
+    ATTRIBUTE_COLD;
+  static int InitLiteralVarStrings(const char *input[], int count)
+    ATTRIBUTE_COLD;
 
 };
 

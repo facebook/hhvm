@@ -19,6 +19,9 @@
 #include <runtime/vm/hhbc.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/unit.h>
+#include <runtime/vm/func.h>
+#include <runtime/vm/translator/translator-inline.h>
+#include <runtime/base/builtin_functions.h>
 #include <runtime/vm/type_constraint.h>
 
 namespace HPHP {
@@ -28,48 +31,132 @@ TRACE_SET_MOD(runtime);
 
 TypeConstraint::TypeMap TypeConstraint::s_typeNamesToTypes;
 
-TypeConstraint::TypeConstraint(const std::string& typeName,
-                               bool nullable) :
-  m_typeName(StringData::GetStaticString(typeName)), m_nullable(nullable) {
-
+TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
+                               bool nullable /* = false */)
+    : m_nullable(nullable), m_typeName(typeName), m_namedEntity(0) {
   if (UNLIKELY(s_typeNamesToTypes.empty())) {
     const struct Pair {
-      const char* name;
+      const StringData* name;
       DataType dt;
     } pairs[] = {
-      { "bool",    KindOfBoolean },
-      { "boolean", KindOfBoolean },
+      { StringData::GetStaticString("bool"),    KindOfBoolean },
+      { StringData::GetStaticString("boolean"), KindOfBoolean },
 
-      { "int",     KindOfInt64 },
-      { "integer", KindOfInt64 },
+      { StringData::GetStaticString("int"),     KindOfInt64 },
+      { StringData::GetStaticString("integer"), KindOfInt64 },
 
-      { "real",    KindOfDouble },
-      { "double",  KindOfDouble },
-      { "float",   KindOfDouble },
+      { StringData::GetStaticString("real"),    KindOfDouble },
+      { StringData::GetStaticString("double"),  KindOfDouble },
+      { StringData::GetStaticString("float"),   KindOfDouble },
 
-      { "string",  KindOfString },
+      { StringData::GetStaticString("string"),  KindOfString },
 
-      { "array",   KindOfArray },
+      { StringData::GetStaticString("array"),   KindOfArray },
 
-      { NULL,      KindOfInvalid },
+      { StringData::GetStaticString("self"),    KindOfSelf },
+      { StringData::GetStaticString("parent"),  KindOfParent }
     };
-    for (const Pair *p = pairs; p->name; p++) {
-      s_typeNamesToTypes[p->name] = p->dt;
+    for (unsigned i = 0; i < sizeof(pairs)/sizeof(Pair); ++i) {
+      s_typeNamesToTypes[pairs[i].name] = pairs[i].dt;
     }
   }
 
-  DataType dtype;
-  TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
-        this, typeName.c_str(), nullable);
-  if (!mapGet(s_typeNamesToTypes, typeName, &dtype)) {
-    TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
-          this, typeName.c_str());
-    m_baseType = KindOfObject;
+  if (typeName == NULL) {
+    m_baseType = KindOfInvalid;
     return;
   }
-  m_baseType = dtype;
+  ASSERT(!typeName->empty());
+  DataType dtype;
+  TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
+        this, typeName->data(), nullable);
+  if (!mapGet(s_typeNamesToTypes, typeName, &dtype)) {
+    TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
+          this, typeName->data());
+    m_baseType = KindOfObject;
+    m_namedEntity = Unit::GetNamedEntity(typeName);
+    return;
+  }
+  m_baseType = RuntimeOption::EnableHipHopSyntax || dtype == KindOfArray ||
+               dtype == KindOfSelf || dtype == KindOfParent ?
+    dtype : KindOfObject;
   ASSERT(m_baseType != KindOfStaticString);
   ASSERT(m_baseType != KindOfInt32);
+}
+
+void TypeConstraint::verifyFail(const Func* func, int paramNum,
+                                const TypedValue* tv) const {
+  Transl::VMRegAnchor _;
+  std::ostringstream fname;
+  if (func->preClass() != NULL) {
+    fname << func->preClass()->name()->data() << "::"
+      << func->name()->data() << "()";
+  } else {
+    fname << func->name()->data() << "()";
+  }
+  const StringData* tn = typeName();
+  if (isSelf()) {
+    selfToTypeName(func, &tn);
+  } else if (isParent()) {
+    parentToTypeName(func, &tn);
+  }
+  throw_unexpected_argument_type(paramNum + 1, fname.str().c_str(),
+                                 tn->data(), tvAsCVarRef(tv));
+}
+
+void TypeConstraint::selfToClass(const Func* func, const Class **cls) const {
+  if (hphpiCompat) {
+    // hphpi: a typehint self in a trait's method in the class using a trait
+    // represents the trait rather than the using class.
+    const PreClass* pc = func->preClass();
+    if (pc && !(pc->attrs() & AttrTrait)) {
+      *cls = func->cls();
+    }
+    return;
+  }
+  // PHP 5.4: typehint self in a method in a trait is the class using the trait
+  const Class* c = func->cls();
+  if (c) {
+    *cls = c;
+  }
+}
+
+void TypeConstraint::selfToTypeName(const Func* func,
+                                    const StringData **typeName) const {
+  if (hphpiCompat) {
+    // hphpi: a typehint self in a trait's method in the class using a trait
+    // represents the trait rather than the using class.
+    const PreClass* pc = func->preClass();
+    if (pc) {
+      *typeName = pc->name();
+    }
+    return;
+  }
+  // PHP 5.4: typehint self in a trait's method is the class using the trait
+  const Class* c = func->cls();
+  if (c) {
+    *typeName = c->name();
+  }
+}
+
+void TypeConstraint::parentToClass(const Func* func, const Class **cls) const {
+  if (hphpiCompat) {
+    return;
+  }
+  // Match 5.4 for methods defined in classes and traits
+  Class* c1 = func->cls();
+  const Class* c2 = c1 ? c1->parent() : NULL;
+  if (c2) {
+    *cls = c2;
+  }
+}
+
+void TypeConstraint::parentToTypeName(const Func* func,
+                                      const StringData **typeName) const {
+  const Class* c = NULL;
+  parentToClass(func, &c);
+  if (c) {
+    *typeName = c->name();
+  }
 }
 
 }

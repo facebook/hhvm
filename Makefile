@@ -8,7 +8,7 @@ default_target: all
 #=============================================================================
 # Special targets provided by cmake.
 
-# Disable implicit rules so canoncical targets will work.
+# Disable implicit rules so canonical targets will work.
 .SUFFIXES:
 
 # Remove some rules from gmake that .SUFFIXES does not remove.
@@ -36,10 +36,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/macvicar/dev/vm/hiphop-php
+CMAKE_SOURCE_DIR = /home/joelp/dev/hiphop-php
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/macvicar/dev/vm/hiphop-php
+CMAKE_BINARY_DIR = /home/joelp/dev/hiphop-php
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -107,9 +107,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/macvicar/dev/vm/hiphop-php/CMakeFiles /home/macvicar/dev/vm/hiphop-php/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/joelp/dev/hiphop-php/CMakeFiles /home/joelp/dev/hiphop-php/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/macvicar/dev/vm/hiphop-php/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/joelp/dev/hiphop-php/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -148,6 +148,19 @@ hphp_runtime_static: cmake_check_build_system
 hphp_runtime_static/fast:
 	$(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/build
 .PHONY : hphp_runtime_static/fast
+
+#=============================================================================
+# Target rules for targets named xhp
+
+# Build rule for target.
+xhp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 xhp
+.PHONY : xhp
+
+# fast build rule for target.
+xhp/fast:
+	$(MAKE) -f src/third_party/xhp/xhp/CMakeFiles/xhp.dir/build.make src/third_party/xhp/xhp/CMakeFiles/xhp.dir/build
+.PHONY : xhp/fast
 
 #=============================================================================
 # Target rules for targets named afdt
@@ -215,6 +228,19 @@ hphp_analysis/fast:
 .PHONY : hphp_analysis/fast
 
 #=============================================================================
+# Target rules for targets named ext_hhvm_static
+
+# Build rule for target.
+ext_hhvm_static: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ext_hhvm_static
+.PHONY : ext_hhvm_static
+
+# fast build rule for target.
+ext_hhvm_static/fast:
+	$(MAKE) -f src/runtime/ext_hhvm/CMakeFiles/ext_hhvm_static.dir/build.make src/runtime/ext_hhvm/CMakeFiles/ext_hhvm_static.dir/build
+.PHONY : ext_hhvm_static/fast
+
+#=============================================================================
 # Target rules for targets named hphp
 
 # Build rule for target.
@@ -253,11 +279,13 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... hphp_runtime_static"
+	@echo "... xhp"
 	@echo "... afdt"
 	@echo "... mbfl"
 	@echo "... sqlite3"
 	@echo "... timelib"
 	@echo "... hphp_analysis"
+	@echo "... ext_hhvm_static"
 	@echo "... hphp"
 	@echo "... test"
 .PHONY : help

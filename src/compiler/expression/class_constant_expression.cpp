@@ -27,8 +27,6 @@
 #include <compiler/expression/constant_expression.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -269,16 +267,18 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
                 cg.getGlobals(ar));
       if (cg.isFileOrClassHeader()) {
         if (getClassScope()) {
-          getClassScope()->addUsedClassFullHeader(trueClassName);
+          getClassScope()->addUsedClassFullHeader(ClassScopeRawPtr(cls));
         } else {
-          getFileScope()->addUsedClassFullHeader(trueClassName);
+          getFileScope()->addUsedClassFullHeader(ClassScopeRawPtr(cls));
         }
       }
     } else if (cg.isFileOrClassHeader()) {
       if (getClassScope()) {
-        getClassScope()->addUsedClassConstHeader(trueClassName, m_varName);
+        getClassScope()->addUsedClassConstHeader(ClassScopeRawPtr(cls),
+                                                 m_varName);
       } else {
-        getFileScope()->addUsedClassConstHeader(trueClassName, m_varName);
+        getFileScope()->addUsedClassConstHeader(ClassScopeRawPtr(cls),
+                                                m_varName);
       }
     }
     cg_printf("%s%s%s%s",

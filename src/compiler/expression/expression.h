@@ -75,7 +75,8 @@ class Variant;
     x(ModifierExpression, None),                \
     x(ConstantExpression, Const),               \
     x(EncapsListExpression, None),              \
-    x(ClosureExpression, None)
+    x(ClosureExpression, None),                 \
+    x(UserAttribute, None)
 
 class Expression : public Construct {
 public:
@@ -255,6 +256,7 @@ public:
   KindOf getKindOf() const { return m_kindOf;}
   virtual bool isTemporary() const { return false; }
   virtual bool isScalar() const { return false; }
+  bool isArray() const;
   virtual bool isRefable(bool checkError = false) const { return false; }
   virtual bool getScalarValue(Variant &value) { return false; }
   bool getEffectiveScalar(Variant &value);
@@ -400,15 +402,23 @@ public:
 protected:
   static bool IsIdentifier(const std::string &value);
 
-  KindOf m_kindOf;
   int m_context;
+  int m_argNum;
+
+private:
+  KindOf m_kindOf;
+  bool m_originalScopeSet;
+  bool m_unused;
+  unsigned m_canon_id;
+  mutable int m_error;
+
+protected:
   TypePtr m_actualType;
   TypePtr m_expectedType; // null if the same as m_actualType
   TypePtr m_implementedType; // null if the same as m_actualType
   TypePtr m_assertedType;
   std::string m_cppTemp;
   std::string m_cppCseTemp;
-  int m_argNum;
 
   bool hasCPPCseTemp() const { return !m_cppCseTemp.empty(); }
 
@@ -439,11 +449,7 @@ protected:
   bool canUseFastCast(AnalysisResultPtr ar);
 
   BlockScopeRawPtr m_originalScope;
-  bool m_originalScopeSet;
-  unsigned m_canon_id;
   ExpressionPtr m_canonPtr;
-  mutable int m_error;
-  bool m_unused;
   ExpressionPtr m_replacement;
 };
 

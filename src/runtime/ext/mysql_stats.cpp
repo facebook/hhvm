@@ -18,8 +18,6 @@
 #include <runtime/ext/mysql_stats.h>
 #include <util/util.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -127,7 +125,7 @@ void MySqlStats::Record(const std::string &verb,
 }
 
 std::string MySqlStats::ReportStats() {
-  ostringstream out;
+  std::ostringstream out;
 
   Lock lock(s_mutex);
   for (StatsMap::const_iterator iter = s_stats.begin(); iter != s_stats.end();

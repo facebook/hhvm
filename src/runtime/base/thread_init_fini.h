@@ -27,6 +27,13 @@ void init_thread_locals(void *arg = NULL) ATTRIBUTE_COLD
 void finish_thread_locals(void *arg = NULL) ATTRIBUTE_COLD
   NEVER_INLINE;
 
+struct InitFiniNode {
+  InitFiniNode(void(*f)(), bool init);
+  void (*func)();
+  InitFiniNode *next;
+};
+
+extern InitFiniNode *extra_init, *extra_fini;
 ///////////////////////////////////////////////////////////////////////////////
 }
 

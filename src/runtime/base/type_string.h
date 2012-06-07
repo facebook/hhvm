@@ -27,13 +27,13 @@
 #include <runtime/base/string_offset.h>
 #include <runtime/base/types.h>
 #include <runtime/base/hphp_value.h>
+#include <runtime/base/gc_roots.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 class Array;
 class String;
 class VarNR;
-class AtomicString;
 
 // helpers
 StringData* buildStringData(int     n);
@@ -41,11 +41,17 @@ StringData* buildStringData(int64   n);
 StringData* buildStringData(double  n);
 StringData* buildStringData(litstr  s);
 
+#ifdef HHVM_GC
+typedef GCRootTracker<StringData> StringBase;
+#else
+typedef SmartPtr<StringData> StringBase;
+#endif
+
 /**
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-class String : public SmartPtr<StringData> {
+class String : protected StringBase {
 public:
   typedef hphp_hash_map<int64, const StringData *, int64_hash>
     IntegerStringDataMap;
@@ -91,14 +97,26 @@ public:
   String() {}
   ~String();
 
-  StringData *operator->() const {
+  StringData* get() const { return m_px; }
+  void reset() { StringBase::reset(); }
+
+  // Deliberately doesn't throw_null_pointer_exception as a perf
+  // optimization.
+  StringData* operator->() const {
     return m_px;
+  }
+
+  // Transfer ownership of our reference to this StringData.
+  StringData* detach() {
+    StringData* ret = m_px;
+    m_px = 0;
+    return ret;
   }
 
   /**
    * Constructors
    */
-  String(StringData *data) : SmartPtr<StringData>(data) { }
+  String(StringData *data) : StringBase(data) { }
   String(int     n);
   String(int64   n);
   String(double  n);
@@ -108,8 +126,7 @@ public:
       m_px->setRefCount(1);
     }
   }
-  String(CStrRef str)
-    : SmartPtr<StringData>(str.m_px) { }
+  String(CStrRef str) : StringBase(str.m_px) { }
   String(const std::string &s) { // always make a copy
     m_px = NEW(StringData)(s.data(), s.size(), CopyString);
     m_px->setRefCount(1);
@@ -126,7 +143,6 @@ public:
       m_px->setRefCount(1);
     }
   }
-  String(const AtomicString &s);
 
   void clear() { reset();}
   /**
@@ -251,7 +267,6 @@ public:
   String &operator =  (CStrRef v);
   String &operator =  (CVarRef v);
   String &operator =  (const std::string &s);
-  String &operator =  (const AtomicString &s);
   String  operator +  (litstr  v) const;
   String  operator +  (CStrRef v) const;
   String &operator += (litstr  v);
@@ -385,11 +400,6 @@ public:
   bool checkStatic();
 
   /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   */
-  String fiberCopy() const;
-
-  /**
    * Debugging
    */
   void dump() const;
@@ -398,7 +408,7 @@ public:
 
   StringOffset lvalAtImpl(int key) {
     StringData *s = StringData::Escalate(m_px);
-    SmartPtr<StringData>::operator=(s);
+    StringBase::operator=(s);
     return StringOffset(m_px, key);
   }
 
@@ -411,6 +421,7 @@ public:
 
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(String, m_px) == offsetof(Value, m_data));
+    BOOST_STATIC_ASSERT((offsetof(String, m_px) == kExpectedMPxOffset));
   }
 };
 
@@ -454,6 +465,8 @@ struct string_data_lt {
 
 typedef hphp_hash_set<StringData *, string_data_hash, string_data_same>
   StringDataSet;
+typedef hphp_hash_set<const StringData*, string_data_hash, string_data_same>
+  ConstStringDataSet;
 
 struct hphp_string_hash {
   size_t operator()(CStrRef s) const {
@@ -485,22 +498,13 @@ struct StringDataHashCompare {
 };
 
 struct StringDataHashICompare {
-  bool equal(StringData *s1, StringData *s2) const {
+  bool equal(const StringData *s1, const StringData *s2) const {
     ASSERT(s1 && s2);
     return s1->isame(s2);
   }
   size_t hash(const StringData *s) const {
     ASSERT(s);
     return s->hash();
-  }
-};
-
-struct stringHashCompare {
-  bool equal(const std::string &s1, const std::string &s2) const {
-    return s1 == s2;
-  }
-  size_t hash(const std::string &s) const {
-    return hash_string(s.c_str(), s.size());
   }
 };
 
@@ -515,6 +519,39 @@ typedef hphp_hash_set<String, hphp_string_hash, hphp_string_same> StringSet;
 template<typename T>
 class StringMap :
   public hphp_hash_map<String, T, hphp_string_hash, hphp_string_same> { };
+
+///////////////////////////////////////////////////////////////////////////////
+// StrNR
+
+class StrNR {
+public:
+  explicit StrNR(StringData *data) {
+    m_px = data;
+  }
+  explicit StrNR(const StringData *data) {
+    m_px = const_cast<StringData*>(data);
+  }
+  explicit StrNR(const String &s) { // XXX
+    m_px = s.get();
+  }
+
+  operator CStrRef() const { return asString(); }
+  const char *data() const { return m_px ? m_px->data() : ""; }
+
+  String& asString() {
+    return *reinterpret_cast<String*>(this);
+  }
+
+  const String& asString() const {
+    return const_cast<StrNR*>(this)->asString();
+  }
+
+protected:
+  StringData *m_px;
+  static void compileTimeAssertions() {
+    BOOST_STATIC_ASSERT((offsetof(StrNR, m_px) == kExpectedMPxOffset));
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -532,7 +569,6 @@ public:
 
 public:
   friend class StringUtil;
-  friend class LiteralStringInitializer;
 
   StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
@@ -552,48 +588,15 @@ private:
   static StringDataSet *s_stringSet;
 };
 
+typedef struct StaticStringProxy {
+  union {
+    char m_data[sizeof(StaticString)];
+    void *p_dummy;
+    int64 i_dummy;
+  };
+} StaticStringProxy;
+
 extern const StaticString empty_string;
-
-///////////////////////////////////////////////////////////////////////////////
-// StrNR
-
-class StrNR : public String {
-public:
-  StrNR(StringData *data) {
-    m_px = data;
-  }
-  StrNR(const StrNR &s) {
-    m_px = s.m_px;
-  }
-  ~StrNR() {
-    m_px = NULL;
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// AtomicString
-
-class AtomicString : public AtomicSmartPtr<StringData> {
-public:
-  AtomicString() { }
-  AtomicString(const char *s, StringDataMode mode = AttachLiteral);
-  AtomicString(const std::string &s);
-  AtomicString(StringData *str);
-  AtomicString(const AtomicString &s) : AtomicSmartPtr<StringData>(s.m_px) { }
-
-  AtomicString &operator=(const AtomicString &s);
-  AtomicString &operator=(const std::string &s);
-
-  const char *c_str() const {
-    return m_px ? m_px->data() : "";
-  }
-  bool empty() const {
-    return m_px ? m_px->empty() : true;
-  }
-  int size() const {
-    return m_px ? m_px->size() : 0;
-  }
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

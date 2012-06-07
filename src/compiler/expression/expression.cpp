@@ -38,8 +38,6 @@
 #include <runtime/base/array/array_iterator.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,9 +52,9 @@ Expression::ExprClass Expression::Classes[] = {
 };
 
 Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
-    : Construct(scope, loc), m_kindOf(kindOf), m_context(RValue),
-      m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0),
-      m_unused(false) {
+    : Construct(scope, loc), m_context(RValue), m_kindOf(kindOf),
+      m_originalScopeSet(false), m_unused(false), m_canon_id(0), m_error(0),
+      m_canonPtr() {
 }
 
 ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
@@ -371,7 +369,7 @@ void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
   }
 
   if (m_actualType->isSpecificObject()) {
-    const_pointer_cast<AnalysisResult>(ar)->
+    boost::const_pointer_cast<AnalysisResult>(ar)->
       addClassDependency(getFileScope(), m_actualType->getName());
   }
 }
@@ -460,6 +458,9 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
   TypePtr ret = type;
   if (value) {
     ret = value->inferAndCheck(ar, Type::Some, false);
+    if (value->isLiteralNull()) {
+      ret = Type::Null;
+    }
     ASSERT(ret);
   }
 
@@ -596,6 +597,10 @@ bool Expression::equals(ExpressionPtr other) {
     ExpressionPtr thisKid = getNthExpr(i);
     ExpressionPtr otherKid = other->getNthExpr(i);
 
+    if (!thisKid || !otherKid) {
+      if (thisKid == otherKid) continue;
+      return false;
+    }
     if (!thisKid->equals(otherKid)) {
       return false;
     }
@@ -651,6 +656,13 @@ void Expression::computeLocalExprAltered() {
   if (res) {
     setLocalExprAltered();
   }
+}
+
+bool Expression::isArray() const {
+  if (is(KindOfUnaryOpExpression)) {
+    return static_cast<const UnaryOpExpression*>(this)->getOp() == T_ARRAY;
+  }
+  return false;
 }
 
 bool Expression::isUnquotedScalar() const {
@@ -932,13 +944,20 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                 t.c_str());
 
       int closeParen = 0;
+      string method = Type::GetFastCastMethod(
+        m_actualType, isReferenced, constRef);
       if (!Type::SameType(m_actualType, dstType)) {
         dstType->outputCPPCast(cg, ar, getScope());
         cg_printf("(");
         closeParen++;
-      }
-
-      if (m_actualType->isSpecificObject()) {
+        if (m_actualType->is(Type::KindOfObject)) {
+          method = "getObjectDataOrNull";
+        } else if (m_actualType->is(Type::KindOfString)) {
+          method = "getStringDataOrNull";
+        } else if (m_actualType->is(Type::KindOfArray)) {
+          method = "getArrayDataOrNull";
+        }
+      } else if (m_actualType->isSpecificObject()) {
         cg_printf("(");
         closeParen++;
         m_actualType->outputCPPFastObjectCast(
@@ -947,8 +966,6 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
         closeParen++;
       }
 
-      const string& method = Type::GetFastCastMethod(
-          m_actualType, isReferenced, constRef);
       cg_printf("%s.%s()", t.c_str(), method.c_str());
 
       for (int i = 0; i < closeParen; i++) cg_printf(")");
@@ -1358,6 +1375,10 @@ bool Expression::getTypeCastPtrs(
       !Type::SameType(m_implementedType, srcType)) {
     srcType = m_implementedType;
   }
+  if (!srcType && dstType && Type::IsCastNeeded(ar, Type::Variant, dstType)) {
+    srcType = Type::Variant;
+    return true;
+  }
   return dstType && srcType && ((m_context & LValue) == 0) &&
       Type::IsCastNeeded(ar, srcType, dstType);
 }
@@ -1431,7 +1452,7 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (needsCast) {
     ASSERT(dstType);
-    bool isSpecObj = m_actualType->isSpecificObject();
+    bool isSpecObj = m_actualType && m_actualType->isSpecificObject();
     if (!useFastCast ||
         !Type::SameType(m_actualType, dstType) ||
         isSpecObj) {

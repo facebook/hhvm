@@ -631,6 +631,43 @@ DefineFunction(
       )
     )));
 
+DefineFunction(
+  array(
+    'name' => 'nzcompress',
+    'desc' => 'This function compresses the given string using the nzlib data format, which is primarily used for compressing and uncompressing memcache values',
+    'args' => array(
+      array(
+        'name' => 'uncompressed',
+        'type' => String,
+        'desc' => 'The uncompressed data'
+      ),
+    ),
+    'return' => array(
+      'type' => Variant,
+      'desc' => 'The compressed data, or FALSE on error.',
+    ),
+  )
+);
+
+DefineFunction(
+  array(
+    'name' => 'nzuncompress',
+    'desc' => 'This function uncompresses the given string given that it is in the nzlib data format, which is primarily used for compressing and uncompressing memcache values',
+    'args' => array(
+      array(
+        'name' => 'compressed',
+        'type' => String,
+        'desc' => 'The data compressed by nzcompress().',
+      ),
+    ),
+    'return' => array(
+      'type' => Variant,
+      'desc' => 'The uncompressed data, or FALSE on error',
+    ),
+  )
+);
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

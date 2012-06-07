@@ -111,14 +111,17 @@ Array f_get_meta_tags(CStrRef filename, bool use_include_path /* = false */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void url_encode_array(StringBuffer &ret, CArrRef arr,
+static void url_encode_array(StringBuffer &ret, CVarRef varr,
                              std::set<void*> &seen_arrs,
                              CStrRef num_prefix, CStrRef key_prefix,
                              CStrRef key_suffix, CStrRef arg_sep) {
-  if (seen_arrs.find((void*)arr.get()) != seen_arrs.end()) {
+  void *id = varr.is(KindOfArray) ?
+    (void*)varr.getArrayData() : (void*)varr.getObjectData();
+  if (!seen_arrs.insert(id).second) {
     return; // recursive
   }
-  seen_arrs.insert((void*)arr.get());
+
+  Array arr = varr.toArray();
 
   for (ArrayIter iter(arr); iter; ++iter) {
     Variant data = iter.second();
@@ -141,7 +144,7 @@ static void url_encode_array(StringBuffer &ret, CArrRef arr,
       new_prefix += encoded;
       new_prefix += key_suffix;
       new_prefix += "%5B";
-      url_encode_array(ret, data.toArray(), seen_arrs, String(),
+      url_encode_array(ret, data, seen_arrs, String(),
                        new_prefix.detach(), String("%5D", AttachLiteral),
                        arg_sep);
     } else {
@@ -185,7 +188,7 @@ Variant f_http_build_query(CVarRef formdata,
 
   StringBuffer ret(1024);
   std::set<void*> seen_arrs;
-  url_encode_array(ret, formdata.toArray(), seen_arrs,
+  url_encode_array(ret, formdata, seen_arrs,
                    numeric_prefix, String(), String(), arg_sep);
   return ret.detach();
 }

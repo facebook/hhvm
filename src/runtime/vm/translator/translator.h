@@ -26,10 +26,14 @@
 #include <vector>
 #include <set>
 
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <util/hash.h>
+#include <runtime/base/execution_context.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/translator/immstack.h>
 #include <runtime/vm/translator/runtime-type.h>
+#include <runtime/vm/translator/fixup.h>
+#include <runtime/vm/debugger_hook.h>
 #include <runtime/base/md5.h>
 
 /* Translator front-end. */
@@ -37,9 +41,20 @@ namespace HPHP {
 namespace VM {
 namespace Transl {
 
-typedef unsigned char* TCA; // "Translation cache adddress."
+static const bool trustSigSegv = false;
 
-using std::vector;
+static const uint32 transCountersPerChunk = 1024 * 1024 / 8;
+
+/*
+ * REGSTATE_DIRTY when the live register state is spread across the
+ * stack and m_fixup, REGSTATE_CLEAN when it has been sync'ed into
+ * g_context.
+ */
+enum VMRegState {
+  REGSTATE_CLEAN,
+  REGSTATE_DIRTY
+};
+extern __thread VMRegState tl_regState;
 
 /*
  * A SrcKey is a logical source instruction, currently a unit/instruction pair.
@@ -48,25 +63,23 @@ using std::vector;
  * the same contents.
  */
 struct SrcKey {
-  MD5 m_md5;
+  Func::FuncId m_funcId;
   Offset m_offset;
 
-  SrcKey() :
-    m_md5("00000000000000000000000000000000"),
-    m_offset(0) { }
+  SrcKey() : m_funcId(Func::InvalidId), m_offset(0) { }
 
-  SrcKey(const Unit *u, Offset off) :
-    m_md5(u->md5()), m_offset(off) { }
+  SrcKey(const Func* f, Offset off) :
+    m_funcId(f->getFuncId()), m_offset(off) { }
 
-  SrcKey(const Unit *u, const Opcode *i) :
-    m_md5(u->md5()), m_offset(u->offsetOf(i)) { }
+  SrcKey(const Func* f, const Opcode* i) :
+    m_funcId(f->getFuncId()), m_offset(f->unit()->offsetOf(i)) { }
 
   int cmp(const SrcKey &r) const {
     // Can't use memcmp because of pad bytes. Frowny.
 #define CMP(field) \
     if (field < r.field) return -1; \
     if (field > r.field) return 1
-    CMP(m_md5);
+    CMP(m_funcId);
     CMP(m_offset);
 #undef CMP
     return 0;
@@ -83,10 +96,32 @@ struct SrcKey {
   bool operator>(const SrcKey& r) const {
     return cmp(r) < 0;
   }
-  // Hash function
-  size_t operator()(const SrcKey &sk) const {
-    return HPHP::hash_int64_pair(sk.m_md5.hash(), uint64(sk.m_offset));
+  // Hash function for both hash_map and tbb conventions.
+  static size_t hash(const SrcKey &sk) {
+    return HPHP::hash_int64_pair(sk.m_funcId, uint64(sk.m_offset));
   }
+  size_t operator()(const SrcKey& sk) const {
+    return hash(sk);
+  }
+  static bool equal(const SrcKey& sk1, const SrcKey& sk2) {
+    return sk1 == sk2;
+  }
+
+  // Packed representation of SrcKeys for use in contexts where we
+  // want atomicity.  (SrcDB.)
+  typedef uint64_t AtomicInt;
+
+  AtomicInt toAtomicInt() const {
+    return uint64_t(m_funcId) << 32 | uint64_t(m_offset);
+  }
+
+  static SrcKey fromAtomicInt(AtomicInt in) {
+    SrcKey k;
+    k.m_funcId = in >> 32;
+    k.m_offset = in & 0xffffffff;
+    return k;
+  }
+
   void trace(const char *fmt, ...) const;
   int offset() const {
     return m_offset;
@@ -96,6 +131,7 @@ struct SrcKey {
   }
 };
 
+typedef hphp_hash_set<SrcKey, SrcKey> SrcKeySet;
 #define SKTRACE(level, sk, ...) \
   ONTRACE(level, (sk).trace(__VA_ARGS__))
 
@@ -138,11 +174,26 @@ struct DynLocation {
   bool isInt() const {
     return rtt.isInt();
   }
+  bool isDouble() const {
+    return rtt.isDouble();
+  }
+  bool isBoolean() const {
+    return rtt.isBoolean();
+  }
   bool isVariant() const {
     return rtt.isVariant();
   }
   bool isValue() const {
     return rtt.isValue();
+  }
+  bool isNull() const {
+    return rtt.isNull();
+  }
+  bool isObject() const {
+    return rtt.isObject();
+  }
+  bool isArray() const {
+    return rtt.isArray();
   }
   DataType valueType() const {
     return rtt.valueType();
@@ -158,17 +209,25 @@ struct DynLocation {
     return location.space == Location::Local;
   }
 
-  // Uses the runtime state. True if this dynLocation can be overwritten by SetG's
-  // and SetM's.
+  // Uses the runtime state. True if this dynLocation can be overwritten by
+  // SetG's and SetM's.
   bool canBeAliased() const;
+};
+
+// Flags that summarize the plan for handling a given instruction.
+enum TXFlags {
+  Interp = 0,       // default; must be boolean false
+  Supported = 1,    // Not interpreted, though possibly with C++
+  NonReentrant = 2, // Supported with no possibility of reentry.
+  MachineCode  = 4, // Supported without C++ at all.
+  Simple = NonReentrant | Supported,
+  Native = MachineCode | Simple
 };
 
 // A NormalizedInstruction has been decorated with its typed inputs and
 // outputs.
 class NormalizedInstruction {
  public:
-  static const int kNoImm = -1;
-
   NormalizedInstruction* next;
   NormalizedInstruction* prev;
 
@@ -176,24 +235,34 @@ class NormalizedInstruction {
   const Func* funcd; // The Func in the topmost AR on the stack. Guaranteed to
                      // be accurate. Don't guess about this. Note that this is
                      // *not* the function whose body the NI belongs to.
+  const StringData* funcName;
+    // For FCall's, an opaque identifier that is either null, or uniquely
+    // identifies the (functionName, -arity) pair of this call site.
   const Unit* m_unit;
   vector<DynLocation*> inputs;
   DynLocation* outStack;
   DynLocation* outLocal;
-  vector<DynLocation*> inputHomes;
+  DynLocation* outStack2; // Used for CGetL2
+  DynLocation* outStack3; // Used for CGetL3
   vector<Location> deadLocs; // locations that die at the end of this
                              // instruction
-  ArgUnion imm[2];
-  ImmVector* immVecPtr; // pointer to the vector immediate, or NULL if the
-                        // instruction has no vector immediate
+  ArgUnion imm[3];
+  ImmVector immVec; // vector immediate; will have !isValid() if the
+                    // instruction has no vector immediate
+  std::vector<MemberCode> immVecM;
+
   // StackOff: logical delta at *start* of this instruction to
   // stack at tracelet entry.
   int stackOff;
+  bool hasConstImm;
   bool breaksBB;
-  bool preppedByRef;    // For Prep*
-  int constImmPos;
+  bool changesPC;
+  bool fuseBranch;
+  bool preppedByRef;    // For FPass*; indicates parameter reffiness
+  bool manuallyAllocInputs;
+  bool uncheckedInputs;
   ArgUnion constImm;
-  bool txSupported;
+  TXFlags m_txFlags;
 
   Opcode op() const;
   PC pc() const;
@@ -207,12 +276,26 @@ class NormalizedInstruction {
     inputs(),
     outStack(NULL),
     outLocal(NULL),
-    inputHomes(),
+    outStack2(NULL),
+    outStack3(NULL),
     deadLocs(),
-    immVecPtr(NULL),
-    constImmPos(kNoImm),
-    txSupported(false)
+    hasConstImm(false),
+    m_txFlags(Interp)
   { }
+
+  bool isSupported() const {
+    return (m_txFlags & Supported) == Supported;
+  }
+
+  bool isSimple() const {
+    return (m_txFlags & Simple) == Simple;
+  }
+
+  bool isNative() const {
+    return (m_txFlags & Native) == Native;
+  }
+
+  bool hasAliasableSuccessors() const;
 };
 
 class TranslationFailedExc : public std::exception {
@@ -235,12 +318,6 @@ class UnknownInputExc : public std::exception {
   throw TranslationFailedExc(__FILE__, __LINE__); \
 } while(0)
 
-#define puntUnless(predicate) do { \
-  if (!(predicate)) { \
-    punt(); \
-  } \
-} while(0)
-
 #define throwUnknownInput() do { \
   throw UnknownInputExc(__FILE__, __LINE__); \
 } while(0);
@@ -257,12 +334,6 @@ typedef hphp_hash_map<Location, DynLocation*, Location> ChangeMap;
 typedef ChangeMap DepMap;
 typedef hphp_hash_set<Location, Location> LocationSet;
 
-struct ClassDep {
-  Class*   m_class; // Requires: m_loc is sub-class of m_class ...
-  int      m_depth; // at depth d in the inheritance hierarchy.
-};
-typedef hphp_hash_map<Location, ClassDep, Location> ClassDeps;
-
 struct InstrStream {
   InstrStream() : first(NULL), last(NULL) {}
   void append(NormalizedInstruction* ni);
@@ -271,23 +342,47 @@ struct InstrStream {
   NormalizedInstruction* last;
 };
 
-struct RefDeps {
-  vector<bool> m_mask;
-  vector<bool> m_vals;
+typedef hphp_hash_map<Location, DynLocation*, Location> ChangeMap;
 
-  RefDeps() {
-    ASSERT(m_mask.size() == 0);
-    ASSERT(m_vals.size() == 0);
+struct RefDeps {
+  struct Record {
+    vector<bool> m_mask;
+    vector<bool> m_vals;
+
+    std::string pretty() const {
+      std::ostringstream out;
+      out << "mask=";
+      for (size_t i = 0; i < m_mask.size(); ++i) {
+        out << (m_mask[i] ? "1" : "0");
+      }
+      out << " vals=";
+      for (size_t i = 0; i < m_vals.size(); ++i) {
+        out << (m_vals[i] ? "1" : "0");
+      }
+      return out.str();
+    }
+  };
+  typedef hphp_hash_map<int64, Record, int64_hash> ArMap;
+  ArMap m_arMap;
+
+  RefDeps() {}
+
+  void addDep(int entryArDelta, unsigned argNum, bool isRef) {
+    if (m_arMap.find(entryArDelta) == m_arMap.end()) {
+      m_arMap[entryArDelta] = Record();
+    }
+    Record& r = m_arMap[entryArDelta];
+    if (argNum >= r.m_mask.size()) {
+      ASSERT(argNum >= r.m_vals.size());
+      r.m_mask.resize(argNum + 1);
+      r.m_vals.resize(argNum + 1);
+    }
+    r.m_mask[argNum] = true;
+    r.m_vals[argNum] = isRef;
   }
 
-  void addDep(unsigned argNum, bool isRef) {
-    if (argNum >= m_mask.size()) {
-      ASSERT(argNum >= m_vals.size());
-      m_mask.resize(argNum + 1);
-      m_vals.resize(argNum + 1);
-    }
-    m_mask[argNum] = true;
-    m_vals[argNum] = isRef;
+  size_t size() const {
+    return m_arMap.size();
   }
 };
 
@@ -311,25 +406,42 @@ struct ActRecState {
   // VM design; at present, the ActRec is not easily recoverable from an
   // arbitrary instruction boundary. However, it can be recovered from the
   // instructions that need to do so.
-  enum {
-    GUESSABLE, KNOWN, UNKNOWABLE
-  }              m_state;
-  const Func*    m_topFunc;
   static const int InvalidEntryArDelta = INT_MAX;
-  int            m_entryArDelta; // delta at BB entry to guessed ActRec.
 
-  ActRecState();
+  struct Record {
+    enum {
+      GUESSABLE, KNOWN, UNKNOWABLE
+    }              m_state;
+    const Func*    m_topFunc;
+    int            m_entryArDelta; // delta at BB entry to guessed ActRec.
+  };
+
+  std::vector<Record> m_arStack;
+
+  ActRecState() {}
   void pushFuncD(const Func* func);
-  void pushDynFunc(void);
+  void pushDynFunc();
+  void pop();
   bool getReffiness(int argNum, int stackOffset, RefDeps* outRefDeps);
+  const Func* getCurrentFunc();
+  int getCurrentState();
 };
 
-struct Tracelet {
+struct Tracelet : private boost::noncopyable {
   ChangeMap      m_changes;
   DepMap         m_dependencies;
   InstrStream    m_instrStream;
   int            m_stackChange;
+
+  // SrcKey for the start of the Tracelet.  This might be different
+  // from m_instrStream.first->source.
   SrcKey         m_sk;
+
+  // After this Tracelet runs, this is the SrcKey for the next
+  // instruction that we should go to.  Note that this can be
+  // different from m_instrStream.last->source.advance() if we removed
+  // the last instruction from the stream.
+  SrcKey         m_nextSk;
 
   // numOpcodes is the number of raw opcode instructions, before optimiation.
   // The immediates optimization may both:
@@ -343,9 +455,6 @@ struct Tracelet {
   ActRecState    m_arState;
   RefDeps        m_refDeps;
 
-  // Assumptions about object class lineage.
-  ClassDeps      m_classDeps;
-
   /*
    * If we were unable to make sense of the instruction stream (e.g., it
    * used instructions that the translator does not understand), then this
@@ -357,14 +466,13 @@ struct Tracelet {
 
   // Track which NormalizedInstructions and DynLocations are owned by this
   // Tracelet; used for cleanup purposes
-  std::vector<NormalizedInstruction*> m_instrs;
-  std::vector<DynLocation*> m_dynlocs;
+  boost::ptr_vector<NormalizedInstruction> m_instrs;
+  boost::ptr_vector<DynLocation> m_dynlocs;
 
   Tracelet() :
     m_stackChange(0),
     m_arState(),
     m_analysisFailed(false) { }
-  ~Tracelet();
 
   NormalizedInstruction* newNormalizedInstruction();
   DynLocation* newDynLocation(Location l, DataType t);
@@ -379,36 +487,79 @@ struct TraceletContext {
   LocationSet m_changeSet;
   LocationSet m_deletedSet;
   bool        m_aliasTaint;
+  bool        m_varEnvTaint;
 
-  TraceletContext() : m_t(NULL), m_aliasTaint(false)  {}
-  TraceletContext(Tracelet* t) : m_t(t), m_aliasTaint(false) {}
-  DynLocation* recordRead(const Location& l);
+  TraceletContext()
+    : m_t(NULL), m_aliasTaint(false), m_varEnvTaint(false) {}
+  TraceletContext(Tracelet* t)
+    : m_t(t), m_aliasTaint(false), m_varEnvTaint(false) {}
+  DynLocation* recordRead(const InputInfo& l);
   void recordWrite(DynLocation* dl, NormalizedInstruction* source);
   void recordDelete(const Location& l);
   void aliasTaint();
+  void varEnvTaint();
 
  private:
   static bool canBeAliased(const DynLocation* dl);
 };
 
+typedef uint32 TransID;
+
+enum TransKind {
+  TransNormal = 0,
+  TransAnchor = 1,
+  TransProlog = 2,
+};
+
+const char* getTransKindName(TransKind kind);
+
 /*
- * For debugging purposes, a record of the place a txn came from. Record
- * the start address of each translation here. Useful for logs,
- * post-mortems, etc.
+ * A record with various information about a translation.
  */
 struct TransRec {
-  SrcKey src;
-  bool isAnchor;
+  TransID             id;
+  TransKind           kind;
+  SrcKey              src;
+  MD5                 md5;
+  uint32              bcStopOffset;
   vector<DynLocation> dependencies;
-  TransRec() { }
-  TransRec(SrcKey s) : src(s), isAnchor(true) { }
-  TransRec(SrcKey s, const Tracelet& t) : src(s), isAnchor(false) {
+  TCA                 aStart;
+  uint32              aLen;
+  TCA                 astubsStart;
+  uint32              astubsLen;
+
+  TransRec() {}
+
+  TransRec(SrcKey    s,
+           MD5       _md5,
+           TransKind _kind,
+           TCA       _aStart = 0,
+           uint32    _aLen = 0,
+           TCA       _astubsStart = 0,
+           uint32    _astubsLen = 0) :
+      id(0), kind(_kind), src(s), md5(_md5), bcStopOffset(0),
+      aStart(_aStart), aLen(_aLen),
+      astubsStart(_astubsStart), astubsLen(_astubsLen) { }
+
+  TransRec(SrcKey          s,
+           MD5             _md5,
+           const Tracelet& t,
+           TCA             _aStart = 0,
+           uint32          _aLen = 0,
+           TCA             _astubsStart = 0,
+           uint32          _astubsLen = 0) :
+      id(0), kind(TransNormal), src(s), md5(_md5),
+      bcStopOffset(t.m_nextSk.offset()), aStart(_aStart), aLen(_aLen),
+      astubsStart(_astubsStart), astubsLen(_astubsLen) {
     for (DepMap::const_iterator dep = t.m_dependencies.begin();
          dep != t.m_dependencies.end();
          ++dep) {
       dependencies.push_back(*dep->second);
     }
   }
+
+  void setID(TransID newID) { id = newID; }
+  void print(char *outbuf, uint64 profCount) const;
 };
 
 /*
@@ -425,16 +576,19 @@ private:
 
   int stackFrameOffset; // sp at current instr; used to normalize
 
+  void analyzeSecondPass(Tracelet& t);
+  void applyInputMetaData(Unit::MetaHandle&,
+                          NormalizedInstruction* ni);
   void getInputs(Tracelet& t,
                  NormalizedInstruction* ni,
                  int& currentStackOffset,
-                 vector<Location>& inputs);
+                 vector<InputInfo>& inputs);
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,
-                  bool& writeAlias);
+                  bool& writeAlias,
+                  bool& varEnvTaint);
 
-  static Location tvToLocation(const TypedValue* tv);
   static RuntimeType liveType(Location l, const Unit &u);
   static RuntimeType liveType(const Cell* outer, const Location& l);
 
@@ -445,13 +599,38 @@ private:
 
   void findImmable(ImmStack &stack, NormalizedInstruction* ni);
 
+  virtual void syncWork() = 0;
+  virtual void invalidateSrcKey(const SrcKey& sk) = 0;
+  /*
+   * If this returns true, we dont generate guards for any of the
+   * inputs to this instruction (this is essentially to avoid
+   * generating guards on behalf of interpreted instructions).
+   */
+  virtual bool dontGuardAnyInputs(Opcode op) { return false; }
+
 protected:
+  struct PendingFixup {
+    TCA m_tca;
+    Fixup m_fixup;
+    PendingFixup() { }
+    PendingFixup(TCA tca, Fixup fixup) :
+      m_tca(tca), m_fixup(fixup) { }
+  };
+  vector<PendingFixup> m_pendingFixups;
+  FixupMap m_fixupMap;
   void requestResetHighLevelTranslator();
+
+  TCA m_resumeHelper;
+
+  typedef std::map<TCA, uint32> TransDB;
+  TransDB          m_transDB;
+  vector<TransRec> m_translations;
+  vector<uint64*>  m_transCounters;
 
 public:
 
   Translator();
-  virtual ~Translator() { }
+  virtual ~Translator();
   static Translator* Get();
 
   /*
@@ -461,41 +640,143 @@ public:
   virtual void requestInit() = 0;
   virtual void requestExit() = 0;
   virtual void analyzeInstr(Tracelet& t, NormalizedInstruction& i) = 0;
-  virtual TCA funcPrologue(const Func* f, int nArgs, int flags) = 0;
+  virtual TCA funcPrologue(Func* f, int nArgs) = 0;
   virtual TCA getCallToExit() = 0;
   virtual TCA getRetFromInterpretedFrame() = 0;
   virtual void resume(SrcKey sk) = 0;
   virtual void defineCns(StringData* name) = 0;
+  virtual std::string getUsage() = 0;
+  virtual bool dumpTC() = 0;
+  virtual bool dumpTCCode(const char *filename) = 0;
+  virtual bool dumpTCData() = 0;
 
-  enum {
+  enum FuncPrologueFlags {
     FuncPrologueNormal      = 0,
     FuncPrologueMagicCall   = 1,
     FuncPrologueIntercepted = 2,
   };
 
-  typedef std::map<TCA, TransRec> TransDB;
-  virtual TransDB& getTransDB() = 0;
+  const TransDB& getTransDB() const {
+    return m_transDB;
+  }
 
-  Tracelet analyze(const SrcKey* sk);
+  const TransRec* getTransRec(TCA tca) const {
+    if (!isTransDBEnabled()) return NULL;
+
+    TransDB::const_iterator it = m_transDB.find(tca);
+    if (it == m_transDB.end()) {
+      return NULL;
+    }
+    return getTransRec(it->second);
+  }
+
+  const TransRec* getTransRec(uint32 transId) const {
+    if (!isTransDBEnabled()) return NULL;
+
+    if (transId >= m_translations.size()) {
+      return NULL;
+    }
+    return &m_translations[transId];
+  }
+
+  uint64* getTransCounterAddr() {
+    if (!isTransDBEnabled()) return NULL;
+    TransID id = m_translations.size();
+
+    // allocate a new chunk of counters if necessary
+    if (id >= m_transCounters.size() * transCountersPerChunk) {
+      uint32   size = sizeof(uint64) * transCountersPerChunk;
+      uint64 *chunk = (uint64*)malloc(size);
+      bzero(chunk, size);
+      m_transCounters.push_back(chunk);
+    }
+    ASSERT(id / transCountersPerChunk < m_transCounters.size());
+    return &(m_transCounters[id / transCountersPerChunk]
+                            [id % transCountersPerChunk]);
+  }
+
+  uint64 getTransCounter(uint32 transId) const {
+    if (!isTransDBEnabled()) return -1ul;
+    ASSERT(transId < m_translations.size());
+
+    if (transId / transCountersPerChunk >= m_transCounters.size()) return 0;
+
+    return m_transCounters[transId / transCountersPerChunk]
+                          [transId % transCountersPerChunk];
+  }
+
+  uint32 addTranslation(const TransRec& transRec) {
+    if (!isTransDBEnabled()) return -1u;
+    uint32 id = m_translations.size();
+    m_translations.push_back(transRec);
+    m_translations[id].setID(id);
+
+    if (transRec.aLen > 0) {
+      m_transDB[transRec.aStart] = id;
+    }
+    if (transRec.astubsLen > 0) {
+      m_transDB[transRec.astubsStart] = id;
+    }
+
+    return id;
+  }
+
+  void analyze(const SrcKey* sk, Tracelet& out);
   void advance(Opcode const **instrs);
   static int locPhysicalOffset(Location l, const Func* f = NULL);
+  static Location tvToLocation(const TypedValue* tv, const TypedValue* frame);
   static bool typeIsString(DataType type) {
     return type == KindOfString || type == KindOfStaticString;
   }
   static bool liveFrameIsPseudoMain();
+
+  inline void sync() {
+    if (tl_regState == REGSTATE_CLEAN) return;
+    syncWork();
+  }
+
+  inline bool stateIsDirty() {
+    return tl_regState == REGSTATE_DIRTY;
+  }
+  
+  inline bool isTransDBEnabled() const {
+    return debug || RuntimeOption::EvalDumpTC;
+  }
+
+protected:
+  PCFilter m_dbgBLPC;
+  SrcKeySet m_dbgBLSrcKey;
+  Mutex m_dbgBlacklistLock;
+  bool isSrcKeyInBL(const Unit* unit, const SrcKey& sk);
+
+public:
+  void clearDbgBL();
+  bool addDbgBLPC(PC pc);
+  virtual bool addDbgGuards(const Unit* unit) = 0;
+  virtual bool addDbgGuard(const Func* func, Offset offset) = 0;
+
+  TCA getResumeHelper() {
+    return m_resumeHelper;
+  }
 };
 
+extern Translator* transl;
+
+int getStackDelta(const NormalizedInstruction& ni);
+
 /*
- * opcodeBreaksBB --
+ * opcodeChangesPC --
  *
- *   Instructions which always break a basic block. Mostly branches.
+ *   Returns true if the instruction can potentially set PC to point
+ *   to something other than the next instruction in the bytecode
  */
 static inline bool
-opcodeBreaksBB(const Opcode instr) {
+opcodeChangesPC(const Opcode instr) {
   switch (instr) {
     case OpJmp:
     case OpJmpZ:
     case OpJmpNZ:
+    case OpSwitch:
     case OpFCall:
     case OpRetC:
     case OpRetV:
@@ -511,12 +792,33 @@ opcodeBreaksBB(const Opcode instr) {
     case OpInclOnce:
     case OpReq:
     case OpReqOnce:
+    case OpReqDoc:
+    case OpReqMod:
+    case OpReqSrc:
     case OpEval:
+    case OpNativeImpl:
+    case OpContHandle:
       return true;
     default:
       return false;
   }
 }
+
+/*
+ * opcodeBreaksBB --
+ *
+ *   Returns true if the instruction always breaks a tracelet. Most
+ *   instructions that change PC will break the tracelet, though some
+ *   do not (ex. FCall).
+ */
+static inline bool
+opcodeBreaksBB(const Opcode instr) {
+  return opcodeChangesPC(instr) && instr != OpFCall;
+}
+
+extern bool tc_dump();
+const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
+                                  bool& magicCall, bool staticLookup);
 
 } } } // HPHP::VM::Transl
 

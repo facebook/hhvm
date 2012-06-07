@@ -23,6 +23,7 @@
 void Test::RunTestsImpl(bool &allPassed, std::string &suite,
                         std::string &which, std::string &set) {
   // individual test suites
+  s_suite = suite;
   if (suite == "TestCodeRun") {
     RUN_TESTSUITE(TestCodeRun);
     return;
@@ -33,10 +34,20 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     RUN_TESTSUITE(TestCodeRun);
     return;
   }
+  if (suite == "TestDebugger" || suite == "TestDebuggerJit") {
+    if (suite == "TestDebuggerJit") {
+      RuntimeOption::EvalJit = true;
+    } else {
+      RuntimeOption::EvalJit = false;
+    }
+    suite = "TestDebugger";
+    RUN_TESTSUITE(TestDebugger);
+    return;
+  }
   if (hhvm) {
     const char *vmFilter = 0;
 
-    if (suite == "TestCodeRunVM") {
+    if (suite == "TestCodeRunVM" || suite == "TestCodeRunRepo") {
       suite = "TestCodeRun";
       Option::EnableEval = Option::FullEval;
       RuntimeOption::EvalJit = false;
@@ -44,7 +55,7 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
       RUN_TESTSUITE(TestCodeRun);
       return;
     }
-    if (suite == "TestCodeRunJit") {
+    if (suite == "TestCodeRunJit" || suite == "TestCodeRunRepoJit") {
       suite = "TestCodeRun";
       Option::EnableEval = Option::FullEval;
       RuntimeOption::EvalJit = true;

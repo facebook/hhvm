@@ -273,6 +273,8 @@ Variant f_mysql_errno(CVarRef link_identifier = null);
 
 Variant f_mysql_error(CVarRef link_identifier = null);
 
+Variant f_mysql_warning_count(CVarRef link_identifier = null);
+
 inline Variant f_mysql_get_host_info(CVarRef link_identifier = null) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
@@ -332,6 +334,8 @@ inline Variant f_mysql_affected_rows(CVarRef link_identifier = null) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
+
+Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field);
 
 bool f_mysql_set_timeout(int query_timeout_ms = -1,
                          CVarRef link_identifier = null);

@@ -9,22 +9,26 @@ class C1 {
   }
 }
 
-// FPushClsMethodD
-C1::__callStatic("a", "b", "c", "d");
-C1::foo("a", "b", "c", "d");
+function main1() {
+  // FPushClsMethodD
+  C1::__callStatic("a", "b", "c", "d");
+  C1::foo("a", "b", "c", "d");
 
-// FPushClsMethod
-$cls = 'C1';
-$cls::__callStatic("a", "b", "c", "d");
-$cls::foo("a", "b", "c", "d");
-$fn = '__callStatic';
-C1::$fn("a", "b", "c", "d");
-$fn = 'foo';
-C1::$fn("a", "b", "c", "d");
-$fn = '__callStatic';
-$cls::$fn("a", "b", "c", "d");
-$fn = 'foo';
-$cls::$fn("a", "b", "c", "d");
+  // FPushClsMethod
+  $cls = 'C1';
+  $cls::__callStatic("a", "b", "c", "d");
+  $cls::foo("a", "b", "c", "d");
+  $fn = '__callStatic';
+  C1::$fn("a", "b", "c", "d");
+  $fn = 'foo';
+  C1::$fn("a", "b", "c", "d");
+  $fn = '__callStatic';
+  $cls::$fn("a", "b", "c", "d");
+  $fn = 'foo';
+  $cls::$fn("a", "b", "c", "d");
+}
+
+main1();
 
 class C2 {
   public static function __callStatic($fn, $args) {
@@ -56,8 +60,11 @@ class C2 {
     self::foo("a", "b", "c", "d");
   }
 }
-$obj = new C2;
-$obj->test();
+function main2() {
+  $obj = new C2;
+  $obj->test();
+}
+main2();
 
 class B3 {
   public function __call($fn, $args) {
@@ -97,9 +104,11 @@ class C3 extends B3 {
     self::foo("a", "b", "c", "d");
   }
 }
-$obj = new C3;
-$obj->test();
-
+function main3() {
+  $obj = new C3;
+  $obj->test();
+}
+main3();
 
 class A4 {
   public function foo($w, $x, $y, $z) {
@@ -115,9 +124,12 @@ class B4 extends A4 {
 }
 class C4 extends B4 {
 }
-C4::foo("a", "b", "c", "d");
-C4::$fn("a", "b", "c", "d");
-
+function main4() {
+  $fn = 'foo';
+  C4::foo("a", "b", "c", "d");
+  C4::$fn("a", "b", "c", "d");
+}
+main4();
 
 class A5 {
   public static function __callStatic($fn, $args) {
@@ -133,5 +145,8 @@ class B5 extends A5 {
 class C5 extends B5 {
 }
 
-$obj = new C5;
-$obj->test();
+function main5() {
+  $obj = new C5;
+  $obj->test();
+}
+main5();

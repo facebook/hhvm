@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_abort.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

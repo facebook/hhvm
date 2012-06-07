@@ -35,17 +35,17 @@ Anonymous context, Child object, strong foreach
 object(Child) (8) {
   ["childPub"]=>
   string(5) "BLARK"
-  ["childProt:protected"]=>
+  ["childProt":protected]=>
   int(50)
-  ["childPriv:private"]=>
+  ["childPriv":"Child":private]=>
   int(60)
-  ["basePriv:private"]=>
+  ["basePriv":"Child":private]=>
   string(16) "child's basePriv"
   ["basePub"]=>
   string(5) "BLARK"
-  ["baseProt:protected"]=>
+  ["baseProt":protected]=>
   int(20)
-  ["basePriv:private"]=>
+  ["basePriv":"Base":private]=>
   int(30)
   ["dynamic"]=>
   &string(5) "BLARK"

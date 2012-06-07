@@ -28,8 +28,6 @@
 #include <compiler/option.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -431,6 +429,11 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     ASSERT(m_resolvedClass);
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
     string clsId = m_resolvedClass->getId();
+    TypePtr type = getCPPType();
+    bool close = type->isSpecificObject();
+    if (close) {
+      cg_printf("((%s&)", type->getCPPDecl(ar, getScope()).c_str());
+    }
     if (m_resolvedClass->needLazyStaticInitializer()) {
       cg_printf("%s%s->lazy_initializer(g)->%s%s%s%s",
                 Option::ClassStaticsCallbackPrefix, clsId.c_str(),
@@ -442,6 +445,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
                 Option::IdPrefix.c_str(),
                 CodeGenerator::FormatLabel(var->getString()).c_str());
     }
+    if (close) cg_printf(")");
   } else {
     if (m_context & (LValue | RefValue | UnsetContext)) {
       if (isRedeclared()) cg_printf("g->");

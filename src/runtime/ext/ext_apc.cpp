@@ -29,11 +29,25 @@
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_trace.h>
 
-using namespace std;
-
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(apc);
 ///////////////////////////////////////////////////////////////////////////////
+
+static class apcExtension : public Extension {
+public:
+  apcExtension() : Extension("apc") {}
+  virtual void moduleInit() {
+    if (RuntimeOption::ApcUseFileStorage) {
+      s_apc_file_storage.enable(RuntimeOption::ApcFileStoragePrefix,
+                                RuntimeOption::ApcFileStorageChunkSize,
+                                RuntimeOption::ApcFileStorageMaxSize);
+    }
+  }
+  virtual void moduleShutdown() {
+    if (RuntimeOption::ApcUseFileStorage) {
+      s_apc_file_storage.cleanup();
+    }
+  }
+} s_apc_extension;
 
 KEEP_SECTION
 bool f_apc_store(CStrRef key, CVarRef var, int64 ttl /* = 0 */,
@@ -142,8 +156,7 @@ bool f_apc_clear_cache(int64 cache_id /* = 0 */) {
     throw_invalid_argument("cache_id: %d", cache_id);
     return false;
   }
-  s_apc_store[cache_id].clear();
-  return true;
+  return s_apc_store[cache_id].clear();
 }
 
 Variant f_apc_inc(CStrRef key, int64 step /* = 1 */,
@@ -291,11 +304,7 @@ void apc_load(int thread) {
     JobDispatcher<ApcLoadJob, ApcLoadWorker>(jobs, thread).run();
   }
 
-  for (set<string>::const_iterator iter =
-         RuntimeOption::ApcCompletionKeys.begin();
-       iter != RuntimeOption::ApcCompletionKeys.end(); ++iter) {
-    f_apc_store(String(*iter), 1);
-  }
+  s_apc_store[0].primeDone();
 
   if (RuntimeOption::EnableConstLoad) {
 #ifndef NO_JEMALLOC
@@ -464,7 +473,7 @@ void apc_load_impl(struct cache_info *info,
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *k;
         item.len = (int)(int64)*(k+1);
-        item.value = s.construct(item.key, item.len, *v++);
+        s.constructPrime(*v++, item);
       }
       s.prime(vars);
     }
@@ -480,9 +489,9 @@ void apc_load_impl(struct cache_info *info,
         item.key = *k;
         item.len = (int)(int64)*(k+1);
         switch (*v++) {
-        case 0: item.value = s.construct(item.key, item.len, false); break;
-        case 1: item.value = s.construct(item.key, item.len, true ); break;
-        case 2: item.value = s.construct(item.key, item.len, null ); break;
+        case 0: s.constructPrime(false, item); break;
+        case 1: s.constructPrime(true , item); break;
+        case 2: s.constructPrime(null , item); break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }
@@ -502,7 +511,7 @@ void apc_load_impl(struct cache_info *info,
         // Strings would be copied into APC anyway.
         String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
         value.checkStatic();
-        item.value = s.construct(item.key, item.len, value, false);
+        s.constructPrime(value, item, false);
       }
       s.prime(vars);
     }
@@ -517,7 +526,7 @@ void apc_load_impl(struct cache_info *info,
         item.key = *p;
         item.len = (int)(int64)*(p+1);
         String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
-        item.value = s.construct(item.key, item.len, value, true);
+        s.constructPrime(value, item, true);
       }
       s.prime(vars);
     }
@@ -537,7 +546,7 @@ void apc_load_impl(struct cache_info *info,
         if (same(success, false)) {
           throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
         }
-        item.value = s.construct(item.key, item.len, v);
+        s.constructPrime(v, item);
       }
       s.prime(vars);
     }
@@ -559,7 +568,7 @@ void apc_load_impl(struct cache_info *info,
           // supposed to be serialized as a char
           throw Exception("bad apc archive, f_unserialize failed");
         }
-        item.value = s.construct(item.key, item.len, v);
+        s.constructPrime(v, item);
       }
       s.prime(vars);
     }
@@ -734,7 +743,7 @@ void apc_load_impl_compressed
         SharedStore::KeyValuePair &item = vars[i];
         item.key = k;
         item.len = int_lens[i + 2];
-        item.value = s.construct(item.key, item.len, *v++);
+        s.constructPrime(*v++, item);
         k += int_lens[i + 2] + 1; // skip \0
       }
       s.prime(vars);
@@ -756,9 +765,9 @@ void apc_load_impl_compressed
         item.key = k;
         item.len = char_lens[i + 2];
         switch (*v++) {
-        case 0: item.value = s.construct(item.key, item.len, false); break;
-        case 1: item.value = s.construct(item.key, item.len, true ); break;
-        case 2: item.value = s.construct(item.key, item.len, null ); break;
+        case 0: s.constructPrime(false, item); break;
+        case 1: s.constructPrime(true , item); break;
+        case 2: s.constructPrime(null , item); break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }
@@ -785,7 +794,7 @@ void apc_load_impl_compressed
         // Strings would be copied into APC anyway.
         String value(p, string_lens[i + i + 3], AttachLiteral);
         value.checkStatic();
-        item.value = s.construct(item.key, item.len, value, false);
+        s.constructPrime(value, item, false);
         p += string_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -807,7 +816,7 @@ void apc_load_impl_compressed
         item.len = object_lens[i + i + 2];
         p += object_lens[i + i + 2] + 1; // skip \0
         String value(p, object_lens[i + i + 3], AttachLiteral);
-        item.value = s.construct(item.key, item.len, value, true);
+        s.constructPrime(value, item, true);
         p += object_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -834,7 +843,7 @@ void apc_load_impl_compressed
         if (same(success, false)) {
           throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
         }
-        item.value = s.construct(item.key, item.len, v);
+        s.constructPrime(v, item);
         p += thrift_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -862,7 +871,7 @@ void apc_load_impl_compressed
           // supposed to be serialized as a char
           throw Exception("bad apc archive, f_unserialize failed");
         }
-        item.value = s.construct(item.key, item.len, v);
+        s.constructPrime(v, item);
         p += other_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -986,7 +995,7 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *k;
         item.len = (int)(int64)*(k+1);
-        item.value = s.construct(item.key, item.len, *v++);
+        s.constructPrime(*v++, item);
       }
       s.prime(vars);
     }
@@ -1002,9 +1011,9 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         item.key = *k;
         item.len = (int)(int64)*(k+1);
         switch (*v++) {
-        case 0: item.value = s.construct(item.key, item.len, false); break;
-        case 1: item.value = s.construct(item.key, item.len, true ); break;
-        case 2: item.value = s.construct(item.key, item.len, null ); break;
+        case 0: s.constructPrime(false, item); break;
+        case 1: s.constructPrime(true , item); break;
+        case 2: s.constructPrime(null , item); break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }
@@ -1024,7 +1033,7 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         // Strings would be copied into APC anyway.
         String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
         value.checkStatic();
-        item.value = s.construct(item.key, item.len, value, false);
+        s.constructPrime(value, item, false);
       }
       s.prime(vars);
     }
@@ -1039,7 +1048,7 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         item.key = *p;
         item.len = (int)(int64)*(p+1);
         String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
-        item.value = s.construct(item.key, item.len, value, true);
+        s.constructPrime(value, item, true);
       }
       s.prime(vars);
     }
@@ -1059,7 +1068,7 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         if (same(success, false)) {
           throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
         }
-        item.value = s.construct(item.key, item.len, v);
+        s.constructPrime(v, item);
       }
       s.prime(vars);
     }
@@ -1081,7 +1090,7 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
           // supposed to be serialized as a char
           throw Exception("bad apc archive, f_unserialize failed");
         }
-        item.value = s.construct(item.key, item.len, v);
+        s.constructPrime(v, item);
       }
       s.prime(vars);
     }
@@ -1247,7 +1256,7 @@ void apc_load_impl_compressed
         SharedStore::KeyValuePair &item = vars[i];
         item.key = k;
         item.len = int_lens[i + 2];
-        item.value = s.construct(item.key, item.len, *v++);
+        s.constructPrime(*v++, item);
         k += int_lens[i + 2] + 1; // skip \0
       }
       s.prime(vars);
@@ -1269,9 +1278,9 @@ void apc_load_impl_compressed
         item.key = k;
         item.len = char_lens[i + 2];
         switch (*v++) {
-        case 0: item.value = s.construct(item.key, item.len, false); break;
-        case 1: item.value = s.construct(item.key, item.len, true ); break;
-        case 2: item.value = s.construct(item.key, item.len, null ); break;
+        case 0: s.constructPrime(false, item); break;
+        case 1: s.constructPrime(true , item); break;
+        case 2: s.constructPrime(null , item); break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }
@@ -1298,7 +1307,7 @@ void apc_load_impl_compressed
         // Strings would be copied into APC anyway.
         String value(p, string_lens[i + i + 3], AttachLiteral);
         value.checkStatic();
-        item.value = s.construct(item.key, item.len, value, false);
+        s.constructPrime(value, item, false);
         p += string_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -1320,7 +1329,7 @@ void apc_load_impl_compressed
         item.len = object_lens[i + i + 2];
         p += object_lens[i + i + 2] + 1; // skip \0
         String value(p, object_lens[i + i + 3], AttachLiteral);
-        item.value = s.construct(item.key, item.len, value, true);
+        s.constructPrime(value, item, true);
         p += object_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -1347,7 +1356,7 @@ void apc_load_impl_compressed
         if (same(success, false)) {
           throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
         }
-        item.value = s.construct(item.key, item.len, v);
+        s.constructPrime(v, item);
         p += thrift_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -1375,7 +1384,7 @@ void apc_load_impl_compressed
           // supposed to be serialized as a char
           throw Exception("bad apc archive, f_unserialize failed");
         }
-        item.value = s.construct(item.key, item.len, v);
+        s.constructPrime(v, item);
         p += other_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -1560,15 +1569,24 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
 // apc serialization
 
 String apc_serialize(CVarRef value) {
-  VariableSerializer vs(VariableSerializer::APCSerialize);
+  VariableSerializer::Type sType =
+    RuntimeOption::EnableApcSerialize ?
+      VariableSerializer::APCSerialize :
+      VariableSerializer::Serialize;
+  VariableSerializer vs(sType);
   return vs.serialize(value, true);
 }
 
 Variant apc_unserialize(CStrRef str) {
-  return unserialize_ex(str, VariableUnserializer::APCSerialize);
+  VariableUnserializer::Type sType =
+    RuntimeOption::EnableApcSerialize ?
+      VariableUnserializer::APCSerialize :
+      VariableUnserializer::Serialize;
+  return unserialize_ex(str, sType);
 }
 
 void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
+
   char type = uns->readChar();
   char sep = uns->readChar();
 
@@ -1709,7 +1727,8 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
 }
 
 String apc_reserialize(CStrRef str) {
-  if (str.empty()) return str;
+  if (str.empty() ||
+      !RuntimeOption::EnableApcSerialize) return str;
 
   VariableUnserializer uns(str.data(), str.size(),
                            VariableUnserializer::APCSerialize);
@@ -1722,13 +1741,13 @@ String apc_reserialize(CStrRef str) {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
 
-bool apc_dump(const char *filename) {
+bool apc_dump(const char *filename, bool keyOnly, int waitSeconds) {
   const int CACHE_ID = 0; /* 0 is used as default for apc */
   std::ofstream out(filename);
   if (out.fail()) {
     return false;
   }
-  s_apc_store[CACHE_ID].dump(out);
+  s_apc_store[CACHE_ID].dump(out, keyOnly, waitSeconds);
   out.close();
   return true;
 }

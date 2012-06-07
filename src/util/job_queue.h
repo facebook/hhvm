@@ -25,6 +25,7 @@
 #include "atomic.h"
 #include "alloc.h"
 #include "exception.h"
+#include "runtime/vm/bytecode.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,9 +116,13 @@ public:
       } else if (!wait(id, true, m_dropCacheTimeout)) {
         // since we timed out, maybe we can turn idle without holding memory
         if (m_jobs.empty()) {
+          ScopedUnlock unlock(this);
           Util::flush_thread_caches();
           if (m_dropStack && Util::s_stackLimit) {
             Util::flush_thread_stack();
+          }
+          if (hhvm) {
+            VM::Stack::flush();
           }
           flushed = true;
         }
@@ -309,8 +314,8 @@ public:
     if (!TWorker::CountActive) {
       // If TWorker does not support counting the number of
       // active workers, just start all of the workers eagerly
-      for (int i = 0; i < threadCount; i++) {   
-        addWorkerImpl(false);   
+      for (int i = 0; i < threadCount; i++) {
+        addWorkerImpl(false);
       }
     }
   }
@@ -385,28 +390,6 @@ public:
     }
   }
 
-  /**
-   * Remove a worker thread on the fly. Use "defer=true" for removing a worker
-   * thread from within a worker thread itself, as it's still running.
-   * Otherwise, "defer=false" has to be used to properly delete the thread.
-   */
-  void removeWorker(TWorker *worker, AsyncFunc<TWorker> *func, bool defer) {
-    Lock lock(m_mutex);
-    if (!m_stopped) {
-      if (m_funcs.find(func) != m_funcs.end()) {
-        m_funcs.erase(func);
-        if (defer) {
-          func->setAutoDelete();
-        } else {
-          delete func;
-        }
-      }
-      if (m_workers.find(worker) != m_workers.end()) {
-        m_workers.erase(worker);
-        delete worker;
-      }
-    }
-  }
   void getWorkers(std::vector<TWorker*> &workers) {
     Lock lock(m_mutex);
     workers.insert(workers.end(), m_workers.begin(), m_workers.end());

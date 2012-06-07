@@ -23,6 +23,7 @@
 #include <compiler/statement/exp_statement.h>
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/class_statement.h>
+#include <compiler/statement/function_statement.h>
 #include <compiler/statement/return_statement.h>
 #include <compiler/statement/block_statement.h>
 #include <util/parser/hphp.tab.hpp>
@@ -30,10 +31,9 @@
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/constant_expression.h>
+#include <compiler/expression/unary_op_expression.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -102,6 +102,7 @@ bool StatementList::hasImpl() const {
 }
 
 ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
+  ExpressionListPtr rep;
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr s = m_stmts[i];
     if (s->is(KindOfReturnStatement)) {
@@ -111,9 +112,66 @@ ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
       } else if (!e->isScalar()) {
         break;
       }
-      return e;
+      if (!rep) return e;
+
+      rep->addElement(e);
+      return rep;
     }
-    if (m_stmts[i]->hasImpl()) break;
+    if (s->hasImpl()) {
+      /*
+        In hphpc, marking a volatile class as defined is very cheap - just
+        setting a flag in GlobalVariables. So if all a file does is to define
+        a number of volatile classes (non-volatile classes are already ignored
+        by s->hasImpl()) we may as well just pull those definitions into
+        the requirer.
+        In hhvm, we would need to be able to find the unit that defines
+        the class in order to do the same thing. Not out of the question,
+        but a lot of complexity/fragility for not much gain (we already
+        omit the pseudomain if we manage to merge all the classes
+        successfully).
+      */
+      if (hhvm && Option::OutputHHBC) break;
+      if (s->is(KindOfClassStatement) ||
+          s->is(KindOfInterfaceStatement)) {
+        ClassScopePtr cls(
+          static_pointer_cast<InterfaceStatement>(s)->getClassScope());
+
+        if (!cls->isVolatile()) continue;
+        if (cls->hasUnknownBases()) break;
+        if (!rep) {
+          rep = ExpressionListPtr(
+            new ExpressionList(getScope(), getLocation(),
+                               ExpressionList::ListKindWrapped));
+        }
+        UnaryOpExpressionPtr e(
+          new UnaryOpExpression(getScope(), getLocation(),
+                                makeScalarExpression(ar, cls->getName()),
+                                T_CLASS, true));
+        e->setDefinedScope(cls);
+        rep->addElement(e);
+        continue;
+      } else if (s->is(KindOfFunctionStatement)) {
+        FunctionScopePtr func(
+          static_pointer_cast<FunctionStatement>(s)->getFunctionScope());
+
+        if (!func->isVolatile()) continue;
+
+        if (!rep) {
+          rep = ExpressionListPtr(
+            new ExpressionList(getScope(), getLocation(),
+                               ExpressionList::ListKindWrapped));
+        }
+        UnaryOpExpressionPtr e(
+          new UnaryOpExpression(getScope(), getLocation(),
+                                makeScalarExpression(ar, func->getName()),
+                                T_FUNCTION, true));
+        e->setDefinedScope(func);
+        rep->addElement(e);
+        continue;
+      }
+
+      break;
+    }
   }
   return ExpressionPtr();
 }
@@ -145,14 +203,7 @@ void StatementList::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    // TODO(stephentu): Also include method statement here?
-    bool scopeStmt = stmt->is(Statement::KindOfFunctionStatement) ||
-      stmt->is(Statement::KindOfClassStatement) ||
-      stmt->is(Statement::KindOfInterfaceStatement);
-    if (ar->getPhase() != AnalysisResult::AnalyzeTopLevel || !scopeStmt) {
-      /* Recurse when analyzing include/all OR when not a scope */
-      stmt->analyzeProgram(ar);
-    }
+    stmt->analyzeProgram(ar);
   }
 }
 

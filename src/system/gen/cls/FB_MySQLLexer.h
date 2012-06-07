@@ -25,11 +25,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern StaticString s_sys_ss00000000;
+extern StaticStringProxy s_sys_ssp00000000;
+#ifndef s_sys_ss00000000
+#define s_sys_ss00000000 (*(StaticString *)(&s_sys_ssp00000000))
+#endif
 
 extern const VarNR &s_sys_svif01bca90;
 
-extern VarNR s_sys_svs00000000;
+extern VariantProxy s_sys_svsp00000000;
+#ifndef s_sys_svs00000000
+#define s_sys_svs00000000 (*(Variant *)&s_sys_svsp00000000)
+#endif
 
 /* SRC: classes/fbmysqllexer.php line 40 */
 FORWARD_DECLARE_CLASS(FB_MySQLLexer);
@@ -58,7 +64,9 @@ class c_FB_MySQLLexer : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(FB_MySQLLexer, FB_MySQLLexer, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_FB_MySQLLexer(const ObjectStaticCallbacks *cb = &cw_FB_MySQLLexer) : ExtObjectData(cb) {}
+  c_FB_MySQLLexer(const ObjectStaticCallbacks *cb = &cw_FB_MySQLLexer) : ExtObjectData(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   void init();
   public: void t___construct(Variant v_string = NAMSTR(s_sys_ss00000000, ""), Variant v_lookahead = 0LL);
   public: c_FB_MySQLLexer *create(CVarRef v_string = NAMVAR(s_sys_svs00000000, ""), CVarRef v_lookahead = NAMVAR(s_sys_svif01bca90, 0LL));

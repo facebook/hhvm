@@ -30,7 +30,7 @@ namespace HPHP {
 
 Array f_debug_backtrace(bool provide_object /* = true */) {
   if (hhvm) {
-    return g_context->debugBacktrace(true, false, provide_object);
+    return g_vmContext->debugBacktrace(true, false, provide_object);
   } else {
     if (RuntimeOption::InjectedStackTrace) {
       return FrameInjection::GetBacktrace(true, false, provide_object);
@@ -43,7 +43,7 @@ Array f_debug_backtrace(bool provide_object /* = true */) {
 /**
  * hphp_debug_caller_info - returns an array of info about the "caller"
  *
- * For clarity, we refer to the function that called debug_get_caller_info()
+ * For clarity, we refer to the function that called hphp_debug_caller_info()
  * as the "callee", and we refer to the function that called the callee as
  * the "caller".
  *
@@ -54,22 +54,26 @@ Array f_debug_backtrace(bool provide_object /* = true */) {
 Array f_hphp_debug_caller_info() {
   if (RuntimeOption::InjectedStackTrace) {
     return hhvm
-           ? g_context->getCallerInfo(true)
+           ? g_vmContext->getCallerInfo(true)
            : FrameInjection::GetCallerInfo(true);
   }
   return Array::Create();
 }
 
 void f_debug_print_backtrace() {
+  echo(debug_string_backtrace(true));
+}
+
+String debug_string_backtrace(bool skip) {
   if (RuntimeOption::InjectedStackTrace) {
     Array bt;
+    StringBuffer buf;
     bt = hhvm
-         ? g_context->debugBacktrace(true)
-         : FrameInjection::GetBacktrace(true);
+         ? g_vmContext->debugBacktrace(skip)
+         : FrameInjection::GetBacktrace(skip);
     int i = 0;
     for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {
       Array frame = it.second().toArray();
-      StringBuffer buf;
       buf.append('#');
       buf.append(i);
       if (i < 10) buf.append(' ');
@@ -88,11 +92,11 @@ void f_debug_print_backtrace() {
         buf.append(']');
       }
       buf.append('\n');
-      echo(buf.detach());
     }
+    return buf.detach();
   } else {
     StackTrace st;
-    echo(String(st.toString()));
+    return String(st.toString());
   }
 }
 

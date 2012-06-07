@@ -23,6 +23,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // 1. Static Strings
+extern StaticStringProxy s_sys_ssp360b4ac7;
+#ifndef s_sys_ss360b4ac7
+#define s_sys_ss360b4ac7 (*(StaticString *)(&s_sys_ssp360b4ac7))
+#endif
 
 // 2. Static Arrays
 

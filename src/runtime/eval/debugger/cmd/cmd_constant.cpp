@@ -18,8 +18,6 @@
 #include <runtime/base/class_info.h>
 #include <runtime/ext/ext_array.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -102,7 +100,7 @@ void CmdConstant::setClientOutput(DebuggerClient *client) {
   Array values;
   for (ArrayIter iter(m_constants); iter; ++iter) {
     String name = iter.first().toString();
-    if (client->getDebuggerApiModeSerialize()) {
+    if (client->getDebuggerClientApiModeSerialize()) {
       values.set(name,
                  DebuggerClient::FormatVariable(iter.second(), 200));
     } else {

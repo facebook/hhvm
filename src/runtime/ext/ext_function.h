@@ -54,6 +54,7 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos);
  * parameters to help the implementation.
  */
 Array f_func_get_args();
+Array hhvm_get_frame_args(VM::ActRec* ar);
 Array func_get_args(int num_args, CArrRef params, CArrRef args);
 
 /**

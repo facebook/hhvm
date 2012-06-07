@@ -20,8 +20,6 @@
 #include <runtime/ext/pdo_mysql.h>
 #include <runtime/ext/ext_variable.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // static strings

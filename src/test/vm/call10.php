@@ -6,19 +6,22 @@ class C1 {
     echo "\n";
   }
 }
-$obj = new C1;
 
-// FPushObjMethodD
-$obj->__call("a", "b", "c", "d");
-$obj->foo("a", "b", "c", "d");
+function main1() {
+  $obj = new C1;
 
-// FPushObjMethod
-$fn = '__call';
-$obj->$fn("a", "b", "c", "d");
-$fn = 'foo';
-$obj->$fn("a", "b", "c", "d");
+  // FPushObjMethodD
+  $obj->__call("a", "b", "c", "d");
+  $obj->foo("a", "b", "c", "d");
 
-
+  // FPushObjMethod
+  $fn = '__call';
+  $obj->$fn("a", "b", "c", "d");
+  $fn = 'foo';
+  $obj->$fn("a", "b", "c", "d");
+}
+ 
+main1();
 
 class C2 {
   public function __call($fn, $args) {
@@ -50,10 +53,13 @@ class C2 {
     self::foo("a", "b", "c", "d");
   }
 }
-$obj = new C2;
-$obj->test();
 
+function main2() {
+  $obj = new C2;
+  $obj->test();
+}
 
+main2();
 
 class B3 {
   public function __call($fn, $args) {
@@ -63,19 +69,22 @@ class B3 {
 }
 class C3 extends B3 {
 }
-$obj = new C3;
 
-// FPushObjMethodD
-$obj->__call("a", "b", "c", "d");
-$obj->foo("a", "b", "c", "d");
+function main3() {
+  $obj = new C3;
 
-// FPushObjMethod
-$fn = '__call';
-$obj->$fn("a", "b", "c", "d");
-$fn = 'foo';
-$obj->$fn("a", "b", "c", "d");
+  // FPushObjMethodD
+  $obj->__call("a", "b", "c", "d");
+  $obj->foo("a", "b", "c", "d");
 
+  // FPushObjMethod
+  $fn = '__call';
+  $obj->$fn("a", "b", "c", "d");
+  $fn = 'foo';
+  $obj->$fn("a", "b", "c", "d");
+}
 
+main3();
 
 class A4 {
   public function foo($w, $x, $y, $z) {
@@ -90,12 +99,14 @@ class B4 extends A4 {
 }
 class C4 extends B4 {
 }
-$obj = new C4;
-$obj->foo("a", "b", "c", "d");
-$fn = 'foo';
-$obj->$fn("a", "b", "c", "d");
 
-
+function main4() {
+  $obj = new C4;
+  $obj->foo("a", "b", "c", "d");
+  $fn = 'foo';
+  $obj->$fn("a", "b", "c", "d");
+}
+main4();
 
 class A5 {
 }
@@ -110,10 +121,12 @@ class C5 extends B5 {
   }
 }
 
-$obj = new C5;
-$obj->test();
+function main5() {
+  $obj = new C5;
+  $obj->test();
+}
 
-
+main5();
 
 class A6 {
   public function __call($fn, $args) {
@@ -128,6 +141,9 @@ class B6 extends A6 {
 class C6 extends B6 {
 }
 
-$obj = new C6;
-$obj->test();
+function main6() {
+  $obj = new C6;
+  $obj->test();
+}
 
+main6();

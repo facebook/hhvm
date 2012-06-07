@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_eval.h>
+#include <runtime/vm/debugger_hook.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,10 +38,20 @@ bool CmdEval::onClient(DebuggerClient *client) {
   m_body = client->getCode();
   m_frame = client->getFrame();
   m_bypassAccessCheck = client->getDebuggerBypassCheck();
-  CmdEvalPtr res = client->xend<CmdEval>(this);
-  m_output = res->m_output;
-  client->print(res->m_output);
+  client->send(this);
+  DebuggerCommandPtr res = client->recv(m_type);
+  if (!res->is(m_type)) {
+    ASSERT(client->isApiMode());
+    m_incomplete = true;
+    res->setClientOutput(client);
+  } else {
+    res->handleReply(client);
+  }
   return true;
+}
+
+void CmdEval::handleReply(DebuggerClient *client) {
+  client->print(m_output);
 }
 
 void CmdEval::setClientOutput(DebuggerClient *client) {
@@ -59,11 +70,14 @@ bool CmdEval::onServer(DebuggerProxy *proxy) {
 }
 
 bool CmdEval::onServerVM(DebuggerProxy *proxy) {
-  const HPHP::VM::SourceLoc *saveLoc = g_context->m_debuggerLastBreakLoc;
-  g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
+  const_assert(hhvm);
+  VM::PCFilter* locSave = g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = new VM::PCFilter();
+  g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
   DebuggerProxyVM::ExecutePHP(m_body, m_output, !proxy->isLocal(), m_frame);
-  g_context->setDebuggerBypassCheck(false);
-  g_context->m_debuggerLastBreakLoc = saveLoc;
+  g_vmContext->setDebuggerBypassCheck(false);
+  delete g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = locSave;
   return proxy->send(this);
 }
 

@@ -22,7 +22,7 @@ namespace HPHP {
 void GlobalArrayWrapper::release() {
 }
 
-ssize_t GlobalArrayWrapper::size() const {
+ssize_t GlobalArrayWrapper::vsize() const {
   return m_globals->size();
 }
 

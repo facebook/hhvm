@@ -24,8 +24,6 @@
 #include "text_color.h"
 #include <util/atomic.h>
 
-using namespace std;
-
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL, err)                               \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
@@ -97,7 +95,7 @@ void Logger::log(bool err, const char *type, const Exception &e,
   std::string msg = type;
   msg += e.getMessage();
   if (file && file[0]) {
-    ostringstream os;
+    std::ostringstream os;
     os << " in " << file << " on line " << line;
     msg += os.str();
   }
@@ -248,7 +246,7 @@ char *Logger::EscapeString(const std::string &msg) {
 bool Logger::checkDropCache(int &bytesWritten, int &prevBytesWritten,
                             FILE *f) {
   if (bytesWritten - prevBytesWritten > Logger::DropCacheChunkSize) {
-    Util::drop_cache(f, (off_t)bytesWritten);
+    Util::drop_cache(f);
     prevBytesWritten = bytesWritten;
     return true;
   }

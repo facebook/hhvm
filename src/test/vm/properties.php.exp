@@ -4,15 +4,15 @@ C::C
 3
 0
 object(C) (7) {
-  ["np:private"]=>
+  ["np":"C":private]=>
   string(4) "C::C"
-  ["nq:protected"]=>
+  ["nq":protected]=>
   string(4) "C::C"
   ["nr"]=>
   string(4) "C::C"
-  ["p:private"]=>
+  ["p":"C":private]=>
   int(1)
-  ["q:protected"]=>
+  ["q":protected]=>
   int(2)
   ["r"]=>
   int(3)
@@ -28,15 +28,15 @@ Properties:
   "r" => 3
   "s" => 0
 object(C) (7) {
-  ["np:private"]=>
+  ["np":"C":private]=>
   string(4) "C::E"
-  ["nq:protected"]=>
+  ["nq":protected]=>
   string(4) "C::E"
   ["nr"]=>
   string(4) "C::E"
-  ["p:private"]=>
+  ["p":"C":private]=>
   int(3)
-  ["q:protected"]=>
+  ["q":protected]=>
   int(4)
   ["r"]=>
   int(5)
@@ -56,21 +56,21 @@ D::D
 33
 0
 object(D) (9) {
-  ["np:private"]=>
+  ["np":"D":private]=>
   string(4) "D::F"
-  ["nq:protected"]=>
+  ["nq":protected]=>
   string(4) "D::H"
   ["nr"]=>
   string(4) "D::H"
-  ["p:private"]=>
+  ["p":"D":private]=>
   int(13)
-  ["q:protected"]=>
+  ["q":protected]=>
   int(26)
   ["r"]=>
   int(37)
-  ["np:private"]=>
+  ["np":"C":private]=>
   string(4) "C::E"
-  ["p:private"]=>
+  ["p":"C":private]=>
   int(3)
   ["s"]=>
   int(2)
@@ -90,21 +90,21 @@ E::E
 33
 0
 object(E) (9) {
-  ["np:protected"]=>
+  ["np":protected]=>
   string(4) "E::G"
-  ["nq:protected"]=>
+  ["nq":protected]=>
   string(4) "E::I"
   ["nr"]=>
   string(4) "E::I"
-  ["p:protected"]=>
+  ["p":protected]=>
   int(13)
-  ["q:protected"]=>
+  ["q":protected]=>
   int(26)
   ["r"]=>
   int(37)
-  ["np:private"]=>
+  ["np":"C":private]=>
   string(4) "C::E"
-  ["p:private"]=>
+  ["p":"C":private]=>
   int(3)
   ["s"]=>
   int(2)
@@ -140,9 +140,9 @@ object(F) (9) {
   int(26)
   ["r"]=>
   int(37)
-  ["np:private"]=>
+  ["np":"C":private]=>
   string(4) "C::E"
-  ["p:private"]=>
+  ["p":"C":private]=>
   int(3)
   ["s"]=>
   int(2)
@@ -178,13 +178,13 @@ object(G) (11) {
   int(28)
   ["r"]=>
   int(39)
-  ["np:private"]=>
+  ["np":"D":private]=>
   string(4) "D::F"
-  ["p:private"]=>
+  ["p":"D":private]=>
   int(13)
-  ["np:private"]=>
+  ["np":"C":private]=>
   string(4) "C::E"
-  ["p:private"]=>
+  ["p":"C":private]=>
   int(3)
   ["s"]=>
   int(2)
@@ -209,21 +209,21 @@ H::H
 222
 333
 object(D) (9) {
-  ["np:private"]=>
+  ["np":"D":private]=>
   string(4) "D::E"
-  ["nq:protected"]=>
+  ["nq":protected]=>
   string(4) "D::F"
   ["nr"]=>
   string(4) "D::F"
-  ["p:private"]=>
+  ["p":"D":private]=>
   int(12)
-  ["q:protected"]=>
+  ["q":protected]=>
   int(24)
   ["r"]=>
   int(36)
-  ["np:private"]=>
+  ["np":"C":private]=>
   string(4) "C::D"
-  ["p:private"]=>
+  ["p":"C":private]=>
   int(2)
   ["s"]=>
   int(1)

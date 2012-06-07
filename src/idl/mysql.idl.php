@@ -431,6 +431,26 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "mysql_warning_count",
+    'desc'   => "Returns the number of errors generated during execution of the previous SQL statement. To retrieve warning messages you can use the SQL command SHOW WARNINGS [limit row_count].",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the number of warnings from the last MySQL function, or 0 (zero) if no warnings occurred.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "link_identifier",
+        'type'   => Variant,
+        'value'  => "null",
+        'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "mysql_get_client_info",
     'desc'   => "mysql_get_client_info() returns a string that represents the client library version.",
     'flags'  =>  HasDocComment,
@@ -736,7 +756,7 @@ DefineFunction(
   array(
     'name'   => "mysql_multi_query",
     'desc'   => "mysql_multi_query() executes one or more queries separated by a ; to the currently active database on the server that's associated with the specified link_identifier.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "This is a fb specific query so behaviour is a little random at the moment.",
@@ -761,7 +781,7 @@ DefineFunction(
   array(
     'name'   => "mysql_next_result",
     'desc'   => "Used with mysql_multi_query() to move the result set on one.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "True if the iterator has more results after this one. False if there was none.",
@@ -781,7 +801,7 @@ DefineFunction(
   array(
     'name'   => "mysql_more_results",
     'desc'   => "Used with mysql_multi_query() to check if there are more result sets to be returned.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "True if there is at least one more item in the result set.",
@@ -801,7 +821,7 @@ DefineFunction(
   array(
     'name'   => "mysql_fetch_result",
     'desc'   => "Used with mysql_multi_query() to return a mysql result for the current iterated query.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a resource or a boolean.",

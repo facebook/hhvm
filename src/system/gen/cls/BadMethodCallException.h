@@ -36,16 +36,9 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(BadMethodCallException, BadMethodCallException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_BadMethodCallException(const ObjectStaticCallbacks *cb = &cw_BadMethodCallException) : c_BadFunctionCallException(cb) {}
+  c_BadMethodCallException(const ObjectStaticCallbacks *cb = &cw_BadMethodCallException) : c_BadFunctionCallException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_BadMethodCallException() NEVER_INLINE;
 

@@ -151,8 +151,10 @@ propd($a->y);
 propd($a->x);
 // PropU for visible, accessible property
 unset($a->y);
+/*
 // SetProp for visible, accessible properties: use __set
 $a->setprop();
+*/
 // SetOpProp: use __set and __get
 $a->unsetall();
 $a->setopprop();

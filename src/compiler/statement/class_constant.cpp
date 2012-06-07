@@ -25,8 +25,6 @@
 #include <compiler/option.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -50,6 +48,11 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
                                  ClassScopePtr scope) {
   ConstantTablePtr constants = scope->getConstants();
 
+  if (scope->isTrait()) {
+    parseTimeFatal(Compiler::InvalidTraitStatement,
+                   "Traits cannot have constants");
+  }
+
   for (int i = 0; i < m_exp->getCount(); i++) {
     AssignmentExpressionPtr assignment =
       dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
@@ -58,8 +61,10 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
     const std::string &name =
       dynamic_pointer_cast<ConstantExpression>(var)->getName();
     if (constants->isPresent(name)) {
-      Compiler::Error(Compiler::DeclaredConstantTwice, assignment);
-      m_exp->removeElement(i--);
+      assignment->parseTimeFatal(Compiler::DeclaredConstantTwice,
+                                 "Cannot redeclare %s::%s",
+                                 scope->getOriginalName().c_str(),
+                                 name.c_str());
     } else {
       assignment->onParseRecur(ar, scope);
     }

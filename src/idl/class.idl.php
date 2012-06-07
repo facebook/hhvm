@@ -200,7 +200,7 @@ DefineFunction(
   array(
     'name'   => "get_class_constants",
     'desc'   => "Get the constants of the given class.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an associative array of constants with their values."

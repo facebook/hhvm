@@ -35,6 +35,7 @@ bool TestExtMysql::RunTests(const std::string &which) {
   RUN_TEST(test_mysql_close);
   RUN_TEST(test_mysql_errno);
   RUN_TEST(test_mysql_error);
+  RUN_TEST(test_mysql_warning_count);
   RUN_TEST(test_mysql_get_client_info);
   RUN_TEST(test_mysql_get_host_info);
   RUN_TEST(test_mysql_get_proto_info);
@@ -156,6 +157,25 @@ bool TestExtMysql::test_mysql_error() {
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   VERIFY(!f_mysql_select_db("nonexistentdb"));
   VS(f_mysql_error(conn), "Unknown database 'nonexistentdb'");
+  return Count(true);
+}
+
+bool TestExtMysql::test_mysql_warning_count() {
+  Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
+  // No warnings from normal operations.
+  VERIFY(CreateTestTable());
+  VS(f_mysql_warning_count(conn), 0);
+  VS(f_mysql_query("INSERT INTO test (name) VALUES ('test'),('test2')"), true);
+  VS(f_mysql_warning_count(conn), 0);
+
+  // Dropping a non-existent table with IF EXISTS generates a warning.
+  VS(f_mysql_query("DROP TABLE IF EXISTS no_such_table"), true);
+  VS(f_mysql_warning_count(conn), 1);
+
+  // Dropping an existing table generates no warnings.
+  VS(f_mysql_query("DROP TABLE IF EXISTS test"), true);
+  VS(f_mysql_warning_count(conn), 0);
+
   return Count(true);
 }
 

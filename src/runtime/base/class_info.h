@@ -51,11 +51,9 @@ public:
     IsInherited            = (1 << 10), //                         x
     HasCall                = IsPublic,  //    x
     HasCallStatic          = IsProtected,//   x
-
+    IgnoreRedefinition     = IsPrivate, //                  x
     IsReference            = (1 << 11), //                  x      x     x
-    IsOptional             = (1 << 12), //                               x
-
-    IsConstructor          = IsOptional,//                         x
+    IsConstructor          = (1 << 12), //                         x
 
     // need a non-zero number for const char * maps
     IsNothing              = (1 << 13),
@@ -81,6 +79,15 @@ public:
     IsTrait                = (1 << 29), //    x
     UsesTraits             = (1 << 30), //    x
     HasAliasedMethods      = (1u << 31),//    x
+  };
+
+  enum GetArrayKind {
+    GetArrayNone = 0,
+    GetArrayPrivate = 1,
+    GetArrayDynamic = 2,
+
+    GetArrayAll = GetArrayPrivate|GetArrayDynamic,
+    GetArrayPublic = GetArrayDynamic
   };
 
   class ConstantInfo {
@@ -171,6 +178,7 @@ public:
   /**
    * Locate one function.
    */
+  static const MethodInfo *FindSystemFunction(CStrRef name);
   static const MethodInfo *FindFunction(CStrRef name);
 
   /**
@@ -272,8 +280,13 @@ public:
                              std::vector<String> *clsConstants);
 
   static void GetArray(const ObjectData *obj, const ClassPropTable *ct,
-                       Array &props, bool pubOnly);
-  static void SetArray(ObjectData *obj, const ClassPropTable *ct, CArrRef props);
+                       Array &props, GetArrayKind kind);
+  static void GetArray(const ObjectData *obj, const ClassPropTable *ct,
+                       Array &props, bool pubOnly) {
+    GetArray(obj, ct, props, pubOnly ? GetArrayPublic : GetArrayAll);
+  }
+  static void SetArray(ObjectData *obj, const ClassPropTable *ct,
+                       CArrRef props);
   static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
 
 public:

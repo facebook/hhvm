@@ -19,7 +19,6 @@
 #include <runtime/base/complex_types.h>
 
 using namespace HPHP;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors

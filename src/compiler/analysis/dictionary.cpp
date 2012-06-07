@@ -22,7 +22,6 @@
 #include <compiler/statement/statement_list.h>
 
 using namespace HPHP;
-using namespace boost;
 using std::vector;
 
 ///////////////////////////////////////////////////////////////////////////////

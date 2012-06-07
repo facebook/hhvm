@@ -36,7 +36,7 @@ public:
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
   virtual bool isResource() const { return !m_dir.isNull();}
-  String getPathName();
+  String getPathName() const;
 
   void rewind();
   bool valid();
@@ -44,7 +44,7 @@ public:
   bool isdot();
 
 public:
-  std::string m_path;
+  String m_path;
   Object m_dir;
   Variant m_dirEntry;
   int m_index;
@@ -67,20 +67,27 @@ public:
   int m_flags;
 };
 
-class RecursiveIteratorIterator: public ResourceData {
+class RecursiveIteratorIterator: public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(RecursiveIteratorIterator);
 
   RecursiveIteratorIterator(CObjRef iterator, int mode, int flags);
+  ~RecursiveIteratorIterator() {
+    freeAllIterators();
+  }
 
   static StaticString s_class_name;
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
   virtual bool isResource() const { return !m_iterator.isNull();}
 
+  void freeAllIterators();
+
 public:
+  typedef std::vector<std::pair<ObjectData*,int> > IteratorList;
+
   Object m_iterator;
-  std::vector<std::pair<Object, int> > m_iterators;
+  IteratorList m_iterators;
   int m_mode;
   int m_flags;
 };
@@ -115,6 +122,46 @@ bool f_hphp_recursivedirectoryiterator_haschildren(CObjRef obj);
 Object f_hphp_recursivedirectoryiterator_getchildren(CObjRef obj);
 String f_hphp_recursivedirectoryiterator_getsubpath(CObjRef obj);
 String f_hphp_recursivedirectoryiterator_getsubpathname(CObjRef obj);
+
+///////////////////////////////////////////////////////////////////////////////
+// class MutableArrayIterator
+
+FORWARD_DECLARE_CLASS_BUILTIN(MutableArrayIterator);
+class c_MutableArrayIterator : public ExtObjectData, public Sweepable {
+ public:
+  DECLARE_CLASS(MutableArrayIterator, MutableArrayIterator, ObjectData)
+
+  // need to implement
+  public: c_MutableArrayIterator(const ObjectStaticCallbacks *cb = &cw_MutableArrayIterator);
+  public: ~c_MutableArrayIterator();
+  public: void t___construct(VRefParam array);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: Variant t_currentref();
+  DECLARE_METHOD_INVOKE_HELPERS(currentref);
+  public: Variant t_current();
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  public: Variant t_key();
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  public: void t_next();
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  public: bool t_valid();
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
+
+  // implemented by HPHP
+  public: c_MutableArrayIterator *create(VRefParam array);
+
+  public: union {
+    char m_u[sizeof(MIterCtx)];
+    TypedValue m_align;
+  };
+  public: bool m_valid;
+
+  private: MIterCtx& marr() {
+    return *(MIterCtx*)(m_u);
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

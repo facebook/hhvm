@@ -18,9 +18,6 @@
 #include <runtime/base/macros.h>
 #include <util/hash.h>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -104,8 +101,8 @@ std::string ParserBase::getMessage(Location *loc,
   if (filename) {
     ret += string("File: ") + file() + ", ";
   }
-  ret += string("Line: ") + lexical_cast<string>(line);
-  ret += ", Char: " + lexical_cast<string>(column) + ")";
+  ret += string("Line: ") + boost::lexical_cast<string>(line);
+  ret += ", Char: " + boost::lexical_cast<string>(column) + ")";
   return ret;
 }
 
@@ -144,10 +141,37 @@ std::string ParserBase::getAnonFuncName(AnonFuncKind kind) {
 
   string ret;
   ret += GetAnonPrefix(kind);
-  ret += lexical_cast<string>(h);
+  ret += boost::lexical_cast<string>(h);
   ret += "_";
-  ret += lexical_cast<string>(closureId);
+  ret += boost::lexical_cast<string>(closureId);
   return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// typevar scopes
+
+void ParserBase::pushTypeScope() {
+  m_typeScopes.push_back(m_typeVars);
+  m_typeVars.clear();
+}
+
+void ParserBase::popTypeScope() {
+  m_typeScopes.pop_back();
+}
+
+void ParserBase::addTypeVar(const std::string &name) {
+  m_typeVars.insert(name);
+}
+
+bool ParserBase::isTypeVar(const std::string &name) {
+  for (TypevarScopeStack::iterator iter = m_typeScopes.begin();
+       iter != m_typeScopes.end();
+       iter++) {
+    if (iter->find(name) != iter->end()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -211,9 +235,9 @@ void ParserBase::popLabelInfo() {
     const GotoInfo &gotoInfo = info.gotos[i];
     LabelMap::const_iterator iter = info.labels.find(gotoInfo.label);
     if (iter == info.labels.end()) {
+      invalidateGoto(gotoInfo.stmt, UndefLabel);
       error("'goto' to undefined label '%s': %s",
             gotoInfo.label.c_str(), getMessage(gotoInfo.loc.get()).c_str());
-      invalidateGoto(gotoInfo.stmt, UndefLabel);
       continue;
     }
     const LabelStmtInfo &labelInfo = iter->second;
@@ -230,9 +254,9 @@ void ParserBase::popLabelInfo() {
       }
     }
     if (!found) {
+      invalidateGoto(gotoInfo.stmt, InvalidBlock);
       error("'goto' into loop or switch statement "
             "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
-      invalidateGoto(gotoInfo.stmt, InvalidBlock);
       continue;
     } else {
       labels.erase(gotoInfo.label);

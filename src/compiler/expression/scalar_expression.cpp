@@ -15,6 +15,7 @@
 */
 
 #include <sstream>
+#include <cmath>
 #include <limits.h>
 #include <compiler/expression/scalar_expression.h>
 #include <util/parser/hphp.tab.hpp>
@@ -35,8 +36,6 @@
 #include <compiler/analysis/file_scope.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -137,8 +136,6 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
         m_translated.clear();
         if (b && b->is(BlockScope::ClassScope)) {
           ClassScopePtr clsScope = dynamic_pointer_cast<ClassScope>(b);
-
-          // For traits, don't fill this yet -- it must be imported first
           if (!clsScope->isTrait()) {
             m_translated = clsScope->getOriginalName();
           }
@@ -541,7 +538,7 @@ void ScalarExpression::outputCPPNamedDouble(CodeGenerator &cg,
         getFileScope()->addUsedScalarVarDoubleHeader(dval);
       }
     }
-  } else if (isnan(dval)) {
+  } else if (std::isnan(dval)) {
     cg_printf("NAN_varNR");
   } else if (dval > 0) {
     cg_printf("INF_varNR");
@@ -555,7 +552,7 @@ void ScalarExpression::outputCPPDouble(CodeGenerator &cg,
   double dval = getVariant().getDouble();
   if (finite(dval)) {
     ar->outputCPPFiniteDouble(cg, dval);
-  } else if (isnan(dval)) {
+  } else if (std::isnan(dval)) {
     cg_printf("%sNAN", Option::ConstantPrefix);
   } else if (dval > 0) {
     cg_printf("%sINF", Option::ConstantPrefix);

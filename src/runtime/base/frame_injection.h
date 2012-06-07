@@ -27,11 +27,11 @@ namespace HPHP {
 
 class VariableEnvironment;
 
-// The FrameInjectionVM class is used instead of real
-// FrameInjection classes (see macros.h) for the few remaining cases
-// where a FrameInjection object is needed for calling methods. Most of
-// the methods do not appear to get called anywhere during execution
-// but they are needed for successful compilation.
+// The FrameInjectionVM class is used instead of real FrameInjection
+// classes (see macros.h) for the few remaining cases where a
+// FrameInjection object is needed for calling methods. All of the
+// methods just assert(false) but they are needed for successful
+// compilation without even more #ifdefs.
 class FrameInjectionVM {
  public:
   FrameInjectionVM () {}
@@ -48,6 +48,10 @@ class FrameInjectionVM {
     assert(false);
     // Anything relying on this information in the VM is already
     // broken.
+  }
+
+  void setStaticClassName(CStrRef cls) {
+    assert(false);
   }
 };
 

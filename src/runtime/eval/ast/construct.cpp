@@ -19,7 +19,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Construct::TypePtrMap Construct::TypeHintTypes;
@@ -91,7 +91,7 @@ void Construct::release() {
 }
 
 void Construct::dumpLoc() const {
-  cerr << m_loc.file << ":" << m_loc.line1 << endl;
+  std::cerr << m_loc.file << ":" << m_loc.line1 << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

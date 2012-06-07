@@ -20,6 +20,9 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_collator.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/vm/translator/translator.h>
+#include <runtime/vm/translator/translator-inline.h>
+#include <runtime/eval/eval.h>
 #include <util/logger.h>
 
 #define SORT_REGULAR            0
@@ -29,8 +32,6 @@
 
 #define SORT_DESC               3
 #define SORT_ASC                4
-
-using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,6 +62,8 @@ const int64 k_UCOL_NORMALIZATION_MODE = UCOL_NORMALIZATION_MODE;
 const int64 k_UCOL_STRENGTH = UCOL_STRENGTH;
 const int64 k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64 k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
+
+using HPHP::VM::Transl::CallerFrame;
 
 #define getCheckedArrayRetType(input, fail, type)                       \
   Variant::TypedValueAccessor tva_##input = input.getTypedAccessor();   \
@@ -101,9 +104,9 @@ static bool filter_func(CVarRef value, const void *data) {
   if (hhvm) {
     HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
     Variant ret;
-    g_context->invokeFunc((TypedValue*)&ret, ctx->func, CREATE_VECTOR1(value),
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+    g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, CREATE_VECTOR1(value),
+                            ctx->this_, ctx->cls,
+                            NULL, ctx->invName);
     return ret.toBoolean();
   } else {
     MethodCallPackage *mcp = (MethodCallPackage *)data;
@@ -128,8 +131,8 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   }
   if (hhvm) {
     HPHP::VM::CallCtx ctx;
-    HPHP::VM::ActRec* ar = vm_get_previous_frame();
-    ctx.func = vm_decode_function(callback, ar, false, ctx.this_, ctx.cls,
+    CallerFrame cf;
+    ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
                                   ctx.invName);
     if (ctx.func == NULL) {
       return null;
@@ -143,6 +146,8 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
                                mcp, classname, methodname, doBind)) {
       return null;
     }
+    if (has_eval_support) eval_set_callee_alias(methodname);
+
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before
       // calling the user callback
@@ -160,26 +165,39 @@ Variant f_array_flip(CVarRef trans) {
   return ArrayUtil::Flip(arr_trans);
 }
 
+HOT_FUNC
 bool f_array_key_exists(CVarRef key, CVarRef search) {
-  if (!search.isArray() && !search.isObject()) {
+  const ArrayData *ad;
+  Variant::TypedValueAccessor sacc = search.getTypedAccessor();
+  DataType saccType = Variant::GetAccessorType(sacc);
+  if (LIKELY(saccType == KindOfArray)) {
+    ad = Variant::GetArrayData(sacc);
+  } else if (saccType == KindOfObject) {
+    return f_array_key_exists(key, toArray(search));
+  } else {
     throw_bad_type_exception("array_key_exists expects an array or an object; "
-                             "false returned.");
+                           "false returned.");
     return false;
   }
-
-  if (key.isString()) {
+  Variant::TypedValueAccessor kacc = key.getTypedAccessor();
+  switch (Variant::GetAccessorType(kacc)) {
+  case KindOfString:
+  case KindOfStaticString: {
     int64 n = 0;
-    CStrRef k = key.toStrNR();
-    if (k->isStrictlyInteger(n)) {
-      return toArray(search).exists(n);
+    StringData *sd = Variant::GetStringData(kacc);
+    if (sd->isStrictlyInteger(n)) {
+      return ad->exists(n);
     }
-    return toArray(search)->exists(k);
+    return ad->exists(StrNR(sd));
   }
-  if (key.isInteger()) {
-    return toArray(search).exists(key.toInt64());
-  }
-  if (key.isNull()) {
-    return toArray(search).exists(empty_string);
+  case KindOfInt32:
+  case KindOfInt64:
+    return ad->exists(Variant::GetInt64(kacc));
+  case KindOfUninit:
+  case KindOfNull:
+    return ad->exists(empty_string);
+  default:
+    break;
   }
   raise_warning("Array key should be either a string or an integer");
   return false;
@@ -201,9 +219,9 @@ static Variant map_func(CArrRef params, const void *data) {
       return params;
     }
     Variant ret;
-    g_context->invokeFunc((TypedValue*)&ret, ctx->func, params,
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+    g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, params,
+                            ctx->this_, ctx->cls,
+                            NULL, ctx->invName);
     return ret;
   } else {
     if (!data) {
@@ -234,8 +252,8 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
     HPHP::VM::CallCtx ctx;
     ctx.func = NULL;
     if (!callback.isNull()) {
-      HPHP::VM::ActRec* ar = vm_get_previous_frame();
-      ctx.func = vm_decode_function(callback, ar, false, ctx.this_, ctx.cls,
+      CallerFrame cf;
+      ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
                                     ctx.invName);
     }
     if (ctx.func == NULL) {
@@ -251,6 +269,8 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
                                mcp, classname, methodname, doBind)) {
       return ArrayUtil::Map(inputs, map_func, NULL);
     }
+    if (has_eval_support) eval_set_callee_alias(methodname);
+
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before
       // calling the user callback
@@ -449,9 +469,9 @@ static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
   if (hhvm) {
     HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
     Variant ret;
-    g_context->invokeFunc((TypedValue*)&ret, ctx->func,
-                          CREATE_VECTOR2(result, operand), ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+    g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func,
+                            CREATE_VECTOR2(result, operand), ctx->this_,
+                            ctx->cls, NULL, ctx->invName);
     return ret;
   } else {
     MethodCallPackage *mcp = (MethodCallPackage *)data;
@@ -473,8 +493,8 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
   getCheckedArray(input);
   if (hhvm) {
     HPHP::VM::CallCtx ctx;
-    HPHP::VM::ActRec* ar = vm_get_previous_frame();
-    ctx.func = vm_decode_function(callback, ar, false, ctx.this_, ctx.cls,
+    CallerFrame cf;
+    ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
                                   ctx.invName);
     if (ctx.func == NULL) {
       return null;
@@ -488,6 +508,8 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
                                mcp, classname, methodname, doBind)) {
       return null;
     }
+    if (has_eval_support) eval_set_callee_alias(methodname);
+
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before
       // calling the user callback
@@ -587,10 +609,10 @@ static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
   if (hhvm) {
     HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
     Variant sink;
-    g_context->invokeFunc((TypedValue*)&sink, ctx->func,
-                          CREATE_VECTOR3(ref(value), key, userdata),
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+    g_vmContext->invokeFunc((TypedValue*)&sink, ctx->func,
+                            CREATE_VECTOR3(ref(value), key, userdata),
+                            ctx->this_, ctx->cls,
+                            NULL, ctx->invName);
   } else {
     MethodCallPackage *mcp = (MethodCallPackage *)data;
     // Here to avoid crash in interpreter, we need to use different variation
@@ -628,8 +650,8 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
   }
   if (hhvm) {
     HPHP::VM::CallCtx ctx;
-    HPHP::VM::ActRec* ar = vm_get_previous_frame();
-    ctx.func = vm_decode_function(funcname, ar, false, ctx.this_, ctx.cls,
+    CallerFrame cf;
+    ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
                                   ctx.invName);
     if (ctx.func == NULL) {
       return null;
@@ -644,6 +666,8 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                                mcp, classname, methodname, doBind)) {
       return null;
     }
+    if (has_eval_support) eval_set_callee_alias(methodname);
+
     PointerSet seen;
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before
@@ -665,8 +689,8 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   }
   if (hhvm) {
     HPHP::VM::CallCtx ctx;
-    HPHP::VM::ActRec* ar = vm_get_previous_frame();
-    ctx.func = vm_decode_function(funcname, ar, false, ctx.this_, ctx.cls,
+    CallerFrame cf;
+    ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
                                   ctx.invName);
     if (ctx.func == NULL) {
       return null;
@@ -680,6 +704,8 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
                                mcp, classname, methodname, doBind)) {
       return null;
     }
+    if (has_eval_support) eval_set_callee_alias(methodname);
+
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before
       // calling the user callback
@@ -710,9 +736,11 @@ static void compact(HPHP::VM::VarEnv* v, Array &ret, CVarRef var) {
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
   if (hhvm) {
     Array ret = Array::Create();
-    HPHP::VM::VarEnv* v = g_context->getVarEnv();
-    compact(v, ret, varname);
-    compact(v, ret, _argv);
+    HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+    if (v) {
+      compact(v, ret, varname);
+      compact(v, ret, _argv);
+    }
     return ret;
   } else {
     raise_error("Invalid call to f_compact");
@@ -809,7 +837,7 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   }
   if (iterable.isObject()) {
     CStrRef context = hhvm
-                      ? g_context->getContextClassName(true)
+                      ? g_vmContext->getContextClassName(true)
                       : FrameInjection::GetClassName(true);
 
     ObjectData *obj = iterable.getObjectData();

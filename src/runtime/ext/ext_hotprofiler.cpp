@@ -21,7 +21,7 @@
 #include <runtime/base/zend/zend_math.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/ini_setting.h>
-#include <runtime/vm/dyn_tracer.h>
+#include <runtime/vm/event_hook.h>
 #include <util/alloc.h>
 
 #ifdef __FreeBSD__
@@ -834,8 +834,6 @@ private:
   uint32 m_flags;
 };
 
-using namespace std;
-
 template <class TraceIt, class Stats>
 class walkTraceClass {
 public:
@@ -869,7 +867,7 @@ public:
       arc_buff_len *= 2;
       arc_buff = (char *)realloc(arc_buff, arc_buff_len);
       if (arc_buff == NULL) {
-        throw bad_alloc();
+        throw std::bad_alloc();
       }
     }
   }
@@ -894,7 +892,7 @@ public:
     memcpy(cp, caller.trace->symbol.ptr, caller.len);
     cp += caller.len;
     if (caller.level >= 1) {
-      pair<char *, int>& lvl = recursion[caller.level];
+      std::pair<char *, int>& lvl = recursion[caller.level];
       memcpy(cp, lvl.first, lvl.second);
       cp += lvl.second;
     }
@@ -903,7 +901,7 @@ public:
     memcpy(cp, callee.trace->symbol.ptr, callee.len);
     cp += callee.len;
     if (callee.level >= 1) {
-      pair<char *, int>& lvl = recursion[callee.level];
+      std::pair<char *, int>& lvl = recursion[callee.level];
       memcpy(cp, lvl.first, lvl.second);
       cp += lvl.second;
     }
@@ -913,12 +911,12 @@ public:
   }
 
   void walk(TraceIt begin, TraceIt end, Stats& stats,
-            map<const char *, unsigned> &functionLevel)
+            std::map<const char *, unsigned> &functionLevel)
   {
     if (begin == end) {
       return;
     }
-    recursion.push_back(make_pair((char *)NULL, 0));
+    recursion.push_back(std::make_pair((char *)NULL, 0));
     while (begin != end && !begin->symbol.ptr) {
       ++begin;
     }
@@ -928,7 +926,8 @@ public:
         if (level >= recursion.size()) {
           char *level_string = new char[8];
           sprintf(level_string, "@%u", level);
-          recursion.push_back(make_pair(level_string, strlen(level_string)));
+          recursion.push_back(std::make_pair(level_string,
+            strlen(level_string)));
         }
         Frame fr;
         fr.trace = begin;
@@ -1153,7 +1152,7 @@ public:
   }
 
   virtual void writeStats(Array &ret) {
-    map<const char *, unsigned>fmap;
+    std::map<const char *, unsigned>fmap;
     TraceData my_begin;
     collectStats(my_begin);
     walkTrace(s_trace, s_trace + nTrace, m_stats, fmap);
@@ -1493,7 +1492,7 @@ public:
       return;
     }
     if (hhvm) {
-      HPHP::VM::DynTracer::Enable();
+      HPHP::VM::EventHook::Enable();
     }
     if (m_profiler == NULL) {
       switch (level) {
@@ -1697,7 +1696,7 @@ Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
     }
   }
 
-  map<const char *, unsigned>fmap;
+  std::map<const char *, unsigned>fmap;
   Array result;
   TraceProfiler::StatsMap stats;
   walkTrace(&*begin, &*end, stats, fmap);

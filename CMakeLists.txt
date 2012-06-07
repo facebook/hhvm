@@ -27,3 +27,7 @@ IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 	message(STATUS "32-bit support is experimental, things may be broken")
 	message(STATUS "------------")
 ENDIF()
+
+IF ("$ENV{USE_HHVM}" STREQUAL "1")
+	message("USE_HHVM is set")
+ENDIF()

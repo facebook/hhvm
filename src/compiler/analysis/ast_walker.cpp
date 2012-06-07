@@ -18,7 +18,6 @@
 #include <compiler/statement/statement.h>
 
 using namespace HPHP;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 

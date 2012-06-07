@@ -8,7 +8,7 @@ default_target: all
 #=============================================================================
 # Special targets provided by cmake.
 
-# Disable implicit rules so canoncical targets will work.
+# Disable implicit rules so canonical targets will work.
 .SUFFIXES:
 
 # Remove some rules from gmake that .SUFFIXES does not remove.
@@ -36,10 +36,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/macvicar/dev/vm/hiphop-php
+CMAKE_SOURCE_DIR = /home/joelp/dev/hiphop-php
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/macvicar/dev/vm/hiphop-php
+CMAKE_BINARY_DIR = /home/joelp/dev/hiphop-php
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -107,14 +107,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/macvicar/dev/vm/hiphop-php && $(CMAKE_COMMAND) -E cmake_progress_start /home/macvicar/dev/vm/hiphop-php/CMakeFiles /home/macvicar/dev/vm/hiphop-php/src/CMakeFiles/progress.marks
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/macvicar/dev/vm/hiphop-php/CMakeFiles 0
+	cd /home/joelp/dev/hiphop-php && $(CMAKE_COMMAND) -E cmake_progress_start /home/joelp/dev/hiphop-php/CMakeFiles /home/joelp/dev/hiphop-php/src/CMakeFiles/progress.marks
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/joelp/dev/hiphop-php/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/clean
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/clean
 .PHONY : clean
 
 # The main clean target
@@ -123,22 +123,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/macvicar/dev/vm/hiphop-php && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/joelp/dev/hiphop-php && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/CMakeFiles/hphp_runtime_static.dir/rule:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/hphp_runtime_static.dir/rule
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/hphp_runtime_static.dir/rule
 .PHONY : src/CMakeFiles/hphp_runtime_static.dir/rule
 
 # Convenience name for target.
@@ -147,7 +147,7 @@ hphp_runtime_static: src/CMakeFiles/hphp_runtime_static.dir/rule
 
 # fast build rule for target.
 hphp_runtime_static/fast:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/build
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/build
 .PHONY : hphp_runtime_static/fast
 
 runtime/base/array/array_data.o: runtime/base/array/array_data.cpp.o
@@ -155,7 +155,7 @@ runtime/base/array/array_data.o: runtime/base/array/array_data.cpp.o
 
 # target to build an object file
 runtime/base/array/array_data.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_data.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_data.cpp.o
 .PHONY : runtime/base/array/array_data.cpp.o
 
 runtime/base/array/array_data.i: runtime/base/array/array_data.cpp.i
@@ -163,7 +163,7 @@ runtime/base/array/array_data.i: runtime/base/array/array_data.cpp.i
 
 # target to preprocess a source file
 runtime/base/array/array_data.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_data.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_data.cpp.i
 .PHONY : runtime/base/array/array_data.cpp.i
 
 runtime/base/array/array_data.s: runtime/base/array/array_data.cpp.s
@@ -171,7 +171,7 @@ runtime/base/array/array_data.s: runtime/base/array/array_data.cpp.s
 
 # target to generate assembly for a file
 runtime/base/array/array_data.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_data.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_data.cpp.s
 .PHONY : runtime/base/array/array_data.cpp.s
 
 runtime/base/array/array_init.o: runtime/base/array/array_init.cpp.o
@@ -179,7 +179,7 @@ runtime/base/array/array_init.o: runtime/base/array/array_init.cpp.o
 
 # target to build an object file
 runtime/base/array/array_init.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_init.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_init.cpp.o
 .PHONY : runtime/base/array/array_init.cpp.o
 
 runtime/base/array/array_init.i: runtime/base/array/array_init.cpp.i
@@ -187,7 +187,7 @@ runtime/base/array/array_init.i: runtime/base/array/array_init.cpp.i
 
 # target to preprocess a source file
 runtime/base/array/array_init.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_init.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_init.cpp.i
 .PHONY : runtime/base/array/array_init.cpp.i
 
 runtime/base/array/array_init.s: runtime/base/array/array_init.cpp.s
@@ -195,7 +195,7 @@ runtime/base/array/array_init.s: runtime/base/array/array_init.cpp.s
 
 # target to generate assembly for a file
 runtime/base/array/array_init.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_init.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_init.cpp.s
 .PHONY : runtime/base/array/array_init.cpp.s
 
 runtime/base/array/array_iterator.o: runtime/base/array/array_iterator.cpp.o
@@ -203,7 +203,7 @@ runtime/base/array/array_iterator.o: runtime/base/array/array_iterator.cpp.o
 
 # target to build an object file
 runtime/base/array/array_iterator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_iterator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_iterator.cpp.o
 .PHONY : runtime/base/array/array_iterator.cpp.o
 
 runtime/base/array/array_iterator.i: runtime/base/array/array_iterator.cpp.i
@@ -211,7 +211,7 @@ runtime/base/array/array_iterator.i: runtime/base/array/array_iterator.cpp.i
 
 # target to preprocess a source file
 runtime/base/array/array_iterator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_iterator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_iterator.cpp.i
 .PHONY : runtime/base/array/array_iterator.cpp.i
 
 runtime/base/array/array_iterator.s: runtime/base/array/array_iterator.cpp.s
@@ -219,7 +219,7 @@ runtime/base/array/array_iterator.s: runtime/base/array/array_iterator.cpp.s
 
 # target to generate assembly for a file
 runtime/base/array/array_iterator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_iterator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_iterator.cpp.s
 .PHONY : runtime/base/array/array_iterator.cpp.s
 
 runtime/base/array/array_util.o: runtime/base/array/array_util.cpp.o
@@ -227,7 +227,7 @@ runtime/base/array/array_util.o: runtime/base/array/array_util.cpp.o
 
 # target to build an object file
 runtime/base/array/array_util.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_util.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_util.cpp.o
 .PHONY : runtime/base/array/array_util.cpp.o
 
 runtime/base/array/array_util.i: runtime/base/array/array_util.cpp.i
@@ -235,7 +235,7 @@ runtime/base/array/array_util.i: runtime/base/array/array_util.cpp.i
 
 # target to preprocess a source file
 runtime/base/array/array_util.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_util.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_util.cpp.i
 .PHONY : runtime/base/array/array_util.cpp.i
 
 runtime/base/array/array_util.s: runtime/base/array/array_util.cpp.s
@@ -243,7 +243,7 @@ runtime/base/array/array_util.s: runtime/base/array/array_util.cpp.s
 
 # target to generate assembly for a file
 runtime/base/array/array_util.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_util.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/array_util.cpp.s
 .PHONY : runtime/base/array/array_util.cpp.s
 
 runtime/base/array/hphp_array.o: runtime/base/array/hphp_array.cpp.o
@@ -251,7 +251,7 @@ runtime/base/array/hphp_array.o: runtime/base/array/hphp_array.cpp.o
 
 # target to build an object file
 runtime/base/array/hphp_array.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/hphp_array.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/hphp_array.cpp.o
 .PHONY : runtime/base/array/hphp_array.cpp.o
 
 runtime/base/array/hphp_array.i: runtime/base/array/hphp_array.cpp.i
@@ -259,7 +259,7 @@ runtime/base/array/hphp_array.i: runtime/base/array/hphp_array.cpp.i
 
 # target to preprocess a source file
 runtime/base/array/hphp_array.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/hphp_array.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/hphp_array.cpp.i
 .PHONY : runtime/base/array/hphp_array.cpp.i
 
 runtime/base/array/hphp_array.s: runtime/base/array/hphp_array.cpp.s
@@ -267,39 +267,39 @@ runtime/base/array/hphp_array.s: runtime/base/array/hphp_array.cpp.s
 
 # target to generate assembly for a file
 runtime/base/array/hphp_array.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/hphp_array.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/hphp_array.cpp.s
 .PHONY : runtime/base/array/hphp_array.cpp.s
 
-runtime/base/array/small_array.o: runtime/base/array/small_array.cpp.o
-.PHONY : runtime/base/array/small_array.o
+runtime/base/array/vector_array.o: runtime/base/array/vector_array.cpp.o
+.PHONY : runtime/base/array/vector_array.o
 
 # target to build an object file
-runtime/base/array/small_array.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/small_array.cpp.o
-.PHONY : runtime/base/array/small_array.cpp.o
+runtime/base/array/vector_array.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/vector_array.cpp.o
+.PHONY : runtime/base/array/vector_array.cpp.o
 
-runtime/base/array/small_array.i: runtime/base/array/small_array.cpp.i
-.PHONY : runtime/base/array/small_array.i
+runtime/base/array/vector_array.i: runtime/base/array/vector_array.cpp.i
+.PHONY : runtime/base/array/vector_array.i
 
 # target to preprocess a source file
-runtime/base/array/small_array.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/small_array.cpp.i
-.PHONY : runtime/base/array/small_array.cpp.i
+runtime/base/array/vector_array.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/vector_array.cpp.i
+.PHONY : runtime/base/array/vector_array.cpp.i
 
-runtime/base/array/small_array.s: runtime/base/array/small_array.cpp.s
-.PHONY : runtime/base/array/small_array.s
+runtime/base/array/vector_array.s: runtime/base/array/vector_array.cpp.s
+.PHONY : runtime/base/array/vector_array.s
 
 # target to generate assembly for a file
-runtime/base/array/small_array.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/small_array.cpp.s
-.PHONY : runtime/base/array/small_array.cpp.s
+runtime/base/array/vector_array.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/vector_array.cpp.s
+.PHONY : runtime/base/array/vector_array.cpp.s
 
 runtime/base/array/zend_array.o: runtime/base/array/zend_array.cpp.o
 .PHONY : runtime/base/array/zend_array.o
 
 # target to build an object file
 runtime/base/array/zend_array.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/zend_array.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/zend_array.cpp.o
 .PHONY : runtime/base/array/zend_array.cpp.o
 
 runtime/base/array/zend_array.i: runtime/base/array/zend_array.cpp.i
@@ -307,7 +307,7 @@ runtime/base/array/zend_array.i: runtime/base/array/zend_array.cpp.i
 
 # target to preprocess a source file
 runtime/base/array/zend_array.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/zend_array.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/zend_array.cpp.i
 .PHONY : runtime/base/array/zend_array.cpp.i
 
 runtime/base/array/zend_array.s: runtime/base/array/zend_array.cpp.s
@@ -315,7 +315,7 @@ runtime/base/array/zend_array.s: runtime/base/array/zend_array.cpp.s
 
 # target to generate assembly for a file
 runtime/base/array/zend_array.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/zend_array.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/array/zend_array.cpp.s
 .PHONY : runtime/base/array/zend_array.cpp.s
 
 runtime/base/bstring.o: runtime/base/bstring.cpp.o
@@ -323,7 +323,7 @@ runtime/base/bstring.o: runtime/base/bstring.cpp.o
 
 # target to build an object file
 runtime/base/bstring.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/bstring.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/bstring.cpp.o
 .PHONY : runtime/base/bstring.cpp.o
 
 runtime/base/bstring.i: runtime/base/bstring.cpp.i
@@ -331,7 +331,7 @@ runtime/base/bstring.i: runtime/base/bstring.cpp.i
 
 # target to preprocess a source file
 runtime/base/bstring.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/bstring.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/bstring.cpp.i
 .PHONY : runtime/base/bstring.cpp.i
 
 runtime/base/bstring.s: runtime/base/bstring.cpp.s
@@ -339,7 +339,7 @@ runtime/base/bstring.s: runtime/base/bstring.cpp.s
 
 # target to generate assembly for a file
 runtime/base/bstring.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/bstring.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/bstring.cpp.s
 .PHONY : runtime/base/bstring.cpp.s
 
 runtime/base/builtin_functions.o: runtime/base/builtin_functions.cpp.o
@@ -347,7 +347,7 @@ runtime/base/builtin_functions.o: runtime/base/builtin_functions.cpp.o
 
 # target to build an object file
 runtime/base/builtin_functions.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/builtin_functions.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/builtin_functions.cpp.o
 .PHONY : runtime/base/builtin_functions.cpp.o
 
 runtime/base/builtin_functions.i: runtime/base/builtin_functions.cpp.i
@@ -355,7 +355,7 @@ runtime/base/builtin_functions.i: runtime/base/builtin_functions.cpp.i
 
 # target to preprocess a source file
 runtime/base/builtin_functions.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/builtin_functions.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/builtin_functions.cpp.i
 .PHONY : runtime/base/builtin_functions.cpp.i
 
 runtime/base/builtin_functions.s: runtime/base/builtin_functions.cpp.s
@@ -363,7 +363,7 @@ runtime/base/builtin_functions.s: runtime/base/builtin_functions.cpp.s
 
 # target to generate assembly for a file
 runtime/base/builtin_functions.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/builtin_functions.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/builtin_functions.cpp.s
 .PHONY : runtime/base/builtin_functions.cpp.s
 
 runtime/base/class_info.o: runtime/base/class_info.cpp.o
@@ -371,7 +371,7 @@ runtime/base/class_info.o: runtime/base/class_info.cpp.o
 
 # target to build an object file
 runtime/base/class_info.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/class_info.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/class_info.cpp.o
 .PHONY : runtime/base/class_info.cpp.o
 
 runtime/base/class_info.i: runtime/base/class_info.cpp.i
@@ -379,7 +379,7 @@ runtime/base/class_info.i: runtime/base/class_info.cpp.i
 
 # target to preprocess a source file
 runtime/base/class_info.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/class_info.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/class_info.cpp.i
 .PHONY : runtime/base/class_info.cpp.i
 
 runtime/base/class_info.s: runtime/base/class_info.cpp.s
@@ -387,15 +387,39 @@ runtime/base/class_info.s: runtime/base/class_info.cpp.s
 
 # target to generate assembly for a file
 runtime/base/class_info.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/class_info.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/class_info.cpp.s
 .PHONY : runtime/base/class_info.cpp.s
+
+runtime/base/code_coverage.o: runtime/base/code_coverage.cpp.o
+.PHONY : runtime/base/code_coverage.o
+
+# target to build an object file
+runtime/base/code_coverage.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/code_coverage.cpp.o
+.PHONY : runtime/base/code_coverage.cpp.o
+
+runtime/base/code_coverage.i: runtime/base/code_coverage.cpp.i
+.PHONY : runtime/base/code_coverage.i
+
+# target to preprocess a source file
+runtime/base/code_coverage.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/code_coverage.cpp.i
+.PHONY : runtime/base/code_coverage.cpp.i
+
+runtime/base/code_coverage.s: runtime/base/code_coverage.cpp.s
+.PHONY : runtime/base/code_coverage.s
+
+# target to generate assembly for a file
+runtime/base/code_coverage.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/code_coverage.cpp.s
+.PHONY : runtime/base/code_coverage.cpp.s
 
 runtime/base/comparisons.o: runtime/base/comparisons.cpp.o
 .PHONY : runtime/base/comparisons.o
 
 # target to build an object file
 runtime/base/comparisons.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/comparisons.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/comparisons.cpp.o
 .PHONY : runtime/base/comparisons.cpp.o
 
 runtime/base/comparisons.i: runtime/base/comparisons.cpp.i
@@ -403,7 +427,7 @@ runtime/base/comparisons.i: runtime/base/comparisons.cpp.i
 
 # target to preprocess a source file
 runtime/base/comparisons.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/comparisons.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/comparisons.cpp.i
 .PHONY : runtime/base/comparisons.cpp.i
 
 runtime/base/comparisons.s: runtime/base/comparisons.cpp.s
@@ -411,7 +435,7 @@ runtime/base/comparisons.s: runtime/base/comparisons.cpp.s
 
 # target to generate assembly for a file
 runtime/base/comparisons.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/comparisons.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/comparisons.cpp.s
 .PHONY : runtime/base/comparisons.cpp.s
 
 runtime/base/debug/backtrace.o: runtime/base/debug/backtrace.cpp.o
@@ -419,7 +443,7 @@ runtime/base/debug/backtrace.o: runtime/base/debug/backtrace.cpp.o
 
 # target to build an object file
 runtime/base/debug/backtrace.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debug/backtrace.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debug/backtrace.cpp.o
 .PHONY : runtime/base/debug/backtrace.cpp.o
 
 runtime/base/debug/backtrace.i: runtime/base/debug/backtrace.cpp.i
@@ -427,7 +451,7 @@ runtime/base/debug/backtrace.i: runtime/base/debug/backtrace.cpp.i
 
 # target to preprocess a source file
 runtime/base/debug/backtrace.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debug/backtrace.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debug/backtrace.cpp.i
 .PHONY : runtime/base/debug/backtrace.cpp.i
 
 runtime/base/debug/backtrace.s: runtime/base/debug/backtrace.cpp.s
@@ -435,7 +459,7 @@ runtime/base/debug/backtrace.s: runtime/base/debug/backtrace.cpp.s
 
 # target to generate assembly for a file
 runtime/base/debug/backtrace.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debug/backtrace.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debug/backtrace.cpp.s
 .PHONY : runtime/base/debug/backtrace.cpp.s
 
 runtime/base/debuggable.o: runtime/base/debuggable.cpp.o
@@ -443,7 +467,7 @@ runtime/base/debuggable.o: runtime/base/debuggable.cpp.o
 
 # target to build an object file
 runtime/base/debuggable.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debuggable.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debuggable.cpp.o
 .PHONY : runtime/base/debuggable.cpp.o
 
 runtime/base/debuggable.i: runtime/base/debuggable.cpp.i
@@ -451,7 +475,7 @@ runtime/base/debuggable.i: runtime/base/debuggable.cpp.i
 
 # target to preprocess a source file
 runtime/base/debuggable.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debuggable.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debuggable.cpp.i
 .PHONY : runtime/base/debuggable.cpp.i
 
 runtime/base/debuggable.s: runtime/base/debuggable.cpp.s
@@ -459,7 +483,7 @@ runtime/base/debuggable.s: runtime/base/debuggable.cpp.s
 
 # target to generate assembly for a file
 runtime/base/debuggable.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debuggable.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/debuggable.cpp.s
 .PHONY : runtime/base/debuggable.cpp.s
 
 runtime/base/dynamic_object_data.o: runtime/base/dynamic_object_data.cpp.o
@@ -467,7 +491,7 @@ runtime/base/dynamic_object_data.o: runtime/base/dynamic_object_data.cpp.o
 
 # target to build an object file
 runtime/base/dynamic_object_data.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/dynamic_object_data.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/dynamic_object_data.cpp.o
 .PHONY : runtime/base/dynamic_object_data.cpp.o
 
 runtime/base/dynamic_object_data.i: runtime/base/dynamic_object_data.cpp.i
@@ -475,7 +499,7 @@ runtime/base/dynamic_object_data.i: runtime/base/dynamic_object_data.cpp.i
 
 # target to preprocess a source file
 runtime/base/dynamic_object_data.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/dynamic_object_data.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/dynamic_object_data.cpp.i
 .PHONY : runtime/base/dynamic_object_data.cpp.i
 
 runtime/base/dynamic_object_data.s: runtime/base/dynamic_object_data.cpp.s
@@ -483,7 +507,7 @@ runtime/base/dynamic_object_data.s: runtime/base/dynamic_object_data.cpp.s
 
 # target to generate assembly for a file
 runtime/base/dynamic_object_data.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/dynamic_object_data.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/dynamic_object_data.cpp.s
 .PHONY : runtime/base/dynamic_object_data.cpp.s
 
 runtime/base/execution_context.o: runtime/base/execution_context.cpp.o
@@ -491,7 +515,7 @@ runtime/base/execution_context.o: runtime/base/execution_context.cpp.o
 
 # target to build an object file
 runtime/base/execution_context.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/execution_context.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/execution_context.cpp.o
 .PHONY : runtime/base/execution_context.cpp.o
 
 runtime/base/execution_context.i: runtime/base/execution_context.cpp.i
@@ -499,7 +523,7 @@ runtime/base/execution_context.i: runtime/base/execution_context.cpp.i
 
 # target to preprocess a source file
 runtime/base/execution_context.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/execution_context.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/execution_context.cpp.i
 .PHONY : runtime/base/execution_context.cpp.i
 
 runtime/base/execution_context.s: runtime/base/execution_context.cpp.s
@@ -507,87 +531,15 @@ runtime/base/execution_context.s: runtime/base/execution_context.cpp.s
 
 # target to generate assembly for a file
 runtime/base/execution_context.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/execution_context.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/execution_context.cpp.s
 .PHONY : runtime/base/execution_context.cpp.s
-
-runtime/base/fiber_async_func.o: runtime/base/fiber_async_func.cpp.o
-.PHONY : runtime/base/fiber_async_func.o
-
-# target to build an object file
-runtime/base/fiber_async_func.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_async_func.cpp.o
-.PHONY : runtime/base/fiber_async_func.cpp.o
-
-runtime/base/fiber_async_func.i: runtime/base/fiber_async_func.cpp.i
-.PHONY : runtime/base/fiber_async_func.i
-
-# target to preprocess a source file
-runtime/base/fiber_async_func.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_async_func.cpp.i
-.PHONY : runtime/base/fiber_async_func.cpp.i
-
-runtime/base/fiber_async_func.s: runtime/base/fiber_async_func.cpp.s
-.PHONY : runtime/base/fiber_async_func.s
-
-# target to generate assembly for a file
-runtime/base/fiber_async_func.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_async_func.cpp.s
-.PHONY : runtime/base/fiber_async_func.cpp.s
-
-runtime/base/fiber_reference_map.o: runtime/base/fiber_reference_map.cpp.o
-.PHONY : runtime/base/fiber_reference_map.o
-
-# target to build an object file
-runtime/base/fiber_reference_map.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_reference_map.cpp.o
-.PHONY : runtime/base/fiber_reference_map.cpp.o
-
-runtime/base/fiber_reference_map.i: runtime/base/fiber_reference_map.cpp.i
-.PHONY : runtime/base/fiber_reference_map.i
-
-# target to preprocess a source file
-runtime/base/fiber_reference_map.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_reference_map.cpp.i
-.PHONY : runtime/base/fiber_reference_map.cpp.i
-
-runtime/base/fiber_reference_map.s: runtime/base/fiber_reference_map.cpp.s
-.PHONY : runtime/base/fiber_reference_map.s
-
-# target to generate assembly for a file
-runtime/base/fiber_reference_map.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_reference_map.cpp.s
-.PHONY : runtime/base/fiber_reference_map.cpp.s
-
-runtime/base/fiber_safe.o: runtime/base/fiber_safe.cpp.o
-.PHONY : runtime/base/fiber_safe.o
-
-# target to build an object file
-runtime/base/fiber_safe.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_safe.cpp.o
-.PHONY : runtime/base/fiber_safe.cpp.o
-
-runtime/base/fiber_safe.i: runtime/base/fiber_safe.cpp.i
-.PHONY : runtime/base/fiber_safe.i
-
-# target to preprocess a source file
-runtime/base/fiber_safe.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_safe.cpp.i
-.PHONY : runtime/base/fiber_safe.cpp.i
-
-runtime/base/fiber_safe.s: runtime/base/fiber_safe.cpp.s
-.PHONY : runtime/base/fiber_safe.s
-
-# target to generate assembly for a file
-runtime/base/fiber_safe.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/fiber_safe.cpp.s
-.PHONY : runtime/base/fiber_safe.cpp.s
 
 runtime/base/file/bzip2_file.o: runtime/base/file/bzip2_file.cpp.o
 .PHONY : runtime/base/file/bzip2_file.o
 
 # target to build an object file
 runtime/base/file/bzip2_file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/bzip2_file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/bzip2_file.cpp.o
 .PHONY : runtime/base/file/bzip2_file.cpp.o
 
 runtime/base/file/bzip2_file.i: runtime/base/file/bzip2_file.cpp.i
@@ -595,7 +547,7 @@ runtime/base/file/bzip2_file.i: runtime/base/file/bzip2_file.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/bzip2_file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/bzip2_file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/bzip2_file.cpp.i
 .PHONY : runtime/base/file/bzip2_file.cpp.i
 
 runtime/base/file/bzip2_file.s: runtime/base/file/bzip2_file.cpp.s
@@ -603,7 +555,7 @@ runtime/base/file/bzip2_file.s: runtime/base/file/bzip2_file.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/bzip2_file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/bzip2_file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/bzip2_file.cpp.s
 .PHONY : runtime/base/file/bzip2_file.cpp.s
 
 runtime/base/file/file.o: runtime/base/file/file.cpp.o
@@ -611,7 +563,7 @@ runtime/base/file/file.o: runtime/base/file/file.cpp.o
 
 # target to build an object file
 runtime/base/file/file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/file.cpp.o
 .PHONY : runtime/base/file/file.cpp.o
 
 runtime/base/file/file.i: runtime/base/file/file.cpp.i
@@ -619,7 +571,7 @@ runtime/base/file/file.i: runtime/base/file/file.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/file.cpp.i
 .PHONY : runtime/base/file/file.cpp.i
 
 runtime/base/file/file.s: runtime/base/file/file.cpp.s
@@ -627,7 +579,7 @@ runtime/base/file/file.s: runtime/base/file/file.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/file.cpp.s
 .PHONY : runtime/base/file/file.cpp.s
 
 runtime/base/file/mem_file.o: runtime/base/file/mem_file.cpp.o
@@ -635,7 +587,7 @@ runtime/base/file/mem_file.o: runtime/base/file/mem_file.cpp.o
 
 # target to build an object file
 runtime/base/file/mem_file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/mem_file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/mem_file.cpp.o
 .PHONY : runtime/base/file/mem_file.cpp.o
 
 runtime/base/file/mem_file.i: runtime/base/file/mem_file.cpp.i
@@ -643,7 +595,7 @@ runtime/base/file/mem_file.i: runtime/base/file/mem_file.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/mem_file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/mem_file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/mem_file.cpp.i
 .PHONY : runtime/base/file/mem_file.cpp.i
 
 runtime/base/file/mem_file.s: runtime/base/file/mem_file.cpp.s
@@ -651,7 +603,7 @@ runtime/base/file/mem_file.s: runtime/base/file/mem_file.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/mem_file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/mem_file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/mem_file.cpp.s
 .PHONY : runtime/base/file/mem_file.cpp.s
 
 runtime/base/file/output_file.o: runtime/base/file/output_file.cpp.o
@@ -659,7 +611,7 @@ runtime/base/file/output_file.o: runtime/base/file/output_file.cpp.o
 
 # target to build an object file
 runtime/base/file/output_file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/output_file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/output_file.cpp.o
 .PHONY : runtime/base/file/output_file.cpp.o
 
 runtime/base/file/output_file.i: runtime/base/file/output_file.cpp.i
@@ -667,7 +619,7 @@ runtime/base/file/output_file.i: runtime/base/file/output_file.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/output_file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/output_file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/output_file.cpp.i
 .PHONY : runtime/base/file/output_file.cpp.i
 
 runtime/base/file/output_file.s: runtime/base/file/output_file.cpp.s
@@ -675,7 +627,7 @@ runtime/base/file/output_file.s: runtime/base/file/output_file.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/output_file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/output_file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/output_file.cpp.s
 .PHONY : runtime/base/file/output_file.cpp.s
 
 runtime/base/file/pipe.o: runtime/base/file/pipe.cpp.o
@@ -683,7 +635,7 @@ runtime/base/file/pipe.o: runtime/base/file/pipe.cpp.o
 
 # target to build an object file
 runtime/base/file/pipe.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/pipe.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/pipe.cpp.o
 .PHONY : runtime/base/file/pipe.cpp.o
 
 runtime/base/file/pipe.i: runtime/base/file/pipe.cpp.i
@@ -691,7 +643,7 @@ runtime/base/file/pipe.i: runtime/base/file/pipe.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/pipe.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/pipe.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/pipe.cpp.i
 .PHONY : runtime/base/file/pipe.cpp.i
 
 runtime/base/file/pipe.s: runtime/base/file/pipe.cpp.s
@@ -699,7 +651,7 @@ runtime/base/file/pipe.s: runtime/base/file/pipe.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/pipe.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/pipe.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/pipe.cpp.s
 .PHONY : runtime/base/file/pipe.cpp.s
 
 runtime/base/file/plain_file.o: runtime/base/file/plain_file.cpp.o
@@ -707,7 +659,7 @@ runtime/base/file/plain_file.o: runtime/base/file/plain_file.cpp.o
 
 # target to build an object file
 runtime/base/file/plain_file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/plain_file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/plain_file.cpp.o
 .PHONY : runtime/base/file/plain_file.cpp.o
 
 runtime/base/file/plain_file.i: runtime/base/file/plain_file.cpp.i
@@ -715,7 +667,7 @@ runtime/base/file/plain_file.i: runtime/base/file/plain_file.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/plain_file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/plain_file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/plain_file.cpp.i
 .PHONY : runtime/base/file/plain_file.cpp.i
 
 runtime/base/file/plain_file.s: runtime/base/file/plain_file.cpp.s
@@ -723,7 +675,7 @@ runtime/base/file/plain_file.s: runtime/base/file/plain_file.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/plain_file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/plain_file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/plain_file.cpp.s
 .PHONY : runtime/base/file/plain_file.cpp.s
 
 runtime/base/file/socket.o: runtime/base/file/socket.cpp.o
@@ -731,7 +683,7 @@ runtime/base/file/socket.o: runtime/base/file/socket.cpp.o
 
 # target to build an object file
 runtime/base/file/socket.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/socket.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/socket.cpp.o
 .PHONY : runtime/base/file/socket.cpp.o
 
 runtime/base/file/socket.i: runtime/base/file/socket.cpp.i
@@ -739,7 +691,7 @@ runtime/base/file/socket.i: runtime/base/file/socket.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/socket.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/socket.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/socket.cpp.i
 .PHONY : runtime/base/file/socket.cpp.i
 
 runtime/base/file/socket.s: runtime/base/file/socket.cpp.s
@@ -747,7 +699,7 @@ runtime/base/file/socket.s: runtime/base/file/socket.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/socket.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/socket.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/socket.cpp.s
 .PHONY : runtime/base/file/socket.cpp.s
 
 runtime/base/file/ssl_socket.o: runtime/base/file/ssl_socket.cpp.o
@@ -755,7 +707,7 @@ runtime/base/file/ssl_socket.o: runtime/base/file/ssl_socket.cpp.o
 
 # target to build an object file
 runtime/base/file/ssl_socket.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/ssl_socket.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/ssl_socket.cpp.o
 .PHONY : runtime/base/file/ssl_socket.cpp.o
 
 runtime/base/file/ssl_socket.i: runtime/base/file/ssl_socket.cpp.i
@@ -763,7 +715,7 @@ runtime/base/file/ssl_socket.i: runtime/base/file/ssl_socket.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/ssl_socket.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/ssl_socket.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/ssl_socket.cpp.i
 .PHONY : runtime/base/file/ssl_socket.cpp.i
 
 runtime/base/file/ssl_socket.s: runtime/base/file/ssl_socket.cpp.s
@@ -771,7 +723,7 @@ runtime/base/file/ssl_socket.s: runtime/base/file/ssl_socket.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/ssl_socket.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/ssl_socket.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/ssl_socket.cpp.s
 .PHONY : runtime/base/file/ssl_socket.cpp.s
 
 runtime/base/file/temp_file.o: runtime/base/file/temp_file.cpp.o
@@ -779,7 +731,7 @@ runtime/base/file/temp_file.o: runtime/base/file/temp_file.cpp.o
 
 # target to build an object file
 runtime/base/file/temp_file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/temp_file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/temp_file.cpp.o
 .PHONY : runtime/base/file/temp_file.cpp.o
 
 runtime/base/file/temp_file.i: runtime/base/file/temp_file.cpp.i
@@ -787,7 +739,7 @@ runtime/base/file/temp_file.i: runtime/base/file/temp_file.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/temp_file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/temp_file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/temp_file.cpp.i
 .PHONY : runtime/base/file/temp_file.cpp.i
 
 runtime/base/file/temp_file.s: runtime/base/file/temp_file.cpp.s
@@ -795,7 +747,7 @@ runtime/base/file/temp_file.s: runtime/base/file/temp_file.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/temp_file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/temp_file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/temp_file.cpp.s
 .PHONY : runtime/base/file/temp_file.cpp.s
 
 runtime/base/file/url_file.o: runtime/base/file/url_file.cpp.o
@@ -803,7 +755,7 @@ runtime/base/file/url_file.o: runtime/base/file/url_file.cpp.o
 
 # target to build an object file
 runtime/base/file/url_file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/url_file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/url_file.cpp.o
 .PHONY : runtime/base/file/url_file.cpp.o
 
 runtime/base/file/url_file.i: runtime/base/file/url_file.cpp.i
@@ -811,7 +763,7 @@ runtime/base/file/url_file.i: runtime/base/file/url_file.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/url_file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/url_file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/url_file.cpp.i
 .PHONY : runtime/base/file/url_file.cpp.i
 
 runtime/base/file/url_file.s: runtime/base/file/url_file.cpp.s
@@ -819,7 +771,7 @@ runtime/base/file/url_file.s: runtime/base/file/url_file.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/url_file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/url_file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/url_file.cpp.s
 .PHONY : runtime/base/file/url_file.cpp.s
 
 runtime/base/file/zip_file.o: runtime/base/file/zip_file.cpp.o
@@ -827,7 +779,7 @@ runtime/base/file/zip_file.o: runtime/base/file/zip_file.cpp.o
 
 # target to build an object file
 runtime/base/file/zip_file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/zip_file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/zip_file.cpp.o
 .PHONY : runtime/base/file/zip_file.cpp.o
 
 runtime/base/file/zip_file.i: runtime/base/file/zip_file.cpp.i
@@ -835,7 +787,7 @@ runtime/base/file/zip_file.i: runtime/base/file/zip_file.cpp.i
 
 # target to preprocess a source file
 runtime/base/file/zip_file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/zip_file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/zip_file.cpp.i
 .PHONY : runtime/base/file/zip_file.cpp.i
 
 runtime/base/file/zip_file.s: runtime/base/file/zip_file.cpp.s
@@ -843,7 +795,7 @@ runtime/base/file/zip_file.s: runtime/base/file/zip_file.cpp.s
 
 # target to generate assembly for a file
 runtime/base/file/zip_file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/zip_file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/file/zip_file.cpp.s
 .PHONY : runtime/base/file/zip_file.cpp.s
 
 runtime/base/frame_injection.o: runtime/base/frame_injection.cpp.o
@@ -851,7 +803,7 @@ runtime/base/frame_injection.o: runtime/base/frame_injection.cpp.o
 
 # target to build an object file
 runtime/base/frame_injection.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/frame_injection.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/frame_injection.cpp.o
 .PHONY : runtime/base/frame_injection.cpp.o
 
 runtime/base/frame_injection.i: runtime/base/frame_injection.cpp.i
@@ -859,7 +811,7 @@ runtime/base/frame_injection.i: runtime/base/frame_injection.cpp.i
 
 # target to preprocess a source file
 runtime/base/frame_injection.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/frame_injection.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/frame_injection.cpp.i
 .PHONY : runtime/base/frame_injection.cpp.i
 
 runtime/base/frame_injection.s: runtime/base/frame_injection.cpp.s
@@ -867,7 +819,7 @@ runtime/base/frame_injection.s: runtime/base/frame_injection.cpp.s
 
 # target to generate assembly for a file
 runtime/base/frame_injection.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/frame_injection.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/frame_injection.cpp.s
 .PHONY : runtime/base/frame_injection.cpp.s
 
 runtime/base/global_array_wrapper.o: runtime/base/global_array_wrapper.cpp.o
@@ -875,7 +827,7 @@ runtime/base/global_array_wrapper.o: runtime/base/global_array_wrapper.cpp.o
 
 # target to build an object file
 runtime/base/global_array_wrapper.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/global_array_wrapper.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/global_array_wrapper.cpp.o
 .PHONY : runtime/base/global_array_wrapper.cpp.o
 
 runtime/base/global_array_wrapper.i: runtime/base/global_array_wrapper.cpp.i
@@ -883,7 +835,7 @@ runtime/base/global_array_wrapper.i: runtime/base/global_array_wrapper.cpp.i
 
 # target to preprocess a source file
 runtime/base/global_array_wrapper.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/global_array_wrapper.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/global_array_wrapper.cpp.i
 .PHONY : runtime/base/global_array_wrapper.cpp.i
 
 runtime/base/global_array_wrapper.s: runtime/base/global_array_wrapper.cpp.s
@@ -891,7 +843,7 @@ runtime/base/global_array_wrapper.s: runtime/base/global_array_wrapper.cpp.s
 
 # target to generate assembly for a file
 runtime/base/global_array_wrapper.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/global_array_wrapper.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/global_array_wrapper.cpp.s
 .PHONY : runtime/base/global_array_wrapper.cpp.s
 
 runtime/base/hphp_ffi.o: runtime/base/hphp_ffi.cpp.o
@@ -899,7 +851,7 @@ runtime/base/hphp_ffi.o: runtime/base/hphp_ffi.cpp.o
 
 # target to build an object file
 runtime/base/hphp_ffi.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_ffi.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_ffi.cpp.o
 .PHONY : runtime/base/hphp_ffi.cpp.o
 
 runtime/base/hphp_ffi.i: runtime/base/hphp_ffi.cpp.i
@@ -907,7 +859,7 @@ runtime/base/hphp_ffi.i: runtime/base/hphp_ffi.cpp.i
 
 # target to preprocess a source file
 runtime/base/hphp_ffi.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_ffi.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_ffi.cpp.i
 .PHONY : runtime/base/hphp_ffi.cpp.i
 
 runtime/base/hphp_ffi.s: runtime/base/hphp_ffi.cpp.s
@@ -915,7 +867,7 @@ runtime/base/hphp_ffi.s: runtime/base/hphp_ffi.cpp.s
 
 # target to generate assembly for a file
 runtime/base/hphp_ffi.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_ffi.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_ffi.cpp.s
 .PHONY : runtime/base/hphp_ffi.cpp.s
 
 runtime/base/hphp_system.o: runtime/base/hphp_system.cpp.o
@@ -923,7 +875,7 @@ runtime/base/hphp_system.o: runtime/base/hphp_system.cpp.o
 
 # target to build an object file
 runtime/base/hphp_system.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_system.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_system.cpp.o
 .PHONY : runtime/base/hphp_system.cpp.o
 
 runtime/base/hphp_system.i: runtime/base/hphp_system.cpp.i
@@ -931,7 +883,7 @@ runtime/base/hphp_system.i: runtime/base/hphp_system.cpp.i
 
 # target to preprocess a source file
 runtime/base/hphp_system.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_system.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_system.cpp.i
 .PHONY : runtime/base/hphp_system.cpp.i
 
 runtime/base/hphp_system.s: runtime/base/hphp_system.cpp.s
@@ -939,7 +891,7 @@ runtime/base/hphp_system.s: runtime/base/hphp_system.cpp.s
 
 # target to generate assembly for a file
 runtime/base/hphp_system.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_system.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/hphp_system.cpp.s
 .PHONY : runtime/base/hphp_system.cpp.s
 
 runtime/base/ini_setting.o: runtime/base/ini_setting.cpp.o
@@ -947,7 +899,7 @@ runtime/base/ini_setting.o: runtime/base/ini_setting.cpp.o
 
 # target to build an object file
 runtime/base/ini_setting.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/ini_setting.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/ini_setting.cpp.o
 .PHONY : runtime/base/ini_setting.cpp.o
 
 runtime/base/ini_setting.i: runtime/base/ini_setting.cpp.i
@@ -955,7 +907,7 @@ runtime/base/ini_setting.i: runtime/base/ini_setting.cpp.i
 
 # target to preprocess a source file
 runtime/base/ini_setting.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/ini_setting.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/ini_setting.cpp.i
 .PHONY : runtime/base/ini_setting.cpp.i
 
 runtime/base/ini_setting.s: runtime/base/ini_setting.cpp.s
@@ -963,7 +915,7 @@ runtime/base/ini_setting.s: runtime/base/ini_setting.cpp.s
 
 # target to generate assembly for a file
 runtime/base/ini_setting.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/ini_setting.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/ini_setting.cpp.s
 .PHONY : runtime/base/ini_setting.cpp.s
 
 runtime/base/intercept.o: runtime/base/intercept.cpp.o
@@ -971,7 +923,7 @@ runtime/base/intercept.o: runtime/base/intercept.cpp.o
 
 # target to build an object file
 runtime/base/intercept.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/intercept.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/intercept.cpp.o
 .PHONY : runtime/base/intercept.cpp.o
 
 runtime/base/intercept.i: runtime/base/intercept.cpp.i
@@ -979,7 +931,7 @@ runtime/base/intercept.i: runtime/base/intercept.cpp.i
 
 # target to preprocess a source file
 runtime/base/intercept.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/intercept.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/intercept.cpp.i
 .PHONY : runtime/base/intercept.cpp.i
 
 runtime/base/intercept.s: runtime/base/intercept.cpp.s
@@ -987,7 +939,7 @@ runtime/base/intercept.s: runtime/base/intercept.cpp.s
 
 # target to generate assembly for a file
 runtime/base/intercept.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/intercept.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/intercept.cpp.s
 .PHONY : runtime/base/intercept.cpp.s
 
 runtime/base/list_assignment.o: runtime/base/list_assignment.cpp.o
@@ -995,7 +947,7 @@ runtime/base/list_assignment.o: runtime/base/list_assignment.cpp.o
 
 # target to build an object file
 runtime/base/list_assignment.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/list_assignment.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/list_assignment.cpp.o
 .PHONY : runtime/base/list_assignment.cpp.o
 
 runtime/base/list_assignment.i: runtime/base/list_assignment.cpp.i
@@ -1003,7 +955,7 @@ runtime/base/list_assignment.i: runtime/base/list_assignment.cpp.i
 
 # target to preprocess a source file
 runtime/base/list_assignment.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/list_assignment.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/list_assignment.cpp.i
 .PHONY : runtime/base/list_assignment.cpp.i
 
 runtime/base/list_assignment.s: runtime/base/list_assignment.cpp.s
@@ -1011,7 +963,7 @@ runtime/base/list_assignment.s: runtime/base/list_assignment.cpp.s
 
 # target to generate assembly for a file
 runtime/base/list_assignment.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/list_assignment.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/list_assignment.cpp.s
 .PHONY : runtime/base/list_assignment.cpp.s
 
 runtime/base/memory/leak_detectable.o: runtime/base/memory/leak_detectable.cpp.o
@@ -1019,7 +971,7 @@ runtime/base/memory/leak_detectable.o: runtime/base/memory/leak_detectable.cpp.o
 
 # target to build an object file
 runtime/base/memory/leak_detectable.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/leak_detectable.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/leak_detectable.cpp.o
 .PHONY : runtime/base/memory/leak_detectable.cpp.o
 
 runtime/base/memory/leak_detectable.i: runtime/base/memory/leak_detectable.cpp.i
@@ -1027,7 +979,7 @@ runtime/base/memory/leak_detectable.i: runtime/base/memory/leak_detectable.cpp.i
 
 # target to preprocess a source file
 runtime/base/memory/leak_detectable.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/leak_detectable.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/leak_detectable.cpp.i
 .PHONY : runtime/base/memory/leak_detectable.cpp.i
 
 runtime/base/memory/leak_detectable.s: runtime/base/memory/leak_detectable.cpp.s
@@ -1035,39 +987,15 @@ runtime/base/memory/leak_detectable.s: runtime/base/memory/leak_detectable.cpp.s
 
 # target to generate assembly for a file
 runtime/base/memory/leak_detectable.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/leak_detectable.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/leak_detectable.cpp.s
 .PHONY : runtime/base/memory/leak_detectable.cpp.s
-
-runtime/base/memory/linear_allocator.o: runtime/base/memory/linear_allocator.cpp.o
-.PHONY : runtime/base/memory/linear_allocator.o
-
-# target to build an object file
-runtime/base/memory/linear_allocator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/linear_allocator.cpp.o
-.PHONY : runtime/base/memory/linear_allocator.cpp.o
-
-runtime/base/memory/linear_allocator.i: runtime/base/memory/linear_allocator.cpp.i
-.PHONY : runtime/base/memory/linear_allocator.i
-
-# target to preprocess a source file
-runtime/base/memory/linear_allocator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/linear_allocator.cpp.i
-.PHONY : runtime/base/memory/linear_allocator.cpp.i
-
-runtime/base/memory/linear_allocator.s: runtime/base/memory/linear_allocator.cpp.s
-.PHONY : runtime/base/memory/linear_allocator.s
-
-# target to generate assembly for a file
-runtime/base/memory/linear_allocator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/linear_allocator.cpp.s
-.PHONY : runtime/base/memory/linear_allocator.cpp.s
 
 runtime/base/memory/memory_manager.o: runtime/base/memory/memory_manager.cpp.o
 .PHONY : runtime/base/memory/memory_manager.o
 
 # target to build an object file
 runtime/base/memory/memory_manager.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/memory_manager.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/memory_manager.cpp.o
 .PHONY : runtime/base/memory/memory_manager.cpp.o
 
 runtime/base/memory/memory_manager.i: runtime/base/memory/memory_manager.cpp.i
@@ -1075,7 +1003,7 @@ runtime/base/memory/memory_manager.i: runtime/base/memory/memory_manager.cpp.i
 
 # target to preprocess a source file
 runtime/base/memory/memory_manager.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/memory_manager.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/memory_manager.cpp.i
 .PHONY : runtime/base/memory/memory_manager.cpp.i
 
 runtime/base/memory/memory_manager.s: runtime/base/memory/memory_manager.cpp.s
@@ -1083,7 +1011,7 @@ runtime/base/memory/memory_manager.s: runtime/base/memory/memory_manager.cpp.s
 
 # target to generate assembly for a file
 runtime/base/memory/memory_manager.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/memory_manager.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/memory_manager.cpp.s
 .PHONY : runtime/base/memory/memory_manager.cpp.s
 
 runtime/base/memory/smart_allocator.o: runtime/base/memory/smart_allocator.cpp.o
@@ -1091,7 +1019,7 @@ runtime/base/memory/smart_allocator.o: runtime/base/memory/smart_allocator.cpp.o
 
 # target to build an object file
 runtime/base/memory/smart_allocator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/smart_allocator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/smart_allocator.cpp.o
 .PHONY : runtime/base/memory/smart_allocator.cpp.o
 
 runtime/base/memory/smart_allocator.i: runtime/base/memory/smart_allocator.cpp.i
@@ -1099,7 +1027,7 @@ runtime/base/memory/smart_allocator.i: runtime/base/memory/smart_allocator.cpp.i
 
 # target to preprocess a source file
 runtime/base/memory/smart_allocator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/smart_allocator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/smart_allocator.cpp.i
 .PHONY : runtime/base/memory/smart_allocator.cpp.i
 
 runtime/base/memory/smart_allocator.s: runtime/base/memory/smart_allocator.cpp.s
@@ -1107,7 +1035,7 @@ runtime/base/memory/smart_allocator.s: runtime/base/memory/smart_allocator.cpp.s
 
 # target to generate assembly for a file
 runtime/base/memory/smart_allocator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/smart_allocator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/smart_allocator.cpp.s
 .PHONY : runtime/base/memory/smart_allocator.cpp.s
 
 runtime/base/memory/sweepable.o: runtime/base/memory/sweepable.cpp.o
@@ -1115,7 +1043,7 @@ runtime/base/memory/sweepable.o: runtime/base/memory/sweepable.cpp.o
 
 # target to build an object file
 runtime/base/memory/sweepable.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/sweepable.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/sweepable.cpp.o
 .PHONY : runtime/base/memory/sweepable.cpp.o
 
 runtime/base/memory/sweepable.i: runtime/base/memory/sweepable.cpp.i
@@ -1123,7 +1051,7 @@ runtime/base/memory/sweepable.i: runtime/base/memory/sweepable.cpp.i
 
 # target to preprocess a source file
 runtime/base/memory/sweepable.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/sweepable.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/sweepable.cpp.i
 .PHONY : runtime/base/memory/sweepable.cpp.i
 
 runtime/base/memory/sweepable.s: runtime/base/memory/sweepable.cpp.s
@@ -1131,39 +1059,15 @@ runtime/base/memory/sweepable.s: runtime/base/memory/sweepable.cpp.s
 
 # target to generate assembly for a file
 runtime/base/memory/sweepable.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/sweepable.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/sweepable.cpp.s
 .PHONY : runtime/base/memory/sweepable.cpp.s
-
-runtime/base/memory/unsafe_pointer.o: runtime/base/memory/unsafe_pointer.cpp.o
-.PHONY : runtime/base/memory/unsafe_pointer.o
-
-# target to build an object file
-runtime/base/memory/unsafe_pointer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/unsafe_pointer.cpp.o
-.PHONY : runtime/base/memory/unsafe_pointer.cpp.o
-
-runtime/base/memory/unsafe_pointer.i: runtime/base/memory/unsafe_pointer.cpp.i
-.PHONY : runtime/base/memory/unsafe_pointer.i
-
-# target to preprocess a source file
-runtime/base/memory/unsafe_pointer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/unsafe_pointer.cpp.i
-.PHONY : runtime/base/memory/unsafe_pointer.cpp.i
-
-runtime/base/memory/unsafe_pointer.s: runtime/base/memory/unsafe_pointer.cpp.s
-.PHONY : runtime/base/memory/unsafe_pointer.s
-
-# target to generate assembly for a file
-runtime/base/memory/unsafe_pointer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/memory/unsafe_pointer.cpp.s
-.PHONY : runtime/base/memory/unsafe_pointer.cpp.s
 
 runtime/base/object_data.o: runtime/base/object_data.cpp.o
 .PHONY : runtime/base/object_data.o
 
 # target to build an object file
 runtime/base/object_data.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/object_data.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/object_data.cpp.o
 .PHONY : runtime/base/object_data.cpp.o
 
 runtime/base/object_data.i: runtime/base/object_data.cpp.i
@@ -1171,7 +1075,7 @@ runtime/base/object_data.i: runtime/base/object_data.cpp.i
 
 # target to preprocess a source file
 runtime/base/object_data.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/object_data.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/object_data.cpp.i
 .PHONY : runtime/base/object_data.cpp.i
 
 runtime/base/object_data.s: runtime/base/object_data.cpp.s
@@ -1179,7 +1083,7 @@ runtime/base/object_data.s: runtime/base/object_data.cpp.s
 
 # target to generate assembly for a file
 runtime/base/object_data.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/object_data.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/object_data.cpp.s
 .PHONY : runtime/base/object_data.cpp.s
 
 runtime/base/preg.o: runtime/base/preg.cpp.o
@@ -1187,7 +1091,7 @@ runtime/base/preg.o: runtime/base/preg.cpp.o
 
 # target to build an object file
 runtime/base/preg.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/preg.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/preg.cpp.o
 .PHONY : runtime/base/preg.cpp.o
 
 runtime/base/preg.i: runtime/base/preg.cpp.i
@@ -1195,7 +1099,7 @@ runtime/base/preg.i: runtime/base/preg.cpp.i
 
 # target to preprocess a source file
 runtime/base/preg.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/preg.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/preg.cpp.i
 .PHONY : runtime/base/preg.cpp.i
 
 runtime/base/preg.s: runtime/base/preg.cpp.s
@@ -1203,7 +1107,7 @@ runtime/base/preg.s: runtime/base/preg.cpp.s
 
 # target to generate assembly for a file
 runtime/base/preg.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/preg.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/preg.cpp.s
 .PHONY : runtime/base/preg.cpp.s
 
 runtime/base/program_functions.o: runtime/base/program_functions.cpp.o
@@ -1211,7 +1115,7 @@ runtime/base/program_functions.o: runtime/base/program_functions.cpp.o
 
 # target to build an object file
 runtime/base/program_functions.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/program_functions.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/program_functions.cpp.o
 .PHONY : runtime/base/program_functions.cpp.o
 
 runtime/base/program_functions.i: runtime/base/program_functions.cpp.i
@@ -1219,7 +1123,7 @@ runtime/base/program_functions.i: runtime/base/program_functions.cpp.i
 
 # target to preprocess a source file
 runtime/base/program_functions.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/program_functions.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/program_functions.cpp.i
 .PHONY : runtime/base/program_functions.cpp.i
 
 runtime/base/program_functions.s: runtime/base/program_functions.cpp.s
@@ -1227,7 +1131,7 @@ runtime/base/program_functions.s: runtime/base/program_functions.cpp.s
 
 # target to generate assembly for a file
 runtime/base/program_functions.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/program_functions.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/program_functions.cpp.s
 .PHONY : runtime/base/program_functions.cpp.s
 
 runtime/base/resource_data.o: runtime/base/resource_data.cpp.o
@@ -1235,7 +1139,7 @@ runtime/base/resource_data.o: runtime/base/resource_data.cpp.o
 
 # target to build an object file
 runtime/base/resource_data.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/resource_data.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/resource_data.cpp.o
 .PHONY : runtime/base/resource_data.cpp.o
 
 runtime/base/resource_data.i: runtime/base/resource_data.cpp.i
@@ -1243,7 +1147,7 @@ runtime/base/resource_data.i: runtime/base/resource_data.cpp.i
 
 # target to preprocess a source file
 runtime/base/resource_data.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/resource_data.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/resource_data.cpp.i
 .PHONY : runtime/base/resource_data.cpp.i
 
 runtime/base/resource_data.s: runtime/base/resource_data.cpp.s
@@ -1251,7 +1155,7 @@ runtime/base/resource_data.s: runtime/base/resource_data.cpp.s
 
 # target to generate assembly for a file
 runtime/base/resource_data.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/resource_data.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/resource_data.cpp.s
 .PHONY : runtime/base/resource_data.cpp.s
 
 runtime/base/rtti_info.o: runtime/base/rtti_info.cpp.o
@@ -1259,7 +1163,7 @@ runtime/base/rtti_info.o: runtime/base/rtti_info.cpp.o
 
 # target to build an object file
 runtime/base/rtti_info.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/rtti_info.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/rtti_info.cpp.o
 .PHONY : runtime/base/rtti_info.cpp.o
 
 runtime/base/rtti_info.i: runtime/base/rtti_info.cpp.i
@@ -1267,7 +1171,7 @@ runtime/base/rtti_info.i: runtime/base/rtti_info.cpp.i
 
 # target to preprocess a source file
 runtime/base/rtti_info.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/rtti_info.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/rtti_info.cpp.i
 .PHONY : runtime/base/rtti_info.cpp.i
 
 runtime/base/rtti_info.s: runtime/base/rtti_info.cpp.s
@@ -1275,7 +1179,7 @@ runtime/base/rtti_info.s: runtime/base/rtti_info.cpp.s
 
 # target to generate assembly for a file
 runtime/base/rtti_info.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/rtti_info.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/rtti_info.cpp.s
 .PHONY : runtime/base/rtti_info.cpp.s
 
 runtime/base/runtime_error.o: runtime/base/runtime_error.cpp.o
@@ -1283,7 +1187,7 @@ runtime/base/runtime_error.o: runtime/base/runtime_error.cpp.o
 
 # target to build an object file
 runtime/base/runtime_error.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_error.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_error.cpp.o
 .PHONY : runtime/base/runtime_error.cpp.o
 
 runtime/base/runtime_error.i: runtime/base/runtime_error.cpp.i
@@ -1291,7 +1195,7 @@ runtime/base/runtime_error.i: runtime/base/runtime_error.cpp.i
 
 # target to preprocess a source file
 runtime/base/runtime_error.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_error.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_error.cpp.i
 .PHONY : runtime/base/runtime_error.cpp.i
 
 runtime/base/runtime_error.s: runtime/base/runtime_error.cpp.s
@@ -1299,7 +1203,7 @@ runtime/base/runtime_error.s: runtime/base/runtime_error.cpp.s
 
 # target to generate assembly for a file
 runtime/base/runtime_error.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_error.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_error.cpp.s
 .PHONY : runtime/base/runtime_error.cpp.s
 
 runtime/base/runtime_option.o: runtime/base/runtime_option.cpp.o
@@ -1307,7 +1211,7 @@ runtime/base/runtime_option.o: runtime/base/runtime_option.cpp.o
 
 # target to build an object file
 runtime/base/runtime_option.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_option.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_option.cpp.o
 .PHONY : runtime/base/runtime_option.cpp.o
 
 runtime/base/runtime_option.i: runtime/base/runtime_option.cpp.i
@@ -1315,7 +1219,7 @@ runtime/base/runtime_option.i: runtime/base/runtime_option.cpp.i
 
 # target to preprocess a source file
 runtime/base/runtime_option.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_option.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_option.cpp.i
 .PHONY : runtime/base/runtime_option.cpp.i
 
 runtime/base/runtime_option.s: runtime/base/runtime_option.cpp.s
@@ -1323,7 +1227,7 @@ runtime/base/runtime_option.s: runtime/base/runtime_option.cpp.s
 
 # target to generate assembly for a file
 runtime/base/runtime_option.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_option.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/runtime_option.cpp.s
 .PHONY : runtime/base/runtime_option.cpp.s
 
 runtime/base/server/access_log.o: runtime/base/server/access_log.cpp.o
@@ -1331,7 +1235,7 @@ runtime/base/server/access_log.o: runtime/base/server/access_log.cpp.o
 
 # target to build an object file
 runtime/base/server/access_log.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/access_log.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/access_log.cpp.o
 .PHONY : runtime/base/server/access_log.cpp.o
 
 runtime/base/server/access_log.i: runtime/base/server/access_log.cpp.i
@@ -1339,7 +1243,7 @@ runtime/base/server/access_log.i: runtime/base/server/access_log.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/access_log.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/access_log.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/access_log.cpp.i
 .PHONY : runtime/base/server/access_log.cpp.i
 
 runtime/base/server/access_log.s: runtime/base/server/access_log.cpp.s
@@ -1347,7 +1251,7 @@ runtime/base/server/access_log.s: runtime/base/server/access_log.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/access_log.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/access_log.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/access_log.cpp.s
 .PHONY : runtime/base/server/access_log.cpp.s
 
 runtime/base/server/admin_request_handler.o: runtime/base/server/admin_request_handler.cpp.o
@@ -1355,7 +1259,7 @@ runtime/base/server/admin_request_handler.o: runtime/base/server/admin_request_h
 
 # target to build an object file
 runtime/base/server/admin_request_handler.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/admin_request_handler.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/admin_request_handler.cpp.o
 .PHONY : runtime/base/server/admin_request_handler.cpp.o
 
 runtime/base/server/admin_request_handler.i: runtime/base/server/admin_request_handler.cpp.i
@@ -1363,7 +1267,7 @@ runtime/base/server/admin_request_handler.i: runtime/base/server/admin_request_h
 
 # target to preprocess a source file
 runtime/base/server/admin_request_handler.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/admin_request_handler.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/admin_request_handler.cpp.i
 .PHONY : runtime/base/server/admin_request_handler.cpp.i
 
 runtime/base/server/admin_request_handler.s: runtime/base/server/admin_request_handler.cpp.s
@@ -1371,7 +1275,7 @@ runtime/base/server/admin_request_handler.s: runtime/base/server/admin_request_h
 
 # target to generate assembly for a file
 runtime/base/server/admin_request_handler.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/admin_request_handler.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/admin_request_handler.cpp.s
 .PHONY : runtime/base/server/admin_request_handler.cpp.s
 
 runtime/base/server/dynamic_content_cache.o: runtime/base/server/dynamic_content_cache.cpp.o
@@ -1379,7 +1283,7 @@ runtime/base/server/dynamic_content_cache.o: runtime/base/server/dynamic_content
 
 # target to build an object file
 runtime/base/server/dynamic_content_cache.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/dynamic_content_cache.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/dynamic_content_cache.cpp.o
 .PHONY : runtime/base/server/dynamic_content_cache.cpp.o
 
 runtime/base/server/dynamic_content_cache.i: runtime/base/server/dynamic_content_cache.cpp.i
@@ -1387,7 +1291,7 @@ runtime/base/server/dynamic_content_cache.i: runtime/base/server/dynamic_content
 
 # target to preprocess a source file
 runtime/base/server/dynamic_content_cache.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/dynamic_content_cache.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/dynamic_content_cache.cpp.i
 .PHONY : runtime/base/server/dynamic_content_cache.cpp.i
 
 runtime/base/server/dynamic_content_cache.s: runtime/base/server/dynamic_content_cache.cpp.s
@@ -1395,7 +1299,7 @@ runtime/base/server/dynamic_content_cache.s: runtime/base/server/dynamic_content
 
 # target to generate assembly for a file
 runtime/base/server/dynamic_content_cache.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/dynamic_content_cache.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/dynamic_content_cache.cpp.s
 .PHONY : runtime/base/server/dynamic_content_cache.cpp.s
 
 runtime/base/server/files_match.o: runtime/base/server/files_match.cpp.o
@@ -1403,7 +1307,7 @@ runtime/base/server/files_match.o: runtime/base/server/files_match.cpp.o
 
 # target to build an object file
 runtime/base/server/files_match.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/files_match.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/files_match.cpp.o
 .PHONY : runtime/base/server/files_match.cpp.o
 
 runtime/base/server/files_match.i: runtime/base/server/files_match.cpp.i
@@ -1411,7 +1315,7 @@ runtime/base/server/files_match.i: runtime/base/server/files_match.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/files_match.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/files_match.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/files_match.cpp.i
 .PHONY : runtime/base/server/files_match.cpp.i
 
 runtime/base/server/files_match.s: runtime/base/server/files_match.cpp.s
@@ -1419,7 +1323,7 @@ runtime/base/server/files_match.s: runtime/base/server/files_match.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/files_match.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/files_match.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/files_match.cpp.s
 .PHONY : runtime/base/server/files_match.cpp.s
 
 runtime/base/server/http_protocol.o: runtime/base/server/http_protocol.cpp.o
@@ -1427,7 +1331,7 @@ runtime/base/server/http_protocol.o: runtime/base/server/http_protocol.cpp.o
 
 # target to build an object file
 runtime/base/server/http_protocol.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_protocol.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_protocol.cpp.o
 .PHONY : runtime/base/server/http_protocol.cpp.o
 
 runtime/base/server/http_protocol.i: runtime/base/server/http_protocol.cpp.i
@@ -1435,7 +1339,7 @@ runtime/base/server/http_protocol.i: runtime/base/server/http_protocol.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/http_protocol.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_protocol.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_protocol.cpp.i
 .PHONY : runtime/base/server/http_protocol.cpp.i
 
 runtime/base/server/http_protocol.s: runtime/base/server/http_protocol.cpp.s
@@ -1443,7 +1347,7 @@ runtime/base/server/http_protocol.s: runtime/base/server/http_protocol.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/http_protocol.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_protocol.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_protocol.cpp.s
 .PHONY : runtime/base/server/http_protocol.cpp.s
 
 runtime/base/server/http_request_handler.o: runtime/base/server/http_request_handler.cpp.o
@@ -1451,7 +1355,7 @@ runtime/base/server/http_request_handler.o: runtime/base/server/http_request_han
 
 # target to build an object file
 runtime/base/server/http_request_handler.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_request_handler.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_request_handler.cpp.o
 .PHONY : runtime/base/server/http_request_handler.cpp.o
 
 runtime/base/server/http_request_handler.i: runtime/base/server/http_request_handler.cpp.i
@@ -1459,7 +1363,7 @@ runtime/base/server/http_request_handler.i: runtime/base/server/http_request_han
 
 # target to preprocess a source file
 runtime/base/server/http_request_handler.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_request_handler.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_request_handler.cpp.i
 .PHONY : runtime/base/server/http_request_handler.cpp.i
 
 runtime/base/server/http_request_handler.s: runtime/base/server/http_request_handler.cpp.s
@@ -1467,7 +1371,7 @@ runtime/base/server/http_request_handler.s: runtime/base/server/http_request_han
 
 # target to generate assembly for a file
 runtime/base/server/http_request_handler.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_request_handler.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_request_handler.cpp.s
 .PHONY : runtime/base/server/http_request_handler.cpp.s
 
 runtime/base/server/http_server.o: runtime/base/server/http_server.cpp.o
@@ -1475,7 +1379,7 @@ runtime/base/server/http_server.o: runtime/base/server/http_server.cpp.o
 
 # target to build an object file
 runtime/base/server/http_server.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_server.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_server.cpp.o
 .PHONY : runtime/base/server/http_server.cpp.o
 
 runtime/base/server/http_server.i: runtime/base/server/http_server.cpp.i
@@ -1483,7 +1387,7 @@ runtime/base/server/http_server.i: runtime/base/server/http_server.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/http_server.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_server.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_server.cpp.i
 .PHONY : runtime/base/server/http_server.cpp.i
 
 runtime/base/server/http_server.s: runtime/base/server/http_server.cpp.s
@@ -1491,7 +1395,7 @@ runtime/base/server/http_server.s: runtime/base/server/http_server.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/http_server.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_server.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/http_server.cpp.s
 .PHONY : runtime/base/server/http_server.cpp.s
 
 runtime/base/server/ip_block_map.o: runtime/base/server/ip_block_map.cpp.o
@@ -1499,7 +1403,7 @@ runtime/base/server/ip_block_map.o: runtime/base/server/ip_block_map.cpp.o
 
 # target to build an object file
 runtime/base/server/ip_block_map.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/ip_block_map.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/ip_block_map.cpp.o
 .PHONY : runtime/base/server/ip_block_map.cpp.o
 
 runtime/base/server/ip_block_map.i: runtime/base/server/ip_block_map.cpp.i
@@ -1507,7 +1411,7 @@ runtime/base/server/ip_block_map.i: runtime/base/server/ip_block_map.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/ip_block_map.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/ip_block_map.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/ip_block_map.cpp.i
 .PHONY : runtime/base/server/ip_block_map.cpp.i
 
 runtime/base/server/ip_block_map.s: runtime/base/server/ip_block_map.cpp.s
@@ -1515,7 +1419,7 @@ runtime/base/server/ip_block_map.s: runtime/base/server/ip_block_map.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/ip_block_map.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/ip_block_map.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/ip_block_map.cpp.s
 .PHONY : runtime/base/server/ip_block_map.cpp.s
 
 runtime/base/server/libevent_server.o: runtime/base/server/libevent_server.cpp.o
@@ -1523,7 +1427,7 @@ runtime/base/server/libevent_server.o: runtime/base/server/libevent_server.cpp.o
 
 # target to build an object file
 runtime/base/server/libevent_server.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server.cpp.o
 .PHONY : runtime/base/server/libevent_server.cpp.o
 
 runtime/base/server/libevent_server.i: runtime/base/server/libevent_server.cpp.i
@@ -1531,7 +1435,7 @@ runtime/base/server/libevent_server.i: runtime/base/server/libevent_server.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/libevent_server.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server.cpp.i
 .PHONY : runtime/base/server/libevent_server.cpp.i
 
 runtime/base/server/libevent_server.s: runtime/base/server/libevent_server.cpp.s
@@ -1539,7 +1443,7 @@ runtime/base/server/libevent_server.s: runtime/base/server/libevent_server.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/libevent_server.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server.cpp.s
 .PHONY : runtime/base/server/libevent_server.cpp.s
 
 runtime/base/server/libevent_server_with_fd.o: runtime/base/server/libevent_server_with_fd.cpp.o
@@ -1547,7 +1451,7 @@ runtime/base/server/libevent_server_with_fd.o: runtime/base/server/libevent_serv
 
 # target to build an object file
 runtime/base/server/libevent_server_with_fd.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_fd.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_fd.cpp.o
 .PHONY : runtime/base/server/libevent_server_with_fd.cpp.o
 
 runtime/base/server/libevent_server_with_fd.i: runtime/base/server/libevent_server_with_fd.cpp.i
@@ -1555,7 +1459,7 @@ runtime/base/server/libevent_server_with_fd.i: runtime/base/server/libevent_serv
 
 # target to preprocess a source file
 runtime/base/server/libevent_server_with_fd.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_fd.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_fd.cpp.i
 .PHONY : runtime/base/server/libevent_server_with_fd.cpp.i
 
 runtime/base/server/libevent_server_with_fd.s: runtime/base/server/libevent_server_with_fd.cpp.s
@@ -1563,7 +1467,7 @@ runtime/base/server/libevent_server_with_fd.s: runtime/base/server/libevent_serv
 
 # target to generate assembly for a file
 runtime/base/server/libevent_server_with_fd.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_fd.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_fd.cpp.s
 .PHONY : runtime/base/server/libevent_server_with_fd.cpp.s
 
 runtime/base/server/libevent_server_with_takeover.o: runtime/base/server/libevent_server_with_takeover.cpp.o
@@ -1571,7 +1475,7 @@ runtime/base/server/libevent_server_with_takeover.o: runtime/base/server/libeven
 
 # target to build an object file
 runtime/base/server/libevent_server_with_takeover.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_takeover.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_takeover.cpp.o
 .PHONY : runtime/base/server/libevent_server_with_takeover.cpp.o
 
 runtime/base/server/libevent_server_with_takeover.i: runtime/base/server/libevent_server_with_takeover.cpp.i
@@ -1579,7 +1483,7 @@ runtime/base/server/libevent_server_with_takeover.i: runtime/base/server/libeven
 
 # target to preprocess a source file
 runtime/base/server/libevent_server_with_takeover.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_takeover.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_takeover.cpp.i
 .PHONY : runtime/base/server/libevent_server_with_takeover.cpp.i
 
 runtime/base/server/libevent_server_with_takeover.s: runtime/base/server/libevent_server_with_takeover.cpp.s
@@ -1587,7 +1491,7 @@ runtime/base/server/libevent_server_with_takeover.s: runtime/base/server/libeven
 
 # target to generate assembly for a file
 runtime/base/server/libevent_server_with_takeover.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_takeover.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_server_with_takeover.cpp.s
 .PHONY : runtime/base/server/libevent_server_with_takeover.cpp.s
 
 runtime/base/server/libevent_transport.o: runtime/base/server/libevent_transport.cpp.o
@@ -1595,7 +1499,7 @@ runtime/base/server/libevent_transport.o: runtime/base/server/libevent_transport
 
 # target to build an object file
 runtime/base/server/libevent_transport.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_transport.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_transport.cpp.o
 .PHONY : runtime/base/server/libevent_transport.cpp.o
 
 runtime/base/server/libevent_transport.i: runtime/base/server/libevent_transport.cpp.i
@@ -1603,7 +1507,7 @@ runtime/base/server/libevent_transport.i: runtime/base/server/libevent_transport
 
 # target to preprocess a source file
 runtime/base/server/libevent_transport.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_transport.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_transport.cpp.i
 .PHONY : runtime/base/server/libevent_transport.cpp.i
 
 runtime/base/server/libevent_transport.s: runtime/base/server/libevent_transport.cpp.s
@@ -1611,7 +1515,7 @@ runtime/base/server/libevent_transport.s: runtime/base/server/libevent_transport
 
 # target to generate assembly for a file
 runtime/base/server/libevent_transport.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_transport.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/libevent_transport.cpp.s
 .PHONY : runtime/base/server/libevent_transport.cpp.s
 
 runtime/base/server/pagelet_server.o: runtime/base/server/pagelet_server.cpp.o
@@ -1619,7 +1523,7 @@ runtime/base/server/pagelet_server.o: runtime/base/server/pagelet_server.cpp.o
 
 # target to build an object file
 runtime/base/server/pagelet_server.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/pagelet_server.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/pagelet_server.cpp.o
 .PHONY : runtime/base/server/pagelet_server.cpp.o
 
 runtime/base/server/pagelet_server.i: runtime/base/server/pagelet_server.cpp.i
@@ -1627,7 +1531,7 @@ runtime/base/server/pagelet_server.i: runtime/base/server/pagelet_server.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/pagelet_server.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/pagelet_server.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/pagelet_server.cpp.i
 .PHONY : runtime/base/server/pagelet_server.cpp.i
 
 runtime/base/server/pagelet_server.s: runtime/base/server/pagelet_server.cpp.s
@@ -1635,7 +1539,7 @@ runtime/base/server/pagelet_server.s: runtime/base/server/pagelet_server.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/pagelet_server.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/pagelet_server.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/pagelet_server.cpp.s
 .PHONY : runtime/base/server/pagelet_server.cpp.s
 
 runtime/base/server/replay_transport.o: runtime/base/server/replay_transport.cpp.o
@@ -1643,7 +1547,7 @@ runtime/base/server/replay_transport.o: runtime/base/server/replay_transport.cpp
 
 # target to build an object file
 runtime/base/server/replay_transport.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/replay_transport.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/replay_transport.cpp.o
 .PHONY : runtime/base/server/replay_transport.cpp.o
 
 runtime/base/server/replay_transport.i: runtime/base/server/replay_transport.cpp.i
@@ -1651,7 +1555,7 @@ runtime/base/server/replay_transport.i: runtime/base/server/replay_transport.cpp
 
 # target to preprocess a source file
 runtime/base/server/replay_transport.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/replay_transport.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/replay_transport.cpp.i
 .PHONY : runtime/base/server/replay_transport.cpp.i
 
 runtime/base/server/replay_transport.s: runtime/base/server/replay_transport.cpp.s
@@ -1659,7 +1563,7 @@ runtime/base/server/replay_transport.s: runtime/base/server/replay_transport.cpp
 
 # target to generate assembly for a file
 runtime/base/server/replay_transport.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/replay_transport.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/replay_transport.cpp.s
 .PHONY : runtime/base/server/replay_transport.cpp.s
 
 runtime/base/server/request_uri.o: runtime/base/server/request_uri.cpp.o
@@ -1667,7 +1571,7 @@ runtime/base/server/request_uri.o: runtime/base/server/request_uri.cpp.o
 
 # target to build an object file
 runtime/base/server/request_uri.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/request_uri.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/request_uri.cpp.o
 .PHONY : runtime/base/server/request_uri.cpp.o
 
 runtime/base/server/request_uri.i: runtime/base/server/request_uri.cpp.i
@@ -1675,7 +1579,7 @@ runtime/base/server/request_uri.i: runtime/base/server/request_uri.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/request_uri.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/request_uri.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/request_uri.cpp.i
 .PHONY : runtime/base/server/request_uri.cpp.i
 
 runtime/base/server/request_uri.s: runtime/base/server/request_uri.cpp.s
@@ -1683,7 +1587,7 @@ runtime/base/server/request_uri.s: runtime/base/server/request_uri.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/request_uri.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/request_uri.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/request_uri.cpp.s
 .PHONY : runtime/base/server/request_uri.cpp.s
 
 runtime/base/server/rpc_request_handler.o: runtime/base/server/rpc_request_handler.cpp.o
@@ -1691,7 +1595,7 @@ runtime/base/server/rpc_request_handler.o: runtime/base/server/rpc_request_handl
 
 # target to build an object file
 runtime/base/server/rpc_request_handler.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/rpc_request_handler.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/rpc_request_handler.cpp.o
 .PHONY : runtime/base/server/rpc_request_handler.cpp.o
 
 runtime/base/server/rpc_request_handler.i: runtime/base/server/rpc_request_handler.cpp.i
@@ -1699,7 +1603,7 @@ runtime/base/server/rpc_request_handler.i: runtime/base/server/rpc_request_handl
 
 # target to preprocess a source file
 runtime/base/server/rpc_request_handler.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/rpc_request_handler.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/rpc_request_handler.cpp.i
 .PHONY : runtime/base/server/rpc_request_handler.cpp.i
 
 runtime/base/server/rpc_request_handler.s: runtime/base/server/rpc_request_handler.cpp.s
@@ -1707,7 +1611,7 @@ runtime/base/server/rpc_request_handler.s: runtime/base/server/rpc_request_handl
 
 # target to generate assembly for a file
 runtime/base/server/rpc_request_handler.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/rpc_request_handler.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/rpc_request_handler.cpp.s
 .PHONY : runtime/base/server/rpc_request_handler.cpp.s
 
 runtime/base/server/satellite_server.o: runtime/base/server/satellite_server.cpp.o
@@ -1715,7 +1619,7 @@ runtime/base/server/satellite_server.o: runtime/base/server/satellite_server.cpp
 
 # target to build an object file
 runtime/base/server/satellite_server.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/satellite_server.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/satellite_server.cpp.o
 .PHONY : runtime/base/server/satellite_server.cpp.o
 
 runtime/base/server/satellite_server.i: runtime/base/server/satellite_server.cpp.i
@@ -1723,7 +1627,7 @@ runtime/base/server/satellite_server.i: runtime/base/server/satellite_server.cpp
 
 # target to preprocess a source file
 runtime/base/server/satellite_server.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/satellite_server.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/satellite_server.cpp.i
 .PHONY : runtime/base/server/satellite_server.cpp.i
 
 runtime/base/server/satellite_server.s: runtime/base/server/satellite_server.cpp.s
@@ -1731,7 +1635,7 @@ runtime/base/server/satellite_server.s: runtime/base/server/satellite_server.cpp
 
 # target to generate assembly for a file
 runtime/base/server/satellite_server.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/satellite_server.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/satellite_server.cpp.s
 .PHONY : runtime/base/server/satellite_server.cpp.s
 
 runtime/base/server/server.o: runtime/base/server/server.cpp.o
@@ -1739,7 +1643,7 @@ runtime/base/server/server.o: runtime/base/server/server.cpp.o
 
 # target to build an object file
 runtime/base/server/server.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server.cpp.o
 .PHONY : runtime/base/server/server.cpp.o
 
 runtime/base/server/server.i: runtime/base/server/server.cpp.i
@@ -1747,7 +1651,7 @@ runtime/base/server/server.i: runtime/base/server/server.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/server.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server.cpp.i
 .PHONY : runtime/base/server/server.cpp.i
 
 runtime/base/server/server.s: runtime/base/server/server.cpp.s
@@ -1755,7 +1659,7 @@ runtime/base/server/server.s: runtime/base/server/server.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/server.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server.cpp.s
 .PHONY : runtime/base/server/server.cpp.s
 
 runtime/base/server/server_note.o: runtime/base/server/server_note.cpp.o
@@ -1763,7 +1667,7 @@ runtime/base/server/server_note.o: runtime/base/server/server_note.cpp.o
 
 # target to build an object file
 runtime/base/server/server_note.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_note.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_note.cpp.o
 .PHONY : runtime/base/server/server_note.cpp.o
 
 runtime/base/server/server_note.i: runtime/base/server/server_note.cpp.i
@@ -1771,7 +1675,7 @@ runtime/base/server/server_note.i: runtime/base/server/server_note.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/server_note.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_note.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_note.cpp.i
 .PHONY : runtime/base/server/server_note.cpp.i
 
 runtime/base/server/server_note.s: runtime/base/server/server_note.cpp.s
@@ -1779,7 +1683,7 @@ runtime/base/server/server_note.s: runtime/base/server/server_note.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/server_note.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_note.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_note.cpp.s
 .PHONY : runtime/base/server/server_note.cpp.s
 
 runtime/base/server/server_stats.o: runtime/base/server/server_stats.cpp.o
@@ -1787,7 +1691,7 @@ runtime/base/server/server_stats.o: runtime/base/server/server_stats.cpp.o
 
 # target to build an object file
 runtime/base/server/server_stats.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_stats.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_stats.cpp.o
 .PHONY : runtime/base/server/server_stats.cpp.o
 
 runtime/base/server/server_stats.i: runtime/base/server/server_stats.cpp.i
@@ -1795,7 +1699,7 @@ runtime/base/server/server_stats.i: runtime/base/server/server_stats.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/server_stats.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_stats.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_stats.cpp.i
 .PHONY : runtime/base/server/server_stats.cpp.i
 
 runtime/base/server/server_stats.s: runtime/base/server/server_stats.cpp.s
@@ -1803,7 +1707,7 @@ runtime/base/server/server_stats.s: runtime/base/server/server_stats.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/server_stats.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_stats.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/server_stats.cpp.s
 .PHONY : runtime/base/server/server_stats.cpp.s
 
 runtime/base/server/service_thread.o: runtime/base/server/service_thread.cpp.o
@@ -1811,7 +1715,7 @@ runtime/base/server/service_thread.o: runtime/base/server/service_thread.cpp.o
 
 # target to build an object file
 runtime/base/server/service_thread.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/service_thread.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/service_thread.cpp.o
 .PHONY : runtime/base/server/service_thread.cpp.o
 
 runtime/base/server/service_thread.i: runtime/base/server/service_thread.cpp.i
@@ -1819,7 +1723,7 @@ runtime/base/server/service_thread.i: runtime/base/server/service_thread.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/service_thread.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/service_thread.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/service_thread.cpp.i
 .PHONY : runtime/base/server/service_thread.cpp.i
 
 runtime/base/server/service_thread.s: runtime/base/server/service_thread.cpp.s
@@ -1827,7 +1731,7 @@ runtime/base/server/service_thread.s: runtime/base/server/service_thread.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/service_thread.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/service_thread.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/service_thread.cpp.s
 .PHONY : runtime/base/server/service_thread.cpp.s
 
 runtime/base/server/source_root_info.o: runtime/base/server/source_root_info.cpp.o
@@ -1835,7 +1739,7 @@ runtime/base/server/source_root_info.o: runtime/base/server/source_root_info.cpp
 
 # target to build an object file
 runtime/base/server/source_root_info.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/source_root_info.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/source_root_info.cpp.o
 .PHONY : runtime/base/server/source_root_info.cpp.o
 
 runtime/base/server/source_root_info.i: runtime/base/server/source_root_info.cpp.i
@@ -1843,7 +1747,7 @@ runtime/base/server/source_root_info.i: runtime/base/server/source_root_info.cpp
 
 # target to preprocess a source file
 runtime/base/server/source_root_info.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/source_root_info.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/source_root_info.cpp.i
 .PHONY : runtime/base/server/source_root_info.cpp.i
 
 runtime/base/server/source_root_info.s: runtime/base/server/source_root_info.cpp.s
@@ -1851,7 +1755,7 @@ runtime/base/server/source_root_info.s: runtime/base/server/source_root_info.cpp
 
 # target to generate assembly for a file
 runtime/base/server/source_root_info.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/source_root_info.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/source_root_info.cpp.s
 .PHONY : runtime/base/server/source_root_info.cpp.s
 
 runtime/base/server/static_content_cache.o: runtime/base/server/static_content_cache.cpp.o
@@ -1859,7 +1763,7 @@ runtime/base/server/static_content_cache.o: runtime/base/server/static_content_c
 
 # target to build an object file
 runtime/base/server/static_content_cache.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/static_content_cache.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/static_content_cache.cpp.o
 .PHONY : runtime/base/server/static_content_cache.cpp.o
 
 runtime/base/server/static_content_cache.i: runtime/base/server/static_content_cache.cpp.i
@@ -1867,7 +1771,7 @@ runtime/base/server/static_content_cache.i: runtime/base/server/static_content_c
 
 # target to preprocess a source file
 runtime/base/server/static_content_cache.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/static_content_cache.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/static_content_cache.cpp.i
 .PHONY : runtime/base/server/static_content_cache.cpp.i
 
 runtime/base/server/static_content_cache.s: runtime/base/server/static_content_cache.cpp.s
@@ -1875,7 +1779,7 @@ runtime/base/server/static_content_cache.s: runtime/base/server/static_content_c
 
 # target to generate assembly for a file
 runtime/base/server/static_content_cache.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/static_content_cache.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/static_content_cache.cpp.s
 .PHONY : runtime/base/server/static_content_cache.cpp.s
 
 runtime/base/server/transport.o: runtime/base/server/transport.cpp.o
@@ -1883,7 +1787,7 @@ runtime/base/server/transport.o: runtime/base/server/transport.cpp.o
 
 # target to build an object file
 runtime/base/server/transport.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/transport.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/transport.cpp.o
 .PHONY : runtime/base/server/transport.cpp.o
 
 runtime/base/server/transport.i: runtime/base/server/transport.cpp.i
@@ -1891,7 +1795,7 @@ runtime/base/server/transport.i: runtime/base/server/transport.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/transport.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/transport.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/transport.cpp.i
 .PHONY : runtime/base/server/transport.cpp.i
 
 runtime/base/server/transport.s: runtime/base/server/transport.cpp.s
@@ -1899,7 +1803,7 @@ runtime/base/server/transport.s: runtime/base/server/transport.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/transport.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/transport.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/transport.cpp.s
 .PHONY : runtime/base/server/transport.cpp.s
 
 runtime/base/server/upload.o: runtime/base/server/upload.cpp.o
@@ -1907,7 +1811,7 @@ runtime/base/server/upload.o: runtime/base/server/upload.cpp.o
 
 # target to build an object file
 runtime/base/server/upload.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/upload.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/upload.cpp.o
 .PHONY : runtime/base/server/upload.cpp.o
 
 runtime/base/server/upload.i: runtime/base/server/upload.cpp.i
@@ -1915,7 +1819,7 @@ runtime/base/server/upload.i: runtime/base/server/upload.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/upload.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/upload.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/upload.cpp.i
 .PHONY : runtime/base/server/upload.cpp.i
 
 runtime/base/server/upload.s: runtime/base/server/upload.cpp.s
@@ -1923,7 +1827,7 @@ runtime/base/server/upload.s: runtime/base/server/upload.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/upload.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/upload.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/upload.cpp.s
 .PHONY : runtime/base/server/upload.cpp.s
 
 runtime/base/server/virtual_host.o: runtime/base/server/virtual_host.cpp.o
@@ -1931,7 +1835,7 @@ runtime/base/server/virtual_host.o: runtime/base/server/virtual_host.cpp.o
 
 # target to build an object file
 runtime/base/server/virtual_host.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/virtual_host.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/virtual_host.cpp.o
 .PHONY : runtime/base/server/virtual_host.cpp.o
 
 runtime/base/server/virtual_host.i: runtime/base/server/virtual_host.cpp.i
@@ -1939,7 +1843,7 @@ runtime/base/server/virtual_host.i: runtime/base/server/virtual_host.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/virtual_host.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/virtual_host.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/virtual_host.cpp.i
 .PHONY : runtime/base/server/virtual_host.cpp.i
 
 runtime/base/server/virtual_host.s: runtime/base/server/virtual_host.cpp.s
@@ -1947,7 +1851,7 @@ runtime/base/server/virtual_host.s: runtime/base/server/virtual_host.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/virtual_host.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/virtual_host.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/virtual_host.cpp.s
 .PHONY : runtime/base/server/virtual_host.cpp.s
 
 runtime/base/server/xbox_server.o: runtime/base/server/xbox_server.cpp.o
@@ -1955,7 +1859,7 @@ runtime/base/server/xbox_server.o: runtime/base/server/xbox_server.cpp.o
 
 # target to build an object file
 runtime/base/server/xbox_server.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/xbox_server.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/xbox_server.cpp.o
 .PHONY : runtime/base/server/xbox_server.cpp.o
 
 runtime/base/server/xbox_server.i: runtime/base/server/xbox_server.cpp.i
@@ -1963,7 +1867,7 @@ runtime/base/server/xbox_server.i: runtime/base/server/xbox_server.cpp.i
 
 # target to preprocess a source file
 runtime/base/server/xbox_server.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/xbox_server.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/xbox_server.cpp.i
 .PHONY : runtime/base/server/xbox_server.cpp.i
 
 runtime/base/server/xbox_server.s: runtime/base/server/xbox_server.cpp.s
@@ -1971,7 +1875,7 @@ runtime/base/server/xbox_server.s: runtime/base/server/xbox_server.cpp.s
 
 # target to generate assembly for a file
 runtime/base/server/xbox_server.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/xbox_server.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/server/xbox_server.cpp.s
 .PHONY : runtime/base/server/xbox_server.cpp.s
 
 runtime/base/shared/concurrent_shared_store.o: runtime/base/shared/concurrent_shared_store.cpp.o
@@ -1979,7 +1883,7 @@ runtime/base/shared/concurrent_shared_store.o: runtime/base/shared/concurrent_sh
 
 # target to build an object file
 runtime/base/shared/concurrent_shared_store.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/concurrent_shared_store.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/concurrent_shared_store.cpp.o
 .PHONY : runtime/base/shared/concurrent_shared_store.cpp.o
 
 runtime/base/shared/concurrent_shared_store.i: runtime/base/shared/concurrent_shared_store.cpp.i
@@ -1987,7 +1891,7 @@ runtime/base/shared/concurrent_shared_store.i: runtime/base/shared/concurrent_sh
 
 # target to preprocess a source file
 runtime/base/shared/concurrent_shared_store.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/concurrent_shared_store.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/concurrent_shared_store.cpp.i
 .PHONY : runtime/base/shared/concurrent_shared_store.cpp.i
 
 runtime/base/shared/concurrent_shared_store.s: runtime/base/shared/concurrent_shared_store.cpp.s
@@ -1995,7 +1899,7 @@ runtime/base/shared/concurrent_shared_store.s: runtime/base/shared/concurrent_sh
 
 # target to generate assembly for a file
 runtime/base/shared/concurrent_shared_store.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/concurrent_shared_store.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/concurrent_shared_store.cpp.s
 .PHONY : runtime/base/shared/concurrent_shared_store.cpp.s
 
 runtime/base/shared/immutable_map.o: runtime/base/shared/immutable_map.cpp.o
@@ -2003,7 +1907,7 @@ runtime/base/shared/immutable_map.o: runtime/base/shared/immutable_map.cpp.o
 
 # target to build an object file
 runtime/base/shared/immutable_map.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_map.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_map.cpp.o
 .PHONY : runtime/base/shared/immutable_map.cpp.o
 
 runtime/base/shared/immutable_map.i: runtime/base/shared/immutable_map.cpp.i
@@ -2011,7 +1915,7 @@ runtime/base/shared/immutable_map.i: runtime/base/shared/immutable_map.cpp.i
 
 # target to preprocess a source file
 runtime/base/shared/immutable_map.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_map.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_map.cpp.i
 .PHONY : runtime/base/shared/immutable_map.cpp.i
 
 runtime/base/shared/immutable_map.s: runtime/base/shared/immutable_map.cpp.s
@@ -2019,7 +1923,7 @@ runtime/base/shared/immutable_map.s: runtime/base/shared/immutable_map.cpp.s
 
 # target to generate assembly for a file
 runtime/base/shared/immutable_map.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_map.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_map.cpp.s
 .PHONY : runtime/base/shared/immutable_map.cpp.s
 
 runtime/base/shared/immutable_obj.o: runtime/base/shared/immutable_obj.cpp.o
@@ -2027,7 +1931,7 @@ runtime/base/shared/immutable_obj.o: runtime/base/shared/immutable_obj.cpp.o
 
 # target to build an object file
 runtime/base/shared/immutable_obj.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_obj.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_obj.cpp.o
 .PHONY : runtime/base/shared/immutable_obj.cpp.o
 
 runtime/base/shared/immutable_obj.i: runtime/base/shared/immutable_obj.cpp.i
@@ -2035,7 +1939,7 @@ runtime/base/shared/immutable_obj.i: runtime/base/shared/immutable_obj.cpp.i
 
 # target to preprocess a source file
 runtime/base/shared/immutable_obj.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_obj.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_obj.cpp.i
 .PHONY : runtime/base/shared/immutable_obj.cpp.i
 
 runtime/base/shared/immutable_obj.s: runtime/base/shared/immutable_obj.cpp.s
@@ -2043,7 +1947,7 @@ runtime/base/shared/immutable_obj.s: runtime/base/shared/immutable_obj.cpp.s
 
 # target to generate assembly for a file
 runtime/base/shared/immutable_obj.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_obj.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/immutable_obj.cpp.s
 .PHONY : runtime/base/shared/immutable_obj.cpp.s
 
 runtime/base/shared/shared_map.o: runtime/base/shared/shared_map.cpp.o
@@ -2051,7 +1955,7 @@ runtime/base/shared/shared_map.o: runtime/base/shared/shared_map.cpp.o
 
 # target to build an object file
 runtime/base/shared/shared_map.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_map.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_map.cpp.o
 .PHONY : runtime/base/shared/shared_map.cpp.o
 
 runtime/base/shared/shared_map.i: runtime/base/shared/shared_map.cpp.i
@@ -2059,7 +1963,7 @@ runtime/base/shared/shared_map.i: runtime/base/shared/shared_map.cpp.i
 
 # target to preprocess a source file
 runtime/base/shared/shared_map.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_map.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_map.cpp.i
 .PHONY : runtime/base/shared/shared_map.cpp.i
 
 runtime/base/shared/shared_map.s: runtime/base/shared/shared_map.cpp.s
@@ -2067,7 +1971,7 @@ runtime/base/shared/shared_map.s: runtime/base/shared/shared_map.cpp.s
 
 # target to generate assembly for a file
 runtime/base/shared/shared_map.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_map.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_map.cpp.s
 .PHONY : runtime/base/shared/shared_map.cpp.s
 
 runtime/base/shared/shared_store.o: runtime/base/shared/shared_store.cpp.o
@@ -2075,7 +1979,7 @@ runtime/base/shared/shared_store.o: runtime/base/shared/shared_store.cpp.o
 
 # target to build an object file
 runtime/base/shared/shared_store.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store.cpp.o
 .PHONY : runtime/base/shared/shared_store.cpp.o
 
 runtime/base/shared/shared_store.i: runtime/base/shared/shared_store.cpp.i
@@ -2083,7 +1987,7 @@ runtime/base/shared/shared_store.i: runtime/base/shared/shared_store.cpp.i
 
 # target to preprocess a source file
 runtime/base/shared/shared_store.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store.cpp.i
 .PHONY : runtime/base/shared/shared_store.cpp.i
 
 runtime/base/shared/shared_store.s: runtime/base/shared/shared_store.cpp.s
@@ -2091,7 +1995,7 @@ runtime/base/shared/shared_store.s: runtime/base/shared/shared_store.cpp.s
 
 # target to generate assembly for a file
 runtime/base/shared/shared_store.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store.cpp.s
 .PHONY : runtime/base/shared/shared_store.cpp.s
 
 runtime/base/shared/shared_store_base.o: runtime/base/shared/shared_store_base.cpp.o
@@ -2099,7 +2003,7 @@ runtime/base/shared/shared_store_base.o: runtime/base/shared/shared_store_base.c
 
 # target to build an object file
 runtime/base/shared/shared_store_base.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_base.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_base.cpp.o
 .PHONY : runtime/base/shared/shared_store_base.cpp.o
 
 runtime/base/shared/shared_store_base.i: runtime/base/shared/shared_store_base.cpp.i
@@ -2107,7 +2011,7 @@ runtime/base/shared/shared_store_base.i: runtime/base/shared/shared_store_base.c
 
 # target to preprocess a source file
 runtime/base/shared/shared_store_base.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_base.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_base.cpp.i
 .PHONY : runtime/base/shared/shared_store_base.cpp.i
 
 runtime/base/shared/shared_store_base.s: runtime/base/shared/shared_store_base.cpp.s
@@ -2115,7 +2019,7 @@ runtime/base/shared/shared_store_base.s: runtime/base/shared/shared_store_base.c
 
 # target to generate assembly for a file
 runtime/base/shared/shared_store_base.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_base.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_base.cpp.s
 .PHONY : runtime/base/shared/shared_store_base.cpp.s
 
 runtime/base/shared/shared_store_stats.o: runtime/base/shared/shared_store_stats.cpp.o
@@ -2123,7 +2027,7 @@ runtime/base/shared/shared_store_stats.o: runtime/base/shared/shared_store_stats
 
 # target to build an object file
 runtime/base/shared/shared_store_stats.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_stats.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_stats.cpp.o
 .PHONY : runtime/base/shared/shared_store_stats.cpp.o
 
 runtime/base/shared/shared_store_stats.i: runtime/base/shared/shared_store_stats.cpp.i
@@ -2131,7 +2035,7 @@ runtime/base/shared/shared_store_stats.i: runtime/base/shared/shared_store_stats
 
 # target to preprocess a source file
 runtime/base/shared/shared_store_stats.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_stats.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_stats.cpp.i
 .PHONY : runtime/base/shared/shared_store_stats.cpp.i
 
 runtime/base/shared/shared_store_stats.s: runtime/base/shared/shared_store_stats.cpp.s
@@ -2139,7 +2043,7 @@ runtime/base/shared/shared_store_stats.s: runtime/base/shared/shared_store_stats
 
 # target to generate assembly for a file
 runtime/base/shared/shared_store_stats.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_stats.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_store_stats.cpp.s
 .PHONY : runtime/base/shared/shared_store_stats.cpp.s
 
 runtime/base/shared/shared_string.o: runtime/base/shared/shared_string.cpp.o
@@ -2147,7 +2051,7 @@ runtime/base/shared/shared_string.o: runtime/base/shared/shared_string.cpp.o
 
 # target to build an object file
 runtime/base/shared/shared_string.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_string.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_string.cpp.o
 .PHONY : runtime/base/shared/shared_string.cpp.o
 
 runtime/base/shared/shared_string.i: runtime/base/shared/shared_string.cpp.i
@@ -2155,7 +2059,7 @@ runtime/base/shared/shared_string.i: runtime/base/shared/shared_string.cpp.i
 
 # target to preprocess a source file
 runtime/base/shared/shared_string.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_string.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_string.cpp.i
 .PHONY : runtime/base/shared/shared_string.cpp.i
 
 runtime/base/shared/shared_string.s: runtime/base/shared/shared_string.cpp.s
@@ -2163,7 +2067,7 @@ runtime/base/shared/shared_string.s: runtime/base/shared/shared_string.cpp.s
 
 # target to generate assembly for a file
 runtime/base/shared/shared_string.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_string.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_string.cpp.s
 .PHONY : runtime/base/shared/shared_string.cpp.s
 
 runtime/base/shared/shared_variant.o: runtime/base/shared/shared_variant.cpp.o
@@ -2171,7 +2075,7 @@ runtime/base/shared/shared_variant.o: runtime/base/shared/shared_variant.cpp.o
 
 # target to build an object file
 runtime/base/shared/shared_variant.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_variant.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_variant.cpp.o
 .PHONY : runtime/base/shared/shared_variant.cpp.o
 
 runtime/base/shared/shared_variant.i: runtime/base/shared/shared_variant.cpp.i
@@ -2179,7 +2083,7 @@ runtime/base/shared/shared_variant.i: runtime/base/shared/shared_variant.cpp.i
 
 # target to preprocess a source file
 runtime/base/shared/shared_variant.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_variant.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_variant.cpp.i
 .PHONY : runtime/base/shared/shared_variant.cpp.i
 
 runtime/base/shared/shared_variant.s: runtime/base/shared/shared_variant.cpp.s
@@ -2187,7 +2091,7 @@ runtime/base/shared/shared_variant.s: runtime/base/shared/shared_variant.cpp.s
 
 # target to generate assembly for a file
 runtime/base/shared/shared_variant.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_variant.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/shared/shared_variant.cpp.s
 .PHONY : runtime/base/shared/shared_variant.cpp.s
 
 runtime/base/source_info.o: runtime/base/source_info.cpp.o
@@ -2195,7 +2099,7 @@ runtime/base/source_info.o: runtime/base/source_info.cpp.o
 
 # target to build an object file
 runtime/base/source_info.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/source_info.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/source_info.cpp.o
 .PHONY : runtime/base/source_info.cpp.o
 
 runtime/base/source_info.i: runtime/base/source_info.cpp.i
@@ -2203,7 +2107,7 @@ runtime/base/source_info.i: runtime/base/source_info.cpp.i
 
 # target to preprocess a source file
 runtime/base/source_info.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/source_info.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/source_info.cpp.i
 .PHONY : runtime/base/source_info.cpp.i
 
 runtime/base/source_info.s: runtime/base/source_info.cpp.s
@@ -2211,7 +2115,7 @@ runtime/base/source_info.s: runtime/base/source_info.cpp.s
 
 # target to generate assembly for a file
 runtime/base/source_info.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/source_info.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/source_info.cpp.s
 .PHONY : runtime/base/source_info.cpp.s
 
 runtime/base/string_data.o: runtime/base/string_data.cpp.o
@@ -2219,7 +2123,7 @@ runtime/base/string_data.o: runtime/base/string_data.cpp.o
 
 # target to build an object file
 runtime/base/string_data.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_data.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_data.cpp.o
 .PHONY : runtime/base/string_data.cpp.o
 
 runtime/base/string_data.i: runtime/base/string_data.cpp.i
@@ -2227,7 +2131,7 @@ runtime/base/string_data.i: runtime/base/string_data.cpp.i
 
 # target to preprocess a source file
 runtime/base/string_data.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_data.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_data.cpp.i
 .PHONY : runtime/base/string_data.cpp.i
 
 runtime/base/string_data.s: runtime/base/string_data.cpp.s
@@ -2235,7 +2139,7 @@ runtime/base/string_data.s: runtime/base/string_data.cpp.s
 
 # target to generate assembly for a file
 runtime/base/string_data.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_data.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_data.cpp.s
 .PHONY : runtime/base/string_data.cpp.s
 
 runtime/base/string_offset.o: runtime/base/string_offset.cpp.o
@@ -2243,7 +2147,7 @@ runtime/base/string_offset.o: runtime/base/string_offset.cpp.o
 
 # target to build an object file
 runtime/base/string_offset.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_offset.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_offset.cpp.o
 .PHONY : runtime/base/string_offset.cpp.o
 
 runtime/base/string_offset.i: runtime/base/string_offset.cpp.i
@@ -2251,7 +2155,7 @@ runtime/base/string_offset.i: runtime/base/string_offset.cpp.i
 
 # target to preprocess a source file
 runtime/base/string_offset.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_offset.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_offset.cpp.i
 .PHONY : runtime/base/string_offset.cpp.i
 
 runtime/base/string_offset.s: runtime/base/string_offset.cpp.s
@@ -2259,7 +2163,7 @@ runtime/base/string_offset.s: runtime/base/string_offset.cpp.s
 
 # target to generate assembly for a file
 runtime/base/string_offset.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_offset.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_offset.cpp.s
 .PHONY : runtime/base/string_offset.cpp.s
 
 runtime/base/string_util.o: runtime/base/string_util.cpp.o
@@ -2267,7 +2171,7 @@ runtime/base/string_util.o: runtime/base/string_util.cpp.o
 
 # target to build an object file
 runtime/base/string_util.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_util.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_util.cpp.o
 .PHONY : runtime/base/string_util.cpp.o
 
 runtime/base/string_util.i: runtime/base/string_util.cpp.i
@@ -2275,7 +2179,7 @@ runtime/base/string_util.i: runtime/base/string_util.cpp.i
 
 # target to preprocess a source file
 runtime/base/string_util.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_util.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_util.cpp.i
 .PHONY : runtime/base/string_util.cpp.i
 
 runtime/base/string_util.s: runtime/base/string_util.cpp.s
@@ -2283,7 +2187,7 @@ runtime/base/string_util.s: runtime/base/string_util.cpp.s
 
 # target to generate assembly for a file
 runtime/base/string_util.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_util.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/string_util.cpp.s
 .PHONY : runtime/base/string_util.cpp.s
 
 runtime/base/taint/taint_data.o: runtime/base/taint/taint_data.cpp.o
@@ -2291,7 +2195,7 @@ runtime/base/taint/taint_data.o: runtime/base/taint/taint_data.cpp.o
 
 # target to build an object file
 runtime/base/taint/taint_data.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_data.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_data.cpp.o
 .PHONY : runtime/base/taint/taint_data.cpp.o
 
 runtime/base/taint/taint_data.i: runtime/base/taint/taint_data.cpp.i
@@ -2299,7 +2203,7 @@ runtime/base/taint/taint_data.i: runtime/base/taint/taint_data.cpp.i
 
 # target to preprocess a source file
 runtime/base/taint/taint_data.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_data.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_data.cpp.i
 .PHONY : runtime/base/taint/taint_data.cpp.i
 
 runtime/base/taint/taint_data.s: runtime/base/taint/taint_data.cpp.s
@@ -2307,7 +2211,7 @@ runtime/base/taint/taint_data.s: runtime/base/taint/taint_data.cpp.s
 
 # target to generate assembly for a file
 runtime/base/taint/taint_data.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_data.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_data.cpp.s
 .PHONY : runtime/base/taint/taint_data.cpp.s
 
 runtime/base/taint/taint_helper.o: runtime/base/taint/taint_helper.cpp.o
@@ -2315,7 +2219,7 @@ runtime/base/taint/taint_helper.o: runtime/base/taint/taint_helper.cpp.o
 
 # target to build an object file
 runtime/base/taint/taint_helper.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_helper.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_helper.cpp.o
 .PHONY : runtime/base/taint/taint_helper.cpp.o
 
 runtime/base/taint/taint_helper.i: runtime/base/taint/taint_helper.cpp.i
@@ -2323,7 +2227,7 @@ runtime/base/taint/taint_helper.i: runtime/base/taint/taint_helper.cpp.i
 
 # target to preprocess a source file
 runtime/base/taint/taint_helper.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_helper.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_helper.cpp.i
 .PHONY : runtime/base/taint/taint_helper.cpp.i
 
 runtime/base/taint/taint_helper.s: runtime/base/taint/taint_helper.cpp.s
@@ -2331,7 +2235,7 @@ runtime/base/taint/taint_helper.s: runtime/base/taint/taint_helper.cpp.s
 
 # target to generate assembly for a file
 runtime/base/taint/taint_helper.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_helper.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_helper.cpp.s
 .PHONY : runtime/base/taint/taint_helper.cpp.s
 
 runtime/base/taint/taint_observer.o: runtime/base/taint/taint_observer.cpp.o
@@ -2339,7 +2243,7 @@ runtime/base/taint/taint_observer.o: runtime/base/taint/taint_observer.cpp.o
 
 # target to build an object file
 runtime/base/taint/taint_observer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_observer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_observer.cpp.o
 .PHONY : runtime/base/taint/taint_observer.cpp.o
 
 runtime/base/taint/taint_observer.i: runtime/base/taint/taint_observer.cpp.i
@@ -2347,7 +2251,7 @@ runtime/base/taint/taint_observer.i: runtime/base/taint/taint_observer.cpp.i
 
 # target to preprocess a source file
 runtime/base/taint/taint_observer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_observer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_observer.cpp.i
 .PHONY : runtime/base/taint/taint_observer.cpp.i
 
 runtime/base/taint/taint_observer.s: runtime/base/taint/taint_observer.cpp.s
@@ -2355,7 +2259,7 @@ runtime/base/taint/taint_observer.s: runtime/base/taint/taint_observer.cpp.s
 
 # target to generate assembly for a file
 runtime/base/taint/taint_observer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_observer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_observer.cpp.s
 .PHONY : runtime/base/taint/taint_observer.cpp.s
 
 runtime/base/taint/taint_trace.o: runtime/base/taint/taint_trace.cpp.o
@@ -2363,7 +2267,7 @@ runtime/base/taint/taint_trace.o: runtime/base/taint/taint_trace.cpp.o
 
 # target to build an object file
 runtime/base/taint/taint_trace.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_trace.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_trace.cpp.o
 .PHONY : runtime/base/taint/taint_trace.cpp.o
 
 runtime/base/taint/taint_trace.i: runtime/base/taint/taint_trace.cpp.i
@@ -2371,7 +2275,7 @@ runtime/base/taint/taint_trace.i: runtime/base/taint/taint_trace.cpp.i
 
 # target to preprocess a source file
 runtime/base/taint/taint_trace.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_trace.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_trace.cpp.i
 .PHONY : runtime/base/taint/taint_trace.cpp.i
 
 runtime/base/taint/taint_trace.s: runtime/base/taint/taint_trace.cpp.s
@@ -2379,7 +2283,7 @@ runtime/base/taint/taint_trace.s: runtime/base/taint/taint_trace.cpp.s
 
 # target to generate assembly for a file
 runtime/base/taint/taint_trace.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_trace.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_trace.cpp.s
 .PHONY : runtime/base/taint/taint_trace.cpp.s
 
 runtime/base/taint/taint_warning.o: runtime/base/taint/taint_warning.cpp.o
@@ -2387,7 +2291,7 @@ runtime/base/taint/taint_warning.o: runtime/base/taint/taint_warning.cpp.o
 
 # target to build an object file
 runtime/base/taint/taint_warning.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_warning.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_warning.cpp.o
 .PHONY : runtime/base/taint/taint_warning.cpp.o
 
 runtime/base/taint/taint_warning.i: runtime/base/taint/taint_warning.cpp.i
@@ -2395,7 +2299,7 @@ runtime/base/taint/taint_warning.i: runtime/base/taint/taint_warning.cpp.i
 
 # target to preprocess a source file
 runtime/base/taint/taint_warning.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_warning.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_warning.cpp.i
 .PHONY : runtime/base/taint/taint_warning.cpp.i
 
 runtime/base/taint/taint_warning.s: runtime/base/taint/taint_warning.cpp.s
@@ -2403,7 +2307,7 @@ runtime/base/taint/taint_warning.s: runtime/base/taint/taint_warning.cpp.s
 
 # target to generate assembly for a file
 runtime/base/taint/taint_warning.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_warning.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/taint/taint_warning.cpp.s
 .PHONY : runtime/base/taint/taint_warning.cpp.s
 
 runtime/base/thread_info.o: runtime/base/thread_info.cpp.o
@@ -2411,7 +2315,7 @@ runtime/base/thread_info.o: runtime/base/thread_info.cpp.o
 
 # target to build an object file
 runtime/base/thread_info.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_info.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_info.cpp.o
 .PHONY : runtime/base/thread_info.cpp.o
 
 runtime/base/thread_info.i: runtime/base/thread_info.cpp.i
@@ -2419,7 +2323,7 @@ runtime/base/thread_info.i: runtime/base/thread_info.cpp.i
 
 # target to preprocess a source file
 runtime/base/thread_info.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_info.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_info.cpp.i
 .PHONY : runtime/base/thread_info.cpp.i
 
 runtime/base/thread_info.s: runtime/base/thread_info.cpp.s
@@ -2427,7 +2331,7 @@ runtime/base/thread_info.s: runtime/base/thread_info.cpp.s
 
 # target to generate assembly for a file
 runtime/base/thread_info.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_info.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_info.cpp.s
 .PHONY : runtime/base/thread_info.cpp.s
 
 runtime/base/thread_init_fini.o: runtime/base/thread_init_fini.cpp.o
@@ -2435,7 +2339,7 @@ runtime/base/thread_init_fini.o: runtime/base/thread_init_fini.cpp.o
 
 # target to build an object file
 runtime/base/thread_init_fini.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_init_fini.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_init_fini.cpp.o
 .PHONY : runtime/base/thread_init_fini.cpp.o
 
 runtime/base/thread_init_fini.i: runtime/base/thread_init_fini.cpp.i
@@ -2443,7 +2347,7 @@ runtime/base/thread_init_fini.i: runtime/base/thread_init_fini.cpp.i
 
 # target to preprocess a source file
 runtime/base/thread_init_fini.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_init_fini.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_init_fini.cpp.i
 .PHONY : runtime/base/thread_init_fini.cpp.i
 
 runtime/base/thread_init_fini.s: runtime/base/thread_init_fini.cpp.s
@@ -2451,7 +2355,7 @@ runtime/base/thread_init_fini.s: runtime/base/thread_init_fini.cpp.s
 
 # target to generate assembly for a file
 runtime/base/thread_init_fini.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_init_fini.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/thread_init_fini.cpp.s
 .PHONY : runtime/base/thread_init_fini.cpp.s
 
 runtime/base/time/datetime.o: runtime/base/time/datetime.cpp.o
@@ -2459,7 +2363,7 @@ runtime/base/time/datetime.o: runtime/base/time/datetime.cpp.o
 
 # target to build an object file
 runtime/base/time/datetime.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/datetime.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/datetime.cpp.o
 .PHONY : runtime/base/time/datetime.cpp.o
 
 runtime/base/time/datetime.i: runtime/base/time/datetime.cpp.i
@@ -2467,7 +2371,7 @@ runtime/base/time/datetime.i: runtime/base/time/datetime.cpp.i
 
 # target to preprocess a source file
 runtime/base/time/datetime.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/datetime.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/datetime.cpp.i
 .PHONY : runtime/base/time/datetime.cpp.i
 
 runtime/base/time/datetime.s: runtime/base/time/datetime.cpp.s
@@ -2475,7 +2379,7 @@ runtime/base/time/datetime.s: runtime/base/time/datetime.cpp.s
 
 # target to generate assembly for a file
 runtime/base/time/datetime.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/datetime.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/datetime.cpp.s
 .PHONY : runtime/base/time/datetime.cpp.s
 
 runtime/base/time/timestamp.o: runtime/base/time/timestamp.cpp.o
@@ -2483,7 +2387,7 @@ runtime/base/time/timestamp.o: runtime/base/time/timestamp.cpp.o
 
 # target to build an object file
 runtime/base/time/timestamp.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timestamp.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timestamp.cpp.o
 .PHONY : runtime/base/time/timestamp.cpp.o
 
 runtime/base/time/timestamp.i: runtime/base/time/timestamp.cpp.i
@@ -2491,7 +2395,7 @@ runtime/base/time/timestamp.i: runtime/base/time/timestamp.cpp.i
 
 # target to preprocess a source file
 runtime/base/time/timestamp.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timestamp.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timestamp.cpp.i
 .PHONY : runtime/base/time/timestamp.cpp.i
 
 runtime/base/time/timestamp.s: runtime/base/time/timestamp.cpp.s
@@ -2499,7 +2403,7 @@ runtime/base/time/timestamp.s: runtime/base/time/timestamp.cpp.s
 
 # target to generate assembly for a file
 runtime/base/time/timestamp.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timestamp.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timestamp.cpp.s
 .PHONY : runtime/base/time/timestamp.cpp.s
 
 runtime/base/time/timezone.o: runtime/base/time/timezone.cpp.o
@@ -2507,7 +2411,7 @@ runtime/base/time/timezone.o: runtime/base/time/timezone.cpp.o
 
 # target to build an object file
 runtime/base/time/timezone.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timezone.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timezone.cpp.o
 .PHONY : runtime/base/time/timezone.cpp.o
 
 runtime/base/time/timezone.i: runtime/base/time/timezone.cpp.i
@@ -2515,7 +2419,7 @@ runtime/base/time/timezone.i: runtime/base/time/timezone.cpp.i
 
 # target to preprocess a source file
 runtime/base/time/timezone.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timezone.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timezone.cpp.i
 .PHONY : runtime/base/time/timezone.cpp.i
 
 runtime/base/time/timezone.s: runtime/base/time/timezone.cpp.s
@@ -2523,7 +2427,7 @@ runtime/base/time/timezone.s: runtime/base/time/timezone.cpp.s
 
 # target to generate assembly for a file
 runtime/base/time/timezone.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timezone.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/time/timezone.cpp.s
 .PHONY : runtime/base/time/timezone.cpp.s
 
 runtime/base/timeout_thread.o: runtime/base/timeout_thread.cpp.o
@@ -2531,7 +2435,7 @@ runtime/base/timeout_thread.o: runtime/base/timeout_thread.cpp.o
 
 # target to build an object file
 runtime/base/timeout_thread.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/timeout_thread.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/timeout_thread.cpp.o
 .PHONY : runtime/base/timeout_thread.cpp.o
 
 runtime/base/timeout_thread.i: runtime/base/timeout_thread.cpp.i
@@ -2539,7 +2443,7 @@ runtime/base/timeout_thread.i: runtime/base/timeout_thread.cpp.i
 
 # target to preprocess a source file
 runtime/base/timeout_thread.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/timeout_thread.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/timeout_thread.cpp.i
 .PHONY : runtime/base/timeout_thread.cpp.i
 
 runtime/base/timeout_thread.s: runtime/base/timeout_thread.cpp.s
@@ -2547,7 +2451,7 @@ runtime/base/timeout_thread.s: runtime/base/timeout_thread.cpp.s
 
 # target to generate assembly for a file
 runtime/base/timeout_thread.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/timeout_thread.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/timeout_thread.cpp.s
 .PHONY : runtime/base/timeout_thread.cpp.s
 
 runtime/base/tv_helpers.o: runtime/base/tv_helpers.cpp.o
@@ -2555,7 +2459,7 @@ runtime/base/tv_helpers.o: runtime/base/tv_helpers.cpp.o
 
 # target to build an object file
 runtime/base/tv_helpers.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/tv_helpers.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/tv_helpers.cpp.o
 .PHONY : runtime/base/tv_helpers.cpp.o
 
 runtime/base/tv_helpers.i: runtime/base/tv_helpers.cpp.i
@@ -2563,7 +2467,7 @@ runtime/base/tv_helpers.i: runtime/base/tv_helpers.cpp.i
 
 # target to preprocess a source file
 runtime/base/tv_helpers.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/tv_helpers.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/tv_helpers.cpp.i
 .PHONY : runtime/base/tv_helpers.cpp.i
 
 runtime/base/tv_helpers.s: runtime/base/tv_helpers.cpp.s
@@ -2571,7 +2475,7 @@ runtime/base/tv_helpers.s: runtime/base/tv_helpers.cpp.s
 
 # target to generate assembly for a file
 runtime/base/tv_helpers.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/tv_helpers.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/tv_helpers.cpp.s
 .PHONY : runtime/base/tv_helpers.cpp.s
 
 runtime/base/type_array.o: runtime/base/type_array.cpp.o
@@ -2579,7 +2483,7 @@ runtime/base/type_array.o: runtime/base/type_array.cpp.o
 
 # target to build an object file
 runtime/base/type_array.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_array.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_array.cpp.o
 .PHONY : runtime/base/type_array.cpp.o
 
 runtime/base/type_array.i: runtime/base/type_array.cpp.i
@@ -2587,7 +2491,7 @@ runtime/base/type_array.i: runtime/base/type_array.cpp.i
 
 # target to preprocess a source file
 runtime/base/type_array.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_array.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_array.cpp.i
 .PHONY : runtime/base/type_array.cpp.i
 
 runtime/base/type_array.s: runtime/base/type_array.cpp.s
@@ -2595,7 +2499,7 @@ runtime/base/type_array.s: runtime/base/type_array.cpp.s
 
 # target to generate assembly for a file
 runtime/base/type_array.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_array.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_array.cpp.s
 .PHONY : runtime/base/type_array.cpp.s
 
 runtime/base/type_conversions.o: runtime/base/type_conversions.cpp.o
@@ -2603,7 +2507,7 @@ runtime/base/type_conversions.o: runtime/base/type_conversions.cpp.o
 
 # target to build an object file
 runtime/base/type_conversions.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_conversions.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_conversions.cpp.o
 .PHONY : runtime/base/type_conversions.cpp.o
 
 runtime/base/type_conversions.i: runtime/base/type_conversions.cpp.i
@@ -2611,7 +2515,7 @@ runtime/base/type_conversions.i: runtime/base/type_conversions.cpp.i
 
 # target to preprocess a source file
 runtime/base/type_conversions.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_conversions.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_conversions.cpp.i
 .PHONY : runtime/base/type_conversions.cpp.i
 
 runtime/base/type_conversions.s: runtime/base/type_conversions.cpp.s
@@ -2619,7 +2523,7 @@ runtime/base/type_conversions.s: runtime/base/type_conversions.cpp.s
 
 # target to generate assembly for a file
 runtime/base/type_conversions.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_conversions.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_conversions.cpp.s
 .PHONY : runtime/base/type_conversions.cpp.s
 
 runtime/base/type_object.o: runtime/base/type_object.cpp.o
@@ -2627,7 +2531,7 @@ runtime/base/type_object.o: runtime/base/type_object.cpp.o
 
 # target to build an object file
 runtime/base/type_object.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_object.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_object.cpp.o
 .PHONY : runtime/base/type_object.cpp.o
 
 runtime/base/type_object.i: runtime/base/type_object.cpp.i
@@ -2635,7 +2539,7 @@ runtime/base/type_object.i: runtime/base/type_object.cpp.i
 
 # target to preprocess a source file
 runtime/base/type_object.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_object.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_object.cpp.i
 .PHONY : runtime/base/type_object.cpp.i
 
 runtime/base/type_object.s: runtime/base/type_object.cpp.s
@@ -2643,7 +2547,7 @@ runtime/base/type_object.s: runtime/base/type_object.cpp.s
 
 # target to generate assembly for a file
 runtime/base/type_object.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_object.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_object.cpp.s
 .PHONY : runtime/base/type_object.cpp.s
 
 runtime/base/type_string.o: runtime/base/type_string.cpp.o
@@ -2651,7 +2555,7 @@ runtime/base/type_string.o: runtime/base/type_string.cpp.o
 
 # target to build an object file
 runtime/base/type_string.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_string.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_string.cpp.o
 .PHONY : runtime/base/type_string.cpp.o
 
 runtime/base/type_string.i: runtime/base/type_string.cpp.i
@@ -2659,7 +2563,7 @@ runtime/base/type_string.i: runtime/base/type_string.cpp.i
 
 # target to preprocess a source file
 runtime/base/type_string.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_string.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_string.cpp.i
 .PHONY : runtime/base/type_string.cpp.i
 
 runtime/base/type_string.s: runtime/base/type_string.cpp.s
@@ -2667,7 +2571,7 @@ runtime/base/type_string.s: runtime/base/type_string.cpp.s
 
 # target to generate assembly for a file
 runtime/base/type_string.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_string.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_string.cpp.s
 .PHONY : runtime/base/type_string.cpp.s
 
 runtime/base/type_variant.o: runtime/base/type_variant.cpp.o
@@ -2675,7 +2579,7 @@ runtime/base/type_variant.o: runtime/base/type_variant.cpp.o
 
 # target to build an object file
 runtime/base/type_variant.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_variant.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_variant.cpp.o
 .PHONY : runtime/base/type_variant.cpp.o
 
 runtime/base/type_variant.i: runtime/base/type_variant.cpp.i
@@ -2683,7 +2587,7 @@ runtime/base/type_variant.i: runtime/base/type_variant.cpp.i
 
 # target to preprocess a source file
 runtime/base/type_variant.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_variant.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_variant.cpp.i
 .PHONY : runtime/base/type_variant.cpp.i
 
 runtime/base/type_variant.s: runtime/base/type_variant.cpp.s
@@ -2691,7 +2595,7 @@ runtime/base/type_variant.s: runtime/base/type_variant.cpp.s
 
 # target to generate assembly for a file
 runtime/base/type_variant.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_variant.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/type_variant.cpp.s
 .PHONY : runtime/base/type_variant.cpp.s
 
 runtime/base/util/countable.o: runtime/base/util/countable.cpp.o
@@ -2699,7 +2603,7 @@ runtime/base/util/countable.o: runtime/base/util/countable.cpp.o
 
 # target to build an object file
 runtime/base/util/countable.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/countable.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/countable.cpp.o
 .PHONY : runtime/base/util/countable.cpp.o
 
 runtime/base/util/countable.i: runtime/base/util/countable.cpp.i
@@ -2707,7 +2611,7 @@ runtime/base/util/countable.i: runtime/base/util/countable.cpp.i
 
 # target to preprocess a source file
 runtime/base/util/countable.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/countable.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/countable.cpp.i
 .PHONY : runtime/base/util/countable.cpp.i
 
 runtime/base/util/countable.s: runtime/base/util/countable.cpp.s
@@ -2715,7 +2619,7 @@ runtime/base/util/countable.s: runtime/base/util/countable.cpp.s
 
 # target to generate assembly for a file
 runtime/base/util/countable.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/countable.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/countable.cpp.s
 .PHONY : runtime/base/util/countable.cpp.s
 
 runtime/base/util/exceptions.o: runtime/base/util/exceptions.cpp.o
@@ -2723,7 +2627,7 @@ runtime/base/util/exceptions.o: runtime/base/util/exceptions.cpp.o
 
 # target to build an object file
 runtime/base/util/exceptions.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/exceptions.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/exceptions.cpp.o
 .PHONY : runtime/base/util/exceptions.cpp.o
 
 runtime/base/util/exceptions.i: runtime/base/util/exceptions.cpp.i
@@ -2731,7 +2635,7 @@ runtime/base/util/exceptions.i: runtime/base/util/exceptions.cpp.i
 
 # target to preprocess a source file
 runtime/base/util/exceptions.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/exceptions.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/exceptions.cpp.i
 .PHONY : runtime/base/util/exceptions.cpp.i
 
 runtime/base/util/exceptions.s: runtime/base/util/exceptions.cpp.s
@@ -2739,7 +2643,7 @@ runtime/base/util/exceptions.s: runtime/base/util/exceptions.cpp.s
 
 # target to generate assembly for a file
 runtime/base/util/exceptions.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/exceptions.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/exceptions.cpp.s
 .PHONY : runtime/base/util/exceptions.cpp.s
 
 runtime/base/util/extended_logger.o: runtime/base/util/extended_logger.cpp.o
@@ -2747,7 +2651,7 @@ runtime/base/util/extended_logger.o: runtime/base/util/extended_logger.cpp.o
 
 # target to build an object file
 runtime/base/util/extended_logger.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/extended_logger.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/extended_logger.cpp.o
 .PHONY : runtime/base/util/extended_logger.cpp.o
 
 runtime/base/util/extended_logger.i: runtime/base/util/extended_logger.cpp.i
@@ -2755,7 +2659,7 @@ runtime/base/util/extended_logger.i: runtime/base/util/extended_logger.cpp.i
 
 # target to preprocess a source file
 runtime/base/util/extended_logger.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/extended_logger.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/extended_logger.cpp.i
 .PHONY : runtime/base/util/extended_logger.cpp.i
 
 runtime/base/util/extended_logger.s: runtime/base/util/extended_logger.cpp.s
@@ -2763,7 +2667,7 @@ runtime/base/util/extended_logger.s: runtime/base/util/extended_logger.cpp.s
 
 # target to generate assembly for a file
 runtime/base/util/extended_logger.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/extended_logger.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/extended_logger.cpp.s
 .PHONY : runtime/base/util/extended_logger.cpp.s
 
 runtime/base/util/http_client.o: runtime/base/util/http_client.cpp.o
@@ -2771,7 +2675,7 @@ runtime/base/util/http_client.o: runtime/base/util/http_client.cpp.o
 
 # target to build an object file
 runtime/base/util/http_client.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/http_client.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/http_client.cpp.o
 .PHONY : runtime/base/util/http_client.cpp.o
 
 runtime/base/util/http_client.i: runtime/base/util/http_client.cpp.i
@@ -2779,7 +2683,7 @@ runtime/base/util/http_client.i: runtime/base/util/http_client.cpp.i
 
 # target to preprocess a source file
 runtime/base/util/http_client.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/http_client.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/http_client.cpp.i
 .PHONY : runtime/base/util/http_client.cpp.i
 
 runtime/base/util/http_client.s: runtime/base/util/http_client.cpp.s
@@ -2787,7 +2691,7 @@ runtime/base/util/http_client.s: runtime/base/util/http_client.cpp.s
 
 # target to generate assembly for a file
 runtime/base/util/http_client.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/http_client.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/http_client.cpp.s
 .PHONY : runtime/base/util/http_client.cpp.s
 
 runtime/base/util/libevent_http_client.o: runtime/base/util/libevent_http_client.cpp.o
@@ -2795,7 +2699,7 @@ runtime/base/util/libevent_http_client.o: runtime/base/util/libevent_http_client
 
 # target to build an object file
 runtime/base/util/libevent_http_client.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/libevent_http_client.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/libevent_http_client.cpp.o
 .PHONY : runtime/base/util/libevent_http_client.cpp.o
 
 runtime/base/util/libevent_http_client.i: runtime/base/util/libevent_http_client.cpp.i
@@ -2803,7 +2707,7 @@ runtime/base/util/libevent_http_client.i: runtime/base/util/libevent_http_client
 
 # target to preprocess a source file
 runtime/base/util/libevent_http_client.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/libevent_http_client.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/libevent_http_client.cpp.i
 .PHONY : runtime/base/util/libevent_http_client.cpp.i
 
 runtime/base/util/libevent_http_client.s: runtime/base/util/libevent_http_client.cpp.s
@@ -2811,7 +2715,7 @@ runtime/base/util/libevent_http_client.s: runtime/base/util/libevent_http_client
 
 # target to generate assembly for a file
 runtime/base/util/libevent_http_client.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/libevent_http_client.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/libevent_http_client.cpp.s
 .PHONY : runtime/base/util/libevent_http_client.cpp.s
 
 runtime/base/util/php_thrift_buffer.o: runtime/base/util/php_thrift_buffer.cpp.o
@@ -2819,7 +2723,7 @@ runtime/base/util/php_thrift_buffer.o: runtime/base/util/php_thrift_buffer.cpp.o
 
 # target to build an object file
 runtime/base/util/php_thrift_buffer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/php_thrift_buffer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/php_thrift_buffer.cpp.o
 .PHONY : runtime/base/util/php_thrift_buffer.cpp.o
 
 runtime/base/util/php_thrift_buffer.i: runtime/base/util/php_thrift_buffer.cpp.i
@@ -2827,7 +2731,7 @@ runtime/base/util/php_thrift_buffer.i: runtime/base/util/php_thrift_buffer.cpp.i
 
 # target to preprocess a source file
 runtime/base/util/php_thrift_buffer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/php_thrift_buffer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/php_thrift_buffer.cpp.i
 .PHONY : runtime/base/util/php_thrift_buffer.cpp.i
 
 runtime/base/util/php_thrift_buffer.s: runtime/base/util/php_thrift_buffer.cpp.s
@@ -2835,7 +2739,7 @@ runtime/base/util/php_thrift_buffer.s: runtime/base/util/php_thrift_buffer.cpp.s
 
 # target to generate assembly for a file
 runtime/base/util/php_thrift_buffer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/php_thrift_buffer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/php_thrift_buffer.cpp.s
 .PHONY : runtime/base/util/php_thrift_buffer.cpp.s
 
 runtime/base/util/simple_counter.o: runtime/base/util/simple_counter.cpp.o
@@ -2843,7 +2747,7 @@ runtime/base/util/simple_counter.o: runtime/base/util/simple_counter.cpp.o
 
 # target to build an object file
 runtime/base/util/simple_counter.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/simple_counter.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/simple_counter.cpp.o
 .PHONY : runtime/base/util/simple_counter.cpp.o
 
 runtime/base/util/simple_counter.i: runtime/base/util/simple_counter.cpp.i
@@ -2851,7 +2755,7 @@ runtime/base/util/simple_counter.i: runtime/base/util/simple_counter.cpp.i
 
 # target to preprocess a source file
 runtime/base/util/simple_counter.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/simple_counter.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/simple_counter.cpp.i
 .PHONY : runtime/base/util/simple_counter.cpp.i
 
 runtime/base/util/simple_counter.s: runtime/base/util/simple_counter.cpp.s
@@ -2859,7 +2763,7 @@ runtime/base/util/simple_counter.s: runtime/base/util/simple_counter.cpp.s
 
 # target to generate assembly for a file
 runtime/base/util/simple_counter.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/simple_counter.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/simple_counter.cpp.s
 .PHONY : runtime/base/util/simple_counter.cpp.s
 
 runtime/base/util/string_buffer.o: runtime/base/util/string_buffer.cpp.o
@@ -2867,7 +2771,7 @@ runtime/base/util/string_buffer.o: runtime/base/util/string_buffer.cpp.o
 
 # target to build an object file
 runtime/base/util/string_buffer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/string_buffer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/string_buffer.cpp.o
 .PHONY : runtime/base/util/string_buffer.cpp.o
 
 runtime/base/util/string_buffer.i: runtime/base/util/string_buffer.cpp.i
@@ -2875,7 +2779,7 @@ runtime/base/util/string_buffer.i: runtime/base/util/string_buffer.cpp.i
 
 # target to preprocess a source file
 runtime/base/util/string_buffer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/string_buffer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/string_buffer.cpp.i
 .PHONY : runtime/base/util/string_buffer.cpp.i
 
 runtime/base/util/string_buffer.s: runtime/base/util/string_buffer.cpp.s
@@ -2883,7 +2787,7 @@ runtime/base/util/string_buffer.s: runtime/base/util/string_buffer.cpp.s
 
 # target to generate assembly for a file
 runtime/base/util/string_buffer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/string_buffer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/string_buffer.cpp.s
 .PHONY : runtime/base/util/string_buffer.cpp.s
 
 runtime/base/util/thrift_buffer.o: runtime/base/util/thrift_buffer.cpp.o
@@ -2891,7 +2795,7 @@ runtime/base/util/thrift_buffer.o: runtime/base/util/thrift_buffer.cpp.o
 
 # target to build an object file
 runtime/base/util/thrift_buffer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/thrift_buffer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/thrift_buffer.cpp.o
 .PHONY : runtime/base/util/thrift_buffer.cpp.o
 
 runtime/base/util/thrift_buffer.i: runtime/base/util/thrift_buffer.cpp.i
@@ -2899,7 +2803,7 @@ runtime/base/util/thrift_buffer.i: runtime/base/util/thrift_buffer.cpp.i
 
 # target to preprocess a source file
 runtime/base/util/thrift_buffer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/thrift_buffer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/thrift_buffer.cpp.i
 .PHONY : runtime/base/util/thrift_buffer.cpp.i
 
 runtime/base/util/thrift_buffer.s: runtime/base/util/thrift_buffer.cpp.s
@@ -2907,7 +2811,7 @@ runtime/base/util/thrift_buffer.s: runtime/base/util/thrift_buffer.cpp.s
 
 # target to generate assembly for a file
 runtime/base/util/thrift_buffer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/thrift_buffer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/util/thrift_buffer.cpp.s
 .PHONY : runtime/base/util/thrift_buffer.cpp.s
 
 runtime/base/variable_serializer.o: runtime/base/variable_serializer.cpp.o
@@ -2915,7 +2819,7 @@ runtime/base/variable_serializer.o: runtime/base/variable_serializer.cpp.o
 
 # target to build an object file
 runtime/base/variable_serializer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_serializer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_serializer.cpp.o
 .PHONY : runtime/base/variable_serializer.cpp.o
 
 runtime/base/variable_serializer.i: runtime/base/variable_serializer.cpp.i
@@ -2923,7 +2827,7 @@ runtime/base/variable_serializer.i: runtime/base/variable_serializer.cpp.i
 
 # target to preprocess a source file
 runtime/base/variable_serializer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_serializer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_serializer.cpp.i
 .PHONY : runtime/base/variable_serializer.cpp.i
 
 runtime/base/variable_serializer.s: runtime/base/variable_serializer.cpp.s
@@ -2931,7 +2835,7 @@ runtime/base/variable_serializer.s: runtime/base/variable_serializer.cpp.s
 
 # target to generate assembly for a file
 runtime/base/variable_serializer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_serializer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_serializer.cpp.s
 .PHONY : runtime/base/variable_serializer.cpp.s
 
 runtime/base/variable_table.o: runtime/base/variable_table.cpp.o
@@ -2939,7 +2843,7 @@ runtime/base/variable_table.o: runtime/base/variable_table.cpp.o
 
 # target to build an object file
 runtime/base/variable_table.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_table.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_table.cpp.o
 .PHONY : runtime/base/variable_table.cpp.o
 
 runtime/base/variable_table.i: runtime/base/variable_table.cpp.i
@@ -2947,7 +2851,7 @@ runtime/base/variable_table.i: runtime/base/variable_table.cpp.i
 
 # target to preprocess a source file
 runtime/base/variable_table.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_table.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_table.cpp.i
 .PHONY : runtime/base/variable_table.cpp.i
 
 runtime/base/variable_table.s: runtime/base/variable_table.cpp.s
@@ -2955,7 +2859,7 @@ runtime/base/variable_table.s: runtime/base/variable_table.cpp.s
 
 # target to generate assembly for a file
 runtime/base/variable_table.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_table.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_table.cpp.s
 .PHONY : runtime/base/variable_table.cpp.s
 
 runtime/base/variable_unserializer.o: runtime/base/variable_unserializer.cpp.o
@@ -2963,7 +2867,7 @@ runtime/base/variable_unserializer.o: runtime/base/variable_unserializer.cpp.o
 
 # target to build an object file
 runtime/base/variable_unserializer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_unserializer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_unserializer.cpp.o
 .PHONY : runtime/base/variable_unserializer.cpp.o
 
 runtime/base/variable_unserializer.i: runtime/base/variable_unserializer.cpp.i
@@ -2971,7 +2875,7 @@ runtime/base/variable_unserializer.i: runtime/base/variable_unserializer.cpp.i
 
 # target to preprocess a source file
 runtime/base/variable_unserializer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_unserializer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_unserializer.cpp.i
 .PHONY : runtime/base/variable_unserializer.cpp.i
 
 runtime/base/variable_unserializer.s: runtime/base/variable_unserializer.cpp.s
@@ -2979,7 +2883,7 @@ runtime/base/variable_unserializer.s: runtime/base/variable_unserializer.cpp.s
 
 # target to generate assembly for a file
 runtime/base/variable_unserializer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_unserializer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/variable_unserializer.cpp.s
 .PHONY : runtime/base/variable_unserializer.cpp.s
 
 runtime/base/zend/intl_convert.o: runtime/base/zend/intl_convert.cpp.o
@@ -2987,7 +2891,7 @@ runtime/base/zend/intl_convert.o: runtime/base/zend/intl_convert.cpp.o
 
 # target to build an object file
 runtime/base/zend/intl_convert.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/intl_convert.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/intl_convert.cpp.o
 .PHONY : runtime/base/zend/intl_convert.cpp.o
 
 runtime/base/zend/intl_convert.i: runtime/base/zend/intl_convert.cpp.i
@@ -2995,7 +2899,7 @@ runtime/base/zend/intl_convert.i: runtime/base/zend/intl_convert.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/intl_convert.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/intl_convert.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/intl_convert.cpp.i
 .PHONY : runtime/base/zend/intl_convert.cpp.i
 
 runtime/base/zend/intl_convert.s: runtime/base/zend/intl_convert.cpp.s
@@ -3003,7 +2907,7 @@ runtime/base/zend/intl_convert.s: runtime/base/zend/intl_convert.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/intl_convert.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/intl_convert.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/intl_convert.cpp.s
 .PHONY : runtime/base/zend/intl_convert.cpp.s
 
 runtime/base/zend/utf8_decode.o: runtime/base/zend/utf8_decode.cpp.o
@@ -3011,7 +2915,7 @@ runtime/base/zend/utf8_decode.o: runtime/base/zend/utf8_decode.cpp.o
 
 # target to build an object file
 runtime/base/zend/utf8_decode.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/utf8_decode.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/utf8_decode.cpp.o
 .PHONY : runtime/base/zend/utf8_decode.cpp.o
 
 runtime/base/zend/utf8_decode.i: runtime/base/zend/utf8_decode.cpp.i
@@ -3019,7 +2923,7 @@ runtime/base/zend/utf8_decode.i: runtime/base/zend/utf8_decode.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/utf8_decode.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/utf8_decode.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/utf8_decode.cpp.i
 .PHONY : runtime/base/zend/utf8_decode.cpp.i
 
 runtime/base/zend/utf8_decode.s: runtime/base/zend/utf8_decode.cpp.s
@@ -3027,7 +2931,7 @@ runtime/base/zend/utf8_decode.s: runtime/base/zend/utf8_decode.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/utf8_decode.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/utf8_decode.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/utf8_decode.cpp.s
 .PHONY : runtime/base/zend/utf8_decode.cpp.s
 
 runtime/base/zend/zend_collator.o: runtime/base/zend/zend_collator.cpp.o
@@ -3035,7 +2939,7 @@ runtime/base/zend/zend_collator.o: runtime/base/zend/zend_collator.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_collator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_collator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_collator.cpp.o
 .PHONY : runtime/base/zend/zend_collator.cpp.o
 
 runtime/base/zend/zend_collator.i: runtime/base/zend/zend_collator.cpp.i
@@ -3043,7 +2947,7 @@ runtime/base/zend/zend_collator.i: runtime/base/zend/zend_collator.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_collator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_collator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_collator.cpp.i
 .PHONY : runtime/base/zend/zend_collator.cpp.i
 
 runtime/base/zend/zend_collator.s: runtime/base/zend/zend_collator.cpp.s
@@ -3051,7 +2955,7 @@ runtime/base/zend/zend_collator.s: runtime/base/zend/zend_collator.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_collator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_collator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_collator.cpp.s
 .PHONY : runtime/base/zend/zend_collator.cpp.s
 
 runtime/base/zend/zend_functions.o: runtime/base/zend/zend_functions.cpp.o
@@ -3059,7 +2963,7 @@ runtime/base/zend/zend_functions.o: runtime/base/zend/zend_functions.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_functions.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_functions.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_functions.cpp.o
 .PHONY : runtime/base/zend/zend_functions.cpp.o
 
 runtime/base/zend/zend_functions.i: runtime/base/zend/zend_functions.cpp.i
@@ -3067,7 +2971,7 @@ runtime/base/zend/zend_functions.i: runtime/base/zend/zend_functions.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_functions.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_functions.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_functions.cpp.i
 .PHONY : runtime/base/zend/zend_functions.cpp.i
 
 runtime/base/zend/zend_functions.s: runtime/base/zend/zend_functions.cpp.s
@@ -3075,7 +2979,7 @@ runtime/base/zend/zend_functions.s: runtime/base/zend/zend_functions.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_functions.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_functions.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_functions.cpp.s
 .PHONY : runtime/base/zend/zend_functions.cpp.s
 
 runtime/base/zend/zend_html.o: runtime/base/zend/zend_html.cpp.o
@@ -3083,7 +2987,7 @@ runtime/base/zend/zend_html.o: runtime/base/zend/zend_html.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_html.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_html.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_html.cpp.o
 .PHONY : runtime/base/zend/zend_html.cpp.o
 
 runtime/base/zend/zend_html.i: runtime/base/zend/zend_html.cpp.i
@@ -3091,7 +2995,7 @@ runtime/base/zend/zend_html.i: runtime/base/zend/zend_html.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_html.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_html.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_html.cpp.i
 .PHONY : runtime/base/zend/zend_html.cpp.i
 
 runtime/base/zend/zend_html.s: runtime/base/zend/zend_html.cpp.s
@@ -3099,7 +3003,7 @@ runtime/base/zend/zend_html.s: runtime/base/zend/zend_html.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_html.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_html.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_html.cpp.s
 .PHONY : runtime/base/zend/zend_html.cpp.s
 
 runtime/base/zend/zend_ini.lex.yy.o: runtime/base/zend/zend_ini.lex.yy.cpp.o
@@ -3107,7 +3011,7 @@ runtime/base/zend/zend_ini.lex.yy.o: runtime/base/zend/zend_ini.lex.yy.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_ini.lex.yy.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.lex.yy.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.lex.yy.cpp.o
 .PHONY : runtime/base/zend/zend_ini.lex.yy.cpp.o
 
 runtime/base/zend/zend_ini.lex.yy.i: runtime/base/zend/zend_ini.lex.yy.cpp.i
@@ -3115,7 +3019,7 @@ runtime/base/zend/zend_ini.lex.yy.i: runtime/base/zend/zend_ini.lex.yy.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_ini.lex.yy.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.lex.yy.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.lex.yy.cpp.i
 .PHONY : runtime/base/zend/zend_ini.lex.yy.cpp.i
 
 runtime/base/zend/zend_ini.lex.yy.s: runtime/base/zend/zend_ini.lex.yy.cpp.s
@@ -3123,7 +3027,7 @@ runtime/base/zend/zend_ini.lex.yy.s: runtime/base/zend/zend_ini.lex.yy.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_ini.lex.yy.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.lex.yy.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.lex.yy.cpp.s
 .PHONY : runtime/base/zend/zend_ini.lex.yy.cpp.s
 
 runtime/base/zend/zend_ini.tab.o: runtime/base/zend/zend_ini.tab.cpp.o
@@ -3131,7 +3035,7 @@ runtime/base/zend/zend_ini.tab.o: runtime/base/zend/zend_ini.tab.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_ini.tab.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.tab.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.tab.cpp.o
 .PHONY : runtime/base/zend/zend_ini.tab.cpp.o
 
 runtime/base/zend/zend_ini.tab.i: runtime/base/zend/zend_ini.tab.cpp.i
@@ -3139,7 +3043,7 @@ runtime/base/zend/zend_ini.tab.i: runtime/base/zend/zend_ini.tab.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_ini.tab.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.tab.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.tab.cpp.i
 .PHONY : runtime/base/zend/zend_ini.tab.cpp.i
 
 runtime/base/zend/zend_ini.tab.s: runtime/base/zend/zend_ini.tab.cpp.s
@@ -3147,7 +3051,7 @@ runtime/base/zend/zend_ini.tab.s: runtime/base/zend/zend_ini.tab.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_ini.tab.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.tab.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_ini.tab.cpp.s
 .PHONY : runtime/base/zend/zend_ini.tab.cpp.s
 
 runtime/base/zend/zend_md5.o: runtime/base/zend/zend_md5.cpp.o
@@ -3155,7 +3059,7 @@ runtime/base/zend/zend_md5.o: runtime/base/zend/zend_md5.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_md5.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_md5.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_md5.cpp.o
 .PHONY : runtime/base/zend/zend_md5.cpp.o
 
 runtime/base/zend/zend_md5.i: runtime/base/zend/zend_md5.cpp.i
@@ -3163,7 +3067,7 @@ runtime/base/zend/zend_md5.i: runtime/base/zend/zend_md5.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_md5.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_md5.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_md5.cpp.i
 .PHONY : runtime/base/zend/zend_md5.cpp.i
 
 runtime/base/zend/zend_md5.s: runtime/base/zend/zend_md5.cpp.s
@@ -3171,7 +3075,7 @@ runtime/base/zend/zend_md5.s: runtime/base/zend/zend_md5.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_md5.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_md5.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_md5.cpp.s
 .PHONY : runtime/base/zend/zend_md5.cpp.s
 
 runtime/base/zend/zend_pack.o: runtime/base/zend/zend_pack.cpp.o
@@ -3179,7 +3083,7 @@ runtime/base/zend/zend_pack.o: runtime/base/zend/zend_pack.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_pack.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_pack.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_pack.cpp.o
 .PHONY : runtime/base/zend/zend_pack.cpp.o
 
 runtime/base/zend/zend_pack.i: runtime/base/zend/zend_pack.cpp.i
@@ -3187,7 +3091,7 @@ runtime/base/zend/zend_pack.i: runtime/base/zend/zend_pack.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_pack.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_pack.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_pack.cpp.i
 .PHONY : runtime/base/zend/zend_pack.cpp.i
 
 runtime/base/zend/zend_pack.s: runtime/base/zend/zend_pack.cpp.s
@@ -3195,7 +3099,7 @@ runtime/base/zend/zend_pack.s: runtime/base/zend/zend_pack.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_pack.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_pack.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_pack.cpp.s
 .PHONY : runtime/base/zend/zend_pack.cpp.s
 
 runtime/base/zend/zend_printf.o: runtime/base/zend/zend_printf.cpp.o
@@ -3203,7 +3107,7 @@ runtime/base/zend/zend_printf.o: runtime/base/zend/zend_printf.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_printf.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_printf.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_printf.cpp.o
 .PHONY : runtime/base/zend/zend_printf.cpp.o
 
 runtime/base/zend/zend_printf.i: runtime/base/zend/zend_printf.cpp.i
@@ -3211,7 +3115,7 @@ runtime/base/zend/zend_printf.i: runtime/base/zend/zend_printf.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_printf.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_printf.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_printf.cpp.i
 .PHONY : runtime/base/zend/zend_printf.cpp.i
 
 runtime/base/zend/zend_printf.s: runtime/base/zend/zend_printf.cpp.s
@@ -3219,7 +3123,7 @@ runtime/base/zend/zend_printf.s: runtime/base/zend/zend_printf.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_printf.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_printf.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_printf.cpp.s
 .PHONY : runtime/base/zend/zend_printf.cpp.s
 
 runtime/base/zend/zend_qsort.o: runtime/base/zend/zend_qsort.cpp.o
@@ -3227,7 +3131,7 @@ runtime/base/zend/zend_qsort.o: runtime/base/zend/zend_qsort.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_qsort.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_qsort.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_qsort.cpp.o
 .PHONY : runtime/base/zend/zend_qsort.cpp.o
 
 runtime/base/zend/zend_qsort.i: runtime/base/zend/zend_qsort.cpp.i
@@ -3235,7 +3139,7 @@ runtime/base/zend/zend_qsort.i: runtime/base/zend/zend_qsort.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_qsort.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_qsort.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_qsort.cpp.i
 .PHONY : runtime/base/zend/zend_qsort.cpp.i
 
 runtime/base/zend/zend_qsort.s: runtime/base/zend/zend_qsort.cpp.s
@@ -3243,7 +3147,7 @@ runtime/base/zend/zend_qsort.s: runtime/base/zend/zend_qsort.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_qsort.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_qsort.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_qsort.cpp.s
 .PHONY : runtime/base/zend/zend_qsort.cpp.s
 
 runtime/base/zend/zend_rand.o: runtime/base/zend/zend_rand.cpp.o
@@ -3251,7 +3155,7 @@ runtime/base/zend/zend_rand.o: runtime/base/zend/zend_rand.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_rand.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_rand.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_rand.cpp.o
 .PHONY : runtime/base/zend/zend_rand.cpp.o
 
 runtime/base/zend/zend_rand.i: runtime/base/zend/zend_rand.cpp.i
@@ -3259,7 +3163,7 @@ runtime/base/zend/zend_rand.i: runtime/base/zend/zend_rand.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_rand.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_rand.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_rand.cpp.i
 .PHONY : runtime/base/zend/zend_rand.cpp.i
 
 runtime/base/zend/zend_rand.s: runtime/base/zend/zend_rand.cpp.s
@@ -3267,7 +3171,7 @@ runtime/base/zend/zend_rand.s: runtime/base/zend/zend_rand.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_rand.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_rand.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_rand.cpp.s
 .PHONY : runtime/base/zend/zend_rand.cpp.s
 
 runtime/base/zend/zend_scanf.o: runtime/base/zend/zend_scanf.cpp.o
@@ -3275,7 +3179,7 @@ runtime/base/zend/zend_scanf.o: runtime/base/zend/zend_scanf.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_scanf.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_scanf.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_scanf.cpp.o
 .PHONY : runtime/base/zend/zend_scanf.cpp.o
 
 runtime/base/zend/zend_scanf.i: runtime/base/zend/zend_scanf.cpp.i
@@ -3283,7 +3187,7 @@ runtime/base/zend/zend_scanf.i: runtime/base/zend/zend_scanf.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_scanf.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_scanf.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_scanf.cpp.i
 .PHONY : runtime/base/zend/zend_scanf.cpp.i
 
 runtime/base/zend/zend_scanf.s: runtime/base/zend/zend_scanf.cpp.s
@@ -3291,7 +3195,7 @@ runtime/base/zend/zend_scanf.s: runtime/base/zend/zend_scanf.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_scanf.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_scanf.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_scanf.cpp.s
 .PHONY : runtime/base/zend/zend_scanf.cpp.s
 
 runtime/base/zend/zend_sha1.o: runtime/base/zend/zend_sha1.cpp.o
@@ -3299,7 +3203,7 @@ runtime/base/zend/zend_sha1.o: runtime/base/zend/zend_sha1.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_sha1.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_sha1.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_sha1.cpp.o
 .PHONY : runtime/base/zend/zend_sha1.cpp.o
 
 runtime/base/zend/zend_sha1.i: runtime/base/zend/zend_sha1.cpp.i
@@ -3307,7 +3211,7 @@ runtime/base/zend/zend_sha1.i: runtime/base/zend/zend_sha1.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_sha1.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_sha1.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_sha1.cpp.i
 .PHONY : runtime/base/zend/zend_sha1.cpp.i
 
 runtime/base/zend/zend_sha1.s: runtime/base/zend/zend_sha1.cpp.s
@@ -3315,7 +3219,7 @@ runtime/base/zend/zend_sha1.s: runtime/base/zend/zend_sha1.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_sha1.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_sha1.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_sha1.cpp.s
 .PHONY : runtime/base/zend/zend_sha1.cpp.s
 
 runtime/base/zend/zend_string.o: runtime/base/zend/zend_string.cpp.o
@@ -3323,7 +3227,7 @@ runtime/base/zend/zend_string.o: runtime/base/zend/zend_string.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_string.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_string.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_string.cpp.o
 .PHONY : runtime/base/zend/zend_string.cpp.o
 
 runtime/base/zend/zend_string.i: runtime/base/zend/zend_string.cpp.i
@@ -3331,7 +3235,7 @@ runtime/base/zend/zend_string.i: runtime/base/zend/zend_string.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_string.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_string.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_string.cpp.i
 .PHONY : runtime/base/zend/zend_string.cpp.i
 
 runtime/base/zend/zend_string.s: runtime/base/zend/zend_string.cpp.s
@@ -3339,7 +3243,7 @@ runtime/base/zend/zend_string.s: runtime/base/zend/zend_string.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_string.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_string.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_string.cpp.s
 .PHONY : runtime/base/zend/zend_string.cpp.s
 
 runtime/base/zend/zend_strtod.o: runtime/base/zend/zend_strtod.cpp.o
@@ -3347,7 +3251,7 @@ runtime/base/zend/zend_strtod.o: runtime/base/zend/zend_strtod.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_strtod.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_strtod.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_strtod.cpp.o
 .PHONY : runtime/base/zend/zend_strtod.cpp.o
 
 runtime/base/zend/zend_strtod.i: runtime/base/zend/zend_strtod.cpp.i
@@ -3355,7 +3259,7 @@ runtime/base/zend/zend_strtod.i: runtime/base/zend/zend_strtod.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_strtod.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_strtod.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_strtod.cpp.i
 .PHONY : runtime/base/zend/zend_strtod.cpp.i
 
 runtime/base/zend/zend_strtod.s: runtime/base/zend/zend_strtod.cpp.s
@@ -3363,7 +3267,7 @@ runtime/base/zend/zend_strtod.s: runtime/base/zend/zend_strtod.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_strtod.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_strtod.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_strtod.cpp.s
 .PHONY : runtime/base/zend/zend_strtod.cpp.s
 
 runtime/base/zend/zend_url.o: runtime/base/zend/zend_url.cpp.o
@@ -3371,7 +3275,7 @@ runtime/base/zend/zend_url.o: runtime/base/zend/zend_url.cpp.o
 
 # target to build an object file
 runtime/base/zend/zend_url.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_url.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_url.cpp.o
 .PHONY : runtime/base/zend/zend_url.cpp.o
 
 runtime/base/zend/zend_url.i: runtime/base/zend/zend_url.cpp.i
@@ -3379,7 +3283,7 @@ runtime/base/zend/zend_url.i: runtime/base/zend/zend_url.cpp.i
 
 # target to preprocess a source file
 runtime/base/zend/zend_url.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_url.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_url.cpp.i
 .PHONY : runtime/base/zend/zend_url.cpp.i
 
 runtime/base/zend/zend_url.s: runtime/base/zend/zend_url.cpp.s
@@ -3387,7 +3291,7 @@ runtime/base/zend/zend_url.s: runtime/base/zend/zend_url.cpp.s
 
 # target to generate assembly for a file
 runtime/base/zend/zend_url.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_url.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/base/zend/zend_url.cpp.s
 .PHONY : runtime/base/zend/zend_url.cpp.s
 
 runtime/eval/analysis/block.o: runtime/eval/analysis/block.cpp.o
@@ -3395,7 +3299,7 @@ runtime/eval/analysis/block.o: runtime/eval/analysis/block.cpp.o
 
 # target to build an object file
 runtime/eval/analysis/block.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/analysis/block.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/analysis/block.cpp.o
 .PHONY : runtime/eval/analysis/block.cpp.o
 
 runtime/eval/analysis/block.i: runtime/eval/analysis/block.cpp.i
@@ -3403,7 +3307,7 @@ runtime/eval/analysis/block.i: runtime/eval/analysis/block.cpp.i
 
 # target to preprocess a source file
 runtime/eval/analysis/block.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/analysis/block.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/analysis/block.cpp.i
 .PHONY : runtime/eval/analysis/block.cpp.i
 
 runtime/eval/analysis/block.s: runtime/eval/analysis/block.cpp.s
@@ -3411,7 +3315,7 @@ runtime/eval/analysis/block.s: runtime/eval/analysis/block.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/analysis/block.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/analysis/block.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/analysis/block.cpp.s
 .PHONY : runtime/eval/analysis/block.cpp.s
 
 runtime/eval/ast/array_element_expression.o: runtime/eval/ast/array_element_expression.cpp.o
@@ -3419,7 +3323,7 @@ runtime/eval/ast/array_element_expression.o: runtime/eval/ast/array_element_expr
 
 # target to build an object file
 runtime/eval/ast/array_element_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_element_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_element_expression.cpp.o
 .PHONY : runtime/eval/ast/array_element_expression.cpp.o
 
 runtime/eval/ast/array_element_expression.i: runtime/eval/ast/array_element_expression.cpp.i
@@ -3427,7 +3331,7 @@ runtime/eval/ast/array_element_expression.i: runtime/eval/ast/array_element_expr
 
 # target to preprocess a source file
 runtime/eval/ast/array_element_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_element_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_element_expression.cpp.i
 .PHONY : runtime/eval/ast/array_element_expression.cpp.i
 
 runtime/eval/ast/array_element_expression.s: runtime/eval/ast/array_element_expression.cpp.s
@@ -3435,7 +3339,7 @@ runtime/eval/ast/array_element_expression.s: runtime/eval/ast/array_element_expr
 
 # target to generate assembly for a file
 runtime/eval/ast/array_element_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_element_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_element_expression.cpp.s
 .PHONY : runtime/eval/ast/array_element_expression.cpp.s
 
 runtime/eval/ast/array_expression.o: runtime/eval/ast/array_expression.cpp.o
@@ -3443,7 +3347,7 @@ runtime/eval/ast/array_expression.o: runtime/eval/ast/array_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/array_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_expression.cpp.o
 .PHONY : runtime/eval/ast/array_expression.cpp.o
 
 runtime/eval/ast/array_expression.i: runtime/eval/ast/array_expression.cpp.i
@@ -3451,7 +3355,7 @@ runtime/eval/ast/array_expression.i: runtime/eval/ast/array_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/array_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_expression.cpp.i
 .PHONY : runtime/eval/ast/array_expression.cpp.i
 
 runtime/eval/ast/array_expression.s: runtime/eval/ast/array_expression.cpp.s
@@ -3459,7 +3363,7 @@ runtime/eval/ast/array_expression.s: runtime/eval/ast/array_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/array_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/array_expression.cpp.s
 .PHONY : runtime/eval/ast/array_expression.cpp.s
 
 runtime/eval/ast/assignment_op_expression.o: runtime/eval/ast/assignment_op_expression.cpp.o
@@ -3467,7 +3371,7 @@ runtime/eval/ast/assignment_op_expression.o: runtime/eval/ast/assignment_op_expr
 
 # target to build an object file
 runtime/eval/ast/assignment_op_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_op_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_op_expression.cpp.o
 .PHONY : runtime/eval/ast/assignment_op_expression.cpp.o
 
 runtime/eval/ast/assignment_op_expression.i: runtime/eval/ast/assignment_op_expression.cpp.i
@@ -3475,7 +3379,7 @@ runtime/eval/ast/assignment_op_expression.i: runtime/eval/ast/assignment_op_expr
 
 # target to preprocess a source file
 runtime/eval/ast/assignment_op_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_op_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_op_expression.cpp.i
 .PHONY : runtime/eval/ast/assignment_op_expression.cpp.i
 
 runtime/eval/ast/assignment_op_expression.s: runtime/eval/ast/assignment_op_expression.cpp.s
@@ -3483,7 +3387,7 @@ runtime/eval/ast/assignment_op_expression.s: runtime/eval/ast/assignment_op_expr
 
 # target to generate assembly for a file
 runtime/eval/ast/assignment_op_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_op_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_op_expression.cpp.s
 .PHONY : runtime/eval/ast/assignment_op_expression.cpp.s
 
 runtime/eval/ast/assignment_ref_expression.o: runtime/eval/ast/assignment_ref_expression.cpp.o
@@ -3491,7 +3395,7 @@ runtime/eval/ast/assignment_ref_expression.o: runtime/eval/ast/assignment_ref_ex
 
 # target to build an object file
 runtime/eval/ast/assignment_ref_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_ref_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_ref_expression.cpp.o
 .PHONY : runtime/eval/ast/assignment_ref_expression.cpp.o
 
 runtime/eval/ast/assignment_ref_expression.i: runtime/eval/ast/assignment_ref_expression.cpp.i
@@ -3499,7 +3403,7 @@ runtime/eval/ast/assignment_ref_expression.i: runtime/eval/ast/assignment_ref_ex
 
 # target to preprocess a source file
 runtime/eval/ast/assignment_ref_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_ref_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_ref_expression.cpp.i
 .PHONY : runtime/eval/ast/assignment_ref_expression.cpp.i
 
 runtime/eval/ast/assignment_ref_expression.s: runtime/eval/ast/assignment_ref_expression.cpp.s
@@ -3507,7 +3411,7 @@ runtime/eval/ast/assignment_ref_expression.s: runtime/eval/ast/assignment_ref_ex
 
 # target to generate assembly for a file
 runtime/eval/ast/assignment_ref_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_ref_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/assignment_ref_expression.cpp.s
 .PHONY : runtime/eval/ast/assignment_ref_expression.cpp.s
 
 runtime/eval/ast/binary_op_expression.o: runtime/eval/ast/binary_op_expression.cpp.o
@@ -3515,7 +3419,7 @@ runtime/eval/ast/binary_op_expression.o: runtime/eval/ast/binary_op_expression.c
 
 # target to build an object file
 runtime/eval/ast/binary_op_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/binary_op_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/binary_op_expression.cpp.o
 .PHONY : runtime/eval/ast/binary_op_expression.cpp.o
 
 runtime/eval/ast/binary_op_expression.i: runtime/eval/ast/binary_op_expression.cpp.i
@@ -3523,7 +3427,7 @@ runtime/eval/ast/binary_op_expression.i: runtime/eval/ast/binary_op_expression.c
 
 # target to preprocess a source file
 runtime/eval/ast/binary_op_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/binary_op_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/binary_op_expression.cpp.i
 .PHONY : runtime/eval/ast/binary_op_expression.cpp.i
 
 runtime/eval/ast/binary_op_expression.s: runtime/eval/ast/binary_op_expression.cpp.s
@@ -3531,7 +3435,7 @@ runtime/eval/ast/binary_op_expression.s: runtime/eval/ast/binary_op_expression.c
 
 # target to generate assembly for a file
 runtime/eval/ast/binary_op_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/binary_op_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/binary_op_expression.cpp.s
 .PHONY : runtime/eval/ast/binary_op_expression.cpp.s
 
 runtime/eval/ast/break_statement.o: runtime/eval/ast/break_statement.cpp.o
@@ -3539,7 +3443,7 @@ runtime/eval/ast/break_statement.o: runtime/eval/ast/break_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/break_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/break_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/break_statement.cpp.o
 .PHONY : runtime/eval/ast/break_statement.cpp.o
 
 runtime/eval/ast/break_statement.i: runtime/eval/ast/break_statement.cpp.i
@@ -3547,7 +3451,7 @@ runtime/eval/ast/break_statement.i: runtime/eval/ast/break_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/break_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/break_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/break_statement.cpp.i
 .PHONY : runtime/eval/ast/break_statement.cpp.i
 
 runtime/eval/ast/break_statement.s: runtime/eval/ast/break_statement.cpp.s
@@ -3555,7 +3459,7 @@ runtime/eval/ast/break_statement.s: runtime/eval/ast/break_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/break_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/break_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/break_statement.cpp.s
 .PHONY : runtime/eval/ast/break_statement.cpp.s
 
 runtime/eval/ast/class_constant_expression.o: runtime/eval/ast/class_constant_expression.cpp.o
@@ -3563,7 +3467,7 @@ runtime/eval/ast/class_constant_expression.o: runtime/eval/ast/class_constant_ex
 
 # target to build an object file
 runtime/eval/ast/class_constant_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_constant_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_constant_expression.cpp.o
 .PHONY : runtime/eval/ast/class_constant_expression.cpp.o
 
 runtime/eval/ast/class_constant_expression.i: runtime/eval/ast/class_constant_expression.cpp.i
@@ -3571,7 +3475,7 @@ runtime/eval/ast/class_constant_expression.i: runtime/eval/ast/class_constant_ex
 
 # target to preprocess a source file
 runtime/eval/ast/class_constant_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_constant_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_constant_expression.cpp.i
 .PHONY : runtime/eval/ast/class_constant_expression.cpp.i
 
 runtime/eval/ast/class_constant_expression.s: runtime/eval/ast/class_constant_expression.cpp.s
@@ -3579,7 +3483,7 @@ runtime/eval/ast/class_constant_expression.s: runtime/eval/ast/class_constant_ex
 
 # target to generate assembly for a file
 runtime/eval/ast/class_constant_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_constant_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_constant_expression.cpp.s
 .PHONY : runtime/eval/ast/class_constant_expression.cpp.s
 
 runtime/eval/ast/class_statement.o: runtime/eval/ast/class_statement.cpp.o
@@ -3587,7 +3491,7 @@ runtime/eval/ast/class_statement.o: runtime/eval/ast/class_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/class_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_statement.cpp.o
 .PHONY : runtime/eval/ast/class_statement.cpp.o
 
 runtime/eval/ast/class_statement.i: runtime/eval/ast/class_statement.cpp.i
@@ -3595,7 +3499,7 @@ runtime/eval/ast/class_statement.i: runtime/eval/ast/class_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/class_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_statement.cpp.i
 .PHONY : runtime/eval/ast/class_statement.cpp.i
 
 runtime/eval/ast/class_statement.s: runtime/eval/ast/class_statement.cpp.s
@@ -3603,7 +3507,7 @@ runtime/eval/ast/class_statement.s: runtime/eval/ast/class_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/class_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/class_statement.cpp.s
 .PHONY : runtime/eval/ast/class_statement.cpp.s
 
 runtime/eval/ast/closure_expression.o: runtime/eval/ast/closure_expression.cpp.o
@@ -3611,7 +3515,7 @@ runtime/eval/ast/closure_expression.o: runtime/eval/ast/closure_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/closure_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/closure_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/closure_expression.cpp.o
 .PHONY : runtime/eval/ast/closure_expression.cpp.o
 
 runtime/eval/ast/closure_expression.i: runtime/eval/ast/closure_expression.cpp.i
@@ -3619,7 +3523,7 @@ runtime/eval/ast/closure_expression.i: runtime/eval/ast/closure_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/closure_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/closure_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/closure_expression.cpp.i
 .PHONY : runtime/eval/ast/closure_expression.cpp.i
 
 runtime/eval/ast/closure_expression.s: runtime/eval/ast/closure_expression.cpp.s
@@ -3627,7 +3531,7 @@ runtime/eval/ast/closure_expression.s: runtime/eval/ast/closure_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/closure_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/closure_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/closure_expression.cpp.s
 .PHONY : runtime/eval/ast/closure_expression.cpp.s
 
 runtime/eval/ast/constant_expression.o: runtime/eval/ast/constant_expression.cpp.o
@@ -3635,7 +3539,7 @@ runtime/eval/ast/constant_expression.o: runtime/eval/ast/constant_expression.cpp
 
 # target to build an object file
 runtime/eval/ast/constant_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/constant_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/constant_expression.cpp.o
 .PHONY : runtime/eval/ast/constant_expression.cpp.o
 
 runtime/eval/ast/constant_expression.i: runtime/eval/ast/constant_expression.cpp.i
@@ -3643,7 +3547,7 @@ runtime/eval/ast/constant_expression.i: runtime/eval/ast/constant_expression.cpp
 
 # target to preprocess a source file
 runtime/eval/ast/constant_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/constant_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/constant_expression.cpp.i
 .PHONY : runtime/eval/ast/constant_expression.cpp.i
 
 runtime/eval/ast/constant_expression.s: runtime/eval/ast/constant_expression.cpp.s
@@ -3651,7 +3555,7 @@ runtime/eval/ast/constant_expression.s: runtime/eval/ast/constant_expression.cpp
 
 # target to generate assembly for a file
 runtime/eval/ast/constant_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/constant_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/constant_expression.cpp.s
 .PHONY : runtime/eval/ast/constant_expression.cpp.s
 
 runtime/eval/ast/construct.o: runtime/eval/ast/construct.cpp.o
@@ -3659,7 +3563,7 @@ runtime/eval/ast/construct.o: runtime/eval/ast/construct.cpp.o
 
 # target to build an object file
 runtime/eval/ast/construct.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/construct.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/construct.cpp.o
 .PHONY : runtime/eval/ast/construct.cpp.o
 
 runtime/eval/ast/construct.i: runtime/eval/ast/construct.cpp.i
@@ -3667,7 +3571,7 @@ runtime/eval/ast/construct.i: runtime/eval/ast/construct.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/construct.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/construct.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/construct.cpp.i
 .PHONY : runtime/eval/ast/construct.cpp.i
 
 runtime/eval/ast/construct.s: runtime/eval/ast/construct.cpp.s
@@ -3675,7 +3579,7 @@ runtime/eval/ast/construct.s: runtime/eval/ast/construct.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/construct.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/construct.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/construct.cpp.s
 .PHONY : runtime/eval/ast/construct.cpp.s
 
 runtime/eval/ast/do_while_statement.o: runtime/eval/ast/do_while_statement.cpp.o
@@ -3683,7 +3587,7 @@ runtime/eval/ast/do_while_statement.o: runtime/eval/ast/do_while_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/do_while_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/do_while_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/do_while_statement.cpp.o
 .PHONY : runtime/eval/ast/do_while_statement.cpp.o
 
 runtime/eval/ast/do_while_statement.i: runtime/eval/ast/do_while_statement.cpp.i
@@ -3691,7 +3595,7 @@ runtime/eval/ast/do_while_statement.i: runtime/eval/ast/do_while_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/do_while_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/do_while_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/do_while_statement.cpp.i
 .PHONY : runtime/eval/ast/do_while_statement.cpp.i
 
 runtime/eval/ast/do_while_statement.s: runtime/eval/ast/do_while_statement.cpp.s
@@ -3699,7 +3603,7 @@ runtime/eval/ast/do_while_statement.s: runtime/eval/ast/do_while_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/do_while_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/do_while_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/do_while_statement.cpp.s
 .PHONY : runtime/eval/ast/do_while_statement.cpp.s
 
 runtime/eval/ast/echo_statement.o: runtime/eval/ast/echo_statement.cpp.o
@@ -3707,7 +3611,7 @@ runtime/eval/ast/echo_statement.o: runtime/eval/ast/echo_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/echo_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/echo_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/echo_statement.cpp.o
 .PHONY : runtime/eval/ast/echo_statement.cpp.o
 
 runtime/eval/ast/echo_statement.i: runtime/eval/ast/echo_statement.cpp.i
@@ -3715,7 +3619,7 @@ runtime/eval/ast/echo_statement.i: runtime/eval/ast/echo_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/echo_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/echo_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/echo_statement.cpp.i
 .PHONY : runtime/eval/ast/echo_statement.cpp.i
 
 runtime/eval/ast/echo_statement.s: runtime/eval/ast/echo_statement.cpp.s
@@ -3723,7 +3627,7 @@ runtime/eval/ast/echo_statement.s: runtime/eval/ast/echo_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/echo_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/echo_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/echo_statement.cpp.s
 .PHONY : runtime/eval/ast/echo_statement.cpp.s
 
 runtime/eval/ast/encaps_list_expression.o: runtime/eval/ast/encaps_list_expression.cpp.o
@@ -3731,7 +3635,7 @@ runtime/eval/ast/encaps_list_expression.o: runtime/eval/ast/encaps_list_expressi
 
 # target to build an object file
 runtime/eval/ast/encaps_list_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/encaps_list_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/encaps_list_expression.cpp.o
 .PHONY : runtime/eval/ast/encaps_list_expression.cpp.o
 
 runtime/eval/ast/encaps_list_expression.i: runtime/eval/ast/encaps_list_expression.cpp.i
@@ -3739,7 +3643,7 @@ runtime/eval/ast/encaps_list_expression.i: runtime/eval/ast/encaps_list_expressi
 
 # target to preprocess a source file
 runtime/eval/ast/encaps_list_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/encaps_list_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/encaps_list_expression.cpp.i
 .PHONY : runtime/eval/ast/encaps_list_expression.cpp.i
 
 runtime/eval/ast/encaps_list_expression.s: runtime/eval/ast/encaps_list_expression.cpp.s
@@ -3747,7 +3651,7 @@ runtime/eval/ast/encaps_list_expression.s: runtime/eval/ast/encaps_list_expressi
 
 # target to generate assembly for a file
 runtime/eval/ast/encaps_list_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/encaps_list_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/encaps_list_expression.cpp.s
 .PHONY : runtime/eval/ast/encaps_list_expression.cpp.s
 
 runtime/eval/ast/expr_statement.o: runtime/eval/ast/expr_statement.cpp.o
@@ -3755,7 +3659,7 @@ runtime/eval/ast/expr_statement.o: runtime/eval/ast/expr_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/expr_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expr_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expr_statement.cpp.o
 .PHONY : runtime/eval/ast/expr_statement.cpp.o
 
 runtime/eval/ast/expr_statement.i: runtime/eval/ast/expr_statement.cpp.i
@@ -3763,7 +3667,7 @@ runtime/eval/ast/expr_statement.i: runtime/eval/ast/expr_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/expr_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expr_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expr_statement.cpp.i
 .PHONY : runtime/eval/ast/expr_statement.cpp.i
 
 runtime/eval/ast/expr_statement.s: runtime/eval/ast/expr_statement.cpp.s
@@ -3771,7 +3675,7 @@ runtime/eval/ast/expr_statement.s: runtime/eval/ast/expr_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/expr_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expr_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expr_statement.cpp.s
 .PHONY : runtime/eval/ast/expr_statement.cpp.s
 
 runtime/eval/ast/expression.o: runtime/eval/ast/expression.cpp.o
@@ -3779,7 +3683,7 @@ runtime/eval/ast/expression.o: runtime/eval/ast/expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expression.cpp.o
 .PHONY : runtime/eval/ast/expression.cpp.o
 
 runtime/eval/ast/expression.i: runtime/eval/ast/expression.cpp.i
@@ -3787,7 +3691,7 @@ runtime/eval/ast/expression.i: runtime/eval/ast/expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expression.cpp.i
 .PHONY : runtime/eval/ast/expression.cpp.i
 
 runtime/eval/ast/expression.s: runtime/eval/ast/expression.cpp.s
@@ -3795,7 +3699,7 @@ runtime/eval/ast/expression.s: runtime/eval/ast/expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/expression.cpp.s
 .PHONY : runtime/eval/ast/expression.cpp.s
 
 runtime/eval/ast/for_statement.o: runtime/eval/ast/for_statement.cpp.o
@@ -3803,7 +3707,7 @@ runtime/eval/ast/for_statement.o: runtime/eval/ast/for_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/for_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/for_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/for_statement.cpp.o
 .PHONY : runtime/eval/ast/for_statement.cpp.o
 
 runtime/eval/ast/for_statement.i: runtime/eval/ast/for_statement.cpp.i
@@ -3811,7 +3715,7 @@ runtime/eval/ast/for_statement.i: runtime/eval/ast/for_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/for_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/for_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/for_statement.cpp.i
 .PHONY : runtime/eval/ast/for_statement.cpp.i
 
 runtime/eval/ast/for_statement.s: runtime/eval/ast/for_statement.cpp.s
@@ -3819,7 +3723,7 @@ runtime/eval/ast/for_statement.s: runtime/eval/ast/for_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/for_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/for_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/for_statement.cpp.s
 .PHONY : runtime/eval/ast/for_statement.cpp.s
 
 runtime/eval/ast/foreach_statement.o: runtime/eval/ast/foreach_statement.cpp.o
@@ -3827,7 +3731,7 @@ runtime/eval/ast/foreach_statement.o: runtime/eval/ast/foreach_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/foreach_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/foreach_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/foreach_statement.cpp.o
 .PHONY : runtime/eval/ast/foreach_statement.cpp.o
 
 runtime/eval/ast/foreach_statement.i: runtime/eval/ast/foreach_statement.cpp.i
@@ -3835,7 +3739,7 @@ runtime/eval/ast/foreach_statement.i: runtime/eval/ast/foreach_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/foreach_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/foreach_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/foreach_statement.cpp.i
 .PHONY : runtime/eval/ast/foreach_statement.cpp.i
 
 runtime/eval/ast/foreach_statement.s: runtime/eval/ast/foreach_statement.cpp.s
@@ -3843,7 +3747,7 @@ runtime/eval/ast/foreach_statement.s: runtime/eval/ast/foreach_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/foreach_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/foreach_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/foreach_statement.cpp.s
 .PHONY : runtime/eval/ast/foreach_statement.cpp.s
 
 runtime/eval/ast/function_call_expression.o: runtime/eval/ast/function_call_expression.cpp.o
@@ -3851,7 +3755,7 @@ runtime/eval/ast/function_call_expression.o: runtime/eval/ast/function_call_expr
 
 # target to build an object file
 runtime/eval/ast/function_call_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_call_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_call_expression.cpp.o
 .PHONY : runtime/eval/ast/function_call_expression.cpp.o
 
 runtime/eval/ast/function_call_expression.i: runtime/eval/ast/function_call_expression.cpp.i
@@ -3859,7 +3763,7 @@ runtime/eval/ast/function_call_expression.i: runtime/eval/ast/function_call_expr
 
 # target to preprocess a source file
 runtime/eval/ast/function_call_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_call_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_call_expression.cpp.i
 .PHONY : runtime/eval/ast/function_call_expression.cpp.i
 
 runtime/eval/ast/function_call_expression.s: runtime/eval/ast/function_call_expression.cpp.s
@@ -3867,7 +3771,7 @@ runtime/eval/ast/function_call_expression.s: runtime/eval/ast/function_call_expr
 
 # target to generate assembly for a file
 runtime/eval/ast/function_call_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_call_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_call_expression.cpp.s
 .PHONY : runtime/eval/ast/function_call_expression.cpp.s
 
 runtime/eval/ast/function_statement.o: runtime/eval/ast/function_statement.cpp.o
@@ -3875,7 +3779,7 @@ runtime/eval/ast/function_statement.o: runtime/eval/ast/function_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/function_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_statement.cpp.o
 .PHONY : runtime/eval/ast/function_statement.cpp.o
 
 runtime/eval/ast/function_statement.i: runtime/eval/ast/function_statement.cpp.i
@@ -3883,7 +3787,7 @@ runtime/eval/ast/function_statement.i: runtime/eval/ast/function_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/function_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_statement.cpp.i
 .PHONY : runtime/eval/ast/function_statement.cpp.i
 
 runtime/eval/ast/function_statement.s: runtime/eval/ast/function_statement.cpp.s
@@ -3891,7 +3795,7 @@ runtime/eval/ast/function_statement.s: runtime/eval/ast/function_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/function_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/function_statement.cpp.s
 .PHONY : runtime/eval/ast/function_statement.cpp.s
 
 runtime/eval/ast/global_statement.o: runtime/eval/ast/global_statement.cpp.o
@@ -3899,7 +3803,7 @@ runtime/eval/ast/global_statement.o: runtime/eval/ast/global_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/global_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/global_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/global_statement.cpp.o
 .PHONY : runtime/eval/ast/global_statement.cpp.o
 
 runtime/eval/ast/global_statement.i: runtime/eval/ast/global_statement.cpp.i
@@ -3907,7 +3811,7 @@ runtime/eval/ast/global_statement.i: runtime/eval/ast/global_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/global_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/global_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/global_statement.cpp.i
 .PHONY : runtime/eval/ast/global_statement.cpp.i
 
 runtime/eval/ast/global_statement.s: runtime/eval/ast/global_statement.cpp.s
@@ -3915,7 +3819,7 @@ runtime/eval/ast/global_statement.s: runtime/eval/ast/global_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/global_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/global_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/global_statement.cpp.s
 .PHONY : runtime/eval/ast/global_statement.cpp.s
 
 runtime/eval/ast/goto_statement.o: runtime/eval/ast/goto_statement.cpp.o
@@ -3923,7 +3827,7 @@ runtime/eval/ast/goto_statement.o: runtime/eval/ast/goto_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/goto_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/goto_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/goto_statement.cpp.o
 .PHONY : runtime/eval/ast/goto_statement.cpp.o
 
 runtime/eval/ast/goto_statement.i: runtime/eval/ast/goto_statement.cpp.i
@@ -3931,7 +3835,7 @@ runtime/eval/ast/goto_statement.i: runtime/eval/ast/goto_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/goto_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/goto_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/goto_statement.cpp.i
 .PHONY : runtime/eval/ast/goto_statement.cpp.i
 
 runtime/eval/ast/goto_statement.s: runtime/eval/ast/goto_statement.cpp.s
@@ -3939,7 +3843,7 @@ runtime/eval/ast/goto_statement.s: runtime/eval/ast/goto_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/goto_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/goto_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/goto_statement.cpp.s
 .PHONY : runtime/eval/ast/goto_statement.cpp.s
 
 runtime/eval/ast/if_statement.o: runtime/eval/ast/if_statement.cpp.o
@@ -3947,7 +3851,7 @@ runtime/eval/ast/if_statement.o: runtime/eval/ast/if_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/if_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/if_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/if_statement.cpp.o
 .PHONY : runtime/eval/ast/if_statement.cpp.o
 
 runtime/eval/ast/if_statement.i: runtime/eval/ast/if_statement.cpp.i
@@ -3955,7 +3859,7 @@ runtime/eval/ast/if_statement.i: runtime/eval/ast/if_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/if_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/if_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/if_statement.cpp.i
 .PHONY : runtime/eval/ast/if_statement.cpp.i
 
 runtime/eval/ast/if_statement.s: runtime/eval/ast/if_statement.cpp.s
@@ -3963,7 +3867,7 @@ runtime/eval/ast/if_statement.s: runtime/eval/ast/if_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/if_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/if_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/if_statement.cpp.s
 .PHONY : runtime/eval/ast/if_statement.cpp.s
 
 runtime/eval/ast/inc_op_expression.o: runtime/eval/ast/inc_op_expression.cpp.o
@@ -3971,7 +3875,7 @@ runtime/eval/ast/inc_op_expression.o: runtime/eval/ast/inc_op_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/inc_op_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/inc_op_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/inc_op_expression.cpp.o
 .PHONY : runtime/eval/ast/inc_op_expression.cpp.o
 
 runtime/eval/ast/inc_op_expression.i: runtime/eval/ast/inc_op_expression.cpp.i
@@ -3979,7 +3883,7 @@ runtime/eval/ast/inc_op_expression.i: runtime/eval/ast/inc_op_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/inc_op_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/inc_op_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/inc_op_expression.cpp.i
 .PHONY : runtime/eval/ast/inc_op_expression.cpp.i
 
 runtime/eval/ast/inc_op_expression.s: runtime/eval/ast/inc_op_expression.cpp.s
@@ -3987,7 +3891,7 @@ runtime/eval/ast/inc_op_expression.s: runtime/eval/ast/inc_op_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/inc_op_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/inc_op_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/inc_op_expression.cpp.s
 .PHONY : runtime/eval/ast/inc_op_expression.cpp.s
 
 runtime/eval/ast/include_expression.o: runtime/eval/ast/include_expression.cpp.o
@@ -3995,7 +3899,7 @@ runtime/eval/ast/include_expression.o: runtime/eval/ast/include_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/include_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/include_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/include_expression.cpp.o
 .PHONY : runtime/eval/ast/include_expression.cpp.o
 
 runtime/eval/ast/include_expression.i: runtime/eval/ast/include_expression.cpp.i
@@ -4003,7 +3907,7 @@ runtime/eval/ast/include_expression.i: runtime/eval/ast/include_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/include_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/include_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/include_expression.cpp.i
 .PHONY : runtime/eval/ast/include_expression.cpp.i
 
 runtime/eval/ast/include_expression.s: runtime/eval/ast/include_expression.cpp.s
@@ -4011,7 +3915,7 @@ runtime/eval/ast/include_expression.s: runtime/eval/ast/include_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/include_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/include_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/include_expression.cpp.s
 .PHONY : runtime/eval/ast/include_expression.cpp.s
 
 runtime/eval/ast/instanceof_expression.o: runtime/eval/ast/instanceof_expression.cpp.o
@@ -4019,7 +3923,7 @@ runtime/eval/ast/instanceof_expression.o: runtime/eval/ast/instanceof_expression
 
 # target to build an object file
 runtime/eval/ast/instanceof_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/instanceof_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/instanceof_expression.cpp.o
 .PHONY : runtime/eval/ast/instanceof_expression.cpp.o
 
 runtime/eval/ast/instanceof_expression.i: runtime/eval/ast/instanceof_expression.cpp.i
@@ -4027,7 +3931,7 @@ runtime/eval/ast/instanceof_expression.i: runtime/eval/ast/instanceof_expression
 
 # target to preprocess a source file
 runtime/eval/ast/instanceof_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/instanceof_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/instanceof_expression.cpp.i
 .PHONY : runtime/eval/ast/instanceof_expression.cpp.i
 
 runtime/eval/ast/instanceof_expression.s: runtime/eval/ast/instanceof_expression.cpp.s
@@ -4035,7 +3939,7 @@ runtime/eval/ast/instanceof_expression.s: runtime/eval/ast/instanceof_expression
 
 # target to generate assembly for a file
 runtime/eval/ast/instanceof_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/instanceof_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/instanceof_expression.cpp.s
 .PHONY : runtime/eval/ast/instanceof_expression.cpp.s
 
 runtime/eval/ast/isset_expression.o: runtime/eval/ast/isset_expression.cpp.o
@@ -4043,7 +3947,7 @@ runtime/eval/ast/isset_expression.o: runtime/eval/ast/isset_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/isset_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/isset_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/isset_expression.cpp.o
 .PHONY : runtime/eval/ast/isset_expression.cpp.o
 
 runtime/eval/ast/isset_expression.i: runtime/eval/ast/isset_expression.cpp.i
@@ -4051,7 +3955,7 @@ runtime/eval/ast/isset_expression.i: runtime/eval/ast/isset_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/isset_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/isset_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/isset_expression.cpp.i
 .PHONY : runtime/eval/ast/isset_expression.cpp.i
 
 runtime/eval/ast/isset_expression.s: runtime/eval/ast/isset_expression.cpp.s
@@ -4059,7 +3963,7 @@ runtime/eval/ast/isset_expression.s: runtime/eval/ast/isset_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/isset_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/isset_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/isset_expression.cpp.s
 .PHONY : runtime/eval/ast/isset_expression.cpp.s
 
 runtime/eval/ast/label_statement.o: runtime/eval/ast/label_statement.cpp.o
@@ -4067,7 +3971,7 @@ runtime/eval/ast/label_statement.o: runtime/eval/ast/label_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/label_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/label_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/label_statement.cpp.o
 .PHONY : runtime/eval/ast/label_statement.cpp.o
 
 runtime/eval/ast/label_statement.i: runtime/eval/ast/label_statement.cpp.i
@@ -4075,7 +3979,7 @@ runtime/eval/ast/label_statement.i: runtime/eval/ast/label_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/label_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/label_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/label_statement.cpp.i
 .PHONY : runtime/eval/ast/label_statement.cpp.i
 
 runtime/eval/ast/label_statement.s: runtime/eval/ast/label_statement.cpp.s
@@ -4083,7 +3987,7 @@ runtime/eval/ast/label_statement.s: runtime/eval/ast/label_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/label_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/label_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/label_statement.cpp.s
 .PHONY : runtime/eval/ast/label_statement.cpp.s
 
 runtime/eval/ast/list_assignment_expression.o: runtime/eval/ast/list_assignment_expression.cpp.o
@@ -4091,7 +3995,7 @@ runtime/eval/ast/list_assignment_expression.o: runtime/eval/ast/list_assignment_
 
 # target to build an object file
 runtime/eval/ast/list_assignment_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/list_assignment_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/list_assignment_expression.cpp.o
 .PHONY : runtime/eval/ast/list_assignment_expression.cpp.o
 
 runtime/eval/ast/list_assignment_expression.i: runtime/eval/ast/list_assignment_expression.cpp.i
@@ -4099,7 +4003,7 @@ runtime/eval/ast/list_assignment_expression.i: runtime/eval/ast/list_assignment_
 
 # target to preprocess a source file
 runtime/eval/ast/list_assignment_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/list_assignment_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/list_assignment_expression.cpp.i
 .PHONY : runtime/eval/ast/list_assignment_expression.cpp.i
 
 runtime/eval/ast/list_assignment_expression.s: runtime/eval/ast/list_assignment_expression.cpp.s
@@ -4107,7 +4011,7 @@ runtime/eval/ast/list_assignment_expression.s: runtime/eval/ast/list_assignment_
 
 # target to generate assembly for a file
 runtime/eval/ast/list_assignment_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/list_assignment_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/list_assignment_expression.cpp.s
 .PHONY : runtime/eval/ast/list_assignment_expression.cpp.s
 
 runtime/eval/ast/lval_expression.o: runtime/eval/ast/lval_expression.cpp.o
@@ -4115,7 +4019,7 @@ runtime/eval/ast/lval_expression.o: runtime/eval/ast/lval_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/lval_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/lval_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/lval_expression.cpp.o
 .PHONY : runtime/eval/ast/lval_expression.cpp.o
 
 runtime/eval/ast/lval_expression.i: runtime/eval/ast/lval_expression.cpp.i
@@ -4123,7 +4027,7 @@ runtime/eval/ast/lval_expression.i: runtime/eval/ast/lval_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/lval_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/lval_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/lval_expression.cpp.i
 .PHONY : runtime/eval/ast/lval_expression.cpp.i
 
 runtime/eval/ast/lval_expression.s: runtime/eval/ast/lval_expression.cpp.s
@@ -4131,7 +4035,7 @@ runtime/eval/ast/lval_expression.s: runtime/eval/ast/lval_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/lval_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/lval_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/lval_expression.cpp.s
 .PHONY : runtime/eval/ast/lval_expression.cpp.s
 
 runtime/eval/ast/method_statement.o: runtime/eval/ast/method_statement.cpp.o
@@ -4139,7 +4043,7 @@ runtime/eval/ast/method_statement.o: runtime/eval/ast/method_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/method_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/method_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/method_statement.cpp.o
 .PHONY : runtime/eval/ast/method_statement.cpp.o
 
 runtime/eval/ast/method_statement.i: runtime/eval/ast/method_statement.cpp.i
@@ -4147,7 +4051,7 @@ runtime/eval/ast/method_statement.i: runtime/eval/ast/method_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/method_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/method_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/method_statement.cpp.i
 .PHONY : runtime/eval/ast/method_statement.cpp.i
 
 runtime/eval/ast/method_statement.s: runtime/eval/ast/method_statement.cpp.s
@@ -4155,7 +4059,7 @@ runtime/eval/ast/method_statement.s: runtime/eval/ast/method_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/method_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/method_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/method_statement.cpp.s
 .PHONY : runtime/eval/ast/method_statement.cpp.s
 
 runtime/eval/ast/name.o: runtime/eval/ast/name.cpp.o
@@ -4163,7 +4067,7 @@ runtime/eval/ast/name.o: runtime/eval/ast/name.cpp.o
 
 # target to build an object file
 runtime/eval/ast/name.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/name.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/name.cpp.o
 .PHONY : runtime/eval/ast/name.cpp.o
 
 runtime/eval/ast/name.i: runtime/eval/ast/name.cpp.i
@@ -4171,7 +4075,7 @@ runtime/eval/ast/name.i: runtime/eval/ast/name.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/name.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/name.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/name.cpp.i
 .PHONY : runtime/eval/ast/name.cpp.i
 
 runtime/eval/ast/name.s: runtime/eval/ast/name.cpp.s
@@ -4179,7 +4083,7 @@ runtime/eval/ast/name.s: runtime/eval/ast/name.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/name.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/name.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/name.cpp.s
 .PHONY : runtime/eval/ast/name.cpp.s
 
 runtime/eval/ast/new_object_expression.o: runtime/eval/ast/new_object_expression.cpp.o
@@ -4187,7 +4091,7 @@ runtime/eval/ast/new_object_expression.o: runtime/eval/ast/new_object_expression
 
 # target to build an object file
 runtime/eval/ast/new_object_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/new_object_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/new_object_expression.cpp.o
 .PHONY : runtime/eval/ast/new_object_expression.cpp.o
 
 runtime/eval/ast/new_object_expression.i: runtime/eval/ast/new_object_expression.cpp.i
@@ -4195,7 +4099,7 @@ runtime/eval/ast/new_object_expression.i: runtime/eval/ast/new_object_expression
 
 # target to preprocess a source file
 runtime/eval/ast/new_object_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/new_object_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/new_object_expression.cpp.i
 .PHONY : runtime/eval/ast/new_object_expression.cpp.i
 
 runtime/eval/ast/new_object_expression.s: runtime/eval/ast/new_object_expression.cpp.s
@@ -4203,7 +4107,7 @@ runtime/eval/ast/new_object_expression.s: runtime/eval/ast/new_object_expression
 
 # target to generate assembly for a file
 runtime/eval/ast/new_object_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/new_object_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/new_object_expression.cpp.s
 .PHONY : runtime/eval/ast/new_object_expression.cpp.s
 
 runtime/eval/ast/object_method_expression.o: runtime/eval/ast/object_method_expression.cpp.o
@@ -4211,7 +4115,7 @@ runtime/eval/ast/object_method_expression.o: runtime/eval/ast/object_method_expr
 
 # target to build an object file
 runtime/eval/ast/object_method_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_method_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_method_expression.cpp.o
 .PHONY : runtime/eval/ast/object_method_expression.cpp.o
 
 runtime/eval/ast/object_method_expression.i: runtime/eval/ast/object_method_expression.cpp.i
@@ -4219,7 +4123,7 @@ runtime/eval/ast/object_method_expression.i: runtime/eval/ast/object_method_expr
 
 # target to preprocess a source file
 runtime/eval/ast/object_method_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_method_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_method_expression.cpp.i
 .PHONY : runtime/eval/ast/object_method_expression.cpp.i
 
 runtime/eval/ast/object_method_expression.s: runtime/eval/ast/object_method_expression.cpp.s
@@ -4227,7 +4131,7 @@ runtime/eval/ast/object_method_expression.s: runtime/eval/ast/object_method_expr
 
 # target to generate assembly for a file
 runtime/eval/ast/object_method_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_method_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_method_expression.cpp.s
 .PHONY : runtime/eval/ast/object_method_expression.cpp.s
 
 runtime/eval/ast/object_property_expression.o: runtime/eval/ast/object_property_expression.cpp.o
@@ -4235,7 +4139,7 @@ runtime/eval/ast/object_property_expression.o: runtime/eval/ast/object_property_
 
 # target to build an object file
 runtime/eval/ast/object_property_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_property_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_property_expression.cpp.o
 .PHONY : runtime/eval/ast/object_property_expression.cpp.o
 
 runtime/eval/ast/object_property_expression.i: runtime/eval/ast/object_property_expression.cpp.i
@@ -4243,7 +4147,7 @@ runtime/eval/ast/object_property_expression.i: runtime/eval/ast/object_property_
 
 # target to preprocess a source file
 runtime/eval/ast/object_property_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_property_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_property_expression.cpp.i
 .PHONY : runtime/eval/ast/object_property_expression.cpp.i
 
 runtime/eval/ast/object_property_expression.s: runtime/eval/ast/object_property_expression.cpp.s
@@ -4251,7 +4155,7 @@ runtime/eval/ast/object_property_expression.s: runtime/eval/ast/object_property_
 
 # target to generate assembly for a file
 runtime/eval/ast/object_property_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_property_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/object_property_expression.cpp.s
 .PHONY : runtime/eval/ast/object_property_expression.cpp.s
 
 runtime/eval/ast/qop_expression.o: runtime/eval/ast/qop_expression.cpp.o
@@ -4259,7 +4163,7 @@ runtime/eval/ast/qop_expression.o: runtime/eval/ast/qop_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/qop_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/qop_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/qop_expression.cpp.o
 .PHONY : runtime/eval/ast/qop_expression.cpp.o
 
 runtime/eval/ast/qop_expression.i: runtime/eval/ast/qop_expression.cpp.i
@@ -4267,7 +4171,7 @@ runtime/eval/ast/qop_expression.i: runtime/eval/ast/qop_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/qop_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/qop_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/qop_expression.cpp.i
 .PHONY : runtime/eval/ast/qop_expression.cpp.i
 
 runtime/eval/ast/qop_expression.s: runtime/eval/ast/qop_expression.cpp.s
@@ -4275,7 +4179,7 @@ runtime/eval/ast/qop_expression.s: runtime/eval/ast/qop_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/qop_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/qop_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/qop_expression.cpp.s
 .PHONY : runtime/eval/ast/qop_expression.cpp.s
 
 runtime/eval/ast/ref_param_expression.o: runtime/eval/ast/ref_param_expression.cpp.o
@@ -4283,7 +4187,7 @@ runtime/eval/ast/ref_param_expression.o: runtime/eval/ast/ref_param_expression.c
 
 # target to build an object file
 runtime/eval/ast/ref_param_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/ref_param_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/ref_param_expression.cpp.o
 .PHONY : runtime/eval/ast/ref_param_expression.cpp.o
 
 runtime/eval/ast/ref_param_expression.i: runtime/eval/ast/ref_param_expression.cpp.i
@@ -4291,7 +4195,7 @@ runtime/eval/ast/ref_param_expression.i: runtime/eval/ast/ref_param_expression.c
 
 # target to preprocess a source file
 runtime/eval/ast/ref_param_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/ref_param_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/ref_param_expression.cpp.i
 .PHONY : runtime/eval/ast/ref_param_expression.cpp.i
 
 runtime/eval/ast/ref_param_expression.s: runtime/eval/ast/ref_param_expression.cpp.s
@@ -4299,7 +4203,7 @@ runtime/eval/ast/ref_param_expression.s: runtime/eval/ast/ref_param_expression.c
 
 # target to generate assembly for a file
 runtime/eval/ast/ref_param_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/ref_param_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/ref_param_expression.cpp.s
 .PHONY : runtime/eval/ast/ref_param_expression.cpp.s
 
 runtime/eval/ast/return_statement.o: runtime/eval/ast/return_statement.cpp.o
@@ -4307,7 +4211,7 @@ runtime/eval/ast/return_statement.o: runtime/eval/ast/return_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/return_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/return_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/return_statement.cpp.o
 .PHONY : runtime/eval/ast/return_statement.cpp.o
 
 runtime/eval/ast/return_statement.i: runtime/eval/ast/return_statement.cpp.i
@@ -4315,7 +4219,7 @@ runtime/eval/ast/return_statement.i: runtime/eval/ast/return_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/return_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/return_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/return_statement.cpp.i
 .PHONY : runtime/eval/ast/return_statement.cpp.i
 
 runtime/eval/ast/return_statement.s: runtime/eval/ast/return_statement.cpp.s
@@ -4323,7 +4227,7 @@ runtime/eval/ast/return_statement.s: runtime/eval/ast/return_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/return_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/return_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/return_statement.cpp.s
 .PHONY : runtime/eval/ast/return_statement.cpp.s
 
 runtime/eval/ast/scalar_expression.o: runtime/eval/ast/scalar_expression.cpp.o
@@ -4331,7 +4235,7 @@ runtime/eval/ast/scalar_expression.o: runtime/eval/ast/scalar_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/scalar_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_expression.cpp.o
 .PHONY : runtime/eval/ast/scalar_expression.cpp.o
 
 runtime/eval/ast/scalar_expression.i: runtime/eval/ast/scalar_expression.cpp.i
@@ -4339,7 +4243,7 @@ runtime/eval/ast/scalar_expression.i: runtime/eval/ast/scalar_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/scalar_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_expression.cpp.i
 .PHONY : runtime/eval/ast/scalar_expression.cpp.i
 
 runtime/eval/ast/scalar_expression.s: runtime/eval/ast/scalar_expression.cpp.s
@@ -4347,7 +4251,7 @@ runtime/eval/ast/scalar_expression.s: runtime/eval/ast/scalar_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/scalar_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_expression.cpp.s
 .PHONY : runtime/eval/ast/scalar_expression.cpp.s
 
 runtime/eval/ast/scalar_value_expression.o: runtime/eval/ast/scalar_value_expression.cpp.o
@@ -4355,7 +4259,7 @@ runtime/eval/ast/scalar_value_expression.o: runtime/eval/ast/scalar_value_expres
 
 # target to build an object file
 runtime/eval/ast/scalar_value_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_value_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_value_expression.cpp.o
 .PHONY : runtime/eval/ast/scalar_value_expression.cpp.o
 
 runtime/eval/ast/scalar_value_expression.i: runtime/eval/ast/scalar_value_expression.cpp.i
@@ -4363,7 +4267,7 @@ runtime/eval/ast/scalar_value_expression.i: runtime/eval/ast/scalar_value_expres
 
 # target to preprocess a source file
 runtime/eval/ast/scalar_value_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_value_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_value_expression.cpp.i
 .PHONY : runtime/eval/ast/scalar_value_expression.cpp.i
 
 runtime/eval/ast/scalar_value_expression.s: runtime/eval/ast/scalar_value_expression.cpp.s
@@ -4371,7 +4275,7 @@ runtime/eval/ast/scalar_value_expression.s: runtime/eval/ast/scalar_value_expres
 
 # target to generate assembly for a file
 runtime/eval/ast/scalar_value_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_value_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/scalar_value_expression.cpp.s
 .PHONY : runtime/eval/ast/scalar_value_expression.cpp.s
 
 runtime/eval/ast/simple_function_call_expression.o: runtime/eval/ast/simple_function_call_expression.cpp.o
@@ -4379,7 +4283,7 @@ runtime/eval/ast/simple_function_call_expression.o: runtime/eval/ast/simple_func
 
 # target to build an object file
 runtime/eval/ast/simple_function_call_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/simple_function_call_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/simple_function_call_expression.cpp.o
 .PHONY : runtime/eval/ast/simple_function_call_expression.cpp.o
 
 runtime/eval/ast/simple_function_call_expression.i: runtime/eval/ast/simple_function_call_expression.cpp.i
@@ -4387,7 +4291,7 @@ runtime/eval/ast/simple_function_call_expression.i: runtime/eval/ast/simple_func
 
 # target to preprocess a source file
 runtime/eval/ast/simple_function_call_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/simple_function_call_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/simple_function_call_expression.cpp.i
 .PHONY : runtime/eval/ast/simple_function_call_expression.cpp.i
 
 runtime/eval/ast/simple_function_call_expression.s: runtime/eval/ast/simple_function_call_expression.cpp.s
@@ -4395,7 +4299,7 @@ runtime/eval/ast/simple_function_call_expression.s: runtime/eval/ast/simple_func
 
 # target to generate assembly for a file
 runtime/eval/ast/simple_function_call_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/simple_function_call_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/simple_function_call_expression.cpp.s
 .PHONY : runtime/eval/ast/simple_function_call_expression.cpp.s
 
 runtime/eval/ast/statement.o: runtime/eval/ast/statement.cpp.o
@@ -4403,7 +4307,7 @@ runtime/eval/ast/statement.o: runtime/eval/ast/statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement.cpp.o
 .PHONY : runtime/eval/ast/statement.cpp.o
 
 runtime/eval/ast/statement.i: runtime/eval/ast/statement.cpp.i
@@ -4411,7 +4315,7 @@ runtime/eval/ast/statement.i: runtime/eval/ast/statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement.cpp.i
 .PHONY : runtime/eval/ast/statement.cpp.i
 
 runtime/eval/ast/statement.s: runtime/eval/ast/statement.cpp.s
@@ -4419,7 +4323,7 @@ runtime/eval/ast/statement.s: runtime/eval/ast/statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement.cpp.s
 .PHONY : runtime/eval/ast/statement.cpp.s
 
 runtime/eval/ast/statement_list_statement.o: runtime/eval/ast/statement_list_statement.cpp.o
@@ -4427,7 +4331,7 @@ runtime/eval/ast/statement_list_statement.o: runtime/eval/ast/statement_list_sta
 
 # target to build an object file
 runtime/eval/ast/statement_list_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement_list_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement_list_statement.cpp.o
 .PHONY : runtime/eval/ast/statement_list_statement.cpp.o
 
 runtime/eval/ast/statement_list_statement.i: runtime/eval/ast/statement_list_statement.cpp.i
@@ -4435,7 +4339,7 @@ runtime/eval/ast/statement_list_statement.i: runtime/eval/ast/statement_list_sta
 
 # target to preprocess a source file
 runtime/eval/ast/statement_list_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement_list_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement_list_statement.cpp.i
 .PHONY : runtime/eval/ast/statement_list_statement.cpp.i
 
 runtime/eval/ast/statement_list_statement.s: runtime/eval/ast/statement_list_statement.cpp.s
@@ -4443,7 +4347,7 @@ runtime/eval/ast/statement_list_statement.s: runtime/eval/ast/statement_list_sta
 
 # target to generate assembly for a file
 runtime/eval/ast/statement_list_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement_list_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/statement_list_statement.cpp.s
 .PHONY : runtime/eval/ast/statement_list_statement.cpp.s
 
 runtime/eval/ast/static_member_expression.o: runtime/eval/ast/static_member_expression.cpp.o
@@ -4451,7 +4355,7 @@ runtime/eval/ast/static_member_expression.o: runtime/eval/ast/static_member_expr
 
 # target to build an object file
 runtime/eval/ast/static_member_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_member_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_member_expression.cpp.o
 .PHONY : runtime/eval/ast/static_member_expression.cpp.o
 
 runtime/eval/ast/static_member_expression.i: runtime/eval/ast/static_member_expression.cpp.i
@@ -4459,7 +4363,7 @@ runtime/eval/ast/static_member_expression.i: runtime/eval/ast/static_member_expr
 
 # target to preprocess a source file
 runtime/eval/ast/static_member_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_member_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_member_expression.cpp.i
 .PHONY : runtime/eval/ast/static_member_expression.cpp.i
 
 runtime/eval/ast/static_member_expression.s: runtime/eval/ast/static_member_expression.cpp.s
@@ -4467,7 +4371,7 @@ runtime/eval/ast/static_member_expression.s: runtime/eval/ast/static_member_expr
 
 # target to generate assembly for a file
 runtime/eval/ast/static_member_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_member_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_member_expression.cpp.s
 .PHONY : runtime/eval/ast/static_member_expression.cpp.s
 
 runtime/eval/ast/static_method_expression.o: runtime/eval/ast/static_method_expression.cpp.o
@@ -4475,7 +4379,7 @@ runtime/eval/ast/static_method_expression.o: runtime/eval/ast/static_method_expr
 
 # target to build an object file
 runtime/eval/ast/static_method_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_method_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_method_expression.cpp.o
 .PHONY : runtime/eval/ast/static_method_expression.cpp.o
 
 runtime/eval/ast/static_method_expression.i: runtime/eval/ast/static_method_expression.cpp.i
@@ -4483,7 +4387,7 @@ runtime/eval/ast/static_method_expression.i: runtime/eval/ast/static_method_expr
 
 # target to preprocess a source file
 runtime/eval/ast/static_method_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_method_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_method_expression.cpp.i
 .PHONY : runtime/eval/ast/static_method_expression.cpp.i
 
 runtime/eval/ast/static_method_expression.s: runtime/eval/ast/static_method_expression.cpp.s
@@ -4491,7 +4395,7 @@ runtime/eval/ast/static_method_expression.s: runtime/eval/ast/static_method_expr
 
 # target to generate assembly for a file
 runtime/eval/ast/static_method_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_method_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_method_expression.cpp.s
 .PHONY : runtime/eval/ast/static_method_expression.cpp.s
 
 runtime/eval/ast/static_statement.o: runtime/eval/ast/static_statement.cpp.o
@@ -4499,7 +4403,7 @@ runtime/eval/ast/static_statement.o: runtime/eval/ast/static_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/static_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_statement.cpp.o
 .PHONY : runtime/eval/ast/static_statement.cpp.o
 
 runtime/eval/ast/static_statement.i: runtime/eval/ast/static_statement.cpp.i
@@ -4507,7 +4411,7 @@ runtime/eval/ast/static_statement.i: runtime/eval/ast/static_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/static_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_statement.cpp.i
 .PHONY : runtime/eval/ast/static_statement.cpp.i
 
 runtime/eval/ast/static_statement.s: runtime/eval/ast/static_statement.cpp.s
@@ -4515,7 +4419,7 @@ runtime/eval/ast/static_statement.s: runtime/eval/ast/static_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/static_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/static_statement.cpp.s
 .PHONY : runtime/eval/ast/static_statement.cpp.s
 
 runtime/eval/ast/strong_foreach_statement.o: runtime/eval/ast/strong_foreach_statement.cpp.o
@@ -4523,7 +4427,7 @@ runtime/eval/ast/strong_foreach_statement.o: runtime/eval/ast/strong_foreach_sta
 
 # target to build an object file
 runtime/eval/ast/strong_foreach_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/strong_foreach_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/strong_foreach_statement.cpp.o
 .PHONY : runtime/eval/ast/strong_foreach_statement.cpp.o
 
 runtime/eval/ast/strong_foreach_statement.i: runtime/eval/ast/strong_foreach_statement.cpp.i
@@ -4531,7 +4435,7 @@ runtime/eval/ast/strong_foreach_statement.i: runtime/eval/ast/strong_foreach_sta
 
 # target to preprocess a source file
 runtime/eval/ast/strong_foreach_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/strong_foreach_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/strong_foreach_statement.cpp.i
 .PHONY : runtime/eval/ast/strong_foreach_statement.cpp.i
 
 runtime/eval/ast/strong_foreach_statement.s: runtime/eval/ast/strong_foreach_statement.cpp.s
@@ -4539,7 +4443,7 @@ runtime/eval/ast/strong_foreach_statement.s: runtime/eval/ast/strong_foreach_sta
 
 # target to generate assembly for a file
 runtime/eval/ast/strong_foreach_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/strong_foreach_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/strong_foreach_statement.cpp.s
 .PHONY : runtime/eval/ast/strong_foreach_statement.cpp.s
 
 runtime/eval/ast/switch_statement.o: runtime/eval/ast/switch_statement.cpp.o
@@ -4547,7 +4451,7 @@ runtime/eval/ast/switch_statement.o: runtime/eval/ast/switch_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/switch_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/switch_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/switch_statement.cpp.o
 .PHONY : runtime/eval/ast/switch_statement.cpp.o
 
 runtime/eval/ast/switch_statement.i: runtime/eval/ast/switch_statement.cpp.i
@@ -4555,7 +4459,7 @@ runtime/eval/ast/switch_statement.i: runtime/eval/ast/switch_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/switch_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/switch_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/switch_statement.cpp.i
 .PHONY : runtime/eval/ast/switch_statement.cpp.i
 
 runtime/eval/ast/switch_statement.s: runtime/eval/ast/switch_statement.cpp.s
@@ -4563,7 +4467,7 @@ runtime/eval/ast/switch_statement.s: runtime/eval/ast/switch_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/switch_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/switch_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/switch_statement.cpp.s
 .PHONY : runtime/eval/ast/switch_statement.cpp.s
 
 runtime/eval/ast/temp_expression.o: runtime/eval/ast/temp_expression.cpp.o
@@ -4571,7 +4475,7 @@ runtime/eval/ast/temp_expression.o: runtime/eval/ast/temp_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/temp_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression.cpp.o
 .PHONY : runtime/eval/ast/temp_expression.cpp.o
 
 runtime/eval/ast/temp_expression.i: runtime/eval/ast/temp_expression.cpp.i
@@ -4579,7 +4483,7 @@ runtime/eval/ast/temp_expression.i: runtime/eval/ast/temp_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/temp_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression.cpp.i
 .PHONY : runtime/eval/ast/temp_expression.cpp.i
 
 runtime/eval/ast/temp_expression.s: runtime/eval/ast/temp_expression.cpp.s
@@ -4587,7 +4491,7 @@ runtime/eval/ast/temp_expression.s: runtime/eval/ast/temp_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/temp_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression.cpp.s
 .PHONY : runtime/eval/ast/temp_expression.cpp.s
 
 runtime/eval/ast/temp_expression_list.o: runtime/eval/ast/temp_expression_list.cpp.o
@@ -4595,7 +4499,7 @@ runtime/eval/ast/temp_expression_list.o: runtime/eval/ast/temp_expression_list.c
 
 # target to build an object file
 runtime/eval/ast/temp_expression_list.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression_list.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression_list.cpp.o
 .PHONY : runtime/eval/ast/temp_expression_list.cpp.o
 
 runtime/eval/ast/temp_expression_list.i: runtime/eval/ast/temp_expression_list.cpp.i
@@ -4603,7 +4507,7 @@ runtime/eval/ast/temp_expression_list.i: runtime/eval/ast/temp_expression_list.c
 
 # target to preprocess a source file
 runtime/eval/ast/temp_expression_list.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression_list.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression_list.cpp.i
 .PHONY : runtime/eval/ast/temp_expression_list.cpp.i
 
 runtime/eval/ast/temp_expression_list.s: runtime/eval/ast/temp_expression_list.cpp.s
@@ -4611,7 +4515,7 @@ runtime/eval/ast/temp_expression_list.s: runtime/eval/ast/temp_expression_list.c
 
 # target to generate assembly for a file
 runtime/eval/ast/temp_expression_list.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression_list.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/temp_expression_list.cpp.s
 .PHONY : runtime/eval/ast/temp_expression_list.cpp.s
 
 runtime/eval/ast/this_expression.o: runtime/eval/ast/this_expression.cpp.o
@@ -4619,7 +4523,7 @@ runtime/eval/ast/this_expression.o: runtime/eval/ast/this_expression.cpp.o
 
 # target to build an object file
 runtime/eval/ast/this_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/this_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/this_expression.cpp.o
 .PHONY : runtime/eval/ast/this_expression.cpp.o
 
 runtime/eval/ast/this_expression.i: runtime/eval/ast/this_expression.cpp.i
@@ -4627,7 +4531,7 @@ runtime/eval/ast/this_expression.i: runtime/eval/ast/this_expression.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/this_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/this_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/this_expression.cpp.i
 .PHONY : runtime/eval/ast/this_expression.cpp.i
 
 runtime/eval/ast/this_expression.s: runtime/eval/ast/this_expression.cpp.s
@@ -4635,7 +4539,7 @@ runtime/eval/ast/this_expression.s: runtime/eval/ast/this_expression.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/this_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/this_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/this_expression.cpp.s
 .PHONY : runtime/eval/ast/this_expression.cpp.s
 
 runtime/eval/ast/throw_statement.o: runtime/eval/ast/throw_statement.cpp.o
@@ -4643,7 +4547,7 @@ runtime/eval/ast/throw_statement.o: runtime/eval/ast/throw_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/throw_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/throw_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/throw_statement.cpp.o
 .PHONY : runtime/eval/ast/throw_statement.cpp.o
 
 runtime/eval/ast/throw_statement.i: runtime/eval/ast/throw_statement.cpp.i
@@ -4651,7 +4555,7 @@ runtime/eval/ast/throw_statement.i: runtime/eval/ast/throw_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/throw_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/throw_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/throw_statement.cpp.i
 .PHONY : runtime/eval/ast/throw_statement.cpp.i
 
 runtime/eval/ast/throw_statement.s: runtime/eval/ast/throw_statement.cpp.s
@@ -4659,7 +4563,7 @@ runtime/eval/ast/throw_statement.s: runtime/eval/ast/throw_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/throw_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/throw_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/throw_statement.cpp.s
 .PHONY : runtime/eval/ast/throw_statement.cpp.s
 
 runtime/eval/ast/trait_alias_statement.o: runtime/eval/ast/trait_alias_statement.cpp.o
@@ -4667,7 +4571,7 @@ runtime/eval/ast/trait_alias_statement.o: runtime/eval/ast/trait_alias_statement
 
 # target to build an object file
 runtime/eval/ast/trait_alias_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_alias_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_alias_statement.cpp.o
 .PHONY : runtime/eval/ast/trait_alias_statement.cpp.o
 
 runtime/eval/ast/trait_alias_statement.i: runtime/eval/ast/trait_alias_statement.cpp.i
@@ -4675,7 +4579,7 @@ runtime/eval/ast/trait_alias_statement.i: runtime/eval/ast/trait_alias_statement
 
 # target to preprocess a source file
 runtime/eval/ast/trait_alias_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_alias_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_alias_statement.cpp.i
 .PHONY : runtime/eval/ast/trait_alias_statement.cpp.i
 
 runtime/eval/ast/trait_alias_statement.s: runtime/eval/ast/trait_alias_statement.cpp.s
@@ -4683,7 +4587,7 @@ runtime/eval/ast/trait_alias_statement.s: runtime/eval/ast/trait_alias_statement
 
 # target to generate assembly for a file
 runtime/eval/ast/trait_alias_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_alias_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_alias_statement.cpp.s
 .PHONY : runtime/eval/ast/trait_alias_statement.cpp.s
 
 runtime/eval/ast/trait_prec_statement.o: runtime/eval/ast/trait_prec_statement.cpp.o
@@ -4691,7 +4595,7 @@ runtime/eval/ast/trait_prec_statement.o: runtime/eval/ast/trait_prec_statement.c
 
 # target to build an object file
 runtime/eval/ast/trait_prec_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_prec_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_prec_statement.cpp.o
 .PHONY : runtime/eval/ast/trait_prec_statement.cpp.o
 
 runtime/eval/ast/trait_prec_statement.i: runtime/eval/ast/trait_prec_statement.cpp.i
@@ -4699,7 +4603,7 @@ runtime/eval/ast/trait_prec_statement.i: runtime/eval/ast/trait_prec_statement.c
 
 # target to preprocess a source file
 runtime/eval/ast/trait_prec_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_prec_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_prec_statement.cpp.i
 .PHONY : runtime/eval/ast/trait_prec_statement.cpp.i
 
 runtime/eval/ast/trait_prec_statement.s: runtime/eval/ast/trait_prec_statement.cpp.s
@@ -4707,7 +4611,7 @@ runtime/eval/ast/trait_prec_statement.s: runtime/eval/ast/trait_prec_statement.c
 
 # target to generate assembly for a file
 runtime/eval/ast/trait_prec_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_prec_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/trait_prec_statement.cpp.s
 .PHONY : runtime/eval/ast/trait_prec_statement.cpp.s
 
 runtime/eval/ast/try_statement.o: runtime/eval/ast/try_statement.cpp.o
@@ -4715,7 +4619,7 @@ runtime/eval/ast/try_statement.o: runtime/eval/ast/try_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/try_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/try_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/try_statement.cpp.o
 .PHONY : runtime/eval/ast/try_statement.cpp.o
 
 runtime/eval/ast/try_statement.i: runtime/eval/ast/try_statement.cpp.i
@@ -4723,7 +4627,7 @@ runtime/eval/ast/try_statement.i: runtime/eval/ast/try_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/try_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/try_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/try_statement.cpp.i
 .PHONY : runtime/eval/ast/try_statement.cpp.i
 
 runtime/eval/ast/try_statement.s: runtime/eval/ast/try_statement.cpp.s
@@ -4731,7 +4635,7 @@ runtime/eval/ast/try_statement.s: runtime/eval/ast/try_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/try_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/try_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/try_statement.cpp.s
 .PHONY : runtime/eval/ast/try_statement.cpp.s
 
 runtime/eval/ast/unary_op_expression.o: runtime/eval/ast/unary_op_expression.cpp.o
@@ -4739,7 +4643,7 @@ runtime/eval/ast/unary_op_expression.o: runtime/eval/ast/unary_op_expression.cpp
 
 # target to build an object file
 runtime/eval/ast/unary_op_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unary_op_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unary_op_expression.cpp.o
 .PHONY : runtime/eval/ast/unary_op_expression.cpp.o
 
 runtime/eval/ast/unary_op_expression.i: runtime/eval/ast/unary_op_expression.cpp.i
@@ -4747,7 +4651,7 @@ runtime/eval/ast/unary_op_expression.i: runtime/eval/ast/unary_op_expression.cpp
 
 # target to preprocess a source file
 runtime/eval/ast/unary_op_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unary_op_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unary_op_expression.cpp.i
 .PHONY : runtime/eval/ast/unary_op_expression.cpp.i
 
 runtime/eval/ast/unary_op_expression.s: runtime/eval/ast/unary_op_expression.cpp.s
@@ -4755,7 +4659,7 @@ runtime/eval/ast/unary_op_expression.s: runtime/eval/ast/unary_op_expression.cpp
 
 # target to generate assembly for a file
 runtime/eval/ast/unary_op_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unary_op_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unary_op_expression.cpp.s
 .PHONY : runtime/eval/ast/unary_op_expression.cpp.s
 
 runtime/eval/ast/unset_statement.o: runtime/eval/ast/unset_statement.cpp.o
@@ -4763,7 +4667,7 @@ runtime/eval/ast/unset_statement.o: runtime/eval/ast/unset_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/unset_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unset_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unset_statement.cpp.o
 .PHONY : runtime/eval/ast/unset_statement.cpp.o
 
 runtime/eval/ast/unset_statement.i: runtime/eval/ast/unset_statement.cpp.i
@@ -4771,7 +4675,7 @@ runtime/eval/ast/unset_statement.i: runtime/eval/ast/unset_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/unset_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unset_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unset_statement.cpp.i
 .PHONY : runtime/eval/ast/unset_statement.cpp.i
 
 runtime/eval/ast/unset_statement.s: runtime/eval/ast/unset_statement.cpp.s
@@ -4779,7 +4683,7 @@ runtime/eval/ast/unset_statement.s: runtime/eval/ast/unset_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/unset_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unset_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/unset_statement.cpp.s
 .PHONY : runtime/eval/ast/unset_statement.cpp.s
 
 runtime/eval/ast/use_trait_statement.o: runtime/eval/ast/use_trait_statement.cpp.o
@@ -4787,7 +4691,7 @@ runtime/eval/ast/use_trait_statement.o: runtime/eval/ast/use_trait_statement.cpp
 
 # target to build an object file
 runtime/eval/ast/use_trait_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/use_trait_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/use_trait_statement.cpp.o
 .PHONY : runtime/eval/ast/use_trait_statement.cpp.o
 
 runtime/eval/ast/use_trait_statement.i: runtime/eval/ast/use_trait_statement.cpp.i
@@ -4795,7 +4699,7 @@ runtime/eval/ast/use_trait_statement.i: runtime/eval/ast/use_trait_statement.cpp
 
 # target to preprocess a source file
 runtime/eval/ast/use_trait_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/use_trait_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/use_trait_statement.cpp.i
 .PHONY : runtime/eval/ast/use_trait_statement.cpp.i
 
 runtime/eval/ast/use_trait_statement.s: runtime/eval/ast/use_trait_statement.cpp.s
@@ -4803,15 +4707,39 @@ runtime/eval/ast/use_trait_statement.s: runtime/eval/ast/use_trait_statement.cpp
 
 # target to generate assembly for a file
 runtime/eval/ast/use_trait_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/use_trait_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/use_trait_statement.cpp.s
 .PHONY : runtime/eval/ast/use_trait_statement.cpp.s
+
+runtime/eval/ast/user_attribute.o: runtime/eval/ast/user_attribute.cpp.o
+.PHONY : runtime/eval/ast/user_attribute.o
+
+# target to build an object file
+runtime/eval/ast/user_attribute.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/user_attribute.cpp.o
+.PHONY : runtime/eval/ast/user_attribute.cpp.o
+
+runtime/eval/ast/user_attribute.i: runtime/eval/ast/user_attribute.cpp.i
+.PHONY : runtime/eval/ast/user_attribute.i
+
+# target to preprocess a source file
+runtime/eval/ast/user_attribute.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/user_attribute.cpp.i
+.PHONY : runtime/eval/ast/user_attribute.cpp.i
+
+runtime/eval/ast/user_attribute.s: runtime/eval/ast/user_attribute.cpp.s
+.PHONY : runtime/eval/ast/user_attribute.s
+
+# target to generate assembly for a file
+runtime/eval/ast/user_attribute.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/user_attribute.cpp.s
+.PHONY : runtime/eval/ast/user_attribute.cpp.s
 
 runtime/eval/ast/variable_expression.o: runtime/eval/ast/variable_expression.cpp.o
 .PHONY : runtime/eval/ast/variable_expression.o
 
 # target to build an object file
 runtime/eval/ast/variable_expression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/variable_expression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/variable_expression.cpp.o
 .PHONY : runtime/eval/ast/variable_expression.cpp.o
 
 runtime/eval/ast/variable_expression.i: runtime/eval/ast/variable_expression.cpp.i
@@ -4819,7 +4747,7 @@ runtime/eval/ast/variable_expression.i: runtime/eval/ast/variable_expression.cpp
 
 # target to preprocess a source file
 runtime/eval/ast/variable_expression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/variable_expression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/variable_expression.cpp.i
 .PHONY : runtime/eval/ast/variable_expression.cpp.i
 
 runtime/eval/ast/variable_expression.s: runtime/eval/ast/variable_expression.cpp.s
@@ -4827,7 +4755,7 @@ runtime/eval/ast/variable_expression.s: runtime/eval/ast/variable_expression.cpp
 
 # target to generate assembly for a file
 runtime/eval/ast/variable_expression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/variable_expression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/variable_expression.cpp.s
 .PHONY : runtime/eval/ast/variable_expression.cpp.s
 
 runtime/eval/ast/while_statement.o: runtime/eval/ast/while_statement.cpp.o
@@ -4835,7 +4763,7 @@ runtime/eval/ast/while_statement.o: runtime/eval/ast/while_statement.cpp.o
 
 # target to build an object file
 runtime/eval/ast/while_statement.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/while_statement.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/while_statement.cpp.o
 .PHONY : runtime/eval/ast/while_statement.cpp.o
 
 runtime/eval/ast/while_statement.i: runtime/eval/ast/while_statement.cpp.i
@@ -4843,7 +4771,7 @@ runtime/eval/ast/while_statement.i: runtime/eval/ast/while_statement.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ast/while_statement.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/while_statement.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/while_statement.cpp.i
 .PHONY : runtime/eval/ast/while_statement.cpp.i
 
 runtime/eval/ast/while_statement.s: runtime/eval/ast/while_statement.cpp.s
@@ -4851,7 +4779,7 @@ runtime/eval/ast/while_statement.s: runtime/eval/ast/while_statement.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ast/while_statement.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/while_statement.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ast/while_statement.cpp.s
 .PHONY : runtime/eval/ast/while_statement.cpp.s
 
 runtime/eval/debugger/break_point.o: runtime/eval/debugger/break_point.cpp.o
@@ -4859,7 +4787,7 @@ runtime/eval/debugger/break_point.o: runtime/eval/debugger/break_point.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/break_point.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/break_point.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/break_point.cpp.o
 .PHONY : runtime/eval/debugger/break_point.cpp.o
 
 runtime/eval/debugger/break_point.i: runtime/eval/debugger/break_point.cpp.i
@@ -4867,7 +4795,7 @@ runtime/eval/debugger/break_point.i: runtime/eval/debugger/break_point.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/break_point.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/break_point.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/break_point.cpp.i
 .PHONY : runtime/eval/debugger/break_point.cpp.i
 
 runtime/eval/debugger/break_point.s: runtime/eval/debugger/break_point.cpp.s
@@ -4875,7 +4803,7 @@ runtime/eval/debugger/break_point.s: runtime/eval/debugger/break_point.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/break_point.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/break_point.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/break_point.cpp.s
 .PHONY : runtime/eval/debugger/break_point.cpp.s
 
 runtime/eval/debugger/cmd/cmd_abort.o: runtime/eval/debugger/cmd/cmd_abort.cpp.o
@@ -4883,7 +4811,7 @@ runtime/eval/debugger/cmd/cmd_abort.o: runtime/eval/debugger/cmd/cmd_abort.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_abort.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_abort.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_abort.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_abort.cpp.o
 
 runtime/eval/debugger/cmd/cmd_abort.i: runtime/eval/debugger/cmd/cmd_abort.cpp.i
@@ -4891,7 +4819,7 @@ runtime/eval/debugger/cmd/cmd_abort.i: runtime/eval/debugger/cmd/cmd_abort.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_abort.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_abort.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_abort.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_abort.cpp.i
 
 runtime/eval/debugger/cmd/cmd_abort.s: runtime/eval/debugger/cmd/cmd_abort.cpp.s
@@ -4899,7 +4827,7 @@ runtime/eval/debugger/cmd/cmd_abort.s: runtime/eval/debugger/cmd/cmd_abort.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_abort.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_abort.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_abort.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_abort.cpp.s
 
 runtime/eval/debugger/cmd/cmd_break.o: runtime/eval/debugger/cmd/cmd_break.cpp.o
@@ -4907,7 +4835,7 @@ runtime/eval/debugger/cmd/cmd_break.o: runtime/eval/debugger/cmd/cmd_break.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_break.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_break.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_break.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_break.cpp.o
 
 runtime/eval/debugger/cmd/cmd_break.i: runtime/eval/debugger/cmd/cmd_break.cpp.i
@@ -4915,7 +4843,7 @@ runtime/eval/debugger/cmd/cmd_break.i: runtime/eval/debugger/cmd/cmd_break.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_break.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_break.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_break.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_break.cpp.i
 
 runtime/eval/debugger/cmd/cmd_break.s: runtime/eval/debugger/cmd/cmd_break.cpp.s
@@ -4923,15 +4851,39 @@ runtime/eval/debugger/cmd/cmd_break.s: runtime/eval/debugger/cmd/cmd_break.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_break.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_break.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_break.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_break.cpp.s
+
+runtime/eval/debugger/cmd/cmd_complete.o: runtime/eval/debugger/cmd/cmd_complete.cpp.o
+.PHONY : runtime/eval/debugger/cmd/cmd_complete.o
+
+# target to build an object file
+runtime/eval/debugger/cmd/cmd_complete.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_complete.cpp.o
+.PHONY : runtime/eval/debugger/cmd/cmd_complete.cpp.o
+
+runtime/eval/debugger/cmd/cmd_complete.i: runtime/eval/debugger/cmd/cmd_complete.cpp.i
+.PHONY : runtime/eval/debugger/cmd/cmd_complete.i
+
+# target to preprocess a source file
+runtime/eval/debugger/cmd/cmd_complete.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_complete.cpp.i
+.PHONY : runtime/eval/debugger/cmd/cmd_complete.cpp.i
+
+runtime/eval/debugger/cmd/cmd_complete.s: runtime/eval/debugger/cmd/cmd_complete.cpp.s
+.PHONY : runtime/eval/debugger/cmd/cmd_complete.s
+
+# target to generate assembly for a file
+runtime/eval/debugger/cmd/cmd_complete.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_complete.cpp.s
+.PHONY : runtime/eval/debugger/cmd/cmd_complete.cpp.s
 
 runtime/eval/debugger/cmd/cmd_config.o: runtime/eval/debugger/cmd/cmd_config.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_config.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_config.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_config.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_config.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_config.cpp.o
 
 runtime/eval/debugger/cmd/cmd_config.i: runtime/eval/debugger/cmd/cmd_config.cpp.i
@@ -4939,7 +4891,7 @@ runtime/eval/debugger/cmd/cmd_config.i: runtime/eval/debugger/cmd/cmd_config.cpp
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_config.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_config.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_config.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_config.cpp.i
 
 runtime/eval/debugger/cmd/cmd_config.s: runtime/eval/debugger/cmd/cmd_config.cpp.s
@@ -4947,7 +4899,7 @@ runtime/eval/debugger/cmd/cmd_config.s: runtime/eval/debugger/cmd/cmd_config.cpp
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_config.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_config.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_config.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_config.cpp.s
 
 runtime/eval/debugger/cmd/cmd_constant.o: runtime/eval/debugger/cmd/cmd_constant.cpp.o
@@ -4955,7 +4907,7 @@ runtime/eval/debugger/cmd/cmd_constant.o: runtime/eval/debugger/cmd/cmd_constant
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_constant.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_constant.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_constant.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_constant.cpp.o
 
 runtime/eval/debugger/cmd/cmd_constant.i: runtime/eval/debugger/cmd/cmd_constant.cpp.i
@@ -4963,7 +4915,7 @@ runtime/eval/debugger/cmd/cmd_constant.i: runtime/eval/debugger/cmd/cmd_constant
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_constant.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_constant.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_constant.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_constant.cpp.i
 
 runtime/eval/debugger/cmd/cmd_constant.s: runtime/eval/debugger/cmd/cmd_constant.cpp.s
@@ -4971,7 +4923,7 @@ runtime/eval/debugger/cmd/cmd_constant.s: runtime/eval/debugger/cmd/cmd_constant
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_constant.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_constant.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_constant.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_constant.cpp.s
 
 runtime/eval/debugger/cmd/cmd_continue.o: runtime/eval/debugger/cmd/cmd_continue.cpp.o
@@ -4979,7 +4931,7 @@ runtime/eval/debugger/cmd/cmd_continue.o: runtime/eval/debugger/cmd/cmd_continue
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_continue.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_continue.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_continue.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_continue.cpp.o
 
 runtime/eval/debugger/cmd/cmd_continue.i: runtime/eval/debugger/cmd/cmd_continue.cpp.i
@@ -4987,7 +4939,7 @@ runtime/eval/debugger/cmd/cmd_continue.i: runtime/eval/debugger/cmd/cmd_continue
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_continue.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_continue.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_continue.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_continue.cpp.i
 
 runtime/eval/debugger/cmd/cmd_continue.s: runtime/eval/debugger/cmd/cmd_continue.cpp.s
@@ -4995,7 +4947,7 @@ runtime/eval/debugger/cmd/cmd_continue.s: runtime/eval/debugger/cmd/cmd_continue
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_continue.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_continue.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_continue.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_continue.cpp.s
 
 runtime/eval/debugger/cmd/cmd_down.o: runtime/eval/debugger/cmd/cmd_down.cpp.o
@@ -5003,7 +4955,7 @@ runtime/eval/debugger/cmd/cmd_down.o: runtime/eval/debugger/cmd/cmd_down.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_down.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_down.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_down.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_down.cpp.o
 
 runtime/eval/debugger/cmd/cmd_down.i: runtime/eval/debugger/cmd/cmd_down.cpp.i
@@ -5011,7 +4963,7 @@ runtime/eval/debugger/cmd/cmd_down.i: runtime/eval/debugger/cmd/cmd_down.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_down.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_down.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_down.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_down.cpp.i
 
 runtime/eval/debugger/cmd/cmd_down.s: runtime/eval/debugger/cmd/cmd_down.cpp.s
@@ -5019,7 +4971,7 @@ runtime/eval/debugger/cmd/cmd_down.s: runtime/eval/debugger/cmd/cmd_down.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_down.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_down.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_down.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_down.cpp.s
 
 runtime/eval/debugger/cmd/cmd_eval.o: runtime/eval/debugger/cmd/cmd_eval.cpp.o
@@ -5027,7 +4979,7 @@ runtime/eval/debugger/cmd/cmd_eval.o: runtime/eval/debugger/cmd/cmd_eval.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_eval.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_eval.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_eval.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_eval.cpp.o
 
 runtime/eval/debugger/cmd/cmd_eval.i: runtime/eval/debugger/cmd/cmd_eval.cpp.i
@@ -5035,7 +4987,7 @@ runtime/eval/debugger/cmd/cmd_eval.i: runtime/eval/debugger/cmd/cmd_eval.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_eval.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_eval.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_eval.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_eval.cpp.i
 
 runtime/eval/debugger/cmd/cmd_eval.s: runtime/eval/debugger/cmd/cmd_eval.cpp.s
@@ -5043,7 +4995,7 @@ runtime/eval/debugger/cmd/cmd_eval.s: runtime/eval/debugger/cmd/cmd_eval.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_eval.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_eval.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_eval.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_eval.cpp.s
 
 runtime/eval/debugger/cmd/cmd_example.o: runtime/eval/debugger/cmd/cmd_example.cpp.o
@@ -5051,7 +5003,7 @@ runtime/eval/debugger/cmd/cmd_example.o: runtime/eval/debugger/cmd/cmd_example.c
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_example.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_example.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_example.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_example.cpp.o
 
 runtime/eval/debugger/cmd/cmd_example.i: runtime/eval/debugger/cmd/cmd_example.cpp.i
@@ -5059,7 +5011,7 @@ runtime/eval/debugger/cmd/cmd_example.i: runtime/eval/debugger/cmd/cmd_example.c
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_example.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_example.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_example.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_example.cpp.i
 
 runtime/eval/debugger/cmd/cmd_example.s: runtime/eval/debugger/cmd/cmd_example.cpp.s
@@ -5067,7 +5019,7 @@ runtime/eval/debugger/cmd/cmd_example.s: runtime/eval/debugger/cmd/cmd_example.c
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_example.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_example.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_example.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_example.cpp.s
 
 runtime/eval/debugger/cmd/cmd_exception.o: runtime/eval/debugger/cmd/cmd_exception.cpp.o
@@ -5075,7 +5027,7 @@ runtime/eval/debugger/cmd/cmd_exception.o: runtime/eval/debugger/cmd/cmd_excepti
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_exception.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_exception.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_exception.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_exception.cpp.o
 
 runtime/eval/debugger/cmd/cmd_exception.i: runtime/eval/debugger/cmd/cmd_exception.cpp.i
@@ -5083,7 +5035,7 @@ runtime/eval/debugger/cmd/cmd_exception.i: runtime/eval/debugger/cmd/cmd_excepti
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_exception.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_exception.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_exception.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_exception.cpp.i
 
 runtime/eval/debugger/cmd/cmd_exception.s: runtime/eval/debugger/cmd/cmd_exception.cpp.s
@@ -5091,7 +5043,7 @@ runtime/eval/debugger/cmd/cmd_exception.s: runtime/eval/debugger/cmd/cmd_excepti
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_exception.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_exception.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_exception.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_exception.cpp.s
 
 runtime/eval/debugger/cmd/cmd_extended.o: runtime/eval/debugger/cmd/cmd_extended.cpp.o
@@ -5099,7 +5051,7 @@ runtime/eval/debugger/cmd/cmd_extended.o: runtime/eval/debugger/cmd/cmd_extended
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_extended.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extended.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extended.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_extended.cpp.o
 
 runtime/eval/debugger/cmd/cmd_extended.i: runtime/eval/debugger/cmd/cmd_extended.cpp.i
@@ -5107,7 +5059,7 @@ runtime/eval/debugger/cmd/cmd_extended.i: runtime/eval/debugger/cmd/cmd_extended
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_extended.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extended.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extended.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_extended.cpp.i
 
 runtime/eval/debugger/cmd/cmd_extended.s: runtime/eval/debugger/cmd/cmd_extended.cpp.s
@@ -5115,7 +5067,7 @@ runtime/eval/debugger/cmd/cmd_extended.s: runtime/eval/debugger/cmd/cmd_extended
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_extended.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extended.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extended.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_extended.cpp.s
 
 runtime/eval/debugger/cmd/cmd_extension.o: runtime/eval/debugger/cmd/cmd_extension.cpp.o
@@ -5123,7 +5075,7 @@ runtime/eval/debugger/cmd/cmd_extension.o: runtime/eval/debugger/cmd/cmd_extensi
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_extension.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extension.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extension.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_extension.cpp.o
 
 runtime/eval/debugger/cmd/cmd_extension.i: runtime/eval/debugger/cmd/cmd_extension.cpp.i
@@ -5131,7 +5083,7 @@ runtime/eval/debugger/cmd/cmd_extension.i: runtime/eval/debugger/cmd/cmd_extensi
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_extension.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extension.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extension.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_extension.cpp.i
 
 runtime/eval/debugger/cmd/cmd_extension.s: runtime/eval/debugger/cmd/cmd_extension.cpp.s
@@ -5139,7 +5091,7 @@ runtime/eval/debugger/cmd/cmd_extension.s: runtime/eval/debugger/cmd/cmd_extensi
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_extension.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extension.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_extension.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_extension.cpp.s
 
 runtime/eval/debugger/cmd/cmd_flow_control.o: runtime/eval/debugger/cmd/cmd_flow_control.cpp.o
@@ -5147,7 +5099,7 @@ runtime/eval/debugger/cmd/cmd_flow_control.o: runtime/eval/debugger/cmd/cmd_flow
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_flow_control.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_flow_control.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_flow_control.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_flow_control.cpp.o
 
 runtime/eval/debugger/cmd/cmd_flow_control.i: runtime/eval/debugger/cmd/cmd_flow_control.cpp.i
@@ -5155,7 +5107,7 @@ runtime/eval/debugger/cmd/cmd_flow_control.i: runtime/eval/debugger/cmd/cmd_flow
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_flow_control.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_flow_control.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_flow_control.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_flow_control.cpp.i
 
 runtime/eval/debugger/cmd/cmd_flow_control.s: runtime/eval/debugger/cmd/cmd_flow_control.cpp.s
@@ -5163,7 +5115,7 @@ runtime/eval/debugger/cmd/cmd_flow_control.s: runtime/eval/debugger/cmd/cmd_flow
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_flow_control.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_flow_control.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_flow_control.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_flow_control.cpp.s
 
 runtime/eval/debugger/cmd/cmd_frame.o: runtime/eval/debugger/cmd/cmd_frame.cpp.o
@@ -5171,7 +5123,7 @@ runtime/eval/debugger/cmd/cmd_frame.o: runtime/eval/debugger/cmd/cmd_frame.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_frame.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_frame.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_frame.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_frame.cpp.o
 
 runtime/eval/debugger/cmd/cmd_frame.i: runtime/eval/debugger/cmd/cmd_frame.cpp.i
@@ -5179,7 +5131,7 @@ runtime/eval/debugger/cmd/cmd_frame.i: runtime/eval/debugger/cmd/cmd_frame.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_frame.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_frame.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_frame.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_frame.cpp.i
 
 runtime/eval/debugger/cmd/cmd_frame.s: runtime/eval/debugger/cmd/cmd_frame.cpp.s
@@ -5187,7 +5139,7 @@ runtime/eval/debugger/cmd/cmd_frame.s: runtime/eval/debugger/cmd/cmd_frame.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_frame.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_frame.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_frame.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_frame.cpp.s
 
 runtime/eval/debugger/cmd/cmd_global.o: runtime/eval/debugger/cmd/cmd_global.cpp.o
@@ -5195,7 +5147,7 @@ runtime/eval/debugger/cmd/cmd_global.o: runtime/eval/debugger/cmd/cmd_global.cpp
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_global.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_global.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_global.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_global.cpp.o
 
 runtime/eval/debugger/cmd/cmd_global.i: runtime/eval/debugger/cmd/cmd_global.cpp.i
@@ -5203,7 +5155,7 @@ runtime/eval/debugger/cmd/cmd_global.i: runtime/eval/debugger/cmd/cmd_global.cpp
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_global.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_global.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_global.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_global.cpp.i
 
 runtime/eval/debugger/cmd/cmd_global.s: runtime/eval/debugger/cmd/cmd_global.cpp.s
@@ -5211,7 +5163,7 @@ runtime/eval/debugger/cmd/cmd_global.s: runtime/eval/debugger/cmd/cmd_global.cpp
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_global.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_global.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_global.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_global.cpp.s
 
 runtime/eval/debugger/cmd/cmd_help.o: runtime/eval/debugger/cmd/cmd_help.cpp.o
@@ -5219,7 +5171,7 @@ runtime/eval/debugger/cmd/cmd_help.o: runtime/eval/debugger/cmd/cmd_help.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_help.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_help.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_help.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_help.cpp.o
 
 runtime/eval/debugger/cmd/cmd_help.i: runtime/eval/debugger/cmd/cmd_help.cpp.i
@@ -5227,7 +5179,7 @@ runtime/eval/debugger/cmd/cmd_help.i: runtime/eval/debugger/cmd/cmd_help.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_help.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_help.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_help.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_help.cpp.i
 
 runtime/eval/debugger/cmd/cmd_help.s: runtime/eval/debugger/cmd/cmd_help.cpp.s
@@ -5235,7 +5187,7 @@ runtime/eval/debugger/cmd/cmd_help.s: runtime/eval/debugger/cmd/cmd_help.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_help.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_help.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_help.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_help.cpp.s
 
 runtime/eval/debugger/cmd/cmd_info.o: runtime/eval/debugger/cmd/cmd_info.cpp.o
@@ -5243,7 +5195,7 @@ runtime/eval/debugger/cmd/cmd_info.o: runtime/eval/debugger/cmd/cmd_info.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_info.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_info.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_info.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_info.cpp.o
 
 runtime/eval/debugger/cmd/cmd_info.i: runtime/eval/debugger/cmd/cmd_info.cpp.i
@@ -5251,7 +5203,7 @@ runtime/eval/debugger/cmd/cmd_info.i: runtime/eval/debugger/cmd/cmd_info.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_info.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_info.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_info.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_info.cpp.i
 
 runtime/eval/debugger/cmd/cmd_info.s: runtime/eval/debugger/cmd/cmd_info.cpp.s
@@ -5259,7 +5211,7 @@ runtime/eval/debugger/cmd/cmd_info.s: runtime/eval/debugger/cmd/cmd_info.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_info.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_info.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_info.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_info.cpp.s
 
 runtime/eval/debugger/cmd/cmd_instrument.o: runtime/eval/debugger/cmd/cmd_instrument.cpp.o
@@ -5267,7 +5219,7 @@ runtime/eval/debugger/cmd/cmd_instrument.o: runtime/eval/debugger/cmd/cmd_instru
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_instrument.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_instrument.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_instrument.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_instrument.cpp.o
 
 runtime/eval/debugger/cmd/cmd_instrument.i: runtime/eval/debugger/cmd/cmd_instrument.cpp.i
@@ -5275,7 +5227,7 @@ runtime/eval/debugger/cmd/cmd_instrument.i: runtime/eval/debugger/cmd/cmd_instru
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_instrument.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_instrument.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_instrument.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_instrument.cpp.i
 
 runtime/eval/debugger/cmd/cmd_instrument.s: runtime/eval/debugger/cmd/cmd_instrument.cpp.s
@@ -5283,7 +5235,7 @@ runtime/eval/debugger/cmd/cmd_instrument.s: runtime/eval/debugger/cmd/cmd_instru
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_instrument.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_instrument.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_instrument.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_instrument.cpp.s
 
 runtime/eval/debugger/cmd/cmd_interrupt.o: runtime/eval/debugger/cmd/cmd_interrupt.cpp.o
@@ -5291,7 +5243,7 @@ runtime/eval/debugger/cmd/cmd_interrupt.o: runtime/eval/debugger/cmd/cmd_interru
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_interrupt.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_interrupt.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_interrupt.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_interrupt.cpp.o
 
 runtime/eval/debugger/cmd/cmd_interrupt.i: runtime/eval/debugger/cmd/cmd_interrupt.cpp.i
@@ -5299,7 +5251,7 @@ runtime/eval/debugger/cmd/cmd_interrupt.i: runtime/eval/debugger/cmd/cmd_interru
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_interrupt.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_interrupt.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_interrupt.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_interrupt.cpp.i
 
 runtime/eval/debugger/cmd/cmd_interrupt.s: runtime/eval/debugger/cmd/cmd_interrupt.cpp.s
@@ -5307,7 +5259,7 @@ runtime/eval/debugger/cmd/cmd_interrupt.s: runtime/eval/debugger/cmd/cmd_interru
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_interrupt.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_interrupt.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_interrupt.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_interrupt.cpp.s
 
 runtime/eval/debugger/cmd/cmd_jump.o: runtime/eval/debugger/cmd/cmd_jump.cpp.o
@@ -5315,7 +5267,7 @@ runtime/eval/debugger/cmd/cmd_jump.o: runtime/eval/debugger/cmd/cmd_jump.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_jump.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_jump.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_jump.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_jump.cpp.o
 
 runtime/eval/debugger/cmd/cmd_jump.i: runtime/eval/debugger/cmd/cmd_jump.cpp.i
@@ -5323,7 +5275,7 @@ runtime/eval/debugger/cmd/cmd_jump.i: runtime/eval/debugger/cmd/cmd_jump.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_jump.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_jump.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_jump.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_jump.cpp.i
 
 runtime/eval/debugger/cmd/cmd_jump.s: runtime/eval/debugger/cmd/cmd_jump.cpp.s
@@ -5331,7 +5283,7 @@ runtime/eval/debugger/cmd/cmd_jump.s: runtime/eval/debugger/cmd/cmd_jump.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_jump.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_jump.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_jump.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_jump.cpp.s
 
 runtime/eval/debugger/cmd/cmd_list.o: runtime/eval/debugger/cmd/cmd_list.cpp.o
@@ -5339,7 +5291,7 @@ runtime/eval/debugger/cmd/cmd_list.o: runtime/eval/debugger/cmd/cmd_list.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_list.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_list.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_list.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_list.cpp.o
 
 runtime/eval/debugger/cmd/cmd_list.i: runtime/eval/debugger/cmd/cmd_list.cpp.i
@@ -5347,7 +5299,7 @@ runtime/eval/debugger/cmd/cmd_list.i: runtime/eval/debugger/cmd/cmd_list.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_list.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_list.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_list.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_list.cpp.i
 
 runtime/eval/debugger/cmd/cmd_list.s: runtime/eval/debugger/cmd/cmd_list.cpp.s
@@ -5355,7 +5307,7 @@ runtime/eval/debugger/cmd/cmd_list.s: runtime/eval/debugger/cmd/cmd_list.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_list.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_list.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_list.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_list.cpp.s
 
 runtime/eval/debugger/cmd/cmd_machine.o: runtime/eval/debugger/cmd/cmd_machine.cpp.o
@@ -5363,7 +5315,7 @@ runtime/eval/debugger/cmd/cmd_machine.o: runtime/eval/debugger/cmd/cmd_machine.c
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_machine.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_machine.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_machine.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_machine.cpp.o
 
 runtime/eval/debugger/cmd/cmd_machine.i: runtime/eval/debugger/cmd/cmd_machine.cpp.i
@@ -5371,7 +5323,7 @@ runtime/eval/debugger/cmd/cmd_machine.i: runtime/eval/debugger/cmd/cmd_machine.c
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_machine.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_machine.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_machine.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_machine.cpp.i
 
 runtime/eval/debugger/cmd/cmd_machine.s: runtime/eval/debugger/cmd/cmd_machine.cpp.s
@@ -5379,7 +5331,7 @@ runtime/eval/debugger/cmd/cmd_machine.s: runtime/eval/debugger/cmd/cmd_machine.c
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_machine.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_machine.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_machine.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_machine.cpp.s
 
 runtime/eval/debugger/cmd/cmd_macro.o: runtime/eval/debugger/cmd/cmd_macro.cpp.o
@@ -5387,7 +5339,7 @@ runtime/eval/debugger/cmd/cmd_macro.o: runtime/eval/debugger/cmd/cmd_macro.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_macro.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_macro.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_macro.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_macro.cpp.o
 
 runtime/eval/debugger/cmd/cmd_macro.i: runtime/eval/debugger/cmd/cmd_macro.cpp.i
@@ -5395,7 +5347,7 @@ runtime/eval/debugger/cmd/cmd_macro.i: runtime/eval/debugger/cmd/cmd_macro.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_macro.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_macro.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_macro.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_macro.cpp.i
 
 runtime/eval/debugger/cmd/cmd_macro.s: runtime/eval/debugger/cmd/cmd_macro.cpp.s
@@ -5403,7 +5355,7 @@ runtime/eval/debugger/cmd/cmd_macro.s: runtime/eval/debugger/cmd/cmd_macro.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_macro.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_macro.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_macro.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_macro.cpp.s
 
 runtime/eval/debugger/cmd/cmd_next.o: runtime/eval/debugger/cmd/cmd_next.cpp.o
@@ -5411,7 +5363,7 @@ runtime/eval/debugger/cmd/cmd_next.o: runtime/eval/debugger/cmd/cmd_next.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_next.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_next.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_next.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_next.cpp.o
 
 runtime/eval/debugger/cmd/cmd_next.i: runtime/eval/debugger/cmd/cmd_next.cpp.i
@@ -5419,7 +5371,7 @@ runtime/eval/debugger/cmd/cmd_next.i: runtime/eval/debugger/cmd/cmd_next.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_next.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_next.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_next.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_next.cpp.i
 
 runtime/eval/debugger/cmd/cmd_next.s: runtime/eval/debugger/cmd/cmd_next.cpp.s
@@ -5427,7 +5379,7 @@ runtime/eval/debugger/cmd/cmd_next.s: runtime/eval/debugger/cmd/cmd_next.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_next.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_next.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_next.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_next.cpp.s
 
 runtime/eval/debugger/cmd/cmd_out.o: runtime/eval/debugger/cmd/cmd_out.cpp.o
@@ -5435,7 +5387,7 @@ runtime/eval/debugger/cmd/cmd_out.o: runtime/eval/debugger/cmd/cmd_out.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_out.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_out.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_out.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_out.cpp.o
 
 runtime/eval/debugger/cmd/cmd_out.i: runtime/eval/debugger/cmd/cmd_out.cpp.i
@@ -5443,7 +5395,7 @@ runtime/eval/debugger/cmd/cmd_out.i: runtime/eval/debugger/cmd/cmd_out.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_out.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_out.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_out.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_out.cpp.i
 
 runtime/eval/debugger/cmd/cmd_out.s: runtime/eval/debugger/cmd/cmd_out.cpp.s
@@ -5451,7 +5403,7 @@ runtime/eval/debugger/cmd/cmd_out.s: runtime/eval/debugger/cmd/cmd_out.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_out.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_out.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_out.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_out.cpp.s
 
 runtime/eval/debugger/cmd/cmd_print.o: runtime/eval/debugger/cmd/cmd_print.cpp.o
@@ -5459,7 +5411,7 @@ runtime/eval/debugger/cmd/cmd_print.o: runtime/eval/debugger/cmd/cmd_print.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_print.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_print.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_print.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_print.cpp.o
 
 runtime/eval/debugger/cmd/cmd_print.i: runtime/eval/debugger/cmd/cmd_print.cpp.i
@@ -5467,7 +5419,7 @@ runtime/eval/debugger/cmd/cmd_print.i: runtime/eval/debugger/cmd/cmd_print.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_print.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_print.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_print.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_print.cpp.i
 
 runtime/eval/debugger/cmd/cmd_print.s: runtime/eval/debugger/cmd/cmd_print.cpp.s
@@ -5475,7 +5427,7 @@ runtime/eval/debugger/cmd/cmd_print.s: runtime/eval/debugger/cmd/cmd_print.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_print.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_print.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_print.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_print.cpp.s
 
 runtime/eval/debugger/cmd/cmd_quit.o: runtime/eval/debugger/cmd/cmd_quit.cpp.o
@@ -5483,7 +5435,7 @@ runtime/eval/debugger/cmd/cmd_quit.o: runtime/eval/debugger/cmd/cmd_quit.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_quit.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_quit.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_quit.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_quit.cpp.o
 
 runtime/eval/debugger/cmd/cmd_quit.i: runtime/eval/debugger/cmd/cmd_quit.cpp.i
@@ -5491,7 +5443,7 @@ runtime/eval/debugger/cmd/cmd_quit.i: runtime/eval/debugger/cmd/cmd_quit.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_quit.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_quit.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_quit.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_quit.cpp.i
 
 runtime/eval/debugger/cmd/cmd_quit.s: runtime/eval/debugger/cmd/cmd_quit.cpp.s
@@ -5499,7 +5451,7 @@ runtime/eval/debugger/cmd/cmd_quit.s: runtime/eval/debugger/cmd/cmd_quit.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_quit.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_quit.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_quit.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_quit.cpp.s
 
 runtime/eval/debugger/cmd/cmd_run.o: runtime/eval/debugger/cmd/cmd_run.cpp.o
@@ -5507,7 +5459,7 @@ runtime/eval/debugger/cmd/cmd_run.o: runtime/eval/debugger/cmd/cmd_run.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_run.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_run.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_run.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_run.cpp.o
 
 runtime/eval/debugger/cmd/cmd_run.i: runtime/eval/debugger/cmd/cmd_run.cpp.i
@@ -5515,7 +5467,7 @@ runtime/eval/debugger/cmd/cmd_run.i: runtime/eval/debugger/cmd/cmd_run.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_run.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_run.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_run.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_run.cpp.i
 
 runtime/eval/debugger/cmd/cmd_run.s: runtime/eval/debugger/cmd/cmd_run.cpp.s
@@ -5523,7 +5475,7 @@ runtime/eval/debugger/cmd/cmd_run.s: runtime/eval/debugger/cmd/cmd_run.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_run.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_run.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_run.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_run.cpp.s
 
 runtime/eval/debugger/cmd/cmd_shell.o: runtime/eval/debugger/cmd/cmd_shell.cpp.o
@@ -5531,7 +5483,7 @@ runtime/eval/debugger/cmd/cmd_shell.o: runtime/eval/debugger/cmd/cmd_shell.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_shell.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_shell.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_shell.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_shell.cpp.o
 
 runtime/eval/debugger/cmd/cmd_shell.i: runtime/eval/debugger/cmd/cmd_shell.cpp.i
@@ -5539,7 +5491,7 @@ runtime/eval/debugger/cmd/cmd_shell.i: runtime/eval/debugger/cmd/cmd_shell.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_shell.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_shell.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_shell.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_shell.cpp.i
 
 runtime/eval/debugger/cmd/cmd_shell.s: runtime/eval/debugger/cmd/cmd_shell.cpp.s
@@ -5547,7 +5499,7 @@ runtime/eval/debugger/cmd/cmd_shell.s: runtime/eval/debugger/cmd/cmd_shell.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_shell.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_shell.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_shell.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_shell.cpp.s
 
 runtime/eval/debugger/cmd/cmd_signal.o: runtime/eval/debugger/cmd/cmd_signal.cpp.o
@@ -5555,7 +5507,7 @@ runtime/eval/debugger/cmd/cmd_signal.o: runtime/eval/debugger/cmd/cmd_signal.cpp
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_signal.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_signal.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_signal.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_signal.cpp.o
 
 runtime/eval/debugger/cmd/cmd_signal.i: runtime/eval/debugger/cmd/cmd_signal.cpp.i
@@ -5563,7 +5515,7 @@ runtime/eval/debugger/cmd/cmd_signal.i: runtime/eval/debugger/cmd/cmd_signal.cpp
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_signal.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_signal.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_signal.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_signal.cpp.i
 
 runtime/eval/debugger/cmd/cmd_signal.s: runtime/eval/debugger/cmd/cmd_signal.cpp.s
@@ -5571,7 +5523,7 @@ runtime/eval/debugger/cmd/cmd_signal.s: runtime/eval/debugger/cmd/cmd_signal.cpp
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_signal.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_signal.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_signal.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_signal.cpp.s
 
 runtime/eval/debugger/cmd/cmd_step.o: runtime/eval/debugger/cmd/cmd_step.cpp.o
@@ -5579,7 +5531,7 @@ runtime/eval/debugger/cmd/cmd_step.o: runtime/eval/debugger/cmd/cmd_step.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_step.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_step.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_step.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_step.cpp.o
 
 runtime/eval/debugger/cmd/cmd_step.i: runtime/eval/debugger/cmd/cmd_step.cpp.i
@@ -5587,7 +5539,7 @@ runtime/eval/debugger/cmd/cmd_step.i: runtime/eval/debugger/cmd/cmd_step.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_step.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_step.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_step.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_step.cpp.i
 
 runtime/eval/debugger/cmd/cmd_step.s: runtime/eval/debugger/cmd/cmd_step.cpp.s
@@ -5595,7 +5547,7 @@ runtime/eval/debugger/cmd/cmd_step.s: runtime/eval/debugger/cmd/cmd_step.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_step.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_step.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_step.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_step.cpp.s
 
 runtime/eval/debugger/cmd/cmd_thread.o: runtime/eval/debugger/cmd/cmd_thread.cpp.o
@@ -5603,7 +5555,7 @@ runtime/eval/debugger/cmd/cmd_thread.o: runtime/eval/debugger/cmd/cmd_thread.cpp
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_thread.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_thread.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_thread.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_thread.cpp.o
 
 runtime/eval/debugger/cmd/cmd_thread.i: runtime/eval/debugger/cmd/cmd_thread.cpp.i
@@ -5611,7 +5563,7 @@ runtime/eval/debugger/cmd/cmd_thread.i: runtime/eval/debugger/cmd/cmd_thread.cpp
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_thread.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_thread.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_thread.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_thread.cpp.i
 
 runtime/eval/debugger/cmd/cmd_thread.s: runtime/eval/debugger/cmd/cmd_thread.cpp.s
@@ -5619,7 +5571,7 @@ runtime/eval/debugger/cmd/cmd_thread.s: runtime/eval/debugger/cmd/cmd_thread.cpp
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_thread.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_thread.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_thread.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_thread.cpp.s
 
 runtime/eval/debugger/cmd/cmd_up.o: runtime/eval/debugger/cmd/cmd_up.cpp.o
@@ -5627,7 +5579,7 @@ runtime/eval/debugger/cmd/cmd_up.o: runtime/eval/debugger/cmd/cmd_up.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_up.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_up.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_up.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_up.cpp.o
 
 runtime/eval/debugger/cmd/cmd_up.i: runtime/eval/debugger/cmd/cmd_up.cpp.i
@@ -5635,7 +5587,7 @@ runtime/eval/debugger/cmd/cmd_up.i: runtime/eval/debugger/cmd/cmd_up.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_up.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_up.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_up.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_up.cpp.i
 
 runtime/eval/debugger/cmd/cmd_up.s: runtime/eval/debugger/cmd/cmd_up.cpp.s
@@ -5643,7 +5595,7 @@ runtime/eval/debugger/cmd/cmd_up.s: runtime/eval/debugger/cmd/cmd_up.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_up.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_up.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_up.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_up.cpp.s
 
 runtime/eval/debugger/cmd/cmd_user.o: runtime/eval/debugger/cmd/cmd_user.cpp.o
@@ -5651,7 +5603,7 @@ runtime/eval/debugger/cmd/cmd_user.o: runtime/eval/debugger/cmd/cmd_user.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_user.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_user.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_user.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_user.cpp.o
 
 runtime/eval/debugger/cmd/cmd_user.i: runtime/eval/debugger/cmd/cmd_user.cpp.i
@@ -5659,7 +5611,7 @@ runtime/eval/debugger/cmd/cmd_user.i: runtime/eval/debugger/cmd/cmd_user.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_user.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_user.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_user.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_user.cpp.i
 
 runtime/eval/debugger/cmd/cmd_user.s: runtime/eval/debugger/cmd/cmd_user.cpp.s
@@ -5667,7 +5619,7 @@ runtime/eval/debugger/cmd/cmd_user.s: runtime/eval/debugger/cmd/cmd_user.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_user.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_user.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_user.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_user.cpp.s
 
 runtime/eval/debugger/cmd/cmd_variable.o: runtime/eval/debugger/cmd/cmd_variable.cpp.o
@@ -5675,7 +5627,7 @@ runtime/eval/debugger/cmd/cmd_variable.o: runtime/eval/debugger/cmd/cmd_variable
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_variable.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_variable.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_variable.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_variable.cpp.o
 
 runtime/eval/debugger/cmd/cmd_variable.i: runtime/eval/debugger/cmd/cmd_variable.cpp.i
@@ -5683,7 +5635,7 @@ runtime/eval/debugger/cmd/cmd_variable.i: runtime/eval/debugger/cmd/cmd_variable
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_variable.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_variable.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_variable.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_variable.cpp.i
 
 runtime/eval/debugger/cmd/cmd_variable.s: runtime/eval/debugger/cmd/cmd_variable.cpp.s
@@ -5691,7 +5643,7 @@ runtime/eval/debugger/cmd/cmd_variable.s: runtime/eval/debugger/cmd/cmd_variable
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_variable.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_variable.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_variable.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_variable.cpp.s
 
 runtime/eval/debugger/cmd/cmd_where.o: runtime/eval/debugger/cmd/cmd_where.cpp.o
@@ -5699,7 +5651,7 @@ runtime/eval/debugger/cmd/cmd_where.o: runtime/eval/debugger/cmd/cmd_where.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_where.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_where.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_where.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_where.cpp.o
 
 runtime/eval/debugger/cmd/cmd_where.i: runtime/eval/debugger/cmd/cmd_where.cpp.i
@@ -5707,7 +5659,7 @@ runtime/eval/debugger/cmd/cmd_where.i: runtime/eval/debugger/cmd/cmd_where.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_where.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_where.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_where.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_where.cpp.i
 
 runtime/eval/debugger/cmd/cmd_where.s: runtime/eval/debugger/cmd/cmd_where.cpp.s
@@ -5715,7 +5667,7 @@ runtime/eval/debugger/cmd/cmd_where.s: runtime/eval/debugger/cmd/cmd_where.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_where.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_where.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_where.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_where.cpp.s
 
 runtime/eval/debugger/cmd/cmd_zend.o: runtime/eval/debugger/cmd/cmd_zend.cpp.o
@@ -5723,7 +5675,7 @@ runtime/eval/debugger/cmd/cmd_zend.o: runtime/eval/debugger/cmd/cmd_zend.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/cmd/cmd_zend.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_zend.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_zend.cpp.o
 .PHONY : runtime/eval/debugger/cmd/cmd_zend.cpp.o
 
 runtime/eval/debugger/cmd/cmd_zend.i: runtime/eval/debugger/cmd/cmd_zend.cpp.i
@@ -5731,7 +5683,7 @@ runtime/eval/debugger/cmd/cmd_zend.i: runtime/eval/debugger/cmd/cmd_zend.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/cmd/cmd_zend.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_zend.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_zend.cpp.i
 .PHONY : runtime/eval/debugger/cmd/cmd_zend.cpp.i
 
 runtime/eval/debugger/cmd/cmd_zend.s: runtime/eval/debugger/cmd/cmd_zend.cpp.s
@@ -5739,7 +5691,7 @@ runtime/eval/debugger/cmd/cmd_zend.s: runtime/eval/debugger/cmd/cmd_zend.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/cmd/cmd_zend.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_zend.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/cmd/cmd_zend.cpp.s
 .PHONY : runtime/eval/debugger/cmd/cmd_zend.cpp.s
 
 runtime/eval/debugger/debugger.o: runtime/eval/debugger/debugger.cpp.o
@@ -5747,7 +5699,7 @@ runtime/eval/debugger/debugger.o: runtime/eval/debugger/debugger.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/debugger.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger.cpp.o
 .PHONY : runtime/eval/debugger/debugger.cpp.o
 
 runtime/eval/debugger/debugger.i: runtime/eval/debugger/debugger.cpp.i
@@ -5755,7 +5707,7 @@ runtime/eval/debugger/debugger.i: runtime/eval/debugger/debugger.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/debugger.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger.cpp.i
 .PHONY : runtime/eval/debugger/debugger.cpp.i
 
 runtime/eval/debugger/debugger.s: runtime/eval/debugger/debugger.cpp.s
@@ -5763,7 +5715,7 @@ runtime/eval/debugger/debugger.s: runtime/eval/debugger/debugger.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/debugger.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger.cpp.s
 .PHONY : runtime/eval/debugger/debugger.cpp.s
 
 runtime/eval/debugger/debugger_base.o: runtime/eval/debugger/debugger_base.cpp.o
@@ -5771,7 +5723,7 @@ runtime/eval/debugger/debugger_base.o: runtime/eval/debugger/debugger_base.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/debugger_base.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_base.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_base.cpp.o
 .PHONY : runtime/eval/debugger/debugger_base.cpp.o
 
 runtime/eval/debugger/debugger_base.i: runtime/eval/debugger/debugger_base.cpp.i
@@ -5779,7 +5731,7 @@ runtime/eval/debugger/debugger_base.i: runtime/eval/debugger/debugger_base.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/debugger_base.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_base.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_base.cpp.i
 .PHONY : runtime/eval/debugger/debugger_base.cpp.i
 
 runtime/eval/debugger/debugger_base.s: runtime/eval/debugger/debugger_base.cpp.s
@@ -5787,7 +5739,7 @@ runtime/eval/debugger/debugger_base.s: runtime/eval/debugger/debugger_base.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/debugger_base.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_base.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_base.cpp.s
 .PHONY : runtime/eval/debugger/debugger_base.cpp.s
 
 runtime/eval/debugger/debugger_client.o: runtime/eval/debugger/debugger_client.cpp.o
@@ -5795,7 +5747,7 @@ runtime/eval/debugger/debugger_client.o: runtime/eval/debugger/debugger_client.c
 
 # target to build an object file
 runtime/eval/debugger/debugger_client.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_client.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_client.cpp.o
 .PHONY : runtime/eval/debugger/debugger_client.cpp.o
 
 runtime/eval/debugger/debugger_client.i: runtime/eval/debugger/debugger_client.cpp.i
@@ -5803,7 +5755,7 @@ runtime/eval/debugger/debugger_client.i: runtime/eval/debugger/debugger_client.c
 
 # target to preprocess a source file
 runtime/eval/debugger/debugger_client.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_client.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_client.cpp.i
 .PHONY : runtime/eval/debugger/debugger_client.cpp.i
 
 runtime/eval/debugger/debugger_client.s: runtime/eval/debugger/debugger_client.cpp.s
@@ -5811,7 +5763,7 @@ runtime/eval/debugger/debugger_client.s: runtime/eval/debugger/debugger_client.c
 
 # target to generate assembly for a file
 runtime/eval/debugger/debugger_client.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_client.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_client.cpp.s
 .PHONY : runtime/eval/debugger/debugger_client.cpp.s
 
 runtime/eval/debugger/debugger_command.o: runtime/eval/debugger/debugger_command.cpp.o
@@ -5819,7 +5771,7 @@ runtime/eval/debugger/debugger_command.o: runtime/eval/debugger/debugger_command
 
 # target to build an object file
 runtime/eval/debugger/debugger_command.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_command.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_command.cpp.o
 .PHONY : runtime/eval/debugger/debugger_command.cpp.o
 
 runtime/eval/debugger/debugger_command.i: runtime/eval/debugger/debugger_command.cpp.i
@@ -5827,7 +5779,7 @@ runtime/eval/debugger/debugger_command.i: runtime/eval/debugger/debugger_command
 
 # target to preprocess a source file
 runtime/eval/debugger/debugger_command.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_command.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_command.cpp.i
 .PHONY : runtime/eval/debugger/debugger_command.cpp.i
 
 runtime/eval/debugger/debugger_command.s: runtime/eval/debugger/debugger_command.cpp.s
@@ -5835,7 +5787,7 @@ runtime/eval/debugger/debugger_command.s: runtime/eval/debugger/debugger_command
 
 # target to generate assembly for a file
 runtime/eval/debugger/debugger_command.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_command.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_command.cpp.s
 .PHONY : runtime/eval/debugger/debugger_command.cpp.s
 
 runtime/eval/debugger/debugger_proxy.o: runtime/eval/debugger/debugger_proxy.cpp.o
@@ -5843,7 +5795,7 @@ runtime/eval/debugger/debugger_proxy.o: runtime/eval/debugger/debugger_proxy.cpp
 
 # target to build an object file
 runtime/eval/debugger/debugger_proxy.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_proxy.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_proxy.cpp.o
 .PHONY : runtime/eval/debugger/debugger_proxy.cpp.o
 
 runtime/eval/debugger/debugger_proxy.i: runtime/eval/debugger/debugger_proxy.cpp.i
@@ -5851,7 +5803,7 @@ runtime/eval/debugger/debugger_proxy.i: runtime/eval/debugger/debugger_proxy.cpp
 
 # target to preprocess a source file
 runtime/eval/debugger/debugger_proxy.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_proxy.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_proxy.cpp.i
 .PHONY : runtime/eval/debugger/debugger_proxy.cpp.i
 
 runtime/eval/debugger/debugger_proxy.s: runtime/eval/debugger/debugger_proxy.cpp.s
@@ -5859,7 +5811,7 @@ runtime/eval/debugger/debugger_proxy.s: runtime/eval/debugger/debugger_proxy.cpp
 
 # target to generate assembly for a file
 runtime/eval/debugger/debugger_proxy.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_proxy.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_proxy.cpp.s
 .PHONY : runtime/eval/debugger/debugger_proxy.cpp.s
 
 runtime/eval/debugger/debugger_server.o: runtime/eval/debugger/debugger_server.cpp.o
@@ -5867,7 +5819,7 @@ runtime/eval/debugger/debugger_server.o: runtime/eval/debugger/debugger_server.c
 
 # target to build an object file
 runtime/eval/debugger/debugger_server.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_server.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_server.cpp.o
 .PHONY : runtime/eval/debugger/debugger_server.cpp.o
 
 runtime/eval/debugger/debugger_server.i: runtime/eval/debugger/debugger_server.cpp.i
@@ -5875,7 +5827,7 @@ runtime/eval/debugger/debugger_server.i: runtime/eval/debugger/debugger_server.c
 
 # target to preprocess a source file
 runtime/eval/debugger/debugger_server.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_server.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_server.cpp.i
 .PHONY : runtime/eval/debugger/debugger_server.cpp.i
 
 runtime/eval/debugger/debugger_server.s: runtime/eval/debugger/debugger_server.cpp.s
@@ -5883,7 +5835,7 @@ runtime/eval/debugger/debugger_server.s: runtime/eval/debugger/debugger_server.c
 
 # target to generate assembly for a file
 runtime/eval/debugger/debugger_server.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_server.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_server.cpp.s
 .PHONY : runtime/eval/debugger/debugger_server.cpp.s
 
 runtime/eval/debugger/debugger_thrift_buffer.o: runtime/eval/debugger/debugger_thrift_buffer.cpp.o
@@ -5891,7 +5843,7 @@ runtime/eval/debugger/debugger_thrift_buffer.o: runtime/eval/debugger/debugger_t
 
 # target to build an object file
 runtime/eval/debugger/debugger_thrift_buffer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_thrift_buffer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_thrift_buffer.cpp.o
 .PHONY : runtime/eval/debugger/debugger_thrift_buffer.cpp.o
 
 runtime/eval/debugger/debugger_thrift_buffer.i: runtime/eval/debugger/debugger_thrift_buffer.cpp.i
@@ -5899,7 +5851,7 @@ runtime/eval/debugger/debugger_thrift_buffer.i: runtime/eval/debugger/debugger_t
 
 # target to preprocess a source file
 runtime/eval/debugger/debugger_thrift_buffer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_thrift_buffer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_thrift_buffer.cpp.i
 .PHONY : runtime/eval/debugger/debugger_thrift_buffer.cpp.i
 
 runtime/eval/debugger/debugger_thrift_buffer.s: runtime/eval/debugger/debugger_thrift_buffer.cpp.s
@@ -5907,7 +5859,7 @@ runtime/eval/debugger/debugger_thrift_buffer.s: runtime/eval/debugger/debugger_t
 
 # target to generate assembly for a file
 runtime/eval/debugger/debugger_thrift_buffer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_thrift_buffer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/debugger_thrift_buffer.cpp.s
 .PHONY : runtime/eval/debugger/debugger_thrift_buffer.cpp.s
 
 runtime/eval/debugger/dummy_sandbox.o: runtime/eval/debugger/dummy_sandbox.cpp.o
@@ -5915,7 +5867,7 @@ runtime/eval/debugger/dummy_sandbox.o: runtime/eval/debugger/dummy_sandbox.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/dummy_sandbox.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/dummy_sandbox.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/dummy_sandbox.cpp.o
 .PHONY : runtime/eval/debugger/dummy_sandbox.cpp.o
 
 runtime/eval/debugger/dummy_sandbox.i: runtime/eval/debugger/dummy_sandbox.cpp.i
@@ -5923,7 +5875,7 @@ runtime/eval/debugger/dummy_sandbox.i: runtime/eval/debugger/dummy_sandbox.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/dummy_sandbox.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/dummy_sandbox.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/dummy_sandbox.cpp.i
 .PHONY : runtime/eval/debugger/dummy_sandbox.cpp.i
 
 runtime/eval/debugger/dummy_sandbox.s: runtime/eval/debugger/dummy_sandbox.cpp.s
@@ -5931,7 +5883,7 @@ runtime/eval/debugger/dummy_sandbox.s: runtime/eval/debugger/dummy_sandbox.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/dummy_sandbox.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/dummy_sandbox.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/dummy_sandbox.cpp.s
 .PHONY : runtime/eval/debugger/dummy_sandbox.cpp.s
 
 runtime/eval/debugger/inst_point.o: runtime/eval/debugger/inst_point.cpp.o
@@ -5939,7 +5891,7 @@ runtime/eval/debugger/inst_point.o: runtime/eval/debugger/inst_point.cpp.o
 
 # target to build an object file
 runtime/eval/debugger/inst_point.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/inst_point.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/inst_point.cpp.o
 .PHONY : runtime/eval/debugger/inst_point.cpp.o
 
 runtime/eval/debugger/inst_point.i: runtime/eval/debugger/inst_point.cpp.i
@@ -5947,7 +5899,7 @@ runtime/eval/debugger/inst_point.i: runtime/eval/debugger/inst_point.cpp.i
 
 # target to preprocess a source file
 runtime/eval/debugger/inst_point.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/inst_point.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/inst_point.cpp.i
 .PHONY : runtime/eval/debugger/inst_point.cpp.i
 
 runtime/eval/debugger/inst_point.s: runtime/eval/debugger/inst_point.cpp.s
@@ -5955,7 +5907,7 @@ runtime/eval/debugger/inst_point.s: runtime/eval/debugger/inst_point.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/debugger/inst_point.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/inst_point.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/debugger/inst_point.cpp.s
 .PHONY : runtime/eval/debugger/inst_point.cpp.s
 
 runtime/eval/eval.o: runtime/eval/eval.cpp.o
@@ -5963,7 +5915,7 @@ runtime/eval/eval.o: runtime/eval/eval.cpp.o
 
 # target to build an object file
 runtime/eval/eval.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/eval.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/eval.cpp.o
 .PHONY : runtime/eval/eval.cpp.o
 
 runtime/eval/eval.i: runtime/eval/eval.cpp.i
@@ -5971,7 +5923,7 @@ runtime/eval/eval.i: runtime/eval/eval.cpp.i
 
 # target to preprocess a source file
 runtime/eval/eval.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/eval.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/eval.cpp.i
 .PHONY : runtime/eval/eval.cpp.i
 
 runtime/eval/eval.s: runtime/eval/eval.cpp.s
@@ -5979,7 +5931,7 @@ runtime/eval/eval.s: runtime/eval/eval.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/eval.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/eval.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/eval.cpp.s
 .PHONY : runtime/eval/eval.cpp.s
 
 runtime/eval/ext/ext.o: runtime/eval/ext/ext.cpp.o
@@ -5987,7 +5939,7 @@ runtime/eval/ext/ext.o: runtime/eval/ext/ext.cpp.o
 
 # target to build an object file
 runtime/eval/ext/ext.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ext/ext.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ext/ext.cpp.o
 .PHONY : runtime/eval/ext/ext.cpp.o
 
 runtime/eval/ext/ext.i: runtime/eval/ext/ext.cpp.i
@@ -5995,7 +5947,7 @@ runtime/eval/ext/ext.i: runtime/eval/ext/ext.cpp.i
 
 # target to preprocess a source file
 runtime/eval/ext/ext.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ext/ext.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ext/ext.cpp.i
 .PHONY : runtime/eval/ext/ext.cpp.i
 
 runtime/eval/ext/ext.s: runtime/eval/ext/ext.cpp.s
@@ -6003,7 +5955,7 @@ runtime/eval/ext/ext.s: runtime/eval/ext/ext.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/ext/ext.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ext/ext.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/ext/ext.cpp.s
 .PHONY : runtime/eval/ext/ext.cpp.s
 
 runtime/eval/parser/hphp.tab.o: runtime/eval/parser/hphp.tab.cpp.o
@@ -6011,7 +5963,7 @@ runtime/eval/parser/hphp.tab.o: runtime/eval/parser/hphp.tab.cpp.o
 
 # target to build an object file
 runtime/eval/parser/hphp.tab.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/hphp.tab.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/hphp.tab.cpp.o
 .PHONY : runtime/eval/parser/hphp.tab.cpp.o
 
 runtime/eval/parser/hphp.tab.i: runtime/eval/parser/hphp.tab.cpp.i
@@ -6019,7 +5971,7 @@ runtime/eval/parser/hphp.tab.i: runtime/eval/parser/hphp.tab.cpp.i
 
 # target to preprocess a source file
 runtime/eval/parser/hphp.tab.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/hphp.tab.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/hphp.tab.cpp.i
 .PHONY : runtime/eval/parser/hphp.tab.cpp.i
 
 runtime/eval/parser/hphp.tab.s: runtime/eval/parser/hphp.tab.cpp.s
@@ -6027,7 +5979,7 @@ runtime/eval/parser/hphp.tab.s: runtime/eval/parser/hphp.tab.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/parser/hphp.tab.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/hphp.tab.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/hphp.tab.cpp.s
 .PHONY : runtime/eval/parser/hphp.tab.cpp.s
 
 runtime/eval/parser/parser.o: runtime/eval/parser/parser.cpp.o
@@ -6035,7 +5987,7 @@ runtime/eval/parser/parser.o: runtime/eval/parser/parser.cpp.o
 
 # target to build an object file
 runtime/eval/parser/parser.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/parser.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/parser.cpp.o
 .PHONY : runtime/eval/parser/parser.cpp.o
 
 runtime/eval/parser/parser.i: runtime/eval/parser/parser.cpp.i
@@ -6043,7 +5995,7 @@ runtime/eval/parser/parser.i: runtime/eval/parser/parser.cpp.i
 
 # target to preprocess a source file
 runtime/eval/parser/parser.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/parser.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/parser.cpp.i
 .PHONY : runtime/eval/parser/parser.cpp.i
 
 runtime/eval/parser/parser.s: runtime/eval/parser/parser.cpp.s
@@ -6051,7 +6003,7 @@ runtime/eval/parser/parser.s: runtime/eval/parser/parser.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/parser/parser.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/parser.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/parser/parser.cpp.s
 .PHONY : runtime/eval/parser/parser.cpp.s
 
 runtime/eval/runtime/assoc_list.o: runtime/eval/runtime/assoc_list.cpp.o
@@ -6059,7 +6011,7 @@ runtime/eval/runtime/assoc_list.o: runtime/eval/runtime/assoc_list.cpp.o
 
 # target to build an object file
 runtime/eval/runtime/assoc_list.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/assoc_list.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/assoc_list.cpp.o
 .PHONY : runtime/eval/runtime/assoc_list.cpp.o
 
 runtime/eval/runtime/assoc_list.i: runtime/eval/runtime/assoc_list.cpp.i
@@ -6067,7 +6019,7 @@ runtime/eval/runtime/assoc_list.i: runtime/eval/runtime/assoc_list.cpp.i
 
 # target to preprocess a source file
 runtime/eval/runtime/assoc_list.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/assoc_list.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/assoc_list.cpp.i
 .PHONY : runtime/eval/runtime/assoc_list.cpp.i
 
 runtime/eval/runtime/assoc_list.s: runtime/eval/runtime/assoc_list.cpp.s
@@ -6075,39 +6027,15 @@ runtime/eval/runtime/assoc_list.s: runtime/eval/runtime/assoc_list.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/runtime/assoc_list.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/assoc_list.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/assoc_list.cpp.s
 .PHONY : runtime/eval/runtime/assoc_list.cpp.s
-
-runtime/eval/runtime/code_coverage.o: runtime/eval/runtime/code_coverage.cpp.o
-.PHONY : runtime/eval/runtime/code_coverage.o
-
-# target to build an object file
-runtime/eval/runtime/code_coverage.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/code_coverage.cpp.o
-.PHONY : runtime/eval/runtime/code_coverage.cpp.o
-
-runtime/eval/runtime/code_coverage.i: runtime/eval/runtime/code_coverage.cpp.i
-.PHONY : runtime/eval/runtime/code_coverage.i
-
-# target to preprocess a source file
-runtime/eval/runtime/code_coverage.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/code_coverage.cpp.i
-.PHONY : runtime/eval/runtime/code_coverage.cpp.i
-
-runtime/eval/runtime/code_coverage.s: runtime/eval/runtime/code_coverage.cpp.s
-.PHONY : runtime/eval/runtime/code_coverage.s
-
-# target to generate assembly for a file
-runtime/eval/runtime/code_coverage.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/code_coverage.cpp.s
-.PHONY : runtime/eval/runtime/code_coverage.cpp.s
 
 runtime/eval/runtime/eval_frame_injection.o: runtime/eval/runtime/eval_frame_injection.cpp.o
 .PHONY : runtime/eval/runtime/eval_frame_injection.o
 
 # target to build an object file
 runtime/eval/runtime/eval_frame_injection.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_frame_injection.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_frame_injection.cpp.o
 .PHONY : runtime/eval/runtime/eval_frame_injection.cpp.o
 
 runtime/eval/runtime/eval_frame_injection.i: runtime/eval/runtime/eval_frame_injection.cpp.i
@@ -6115,7 +6043,7 @@ runtime/eval/runtime/eval_frame_injection.i: runtime/eval/runtime/eval_frame_inj
 
 # target to preprocess a source file
 runtime/eval/runtime/eval_frame_injection.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_frame_injection.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_frame_injection.cpp.i
 .PHONY : runtime/eval/runtime/eval_frame_injection.cpp.i
 
 runtime/eval/runtime/eval_frame_injection.s: runtime/eval/runtime/eval_frame_injection.cpp.s
@@ -6123,7 +6051,7 @@ runtime/eval/runtime/eval_frame_injection.s: runtime/eval/runtime/eval_frame_inj
 
 # target to generate assembly for a file
 runtime/eval/runtime/eval_frame_injection.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_frame_injection.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_frame_injection.cpp.s
 .PHONY : runtime/eval/runtime/eval_frame_injection.cpp.s
 
 runtime/eval/runtime/eval_object_data.o: runtime/eval/runtime/eval_object_data.cpp.o
@@ -6131,7 +6059,7 @@ runtime/eval/runtime/eval_object_data.o: runtime/eval/runtime/eval_object_data.c
 
 # target to build an object file
 runtime/eval/runtime/eval_object_data.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_object_data.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_object_data.cpp.o
 .PHONY : runtime/eval/runtime/eval_object_data.cpp.o
 
 runtime/eval/runtime/eval_object_data.i: runtime/eval/runtime/eval_object_data.cpp.i
@@ -6139,7 +6067,7 @@ runtime/eval/runtime/eval_object_data.i: runtime/eval/runtime/eval_object_data.c
 
 # target to preprocess a source file
 runtime/eval/runtime/eval_object_data.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_object_data.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_object_data.cpp.i
 .PHONY : runtime/eval/runtime/eval_object_data.cpp.i
 
 runtime/eval/runtime/eval_object_data.s: runtime/eval/runtime/eval_object_data.cpp.s
@@ -6147,7 +6075,7 @@ runtime/eval/runtime/eval_object_data.s: runtime/eval/runtime/eval_object_data.c
 
 # target to generate assembly for a file
 runtime/eval/runtime/eval_object_data.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_object_data.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_object_data.cpp.s
 .PHONY : runtime/eval/runtime/eval_object_data.cpp.s
 
 runtime/eval/runtime/eval_state.o: runtime/eval/runtime/eval_state.cpp.o
@@ -6155,7 +6083,7 @@ runtime/eval/runtime/eval_state.o: runtime/eval/runtime/eval_state.cpp.o
 
 # target to build an object file
 runtime/eval/runtime/eval_state.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_state.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_state.cpp.o
 .PHONY : runtime/eval/runtime/eval_state.cpp.o
 
 runtime/eval/runtime/eval_state.i: runtime/eval/runtime/eval_state.cpp.i
@@ -6163,7 +6091,7 @@ runtime/eval/runtime/eval_state.i: runtime/eval/runtime/eval_state.cpp.i
 
 # target to preprocess a source file
 runtime/eval/runtime/eval_state.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_state.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_state.cpp.i
 .PHONY : runtime/eval/runtime/eval_state.cpp.i
 
 runtime/eval/runtime/eval_state.s: runtime/eval/runtime/eval_state.cpp.s
@@ -6171,7 +6099,7 @@ runtime/eval/runtime/eval_state.s: runtime/eval/runtime/eval_state.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/runtime/eval_state.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_state.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/eval_state.cpp.s
 .PHONY : runtime/eval/runtime/eval_state.cpp.s
 
 runtime/eval/runtime/file_repository.o: runtime/eval/runtime/file_repository.cpp.o
@@ -6179,7 +6107,7 @@ runtime/eval/runtime/file_repository.o: runtime/eval/runtime/file_repository.cpp
 
 # target to build an object file
 runtime/eval/runtime/file_repository.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/file_repository.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/file_repository.cpp.o
 .PHONY : runtime/eval/runtime/file_repository.cpp.o
 
 runtime/eval/runtime/file_repository.i: runtime/eval/runtime/file_repository.cpp.i
@@ -6187,7 +6115,7 @@ runtime/eval/runtime/file_repository.i: runtime/eval/runtime/file_repository.cpp
 
 # target to preprocess a source file
 runtime/eval/runtime/file_repository.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/file_repository.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/file_repository.cpp.i
 .PHONY : runtime/eval/runtime/file_repository.cpp.i
 
 runtime/eval/runtime/file_repository.s: runtime/eval/runtime/file_repository.cpp.s
@@ -6195,7 +6123,7 @@ runtime/eval/runtime/file_repository.s: runtime/eval/runtime/file_repository.cpp
 
 # target to generate assembly for a file
 runtime/eval/runtime/file_repository.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/file_repository.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/file_repository.cpp.s
 .PHONY : runtime/eval/runtime/file_repository.cpp.s
 
 runtime/eval/runtime/variable_environment.o: runtime/eval/runtime/variable_environment.cpp.o
@@ -6203,7 +6131,7 @@ runtime/eval/runtime/variable_environment.o: runtime/eval/runtime/variable_envir
 
 # target to build an object file
 runtime/eval/runtime/variable_environment.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variable_environment.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variable_environment.cpp.o
 .PHONY : runtime/eval/runtime/variable_environment.cpp.o
 
 runtime/eval/runtime/variable_environment.i: runtime/eval/runtime/variable_environment.cpp.i
@@ -6211,7 +6139,7 @@ runtime/eval/runtime/variable_environment.i: runtime/eval/runtime/variable_envir
 
 # target to preprocess a source file
 runtime/eval/runtime/variable_environment.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variable_environment.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variable_environment.cpp.i
 .PHONY : runtime/eval/runtime/variable_environment.cpp.i
 
 runtime/eval/runtime/variable_environment.s: runtime/eval/runtime/variable_environment.cpp.s
@@ -6219,7 +6147,7 @@ runtime/eval/runtime/variable_environment.s: runtime/eval/runtime/variable_envir
 
 # target to generate assembly for a file
 runtime/eval/runtime/variable_environment.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variable_environment.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variable_environment.cpp.s
 .PHONY : runtime/eval/runtime/variable_environment.cpp.s
 
 runtime/eval/runtime/variant_stack.o: runtime/eval/runtime/variant_stack.cpp.o
@@ -6227,7 +6155,7 @@ runtime/eval/runtime/variant_stack.o: runtime/eval/runtime/variant_stack.cpp.o
 
 # target to build an object file
 runtime/eval/runtime/variant_stack.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variant_stack.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variant_stack.cpp.o
 .PHONY : runtime/eval/runtime/variant_stack.cpp.o
 
 runtime/eval/runtime/variant_stack.i: runtime/eval/runtime/variant_stack.cpp.i
@@ -6235,7 +6163,7 @@ runtime/eval/runtime/variant_stack.i: runtime/eval/runtime/variant_stack.cpp.i
 
 # target to preprocess a source file
 runtime/eval/runtime/variant_stack.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variant_stack.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variant_stack.cpp.i
 .PHONY : runtime/eval/runtime/variant_stack.cpp.i
 
 runtime/eval/runtime/variant_stack.s: runtime/eval/runtime/variant_stack.cpp.s
@@ -6243,7 +6171,7 @@ runtime/eval/runtime/variant_stack.s: runtime/eval/runtime/variant_stack.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/runtime/variant_stack.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variant_stack.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/runtime/variant_stack.cpp.s
 .PHONY : runtime/eval/runtime/variant_stack.cpp.s
 
 runtime/eval/strict_mode.o: runtime/eval/strict_mode.cpp.o
@@ -6251,7 +6179,7 @@ runtime/eval/strict_mode.o: runtime/eval/strict_mode.cpp.o
 
 # target to build an object file
 runtime/eval/strict_mode.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/strict_mode.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/strict_mode.cpp.o
 .PHONY : runtime/eval/strict_mode.cpp.o
 
 runtime/eval/strict_mode.i: runtime/eval/strict_mode.cpp.i
@@ -6259,7 +6187,7 @@ runtime/eval/strict_mode.i: runtime/eval/strict_mode.cpp.i
 
 # target to preprocess a source file
 runtime/eval/strict_mode.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/strict_mode.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/strict_mode.cpp.i
 .PHONY : runtime/eval/strict_mode.cpp.i
 
 runtime/eval/strict_mode.s: runtime/eval/strict_mode.cpp.s
@@ -6267,7 +6195,7 @@ runtime/eval/strict_mode.s: runtime/eval/strict_mode.cpp.s
 
 # target to generate assembly for a file
 runtime/eval/strict_mode.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/strict_mode.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/eval/strict_mode.cpp.s
 .PHONY : runtime/eval/strict_mode.cpp.s
 
 runtime/ext/JSON_parser.o: runtime/ext/JSON_parser.cpp.o
@@ -6275,7 +6203,7 @@ runtime/ext/JSON_parser.o: runtime/ext/JSON_parser.cpp.o
 
 # target to build an object file
 runtime/ext/JSON_parser.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/JSON_parser.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/JSON_parser.cpp.o
 .PHONY : runtime/ext/JSON_parser.cpp.o
 
 runtime/ext/JSON_parser.i: runtime/ext/JSON_parser.cpp.i
@@ -6283,7 +6211,7 @@ runtime/ext/JSON_parser.i: runtime/ext/JSON_parser.cpp.i
 
 # target to preprocess a source file
 runtime/ext/JSON_parser.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/JSON_parser.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/JSON_parser.cpp.i
 .PHONY : runtime/ext/JSON_parser.cpp.i
 
 runtime/ext/JSON_parser.s: runtime/ext/JSON_parser.cpp.s
@@ -6291,7 +6219,7 @@ runtime/ext/JSON_parser.s: runtime/ext/JSON_parser.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/JSON_parser.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/JSON_parser.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/JSON_parser.cpp.s
 .PHONY : runtime/ext/JSON_parser.cpp.s
 
 runtime/ext/bcmath/add.o: runtime/ext/bcmath/add.c.o
@@ -6299,7 +6227,7 @@ runtime/ext/bcmath/add.o: runtime/ext/bcmath/add.c.o
 
 # target to build an object file
 runtime/ext/bcmath/add.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/add.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/add.c.o
 .PHONY : runtime/ext/bcmath/add.c.o
 
 runtime/ext/bcmath/add.i: runtime/ext/bcmath/add.c.i
@@ -6307,7 +6235,7 @@ runtime/ext/bcmath/add.i: runtime/ext/bcmath/add.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/add.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/add.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/add.c.i
 .PHONY : runtime/ext/bcmath/add.c.i
 
 runtime/ext/bcmath/add.s: runtime/ext/bcmath/add.c.s
@@ -6315,7 +6243,7 @@ runtime/ext/bcmath/add.s: runtime/ext/bcmath/add.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/add.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/add.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/add.c.s
 .PHONY : runtime/ext/bcmath/add.c.s
 
 runtime/ext/bcmath/compare.o: runtime/ext/bcmath/compare.c.o
@@ -6323,7 +6251,7 @@ runtime/ext/bcmath/compare.o: runtime/ext/bcmath/compare.c.o
 
 # target to build an object file
 runtime/ext/bcmath/compare.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/compare.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/compare.c.o
 .PHONY : runtime/ext/bcmath/compare.c.o
 
 runtime/ext/bcmath/compare.i: runtime/ext/bcmath/compare.c.i
@@ -6331,7 +6259,7 @@ runtime/ext/bcmath/compare.i: runtime/ext/bcmath/compare.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/compare.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/compare.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/compare.c.i
 .PHONY : runtime/ext/bcmath/compare.c.i
 
 runtime/ext/bcmath/compare.s: runtime/ext/bcmath/compare.c.s
@@ -6339,7 +6267,7 @@ runtime/ext/bcmath/compare.s: runtime/ext/bcmath/compare.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/compare.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/compare.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/compare.c.s
 .PHONY : runtime/ext/bcmath/compare.c.s
 
 runtime/ext/bcmath/debug.o: runtime/ext/bcmath/debug.c.o
@@ -6347,7 +6275,7 @@ runtime/ext/bcmath/debug.o: runtime/ext/bcmath/debug.c.o
 
 # target to build an object file
 runtime/ext/bcmath/debug.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/debug.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/debug.c.o
 .PHONY : runtime/ext/bcmath/debug.c.o
 
 runtime/ext/bcmath/debug.i: runtime/ext/bcmath/debug.c.i
@@ -6355,7 +6283,7 @@ runtime/ext/bcmath/debug.i: runtime/ext/bcmath/debug.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/debug.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/debug.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/debug.c.i
 .PHONY : runtime/ext/bcmath/debug.c.i
 
 runtime/ext/bcmath/debug.s: runtime/ext/bcmath/debug.c.s
@@ -6363,7 +6291,7 @@ runtime/ext/bcmath/debug.s: runtime/ext/bcmath/debug.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/debug.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/debug.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/debug.c.s
 .PHONY : runtime/ext/bcmath/debug.c.s
 
 runtime/ext/bcmath/div.o: runtime/ext/bcmath/div.c.o
@@ -6371,7 +6299,7 @@ runtime/ext/bcmath/div.o: runtime/ext/bcmath/div.c.o
 
 # target to build an object file
 runtime/ext/bcmath/div.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/div.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/div.c.o
 .PHONY : runtime/ext/bcmath/div.c.o
 
 runtime/ext/bcmath/div.i: runtime/ext/bcmath/div.c.i
@@ -6379,7 +6307,7 @@ runtime/ext/bcmath/div.i: runtime/ext/bcmath/div.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/div.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/div.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/div.c.i
 .PHONY : runtime/ext/bcmath/div.c.i
 
 runtime/ext/bcmath/div.s: runtime/ext/bcmath/div.c.s
@@ -6387,7 +6315,7 @@ runtime/ext/bcmath/div.s: runtime/ext/bcmath/div.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/div.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/div.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/div.c.s
 .PHONY : runtime/ext/bcmath/div.c.s
 
 runtime/ext/bcmath/divmod.o: runtime/ext/bcmath/divmod.c.o
@@ -6395,7 +6323,7 @@ runtime/ext/bcmath/divmod.o: runtime/ext/bcmath/divmod.c.o
 
 # target to build an object file
 runtime/ext/bcmath/divmod.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/divmod.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/divmod.c.o
 .PHONY : runtime/ext/bcmath/divmod.c.o
 
 runtime/ext/bcmath/divmod.i: runtime/ext/bcmath/divmod.c.i
@@ -6403,7 +6331,7 @@ runtime/ext/bcmath/divmod.i: runtime/ext/bcmath/divmod.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/divmod.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/divmod.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/divmod.c.i
 .PHONY : runtime/ext/bcmath/divmod.c.i
 
 runtime/ext/bcmath/divmod.s: runtime/ext/bcmath/divmod.c.s
@@ -6411,7 +6339,7 @@ runtime/ext/bcmath/divmod.s: runtime/ext/bcmath/divmod.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/divmod.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/divmod.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/divmod.c.s
 .PHONY : runtime/ext/bcmath/divmod.c.s
 
 runtime/ext/bcmath/doaddsub.o: runtime/ext/bcmath/doaddsub.c.o
@@ -6419,7 +6347,7 @@ runtime/ext/bcmath/doaddsub.o: runtime/ext/bcmath/doaddsub.c.o
 
 # target to build an object file
 runtime/ext/bcmath/doaddsub.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/doaddsub.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/doaddsub.c.o
 .PHONY : runtime/ext/bcmath/doaddsub.c.o
 
 runtime/ext/bcmath/doaddsub.i: runtime/ext/bcmath/doaddsub.c.i
@@ -6427,7 +6355,7 @@ runtime/ext/bcmath/doaddsub.i: runtime/ext/bcmath/doaddsub.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/doaddsub.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/doaddsub.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/doaddsub.c.i
 .PHONY : runtime/ext/bcmath/doaddsub.c.i
 
 runtime/ext/bcmath/doaddsub.s: runtime/ext/bcmath/doaddsub.c.s
@@ -6435,7 +6363,7 @@ runtime/ext/bcmath/doaddsub.s: runtime/ext/bcmath/doaddsub.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/doaddsub.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/doaddsub.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/doaddsub.c.s
 .PHONY : runtime/ext/bcmath/doaddsub.c.s
 
 runtime/ext/bcmath/init.o: runtime/ext/bcmath/init.c.o
@@ -6443,7 +6371,7 @@ runtime/ext/bcmath/init.o: runtime/ext/bcmath/init.c.o
 
 # target to build an object file
 runtime/ext/bcmath/init.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/init.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/init.c.o
 .PHONY : runtime/ext/bcmath/init.c.o
 
 runtime/ext/bcmath/init.i: runtime/ext/bcmath/init.c.i
@@ -6451,7 +6379,7 @@ runtime/ext/bcmath/init.i: runtime/ext/bcmath/init.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/init.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/init.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/init.c.i
 .PHONY : runtime/ext/bcmath/init.c.i
 
 runtime/ext/bcmath/init.s: runtime/ext/bcmath/init.c.s
@@ -6459,7 +6387,7 @@ runtime/ext/bcmath/init.s: runtime/ext/bcmath/init.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/init.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/init.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/init.c.s
 .PHONY : runtime/ext/bcmath/init.c.s
 
 runtime/ext/bcmath/int2num.o: runtime/ext/bcmath/int2num.c.o
@@ -6467,7 +6395,7 @@ runtime/ext/bcmath/int2num.o: runtime/ext/bcmath/int2num.c.o
 
 # target to build an object file
 runtime/ext/bcmath/int2num.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/int2num.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/int2num.c.o
 .PHONY : runtime/ext/bcmath/int2num.c.o
 
 runtime/ext/bcmath/int2num.i: runtime/ext/bcmath/int2num.c.i
@@ -6475,7 +6403,7 @@ runtime/ext/bcmath/int2num.i: runtime/ext/bcmath/int2num.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/int2num.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/int2num.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/int2num.c.i
 .PHONY : runtime/ext/bcmath/int2num.c.i
 
 runtime/ext/bcmath/int2num.s: runtime/ext/bcmath/int2num.c.s
@@ -6483,7 +6411,7 @@ runtime/ext/bcmath/int2num.s: runtime/ext/bcmath/int2num.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/int2num.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/int2num.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/int2num.c.s
 .PHONY : runtime/ext/bcmath/int2num.c.s
 
 runtime/ext/bcmath/nearzero.o: runtime/ext/bcmath/nearzero.c.o
@@ -6491,7 +6419,7 @@ runtime/ext/bcmath/nearzero.o: runtime/ext/bcmath/nearzero.c.o
 
 # target to build an object file
 runtime/ext/bcmath/nearzero.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/nearzero.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/nearzero.c.o
 .PHONY : runtime/ext/bcmath/nearzero.c.o
 
 runtime/ext/bcmath/nearzero.i: runtime/ext/bcmath/nearzero.c.i
@@ -6499,7 +6427,7 @@ runtime/ext/bcmath/nearzero.i: runtime/ext/bcmath/nearzero.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/nearzero.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/nearzero.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/nearzero.c.i
 .PHONY : runtime/ext/bcmath/nearzero.c.i
 
 runtime/ext/bcmath/nearzero.s: runtime/ext/bcmath/nearzero.c.s
@@ -6507,7 +6435,7 @@ runtime/ext/bcmath/nearzero.s: runtime/ext/bcmath/nearzero.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/nearzero.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/nearzero.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/nearzero.c.s
 .PHONY : runtime/ext/bcmath/nearzero.c.s
 
 runtime/ext/bcmath/neg.o: runtime/ext/bcmath/neg.c.o
@@ -6515,7 +6443,7 @@ runtime/ext/bcmath/neg.o: runtime/ext/bcmath/neg.c.o
 
 # target to build an object file
 runtime/ext/bcmath/neg.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/neg.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/neg.c.o
 .PHONY : runtime/ext/bcmath/neg.c.o
 
 runtime/ext/bcmath/neg.i: runtime/ext/bcmath/neg.c.i
@@ -6523,7 +6451,7 @@ runtime/ext/bcmath/neg.i: runtime/ext/bcmath/neg.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/neg.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/neg.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/neg.c.i
 .PHONY : runtime/ext/bcmath/neg.c.i
 
 runtime/ext/bcmath/neg.s: runtime/ext/bcmath/neg.c.s
@@ -6531,7 +6459,7 @@ runtime/ext/bcmath/neg.s: runtime/ext/bcmath/neg.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/neg.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/neg.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/neg.c.s
 .PHONY : runtime/ext/bcmath/neg.c.s
 
 runtime/ext/bcmath/num2long.o: runtime/ext/bcmath/num2long.c.o
@@ -6539,7 +6467,7 @@ runtime/ext/bcmath/num2long.o: runtime/ext/bcmath/num2long.c.o
 
 # target to build an object file
 runtime/ext/bcmath/num2long.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2long.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2long.c.o
 .PHONY : runtime/ext/bcmath/num2long.c.o
 
 runtime/ext/bcmath/num2long.i: runtime/ext/bcmath/num2long.c.i
@@ -6547,7 +6475,7 @@ runtime/ext/bcmath/num2long.i: runtime/ext/bcmath/num2long.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/num2long.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2long.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2long.c.i
 .PHONY : runtime/ext/bcmath/num2long.c.i
 
 runtime/ext/bcmath/num2long.s: runtime/ext/bcmath/num2long.c.s
@@ -6555,7 +6483,7 @@ runtime/ext/bcmath/num2long.s: runtime/ext/bcmath/num2long.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/num2long.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2long.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2long.c.s
 .PHONY : runtime/ext/bcmath/num2long.c.s
 
 runtime/ext/bcmath/num2str.o: runtime/ext/bcmath/num2str.c.o
@@ -6563,7 +6491,7 @@ runtime/ext/bcmath/num2str.o: runtime/ext/bcmath/num2str.c.o
 
 # target to build an object file
 runtime/ext/bcmath/num2str.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2str.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2str.c.o
 .PHONY : runtime/ext/bcmath/num2str.c.o
 
 runtime/ext/bcmath/num2str.i: runtime/ext/bcmath/num2str.c.i
@@ -6571,7 +6499,7 @@ runtime/ext/bcmath/num2str.i: runtime/ext/bcmath/num2str.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/num2str.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2str.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2str.c.i
 .PHONY : runtime/ext/bcmath/num2str.c.i
 
 runtime/ext/bcmath/num2str.s: runtime/ext/bcmath/num2str.c.s
@@ -6579,7 +6507,7 @@ runtime/ext/bcmath/num2str.s: runtime/ext/bcmath/num2str.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/num2str.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2str.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/num2str.c.s
 .PHONY : runtime/ext/bcmath/num2str.c.s
 
 runtime/ext/bcmath/outofmem.o: runtime/ext/bcmath/outofmem.c.o
@@ -6587,7 +6515,7 @@ runtime/ext/bcmath/outofmem.o: runtime/ext/bcmath/outofmem.c.o
 
 # target to build an object file
 runtime/ext/bcmath/outofmem.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/outofmem.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/outofmem.c.o
 .PHONY : runtime/ext/bcmath/outofmem.c.o
 
 runtime/ext/bcmath/outofmem.i: runtime/ext/bcmath/outofmem.c.i
@@ -6595,7 +6523,7 @@ runtime/ext/bcmath/outofmem.i: runtime/ext/bcmath/outofmem.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/outofmem.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/outofmem.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/outofmem.c.i
 .PHONY : runtime/ext/bcmath/outofmem.c.i
 
 runtime/ext/bcmath/outofmem.s: runtime/ext/bcmath/outofmem.c.s
@@ -6603,7 +6531,7 @@ runtime/ext/bcmath/outofmem.s: runtime/ext/bcmath/outofmem.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/outofmem.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/outofmem.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/outofmem.c.s
 .PHONY : runtime/ext/bcmath/outofmem.c.s
 
 runtime/ext/bcmath/output.o: runtime/ext/bcmath/output.c.o
@@ -6611,7 +6539,7 @@ runtime/ext/bcmath/output.o: runtime/ext/bcmath/output.c.o
 
 # target to build an object file
 runtime/ext/bcmath/output.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/output.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/output.c.o
 .PHONY : runtime/ext/bcmath/output.c.o
 
 runtime/ext/bcmath/output.i: runtime/ext/bcmath/output.c.i
@@ -6619,7 +6547,7 @@ runtime/ext/bcmath/output.i: runtime/ext/bcmath/output.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/output.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/output.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/output.c.i
 .PHONY : runtime/ext/bcmath/output.c.i
 
 runtime/ext/bcmath/output.s: runtime/ext/bcmath/output.c.s
@@ -6627,7 +6555,7 @@ runtime/ext/bcmath/output.s: runtime/ext/bcmath/output.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/output.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/output.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/output.c.s
 .PHONY : runtime/ext/bcmath/output.c.s
 
 runtime/ext/bcmath/raise.o: runtime/ext/bcmath/raise.c.o
@@ -6635,7 +6563,7 @@ runtime/ext/bcmath/raise.o: runtime/ext/bcmath/raise.c.o
 
 # target to build an object file
 runtime/ext/bcmath/raise.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raise.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raise.c.o
 .PHONY : runtime/ext/bcmath/raise.c.o
 
 runtime/ext/bcmath/raise.i: runtime/ext/bcmath/raise.c.i
@@ -6643,7 +6571,7 @@ runtime/ext/bcmath/raise.i: runtime/ext/bcmath/raise.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/raise.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raise.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raise.c.i
 .PHONY : runtime/ext/bcmath/raise.c.i
 
 runtime/ext/bcmath/raise.s: runtime/ext/bcmath/raise.c.s
@@ -6651,7 +6579,7 @@ runtime/ext/bcmath/raise.s: runtime/ext/bcmath/raise.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/raise.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raise.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raise.c.s
 .PHONY : runtime/ext/bcmath/raise.c.s
 
 runtime/ext/bcmath/raisemod.o: runtime/ext/bcmath/raisemod.c.o
@@ -6659,7 +6587,7 @@ runtime/ext/bcmath/raisemod.o: runtime/ext/bcmath/raisemod.c.o
 
 # target to build an object file
 runtime/ext/bcmath/raisemod.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raisemod.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raisemod.c.o
 .PHONY : runtime/ext/bcmath/raisemod.c.o
 
 runtime/ext/bcmath/raisemod.i: runtime/ext/bcmath/raisemod.c.i
@@ -6667,7 +6595,7 @@ runtime/ext/bcmath/raisemod.i: runtime/ext/bcmath/raisemod.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/raisemod.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raisemod.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raisemod.c.i
 .PHONY : runtime/ext/bcmath/raisemod.c.i
 
 runtime/ext/bcmath/raisemod.s: runtime/ext/bcmath/raisemod.c.s
@@ -6675,7 +6603,7 @@ runtime/ext/bcmath/raisemod.s: runtime/ext/bcmath/raisemod.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/raisemod.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raisemod.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/raisemod.c.s
 .PHONY : runtime/ext/bcmath/raisemod.c.s
 
 runtime/ext/bcmath/recmul.o: runtime/ext/bcmath/recmul.c.o
@@ -6683,7 +6611,7 @@ runtime/ext/bcmath/recmul.o: runtime/ext/bcmath/recmul.c.o
 
 # target to build an object file
 runtime/ext/bcmath/recmul.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/recmul.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/recmul.c.o
 .PHONY : runtime/ext/bcmath/recmul.c.o
 
 runtime/ext/bcmath/recmul.i: runtime/ext/bcmath/recmul.c.i
@@ -6691,7 +6619,7 @@ runtime/ext/bcmath/recmul.i: runtime/ext/bcmath/recmul.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/recmul.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/recmul.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/recmul.c.i
 .PHONY : runtime/ext/bcmath/recmul.c.i
 
 runtime/ext/bcmath/recmul.s: runtime/ext/bcmath/recmul.c.s
@@ -6699,7 +6627,7 @@ runtime/ext/bcmath/recmul.s: runtime/ext/bcmath/recmul.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/recmul.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/recmul.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/recmul.c.s
 .PHONY : runtime/ext/bcmath/recmul.c.s
 
 runtime/ext/bcmath/rmzero.o: runtime/ext/bcmath/rmzero.c.o
@@ -6707,7 +6635,7 @@ runtime/ext/bcmath/rmzero.o: runtime/ext/bcmath/rmzero.c.o
 
 # target to build an object file
 runtime/ext/bcmath/rmzero.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rmzero.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rmzero.c.o
 .PHONY : runtime/ext/bcmath/rmzero.c.o
 
 runtime/ext/bcmath/rmzero.i: runtime/ext/bcmath/rmzero.c.i
@@ -6715,7 +6643,7 @@ runtime/ext/bcmath/rmzero.i: runtime/ext/bcmath/rmzero.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/rmzero.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rmzero.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rmzero.c.i
 .PHONY : runtime/ext/bcmath/rmzero.c.i
 
 runtime/ext/bcmath/rmzero.s: runtime/ext/bcmath/rmzero.c.s
@@ -6723,7 +6651,7 @@ runtime/ext/bcmath/rmzero.s: runtime/ext/bcmath/rmzero.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/rmzero.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rmzero.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rmzero.c.s
 .PHONY : runtime/ext/bcmath/rmzero.c.s
 
 runtime/ext/bcmath/rt.o: runtime/ext/bcmath/rt.c.o
@@ -6731,7 +6659,7 @@ runtime/ext/bcmath/rt.o: runtime/ext/bcmath/rt.c.o
 
 # target to build an object file
 runtime/ext/bcmath/rt.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rt.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rt.c.o
 .PHONY : runtime/ext/bcmath/rt.c.o
 
 runtime/ext/bcmath/rt.i: runtime/ext/bcmath/rt.c.i
@@ -6739,7 +6667,7 @@ runtime/ext/bcmath/rt.i: runtime/ext/bcmath/rt.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/rt.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rt.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rt.c.i
 .PHONY : runtime/ext/bcmath/rt.c.i
 
 runtime/ext/bcmath/rt.s: runtime/ext/bcmath/rt.c.s
@@ -6747,7 +6675,7 @@ runtime/ext/bcmath/rt.s: runtime/ext/bcmath/rt.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/rt.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rt.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/rt.c.s
 .PHONY : runtime/ext/bcmath/rt.c.s
 
 runtime/ext/bcmath/sqrt.o: runtime/ext/bcmath/sqrt.c.o
@@ -6755,7 +6683,7 @@ runtime/ext/bcmath/sqrt.o: runtime/ext/bcmath/sqrt.c.o
 
 # target to build an object file
 runtime/ext/bcmath/sqrt.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sqrt.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sqrt.c.o
 .PHONY : runtime/ext/bcmath/sqrt.c.o
 
 runtime/ext/bcmath/sqrt.i: runtime/ext/bcmath/sqrt.c.i
@@ -6763,7 +6691,7 @@ runtime/ext/bcmath/sqrt.i: runtime/ext/bcmath/sqrt.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/sqrt.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sqrt.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sqrt.c.i
 .PHONY : runtime/ext/bcmath/sqrt.c.i
 
 runtime/ext/bcmath/sqrt.s: runtime/ext/bcmath/sqrt.c.s
@@ -6771,7 +6699,7 @@ runtime/ext/bcmath/sqrt.s: runtime/ext/bcmath/sqrt.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/sqrt.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sqrt.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sqrt.c.s
 .PHONY : runtime/ext/bcmath/sqrt.c.s
 
 runtime/ext/bcmath/str2num.o: runtime/ext/bcmath/str2num.c.o
@@ -6779,7 +6707,7 @@ runtime/ext/bcmath/str2num.o: runtime/ext/bcmath/str2num.c.o
 
 # target to build an object file
 runtime/ext/bcmath/str2num.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/str2num.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/str2num.c.o
 .PHONY : runtime/ext/bcmath/str2num.c.o
 
 runtime/ext/bcmath/str2num.i: runtime/ext/bcmath/str2num.c.i
@@ -6787,7 +6715,7 @@ runtime/ext/bcmath/str2num.i: runtime/ext/bcmath/str2num.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/str2num.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/str2num.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/str2num.c.i
 .PHONY : runtime/ext/bcmath/str2num.c.i
 
 runtime/ext/bcmath/str2num.s: runtime/ext/bcmath/str2num.c.s
@@ -6795,7 +6723,7 @@ runtime/ext/bcmath/str2num.s: runtime/ext/bcmath/str2num.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/str2num.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/str2num.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/str2num.c.s
 .PHONY : runtime/ext/bcmath/str2num.c.s
 
 runtime/ext/bcmath/sub.o: runtime/ext/bcmath/sub.c.o
@@ -6803,7 +6731,7 @@ runtime/ext/bcmath/sub.o: runtime/ext/bcmath/sub.c.o
 
 # target to build an object file
 runtime/ext/bcmath/sub.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sub.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sub.c.o
 .PHONY : runtime/ext/bcmath/sub.c.o
 
 runtime/ext/bcmath/sub.i: runtime/ext/bcmath/sub.c.i
@@ -6811,7 +6739,7 @@ runtime/ext/bcmath/sub.i: runtime/ext/bcmath/sub.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/sub.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sub.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sub.c.i
 .PHONY : runtime/ext/bcmath/sub.c.i
 
 runtime/ext/bcmath/sub.s: runtime/ext/bcmath/sub.c.s
@@ -6819,7 +6747,7 @@ runtime/ext/bcmath/sub.s: runtime/ext/bcmath/sub.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/sub.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sub.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/sub.c.s
 .PHONY : runtime/ext/bcmath/sub.c.s
 
 runtime/ext/bcmath/zero.o: runtime/ext/bcmath/zero.c.o
@@ -6827,7 +6755,7 @@ runtime/ext/bcmath/zero.o: runtime/ext/bcmath/zero.c.o
 
 # target to build an object file
 runtime/ext/bcmath/zero.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/zero.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/zero.c.o
 .PHONY : runtime/ext/bcmath/zero.c.o
 
 runtime/ext/bcmath/zero.i: runtime/ext/bcmath/zero.c.i
@@ -6835,7 +6763,7 @@ runtime/ext/bcmath/zero.i: runtime/ext/bcmath/zero.c.i
 
 # target to preprocess a source file
 runtime/ext/bcmath/zero.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/zero.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/zero.c.i
 .PHONY : runtime/ext/bcmath/zero.c.i
 
 runtime/ext/bcmath/zero.s: runtime/ext/bcmath/zero.c.s
@@ -6843,7 +6771,7 @@ runtime/ext/bcmath/zero.s: runtime/ext/bcmath/zero.c.s
 
 # target to generate assembly for a file
 runtime/ext/bcmath/zero.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/zero.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/bcmath/zero.c.s
 .PHONY : runtime/ext/bcmath/zero.c.s
 
 runtime/ext/crutch.o: runtime/ext/crutch.cpp.o
@@ -6851,7 +6779,7 @@ runtime/ext/crutch.o: runtime/ext/crutch.cpp.o
 
 # target to build an object file
 runtime/ext/crutch.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/crutch.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/crutch.cpp.o
 .PHONY : runtime/ext/crutch.cpp.o
 
 runtime/ext/crutch.i: runtime/ext/crutch.cpp.i
@@ -6859,7 +6787,7 @@ runtime/ext/crutch.i: runtime/ext/crutch.cpp.i
 
 # target to preprocess a source file
 runtime/ext/crutch.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/crutch.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/crutch.cpp.i
 .PHONY : runtime/ext/crutch.cpp.i
 
 runtime/ext/crutch.s: runtime/ext/crutch.cpp.s
@@ -6867,7 +6795,7 @@ runtime/ext/crutch.s: runtime/ext/crutch.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/crutch.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/crutch.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/crutch.cpp.s
 .PHONY : runtime/ext/crutch.cpp.s
 
 runtime/ext/ext_apache.o: runtime/ext/ext_apache.cpp.o
@@ -6875,7 +6803,7 @@ runtime/ext/ext_apache.o: runtime/ext/ext_apache.cpp.o
 
 # target to build an object file
 runtime/ext/ext_apache.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apache.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apache.cpp.o
 .PHONY : runtime/ext/ext_apache.cpp.o
 
 runtime/ext/ext_apache.i: runtime/ext/ext_apache.cpp.i
@@ -6883,7 +6811,7 @@ runtime/ext/ext_apache.i: runtime/ext/ext_apache.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_apache.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apache.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apache.cpp.i
 .PHONY : runtime/ext/ext_apache.cpp.i
 
 runtime/ext/ext_apache.s: runtime/ext/ext_apache.cpp.s
@@ -6891,7 +6819,7 @@ runtime/ext/ext_apache.s: runtime/ext/ext_apache.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_apache.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apache.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apache.cpp.s
 .PHONY : runtime/ext/ext_apache.cpp.s
 
 runtime/ext/ext_apc.o: runtime/ext/ext_apc.cpp.o
@@ -6899,7 +6827,7 @@ runtime/ext/ext_apc.o: runtime/ext/ext_apc.cpp.o
 
 # target to build an object file
 runtime/ext/ext_apc.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apc.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apc.cpp.o
 .PHONY : runtime/ext/ext_apc.cpp.o
 
 runtime/ext/ext_apc.i: runtime/ext/ext_apc.cpp.i
@@ -6907,7 +6835,7 @@ runtime/ext/ext_apc.i: runtime/ext/ext_apc.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_apc.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apc.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apc.cpp.i
 .PHONY : runtime/ext/ext_apc.cpp.i
 
 runtime/ext/ext_apc.s: runtime/ext/ext_apc.cpp.s
@@ -6915,7 +6843,7 @@ runtime/ext/ext_apc.s: runtime/ext/ext_apc.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_apc.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apc.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apc.cpp.s
 .PHONY : runtime/ext/ext_apc.cpp.s
 
 runtime/ext/ext_apd.o: runtime/ext/ext_apd.cpp.o
@@ -6923,7 +6851,7 @@ runtime/ext/ext_apd.o: runtime/ext/ext_apd.cpp.o
 
 # target to build an object file
 runtime/ext/ext_apd.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apd.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apd.cpp.o
 .PHONY : runtime/ext/ext_apd.cpp.o
 
 runtime/ext/ext_apd.i: runtime/ext/ext_apd.cpp.i
@@ -6931,7 +6859,7 @@ runtime/ext/ext_apd.i: runtime/ext/ext_apd.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_apd.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apd.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apd.cpp.i
 .PHONY : runtime/ext/ext_apd.cpp.i
 
 runtime/ext/ext_apd.s: runtime/ext/ext_apd.cpp.s
@@ -6939,7 +6867,7 @@ runtime/ext/ext_apd.s: runtime/ext/ext_apd.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_apd.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apd.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_apd.cpp.s
 .PHONY : runtime/ext/ext_apd.cpp.s
 
 runtime/ext/ext_array.o: runtime/ext/ext_array.cpp.o
@@ -6947,7 +6875,7 @@ runtime/ext/ext_array.o: runtime/ext/ext_array.cpp.o
 
 # target to build an object file
 runtime/ext/ext_array.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_array.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_array.cpp.o
 .PHONY : runtime/ext/ext_array.cpp.o
 
 runtime/ext/ext_array.i: runtime/ext/ext_array.cpp.i
@@ -6955,7 +6883,7 @@ runtime/ext/ext_array.i: runtime/ext/ext_array.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_array.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_array.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_array.cpp.i
 .PHONY : runtime/ext/ext_array.cpp.i
 
 runtime/ext/ext_array.s: runtime/ext/ext_array.cpp.s
@@ -6963,7 +6891,7 @@ runtime/ext/ext_array.s: runtime/ext/ext_array.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_array.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_array.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_array.cpp.s
 .PHONY : runtime/ext/ext_array.cpp.s
 
 runtime/ext/ext_bcmath.o: runtime/ext/ext_bcmath.cpp.o
@@ -6971,7 +6899,7 @@ runtime/ext/ext_bcmath.o: runtime/ext/ext_bcmath.cpp.o
 
 # target to build an object file
 runtime/ext/ext_bcmath.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bcmath.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bcmath.cpp.o
 .PHONY : runtime/ext/ext_bcmath.cpp.o
 
 runtime/ext/ext_bcmath.i: runtime/ext/ext_bcmath.cpp.i
@@ -6979,7 +6907,7 @@ runtime/ext/ext_bcmath.i: runtime/ext/ext_bcmath.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_bcmath.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bcmath.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bcmath.cpp.i
 .PHONY : runtime/ext/ext_bcmath.cpp.i
 
 runtime/ext/ext_bcmath.s: runtime/ext/ext_bcmath.cpp.s
@@ -6987,7 +6915,7 @@ runtime/ext/ext_bcmath.s: runtime/ext/ext_bcmath.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_bcmath.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bcmath.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bcmath.cpp.s
 .PHONY : runtime/ext/ext_bcmath.cpp.s
 
 runtime/ext/ext_bzip2.o: runtime/ext/ext_bzip2.cpp.o
@@ -6995,7 +6923,7 @@ runtime/ext/ext_bzip2.o: runtime/ext/ext_bzip2.cpp.o
 
 # target to build an object file
 runtime/ext/ext_bzip2.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bzip2.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bzip2.cpp.o
 .PHONY : runtime/ext/ext_bzip2.cpp.o
 
 runtime/ext/ext_bzip2.i: runtime/ext/ext_bzip2.cpp.i
@@ -7003,7 +6931,7 @@ runtime/ext/ext_bzip2.i: runtime/ext/ext_bzip2.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_bzip2.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bzip2.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bzip2.cpp.i
 .PHONY : runtime/ext/ext_bzip2.cpp.i
 
 runtime/ext/ext_bzip2.s: runtime/ext/ext_bzip2.cpp.s
@@ -7011,7 +6939,7 @@ runtime/ext/ext_bzip2.s: runtime/ext/ext_bzip2.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_bzip2.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bzip2.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_bzip2.cpp.s
 .PHONY : runtime/ext/ext_bzip2.cpp.s
 
 runtime/ext/ext_class.o: runtime/ext/ext_class.cpp.o
@@ -7019,7 +6947,7 @@ runtime/ext/ext_class.o: runtime/ext/ext_class.cpp.o
 
 # target to build an object file
 runtime/ext/ext_class.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_class.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_class.cpp.o
 .PHONY : runtime/ext/ext_class.cpp.o
 
 runtime/ext/ext_class.i: runtime/ext/ext_class.cpp.i
@@ -7027,7 +6955,7 @@ runtime/ext/ext_class.i: runtime/ext/ext_class.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_class.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_class.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_class.cpp.i
 .PHONY : runtime/ext/ext_class.cpp.i
 
 runtime/ext/ext_class.s: runtime/ext/ext_class.cpp.s
@@ -7035,7 +6963,7 @@ runtime/ext/ext_class.s: runtime/ext/ext_class.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_class.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_class.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_class.cpp.s
 .PHONY : runtime/ext/ext_class.cpp.s
 
 runtime/ext/ext_closure.o: runtime/ext/ext_closure.cpp.o
@@ -7043,7 +6971,7 @@ runtime/ext/ext_closure.o: runtime/ext/ext_closure.cpp.o
 
 # target to build an object file
 runtime/ext/ext_closure.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_closure.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_closure.cpp.o
 .PHONY : runtime/ext/ext_closure.cpp.o
 
 runtime/ext/ext_closure.i: runtime/ext/ext_closure.cpp.i
@@ -7051,7 +6979,7 @@ runtime/ext/ext_closure.i: runtime/ext/ext_closure.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_closure.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_closure.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_closure.cpp.i
 .PHONY : runtime/ext/ext_closure.cpp.i
 
 runtime/ext/ext_closure.s: runtime/ext/ext_closure.cpp.s
@@ -7059,7 +6987,7 @@ runtime/ext/ext_closure.s: runtime/ext/ext_closure.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_closure.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_closure.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_closure.cpp.s
 .PHONY : runtime/ext/ext_closure.cpp.s
 
 runtime/ext/ext_continuation.o: runtime/ext/ext_continuation.cpp.o
@@ -7067,7 +6995,7 @@ runtime/ext/ext_continuation.o: runtime/ext/ext_continuation.cpp.o
 
 # target to build an object file
 runtime/ext/ext_continuation.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_continuation.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_continuation.cpp.o
 .PHONY : runtime/ext/ext_continuation.cpp.o
 
 runtime/ext/ext_continuation.i: runtime/ext/ext_continuation.cpp.i
@@ -7075,7 +7003,7 @@ runtime/ext/ext_continuation.i: runtime/ext/ext_continuation.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_continuation.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_continuation.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_continuation.cpp.i
 .PHONY : runtime/ext/ext_continuation.cpp.i
 
 runtime/ext/ext_continuation.s: runtime/ext/ext_continuation.cpp.s
@@ -7083,7 +7011,7 @@ runtime/ext/ext_continuation.s: runtime/ext/ext_continuation.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_continuation.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_continuation.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_continuation.cpp.s
 .PHONY : runtime/ext/ext_continuation.cpp.s
 
 runtime/ext/ext_ctype.o: runtime/ext/ext_ctype.cpp.o
@@ -7091,7 +7019,7 @@ runtime/ext/ext_ctype.o: runtime/ext/ext_ctype.cpp.o
 
 # target to build an object file
 runtime/ext/ext_ctype.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ctype.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ctype.cpp.o
 .PHONY : runtime/ext/ext_ctype.cpp.o
 
 runtime/ext/ext_ctype.i: runtime/ext/ext_ctype.cpp.i
@@ -7099,7 +7027,7 @@ runtime/ext/ext_ctype.i: runtime/ext/ext_ctype.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_ctype.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ctype.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ctype.cpp.i
 .PHONY : runtime/ext/ext_ctype.cpp.i
 
 runtime/ext/ext_ctype.s: runtime/ext/ext_ctype.cpp.s
@@ -7107,7 +7035,7 @@ runtime/ext/ext_ctype.s: runtime/ext/ext_ctype.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_ctype.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ctype.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ctype.cpp.s
 .PHONY : runtime/ext/ext_ctype.cpp.s
 
 runtime/ext/ext_curl.o: runtime/ext/ext_curl.cpp.o
@@ -7115,7 +7043,7 @@ runtime/ext/ext_curl.o: runtime/ext/ext_curl.cpp.o
 
 # target to build an object file
 runtime/ext/ext_curl.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_curl.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_curl.cpp.o
 .PHONY : runtime/ext/ext_curl.cpp.o
 
 runtime/ext/ext_curl.i: runtime/ext/ext_curl.cpp.i
@@ -7123,7 +7051,7 @@ runtime/ext/ext_curl.i: runtime/ext/ext_curl.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_curl.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_curl.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_curl.cpp.i
 .PHONY : runtime/ext/ext_curl.cpp.i
 
 runtime/ext/ext_curl.s: runtime/ext/ext_curl.cpp.s
@@ -7131,7 +7059,7 @@ runtime/ext/ext_curl.s: runtime/ext/ext_curl.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_curl.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_curl.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_curl.cpp.s
 .PHONY : runtime/ext/ext_curl.cpp.s
 
 runtime/ext/ext_datetime.o: runtime/ext/ext_datetime.cpp.o
@@ -7139,7 +7067,7 @@ runtime/ext/ext_datetime.o: runtime/ext/ext_datetime.cpp.o
 
 # target to build an object file
 runtime/ext/ext_datetime.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_datetime.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_datetime.cpp.o
 .PHONY : runtime/ext/ext_datetime.cpp.o
 
 runtime/ext/ext_datetime.i: runtime/ext/ext_datetime.cpp.i
@@ -7147,7 +7075,7 @@ runtime/ext/ext_datetime.i: runtime/ext/ext_datetime.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_datetime.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_datetime.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_datetime.cpp.i
 .PHONY : runtime/ext/ext_datetime.cpp.i
 
 runtime/ext/ext_datetime.s: runtime/ext/ext_datetime.cpp.s
@@ -7155,7 +7083,7 @@ runtime/ext/ext_datetime.s: runtime/ext/ext_datetime.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_datetime.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_datetime.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_datetime.cpp.s
 .PHONY : runtime/ext/ext_datetime.cpp.s
 
 runtime/ext/ext_debugger.o: runtime/ext/ext_debugger.cpp.o
@@ -7163,7 +7091,7 @@ runtime/ext/ext_debugger.o: runtime/ext/ext_debugger.cpp.o
 
 # target to build an object file
 runtime/ext/ext_debugger.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_debugger.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_debugger.cpp.o
 .PHONY : runtime/ext/ext_debugger.cpp.o
 
 runtime/ext/ext_debugger.i: runtime/ext/ext_debugger.cpp.i
@@ -7171,7 +7099,7 @@ runtime/ext/ext_debugger.i: runtime/ext/ext_debugger.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_debugger.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_debugger.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_debugger.cpp.i
 .PHONY : runtime/ext/ext_debugger.cpp.i
 
 runtime/ext/ext_debugger.s: runtime/ext/ext_debugger.cpp.s
@@ -7179,7 +7107,7 @@ runtime/ext/ext_debugger.s: runtime/ext/ext_debugger.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_debugger.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_debugger.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_debugger.cpp.s
 .PHONY : runtime/ext/ext_debugger.cpp.s
 
 runtime/ext/ext_domdocument.o: runtime/ext/ext_domdocument.cpp.o
@@ -7187,7 +7115,7 @@ runtime/ext/ext_domdocument.o: runtime/ext/ext_domdocument.cpp.o
 
 # target to build an object file
 runtime/ext/ext_domdocument.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_domdocument.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_domdocument.cpp.o
 .PHONY : runtime/ext/ext_domdocument.cpp.o
 
 runtime/ext/ext_domdocument.i: runtime/ext/ext_domdocument.cpp.i
@@ -7195,7 +7123,7 @@ runtime/ext/ext_domdocument.i: runtime/ext/ext_domdocument.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_domdocument.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_domdocument.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_domdocument.cpp.i
 .PHONY : runtime/ext/ext_domdocument.cpp.i
 
 runtime/ext/ext_domdocument.s: runtime/ext/ext_domdocument.cpp.s
@@ -7203,7 +7131,7 @@ runtime/ext/ext_domdocument.s: runtime/ext/ext_domdocument.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_domdocument.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_domdocument.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_domdocument.cpp.s
 .PHONY : runtime/ext/ext_domdocument.cpp.s
 
 runtime/ext/ext_error.o: runtime/ext/ext_error.cpp.o
@@ -7211,7 +7139,7 @@ runtime/ext/ext_error.o: runtime/ext/ext_error.cpp.o
 
 # target to build an object file
 runtime/ext/ext_error.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_error.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_error.cpp.o
 .PHONY : runtime/ext/ext_error.cpp.o
 
 runtime/ext/ext_error.i: runtime/ext/ext_error.cpp.i
@@ -7219,7 +7147,7 @@ runtime/ext/ext_error.i: runtime/ext/ext_error.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_error.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_error.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_error.cpp.i
 .PHONY : runtime/ext/ext_error.cpp.i
 
 runtime/ext/ext_error.s: runtime/ext/ext_error.cpp.s
@@ -7227,7 +7155,7 @@ runtime/ext/ext_error.s: runtime/ext/ext_error.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_error.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_error.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_error.cpp.s
 .PHONY : runtime/ext/ext_error.cpp.s
 
 runtime/ext/ext_fb.o: runtime/ext/ext_fb.cpp.o
@@ -7235,7 +7163,7 @@ runtime/ext/ext_fb.o: runtime/ext/ext_fb.cpp.o
 
 # target to build an object file
 runtime/ext/ext_fb.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_fb.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_fb.cpp.o
 .PHONY : runtime/ext/ext_fb.cpp.o
 
 runtime/ext/ext_fb.i: runtime/ext/ext_fb.cpp.i
@@ -7243,7 +7171,7 @@ runtime/ext/ext_fb.i: runtime/ext/ext_fb.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_fb.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_fb.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_fb.cpp.i
 .PHONY : runtime/ext/ext_fb.cpp.i
 
 runtime/ext/ext_fb.s: runtime/ext/ext_fb.cpp.s
@@ -7251,7 +7179,7 @@ runtime/ext/ext_fb.s: runtime/ext/ext_fb.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_fb.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_fb.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_fb.cpp.s
 .PHONY : runtime/ext/ext_fb.cpp.s
 
 runtime/ext/ext_file.o: runtime/ext/ext_file.cpp.o
@@ -7259,7 +7187,7 @@ runtime/ext/ext_file.o: runtime/ext/ext_file.cpp.o
 
 # target to build an object file
 runtime/ext/ext_file.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_file.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_file.cpp.o
 .PHONY : runtime/ext/ext_file.cpp.o
 
 runtime/ext/ext_file.i: runtime/ext/ext_file.cpp.i
@@ -7267,7 +7195,7 @@ runtime/ext/ext_file.i: runtime/ext/ext_file.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_file.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_file.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_file.cpp.i
 .PHONY : runtime/ext/ext_file.cpp.i
 
 runtime/ext/ext_file.s: runtime/ext/ext_file.cpp.s
@@ -7275,7 +7203,7 @@ runtime/ext/ext_file.s: runtime/ext/ext_file.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_file.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_file.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_file.cpp.s
 .PHONY : runtime/ext/ext_file.cpp.s
 
 runtime/ext/ext_function.o: runtime/ext/ext_function.cpp.o
@@ -7283,7 +7211,7 @@ runtime/ext/ext_function.o: runtime/ext/ext_function.cpp.o
 
 # target to build an object file
 runtime/ext/ext_function.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_function.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_function.cpp.o
 .PHONY : runtime/ext/ext_function.cpp.o
 
 runtime/ext/ext_function.i: runtime/ext/ext_function.cpp.i
@@ -7291,7 +7219,7 @@ runtime/ext/ext_function.i: runtime/ext/ext_function.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_function.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_function.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_function.cpp.i
 .PHONY : runtime/ext/ext_function.cpp.i
 
 runtime/ext/ext_function.s: runtime/ext/ext_function.cpp.s
@@ -7299,7 +7227,7 @@ runtime/ext/ext_function.s: runtime/ext/ext_function.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_function.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_function.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_function.cpp.s
 .PHONY : runtime/ext/ext_function.cpp.s
 
 runtime/ext/ext_hash.o: runtime/ext/ext_hash.cpp.o
@@ -7307,7 +7235,7 @@ runtime/ext/ext_hash.o: runtime/ext/ext_hash.cpp.o
 
 # target to build an object file
 runtime/ext/ext_hash.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hash.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hash.cpp.o
 .PHONY : runtime/ext/ext_hash.cpp.o
 
 runtime/ext/ext_hash.i: runtime/ext/ext_hash.cpp.i
@@ -7315,7 +7243,7 @@ runtime/ext/ext_hash.i: runtime/ext/ext_hash.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_hash.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hash.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hash.cpp.i
 .PHONY : runtime/ext/ext_hash.cpp.i
 
 runtime/ext/ext_hash.s: runtime/ext/ext_hash.cpp.s
@@ -7323,7 +7251,7 @@ runtime/ext/ext_hash.s: runtime/ext/ext_hash.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_hash.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hash.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hash.cpp.s
 .PHONY : runtime/ext/ext_hash.cpp.s
 
 runtime/ext/ext_hotprofiler.o: runtime/ext/ext_hotprofiler.cpp.o
@@ -7331,7 +7259,7 @@ runtime/ext/ext_hotprofiler.o: runtime/ext/ext_hotprofiler.cpp.o
 
 # target to build an object file
 runtime/ext/ext_hotprofiler.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hotprofiler.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hotprofiler.cpp.o
 .PHONY : runtime/ext/ext_hotprofiler.cpp.o
 
 runtime/ext/ext_hotprofiler.i: runtime/ext/ext_hotprofiler.cpp.i
@@ -7339,7 +7267,7 @@ runtime/ext/ext_hotprofiler.i: runtime/ext/ext_hotprofiler.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_hotprofiler.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hotprofiler.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hotprofiler.cpp.i
 .PHONY : runtime/ext/ext_hotprofiler.cpp.i
 
 runtime/ext/ext_hotprofiler.s: runtime/ext/ext_hotprofiler.cpp.s
@@ -7347,7 +7275,7 @@ runtime/ext/ext_hotprofiler.s: runtime/ext/ext_hotprofiler.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_hotprofiler.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hotprofiler.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_hotprofiler.cpp.s
 .PHONY : runtime/ext/ext_hotprofiler.cpp.s
 
 runtime/ext/ext_iconv.o: runtime/ext/ext_iconv.cpp.o
@@ -7355,7 +7283,7 @@ runtime/ext/ext_iconv.o: runtime/ext/ext_iconv.cpp.o
 
 # target to build an object file
 runtime/ext/ext_iconv.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iconv.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iconv.cpp.o
 .PHONY : runtime/ext/ext_iconv.cpp.o
 
 runtime/ext/ext_iconv.i: runtime/ext/ext_iconv.cpp.i
@@ -7363,7 +7291,7 @@ runtime/ext/ext_iconv.i: runtime/ext/ext_iconv.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_iconv.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iconv.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iconv.cpp.i
 .PHONY : runtime/ext/ext_iconv.cpp.i
 
 runtime/ext/ext_iconv.s: runtime/ext/ext_iconv.cpp.s
@@ -7371,7 +7299,7 @@ runtime/ext/ext_iconv.s: runtime/ext/ext_iconv.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_iconv.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iconv.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iconv.cpp.s
 .PHONY : runtime/ext/ext_iconv.cpp.s
 
 runtime/ext/ext_icu.o: runtime/ext/ext_icu.cpp.o
@@ -7379,7 +7307,7 @@ runtime/ext/ext_icu.o: runtime/ext/ext_icu.cpp.o
 
 # target to build an object file
 runtime/ext/ext_icu.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu.cpp.o
 .PHONY : runtime/ext/ext_icu.cpp.o
 
 runtime/ext/ext_icu.i: runtime/ext/ext_icu.cpp.i
@@ -7387,7 +7315,7 @@ runtime/ext/ext_icu.i: runtime/ext/ext_icu.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_icu.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu.cpp.i
 .PHONY : runtime/ext/ext_icu.cpp.i
 
 runtime/ext/ext_icu.s: runtime/ext/ext_icu.cpp.s
@@ -7395,7 +7323,7 @@ runtime/ext/ext_icu.s: runtime/ext/ext_icu.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_icu.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu.cpp.s
 .PHONY : runtime/ext/ext_icu.cpp.s
 
 runtime/ext/ext_icu_ucsdet.o: runtime/ext/ext_icu_ucsdet.cpp.o
@@ -7403,7 +7331,7 @@ runtime/ext/ext_icu_ucsdet.o: runtime/ext/ext_icu_ucsdet.cpp.o
 
 # target to build an object file
 runtime/ext/ext_icu_ucsdet.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_ucsdet.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_ucsdet.cpp.o
 .PHONY : runtime/ext/ext_icu_ucsdet.cpp.o
 
 runtime/ext/ext_icu_ucsdet.i: runtime/ext/ext_icu_ucsdet.cpp.i
@@ -7411,7 +7339,7 @@ runtime/ext/ext_icu_ucsdet.i: runtime/ext/ext_icu_ucsdet.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_icu_ucsdet.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_ucsdet.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_ucsdet.cpp.i
 .PHONY : runtime/ext/ext_icu_ucsdet.cpp.i
 
 runtime/ext/ext_icu_ucsdet.s: runtime/ext/ext_icu_ucsdet.cpp.s
@@ -7419,7 +7347,7 @@ runtime/ext/ext_icu_ucsdet.s: runtime/ext/ext_icu_ucsdet.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_icu_ucsdet.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_ucsdet.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_ucsdet.cpp.s
 .PHONY : runtime/ext/ext_icu_ucsdet.cpp.s
 
 runtime/ext/ext_icu_uspoof.o: runtime/ext/ext_icu_uspoof.cpp.o
@@ -7427,7 +7355,7 @@ runtime/ext/ext_icu_uspoof.o: runtime/ext/ext_icu_uspoof.cpp.o
 
 # target to build an object file
 runtime/ext/ext_icu_uspoof.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_uspoof.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_uspoof.cpp.o
 .PHONY : runtime/ext/ext_icu_uspoof.cpp.o
 
 runtime/ext/ext_icu_uspoof.i: runtime/ext/ext_icu_uspoof.cpp.i
@@ -7435,7 +7363,7 @@ runtime/ext/ext_icu_uspoof.i: runtime/ext/ext_icu_uspoof.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_icu_uspoof.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_uspoof.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_uspoof.cpp.i
 .PHONY : runtime/ext/ext_icu_uspoof.cpp.i
 
 runtime/ext/ext_icu_uspoof.s: runtime/ext/ext_icu_uspoof.cpp.s
@@ -7443,7 +7371,7 @@ runtime/ext/ext_icu_uspoof.s: runtime/ext/ext_icu_uspoof.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_icu_uspoof.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_uspoof.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_icu_uspoof.cpp.s
 .PHONY : runtime/ext/ext_icu_uspoof.cpp.s
 
 runtime/ext/ext_image.o: runtime/ext/ext_image.cpp.o
@@ -7451,7 +7379,7 @@ runtime/ext/ext_image.o: runtime/ext/ext_image.cpp.o
 
 # target to build an object file
 runtime/ext/ext_image.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_image.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_image.cpp.o
 .PHONY : runtime/ext/ext_image.cpp.o
 
 runtime/ext/ext_image.i: runtime/ext/ext_image.cpp.i
@@ -7459,7 +7387,7 @@ runtime/ext/ext_image.i: runtime/ext/ext_image.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_image.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_image.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_image.cpp.i
 .PHONY : runtime/ext/ext_image.cpp.i
 
 runtime/ext/ext_image.s: runtime/ext/ext_image.cpp.s
@@ -7467,7 +7395,7 @@ runtime/ext/ext_image.s: runtime/ext/ext_image.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_image.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_image.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_image.cpp.s
 .PHONY : runtime/ext/ext_image.cpp.s
 
 runtime/ext/ext_imagesprite.o: runtime/ext/ext_imagesprite.cpp.o
@@ -7475,7 +7403,7 @@ runtime/ext/ext_imagesprite.o: runtime/ext/ext_imagesprite.cpp.o
 
 # target to build an object file
 runtime/ext/ext_imagesprite.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imagesprite.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imagesprite.cpp.o
 .PHONY : runtime/ext/ext_imagesprite.cpp.o
 
 runtime/ext/ext_imagesprite.i: runtime/ext/ext_imagesprite.cpp.i
@@ -7483,7 +7411,7 @@ runtime/ext/ext_imagesprite.i: runtime/ext/ext_imagesprite.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_imagesprite.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imagesprite.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imagesprite.cpp.i
 .PHONY : runtime/ext/ext_imagesprite.cpp.i
 
 runtime/ext/ext_imagesprite.s: runtime/ext/ext_imagesprite.cpp.s
@@ -7491,7 +7419,7 @@ runtime/ext/ext_imagesprite.s: runtime/ext/ext_imagesprite.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_imagesprite.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imagesprite.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imagesprite.cpp.s
 .PHONY : runtime/ext/ext_imagesprite.cpp.s
 
 runtime/ext/ext_imap.o: runtime/ext/ext_imap.cpp.o
@@ -7499,7 +7427,7 @@ runtime/ext/ext_imap.o: runtime/ext/ext_imap.cpp.o
 
 # target to build an object file
 runtime/ext/ext_imap.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imap.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imap.cpp.o
 .PHONY : runtime/ext/ext_imap.cpp.o
 
 runtime/ext/ext_imap.i: runtime/ext/ext_imap.cpp.i
@@ -7507,7 +7435,7 @@ runtime/ext/ext_imap.i: runtime/ext/ext_imap.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_imap.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imap.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imap.cpp.i
 .PHONY : runtime/ext/ext_imap.cpp.i
 
 runtime/ext/ext_imap.s: runtime/ext/ext_imap.cpp.s
@@ -7515,7 +7443,7 @@ runtime/ext/ext_imap.s: runtime/ext/ext_imap.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_imap.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imap.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_imap.cpp.s
 .PHONY : runtime/ext/ext_imap.cpp.s
 
 runtime/ext/ext_intl.o: runtime/ext/ext_intl.cpp.o
@@ -7523,7 +7451,7 @@ runtime/ext/ext_intl.o: runtime/ext/ext_intl.cpp.o
 
 # target to build an object file
 runtime/ext/ext_intl.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_intl.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_intl.cpp.o
 .PHONY : runtime/ext/ext_intl.cpp.o
 
 runtime/ext/ext_intl.i: runtime/ext/ext_intl.cpp.i
@@ -7531,7 +7459,7 @@ runtime/ext/ext_intl.i: runtime/ext/ext_intl.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_intl.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_intl.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_intl.cpp.i
 .PHONY : runtime/ext/ext_intl.cpp.i
 
 runtime/ext/ext_intl.s: runtime/ext/ext_intl.cpp.s
@@ -7539,7 +7467,7 @@ runtime/ext/ext_intl.s: runtime/ext/ext_intl.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_intl.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_intl.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_intl.cpp.s
 .PHONY : runtime/ext/ext_intl.cpp.s
 
 runtime/ext/ext_ipc.o: runtime/ext/ext_ipc.cpp.o
@@ -7547,7 +7475,7 @@ runtime/ext/ext_ipc.o: runtime/ext/ext_ipc.cpp.o
 
 # target to build an object file
 runtime/ext/ext_ipc.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ipc.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ipc.cpp.o
 .PHONY : runtime/ext/ext_ipc.cpp.o
 
 runtime/ext/ext_ipc.i: runtime/ext/ext_ipc.cpp.i
@@ -7555,7 +7483,7 @@ runtime/ext/ext_ipc.i: runtime/ext/ext_ipc.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_ipc.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ipc.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ipc.cpp.i
 .PHONY : runtime/ext/ext_ipc.cpp.i
 
 runtime/ext/ext_ipc.s: runtime/ext/ext_ipc.cpp.s
@@ -7563,7 +7491,7 @@ runtime/ext/ext_ipc.s: runtime/ext/ext_ipc.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_ipc.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ipc.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ipc.cpp.s
 .PHONY : runtime/ext/ext_ipc.cpp.s
 
 runtime/ext/ext_iterator.o: runtime/ext/ext_iterator.cpp.o
@@ -7571,7 +7499,7 @@ runtime/ext/ext_iterator.o: runtime/ext/ext_iterator.cpp.o
 
 # target to build an object file
 runtime/ext/ext_iterator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iterator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iterator.cpp.o
 .PHONY : runtime/ext/ext_iterator.cpp.o
 
 runtime/ext/ext_iterator.i: runtime/ext/ext_iterator.cpp.i
@@ -7579,7 +7507,7 @@ runtime/ext/ext_iterator.i: runtime/ext/ext_iterator.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_iterator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iterator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iterator.cpp.i
 .PHONY : runtime/ext/ext_iterator.cpp.i
 
 runtime/ext/ext_iterator.s: runtime/ext/ext_iterator.cpp.s
@@ -7587,7 +7515,7 @@ runtime/ext/ext_iterator.s: runtime/ext/ext_iterator.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_iterator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iterator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_iterator.cpp.s
 .PHONY : runtime/ext/ext_iterator.cpp.s
 
 runtime/ext/ext_json.o: runtime/ext/ext_json.cpp.o
@@ -7595,7 +7523,7 @@ runtime/ext/ext_json.o: runtime/ext/ext_json.cpp.o
 
 # target to build an object file
 runtime/ext/ext_json.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_json.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_json.cpp.o
 .PHONY : runtime/ext/ext_json.cpp.o
 
 runtime/ext/ext_json.i: runtime/ext/ext_json.cpp.i
@@ -7603,7 +7531,7 @@ runtime/ext/ext_json.i: runtime/ext/ext_json.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_json.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_json.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_json.cpp.i
 .PHONY : runtime/ext/ext_json.cpp.i
 
 runtime/ext/ext_json.s: runtime/ext/ext_json.cpp.s
@@ -7611,7 +7539,7 @@ runtime/ext/ext_json.s: runtime/ext/ext_json.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_json.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_json.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_json.cpp.s
 .PHONY : runtime/ext/ext_json.cpp.s
 
 runtime/ext/ext_ldap.o: runtime/ext/ext_ldap.cpp.o
@@ -7619,7 +7547,7 @@ runtime/ext/ext_ldap.o: runtime/ext/ext_ldap.cpp.o
 
 # target to build an object file
 runtime/ext/ext_ldap.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ldap.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ldap.cpp.o
 .PHONY : runtime/ext/ext_ldap.cpp.o
 
 runtime/ext/ext_ldap.i: runtime/ext/ext_ldap.cpp.i
@@ -7627,7 +7555,7 @@ runtime/ext/ext_ldap.i: runtime/ext/ext_ldap.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_ldap.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ldap.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ldap.cpp.i
 .PHONY : runtime/ext/ext_ldap.cpp.i
 
 runtime/ext/ext_ldap.s: runtime/ext/ext_ldap.cpp.s
@@ -7635,7 +7563,7 @@ runtime/ext/ext_ldap.s: runtime/ext/ext_ldap.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_ldap.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ldap.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_ldap.cpp.s
 .PHONY : runtime/ext/ext_ldap.cpp.s
 
 runtime/ext/ext_magick.o: runtime/ext/ext_magick.cpp.o
@@ -7643,7 +7571,7 @@ runtime/ext/ext_magick.o: runtime/ext/ext_magick.cpp.o
 
 # target to build an object file
 runtime/ext/ext_magick.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_magick.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_magick.cpp.o
 .PHONY : runtime/ext/ext_magick.cpp.o
 
 runtime/ext/ext_magick.i: runtime/ext/ext_magick.cpp.i
@@ -7651,7 +7579,7 @@ runtime/ext/ext_magick.i: runtime/ext/ext_magick.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_magick.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_magick.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_magick.cpp.i
 .PHONY : runtime/ext/ext_magick.cpp.i
 
 runtime/ext/ext_magick.s: runtime/ext/ext_magick.cpp.s
@@ -7659,7 +7587,7 @@ runtime/ext/ext_magick.s: runtime/ext/ext_magick.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_magick.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_magick.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_magick.cpp.s
 .PHONY : runtime/ext/ext_magick.cpp.s
 
 runtime/ext/ext_mailparse.o: runtime/ext/ext_mailparse.cpp.o
@@ -7667,7 +7595,7 @@ runtime/ext/ext_mailparse.o: runtime/ext/ext_mailparse.cpp.o
 
 # target to build an object file
 runtime/ext/ext_mailparse.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mailparse.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mailparse.cpp.o
 .PHONY : runtime/ext/ext_mailparse.cpp.o
 
 runtime/ext/ext_mailparse.i: runtime/ext/ext_mailparse.cpp.i
@@ -7675,7 +7603,7 @@ runtime/ext/ext_mailparse.i: runtime/ext/ext_mailparse.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_mailparse.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mailparse.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mailparse.cpp.i
 .PHONY : runtime/ext/ext_mailparse.cpp.i
 
 runtime/ext/ext_mailparse.s: runtime/ext/ext_mailparse.cpp.s
@@ -7683,7 +7611,7 @@ runtime/ext/ext_mailparse.s: runtime/ext/ext_mailparse.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_mailparse.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mailparse.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mailparse.cpp.s
 .PHONY : runtime/ext/ext_mailparse.cpp.s
 
 runtime/ext/ext_math.o: runtime/ext/ext_math.cpp.o
@@ -7691,7 +7619,7 @@ runtime/ext/ext_math.o: runtime/ext/ext_math.cpp.o
 
 # target to build an object file
 runtime/ext/ext_math.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_math.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_math.cpp.o
 .PHONY : runtime/ext/ext_math.cpp.o
 
 runtime/ext/ext_math.i: runtime/ext/ext_math.cpp.i
@@ -7699,7 +7627,7 @@ runtime/ext/ext_math.i: runtime/ext/ext_math.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_math.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_math.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_math.cpp.i
 .PHONY : runtime/ext/ext_math.cpp.i
 
 runtime/ext/ext_math.s: runtime/ext/ext_math.cpp.s
@@ -7707,7 +7635,7 @@ runtime/ext/ext_math.s: runtime/ext/ext_math.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_math.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_math.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_math.cpp.s
 .PHONY : runtime/ext/ext_math.cpp.s
 
 runtime/ext/ext_mb.o: runtime/ext/ext_mb.cpp.o
@@ -7715,7 +7643,7 @@ runtime/ext/ext_mb.o: runtime/ext/ext_mb.cpp.o
 
 # target to build an object file
 runtime/ext/ext_mb.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mb.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mb.cpp.o
 .PHONY : runtime/ext/ext_mb.cpp.o
 
 runtime/ext/ext_mb.i: runtime/ext/ext_mb.cpp.i
@@ -7723,7 +7651,7 @@ runtime/ext/ext_mb.i: runtime/ext/ext_mb.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_mb.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mb.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mb.cpp.i
 .PHONY : runtime/ext/ext_mb.cpp.i
 
 runtime/ext/ext_mb.s: runtime/ext/ext_mb.cpp.s
@@ -7731,7 +7659,7 @@ runtime/ext/ext_mb.s: runtime/ext/ext_mb.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_mb.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mb.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mb.cpp.s
 .PHONY : runtime/ext/ext_mb.cpp.s
 
 runtime/ext/ext_mcrypt.o: runtime/ext/ext_mcrypt.cpp.o
@@ -7739,7 +7667,7 @@ runtime/ext/ext_mcrypt.o: runtime/ext/ext_mcrypt.cpp.o
 
 # target to build an object file
 runtime/ext/ext_mcrypt.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mcrypt.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mcrypt.cpp.o
 .PHONY : runtime/ext/ext_mcrypt.cpp.o
 
 runtime/ext/ext_mcrypt.i: runtime/ext/ext_mcrypt.cpp.i
@@ -7747,7 +7675,7 @@ runtime/ext/ext_mcrypt.i: runtime/ext/ext_mcrypt.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_mcrypt.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mcrypt.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mcrypt.cpp.i
 .PHONY : runtime/ext/ext_mcrypt.cpp.i
 
 runtime/ext/ext_mcrypt.s: runtime/ext/ext_mcrypt.cpp.s
@@ -7755,7 +7683,7 @@ runtime/ext/ext_mcrypt.s: runtime/ext/ext_mcrypt.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_mcrypt.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mcrypt.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mcrypt.cpp.s
 .PHONY : runtime/ext/ext_mcrypt.cpp.s
 
 runtime/ext/ext_memcache.o: runtime/ext/ext_memcache.cpp.o
@@ -7763,7 +7691,7 @@ runtime/ext/ext_memcache.o: runtime/ext/ext_memcache.cpp.o
 
 # target to build an object file
 runtime/ext/ext_memcache.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcache.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcache.cpp.o
 .PHONY : runtime/ext/ext_memcache.cpp.o
 
 runtime/ext/ext_memcache.i: runtime/ext/ext_memcache.cpp.i
@@ -7771,7 +7699,7 @@ runtime/ext/ext_memcache.i: runtime/ext/ext_memcache.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_memcache.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcache.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcache.cpp.i
 .PHONY : runtime/ext/ext_memcache.cpp.i
 
 runtime/ext/ext_memcache.s: runtime/ext/ext_memcache.cpp.s
@@ -7779,7 +7707,7 @@ runtime/ext/ext_memcache.s: runtime/ext/ext_memcache.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_memcache.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcache.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcache.cpp.s
 .PHONY : runtime/ext/ext_memcache.cpp.s
 
 runtime/ext/ext_memcached.o: runtime/ext/ext_memcached.cpp.o
@@ -7787,7 +7715,7 @@ runtime/ext/ext_memcached.o: runtime/ext/ext_memcached.cpp.o
 
 # target to build an object file
 runtime/ext/ext_memcached.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcached.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcached.cpp.o
 .PHONY : runtime/ext/ext_memcached.cpp.o
 
 runtime/ext/ext_memcached.i: runtime/ext/ext_memcached.cpp.i
@@ -7795,7 +7723,7 @@ runtime/ext/ext_memcached.i: runtime/ext/ext_memcached.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_memcached.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcached.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcached.cpp.i
 .PHONY : runtime/ext/ext_memcached.cpp.i
 
 runtime/ext/ext_memcached.s: runtime/ext/ext_memcached.cpp.s
@@ -7803,7 +7731,7 @@ runtime/ext/ext_memcached.s: runtime/ext/ext_memcached.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_memcached.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcached.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_memcached.cpp.s
 .PHONY : runtime/ext/ext_memcached.cpp.s
 
 runtime/ext/ext_misc.o: runtime/ext/ext_misc.cpp.o
@@ -7811,7 +7739,7 @@ runtime/ext/ext_misc.o: runtime/ext/ext_misc.cpp.o
 
 # target to build an object file
 runtime/ext/ext_misc.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_misc.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_misc.cpp.o
 .PHONY : runtime/ext/ext_misc.cpp.o
 
 runtime/ext/ext_misc.i: runtime/ext/ext_misc.cpp.i
@@ -7819,7 +7747,7 @@ runtime/ext/ext_misc.i: runtime/ext/ext_misc.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_misc.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_misc.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_misc.cpp.i
 .PHONY : runtime/ext/ext_misc.cpp.i
 
 runtime/ext/ext_misc.s: runtime/ext/ext_misc.cpp.s
@@ -7827,7 +7755,7 @@ runtime/ext/ext_misc.s: runtime/ext/ext_misc.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_misc.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_misc.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_misc.cpp.s
 .PHONY : runtime/ext/ext_misc.cpp.s
 
 runtime/ext/ext_mysql.o: runtime/ext/ext_mysql.cpp.o
@@ -7835,7 +7763,7 @@ runtime/ext/ext_mysql.o: runtime/ext/ext_mysql.cpp.o
 
 # target to build an object file
 runtime/ext/ext_mysql.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mysql.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mysql.cpp.o
 .PHONY : runtime/ext/ext_mysql.cpp.o
 
 runtime/ext/ext_mysql.i: runtime/ext/ext_mysql.cpp.i
@@ -7843,7 +7771,7 @@ runtime/ext/ext_mysql.i: runtime/ext/ext_mysql.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_mysql.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mysql.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mysql.cpp.i
 .PHONY : runtime/ext/ext_mysql.cpp.i
 
 runtime/ext/ext_mysql.s: runtime/ext/ext_mysql.cpp.s
@@ -7851,7 +7779,7 @@ runtime/ext/ext_mysql.s: runtime/ext/ext_mysql.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_mysql.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mysql.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_mysql.cpp.s
 .PHONY : runtime/ext/ext_mysql.cpp.s
 
 runtime/ext/ext_network.o: runtime/ext/ext_network.cpp.o
@@ -7859,7 +7787,7 @@ runtime/ext/ext_network.o: runtime/ext/ext_network.cpp.o
 
 # target to build an object file
 runtime/ext/ext_network.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_network.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_network.cpp.o
 .PHONY : runtime/ext/ext_network.cpp.o
 
 runtime/ext/ext_network.i: runtime/ext/ext_network.cpp.i
@@ -7867,7 +7795,7 @@ runtime/ext/ext_network.i: runtime/ext/ext_network.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_network.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_network.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_network.cpp.i
 .PHONY : runtime/ext/ext_network.cpp.i
 
 runtime/ext/ext_network.s: runtime/ext/ext_network.cpp.s
@@ -7875,7 +7803,7 @@ runtime/ext/ext_network.s: runtime/ext/ext_network.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_network.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_network.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_network.cpp.s
 .PHONY : runtime/ext/ext_network.cpp.s
 
 runtime/ext/ext_openssl.o: runtime/ext/ext_openssl.cpp.o
@@ -7883,7 +7811,7 @@ runtime/ext/ext_openssl.o: runtime/ext/ext_openssl.cpp.o
 
 # target to build an object file
 runtime/ext/ext_openssl.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_openssl.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_openssl.cpp.o
 .PHONY : runtime/ext/ext_openssl.cpp.o
 
 runtime/ext/ext_openssl.i: runtime/ext/ext_openssl.cpp.i
@@ -7891,7 +7819,7 @@ runtime/ext/ext_openssl.i: runtime/ext/ext_openssl.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_openssl.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_openssl.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_openssl.cpp.i
 .PHONY : runtime/ext/ext_openssl.cpp.i
 
 runtime/ext/ext_openssl.s: runtime/ext/ext_openssl.cpp.s
@@ -7899,7 +7827,7 @@ runtime/ext/ext_openssl.s: runtime/ext/ext_openssl.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_openssl.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_openssl.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_openssl.cpp.s
 .PHONY : runtime/ext/ext_openssl.cpp.s
 
 runtime/ext/ext_options.o: runtime/ext/ext_options.cpp.o
@@ -7907,7 +7835,7 @@ runtime/ext/ext_options.o: runtime/ext/ext_options.cpp.o
 
 # target to build an object file
 runtime/ext/ext_options.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_options.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_options.cpp.o
 .PHONY : runtime/ext/ext_options.cpp.o
 
 runtime/ext/ext_options.i: runtime/ext/ext_options.cpp.i
@@ -7915,7 +7843,7 @@ runtime/ext/ext_options.i: runtime/ext/ext_options.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_options.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_options.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_options.cpp.i
 .PHONY : runtime/ext/ext_options.cpp.i
 
 runtime/ext/ext_options.s: runtime/ext/ext_options.cpp.s
@@ -7923,7 +7851,7 @@ runtime/ext/ext_options.s: runtime/ext/ext_options.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_options.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_options.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_options.cpp.s
 .PHONY : runtime/ext/ext_options.cpp.s
 
 runtime/ext/ext_output.o: runtime/ext/ext_output.cpp.o
@@ -7931,7 +7859,7 @@ runtime/ext/ext_output.o: runtime/ext/ext_output.cpp.o
 
 # target to build an object file
 runtime/ext/ext_output.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_output.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_output.cpp.o
 .PHONY : runtime/ext/ext_output.cpp.o
 
 runtime/ext/ext_output.i: runtime/ext/ext_output.cpp.i
@@ -7939,7 +7867,7 @@ runtime/ext/ext_output.i: runtime/ext/ext_output.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_output.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_output.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_output.cpp.i
 .PHONY : runtime/ext/ext_output.cpp.i
 
 runtime/ext/ext_output.s: runtime/ext/ext_output.cpp.s
@@ -7947,7 +7875,7 @@ runtime/ext/ext_output.s: runtime/ext/ext_output.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_output.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_output.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_output.cpp.s
 .PHONY : runtime/ext/ext_output.cpp.s
 
 runtime/ext/ext_pdo.o: runtime/ext/ext_pdo.cpp.o
@@ -7955,7 +7883,7 @@ runtime/ext/ext_pdo.o: runtime/ext/ext_pdo.cpp.o
 
 # target to build an object file
 runtime/ext/ext_pdo.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_pdo.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_pdo.cpp.o
 .PHONY : runtime/ext/ext_pdo.cpp.o
 
 runtime/ext/ext_pdo.i: runtime/ext/ext_pdo.cpp.i
@@ -7963,7 +7891,7 @@ runtime/ext/ext_pdo.i: runtime/ext/ext_pdo.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_pdo.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_pdo.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_pdo.cpp.i
 .PHONY : runtime/ext/ext_pdo.cpp.i
 
 runtime/ext/ext_pdo.s: runtime/ext/ext_pdo.cpp.s
@@ -7971,7 +7899,7 @@ runtime/ext/ext_pdo.s: runtime/ext/ext_pdo.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_pdo.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_pdo.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_pdo.cpp.s
 .PHONY : runtime/ext/ext_pdo.cpp.s
 
 runtime/ext/ext_posix.o: runtime/ext/ext_posix.cpp.o
@@ -7979,7 +7907,7 @@ runtime/ext/ext_posix.o: runtime/ext/ext_posix.cpp.o
 
 # target to build an object file
 runtime/ext/ext_posix.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_posix.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_posix.cpp.o
 .PHONY : runtime/ext/ext_posix.cpp.o
 
 runtime/ext/ext_posix.i: runtime/ext/ext_posix.cpp.i
@@ -7987,7 +7915,7 @@ runtime/ext/ext_posix.i: runtime/ext/ext_posix.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_posix.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_posix.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_posix.cpp.i
 .PHONY : runtime/ext/ext_posix.cpp.i
 
 runtime/ext/ext_posix.s: runtime/ext/ext_posix.cpp.s
@@ -7995,7 +7923,7 @@ runtime/ext/ext_posix.s: runtime/ext/ext_posix.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_posix.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_posix.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_posix.cpp.s
 .PHONY : runtime/ext/ext_posix.cpp.s
 
 runtime/ext/ext_preg.o: runtime/ext/ext_preg.cpp.o
@@ -8003,7 +7931,7 @@ runtime/ext/ext_preg.o: runtime/ext/ext_preg.cpp.o
 
 # target to build an object file
 runtime/ext/ext_preg.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_preg.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_preg.cpp.o
 .PHONY : runtime/ext/ext_preg.cpp.o
 
 runtime/ext/ext_preg.i: runtime/ext/ext_preg.cpp.i
@@ -8011,7 +7939,7 @@ runtime/ext/ext_preg.i: runtime/ext/ext_preg.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_preg.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_preg.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_preg.cpp.i
 .PHONY : runtime/ext/ext_preg.cpp.i
 
 runtime/ext/ext_preg.s: runtime/ext/ext_preg.cpp.s
@@ -8019,7 +7947,7 @@ runtime/ext/ext_preg.s: runtime/ext/ext_preg.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_preg.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_preg.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_preg.cpp.s
 .PHONY : runtime/ext/ext_preg.cpp.s
 
 runtime/ext/ext_process.o: runtime/ext/ext_process.cpp.o
@@ -8027,7 +7955,7 @@ runtime/ext/ext_process.o: runtime/ext/ext_process.cpp.o
 
 # target to build an object file
 runtime/ext/ext_process.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_process.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_process.cpp.o
 .PHONY : runtime/ext/ext_process.cpp.o
 
 runtime/ext/ext_process.i: runtime/ext/ext_process.cpp.i
@@ -8035,7 +7963,7 @@ runtime/ext/ext_process.i: runtime/ext/ext_process.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_process.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_process.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_process.cpp.i
 .PHONY : runtime/ext/ext_process.cpp.i
 
 runtime/ext/ext_process.s: runtime/ext/ext_process.cpp.s
@@ -8043,7 +7971,7 @@ runtime/ext/ext_process.s: runtime/ext/ext_process.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_process.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_process.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_process.cpp.s
 .PHONY : runtime/ext/ext_process.cpp.s
 
 runtime/ext/ext_reflection.o: runtime/ext/ext_reflection.cpp.o
@@ -8051,7 +7979,7 @@ runtime/ext/ext_reflection.o: runtime/ext/ext_reflection.cpp.o
 
 # target to build an object file
 runtime/ext/ext_reflection.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_reflection.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_reflection.cpp.o
 .PHONY : runtime/ext/ext_reflection.cpp.o
 
 runtime/ext/ext_reflection.i: runtime/ext/ext_reflection.cpp.i
@@ -8059,7 +7987,7 @@ runtime/ext/ext_reflection.i: runtime/ext/ext_reflection.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_reflection.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_reflection.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_reflection.cpp.i
 .PHONY : runtime/ext/ext_reflection.cpp.i
 
 runtime/ext/ext_reflection.s: runtime/ext/ext_reflection.cpp.s
@@ -8067,7 +7995,7 @@ runtime/ext/ext_reflection.s: runtime/ext/ext_reflection.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_reflection.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_reflection.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_reflection.cpp.s
 .PHONY : runtime/ext/ext_reflection.cpp.s
 
 runtime/ext/ext_server.o: runtime/ext/ext_server.cpp.o
@@ -8075,7 +8003,7 @@ runtime/ext/ext_server.o: runtime/ext/ext_server.cpp.o
 
 # target to build an object file
 runtime/ext/ext_server.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_server.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_server.cpp.o
 .PHONY : runtime/ext/ext_server.cpp.o
 
 runtime/ext/ext_server.i: runtime/ext/ext_server.cpp.i
@@ -8083,7 +8011,7 @@ runtime/ext/ext_server.i: runtime/ext/ext_server.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_server.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_server.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_server.cpp.i
 .PHONY : runtime/ext/ext_server.cpp.i
 
 runtime/ext/ext_server.s: runtime/ext/ext_server.cpp.s
@@ -8091,7 +8019,7 @@ runtime/ext/ext_server.s: runtime/ext/ext_server.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_server.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_server.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_server.cpp.s
 .PHONY : runtime/ext/ext_server.cpp.s
 
 runtime/ext/ext_session.o: runtime/ext/ext_session.cpp.o
@@ -8099,7 +8027,7 @@ runtime/ext/ext_session.o: runtime/ext/ext_session.cpp.o
 
 # target to build an object file
 runtime/ext/ext_session.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_session.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_session.cpp.o
 .PHONY : runtime/ext/ext_session.cpp.o
 
 runtime/ext/ext_session.i: runtime/ext/ext_session.cpp.i
@@ -8107,7 +8035,7 @@ runtime/ext/ext_session.i: runtime/ext/ext_session.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_session.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_session.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_session.cpp.i
 .PHONY : runtime/ext/ext_session.cpp.i
 
 runtime/ext/ext_session.s: runtime/ext/ext_session.cpp.s
@@ -8115,7 +8043,7 @@ runtime/ext/ext_session.s: runtime/ext/ext_session.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_session.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_session.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_session.cpp.s
 .PHONY : runtime/ext/ext_session.cpp.s
 
 runtime/ext/ext_simplexml.o: runtime/ext/ext_simplexml.cpp.o
@@ -8123,7 +8051,7 @@ runtime/ext/ext_simplexml.o: runtime/ext/ext_simplexml.cpp.o
 
 # target to build an object file
 runtime/ext/ext_simplexml.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_simplexml.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_simplexml.cpp.o
 .PHONY : runtime/ext/ext_simplexml.cpp.o
 
 runtime/ext/ext_simplexml.i: runtime/ext/ext_simplexml.cpp.i
@@ -8131,7 +8059,7 @@ runtime/ext/ext_simplexml.i: runtime/ext/ext_simplexml.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_simplexml.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_simplexml.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_simplexml.cpp.i
 .PHONY : runtime/ext/ext_simplexml.cpp.i
 
 runtime/ext/ext_simplexml.s: runtime/ext/ext_simplexml.cpp.s
@@ -8139,7 +8067,7 @@ runtime/ext/ext_simplexml.s: runtime/ext/ext_simplexml.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_simplexml.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_simplexml.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_simplexml.cpp.s
 .PHONY : runtime/ext/ext_simplexml.cpp.s
 
 runtime/ext/ext_soap.o: runtime/ext/ext_soap.cpp.o
@@ -8147,7 +8075,7 @@ runtime/ext/ext_soap.o: runtime/ext/ext_soap.cpp.o
 
 # target to build an object file
 runtime/ext/ext_soap.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_soap.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_soap.cpp.o
 .PHONY : runtime/ext/ext_soap.cpp.o
 
 runtime/ext/ext_soap.i: runtime/ext/ext_soap.cpp.i
@@ -8155,7 +8083,7 @@ runtime/ext/ext_soap.i: runtime/ext/ext_soap.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_soap.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_soap.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_soap.cpp.i
 .PHONY : runtime/ext/ext_soap.cpp.i
 
 runtime/ext/ext_soap.s: runtime/ext/ext_soap.cpp.s
@@ -8163,7 +8091,7 @@ runtime/ext/ext_soap.s: runtime/ext/ext_soap.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_soap.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_soap.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_soap.cpp.s
 .PHONY : runtime/ext/ext_soap.cpp.s
 
 runtime/ext/ext_socket.o: runtime/ext/ext_socket.cpp.o
@@ -8171,7 +8099,7 @@ runtime/ext/ext_socket.o: runtime/ext/ext_socket.cpp.o
 
 # target to build an object file
 runtime/ext/ext_socket.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_socket.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_socket.cpp.o
 .PHONY : runtime/ext/ext_socket.cpp.o
 
 runtime/ext/ext_socket.i: runtime/ext/ext_socket.cpp.i
@@ -8179,7 +8107,7 @@ runtime/ext/ext_socket.i: runtime/ext/ext_socket.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_socket.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_socket.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_socket.cpp.i
 .PHONY : runtime/ext/ext_socket.cpp.i
 
 runtime/ext/ext_socket.s: runtime/ext/ext_socket.cpp.s
@@ -8187,7 +8115,7 @@ runtime/ext/ext_socket.s: runtime/ext/ext_socket.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_socket.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_socket.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_socket.cpp.s
 .PHONY : runtime/ext/ext_socket.cpp.s
 
 runtime/ext/ext_spl.o: runtime/ext/ext_spl.cpp.o
@@ -8195,7 +8123,7 @@ runtime/ext/ext_spl.o: runtime/ext/ext_spl.cpp.o
 
 # target to build an object file
 runtime/ext/ext_spl.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_spl.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_spl.cpp.o
 .PHONY : runtime/ext/ext_spl.cpp.o
 
 runtime/ext/ext_spl.i: runtime/ext/ext_spl.cpp.i
@@ -8203,7 +8131,7 @@ runtime/ext/ext_spl.i: runtime/ext/ext_spl.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_spl.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_spl.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_spl.cpp.i
 .PHONY : runtime/ext/ext_spl.cpp.i
 
 runtime/ext/ext_spl.s: runtime/ext/ext_spl.cpp.s
@@ -8211,7 +8139,7 @@ runtime/ext/ext_spl.s: runtime/ext/ext_spl.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_spl.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_spl.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_spl.cpp.s
 .PHONY : runtime/ext/ext_spl.cpp.s
 
 runtime/ext/ext_splfile.o: runtime/ext/ext_splfile.cpp.o
@@ -8219,7 +8147,7 @@ runtime/ext/ext_splfile.o: runtime/ext/ext_splfile.cpp.o
 
 # target to build an object file
 runtime/ext/ext_splfile.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_splfile.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_splfile.cpp.o
 .PHONY : runtime/ext/ext_splfile.cpp.o
 
 runtime/ext/ext_splfile.i: runtime/ext/ext_splfile.cpp.i
@@ -8227,7 +8155,7 @@ runtime/ext/ext_splfile.i: runtime/ext/ext_splfile.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_splfile.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_splfile.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_splfile.cpp.i
 .PHONY : runtime/ext/ext_splfile.cpp.i
 
 runtime/ext/ext_splfile.s: runtime/ext/ext_splfile.cpp.s
@@ -8235,7 +8163,7 @@ runtime/ext/ext_splfile.s: runtime/ext/ext_splfile.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_splfile.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_splfile.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_splfile.cpp.s
 .PHONY : runtime/ext/ext_splfile.cpp.s
 
 runtime/ext/ext_sqlite3.o: runtime/ext/ext_sqlite3.cpp.o
@@ -8243,7 +8171,7 @@ runtime/ext/ext_sqlite3.o: runtime/ext/ext_sqlite3.cpp.o
 
 # target to build an object file
 runtime/ext/ext_sqlite3.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_sqlite3.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_sqlite3.cpp.o
 .PHONY : runtime/ext/ext_sqlite3.cpp.o
 
 runtime/ext/ext_sqlite3.i: runtime/ext/ext_sqlite3.cpp.i
@@ -8251,7 +8179,7 @@ runtime/ext/ext_sqlite3.i: runtime/ext/ext_sqlite3.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_sqlite3.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_sqlite3.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_sqlite3.cpp.i
 .PHONY : runtime/ext/ext_sqlite3.cpp.i
 
 runtime/ext/ext_sqlite3.s: runtime/ext/ext_sqlite3.cpp.s
@@ -8259,7 +8187,7 @@ runtime/ext/ext_sqlite3.s: runtime/ext/ext_sqlite3.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_sqlite3.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_sqlite3.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_sqlite3.cpp.s
 .PHONY : runtime/ext/ext_sqlite3.cpp.s
 
 runtime/ext/ext_stream.o: runtime/ext/ext_stream.cpp.o
@@ -8267,7 +8195,7 @@ runtime/ext/ext_stream.o: runtime/ext/ext_stream.cpp.o
 
 # target to build an object file
 runtime/ext/ext_stream.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_stream.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_stream.cpp.o
 .PHONY : runtime/ext/ext_stream.cpp.o
 
 runtime/ext/ext_stream.i: runtime/ext/ext_stream.cpp.i
@@ -8275,7 +8203,7 @@ runtime/ext/ext_stream.i: runtime/ext/ext_stream.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_stream.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_stream.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_stream.cpp.i
 .PHONY : runtime/ext/ext_stream.cpp.i
 
 runtime/ext/ext_stream.s: runtime/ext/ext_stream.cpp.s
@@ -8283,7 +8211,7 @@ runtime/ext/ext_stream.s: runtime/ext/ext_stream.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_stream.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_stream.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_stream.cpp.s
 .PHONY : runtime/ext/ext_stream.cpp.s
 
 runtime/ext/ext_string.o: runtime/ext/ext_string.cpp.o
@@ -8291,7 +8219,7 @@ runtime/ext/ext_string.o: runtime/ext/ext_string.cpp.o
 
 # target to build an object file
 runtime/ext/ext_string.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_string.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_string.cpp.o
 .PHONY : runtime/ext/ext_string.cpp.o
 
 runtime/ext/ext_string.i: runtime/ext/ext_string.cpp.i
@@ -8299,7 +8227,7 @@ runtime/ext/ext_string.i: runtime/ext/ext_string.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_string.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_string.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_string.cpp.i
 .PHONY : runtime/ext/ext_string.cpp.i
 
 runtime/ext/ext_string.s: runtime/ext/ext_string.cpp.s
@@ -8307,7 +8235,7 @@ runtime/ext/ext_string.s: runtime/ext/ext_string.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_string.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_string.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_string.cpp.s
 .PHONY : runtime/ext/ext_string.cpp.s
 
 runtime/ext/ext_thread.o: runtime/ext/ext_thread.cpp.o
@@ -8315,7 +8243,7 @@ runtime/ext/ext_thread.o: runtime/ext/ext_thread.cpp.o
 
 # target to build an object file
 runtime/ext/ext_thread.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_thread.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_thread.cpp.o
 .PHONY : runtime/ext/ext_thread.cpp.o
 
 runtime/ext/ext_thread.i: runtime/ext/ext_thread.cpp.i
@@ -8323,7 +8251,7 @@ runtime/ext/ext_thread.i: runtime/ext/ext_thread.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_thread.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_thread.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_thread.cpp.i
 .PHONY : runtime/ext/ext_thread.cpp.i
 
 runtime/ext/ext_thread.s: runtime/ext/ext_thread.cpp.s
@@ -8331,7 +8259,7 @@ runtime/ext/ext_thread.s: runtime/ext/ext_thread.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_thread.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_thread.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_thread.cpp.s
 .PHONY : runtime/ext/ext_thread.cpp.s
 
 runtime/ext/ext_url.o: runtime/ext/ext_url.cpp.o
@@ -8339,7 +8267,7 @@ runtime/ext/ext_url.o: runtime/ext/ext_url.cpp.o
 
 # target to build an object file
 runtime/ext/ext_url.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_url.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_url.cpp.o
 .PHONY : runtime/ext/ext_url.cpp.o
 
 runtime/ext/ext_url.i: runtime/ext/ext_url.cpp.i
@@ -8347,7 +8275,7 @@ runtime/ext/ext_url.i: runtime/ext/ext_url.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_url.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_url.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_url.cpp.i
 .PHONY : runtime/ext/ext_url.cpp.i
 
 runtime/ext/ext_url.s: runtime/ext/ext_url.cpp.s
@@ -8355,7 +8283,7 @@ runtime/ext/ext_url.s: runtime/ext/ext_url.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_url.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_url.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_url.cpp.s
 .PHONY : runtime/ext/ext_url.cpp.s
 
 runtime/ext/ext_variable.o: runtime/ext/ext_variable.cpp.o
@@ -8363,7 +8291,7 @@ runtime/ext/ext_variable.o: runtime/ext/ext_variable.cpp.o
 
 # target to build an object file
 runtime/ext/ext_variable.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_variable.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_variable.cpp.o
 .PHONY : runtime/ext/ext_variable.cpp.o
 
 runtime/ext/ext_variable.i: runtime/ext/ext_variable.cpp.i
@@ -8371,7 +8299,7 @@ runtime/ext/ext_variable.i: runtime/ext/ext_variable.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_variable.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_variable.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_variable.cpp.i
 .PHONY : runtime/ext/ext_variable.cpp.i
 
 runtime/ext/ext_variable.s: runtime/ext/ext_variable.cpp.s
@@ -8379,7 +8307,7 @@ runtime/ext/ext_variable.s: runtime/ext/ext_variable.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_variable.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_variable.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_variable.cpp.s
 .PHONY : runtime/ext/ext_variable.cpp.s
 
 runtime/ext/ext_xml.o: runtime/ext/ext_xml.cpp.o
@@ -8387,7 +8315,7 @@ runtime/ext/ext_xml.o: runtime/ext/ext_xml.cpp.o
 
 # target to build an object file
 runtime/ext/ext_xml.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xml.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xml.cpp.o
 .PHONY : runtime/ext/ext_xml.cpp.o
 
 runtime/ext/ext_xml.i: runtime/ext/ext_xml.cpp.i
@@ -8395,7 +8323,7 @@ runtime/ext/ext_xml.i: runtime/ext/ext_xml.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_xml.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xml.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xml.cpp.i
 .PHONY : runtime/ext/ext_xml.cpp.i
 
 runtime/ext/ext_xml.s: runtime/ext/ext_xml.cpp.s
@@ -8403,7 +8331,7 @@ runtime/ext/ext_xml.s: runtime/ext/ext_xml.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_xml.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xml.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xml.cpp.s
 .PHONY : runtime/ext/ext_xml.cpp.s
 
 runtime/ext/ext_xmlreader.o: runtime/ext/ext_xmlreader.cpp.o
@@ -8411,7 +8339,7 @@ runtime/ext/ext_xmlreader.o: runtime/ext/ext_xmlreader.cpp.o
 
 # target to build an object file
 runtime/ext/ext_xmlreader.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlreader.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlreader.cpp.o
 .PHONY : runtime/ext/ext_xmlreader.cpp.o
 
 runtime/ext/ext_xmlreader.i: runtime/ext/ext_xmlreader.cpp.i
@@ -8419,7 +8347,7 @@ runtime/ext/ext_xmlreader.i: runtime/ext/ext_xmlreader.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_xmlreader.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlreader.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlreader.cpp.i
 .PHONY : runtime/ext/ext_xmlreader.cpp.i
 
 runtime/ext/ext_xmlreader.s: runtime/ext/ext_xmlreader.cpp.s
@@ -8427,7 +8355,7 @@ runtime/ext/ext_xmlreader.s: runtime/ext/ext_xmlreader.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_xmlreader.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlreader.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlreader.cpp.s
 .PHONY : runtime/ext/ext_xmlreader.cpp.s
 
 runtime/ext/ext_xmlwriter.o: runtime/ext/ext_xmlwriter.cpp.o
@@ -8435,7 +8363,7 @@ runtime/ext/ext_xmlwriter.o: runtime/ext/ext_xmlwriter.cpp.o
 
 # target to build an object file
 runtime/ext/ext_xmlwriter.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlwriter.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlwriter.cpp.o
 .PHONY : runtime/ext/ext_xmlwriter.cpp.o
 
 runtime/ext/ext_xmlwriter.i: runtime/ext/ext_xmlwriter.cpp.i
@@ -8443,7 +8371,7 @@ runtime/ext/ext_xmlwriter.i: runtime/ext/ext_xmlwriter.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_xmlwriter.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlwriter.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlwriter.cpp.i
 .PHONY : runtime/ext/ext_xmlwriter.cpp.i
 
 runtime/ext/ext_xmlwriter.s: runtime/ext/ext_xmlwriter.cpp.s
@@ -8451,7 +8379,7 @@ runtime/ext/ext_xmlwriter.s: runtime/ext/ext_xmlwriter.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_xmlwriter.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlwriter.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_xmlwriter.cpp.s
 .PHONY : runtime/ext/ext_xmlwriter.cpp.s
 
 runtime/ext/ext_zlib.o: runtime/ext/ext_zlib.cpp.o
@@ -8459,7 +8387,7 @@ runtime/ext/ext_zlib.o: runtime/ext/ext_zlib.cpp.o
 
 # target to build an object file
 runtime/ext/ext_zlib.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_zlib.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_zlib.cpp.o
 .PHONY : runtime/ext/ext_zlib.cpp.o
 
 runtime/ext/ext_zlib.i: runtime/ext/ext_zlib.cpp.i
@@ -8467,7 +8395,7 @@ runtime/ext/ext_zlib.i: runtime/ext/ext_zlib.cpp.i
 
 # target to preprocess a source file
 runtime/ext/ext_zlib.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_zlib.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_zlib.cpp.i
 .PHONY : runtime/ext/ext_zlib.cpp.i
 
 runtime/ext/ext_zlib.s: runtime/ext/ext_zlib.cpp.s
@@ -8475,7 +8403,7 @@ runtime/ext/ext_zlib.s: runtime/ext/ext_zlib.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/ext_zlib.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_zlib.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/ext_zlib.cpp.s
 .PHONY : runtime/ext/ext_zlib.cpp.s
 
 runtime/ext/extension.o: runtime/ext/extension.cpp.o
@@ -8483,7 +8411,7 @@ runtime/ext/extension.o: runtime/ext/extension.cpp.o
 
 # target to build an object file
 runtime/ext/extension.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/extension.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/extension.cpp.o
 .PHONY : runtime/ext/extension.cpp.o
 
 runtime/ext/extension.i: runtime/ext/extension.cpp.i
@@ -8491,7 +8419,7 @@ runtime/ext/extension.i: runtime/ext/extension.cpp.i
 
 # target to preprocess a source file
 runtime/ext/extension.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/extension.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/extension.cpp.i
 .PHONY : runtime/ext/extension.cpp.i
 
 runtime/ext/extension.s: runtime/ext/extension.cpp.s
@@ -8499,7 +8427,7 @@ runtime/ext/extension.s: runtime/ext/extension.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/extension.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/extension.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/extension.cpp.s
 .PHONY : runtime/ext/extension.cpp.s
 
 runtime/ext/hash/hash_adler32.o: runtime/ext/hash/hash_adler32.cpp.o
@@ -8507,7 +8435,7 @@ runtime/ext/hash/hash_adler32.o: runtime/ext/hash/hash_adler32.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_adler32.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_adler32.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_adler32.cpp.o
 .PHONY : runtime/ext/hash/hash_adler32.cpp.o
 
 runtime/ext/hash/hash_adler32.i: runtime/ext/hash/hash_adler32.cpp.i
@@ -8515,7 +8443,7 @@ runtime/ext/hash/hash_adler32.i: runtime/ext/hash/hash_adler32.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_adler32.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_adler32.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_adler32.cpp.i
 .PHONY : runtime/ext/hash/hash_adler32.cpp.i
 
 runtime/ext/hash/hash_adler32.s: runtime/ext/hash/hash_adler32.cpp.s
@@ -8523,7 +8451,7 @@ runtime/ext/hash/hash_adler32.s: runtime/ext/hash/hash_adler32.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_adler32.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_adler32.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_adler32.cpp.s
 .PHONY : runtime/ext/hash/hash_adler32.cpp.s
 
 runtime/ext/hash/hash_crc32.o: runtime/ext/hash/hash_crc32.cpp.o
@@ -8531,7 +8459,7 @@ runtime/ext/hash/hash_crc32.o: runtime/ext/hash/hash_crc32.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_crc32.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_crc32.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_crc32.cpp.o
 .PHONY : runtime/ext/hash/hash_crc32.cpp.o
 
 runtime/ext/hash/hash_crc32.i: runtime/ext/hash/hash_crc32.cpp.i
@@ -8539,7 +8467,7 @@ runtime/ext/hash/hash_crc32.i: runtime/ext/hash/hash_crc32.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_crc32.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_crc32.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_crc32.cpp.i
 .PHONY : runtime/ext/hash/hash_crc32.cpp.i
 
 runtime/ext/hash/hash_crc32.s: runtime/ext/hash/hash_crc32.cpp.s
@@ -8547,7 +8475,7 @@ runtime/ext/hash/hash_crc32.s: runtime/ext/hash/hash_crc32.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_crc32.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_crc32.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_crc32.cpp.s
 .PHONY : runtime/ext/hash/hash_crc32.cpp.s
 
 runtime/ext/hash/hash_furc.o: runtime/ext/hash/hash_furc.cpp.o
@@ -8555,7 +8483,7 @@ runtime/ext/hash/hash_furc.o: runtime/ext/hash/hash_furc.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_furc.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_furc.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_furc.cpp.o
 .PHONY : runtime/ext/hash/hash_furc.cpp.o
 
 runtime/ext/hash/hash_furc.i: runtime/ext/hash/hash_furc.cpp.i
@@ -8563,7 +8491,7 @@ runtime/ext/hash/hash_furc.i: runtime/ext/hash/hash_furc.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_furc.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_furc.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_furc.cpp.i
 .PHONY : runtime/ext/hash/hash_furc.cpp.i
 
 runtime/ext/hash/hash_furc.s: runtime/ext/hash/hash_furc.cpp.s
@@ -8571,7 +8499,7 @@ runtime/ext/hash/hash_furc.s: runtime/ext/hash/hash_furc.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_furc.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_furc.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_furc.cpp.s
 .PHONY : runtime/ext/hash/hash_furc.cpp.s
 
 runtime/ext/hash/hash_gost.o: runtime/ext/hash/hash_gost.cpp.o
@@ -8579,7 +8507,7 @@ runtime/ext/hash/hash_gost.o: runtime/ext/hash/hash_gost.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_gost.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_gost.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_gost.cpp.o
 .PHONY : runtime/ext/hash/hash_gost.cpp.o
 
 runtime/ext/hash/hash_gost.i: runtime/ext/hash/hash_gost.cpp.i
@@ -8587,7 +8515,7 @@ runtime/ext/hash/hash_gost.i: runtime/ext/hash/hash_gost.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_gost.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_gost.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_gost.cpp.i
 .PHONY : runtime/ext/hash/hash_gost.cpp.i
 
 runtime/ext/hash/hash_gost.s: runtime/ext/hash/hash_gost.cpp.s
@@ -8595,7 +8523,7 @@ runtime/ext/hash/hash_gost.s: runtime/ext/hash/hash_gost.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_gost.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_gost.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_gost.cpp.s
 .PHONY : runtime/ext/hash/hash_gost.cpp.s
 
 runtime/ext/hash/hash_haval.o: runtime/ext/hash/hash_haval.cpp.o
@@ -8603,7 +8531,7 @@ runtime/ext/hash/hash_haval.o: runtime/ext/hash/hash_haval.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_haval.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_haval.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_haval.cpp.o
 .PHONY : runtime/ext/hash/hash_haval.cpp.o
 
 runtime/ext/hash/hash_haval.i: runtime/ext/hash/hash_haval.cpp.i
@@ -8611,7 +8539,7 @@ runtime/ext/hash/hash_haval.i: runtime/ext/hash/hash_haval.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_haval.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_haval.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_haval.cpp.i
 .PHONY : runtime/ext/hash/hash_haval.cpp.i
 
 runtime/ext/hash/hash_haval.s: runtime/ext/hash/hash_haval.cpp.s
@@ -8619,7 +8547,7 @@ runtime/ext/hash/hash_haval.s: runtime/ext/hash/hash_haval.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_haval.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_haval.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_haval.cpp.s
 .PHONY : runtime/ext/hash/hash_haval.cpp.s
 
 runtime/ext/hash/hash_md.o: runtime/ext/hash/hash_md.cpp.o
@@ -8627,7 +8555,7 @@ runtime/ext/hash/hash_md.o: runtime/ext/hash/hash_md.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_md.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_md.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_md.cpp.o
 .PHONY : runtime/ext/hash/hash_md.cpp.o
 
 runtime/ext/hash/hash_md.i: runtime/ext/hash/hash_md.cpp.i
@@ -8635,7 +8563,7 @@ runtime/ext/hash/hash_md.i: runtime/ext/hash/hash_md.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_md.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_md.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_md.cpp.i
 .PHONY : runtime/ext/hash/hash_md.cpp.i
 
 runtime/ext/hash/hash_md.s: runtime/ext/hash/hash_md.cpp.s
@@ -8643,7 +8571,7 @@ runtime/ext/hash/hash_md.s: runtime/ext/hash/hash_md.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_md.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_md.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_md.cpp.s
 .PHONY : runtime/ext/hash/hash_md.cpp.s
 
 runtime/ext/hash/hash_murmur.o: runtime/ext/hash/hash_murmur.cpp.o
@@ -8651,7 +8579,7 @@ runtime/ext/hash/hash_murmur.o: runtime/ext/hash/hash_murmur.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_murmur.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_murmur.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_murmur.cpp.o
 .PHONY : runtime/ext/hash/hash_murmur.cpp.o
 
 runtime/ext/hash/hash_murmur.i: runtime/ext/hash/hash_murmur.cpp.i
@@ -8659,7 +8587,7 @@ runtime/ext/hash/hash_murmur.i: runtime/ext/hash/hash_murmur.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_murmur.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_murmur.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_murmur.cpp.i
 .PHONY : runtime/ext/hash/hash_murmur.cpp.i
 
 runtime/ext/hash/hash_murmur.s: runtime/ext/hash/hash_murmur.cpp.s
@@ -8667,7 +8595,7 @@ runtime/ext/hash/hash_murmur.s: runtime/ext/hash/hash_murmur.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_murmur.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_murmur.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_murmur.cpp.s
 .PHONY : runtime/ext/hash/hash_murmur.cpp.s
 
 runtime/ext/hash/hash_ripemd.o: runtime/ext/hash/hash_ripemd.cpp.o
@@ -8675,7 +8603,7 @@ runtime/ext/hash/hash_ripemd.o: runtime/ext/hash/hash_ripemd.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_ripemd.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_ripemd.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_ripemd.cpp.o
 .PHONY : runtime/ext/hash/hash_ripemd.cpp.o
 
 runtime/ext/hash/hash_ripemd.i: runtime/ext/hash/hash_ripemd.cpp.i
@@ -8683,7 +8611,7 @@ runtime/ext/hash/hash_ripemd.i: runtime/ext/hash/hash_ripemd.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_ripemd.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_ripemd.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_ripemd.cpp.i
 .PHONY : runtime/ext/hash/hash_ripemd.cpp.i
 
 runtime/ext/hash/hash_ripemd.s: runtime/ext/hash/hash_ripemd.cpp.s
@@ -8691,7 +8619,7 @@ runtime/ext/hash/hash_ripemd.s: runtime/ext/hash/hash_ripemd.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_ripemd.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_ripemd.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_ripemd.cpp.s
 .PHONY : runtime/ext/hash/hash_ripemd.cpp.s
 
 runtime/ext/hash/hash_salsa.o: runtime/ext/hash/hash_salsa.cpp.o
@@ -8699,7 +8627,7 @@ runtime/ext/hash/hash_salsa.o: runtime/ext/hash/hash_salsa.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_salsa.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_salsa.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_salsa.cpp.o
 .PHONY : runtime/ext/hash/hash_salsa.cpp.o
 
 runtime/ext/hash/hash_salsa.i: runtime/ext/hash/hash_salsa.cpp.i
@@ -8707,7 +8635,7 @@ runtime/ext/hash/hash_salsa.i: runtime/ext/hash/hash_salsa.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_salsa.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_salsa.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_salsa.cpp.i
 .PHONY : runtime/ext/hash/hash_salsa.cpp.i
 
 runtime/ext/hash/hash_salsa.s: runtime/ext/hash/hash_salsa.cpp.s
@@ -8715,7 +8643,7 @@ runtime/ext/hash/hash_salsa.s: runtime/ext/hash/hash_salsa.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_salsa.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_salsa.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_salsa.cpp.s
 .PHONY : runtime/ext/hash/hash_salsa.cpp.s
 
 runtime/ext/hash/hash_sha.o: runtime/ext/hash/hash_sha.cpp.o
@@ -8723,7 +8651,7 @@ runtime/ext/hash/hash_sha.o: runtime/ext/hash/hash_sha.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_sha.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_sha.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_sha.cpp.o
 .PHONY : runtime/ext/hash/hash_sha.cpp.o
 
 runtime/ext/hash/hash_sha.i: runtime/ext/hash/hash_sha.cpp.i
@@ -8731,7 +8659,7 @@ runtime/ext/hash/hash_sha.i: runtime/ext/hash/hash_sha.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_sha.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_sha.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_sha.cpp.i
 .PHONY : runtime/ext/hash/hash_sha.cpp.i
 
 runtime/ext/hash/hash_sha.s: runtime/ext/hash/hash_sha.cpp.s
@@ -8739,7 +8667,7 @@ runtime/ext/hash/hash_sha.s: runtime/ext/hash/hash_sha.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_sha.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_sha.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_sha.cpp.s
 .PHONY : runtime/ext/hash/hash_sha.cpp.s
 
 runtime/ext/hash/hash_snefru.o: runtime/ext/hash/hash_snefru.cpp.o
@@ -8747,7 +8675,7 @@ runtime/ext/hash/hash_snefru.o: runtime/ext/hash/hash_snefru.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_snefru.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_snefru.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_snefru.cpp.o
 .PHONY : runtime/ext/hash/hash_snefru.cpp.o
 
 runtime/ext/hash/hash_snefru.i: runtime/ext/hash/hash_snefru.cpp.i
@@ -8755,7 +8683,7 @@ runtime/ext/hash/hash_snefru.i: runtime/ext/hash/hash_snefru.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_snefru.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_snefru.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_snefru.cpp.i
 .PHONY : runtime/ext/hash/hash_snefru.cpp.i
 
 runtime/ext/hash/hash_snefru.s: runtime/ext/hash/hash_snefru.cpp.s
@@ -8763,7 +8691,7 @@ runtime/ext/hash/hash_snefru.s: runtime/ext/hash/hash_snefru.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_snefru.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_snefru.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_snefru.cpp.s
 .PHONY : runtime/ext/hash/hash_snefru.cpp.s
 
 runtime/ext/hash/hash_tiger.o: runtime/ext/hash/hash_tiger.cpp.o
@@ -8771,7 +8699,7 @@ runtime/ext/hash/hash_tiger.o: runtime/ext/hash/hash_tiger.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_tiger.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_tiger.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_tiger.cpp.o
 .PHONY : runtime/ext/hash/hash_tiger.cpp.o
 
 runtime/ext/hash/hash_tiger.i: runtime/ext/hash/hash_tiger.cpp.i
@@ -8779,7 +8707,7 @@ runtime/ext/hash/hash_tiger.i: runtime/ext/hash/hash_tiger.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_tiger.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_tiger.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_tiger.cpp.i
 .PHONY : runtime/ext/hash/hash_tiger.cpp.i
 
 runtime/ext/hash/hash_tiger.s: runtime/ext/hash/hash_tiger.cpp.s
@@ -8787,7 +8715,7 @@ runtime/ext/hash/hash_tiger.s: runtime/ext/hash/hash_tiger.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_tiger.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_tiger.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_tiger.cpp.s
 .PHONY : runtime/ext/hash/hash_tiger.cpp.s
 
 runtime/ext/hash/hash_whirlpool.o: runtime/ext/hash/hash_whirlpool.cpp.o
@@ -8795,7 +8723,7 @@ runtime/ext/hash/hash_whirlpool.o: runtime/ext/hash/hash_whirlpool.cpp.o
 
 # target to build an object file
 runtime/ext/hash/hash_whirlpool.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_whirlpool.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_whirlpool.cpp.o
 .PHONY : runtime/ext/hash/hash_whirlpool.cpp.o
 
 runtime/ext/hash/hash_whirlpool.i: runtime/ext/hash/hash_whirlpool.cpp.i
@@ -8803,7 +8731,7 @@ runtime/ext/hash/hash_whirlpool.i: runtime/ext/hash/hash_whirlpool.cpp.i
 
 # target to preprocess a source file
 runtime/ext/hash/hash_whirlpool.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_whirlpool.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_whirlpool.cpp.i
 .PHONY : runtime/ext/hash/hash_whirlpool.cpp.i
 
 runtime/ext/hash/hash_whirlpool.s: runtime/ext/hash/hash_whirlpool.cpp.s
@@ -8811,7 +8739,7 @@ runtime/ext/hash/hash_whirlpool.s: runtime/ext/hash/hash_whirlpool.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/hash/hash_whirlpool.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_whirlpool.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/hash/hash_whirlpool.cpp.s
 .PHONY : runtime/ext/hash/hash_whirlpool.cpp.s
 
 runtime/ext/icu/ICUMatcher.o: runtime/ext/icu/ICUMatcher.cpp.o
@@ -8819,7 +8747,7 @@ runtime/ext/icu/ICUMatcher.o: runtime/ext/icu/ICUMatcher.cpp.o
 
 # target to build an object file
 runtime/ext/icu/ICUMatcher.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUMatcher.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUMatcher.cpp.o
 .PHONY : runtime/ext/icu/ICUMatcher.cpp.o
 
 runtime/ext/icu/ICUMatcher.i: runtime/ext/icu/ICUMatcher.cpp.i
@@ -8827,7 +8755,7 @@ runtime/ext/icu/ICUMatcher.i: runtime/ext/icu/ICUMatcher.cpp.i
 
 # target to preprocess a source file
 runtime/ext/icu/ICUMatcher.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUMatcher.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUMatcher.cpp.i
 .PHONY : runtime/ext/icu/ICUMatcher.cpp.i
 
 runtime/ext/icu/ICUMatcher.s: runtime/ext/icu/ICUMatcher.cpp.s
@@ -8835,7 +8763,7 @@ runtime/ext/icu/ICUMatcher.s: runtime/ext/icu/ICUMatcher.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/icu/ICUMatcher.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUMatcher.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUMatcher.cpp.s
 .PHONY : runtime/ext/icu/ICUMatcher.cpp.s
 
 runtime/ext/icu/ICUTransliterator.o: runtime/ext/icu/ICUTransliterator.cpp.o
@@ -8843,7 +8771,7 @@ runtime/ext/icu/ICUTransliterator.o: runtime/ext/icu/ICUTransliterator.cpp.o
 
 # target to build an object file
 runtime/ext/icu/ICUTransliterator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUTransliterator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUTransliterator.cpp.o
 .PHONY : runtime/ext/icu/ICUTransliterator.cpp.o
 
 runtime/ext/icu/ICUTransliterator.i: runtime/ext/icu/ICUTransliterator.cpp.i
@@ -8851,7 +8779,7 @@ runtime/ext/icu/ICUTransliterator.i: runtime/ext/icu/ICUTransliterator.cpp.i
 
 # target to preprocess a source file
 runtime/ext/icu/ICUTransliterator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUTransliterator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUTransliterator.cpp.i
 .PHONY : runtime/ext/icu/ICUTransliterator.cpp.i
 
 runtime/ext/icu/ICUTransliterator.s: runtime/ext/icu/ICUTransliterator.cpp.s
@@ -8859,7 +8787,7 @@ runtime/ext/icu/ICUTransliterator.s: runtime/ext/icu/ICUTransliterator.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/icu/ICUTransliterator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUTransliterator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/ICUTransliterator.cpp.s
 .PHONY : runtime/ext/icu/ICUTransliterator.cpp.s
 
 runtime/ext/icu/LifeEventTokenizer.o: runtime/ext/icu/LifeEventTokenizer.cpp.o
@@ -8867,7 +8795,7 @@ runtime/ext/icu/LifeEventTokenizer.o: runtime/ext/icu/LifeEventTokenizer.cpp.o
 
 # target to build an object file
 runtime/ext/icu/LifeEventTokenizer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/LifeEventTokenizer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/LifeEventTokenizer.cpp.o
 .PHONY : runtime/ext/icu/LifeEventTokenizer.cpp.o
 
 runtime/ext/icu/LifeEventTokenizer.i: runtime/ext/icu/LifeEventTokenizer.cpp.i
@@ -8875,7 +8803,7 @@ runtime/ext/icu/LifeEventTokenizer.i: runtime/ext/icu/LifeEventTokenizer.cpp.i
 
 # target to preprocess a source file
 runtime/ext/icu/LifeEventTokenizer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/LifeEventTokenizer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/LifeEventTokenizer.cpp.i
 .PHONY : runtime/ext/icu/LifeEventTokenizer.cpp.i
 
 runtime/ext/icu/LifeEventTokenizer.s: runtime/ext/icu/LifeEventTokenizer.cpp.s
@@ -8883,7 +8811,7 @@ runtime/ext/icu/LifeEventTokenizer.s: runtime/ext/icu/LifeEventTokenizer.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/icu/LifeEventTokenizer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/LifeEventTokenizer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/icu/LifeEventTokenizer.cpp.s
 .PHONY : runtime/ext/icu/LifeEventTokenizer.cpp.s
 
 runtime/ext/mailparse/mime.o: runtime/ext/mailparse/mime.cpp.o
@@ -8891,7 +8819,7 @@ runtime/ext/mailparse/mime.o: runtime/ext/mailparse/mime.cpp.o
 
 # target to build an object file
 runtime/ext/mailparse/mime.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/mime.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/mime.cpp.o
 .PHONY : runtime/ext/mailparse/mime.cpp.o
 
 runtime/ext/mailparse/mime.i: runtime/ext/mailparse/mime.cpp.i
@@ -8899,7 +8827,7 @@ runtime/ext/mailparse/mime.i: runtime/ext/mailparse/mime.cpp.i
 
 # target to preprocess a source file
 runtime/ext/mailparse/mime.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/mime.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/mime.cpp.i
 .PHONY : runtime/ext/mailparse/mime.cpp.i
 
 runtime/ext/mailparse/mime.s: runtime/ext/mailparse/mime.cpp.s
@@ -8907,7 +8835,7 @@ runtime/ext/mailparse/mime.s: runtime/ext/mailparse/mime.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/mailparse/mime.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/mime.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/mime.cpp.s
 .PHONY : runtime/ext/mailparse/mime.cpp.s
 
 runtime/ext/mailparse/rfc822.o: runtime/ext/mailparse/rfc822.cpp.o
@@ -8915,7 +8843,7 @@ runtime/ext/mailparse/rfc822.o: runtime/ext/mailparse/rfc822.cpp.o
 
 # target to build an object file
 runtime/ext/mailparse/rfc822.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/rfc822.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/rfc822.cpp.o
 .PHONY : runtime/ext/mailparse/rfc822.cpp.o
 
 runtime/ext/mailparse/rfc822.i: runtime/ext/mailparse/rfc822.cpp.i
@@ -8923,7 +8851,7 @@ runtime/ext/mailparse/rfc822.i: runtime/ext/mailparse/rfc822.cpp.i
 
 # target to preprocess a source file
 runtime/ext/mailparse/rfc822.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/rfc822.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/rfc822.cpp.i
 .PHONY : runtime/ext/mailparse/rfc822.cpp.i
 
 runtime/ext/mailparse/rfc822.s: runtime/ext/mailparse/rfc822.cpp.s
@@ -8931,7 +8859,7 @@ runtime/ext/mailparse/rfc822.s: runtime/ext/mailparse/rfc822.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/mailparse/rfc822.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/rfc822.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mailparse/rfc822.cpp.s
 .PHONY : runtime/ext/mailparse/rfc822.cpp.s
 
 runtime/ext/mysql_stats.o: runtime/ext/mysql_stats.cpp.o
@@ -8939,7 +8867,7 @@ runtime/ext/mysql_stats.o: runtime/ext/mysql_stats.cpp.o
 
 # target to build an object file
 runtime/ext/mysql_stats.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mysql_stats.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mysql_stats.cpp.o
 .PHONY : runtime/ext/mysql_stats.cpp.o
 
 runtime/ext/mysql_stats.i: runtime/ext/mysql_stats.cpp.i
@@ -8947,7 +8875,7 @@ runtime/ext/mysql_stats.i: runtime/ext/mysql_stats.cpp.i
 
 # target to preprocess a source file
 runtime/ext/mysql_stats.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mysql_stats.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mysql_stats.cpp.i
 .PHONY : runtime/ext/mysql_stats.cpp.i
 
 runtime/ext/mysql_stats.s: runtime/ext/mysql_stats.cpp.s
@@ -8955,7 +8883,7 @@ runtime/ext/mysql_stats.s: runtime/ext/mysql_stats.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/mysql_stats.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mysql_stats.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/mysql_stats.cpp.s
 .PHONY : runtime/ext/mysql_stats.cpp.s
 
 runtime/ext/pdo_driver.o: runtime/ext/pdo_driver.cpp.o
@@ -8963,7 +8891,7 @@ runtime/ext/pdo_driver.o: runtime/ext/pdo_driver.cpp.o
 
 # target to build an object file
 runtime/ext/pdo_driver.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_driver.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_driver.cpp.o
 .PHONY : runtime/ext/pdo_driver.cpp.o
 
 runtime/ext/pdo_driver.i: runtime/ext/pdo_driver.cpp.i
@@ -8971,7 +8899,7 @@ runtime/ext/pdo_driver.i: runtime/ext/pdo_driver.cpp.i
 
 # target to preprocess a source file
 runtime/ext/pdo_driver.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_driver.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_driver.cpp.i
 .PHONY : runtime/ext/pdo_driver.cpp.i
 
 runtime/ext/pdo_driver.s: runtime/ext/pdo_driver.cpp.s
@@ -8979,7 +8907,7 @@ runtime/ext/pdo_driver.s: runtime/ext/pdo_driver.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/pdo_driver.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_driver.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_driver.cpp.s
 .PHONY : runtime/ext/pdo_driver.cpp.s
 
 runtime/ext/pdo_mysql.o: runtime/ext/pdo_mysql.cpp.o
@@ -8987,7 +8915,7 @@ runtime/ext/pdo_mysql.o: runtime/ext/pdo_mysql.cpp.o
 
 # target to build an object file
 runtime/ext/pdo_mysql.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_mysql.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_mysql.cpp.o
 .PHONY : runtime/ext/pdo_mysql.cpp.o
 
 runtime/ext/pdo_mysql.i: runtime/ext/pdo_mysql.cpp.i
@@ -8995,7 +8923,7 @@ runtime/ext/pdo_mysql.i: runtime/ext/pdo_mysql.cpp.i
 
 # target to preprocess a source file
 runtime/ext/pdo_mysql.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_mysql.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_mysql.cpp.i
 .PHONY : runtime/ext/pdo_mysql.cpp.i
 
 runtime/ext/pdo_mysql.s: runtime/ext/pdo_mysql.cpp.s
@@ -9003,7 +8931,7 @@ runtime/ext/pdo_mysql.s: runtime/ext/pdo_mysql.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/pdo_mysql.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_mysql.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_mysql.cpp.s
 .PHONY : runtime/ext/pdo_mysql.cpp.s
 
 runtime/ext/pdo_sqlite.o: runtime/ext/pdo_sqlite.cpp.o
@@ -9011,7 +8939,7 @@ runtime/ext/pdo_sqlite.o: runtime/ext/pdo_sqlite.cpp.o
 
 # target to build an object file
 runtime/ext/pdo_sqlite.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_sqlite.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_sqlite.cpp.o
 .PHONY : runtime/ext/pdo_sqlite.cpp.o
 
 runtime/ext/pdo_sqlite.i: runtime/ext/pdo_sqlite.cpp.i
@@ -9019,7 +8947,7 @@ runtime/ext/pdo_sqlite.i: runtime/ext/pdo_sqlite.cpp.i
 
 # target to preprocess a source file
 runtime/ext/pdo_sqlite.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_sqlite.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_sqlite.cpp.i
 .PHONY : runtime/ext/pdo_sqlite.cpp.i
 
 runtime/ext/pdo_sqlite.s: runtime/ext/pdo_sqlite.cpp.s
@@ -9027,87 +8955,15 @@ runtime/ext/pdo_sqlite.s: runtime/ext/pdo_sqlite.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/pdo_sqlite.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_sqlite.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/pdo_sqlite.cpp.s
 .PHONY : runtime/ext/pdo_sqlite.cpp.s
-
-runtime/ext/sep/mhash/ext_mhash.o: runtime/ext/sep/mhash/ext_mhash.cpp.o
-.PHONY : runtime/ext/sep/mhash/ext_mhash.o
-
-# target to build an object file
-runtime/ext/sep/mhash/ext_mhash.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/ext_mhash.cpp.o
-.PHONY : runtime/ext/sep/mhash/ext_mhash.cpp.o
-
-runtime/ext/sep/mhash/ext_mhash.i: runtime/ext/sep/mhash/ext_mhash.cpp.i
-.PHONY : runtime/ext/sep/mhash/ext_mhash.i
-
-# target to preprocess a source file
-runtime/ext/sep/mhash/ext_mhash.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/ext_mhash.cpp.i
-.PHONY : runtime/ext/sep/mhash/ext_mhash.cpp.i
-
-runtime/ext/sep/mhash/ext_mhash.s: runtime/ext/sep/mhash/ext_mhash.cpp.s
-.PHONY : runtime/ext/sep/mhash/ext_mhash.s
-
-# target to generate assembly for a file
-runtime/ext/sep/mhash/ext_mhash.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/ext_mhash.cpp.s
-.PHONY : runtime/ext/sep/mhash/ext_mhash.cpp.s
-
-runtime/ext/sep/mhash/extmap_mhash.o: runtime/ext/sep/mhash/extmap_mhash.cpp.o
-.PHONY : runtime/ext/sep/mhash/extmap_mhash.o
-
-# target to build an object file
-runtime/ext/sep/mhash/extmap_mhash.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/extmap_mhash.cpp.o
-.PHONY : runtime/ext/sep/mhash/extmap_mhash.cpp.o
-
-runtime/ext/sep/mhash/extmap_mhash.i: runtime/ext/sep/mhash/extmap_mhash.cpp.i
-.PHONY : runtime/ext/sep/mhash/extmap_mhash.i
-
-# target to preprocess a source file
-runtime/ext/sep/mhash/extmap_mhash.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/extmap_mhash.cpp.i
-.PHONY : runtime/ext/sep/mhash/extmap_mhash.cpp.i
-
-runtime/ext/sep/mhash/extmap_mhash.s: runtime/ext/sep/mhash/extmap_mhash.cpp.s
-.PHONY : runtime/ext/sep/mhash/extmap_mhash.s
-
-# target to generate assembly for a file
-runtime/ext/sep/mhash/extmap_mhash.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/extmap_mhash.cpp.s
-.PHONY : runtime/ext/sep/mhash/extmap_mhash.cpp.s
-
-runtime/ext/sep/mhash/test_ext_mhash.o: runtime/ext/sep/mhash/test_ext_mhash.cpp.o
-.PHONY : runtime/ext/sep/mhash/test_ext_mhash.o
-
-# target to build an object file
-runtime/ext/sep/mhash/test_ext_mhash.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/test_ext_mhash.cpp.o
-.PHONY : runtime/ext/sep/mhash/test_ext_mhash.cpp.o
-
-runtime/ext/sep/mhash/test_ext_mhash.i: runtime/ext/sep/mhash/test_ext_mhash.cpp.i
-.PHONY : runtime/ext/sep/mhash/test_ext_mhash.i
-
-# target to preprocess a source file
-runtime/ext/sep/mhash/test_ext_mhash.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/test_ext_mhash.cpp.i
-.PHONY : runtime/ext/sep/mhash/test_ext_mhash.cpp.i
-
-runtime/ext/sep/mhash/test_ext_mhash.s: runtime/ext/sep/mhash/test_ext_mhash.cpp.s
-.PHONY : runtime/ext/sep/mhash/test_ext_mhash.s
-
-# target to generate assembly for a file
-runtime/ext/sep/mhash/test_ext_mhash.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/sep/mhash/test_ext_mhash.cpp.s
-.PHONY : runtime/ext/sep/mhash/test_ext_mhash.cpp.s
 
 runtime/ext/soap/encoding.o: runtime/ext/soap/encoding.cpp.o
 .PHONY : runtime/ext/soap/encoding.o
 
 # target to build an object file
 runtime/ext/soap/encoding.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/encoding.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/encoding.cpp.o
 .PHONY : runtime/ext/soap/encoding.cpp.o
 
 runtime/ext/soap/encoding.i: runtime/ext/soap/encoding.cpp.i
@@ -9115,7 +8971,7 @@ runtime/ext/soap/encoding.i: runtime/ext/soap/encoding.cpp.i
 
 # target to preprocess a source file
 runtime/ext/soap/encoding.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/encoding.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/encoding.cpp.i
 .PHONY : runtime/ext/soap/encoding.cpp.i
 
 runtime/ext/soap/encoding.s: runtime/ext/soap/encoding.cpp.s
@@ -9123,7 +8979,7 @@ runtime/ext/soap/encoding.s: runtime/ext/soap/encoding.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/soap/encoding.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/encoding.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/encoding.cpp.s
 .PHONY : runtime/ext/soap/encoding.cpp.s
 
 runtime/ext/soap/packet.o: runtime/ext/soap/packet.cpp.o
@@ -9131,7 +8987,7 @@ runtime/ext/soap/packet.o: runtime/ext/soap/packet.cpp.o
 
 # target to build an object file
 runtime/ext/soap/packet.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/packet.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/packet.cpp.o
 .PHONY : runtime/ext/soap/packet.cpp.o
 
 runtime/ext/soap/packet.i: runtime/ext/soap/packet.cpp.i
@@ -9139,7 +8995,7 @@ runtime/ext/soap/packet.i: runtime/ext/soap/packet.cpp.i
 
 # target to preprocess a source file
 runtime/ext/soap/packet.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/packet.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/packet.cpp.i
 .PHONY : runtime/ext/soap/packet.cpp.i
 
 runtime/ext/soap/packet.s: runtime/ext/soap/packet.cpp.s
@@ -9147,7 +9003,7 @@ runtime/ext/soap/packet.s: runtime/ext/soap/packet.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/soap/packet.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/packet.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/packet.cpp.s
 .PHONY : runtime/ext/soap/packet.cpp.s
 
 runtime/ext/soap/schema.o: runtime/ext/soap/schema.cpp.o
@@ -9155,7 +9011,7 @@ runtime/ext/soap/schema.o: runtime/ext/soap/schema.cpp.o
 
 # target to build an object file
 runtime/ext/soap/schema.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/schema.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/schema.cpp.o
 .PHONY : runtime/ext/soap/schema.cpp.o
 
 runtime/ext/soap/schema.i: runtime/ext/soap/schema.cpp.i
@@ -9163,7 +9019,7 @@ runtime/ext/soap/schema.i: runtime/ext/soap/schema.cpp.i
 
 # target to preprocess a source file
 runtime/ext/soap/schema.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/schema.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/schema.cpp.i
 .PHONY : runtime/ext/soap/schema.cpp.i
 
 runtime/ext/soap/schema.s: runtime/ext/soap/schema.cpp.s
@@ -9171,7 +9027,7 @@ runtime/ext/soap/schema.s: runtime/ext/soap/schema.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/soap/schema.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/schema.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/schema.cpp.s
 .PHONY : runtime/ext/soap/schema.cpp.s
 
 runtime/ext/soap/sdl.o: runtime/ext/soap/sdl.cpp.o
@@ -9179,7 +9035,7 @@ runtime/ext/soap/sdl.o: runtime/ext/soap/sdl.cpp.o
 
 # target to build an object file
 runtime/ext/soap/sdl.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/sdl.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/sdl.cpp.o
 .PHONY : runtime/ext/soap/sdl.cpp.o
 
 runtime/ext/soap/sdl.i: runtime/ext/soap/sdl.cpp.i
@@ -9187,7 +9043,7 @@ runtime/ext/soap/sdl.i: runtime/ext/soap/sdl.cpp.i
 
 # target to preprocess a source file
 runtime/ext/soap/sdl.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/sdl.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/sdl.cpp.i
 .PHONY : runtime/ext/soap/sdl.cpp.i
 
 runtime/ext/soap/sdl.s: runtime/ext/soap/sdl.cpp.s
@@ -9195,7 +9051,7 @@ runtime/ext/soap/sdl.s: runtime/ext/soap/sdl.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/soap/sdl.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/sdl.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/sdl.cpp.s
 .PHONY : runtime/ext/soap/sdl.cpp.s
 
 runtime/ext/soap/soap.o: runtime/ext/soap/soap.cpp.o
@@ -9203,7 +9059,7 @@ runtime/ext/soap/soap.o: runtime/ext/soap/soap.cpp.o
 
 # target to build an object file
 runtime/ext/soap/soap.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/soap.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/soap.cpp.o
 .PHONY : runtime/ext/soap/soap.cpp.o
 
 runtime/ext/soap/soap.i: runtime/ext/soap/soap.cpp.i
@@ -9211,7 +9067,7 @@ runtime/ext/soap/soap.i: runtime/ext/soap/soap.cpp.i
 
 # target to preprocess a source file
 runtime/ext/soap/soap.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/soap.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/soap.cpp.i
 .PHONY : runtime/ext/soap/soap.cpp.i
 
 runtime/ext/soap/soap.s: runtime/ext/soap/soap.cpp.s
@@ -9219,7 +9075,7 @@ runtime/ext/soap/soap.s: runtime/ext/soap/soap.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/soap/soap.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/soap.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/soap.cpp.s
 .PHONY : runtime/ext/soap/soap.cpp.s
 
 runtime/ext/soap/xml.o: runtime/ext/soap/xml.cpp.o
@@ -9227,7 +9083,7 @@ runtime/ext/soap/xml.o: runtime/ext/soap/xml.cpp.o
 
 # target to build an object file
 runtime/ext/soap/xml.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/xml.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/xml.cpp.o
 .PHONY : runtime/ext/soap/xml.cpp.o
 
 runtime/ext/soap/xml.i: runtime/ext/soap/xml.cpp.i
@@ -9235,7 +9091,7 @@ runtime/ext/soap/xml.i: runtime/ext/soap/xml.cpp.i
 
 # target to preprocess a source file
 runtime/ext/soap/xml.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/xml.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/xml.cpp.i
 .PHONY : runtime/ext/soap/xml.cpp.i
 
 runtime/ext/soap/xml.s: runtime/ext/soap/xml.cpp.s
@@ -9243,7 +9099,7 @@ runtime/ext/soap/xml.s: runtime/ext/soap/xml.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/soap/xml.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/xml.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/soap/xml.cpp.s
 .PHONY : runtime/ext/soap/xml.cpp.s
 
 runtime/ext/thrift/binary.o: runtime/ext/thrift/binary.cpp.o
@@ -9251,7 +9107,7 @@ runtime/ext/thrift/binary.o: runtime/ext/thrift/binary.cpp.o
 
 # target to build an object file
 runtime/ext/thrift/binary.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/binary.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/binary.cpp.o
 .PHONY : runtime/ext/thrift/binary.cpp.o
 
 runtime/ext/thrift/binary.i: runtime/ext/thrift/binary.cpp.i
@@ -9259,7 +9115,7 @@ runtime/ext/thrift/binary.i: runtime/ext/thrift/binary.cpp.i
 
 # target to preprocess a source file
 runtime/ext/thrift/binary.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/binary.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/binary.cpp.i
 .PHONY : runtime/ext/thrift/binary.cpp.i
 
 runtime/ext/thrift/binary.s: runtime/ext/thrift/binary.cpp.s
@@ -9267,7 +9123,7 @@ runtime/ext/thrift/binary.s: runtime/ext/thrift/binary.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/thrift/binary.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/binary.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/binary.cpp.s
 .PHONY : runtime/ext/thrift/binary.cpp.s
 
 runtime/ext/thrift/compact.o: runtime/ext/thrift/compact.cpp.o
@@ -9275,7 +9131,7 @@ runtime/ext/thrift/compact.o: runtime/ext/thrift/compact.cpp.o
 
 # target to build an object file
 runtime/ext/thrift/compact.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/compact.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/compact.cpp.o
 .PHONY : runtime/ext/thrift/compact.cpp.o
 
 runtime/ext/thrift/compact.i: runtime/ext/thrift/compact.cpp.i
@@ -9283,7 +9139,7 @@ runtime/ext/thrift/compact.i: runtime/ext/thrift/compact.cpp.i
 
 # target to preprocess a source file
 runtime/ext/thrift/compact.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/compact.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/compact.cpp.i
 .PHONY : runtime/ext/thrift/compact.cpp.i
 
 runtime/ext/thrift/compact.s: runtime/ext/thrift/compact.cpp.s
@@ -9291,7 +9147,7 @@ runtime/ext/thrift/compact.s: runtime/ext/thrift/compact.cpp.s
 
 # target to generate assembly for a file
 runtime/ext/thrift/compact.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/compact.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/ext/thrift/compact.cpp.s
 .PHONY : runtime/ext/thrift/compact.cpp.s
 
 runtime/vm/bytecode.o: runtime/vm/bytecode.cpp.o
@@ -9299,7 +9155,7 @@ runtime/vm/bytecode.o: runtime/vm/bytecode.cpp.o
 
 # target to build an object file
 runtime/vm/bytecode.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/bytecode.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/bytecode.cpp.o
 .PHONY : runtime/vm/bytecode.cpp.o
 
 runtime/vm/bytecode.i: runtime/vm/bytecode.cpp.i
@@ -9307,7 +9163,7 @@ runtime/vm/bytecode.i: runtime/vm/bytecode.cpp.i
 
 # target to preprocess a source file
 runtime/vm/bytecode.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/bytecode.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/bytecode.cpp.i
 .PHONY : runtime/vm/bytecode.cpp.i
 
 runtime/vm/bytecode.s: runtime/vm/bytecode.cpp.s
@@ -9315,7 +9171,7 @@ runtime/vm/bytecode.s: runtime/vm/bytecode.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/bytecode.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/bytecode.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/bytecode.cpp.s
 .PHONY : runtime/vm/bytecode.cpp.s
 
 runtime/vm/class.o: runtime/vm/class.cpp.o
@@ -9323,7 +9179,7 @@ runtime/vm/class.o: runtime/vm/class.cpp.o
 
 # target to build an object file
 runtime/vm/class.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/class.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/class.cpp.o
 .PHONY : runtime/vm/class.cpp.o
 
 runtime/vm/class.i: runtime/vm/class.cpp.i
@@ -9331,7 +9187,7 @@ runtime/vm/class.i: runtime/vm/class.cpp.i
 
 # target to preprocess a source file
 runtime/vm/class.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/class.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/class.cpp.i
 .PHONY : runtime/vm/class.cpp.i
 
 runtime/vm/class.s: runtime/vm/class.cpp.s
@@ -9339,7 +9195,7 @@ runtime/vm/class.s: runtime/vm/class.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/class.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/class.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/class.cpp.s
 .PHONY : runtime/vm/class.cpp.s
 
 runtime/vm/debug/debug.o: runtime/vm/debug/debug.cpp.o
@@ -9347,7 +9203,7 @@ runtime/vm/debug/debug.o: runtime/vm/debug/debug.cpp.o
 
 # target to build an object file
 runtime/vm/debug/debug.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/debug.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/debug.cpp.o
 .PHONY : runtime/vm/debug/debug.cpp.o
 
 runtime/vm/debug/debug.i: runtime/vm/debug/debug.cpp.i
@@ -9355,7 +9211,7 @@ runtime/vm/debug/debug.i: runtime/vm/debug/debug.cpp.i
 
 # target to preprocess a source file
 runtime/vm/debug/debug.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/debug.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/debug.cpp.i
 .PHONY : runtime/vm/debug/debug.cpp.i
 
 runtime/vm/debug/debug.s: runtime/vm/debug/debug.cpp.s
@@ -9363,7 +9219,7 @@ runtime/vm/debug/debug.s: runtime/vm/debug/debug.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/debug/debug.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/debug.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/debug.cpp.s
 .PHONY : runtime/vm/debug/debug.cpp.s
 
 runtime/vm/debug/dwarf.o: runtime/vm/debug/dwarf.cpp.o
@@ -9371,7 +9227,7 @@ runtime/vm/debug/dwarf.o: runtime/vm/debug/dwarf.cpp.o
 
 # target to build an object file
 runtime/vm/debug/dwarf.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/dwarf.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/dwarf.cpp.o
 .PHONY : runtime/vm/debug/dwarf.cpp.o
 
 runtime/vm/debug/dwarf.i: runtime/vm/debug/dwarf.cpp.i
@@ -9379,7 +9235,7 @@ runtime/vm/debug/dwarf.i: runtime/vm/debug/dwarf.cpp.i
 
 # target to preprocess a source file
 runtime/vm/debug/dwarf.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/dwarf.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/dwarf.cpp.i
 .PHONY : runtime/vm/debug/dwarf.cpp.i
 
 runtime/vm/debug/dwarf.s: runtime/vm/debug/dwarf.cpp.s
@@ -9387,7 +9243,7 @@ runtime/vm/debug/dwarf.s: runtime/vm/debug/dwarf.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/debug/dwarf.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/dwarf.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/dwarf.cpp.s
 .PHONY : runtime/vm/debug/dwarf.cpp.s
 
 runtime/vm/debug/elfwriter.o: runtime/vm/debug/elfwriter.cpp.o
@@ -9395,7 +9251,7 @@ runtime/vm/debug/elfwriter.o: runtime/vm/debug/elfwriter.cpp.o
 
 # target to build an object file
 runtime/vm/debug/elfwriter.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/elfwriter.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/elfwriter.cpp.o
 .PHONY : runtime/vm/debug/elfwriter.cpp.o
 
 runtime/vm/debug/elfwriter.i: runtime/vm/debug/elfwriter.cpp.i
@@ -9403,7 +9259,7 @@ runtime/vm/debug/elfwriter.i: runtime/vm/debug/elfwriter.cpp.i
 
 # target to preprocess a source file
 runtime/vm/debug/elfwriter.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/elfwriter.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/elfwriter.cpp.i
 .PHONY : runtime/vm/debug/elfwriter.cpp.i
 
 runtime/vm/debug/elfwriter.s: runtime/vm/debug/elfwriter.cpp.s
@@ -9411,7 +9267,7 @@ runtime/vm/debug/elfwriter.s: runtime/vm/debug/elfwriter.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/debug/elfwriter.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/elfwriter.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/elfwriter.cpp.s
 .PHONY : runtime/vm/debug/elfwriter.cpp.s
 
 runtime/vm/debug/gdb-jit.o: runtime/vm/debug/gdb-jit.cpp.o
@@ -9419,7 +9275,7 @@ runtime/vm/debug/gdb-jit.o: runtime/vm/debug/gdb-jit.cpp.o
 
 # target to build an object file
 runtime/vm/debug/gdb-jit.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/gdb-jit.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/gdb-jit.cpp.o
 .PHONY : runtime/vm/debug/gdb-jit.cpp.o
 
 runtime/vm/debug/gdb-jit.i: runtime/vm/debug/gdb-jit.cpp.i
@@ -9427,7 +9283,7 @@ runtime/vm/debug/gdb-jit.i: runtime/vm/debug/gdb-jit.cpp.i
 
 # target to preprocess a source file
 runtime/vm/debug/gdb-jit.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/gdb-jit.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/gdb-jit.cpp.i
 .PHONY : runtime/vm/debug/gdb-jit.cpp.i
 
 runtime/vm/debug/gdb-jit.s: runtime/vm/debug/gdb-jit.cpp.s
@@ -9435,39 +9291,111 @@ runtime/vm/debug/gdb-jit.s: runtime/vm/debug/gdb-jit.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/debug/gdb-jit.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/gdb-jit.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debug/gdb-jit.cpp.s
 .PHONY : runtime/vm/debug/gdb-jit.cpp.s
 
-runtime/vm/dyn_tracer.o: runtime/vm/dyn_tracer.cpp.o
-.PHONY : runtime/vm/dyn_tracer.o
+runtime/vm/debugger_hook.o: runtime/vm/debugger_hook.cpp.o
+.PHONY : runtime/vm/debugger_hook.o
 
 # target to build an object file
-runtime/vm/dyn_tracer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/dyn_tracer.cpp.o
-.PHONY : runtime/vm/dyn_tracer.cpp.o
+runtime/vm/debugger_hook.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debugger_hook.cpp.o
+.PHONY : runtime/vm/debugger_hook.cpp.o
 
-runtime/vm/dyn_tracer.i: runtime/vm/dyn_tracer.cpp.i
-.PHONY : runtime/vm/dyn_tracer.i
+runtime/vm/debugger_hook.i: runtime/vm/debugger_hook.cpp.i
+.PHONY : runtime/vm/debugger_hook.i
 
 # target to preprocess a source file
-runtime/vm/dyn_tracer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/dyn_tracer.cpp.i
-.PHONY : runtime/vm/dyn_tracer.cpp.i
+runtime/vm/debugger_hook.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debugger_hook.cpp.i
+.PHONY : runtime/vm/debugger_hook.cpp.i
 
-runtime/vm/dyn_tracer.s: runtime/vm/dyn_tracer.cpp.s
-.PHONY : runtime/vm/dyn_tracer.s
+runtime/vm/debugger_hook.s: runtime/vm/debugger_hook.cpp.s
+.PHONY : runtime/vm/debugger_hook.s
 
 # target to generate assembly for a file
-runtime/vm/dyn_tracer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/dyn_tracer.cpp.s
-.PHONY : runtime/vm/dyn_tracer.cpp.s
+runtime/vm/debugger_hook.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/debugger_hook.cpp.s
+.PHONY : runtime/vm/debugger_hook.cpp.s
+
+runtime/vm/event_hook.o: runtime/vm/event_hook.cpp.o
+.PHONY : runtime/vm/event_hook.o
+
+# target to build an object file
+runtime/vm/event_hook.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/event_hook.cpp.o
+.PHONY : runtime/vm/event_hook.cpp.o
+
+runtime/vm/event_hook.i: runtime/vm/event_hook.cpp.i
+.PHONY : runtime/vm/event_hook.i
+
+# target to preprocess a source file
+runtime/vm/event_hook.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/event_hook.cpp.i
+.PHONY : runtime/vm/event_hook.cpp.i
+
+runtime/vm/event_hook.s: runtime/vm/event_hook.cpp.s
+.PHONY : runtime/vm/event_hook.s
+
+# target to generate assembly for a file
+runtime/vm/event_hook.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/event_hook.cpp.s
+.PHONY : runtime/vm/event_hook.cpp.s
+
+runtime/vm/exception_gate.o: runtime/vm/exception_gate.cpp.o
+.PHONY : runtime/vm/exception_gate.o
+
+# target to build an object file
+runtime/vm/exception_gate.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/exception_gate.cpp.o
+.PHONY : runtime/vm/exception_gate.cpp.o
+
+runtime/vm/exception_gate.i: runtime/vm/exception_gate.cpp.i
+.PHONY : runtime/vm/exception_gate.i
+
+# target to preprocess a source file
+runtime/vm/exception_gate.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/exception_gate.cpp.i
+.PHONY : runtime/vm/exception_gate.cpp.i
+
+runtime/vm/exception_gate.s: runtime/vm/exception_gate.cpp.s
+.PHONY : runtime/vm/exception_gate.s
+
+# target to generate assembly for a file
+runtime/vm/exception_gate.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/exception_gate.cpp.s
+.PHONY : runtime/vm/exception_gate.cpp.s
+
+runtime/vm/fixed_string_map.o: runtime/vm/fixed_string_map.cpp.o
+.PHONY : runtime/vm/fixed_string_map.o
+
+# target to build an object file
+runtime/vm/fixed_string_map.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/fixed_string_map.cpp.o
+.PHONY : runtime/vm/fixed_string_map.cpp.o
+
+runtime/vm/fixed_string_map.i: runtime/vm/fixed_string_map.cpp.i
+.PHONY : runtime/vm/fixed_string_map.i
+
+# target to preprocess a source file
+runtime/vm/fixed_string_map.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/fixed_string_map.cpp.i
+.PHONY : runtime/vm/fixed_string_map.cpp.i
+
+runtime/vm/fixed_string_map.s: runtime/vm/fixed_string_map.cpp.s
+.PHONY : runtime/vm/fixed_string_map.s
+
+# target to generate assembly for a file
+runtime/vm/fixed_string_map.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/fixed_string_map.cpp.s
+.PHONY : runtime/vm/fixed_string_map.cpp.s
 
 runtime/vm/func.o: runtime/vm/func.cpp.o
 .PHONY : runtime/vm/func.o
 
 # target to build an object file
 runtime/vm/func.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/func.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/func.cpp.o
 .PHONY : runtime/vm/func.cpp.o
 
 runtime/vm/func.i: runtime/vm/func.cpp.i
@@ -9475,7 +9403,7 @@ runtime/vm/func.i: runtime/vm/func.cpp.i
 
 # target to preprocess a source file
 runtime/vm/func.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/func.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/func.cpp.i
 .PHONY : runtime/vm/func.cpp.i
 
 runtime/vm/func.s: runtime/vm/func.cpp.s
@@ -9483,7 +9411,7 @@ runtime/vm/func.s: runtime/vm/func.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/func.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/func.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/func.cpp.s
 .PHONY : runtime/vm/func.cpp.s
 
 runtime/vm/funcdict.o: runtime/vm/funcdict.cpp.o
@@ -9491,7 +9419,7 @@ runtime/vm/funcdict.o: runtime/vm/funcdict.cpp.o
 
 # target to build an object file
 runtime/vm/funcdict.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/funcdict.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/funcdict.cpp.o
 .PHONY : runtime/vm/funcdict.cpp.o
 
 runtime/vm/funcdict.i: runtime/vm/funcdict.cpp.i
@@ -9499,7 +9427,7 @@ runtime/vm/funcdict.i: runtime/vm/funcdict.cpp.i
 
 # target to preprocess a source file
 runtime/vm/funcdict.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/funcdict.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/funcdict.cpp.i
 .PHONY : runtime/vm/funcdict.cpp.i
 
 runtime/vm/funcdict.s: runtime/vm/funcdict.cpp.s
@@ -9507,7 +9435,7 @@ runtime/vm/funcdict.s: runtime/vm/funcdict.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/funcdict.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/funcdict.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/funcdict.cpp.s
 .PHONY : runtime/vm/funcdict.cpp.s
 
 runtime/vm/hhbc.o: runtime/vm/hhbc.cpp.o
@@ -9515,7 +9443,7 @@ runtime/vm/hhbc.o: runtime/vm/hhbc.cpp.o
 
 # target to build an object file
 runtime/vm/hhbc.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/hhbc.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/hhbc.cpp.o
 .PHONY : runtime/vm/hhbc.cpp.o
 
 runtime/vm/hhbc.i: runtime/vm/hhbc.cpp.i
@@ -9523,7 +9451,7 @@ runtime/vm/hhbc.i: runtime/vm/hhbc.cpp.i
 
 # target to preprocess a source file
 runtime/vm/hhbc.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/hhbc.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/hhbc.cpp.i
 .PHONY : runtime/vm/hhbc.cpp.i
 
 runtime/vm/hhbc.s: runtime/vm/hhbc.cpp.s
@@ -9531,7 +9459,7 @@ runtime/vm/hhbc.s: runtime/vm/hhbc.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/hhbc.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/hhbc.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/hhbc.cpp.s
 .PHONY : runtime/vm/hhbc.cpp.s
 
 runtime/vm/instance.o: runtime/vm/instance.cpp.o
@@ -9539,7 +9467,7 @@ runtime/vm/instance.o: runtime/vm/instance.cpp.o
 
 # target to build an object file
 runtime/vm/instance.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instance.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instance.cpp.o
 .PHONY : runtime/vm/instance.cpp.o
 
 runtime/vm/instance.i: runtime/vm/instance.cpp.i
@@ -9547,7 +9475,7 @@ runtime/vm/instance.i: runtime/vm/instance.cpp.i
 
 # target to preprocess a source file
 runtime/vm/instance.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instance.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instance.cpp.i
 .PHONY : runtime/vm/instance.cpp.i
 
 runtime/vm/instance.s: runtime/vm/instance.cpp.s
@@ -9555,7 +9483,7 @@ runtime/vm/instance.s: runtime/vm/instance.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/instance.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instance.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instance.cpp.s
 .PHONY : runtime/vm/instance.cpp.s
 
 runtime/vm/instrumentation.o: runtime/vm/instrumentation.cpp.o
@@ -9563,7 +9491,7 @@ runtime/vm/instrumentation.o: runtime/vm/instrumentation.cpp.o
 
 # target to build an object file
 runtime/vm/instrumentation.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instrumentation.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instrumentation.cpp.o
 .PHONY : runtime/vm/instrumentation.cpp.o
 
 runtime/vm/instrumentation.i: runtime/vm/instrumentation.cpp.i
@@ -9571,7 +9499,7 @@ runtime/vm/instrumentation.i: runtime/vm/instrumentation.cpp.i
 
 # target to preprocess a source file
 runtime/vm/instrumentation.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instrumentation.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instrumentation.cpp.i
 .PHONY : runtime/vm/instrumentation.cpp.i
 
 runtime/vm/instrumentation.s: runtime/vm/instrumentation.cpp.s
@@ -9579,7 +9507,7 @@ runtime/vm/instrumentation.s: runtime/vm/instrumentation.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/instrumentation.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instrumentation.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/instrumentation.cpp.s
 .PHONY : runtime/vm/instrumentation.cpp.s
 
 runtime/vm/object_allocator_sizes.o: runtime/vm/object_allocator_sizes.cpp.o
@@ -9587,7 +9515,7 @@ runtime/vm/object_allocator_sizes.o: runtime/vm/object_allocator_sizes.cpp.o
 
 # target to build an object file
 runtime/vm/object_allocator_sizes.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/object_allocator_sizes.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/object_allocator_sizes.cpp.o
 .PHONY : runtime/vm/object_allocator_sizes.cpp.o
 
 runtime/vm/object_allocator_sizes.i: runtime/vm/object_allocator_sizes.cpp.i
@@ -9595,7 +9523,7 @@ runtime/vm/object_allocator_sizes.i: runtime/vm/object_allocator_sizes.cpp.i
 
 # target to preprocess a source file
 runtime/vm/object_allocator_sizes.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/object_allocator_sizes.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/object_allocator_sizes.cpp.i
 .PHONY : runtime/vm/object_allocator_sizes.cpp.i
 
 runtime/vm/object_allocator_sizes.s: runtime/vm/object_allocator_sizes.cpp.s
@@ -9603,7 +9531,7 @@ runtime/vm/object_allocator_sizes.s: runtime/vm/object_allocator_sizes.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/object_allocator_sizes.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/object_allocator_sizes.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/object_allocator_sizes.cpp.s
 .PHONY : runtime/vm/object_allocator_sizes.cpp.s
 
 runtime/vm/peephole.o: runtime/vm/peephole.cpp.o
@@ -9611,7 +9539,7 @@ runtime/vm/peephole.o: runtime/vm/peephole.cpp.o
 
 # target to build an object file
 runtime/vm/peephole.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/peephole.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/peephole.cpp.o
 .PHONY : runtime/vm/peephole.cpp.o
 
 runtime/vm/peephole.i: runtime/vm/peephole.cpp.i
@@ -9619,7 +9547,7 @@ runtime/vm/peephole.i: runtime/vm/peephole.cpp.i
 
 # target to preprocess a source file
 runtime/vm/peephole.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/peephole.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/peephole.cpp.i
 .PHONY : runtime/vm/peephole.cpp.i
 
 runtime/vm/peephole.s: runtime/vm/peephole.cpp.s
@@ -9627,15 +9555,39 @@ runtime/vm/peephole.s: runtime/vm/peephole.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/peephole.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/peephole.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/peephole.cpp.s
 .PHONY : runtime/vm/peephole.cpp.s
+
+runtime/vm/pendq.o: runtime/vm/pendq.cpp.o
+.PHONY : runtime/vm/pendq.o
+
+# target to build an object file
+runtime/vm/pendq.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/pendq.cpp.o
+.PHONY : runtime/vm/pendq.cpp.o
+
+runtime/vm/pendq.i: runtime/vm/pendq.cpp.i
+.PHONY : runtime/vm/pendq.i
+
+# target to preprocess a source file
+runtime/vm/pendq.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/pendq.cpp.i
+.PHONY : runtime/vm/pendq.cpp.i
+
+runtime/vm/pendq.s: runtime/vm/pendq.cpp.s
+.PHONY : runtime/vm/pendq.s
+
+# target to generate assembly for a file
+runtime/vm/pendq.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/pendq.cpp.s
+.PHONY : runtime/vm/pendq.cpp.s
 
 runtime/vm/php_debug.o: runtime/vm/php_debug.cpp.o
 .PHONY : runtime/vm/php_debug.o
 
 # target to build an object file
 runtime/vm/php_debug.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/php_debug.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/php_debug.cpp.o
 .PHONY : runtime/vm/php_debug.cpp.o
 
 runtime/vm/php_debug.i: runtime/vm/php_debug.cpp.i
@@ -9643,7 +9595,7 @@ runtime/vm/php_debug.i: runtime/vm/php_debug.cpp.i
 
 # target to preprocess a source file
 runtime/vm/php_debug.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/php_debug.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/php_debug.cpp.i
 .PHONY : runtime/vm/php_debug.cpp.i
 
 runtime/vm/php_debug.s: runtime/vm/php_debug.cpp.s
@@ -9651,15 +9603,63 @@ runtime/vm/php_debug.s: runtime/vm/php_debug.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/php_debug.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/php_debug.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/php_debug.cpp.s
 .PHONY : runtime/vm/php_debug.cpp.s
+
+runtime/vm/repo.o: runtime/vm/repo.cpp.o
+.PHONY : runtime/vm/repo.o
+
+# target to build an object file
+runtime/vm/repo.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/repo.cpp.o
+.PHONY : runtime/vm/repo.cpp.o
+
+runtime/vm/repo.i: runtime/vm/repo.cpp.i
+.PHONY : runtime/vm/repo.i
+
+# target to preprocess a source file
+runtime/vm/repo.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/repo.cpp.i
+.PHONY : runtime/vm/repo.cpp.i
+
+runtime/vm/repo.s: runtime/vm/repo.cpp.s
+.PHONY : runtime/vm/repo.s
+
+# target to generate assembly for a file
+runtime/vm/repo.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/repo.cpp.s
+.PHONY : runtime/vm/repo.cpp.s
+
+runtime/vm/repo_helpers.o: runtime/vm/repo_helpers.cpp.o
+.PHONY : runtime/vm/repo_helpers.o
+
+# target to build an object file
+runtime/vm/repo_helpers.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/repo_helpers.cpp.o
+.PHONY : runtime/vm/repo_helpers.cpp.o
+
+runtime/vm/repo_helpers.i: runtime/vm/repo_helpers.cpp.i
+.PHONY : runtime/vm/repo_helpers.i
+
+# target to preprocess a source file
+runtime/vm/repo_helpers.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/repo_helpers.cpp.i
+.PHONY : runtime/vm/repo_helpers.cpp.i
+
+runtime/vm/repo_helpers.s: runtime/vm/repo_helpers.cpp.s
+.PHONY : runtime/vm/repo_helpers.s
+
+# target to generate assembly for a file
+runtime/vm/repo_helpers.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/repo_helpers.cpp.s
+.PHONY : runtime/vm/repo_helpers.cpp.s
 
 runtime/vm/runtime.o: runtime/vm/runtime.cpp.o
 .PHONY : runtime/vm/runtime.o
 
 # target to build an object file
 runtime/vm/runtime.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/runtime.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/runtime.cpp.o
 .PHONY : runtime/vm/runtime.cpp.o
 
 runtime/vm/runtime.i: runtime/vm/runtime.cpp.i
@@ -9667,7 +9667,7 @@ runtime/vm/runtime.i: runtime/vm/runtime.cpp.i
 
 # target to preprocess a source file
 runtime/vm/runtime.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/runtime.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/runtime.cpp.i
 .PHONY : runtime/vm/runtime.cpp.i
 
 runtime/vm/runtime.s: runtime/vm/runtime.cpp.s
@@ -9675,15 +9675,63 @@ runtime/vm/runtime.s: runtime/vm/runtime.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/runtime.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/runtime.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/runtime.cpp.s
 .PHONY : runtime/vm/runtime.cpp.s
+
+runtime/vm/stats.o: runtime/vm/stats.cpp.o
+.PHONY : runtime/vm/stats.o
+
+# target to build an object file
+runtime/vm/stats.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/stats.cpp.o
+.PHONY : runtime/vm/stats.cpp.o
+
+runtime/vm/stats.i: runtime/vm/stats.cpp.i
+.PHONY : runtime/vm/stats.i
+
+# target to preprocess a source file
+runtime/vm/stats.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/stats.cpp.i
+.PHONY : runtime/vm/stats.cpp.i
+
+runtime/vm/stats.s: runtime/vm/stats.cpp.s
+.PHONY : runtime/vm/stats.s
+
+# target to generate assembly for a file
+runtime/vm/stats.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/stats.cpp.s
+.PHONY : runtime/vm/stats.cpp.s
+
+runtime/vm/translator/annotation.o: runtime/vm/translator/annotation.cpp.o
+.PHONY : runtime/vm/translator/annotation.o
+
+# target to build an object file
+runtime/vm/translator/annotation.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/annotation.cpp.o
+.PHONY : runtime/vm/translator/annotation.cpp.o
+
+runtime/vm/translator/annotation.i: runtime/vm/translator/annotation.cpp.i
+.PHONY : runtime/vm/translator/annotation.i
+
+# target to preprocess a source file
+runtime/vm/translator/annotation.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/annotation.cpp.i
+.PHONY : runtime/vm/translator/annotation.cpp.i
+
+runtime/vm/translator/annotation.s: runtime/vm/translator/annotation.cpp.s
+.PHONY : runtime/vm/translator/annotation.s
+
+# target to generate assembly for a file
+runtime/vm/translator/annotation.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/annotation.cpp.s
+.PHONY : runtime/vm/translator/annotation.cpp.s
 
 runtime/vm/translator/asm-x64-test.o: runtime/vm/translator/asm-x64-test.cpp.o
 .PHONY : runtime/vm/translator/asm-x64-test.o
 
 # target to build an object file
 runtime/vm/translator/asm-x64-test.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64-test.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64-test.cpp.o
 .PHONY : runtime/vm/translator/asm-x64-test.cpp.o
 
 runtime/vm/translator/asm-x64-test.i: runtime/vm/translator/asm-x64-test.cpp.i
@@ -9691,7 +9739,7 @@ runtime/vm/translator/asm-x64-test.i: runtime/vm/translator/asm-x64-test.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/asm-x64-test.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64-test.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64-test.cpp.i
 .PHONY : runtime/vm/translator/asm-x64-test.cpp.i
 
 runtime/vm/translator/asm-x64-test.s: runtime/vm/translator/asm-x64-test.cpp.s
@@ -9699,7 +9747,7 @@ runtime/vm/translator/asm-x64-test.s: runtime/vm/translator/asm-x64-test.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/asm-x64-test.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64-test.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64-test.cpp.s
 .PHONY : runtime/vm/translator/asm-x64-test.cpp.s
 
 runtime/vm/translator/asm-x64.o: runtime/vm/translator/asm-x64.cpp.o
@@ -9707,7 +9755,7 @@ runtime/vm/translator/asm-x64.o: runtime/vm/translator/asm-x64.cpp.o
 
 # target to build an object file
 runtime/vm/translator/asm-x64.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64.cpp.o
 .PHONY : runtime/vm/translator/asm-x64.cpp.o
 
 runtime/vm/translator/asm-x64.i: runtime/vm/translator/asm-x64.cpp.i
@@ -9715,7 +9763,7 @@ runtime/vm/translator/asm-x64.i: runtime/vm/translator/asm-x64.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/asm-x64.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64.cpp.i
 .PHONY : runtime/vm/translator/asm-x64.cpp.i
 
 runtime/vm/translator/asm-x64.s: runtime/vm/translator/asm-x64.cpp.s
@@ -9723,15 +9771,39 @@ runtime/vm/translator/asm-x64.s: runtime/vm/translator/asm-x64.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/asm-x64.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/asm-x64.cpp.s
 .PHONY : runtime/vm/translator/asm-x64.cpp.s
+
+runtime/vm/translator/fixup.o: runtime/vm/translator/fixup.cpp.o
+.PHONY : runtime/vm/translator/fixup.o
+
+# target to build an object file
+runtime/vm/translator/fixup.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/fixup.cpp.o
+.PHONY : runtime/vm/translator/fixup.cpp.o
+
+runtime/vm/translator/fixup.i: runtime/vm/translator/fixup.cpp.i
+.PHONY : runtime/vm/translator/fixup.i
+
+# target to preprocess a source file
+runtime/vm/translator/fixup.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/fixup.cpp.i
+.PHONY : runtime/vm/translator/fixup.cpp.i
+
+runtime/vm/translator/fixup.s: runtime/vm/translator/fixup.cpp.s
+.PHONY : runtime/vm/translator/fixup.s
+
+# target to generate assembly for a file
+runtime/vm/translator/fixup.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/fixup.cpp.s
+.PHONY : runtime/vm/translator/fixup.cpp.s
 
 runtime/vm/translator/immstack.o: runtime/vm/translator/immstack.cpp.o
 .PHONY : runtime/vm/translator/immstack.o
 
 # target to build an object file
 runtime/vm/translator/immstack.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/immstack.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/immstack.cpp.o
 .PHONY : runtime/vm/translator/immstack.cpp.o
 
 runtime/vm/translator/immstack.i: runtime/vm/translator/immstack.cpp.i
@@ -9739,7 +9811,7 @@ runtime/vm/translator/immstack.i: runtime/vm/translator/immstack.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/immstack.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/immstack.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/immstack.cpp.i
 .PHONY : runtime/vm/translator/immstack.cpp.i
 
 runtime/vm/translator/immstack.s: runtime/vm/translator/immstack.cpp.s
@@ -9747,7 +9819,7 @@ runtime/vm/translator/immstack.s: runtime/vm/translator/immstack.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/immstack.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/immstack.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/immstack.cpp.s
 .PHONY : runtime/vm/translator/immstack.cpp.s
 
 runtime/vm/translator/log.o: runtime/vm/translator/log.cpp.o
@@ -9755,7 +9827,7 @@ runtime/vm/translator/log.o: runtime/vm/translator/log.cpp.o
 
 # target to build an object file
 runtime/vm/translator/log.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/log.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/log.cpp.o
 .PHONY : runtime/vm/translator/log.cpp.o
 
 runtime/vm/translator/log.i: runtime/vm/translator/log.cpp.i
@@ -9763,7 +9835,7 @@ runtime/vm/translator/log.i: runtime/vm/translator/log.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/log.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/log.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/log.cpp.i
 .PHONY : runtime/vm/translator/log.cpp.i
 
 runtime/vm/translator/log.s: runtime/vm/translator/log.cpp.s
@@ -9771,7 +9843,7 @@ runtime/vm/translator/log.s: runtime/vm/translator/log.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/log.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/log.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/log.cpp.s
 .PHONY : runtime/vm/translator/log.cpp.s
 
 runtime/vm/translator/regalloc.o: runtime/vm/translator/regalloc.cpp.o
@@ -9779,7 +9851,7 @@ runtime/vm/translator/regalloc.o: runtime/vm/translator/regalloc.cpp.o
 
 # target to build an object file
 runtime/vm/translator/regalloc.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/regalloc.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/regalloc.cpp.o
 .PHONY : runtime/vm/translator/regalloc.cpp.o
 
 runtime/vm/translator/regalloc.i: runtime/vm/translator/regalloc.cpp.i
@@ -9787,7 +9859,7 @@ runtime/vm/translator/regalloc.i: runtime/vm/translator/regalloc.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/regalloc.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/regalloc.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/regalloc.cpp.i
 .PHONY : runtime/vm/translator/regalloc.cpp.i
 
 runtime/vm/translator/regalloc.s: runtime/vm/translator/regalloc.cpp.s
@@ -9795,7 +9867,7 @@ runtime/vm/translator/regalloc.s: runtime/vm/translator/regalloc.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/regalloc.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/regalloc.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/regalloc.cpp.s
 .PHONY : runtime/vm/translator/regalloc.cpp.s
 
 runtime/vm/translator/runtime-type.o: runtime/vm/translator/runtime-type.cpp.o
@@ -9803,7 +9875,7 @@ runtime/vm/translator/runtime-type.o: runtime/vm/translator/runtime-type.cpp.o
 
 # target to build an object file
 runtime/vm/translator/runtime-type.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/runtime-type.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/runtime-type.cpp.o
 .PHONY : runtime/vm/translator/runtime-type.cpp.o
 
 runtime/vm/translator/runtime-type.i: runtime/vm/translator/runtime-type.cpp.i
@@ -9811,7 +9883,7 @@ runtime/vm/translator/runtime-type.i: runtime/vm/translator/runtime-type.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/runtime-type.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/runtime-type.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/runtime-type.cpp.i
 .PHONY : runtime/vm/translator/runtime-type.cpp.i
 
 runtime/vm/translator/runtime-type.s: runtime/vm/translator/runtime-type.cpp.s
@@ -9819,7 +9891,7 @@ runtime/vm/translator/runtime-type.s: runtime/vm/translator/runtime-type.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/runtime-type.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/runtime-type.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/runtime-type.cpp.s
 .PHONY : runtime/vm/translator/runtime-type.cpp.s
 
 runtime/vm/translator/srcdb.o: runtime/vm/translator/srcdb.cpp.o
@@ -9827,7 +9899,7 @@ runtime/vm/translator/srcdb.o: runtime/vm/translator/srcdb.cpp.o
 
 # target to build an object file
 runtime/vm/translator/srcdb.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/srcdb.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/srcdb.cpp.o
 .PHONY : runtime/vm/translator/srcdb.cpp.o
 
 runtime/vm/translator/srcdb.i: runtime/vm/translator/srcdb.cpp.i
@@ -9835,7 +9907,7 @@ runtime/vm/translator/srcdb.i: runtime/vm/translator/srcdb.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/srcdb.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/srcdb.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/srcdb.cpp.i
 .PHONY : runtime/vm/translator/srcdb.cpp.i
 
 runtime/vm/translator/srcdb.s: runtime/vm/translator/srcdb.cpp.s
@@ -9843,7 +9915,7 @@ runtime/vm/translator/srcdb.s: runtime/vm/translator/srcdb.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/srcdb.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/srcdb.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/srcdb.cpp.s
 .PHONY : runtime/vm/translator/srcdb.cpp.s
 
 runtime/vm/translator/targetcache.o: runtime/vm/translator/targetcache.cpp.o
@@ -9851,7 +9923,7 @@ runtime/vm/translator/targetcache.o: runtime/vm/translator/targetcache.cpp.o
 
 # target to build an object file
 runtime/vm/translator/targetcache.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/targetcache.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/targetcache.cpp.o
 .PHONY : runtime/vm/translator/targetcache.cpp.o
 
 runtime/vm/translator/targetcache.i: runtime/vm/translator/targetcache.cpp.i
@@ -9859,7 +9931,7 @@ runtime/vm/translator/targetcache.i: runtime/vm/translator/targetcache.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/targetcache.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/targetcache.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/targetcache.cpp.i
 .PHONY : runtime/vm/translator/targetcache.cpp.i
 
 runtime/vm/translator/targetcache.s: runtime/vm/translator/targetcache.cpp.s
@@ -9867,15 +9939,39 @@ runtime/vm/translator/targetcache.s: runtime/vm/translator/targetcache.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/targetcache.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/targetcache.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/targetcache.cpp.s
 .PHONY : runtime/vm/translator/targetcache.cpp.s
+
+runtime/vm/translator/translator-deps.o: runtime/vm/translator/translator-deps.cpp.o
+.PHONY : runtime/vm/translator/translator-deps.o
+
+# target to build an object file
+runtime/vm/translator/translator-deps.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-deps.cpp.o
+.PHONY : runtime/vm/translator/translator-deps.cpp.o
+
+runtime/vm/translator/translator-deps.i: runtime/vm/translator/translator-deps.cpp.i
+.PHONY : runtime/vm/translator/translator-deps.i
+
+# target to preprocess a source file
+runtime/vm/translator/translator-deps.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-deps.cpp.i
+.PHONY : runtime/vm/translator/translator-deps.cpp.i
+
+runtime/vm/translator/translator-deps.s: runtime/vm/translator/translator-deps.cpp.s
+.PHONY : runtime/vm/translator/translator-deps.s
+
+# target to generate assembly for a file
+runtime/vm/translator/translator-deps.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-deps.cpp.s
+.PHONY : runtime/vm/translator/translator-deps.cpp.s
 
 runtime/vm/translator/translator-x64.o: runtime/vm/translator/translator-x64.cpp.o
 .PHONY : runtime/vm/translator/translator-x64.o
 
 # target to build an object file
 runtime/vm/translator/translator-x64.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-x64.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-x64.cpp.o
 .PHONY : runtime/vm/translator/translator-x64.cpp.o
 
 runtime/vm/translator/translator-x64.i: runtime/vm/translator/translator-x64.cpp.i
@@ -9883,7 +9979,7 @@ runtime/vm/translator/translator-x64.i: runtime/vm/translator/translator-x64.cpp
 
 # target to preprocess a source file
 runtime/vm/translator/translator-x64.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-x64.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-x64.cpp.i
 .PHONY : runtime/vm/translator/translator-x64.cpp.i
 
 runtime/vm/translator/translator-x64.s: runtime/vm/translator/translator-x64.cpp.s
@@ -9891,7 +9987,7 @@ runtime/vm/translator/translator-x64.s: runtime/vm/translator/translator-x64.cpp
 
 # target to generate assembly for a file
 runtime/vm/translator/translator-x64.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-x64.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator-x64.cpp.s
 .PHONY : runtime/vm/translator/translator-x64.cpp.s
 
 runtime/vm/translator/translator.o: runtime/vm/translator/translator.cpp.o
@@ -9899,7 +9995,7 @@ runtime/vm/translator/translator.o: runtime/vm/translator/translator.cpp.o
 
 # target to build an object file
 runtime/vm/translator/translator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator.cpp.o
 .PHONY : runtime/vm/translator/translator.cpp.o
 
 runtime/vm/translator/translator.i: runtime/vm/translator/translator.cpp.i
@@ -9907,7 +10003,7 @@ runtime/vm/translator/translator.i: runtime/vm/translator/translator.cpp.i
 
 # target to preprocess a source file
 runtime/vm/translator/translator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator.cpp.i
 .PHONY : runtime/vm/translator/translator.cpp.i
 
 runtime/vm/translator/translator.s: runtime/vm/translator/translator.cpp.s
@@ -9915,15 +10011,39 @@ runtime/vm/translator/translator.s: runtime/vm/translator/translator.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/translator/translator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/translator/translator.cpp.s
 .PHONY : runtime/vm/translator/translator.cpp.s
+
+runtime/vm/treadmill.o: runtime/vm/treadmill.cpp.o
+.PHONY : runtime/vm/treadmill.o
+
+# target to build an object file
+runtime/vm/treadmill.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/treadmill.cpp.o
+.PHONY : runtime/vm/treadmill.cpp.o
+
+runtime/vm/treadmill.i: runtime/vm/treadmill.cpp.i
+.PHONY : runtime/vm/treadmill.i
+
+# target to preprocess a source file
+runtime/vm/treadmill.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/treadmill.cpp.i
+.PHONY : runtime/vm/treadmill.cpp.i
+
+runtime/vm/treadmill.s: runtime/vm/treadmill.cpp.s
+.PHONY : runtime/vm/treadmill.s
+
+# target to generate assembly for a file
+runtime/vm/treadmill.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/treadmill.cpp.s
+.PHONY : runtime/vm/treadmill.cpp.s
 
 runtime/vm/type_constraint.o: runtime/vm/type_constraint.cpp.o
 .PHONY : runtime/vm/type_constraint.o
 
 # target to build an object file
 runtime/vm/type_constraint.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/type_constraint.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/type_constraint.cpp.o
 .PHONY : runtime/vm/type_constraint.cpp.o
 
 runtime/vm/type_constraint.i: runtime/vm/type_constraint.cpp.i
@@ -9931,7 +10051,7 @@ runtime/vm/type_constraint.i: runtime/vm/type_constraint.cpp.i
 
 # target to preprocess a source file
 runtime/vm/type_constraint.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/type_constraint.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/type_constraint.cpp.i
 .PHONY : runtime/vm/type_constraint.cpp.i
 
 runtime/vm/type_constraint.s: runtime/vm/type_constraint.cpp.s
@@ -9939,7 +10059,7 @@ runtime/vm/type_constraint.s: runtime/vm/type_constraint.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/type_constraint.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/type_constraint.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/type_constraint.cpp.s
 .PHONY : runtime/vm/type_constraint.cpp.s
 
 runtime/vm/unit.o: runtime/vm/unit.cpp.o
@@ -9947,7 +10067,7 @@ runtime/vm/unit.o: runtime/vm/unit.cpp.o
 
 # target to build an object file
 runtime/vm/unit.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/unit.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/unit.cpp.o
 .PHONY : runtime/vm/unit.cpp.o
 
 runtime/vm/unit.i: runtime/vm/unit.cpp.i
@@ -9955,7 +10075,7 @@ runtime/vm/unit.i: runtime/vm/unit.cpp.i
 
 # target to preprocess a source file
 runtime/vm/unit.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/unit.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/unit.cpp.i
 .PHONY : runtime/vm/unit.cpp.i
 
 runtime/vm/unit.s: runtime/vm/unit.cpp.s
@@ -9963,7 +10083,7 @@ runtime/vm/unit.s: runtime/vm/unit.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/unit.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/unit.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/unit.cpp.s
 .PHONY : runtime/vm/unit.cpp.s
 
 runtime/vm/vm.o: runtime/vm/vm.cpp.o
@@ -9971,7 +10091,7 @@ runtime/vm/vm.o: runtime/vm/vm.cpp.o
 
 # target to build an object file
 runtime/vm/vm.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/vm.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/vm.cpp.o
 .PHONY : runtime/vm/vm.cpp.o
 
 runtime/vm/vm.i: runtime/vm/vm.cpp.i
@@ -9979,7 +10099,7 @@ runtime/vm/vm.i: runtime/vm/vm.cpp.i
 
 # target to preprocess a source file
 runtime/vm/vm.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/vm.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/vm.cpp.i
 .PHONY : runtime/vm/vm.cpp.i
 
 runtime/vm/vm.s: runtime/vm/vm.cpp.s
@@ -9987,7 +10107,7 @@ runtime/vm/vm.s: runtime/vm/vm.cpp.s
 
 # target to generate assembly for a file
 runtime/vm/vm.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/vm.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/runtime/vm/vm.cpp.s
 .PHONY : runtime/vm/vm.cpp.s
 
 system/gen/php/classes/arrayaccess.o: system/gen/php/classes/arrayaccess.cpp.o
@@ -9995,7 +10115,7 @@ system/gen/php/classes/arrayaccess.o: system/gen/php/classes/arrayaccess.cpp.o
 
 # target to build an object file
 system/gen/php/classes/arrayaccess.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/arrayaccess.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/arrayaccess.cpp.o
 .PHONY : system/gen/php/classes/arrayaccess.cpp.o
 
 system/gen/php/classes/arrayaccess.i: system/gen/php/classes/arrayaccess.cpp.i
@@ -10003,7 +10123,7 @@ system/gen/php/classes/arrayaccess.i: system/gen/php/classes/arrayaccess.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/arrayaccess.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/arrayaccess.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/arrayaccess.cpp.i
 .PHONY : system/gen/php/classes/arrayaccess.cpp.i
 
 system/gen/php/classes/arrayaccess.s: system/gen/php/classes/arrayaccess.cpp.s
@@ -10011,7 +10131,7 @@ system/gen/php/classes/arrayaccess.s: system/gen/php/classes/arrayaccess.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/arrayaccess.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/arrayaccess.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/arrayaccess.cpp.s
 .PHONY : system/gen/php/classes/arrayaccess.cpp.s
 
 system/gen/php/classes/debugger.o: system/gen/php/classes/debugger.cpp.o
@@ -10019,7 +10139,7 @@ system/gen/php/classes/debugger.o: system/gen/php/classes/debugger.cpp.o
 
 # target to build an object file
 system/gen/php/classes/debugger.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/debugger.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/debugger.cpp.o
 .PHONY : system/gen/php/classes/debugger.cpp.o
 
 system/gen/php/classes/debugger.i: system/gen/php/classes/debugger.cpp.i
@@ -10027,7 +10147,7 @@ system/gen/php/classes/debugger.i: system/gen/php/classes/debugger.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/debugger.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/debugger.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/debugger.cpp.i
 .PHONY : system/gen/php/classes/debugger.cpp.i
 
 system/gen/php/classes/debugger.s: system/gen/php/classes/debugger.cpp.s
@@ -10035,7 +10155,7 @@ system/gen/php/classes/debugger.s: system/gen/php/classes/debugger.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/debugger.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/debugger.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/debugger.cpp.s
 .PHONY : system/gen/php/classes/debugger.cpp.s
 
 system/gen/php/classes/directory.o: system/gen/php/classes/directory.cpp.o
@@ -10043,7 +10163,7 @@ system/gen/php/classes/directory.o: system/gen/php/classes/directory.cpp.o
 
 # target to build an object file
 system/gen/php/classes/directory.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directory.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directory.cpp.o
 .PHONY : system/gen/php/classes/directory.cpp.o
 
 system/gen/php/classes/directory.i: system/gen/php/classes/directory.cpp.i
@@ -10051,7 +10171,7 @@ system/gen/php/classes/directory.i: system/gen/php/classes/directory.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/directory.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directory.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directory.cpp.i
 .PHONY : system/gen/php/classes/directory.cpp.i
 
 system/gen/php/classes/directory.s: system/gen/php/classes/directory.cpp.s
@@ -10059,7 +10179,7 @@ system/gen/php/classes/directory.s: system/gen/php/classes/directory.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/directory.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directory.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directory.cpp.s
 .PHONY : system/gen/php/classes/directory.cpp.s
 
 system/gen/php/classes/directoryiterator.o: system/gen/php/classes/directoryiterator.cpp.o
@@ -10067,7 +10187,7 @@ system/gen/php/classes/directoryiterator.o: system/gen/php/classes/directoryiter
 
 # target to build an object file
 system/gen/php/classes/directoryiterator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directoryiterator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directoryiterator.cpp.o
 .PHONY : system/gen/php/classes/directoryiterator.cpp.o
 
 system/gen/php/classes/directoryiterator.i: system/gen/php/classes/directoryiterator.cpp.i
@@ -10075,7 +10195,7 @@ system/gen/php/classes/directoryiterator.i: system/gen/php/classes/directoryiter
 
 # target to preprocess a source file
 system/gen/php/classes/directoryiterator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directoryiterator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directoryiterator.cpp.i
 .PHONY : system/gen/php/classes/directoryiterator.cpp.i
 
 system/gen/php/classes/directoryiterator.s: system/gen/php/classes/directoryiterator.cpp.s
@@ -10083,7 +10203,7 @@ system/gen/php/classes/directoryiterator.s: system/gen/php/classes/directoryiter
 
 # target to generate assembly for a file
 system/gen/php/classes/directoryiterator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directoryiterator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/directoryiterator.cpp.s
 .PHONY : system/gen/php/classes/directoryiterator.cpp.s
 
 system/gen/php/classes/exception.o: system/gen/php/classes/exception.cpp.o
@@ -10091,7 +10211,7 @@ system/gen/php/classes/exception.o: system/gen/php/classes/exception.cpp.o
 
 # target to build an object file
 system/gen/php/classes/exception.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/exception.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/exception.cpp.o
 .PHONY : system/gen/php/classes/exception.cpp.o
 
 system/gen/php/classes/exception.i: system/gen/php/classes/exception.cpp.i
@@ -10099,7 +10219,7 @@ system/gen/php/classes/exception.i: system/gen/php/classes/exception.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/exception.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/exception.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/exception.cpp.i
 .PHONY : system/gen/php/classes/exception.cpp.i
 
 system/gen/php/classes/exception.s: system/gen/php/classes/exception.cpp.s
@@ -10107,7 +10227,7 @@ system/gen/php/classes/exception.s: system/gen/php/classes/exception.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/exception.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/exception.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/exception.cpp.s
 .PHONY : system/gen/php/classes/exception.cpp.s
 
 system/gen/php/classes/fbmysqllexer.o: system/gen/php/classes/fbmysqllexer.cpp.o
@@ -10115,7 +10235,7 @@ system/gen/php/classes/fbmysqllexer.o: system/gen/php/classes/fbmysqllexer.cpp.o
 
 # target to build an object file
 system/gen/php/classes/fbmysqllexer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/fbmysqllexer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/fbmysqllexer.cpp.o
 .PHONY : system/gen/php/classes/fbmysqllexer.cpp.o
 
 system/gen/php/classes/fbmysqllexer.i: system/gen/php/classes/fbmysqllexer.cpp.i
@@ -10123,7 +10243,7 @@ system/gen/php/classes/fbmysqllexer.i: system/gen/php/classes/fbmysqllexer.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/fbmysqllexer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/fbmysqllexer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/fbmysqllexer.cpp.i
 .PHONY : system/gen/php/classes/fbmysqllexer.cpp.i
 
 system/gen/php/classes/fbmysqllexer.s: system/gen/php/classes/fbmysqllexer.cpp.s
@@ -10131,7 +10251,7 @@ system/gen/php/classes/fbmysqllexer.s: system/gen/php/classes/fbmysqllexer.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/fbmysqllexer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/fbmysqllexer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/fbmysqllexer.cpp.s
 .PHONY : system/gen/php/classes/fbmysqllexer.cpp.s
 
 system/gen/php/classes/iterator.o: system/gen/php/classes/iterator.cpp.o
@@ -10139,7 +10259,7 @@ system/gen/php/classes/iterator.o: system/gen/php/classes/iterator.cpp.o
 
 # target to build an object file
 system/gen/php/classes/iterator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/iterator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/iterator.cpp.o
 .PHONY : system/gen/php/classes/iterator.cpp.o
 
 system/gen/php/classes/iterator.i: system/gen/php/classes/iterator.cpp.i
@@ -10147,7 +10267,7 @@ system/gen/php/classes/iterator.i: system/gen/php/classes/iterator.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/iterator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/iterator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/iterator.cpp.i
 .PHONY : system/gen/php/classes/iterator.cpp.i
 
 system/gen/php/classes/iterator.s: system/gen/php/classes/iterator.cpp.s
@@ -10155,7 +10275,7 @@ system/gen/php/classes/iterator.s: system/gen/php/classes/iterator.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/iterator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/iterator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/iterator.cpp.s
 .PHONY : system/gen/php/classes/iterator.cpp.s
 
 system/gen/php/classes/reflection.o: system/gen/php/classes/reflection.cpp.o
@@ -10163,7 +10283,7 @@ system/gen/php/classes/reflection.o: system/gen/php/classes/reflection.cpp.o
 
 # target to build an object file
 system/gen/php/classes/reflection.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/reflection.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/reflection.cpp.o
 .PHONY : system/gen/php/classes/reflection.cpp.o
 
 system/gen/php/classes/reflection.i: system/gen/php/classes/reflection.cpp.i
@@ -10171,7 +10291,7 @@ system/gen/php/classes/reflection.i: system/gen/php/classes/reflection.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/reflection.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/reflection.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/reflection.cpp.i
 .PHONY : system/gen/php/classes/reflection.cpp.i
 
 system/gen/php/classes/reflection.s: system/gen/php/classes/reflection.cpp.s
@@ -10179,7 +10299,7 @@ system/gen/php/classes/reflection.s: system/gen/php/classes/reflection.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/reflection.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/reflection.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/reflection.cpp.s
 .PHONY : system/gen/php/classes/reflection.cpp.s
 
 system/gen/php/classes/soapfault.o: system/gen/php/classes/soapfault.cpp.o
@@ -10187,7 +10307,7 @@ system/gen/php/classes/soapfault.o: system/gen/php/classes/soapfault.cpp.o
 
 # target to build an object file
 system/gen/php/classes/soapfault.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/soapfault.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/soapfault.cpp.o
 .PHONY : system/gen/php/classes/soapfault.cpp.o
 
 system/gen/php/classes/soapfault.i: system/gen/php/classes/soapfault.cpp.i
@@ -10195,7 +10315,7 @@ system/gen/php/classes/soapfault.i: system/gen/php/classes/soapfault.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/soapfault.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/soapfault.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/soapfault.cpp.i
 .PHONY : system/gen/php/classes/soapfault.cpp.i
 
 system/gen/php/classes/soapfault.s: system/gen/php/classes/soapfault.cpp.s
@@ -10203,7 +10323,7 @@ system/gen/php/classes/soapfault.s: system/gen/php/classes/soapfault.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/soapfault.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/soapfault.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/soapfault.cpp.s
 .PHONY : system/gen/php/classes/soapfault.cpp.s
 
 system/gen/php/classes/splfile.o: system/gen/php/classes/splfile.cpp.o
@@ -10211,7 +10331,7 @@ system/gen/php/classes/splfile.o: system/gen/php/classes/splfile.cpp.o
 
 # target to build an object file
 system/gen/php/classes/splfile.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splfile.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splfile.cpp.o
 .PHONY : system/gen/php/classes/splfile.cpp.o
 
 system/gen/php/classes/splfile.i: system/gen/php/classes/splfile.cpp.i
@@ -10219,7 +10339,7 @@ system/gen/php/classes/splfile.i: system/gen/php/classes/splfile.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/splfile.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splfile.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splfile.cpp.i
 .PHONY : system/gen/php/classes/splfile.cpp.i
 
 system/gen/php/classes/splfile.s: system/gen/php/classes/splfile.cpp.s
@@ -10227,7 +10347,7 @@ system/gen/php/classes/splfile.s: system/gen/php/classes/splfile.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/splfile.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splfile.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splfile.cpp.s
 .PHONY : system/gen/php/classes/splfile.cpp.s
 
 system/gen/php/classes/splobjectstorage.o: system/gen/php/classes/splobjectstorage.cpp.o
@@ -10235,7 +10355,7 @@ system/gen/php/classes/splobjectstorage.o: system/gen/php/classes/splobjectstora
 
 # target to build an object file
 system/gen/php/classes/splobjectstorage.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splobjectstorage.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splobjectstorage.cpp.o
 .PHONY : system/gen/php/classes/splobjectstorage.cpp.o
 
 system/gen/php/classes/splobjectstorage.i: system/gen/php/classes/splobjectstorage.cpp.i
@@ -10243,7 +10363,7 @@ system/gen/php/classes/splobjectstorage.i: system/gen/php/classes/splobjectstora
 
 # target to preprocess a source file
 system/gen/php/classes/splobjectstorage.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splobjectstorage.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splobjectstorage.cpp.i
 .PHONY : system/gen/php/classes/splobjectstorage.cpp.i
 
 system/gen/php/classes/splobjectstorage.s: system/gen/php/classes/splobjectstorage.cpp.s
@@ -10251,7 +10371,7 @@ system/gen/php/classes/splobjectstorage.s: system/gen/php/classes/splobjectstora
 
 # target to generate assembly for a file
 system/gen/php/classes/splobjectstorage.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splobjectstorage.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/splobjectstorage.cpp.s
 .PHONY : system/gen/php/classes/splobjectstorage.cpp.s
 
 system/gen/php/classes/stdclass.o: system/gen/php/classes/stdclass.cpp.o
@@ -10259,7 +10379,7 @@ system/gen/php/classes/stdclass.o: system/gen/php/classes/stdclass.cpp.o
 
 # target to build an object file
 system/gen/php/classes/stdclass.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/stdclass.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/stdclass.cpp.o
 .PHONY : system/gen/php/classes/stdclass.cpp.o
 
 system/gen/php/classes/stdclass.i: system/gen/php/classes/stdclass.cpp.i
@@ -10267,7 +10387,7 @@ system/gen/php/classes/stdclass.i: system/gen/php/classes/stdclass.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/stdclass.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/stdclass.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/stdclass.cpp.i
 .PHONY : system/gen/php/classes/stdclass.cpp.i
 
 system/gen/php/classes/stdclass.s: system/gen/php/classes/stdclass.cpp.s
@@ -10275,7 +10395,7 @@ system/gen/php/classes/stdclass.s: system/gen/php/classes/stdclass.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/stdclass.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/stdclass.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/stdclass.cpp.s
 .PHONY : system/gen/php/classes/stdclass.cpp.s
 
 system/gen/php/classes/xhprof.o: system/gen/php/classes/xhprof.cpp.o
@@ -10283,7 +10403,7 @@ system/gen/php/classes/xhprof.o: system/gen/php/classes/xhprof.cpp.o
 
 # target to build an object file
 system/gen/php/classes/xhprof.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/xhprof.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/xhprof.cpp.o
 .PHONY : system/gen/php/classes/xhprof.cpp.o
 
 system/gen/php/classes/xhprof.i: system/gen/php/classes/xhprof.cpp.i
@@ -10291,7 +10411,7 @@ system/gen/php/classes/xhprof.i: system/gen/php/classes/xhprof.cpp.i
 
 # target to preprocess a source file
 system/gen/php/classes/xhprof.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/xhprof.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/xhprof.cpp.i
 .PHONY : system/gen/php/classes/xhprof.cpp.i
 
 system/gen/php/classes/xhprof.s: system/gen/php/classes/xhprof.cpp.s
@@ -10299,7 +10419,7 @@ system/gen/php/classes/xhprof.s: system/gen/php/classes/xhprof.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/classes/xhprof.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/xhprof.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/classes/xhprof.cpp.s
 .PHONY : system/gen/php/classes/xhprof.cpp.s
 
 system/gen/php/globals/constants.o: system/gen/php/globals/constants.cpp.o
@@ -10307,7 +10427,7 @@ system/gen/php/globals/constants.o: system/gen/php/globals/constants.cpp.o
 
 # target to build an object file
 system/gen/php/globals/constants.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/constants.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/constants.cpp.o
 .PHONY : system/gen/php/globals/constants.cpp.o
 
 system/gen/php/globals/constants.i: system/gen/php/globals/constants.cpp.i
@@ -10315,7 +10435,7 @@ system/gen/php/globals/constants.i: system/gen/php/globals/constants.cpp.i
 
 # target to preprocess a source file
 system/gen/php/globals/constants.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/constants.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/constants.cpp.i
 .PHONY : system/gen/php/globals/constants.cpp.i
 
 system/gen/php/globals/constants.s: system/gen/php/globals/constants.cpp.s
@@ -10323,7 +10443,7 @@ system/gen/php/globals/constants.s: system/gen/php/globals/constants.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/globals/constants.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/constants.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/constants.cpp.s
 .PHONY : system/gen/php/globals/constants.cpp.s
 
 system/gen/php/globals/symbols.o: system/gen/php/globals/symbols.cpp.o
@@ -10331,7 +10451,7 @@ system/gen/php/globals/symbols.o: system/gen/php/globals/symbols.cpp.o
 
 # target to build an object file
 system/gen/php/globals/symbols.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/symbols.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/symbols.cpp.o
 .PHONY : system/gen/php/globals/symbols.cpp.o
 
 system/gen/php/globals/symbols.i: system/gen/php/globals/symbols.cpp.i
@@ -10339,7 +10459,7 @@ system/gen/php/globals/symbols.i: system/gen/php/globals/symbols.cpp.i
 
 # target to preprocess a source file
 system/gen/php/globals/symbols.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/symbols.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/symbols.cpp.i
 .PHONY : system/gen/php/globals/symbols.cpp.i
 
 system/gen/php/globals/symbols.s: system/gen/php/globals/symbols.cpp.s
@@ -10347,7 +10467,7 @@ system/gen/php/globals/symbols.s: system/gen/php/globals/symbols.cpp.s
 
 # target to generate assembly for a file
 system/gen/php/globals/symbols.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/symbols.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/php/globals/symbols.cpp.s
 .PHONY : system/gen/php/globals/symbols.cpp.s
 
 system/gen/sys/dynamic_table_class.o: system/gen/sys/dynamic_table_class.cpp.o
@@ -10355,7 +10475,7 @@ system/gen/sys/dynamic_table_class.o: system/gen/sys/dynamic_table_class.cpp.o
 
 # target to build an object file
 system/gen/sys/dynamic_table_class.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_class.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_class.cpp.o
 .PHONY : system/gen/sys/dynamic_table_class.cpp.o
 
 system/gen/sys/dynamic_table_class.i: system/gen/sys/dynamic_table_class.cpp.i
@@ -10363,7 +10483,7 @@ system/gen/sys/dynamic_table_class.i: system/gen/sys/dynamic_table_class.cpp.i
 
 # target to preprocess a source file
 system/gen/sys/dynamic_table_class.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_class.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_class.cpp.i
 .PHONY : system/gen/sys/dynamic_table_class.cpp.i
 
 system/gen/sys/dynamic_table_class.s: system/gen/sys/dynamic_table_class.cpp.s
@@ -10371,7 +10491,7 @@ system/gen/sys/dynamic_table_class.s: system/gen/sys/dynamic_table_class.cpp.s
 
 # target to generate assembly for a file
 system/gen/sys/dynamic_table_class.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_class.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_class.cpp.s
 .PHONY : system/gen/sys/dynamic_table_class.cpp.s
 
 system/gen/sys/dynamic_table_constant.o: system/gen/sys/dynamic_table_constant.cpp.o
@@ -10379,7 +10499,7 @@ system/gen/sys/dynamic_table_constant.o: system/gen/sys/dynamic_table_constant.c
 
 # target to build an object file
 system/gen/sys/dynamic_table_constant.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_constant.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_constant.cpp.o
 .PHONY : system/gen/sys/dynamic_table_constant.cpp.o
 
 system/gen/sys/dynamic_table_constant.i: system/gen/sys/dynamic_table_constant.cpp.i
@@ -10387,7 +10507,7 @@ system/gen/sys/dynamic_table_constant.i: system/gen/sys/dynamic_table_constant.c
 
 # target to preprocess a source file
 system/gen/sys/dynamic_table_constant.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_constant.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_constant.cpp.i
 .PHONY : system/gen/sys/dynamic_table_constant.cpp.i
 
 system/gen/sys/dynamic_table_constant.s: system/gen/sys/dynamic_table_constant.cpp.s
@@ -10395,39 +10515,39 @@ system/gen/sys/dynamic_table_constant.s: system/gen/sys/dynamic_table_constant.c
 
 # target to generate assembly for a file
 system/gen/sys/dynamic_table_constant.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_constant.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_constant.cpp.s
 .PHONY : system/gen/sys/dynamic_table_constant.cpp.s
 
-system/gen/sys/dynamic_table_func.no.o: system/gen/sys/dynamic_table_func.no.cpp.o
-.PHONY : system/gen/sys/dynamic_table_func.no.o
+system/gen/sys/dynamic_table_func.o: system/gen/sys/dynamic_table_func.cpp.o
+.PHONY : system/gen/sys/dynamic_table_func.o
 
 # target to build an object file
-system/gen/sys/dynamic_table_func.no.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_func.no.cpp.o
-.PHONY : system/gen/sys/dynamic_table_func.no.cpp.o
+system/gen/sys/dynamic_table_func.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_func.cpp.o
+.PHONY : system/gen/sys/dynamic_table_func.cpp.o
 
-system/gen/sys/dynamic_table_func.no.i: system/gen/sys/dynamic_table_func.no.cpp.i
-.PHONY : system/gen/sys/dynamic_table_func.no.i
+system/gen/sys/dynamic_table_func.i: system/gen/sys/dynamic_table_func.cpp.i
+.PHONY : system/gen/sys/dynamic_table_func.i
 
 # target to preprocess a source file
-system/gen/sys/dynamic_table_func.no.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_func.no.cpp.i
-.PHONY : system/gen/sys/dynamic_table_func.no.cpp.i
+system/gen/sys/dynamic_table_func.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_func.cpp.i
+.PHONY : system/gen/sys/dynamic_table_func.cpp.i
 
-system/gen/sys/dynamic_table_func.no.s: system/gen/sys/dynamic_table_func.no.cpp.s
-.PHONY : system/gen/sys/dynamic_table_func.no.s
+system/gen/sys/dynamic_table_func.s: system/gen/sys/dynamic_table_func.cpp.s
+.PHONY : system/gen/sys/dynamic_table_func.s
 
 # target to generate assembly for a file
-system/gen/sys/dynamic_table_func.no.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_func.no.cpp.s
-.PHONY : system/gen/sys/dynamic_table_func.no.cpp.s
+system/gen/sys/dynamic_table_func.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/dynamic_table_func.cpp.s
+.PHONY : system/gen/sys/dynamic_table_func.cpp.s
 
 system/gen/sys/literal_strings_0.no.o: system/gen/sys/literal_strings_0.no.cpp.o
 .PHONY : system/gen/sys/literal_strings_0.no.o
 
 # target to build an object file
 system/gen/sys/literal_strings_0.no.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/literal_strings_0.no.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/literal_strings_0.no.cpp.o
 .PHONY : system/gen/sys/literal_strings_0.no.cpp.o
 
 system/gen/sys/literal_strings_0.no.i: system/gen/sys/literal_strings_0.no.cpp.i
@@ -10435,7 +10555,7 @@ system/gen/sys/literal_strings_0.no.i: system/gen/sys/literal_strings_0.no.cpp.i
 
 # target to preprocess a source file
 system/gen/sys/literal_strings_0.no.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/literal_strings_0.no.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/literal_strings_0.no.cpp.i
 .PHONY : system/gen/sys/literal_strings_0.no.cpp.i
 
 system/gen/sys/literal_strings_0.no.s: system/gen/sys/literal_strings_0.no.cpp.s
@@ -10443,7 +10563,7 @@ system/gen/sys/literal_strings_0.no.s: system/gen/sys/literal_strings_0.no.cpp.s
 
 # target to generate assembly for a file
 system/gen/sys/literal_strings_0.no.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/literal_strings_0.no.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/literal_strings_0.no.cpp.s
 .PHONY : system/gen/sys/literal_strings_0.no.cpp.s
 
 system/gen/sys/scalar_arrays.no.o: system/gen/sys/scalar_arrays.no.cpp.o
@@ -10451,7 +10571,7 @@ system/gen/sys/scalar_arrays.no.o: system/gen/sys/scalar_arrays.no.cpp.o
 
 # target to build an object file
 system/gen/sys/scalar_arrays.no.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays.no.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays.no.cpp.o
 .PHONY : system/gen/sys/scalar_arrays.no.cpp.o
 
 system/gen/sys/scalar_arrays.no.i: system/gen/sys/scalar_arrays.no.cpp.i
@@ -10459,7 +10579,7 @@ system/gen/sys/scalar_arrays.no.i: system/gen/sys/scalar_arrays.no.cpp.i
 
 # target to preprocess a source file
 system/gen/sys/scalar_arrays.no.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays.no.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays.no.cpp.i
 .PHONY : system/gen/sys/scalar_arrays.no.cpp.i
 
 system/gen/sys/scalar_arrays.no.s: system/gen/sys/scalar_arrays.no.cpp.s
@@ -10467,7 +10587,7 @@ system/gen/sys/scalar_arrays.no.s: system/gen/sys/scalar_arrays.no.cpp.s
 
 # target to generate assembly for a file
 system/gen/sys/scalar_arrays.no.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays.no.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays.no.cpp.s
 .PHONY : system/gen/sys/scalar_arrays.no.cpp.s
 
 system/gen/sys/scalar_arrays_0.no.o: system/gen/sys/scalar_arrays_0.no.cpp.o
@@ -10475,7 +10595,7 @@ system/gen/sys/scalar_arrays_0.no.o: system/gen/sys/scalar_arrays_0.no.cpp.o
 
 # target to build an object file
 system/gen/sys/scalar_arrays_0.no.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays_0.no.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays_0.no.cpp.o
 .PHONY : system/gen/sys/scalar_arrays_0.no.cpp.o
 
 system/gen/sys/scalar_arrays_0.no.i: system/gen/sys/scalar_arrays_0.no.cpp.i
@@ -10483,7 +10603,7 @@ system/gen/sys/scalar_arrays_0.no.i: system/gen/sys/scalar_arrays_0.no.cpp.i
 
 # target to preprocess a source file
 system/gen/sys/scalar_arrays_0.no.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays_0.no.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays_0.no.cpp.i
 .PHONY : system/gen/sys/scalar_arrays_0.no.cpp.i
 
 system/gen/sys/scalar_arrays_0.no.s: system/gen/sys/scalar_arrays_0.no.cpp.s
@@ -10491,7 +10611,7 @@ system/gen/sys/scalar_arrays_0.no.s: system/gen/sys/scalar_arrays_0.no.cpp.s
 
 # target to generate assembly for a file
 system/gen/sys/scalar_arrays_0.no.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays_0.no.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_arrays_0.no.cpp.s
 .PHONY : system/gen/sys/scalar_arrays_0.no.cpp.s
 
 system/gen/sys/scalar_integers.o: system/gen/sys/scalar_integers.cpp.o
@@ -10499,7 +10619,7 @@ system/gen/sys/scalar_integers.o: system/gen/sys/scalar_integers.cpp.o
 
 # target to build an object file
 system/gen/sys/scalar_integers.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_integers.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_integers.cpp.o
 .PHONY : system/gen/sys/scalar_integers.cpp.o
 
 system/gen/sys/scalar_integers.i: system/gen/sys/scalar_integers.cpp.i
@@ -10507,7 +10627,7 @@ system/gen/sys/scalar_integers.i: system/gen/sys/scalar_integers.cpp.i
 
 # target to preprocess a source file
 system/gen/sys/scalar_integers.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_integers.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_integers.cpp.i
 .PHONY : system/gen/sys/scalar_integers.cpp.i
 
 system/gen/sys/scalar_integers.s: system/gen/sys/scalar_integers.cpp.s
@@ -10515,7 +10635,7 @@ system/gen/sys/scalar_integers.s: system/gen/sys/scalar_integers.cpp.s
 
 # target to generate assembly for a file
 system/gen/sys/scalar_integers.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_integers.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/scalar_integers.cpp.s
 .PHONY : system/gen/sys/scalar_integers.cpp.s
 
 system/gen/sys/system_globals.o: system/gen/sys/system_globals.cpp.o
@@ -10523,7 +10643,7 @@ system/gen/sys/system_globals.o: system/gen/sys/system_globals.cpp.o
 
 # target to build an object file
 system/gen/sys/system_globals.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/system_globals.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/system_globals.cpp.o
 .PHONY : system/gen/sys/system_globals.cpp.o
 
 system/gen/sys/system_globals.i: system/gen/sys/system_globals.cpp.i
@@ -10531,7 +10651,7 @@ system/gen/sys/system_globals.i: system/gen/sys/system_globals.cpp.i
 
 # target to preprocess a source file
 system/gen/sys/system_globals.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/system_globals.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/system_globals.cpp.i
 .PHONY : system/gen/sys/system_globals.cpp.i
 
 system/gen/sys/system_globals.s: system/gen/sys/system_globals.cpp.s
@@ -10539,7 +10659,7 @@ system/gen/sys/system_globals.s: system/gen/sys/system_globals.cpp.s
 
 # target to generate assembly for a file
 system/gen/sys/system_globals.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/system_globals.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/gen/sys/system_globals.cpp.s
 .PHONY : system/gen/sys/system_globals.cpp.s
 
 system/lib/systemlib.o: system/lib/systemlib.cpp.o
@@ -10547,7 +10667,7 @@ system/lib/systemlib.o: system/lib/systemlib.cpp.o
 
 # target to build an object file
 system/lib/systemlib.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/lib/systemlib.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/lib/systemlib.cpp.o
 .PHONY : system/lib/systemlib.cpp.o
 
 system/lib/systemlib.i: system/lib/systemlib.cpp.i
@@ -10555,7 +10675,7 @@ system/lib/systemlib.i: system/lib/systemlib.cpp.i
 
 # target to preprocess a source file
 system/lib/systemlib.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/lib/systemlib.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/lib/systemlib.cpp.i
 .PHONY : system/lib/systemlib.cpp.i
 
 system/lib/systemlib.s: system/lib/systemlib.cpp.s
@@ -10563,7 +10683,7 @@ system/lib/systemlib.s: system/lib/systemlib.cpp.s
 
 # target to generate assembly for a file
 system/lib/systemlib.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/lib/systemlib.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/system/lib/systemlib.cpp.s
 .PHONY : system/lib/systemlib.cpp.s
 
 util/alloc.o: util/alloc.cpp.o
@@ -10571,7 +10691,7 @@ util/alloc.o: util/alloc.cpp.o
 
 # target to build an object file
 util/alloc.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/alloc.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/alloc.cpp.o
 .PHONY : util/alloc.cpp.o
 
 util/alloc.i: util/alloc.cpp.i
@@ -10579,7 +10699,7 @@ util/alloc.i: util/alloc.cpp.i
 
 # target to preprocess a source file
 util/alloc.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/alloc.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/alloc.cpp.i
 .PHONY : util/alloc.cpp.i
 
 util/alloc.s: util/alloc.cpp.s
@@ -10587,7 +10707,7 @@ util/alloc.s: util/alloc.cpp.s
 
 # target to generate assembly for a file
 util/alloc.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/alloc.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/alloc.cpp.s
 .PHONY : util/alloc.cpp.s
 
 util/async_func.o: util/async_func.cpp.o
@@ -10595,7 +10715,7 @@ util/async_func.o: util/async_func.cpp.o
 
 # target to build an object file
 util/async_func.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_func.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_func.cpp.o
 .PHONY : util/async_func.cpp.o
 
 util/async_func.i: util/async_func.cpp.i
@@ -10603,7 +10723,7 @@ util/async_func.i: util/async_func.cpp.i
 
 # target to preprocess a source file
 util/async_func.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_func.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_func.cpp.i
 .PHONY : util/async_func.cpp.i
 
 util/async_func.s: util/async_func.cpp.s
@@ -10611,7 +10731,7 @@ util/async_func.s: util/async_func.cpp.s
 
 # target to generate assembly for a file
 util/async_func.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_func.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_func.cpp.s
 .PHONY : util/async_func.cpp.s
 
 util/async_job.o: util/async_job.cpp.o
@@ -10619,7 +10739,7 @@ util/async_job.o: util/async_job.cpp.o
 
 # target to build an object file
 util/async_job.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_job.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_job.cpp.o
 .PHONY : util/async_job.cpp.o
 
 util/async_job.i: util/async_job.cpp.i
@@ -10627,7 +10747,7 @@ util/async_job.i: util/async_job.cpp.i
 
 # target to preprocess a source file
 util/async_job.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_job.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_job.cpp.i
 .PHONY : util/async_job.cpp.i
 
 util/async_job.s: util/async_job.cpp.s
@@ -10635,7 +10755,7 @@ util/async_job.s: util/async_job.cpp.s
 
 # target to generate assembly for a file
 util/async_job.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_job.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/async_job.cpp.s
 .PHONY : util/async_job.cpp.s
 
 util/atomic.o: util/atomic.cpp.o
@@ -10643,7 +10763,7 @@ util/atomic.o: util/atomic.cpp.o
 
 # target to build an object file
 util/atomic.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/atomic.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/atomic.cpp.o
 .PHONY : util/atomic.cpp.o
 
 util/atomic.i: util/atomic.cpp.i
@@ -10651,7 +10771,7 @@ util/atomic.i: util/atomic.cpp.i
 
 # target to preprocess a source file
 util/atomic.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/atomic.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/atomic.cpp.i
 .PHONY : util/atomic.cpp.i
 
 util/atomic.s: util/atomic.cpp.s
@@ -10659,7 +10779,7 @@ util/atomic.s: util/atomic.cpp.s
 
 # target to generate assembly for a file
 util/atomic.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/atomic.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/atomic.cpp.s
 .PHONY : util/atomic.cpp.s
 
 util/capability.o: util/capability.cpp.o
@@ -10667,7 +10787,7 @@ util/capability.o: util/capability.cpp.o
 
 # target to build an object file
 util/capability.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/capability.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/capability.cpp.o
 .PHONY : util/capability.cpp.o
 
 util/capability.i: util/capability.cpp.i
@@ -10675,7 +10795,7 @@ util/capability.i: util/capability.cpp.i
 
 # target to preprocess a source file
 util/capability.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/capability.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/capability.cpp.i
 .PHONY : util/capability.cpp.i
 
 util/capability.s: util/capability.cpp.s
@@ -10683,7 +10803,7 @@ util/capability.s: util/capability.cpp.s
 
 # target to generate assembly for a file
 util/capability.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/capability.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/capability.cpp.s
 .PHONY : util/capability.cpp.s
 
 util/compatibility.o: util/compatibility.cpp.o
@@ -10691,7 +10811,7 @@ util/compatibility.o: util/compatibility.cpp.o
 
 # target to build an object file
 util/compatibility.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compatibility.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compatibility.cpp.o
 .PHONY : util/compatibility.cpp.o
 
 util/compatibility.i: util/compatibility.cpp.i
@@ -10699,7 +10819,7 @@ util/compatibility.i: util/compatibility.cpp.i
 
 # target to preprocess a source file
 util/compatibility.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compatibility.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compatibility.cpp.i
 .PHONY : util/compatibility.cpp.i
 
 util/compatibility.s: util/compatibility.cpp.s
@@ -10707,7 +10827,7 @@ util/compatibility.s: util/compatibility.cpp.s
 
 # target to generate assembly for a file
 util/compatibility.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compatibility.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compatibility.cpp.s
 .PHONY : util/compatibility.cpp.s
 
 util/compression.o: util/compression.cpp.o
@@ -10715,7 +10835,7 @@ util/compression.o: util/compression.cpp.o
 
 # target to build an object file
 util/compression.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compression.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compression.cpp.o
 .PHONY : util/compression.cpp.o
 
 util/compression.i: util/compression.cpp.i
@@ -10723,7 +10843,7 @@ util/compression.i: util/compression.cpp.i
 
 # target to preprocess a source file
 util/compression.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compression.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compression.cpp.i
 .PHONY : util/compression.cpp.i
 
 util/compression.s: util/compression.cpp.s
@@ -10731,7 +10851,7 @@ util/compression.s: util/compression.cpp.s
 
 # target to generate assembly for a file
 util/compression.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compression.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/compression.cpp.s
 .PHONY : util/compression.cpp.s
 
 util/cronolog.o: util/cronolog.cpp.o
@@ -10739,7 +10859,7 @@ util/cronolog.o: util/cronolog.cpp.o
 
 # target to build an object file
 util/cronolog.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronolog.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronolog.cpp.o
 .PHONY : util/cronolog.cpp.o
 
 util/cronolog.i: util/cronolog.cpp.i
@@ -10747,7 +10867,7 @@ util/cronolog.i: util/cronolog.cpp.i
 
 # target to preprocess a source file
 util/cronolog.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronolog.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronolog.cpp.i
 .PHONY : util/cronolog.cpp.i
 
 util/cronolog.s: util/cronolog.cpp.s
@@ -10755,7 +10875,7 @@ util/cronolog.s: util/cronolog.cpp.s
 
 # target to generate assembly for a file
 util/cronolog.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronolog.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronolog.cpp.s
 .PHONY : util/cronolog.cpp.s
 
 util/cronoutils.o: util/cronoutils.cpp.o
@@ -10763,7 +10883,7 @@ util/cronoutils.o: util/cronoutils.cpp.o
 
 # target to build an object file
 util/cronoutils.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronoutils.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronoutils.cpp.o
 .PHONY : util/cronoutils.cpp.o
 
 util/cronoutils.i: util/cronoutils.cpp.i
@@ -10771,7 +10891,7 @@ util/cronoutils.i: util/cronoutils.cpp.i
 
 # target to preprocess a source file
 util/cronoutils.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronoutils.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronoutils.cpp.i
 .PHONY : util/cronoutils.cpp.i
 
 util/cronoutils.s: util/cronoutils.cpp.s
@@ -10779,7 +10899,7 @@ util/cronoutils.s: util/cronoutils.cpp.s
 
 # target to generate assembly for a file
 util/cronoutils.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronoutils.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/cronoutils.cpp.s
 .PHONY : util/cronoutils.cpp.s
 
 util/dataset.o: util/dataset.cpp.o
@@ -10787,7 +10907,7 @@ util/dataset.o: util/dataset.cpp.o
 
 # target to build an object file
 util/dataset.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/dataset.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/dataset.cpp.o
 .PHONY : util/dataset.cpp.o
 
 util/dataset.i: util/dataset.cpp.i
@@ -10795,7 +10915,7 @@ util/dataset.i: util/dataset.cpp.i
 
 # target to preprocess a source file
 util/dataset.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/dataset.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/dataset.cpp.i
 .PHONY : util/dataset.cpp.i
 
 util/dataset.s: util/dataset.cpp.s
@@ -10803,7 +10923,7 @@ util/dataset.s: util/dataset.cpp.s
 
 # target to generate assembly for a file
 util/dataset.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/dataset.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/dataset.cpp.s
 .PHONY : util/dataset.cpp.s
 
 util/db_conn.o: util/db_conn.cpp.o
@@ -10811,7 +10931,7 @@ util/db_conn.o: util/db_conn.cpp.o
 
 # target to build an object file
 util/db_conn.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_conn.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_conn.cpp.o
 .PHONY : util/db_conn.cpp.o
 
 util/db_conn.i: util/db_conn.cpp.i
@@ -10819,7 +10939,7 @@ util/db_conn.i: util/db_conn.cpp.i
 
 # target to preprocess a source file
 util/db_conn.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_conn.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_conn.cpp.i
 .PHONY : util/db_conn.cpp.i
 
 util/db_conn.s: util/db_conn.cpp.s
@@ -10827,7 +10947,7 @@ util/db_conn.s: util/db_conn.cpp.s
 
 # target to generate assembly for a file
 util/db_conn.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_conn.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_conn.cpp.s
 .PHONY : util/db_conn.cpp.s
 
 util/db_dataset.o: util/db_dataset.cpp.o
@@ -10835,7 +10955,7 @@ util/db_dataset.o: util/db_dataset.cpp.o
 
 # target to build an object file
 util/db_dataset.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_dataset.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_dataset.cpp.o
 .PHONY : util/db_dataset.cpp.o
 
 util/db_dataset.i: util/db_dataset.cpp.i
@@ -10843,7 +10963,7 @@ util/db_dataset.i: util/db_dataset.cpp.i
 
 # target to preprocess a source file
 util/db_dataset.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_dataset.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_dataset.cpp.i
 .PHONY : util/db_dataset.cpp.i
 
 util/db_dataset.s: util/db_dataset.cpp.s
@@ -10851,7 +10971,7 @@ util/db_dataset.s: util/db_dataset.cpp.s
 
 # target to generate assembly for a file
 util/db_dataset.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_dataset.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_dataset.cpp.s
 .PHONY : util/db_dataset.cpp.s
 
 util/db_filter.o: util/db_filter.cpp.o
@@ -10859,7 +10979,7 @@ util/db_filter.o: util/db_filter.cpp.o
 
 # target to build an object file
 util/db_filter.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_filter.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_filter.cpp.o
 .PHONY : util/db_filter.cpp.o
 
 util/db_filter.i: util/db_filter.cpp.i
@@ -10867,7 +10987,7 @@ util/db_filter.i: util/db_filter.cpp.i
 
 # target to preprocess a source file
 util/db_filter.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_filter.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_filter.cpp.i
 .PHONY : util/db_filter.cpp.i
 
 util/db_filter.s: util/db_filter.cpp.s
@@ -10875,7 +10995,7 @@ util/db_filter.s: util/db_filter.cpp.s
 
 # target to generate assembly for a file
 util/db_filter.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_filter.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_filter.cpp.s
 .PHONY : util/db_filter.cpp.s
 
 util/db_mysql.o: util/db_mysql.cpp.o
@@ -10883,7 +11003,7 @@ util/db_mysql.o: util/db_mysql.cpp.o
 
 # target to build an object file
 util/db_mysql.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_mysql.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_mysql.cpp.o
 .PHONY : util/db_mysql.cpp.o
 
 util/db_mysql.i: util/db_mysql.cpp.i
@@ -10891,7 +11011,7 @@ util/db_mysql.i: util/db_mysql.cpp.i
 
 # target to preprocess a source file
 util/db_mysql.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_mysql.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_mysql.cpp.i
 .PHONY : util/db_mysql.cpp.i
 
 util/db_mysql.s: util/db_mysql.cpp.s
@@ -10899,7 +11019,7 @@ util/db_mysql.s: util/db_mysql.cpp.s
 
 # target to generate assembly for a file
 util/db_mysql.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_mysql.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_mysql.cpp.s
 .PHONY : util/db_mysql.cpp.s
 
 util/db_query.o: util/db_query.cpp.o
@@ -10907,7 +11027,7 @@ util/db_query.o: util/db_query.cpp.o
 
 # target to build an object file
 util/db_query.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_query.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_query.cpp.o
 .PHONY : util/db_query.cpp.o
 
 util/db_query.i: util/db_query.cpp.i
@@ -10915,7 +11035,7 @@ util/db_query.i: util/db_query.cpp.i
 
 # target to preprocess a source file
 util/db_query.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_query.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_query.cpp.i
 .PHONY : util/db_query.cpp.i
 
 util/db_query.s: util/db_query.cpp.s
@@ -10923,7 +11043,7 @@ util/db_query.s: util/db_query.cpp.s
 
 # target to generate assembly for a file
 util/db_query.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_query.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/db_query.cpp.s
 .PHONY : util/db_query.cpp.s
 
 util/exception.o: util/exception.cpp.o
@@ -10931,7 +11051,7 @@ util/exception.o: util/exception.cpp.o
 
 # target to build an object file
 util/exception.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/exception.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/exception.cpp.o
 .PHONY : util/exception.cpp.o
 
 util/exception.i: util/exception.cpp.i
@@ -10939,7 +11059,7 @@ util/exception.i: util/exception.cpp.i
 
 # target to preprocess a source file
 util/exception.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/exception.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/exception.cpp.i
 .PHONY : util/exception.cpp.i
 
 util/exception.s: util/exception.cpp.s
@@ -10947,7 +11067,7 @@ util/exception.s: util/exception.cpp.s
 
 # target to generate assembly for a file
 util/exception.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/exception.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/exception.cpp.s
 .PHONY : util/exception.cpp.s
 
 util/file_cache.o: util/file_cache.cpp.o
@@ -10955,7 +11075,7 @@ util/file_cache.o: util/file_cache.cpp.o
 
 # target to build an object file
 util/file_cache.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/file_cache.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/file_cache.cpp.o
 .PHONY : util/file_cache.cpp.o
 
 util/file_cache.i: util/file_cache.cpp.i
@@ -10963,7 +11083,7 @@ util/file_cache.i: util/file_cache.cpp.i
 
 # target to preprocess a source file
 util/file_cache.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/file_cache.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/file_cache.cpp.i
 .PHONY : util/file_cache.cpp.i
 
 util/file_cache.s: util/file_cache.cpp.s
@@ -10971,15 +11091,39 @@ util/file_cache.s: util/file_cache.cpp.s
 
 # target to generate assembly for a file
 util/file_cache.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/file_cache.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/file_cache.cpp.s
 .PHONY : util/file_cache.cpp.s
+
+util/hardware_counter.o: util/hardware_counter.cpp.o
+.PHONY : util/hardware_counter.o
+
+# target to build an object file
+util/hardware_counter.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hardware_counter.cpp.o
+.PHONY : util/hardware_counter.cpp.o
+
+util/hardware_counter.i: util/hardware_counter.cpp.i
+.PHONY : util/hardware_counter.i
+
+# target to preprocess a source file
+util/hardware_counter.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hardware_counter.cpp.i
+.PHONY : util/hardware_counter.cpp.i
+
+util/hardware_counter.s: util/hardware_counter.cpp.s
+.PHONY : util/hardware_counter.s
+
+# target to generate assembly for a file
+util/hardware_counter.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hardware_counter.cpp.s
+.PHONY : util/hardware_counter.cpp.s
 
 util/hash.o: util/hash.cpp.o
 .PHONY : util/hash.o
 
 # target to build an object file
 util/hash.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hash.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hash.cpp.o
 .PHONY : util/hash.cpp.o
 
 util/hash.i: util/hash.cpp.i
@@ -10987,7 +11131,7 @@ util/hash.i: util/hash.cpp.i
 
 # target to preprocess a source file
 util/hash.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hash.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hash.cpp.i
 .PHONY : util/hash.cpp.i
 
 util/hash.s: util/hash.cpp.s
@@ -10995,7 +11139,7 @@ util/hash.s: util/hash.cpp.s
 
 # target to generate assembly for a file
 util/hash.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hash.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hash.cpp.s
 .PHONY : util/hash.cpp.s
 
 util/hdf.o: util/hdf.cpp.o
@@ -11003,7 +11147,7 @@ util/hdf.o: util/hdf.cpp.o
 
 # target to build an object file
 util/hdf.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hdf.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hdf.cpp.o
 .PHONY : util/hdf.cpp.o
 
 util/hdf.i: util/hdf.cpp.i
@@ -11011,7 +11155,7 @@ util/hdf.i: util/hdf.cpp.i
 
 # target to preprocess a source file
 util/hdf.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hdf.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hdf.cpp.i
 .PHONY : util/hdf.cpp.i
 
 util/hdf.s: util/hdf.cpp.s
@@ -11019,7 +11163,7 @@ util/hdf.s: util/hdf.cpp.s
 
 # target to generate assembly for a file
 util/hdf.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hdf.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/hdf.cpp.s
 .PHONY : util/hdf.cpp.s
 
 util/json.o: util/json.cpp.o
@@ -11027,7 +11171,7 @@ util/json.o: util/json.cpp.o
 
 # target to build an object file
 util/json.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/json.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/json.cpp.o
 .PHONY : util/json.cpp.o
 
 util/json.i: util/json.cpp.i
@@ -11035,7 +11179,7 @@ util/json.i: util/json.cpp.i
 
 # target to preprocess a source file
 util/json.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/json.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/json.cpp.i
 .PHONY : util/json.cpp.i
 
 util/json.s: util/json.cpp.s
@@ -11043,7 +11187,7 @@ util/json.s: util/json.cpp.s
 
 # target to generate assembly for a file
 util/json.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/json.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/json.cpp.s
 .PHONY : util/json.cpp.s
 
 util/light_process.o: util/light_process.cpp.o
@@ -11051,7 +11195,7 @@ util/light_process.o: util/light_process.cpp.o
 
 # target to build an object file
 util/light_process.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/light_process.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/light_process.cpp.o
 .PHONY : util/light_process.cpp.o
 
 util/light_process.i: util/light_process.cpp.i
@@ -11059,7 +11203,7 @@ util/light_process.i: util/light_process.cpp.i
 
 # target to preprocess a source file
 util/light_process.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/light_process.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/light_process.cpp.i
 .PHONY : util/light_process.cpp.i
 
 util/light_process.s: util/light_process.cpp.s
@@ -11067,7 +11211,7 @@ util/light_process.s: util/light_process.cpp.s
 
 # target to generate assembly for a file
 util/light_process.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/light_process.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/light_process.cpp.s
 .PHONY : util/light_process.cpp.s
 
 util/lock.o: util/lock.cpp.o
@@ -11075,7 +11219,7 @@ util/lock.o: util/lock.cpp.o
 
 # target to build an object file
 util/lock.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/lock.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/lock.cpp.o
 .PHONY : util/lock.cpp.o
 
 util/lock.i: util/lock.cpp.i
@@ -11083,7 +11227,7 @@ util/lock.i: util/lock.cpp.i
 
 # target to preprocess a source file
 util/lock.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/lock.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/lock.cpp.i
 .PHONY : util/lock.cpp.i
 
 util/lock.s: util/lock.cpp.s
@@ -11091,7 +11235,7 @@ util/lock.s: util/lock.cpp.s
 
 # target to generate assembly for a file
 util/lock.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/lock.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/lock.cpp.s
 .PHONY : util/lock.cpp.s
 
 util/log_aggregator.o: util/log_aggregator.cpp.o
@@ -11099,7 +11243,7 @@ util/log_aggregator.o: util/log_aggregator.cpp.o
 
 # target to build an object file
 util/log_aggregator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/log_aggregator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/log_aggregator.cpp.o
 .PHONY : util/log_aggregator.cpp.o
 
 util/log_aggregator.i: util/log_aggregator.cpp.i
@@ -11107,7 +11251,7 @@ util/log_aggregator.i: util/log_aggregator.cpp.i
 
 # target to preprocess a source file
 util/log_aggregator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/log_aggregator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/log_aggregator.cpp.i
 .PHONY : util/log_aggregator.cpp.i
 
 util/log_aggregator.s: util/log_aggregator.cpp.s
@@ -11115,7 +11259,7 @@ util/log_aggregator.s: util/log_aggregator.cpp.s
 
 # target to generate assembly for a file
 util/log_aggregator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/log_aggregator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/log_aggregator.cpp.s
 .PHONY : util/log_aggregator.cpp.s
 
 util/logger.o: util/logger.cpp.o
@@ -11123,7 +11267,7 @@ util/logger.o: util/logger.cpp.o
 
 # target to build an object file
 util/logger.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/logger.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/logger.cpp.o
 .PHONY : util/logger.cpp.o
 
 util/logger.i: util/logger.cpp.i
@@ -11131,7 +11275,7 @@ util/logger.i: util/logger.cpp.i
 
 # target to preprocess a source file
 util/logger.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/logger.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/logger.cpp.i
 .PHONY : util/logger.cpp.i
 
 util/logger.s: util/logger.cpp.s
@@ -11139,7 +11283,7 @@ util/logger.s: util/logger.cpp.s
 
 # target to generate assembly for a file
 util/logger.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/logger.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/logger.cpp.s
 .PHONY : util/logger.cpp.s
 
 util/neo/neo_err.o: util/neo/neo_err.c.o
@@ -11147,7 +11291,7 @@ util/neo/neo_err.o: util/neo/neo_err.c.o
 
 # target to build an object file
 util/neo/neo_err.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_err.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_err.c.o
 .PHONY : util/neo/neo_err.c.o
 
 util/neo/neo_err.i: util/neo/neo_err.c.i
@@ -11155,7 +11299,7 @@ util/neo/neo_err.i: util/neo/neo_err.c.i
 
 # target to preprocess a source file
 util/neo/neo_err.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_err.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_err.c.i
 .PHONY : util/neo/neo_err.c.i
 
 util/neo/neo_err.s: util/neo/neo_err.c.s
@@ -11163,7 +11307,7 @@ util/neo/neo_err.s: util/neo/neo_err.c.s
 
 # target to generate assembly for a file
 util/neo/neo_err.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_err.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_err.c.s
 .PHONY : util/neo/neo_err.c.s
 
 util/neo/neo_files.o: util/neo/neo_files.c.o
@@ -11171,7 +11315,7 @@ util/neo/neo_files.o: util/neo/neo_files.c.o
 
 # target to build an object file
 util/neo/neo_files.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_files.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_files.c.o
 .PHONY : util/neo/neo_files.c.o
 
 util/neo/neo_files.i: util/neo/neo_files.c.i
@@ -11179,7 +11323,7 @@ util/neo/neo_files.i: util/neo/neo_files.c.i
 
 # target to preprocess a source file
 util/neo/neo_files.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_files.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_files.c.i
 .PHONY : util/neo/neo_files.c.i
 
 util/neo/neo_files.s: util/neo/neo_files.c.s
@@ -11187,7 +11331,7 @@ util/neo/neo_files.s: util/neo/neo_files.c.s
 
 # target to generate assembly for a file
 util/neo/neo_files.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_files.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_files.c.s
 .PHONY : util/neo/neo_files.c.s
 
 util/neo/neo_hash.o: util/neo/neo_hash.c.o
@@ -11195,7 +11339,7 @@ util/neo/neo_hash.o: util/neo/neo_hash.c.o
 
 # target to build an object file
 util/neo/neo_hash.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hash.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hash.c.o
 .PHONY : util/neo/neo_hash.c.o
 
 util/neo/neo_hash.i: util/neo/neo_hash.c.i
@@ -11203,7 +11347,7 @@ util/neo/neo_hash.i: util/neo/neo_hash.c.i
 
 # target to preprocess a source file
 util/neo/neo_hash.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hash.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hash.c.i
 .PHONY : util/neo/neo_hash.c.i
 
 util/neo/neo_hash.s: util/neo/neo_hash.c.s
@@ -11211,7 +11355,7 @@ util/neo/neo_hash.s: util/neo/neo_hash.c.s
 
 # target to generate assembly for a file
 util/neo/neo_hash.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hash.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hash.c.s
 .PHONY : util/neo/neo_hash.c.s
 
 util/neo/neo_hdf.o: util/neo/neo_hdf.c.o
@@ -11219,7 +11363,7 @@ util/neo/neo_hdf.o: util/neo/neo_hdf.c.o
 
 # target to build an object file
 util/neo/neo_hdf.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hdf.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hdf.c.o
 .PHONY : util/neo/neo_hdf.c.o
 
 util/neo/neo_hdf.i: util/neo/neo_hdf.c.i
@@ -11227,7 +11371,7 @@ util/neo/neo_hdf.i: util/neo/neo_hdf.c.i
 
 # target to preprocess a source file
 util/neo/neo_hdf.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hdf.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hdf.c.i
 .PHONY : util/neo/neo_hdf.c.i
 
 util/neo/neo_hdf.s: util/neo/neo_hdf.c.s
@@ -11235,7 +11379,7 @@ util/neo/neo_hdf.s: util/neo/neo_hdf.c.s
 
 # target to generate assembly for a file
 util/neo/neo_hdf.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hdf.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_hdf.c.s
 .PHONY : util/neo/neo_hdf.c.s
 
 util/neo/neo_misc.o: util/neo/neo_misc.c.o
@@ -11243,7 +11387,7 @@ util/neo/neo_misc.o: util/neo/neo_misc.c.o
 
 # target to build an object file
 util/neo/neo_misc.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_misc.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_misc.c.o
 .PHONY : util/neo/neo_misc.c.o
 
 util/neo/neo_misc.i: util/neo/neo_misc.c.i
@@ -11251,7 +11395,7 @@ util/neo/neo_misc.i: util/neo/neo_misc.c.i
 
 # target to preprocess a source file
 util/neo/neo_misc.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_misc.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_misc.c.i
 .PHONY : util/neo/neo_misc.c.i
 
 util/neo/neo_misc.s: util/neo/neo_misc.c.s
@@ -11259,7 +11403,7 @@ util/neo/neo_misc.s: util/neo/neo_misc.c.s
 
 # target to generate assembly for a file
 util/neo/neo_misc.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_misc.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_misc.c.s
 .PHONY : util/neo/neo_misc.c.s
 
 util/neo/neo_rand.o: util/neo/neo_rand.c.o
@@ -11267,7 +11411,7 @@ util/neo/neo_rand.o: util/neo/neo_rand.c.o
 
 # target to build an object file
 util/neo/neo_rand.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_rand.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_rand.c.o
 .PHONY : util/neo/neo_rand.c.o
 
 util/neo/neo_rand.i: util/neo/neo_rand.c.i
@@ -11275,7 +11419,7 @@ util/neo/neo_rand.i: util/neo/neo_rand.c.i
 
 # target to preprocess a source file
 util/neo/neo_rand.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_rand.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_rand.c.i
 .PHONY : util/neo/neo_rand.c.i
 
 util/neo/neo_rand.s: util/neo/neo_rand.c.s
@@ -11283,7 +11427,7 @@ util/neo/neo_rand.s: util/neo/neo_rand.c.s
 
 # target to generate assembly for a file
 util/neo/neo_rand.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_rand.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_rand.c.s
 .PHONY : util/neo/neo_rand.c.s
 
 util/neo/neo_str.o: util/neo/neo_str.c.o
@@ -11291,7 +11435,7 @@ util/neo/neo_str.o: util/neo/neo_str.c.o
 
 # target to build an object file
 util/neo/neo_str.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_str.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_str.c.o
 .PHONY : util/neo/neo_str.c.o
 
 util/neo/neo_str.i: util/neo/neo_str.c.i
@@ -11299,7 +11443,7 @@ util/neo/neo_str.i: util/neo/neo_str.c.i
 
 # target to preprocess a source file
 util/neo/neo_str.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_str.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_str.c.i
 .PHONY : util/neo/neo_str.c.i
 
 util/neo/neo_str.s: util/neo/neo_str.c.s
@@ -11307,7 +11451,7 @@ util/neo/neo_str.s: util/neo/neo_str.c.s
 
 # target to generate assembly for a file
 util/neo/neo_str.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_str.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/neo_str.c.s
 .PHONY : util/neo/neo_str.c.s
 
 util/neo/ulist.o: util/neo/ulist.c.o
@@ -11315,7 +11459,7 @@ util/neo/ulist.o: util/neo/ulist.c.o
 
 # target to build an object file
 util/neo/ulist.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulist.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulist.c.o
 .PHONY : util/neo/ulist.c.o
 
 util/neo/ulist.i: util/neo/ulist.c.i
@@ -11323,7 +11467,7 @@ util/neo/ulist.i: util/neo/ulist.c.i
 
 # target to preprocess a source file
 util/neo/ulist.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulist.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulist.c.i
 .PHONY : util/neo/ulist.c.i
 
 util/neo/ulist.s: util/neo/ulist.c.s
@@ -11331,7 +11475,7 @@ util/neo/ulist.s: util/neo/ulist.c.s
 
 # target to generate assembly for a file
 util/neo/ulist.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulist.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulist.c.s
 .PHONY : util/neo/ulist.c.s
 
 util/neo/ulocks.o: util/neo/ulocks.c.o
@@ -11339,7 +11483,7 @@ util/neo/ulocks.o: util/neo/ulocks.c.o
 
 # target to build an object file
 util/neo/ulocks.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulocks.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulocks.c.o
 .PHONY : util/neo/ulocks.c.o
 
 util/neo/ulocks.i: util/neo/ulocks.c.i
@@ -11347,7 +11491,7 @@ util/neo/ulocks.i: util/neo/ulocks.c.i
 
 # target to preprocess a source file
 util/neo/ulocks.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulocks.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulocks.c.i
 .PHONY : util/neo/ulocks.c.i
 
 util/neo/ulocks.s: util/neo/ulocks.c.s
@@ -11355,7 +11499,7 @@ util/neo/ulocks.s: util/neo/ulocks.c.s
 
 # target to generate assembly for a file
 util/neo/ulocks.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulocks.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/ulocks.c.s
 .PHONY : util/neo/ulocks.c.s
 
 util/neo/wildmat.o: util/neo/wildmat.c.o
@@ -11363,7 +11507,7 @@ util/neo/wildmat.o: util/neo/wildmat.c.o
 
 # target to build an object file
 util/neo/wildmat.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/wildmat.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/wildmat.c.o
 .PHONY : util/neo/wildmat.c.o
 
 util/neo/wildmat.i: util/neo/wildmat.c.i
@@ -11371,7 +11515,7 @@ util/neo/wildmat.i: util/neo/wildmat.c.i
 
 # target to preprocess a source file
 util/neo/wildmat.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/wildmat.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/wildmat.c.i
 .PHONY : util/neo/wildmat.c.i
 
 util/neo/wildmat.s: util/neo/wildmat.c.s
@@ -11379,7 +11523,7 @@ util/neo/wildmat.s: util/neo/wildmat.c.s
 
 # target to generate assembly for a file
 util/neo/wildmat.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/wildmat.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/neo/wildmat.c.s
 .PHONY : util/neo/wildmat.c.s
 
 util/network.o: util/network.cpp.o
@@ -11387,7 +11531,7 @@ util/network.o: util/network.cpp.o
 
 # target to build an object file
 util/network.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/network.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/network.cpp.o
 .PHONY : util/network.cpp.o
 
 util/network.i: util/network.cpp.i
@@ -11395,7 +11539,7 @@ util/network.i: util/network.cpp.i
 
 # target to preprocess a source file
 util/network.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/network.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/network.cpp.i
 .PHONY : util/network.cpp.i
 
 util/network.s: util/network.cpp.s
@@ -11403,7 +11547,7 @@ util/network.s: util/network.cpp.s
 
 # target to generate assembly for a file
 util/network.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/network.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/network.cpp.s
 .PHONY : util/network.cpp.s
 
 util/parser/lex.yy.o: util/parser/lex.yy.cpp.o
@@ -11411,7 +11555,7 @@ util/parser/lex.yy.o: util/parser/lex.yy.cpp.o
 
 # target to build an object file
 util/parser/lex.yy.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/lex.yy.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/lex.yy.cpp.o
 .PHONY : util/parser/lex.yy.cpp.o
 
 util/parser/lex.yy.i: util/parser/lex.yy.cpp.i
@@ -11419,7 +11563,7 @@ util/parser/lex.yy.i: util/parser/lex.yy.cpp.i
 
 # target to preprocess a source file
 util/parser/lex.yy.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/lex.yy.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/lex.yy.cpp.i
 .PHONY : util/parser/lex.yy.cpp.i
 
 util/parser/lex.yy.s: util/parser/lex.yy.cpp.s
@@ -11427,7 +11571,7 @@ util/parser/lex.yy.s: util/parser/lex.yy.cpp.s
 
 # target to generate assembly for a file
 util/parser/lex.yy.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/lex.yy.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/lex.yy.cpp.s
 .PHONY : util/parser/lex.yy.cpp.s
 
 util/parser/parser.o: util/parser/parser.cpp.o
@@ -11435,7 +11579,7 @@ util/parser/parser.o: util/parser/parser.cpp.o
 
 # target to build an object file
 util/parser/parser.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/parser.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/parser.cpp.o
 .PHONY : util/parser/parser.cpp.o
 
 util/parser/parser.i: util/parser/parser.cpp.i
@@ -11443,7 +11587,7 @@ util/parser/parser.i: util/parser/parser.cpp.i
 
 # target to preprocess a source file
 util/parser/parser.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/parser.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/parser.cpp.i
 .PHONY : util/parser/parser.cpp.i
 
 util/parser/parser.s: util/parser/parser.cpp.s
@@ -11451,7 +11595,7 @@ util/parser/parser.s: util/parser/parser.cpp.s
 
 # target to generate assembly for a file
 util/parser/parser.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/parser.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/parser.cpp.s
 .PHONY : util/parser/parser.cpp.s
 
 util/parser/scanner.o: util/parser/scanner.cpp.o
@@ -11459,7 +11603,7 @@ util/parser/scanner.o: util/parser/scanner.cpp.o
 
 # target to build an object file
 util/parser/scanner.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/scanner.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/scanner.cpp.o
 .PHONY : util/parser/scanner.cpp.o
 
 util/parser/scanner.i: util/parser/scanner.cpp.i
@@ -11467,7 +11611,7 @@ util/parser/scanner.i: util/parser/scanner.cpp.i
 
 # target to preprocess a source file
 util/parser/scanner.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/scanner.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/scanner.cpp.i
 .PHONY : util/parser/scanner.cpp.i
 
 util/parser/scanner.s: util/parser/scanner.cpp.s
@@ -11475,7 +11619,7 @@ util/parser/scanner.s: util/parser/scanner.cpp.s
 
 # target to generate assembly for a file
 util/parser/scanner.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/scanner.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/parser/scanner.cpp.s
 .PHONY : util/parser/scanner.cpp.s
 
 util/pathtrack.o: util/pathtrack.c.o
@@ -11483,7 +11627,7 @@ util/pathtrack.o: util/pathtrack.c.o
 
 # target to build an object file
 util/pathtrack.c.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/pathtrack.c.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/pathtrack.c.o
 .PHONY : util/pathtrack.c.o
 
 util/pathtrack.i: util/pathtrack.c.i
@@ -11491,7 +11635,7 @@ util/pathtrack.i: util/pathtrack.c.i
 
 # target to preprocess a source file
 util/pathtrack.c.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/pathtrack.c.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/pathtrack.c.i
 .PHONY : util/pathtrack.c.i
 
 util/pathtrack.s: util/pathtrack.c.s
@@ -11499,7 +11643,7 @@ util/pathtrack.s: util/pathtrack.c.s
 
 # target to generate assembly for a file
 util/pathtrack.c.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/pathtrack.c.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/pathtrack.c.s
 .PHONY : util/pathtrack.c.s
 
 util/preprocess.o: util/preprocess.cpp.o
@@ -11507,7 +11651,7 @@ util/preprocess.o: util/preprocess.cpp.o
 
 # target to build an object file
 util/preprocess.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/preprocess.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/preprocess.cpp.o
 .PHONY : util/preprocess.cpp.o
 
 util/preprocess.i: util/preprocess.cpp.i
@@ -11515,7 +11659,7 @@ util/preprocess.i: util/preprocess.cpp.i
 
 # target to preprocess a source file
 util/preprocess.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/preprocess.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/preprocess.cpp.i
 .PHONY : util/preprocess.cpp.i
 
 util/preprocess.s: util/preprocess.cpp.s
@@ -11523,7 +11667,7 @@ util/preprocess.s: util/preprocess.cpp.s
 
 # target to generate assembly for a file
 util/preprocess.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/preprocess.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/preprocess.cpp.s
 .PHONY : util/preprocess.cpp.s
 
 util/process.o: util/process.cpp.o
@@ -11531,7 +11675,7 @@ util/process.o: util/process.cpp.o
 
 # target to build an object file
 util/process.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/process.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/process.cpp.o
 .PHONY : util/process.cpp.o
 
 util/process.i: util/process.cpp.i
@@ -11539,7 +11683,7 @@ util/process.i: util/process.cpp.i
 
 # target to preprocess a source file
 util/process.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/process.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/process.cpp.i
 .PHONY : util/process.cpp.i
 
 util/process.s: util/process.cpp.s
@@ -11547,15 +11691,63 @@ util/process.s: util/process.cpp.s
 
 # target to generate assembly for a file
 util/process.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/process.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/process.cpp.s
 .PHONY : util/process.cpp.s
+
+util/rank.o: util/rank.cpp.o
+.PHONY : util/rank.o
+
+# target to build an object file
+util/rank.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/rank.cpp.o
+.PHONY : util/rank.cpp.o
+
+util/rank.i: util/rank.cpp.i
+.PHONY : util/rank.i
+
+# target to preprocess a source file
+util/rank.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/rank.cpp.i
+.PHONY : util/rank.cpp.i
+
+util/rank.s: util/rank.cpp.s
+.PHONY : util/rank.s
+
+# target to generate assembly for a file
+util/rank.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/rank.cpp.s
+.PHONY : util/rank.cpp.s
+
+util/ringbuffer.o: util/ringbuffer.cpp.o
+.PHONY : util/ringbuffer.o
+
+# target to build an object file
+util/ringbuffer.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ringbuffer.cpp.o
+.PHONY : util/ringbuffer.cpp.o
+
+util/ringbuffer.i: util/ringbuffer.cpp.i
+.PHONY : util/ringbuffer.i
+
+# target to preprocess a source file
+util/ringbuffer.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ringbuffer.cpp.i
+.PHONY : util/ringbuffer.cpp.i
+
+util/ringbuffer.s: util/ringbuffer.cpp.s
+.PHONY : util/ringbuffer.s
+
+# target to generate assembly for a file
+util/ringbuffer.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ringbuffer.cpp.s
+.PHONY : util/ringbuffer.cpp.s
 
 util/shared_memory_allocator.o: util/shared_memory_allocator.cpp.o
 .PHONY : util/shared_memory_allocator.o
 
 # target to build an object file
 util/shared_memory_allocator.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shared_memory_allocator.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shared_memory_allocator.cpp.o
 .PHONY : util/shared_memory_allocator.cpp.o
 
 util/shared_memory_allocator.i: util/shared_memory_allocator.cpp.i
@@ -11563,7 +11755,7 @@ util/shared_memory_allocator.i: util/shared_memory_allocator.cpp.i
 
 # target to preprocess a source file
 util/shared_memory_allocator.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shared_memory_allocator.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shared_memory_allocator.cpp.i
 .PHONY : util/shared_memory_allocator.cpp.i
 
 util/shared_memory_allocator.s: util/shared_memory_allocator.cpp.s
@@ -11571,7 +11763,7 @@ util/shared_memory_allocator.s: util/shared_memory_allocator.cpp.s
 
 # target to generate assembly for a file
 util/shared_memory_allocator.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shared_memory_allocator.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shared_memory_allocator.cpp.s
 .PHONY : util/shared_memory_allocator.cpp.s
 
 util/shm_counter.o: util/shm_counter.cpp.o
@@ -11579,7 +11771,7 @@ util/shm_counter.o: util/shm_counter.cpp.o
 
 # target to build an object file
 util/shm_counter.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shm_counter.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shm_counter.cpp.o
 .PHONY : util/shm_counter.cpp.o
 
 util/shm_counter.i: util/shm_counter.cpp.i
@@ -11587,7 +11779,7 @@ util/shm_counter.i: util/shm_counter.cpp.i
 
 # target to preprocess a source file
 util/shm_counter.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shm_counter.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shm_counter.cpp.i
 .PHONY : util/shm_counter.cpp.i
 
 util/shm_counter.s: util/shm_counter.cpp.s
@@ -11595,7 +11787,7 @@ util/shm_counter.s: util/shm_counter.cpp.s
 
 # target to generate assembly for a file
 util/shm_counter.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shm_counter.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/shm_counter.cpp.s
 .PHONY : util/shm_counter.cpp.s
 
 util/ssl_init.o: util/ssl_init.cpp.o
@@ -11603,7 +11795,7 @@ util/ssl_init.o: util/ssl_init.cpp.o
 
 # target to build an object file
 util/ssl_init.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ssl_init.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ssl_init.cpp.o
 .PHONY : util/ssl_init.cpp.o
 
 util/ssl_init.i: util/ssl_init.cpp.i
@@ -11611,7 +11803,7 @@ util/ssl_init.i: util/ssl_init.cpp.i
 
 # target to preprocess a source file
 util/ssl_init.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ssl_init.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ssl_init.cpp.i
 .PHONY : util/ssl_init.cpp.i
 
 util/ssl_init.s: util/ssl_init.cpp.s
@@ -11619,7 +11811,7 @@ util/ssl_init.s: util/ssl_init.cpp.s
 
 # target to generate assembly for a file
 util/ssl_init.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ssl_init.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/ssl_init.cpp.s
 .PHONY : util/ssl_init.cpp.s
 
 util/stack_trace.o: util/stack_trace.cpp.o
@@ -11627,7 +11819,7 @@ util/stack_trace.o: util/stack_trace.cpp.o
 
 # target to build an object file
 util/stack_trace.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stack_trace.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stack_trace.cpp.o
 .PHONY : util/stack_trace.cpp.o
 
 util/stack_trace.i: util/stack_trace.cpp.i
@@ -11635,7 +11827,7 @@ util/stack_trace.i: util/stack_trace.cpp.i
 
 # target to preprocess a source file
 util/stack_trace.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stack_trace.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stack_trace.cpp.i
 .PHONY : util/stack_trace.cpp.i
 
 util/stack_trace.s: util/stack_trace.cpp.s
@@ -11643,15 +11835,39 @@ util/stack_trace.s: util/stack_trace.cpp.s
 
 # target to generate assembly for a file
 util/stack_trace.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stack_trace.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stack_trace.cpp.s
 .PHONY : util/stack_trace.cpp.s
+
+util/stat_cache.o: util/stat_cache.cpp.o
+.PHONY : util/stat_cache.o
+
+# target to build an object file
+util/stat_cache.cpp.o:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stat_cache.cpp.o
+.PHONY : util/stat_cache.cpp.o
+
+util/stat_cache.i: util/stat_cache.cpp.i
+.PHONY : util/stat_cache.i
+
+# target to preprocess a source file
+util/stat_cache.cpp.i:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stat_cache.cpp.i
+.PHONY : util/stat_cache.cpp.i
+
+util/stat_cache.s: util/stat_cache.cpp.s
+.PHONY : util/stat_cache.s
+
+# target to generate assembly for a file
+util/stat_cache.cpp.s:
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/stat_cache.cpp.s
+.PHONY : util/stat_cache.cpp.s
 
 util/string_bag.o: util/string_bag.cpp.o
 .PHONY : util/string_bag.o
 
 # target to build an object file
 util/string_bag.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/string_bag.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/string_bag.cpp.o
 .PHONY : util/string_bag.cpp.o
 
 util/string_bag.i: util/string_bag.cpp.i
@@ -11659,7 +11875,7 @@ util/string_bag.i: util/string_bag.cpp.i
 
 # target to preprocess a source file
 util/string_bag.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/string_bag.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/string_bag.cpp.i
 .PHONY : util/string_bag.cpp.i
 
 util/string_bag.s: util/string_bag.cpp.s
@@ -11667,7 +11883,7 @@ util/string_bag.s: util/string_bag.cpp.s
 
 # target to generate assembly for a file
 util/string_bag.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/string_bag.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/string_bag.cpp.s
 .PHONY : util/string_bag.cpp.s
 
 util/synchronizable.o: util/synchronizable.cpp.o
@@ -11675,7 +11891,7 @@ util/synchronizable.o: util/synchronizable.cpp.o
 
 # target to build an object file
 util/synchronizable.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable.cpp.o
 .PHONY : util/synchronizable.cpp.o
 
 util/synchronizable.i: util/synchronizable.cpp.i
@@ -11683,7 +11899,7 @@ util/synchronizable.i: util/synchronizable.cpp.i
 
 # target to preprocess a source file
 util/synchronizable.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable.cpp.i
 .PHONY : util/synchronizable.cpp.i
 
 util/synchronizable.s: util/synchronizable.cpp.s
@@ -11691,7 +11907,7 @@ util/synchronizable.s: util/synchronizable.cpp.s
 
 # target to generate assembly for a file
 util/synchronizable.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable.cpp.s
 .PHONY : util/synchronizable.cpp.s
 
 util/synchronizable_multi.o: util/synchronizable_multi.cpp.o
@@ -11699,7 +11915,7 @@ util/synchronizable_multi.o: util/synchronizable_multi.cpp.o
 
 # target to build an object file
 util/synchronizable_multi.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable_multi.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable_multi.cpp.o
 .PHONY : util/synchronizable_multi.cpp.o
 
 util/synchronizable_multi.i: util/synchronizable_multi.cpp.i
@@ -11707,7 +11923,7 @@ util/synchronizable_multi.i: util/synchronizable_multi.cpp.i
 
 # target to preprocess a source file
 util/synchronizable_multi.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable_multi.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable_multi.cpp.i
 .PHONY : util/synchronizable_multi.cpp.i
 
 util/synchronizable_multi.s: util/synchronizable_multi.cpp.s
@@ -11715,7 +11931,7 @@ util/synchronizable_multi.s: util/synchronizable_multi.cpp.s
 
 # target to generate assembly for a file
 util/synchronizable_multi.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable_multi.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/synchronizable_multi.cpp.s
 .PHONY : util/synchronizable_multi.cpp.s
 
 util/text_art.o: util/text_art.cpp.o
@@ -11723,7 +11939,7 @@ util/text_art.o: util/text_art.cpp.o
 
 # target to build an object file
 util/text_art.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_art.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_art.cpp.o
 .PHONY : util/text_art.cpp.o
 
 util/text_art.i: util/text_art.cpp.i
@@ -11731,7 +11947,7 @@ util/text_art.i: util/text_art.cpp.i
 
 # target to preprocess a source file
 util/text_art.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_art.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_art.cpp.i
 .PHONY : util/text_art.cpp.i
 
 util/text_art.s: util/text_art.cpp.s
@@ -11739,7 +11955,7 @@ util/text_art.s: util/text_art.cpp.s
 
 # target to generate assembly for a file
 util/text_art.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_art.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_art.cpp.s
 .PHONY : util/text_art.cpp.s
 
 util/text_color.o: util/text_color.cpp.o
@@ -11747,7 +11963,7 @@ util/text_color.o: util/text_color.cpp.o
 
 # target to build an object file
 util/text_color.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_color.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_color.cpp.o
 .PHONY : util/text_color.cpp.o
 
 util/text_color.i: util/text_color.cpp.i
@@ -11755,7 +11971,7 @@ util/text_color.i: util/text_color.cpp.i
 
 # target to preprocess a source file
 util/text_color.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_color.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_color.cpp.i
 .PHONY : util/text_color.cpp.i
 
 util/text_color.s: util/text_color.cpp.s
@@ -11763,7 +11979,7 @@ util/text_color.s: util/text_color.cpp.s
 
 # target to generate assembly for a file
 util/text_color.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_color.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/text_color.cpp.s
 .PHONY : util/text_color.cpp.s
 
 util/thread_local.o: util/thread_local.cpp.o
@@ -11771,7 +11987,7 @@ util/thread_local.o: util/thread_local.cpp.o
 
 # target to build an object file
 util/thread_local.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/thread_local.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/thread_local.cpp.o
 .PHONY : util/thread_local.cpp.o
 
 util/thread_local.i: util/thread_local.cpp.i
@@ -11779,7 +11995,7 @@ util/thread_local.i: util/thread_local.cpp.i
 
 # target to preprocess a source file
 util/thread_local.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/thread_local.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/thread_local.cpp.i
 .PHONY : util/thread_local.cpp.i
 
 util/thread_local.s: util/thread_local.cpp.s
@@ -11787,7 +12003,7 @@ util/thread_local.s: util/thread_local.cpp.s
 
 # target to generate assembly for a file
 util/thread_local.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/thread_local.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/thread_local.cpp.s
 .PHONY : util/thread_local.cpp.s
 
 util/timer.o: util/timer.cpp.o
@@ -11795,7 +12011,7 @@ util/timer.o: util/timer.cpp.o
 
 # target to build an object file
 util/timer.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/timer.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/timer.cpp.o
 .PHONY : util/timer.cpp.o
 
 util/timer.i: util/timer.cpp.i
@@ -11803,7 +12019,7 @@ util/timer.i: util/timer.cpp.i
 
 # target to preprocess a source file
 util/timer.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/timer.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/timer.cpp.i
 .PHONY : util/timer.cpp.i
 
 util/timer.s: util/timer.cpp.s
@@ -11811,7 +12027,7 @@ util/timer.s: util/timer.cpp.s
 
 # target to generate assembly for a file
 util/timer.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/timer.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/timer.cpp.s
 .PHONY : util/timer.cpp.s
 
 util/trace.o: util/trace.cpp.o
@@ -11819,7 +12035,7 @@ util/trace.o: util/trace.cpp.o
 
 # target to build an object file
 util/trace.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/trace.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/trace.cpp.o
 .PHONY : util/trace.cpp.o
 
 util/trace.i: util/trace.cpp.i
@@ -11827,7 +12043,7 @@ util/trace.i: util/trace.cpp.i
 
 # target to preprocess a source file
 util/trace.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/trace.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/trace.cpp.i
 .PHONY : util/trace.cpp.i
 
 util/trace.s: util/trace.cpp.s
@@ -11835,7 +12051,7 @@ util/trace.s: util/trace.cpp.s
 
 # target to generate assembly for a file
 util/trace.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/trace.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/trace.cpp.s
 .PHONY : util/trace.cpp.s
 
 util/util.o: util/util.cpp.o
@@ -11843,7 +12059,7 @@ util/util.o: util/util.cpp.o
 
 # target to build an object file
 util/util.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/util.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/util.cpp.o
 .PHONY : util/util.cpp.o
 
 util/util.i: util/util.cpp.i
@@ -11851,7 +12067,7 @@ util/util.i: util/util.cpp.i
 
 # target to preprocess a source file
 util/util.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/util.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/util.cpp.i
 .PHONY : util/util.cpp.i
 
 util/util.s: util/util.cpp.s
@@ -11859,7 +12075,7 @@ util/util.s: util/util.cpp.s
 
 # target to generate assembly for a file
 util/util.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/util.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/CMakeFiles/hphp_runtime_static.dir/build.make src/CMakeFiles/hphp_runtime_static.dir/util/util.cpp.s
 .PHONY : util/util.cpp.s
 
 # Help Target
@@ -11890,9 +12106,9 @@ help:
 	@echo "... runtime/base/array/hphp_array.o"
 	@echo "... runtime/base/array/hphp_array.i"
 	@echo "... runtime/base/array/hphp_array.s"
-	@echo "... runtime/base/array/small_array.o"
-	@echo "... runtime/base/array/small_array.i"
-	@echo "... runtime/base/array/small_array.s"
+	@echo "... runtime/base/array/vector_array.o"
+	@echo "... runtime/base/array/vector_array.i"
+	@echo "... runtime/base/array/vector_array.s"
 	@echo "... runtime/base/array/zend_array.o"
 	@echo "... runtime/base/array/zend_array.i"
 	@echo "... runtime/base/array/zend_array.s"
@@ -11905,6 +12121,9 @@ help:
 	@echo "... runtime/base/class_info.o"
 	@echo "... runtime/base/class_info.i"
 	@echo "... runtime/base/class_info.s"
+	@echo "... runtime/base/code_coverage.o"
+	@echo "... runtime/base/code_coverage.i"
+	@echo "... runtime/base/code_coverage.s"
 	@echo "... runtime/base/comparisons.o"
 	@echo "... runtime/base/comparisons.i"
 	@echo "... runtime/base/comparisons.s"
@@ -11920,15 +12139,6 @@ help:
 	@echo "... runtime/base/execution_context.o"
 	@echo "... runtime/base/execution_context.i"
 	@echo "... runtime/base/execution_context.s"
-	@echo "... runtime/base/fiber_async_func.o"
-	@echo "... runtime/base/fiber_async_func.i"
-	@echo "... runtime/base/fiber_async_func.s"
-	@echo "... runtime/base/fiber_reference_map.o"
-	@echo "... runtime/base/fiber_reference_map.i"
-	@echo "... runtime/base/fiber_reference_map.s"
-	@echo "... runtime/base/fiber_safe.o"
-	@echo "... runtime/base/fiber_safe.i"
-	@echo "... runtime/base/fiber_safe.s"
 	@echo "... runtime/base/file/bzip2_file.o"
 	@echo "... runtime/base/file/bzip2_file.i"
 	@echo "... runtime/base/file/bzip2_file.s"
@@ -11986,9 +12196,6 @@ help:
 	@echo "... runtime/base/memory/leak_detectable.o"
 	@echo "... runtime/base/memory/leak_detectable.i"
 	@echo "... runtime/base/memory/leak_detectable.s"
-	@echo "... runtime/base/memory/linear_allocator.o"
-	@echo "... runtime/base/memory/linear_allocator.i"
-	@echo "... runtime/base/memory/linear_allocator.s"
 	@echo "... runtime/base/memory/memory_manager.o"
 	@echo "... runtime/base/memory/memory_manager.i"
 	@echo "... runtime/base/memory/memory_manager.s"
@@ -11998,9 +12205,6 @@ help:
 	@echo "... runtime/base/memory/sweepable.o"
 	@echo "... runtime/base/memory/sweepable.i"
 	@echo "... runtime/base/memory/sweepable.s"
-	@echo "... runtime/base/memory/unsafe_pointer.o"
-	@echo "... runtime/base/memory/unsafe_pointer.i"
-	@echo "... runtime/base/memory/unsafe_pointer.s"
 	@echo "... runtime/base/object_data.o"
 	@echo "... runtime/base/object_data.i"
 	@echo "... runtime/base/object_data.s"
@@ -12457,6 +12661,9 @@ help:
 	@echo "... runtime/eval/ast/use_trait_statement.o"
 	@echo "... runtime/eval/ast/use_trait_statement.i"
 	@echo "... runtime/eval/ast/use_trait_statement.s"
+	@echo "... runtime/eval/ast/user_attribute.o"
+	@echo "... runtime/eval/ast/user_attribute.i"
+	@echo "... runtime/eval/ast/user_attribute.s"
 	@echo "... runtime/eval/ast/variable_expression.o"
 	@echo "... runtime/eval/ast/variable_expression.i"
 	@echo "... runtime/eval/ast/variable_expression.s"
@@ -12472,6 +12679,9 @@ help:
 	@echo "... runtime/eval/debugger/cmd/cmd_break.o"
 	@echo "... runtime/eval/debugger/cmd/cmd_break.i"
 	@echo "... runtime/eval/debugger/cmd/cmd_break.s"
+	@echo "... runtime/eval/debugger/cmd/cmd_complete.o"
+	@echo "... runtime/eval/debugger/cmd/cmd_complete.i"
+	@echo "... runtime/eval/debugger/cmd/cmd_complete.s"
 	@echo "... runtime/eval/debugger/cmd/cmd_config.o"
 	@echo "... runtime/eval/debugger/cmd/cmd_config.i"
 	@echo "... runtime/eval/debugger/cmd/cmd_config.s"
@@ -12616,9 +12826,6 @@ help:
 	@echo "... runtime/eval/runtime/assoc_list.o"
 	@echo "... runtime/eval/runtime/assoc_list.i"
 	@echo "... runtime/eval/runtime/assoc_list.s"
-	@echo "... runtime/eval/runtime/code_coverage.o"
-	@echo "... runtime/eval/runtime/code_coverage.i"
-	@echo "... runtime/eval/runtime/code_coverage.s"
 	@echo "... runtime/eval/runtime/eval_frame_injection.o"
 	@echo "... runtime/eval/runtime/eval_frame_injection.i"
 	@echo "... runtime/eval/runtime/eval_frame_injection.s"
@@ -12985,15 +13192,6 @@ help:
 	@echo "... runtime/ext/pdo_sqlite.o"
 	@echo "... runtime/ext/pdo_sqlite.i"
 	@echo "... runtime/ext/pdo_sqlite.s"
-	@echo "... runtime/ext/sep/mhash/ext_mhash.o"
-	@echo "... runtime/ext/sep/mhash/ext_mhash.i"
-	@echo "... runtime/ext/sep/mhash/ext_mhash.s"
-	@echo "... runtime/ext/sep/mhash/extmap_mhash.o"
-	@echo "... runtime/ext/sep/mhash/extmap_mhash.i"
-	@echo "... runtime/ext/sep/mhash/extmap_mhash.s"
-	@echo "... runtime/ext/sep/mhash/test_ext_mhash.o"
-	@echo "... runtime/ext/sep/mhash/test_ext_mhash.i"
-	@echo "... runtime/ext/sep/mhash/test_ext_mhash.s"
 	@echo "... runtime/ext/soap/encoding.o"
 	@echo "... runtime/ext/soap/encoding.i"
 	@echo "... runtime/ext/soap/encoding.s"
@@ -13036,9 +13234,18 @@ help:
 	@echo "... runtime/vm/debug/gdb-jit.o"
 	@echo "... runtime/vm/debug/gdb-jit.i"
 	@echo "... runtime/vm/debug/gdb-jit.s"
-	@echo "... runtime/vm/dyn_tracer.o"
-	@echo "... runtime/vm/dyn_tracer.i"
-	@echo "... runtime/vm/dyn_tracer.s"
+	@echo "... runtime/vm/debugger_hook.o"
+	@echo "... runtime/vm/debugger_hook.i"
+	@echo "... runtime/vm/debugger_hook.s"
+	@echo "... runtime/vm/event_hook.o"
+	@echo "... runtime/vm/event_hook.i"
+	@echo "... runtime/vm/event_hook.s"
+	@echo "... runtime/vm/exception_gate.o"
+	@echo "... runtime/vm/exception_gate.i"
+	@echo "... runtime/vm/exception_gate.s"
+	@echo "... runtime/vm/fixed_string_map.o"
+	@echo "... runtime/vm/fixed_string_map.i"
+	@echo "... runtime/vm/fixed_string_map.s"
 	@echo "... runtime/vm/func.o"
 	@echo "... runtime/vm/func.i"
 	@echo "... runtime/vm/func.s"
@@ -13060,18 +13267,36 @@ help:
 	@echo "... runtime/vm/peephole.o"
 	@echo "... runtime/vm/peephole.i"
 	@echo "... runtime/vm/peephole.s"
+	@echo "... runtime/vm/pendq.o"
+	@echo "... runtime/vm/pendq.i"
+	@echo "... runtime/vm/pendq.s"
 	@echo "... runtime/vm/php_debug.o"
 	@echo "... runtime/vm/php_debug.i"
 	@echo "... runtime/vm/php_debug.s"
+	@echo "... runtime/vm/repo.o"
+	@echo "... runtime/vm/repo.i"
+	@echo "... runtime/vm/repo.s"
+	@echo "... runtime/vm/repo_helpers.o"
+	@echo "... runtime/vm/repo_helpers.i"
+	@echo "... runtime/vm/repo_helpers.s"
 	@echo "... runtime/vm/runtime.o"
 	@echo "... runtime/vm/runtime.i"
 	@echo "... runtime/vm/runtime.s"
+	@echo "... runtime/vm/stats.o"
+	@echo "... runtime/vm/stats.i"
+	@echo "... runtime/vm/stats.s"
+	@echo "... runtime/vm/translator/annotation.o"
+	@echo "... runtime/vm/translator/annotation.i"
+	@echo "... runtime/vm/translator/annotation.s"
 	@echo "... runtime/vm/translator/asm-x64-test.o"
 	@echo "... runtime/vm/translator/asm-x64-test.i"
 	@echo "... runtime/vm/translator/asm-x64-test.s"
 	@echo "... runtime/vm/translator/asm-x64.o"
 	@echo "... runtime/vm/translator/asm-x64.i"
 	@echo "... runtime/vm/translator/asm-x64.s"
+	@echo "... runtime/vm/translator/fixup.o"
+	@echo "... runtime/vm/translator/fixup.i"
+	@echo "... runtime/vm/translator/fixup.s"
 	@echo "... runtime/vm/translator/immstack.o"
 	@echo "... runtime/vm/translator/immstack.i"
 	@echo "... runtime/vm/translator/immstack.s"
@@ -13090,12 +13315,18 @@ help:
 	@echo "... runtime/vm/translator/targetcache.o"
 	@echo "... runtime/vm/translator/targetcache.i"
 	@echo "... runtime/vm/translator/targetcache.s"
+	@echo "... runtime/vm/translator/translator-deps.o"
+	@echo "... runtime/vm/translator/translator-deps.i"
+	@echo "... runtime/vm/translator/translator-deps.s"
 	@echo "... runtime/vm/translator/translator-x64.o"
 	@echo "... runtime/vm/translator/translator-x64.i"
 	@echo "... runtime/vm/translator/translator-x64.s"
 	@echo "... runtime/vm/translator/translator.o"
 	@echo "... runtime/vm/translator/translator.i"
 	@echo "... runtime/vm/translator/translator.s"
+	@echo "... runtime/vm/treadmill.o"
+	@echo "... runtime/vm/treadmill.i"
+	@echo "... runtime/vm/treadmill.s"
 	@echo "... runtime/vm/type_constraint.o"
 	@echo "... runtime/vm/type_constraint.i"
 	@echo "... runtime/vm/type_constraint.s"
@@ -13156,9 +13387,9 @@ help:
 	@echo "... system/gen/sys/dynamic_table_constant.o"
 	@echo "... system/gen/sys/dynamic_table_constant.i"
 	@echo "... system/gen/sys/dynamic_table_constant.s"
-	@echo "... system/gen/sys/dynamic_table_func.no.o"
-	@echo "... system/gen/sys/dynamic_table_func.no.i"
-	@echo "... system/gen/sys/dynamic_table_func.no.s"
+	@echo "... system/gen/sys/dynamic_table_func.o"
+	@echo "... system/gen/sys/dynamic_table_func.i"
+	@echo "... system/gen/sys/dynamic_table_func.s"
 	@echo "... system/gen/sys/literal_strings_0.no.o"
 	@echo "... system/gen/sys/literal_strings_0.no.i"
 	@echo "... system/gen/sys/literal_strings_0.no.s"
@@ -13228,6 +13459,9 @@ help:
 	@echo "... util/file_cache.o"
 	@echo "... util/file_cache.i"
 	@echo "... util/file_cache.s"
+	@echo "... util/hardware_counter.o"
+	@echo "... util/hardware_counter.i"
+	@echo "... util/hardware_counter.s"
 	@echo "... util/hash.o"
 	@echo "... util/hash.i"
 	@echo "... util/hash.s"
@@ -13300,6 +13534,12 @@ help:
 	@echo "... util/process.o"
 	@echo "... util/process.i"
 	@echo "... util/process.s"
+	@echo "... util/rank.o"
+	@echo "... util/rank.i"
+	@echo "... util/rank.s"
+	@echo "... util/ringbuffer.o"
+	@echo "... util/ringbuffer.i"
+	@echo "... util/ringbuffer.s"
 	@echo "... util/shared_memory_allocator.o"
 	@echo "... util/shared_memory_allocator.i"
 	@echo "... util/shared_memory_allocator.s"
@@ -13312,6 +13552,9 @@ help:
 	@echo "... util/stack_trace.o"
 	@echo "... util/stack_trace.i"
 	@echo "... util/stack_trace.s"
+	@echo "... util/stat_cache.o"
+	@echo "... util/stat_cache.i"
+	@echo "... util/stat_cache.s"
 	@echo "... util/string_bag.o"
 	@echo "... util/string_bag.i"
 	@echo "... util/string_bag.s"
@@ -13350,6 +13593,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/macvicar/dev/vm/hiphop-php && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/joelp/dev/hiphop-php && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

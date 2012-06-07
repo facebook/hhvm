@@ -25,116 +25,66 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * If a Countable object may be shared by multiple threads, and cannot be set
- * static, we need to create it with the C++ new operator, i.e., not through
- * the SmartAllocator, and call setAtomic() on it.
- * It is possible to wrap an atomic Countable with a SmartPtr, but
- * incRefCount() and decRefCount() are no-ops. Instead, incAtomicCount() and
- * decAtomicCount() are used to maintain its (atomic) reference count.
- */
-#define IMPLEMENT_ATOMIC_COUNTABLE_METHODS                              \
-  bool isRefCounted() const { return _count < Countable::ATOMIC_FLAG; } \
-  void setAtomic() const {                                              \
-    if (!isAtomic()) _count = Countable::ATOMIC_FLAG;                   \
-  }                                                                     \
-  bool isAtomic() const { return _count & Countable::ATOMIC_FLAG; }     \
-  void incAtomicCount() const {                                         \
-    ASSERT(!isRefCounted());                                            \
-    if (isAtomic()) atomic_inc(_count);                                 \
-  }                                                                     \
-  int decAtomicCount() const {                                          \
-    ASSERT(_count > Countable::ATOMIC_FLAG);                            \
-    return isAtomic() ? atomic_dec(_count) - Countable::ATOMIC_FLAG     \
-                      : _count;                                         \
-  }                                                                     \
-
-/**
- * StringData and Variant do not formally derived from Countable, but they
+ * StringData and Variant do not formally derive from Countable, but they
  * have a _count field and define all of the methods from Countable. These
  * macros are provided to avoid code duplication.
  */
-#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                        \
-  void incRefCount() const {                                         \
-    if (isRefCounted()) {                                            \
-      TRACE_MOD(Trace::refcount, 5, "incRef: %p %010d++\n", this,    \
-                _count);                                             \
-      ++_count;                                                      \
-    }                                                                \
-  }                                                                  \
-  int decRefCount() const {                                          \
-    if (Trace::moduleEnabled(Trace::refcount, 5) &&                  \
-        isRefCounted()) {                                            \
-      TRACE_MOD(Trace::refcount, 5, "decRef: %p %010d--\n", this,    \
-                _count);                                             \
-    }                                                                \
-    ASSERT(_count > 0);                                              \
-    return isRefCounted() ? --_count : _count;                       \
-  }                                                                  \
-  int getCount() const { return _count; }                            \
-  IMPLEMENT_ATOMIC_COUNTABLE_METHODS                                 \
+#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                            \
+  int32_t getCount() const { return _count; }                            \
+  bool isRefCounted() const { return _count != Countable::STATIC_FLAG; } \
+  void incRefCount() const { if (isRefCounted()) { ++_count; } }         \
+  int32_t decRefCount() const {                                          \
+    ASSERT(_count > 0);                                                  \
+    return isRefCounted() ? --_count : _count;                           \
+  }
 
-#define IMPLEMENT_COUNTABLE_METHODS                                  \
-  /* setStatic() is used by StaticString and StaticArray to make  */ \
-  /* sure ref count is "never" going to reach 0, even if multiple */ \
-  /* threads modify it in a non-thread-safe fashion.              */ \
-  void setStatic() const { _count = Countable::STATIC_FLAG; }        \
-  bool isStatic() const { return _count == STATIC_FLAG; }            \
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                              \
+#define IMPLEMENT_COUNTABLE_METHODS                                      \
+  /* setStatic() is used by StaticString and StaticArray to make  */     \
+  /* sure ref count is "never" going to reach 0, even if multiple */     \
+  /* threads modify it in a non-thread-safe fashion.              */     \
+  void setStatic() const { _count = Countable::STATIC_FLAG; }            \
+  bool isStatic() const { return _count == STATIC_FLAG; }                \
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+
+const int32_t RefCountStaticValue = (1 << 30);
 
 /**
- * Implements reference counting. We could have used boost::shared_ptr<T> for
- * reference counting, but deriving our classes from Countable is more
- * efficient, both in time and space. This is because _count is not separately
- * allocated from the object, and it's an int than a 64-bit pointer. We
- * achieved this because we ask our classes to derive from Countable,
- * something boost::shared_ptr<T> doesn't have the luxury to.
+ * Implements reference counting. We chose to roll our own SmartPtr type
+ * instead of using boost::shared_ptr<T> so that we can achieve better
+ * performance by directly embedding the reference count in the object.
  */
-
 class Countable {
  public:
-  static const int STATIC_FLAG = (1 << 30);
-  static const int ATOMIC_FLAG = (1 << 29);
-
+  static const int32_t STATIC_FLAG = RefCountStaticValue;
   Countable() : _count(0) {}
   IMPLEMENT_COUNTABLE_METHODS
  protected:
-  mutable int _count;
+  mutable int32_t _count;
 };
 
-const int RefCountStaticValue = Countable::STATIC_FLAG;
+/**
+ * This is a special value for _count used to indicate objects that
+ * are already deallocated. (See smart_allocator.h.)
+ */
+const int32_t RefCountTombstoneValue = 0xde1ee7ed;
+
+#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC                               \
+  int32_t getCount() const { return _count; }                                 \
+  bool isRefCounted() const { return true; }                                  \
+  void incRefCount() const { ++_count; }                                      \
+  int32_t decRefCount() const { ASSERT(_count > 0); return --_count; }
 
 /**
  * CountableNF : countable no flags
  */
-
-#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC                               \
-  void setAtomic() const { ASSERT(false); }                                   \
-  bool isAtomic() const { return false;   }                                   \
-  bool isRefCounted() const { return true; }                                  \
-  void incAtomicCount() const { ASSERT(false); }                              \
-  int decAtomicCount() const { ASSERT(false); return _count; }                \
-  void incRefCount() const {                                                  \
-    TRACE_MOD(Trace::refcount, 7, "incRef: %p %010d++\n", this,               \
-              _count);                                                        \
-    ++_count;                                                                 \
-  }                                                                           \
-  int decRefCount() const {                                                   \
-    TRACE_MOD(Trace::refcount, 7, "decRef: %p %010d++\n", this,               \
-              _count);                                                        \
-    ASSERT(_count > 0);                                                       \
-    return --_count;                                                          \
-  }                                                                           \
-  int getCount() const { return _count; }                                     \
-
 class CountableNF : public Countable {
  public:
   void setStatic() const { ASSERT(false); }
-  bool isStatic() const { return false;   }
+  bool isStatic() const { return false; }
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC;
 };
 
 /* We only use this to hold objects */
-
 class CountableHelper {
 public:
   CountableHelper(CountableNF *countable) : m_countable(countable) {
@@ -143,9 +93,24 @@ public:
   ~CountableHelper() {
     m_countable->decRefCount();
   }
-
 private:
   CountableNF *m_countable;
+};
+
+/**
+ * If an object may be shared by multiple threads but we want to reclaim it
+ * when all threads are finished using it, we need to allocate it with the C++
+ * new operator (instead of SmartAllocator) and we need to use AtomicSmartPtr
+ * instead of SmartPtr.
+ */
+class AtomicCountable {
+ public:
+  AtomicCountable() : _count(0) {}
+  int32_t getCount() const { return _count; }                        
+  void incAtomicCount() const { atomic_inc(_count); }
+  int decAtomicCount() const { return atomic_dec(_count); }
+ protected:
+  mutable int32_t _count;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

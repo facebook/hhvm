@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_run.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -61,6 +59,8 @@ bool CmdRun::onClient(DebuggerClient *client) {
   m_args = StringVecPtr(client->args(), null_deleter());
   m_smallStep = client->getDebuggerSmallStep();
   client->send(this);
+  client->clearCachedLocal();
+  client->setFrame(0);
   throw DebuggerConsoleExitException();
 }
 

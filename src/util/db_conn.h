@@ -31,10 +31,7 @@ public:
     va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
   }
   int m_code;
-  virtual DatabaseException* clone() {
-    return new DatabaseException(*this);
-  }
-  virtual void throwException() { throw *this; }
+  EXCEPTION_COMMON_IMPL(DatabaseException);
 };
 
 class DBConnectionException : public DatabaseException {
@@ -44,10 +41,7 @@ public:
       : DatabaseException(code, "Failed to connect to %s %s: %s (%d)",
                           ip, database, msg, code) {
   }
-  virtual DBConnectionException* clone() {
-    return new DBConnectionException(*this);
-  }
-  virtual void throwException() { throw *this; }
+  EXCEPTION_COMMON_IMPL(DBConnectionException);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

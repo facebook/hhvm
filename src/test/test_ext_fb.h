@@ -31,6 +31,9 @@ class TestExtFb : public TestCppExt {
   bool test_fb_thrift_unserialize();
   bool test_fb_rename_function();
   bool test_fb_utf8ize();
+  bool test_fb_utf8_strlen();
+  bool test_fb_utf8_strlen_deprecated();
+  bool test_fb_utf8_substr();
   bool test_fb_call_user_func_safe();
   bool test_fb_call_user_func_safe_return();
   bool test_fb_call_user_func_array_safe();

@@ -35,16 +35,9 @@ class c_stdClass : public ExtObjectData {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(stdClass, stdClass)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_stdClass(const ObjectStaticCallbacks *cb = &cw_stdClass) : ExtObjectData(cb) {}
+  c_stdClass(const ObjectStaticCallbacks *cb = &cw_stdClass) : ExtObjectData(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_stdClass() NEVER_INLINE;
 

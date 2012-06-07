@@ -23,7 +23,7 @@
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 static StaticString s_trait_marker("[trait]");
 
@@ -51,14 +51,15 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   Object co;
   if (!vco.isNull()) co = vco.toObject();
   if (cname.same(s_trait_marker)) {
-    cname = ClassStatement::resolveSpInTrait(env, co, m_cname.get());
+    cname = ClassStatement::resolveSpInTrait(env, m_cname.get());
   }
   bool withinClass = !co.isNull() && co->o_instanceof(cname.data());
   ClassEvalState *ce = RequestEvalState::findClassState(cname);
+  const MethodStatementWrapper *msw = NULL;
   const MethodStatement *ms = NULL;
-  int access = 0;
   if (ce) {
-    ms = ce->getMethod(name.data(), access);
+    msw = ce->getMethod(name);
+    if (msw) ms = msw->m_methodStatement;
   }
 
   if (withinClass) {
@@ -73,11 +74,9 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
         }
         // Ugly but needed to populate the method table for the parent
         ces->initializeInstance();
-        ms = ces->getConstructor();
-        if (ms) {
-          access = 0; // use method's own access level
-          break;
-        }
+        msw = &ces->getConstructorWrapper();
+        ms = msw->m_methodStatement;
+        if (ms) break;
         name = ces->getClass()->parent();
         if (name.empty()) break;
       }
@@ -88,14 +87,16 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
       return strongBind(co->o_invoke_ex(cname, name, params));
     } else if (!(ms->getModifiers() & ClassStatement::Static)) {
       EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
-      return strongBind(ms->invokeInstanceDirect(co, env, this));
+      return strongBind(ms->invokeInstanceDirect(co, name, env, this, msw));
     }
   }
   if (ms) {
-    return strongBind(ms->invokeStaticDirect(cname, env, this, sp, access));
+    return strongBind(ms->invokeStaticDirect(cname, name, env,
+                                             this, sp, msw));
   }
 
   // Handle builtins
+  EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
   MethodCallPackage mcp1;
   mcp1.dynamicNamedCall(cname, name, -1);
   const CallInfo* ci = mcp1.ci;

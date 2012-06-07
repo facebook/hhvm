@@ -21,8 +21,6 @@
 #include <runtime/base/server/server_note.h>
 #include <runtime/base/server/transport.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

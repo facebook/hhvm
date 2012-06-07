@@ -8,7 +8,7 @@ default_target: all
 #=============================================================================
 # Special targets provided by cmake.
 
-# Disable implicit rules so canoncical targets will work.
+# Disable implicit rules so canonical targets will work.
 .SUFFIXES:
 
 # Remove some rules from gmake that .SUFFIXES does not remove.
@@ -36,10 +36,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/macvicar/dev/vm/hiphop-php
+CMAKE_SOURCE_DIR = /home/joelp/dev/hiphop-php
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/macvicar/dev/vm/hiphop-php
+CMAKE_BINARY_DIR = /home/joelp/dev/hiphop-php
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -107,14 +107,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/macvicar/dev/vm/hiphop-php && $(CMAKE_COMMAND) -E cmake_progress_start /home/macvicar/dev/vm/hiphop-php/CMakeFiles /home/macvicar/dev/vm/hiphop-php/src/hphp/CMakeFiles/progress.marks
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/macvicar/dev/vm/hiphop-php/CMakeFiles 0
+	cd /home/joelp/dev/hiphop-php && $(CMAKE_COMMAND) -E cmake_progress_start /home/joelp/dev/hiphop-php/CMakeFiles /home/joelp/dev/hiphop-php/src/hphp/CMakeFiles/progress.marks
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/joelp/dev/hiphop-php/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/clean
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/clean
 .PHONY : clean
 
 # The main clean target
@@ -123,22 +123,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/preinstall
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/preinstall
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/macvicar/dev/vm/hiphop-php && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/joelp/dev/hiphop-php && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/hphp/CMakeFiles/hphp.dir/rule:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/CMakeFiles/hphp.dir/rule
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f CMakeFiles/Makefile2 src/hphp/CMakeFiles/hphp.dir/rule
 .PHONY : src/hphp/CMakeFiles/hphp.dir/rule
 
 # Convenience name for target.
@@ -147,7 +147,7 @@ hphp: src/hphp/CMakeFiles/hphp.dir/rule
 
 # fast build rule for target.
 hphp/fast:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/build
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/build
 .PHONY : hphp/fast
 
 externals.o: externals.cpp.o
@@ -155,7 +155,7 @@ externals.o: externals.cpp.o
 
 # target to build an object file
 externals.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/externals.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/externals.cpp.o
 .PHONY : externals.cpp.o
 
 externals.i: externals.cpp.i
@@ -163,7 +163,7 @@ externals.i: externals.cpp.i
 
 # target to preprocess a source file
 externals.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/externals.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/externals.cpp.i
 .PHONY : externals.cpp.i
 
 externals.s: externals.cpp.s
@@ -171,7 +171,7 @@ externals.s: externals.cpp.s
 
 # target to generate assembly for a file
 externals.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/externals.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/externals.cpp.s
 .PHONY : externals.cpp.s
 
 main.o: main.cpp.o
@@ -179,7 +179,7 @@ main.o: main.cpp.o
 
 # target to build an object file
 main.cpp.o:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/main.cpp.o
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/main.cpp.o
 .PHONY : main.cpp.o
 
 main.i: main.cpp.i
@@ -187,7 +187,7 @@ main.i: main.cpp.i
 
 # target to preprocess a source file
 main.cpp.i:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/main.cpp.i
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/main.cpp.i
 .PHONY : main.cpp.i
 
 main.s: main.cpp.s
@@ -195,7 +195,7 @@ main.s: main.cpp.s
 
 # target to generate assembly for a file
 main.cpp.s:
-	cd /home/macvicar/dev/vm/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/main.cpp.s
+	cd /home/joelp/dev/hiphop-php && $(MAKE) -f src/hphp/CMakeFiles/hphp.dir/build.make src/hphp/CMakeFiles/hphp.dir/main.cpp.s
 .PHONY : main.cpp.s
 
 # Help Target
@@ -228,6 +228,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/macvicar/dev/vm/hiphop-php && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/joelp/dev/hiphop-php && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

@@ -365,6 +365,8 @@ public:
   static std::string getEscapedText(Variant v, int &len);
 protected:
   Symbol *genSymbol(const std::string &name, bool konst);
+  Symbol *genSymbol(const std::string &name, bool konst,
+                    ConstructPtr construct);
   typedef std::map<std::string,Symbol> StringToSymbolMap;
   BlockScope &m_blockScope;     // owner
 

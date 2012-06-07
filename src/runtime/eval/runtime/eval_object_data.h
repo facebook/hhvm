@@ -33,12 +33,12 @@ class EvalObjectData : public DynamicObjectData {
 public:
   EvalObjectData(ClassEvalState &cls, const char* pname,
                  ObjectData *r = NULL);
+  ~EvalObjectData();
+
   virtual void getConstructor(MethodCallPackage &mcp);
   virtual void init();
-  virtual void destruct();
 
   // properties
-  virtual Array o_toArray() const;
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
   virtual void o_setArray(CArrRef props);
   virtual Variant *o_realPropHook(CStrRef prop, int flags,
@@ -50,9 +50,9 @@ public:
 
    // methods
   virtual CStrRef o_getClassNameHook() const;
-  virtual const MethodStatement *getMethodStatement(CStrRef name,
-                                                    int &access) const;
-  virtual const MethodStatement *getConstructorStatement() const;
+  virtual const MethodStatementWrapper *getMethodStatementWrapper(
+    CStrRef name) const;
+  virtual const MethodStatementWrapper *getConstructorStatementWrapper() const;
 
   virtual bool o_get_call_info_hook(const char *clsname,
                                     MethodCallPackage &mcp, int64 hash = -1);
@@ -74,12 +74,6 @@ public:
   virtual Variant t___clone();
   virtual Variant &___offsetget_lval(Variant v_name);
   virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
-
-  /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   */
-  virtual Object fiberMarshal(FiberReferenceMap &refMap) const;
-  virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
 
 protected:
   virtual ObjectData* clone();

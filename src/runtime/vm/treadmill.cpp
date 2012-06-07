@@ -1,0 +1,158 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <stdio.h>
+
+#include <list>
+
+#include "util/trace.h"
+#include "util/base.h"
+#include "util/rank.h"
+#include "runtime/base/macros.h"
+#include "runtime/vm/class.h"
+#include "treadmill.h"
+
+namespace HPHP { namespace VM { namespace Treadmill {
+
+TRACE_SET_MOD(treadmill);
+
+namespace {
+static pthread_mutex_t s_genLock = PTHREAD_MUTEX_INITIALIZER;
+static GenCount s_gen = 1;
+static const GenCount kIdleGenCount = 0; // not processing any requests.
+static GenCount* s_inflightRequests;
+static int s_maxThreadID;
+
+struct GenCountGuard {
+  GenCountGuard() {
+    checkRank(RankTreadmill);
+    pthread_mutex_lock(&s_genLock);
+    pushRank(RankTreadmill);
+    if (!s_inflightRequests) {
+      s_maxThreadID = 2;
+      s_inflightRequests = (GenCount*)calloc(sizeof(GenCount), s_maxThreadID);
+      CT_ASSERT(kIdleGenCount == 0);
+    }
+  }
+  ~GenCountGuard() {
+    popRank(RankTreadmill);
+    pthread_mutex_unlock(&s_genLock);
+  }
+};
+}
+
+static GenCount* idToCount(int threadID) {
+  if (threadID >= s_maxThreadID) {
+    int newSize = threadID + 1;
+    s_inflightRequests = (GenCount*)realloc(s_inflightRequests,
+                                           sizeof(GenCount) * newSize);
+    for (int i = s_maxThreadID; i < newSize; i++) {
+      s_inflightRequests[i] = kIdleGenCount;
+    }
+    s_maxThreadID = newSize;
+  }
+  return s_inflightRequests + threadID;
+}
+
+static bool isUnreachable(GenCount gc) {
+  if (gc > s_gen) return false;
+  for (int i = 0; i < s_maxThreadID; ++i) {
+    if (s_inflightRequests[i] != kIdleGenCount &&
+        s_inflightRequests[i] <= gc) {
+      TRACE(1, "request %d still in flight, of gen %d\n", i,
+            int(s_inflightRequests[i]));
+      return false;
+    }
+  }
+  return true;
+}
+
+typedef std::list<WorkItem*> PendingTriggers;
+static PendingTriggers s_tq;
+
+// Inherently racy. We get a lower bound on the generation; presumably
+// clients are aware of this, and are creating the trigger for an object
+// that was reachable strictly in the past.
+WorkItem::WorkItem() : m_gen(s_gen) {
+}
+
+void WorkItem::enqueue(WorkItem* gt) {
+  GenCountGuard g;
+  gt->m_gen = s_gen++;
+  s_tq.push_back(gt);
+}
+
+void startRequest(int threadId) {
+  GenCountGuard g;
+  ASSERT(*idToCount(threadId) == kIdleGenCount);
+  TRACE(1, "tid %d start @gen %d\n", threadId, int(s_gen));
+  *idToCount(threadId) = s_gen;
+}
+
+void finishRequest(int threadId) {
+  TRACE(1, "tid %d finish\n", threadId);
+  std::vector<WorkItem*> toFire;
+  {
+    GenCountGuard g;
+    ASSERT(*idToCount(threadId) != kIdleGenCount);
+    *idToCount(threadId) = kIdleGenCount;
+
+    // After finishing a request, check to see if we've allowed any triggers
+    // to fire.
+    for (PendingTriggers::iterator it = s_tq.begin();
+         it != s_tq.end(); ) {
+      TRACE(2, "considering delendum %d\n", int((*it)->m_gen));
+      if (isUnreachable((*it)->m_gen)) {
+        toFire.push_back(*it);
+        it = s_tq.erase(it);
+      } else {
+        TRACE(2, "not unreachable! %d\n", int((*it)->m_gen));
+        it++;
+      }
+    }
+  }
+  for (unsigned i = 0; i < toFire.size(); ++i) {
+    (*toFire[i])();
+    delete toFire[i];
+  }
+}
+
+FreeMemoryTrigger::FreeMemoryTrigger(void* ptr) : m_ptr(ptr) {
+  TRACE(3, "FreeMemoryTrigger @ %p, m_f %p\n", this, m_ptr);
+}
+
+void FreeMemoryTrigger::operator()() {
+  TRACE(3, "FreeMemoryTrigger: Firing @ %p , m_f %p\n", this, m_ptr);
+  free(m_ptr);
+}
+
+FreeClassTrigger::FreeClassTrigger(Class* cls) : m_cls(cls) {
+  TRACE(3, "FreeClassTrigger @ %p, cls %p\n", this, m_cls);
+}
+
+void FreeClassTrigger::operator()() {
+  TRACE(3, "FreeClassTrigger: Firing @ %p , cls %p\n", this, m_cls);
+  m_cls->atomicRelease();
+}
+
+void deferredFree(void* p) {
+  WorkItem::enqueue(new FreeMemoryTrigger(p));
+}
+
+}}}

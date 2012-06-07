@@ -42,7 +42,9 @@ class c_SplObjectStorage : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SplObjectStorage, SplObjectStorage, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_SplObjectStorage(const ObjectStaticCallbacks *cb = &cw_SplObjectStorage) : ExtObjectData(cb), m_index(0LL) {}
+  c_SplObjectStorage(const ObjectStaticCallbacks *cb = &cw_SplObjectStorage) : ExtObjectData(cb), m_index(0LL) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   void init();
   public: void t_rewind();
   public: bool t_valid();

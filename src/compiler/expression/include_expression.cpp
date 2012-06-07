@@ -30,8 +30,6 @@
 #include <util/util.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -41,7 +39,9 @@ IncludeExpression::IncludeExpression
   : UnaryOpExpression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(IncludeExpression),
       exp, op, true),
-    m_documentRoot(false), m_privateScope(false), m_depsSet(false) {
+    m_documentRoot(false), m_privateScope(false),
+    m_privateInclude(false), m_module(false),
+    m_depsSet(false) {
 }
 
 ExpressionPtr IncludeExpression::clone() {
@@ -55,52 +55,41 @@ ExpressionPtr IncludeExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-static string get_include_file_path(const string &source, string expText,
-                                    bool documentRoot) {
-  if (expText.size() <= 2) return "";
-
-  char first = expText[0];
-  char last = expText[expText.size() - 1];
-
-  // (exp)
-  if (first == '(' && last == ')') {
-    expText = expText.substr(1, expText.size() - 2);
-    return get_include_file_path(source, expText, documentRoot);
-  }
-
-  // 'string'
-  if ((first == '\'' && last == '\'') || (first == '"' && last == '"')) {
-    expText = expText.substr(1, expText.size() - 2);
-
+static string get_include_file_path(const string &source,
+                                    const string &var, const string &lit,
+                                    bool documentRoot, bool relative) {
+  if (var.empty()) {
     // absolute path
-    if (!expText.empty() && expText[0] == '/') {
-      return expText;
+    if (!lit.empty() && lit[0] == '/') {
+      return lit;
     }
 
     // relative path to document root
     if (documentRoot) {
-      return expText;
+      return lit;
     }
 
     struct stat sb;
-
     // relative path to containing file's directory
-    if (source.empty() && stat(expText.c_str(), &sb) == 0) {
-      return expText;
+    if (source.empty() && (relative || stat(lit.c_str(), &sb) == 0)) {
+      return lit;
     }
 
     size_t pos = source.rfind('/');
     string resolved;
     if (pos != string::npos) {
-      resolved = source.substr(0, pos + 1) + expText;
-      if (stat(resolved.c_str(), &sb) == 0) {
+      resolved = source.substr(0, pos + 1) + lit;
+      if (relative || stat(resolved.c_str(), &sb) == 0) {
         return resolved;
       }
     }
 
+    if (relative) return "";
+
     // if file cannot be found, resolve it using search paths
     for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
-      string filename = Option::IncludeSearchPaths[i] + "/" + expText;
+      string filename = Option::IncludeSearchPaths[i] + "/" + lit;
+      struct stat sb;
       if (stat(filename.c_str(), &sb) == 0) {
         return filename;
       }
@@ -111,34 +100,28 @@ static string get_include_file_path(const string &source, string expText,
       return resolved;
     }
 
-    return expText;
+    return lit;
   }
 
   // [IncludeRoot] . 'string'
-  for (map<string, string>::const_iterator iter = Option::IncludeRoots.begin();
-       iter != Option::IncludeRoots.end(); iter++) {
-    string rootExp = iter->first + " . ";
-    int rootLen = rootExp.size();
-    if (expText.substr(0, rootLen) == rootExp &&
-        (int)expText.length() > rootLen + 2 &&
-        ((expText[rootLen] == '\'' && last == '\'') ||
-         (expText[rootLen] == '"' && last == '"'))) {
-      expText = expText.substr(rootLen + 1, expText.length() - rootLen - 2);
+  std::map<string, string>::const_iterator iter =
+    Option::IncludeRoots.find(var);
 
-      string includeRoot = iter->second;
-      if (!includeRoot.empty()) {
-        if (includeRoot[0] == '/') includeRoot = includeRoot.substr(1);
-        if (includeRoot.empty() ||
-            includeRoot[includeRoot.size()-1] != '/') {
-          includeRoot += "/";
-        }
+  if (iter != Option::IncludeRoots.end()) {
+    string includeRoot = iter->second;
+    if (!includeRoot.empty()) {
+      if (includeRoot[0] == '/') includeRoot = includeRoot.substr(1);
+      if (includeRoot.empty() ||
+          includeRoot[includeRoot.size()-1] != '/') {
+        includeRoot += "/";
       }
-      if (!expText.empty() && expText[0] == '/') {
-        expText = expText.substr(1);
-      }
-      expText = includeRoot + expText;
-      return expText;
     }
+    if (!lit.empty() && lit[0] == '/') {
+      includeRoot += lit.substr(1);
+    } else {
+      includeRoot += lit;
+    }
+    return includeRoot;
   }
 
   return "";
@@ -175,46 +158,59 @@ static void parse_string_arg(ExpressionPtr exp, string &var, string &lit) {
 
 string IncludeExpression::CheckInclude(ConstructPtr includeExp,
                                        ExpressionPtr fileExp,
-                                       bool documentRoot) {
+                                       bool &documentRoot,
+                                       bool relative) {
   string container = includeExp->getLocation()->file;
   string var, lit;
   parse_string_arg(fileExp, var, lit);
-  if (!lit.empty()) {
-    if (!var.empty()) {
-      var += " . ";
-    }
-    var += "'" + lit + "'";
-  }
+  if (lit.empty()) return lit;
 
-  string included = get_include_file_path(container, var, documentRoot);
-  included = Util::canonicalize(included);
-  if (included.empty() || container == included) {
-    if (!included.empty() && included.find(' ') == string::npos) {
+  string included = get_include_file_path(container, var, lit,
+                                          documentRoot, relative);
+  if (!included.empty()) {
+    if (included == container) {
       Compiler::Error(Compiler::BadPHPIncludeFile, includeExp);
     }
-    return "";
+    included = Util::canonicalize(included);
+    if (!var.empty()) documentRoot = true;
   }
   return included;
 }
 
 void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
-  m_include = CheckInclude(shared_from_this(), m_exp, m_documentRoot);
+  /* m_documentRoot is a bitfield */
+  bool dr = m_documentRoot;
+  m_include = CheckInclude(shared_from_this(), m_exp,
+                           dr, m_privateScope && !dr);
+  m_documentRoot = dr;
   if (!m_include.empty()) ar->parseOnDemand(m_include);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+FileScopeRawPtr IncludeExpression::getIncludedFile(
+  AnalysisResultConstPtr ar) const {
+  if (m_include.empty()) return FileScopeRawPtr();
+  return ar->findFileScope(m_include);
+}
+
 bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
                                        const std::string &include) {
   ConstructPtr self = shared_from_this();
   FileScopePtr file = ar->findFileScope(include);
   if (!file) {
-    if (!include.empty() && include.find(' ') == string::npos) {
-      Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
-    }
+    Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
     return false;
   }
+  if (m_module || m_privateInclude) {
+    Lock l(BlockScope::s_constMutex);
+    if (m_module) file->setModule();
+    if (m_privateInclude) {
+      file->setPrivateInclude();
+    }
+  }
+
   FunctionScopePtr func = getFunctionScope();
   if (func && file->getPseudoMain()) {
     file->getPseudoMain()->addUse(func, BlockScope::UseKindInclude);
@@ -237,7 +233,6 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
     VariableTablePtr var = getScope()->getVariables();
     var->setAttribute(VariableTable::ContainsLDynamicVariable);
     var->forceVariants(ar, VariableTable::AnyVars);
-    getFileScope()->setHasNonPrivateScope();
   }
 
   UnaryOpExpression::analyzeProgram(ar);
@@ -246,7 +241,10 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
 ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_include.empty()) {
-      m_include = CheckInclude(shared_from_this(), m_exp, m_documentRoot);
+      bool dr = m_documentRoot;
+      m_include = CheckInclude(shared_from_this(), m_exp,
+                               dr, m_privateScope && !dr);
+      m_documentRoot = dr;
       m_depsSet = false;
     }
     if (!m_depsSet && !m_include.empty()) {
@@ -271,7 +269,9 @@ ExpressionPtr IncludeExpression::postOptimize(AnalysisResultConstPtr ar) {
           return replaceValue(rep->clone());
         }
       }
-      m_exp.reset();
+      if (!hhvm || !Option::OutputHHBC) {
+        m_exp.reset();
+      }
     } else {
       m_include = "";
     }

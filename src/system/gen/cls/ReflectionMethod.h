@@ -27,11 +27,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern StaticString s_sys_ss00000000;
+extern StaticStringProxy s_sys_ssp00000000;
+#ifndef s_sys_ss00000000
+#define s_sys_ss00000000 (*(StaticString *)(&s_sys_ssp00000000))
+#endif
 
-extern VarNR s_sys_svs00000000;
+extern VariantProxy s_sys_svsp00000000;
+#ifndef s_sys_svs00000000
+#define s_sys_svs00000000 (*(Variant *)&s_sys_svsp00000000)
+#endif
 
-/* SRC: classes/reflection.php line 1627 */
+/* SRC: classes/reflection.php line 1655 */
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 extern const ObjectStaticCallbacks cw_ReflectionMethod;
 class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
@@ -46,11 +52,13 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionMethod, ReflectionMethod, ReflectionFunctionAbstract)
   static const ClassPropTable os_prop_table;
-  c_ReflectionMethod(const ObjectStaticCallbacks *cb = &cw_ReflectionMethod) : c_ReflectionFunctionAbstract(cb), m_name(Variant::nullInit), m_class(Variant::nullInit) {}
+  c_ReflectionMethod(const ObjectStaticCallbacks *cb = &cw_ReflectionMethod) : c_ReflectionFunctionAbstract(cb), m_name(Variant::nullInit), m_class(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
   public: c_ReflectionMethod *create(CVarRef v_cls, CVarRef v_name = NAMVAR(s_sys_svs00000000, ""));
   public: String t___tostring();
-  public: static Variant t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret);
+  public: static Variant t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret = false_varNR);
   public: Variant t_invoke(int num_args, CVarRef v_obj, Array args = Array());
   public: Variant t_invokeargs(CVarRef v_obj, CVarRef v_args);
   public: bool t_isfinal();

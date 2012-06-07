@@ -49,86 +49,94 @@ public:
     if (cls->m_InstanceCtor) {
       return cls->m_InstanceCtor(cls);
     }
-    Attr attrs = cls->m_preClass->m_attrs;
+    Attr attrs = cls->attrs();
     if (UNLIKELY(attrs & (AttrAbstract | AttrInterface | AttrTrait))) {
       raise_error("Cannot instantiate %s %s",
                   (attrs & AttrInterface) ? "interface" :
                   (attrs & AttrTrait)     ? "trait" : "abstract class",
-                  cls->m_preClass->m_name->data());
+                  cls->preClass()->name()->data());
     }
-    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-    unsigned nProps = cls->m_declPropInfo.size();
-    unsigned size = sizeForNProps(nProps);
+    size_t nProps = cls->numDeclProperties();
+    size_t size = sizeForNProps(nProps);
     Instance* obj = (Instance*)ALLOCOBJSZ(size);
     new (obj) Instance(cls);
     return obj;
   }
-  Instance(Class* cls)
-    : ObjectData(NULL, false, cls) {
-    unsigned nProps = cls->m_declPropInfo.size();
-    setAttributes(cls->m_ODAttrs | (m_cls->m_isCppExtClass ? 0 : IsInstance));
+
+private:
+  explicit Instance(Class* cls) : ObjectData(NULL, false, cls) {
+    /*
+     * During the construction of an instance, the instance has a ref
+     * count of zero, and no pointer to it yet exists anywhere the
+     * tracing collector can find it.  (I.e., newInstance() hasn't
+     * returned, so it isn't on the execution stack or in an Object
+     * smart pointer yet.)
+     *
+     * However, instance creation can sometimes lead to execution of
+     * arbitrary code (in the form of an autoload handler).  Moreover
+     * it can also lead to memory allocations (which may be a point at
+     * which we want to do GC), so we need to register the root for
+     * the duration of construction.
+     */
+    DECLARE_STACK_GC_ROOT(ObjectData, this);
+
+    size_t nProps = cls->numDeclProperties();
+    setAttributes(cls->getODAttrs() | (m_cls->clsInfo() ? 0 : IsInstance));
     m_propVec = (TypedValue *)((uintptr_t)this
                 + sizeof(ObjectData));
-    if (cls->m_needInitialization) {
+    if (cls->needInitialization()) {
       cls->initialize();
     }
     if (nProps > 0) {
-      if (cls->m_pinitVec.size() > 0) {
+      if (cls->pinitVec().size() > 0) {
         // initialize() is not inlined because trying to use g_context here
         // trips on a tangle of header dependencies.
         initialize(nProps);
       } else {
-        ASSERT(nProps == cls->m_declPropInit.size());
-        memcpy(m_propVec, &cls->m_declPropInit[0],
+        ASSERT(nProps == cls->declPropInit().size());
+        memcpy(m_propVec, &cls->declPropInit()[0],
                nProps * sizeof(TypedValue));
       }
     }
+    if (UNLIKELY(cls->needInstanceInit())) {
+      instanceInit();
+    }
   }
 protected:
-  void initialize(unsigned nProps);
-  template <bool canThrow> void destructHardImpl(const Func* meth);
+  void initialize(Slot nProps);
+  void instanceInit();
 public:
   virtual ~Instance() {}
 public:
   void operator delete(void* p) {
     Instance* this_ = (Instance*)p;
-    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-    unsigned nProps = this_->m_cls->m_declPropInfo.size();
-    unsigned size = sizeForNProps(nProps);
+    size_t nProps = this_->m_cls->numDeclProperties();
     if (this_->m_propMap) {
       this_->m_propMap->release();
     }
-    for (unsigned i = 0; i < nProps; ++i) {
+    for (Slot i = 0; i < nProps; ++i) {
       TypedValue* prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
     }
-    DELETEOBJSZ(size)(this_);
+    DELETEOBJSZ(sizeForNProps(nProps))(this_);
   }
-  template <bool canThrow>
-  void destructImpl() {
-    if (!getAttribute(InDestructor)) {
-      if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
-        forgetSweepable();
-      }
+  virtual void destruct() {
+    if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
+      forgetSweepable();
+    }
+
+    if (!noDestruct()) {
+      setNoDestruct();
+      CountableHelper h(this);
       static StringData* sd__destruct
         = StringData::GetStaticString("__destruct");
       const Func* meth = m_cls->lookupMethod(sd__destruct);
       if (meth != NULL) {
         // We raise the refcount around the call to __destruct(). This is to
         // prevent the refcount from going to zero when the destructor returns.
-        incRefCount();
-        destructHardImpl<canThrow>(meth);
-        decRefCount();
+        destructHard(meth);
       }
     }
-  }
-
-  virtual void destruct() {
-    Instance::destructImpl<true>();
-  }
-
-  virtual void destructNoThrow() {
-    Instance::destructImpl<false>();
   }
 
 private:
@@ -146,7 +154,7 @@ public:
     return getVMClass()->lookupMethod(sd);
   }
 
-  static size_t sizeForNProps(unsigned nProps) {
+  static size_t sizeForNProps(Slot nProps) {
     return sizeof(Instance) + (sizeof(TypedValue) * nProps);
   }
 
@@ -189,32 +197,51 @@ public:
   // Properties.
 public:
   // public for ObjectData access
-  void initPropMap();
-  int declPropInd(TypedValue* prop) const;
-  TypedValue* getProp(PreClass* ctx, const StringData* key, bool& visible,
+  void initPropMap(int numDynamic = 1);
+  Slot declPropInd(TypedValue* prop) const;
+ private:
+  template <bool declOnly>
+  TypedValue* getPropImpl(Class* ctx, const StringData* key, bool& visible,
+                          bool& accessible, bool& unset);
+ public:
+  TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
                       bool& accessible, bool& unset);
+  TypedValue* getDeclProp(Class* ctx, const StringData* key, bool& visible,
+                          bool& accessible, bool& unset);
 private:
   template <bool warn, bool define>
-  void propImpl(TypedValue*& retval, PreClass* ctx, const StringData* key);
+  void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
+                const StringData* key);
   void invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
   void invokeGet(TypedValue* retval, const StringData* key);
+  void invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
+                     const StringData* key);
   void invokeIsset(TypedValue* retval, const StringData* key);
   void invokeUnset(TypedValue* retval, const StringData* key);
+  void o_getProps(const Class* klass, bool pubOnly,
+                  const PreClass::PropertyVec& propVec,
+                  Array& props, std::vector<bool>& inserted) const;
 public:
-  void prop(TypedValue*& retval, PreClass* ctx, const StringData* key);
-  void propD(TypedValue*& retval, PreClass* ctx, const StringData* key);
-  void propW(TypedValue*& retval, PreClass* ctx, const StringData* key);
-  void propWD(TypedValue*& retval, PreClass* ctx, const StringData* key);
-  bool propIsset(PreClass* ctx, const StringData* key);
-  bool propEmpty(PreClass* ctx, const StringData* key);
+  void prop(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
+            const StringData* key);
+  void propD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
+             const StringData* key);
+  void propW(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
+             const StringData* key);
+  void propWD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
+              const StringData* key);
+  bool propIsset(Class* ctx, const StringData* key);
+  bool propEmpty(Class* ctx, const StringData* key);
 
-  void setProp(PreClass* ctx, const StringData* key, TypedValue* val,
-               bool bindingAssignment = false);
-  TypedValue* setOpProp(TypedValue& tvRef, PreClass* ctx, unsigned char op,
+  TypedValue* setProp(Class* ctx, const StringData* key, TypedValue* val,
+                      bool bindingAssignment = false);
+  TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, unsigned char op,
                         const StringData* key, Cell* val);
-  void incDecProp(TypedValue& tvRef, PreClass* ctx, unsigned char op,
+  void incDecProp(TypedValue& tvRef, Class* ctx, unsigned char op,
                   const StringData* key, TypedValue& dest);
-  void unsetProp(PreClass* ctx, const StringData* key);
+  void unsetProp(Class* ctx, const StringData* key);
+
+  void raiseUndefProp(const StringData* name);
 };
 
 } } // HPHP::VM
@@ -232,6 +259,7 @@ public:
       EOD_PARENT(cb, false), root(this) {}
   virtual void setRoot(ObjectData *r) { root = r; }
   virtual ObjectData *getRoot() { return root; }
+  ObjectData *getBuiltinRoot() { return root; }
 protected: ObjectData *root;
 
 };

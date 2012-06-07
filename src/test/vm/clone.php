@@ -13,19 +13,23 @@ class A {
   }
 };
 
-$a = new A;
-$a->y = "foo";
-$b = clone $a;
-$a->y = "bar";
-var_dump($b);
+function main() {
+  $a = new A;
+  $a->y = "foo";
+  $b = clone $a;
+  $a->y = "bar";
+  var_dump($b);
 
 
-class C {}
-$ten = 10;
-$d = new C();
-$d->thing = &$ten;
-unset($ten);  // now the property is the only reference
+  class C {}
+  $ten = 10;
+  $d = new C();
+  $d->thing = &$ten;
+  unset($ten);  // now the property is the only reference
 
-var_dump($d);
-$e = clone $d;
-var_dump($d);  // the reference doesn't persist across the clone
+  var_dump($d);
+  $e = clone $d;
+  var_dump($d);  // the reference doesn't persist across the clone
+}
+main();
+

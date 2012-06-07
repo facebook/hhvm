@@ -25,6 +25,7 @@
 
 class Test {
 public:
+  static std::string s_suite;
   static int s_total;
   static int s_passed;
   static int s_skipped;
@@ -83,6 +84,7 @@ private:
 #define IMPLEMENT_SEP_EXTENSION_TEST(name)
 #endif
 
+extern const char *php_path;
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // __TEST_H__

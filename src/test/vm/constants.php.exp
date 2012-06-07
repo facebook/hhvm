@@ -1,46 +1,46 @@
 Test begin
-HipHop Notice:  Undefined constant: CN
+HipHop Notice:  Use of undefined constant CN - assumed 'CN'
 string(2) "CN"
-HipHop Notice:  Undefined constant: CB
+HipHop Notice:  Use of undefined constant CB - assumed 'CB'
 string(2) "CB"
-HipHop Notice:  Undefined constant: CI
+HipHop Notice:  Use of undefined constant CI - assumed 'CI'
 string(2) "CI"
-HipHop Notice:  Undefined constant: CD
+HipHop Notice:  Use of undefined constant CD - assumed 'CD'
 string(2) "CD"
-HipHop Notice:  Undefined constant: CS
+HipHop Notice:  Use of undefined constant CS - assumed 'CS'
 string(2) "CS"
 Enter f()
-HipHop Notice:  Undefined constant: CN
+HipHop Notice:  Use of undefined constant CN - assumed 'CN'
 string(2) "CN"
-HipHop Notice:  Undefined constant: CB
+HipHop Notice:  Use of undefined constant CB - assumed 'CB'
 string(2) "CB"
-HipHop Notice:  Undefined constant: CI
+HipHop Notice:  Use of undefined constant CI - assumed 'CI'
 string(2) "CI"
-HipHop Notice:  Undefined constant: CD
+HipHop Notice:  Use of undefined constant CD - assumed 'CD'
 string(2) "CD"
-HipHop Notice:  Undefined constant: CS
+HipHop Notice:  Use of undefined constant CS - assumed 'CS'
 string(2) "CS"
 Leave f()
-HipHop Notice:  Undefined constant: CN
+HipHop Notice:  Use of undefined constant CN - assumed 'CN'
 string(2) "CN"
-HipHop Notice:  Undefined constant: CB
+HipHop Notice:  Use of undefined constant CB - assumed 'CB'
 string(2) "CB"
-HipHop Notice:  Undefined constant: CI
+HipHop Notice:  Use of undefined constant CI - assumed 'CI'
 string(2) "CI"
-HipHop Notice:  Undefined constant: CD
+HipHop Notice:  Use of undefined constant CD - assumed 'CD'
 string(2) "CD"
-HipHop Notice:  Undefined constant: CS
+HipHop Notice:  Use of undefined constant CS - assumed 'CS'
 string(2) "CS"
 Enter f()
-HipHop Notice:  Undefined constant: CN
+HipHop Notice:  Use of undefined constant CN - assumed 'CN'
 string(2) "CN"
-HipHop Notice:  Undefined constant: CB
+HipHop Notice:  Use of undefined constant CB - assumed 'CB'
 string(2) "CB"
-HipHop Notice:  Undefined constant: CI
+HipHop Notice:  Use of undefined constant CI - assumed 'CI'
 string(2) "CI"
-HipHop Notice:  Undefined constant: CD
+HipHop Notice:  Use of undefined constant CD - assumed 'CD'
 string(2) "CD"
-HipHop Notice:  Undefined constant: CS
+HipHop Notice:  Use of undefined constant CS - assumed 'CS'
 string(2) "CS"
 Leave f()
 NULL

@@ -37,7 +37,7 @@
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
-using namespace std;
+using std::map;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,6 +97,16 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   // $_ENV
   process_env_variables(g->GV(_ENV));
   g->GV(_ENV).set("HPHP", 1);
+  switch (getHphpBinaryType()) {
+  case HphpBinary::hhvm:
+    g->GV(_ENV).set("HHVM", 1);
+    if (RuntimeOption::EvalJit) {
+      g->GV(_ENV).set("HHVM_JIT", 1);
+    }
+    break;
+  case HphpBinary::hphpi: g->GV(_ENV).set("HPHPI", 1); break;
+  default: break;
+  }
 
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
   if (isServer) {

@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 249 */
+/* SRC: classes/reflection.php line 277 */
 FORWARD_DECLARE_CLASS(ReflectionFunctionAbstract);
 extern const ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
 class c_ReflectionFunctionAbstract : public ExtObjectData {
@@ -39,7 +39,9 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionFunctionAbstract, ReflectionFunctionAbstract, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_ReflectionFunctionAbstract(const ObjectStaticCallbacks *cb = &cw_ReflectionFunctionAbstract) : ExtObjectData(cb), m_info(Variant::nullInit) {}
+  c_ReflectionFunctionAbstract(const ObjectStaticCallbacks *cb = &cw_ReflectionFunctionAbstract) : ExtObjectData(cb), m_info(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: Variant t_getname();
   public: bool t_isinternal();
   public: Variant t_getclosure();

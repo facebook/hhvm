@@ -36,8 +36,11 @@ class SystemLib {
   static bool s_inited;
   static HPHP::Eval::PhpFile* s_phpFile;
   static HPHP::VM::Unit* s_unit;
+  static HPHP::VM::Unit* s_nativeFuncUnit;
+  static HPHP::VM::Unit* s_nativeClassUnit;
   static HPHP::VM::Class* s_stdclassClass;
   static HPHP::VM::Class* s_ExceptionClass;
+  static HPHP::VM::Class* s_BadMethodCallExceptionClass;
   static HPHP::VM::Class* s_pinitSentinelClass;
   static HPHP::VM::Class* s_resourceClass;
   static HPHP::VM::Class* s_DirectoryClass;
@@ -52,6 +55,7 @@ class SystemLib {
   static ObjectData* AllocStdClassObject();
   static ObjectData* AllocPinitSentinel();
   static ObjectData* AllocExceptionObject(CVarRef message);
+  static ObjectData* AllocBadMethodCallExceptionObject(CVarRef message);
   static ObjectData* AllocDOMExceptionObject(CVarRef message,
                                              CVarRef code);
   static ObjectData* AllocDirectoryObject();

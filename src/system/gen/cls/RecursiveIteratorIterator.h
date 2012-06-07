@@ -29,7 +29,7 @@ namespace HPHP {
 
 extern const VarNR &s_sys_svif01bca90;
 
-/* SRC: classes/iterator.php line 228 */
+/* SRC: classes/iterator.php line 244 */
 FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
 extern const ObjectStaticCallbacks cw_RecursiveIteratorIterator;
 class c_RecursiveIteratorIterator : public ExtObjectData {
@@ -43,7 +43,9 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   // Class Map
   DECLARE_CLASS_NO_SWEEP(RecursiveIteratorIterator, RecursiveIteratorIterator, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_RecursiveIteratorIterator(const ObjectStaticCallbacks *cb = &cw_RecursiveIteratorIterator) : ExtObjectData(cb), m_rsrc(Variant::nullInit) {}
+  c_RecursiveIteratorIterator(const ObjectStaticCallbacks *cb = &cw_RecursiveIteratorIterator) : ExtObjectData(cb), m_rsrc(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_iterator, Variant v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, Variant v_flags = 0LL);
   public: c_RecursiveIteratorIterator *create(CVarRef v_iterator, CVarRef v_mode = NAMVAR(s_sys_svif01bca90, 0LL) /* RecursiveIteratorIterator::LEAVES_ONLY */, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: Object t_getinneriterator();

@@ -29,7 +29,6 @@
 #include <runtime/vm/translator/asm-x64.h>
 #include <runtime/vm/translator/translator-x64.h>
 
-using namespace std;
 using namespace HPHP::VM::Transl;
 
 namespace HPHP {
@@ -38,9 +37,11 @@ namespace Debug {
 
 static const Trace::Module TRACEMOD = Trace::debuginfo;
 
+extern void recordPerfMap(const DwarfChunk* chunk);
+
 void ElfWriter::logError(const string& msg) {
   perror("");
-  cerr << msg << endl;
+  std::cerr << msg << '\n';
 }
 
 int ElfWriter::dwarfCallback(char *name, int size, Dwarf_Unsigned type,
@@ -128,7 +129,6 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
   /* if this function is from an unseen file, register file name
    * and get index to file name */
   if (it == m_fileDB.end()) {
-    ASSERT(strlen(f->file) > 0);
     file = dwarf_add_file_decl(m_dwarfProducer,
       (char *)f->file, 0, 0, 1000, &error);
     if (file == DW_DLV_NOCOUNT) {
@@ -439,12 +439,19 @@ ElfWriter::ElfWriter(DwarfChunk* d):
     return;
   }
 
-  symfile = new char[elf_size];
+  if (lseek(m_fd, 0, SEEK_SET) != 0) {
+    logError("Unable to seek to beginning of ELF file");
+    return;
+  }
+
+  symfile = (char*)malloc(elf_size);
   if (read(m_fd, (void *)symfile, elf_size) != elf_size) {
     logError("Unable to read elf file");
     return;
   }
   register_gdb_hook(symfile, elf_size, d);
+  recordPerfMap(d);
+  d->setSynced();
 }
 
 ElfWriter::~ElfWriter() {

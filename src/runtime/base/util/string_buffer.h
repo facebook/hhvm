@@ -46,12 +46,13 @@ public:
    * Constructing a string buffer with some initial size, subsequent allocation
    * will double existing size every round.
    */
-  StringBuffer(int initialSize = 1024);
-  StringBuffer(const char *filename);
+  explicit StringBuffer(int initialSize = 1024);
+  explicit StringBuffer(const char *filename);
   StringBuffer(char *data, int len); // attaching
   ~StringBuffer();
 
-  void setOutputLimit(int maxBytes) { m_maxBytes = maxBytes;}
+  static const int kDefaultOutputLimit = INT_MAX;
+  void setOutputLimit(int maxBytes) { m_maxBytes = maxBytes; }
 
   bool valid() const { return m_buffer != NULL;}
   bool empty() const { return m_pos == 0;}
@@ -97,7 +98,7 @@ public:
   void append(int n);
   void append(int64 n);
   void append(char c) {
-    if (m_buffer && m_pos + 1 <= m_size) {
+    if (m_buffer && m_pos < m_size) {
       m_buffer[m_pos++] = c;
       return;
     }
@@ -111,11 +112,12 @@ public:
     TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
     append(s);
   }
-  void append(CVarRef s) { append(s.toString()); }
+  void append(CVarRef s);
+  void append(const StringData *s) { append(s->data(), s->size()); }
   void append(const char *s, int len) {
     TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
     ASSERT(len >= 0);
-    if (m_buffer && m_pos + len <= m_size) {
+    if (m_buffer && len <= m_size - m_pos) {
       memcpy(m_buffer + m_pos, s, len);
       m_pos += len;
       return;
@@ -184,7 +186,7 @@ private:
   TaintData m_taint_data;
 #endif
 
-  void grow(int minSize);
+  void growBy(int spaceRequired);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

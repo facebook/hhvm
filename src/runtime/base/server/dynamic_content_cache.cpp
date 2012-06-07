@@ -18,8 +18,6 @@
 #include <util/lock.h>
 #include <util/compression.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

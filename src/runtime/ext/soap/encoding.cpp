@@ -20,9 +20,6 @@
 #include <runtime/ext/ext_soap.h>
 #include <runtime/base/util/string_buffer.h>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -3136,7 +3133,7 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns) {
     xmlns = xmlSearchNsPrefixByHref(node->doc, node, BAD_CAST(ns));
   }
   if (xmlns == NULL) {
-    map<string, string>::const_iterator iter =
+    std::map<string, string>::const_iterator iter =
       SOAP_GLOBAL(defEncNs).find(ns);
     if (iter != SOAP_GLOBAL(defEncNs).end()) {
       xmlns = xmlNewNs(node->doc->children, BAD_CAST(ns),
@@ -3190,7 +3187,7 @@ void encode_finish() {
 
 encodePtr get_conversion(int encode) {
   USE_SOAP_GLOBAL;
-  map<int, encodePtr>::const_iterator iter =
+  std::map<int, encodePtr>::const_iterator iter =
     SOAP_GLOBAL(defEncIndex).find(encode);
   if (iter != SOAP_GLOBAL(defEncIndex).end()) {
     return iter->second;

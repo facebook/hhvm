@@ -15,26 +15,26 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/ext_misc.h>
-#include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_math.h>
+#include <runtime/base/server/server_stats.h>
 #include <runtime/base/util/exceptions.h>
 #include <runtime/base/zend/zend_pack.h>
 #include <runtime/base/hphp_system.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/base/server/server_stats.h>
-#include <util/parser/scanner.h>
+#include <runtime/base/strings.h>
 #include <runtime/eval/runtime/eval_state.h>
+#include <runtime/ext/ext_class.h>
+#include <runtime/ext/ext_math.h>
+#include <runtime/ext/ext_misc.h>
+#include <runtime/vm/bytecode.h>
+#include <util/parser/scanner.h>
 
 namespace HPHP {
-using namespace std;
 
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION(tokenizer);
 
-const double k_INF = numeric_limits<double>::infinity();
-const double k_NAN = numeric_limits<double>::quiet_NaN();
+const double k_INF = std::numeric_limits<double>::infinity();
+const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -63,7 +63,7 @@ Variant f_constant(CStrRef name) {
     // translate "self" or "parent"
     if (className == "self") {
       String this_class = hhvm
-                          ? g_context->getContextClassName(true)
+                          ? g_vmContext->getContextClassName(true)
                           : FrameInjection::GetClassName(true);
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
@@ -73,7 +73,7 @@ Variant f_constant(CStrRef name) {
       }
     } else if (className == "parent") {
       String parent_class = hhvm
-                            ? g_context->getParentContextClassName(true)
+                            ? g_vmContext->getParentContextClassName(true)
                             : FrameInjection::GetParentClassName(true);
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
@@ -98,12 +98,13 @@ Variant f_constant(CStrRef name) {
 
 bool f_define(CStrRef name, CVarRef value,
               bool case_insensitive /* = false */) {
+  if (case_insensitive) {
+    raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
+  }
   if (hhvm) {
-    StringData* sd = NEW(StringData)(name.data(), name.size(), CopyString);
-    sd->incRefCount();
-    bool ret = g_context->setCns(sd, value);
-    LITSTR_DECREF(sd);
-    return ret;
+    // TODO: Once we're inlining constants from hphpc this should
+    // fatal or fail in some other way.
+    return g_vmContext->setCns(name.get(), value, true);
   } else {
     if (!has_eval_support) {
       // define() should be turned into constant definition by HPHP
@@ -111,13 +112,13 @@ bool f_define(CStrRef name, CVarRef value,
       return false;
     }
     if (!value.isAllowedAsConstantValue()) {
-      raise_warning("Constants may only evaluate to scalar values");
+      raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
       return false;
     }
     if (!f_defined(name)) {
       return Eval::RequestEvalState::declareConstant(name, value);
     }
-    raise_notice("Constant %s already defined", name.data());
+    raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name.data());
     return false;
   }
 }
@@ -135,7 +136,7 @@ bool f_defined(CStrRef name) {
     // translate "self" or "parent"
     if (className == "self") {
       String this_class = hhvm
-                          ? g_context->getContextClassName(true)
+                          ? g_vmContext->getContextClassName(true)
                           : FrameInjection::GetClassName(true);
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
@@ -145,7 +146,7 @@ bool f_defined(CStrRef name) {
       }
     } else if (className == "parent") {
       String parent_class = hhvm
-                            ? g_context->getParentContextClassName(true)
+                            ? g_vmContext->getParentContextClassName(true)
                             : FrameInjection::GetParentClassName(true);
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
@@ -173,7 +174,7 @@ bool f_defined(CStrRef name) {
     if (ClassInfo::FindConstant(name)) return true;
     // dynamic/redeclared constant
     return ((Globals*)get_global_variables())->defined(name)
-            || (hhvm && g_context->defined(name));
+            || (hhvm && g_vmContext->defined(name));
 
   }
 }
@@ -365,6 +366,13 @@ String f_token_name(int64 token) {
     }
   }
   return "UNKNOWN";
+}
+
+Variant f_hphp_process_abort(CVarRef magic) {
+  if (magic.equal("I solemnly swear that I am up to no good.")) {
+    *((int*)0) = 0xdead;
+  }
+  return null_variant;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

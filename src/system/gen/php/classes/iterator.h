@@ -21,6 +21,10 @@
 #include <runtime/base/hphp_system.h>
 #include <system/gen/sys/literal_strings_remap.h>
 #include <system/gen/sys/scalar_arrays_remap.h>
+#include <cls/AppendIterator.h>
+#include <cls/ArrayIterator.h>
+#include <cls/FilterIterator.h>
+#include <cls/IteratorIterator.h>
 
 // Declarations
 #include <cls/RecursiveIteratorIterator.h>
@@ -28,12 +32,12 @@
 #include <cls/OuterIterator.h>
 #include <cls/FilterIterator.h>
 #include <cls/Iterator.h>
-#include <cls/MutableArrayIterator.h>
 #include <cls/RecursiveIterator.h>
 #include <cls/IteratorIterator.h>
 #include <cls/ArrayIterator.h>
 #include <cls/AppendIterator.h>
 #include <cls/Traversable.h>
+#include <cls/JsonSerializable.h>
 #include <cls/Countable.h>
 #include <cls/SeekableIterator.h>
 #include <cls/Serializable.h>

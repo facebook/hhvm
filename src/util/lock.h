@@ -104,6 +104,26 @@ public:
     : ConditionalLock(obj, true, profile) {}
 };
 
+class ScopedUnlock {
+public:
+  ScopedUnlock(Mutex &mutex) : m_mutex(mutex) {
+    m_mutex.unlock();
+  }
+  ScopedUnlock(Synchronizable *obj) : m_mutex(obj->getMutex()) {
+    m_mutex.unlock();
+  }
+  ScopedUnlock(SynchronizableMulti *obj) : m_mutex(obj->getMutex()) {
+    m_mutex.unlock();
+  }
+
+  ~ScopedUnlock() {
+    m_mutex.lock();
+  }
+
+private:
+  Mutex &m_mutex;
+};
+
 class SimpleConditionalLock : public BaseConditionalLock<SimpleMutex> {
 public:
   SimpleConditionalLock(SimpleMutex &mutex,
@@ -124,20 +144,33 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ReadLock {
+class ConditionalReadLock {
 public:
-  ReadLock(ReadWriteMutex &mutex, bool profile = true)
-    : m_profiler(profile), m_mutex(mutex) {
-    m_mutex.acquireRead();
+  ConditionalReadLock(ReadWriteMutex &mutex, bool condition,
+                      bool profile = true)
+    : m_profiler(profile), m_mutex(mutex), m_acquired(false) {
+    if (condition) {
+      m_mutex.acquireRead();
+      m_acquired = true;
+    }
   }
 
-  ~ReadLock() {
-    m_mutex.release();
+  ~ConditionalReadLock() {
+    if (m_acquired) {
+      m_mutex.release();
+    }
   }
 
 private:
   LockProfiler m_profiler;
   ReadWriteMutex &m_mutex;
+  bool m_acquired;
+};
+
+class ReadLock : public ConditionalReadLock {
+public:
+  ReadLock(ReadWriteMutex &mutex, bool profile = true)
+    : ConditionalReadLock(mutex, true, profile) {}
 };
 
 class WriteLock {

@@ -19,27 +19,24 @@
 #include <runtime/eval/debugger/debugger_proxy.h>
 #include <runtime/eval/debugger/debugger_thrift_buffer.h>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 const uchar* InstPointInfo::lookupPC() {
-  ExecutionContext* context = g_context.getNoCheck();
+  const_assert(hhvm);
+  VMExecutionContext* context = g_vmContext;
   if (m_locType == LocHere) {
     // Instrument to current location
-    HPHP::VM::ActRec *fp = context->m_fp;
+    HPHP::VM::ActRec *fp = context->getFP();
     if (!fp) {
       return NULL;
     }
-    HPHP::VM::PC pc = context->m_pc;
-    HPHP::VM::Unit *unit = fp->m_func->m_unit;
+    HPHP::VM::PC pc = context->getPC();
+    HPHP::VM::Unit *unit = fp->m_func->unit();
     if (!unit) {
       return NULL;
     }
-    ASSERT(unit->m_filepath);
-    m_file = unit->m_filepath->data();
+    m_file = unit->filepath()->data();
     m_line = unit->getLineNumber(unit->offsetOf(pc));
     return pc;
   }

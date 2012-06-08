@@ -24,10 +24,6 @@ hphp.log
 /src/test/vm/perf/*.out
 /src/test/vm/perf/*.diff
 /src/test/vm/perf/*.perf
-/src/runtime/ext_hhvm/xconstants.php
-/src/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
-/src/runtime/ext_hhvm/ext_noinline.cpp
-*.ext_hhvm.cpp
 
 /src/hphp/hphp
 
@@ -35,7 +31,6 @@ hphp.log
 /src/runtime/tmp/run
 /src/runtime/tmp/run.sh
 /src/runtime/tmp/libtest.so
-/src/runtime/vm/repo_schema.h
 
 /src/hphpi/gen
 /src/hphpi/hphpi

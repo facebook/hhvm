@@ -415,14 +415,18 @@ static inline void SetElemEmptyish(TypedValue* base, TypedValue* key,
   a.set(tvAsCVarRef(key), tvAsCVarRef(value));
   tvAsVariant(base) = a;
 }
+template <bool setResult>
 static inline void SetElemNumberish(Cell* value) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvRefcountedDecRefCell((TypedValue*)value);
-  tvWriteNull((TypedValue*)value);
+  if (setResult) {
+    tvRefcountedDecRefCell((TypedValue*)value);
+    tvWriteNull((TypedValue*)value);
+  }
 }
 // SetElem() leaves the result in 'value', rather than returning it as in
 // SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
 // get around.
+template <bool setResult>
 static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   DataType type;
   opPre(base, type);
@@ -434,7 +438,7 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      SetElemNumberish(value);
+      SetElemNumberish<setResult>(value);
     } else {
       SetElemEmptyish(base, key, value);
     }
@@ -442,7 +446,7 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   }
   case KindOfInt64:
   case KindOfDouble: {
-    SetElemNumberish(value);
+    SetElemNumberish<setResult>(value);
     break;
   }
   case KindOfStaticString:
@@ -507,13 +511,15 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         base->m_data.pstr = sd;
         base->m_type = KindOfString;
       }
-      // Push y onto the stack.
-      tvRefcountedDecRef(value);
-      StringData* sd = NEW(StringData)(y, strlen(y), CopyString);
-      sd->incRefCount();
-      value->m_data.pstr = sd;
-      value->_count = 0;
-      value->m_type = KindOfString;
+      if (setResult) {
+        // Push y onto the stack.
+        tvRefcountedDecRef(value);
+        StringData* sd = NEW(StringData)(y, strlen(y), CopyString);
+        sd->incRefCount();
+        value->m_data.pstr = sd;
+        value->_count = 0;
+        value->m_type = KindOfString;
+      }
     }
     break;
   }
@@ -541,10 +547,12 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
       // Assignment failed, so the result is null rather than the RHS.
       // XXX This does not match bytecode.specification, but it does
       // roughly match Zend behavior.
-      if (IS_REFCOUNTED_TYPE(value->m_type)) {
-        tvDecRef(value);
+      if (setResult) {
+        if (IS_REFCOUNTED_TYPE(value->m_type)) {
+          tvDecRef(value);
+        }
+        tvWriteNull(value);
       }
-      tvWriteNull(value);
     }
 
     if (newData != NULL && newData != a) {
@@ -573,11 +581,15 @@ static inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
   a.append(tvCellAsCVarRef(value));
   tvAsVariant(base) = a;
 }
+template <bool setResult>
 static inline void SetNewElemNumberish(Cell* value) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvRefcountedDecRefCell((TypedValue*)value);
-  tvWriteNull((TypedValue*)value);
+  if (setResult) {
+    tvRefcountedDecRefCell((TypedValue*)value);
+    tvWriteNull((TypedValue*)value);
+  }
 }
+template <bool setResult>
 static inline void SetNewElem(TypedValue* base, Cell* value) {
   DataType type;
   opPre(base, type);
@@ -589,7 +601,7 @@ static inline void SetNewElem(TypedValue* base, Cell* value) {
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      SetNewElemNumberish(value);
+      SetNewElemNumberish<setResult>(value);
     } else {
       SetNewElemEmptyish(base, value);
     }
@@ -597,7 +609,7 @@ static inline void SetNewElem(TypedValue* base, Cell* value) {
   }
   case KindOfInt64:
   case KindOfDouble: {
-    SetNewElemNumberish(value);
+    SetNewElemNumberish<setResult>(value);
     break;
   }
   case KindOfStaticString:
@@ -778,27 +790,36 @@ static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   return result;
 }
 
+template <bool setResult>
 static inline void IncDecBody(unsigned char op, TypedValue* fr,
                               TypedValue* to) {
   if (fr->m_type == KindOfInt64) {
     switch ((IncDecOp)op) {
     case PreInc: {
       ++(fr->m_data.num);
-      tvDupCell(fr, to);
+      if (setResult) {
+        tvDupCell(fr, to);
+      }
       break;
     }
     case PostInc: {
-      tvDupCell(fr, to);
+      if (setResult) {
+        tvDupCell(fr, to);
+      }
       ++(fr->m_data.num);
       break;
     }
     case PreDec: {
       --(fr->m_data.num);
-      tvDupCell(fr, to);
+      if (setResult) {
+        tvDupCell(fr, to);
+      }
       break;
     }
     case PostDec: {
-      tvDupCell(fr, to);
+      if (setResult) {
+        tvDupCell(fr, to);
+      }
       --(fr->m_data.num);
       break;
     }
@@ -821,21 +842,29 @@ static inline void IncDecBody(unsigned char op, TypedValue* fr,
   switch ((IncDecOp)op) {
   case PreInc: {
     ++(tvAsVariant(fr));
-    tvReadCell(fr, to);
+    if (setResult) {
+      tvReadCell(fr, to);
+    }
     break;
   }
   case PostInc: {
-    tvReadCell(fr, to);
+    if (setResult) {
+      tvReadCell(fr, to);
+    }
     ++(tvAsVariant(fr));
     break;
   }
   case PreDec: {
     --(tvAsVariant(fr));
-    tvReadCell(fr, to);
+    if (setResult) {
+      tvReadCell(fr, to);
+    }
     break;
   }
   case PostDec: {
-    tvReadCell(fr, to);
+    if (setResult) {
+      tvReadCell(fr, to);
+    }
     --(tvAsVariant(fr));
     break;
   }
@@ -843,6 +872,7 @@ static inline void IncDecBody(unsigned char op, TypedValue* fr,
   }
 }
 
+template <bool setResult>
 static inline void IncDecElemEmptyish(unsigned char op, TypedValue* base,
                                       TypedValue* key, TypedValue& dest) {
   Array a = Array::Create();
@@ -852,12 +882,16 @@ static inline void IncDecElemEmptyish(unsigned char op, TypedValue* base,
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(key).toString().data());
   }
-  IncDecBody(op, result, &dest);
+  IncDecBody<setResult>(op, result, &dest);
 }
+template <bool setResult>
 static inline void IncDecElemNumberish(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&dest);
+  if (setResult) {
+    tvWriteNull(&dest);
+  }
 }
+template <bool setResult>
 static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
                               unsigned char op, TypedValue* base,
                               TypedValue* key, TypedValue& dest) {
@@ -866,20 +900,20 @@ static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
   switch (type) {
   case KindOfUninit:
   case KindOfNull: {
-    IncDecElemEmptyish(op, base, key, dest);
+    IncDecElemEmptyish<setResult>(op, base, key, dest);
     break;
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      IncDecElemNumberish(dest);
+      IncDecElemNumberish<setResult>(dest);
     } else {
-      IncDecElemEmptyish(op, base, key, dest);
+      IncDecElemEmptyish<setResult>(op, base, key, dest);
     }
     break;
   }
   case KindOfInt64:
   case KindOfDouble: {
-    IncDecElemNumberish(dest);
+    IncDecElemNumberish<setResult>(dest);
     break;
   }
   case KindOfStaticString:
@@ -887,12 +921,12 @@ static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     if (base->m_data.pstr->size() != 0) {
       raise_error("Invalid IncDecElem operand");
     }
-    IncDecElemEmptyish(op, base, key, dest);
+    IncDecElemEmptyish<setResult>(op, base, key, dest);
     break;
   }
   case KindOfArray: {
     TypedValue* result = ElemDArray<MoreWarnings>(base, key);
-    IncDecBody(op, result, &dest);
+    IncDecBody<setResult>(op, result, &dest);
     break;
   }
   case KindOfObject: {
@@ -902,24 +936,29 @@ static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     } else {
       result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
     }
-    IncDecBody(op, result, &dest);
+    IncDecBody<setResult>(op, result, &dest);
     break;
   }
   default: ASSERT(false);
   }
 }
 
+template <bool setResult>
 static inline void IncDecNewElemEmptyish(unsigned char op, TypedValue* base,
                                          TypedValue& dest) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
-  IncDecBody(op, result, &dest);
+  IncDecBody<setResult>(op, result, &dest);
 }
+template <bool setResult>
 static inline void IncDecNewElemNumberish(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&dest);
+  if (setResult) {
+    tvWriteNull(&dest);
+  }
 }
+template <bool setResult>
 static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
                                  unsigned char op, TypedValue* base,
                                  TypedValue& dest) {
@@ -928,20 +967,20 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   switch (type) {
   case KindOfUninit:
   case KindOfNull: {
-    IncDecNewElemEmptyish(op, base, dest);
+    IncDecNewElemEmptyish<setResult>(op, base, dest);
     break;
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      IncDecNewElemNumberish(dest);
+      IncDecNewElemNumberish<setResult>(dest);
     } else {
-      IncDecNewElemEmptyish(op, base, dest);
+      IncDecNewElemEmptyish<setResult>(op, base, dest);
     }
     break;
   }
   case KindOfInt64:
   case KindOfDouble: {
-    IncDecNewElemNumberish(dest);
+    IncDecNewElemNumberish<setResult>(dest);
     break;
   }
   case KindOfStaticString:
@@ -949,12 +988,12 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     if (base->m_data.pstr->size() != 0) {
       raise_error("Invalid IncDecNewElem operand");
     }
-    IncDecNewElemEmptyish(op, base, dest);
+    IncDecNewElemEmptyish<setResult>(op, base, dest);
     break;
   }
   case KindOfArray: {
     TypedValue* result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
-    IncDecBody(op, result, &dest);
+    IncDecBody<setResult>(op, result, &dest);
     break;
   }
   case KindOfObject: {
@@ -964,7 +1003,7 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
       result = NULL;
     } else {
       result = objOffsetGet(tvRef, base, init_null_variant);
-      IncDecBody(op, result, &dest);
+      IncDecBody<setResult>(op, result, &dest);
     }
     break;
   }
@@ -1102,7 +1141,7 @@ static inline void propPost(StringData* keySD) {
 //        v
 //     $result
 template <bool warn, bool define, bool unset>
-static inline TypedValue* prop(TypedValue& tvScratch, TypedValue& tvRef,
+static inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
                                Class* ctx, TypedValue* base, TypedValue* key) {
   ASSERT(!warn || !unset);
   TypedValue* result = NULL;
@@ -1210,9 +1249,12 @@ static inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
   }
 }
 
+template <bool setResult>
 static inline void SetPropNull(Cell* val) {
-  tvRefcountedDecRefCell(val);
-  tvWriteNull(val);
+  if (setResult) {
+    tvRefcountedDecRefCell(val);
+    tvWriteNull(val);
+  }
   raise_warning("Cannot access property on non-object");
 }
 static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
@@ -1230,6 +1272,7 @@ static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
   base->m_data.pobj = obj;
 }
 // $base->$key = $val
+template <bool setResult>
 static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
                            Cell* val) {
   DataType type;
@@ -1242,7 +1285,7 @@ static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      SetPropNull(val);
+      SetPropNull<setResult>(val);
     } else {
       SetPropStdclass(base, key, val);
     }
@@ -1251,7 +1294,7 @@ static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
   case KindOfStaticString:
   case KindOfString: {
     if (base->m_data.pstr->size() != 0) {
-      SetPropNull(val);
+      SetPropNull<setResult>(val);
     } else {
       SetPropStdclass(base, key, val);
     }
@@ -1266,7 +1309,7 @@ static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
     break;
   }
   default: {
-    SetPropNull(val);
+    SetPropNull<setResult>(val);
     break;
   }
   }
@@ -1340,10 +1383,14 @@ static inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
   return result;
 }
 
+template <bool setResult>
 static inline void IncDecPropNull(TypedValue& dest) {
   raise_warning("Attempt to increment/decrement property of non-object");
-  tvWriteNull(&dest);
+  if (setResult) {
+    tvWriteNull(&dest);
+  }
 }
+template <bool setResult>
 static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
                                       TypedValue* key, TypedValue& dest) {
   Instance* obj = createDefaultObject();
@@ -1356,11 +1403,22 @@ static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
   StringData* keySD = prepareKey(key).detach();
   TypedValue tv;
   tvWriteNull(&tv);
-  IncDecBody(op, (&tv), &dest);
-  obj->setProp(NULL, keySD, &dest);
+  if (setResult) {
+    IncDecBody<true>(op, (&tv), &dest);
+    obj->setProp(NULL, keySD, &dest);
+  } else {
+    // The caller doesn't actually want the result set, but we have to do so in
+    // order to call obj->setProp().
+    TypedValue tDest;
+    tvWriteUninit(&tDest);
+    IncDecBody<true>(op, (&tv), &tDest);
+    obj->setProp(NULL, keySD, &tDest);
+    ASSERT(!IS_REFCOUNTED_TYPE(tDest.m_type));
+  }
   ASSERT(!IS_REFCOUNTED_TYPE(tv.m_type));
   LITSTR_DECREF(keySD);
 }
+template <bool setResult>
 static inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
                               Class* ctx, unsigned char op,
                               TypedValue* base, TypedValue* key,
@@ -1370,35 +1428,35 @@ static inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
   switch (type) {
   case KindOfUninit:
   case KindOfNull: {
-    IncDecPropStdclass(op, base, key, dest);
+    IncDecPropStdclass<setResult>(op, base, key, dest);
     break;
   }
   case KindOfBoolean: {
     if (base->m_data.num) {
-      IncDecPropNull(dest);
+      IncDecPropNull<setResult>(dest);
     } else {
-      IncDecPropStdclass(op, base, key, dest);
+      IncDecPropStdclass<setResult>(op, base, key, dest);
     }
     break;
   }
   case KindOfStaticString:
   case KindOfString: {
     if (base->m_data.pstr->size() != 0) {
-      IncDecPropNull(dest);
+      IncDecPropNull<setResult>(dest);
     } else {
-      IncDecPropStdclass(op, base, key, dest);
+      IncDecPropStdclass<setResult>(op, base, key, dest);
     }
     break;
   }
   case KindOfObject: {
     StringData* keySD = prepareKey(key).detach();
     Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-    instance->incDecProp(tvRef, ctx, op, keySD, dest);
+    instance->incDecProp<setResult>(tvRef, ctx, op, keySD, dest);
     LITSTR_DECREF(keySD);
     break;
   }
   default: {
-    IncDecPropNull(dest);
+    IncDecPropNull<setResult>(dest);
     break;
   }
   }

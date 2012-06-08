@@ -28,7 +28,7 @@ namespace Transl {
 //   value.
 struct Location {
   enum Space {
-    Invalid,  // Unknown location;
+    Invalid,  // Unknown location
     Stack,    // Stack; offset == delta from top
     Local,    // Stack frame's registers; offset == local register
     Iter,     // Stack frame's iterators

@@ -472,9 +472,10 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
   return propVal;
 }
 
-void Instance::incDecProp(TypedValue& tvRef, Class* ctx,
-                          unsigned char op, const StringData* key,
-                          TypedValue& dest) {
+template <bool setResult>
+void Instance::incDecPropImpl(TypedValue& tvRef, Class* ctx,
+                              unsigned char op, const StringData* key,
+                              TypedValue& dest) {
   bool visible, accessible, unset;
   TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
@@ -483,7 +484,7 @@ void Instance::incDecProp(TypedValue& tvRef, Class* ctx,
       TypedValue tvResult;
       tvWriteUninit(&tvResult);
       invokeGet(&tvResult, key);
-      IncDecBody(op, &tvResult, &dest);
+      IncDecBody<setResult>(op, &tvResult, &dest);
       if (getAttribute(UseSet)) {
         TypedValue ignored;
         invokeSet(&ignored, key, &tvResult);
@@ -493,7 +494,7 @@ void Instance::incDecProp(TypedValue& tvRef, Class* ctx,
         memcpy((void *)propVal, (void *)&tvResult, sizeof(TypedValue));
       }
     } else {
-      IncDecBody(op, propVal, &dest);
+      IncDecBody<setResult>(op, propVal, &dest);
     }
     return;
   }
@@ -515,13 +516,13 @@ void Instance::incDecProp(TypedValue& tvRef, Class* ctx,
     // don't write propVal->_count because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
-    IncDecBody(op, propVal, &dest);
+    IncDecBody<setResult>(op, propVal, &dest);
     return;
   } else if (!getAttribute(UseSet)) {
     TypedValue tvResult;
     tvWriteUninit(&tvResult);
     invokeGet(&tvResult, key);
-    IncDecBody(op, &tvResult, &dest);
+    IncDecBody<setResult>(op, &tvResult, &dest);
     if (o_properties.get() == NULL) {
       initDynProps();
     }
@@ -536,11 +537,27 @@ void Instance::incDecProp(TypedValue& tvRef, Class* ctx,
   ASSERT(!accessible);
   ASSERT(getAttribute(UseGet) && getAttribute(UseSet));
   invokeGet(&tvRef, key);
-  IncDecBody(op, &tvRef, &dest);
+  IncDecBody<setResult>(op, &tvRef, &dest);
   TypedValue ignored;
   invokeSet(&ignored, key, &tvRef);
   tvRefcountedDecRef(&ignored);
   propVal = &tvRef;
+}
+
+// Actualize template method so that the method can be defined in instance.cpp
+// (rather than instance.h), but still be invoked elsewhere.
+template <>
+void Instance::incDecProp<false>(TypedValue& tvRef, Class* ctx,
+                                 unsigned char op, const StringData* key,
+                                 TypedValue& dest) {
+  incDecPropImpl<false>(tvRef, ctx, op, key, dest);
+}
+
+template <>
+void Instance::incDecProp<true>(TypedValue& tvRef, Class* ctx,
+                                unsigned char op, const StringData* key,
+                                TypedValue& dest) {
+  incDecPropImpl<true>(tvRef, ctx, op, key, dest);
 }
 
 void Instance::unsetProp(Class* ctx, const StringData* key) {

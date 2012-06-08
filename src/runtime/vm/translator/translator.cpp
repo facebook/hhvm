@@ -1154,9 +1154,9 @@ void Translator::analyzeSecondPass(Tracelet& t) {
     }
 
     /*
-     * If this is a Pop instruction the previous instruction is an
-     * instruction that pushed a single return value cell on the stack,
-     * we can roll the pop into the previous instruction.
+     * If this is a Pop instruction and the previous instruction pushed a
+     * single return value cell on the stack, we can roll the pop into the
+     * previous instruction.
      *
      * TODO: SetG/SetS?
      */
@@ -1165,7 +1165,9 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       prevOp == OpBindL ||
       prevOp == OpIncDecL ||
       prevOp == OpPrint ||
-      prevOp == OpSetM;
+      prevOp == OpSetM ||
+      prevOp == OpSetOpM ||
+      prevOp == OpIncDecM;
 
     if (isPop && isOptimizable) {
       // If one of these instructions already has a null outStack, we
@@ -1179,7 +1181,8 @@ void Translator::analyzeSecondPass(Tracelet& t) {
           prev->deadLocs.push_back(ni->deadLocs[i]);
         }
         t.m_instrStream.remove(ni);
-        if (prevOp == OpSetM && prev->prev && prev->prev->op() == OpCGetL &&
+        if ((prevOp == OpSetM || prevOp == OpSetOpM || prevOp == OpIncDecM) &&
+            prev->prev && prev->prev->op() == OpCGetL &&
             prev->prev->inputs[0]->outerType() != KindOfUninit) {
           ASSERT(prev->prev->outStack);
           prev->prev->outStack = 0;
@@ -1793,7 +1796,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           continue;
         }
         ASSERT_NOT_IMPLEMENTED(op == OpSetOpL ||
-                               op == OpSetM ||
+                               op == OpSetM || op == OpSetOpM ||
                                op == OpIncDecL || op == OpIncDecG ||
                                op == OpUnsetG || op == OpBindG ||
                                op == OpSetG || op == OpSetOpG ||
@@ -1837,7 +1840,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                           KindOfInvalid);
           continue;
         }
-        if (op == OpSetM || op == OpVGetM) {
+        if (op == OpSetM || op == OpSetOpM || op == OpVGetM) {
           // TODO(#1069330): This code assumes that the location is
           // LH. We need to figure out how to handle cases where the
           // location is LN or LG or LR. Also, this code is also
@@ -1846,7 +1849,8 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           // be P, which promotes Null to Object.
           // XXX: analogous garbage needed for OpSetOpM.
           if (ni->immVec.locationCode() == LL) {
-            const int kVecStart = op == OpSetM ? 1 : 0; // 0 is rhs for SetM
+            const int kVecStart = (op == OpSetM || op == OpSetOpM)
+              ? 1 : 0; // 0 is rhs for SetM/SetOpM
             DynLocation* inLoc = ni->inputs[kVecStart];
             ASSERT(inLoc->location.isLocal());
             Location locLoc = inLoc->location;

@@ -157,6 +157,102 @@ enum MemberCode {
   InvalidMemberCode = NumMemberCodes
 };
 
+enum MInstrAttr {
+  MIA_none         = 0x00,
+  MIA_warn         = 0x01,
+  MIA_define       = 0x02,
+  MIA_reffy        = 0x04,
+  MIA_unset        = 0x08,
+  MIA_new          = 0x10,
+  MIA_final_get    = 0x20,
+  MIA_base         = MIA_warn | MIA_define,
+  MIA_intermediate = MIA_warn | MIA_define | MIA_reffy | MIA_unset,
+  MIA_final        = MIA_new | MIA_final_get
+};
+
+// MII(instr,  * in *M
+//     attrs,  operation attributes
+//     bS,     base operation suffix
+//     iS,     intermediate operation suffix
+//     vC,     final value count (0 or 1)
+//     fN)     final new element operation name
+#define MINSTRS \
+  MII(CGet,   MIA_warn|MIA_final_get,            W,  W, 0, NotSuppNewElem) \
+  MII(VGet,   MIA_define|MIA_reffy|MIA_new|MIA_final_get, \
+                                                 D,  D, 0, VGetNewElem) \
+  MII(Isset,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
+  MII(Empty,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
+  MII(Set,    MIA_define|MIA_new,                D,  D, 1, SetNewElem) \
+  MII(SetOp,  MIA_warn|MIA_define|MIA_new|MIA_final_get, \
+                                                WD, WD, 1, SetOpNewElem) \
+  MII(IncDec, MIA_warn|MIA_define|MIA_new|MIA_final_get, \
+                                                WD, WD, 0, IncDecNewElem) \
+  MII(Bind,   MIA_define|MIA_reffy|MIA_new|MIA_final_get, \
+                                                 D,  D, 1, BindNewElem) \
+  MII(Unset,  MIA_unset,                          ,  U, 0, NotSuppNewElem) \
+
+enum MInstr {
+#define MII(instr, attrs, bS, iS, vC, fN) \
+  MI_##instr##M,
+  MINSTRS
+#undef MII
+};
+
+struct MInstrInfo {
+  MInstr     m_instr;
+  MInstrAttr m_baseOps[NumLocationCodes];
+  MInstrAttr m_intermediateOps[NumMemberCodes];
+  unsigned   m_valCount;
+  bool       m_newElem;
+  bool       m_finalGet;
+
+  MInstr instr() const {
+    return m_instr;
+  }
+
+  const MInstrAttr& getAttr(LocationCode lc) const {
+    ASSERT(lc < NumLocationCodes);
+    return m_baseOps[lc];
+  }
+
+  const MInstrAttr& getAttr(MemberCode mc) const {
+    ASSERT(mc < NumMemberCodes);
+    return m_intermediateOps[mc];
+  }
+
+  unsigned valCount() const {
+    return m_valCount;
+  }
+
+  bool newElem() const {
+    return m_newElem;
+  }
+
+  bool finalGet() const {
+    return m_finalGet;
+  }
+};
+
+static const MInstrInfo mInstrInfo[] = {
+#define MII(instr, attrs, bS, iS, vC, fN) \
+  {MI_##instr##M, \
+   {MIA_none, MIA_none, MInstrAttr((attrs) & MIA_base), \
+    MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base), \
+    MInstrAttr((attrs) & MIA_base), MInstrAttr((attrs) & MIA_base), MIA_none, \
+    MIA_none}, \
+   {MInstrAttr((attrs) & MIA_intermediate), \
+    MInstrAttr((attrs) & MIA_intermediate), \
+    MInstrAttr((attrs) & MIA_intermediate), \
+    MInstrAttr((attrs) & MIA_intermediate), \
+    MInstrAttr((attrs) & MIA_intermediate), \
+    MInstrAttr((attrs) & MIA_intermediate), \
+    MInstrAttr((attrs) & MIA_intermediate), \
+    MInstrAttr((attrs) & MIA_final)}, \
+   unsigned(vC), bool((attrs) & MIA_new), bool((attrs) & MIA_final_get)},
+  MINSTRS
+#undef MII
+};
+
 inline bool memberCodeHasImm(MemberCode mc) {
   return mc == MEL || mc == MPL || mc == MET || mc == MPT || mc == MEI;
 }
@@ -180,11 +276,16 @@ const char* memberCodeString(MemberCode mc);
 // Same semantics as parseLocationCode, but for member codes.
 MemberCode parseMemberCode(const char*);
 
+#define INCDEC_OPS \
+  INCDEC_OP(PreInc) \
+  INCDEC_OP(PostInc) \
+  INCDEC_OP(PreDec) \
+  INCDEC_OP(PostDec)
+
 enum IncDecOp {
-  PreInc,
-  PostInc,
-  PreDec,
-  PostDec,
+#define INCDEC_OP(incDecOp) incDecOp,
+  INCDEC_OPS
+#undef INCDEC_OP
   IncDec_invalid
 };
 
@@ -192,20 +293,20 @@ enum IncDecOp {
 // for using distinct bitwise representations, though. This macro records
 // their correspondence for mapping either direction.
 #define SETOP_OPS \
-  SETOP_OP(SetOpPlusEqual,   OpAdd) \
-  SETOP_OP(SetOpMinusEqual,  OpSub) \
-  SETOP_OP(SetOpMulEqual,    OpMul) \
-  SETOP_OP(SetOpConcatEqual, OpConcat) \
-  SETOP_OP(SetOpDivEqual,    OpDiv) \
-  SETOP_OP(SetOpModEqual,    OpMod) \
-  SETOP_OP(SetOpAndEqual,    OpBitAnd) \
-  SETOP_OP(SetOpOrEqual,     OpBitOr) \
-  SETOP_OP(SetOpXorEqual,    OpBitXor) \
-  SETOP_OP(SetOpSlEqual,     OpShl) \
-  SETOP_OP(SetOpSrEqual,     OpShr)
+  SETOP_OP(PlusEqual,   OpAdd) \
+  SETOP_OP(MinusEqual,  OpSub) \
+  SETOP_OP(MulEqual,    OpMul) \
+  SETOP_OP(ConcatEqual, OpConcat) \
+  SETOP_OP(DivEqual,    OpDiv) \
+  SETOP_OP(ModEqual,    OpMod) \
+  SETOP_OP(AndEqual,    OpBitAnd) \
+  SETOP_OP(OrEqual,     OpBitOr) \
+  SETOP_OP(XorEqual,    OpBitXor) \
+  SETOP_OP(SlEqual,     OpShl) \
+  SETOP_OP(SrEqual,     OpShr)
 
 enum SetOpOp {
-#define SETOP_OP(setOpOp, bcOp) setOpOp,
+#define SETOP_OP(setOpOp, bcOp) SetOp##setOpOp,
   SETOP_OPS
 #undef SETOP_OP
   SetOp_invalid
@@ -422,6 +523,20 @@ enum Op {
 #undef O
   Op_count
 };
+
+inline const MInstrInfo& getMInstrInfo(Op op) {
+  switch (op) {
+#define MII(instr_, attrs, bS, iS, vC, fN) \
+  case Op##instr_##M: { \
+    const MInstrInfo& mii = mInstrInfo[MI_##instr_##M]; \
+    ASSERT(mii.instr() == MI_##instr_##M); \
+    return mii; \
+  }
+  MINSTRS
+#undef MII
+  default: not_reached();
+  }
+}
 
 enum AstubsOp {
   OpAstubStart = Op_count-1,

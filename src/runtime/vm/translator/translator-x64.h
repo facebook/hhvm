@@ -165,8 +165,6 @@ class TranslatorX64 : public Translator, public SpillFill,
 
   void emitCallSaveRegs();
   void prepareCallSaveRegs();
-  void emitCallPassLoc(const Location& loc, int argNum);
-  void emitCallPassLocAddr(const Location& loc, int argNum);
   void emitCall(Asm& a, TCA dest, bool killRegs=false);
   void emitCallFillCont(Asm& a, const Func* orig, const Func* gen);
   void emitCallUnpack(Asm& a, const NormalizedInstruction& i, int nCopy);
@@ -263,6 +261,113 @@ class TranslatorX64 : public Translator, public SpillFill,
   void allocInputsForCall(const NormalizedInstruction& i,
                           const int* args);
 
+ public:
+  struct MInstrState {
+    TypedValue tvScratch;
+    TypedValue tvLiteral;
+    TypedValue tvRef;
+    TypedValue tvRef2;
+    TypedValue tvResult;
+    TypedValue tvVal;
+    bool baseStrOff;
+    Class* ctx;
+  } __attribute__((aligned(16)));
+ private:
+  int mResultStackOffset(const NormalizedInstruction& ni) const;
+  bool generateMVal(const Tracelet& t, const NormalizedInstruction& ni,
+                    const MInstrInfo& mii) const;
+  bool logicalTeleportMVal(const Tracelet& t, const NormalizedInstruction& ni,
+                           const MInstrInfo& mii) const;
+  bool teleportMVal(const Tracelet& t, const NormalizedInstruction& ni,
+                    const MInstrInfo& mii) const;
+  bool useTvResult(const Tracelet& t, const NormalizedInstruction& ni,
+                   const MInstrInfo& mii) const;
+  bool forceMValIncDec(const NormalizedInstruction& ni, const DynLocation& base,
+                       const DynLocation& val) const;
+  bool forceMValIncDec(const Tracelet& t, const NormalizedInstruction& ni,
+                       const MInstrInfo& mii) const;
+  void emitBaseLCR(const Tracelet& t, const NormalizedInstruction& ni,
+                   const MInstrInfo& mii, unsigned iInd, PhysReg& rBase);
+  void emitBaseN(const Tracelet& t, const NormalizedInstruction& ni,
+                 const MInstrInfo& mii, unsigned iInd, PhysReg& rBase);
+  void emitBaseG(const Tracelet& t, const NormalizedInstruction& ni,
+                 const MInstrInfo& mii, unsigned iInd, PhysReg& rBase);
+  void emitBaseS(const Tracelet& t, const NormalizedInstruction& ni,
+                 unsigned iInd, bool ctxFixed, PhysReg& rBase);
+  void emitBaseOp(const Tracelet& t, const NormalizedInstruction& ni,
+                  const MInstrInfo& mii, unsigned iInd, bool ctxFixed,
+                  PhysReg& rBase);
+  void emitElem(const Tracelet& t, const NormalizedInstruction& ni,
+                const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                PhysReg& rBase);
+  void emitProp(const Tracelet& t, const NormalizedInstruction& ni,
+                const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+                unsigned iInd, PhysReg& rBase);
+  void emitNewElem(const Tracelet& t, const NormalizedInstruction& ni,
+                   unsigned mInd, PhysReg& rBase);
+  void emitIntermediateOp(const Tracelet& t, const NormalizedInstruction& ni,
+                          const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+                          unsigned& iInd, PhysReg& rBase);
+  bool needFirstRatchet(const Tracelet& t, const NormalizedInstruction& ni,
+                        const MInstrInfo& mii) const;
+  bool needFinalRatchet(const Tracelet& t, const NormalizedInstruction& ni,
+                        const MInstrInfo& mii) const;
+  unsigned nLogicalRatchets(const Tracelet& t, const NormalizedInstruction& ni,
+                            const MInstrInfo& mii) const;
+  int ratchetInd(const Tracelet& t, const NormalizedInstruction& ni,
+                 const MInstrInfo& mii, unsigned mInd) const;
+  void emitRatchetRefs(const Tracelet& t, const NormalizedInstruction& ni,
+                       const MInstrInfo& mii, unsigned mInd,
+                       const PhysReg& rBase);
+  template <bool useEmpty>
+  void emitIssetEmptyElem(const Tracelet& t, const NormalizedInstruction& ni,
+                          const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                          const PhysReg& rBase);
+  template <bool useEmpty>
+  void emitIssetEmptyProp(const Tracelet& t, const NormalizedInstruction& ni,
+                          const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+                          unsigned iInd, const PhysReg& rBase);
+  void emitVGetNewElem(const Tracelet& t, const NormalizedInstruction& ni,
+                       const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                       const PhysReg& rBase);
+  void emitSetNewElem(const Tracelet& t, const NormalizedInstruction& ni,
+                      const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                      const PhysReg& rBase);
+  void emitSetOpNewElem(const Tracelet& t, const NormalizedInstruction& ni,
+                        const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                        const PhysReg& rBase);
+  void emitIncDecNewElem(const Tracelet& t, const NormalizedInstruction& ni,
+                         const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                         const PhysReg& rBase);
+  void emitBindNewElem(const Tracelet& t, const NormalizedInstruction& ni,
+                       const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                       const PhysReg& rBase);
+  void emitNotSuppNewElem(const Tracelet& t, const NormalizedInstruction& ni,
+                          const MInstrInfo& mii, unsigned mInd, unsigned iInd,
+                          const PhysReg& rBase);
+  bool needMInstrCtx(const Tracelet& t, const NormalizedInstruction& ni) const;
+  void emitMPre(const Tracelet& t, const NormalizedInstruction& ni,
+                const MInstrInfo& mii, bool& ctxFixed, unsigned& mInd,
+                unsigned& iInd, PhysReg& rBase);
+  void emitMPost(const Tracelet& t, const NormalizedInstruction& ni,
+                 const MInstrInfo& mii);
+#define MII(instr, attrs, bS, iS, vC, fN) \
+  void emit##instr##Elem(const Tracelet& t, const NormalizedInstruction& ni, \
+                         const MInstrInfo& mii, unsigned mInd, unsigned iInd, \
+                         const PhysReg& rBase); \
+  void emit##instr##Prop(const Tracelet& t, const NormalizedInstruction& ni, \
+                         const MInstrInfo& mii, bool ctxFixed, unsigned mInd, \
+                         unsigned iInd, const PhysReg& rBase); \
+  void emitFinal##instr##MOp(const Tracelet& t, \
+                             const NormalizedInstruction& ni, \
+                             const MInstrInfo& mii, bool ctxFixed, \
+                             unsigned mInd, unsigned iInd, \
+                             const PhysReg& rBase); \
+  void translate##instr##MGeneric(const Tracelet& t, \
+                                  const NormalizedInstruction& ni);
+MINSTRS
+#undef MII
+
 #define INSTRS \
   CASE(PopC) \
   CASE(PopV) \
@@ -305,13 +410,17 @@ class TranslatorX64 : public Translator, public SpillFill,
   CASE(VGetG) \
   CASE(VGetM) \
   CASE(IssetM) \
+  CASE(EmptyM) \
   CASE(SetS) \
   CASE(SetG) \
   CASE(SetM) \
   CASE(SetOpL) \
+  CASE(SetOpM) \
   CASE(IncDecL) \
+  CASE(IncDecM) \
   CASE(UnsetL) \
   CASE(UnsetM) \
+  CASE(BindM) \
   CASE(FPushFuncD) \
   CASE(FPushFunc) \
   CASE(FPushClsMethodD) \
@@ -398,6 +507,7 @@ PSEUDOINSTRS
                    PhysReg rhsReg,
                    PhysReg fieldAddr);
   void translateSetMProp(const Tracelet &t, const NormalizedInstruction& i);
+  void translateSetMArray(const Tracelet &t, const NormalizedInstruction& i);
   void emitPropGet(const NormalizedInstruction& i,
                    const DynLocation& base,
                    PhysReg fieldAddr,
@@ -406,12 +516,14 @@ PSEUDOINSTRS
   void translateCGetM_LEE(const Tracelet &t, const NormalizedInstruction& i);
   void translateCGetM_GE(const Tracelet &t, const NormalizedInstruction& i);
   void emitGetGlobal(const NormalizedInstruction& i, int nameIdx,
-    bool allowCreate);
+                     bool allowCreate);
   void emitArrayElem(const NormalizedInstruction& i,
                      const DynLocation* baseInput,
                      PhysReg baseReg,
                      const DynLocation* keyIn,
                      const Location& outLoc);
+  void translateIssetMSimple(const Tracelet& t,
+                             const NormalizedInstruction& ni);
 
   static void toStringHelper(ObjectData *obj);
   void invalidateSrcKey(const SrcKey& sk);

@@ -197,7 +197,6 @@ struct RegContent {
     return HPHP::hash_int64_pair(
       cont.m_kind, cont.isInt() ? cont.m_int : cont.m_loc(cont.m_loc));
   }
-
 };
 
 /*
@@ -255,8 +254,8 @@ class LazyScratchReg;
 
 class RegAlloc {
   // We copy this structure a lot: every time we encounter a physical branch in
-  // translation, for instance. So we've chosen a position-independent, flat encoding,
-  // that can be copied bitwise.
+  // translation, for instance. So we've chosen a position-independent, flat
+  // encoding, that can be copied bitwise.
 
   // RegInfo: indexed by PhysReg.
   RegInfo         m_info[kMaxRegs];
@@ -328,7 +327,7 @@ class RegAlloc {
   // values into these outputs.
   void allocOutputRegs(const NormalizedInstruction& ni);
 
-  PhysReg allocScratchReg();
+  PhysReg allocScratchReg(PhysReg pr = InvalidReg);
   void freeScratchReg(PhysReg r);
   void bind(PhysReg reg, const Location& loc, DataType t, RegInfo::State state);
   void bindScratch(LazyScratchReg& reg, const Location& loc, DataType t,
@@ -357,11 +356,16 @@ class RegAlloc {
   void cleanAll();
   void cleanReg(PhysReg reg);
   void cleanRegs(RegSet regsToPurge);
+ private:
+  template <bool smash>
+  void cleanLocImpl(const Location& loc);
+ public:
   void cleanLoc(const Location& loc);
   void cleanLocals();
   void smashRegs(RegSet smashedRegs);
   void killImms(RegSet imms);
   void smashReg(PhysReg pr);
+  void smashLoc(const Location& loc);
   void reset();
   RegAlloc(RegSet callerSaved, RegSet calleeSaved, SpillFill* spf);
   void scrubStackEntries(int firstUnreachable);
@@ -407,7 +411,7 @@ class LazyScratchReg {
 
   bool isAllocated() const { return m_reg != x64::reg::noreg; }
 
-  void alloc();
+  void alloc(PhysReg pr = InvalidReg);
   PhysReg operator*() const;
 };
 

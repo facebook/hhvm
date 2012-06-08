@@ -3280,9 +3280,17 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     break;
   }
 
-  case LL:
-    loc = frame_local_inner(m_fp, decodeVariableSizeImm(&vec));
+  case LL: {
+    int localInd = decodeVariableSizeImm(&vec);
+    loc = frame_local_inner(m_fp, localInd);
+    if (warn) {
+      if (loc->m_type == KindOfUninit) {
+        raise_notice(Strings::UNDEFINED_VARIABLE,
+                     m_fp->m_func->localVarName(localInd)->data());
+      }
+    }
     break;
+  }
   case LC:
   case LR:
     loc = m_stack.indTV(depth--);
@@ -3335,7 +3343,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     case MPL:
     case MPC:
     case MPT:
-      result = prop<warn, false, false>(tvScratch, tvRef, ctx, base,
+      result = Prop<warn, false, false>(tvScratch, tvRef, ctx, base,
                                         curMember);
       break;
     case MW:
@@ -3572,9 +3580,17 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     break;
   }
 
-  case LL:
-    loc = frame_local_inner(m_fp, decodeVariableSizeImm(&vec));
+  case LL: {
+    int localInd = decodeVariableSizeImm(&vec);
+    loc = frame_local_inner(m_fp, localInd);
+    if (warn) {
+      if (loc->m_type == KindOfUninit) {
+        raise_notice(Strings::UNDEFINED_VARIABLE,
+                     m_fp->m_func->localVarName(localInd)->data());
+      }
+    }
     break;
+  }
   case LC:
   case LR:
     loc = m_stack.indTV(depth--);
@@ -3633,7 +3649,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     case MPL:
     case MPC:
     case MPT:
-      result = prop<warn, define, unset>(tvScratch, tvRef, ctx, base,
+      result = Prop<warn, define, unset>(tvScratch, tvRef, ctx, base,
                                          curMember);
       break;
     case MW:
@@ -5032,20 +5048,20 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetM(PC& pc) {
     Cell* c1 = m_stack.topC();
 
     if (mcode == MW) {
-      SetNewElem(base, c1);
+      SetNewElem<true>(base, c1);
     } else {
       switch (mcode) {
       case MEL:
       case MEC:
       case MET:
       case MEI:
-        SetElem(base, curMember, c1);
+        SetElem<true>(base, curMember, c1);
         break;
       case MPL:
       case MPC:
       case MPT: {
         Class* ctx = arGetContextClass(m_fp);
-        SetProp(ctx, base, curMember, c1);
+        SetProp<true>(ctx, base, curMember, c1);
         break;
       }
       default: ASSERT(false);
@@ -5172,8 +5188,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecL(PC& pc) {
   DECODE_HA(local);
   DECODE(unsigned char, op);
   TypedValue* to = m_stack.allocTV();
+  tvWriteUninit(to);
   TypedValue* fr = frame_local(m_fp, local);
-  IncDecBody(op, fr, to);
+  IncDecBody<true>(op, fr, to);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIncDecN(PC& pc) {
@@ -5185,7 +5202,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecN(PC& pc) {
   // XXX We're probably not getting warnings totally correct here
   lookupd_var(m_fp, name, nameCell, local);
   ASSERT(local != NULL);
-  IncDecBody(op, local, nameCell);
+  IncDecBody<true>(op, local, nameCell);
   LITSTR_DECREF(name);
 }
 
@@ -5198,7 +5215,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecG(PC& pc) {
   // XXX We're probably not getting warnings totally correct here
   lookupd_gbl(m_fp, name, nameCell, gbl);
   ASSERT(gbl != NULL);
-  IncDecBody(op, gbl, nameCell);
+  IncDecBody<true>(op, gbl, nameCell);
   LITSTR_DECREF(name);
 }
 
@@ -5211,7 +5228,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecS(PC& pc) {
                 name->data());
   }
   tvRefcountedDecRefCell(nameCell);
-  IncDecBody(op, val, output);
+  IncDecBody<true>(op, val, output);
   m_stack.discard();
   SPROP_OP_POSTLUDE
 }
@@ -5225,20 +5242,20 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecM(PC& pc) {
   if (!setHelperPre<MoreWarnings, true, false, false, 0,
       LeaveLast>(SETHELPERPRE_ARGS)) {
     if (mcode == MW) {
-      IncDecNewElem(tvScratch, tvRef, op, base, to);
+      IncDecNewElem<true>(tvScratch, tvRef, op, base, to);
     } else {
       switch (mcode) {
       case MEL:
       case MEC:
       case MET:
       case MEI:
-        IncDecElem(tvScratch, tvRef, op, base, curMember, to);
+        IncDecElem<true>(tvScratch, tvRef, op, base, curMember, to);
         break;
       case MPL:
       case MPC:
       case MPT: {
         Class* ctx = arGetContextClass(m_fp);
-        IncDecProp(tvScratch, tvRef, ctx, op, base, curMember, to);
+        IncDecProp<true>(tvScratch, tvRef, ctx, op, base, curMember, to);
         break;
       }
       default: ASSERT(false);

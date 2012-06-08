@@ -33,14 +33,14 @@ class Instance : public ObjectData {
   // ObjectData, so that a property vector can always reside immediately past
   // the end of an object.
 
-private:
+ private:
   // This constructor is used for all pure classes that are not
   // descendents of cppext classes
   explicit Instance(Class* cls) : ObjectData(NULL, false, cls) {
     instanceInit(cls);
   }
 
-public:
+ public:
   // This constructor is used for all cppext classes (including resources)
   // and their descendents.
   Instance(const ObjectStaticCallbacks *cb, bool isResource)
@@ -77,7 +77,7 @@ public:
     return obj;
   }
 
-private:
+ private:
   void instanceInit(Class* cls) {
     /*
      * During the construction of an instance, the instance has a ref
@@ -116,13 +116,13 @@ private:
     }
   }
 
-protected:
+ protected:
   void initialize(Slot nProps);
   void callCustomInstanceInit();
   TypedValue* propVec();
   const TypedValue* propVec() const;
 
-public:
+ public:
   void operator delete(void* p) {
     Instance* this_ = (Instance*)p;
     Class* cls = this_->getVMClass();
@@ -137,14 +137,14 @@ public:
     DELETEOBJSZ(sizeForNProps(nProps))(this_);
   }
 
-private:
+ private:
   void destructHard(const Func* meth);
   void forgetSweepable();
 
   //============================================================================
   // Virtual ObjectData methods that we need to override
 
-public:
+ public:
   virtual void destruct() {
     if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
       forgetSweepable();
@@ -205,7 +205,7 @@ public:
 
   //============================================================================
   // Properties.
-public:
+ public:
   int builtinPropSize() const {
     return m_cls->builtinPropSize();
   }
@@ -222,7 +222,7 @@ public:
                       bool& accessible, bool& unset);
   TypedValue* getDeclProp(Class* ctx, const StringData* key, bool& visible,
                           bool& accessible, bool& unset);
-private:
+ private:
   template <bool warn, bool define>
   void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
                 const StringData* key);
@@ -236,7 +236,7 @@ private:
                Array& props, std::vector<bool>& inserted) const;
   void getProps(const Class* klass, bool pubOnly, const PreClass* pc,
                 Array& props, std::vector<bool>& inserted) const;
-public:
+ public:
   void prop(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
             const StringData* key);
   void propD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
@@ -252,6 +252,12 @@ public:
                       bool bindingAssignment = false);
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, unsigned char op,
                         const StringData* key, Cell* val);
+ private:
+  template <bool setResult>
+  void incDecPropImpl(TypedValue& tvRef, Class* ctx, unsigned char op,
+                      const StringData* key, TypedValue& dest);
+ public:
+  template <bool setResult>
   void incDecProp(TypedValue& tvRef, Class* ctx, unsigned char op,
                   const StringData* key, TypedValue& dest);
   void unsetProp(Class* ctx, const StringData* key);
@@ -265,7 +271,7 @@ namespace HPHP {
 
 #ifdef HHVM
 class ExtObjectData : public HPHP::VM::Instance {
-public:
+ public:
   ExtObjectData(const ObjectStaticCallbacks *cb)
     : HPHP::VM::Instance(cb, false) {}
   virtual void setRoot(ObjectData *r) {}
@@ -274,19 +280,19 @@ public:
 };
 #else
 class ExtObjectData : public ObjectData {
-public:
+ public:
   ExtObjectData(const ObjectStaticCallbacks *cb)
     : ObjectData(cb, false), root(this) {}
   virtual void setRoot(ObjectData *r) { root = r; }
   virtual ObjectData *getRoot() { return root; }
   ObjectData *getBuiltinRoot() { return root; }
-protected:
+ protected:
   ObjectData *root;
 };
 #endif
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {
-public:
+ public:
   ExtObjectDataFlags(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
     ObjectData::setAttributes(flags);
   }

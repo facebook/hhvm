@@ -410,11 +410,13 @@ RegAlloc::cleanRegs(RegSet regs) {
   verify();
 }
 
-void
-RegAlloc::cleanLoc(const Location& loc) {
+template <bool smash>
+void RegAlloc::cleanLocImpl(const Location& loc) {
   RegContent cont(loc);
   PhysReg pr = mapGet(m_contToRegMap, cont, InvalidReg);
-  ASSERT(pr != InvalidReg);
+  if (pr == InvalidReg) {
+    return;
+  }
   RegInfo* info = physRegToInfo(pr);
   ASSERT(info->m_state == RegInfo::CLEAN ||
          info->m_state == RegInfo::DIRTY);
@@ -422,6 +424,13 @@ RegAlloc::cleanLoc(const Location& loc) {
     spill(info);
     stateTransition(info, RegInfo::CLEAN);
   }
+  if (smash) {
+    smashReg(pr);
+  }
+}
+
+void RegAlloc::cleanLoc(const Location& loc) {
+  cleanLocImpl<false>(loc);
 }
 
 void RegAlloc::cleanLocals() {
@@ -486,6 +495,10 @@ void RegAlloc::smashRegs(RegSet toSmash) {
   verify();
 }
 
+void RegAlloc::smashLoc(const Location& loc) {
+  cleanLocImpl<true>(loc);
+}
+
 void RegAlloc::killImms(RegSet toKill) {
   FOR_EACH_REG_IN_SET(r, toKill) {
     if (r->m_cont.m_kind == RegContent::Int) {
@@ -534,12 +547,22 @@ RegAlloc::physRegToInfo(PhysReg reg) const {
 }
 
 /*
- * Scratch regs are not free, and but have no Location, cannot be spilled
+ * Scratch regs are not free, but have no Location, cannot be spilled
  * or filled, and do not appear in m_regMap.
  */
 PhysReg
-RegAlloc::allocScratchReg() {
-  return alloc(Location(), KindOfInvalid, RegInfo::SCRATCH, false)->m_pReg;
+RegAlloc::allocScratchReg(PhysReg pr /* = InvalidReg */) {
+  if (pr != InvalidReg) {
+    RegInfo* ri = physRegToInfo(pr);
+    if (ri->m_state == RegInfo::DIRTY) {
+      cleanReg(pr);
+    }
+    smashRegImpl(ri);
+    bind(pr, Location(), KindOfInvalid, RegInfo::SCRATCH);
+    return pr;
+  } else {
+    return alloc(Location(), KindOfInvalid, RegInfo::SCRATCH, false)->m_pReg;
+  }
 }
 
 void
@@ -828,9 +851,9 @@ LazyScratchReg::~LazyScratchReg() {
 }
 
 void
-LazyScratchReg::alloc() {
+LazyScratchReg::alloc(PhysReg pr /* = InvalidReg */) {
   ASSERT(m_reg == noreg);
-  m_reg = m_regMap.allocScratchReg();
+  m_reg = m_regMap.allocScratchReg(pr);
   TRACE(1, "LazyScratchReg: alloc %d\n", m_reg);
 }
 

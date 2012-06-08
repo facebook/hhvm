@@ -406,6 +406,7 @@ public:
   static bool EvalJitCmovVarDeref;
   static bool EvalThreadingJit;
   static bool EvalJitTransCounters;
+  static bool EvalJitMGeneric;
   static bool EvalDumpBytecode;
   static bool EvalDumpTC;
   static bool EvalDumpAst;

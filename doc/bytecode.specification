@@ -737,9 +737,13 @@ For example, the following correspondence exists (ignoring setup bytecode):
 Instructions that have an immediate argument vector have different stack
 transition descriptions depending on the kind of location descriptor and member
 descriptors contained in the immediate argument vector. Member instructions
-denote the immediate argument vector using the notation "<loc-desc : M-vector>"
+denote the immediate argument vector using the notation "<loc-desc/M-vector>"
 and "C..C" is used to indicate that the member instructions consume a variable
-number of cells from the stack.
+number of cells from the stack. In most cases the immediate vector arguments
+are ordered such that the loc-desc comes first (deepest in the stack), with the
+last M-vector element last (shallowest in the stack). However, classrefs that
+are part of the BaseSC and BaseSL loc-desc inputs always come last (the cell
+input to BaseSC comes first though).
 
 In addition to describing each instruction, this instruction set documentation
 also describes several operations that encapsulate fundamental, but non-trivial
@@ -2962,7 +2966,7 @@ implemented using the corresponding EC or PC intermediate operation: they
 behave exactly as though that literal data had been pushed on the stack as a
 cell, then consumed by an ElemC* or PropC* operation.
 
-CGetM <loc-desc : M-vector>    [C..C]  ->  [C]
+CGetM <loc-desc/M-vector>    [C..C]  ->  [C]
 
   Get member as cell.
 
@@ -2979,7 +2983,7 @@ CGetM <loc-desc : M-vector>    [C..C]  ->  [C]
     SC         | BaseSC
     SL         | BaseSL
 
-VGetM <loc-desc : M-vector>    [C..C]  ->  [V]
+VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
 
   Get member as var.
 
@@ -2996,13 +3000,13 @@ VGetM <loc-desc : M-vector>    [C..C]  ->  [V]
     SC         | BaseSC
     SL         | BaseSL
 
-FPassM <param id> <loc-desc : M-vector>    [C..C]  ->  [F]
+FPassM <param id> <loc-desc/M-vector>    [C..C]  ->  [F]
 
   FPI pass parameter. This instruction behaves as CGetM if parameter
   %1 is pass by value, or it behaves like VGetM if parameter %1 is
   pass by reference. Then it passes the value produced to the callee.
 
-IssetM <loc-desc : M-vector>    [C..C]  ->  [C:Bool]
+IssetM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
 
   Isset member.
 
@@ -3019,7 +3023,7 @@ IssetM <loc-desc : M-vector>    [C..C]  ->  [C:Bool]
     SC         | BaseSC
     SL         | BaseSL
 
-EmptyM <loc-desc : M-vector>    [C..C]  ->  [C:Bool]
+EmptyM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
 
   Empty member.
 
@@ -3036,7 +3040,7 @@ EmptyM <loc-desc : M-vector>    [C..C]  ->  [C:Bool]
     SC         | BaseSC
     SL         | BaseSL
 
-SetM <loc-desc : M-vector>    [C..C C]  ->  [C]
+SetM <loc-desc/M-vector>    [C..C C]  ->  [C]
 
   Set member.
 
@@ -3053,7 +3057,7 @@ SetM <loc-desc : M-vector>    [C..C C]  ->  [C]
     SC         | BaseSC
     SL         | BaseSL
 
-SetOpM <op> <loc-desc : M-vector>    [C..C]  ->  [C]
+SetOpM <op> <loc-desc/M-vector>    [C..C C]  ->  [C]
 
   Set op member.
 
@@ -3070,7 +3074,7 @@ SetOpM <op> <loc-desc : M-vector>    [C..C]  ->  [C]
     SC         | BaseSC
     SL         | BaseSL
 
-IncDecM <op> <loc-desc : M-vector>    [C..C]  ->  [C]
+IncDecM <op> <loc-desc/M-vector>    [C..C]  ->  [C]
 
   Increment/decrement member.
 
@@ -3087,7 +3091,7 @@ IncDecM <op> <loc-desc : M-vector>    [C..C]  ->  [C]
     SC         | BaseSC
     SL         | BaseSL
 
-BindM <loc-desc : M-vector>    [C..C V]  ->  [V]
+BindM <loc-desc/M-vector>    [C..C V]  ->  [V]
 
   Bind member.
 
@@ -3104,7 +3108,7 @@ BindM <loc-desc : M-vector>    [C..C V]  ->  [V]
     SC         | BaseSC
     SL         | BaseSL
 
-UnsetM <loc-desc : M-vector>    [C..C]  ->  []
+UnsetM <loc-desc/M-vector>    [C..C]  ->  []
 
   Unset member.
 

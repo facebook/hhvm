@@ -221,15 +221,19 @@ Exceptions
 ----------
 
 The metadata for each function provides an "exception handler (EH) table".
-Each row in the EH table consists of a kind ("fault" or "catch"), the bytecode
-offset of a fault funclet or catch entry point, the type of exception handled
-(for catch only), and a set of ranges of bytecode that constitute the protected
-region. Each range of bytecode is given by a starting offset and an ending
+Each row in the EH table consists of a kind ("fault" or "catch"), a range
+of bytecode that constitues the protected region, and an offset of a fault
+funclet or list of (classname, offset) pairs describing catch entry points.
+
+Each range of bytecode is given by a starting offset and an ending
 offset, where the starting offset is the bytecode offset at the beginning of
 the first instruction in the range and the ending offset is the bytecode offset
-after the last instruction in the range. Each range of bytecode must be
-distinct and may not overlap or be adjacent to another range of bytecode from
-the same protected region.
+after the last instruction in the range. For any pair of protected regions,
+one of the following must hold: (1) the regions are disjoint and do not
+overlap, or (2) one of the regions must be nested inside the other region.
+
+The offset for each catch target in a "catch" EH row must be within the
+primary function body, and no two "fault" rows may target the same offset.
 
 When an exception is thrown, control is transferred to the unwinder. The
 unwinder starts with the current frame and consults the EH table of the
@@ -242,11 +246,14 @@ first.
 
 When the unwinder visits a "fault" kind protected region, it transfers control
 to the corresponding fault funclet. When the fault funclet ends, it transfers
-control back to the unwinder. When the unwinder visits a "catch" kind protected
-region, it checks if the exception's type is compatible with type of exception
-handled by the catch block. If it is, the unwinder transfers control to the
-corresponding catch entry point, and normal execution resumes. Otherwise, the
-unwinder continues visiting protected regions searching for a matching catch.
+control back to the unwinder with the Unwind instruction.
+
+When the unwinder visits a "catch" kind protected region, it considers each
+catch target in the order they appear in the list. If the exception's type is
+compatible with type of exception handled by the catch block, the unwinder
+transfers control to the corresponding catch entry point, and normal execution
+resumes. Otherwise, the unwinder continues visiting protected regions
+searching for a matching catch.
 
 If the unwinder visits all of the relevant protected regions in the current
 frame's EH table and is unable to find a matching catch, the unwinder pops the
@@ -889,7 +896,7 @@ Add    [C:Arr C:Arr]  ->  [C:Arr]
 
   Addition (+). Performs addition (or plus-merge if $1 and $2 are both arrays).
   Pushes ($2 + $1) onto the stack. This instruction throws a fatal error if
-  error if is_array($1) xor is_array($2) is true.
+  is_array($1) xor is_array($2) is true.
 
 Sub    [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
        [C:<T2> C:<T1>]  ->  [C:Int]    (where T1 != Dbl && T2 != Dbl)
@@ -1127,20 +1134,20 @@ CGetL <local variable id>    []  ->  [C]
   warning and pushes null onto the stack.
 
 CGetL2 <local variable id>    [<F>:<T>]  ->  [C <F>:<T>]
-  
+
   Get local as cell. If the local variable given by %1 is defined, this
   instruction gets the value of the local variable, pushes it onto the stack
   as a cell, and then pushes $1 onto the stack.
-  
+
   If the local variable is not defined, this instruction raises a warning,
   pushes null onto the stack, and then pushes $1 onto the stack.
 
 CGetL3 <local variable id>    [<F2>:<T2> <F1>:<T1>]  ->  [C <F2>:<T1> <F1>:<T1>]
-  
+
   Get local as cell. If the local variable given by %1 is defined, this
   instruction gets the value of the local variable, pushes it onto the stack
   as a cell, then pushes $2 onto the stack, and then pushes $1 onto the stack.
-  
+
   If the local variable given by %1 is not defined, this instruction raises a
   warning, pushes null onto the stack, then pushes $2 onto the stack, and then
   pushes $1 onto the stack.
@@ -1150,7 +1157,7 @@ CGetN    [C]  ->  [C]
   Get local as cell. This instruction first computes x = (string)$1. Next, this
   instruction reads the local variable named x pushes its value onto the stack
   as a cell.
-  
+
   If there is no local variable defined named x, this instruction pushes null
   onto the stack and raises a warning.
 
@@ -1212,7 +1219,7 @@ AGetL <local variable id>    []  ->  [A]
     ------------+----
       AGetC     | $1
       AGetL     | %1
-  
+
   Next this instruction checks if x is a string or an object. If x is not a
   string or object, this instruction throws a fatal error. Otherwise, this
   instruction executes y = (is_object(x) ? get_class(x) : (string)x) and checks
@@ -1227,6 +1234,11 @@ AGetL <local variable id>    []  ->  [A]
 
 6. Isset, Empty, and type querying instructions
 -----------------------------------------------
+
+IssetC    [C]  ->  [C:Bool]
+
+  Isset. If $1 is null this instruction pushes false onto the stack, otherwise
+  it pushes true.
 
 IssetL <local variable id>    []  ->  [C:Bool]
 
@@ -1251,7 +1263,7 @@ IssetS    [C A]  ->  [C:Bool]
   Isset static property. This instruction first computes x = (string)$2. Next
   it checks if class $1 has an accessible static property named x. If it
   doesn't, this instruction pushes false.
-  
+
   If class $1 goes have an accessible property named x, this instruction reads
   the static property named x. If the static property is null, this instruction
   pushes false onto the stack, otherwise it pushes true.
@@ -1365,7 +1377,7 @@ SetOpL <local variable id> <op>    [C]  ->  [C]
 
   Set op local. If the local variable given %1 is not defined, this instruction
   marks it as defined, sets it to null, and raises a warning.
-  
+
   Next, this instruction reads the local variable into x, then executes y = x
   <op> $1, assigns y into local variable %1, and then pushes y onto the stack.
   The immediate value must be one of the following opcodes:
@@ -1376,7 +1388,7 @@ SetOpN <op>    [C C]  ->  [C]
   Set op local. This instruction first computes x = (string)$2. If the local
   variable named n is not defined, this instruction marks it as defined, sets
   it to null, and raises a warning.
-  
+
   Next, this instruction reads the local variable named x into y, executes
   z = y <op> $1, assigns z into the local variable named x, and then pushes z
   onto the stack as a cell. The immediate value must be one of the following
@@ -1388,7 +1400,7 @@ SetOpG <op>    [C C]  ->  [C]
   Set op global. This instruction first computes x = (string)$2. If the global
   variable named n is not defined, this instruction marks it as defined, sets
   it to null, and raises a warning.
-  
+
   Next, this instruction reads the global variable named x into y, executes
   z = y <op> $1, assigns z into the global variable named x, and then pushes z
   onto the stack as a cell. The immediate value must be one of the following
@@ -1431,7 +1443,7 @@ IncDecG <op>    [C]  ->  [C]
   the local variable (IncDecN) or global variable (IncDecG) named x is not
   defined, this instruction first defines it, sets it to null, and raises a
   warning.
-  
+
   Where v is the local variable or global variable named x, this instruction
   performs the following:
 
@@ -1511,7 +1523,7 @@ UnsetG    [C]  ->  []
 
 FPushFunc <num params>                 [C]  ->  []
 FPushFuncD <num params> <litstr id>    []  ->  []
-  
+
   FPI push function. First, these instructions load a value into x as given by
   the following table:
 
@@ -1525,7 +1537,7 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   Otherwise this instruction pushes a new entry on the FPI stack, initializing
   it with the number of parameters being passed (given by %1) and a reference
   to the FPI structure for the function named x.
-  
+
   If x is an object, this instruction checks if the object has an __invoke
   method. If the object does not have an __invoke method, this instruction
   throws a fatal error. Otherwise this instruction pushes a new entry on the
@@ -1545,7 +1557,7 @@ FPushObjMethodD <num params> <litstr id>    [C]  ->  []
     -------------------+----+-----
       FPushObjMethod   | $2 | $1
       FPushObjMethodD  | $1 | %2
-  
+
   This x is not an object or if y is not a string, this instruction throws a
   fatal error. Next, this instruction checks if object x has an accessible
   method named y. If it does, this instruction pushes a new entry on the FPI
@@ -1577,7 +1589,7 @@ FPushClsMethodD <num params> <litstr id> <litstr id>    []  ->  []
 
   When loading %3 into x, FPushClsMethodD will perform the work performed by
   the AGetC instruction to convert the name given by %3 into a classref.
-  
+
   If y is not a string, this instruction throws a fatal error. Next, this
   instruction checks if class x has an accessible method named y. If class x
   has a method named y. If it does, this instruction pushes a new entry on the
@@ -1604,7 +1616,7 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
 
   FPI push constructor. First, these instructions load a value into x as given
   by the following table:
-  
+
     instruction           x
     -------------------+----
       FPushObjMethod   | $1
@@ -1612,14 +1624,14 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
 
   When loading %2 into x, FPushCtorD will perform the work performed by the
   AGetC instruction to convert the name given by %2 into a classref.
-  
+
   This instruction pushes an uninitialized object onto the stack (to be
   initialized during FCall) prior to entering the FPI region, then pushes a new
   entry on the FPI stack, initializing it with the number of parameters being
   passed (given by %1) and a reference to the FPI structure for the constructor
   for class x.
 
-FPushContFunc    []  ->  []
+FPushContFunc <num params>    []  ->  []
 
   FPI push continuation function. This instruction must only be executed inside
   a method of the Continuation class or one of its subclasses. If that
@@ -1833,9 +1845,9 @@ BaseSL <local variable id>    [A]  ->  [B]
 
   Get base from static property. First, this operation loads a value into x as
   given by the following table:
-  
+
        operation     x
-       -----------+---- 
+       -----------+----
          BaseSC   | $2
          BaseSL   | %1
 
@@ -1868,7 +1880,7 @@ ElemL <local variable id>    [B]  ->  [B]
 
   If y is a string, this operation checks the status of the StrOff
   flag of base x. If the StrOff flag is true, this instruction throws
-  a fatal error.  Otherwise, this operation continues to compute z =
+  a fatal error. Otherwise, this operation continues to compute z =
   (int)x. If z >= 0 and z < strlen(z), this operation builds a new
   string consisting of the character at offset z from y and outputs a
   base that contains the new string with the StrOff flag set to
@@ -1905,7 +1917,7 @@ ElemLW <local variable id>    [B]  ->  [B]
 
   If y is a string, this operation checks the status of the StrOff
   flag of base y. If the StrOff flag is true, this instruction throws
-  a fatal error.  Otherwise, this operation continues to compute z =
+  a fatal error. Otherwise, this operation continues to compute z =
   (int)x. If z >= 0 and z < strlen(z), this operation builds a new
   string consisting of the character at offset z from y and outputs a
   base that contains the new string with the StrOff flag set to
@@ -2877,8 +2889,7 @@ BindPropC    [C V B]  ->  [V]
 
 BindPropL <local variable id>    [V B]  ->  [V]
 
-  Bind property.  Where k is the value of the local variable given by
-  %1:
+  Bind property. Where k is the value of the local variable given by %1:
 
   If $1 is an object that does not have an eligible __set method,
   this operation first checks if $1 has a visible property named k. If it does
@@ -2930,52 +2941,47 @@ UnsetPropL <local variable id>    [B]  ->  []
 10. Member instructions
 -----------------------
 
+Member instructions perform series of operations that are structurally
+identical, but each instruction utilizes a distinct set of operations. For each
+member instruction, first use a Base* operation depending on the kind of
+location code. Next perform a series of intermediate operations depending on
+member code to process all but the last member. Finally, perform a final
+operation depending on member code to process the last member. See the
+instruction-specific tables for details.
+
 CGetM <loc-desc : M-vector>    [C..C]  ->  [C]
 
-  Get member as cell. First, CGetM uses a Base* operation depending on
-  the kind of location code (see table below). Next CGetM uses the
-  Elem{L,C}W operation for elements (EL/EC), and the Prop{L,C}W
-  operation for properties (PL/PC), to process all but the last
-  member. Finally, the last member is processed using the
-  CGetElem{L,C} operations for elements (EL/EC) or the CGetProp{L,C}
-  operations for properties (PL/EC).
+  Get member as cell.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseLW
-    NC          | BaseNCW
-    NL          | BaseNLW
-    GC          | BaseGCW
-    GL          | BaseGLW
-    SC          | BaseSC
-    SL          | BaseSL
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+----------
+    C          | BaseC      EC     | ElemCW       | CGetElemC
+    R          | BaseR      PC     | PropCW       | CGetPropC
+    L          | BaseLW     EL     | ElemLW       | CGetElemL
+    NC         | BaseNCW    PL     | PropLW       | CGetPropL
+    NL         | BaseNLW    W      | N/A          | N/A
+    GC         | BaseGCW
+    GL         | BaseGLW
+    SC         | BaseSC
+    SL         | BaseSL
 
 VGetM <loc-desc : M-vector>    [C..C]  ->  [V]
 
-  Get member as var. First, VGetM uses the appropriate Base* operation
-  depending the kind of location (see table below). Next VGetM uses
-  the Elem{L,C}D operation for elements (EL/EC), the NewElem operation
-  for new elements (W), and the Prop{L,C}D operation for properties
-  (PL/PC) to process all but the last member.  Finally, the last
-  member is processed using the VGetElem{L,C} operation for element
-  (EL/EC), the VGetNewElem operation for new element (W), or the
-  VGetProp{L,C} operation for property (PL/PC).
+  Get member as var.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseLD
-    NC          | BaseNCD
-    NL          | BaseNLD
-    GC          | BaseGCD
-    GL          | BaseGLD
-    SC          | BaseSC
-    SL          | BaseSL
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+------------
+    C          | BaseC      EC     |  ElemCD      | VGetElemC
+    R          | BaseR      PC     |  PropCD      | VGetPropC
+    L          | BaseLD     EL     |  ElemLD      | VGetElemL
+    NC         | BaseNCD    PL     |  PropLD      | VGetPropL
+    NL         | BaseNLD    W      |  NewElem     | VGetNewElem
+    GC         | BaseGCD
+    GL         | BaseGLD
+    SC         | BaseSC
+    SL         | BaseSL
 
 FPassM <param id> <loc-desc : M-vector>    [C..C]  ->  [F]
 
@@ -2985,169 +2991,122 @@ FPassM <param id> <loc-desc : M-vector>    [C..C]  ->  [F]
 
 IssetM <loc-desc : M-vector>    [C..C]  ->  [C:Bool]
 
-  Isset member. First, IssetM uses the appropriate Base* operation
-  depending on the kind of location (see table below). Next IssetM
-  uses the Elem{L,C} operations for elements (EL/EC) and the Prop{L,C}
-  operation for properties (PL/PC) to process all but the last
-  member. Finally, the last member is processed using the
-  IssetElem{L,C} operations for elements (EL/EC) or the IssetProp{L,C}
-  operations for properties (PL/PC).
+  Isset member.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseL
-    NC          | BaseNC
-    NL          | BaseNL
-    GC          | BaseGC
-    GL          | BaseGL
-    SC          | BaseSC
-    SL          | BaseSL
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-----------
+    C          | BaseC      EC     | ElemC        | IssetElemC
+    R          | BaseR      PC     | PropC        | IssetPropC
+    L          | BaseL      EL     | ElemL        | IssetElemL
+    NC         | BaseNC     PL     | PropL        | IssetPropL
+    NL         | BaseNL     W      | N/A          | N/A
+    GC         | BaseGC
+    GL         | BaseGL
+    SC         | BaseSC
+    SL         | BaseSL
 
 EmptyM <loc-desc : M-vector>    [C..C]  ->  [C:Bool]
 
-  Empty member. First, EmptyM uses the appropriate Base* operation
-  depending on the kind of location (see table below). Next EmptyM
-  uses the Elem{L,C} operations for elements (EL/EC) and the Prop{L,C}
-  operation for properties (PL/PC) to process all but the last
-  member. Finally, the last member is processed using the
-  EmptyElem{L,C} operations for elements (EL/EC) or the EmptyProp{L,C}
-  operations for property (PL/PC).
+  Empty member.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseL
-    NC          | BaseNC
-    NL          | BaseNL
-    GC          | BaseGC
-    GL          | BaseGL
-    SC          | BaseSL
-    SL          | BaseSC
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-----------
+    C          | BaseC      EC     | ElemC        | EmptyElemC
+    R          | BaseR      PC     | PropC        | EmptyPropC
+    L          | BaseL      EL     | ElemL        | EmptyElemL
+    NC         | BaseNC     PL     | PropL        | EmptyPropL
+    NL         | BaseNL     W      | N/A          | N/A
+    GC         | BaseGC
+    GL         | BaseGL
+    SC         | BaseSC
+    SL         | BaseSL
 
 SetM <loc-desc : M-vector>    [C..C C]  ->  [C]
 
-  Set member. First, SetM uses the appropriate Base* operation
-  depending on the kind of location (see table below). Next SetM uses
-  the Elem{L,C}D operations for elements (EL/EC), the NewElem
-  operation for new elements (W), and the Prop{L,C}D operation for
-  properties (PL/PC) to process all but the last member. Finally, the
-  last member is processed using the SetElem{L,C} operations for
-  elements (EL/EC), the SetNewElem operations for new elements (W), or
-  the SetProp{L,C} operations for properties (PL/PC).
+  Set member.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseLD
-    NC          | BaseNCD
-    NL          | BaseNLD
-    GC          | BaseGCD
-    GL          | BaseGLD
-    SC          | BaseSC
-    SL          | BaseSL
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-----------
+    C          | BaseC      EC     | ElemCD       | SetElemC
+    R          | BaseR      PC     | PropCD       | SetPropC
+    L          | BaseLD     EL     | ElemLD       | SetElemL
+    NC         | BaseNCD    PL     | PropLD       | SetPropL
+    NL         | BaseNLD    W      | NewElem      | SetNewElem
+    GC         | BaseGCD
+    GL         | BaseGLD
+    SC         | BaseSC
+    SL         | BaseSL
 
 SetOpM <op> <loc-desc : M-vector>    [C..C]  ->  [C]
 
-  Set op member. First, SetOpM uses the appropriate Base* operation
-  depending on the kind of location (see table below). Next SetOpM
-  uses the Elem{L,C}WD operations for elements (EL/EC), the NewElem
-  operation for new elements (W), and the Prop{L,C}WD operations for
-  properties (PL/PC) to process all but the last member.  Finally, the
-  last member is processed using the SetOpElem{L,C} operations for
-  elements (EL/EC), the SetOpNewElem operations for new elements (W),
-  or the SetOpProp{L,C} operations for properties (PL/PC).
+  Set op member.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseLWD
-    NC          | BaseNCWD
-    NL          | BaseNLWD
-    GC          | BaseGCWD
-    GL          | BaseGLWD
-    SC          | BaseSC
-    SL          | BaseSL
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-------------
+    C          | BaseC      EC     | ElemCWD      | SetOpElemC
+    R          | BaseR      PC     | PropCWD      | SetOpPropC
+    L          | BaseLWD    EL     | ElemLWD      | SetOpElemL
+    NC         | BaseNCWD   PL     | PropLWD      | SetOpPropL
+    NL         | BaseNLWD   W      | NewElem      | SetOpNewElem
+    GC         | BaseGCWD
+    GL         | BaseGLWD
+    SC         | BaseSC
+    SL         | BaseSL
 
 IncDecM <op> <loc-desc : M-vector>    [C..C]  ->  [C]
 
-  Increment/decrement member. First, IncDecM uses the appropriate
-  Base* operation depending on the kind of location (see table
-  below). Next IncDecM uses the Elem{L,C}WD operation for elements
-  (EL/EC), the NewElem operation for new elements (W), and the
-  Prop{L,C}WD operation for properties (PL/PC) to process all but the
-  last member. Finally, the last member is processed using the
-  IncDecElem{L,C} operations for elements (EL/EC), the IncDecNewElem
-  operation for new elements (W), or the IncDecProp{L,C} operation for
-  property (PL/PC).
+  Increment/decrement member.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseLWD
-    NC          | BaseNCWD
-    NL          | BaseNLWD
-    GC          | BaseGCWD
-    GL          | BaseGLWD
-    SC          | BaseSL
-    SL          | BaseSC
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+--------------
+    C          | BaseC      EC     | ElemCWD      | IncDecElemC
+    R          | BaseR      PC     | PropCWD      | IncDecPropC
+    L          | BaseLWD    EL     | ElemLWD      | IncDecElemL
+    NC         | BaseNCWD   PL     | PropLWD      | IncDecPropL
+    NL         | BaseNLWD   W      | NewElem      | IncDecNewElem
+    GC         | BaseGCWD
+    GL         | BaseGLWD
+    SC         | BaseSC
+    SL         | BaseSL
 
 BindM <loc-desc : M-vector>    [C..C V]  ->  [V]
 
-  Bind member. First, BindM uses the appropriate Base* operation
-  depending on the kind of location (see table below). Next BindM uses
-  the Elem{L,C}D operations for elements (EL/EC), the NewElem
-  operation for new elements (W), and the Prop{L,C}D operations for
-  properties (PL/PC) to process all but the last member. Finally, the
-  last member is processed using the BindElem{L,C} operations for
-  elements (E), the BindNewElem operation for new element (W), or the
-  BindProp{L,C} operations for properties (PL/PC).
+  Bind member.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseLD
-    NC          | BaseNCD
-    NL          | BaseNLD
-    GC          | BaseGCD
-    GL          | BaseGLD
-    SC          | BaseSC
-    SL          | BaseSL
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+------------
+    C          | BaseC      EC     | ElemCD       | BindElemC
+    R          | BaseR      PC     | PropCD       | BindPropC
+    L          | BaseLD     EL     | ElemLD       | BindElemL
+    NC         | BaseNCD    PL     | PropLD       | BindPropL
+    NL         | BaseNLD    W      | NewElem      | BindNewElem
+    GC         | BaseGCD
+    GL         | BaseGLD
+    SC         | BaseSC
+    SL         | BaseSL
 
 UnsetM <loc-desc : M-vector>    [C..C]  ->  []
 
-  Unset member. First, UnsetM uses the appropriate Base* operation
-  depending on the kind of location (see table below). Next UnsetM
-  uses the Elem{L,C}U operations for elements (EL/EC) and the
-  Prop{L,C}U operations for properties (PL/PC) to process all but the
-  last member. Finally, the last member is processed using the
-  UnsetElem{L,C} operation for element (EL/EC) or the UnsetProp{L,C}
-  operation for property (PL/PC).
+  Unset member.
 
-    location      Base*
-    descriptor    operation
-    ------------+------------
-    C           | BaseC
-    R           | BaseR
-    L           | BaseL
-    NC          | BaseNC
-    NL          | BaseNL
-    GC          | BaseGC
-    GL          | BaseGL
-    SC          | BaseSC
-    SL          | BaseSL
+    location     Base*      member   intermediate   final
+    descriptor   operation  code     operation      operation
+    -----------+----------  -------+--------------+-----------
+    C          | BaseC      EC     | ElemCU       | UnsetElemC
+    R          | BaseR      PC     | PropCU       | UnsetPropC
+    L          | BaseL      EL     | ElemLU       | UnsetElemL
+    NC         | BaseNC     PL     | PropLU       | UnsetPropL
+    NL         | BaseNL     W      | N/A          | N/A
+    GC         | BaseGC
+    GL         | BaseGL
+    SC         | BaseSC
+    SL         | BaseSL
 
 
 11. Iterator instructions
@@ -3380,7 +3339,7 @@ DefCns <litstr id>    [C]  ->  [C]
 
   Define constant. If there is already a global constant named %1, raises a
   notice and pushes false. If $1 is an array or an object, raises a notice, and
-  pushes false.  Otherwise defines the constant named %1 to have the value $1,
+  pushes false. Otherwise defines the constant named %1 to have the value $1,
   and pushes true.
 
 

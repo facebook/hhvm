@@ -487,7 +487,7 @@ endif
 # NOT add something that not everyone wants.
 
 # Default externals tree to use
-EXTERNALS ?= hphp 
+EXTERNALS ?= gcc-4.6.2-glibc-2.13
 
 $(LIB_DIR)/hphp.mk:
 	$(V)cp $(PROJECT_ROOT)/src/externals/hphp.mk $@

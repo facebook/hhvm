@@ -786,10 +786,10 @@ TypedValue * fg1_fscanf(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   }
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-2, false);
     for (long long i = 2; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-2);
+      TypedValue* extraArg = ea->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-2, tvAsVariant(extraArg));
       } else {
@@ -812,10 +812,10 @@ TypedValue* fg_fscanf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         Array extraArgs;
         {
-          HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-2, false);
           for (long long i = 2; i < count; ++i) {
-            TypedValue* extraArg = ve->getExtraArg(i-2);
+            TypedValue* extraArg = ea->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-2, tvAsVariant(extraArg));
             } else {
@@ -1060,10 +1060,10 @@ TypedValue * fg1_fprintf(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
   }
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-2, false);
     for (long long i = 2; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-2);
+      TypedValue* extraArg = ea->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-2, tvAsVariant(extraArg));
       } else {
@@ -1086,10 +1086,10 @@ TypedValue* fg_fprintf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         Array extraArgs;
         {
-          HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-2, false);
           for (long long i = 2; i < count; ++i) {
-            TypedValue* extraArg = ve->getExtraArg(i-2);
+            TypedValue* extraArg = ea->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-2, tvAsVariant(extraArg));
             } else {
@@ -2815,14 +2815,14 @@ TypedValue* fg_rename(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_umask(HPHP::Variant const&)
+long long HPHP::f_umask(HPHP::Variant const&)
 _ZN4HPHP7f_umaskERKNS_7VariantE
 
 (return value) => rax
 mask => rdi
 */
 
-int fh_umask(TypedValue* mask) asm("_ZN4HPHP7f_umaskERKNS_7VariantE");
+long long fh_umask(TypedValue* mask) asm("_ZN4HPHP7f_umaskERKNS_7VariantE");
 
 TypedValue* fg_umask(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

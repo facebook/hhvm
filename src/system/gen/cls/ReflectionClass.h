@@ -31,7 +31,7 @@ extern const VarNR &s_sys_svi5830e7c6;
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 FORWARD_DECLARE_CLASS(ReflectionProperty);
 
-/* SRC: classes/reflection.php line 568 */
+/* SRC: classes/reflection.php line 586 */
 FORWARD_DECLARE_CLASS(ReflectionClass);
 extern const ObjectStaticCallbacks cw_ReflectionClass;
 class c_ReflectionClass : public ExtObjectData {
@@ -98,6 +98,10 @@ class c_ReflectionClass : public ExtObjectData {
   public: bool t_implementsinterface(Variant v_cls);
   public: Variant t_getextension();
   public: Variant t_getextensionname();
+  public: Variant t_getattribute(CVarRef v_name);
+  public: Variant t_getattributes();
+  public: Variant t_getattributerecursive(CVarRef v_name);
+  public: Variant t_getattributesrecursive();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(fetch);
   DECLARE_METHOD_INVOKE_HELPERS(fetch_recur);
@@ -146,6 +150,10 @@ class c_ReflectionClass : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(implementsinterface);
   DECLARE_METHOD_INVOKE_HELPERS(getextension);
   DECLARE_METHOD_INVOKE_HELPERS(getextensionname);
+  DECLARE_METHOD_INVOKE_HELPERS(getattribute);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributes);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributerecursive);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributesrecursive);
 };
 ObjectData *coo_ReflectionClass() NEVER_INLINE;
 extern const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT;

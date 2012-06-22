@@ -102,7 +102,7 @@ Variant f_array_splice(VRefParam input, int offset,
 Variant f_array_sum(CVarRef array);
 Variant f_array_unique(CVarRef array, int sort_flags = 2);
 
-int f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
+int64 f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
 
 Variant f_array_values(CVarRef input);
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
@@ -121,9 +121,9 @@ Array compact(LVariableTable *variables, int _argc, CVarRef varname,
               CArrRef _argv = null_array);
 
 bool f_shuffle(VRefParam array);
-int f_count(CVarRef var, bool recursive = false);
+int64 f_count(CVarRef var, bool recursive = false);
 
-inline int f_sizeof(CVarRef var, bool recursive = false) {
+inline int64 f_sizeof(CVarRef var, bool recursive = false) {
   return f_count(var, recursive);
 }
 inline Variant f_each(VRefParam array) {

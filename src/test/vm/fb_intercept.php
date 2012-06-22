@@ -63,60 +63,64 @@ class Blark {
 
 class SubBlark extends Blark {}
 class SubBlark2 extends Blark {}
-$mc = new MagicCall();
+function main () {
 
-// Intercept static method
-fb_intercept('SubBlark2::sfrap', 'handler');
-Blark::sfrap();
-call_user_func(array('Blark', 'sfrap'));
-SubBlark::sfrap();
-call_user_func(array('SubBlark', 'sfrap'));
-SubBlark2::sfrap();
-call_user_func(array('SubBlark2', 'sfrap'));
+  $mc = new MagicCall();
 
-fb_intercept('Blark::sfrap', 'handler');
-Blark::sfrap();
-call_user_func(array('Blark', 'sfrap'));
-SubBlark::sfrap();
-call_user_func(array('SubBlark', 'sfrap'));
-SubBlark2::sfrap();
-call_user_func(array('SubBlark2', 'sfrap'));
+  // Intercept static method
+  fb_intercept('SubBlark2::sfrap', 'handler');
+  Blark::sfrap();
+  call_user_func(array('Blark', 'sfrap'));
+  SubBlark::sfrap();
+  call_user_func(array('SubBlark', 'sfrap'));
+  SubBlark2::sfrap();
+  call_user_func(array('SubBlark2', 'sfrap'));
 
-fb_intercept('Blark::sfrap', 'passthrough_handler');
-Blark::sfrap();
-call_user_func(array('Blark', 'sfrap'));
+  fb_intercept('Blark::sfrap', 'handler');
+  Blark::sfrap();
+  call_user_func(array('Blark', 'sfrap'));
+  SubBlark::sfrap();
+  call_user_func(array('SubBlark', 'sfrap'));
+  SubBlark2::sfrap();
+  call_user_func(array('SubBlark2', 'sfrap'));
 
-fb_intercept('Blark::sfrap', array($mc, 'i_dont_exist_either'));
-Blark::sfrap();
-call_user_func(array('Blark', 'sfrap'));
+  fb_intercept('Blark::sfrap', 'passthrough_handler');
+  Blark::sfrap();
+  call_user_func(array('Blark', 'sfrap'));
 
-// Intercept non-static method
-$b = new Blark();
-fb_intercept('Blark::frap', 'handler');
-$b->frap();
-call_user_func(array($b, 'frap'));
+  fb_intercept('Blark::sfrap', array($mc, 'i_dont_exist_either'));
+  Blark::sfrap();
+  call_user_func(array('Blark', 'sfrap'));
 
-fb_intercept('Blark::frap', 'passthrough_handler');
-$b->frap();
-call_user_func(array($b, 'frap'));
+  // Intercept non-static method
+  $b = new Blark();
+  fb_intercept('Blark::frap', 'handler');
+  $b->frap();
+  call_user_func(array($b, 'frap'));
 
-fb_intercept('Blark::frap', array($mc, 'i_dont_exist_either'));
-$b->frap();
-call_user_func(array($b, 'frap'));
+  fb_intercept('Blark::frap', 'passthrough_handler');
+  $b->frap();
+  call_user_func(array($b, 'frap'));
 
-// MULTI-INTERCEPT!
-fb_intercept('frap', 'handler');
-fb_intercept('handler', 'passthrough_handler');
-frap('claptrap');
+  fb_intercept('Blark::frap', array($mc, 'i_dont_exist_either'));
+  $b->frap();
+  call_user_func(array($b, 'frap'));
 
-// Reset all
-fb_intercept('', null);
-frap('claptrap');
-Blark::sfrap();
-$b->frap();
+  // MULTI-INTERCEPT!
+  fb_intercept('frap', 'handler');
+  fb_intercept('handler', 'passthrough_handler');
+  frap('claptrap');
 
-// Intercept __call
-fb_intercept('MagicCall::__call', 'handler');
-$mc->blark('hi');
-fb_intercept('MagicCall::__call', 'passthrough_handler');
-$mc->blark('ho');
+  // Reset all
+  fb_intercept('', null);
+  frap('claptrap');
+  Blark::sfrap();
+  $b->frap();
+
+  // Intercept __call
+  fb_intercept('MagicCall::__call', 'handler');
+  $mc->blark('hi');
+  fb_intercept('MagicCall::__call', 'passthrough_handler');
+  $mc->blark('ho');
+}
+main();

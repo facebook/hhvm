@@ -53,7 +53,7 @@ Variant f_bzerror(CObjRef bz) {
   return f->error();
 }
 
-int f_bzerrno(CObjRef bz) {
+int64 f_bzerrno(CObjRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->errnu();
 }

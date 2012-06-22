@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 195 */
+/* SRC: classes/iterator.php line 211 */
 FORWARD_DECLARE_GENERIC_INTERFACE(RecursiveIterator);
 class c_RecursiveIterator {
   // public: virtual void t_getchildren() = 0;

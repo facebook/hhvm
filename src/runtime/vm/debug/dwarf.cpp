@@ -225,11 +225,15 @@ void DwarfInfo::compactChunks() {
 
 static Mutex s_lock(RankLeaf);
 
-DwarfChunk* DwarfInfo::addTracelet(TCA start, TCA end, const Unit *unit,
-  const Opcode *instr, bool exit, bool inPrologue) {
+DwarfChunk* DwarfInfo::addTracelet(TCA start, TCA end, const char* name,
+  const Unit *unit, const Opcode *instr, bool exit, bool inPrologue) {
   DwarfChunk* chunk = NULL;
   FunctionInfo* f = new FunctionInfo(start, end, exit);
-  f->name = lookupFunction(unit, instr, exit, inPrologue, true);
+  if (name) {
+    f->name = std::string(name);
+  } else {
+    f->name = lookupFunction(unit, instr, exit, inPrologue, true);
+  }
   f->file = lookupFile(unit);
 
   {
@@ -275,7 +279,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCA start, TCA end, const Unit *unit,
     f->m_chunk = chunk;
   }
 
-  if (f->m_chunk->m_functions.size() == RuntimeOption::EvalGdbSyncChunks) {
+  if (f->m_chunk->m_functions.size() >= RuntimeOption::EvalGdbSyncChunks) {
     Lock lock(s_lock);
     ElfWriter e = ElfWriter(f->m_chunk);
   }

@@ -3167,8 +3167,7 @@ array_getm_is0(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
 
 // issetm's DNA.
 static inline bool
-issetMUnary(const void* dptr, StringData* sd,
-            bool decRefKey = true, bool checkInt = true) {
+issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {
   const ArrayData* ad = (const ArrayData*)dptr;
   bool retval;
   const Variant *cell;

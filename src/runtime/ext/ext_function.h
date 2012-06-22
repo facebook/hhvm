@@ -54,13 +54,13 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos);
  * parameters to help the implementation.
  */
 Array f_func_get_args();
-Array hhvm_get_frame_args(VM::ActRec* ar);
+Array hhvm_get_frame_args(const VM::ActRec* ar);
 Array func_get_args(int num_args, CArrRef params, CArrRef args);
 
 /**
  * HPHP actually inlines this function, so this is degenerated.
  */
-int f_func_num_args();
+int64 f_func_num_args();
 
 ///////////////////////////////////////////////////////////////////////////////
 

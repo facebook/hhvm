@@ -113,7 +113,7 @@ bool f_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_hea
   return php_mail(to2, subject2, message2, headers2, params2);
 }
 
-int f_ezmlm_hash(CStrRef addr) {
+int64 f_ezmlm_hash(CStrRef addr) {
   unsigned long h = 5381L;
   int str_len = addr.length();
   for (int i = 0; i < str_len; i++) {

@@ -55,7 +55,7 @@ DefineFunction(
     'desc'   => "Creates a timer that will send a SIGALRM signal to the process after the given number of seconds. Any call to pcntl_alarm() will cancel any previously set alarm.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the time in seconds that any previously scheduled alarm had remaining before it was to be delivered, or 0 if there was no previously scheduled alarm.",
     ),
     'args'   => array(
@@ -105,7 +105,7 @@ DefineFunction(
     'desc'   => "The pcntl_fork() function creates a child process that differs from the parent process only in its PID and PPID. Please see your system's fork(2) man page for specific details as to how fork works on your system.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "On success, the PID of the child process is returned in the parent's thread of execution, and a 0 is returned in the child's thread of execution. On failure, a -1 will be returned in the parent's context, no child process will be created, and a PHP error is raised.",
     ),
     'taint_observer' => false,
@@ -204,7 +204,7 @@ DefineFunction(
     'desc'   => "The wait function suspends execution of the current process until a child has exited, or until a signal is delivered whose action is to terminate the current process or to call a signal handling function. If a child has already exited by the time of the call (a so-called \"zombie\" process), the function returns immediately. Any system resources used by the child are freed. Please see your system's wait(2) man page for specific details as to how wait works on your system.\n\nThis function is equivalent to calling pcntl_waitpid() with a -1 pid and no options.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "pcntl_wait() returns the process ID of the child which exited, -1 on error or zero if WNOHANG was provided as an option (on wait3-available systems) and no child was available.",
     ),
     'args'   => array(
@@ -229,7 +229,7 @@ DefineFunction(
     'desc'   => "Suspends execution of the current process until a child as specified by the pid argument has exited, or until a signal is delivered whose action is to terminate the current process or to call a signal handling function.\n\nIf a child as requested by pid has already exited by the time of the call (a so-called \"zombie\" process), the function returns immediately. Any system resources used by the child are freed. Please see your system's waitpid(2) man page for specific details as to how waitpid works on your system.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "pcntl_waitpid() returns the process ID of the child which exited, -1 on error or zero if WNOHANG was used and no child was available",
     ),
     'args'   => array(
@@ -259,7 +259,7 @@ DefineFunction(
     'desc'   => "Returns the return code of a terminated child. This function is only useful if pcntl_wifexited() returned TRUE.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the return code, as an integer.",
     ),
     'args'   => array(
@@ -335,7 +335,7 @@ DefineFunction(
     'desc'   => "Returns the number of the signal which caused the child to stop. This function is only useful if pcntl_wifstopped() returned TRUE.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the signal number.",
     ),
     'args'   => array(
@@ -354,7 +354,7 @@ DefineFunction(
     'desc'   => "Returns the number of the signal that caused the child process to terminate. This function is only useful if pcntl_wifsignaled() returned TRUE.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the signal number, as an integer.",
     ),
     'args'   => array(
@@ -557,7 +557,7 @@ DefineFunction(
     'desc'   => "proc_close() is similar to pclose() except that it only works on processes opened by proc_open(). proc_close() waits for the process to terminate, and returns its exit code. If you have open pipes to that process, you should fclose() them prior to calling this function in order to avoid a deadlock - the child process may not be able to exit while the pipes are open.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the termination status of the process that was run.",
     ),
     'args'   => array(

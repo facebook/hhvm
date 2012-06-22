@@ -158,7 +158,7 @@ inline bool x_import_request_variables(CStrRef types, CStrRef prefix = "") {
   return f_import_request_variables(types, prefix);
 }
 
-inline int x_extract(CArrRef var_array, int extract_type = k_EXTR_OVERWRITE, CStrRef prefix = "") {
+inline int64 x_extract(CArrRef var_array, int extract_type = k_EXTR_OVERWRITE, CStrRef prefix = "") {
   FUNCTION_INJECTION_BUILTIN(extract);
   return f_extract(var_array, extract_type, prefix);
 }

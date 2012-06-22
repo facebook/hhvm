@@ -177,10 +177,10 @@ TypedValue* fg_call_user_func(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -288,10 +288,10 @@ TypedValue* fg_call_user_func_async(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfObject;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -600,10 +600,10 @@ TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, long l
   }
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-5, false);
     for (long long i = 5; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-5);
+      TypedValue* extraArg = ea->getExtraArg(i-5);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-5, tvAsVariant(extraArg));
       } else {
@@ -626,10 +626,10 @@ TypedValue* fg_call_user_func_rpc(HPHP::VM::ActRec *ar) {
       if ((args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-5, false);
           for (long long i = 5; i < count; ++i) {
-            TypedValue* extraArg = ve->getExtraArg(i-5);
+            TypedValue* extraArg = ea->getExtraArg(i-5);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-5, tvAsVariant(extraArg));
             } else {
@@ -737,10 +737,10 @@ TypedValue* fg_forward_static_call(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -955,13 +955,13 @@ TypedValue* fg_func_get_args(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_func_num_args()
+long long HPHP::f_func_num_args()
 _ZN4HPHP15f_func_num_argsEv
 
 (return value) => rax
 */
 
-int fh_func_num_args() asm("_ZN4HPHP15f_func_num_argsEv");
+long long fh_func_num_args() asm("_ZN4HPHP15f_func_num_argsEv");
 
 TypedValue* fg_func_num_args(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -1011,10 +1011,10 @@ TypedValue* fg_register_postsend_function(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfNull;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -1063,10 +1063,10 @@ TypedValue* fg_register_shutdown_function(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfNull;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -1115,10 +1115,10 @@ TypedValue* fg_register_cleanup_function(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfNull;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -1167,10 +1167,10 @@ TypedValue* fg_register_tick_function(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfBoolean;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {

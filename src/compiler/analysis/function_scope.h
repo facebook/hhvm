@@ -296,6 +296,10 @@ public:
   void setNRVOFix(bool flag) { m_nrvoFix = flag; }
   bool getNRVOFix() const { return m_nrvoFix; }
 
+  /* Indicates if a function may need to use a VarEnv or varargs (aka
+   * extraArgs) at run time */
+  bool mayUseVV() const;
+
   /**
    * Whether this function matches the specified one with same number of
    * parameters and types and defaults, so to qualify for perfect virtuals.
@@ -414,7 +418,7 @@ public:
   void serialize(JSON::CodeError::OutputStream &out) const;
   void serialize(JSON::DocTarget::OutputStream &out) const;
 
-  bool inPseudoMain() {
+  bool inPseudoMain() const {
     return m_pseudoMain;
   }
 

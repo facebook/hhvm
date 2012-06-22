@@ -1447,6 +1447,10 @@ StaticStringProxy s_sys_sspdad42efb;
 #ifndef s_sys_ssdad42efb
 #define s_sys_ssdad42efb (*(StaticString *)(&s_sys_sspdad42efb))
 #endif
+StaticStringProxy s_sys_sspdb4d5e1b;
+#ifndef s_sys_ssdb4d5e1b
+#define s_sys_ssdb4d5e1b (*(StaticString *)(&s_sys_sspdb4d5e1b))
+#endif
 StaticStringProxy s_sys_sspdbe6c144;
 #ifndef s_sys_ssdbe6c144
 #define s_sys_ssdbe6c144 (*(StaticString *)(&s_sys_sspdbe6c144))
@@ -2299,6 +2303,10 @@ StaticStringProxy s_sys_ssp0fc37e03;
 #ifndef s_sys_ss0fc37e03
 #define s_sys_ss0fc37e03 (*(StaticString *)(&s_sys_ssp0fc37e03))
 #endif
+VariantProxy s_sys_svsp0fc37e03;
+#ifndef s_sys_svs0fc37e03
+#define s_sys_svs0fc37e03 (*(Variant*)(&s_sys_svsp0fc37e03))
+#endif
 StaticStringProxy s_sys_ssp0fe15fdf;
 #ifndef s_sys_ss0fe15fdf
 #define s_sys_ss0fe15fdf (*(StaticString *)(&s_sys_ssp0fe15fdf))
@@ -2414,6 +2422,14 @@ StaticStringProxy s_sys_ssp14eade34;
 StaticStringProxy s_sys_ssp1563b68d;
 #ifndef s_sys_ss1563b68d
 #define s_sys_ss1563b68d (*(StaticString *)(&s_sys_ssp1563b68d))
+#endif
+StaticStringProxy s_sys_ssp1573187a;
+#ifndef s_sys_ss1573187a
+#define s_sys_ss1573187a (*(StaticString *)(&s_sys_ssp1573187a))
+#endif
+VariantProxy s_sys_svsp1573187a;
+#ifndef s_sys_svs1573187a
+#define s_sys_svs1573187a (*(Variant*)(&s_sys_svsp1573187a))
 #endif
 StaticStringProxy s_sys_ssp1577acb0;
 #ifndef s_sys_ss1577acb0
@@ -2743,6 +2759,10 @@ StaticStringProxy s_sys_ssp2e7b6cab;
 #ifndef s_sys_ss2e7b6cab
 #define s_sys_ss2e7b6cab (*(StaticString *)(&s_sys_ssp2e7b6cab))
 #endif
+StaticStringProxy s_sys_ssp2ea2398f;
+#ifndef s_sys_ss2ea2398f
+#define s_sys_ss2ea2398f (*(StaticString *)(&s_sys_ssp2ea2398f))
+#endif
 StaticStringProxy s_sys_ssp2f23c4d1;
 #ifndef s_sys_ss2f23c4d1
 #define s_sys_ss2f23c4d1 (*(StaticString *)(&s_sys_ssp2f23c4d1))
@@ -3046,6 +3066,10 @@ StaticStringProxy s_sys_ssp428c3a20;
 StaticStringProxy s_sys_ssp42a11cef;
 #ifndef s_sys_ss42a11cef
 #define s_sys_ss42a11cef (*(StaticString *)(&s_sys_ssp42a11cef))
+#endif
+StaticStringProxy s_sys_ssp42b93220;
+#ifndef s_sys_ss42b93220
+#define s_sys_ss42b93220 (*(StaticString *)(&s_sys_ssp42b93220))
 #endif
 StaticStringProxy s_sys_ssp42fc2063;
 #ifndef s_sys_ss42fc2063
@@ -4356,6 +4380,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_sspda9a9e7f, (const char *)"FORM_C",
   (const char *)&s_sys_sspdad2f9f1, (const char *)"RES_END",
   (const char *)&s_sys_sspdad42efb, (const char *)"OPT_CONNECT_TIMEOUT",
+  (const char *)&s_sys_sspdb4d5e1b, (const char *)"getAttributesRecursive",
   (const char *)&s_sys_sspdbe6c144, (const char *)"processCmd",
   (const char *)&s_sys_sspdc06d1b5, (const char *)"real_val",
   (const char *)&s_sys_sspdc3cbddc, (const char *)"name",
@@ -4584,6 +4609,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp14b76c41, (const char *)"FORM_KC",
   (const char *)&s_sys_ssp14eade34, (const char *)"hasChildNodes",
   (const char *)&s_sys_ssp1563b68d, (const char *)"OPT_LIBKETAMA_COMPATIBLE",
+  (const char *)&s_sys_ssp1573187a, (const char *)"attributes_rec",
   (const char *)&s_sys_ssp1577acb0, (const char *)"W3C",
   (const char *)&s_sys_ssp15921d14, (const char *)"areConfusable",
   (const char *)&s_sys_ssp15a9d310, (const char *)"fgetcsv",
@@ -4661,6 +4687,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp2e707ef9, (const char *)"HAVE_IGBINARY",
   (const char *)&s_sys_ssp2e7b0ef6, (const char *)"IS_DEPRECATED",
   (const char *)&s_sys_ssp2e7b6cab, (const char *)"<",
+  (const char *)&s_sys_ssp2ea2398f, (const char *)"getAttributes",
   (const char *)&s_sys_ssp2f23c4d1, (const char *)"FETCH_LAZY",
   (const char *)&s_sys_ssp2f5d27fe, (const char *)"HASH_MURMUR",
   (const char *)&s_sys_ssp2f8e5140, (const char *)"setOption",
@@ -4736,6 +4763,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp425d0970, (const char *)"XML_DECLARATION",
   (const char *)&s_sys_ssp428c3a20, (const char *)"PRIMARY",
   (const char *)&s_sys_ssp42a11cef, (const char *)"setobject",
+  (const char *)&s_sys_ssp42b93220, (const char *)"getAttributeRecursive",
   (const char *)&s_sys_ssp42fc2063, (const char *)"startAttributens",
   (const char *)&s_sys_ssp435fda12, (const char *)"WHOLE_SCRIPT_CONFUSABLE",
   (const char *)&s_sys_ssp43d0dde2, (const char *)"isInstance",
@@ -4999,7 +5027,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp747206d2, (const char *)"\000*\000arr", (const char *)6LL,
   (const char *)&s_sys_ssp78cb1b27, (const char *)"\000SplObjectStorage\000storage", (const char *)25LL,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 941, 32);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 945, 32);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs8ce7db5b, (const char *)&s_sys_ss8ce7db5b,
   (const char *)&s_sys_svs90269404, (const char *)&s_sys_ss90269404,
@@ -5018,7 +5046,9 @@ static const char *svs_data0[] = {
   (const char *)&s_sys_svsfb10fd8c, (const char *)&s_sys_ssfb10fd8c,
   (const char *)&s_sys_svs00000000, (const char *)&s_sys_ss00000000,
   (const char *)&s_sys_svs0d42ecf6, (const char *)&s_sys_ss0d42ecf6,
+  (const char *)&s_sys_svs0fc37e03, (const char *)&s_sys_ss0fc37e03,
   (const char *)&s_sys_svs12c8a8a6, (const char *)&s_sys_ss12c8a8a6,
+  (const char *)&s_sys_svs1573187a, (const char *)&s_sys_ss1573187a,
   (const char *)&s_sys_svs2145036e, (const char *)&s_sys_ss2145036e,
   (const char *)&s_sys_svs22824d6b, (const char *)&s_sys_ss22824d6b,
   (const char *)&s_sys_svs570270cc, (const char *)&s_sys_ss570270cc,
@@ -5029,7 +5059,7 @@ static const char *svs_data0[] = {
   (const char *)&s_sys_svs77820fcc, (const char *)&s_sys_ss77820fcc,
   (const char *)&s_sys_svs7e5fc106, (const char *)&s_sys_ss7e5fc106,
 };
-static int ATTRIBUTE_UNUSED initLiteralVarStrings0 = StringUtil::InitLiteralVarStrings(svs_data0, 27);
+static int ATTRIBUTE_UNUSED initLiteralVarStrings0 = StringUtil::InitLiteralVarStrings(svs_data0, 29);
 void sys_init_literal_varstrings() {
 }
 

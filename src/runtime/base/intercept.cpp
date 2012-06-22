@@ -112,10 +112,10 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
     if (!tx64->interceptsEnabled()) {
       tx64->acquireWriteLease(true);
       if (!tx64->interceptsEnabled()) {
+        tx64->enableIntercepts();
         // redirect all existing generated prologues so that they first
         // call the intercept helper
         Eval::FileRepository::enableIntercepts();
-        tx64->enableIntercepts();
       }
       tx64->dropWriteLease();
     }

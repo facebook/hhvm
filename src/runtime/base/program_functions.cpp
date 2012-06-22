@@ -980,7 +980,7 @@ static int execute_program_impl(int argc, char **argv) {
     if (!Eval::FileRepository::findFile(fileName, &s)) return 0;
     Eval::Parser::Reset();
     Eval::FileRepository::FileInfo fileInfo;
-    if (!Eval::FileRepository::readFile(fileName, fileName, s, fileInfo)) {
+    if (!Eval::FileRepository::readFile(fileName, s, fileInfo)) {
       return 0;
     }
     Eval::PhpFile *f = Eval::FileRepository::parseFile(po.parse, fileInfo);

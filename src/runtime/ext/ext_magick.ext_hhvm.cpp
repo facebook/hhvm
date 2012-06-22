@@ -283,13 +283,13 @@ TypedValue* fg_magickgetversion(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetversionnumber()
+long long HPHP::f_magickgetversionnumber()
 _ZN4HPHP24f_magickgetversionnumberEv
 
 (return value) => rax
 */
 
-int fh_magickgetversionnumber() asm("_ZN4HPHP24f_magickgetversionnumberEv");
+long long fh_magickgetversionnumber() asm("_ZN4HPHP24f_magickgetversionnumberEv");
 
 TypedValue* fg_magickgetversionnumber(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -1918,14 +1918,14 @@ TypedValue* fg_wandgetexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_wandgetexceptiontype(HPHP::Object const&)
+long long HPHP::f_wandgetexceptiontype(HPHP::Object const&)
 _ZN4HPHP22f_wandgetexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 wnd => rdi
 */
 
-int fh_wandgetexceptiontype(Value* wnd) asm("_ZN4HPHP22f_wandgetexceptiontypeERKNS_6ObjectE");
+long long fh_wandgetexceptiontype(Value* wnd) asm("_ZN4HPHP22f_wandgetexceptiontypeERKNS_6ObjectE");
 
 TypedValue * fg1_wandgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_wandgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -2727,14 +2727,14 @@ TypedValue* fg_drawgetclippath(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetcliprule(HPHP::Object const&)
+long long HPHP::f_drawgetcliprule(HPHP::Object const&)
 _ZN4HPHP17f_drawgetclipruleERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetcliprule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetclipruleERKNS_6ObjectE");
+long long fh_drawgetcliprule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetclipruleERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -2780,14 +2780,14 @@ TypedValue* fg_drawgetcliprule(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetclipunits(HPHP::Object const&)
+long long HPHP::f_drawgetclipunits(HPHP::Object const&)
 _ZN4HPHP18f_drawgetclipunitsERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetclipunits(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetclipunitsERKNS_6ObjectE");
+long long fh_drawgetclipunits(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetclipunitsERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -2945,14 +2945,14 @@ TypedValue* fg_drawgetexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetexceptiontype(HPHP::Object const&)
+long long HPHP::f_drawgetexceptiontype(HPHP::Object const&)
 _ZN4HPHP22f_drawgetexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetexceptiontype(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetexceptiontypeERKNS_6ObjectE");
+long long fh_drawgetexceptiontype(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetexceptiontypeERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -3160,14 +3160,14 @@ TypedValue* fg_drawgetfillopacity(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetfillrule(HPHP::Object const&)
+long long HPHP::f_drawgetfillrule(HPHP::Object const&)
 _ZN4HPHP17f_drawgetfillruleERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetfillrule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetfillruleERKNS_6ObjectE");
+long long fh_drawgetfillrule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetfillruleERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -3378,14 +3378,14 @@ TypedValue* fg_drawgetfontsize(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetfontstretch(HPHP::Object const&)
+long long HPHP::f_drawgetfontstretch(HPHP::Object const&)
 _ZN4HPHP20f_drawgetfontstretchERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetfontstretch(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetfontstretchERKNS_6ObjectE");
+long long fh_drawgetfontstretch(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetfontstretchERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -3431,14 +3431,14 @@ TypedValue* fg_drawgetfontstretch(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetfontstyle(HPHP::Object const&)
+long long HPHP::f_drawgetfontstyle(HPHP::Object const&)
 _ZN4HPHP18f_drawgetfontstyleERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetfontstyle(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetfontstyleERKNS_6ObjectE");
+long long fh_drawgetfontstyle(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetfontstyleERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -3537,14 +3537,14 @@ TypedValue* fg_drawgetfontweight(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetgravity(HPHP::Object const&)
+long long HPHP::f_drawgetgravity(HPHP::Object const&)
 _ZN4HPHP16f_drawgetgravityERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetgravity(Value* drw_wnd) asm("_ZN4HPHP16f_drawgetgravityERKNS_6ObjectE");
+long long fh_drawgetgravity(Value* drw_wnd) asm("_ZN4HPHP16f_drawgetgravityERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -3861,14 +3861,14 @@ TypedValue* fg_drawgetstrokedashoffset(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetstrokelinecap(HPHP::Object const&)
+long long HPHP::f_drawgetstrokelinecap(HPHP::Object const&)
 _ZN4HPHP22f_drawgetstrokelinecapERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetstrokelinecap(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetstrokelinecapERKNS_6ObjectE");
+long long fh_drawgetstrokelinecap(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetstrokelinecapERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -3914,14 +3914,14 @@ TypedValue* fg_drawgetstrokelinecap(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgetstrokelinejoin(HPHP::Object const&)
+long long HPHP::f_drawgetstrokelinejoin(HPHP::Object const&)
 _ZN4HPHP23f_drawgetstrokelinejoinERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgetstrokelinejoin(Value* drw_wnd) asm("_ZN4HPHP23f_drawgetstrokelinejoinERKNS_6ObjectE");
+long long fh_drawgetstrokelinejoin(Value* drw_wnd) asm("_ZN4HPHP23f_drawgetstrokelinejoinERKNS_6ObjectE");
 
 TypedValue * fg1_drawgetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -4126,14 +4126,14 @@ TypedValue* fg_drawgetstrokewidth(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgettextalignment(HPHP::Object const&)
+long long HPHP::f_drawgettextalignment(HPHP::Object const&)
 _ZN4HPHP22f_drawgettextalignmentERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgettextalignment(Value* drw_wnd) asm("_ZN4HPHP22f_drawgettextalignmentERKNS_6ObjectE");
+long long fh_drawgettextalignment(Value* drw_wnd) asm("_ZN4HPHP22f_drawgettextalignmentERKNS_6ObjectE");
 
 TypedValue * fg1_drawgettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -4232,14 +4232,14 @@ TypedValue* fg_drawgettextantialias(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_drawgettextdecoration(HPHP::Object const&)
+long long HPHP::f_drawgettextdecoration(HPHP::Object const&)
 _ZN4HPHP23f_drawgettextdecorationERKNS_6ObjectE
 
 (return value) => rax
 drw_wnd => rdi
 */
 
-int fh_drawgettextdecoration(Value* drw_wnd) asm("_ZN4HPHP23f_drawgettextdecorationERKNS_6ObjectE");
+long long fh_drawgettextdecoration(Value* drw_wnd) asm("_ZN4HPHP23f_drawgettextdecorationERKNS_6ObjectE");
 
 TypedValue * fg1_drawgettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -12170,14 +12170,14 @@ TypedValue* fg_magickgetexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetexceptiontype(HPHP::Object const&)
+long long HPHP::f_magickgetexceptiontype(HPHP::Object const&)
 _ZN4HPHP24f_magickgetexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetexceptiontype(Value* mgck_wnd) asm("_ZN4HPHP24f_magickgetexceptiontypeERKNS_6ObjectE");
+long long fh_magickgetexceptiontype(Value* mgck_wnd) asm("_ZN4HPHP24f_magickgetexceptiontypeERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -12792,14 +12792,14 @@ TypedValue* fg_magickgetimagecolors(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimagecolorspace(HPHP::Object const&)
+long long HPHP::f_magickgetimagecolorspace(HPHP::Object const&)
 _ZN4HPHP26f_magickgetimagecolorspaceERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimagecolorspace(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimagecolorspaceERKNS_6ObjectE");
+long long fh_magickgetimagecolorspace(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimagecolorspaceERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -12845,14 +12845,14 @@ TypedValue* fg_magickgetimagecolorspace(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimagecompose(HPHP::Object const&)
+long long HPHP::f_magickgetimagecompose(HPHP::Object const&)
 _ZN4HPHP23f_magickgetimagecomposeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimagecompose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagecomposeERKNS_6ObjectE");
+long long fh_magickgetimagecompose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagecomposeERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -12898,14 +12898,14 @@ TypedValue* fg_magickgetimagecompose(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimagecompression(HPHP::Object const&)
+long long HPHP::f_magickgetimagecompression(HPHP::Object const&)
 _ZN4HPHP27f_magickgetimagecompressionERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimagecompression(Value* mgck_wnd) asm("_ZN4HPHP27f_magickgetimagecompressionERKNS_6ObjectE");
+long long fh_magickgetimagecompression(Value* mgck_wnd) asm("_ZN4HPHP27f_magickgetimagecompressionERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -13121,14 +13121,14 @@ TypedValue* fg_magickgetimagedepth(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimagedispose(HPHP::Object const&)
+long long HPHP::f_magickgetimagedispose(HPHP::Object const&)
 _ZN4HPHP23f_magickgetimagedisposeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimagedispose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagedisposeERKNS_6ObjectE");
+long long fh_magickgetimagedispose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagedisposeERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -13571,14 +13571,14 @@ TypedValue* fg_magickgetimagehistogram(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimageindex(HPHP::Object const&)
+long long HPHP::f_magickgetimageindex(HPHP::Object const&)
 _ZN4HPHP21f_magickgetimageindexERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimageindex(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageindexERKNS_6ObjectE");
+long long fh_magickgetimageindex(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageindexERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -13624,14 +13624,14 @@ TypedValue* fg_magickgetimageindex(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimageinterlacescheme(HPHP::Object const&)
+long long HPHP::f_magickgetimageinterlacescheme(HPHP::Object const&)
 _ZN4HPHP31f_magickgetimageinterlaceschemeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimageinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimageinterlaceschemeERKNS_6ObjectE");
+long long fh_magickgetimageinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimageinterlaceschemeERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14042,14 +14042,14 @@ TypedValue* fg_magickgetimageredprimary(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimagerenderingintent(HPHP::Object const&)
+long long HPHP::f_magickgetimagerenderingintent(HPHP::Object const&)
 _ZN4HPHP31f_magickgetimagerenderingintentERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimagerenderingintent(Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimagerenderingintentERKNS_6ObjectE");
+long long fh_magickgetimagerenderingintent(Value* mgck_wnd) asm("_ZN4HPHP31f_magickgetimagerenderingintentERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14260,14 +14260,14 @@ TypedValue* fg_magickgetimagesignature(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimagesize(HPHP::Object const&)
+long long HPHP::f_magickgetimagesize(HPHP::Object const&)
 _ZN4HPHP20f_magickgetimagesizeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimagesize(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagesizeERKNS_6ObjectE");
+long long fh_magickgetimagesize(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagesizeERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14313,14 +14313,14 @@ TypedValue* fg_magickgetimagesize(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimagetype(HPHP::Object const&)
+long long HPHP::f_magickgetimagetype(HPHP::Object const&)
 _ZN4HPHP20f_magickgetimagetypeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimagetype(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagetypeERKNS_6ObjectE");
+long long fh_magickgetimagetype(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagetypeERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14366,14 +14366,14 @@ TypedValue* fg_magickgetimagetype(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimageunits(HPHP::Object const&)
+long long HPHP::f_magickgetimageunits(HPHP::Object const&)
 _ZN4HPHP21f_magickgetimageunitsERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimageunits(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageunitsERKNS_6ObjectE");
+long long fh_magickgetimageunits(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageunitsERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14419,14 +14419,14 @@ TypedValue* fg_magickgetimageunits(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetimagevirtualpixelmethod(HPHP::Object const&)
+long long HPHP::f_magickgetimagevirtualpixelmethod(HPHP::Object const&)
 _ZN4HPHP34f_magickgetimagevirtualpixelmethodERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetimagevirtualpixelmethod(Value* mgck_wnd) asm("_ZN4HPHP34f_magickgetimagevirtualpixelmethodERKNS_6ObjectE");
+long long fh_magickgetimagevirtualpixelmethod(Value* mgck_wnd) asm("_ZN4HPHP34f_magickgetimagevirtualpixelmethodERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14637,14 +14637,14 @@ TypedValue* fg_magickgetimagesblob(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_magickgetinterlacescheme(HPHP::Object const&)
+long long HPHP::f_magickgetinterlacescheme(HPHP::Object const&)
 _ZN4HPHP26f_magickgetinterlaceschemeERKNS_6ObjectE
 
 (return value) => rax
 mgck_wnd => rdi
 */
 
-int fh_magickgetinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetinterlaceschemeERKNS_6ObjectE");
+long long fh_magickgetinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetinterlaceschemeERKNS_6ObjectE");
 
 TypedValue * fg1_magickgetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -23006,14 +23006,14 @@ TypedValue* fg_pixelgetexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_pixelgetexceptiontype(HPHP::Object const&)
+long long HPHP::f_pixelgetexceptiontype(HPHP::Object const&)
 _ZN4HPHP23f_pixelgetexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 pxl_wnd => rdi
 */
 
-int fh_pixelgetexceptiontype(Value* pxl_wnd) asm("_ZN4HPHP23f_pixelgetexceptiontypeERKNS_6ObjectE");
+long long fh_pixelgetexceptiontype(Value* pxl_wnd) asm("_ZN4HPHP23f_pixelgetexceptiontypeERKNS_6ObjectE");
 
 TypedValue * fg1_pixelgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -25147,14 +25147,14 @@ TypedValue* fg_pixelgetiteratorexceptionstring(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_pixelgetiteratorexceptiontype(HPHP::Object const&)
+long long HPHP::f_pixelgetiteratorexceptiontype(HPHP::Object const&)
 _ZN4HPHP31f_pixelgetiteratorexceptiontypeERKNS_6ObjectE
 
 (return value) => rax
 pxl_iter => rdi
 */
 
-int fh_pixelgetiteratorexceptiontype(Value* pxl_iter) asm("_ZN4HPHP31f_pixelgetiteratorexceptiontypeERKNS_6ObjectE");
+long long fh_pixelgetiteratorexceptiontype(Value* pxl_iter) asm("_ZN4HPHP31f_pixelgetiteratorexceptiontypeERKNS_6ObjectE");
 
 TypedValue * fg1_pixelgetiteratorexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetiteratorexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

@@ -52,7 +52,7 @@ class c_ArrayIterator : public ExtObjectData {
   public: c_ArrayIterator *create(CVarRef v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: void t_append(CVarRef v_value);
   public: bool t_asort();
-  public: int t_count();
+  public: int64 t_count();
   public: Variant t_current();
   public: Variant t_getarraycopy();
   public: Variant t_getflags();

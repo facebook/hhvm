@@ -316,7 +316,7 @@ bool c_DebuggerClientCmdUser::t_arg(int index, CStrRef str) {
   return m_client->arg(index + 1, str.data());
 }
 
-int c_DebuggerClientCmdUser::t_argcount() {
+int64 c_DebuggerClientCmdUser::t_argcount() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::argcount);
   return m_client->argCount() - 1;
 }
@@ -375,7 +375,7 @@ Variant c_DebuggerClientCmdUser::t_getstacktrace() {
   return m_client->getStackTrace();
 }
 
-int c_DebuggerClientCmdUser::t_getframe() {
+int64 c_DebuggerClientCmdUser::t_getframe() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::getframe);
   return m_client->getFrame();
 }

@@ -1,0 +1,116 @@
+#
+# Try making some traits
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  UnboxR
+  RetC
+}
+
+.class [trait] Frobbable {
+  .default_ctor;
+
+  .method [public] frob() {
+    String "Frobbed\n"
+    Print
+    RetC
+  }
+}
+
+.class UseFrob {
+  .use Frobbable;
+  .default_ctor;
+}
+
+.class AliasFrob {
+  .use Frobbable { frob as heh; }
+  .default_ctor;
+}
+
+.class [trait] PrivateFoo {
+  .default_ctor;
+  .method [private] foo() {
+    String "PrivateFoo::foo()\n"
+    Print
+    RetC
+  }
+}
+
+.class Publicize {
+  .use PrivateFoo { foo as [public]; }
+  .default_ctor;
+}
+
+.class [trait] Conflicting {
+  .default_ctor;
+
+  .method [public] frob() {
+    String "Conflicting::Frobbed\n"
+    Print
+    RetC
+  }
+}
+
+.class Resolution {
+  .default_ctor;
+  .use Conflicting Frobbable {
+    Conflicting::frob insteadof Frobbable;
+    Frobbable::frob as yo;
+  }
+}
+
+.function main() {
+  FPushCtorD 0 "UseFrob"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  CGetL $obj
+  FPushObjMethodD 0 "frob"
+  FCall 0
+  PopR
+
+  FPushCtorD 0 "AliasFrob"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  CGetL $obj
+  FPushObjMethodD 0 "heh"
+  FCall 0
+  PopR
+
+  FPushCtorD 0 "Publicize"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  CGetL $obj
+  FPushObjMethodD 0 "foo"
+  FCall 0
+  PopR
+
+  FPushCtorD 0 "Resolution"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  CGetL $obj
+  FPushObjMethodD 0 "frob"
+  FCall 0
+  PopR
+
+  CGetL $obj
+  FPushObjMethodD 0 "yo"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}

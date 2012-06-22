@@ -848,6 +848,14 @@ static void only_in_strict_mode(Parser *_p) {
   }
 }
 
+static void sm_array_wrapper(Parser *_p, Token &out, Token &pairs,
+                             const char *wrapper) {
+  Token arr;     _p->onArray(arr, pairs, T_ARRAY);
+  Token params;  _p->onCallParam(params,NULL,arr,0);
+  Token name;    name.set(T_STRING, wrapper);
+  _p->onCall(out, 0, name, params, NULL);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
@@ -975,6 +983,9 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_INSTEADOF
 %token T_TRAIT_C
 
+%token T_VARARG
+%token T_STRICT_INT_MAP
+%token T_STRICT_STR_MAP
 %token T_STRICT_ERROR
 
 %%
@@ -1368,9 +1379,13 @@ new_else_single:
 ;
 
 parameter_list:
-    non_empty_parameter_list           { $$ = $1;}
+    non_empty_parameter_list ',' T_VARARG
+                                       { only_in_strict_mode(_p); $$ = $1; }
+  | non_empty_parameter_list           { $$ = $1;}
+  | T_VARARG                           { only_in_strict_mode(_p); $$.reset(); }
   |                                    { $$.reset();}
 ;
+
 non_empty_parameter_list:
     sm_type_opt T_VARIABLE      { _p->onParam($$,NULL,$1,$2,0,NULL);}
   | sm_type_opt '&' T_VARIABLE  { _p->onParam($$,NULL,$1,$3,1,NULL);}
@@ -1736,7 +1751,11 @@ expr_without_variable:
   | '@' expr                           { UEXP($$,$2,'@',1);}
   | scalar                             { $$ = $1;}
   | T_ARRAY  '(' array_pair_list ')'   { _p->onArray($$,$3,T_ARRAY);}
-  | '[' array_pair_list ']'            { _p->onArray($$,$2,T_ARRAY);}
+  | T_STRICT_INT_MAP '(' array_pair_list ')' { sm_array_wrapper(_p, $$, $3, "__sm_intmap"); }
+  | T_STRICT_STR_MAP '(' array_pair_list ')' { sm_array_wrapper(_p, $$, $3, "__sm_strmap"); }
+  | '[' array_pair_list ']'            { _p->scanner().isStrictMode()
+                                           ? sm_array_wrapper(_p, $$, $2, "__sm_vector")
+                                           : _p->onArray($$,$2,T_ARRAY); }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | type_decl function_loc
@@ -1907,6 +1926,7 @@ xhp_bareword:
   | T_NS_C                             { $$ = $1;}
   | T_TRAIT                            { $$ = $1;}
   | T_TRAIT_C                          { $$ = $1;}
+  | T_VARARG                           { $$ = $1;}
 ;
 
 function_call:
@@ -2338,7 +2358,8 @@ sm_type:
                                          /* if the type annotation is a bound
                                             typevar we have to strip it */
                                          if (_p->scanner().isStrictMode() &&
-                                             _p->isTypeVar($$.text())) {
+                                             (_p->isTypeVar($$.text()) ||
+                                              !$$.text().compare("mixed"))) {
                                            $$.reset();
                                          }
                                        }

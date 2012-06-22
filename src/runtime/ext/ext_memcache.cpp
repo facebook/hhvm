@@ -405,7 +405,7 @@ bool c_Memcache::t_setoptimeout(int64 timeoutms) {
   return true;
 }
 
-int c_Memcache::t_getserverstatus(CStrRef host, int port /* = 0 */) {
+int64 c_Memcache::t_getserverstatus(CStrRef host, int port /* = 0 */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::getserverstatus);
   /* intentionally doing nothing for now */
   return 1;
@@ -652,7 +652,7 @@ bool f_memcache_setoptimeout(CObjRef memcache, int timeoutms) {
   return memcache_obj->t_setoptimeout(timeoutms);
 }
 
-int f_memcache_get_server_status(CObjRef memcache, CStrRef host,
+int64 f_memcache_get_server_status(CObjRef memcache, CStrRef host,
                                  int port /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_getserverstatus(host, port);

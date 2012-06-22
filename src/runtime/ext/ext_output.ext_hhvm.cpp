@@ -339,6 +339,96 @@ TypedValue* fg_hphp_get_hardware_counters(HPHP::VM::ActRec *ar) {
 
 
 
+/*
+bool HPHP::f_hphp_set_hardware_events(HPHP::String const&)
+_ZN4HPHP26f_hphp_set_hardware_eventsERKNS_6StringE
+
+(return value) => rax
+events => rdi
+*/
+
+bool fh_hphp_set_hardware_events(Value* events) asm("_ZN4HPHP26f_hphp_set_hardware_eventsERKNS_6StringE");
+
+TypedValue * fg1_hphp_set_hardware_events(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_set_hardware_events(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfBoolean;
+  tvCastToStringInPlace(args-0);
+  String defVal0 = null;
+  rv->m_data.num = (fh_hphp_set_hardware_events((count > 0) ? (Value*)(args-0) : (Value*)(&defVal0))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_hphp_set_hardware_events(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        String defVal0 = null;
+        rv.m_data.num = (fh_hphp_set_hardware_events((count > 0) ? (Value*)(args-0) : (Value*)(&defVal0))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_hphp_set_hardware_events(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_toomany_arguments_nr("hphp_set_hardware_events", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
+/*
+void HPHP::f_hphp_clear_hardware_events()
+_ZN4HPHP28f_hphp_clear_hardware_eventsEv
+
+*/
+
+void fh_hphp_clear_hardware_events() asm("_ZN4HPHP28f_hphp_clear_hardware_eventsEv");
+
+TypedValue* fg_hphp_clear_hardware_events(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv.m_data.num = 0LL;
+      rv._count = 0;
+      rv.m_type = KindOfNull;
+      fh_hphp_clear_hardware_events();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("hphp_clear_hardware_events", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
 
 } // !HPHP
 

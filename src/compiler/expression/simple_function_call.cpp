@@ -104,7 +104,7 @@ SimpleFunctionCall::SimpleFunctionCall
     m_dynamicInvoke(false), m_transformed(false), m_no_volatile_check(false),
     m_safe(0), m_extra(NULL) {
 
-  if (Option::ParseTimeOpts && !m_class && m_className.empty()) {
+  if (!m_class && m_className.empty()) {
     m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
       Option::DynamicInvokeFunctions.end();
     std::map<string, int>::const_iterator iter =
@@ -133,7 +133,8 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   ConstructPtr self = shared_from_this();
   switch (m_type) {
     case DefineFunction:
-      if (m_params && unsigned(m_params->getCount() - 2) <= 1u) {
+      if (Option::ParseTimeOpts && m_params &&
+          unsigned(m_params->getCount() - 2) <= 1u) {
         // need to register the constant before AnalyzeAll, so that
         // DefinedFunction can mark this volatile
         ExpressionPtr ename = (*m_params)[0];
@@ -166,7 +167,8 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
       }
       break;
     case CreateFunction:
-      if (m_params->getCount() == 2 &&
+      if (Option::ParseTimeOpts &&
+          m_params->getCount() == 2 &&
           (*m_params)[0]->isLiteralString() &&
           (*m_params)[1]->isLiteralString()) {
         string params = (*m_params)[0]->getLiteralString();
@@ -315,7 +317,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     }
 
     if (!m_class && !m_className.empty()) {
-      if (Option::DynamicInvokeFunctions.find(m_className + "::" + m_name) !=
+      if (Option::DynamicInvokeFunctions.find(
+            Util::toLower(m_className + "::" + m_name)) !=
           Option::DynamicInvokeFunctions.end()) {
         setNoInline();
       }
@@ -1069,15 +1072,8 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       func = ar->findFunction(m_name);
     }
   } else {
-    ClassScopePtr cls = resolveClass();
-    if (cls && !isPresent()) {
-      getScope()->getVariables()
-        ->setAttribute(VariableTable::NeedGlobalPointer);
-    }
+    ClassScopePtr cls = resolveClassWithChecks();
     if (!cls) {
-      if (!m_class && !isRedeclared() && getScope()->isFirstPass()) {
-        Compiler::Error(Compiler::UnknownClass, self);
-      }
       if (m_params) {
         m_params->inferAndCheck(ar, Type::Some, false);
         m_params->markParams(canInvokeFewArgs());

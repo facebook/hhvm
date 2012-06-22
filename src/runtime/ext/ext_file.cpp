@@ -1020,7 +1020,7 @@ bool f_rename(CStrRef oldname, CStrRef newname,
   return (ret == 0);
 }
 
-int f_umask(CVarRef mask /* = null_variant */) {
+int64 f_umask(CVarRef mask /* = null_variant */) {
   int oldumask = umask(077);
   if (mask.isNull()) {
     umask(oldumask);

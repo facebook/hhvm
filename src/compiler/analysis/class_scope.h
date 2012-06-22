@@ -585,6 +585,7 @@ private:
   typedef std::map<std::string, TraitMethodList> MethodToTraitListMap;
   typedef std::map<std::string, std::string> GeneratorRenameMap;
   MethodToTraitListMap m_importMethToTraitMap;
+  typedef std::map<std::string, MethodStatementPtr> ImportedMethodMap;
 
   mutable int m_attribute;
   int m_redeclaring; // multiple definition of the same class
@@ -618,12 +619,14 @@ private:
   MethodStatementPtr importTraitMethod(const TraitMethod&  traitMethod,
                                        AnalysisResultPtr   ar,
                                        std::string         methName,
-                                       GeneratorRenameMap& genRenameMap);
+                                       GeneratorRenameMap& genRenameMap,
+                                       const ImportedMethodMap &
+                                       importedTraitMethods);
 
   void importTraitProperties(AnalysisResultPtr ar);
 
   void relinkGeneratorMethods(AnalysisResultPtr ar,
-                        const std::list<MethodStatementPtr>& importedMethods);
+                              ImportedMethodMap& importedMethods);
 
   void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
 
@@ -651,7 +654,7 @@ private:
                                          GeneratorRenameMap& genRenameMap);
 
   void renameCreateContinuationCalls(AnalysisResultPtr ar, ConstructPtr c,
-                                     GeneratorRenameMap& genRenameMap);
+                                     ImportedMethodMap &importedMethods);
 
   std::string getBaseHeaderFilename();
 

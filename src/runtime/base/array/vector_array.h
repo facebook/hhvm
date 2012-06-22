@@ -30,8 +30,7 @@ public:
   friend class ArrayData;
 
   static const uint FixedSize = 8;
-  static VectorArray *MakeVectorArray(ArrayData *src) ATTRIBUTE_COLD;
-  
+
   VectorArray(uint size = 0);
   VectorArray(const VectorArray *src, uint start = 0, uint size = 0);
   VectorArray(const VectorArray *src, bool sma) ATTRIBUTE_COLD;

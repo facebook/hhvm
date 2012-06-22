@@ -29,7 +29,6 @@ String f_gettype(CVarRef v) {
   case KindOfUninit:
   case KindOfNull:    return "NULL";
   case KindOfBoolean: return "boolean";
-  case KindOfInt32:
   case KindOfInt64:   return "integer";
   case KindOfDouble:  return "double";
   case KindOfStaticString:
@@ -161,8 +160,8 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
                               "this function is called.");
 }
 
-int f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
-              CStrRef prefix /* = "" */) {
+int64 f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
+                CStrRef prefix /* = "" */) {
   if (hhvm) {
     bool reference = extract_type & EXTR_REFS;
     extract_type &= ~EXTR_REFS;

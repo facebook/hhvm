@@ -101,7 +101,7 @@ DefineFunction(
     'desc'   => "Loads the PHP extension given by the parameter library.\n\nUse extension_loaded() to test whether a given extension is already available or not. This works on both built-in extensions and dynamically loaded ones (either through php.ini or dl()). Warning This function has been removed from some SAPI's in PHP 5.3.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns TRUE on success or FALSE on failure. If the functionality of loading modules is not available or has been disabled (either by setting enable_dl off or by enabling safe mode in php.ini) an E_ERROR is emitted and execution is stopped. If dl() fails because the specified library couldn't be loaded, in addition to FALSE an E_WARNING message is emitted.",
     ),
     'args'   => array(
@@ -292,7 +292,7 @@ DefineFunction(
     'desc'   => "Returns the current configuration setting of magic_quotes_gpc\n\nKeep in mind that attempting to set magic_quotes_gpc at runtime will not work.\n\nFor more information about magic_quotes, see this security section.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns 0 if magic_quotes_gpc is off, 1 otherwise.",
     ),
     'taint_observer' => false,
@@ -303,7 +303,7 @@ DefineFunction(
     'name'   => "get_magic_quotes_runtime",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns 0 if magic_quotes_runtime is off, 1 otherwise.",
     ),
     'taint_observer' => false,
@@ -344,7 +344,7 @@ DefineFunction(
     'desc'   => "Gets the time of the last modification of the current page.\n\nIf you're interested in getting the last modification time of a different file, consider using filemtime().",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the time of the last modification of the current page. The value returned is a Unix timestamp, suitable for feeding to date(). Returns FALSE on error.",
     ),
     'taint_observer' => false,
@@ -355,7 +355,7 @@ DefineFunction(
     'name'   => "getmygid",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the group ID of the current script, or FALSE on error.",
     ),
     'taint_observer' => false,
@@ -367,7 +367,7 @@ DefineFunction(
     'desc'   => "Gets the inode of the current script.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the current script's inode as an integer, or FALSE on error.",
     ),
     'taint_observer' => false,
@@ -379,7 +379,7 @@ DefineFunction(
     'desc'   => "Gets the current PHP process ID.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the current PHP process ID, or FALSE on error.",
     ),
     'taint_observer' => false,
@@ -390,7 +390,7 @@ DefineFunction(
     'name'   => "getmyuid",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the user ID of the current script, or FALSE on error.",
     ),
     'taint_observer' => false,
@@ -534,7 +534,7 @@ DefineFunction(
     'desc'   => "Gets number of processors.",
     'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Number of CPUs.",
     ),
     'taint_observer' => false,
@@ -938,7 +938,7 @@ DefineFunction(
     'desc'   => "This function returns a unique identifier for the current thread.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the thread id as an integer.",
     ),
     'taint_observer' => false,

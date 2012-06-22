@@ -132,8 +132,8 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
   }
 
   // FileScope's flags are from parser, but VariableTable has more flags
-  // coming from type inference phase. So we are tranferring these two
-  // flags just for better modularization between FileScope and VariableTable.
+  // coming from type inference phase. So we are tranferring these flags
+  // just for better modularization between FileScope and VariableTable.
   if (m_attribute & FileScope::ContainsDynamicVariable) {
     m_variables->setAttribute(VariableTable::ContainsDynamicVariable);
   }
@@ -441,6 +441,18 @@ void FunctionScope::addCaller(BlockScopePtr caller,
 
 void FunctionScope::addNewObjCaller(BlockScopePtr caller) {
   addUse(caller, UseKindCaller & ~UseKindCallerReturn);
+}
+  
+bool FunctionScope::mayUseVV() const { 
+  VariableTableConstPtr variables = getVariables();
+  return (inPseudoMain() ||
+          isVariableArgument() ||
+          isGenerator() ||
+          variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
+          variables->getAttribute(VariableTable::ContainsExtract) ||
+          variables->getAttribute(VariableTable::ContainsCompact) ||
+          variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
+          variables->getAttribute(VariableTable::ContainsDynamicFunctionCall));
 }
 
 bool FunctionScope::matchParams(FunctionScopePtr func) {
@@ -1975,6 +1987,21 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("NULL,\n");
 
   m_variables->outputCPPStaticVariables(cg, ar);
+
+  // user attributes
+  UserAttributeMap::const_iterator it = m_userAttributes.begin();
+  for (; it != m_userAttributes.end(); ++it) {
+    ExpressionPtr expr = it->second;
+    Variant v;
+    bool isScalar UNUSED = expr->getScalarValue(v);
+    ASSERT(isScalar);
+    int valueLen = 0;
+    string valueText = SymbolTable::getEscapedText(v, valueLen);
+    cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
+              CodeGenerator::EscapeLabel(it->first).c_str(),
+              valueLen, valueText.c_str());
+  }
+  cg_printf("NULL,\n");
 }
 
 void FunctionScope::outputCPPHelperClassAlloc(CodeGenerator &cg,

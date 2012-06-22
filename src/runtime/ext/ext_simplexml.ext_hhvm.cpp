@@ -450,9 +450,6 @@ public:
     c_SimpleXMLElement_Instance *this_ = (c_SimpleXMLElement_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_SimpleXMLElement) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1714,9 +1711,6 @@ public:
     c_LibXMLError_Instance *this_ = (c_LibXMLError_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_LibXMLError) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1866,9 +1860,6 @@ public:
     c_SimpleXMLElementIterator_Instance *this_ = (c_SimpleXMLElementIterator_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_SimpleXMLElementIterator) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);

@@ -228,14 +228,14 @@ TypedValue* fg_bzerror(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_bzerrno(HPHP::Object const&)
+long long HPHP::f_bzerrno(HPHP::Object const&)
 _ZN4HPHP9f_bzerrnoERKNS_6ObjectE
 
 (return value) => rax
 bz => rdi
 */
 
-int fh_bzerrno(Value* bz) asm("_ZN4HPHP9f_bzerrnoERKNS_6ObjectE");
+long long fh_bzerrno(Value* bz) asm("_ZN4HPHP9f_bzerrnoERKNS_6ObjectE");
 
 TypedValue * fg1_bzerrno(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_bzerrno(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

@@ -117,7 +117,6 @@ static int fb_serialized_size(CVarRef thing, int depth, int *bytes) {
   case KindOfUninit:
   case KindOfNull:      *bytes = 1; break;     /* type */
   case KindOfBoolean:   *bytes = 2; break;    /* type + sizeof(char) */
-  case KindOfInt32:
   case KindOfInt64:     *bytes = 1 + INT_SIZE(thing.toInt64()); break;
   case KindOfDouble:    *bytes = 9; break;     /* type + sizeof(double) */
   case KindOfStaticString:
@@ -208,7 +207,6 @@ static bool fb_serialize_into_buffer(CVarRef thing, char *buff, int *pos) {
     buff[(*pos)++] = T_BOOLEAN;
     buff[(*pos)++] = (int8_t)thing.toInt64();
     break;
-  case KindOfInt32:
   case KindOfInt64:
     fb_serialize_long_into_buffer(thing.toInt64(), buff, pos);
     break;
@@ -497,11 +495,21 @@ void f_fb_load_local_databases(CArrRef servers) {
     int dbId = iter.first().toInt32();
     Array data = iter.second().toArray();
     if (!data.empty()) {
+      std::vector< std::pair<string, string> > sessionVariables;
+      if (data.exists("session_variable")) {
+        Array sv = data["session_variable"].toArray();
+        for (ArrayIter svIter(sv); svIter; ++svIter) {
+          sessionVariables.push_back(std::pair<string, string>(
+            svIter.first().toString().data(),
+            svIter.second().toString().data()));
+        }
+      }
       DBConn::AddLocalDB(dbId, data["ip"].toString().data(),
                          data["db"].toString().data(),
                          data["port"].toInt32(),
                          data["username"].toString().data(),
-                         data["password"].toString().data());
+                         data["password"].toString().data(),
+                         sessionVariables);
     }
   }
 }
@@ -521,12 +529,22 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
   for (ArrayIter iter(sql_map); iter; ++iter) {
     Array data = iter.second().toArray();
     if (!data.empty()) {
+      std::vector< std::pair<string, string> > sessionVariables;
+      if (data.exists("session_variable")) {
+        Array sv = data["session_variable"].toArray();
+        for (ArrayIter svIter(sv); svIter; ++svIter) {
+          sessionVariables.push_back(std::pair<string, string>(
+            svIter.first().toString().data(),
+            svIter.second().toString().data()));
+        }
+      }
       ServerDataPtr server
         (new ServerData(data["ip"].toString().data(),
                         data["db"].toString().data(),
                         data["port"].toInt32(),
                         data["username"].toString().data(),
-                        data["password"].toString().data()));
+                        data["password"].toString().data(),
+                        sessionVariables));
       queries.push_back(ServerQuery(server, data["sql"].toString().data()));
     } else {
       // so we can report errors according to array index
@@ -713,11 +731,11 @@ static int f_fb_utf8_strlen_impl(CStrRef input, bool deprecated) {
   return num_code_points;
 }
 
-int f_fb_utf8_strlen(CStrRef input) {
+int64 f_fb_utf8_strlen(CStrRef input) {
   return f_fb_utf8_strlen_impl(input, /* deprecated */ false);
 }
 
-int f_fb_utf8_strlen_deprecated(CStrRef input) {
+int64 f_fb_utf8_strlen_deprecated(CStrRef input) {
   return f_fb_utf8_strlen_impl(input, /* deprecated */ true);
 }
 
@@ -733,19 +751,29 @@ static Variant f_fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
 
   ASSERT(firstCodePoint >= 0);  // Wrapper fixes up negative starting positions.
   ASSERT(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
-  if (str.size() <= 0 || str.size() > INT_MAX) {
+  if (str.size() <= 0 ||
+      str.size() > INT_MAX ||
+      firstCodePoint >= srcLenBytes) {
     return false;
   }
-  srcLenBytes = str.size();
 
   // Cannot be more code points than bytes in input.  This typically reduces
   // the INT_MAX default value to something more reasonable.
-  numDesiredCodePoints = std::min(numDesiredCodePoints, srcLenBytes);
+  numDesiredCodePoints = std::min(numDesiredCodePoints,
+                                  srcLenBytes - firstCodePoint);
 
   // Pre-allocate the result.
-  // Worst case, every byte is invalid, requiring 3 * byte length output bytes.
+  // the worst case can come from one of two sources:
+  //  - every code point could be the substitution char (3 bytes)
+  //    giving us numDesiredCodePoints * 3
+  //  - every code point could be 4 bytes long, giving us
+  //    numDesiredCodePoints * 4 - but capped by the length of the input
   uint64_t dstMaxLenBytes =
-    (uint64_t)numDesiredCodePoints * U8_LENGTH(SUBSTITUTION_CHARACTER);
+    std::min((uint64_t)numDesiredCodePoints * 4,
+             (uint64_t)srcLenBytes - firstCodePoint);
+  dstMaxLenBytes = std::max(dstMaxLenBytes,
+                            (uint64_t)numDesiredCodePoints *
+                            U8_LENGTH(SUBSTITUTION_CHARACTER));
   if (dstMaxLenBytes > INT_MAX) {
     return false; // Too long.
   }
@@ -776,6 +804,7 @@ static Variant f_fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
   }
 
   if (dstPosBytes > 0) {
+    ASSERT(dstPosBytes <= (int32_t)dstMaxLenBytes);
     dstBuf[dstPosBytes] = '\0';
     return String(dstBuf, dstPosBytes, AttachString);
   }
@@ -1080,7 +1109,7 @@ Array f_fb_get_flush_stat() {
   return NULL;
 }
 
-int f_fb_get_last_flush_size() {
+int64 f_fb_get_last_flush_size() {
   Transport *transport = g_context->getTransport();
   return transport ? transport->getLastChunkSentSize() : 0;
 }

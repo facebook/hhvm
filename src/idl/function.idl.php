@@ -476,7 +476,7 @@ DefineFunction(
     'desc'   => "Gets the number of arguments passed to the function.\n\nThis function may be used in conjunction with func_get_arg() and func_get_args() to allow user-defined functions to accept variable-length argument lists.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the number of arguments passed into the current user-defined function.",
     ),
     'taint_observer' => false,

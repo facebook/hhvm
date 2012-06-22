@@ -507,6 +507,7 @@ cout << "Compiler: " << COMPILER_ID << "\n";
   if (hhvm && (po.target == "hhbc" || po.target == "run")) {
     Option::OutputHHBC = true;
     RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
+    Option::AnalyzePerfectVirtuals = false;
   }
 
   Option::ProgramName = po.program;
@@ -1053,7 +1054,7 @@ int runTarget(const ProgramOptions &po) {
   // run the executable
   string cmd;
   if (hhvm) {
-    cmd += " ~/dev/hiphop-php/src/hhvm/hhvm";
+    cmd += HHVM_PATH;
     cmd += " -vRepo.Authoritative=true -vRepo.Commit=false";
     cmd += " -vRepo.Local.Mode=r- -vRepo.Local.Path=";
   }

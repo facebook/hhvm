@@ -203,11 +203,16 @@ bool TestCppBase::TestString() {
     VS((const char *)String("test").rvalAt(2), "s");
     String s = "test";
     s.lvalAt(2) = "";
-    VS((const char *)s, "tet");
+    VS(s, String("te\0t", 4, AttachLiteral));
     s.lvalAt(2) = "zz";
-    VS((const char *)s, "tez");
-    s.lvalAt(4) = "q";
-    VS((const char *)s, "tez q");
+    VS(s, "tezt");
+    s.lvalAt(5) = "q";
+    VS(s, "tezt q");
+
+    String s2 = s; // test copy-on-write
+    s.lvalAt(1) = "3";
+    VS(s,  "t3zt q");
+    VS(s2, "tezt q");
   }
 
   return Count(true);

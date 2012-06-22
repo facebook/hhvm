@@ -82,8 +82,7 @@ Repo::Repo()
     m_dbc(NULL), m_localReadable(false), m_localWritable(false),
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
-    m_frp(*this),
-    m_dummy(0) {
+    m_frp(*this) {
 #define RP_OP(c, o) \
   m_##o[RepoIdLocal] = &m_##o##Local; \
   m_##o[RepoIdCentral] = &m_##o##Central;
@@ -159,12 +158,19 @@ bool Repo::GetFileHashStmt::get(const char *path, MD5& md5) {
   return false;
 }
 
-bool Repo::findFile(const char *path, MD5& md5) {
+bool Repo::findFile(const char *path, const string &root, MD5& md5) {
   if (m_dbc == NULL) {
     return false;
   }
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+    if (*path == '/' && !root.empty() &&
+        !strncmp(root.c_str(), path, root.size()) &&
+        getFileHash(repoId).get(path + root.size(), md5)) {
+      TRACE(3, "Repo loaded file hash for '%s' from '%s'\n",
+               path + root.size(), repoName(repoId).c_str());
+      return true;
+    }
     if (getFileHash(repoId).get(path, md5)) {
       TRACE(3, "Repo loaded file hash for '%s' from '%s'\n",
                 path, repoName(repoId).c_str());
@@ -333,6 +339,14 @@ void Repo::initCentral() {
       return;
     }
     failPaths.push_back(RuntimeOption::RepoCentralPath);
+  }
+
+  const char* HHVM_REPO_CENTRAL_PATH = getenv("HHVM_REPO_CENTRAL_PATH");
+  if (HHVM_REPO_CENTRAL_PATH != NULL) {
+    if (!openCentral(HHVM_REPO_CENTRAL_PATH)) {
+      return;
+    }
+    failPaths.push_back(HHVM_REPO_CENTRAL_PATH);
   }
 
   // Try "$HOME/.hhvm.hhbc".

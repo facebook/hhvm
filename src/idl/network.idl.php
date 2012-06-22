@@ -604,6 +604,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "header_register_callback",
+    'desc'   => "Registers a function that will be called when PHP starts sending output.",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+        'desc'   => "Function called just before the headers are sent. It gets no parameters and the return value is ignored.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "header_remove",
     'desc'   => "Removes an HTTP header previously set using header().",
     'flags'  =>  HasDocComment,

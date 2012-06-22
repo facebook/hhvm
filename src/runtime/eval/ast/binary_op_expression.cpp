@@ -155,9 +155,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
   DataType t2 = Variant::GetAccessorType(acc2);
   ASSERT(t1 != KindOfVariant && t2 != KindOfVariant);
   bool sameType = (t1 == t2) ||
-    (t1 == KindOfInt64 && t2 == KindOfInt32 ||
-     t1 == KindOfInt32 && t2 == KindOfInt64 ||
-     t1 == KindOfString && t2 == KindOfStaticString ||
+    (t1 == KindOfString && t2 == KindOfStaticString ||
      t1 == KindOfStaticString && t2 == KindOfString);
   switch (m_op) {
   case T_LOGICAL_XOR:
@@ -165,7 +163,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return logical_xor(v1, v2);
   case '|':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) | Variant::GetInt64(acc2);
       }
     }
@@ -173,7 +171,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return bitwise_or(v1, v2);
   case '&':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) & Variant::GetInt64(acc2);
       }
     }
@@ -181,7 +179,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return bitwise_and(v1, v2);
   case '^':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) ^ Variant::GetInt64(acc2);
       }
     }
@@ -192,7 +190,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return concat(v1, v2);
   case '+':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) + Variant::GetInt64(acc2);
       } else if (LIKELY(t1 == KindOfDouble)) {
         return Variant::GetDouble(acc1) + Variant::GetDouble(acc2);
@@ -202,7 +200,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return v1 + v2;
   case '-':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) - Variant::GetInt64(acc2);
       } else if (LIKELY(t1 == KindOfDouble)) {
         return Variant::GetDouble(acc1) - Variant::GetDouble(acc2);
@@ -212,7 +210,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return v1 - v2;
   case '*':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) * Variant::GetInt64(acc2);
       } else if (LIKELY(t1 == KindOfDouble)) {
         return Variant::GetDouble(acc1) * Variant::GetDouble(acc2);
@@ -222,7 +220,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return v1 * v2;
   case '/':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         int64 lval = Variant::GetInt64(acc1);
         int64 lval2 = Variant::GetInt64(acc2);
         if (UNLIKELY(lval2 == 0)) {
@@ -253,7 +251,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return modulo(v1, v2);
   case T_SL:
     if (sameType) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) << Variant::GetInt64(acc2);
       }
     }
@@ -261,7 +259,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return v1.toInt64() << v2.toInt64();
   case T_SR:
     if (sameType) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) >> Variant::GetInt64(acc2);
       }
     }
@@ -269,7 +267,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return v1.toInt64() >> v2.toInt64();
   case T_IS_IDENTICAL:
     if (sameType) {
-      if (t1 == KindOfInt64 || t1 == KindOfInt32) {
+      if (t1 == KindOfInt64) {
         return Variant::GetInt64(acc1) == Variant::GetInt64(acc2);
       }
       if (t1 == KindOfString || t1 == KindOfStaticString) {
@@ -286,7 +284,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return same(v1, v2);
   case T_IS_NOT_IDENTICAL:
     if (LIKELY(sameType)) {
-      if (t1 == KindOfInt64 || t1 == KindOfInt32) {
+      if (t1 == KindOfInt64) {
         return Variant::GetInt64(acc1) != Variant::GetInt64(acc2);
       }
       if (t1 == KindOfString || t1 == KindOfStaticString) {
@@ -303,7 +301,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return !same(v1, v2);
   case T_IS_EQUAL:
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) == Variant::GetInt64(acc2);
       }
       if (LIKELY(t1 == KindOfString || t1 == KindOfStaticString)) {
@@ -316,7 +314,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return equal(v1, v2);
   case T_IS_NOT_EQUAL:
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) != Variant::GetInt64(acc2);
       }
       if (LIKELY(t1 == KindOfString || t1 == KindOfStaticString)) {
@@ -329,7 +327,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return !equal(v1, v2);
   case '<':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) < Variant::GetInt64(acc2);
       }
       if (LIKELY(t1 == KindOfString || t1 == KindOfStaticString)) {
@@ -342,7 +340,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return less(v1, v2);
   case T_IS_SMALLER_OR_EQUAL:
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) <= Variant::GetInt64(acc2);
       }
       if (LIKELY(t1 == KindOfString || t1 == KindOfStaticString)) {
@@ -355,7 +353,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return not_more(v1, v2);
   case '>':
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) > Variant::GetInt64(acc2);
       }
       if (LIKELY(t1 == KindOfString || t1 == KindOfStaticString)) {
@@ -368,7 +366,7 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
     return more(v1, v2);
   case T_IS_GREATER_OR_EQUAL:
     if (LIKELY(sameType)) {
-      if (LIKELY(t1 == KindOfInt64 || t1 == KindOfInt32)) {
+      if (LIKELY(t1 == KindOfInt64)) {
         return Variant::GetInt64(acc1) >= Variant::GetInt64(acc2);
       }
       if (LIKELY(t1 == KindOfString || t1 == KindOfStaticString)) {

@@ -27,7 +27,7 @@ class Exception {
       return;
     }
     $this->inited = true;
-    $this->trace = debug_backtrace();
+    $this->trace = debug_backtrace(false);
 
     // removing exception constructor stacks to be consistent with PHP
     while (!empty($this->trace)) {

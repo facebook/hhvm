@@ -142,8 +142,8 @@ struct DwarfInfo {
     const Opcode *instr, FunctionInfo* f);
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
-  DwarfChunk* addTracelet(TCA start, TCA end, const Unit *unit,
-    const Opcode *instr, bool exit, bool inPrologue);
+  DwarfChunk* addTracelet(TCA start, TCA end, const char* name,
+    const Unit *unit, const Opcode *instr, bool exit, bool inPrologue);
   void syncChunks();
 };
 

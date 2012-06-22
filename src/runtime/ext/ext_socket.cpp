@@ -948,7 +948,7 @@ String f_socket_strerror(int errnum) {
   return String(Util::safe_strerror(errnum));
 }
 
-int f_socket_last_error(CObjRef socket /* = null_object */) {
+int64 f_socket_last_error(CObjRef socket /* = null_object */) {
   if (!socket.isNull()) {
     Socket *sock = socket.getTyped<Socket>();
     return sock->getError();

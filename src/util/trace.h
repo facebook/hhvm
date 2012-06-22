@@ -74,6 +74,7 @@ namespace Trace {
       TM(fr)          \
       TM(intercept)   \
       TM(txdeps)      \
+      TM(typeProfile)  \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

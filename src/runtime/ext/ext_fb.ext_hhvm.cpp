@@ -486,14 +486,14 @@ TypedValue* fg_fb_utf8ize(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_fb_utf8_strlen_deprecated(HPHP::String const&)
+long long HPHP::f_fb_utf8_strlen_deprecated(HPHP::String const&)
 _ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE
 
 (return value) => rax
 input => rdi
 */
 
-int fh_fb_utf8_strlen_deprecated(Value* input) asm("_ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE");
+long long fh_fb_utf8_strlen_deprecated(Value* input) asm("_ZN4HPHP27f_fb_utf8_strlen_deprecatedERKNS_6StringE");
 
 TypedValue * fg1_fb_utf8_strlen_deprecated(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_fb_utf8_strlen_deprecated(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -539,14 +539,14 @@ TypedValue* fg_fb_utf8_strlen_deprecated(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_fb_utf8_strlen(HPHP::String const&)
+long long HPHP::f_fb_utf8_strlen(HPHP::String const&)
 _ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE
 
 (return value) => rax
 input => rdi
 */
 
-int fh_fb_utf8_strlen(Value* input) asm("_ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE");
+long long fh_fb_utf8_strlen(Value* input) asm("_ZN4HPHP16f_fb_utf8_strlenERKNS_6StringE");
 
 TypedValue * fg1_fb_utf8_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_fb_utf8_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -681,10 +681,10 @@ TypedValue* fg_fb_call_user_func_safe(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfArray;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -734,10 +734,10 @@ TypedValue* fg_fb_call_user_func_safe_return(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1581,13 +1581,13 @@ TypedValue* fg_fb_get_flush_stat(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_fb_get_last_flush_size()
+long long HPHP::f_fb_get_last_flush_size()
 _ZN4HPHP24f_fb_get_last_flush_sizeEv
 
 (return value) => rax
 */
 
-int fh_fb_get_last_flush_size() asm("_ZN4HPHP24f_fb_get_last_flush_sizeEv");
+long long fh_fb_get_last_flush_size() asm("_ZN4HPHP24f_fb_get_last_flush_sizeEv");
 
 TypedValue* fg_fb_get_last_flush_size(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

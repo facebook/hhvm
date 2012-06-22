@@ -165,15 +165,29 @@ class TranslatorX64 : public Translator, public SpillFill,
                                 const NormalizedInstruction& i,
                                 Attr typeAttr);
   void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
-  void recordInstrCall(Asm& a, const NormalizedInstruction& i,
-                       const SrcKey* sk = 0);
-  void recordInstrCall(const NormalizedInstruction& i,
-                       const SrcKey* sk = 0) {
-    recordInstrCall(a, i, sk);
+  template <bool reentrant>
+  void recordCallImpl(Asm& a, const NormalizedInstruction& i,
+                      const SrcKey* inputSk = 0);
+  void recordReentrantCall(Asm& a, const NormalizedInstruction& i,
+                           const SrcKey* inputSk = 0) {
+    recordCallImpl<true>(a, i, inputSk);
   }
-  void recordInstrStubCall(const NormalizedInstruction& i,
-                           const SrcKey* sk = 0) {
-    recordInstrCall(astubs, i, sk);
+  void recordReentrantCall(const NormalizedInstruction& i,
+                           const SrcKey* inputSk = 0) {
+    recordCallImpl<true>(a, i, inputSk);
+  }
+  void recordReentrantStubCall(const NormalizedInstruction& i,
+                               const SrcKey* inputSk = 0) {
+    recordCallImpl<true>(astubs, i, inputSk);
+  }
+  void recordCall(Asm& a, const NormalizedInstruction& i) {
+    recordCallImpl<false>(a, i);
+  }
+  void recordCall(const NormalizedInstruction& i) {
+    recordCall(a, i);
+  }
+  void recordStubCall(const NormalizedInstruction& i) {
+    recordCall(astubs, i);
   }
   void emitSideExit(Asm& a, const NormalizedInstruction& dest, bool next);
   void emitStringToClass(const NormalizedInstruction& i);
@@ -195,9 +209,18 @@ class TranslatorX64 : public Translator, public SpillFill,
   TCA emitBinaryStub(Asm& a, void* fptr);
   TCA genericRefCountStub(Asm& a);
   TCA emitPrologueRedispatch(Asm &a);
-  void emitFuncGuard(Asm& a, const Func *f);
+  TCA emitFuncGuard(Asm& a, const Func *f);
+  template <bool reentrant>
+  void callUnaryStubImpl(Asm& a, const NormalizedInstruction& i, TCA stub,
+                         PhysReg arg, int disp = 0);
+  void callUnaryReentrantStub(Asm& a, const NormalizedInstruction& i, TCA stub,
+                              PhysReg arg, int disp = 0) {
+    callUnaryStubImpl<true>(a, i, stub, arg, disp);
+  }
   void callUnaryStub(Asm& a, const NormalizedInstruction& i, TCA stub,
-                     PhysReg arg, int disp = 0);
+                     PhysReg arg, int disp = 0) {
+    callUnaryStubImpl<false>(a, i, stub, arg, disp);
+  }
   void callBinaryStub(Asm& a, const NormalizedInstruction& i, TCA stub,
                       PhysReg arg1, PhysReg arg2);
   void emitDerefStoreToLoc(PhysReg srcReg, const Location& destLoc);
@@ -246,6 +269,7 @@ class TranslatorX64 : public Translator, public SpillFill,
   CASE(Jmp) \
   CASE(Switch) \
   CASE(RetC) \
+  CASE(RetV) \
   CASE(NativeImpl) \
   CASE(AGetC) \
   CASE(AGetL) \
@@ -536,6 +560,8 @@ public:
 
   void emitGuardChecks(Asm& a, const SrcKey&, const ChangeMap&,
     const RefDeps&, SrcRec&);
+  void emitVariantGuards(const Tracelet& t, const NormalizedInstruction& i);
+  void emitPredictionGuards(const NormalizedInstruction& i);
 
 private:
   TCA getInterceptHelper();
@@ -550,11 +576,12 @@ private:
   void emitSmartAddImm(register_name_t rsrcdest, int64_t imm);
   void emitFrameRelease(Asm& a, const NormalizedInstruction& i,
                         bool noThis = false);
-  void dumpStack(const char*msg, int offset) const;
+  void dumpStack(const char* msg, int offset) const;
 
   static const size_t kJmpTargetAlign = 16;
   static const int kJmpLen = 5;
   static const int kJmpccLen = 6;
+  static const int kJcc8Len = 3;
   // Cache alignment is required for mutable instructions to make sure
   // mutations don't "tear" on remote cpus.
   static const size_t kX64CacheLineSize = 64;
@@ -594,6 +621,7 @@ private:
 
   void recordGdbTranslation(const SrcKey& sk, const Unit* u, TCA start,
                             int numTCBytes, bool exit, bool inPrologue);
+  void recordGdbStub(TCA start, TCA end, const char* name);
 
   void emitStackCheck(int funcDepth, Offset pc);
   void emitStackCheckDynamic(int numArgs, Offset pc);

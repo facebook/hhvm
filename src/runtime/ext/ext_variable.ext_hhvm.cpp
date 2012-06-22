@@ -321,10 +321,10 @@ TypedValue* fg_var_dump(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfNull;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -489,7 +489,7 @@ TypedValue* fg_import_request_variables(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_extract(HPHP::Array const&, int, HPHP::String const&)
+long long HPHP::f_extract(HPHP::Array const&, int, HPHP::String const&)
 _ZN4HPHP9f_extractERKNS_5ArrayEiRKNS_6StringE
 
 (return value) => rax
@@ -498,7 +498,7 @@ extract_type => rsi
 prefix => rdx
 */
 
-int fh_extract(Value* var_array, int extract_type, Value* prefix) asm("_ZN4HPHP9f_extractERKNS_5ArrayEiRKNS_6StringE");
+long long fh_extract(Value* var_array, int extract_type, Value* prefix) asm("_ZN4HPHP9f_extractERKNS_5ArrayEiRKNS_6StringE");
 
 TypedValue * fg1_extract(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_extract(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

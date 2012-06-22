@@ -31,20 +31,11 @@ array(6) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(3) {
+    array(2) {
       [0]=>
       int(1)
       [1]=>
       string(3) "str"
-      [2]=>
-      array(3) {
-        [0]=>
-        int(1)
-        [1]=>
-        int(2)
-        [2]=>
-        int(3)
-      }
     }
   }
   [2]=>
@@ -187,39 +178,11 @@ array(2) {
     ["function"]=>
     string(13) "error_handler"
     ["args"]=>
-    array(6) {
+    array(2) {
       [0]=>
       int(8)
       [1]=>
       string(63) "Use of undefined constant FakeConstant - assumed 'FakeConstant'"
-      [2]=>
-      string() "src/test/vm/debug_backtrace.php"
-      [3]=>
-      int(32)
-      [4]=>
-      string(0) ""
-      [5]=>
-      array(2) {
-        [0]=>
-        array(2) {
-          ["file"]=>
-          string() "src/test/vm/debug_backtrace.php"
-          ["line"]=>
-          int(32)
-        }
-        [1]=>
-        array(4) {
-          ["file"]=>
-          string() "src/test/vm/debug_backtrace.php"
-          ["line"]=>
-          int(34)
-          ["function"]=>
-          string(4) "main"
-          ["args"]=>
-          array(0) {
-          }
-        }
-      }
     }
   }
   [1]=>

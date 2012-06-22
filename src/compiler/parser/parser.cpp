@@ -608,14 +608,24 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   onExprListElem(out, list, out);
 }
 
+void Parser::checkAssignThis(Token &var) {
+  if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
+    if (simp->getName() == "this") {
+      PARSE_ERROR("Cannot re-assign $this");
+    }
+  }
+}
+
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref) {
   if (dynamic_pointer_cast<FunctionCall>(var->exp)) {
     PARSE_ERROR("Can't use return value in write context");
   }
+  checkAssignThis(var);
   out->exp = NEW_EXP(AssignmentExpression, var->exp, expr->exp, ref);
 }
 
 void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
+  checkAssignThis(var);
   ExpressionPtr exp =
     NEW_EXP(NewObjectExpression, name->exp,
             dynamic_pointer_cast<ExpressionList>(args->exp));
@@ -1437,6 +1447,8 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
     PARSE_ERROR("Key element cannot be a reference");
     return;
   }
+  checkAssignThis(name);
+  checkAssignThis(value);
   if (!m_generators.empty() && m_generators.back() > 0) {
     int cnt = ++m_foreaches.back();
     // TODO only transform foreach with yield in its body.

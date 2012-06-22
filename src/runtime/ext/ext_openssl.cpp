@@ -454,8 +454,8 @@ static void add_assoc_name_entry(Array &ret, const char *key,
     if (obj_cnt > 1) {
       subitem.set(String(sname, CopyString), subentries);
     } else if (obj_cnt && str && to_add_len > -1) {
-      subitem.set(String(sname, CopyString),
-                  String((char*)to_add, to_add_len, CopyString));
+      // Use the string instance we created above.
+      subitem.set(String(sname, CopyString), subentries[0]);
     }
   }
 
@@ -2020,7 +2020,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain,
   return ret;
 }
 
-int f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose,
+int64 f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose,
                                 CArrRef cainfo /* = null_array */,
                                 CStrRef untrustedfile /* = null_string */) {
   int ret = -1;

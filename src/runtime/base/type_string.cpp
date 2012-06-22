@@ -88,13 +88,6 @@ static int precompute_integers() {
 
 static int ATTRIBUTE_UNUSED initIntegers = precompute_integers();
 
-String String::FromChar(char ch) {
-  char tmpbuf[2];
-  tmpbuf[0] = ch;
-  tmpbuf[1] = 0;
-  return String(tmpbuf, CopyString);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // constructors
 

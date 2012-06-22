@@ -35,7 +35,7 @@ inline String x_posix_ctermid() {
   return f_posix_ctermid();
 }
 
-inline int x_posix_get_last_error() {
+inline int64 x_posix_get_last_error() {
   FUNCTION_INJECTION_BUILTIN(posix_get_last_error);
   return f_posix_get_last_error();
 }
@@ -45,17 +45,17 @@ inline String x_posix_getcwd() {
   return f_posix_getcwd();
 }
 
-inline int x_posix_getegid() {
+inline int64 x_posix_getegid() {
   FUNCTION_INJECTION_BUILTIN(posix_getegid);
   return f_posix_getegid();
 }
 
-inline int x_posix_geteuid() {
+inline int64 x_posix_geteuid() {
   FUNCTION_INJECTION_BUILTIN(posix_geteuid);
   return f_posix_geteuid();
 }
 
-inline int x_posix_getgid() {
+inline int64 x_posix_getgid() {
   FUNCTION_INJECTION_BUILTIN(posix_getgid);
   return f_posix_getgid();
 }
@@ -85,17 +85,17 @@ inline Variant x_posix_getpgid(int pid) {
   return f_posix_getpgid(pid);
 }
 
-inline int x_posix_getpgrp() {
+inline int64 x_posix_getpgrp() {
   FUNCTION_INJECTION_BUILTIN(posix_getpgrp);
   return f_posix_getpgrp();
 }
 
-inline int x_posix_getpid() {
+inline int64 x_posix_getpid() {
   FUNCTION_INJECTION_BUILTIN(posix_getpid);
   return f_posix_getpid();
 }
 
-inline int x_posix_getppid() {
+inline int64 x_posix_getppid() {
   FUNCTION_INJECTION_BUILTIN(posix_getppid);
   return f_posix_getppid();
 }
@@ -120,7 +120,7 @@ inline Variant x_posix_getsid(int pid) {
   return f_posix_getsid(pid);
 }
 
-inline int x_posix_getuid() {
+inline int64 x_posix_getuid() {
   FUNCTION_INJECTION_BUILTIN(posix_getuid);
   return f_posix_getuid();
 }
@@ -170,7 +170,7 @@ inline bool x_posix_setpgid(int pid, int pgid) {
   return f_posix_setpgid(pid, pgid);
 }
 
-inline int x_posix_setsid() {
+inline int64 x_posix_setsid() {
   FUNCTION_INJECTION_BUILTIN(posix_setsid);
   return f_posix_setsid();
 }

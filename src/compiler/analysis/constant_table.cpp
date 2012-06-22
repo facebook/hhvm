@@ -180,7 +180,9 @@ TypePtr ConstantTable::check(BlockScopeRawPtr context,
             if (defScope) return actualType;
           }
         }
-        Compiler::Error(Compiler::UseUndeclaredConstant, construct);
+        if (!isClassScope || !((ClassScope*)&m_blockScope)->isTrait()) {
+          Compiler::Error(Compiler::UseUndeclaredConstant, construct);
+        }
         actualType = isClassScope || !Option::WholeProgram ?
           Type::Variant : Type::String;
       }

@@ -35,9 +35,6 @@ void Globals::initialize() {
           case KindOfBoolean:
             *(bool*)addr = v.asBooleanVal();
             break;
-          case KindOfInt32:
-            *(int*)addr = v.asInt64Val();
-            break;
           case KindOfInt64:
             *(int64*)addr = v.asInt64Val();
             break;
@@ -65,9 +62,6 @@ void Globals::initialize() {
         switch (p->type) {
           case KindOfBoolean:
             *(bool*)addr = v;
-            break;
-          case KindOfInt32:
-            *(int*)addr = v;
             break;
           case KindOfInt64:
             *(int64*)addr = v;

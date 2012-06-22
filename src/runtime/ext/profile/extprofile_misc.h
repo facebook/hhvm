@@ -25,17 +25,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int x_connection_aborted() {
+inline int64 x_connection_aborted() {
   FUNCTION_INJECTION_BUILTIN(connection_aborted);
   return f_connection_aborted();
 }
 
-inline int x_connection_status() {
+inline int64 x_connection_status() {
   FUNCTION_INJECTION_BUILTIN(connection_status);
   return f_connection_status();
 }
 
-inline int x_connection_timeout() {
+inline int64 x_connection_timeout() {
   FUNCTION_INJECTION_BUILTIN(connection_timeout);
   return f_connection_timeout();
 }
@@ -96,7 +96,7 @@ inline Variant x_highlight_string(CStrRef str, bool ret = false) {
   return f_highlight_string(str, ret);
 }
 
-inline int x_ignore_user_abort(bool setting = false) {
+inline int64 x_ignore_user_abort(bool setting = false) {
   FUNCTION_INJECTION_BUILTIN(ignore_user_abort);
   return f_ignore_user_abort(setting);
 }
@@ -117,7 +117,7 @@ inline String x_php_strip_whitespace(CStrRef filename) {
   return f_php_strip_whitespace(filename);
 }
 
-inline int x_sleep(int seconds) {
+inline int64 x_sleep(int seconds) {
   FUNCTION_INJECTION_BUILTIN(sleep);
   return f_sleep(seconds);
 }

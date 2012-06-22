@@ -1922,7 +1922,7 @@ TypedValue* fg_openssl_x509_check_private_key(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_openssl_x509_checkpurpose(HPHP::Variant const&, int, HPHP::Array const&, HPHP::String const&)
+long long HPHP::f_openssl_x509_checkpurpose(HPHP::Variant const&, int, HPHP::Array const&, HPHP::String const&)
 _ZN4HPHP27f_openssl_x509_checkpurposeERKNS_7VariantEiRKNS_5ArrayERKNS_6StringE
 
 (return value) => rax
@@ -1932,7 +1932,7 @@ cainfo => rdx
 untrustedfile => rcx
 */
 
-int fh_openssl_x509_checkpurpose(TypedValue* x509cert, int purpose, Value* cainfo, Value* untrustedfile) asm("_ZN4HPHP27f_openssl_x509_checkpurposeERKNS_7VariantEiRKNS_5ArrayERKNS_6StringE");
+long long fh_openssl_x509_checkpurpose(TypedValue* x509cert, int purpose, Value* cainfo, Value* untrustedfile) asm("_ZN4HPHP27f_openssl_x509_checkpurposeERKNS_7VariantEiRKNS_5ArrayERKNS_6StringE");
 
 TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

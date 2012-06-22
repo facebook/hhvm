@@ -85,12 +85,12 @@ inline bool x_fb_utf8ize(VRefParam input) {
   return f_fb_utf8ize(input);
 }
 
-inline int x_fb_utf8_strlen_deprecated(CStrRef input) {
+inline int64 x_fb_utf8_strlen_deprecated(CStrRef input) {
   FUNCTION_INJECTION_BUILTIN(fb_utf8_strlen_deprecated);
   return f_fb_utf8_strlen_deprecated(input);
 }
 
-inline int x_fb_utf8_strlen(CStrRef input) {
+inline int64 x_fb_utf8_strlen(CStrRef input) {
   FUNCTION_INJECTION_BUILTIN(fb_utf8_strlen);
   return f_fb_utf8_strlen(input);
 }
@@ -261,7 +261,7 @@ inline Array x_fb_get_flush_stat() {
   return f_fb_get_flush_stat();
 }
 
-inline int x_fb_get_last_flush_size() {
+inline int64 x_fb_get_last_flush_size() {
   FUNCTION_INJECTION_BUILTIN(fb_get_last_flush_size);
   TAINT_OBSERVER(, );
   return f_fb_get_last_flush_size();
@@ -280,6 +280,11 @@ inline Variant x_fb_lazy_lstat(CStrRef filename) {
 inline String x_fb_lazy_realpath(CStrRef filename) {
   FUNCTION_INJECTION_BUILTIN(fb_lazy_realpath);
   return f_fb_lazy_realpath(filename);
+}
+
+inline void x_fb_setprofile(CVarRef callback) {
+  FUNCTION_INJECTION_BUILTIN(fb_setprofile);
+  f_fb_setprofile(callback);
 }
 
 

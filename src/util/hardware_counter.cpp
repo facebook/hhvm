@@ -30,6 +30,9 @@
 #include <asm/unistd.h>
 #include <sys/prctl.h>
 #include <linux/perf_event.h>
+#include <runtime/base/string_data.h>
+#include <runtime/base/zend/zend_url.h>
+#include <runtime/base/runtime_option.h>
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +42,8 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(HardwareCounter,
 
 class HardwareCounterImpl {
 public:
-  HardwareCounterImpl(int type, unsigned long config) : m_fd(-1) {
+  HardwareCounterImpl(int type, unsigned long config, StringData* desc = NULL)
+    : m_desc(desc), m_err(0), m_fd(-1) {
     memset (&pe, 0, sizeof (struct perf_event_attr));
     pe.type = type;
     pe.size = sizeof (struct perf_event_attr);
@@ -60,12 +64,14 @@ public:
     if (m_fd < 0) {
       Logger::Verbose("perf_event_open failed with: %s",
           Util::safe_strerror(errno).c_str());
+      m_err = -1;
       return;
     }
     if (ioctl(m_fd, PERF_EVENT_IOC_ENABLE, 0) < 0) {
-      Logger::Verbose("perf_event failed to enable: %s",
+      Logger::Warning("perf_event failed to enable: %s",
           Util::safe_strerror(errno).c_str());
       close();
+      m_err = -1;
       return;
     }
     reset();
@@ -109,11 +115,15 @@ public:
 
   void reset() {
     if (m_fd > 0 && ioctl (m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
-      Logger::Verbose("perf_event failed to reset with: %s",
+      Logger::Warning("perf_event failed to reset with: %s",
           Util::safe_strerror(errno).c_str());
+      m_err = -1;
     }
   }
 
+public:
+  StringData* m_desc;
+  int m_err;
 private:
   int m_fd;
   struct perf_event_attr pe;
@@ -146,16 +156,27 @@ public:
         PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_WRITE) << 8)) {}
 };
 
-HardwareCounter::HardwareCounter() {
+HardwareCounter::HardwareCounter() : m_countersSet(false) {
   m_instructionCounter = new InstructionCounter();
-  m_loadCounter = new LoadCounter();
-  m_storeCounter = new StoreCounter();
+  if (RuntimeOption::EvalProfileHWEvents == "") {
+    m_loadCounter = new LoadCounter();
+    m_storeCounter = new StoreCounter();
+  } else {
+    m_countersSet = true;
+    setPerfEvents(RuntimeOption::EvalProfileHWEvents);
+  }
 }
 
 HardwareCounter::~HardwareCounter() {
   delete m_instructionCounter;
-  delete m_loadCounter;
-  delete m_storeCounter;
+  if (!m_countersSet) {
+    delete m_loadCounter;
+    delete m_storeCounter;
+  }
+  for (unsigned i = 0; i < m_counters.size(); i++) {
+    delete m_counters[i];
+  }
+  m_counters.clear();
 }
 
 void HardwareCounter::Reset(void) {
@@ -164,8 +185,13 @@ void HardwareCounter::Reset(void) {
 
 void HardwareCounter::reset(void) {
   m_instructionCounter->reset();
-  m_storeCounter->reset();
-  m_loadCounter->reset();
+  if (!m_countersSet) {
+    m_storeCounter->reset();
+    m_loadCounter->reset();
+  }
+  for (unsigned i = 0; i < m_counters.size(); i++) {
+    m_counters[i]->reset();
+  }
 }
 
 int64 HardwareCounter::GetInstructionCount() {
@@ -191,5 +217,152 @@ int64 HardwareCounter::GetStoreCount() {
 int64 HardwareCounter::getStoreCount() {
   return m_storeCounter->read();
 }
+
+struct PerfTable perfTable[] = {
+  /* PERF_TYPE_HARDWARE events */
+#define PC(n)    PERF_TYPE_HARDWARE, PERF_COUNT_HW_ ## n
+  { "cpu-cycles",          PC(CPU_CYCLES)          },
+  { "cycles",              PC(CPU_CYCLES)          },
+  { "instructions",        PC(INSTRUCTIONS)        },
+  { "cache-references",    PC(CACHE_REFERENCES)    },
+  { "cache-misses",        PC(CACHE_MISSES)        },
+  { "branch-instructions", PC(BRANCH_INSTRUCTIONS) },
+  { "branches",            PC(BRANCH_INSTRUCTIONS) },
+  { "branch-misses",       PC(BRANCH_MISSES)       },
+  { "bus-cycles",          PC(BUS_CYCLES)          },
+
+  /* PERF_TYPE_HW_CACHE hw_cache_id */
+#define PCC(n)   PERF_TYPE_HW_CACHE, PERF_COUNT_HW_CACHE_ ## n
+  { "L1-dcache-",          PCC(L1D)                },
+  { "L1-icache-",          PCC(L1I)                },
+  { "LLC-",                PCC(LL)                 },
+  { "dTLB-",               PCC(DTLB)               },
+  { "iTLB-",               PCC(ITLB)               },
+  { "branch-",             PCC(BPU)                },
+
+  /* PERF_TYPE_HW_CACHE hw_cache_op, hw_cache_result */
+#define PCCO(n, m)  PERF_TYPE_HW_CACHE, \
+                    ((PERF_COUNT_HW_CACHE_OP_ ## n) << 8 | \
+                    (PERF_COUNT_HW_CACHE_RESULT_ ## m) << 16)
+  { "loads",               PCCO(READ, ACCESS)      },
+  { "load-misses",         PCCO(READ, MISS)        },
+  { "stores",              PCCO(WRITE, ACCESS)     },
+  { "store-misses",        PCCO(WRITE, MISS)       },
+  { "prefetches",          PCCO(PREFETCH, ACCESS)  },
+  { "prefetch-misses",     PCCO(PREFETCH, MISS)    }
+};
+
+static int findEvent(char *event, struct PerfTable *t,
+                     int len, int *match_len) {
+  int i;
+
+  for (i = 0; i < len; i++) {
+    if (!strncmp(event, t[i].name, strlen(t[i].name))) {
+      *match_len = strlen(t[i].name);
+      return i;
+    }
+  }
+  return -1;
+}
+
+bool HardwareCounter::addPerfEvent(char *event) {
+  uint32_t type = 0;
+  uint64_t config = 0;
+  int i, match_len;
+  bool found = false;
+  char *ev = event;
+  HardwareCounterImpl* hwc;
+
+  while ((i = findEvent(ev, perfTable,
+                        sizeof(perfTable)/sizeof(struct PerfTable),
+                        &match_len))
+       != -1) {
+    found = true;
+    type = perfTable[i].type;
+    config |= perfTable[i].config;
+    ev = &ev[match_len];
+  }
+
+  if (!found) {
+    Logger::Warning("failed to find perf event: %s", event);
+    return false;
+  }
+  hwc = new HardwareCounterImpl(
+            type, config, StringData::GetStaticString(event));
+  if (hwc->m_err) {
+    Logger::Warning("failed to set perf event: %s", event);
+    delete hwc;
+    return false;
+  }
+  m_counters.push_back(hwc);
+  if (!m_countersSet) {
+    // delete load and store counters. This is because
+    // perf does not seem to handle more than three counters
+    // very well.
+    delete m_loadCounter;
+    delete m_storeCounter;
+    m_countersSet = true;
+  }
+  return true;
+}
+
+bool HardwareCounter::eventExists(char *event) {
+  // hopefully m_counters set is small, so a linear scan does not hurt
+  for(unsigned i = 0; i < m_counters.size(); i++) {
+    if (!strcmp(event, m_counters[i]->m_desc->data())) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool HardwareCounter::setPerfEvents(CStrRef events) {
+  StringData* sd = events.get();
+  StringData sevents(sd->data(), sd->size(), CopyString);
+  char *strtok_buf = NULL;
+  char *s = strtok_r(const_cast<char *>(sevents.data()), ",", &strtok_buf);
+  while (s) {
+    int len = strlen(s);
+    char* event = url_decode(s, len);
+    if (!eventExists(event)) {
+      if (!addPerfEvent(event)) {
+        return false;
+      }
+    }
+    s = strtok_r(NULL, ",", &strtok_buf);
+  }
+  return true;
+}
+
+bool HardwareCounter::SetPerfEvents(CStrRef events) {
+  return s_counter->setPerfEvents(events);
+}
+
+void HardwareCounter::clearPerfEvents() {
+  for (unsigned i = 0; i < m_counters.size(); i++) {
+    delete m_counters[i];
+  }
+  m_counters.clear();
+}
+
+void HardwareCounter::ClearPerfEvents() {
+  s_counter->clearPerfEvents();
+}
+
+void HardwareCounter::getPerfEvents(Array& ret) {
+  ret.set("instructions", getInstructionCount());
+  if (!m_countersSet) {
+    ret.set("loads", getLoadCount());
+    ret.set("stores", getStoreCount());
+  }
+  for (unsigned i = 0; i < m_counters.size(); i++) {
+    ret.set(m_counters[i]->m_desc->data(), m_counters[i]->read());
+  }
+}
+
+void HardwareCounter::GetPerfEvents(Array& ret) {
+  s_counter->getPerfEvents(ret);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}

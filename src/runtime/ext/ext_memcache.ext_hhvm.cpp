@@ -927,7 +927,7 @@ TypedValue* fg_memcache_setoptimeout(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_memcache_get_server_status(HPHP::Object const&, HPHP::String const&, int)
+long long HPHP::f_memcache_get_server_status(HPHP::Object const&, HPHP::String const&, int)
 _ZN4HPHP28f_memcache_get_server_statusERKNS_6ObjectERKNS_6StringEi
 
 (return value) => rax
@@ -936,7 +936,7 @@ host => rsi
 port => rdx
 */
 
-int fh_memcache_get_server_status(Value* memcache, Value* host, int port) asm("_ZN4HPHP28f_memcache_get_server_statusERKNS_6ObjectERKNS_6StringEi");
+long long fh_memcache_get_server_status(Value* memcache, Value* host, int port) asm("_ZN4HPHP28f_memcache_get_server_statusERKNS_6ObjectERKNS_6StringEi");
 
 TypedValue * fg1_memcache_get_server_status(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_memcache_get_server_status(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1434,9 +1434,6 @@ public:
     c_Memcache_Instance *this_ = (c_Memcache_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_Memcache) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -2331,7 +2328,7 @@ TypedValue* tg_8Memcache_close(HPHP::VM::ActRec *ar) {
 }
 
 /*
-int HPHP::c_Memcache::t_getserverstatus(HPHP::String const&, int)
+long long HPHP::c_Memcache::t_getserverstatus(HPHP::String const&, int)
 _ZN4HPHP10c_Memcache17t_getserverstatusERKNS_6StringEi
 
 (return value) => rax
@@ -2340,7 +2337,7 @@ host => rsi
 port => rdx
 */
 
-int th_8Memcache_getserverstatus(ObjectData* this_, Value* host, int port) asm("_ZN4HPHP10c_Memcache17t_getserverstatusERKNS_6StringEi");
+long long th_8Memcache_getserverstatus(ObjectData* this_, Value* host, int port) asm("_ZN4HPHP10c_Memcache17t_getserverstatusERKNS_6StringEi");
 
 TypedValue* tg1_8Memcache_getserverstatus(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8Memcache_getserverstatus(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {

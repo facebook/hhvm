@@ -36,6 +36,22 @@ quiet quiet-%:
 	@true
 
 ###############################################################################
+# The exact revision of external repositories that HPHP builds against.
+
+FBCODE_REV = 437f4af63d462990f0e8e0fbfcec084701dbcf87
+FBCODE_THIRD_PARTY_REV = d975d837c121c6920278a63c8714e5963e10169e
+
+ifndef FBCODE_EXTERNALS_ROOT
+FBCODE_EXTERNALS_ROOT = /mnt/gvfs/third-party/$(FBCODE_THIRD_PARTY_REV)
+endif
+
+ifndef FBCODE_HOME
+export FBCODE_HOME=/mnt/gvfs/fbcode/$(FBCODE_REV)
+endif
+
+export FBCODE_BIN=$(LIB_DIR)/_fbcode_bin
+
+###############################################################################
 # Command line switches. For example, "make RELEASE=1".
 
 V ?= @
@@ -78,14 +94,14 @@ ifndef NO_JEMALLOC
 USE_JEMALLOC = 1
 endif
 
-ifndef DEBUG_MEMORY_LEAK
-ifndef DEBUG_RACE_CONDITION
-
 # This normally adds -O3 tag to generate the most optimized code targeted for
 # production build.
 ifndef DEBUG
 RELEASE = 1
 endif
+
+ifndef DEBUG_MEMORY_LEAK
+ifndef DEBUG_RACE_CONDITION
 
 # For hotprofiler instrumentation
 HOTPROFILER = 1
@@ -155,35 +171,29 @@ ifdef OUTPUT_ROOT
 OUT_DIRNAME := $(OUTPUT_ROOT)$(OUT_EXT)
 OUTPUT_REL := $(patsubst /%,,$(patsubst ~%,,$(OUTPUT_ROOT)))
 
-REL_OUT_TOP := $(PROJECT_ROOT)/$(OUT_DIRNAME)/
 OUT_TOP := $(if $(OUTPUT_REL),$(ABS_PROJECT_ROOT)/)$(OUT_DIRNAME)
 OUT_ABS := $(OUT_TOP)$(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))
 OUT_DIR := $(OUT_ABS)/
-REL_OUT_DIR := $(PROJECT_ROOT)/$(OUT_DIRNAME)$(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))/
 
 LIB_DIR := $(OUT_TOP)
 HPHP_LIB := $(LIB_DIR)
 OUT_TOP := $(OUT_TOP)/
 HPHP := $(OUT_TOP)hphp
-HPHPI := $(OUT_TOP)hphpi
 HHVM := $(OUT_TOP)hhvm
 HPHP_OPTIONS := $(OUT_TOP)hphp_options
 
 else
 
-REL_OUT_TOP := $(PROJECT_ROOT)/
 OUT_TOP :=
-REL_OUT_DIR := $(PROJECT_ROOT)/$(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))/
 OUT_DIR :=
 OUT_ABS := $(shell pwd)
-LIB_DIR := $(PROJECT_ROOT)/bin
+LIB_DIR := $(ABS_PROJECT_ROOT)/bin
 ifdef HPHP_LIB
 ifneq ($(HPHP_LIB),$(HPHP_ROOT)/bin)
 LIB_DIR := $(HPHP_LIB)
 endif
 endif
 HPHP := $(PROJECT_ROOT)/src/hphp/hphp
-HPHPI := $(PROJECT_ROOT)/src/hphpi/hphpi
 HHVM := $(PROJECT_ROOT)/src/hhvm/hhvm
 HPHP_OPTIONS := $(LIB_DIR)/hphp_options
 

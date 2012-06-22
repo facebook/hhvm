@@ -147,7 +147,7 @@ DefineFunction(
     'desc'   => "Gets the blocksize of the specified algorithm.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the block size of the algorithm specified in bytes.",
     ),
     'args'   => array(
@@ -172,7 +172,7 @@ DefineFunction(
     'desc'   => "Gets the maximum supported keysize of the opened mode.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "This function returns the maximum supported key size of the algorithm specified in bytes.",
     ),
     'args'   => array(
@@ -644,7 +644,7 @@ DefineFunction(
     'name'   => "mcrypt_get_key_size",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -684,7 +684,7 @@ DefineFunction(
     'desc'   => "Gets the blocksize of the opened algorithm.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the block size of the specified algorithm in bytes.",
     ),
     'args'   => array(
@@ -703,7 +703,7 @@ DefineFunction(
     'desc'   => "This function returns the size of the IV of the algorithm specified by the encryption descriptor in bytes. An IV is used in cbc, cfb and ofb modes, and in some algorithms in stream mode.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the size of the IV, or 0 if the IV is ignored in the algorithm.",
     ),
     'args'   => array(
@@ -722,7 +722,7 @@ DefineFunction(
     'desc'   => "Gets the maximum supported key size of the algorithm in bytes.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the maximum supported key size of the algorithm in bytes.",
     ),
     'args'   => array(
@@ -836,7 +836,7 @@ DefineFunction(
     'desc'   => "This function runs the self test on the algorithm specified by the descriptor td.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "If the self test succeeds it returns FALSE. In case of an error, it returns TRUE.",
     ),
     'args'   => array(
@@ -882,7 +882,7 @@ DefineFunction(
     'desc'   => "You need to call this function before every call to mcrypt_generic() or mdecrypt_generic().",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "The function returns a negative value on error, -3 when the key length was incorrect, -4 when there was a memory allocation problem and any other return value is an unknown error. If an error occurs a warning will be displayed accordingly. FALSE is returned if incorrect parameters were passed.",
     ),
     'args'   => array(

@@ -10,13 +10,13 @@
 namespace HPHP {
 
 /*
-int HPHP::f_connection_aborted()
+long long HPHP::f_connection_aborted()
 _ZN4HPHP20f_connection_abortedEv
 
 (return value) => rax
 */
 
-int fh_connection_aborted() asm("_ZN4HPHP20f_connection_abortedEv");
+long long fh_connection_aborted() asm("_ZN4HPHP20f_connection_abortedEv");
 
 TypedValue* fg_connection_aborted(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -45,13 +45,13 @@ TypedValue* fg_connection_aborted(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_connection_status()
+long long HPHP::f_connection_status()
 _ZN4HPHP19f_connection_statusEv
 
 (return value) => rax
 */
 
-int fh_connection_status() asm("_ZN4HPHP19f_connection_statusEv");
+long long fh_connection_status() asm("_ZN4HPHP19f_connection_statusEv");
 
 TypedValue* fg_connection_status(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -80,13 +80,13 @@ TypedValue* fg_connection_status(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_connection_timeout()
+long long HPHP::f_connection_timeout()
 _ZN4HPHP20f_connection_timeoutEv
 
 (return value) => rax
 */
 
-int fh_connection_timeout() asm("_ZN4HPHP20f_connection_timeoutEv");
+long long fh_connection_timeout() asm("_ZN4HPHP20f_connection_timeoutEv");
 
 TypedValue* fg_connection_timeout(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -697,14 +697,14 @@ TypedValue* fg_highlight_string(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_ignore_user_abort(bool)
+long long HPHP::f_ignore_user_abort(bool)
 _ZN4HPHP19f_ignore_user_abortEb
 
 (return value) => rax
 setting => rdi
 */
 
-int fh_ignore_user_abort(bool setting) asm("_ZN4HPHP19f_ignore_user_abortEb");
+long long fh_ignore_user_abort(bool setting) asm("_ZN4HPHP19f_ignore_user_abortEb");
 
 TypedValue * fg1_ignore_user_abort(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_ignore_user_abort(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -768,10 +768,10 @@ TypedValue * fg1_pack(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -794,10 +794,10 @@ TypedValue* fg_pack(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-1, false);
           for (long long i = 1; i < count; ++i) {
-            TypedValue* extraArg = ve->getExtraArg(i-1);
+            TypedValue* extraArg = ea->getExtraArg(i-1);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-1, tvAsVariant(extraArg));
             } else {
@@ -944,14 +944,14 @@ TypedValue* fg_php_strip_whitespace(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_sleep(int)
+long long HPHP::f_sleep(int)
 _ZN4HPHP7f_sleepEi
 
 (return value) => rax
 seconds => rdi
 */
 
-int fh_sleep(int seconds) asm("_ZN4HPHP7f_sleepEi");
+long long fh_sleep(int seconds) asm("_ZN4HPHP7f_sleepEi");
 
 TypedValue * fg1_sleep(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_sleep(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

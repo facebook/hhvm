@@ -190,6 +190,12 @@ size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
   return 4;
 }
 
+void encodeIvaToVector(std::vector<uchar>& out, int32_t val) {
+  size_t currentLen = out.size();
+  out.resize(out.size() + 4);
+  out.resize(currentLen + encodeVariableSizeImm(val, &out[currentLen]));
+}
+
 int instrLen(const Opcode* opcode) {
   int len = 1;
   int nImm = numImmediates(*opcode);
@@ -268,6 +274,21 @@ Offset instrJumpTarget(const Opcode* instrs, Offset pos) {
   } else {
     return *offset + pos;
   }
+}
+
+/**
+ * Return the number of successor-edges including fall-through paths but not
+ * implicit exception paths.
+ */
+int numSuccs(const Opcode* instr) {
+  if (!instrIsControlFlow(*instr)) return 1;
+  if ((instrFlags(*instr) & TF) != 0) {
+    if (Op(*instr) == OpSwitch) return *(int*)(instr + 1);
+    if (Op(*instr) == OpJmp) return 1;
+    return 0;
+  }
+  if (instrJumpOffset(const_cast<Opcode*>(instr))) return 2;
+  return 1;
 }
 
 /**
@@ -478,7 +499,6 @@ void staticStreamer(TypedValue* tv, std::stringstream& out) {
     out << "\"" << tv->m_data.pstr->data() << "\"";
     break;
   }
-  case KindOfInt32:
   case KindOfInt64: {
     out << tv->m_data.num;
     break;
@@ -495,23 +515,67 @@ void staticStreamer(TypedValue* tv, std::stringstream& out) {
   }
 }
 
+const char* const locationNames[] = { "L", "C",
+                                      "GL", "GC",
+                                      "NL", "NC",
+                                      "SL", "SC",
+                                      "R" };
+const size_t locationNamesCount = sizeof(locationNames) /
+                                  sizeof(*locationNames);
+static_assert(locationNamesCount == NumLocationCodes,
+              "Location code missing for locationCodeString");
+
+const char* locationCodeString(LocationCode lcode) {
+  ASSERT(lcode >= 0 && lcode < NumLocationCodes);
+  return locationNames[lcode];
+}
+
+LocationCode parseLocationCode(const char* s) {
+  if (!*s) return InvalidLocationCode;
+
+  switch (*s) {
+  case 'L':   return LL;
+  case 'C':   return LC;
+  case 'R':   return LR;
+  default:
+    int incr = (s[1] == 'C');
+    switch (*s) {
+    case 'G': return LocationCode(LGL + incr);
+    case 'N': return LocationCode(LNL + incr);
+    case 'S': return LocationCode(LSL + incr);
+    }
+    return InvalidLocationCode;
+  }
+}
+
+const char* const memberNames[] = { "EC", "PC", "EL", "PL", "W" };
+const size_t memberNamesCount = sizeof(memberNames) /
+                                sizeof(*memberNames);
+
+static_assert(memberNamesCount == NumMemberCodes,
+             "Member code missing for memberCodeString");
+
+const char* memberCodeString(MemberCode mcode) {
+  ASSERT(mcode >= 0 && mcode < NumMemberCodes);
+  return memberNames[mcode];
+}
+
+MemberCode parseMemberCode(const char* s) {
+  int incr;
+  switch (*s) {
+  case 'W': return MW;
+  case 'E': incr = 0; break;
+  case 'P': incr = 1; break;
+  default:  return InvalidMemberCode;
+  }
+  switch (s[1]) {
+  case 'C': return MemberCode(MEC + incr);
+  case 'L': return MemberCode(MEL + incr);
+  default:  return InvalidMemberCode;
+  }
+}
+
 std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
-  // Location names
-  static const char* locationNames[] = { "L", "C",
-                                         "GL", "GC",
-                                         "NL", "NC",
-                                         "SL", "SC",
-                                         "R" };
-  static const int locationNamesCount =
-    (int)(sizeof(locationNames)/sizeof(*locationNames));
-  static_assert(locationNamesCount == NumLocationCodes,
-                "Location code missing in instrToString");
-  // Member names
-  static const char* memberNames[] = { "EC", "PC", "EL", "PL", "W" };
-  static const int memberNamesCount =
-    (int)(sizeof(memberNames)/sizeof(*memberNames));
-  static_assert(memberNamesCount == NumMemberCodes,
-                "Member code missing in instrToString");
   // IncDec names
   static const char* incdecNames[] = {
     "PreInc", "PostInc", "PreDec", "PostDec"
@@ -567,32 +631,32 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
   }                                                               \
 } while (false)
 
-#define READVEC() do {                                            \
-  int sz = *((int*)&*it);                                         \
-  it += sizeof(int) * 2;                                          \
-  const uint8_t* const start = it;                                \
-  out << " <";                                                    \
-  if (sz > 0) {                                                   \
-    int immVal = (int)*((uchar*)&*it);                            \
-    out << ((immVal >=0 && immVal < locationNamesCount) ?         \
-            locationNames[immVal] : "?");                         \
-    it += sizeof(uchar);                                          \
-    int numLocImms = numLocationCodeImms(LocationCode(immVal));   \
-    for (int i = 0; i < numLocImms; ++i) {                        \
-      out << ':' << decodeVariableSizeImm(&it);                   \
-    }                                                             \
-    while (reinterpret_cast<const uint8_t*>(it) - start < sz) {   \
-      immVal = (int)*((uchar*)&*it);                              \
-      out << " " << ((immVal >=0 && immVal < memberNamesCount) ?  \
-                     memberNames[immVal] : "?");                  \
-      it += sizeof(uchar);                                        \
-      if (memberCodeHasImm(MemberCode(immVal))) {                 \
-        out << ':' << decodeVariableSizeImm(&it);                 \
-      }                                                           \
-    }                                                             \
-    ASSERT(reinterpret_cast<const uint8_t*>(it) - start == sz);   \
-  }                                                               \
-  out << ">";                                                     \
+#define READVEC() do {                                                  \
+  int sz = *((int*)&*it);                                               \
+  it += sizeof(int) * 2;                                                \
+  const uint8_t* const start = it;                                      \
+  out << " <";                                                          \
+  if (sz > 0) {                                                         \
+    int immVal = (int)*((uchar*)&*it);                                  \
+    out << ((immVal >=0 && size_t(immVal) < locationNamesCount) ?       \
+            locationCodeString(LocationCode(immVal)) : "?");            \
+    it += sizeof(uchar);                                                \
+    int numLocImms = numLocationCodeImms(LocationCode(immVal));         \
+    for (int i = 0; i < numLocImms; ++i) {                              \
+      out << ':' << decodeVariableSizeImm(&it);                         \
+    }                                                                   \
+    while (reinterpret_cast<const uint8_t*>(it) - start < sz) {         \
+      immVal = (int)*((uchar*)&*it);                                    \
+      out << " " << ((immVal >=0 && size_t(immVal) < memberNamesCount) ? \
+                     memberCodeString(MemberCode(immVal)) : "?");       \
+      it += sizeof(uchar);                                              \
+      if (memberCodeHasImm(MemberCode(immVal))) {                       \
+        out << ':' << decodeVariableSizeImm(&it);                       \
+      }                                                                 \
+    }                                                                   \
+    ASSERT(reinterpret_cast<const uint8_t*>(it) - start == sz);         \
+  }                                                                     \
+  out << ">";                                                           \
 } while (false)
 
 #define READIVEC() do {                     \
@@ -731,10 +795,10 @@ const uint8_t* ImmVector::findLastMember() const {
     if (memberCodeHasImm(code)) {
       decodeVariableSizeImm(&vec);
     }
-    if (ret - m_start == m_length) {
+    if (vec - m_start == m_length) {
       return ret;
     }
-    ASSERT(ret - m_start < m_length);
+    ASSERT(vec - m_start < m_length);
   }
 
   NOT_REACHED();

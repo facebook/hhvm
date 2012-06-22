@@ -31,9 +31,6 @@ typedef unsigned char* TCA; // "Translation cache adddress."
 typedef const unsigned char* CTCA;
 
 using std::vector;
-// XXX: the g++ hash primitives are clowny.
-using __gnu_cxx::hash_map;
-using __gnu_cxx::hash_set;
 
 }}}
 

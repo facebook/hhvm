@@ -29,6 +29,7 @@
 #include <runtime/vm/event_hook.h>
 #include <runtime/vm/translator/translator-deps.h>
 #include <runtime/vm/translator/translator-x64.h>
+#include <runtime/vm/member_operations.h>
 #include <runtime/base/code_coverage.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/base/base_includes.h>
@@ -55,6 +56,7 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/vm/exception_gate.h>
 #include <runtime/vm/stats.h>
+#include <runtime/vm/type-profile.h>
 #include <runtime/base/server/source_root_info.h>
 #include <runtime/base/util/extended_logger.h>
 
@@ -76,6 +78,31 @@ namespace VM {
 #define OPTBLD_INLINE ALWAYS_INLINE
 #endif
 static const Trace::Module TRACEMOD = Trace::bcinterp;
+
+static int64 numRequests;
+
+static inline bool serverMode() {
+  static bool firstTime = true;
+  static bool cli;
+  if (UNLIKELY(firstTime)) {
+    cli = !strcmp(RuntimeOption::ExecutionMode, "cli");
+    firstTime = false;
+  }
+  return !cli;
+}
+
+static inline bool warmedUp() {
+  return (numRequests >= RuntimeOption::EvalJitWarmupRequests) ||
+    (!serverMode() && !RuntimeOption::EvalJitProfileRecord);
+}
+
+static inline bool shouldProfile() {
+  if (warmedUp()) return false;
+  if (serverMode()) {
+    return true;
+  }
+  return RuntimeOption::EvalJitProfileRecord;
+}
 
 template <>
 Class* arGetContextClassImpl<false>(const ActRec* ar) {
@@ -115,10 +142,6 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
   }
   return ar->m_func->cls();
 }
-
-// When MoreWarnings is set to true, the VM will match Zend on
-// warnings for SetOpM and CGetG
-static const bool MoreWarnings = false;
 
 static StaticString s_call_user_func(LITSTR_INIT("call_user_func"));
 static StaticString s_call_user_func_array(LITSTR_INIT("call_user_func_array"));
@@ -167,1471 +190,6 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 //=============================================================================
 // Miscellaneous helpers.
 
-static void
-objArrayAccess(TypedValue* base) {
-  ASSERT(base->m_type == KindOfObject);
-  if (!instanceOf(tvAsCVarRef(base), "ArrayAccess")) {
-    raise_error("Object does not implement ArrayAccess");
-  }
-}
-
-static TypedValue*
-objOffsetGet(TypedValue& tvRef, TypedValue* base,
-             CVarRef offset, bool validate=true) {
-  if (validate) {
-    objArrayAccess(base);
-  }
-  TypedValue* result;
-  ObjectData* obj = base->m_data.pobj;
-  if (LIKELY(obj->isInstance())) {
-    Instance* instance = static_cast<Instance*>(obj);
-    static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
-    const Func* method = instance->methodNamed(sd__offsetGet);
-    ASSERT(method != NULL);
-    instance->invokeUserMethod(&tvRef, method, CREATE_VECTOR1(offset));
-    result = &tvRef;
-  } else {
-    tvAsVariant(&tvRef)
-      = tvAsVariant(base).getArrayAccess()->___offsetget_lval(offset);
-    result = &tvRef;
-  }
-  return result;
-}
-
-static bool
-objOffsetExists(TypedValue* base, CVarRef offset) {
-  objArrayAccess(base);
-  TypedValue tvResult;
-  tvWriteUninit(&tvResult);
-  static StringData* sd__offsetExists
-    = StringData::GetStaticString("offsetExists");
-  ObjectData* obj = base->m_data.pobj;
-  if (LIKELY(obj->isInstance())) {
-    Instance* instance = static_cast<Instance*>(obj);
-    const Func* method = instance->methodNamed(sd__offsetExists);
-    ASSERT(method != NULL);
-    instance->invokeUserMethod(&tvResult, method, CREATE_VECTOR1(offset));
-  } else {
-    tvAsVariant(&tvResult) = tvAsVariant(base).getArrayAccess()
-      ->o_invoke(sd__offsetExists, CREATE_VECTOR1(offset));
-  }
-  tvCastToBooleanInPlace(&tvResult);
-  return bool(tvResult.m_data.num);
-}
-
-static void
-objOffsetSet(TypedValue* base, CVarRef offset, TypedValue* val,
-             bool validate=true) {
-  if (validate) {
-    objArrayAccess(base);
-  }
-  static StringData* sd__offsetSet = StringData::GetStaticString("offsetSet");
-  ObjectData* obj = base->m_data.pobj;
-  if (LIKELY(obj->isInstance())) {
-    Instance* instance = static_cast<Instance*>(obj);
-    const Func* method = instance->methodNamed(sd__offsetSet);
-    ASSERT(method != NULL);
-    TypedValue tvResult;
-    tvWriteUninit(&tvResult);
-    instance->invokeUserMethod(&tvResult, method,
-                               CREATE_VECTOR2(offset, tvAsCVarRef(val)));
-    tvRefcountedDecRef(&tvResult);
-  } else {
-    tvAsVariant(base).getArrayAccess()
-      ->o_invoke(sd__offsetSet, CREATE_VECTOR2(offset, tvAsCVarRef(val)));
-  }
-}
-
-static void
-objOffsetUnset(TypedValue* base, CVarRef offset) {
-  objArrayAccess(base);
-  static StringData* sd__offsetUnset
-    = StringData::GetStaticString("offsetUnset");
-  ObjectData* obj = base->m_data.pobj;
-  if (LIKELY(obj->isInstance())) {
-    Instance* instance = static_cast<Instance*>(obj);
-    const Func* method = instance->methodNamed(sd__offsetUnset);
-    ASSERT(method != NULL);
-    TypedValue tv;
-    tvWriteUninit(&tv);
-    instance->invokeUserMethod(&tv, method, CREATE_VECTOR1(offset));
-    tvRefcountedDecRef(&tv);
-  } else {
-    tvAsVariant(base).getArrayAccess()
-      ->o_invoke(sd__offsetUnset, CREATE_VECTOR1(offset));
-  }
-}
-
-static inline String prepareKey(TypedValue* tv) {
-  String ret;
-  if (IS_STRING_TYPE(tv->m_type)) {
-    ret = tv->m_data.pstr;
-  } else {
-    ret = tvAsCVarRef(tv).toString();
-  }
-  return ret;
-}
-
-static inline void opPre(TypedValue*& base, DataType& type) {
-  // Get inner variant if necessary.
-  type = base->m_type;
-  if (type == KindOfVariant) {
-    base = base->m_data.ptv;
-    type = base->m_type;
-  }
-}
-
-template <bool warn>
-static inline TypedValue* ElemArray(TypedValue* base,
-                                    TypedValue* key) {
-  TypedValue* result;
-  bool isHphpArray = IsHphpArray(base->m_data.parr);
-  if (key->m_type == KindOfInt64) {
-    if (LIKELY(isHphpArray)) {
-      result = (static_cast<HphpArray*>(base->m_data.parr))
-               ->nvGet(key->m_data.num);
-      if (result == NULL) {
-        result = (TypedValue*)&null_variant;
-      }
-    } else {
-      result = (TypedValue*)&tvCellAsVariant(base).asArrRef()
-        .rvalAtRef(key->m_data.num);
-    }
-  } else if (IS_STRING_TYPE(key->m_type)) {
-    if (LIKELY(isHphpArray)) {
-      int64 n;
-      if (!key->m_data.pstr->isStrictlyInteger(n)) {
-        result = (static_cast<HphpArray*>(base->m_data.parr))
-                 ->nvGet(key->m_data.pstr);
-      } else {
-        result = (static_cast<HphpArray*>(base->m_data.parr))->nvGet(n);
-      }
-
-      if (result == NULL) {
-        result = (TypedValue*)&null_variant;
-      }
-    } else {
-      result = (TypedValue*)&tvCellAsVariant(base).asArrRef()
-        .rvalAtRef(tvCellAsVariant(key).asCStrRef());
-    }
-  } else {
-    result = (TypedValue*)&tvCellAsVariant(base).asArrRef()
-      .rvalAtRef(tvCellAsCVarRef(key));
-  }
-
-  if (UNLIKELY(result->m_type == KindOfUninit)) {
-    result = (TypedValue*)&init_null_variant;
-    if (warn) {
-      raise_notice(Strings::UNDEFINED_INDEX,
-                   tvAsCVarRef(key).toString().data());
-    }
-  }
-  return result;
-}
-
-// $result = $base[$key];
-template <bool warn>
-static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
-                               TypedValue* base, bool& baseStrOff,
-                               TypedValue* key) {
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    result = (TypedValue*)&init_null_variant;
-    break;
-  }
-  case KindOfBoolean: {
-    result = (TypedValue*)&init_null_variant;
-    break;
-  }
-  case KindOfInt32:
-  case KindOfInt64: {
-    result = (TypedValue*)&init_null_variant;
-    break;
-  }
-  case KindOfDouble: {
-    result = (TypedValue*)&init_null_variant;
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (baseStrOff) {
-      raise_error("Cannot use string offset as an array");
-    }
-    int64 x = IS_INT_TYPE(key->m_type)
-              ? key->m_data.num
-              : int64(tvCellAsCVarRef(key));
-    if (x < 0 || x >= base->m_data.pstr->size()) {
-      if (warn) {
-        raise_warning("Out of bounds");
-      }
-      static StringData* sd = StringData::GetStaticString("");
-      tvScratch.m_data.pstr = sd;
-      tvScratch._count = 0;
-      tvScratch.m_type = KindOfString;
-    } else {
-      tvAsVariant(&tvScratch) = base->m_data.pstr->getChar(x);
-    }
-    result = &tvScratch;
-    baseStrOff = true;
-    break;
-  }
-  case KindOfArray: {
-    result = ElemArray<warn>(base, key);
-    break;
-  }
-  case KindOfObject: {
-    result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
-    break;
-  }
-  default: {
-    ASSERT(false);
-    result = NULL;
-  }
-  }
-  return result;
-}
-
-template <bool warn>
-static inline TypedValue* ElemDArray(TypedValue* base, TypedValue* key) {
-  TypedValue* result;
-  bool defined = !warn || tvAsVariant(base).asArrRef()
-                          .exists(tvAsCVarRef(key));
-  if (key->m_type == KindOfInt64) {
-    result = (TypedValue*)&tvAsVariant(base).asArrRef()
-                                            .lvalAt(key->m_data.num);
-  } else {
-    result = (TypedValue*)&tvAsVariant(base).asArrRef()
-                                            .lvalAt(tvCellAsCVarRef(key));
-  }
-
-  if (warn) {
-    if (!defined) {
-      raise_notice(Strings::UNDEFINED_INDEX,
-                   tvAsCVarRef(key).toString().data());
-    }
-  }
-
-  return result;
-}
-
-// $base[$key] = ...
-// \____ ____/
-//      v
-//   $result
-template <bool warn>
-static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
-                                TypedValue* base, TypedValue* key) {
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    Array a = Array::Create();
-    result = (TypedValue*)&a.lvalAt(tvCellAsCVarRef(key));
-    if (warn) {
-      raise_notice(Strings::UNDEFINED_INDEX,
-                   tvAsCVarRef(key).toString().data());
-    }
-    tvAsVariant(base) = a;
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-      tvWriteUninit(&tvScratch);
-      result = &tvScratch;
-    } else {
-      Array a = Array::Create();
-      result = (TypedValue*)&a.lvalAt(tvCellAsCVarRef(key));
-      if (warn) {
-        raise_notice(Strings::UNDEFINED_INDEX,
-                     tvAsCVarRef(key).toString().data());
-      }
-      tvAsVariant(base) = a;
-    }
-    break;
-  }
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble: {
-    raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-    tvWriteUninit(&tvScratch);
-    result = &tvScratch;
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() == 0) {
-      Array a = Array::Create();
-      result = (TypedValue*)&a.lvalAt(tvCellAsCVarRef(key));
-      if (warn) {
-        raise_notice(Strings::UNDEFINED_INDEX,
-                     tvAsCVarRef(key).toString().data());
-      }
-      tvAsVariant(base) = a;
-    } else {
-      raise_error("Operator not supported for strings");
-      result = NULL; // Silence compiler warning.
-    }
-    break;
-  }
-  case KindOfArray: {
-    result = ElemDArray<warn>(base, key);
-    break;
-  }
-  case KindOfObject: {
-    result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
-    break;
-  }
-  default: {
-    ASSERT(false);
-    result = NULL; // Silence compiler warning.
-  }
-  }
-  return result;
-}
-
-// $base[$key] = ...
-// \____ ____/
-//      v
-//   $result
-static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
-                                TypedValue* base, TypedValue* key) {
-  TypedValue* result = NULL;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull:
-  case KindOfBoolean:
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble: {
-    tvWriteUninit(&tvScratch);
-    result = &tvScratch;
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    raise_error("Operator not supported for strings");
-    break;
-  }
-  case KindOfArray: {
-    bool defined = tvAsVariant(base).asArrRef()
-                      .exists(tvAsCVarRef(key));
-    if (defined) {
-      if (key->m_type == KindOfInt64) {
-        result = (TypedValue*)&tvAsVariant(base).asArrRef()
-                                                .lvalAt(key->m_data.num);
-      } else {
-        result = (TypedValue*)&tvAsVariant(base).asArrRef()
-                                                .lvalAt(tvCellAsCVarRef(key));
-      }
-    } else {
-      tvWriteUninit(&tvScratch);
-      result = &tvScratch;
-    }
-    break;
-  }
-  case KindOfObject: {
-    result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
-    break;
-  }
-  default: {
-    ASSERT(false);
-    result = NULL;
-  }
-  }
-  return result;
-}
-
-// $result = ($base[] = ...);
-static TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                           TypedValue* base) {
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    Array a = Array::Create();
-    result = (TypedValue*)&a.lvalAt();
-    tvAsVariant(base) = a;
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      raise_warning("Invalid NewElem operand");
-      tvWriteUninit(&tvScratch);
-      result = &tvScratch;
-    } else {
-      Array a = Array::Create();
-      result = (TypedValue*)&a.lvalAt();
-      tvAsVariant(base) = a;
-    }
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() == 0) {
-      Array a = Array::Create();
-      result = (TypedValue*)&a.lvalAt();
-      tvAsVariant(base) = a;
-    } else {
-      raise_warning("Invalid NewElem operand");
-      tvWriteUninit(&tvScratch);
-      result = &tvScratch;
-    }
-    break;
-  }
-  case KindOfArray: {
-    result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
-    break;
-  }
-  case KindOfObject: {
-    result = objOffsetGet(tvRef, base, null_variant);
-    break;
-  }
-  default: {
-    raise_warning("Invalid NewElem operand");
-    tvWriteUninit(&tvScratch);
-    result = &tvScratch;
-    break;
-  }
-  }
-  return result;
-}
-
-static inline void SetElemEmptyish(TypedValue* base, TypedValue* key,
-                                   Cell* value) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
-  tvAsVariant(base) = a;
-  tvDupCell((TypedValue*)value, result);
-}
-static inline void SetElemNumberish(Cell* value) {
-  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvRefcountedDecRefCell((TypedValue*)value);
-  tvWriteNull((TypedValue*)value);
-}
-// SetElem() leaves the result in 'value', rather than returning it as in
-// SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
-// get around.
-static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    SetElemEmptyish(base, key, value);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      SetElemNumberish(value);
-    } else {
-      SetElemEmptyish(base, key, value);
-    }
-    break;
-  }
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble: {
-    SetElemNumberish(value);
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    int baseLen = base->m_data.pstr->size();
-    if (baseLen == 0) {
-      SetElemEmptyish(base, key, value);
-    } else {
-      // Convert key to string offset.
-      int64 x;
-      {
-        TypedValue tv;
-        tvDup(key, &tv);
-        tvCastToInt64InPlace(&tv);
-        x = tv.m_data.num;
-      }
-      if (x < 0) {
-        raise_warning("Illegal string offset: %lld", x);
-        break;
-      }
-      // Compute how long the resulting string will be.
-      int slen;
-      if (x >= baseLen) {
-        slen = x + 1;
-      } else {
-        slen = baseLen;
-      }
-      // Extract the first character of (string)value.
-      char y[2];
-      {
-        TypedValue tv;
-        tvDup(value, &tv);
-        tvCastToStringInPlace(&tv);
-        if (tv.m_data.pstr->size() > 0) {
-          y[0] = tv.m_data.pstr->data()[0];
-          y[1] = '\0';
-        } else {
-          y[0] = '\0';
-        }
-        tvRefcountedDecRef(&tv);
-      }
-      // Create and save the result.
-      if (x >= 0 && x < baseLen && base->m_data.pstr->getCount() <= 1) {
-        // Modify base in place.  This is safe because the LHS owns the only
-        // reference.
-        base->m_data.pstr->setChar(x, y[0]);
-      } else {
-        char* s = (char*)malloc(slen + 1);
-        if (s == NULL) {
-          raise_error("Out of memory");
-        }
-        memcpy(s, base->m_data.pstr->data(), baseLen);
-        if (x > baseLen) {
-          memset(&s[baseLen], ' ', slen - baseLen - 1);
-        }
-        s[x] = y[0];
-        s[slen] = '\0';
-        StringData* sd = NEW(StringData)(s, slen, AttachString);
-        sd->incRefCount();
-        base->m_data.pstr = sd;
-        base->m_type = KindOfString;
-      }
-      // Push y onto the stack.
-      tvRefcountedDecRef(value);
-      StringData* sd = NEW(StringData)(y, strlen(y), CopyString);
-      sd->incRefCount();
-      value->m_data.pstr = sd;
-      value->_count = 0;
-      value->m_type = KindOfString;
-    }
-    break;
-  }
-  case KindOfArray: {
-    ArrayData* a = base->m_data.parr;
-    ArrayData* newData = NULL;
-    bool copy = (a->getCount() > 1)
-                || (value->m_type == KindOfArray && value->m_data.parr == a);
-    ASSERT(key->m_type != KindOfVariant);
-    if (key->m_type <= KindOfNull) {
-      newData = a->set(empty_string, tvCellAsCVarRef(value), copy);
-    } else if (IS_STRING_TYPE(key->m_type)) {
-      int64 n;
-      if (key->m_data.pstr->isStrictlyInteger(n)) {
-        newData = a->set(n, tvCellAsCVarRef(value), copy);
-      } else {
-        newData = a->set(tvAsCVarRef(key), tvCellAsCVarRef(value), copy);
-      }
-    } else if (key->m_type != KindOfArray && key->m_type != KindOfObject) {
-      newData = a->set(tvAsCVarRef(key).toInt64(), tvCellAsCVarRef(value),
-                       copy);
-    } else {
-      raise_warning("Illegal offset type");
-      // Assignment failed, so the result is null rather than the RHS.
-      // XXX This does not match bytecode.specification, but it does roughly
-      // match Zend and hphpi behavior.
-      if (IS_REFCOUNTED_TYPE(value->m_type)) {
-        tvDecRef(value);
-      }
-      tvWriteNull(value);
-    }
-
-    if (newData != NULL && newData != a) {
-      newData->incRefCount();
-      if (a->decRefCount() == 0) {
-        a->release();
-      }
-      base->m_data.parr = newData;
-    }
-    break;
-  }
-  case KindOfObject: {
-    objOffsetSet(base, tvAsCVarRef(key), (TypedValue*)value);
-    break;
-  }
-  default: ASSERT(false);
-  }
-}
-
-static inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
-  Array a = Array::Create();
-  a.append(tvCellAsCVarRef(value));
-  tvAsVariant(base) = a;
-}
-static inline void SetNewElemNumberish(Cell* value) {
-  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvRefcountedDecRefCell((TypedValue*)value);
-  tvWriteNull((TypedValue*)value);
-}
-static inline void SetNewElem(TypedValue* base, Cell* value) {
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    SetNewElemEmptyish(base, value);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      SetNewElemNumberish(value);
-    } else {
-      SetNewElemEmptyish(base, value);
-    }
-    break;
-  }
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble: {
-    SetNewElemNumberish(value);
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    int baseLen = base->m_data.pstr->size();
-    if (baseLen == 0) {
-      SetNewElemEmptyish(base, value);
-    } else {
-      raise_error("[] operator not supported for strings");
-    }
-    break;
-  }
-  case KindOfArray: {
-    ArrayData* a = base->m_data.parr;
-    bool copy = (a->getCount() > 1)
-                || (value->m_type == KindOfArray && value->m_data.parr == a);
-    a = a->append(tvCellAsCVarRef(value), copy);
-    if (a) {
-      a->incRefCount();
-      base->m_data.parr->decRefCount();
-      base->m_data.parr = a;
-    }
-    break;
-  }
-  case KindOfObject: {
-    objOffsetSet(base, init_null_variant, (TypedValue*)value);
-    break;
-  }
-  default: ASSERT(false);
-  }
-}
-
-static inline TypedValue* SetOpElemEmptyish(unsigned char op, TypedValue* base,
-                                            TypedValue* key, Cell* rhs) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
-  tvAsVariant(base) = a;
-  if (MoreWarnings) {
-    raise_notice(Strings::UNDEFINED_INDEX,
-                 tvAsCVarRef(key).toString().data());
-  }
-  SETOP_BODY(result, op, rhs);
-  return result;
-}
-static inline TypedValue* SetOpElemNumberish(TypedValue& tvScratch) {
-  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&tvScratch);
-  return &tvScratch;
-}
-static inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                    unsigned char op, TypedValue* base,
-                                    TypedValue* key, Cell* rhs) {
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    result = SetOpElemEmptyish(op, base, key, rhs);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      result = SetOpElemNumberish(tvScratch);
-    } else {
-      result = SetOpElemEmptyish(op, base, key, rhs);
-    }
-    break;
-  }
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble: {
-    result = SetOpElemNumberish(tvScratch);
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() != 0) {
-      raise_error("Invalid SetOpElem operand");
-    }
-    result = SetOpElemEmptyish(op, base, key, rhs);
-    break;
-  }
-  case KindOfArray: {
-    result = ElemDArray<MoreWarnings>(base, key);
-    SETOP_BODY(result, op, rhs);
-    break;
-  }
-  case KindOfObject: {
-    result = objOffsetGet(tvRef, base, tvAsCVarRef(key));
-    SETOP_BODY(result, op, rhs);
-    objOffsetSet(base, tvAsCVarRef(key), result, false);
-    break;
-  }
-  default: {
-    ASSERT(false);
-    result = NULL; // Silence compiler warning.
-  }
-  }
-  return result;
-}
-
-static inline TypedValue* SetOpNewElemEmptyish(unsigned char op,
-                                               TypedValue* base, Cell* rhs) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt();
-  tvAsVariant(base) = a;
-  SETOP_BODY(result, op, rhs);
-  return result;
-}
-static inline TypedValue* SetOpNewElemNumberish(TypedValue& tvScratch) {
-  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&tvScratch);
-  return &tvScratch;
-}
-static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                       unsigned char op, TypedValue* base,
-                                       Cell* rhs) {
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    result = SetOpNewElemEmptyish(op, base, rhs);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      result = SetOpNewElemNumberish(tvScratch);
-    } else {
-      result = SetOpNewElemEmptyish(op, base, rhs);
-    }
-    break;
-  }
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble: {
-    result = SetOpNewElemNumberish(tvScratch);
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() != 0) {
-      raise_error("[] operator not supported for strings");
-    }
-    result = SetOpNewElemEmptyish(op, base, rhs);
-    break;
-  }
-  case KindOfArray: {
-    result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
-    SETOP_BODY(result, op, rhs);
-    break;
-  }
-  case KindOfObject: {
-    result = objOffsetGet(tvRef, base, init_null_variant);
-    SETOP_BODY(result, op, rhs);
-    objOffsetSet(base, init_null_variant, result, false);
-    break;
-  }
-  default: {
-    ASSERT(false);
-    result = NULL; // Silence compiler warning.
-  }
-  }
-  return result;
-}
-
-static inline void IncDecElemEmptyish(unsigned char op, TypedValue* base,
-                                      TypedValue* key, TypedValue& dest) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
-  tvAsVariant(base) = a;
-  if (MoreWarnings) {
-    raise_notice(Strings::UNDEFINED_INDEX,
-                 tvAsCVarRef(key).toString().data());
-  }
-  IncDecBody(op, result, &dest);
-}
-static inline void IncDecElemNumberish(TypedValue& dest) {
-  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&dest);
-}
-static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
-                              unsigned char op, TypedValue* base,
-                              TypedValue* key, TypedValue& dest) {
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    IncDecElemEmptyish(op, base, key, dest);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      IncDecElemNumberish(dest);
-    } else {
-      IncDecElemEmptyish(op, base, key, dest);
-    }
-    break;
-  }
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble: {
-    IncDecElemNumberish(dest);
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() != 0) {
-      raise_error("Invalid IncDecElem operand");
-    }
-    IncDecElemEmptyish(op, base, key, dest);
-    break;
-  }
-  case KindOfArray: {
-    TypedValue* result = ElemDArray<MoreWarnings>(base, key);
-    IncDecBody(op, result, &dest);
-    break;
-  }
-  case KindOfObject: {
-    TypedValue* result = objOffsetGet(tvRef, base, tvAsCVarRef(key));
-    IncDecBody(op, result, &dest);
-    break;
-  }
-  default: ASSERT(false);
-  }
-}
-
-static inline void IncDecNewElemEmptyish(unsigned char op, TypedValue* base,
-                                         TypedValue& dest) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt();
-  tvAsVariant(base) = a;
-  IncDecBody(op, result, &dest);
-}
-static inline void IncDecNewElemNumberish(TypedValue& dest) {
-  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&dest);
-}
-static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                 unsigned char op, TypedValue* base,
-                                 TypedValue& dest) {
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    IncDecNewElemEmptyish(op, base, dest);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      IncDecNewElemNumberish(dest);
-    } else {
-      IncDecNewElemEmptyish(op, base, dest);
-    }
-    break;
-  }
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble: {
-    IncDecNewElemNumberish(dest);
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() != 0) {
-      raise_error("Invalid IncDecNewElem operand");
-    }
-    IncDecNewElemEmptyish(op, base, dest);
-    break;
-  }
-  case KindOfArray: {
-    TypedValue* result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
-    IncDecBody(op, result, &dest);
-    break;
-  }
-  case KindOfObject: {
-    TypedValue* result = objOffsetGet(tvRef, base,
-                                      init_null_variant);
-    IncDecBody(op, result, &dest);
-    break;
-  }
-  default: ASSERT(false);
-  }
-}
-
-void IncDecBody(unsigned char op, TypedValue* fr, TypedValue* to) {
-  if (fr->m_type == KindOfInt64) {
-    switch ((IncDecOp)op) {
-    case PreInc: {
-      ++(fr->m_data.num);
-      tvDupCell(fr, to);
-      break;
-    }
-    case PostInc: {
-      tvDupCell(fr, to);
-      ++(fr->m_data.num);
-      break;
-    }
-    case PreDec: {
-      --(fr->m_data.num);
-      tvDupCell(fr, to);
-      break;
-    }
-    case PostDec: {
-      tvDupCell(fr, to);
-      --(fr->m_data.num);
-      break;
-    }
-    default: ASSERT(false);
-    }
-    return;
-  }
-  if (fr->m_type == KindOfUninit) {
-    ActRec* fp = g_vmContext->m_fp;
-    size_t pind = ((uintptr_t(fp) - uintptr_t(fr)) / sizeof(TypedValue)) - 1;
-    if (pind < fp->m_func->pnames().size()) {
-      // Only raise a warning if fr points to a local variable
-      raise_notice(Strings::UNDEFINED_VARIABLE,
-                   fp->m_func->pnames()[pind]->data());
-    }
-    // Convert uninit null to null so that we don't write out an uninit null
-    // to the eval stack for PostInc and PostDec.
-    fr->m_type = KindOfNull;
-  }
-  switch ((IncDecOp)op) {
-  case PreInc: {
-    ++(tvAsVariant(fr));
-    tvReadCell(fr, to);
-    break;
-  }
-  case PostInc: {
-    tvReadCell(fr, to);
-    ++(tvAsVariant(fr));
-    break;
-  }
-  case PreDec: {
-    --(tvAsVariant(fr));
-    tvReadCell(fr, to);
-    break;
-  }
-  case PostDec: {
-    tvReadCell(fr, to);
-    --(tvAsVariant(fr));
-    break;
-  }
-  default: ASSERT(false);
-  }
-}
-
-static inline void UnsetElem(TypedValue* base, TypedValue* member) {
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfStaticString:
-  case KindOfString: {
-    raise_error("Cannot unset string offsets");
-  }
-  case KindOfArray: {
-    ArrayData* a = base->m_data.parr;
-    bool copy = (a->getCount() > 1);
-    int64 n;
-    if (IS_STRING_TYPE(member->m_type)) {
-      if (member->m_data.pstr->isStrictlyInteger(n)) {
-        a = a->remove(n, copy);
-      } else {
-        a = a->remove(tvAsCVarRef(member), copy);
-      }
-    } else if (member->m_type == KindOfInt32 || member->m_type == KindOfInt64) {
-      a = a->remove(member->m_data.num, copy);
-    } else {
-      CVarRef memberCVR = tvAsCVarRef(member);
-      const VarNR &key = memberCVR.toKey();
-      if (key.isNull()) {
-        return;
-      }
-      a = a->remove(key, copy);
-    }
-    if (a) {
-      a->incRefCount();
-      base->m_data.parr->decRefCount();
-      base->m_data.parr = a;
-    }
-    break;
-  }
-  case KindOfObject: {
-    objOffsetUnset(base, tvAsCVarRef(member));
-    break;
-  }
-  default: break; // Do nothing.
-  }
-}
-
-template <bool warn>
-static inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
-  TV_WRITE_NULL(&tvScratch);
-  result = &tvScratch;
-  if (warn) {
-    raise_warning("Cannot access property on non-object");
-  }
-  return KindOfNull;
-}
-template <bool warn, bool define>
-static inline DataType propPreStdclass(TypedValue& tvScratch,
-                                       TypedValue*& result, TypedValue* base,
-                                       TypedValue* key, StringData*& keySD) {
-  if (!define) {
-    return propPreNull<warn>(tvScratch, result);
-  }
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-  obj->incRefCount();
-  result = base;
-  if (warn) {
-    raise_warning("Cannot access property on non-object");
-  }
-  keySD = prepareKey(key).detach();
-  return KindOfObject;
-}
-
-template <bool warn, bool define, bool issetEmpty>
-static inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
-                               TypedValue*& base, TypedValue* key,
-                               StringData*& keySD) {
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    return propPreStdclass<warn, define>(tvScratch, result, base, key, keySD);
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      return propPreNull<warn>(tvScratch, result);
-    } else {
-      return propPreStdclass<warn, define>(tvScratch, result, base, key, keySD);
-    }
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() != 0) {
-      return propPreNull<warn>(tvScratch, result);
-    } else {
-      return propPreStdclass<warn, define>(tvScratch, result, base, key, keySD);
-    }
-  }
-  case KindOfArray: {
-    return issetEmpty ? KindOfArray : propPreNull<warn>(tvScratch, result);
-  }
-  case KindOfObject: {
-    keySD = prepareKey(key).detach();
-    return KindOfObject;
-  }
-  default: {
-    return propPreNull<warn>(tvScratch, result);
-  }
-  }
-}
-
-static inline void propPost(StringData* keySD) {
-  LITSTR_DECREF(keySD);
-}
-
-// define == false:
-//   $result = $base->$key;
-//
-// define == true:
-//   $base->$key = ...
-//   \____ ____/
-//        v
-//     $result
-template <bool warn, bool define, bool unset>
-static inline TypedValue* prop(TypedValue& tvScratch, TypedValue& tvRef,
-                               Class* ctx, TypedValue* base, TypedValue* key) {
-  ASSERT(!warn || !unset);
-  TypedValue* result = NULL;
-  StringData* keySD;
-  DataType t = propPre<warn, define, false>(tvScratch, result, base, key,
-                                            keySD);
-  if (t == KindOfNull) {
-    return result;
-  }
-  ASSERT(t == KindOfObject);
-  // Get property.
-  if (LIKELY(base->m_data.pobj->isInstance())) {
-    Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-    result = &tvScratch;
-#define ARGS result, tvRef, ctx, keySD
-    if (!warn && !(define || unset)) instance->prop  (ARGS);
-    if (!warn &&  (define || unset)) instance->propD (ARGS);
-    if ( warn && !define           ) instance->propW (ARGS);
-    if ( warn &&  define           ) instance->propWD(ARGS);
-#undef ARGS
-  } else {
-    // Extension class instance.
-    TV_WRITE_UNINIT(&tvRef);
-    CStrRef ctxName = ctx ? ctx->nameRef() : null_string;
-    if (define || unset) {
-      result = (TypedValue*)&base->m_data.pobj->o_lval(StrNR(keySD),
-                                                       tvAsCVarRef(&tvRef),
-                                                       ctxName);
-    } else {
-      tvAsVariant(&tvRef) = base->m_data.pobj->o_get(StrNR(keySD),
-                                                     warn, /* error */
-                                                     ctxName);
-      result = &tvRef;
-    }
-  }
-  propPost(keySD);
-  return result;
-}
-
-template <bool useEmpty>
-static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                  TypedValue* base, bool baseStrOff,
-                                  TypedValue* key) {
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfStaticString:
-  case KindOfString: {
-    if (baseStrOff) {
-      return useEmpty;
-    }
-    TypedValue tv;
-    tvDup(key, &tv);
-    tvCastToInt64InPlace(&tv);
-    int64 x = tv.m_data.num;
-    if (x < 0 || x >= base->m_data.pstr->size()) {
-      return useEmpty;
-    }
-    if (!useEmpty) {
-      return true;
-    }
-    tvAsVariant(&tvScratch) = base->m_data.pstr->getChar(x);
-    result = &tvScratch;
-    break;
-  }
-  case KindOfArray: {
-    result = ElemArray<false>(base, key);
-    break;
-  }
-  case KindOfObject: {
-    if (!useEmpty) {
-      return objOffsetExists(base, tvAsCVarRef(key));
-    }
-    if (!objOffsetExists(base, tvAsCVarRef(key))) {
-      return true;
-    }
-    result = objOffsetGet(tvRef, base, tvAsCVarRef(key), false);
-    break;
-  }
-  default: {
-    return useEmpty;
-  }
-  }
-
-  if (useEmpty) {
-    return empty(tvAsCVarRef(result));
-  } else {
-    return isset(tvAsCVarRef(result));
-  }
-}
-
-template <bool useEmpty>
-static inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
-                                  TypedValue* key) {
-  StringData* keySD;
-  TypedValue tvScratch;
-  TypedValue* result = NULL;
-  DataType t = propPre<false, false, true>(tvScratch, result, base, key,
-                                           keySD);
-  if (t == KindOfNull) {
-    return useEmpty;
-  }
-  if (t == KindOfObject) {
-    bool issetEmptyResult;
-    if (LIKELY(base->m_data.pobj->isInstance())) {
-      Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-      issetEmptyResult = useEmpty ?
-                    instance->propEmpty(ctx, keySD) :
-                    instance->propIsset(ctx, keySD);
-    } else {
-      // Extension class instance.
-      CStrRef ctxName = ctx ? ctx->nameRef() : null_string;
-      issetEmptyResult = useEmpty ?
-                    base->m_data.pobj->o_empty(StrNR(keySD), ctxName) :
-                    base->m_data.pobj->o_isset(StrNR(keySD), ctxName);
-    }
-    propPost(keySD);
-    return issetEmptyResult;
-  } else {
-    ASSERT(t == KindOfArray);
-    return useEmpty;
-  }
-}
-
-static inline void SetPropNull(Cell* val) {
-  tvRefcountedDecRefCell(val);
-  tvWriteNull(val);
-  raise_warning("Cannot access property on non-object");
-}
-static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
-                                   Cell* val) {
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
-  obj->incRefCount();
-  StringData* keySD = prepareKey(key).detach();
-  obj->setProp(NULL, keySD, (TypedValue*)val);
-  if (keySD->decRefCount() == 0) {
-    keySD->release();
-  }
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->_count = 0;
-  base->m_data.pobj = obj;
-}
-// $base->$key = $val
-static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
-                           Cell* val) {
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    SetPropStdclass(base, key, val);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      SetPropNull(val);
-    } else {
-      SetPropStdclass(base, key, val);
-    }
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() != 0) {
-      SetPropNull(val);
-    } else {
-      SetPropStdclass(base, key, val);
-    }
-    break;
-  }
-  case KindOfObject: {
-    StringData* keySD = prepareKey(key).detach();
-    // Set property.
-    if (LIKELY(base->m_data.pobj->isInstance())) {
-      Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-      instance->setProp(ctx, keySD, val);
-    } else {
-      // Extension class instance.
-      base->m_data.pobj->o_set(keySD, tvCellAsCVarRef(val));
-    }
-    LITSTR_DECREF(keySD);
-    break;
-  }
-  default: {
-    SetPropNull(val);
-    break;
-  }
-  }
-}
-
-static inline TypedValue* SetOpPropNull(TypedValue& tvScratch) {
-  raise_warning("Attempt to assign property of non-object");
-  tvWriteNull(&tvScratch);
-  return &tvScratch;
-}
-static inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
-                                            TypedValue* base, TypedValue* key,
-                                            Cell* rhs) {
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
-  obj->incRefCount();
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->_count = 0;
-  base->m_data.pobj = obj;
-
-  StringData* keySD = prepareKey(key).detach();
-  tvWriteNull(&tvRef);
-  SETOP_BODY(&tvRef, op, rhs);
-  obj->setProp(NULL, keySD, &tvRef);
-  LITSTR_DECREF(keySD);
-  return &tvRef;
-}
-// $base->$key <op>= $rhs
-static inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
-                                    Class* ctx, unsigned char op,
-                                    TypedValue* base, TypedValue* key,
-                                    Cell* rhs) {
-  TypedValue* result;
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    result = SetOpPropStdclass(tvRef, op, base, key, rhs);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      result = SetOpPropNull(tvScratch);
-    } else {
-      result = SetOpPropStdclass(tvRef, op, base, key, rhs);
-    }
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() != 0) {
-      result = SetOpPropNull(tvScratch);
-    } else {
-      result = SetOpPropStdclass(tvRef, op, base, key, rhs);
-    }
-    break;
-  }
-  case KindOfObject: {
-    if (LIKELY(base->m_data.pobj->isInstance())) {
-      StringData* keySD = prepareKey(key).detach();
-      Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-      result = instance->setOpProp(tvRef, ctx, op, keySD, rhs);
-      LITSTR_DECREF(keySD);
-    } else {
-      // Extension class instance.
-      // XXX Not entirely spec-compliant.
-      result = prop<true, false, false>(tvScratch, tvRef, ctx, base, key);
-      SETOP_BODY(result, op, rhs);
-    }
-    break;
-  }
-  default: {
-    result = SetOpPropNull(tvScratch);
-    break;
-  }
-  }
-  return result;
-}
-
-static inline void IncDecPropNull(TypedValue& dest) {
-  raise_warning("Attempt to increment/decrement property of non-object");
-  tvWriteNull(&dest);
-}
-static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
-                                      TypedValue* key, TypedValue& dest) {
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
-  obj->incRefCount();
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->_count = 0;
-  base->m_data.pobj = obj;
-
-  StringData* keySD = prepareKey(key).detach();
-  TypedValue tv;
-  tvWriteNull(&tv);
-  IncDecBody(op, (&tv), &dest);
-  obj->setProp(NULL, keySD, &dest);
-  ASSERT(!IS_REFCOUNTED_TYPE(tv.m_type));
-  LITSTR_DECREF(keySD);
-}
-static inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
-                              Class* ctx, unsigned char op,
-                              TypedValue* base, TypedValue* key,
-                              TypedValue& dest) {
-  DataType type;
-  opPre(base, type);
-  switch (type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    IncDecPropStdclass(op, base, key, dest);
-    break;
-  }
-  case KindOfBoolean: {
-    if (base->m_data.num) {
-      IncDecPropNull(dest);
-    } else {
-      IncDecPropStdclass(op, base, key, dest);
-    }
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (base->m_data.pstr->size() != 0) {
-      IncDecPropNull(dest);
-    } else {
-      IncDecPropStdclass(op, base, key, dest);
-    }
-    break;
-  }
-  case KindOfObject: {
-    if (LIKELY(base->m_data.pobj->isInstance())) {
-      StringData* keySD = prepareKey(key).detach();
-      Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-      instance->incDecProp(tvRef, ctx, op, keySD, dest);
-      LITSTR_DECREF(keySD);
-    } else {
-      // Extension class instance.
-      // XXX Not entirely spec-compliant.
-      TypedValue* result = prop<true, true, false>(tvScratch, tvRef,
-                                                   ctx, base, key);
-      IncDecBody(op, result, &dest);
-    }
-    break;
-  }
-  default: {
-    IncDecPropNull(dest);
-    break;
-  }
-  }
-}
-
-static inline void UnsetProp(Class* ctx, TypedValue* base,
-                             TypedValue* key) {
-  DataType type;
-  opPre(base, type);
-  // Validate base.
-  if (UNLIKELY(type != KindOfObject)) {
-    // Do nothing.
-    return;
-  }
-  // Prepare key.
-  StringData* keySD = prepareKey(key).detach();
-  // Unset property.
-  if (LIKELY(base->m_data.pobj->isInstance())) {
-    Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-    instance->unsetProp(ctx, keySD);
-  } else {
-    // Extension class instance.
-    base->m_data.pobj->o_unset(keySD);
-  }
-
-  LITSTR_DECREF(keySD);
-}
-
 static inline Class* frameStaticClass(ActRec* fp) {
   if (fp->hasThis()) {
     return fp->getThis()->getVMClass();
@@ -1649,20 +207,18 @@ VarEnv::VarEnv()
   : m_cfp(NULL)
   , m_name2info(NULL)
   , m_extraArgs(NULL)
-  , m_numExtraArgs(0)
   , m_depth(0)
   , m_isGlobalScope(true)
 {}
 
-VarEnv::VarEnv(ActRec* fp)
+VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
   : m_cfp(fp)
-  , m_extraArgs(0)
-  , m_numExtraArgs(0)
+  , m_extraArgs(eArgs)
   , m_depth(1)
   , m_isGlobalScope(false)
 {
   const Func* func = fp->m_func;
-  const size_t numNames = func->pnames().size();
+  const Id numNames = func->numNamedLocals();
 
   m_name2info = NEW(HphpArray)(numNames);
   m_name2info->incRefCount();
@@ -1670,10 +226,10 @@ VarEnv::VarEnv(ActRec* fp)
   TypedValue** origLocs =
     reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
   TypedValue* loc = frame_local(fp, 0);
-  for (unsigned i = 0; i < numNames; ++i, --loc) {
-    ASSERT(func->lookupVarId(func->pnames()[i]) == (int)i);
+  for (Id i = 0; i < numNames; ++i, --loc) {
+    ASSERT(func->lookupVarId(func->localVarName(i)) == (int)i);
     origLocs[i] = m_name2info->migrateAndSet(
-      const_cast<StringData*>(func->pnames()[i]), loc);
+      const_cast<StringData*>(func->localVarName(i)), loc);
   }
 }
 
@@ -1685,13 +241,10 @@ VarEnv::~VarEnv() {
   ASSERT(m_restoreLocations.empty());
   g_vmContext->m_varEnvs.pop_back();
 
-  ASSERT(m_cfp == NULL);
-  if (m_extraArgs != NULL) {
-    for (unsigned i = 0; i < m_numExtraArgs; i++) {
-      tvRefcountedDecRef(&m_extraArgs[i]);
-    }
-    free(m_extraArgs);
+  if (m_extraArgs) {
+    delete m_extraArgs;
   }
+  ASSERT(m_cfp == NULL);
   if (m_name2info != NULL) {
     if (!m_isGlobalScope) {
       if (m_name2info->decRefCount() == 0) {
@@ -1704,10 +257,11 @@ VarEnv::~VarEnv() {
 VarEnv* VarEnv::createLazyAttach(ActRec* fp,
                                  bool skipInsert /* = false */) {
   const Func* func = fp->m_func;
-  const size_t numNames = func->pnames().size();
+  const size_t numNames = func->numNamedLocals();
+  ExtraArgs *eArgs = fp->getExtraArgs();
 
   void* mem = malloc(sizeof(VarEnv) + sizeof(TypedValue*) * numNames);
-  VarEnv* ret = new (mem) VarEnv(fp);
+  VarEnv* ret = new (mem) VarEnv(fp, eArgs);
   TRACE(3, "Creating lazily attached VarEnv %p\n", mem);
   if (!skipInsert) {
     g_vmContext->m_varEnvs.push_back(ret);
@@ -1729,17 +283,17 @@ void VarEnv::destroy(VarEnv* ve) {
 }
 
 void VarEnv::attach(ActRec* fp) {
-  TRACE(3, "Attaching VarEnv %p [%s] %d pnames @%p\n",
+  TRACE(3, "Attaching VarEnv %p [%s] %d fp @%p\n",
            this,
            m_isGlobalScope ? "global scope" : "local scope",
-           int(fp->m_func->pnames().size()), fp);
+           int(fp->m_func->numNamedLocals()), fp);
   ASSERT(m_depth == 0 || g_vmContext->arGetSfp(fp) == m_cfp ||
          (g_vmContext->arGetSfp(fp) == fp && g_vmContext->isNested()));
   m_cfp = fp;
   m_depth++;
   if (m_name2info == NULL) {
     if (!m_isGlobalScope) {
-      m_name2info = NEW(HphpArray)(fp->m_func->pnames().size());
+      m_name2info = NEW(HphpArray)(fp->m_func->numNamedLocals());
       m_name2info->incRefCount();
     } else {
       SystemGlobals *g = (SystemGlobals*)get_global_variables();
@@ -1752,10 +306,10 @@ void VarEnv::attach(ActRec* fp) {
   const Func* func = fp->m_func;
   TypedValue* loc = frame_local(fp, 0);
   TypedValue** origLocs =
-      (TypedValue**)malloc(func->pnames().size() * sizeof(TypedValue*));
-  for (unsigned i = 0; i < func->pnames().size(); i++, loc--) {
+      (TypedValue**)malloc(func->numNamedLocals() * sizeof(TypedValue*));
+  for (Id i = 0; i < func->numNamedLocals(); i++, loc--) {
     origLocs[i] = m_name2info->migrate(
-      const_cast<StringData*>(func->pnames()[i]), loc);
+      const_cast<StringData*>(func->localVarName(i)), loc);
   }
   m_restoreLocations.push_back(origLocs);
 }
@@ -1782,9 +336,9 @@ void VarEnv::detach(ActRec* fp) {
 
   // Merge/remove fp's overlaid locals.
   const Func* func = fp->m_func;
-  for (unsigned i = 0; i < func->pnames().size(); i++) {
+  for (Id i = 0; i < func->numNamedLocals(); i++) {
     m_name2info->migrate(
-      const_cast<StringData*>(func->pnames()[i]), origLocs[i]);
+      const_cast<StringData*>(func->localVarName(i)), origLocs[i]);
   }
   if (!m_restoreLocations.empty()) {
     m_restoreLocations.pop_back();
@@ -1832,33 +386,6 @@ bool VarEnv::unset(const StringData* name) {
   return true;
 }
 
-void VarEnv::setExtraArgs(TypedValue* args, unsigned nargs) {
-  m_extraArgs = args;
-  m_numExtraArgs = nargs;
-}
-
-void VarEnv::copyExtraArgs(TypedValue* args, unsigned nargs) {
-  // The VarEnv takes over ownership of the args; the original copies are
-  // discarded from the stack without adjusting reference counts, thus allowing
-  // VarEnv to avoid reference count manipulation here.
-  m_extraArgs = (TypedValue*)malloc(nargs * sizeof(TypedValue));
-  m_numExtraArgs = nargs;
-
-  // The stack grows downward, so the args in memory are "backward"; i.e. the
-  // leftmost (in PHP) extra arg is highest in memory.  We just copy them in a
-  // blob here, and compensate in getExtraArg().
-  memcpy(m_extraArgs, args, nargs * sizeof(TypedValue));
-}
-
-unsigned VarEnv::numExtraArgs() const {
-  return m_numExtraArgs;
-}
-
-TypedValue* VarEnv::getExtraArg(unsigned argInd) const {
-  ASSERT(argInd < m_numExtraArgs);
-  return &m_extraArgs[m_numExtraArgs - argInd - 1];
-}
-
 Array VarEnv::getDefinedVariables() const {
   ASSERT(m_name2info != NULL);
   Array ret = Array::Create();
@@ -1875,6 +402,52 @@ Array VarEnv::getDefinedVariables() const {
     }
   }
   return ret;
+}
+
+//=============================================================================
+// ExtraArgs.
+
+ExtraArgs::ExtraArgs()
+  : m_extraArgs(NULL)
+  , m_numExtraArgs(0)
+{}
+
+ExtraArgs::~ExtraArgs() {
+  if (m_extraArgs != NULL) {
+    for (unsigned i = 0; i < m_numExtraArgs; i++) {
+      tvRefcountedDecRef(&m_extraArgs[i]);
+    }
+    free(m_extraArgs);
+  }
+}
+
+void ExtraArgs::setExtraArgs(TypedValue* args, unsigned nargs) {
+  ASSERT(!m_extraArgs);
+  m_extraArgs = args;
+  m_numExtraArgs = nargs;
+}
+
+void ExtraArgs::copyExtraArgs(TypedValue* args, unsigned nargs) {
+  // The ExtraArgs takes over ownership of the args; the original copies are
+  // discarded from the stack without adjusting reference counts, thus allowing
+  // ExtraArgs to avoid reference count manipulation here.
+  ASSERT(!m_extraArgs);
+  m_extraArgs = (TypedValue*)malloc(nargs * sizeof(TypedValue));
+  m_numExtraArgs = nargs;
+
+  // The stack grows downward, so the args in memory are "backward"; i.e. the
+  // leftmost (in PHP) extra arg is highest in memory.  We just copy them in a
+  // blob here, and compensate in getExtraArg().
+  memcpy(m_extraArgs, args, nargs * sizeof(TypedValue));
+}
+
+unsigned ExtraArgs::numExtraArgs() const {
+  return m_numExtraArgs;
+}
+
+TypedValue* ExtraArgs::getExtraArg(unsigned argInd) const {
+  ASSERT(argInd < m_numExtraArgs);
+  return &m_extraArgs[m_numExtraArgs - argInd - 1];
 }
 
 //=============================================================================
@@ -2008,12 +581,6 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
     return;
   }
   ASSERT(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
-  if (tv->m_type == KindOfCanary) {
-    // This can happen while invoking a destructor. The real datum is
-    // sitting in a register.
-    os << "??? canary\n";
-    return;
-  }
   if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.ptv->_count <= 0) {
     // OK in the invoking frame when running a destructor.
     os << " ??? inner_count " << tv->m_data.ptv->_count << " ";
@@ -2048,7 +615,6 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
     os << (tv->m_data.num ? "True" : "False");
     break;
   }
-  case KindOfInt32:
   case KindOfInt64: {
     os << "0x" << std::hex << tv->m_data.num << std::dec;
     break;
@@ -2248,9 +814,9 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
 string Stack::toString(const ActRec* fp, int offset,
                        const string prefix/* = "" */) const {
   std::ostringstream os;
-  os << "Stack at " << curUnit()->filepath()->data() << ":" <<
+  os << prefix << "=== Stack at " << curUnit()->filepath()->data() << ":" <<
     curUnit()->getLineNumber(curUnit()->offsetOf(Transl::vmpc())) << " func " <<
-    curFunc()->fullName()->data() << "\n";
+    curFunc()->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
 
@@ -2863,12 +1429,14 @@ VarEnv* VMExecutionContext::getVarEnv(bool skipBuiltin) {
   HPHP::VM::VarEnv* builtinVarEnv = NULL;
   HPHP::VM::ActRec* fp = m_fp;
   if (skipBuiltin) {
-    builtinVarEnv = fp->m_varEnv;
+    if (fp->hasVarEnv()) {
+      builtinVarEnv = fp->getVarEnv();
+    }
     fp = getPrevVMState(fp);
   }
   if (!fp) return NULL;
   ASSERT(!fp->hasInvName());
-  if (fp->m_varEnv == NULL) {
+  if (!fp->hasVarEnv()) {
     if (builtinVarEnv) {
       // If the builtin function has its own VarEnv, we temporarily
       // remove it from the list before making a VarEnv for the calling
@@ -2892,6 +1460,7 @@ void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
   ActRec *fp = getPrevVMState(m_fp);
   if (!fp) return;
   ASSERT(!fp->hasInvName());
+  ASSERT(!fp->hasExtraArgs());
   ASSERT(fp->m_varEnv != NULL);
   if (ref) {
     fp->m_varEnv->bind(name, v);
@@ -2911,18 +1480,17 @@ Array VMExecutionContext::getLocalDefinedVariables(int frame) {
     return Array::Create();
   }
   ASSERT(!fp->hasInvName());
-  if (fp->m_varEnv) {
+  if (fp->hasVarEnv()) {
     return fp->m_varEnv->getDefinedVariables();
   }
   Array ret = Array::Create();
   const Func *func = fp->m_func;
-  Func::PnameMap::const_iterator it = func->pnameMap().begin();
-  for (; it != func->pnameMap().end(); ++it) {
-    TypedValue* ptv = frame_local(fp, it->second);
+  for (Id id = 0; id < func->numNamedLocals(); ++id) {
+    TypedValue* ptv = frame_local(fp, id);
     if (ptv->m_type == KindOfUninit) {
       continue;
     }
-    Variant name(it->first->data());
+    Variant name(func->localVarName(id)->data());
     ret.add(name, tvAsVariant(ptv));
   }
   return ret;
@@ -3018,17 +1586,27 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       // and enterVM(), so we should only execute the logic below for the
       // non-reenter case.
       if (!reenter) {
-        // If there are extra parameters then we cannot be a pseudomain
-        // inheriting a VarEnv
-        ASSERT(!m_fp->m_varEnv);
-        // Extra parameters must be moved off the stack.
-        m_fp->m_varEnv = VarEnv::createLazyAttach(m_fp);
-        int numExtras = nargs - nparams;
-        m_fp->m_varEnv->copyExtraArgs(
-          (TypedValue*)(uintptr_t(m_fp) - nargs * sizeof(TypedValue)),
-          numExtras);
-        for (int i = 0; i < numExtras; i++) {
-          m_stack.discard();
+        if (func->attrs() & AttrMayUseVV) {
+          // If there are extra parameters then we cannot be a pseudomain
+          // inheriting a VarEnv
+          ASSERT(!m_fp->m_varEnv);
+          // Extra parameters must be moved off the stack.
+          m_fp->setExtraArgs(new ExtraArgs());
+          int numExtras = nargs - nparams;
+          m_fp->getExtraArgs()->copyExtraArgs(
+            (TypedValue*)(uintptr_t(m_fp) - nargs * sizeof(TypedValue)),
+            numExtras);
+          for (int i = 0; i < numExtras; i++) {
+            m_stack.discard();
+          }
+        } else {
+          // The function we're calling is not marked as "MayUseVV",
+          // so just discard the extra arguments
+          int numExtras = nargs - nparams;
+          for (int i = 0; i < numExtras; i++) {
+            m_stack.popTV();
+          } 
+          ar->setNumArgs(nparams);
         }
       }
     }
@@ -3077,6 +1655,7 @@ void VMExecutionContext::enterVMWork(ActRec* ar, bool enterFn) {
   }
   Stats::inc(Stats::VMEnter);
   if (RuntimeOption::EvalJit &&
+      warmedUp() &&
       !ThreadInfo::s_threadInfo->m_reqInjectionData.coverage &&
       !(RuntimeOption::EvalJitDisabledByHphpd && isDebuggerAttached()) &&
       LIKELY(!DEBUGGER_FORCE_INTR)) {
@@ -3096,7 +1675,7 @@ void VMExecutionContext::enterVM(TypedValue* retval,
   // check if necessary before calling enterVM() or reenterVM()
   bool enter = prepareFuncEntry<true, true>(ar, m_pc);
 
-  if (ar->m_varEnv) {
+  if (ar->hasVarEnv()) {
     // If this is a pseudomain inheriting a VarEnv from our caller,
     // there cannot be extra arguments
     ASSERT(!extraArgs);
@@ -3107,8 +1686,8 @@ void VMExecutionContext::enterVM(TypedValue* retval,
     // Create a new VarEnv and stash the extra args in there
     int numExtras = ar->numArgs() - ar->m_func->numParams();
     ASSERT(numExtras > 0);
-    ar->m_varEnv = VarEnv::createLazyAttach(ar);
-    ar->m_varEnv->setExtraArgs(extraArgs, numExtras);
+    ar->setExtraArgs(new ExtraArgs());
+    ar->getExtraArgs()->setExtraArgs(extraArgs, numExtras);
   }
 
   ar->m_savedRip = (uintptr_t)m_transl->getCallToExit();
@@ -3299,7 +1878,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
     if (arr) {
       int numParams = f->numParams();
       int numExtraArgs = arr->size() - numParams;
-      if (numExtraArgs > 0) {
+      if (numExtraArgs > 0 && (f->attrs() & AttrMayUseVV)) {
         extraArgs = (TypedValue*)malloc(sizeof(TypedValue) * numExtraArgs);
       }
       int paramId = 0;
@@ -3311,7 +1890,12 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
         if (LIKELY(paramId < numParams)) {
           to = m_stack.allocTV();
         } else {
-          ASSERT(extraArgs && numExtraArgs > 0);
+          if (!(f->attrs() & AttrMayUseVV)) {
+            ASSERT(extraArgs == NULL);
+            ar->setNumArgs(numParams);
+            break;
+          }
+          ASSERT(extraArgs != NULL && numExtraArgs > 0);
           // VarEnv expects the extra args to be in "reverse" order
           // (i.e. the last extra arg has the lowest address)
           to = extraArgs + (numExtraArgs - 1) - (paramId - numParams);
@@ -3599,8 +2183,8 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
         args.append(tvAsVariant(arg));
       }
       for (; i < nargs; i++) {
-        ASSERT(fp->hasVarEnv());
-        TypedValue *arg = fp->getVarEnv()->getExtraArg(i - nparams);
+        ASSERT(fp->hasExtraArgs());
+        TypedValue *arg = fp->getExtraArgs()->getExtraArg(i - nparams);
         args.append(tvAsVariant(arg));
       }
     }
@@ -3972,7 +2556,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   if (local) {
     ar->m_varEnv = 0;
   } else {
-    if (m_fp->m_varEnv == NULL) {
+    if (!m_fp->hasVarEnv()) {
       m_fp->m_varEnv = VarEnv::createLazyAttach(m_fp);
     }
     ar->m_varEnv = m_fp->m_varEnv;
@@ -4099,6 +2683,8 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     return;
   }
 
+  bool temporaryVarEnv = false;
+
   VarEnv *varEnv = NULL;
   ActRec *fp = m_fp;
   ActRec *cfpSave = NULL;
@@ -4106,7 +2692,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     ASSERT(!g_vmContext->m_varEnvs.empty());
     std::list<HPHP::VM::VarEnv*>::iterator it = g_vmContext->m_varEnvs.end();
     for (; frame > 0; --frame) {
-      if (fp->m_varEnv != NULL) {
+      if (fp->hasVarEnv()) {
         if (it == g_vmContext->m_varEnvs.end() || *it != fp->m_varEnv) {
           --it;
         }
@@ -4119,10 +2705,18 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
       }
       fp = prevFp;
     }
-    if (fp->m_varEnv == NULL) {
+    if (!fp->hasVarEnv()) {
       const bool skipInsert = true;
+      if (!(fp->m_func->attrs() & AttrMayUseVV)) {
+        // We creating a VarEnv for a function is not marked as "MayUseVV",
+        // so that we can access its local variables. We must make sure to
+        // dispose of this VarEnv before we allow execution to resume.
+        temporaryVarEnv = true;
+      }
       fp->m_varEnv = VarEnv::createLazyAttach(fp, skipInsert);
       g_vmContext->m_varEnvs.insert(it, fp->m_varEnv);
+    } else {
+      ASSERT(fp->m_func->attrs() & AttrMayUseVV);
     }
     varEnv = fp->m_varEnv;
     cfpSave = varEnv->getCfp();
@@ -4159,6 +2753,10 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   } catch (Eval::DebuggerException &e) {
     if (varEnv) {
       varEnv->setCfp(cfpSave);
+      if (temporaryVarEnv) {
+        VarEnv::destroy(varEnv);
+        fp->m_varEnv = NULL;
+      }
     }
     throw;
   } catch (Exception &e) {
@@ -4182,6 +2780,10 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   if (varEnv) {
     // Set the Cfp back
     varEnv->setCfp(cfpSave);
+    if (temporaryVarEnv) {
+      VarEnv::destroy(varEnv);
+      fp->m_varEnv = NULL;
+    }
   }
 }
 
@@ -4221,73 +2823,97 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
   varEnv->detach(m_fp);
 }
 
-#define LOOKUP_NAME(name, key) (name) = prepareKey(key).detach()
-#define LOOKUP_VAR(name, key, val) do {                                       \
-  LOOKUP_NAME(name, key);                                                     \
-  const Func* func = m_fp->m_func;                                            \
-  Id id;                                                                      \
-  if (mapGet(func->pnameMap(), name, &id)) {                                  \
-    (val) = frame_local(m_fp, id);                                            \
-  } else {                                                                    \
-    ASSERT(!m_fp->hasInvName());                                              \
-    if (m_fp->m_varEnv != NULL) {                                             \
-      (val) = m_fp->m_varEnv->lookup(name);                                   \
-    } else {                                                                  \
-      (val) = NULL;                                                           \
-    }                                                                         \
-  }                                                                           \
-} while (0)
-#define LOOKUPD_VAR(name, key, val) do {                                      \
-  LOOKUP_NAME(name, key);                                                     \
-  const Func* func = m_fp->m_func;                                            \
-  Id id;                                                                      \
-  if (mapGet(func->pnameMap(), name, &id)) {                                  \
-    (val) = frame_local(m_fp, id);                                            \
-  } else {                                                                    \
-    ASSERT(!m_fp->hasInvName());                                              \
-    if (m_fp->m_varEnv == NULL) {                                             \
-      m_fp->m_varEnv = VarEnv::createLazyAttach(m_fp);                        \
-    }                                                                         \
-    (val) = m_fp->m_varEnv->lookup(name);                                     \
-    if ((val) == NULL) {                                                      \
-      TypedValue tv;                                                          \
-      TV_WRITE_NULL(&tv);                                                     \
-      m_fp->m_varEnv->set(name, &tv);                                         \
-      (val) = m_fp->m_varEnv->lookup(name);                                   \
-    }                                                                         \
-  }                                                                           \
-} while (0)
-#define LOOKUP_GBL(name, key, val) do {                                       \
-  LOOKUP_NAME(name, key);                                                     \
-  ASSERT(!g_vmContext->m_varEnvs.empty());                                    \
-  VarEnv* varEnv = g_vmContext->m_varEnvs.front();                            \
-  ASSERT(varEnv != NULL);                                                     \
-  (val) = varEnv->lookup(name);                                               \
-} while (0)
-#define LOOKUPD_GBL(name, key, val) do {                                      \
-  LOOKUP_NAME(name, key);                                                     \
-  ASSERT(!g_vmContext->m_varEnvs.empty());                                    \
-  VarEnv* varEnv = g_vmContext->m_varEnvs.front();                            \
-  ASSERT(varEnv != NULL);                                                     \
-  (val) = varEnv->lookup(name);                                               \
-  if ((val) == NULL) {                                                        \
-    TypedValue tv;                                                            \
-    TV_WRITE_NULL(&tv);                                                       \
-    varEnv->set(name, &tv);                                                   \
-    (val) = varEnv->lookup(name);                                             \
-  }                                                                           \
-} while (0)
+static inline StringData* lookup_name(TypedValue* key) {
+  return prepareKey(key).detach();
+}
 
-#define LOOKUP_SPROP(clsRef, name, key, val, visible, accessible) do {        \
-  ASSERT(clsRef->m_type == KindOfClass);                                      \
-  LOOKUP_NAME(name, key);                                                     \
-  Class* ctx = arGetContextClass(m_fp);                                       \
-  val = clsRef->m_data.pcls->getSProp(ctx, name, visible, accessible);        \
-} while (0)
+static inline void lookup_var(ActRec* fp,
+                              StringData*& name,
+                              TypedValue* key,
+                              TypedValue*& val) {
+  name = lookup_name(key);
+  const Func* func = fp->m_func;
+  Id id = func->lookupVarId(name);
+  if (id != kInvalidId) {
+    val = frame_local(fp, id);
+  } else {
+    ASSERT(!fp->hasInvName());
+    if (fp->hasVarEnv()) {
+      val = fp->m_varEnv->lookup(name);
+    } else {
+      val = NULL;
+    }
+  }
+}
 
-static void lookupClsRef(TypedValue* input,
-                         TypedValue* output,
-                         bool decRef = false) {
+static inline void lookupd_var(ActRec* fp,
+                               StringData*& name,
+                               TypedValue* key,
+                               TypedValue*& val) {
+  name = lookup_name(key);
+  const Func* func = fp->m_func;
+  Id id = func->lookupVarId(name);
+  if (id != kInvalidId) {
+    val = frame_local(fp, id);
+  } else {
+    ASSERT(!fp->hasInvName());
+    if (!fp->hasVarEnv()) {
+      fp->m_varEnv = VarEnv::createLazyAttach(fp);
+    }
+    val = fp->m_varEnv->lookup(name);
+    if (val == NULL) {
+      TypedValue tv;
+      TV_WRITE_NULL(&tv);
+      fp->m_varEnv->set(name, &tv);
+      val = fp->m_varEnv->lookup(name);
+    }
+  }
+}
+
+static inline void lookup_gbl(ActRec* fp,
+                              StringData*& name,
+                              TypedValue* key,
+                              TypedValue*& val) {
+  name = lookup_name(key);
+  ASSERT(!g_vmContext->m_varEnvs.empty());
+  VarEnv* varEnv = g_vmContext->m_varEnvs.front();
+  ASSERT(varEnv != NULL);
+  val = varEnv->lookup(name);
+}
+
+static inline void lookupd_gbl(ActRec* fp,
+                               StringData*& name,
+                               TypedValue* key,
+                               TypedValue*& val) {
+  name = lookup_name(key);
+  ASSERT(!g_vmContext->m_varEnvs.empty());
+  VarEnv* varEnv = g_vmContext->m_varEnvs.front();
+  ASSERT(varEnv != NULL);
+  val = varEnv->lookup(name);
+  if (val == NULL) {
+    TypedValue tv;
+    TV_WRITE_NULL(&tv);
+    varEnv->set(name, &tv);
+    val = varEnv->lookup(name);
+  }
+}
+
+static inline void lookup_sprop(ActRec* fp,
+                                TypedValue* clsRef,
+                                StringData*& name,
+                                TypedValue* key,
+                                TypedValue*& val,
+                                bool& visible,
+                                bool& accessible) {
+  ASSERT(clsRef->m_type == KindOfClass);
+  name = lookup_name(key);
+  Class* ctx = arGetContextClass(fp);
+  val = clsRef->m_data.pcls->getSProp(ctx, name, visible, accessible);
+}
+
+static inline void lookupClsRef(TypedValue* input,
+                                TypedValue* output,
+                                bool decRef = false) {
   const Class* class_ = NULL;
   if (IS_STRING_TYPE(input->m_type)) {
     class_ = Unit::loadClass(input->m_data.pstr);
@@ -4307,7 +2933,7 @@ static void lookupClsRef(TypedValue* input,
   output->m_type = KindOfClass;
 }
 
-int innerCount(const TypedValue* tv) {
+static UNUSED int innerCount(const TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     return tv->m_data.ptv->_count;
   }
@@ -4419,7 +3045,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     goto lcodeName;
 
   lcodeName:
-    LOOKUP_VAR(name, loc, fr);
+    lookup_var(m_fp, name, loc, fr);
     if (fr == NULL) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
@@ -4440,7 +3066,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     goto lcodeGlobal;
 
   lcodeGlobal:
-    LOOKUP_GBL(name, loc, fr);
+    lookup_gbl(m_fp, name, loc, fr);
     if (fr == NULL) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
@@ -4466,8 +3092,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     bool visible, accessible;
     ASSERT(cref->m_type == KindOfClass);
     const Class* class_ = cref->m_data.pcls;
-    StringData* name;
-    LOOKUP_NAME(name, pname);
+    StringData* name = lookup_name(pname);
     loc = class_->getSProp(ctx, name, visible, accessible);
     if (!(visible && accessible)) {
       raise_error("Invalid static property access: %s::%s",
@@ -4684,9 +3309,9 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
 
   lcodeName:
     if (define) {
-      LOOKUPD_VAR(name, loc, fr);
+      lookupd_var(m_fp, name, loc, fr);
     } else {
-      LOOKUP_VAR(name, loc, fr);
+      lookup_var(m_fp, name, loc, fr);
     }
     if (fr == NULL) {
       if (warn) {
@@ -4709,9 +3334,9 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
 
   lcodeGlobal:
     if (define) {
-      LOOKUPD_GBL(name, loc, fr);
+      lookupd_gbl(m_fp, name, loc, fr);
     } else {
-      LOOKUP_GBL(name, loc, fr);
+      lookup_gbl(m_fp, name, loc, fr);
     }
     if (fr == NULL) {
       if (warn) {
@@ -4738,8 +3363,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     bool visible, accessible;
     ASSERT(cref->m_type == KindOfClass);
     const Class* class_ = cref->m_data.pcls;
-    StringData* name;
-    LOOKUP_NAME(name, pname);
+    StringData* name = lookup_name(pname);
     loc = class_->getSProp(ctx, name, visible, accessible);
     if (!(visible && accessible)) {
       raise_error("Invalid static property access: %s::%s",
@@ -5278,9 +3902,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBitNot(PC& pc) {
     c1->m_data.num = ~int64(c1->m_data.dbl);
   } else if (IS_STRING_TYPE(c1->m_type)) {
     tvCellAsVariant(c1) = ~tvCellAsVariant(c1);
-  } else if (c1->m_type == KindOfInt32) {
-    // Separate from KindOfInt64 due to the infrequency of KindOfInt32.
-    c1->m_data.num = ~c1->m_data.num;
   } else {
     raise_error("Unsupported operand type for ~");
   }
@@ -5627,32 +4248,31 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAGetL(PC& pc) {
   lookupClsRef(fr, top);
 }
 
-#define RAISE_UNDEFINED_LOCAL(local) do {                               \
-  size_t pind = ((uintptr_t(m_fp) - uintptr_t(local)) / sizeof(TypedValue)) \
-                - 1;                                                    \
-  ASSERT(pind < m_fp->m_func->pnames().size());                         \
-  raise_notice(Strings::UNDEFINED_VARIABLE,                             \
-               m_fp->m_func->pnames()[pind]->data());                   \
-} while (0)
+static void raise_undefined_local(ActRec* fp, TypedValue* local) {
+  Id pind = (uintptr_t(fp) - uintptr_t(local)) / sizeof(TypedValue) - 1;
+  ASSERT(pind < fp->m_func->numNamedLocals());
+  raise_notice(Strings::UNDEFINED_VARIABLE,
+               fp->m_func->localVarName(pind)->data());
+}
 
-#define CGETH_BODY() do {                       \
-  if (fr->m_type == KindOfUninit) {             \
-    RAISE_UNDEFINED_LOCAL(fr);                  \
-    TV_WRITE_NULL(to);                          \
-  } else {                                      \
-    tvDup(fr, to);                              \
-    if (to->m_type == KindOfVariant) {          \
-      tvUnbox(to);                              \
-    }                                           \
-  }                                             \
-} while (0)
+static inline void cgeth_body(ActRec* fp, TypedValue* fr, TypedValue* to) {
+  if (fr->m_type == KindOfUninit) {
+    raise_undefined_local(fp, fr);
+    TV_WRITE_NULL(to);
+  } else {
+    tvDup(fr, to);
+    if (to->m_type == KindOfVariant) {
+      tvUnbox(to);
+    }
+  }
+}
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetL(PC& pc) {
   NEXT();
   DECODE_HA(local);
   Cell* to = m_stack.allocC();
   TypedValue* fr = frame_local(m_fp, local);
-  CGETH_BODY();
+  cgeth_body(m_fp, fr, to);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetL2(PC& pc) {
@@ -5663,7 +4283,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetL2(PC& pc) {
   memcpy(newTop, oldTop, sizeof *newTop);
   Cell* to = oldTop;
   TypedValue* fr = frame_local(m_fp, local);
-  CGETH_BODY();
+  cgeth_body(m_fp, fr, to);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetL3(PC& pc) {
@@ -5675,7 +4295,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetL3(PC& pc) {
   memmove(newTop, oldTop, sizeof *oldTop * 2);
   Cell* to = oldSubTop;
   TypedValue* fr = frame_local(m_fp, local);
-  CGETH_BODY();
+  cgeth_body(m_fp, fr, to);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetN(PC& pc) {
@@ -5683,14 +4303,14 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetN(PC& pc) {
   StringData* name;
   TypedValue* to = m_stack.topTV();
   TypedValue* fr = NULL;
-  LOOKUP_VAR(name, to, fr);
+  lookup_var(m_fp, name, to, fr);
   if (fr == NULL) {
     raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     tvRefcountedDecRefCell(to);
     TV_WRITE_NULL(to);
   } else {
     tvRefcountedDecRefCell(to);
-    CGETH_BODY();
+    cgeth_body(m_fp, fr, to);
   }
   LITSTR_DECREF(name);
 }
@@ -5700,7 +4320,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
   StringData* name;
   TypedValue* to = m_stack.topTV();
   TypedValue* fr = NULL;
-  LOOKUP_GBL(name, to, fr);
+  lookup_gbl(m_fp, name, to, fr);
   if (fr == NULL) {
     if (MoreWarnings) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
@@ -5709,7 +4329,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
     TV_WRITE_NULL(to);
   } else {
     tvRefcountedDecRefCell(to);
-    CGETH_BODY();
+    cgeth_body(m_fp, fr, to);
   }
   LITSTR_DECREF(name);
 }
@@ -5722,7 +4342,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
   StringData* name;                                       \
   TypedValue* val;                                        \
   bool visible, accessible;                               \
-  LOOKUP_SPROP(clsref, name, nameCell, val, visible,      \
+  lookup_sprop(m_fp, clsref, name, nameCell, val, visible, \
                accessible);
 
 #define SPROP_OP_POSTLUDE                     \
@@ -5755,23 +4375,29 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
   NEXT();
   DECLARE_GETHELPER_ARGS
   getHelper(GETHELPER_ARGS);
+  if (debug) {
+    UNUSED std::pair<DataType, double> res =
+      predictType(TypeProfileKey(curFunc(), pc));
+    TRACE(3, "profile %p %d %f\n", pc, res.first, res.second);
+  }
   if (tvRet->m_type == KindOfVariant) {
     tvUnbox(tvRet);
   }
 }
 
-#define VGETH_BODY()                                                          \
-  if (fr->m_type != KindOfVariant) {                                          \
-    tvBox(fr);                                                                \
-  }                                                                           \
+static inline void vgeth_body(TypedValue* fr, TypedValue* to) {
+  if (fr->m_type != KindOfVariant) {
+    tvBox(fr);
+  }
   tvDup(fr, to);
+}
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetL(PC& pc) {
   NEXT();
   DECODE_HA(local);
   Var* to = m_stack.allocV();
   TypedValue* fr = frame_local(m_fp, local);
-  VGETH_BODY();
+  vgeth_body(fr, to);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVGetN(PC& pc) {
@@ -5779,10 +4405,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetN(PC& pc) {
   StringData* name;
   TypedValue* to = m_stack.topTV();
   TypedValue* fr = NULL;
-  LOOKUPD_VAR(name, to, fr);
+  lookupd_var(m_fp, name, to, fr);
   ASSERT(fr != NULL);
   tvRefcountedDecRefCell(to);
-  VGETH_BODY()
+  vgeth_body(fr, to);
   LITSTR_DECREF(name);
 }
 
@@ -5791,10 +4417,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetG(PC& pc) {
   StringData* name;
   TypedValue* to = m_stack.topTV();
   TypedValue* fr = NULL;
-  LOOKUPD_GBL(name, to, fr);
+  lookupd_gbl(m_fp, name, to, fr);
   ASSERT(fr != NULL);
   tvRefcountedDecRefCell(to);
-  VGETH_BODY()
+  vgeth_body(fr, to);
   LITSTR_DECREF(name);
 }
 
@@ -5826,7 +4452,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetN(PC& pc) {
   TypedValue* tv1 = m_stack.topTV();
   TypedValue* tv = NULL;
   bool e;
-  LOOKUP_VAR(name, tv1, tv);
+  lookup_var(m_fp, name, tv1, tv);
   if (tv == NULL) {
     e = false;
   } else {
@@ -5845,7 +4471,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetG(PC& pc) {
   TypedValue* tv1 = m_stack.topTV();
   TypedValue* tv = NULL;
   bool e;
-  LOOKUP_GBL(name, tv1, tv);
+  lookup_gbl(m_fp, name, tv1, tv);
   if (tv == NULL) {
     e = false;
   } else {
@@ -5901,23 +4527,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
   tvRet->m_type = KindOfBoolean;
 }
 
-void VMExecutionContext::iopIssetL(PC& pc) {
-  NEXT();
-  DECODE_HA(local);
-  TypedValue* tv = frame_local(m_fp, local);
-  bool ret = isset(tvAsCVarRef(tv));
-  TypedValue* topTv = m_stack.allocTV();
-  topTv->m_data.num = ret;
-  topTv->m_type = KindOfBoolean;
-}
-
-#define IOP_TYPE_CHECK_INSTR(what, predicate)                       \
+#define IOP_TYPE_CHECK_INSTR(checkInit, what, predicate)            \
 void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## L(PC& pc) { \
   NEXT();                                                           \
   DECODE_HA(local);                                                 \
   TypedValue* tv = frame_local(m_fp, local);                        \
-  if (tv->m_type == KindOfUninit) {                                 \
-    RAISE_UNDEFINED_LOCAL(tv);                                      \
+  if (checkInit && tv->m_type == KindOfUninit) {                    \
+    raise_undefined_local(m_fp, tv);                                \
   }                                                                 \
   bool ret = predicate(tvAsCVarRef(tv));                            \
   TypedValue* topTv = m_stack.allocTV();                            \
@@ -5935,13 +4551,14 @@ void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## C(PC& pc) { \
   topTv->m_type = KindOfBoolean;                                    \
 }
 
-IOP_TYPE_CHECK_INSTR(Null,   f_is_null)
-IOP_TYPE_CHECK_INSTR(Bool,   f_is_bool)
-IOP_TYPE_CHECK_INSTR(Int,    f_is_int)
-IOP_TYPE_CHECK_INSTR(Double, f_is_double)
-IOP_TYPE_CHECK_INSTR(String, f_is_string)
-IOP_TYPE_CHECK_INSTR(Array,  f_is_array)
-IOP_TYPE_CHECK_INSTR(Object, f_is_object)
+IOP_TYPE_CHECK_INSTR(false,   set, isset)
+IOP_TYPE_CHECK_INSTR(true,   Null, f_is_null)
+IOP_TYPE_CHECK_INSTR(true,  Array, f_is_array)
+IOP_TYPE_CHECK_INSTR(true, String, f_is_string)
+IOP_TYPE_CHECK_INSTR(true, Object, f_is_object)
+IOP_TYPE_CHECK_INSTR(true,    Int, f_is_int)
+IOP_TYPE_CHECK_INSTR(true, Double, f_is_double)
+IOP_TYPE_CHECK_INSTR(true,   Bool, f_is_bool)
 #undef IOP_TYPE_CHECK_INSTR
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyL(PC& pc) {
@@ -5961,7 +4578,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyN(PC& pc) {
   TypedValue* tv1 = m_stack.topTV();
   TypedValue* tv = NULL;
   bool e;
-  LOOKUP_VAR(name, tv1, tv);
+  lookup_var(m_fp, name, tv1, tv);
   if (tv == NULL) {
     e = true;
   } else {
@@ -5980,7 +4597,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyG(PC& pc) {
   TypedValue* tv1 = m_stack.topTV();
   TypedValue* tv = NULL;
   bool e;
-  LOOKUP_GBL(name, tv1, tv);
+  lookup_gbl(m_fp, name, tv1, tv);
   if (tv == NULL) {
     e = true;
   } else {
@@ -6051,7 +4668,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetN(PC& pc) {
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
   TypedValue* to = NULL;
-  LOOKUPD_VAR(name, tv2, to);
+  lookupd_var(m_fp, name, tv2, to);
   ASSERT(to != NULL);
   tvSet(fr, to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
@@ -6065,7 +4682,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetG(PC& pc) {
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
   TypedValue* to = NULL;
-  LOOKUPD_GBL(name, tv2, to);
+  lookupd_gbl(m_fp, name, tv2, to);
   ASSERT(to != NULL);
   tvSet(fr, to);
   memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
@@ -6082,7 +4699,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetS(PC& pc) {
   StringData* name;
   TypedValue* val;
   bool visible, accessible;
-  LOOKUP_SPROP(classref, name, propn, val, visible, accessible);
+  lookup_sprop(m_fp, classref, name, propn, val, visible, accessible);
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 classref->m_data.pcls->name()->data(),
@@ -6141,7 +4758,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpN(PC& pc) {
   TypedValue* tv2 = m_stack.indTV(1);
   TypedValue* to = NULL;
   // XXX We're probably not getting warnings totally correct here
-  LOOKUPD_VAR(name, tv2, to);
+  lookupd_var(m_fp, name, tv2, to);
   ASSERT(to != NULL);
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRef(fr);
@@ -6159,7 +4776,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpG(PC& pc) {
   TypedValue* tv2 = m_stack.indTV(1);
   TypedValue* to = NULL;
   // XXX We're probably not getting warnings totally correct here
-  LOOKUPD_GBL(name, tv2, to);
+  lookupd_gbl(m_fp, name, tv2, to);
   ASSERT(to != NULL);
   SETOP_BODY(to, op, fr);
   tvRefcountedDecRef(fr);
@@ -6179,7 +4796,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpS(PC& pc) {
   StringData* name;
   TypedValue* val;
   bool visible, accessible;
-  LOOKUP_SPROP(classref, name, propn, val, visible, accessible);
+  lookup_sprop(m_fp, classref, name, propn, val, visible, accessible);
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 classref->m_data.pcls->name()->data(),
@@ -6247,7 +4864,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecN(PC& pc) {
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* local = NULL;
   // XXX We're probably not getting warnings totally correct here
-  LOOKUPD_VAR(name, nameCell, local);
+  lookupd_var(m_fp, name, nameCell, local);
   ASSERT(local != NULL);
   IncDecBody(op, local, nameCell);
   LITSTR_DECREF(name);
@@ -6260,7 +4877,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecG(PC& pc) {
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* gbl = NULL;
   // XXX We're probably not getting warnings totally correct here
-  LOOKUPD_GBL(name, nameCell, gbl);
+  lookupd_gbl(m_fp, name, nameCell, gbl);
   ASSERT(gbl != NULL);
   IncDecBody(op, gbl, nameCell);
   LITSTR_DECREF(name);
@@ -6325,7 +4942,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindN(PC& pc) {
   TypedValue* fr = m_stack.topTV();
   TypedValue* nameTV = m_stack.indTV(1);
   TypedValue* to = NULL;
-  LOOKUPD_VAR(name, nameTV, to);
+  lookupd_var(m_fp, name, nameTV, to);
   ASSERT(to != NULL);
   tvBind(fr, to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
@@ -6339,7 +4956,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindG(PC& pc) {
   TypedValue* fr = m_stack.topTV();
   TypedValue* nameTV = m_stack.indTV(1);
   TypedValue* to = NULL;
-  LOOKUPD_GBL(name, nameTV, to);
+  lookupd_gbl(m_fp, name, nameTV, to);
   ASSERT(to != NULL);
   tvBind(fr, to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
@@ -6356,7 +4973,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindS(PC& pc) {
   StringData* name;
   TypedValue* val;
   bool visible, accessible;
-  LOOKUP_SPROP(classref, name, propn, val, visible, accessible);
+  lookup_sprop(m_fp, classref, name, propn, val, visible, accessible);
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 classref->m_data.pcls->name()->data(),
@@ -6394,12 +5011,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetN(PC& pc) {
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
   TypedValue* tv = NULL;
-  LOOKUP_VAR(name, tv1, tv);
+  lookup_var(m_fp, name, tv1, tv);
   ASSERT(!m_fp->hasInvName());
   if (tv != NULL) {
     tvRefcountedDecRef(tv);
     TV_WRITE_UNINIT(tv);
-  } else if (m_fp->m_varEnv != NULL) {
+  } else if (!m_fp->hasVarEnv()) {
     m_fp->m_varEnv->unset(name);
   }
   m_stack.popC();
@@ -6408,9 +5025,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetN(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopUnsetG(PC& pc) {
   NEXT();
-  StringData* name;
   TypedValue* tv1 = m_stack.topTV();
-  LOOKUP_NAME(name, tv1);
+  StringData* name = lookup_name(tv1);
   VarEnv* varEnv = g_vmContext->m_varEnvs.front();
   ASSERT(varEnv != NULL);
   varEnv->unset(name);
@@ -6810,9 +5426,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPassL(PC& pc) {
   TypedValue* fr = frame_local(m_fp, local);
   TypedValue* to = m_stack.allocTV();
   if (!ar->m_func->byRef(paramId)) {
-    CGETH_BODY();
+    cgeth_body(m_fp, fr, to);
   } else {
-    VGETH_BODY();
+    vgeth_body(fr, to);
   }
 }
 
@@ -7484,14 +6100,14 @@ VMExecutionContext::createContinuation(ActRec* fp,
   return cont;
 }
 
-static inline void setContVar(const Func::PnameMap& pnames,
+static inline void setContVar(const Func* genFunc,
                               const StringData* name,
                               CVarRef value,
                               int nLocals,
                               c_GenericContinuation* cont) {
-  Id id;
   Variant* dest;
-  if (mapGet(pnames, name, &id)) {
+  Id id = genFunc->lookupVarId(name);
+  if (id != kInvalidId) {
     dest = &tvAsVariant(&cont->m_locals[nLocals - id]);
   } else {
     dest = &cont->m_vars.lval(*(String*)&name);
@@ -7511,22 +6127,20 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   // m_vars as usual.
   static const StringData* thisStr = StringData::GetStaticString("this");
   int nLocals = cont->m_nLocals;
-  const Func::PnameMap& genNames = genFunc->pnameMap();
   bool skipThis;
   if (fp->hasVarEnv()) {
     Stats::inc(Stats::Cont_CreateVerySlow);
     Array definedVariables = fp->getVarEnv()->getDefinedVariables();
     skipThis = definedVariables.exists("this", true);
     for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
-      setContVar(genNames, iter.first().getStringData(),
+      setContVar(genFunc, iter.first().getStringData(),
                  iter.secondRef(), nLocals, cont);
     }
   } else {
-    const Func::PnameVec& varNames = origFunc->pnames();
-    skipThis = mapContains(origFunc->pnameMap(), thisStr);
-    for (unsigned i = 0; i < varNames.size(); ++i) {
-      setContVar(genNames, varNames[i], tvAsCVarRef(frame_local(fp, i)),
-                 nLocals, cont);
+    skipThis = origFunc->lookupVarId(thisStr) != kInvalidId;
+    for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
+      setContVar(genFunc, origFunc->localVarName(i),
+                 tvAsCVarRef(frame_local(fp, i)), nLocals, cont);
     }
   }
   cont->m_hasExtraVars = !cont->m_vars.empty();
@@ -7534,9 +6148,11 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   // If $this is used as a local inside the body and is not provided
   // by our containing environment, just prefill it here instead of
   // using InitThisLoc inside the body
-  Id id;
-  if (!skipThis && cont->m_obj.get() && mapGet(genNames, thisStr, &id)) {
-    tvAsVariant(&cont->m_locals[nLocals - id]) = cont->m_obj;
+  if (!skipThis && cont->m_obj.get()) {
+    Id id = genFunc->lookupVarId(thisStr);
+    if (id != kInvalidId) {
+      tvAsVariant(&cont->m_locals[nLocals - id]) = cont->m_obj;
+    }
   }
   return cont;
 }
@@ -7630,7 +6246,7 @@ void VMExecutionContext::packContinuation(c_GenericContinuation* cont,
     for (ArrayIter iter(vars); !iter.end(); iter.next()) {
       Variant key = iter.first();
       CVarRef value = iter.secondRef();
-      if (!mapContains(f->pnameMap(), key.getStringData())) {
+      if (f->lookupVarId(key.getStringData()) == kInvalidId) {
         if (value.m_type == KindOfVariant) {
           cont->m_vars.setRef(key, value);
         } else {
@@ -7885,8 +6501,11 @@ OPCODES
 #undef DECODE_JMP
 #undef DECODE
 
-template <bool limInstrs, bool breakOnCtlFlow>
+template <int dispatchFlags>
 inline void VMExecutionContext::dispatchImpl(int numInstrs) {
+  static const bool limInstrs = dispatchFlags & LimitInstrs;
+  static const bool breakOnCtlFlow = dispatchFlags & BreakOnCtlFlow;
+  static const bool profile = dispatchFlags & Profile;
   static const void *optabDirect[] = {
 #define O(name, imm, push, pop, flags) \
     &&Label##name,
@@ -7978,6 +6597,10 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
       isCtlFlow = instrIsControlFlow(Op##name);                               \
       Stats::incOp(Op##name);                                                 \
     }                                                                         \
+    if (profile &&                                                            \
+        (Op##name == OpRetC || Op##name == OpCGetM)) {                        \
+      recordType(TypeProfileKey(curFunc(), pc), m_stack.top()->m_type);       \
+    }                                                                         \
     DISPATCH();                                                               \
   }
   OPCODES
@@ -8000,12 +6623,16 @@ public:
 
 void VMExecutionContext::dispatch() {
   InterpretingFlagGuard ifg;
-  dispatchImpl<false, false>(0);
+  if (shouldProfile()) {
+    dispatchImpl<Profile>(0);
+  } else {
+    dispatchImpl<0>(0);
+  }
 }
 
 void VMExecutionContext::dispatchN(int numInstrs) {
   InterpretingFlagGuard ifg;
-  dispatchImpl<true, false>(numInstrs);
+  dispatchImpl<LimitInstrs>(numInstrs);
   // We are about to go back to Jit, check whether we should
   // stick with interpreter
   if (DEBUGGER_FORCE_INTR) {
@@ -8015,7 +6642,7 @@ void VMExecutionContext::dispatchN(int numInstrs) {
 
 void VMExecutionContext::dispatchBB() {
   InterpretingFlagGuard ifg;
-  dispatchImpl<false, true>(0);
+  dispatchImpl<BreakOnCtlFlow>(0);
   // We are about to go back to Jit, check whether we should
   // stick with interpreter
   if (DEBUGGER_FORCE_INTR) {
@@ -8114,6 +6741,7 @@ void VMExecutionContext::requestExit() {
   destructObjects();
   m_transl->requestExit();
   m_stack.requestExit();
+  numRequests++; // racy RMW; ok to miss a rare few.
   EventHook::Disable();
 }
 

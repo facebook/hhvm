@@ -80,6 +80,8 @@ V* FixedStringMap<V, case_sensitive>::find(const StringData* sd) const {
 
 template class FixedStringMap<Slot, false>;
 template class FixedStringMap<Slot, true>;
+template class FixedStringMap<Id, false>;
+template class FixedStringMap<Id, true>;
 template class FixedStringMap<Func*, false>;
 
 ///////////////////////////////////////////////////////////////////////////////

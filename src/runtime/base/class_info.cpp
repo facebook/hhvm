@@ -281,6 +281,18 @@ Array ClassInfo::GetConstants() {
   return res;
 }
 
+ClassInfo::UserAttributeInfo::UserAttributeInfo() {
+}
+
+Variant ClassInfo::UserAttributeInfo::getValue() const {
+  return value;
+}
+
+void ClassInfo::UserAttributeInfo::setStaticValue(CVarRef v) {
+  value = v;
+  value.setEvalScalar();
+}
+
 bool ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
                                 int type /* = 0 */) {
   if (classname.empty()) return false;
@@ -807,6 +819,23 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       }
       staticVariables.push_back(staticVariable);
     }
+    p++;
+
+    // user attributes
+    while (*p) {
+      UserAttributeInfo *userAttr = new UserAttributeInfo();
+      userAttr->name = makeStaticString(*p++);
+      
+      const char *len = *p++;
+      const char *valueText = *p++;
+      int64 valueLen = (int64)len;
+      VariableUnserializer vu(valueText,
+                              valueLen,
+                              VariableUnserializer::Serialize);
+      userAttr->setStaticValue(vu.unserialize());
+
+      userAttrs.push_back(userAttr);
+    }
   }
 
   p++;
@@ -914,6 +943,22 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     ASSERT(m_constants.find(constant->name) == m_constants.end());
     m_constants[constant->name] = constant;
     m_constantsVec.push_back(constant);
+  }
+  p++;
+  
+  while (*p) {
+    UserAttributeInfo *userAttr = new UserAttributeInfo();
+    userAttr->name = makeStaticString(*p++);
+    
+    const char *len = *p++;
+    const char *valueText = *p++;
+    int64 valueLen = (int64)len;
+    VariableUnserializer vu(valueText,
+                            valueLen,
+                            VariableUnserializer::Serialize);
+    userAttr->setStaticValue(vu.unserialize());
+
+    m_userAttrVec.push_back(userAttr);
   }
   p++;
 }
@@ -1275,7 +1320,6 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
       }
       switch (p->type) {
         case KindOfBoolean: *(bool*)addr = value;   break;
-        case KindOfInt32:   *(int*)addr = value;    break;
         case KindOfInt64:   *(int64*)addr = value;  break;
         case KindOfDouble:  *(double*)addr = value; break;
         case KindOfString:  *(String*)addr = value.isString() ?

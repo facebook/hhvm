@@ -475,13 +475,13 @@ TypedValue* fg_preg_quote(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_preg_last_error()
+long long HPHP::f_preg_last_error()
 _ZN4HPHP17f_preg_last_errorEv
 
 (return value) => rax
 */
 
-int fh_preg_last_error() asm("_ZN4HPHP17f_preg_last_errorEv");
+long long fh_preg_last_error() asm("_ZN4HPHP17f_preg_last_errorEv");
 
 TypedValue* fg_preg_last_error(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

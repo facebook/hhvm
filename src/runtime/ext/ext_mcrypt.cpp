@@ -270,14 +270,14 @@ Array f_mcrypt_list_modes(CStrRef lib_dir /* = null_string */) {
   return ret;
 }
 
-int f_mcrypt_module_get_algo_block_size(CStrRef algorithm,
+int64 f_mcrypt_module_get_algo_block_size(CStrRef algorithm,
                                         CStrRef lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? MCG(algorithms_dir) : lib_dir;
   return mcrypt_module_get_algo_block_size((char*)algorithm.data(),
                                            (char*)dir.data());
 }
 
-int f_mcrypt_module_get_algo_key_size(CStrRef algorithm,
+int64 f_mcrypt_module_get_algo_key_size(CStrRef algorithm,
                                       CStrRef lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? MCG(algorithms_dir) : lib_dir;
   return mcrypt_module_get_algo_key_size((char*)algorithm.data(),
@@ -447,7 +447,7 @@ Variant f_mcrypt_get_iv_size(CStrRef cipher, CStrRef mode) {
   return ret;
 }
 
-int f_mcrypt_get_key_size(CStrRef cipher, CStrRef module) {
+int64 f_mcrypt_get_key_size(CStrRef cipher, CStrRef module) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)module.data(),
@@ -469,15 +469,15 @@ String f_mcrypt_enc_get_algorithms_name(CObjRef td) {
   return ret;
 }
 
-int f_mcrypt_enc_get_block_size(CObjRef td) {
+int64 f_mcrypt_enc_get_block_size(CObjRef td) {
   return mcrypt_enc_get_block_size(td.getTyped<MCrypt>()->m_td);
 }
 
-int f_mcrypt_enc_get_iv_size(CObjRef td) {
+int64 f_mcrypt_enc_get_iv_size(CObjRef td) {
   return mcrypt_enc_get_iv_size(td.getTyped<MCrypt>()->m_td);
 }
 
-int f_mcrypt_enc_get_key_size(CObjRef td) {
+int64 f_mcrypt_enc_get_key_size(CObjRef td) {
   return mcrypt_enc_get_key_size(td.getTyped<MCrypt>()->m_td);
 }
 
@@ -513,11 +513,11 @@ bool f_mcrypt_enc_is_block_mode(CObjRef td) {
   return mcrypt_enc_is_block_mode(td.getTyped<MCrypt>()->m_td) == 1;
 }
 
-int f_mcrypt_enc_self_test(CObjRef td) {
+int64 f_mcrypt_enc_self_test(CObjRef td) {
   return mcrypt_enc_self_test(td.getTyped<MCrypt>()->m_td);
 }
 
-int f_mcrypt_generic_init(CObjRef td, CStrRef key, CStrRef iv) {
+int64 f_mcrypt_generic_init(CObjRef td, CStrRef key, CStrRef iv) {
   MCrypt *pm = td.getTyped<MCrypt>();
   int max_key_size = mcrypt_enc_get_key_size(pm->m_td);
   int iv_size = mcrypt_enc_get_iv_size(pm->m_td);

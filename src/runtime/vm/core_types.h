@@ -32,7 +32,7 @@ typedef TypedValue Cell;
 typedef TypedValue Var;
 
 /*
- * Non-enumerated version type for referring to opcodes or the
+ * Non-enumerated version of type for referring to opcodes or the
  * bytecode stream.  (Use the enum Op in hhbc.h for an enumerated
  * version.)
  */
@@ -44,6 +44,7 @@ typedef uint8_t Opcode;
  * ids.
  */
 typedef int Id;
+const Id kInvalidId = Id(-1);
 
 // Bytecode offsets.  Used for both absolute offsets and relative
 // offsets.
@@ -76,24 +77,29 @@ const Slot kInvalidSlot = Slot(-1);
 // variadic arguments, where the arguments are either by ref or
 // optionally by ref.  (It is equivalent to having ClassInfo's
 // (RefVariableArguments | MixedVariableArguments).)
+//
+// AttrMayUseVV indicates that a function may need to use a VarEnv or
+// varargs (aka extraArgs) at run time.
 enum Attr {
-  AttrNone      = 0,        // class  property  method  //
-  AttrReference = (1 << 0), //                     X    //
-  AttrPublic    = (1 << 1), //            X        X    //
-  AttrProtected = (1 << 2), //            X        X    //
-  AttrPrivate   = (1 << 3), //            X        X    //
-  AttrStatic    = (1 << 4), //            X        X    //
-  AttrAbstract  = (1 << 5), //    X                X    //
-  AttrFinal     = (1 << 6), //    X                X    //
-  AttrInterface = (1 << 7), //    X                     //
-  AttrTrait     = (1 << 8), //    X                X    //
-  AttrNoInjection = (1 << 9),//                    X    //
-  AttrUnique    = (1 << 10), //   X                X    //
-  AttrMergeOnly = (1 << 11),//                     X    //
-  AttrNoExpandTrait = (1 << 12),//X                     //
-  AttrNoOverride= (1 << 13),//    X                X    //
-  AttrClone     = (1 << 14),//                     X    //
-  AttrVariadicByRef = (1 << 15)//                  X    //
+  AttrNone      = 0,             // class  property  method  //
+  AttrReference = (1 << 0),      //                     X    //
+  AttrPublic    = (1 << 1),      //            X        X    //
+  AttrProtected = (1 << 2),      //            X        X    //
+  AttrPrivate   = (1 << 3),      //            X        X    //
+  AttrStatic    = (1 << 4),      //            X        X    //
+  AttrAbstract  = (1 << 5),      //    X                X    //
+  AttrFinal     = (1 << 6),      //    X                X    //
+  AttrInterface = (1 << 7),      //    X                     //
+  AttrTrait     = (1 << 8),      //    X                X    //
+  AttrNoInjection = (1 << 9),    //                     X    //
+  AttrUnique    = (1 << 10),     //    X                X    //
+  AttrMergeOnly = (1 << 11),     //                     X    //
+  AttrNoExpandTrait = (1 << 12), //    X                     //
+  AttrNoOverride= (1 << 13),     //    X                X    //
+  AttrClone     = (1 << 14),     //                     X    //
+  AttrVariadicByRef = (1 << 15), //                     X    //
+  AttrDynamicInvoke = (1 << 16), //                     X    //
+  AttrMayUseVV  = (1 << 17)      //                     X    //
 };
 
 static inline const char * attrToVisibilityStr(Attr attr) {

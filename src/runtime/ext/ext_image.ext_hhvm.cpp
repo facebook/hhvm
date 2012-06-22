@@ -3565,14 +3565,14 @@ TypedValue* fg_imagefilter(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_imagefontheight(int)
+long long HPHP::f_imagefontheight(int)
 _ZN4HPHP17f_imagefontheightEi
 
 (return value) => rax
 font => rdi
 */
 
-int fh_imagefontheight(int font) asm("_ZN4HPHP17f_imagefontheightEi");
+long long fh_imagefontheight(int font) asm("_ZN4HPHP17f_imagefontheightEi");
 
 TypedValue * fg1_imagefontheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_imagefontheight(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -3618,14 +3618,14 @@ TypedValue* fg_imagefontheight(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_imagefontwidth(int)
+long long HPHP::f_imagefontwidth(int)
 _ZN4HPHP16f_imagefontwidthEi
 
 (return value) => rax
 font => rdi
 */
 
-int fh_imagefontwidth(int font) asm("_ZN4HPHP16f_imagefontwidthEi");
+long long fh_imagefontwidth(int font) asm("_ZN4HPHP16f_imagefontwidthEi");
 
 TypedValue * fg1_imagefontwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_imagefontwidth(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -6229,13 +6229,13 @@ TypedValue* fg_imagettftext(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_imagetypes()
+long long HPHP::f_imagetypes()
 _ZN4HPHP12f_imagetypesEv
 
 (return value) => rax
 */
 
-int fh_imagetypes() asm("_ZN4HPHP12f_imagetypesEv");
+long long fh_imagetypes() asm("_ZN4HPHP12f_imagetypesEv");
 
 TypedValue* fg_imagetypes(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

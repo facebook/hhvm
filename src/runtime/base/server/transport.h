@@ -287,6 +287,7 @@ public:
   }
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
+  bool setHeaderCallback(CVarRef callback);
 private:
   void sendRawLocked(void *data, int size, int code = 200,
                      bool compressed = false, bool chunked = false,
@@ -370,6 +371,8 @@ protected:
   // output
   bool m_chunkedEncoding;
   bool m_headerSent;
+  Variant m_headerCallback;
+  bool m_headerCallbackDone;  // used to prevent infinite loops
   int m_responseCode;
   std::string m_responseCodeInfo;
   HeaderMap m_responseHeaders;

@@ -45,4 +45,6 @@ extern int register_gdb_hook(char *symfile_addr,
                                uint64_t symfile_size, DwarfChunk* d);
 extern void unregister_gdb_chunk(DwarfChunk* d);
 
+extern void __jit_debug_register_code();
+
 #endif

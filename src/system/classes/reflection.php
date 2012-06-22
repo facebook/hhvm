@@ -553,6 +553,24 @@ implements Reflector {
   public function invokeArgs($args) {
     return hphp_invoke($this->info['name'], array_values($args));
   }
+
+  public function getAttribute($name) {
+    $attrs = $this->info['attributes'];
+    return isset($attrs[$name]) ? $attrs[$name] : null;
+  }
+
+  public function getAttributes() {
+    return $this->info['attributes'];
+  }
+
+  public function getAttributeRecursive($name) {
+    $attrs = $this->info['attributes'];
+    return isset($attrs[$name]) ? $attrs[$name] : null;
+  }
+
+  public function getAttributesRecursive() {
+    return $this->info['attributes'];
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -599,6 +617,8 @@ class ReflectionClass implements Reflector {
       throw new ReflectionException("Class $name does not exist");
     }
 
+    $info['attributes_rec'] = $info['attributes'];
+
     $abstract = isset($info['abstract']) || isset($info['interface']);
     // flattening the trees, so it's easier for lookups
     foreach ($info['interfaces'] as $interface => $_) {
@@ -619,6 +639,7 @@ class ReflectionClass implements Reflector {
       $info['methods'] += $p['methods'];
       $info['constants']  += $p['constants'];
       $info['interfaces'] += $p['interfaces'];
+      $info['attributes_rec'] += $p['attributes_rec'];
     }
     self::$fetched[$name] = $info;
     return $info;
@@ -1349,6 +1370,24 @@ class ReflectionClass implements Reflector {
   public function getExtensionName() {
     return $this->fetch('extension')->getName();
   }
+  
+  public function getAttribute($name) {
+    $attrs = $this->fetch('attributes');
+    return isset($attrs[$name]) ? $attrs[$name] : null;
+  }
+
+  public function getAttributes() {
+    return $this->fetch('attributes');
+  }
+  
+  public function getAttributeRecursive($name) {
+    $attrs = $this->fetch('attributes_rec');
+    return isset($attrs[$name]) ? $attrs[$name] : null;
+  }
+  
+  public function getAttributesRecursive() {
+    return $this->fetch('attributes_rec');
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1899,6 +1938,43 @@ implements Reflector {
       return null;
     }
     return new ReflectionClass($this->info['class']);
+  }
+
+  public function getAttribute($name) {
+    $attrs = $this->info['attributes'];
+    return isset($attrs[$name]) ? $attrs[$name] : null;
+  }
+
+  public function getAttributes() {
+    return $this->info['attributes'];
+  }
+  
+  public function getAttributeRecursive($name) {
+    $attrs = $this->info['attributes'];
+    if (isset($attrs[$name])) {
+      return $attrs[$name];
+    }
+    $p = get_parent_class($this->class);
+    if ($p === false) {
+      return null;
+    }
+    $rm = new ReflectionMethod($p, $this->name);
+    if ($rm->isPrivate()) {
+      return null;
+    }
+    return $rm->getAttributeRecursive($name);
+  }
+  
+  public function getAttributesRecursive() {
+    $attrs = $this->info['attributes'];
+    $p = get_parent_class($this->class);
+    if ($p !== false) {
+      $rm = new ReflectionMethod($p, $this->name);
+      if (!$rm->isPrivate()) {
+        $attrs += $rm->getAttributesRecursive();
+      }
+    }
+    return $attrs;
   }
 }
 

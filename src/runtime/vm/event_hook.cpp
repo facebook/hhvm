@@ -19,9 +19,19 @@
 #include "runtime/vm/exception_gate.h"
 #include "runtime/vm/func.h"
 #include "runtime/vm/translator/translator-inline.h"
+#include "runtime/base/builtin_functions.h"
+#include "runtime/base/complex_types.h"
+#include "runtime/ext/ext_function.h"
 
 namespace HPHP {
 namespace VM {
+
+static StaticString s_args("args");
+static StaticString s_enter("enter");
+static StaticString s_exit("exit");
+static StaticString s_exception("exception");
+static StaticString s_name("name");
+static StaticString s_return("return");
 
 void EventHook::Enable() {
   ThreadInfo::s_threadInfo->m_reqInjectionData.setEventHookFlag();
@@ -42,8 +52,53 @@ void EventHook::CheckSurprise() {
   }
 }
 
+class ExecutingSetprofileCallbackGuard {
+public:
+  ExecutingSetprofileCallbackGuard() {
+    g_vmContext->m_executingSetprofileCallback = true;
+  }
+
+  ~ExecutingSetprofileCallbackGuard() {
+    g_vmContext->m_executingSetprofileCallback = false;
+  }
+};
+
+void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
+  // Don't do anything if we are running the profiling function itself
+  // or if we haven't set up a profiler.
+  if (g_vmContext->m_executingSetprofileCallback ||
+      g_vmContext->m_setprofileCallback.isNull()) {
+    return;
+  }
+  ExecutingSetprofileCallbackGuard guard;
+
+  Array params;
+  Array frameinfo;
+
+  if (mode == ProfileEnter) {
+    params.append(s_enter);
+    frameinfo.set(s_args, hhvm_get_frame_args(ar));
+  } else {
+    params.append(s_exit);
+    if (!g_vmContext->m_faults.empty()) {
+      Fault fault = g_vmContext->m_faults.back();
+      if (fault.m_faultType == Fault::KindOfUserException) {
+        frameinfo.set(s_exception, fault.m_userException);
+      }
+    } else {
+      frameinfo.set(s_return, tvAsCVarRef(g_vmContext->m_stack.topTV()));
+    }
+  }
+
+  params.append(VarNR(ar->m_func->fullName()));
+  params.append(frameinfo);
+
+  f_call_user_func_array(g_vmContext->m_setprofileCallback, params);
+}
+
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
   CheckSurprise();
+  RunUserProfiler(ar, ProfileEnter);
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
   if (profiler != NULL) {
@@ -74,6 +129,7 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar) {
+  RunUserProfiler(ar, ProfileExit);
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
   if (profiler != NULL) {

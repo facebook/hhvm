@@ -212,14 +212,14 @@ TypedValue* fg_error_log(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_error_reporting(HPHP::Variant const&)
+long long HPHP::f_error_reporting(HPHP::Variant const&)
 _ZN4HPHP17f_error_reportingERKNS_7VariantE
 
 (return value) => rax
 level => rdi
 */
 
-int fh_error_reporting(TypedValue* level) asm("_ZN4HPHP17f_error_reportingERKNS_7VariantE");
+long long fh_error_reporting(TypedValue* level) asm("_ZN4HPHP17f_error_reportingERKNS_7VariantE");
 
 TypedValue* fg_error_reporting(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

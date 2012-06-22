@@ -14,7 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include <boost/checked_delete.hpp>
+
 #include <iostream>
+#include <algorithm>
 
 #include "runtime/base/base_includes.h"
 #include "runtime/base/tv_macros.h"
@@ -25,7 +28,8 @@
 #include "runtime/vm/class.h"
 #include "runtime/vm/repo.h"
 #include "runtime/vm/translator/targetcache.h"
-#include <runtime/vm/treadmill.h>
+#include "runtime/vm/blob_helper.h"
+#include "runtime/vm/treadmill.h"
 #include "system/lib/systemlib.h"
 #include "util/logger.h"
 
@@ -132,9 +136,12 @@ PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
 }
 
 PreClass::~PreClass() {
-  destroyMembers(m_methods);
-  destroyMembers(m_propertyVec);
-  destroyMembers(m_constantVec);
+  std::for_each(methods(), methods() + numMethods(),
+                boost::checked_deleter<Func>());
+  std::for_each(properties(), properties() + numProperties(),
+                boost::checked_deleter<Prop>());
+  std::for_each(constants(), constants() + numConstants(),
+                boost::checked_deleter<Const>());
 }
 
 void PreClass::atomicRelease() {
@@ -154,18 +161,20 @@ void PreClass::prettyPrint(std::ostream &out) const {
     out << " (ID " << m_id << ")";
   }
   out << std::endl;
-  for (MethodVec::const_iterator it = m_methods.begin();
-       it != m_methods.end(); ++it) {
+
+  for (Func* const* it = methods(); it != methods() + numMethods(); ++it) {
     out << " ";
     (*it)->prettyPrint(out);
   }
-  for (PropertyVec::const_iterator it = m_propertyVec.begin();
-       it != m_propertyVec.end(); ++it) {
+  for (Prop* const* it = properties();
+      it != properties() + numProperties();
+      ++it) {
     out << " ";
     (*it)->prettyPrint(out);
   }
-  for (ConstantVec::const_iterator it = m_constantVec.begin();
-       it != m_constantVec.end(); ++it) {
+  for (Const* const* it = constants();
+      it != constants() + numConstants();
+      ++it) {
     out << " ";
     (*it)->prettyPrint(out);
   }
@@ -188,27 +197,31 @@ PreClassEmitter::Prop::~Prop() {
 //=============================================================================
 // PreClassEmitter.
 
-PreClassEmitter::PreClassEmitter(UnitEmitter& ue, int line1, int line2,
-                                 Offset o, const StringData* n, Attr attrs,
-                                 const StringData* parent,
-                                 const StringData* docComment, Id id,
-                                 bool hoistable)
-  : m_ue(ue), m_line1(line1), m_line2(line2), m_offset(o), m_name(n),
-    m_attrs(attrs), m_parent(parent), m_docComment(docComment), m_id(id),
-    m_hoistable(hoistable), m_InstanceCtor(NULL), m_builtinPropSize(0) {
+PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
+                                 Id id,
+                                 const StringData* n)
+  : m_ue(ue)
+  , m_name(n)
+  , m_id(id)
+  , m_InstanceCtor(NULL)
+  , m_builtinPropSize(0)
+{}
+
+void PreClassEmitter::init(int line1, int line2, Offset offset, Attr attrs,
+                           const StringData* parent, bool hoistable,
+                           const StringData* docComment) {
+  m_line1 = line1;
+  m_line2 = line2;
+  m_offset = offset;
+  m_attrs = attrs;
+  m_parent = parent;
+  m_docComment = docComment;
+  m_hoistable = hoistable;
 }
 
 PreClassEmitter::~PreClassEmitter() {
   for (MethodVec::const_iterator it = m_methods.begin();
        it != m_methods.end(); ++it) {
-    delete *it;
-  }
-  for (PropertyVec::const_iterator it = m_propertyVec.begin();
-       it != m_propertyVec.end(); ++it) {
-    delete *it;
-  }
-  for (ConstantVec::const_iterator it = m_constantVec.begin();
-       it != m_constantVec.end(); ++it) {
     delete *it;
   }
 }
@@ -230,33 +243,31 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
                                   const StringData* docComment,
                                   TypedValue* val) {
-  PropertyMap::const_iterator it = m_propertyMap.find(n);
-  if (it != m_propertyMap.end()) {
+  PropMap::Builder::const_iterator it = m_propMap.find(n);
+  if (it != m_propMap.end()) {
     return false;
   }
-  PreClassEmitter::Prop* prop = new PreClassEmitter::Prop(this, n, attrs,
-                                                          docComment, val);
-  m_propertyVec.push_back(prop);
-  m_propertyMap[prop->name()] = prop;
+  PreClassEmitter::Prop prop(this, n, attrs, docComment, val);
+  m_propMap.add(prop.name(), prop);
   return true;
 }
 
-PreClassEmitter::Prop* PreClassEmitter::lookupProp(const StringData* propName)
-                       const {
-  PropertyMap::const_iterator it = m_propertyMap.find(propName);
-  ASSERT(it != m_propertyMap.end());
-  return it->second;
+const PreClassEmitter::Prop&
+PreClassEmitter::lookupProp(const StringData* propName) const {
+  PropMap::Builder::const_iterator it = m_propMap.find(propName);
+  ASSERT(it != m_propMap.end());
+  Slot idx = it->second;
+  return m_propMap[idx];
 }
 
 bool PreClassEmitter::addConstant(const StringData* n, TypedValue* val,
                                   const StringData* phpCode) {
-  ConstantMap::const_iterator it = m_constantMap.find(n);
-  if (it != m_constantMap.end()) {
+  ConstMap::Builder::const_iterator it = m_constMap.find(n);
+  if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const* const_ = new PreClassEmitter::Const(n, val, phpCode);
-  m_constantMap[const_->name()] = m_constantVec.size();
-  m_constantVec.push_back(const_);
+  PreClassEmitter::Const const_(n, val, phpCode);
+  m_constMap.add(const_.name(), const_);
   return true;
 }
 
@@ -264,11 +275,13 @@ void PreClassEmitter::addUsedTrait(const StringData* traitName) {
   m_usedTraits.push_back(traitName);
 }
 
-void PreClassEmitter::addTraitPrecRule(PreClass::TraitPrecRule &rule) {
+void PreClassEmitter::addTraitPrecRule(
+    const PreClass::TraitPrecRule &rule) {
   m_traitPrecRules.push_back(rule);
 }
 
-void PreClassEmitter::addTraitAliasRule(PreClass::TraitAliasRule &rule) {
+void PreClassEmitter::addTraitAliasRule(
+    const PreClass::TraitAliasRule &rule) {
   m_traitAliasRules.push_back(rule);
 }
 
@@ -282,57 +295,11 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
   int repoId = m_ue.repoId();
   int64 usn = m_ue.sn();
   pcrp.insertPreClass(repoId)
-      .insert(txn, usn, m_id, m_line1, m_line2, m_offset, m_name, m_attrs,
-              m_parent, m_docComment, m_hoistable);
-  for (unsigned i = 0; i < m_interfaces.size(); ++i) {
-    pcrp.insertPreClassInterface(repoId)
-        .insert(txn, usn, m_id, i, m_interfaces[i]);
-  }
-  for (unsigned i = 0; i < m_usedTraits.size(); ++i) {
-    pcrp.insertPreClassTrait(repoId)
-        .insert(txn, usn, m_id, i, m_usedTraits[i]);
-  }
-  for (unsigned i = 0; i < m_traitPrecRules.size(); ++i) {
-    const PreClass::TraitPrecRule& tpr = m_traitPrecRules[i];
-    pcrp.insertPreClassTraitPrec(repoId)
-        .insert(txn, usn, m_id, i, tpr.getMethodName(),
-                tpr.getSelectedTraitName());
-    TraitNameSet otn;
-    tpr.getOtherTraitNames(otn);
-    int j = 0;
-    for (TraitNameSet::const_iterator it = otn.begin(); it != otn.end(); ++it) {
-      pcrp.insertPreClassTraitPrecOther(repoId).insert(txn, usn, m_id,
-                                                       i, j++, *it);
-    }
-  }
-  for (unsigned i = 0; i < m_traitAliasRules.size(); ++i) {
-    const PreClass::TraitAliasRule& tar = m_traitAliasRules[i];
-    pcrp.insertPreClassTraitAlias(repoId)
-        .insert(txn, usn, m_id, i, tar.getTraitName(),
-                tar.getOrigMethodName(), tar.getNewMethodName(),
-                tar.getModifiers());
-  }
-  for (PreClass::UserAttributeMap::const_iterator it = m_userAttributes.begin();
-       it != m_userAttributes.end(); ++it) {
-    const StringData* name = it->first;
-    const TypedValue& tv = it->second;
-    pcrp.insertPreClassUserAttribute(repoId)
-        .insert(txn, usn, m_id, name, tv);
-  }
+      .insert(*this, txn, usn, m_id, m_name, m_hoistable);
+
   for (MethodVec::const_iterator it = m_methods.begin();
        it != m_methods.end(); ++it) {
     (*it)->commit(txn);
-  }
-  for (unsigned i = 0; i < m_propertyVec.size(); ++i) {
-    const Prop* prop = m_propertyVec[i];
-    pcrp.insertPreClassProperty(repoId)
-        .insert(txn, usn, m_id, i, prop->name(), prop->attrs(),
-                prop->docComment(), prop->val());
-  }
-  for (unsigned i = 0; i < m_constantVec.size(); ++i) {
-    const Const* cns = m_constantVec[i];
-    pcrp.insertPreClassConstant(repoId)
-        .insert(txn, usn, m_id, i, cns->name(), cns->val(), cns->phpCode());
   }
 }
 
@@ -360,46 +327,71 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_usedTraits = m_usedTraits;
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
-  pc->m_methodMap.init(m_methods.size());
   pc->m_userAttributes = m_userAttributes;
+
+  PreClass::MethodMap::Builder methodBuild;
   for (MethodVec::const_iterator it = m_methods.begin();
        it != m_methods.end(); ++it) {
     Func* f = (*it)->create(unit, pc);
-    pc->m_methods.push_back(f);
-    pc->m_methodMap.add(f->name(), f);
+    methodBuild.add(f->name(), f);
   }
-  for (unsigned i = 0; i < m_propertyVec.size(); ++i) {
-    Prop* prop = m_propertyVec[i];
-    PreClass::Prop* pcprop = new PreClass::Prop(pc,
-                                                prop->name(),
-                                                prop->attrs(),
-                                                prop->docComment(),
-                                                prop->val());
-    pc->m_propertyMap[prop->name()] = pcprop;
-    pc->m_propertyVec.push_back(pcprop);
+  pc->m_methods.create(methodBuild);
+
+  // Properties in the actual PreClass are heap allocated (currently).
+  // (TODO: #1130994)
+  PreClass::PropMap::Builder propBuild;
+  for (unsigned i = 0; i < m_propMap.size(); ++i) {
+    const Prop& prop = m_propMap[i];
+    propBuild.add(prop.name(), new PreClass::Prop(pc,
+                                                  prop.name(),
+                                                  prop.attrs(),
+                                                  prop.docComment(),
+                                                  prop.val()));
   }
-  for (unsigned i = 0; i < m_constantVec.size(); ++i) {
-    Const* cns = m_constantVec[i];
-    PreClass::Const* pccns = new PreClass::Const(pc,
-                                                 cns->name(),
-                                                 cns->val(),
-                                                 cns->phpCode());
-    pc->m_constantMap[cns->name()] = pc->m_constantVec.size();
-    pc->m_constantVec.push_back(pccns);
+  pc->m_properties.create(propBuild);
+
+  PreClass::ConstMap::Builder constBuild;
+  for (unsigned i = 0; i < m_constMap.size(); ++i) {
+    const Const& const_ = m_constMap[i];
+    constBuild.add(const_.name(), new PreClass::Const(pc,
+                                                      const_.name(),
+                                                      const_.val(),
+                                                      const_.phpCode()));
   }
+  pc->m_constants.create(constBuild);
   return pc;
+}
+
+template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
+  // NOTE: name, hoistable, and a few other fields currently
+  // serialized outside of this.
+  sd(m_line1)
+    (m_line2)
+    (m_offset)
+    (m_attrs)
+    (m_parent)
+    (m_docComment)
+
+    (m_interfaces)
+    (m_usedTraits)
+    (m_traitPrecRules)
+    (m_traitAliasRules)
+    (m_userAttributes)
+    (m_propMap)
+    (m_constMap)
+    ;
 }
 
 //=============================================================================
 // PreClassRepoProxy.
 
 PreClassRepoProxy::PreClassRepoProxy(Repo& repo)
-  : RepoProxy(repo),
+  : RepoProxy(repo)
 #define PCRP_OP(c, o) \
-    m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral),
+  , m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral)
     PCRP_OPS
 #undef PCRP_OP
-    m_dummy(0) {
+{
 #define PCRP_OP(c, o) \
   m_##o[RepoIdLocal] = &m_##o##Local; \
   m_##o[RepoIdCentral] = &m_##o##Central;
@@ -414,101 +406,33 @@ void PreClassRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClass")
-             << "(unitSn INTEGER, preClassId INTEGER, line1 INTEGER,"
-                " line2 INTEGER, offset INTEGER, name TEXT, attrs INTEGER,"
-                " parent TEXT, docComment TEXT, hoistable INTEGER,"
+             << "(unitSn INTEGER, preClassId INTEGER, name TEXT, "
+                " hoistable INTEGER, extraData BLOB, "
                 " PRIMARY KEY (unitSn, preClassId));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClassInterface")
-             << "(unitSn INTEGER, preClassId INTEGER, interfaceSn INTEGER,"
-                " name TEXT, PRIMARY KEY (unitSn, preClassId, interfaceSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClassTrait")
-             << "(unitSn INTEGER, preClassId INTEGER, traitSn INTEGER,"
-                " name TEXT, PRIMARY KEY (unitSn, preClassId, traitSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClassTraitPrec")
-             << "(unitSn INTEGER, preClassId INTEGER, traitPrecSn INTEGER,"
-                " methodName TEXT, selectedTraitName TEXT,"
-                " PRIMARY KEY (unitSn, preClassId, traitPrecSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE "
-             << m_repo.table(repoId, "PreClassTraitPrecOther")
-             << "(unitSn INTEGER, preClassId INTEGER, traitPrecSn INTEGER,"
-                " otherSn INTEGER, other TEXT,"
-                " PRIMARY KEY (unitSn, preClassId, traitPrecSn, otherSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClassTraitAlias")
-             << "(unitSn INTEGER, preClassId INTEGER, traitAliasSn INTEGER,"
-                " name TEXT, origMethodName TEXT, newMethodName TEXT,"
-                " modifiers INTEGER,"
-                " PRIMARY KEY (unitSn, preClassId, traitAliasSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClassUserAttribute")
-             << "(unitSn INTEGER, preClassId INTEGER, name TEXT, value BLOB,"
-                " PRIMARY KEY (unitSn, preClassId, name));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClassProperty")
-             << "(unitSn INTEGER, preClassId INTEGER, propertySn INTEGER,"
-                " name TEXT, attrs INTEGER, docComment TEXT, val BLOB,"
-                " PRIMARY KEY (unitSn, preClassId, propertySn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClassConstant")
-             << "(unitSn INTEGER, preClassId INTEGER, constantSn INTEGER,"
-                " name TEXT, val BLOB, phpCode TEXT,"
-                " PRIMARY KEY (unitSn, preClassId, constantSn));";
     txn.exec(ssCreate.str());
   }
 }
 
 void PreClassRepoProxy::InsertPreClassStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               int line1, int line2, Offset offset,
-                               const StringData* name, Attr attrs,
-                               const StringData* parent,
-                               const StringData* docComment, bool hoistable) {
+                      ::insert(const PreClassEmitter& pce, RepoTxn& txn,
+                               int64 unitSn, Id preClassId,
+                               const StringData* name, bool hoistable) {
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "PreClass")
-             << " VALUES(@unitSn, @preClassId, @line1, @line2, @offset, @name,"
-                " @attrs, @parent, @docComment, @hoistable);";
+             << " VALUES(@unitSn, @preClassId, @name, @hoistable, "
+                "@extraData);";
     txn.prepare(*this, ssInsert.str());
   }
+
+  BlobEncoder extraBlob;
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@preClassId", preClassId);
-  query.bindInt("@line1", line1);
-  query.bindInt("@line2", line2);
-  query.bindOffset("@offset", offset);
   query.bindStaticString("@name", name);
-  query.bindAttr("@attrs", attrs);
-  query.bindStaticString("@parent", parent);
-  query.bindStaticString("@docComment", docComment);
   query.bindBool("@hoistable", hoistable);
+  const_cast<PreClassEmitter&>(pce).serdeMetaData(extraBlob);
+  query.bindBlob("@extraData", extraBlob, /* static */ true);
   query.exec();
 }
 
@@ -517,8 +441,7 @@ void PreClassRepoProxy::GetPreClassesStmt
   RepoTxn txn(m_repo);
   if (!prepared()) {
     std::stringstream ssSelect;
-    ssSelect << "SELECT preClassId,line1,line2,offset,name,attrs,parent,"
-                "docComment,hoistable FROM "
+    ssSelect << "SELECT preClassId,name,hoistable,extraData FROM "
              << m_repo.table(m_repoId, "PreClass")
              << " WHERE unitSn == @unitSn ORDER BY preClassId ASC;";
     txn.prepare(*this, ssSelect.str());
@@ -529,402 +452,13 @@ void PreClassRepoProxy::GetPreClassesStmt
     query.step();
     if (query.row()) {
       Id preClassId;          /**/ query.getId(0, preClassId);
-      int line1;              /**/ query.getInt(1, line1);
-      int line2;              /**/ query.getInt(2, line2);
-      Offset offset;          /**/ query.getOffset(3, offset);
-      StringData* name;       /**/ query.getStaticString(4, name);
-      Attr attrs;             /**/ query.getAttr(5, attrs);
-      StringData* parent;     /**/ query.getStaticString(6, parent);
-      StringData* docComment; /**/ query.getStaticString(7, docComment);
-      bool hoistable;         /**/ query.getBool(8, hoistable);
-      PreClassEmitter* pce = ue.newPreClassEmitter(name, attrs, parent,
-                                                   docComment, line1, line2,
-                                                   offset, hoistable);
+      StringData* name;       /**/ query.getStaticString(1, name);
+      bool hoistable;         /**/ query.getBool(2, hoistable);
+      BlobDecoder extraBlob = /**/ query.getBlob(3);
+      PreClassEmitter* pce = ue.newPreClassEmitter(name, hoistable);
+      pce->setHoistable(hoistable);
+      pce->serdeMetaData(extraBlob);
       ASSERT(pce->id() == preClassId);
-      m_repo.pcrp().getPreClassInterfaces(m_repoId).get(*pce);
-      m_repo.pcrp().getPreClassTraits(m_repoId).get(*pce);
-      m_repo.pcrp().getPreClassTraitPrecs(m_repoId).get(*pce);
-      m_repo.pcrp().getPreClassTraitAliases(m_repoId).get(*pce);
-      m_repo.pcrp().getPreClassUserAttributes(m_repoId).get(*pce);
-      m_repo.pcrp().getPreClassProperties(m_repoId).get(*pce);
-      m_repo.pcrp().getPreClassConstants(m_repoId).get(*pce);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void PreClassRepoProxy::InsertPreClassInterfaceStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               int interfaceSn, const StringData* name) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "PreClassInterface")
-             << " VALUES(@unitSn, @preClassId, @interfaceSn, @name);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindInt("@interfaceSn", interfaceSn);
-  query.bindStaticString("@name", name);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassInterfacesStmt
-                      ::get(PreClassEmitter& pce) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name FROM "
-             << m_repo.table(m_repoId, "PreClassInterface")
-             << " WHERE unitSn == @unitSn AND preClassId == @preClassId"
-                " ORDER BY interfaceSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", pce.ue().sn());
-  query.bindInt("@preClassId", pce.id());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name; /**/ query.getStaticString(0, name);
-      pce.addInterface(name);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void PreClassRepoProxy::InsertPreClassTraitStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               int traitSn, const StringData* name) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "PreClassTrait")
-             << " VALUES(@unitSn, @preClassId, @traitSn, @name);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindInt("@traitSn", traitSn);
-  query.bindStaticString("@name", name);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassTraitsStmt
-                      ::get(PreClassEmitter& pce) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name FROM "
-             << m_repo.table(m_repoId, "PreClassTrait")
-             << " WHERE unitSn == @unitSn AND preClassId == @preClassId"
-                " ORDER BY traitSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", pce.ue().sn());
-  query.bindInt("@preClassId", pce.id());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name; /**/ query.getStaticString(0, name);
-      pce.addUsedTrait(name);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void PreClassRepoProxy::InsertPreClassTraitPrecStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               int traitPrecSn, const StringData* methodName,
-                               const StringData* selectedTraitName) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "PreClassTraitPrec")
-             << " VALUES(@unitSn, @preClassId, @traitPrecSn, @methodName,"
-                " @selectedTraitName);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindInt("@traitPrecSn", traitPrecSn);
-  query.bindStaticString("@methodName", methodName);
-  query.bindStaticString("@selectedTraitName", selectedTraitName);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassTraitPrecsStmt
-                      ::get(PreClassEmitter& pce) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT traitPrecSn,methodName,selectedTraitName FROM "
-             << m_repo.table(m_repoId, "PreClassTraitPrec")
-             << " WHERE unitSn == @unitSn AND preClassId == @preClassId"
-                " ORDER BY traitPrecSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", pce.ue().sn());
-  query.bindInt("@preClassId", pce.id());
-  do {
-    query.step();
-    if (query.row()) {
-      int traitPrecSn;               /**/ query.getInt(0, traitPrecSn);
-      StringData* methodName;        /**/ query.getStaticString(1, methodName);
-      StringData* selectedTraitName; /**/ query.getStaticString(2,
-                                            selectedTraitName);
-      PreClass::TraitPrecRule tpr(selectedTraitName, methodName);
-      m_repo.pcrp().getPreClassTraitPrecOthers(m_repoId).get(pce, traitPrecSn,
-                                                             tpr);
-      pce.addTraitPrecRule(tpr);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void PreClassRepoProxy::InsertPreClassTraitPrecOtherStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               int traitPrecSn, int otherSn,
-                               const StringData* other) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO "
-             << m_repo.table(m_repoId, "PreClassTraitPrecOther")
-             << " VALUES(@unitSn, @preClassId, @traitPrecSn,"
-                " @otherSn, @other);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@preClassId", preClassId);
-  query.bindInt("@traitPrecSn", traitPrecSn);
-  query.bindInt("@otherSn", otherSn);
-  query.bindStaticString("@other", other);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassTraitPrecOthersStmt
-                      ::get(PreClassEmitter& pce, int traitPrecSn,
-                            PreClass::TraitPrecRule& tpr) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT other FROM "
-             << m_repo.table(m_repoId, "PreClassTraitPrecOther")
-             << " WHERE unitSn == @unitSn AND preClassId == @preClassId"
-                " AND traitPrecSn == @traitPrecSn"
-                " ORDER BY otherSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", pce.ue().sn());
-  query.bindInt("@preClassId", pce.id());
-  query.bindInt("@traitPrecSn", traitPrecSn);
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* other; /**/ query.getStaticString(0, other);
-      tpr.addOtherTraitName(other);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void PreClassRepoProxy::InsertPreClassTraitAliasStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               int traitAliasSn, const StringData* name,
-                               const StringData* origMethodName,
-                               const StringData* newMethodName,
-                               Attr modifiers) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "PreClassTraitAlias")
-             << " VALUES(@unitSn, @preClassId, @traitAliasSn, @name,"
-                " @origMethodName, @newMethodName, @modifiers);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindInt("@traitAliasSn", traitAliasSn);
-  query.bindStaticString("@name", name);
-  query.bindStaticString("@origMethodName", origMethodName);
-  query.bindStaticString("@newMethodName", newMethodName);
-  query.bindAttr("@modifiers", modifiers);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassTraitAliasesStmt
-                      ::get(PreClassEmitter& pce) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name,origMethodName,newMethodName,"
-                "modifiers FROM "
-             << m_repo.table(m_repoId, "PreClassTraitAlias")
-             << " WHERE unitSn == @unitSn AND preClassId == @preClassId"
-                " ORDER BY traitAliasSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", pce.ue().sn());
-  query.bindInt("@preClassId", pce.id());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name;           /**/ query.getStaticString(0, name);
-      StringData* origMethodName; /**/ query.getStaticString(1, origMethodName);
-      StringData* newMethodName;  /**/ query.getStaticString(2, newMethodName);
-      Attr modifiers;             /**/ query.getAttr(3, modifiers);
-      PreClass::TraitAliasRule tar(name, origMethodName, newMethodName,
-                                   modifiers);
-      pce.addTraitAliasRule(tar);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void PreClassRepoProxy::InsertPreClassUserAttributeStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               const StringData* name, const TypedValue& tv) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO "
-             << m_repo.table(m_repoId, "PreClassUserAttribute")
-             << " VALUES(@unitSn, @preClassId, @name, @value);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindStaticString("@name", name);
-  query.bindTypedValue("@value", tv);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassUserAttributesStmt
-                      ::get(PreClassEmitter& pce) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name, value FROM "
-             << m_repo.table(m_repoId, "PreClassUserAttribute")
-             << " WHERE unitSn == @unitSn AND preClassId == @preClassId"
-                " ORDER BY name ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", pce.ue().sn());
-  query.bindInt("@preClassId", pce.id());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name;           /**/ query.getStaticString(0, name);
-      TypedValue tv;              /**/ query.getTypedValue(1, tv);
-      pce.addUserAttribute(name, tv);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void PreClassRepoProxy::InsertPreClassPropertyStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               int propertySn, const StringData* name,
-                               Attr attrs, const StringData* docComment,
-                               const TypedValue& val) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "PreClassProperty")
-             << " VALUES(@unitSn, @preClassId, @propertySn, @name, @attrs,"
-                " @docComment, @val);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindInt("@propertySn", propertySn);
-  query.bindStaticString("@name", name);
-  query.bindAttr("@attrs", attrs);
-  query.bindStaticString("@docComment", docComment);
-  query.bindTypedValue("@val", val);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassPropertiesStmt
-                      ::get(PreClassEmitter& pce) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name,attrs,docComment,val FROM "
-             << m_repo.table(m_repoId, "PreClassProperty")
-             << " WHERE unitSn == @unitSn AND preClassId == @preClassId"
-                " ORDER BY propertySn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", pce.ue().sn());
-  query.bindInt("@preClassId", pce.id());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name;       /**/ query.getStaticString(0, name);
-      Attr attrs;             /**/ query.getAttr(1, attrs);
-      StringData* docComment; /**/ query.getStaticString(2, docComment);
-      TypedValue val;         /**/ query.getTypedValue(3, val);
-      bool added UNUSED = pce.addProperty(name, attrs, docComment, &val);
-      ASSERT(added);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void PreClassRepoProxy::InsertPreClassConstantStmt
-                      ::insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                               int constantSn, const StringData* name,
-                               const TypedValue& val,
-                               const StringData* phpCode) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "PreClassConstant")
-             << " VALUES(@unitSn, @preClassId, @constantSn, @name, @val,"
-                " @phpCode);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindId("@preClassId", preClassId);
-  query.bindInt("@constantSn", constantSn);
-  query.bindStaticString("@name", name);
-  query.bindTypedValue("@val", val);
-  query.bindStaticString("@phpCode", phpCode);
-  query.exec();
-}
-
-void PreClassRepoProxy::GetPreClassConstantsStmt
-                      ::get(PreClassEmitter& pce) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name,val,phpCode FROM "
-             << m_repo.table(m_repoId, "PreClassConstant")
-             << " WHERE unitSn == @unitSn AND preClassId == @preClassId"
-                " ORDER BY constantSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", pce.ue().sn());
-  query.bindInt("@preClassId", pce.id());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name;    /**/ query.getStaticString(0, name);
-      TypedValue val;      /**/ query.getTypedValue(1, val);
-      StringData* phpCode; /**/ query.getStaticString(2, phpCode);
-      bool added UNUSED = pce.addConstant(name, &val, phpCode);
-      ASSERT(added);
     }
   } while (!query.done());
   txn.commit();
@@ -1396,7 +930,7 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
 
 TypedValue Class::getStaticPropInitVal(const SProp& prop) {
   Class* declCls = prop.m_class;
-  Slot s = declCls->m_staticProperties.findSlot(prop.m_name);
+  Slot s = declCls->m_staticProperties.findIndex(prop.m_name);
   ASSERT(s != kInvalidSlot);
   return declCls->m_staticProperties[s].m_val;
 }
@@ -1431,7 +965,7 @@ HphpArray* Class::initClsCnsData() const {
 }
 
 TypedValue* Class::clsCnsGet(const StringData* clsCnsName) const {
-  Slot clsCnsInd = m_constants.findSlot(clsCnsName);
+  Slot clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) {
     return 0;
   }
@@ -1538,6 +1072,7 @@ bool Class::setSpecial(bool failIsFatal) {
 
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = lookupMethod(sd86ctor);
+  ASSERT(m_ctor && "class had no user-defined constructor or 86ctor");
   ASSERT(m_ctor->attrs() == AttrPublic);
   return false;
 }
@@ -1594,7 +1129,7 @@ bool Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
 }
 
 ClassPtr Class::findSingleTraitWithMethod(const StringData* methName) {
-  // Note: m_methodMap includes methods from parents / traits recursively
+  // Note: m_methods includes methods from parents / traits recursively
   ClassPtr traitCls = ClassPtr();
   for (size_t t = 0; t < m_usedTraits.size(); t++) {
     if (m_usedTraits[t]->m_methods.contains(methName)) {
@@ -1949,9 +1484,8 @@ bool Class::setMethods(bool failIsFatal) {
   ASSERT(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
   // Overlay/append this class's public/protected methods onto/to those of the
   // parent.
-  for (PreClass::MethodVec::const_iterator it = m_preClass->methods().begin();
-       it != m_preClass->methods().end(); ++it) {
-    Func* method = *it;
+  for (size_t methI = 0; methI < m_preClass->numMethods(); ++methI) {
+    Func* method = m_preClass->methods()[methI];
     MethodMap::Builder::iterator it2 = builder.find(method->name());
     if (it2 != builder.end()) {
       Func* parentMethod = builder[it2->second];
@@ -2095,22 +1629,21 @@ bool Class::setConstants(bool failIsFatal) {
     }
   }
 
-  for (PreClass::ConstantVec::const_iterator it =
-       m_preClass->constantVec().begin();
-       it != m_preClass->constantVec().end(); ++it) {
-    ConstMap::Builder::iterator it2 = builder.find((*it)->name());
+  for (Slot i = 0, sz = m_preClass->numConstants(); i < sz; ++i) {
+    PreClass::Const* preConst = m_preClass->constants()[i];
+    ConstMap::Builder::iterator it2 = builder.find(preConst->name());
     if (it2 != builder.end()) {
       // Overlay ancestor's constant.
       builder[it2->second].m_class = this;
-      builder[it2->second].m_val = (*it)->val();
+      builder[it2->second].m_val = preConst->val();
     } else {
       // Append constant.
       Const constant;
       constant.m_class = this;
-      constant.m_name = (*it)->name();
-      constant.m_val = (*it)->val();
-      constant.m_phpCode = (*it)->phpCode();
-      builder.add((*it)->name(), constant);
+      constant.m_name = preConst->name();
+      constant.m_val = preConst->val();
+      constant.m_phpCode = preConst->phpCode();
+      builder.add(preConst->name(), constant);
     }
   }
 
@@ -2164,10 +1697,8 @@ bool Class::setProperties(bool failIsFatal) {
   }
 
   ASSERT(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
-  for (PreClass::PropertyVec::const_iterator
-       it = m_preClass->propertyVec().begin();
-       it != m_preClass->propertyVec().end(); ++it) {
-    const PreClass::Prop* preProp = *it;
+  for (Slot slot = 0; slot < m_preClass->numProperties(); ++slot) {
+    const PreClass::Prop* preProp = m_preClass->properties()[slot];
 
     if (!(preProp->attrs() & AttrStatic)) {
       // Overlay/append this class's protected and public properties onto/to
@@ -2188,7 +1719,7 @@ bool Class::setProperties(bool failIsFatal) {
       // Get parent's equivalent property, if one exists.
       const Prop* parentProp = NULL;
       if (m_parent.get() != NULL) {
-        Slot id = m_parent->m_declProperties.findSlot(preProp->name());
+        Slot id = m_parent->m_declProperties.findIndex(preProp->name());
         if (id != kInvalidSlot) {
           parentProp = &m_parent->m_declProperties[id];
         }
@@ -2348,7 +1879,6 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
   switch (tv1.m_type) {
     case KindOfNull: return true;
     case KindOfBoolean:
-    case KindOfInt32:
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString:
@@ -2659,9 +2189,9 @@ Class* Class::findMethodBaseClass(const StringData* methName) {
 }
 
 void Class::getMethodNames(const Class* ctx, HphpArray* methods) const {
-  const PreClass::MethodVec& m = m_preClass.get()->methods();
-  for (int i = 0, sz = m.size(); i < sz; i++) {
-    Func* func = m[i];
+  Func* const* pcMethods = m_preClass->methods();
+  for (size_t i = 0, sz = m_preClass->numMethods(); i < sz; i++) {
+    Func* func = pcMethods[i];
     if (isdigit(func->name()->data()[0])) continue;
     if (!(func->attrs() & AttrPublic)) {
       if (!ctx) continue;
@@ -2750,9 +2280,8 @@ void Class::getClassInfo(ClassInfoVM* ci) {
   ci->m_methodsVec.push_back(m);
 
   // Methods: in source order (from our PreClass), then traits.
-  for (PreClass::MethodVec::const_iterator it = m_preClass->methods().begin();
-       it != m_preClass->methods().end(); ++it) {
-    Func* func = lookupMethod((*it)->name());
+  for (size_t i = 0; i < m_preClass->numMethods(); ++i) {
+    Func* func = lookupMethod(m_preClass->methods()[i]->name());
     // Filter out 86ctor() and 86*init().
     ASSERT(func);
     if (func && !isdigit(func->name()->data()[0])) {

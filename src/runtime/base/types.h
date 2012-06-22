@@ -126,13 +126,12 @@ class VariableUnserializer;
 enum DataType {
   // Self and Parent are defined here for use by class TypeConstraint.
   // KindOfSelf/Parent are not used by TypedValue
-  KindOfSelf      = -5,
-  KindOfParent    = -4,
+  KindOfSelf      = -4,
+  KindOfParent    = -3,
 
-  MinDataType     = -3,
+  MinDataType     = -2,
 
   // Values below zero are not PHP values, but runtime-internal.
-  KindOfCanary    = -3,
   KindOfClass     = -2,
   KindOfInvalid   = -1,
 
@@ -143,9 +142,8 @@ enum DataType {
   KindOfUninit  = 0,
   KindOfNull    = 1,
   KindOfBoolean = 2,
-  KindOfInt32   = 3,
-  KindOfInt64   = 4,
-  KindOfDouble  = 5,
+  KindOfInt64   = 3,
+  KindOfDouble  = 4,
   KindOfStaticString  = 6,
   KindOfString  = 7,
   KindOfArray   = 8,
@@ -169,22 +167,15 @@ inline int getDataTypeIndex(DataType t) {
 
 // Helper macro for checking if a given type is refcounted
 #define IS_REFCOUNTED_TYPE(t) ((t) > KindOfRefCountThreshold)
-// Helper macro for checking if a type is KindOfInt32 or KindOfInt64.
-#define IS_INT_TYPE(t) (((t-3) & ~1) == 0)
 // Helper macro for checking if a type is KindOfString or KindOfStaticString.
 #define IS_STRING_TYPE(t) (((t) & ~1) == 6)
+// Check if a type is KindOfUninit or KindOfNull
 #define IS_NULL_TYPE(t) (unsigned(t) <= 1)
+// Other type check macros
+#define IS_INT_TYPE(t) ((t) == KindOfInt64)
 #define IS_ARRAY_TYPE(t) ((t) == KindOfArray)
 #define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
-
-enum StringDataMode {
-  AttachLiteral, // const char * points to a literal string
-  AttachString,  // const char * points to a malloc-ed string
-  CopyString,    // make a real copy of the string
-
-  StringDataModeCount
-};
 
 /**
  * Some of these typedefs are for platform independency, including "int64".

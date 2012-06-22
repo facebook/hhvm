@@ -435,10 +435,10 @@ TypedValue * fg1_mb_convert_variables(TypedValue* rv, HPHP::VM::ActRec* ar, long
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-3, false);
     for (long long i = 3; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-3);
+      TypedValue* extraArg = ea->getExtraArg(i-3);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-3, tvAsVariant(extraArg));
       } else {
@@ -461,10 +461,10 @@ TypedValue* fg_mb_convert_variables(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-3, false);
           for (long long i = 3; i < count; ++i) {
-            TypedValue* extraArg = ve->getExtraArg(i-3);
+            TypedValue* extraArg = ea->getExtraArg(i-3);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-3, tvAsVariant(extraArg));
             } else {
@@ -985,13 +985,13 @@ TypedValue* fg_mb_ereg_replace(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mb_ereg_search_getpos()
+long long HPHP::f_mb_ereg_search_getpos()
 _ZN4HPHP23f_mb_ereg_search_getposEv
 
 (return value) => rax
 */
 
-int fh_mb_ereg_search_getpos() asm("_ZN4HPHP23f_mb_ereg_search_getposEv");
+long long fh_mb_ereg_search_getpos() asm("_ZN4HPHP23f_mb_ereg_search_getposEv");
 
 TypedValue* fg_mb_ereg_search_getpos(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

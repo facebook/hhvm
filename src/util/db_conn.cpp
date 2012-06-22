@@ -21,6 +21,7 @@
 #include "lock.h"
 #include "async_job.h"
 #include "util.h"
+#include "alloc.h"
 #include <boost/lexical_cast.hpp>
 
 namespace HPHP {
@@ -68,8 +69,10 @@ ServerData::ServerData() : m_port(0) {
 }
 
 ServerData::ServerData(const char *ip, const char *database,
-                       int port /* = 0 */, const char *username /* = NULL */,
-                       const char *password /* = NULL */) : m_port(port) {
+                       int port, const char *username,
+                       const char *password,
+                       const SessionVariableVec &sessionVariables) : 
+                       m_port(port), m_sessionVariables(sessionVariables) {
   if (ip) m_ip = ip;
   if (database) m_database = database;
   if (username) m_username = username;
@@ -104,10 +107,12 @@ void DBConn::ClearLocalDatabases() {
 }
 
 void DBConn::AddLocalDB(int dbId, const char *ip, const char *db,
-                        int port, const char *username, const char *password) {
+                        int port, const char *username, const char *password,
+                        const SessionVariableVec &sessionVariables) {
   Lock lock(s_mutex);
   s_localDatabases[dbId] =
-    ServerDataPtr(new ServerData(ip, db, port, username, password));
+    ServerDataPtr(new ServerData(ip, db, port, username, password, 
+                                 sessionVariables));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -150,6 +155,31 @@ void DBConn::open(ServerDataPtr server, int connectTimeout /* = -1 */,
     throw DBConnectionException(code, server->getIP().c_str(),
                                 server->getDatabase().c_str(),
                                 smsg.c_str());
+  }
+
+  // Setting session variables
+  if (server->getSessionVariables().size()) {
+    string sessionCmd = string("SET ");
+    for (SessionVariableVec::const_iterator iter = 
+         server->getSessionVariables().begin(); iter != 
+         server->getSessionVariables().end(); iter++) {
+      if (iter != server->getSessionVariables().begin()) {
+        sessionCmd += ", ";
+      }
+      sessionCmd += string("SESSION ") + iter->first + string("=") + 
+                    iter->second;
+    }
+
+    char *sessionVarSQL = (char*)Util::safe_malloc(sessionCmd.length() * 2 + 1);
+    mysql_real_escape_string(m_conn, sessionVarSQL, sessionCmd.c_str(), 
+      sessionCmd.length());
+    bool failure = mysql_query(m_conn, sessionVarSQL);
+    Util::safe_free(sessionVarSQL);
+    if (failure) {
+      int code = mysql_errno(m_conn);
+      throw DatabaseException(code, "Failed to execute SQL '%s': %s (%d)",
+                              sessionCmd.c_str(), mysql_error(m_conn), code);
+    }
   }
 
   m_server = server;

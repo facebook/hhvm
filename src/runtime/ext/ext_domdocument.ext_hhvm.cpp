@@ -3928,9 +3928,6 @@ public:
     c_DOMNode_Instance *this_ = (c_DOMNode_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMNode) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -5140,9 +5137,6 @@ public:
     c_DOMAttr_Instance *this_ = (c_DOMAttr_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMAttr) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -5482,9 +5476,6 @@ public:
     c_DOMCharacterData_Instance *this_ = (c_DOMCharacterData_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMCharacterData) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -6071,9 +6062,6 @@ public:
     c_DOMComment_Instance *this_ = (c_DOMComment_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMComment) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -6242,9 +6230,6 @@ public:
     c_DOMText_Instance *this_ = (c_DOMText_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMText) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -6629,9 +6614,6 @@ public:
     c_DOMCDATASection_Instance *this_ = (c_DOMCDATASection_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMCDATASection) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -6800,9 +6782,6 @@ public:
     c_DOMDocument_Instance *this_ = (c_DOMDocument_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMDocument) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -8832,9 +8811,6 @@ public:
     c_DOMDocumentFragment_Instance *this_ = (c_DOMDocumentFragment_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMDocumentFragment) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -9041,9 +9017,6 @@ public:
     c_DOMDocumentType_Instance *this_ = (c_DOMDocumentType_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMDocumentType) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -9314,9 +9287,6 @@ public:
     c_DOMElement_Instance *this_ = (c_DOMElement_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMElement) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -10721,9 +10691,6 @@ public:
     c_DOMEntity_Instance *this_ = (c_DOMEntity_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMEntity) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -10994,9 +10961,6 @@ public:
     c_DOMEntityReference_Instance *this_ = (c_DOMEntityReference_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMEntityReference) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -11165,9 +11129,6 @@ public:
     c_DOMNotation_Instance *this_ = (c_DOMNotation_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMNotation) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -11438,9 +11399,6 @@ public:
     c_DOMProcessingInstruction_Instance *this_ = (c_DOMProcessingInstruction_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMProcessingInstruction) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -11741,9 +11699,6 @@ public:
     c_DOMNodeIterator_Instance *this_ = (c_DOMNodeIterator_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMNodeIterator) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -12088,9 +12043,6 @@ public:
     c_DOMNamedNodeMap_Instance *this_ = (c_DOMNamedNodeMap_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMNamedNodeMap) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -12574,9 +12526,6 @@ public:
     c_DOMNodeList_Instance *this_ = (c_DOMNodeList_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMNodeList) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -12942,9 +12891,6 @@ public:
     c_DOMImplementation_Instance *this_ = (c_DOMImplementation_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMImplementation) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -13303,9 +13249,6 @@ public:
     c_DOMXPath_Instance *this_ = (c_DOMXPath_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DOMXPath) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);

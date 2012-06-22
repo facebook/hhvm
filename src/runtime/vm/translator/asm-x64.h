@@ -1030,7 +1030,8 @@ struct X64Assembler {
   }
 
   void emitNop(int n) {
-    const uint8_t nops[][9] = {
+    if (n == 0) return;
+    static const uint8_t nops[][9] = {
       { },
       { 0x90 },
       { 0x66, 0x90 },

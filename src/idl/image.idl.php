@@ -1866,7 +1866,7 @@ DefineFunction(
     'desc'   => "Returns the pixel height of a character in the specified font.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the height of the pixel.",
     ),
     'args'   => array(
@@ -1885,7 +1885,7 @@ DefineFunction(
     'desc'   => "Returns the pixel width of a character in font.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the width of the pixel",
     ),
     'args'   => array(
@@ -3124,7 +3124,7 @@ DefineFunction(
     'desc'   => "Returns the image types supported by the current PHP installation.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns a bit-field corresponding to the image formats supported by the version of GD linked into PHP. The following bits are returned, IMG_GIF | IMG_JPG | IMG_PNG | IMG_WBMP | IMG_XPM.",
     ),
     'taint_observer' => false,

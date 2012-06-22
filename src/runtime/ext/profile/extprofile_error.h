@@ -45,7 +45,7 @@ inline bool x_error_log(CStrRef message, int message_type = 0, CStrRef destinati
   return f_error_log(message, message_type, destination, extra_headers);
 }
 
-inline int x_error_reporting(CVarRef level = null) {
+inline int64 x_error_reporting(CVarRef level = null) {
   FUNCTION_INJECTION_BUILTIN(error_reporting);
   return f_error_reporting(level);
 }

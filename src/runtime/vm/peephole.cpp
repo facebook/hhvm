@@ -121,7 +121,7 @@ Peephole::Peephole(UnitEmitter &ue) : m_ue(ue) {
 
 void Peephole::buildFuncTargets(FuncEmitter* fe) {
   m_jumpTargets.insert(fe->base());
-  for (Func::EHEntVec::const_iterator it = fe->ehtab().begin();
+  for (FuncEmitter::EHEntVec::const_iterator it = fe->ehtab().begin();
       it != fe->ehtab().end(); ++it) {
     m_jumpTargets.insert(it->m_base);
     m_jumpTargets.insert(it->m_past);
@@ -137,7 +137,7 @@ void Peephole::buildFuncTargets(FuncEmitter* fe) {
       m_jumpTargets.insert(pi.funcletOff());
     }
   }
-  for (Func::FPIEntVec::const_iterator it = fe->fpitab().begin();
+  for (FuncEmitter::FPIEntVec::const_iterator it = fe->fpitab().begin();
        it != fe->fpitab().end(); ++it) {
     m_jumpTargets.insert(it->m_fpushOff);
     m_jumpTargets.insert(it->m_fcallOff);

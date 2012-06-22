@@ -230,7 +230,7 @@ void c_SplObjectStorage::t_next() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splobjectstorage.php line 87 */
-int c_SplObjectStorage::t_count() {
+int64 c_SplObjectStorage::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::count);
   ObjectData *obj_tmp UNUSED;
   return x_count(m_storage);
@@ -322,7 +322,7 @@ static const int64 cpt_static_inits[] = {
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x17AC96477E2B6DC3LL,1,0,18,65,10,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage") },
-  {0x4B27521443880CAELL,0,1,18,65,4,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index") },
+  {0x4B27521443880CAELL,0,1,18,65,3,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index") },
 
 };
 static const int cpt_hash_entries[] = {

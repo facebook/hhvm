@@ -38,7 +38,7 @@ static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
 }
 
 #define CLASS_INFO_EMPTY_ENTRY   "", NULL, NULL, NULL
-#define METHOD_INFO_EMPTY_ENTRY  NULL, NULL, NULL, NULL, NULL
+#define METHOD_INFO_EMPTY_ENTRY  NULL, NULL, NULL, NULL, NULL, NULL
 
 const char *g_class_map[] = {
   /* header */ (const char *)ClassInfo::IsSystem,
@@ -63,6 +63,8 @@ const char *g_class_map[] = {
   NULL,
   /* constants */
   NULL,
+  /* user attributes */
+  NULL,
 
   /* header */ (const char *)ClassInfo::IsNothing,
   NULL, CLASS_INFO_EMPTY_ENTRY,
@@ -73,6 +75,8 @@ const char *g_class_map[] = {
   /* properties */
   NULL,
   /* constants */
+  NULL,
+  /* user attributes */
   NULL,
 
   /* header */ (const char *)ClassInfo::IsSystem,
@@ -92,6 +96,8 @@ const char *g_class_map[] = {
   /* constants */
   "const_foo", (const char*)ClassInfo::IsInterface, "s:1:\"f\";",
   NULL,
+  /* user attributes */
+  NULL,
 
   /* header */ (const char *)ClassInfo::IsInterface,
   "itestable", CLASS_INFO_EMPTY_ENTRY,
@@ -104,6 +110,8 @@ const char *g_class_map[] = {
   /* properties */
   NULL,
   /* constants */
+  NULL,
+  /* user attributes */
   NULL,
 
   NULL

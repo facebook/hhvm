@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 183 */
+/* SRC: classes/iterator.php line 199 */
 FORWARD_DECLARE_GENERIC_INTERFACE(OuterIterator);
 class c_OuterIterator {
   // public: virtual void t_getinneriterator() = 0;

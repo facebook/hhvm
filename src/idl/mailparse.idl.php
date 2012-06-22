@@ -94,7 +94,7 @@ DefineFunction(
     'name'   => "ezmlm_hash",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "The hash value of addr.",
     ),
     'args'   => array(

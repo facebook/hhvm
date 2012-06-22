@@ -30,7 +30,9 @@ namespace VM {
 int64 new_iter(HPHP::VM::Iter* dest, HphpArray* arr);
 int64 iter_next_array(HPHP::VM::Iter* dest);
 void iter_value_cell(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_value_cell_local(HPHP::VM::Iter* iter, TypedValue* out);
 void iter_key_cell(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_key_cell_local(HPHP::VM::Iter* iter, TypedValue* out);
 
 StringData* concat_is(int64 v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64 v2);
@@ -81,27 +83,33 @@ inline void ALWAYS_INLINE
 frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
   ASSERT(numLocals == fp->m_func->numLocals());
   ASSERT(!fp->hasInvName());
+  // Check if the frame has a VarEnv or if it has extraArgs
   if (UNLIKELY(fp->m_varEnv != NULL)) {
-    // If there is a VarEnv, free the locals and args by
-    // calling the detach method.
-    fp->m_varEnv->detach(fp);
-  } else {
-    // Otherise, free locals and args here.
-    for (int i = 0; i < numLocals; i++) {
-      TRACE_MOD(Trace::runtime, 5,
-                "RetC: freeing %d'th local of %d\n", i,
-                fp->m_func->numLocals());
-      TypedValue* loc = (TypedValue*)FP2LOC(fp, i);
-      DataType t = loc->m_type;
-      if (IS_REFCOUNTED_TYPE(t)) {
-        uint64_t datum = loc->m_data.num;
-        // When destroying an array or object we can reenter the VM
-        // to call a __destruct method. Null out the local before
-        // calling the destructor so that stacktrace logic doesn't
-        // choke.
-        TV_WRITE_UNINIT(loc);
-        tvDecRefHelper(t, datum);
-      }
+    if (fp->hasVarEnv()) {
+      // If there is a VarEnv, free the locals and the VarEnv
+      // by calling the detach method.
+      fp->m_varEnv->detach(fp);
+      return;
+    }
+    // Free extra args
+    ASSERT(fp->hasExtraArgs());
+    delete fp->getExtraArgs();
+  }
+  // Free locals
+  for (int i = 0; i < numLocals; i++) {
+    TRACE_MOD(Trace::runtime, 5,
+              "RetC: freeing %d'th local of %d\n", i,
+              fp->m_func->numLocals());
+    TypedValue* loc = (TypedValue*)FP2LOC(fp, i);
+    DataType t = loc->m_type;
+    if (IS_REFCOUNTED_TYPE(t)) {
+      uint64_t datum = loc->m_data.num;
+      // When destroying an array or object we can reenter the VM
+      // to call a __destruct method. Null out the local before
+      // calling the destructor so that stacktrace logic doesn't
+      // choke.
+      TV_WRITE_UNINIT(loc);
+      tvDecRefHelper(t, datum);
     }
   }
 }

@@ -907,7 +907,7 @@ DefineFunction(
     'desc'   => "array_unshift() prepends passed elements to the front of the array. Note that the list of elements is prepended as a whole, so that the prepended elements stay in the same order. All numerical array keys will be modified to start counting from zero while literal keys won't be touched.",
     'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the new number of elements in the array.",
     ),
     'args'   => array(
@@ -1047,7 +1047,7 @@ DefineFunction(
     'desc'   => "Counts all elements in an array, or properties in an object.\n\nFor objects, if you have SPL installed, you can hook into count() by implementing interface Countable. The interface has exactly one method, count(), which returns the return value for the count() function.\n\nPlease see the Array section of the manual for a detailed explanation of how arrays are implemented and used in PHP.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the number of elements in var, which is typically an array, since anything else will have one element.\n\nIf var is not an array or an object with implemented Countable interface, 1 will be returned. There is one exception, if var is NULL, 0 will be returned. Caution\n\ncount() may return 0 for a variable that isn't set, but it may also return 0 for a variable that has been initialized with an empty array. Use isset() to test if a variable is set.",
     ),
     'args'   => array(
@@ -1071,7 +1071,7 @@ DefineFunction(
     'name'   => "sizeof",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(

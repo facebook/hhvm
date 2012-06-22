@@ -56,6 +56,7 @@ public:
     NeedGlobalPointer = 256,
     ContainsDynamicStatic  = 512,
     ContainsGetDefinedVars = 1024,
+    ContainsDynamicFunctionCall = 2048,
   };
 
   enum JumpTableType {

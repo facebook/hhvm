@@ -1664,14 +1664,14 @@ TypedValue* fg_socket_strerror(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_socket_last_error(HPHP::Object const&)
+long long HPHP::f_socket_last_error(HPHP::Object const&)
 _ZN4HPHP19f_socket_last_errorERKNS_6ObjectE
 
 (return value) => rax
 socket => rdi
 */
 
-int fh_socket_last_error(Value* socket) asm("_ZN4HPHP19f_socket_last_errorERKNS_6ObjectE");
+long long fh_socket_last_error(Value* socket) asm("_ZN4HPHP19f_socket_last_errorERKNS_6ObjectE");
 
 TypedValue * fg1_socket_last_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_socket_last_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

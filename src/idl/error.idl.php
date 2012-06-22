@@ -136,7 +136,7 @@ DefineFunction(
     'desc'   => "The error_reporting() function sets the error_reporting directive at runtime. PHP has many levels of errors, using this function sets that level for the duration (runtime) of your script. If the optional level is not set, error_reporting() will just return the current error reporting level.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the old error_reporting level or the current level if no level parameter is given.",
     ),
     'args'   => array(

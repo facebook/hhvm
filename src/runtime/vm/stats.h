@@ -72,6 +72,8 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TgtCache_ClassExistsMiss) \
   STAT(Tx64_VerifyParamTypeSlow) \
   STAT(Tx64_VerifyParamTypeFast) \
+  STAT(Tx64_FusedTypeCheck) \
+  STAT(Tx64_UnfusedTypeCheck) \
   STAT(Tx64_InstanceOfDSlow) \
   STAT(Tx64_InstanceOfDFast) \
   STAT(Tx64_PropCache) \
@@ -99,6 +101,8 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TC_MissWriteLease) \
   STAT(TC_Hit) \
   STAT(TC_Sync) \
+  STAT(TC_TypePredHit) \
+  STAT(TC_TypePredMiss) \
   /* Fixup */ \
   STAT(Fixup_Find) \
   STAT(Fixup_Probe) \
@@ -112,7 +116,8 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(VMEnter) \
   STAT(TraceletGuard_enter) \
   STAT(TraceletGuard_branch) \
-  STAT(TraceletGuard_execute) \
+  STAT(TraceletGuard_execute)
+
 
 enum StatCounter {
 #define STAT(name) \

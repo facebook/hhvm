@@ -6,7 +6,7 @@ array(6) {
     ["class"]=>
     string "my_child"
     ["info"]=>
-    array(10) {
+    array(11) {
       ["name"]=>
       string "my_other_override"
       ["access"]=>
@@ -21,6 +21,9 @@ array(6) {
       array(0) {
       }
       ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
       array(0) {
       }
       ["file"]=>
@@ -38,7 +41,7 @@ array(6) {
     ["class"]=>
     string "my_child"
     ["info"]=>
-    array(10) {
+    array(11) {
       ["name"]=>
       string "my_child_method"
       ["access"]=>
@@ -53,6 +56,9 @@ array(6) {
       array(0) {
       }
       ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
       array(0) {
       }
       ["file"]=>
@@ -70,7 +76,7 @@ array(6) {
     ["class"]=>
     string "my_class"
     ["info"]=>
-    array(10) {
+    array(11) {
       ["name"]=>
       string "my_method"
       ["access"]=>
@@ -85,6 +91,9 @@ array(6) {
       array(0) {
       }
       ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
       array(0) {
       }
       ["file"]=>
@@ -102,7 +111,7 @@ array(6) {
     ["class"]=>
     string "my_class"
     ["info"]=>
-    array(10) {
+    array(11) {
       ["name"]=>
       string "my_override_method"
       ["access"]=>
@@ -117,6 +126,9 @@ array(6) {
       array(0) {
       }
       ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
       array(0) {
       }
       ["file"]=>
@@ -134,7 +146,7 @@ array(6) {
     ["class"]=>
     string "my_class"
     ["info"]=>
-    array(10) {
+    array(11) {
       ["name"]=>
       string "my_trait_method"
       ["access"]=>
@@ -149,6 +161,9 @@ array(6) {
       array(0) {
       }
       ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
       array(0) {
       }
       ["file"]=>
@@ -166,7 +181,7 @@ array(6) {
     ["class"]=>
     string "my_base"
     ["info"]=>
-    array(10) {
+    array(11) {
       ["name"]=>
       string "my_base_method"
       ["access"]=>
@@ -181,6 +196,9 @@ array(6) {
       array(0) {
       }
       ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
       array(0) {
       }
       ["file"]=>

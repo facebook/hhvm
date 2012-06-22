@@ -204,12 +204,17 @@ int64 f_hphp_instruction_counter(void) {
 Variant f_hphp_get_hardware_counters(void) {
   Array ret;
 
-  ret.set("instructions", Util::HardwareCounter::GetInstructionCount());
-  ret.set("loads", Util::HardwareCounter::GetLoadCount());
-  ret.set("stores", Util::HardwareCounter::GetStoreCount());
+  Util::HardwareCounter::GetPerfEvents(ret);
   return ret;
 }
 
+bool f_hphp_set_hardware_events(CStrRef events /* = null */) {
+  return Util::HardwareCounter::SetPerfEvents(events);
+}
+
+void f_hphp_clear_hardware_events() {
+  Util::HardwareCounter::ClearPerfEvents();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

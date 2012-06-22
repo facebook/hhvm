@@ -61,6 +61,12 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     if (m_params) {
       m_params->markParams(canInvokeFewArgs());
     }
+
+    if (!m_class && m_className.empty()) {
+      FunctionScopePtr fs = getFunctionScope();
+      VariableTablePtr vt = fs->getVariables();
+      vt->setAttribute(VariableTable::ContainsDynamicFunctionCall);
+    }
   }
 }
 
@@ -91,15 +97,8 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
   if (m_class) {
     m_class->inferAndCheck(ar, Type::Any, false);
   } else if (!m_className.empty()) {
-    ClassScopePtr cls = resolveClass();
-    if (!cls) {
-      if (isRedeclared()) {
-        getScope()->getVariables()->
-          setAttribute(VariableTable::NeedGlobalPointer);
-      } else if (getScope()->isFirstPass()) {
-        Compiler::Error(Compiler::UnknownClass, self);
-      }
-    } else {
+    ClassScopePtr cls = resolveClassWithChecks();
+    if (cls) {
       m_classScope = cls;
     }
   }

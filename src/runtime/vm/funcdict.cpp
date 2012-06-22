@@ -35,13 +35,6 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
   ASSERT(isFunctionRenameable(old) ||
          isFunctionRenameable(n3w));
 
-  // When EvalJitEnableRenameFunction is false, the translator may wire
-  // Func*'s into the TC. Don't rename functions.
-  if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitEnableRenameFunction) {
-    raise_error("You must explicitly enable fb_rename_function in the JIT "
-                "(-v Eval.JitEnableRenameFunction=true)");
-  }
-
   NamedEntity *oldNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(old));
   NamedEntity *newNe = const_cast<NamedEntity *>(Unit::GetNamedEntity(n3w));
 
@@ -50,6 +43,15 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
       // It's the caller's responsibility to ensure that the old function
       // exists.
       not_reached();
+  }
+
+  if (!(func->attrs() & AttrDynamicInvoke)) {
+    // When EvalJitEnableRenameFunction is false, the translator may wire
+    // non-DynamicInvoke Func*'s into the TC. Don't rename functions.
+    if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitEnableRenameFunction) {
+      raise_error("You must explicitly enable fb_rename_function in the JIT "
+                  "(-v Eval.JitEnableRenameFunction=true)");
+    }
   }
 
   Func *fnew = Unit::lookupFunc(newNe, n3w);

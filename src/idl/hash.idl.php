@@ -289,7 +289,7 @@ DefineFunction(
     'name'   => "hash_update_stream",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Actual number of bytes added to the hashing context from handle.",
     ),
     'args'   => array(
@@ -342,7 +342,7 @@ DefineFunction(
     'name'   => "furchash_hphp_ext",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns a number in the range of 0-(nPart-1)",
     ),
     'args'   => array(

@@ -30,7 +30,7 @@ inline bool x_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additio
   return f_mail(to, subject, message, additional_headers, additional_parameters);
 }
 
-inline int x_ezmlm_hash(CStrRef addr) {
+inline int64 x_ezmlm_hash(CStrRef addr) {
   FUNCTION_INJECTION_BUILTIN(ezmlm_hash);
   return f_ezmlm_hash(addr);
 }

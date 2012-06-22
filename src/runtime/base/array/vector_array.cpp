@@ -189,26 +189,6 @@ VectorArray::VectorArray(const VectorArray *src, bool sma /* unused */) :
   ASSERT(src->m_pos == 0 && m_pos == 0);
 }
 
-VectorArray *VectorArray::MakeVectorArray(ArrayData *src) {
-  VectorArray *va = dynamic_cast<VectorArray *>(src);
-  if (va) return va;
-  uint size = src->size();
-  ASSERT(enable_vector_array && RuntimeOption::UseVectorArray);
-  ASSERT(src->isVectorData() && src->size() > 0);
-  va = NEW(VectorArray)(size);
-  uint i = 0;
-  for (ArrayIter iter(src); iter; ++iter) {
-    Variant key(iter.first());
-    ASSERT(key.isInteger() && key.toInt64() == i);
-    va->m_elems[i] = NEW(Variant)(iter.second());
-    i++;
-  }
-  ASSERT(i == size);
-  va->m_size = size;
-  va->m_pos = 0;
-  return va;
-}
-
 void VectorArray::grow(uint newSize) {
   ASSERT(newSize > FixedSize);
   while (m_capacity < newSize) m_capacity <<= 1;
@@ -797,12 +777,17 @@ ArrayData *VectorArray::remove(CVarRef k, bool copy) {
 ArrayData *VectorArray::prepend(CVarRef v, bool copy) {
   if (UNLIKELY(m_size == m_capacity)) {
     ZendArray *a = escalateToNonEmptyZendArray();
-    a->prepend(v, false);
+    ArrayData *aa UNUSED = a->prepend(v, false);
+    ASSERT(!aa);
     return a;
   }
-  if (UNLIKELY(getCount() > 1)) {
-    VectorArray *a = NEW(VectorArray)(this);
-    a->prepend(v, false);
+  if (UNLIKELY(copy)) {
+    ArrayData *a = UNLIKELY(m_size >= FixedSize && Util::isPowerOfTwo(m_size)) ?
+      // in this case, we would escalate in the capacity check anyway
+      static_cast<ArrayData*>(escalateToNonEmptyZendArray()) :
+      static_cast<ArrayData*>(NEW(VectorArray)(this));
+    ArrayData *aa UNUSED = a->prepend(v, false);
+    ASSERT(!aa);
     return a;
   }
   // To match PHP-like semantics, we invalidate all strong iterators

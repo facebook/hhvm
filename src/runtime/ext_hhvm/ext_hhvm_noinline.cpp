@@ -80,7 +80,7 @@ Variant fni_array_shift(VRefParamValue const& array) {
   return f_array_shift(ref(array));
 }
 
-int fni_sizeof(Variant const& var, bool recursive) {
+int64 fni_sizeof(Variant const& var, bool recursive) {
   return f_sizeof(var, recursive);
 }
 
@@ -164,7 +164,7 @@ void fni_date_modify(Object const& object, String const& modify) {
   return f_date_modify(object, modify);
 }
 
-int fni_date_offset_get(Object const& object) {
+int64 fni_date_offset_get(Object const& object) {
   return f_date_offset_get(object);
 }
 
@@ -248,7 +248,7 @@ Variant fni_strtotime(String const& input, long long timestamp) {
   return f_strtotime(input, timestamp);
 }
 
-int fni_time() {
+int64 fni_time() {
   return f_time();
 }
 
@@ -268,7 +268,7 @@ String fni_timezone_name_get(Object const& object) {
   return f_timezone_name_get(object);
 }
 
-int fni_timezone_offset_get(Object const& object, Object const& dt) {
+int64 fni_timezone_offset_get(Object const& object, Object const& dt) {
   return f_timezone_offset_get(object, dt);
 }
 
@@ -586,7 +586,7 @@ bool fni_syslog(int priority, String const& message) {
   return f_syslog(priority, message);
 }
 
-int fni_cpu_get_count() {
+int64 fni_cpu_get_count() {
   return f_cpu_get_count();
 }
 
@@ -630,11 +630,11 @@ String fni_ob_get_flush() {
   return f_ob_get_flush();
 }
 
-int fni_ob_get_length() {
+int64 fni_ob_get_length() {
   return f_ob_get_length();
 }
 
-int fni_ob_get_level() {
+int64 fni_ob_get_level() {
   return f_ob_get_level();
 }
 
@@ -682,7 +682,7 @@ String fni_posix_ctermid() {
   return f_posix_ctermid();
 }
 
-int fni_posix_get_last_error() {
+int64 fni_posix_get_last_error() {
   return f_posix_get_last_error();
 }
 
@@ -690,15 +690,15 @@ String fni_posix_getcwd() {
   return f_posix_getcwd();
 }
 
-int fni_posix_getegid() {
+int64 fni_posix_getegid() {
   return f_posix_getegid();
 }
 
-int fni_posix_geteuid() {
+int64 fni_posix_geteuid() {
   return f_posix_geteuid();
 }
 
-int fni_posix_getgid() {
+int64 fni_posix_getgid() {
   return f_posix_getgid();
 }
 
@@ -710,15 +710,15 @@ Variant fni_posix_getpgid(int pid) {
   return f_posix_getpgid(pid);
 }
 
-int fni_posix_getpgrp() {
+int64 fni_posix_getpgrp() {
   return f_posix_getpgrp();
 }
 
-int fni_posix_getpid() {
+int64 fni_posix_getpid() {
   return f_posix_getpid();
 }
 
-int fni_posix_getppid() {
+int64 fni_posix_getppid() {
   return f_posix_getppid();
 }
 
@@ -726,7 +726,7 @@ Variant fni_posix_getsid(int pid) {
   return f_posix_getsid(pid);
 }
 
-int fni_posix_getuid() {
+int64 fni_posix_getuid() {
   return f_posix_getuid();
 }
 
@@ -758,7 +758,7 @@ bool fni_posix_setpgid(int pid, int pgid) {
   return f_posix_setpgid(pid, pgid);
 }
 
-int fni_posix_setsid() {
+int64 fni_posix_setsid() {
   return f_posix_setsid();
 }
 
@@ -770,11 +770,11 @@ String fni_posix_strerror(int errnum) {
   return f_posix_strerror(errnum);
 }
 
-int fni_pcntl_alarm(int seconds) {
+int64 fni_pcntl_alarm(int seconds) {
   return f_pcntl_alarm(seconds);
 }
 
-int fni_pcntl_wexitstatus(int status) {
+int64 fni_pcntl_wexitstatus(int status) {
   return f_pcntl_wexitstatus(status);
 }
 
@@ -790,11 +790,11 @@ bool fni_pcntl_wifstopped(int status) {
   return f_pcntl_wifstopped(status);
 }
 
-int fni_pcntl_wstopsig(int status) {
+int64 fni_pcntl_wstopsig(int status) {
   return f_pcntl_wstopsig(status);
 }
 
-int fni_pcntl_wtermsig(int status) {
+int64 fni_pcntl_wtermsig(int status) {
   return f_pcntl_wtermsig(status);
 }
 
@@ -894,7 +894,7 @@ String fni_stream_resolve_include_path(String const& filename, Object const& con
   return f_stream_resolve_include_path(filename, context);
 }
 
-int fni_set_file_buffer(Object const& stream, int buffer) {
+int64 fni_set_file_buffer(Object const& stream, int buffer) {
   return f_set_file_buffer(stream, buffer);
 }
 
@@ -1102,31 +1102,31 @@ Variant fni_money_format(String const& format, double number) {
   return f_money_format(format, number);
 }
 
-int fni_strcmp(String const& str1, String const& str2) {
+int64 fni_strcmp(String const& str1, String const& str2) {
   return f_strcmp(str1, str2);
 }
 
-int fni_strncmp(String const& str1, String const& str2, int len) {
+int64 fni_strncmp(String const& str1, String const& str2, int len) {
   return f_strncmp(str1, str2, len);
 }
 
-int fni_strnatcmp(String const& str1, String const& str2) {
+int64 fni_strnatcmp(String const& str1, String const& str2) {
   return f_strnatcmp(str1, str2);
 }
 
-int fni_strcasecmp(String const& str1, String const& str2) {
+int64 fni_strcasecmp(String const& str1, String const& str2) {
   return f_strcasecmp(str1, str2);
 }
 
-int fni_strncasecmp(String const& str1, String const& str2, int len) {
+int64 fni_strncasecmp(String const& str1, String const& str2, int len) {
   return f_strncasecmp(str1, str2, len);
 }
 
-int fni_strnatcasecmp(String const& str1, String const& str2) {
+int64 fni_strnatcasecmp(String const& str1, String const& str2) {
   return f_strnatcasecmp(str1, str2);
 }
 
-int fni_strcoll(String const& str1, String const& str2) {
+int64 fni_strcoll(String const& str1, String const& str2) {
   return f_strcoll(str1, str2);
 }
 
@@ -1134,15 +1134,15 @@ Variant fni_strchr(String const& haystack, Variant const& needle) {
   return f_strchr(haystack, needle);
 }
 
-int fni_strlen(String const& str) {
+int64 fni_strlen(String const& str) {
   return f_strlen(str);
 }
 
-int fni_levenshtein(String const& str1, String const& str2, int cost_ins, int cost_rep, int cost_del) {
+int64 fni_levenshtein(String const& str1, String const& str2, int cost_ins, int cost_rep, int cost_del) {
   return f_levenshtein(str1, str2, cost_ins, cost_rep, cost_del);
 }
 
-int fni_similar_text(String const& first, String const& second, VRefParamValue const& percent) {
+int64 fni_similar_text(String const& first, String const& second, VRefParamValue const& percent) {
   return f_similar_text(first, second, ref(percent));
 }
 

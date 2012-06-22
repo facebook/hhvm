@@ -246,6 +246,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"XOR"                { SETTOKEN; return T_LOGICAL_XOR;}
 <ST_IN_SCRIPTING>"<<"                 { STEPPOS; return T_SL;}
 <ST_IN_SCRIPTING>">>"                 { STEPPOS; return T_SR;}
+<ST_IN_SCRIPTING>"..."                { SETTOKEN; return T_VARARG; }
+<ST_IN_SCRIPTING>"intmap"             { SETTOKEN; return _scanner->isStrictMode() ? T_STRICT_INT_MAP : T_STRING; }
+<ST_IN_SCRIPTING>"strmap"             { SETTOKEN; return _scanner->isStrictMode() ? T_STRICT_STR_MAP : T_STRING; }
+
 
 <ST_IN_SCRIPTING>":"{XHPLABEL}  {
   switch (_scanner->lastToken()) {

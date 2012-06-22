@@ -35,12 +35,12 @@ inline bool x_xml_parser_free(CObjRef parser) {
   return f_xml_parser_free(parser);
 }
 
-inline int x_xml_parse(CObjRef parser, CStrRef data, bool is_final = true) {
+inline int64 x_xml_parse(CObjRef parser, CStrRef data, bool is_final = true) {
   FUNCTION_INJECTION_BUILTIN(xml_parse);
   return f_xml_parse(parser, data, is_final);
 }
 
-inline int x_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values, VRefParam index = null) {
+inline int64 x_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values, VRefParam index = null) {
   FUNCTION_INJECTION_BUILTIN(xml_parse_into_struct);
   return f_xml_parse_into_struct(parser, data, values, index);
 }
@@ -110,22 +110,22 @@ inline bool x_xml_set_object(CObjRef parser, VRefParam object) {
   return f_xml_set_object(parser, object);
 }
 
-inline int x_xml_get_current_byte_index(CObjRef parser) {
+inline int64 x_xml_get_current_byte_index(CObjRef parser) {
   FUNCTION_INJECTION_BUILTIN(xml_get_current_byte_index);
   return f_xml_get_current_byte_index(parser);
 }
 
-inline int x_xml_get_current_column_number(CObjRef parser) {
+inline int64 x_xml_get_current_column_number(CObjRef parser) {
   FUNCTION_INJECTION_BUILTIN(xml_get_current_column_number);
   return f_xml_get_current_column_number(parser);
 }
 
-inline int x_xml_get_current_line_number(CObjRef parser) {
+inline int64 x_xml_get_current_line_number(CObjRef parser) {
   FUNCTION_INJECTION_BUILTIN(xml_get_current_line_number);
   return f_xml_get_current_line_number(parser);
 }
 
-inline int x_xml_get_error_code(CObjRef parser) {
+inline int64 x_xml_get_error_code(CObjRef parser) {
   FUNCTION_INJECTION_BUILTIN(xml_get_error_code);
   return f_xml_get_error_code(parser);
 }

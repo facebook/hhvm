@@ -220,8 +220,6 @@ encodeStatic s_defaultEncoding[] = {
    to_zval_null, to_xml_null},
   {KindOfBoolean, XSD_BOOLEAN_STRING, XSD_NAMESPACE,
    to_zval_bool, to_xml_bool},
-  {KindOfInt32, XSD_INT_STRING, XSD_NAMESPACE,
-   to_zval_long, to_xml_long},
   {KindOfInt64, XSD_INT_STRING, XSD_NAMESPACE,
    to_zval_long, to_xml_long},
   {KindOfDouble, XSD_FLOAT_STRING, XSD_NAMESPACE,

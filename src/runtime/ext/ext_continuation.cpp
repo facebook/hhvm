@@ -97,7 +97,7 @@ void f_hphp_unpack_continuation(CObjRef continuation) {
   }
   if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
     throw_fatal(
-        "Cannot call hphp_pack_continuation with a "
+        "Cannot call hphp_unpack_continuation with a "
         "non-GenericContinuation object");
   }
   Eval::VariableEnvironment *env =

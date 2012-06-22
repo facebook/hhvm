@@ -270,6 +270,7 @@ public:
   void visitKids(ConstructPtr c);
   void visit(FileScopePtr file);
   void assignLocalVariableIds(FunctionScopePtr fs);
+  void fixReturnType(Emitter& e, FunctionCallPtr fn);
   typedef std::vector<int> IndexChain;
   void visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
@@ -316,9 +317,12 @@ public:
     EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
   };
 
+  void pushIterId(Id id) { m_pendingIters.push_back(id); }
+  void popIterId() { m_pendingIters.pop_back(); }
 private:
   typedef std::pair<StringData*, bool> ClosureUseVar;  // (name, byRef)
   typedef std::vector<ClosureUseVar> ClosureUseVarVec;
+  typedef std::vector<Id> IdVec;
   class PostponedMeth {
   public:
     PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
@@ -427,6 +431,7 @@ private:
   std::deque<PostponedNonScalars> m_postponedSinits;
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
+  IdVec m_pendingIters;
   typedef std::map<const StringData*, Label*, string_data_lt> LabelMap;
   LabelMap m_methLabels;
   SymbolicStack m_evalStack;
@@ -478,6 +483,7 @@ public:
   void emitIncDec(Emitter& e, unsigned char cop);
   void emitPop(Emitter& e);
   void emitConvertToCell(Emitter& e);
+  void emitFreePendingIters(Emitter& e);
   void emitConvertToCellIfVar(Emitter& e);
   void emitConvertToCellOrLoc(Emitter& e);
   void emitConvertSecondToCell(Emitter& e);

@@ -51,7 +51,7 @@ class c_SplObjectStorage : public ExtObjectData {
   public: int64 t_key();
   public: Variant t_current();
   public: void t_next();
-  public: int t_count();
+  public: int64 t_count();
   public: bool t_contains(CVarRef v_obj);
   public: void t_attach(CVarRef v_obj);
   public: void t_detach(CVarRef v_obj);

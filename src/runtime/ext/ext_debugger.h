@@ -116,7 +116,7 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getcommand);
   public: bool t_arg(int index, CStrRef str);
   DECLARE_METHOD_INVOKE_HELPERS(arg);
-  public: int t_argcount();
+  public: int64 t_argcount();
   DECLARE_METHOD_INVOKE_HELPERS(argcount);
   public: String t_argvalue(int index);
   DECLARE_METHOD_INVOKE_HELPERS(argvalue);
@@ -132,7 +132,7 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getcurrentlocation);
   public: Variant t_getstacktrace();
   DECLARE_METHOD_INVOKE_HELPERS(getstacktrace);
-  public: int t_getframe();
+  public: int64 t_getframe();
   DECLARE_METHOD_INVOKE_HELPERS(getframe);
   public: void t_printframe(int index);
   DECLARE_METHOD_INVOKE_HELPERS(printframe);

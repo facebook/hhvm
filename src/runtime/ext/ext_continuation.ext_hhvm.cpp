@@ -232,9 +232,6 @@ public:
     c_Continuation_Instance *this_ = (c_Continuation_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_Continuation) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1136,9 +1133,6 @@ public:
     c_GenericContinuation_Instance *this_ = (c_GenericContinuation_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_GenericContinuation) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1444,9 +1438,6 @@ public:
     c_DummyContinuation_Instance *this_ = (c_DummyContinuation_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DummyContinuation) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);

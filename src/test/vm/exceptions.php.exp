@@ -25,7 +25,7 @@ string "#0 src/test/vm/exceptions.php(91): c()
 #4 {main}"
 bar 3
 caught 3
-HipHop Fatal error: Uncaught exception exception 'Ex3' with message '' in src/test/vm/exceptions.php:21
+HipHop Fatal error: Uncaught exception 'Ex3' with message '' in src/test/vm/exceptions.php:21
 Stack trace:
 #0 (): bar()
 #1 src/test/vm/exceptions.php(28): call_user_func()

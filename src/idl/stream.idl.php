@@ -704,7 +704,7 @@ DefineFunction(
     'desc'   => "Sets the buffering for write operations on the given stream to buffer bytes. Output using fwrite() is normally buffered at 8K. This means that if there are two processes wanting to write to the same output stream (a file), each is paused after 8K of data to allow the other to write.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns 0 on success, or EOF if the request cannot be honored.",
     ),
     'args'   => array(
@@ -726,7 +726,7 @@ DefineFunction(
     'name'   => "set_file_buffer",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(

@@ -23,8 +23,6 @@
 
 using namespace HPHP;
 
-void __attribute__((noinline)) __jit_debug_register_code() { };
-
 struct jit_descriptor __jit_debug_descriptor = { 1, 0, 0, 0 };
 
 void unregister_gdb_hook(struct jit_code_entry *e) {

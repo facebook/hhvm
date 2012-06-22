@@ -323,13 +323,13 @@ Variant f_func_get_arg(int arg_num) {
       return tvAsVariant(loc);
     }
 
-    // Not a formal parameter. Value is in the VarEnv.
+    // Not a formal parameter. Value is in the ExtraArgs.
     int extraArgNum = arg_num - numParams;
-    HPHP::VM::VarEnv* varEnv = ar->m_varEnv;
-    int extraArgs = (varEnv ? varEnv->numExtraArgs() : 0);
+    HPHP::VM::ExtraArgs* eArgs = ar->getExtraArgs();
+    int extraArgs = (eArgs ? eArgs->numExtraArgs() : 0);
 
     if (extraArgNum < extraArgs) {
-      return tvAsVariant(varEnv->getExtraArg(extraArgNum));
+      return tvAsVariant(eArgs->getExtraArg(extraArgNum));
     }
 
     return false;
@@ -357,11 +357,11 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos) {
   return false;
 }
 
-Array hhvm_get_frame_args(ActRec* ar) {
+Array hhvm_get_frame_args(const ActRec* ar) {
   if (ar == NULL) {
     return Array();
   }
-  HPHP::VM::VarEnv* varEnv = ar->m_varEnv;
+  HPHP::VM::ExtraArgs* eArgs = ar->getExtraArgs();
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
   HphpArray* retval = NEW(HphpArray)(numArgs);
@@ -374,10 +374,10 @@ Array hhvm_get_frame_args(ActRec* ar) {
       retval->nvAppend(local, false);
       --local;
     } else {
-      // This is not a formal parameter, so it's in the VarEnv.
-      ASSERT(varEnv);
-      ASSERT(i - numParams < (int)varEnv->numExtraArgs());
-      retval->nvAppend(varEnv->getExtraArg(i - numParams), false);
+      // This is not a formal parameter, so it's in the ExtraArgs.
+      ASSERT(eArgs);
+      ASSERT(i - numParams < (int)eArgs->numExtraArgs());
+      retval->nvAppend(eArgs->getExtraArg(i - numParams), false);
     }
   }
 
@@ -413,7 +413,7 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
   return ret;
 }
 
-int f_func_num_args() {
+int64 f_func_num_args() {
   if (hhvm) {
     CallerFrame cf;
     ActRec* ar = cf();

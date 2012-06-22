@@ -65,7 +65,7 @@ inline void x_date_modify(CObjRef object, CStrRef modify) {
   f_date_modify(object, modify);
 }
 
-inline int x_date_offset_get(CObjRef object) {
+inline int64 x_date_offset_get(CObjRef object) {
   FUNCTION_INJECTION_BUILTIN(date_offset_get);
   return f_date_offset_get(object);
 }
@@ -175,7 +175,7 @@ inline Variant x_strtotime(CStrRef input, int64 timestamp = TimeStamp::Current()
   return f_strtotime(input, timestamp);
 }
 
-inline int x_time() {
+inline int64 x_time() {
   FUNCTION_INJECTION_BUILTIN(time);
   return f_time();
 }
@@ -200,7 +200,7 @@ inline String x_timezone_name_get(CObjRef object) {
   return f_timezone_name_get(object);
 }
 
-inline int x_timezone_offset_get(CObjRef object, CObjRef dt) {
+inline int64 x_timezone_offset_get(CObjRef object, CObjRef dt) {
   FUNCTION_INJECTION_BUILTIN(timezone_offset_get);
   return f_timezone_offset_get(object, dt);
 }

@@ -975,6 +975,42 @@ TypedValue* fg_headers_sent(HPHP::VM::ActRec *ar) {
 
 
 /*
+bool HPHP::f_header_register_callback(HPHP::Variant const&)
+_ZN4HPHP26f_header_register_callbackERKNS_7VariantE
+
+(return value) => rax
+callback => rdi
+*/
+
+bool fh_header_register_callback(TypedValue* callback) asm("_ZN4HPHP26f_header_register_callbackERKNS_7VariantE");
+
+TypedValue* fg_header_register_callback(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv._count = 0;
+      rv.m_type = KindOfBoolean;
+      rv.m_data.num = (fh_header_register_callback((args-0))) ? 1LL : 0LL;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("header_register_callback", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
+/*
 void HPHP::f_header_remove(HPHP::String const&)
 _ZN4HPHP15f_header_removeERKNS_6StringE
 

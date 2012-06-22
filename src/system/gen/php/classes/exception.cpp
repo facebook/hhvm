@@ -566,7 +566,7 @@ void c_Exception::t___init__() {
   }
   m_inited = true;
   {
-    const Array &tmp0((x_debug_backtrace()));
+    const Array &tmp0((x_debug_backtrace(false)));
     m_trace = tmp0;
   }
   LOOP_COUNTER(1);

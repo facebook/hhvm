@@ -808,7 +808,7 @@ TypedValue* fg_array_shift(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_sizeof(HPHP::Variant const&, bool)
+long long HPHP::fni_sizeof(HPHP::Variant const&, bool)
 _ZN4HPHP10fni_sizeofERKNS_7VariantEb
 
 (return value) => rax
@@ -816,7 +816,7 @@ var => rdi
 recursive => rsi
 */
 
-int fh_sizeof(TypedValue* var, bool recursive) asm("_ZN4HPHP10fni_sizeofERKNS_7VariantEb");
+long long fh_sizeof(TypedValue* var, bool recursive) asm("_ZN4HPHP10fni_sizeofERKNS_7VariantEb");
 
 TypedValue * fg1_sizeof(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_sizeof(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1852,14 +1852,14 @@ TypedValue* fg_date_modify(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_date_offset_get(HPHP::Object const&)
+long long HPHP::fni_date_offset_get(HPHP::Object const&)
 _ZN4HPHP19fni_date_offset_getERKNS_6ObjectE
 
 (return value) => rax
 object => rdi
 */
 
-int fh_date_offset_get(Value* object) asm("_ZN4HPHP19fni_date_offset_getERKNS_6ObjectE");
+long long fh_date_offset_get(Value* object) asm("_ZN4HPHP19fni_date_offset_getERKNS_6ObjectE");
 
 TypedValue * fg1_date_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_date_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -3210,13 +3210,13 @@ TypedValue* fg_strtotime(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_time()
+long long HPHP::fni_time()
 _ZN4HPHP8fni_timeEv
 
 (return value) => rax
 */
 
-int fh_time() asm("_ZN4HPHP8fni_timeEv");
+long long fh_time() asm("_ZN4HPHP8fni_timeEv");
 
 TypedValue* fg_time(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -3443,7 +3443,7 @@ TypedValue* fg_timezone_name_get(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_timezone_offset_get(HPHP::Object const&, HPHP::Object const&)
+long long HPHP::fni_timezone_offset_get(HPHP::Object const&, HPHP::Object const&)
 _ZN4HPHP23fni_timezone_offset_getERKNS_6ObjectES2_
 
 (return value) => rax
@@ -3451,7 +3451,7 @@ object => rdi
 dt => rsi
 */
 
-int fh_timezone_offset_get(Value* object, Value* dt) asm("_ZN4HPHP23fni_timezone_offset_getERKNS_6ObjectES2_");
+long long fh_timezone_offset_get(Value* object, Value* dt) asm("_ZN4HPHP23fni_timezone_offset_getERKNS_6ObjectES2_");
 
 TypedValue * fg1_timezone_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_timezone_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -7104,13 +7104,13 @@ TypedValue* fg_syslog(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_cpu_get_count()
+long long HPHP::fni_cpu_get_count()
 _ZN4HPHP17fni_cpu_get_countEv
 
 (return value) => rax
 */
 
-int fh_cpu_get_count() asm("_ZN4HPHP17fni_cpu_get_countEv");
+long long fh_cpu_get_count() asm("_ZN4HPHP17fni_cpu_get_countEv");
 
 TypedValue* fg_cpu_get_count(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -7531,13 +7531,13 @@ TypedValue* fg_ob_get_flush(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_ob_get_length()
+long long HPHP::fni_ob_get_length()
 _ZN4HPHP17fni_ob_get_lengthEv
 
 (return value) => rax
 */
 
-int fh_ob_get_length() asm("_ZN4HPHP17fni_ob_get_lengthEv");
+long long fh_ob_get_length() asm("_ZN4HPHP17fni_ob_get_lengthEv");
 
 TypedValue* fg_ob_get_length(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -7566,13 +7566,13 @@ TypedValue* fg_ob_get_length(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_ob_get_level()
+long long HPHP::fni_ob_get_level()
 _ZN4HPHP16fni_ob_get_levelEv
 
 (return value) => rax
 */
 
-int fh_ob_get_level() asm("_ZN4HPHP16fni_ob_get_levelEv");
+long long fh_ob_get_level() asm("_ZN4HPHP16fni_ob_get_levelEv");
 
 TypedValue* fg_ob_get_level(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8145,13 +8145,13 @@ TypedValue* fg_posix_ctermid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_get_last_error()
+long long HPHP::fni_posix_get_last_error()
 _ZN4HPHP24fni_posix_get_last_errorEv
 
 (return value) => rax
 */
 
-int fh_posix_get_last_error() asm("_ZN4HPHP24fni_posix_get_last_errorEv");
+long long fh_posix_get_last_error() asm("_ZN4HPHP24fni_posix_get_last_errorEv");
 
 TypedValue* fg_posix_get_last_error(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8217,13 +8217,13 @@ TypedValue* fg_posix_getcwd(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_getegid()
+long long HPHP::fni_posix_getegid()
 _ZN4HPHP17fni_posix_getegidEv
 
 (return value) => rax
 */
 
-int fh_posix_getegid() asm("_ZN4HPHP17fni_posix_getegidEv");
+long long fh_posix_getegid() asm("_ZN4HPHP17fni_posix_getegidEv");
 
 TypedValue* fg_posix_getegid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8252,13 +8252,13 @@ TypedValue* fg_posix_getegid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_geteuid()
+long long HPHP::fni_posix_geteuid()
 _ZN4HPHP17fni_posix_geteuidEv
 
 (return value) => rax
 */
 
-int fh_posix_geteuid() asm("_ZN4HPHP17fni_posix_geteuidEv");
+long long fh_posix_geteuid() asm("_ZN4HPHP17fni_posix_geteuidEv");
 
 TypedValue* fg_posix_geteuid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8287,13 +8287,13 @@ TypedValue* fg_posix_geteuid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_getgid()
+long long HPHP::fni_posix_getgid()
 _ZN4HPHP16fni_posix_getgidEv
 
 (return value) => rax
 */
 
-int fh_posix_getgid() asm("_ZN4HPHP16fni_posix_getgidEv");
+long long fh_posix_getgid() asm("_ZN4HPHP16fni_posix_getgidEv");
 
 TypedValue* fg_posix_getgid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8409,13 +8409,13 @@ TypedValue* fg_posix_getpgid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_getpgrp()
+long long HPHP::fni_posix_getpgrp()
 _ZN4HPHP17fni_posix_getpgrpEv
 
 (return value) => rax
 */
 
-int fh_posix_getpgrp() asm("_ZN4HPHP17fni_posix_getpgrpEv");
+long long fh_posix_getpgrp() asm("_ZN4HPHP17fni_posix_getpgrpEv");
 
 TypedValue* fg_posix_getpgrp(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8444,13 +8444,13 @@ TypedValue* fg_posix_getpgrp(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_getpid()
+long long HPHP::fni_posix_getpid()
 _ZN4HPHP16fni_posix_getpidEv
 
 (return value) => rax
 */
 
-int fh_posix_getpid() asm("_ZN4HPHP16fni_posix_getpidEv");
+long long fh_posix_getpid() asm("_ZN4HPHP16fni_posix_getpidEv");
 
 TypedValue* fg_posix_getpid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8479,13 +8479,13 @@ TypedValue* fg_posix_getpid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_getppid()
+long long HPHP::fni_posix_getppid()
 _ZN4HPHP17fni_posix_getppidEv
 
 (return value) => rax
 */
 
-int fh_posix_getppid() asm("_ZN4HPHP17fni_posix_getppidEv");
+long long fh_posix_getppid() asm("_ZN4HPHP17fni_posix_getppidEv");
 
 TypedValue* fg_posix_getppid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8566,13 +8566,13 @@ TypedValue* fg_posix_getsid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_getuid()
+long long HPHP::fni_posix_getuid()
 _ZN4HPHP16fni_posix_getuidEv
 
 (return value) => rax
 */
 
-int fh_posix_getuid() asm("_ZN4HPHP16fni_posix_getuidEv");
+long long fh_posix_getuid() asm("_ZN4HPHP16fni_posix_getuidEv");
 
 TypedValue* fg_posix_getuid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -8996,13 +8996,13 @@ TypedValue* fg_posix_setpgid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_posix_setsid()
+long long HPHP::fni_posix_setsid()
 _ZN4HPHP16fni_posix_setsidEv
 
 (return value) => rax
 */
 
-int fh_posix_setsid() asm("_ZN4HPHP16fni_posix_setsidEv");
+long long fh_posix_setsid() asm("_ZN4HPHP16fni_posix_setsidEv");
 
 TypedValue* fg_posix_setsid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -9140,14 +9140,14 @@ TypedValue* fg_posix_strerror(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_pcntl_alarm(int)
+long long HPHP::fni_pcntl_alarm(int)
 _ZN4HPHP15fni_pcntl_alarmEi
 
 (return value) => rax
 seconds => rdi
 */
 
-int fh_pcntl_alarm(int seconds) asm("_ZN4HPHP15fni_pcntl_alarmEi");
+long long fh_pcntl_alarm(int seconds) asm("_ZN4HPHP15fni_pcntl_alarmEi");
 
 TypedValue * fg1_pcntl_alarm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pcntl_alarm(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -9193,14 +9193,14 @@ TypedValue* fg_pcntl_alarm(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_pcntl_wexitstatus(int)
+long long HPHP::fni_pcntl_wexitstatus(int)
 _ZN4HPHP21fni_pcntl_wexitstatusEi
 
 (return value) => rax
 status => rdi
 */
 
-int fh_pcntl_wexitstatus(int status) asm("_ZN4HPHP21fni_pcntl_wexitstatusEi");
+long long fh_pcntl_wexitstatus(int status) asm("_ZN4HPHP21fni_pcntl_wexitstatusEi");
 
 TypedValue * fg1_pcntl_wexitstatus(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pcntl_wexitstatus(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -9405,14 +9405,14 @@ TypedValue* fg_pcntl_wifstopped(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_pcntl_wstopsig(int)
+long long HPHP::fni_pcntl_wstopsig(int)
 _ZN4HPHP18fni_pcntl_wstopsigEi
 
 (return value) => rax
 status => rdi
 */
 
-int fh_pcntl_wstopsig(int status) asm("_ZN4HPHP18fni_pcntl_wstopsigEi");
+long long fh_pcntl_wstopsig(int status) asm("_ZN4HPHP18fni_pcntl_wstopsigEi");
 
 TypedValue * fg1_pcntl_wstopsig(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pcntl_wstopsig(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -9458,14 +9458,14 @@ TypedValue* fg_pcntl_wstopsig(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_pcntl_wtermsig(int)
+long long HPHP::fni_pcntl_wtermsig(int)
 _ZN4HPHP18fni_pcntl_wtermsigEi
 
 (return value) => rax
 status => rdi
 */
 
-int fh_pcntl_wtermsig(int status) asm("_ZN4HPHP18fni_pcntl_wtermsigEi");
+long long fh_pcntl_wtermsig(int status) asm("_ZN4HPHP18fni_pcntl_wtermsigEi");
 
 TypedValue * fg1_pcntl_wtermsig(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pcntl_wtermsig(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -10880,7 +10880,7 @@ TypedValue* fg_stream_resolve_include_path(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_set_file_buffer(HPHP::Object const&, int)
+long long HPHP::fni_set_file_buffer(HPHP::Object const&, int)
 _ZN4HPHP19fni_set_file_bufferERKNS_6ObjectEi
 
 (return value) => rax
@@ -10888,7 +10888,7 @@ stream => rdi
 buffer => rsi
 */
 
-int fh_set_file_buffer(Value* stream, int buffer) asm("_ZN4HPHP19fni_set_file_bufferERKNS_6ObjectEi");
+long long fh_set_file_buffer(Value* stream, int buffer) asm("_ZN4HPHP19fni_set_file_bufferERKNS_6ObjectEi");
 
 TypedValue * fg1_set_file_buffer(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_set_file_buffer(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -13705,10 +13705,10 @@ TypedValue * fg1_printf(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -13731,10 +13731,10 @@ TypedValue* fg_printf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-1, false);
           for (long long i = 1; i < count; ++i) {
-            TypedValue* extraArg = ve->getExtraArg(i-1);
+            TypedValue* extraArg = ea->getExtraArg(i-1);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-1, tvAsVariant(extraArg));
             } else {
@@ -13845,10 +13845,10 @@ TypedValue * fg1_sprintf(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -13871,10 +13871,10 @@ TypedValue* fg_sprintf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-1, false);
           for (long long i = 1; i < count; ++i) {
-            TypedValue* extraArg = ve->getExtraArg(i-1);
+            TypedValue* extraArg = ea->getExtraArg(i-1);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-1, tvAsVariant(extraArg));
             } else {
@@ -14134,7 +14134,7 @@ TypedValue* fg_money_format(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_strcmp(HPHP::String const&, HPHP::String const&)
+long long HPHP::fni_strcmp(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP10fni_strcmpERKNS_6StringES2_
 
 (return value) => rax
@@ -14142,7 +14142,7 @@ str1 => rdi
 str2 => rsi
 */
 
-int fh_strcmp(Value* str1, Value* str2) asm("_ZN4HPHP10fni_strcmpERKNS_6StringES2_");
+long long fh_strcmp(Value* str1, Value* str2) asm("_ZN4HPHP10fni_strcmpERKNS_6StringES2_");
 
 TypedValue * fg1_strcmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strcmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14193,7 +14193,7 @@ TypedValue* fg_strcmp(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_strncmp(HPHP::String const&, HPHP::String const&, int)
+long long HPHP::fni_strncmp(HPHP::String const&, HPHP::String const&, int)
 _ZN4HPHP11fni_strncmpERKNS_6StringES2_i
 
 (return value) => rax
@@ -14202,7 +14202,7 @@ str2 => rsi
 len => rdx
 */
 
-int fh_strncmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP11fni_strncmpERKNS_6StringES2_i");
+long long fh_strncmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP11fni_strncmpERKNS_6StringES2_i");
 
 TypedValue * fg1_strncmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strncmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14256,7 +14256,7 @@ TypedValue* fg_strncmp(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_strnatcmp(HPHP::String const&, HPHP::String const&)
+long long HPHP::fni_strnatcmp(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP13fni_strnatcmpERKNS_6StringES2_
 
 (return value) => rax
@@ -14264,7 +14264,7 @@ str1 => rdi
 str2 => rsi
 */
 
-int fh_strnatcmp(Value* str1, Value* str2) asm("_ZN4HPHP13fni_strnatcmpERKNS_6StringES2_");
+long long fh_strnatcmp(Value* str1, Value* str2) asm("_ZN4HPHP13fni_strnatcmpERKNS_6StringES2_");
 
 TypedValue * fg1_strnatcmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strnatcmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14315,7 +14315,7 @@ TypedValue* fg_strnatcmp(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_strcasecmp(HPHP::String const&, HPHP::String const&)
+long long HPHP::fni_strcasecmp(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP14fni_strcasecmpERKNS_6StringES2_
 
 (return value) => rax
@@ -14323,7 +14323,7 @@ str1 => rdi
 str2 => rsi
 */
 
-int fh_strcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP14fni_strcasecmpERKNS_6StringES2_");
+long long fh_strcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP14fni_strcasecmpERKNS_6StringES2_");
 
 TypedValue * fg1_strcasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strcasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14374,7 +14374,7 @@ TypedValue* fg_strcasecmp(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_strncasecmp(HPHP::String const&, HPHP::String const&, int)
+long long HPHP::fni_strncasecmp(HPHP::String const&, HPHP::String const&, int)
 _ZN4HPHP15fni_strncasecmpERKNS_6StringES2_i
 
 (return value) => rax
@@ -14383,7 +14383,7 @@ str2 => rsi
 len => rdx
 */
 
-int fh_strncasecmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP15fni_strncasecmpERKNS_6StringES2_i");
+long long fh_strncasecmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP15fni_strncasecmpERKNS_6StringES2_i");
 
 TypedValue * fg1_strncasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strncasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14437,7 +14437,7 @@ TypedValue* fg_strncasecmp(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_strnatcasecmp(HPHP::String const&, HPHP::String const&)
+long long HPHP::fni_strnatcasecmp(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP17fni_strnatcasecmpERKNS_6StringES2_
 
 (return value) => rax
@@ -14445,7 +14445,7 @@ str1 => rdi
 str2 => rsi
 */
 
-int fh_strnatcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP17fni_strnatcasecmpERKNS_6StringES2_");
+long long fh_strnatcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP17fni_strnatcasecmpERKNS_6StringES2_");
 
 TypedValue * fg1_strnatcasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strnatcasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14496,7 +14496,7 @@ TypedValue* fg_strnatcasecmp(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_strcoll(HPHP::String const&, HPHP::String const&)
+long long HPHP::fni_strcoll(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP11fni_strcollERKNS_6StringES2_
 
 (return value) => rax
@@ -14504,7 +14504,7 @@ str1 => rdi
 str2 => rsi
 */
 
-int fh_strcoll(Value* str1, Value* str2) asm("_ZN4HPHP11fni_strcollERKNS_6StringES2_");
+long long fh_strcoll(Value* str1, Value* str2) asm("_ZN4HPHP11fni_strcollERKNS_6StringES2_");
 
 TypedValue * fg1_strcoll(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strcoll(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14608,14 +14608,14 @@ TypedValue* fg_strchr(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_strlen(HPHP::String const&)
+long long HPHP::fni_strlen(HPHP::String const&)
 _ZN4HPHP10fni_strlenERKNS_6StringE
 
 (return value) => rax
 str => rdi
 */
 
-int fh_strlen(Value* str) asm("_ZN4HPHP10fni_strlenERKNS_6StringE");
+long long fh_strlen(Value* str) asm("_ZN4HPHP10fni_strlenERKNS_6StringE");
 
 TypedValue * fg1_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14661,7 +14661,7 @@ TypedValue* fg_strlen(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_levenshtein(HPHP::String const&, HPHP::String const&, int, int, int)
+long long HPHP::fni_levenshtein(HPHP::String const&, HPHP::String const&, int, int, int)
 _ZN4HPHP15fni_levenshteinERKNS_6StringES2_iii
 
 (return value) => rax
@@ -14672,7 +14672,7 @@ cost_rep => rcx
 cost_del => r8
 */
 
-int fh_levenshtein(Value* str1, Value* str2, int cost_ins, int cost_rep, int cost_del) asm("_ZN4HPHP15fni_levenshteinERKNS_6StringES2_iii");
+long long fh_levenshtein(Value* str1, Value* str2, int cost_ins, int cost_rep, int cost_del) asm("_ZN4HPHP15fni_levenshteinERKNS_6StringES2_iii");
 
 TypedValue * fg1_levenshtein(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_levenshtein(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -14739,7 +14739,7 @@ TypedValue* fg_levenshtein(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::fni_similar_text(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&)
+long long HPHP::fni_similar_text(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&)
 _ZN4HPHP16fni_similar_textERKNS_6StringES2_RKNS_14VRefParamValueE
 
 (return value) => rax
@@ -14748,7 +14748,7 @@ second => rsi
 percent => rdx
 */
 
-int fh_similar_text(Value* first, Value* second, TypedValue* percent) asm("_ZN4HPHP16fni_similar_textERKNS_6StringES2_RKNS_14VRefParamValueE");
+long long fh_similar_text(Value* first, Value* second, TypedValue* percent) asm("_ZN4HPHP16fni_similar_textERKNS_6StringES2_RKNS_14VRefParamValueE");
 
 TypedValue * fg1_similar_text(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_similar_text(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

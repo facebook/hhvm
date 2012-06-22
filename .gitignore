@@ -39,6 +39,8 @@ hphp.log
 
 /src/tools/shmw/shmw
 
+/tools/tc-print/tc-print
+
 /src/ffi/java/classes
 /src/ffi/java/hphp_ffi_java.h
 

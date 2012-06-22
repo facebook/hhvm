@@ -90,7 +90,7 @@ inline Variant x_xbox_process_call_message(CStrRef msg) {
   return f_xbox_process_call_message(msg);
 }
 
-inline int x_xbox_get_thread_timeout() {
+inline int64 x_xbox_get_thread_timeout() {
   FUNCTION_INJECTION_BUILTIN(xbox_get_thread_timeout);
   return f_xbox_get_thread_timeout();
 }
@@ -105,7 +105,7 @@ inline void x_xbox_schedule_thread_reset() {
   f_xbox_schedule_thread_reset();
 }
 
-inline int x_xbox_get_thread_time() {
+inline int64 x_xbox_get_thread_time() {
   FUNCTION_INJECTION_BUILTIN(xbox_get_thread_time);
   return f_xbox_get_thread_time();
 }

@@ -369,18 +369,25 @@ public:
   static int TaintTraceMaxStrlen;
 #endif
 
+  static std::set<std::string, stdltistr> DynamicInvokeFunctions;
   static bool EnableStrict;
   static int StrictLevel;
   static bool StrictFatal;
   static uint64 EvalVMStackElms;
   static bool EvalJit;
+  static bool EvalAllowHhas;
   static bool EvalJitNoGdb;
   static bool EvalProfileBC;
+  static std::string EvalProfileHWEvents;
   static bool EvalJitTrampolines;
+  static string EvalJitProfilePath;
+  static uint32 EvalJitWarmupRequests;
+  static bool EvalJitProfileRecord;
   static uint32 EvalGdbSyncChunks;
   static bool EvalJitStressLease;
   static bool EvalJitKeepDbgFiles;
   static bool EvalJitEnableRenameFunction;
+
   static bool EvalJitDisabledByHphpd;
   static bool EvalJitCmovVarDeref;
   static bool EvalThreadingJit;

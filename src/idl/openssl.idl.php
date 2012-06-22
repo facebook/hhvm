@@ -1009,7 +1009,7 @@ DefineFunction(
     'desc'   => "openssl_x509_checkpurpose() examines a certificate to see if it can be used for the specified purpose.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns TRUE if the certificate can be used for the intended purpose, FALSE if it cannot, or -1 on error.",
     ),
     'args'   => array(

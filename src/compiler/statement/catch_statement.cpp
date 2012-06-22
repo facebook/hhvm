@@ -20,6 +20,7 @@
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/expression/modifier_expression.h>
+#include <compiler/expression/scalar_expression.h>
 #include <compiler/analysis/code_error.h>
 #include <util/util.h>
 #include <compiler/analysis/class_scope.h>
@@ -35,11 +36,12 @@ CatchStatement::CatchStatement
  const std::string &className, const std::string &variable,
  StatementPtr stmt)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(CatchStatement)),
+    StaticClassName(ExpressionPtr(
+                      new ScalarExpression(scope, loc,
+                                           T_STRING, className, false))),
     m_variable(new SimpleVariable(scope, loc, variable)),
     m_stmt(stmt), m_valid(true) {
   m_variable->setContext(Expression::LValue);
-  m_className = Util::toLower(className);
-  m_originalClassName = className;
 }
 
 StatementPtr CatchStatement::clone() {
@@ -58,6 +60,7 @@ StatementPtr CatchStatement::clone() {
 void CatchStatement::analyzeProgram(AnalysisResultPtr ar) {
   addUserClass(ar, m_className);
   m_variable->analyzeProgram(ar);
+  (void)resolveClass();
   if (m_stmt) m_stmt->analyzeProgram(ar);
   if (m_variable->isThis()) {
     // catch (Exception $this) { ... }
@@ -100,13 +103,9 @@ void CatchStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 void CatchStatement::inferTypes(AnalysisResultPtr ar) {
-  ClassScopePtr cls = ar->findClass(m_className);
+  ClassScopePtr cls = resolveClassWithChecks();
   TypePtr type;
-  m_valid = cls;
-  if (!m_valid && getScope()->isFirstPass()) {
-    ConstructPtr self = shared_from_this();
-    Compiler::Error(Compiler::UnknownClass, self);
-  }
+  m_valid = cls || isRedeclared();
 
   // This can never be a specific exception type, because a future exception
   // class may be re-declaring, then generated code like this won't work with
@@ -121,7 +120,7 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
 // code generation functions
 
 void CatchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf(" catch (%s $%s) ", m_originalClassName.c_str(),
+  cg_printf(" catch (%s $%s) ", m_origClassName.c_str(),
             m_variable->getName().c_str());
   cg_indentBegin("{\n");
   if (m_stmt) m_stmt->outputPHP(cg, ar);

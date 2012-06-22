@@ -583,18 +583,18 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 579 */
 Variant c_SplFileObject::t_fscanf(int num_args, CVarRef v_format, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fscanf);
-  int v_argc = 0;
+  int64 v_argc = 0;
   Array v_argv;
 
   {
-    int tmp0((num_args));
+    int64 tmp0((num_args));
     v_argc = tmp0;
   }
   {
     const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1, ArrayInit::vectorInit).set(v_format).create()),args)));
     v_argv = tmp0;
   }
-  return x_hphp_splfileobject_fscanf(toInt64(v_argc), GET_THIS_TYPED(SplFileObject), toString(v_format), VarNR(v_argv));
+  return x_hphp_splfileobject_fscanf(v_argc, GET_THIS_TYPED(SplFileObject), toString(v_format), VarNR(v_argv));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 607 */
@@ -1324,10 +1324,10 @@ static const int64 cpt_static_inits[] = {
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x26C16E62FD792BB7LL,0,0,13,65,10,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
 
-  {0x54B2A676B563E232LL,1,1,0,100,4,0,&NAMSTR(s_sys_ssb563e232, "SKIP_EMPTY") },
-  {0x23519E830A6DEC13LL,0,2,0,100,4,0,&NAMSTR(s_sys_ss0a6dec13, "READ_CSV") },
-  {0x05ABC27224BDAC64LL,1,3,0,100,4,0,&NAMSTR(s_sys_ss24bdac64, "DROP_NEW_LINE") },
-  {0x6ABD9DCA7D94431ELL,-3,4,0,100,4,0,&NAMSTR(s_sys_ss7d94431e, "READ_AHEAD") },
+  {0x54B2A676B563E232LL,1,1,0,100,3,0,&NAMSTR(s_sys_ssb563e232, "SKIP_EMPTY") },
+  {0x23519E830A6DEC13LL,0,2,0,100,3,0,&NAMSTR(s_sys_ss0a6dec13, "READ_CSV") },
+  {0x05ABC27224BDAC64LL,1,3,0,100,3,0,&NAMSTR(s_sys_ss24bdac64, "DROP_NEW_LINE") },
+  {0x6ABD9DCA7D94431ELL,-3,4,0,100,3,0,&NAMSTR(s_sys_ss7d94431e, "READ_AHEAD") },
 
 };
 static const int cpt_hash_entries[] = {

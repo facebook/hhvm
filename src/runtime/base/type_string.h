@@ -70,7 +70,10 @@ public:
   static void PreConvertInteger(int64 n) ATTRIBUTE_COLD;
 
   // create a string from a character
-  static String FromChar(char ch);
+  static String FromChar(char ch) {
+    return StringData::GetStaticString(ch);
+  }
+
   static const StringData *GetIntegerStringData(int64 n) {
     if (HasConverted(n)) {
       const StringData *sd = converted_integers + n;
@@ -131,13 +134,43 @@ public:
     m_px = NEW(StringData)(s.data(), s.size(), CopyString);
     m_px->setRefCount(1);
   }
-  String(const char *s, StringDataMode mode) { // null-terminated string
+  // attach to null terminated string literal
+  String(const char *s, AttachLiteralMode mode) {
     if (s) {
       m_px = NEW(StringData)(s, mode);
       m_px->setRefCount(1);
     }
   }
-  String(const char *s, int length, StringDataMode mode) { // binary string
+  // attach to null terminated malloc'ed string
+  String(const char *s, AttachStringMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // copy a null terminated string
+  String(const char *s, CopyStringMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // attach to binary string literal
+  String(const char *s, int length, AttachLiteralMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, length, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // attach to binary malloc'ed string
+  String(const char *s, int length, AttachStringMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, length, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // make copy of binary binary string
+  String(const char *s, int length, CopyStringMode mode) {
     if (s) {
       m_px = NEW(StringData)(s, length, mode);
       m_px->setRefCount(1);

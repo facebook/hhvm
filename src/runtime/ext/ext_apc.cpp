@@ -28,6 +28,9 @@
 #include <util/alloc.h>
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_trace.h>
+#include <util/alloc.h>
+
+using HPHP::Util::ScopedMem;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -594,7 +597,7 @@ void const_load_impl_compressed
     if (count) {
       char *keys = gzdecode(int_keys, len);
       if (keys == NULL) throw Exception("bad compressed const archive.");
-      String holder(keys, len, AttachString);
+      ScopedMem holder(keys);
       const char *k = keys;
       int64 *v = int_values;
       for (int i = 0; i < count; i++) {
@@ -612,7 +615,7 @@ void const_load_impl_compressed
     if (count) {
       char *keys = gzdecode(char_keys, len);
       if (keys == NULL) throw Exception("bad compressed const archive.");
-      String holder(keys, len, AttachString);
+      ScopedMem holder(keys);
       const char *k = keys;
       char *v = char_values;
       for (int i = 0; i < count; i++) {
@@ -637,7 +640,7 @@ void const_load_impl_compressed
     if (count) {
       char *decoded = gzdecode(strings, len);
       if (decoded == NULL) throw Exception("bad compressed const archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         String key(p, string_lens[i + i + 2], CopyString);
@@ -657,7 +660,7 @@ void const_load_impl_compressed
     if (count) {
       char *decoded = gzdecode(objects, len);
       if (decoded == NULL) throw Exception("bad compressed const archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         String key(p, object_lens[i + i + 2], CopyString);
@@ -675,7 +678,7 @@ void const_load_impl_compressed
     if (count) {
       char *decoded = gzdecode(thrifts, len);
       if (decoded == NULL) throw Exception("bad compressed const archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         String key(p, thrift_lens[i + i + 2], CopyString);
@@ -698,7 +701,7 @@ void const_load_impl_compressed
     if (count) {
       char *decoded = gzdecode(others, len);
       if (decoded == NULL) throw Exception("bad compressed const archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         String key(p, other_lens[i + i + 2], CopyString);
@@ -736,7 +739,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *keys = gzdecode(int_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
-      String holder(keys, len, AttachString);
+      ScopedMem holder(keys);
       const char *k = keys;
       int64 *v = int_values;
       for (int i = 0; i < count; i++) {
@@ -757,7 +760,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *keys = gzdecode(char_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
-      String holder(keys, len, AttachString);
+      ScopedMem holder(keys);
       const char *k = keys;
       char *v = char_values;
       for (int i = 0; i < count; i++) {
@@ -784,7 +787,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *decoded = gzdecode(strings, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];
@@ -808,7 +811,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *decoded = gzdecode(objects, len);
       if (decoded == NULL) throw Exception("bad compressed APC archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];
@@ -830,7 +833,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *decoded = gzdecode(thrifts, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];
@@ -857,7 +860,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *decoded = gzdecode(others, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];
@@ -1111,7 +1114,7 @@ void const_load_impl_compressed
     if (count) {
       char *keys = gzdecode(int_keys, len);
       if (keys == NULL) throw Exception("bad compressed const archive.");
-      String holder(keys, len, AttachString);
+      ScopedMem holder(keys);
       const char *k = keys;
       int64 *v = int_values;
       for (int i = 0; i < count; i++) {
@@ -1129,7 +1132,7 @@ void const_load_impl_compressed
     if (count) {
       char *keys = gzdecode(char_keys, len);
       if (keys == NULL) throw Exception("bad compressed const archive.");
-      String holder(keys, len, AttachString);
+      ScopedMem holder(keys);
       const char *k = keys;
       char *v = char_values;
       for (int i = 0; i < count; i++) {
@@ -1154,7 +1157,7 @@ void const_load_impl_compressed
     if (count) {
       char *decoded = gzdecode(strings, len);
       if (decoded == NULL) throw Exception("bad compressed const archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         String key(p, string_lens[i + i + 2], CopyString);
@@ -1174,7 +1177,7 @@ void const_load_impl_compressed
     if (count) {
       char *decoded = gzdecode(objects, len);
       if (decoded == NULL) throw Exception("bad compressed const archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         String key(p, object_lens[i + i + 2], CopyString);
@@ -1192,7 +1195,7 @@ void const_load_impl_compressed
     if (count) {
       char *decoded = gzdecode(thrifts, len);
       if (decoded == NULL) throw Exception("bad compressed const archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         String key(p, thrift_lens[i + i + 2], CopyString);
@@ -1215,7 +1218,7 @@ void const_load_impl_compressed
     if (count) {
       char *decoded = gzdecode(others, len);
       if (decoded == NULL) throw Exception("bad compressed const archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         String key(p, other_lens[i + i + 2], CopyString);
@@ -1249,7 +1252,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *keys = gzdecode(int_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
-      String holder(keys, len, AttachString);
+      ScopedMem holder(keys);
       const char *k = keys;
       int64 *v = int_values;
       for (int i = 0; i < count; i++) {
@@ -1270,7 +1273,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *keys = gzdecode(char_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
-      String holder(keys, len, AttachString);
+      ScopedMem holder(keys);
       const char *k = keys;
       char *v = char_values;
       for (int i = 0; i < count; i++) {
@@ -1297,7 +1300,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *decoded = gzdecode(strings, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];
@@ -1321,7 +1324,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *decoded = gzdecode(objects, len);
       if (decoded == NULL) throw Exception("bad compressed APC archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];
@@ -1343,7 +1346,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *decoded = gzdecode(thrifts, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];
@@ -1370,7 +1373,7 @@ void apc_load_impl_compressed
       vector<SharedStore::KeyValuePair> vars(count);
       char *decoded = gzdecode(others, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
-      String holder(decoded, len, AttachString);
+      ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
         SharedStore::KeyValuePair &item = vars[i];

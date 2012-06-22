@@ -1211,12 +1211,12 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
 
 static Object create_libxmlerror(xmlError &error) {
   Object ret(NEWOBJ(c_LibXMLError)());
-  ret->o_set("level",   error.level);
-  ret->o_set("code",    error.code);
-  ret->o_set("column",  error.int2);
-  ret->o_set("message", String(error.message, CopyString));
-  ret->o_set("file",    String(error.file, CopyString));
-  ret->o_set("line",    error.line);
+  ret->o_setPublic("level",   error.level);
+  ret->o_setPublic("code",    error.code);
+  ret->o_setPublic("column",  error.int2);
+  ret->o_setPublic("message", String(error.message, CopyString));
+  ret->o_setPublic("file",    String(error.file, CopyString));
+  ret->o_setPublic("line",    error.line);
   return ret;
 }
 

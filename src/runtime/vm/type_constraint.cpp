@@ -80,7 +80,6 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
                dtype == KindOfSelf || dtype == KindOfParent ?
     dtype : KindOfObject;
   ASSERT(m_baseType != KindOfStaticString);
-  ASSERT(m_baseType != KindOfInt32);
 }
 
 void TypeConstraint::verifyFail(const Func* func, int paramNum,

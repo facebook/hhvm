@@ -94,7 +94,7 @@ bool f_lchgrp(CStrRef filename, CVarRef group);
 bool f_touch(CStrRef filename, int64 mtime = 0, int64 atime = 0);
 bool f_copy(CStrRef source, CStrRef dest, CVarRef context = null);
 bool f_rename(CStrRef oldname, CStrRef newname, CVarRef context = null);
-int f_umask(CVarRef mask = null_variant);
+int64 f_umask(CVarRef mask = null_variant);
 bool f_unlink(CStrRef filename, CVarRef context = null);
 bool f_link(CStrRef target, CStrRef link);
 bool f_symlink(CStrRef target, CStrRef link);

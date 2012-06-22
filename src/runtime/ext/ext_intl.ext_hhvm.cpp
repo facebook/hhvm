@@ -970,9 +970,6 @@ public:
     c_Collator_Instance *this_ = (c_Collator_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_Collator) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1766,9 +1763,6 @@ public:
     c_Locale_Instance *this_ = (c_Locale_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_Locale) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1918,9 +1912,6 @@ public:
     c_Normalizer_Instance *this_ = (c_Normalizer_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_Normalizer) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);

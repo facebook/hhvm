@@ -36,3 +36,23 @@ Set a break point at line 55 of main.no.cpp, then "r", you will get this,
 
 Magically, gdb is able to switch to main thread, attaching to it, then it will
 be able to debug it, even if it forks afterwards.
+
+<h2> Getting PHP symbols in the JIT under gdb </h2>
+
+The VM periodically emits DWARF files containing function address
+information for the JIT code it generates. These DWARF files are synced with gdb
+asynchronously (by default every ~128 tracelets). This means that the backtrace
+you see under gdb  may contain some unresolved PHP symbols that show up as ??s,
+for symbols that have not been synced.
+
+There are three ways to resolve this:
+
+1. pass -v Eval.GdbSyncChunks=1 in the command line. This forces the VM to sync
+debug info synchronously with gdb.
+
+2. call HPHP::g_context.m_node.m_p->syncGdbState() from the gdb CLI. This
+forces a manual sync of all outstanding symbols to gdb.
+
+3. if the program has hit a seg fault (or another signal), press continue on
+the CLI. The HHVM signal handler will sync outstanding DWARF symbols to gdb,
+and a subsequent 'bt' should show all symbols.

@@ -1,14 +1,14 @@
 object(Foo)#1 (6) {
-  ["message:protected"]=>
+  ["message":protected]=>
   string(0) ""
-  ["code:protected"]=>
+  ["code":protected]=>
   int(0)
-  ["previous:protected"]=>
+  ["previous":protected]=>
   NULL
-  ["file:protected"]=>
+  ["file":protected]=>
   NULL
-  ["line:protected"]=>
+  ["line":protected]=>
   NULL
-  ["trace:protected"]=>
+  ["trace":protected]=>
   NULL
 }

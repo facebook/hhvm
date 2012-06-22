@@ -204,7 +204,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   bool isChanged = !isNew && acc->second->isChanged(s);
 
   if (isNew || isChanged) {
-    if (!readFile(n, rname, s, fileInfo)) {
+    if (!readFile(n, s, fileInfo)) {
       // Be sure to get rid of the new reference to it.
       s_files.erase(acc);
       TRACE(1, "File disappeared between stat and FR::readNewFile: %s\n",
@@ -286,24 +286,21 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
 
 bool FileRepository::findFile(const StringData *path, struct stat *s) {
   if (isAuthoritativeRepo()) {
-    UnitMd5Map::accessor acc;
-    if (s_unitMd5Map.find(acc, path)) {
-      return acc->second.m_present;
-    }
-    MD5 md5;
-    bool present = VM::Repo::get().findFile(path->data(), md5);
-    if (!present && path->data()[0] == '/') {
-      const string &s = SourceRootInfo::GetCurrentSourceRoot();
-      if (!s.empty()) {
-        if (!strncmp(s.c_str(), path->data(), s.size())) {
-          present = VM::Repo::get().findFile(path->data() + s.size(), md5);
-        }
+    {
+      UnitMd5Map::const_accessor acc;
+      if (s_unitMd5Map.find(acc, path)) {
+        return acc->second.m_present;
       }
     }
+    MD5 md5;
     const StringData* spath = StringData::GetStaticString(path);
-    s_unitMd5Map.insert(acc, spath);
-    acc->second.m_present = present;
-    acc->second.m_unitMd5 = md5;
+    UnitMd5Map::accessor acc;
+    if (s_unitMd5Map.insert(acc, spath)) {
+      bool present = VM::Repo::get().findFile(
+        path->data(), SourceRootInfo::GetCurrentSourceRoot(), md5);
+      acc->second.m_present = present;
+      acc->second.m_unitMd5 = md5;
+    }
     return acc->second.m_present;
   }
   return fileStat(path->data(), s) && !S_ISDIR(s->st_mode);
@@ -384,7 +381,7 @@ void FileRepository::setFileInfo(const StringData *name,
 bool FileRepository::readActualFile(const StringData *name,
                                     const struct stat &s,
                                     FileInfo &fileInfo) {
-  if (s.st_size > StringData::LenMask) {
+  if (s.st_size > StringData::MaxSize) {
     throw FatalErrorException(0, "file %s is too big", name->data());
   }
   int fileSize = s.st_size;
@@ -409,37 +406,48 @@ bool FileRepository::readActualFile(const StringData *name,
 bool FileRepository::readRepoMd5(const StringData *path,
                                  FileInfo& fileInfo) {
   MD5 md5;
-  UnitMd5Map::accessor acc;
-  if (s_unitMd5Map.find(acc, path)) {
-    if (!acc->second.m_present) {
-      return false;
+  bool found;
+  {
+    UnitMd5Map::const_accessor acc;
+    found = s_unitMd5Map.find(acc, path);
+    if (found) {
+      if (!acc->second.m_present) {
+        return false;
+      }
+      md5 = acc->second.m_unitMd5;
+      path = acc->first;
     }
-    md5 = acc->second.m_unitMd5;
-    path = acc->first;
-  } else {
+  }
+  if (!found) {
+    UnitMd5Map::accessor acc;
     path = StringData::GetStaticString(path);
-    s_unitMd5Map.insert(acc, path);
-    if (!VM::Repo::get().findFile(path->data(), md5)) {
-      acc->second.m_present = false;
-      return false;
+    if (s_unitMd5Map.insert(acc, path)) {
+      if (!VM::Repo::get().findFile(path->data(),
+                                    SourceRootInfo::GetCurrentSourceRoot(),
+                                    md5)) {
+        acc->second.m_present = false;
+        return false;
+      }
+      acc->second.m_present = true;
+      acc->second.m_unitMd5 = md5;
+    } else {
+      md5 = acc->second.m_unitMd5;
+      path = acc->first;
     }
-    acc->second.m_present = true;
-    acc->second.m_unitMd5 = md5;
   }
   setFileInfo(path, md5.toString(), fileInfo, true);
   return true;
 }
 
 bool FileRepository::readFile(const StringData *name,
-                              const StringData *rname,
                               const struct stat &s,
                               FileInfo &fileInfo) {
   if (!isAuthoritativeRepo()) {
-    TRACE(1, "read initial \"%s\" r\"%s\"\n", name->data(), rname->data());
+    TRACE(1, "read initial \"%s\"\n", name->data());
     return readActualFile(name, s, fileInfo);
   }
 
-  if (!readRepoMd5(rname, fileInfo) && !readRepoMd5(name, fileInfo)) {
+  if (!readRepoMd5(name, fileInfo)) {
     return false;
   }
   return true;

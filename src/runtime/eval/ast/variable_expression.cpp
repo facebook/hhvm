@@ -138,9 +138,8 @@ bool VariableExpression::CheckCompatibleAssignment(CVarRef left, CVarRef right) 
   case KindOfString:
     return rhs == KindOfStaticString || rhs == KindOfString;
 
-  case KindOfInt32:
   case KindOfInt64:
-    return rhs == KindOfInt32 || rhs == KindOfInt64;
+    return rhs == KindOfInt64;
   default:
     ASSERT(false);
   }

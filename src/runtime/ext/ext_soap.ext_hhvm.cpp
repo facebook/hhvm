@@ -166,9 +166,6 @@ public:
     c_SoapServer_Instance *this_ = (c_SoapServer_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_SoapServer) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -287,10 +284,10 @@ TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, long
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -317,10 +314,10 @@ TypedValue* tg_10SoapServer_setclass(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-1, false);
             for (long long i = 1; i < count; ++i) {
-              TypedValue* extraArg = ve->getExtraArg(i-1);
+              TypedValue* extraArg = ea->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
               } else {
@@ -816,9 +813,6 @@ public:
     c_SoapClient_Instance *this_ = (c_SoapClient_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_SoapClient) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1582,9 +1576,6 @@ public:
     c_SoapVar_Instance *this_ = (c_SoapVar_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_SoapVar) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1777,9 +1768,6 @@ public:
     c_SoapParam_Instance *this_ = (c_SoapParam_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_SoapParam) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1949,9 +1937,6 @@ public:
     c_SoapHeader_Instance *this_ = (c_SoapHeader_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_SoapHeader) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);

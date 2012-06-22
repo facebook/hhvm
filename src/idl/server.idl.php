@@ -346,7 +346,7 @@ DefineFunction(
     'desc'   => "Gets the timeout (maximum duration), in seconds, of the current xbox thread. Throws for non-xbox threads.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "The current timeout (maximum duration).",
     ),
   ));
@@ -384,7 +384,7 @@ DefineFunction(
     'desc'   => "Returns the time that the current xbox thread has been running without a reset, in seconds, and throws for non-xbox threads.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "The time that the current xbox thread has been running without a reset.",
     ),
   ));

@@ -38,15 +38,15 @@ const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int f_connection_aborted() {
+int64 f_connection_aborted() {
   return f_connection_status() == k_CONNECTION_ABORTED;
 }
 
-int f_connection_status() {
+int64 f_connection_status() {
   return k_CONNECTION_NORMAL;
 }
 
-int f_connection_timeout() {
+int64 f_connection_timeout() {
   return f_connection_status() == k_CONNECTION_TIMEOUT;
 }
 
@@ -216,7 +216,7 @@ Variant f_highlight_string(CStrRef str, bool ret /* = false */) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 
-int f_ignore_user_abort(bool setting /* = false */) {
+int64 f_ignore_user_abort(bool setting /* = false */) {
   return 0;
 }
 
@@ -232,7 +232,7 @@ String f_php_strip_whitespace(CStrRef filename) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 
-int f_sleep(int seconds) {
+int64 f_sleep(int seconds) {
   IOStatusHelper io("sleep");
   sleep(seconds);
   return 0;

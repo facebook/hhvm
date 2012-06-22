@@ -87,14 +87,14 @@ TypedValue* fg_mail(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_ezmlm_hash(HPHP::String const&)
+long long HPHP::f_ezmlm_hash(HPHP::String const&)
 _ZN4HPHP12f_ezmlm_hashERKNS_6StringE
 
 (return value) => rax
 addr => rdi
 */
 
-int fh_ezmlm_hash(Value* addr) asm("_ZN4HPHP12f_ezmlm_hashERKNS_6StringE");
+long long fh_ezmlm_hash(Value* addr) asm("_ZN4HPHP12f_ezmlm_hashERKNS_6StringE");
 
 TypedValue * fg1_ezmlm_hash(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_ezmlm_hash(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

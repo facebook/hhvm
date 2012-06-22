@@ -73,7 +73,6 @@ ScalarExpression::ScalarExpression
   case KindOfString:
     m_type = T_STRING;
     break;
-  case KindOfInt32:
   case KindOfInt64:
     m_type = T_LNUMBER;
     break;
@@ -231,7 +230,7 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
     break;
 
   case T_LINE:
-    actualType = Type::Int32;
+    actualType = Type::Int64;
     break;
 
   case T_CONSTANT_ENCAPSED_STRING:

@@ -115,43 +115,43 @@ EOT
 DefineConstant(
   array(
     'name'   => "SINGLE_SCRIPT_CONFUSABLE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "MIXED_SCRIPT_CONFUSABLE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "WHOLE_SCRIPT_CONFUSABLE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "ANY_CASE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "SINGLE_SCRIPT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "INVISIBLE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "CHAR_LIMIT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineFunction(

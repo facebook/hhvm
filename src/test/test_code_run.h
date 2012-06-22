@@ -126,6 +126,7 @@ class TestCodeRun : public TestBase {
   bool TestGetParentClass();
   bool TestRedeclaredFunctions();
   bool TestRedeclaredClasses();
+  bool TestReassignThis();
   bool TestClone();
   bool TestEvalOrder();
   bool TestGetObjectVars();

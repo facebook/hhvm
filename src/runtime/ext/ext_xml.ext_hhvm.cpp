@@ -119,7 +119,7 @@ TypedValue* fg_xml_parser_free(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_xml_parse(HPHP::Object const&, HPHP::String const&, bool)
+long long HPHP::f_xml_parse(HPHP::Object const&, HPHP::String const&, bool)
 _ZN4HPHP11f_xml_parseERKNS_6ObjectERKNS_6StringEb
 
 (return value) => rax
@@ -128,7 +128,7 @@ data => rsi
 is_final => rdx
 */
 
-int fh_xml_parse(Value* parser, Value* data, bool is_final) asm("_ZN4HPHP11f_xml_parseERKNS_6ObjectERKNS_6StringEb");
+long long fh_xml_parse(Value* parser, Value* data, bool is_final) asm("_ZN4HPHP11f_xml_parseERKNS_6ObjectERKNS_6StringEb");
 
 TypedValue * fg1_xml_parse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_parse(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -187,7 +187,7 @@ TypedValue* fg_xml_parse(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_xml_parse_into_struct(HPHP::Object const&, HPHP::String const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
+long long HPHP::f_xml_parse_into_struct(HPHP::Object const&, HPHP::String const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
 _ZN4HPHP23f_xml_parse_into_structERKNS_6ObjectERKNS_6StringERKNS_14VRefParamValueES8_
 
 (return value) => rax
@@ -197,7 +197,7 @@ values => rdx
 index => rcx
 */
 
-int fh_xml_parse_into_struct(Value* parser, Value* data, TypedValue* values, TypedValue* index) asm("_ZN4HPHP23f_xml_parse_into_structERKNS_6ObjectERKNS_6StringERKNS_14VRefParamValueES8_");
+long long fh_xml_parse_into_struct(Value* parser, Value* data, TypedValue* values, TypedValue* index) asm("_ZN4HPHP23f_xml_parse_into_structERKNS_6ObjectERKNS_6StringERKNS_14VRefParamValueES8_");
 
 TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -982,14 +982,14 @@ TypedValue* fg_xml_set_object(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_xml_get_current_byte_index(HPHP::Object const&)
+long long HPHP::f_xml_get_current_byte_index(HPHP::Object const&)
 _ZN4HPHP28f_xml_get_current_byte_indexERKNS_6ObjectE
 
 (return value) => rax
 parser => rdi
 */
 
-int fh_xml_get_current_byte_index(Value* parser) asm("_ZN4HPHP28f_xml_get_current_byte_indexERKNS_6ObjectE");
+long long fh_xml_get_current_byte_index(Value* parser) asm("_ZN4HPHP28f_xml_get_current_byte_indexERKNS_6ObjectE");
 
 TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1035,14 +1035,14 @@ TypedValue* fg_xml_get_current_byte_index(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_xml_get_current_column_number(HPHP::Object const&)
+long long HPHP::f_xml_get_current_column_number(HPHP::Object const&)
 _ZN4HPHP31f_xml_get_current_column_numberERKNS_6ObjectE
 
 (return value) => rax
 parser => rdi
 */
 
-int fh_xml_get_current_column_number(Value* parser) asm("_ZN4HPHP31f_xml_get_current_column_numberERKNS_6ObjectE");
+long long fh_xml_get_current_column_number(Value* parser) asm("_ZN4HPHP31f_xml_get_current_column_numberERKNS_6ObjectE");
 
 TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1088,14 +1088,14 @@ TypedValue* fg_xml_get_current_column_number(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_xml_get_current_line_number(HPHP::Object const&)
+long long HPHP::f_xml_get_current_line_number(HPHP::Object const&)
 _ZN4HPHP29f_xml_get_current_line_numberERKNS_6ObjectE
 
 (return value) => rax
 parser => rdi
 */
 
-int fh_xml_get_current_line_number(Value* parser) asm("_ZN4HPHP29f_xml_get_current_line_numberERKNS_6ObjectE");
+long long fh_xml_get_current_line_number(Value* parser) asm("_ZN4HPHP29f_xml_get_current_line_numberERKNS_6ObjectE");
 
 TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1141,14 +1141,14 @@ TypedValue* fg_xml_get_current_line_number(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_xml_get_error_code(HPHP::Object const&)
+long long HPHP::f_xml_get_error_code(HPHP::Object const&)
 _ZN4HPHP20f_xml_get_error_codeERKNS_6ObjectE
 
 (return value) => rax
 parser => rdi
 */
 
-int fh_xml_get_error_code(Value* parser) asm("_ZN4HPHP20f_xml_get_error_codeERKNS_6ObjectE");
+long long fh_xml_get_error_code(Value* parser) asm("_ZN4HPHP20f_xml_get_error_codeERKNS_6ObjectE");
 
 TypedValue * fg1_xml_get_error_code(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_get_error_code(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

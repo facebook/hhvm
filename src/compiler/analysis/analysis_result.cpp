@@ -4419,9 +4419,11 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
     ASSERT(!func->isUserFunction());
     func->outputCPPClassMap(cg, ar);
   }
+  
   cg_printf("NULL,\n"); // methods
   cg_printf("NULL,\n"); // properties
-  // system constants
+
+  // constants
   int len;
   string output = SymbolTable::getEscapedText(false, len);
   cg_printf("\"false\", (const char *)%d, \"%s\",\n",
@@ -4432,8 +4434,9 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   output = SymbolTable::getEscapedText(null, len);
   cg_printf("\"null\", (const char *)%d, \"%s\",\n",
             len, output.c_str());
-
   m_constants->outputCPPClassMap(cg, ar);
+
+  cg_printf("NULL,\n"); // attributes
 
   // user functions
   cg_printf("(const char *)ClassInfo::IsNothing, NULL, \"\","
@@ -4467,6 +4470,8 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
     ConstantTablePtr constants = m_fileScopes[i]->getConstants();
     constants->outputCPPClassMap(cg, ar, (i == (int)m_fileScopes.size() - 1));
   }
+  
+  cg_printf("NULL,\n"); // attributes
 
   // system classes
   for (StringToClassScopePtrMap::const_iterator iter = m_systemClasses.begin();

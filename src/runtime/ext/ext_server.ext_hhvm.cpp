@@ -714,13 +714,13 @@ TypedValue* fg_xbox_process_call_message(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_xbox_get_thread_timeout()
+long long HPHP::f_xbox_get_thread_timeout()
 _ZN4HPHP25f_xbox_get_thread_timeoutEv
 
 (return value) => rax
 */
 
-int fh_xbox_get_thread_timeout() asm("_ZN4HPHP25f_xbox_get_thread_timeoutEv");
+long long fh_xbox_get_thread_timeout() asm("_ZN4HPHP25f_xbox_get_thread_timeoutEv");
 
 TypedValue* fg_xbox_get_thread_timeout(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -838,13 +838,13 @@ TypedValue* fg_xbox_schedule_thread_reset(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_xbox_get_thread_time()
+long long HPHP::f_xbox_get_thread_time()
 _ZN4HPHP22f_xbox_get_thread_timeEv
 
 (return value) => rax
 */
 
-int fh_xbox_get_thread_time() asm("_ZN4HPHP22f_xbox_get_thread_timeEv");
+long long fh_xbox_get_thread_time() asm("_ZN4HPHP22f_xbox_get_thread_timeEv");
 
 TypedValue* fg_xbox_get_thread_time(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

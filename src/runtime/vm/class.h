@@ -22,6 +22,7 @@
 #include <runtime/base/array/hphp_array.h>
 #include <runtime/ext_hhvm/ext_hhvm.h>
 #include <util/parser/location.h>
+#include <util/fixed_vector.h>
 #include <runtime/vm/fixed_string_map.h>
 #include <runtime/vm/indexed_string_map.h>
 
@@ -50,6 +51,9 @@ typedef hphp_hash_set<const Class*, pointer_hash<Class> > ClassSet;
 typedef Instance*(*BuiltinCtorFunction)(Class*);
 
 class PreClass : public AtomicCountable {
+  friend class PreClassEmitter;
+  friend class Peephole;
+
  public:
   class Prop {
    public:
@@ -97,6 +101,11 @@ class PreClass : public AtomicCountable {
 
   class TraitPrecRule {
    public:
+    TraitPrecRule()
+      : m_methodName(0)
+      , m_selectedTraitName(0)
+    {}
+
     TraitPrecRule(const StringData* selectedTraitName,
                   const StringData* methodName) :
         m_methodName(methodName), m_selectedTraitName(selectedTraitName),
@@ -112,6 +121,11 @@ class PreClass : public AtomicCountable {
     void getOtherTraitNames(TraitNameSet& nameSet) const {
       nameSet = m_otherTraitNames;
     }
+
+    template<class SerDe> void serde(SerDe& sd) {
+      sd(m_methodName)(m_selectedTraitName)(m_otherTraitNames);
+    }
+
    private:
     const StringData*  m_methodName;
     const StringData*  m_selectedTraitName;
@@ -120,6 +134,13 @@ class PreClass : public AtomicCountable {
 
   class TraitAliasRule {
    public:
+    TraitAliasRule()
+      : m_traitName(0)
+      , m_origMethodName(0)
+      , m_newMethodName(0)
+      , m_modifiers(AttrNone)
+    {}
+
     TraitAliasRule(const StringData* traitName,
                    const StringData* origMethodName,
                    const StringData* newMethodName,
@@ -128,10 +149,16 @@ class PreClass : public AtomicCountable {
         m_origMethodName(origMethodName),
         m_newMethodName(newMethodName),
         m_modifiers(modifiers) {}
+
     const StringData* getTraitName() const      { return m_traitName; }
     const StringData* getOrigMethodName() const { return m_origMethodName; }
     const StringData* getNewMethodName() const  { return m_newMethodName; }
     Attr              getModifiers() const      { return m_modifiers; }
+
+    template<class SerDe> void serde(SerDe& sd) {
+      sd(m_traitName)(m_origMethodName)(m_newMethodName)(m_modifiers);
+    }
+
    private:
     const StringData* m_traitName;
     const StringData* m_origMethodName;
@@ -139,18 +166,10 @@ class PreClass : public AtomicCountable {
     Attr              m_modifiers;
   };
 
-  typedef std::vector<const StringData*> InterfaceVec;
-  typedef std::vector<const StringData*> UsedTraitVec;
-  typedef std::vector<TraitPrecRule> TraitPrecRuleVec;
-  typedef std::vector<TraitAliasRule> TraitAliasRuleVec;
-  typedef std::vector<Func*> MethodVec;
-  typedef FixedStringMap<Func*, false> MethodMap;
-  typedef std::vector<Prop*> PropertyVec;
-  typedef hphp_hash_map<const StringData*, Prop*, string_data_hash,
-                        string_data_same> PropertyMap;
-  typedef std::vector<Const*> ConstantVec;
-  typedef hphp_hash_map<const StringData*, unsigned, string_data_hash,
-                        string_data_same> ConstantMap;
+  typedef FixedVector<const StringData*> InterfaceVec;
+  typedef FixedVector<const StringData*> UsedTraitVec;
+  typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
+  typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
   typedef hphp_hash_map<const StringData*, TypedValue, string_data_hash,
                         string_data_isame> UserAttributeMap;
 
@@ -176,36 +195,48 @@ class PreClass : public AtomicCountable {
   const TraitPrecRuleVec& traitPrecRules() const { return m_traitPrecRules; }
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes() const { return m_userAttributes; }
-  const MethodVec& methods() const { return m_methods; }
+
+  Func* const* methods()    const { return m_methods.accessList(); }
+  Prop* const* properties() const { return m_properties.accessList(); }
+  Const* const* constants() const { return m_constants.accessList(); }
+
+  size_t numMethods()    const { return m_methods.size(); }
+  size_t numProperties() const { return m_properties.size(); }
+  size_t numConstants()  const { return m_constants.size(); }
+
   bool hasMethod(const StringData* methName) const {
-    return m_methodMap.find(methName) != NULL;
+    return m_methods.contains(methName);
   }
+
+  bool hasProp(const StringData* propName) const {
+    return m_properties.contains(propName);
+  }
+
   Func* lookupMethod(const StringData* methName) const {
-    Func **f = m_methodMap.find(methName);
+    Func* f = m_methods.lookupDefault(methName, 0);
     ASSERT(f != NULL);
-    return *f;
+    return f;
+  }
+
+  Prop* lookupProp(const StringData* propName) const {
+    Prop* p = m_properties.lookupDefault(propName, 0);
+    ASSERT(p != NULL);
+    return p;
   }
 
   BuiltinCtorFunction instanceCtor() { return m_InstanceCtor; }
   int builtinPropSize() { return m_builtinPropSize; }
 
-  const PropertyVec& propertyVec() const { return m_propertyVec; }
-  bool hasProp(const StringData* propName) const {
-    return m_propertyMap.find(propName) != m_propertyMap.end();
-  }
-  Prop* lookupProp(const StringData* propName) const {
-    PropertyMap::const_iterator it = m_propertyMap.find(propName);
-    ASSERT(it != m_propertyMap.end());
-    return it->second;
-  }
-  const ConstantVec& constantVec() const { return m_constantVec; }
-
   void prettyPrint(std::ostream& out) const;
 
   const NamedEntity* namedEntity() const { return m_namedEntity; }
- private:
-  friend class PreClassEmitter;
-  friend class Peephole;
+
+private:
+  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
+  typedef IndexedStringMap<Prop*,true,Slot> PropMap;
+  typedef IndexedStringMap<Const*,true,Slot> ConstMap;
+
+private:
   Unit* m_unit;
   const NamedEntity* m_namedEntity;
   int m_line1;
@@ -224,12 +255,9 @@ class PreClass : public AtomicCountable {
   TraitPrecRuleVec m_traitPrecRules;
   TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;
-  MethodVec m_methods;
-  MethodMap m_methodMap;
-  PropertyVec m_propertyVec;
-  PropertyMap m_propertyMap;
-  ConstantVec m_constantVec;
-  ConstantMap m_constantMap;
+  MethodMap m_methods;
+  PropMap m_properties;
+  ConstMap m_constants;
 };
 // It is possible for multiple Class'es to refer to the same PreClass, and we
 // need to make sure that the PreClass lives for as long as an associated Class
@@ -238,8 +266,17 @@ class PreClass : public AtomicCountable {
 typedef AtomicSmartPtr<PreClass> PreClassPtr;
 class PreClassEmitter {
  public:
+  typedef std::vector<FuncEmitter*> MethodVec;
+
   class Prop {
    public:
+    Prop()
+      : m_name(0)
+      , m_mangledName(0)
+      , m_attrs(AttrNone)
+      , m_docComment(0)
+    {}
+
     Prop(const PreClassEmitter* pce, const StringData* n, Attr attrs,
          const StringData* docComment, TypedValue* val);
     ~Prop();
@@ -249,6 +286,16 @@ class PreClassEmitter {
     Attr attrs() const { return m_attrs; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
+
+    template<class SerDe> void serde(SerDe& sd) {
+      sd(m_name)
+        (m_mangledName)
+        (m_attrs)
+        (m_docComment)
+        (m_val)
+        ;
+    }
+
    private:
     const StringData* m_name;
     const StringData* m_mangledName;
@@ -256,8 +303,13 @@ class PreClassEmitter {
     const StringData* m_docComment;
     TypedValue m_val;
   };
+
   class Const {
    public:
+    Const()
+      : m_name(0)
+      , m_phpCode(0)
+    {}
     Const(const StringData* n, TypedValue* val, const StringData* phpCode)
       : m_name(n), m_phpCode(phpCode) {
       memcpy(&m_val, val, sizeof(TypedValue));
@@ -267,41 +319,41 @@ class PreClassEmitter {
     const StringData* name() const { return m_name; }
     const TypedValue& val() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
+
+    template<class SerDe> void serde(SerDe& sd) {
+      sd(m_name)(m_val)(m_phpCode);
+    }
+
    private:
     const StringData* m_name;
     TypedValue m_val;
     const StringData* m_phpCode;
   };
 
-  typedef std::vector<Prop*> PropertyVec;
-  typedef hphp_hash_map<const StringData*, Prop*, string_data_hash,
-                        string_data_same> PropertyMap;
-  typedef std::vector<Const*> ConstantVec;
-  typedef hphp_hash_map<const StringData*, unsigned, string_data_hash,
-                        string_data_same> ConstantMap;
-
-  PreClassEmitter(UnitEmitter& ue, int line1, int line2, Offset o,
-                  const StringData* n, Attr attrs, const StringData* parent,
-                  const StringData* docComment, Id id, bool hoistable);
+  PreClassEmitter(UnitEmitter& ue, Id id, const StringData* n);
   ~PreClassEmitter();
+
+  void init(int line1, int line2, Offset offset, Attr attrs,
+            const StringData* parent, bool hoistable,
+            const StringData* docComment);
 
   UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
   Attr attrs() const { return m_attrs; }
+  void setHoistable(bool b) { m_hoistable = b; }
   Id id() const { return m_id; }
-  typedef std::vector<FuncEmitter*> MethodVec;
   const MethodVec& methods() const { return m_methods; }
 
   void addInterface(const StringData* n);
   bool addMethod(FuncEmitter* method);
   bool addProperty(const StringData* n, Attr attrs,
                    const StringData* docComment, TypedValue* val);
-  Prop* lookupProp(const StringData* propName) const;
+  const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, TypedValue* val,
                    const StringData* phpCode);
   void addUsedTrait(const StringData* traitName);
-  void addTraitPrecRule(PreClass::TraitPrecRule &rule);
-  void addTraitAliasRule(PreClass::TraitAliasRule &rule);
+  void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
+  void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
   void addUserAttribute(const StringData* name, TypedValue tv);
   void commit(RepoTxn& txn) const;
 
@@ -311,7 +363,14 @@ class PreClassEmitter {
 
   PreClass* create(Unit& unit) const;
 
+  template<class SerDe> void serdeMetaData(SerDe&);
+
  private:
+  typedef IndexedStringMap<Prop,true,Slot> PropMap;
+  typedef IndexedStringMap<Const,true,Slot> ConstMap;
+  typedef hphp_hash_map<const StringData*, FuncEmitter*, string_data_hash,
+                        string_data_isame> MethodMap;
+
   UnitEmitter& m_ue;
   int m_line1;
   int m_line2;
@@ -325,19 +384,15 @@ class PreClassEmitter {
   BuiltinCtorFunction m_InstanceCtor;
   int m_builtinPropSize;
 
-  PreClass::InterfaceVec m_interfaces;
-  PreClass::UsedTraitVec m_usedTraits;
-  PreClass::TraitPrecRuleVec m_traitPrecRules;
-  PreClass::TraitAliasRuleVec m_traitAliasRules;
+  std::vector<const StringData*> m_interfaces;
+  std::vector<const StringData*> m_usedTraits;
+  std::vector<PreClass::TraitPrecRule> m_traitPrecRules;
+  std::vector<PreClass::TraitAliasRule> m_traitAliasRules;
   PreClass::UserAttributeMap m_userAttributes;
   MethodVec m_methods;
-  typedef hphp_hash_map<const StringData*, FuncEmitter*, string_data_hash,
-                        string_data_isame> MethodMap;
   MethodMap m_methodMap;
-  PropertyVec m_propertyVec;
-  PropertyMap m_propertyMap;
-  ConstantVec m_constantVec;
-  ConstantMap m_constantMap;
+  PropMap::Builder m_propMap;
+  ConstMap::Builder m_constMap;
 };
 
 class PreClassRepoProxy : public RepoProxy {
@@ -352,132 +407,17 @@ class PreClassRepoProxy : public RepoProxy {
 #define PCRP_GOP(o) PCRP_OP(Get##o, get##o)
 #define PCRP_OPS \
   PCRP_IOP(PreClass) \
-  PCRP_GOP(PreClasses) \
-  PCRP_IOP(PreClassInterface) \
-  PCRP_GOP(PreClassInterfaces) \
-  PCRP_IOP(PreClassTrait) \
-  PCRP_GOP(PreClassTraits) \
-  PCRP_IOP(PreClassTraitPrec) \
-  PCRP_GOP(PreClassTraitPrecs) \
-  PCRP_IOP(PreClassTraitPrecOther) \
-  PCRP_GOP(PreClassTraitPrecOthers) \
-  PCRP_IOP(PreClassTraitAlias) \
-  PCRP_GOP(PreClassTraitAliases) \
-  PCRP_IOP(PreClassUserAttribute) \
-  PCRP_GOP(PreClassUserAttributes) \
-  PCRP_IOP(PreClassProperty) \
-  PCRP_GOP(PreClassProperties) \
-  PCRP_IOP(PreClassConstant) \
-  PCRP_GOP(PreClassConstants)
+  PCRP_GOP(PreClasses)
   class InsertPreClassStmt : public RepoProxy::Stmt {
    public:
     InsertPreClassStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId, int line1, int line2,
-                Offset offset, const StringData* name, Attr attrs,
-                const StringData* parent, const StringData* docComment,
-                bool hoistable);
+    void insert(const PreClassEmitter& pce, RepoTxn& txn, int64 unitSn,
+                Id preClassId, const StringData* name, bool hoistable);
   };
   class GetPreClassesStmt : public RepoProxy::Stmt {
    public:
     GetPreClassesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue);
-  };
-  class InsertPreClassInterfaceStmt : public RepoProxy::Stmt {
-   public:
-    InsertPreClassInterfaceStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId, int interfaceSn,
-                const StringData* name);
-  };
-  class GetPreClassInterfacesStmt : public RepoProxy::Stmt {
-   public:
-    GetPreClassInterfacesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(PreClassEmitter& pce);
-  };
-  class InsertPreClassTraitStmt : public RepoProxy::Stmt {
-   public:
-    InsertPreClassTraitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId, int traitSn,
-                const StringData* name);
-  };
-  class GetPreClassTraitsStmt : public RepoProxy::Stmt {
-   public:
-    GetPreClassTraitsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(PreClassEmitter& pce);
-  };
-  class InsertPreClassTraitPrecStmt : public RepoProxy::Stmt {
-   public:
-    InsertPreClassTraitPrecStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId, int traitPrecSn,
-                const StringData* methodName,
-                const StringData* selectedTraitName);
-  };
-  class GetPreClassTraitPrecsStmt : public RepoProxy::Stmt {
-   public:
-    GetPreClassTraitPrecsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(PreClassEmitter& pce);
-  };
-  class InsertPreClassTraitPrecOtherStmt : public RepoProxy::Stmt {
-   public:
-    InsertPreClassTraitPrecOtherStmt(Repo& repo, int repoId)
-      : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId, int traitPrecSn,
-                int otherSn, const StringData* other);
-  };
-  class GetPreClassTraitPrecOthersStmt : public RepoProxy::Stmt {
-   public:
-    GetPreClassTraitPrecOthersStmt(Repo& repo, int repoId)
-      : Stmt(repo, repoId) {}
-    void get(PreClassEmitter& pce, int traitPrecSn,
-             PreClass::TraitPrecRule& tpr);
-  };
-  class InsertPreClassTraitAliasStmt : public RepoProxy::Stmt {
-   public:
-    InsertPreClassTraitAliasStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId, int traitAliasSn,
-                const StringData* name, const StringData* origMethodName,
-                const StringData* newMethodName, Attr modifiers);
-  };
-  class GetPreClassTraitAliasesStmt : public RepoProxy::Stmt {
-   public:
-    GetPreClassTraitAliasesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(PreClassEmitter& pce);
-  };
-  class InsertPreClassUserAttributeStmt : public RepoProxy::Stmt {
-   public:
-    InsertPreClassUserAttributeStmt(Repo& repo, int repoId)
-      : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId,
-                const StringData* name, const TypedValue& tv);
-  };
-  class GetPreClassUserAttributesStmt : public RepoProxy::Stmt {
-   public:
-    GetPreClassUserAttributesStmt(Repo& repo, int repoId)
-      : Stmt(repo, repoId) {}
-    void get(PreClassEmitter& pce);
-  };
-  class InsertPreClassPropertyStmt : public RepoProxy::Stmt {
-   public:
-    InsertPreClassPropertyStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId, int propertySn,
-                const StringData* name, Attr attrs,
-                const StringData* docComment, const TypedValue& val);
-  };
-  class GetPreClassPropertiesStmt : public RepoProxy::Stmt {
-   public:
-    GetPreClassPropertiesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(PreClassEmitter& pce);
-  };
-  class InsertPreClassConstantStmt : public RepoProxy::Stmt {
-   public:
-    InsertPreClassConstantStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, Id preClassId, int constantSn,
-                const StringData* name, const TypedValue& val,
-                const StringData* phpCode);
-  };
-  class GetPreClassConstantsStmt : public RepoProxy::Stmt {
-   public:
-    GetPreClassConstantsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(PreClassEmitter& pce);
   };
 #define PCRP_OP(c, o) \
  public: \
@@ -488,8 +428,6 @@ class PreClassRepoProxy : public RepoProxy {
   c##Stmt* m_##o[RepoIdCount];
   PCRP_OPS
 #undef PCRP_OP
- private:
-  int m_dummy; // Used to avoid a syntax error in the ctor initializer list.
 };
 
 typedef AtomicSmartPtr<Class> ClassPtr;
@@ -658,7 +596,7 @@ public:
 
   // Returns kInvalidSlot if we can't find this property.
   Slot lookupDeclProp(const StringData* propName) const {
-    return m_declProperties.findSlot(propName);
+    return m_declProperties.findIndex(propName);
   }
 
   Slot getDeclPropIndex(Class* ctx, const StringData* key,
@@ -669,7 +607,7 @@ public:
 
   // Returns kInvalidSlot if we can't find this static property.
   Slot lookupSProp(const StringData* sPropName) const {
-    return m_staticProperties.findSlot(sPropName);
+    return m_staticProperties.findIndex(sPropName);
   }
 
   TypedValue getStaticPropInitVal(const SProp& prop);
@@ -697,10 +635,10 @@ private:
         m_trait(trait), m_method(method), m_modifiers(modifiers) { }
   };
 
-  typedef IndexedStringMap<Func*,false> MethodMap;
-  typedef IndexedStringMap<Const,true> ConstMap;
-  typedef IndexedStringMap<Prop,true> PropMap;
-  typedef IndexedStringMap<SProp,true> SPropMap;
+  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
+  typedef IndexedStringMap<Const,true,Slot> ConstMap;
+  typedef IndexedStringMap<Prop,true,Slot> PropMap;
+  typedef IndexedStringMap<SProp,true,Slot> SPropMap;
   typedef std::list<TraitMethod> TraitMethodList;
   typedef hphp_hash_map<const StringData*, TraitMethodList, string_data_hash,
                         string_data_isame> MethodToTraitListMap;

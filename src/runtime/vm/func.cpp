@@ -21,7 +21,7 @@
 #include "util/util.h"
 #include "util/trace.h"
 #include "util/debug.h"
-#include <runtime/base/strings.h>
+#include "runtime/base/strings.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/func.h"
 #include "runtime/vm/runtime.h"
@@ -29,6 +29,7 @@
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/eval/runtime/file_repository.h"
 #include "runtime/vm/translator/translator-x64.h"
+#include "runtime/vm/blob_helper.h"
 
 namespace HPHP {
 namespace VM {
@@ -86,7 +87,7 @@ bool Func::parametersCompat(const PreClass* preClass, const Func* imeth,
   return true;
 }
 
-static Func::FuncId s_nextFuncId = 0; 
+static Func::FuncId s_nextFuncId = 0;
 void Func::setFuncId(FuncId id) {
   ASSERT(m_funcId == InvalidId);
   ASSERT(id != InvalidId);
@@ -106,6 +107,12 @@ void Func::setFullName() {
   } else {
     m_fullName = m_name;
     m_namedEntity = Unit::GetNamedEntity(m_name);
+  }
+  if (RuntimeOption::DynamicInvokeFunctions.size()) {
+    if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
+        RuntimeOption::DynamicInvokeFunctions.end()) {
+      m_attrs = Attr(m_attrs | AttrDynamicInvoke);
+    }
   }
 }
 
@@ -149,10 +156,18 @@ void* Func::allocFuncMem(const StringData* name, int numParams) {
 Func::Func(Unit& unit, Id id, int line1, int line2,
            Offset base, Offset past, const StringData* name,
            Attr attrs, bool top, const StringData* docComment, int numParams)
-  : m_unit(&unit), m_cls(NULL), m_baseCls(NULL), m_name(name),
-    m_hasPrivateAncestor(false), m_attrs(attrs), m_funcId(InvalidId),
-    m_namedEntity(NULL), m_cachedOffset(-1), m_refBitVec(NULL),
-    m_maxStackCells(0), m_numParams(0)
+  : m_unit(&unit)
+  , m_cls(NULL)
+  , m_baseCls(NULL)
+  , m_name(name)
+  , m_namedEntity(NULL)
+  , m_refBitVec(NULL)
+  , m_cachedOffset(-1)
+  , m_maxStackCells(0)
+  , m_numParams(0)
+  , m_attrs(attrs)
+  , m_funcId(InvalidId)
+  , m_hasPrivateAncestor(false)
 {
   m_shared = new SharedData(NULL, id, base, past, line1, line2,
                             top, docComment);
@@ -163,10 +178,18 @@ Func::Func(Unit& unit, Id id, int line1, int line2,
 Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
            Offset past, const StringData* name, Attr attrs,
            bool top, const StringData* docComment, int numParams)
-  : m_unit(&unit), m_cls(NULL), m_baseCls(NULL), m_name(name),
-    m_hasPrivateAncestor(false), m_attrs(attrs), m_funcId(InvalidId),
-    m_namedEntity(NULL), m_cachedOffset(-1), m_refBitVec(NULL),
-    m_maxStackCells(0), m_numParams(0)
+  : m_unit(&unit)
+  , m_cls(NULL)
+  , m_baseCls(NULL)
+  , m_name(name)
+  , m_namedEntity(NULL)
+  , m_refBitVec(NULL)
+  , m_cachedOffset(-1)
+  , m_maxStackCells(0)
+  , m_numParams(0)
+  , m_attrs(attrs)
+  , m_funcId(InvalidId)
+  , m_hasPrivateAncestor(false)
 {
   Id id = -1;
   m_shared = new SharedData(preClass, id, base, past, line1, line2,
@@ -270,8 +293,26 @@ const FPIEnt* Func::findFPI(Offset o) const {
   return fe;
 }
 
+const FPIEnt* Func::findPrecedingFPI(Offset o) const {
+  ASSERT(o >= base() && o < past());
+  const FPIEntVec& fpitab = shared()->m_fpitab;
+  ASSERT(fpitab.size());
+  const FPIEnt* fe = &fpitab[0];
+  unsigned int i;
+  for (i = 1; i < fpitab.size(); i++) {
+    const FPIEnt* cur = &fpitab[i];
+    if (o > cur->m_fcallOff &&
+        fe->m_fcallOff < cur->m_fcallOff) {
+      fe = cur;
+    }
+  }
+  ASSERT(fe);
+  return fe;
+}
+
 bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
-  if (RuntimeOption::EvalJitEnableRenameFunction) {
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
+      m_attrs & AttrDynamicInvoke) {
     return false;
   }
 
@@ -287,12 +328,6 @@ bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
   // conditionally defined functions and cross-module calls -- both phenomena
   // can change name->Func mappings during the lifetime of a TC.
   return top() && (fromUnit == m_unit);
-
-  // Using global analysis, we may be able to return true more often; for
-  // example, if we statically know this function's name is globally unique.  If
-  // we do this, we'll need to be careful about the reloading-code case; unless
-  // we throw away the entire TC, we may need to disable this optimization in
-  // sandbox mode.
 }
 
 bool Func::byRef(int32 arg) const {
@@ -324,13 +359,7 @@ bool Func::mustBeRef(int32 arg) const {
   return retval;
 }
 
-Id Func::newLocal() {
-  return shared()->m_numLocals++;
-}
-
-void Func::appendParam(const StringData* name, bool ref,
-                       const Func::ParamInfo& info) {
-  allocVarId(name);
+void Func::appendParam(bool ref, const Func::ParamInfo& info) {
   int qword = m_numParams / kBitsPerQword;
   int bit   = m_numParams % kBitsPerQword;
   // Grow args, if necessary.
@@ -354,24 +383,9 @@ void Func::appendParam(const StringData* name, bool ref,
   shared()->m_params.push_back(info);
 }
 
-void Func::allocVarId(const StringData* name) {
-  ASSERT(name != NULL);
-  Id id;
-  PnameMap& pnameMap = shared()->m_pnameMap;
-  PnameVec& pnames = shared()->m_pnames;
-  if (!mapGet(pnameMap, name, &id)) {
-    id = newLocal();
-    ASSERT(id == (int)pnames.size());
-    pnameMap[name] = id;
-    pnames.push_back(name);
-  }
-}
-
 Id Func::lookupVarId(const StringData* name) const {
   ASSERT(name != NULL);
-  const PnameMap& pnameMap = shared()->m_pnameMap;
-  ASSERT(mapContains(pnameMap, name));
-  return mapGet(pnameMap, name);
+  return shared()->m_localNames.findIndex(name);
 }
 
 void Func::prettyPrint(std::ostream& out) const {
@@ -417,11 +431,15 @@ void Func::prettyPrint(std::ostream& out) const {
       for (EHEnt::CatchVec::const_iterator it2 = it->m_catches.begin();
            it2 != it->m_catches.end(); ++it2) {
         out << "  Handle " << m_unit->lookupLitstrId(it2->first)->data()
-          << " at " << it2->second << std::endl;
+          << " at " << it2->second;
       }
     } else {
-      out << " to " << it->m_fault << std::endl;
+      out << " to " << it->m_fault;
     }
+    if (it->m_parentIndex != -1) {
+      out << " parentIndex " << it->m_parentIndex;
+    }
+    out << std::endl;
   }
 }
 
@@ -480,7 +498,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
       const ParamInfoVec& params = shared()->m_params;
       const ParamInfo& fpi = params[i];
       pi->attribute = (ClassInfo::Attribute)attr;
-      pi->name = shared()->m_pnames[i]->data();
+      pi->name = shared()->m_localNames[i]->data();
       if (params.size() <= i || !fpi.hasDefaultValue()) {
         pi->value = NULL;
         pi->valueText = "";
@@ -663,19 +681,18 @@ void FuncEmitter::allocVarId(const StringData* name) {
   ASSERT(name != NULL);
   // Unnamed locals are segregated (they all come after the named locals).
   ASSERT(m_numUnnamedLocals == 0);
-  Id id;
-  if (!mapGet(m_pnameMap, name, &id)) {
+  UNUSED Id id;
+  if (m_localNames.find(name) == m_localNames.end()) {
     id = newLocal();
-    ASSERT(id == (int)m_pnames.size());
-    m_pnameMap[name] = id;
-    m_pnames.push_back(name);
+    ASSERT(id == (int)m_localNames.size());
+    m_localNames.add(name, name);
   }
 }
 
 Id FuncEmitter::lookupVarId(const StringData* name) const {
   ASSERT(name != NULL);
-  ASSERT(mapContains(m_pnameMap, name));
-  return mapGet(m_pnameMap, name);
+  ASSERT(m_localNames.find(name) != m_localNames.end());
+  return m_localNames.find(name)->second;
 }
 
 Id FuncEmitter::allocIterator() {
@@ -766,50 +783,9 @@ void FuncEmitter::commit(RepoTxn& txn) const {
   FuncRepoProxy& frp = repo.frp();
   int repoId = m_ue.repoId();
   int64 usn = m_ue.sn();
+
   frp.insertFunc(repoId)
-     .insert(txn, usn, m_sn, m_pce ? m_pce->id() : -1, m_id, m_base,
-             m_past, m_line1, m_line2, m_name, m_numLocals, m_numIterators,
-             m_maxStackCells, m_attrs, m_top, m_docComment, m_isClosureBody,
-             m_isGenerator, m_isGeneratorFromClosure);
-  for (unsigned i = 0; i < m_params.size(); ++i) {
-    const TypeConstraint& tc = m_params[i].typeConstraint();
-    frp.insertFuncParam(repoId)
-       .insert(txn, usn, m_sn, i, m_pnames[i], m_params[i].funcletOff(),
-               m_params[i].defaultValue(), m_params[i].phpCode(), tc,
-               m_params[i].ref());
-  }
-  for (unsigned i = m_params.size(); i < m_pnames.size(); ++i) {
-    frp.insertFuncVar(repoId).insert(txn, usn, m_sn, i, m_pnames[i]);
-  }
-  for (unsigned i = 0; i < m_staticVars.size(); ++i) {
-    const Func::SVInfo& svi = m_staticVars[i];
-    frp.insertFuncStaticVar(repoId)
-       .insert(txn, usn, m_sn, i, svi.name, svi.phpCode);
-  }
-  for (unsigned i = 0; i < m_ehtab.size(); ++i) {
-    const EHEnt& eh = m_ehtab[i];
-    frp.insertFuncEH(repoId)
-       .insert(txn, usn, m_sn, i, eh.m_ehtype, eh.m_base, eh.m_past,
-               eh.m_iterId, eh.m_parentIndex, eh.m_fault);
-    for (unsigned j = 0; j < eh.m_catches.size(); ++j) {
-      const std::pair<Id, Offset>& ehcatch = eh.m_catches[j];
-      frp.insertFuncEHCatch(repoId)
-         .insert(txn, usn, m_sn, i, j, ehcatch.first, ehcatch.second);
-    }
-  }
-  for (unsigned i = 0; i < m_fpitab.size(); ++i) {
-    const FPIEnt& fpi = m_fpitab[i];
-    frp.insertFuncFPI(repoId)
-       .insert(txn, usn, m_sn, i, fpi.m_fpushOff, fpi.m_fcallOff,
-               fpi.m_fpOff, fpi.m_parentIndex, fpi.m_fpiDepth);
-  }
-  for (Func::UserAttributeMap::const_iterator it = m_userAttributes.begin();
-       it != m_userAttributes.end(); ++it) {
-    const StringData* name = it->first;
-    const TypedValue& tv = it->second;
-    frp.insertFuncUserAttribute(repoId)
-       .insert(txn, usn, m_sn, name, tv);
-  }
+     .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, m_name, m_top);
 }
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
@@ -827,11 +803,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     pi.setDefaultValue(m_params[i].defaultValue());
     pi.setPhpCode(m_params[i].phpCode());
     pi.setTypeConstraint(m_params[i].typeConstraint());
-    f->appendParam(m_pnames[i], m_params[i].ref(), pi);
+    f->appendParam(m_params[i].ref(), pi);
   }
-  for (unsigned i = m_params.size(); i < m_pnames.size(); ++i) {
-    f->allocVarId(m_pnames[i]);
-  }
+  f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = m_maxStackCells;
@@ -854,8 +828,11 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   m_builtinFuncPtr = funcPtr;
   m_base = base;
   m_top = true;
-  m_docComment = StringData::GetStaticString("");
+  m_docComment = StringData::GetStaticString(info->docComment);
   m_attrs = AttrNone;
+  // TODO: Task #1137917: See if we can avoid marking most builtins with
+  // "MayUseVV" and still make things work
+  m_attrs = (Attr)(m_attrs | AttrMayUseVV);
   if (info->attribute & (ClassInfo::RefVariableArguments |
                          ClassInfo::MixedVariableArguments)) {
     m_attrs = Attr(m_attrs | AttrVariadicByRef);
@@ -884,6 +861,7 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
       m_attrs = (Attr)(m_attrs | AttrPublic);
     }
   }
+  
   for (unsigned i = 0; i < info->parameters.size(); ++i) {
     // For builtin only, we use a dummy ParamInfo
     FuncEmitter::ParamInfo pi;
@@ -892,16 +870,42 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   }
 }
 
+template<class SerDe>
+void FuncEmitter::serdeMetaData(SerDe& sd) {
+  // NOTE: name, top, and a few other fields currently serialized
+  // outside of this.
+  sd(m_line1)
+    (m_line2)
+    (m_base)
+    (m_past)
+    (m_attrs)
+    (m_docComment)
+    (m_numLocals)
+    (m_numIterators)
+    (m_maxStackCells)
+    (m_isClosureBody)
+    (m_isGenerator)
+    (m_isGeneratorFromClosure)
+
+    (m_params)
+    (m_localNames)
+    (m_staticVars)
+    (m_ehtab)
+    (m_fpitab)
+    (m_userAttributes)
+    ;
+}
+
 //=============================================================================
 // FuncRepoProxy.
 
 FuncRepoProxy::FuncRepoProxy(Repo& repo)
-  : RepoProxy(repo),
+  : RepoProxy(repo)
 #define FRP_OP(c, o) \
-    m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral),
+  , m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral)
     FRP_OPS
 #undef FRP_OP
-    m_dummy(0) {
+{
 #define FRP_OP(c, o) \
   m_##o[RepoIdLocal] = &m_##o##Local; \
   m_##o[RepoIdCentral] = &m_##o##Central;
@@ -913,114 +917,37 @@ FuncRepoProxy::~FuncRepoProxy() {
 }
 
 void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Func")
-             << "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER,"
-                " funcId INTEGER, base INTEGER, past INTEGER,"
-                " line1 INTEGER, line2 INTEGER, name TEXT, numLocals INTEGER,"
-                " numIterators INTEGER, maxStackCells INTEGER, attrs INTEGER,"
-                " top INTEGER, docComment TEXT, isClosureBody INTEGER,"
-                " isGenerator INTEGER, isGeneratorFromClosure INTEGER,"
-                " PRIMARY KEY (unitSn, funcSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "FuncParam")
-             << "(unitSn INTEGER, funcSn INTEGER, localId INTEGER, name TEXT,"
-                " funcletOff INTEGER, defaultValue BLOB, phpCode TEXT,"
-                " typeConstraint TEXT, typeConstraintNullable INTEGER,"
-                " ref INTEGER, PRIMARY KEY (unitSn, funcSn, localId));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "FuncVar")
-             << "(unitSn INTEGER, funcSn INTEGER, localId INTEGER, name TEXT,"
-                " PRIMARY KEY (unitSn, funcSn, localId));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "FuncStaticVar")
-             << "(unitSn INTEGER, funcSn INTEGER, staticVarSn INTEGER,"
-                " name TEXT, phpCode TEXT, PRIMARY KEY (unitSn, funcSn,"
-                " staticVarSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "FuncEH")
-             << "(unitSn INTEGER, funcSn INTEGER, ehSn INTEGER,"
-                " type INTEGER, base INTEGER, past INTEGER,"
-                " iterId INTEGER, parentIndex INTEGER, fault INTEGER,"
-                " PRIMARY KEY (unitSn, funcSn, ehSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "FuncEHCatch")
-             << "(unitSn INTEGER, funcSn INTEGER, ehSn INTEGER,"
-                " ehCatchSn INTEGER, nameId INTEGER, offset INTEGER,"
-                " PRIMARY KEY (unitSn, funcSn, ehSn, ehCatchSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "FuncFPI")
-             << "(unitSn INTEGER, funcSn INTEGER, fpiSn INTEGER,"
-                " base INTEGER, past INTEGER, fpOff INTEGER,"
-                " parentIndex INTEGER, fpiDepth INTEGER,"
-                " PRIMARY KEY (unitSn, funcSn, fpiSn));";
-    txn.exec(ssCreate.str());
-  }
-  {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "FuncUserAttribute")
-             << "(unitSn INTEGER, funcSn INTEGER, name TEXT, value BLOB,"
-                " PRIMARY KEY (unitSn, funcSn, name));";
-    txn.exec(ssCreate.str());
-  }
+  std::stringstream ssCreate;
+  ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Func")
+           << "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER,"
+              " name TEXT, top INTEGER, "
+              " extraData BLOB,"
+              " PRIMARY KEY (unitSn, funcSn));";
+  txn.exec(ssCreate.str());
 }
 
 void FuncRepoProxy::InsertFuncStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, int funcSn,
-                           Id preClassId, Id funcId, Offset base,
-                           Offset past, int line1, int line2,
-                           const StringData* name, Id numLocals,
-                           Id numIterators, int maxStackCells, Attr attrs,
-                           bool top, const StringData* docComment,
-                           bool isClosureBody, bool isGenerator,
-                           bool isGeneratorFromClosure) {
+                  ::insert(const FuncEmitter& fe,
+                           RepoTxn& txn, int64 unitSn, int funcSn,
+                           Id preClassId, const StringData* name,
+                           bool top) {
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Func")
-             << " VALUES(@unitSn, @funcSn, @preClassId, @funcId, @base,"
-                " @past, @line1, @line2, @name, @numLocals,"
-                " @numIterators, @maxStackCells, @attrs, @top, @docComment,"
-                " @isClosureBody, @isGenerator, @isGeneratorFromClosure);";
+             << " VALUES(@unitSn, @funcSn, @preClassId, @name, "
+                "        @top, @extraData);";
     txn.prepare(*this, ssInsert.str());
   }
+
+  BlobEncoder extraBlob;
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindInt("@funcSn", funcSn);
   query.bindId("@preClassId", preClassId);
-  query.bindId("@funcId", funcId);
-  query.bindOffset("@base", base);
-  query.bindOffset("@past", past);
-  query.bindInt("@line1", line1);
-  query.bindInt("@line2", line2);
   query.bindStaticString("@name", name);
-  query.bindId("@numLocals", numLocals);
-  query.bindId("@numIterators", numIterators);
-  query.bindInt("@maxStackCells", maxStackCells);
-  query.bindAttr("@attrs", attrs);
   query.bindBool("@top", top);
-  query.bindStaticString("@docComment", docComment);
-  query.bindBool("@isClosureBody", isClosureBody);
-  query.bindBool("@isGenerator", isGenerator);
-  query.bindBool("@isGeneratorFromClosure", isGeneratorFromClosure);
+  const_cast<FuncEmitter&>(fe).serdeMetaData(extraBlob);
+  query.bindBlob("@extraData", extraBlob, /* static */ true);
   query.exec();
 }
 
@@ -1029,9 +956,7 @@ void FuncRepoProxy::GetFuncsStmt
   RepoTxn txn(m_repo);
   if (!prepared()) {
     std::stringstream ssSelect;
-    ssSelect << "SELECT funcSn,preClassId,funcId,base,past,line1,"
-                "line2,name,numLocals,numIterators,maxStackCells,attrs,top,"
-                "docComment,isClosureBody,isGenerator,isGeneratorFromClosure "
+    ssSelect << "SELECT funcSn,preClassId,name,top,extraData "
                 "FROM "
              << m_repo.table(m_repoId, "Func")
              << " WHERE unitSn == @unitSn ORDER BY funcSn ASC;";
@@ -1044,26 +969,13 @@ void FuncRepoProxy::GetFuncsStmt
     if (query.row()) {
       int funcSn;               /**/ query.getInt(0, funcSn);
       Id preClassId;            /**/ query.getId(1, preClassId);
-      Id funcId;                /**/ query.getId(2, funcId);
-      Offset base;              /**/ query.getOffset(3, base);
-      Offset past;              /**/ query.getOffset(4, past);
-      int line1;                /**/ query.getInt(5, line1);
-      int line2;                /**/ query.getInt(6, line2);
-      StringData* name;         /**/ query.getStaticString(7, name);
-      Id numLocals;             /**/ query.getId(8, numLocals);
-      Id numIterators;          /**/ query.getId(9, numIterators);
-      int maxStackCells;        /**/ query.getInt(10, maxStackCells);
-      Attr attrs;               /**/ query.getAttr(11, attrs);
-      bool top;                 /**/ query.getBool(12, top);
-      StringData* docComment;   /**/ query.getStaticString(13, docComment);
-      bool isClosureBody;       /**/ query.getBool(14, isClosureBody);
-      bool isGenerator;         /**/ query.getBool(15, isGenerator);
-      bool isGeneratorFromClosure;
-                                /**/ query.getBool(16, isGeneratorFromClosure);
+      StringData* name;         /**/ query.getStaticString(2, name);
+      bool top;                 /**/ query.getBool(3, top);
+      BlobDecoder extraBlob =   /**/ query.getBlob(4);
+
       FuncEmitter* fe;
       if (preClassId < 0) {
         fe = ue.newFuncEmitter(name, top);
-        ASSERT(fe->id() == funcId);
       } else {
         PreClassEmitter* pce = ue.pce(preClassId);
         fe = ue.newMethodEmitter(name, pce);
@@ -1071,373 +983,10 @@ void FuncRepoProxy::GetFuncsStmt
         ASSERT(added);
       }
       ASSERT(fe->sn() == funcSn);
-      fe->init(line1, line2, base, attrs, top, docComment);
-      m_repo.frp().getFuncParams(m_repoId).get(*fe);
-      m_repo.frp().getFuncVars(m_repoId).get(*fe);
-      m_repo.frp().getFuncStaticVars(m_repoId).get(*fe);
-      m_repo.frp().getFuncEHs(m_repoId).get(*fe);
-      m_repo.frp().getFuncFPIs(m_repoId).get(*fe);
-      m_repo.frp().getFuncUserAttributes(m_repoId).get(*fe);
-      fe->setNumLocals(numLocals);
-      fe->setNumIterators(numIterators);
-      fe->setMaxStackCells(maxStackCells);
-      fe->setIsClosureBody(isClosureBody);
-      fe->setIsGenerator(isGenerator);
-      fe->setIsGeneratorFromClosure(isGeneratorFromClosure);
-      fe->finish(past, true);
+      fe->setTop(top);
+      fe->serdeMetaData(extraBlob);
+      fe->finish(fe->past(), true);
       ue.recordFunction(fe);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void FuncRepoProxy::InsertFuncParamStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, int funcSn,
-                           Id localId, const StringData* name,
-                           Offset funcletOff, const TypedValue& defaultValue,
-                           const StringData* phpCode, const TypeConstraint& tc,
-                           bool ref) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "FuncParam")
-             << " VALUES(@unitSn, @funcSn, @localId, @name, @funcletOff,"
-                " @defaultValue, @phpCode, @typeConstraint,"
-                " @typeConstraintNullable, @ref);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindId("@localId", localId);
-  query.bindStaticString("@name", name);
-  query.bindOffset("@funcletOff", funcletOff);
-  query.bindTypedValue("@defaultValue", defaultValue);
-  query.bindStaticString("@phpCode", phpCode);
-  query.bindStaticString("@typeConstraint", tc.typeName());
-  query.bindBool("@typeConstraintNullable", tc.nullable());
-  query.bindBool("@ref", ref);
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncParamsStmt
-                  ::get(FuncEmitter& fe) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT localId,name,funcletOff,defaultValue,phpCode,"
-                "typeConstraint,typeConstraintNullable,ref FROM "
-             << m_repo.table(m_repoId, "FuncParam")
-             << " WHERE unitSn == @unitSn AND funcSn == @funcSn"
-                " ORDER BY localId ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", fe.ue().sn());
-  query.bindInt("@funcSn", fe.sn());
-  do {
-    query.step();
-    if (query.row()) {
-      Id localId;                  /**/ query.getId(0, localId);
-      StringData* name;            /**/ query.getStaticString(1, name);
-      Offset funcletOff;           /**/ query.getOffset(2, funcletOff);
-      TypedValue defaultValue;     /**/ query.getTypedValue(3, defaultValue);
-      StringData* phpCode;         /**/ query.getStaticString(4, phpCode);
-      StringData* typeConstraint;  /**/ query.getStaticString(5,
-                                                              typeConstraint);
-      bool typeConstraintNullable; /**/ query.getBool(6,
-                                                      typeConstraintNullable);
-      bool ref;                    /**/ query.getBool(7, ref);
-      FuncEmitter::ParamInfo pi;
-      pi.setFuncletOff(funcletOff);
-      pi.setDefaultValue(defaultValue);
-      pi.setPhpCode(phpCode);
-      TypeConstraint tc(typeConstraint, typeConstraintNullable);
-      pi.setTypeConstraint(tc);
-      pi.setRef(ref);
-      fe.appendParam(name, pi);
-      ASSERT(fe.lookupVarId(name) == localId);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void FuncRepoProxy::InsertFuncVarStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, int funcSn,
-                           Id localId, const StringData* name) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "FuncVar")
-             << " VALUES(@unitSn, @funcSn, @localId, @name);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindId("@localId", localId);
-  query.bindStaticString("@name", name);
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncVarsStmt
-                  ::get(FuncEmitter& fe) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT localId,name FROM "
-             << m_repo.table(m_repoId, "FuncVar")
-             << " WHERE unitSn == @unitSn AND funcSn == @funcSn"
-                " ORDER BY localId ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", fe.ue().sn());
-  query.bindInt("@funcSn", fe.sn());
-  do {
-    query.step();
-    if (query.row()) {
-      Id localId;       /**/ query.getId(0, localId);
-      StringData* name; /**/ query.getStaticString(1, name);
-      fe.allocVarId(name);
-      ASSERT(fe.lookupVarId(name) == localId);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void FuncRepoProxy::InsertFuncStaticVarStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, int funcSn,
-                           int staticVarSn, const StringData* name,
-                           const StringData* phpCode) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "FuncStaticVar")
-             << " VALUES(@unitSn, @funcSn, @staticVarSn, @name, @phpCode);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindInt("@staticVarSn", staticVarSn);
-  query.bindStaticString("@name", name);
-  query.bindStaticString("@phpCode", phpCode);
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncStaticVarsStmt
-                  ::get(FuncEmitter& fe) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name,phpCode FROM "
-             << m_repo.table(m_repoId, "FuncStaticVar")
-             << " WHERE unitSn == @unitSn AND funcSn == @funcSn"
-                " ORDER BY staticVarsn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", fe.ue().sn());
-  query.bindInt("@funcSn", fe.sn());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name;        /**/ query.getStaticString(0, name);
-      StringData* phpCode;     /**/ query.getStaticString(1, phpCode);
-      Func::SVInfo svInfo;
-      svInfo.name = name;
-      svInfo.phpCode = phpCode;
-      fe.addStaticVar(svInfo);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void FuncRepoProxy::InsertFuncEHStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, int funcSn,
-                           int ehSn, int type, Offset base, Offset past,
-                           int iterId, int parentIndex, Offset fault) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "FuncEH")
-             << " VALUES(@unitSn, @funcSn, @ehSn, @type, @base, @past,"
-                " @iterId, @parentIndex, @fault);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindInt("@ehSn", ehSn);
-  query.bindInt("@type", type);
-  query.bindOffset("@base", base);
-  query.bindOffset("@past", past);
-  query.bindInt("@iterId", iterId);
-  query.bindInt("@parentIndex", parentIndex);
-  query.bindOffset("@fault", fault);
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncEHsStmt
-                  ::get(FuncEmitter& fe) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT ehSn,type,base,past,iterId,parentIndex,fault FROM "
-             << m_repo.table(m_repoId, "FuncEH")
-             << " WHERE unitSn == @unitSn AND funcSn == @funcSn"
-                " ORDER BY ehSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", fe.ue().sn());
-  query.bindInt("@funcSn", fe.sn());
-  do {
-    query.step();
-    if (query.row()) {
-      int ehSn;                  /**/ query.getInt(0, ehSn);
-      EHEnt& eh = fe.addEHEnt(); /**/ query.getInt(1, (int&)eh.m_ehtype);
-                                 /**/ query.getOffset(2, eh.m_base);
-                                 /**/ query.getOffset(3, eh.m_past);
-                                 /**/ query.getInt(4, eh.m_parentIndex);
-                                 /**/ query.getInt(5, eh.m_parentIndex);
-                                 /**/ query.getOffset(6, eh.m_fault);
-      m_repo.frp().getFuncEHCatches(m_repoId).get(fe, ehSn, eh);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void FuncRepoProxy::InsertFuncEHCatchStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, int funcSn,
-                           int ehSn, int ehCatchSn, Id nameId, Offset offset) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "FuncEHCatch")
-             << " VALUES(@unitSn, @funcSn, @ehSn, @ehCatchSn, @nameId,"
-                " @offset);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindInt("@ehSn", ehSn);
-  query.bindInt("@ehCatchSn", ehCatchSn);
-  query.bindId("@nameId", nameId);
-  query.bindOffset("@offset", offset);
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncEHCatchesStmt
-                  ::get(FuncEmitter& fe, int ehSn, EHEnt& eh) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT nameId,offset FROM "
-             << m_repo.table(m_repoId, "FuncEHCatch")
-             << " WHERE unitSn == @unitSn AND funcSn == @funcSn"
-                " AND ehSn == @ehSn ORDER BY ehCatchSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", fe.ue().sn());
-  query.bindInt("@funcSn", fe.sn());
-  query.bindInt("@ehSn", ehSn);
-  do {
-    query.step();
-    if (query.row()) {
-      Id nameId;     /**/ query.getId(0, nameId);
-      Offset offset; /**/ query.getOffset(1, offset);
-      eh.m_catches.push_back(std::pair<Id, Offset>(nameId, offset));
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void FuncRepoProxy::InsertFuncFPIStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, int funcSn, int fpiSn,
-                           Offset base, Offset past, Offset fpOff,
-                           int parentIndex, int fpiDepth) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "FuncFPI")
-             << " VALUES(@unitSn, @funcSn, @fpiSn, @base, @past, @fpOff,"
-                " @parentIndex, @fpiDepth);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindInt("@fpiSn", fpiSn);
-  query.bindOffset("@base", base);
-  query.bindOffset("@past", past);
-  query.bindOffset("@fpOff", fpOff);
-  query.bindInt("@parentIndex", parentIndex);
-  query.bindInt("@fpiDepth", fpiDepth);
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncFPIsStmt
-                  ::get(FuncEmitter& fe) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT base,past,fpOff,parentIndex,fpiDepth FROM "
-             << m_repo.table(m_repoId, "FuncFPI")
-             << " WHERE unitSn == @unitSn AND funcSn == @funcSn"
-                " ORDER BY fpiSn ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", fe.ue().sn());
-  query.bindInt("@funcSn", fe.sn());
-  do {
-    query.step();
-    if (query.row()) {
-      FPIEnt& fpi = fe.addFPIEnt(); /**/ query.getOffset(0, fpi.m_fpushOff);
-                                    /**/ query.getOffset(1, fpi.m_fcallOff);
-                                    /**/ query.getOffset(2, fpi.m_fpOff);
-                                    /**/ query.getInt(3, fpi.m_parentIndex);
-                                    /**/ query.getInt(4, fpi.m_fpiDepth);
-    }
-  } while (!query.done());
-  txn.commit();
-}
-
-void FuncRepoProxy::InsertFuncUserAttributeStmt
-                  ::insert(RepoTxn& txn, int64 unitSn, int funcSn,
-                           const StringData* name, const TypedValue& tv) {
-  if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "FuncUserAttribute")
-             << " VALUES(@unitSn, @funcSn, @name, @value);";
-    txn.prepare(*this, ssInsert.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", unitSn);
-  query.bindInt("@funcSn", funcSn);
-  query.bindStaticString("@name", name);
-  query.bindTypedValue("@value", tv);
-  query.exec();
-}
-
-void FuncRepoProxy::GetFuncUserAttributesStmt
-                  ::get(FuncEmitter& fe) {
-  RepoTxn txn(m_repo);
-  if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT name, value FROM "
-             << m_repo.table(m_repoId, "FuncUserAttribute")
-             << " WHERE unitSn == @unitSn AND funcSn == @funcSn"
-                " ORDER BY name ASC;";
-    txn.prepare(*this, ssSelect.str());
-  }
-  RepoTxnQuery query(txn, *this);
-  query.bindInt64("@unitSn", fe.ue().sn());
-  query.bindInt("@funcSn", fe.sn());
-  do {
-    query.step();
-    if (query.row()) {
-      StringData* name;           /**/ query.getStaticString(0, name);
-      TypedValue tv;              /**/ query.getTypedValue(1, tv);
-      fe.addUserAttribute(name, tv);
     }
   } while (!query.done());
   txn.commit();

@@ -45,7 +45,6 @@ string tname(DataType t) {
     CS(Uninit)
     CS(Null)
     CS(Boolean)
-    CS(Int32)
     CS(Int64)
     CS(Double)
     CS(StaticString)

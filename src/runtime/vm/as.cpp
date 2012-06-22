@@ -1,0 +1,1578 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
+/*
+ * This module contains an assembler implementation for HHBC.  It is
+ * probably fairly close to allowing you to access most of the
+ * metadata associated with hhvm's compiled unit format, although it's
+ * possible something has been overlooked.
+ *
+ * To use it, run hhvm with -v Eval.AllowHhas=true on a file with a
+ * ".hhas" extension.  The syntax is probably easiest to understand by
+ * looking at some examples (or the semi-BNF markup around some of the
+ * parse functions here).  For examples, see src/tests/vm/asm_*.
+ *
+ *
+ * Notes:
+ *
+ *    - You can crash hhvm very easily with this.
+ *
+ *      Using this module, you can emit pretty much any sort of not
+ *      trivially-illegal bytecode stream, and many trivially-illegal
+ *      ones as well.  You can also easily create Units with illegal
+ *      metadata.  Generally this will crash the VM.  In other cases
+ *      (especially if you don't bother to DefCls your classes in your
+ *      .main) you'll just get mysterious "class not defined" errors
+ *      or weird behavior.
+ *
+ *    - Whitespace is not normally significant, but newlines may not
+ *      be in the middle of a list of opcode arguments.  (After the
+ *      newline, the next thing seen is expected to be either a
+ *      mnemonic for the next opcode in the stream or some sort of
+ *      directive.)  However, newlines (and comments) may appear
+ *      *inside* certain opcode arguments (e.g. string literals or
+ *      vector immediates).
+ *
+ *      Rationale: this is partially intended to make it trivial to
+ *      catch wrong-number-of-arguments errors, although it probably
+ *      could be done without this if you feel like changing it.
+ *
+ *
+ * Caveats:
+ *
+ *   - There's currently no support for inserting the Units this
+ *     module makes into the Repo.
+ *
+ *   - It might be nice if you could refer to iterators by name
+ *     instead of by index.
+ *
+ *   - DefCls by name would be nice.
+ *
+ *   - Line number information can't be propagated to the various Unit
+ *     structures.  (It might make sense to do this via something like
+ *     a .line directive at some point.)
+ *
+ *   - SetOpOp and IncDecOp op names are not implemented.
+ *
+ *   - You can't currently create non-top functions or non-hoistable
+ *     classes.
+ *
+ *   - Missing support for static variables in a function/method.
+ *
+ * @author Jorden DeLong <delong.j@fb.com>
+ */
+
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <iterator>
+#include <vector>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/bind.hpp>
+
+#include <runtime/vm/unit.h>
+#include <runtime/vm/hhbc.h>
+#include <runtime/base/builtin_functions.h>
+#include <compiler/analysis/emitter.h>
+
+namespace HPHP { namespace VM {
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+struct AsmState;
+typedef void (*ParserFunc)(AsmState& as);
+
+struct Error : std::runtime_error {
+  explicit Error(int where, const std::string& what)
+    : std::runtime_error(str(
+        boost::format("Assembler Error: line %1%: %2%") % where % what))
+  {}
+};
+
+struct Input {
+  explicit Input(std::istream& in)
+    : m_in(in)
+    , m_lineNumber(1)
+  {}
+
+  int peek() { return m_in.peek(); }
+
+  int getc() {
+    int ret = m_in.get();
+    if (ret == EOF) {
+      io_error_if_bad();
+    } else if (ret == '\n') {
+      ++m_lineNumber;
+    }
+    return ret;
+  }
+
+  void ungetc(char c) {
+    if (c == '\n') --m_lineNumber;
+    m_in.putback(c);
+  }
+
+  void expect(int c) {
+    if (getc() != c) {
+      error(str(boost::format("expected character `%1%'") % char(c)));
+    }
+  }
+
+  /*
+   * Expect `c' after possible whitespace/comments.  When convenient,
+   * preferable to doing skipWhitespace/expect manually to keep the
+   * line number in the error prior to the whitespace skipped.
+   */
+  void expectWs(int c) {
+    const int currentLine = m_lineNumber;
+    skipWhitespace();
+    if (getc() != c) {
+      throw Error(currentLine,
+        str(boost::format("expected character `%1%'") % char(c)));
+    }
+  }
+
+  int getLineNumber() const {
+    return m_lineNumber;
+  }
+
+  // Skips whitespace, then populates word with valid bareword
+  // characters.  Returns true if we read any characters into word.
+  bool readword(std::string& word) {
+    word.clear();
+    skipWhitespace();
+    consumePred(is_bareword(), std::back_inserter(word));
+    return !word.empty();
+  }
+
+  // Try to consume a bareword.  Skips whitespace.  If we can't
+  // consume the specified word, returns false.
+  bool tryConsume(const std::string& what) {
+    std::string word;
+    if (!readword(word)) {
+      return false;
+    }
+    if (word != what) {
+      std::for_each(word.rbegin(), word.rend(),
+                    boost::bind(&Input::ungetc, this, _1));
+      return false;
+    }
+    return true;
+  }
+
+  // Mostly C-style character escapes, but not quite everything is
+  // implemented.
+  template<class OutCont>
+  void escapeChar(int src, OutCont& out) {
+    switch (src) {
+    case EOF:  error("EOF in string literal");
+    case 't':  out.push_back('\t'); break;
+    case 'n':  out.push_back('\n'); break;
+    case 'v':  out.push_back('\v'); break;
+    case '\\': out.push_back('\\'); break;
+    case '\"': out.push_back('\"'); break;
+    case '\n': /* ignore */         break;
+    default:
+      // If you hit this and want octal or hex escapes or something,
+      // please implement.
+      error("unrecognized character escape");
+    }
+  }
+
+  // Reads a quoted string with typical escaping rules.  Does not skip
+  // any whitespace.  Returns true if we successfully read one, or
+  // false.  EOF during the string throws.
+  bool readQuotedStr(std::string& str) {
+    str.clear();
+    if (peek() != '\"') {
+      return false;
+    }
+    getc();
+
+    int c;
+    while ((c = getc()) != EOF) {
+      switch (c) {
+      case '\"': return true;
+      case '\\': escapeChar(getc(), str); break;
+      default:   str.push_back(c);        break;
+      }
+    }
+    error("EOF in string literal");
+    NOT_REACHED();
+    return false;
+  }
+
+  /*
+   * Reads a python-style longstring, or returns false if we don't
+   * have one.  Does not skip any whitespace before looking for the
+   * string.
+   *
+   * Python longstrings start with \"\"\", and can contain any bytes
+   * other than \"\"\".  A '\\' character introduces C-style escapes,
+   * but there's no need to escape single quote characters.
+   */
+  bool readLongString(std::vector<char>& buffer) {
+    if (peek() != '\"') return false;
+    getc();
+    if (peek() != '\"') { ungetc('\"'); return false; }
+    getc();
+    if (peek() != '\"') { ungetc('\"');
+                          ungetc('\"'); return false; }
+    getc();
+
+    int c;
+    while ((c = getc()) != EOF) {
+      if (c == '\\') {
+        escapeChar(getc(), buffer);
+        continue;
+      }
+      if (c == '"') {
+        c = getc();
+        if (c != '"') {
+          buffer.push_back('"');
+          ungetc(c);
+          continue;
+        }
+        c = getc();
+        if (c != '"') {
+          buffer.push_back('"');
+          buffer.push_back('"');
+          ungetc(c);
+          continue;
+        }
+        return true;
+      }
+
+      buffer.push_back(c);
+    }
+    error("EOF in \"\"\"-string literal");
+    NOT_REACHED();
+    return false;
+  }
+
+  // Skips whitespace (including newlines and comments).
+  void skipWhitespace() {
+    for (;;) {
+      skipPred(boost::is_any_of(" \t\n"));
+      if (peek() == '#') {
+        skipPred(!boost::is_any_of("\n"));
+        expect('\n');
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Skip spaces and tabs, but other whitespace (such as comments or
+  // newlines) stop the skip.
+  void skipSpaceTab() {
+    skipPred(boost::is_any_of(" \t"));
+  }
+
+  template<class Predicate>
+  void skipPred(Predicate pred) {
+    int c;
+    while (pred(c = peek())) { getc(); }
+  }
+
+  template<class Predicate, class OutputIterator>
+  void consumePred(Predicate pred, OutputIterator out) {
+    int c;
+    while (pred(c = peek())) { *out++ = getc(); }
+  }
+
+private:
+  struct is_bareword {
+    bool operator()(int i) const {
+      return isalnum(i) || i == '_' || i == '.';
+    }
+  };
+
+  void error(const std::string& what) {
+    throw Error(getLineNumber(), what);
+  }
+
+  void io_error_if_bad() {
+    if (m_in.bad()) {
+      error("I/O error reading stream: " +
+        std::string(strerror(errno)));
+    }
+  }
+
+private:
+  std::istream& m_in;
+  int m_lineNumber;
+};
+
+struct FPIReg {
+  Offset fpushOff;
+  int fpOff;
+};
+
+struct Label {
+  Label() : bound(false) {}
+
+  bool bound;
+  Offset target;
+
+  /*
+   * Each label source source has an Offset where the jmp should be
+   * patched up is, and an Offset from which the jump delta should be
+   * computed.  (The second Offset is basically to the actual
+   * jump/switch/etc instruction, while the first points to the
+   * immediate.)
+   */
+  typedef std::vector<std::pair<Offset,Offset> > SourcesVec;
+  SourcesVec sources;
+
+  /*
+   * List of a parameter ids that use this label for its DV
+   * initializer.
+   */
+  std::vector<Id> dvInits;
+
+  /*
+   * List of EHEnt's that should have m_fault bound to the Offset of
+   * this label.
+   */
+  std::vector<size_t> ehFaults;
+
+  /*
+   * Map from exception names to the list of EHEnt's that have a catch
+   * block jumping to this label for that name.
+   */
+  typedef std::map<std::string,std::vector<size_t> > CatchesMap;
+  CatchesMap ehCatches;
+};
+
+struct AsmState : private boost::noncopyable {
+  explicit AsmState(std::istream& in)
+    : in(in)
+    , emittedPseudoMain(false)
+    , fe(0)
+    , numItersSet(false)
+    , stackDepth(0)
+    , stackHighWater(0)
+    , fdescDepth(0)
+    , fdescHighWater(0)
+  {}
+
+  void error(const std::string& what) {
+    throw Error(in.getLineNumber(), what);
+  }
+
+  void adjustStack(int delta) {
+    stackDepth += delta;
+    if (stackDepth < 0) {
+      error("opcode sequence caused stack depth to go negative");
+    }
+    stackHighWater = std::max(stackHighWater, stackDepth);
+  }
+
+  void addLabelTarget(const std::string& name) {
+    Label& label = labelMap[name];
+    if (label.bound) {
+      error("Duplicate label " + name);
+    }
+    label.bound = true;
+    label.target = ue->bcPos();
+  }
+
+  void addLabelJump(const std::string& name, Offset opcodeOff) {
+    labelMap[name].sources.push_back(
+      std::make_pair(ue->bcPos(), opcodeOff));
+  }
+
+  void addLabelDVInit(const std::string& name, int paramId) {
+    labelMap[name].dvInits.push_back(paramId);
+  }
+
+  void addLabelEHFault(const std::string& name, size_t ehIdx) {
+    labelMap[name].ehFaults.push_back(ehIdx);
+  }
+
+  void addLabelEHCatch(const std::string& what,
+                       const std::string& label,
+                       size_t ehIdx) {
+    labelMap[label].ehCatches[what].push_back(ehIdx);
+  }
+
+  void beginFpi() {
+    fpiRegs.push_back(FPIReg());
+    FPIReg& fpi = fpiRegs.back();
+    fpi.fpushOff = ue->bcPos();
+    fpi.fpOff = stackDepth;
+    fdescDepth += kNumActRecCells;
+    fdescHighWater = std::max(fdescDepth, fdescHighWater);
+  }
+
+  void endFpi() {
+    ASSERT(!fpiRegs.empty());
+
+    FPIEnt& ent = fe->addFPIEnt();
+    FPIReg& reg = fpiRegs.back();
+    ent.m_fpushOff = reg.fpushOff;
+    ent.m_fcallOff = ue->bcPos();
+    ent.m_fpOff = reg.fpOff;
+    fpiRegs.pop_back();
+    fdescDepth -= kNumActRecCells;
+  }
+
+  void finishClass() {
+    ASSERT(!fe);
+    pce = 0;
+  }
+
+  void patchLabelOffsets(const Label& label) {
+    for (Label::SourcesVec::const_iterator it = label.sources.begin();
+        it != label.sources.end();
+        ++it) {
+      ue->emitInt32(label.target - it->second, it->first);
+    }
+
+    for (std::vector<Id>::const_iterator it = label.dvInits.begin();
+        it != label.dvInits.end();
+        ++it) {
+      fe->setParamFuncletOff(*it, label.target);
+    }
+
+    for (std::vector<size_t>::const_iterator it = label.ehFaults.begin();
+        it != label.ehFaults.end();
+        ++it) {
+      fe->ehtab()[*it].m_fault = label.target;
+    }
+
+    for (Label::CatchesMap::const_iterator it = label.ehCatches.begin();
+        it != label.ehCatches.end();
+        ++it) {
+      Id exId = ue->mergeLitstr(StringData::GetStaticString(it->first));
+      for (std::vector<size_t>::const_iterator idx_it = it->second.begin();
+          idx_it != it->second.end();
+          ++idx_it) {
+        fe->ehtab()[*idx_it].m_catches.push_back(
+          std::make_pair(exId, label.target));
+      }
+    }
+  }
+
+  void finishFunction() {
+    for (LabelMap::const_iterator it = labelMap.begin();
+        it != labelMap.end();
+        ++it) {
+      if (!it->second.bound) {
+        error("Undefined label " + it->first);
+      }
+      if (it->second.target >= ue->bcPos()) {
+        error("label " + it->first + " falls of the end of the function");
+      }
+
+      patchLabelOffsets(it->second);
+    }
+
+    if (stackDepth != 0) {
+      error("end of function body has nonzero stack depth");
+    }
+
+    fe->setMaxStackCells(stackHighWater + kNumActRecCells + fdescHighWater);
+    fe->finish(ue->bcPos(), false);
+    ue->recordFunction(fe);
+
+    fe = 0;
+    fpiRegs.clear();
+    labelMap.clear();
+    numItersSet = false;
+    stackDepth = 0;
+    stackHighWater = 0;
+    fdescDepth = 0;
+    fdescHighWater = 0;
+  }
+
+  int getLocalId(const std::string& name) {
+    if (name[0] != '$') {
+      error("local variables must be prefixed with $");
+    }
+
+    const StringData* sd = StringData::GetStaticString(name.c_str() + 1);
+    fe->allocVarId(sd);
+    return fe->lookupVarId(sd);
+  }
+
+  int getIterId(int32_t id) {
+    if (id >= fe->numIterators()) {
+      error("iterator id exceeded number of iterators in the function");
+    }
+    return id;
+  }
+
+  UnitEmitter* ue;
+  Input in;
+  bool emittedPseudoMain;
+
+  typedef std::map<std::string,ArrayData*> ADataMap;
+  ADataMap adataMap;
+
+  // When inside a class, this state is active.
+  PreClassEmitter* pce;
+
+  // When we're doing a function or method body, this state is active.
+  FuncEmitter* fe;
+  std::vector<FPIReg> fpiRegs;
+  typedef std::map<std::string,Label> LabelMap;
+  std::map<std::string,Label> labelMap;
+  bool numItersSet;
+  int stackDepth;
+  int stackHighWater;
+  int fdescDepth;
+  int fdescHighWater;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Opcode arguments must be on the same line as the opcode itself,
+ * although certain argument types may contain internal newlines (see,
+ * for example, read_immvector, read_jmpvector, or string literals).
+ */
+template<class Target> Target read_opcode_arg(AsmState& as) {
+  as.in.skipSpaceTab();
+  std::string strVal;
+  as.in.consumePred(!boost::is_any_of(" \t\n#;"),
+                    std::back_inserter(strVal));
+  if (strVal.empty()) {
+    as.error("expected opcode or directive argument");
+  }
+  try {
+    return boost::lexical_cast<Target>(strVal);
+  } catch (boost::bad_lexical_cast&) {
+    as.error("couldn't convert input argument (" + strVal + ") to "
+             "proper type");
+    NOT_REACHED();
+  }
+}
+
+const StringData* read_litstr(AsmState& as) {
+  as.in.skipSpaceTab();
+  std::string strVal;
+  if (!as.in.readQuotedStr(strVal)) {
+    as.error("expected quoted string literal");
+  }
+  return StringData::GetStaticString(strVal);
+}
+
+ArrayData* read_litarray(AsmState& as) {
+  as.in.skipSpaceTab();
+  if (as.in.getc() != '@') {
+    as.error("expecting an `@foo' array literal reference");
+  }
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error("expected name of .adata literal");
+  }
+
+  AsmState::ADataMap::const_iterator it = as.adataMap.find(name);
+  if (it == as.adataMap.end()) {
+    as.error("unknown array data literal name " + name);
+  }
+  return it->second;
+}
+
+// Currently only supporting immediates that are local variable
+// names (will need to support string literals probably eventually).
+void read_immvector_immediate(AsmState& as, std::vector<uchar>& ret) {
+  if (as.in.getc() != '$') {
+    as.error("only local-variable immediates supported in "
+             "vector immediates");
+  }
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error("couldn't read name for local variable in vector immediate");
+  }
+  encodeIvaToVector(ret, as.getLocalId("$" + name));
+}
+
+std::vector<uchar> read_immvector(AsmState& as, int& stackCount) {
+  std::vector<uchar> ret;
+
+  as.in.skipSpaceTab();
+  as.in.expect('<');
+
+  std::string word;
+  if (!as.in.readword(word)) {
+    as.error("expected location code in immediate vector");
+  }
+
+  LocationCode lcode = parseLocationCode(word.c_str());
+  if (lcode == InvalidLocationCode) {
+    as.error("expected location code, saw `" + word + "'");
+  }
+  ret.push_back(uint8_t(lcode));
+  if (word[word.size() - 1] == 'L') {
+    if (as.in.getc() != ':') {
+      as.error("expected `:' after location code `" + word + "'");
+    }
+  }
+  for (int i = 0; i < numLocationCodeImms(lcode); ++i) {
+    read_immvector_immediate(as, ret);
+  }
+  stackCount = numLocationCodeStackVals(lcode);
+
+  // Read all the member entries.
+  for (;;) {
+    as.in.skipWhitespace();
+    if (as.in.peek() == '>') { as.in.getc(); break; }
+
+    if (!as.in.readword(word)) {
+      as.error("expected member code in immediate vector");
+    }
+    MemberCode mcode = parseMemberCode(word.c_str());\
+    if (mcode == InvalidMemberCode) {
+      as.error("unrecognized member code `" + word + "'");
+    }
+    ret.push_back(uint8_t(mcode));
+    if (word[word.size() - 1] == 'L') {
+      if (as.in.getc() != ':') {
+        as.error("expected `:' after member code `" + word + "'");
+      }
+    }
+
+    if (memberCodeHasImm(mcode)) {
+      read_immvector_immediate(as, ret);
+    } else if (mcode != MW) {
+      ++stackCount;
+    }
+  }
+
+  return ret;
+}
+
+// Jump tables are lists of labels.
+std::vector<std::string> read_jmpvector(AsmState& as) {
+  std::vector<std::string> ret;
+
+  as.in.skipSpaceTab();
+  as.in.expect('<');
+
+  std::string word;
+  while (as.in.readword(word)) {
+    ret.push_back(word);
+  }
+  as.in.expectWs('>');
+
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+typedef std::map<std::string,ParserFunc> OpcodeParserMap;
+OpcodeParserMap opcode_parsers;
+
+#define IMM_NA
+#define IMM_ONE(t) IMM_##t
+#define IMM_TWO(t1, t2) IMM_##t1; IMM_##t2
+#define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
+
+// We need the first argument to FCall to do POP_FMANY.
+#define IMM_IVA                                   \
+  if (thisOpcode == OpFCall) {                    \
+    fcallIVA = read_opcode_arg<int64_t>(as);      \
+    as.ue->emitIVA(fcallIVA);                     \
+  } else {                                        \
+    as.ue->emitIVA(read_opcode_arg<int64_t>(as)); \
+  }
+
+#define IMM_SA   as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
+#define IMM_I64A as.ue->emitInt64(read_opcode_arg<int64_t>(as))
+#define IMM_DA   as.ue->emitDouble(read_opcode_arg<double>(as))
+#define IMM_HA   as.ue->emitIVA(as.getLocalId(  \
+                   read_opcode_arg<std::string>(as)))
+#define IMM_IA   as.ue->emitIVA(as.getIterId( \
+                   read_opcode_arg<int32_t>(as)))
+#define IMM_OA   as.ue->emitByte(               \
+                   uint8_t(read_opcode_arg<int32_t>(as))) // TODO op names
+#define IMM_AA   as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
+
+/*
+ * There can currently be no more than one immvector per instruction,
+ * and we need access to the size of the immediate vector for
+ * NUM_POP_*, so the member vector guy exposes a vecImmStackValues
+ * integer.
+ */
+#define IMM_MA                                                        \
+  int vecImmStackValues = 0;                                          \
+  std::vector<uchar> vecImm = read_immvector(as, vecImmStackValues);  \
+  as.ue->emitInt32(vecImm.size());                                    \
+  as.ue->emitInt32(vecImmStackValues);                                \
+  for (size_t i = 0; i < vecImm.size(); ++i) {                        \
+    as.ue->emitByte(vecImm[i]);                                       \
+  }
+
+#define IMM_ILA do {                                    \
+  std::vector<std::string> vecImm = read_jmpvector(as); \
+  as.ue->emitInt32(vecImm.size());                      \
+  for (size_t i = 0; i < vecImm.size(); ++i) {          \
+    as.addLabelJump(vecImm[i], curOpcodeOff);           \
+    as.ue->emitInt32(0); /* to be patched */            \
+  }                                                     \
+} while (0)
+
+#define IMM_BA do {                                                 \
+  as.addLabelJump(read_opcode_arg<std::string>(as), curOpcodeOff);  \
+  as.ue->emitInt32(0);                                              \
+} while (0)
+
+#define NUM_PUSH_NOV 0
+#define NUM_PUSH_ONE(a) 1
+#define NUM_PUSH_TWO(a,b) 2
+#define NUM_PUSH_THREE(a,b,c) 3
+#define NUM_PUSH_INS_1(a) 1
+#define NUM_PUSH_INS_2(a) 1
+#define NUM_POP_NOV 0
+#define NUM_POP_ONE(a) 1
+#define NUM_POP_TWO(a,b) 2
+#define NUM_POP_THREE(a,b,c) 3
+#define NUM_POP_LMANY() vecImmStackValues
+#define NUM_POP_V_LMANY() (1 + vecImmStackValues)
+#define NUM_POP_C_LMANY() (1 + vecImmStackValues)
+#define NUM_POP_FMANY fcallIVA /* number of arguments */
+
+#define O(name, imm, pop, push, flags)                            \
+  void parse_opcode_##name(AsmState& as) {                        \
+    UNUSED int64_t fcallIVA = -1;                                 \
+    UNUSED const Opcode thisOpcode = Op##name;                    \
+    UNUSED const Offset curOpcodeOff = as.ue->bcPos();            \
+                                                                  \
+    if (isFPush(Op##name)) {                                      \
+      as.beginFpi();                                              \
+    } else if (Op##name == OpFCall) {                             \
+      as.endFpi();                                                \
+    }                                                             \
+    as.ue->emitOp(Op##name);                                      \
+    IMM_##imm;                                                    \
+    if (instrFlags(thisOpcode) & TF) {                            \
+      as.adjustStack(-as.stackDepth);                             \
+    } else {                                                      \
+      int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;           \
+      as.adjustStack(stackDelta);                                 \
+    }                                                             \
+    if (thisOpcode == OpRetC || thisOpcode == OpRetV) {           \
+      if (as.stackDepth != 0) {                                   \
+        /* Note: probably we'll want to remove this check
+           to allow writing tests that the verifier catches
+           these errors.  Until this is hooked up to that, though,
+          it's too easy to mess up without this check. */         \
+        as.error("stack depth must be exactly 1 before a "        \
+                 "RetC or RetV instruction");                     \
+      }                                                           \
+    }                                                             \
+  }
+
+OPCODES
+
+#undef O
+
+#undef IMM_I64A
+#undef IMM_SA
+#undef IMM_DA
+#undef IMM_IVA
+#undef IMM_HA
+#undef IMM_BA
+#undef IMM_ILA
+#undef IMM_OA
+#undef IMM_MA
+#undef IMM_AA
+
+#undef NUM_PUSH_NOV
+#undef NUM_PUSH_ONE
+#undef NUM_PUSH_TWO
+#undef NUM_PUSH_THREE
+#undef NUM_PUSH_POS_N
+#undef NUM_PUSH_INS_1
+#undef NUM_POP_NOV
+#undef NUM_POP_ONE
+#undef NUM_POP_TWO
+#undef NUM_POP_THREE
+#undef NUM_POP_POS_N
+#undef NUM_POP_LMANY
+#undef NUM_POP_V_LMANY
+#undef NUM_POP_C_LMANY
+#undef NUM_POP_FMANY
+
+void initialize_opcode_map() {
+#define O(name, imm, pop, push, flags) \
+  opcode_parsers[#name] = parse_opcode_##name;
+OPCODES
+#undef O
+}
+
+struct Initializer {
+  Initializer() { initialize_opcode_map(); }
+} initializer;
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * php-serialized : long-string-literal
+ *                ;
+ *
+ * `long-string-literal' is a python-style longstring.  See
+ * readLongString for more details.
+ *
+ * Returns a Variant representing the serialized data.  It's up to the
+ * caller to make sure it is a legal literal.
+ */
+Variant parse_php_serialized(AsmState& as) {
+  as.in.skipWhitespace();
+
+  std::vector<char> buffer;
+  if (!as.in.readLongString(buffer)) {
+    as.error("expected \"\"\"-string of serialized php data");
+  }
+  if (buffer.empty()) {
+    as.error("empty php serialized data is not a valid php object");
+  }
+
+  // String wants a null, and dereferences one past the size we give
+  // it.
+  buffer.push_back('\0');
+  String data(&buffer[0], buffer.size() - 1, AttachLiteral);
+  return f_unserialize(data);
+}
+
+/*
+ * directive-numiters : integer ';'
+ *                    ;
+ */
+void parse_numiters(AsmState& as) {
+  if (as.numItersSet) {
+    as.error("only one .numiters directive may appear in a given function");
+  }
+  int32_t count = read_opcode_arg<int32_t>(as);
+  as.numItersSet = true;
+  as.fe->setNumIterators(count);
+  as.in.expectWs(';');
+}
+
+void parse_function_body(AsmState&, int nestLevel = 0);
+
+/*
+ * directive-fault : identifier '{' function-body
+ *                 ;
+ */
+void parse_fault(AsmState& as, int nestLevel) {
+  const Offset start = as.ue->bcPos();
+
+  std::string label;
+  if (!as.in.readword(label)) {
+    as.error("expected label name after .try_fault");
+  }
+  as.in.expectWs('{');
+  parse_function_body(as, nestLevel + 1);
+
+  EHEnt& eh = as.fe->addEHEnt();
+  eh.m_ehtype = EHEnt::EHType_Fault;
+  eh.m_base = start;
+  eh.m_past = as.ue->bcPos();
+  eh.m_iterId = -1; // only used for debug printing
+
+  as.addLabelEHFault(label, as.fe->ehtab().size() - 1);
+}
+
+/*
+ * directive-catch : catch-spec+ '{' function-body
+ *                 ;
+ *
+ * catch-spec : '(' identifier identifier ')'
+ *            ;
+ */
+void parse_catch(AsmState& as, int nestLevel) {
+  const Offset start = as.ue->bcPos();
+
+  std::vector<std::pair<std::string,std::string> > catches;
+  size_t numCatches = 0;
+  as.in.skipWhitespace();
+  for (; as.in.peek() == '('; ++numCatches) {
+    as.in.getc();
+
+    std::string except, label;
+    if (!as.in.readword(except) || !as.in.readword(label)) {
+      as.error("expected (ExceptionType label) after .try_catch");
+    }
+
+    as.in.expectWs(')');
+
+    catches.push_back(std::make_pair(except, label));
+    as.in.skipWhitespace();
+  }
+  if (catches.empty()) {
+    as.error("expected at least one (ExceptionType label) pair "
+             "after .try_catch");
+  }
+
+  as.in.expect('{');
+  parse_function_body(as, nestLevel + 1);
+
+  EHEnt& eh = as.fe->addEHEnt();
+  eh.m_ehtype = EHEnt::EHType_Catch;
+  eh.m_base = start;
+  eh.m_past = as.ue->bcPos();
+  eh.m_iterId = -1;
+
+  for (size_t i = 0; i < catches.size(); ++i) {
+    as.addLabelEHCatch(catches[i].first,
+                       catches[i].second,
+                       as.fe->ehtab().size() - 1);
+  }
+}
+
+/*
+ * function-body :  fbody-line* '}'
+ *               ;
+ *
+ * fbody-line :  ".numiters" directive-numiters
+ *            |  ".try_fault" directive-fault
+ *            |  ".try_catch" directive-catch
+ *            |  label-name
+ *            |  opcode-line
+ *            ;
+ *
+ * label-name : identifier ':'
+ *            ;
+ *
+ * opcode-line : opcode-mnemonic <junk that depends on opcode> '\n'
+ *             ;
+ */
+void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
+  std::string word;
+  for (;;) {
+    as.in.skipWhitespace();
+    if (as.in.peek() == '}') {
+      as.in.getc();
+      if (!nestLevel) {
+        as.finishFunction();
+      }
+      return;
+    }
+
+    if (!as.in.readword(word)) {
+      as.error("unexpected directive or opcode line in function body");
+    }
+    if (word[0] == '.') {
+      if (word == ".numiters")  { parse_numiters(as); continue; }
+      if (word == ".try_fault") { parse_fault(as, nestLevel); continue; }
+      if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
+      as.error("unrecognized directive `" + word + "' in function");
+    }
+    if (as.in.peek() == ':') {
+      as.in.getc();
+      as.addLabelTarget(word);
+      continue;
+    }
+
+    // Ok, it better be an opcode now.
+    OpcodeParserMap::const_iterator it = opcode_parsers.find(word);
+    if (it == opcode_parsers.end()) {
+      as.error("unrecognized opcode `" + word + "'");
+    }
+    it->second(as);
+
+    as.in.skipSpaceTab();
+    if (as.in.peek() != '\n' && as.in.peek() != '#' && as.in.peek() != EOF) {
+      as.error("too many arguments for opcode `" + word + "'");
+    }
+  }
+}
+
+/*
+ * attribute-list : empty
+ *                | '[' attribute-name* ']'
+ *                ;
+ *
+ * The `attribute-name' rule is context-sensitive; just look at the
+ * code below.
+ */
+enum AttrContext {
+  ClassAttributes,
+  FuncAttributes,
+  PropAttributes,
+  TraitImportAttributes
+};
+Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
+  as.in.skipWhitespace();
+  if (as.in.peek() != '[') return AttrNone;
+  as.in.getc();
+
+  int ret = AttrNone;
+  std::string word;
+  for (;;) {
+    as.in.skipWhitespace();
+    if (as.in.peek() == ']') break;
+    if (!as.in.readword(word)) break;
+
+    if (ctx == FuncAttributes || ctx == PropAttributes ||
+        ctx == TraitImportAttributes) {
+      if (word == "public")    { ret |= AttrPublic;    continue; }
+      if (word == "protected") { ret |= AttrProtected; continue; }
+      if (word == "private")   { ret |= AttrPrivate;   continue; }
+    }
+    if (ctx == FuncAttributes || ctx == PropAttributes) {
+      if (word == "static")    { ret |= AttrStatic;    continue; }
+    }
+    if (ctx == ClassAttributes) {
+      if (word == "interface") { ret |= AttrInterface; continue; }
+      if (word == "no_expand_trait")
+                               { ret |= AttrNoExpandTrait; continue; }
+    }
+    if (ctx == ClassAttributes || ctx == FuncAttributes ||
+        ctx == TraitImportAttributes) {
+      if (word == "abstract")  { ret |= AttrAbstract;  continue; }
+      if (word == "final")     { ret |= AttrFinal;     continue; }
+      if (word == "no_override") { ret |= AttrNoOverride; continue; }
+    }
+    if (ctx == ClassAttributes || ctx == FuncAttributes) {
+      if (word == "trait")     { ret |= AttrTrait;     continue; }
+      if (word == "unique")    { ret |= AttrUnique;    continue; }
+    }
+
+    as.error("unrecognized attribute `" + word + "' in this context");
+  }
+  as.in.expect(']');
+  return Attr(ret);
+}
+
+/*
+ * parameter-list : '(' param-name-list ')'
+ *                ;
+ *
+ * param-name-list : empty
+ *                 | param-name ',' param-name-list
+ *                 ;
+ *
+ * param-name : '$' identifier dv-initializer
+ *            | '&' '$' identifier dv-initializer
+ *            ;
+ *
+ * dv-initializer : empty
+ *                | '=' identifier
+ *                ;
+ */
+void parse_parameter_list(AsmState& as) {
+  as.in.skipWhitespace();
+  if (as.in.peek() != '(') return;
+  as.in.getc();
+
+  // Once we see one dv-initializer, every parameter after that must
+  // have a dv-initializer.
+  bool inDVInits = false;
+
+  for (;;) {
+    FuncEmitter::ParamInfo param;
+
+    as.in.skipWhitespace();
+    int ch = as.in.getc();
+    if (ch == ')') break; // allow empty param lists
+    if (ch == '&') { param.setRef(true); ch = as.in.getc(); }
+    if (ch != '$') {
+      as.error("function parameters must have a $ prefix");
+    }
+    std::string name;
+    if (!as.in.readword(name)) {
+      as.error("expected parameter name after $");
+    }
+
+    as.fe->appendParam(StringData::GetStaticString(name), param);
+
+    as.in.skipWhitespace();
+    ch = as.in.getc();
+    if (ch == '=') {
+      inDVInits = true;
+
+      std::string label;
+      if (!as.in.readword(label)) {
+        as.error("expected label name for dv-initializer");
+      }
+      as.addLabelDVInit(label, as.fe->numParams() - 1);
+
+      ch = as.in.getc();
+    } else {
+      if (inDVInits) {
+        as.error("all parameters after the first with a dv-initializer "
+                 "must have a dv-initializer");
+      }
+    }
+
+    if (ch == ')') break;
+    if (ch != ',') as.error("expected , between parameter names");
+  }
+}
+
+/*
+ * directive-function : attribute-list identifier parameter-list
+ *                        '{' function-body
+ *                    ;
+ */
+void parse_function(AsmState& as) {
+  if (!as.emittedPseudoMain) {
+    as.error(".function blocks must all follow the .main block");
+  }
+
+  Attr attrs = parse_attribute_list(as, FuncAttributes);
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error(".function must have a name");
+  }
+
+  as.fe = as.ue->newFuncEmitter(StringData::GetStaticString(name), true);
+  as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
+              as.ue->bcPos(), attrs, true, 0);
+
+  parse_parameter_list(as);
+  as.in.expectWs('{');
+
+  parse_function_body(as);
+}
+
+/*
+ * directive-method : attribute-list identifier parameter-list
+ *                      '{' function-body
+ *                  ;
+ */
+void parse_method(AsmState& as) {
+  as.in.skipWhitespace();
+
+  Attr attrs = parse_attribute_list(as, FuncAttributes);
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error(".method requires a method name");
+  }
+
+  as.fe = as.ue->newMethodEmitter(StringData::GetStaticString(name), as.pce);
+  as.pce->addMethod(as.fe);
+  as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
+              as.ue->bcPos(), attrs, true, 0);
+
+  parse_parameter_list(as);
+  as.in.expectWs('{');
+
+  parse_function_body(as);
+}
+
+/*
+ * member-tv-initializer  :  '=' php-serialized ';'
+ *                        |  '=' uninit ';'
+ *                        |  ';'
+ *                        ;
+ */
+TypedValue parse_member_tv_initializer(AsmState& as) {
+  as.in.skipWhitespace();
+
+  TypedValue tvInit;
+  TV_WRITE_NULL(&tvInit); // Don't confuse Variant with uninit data
+
+  int what = as.in.getc();
+  if (what == '=') {
+    as.in.skipWhitespace();
+
+    if (as.in.peek() != '\"') {
+      // It might be an uninitialized property/constant.
+      if (!as.in.tryConsume("uninit")) {
+        as.error("Expected \"\"\" or \"uninit\" after '=' in "
+                 "const/property initializer");
+      }
+      as.in.expectWs(';');
+      TV_WRITE_UNINIT(&tvInit);
+      return tvInit;
+    }
+
+    tvAsVariant(&tvInit) = parse_php_serialized(as);
+    if (IS_STRING_TYPE(tvInit.m_type)) {
+      tvInit.m_data.pstr = StringData::GetStaticString(tvInit.m_data.pstr);
+      as.ue->mergeLitstr(tvInit.m_data.pstr);
+    } else if (IS_ARRAY_TYPE(tvInit.m_type)) {
+      tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
+      as.ue->mergeArray(tvInit.m_data.parr);
+    } else if (tvInit.m_type == KindOfObject) {
+      as.error("property initializer can't be an object");
+    }
+    as.in.expectWs(';');
+  } else if (what == ';') {
+    // already null
+  } else {
+    as.error("expected '=' or ';' after property name");
+  }
+
+  return tvInit;
+}
+
+/*
+ * directive-property : attribute-list identifier member-tv-initializer
+ *                    ;
+ *
+ */
+void parse_property(AsmState& as) {
+  as.in.skipWhitespace();
+
+  Attr attrs = parse_attribute_list(as, PropAttributes);
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error("expected name for property");
+  }
+
+  TypedValue tvInit = parse_member_tv_initializer(as);
+  as.pce->addProperty(StringData::GetStaticString(name),
+                      attrs,
+                      empty_string.get(),
+                      &tvInit);
+}
+
+/*
+ * directive-const : identifier member-tv-initializer
+ *                 ;
+ */
+void parse_constant(AsmState& as) {
+  as.in.skipWhitespace();
+
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error("expected name for constant");
+  }
+
+  TypedValue tvInit = parse_member_tv_initializer(as);
+  as.pce->addConstant(StringData::GetStaticString(name),
+                      &tvInit,
+                      empty_string.get());
+}
+
+/*
+ * directive-default-ctor : ';'
+ *                        ;
+ *
+ * Creates an 86ctor stub for the class.
+ */
+void parse_default_ctor(AsmState& as) {
+  ASSERT(!as.fe && as.pce);
+
+  as.fe = as.ue->newMethodEmitter(
+    StringData::GetStaticString("86ctor"), as.pce);
+  as.pce->addMethod(as.fe);
+  as.fe->init(as.in.getLineNumber(), as.in.getLineNumber(),
+              as.ue->bcPos(), AttrPublic, true, 0);
+  as.ue->emitOp(OpNull);
+  as.ue->emitOp(OpRetC);
+  as.stackHighWater = 1;
+  as.finishFunction();
+
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-use :  identifier+ ';'
+ *               |  identifier+ '{' use-line* '}'
+ *               ;
+ *
+ * use-line : use-name-ref "insteadof" identifier+ ';'
+ *          | use-name-ref "as" attribute-list identifier ';'
+ *          | use-name-ref "as" attribute-list ';'
+ *          ;
+ */
+void parse_use(AsmState& as) {
+  std::vector<std::string> usedTraits;
+  for (;;) {
+    std::string name;
+    if (!as.in.readword(name)) break;
+    usedTraits.push_back(name);
+  }
+  if (usedTraits.empty()) {
+    as.error(".use requires a trait name");
+  }
+
+  for (size_t i = 0; i < usedTraits.size(); ++i) {
+    as.pce->addUsedTrait(StringData::GetStaticString(usedTraits[i]));
+  }
+  as.in.skipWhitespace();
+  if (as.in.peek() != '{') {
+    as.in.expect(';');
+    return;
+  }
+  as.in.getc();
+
+  for (;;) {
+    as.in.skipWhitespace();
+    if (as.in.peek() == '}') break;
+
+    std::string traitName;
+    std::string identifier;
+    if (!as.in.readword(traitName)) {
+      as.error("expected identifier for line in .use block");
+    }
+    as.in.skipWhitespace();
+    if (as.in.peek() == ':') {
+      as.in.getc();
+      as.in.expect(':');
+      if (!as.in.readword(identifier)) {
+        as.error("expected identifier after ::");
+      }
+    } else {
+      identifier = traitName;
+      if (usedTraits.size() != 1) {
+        as.error("you must say which trait contains `" +
+                 identifier + "' since this .use block brings in "
+                 "multiple traits");
+      }
+      traitName = usedTraits.front();
+    }
+
+    if (as.in.tryConsume("as")) {
+      Attr attrs = parse_attribute_list(as, TraitImportAttributes);
+      std::string alias;
+      if (!as.in.readword(alias)) {
+        if (attrs != AttrNone) {
+          alias = identifier;
+        } else {
+          as.error("expected identifier or attribute list after "
+                   "`as' in .use block");
+        }
+      }
+
+      as.pce->addTraitAliasRule(PreClass::TraitAliasRule(
+        StringData::GetStaticString(traitName),
+        StringData::GetStaticString(identifier),
+        StringData::GetStaticString(alias),
+        attrs));
+    } else if (as.in.tryConsume("insteadof")) {
+      PreClass::TraitPrecRule precRule(
+        StringData::GetStaticString(traitName),
+        StringData::GetStaticString(identifier));
+
+      bool addedOtherTraits = false;
+      std::string whom;
+      while (as.in.readword(whom)) {
+        precRule.addOtherTraitName(StringData::GetStaticString(whom));
+        addedOtherTraits = true;
+      }
+      if (!addedOtherTraits) {
+        as.error("one or more trait names expected after `insteadof'");
+      }
+
+      as.pce->addTraitPrecRule(precRule);
+    } else {
+      as.error("expected `as' or `insteadof' in .use block");
+    }
+
+    as.in.expectWs(';');
+  }
+
+  as.in.expect('}');
+}
+
+/*
+ * class-body : class-body-line* '}'
+ *            ;
+ *
+ * class-body-line : ".method"       directive-method
+ *                 | ".property"     directive-property
+ *                 | ".const"        directive-const
+ *                 | ".use"          directive-use
+ *                 | ".default_ctor" directive-default-ctor
+ *                 ;
+ */
+void parse_class_body(AsmState& as) {
+  if (!as.emittedPseudoMain) {
+    as.error(".class blocks must all follow the .main block");
+  }
+
+  std::string directive;
+  while (as.in.readword(directive)) {
+    if (directive == ".method")   { parse_method(as);   continue; }
+    if (directive == ".property") { parse_property(as); continue; }
+    if (directive == ".const")    { parse_constant(as); continue; }
+    if (directive == ".use")      { parse_use(as);      continue; }
+    if (directive == ".default_ctor") { parse_default_ctor(as); continue; }
+
+    as.error("unrecognized directive `" + directive + "' in class");
+  }
+  as.in.expect('}');
+  as.finishClass();
+}
+
+/*
+ * directive-class : attribute-list identifier extension-clause
+ *                      implements-clause '{' class-body
+ *                 ;
+ *
+ * extension-clause : empty
+ *                  | "extends" identifier
+ *                  ;
+ *
+ * implements-clause : empty
+ *                   | "implements" '(' identifier* ')'
+ *                   ;
+ *
+ */
+void parse_class(AsmState& as) {
+  as.in.skipWhitespace();
+
+  Attr attrs = parse_attribute_list(as, ClassAttributes);
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error(".class must have a name");
+  }
+
+  std::string parentName;
+  if (as.in.tryConsume("extends")) {
+    if (!as.in.readword(parentName)) {
+      as.error("expected parent class name after `extends'");
+    }
+  }
+
+  std::vector<std::string> ifaces;
+  if (as.in.tryConsume("implements")) {
+    as.in.expectWs('(');
+    std::string word;
+    while (as.in.readword(word)) {
+      ifaces.push_back(word);
+    }
+    as.in.expect(')');
+  }
+
+  as.pce = as.ue->newPreClassEmitter(StringData::GetStaticString(name),
+                                     true /* hoistable */);
+  as.pce->init(as.in.getLineNumber(),
+               as.in.getLineNumber() + 1, // XXX
+               as.ue->bcPos(),
+               attrs,
+               StringData::GetStaticString(parentName),
+               true /* hoistable */,
+               empty_string.get());
+  for (size_t i = 0; i < ifaces.size(); ++i) {
+    as.pce->addInterface(StringData::GetStaticString(ifaces[i]));
+  }
+
+  as.in.expectWs('{');
+  parse_class_body(as);
+}
+
+/*
+ * directive-main : '{' function-body
+ *                ;
+ */
+void parse_main(AsmState& as) {
+  as.in.expectWs('{');
+
+  as.ue->initMain(as.in.getLineNumber(),
+                  as.in.getLineNumber() + 1 /* XXX */);
+  as.fe = as.ue->getMain();
+  as.emittedPseudoMain = true;
+  parse_function_body(as);
+}
+
+/*
+ * directive-adata :  identifier '=' php-serialized ';'
+ *                 ;
+ */
+void parse_adata(AsmState& as) {
+  as.in.skipWhitespace();
+  std::string dataLabel;
+  if (!as.in.readword(dataLabel)) {
+    as.error("expected name for .adata");
+  }
+  if (as.adataMap.count(dataLabel)) {
+    as.error("duplicate adata label name " + dataLabel);
+  }
+
+  as.in.expectWs('=');
+  Variant var = parse_php_serialized(as);
+  if (!var.isArray()) {
+    as.error(".adata only supports serialized arrays");
+  }
+  Array arr(var.toArray());
+  ArrayData* data = ArrayData::GetScalarArray(arr.get());
+  as.ue->mergeArray(data);
+  as.adataMap[dataLabel] = data;
+
+  as.in.expectWs(';');
+}
+
+/*
+ * asm-file : asm-tld* <EOF>
+ *          ;
+ *
+ * asm-tld :    ".main"        directive-main
+ *         |    ".function"    directive-function
+ *         |    ".adata"       directive-adata
+ *         |    ".class"       directive-class
+ *         ;
+ */
+void parse(AsmState& as) {
+  as.in.skipWhitespace();
+  std::string directive;
+  while (as.in.readword(directive)) {
+    if (directive == ".main")        { parse_main(as);     continue; }
+    if (directive == ".function")    { parse_function(as); continue; }
+    if (directive == ".adata")       { parse_adata(as);    continue; }
+    if (directive == ".class")       { parse_class(as);    continue; }
+
+    as.error("unrecognized top-level directive `" + directive + "'");
+  }
+
+  if (!as.emittedPseudoMain) {
+    as.error("no .main found in hhas unit");
+  }
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Unit* assemble_file(const char* filename, const MD5& md5) {
+  boost::scoped_ptr<UnitEmitter> ue(new UnitEmitter(md5));
+  StringData* sd = StringData::GetStaticString(filename);
+  ue->setFilepath(sd);
+
+  try {
+    std::ifstream instr(filename);
+    if (!instr.is_open()) {
+      throw std::runtime_error(std::string("couldn't open file ") +
+            filename + ": " + strerror(errno));
+    }
+    AsmState as(instr);
+    as.ue = ue.get();
+    parse(as);
+  } catch (const std::exception& e) {
+    ue.reset(new UnitEmitter(md5));
+    ue->setFilepath(sd);
+    ue->initMain(1, 1);
+    ue->emitOp(OpString);
+    ue->emitInt32(ue->mergeLitstr(StringData::GetStaticString(e.what())));
+    ue->emitOp(OpFatal);
+    FuncEmitter* fe = ue->getMain();
+    fe->setMaxStackCells(kNumActRecCells + 1);
+    // XXX line numbers are bogus
+    fe->finish(ue->bcPos(), false);
+    ue->recordFunction(fe);
+  }
+
+  return ue->create();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}}

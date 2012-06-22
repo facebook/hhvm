@@ -37,7 +37,7 @@ extern VariantProxy s_sys_svsp00000000;
 #define s_sys_svs00000000 (*(Variant *)&s_sys_svsp00000000)
 #endif
 
-/* SRC: classes/reflection.php line 1655 */
+/* SRC: classes/reflection.php line 1694 */
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 extern const ObjectStaticCallbacks cw_ReflectionMethod;
 class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
@@ -72,6 +72,10 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public: Variant t_getmodifiers();
   public: Variant t_getclosure();
   public: Variant t_getdeclaringclass();
+  public: Variant t_getattribute(CVarRef v_name);
+  public: Variant t_getattributes();
+  public: Variant t_getattributerecursive(CVarRef v_name);
+  public: Variant t_getattributesrecursive();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(export);
@@ -88,6 +92,10 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(getmodifiers);
   DECLARE_METHOD_INVOKE_HELPERS(getclosure);
   DECLARE_METHOD_INVOKE_HELPERS(getdeclaringclass);
+  DECLARE_METHOD_INVOKE_HELPERS(getattribute);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributes);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributerecursive);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributesrecursive);
 };
 ObjectData *coo_ReflectionMethod() NEVER_INLINE;
 extern const int64 q_ReflectionMethod$$IS_STATIC;

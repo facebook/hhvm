@@ -122,6 +122,13 @@ void iter_value_cell(Iter* iter, TypedValue* out) {
   TV_READ_CELL((TypedValue*)&val, out);
 }
 
+void iter_value_cell_local(Iter* iter, TypedValue* out) {
+  DataType oldType = out->m_type;
+  uint64_t oldDatum = out->m_data.num;
+  iter_value_cell(iter, out);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
 void iter_key_cell(Iter* iter, TypedValue* out) {
   TRACE(2, "iter_key_cell: I %p, out %p\n", iter, out);
   ASSERT(iter->m_itype == Iter::TypeArray ||
@@ -134,6 +141,13 @@ void iter_key_cell(Iter* iter, TypedValue* out) {
   Variant key = arr.first();
   ASSERT(key.getRawType() == KindOfInt64 || IS_STRING_TYPE(key.getRawType()));
   TV_READ_CELL((TypedValue*)&key, out);
+}
+
+void iter_key_cell_local(Iter* iter, TypedValue* out) {
+  DataType oldType = out->m_type;
+  uint64_t oldDatum = out->m_data.num;
+  iter_key_cell(iter, out);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
 static inline void

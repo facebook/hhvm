@@ -474,13 +474,6 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
     scope->getConstants()->check(getScope(), exp->getName(), ret,
                                  true, ar, variable,
                                  bases, defScope);
-  } else if (variable->is(Expression::KindOfSimpleVariable)) {
-    SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-    if (var->getName() == "this" && getClassScope()) {
-      if (getScope()->isFirstPass()) {
-        Compiler::Error(Compiler::ReassignThis, variable);
-      }
-    }
   }
 
   m_implementedType.reset();
@@ -1424,12 +1417,19 @@ bool Expression::canUseFastCast(AnalysisResultPtr ar) {
   // with a fast cast method, and we have a dst type that
   // is not Variant (in CPP), then we have something to benefit
   // from doing a fast cast and should emit one.
-  return m_implementedType &&
-         Type::IsMappedToVariant(m_implementedType) &&
-         m_actualType &&
-         Type::HasFastCastMethod(m_actualType) &&
-         dstType &&
-         !Type::IsMappedToVariant(dstType);
+  if (m_implementedType &&
+      Type::IsMappedToVariant(m_implementedType) &&
+      m_actualType &&
+      Type::HasFastCastMethod(m_actualType) &&
+      dstType &&
+      !Type::IsMappedToVariant(dstType)) {
+    if (m_assertedType) return true;
+    if (is(KindOfSimpleVariable) &&
+        static_cast<SimpleVariable*>(this)->isGuarded()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -1461,20 +1461,20 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
           dstType->outputCPPCast(cg, ar, getScope());
           cg_printf("(");
           closeParen++;
+        } else {
+          // specific object is special, since we do not have
+          // a fast cast method into a specific object on Variant,
+          // we must emit an additional (but also fast) cast.
+          // In the end, the cast will look like (for example):
+          //
+          //    (const X&)(v_var.asCObjRef())
+
+          cg_printf("(");
+          closeParen++;
+          m_actualType->outputCPPFastObjectCast(cg, ar, getScope(), !isLval);
+          cg_printf("(");
+          closeParen++;
         }
-
-        // specific object is special, since we do not have
-        // a fast cast method into a specific object on Variant,
-        // we must emit an additional (but also fast) cast.
-        // In the end, the cast will look like (for example):
-        //
-        //    (const X&)(v_var.asCObjRef())
-
-        cg_printf("(");
-        closeParen++;
-        m_actualType->outputCPPFastObjectCast(cg, ar, getScope(), !isLval);
-        cg_printf("(");
-        closeParen++;
       } else {
         dstType->outputCPPCast(cg, ar, getScope());
         cg_printf("(");
@@ -1535,9 +1535,21 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (useFastCast) {
     ASSERT(srcType == m_implementedType);
-    const string& method = Type::GetFastCastMethod(
+    string method;
+    if (!Type::SameType(m_actualType, dstType)) {
+      if (m_actualType->is(Type::KindOfObject)) {
+        method = "getObjectDataOrNull";
+      } else if (m_actualType->is(Type::KindOfString)) {
+        method = "getStringDataOrNull";
+      } else if (m_actualType->is(Type::KindOfArray)) {
+        method = "getArrayDataOrNull";
+      }
+    }
+    if (method.empty()) {
+      method = Type::GetFastCastMethod(
         m_actualType, isReferenced,
         !isLval && !(m_context & UnsetContext));
+    }
     cg_printf(".%s()", method.c_str());
   }
 

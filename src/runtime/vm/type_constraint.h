@@ -80,7 +80,6 @@ public:
     return
       (t1 == t2) ||
       (IS_STRING_TYPE(t1) && IS_STRING_TYPE(t2)) ||
-      (IS_INT_TYPE(t1) && IS_INT_TYPE(t2)) ||
       (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
   }
 

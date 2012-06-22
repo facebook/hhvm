@@ -82,6 +82,19 @@ void flush_thread_caches();
  */
 void flush_thread_stack();
 
+/**
+ * Like scoped_ptr, but calls free() on destruct
+ */
+class ScopedMem {
+  ScopedMem(const ScopedMem&); // disable copying
+  ScopedMem& operator=(const ScopedMem&); 
+ public:
+  ScopedMem(void* ptr) : m_ptr(ptr) {}
+  ~ScopedMem() { free(m_ptr); }
+ private:
+  void* m_ptr;
+};
+
 extern __thread uintptr_t s_stackLimit;
 extern __thread size_t s_stackSize;
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/file_scope.h>
+#include <compiler/analysis/variable_table.h>
 #include <util/util.h>
 
 namespace HPHP {
@@ -55,6 +56,12 @@ void StaticClassName::updateClassName() {
   }
 }
 
+static BlockScopeRawPtr originalScope(StaticClassName *scn) {
+  Expression *e = dynamic_cast<Expression*>(scn);
+  if (e) return e->getOriginalScope();
+  return dynamic_cast<Statement*>(scn)->getScope();
+}
+
 void StaticClassName::resolveStatic(const string &name) {
   assert(isStatic());
   m_static = m_self = m_parent = false;
@@ -68,7 +75,7 @@ ClassScopePtr StaticClassName::resolveClass() {
   m_present = false;
   m_unknown = true;
   if (m_class) return ClassScopePtr();
-  BlockScopeRawPtr scope = dynamic_cast<Expression*>(this)->getOriginalScope();
+  BlockScopeRawPtr scope = originalScope(this);
   if (m_self) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       m_className = self->getName();
@@ -113,9 +120,28 @@ ClassScopePtr StaticClassName::resolveClass() {
   return cls;
 }
 
+ClassScopePtr StaticClassName::resolveClassWithChecks() {
+  ClassScopePtr cls = resolveClass();
+  if (!m_class && !cls) {
+    Construct *self = dynamic_cast<Construct*>(this);
+    BlockScopeRawPtr scope = self->getScope();
+    if (isRedeclared()) {
+      scope->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
+    } else if (scope->isFirstPass()) {
+      ClassScopeRawPtr cscope = scope->getContainingClass();
+      if (!cscope ||
+          !cscope->isTrait() ||
+          (!isSelf() && !isParent())) {
+        Compiler::Error(Compiler::UnknownClass, self->shared_from_this());
+      }
+    }
+  }
+  return cls;
+}
+
 bool StaticClassName::checkPresent() {
   if (m_self || m_parent || m_static) return true;
-  BlockScopeRawPtr scope = dynamic_cast<Expression*>(this)->getOriginalScope();
+  BlockScopeRawPtr scope = originalScope(this);
   FileScopeRawPtr currentFile = scope->getContainingFile();
   if (currentFile) {
     AnalysisResultPtr ar = currentFile->getContainingProgram();

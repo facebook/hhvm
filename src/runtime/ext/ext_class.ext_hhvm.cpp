@@ -870,10 +870,10 @@ TypedValue * fg1_call_user_method(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-2, false);
     for (long long i = 2; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-2);
+      TypedValue* extraArg = ea->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-2, tvAsVariant(extraArg));
       } else {
@@ -896,10 +896,10 @@ TypedValue* fg_call_user_method(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-2, false);
           for (long long i = 2; i < count; ++i) {
-            TypedValue* extraArg = ve->getExtraArg(i-2);
+            TypedValue* extraArg = ea->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-2, tvAsVariant(extraArg));
             } else {

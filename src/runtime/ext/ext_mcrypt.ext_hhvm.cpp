@@ -241,7 +241,7 @@ TypedValue* fg_mcrypt_list_modes(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mcrypt_module_get_algo_block_size(HPHP::String const&, HPHP::String const&)
+long long HPHP::f_mcrypt_module_get_algo_block_size(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP35f_mcrypt_module_get_algo_block_sizeERKNS_6StringES2_
 
 (return value) => rax
@@ -249,7 +249,7 @@ algorithm => rdi
 lib_dir => rsi
 */
 
-int fh_mcrypt_module_get_algo_block_size(Value* algorithm, Value* lib_dir) asm("_ZN4HPHP35f_mcrypt_module_get_algo_block_sizeERKNS_6StringES2_");
+long long fh_mcrypt_module_get_algo_block_size(Value* algorithm, Value* lib_dir) asm("_ZN4HPHP35f_mcrypt_module_get_algo_block_sizeERKNS_6StringES2_");
 
 TypedValue * fg1_mcrypt_module_get_algo_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_mcrypt_module_get_algo_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -305,7 +305,7 @@ TypedValue* fg_mcrypt_module_get_algo_block_size(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mcrypt_module_get_algo_key_size(HPHP::String const&, HPHP::String const&)
+long long HPHP::f_mcrypt_module_get_algo_key_size(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP33f_mcrypt_module_get_algo_key_sizeERKNS_6StringES2_
 
 (return value) => rax
@@ -313,7 +313,7 @@ algorithm => rdi
 lib_dir => rsi
 */
 
-int fh_mcrypt_module_get_algo_key_size(Value* algorithm, Value* lib_dir) asm("_ZN4HPHP33f_mcrypt_module_get_algo_key_sizeERKNS_6StringES2_");
+long long fh_mcrypt_module_get_algo_key_size(Value* algorithm, Value* lib_dir) asm("_ZN4HPHP33f_mcrypt_module_get_algo_key_sizeERKNS_6StringES2_");
 
 TypedValue * fg1_mcrypt_module_get_algo_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_mcrypt_module_get_algo_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1378,7 +1378,7 @@ TypedValue* fg_mcrypt_get_iv_size(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mcrypt_get_key_size(HPHP::String const&, HPHP::String const&)
+long long HPHP::f_mcrypt_get_key_size(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP21f_mcrypt_get_key_sizeERKNS_6StringES2_
 
 (return value) => rax
@@ -1386,7 +1386,7 @@ cipher => rdi
 module => rsi
 */
 
-int fh_mcrypt_get_key_size(Value* cipher, Value* module) asm("_ZN4HPHP21f_mcrypt_get_key_sizeERKNS_6StringES2_");
+long long fh_mcrypt_get_key_size(Value* cipher, Value* module) asm("_ZN4HPHP21f_mcrypt_get_key_sizeERKNS_6StringES2_");
 
 TypedValue * fg1_mcrypt_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_mcrypt_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1493,14 +1493,14 @@ TypedValue* fg_mcrypt_enc_get_algorithms_name(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mcrypt_enc_get_block_size(HPHP::Object const&)
+long long HPHP::f_mcrypt_enc_get_block_size(HPHP::Object const&)
 _ZN4HPHP27f_mcrypt_enc_get_block_sizeERKNS_6ObjectE
 
 (return value) => rax
 td => rdi
 */
 
-int fh_mcrypt_enc_get_block_size(Value* td) asm("_ZN4HPHP27f_mcrypt_enc_get_block_sizeERKNS_6ObjectE");
+long long fh_mcrypt_enc_get_block_size(Value* td) asm("_ZN4HPHP27f_mcrypt_enc_get_block_sizeERKNS_6ObjectE");
 
 TypedValue * fg1_mcrypt_enc_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_mcrypt_enc_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1546,14 +1546,14 @@ TypedValue* fg_mcrypt_enc_get_block_size(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mcrypt_enc_get_iv_size(HPHP::Object const&)
+long long HPHP::f_mcrypt_enc_get_iv_size(HPHP::Object const&)
 _ZN4HPHP24f_mcrypt_enc_get_iv_sizeERKNS_6ObjectE
 
 (return value) => rax
 td => rdi
 */
 
-int fh_mcrypt_enc_get_iv_size(Value* td) asm("_ZN4HPHP24f_mcrypt_enc_get_iv_sizeERKNS_6ObjectE");
+long long fh_mcrypt_enc_get_iv_size(Value* td) asm("_ZN4HPHP24f_mcrypt_enc_get_iv_sizeERKNS_6ObjectE");
 
 TypedValue * fg1_mcrypt_enc_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_mcrypt_enc_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1599,14 +1599,14 @@ TypedValue* fg_mcrypt_enc_get_iv_size(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mcrypt_enc_get_key_size(HPHP::Object const&)
+long long HPHP::f_mcrypt_enc_get_key_size(HPHP::Object const&)
 _ZN4HPHP25f_mcrypt_enc_get_key_sizeERKNS_6ObjectE
 
 (return value) => rax
 td => rdi
 */
 
-int fh_mcrypt_enc_get_key_size(Value* td) asm("_ZN4HPHP25f_mcrypt_enc_get_key_sizeERKNS_6ObjectE");
+long long fh_mcrypt_enc_get_key_size(Value* td) asm("_ZN4HPHP25f_mcrypt_enc_get_key_sizeERKNS_6ObjectE");
 
 TypedValue * fg1_mcrypt_enc_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_mcrypt_enc_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1923,14 +1923,14 @@ TypedValue* fg_mcrypt_enc_is_block_mode(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mcrypt_enc_self_test(HPHP::Object const&)
+long long HPHP::f_mcrypt_enc_self_test(HPHP::Object const&)
 _ZN4HPHP22f_mcrypt_enc_self_testERKNS_6ObjectE
 
 (return value) => rax
 td => rdi
 */
 
-int fh_mcrypt_enc_self_test(Value* td) asm("_ZN4HPHP22f_mcrypt_enc_self_testERKNS_6ObjectE");
+long long fh_mcrypt_enc_self_test(Value* td) asm("_ZN4HPHP22f_mcrypt_enc_self_testERKNS_6ObjectE");
 
 TypedValue * fg1_mcrypt_enc_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_mcrypt_enc_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -2034,7 +2034,7 @@ TypedValue* fg_mcrypt_generic(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_mcrypt_generic_init(HPHP::Object const&, HPHP::String const&, HPHP::String const&)
+long long HPHP::f_mcrypt_generic_init(HPHP::Object const&, HPHP::String const&, HPHP::String const&)
 _ZN4HPHP21f_mcrypt_generic_initERKNS_6ObjectERKNS_6StringES5_
 
 (return value) => rax
@@ -2043,7 +2043,7 @@ key => rsi
 iv => rdx
 */
 
-int fh_mcrypt_generic_init(Value* td, Value* key, Value* iv) asm("_ZN4HPHP21f_mcrypt_generic_initERKNS_6ObjectERKNS_6StringES5_");
+long long fh_mcrypt_generic_init(Value* td, Value* key, Value* iv) asm("_ZN4HPHP21f_mcrypt_generic_initERKNS_6ObjectERKNS_6StringES5_");
 
 TypedValue * fg1_mcrypt_generic_init(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_mcrypt_generic_init(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

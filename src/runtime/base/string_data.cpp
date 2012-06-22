@@ -67,47 +67,83 @@ StringData *StringData::GetStaticString(const char *str) {
   return GetStaticString(&sd);
 }
 
-StringData::StringData(const char *data,
-                       StringDataMode mode /* = AttachLiteral */)
-  : _count(0) {
-  int len = strlen(data);
-  ASSERT(data);
-  ASSERT(mode >= 0 && mode < StringDataModeCount);
-  if (len & IsMask) {
+void StringData::initLiteral(const char* data) {
+  return initLiteral(data, strlen(data));
+}
+
+void StringData::initLiteral(const char* data, int len) {
+  ASSERT(data && len >= 0 && data[len] == '\0'); // check well formed string.
+  if (uint32_t(len) > MaxSize) {
     throw InvalidArgumentException("len>=2^30", len);
   }
+  _count = 0;
+  m_data = data;
+  m_len = len | IsLiteral;
   m_hash = 0;
-  assignHelper(data, len, mode);
-
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
 HOT_FUNC
-StringData::StringData(const char *data, int len, StringDataMode mode)
-  : _count(0) {
-  m_hash = 0;
-  ASSERT(data);
-  ASSERT(len >= 0);
-  ASSERT(mode >= 0 && mode < StringDataModeCount);
-  if (len < 0 || (len & IsMask)) {
+void StringData::initAttach(const char* data) {
+  return initAttach(data, strlen(data));
+}
+
+HOT_FUNC
+void StringData::initAttach(const char* data, int len) {
+  ASSERT(data && len >= 0 && data[len] == '\0'); // check well formed string.
+  if (uint32_t(len) > MaxSize) {
     throw InvalidArgumentException("len>=2^30", len);
   }
-  assignHelper(data, len, mode);
+  _count = 0;
+  m_hash = 0;
+  if (len) {
+    m_len = len;
+    m_data = data;
+  } else {
+    free((void*)data); // we don't really need a malloc-ed empty string
+    m_len = len | IsLiteral;
+    m_data = "";
+  }
+  ASSERT(m_data);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
+}
+
+HOT_FUNC
+void StringData::initCopy(const char* data) {
+  return initCopy(data, strlen(data));
+}
+
+HOT_FUNC
+void StringData::initCopy(const char* data, int len) {
+  ASSERT(data && len >= 0); // check well formed string slice
+  if (uint32_t(len) > MaxSize) {
+    throw InvalidArgumentException("len>=2^30", len);
+  }
+  _count = 0;
+  m_hash = 0;
+  if (len) {
+    char *buf = (char*)malloc(len + 1);
+    memcpy(buf, data, len);
+    buf[len] = '\0';
+    m_len = len;
+    m_data = buf;
+  } else {
+    m_len = len | IsLiteral;
+    m_data = "";
+  }
+  ASSERT(m_data);
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
 HOT_FUNC
 StringData::StringData(SharedVariant *shared)
   : _count(0), m_len(0) {
-  m_hash = 0;
-
   ASSERT(shared);
   shared->incRef();
+  m_data = shared->stringData();
+  m_len = shared->stringLength() | IsShared;
   m_shared = shared;
-  m_data = m_shared->stringData();
-  m_len = m_shared->stringLength() | IsShared;
   ASSERT(m_data);
-
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, m_data);
 }
 
@@ -116,55 +152,30 @@ void StringData::releaseData() {
   if ((m_len & IsLiteral) == 0) {
     if (isShared()) {
       m_shared->decRef();
+      m_shared = NULL;
     } else if (m_data) {
       free((void*)m_data);
       m_data = NULL;
     }
   }
-  m_hash = 0;
 }
 
-void StringData::assignHelper(const char *data, int len, StringDataMode mode) {
-  m_len = len;
-  if (m_len) {
-    switch (mode) {
-    case CopyString:
-      {
-        char *buf = (char*)malloc(len + 1);
-        buf[len] = '\0';
-        memcpy(buf, data, len);
-        m_data = buf;
-      }
-      break;
-    case AttachLiteral:
-      m_len |= IsLiteral;
-      m_data = data;
-      ASSERT(m_data[len] == '\0');// all PHP strings need NULL termination
-      break;
-    case AttachString:
-      m_data = data;
-      ASSERT(m_data[len] == '\0');// all PHP strings need NULL termination
-      break;
-    default:
-      ASSERT(false);
-      break;
-    }
-  } else {
-    if (mode == AttachString) {
-      free((void*)data); // we don't really need a malloc-ed empty string
-    }
-    m_len |= IsLiteral;
-    m_data = "";
-  }
-  ASSERT(m_data);
-}
-
-void StringData::assign(const char *data, int len, StringDataMode mode) {
-  if (len < 0 || (len & IsMask)) {
+void StringData::attach(const char *data, int len) {
+  ASSERT(data && len >= 0 && data[len] == '\0'); // well formed?
+  if (uint32_t(len) > MaxSize) {
     throw InvalidArgumentException("len>=2^30", len);
   }
   releaseData();
-  assignHelper(data, len, mode);
+  if (len) {
+    m_len = len;
+    m_data = data;
+  } else {
+    free((void*)data); // we don't really need a malloc-ed empty string
+    m_len = len | IsLiteral;
+    m_data = "";
+  }
+  m_hash = 0;
+  ASSERT(m_data);
 }
 
 void StringData::append(const char *s, int len) {
@@ -190,6 +201,7 @@ void StringData::append(const char *s, int len) {
     // We are mutating, so we don't need to repropagate our own taint
     char *newdata = string_concat(m_data, size(), s, len, newlen);
     releaseData();
+    m_hash = 0;
     m_data = newdata;
     m_len = newlen;
   } else {
@@ -207,6 +219,7 @@ void StringData::append(const char *s, int len) {
     int len = m_len;
     m_len &= ~IsMask;
     releaseData();
+    m_hash = 0;
     m_data = NULL;
     m_len = 0;
     throw FatalErrorException(0, "String length exceeded 2^30 - 1: %d", len);
@@ -282,21 +295,35 @@ void StringData::dump() const {
   printf("]\n");
 }
 
-// mutations
+static StringData** precompute_chars() ATTRIBUTE_COLD;
+static StringData** precompute_chars() {
+  StringData** raw = new StringData*[256];
+  for (int i = 0; i < 256; i++) {
+    char s[2] = { (char)i, 0 };
+    StringData str(s, 1, CopyString);
+    raw[i] = StringData::GetStaticString(&str);
+  }
+  return raw;
+}
+
+static StringData** precomputed_chars = precompute_chars();
+
+HOT_FUNC
+StringData* StringData::GetStaticString(char c) {
+  return precomputed_chars[(uint8_t)c];
+}
 
 HOT_FUNC
 StringData *StringData::getChar(int offset) const {
   if (offset >= 0 && offset < size()) {
-    char *buf = (char *)malloc(2);
-    buf[0] = m_data[offset];
-    buf[1] = 0;
-    return NEW(StringData)(buf, 1, AttachString);
+    return GetStaticString(m_data[offset]);
   }
 
   raise_notice("Uninitialized string offset: %d", offset);
   return NEW(StringData)("", 0, AttachLiteral);
 }
 
+// mutations
 void StringData::setChar(int offset, CStrRef substring) {
   ASSERT(!isStatic());
   if (offset >= 0) {
@@ -307,11 +334,7 @@ void StringData::setChar(int offset, CStrRef substring) {
     }
 
     if (offset < len) {
-      if (!substring.empty()) {
-        setChar(offset, substring.data()[0]);
-      } else {
-        removeChar(offset);
-      }
+      setChar(offset, substring.empty() ? '\0' : substring.data()[0]);
     } else if (offset > RuntimeOption::StringOffsetLimit) {
       throw OffsetOutOfRangeException();
     } else {
@@ -322,7 +345,7 @@ void StringData::setChar(int offset, CStrRef substring) {
     // We are mutating, so we don't need to repropagate our own taint
       memcpy(buf, m_data, len);
       if (!substring.empty()) buf[offset] = substring.data()[0];
-      assign(buf, newlen, AttachString);
+      attach(buf, newlen);
     }
   }
 }
@@ -334,31 +357,7 @@ void StringData::setChar(int offset, char ch) {
     escalate();
   }
   ((char*)m_data)[offset] = ch;
-}
-
-void StringData::removeChar(int offset) {
-  ASSERT(offset >= 0 && offset < size());
-  ASSERT(!isStatic());
-  int len = size();
-  if (isImmutable()) {
-    char *data = (char*)malloc(len);
-    if (offset) {
-      // We are mutating, so we don't need to repropagate our own taint
-      memcpy(data, m_data, offset);
-    }
-    if (offset < len - 1) {
-      // We are mutating, so we don't need to repropagate our own taint
-      memcpy(data + offset, m_data + offset + 1, len - offset - 1);
-    }
-    data[len] = 0;
-    m_len = len;
-    releaseData();
-    m_data = data;
-  } else {
-    m_len = ((m_len & IsMask) | (len - 1));
-    memmove((void*)(m_data + offset), m_data + offset + 1, len - offset);
-    m_hash = 0;
-  }
+  m_hash = 0; // clear hash since we modified the string.
 }
 
 void StringData::inc() {
@@ -370,13 +369,17 @@ void StringData::inc() {
   int len = size();
   char *overflowed = increment_string((char *)m_data, len);
   if (overflowed) {
-    assign(overflowed, len, AttachString);
+    attach(overflowed, len);
+  } else {
+    // We didn't overflow but we did modify the string.
+    m_hash = 0;
   }
 }
 
 void StringData::negate() {
   if (empty()) return;
-  ASSERT(!isImmutable());
+  // Assume we're a fresh mutable copy.
+  ASSERT(!isImmutable() && _count <= 1 && m_hash == 0);
   char *buf = (char*)m_data;
   int len = size();
   for (int i = 0; i < len; i++) {

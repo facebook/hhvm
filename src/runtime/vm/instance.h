@@ -106,14 +106,12 @@ protected:
   void initialize(Slot nProps);
   void instanceInit();
 public:
-  virtual ~Instance() {}
+  virtual ~Instance() {
+  }
 public:
   void operator delete(void* p) {
     Instance* this_ = (Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (Slot i = 0; i < nProps; ++i) {
       TypedValue* prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -197,7 +195,7 @@ public:
   // Properties.
 public:
   // public for ObjectData access
-  void initPropMap(int numDynamic = 1);
+  void initDynProps(int numDynamic = 0);
   Slot declPropInd(TypedValue* prop) const;
  private:
   template <bool declOnly>
@@ -218,9 +216,10 @@ private:
                      const StringData* key);
   void invokeIsset(TypedValue* retval, const StringData* key);
   void invokeUnset(TypedValue* retval, const StringData* key);
-  void o_getProps(const Class* klass, bool pubOnly,
-                  const PreClass::PropertyVec& propVec,
-                  Array& props, std::vector<bool>& inserted) const;
+  void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
+               Array& props, std::vector<bool>& inserted) const;
+  void getProps(const Class* klass, bool pubOnly, const PreClass* pc,
+                Array& props, std::vector<bool>& inserted) const;
 public:
   void prop(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
             const StringData* key);

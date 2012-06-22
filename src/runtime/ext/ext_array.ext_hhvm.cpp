@@ -422,10 +422,10 @@ TypedValue* fg_array_map(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -474,10 +474,10 @@ TypedValue* fg_array_merge_recursive(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -526,10 +526,10 @@ TypedValue* fg_array_merge(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -578,10 +578,10 @@ TypedValue* fg_array_replace_recursive(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -630,10 +630,10 @@ TypedValue* fg_array_replace(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -683,10 +683,10 @@ TypedValue* fg_array_multisort(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfBoolean;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -825,10 +825,10 @@ TypedValue* fg_array_push(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1265,7 +1265,7 @@ TypedValue* fg_array_unique(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_array_unshift(int, HPHP::VRefParamValue const&, HPHP::Variant const&, HPHP::Array const&)
+long long HPHP::f_array_unshift(int, HPHP::VRefParamValue const&, HPHP::Variant const&, HPHP::Array const&)
 _ZN4HPHP15f_array_unshiftEiRKNS_14VRefParamValueERKNS_7VariantERKNS_5ArrayE
 
 (return value) => rax
@@ -1275,7 +1275,7 @@ var => rdx
 _argv => rcx
 */
 
-int fh_array_unshift(long long _argc, TypedValue* array, TypedValue* var, Value* _argv) asm("_ZN4HPHP15f_array_unshiftEiRKNS_14VRefParamValueERKNS_7VariantERKNS_5ArrayE");
+long long fh_array_unshift(long long _argc, TypedValue* array, TypedValue* var, Value* _argv) asm("_ZN4HPHP15f_array_unshiftEiRKNS_14VRefParamValueERKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* fg_array_unshift(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -1287,10 +1287,10 @@ TypedValue* fg_array_unshift(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfInt64;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1452,10 +1452,10 @@ TypedValue* fg_compact(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfArray;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -1520,7 +1520,7 @@ TypedValue* fg_shuffle(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_count(HPHP::Variant const&, bool)
+long long HPHP::f_count(HPHP::Variant const&, bool)
 _ZN4HPHP7f_countERKNS_7VariantEb
 
 (return value) => rax
@@ -1528,7 +1528,7 @@ var => rdi
 recursive => rsi
 */
 
-int fh_count(TypedValue* var, bool recursive) asm("_ZN4HPHP7f_countERKNS_7VariantEb");
+long long fh_count(TypedValue* var, bool recursive) asm("_ZN4HPHP7f_countERKNS_7VariantEb");
 
 TypedValue * fg1_count(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_count(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -1761,10 +1761,10 @@ TypedValue* fg_array_diff(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1815,10 +1815,10 @@ TypedValue* fg_array_udiff(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-3);
+          TypedValue* extraArg = ea->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -1868,10 +1868,10 @@ TypedValue* fg_array_diff_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1922,10 +1922,10 @@ TypedValue* fg_array_diff_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-3);
+          TypedValue* extraArg = ea->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -1976,10 +1976,10 @@ TypedValue* fg_array_udiff_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-3);
+          TypedValue* extraArg = ea->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2031,10 +2031,10 @@ TypedValue* fg_array_udiff_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 4LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-4, false);
         for (long long i = 4; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-4);
+          TypedValue* extraArg = ea->getExtraArg(i-4);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-4, tvAsVariant(extraArg));
           } else {
@@ -2084,10 +2084,10 @@ TypedValue* fg_array_diff_key(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -2138,10 +2138,10 @@ TypedValue* fg_array_diff_ukey(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-3);
+          TypedValue* extraArg = ea->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2191,10 +2191,10 @@ TypedValue* fg_array_intersect(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -2245,10 +2245,10 @@ TypedValue* fg_array_uintersect(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-3);
+          TypedValue* extraArg = ea->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2298,10 +2298,10 @@ TypedValue* fg_array_intersect_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -2352,10 +2352,10 @@ TypedValue* fg_array_intersect_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-3);
+          TypedValue* extraArg = ea->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2406,10 +2406,10 @@ TypedValue* fg_array_uintersect_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-3);
+          TypedValue* extraArg = ea->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2461,10 +2461,10 @@ TypedValue* fg_array_uintersect_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 4LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-4, false);
         for (long long i = 4; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-4);
+          TypedValue* extraArg = ea->getExtraArg(i-4);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-4, tvAsVariant(extraArg));
           } else {
@@ -2514,10 +2514,10 @@ TypedValue* fg_array_intersect_key(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-2);
+          TypedValue* extraArg = ea->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -2568,10 +2568,10 @@ TypedValue* fg_array_intersect_ukey(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-3);
+          TypedValue* extraArg = ea->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {

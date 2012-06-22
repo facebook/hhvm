@@ -103,7 +103,7 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
         sb.append(buf);
       }
     }
-    return sb.data();
+    return sb.data() ? sb.data() : "";
   }
   if (strcmp(format, "time") == 0) {
     DateTime dt;

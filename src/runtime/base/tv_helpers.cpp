@@ -31,7 +31,6 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
   case KindOfUninit:
   case KindOfNull:    b = false; break;
   case KindOfBoolean: return;
-  case KindOfInt32:
   case KindOfInt64:   b = (tv->m_data.num != 0LL); break;
   case KindOfDouble:  b = (tv->m_data.dbl != 0); break;
   case KindOfStaticString: b = tv->m_data.pstr->toBoolean(); break;
@@ -51,10 +50,15 @@ void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
   int64 i;
   switch (tv->m_type) {
   case KindOfUninit:
-  case KindOfNull:    i = 0LL; break;
-  case KindOfBoolean: ASSERT(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
-  case KindOfInt32:
-  case KindOfInt64:   tv->m_type = KindOfInt64; return;
+  case KindOfNull:
+    tv->m_data.num = 0LL;
+    // Fall through
+  case KindOfBoolean:
+    ASSERT(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
+    tv->m_type = KindOfInt64;
+    // Fall through
+  case KindOfInt64:
+    return;
   case KindOfDouble:  {
     i = toInt64(tv->m_data.dbl);
     break;
@@ -90,7 +94,6 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
   case KindOfUninit:
   case KindOfNull:    d = 0.0; break;
   case KindOfBoolean: ASSERT(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
-  case KindOfInt32:
   case KindOfInt64:   d = (double)(tv->m_data.num); break;
   case KindOfDouble:  return;
   case KindOfStaticString: d = tv->m_data.pstr->toDouble(); break;
@@ -120,7 +123,6 @@ void tvCastToStringInPlace(TypedValue* tv) {
   case KindOfUninit:
   case KindOfNull:    s = buildStringData(""); break;
   case KindOfBoolean: s = buildStringData(tv->m_data.num ? "1" : ""); break;
-  case KindOfInt32:
   case KindOfInt64:   s = buildStringData(tv->m_data.num); break;
   case KindOfDouble:  s = buildStringData(tv->m_data.dbl); break;
   case KindOfStaticString:
@@ -147,7 +149,6 @@ void tvCastToArrayInPlace(TypedValue* tv) {
   case KindOfUninit:
   case KindOfNull:    a = ArrayData::Create(); break;
   case KindOfBoolean:
-  case KindOfInt32:
   case KindOfInt64:
   case KindOfDouble:
   case KindOfStaticString: a = ArrayData::Create(tvAsVariant(tv)); break;
@@ -178,7 +179,6 @@ void tvCastToObjectInPlace(TypedValue* tv) {
   case KindOfUninit:
   case KindOfNull:    o = SystemLib::AllocStdClassObject(); break;
   case KindOfBoolean:
-  case KindOfInt32:
   case KindOfInt64:
   case KindOfDouble:
   case KindOfStaticString: {

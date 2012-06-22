@@ -170,12 +170,12 @@ inline bool x_stream_set_timeout(CObjRef stream, int seconds, int microseconds =
   return f_stream_set_timeout(stream, seconds, microseconds);
 }
 
-inline int x_stream_set_write_buffer(CObjRef stream, int buffer) {
+inline int64 x_stream_set_write_buffer(CObjRef stream, int buffer) {
   FUNCTION_INJECTION_BUILTIN(stream_set_write_buffer);
   return f_stream_set_write_buffer(stream, buffer);
 }
 
-inline int x_set_file_buffer(CObjRef stream, int buffer) {
+inline int64 x_set_file_buffer(CObjRef stream, int buffer) {
   FUNCTION_INJECTION_BUILTIN(set_file_buffer);
   return f_set_file_buffer(stream, buffer);
 }

@@ -22,7 +22,6 @@
 #include <util/case_insensitive.h>
 #include <runtime/base/types.h>
 
-#define NEW_TYPE(s) TypePtr(new Type(Type::KindOf ## s))
 
 class TestCodeRun;
 class TestCodeError;
@@ -83,8 +82,6 @@ public:
    */
   static TypePtr Null;
   static TypePtr Boolean;
-  static TypePtr Byte;
-  static TypePtr Int16;
   static TypePtr Int32;
   static TypePtr Int64;
   static TypePtr Double;

@@ -537,6 +537,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   GEN_TEST(TestGetParentClass);
   GEN_TEST(TestRedeclaredFunctions);
   GEN_TEST(TestRedeclaredClasses);
+  GEN_TEST(TestReassignThis);
   GEN_TEST(TestClone);
   GEN_TEST(TestEvalOrder);
   GEN_TEST(TestGetObjectVars);
@@ -1361,6 +1362,20 @@ bool TestCodeRun::TestPerfectVirtual() {
        "  $obj = new B; $obj->foo();"
        "} bar();"
       );
+
+  MVCR("<?php "
+       "class X {"
+       "  function foo($a) { return $a; }"
+       "}"
+       "class Y extends X {"
+       "  function &foo($a) { return $a; }"
+       "}"
+       "function test(X $x) {"
+       "  $y = $x->foo(5);"
+       "  return ++$y;"
+       "}"
+       "test(new Y);");
+
   return true;
 }
 
@@ -2058,6 +2073,18 @@ bool TestCodeRun::TestArray() {
         "  int(0)\n"
         "}\n"
         "int(4)\n");
+
+  MVCR("<?php "
+       "function test($q, $a, $b, $c) {"
+       "  $x = array($a, 'foo'=> $a);"
+       "  if ($x) {"
+       "    var_dump(isset($x[0][1]), isset($x['foo'][1]));"
+       "    var_dump(isset($x[$b][1]), isset($x[$c][1]));"
+       "    var_dump(end($x[0]));"
+       "  }"
+       "}"
+       "test(5, array(0,1), 0, 'foo');");
+
   return true;
 }
 
@@ -2435,6 +2462,20 @@ bool TestCodeRun::TestArrayEscalation() {
   TEST_ARRAY_PLUS("array('a' => 10)");
   TEST_ARRAY_PLUS("array('a' => 'va')");
   TEST_ARRAY_PLUS("array('a' => array(1))");
+
+  MVCR("<?php "
+       "function test() {"
+       "  $a = array();"
+       "  for ($i = 0; $i < 17; $i++) {"
+       "    $a[] = $i;"
+       "  }"
+       "  unset($a[16]);"
+       "  $b = $a;"
+       "  array_unshift($a, 'foo');"
+       "  var_dump(count($a), count($b));"
+       "}"
+       "test();");
+
   return true;
 }
 
@@ -5463,6 +5504,24 @@ bool TestCodeRun::TestObject() {
        "$y = 140;\n"
        "var_dump($x);\n"
        "$x = null;\n");
+
+  MVCR("<?php "
+       "class X {"
+       "  function foo() { var_dump(__METHOD__); }"
+       "  }"
+       "function foo($a) {"
+       "  $x = null;"
+       "  if ($a) $x = new X;"
+       "  return $x;"
+       "}"
+       "function test($x, $a) {"
+       "  $x = foo($a);"
+       "  if ($x) {"
+       "    $x->foo();"
+       "  }"
+       "}"
+       "test(45, 0);"
+       "test(77, 1);");
 
   return true;
 }
@@ -9162,6 +9221,21 @@ bool TestCodeRun::TestIntercept() {
         "int(2)\n"
         "int(3)\n");
 
+  MVCRO("<?php"
+        "class X {"
+        "  static function foo() { global$g; return $g; }"
+        "}"
+        "function bar() {"
+        "  var_dump('Intercepted');"
+        "}"
+        "function test() {"
+        "  X::foo();"
+        "  fb_intercept('X::foo', 'bar', 'bar');"
+        "  X::foo();"
+        "}"
+        "test();",
+        "string(11) \"Intercepted\"\n");
+
   return true;
 }
 
@@ -10414,6 +10488,18 @@ bool TestCodeRun::TestCompilation() {
        "}"
        "var_dump((boolean)f(),(int)f(),(double)f(),(string)f());"
        "var_dump((array)f(),(object)f(),(unset)f());");
+
+  MVCR("<?php "
+       "if (isset($g)) {"
+       "  class X {"
+       "    private static $i = null;"
+       "    function foo() {"
+       "      self::$i = $this;"
+       "    }"
+       "  }"
+       "} else {"
+       "  class X {}"
+       "}");
 
   return true;
 }
@@ -13577,6 +13663,52 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "$z = new z;"
        "foo($z);"
        "unset($z, $y);");
+
+  return true;
+}
+
+bool TestCodeRun::TestReassignThis() {
+  MVCRONW("<?php "
+         "class Foo {"
+         "  function Bar() {"
+         "    $__this = $this;"
+         "    $this = null;"
+         "    debug_backtrace();"
+         "    $this = $__this;"
+         "  } "
+         "}", "");
+  MVCRONW("<?php "
+         "function foo() {"
+         "  $this = 2;"
+         "  echo \"You should not see this\"; "
+         "} "
+         "foo();", "");
+  MVCRONW("<?php "
+         "$x = 5; "
+         "$this =& $x; "
+         "echo \"You should not see this\";", "");
+  MVCRONW("<?php "
+         "class Foo {"
+         "  public $x; "
+         "} "
+         "$this = new Foo(); "
+         "echo \"You should not see this\";", "");
+  MVCRONW("<?php "
+         "class Foo {"
+         "  public $x; "
+         "} "
+         "$this =& new Foo(); "
+         "echo \"You should not see this\";", "");
+  MVCRONW("<?php "
+          "$myarray = array(1 => 2, 2 => 3); "
+          "foreach ($myarray as $this => $wat) {"
+          "  echo \"You should not see this\"; "
+          "}", "");
+  MVCRONW("<?php "
+          "$myarray = array(1 => 2, 2 => 3); "
+          "foreach ($myarray as $a => $this) {"
+          "  echo \"You should not see this\"; "
+          "}", "");
 
   return true;
 }
@@ -18010,6 +18142,15 @@ bool TestCodeRun::TestTypes() {
        "}"
        "var_dump(bug());");
 
+  MVCR("<?php "
+       "function foo($a) {"
+       "  return (int)$a;"
+       "}"
+       "function test() {"
+       "  var_dump(foo(false));"
+       "}"
+       "test();");
+
   return true;
 }
 
@@ -20190,7 +20331,8 @@ bool TestCodeRun::TestInlining() {
 }
 
 bool TestCodeRun::TestCopyProp() {
-  OptionSetter w(this, OptionSetter::CompileTime, "-vCopyProp=1");
+  OptionSetter w1(this, OptionSetter::CompileTime, "-vCopyProp=1");
+  HipHopSyntax w2(this);
 
   MVCR("<?php "
        "function test($tr_data) {"
@@ -20228,6 +20370,19 @@ bool TestCodeRun::TestCopyProp() {
        "}\n"
        "var_dump(f(false, false));\n"
        "var_dump(f(true, true));\n");
+
+  MVCRO("<?php"
+        "function foo() {"
+        "  $a = &$b;"
+        "  $b = 1;"
+        "  yield $a;"
+        "  $a = 3;"
+        "  $b = 2;"
+        "  yield $a;"
+        "}"
+        "foreach (foo() as $x) var_dump($x);",
+        "int(1)\n"
+        "int(2)\n");
 
   return true;
 }
@@ -22738,6 +22893,212 @@ bool TestCodeRun::TestUserAttributes() {
         "echo \"Done\\n\";\n"
         ,
         "Done\n");
+
+  MVCRO("<?php\n"
+        "<<A(1),B('foo',array(42,73))>>\n"
+        "class C {\n"
+        "  <<A(2),B('bar',array(43,74))>>\n"
+        "  function f() {}\n"
+        "}\n"
+        "$rc = new ReflectionClass('C');\n"
+        "$attrs = $rc->getAttributes();\n"
+        "ksort($attrs);\n"
+        "var_dump($attrs);\n"
+        "$rm = $rc->getMethod('f');\n"
+        "$attrs = $rm->getAttributes();\n"
+        "ksort($attrs);\n"
+        "var_dump($attrs);\n"
+        "\n"
+        "<<A(3),B('bar',array(44,75))>>\n"
+        "function f() {}\n"
+        "$rf = new ReflectionFunction('f');\n"
+        "$attrs = $rf->getAttributes();\n"
+        "ksort($attrs);\n"
+        "var_dump($attrs);\n"
+        ,
+        "array(2) {\n"
+        "  [\"A\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(1)\n"
+        "  }\n"
+        "  [\"B\"]=>\n"
+        "  array(2) {\n"
+        "    [0]=>\n"
+        "    string(3) \"foo\"\n"
+        "    [1]=>\n"
+        "    array(2) {\n"
+        "      [0]=>\n"
+        "      int(42)\n"
+        "      [1]=>\n"
+        "      int(73)\n"
+        "    }\n"
+        "  }\n"
+        "}\n"
+        "array(2) {\n"
+        "  [\"A\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(2)\n"
+        "  }\n"
+        "  [\"B\"]=>\n"
+        "  array(2) {\n"
+        "    [0]=>\n"
+        "    string(3) \"bar\"\n"
+        "    [1]=>\n"
+        "    array(2) {\n"
+        "      [0]=>\n"
+        "      int(43)\n"
+        "      [1]=>\n"
+        "      int(74)\n"
+        "    }\n"
+        "  }\n"
+        "}\n"
+        "array(2) {\n"
+        "  [\"A\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(3)\n"
+        "  }\n"
+        "  [\"B\"]=>\n"
+        "  array(2) {\n"
+        "    [0]=>\n"
+        "    string(3) \"bar\"\n"
+        "    [1]=>\n"
+        "    array(2) {\n"
+        "      [0]=>\n"
+        "      int(44)\n"
+        "      [1]=>\n"
+        "      int(75)\n"
+        "    }\n"
+        "  }\n"
+        "}\n");
+
+  MVCRO("<?php\n"
+        "<<A(1)>>\n"
+        "function f() {}\n"
+        "$rf = new ReflectionFunction('f');\n"
+        "var_dump($rf->getAttribute('A'));\n"
+        "var_dump($rf->getAttribute('B'));\n"
+        "var_dump($rf->getAttributes());\n"
+        "var_dump($rf->getAttributeRecursive('A'));\n"
+        "var_dump($rf->getAttributeRecursive('B'));\n"
+        "var_dump($rf->getAttributesRecursive());\n"
+        ,
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(1)\n"
+        "}\n"
+        "NULL\n"
+        "array(1) {\n"
+        "  [\"A\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(1)\n"
+        "  }\n"
+        "}\n"
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(1)\n"
+        "}\n"
+        "NULL\n"
+        "array(1) {\n"
+        "  [\"A\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(1)\n"
+        "  }\n"
+        "}\n");
+
+  MVCRO("<?php\n"
+        "class A {\n"
+        "  <<W(1),X(2)>>\n"
+        "  private function foo() {}\n"
+        "}\n"
+        "class B extends A {}\n"
+        "class C extends B {\n"
+        "  <<X(3),Y(4)>>\n"
+        "  protected function foo() {}\n"
+        "}\n"
+        "class D extends C {}\n"
+        "class E extends D {\n"
+        "  <<Y(5),Z(6)>>\n"
+        "  public function foo() {}\n"
+        "}\n"
+        "class F extends E {}\n"
+        "\n"
+        "$rm = new ReflectionMethod('F', 'foo');\n"
+        "\n"
+        "var_dump($rm->getAttribute('W'));\n"
+        "var_dump($rm->getAttribute('X'));\n"
+        "var_dump($rm->getAttribute('Y'));\n"
+        "var_dump($rm->getAttribute('Z'));\n"
+        "\n"
+        "$attrs = $rm->getAttributes();\n"
+        "ksort($attrs);\n"
+        "var_dump($attrs);\n"
+        "\n"
+        "var_dump($rm->getAttributeRecursive('W'));\n"
+        "var_dump($rm->getAttributeRecursive('X'));\n"
+        "var_dump($rm->getAttributeRecursive('Y'));\n"
+        "var_dump($rm->getAttributeRecursive('Z'));\n"
+        "\n"
+        "$attrs = $rm->getAttributesRecursive();\n"
+        "ksort($attrs);\n"
+        "var_dump($attrs);\n"
+        ,
+        "NULL\n"
+        "NULL\n"
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(5)\n"
+        "}\n"
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(6)\n"
+        "}\n"
+        "array(2) {\n"
+        "  [\"Y\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(5)\n"
+        "  }\n"
+        "  [\"Z\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(6)\n"
+        "  }\n"
+        "}\n"
+        "NULL\n"
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(3)\n"
+        "}\n"
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(5)\n"
+        "}\n"
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(6)\n"
+        "}\n"
+        "array(3) {\n"
+        "  [\"X\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(3)\n"
+        "  }\n"
+        "  [\"Y\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(5)\n"
+        "  }\n"
+        "  [\"Z\"]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    int(6)\n"
+        "  }\n"
+        "}\n");
 
   return true;
 }
@@ -29385,80 +29746,99 @@ bool TestCodeRun::TestTraits() {
           "3\n"
          );
 
-  MVCRO("<?php\n"
-        "trait U {\n"
-        "  public function test() {\n"
-        "    echo __CLASS__ . \"\\n\";\n"
-        "    $this->foo();\n"
-        "    yield null;\n"
-        "  }\n"
-        "}\n"
-        "class D {\n"
-        "  use U;\n"
-        "  protected function foo() {\n"
-        "    echo \"U::foo\\n\";\n"
-        "  }\n"
-        "}\n"
-        "$obj = new D;\n"
-        "$x = $obj->test();\n"
-        "foreach ($x as $v) {}\n"
-        ,
-        "D\n"
-        "U::foo\n"
-       );
+    MVCRO("<?php\n"
+          "trait U {\n"
+          "  public function test() {\n"
+          "    echo __CLASS__ . \"\\n\";\n"
+          "    $this->foo();\n"
+          "    yield null;\n"
+          "  }\n"
+          "}\n"
+          "class D {\n"
+          "  use U;\n"
+          "  protected function foo() {\n"
+          "    echo \"U::foo\\n\";\n"
+          "  }\n"
+          "}\n"
+          "$obj = new D;\n"
+          "$x = $obj->test();\n"
+          "foreach ($x as $v) {}\n"
+          ,
+          "D\n"
+          "U::foo\n"
+         );
 
-  MVCRO("<?php"
-        "trait baz  {"
-        "  public function bar() { yield 1; }"
-        "}"
-        "class foo {"
-        "  use baz;"
-        "  public function bar() {}"
-        "}",
-        "");
+    MVCRO("<?php"
+          "trait baz  {"
+          "  public function bar() { yield 1; }"
+          "}"
+          "class foo {"
+          "  use baz;"
+          "  public function bar() {}"
+          "}",
+          "");
 
-  OptionSetter w1(this, OptionSetter::Env, "ENABLE_INTERCEPT=1");
-  MVCRO("<?php\n"
-        "trait T {\n"
-        "  public function m() { echo \"original\n\"; }\n"
-        "}\n"
-        "class A { use T; }\n"
-        "class B { use T; }\n"
-        "$a1 = new A;\n"
-        "$a1->m();\n"
-        "fb_intercept(\"A::m\", function() { echo \"new\n\"; });\n"
-        "$a2 = new A;\n"
-        "$a2->m();\n"
-        "$b1 = new B;\n"
-        "$b1->m();\n"
-        "T::m();\n"
-        ,
-        "original\n"
-        "new\n"
-        "original\n"
-        "original\n");
+    OptionSetter w1(this, OptionSetter::Env, "ENABLE_INTERCEPT=1");
+    OptionSetter w2(this, OptionSetter::RunTime,
+                    "-vEval.JitEnableRenameFunction=true");
+    MVCRO("<?php\n"
+          "trait T {\n"
+          "  public function m() { echo \"original\n\"; }\n"
+          "}\n"
+          "class A { use T; }\n"
+          "class B { use T; }\n"
+          "$a1 = new A;\n"
+          "$a1->m();\n"
+          "fb_intercept(\"A::m\", function() { echo \"new\n\"; });\n"
+          "$a2 = new A;\n"
+          "$a2->m();\n"
+          "$b1 = new B;\n"
+          "$b1->m();\n"
+          "T::m();\n"
+          ,
+          "original\n"
+          "new\n"
+          "original\n"
+          "original\n");
 
-  MVCRO("<?php\n"
-        "trait T {\n"
-        "  public function m() { echo \"original\n\"; }\n"
-        "}\n"
-        "class A { use T; }\n"
-        "class B { use T; }\n"
-        "T::m();\n"
-        "$a1 = new A;\n"
-        "$a1->m();\n"
-        "fb_intercept(\"T::m\", function() { echo \"new\n\"; });\n"
-        "$a2 = new A;\n"
-        "$a2->m();\n"
-        "$b1 = new B;\n"
-        "$b1->m();\n"
-        "T::m();\n"
-        ,
-        "original\n"
-        "original\n"
-        "original\n"
-        "original\n"
-        "new\n");
+    MVCRO("<?php\n"
+          "trait T {\n"
+          "  public function m() { echo \"original\n\"; }\n"
+          "}\n"
+          "class A { use T; }\n"
+          "class B { use T; }\n"
+          "T::m();\n"
+          "$a1 = new A;\n"
+          "$a1->m();\n"
+          "fb_intercept(\"T::m\", function() { echo \"new\n\"; });\n"
+          "$a2 = new A;\n"
+          "$a2->m();\n"
+          "$b1 = new B;\n"
+          "$b1->m();\n"
+          "T::m();\n"
+          ,
+          "original\n"
+          "original\n"
+          "original\n"
+          "original\n"
+          "new\n");
+
+    MVCRONW("<?php "
+            "trait T1 { function foo() { yield 1; } }"
+            "class C { use T1 { T1::foo as static; } }",
+            "");
+
+    MVCRO("<?php"
+          "trait T1 { function foo() { yield 1; } }"
+          "trait T2 {"
+          "  use T1 {"
+          "    foo as bar;"
+          "  }"
+          "  function foo() { return bar(); }"
+          "}"
+          "class C { use T2; }"
+          "foreach (C::bar() as $x) var_dump($x);",
+          "int(1)\n");
 
   } // end trait tests with EnableHipHopSyntax
 
@@ -30352,6 +30732,15 @@ bool TestCodeRun::TestStrictMode() {
         "echo vidx($a, 0), Foo::BLEH, car($blork), $d();\n",
 
         "abcd");
+
+  MVCRO(
+    "<?hh\n"
+    "function __sm_intmap($s) { return array('intmap', $s); }\n"
+    "function __sm_strmap($s) { return array('strmap', $s); }\n"
+    "function __sm_vector($s) { return array('vector', $s); }\n"
+    "echo json_encode(intmap(10 => strmap('foo'=> [1,2,3])));",
+
+    "[\"intmap\",{\"10\":[\"strmap\",{\"foo\":[\"vector\",[1,2,3]]}]}]");
 
   return true;
 }

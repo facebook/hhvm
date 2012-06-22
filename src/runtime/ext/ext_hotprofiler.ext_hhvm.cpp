@@ -397,6 +397,42 @@ TypedValue* fg_xhprof_sample_disable(HPHP::VM::ActRec *ar) {
 
 
 
+/*
+void HPHP::f_fb_setprofile(HPHP::Variant const&)
+_ZN4HPHP15f_fb_setprofileERKNS_7VariantE
+
+callback => rdi
+*/
+
+void fh_fb_setprofile(TypedValue* callback) asm("_ZN4HPHP15f_fb_setprofileERKNS_7VariantE");
+
+TypedValue* fg_fb_setprofile(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv.m_data.num = 0LL;
+      rv._count = 0;
+      rv.m_type = KindOfNull;
+      fh_fb_setprofile((args-0));
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("fb_setprofile", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
 
 } // !HPHP
 

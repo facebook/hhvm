@@ -323,7 +323,7 @@ DefineFunction(
     'desc'   => "Returns the error code of the last PCRE regex execution.\n\nExample #1 preg_last_error() example\n\n\n\nBacktrack limit was exhausted!",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns one of the following constants (explained on their own page): PREG_NO_ERROR PREG_INTERNAL_ERROR PREG_BACKTRACK_LIMIT_ERROR (see also pcre.backtrack_limit) PREG_RECURSION_LIMIT_ERROR (see also pcre.recursion_limit) PREG_BAD_UTF8_ERROR PREG_BAD_UTF8_OFFSET_ERROR (since PHP 5.3.0)",
     ),
     'taint_observer' => false,

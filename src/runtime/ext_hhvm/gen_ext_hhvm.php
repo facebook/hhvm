@@ -293,14 +293,14 @@ function emitExtCall($obj, $ext_hhvm_cpp, $indent, $prefix) {
 function emitBuildExtraArgs($obj, $ext_hhvm_cpp, $indent) {
   fwrite($ext_hhvm_cpp, $indent . "Array extraArgs;\n");
   fwrite($ext_hhvm_cpp, $indent . "{\n");
-  fwrite($ext_hhvm_cpp, $indent . '  HPHP::VM::VarEnv* ve UNUSED = ' .
-                                  'ar->m_varEnv;' . "\n");
+  fwrite($ext_hhvm_cpp, $indent . '  HPHP::VM::ExtraArgs* ea UNUSED = ' .
+                                  'ar->getExtraArgs();' . "\n");
   $argstr = 'extraArg';
   fwrite($ext_hhvm_cpp, $indent . "  ArrayInit ai(count-" . $obj->maxNumParams .
          ", false);\n");
   fwrite($ext_hhvm_cpp, $indent . "  for (long long i = " . $obj->maxNumParams .
          "; i < count; ++i) {\n");
-  fwrite($ext_hhvm_cpp, $indent . '    TypedValue* extraArg = ve->getExtraArg(i-' . $obj->maxNumParams . ');'."\n");
+  fwrite($ext_hhvm_cpp, $indent . '    TypedValue* extraArg = ea->getExtraArg(i-' . $obj->maxNumParams . ');'."\n");
   fwrite($ext_hhvm_cpp, $indent . "    if (tvIsStronglyBound(" . $argstr . ")) {\n");
   fwrite($ext_hhvm_cpp, $indent . "      ai.setRef(i-" . $obj->maxNumParams .
          ", tvAsVariant(" . $argstr . "));\n");
@@ -724,9 +724,6 @@ function emit_instance_definition($out, $cname) {
                         "this_->m_cls->numDeclProperties();\n");
   fwrite($out, "    size_t builtinPropSize UNUSED = " .
                         "sizeof(c_" . $cname . ") - sizeof(ObjectData);\n");
-  fwrite($out, "    if (this_->m_propMap) {\n");
-  fwrite($out, "      this_->m_propMap->release();\n");
-  fwrite($out, "    }\n");
   fwrite($out, "    for (size_t i = 0; i < nProps; ++i) {\n");
   fwrite($out, "      TypedValue *prop = &this_->m_propVec[i];\n");
   fwrite($out, "      tvRefcountedDecRef(prop);\n");

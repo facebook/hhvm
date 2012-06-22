@@ -39,6 +39,21 @@ struct FilePlace {
   int line;
 };
 
+  // const char* points to a string which must remain valid for the lifetime
+  // of the StringData.  Clients cannot assume the new String will actually
+  // point to the literal passed in (StringData might make a copy anyway).
+enum AttachLiteralMode { AttachLiteral };
+
+  // const char* points to malloc'd memory that will be freed at any time
+  // between after creating the StringData, but no later than ~StringData.
+  // Clients must not access this memory after it is given to the StringData
+  // constructor.
+enum AttachStringMode { AttachString };
+
+  // const char* points to client-owned memory, StringData will copy it 
+  // at construct-time.
+enum CopyStringMode { CopyString };
+
 /**
  * Inner data class for String type. As a coding guideline, String and
  * StringOffset classes should delegate real string work to this class,
@@ -54,9 +69,9 @@ class StringData {
   const static unsigned int IsShared  = (1 << 30); // shared memory string
 
   const static unsigned int IsMask = IsLiteral | IsShared;
+  const static unsigned int LenMask = ~IsMask;
 
  public:
-  const static unsigned int LenMask = ~IsMask;
   const static unsigned int MaxSize = LenMask;
 
   /**
@@ -95,8 +110,28 @@ class StringData {
    * Different ways of constructing StringData. Default constructor at above
    * is actually only for SmartAllocator to pre-allocate the objects.
    */
-  StringData(const char *data, StringDataMode mode = AttachLiteral);
-  StringData(const char *data, int len, StringDataMode mode);
+  StringData(const char* data) {
+    initLiteral(data);
+  }
+  StringData(const char *data, AttachLiteralMode) {
+    initLiteral(data);
+  }
+  StringData(const char *data, AttachStringMode) {
+    initAttach(data);
+  }
+  StringData(const char *data, CopyStringMode) {
+    initCopy(data);
+  }
+
+  StringData(const char *data, int len, AttachLiteralMode) {
+    initLiteral(data, len);
+  }
+  StringData(const char* data, int len, AttachStringMode) {
+    initAttach(data, len);
+  }
+  StringData(const char* data, int len, CopyStringMode) {
+    initCopy(data, len);
+  }
 
   StringData(SharedVariant *shared);
 
@@ -219,6 +254,7 @@ class StringData {
   static StringData *GetStaticString(const StringData *str);
   static StringData *GetStaticString(const std::string &str);
   static StringData *GetStaticString(const char *str);
+  static StringData *GetStaticString(char c);
 
   /**
    * The order of the data members is significant. The _count field must
@@ -238,22 +274,24 @@ class StringData {
   TaintData m_taint_data;
 #endif
 
-  void releaseData();
-
+ private:
   /**
    * Helpers.
    */
+  void initLiteral(const char* data);
+  void initAttach(const char* data);
+  void initCopy(const char* data);
+  void initLiteral(const char* data, int len);
+  void initAttach(const char* data, int len);
+  void initCopy(const char* data, int len);
+  void releaseData();
   int numericCompare(const StringData *v2) const;
   void escalate(); // change to malloc-ed string
-  void removeChar(int offset);
 
   int64 getSharedStringHash() const;
   int64 hashHelper() const NEVER_INLINE;
+  void attach(const char *data, int len);
 
-  void assignHelper(const char *data, int len, StringDataMode mode);
-  void assign(const char *data, int len, StringDataMode mode);
-
- private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(StringData, _count) == FAST_REFCOUNT_OFFSET);
   }

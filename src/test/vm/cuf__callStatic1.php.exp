@@ -4,7 +4,7 @@ In A::__callStatic
 In A::__callStatic
 In A::__callStatic
 In A::__callStatic
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf__callStatic1.php on line 24
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf__callStatic1.php on line 33
 In A::__callStatic
 In A::__callStatic
-HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf__callStatic1.php on line 30
+HipHop Warning:  Invalid argument: function: method 'foo' not found in src/test/vm/cuf__callStatic1.php on line 22

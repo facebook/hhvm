@@ -72,6 +72,7 @@ static StaticString s_interface("interface");
 static StaticString s_trait("trait");
 static StaticString s_methods("methods");
 static StaticString s_properties("properties");
+static StaticString s_attributes("attributes");
 
 static StaticString s_trait_aliases("trait_aliases");
 static StaticString s_varg("varg");
@@ -262,6 +263,16 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
     }
     ret.set(s_static_variables, arr);
   }
+
+  // user attributes
+  {
+    Array arr = Array::Create();
+    for (unsigned i = 0; i < info->userAttrs.size(); ++i) {
+      const ClassInfo::UserAttributeInfo *ai = info->userAttrs[i];
+      arr.set(ai->name, ai->getValue());
+    }
+    ret.set(s_attributes, VarNR(arr));
+  }
 }
 
 static void set_function_info(Array &ret, const VM::Func* func) {
@@ -288,7 +299,7 @@ static void set_function_info(Array &ret, const VM::Func* func) {
       const VM::Func::ParamInfo& fpi = params[i];
 
       param.set(s_index, VarNR((int)i));
-      VarNR name(func->pnames()[i]);
+      VarNR name(func->localNames()[i]);
       param.set(s_name, name);
       const StringData* type = fpi.typeConstraint().exists() ?
         fpi.typeConstraint().typeName() : empty_string.get();
@@ -334,6 +345,18 @@ static void set_function_info(Array &ret, const VM::Func* func) {
       arr.set(VarNR(sv.name), VarNR(sv.phpCode));
     }
     ret.set(s_static_variables, VarNR(arr));
+  }
+
+  // user attributes
+  {
+    Array arr = Array::Create();
+    VM::Func::UserAttributeMap::const_iterator it;
+    for (it = func->userAttributes().begin();
+         it != func->userAttributes().end(); ++it) {
+      arr.set(String(const_cast<StringData*>(it->first)),
+              tvAsCVarRef(&it->second));
+    }
+    ret.set(s_attributes, VarNR(arr));
   }
 }
 
@@ -556,6 +579,18 @@ static Array get_class_info(const ClassInfo *cls) {
     set_doc_comment(ret, cls->getDocComment());
   }
 
+  // user attributes
+  {
+    Array arr = Array::Create();
+    const ClassInfo::UserAttributeVec &userAttrs = cls->getUserAttributeVec();
+    for (ClassInfo::UserAttributeVec::const_iterator iter = userAttrs.begin();
+         iter != userAttrs.end(); ++iter) {
+      ClassInfo::UserAttributeInfo *info = *iter;
+      arr.set(info->name, info->getValue());
+    }
+    ret.set(s_attributes, VarNR(arr));
+  }
+
   return ret;
 }
 
@@ -636,8 +671,9 @@ Array f_hphp_get_class_info(CVarRef name) {
     // methods
     {
       Array arr = Array::Create();
-      const VM::PreClass::MethodVec &methods = cls->preClass()->methods();
-      for (unsigned i = 0, s = methods.size(); i < s; ++i) {
+      VM::Func* const* methods = cls->preClass()->methods();
+      size_t const numMethods = cls->preClass()->numMethods();
+      for (VM::Slot i = 0; i < numMethods; ++i) {
         const VM::Func* m = methods[i];
         if (isdigit(m->name()->data()[0])) continue;
         Array info = Array::Create();
@@ -661,9 +697,11 @@ Array f_hphp_get_class_info(CVarRef name) {
     // properties
     {
       Array arr = Array::Create();
-      const VM::PreClass::PropertyVec& properties =
-        cls->preClass()->propertyVec();
-      for (unsigned i = 0, s = properties.size(); i < s; ++i) {
+      VM::PreClass::Prop* const* properties =
+        cls->preClass()->properties();
+      const size_t nProps = cls->preClass()->numProperties();
+
+      for (VM::Slot i = 0; i < nProps; ++i) {
         VM::PreClass::Prop* prop = properties[i];
         Array info = Array::Create();
         set_property_info(info, prop);
@@ -696,6 +734,19 @@ Array f_hphp_get_class_info(CVarRef name) {
       set_source_info(ret, pcls->unit()->filepath()->data(),
                       pcls->line1(), pcls->line2());
       set_doc_comment(ret, pcls->docComment());
+    }
+    
+    // user attributes
+    {
+      Array arr = Array::Create();
+      const VM::PreClass* pcls = cls->preClass();
+      VM::PreClass::UserAttributeMap::const_iterator it;
+      for (it = pcls->userAttributes().begin();
+           it != pcls->userAttributes().end(); ++it) {
+        arr.set(String(const_cast<StringData*>(it->first)),
+                tvAsCVarRef(&it->second));
+      }
+      ret.set(s_attributes, VarNR(arr));
     }
 
     return ret;

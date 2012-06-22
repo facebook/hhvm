@@ -39,6 +39,12 @@ namespace HPHP { namespace Util {
 #define FLATTEN        __attribute__((flatten))
 #define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
 
+#ifdef DEBUG
+#define DEBUG_ONLY /* nop */
+#else
+#define DEBUG_ONLY UNUSED
+#endif
+
 #ifdef HHVM
 #define HOT_FUNC_VM HOT_FUNC
 #define HOT_FUNC_HPHP

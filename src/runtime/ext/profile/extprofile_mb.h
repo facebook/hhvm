@@ -110,7 +110,7 @@ inline Variant x_mb_ereg_replace(CVarRef pattern, CStrRef replacement, CStrRef s
   return f_mb_ereg_replace(pattern, replacement, str, option);
 }
 
-inline int x_mb_ereg_search_getpos() {
+inline int64 x_mb_ereg_search_getpos() {
   FUNCTION_INJECTION_BUILTIN(mb_ereg_search_getpos);
   return f_mb_ereg_search_getpos();
 }

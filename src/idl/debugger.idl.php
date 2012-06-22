@@ -642,7 +642,7 @@ DefineFunction(
     'desc'   => "Count of total arguments.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "The count, not including user command itself.",
     ),
   ));
@@ -756,7 +756,7 @@ DefineFunction(
     'desc'   => "Returns current frame index.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "An index indicating which frame end user has moved to for inspection.",
     ),
   ));

@@ -28,7 +28,7 @@ int(862)
 --------------------
 _fbcufa_init.php begin
 _fbcufa_init.php end
-HipHop Fatal error: Uncaught exception exception 'Exception' with message 'blah' in src/test/vm/_fbcufa_init.php:4
+HipHop Fatal error: Uncaught exception 'Exception' with message 'blah' in src/test/vm/_fbcufa_init.php:4
 Stack trace:
 #0 (): doThrow()
 #1 (): xbox_process_call_message()

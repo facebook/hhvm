@@ -27,6 +27,8 @@ namespace VM {
 
 // Forward declaration.
 class Repo;
+class BlobEncoder;
+class BlobDecoder;
 
 enum RepoId {
   RepoIdInvalid = -1,
@@ -90,6 +92,8 @@ class RepoQuery {
 
   void bindBlob(const char* paramName, const void* blob, size_t size,
                 bool isStatic=false);
+  void bindBlob(const char* paramName, const BlobEncoder& blob,
+                bool isStatic=false);
   void bindMd5(const char* paramName, const MD5& md5);
   void bindTypedValue(const char* paramName, const TypedValue& tv);
   void bindText(const char* paramName, const char* text, size_t size,
@@ -119,6 +123,7 @@ class RepoQuery {
   bool isInt(int iCol);
   bool isNull(int iCol);
   void getBlob(int iCol, const void*& blob, size_t& size);
+  BlobDecoder getBlob(int iCol);
   void getMd5(int iCol, MD5& md5);
   void getTypedValue(int iCol, TypedValue& tv);
   void getText(int iCol, const char*& text);

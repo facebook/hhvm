@@ -1,4 +1,4 @@
-HipHop Fatal error: Uncaught exception exception 'Exception' with message 'throwing first' in src/test/vm/exception_handler.php:9
+HipHop Fatal error: Uncaught exception 'Exception' with message 'throwing first' in src/test/vm/exception_handler.php:9
 Stack trace:
 #0 src/test/vm/exception_handler.php(11): main()
 #1 {main}

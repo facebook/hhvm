@@ -28,6 +28,7 @@
 #include <util/stack_trace.h>
 #include <util/process.h>
 #include <util/file_cache.h>
+#include <util/hardware_counter.h>
 #include <runtime/base/preg.h>
 #include <util/parser/scanner.h>
 #include <runtime/base/server/access_log.h>
@@ -364,14 +365,21 @@ bool RuntimeOption::StrictFatal = false;
 #endif
 uint64 RuntimeOption::EvalVMStackElms = EvalVMStackElmsDefault;
 bool RuntimeOption::EvalJit = false;
+bool RuntimeOption::EvalAllowHhas = false;
+std::string RuntimeOption::EvalJitProfilePath = "/tmp/hhvm-profile";
+static const int kDefaultWarmupRequests = debug ? 3 : 7;
+uint32 RuntimeOption::EvalJitWarmupRequests = kDefaultWarmupRequests;
+bool RuntimeOption::EvalJitProfileRecord = false;
 bool RuntimeOption::EvalJitNoGdb = false;
 bool RuntimeOption::EvalProfileBC = false;
+std::string RuntimeOption::EvalProfileHWEvents = "";
 #define JIT_TRAMPOLINES_DEFAULT true
 bool RuntimeOption::EvalJitTrampolines = JIT_TRAMPOLINES_DEFAULT;
 uint32 RuntimeOption::EvalGdbSyncChunks = 128;
 bool RuntimeOption::EvalJitStressLease = false;
 bool RuntimeOption::EvalJitKeepDbgFiles = false;
 bool RuntimeOption::EvalJitEnableRenameFunction = false;
+std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::EvalJitCmovVarDeref = true;
 bool RuntimeOption::EvalJitTransCounters = false;
 bool RuntimeOption::EvalThreadingJit = false;
@@ -519,6 +527,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
 
   PidFile = config["PidFile"].getString("www.pid");
+
+  config["DynamicInvokeFunctions"].get(DynamicInvokeFunctions);
 
   {
     Hdf logger = config["Log"];
@@ -1110,8 +1120,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     StrictFatal = eval["StrictFatal"].getBool();
     EvalVMStackElms = eval["VMStackElms"].getUInt64(EvalVMStackElmsDefault);
     EvalJit = eval["Jit"].getBool(evalJitDefault());
+    EvalAllowHhas = eval["AllowHhas"].getBool(false);
     EvalJitNoGdb = eval["JitNoGdb"].getBool(false);
     EvalProfileBC = eval["ProfileBC"].getBool(false);
+    EvalProfileHWEvents = eval["ProfileHWEvents"].getString();
     EvalJitTrampolines =
       eval["JitTrampolines"].getBool(JIT_TRAMPOLINES_DEFAULT);
     EvalGdbSyncChunks = eval["GdbSyncChunks"].getInt32(128);
@@ -1119,10 +1131,13 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EvalJitStressLease = eval["JitStressLease"].getBool(false);
     EvalJitKeepDbgFiles = eval["JitKeepDbgFiles"].getBool(false);
     EvalJitEnableRenameFunction =
-      eval["JitEnableRenameFunction"].getBool(false);
+      eval["JitEnableRenameFunction"].getBool(false) || !EvalJit;
     EvalJitDisabledByHphpd = eval["EvalJitDisabledByHphpd"].getBool(false);
     EvalJitCmovVarDeref = eval["JitCmovVarDeref"].getBool(true);
     EvalJitTransCounters = eval["JitTransCounters"].getBool(false);
+    EvalJitProfilePath = eval["JitProfilePath"].getString();
+    EvalJitProfileRecord = eval["JitProfileRecord"].getBool(false);
+    EvalJitWarmupRequests = eval["JitWarmupRequests"].getInt32(kDefaultWarmupRequests);
     EvalDumpBytecode = eval["DumpBytecode"].getBool(false);
     EvalDumpTC = eval["DumpTC"].getBool(false);
     EvalDumpAst = eval["DumpAst"].getBool(false);
@@ -1184,12 +1199,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       Hdf repoCentral = repo["Central"];
       // Repo.Central.Path.
       RepoCentralPath = repoCentral["Path"].getString();
-      if (!empty && RepoCentralPath.empty()) {
-        const char* HHVM_REPO_CENTRAL_PATH = getenv("HHVM_REPO_CENTRAL_PATH");
-        if (HHVM_REPO_CENTRAL_PATH != NULL) {
-          RepoCentralPath = HHVM_REPO_CENTRAL_PATH;
-        }
-      }
     }
     {
       Hdf repoEval = repo["Eval"];

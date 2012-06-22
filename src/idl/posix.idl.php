@@ -92,7 +92,7 @@ DefineFunction(
     'desc'   => "Retrieve the error number set by the last posix function that failed. The system error message associated with the errno may be checked with posix_strerror().",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the errno (error number) set by the last posix function that failed. If no errors exist, 0 is returned.",
     ),
     'taint_observer' => false,
@@ -116,7 +116,7 @@ DefineFunction(
     'desc'   => "Return the numeric effective group ID of the current process.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns an integer of the effective group ID.",
     ),
     'taint_observer' => false,
@@ -128,7 +128,7 @@ DefineFunction(
     'desc'   => "Return the numeric effective user ID of the current process. See also posix_getpwuid() for information on how to convert this into a useable username.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the user id, as an integer",
     ),
     'taint_observer' => false,
@@ -140,7 +140,7 @@ DefineFunction(
     'desc'   => "Return the numeric real group ID of the current process.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the real group id, as an integer.",
     ),
     'taint_observer' => false,
@@ -232,7 +232,7 @@ DefineFunction(
     'desc'   => "Return the process group identifier of the current process.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the identifier, as an integer.",
     ),
     'taint_observer' => false,
@@ -244,7 +244,7 @@ DefineFunction(
     'desc'   => "Return the process identifier of the current process.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the identifier, as an integer.",
     ),
     'taint_observer' => false,
@@ -256,7 +256,7 @@ DefineFunction(
     'desc'   => "Return the process identifier of the parent process of the current process.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the identifier, as an integer.",
     ),
     'taint_observer' => false,
@@ -337,7 +337,7 @@ DefineFunction(
     'desc'   => "Return the numeric real user ID of the current process.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the user id, as an integer",
     ),
     'taint_observer' => false,
@@ -557,7 +557,7 @@ DefineFunction(
     'desc'   => "Make the current process a session leader.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the session id, or -1 on errors.",
     ),
     'taint_observer' => false,

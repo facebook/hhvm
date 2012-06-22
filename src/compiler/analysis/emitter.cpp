@@ -22,6 +22,7 @@
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/peephole.h>
 #include <runtime/vm/repo.h>
+#include <runtime/vm/as.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/eval/runtime/file_repository.h>
@@ -259,8 +260,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
     getUnitEmitter().emitOp(Op##name); \
     IMPL_##imm; \
     getUnitEmitter().recordSourceLocation(m_tempLoc ? m_tempLoc.get() : \
-                                          m_node->getLocation().get(), curPos, \
-                                          getUnitEmitter().bcPos()); \
+                                          m_node->getLocation().get(), curPos); \
     if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack(); \
     getEmitterVisitor().setPrevOpcode(opcode); \
   }
@@ -1412,6 +1412,36 @@ static StringData* getClassName(ExpressionPtr e) {
   return NULL;
 }
 
+void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn) {
+  int ref = -1;
+  if (fn->hasAnyContext(Expression::RefValue |
+                        Expression::DeepReference |
+                        Expression::LValue |
+                        Expression::OprLValue |
+                        Expression::UnsetContext) ||
+      fn->isUnused()) {
+    return;
+  }
+  if (fn->isValid() && fn->getFuncScope()) {
+    ref = fn->getFuncScope()->isRefReturn();
+  } else if (!fn->getName().empty()) {
+    FunctionScope::FunctionInfoPtr fi =
+      FunctionScope::GetFunctionInfo(fn->getName());
+    if (!fi || !fi->getMaybeRefReturn()) ref = false;
+  }
+  if (ref >= 0) {
+    ASSERT(m_evalStack.get(m_evalStack.size() - 1) == StackSym::R);
+    Offset cur = m_ue.bcPos();
+    if (ref) {
+      e.BoxR();
+    } else {
+      e.UnboxR();
+    }
+    m_metaMap[cur].push_back(
+      Unit::MetaInfo(Unit::MetaInfo::NopOut, -1, 0));
+  }
+}
+
 void EmitterVisitor::visitKids(ConstructPtr c) {
   for (int i = 0, nk = c->getKidCount(); i < nk; i++) {
     ConstructPtr kid(c->getNthKid(i));
@@ -1666,12 +1696,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         if (visit(r->getRetExp())) {
           if (r->getRetExp()->getContext() & Expression::RefValue) {
             emitConvertToVar(e);
+            emitFreePendingIters(e);
             e.RetV();
           } else {
             emitConvertToCell(e);
+            emitFreePendingIters(e);
             e.RetC();
           }
         } else {
+          emitFreePendingIters(e);
           e.Null();
           e.RetC();
         }
@@ -2188,28 +2221,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         }
 
         if (b->isShortCircuitOperator()) {
-          // Kinda crappy but I don't have to descend into the tree this way
-          // will revisit
-          bool isOr = op == T_LOGICAL_OR || op == T_BOOLEAN_OR;
-          visit(b->getExp1());
-          emitConvertToCell(e);
-          Label shortCirc;
-          if (isOr) {
-            e.JmpNZ(shortCirc);
-          } else {
-            e.JmpZ(shortCirc);
-          }
-          visit(b->getExp2());
-          emitConvertToCell(e);
-          e.CastBool();
-          Label done;
+          Label tru, fls, done;
+          visitIfCondition(b, e, tru, fls, false);
+          if (fls.isUsed()) fls.set(e);
+          e.False();
           e.Jmp(done);
-          shortCirc.set(e);
-          if (isOr) {
-            e.True();
-          } else {
-            e.False();
-          }
+          tru.set(e);
+          e.True();
           done.set(e);
           return true;
         }
@@ -2395,7 +2413,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       case Expression::KindOfArrayElementExpression: {
         ArrayElementExpressionPtr ae(
           static_pointer_cast<ArrayElementExpression>(node));
-        if (!ae->isSuperGlobal()) {
+        if (!ae->isSuperGlobal() || !ae->getOffset()) {
           visit(ae->getVariable());
           // XHP syntax allows for expressions like "($a =& $b)[0]". We
           // handle this by unboxing the var produced by "($a =& $b)".
@@ -2760,7 +2778,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           }
         }
         e.FCall(numParams);
-
+        if (Option::WholeProgram) {
+          fixReturnType(e, om);
+        }
         return true;
       }
 
@@ -2844,7 +2864,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             }
             break;
           }
-          case KindOfInt32:
           case KindOfInt64:
             e.Int(v.getInt64());
             break;
@@ -3055,10 +3074,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         const static StringData* parentName =
           StringData::GetStaticString("closure");
         const Location* sLoc = ce->getLocation().get();
-        PreClassEmitter* pce =
-          m_ue.newPreClassEmitter(className, AttrNone, parentName, NULL,
-                                  sLoc->line0, sLoc->line1, m_ue.bcPos(),
-                                  /* hoistable = */ false);
+        PreClassEmitter* pce = m_ue.newPreClassEmitter(className,
+          /* hoistable = */ false);
+        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), AttrNone,
+                  parentName, false, NULL);
         e.DefCls(pce->id());
 
         // We're still at the closure definition site. Emit code to instantiate
@@ -3126,12 +3145,6 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
                      "was found (at offset %d)",
                      m_ue.bcPos());
   return 0;
-}
-
-static void encodeIvaToVector(std::vector<uchar>& out, int32_t val) {
-  size_t currentLen = out.size();
-  out.resize(out.size() + 4);
-  out.resize(currentLen + encodeVariableSizeImm(val, &out[currentLen]));
 }
 
 void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
@@ -3462,7 +3475,6 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                      int paramId) {
   visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
-  emitClsIfSPropBase(e);
   if (Option::WholeProgram && !exp->hasAnyContext(Expression::InvokeArgument)) {
     if (exp->hasContext(Expression::RefValue)) {
       emitVGet(e);
@@ -3476,6 +3488,7 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
     }
     return;
   }
+  emitClsIfSPropBase(e);
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
@@ -3539,7 +3552,7 @@ void EmitterVisitor::emitIsset(Emitter& e) {
       // code is valid. Once the parser handles this correctly,
       // the R and C cases can go.
       case StackSym::R:  e.UnboxR(); // fall through
-      case StackSym::C:  e.IsNullC(); e.Not(); break;
+      case StackSym::C:  e.IssetC(); break;
       default: {
         unexpectedStackSym(sym, "emitIsset");
         break;
@@ -3781,6 +3794,12 @@ void EmitterVisitor::emitIncDec(Emitter& e, unsigned char cop) {
 
 void EmitterVisitor::emitConvertToCell(Emitter& e) {
   emitCGet(e);
+}
+
+void EmitterVisitor::emitFreePendingIters(Emitter& e) {
+  for (unsigned i = 0; i < m_pendingIters.size(); ++i) {
+    e.IterFree(m_pendingIters[i]);
+  }
 }
 
 void EmitterVisitor::emitConvertSecondToCell(Emitter& e) {
@@ -4257,6 +4276,11 @@ void EmitterVisitor::emitPostponedMeths() {
       StringData::GetStaticString(p.m_meth->getDocComment());
     ModifierExpressionPtr mod(p.m_meth->getModifiers());
     Attr attrs = buildAttrs(mod, p.m_meth->isRef());
+
+    if (p.m_meth->getFunctionScope()->mayUseVV()) {
+      attrs = (Attr)(attrs | AttrMayUseVV);
+    }
+
     if (Option::WholeProgram) {
       if (!funcScope->isRedeclaring()) {
         attrs = (Attr)(attrs | AttrUnique);
@@ -4265,7 +4289,7 @@ void EmitterVisitor::emitPostponedMeths() {
         if (p.m_meth->getName() == cls->getName() &&
             !cls->classNameCtor()) {
           /*
-            In wholeprogram mode, we inline the traits into their
+            In WholeProgram mode, we inline the traits into their
             classes. If a trait method name matches the class name
             its NOT a constructor.
             Putting AttrTrait on a method, tells it not to treat
@@ -4385,8 +4409,8 @@ void EmitterVisitor::newContinuationClass(const StringData* name) {
   StringData* className = continuationClassName(name);
   static const StringData* parentName =
     StringData::GetStaticString("GenericContinuation");
-  m_ue.newPreClassEmitter(className, AttrNone, parentName, NULL,
-                          0, 0, m_ue.bcPos(), true);
+  PreClassEmitter* pce = m_ue.newPreClassEmitter(className, true);
+  pce->init(0, 0, m_ue.bcPos(), AttrNone, parentName, true, NULL);
 }
 
 void EmitterVisitor::emitPostponedCtors() {
@@ -4458,10 +4482,11 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
 
     bool conditional;
     if (pinit) {
-      PreClassEmitter::Prop* preProp = p.m_fe->pce()->lookupProp(propName);
-      if ((preProp->attrs() & (AttrPrivate|AttrStatic)) == AttrPrivate) {
+      const PreClassEmitter::Prop& preProp =
+        p.m_fe->pce()->lookupProp(propName);
+      if ((preProp.attrs() & (AttrPrivate|AttrStatic)) == AttrPrivate) {
         conditional = false;
-        propName = preProp->mangledName();
+        propName = preProp.mangledName();
       } else {
         conditional = true;
       }
@@ -4809,6 +4834,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     }
   }
   e.FCall(numParams);
+  if (Option::WholeProgram) {
+    fixReturnType(e, node);
+  }
 }
 
 void EmitterVisitor::emitClassTraitPrecRule(PreClassEmitter* pce,
@@ -4902,10 +4930,9 @@ bool EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
   */
   if (nInterfaces > firstInterface && SystemLib::s_inited) hoistable = false;
   if (cNode->getUsedTraitNames().size()) hoistable = false;
-  PreClassEmitter* pce = m_ue.newPreClassEmitter(className, attr,
-                                                 parentName, classDoc,
-                                                 sLoc->line0, sLoc->line1,
-                                                 m_ue.bcPos(), hoistable);
+  PreClassEmitter* pce = m_ue.newPreClassEmitter(className, hoistable);
+  pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attr, parentName,
+            hoistable, classDoc);
   e.DefCls(pce->id());
   for (int i = firstInterface; i < nInterfaces; ++i) {
     pce->addInterface(StringData::GetStaticString(bases[i]));
@@ -5124,6 +5151,17 @@ void EmitterVisitor::emitBreakHandler(Emitter& e, Label& brkTarg,
   }
 }
 
+class ForeachIterGuard {
+  EmitterVisitor& m_ev;
+ public:
+  ForeachIterGuard(EmitterVisitor& ev, Id iterId) : m_ev(ev) {
+    m_ev.pushIterId(iterId);
+  }
+  ~ForeachIterGuard() {
+    m_ev.popIterId();
+  }
+};
+
 void EmitterVisitor::emitForeach(Emitter& e,
                                  ExpressionPtr val, ExpressionPtr key,
                                  StatementPtr body, bool strong) {
@@ -5132,6 +5170,7 @@ void EmitterVisitor::emitForeach(Emitter& e,
   Label brkHand;
   Label cntHand;
   Id itId = m_curFunc->allocIterator();
+  ForeachIterGuard fig(*this, itId);
   if (strong) {
     e.IterInitM(itId, exit);
   } else {
@@ -5627,7 +5666,8 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
   static const StringData* valStr = StringData::GetStaticString("value");
   static const StringData* exnStr = StringData::GetStaticString("exception");
 
-  fe->init(0, 0, ue.bcPos(), AttrPublic, false, empty_string.get());
+  Attr attrs = (Attr)(AttrPublic | AttrMayUseVV);
+  fe->init(0, 0, ue.bcPos(), attrs, false, empty_string.get());
   switch (m) {
     case METH_SEND:
     case METH_RAISE:
@@ -5768,9 +5808,10 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     Entry& e = classEntries[i];
     StringData* parentName =
       StringData::GetStaticString(e.ci->getParentClass().get());
-    PreClassEmitter* pce = ue->newPreClassEmitter(
-      e.name, AttrNone, parentName, NULL, 0, 0,
-      ue->bcPos(), /* hoistable */ true);
+    PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
+      /* hoistable */ true);
+    pce->init(0, 0, ue->bcPos(), AttrNone, parentName,
+      /* hoistable */ true, NULL);
     pce->setBuiltinClassInfo(e.ci, e.info->m_InstanceCtor, e.info->m_sizeof);
     {
       ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();
@@ -5935,6 +5976,18 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       unitOrigin = UnitOriginEval;
     }
     ScopeGuard sg(SymbolTable::Purge);
+
+    // Check if this file contains raw hip hop bytecode instead of php.
+    // For now this is just dictated by file extension, and doesn't ever
+    // commit to the repo.
+    if (RuntimeOption::EvalAllowHhas) {
+      if (const char* dot = strrchr(filename, '.')) {
+        const char hhbc_ext[] = "hhas";
+        if (!strcmp(dot + 1, hhbc_ext)) {
+          return VM::assemble_file(filename, md5);
+        }
+      }
+    }
 
     AnalysisResultPtr ar(new AnalysisResult());
     Scanner scanner(code, codeLen, RuntimeOption::ScannerType, filename);

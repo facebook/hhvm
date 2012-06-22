@@ -141,7 +141,6 @@ bool Parameter::checkTypeHint(DataType hint, DataType type) const {
     return (type == hint || type == KindOfNull);
   case KindOfInt64:
     return (type == KindOfInt64 ||
-            type == KindOfInt32 ||
             type == KindOfNull);
   case KindOfString:
     return (type == KindOfString ||
@@ -219,8 +218,7 @@ void Parameter::bind(FuncScopeVariableEnvironment &fenv, CVarRef val,
                      bool ref /* = false */) const {
   if (m_kind != KindOfNull) {
     DataType otype = val.getType();
-    if (otype == KindOfInt32) otype = KindOfInt64;
-    else if (otype == KindOfStaticString) otype = KindOfString;
+    if (otype == KindOfStaticString) otype = KindOfString;
     ASSERT(otype != KindOfUninit);
     if (!(m_nullDefault && otype == KindOfNull ||
           otype == m_kind &&

@@ -42,9 +42,6 @@ public:
     c_Memcached_Instance *this_ = (c_Memcached_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_Memcached) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -1513,14 +1510,14 @@ TypedValue* tg_9Memcached_getOption(HPHP::VM::ActRec *ar) {
 }
 
 /*
-int HPHP::c_Memcached::t_getresultcode()
+long long HPHP::c_Memcached::t_getresultcode()
 _ZN4HPHP11c_Memcached15t_getresultcodeEv
 
 (return value) => rax
 this_ => rdi
 */
 
-int th_9Memcached_getResultCode(ObjectData* this_) asm("_ZN4HPHP11c_Memcached15t_getresultcodeEv");
+long long th_9Memcached_getResultCode(ObjectData* this_) asm("_ZN4HPHP11c_Memcached15t_getresultcodeEv");
 
 TypedValue* tg_9Memcached_getResultCode(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

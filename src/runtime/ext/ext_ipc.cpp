@@ -19,6 +19,7 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/base/variable_unserializer.h>
 #include <util/lock.h>
+#include <util/alloc.h>
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -34,6 +35,8 @@
 #define MSGBUF_MTYPE(b) (b)->mtype
 #define MSGBUF_MTEXT(b) (b)->mtext
 #endif
+
+using HPHP::Util::ScopedMem;
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(sysvmsg);
@@ -171,7 +174,7 @@ bool f_msg_send(CObjRef queue, int64 msgtype, CVarRef message,
   }
   int len = data.length();
   buffer = (struct msgbuf *)calloc(len + sizeof(struct msgbuf), 1);
-  String deleter((char*)buffer, 1, AttachString);
+  ScopedMem deleter(buffer);
   MSGBUF_MTYPE(buffer) = msgtype;
   memcpy(MSGBUF_MTEXT(buffer), (const char *)data, len + 1);
 
@@ -214,7 +217,7 @@ bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, VRefParam msgtype,
 
   struct msgbuf *buffer =
     (struct msgbuf *)calloc(maxsize + sizeof(struct msgbuf), 1);
-  String deleter((char*)buffer, 1, AttachString);
+  ScopedMem deleter(buffer);
 
   int result = msgrcv(q->id, buffer, maxsize, desiredmsgtype, realflags);
   if (result < 0) {

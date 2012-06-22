@@ -80,13 +80,13 @@ TypedValue* fg_pcntl_exec(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_pcntl_fork()
+long long HPHP::f_pcntl_fork()
 _ZN4HPHP12f_pcntl_forkEv
 
 (return value) => rax
 */
 
-int fh_pcntl_fork() asm("_ZN4HPHP12f_pcntl_forkEv");
+long long fh_pcntl_fork() asm("_ZN4HPHP12f_pcntl_forkEv");
 
 TypedValue* fg_pcntl_fork(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -313,7 +313,7 @@ TypedValue* fg_pcntl_signal(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_pcntl_wait(HPHP::VRefParamValue const&, int)
+long long HPHP::f_pcntl_wait(HPHP::VRefParamValue const&, int)
 _ZN4HPHP12f_pcntl_waitERKNS_14VRefParamValueEi
 
 (return value) => rax
@@ -321,7 +321,7 @@ status => rdi
 options => rsi
 */
 
-int fh_pcntl_wait(TypedValue* status, int options) asm("_ZN4HPHP12f_pcntl_waitERKNS_14VRefParamValueEi");
+long long fh_pcntl_wait(TypedValue* status, int options) asm("_ZN4HPHP12f_pcntl_waitERKNS_14VRefParamValueEi");
 
 TypedValue * fg1_pcntl_wait(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pcntl_wait(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -367,7 +367,7 @@ TypedValue* fg_pcntl_wait(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_pcntl_waitpid(int, HPHP::VRefParamValue const&, int)
+long long HPHP::f_pcntl_waitpid(int, HPHP::VRefParamValue const&, int)
 _ZN4HPHP15f_pcntl_waitpidEiRKNS_14VRefParamValueEi
 
 (return value) => rax
@@ -376,7 +376,7 @@ status => rsi
 options => rdx
 */
 
-int fh_pcntl_waitpid(int pid, TypedValue* status, int options) asm("_ZN4HPHP15f_pcntl_waitpidEiRKNS_14VRefParamValueEi");
+long long fh_pcntl_waitpid(int pid, TypedValue* status, int options) asm("_ZN4HPHP15f_pcntl_waitpidEiRKNS_14VRefParamValueEi");
 
 TypedValue * fg1_pcntl_waitpid(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pcntl_waitpid(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -837,14 +837,14 @@ TypedValue* fg_proc_terminate(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_proc_close(HPHP::Object const&)
+long long HPHP::f_proc_close(HPHP::Object const&)
 _ZN4HPHP12f_proc_closeERKNS_6ObjectE
 
 (return value) => rax
 process => rdi
 */
 
-int fh_proc_close(Value* process) asm("_ZN4HPHP12f_proc_closeERKNS_6ObjectE");
+long long fh_proc_close(Value* process) asm("_ZN4HPHP12f_proc_closeERKNS_6ObjectE");
 
 TypedValue * fg1_proc_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_proc_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

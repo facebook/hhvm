@@ -112,6 +112,19 @@ bool TestCodeError::TestUnknownClass() {
   VE(UnknownClass, "<?php $a = new T();");
 
   VEN(UnknownClass, "<?php class A { function foo(self $a) {}}");
+  VEN(UnknownClass,
+      "<?php "
+      "trait A {"
+      "  function foo($f) {"
+      "    echo self::FOO+parent::FOO;"
+      "    echo self::$f()+parent::$f();"
+      "    var_dump(new self, new parent);"
+      "    echo self::bar()+parent::bar();"
+      "    echo self::$foo+parent::$foo;"
+      "    try {} catch (self $p) {}"
+      "    try {} catch (parent $p) {}"
+      "  }"
+      "}");
   return true;
 }
 
@@ -355,21 +368,6 @@ bool TestCodeError::TestInvalidOverride() {
 
   VE(InvalidOverride,
      "<?php class A { public $x; } class B extends A { protected $x; }");
-
-  return true;
-}
-
-bool TestCodeError::TestReassignThis() {
-  VE(ReassignThis,
-     "<?php "
-     "class Foo {"
-     "  function Bar() {"
-     "    $__this = $this;"
-     "    $this = null;"
-     "    debug_backtrace();"
-     "    $this = $__this;"
-     "  }"
-     "}");
 
   return true;
 }

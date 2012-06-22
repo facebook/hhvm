@@ -220,7 +220,7 @@ public:
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  virtual bool inPseudoMain() {
+  virtual bool inPseudoMain() const {
     return false;
   }
 

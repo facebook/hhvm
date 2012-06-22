@@ -304,9 +304,6 @@ public:
     c_DebuggerProxyCmdUser_Instance *this_ = (c_DebuggerProxyCmdUser_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DebuggerProxyCmdUser) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -551,9 +548,6 @@ public:
     c_DebuggerClientCmdUser_Instance *this_ = (c_DebuggerClientCmdUser_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DebuggerClientCmdUser) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -691,10 +685,10 @@ TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, HPHP::VM::ActRec* 
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -721,10 +715,10 @@ TypedValue* tg_21DebuggerClientCmdUser_print(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-1, false);
             for (long long i = 1; i < count; ++i) {
-              TypedValue* extraArg = ve->getExtraArg(i-1);
+              TypedValue* extraArg = ea->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
               } else {
@@ -779,10 +773,10 @@ TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, HPHP::VM::ActRec* a
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -809,10 +803,10 @@ TypedValue* tg_21DebuggerClientCmdUser_help(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-1, false);
             for (long long i = 1; i < count; ++i) {
-              TypedValue* extraArg = ve->getExtraArg(i-1);
+              TypedValue* extraArg = ea->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
               } else {
@@ -867,10 +861,10 @@ TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, HPHP::VM::ActRec* a
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -897,10 +891,10 @@ TypedValue* tg_21DebuggerClientCmdUser_info(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-1, false);
             for (long long i = 1; i < count; ++i) {
-              TypedValue* extraArg = ve->getExtraArg(i-1);
+              TypedValue* extraArg = ea->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
               } else {
@@ -955,10 +949,10 @@ TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, HPHP::VM::ActRec*
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -985,10 +979,10 @@ TypedValue* tg_21DebuggerClientCmdUser_output(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-1, false);
             for (long long i = 1; i < count; ++i) {
-              TypedValue* extraArg = ve->getExtraArg(i-1);
+              TypedValue* extraArg = ea->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
               } else {
@@ -1043,10 +1037,10 @@ TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, HPHP::VM::ActRec* 
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -1073,10 +1067,10 @@ TypedValue* tg_21DebuggerClientCmdUser_error(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-1, false);
             for (long long i = 1; i < count; ++i) {
-              TypedValue* extraArg = ve->getExtraArg(i-1);
+              TypedValue* extraArg = ea->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
               } else {
@@ -1209,10 +1203,10 @@ TypedValue* tg1_21DebuggerClientCmdUser_ask(TypedValue* rv, HPHP::VM::ActRec* ar
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-1);
+      TypedValue* extraArg = ea->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -1237,10 +1231,10 @@ TypedValue* tg_21DebuggerClientCmdUser_ask(HPHP::VM::ActRec *ar) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           Array extraArgs;
           {
-            HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-1, false);
             for (long long i = 1; i < count; ++i) {
-              TypedValue* extraArg = ve->getExtraArg(i-1);
+              TypedValue* extraArg = ea->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
               } else {
@@ -1420,10 +1414,10 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, HPHP::VM::ActRe
   }
   Array extraArgs;
   {
-    HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-2, false);
     for (long long i = 2; i < count; ++i) {
-      TypedValue* extraArg = ve->getExtraArg(i-2);
+      TypedValue* extraArg = ea->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-2, tvAsVariant(extraArg));
       } else {
@@ -1450,10 +1444,10 @@ TypedValue* tg_21DebuggerClientCmdUser_helpCmds(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
-            HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-2, false);
             for (long long i = 2; i < count; ++i) {
-              TypedValue* extraArg = ve->getExtraArg(i-2);
+              TypedValue* extraArg = ea->getExtraArg(i-2);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-2, tvAsVariant(extraArg));
               } else {
@@ -1807,14 +1801,14 @@ TypedValue* tg_21DebuggerClientCmdUser_arg(HPHP::VM::ActRec *ar) {
 }
 
 /*
-int HPHP::c_DebuggerClientCmdUser::t_argcount()
+long long HPHP::c_DebuggerClientCmdUser::t_argcount()
 _ZN4HPHP23c_DebuggerClientCmdUser10t_argcountEv
 
 (return value) => rax
 this_ => rdi
 */
 
-int th_21DebuggerClientCmdUser_argCount(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_argcountEv");
+long long th_21DebuggerClientCmdUser_argCount(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_argcountEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_argCount(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -2197,14 +2191,14 @@ TypedValue* tg_21DebuggerClientCmdUser_getStackTrace(HPHP::VM::ActRec *ar) {
 }
 
 /*
-int HPHP::c_DebuggerClientCmdUser::t_getframe()
+long long HPHP::c_DebuggerClientCmdUser::t_getframe()
 _ZN4HPHP23c_DebuggerClientCmdUser10t_getframeEv
 
 (return value) => rax
 this_ => rdi
 */
 
-int th_21DebuggerClientCmdUser_getFrame(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_getframeEv");
+long long th_21DebuggerClientCmdUser_getFrame(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_getframeEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_getFrame(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -2405,9 +2399,6 @@ public:
     c_DebuggerClient_Instance *this_ = (c_DebuggerClient_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_DebuggerClient) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);

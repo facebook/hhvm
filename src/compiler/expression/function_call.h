@@ -59,6 +59,7 @@ public:
   FunctionScopeRawPtr getFuncScope() const { return m_funcScope; }
   bool canInvokeFewArgs();
   void setArrayParams() { m_arrayParams = true; }
+  bool isValid() const { return m_valid; }
 
 protected:
   void outputDynamicCall(CodeGenerator &cg,

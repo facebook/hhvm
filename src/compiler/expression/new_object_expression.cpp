@@ -95,22 +95,17 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   m_funcScope.reset();
   ConstructPtr self = shared_from_this();
   if (!m_name.empty() && !isStatic()) {
-    ClassScopePtr cls = resolveClass();
+    ClassScopePtr cls = resolveClassWithChecks();
     m_name = m_className;
-
     if (!cls) {
-      if (isRedeclared()) {
-        getScope()->getVariables()->
-          setAttribute(VariableTable::NeedGlobalPointer);
-      } else if (getScope()->isFirstPass()) {
-        Compiler::Error(Compiler::UnknownClass, self);
-      }
       if (m_params) m_params->inferAndCheck(ar, Type::Any, false);
       return Type::Object;
     }
 
     if (getScope()->isFirstPass() &&
-        (cls->isInterface() || cls->isAbstract())) {
+        (cls->isTrait() ?
+         !isSelf() && !isParent() :
+         cls->isInterface() || cls->isAbstract())) {
       Compiler::Error(Compiler::InvalidInstantiation, self);
     }
 

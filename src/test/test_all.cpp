@@ -63,22 +63,8 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
       RUN_TESTSUITE(TestCodeRun);
       return;
     }
-  } else {
-    if (suite == "TestCodeRunEval") {
-      suite = "TestCodeRun";
-      Option::EnableEval = Option::FullEval;
-      RuntimeOption::EvalJit = false;
-      RUN_TESTSUITE(TestCodeRun);
-      return;
-    }
   }
   if (suite == "TestServer") {
-    RUN_TESTSUITE(TestServer);
-    return;
-  }
-  if (suite == "TestServerEval") {
-    suite = "TestServer";
-    Option::EnableEval = Option::FullEval;
     RUN_TESTSUITE(TestServer);
     return;
   }

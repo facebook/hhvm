@@ -396,33 +396,21 @@ MethodStatementPtr
 ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
                               AnalysisResultPtr   ar,
                               string              methName,
-                              GeneratorRenameMap& genRenameMap) {
+                              GeneratorRenameMap& genRenameMap,
+                              const std::map<string, MethodStatementPtr>&
+                              importedTraitMethods) {
   MethodStatementPtr meth = traitMethod.m_method;
   string origMethName = traitMethod.m_originalName;
   ModifierExpressionPtr modifiers = traitMethod.m_modifiers;
 
-  // For abstract methods, simply return if method already exists in the class
-  if ((modifiers && modifiers->isAbstract()) ||
-      (!modifiers && meth->getModifiers()->isAbstract())) {
-    if (findFunction(ar, methName, true)) {
-      return MethodStatementPtr();
-    }
-  }
-
   if (meth->getOrigGeneratorFunc()) {
     const string &name = meth->getOrigGeneratorFunc()->getName();
-    if (m_importMethToTraitMap.find(name) == m_importMethToTraitMap.end()) {
+    if (!importedTraitMethods.count(name)) {
       // Dont import the generator, if the origGenerator wasnt imported
       // this happens when a generator in the trait is hidden by a non-generator
       // method in the importing class.
       return MethodStatementPtr();
     }
-  }
-
-  // Check for errors before cloning
-  if (modifiers && modifiers->isStatic()) {
-    Compiler::Error(Compiler::InvalidAccessModifier, traitMethod.m_ruleStmt);
-    return MethodStatementPtr();
   }
 
   MethodStatementPtr cloneMeth = dynamic_pointer_cast<MethodStatement>(
@@ -459,11 +447,6 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
   ar->recordFunctionSource(cloneMeth->getFullName(), meth->getLocation(),
                            meth->getFileScope()->getName());
 
-  // OrigGenerator methods need to have their hphp_create_continuation calls
-  // patched to the new generator name.
-  if (cloneMeth->getGeneratorFunc()) {
-    renameCreateContinuationCalls(ar, cloneMeth, genRenameMap);
-  }
   return cloneMeth;
 }
 
@@ -730,8 +713,8 @@ void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
   }
 }
 
-const string& ClassScope::getNewGeneratorName(FunctionScopePtr    genFuncScope,
-                                              GeneratorRenameMap& genRenameMap) {
+const string& ClassScope::getNewGeneratorName(
+  FunctionScopePtr genFuncScope, GeneratorRenameMap &genRenameMap) {
   ASSERT(genFuncScope->isGenerator());
   const string& oldName = genFuncScope->getName();
   GeneratorRenameMap::iterator mapIt = genRenameMap.find(oldName);
@@ -745,25 +728,27 @@ const string& ClassScope::getNewGeneratorName(FunctionScopePtr    genFuncScope,
 }
 
 void
-ClassScope::renameCreateContinuationCalls(AnalysisResultPtr   ar,
-                                          ConstructPtr        c,
-                                          GeneratorRenameMap& genRenameMap) {
+ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
+                                          ConstructPtr      c,
+                                          ImportedMethodMap &importedMethods) {
   if (!c) return;
   SimpleFunctionCallPtr funcCall = dynamic_pointer_cast<SimpleFunctionCall>(c);
   if (funcCall && funcCall->getName() == "hphp_create_continuation") {
 
     ExpressionListPtr params = funcCall->getParams();
     ASSERT(params->getCount() >= 2);
-    const string& oldClassName =
+    const string &oldClassName =
       dynamic_pointer_cast<ScalarExpression>((*params)[0])->getString();
     ClassScopePtr oldClassScope = ar->findClass(oldClassName);
     if (!oldClassScope || !oldClassScope->isTrait()) return;
 
-    const string& oldGenName =
+    const string &oldGenName =
       dynamic_pointer_cast<ScalarExpression>((*params)[1])->getString();
-    FunctionScopePtr oldGenScope = oldClassScope->findFunction(ar, oldGenName,
-                                                               false);
-    const string& newGenName = getNewGeneratorName(oldGenScope, genRenameMap);
+
+    MethodStatementPtr origGenStmt = importedMethods[oldGenName];
+    ASSERT(origGenStmt);
+
+    const string &newGenName = origGenStmt->getOriginalName();
     ExpressionPtr newGenExpr = funcCall->makeScalarExpression(ar, newGenName);
     ExpressionPtr newClsExpr = funcCall->makeScalarExpression(ar, getName());
     (*params)[0] = newClsExpr;
@@ -772,30 +757,37 @@ ClassScope::renameCreateContinuationCalls(AnalysisResultPtr   ar,
     return;
   }
   for (int i=0; i < c->getKidCount(); i++) {
-    renameCreateContinuationCalls(ar, c->getNthKid(i), genRenameMap);
+    renameCreateContinuationCalls(ar, c->getNthKid(i), importedMethods);
   }
 }
 
-void ClassScope::relinkGeneratorMethods(AnalysisResultPtr ar,
-                      const std::list<MethodStatementPtr>& importedMethods) {
-  for (std::list<MethodStatementPtr>::const_iterator methIt =
+void ClassScope::relinkGeneratorMethods(
+  AnalysisResultPtr ar,
+  ImportedMethodMap &importedMethods) {
+  for (ImportedMethodMap::const_iterator methIt =
          importedMethods.begin(); methIt != importedMethods.end(); methIt++) {
-    MethodStatementPtr newMeth = *methIt;
+    MethodStatementPtr newMeth = methIt->second;
 
     // Skip non-generator methods
-    if (!newMeth->getOrigGeneratorFunc()) continue;
+    if (!newMeth) continue;
 
-    // Get corresponding original generator method in the current class
-    const string& origGenName = newMeth->getOrigGeneratorFunc()->getName();
-    FunctionScopePtr origGenScope = findFunction(ar, origGenName, false);
-    ASSERT(origGenScope);
-    MethodStatementPtr origGenStmt =
-      dynamic_pointer_cast<MethodStatement>(origGenScope->getStmt());
-    // It must be an orig gen func already, we're just updating to point
-    // to the corresponding method cloned from the trait
-    ASSERT(origGenStmt->getGeneratorFunc());
-    newMeth->setOrigGeneratorFunc(origGenStmt);
-    origGenStmt->setGeneratorFunc(newMeth);
+    if (newMeth->getOrigGeneratorFunc()) {
+      // Get corresponding original generator method in the current class
+      const string& origGenName = newMeth->getOrigGeneratorFunc()->getName();
+      MethodStatementPtr origGenStmt = importedMethods[origGenName];
+      ASSERT(origGenStmt);
+      // It must be an orig gen func already, we're just updating to point
+      // to the corresponding method cloned from the trait
+      ASSERT(origGenStmt->getGeneratorFunc());
+      newMeth->setOrigGeneratorFunc(origGenStmt);
+      origGenStmt->setGeneratorFunc(newMeth);
+    }
+
+    // OrigGenerator methods need to have their hphp_create_continuation calls
+    // patched to the new generator name.
+    if (newMeth->getGeneratorFunc()) {
+      renameCreateContinuationCalls(ar, newMeth, importedMethods);
+    }
   }
 }
 
@@ -841,7 +833,9 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     }
   }
 
-  std::list<MethodStatementPtr> importedTraitMethods;
+  std::map<string, MethodStatementPtr> importedTraitMethods;
+  std::vector<std::pair<string,const TraitMethod*> > importedTraitsWithOrigName;
+
   GeneratorRenameMap genRenameMap;
 
   // Actually import the methods
@@ -859,11 +853,38 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
       Compiler::Error(Compiler::MethodInMultipleTraits, getStmt());
     } else {
       TraitMethodList::const_iterator traitMethIter = iter->second.begin();
-      MethodStatementPtr newMeth = importTraitMethod(*traitMethIter, ar,
-                                                     iter->first, genRenameMap);
-      if (newMeth) {
-        importedTraitMethods.push_back(newMeth);
+      if ((traitMethIter->m_modifiers ? traitMethIter->m_modifiers :
+           traitMethIter->m_method->getModifiers())->isAbstract()) {
+        // Skip abstract methods, if method already exists in the class
+        if (findFunction(ar, iter->first, true) ||
+            importedTraitMethods.count(iter->first)) {
+          continue;
+        }
       }
+      if (traitMethIter->m_modifiers &&
+          traitMethIter->m_modifiers->isStatic()) {
+        Compiler::Error(Compiler::InvalidAccessModifier,
+                        traitMethIter->m_modifiers);
+        continue;
+      }
+
+      string sourceName = traitMethIter->m_ruleStmt ?
+        Util::toLower(((TraitAliasStatement*)traitMethIter->m_ruleStmt.get())->
+                      getMethodName()) : iter->first;
+      importedTraitMethods[sourceName] = MethodStatementPtr();
+      importedTraitsWithOrigName.push_back(
+        make_pair(sourceName, &*traitMethIter));
+    }
+  }
+
+  for (unsigned i = 0; i < importedTraitsWithOrigName.size(); i++) {
+    const string &sourceName = importedTraitsWithOrigName[i].first;
+    const TraitMethod *traitMethod = importedTraitsWithOrigName[i].second;
+    MethodStatementPtr newMeth = importTraitMethod(
+      *traitMethod, ar, Util::toLower(traitMethod->m_originalName),
+      genRenameMap, importedTraitMethods);
+    if (newMeth) {
+      importedTraitMethods[sourceName] = newMeth;
     }
   }
 
@@ -1168,9 +1189,26 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   cg_printf("NULL,\n");
 
-  // properties && constants
+  // properties
   m_variables->outputCPPClassMap(cg, ar);
+
+  // constants
   m_constants->outputCPPClassMap(cg, ar);
+      
+  // user attributes
+  UserAttributeMap::const_iterator it = m_userAttributes.begin();
+  for (; it != m_userAttributes.end(); ++it) {
+    ExpressionPtr expr = it->second;
+    Variant v;
+    bool isScalar UNUSED = expr->getScalarValue(v);
+    ASSERT(isScalar);
+    int valueLen = 0;
+    string valueText = SymbolTable::getEscapedText(v, valueLen);
+    cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
+              CodeGenerator::EscapeLabel(it->first).c_str(),
+              valueLen, valueText.c_str());
+  }
+  cg_printf("NULL,\n");
 }
 
 bool ClassScope::hasConst(const string &name) const {
@@ -2243,7 +2281,6 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                 case KindOfBoolean:
                   if (cflags & ConstFalse) needsInit = false;
                   goto check_plain;
-                case KindOfInt32:
                 case KindOfInt64:
                   if (cflags & ConstZero) needsInit = false;
                   goto check_plain;

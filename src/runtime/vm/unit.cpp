@@ -24,6 +24,7 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/repo.h>
+#include <runtime/vm/blob_helper.h>
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/vm/vm.h>
 #include <runtime/vm/translator/translator-deps.h>
@@ -502,17 +503,15 @@ const Func* Unit::getFunc(Offset pc) const {
 void Unit::prettyPrint(std::ostream &out, size_t startOffset,
                        size_t stopOffset) const {
   std::map<Offset,const Func*> funcMap;
-  for (FuncVec::const_iterator it = m_funcs.begin(); it != m_funcs.end();
-       ++it) {
-    funcMap[(*it)->base()] = *it;
+  for (size_t i = 0; i < m_funcs.size(); ++i) {
+    funcMap[m_funcs[i]->base()] = m_funcs[i];
   }
   for (PreClassPtrVec::const_iterator it = m_preClasses.begin();
       it != m_preClasses.end(); ++it) {
-    const PreClass::MethodVec& methods = (*it)->methods();
-    for (PreClass::MethodVec::const_iterator it = methods.begin();
-        it != methods.end();
-        ++it) {
-      funcMap[(*it)->base()] = *it;
+    Func* const* methods = (*it)->methods();
+    size_t const numMethods = (*it)->numMethods();
+    for (size_t i = 0; i < numMethods; ++i) {
+      funcMap[methods[i]->base()] = methods[i];
     }
   }
 
@@ -521,6 +520,7 @@ void Unit::prettyPrint(std::ostream &out, size_t startOffset,
 
   const uchar* it = &m_bc[startOffset];
   int prevLineNum = -1;
+  MetaHandle metaHand;
   while (it < &m_bc[stopOffset]) {
     ASSERT(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
     if (funcIt != funcMap.end() && funcIt->first == offsetOf(it)) {
@@ -536,7 +536,34 @@ void Unit::prettyPrint(std::ostream &out, size_t startOffset,
     }
 
     out << "  " << std::setw(4) << (it - m_bc) << ": ";
-    out << instrToString((Opcode*)it, (Unit*)this) << std::endl;
+    out << instrToString((Opcode*)it, (Unit*)this);
+    if (metaHand.findMeta(this, offsetOf(it))) {
+      out << "#";
+      Unit::MetaInfo info;
+      while (metaHand.nextArg(info)) {
+        switch (info.m_kind) {
+          case Unit::MetaInfo::String: {
+            const StringData* sd = this->lookupLitstrId(info.m_data);
+            out << " i" << (int)info.m_arg << ":s=" <<
+              std::string(sd->data(), sd->size());
+            break;
+          }
+          case Unit::MetaInfo::Class: {
+            const StringData* sd = this->lookupLitstrId(info.m_data);
+            out << " i" << (int)info.m_arg << ":c=" << sd->data();
+            break;
+          }
+          case Unit::MetaInfo::NopOut:
+            out << " Nop";
+            break;
+          case Unit::MetaInfo::None:
+            ASSERT(false);
+            break;
+        }
+      }
+    }
+    out << std::endl;
+
     it += instrLen((Opcode*)it);
   }
 }
@@ -574,10 +601,6 @@ void Unit::enableIntercepts() {
       // pseudomain's can't be intercepted
       continue;
     }
-    if (func->maybeIntercepted() == -1) {
-      continue;
-    }
-    func->maybeIntercepted() = -1;
     tx64->interceptPrologues(func);
   }
 
@@ -590,10 +613,6 @@ void Unit::enableIntercepts() {
         size_t numFuncs = cls->numMethods();
         Func* const* funcs = cls->methods();
         for (unsigned i = 0; i < numFuncs; i++) {
-          if (funcs[i]->maybeIntercepted() == -1) {
-            continue;
-          }
-          funcs[i]->maybeIntercepted() = -1;
           tx64->interceptPrologues(funcs[i]);
         }
         cls = cls->m_nextClass;
@@ -617,12 +636,12 @@ Func *Unit::lookupFunc(const StringData *funcName) {
 // UnitRepoProxy.
 
 UnitRepoProxy::UnitRepoProxy(Repo& repo)
-  : RepoProxy(repo),
+  : RepoProxy(repo)
 #define URP_OP(c, o) \
-    m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral),
+  , m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral)
     URP_OPS
 #undef URP_OP
-    m_dummy(0) {
+{
 #define URP_OP(c, o) \
   m_##o[RepoIdLocal] = &m_##o##Local; \
   m_##o[RepoIdCentral] = &m_##o##Central;
@@ -709,6 +728,8 @@ void UnitRepoProxy::InsertUnitStmt
                            const uchar* bc, size_t bclen,
                            const uchar* bc_meta, size_t bc_meta_len,
                            const LineTable& lines) {
+  BlobEncoder linesBlob;
+
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Unit")
@@ -721,8 +742,7 @@ void UnitRepoProxy::InsertUnitStmt
   query.bindBlob("@bc_meta",
                  bc_meta_len ? (const void*)bc_meta : (const void*)"",
                  bc_meta_len);
-  query.bindBlob("@lines", (const void*)&lines[0],
-                 lines.size() * sizeof(LineEntry));
+  query.bindBlob("@lines", linesBlob(lines), /* static */ true);
   query.exec();
   unitSn = query.getInsertedRowid();
 }
@@ -748,13 +768,15 @@ bool UnitRepoProxy::GetUnitStmt
     const void* bc; size_t bclen;            /**/ query.getBlob(1, bc, bclen);
     const void* bc_meta; size_t bc_meta_len; /**/ query.getBlob(2, bc_meta,
                                                                 bc_meta_len);
-    const void* lines; size_t lineslen;      /**/ query.getBlob(3, lines,
-                                                                lineslen);
+    BlobDecoder linesBlob =                  /**/ query.getBlob(3);
     ue.setRepoId(m_repoId);
     ue.setSn(unitSn);
     ue.setBc((const uchar*)bc, bclen);
     ue.setBcMeta((const uchar*)bc_meta, bc_meta_len);
-    ue.setLines((const LineEntry*)lines, lineslen / sizeof(LineEntry));
+
+    LineTable lines;
+    linesBlob(lines);
+    ue.setLines(lines);
 
     txn.commit();
   } catch (RepoExc& re) {
@@ -1090,14 +1112,14 @@ void UnitEmitter::setBcMeta(const uchar* bc_meta, size_t bc_meta_len) {
   m_bc_meta_len = bc_meta_len;
 }
 
-void UnitEmitter::setLines(const LineEntry* lines, size_t nlines) {
+void UnitEmitter::setLines(const LineTable& lines) {
   Offset prevPastOffset = 0;
-  for (size_t i = 0; i < nlines; ++i) {
+  for (size_t i = 0; i < lines.size(); ++i) {
     const LineEntry* line = &lines[i];
     Location sLoc;
     sLoc.line0 = sLoc.line1 = line->val();
     Offset pastOffset = line->pastOffset();
-    recordSourceLocation(&sLoc, prevPastOffset, pastOffset);
+    recordSourceLocation(&sLoc, prevPastOffset);
     prevPastOffset = pastOffset;
   }
 }
@@ -1157,7 +1179,8 @@ void UnitEmitter::initMain(int line1, int line2) {
   ASSERT(m_fes.size() == 0);
   StringData* name = StringData::GetStaticString("");
   FuncEmitter* pseudomain = newFuncEmitter(name, false);
-  pseudomain->init(line1, line2, 0, AttrNone, false, name);
+  Attr attrs = AttrMayUseVV;
+  pseudomain->init(line1, line2, 0, attrs, false, name);
 }
 
 FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* n, bool top) {
@@ -1179,12 +1202,8 @@ FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* n,
 }
 
 PreClassEmitter* UnitEmitter::newPreClassEmitter(const StringData* n,
-                                                 Attr attrs,
-                                                 const StringData* parent,
-                                                 const StringData* docComment,
-                                                 int line1, int line2, Offset o,
                                                  bool hoistable) {
-  PreClassEmitter* pce;
+  PreClassEmitter* pce = new PreClassEmitter(*this, m_pceVec.size(), n);
   // A class declaration is hoisted if all of the following are true:
   // 1) It is at the top level of pseudomain (as indicated by the 'hoistable'
   //    parameter).
@@ -1194,49 +1213,34 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(const StringData* n,
   //    is made to hoist the class.
   // Only the first two conditions are enforced here, because (3) cannot be
   // precomputed.
-  if (hoistable && m_hoistablePreClassSet.find(n) ==
-      m_hoistablePreClassSet.end()) {
-    pce = new PreClassEmitter(*this, line1, line2, o, n, attrs, parent,
-                              docComment, m_pceVec.size(), true);
+  if (hoistable && !m_hoistablePreClassSet.count(n)) {
     m_hoistablePreClassSet.insert(n);
     m_hoistablePceVec.push_back(pce);
-  } else {
-    pce = new PreClassEmitter(*this, line1, line2, o, n, attrs, parent,
-                              docComment, m_pceVec.size(), false);
   }
   m_pceVec.push_back(pce);
   return pce;
 }
 
-template<typename T>
-static void addToIntervalMap(std::map<Offset, IntervalMapEntry<T> > *intMap,
-                             Offset start, Offset end,
-                             IntervalMapEntry<T> &entry) {
-  typename std::map<Offset, IntervalMapEntry<T> >::iterator it =
-    intMap->lower_bound(start);
-  if (it != intMap->end() && it->second.val == entry.val) {
-    entry.startOffset = it->second.startOffset;
-    intMap->erase(start);
+void UnitEmitter::recordSourceLocation(const Location* sLoc, Offset start) {
+  SourceLoc newLoc(*sLoc);
+  if (!m_sourceLocTab.empty()) {
+    if (m_sourceLocTab.back().second == newLoc) {
+      // Combine into the interval already at the back of the vector.
+      ASSERT(start >= m_sourceLocTab.back().first);
+      return;
+    }
+    ASSERT(m_sourceLocTab.back().first < start &&
+           "source location offsets must be added to UnitEmitter in "
+           "increasing order");
   } else {
-    entry.startOffset = start;
+    // First record added should be for bytecode offset zero.
+    ASSERT(start == 0);
   }
-  entry.endOffset = end;
-  (*intMap)[end] = entry;
+  m_sourceLocTab.push_back(std::make_pair(start, newLoc));
 }
 
-void UnitEmitter::recordSourceLocation(const Location *sLoc, Offset start,
-                                       Offset end) {
-  ASSERT(sLoc);
-
-  SourceLocEntry newEntryLoc;
-  newEntryLoc.val.setLoc(sLoc);
-  addToIntervalMap(&m_sourceLocTable, start, end, newEntryLoc);
-}
-
-void UnitEmitter::recordFunction(FuncEmitter *fe) {
-  FuncEmitterEntry newEntry;
-  newEntry.val = fe;
-  addToIntervalMap(&m_feTable, fe->base(), fe->past(), newEntry);
+void UnitEmitter::recordFunction(FuncEmitter* fe) {
+  m_feTab.push_back(std::make_pair(fe->past(), fe));
 }
 
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1,
@@ -1262,6 +1266,16 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
   return f;
 }
 
+template<class SourceLocTable>
+static LineTable createLineTable(SourceLocTable& srcLoc, Offset bclen) {
+  LineTable lines;
+  for (size_t i = 0; i < srcLoc.size(); ++i) {
+    Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
+    lines.push_back(LineEntry(endOff, srcLoc[i].second.line1));
+  }
+  return lines;
+}
+
 void UnitEmitter::commit(UnitOrigin unitOrigin) {
   Repo& repo = Repo::get();
   UnitRepoProxy& urp = repo.urp();
@@ -1273,13 +1287,7 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
   try {
     RepoTxn txn(repo);
     {
-      LineTable lines;
-      for (std::map<Offset, SourceLocEntry>::const_iterator
-           it = m_sourceLocTable.begin(); it != m_sourceLocTable.end(); ++it) {
-        SourceLocEntry e = it->second;
-        ASSERT(it->first == e.endOffset);
-        lines.push_back(LineEntry(e.endOffset, e.val.line1));
-      }
+      LineTable lines = createLineTable(m_sourceLocTab, m_bclen);
       urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
                                     m_bc_meta, m_bc_meta_len, lines);
     }
@@ -1301,13 +1309,14 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
       (*it)->commit(txn);
     }
     if (RuntimeOption::RepoDebugInfo) {
-      for (std::map<Offset, SourceLocEntry>::const_iterator
-           it = m_sourceLocTable.begin(); it != m_sourceLocTable.end(); ++it) {
-        SourceLocEntry e = it->second;
-        ASSERT(it->first == e.endOffset);
+      for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
+        SourceLoc& e = m_sourceLocTab[i].second;
+        Offset endOff = i < m_sourceLocTab.size() - 1
+                          ? m_sourceLocTab[i + 1].first
+                          : m_bclen;
+
         urp.insertUnitSourceLoc(repoId)
-           .insert(txn, usn, e.endOffset, e.val.line0, e.val.char0, e.val.line1,
-                   e.val.char1);
+           .insert(txn, usn, endOff, e.line0, e.char0, e.line1, e.char1);
       }
     }
     txn.commit();
@@ -1367,21 +1376,18 @@ Unit* UnitEmitter::create() {
        it != m_hoistablePceVec.end(); ++it) {
     u->m_hoistablePreClasses.push_back(u->m_preClasses[(*it)->id()].get());
   }
-  for (std::map<Offset, SourceLocEntry>::const_iterator
-       it = m_sourceLocTable.begin(); it != m_sourceLocTable.end(); ++it) {
-    const SourceLocEntry& e = it->second;
-    ASSERT(it->first == e.endOffset);
-    u->m_lineTable.push_back(LineEntry(e.endOffset, e.val.line1));
+  u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+  for (size_t i = 0; i < m_feTab.size(); ++i) {
+    ASSERT(m_feTab[i].second->past() == m_feTab[i].first);
+    ASSERT(m_fMap.find(m_feTab[i].second) != m_fMap.end());
+    u->m_funcTable.push_back(
+      FuncEntry(m_feTab[i].first, m_fMap.find(m_feTab[i].second)->second));
   }
-  for (FeTable::const_iterator it = m_feTable.begin(); it != m_feTable.end();
-       ++it) {
-    const FuncEmitterEntry& e = it->second;
-    ASSERT(e.val->base() == e.startOffset);
-    ASSERT(e.val->past() == e.endOffset);
-    ASSERT(m_fMap.find(e.val) != m_fMap.end());
-    u->m_funcTable.push_back(FuncEntry(e.endOffset,
-                                       m_fMap.find(e.val)->second));
-  }
+
+  // Funcs can be recorded out of order when loading them from the
+  // repo currently.  So sort 'em here.
+  std::sort(u->m_funcTable.begin(), u->m_funcTable.end());
+
   m_fMap.clear();
 
   u->m_preConsts = m_preConsts;

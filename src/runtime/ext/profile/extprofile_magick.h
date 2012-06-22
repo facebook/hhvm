@@ -60,7 +60,7 @@ inline Array x_magickgetversion() {
   return f_magickgetversion();
 }
 
-inline int x_magickgetversionnumber() {
+inline int64 x_magickgetversionnumber() {
   FUNCTION_INJECTION_BUILTIN(magickgetversionnumber);
   return f_magickgetversionnumber();
 }
@@ -220,7 +220,7 @@ inline String x_wandgetexceptionstring(CObjRef wnd) {
   return f_wandgetexceptionstring(wnd);
 }
 
-inline int x_wandgetexceptiontype(CObjRef wnd) {
+inline int64 x_wandgetexceptiontype(CObjRef wnd) {
   FUNCTION_INJECTION_BUILTIN(wandgetexceptiontype);
   return f_wandgetexceptiontype(wnd);
 }
@@ -280,12 +280,12 @@ inline String x_drawgetclippath(CObjRef drw_wnd) {
   return f_drawgetclippath(drw_wnd);
 }
 
-inline int x_drawgetcliprule(CObjRef drw_wnd) {
+inline int64 x_drawgetcliprule(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetcliprule);
   return f_drawgetcliprule(drw_wnd);
 }
 
-inline int x_drawgetclipunits(CObjRef drw_wnd) {
+inline int64 x_drawgetclipunits(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetclipunits);
   return f_drawgetclipunits(drw_wnd);
 }
@@ -300,7 +300,7 @@ inline String x_drawgetexceptionstring(CObjRef drw_wnd) {
   return f_drawgetexceptionstring(drw_wnd);
 }
 
-inline int x_drawgetexceptiontype(CObjRef drw_wnd) {
+inline int64 x_drawgetexceptiontype(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetexceptiontype);
   return f_drawgetexceptiontype(drw_wnd);
 }
@@ -320,7 +320,7 @@ inline double x_drawgetfillopacity(CObjRef drw_wnd) {
   return f_drawgetfillopacity(drw_wnd);
 }
 
-inline int x_drawgetfillrule(CObjRef drw_wnd) {
+inline int64 x_drawgetfillrule(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfillrule);
   return f_drawgetfillrule(drw_wnd);
 }
@@ -340,12 +340,12 @@ inline double x_drawgetfontsize(CObjRef drw_wnd) {
   return f_drawgetfontsize(drw_wnd);
 }
 
-inline int x_drawgetfontstretch(CObjRef drw_wnd) {
+inline int64 x_drawgetfontstretch(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfontstretch);
   return f_drawgetfontstretch(drw_wnd);
 }
 
-inline int x_drawgetfontstyle(CObjRef drw_wnd) {
+inline int64 x_drawgetfontstyle(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetfontstyle);
   return f_drawgetfontstyle(drw_wnd);
 }
@@ -355,7 +355,7 @@ inline double x_drawgetfontweight(CObjRef drw_wnd) {
   return f_drawgetfontweight(drw_wnd);
 }
 
-inline int x_drawgetgravity(CObjRef drw_wnd) {
+inline int64 x_drawgetgravity(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetgravity);
   return f_drawgetgravity(drw_wnd);
 }
@@ -385,12 +385,12 @@ inline double x_drawgetstrokedashoffset(CObjRef drw_wnd) {
   return f_drawgetstrokedashoffset(drw_wnd);
 }
 
-inline int x_drawgetstrokelinecap(CObjRef drw_wnd) {
+inline int64 x_drawgetstrokelinecap(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokelinecap);
   return f_drawgetstrokelinecap(drw_wnd);
 }
 
-inline int x_drawgetstrokelinejoin(CObjRef drw_wnd) {
+inline int64 x_drawgetstrokelinejoin(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgetstrokelinejoin);
   return f_drawgetstrokelinejoin(drw_wnd);
 }
@@ -410,7 +410,7 @@ inline double x_drawgetstrokewidth(CObjRef drw_wnd) {
   return f_drawgetstrokewidth(drw_wnd);
 }
 
-inline int x_drawgettextalignment(CObjRef drw_wnd) {
+inline int64 x_drawgettextalignment(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgettextalignment);
   return f_drawgettextalignment(drw_wnd);
 }
@@ -420,7 +420,7 @@ inline bool x_drawgettextantialias(CObjRef drw_wnd) {
   return f_drawgettextantialias(drw_wnd);
 }
 
-inline int x_drawgettextdecoration(CObjRef drw_wnd) {
+inline int64 x_drawgettextdecoration(CObjRef drw_wnd) {
   FUNCTION_INJECTION_BUILTIN(drawgettextdecoration);
   return f_drawgettextdecoration(drw_wnd);
 }
@@ -1055,7 +1055,7 @@ inline String x_magickgetexceptionstring(CObjRef mgck_wnd) {
   return f_magickgetexceptionstring(mgck_wnd);
 }
 
-inline int x_magickgetexceptiontype(CObjRef mgck_wnd) {
+inline int64 x_magickgetexceptiontype(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetexceptiontype);
   return f_magickgetexceptiontype(mgck_wnd);
 }
@@ -1110,17 +1110,17 @@ inline double x_magickgetimagecolors(CObjRef mgck_wnd) {
   return f_magickgetimagecolors(mgck_wnd);
 }
 
-inline int x_magickgetimagecolorspace(CObjRef mgck_wnd) {
+inline int64 x_magickgetimagecolorspace(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecolorspace);
   return f_magickgetimagecolorspace(mgck_wnd);
 }
 
-inline int x_magickgetimagecompose(CObjRef mgck_wnd) {
+inline int64 x_magickgetimagecompose(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecompose);
   return f_magickgetimagecompose(mgck_wnd);
 }
 
-inline int x_magickgetimagecompression(CObjRef mgck_wnd) {
+inline int64 x_magickgetimagecompression(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagecompression);
   return f_magickgetimagecompression(mgck_wnd);
 }
@@ -1140,7 +1140,7 @@ inline double x_magickgetimagedepth(CObjRef mgck_wnd, int channel_type = 0) {
   return f_magickgetimagedepth(mgck_wnd, channel_type);
 }
 
-inline int x_magickgetimagedispose(CObjRef mgck_wnd) {
+inline int64 x_magickgetimagedispose(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagedispose);
   return f_magickgetimagedispose(mgck_wnd);
 }
@@ -1180,12 +1180,12 @@ inline Array x_magickgetimagehistogram(CObjRef mgck_wnd) {
   return f_magickgetimagehistogram(mgck_wnd);
 }
 
-inline int x_magickgetimageindex(CObjRef mgck_wnd) {
+inline int64 x_magickgetimageindex(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageindex);
   return f_magickgetimageindex(mgck_wnd);
 }
 
-inline int x_magickgetimageinterlacescheme(CObjRef mgck_wnd) {
+inline int64 x_magickgetimageinterlacescheme(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageinterlacescheme);
   return f_magickgetimageinterlacescheme(mgck_wnd);
 }
@@ -1220,7 +1220,7 @@ inline Array x_magickgetimageredprimary(CObjRef mgck_wnd) {
   return f_magickgetimageredprimary(mgck_wnd);
 }
 
-inline int x_magickgetimagerenderingintent(CObjRef mgck_wnd) {
+inline int64 x_magickgetimagerenderingintent(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagerenderingintent);
   return f_magickgetimagerenderingintent(mgck_wnd);
 }
@@ -1240,22 +1240,22 @@ inline String x_magickgetimagesignature(CObjRef mgck_wnd) {
   return f_magickgetimagesignature(mgck_wnd);
 }
 
-inline int x_magickgetimagesize(CObjRef mgck_wnd) {
+inline int64 x_magickgetimagesize(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagesize);
   return f_magickgetimagesize(mgck_wnd);
 }
 
-inline int x_magickgetimagetype(CObjRef mgck_wnd) {
+inline int64 x_magickgetimagetype(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagetype);
   return f_magickgetimagetype(mgck_wnd);
 }
 
-inline int x_magickgetimageunits(CObjRef mgck_wnd) {
+inline int64 x_magickgetimageunits(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimageunits);
   return f_magickgetimageunits(mgck_wnd);
 }
 
-inline int x_magickgetimagevirtualpixelmethod(CObjRef mgck_wnd) {
+inline int64 x_magickgetimagevirtualpixelmethod(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetimagevirtualpixelmethod);
   return f_magickgetimagevirtualpixelmethod(mgck_wnd);
 }
@@ -1275,7 +1275,7 @@ inline String x_magickgetimagesblob(CObjRef mgck_wnd) {
   return f_magickgetimagesblob(mgck_wnd);
 }
 
-inline int x_magickgetinterlacescheme(CObjRef mgck_wnd) {
+inline int64 x_magickgetinterlacescheme(CObjRef mgck_wnd) {
   FUNCTION_INJECTION_BUILTIN(magickgetinterlacescheme);
   return f_magickgetinterlacescheme(mgck_wnd);
 }
@@ -1955,7 +1955,7 @@ inline String x_pixelgetexceptionstring(CObjRef pxl_wnd) {
   return f_pixelgetexceptionstring(pxl_wnd);
 }
 
-inline int x_pixelgetexceptiontype(CObjRef pxl_wnd) {
+inline int64 x_pixelgetexceptiontype(CObjRef pxl_wnd) {
   FUNCTION_INJECTION_BUILTIN(pixelgetexceptiontype);
   return f_pixelgetexceptiontype(pxl_wnd);
 }
@@ -2140,7 +2140,7 @@ inline String x_pixelgetiteratorexceptionstring(CObjRef pxl_iter) {
   return f_pixelgetiteratorexceptionstring(pxl_iter);
 }
 
-inline int x_pixelgetiteratorexceptiontype(CObjRef pxl_iter) {
+inline int64 x_pixelgetiteratorexceptiontype(CObjRef pxl_iter) {
   FUNCTION_INJECTION_BUILTIN(pixelgetiteratorexceptiontype);
   return f_pixelgetiteratorexceptiontype(pxl_iter);
 }

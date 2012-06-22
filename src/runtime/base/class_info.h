@@ -109,6 +109,19 @@ public:
     std::string svalue; // serialized, only used by eval
   };
 
+  class UserAttributeInfo {
+  public:
+    UserAttributeInfo();
+
+    String name;
+
+    Variant getValue() const;
+    void setStaticValue(CVarRef value);
+
+  private:
+    Variant value;
+  };
+
   struct ParameterInfo {
     Attribute attribute;
     const char *name;
@@ -128,6 +141,7 @@ public:
 
     std::vector<const ParameterInfo *> parameters;
     std::vector<const ConstantInfo *> staticVariables;
+    std::vector<const UserAttributeInfo *> userAttrs;
 
     const char *docComment;
     const char *file;
@@ -157,6 +171,7 @@ public:
   typedef std::vector<PropertyInfo *>             PropertyVec;
   typedef StringMap<ConstantInfo *>               ConstantMap;
   typedef std::vector<ConstantInfo *>             ConstantVec;
+  typedef std::vector<UserAttributeInfo *>        UserAttributeVec;
   typedef std::vector<std::pair<String, String> > TraitAliasVec;
 
 public:
@@ -358,6 +373,8 @@ public:
   ConstantInfo *getConstantInfo(CStrRef name) const;
   bool hasConstant(CStrRef name) const;
 
+  virtual const UserAttributeVec &getUserAttributeVec() const = 0;
+
 protected:
   static bool s_loaded;            // whether class map is loaded
   static ClassInfo *s_systemFuncs; // all system functions
@@ -408,6 +425,7 @@ public:
   const PropertyVec &getPropertiesVec() const { return m_propertiesVec;}
   const ConstantMap &getConstants() const { return m_constants;}
   const ConstantVec &getConstantsVec() const { return m_constantsVec;}
+  const UserAttributeVec &getUserAttributeVec() const { return m_userAttrVec;}
 
   virtual void postInit();
 
@@ -425,6 +443,7 @@ private:
   PropertyVec   m_propertiesVec;   // all properties in declaration order
   ConstantMap   m_constants;       // all constants
   ConstantVec   m_constantsVec;    // all constants in declaration order
+  UserAttributeVec m_userAttrVec;
 };
 
 /**
@@ -473,6 +492,9 @@ public:
   }
   const ConstantVec &getConstantsVec() const {
     return current()->getConstantsVec();
+  }
+  const UserAttributeVec &getUserAttributeVec() const {
+    return current()->getUserAttributeVec();
   }
 
   virtual void postInit();
@@ -536,8 +558,6 @@ struct ClassPropTableEntry {
     switch (type) {
       case KindOfBoolean:
         return *(bool*)addr;
-      case KindOfInt32:
-        return *(int*)addr;
       case KindOfInt64:
         return *(int64*)addr;
       case KindOfDouble:

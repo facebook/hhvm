@@ -28,7 +28,6 @@
 #include <runtime/vm/funcdict.h>
 #include <runtime/vm/func.h>
 #include <runtime/vm/bytecode.h>
-#include <runtime/vm/translator/translator.h>
 #include <runtime/vm/instrumentation.h>
 #include <util/base.h>
 #include <util/lock.h>
@@ -112,6 +111,7 @@ class ClassInfoVM : public ClassInfo,
   const PropertyVec   &getPropertiesVec()   const { return m_propertiesVec;}
   const ConstantMap   &getConstants()       const { return m_constants;}
   const ConstantVec   &getConstantsVec()    const { return m_constantsVec;}
+  const UserAttributeVec &getUserAttributeVec() const { return m_userAttrVec;}
   const TraitSet      &getTraits()          const { return m_traits;}
   const TraitVec      &getTraitsVec()       const { return m_traitsVec;}
   const TraitAliasVec &getTraitAliasesVec() const { return m_traitAliasesVec;}
@@ -129,6 +129,7 @@ class ClassInfoVM : public ClassInfo,
   PropertyVec   m_propertiesVec;   // in source order
   ConstantMap   m_constants;       // all constants
   ConstantVec   m_constantsVec;    // in source order
+  UserAttributeVec m_userAttrVec;
 
  public:
   friend class HPHP::VM::Class;
@@ -714,7 +715,12 @@ public:
   void op##name();
 OPCODES
 #undef O
-  template <bool limInstrs, bool breakOnCtlFlow>
+  enum DispatchFlags {
+    LimitInstrs = 1 << 0,
+    BreakOnCtlFlow = 1 << 1,
+    Profile = 1 << 2
+  };
+  template <int dispatchFlags>
   void dispatchImpl(int numInstrs);
   void dispatch();
   // dispatchN() runs numInstrs instructions, or to program termination,
@@ -734,6 +740,8 @@ private:
 
 public:
   static int64_t s_threadIdxCounter;
+  Variant m_setprofileCallback;
+  bool m_executingSetprofileCallback;
   inline HPHP::VM::Offset pcOff() const {
     return m_fp->m_func->unit()->offsetOf(m_pc);
   }

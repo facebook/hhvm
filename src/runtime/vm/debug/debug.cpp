@@ -72,9 +72,13 @@ DebugInfo::DebugInfo() {
   openMap();
 }
 
+void DebugInfo::recordStub(TCA start, TCA end, const char* name) {
+  m_dwarfInfo.addTracelet(start, end, name, NULL, NULL, false, false);
+}
+
 void DebugInfo::recordTracelet(TCA start, TCA end, const Unit *unit,
     const Opcode *instr, bool exit, bool inPrologue) {
-  m_dwarfInfo.addTracelet(start, end, unit, instr,
+  m_dwarfInfo.addTracelet(start, end, NULL, unit, instr,
                                               exit, inPrologue);
 }
 

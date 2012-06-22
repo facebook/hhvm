@@ -42,9 +42,6 @@ public:
     c_EncodingDetector_Instance *this_ = (c_EncodingDetector_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_EncodingDetector) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -392,9 +389,6 @@ public:
     c_EncodingMatch_Instance *this_ = (c_EncodingMatch_Instance*)p;
     size_t nProps = this_->m_cls->numDeclProperties();
     size_t builtinPropSize UNUSED = sizeof(c_EncodingMatch) - sizeof(ObjectData);
-    if (this_->m_propMap) {
-      this_->m_propMap->release();
-    }
     for (size_t i = 0; i < nProps; ++i) {
       TypedValue *prop = &this_->m_propVec[i];
       tvRefcountedDecRef(prop);
@@ -553,14 +547,14 @@ TypedValue* tg_13EncodingMatch_getEncoding(HPHP::VM::ActRec *ar) {
 }
 
 /*
-int HPHP::c_EncodingMatch::t_getconfidence()
+long long HPHP::c_EncodingMatch::t_getconfidence()
 _ZN4HPHP15c_EncodingMatch15t_getconfidenceEv
 
 (return value) => rax
 this_ => rdi
 */
 
-int th_13EncodingMatch_getConfidence(ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch15t_getconfidenceEv");
+long long th_13EncodingMatch_getConfidence(ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch15t_getconfidenceEv");
 
 TypedValue* tg_13EncodingMatch_getConfidence(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

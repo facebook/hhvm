@@ -72,6 +72,21 @@ namespace VM {
 
 class Func;
 
+struct ExtraArgs : private boost::noncopyable {
+private:
+  TypedValue* m_extraArgs;
+  unsigned m_numExtraArgs;
+
+public:
+  ExtraArgs();
+  ~ExtraArgs();
+  void setExtraArgs(TypedValue* args, unsigned nargs);
+  void copyExtraArgs(TypedValue* args, unsigned nargs);
+  unsigned numExtraArgs() const;
+  TypedValue* getExtraArg(unsigned argInd) const;
+
+};
+
 // Variable environment.
 //
 // A variable environment consists of the locals for the current function
@@ -93,15 +108,14 @@ class VarEnv {
   ActRec* m_cfp;
   HphpArray* m_name2info;
   std::vector<TypedValue**> m_restoreLocations;
+  ExtraArgs *m_extraArgs;
 
-  TypedValue* m_extraArgs;
-  unsigned m_numExtraArgs;
   uint16_t m_depth;
   bool m_isGlobalScope;
 
  private:
   explicit VarEnv(); // create global fp
-  explicit VarEnv(ActRec* fp); // attach to fp
+  explicit VarEnv(ActRec* fp, ExtraArgs* eArgs); // attach to fp
   VarEnv(const VarEnv&);
   VarEnv& operator=(const VarEnv&);
   ~VarEnv();
@@ -131,11 +145,6 @@ class VarEnv {
   void setWithRef(const StringData* name, TypedValue* tv);
   TypedValue* lookup(const StringData* name);
   bool unset(const StringData* name);
-
-  void setExtraArgs(TypedValue* args, unsigned nargs);
-  void copyExtraArgs(TypedValue* args, unsigned nargs);
-  unsigned numExtraArgs() const;
-  TypedValue* getExtraArg(unsigned argInd) const;
 
   Array getDefinedVariables() const;
 
@@ -197,10 +206,12 @@ struct ActRec {
         Class* m_cls;          // Late bound class.
       };
       union {
-        VarEnv* m_varEnv;      // Variable environment; only used when the
-                               //   ActRec is live.
-        StringData* m_invName; // Invoked function name (used for __call);
-                               //   only used when ActRec is pre-live.
+        VarEnv* m_varEnv;       // Variable environment; only used when the
+                                //   ActRec is live.
+        ExtraArgs* m_extraArgs; // Light-weight extra args; used only when the
+                                //   ActRec is live
+        StringData* m_invName;  // Invoked function name (used for __call);
+                                //   only used when ActRec is pre-live.
       };
     };
   };
@@ -225,6 +236,7 @@ struct ActRec {
     ASSERT((numArgs & (1u << 31)) == 0);
     return numArgs | (isFPushCtor << 31);
   }
+
   void initNumArgs(uint32_t numArgs, bool isFPushCtor = false) {
     m_numArgsAndCtorFlag = encodeNumArgs(numArgs, isFPushCtor);
   }
@@ -247,9 +259,9 @@ struct ActRec {
    * accessors.
    */
 
-#define UNION_FIELD_ACCESSORS(name1, type1, field1, name2, type2, field2) \
+#define UNION_FIELD_ACCESSORS2(name1, type1, field1, name2, type2, field2) \
   inline bool has##name1() const { \
-    return field1 && !(intptr_t(field1) & 1LL); \
+    return field1 && !(intptr_t(field1) & 3LL); \
   } \
   inline bool has##name2() const { \
     return bool(intptr_t(field2) & 1LL); \
@@ -267,11 +279,42 @@ struct ActRec {
   } \
   inline void set##name2(type2 val) { \
     field2 = (type2)(intptr_t(val) | 1LL); \
+  } \
+
+#define UNION_FIELD_ACCESSORS3(name1, type1, field1, name2, type2, field2, name3, type3, field3) \
+  inline bool has##name1() const { \
+    return field1 && !(intptr_t(field1) & 3LL); \
+  } \
+  inline bool has##name2() const { \
+    return bool(intptr_t(field2) & 1LL); \
+  } \
+  inline bool has##name3() const { \
+    return bool(intptr_t(field3) & 2LL); \
+  } \
+  inline type1 get##name1() const { \
+    ASSERT(has##name1()); \
+    return field1; \
+  } \
+  inline type2 get##name2() const { \
+    ASSERT(has##name2()); \
+    return (type2)(intptr_t(field2) & ~1LL); \
+  } \
+  inline type3 get##name3() const { \
+    return (type3)(intptr_t(field3) & ~2LL); \
+  } \
+  inline void set##name1(type1 val) { \
+    field1 = val; \
+  } \
+  inline void set##name2(type2 val) { \
+    field2 = (type2)(intptr_t(val) | 1LL); \
+  } \
+  inline void set##name3(type3 val) { \
+    field3 = (type3)(intptr_t(val) | 2LL); \
   }
 
-  UNION_FIELD_ACCESSORS(This, ObjectData*, m_this, Class, Class*, m_cls)
-  UNION_FIELD_ACCESSORS(VarEnv, VarEnv*, m_varEnv, InvName, StringData*,
-                        m_invName)
+  UNION_FIELD_ACCESSORS2(This, ObjectData*, m_this, Class, Class*, m_cls)
+  UNION_FIELD_ACCESSORS3(VarEnv, VarEnv*, m_varEnv, InvName, StringData*,
+                         m_invName, ExtraArgs, ExtraArgs*, m_extraArgs)
 
 #undef UNION_FIELD_ACCESSORS
 };
@@ -293,8 +336,6 @@ inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
   CT_ASSERT(sizeof(ActRec*) <= sizeof(uint64_t));
   ar->m_savedRbp = (uint64_t)sfp;
 }
-
-void IncDecBody(unsigned char op, TypedValue* fr, TypedValue* to);
 
 template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
 #define arGetContextClass(ar)    HPHP::VM::arGetContextClassImpl<false>(ar)
@@ -467,6 +508,7 @@ public:
     if (ar->hasInvName()) {
       StringData* invName = ar->getInvName();
       if (invName->decRefCount() == 0) {
+        invName->release();
       }
     }
     m_top += kNumActRecCells;

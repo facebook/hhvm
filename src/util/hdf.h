@@ -131,6 +131,7 @@ public:
 
   void get(std::vector<std::string> &values) const;
   void get(std::set<std::string> &values) const;
+  void get(std::set<std::string, stdltistr> &values) const;
   void get(std::map<std::string, std::string> &values) const;
   void get(hphp_string_imap<std::string> &values) const;
 

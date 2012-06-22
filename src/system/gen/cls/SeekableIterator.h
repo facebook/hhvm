@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 161 */
+/* SRC: classes/iterator.php line 177 */
 FORWARD_DECLARE_GENERIC_INTERFACE(SeekableIterator);
 class c_SeekableIterator {
   // public: virtual void t_seek(CVarRef v_position) = 0;

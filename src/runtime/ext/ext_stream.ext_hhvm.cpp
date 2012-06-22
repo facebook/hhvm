@@ -401,7 +401,7 @@ TypedValue* fg_stream_set_timeout(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_stream_set_write_buffer(HPHP::Object const&, int)
+long long HPHP::f_stream_set_write_buffer(HPHP::Object const&, int)
 _ZN4HPHP25f_stream_set_write_bufferERKNS_6ObjectEi
 
 (return value) => rax
@@ -409,7 +409,7 @@ stream => rdi
 buffer => rsi
 */
 
-int fh_stream_set_write_buffer(Value* stream, int buffer) asm("_ZN4HPHP25f_stream_set_write_bufferERKNS_6ObjectEi");
+long long fh_stream_set_write_buffer(Value* stream, int buffer) asm("_ZN4HPHP25f_stream_set_write_bufferERKNS_6ObjectEi");
 
 TypedValue * fg1_stream_set_write_buffer(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_set_write_buffer(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

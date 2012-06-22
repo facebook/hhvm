@@ -216,7 +216,7 @@ void c_FB_MySQLLexer::t___construct(Variant v_string //  = NAMSTR(s_sys_ss000000
   ObjectData *obj_tmp UNUSED;
   m_string.assignVal(v_string);
   {
-    int tmp0((x_strlen(toString(v_string))));
+    int64 tmp0((x_strlen(toString(v_string))));
     m_stringLen = tmp0;
   }
   m_lookahead.assignVal(v_lookahead);
@@ -279,7 +279,7 @@ void c_FB_MySQLLexer::t_pushback() {
     {
       bool tmp1 = (more(m_lookahead, 0LL));
       if (tmp1) {
-        int tmp2((x_count(m_tokenStack)));
+        int64 tmp2((x_count(m_tokenStack)));
         tmp1 = (more(tmp2, 0LL));
       }
       tmp0 = ((tmp1 && more(m_stackPtr, 0LL)));
@@ -306,7 +306,7 @@ Variant c_FB_MySQLLexer::t_lex() {
         bool tmp0;
         {
           Variant tmp1((m_stackPtr));
-          int tmp2((x_count(m_tokenStack)));
+          int64 tmp2((x_count(m_tokenStack)));
           tmp0 = (less(tmp1, tmp2));
         }
         if (tmp0) {
@@ -341,7 +341,7 @@ Variant c_FB_MySQLLexer::t_lex() {
                   LOOP_COUNTER(1);
                   for (v_i = 0LL; ; v_i++) {
                     {
-                      int tmp0((x_count(m_tokenStack)));
+                      int64 tmp0((x_count(m_tokenStack)));
                       int64 tmp1(((tmp0 - 1LL)));
                       if (!((less(v_i, tmp1)))) break;
                     }

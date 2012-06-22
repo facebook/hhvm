@@ -46,10 +46,11 @@ void c_EncodingDetector::t___construct() {
 void c_EncodingDetector::t_settext(CStrRef text) {
   INSTANCE_METHOD_INJECTION_BUILTIN(EncodingDetector, EncodingDetector::settext);
   UErrorCode status = U_ZERO_ERROR;
+  m_text = text;
   ucsdet_setText(
     m_encoding_detector,
-    text.data(),
-    text.length(),
+    m_text.data(),
+    m_text.length(),
     &status);
   if (U_FAILURE(status)) {
     throw Exception(
@@ -61,10 +62,11 @@ void c_EncodingDetector::t_settext(CStrRef text) {
 void c_EncodingDetector::t_setdeclaredencoding(CStrRef text) {
   INSTANCE_METHOD_INJECTION_BUILTIN(EncodingDetector, EncodingDetector::setdeclaredencoding);
   UErrorCode status = U_ZERO_ERROR;
+  m_declaredencoding = text;
   ucsdet_setDeclaredEncoding(
     m_encoding_detector,
-    text.data(),
-    text.length(),
+    m_declaredencoding.data(),
+    m_declaredencoding.length(),
     &status);
   if (U_FAILURE(status)) {
     throw Exception(
@@ -156,7 +158,7 @@ String c_EncodingMatch::t_getencoding() {
   return String(encoding);
 }
 
-int c_EncodingMatch::t_getconfidence() {
+int64 c_EncodingMatch::t_getconfidence() {
   INSTANCE_METHOD_INJECTION_BUILTIN(EncodingMatch, EncodingMatch::getconfidence);
   validate();
 

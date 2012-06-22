@@ -33,6 +33,7 @@ struct DebugInfo {
   DwarfInfo m_dwarfInfo;
   void recordTracelet(TCA start, TCA end, const Unit *unit,
     const Opcode *instr, bool exit, bool inPrologue);
+  void recordStub(TCA start, TCA end, const char* name);
   void debugSync();
 };
 

@@ -1175,7 +1175,7 @@ bool c_ArrayIterator::t_asort() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 396 */
-int c_ArrayIterator::t_count() {
+int64 c_ArrayIterator::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::count);
   ObjectData *obj_tmp UNUSED;
   return x_count(m_arr);
@@ -1796,8 +1796,8 @@ static const int64 cpt_static_inits[] = {
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x60EA38C41F14FF71LL,0,0,16,65,9,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators") },
 
-  {0x7DE206EA225FC80CLL,1,1,0,100,4,0,&NAMSTR(s_sys_ss225fc80c, "STD_PROP_LIST") },
-  {0x3C29F8CAC8DB5B17LL,0,2,0,100,4,0,&NAMSTR(s_sys_ssc8db5b17, "ARRAY_AS_PROPS") },
+  {0x7DE206EA225FC80CLL,1,1,0,100,3,0,&NAMSTR(s_sys_ss225fc80c, "STD_PROP_LIST") },
+  {0x3C29F8CAC8DB5B17LL,0,2,0,100,3,0,&NAMSTR(s_sys_ssc8db5b17, "ARRAY_AS_PROPS") },
 
   {0x7401482B86AFCBFBLL,0,0,3,66,10,GET_PROPERTY_OFFSET(c_ArrayIterator, m_flags),&NAMSTR(s_sys_ss6f8d07eb, "\000*\000flags") },
   {0x7D2126D089B92EA5LL,-1,0,3,66,10,GET_PROPERTY_OFFSET(c_ArrayIterator, m_arr),&NAMSTR(s_sys_ss747206d2, "\000*\000arr") },
@@ -1806,10 +1806,10 @@ static const ClassPropTableEntry cpt_table_entries[] = {
 
   {0x0636A5F84AF9D29ELL,0,0,18,65,10,GET_PROPERTY_OFFSET(c_IteratorIterator, m_iterator),&NAMSTR(s_sys_ss8c1ec20c, "\000IteratorIterator\000iterator") },
 
-  {0x618BE0B31B5C1FD1LL,2,2,0,100,4,0,&NAMSTR(s_sys_ss1b5c1fd1, "CHILD_FIRST") },
-  {0x181DAA5BC4B24F6CLL,2,3,0,36,4,0,&NAMSTR(s_sys_ssc4b24f6c, "LEAVES_ONLY") },
-  {0x7F32D13555655AA4LL,0,4,0,100,4,0,&NAMSTR(s_sys_ss55655aa4, "CATCH_GET_CHILD") },
-  {0x0822A034E83D2285LL,-3,1,0,100,4,0,&NAMSTR(s_sys_sse83d2285, "SELF_FIRST") },
+  {0x618BE0B31B5C1FD1LL,2,2,0,100,3,0,&NAMSTR(s_sys_ss1b5c1fd1, "CHILD_FIRST") },
+  {0x181DAA5BC4B24F6CLL,2,3,0,36,3,0,&NAMSTR(s_sys_ssc4b24f6c, "LEAVES_ONLY") },
+  {0x7F32D13555655AA4LL,0,4,0,100,3,0,&NAMSTR(s_sys_ss55655aa4, "CATCH_GET_CHILD") },
+  {0x0822A034E83D2285LL,-3,1,0,100,3,0,&NAMSTR(s_sys_sse83d2285, "SELF_FIRST") },
 
   {0x26C16E62FD792BB7LL,0,0,27,65,10,GET_PROPERTY_OFFSET(c_RecursiveIteratorIterator, m_rsrc),&NAMSTR(s_sys_ss246080da, "\000RecursiveIteratorIterator\000rsrc") },
 

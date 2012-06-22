@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers = null_string, CStrRef additional_parameters = null_string);
-int f_ezmlm_hash(CStrRef addr);
+int64 f_ezmlm_hash(CStrRef addr);
 Object f_mailparse_msg_create();
 bool f_mailparse_msg_free(CObjRef mimemail);
 Variant f_mailparse_msg_parse_file(CStrRef filename);

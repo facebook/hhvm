@@ -3338,7 +3338,7 @@ Variant f_mb_eregi_replace(CVarRef pattern, CStrRef replacement, CStrRef str,
                                          str, option, ONIG_OPTION_IGNORECASE);
 }
 
-int f_mb_ereg_search_getpos() {
+int64 f_mb_ereg_search_getpos() {
   return MBSTRG(search_pos);
 }
 

@@ -145,7 +145,7 @@ inline String x_socket_strerror(int errnum) {
   return f_socket_strerror(errnum);
 }
 
-inline int x_socket_last_error(CObjRef socket = null_object) {
+inline int64 x_socket_last_error(CObjRef socket = null_object) {
   FUNCTION_INJECTION_BUILTIN(socket_last_error);
   return f_socket_last_error(socket);
 }

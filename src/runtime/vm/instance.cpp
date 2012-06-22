@@ -18,6 +18,7 @@
 #include "runtime/base/variable_serializer.h"
 #include "runtime/base/tv_macros.h"
 #include "runtime/vm/core_types.h"
+#include "runtime/vm/member_operations.h"
 #include "runtime/vm/hhbc.h"
 #include "runtime/vm/class.h"
 #include "runtime/vm/instance.h"
@@ -94,8 +95,8 @@ Object Instance::FromArray(ArrayData *properties) {
   ASSERT(hhvm);
   Instance* retval =
     Instance::newInstance(SystemLib::s_stdclassClass);
-  retval->initPropMap();
-  HphpArray* props = retval->m_propMap;
+  retval->initDynProps();
+  HphpArray* props = static_cast<HphpArray*>(retval->o_properties.get());
   if (LIKELY(HphpArray::isHphpArray(properties))) {
     HphpArray* oldProps = static_cast<HphpArray*>(properties);
     for (ssize_t pos = oldProps->iter_begin(); pos != ArrayData::invalid_index;
@@ -126,20 +127,9 @@ Object Instance::FromArray(ArrayData *properties) {
   return retval;
 }
 
-void Instance::initPropMap(int numDynamic /* = 1 */) {
-  // Create m_propMap with at least enough room for all the accessible declared
-  // properties, plus numDynamic which will soon be inserted.
-  m_propMap = NEW(HphpArray)(m_cls->m_declPropNumAccessible + numDynamic);
-  m_propMap->incRefCount();
-  const Class::Prop* declProps = m_cls->declProperties();
-  size_t numDeclProps = m_cls->numDeclProperties();
-  for (size_t i = 0; i < numDeclProps; ++i) {
-    const Class::Prop& prop = declProps[i];
-    if (prop.m_name->size() != 0) {
-      m_propMap->migrateAndSet(const_cast<StringData*>(prop.m_name),
-                               &m_propVec[i]);
-    }
-  }
+void Instance::initDynProps(int numDynamic /* = 0 */) {
+  // Create o_properties with room for numDynamic
+  o_properties.asArray() = NEW(HphpArray)(numDynamic);
 }
 
 Slot Instance::declPropInd(TypedValue* prop) const {
@@ -172,23 +162,15 @@ TypedValue* Instance::getPropImpl(Class* ctx, const StringData* key,
     ASSERT(!visible && !accessible);
     // We could not find a visible property. We need to check for a
     // dynamic property with this name if declOnly = false.
-    if (!declOnly && m_propMap) {
-      prop = m_propMap->nvGet(key, false);
+    if (!declOnly && o_properties.get()) {
+      prop = static_cast<HphpArray*>(o_properties.get())->nvGet(key, false);
       if (prop) {
-        if (declPropInd(prop) != kInvalidSlot) {
-          // If m_propMap->nvGet() returned a declared property, we
-          // know it is not visible, because if it were visible the
-          // call to Class::getDeclPropIndex() above would have
-          // returned a valid index.
-          prop = NULL;
-        } else {
-          // If m_propMap->nvGet() returned a non-declared property,
-          // we know that it is visible and accessible (since all
-          // dynamic properties are), and we know it is not unset
-          // (since unset dynamic properties don't appear in m_propMap).
-          visible = true;
-          accessible = true;
-        }
+        // o_properties.get()->nvGet() returned a non-declared property,
+        // we know that it is visible and accessible (since all
+        // dynamic properties are), and we know it is not unset
+        // (since unset dynamic properties don't appear in o_properties.get()).
+        visible = true;
+        accessible = true;
       }
     }
   }
@@ -282,11 +264,11 @@ void Instance::propImpl(TypedValue*& retval, TypedValue& tvRef,
         raiseUndefProp(key);
       }
       if (define) {
-        if (m_propMap == NULL) {
-          initPropMap();
+        if (o_properties.get() == NULL) {
+          initDynProps();
         }
-        m_propMap->lvalPtr(*(const String*)&key, *(Variant**)(&retval), false,
-                           true);
+        o_properties.get()->lvalPtr(*(const String*)&key,
+                           *(Variant**)(&retval), false, true);
       } else {
         retval = (TypedValue*)&init_null_variant;
       }
@@ -388,11 +370,11 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseSet)) {
-    if (m_propMap == NULL) {
-      initPropMap();
+    if (o_properties.get() == NULL) {
+      initDynProps();
     }
-    m_propMap->lvalPtr(*(const String*)&key, *(Variant**)(&propVal), false,
-                       true);
+    o_properties.get()->lvalPtr(*(const String*)&key,
+                        *(Variant**)(&propVal), false, true);
     TypedValue tvRef;
     tvWriteUninit(&tvRef);
     propImpl<false, true>(propVal, tvRef, ctx, key);
@@ -447,11 +429,11 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseGet)) {
-    if (m_propMap == NULL) {
-      initPropMap();
+    if (o_properties.get() == NULL) {
+      initDynProps();
     }
-    m_propMap->lvalPtr(*(const String*)&key, *(Variant**)(&propVal), false,
-                       true);
+    o_properties.get()->lvalPtr(*(const String*)&key,
+                        *(Variant**)(&propVal), false, true);
     tvWriteNull(propVal);
     SETOP_BODY(propVal, op, val);
     return propVal;
@@ -460,10 +442,10 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
     tvWriteUninit(&tvResult);
     invokeGet(&tvResult, key);
     SETOP_BODY(&tvResult, op, val);
-    if (m_propMap == NULL) {
-      initPropMap();
+    if (o_properties.get() == NULL) {
+      initDynProps();
     }
-    m_propMap->lvalPtr(*(const String*)&key, *(Variant**)(&propVal),
+    o_properties.get()->lvalPtr(*(const String*)&key, *(Variant**)(&propVal),
                        false, true);
     memcpy((void*)propVal, (void*)&tvResult, sizeof(TypedValue));
     return propVal;
@@ -514,11 +496,11 @@ void Instance::incDecProp(TypedValue& tvRef, Class* ctx,
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseGet)) {
-    if (m_propMap == NULL) {
-      initPropMap();
+    if (o_properties.get() == NULL) {
+      initDynProps();
     }
-    m_propMap->lvalPtr(*(const String*)&key, *(Variant**)(&propVal), false,
-                       true);
+    o_properties.get()->lvalPtr(*(const String*)&key,
+                       *(Variant**)(&propVal), false, true);
     tvWriteNull(propVal);
     IncDecBody(op, propVal, &dest);
     return;
@@ -527,10 +509,10 @@ void Instance::incDecProp(TypedValue& tvRef, Class* ctx,
     tvWriteUninit(&tvResult);
     invokeGet(&tvResult, key);
     IncDecBody(op, &tvResult, &dest);
-    if (m_propMap == NULL) {
-      initPropMap();
+    if (o_properties.get() == NULL) {
+      initDynProps();
     }
-    m_propMap->lvalPtr(*(const String*)&key, *(Variant**)(&propVal),
+    o_properties.get()->lvalPtr(*(const String*)&key, *(Variant**)(&propVal),
                        false, true);
     memcpy((void*)propVal, (void*)&tvResult, sizeof(TypedValue));
     return;
@@ -556,8 +538,8 @@ void Instance::unsetProp(Class* ctx, const StringData* key) {
       TV_WRITE_UNINIT(propVal);
     } else {
       // Dynamic property.
-      ASSERT(m_propMap != NULL);
-      m_propMap->remove(CStrRef(key), false);
+      ASSERT(o_properties.get() != NULL);
+      o_properties.get()->remove(CStrRef(key), false);
     }
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
@@ -587,8 +569,8 @@ const String& Instance::o_getParentName() const {
 }
 
 Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
-  int size = (m_propMap != NULL ?
-              m_propMap->size() : m_cls->m_declPropNumAccessible);
+  int size = m_cls->m_declPropNumAccessible +
+               (o_properties.get() != NULL ? o_properties.get()->size() : 0);
   HphpArray* retval = NEW(HphpArray)(size);
   Class* ctx = NULL;
   if (!context.empty()) {
@@ -599,10 +581,11 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
   // hierarchy, in declaration order.
   const Class* klass = m_cls;
   while (klass != NULL) {
-    const PreClass::PropertyVec& props = klass->m_preClass.get()->propertyVec();
-    for (PreClass::PropertyVec::const_iterator it = props.begin();
-         it != props.end(); ++it) {
-      StringData* key = const_cast<StringData*>((*it)->name());
+    PreClass::Prop* const* props = klass->m_preClass->properties();
+    const size_t numProps = klass->m_preClass->numProperties();
+
+    for (size_t i = 0; i < numProps; ++i) {
+      StringData* key = const_cast<StringData*>(props[i]->name());
       bool visible, accessible, unset;
       TypedValue* val = getProp(ctx, key, visible, accessible, unset);
       if (accessible && val->m_type != KindOfUninit && !unset) {
@@ -620,18 +603,19 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
   }
 
   // Now get dynamic properties.
-  if (m_propMap != NULL) {
-    ssize_t iter = m_propMap->iter_begin();
+  if (o_properties.get() != NULL) {
+    ssize_t iter = o_properties.get()->iter_begin();
     while (iter != HphpArray::ElmIndEmpty) {
       TypedValue key;
-      m_propMap->nvGetKey(&key, iter);
-      iter = m_propMap->iter_advance(iter);
+      static_cast<HphpArray*>(o_properties.get())->nvGetKey(&key, iter);
+      iter = o_properties.get()->iter_advance(iter);
 
       // You can get this if you cast an array to object. These properties must
       // be dynamic because you can't declare a property with a non-string name.
       if (UNLIKELY(!IS_STRING_TYPE(key.m_type))) {
         ASSERT(key.m_type == KindOfInt64);
-        TypedValue* val = m_propMap->nvGet(key.m_data.num);
+        TypedValue* val =
+          static_cast<HphpArray*>(o_properties.get())->nvGet(key.m_data.num);
         if (getRef) {
           if (val->m_type != KindOfVariant) {
             tvBox(val);
@@ -643,16 +627,15 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
         continue;
       }
 
-      if (m_cls->lookupDeclProp(key.m_data.pstr) == kInvalidSlot) {
-        TypedValue* val = m_propMap->nvGet(key.m_data.pstr);
-        if (getRef) {
-          if (val->m_type != KindOfVariant) {
-            tvBox(val);
-          }
-          retval->nvBind(key.m_data.pstr, val, false);
-        } else {
-          retval->nvSet(key.m_data.pstr, val, false);
+      TypedValue* val =
+        static_cast<HphpArray*>(o_properties.get())->nvGet(key.m_data.pstr);
+      if (getRef) {
+        if (val->m_type != KindOfVariant) {
+          tvBox(val);
         }
+        retval->nvBind(key.m_data.pstr, val, false);
+      } else {
+        retval->nvSet(key.m_data.pstr, val, false);
       }
     }
   }
@@ -689,28 +672,35 @@ void Instance::o_setArray(CArrRef properties) {
   ObjectData::o_setArray(properties);
 }
 
-void Instance::o_getProps(const Class* klass, bool pubOnly,
-                          const PreClass::PropertyVec& propVec,
-                          Array& props,
-                          std::vector<bool>& inserted) const {
-  for (PreClass::PropertyVec::const_iterator it = propVec.begin();
-       it != propVec.end(); ++it) {
-    PreClass::Prop* prop = *it;
-    if (prop->attrs() & AttrStatic) {
-      continue;
-    }
+void Instance::getProp(const Class* klass, bool pubOnly,
+                       const PreClass::Prop* prop,
+                       Array& props,
+                       std::vector<bool>& inserted) const {
+  if (prop->attrs() & AttrStatic) {
+    return;
+  }
 
-    Slot propInd = klass->lookupDeclProp(prop->name());
-    ASSERT(propInd != kInvalidSlot);
-    TypedValue* propVal = &m_propVec[propInd];
+  Slot propInd = klass->lookupDeclProp(prop->name());
+  ASSERT(propInd != kInvalidSlot);
+  TypedValue* propVal = &m_propVec[propInd];
 
-    if ((!pubOnly || (prop->attrs() & AttrPublic)) &&
-        propVal->m_type != KindOfUninit &&
-        !inserted[propInd]) {
-      inserted[propInd] = true;
-      props.lvalAt(CStrRef(klass->declProperties()[propInd].m_mangledName))
-        .setWithRef(tvAsCVarRef(propVal));
-    }
+  if ((!pubOnly || (prop->attrs() & AttrPublic)) &&
+      propVal->m_type != KindOfUninit &&
+      !inserted[propInd]) {
+    inserted[propInd] = true;
+    props.lvalAt(CStrRef(klass->declProperties()[propInd].m_mangledName))
+      .setWithRef(tvAsCVarRef(propVal));
+  }
+}
+
+void Instance::getProps(const Class* klass, bool pubOnly,
+                        const PreClass* pc,
+                        Array& props,
+                        std::vector<bool>& inserted) const {
+  PreClass::Prop* const* propVec = pc->properties();
+  size_t count = pc->numProperties();
+  for (size_t i = 0; i < count; ++i) {
+    getProp(klass, pubOnly, propVec[i], props, inserted);
   }
 }
 
@@ -728,29 +718,23 @@ void Instance::o_getArray(Array& props, bool pubOnly /* = false */) const {
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
   const Class* klass = m_cls;
   while (klass != NULL) {
-    o_getProps(klass, pubOnly, klass->m_preClass->propertyVec(), props,
-               inserted);
+    getProps(klass, pubOnly, klass->m_preClass.get(), props, inserted);
 
     const std::vector<ClassPtr> &usedTraits = klass->m_usedTraits;
     for (unsigned t = 0; t < usedTraits.size(); t++) {
-      const ClassPtr trait = usedTraits[t];
-      o_getProps(klass, pubOnly, trait->m_preClass->propertyVec(), props,
-                 inserted);
+      const ClassPtr& trait = usedTraits[t];
+      getProps(klass, pubOnly, trait->m_preClass.get(), props, inserted);
     }
 
     klass = klass->m_parent.get();
   }
 
   // Iterate over dynamic properties and insert {name --> prop} pairs.
-  if (m_propMap != NULL && !m_propMap->empty()) {
-    for (ArrayIter it(m_propMap); !it.end(); it.next()) {
-      CVarRef val = it.secondRef();
-      if (declPropInd((TypedValue*)&val) == kInvalidSlot) {
-        // Not a declared property; insert.
-        Variant key = it.first();
-        CVarRef value = it.secondRef();
-        props.addLval(key, true).setWithRef(value);
-      }
+  if (o_properties.get() != NULL && !o_properties.get()->empty()) {
+    for (ArrayIter it(o_properties.get()); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      props.addLval(key, true).setWithRef(value);
     }
   }
 }
@@ -932,21 +916,19 @@ void Instance::cloneSet(ObjectData* clone) {
     TypedValue* to = &iclone->m_propVec[i];
     TV_DUP_FLATTEN_VARS(fr, to, NULL);
   }
-  iclone->initPropMap();
-  if (m_propMap != NULL) {
-    ssize_t iter = m_propMap->iter_begin();
+  iclone->initDynProps();
+  if (o_properties.get() != NULL) {
+    ssize_t iter = o_properties.get()->iter_begin();
     while (iter != HphpArray::ElmIndEmpty) {
       TypedValue key;
-      m_propMap->nvGetKey(&key, iter);
-      if (m_cls->lookupDeclProp(key.m_data.pstr) == kInvalidSlot) {
-        // not a declared property. insert.
-        TypedValue* retval;
-        TypedValue *val = m_propMap->nvGet(key.m_data.pstr);
-        iclone->m_propMap->lvalPtr(*(const String *)&key.m_data.pstr,
-                                   *(Variant**)&retval, false, true);
-        TV_DUP_FLATTEN_VARS(val, retval, iclone->m_propMap);
-      }
-      iter = m_propMap->iter_advance(iter);
+      static_cast<HphpArray*>(o_properties.get())->nvGetKey(&key, iter);
+      TypedValue* retval;
+      TypedValue *val =
+        static_cast<HphpArray*>(o_properties.get())->nvGet(key.m_data.pstr);
+      iclone->o_properties.get()->lvalPtr(*(const String *)&key.m_data.pstr,
+                                 *(Variant**)&retval, false, true);
+      TV_DUP_FLATTEN_VARS(val, retval, iclone->o_properties.get());
+      iter = o_properties.get()->iter_advance(iter);
     }
   }
 }

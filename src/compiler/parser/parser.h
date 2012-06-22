@@ -270,6 +270,8 @@ private:
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
 
   bool hasType(Token &type);
+
+  void checkAssignThis(Token &var);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

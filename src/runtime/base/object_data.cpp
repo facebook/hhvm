@@ -183,7 +183,8 @@ inline ALWAYS_INLINE bool InstanceOfHelper(CStrRef s,
           info += o;
           do {
             if (hash == info->hash &&
-                LIKELY(!strcasecmp(info->name, s->data()))) {
+                LIKELY((info->name == s->data()) ||
+                  !strcasecmp(info->name, s->data()))) {
               return true;
             }
           } while (!info++->flags);
@@ -355,7 +356,6 @@ static void LazyInitializer(const ClassPropTable *cpt, const char *globals) {
       } else {
         switch (ce->type) {
           case KindOfBoolean: *(bool*)addr = init;   break;
-          case KindOfInt32:   *(int*)addr = init;    break;
           case KindOfInt64:   *(int64*)addr = init;  break;
           case KindOfDouble:  *(double*)addr = init; break;
           case KindOfString:  *(String*)addr = init; break;
@@ -577,9 +577,9 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
           if (o >= 0) {
             info += o;
             do {
-              if (LIKELY(hash == info->hash) &&
-                  LIKELY(info->len == s->size()) &&
-                  LIKELY(!strcasecmp(info->name, s->data()))) {
+              if (info->name == s->data() ||
+                    (LIKELY(hash == info->hash) &&
+                     LIKELY(!strcasecmp(info->name, s->data())))) {
                 mcp.ci = info->ci;
                 return true;
               }
@@ -787,7 +787,7 @@ Variant *ObjectData::RealPropPublicHelper(
 
 void ObjectData::initProperties(int nProp) {
   if (hhvm && isInstance()) {
-    if (!m_propMap) ((HPHP::VM::Instance*)this)->initPropMap(nProp);
+    if (!o_properties.get()) ((HPHP::VM::Instance*)this)->initDynProps(nProp);
   } else {
     ASSERT(hhvm || (enable_hphp_array && RuntimeOption::UseHphpArray));
     if (!o_properties.get()) {
@@ -823,10 +823,11 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
         // Property is not declared, and not dynamically created yet.
         if (flags & RealPropCreate) {
           ASSERT(!(flags & RealPropNoDynamic));
-          if (m_propMap == NULL) {
-            thiz->initPropMap();
+          if (o_properties.get() == NULL) {
+            thiz->initDynProps();
           }
-          m_propMap->lvalPtr(propName, *(Variant**)(&ret), false, true);
+          o_properties.get()->lvalPtr(propName,
+                                      *(Variant**)(&ret), false, true);
           return (Variant*)ret;
         } else {
           return NULL;
@@ -947,7 +948,7 @@ Variant *ObjectData::o_realProp(CStrRef propName, int flags,
 Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
   if (hhvm) {
     if (isInstance()) {
-      return o_realProp(propName, flags);
+      return o_realProp(propName, flags, empty_string);
     }
   }
   const ObjectStaticCallbacks *orig = o_get_callbacks();
@@ -1705,9 +1706,6 @@ ObjectData *ObjectData::clone() {
           switch (p->type) {
             case KindOfBoolean:
               *(bool*)a2 = *(bool*)a1;
-              break;
-            case KindOfInt32:
-              *(int*)a2 = *(int*)a1;
               break;
             case KindOfInt64:
               *(int64*)a2 = *(int64*)a1;

@@ -58,7 +58,7 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys, 
 bool f_openssl_sign(CStrRef data, VRefParam signature, CVarRef priv_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1);
 Variant f_openssl_verify(CStrRef data, CStrRef signature, CVarRef pub_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1);
 bool f_openssl_x509_check_private_key(CVarRef cert, CVarRef key);
-int f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, CArrRef cainfo = null_array, CStrRef untrustedfile = null_string);
+int64 f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, CArrRef cainfo = null_array, CStrRef untrustedfile = null_string);
 bool f_openssl_x509_export_to_file(CVarRef x509, CStrRef outfilename, bool notext = true);
 bool f_openssl_x509_export(CVarRef x509, VRefParam output, bool notext = true);
 void f_openssl_x509_free(CObjRef x509cert);

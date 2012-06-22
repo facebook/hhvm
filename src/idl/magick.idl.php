@@ -130,7 +130,7 @@ DefineFunction(
     'name'   => "magickgetversionnumber",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'taint_observer' => false,
   ));
@@ -639,7 +639,7 @@ DefineFunction(
     'name'   => "wandgetexceptiontype",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -975,7 +975,7 @@ DefineFunction(
     'name'   => "drawgetcliprule",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -991,7 +991,7 @@ DefineFunction(
     'name'   => "drawgetclipunits",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1039,7 +1039,7 @@ DefineFunction(
     'name'   => "drawgetexceptiontype",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1103,7 +1103,7 @@ DefineFunction(
     'name'   => "drawgetfillrule",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1167,7 +1167,7 @@ DefineFunction(
     'name'   => "drawgetfontstretch",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1183,7 +1183,7 @@ DefineFunction(
     'name'   => "drawgetfontstyle",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1215,7 +1215,7 @@ DefineFunction(
     'name'   => "drawgetgravity",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1311,7 +1311,7 @@ DefineFunction(
     'name'   => "drawgetstrokelinecap",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1327,7 +1327,7 @@ DefineFunction(
     'name'   => "drawgetstrokelinejoin",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1391,7 +1391,7 @@ DefineFunction(
     'name'   => "drawgettextalignment",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1423,7 +1423,7 @@ DefineFunction(
     'name'   => "drawgettextdecoration",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4304,7 +4304,7 @@ DefineFunction(
     'name'   => "magickgetexceptiontype",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4488,7 +4488,7 @@ DefineFunction(
     'name'   => "magickgetimagecolorspace",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4504,7 +4504,7 @@ DefineFunction(
     'name'   => "magickgetimagecompose",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4520,7 +4520,7 @@ DefineFunction(
     'name'   => "magickgetimagecompression",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4589,7 +4589,7 @@ DefineFunction(
     'name'   => "magickgetimagedispose",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4722,7 +4722,7 @@ DefineFunction(
     'name'   => "magickgetimageindex",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4738,7 +4738,7 @@ DefineFunction(
     'name'   => "magickgetimageinterlacescheme",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4878,7 +4878,7 @@ DefineFunction(
     'name'   => "magickgetimagerenderingintent",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4942,7 +4942,7 @@ DefineFunction(
     'name'   => "magickgetimagesize",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4958,7 +4958,7 @@ DefineFunction(
     'name'   => "magickgetimagetype",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4974,7 +4974,7 @@ DefineFunction(
     'name'   => "magickgetimageunits",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -4990,7 +4990,7 @@ DefineFunction(
     'name'   => "magickgetimagevirtualpixelmethod",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -5054,7 +5054,7 @@ DefineFunction(
     'name'   => "magickgetinterlacescheme",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -8056,7 +8056,7 @@ DefineFunction(
     'name'   => "pixelgetexceptiontype",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -8749,7 +8749,7 @@ DefineFunction(
     'name'   => "pixelgetiteratorexceptiontype",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(

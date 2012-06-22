@@ -26,7 +26,7 @@ namespace HPHP {
 
 Variant f_assert_options(int what, CVarRef value = null_variant);
 Variant f_assert(CVarRef assertion);
-int f_dl(CStrRef library);
+int64 f_dl(CStrRef library);
 bool f_extension_loaded(CStrRef name);
 Array f_get_loaded_extensions(bool zend_extensions = false);
 Array f_get_extension_funcs(CStrRef module_name);
@@ -38,21 +38,21 @@ void f_restore_include_path();
 String f_set_include_path(CStrRef new_include_path);
 Array f_get_included_files();
 Array f_inclued_get_data();
-int f_get_magic_quotes_gpc();
-int f_get_magic_quotes_runtime();
+int64 f_get_magic_quotes_gpc();
+int64 f_get_magic_quotes_runtime();
 Array f_get_required_files();
 Variant f_getenv(CStrRef varname);
-int f_getlastmod();
-int f_getmygid();
-int f_getmyinode();
-int f_getmypid();
-int f_getmyuid();
+int64 f_getlastmod();
+int64 f_getmygid();
+int64 f_getmyinode();
+int64 f_getmypid();
+int64 f_getmyuid();
 Array f_getopt(CStrRef options, CVarRef longopts = null_variant);
 Array f_getrusage(int who = 0);
 bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec);
 bool f_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec);
 bool f_clock_settime(int clk_id, int64 sec, int64 nsec);
-inline int f_cpu_get_count() { return Process::GetCPUCount();}
+inline int64 f_cpu_get_count() { return Process::GetCPUCount();}
 inline String f_cpu_get_model() { return Process::GetCPUModel();}
 String f_ini_alter(CStrRef varname, CStrRef newvalue);
 Array f_ini_get_all(CStrRef extension = null_string);
@@ -75,7 +75,7 @@ void f_set_time_limit(int seconds);
 String f_sys_get_temp_dir();
 Variant f_version_compare(CStrRef version1, CStrRef version2, CStrRef sop = null_string);
 String f_zend_logo_guid();
-int f_zend_thread_id();
+int64 f_zend_thread_id();
 String f_zend_version();
 
 ///////////////////////////////////////////////////////////////////////////////

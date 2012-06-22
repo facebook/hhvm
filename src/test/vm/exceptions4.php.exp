@@ -2,7 +2,7 @@ HipHop Warning:  Destructor threw an object exception: exception 'Exception' wit
 Stack trace:
 #0 src/test/vm/exceptions4.php(21): B->__destruct()
 #1 {main} in src/test/vm/exceptions4.php on line 21
-HipHop Fatal error: Uncaught exception exception 'Exception' with message '' in src/test/vm/exceptions4.php:5
+HipHop Fatal error: Uncaught exception 'Exception' with message '' in src/test/vm/exceptions4.php:5
 Stack trace:
 #0 src/test/vm/exceptions4.php(21): A->__construct()
 #1 {main}

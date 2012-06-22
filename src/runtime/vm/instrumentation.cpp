@@ -39,7 +39,7 @@ void Injection::execute() const {
   Class *cls = NULL;
   ActRec *fp = g_vmContext->getFP();
   if (fp) {
-    if (fp->m_varEnv == NULL) {
+    if (!fp->hasVarEnv()) {
       fp->m_varEnv = VarEnv::createLazyAttach(fp);
     }
     varEnv = fp->m_varEnv;

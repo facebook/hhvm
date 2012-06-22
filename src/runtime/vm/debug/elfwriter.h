@@ -17,7 +17,6 @@
 #define _ELF_H_
 
 #include <runtime/base/types.h>
-#include <runtime/vm/translator/translator.h>
 #include "dwarf.h"
 #include <elf.h>
 #include <gelf.h>

@@ -165,18 +165,11 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
-  ClassScopePtr cls = resolveClass();
+  ClassScopePtr cls = resolveClassWithChecks();
   if (!cls) {
-    if (isRedeclared()) {
-      getScope()->getVariables()->
-        setAttribute(VariableTable::NeedGlobalPointer);
-    } else if (getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::UnknownClass, self);
-    }
     return Type::Variant;
   }
 
-  ASSERT(cls);
   ClassScopePtr defClass = cls;
   ConstructPtr decl =
     cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);

@@ -528,7 +528,7 @@ TypedValue* fg_hash_update_file(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_hash_update_stream(HPHP::Object const&, HPHP::Object const&, int)
+long long HPHP::f_hash_update_stream(HPHP::Object const&, HPHP::Object const&, int)
 _ZN4HPHP20f_hash_update_streamERKNS_6ObjectES2_i
 
 (return value) => rax
@@ -537,7 +537,7 @@ handle => rsi
 length => rdx
 */
 
-int fh_hash_update_stream(Value* context, Value* handle, int length) asm("_ZN4HPHP20f_hash_update_streamERKNS_6ObjectES2_i");
+long long fh_hash_update_stream(Value* context, Value* handle, int length) asm("_ZN4HPHP20f_hash_update_streamERKNS_6ObjectES2_i");
 
 TypedValue * fg1_hash_update_stream(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_hash_update_stream(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -655,7 +655,7 @@ TypedValue* fg_hash_update(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_furchash_hphp_ext(HPHP::String const&, int, int)
+long long HPHP::f_furchash_hphp_ext(HPHP::String const&, int, int)
 _ZN4HPHP19f_furchash_hphp_extERKNS_6StringEii
 
 (return value) => rax
@@ -664,7 +664,7 @@ len => rsi
 nPart => rdx
 */
 
-int fh_furchash_hphp_ext(Value* key, int len, int nPart) asm("_ZN4HPHP19f_furchash_hphp_extERKNS_6StringEii");
+long long fh_furchash_hphp_ext(Value* key, int len, int nPart) asm("_ZN4HPHP19f_furchash_hphp_extERKNS_6StringEii");
 
 TypedValue * fg1_furchash_hphp_ext(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_furchash_hphp_ext(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {

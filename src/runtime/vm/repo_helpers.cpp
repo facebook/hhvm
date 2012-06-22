@@ -16,6 +16,7 @@
 
 #include "runtime/vm/repo.h"
 #include "runtime/vm/repo_helpers.h"
+#include "runtime/vm/blob_helper.h"
 #include "runtime/base/builtin_functions.h"
 
 namespace HPHP {
@@ -152,6 +153,11 @@ void RepoQuery::bindBlob(const char* paramName, const void* blob,
                       blob, int(size),
                       isStatic ? SQLITE_STATIC : SQLITE_TRANSIENT);
   ASSERT(rc == SQLITE_OK);
+}
+
+void RepoQuery::bindBlob(const char* paramName, const BlobEncoder& blob,
+                         bool isStatic) {
+  return bindBlob(paramName, blob.data(), blob.size(), isStatic);
 }
 
 void RepoQuery::bindMd5(const char* paramName, const MD5& md5) {
@@ -311,6 +317,13 @@ void RepoQuery::getBlob(int iCol, const void*& blob, size_t& size) {
   }
   blob = sqlite3_column_blob(m_stmt.get(), iCol);
   size = size_t(sqlite3_column_bytes(m_stmt.get(), iCol));
+}
+
+BlobDecoder RepoQuery::getBlob(int iCol) {
+  const void* vp;
+  size_t sz;
+  getBlob(iCol, vp, sz);
+  return BlobDecoder(vp, sz);
 }
 
 void RepoQuery::getMd5(int iCol, MD5& md5) {

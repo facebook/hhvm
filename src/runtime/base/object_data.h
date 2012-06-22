@@ -93,7 +93,7 @@ class ObjectData : public CountableNF {
              VM::Class* type = NULL)
       : o_attribute(0), o_callbacks(cb)
 #ifdef HHVM
-        , m_cls(type), m_propMap(NULL), m_propVec(NULL)
+        , m_cls(type), m_propVec(NULL)
 #endif
         {
     if (!noId) {
@@ -361,9 +361,8 @@ public:
   int           o_id;            // a numeric identifier of this object
  private:
   mutable int16 o_attribute;     // various flags
- private:
-  ArrNR         o_properties;    // dynamic properties
  protected:
+  ArrNR         o_properties;    // dynamic properties
 #ifndef HHVM
   // For non-HHVM builds, avoid the memory overhead of HHVM-specific fields by
   // overlaying them onto a field that exists regardless.  This is sufficient
@@ -378,7 +377,6 @@ public:
     // the property vector that follows an "Instance", regardless of whether the
     // Instance is actually an extension class that derives from ObjectData.
     HPHP::VM::Class* m_cls;
-    HphpArray* m_propMap;
     TypedValue* m_propVec;
 #ifndef HHVM
   };

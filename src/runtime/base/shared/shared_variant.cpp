@@ -37,7 +37,6 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
       m_data.num = source.toBoolean();
       break;
     }
-  case KindOfInt32:
   case KindOfInt64:
     {
       m_type = KindOfInt64;
@@ -253,7 +252,6 @@ HOT_FUNC
 int SharedVariant::getIndex(CVarRef key) {
   ASSERT(is(KindOfArray));
   switch (key.getType()) {
-  case KindOfInt32:
   case KindOfInt64: {
     int64 num = key.getNumData();
     if (getIsVector()) {

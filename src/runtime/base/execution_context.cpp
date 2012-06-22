@@ -83,7 +83,8 @@ VMExecutionContext::VMExecutionContext() :
     m_halted(false), m_lambdaCounter(0), m_nesting(0),
     m_injTables(NULL), m_breakPointFilter(NULL), m_lastLocFilter(NULL),
     m_interpreting(false), m_dbgNoBreak(false),
-    m_coverPrevLine(-1), m_coverPrevUnit(NULL) {
+    m_coverPrevLine(-1), m_coverPrevUnit(NULL),
+    m_executingSetprofileCallback(false) {
 
 #ifdef HHVM
   // Make sure any fields accessed from the TC are within a byte of
@@ -733,7 +734,7 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
 bool BaseExecutionContext::onUnhandledException(Object e) {
   String err = e.toString();
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Error("HipHop Fatal error: Uncaught exception %s", err.data());
+    Logger::Error("HipHop Fatal error: Uncaught %s", err.data());
   }
 
   if (e.instanceof("Exception")) {
@@ -752,7 +753,7 @@ bool BaseExecutionContext::onUnhandledException(Object e) {
   m_lastError = err;
 
   if (!RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Error("HipHop Fatal error: Uncaught exception: %s", err.data());
+    Logger::Error("HipHop Fatal error: Uncaught %s", err.data());
   }
   return false;
 }

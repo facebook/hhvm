@@ -190,7 +190,7 @@ inline bool x_openssl_x509_check_private_key(CVarRef cert, CVarRef key) {
   return f_openssl_x509_check_private_key(cert, key);
 }
 
-inline int x_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, CArrRef cainfo = null_array, CStrRef untrustedfile = null_string) {
+inline int64 x_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, CArrRef cainfo = null_array, CStrRef untrustedfile = null_string) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_checkpurpose);
   return f_openssl_x509_checkpurpose(x509cert, purpose, cainfo, untrustedfile);
 }

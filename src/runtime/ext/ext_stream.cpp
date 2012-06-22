@@ -147,7 +147,7 @@ bool f_stream_set_timeout(CObjRef stream, int seconds,
   return false;
 }
 
-int f_stream_set_write_buffer(CObjRef stream, int buffer) {
+int64 f_stream_set_write_buffer(CObjRef stream, int buffer) {
   PlainFile *file = stream.getTyped<PlainFile>(false, true);
   if (file) {
     switch (buffer) {

@@ -205,7 +205,7 @@ Variant f_xbox_process_call_message(CStrRef msg) {
   return f_call_user_func_array(fn, args.toArray());
 }
 
-int f_xbox_get_thread_timeout() {
+int64 f_xbox_get_thread_timeout() {
   XboxServerInfoPtr server_info = XboxServer::GetServerInfo();
   if (server_info) {
     return server_info->getMaxDuration();
@@ -235,7 +235,7 @@ void f_xbox_schedule_thread_reset() {
   }
 }
 
-int f_xbox_get_thread_time() {
+int64 f_xbox_get_thread_time() {
   RPCRequestHandler *handler = XboxServer::GetRequestHandler();
   if (handler) {
     return time(NULL) - handler->getCreationTime();

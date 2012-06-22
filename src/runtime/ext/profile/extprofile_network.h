@@ -150,6 +150,11 @@ inline bool x_headers_sent(VRefParam file = null, VRefParam line = null) {
   return f_headers_sent(file, line);
 }
 
+inline bool x_header_register_callback(CVarRef callback) {
+  FUNCTION_INJECTION_BUILTIN(header_register_callback);
+  return f_header_register_callback(callback);
+}
+
 inline void x_header_remove(CStrRef name = null_string) {
   FUNCTION_INJECTION_BUILTIN(header_remove);
   f_header_remove(name);

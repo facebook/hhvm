@@ -2478,7 +2478,6 @@ safe:
             plc->quoted = "NULL";
             break;
 
-          case KindOfInt32:
           case KindOfInt64:
           case KindOfDouble:
             plc->quoted = param->parameter.toString();

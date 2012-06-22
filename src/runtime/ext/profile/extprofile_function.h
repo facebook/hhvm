@@ -115,7 +115,7 @@ inline Array x_func_get_args() {
   return f_func_get_args();
 }
 
-inline int x_func_num_args() {
+inline int64 x_func_num_args() {
   FUNCTION_INJECTION_BUILTIN(func_num_args);
   return f_func_num_args();
 }

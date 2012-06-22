@@ -80,7 +80,7 @@ Variant f_gethostname() {
   int error;
   String canon_hname;
 
-  error = gethostname(h_name, NI_MAXHOST);  
+  error = gethostname(h_name, NI_MAXHOST);
   if (error) {
     return false;
   }
@@ -94,7 +94,7 @@ Variant f_gethostname() {
     return String(h_name, CopyString);
   }
 
-  canon_hname = String(res->ai_canonname, CopyString);  
+  canon_hname = String(res->ai_canonname, CopyString);
   freeaddrinfo(res);
   return canon_hname;
 }
@@ -904,6 +904,19 @@ bool f_headers_sent(VRefParam file /* = null */, VRefParam line /* = null */) {
     return transport->headersSent();
   }
   return false;
+}
+
+bool f_header_register_callback(CVarRef callback) {
+  Transport *transport = g_context->getTransport();
+  if (!transport) {
+    // fail if there is no transport
+    return false;
+  }
+  if (transport->headersSent()) {
+    // fail if headers have already been sent
+    return false;
+  }
+  return transport->setHeaderCallback(callback);
 }
 
 void f_header_remove(CStrRef name /* = null_string */) {

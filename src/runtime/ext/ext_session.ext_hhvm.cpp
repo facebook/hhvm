@@ -866,10 +866,10 @@ TypedValue* fg_session_register(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfBoolean;
       Array extraArgs;
       {
-        HPHP::VM::VarEnv* ve UNUSED = ar->m_varEnv;
+        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ve->getExtraArg(i-1);
+          TypedValue* extraArg = ea->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {

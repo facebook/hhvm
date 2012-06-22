@@ -37,6 +37,7 @@ namespace HPHP {
 Transport::Transport()
   : m_instructions(0), m_url(NULL), m_postData(NULL), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
+    m_headerCallback(null), m_headerCallbackDone(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
     m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
     m_flushTimeUs(0), m_sendContentType(true),
@@ -703,6 +704,15 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   return response;
 }
 
+bool Transport::setHeaderCallback(CVarRef callback) {
+  if (m_headerCallback) {
+    // return false if a callback has already been set.
+    return false;
+  }
+  m_headerCallback = callback;
+  return true;
+}
+
 void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
                               bool compressed /* = false */,
                               bool chunked /* = false */,
@@ -723,6 +733,16 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
   // out headers earlier, which seems to be a useless feature.
   if (chunked && size == 0) {
     return;
+  }
+
+  if (!m_headerCallbackDone && !m_headerCallback.isNull()) {
+    // We could use m_headerSent here, however it seems we can still
+    // end up in an infinite loop when:
+    // m_headerCallback calls flush()
+    // flush() triggers php's recursion guard
+    // the recursion guard calls back into m_headerCallback
+    m_headerCallbackDone = true;
+    call_user_func0(m_headerCallback);
   }
 
   // compression handling

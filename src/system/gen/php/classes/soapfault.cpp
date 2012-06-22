@@ -134,7 +134,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
     {
       bool tmp1 = (x_is_array(v_code));
       if (tmp1) {
-        int tmp2((x_count(v_code)));
+        int64 tmp2((x_count(v_code)));
         tmp1 = (equal(tmp2, 2LL));
       }
       tmp0 = (tmp1);

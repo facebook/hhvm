@@ -70,6 +70,19 @@ class EHEnt {
   Offset m_fault;
   typedef std::vector<std::pair<Id, Offset> > CatchVec;
   CatchVec m_catches;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd(m_ehtype)
+      (m_base)
+      (m_past)
+      (m_iterId)
+      (m_fault)
+      // eh.m_parentIndex is re-computed in sortEHTab, not serialized.
+      ;
+    if (m_ehtype == EHType_Catch) {
+      sd(m_catches);
+    }
+  }
 };
 
 class EHEntComp {
@@ -94,6 +107,13 @@ class FPIEnt {
   Offset m_fpOff; // evaluation stack depth to current frame pointer
   int m_parentIndex;
   int m_fpiDepth;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd(m_fpushOff)(m_fcallOff)(m_fpOff);
+    // These fields are recomputed by sortFPITab:
+    // m_parentIndex;
+    // m_fpiDepth;
+  }
 };
 
 class FPIEntComp {
@@ -106,6 +126,7 @@ class FPIEntComp {
 class SourceLoc {
  public:
   SourceLoc() : line0(1), char0(1), line1(1), char1(1) {}
+  explicit SourceLoc(const Location& l) { setLoc(&l); }
 
   int line0;
   int char0;
@@ -149,18 +170,10 @@ class OffsetRange {
 typedef std::vector<OffsetRange> OffsetRangeVec;
 
 template<typename T>
-struct IntervalMapEntry {
-  Offset startOffset;
-  Offset endOffset;
-  T val;
-};
-
-typedef IntervalMapEntry<SourceLoc> SourceLocEntry;
-typedef IntervalMapEntry<const FuncEmitter*> FuncEmitterEntry;
-
-template<typename T>
 class TableEntry {
  public:
+  TableEntry() : m_pastOffset(0) {}
+
   TableEntry(Offset pastOffset, T val)
     : m_pastOffset(pastOffset), m_val(val) {}
   Offset pastOffset() const { return m_pastOffset; }
@@ -168,6 +181,9 @@ class TableEntry {
   bool operator <(const TableEntry& other) const {
     return m_pastOffset < other.m_pastOffset;
   }
+
+  template<class SerDe> void serde(SerDe& sd) { sd(m_pastOffset)(m_val); }
+
  private:
   Offset m_pastOffset;
   T m_val;
@@ -218,7 +234,8 @@ struct Unit {
     enum Kind {
       None,
       String,
-      Class
+      Class,
+      NopOut
     };
     MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {}
     MetaInfo() : m_kind(None), m_arg(-1), m_data(0) {}
@@ -276,12 +293,13 @@ struct Unit {
   int repoId() const { return m_repoId; }
   int64 sn() const { return m_sn; }
 
-  const PC entry() const { return m_bc; }
-  const PC at(const Offset off) const {
+  PC entry() const { return m_bc; }
+  Offset bclen() const { return m_bclen; }
+  PC at(const Offset off) const {
     ASSERT(off >= 0 && off <= Offset(m_bclen));
     return m_bc + off;
   }
-  const Offset offsetOf(const Opcode* op) const {
+  Offset offsetOf(const Opcode* op) const {
     ASSERT(op >= m_bc && op <= (m_bc + m_bclen));
     return op - m_bc;
   }
@@ -307,6 +325,9 @@ struct Unit {
   static Array getInterfacesInfo();
   static Array getTraitsInfo();
 
+  size_t numLitstrs() const {
+    return m_namedInfo.size();
+  }
   StringData* lookupLitstrId(Id id) const {
     ASSERT(id < Id(m_namedInfo.size()));
     return const_cast<StringData*>(m_namedInfo[id].first);
@@ -326,6 +347,9 @@ struct Unit {
     return ne;
   }
 
+  size_t numArrays() const {
+    return m_arrays.size();
+  }
   ArrayData* lookupArrayId(Id id) const {
     return const_cast<ArrayData*>(m_arrays.at(id));
   }
@@ -393,11 +417,17 @@ struct Unit {
   void renameFunc(const StringData* oldName, const StringData* newName);
   void mergeFuncs() const;
   static void loadFunc(Func *func);
+  const std::vector<Func*>& funcs() const {
+    return m_funcs;
+  }
   Func* lookupFuncId(Id id) const {
     ASSERT(id < Id(m_funcs.size()));
     return m_funcs[id];
   }
 
+  size_t numPreClasses() const {
+    return (size_t)m_preClasses.size();
+  }
   PreClass* lookupPreClassId(Id id) const {
     ASSERT(id < Id(m_preClasses.size()));
     return m_preClasses[id].get();
@@ -415,6 +445,12 @@ struct Unit {
   bool getSourceLoc(Offset pc, SourceLoc& sLoc) const;
   bool getOffsetRanges(int line, OffsetRangeVec& offsets) const;
   bool getOffsetRange(Offset pc, OffsetRange& range) const;
+
+  Opcode getOpcode(size_t instrOffset) const {
+    ASSERT(instrOffset < m_bclen);
+    return (Opcode)m_bc[instrOffset]; 
+  }
+
   const Func* getFunc(Offset pc) const;
   void enableIntercepts();
 
@@ -477,7 +513,6 @@ class UnitEmitter {
   Offset bcPos() const { return (Offset)m_bclen; }
   void setBc(const uchar* bc, size_t bclen);
   void setBcMeta(const uchar* bc_meta, size_t bc_meta_len);
-  void setLines(const LineEntry* lines, size_t nlines);
   const StringData* getFilepath() { return m_filepath; }
   void setFilepath(const StringData* filepath) { m_filepath = filepath; }
   const MD5& md5() const { return m_md5; }
@@ -488,14 +523,25 @@ class UnitEmitter {
   void initMain(int line1, int line2);
   FuncEmitter* newFuncEmitter(const StringData* n, bool top);
   FuncEmitter* newMethodEmitter(const StringData* n, PreClassEmitter* pce);
-  PreClassEmitter* newPreClassEmitter(const StringData* n, Attr attrs,
-                                      const StringData* parent,
-                                      const StringData* docComment,
-                                      int line1, int line2, Offset o,
-                                      bool hoistable);
+  PreClassEmitter* newPreClassEmitter(const StringData* n, bool hoistable);
   PreClassEmitter* pce(Id preClassId) { return m_pceVec[preClassId]; }
-  void recordSourceLocation(const Location *sLoc, Offset start, Offset end);
+
+  /*
+   * Record source location information for the last chunk of bytecode
+   * added to this UnitEmitter.  Adjacent regions associated with the
+   * same source line will be collapsed as this is created.
+   */
+  void recordSourceLocation(const Location *sLoc, Offset start);
+
+  /*
+   * Adds a new FuncEmitter to the unit.  You can only do this once
+   * for the FuncEmitter (after you are done setting it up).  Also,
+   * all FuncEmitter's added to the unit must not overlap.
+   *
+   * Takes ownership of `fe'.
+   */
   void recordFunction(FuncEmitter *fe);
+
  private:
   template<class T>
   void emitImpl(T n, int64 pos) {
@@ -543,6 +589,9 @@ class UnitEmitter {
   Unit* create();
 
  private:
+  void setLines(const LineTable& lines);
+
+ private:
   int m_repoId;
   int64 m_sn;
   static const size_t BCMaxInit = 4096; // Initial bytecode size.
@@ -579,17 +628,20 @@ class UnitEmitter {
                         string_data_isame> HoistedPreClassSet;
   HoistedPreClassSet m_hoistablePreClassSet;
   PceVec m_hoistablePceVec;
-  // m_sourceLocTable and m_feTable are interval maps.  Each entry encodes an
-  // open-closed range of bytecode offsets.  For example, in m_sourceLocTable
-  // there might be the following entries:
-  //
-  // [startOffset..endOffset) | {... line1 ...}
-  // -------------------------+----------------
-  // [0..9)                   | {... 2 ...}
-  // [9..33)                  | {... 3 ...}
-  std::map<Offset, SourceLocEntry> m_sourceLocTable;
-  typedef std::map<Offset, FuncEmitterEntry> FeTable;
-  FeTable m_feTable;
+
+  /*
+   * m_sourceLocTab and m_feTab are interval maps.  Each entry encodes
+   * an open-closed range of bytecode offsets.
+   *
+   * The m_sourceLocTab is keyed by the start of each half-open range.
+   * This is to allow appending new bytecode offsets that are part of
+   * the same range to coalesce.
+   *
+   * The m_feTab is keyed by the past-the-end offset.  This is the
+   * format we'll want it in when we go to create a Unit.
+   */
+  std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
+  std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
   PreConstVec m_preConsts;
 };
 
@@ -704,8 +756,6 @@ class UnitRepoProxy : public RepoProxy {
   c##Stmt* m_##o[RepoIdCount];
   URP_OPS
 #undef URP_OP
- private:
-  int m_dummy; // Used to avoid a syntax error in the ctor initializer list.
 };
 
 // hphp_compiler_parse() is defined in the compiler, but we must use

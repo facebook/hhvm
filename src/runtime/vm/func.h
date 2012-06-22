@@ -20,6 +20,7 @@
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/type_constraint.h"
 #include "runtime/vm/repo_helpers.h"
+#include "runtime/vm/indexed_string_map.h"
 #include "runtime/base/intercept.h"
 
 namespace HPHP {
@@ -37,6 +38,24 @@ struct Func {
     // construct a dummy ParamInfo
     ParamInfo() : m_funcletOff(InvalidAbsoluteOffset), m_phpCode(NULL) {
       TV_WRITE_UNINIT(&m_defVal);
+    }
+
+    template<class SerDe>
+    void serde(SerDe& sd) {
+      const StringData* tcName = m_typeConstraint.typeName();
+      bool tcNullable          = m_typeConstraint.nullable();
+
+      sd(m_funcletOff)
+        (m_defVal)
+        (m_phpCode)
+        (tcName)
+        (tcNullable)
+        ;
+
+      if (SerDe::deserializing) {
+        setTypeConstraint(TypeConstraint(tcName,
+                                         tcNullable));
+      }
     }
 
     void setFuncletOff(Offset funcletOff) { m_funcletOff = funcletOff; }
@@ -67,15 +86,14 @@ struct Func {
   struct SVInfo { // Static variable info.
     const StringData* name;
     const StringData* phpCode; // eval'able PHP or NULL if no default.
+
+    template<class SerDe> void serde(SerDe& sd) { sd(name)(phpCode); }
   };
 
   typedef std::vector<ParamInfo> ParamInfoVec;
-  typedef hphp_hash_map<const StringData*, Id,
-                        string_data_hash, string_data_same> PnameMap;
-  typedef std::vector<const StringData*> PnameVec;
-  typedef std::vector<SVInfo> SVInfoVec;
-  typedef std::vector<EHEnt> EHEntVec;
-  typedef std::vector<FPIEnt> FPIEntVec;
+  typedef FixedVector<SVInfo> SVInfoVec;
+  typedef FixedVector<EHEnt> EHEntVec;
+  typedef FixedVector<FPIEnt> FPIEntVec;
 
   typedef uint32_t FuncId;
   static const FuncId InvalidId = -1LL;
@@ -113,6 +131,7 @@ struct Func {
   const EHEnt* findEH(Offset o) const;
   Offset findFaultPCFromEH(Offset o) const;
   const FPIEnt* findFPI(Offset o) const;
+  const FPIEnt* findPrecedingFPI(Offset o) const;
 
   bool parametersCompat(const PreClass* preClass, const Func* imeth,
                         bool failIsFatal) const;
@@ -158,6 +177,9 @@ struct Func {
   }
   bool isMagicCallStaticMethod() const {
     return m_name->isame(s___callStatic);
+  }
+  bool isMagic() const {
+    return isMagicCallMethod() || isMagicCallStaticMethod();
   }
   static bool isSpecial(const StringData* methName) {
     return strncmp("86", methName->data(), 2) == 0;
@@ -231,10 +253,20 @@ struct Func {
   }
   int numParams() const { return m_numParams; }
   const ParamInfoVec& params() const { return shared()->m_params; }
-  const PnameMap& pnameMap() const { return shared()->m_pnameMap; }
-  const PnameVec& pnames() const { return shared()->m_pnames; }
   int numLocals() const { return shared()->m_numLocals; }
-  int numNamedLocals() const { return pnames().size(); }
+
+  const StringData* const* localNames() const {
+    return shared()->m_localNames.accessList();
+  }
+  Id numNamedLocals() const { return shared()->m_localNames.size(); }
+
+  // Returns the name of a local variable, or null if this varid is an
+  // unnamed local.
+  const StringData* localVarName(Id id) const {
+    ASSERT(id >= 0);
+    return id < numNamedLocals() ? shared()->m_localNames[id] : 0;
+  }
+
   int numIterators() const { return shared()->m_numIterators; }
   const EHEntVec& ehtab() const { return shared()->m_ehtab; }
   const FPIEntVec& fpitab() const { return shared()->m_fpitab; }
@@ -264,9 +296,6 @@ struct Func {
 
   static void* allocFuncMem(const StringData* name, int numParams);
 
-  static size_t prologueTableOffset() {
-    return offsetof(Func, m_prologueTable);
-  }
   void setPrologue(int index, unsigned char* tca) {
     m_prologueTable[index] = tca;
   }
@@ -311,6 +340,8 @@ public: // Offset accessors for the translator.
 #undef X
 
 private:
+  typedef IndexedStringMap<const StringData*,true,Id> NamedLocalsMap;
+
   struct SharedData : public Countable {
     PreClass* m_preClass;
     Id m_id;
@@ -324,16 +355,15 @@ private:
     uint64_t* m_refBitVec;
     BuiltinFunction m_builtinFuncPtr;
     ParamInfoVec m_params; // m_params[i] corresponds to parameter i.
-    PnameMap m_pnameMap;
-    PnameVec m_pnames;
+    NamedLocalsMap m_localNames; // includes parameter names
     SVInfoVec m_staticVars;
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
     const StringData* m_docComment;
-    bool m_top; // Defined at top level.
-    bool m_isClosureBody;
-    bool m_isGenerator;
-    bool m_isGeneratorFromClosure;
+    bool m_top : 1; // Defined at top level.
+    bool m_isClosureBody : 1;
+    bool m_isGenerator : 1;
+    bool m_isGeneratorFromClosure : 1;
     UserAttributeMap m_userAttributes;
     SharedData(PreClass* preClass, const ClassInfo::MethodInfo* info,
                BuiltinFunction funcPtr);
@@ -354,8 +384,7 @@ private:
   void setFullName();
   void init(int numParams);
   void initPrologues(int numParams);
-  Id newLocal();
-  void appendParam(const StringData* name, bool ref, const ParamInfo& info);
+  void appendParam(bool ref, const ParamInfo& info);
   void allocVarId(const StringData* name);
   const SharedData* shared() const { return m_shared.get(); }
   SharedData* shared() { return m_shared.get(); }
@@ -371,26 +400,28 @@ private:
                      // class that did not provide an implementation
   const StringData* m_name;
   const StringData* m_fullName;
-  bool m_hasPrivateAncestor; // This flag indicates if any of this Class's
-                             // ancestors provide a "private" implementation
-                             // for this method
-  mutable char m_maybeIntercepted;
-  Attr m_attrs;
-  FuncId m_funcId;
-#ifdef DEBUG
-  int m_magic; // For asserts only.
-#endif
   SharedDataPtr m_shared;
   union {
     const NamedEntity* m_namedEntity;
     Slot m_methodSlot;
   };
+  uint64_t* m_refBitVec;
 public: // used by Unit
   unsigned m_cachedOffset;
 private:
-  uint64_t* m_refBitVec;
+#ifdef DEBUG
+  int m_magic; // For asserts only.
+#endif
   int m_maxStackCells;
   int m_numParams;
+  Attr m_attrs;
+  FuncId m_funcId;
+  bool m_hasPrivateAncestor : 1; // This flag indicates if any of this
+                                 // Class's ancestors provide a
+                                 // "private" implementation for this
+                                 // method
+  // TODO(#1114385) intercept should work via invalidation.
+  mutable char m_maybeIntercepted; // -1, 0, or 1.  Accessed atomically.
   // This must be the last field declared in this structure
   // and the Func class should not be inherited from.
   unsigned char* volatile m_prologueTable[kNumFixedPrologues];
@@ -398,11 +429,21 @@ private:
 
 class FuncEmitter {
  public:
+  typedef std::vector<Func::SVInfo> SVInfoVec;
+  typedef std::vector<EHEnt> EHEntVec;
+  typedef std::vector<FPIEnt> FPIEntVec;
+
   struct ParamInfo : public Func::ParamInfo {
     ParamInfo() : m_ref(false) {}
 
     void setRef(bool ref) { m_ref = ref; }
     bool ref() const { return m_ref; }
+
+    template<class SerDe> void serde(SerDe& sd) {
+      Func::ParamInfo* parent = this;
+      parent->serde(sd);
+      sd(m_ref);
+    }
 
    private:
     bool m_ref; // True if parameter is passed by reference.
@@ -418,6 +459,8 @@ class FuncEmitter {
             const StringData* docComment);
   void finish(Offset past, bool load);
 
+  template<class SerDe> void serdeMetaData(SerDe&);
+
   EHEnt& addEHEnt();
   FPIEnt& addFPIEnt();
 
@@ -428,10 +471,12 @@ class FuncEmitter {
   }
   void allocVarId(const StringData* name);
   Id lookupVarId(const StringData* name) const;
+  Id numParams() const { return m_params.size(); }
 
   Id allocIterator();
   void freeIterator(Id id);
   void setNumIterators(Id numIterators);
+  Id numIterators() const { return m_numIterators; }
 
   Id allocUnnamedLocal();
   void freeUnnamedLocal(Id id);
@@ -452,12 +497,14 @@ class FuncEmitter {
   Offset past() const { return m_past; }
   const StringData* name() const { return m_name; }
   const ParamInfoVec& params() const { return m_params; }
-  const Func::EHEntVec& ehtab() const { return m_ehtab; }
-  const Func::FPIEntVec& fpitab() const { return m_fpitab; }
+  const EHEntVec& ehtab() const { return m_ehtab; }
+  EHEntVec& ehtab() { return m_ehtab; }
+  const FPIEntVec& fpitab() const { return m_fpitab; }
 
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   Attr attrs() const { return m_attrs; }
 
+  void setTop(bool top) { m_top = top; }
   bool top() { return m_top; }
 
   bool isPseudoMain() const { return m_name->empty(); }
@@ -494,20 +541,18 @@ class FuncEmitter {
   int m_line2;
   const StringData* m_name;
 
-  int m_numParams;
   ParamInfoVec m_params;
-  Func::PnameMap m_pnameMap;
-  Func::PnameVec m_pnames;
+  Func::NamedLocalsMap::Builder m_localNames;
   Id m_numLocals;
   int m_numUnnamedLocals;
   int m_activeUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
   int m_maxStackCells;
-  Func::SVInfoVec m_staticVars;
+  SVInfoVec m_staticVars;
 
-  Func::EHEntVec m_ehtab;
-  Func::FPIEntVec m_fpitab;
+  EHEntVec m_ehtab;
+  FPIEntVec m_fpitab;
 
   Attr m_attrs;
   bool m_top;
@@ -534,114 +579,18 @@ class FuncRepoProxy : public RepoProxy {
 #define FRP_GOP(o) FRP_OP(Get##o, get##o)
 #define FRP_OPS \
   FRP_IOP(Func) \
-  FRP_GOP(Funcs) \
-  FRP_IOP(FuncParam) \
-  FRP_GOP(FuncParams) \
-  FRP_IOP(FuncVar) \
-  FRP_GOP(FuncVars) \
-  FRP_IOP(FuncStaticVar) \
-  FRP_GOP(FuncStaticVars) \
-  FRP_IOP(FuncEH) \
-  FRP_GOP(FuncEHs) \
-  FRP_IOP(FuncEHCatch) \
-  FRP_GOP(FuncEHCatches) \
-  FRP_IOP(FuncFPI) \
-  FRP_GOP(FuncFPIs) \
-  FRP_IOP(FuncUserAttribute) \
-  FRP_GOP(FuncUserAttributes)
+  FRP_GOP(Funcs)
   class InsertFuncStmt : public RepoProxy::Stmt {
    public:
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, int funcSn, Id preClassId,
-                Id funcId, Offset base, Offset past, int line1,
-                int line2, const StringData* name, Id numLocals,
-                Id numIterators, int maxStackCells, Attr attrs, bool top,
-                const StringData* docComment, bool isClosureBody,
-                bool isGenerator, bool isGeneratorFromClosure);
+    void insert(const FuncEmitter& fe,
+                RepoTxn& txn, int64 unitSn, int funcSn, Id preClassId,
+                const StringData* name, bool top);
   };
   class GetFuncsStmt : public RepoProxy::Stmt {
    public:
     GetFuncsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue);
-  };
-  class InsertFuncParamStmt : public RepoProxy::Stmt {
-   public:
-    InsertFuncParamStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, int funcSn, Id localId,
-                const StringData* name, Offset funcletOff,
-                const TypedValue& defaultValue, const StringData* phpCode,
-                const TypeConstraint& tc, bool ref);
-  };
-  class GetFuncParamsStmt : public RepoProxy::Stmt {
-   public:
-    GetFuncParamsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(FuncEmitter& fe);
-  };
-  class InsertFuncVarStmt : public RepoProxy::Stmt {
-   public:
-    InsertFuncVarStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, int funcSn, Id localId,
-                const StringData* name);
-  };
-  class GetFuncVarsStmt : public RepoProxy::Stmt {
-   public:
-    GetFuncVarsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(FuncEmitter& fe);
-  };
-  class InsertFuncStaticVarStmt : public RepoProxy::Stmt {
-   public:
-    InsertFuncStaticVarStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, int funcSn, int staticVarSn,
-                const StringData* name, const StringData* phpCode);
-  };
-  class GetFuncStaticVarsStmt : public RepoProxy::Stmt {
-   public:
-    GetFuncStaticVarsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(FuncEmitter& fe);
-  };
-  class InsertFuncEHStmt : public RepoProxy::Stmt {
-   public:
-    InsertFuncEHStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, int funcSn, int ehSn, int type,
-                Offset base, Offset past, int iterId, int parentIndex, Offset fault);
-  };
-  class GetFuncEHsStmt : public RepoProxy::Stmt {
-   public:
-    GetFuncEHsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(FuncEmitter& fe);
-  };
-  class InsertFuncEHCatchStmt : public RepoProxy::Stmt {
-   public:
-    InsertFuncEHCatchStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, int funcSn, int ehSn, int ehCatchSn,
-                Id nameId, Offset offset);
-  };
-  class GetFuncEHCatchesStmt : public RepoProxy::Stmt {
-   public:
-    GetFuncEHCatchesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(FuncEmitter& fe, int ehSn, EHEnt& eh);
-  };
-  class InsertFuncFPIStmt : public RepoProxy::Stmt {
-   public:
-    InsertFuncFPIStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, int funcSn, int fpiSn, Offset base,
-                Offset past, Offset fpOff, int parentIndex, int fpiDepth);
-  };
-  class GetFuncFPIsStmt : public RepoProxy::Stmt {
-   public:
-    GetFuncFPIsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(FuncEmitter& fe);
-  };
-  class InsertFuncUserAttributeStmt : public RepoProxy::Stmt {
-   public:
-    InsertFuncUserAttributeStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64 unitSn, int funcSn, const StringData* name,
-                const TypedValue& tv);
-  };
-  class GetFuncUserAttributesStmt : public RepoProxy::Stmt {
-   public:
-    GetFuncUserAttributesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(FuncEmitter& fe);
   };
 #define FRP_OP(c, o) \
  public: \
@@ -652,8 +601,6 @@ class FuncRepoProxy : public RepoProxy {
   c##Stmt* m_##o[RepoIdCount];
   FRP_OPS
 #undef FRP_OP
- private:
-  int m_dummy; // Used to avoid a syntax error in the ctor initializer list.
 };
 
 } }

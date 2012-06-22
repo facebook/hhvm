@@ -76,7 +76,7 @@ class Repo : public RepoProxy {
   static void setCliFile(const std::string& cliFile);
 
   Unit* loadUnit(const std::string& name, const MD5& md5);
-  bool findFile(const char* path, MD5& md5);
+  bool findFile(const char* path, const std::string& root, MD5& md5);
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter *ue);
 
 #define RP_IOP(o) RP_OP(Insert##o, insert##o)
@@ -168,8 +168,6 @@ class Repo : public RepoProxy {
   UnitRepoProxy m_urp;
   PreClassRepoProxy m_pcrp;
   FuncRepoProxy m_frp;
- private:
-  int m_dummy; // Used to avoid a syntax error in the ctor initializer list
 };
 
 } }

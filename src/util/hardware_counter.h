@@ -18,6 +18,8 @@
 #define __HPHP_UTIL_HARDWARE_COUNTER_H__
 
 #include <util/thread_local.h>
+#include <linux/perf_event.h>
+#include <runtime/base/complex_types.h>
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,6 +27,14 @@ namespace HPHP { namespace Util {
 class InstructionCounter;
 class LoadCounter;
 class StoreCounter;
+
+struct PerfTable {
+  const char *name;
+  uint32_t type;
+  uint64_t config;
+};
+
+class HardwareCounterImpl;
 
 class HardwareCounter {
 public:
@@ -35,17 +45,27 @@ public:
   static int64 GetInstructionCount(void);
   static int64 GetLoadCount(void);
   static int64 GetStoreCount(void);
+  static bool SetPerfEvents(CStrRef events);
+  static void GetPerfEvents(Array& ret);
+  static void ClearPerfEvents();
 
   void  reset(void);
   int64 getInstructionCount(void);
   int64 getLoadCount(void);
   int64 getStoreCount(void);
+  bool eventExists(char *event);
+  bool addPerfEvent(char* event);
+  bool setPerfEvents(CStrRef events);
+  void getPerfEvents(Array& ret);
+  void clearPerfEvents();
 
   static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
+  bool m_countersSet;
 private:
   InstructionCounter *m_instructionCounter;
   LoadCounter *m_loadCounter;
   StoreCounter *m_storeCounter;
+  std::vector<HardwareCounterImpl *> m_counters;
 };
 ///////////////////////////////////////////////////////////////////////////////
 }}

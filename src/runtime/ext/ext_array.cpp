@@ -190,7 +190,6 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
     }
     return ad->exists(StrNR(sd));
   }
-  case KindOfInt32:
   case KindOfInt64:
     return ad->exists(Variant::GetInt64(kacc));
   case KindOfUninit:
@@ -560,7 +559,7 @@ Variant f_array_sum(CVarRef array) {
   }
 }
 
-int f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
+int64 f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
   if (array.toArray()->isVectorData()) {
     if (!_argv.empty()) {
       for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
@@ -802,7 +801,7 @@ bool f_shuffle(VRefParam array) {
   return true;
 }
 
-int f_count(CVarRef var, bool recursive /* = false */) {
+int64 f_count(CVarRef var, bool recursive /* = false */) {
   switch (var.getType()) {
   case KindOfUninit:
   case KindOfNull:

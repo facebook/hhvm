@@ -379,6 +379,7 @@ TypedValue* fg_fb_get_last_flush_size(VM::ActRec *ar);
 TypedValue* fg_fb_lazy_stat(VM::ActRec *ar);
 TypedValue* fg_fb_lazy_lstat(VM::ActRec *ar);
 TypedValue* fg_fb_lazy_realpath(VM::ActRec *ar);
+TypedValue* fg_fb_setprofile(VM::ActRec *ar);
 TypedValue* fg_fopen(VM::ActRec *ar);
 TypedValue* fg_popen(VM::ActRec *ar);
 TypedValue* fg_fclose(VM::ActRec *ar);
@@ -1519,6 +1520,7 @@ TypedValue* fg_socket_set_timeout(VM::ActRec *ar);
 TypedValue* fg_header(VM::ActRec *ar);
 TypedValue* fg_headers_list(VM::ActRec *ar);
 TypedValue* fg_headers_sent(VM::ActRec *ar);
+TypedValue* fg_header_register_callback(VM::ActRec *ar);
 TypedValue* fg_header_remove(VM::ActRec *ar);
 TypedValue* fg_setcookie(VM::ActRec *ar);
 TypedValue* fg_setrawcookie(VM::ActRec *ar);
@@ -1653,6 +1655,8 @@ TypedValue* fg_hphp_get_timers(VM::ActRec *ar);
 TypedValue* fg_hphp_output_global_state(VM::ActRec *ar);
 TypedValue* fg_hphp_instruction_counter(VM::ActRec *ar);
 TypedValue* fg_hphp_get_hardware_counters(VM::ActRec *ar);
+TypedValue* fg_hphp_set_hardware_events(VM::ActRec *ar);
+TypedValue* fg_hphp_clear_hardware_events(VM::ActRec *ar);
 TypedValue* fg_pdo_drivers(VM::ActRec *ar);
 TypedValue* fg_posix_access(VM::ActRec *ar);
 TypedValue* fg_posix_ctermid(VM::ActRec *ar);
@@ -2811,7 +2815,7 @@ TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter___destruct(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2161;
+const long long hhbc_ext_funcs_count = 2165;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -3185,6 +3189,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "fb_lazy_stat", fg_fb_lazy_stat },
   { "fb_lazy_lstat", fg_fb_lazy_lstat },
   { "fb_lazy_realpath", fg_fb_lazy_realpath },
+  { "fb_setprofile", fg_fb_setprofile },
   { "fopen", fg_fopen },
   { "popen", fg_popen },
   { "fclose", fg_fclose },
@@ -4325,6 +4330,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "header", fg_header },
   { "headers_list", fg_headers_list },
   { "headers_sent", fg_headers_sent },
+  { "header_register_callback", fg_header_register_callback },
   { "header_remove", fg_header_remove },
   { "setcookie", fg_setcookie },
   { "setrawcookie", fg_setrawcookie },
@@ -4459,6 +4465,8 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "hphp_output_global_state", fg_hphp_output_global_state },
   { "hphp_instruction_counter", fg_hphp_instruction_counter },
   { "hphp_get_hardware_counters", fg_hphp_get_hardware_counters },
+  { "hphp_set_hardware_events", fg_hphp_set_hardware_events },
+  { "hphp_clear_hardware_events", fg_hphp_clear_hardware_events },
   { "pdo_drivers", fg_pdo_drivers },
   { "posix_access", fg_posix_access },
   { "posix_ctermid", fg_posix_ctermid },

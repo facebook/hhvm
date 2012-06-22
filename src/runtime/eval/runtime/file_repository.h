@@ -160,7 +160,7 @@ public:
   static bool readActualFile(const StringData *name, const struct stat &s,
                              FileInfo &fileInfo);
   static bool readRepoMd5(const StringData *path, FileInfo& fileInfo);
-  static bool readFile(const StringData *name, const StringData *rname,
+  static bool readFile(const StringData *name,
                        const struct stat &s, FileInfo &fileInfo);
   static PhpFile *readHhbc(const std::string &name, const FileInfo &fileInfo);
   static PhpFile *parseFile(const std::string &name, const FileInfo &fileInfo);

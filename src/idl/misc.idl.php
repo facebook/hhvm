@@ -67,7 +67,7 @@ DefineFunction(
     'desc'   => "Checks whether the client disconnected.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns 1 if client disconnected, 0 otherwise.",
     ),
     'taint_observer' => false,
@@ -79,7 +79,7 @@ DefineFunction(
     'desc'   => "Gets the connection status bitfield.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the connection status bitfield, which can be used against the CONNECTION_XXX constants to determine the connection status.",
     ),
     'taint_observer' => false,
@@ -91,7 +91,7 @@ DefineFunction(
     'desc'   => "Determines whether the script timed out.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns 1 if the script timed out, 0 otherwise.",
     ),
     'taint_observer' => false,
@@ -335,7 +335,7 @@ DefineFunction(
     'desc'   => "Sets whether a client disconnect should cause a script to be aborted.\n\nWhen running PHP as a command line script, and the script's tty goes away without the script being terminated then the script will die the next time it tries to write anything, unless value is set to TRUE",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the previous setting, as an integer.",
     ),
     'args'   => array(
@@ -420,7 +420,7 @@ DefineFunction(
     'name'   => "sleep",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns zero on success, or FALSE on errors. If the call was interrupted by a signal, sleep() returns the number of seconds left to sleep.",
     ),
     'args'   => array(

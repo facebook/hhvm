@@ -229,7 +229,6 @@ void ParameterExpression::compatibleDefault() {
     switch(defaultType) {
     case KindOfBoolean:
       compat = (!strcmp(hint, "bool") || !strcmp(hint, "boolean")); break;
-    case KindOfInt32:   /* fall through */
     case KindOfInt64:
       compat = (!strcmp(hint, "int") || !strcmp(hint, "integer")); break;
     case KindOfDouble:

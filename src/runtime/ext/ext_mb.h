@@ -41,7 +41,7 @@ Variant f_mb_encode_mimeheader(CStrRef str, CStrRef charset = null_string, CStrR
 Variant f_mb_encode_numericentity(CStrRef str, CVarRef convmap, CStrRef encoding = null_string);
 bool f_mb_ereg_match(CStrRef pattern, CStrRef str, CStrRef option = null_string);
 Variant f_mb_ereg_replace(CVarRef pattern, CStrRef replacement, CStrRef str, CStrRef option = null_string);
-int f_mb_ereg_search_getpos();
+int64 f_mb_ereg_search_getpos();
 Variant f_mb_ereg_search_getregs();
 bool f_mb_ereg_search_init(CStrRef str, CStrRef pattern = null_string, CStrRef option = null_string);
 Variant f_mb_ereg_search_pos(CStrRef pattern = null_string, CStrRef option = null_string);

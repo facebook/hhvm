@@ -63,8 +63,8 @@ typedef hphp_hash_map<ConstructRawPtr, ControlBlock*,
 
 class ControlFlowBuilder : public FunctionWalker {
 public:
-  ControlFlowBuilder(ControlFlowGraph *g) :
-      m_graph(g), m_pass(0), m_cur(0), m_head(0) {}
+  ControlFlowBuilder(ControlFlowGraph *g, bool isGenerator) :
+      m_graph(g), m_pass(0), m_isGenerator(isGenerator), m_cur(0), m_head(0) {}
 
   int before(ConstructRawPtr cp);
   int after(ConstructRawPtr cp);
@@ -114,6 +114,17 @@ private:
     cfi(cp).m_noFallThrough = true;
   }
 
+  void setEdge(ConstructRawPtr cp_from, ConstructLocation l_from,
+               ConstructRawPtr cp_to, ConstructLocation l_to) {
+    assert(cp_from);
+    assert(cp_to);
+    assert(l_from < 2);
+
+    ControlFlowInfo &from(cfi(cp_from));
+    from.m_targets[l_from].clear();
+    addEdge(cp_from, l_from, cp_to, l_to);
+  }
+
   ControlFlowInfo       *get(ConstructRawPtr cp) {
     ConstructCFIMap::iterator it = m_ccfiMap.find(cp);
     return it == m_ccfiMap.end() ? NULL : &it->second;
@@ -149,7 +160,7 @@ private:
   ControlFlowGraph               *m_graph;
   AstWalkerStateVec              m_state;
   int                            m_pass;
-
+  bool                           m_isGenerator;
   ControlBlock                   *m_cur;
   ControlBlock                   *m_head;
 
@@ -394,8 +405,8 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           }
 
           case Statement::KindOfReturnStatement:
-            addEdge(s, AfterConstruct, root(), AfterConstruct);
-            noFallThrough(s);
+            setEdge(s, AfterConstruct, root(), AfterConstruct);
+            if (!m_isGenerator) noFallThrough(s);
             break;
 
           case Statement::KindOfBreakStatement:
@@ -814,7 +825,7 @@ ControlFlowGraph *ControlFlowGraph::buildControlFlow(MethodStatementPtr m) {
   ControlFlowGraph *graph = new ControlFlowGraph;
 
   graph->m_stmt = m;
-  ControlFlowBuilder cfb(graph);
+  ControlFlowBuilder cfb(graph, m->getOrigGeneratorFunc());
   cfb.run(m->getStmts());
   graph->m_nextDfn = 1;
   depth_first_visit(*graph, cfb.head(),

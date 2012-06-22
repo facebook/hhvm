@@ -1246,7 +1246,6 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
   case KindOfUninit:
   case KindOfNull:    otype = "null";        break;
   case KindOfBoolean: otype = "bool";        break;
-  case KindOfInt32:
   case KindOfInt64:   otype = "int";         break;
   case KindOfDouble:  otype = "double";      break;
   case KindOfStaticString:
@@ -1278,7 +1277,6 @@ String f_serialize(CVarRef value) {
     return "N;";
   case KindOfBoolean:
     return value.getBoolean() ? "b:1;" : "b:0;";
-  case KindOfInt32:
   case KindOfInt64: {
     StringBuffer sb;
     sb.append("i:");

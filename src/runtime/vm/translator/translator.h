@@ -94,7 +94,7 @@ struct SrcKey {
     return cmp(r) < 0;
   }
   bool operator>(const SrcKey& r) const {
-    return cmp(r) < 0;
+    return cmp(r) > 0;
   }
   // Hash function for both hash_map and tbb conventions.
   static size_t hash(const SrcKey &sk) {
@@ -260,7 +260,8 @@ class NormalizedInstruction {
   bool fuseBranch;
   bool preppedByRef;    // For FPass*; indicates parameter reffiness
   bool manuallyAllocInputs;
-  bool uncheckedInputs;
+  bool invertCond;
+  bool outputPredicted;
   ArgUnion constImm;
   TXFlags m_txFlags;
 
@@ -280,8 +281,14 @@ class NormalizedInstruction {
     outStack3(NULL),
     deadLocs(),
     hasConstImm(false),
+    invertCond(false),
     m_txFlags(Interp)
   { }
+
+  bool isJmpNZ() const {
+    ASSERT(op() == OpJmpNZ || op() == OpJmpZ);
+    return (op() == OpJmpNZ) != invertCond;
+  }
 
   bool isSupported() const {
     return (m_txFlags & Supported) == Supported;
@@ -295,7 +302,7 @@ class NormalizedInstruction {
     return (m_txFlags & Native) == Native;
   }
 
-  bool hasAliasableSuccessors() const;
+  bool outStackIsUsed() const;
 };
 
 class TranslationFailedExc : public std::exception {
@@ -341,8 +348,6 @@ struct InstrStream {
   NormalizedInstruction* first;
   NormalizedInstruction* last;
 };
-
-typedef hphp_hash_map<Location, DynLocation*, Location> ChangeMap;
 
 struct RefDeps {
   struct Record {
@@ -390,8 +395,8 @@ struct ActRecState {
   // State for tracking function param reffiness. m_topFunc is the function
   // for the activation record that is closest to the top of the stack, or
   // NULL if it is currently unknown. A tracelet can be in one of three
-  // epistemological states: GUESSED, KNOWN, and UNKNOWABLE. We start out in
-  // GUESSED, with m_topFunc == NULL (not yet guessed); when it's time to
+  // epistemological states: GUESSABLE, KNOWN, and UNKNOWABLE. We start out in
+  // GUESSABLE, with m_topFunc == NULL (not yet guessed); when it's time to
   // guess, we will use the ActRec seen on the top of stack at compilation
   // time as a hint for refs going forward.
   //
@@ -443,7 +448,7 @@ struct Tracelet : private boost::noncopyable {
   // the last instruction from the stream.
   SrcKey         m_nextSk;
 
-  // numOpcodes is the number of raw opcode instructions, before optimiation.
+  // numOpcodes is the number of raw opcode instructions, before optimization.
   // The immediates optimization may both:
   //
   // 1. remove the first opcode, thus making
@@ -514,19 +519,29 @@ enum TransKind {
 const char* getTransKindName(TransKind kind);
 
 /*
+ * Used to maintain a mapping from the bytecode to its corresponding x86.
+ */
+struct TransBCMapping {
+  Offset bcStart;
+  TCA    aStart;
+  TCA    astubsStart;
+};
+
+/*
  * A record with various information about a translation.
  */
 struct TransRec {
-  TransID             id;
-  TransKind           kind;
-  SrcKey              src;
-  MD5                 md5;
-  uint32              bcStopOffset;
-  vector<DynLocation> dependencies;
-  TCA                 aStart;
-  uint32              aLen;
-  TCA                 astubsStart;
-  uint32              astubsLen;
+  TransID                 id;
+  TransKind               kind;
+  SrcKey                  src;
+  MD5                     md5;
+  uint32                  bcStopOffset;
+  vector<DynLocation>     dependencies;
+  TCA                     aStart;
+  uint32                  aLen;
+  TCA                     astubsStart;
+  uint32                  astubsLen;
+  vector<TransBCMapping>  bcMapping;
 
   TransRec() {}
 
@@ -541,16 +556,17 @@ struct TransRec {
       aStart(_aStart), aLen(_aLen),
       astubsStart(_astubsStart), astubsLen(_astubsLen) { }
 
-  TransRec(SrcKey          s,
-           MD5             _md5,
-           const Tracelet& t,
-           TCA             _aStart = 0,
-           uint32          _aLen = 0,
-           TCA             _astubsStart = 0,
-           uint32          _astubsLen = 0) :
+  TransRec(SrcKey                   s,
+           MD5                      _md5,
+           const Tracelet&          t,
+           TCA                      _aStart = 0,
+           uint32                   _aLen = 0,
+           TCA                      _astubsStart = 0,
+           uint32                   _astubsLen = 0,
+           vector<TransBCMapping>   _bcMapping = vector<TransBCMapping>()) :
       id(0), kind(TransNormal), src(s), md5(_md5),
       bcStopOffset(t.m_nextSk.offset()), aStart(_aStart), aLen(_aLen),
-      astubsStart(_astubsStart), astubsLen(_astubsLen) {
+      astubsStart(_astubsStart), astubsLen(_astubsLen), bcMapping(_bcMapping) {
     for (DepMap::const_iterator dep = t.m_dependencies.begin();
          dep != t.m_dependencies.end();
          ++dep) {
@@ -559,7 +575,7 @@ struct TransRec {
   }
 
   void setID(TransID newID) { id = newID; }
-  void print(char *outbuf, uint64 profCount) const;
+  string print(uint64 profCount) const;
 };
 
 /*
@@ -577,8 +593,10 @@ private:
   int stackFrameOffset; // sp at current instr; used to normalize
 
   void analyzeSecondPass(Tracelet& t);
-  void applyInputMetaData(Unit::MetaHandle&,
-                          NormalizedInstruction* ni);
+  bool applyInputMetaData(Unit::MetaHandle&,
+                          NormalizedInstruction* ni,
+                          TraceletContext& tas,
+                          vector<InputInfo>& ii);
   void getInputs(Tracelet& t,
                  NormalizedInstruction* ni,
                  int& currentStackOffset,
@@ -586,7 +604,6 @@ private:
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,
-                  bool& writeAlias,
                   bool& varEnvTaint);
 
   static RuntimeType liveType(Location l, const Unit &u);
@@ -721,6 +738,9 @@ public:
     return id;
   }
 
+  void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
+                   int& currentStackOffset, Tracelet& t,
+                   TraceletContext& tas);
   void analyze(const SrcKey* sk, Tracelet& out);
   void advance(Opcode const **instrs);
   static int locPhysicalOffset(Location l, const Func* f = NULL);
@@ -738,7 +758,7 @@ public:
   inline bool stateIsDirty() {
     return tl_regState == REGSTATE_DIRTY;
   }
-  
+
   inline bool isTransDBEnabled() const {
     return debug || RuntimeOption::EvalDumpTC;
   }

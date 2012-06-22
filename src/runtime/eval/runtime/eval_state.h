@@ -230,6 +230,7 @@ class ClassInfoEvaled : public ClassInfo, public AtomicCountable {
   const PropertyVec   &getPropertiesVec()   const { return m_propertiesVec;}
   const ConstantMap   &getConstants()       const { return m_constants;}
   const ConstantVec   &getConstantsVec()    const { return m_constantsVec;}
+  const UserAttributeVec &getUserAttributeVec() const { return m_userAttrs;}
 
  private:
   friend class ClassStatement;
@@ -245,6 +246,7 @@ class ClassInfoEvaled : public ClassInfo, public AtomicCountable {
   PropertyVec   m_propertiesVec;   // in source order
   ConstantMap   m_constants;       // all constants
   ConstantVec   m_constantsVec;    // in source order
+  UserAttributeVec m_userAttrs;    // user attributes
 };
 
 class RequestEvalState {

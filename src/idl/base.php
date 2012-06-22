@@ -1066,6 +1066,7 @@ function phpnet_clean($text) {
   $text = preg_replace('# ?<> ?#', "\n\n", $text);
   $text = preg_replace('/&#039;/', "'", $text);
   $text = trim(html_entity_decode($text));
+  $text = preg_replace('/[^\t\n -~]/', '', $text);
   return $text;
 }
 

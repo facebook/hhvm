@@ -99,14 +99,14 @@ TypedValue* fg_assert(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_dl(HPHP::String const&)
+long long HPHP::f_dl(HPHP::String const&)
 _ZN4HPHP4f_dlERKNS_6StringE
 
 (return value) => rax
 library => rdi
 */
 
-int fh_dl(Value* library) asm("_ZN4HPHP4f_dlERKNS_6StringE");
+long long fh_dl(Value* library) asm("_ZN4HPHP4f_dlERKNS_6StringE");
 
 TypedValue * fg1_dl(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_dl(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
@@ -650,13 +650,13 @@ TypedValue* fg_inclued_get_data(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_get_magic_quotes_gpc()
+long long HPHP::f_get_magic_quotes_gpc()
 _ZN4HPHP22f_get_magic_quotes_gpcEv
 
 (return value) => rax
 */
 
-int fh_get_magic_quotes_gpc() asm("_ZN4HPHP22f_get_magic_quotes_gpcEv");
+long long fh_get_magic_quotes_gpc() asm("_ZN4HPHP22f_get_magic_quotes_gpcEv");
 
 TypedValue* fg_get_magic_quotes_gpc(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -685,13 +685,13 @@ TypedValue* fg_get_magic_quotes_gpc(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_get_magic_quotes_runtime()
+long long HPHP::f_get_magic_quotes_runtime()
 _ZN4HPHP26f_get_magic_quotes_runtimeEv
 
 (return value) => rax
 */
 
-int fh_get_magic_quotes_runtime() asm("_ZN4HPHP26f_get_magic_quotes_runtimeEv");
+long long fh_get_magic_quotes_runtime() asm("_ZN4HPHP26f_get_magic_quotes_runtimeEv");
 
 TypedValue* fg_get_magic_quotes_runtime(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -809,13 +809,13 @@ TypedValue* fg_getenv(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_getlastmod()
+long long HPHP::f_getlastmod()
 _ZN4HPHP12f_getlastmodEv
 
 (return value) => rax
 */
 
-int fh_getlastmod() asm("_ZN4HPHP12f_getlastmodEv");
+long long fh_getlastmod() asm("_ZN4HPHP12f_getlastmodEv");
 
 TypedValue* fg_getlastmod(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -844,13 +844,13 @@ TypedValue* fg_getlastmod(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_getmygid()
+long long HPHP::f_getmygid()
 _ZN4HPHP10f_getmygidEv
 
 (return value) => rax
 */
 
-int fh_getmygid() asm("_ZN4HPHP10f_getmygidEv");
+long long fh_getmygid() asm("_ZN4HPHP10f_getmygidEv");
 
 TypedValue* fg_getmygid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -879,13 +879,13 @@ TypedValue* fg_getmygid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_getmyinode()
+long long HPHP::f_getmyinode()
 _ZN4HPHP12f_getmyinodeEv
 
 (return value) => rax
 */
 
-int fh_getmyinode() asm("_ZN4HPHP12f_getmyinodeEv");
+long long fh_getmyinode() asm("_ZN4HPHP12f_getmyinodeEv");
 
 TypedValue* fg_getmyinode(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -914,13 +914,13 @@ TypedValue* fg_getmyinode(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_getmypid()
+long long HPHP::f_getmypid()
 _ZN4HPHP10f_getmypidEv
 
 (return value) => rax
 */
 
-int fh_getmypid() asm("_ZN4HPHP10f_getmypidEv");
+long long fh_getmypid() asm("_ZN4HPHP10f_getmypidEv");
 
 TypedValue* fg_getmypid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -949,13 +949,13 @@ TypedValue* fg_getmypid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_getmyuid()
+long long HPHP::f_getmyuid()
 _ZN4HPHP10f_getmyuidEv
 
 (return value) => rax
 */
 
-int fh_getmyuid() asm("_ZN4HPHP10f_getmyuidEv");
+long long fh_getmyuid() asm("_ZN4HPHP10f_getmyuidEv");
 
 TypedValue* fg_getmyuid(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -2331,13 +2331,13 @@ TypedValue* fg_zend_logo_guid(HPHP::VM::ActRec *ar) {
 
 
 /*
-int HPHP::f_zend_thread_id()
+long long HPHP::f_zend_thread_id()
 _ZN4HPHP16f_zend_thread_idEv
 
 (return value) => rax
 */
 
-int fh_zend_thread_id() asm("_ZN4HPHP16f_zend_thread_idEv");
+long long fh_zend_thread_id() asm("_ZN4HPHP16f_zend_thread_idEv");
 
 TypedValue* fg_zend_thread_id(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();

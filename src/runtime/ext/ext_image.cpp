@@ -3310,7 +3310,7 @@ Variant f_imagecreate(int width, int height) {
   return Object(new Image(im));
 }
 
-int f_imagetypes() {
+int64 f_imagetypes() {
   int ret=0;
 #ifdef HAVE_GD_GIF_CREATE
   ret = 1;
@@ -3873,11 +3873,11 @@ bool f_imagefilledpolygon(CObjRef image, CArrRef points, int num_points,
   return php_imagepolygon(image, points, num_points, color, 1);
 }
 
-int f_imagefontwidth(int font) {
+int64 f_imagefontwidth(int font) {
   return php_imagefontsize(font, 0);
 }
 
-int f_imagefontheight(int font) {
+int64 f_imagefontheight(int font) {
   return php_imagefontsize(font, 1);
 }
 

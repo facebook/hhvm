@@ -461,7 +461,7 @@ DefineFunction(
     'name'   => "memcache_get_server_status",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -1071,7 +1071,7 @@ DefineFunction(
     'desc'   => "Memcache::getServerStatus() returns a the servers online/offline status. You can also use memcache_get_server_status() function.\n\nThis function has been added to Memcache version 2.1.0.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns a the servers status. 0 if server is failed, non-zero otherwise",
     ),
     'args'   => array(

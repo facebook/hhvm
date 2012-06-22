@@ -61,7 +61,7 @@ inline Variant x_bzerror(CObjRef bz) {
   return f_bzerror(bz);
 }
 
-inline int x_bzerrno(CObjRef bz) {
+inline int64 x_bzerrno(CObjRef bz) {
   FUNCTION_INJECTION_BUILTIN(bzerrno);
   return f_bzerrno(bz);
 }

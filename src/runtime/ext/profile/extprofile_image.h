@@ -295,12 +295,12 @@ inline bool x_imagefilter(CObjRef image, int filtertype, int arg1 = 0, int arg2 
   return f_imagefilter(image, filtertype, arg1, arg2, arg3, arg4);
 }
 
-inline int x_imagefontheight(int font) {
+inline int64 x_imagefontheight(int font) {
   FUNCTION_INJECTION_BUILTIN(imagefontheight);
   return f_imagefontheight(font);
 }
 
-inline int x_imagefontwidth(int font) {
+inline int64 x_imagefontwidth(int font) {
   FUNCTION_INJECTION_BUILTIN(imagefontwidth);
   return f_imagefontwidth(font);
 }
@@ -500,7 +500,7 @@ inline Variant x_imagettftext(CObjRef image, double size, double angle, int x, i
   return f_imagettftext(image, size, angle, x, y, color, fontfile, text);
 }
 
-inline int x_imagetypes() {
+inline int64 x_imagetypes() {
   FUNCTION_INJECTION_BUILTIN(imagetypes);
   return f_imagetypes();
 }

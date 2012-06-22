@@ -463,7 +463,7 @@ DefineFunction(
     'desc'   => "Count the number of UTF-8 code points in string or byte count if it's not valid UTF-8.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the count of code points if valid UTF-8 else byte count.",
     ),
     'args'   => array(
@@ -482,7 +482,7 @@ DefineFunction(
     'desc'   => "Count the number of UTF-8 code points in string, substituting U+FFFD for invalid sequences.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the number of code points interpreting string as UTF-8.",
     ),
     'args'   => array(
@@ -1089,7 +1089,7 @@ DefineFunction(
     'desc'   => "Get stats on flushing the last data chunk from server.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Total number of bytes flushed since last flush",
     ),
     'taint_observer' => array(
@@ -1148,6 +1148,25 @@ DefineFunction(
         'desc'   => "Fake path to the file.",
       ),
     ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_setprofile",
+    'desc'   => "Set a callback function to be called whenever a function is entered or exited. Takes 3 args, the function name, the mode (enter or exit), and an array describing the frame.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+      'desc'   => "No value is returned."
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+        'desc'   => "Profiler function to call or null to disable",
+      ),
+    ),
+    'taint_observer' => false,
   ));
 
 

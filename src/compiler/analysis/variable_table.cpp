@@ -1250,8 +1250,8 @@ void VariableTable::outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
       ASSERT(!sgi->sym->isOverride());
       TypePtr varType = sgi->sym->getFinalType();
       if (varType->isSpecificObject()) {
-        ClassScopePtr cls = ar->findClass(varType->getName());
-        ASSERT(cls && !cls->isRedeclaring());
+        ClassScopePtr cls = varType->getClass(ar, sgi->cls);
+        ASSERT(cls);
         if (cls->isUserClass()) {
           const string fileBase = cls->getContainingFile()->outputFilebase();
           if (dtorIncludes.find(fileBase) == dtorIncludes.end()) {

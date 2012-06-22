@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // DNS
-Variant f_gethostname(); 
+Variant f_gethostname();
 Variant f_gethostbyaddr(CStrRef ip_address);
 String f_gethostbyname(CStrRef hostname);
 Variant f_gethostbynamel(CStrRef hostname);
@@ -84,6 +84,8 @@ void f_header(CStrRef str, bool replace = true, int http_response_code = 0);
 Array f_headers_list();
 
 bool f_headers_sent(VRefParam file = null, VRefParam line = null);
+
+bool f_header_register_callback(CVarRef callback);
 
 void f_header_remove(CStrRef name = null_string);
 

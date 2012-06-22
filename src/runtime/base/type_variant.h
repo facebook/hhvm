@@ -132,7 +132,7 @@ class Variant : VariantBase {
    * operator overloads.
    */
   Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = (v?1:0);}
-  Variant(int     v) : _count(0), m_type(KindOfInt32  ) { m_data.num = v;}
+  Variant(int     v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(int64   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(long    v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
@@ -214,14 +214,14 @@ class Variant : VariantBase {
 // int64
 
   inline ALWAYS_INLINE int64 asInt64Val() const {
-    ASSERT(m_type == KindOfInt32 || m_type == KindOfInt64);
+    ASSERT(m_type == KindOfInt64);
     return m_data.num;
   }
 
   inline ALWAYS_INLINE int64 toInt64Val() const {
-    ASSERT(is(KindOfInt32) || is(KindOfInt64));
+    ASSERT(is(KindOfInt64));
     return
-        LIKELY(m_type == KindOfInt32 || m_type == KindOfInt64) ?
+        LIKELY(m_type == KindOfInt64) ?
         m_data.num : m_data.pvar->m_data.num;
   }
 
@@ -399,7 +399,6 @@ class Variant : VariantBase {
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
-      case KindOfInt32:
       case KindOfInt64:
       case KindOfObject:
         return true;
@@ -457,8 +456,7 @@ class Variant : VariantBase {
     return val;
   }
   int64 getInt64() const {
-    ASSERT(getType() == KindOfInt32   ||
-           getType() == KindOfInt64);
+    ASSERT(getType() == KindOfInt64);
     return m_type == KindOfVariant ? m_data.pvar->m_data.num : m_data.num;
   }
   double getDouble() const {
@@ -767,6 +765,7 @@ class Variant : VariantBase {
   CVarRef rvalRef(int offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
     return rvalRef((int64)offset, tmp, flags);
   }
+
   CVarRef rvalRef(int64 offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
     if (m_type == KindOfArray) {
       return m_data.parr->get(offset, flags & AccessFlags::Error);
@@ -779,6 +778,25 @@ class Variant : VariantBase {
   CVarRef rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
   CVarRef rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
 
+  // for when we know its an array or null
+  template <typename T>
+  CVarRef rvalAtRefHelper(T offset, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(bool offset, ACCESSPARAMS_DECL) const {
+    return rvalAtRefHelper((int64)offset, flags);
+  }
+  CVarRef rvalAtRef(int offset, ACCESSPARAMS_DECL) const {
+    return rvalAtRefHelper((int64)offset, flags);
+  }
+  CVarRef rvalAtRef(double offset, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(int64 offset, ACCESSPARAMS_DECL) const {
+    return rvalAtRefHelper(offset, flags);
+  }
+  CVarRef rvalAtRef(CStrRef offset, ACCESSPARAMS_DECL) const {
+    return rvalAtRefHelper<CStrRef>(offset, flags);
+  }
+  CVarRef rvalAtRef(CVarRef offset, ACCESSPARAMS_DECL) const {
+    return rvalAtRefHelper<CVarRef>(offset, flags);
+  }
   const Variant operator[](bool    key) const { return rvalAt(key);}
   const Variant operator[](int     key) const { return rvalAt(key);}
   const Variant operator[](int64   key) const { return rvalAt(key);}
@@ -1024,7 +1042,7 @@ class Variant : VariantBase {
    * Low level access that should be restricted to internal use.
    */
   int64 *getInt64Data() const {
-    ASSERT(getType() == KindOfInt64 || getType() == KindOfInt32);
+    ASSERT(getType() == KindOfInt64);
     return m_type == KindOfVariant ? &m_data.pvar->m_data.num : &m_data.num;
   }
   double *getDoubleData() const {
@@ -1108,14 +1126,12 @@ class Variant : VariantBase {
   }
   static int64 GetInt64(TypedValueAccessor acc) {
     ASSERT(acc);
-    ASSERT(acc->m_type == KindOfInt32 ||
-           acc->m_type == KindOfInt64);
+    ASSERT(acc->m_type == KindOfInt64);
     return acc->m_data.num;
   }
   static int64 *GetInt64Data(TypedValueAccessor acc) {
     ASSERT(acc);
-    ASSERT(acc->m_type == KindOfInt32 ||
-           acc->m_type == KindOfInt64);
+    ASSERT(acc->m_type == KindOfInt64);
     return &acc->m_data.num;
   }
   static double GetDouble(TypedValueAccessor acc) {
@@ -1528,7 +1544,7 @@ class VarNR : private TypedValue {
 public:
   // Use to hold variant that do not need ref-counting
   explicit VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}
-  explicit VarNR(int     v) { init(KindOfInt32  ); m_data.num = v;}
+  explicit VarNR(int     v) { init(KindOfInt64  ); m_data.num = v;}
   explicit VarNR(int64   v) { init(KindOfInt64  ); m_data.num = v;}
   explicit VarNR(uint64  v) { init(KindOfInt64  ); m_data.num = v;}
   explicit VarNR(long    v) { init(KindOfInt64  ); m_data.num = v;}

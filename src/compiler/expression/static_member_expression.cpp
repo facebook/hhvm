@@ -106,7 +106,8 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
       if (m_resolvedClass) {
         m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
         if (!sym && !m_dynamicClass && !name.empty() &&
-            ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+            ar->getPhase() == AnalysisResult::AnalyzeFinal &&
+            !m_resolvedClass->isTrait()) {
           Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
         }
       }
@@ -226,7 +227,12 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
   m_valid = findMember(ar, name, sym);
   if (!m_valid) {
     if (getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::UnknownClass, self);
+      ClassScopeRawPtr cscope = getClassScope();
+      if (!cscope ||
+          !cscope->isTrait() ||
+          (!isSelf() && !isParent())) {
+        Compiler::Error(Compiler::UnknownClass, self);
+      }
     }
   } else if (m_resolvedClass) {
     m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);

@@ -107,7 +107,8 @@ enum LocationCode {
   // Base is a function return value.
   LR,
 
-  NumLocationCodes
+  NumLocationCodes,
+  InvalidLocationCode = NumLocationCodes
 };
 
 inline int numLocationCodeImms(LocationCode lc) {
@@ -123,6 +124,16 @@ inline int numLocationCodeStackVals(LocationCode lc) {
     0;
 }
 
+// Returns string representation of `lc'.  (Pointer to internal static
+// data, does not need to be freed.)
+const char* locationCodeString(LocationCode lc);
+
+// Grok a LocationCode from a string---if the string doesn't represent
+// a location code, returns InvalidLocationCode.  This looks at at
+// most the first two bytes in `s'---the parse will not fail if there
+// is more junk after the first two bytes.
+LocationCode parseLocationCode(const char* s);
+
 enum MemberCode {
   // Element and property, consuming a cell from the stack.
   MEC,
@@ -135,12 +146,20 @@ enum MemberCode {
   // New element operation.  (No real stack element.)
   MW,
 
-  NumMemberCodes
+  NumMemberCodes,
+  InvalidMemberCode = NumMemberCodes
 };
 
 inline bool memberCodeHasImm(MemberCode mc) {
   return mc == MEL || mc == MPL;
 }
+
+// Returns string representation of `mc'.  (Pointer to internal static
+// data, does not need to be freed.)
+const char* memberCodeString(MemberCode mc);
+
+// Same semantics as parseLocationCode, but for member codes.
+MemberCode parseMemberCode(const char*);
 
 enum IncDecOp {
   PreInc,
@@ -261,6 +280,7 @@ enum SetOpOp {
   O(VGetM,           ONE(MA),          LMANY(),         ONE(VV),    NF) \
   O(AGetC,           NA,               ONE(CV),         ONE(AV),    NF) \
   O(AGetL,           ONE(HA),          NOV,             ONE(AV),    NF) \
+  O(IssetC,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetL,          ONE(HA),          NOV,             ONE(CV),    NF) \
   O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
@@ -271,6 +291,7 @@ enum SetOpOp {
   O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
   O(EmptyM,          ONE(MA),          LMANY(),         ONE(CV),    NF) \
+  /* NB: isTypePred depends on this ordering. */ \
   O(IsNullC,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(IsBoolC,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(IsIntC,          NA,               ONE(CV),         ONE(CV),    NF) \
@@ -309,6 +330,7 @@ enum SetOpOp {
   O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetM,          ONE(MA),          LMANY(),         NOV,        NF) \
+  /* NOTE: isFPush below relies on the grouping of FPush* here */       \
   O(FPushFunc,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        NF) \
   O(FPushObjMethod,  ONE(IVA),         TWO(CV,CV),      NOV,        NF) \
@@ -485,8 +507,12 @@ ArgType immType(Opcode opcode, int idx);
 int immSize(const Opcode* opcode, int idx);
 bool immIsVector(Opcode opcode, int idx);
 bool hasImmVector(Opcode opcode);
+static inline bool isTypePred(const Opcode op) {
+  return op >= OpIsNullC && op <= OpIsObjectL;
+}
 int instrLen(const Opcode* opcode);
 InstrFlags instrFlags(Opcode opcode);
+int numSuccs(const Opcode* opcode);
 
 // The returned struct has normalized variable-sized immediates
 ArgUnion getImm(const Opcode* opcode, int idx);
@@ -510,6 +536,9 @@ inline int32 decodeVariableSizeImm(const unsigned char** immPtr) {
 // Encodes a variable sized immediate for `val' into `buf'.  Returns
 // the number of bytes used taken.  At most 4 bytes can be used.
 size_t encodeVariableSizeImm(int32_t val, unsigned char* buf);
+
+// Encodes a variable sized immediate to the end of vec.
+void encodeIvaToVector(std::vector<uchar>& vec, int32_t val);
 
 void staticStreamer(TypedValue* tv, std::stringstream& out);
 
@@ -536,8 +565,13 @@ struct StackTransInfo {
   int pos;
 };
 
+bool isValidOpcode(Opcode opcode);
 bool instrIsControlFlow(Opcode opcode);
 bool instrReadsCurrentFpi(Opcode opcode);
+
+inline bool isFPush(Opcode opcode) {
+  return opcode >= OpFPushFunc && opcode <= OpFPushContFunc;
+}
 
 int instrNumPops(const Opcode* opcode);
 int instrNumPushes(const Opcode* opcode);

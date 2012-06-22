@@ -233,7 +233,7 @@ DefineFunction(
     'name'   => "date_offset_get",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(
@@ -826,7 +826,7 @@ DefineFunction(
     'desc'   => "Returns the current time measured in the number of seconds since the Unix Epoch (January 1 1970 00:00:00 GMT).",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'taint_observer' => false,
   ));
@@ -902,7 +902,7 @@ DefineFunction(
     'name'   => "timezone_offset_get",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
     ),
     'args'   => array(
       array(

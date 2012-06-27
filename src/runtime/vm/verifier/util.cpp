@@ -20,6 +20,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 
 using HPHP::Util::safe_malloc;
 

@@ -160,16 +160,8 @@ if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED
 		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
 	FIND_LIBRARY(JEMALLOC_LIB jemalloc)
 	if (JEMALLOC_LIB)
-		CHECK_LIBRARY_EXISTS(jemalloc mallctl "" HAVE_JEMALLOC_FUN)
-		if (HAVE_JEMALLOC_FUN)
-			message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
-			set(JEMALLOC_ENABLED 1)
-		else()
-			message(STATUS "Found jemalloc at ${JEMALLOC_LIB}, but unable to find its API "
-			               "(maybe the library was configured with a non-empty function prefix?)")
-		endif()
-	else()
-		message(STATUS "Can't find jemalloc")
+		message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
+		set(JEMALLOC_ENABLED 1)
 	endif()
 endif()
 

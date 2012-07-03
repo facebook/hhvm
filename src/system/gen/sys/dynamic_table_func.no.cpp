@@ -11996,6 +11996,19 @@ Variant ifa_ob_get_flush(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_ob_get_flush(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_ob_get_flush);
 }
+Variant ifa_filter_input(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 2 || count > 4)) return throw_wrong_arguments("filter_input", count, 2, 4, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  if (count <= 2) return (x_filter_input(arg0, arg1));
+  CVarRef arg2(a2);
+  if (count <= 3) return (x_filter_input(arg0, arg1, arg2));
+  CVarRef arg3(a3);
+  return (x_filter_input(arg0, arg1, arg2, arg3));
+}
+Variant i_filter_input(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_filter_input);
+}
 Variant ifa_mb_send_mail(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count < 3 || count > 5)) return throw_wrong_arguments("mb_send_mail", count, 3, 5, 1);
   CVarRef arg0(a0);
@@ -22568,6 +22581,7 @@ CallInfo ci_drawgetstrokewidth((void*)&i_drawgetstrokewidth, (void*)&ifa_drawget
 CallInfo ci_hphp_recursivedirectoryiterator_key((void*)&i_hphp_recursivedirectoryiterator_key, (void*)&ifa_hphp_recursivedirectoryiterator_key, 1, 0, 0x0000000000000000LL);
 CallInfo ci_readfile((void*)&i_readfile, (void*)&ifa_readfile, 3, 0, 0x0000000000000000LL);
 CallInfo ci_ob_get_flush((void*)&i_ob_get_flush, (void*)&ifa_ob_get_flush, 0, 0, 0x0000000000000000LL);
+CallInfo ci_filter_input((void*)&i_filter_input, (void*)&ifa_filter_input, 4, 0, 0x0000000000000000LL);
 CallInfo ci_mb_send_mail((void*)&i_mb_send_mail, (void*)&ifa_mb_send_mail, 5, 0, 0x0000000000000000LL);
 CallInfo ci_gzgetc((void*)&i_gzgetc, (void*)&ifa_gzgetc, 1, 0, 0x0000000000000000LL);
 CallInfo ci_fputcsv((void*)&i_fputcsv, (void*)&ifa_fputcsv, 4, 0, 0x0000000000000000LL);
@@ -32087,6 +32101,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 5540:
       HASH_GUARD(0x3C014439AE5D75A4LL, magickgetcharheight) {
         ci = &ci_magickgetcharheight;
+        return true;
+      }
+      break;
+    case 5541:
+      HASH_GUARD(0x7F43D40AA4F755A5LL, filter_input) {
+        ci = &ci_filter_input;
         return true;
       }
       break;

@@ -80,6 +80,10 @@ const int64 k_FILTER_SANITIZE_FULL_SPECIAL_CHARS =  0x020a;
 const int64 k_FILTER_SANITIZE_LAST               =  0x020a;
 const int64 k_FILTER_SANITIZE_STRIPPED           =  0x020b;
 
+
+const int64 k_FILTER_SANITIZE_ALL               = 0x0200;
+const int64 k_FILTER_CALLBACK                   = 0x0400;
+
 const int64 k_INPUT_POST                        = 0;
 const int64 k_INPUT_GET                         = 1;
 const int64 k_INPUT_COOKIE                      = 2;
@@ -89,9 +93,18 @@ const int64 k_INPUT_SESSION                     = 6; // not IMPLEMENT
 
 
 Variant filterGetStorage (int64 type);
+Variant php_filter_call(CVarRef filtered, int64 filter, CVarRef filter_args, const int copy, int64  filter_flags);
+Variant php_zval_filter_recursive(CVarRef value, int64 filter, int64 flags, CVarRef options, CStrRef charset, int copy);
+Variant php_zval_filter(CVarRef value, int64 filter, int64 flags, CVarRef options, CStrRef charset, int copy);
+
 Variant f_filter_input(int64 type, CStrRef variable_name, int64 filter /* = 0 */, CVarRef options /* = 0 */) {
  // throw NotImplementedException(__func__);
     Variant filteredVar = filterGetStorage(type);
+    int64 filter_got = k_FILTER_DEFAULT;
+
+    if(!filter == 0L ) {
+        filter_got = filter;
+    }
 
     if (filteredVar.is(KindOfNull) || !filteredVar.toArray().exists(String(variable_name))) {
         int64 filter_flags = 0L;
@@ -122,9 +135,11 @@ Variant f_filter_input(int64 type, CStrRef variable_name, int64 filter /* = 0 */
             return null_variant;
         }
     }
-    return filteredVar[variable_name].toString();
+    return php_filter_call(filteredVar[variable_name], filter_got, options, 1, k_FILTER_REQUIRE_SCALAR);
+    //return filteredVar[variable_name].toString();
 }
 
+//get the global variable
 Variant filterGetStorage (int64 type) {
     SystemGlobals *g = (SystemGlobals*)get_global_variables();
     Variant ret = null_variant;
@@ -150,5 +165,159 @@ Variant filterGetStorage (int64 type) {
     }
     return ret;
 }
+
+Variant php_filter_call(CVarRef filtered, int64 filter, CVarRef filter_args, const int copy, int64 filter_flags )
+{
+	Variant options = null;
+
+	CStrRef charset = null;
+
+	if (!filter_args.is(KindOfNull) && !filter_args.is(KindOfArray) ) {
+		long lval;
+                lval = filter_args.toInt64();
+
+		if (filter != -1) {
+                    /* handler for array apply */
+			/* filter_args is the filter_flags */
+			filter_flags = lval;
+
+			if (!(filter_flags & k_FILTER_REQUIRE_ARRAY ||  filter_flags & k_FILTER_FORCE_ARRAY)) {
+				filter_flags |= k_FILTER_REQUIRE_SCALAR;
+			}
+		} else {
+			filter = lval;
+		}
+
+	} else if (!filter_args.is(KindOfNull)) {
+
+
+                if (filter_args.is(KindOfArray) && filter_args.toArray().exists(String("filter"))) {
+                        filter = filter_args.toArray()[String("filter")].toInt64();
+		}
+
+
+                if (filter_args.is(KindOfArray) && filter_args.toArray().exists(String("flags"))) {
+                        filter_flags = filter_args.toArray()[String("flags")].toInt64();
+
+			if (!(filter_flags & k_FILTER_REQUIRE_ARRAY ||  filter_flags & k_FILTER_FORCE_ARRAY)) {
+				filter_flags |= k_FILTER_REQUIRE_SCALAR;
+			}
+		}
+
+                if (filter_args.is(KindOfArray) && filter_args.toArray().exists(String("options"))) {
+			if (filter != k_FILTER_CALLBACK) {
+                            if(filter_args.toArray()[String("options")].is(KindOfArray)) {
+                                options = filter_args.toArray()[String("options")].toArray();
+                            }
+			} else {
+                                //TODO
+				options = filter_args.toArray()[String("options")];
+				filter_flags = 0;
+			}
+		}
+	}
+
+	if (filtered.is(KindOfArray)) {
+		if (filter_flags & k_FILTER_REQUIRE_SCALAR) {
+			if (filter_flags & k_FILTER_NULL_ON_FAILURE) {
+                            return null_variant;
+			} else {
+                            return false;
+			}
+		}
+                //TODO
+		return php_zval_filter_recursive(filtered, filter, filter_flags, options, charset, copy);
+	}
+
+	if (filter_flags & k_FILTER_REQUIRE_ARRAY) {
+            if (filter_flags & k_FILTER_NULL_ON_FAILURE) {
+                return null_variant;
+            } else {
+                return false;
+            }
+            return null_variant;
+	}
+
+	Variant filtered_ret = php_zval_filter(filtered, filter, filter_flags, options, charset, copy);
+
+	if (filter_flags & k_FILTER_FORCE_ARRAY) {
+            if(!filtered_ret.is(KindOfArray)) {
+                Array tmp = Array::Create();
+                tmp.append(filtered_ret);
+                return tmp;
+            }
+	}
+
+        return filtered_ret;
+}
+
+Variant php_zval_filter_recursive(CVarRef value, int64 filter, int64 flags, CVarRef options, CStrRef charset, int copy)
+{
+    if(value.is(KindOfArray)) {
+        Variant value_ret = value;
+        for (ArrayIter iter(value); iter; ++iter) {
+            Variant key = iter.first();
+            Variant val = iter.second();
+            Variant res;
+            if(val.is(KindOfArray)) {
+		res = php_zval_filter_recursive(iter.second(), filter, flags, options, charset, copy);
+            } else {
+                res = php_zval_filter(iter.second(), filter, flags, options, charset, copy);
+            }
+            value_ret.set(key, res);
+        }
+        return value_ret;
+    } else {
+        return php_zval_filter(value, filter, flags, options, charset, copy);
+    }
+}
+
+
+Variant php_zval_filter(CVarRef value, int64 filter, int64 flags, CVarRef options, CStrRef charset, int copy)
+{
+//filter_list_entry  filter_func;
+//
+//filter_func = php_find_filter(filter);
+//
+//if (!filter_func.id) {
+//	/* Find default filter */
+//	filter_func = php_find_filter(FILTER_DEFAULT);
+//}
+//
+//if (copy) {
+//	SEPARATE_ZVAL(value);
+//}
+//
+///* #49274, fatal error with object without a toString method
+//  Fails nicely instead of getting a recovarable fatal error. */
+//if (Z_TYPE_PP(value) == IS_OBJECT) {
+//	zend_class_entry *ce;
+//
+//	ce = Z_OBJCE_PP(value);
+//	if (!ce->__tostring) {
+//		ZVAL_FALSE(*value);
+//		return;
+//	}
+//}
+//
+///* Here be strings */
+//convert_to_string(*value);
+//
+//filter_func.function(*value, flags, options, charset TSRMLS_CC);
+//
+//if (
+//	options && (Z_TYPE_P(options) == IS_ARRAY || Z_TYPE_P(options) == IS_OBJECT) &&
+//	((flags & FILTER_NULL_ON_FAILURE && Z_TYPE_PP(value) == IS_NULL) ||
+//	(!(flags & FILTER_NULL_ON_FAILURE) && Z_TYPE_PP(value) == IS_BOOL && Z_LVAL_PP(value) == 0)) &&
+//	zend_hash_exists(HASH_OF(options), "default", sizeof("default"))
+//) {
+//	zval **tmp;
+//	if (zend_hash_find(HASH_OF(options), "default", sizeof("default"), (void **)&tmp) == SUCCESS) {
+//		MAKE_COPY_ZVAL(tmp, *value);
+//	}
+//}
+    return value;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

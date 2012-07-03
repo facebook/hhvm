@@ -2089,7 +2089,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2163];
+static hashNodeCon conBuckets[2165];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -4256,6 +4256,8 @@ void init_builtin_constant_table() {
       (const char *)"FILTER_VALIDATE_LAST", (const char *)-1, (const char *)32, (const char *)&k_FILTER_VALIDATE_LAST,
       (const char *)"FILTER_VALIDATE_REGEXP", (const char *)-1, (const char *)32, (const char *)&k_FILTER_VALIDATE_REGEXP,
       (const char *)"FILTER_VALIDATE_URL", (const char *)-1, (const char *)32, (const char *)&k_FILTER_VALIDATE_URL,
+      (const char *)"FILTER_SANITIZE_ALL", (const char *)-1, (const char *)32, (const char *)&k_FILTER_SANITIZE_ALL,
+      (const char *)"FILTER_CALLBACK", (const char *)-1, (const char *)32, (const char *)&k_FILTER_CALLBACK,
     NULL, NULL, NULL, NULL
   };
   hashNodeCon *b = conBuckets;

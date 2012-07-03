@@ -74,6 +74,9 @@ extern const int64 k_FILTER_SANITIZE_LAST;
 extern const int64 k_FILTER_VALIDATE_ALL;
 extern const int64 k_FILTER_VALIDATE_LAST;
 
+extern const int64 k_FILTER_SANITIZE_ALL;
+extern const int64 k_FILTER_CALLBACK;
+
 extern const int64 k_INPUT_GET;
 extern const int64 k_INPUT_POST;
 extern const int64 k_INPUT_COOKIE;

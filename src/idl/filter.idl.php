@@ -106,7 +106,8 @@ DefineConstant( array ( 'name' => 'k_FILTER_REQUIRE_ARRAY', 'type' => Int64,));
 DefineConstant( array ( 'name' => 'k_FILTER_REQUIRE_SCALAR', 'type' => Int64,));
 DefineConstant( array ( 'name' => 'k_FILTER_SANITIZE_LAST', 'type' => Int64,));
 DefineConstant( array ( 'name' => 'k_FILTER_VALIDATE_ALL', 'type' => Int64,));
-DefineConstant( array ( 'name' => 'k_FILTER_VALIDATE_LAST', 'type' => Int64,));
+DefineConstant( array ( 'name' => 'k_FILTER_SANITIZE_ALL', 'type' => Int64,));
+DefineConstant( array ( 'name' => 'k_FILTER_CALLBACK', 'type' => Int64,));
 
 /**
 DefineConstant( array( 'name'   => "FILTER_VALIDATE_BOOLEAN", 'type'   => Int64,));

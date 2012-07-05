@@ -16,9 +16,13 @@
 */
 
 #include <runtime/ext/ext_filter.h>
+#include <runtime/ext/ext_preg.h>
+#include <runtime/ext/ext_string.h>
+#include <util/alloc.h>
 #include <util/logger.h>
 #include <runtime/base/zend/zend_url.h>
 
+using namespace HPHP::Util;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 IMPLEMENT_DEFAULT_EXTENSION(filter);
@@ -783,6 +787,7 @@ Variant php_filter_float(CVarRef value, int64 flags, CVarRef options, CStrRef ch
     return value;
 }
 
+//TODO implement
 Variant php_filter_validate_regexp(CVarRef value, int64 flags, CVarRef options, CStrRef charset){
         String str = f_trim(value.toString());
 	String regexp;
@@ -840,73 +845,488 @@ Variant php_filter_validate_regexp(CVarRef value, int64 flags, CVarRef options, 
     return str;
 }
 
+int is_url_allow_char(char c) {
+    const char *url_allow_chars = URL_ALLOW_CHARS;
+    int len = strlen(url_allow_chars);
+
+    for(int i=0;i<len ;i++) {
+        if(c = url_allow_chars[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 Variant php_filter_validate_url(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-	//php_url *url;
-        /**
-	int old_len = value.toString().size();
+    //php_url *url;
+    int old_len = value.toString().size();
+    String value_old = value.toString();
+    if(!value.is(KindOfString)) {
+        if (flags & k_FILTER_NULL_ON_FAILURE) {
+            return null_variant;
+        } else {
+            return false;
+        }
+    }
 
-	php_filter_url(value, flags, option_array, charset TSRMLS_CC);
+    for(int i=0;i<old_len;i++) {
+        if(!is_url_allow_char(value_old[i])) {
+            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                return null_variant;
+            } else {
+                return false;
+            }
+        }
+    }
 
-	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
-		RETURN_VALIDATION_FAILED
-	}
-	// Use parse_url - if it returns false, we return NULL
-	url = php_url_parse_ex(Z_STRVAL_P(value), Z_STRLEN_P(value));
+    Url resource;
+    if (!url_parse(resource, value_old.data(), value_old.size())) {
+        //raise_notice("invalid url: %s", url.data());
+        if (flags & k_FILTER_NULL_ON_FAILURE) {
+            return null_variant;
+        } else {
+            return false;
+        }
+    }
 
-	if (url == NULL) {
-		RETURN_VALIDATION_FAILED
-	}
 
-	if (url->scheme != NULL && (!strcasecmp(url->scheme, "http") || !strcasecmp(url->scheme, "https"))) {
-		char *e, *s;
+    if (resource.scheme != NULL && (!strcasecmp(resource.scheme, "http") || !strcasecmp(resource.scheme, "https"))) {
+            char *e, *s;
 
-		if (url->host == NULL) {
-			goto bad_url;
-		}
+            if (resource.host == NULL) {
+                    goto bad_url;
+            }
 
-		e = url->host + strlen(url->host);
-		s = url->host;
+            e = resource.host + strlen(resource.host);
+            s = resource.host;
 
-		// First char of hostname must be alphanumeric
-		if(!isalnum((int)*(unsigned char *)s)) {
-			goto bad_url;
-		}
+            // First char of hostname must be alphanumeric
+            if(!isalnum((int)*(unsigned char *)s)) {
+                    goto bad_url;
+            }
 
-		while (s < e) {
-			if (!isalnum((int)*(unsigned char *)s) && *s != '-' && *s != '.') {
-				goto bad_url;
-			}
-			s++;
-		}
+            while (s < e) {
+                    if (!isalnum((int)*(unsigned char *)s) && *s != '-' && *s != '.') {
+                            goto bad_url;
+                    }
+                    s++;
+            }
 
-		if (*(e - 1) == '.') {
-			goto bad_url;
-		}
-	}
+            if (*(e - 1) == '.') {
+                    goto bad_url;
+            }
+    }
 
-	if (
-		url->scheme == NULL ||
-	// some schemas allow the host to be empty
-		(url->host == NULL && (strcmp(url->scheme, "mailto") && strcmp(url->scheme, "news") && strcmp(url->scheme, "file"))) ||
-		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
-	) {
+    if (
+            resource.scheme == NULL ||
+    // some schemas allow the host to be empty
+            (resource.host == NULL && (strcmp(resource.scheme, "mailto") && strcmp(resource.scheme, "news") && strcmp(resource.scheme, "file"))) ||
+            ((flags & k_FILTER_FLAG_PATH_REQUIRED) && resource.path == NULL) || ((flags & k_FILTER_FLAG_QUERY_REQUIRED) && resource.query == NULL)
+    ) {
 bad_url:
-		php_url_free(url);
-		RETURN_VALIDATION_FAILED
-	}
-	php_url_free(url);
-        */
+        if (flags & k_FILTER_NULL_ON_FAILURE) {
+            return null_variant;
+        } else {
+            return false;
+        }
+    }
+
     return value;
 }
+
 Variant php_filter_validate_email(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
+    const char regexp[] = "/^(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){255,})(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){65,}@)(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22))(?:\\.(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-+[a-z0-9]+)*\\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-+[a-z0-9]+)*)|(?:\\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\\]))$/iD";
+
+    int preg_options = 0;
+
+    String q = value.toString();
+    /* The maximum length of an e-mail address is 320 octets, per RFC 2821. */
+    if (q.size() > 320) {
+        if (flags & k_FILTER_NULL_ON_FAILURE) {
+            return null_variant;
+        } else {
+            return false;
+        }
+    }
+
+    if(same(f_preg_match(regexp, q ),0)){
+        if (flags & k_FILTER_NULL_ON_FAILURE) {
+            return null_variant;
+        } else {
+            return false;
+        }
+    }
+
     return value;
+}
+
+#define FORMAT_IPV4    4
+#define FORMAT_IPV6    6
+
+
+static int _php_filter_validate_ipv4(const char *str, int str_len, int *ip)
+{
+        const char * str_val = str;
+	const char *end = str_val + str_len;
+	int num, m;
+	int n = 0;
+
+	while (str_val < end) {
+		int leading_zero;
+		if (*str_val < '0' || *str_val > '9') {
+			return 0;
+		}
+		leading_zero = (*str_val == '0');
+		m = 1;
+		num = ((*(str_val++)) - '0');
+		while (str_val < end && (*str_val >= '0' && *str_val <= '9')) {
+			num = num * 10 + ((*(str_val++)) - '0');
+			if (num > 255 || ++m > 3) {
+				return 0;
+			}
+		}
+		/* don't allow a leading 0; that introduces octal numbers,
+		 * which we don't support */
+		if (leading_zero && (num != 0 || m > 1))
+			return 0;
+		ip[n++] = num;
+		if (n == 4) {
+			return str_val == end;
+		} else if (str_val >= end || *(str_val++) != '.') {
+			return 0;
+		}
+	}
+	return 0;
+}
+
+
+static int _php_filter_validate_ipv6(const char *str, int str_len )
+{
+	int compressed = 0;
+	int blocks = 0;
+	int n;
+	char *ipv4;
+	const char *end;
+	int ip4elm[4];
+	const char *s = str;
+
+	if (!memchr(str, ':', str_len)) {
+		return 0;
+	}
+
+	/* check for bundled IPv4 */
+	ipv4 = (char *)memchr(str, '.', str_len);
+	if (ipv4) {
+ 		while (ipv4 > str && *(ipv4-1) != ':') {
+			ipv4--;
+		}
+
+		if (!_php_filter_validate_ipv4(ipv4, (str_len - (ipv4 - str)), ip4elm)) {
+			return 0;
+		}
+
+		str_len = ipv4 - str; /* length excluding ipv4 */
+		if (str_len < 2) {
+			return 0;
+		}
+
+		if (ipv4[-2] != ':') {
+			/* don't include : before ipv4 unless it's a :: */
+			str_len--;
+		}
+
+		blocks = 2;
+	}
+
+	end = str + str_len;
+
+	while (str < end) {
+		if (*str == ':') {
+			if (++str >= end) {
+				/* cannot end in : without previous : */
+				return 0;
+			}
+			if (*str == ':') {
+				if (compressed) {
+					return 0;
+				}
+				blocks++; /* :: means 1 or more 16-bit 0 blocks */
+				compressed = 1;
+
+				if (++str == end) {
+					return (blocks <= 8);
+				}
+			} else if ((str - 1) == s) {
+				/* dont allow leading : without another : following */
+				return 0;
+			}
+		}
+		n = 0;
+		while ((str < end) &&
+		       ((*str >= '0' && *str <= '9') ||
+		        (*str >= 'a' && *str <= 'f') ||
+		        (*str >= 'A' && *str <= 'F'))) {
+			n++;
+			str++;
+		}
+		if (n < 1 || n > 4) {
+			return 0;
+		}
+		if (++blocks > 8)
+			return 0;
+	}
+	return ((compressed && blocks <= 8) || blocks == 8);
 }
 
 Variant php_filter_validate_ip(CVarRef value, int64 flags, CVarRef options, CStrRef charset){
+
+	/* validates an ipv4 or ipv6 IP, based on the flag (4, 6, or both) add a
+	 * flag to throw out reserved ranges; multicast ranges... etc. If both
+	 * allow_ipv4 and allow_ipv6 flags flag are used, then the first dot or
+	 * colon determine the format */
+
+	int            ip[4];
+	int            mode;
+        String value_str = value.toString();
+        if(!same(f_strpos(value.toString(), ':', 0), false)) {
+            mode = FORMAT_IPV6;
+        } else if(!same(f_strpos(value.toString(), '.', 0), false)) {
+            mode = FORMAT_IPV4;
+        } else {
+            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                return null_variant;
+            } else {
+                return false;
+            }
+        }
+
+
+	if ((flags & k_FILTER_FLAG_IPV4) && (flags & k_FILTER_FLAG_IPV6)) {
+		/* Both formats are cool */
+	} else if ((flags & k_FILTER_FLAG_IPV4) && mode == FORMAT_IPV6) {
+            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                return null_variant;
+            } else {
+                return false;
+            }
+	} else if ((flags & k_FILTER_FLAG_IPV6) && mode == FORMAT_IPV4) {
+            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                return null_variant;
+            } else {
+                return false;
+            }
+	}
+
+	switch (mode) {
+		case FORMAT_IPV4:
+			if (!_php_filter_validate_ipv4(value_str.data(), value_str.size(), ip)) {
+                            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                return null_variant;
+                            } else {
+                                return false;
+                            }
+                        }
+
+			/* Check flags */
+			if (flags & k_FILTER_FLAG_NO_PRIV_RANGE) {
+				if (
+					(ip[0] == 10) ||
+					(ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31)) ||
+					(ip[0] == 192 && ip[1] == 168)
+				) {
+                                    if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                        return null_variant;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+			}
+
+			if (flags & k_FILTER_FLAG_NO_RES_RANGE) {
+				if (
+					(ip[0] == 0) ||
+					(ip[0] == 128 && ip[1] == 0) ||
+					(ip[0] == 191 && ip[1] == 255) ||
+					(ip[0] == 169 && ip[1] == 254) ||
+					(ip[0] == 192 && ip[1] == 0 && ip[2] == 2) ||
+					(ip[0] == 127 && ip[1] == 0 && ip[2] == 0 && ip[3] == 1) ||
+					(ip[0] >= 224 && ip[0] <= 255)
+				) {
+                                    if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                        return null_variant;
+                                    } else {
+                                        return false;
+                                    }
+				}
+			}
+			break;
+
+		case FORMAT_IPV6:
+			{
+				int res = 0;
+				res = _php_filter_validate_ipv6(value_str.data(), value_str.size());
+				if (res < 1) {
+                                    if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                        return null_variant;
+                                    } else {
+                                        return false;
+                                    }
+				}
+				/* Check flags */
+				if (flags & k_FILTER_FLAG_NO_PRIV_RANGE) {
+					if (value_str.size() >=2 && (!strncasecmp("FC", value_str.data(), 2) || !strncasecmp("FD", value_str.data(), 2))) {
+                                            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                                return null_variant;
+                                            } else {
+                                                return false;
+                                            }
+					}
+				}
+				if (flags & k_FILTER_FLAG_NO_RES_RANGE) {
+					switch (value_str.size()) {
+						case 1: case 0:
+							break;
+						case 2:
+							if (!strcmp("::", value_str.data())) {
+                                                            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                                                return null_variant;
+                                                            } else {
+                                                                return false;
+                                                            }
+							}
+							break;
+						case 3:
+							if (!strcmp("::1", value_str.data()) || !strcmp("5f:",value_str.data())) {
+                                                            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                                                return null_variant;
+                                                            } else {
+                                                                return false;
+                                                            }
+							}
+							break;
+						default:
+							if (value_str.size() >= 5) {
+								if (
+									!strncasecmp("fe8", value_str.data(), 3) ||
+									!strncasecmp("fe9", value_str.data(), 3) ||
+									!strncasecmp("fea", value_str.data(), 3) ||
+									!strncasecmp("feb", value_str.data(), 3)
+								) {
+                                                                    if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                                                        return null_variant;
+                                                                    } else {
+                                                                        return false;
+                                                                    }
+								}
+							}
+							if (
+								(value_str.size() >= 9 &&  !strncasecmp("2001:0db8", value_str.data(), 9)) ||
+								(value_str.size() >= 2 &&  !strncasecmp("5f", value_str.data(), 2)) ||
+								(value_str.size() >= 4 &&  !strncasecmp("3ff3", value_str.data(), 4)) ||
+								(value_str.size() >= 8 &&  !strncasecmp("2001:001", value_str.data(), 8))
+							) {
+                                                            if (flags & k_FILTER_NULL_ON_FAILURE) {
+                                                                return null_variant;
+                                                            } else {
+                                                                return false;
+                                                            }
+							}
+					}
+				}
+			}
+			break;
+	}
     return value;
 }
+
+
+static String php_filter_encode_html(CStrRef value, const unsigned char *chars)
+{
+        StringBuffer str;
+	int len = value.size();
+	unsigned char *s = (unsigned char *)value.data();
+	unsigned char *e = s + len;
+
+	if (value.size() == 0) {
+		return value;
+	}
+
+	while (s < e) {
+		if (chars[*s]) {
+                        str.append("&#");
+                        str.append((int)*s);
+                        str.append(";");
+		} else {
+			/* XXX: this needs to be optimized to work with blocks of 'safe' chars */
+                        str.append(s[0]);
+		}
+		s++;
+	}
+
+        return String(str.data());
+}
+static String php_filter_strip(CStrRef value, long flags)
+{
+	char *buf, *str;
+	int   i, c;
+
+	/* Optimization for if no strip flags are set */
+	if (! ((flags & k_FILTER_FLAG_STRIP_LOW) || (flags & k_FILTER_FLAG_STRIP_HIGH)) ) {
+		return value;
+	}
+
+	str = (char *)value.data();
+	buf = (char *)safe_malloc(value.size() + 1);
+	c = 0;
+	for (i = 0; i < value.size(); i++) {
+		if ((str[i] > 127) && (flags & k_FILTER_FLAG_STRIP_HIGH)) {
+		} else if ((str[i] < 32) && (flags & k_FILTER_FLAG_STRIP_LOW)) {
+		} else if ((str[i] == '`') && (flags & k_FILTER_FLAG_STRIP_BACKTICK)) {
+		} else {
+			buf[c] = str[i];
+			++c;
+		}
+	}
+	/* update zval string data */
+	buf[c] = '\0';
+
+        String ret = String(buf);
+	safe_free(buf);
+        return ret;
+}
+
+//TODO FIX BUG
 Variant php_filter_string(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
+
+    unsigned char enc[256] = {0};
+
+    String value_str = php_filter_strip(value.toString(), flags);
+
+    if (!(flags & k_FILTER_FLAG_NO_ENCODE_QUOTES)) {
+        enc['\''] = enc['"'] = 1;
+    }
+    if (flags & k_FILTER_FLAG_ENCODE_AMP) {
+        enc['&'] = 1;
+    }
+    if (flags & k_FILTER_FLAG_ENCODE_LOW) {
+        memset(enc, 1, 32);
+    }
+    if (flags & k_FILTER_FLAG_ENCODE_HIGH) {
+        memset(enc + 127, 1, sizeof(enc) - 127);
+    }
+
+    String value_ret = php_filter_encode_html(value.toString(), enc);
+    /* strip tags, implicitly also removes \0 chars */
+    String new_str = f_strip_tags(value_ret);
+
+    if (new_str.size()== 0) {
+        if (flags & k_FILTER_FLAG_EMPTY_STRING_NULL) {
+            return null_variant;
+        } else {
+            return String("");
+        }
+    }
+    return new_str;
 }
 Variant php_filter_encoded(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
     return value;

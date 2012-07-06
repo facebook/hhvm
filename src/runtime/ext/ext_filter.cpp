@@ -100,6 +100,20 @@ const int64 k_INPUT_SESSION                     = 6; // not IMPLEMENT
 #define MAX_LENGTH_OF_LONG 20
 #define URL_ALLOW_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$-_.+!*'(),{}|\\^~[]`<>#%\";/?:@&="
 
+#define LOWALPHA    "abcdefghijklmnopqrstuvwxyz"
+#define HIALPHA     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define DIGIT       "0123456789"
+
+#define SAFE        "$-_.+"
+#define EXTRA       "!*'(),"
+#define NATIONAL    "{}|\\^~[]`"
+#define PUNCTUATION "<>#%\""
+#define RESERVED    ";/?:@&="
+
+static const unsigned char hexchars[] = "0123456789ABCDEF";
+
+#define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
+
 Variant filterGetStorage (int64 type);
 Variant php_filter_call(CVarRef filtered, int64 filter, CVarRef filter_args, const int copy, int64  filter_flags);
 Variant php_zval_filter_recursive(CVarRef value, int64 filter, int64 flags, CVarRef options, CStrRef charset, int copy);
@@ -289,7 +303,6 @@ Variant php_filter_call(CVarRef filtered, int64 filter, CVarRef filter_args, con
                                 options = filter_args.toArray()[String("options")].toArray();
                             }
 			} else {
-                                //TODO
 				options = filter_args.toArray()[String("options")];
 				filter_flags = 0;
 			}
@@ -304,7 +317,6 @@ Variant php_filter_call(CVarRef filtered, int64 filter, CVarRef filter_args, con
                             return false;
 			}
 		}
-                //TODO
 		return php_zval_filter_recursive(filtered, filter, filter_flags, options, charset, copy);
 	}
 
@@ -789,60 +801,61 @@ Variant php_filter_float(CVarRef value, int64 flags, CVarRef options, CStrRef ch
 
 //TODO implement
 Variant php_filter_validate_regexp(CVarRef value, int64 flags, CVarRef options, CStrRef charset){
-        String str = f_trim(value.toString());
-	String regexp;
-	long   option_flags;
-	int    regexp_set=0, option_flags_set=0;
-	pcre       *re = NULL;
-	pcre_extra *pcre_extra = NULL;
-	int preg_options = 0;
-
-	int         ovector[3];
-	int         matches;
-
-	/* Parse options */
-        if(options && options.toArray().exists(String("regexp"))
-               && options[String("regexp")]) {
-                regexp_set = 1;
-                regexp = options[String("regexp")].toString();
-        }
-
-        if(options && options.toArray().exists(String("flags"))
-           && options[String("flags")]) {
-            option_flags_set = 1;
-            option_flags = options[String("flags")].toInt64();
-        }
-
-	if (!regexp_set) {
-                Logger::Warning("'regexp' option missing");
-                if (flags & k_FILTER_NULL_ON_FAILURE) {
-                    return null_variant;
-                } else {
-                    return false;
-                }
-	}
-        //TODO
-        //re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options );
-
-	if (!re) {
-            if (flags & k_FILTER_NULL_ON_FAILURE) {
-                return null_variant;
-            } else {
-                return false;
-            }
-	}
-        //TODO
-	//matches = pcre_exec(re, NULL, str, str.size() , 0, 0, ovector, 3);
-
-	/* 0 means that the vector is too small to hold all the captured substring offsets */
-	if (matches < 0) {
-            if (flags & k_FILTER_NULL_ON_FAILURE) {
-                return null_variant;
-            } else {
-                return false;
-            }
-	}
-    return str;
+//       String str = f_trim(value.toString());
+//       String regexp;
+//       long   option_flags;
+//       int    regexp_set=0, option_flags_set=0;
+//       pcre       *re = NULL;
+//       pcre_extra *pcre_extra = NULL;
+//       int preg_options = 0;
+//
+//       int         ovector[3];
+//       int         matches;
+//       /* Parse options */
+//       if(options && options.toArray().exists(String("regexp"))
+//              && options[String("regexp")]) {
+//               regexp_set = 1;
+//               regexp = options[String("regexp")].toString();
+//       }
+//
+//       if(options && options.toArray().exists(String("flags"))
+//          && options[String("flags")]) {
+//           option_flags_set = 1;
+//           option_flags = options[String("flags")].toInt64();
+//       }
+//
+//       if (!regexp_set) {
+//               Logger::Warning("'regexp' option missing");
+//               if (flags & k_FILTER_NULL_ON_FAILURE) {
+//                   return null_variant;
+//               } else {
+//                   return false;
+//               }
+//       }
+//       //TODO
+//       //re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options );
+//
+//       if (!re) {
+//           if (flags & k_FILTER_NULL_ON_FAILURE) {
+//               return null_variant;
+//           } else {
+//               return false;
+//           }
+//       }
+//       //TODO
+//       //matches = pcre_exec(re, NULL, str, str.size() , 0, 0, ovector, 3);
+//
+//       /* 0 means that the vector is too small to hold all the captured substring offsets */
+//       if (matches < 0) {
+//           if (flags & k_FILTER_NULL_ON_FAILURE) {
+//               return null_variant;
+//           } else {
+//               return false;
+//           }
+//	}
+//
+//    return str;
+    return value;
 }
 
 int is_url_allow_char(char c) {
@@ -1293,7 +1306,38 @@ static String php_filter_strip(CStrRef value, long flags)
         return ret;
 }
 
-//TODO FIX BUG
+
+static String php_filter_encode_url(CStrRef value, const unsigned char* chars, const int char_len, int high, int low, int encode_nul)
+{
+	unsigned char tmp[256];
+	unsigned char *s = (unsigned char *)chars;
+	unsigned char *e = s + char_len;
+
+	memset(tmp, 1, sizeof(tmp)-1);
+
+        StringBuffer stringBuf;
+
+	while (s < e) {
+		tmp[*s++] = 0;
+	}
+
+	s = (unsigned char *)value.data();
+	e = s + value.size();
+
+	while (s < e) {
+		if (tmp[*s]) {
+                        stringBuf.append('%');
+                        stringBuf.append(hexchars[(char )s[0] >> 4]);
+                        stringBuf.append(hexchars[(char) s[0] & 15]);
+                        Logger::Info((const char *)s);
+		} else {
+                    stringBuf.append(s[0]);
+		}
+		s++;
+	}
+        return stringBuf.copy();
+}
+
 Variant php_filter_string(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
 
     unsigned char enc[256] = {0};
@@ -1313,7 +1357,7 @@ Variant php_filter_string(CVarRef value, int64 flags, CVarRef options, CStrRef c
         memset(enc + 127, 1, sizeof(enc) - 127);
     }
 
-    String value_ret = php_filter_encode_html(value.toString(), enc);
+    String value_ret = php_filter_encode_html(value_str, enc);
     //Logger::Info(value_str);
     //Logger::Info(value_ret);
     /* strip tags, implicitly also removes \0 chars */
@@ -1329,37 +1373,197 @@ Variant php_filter_string(CVarRef value, int64 flags, CVarRef options, CStrRef c
     }
     return new_str;
 }
+
 Variant php_filter_encoded(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
+    /* apply strip_high and strip_low filters */
+    String value_str = php_filter_strip(value.toString(), flags);
+    /* urlencode */
+    String value_ret = php_filter_encode_url(value_str, (unsigned char *)DEFAULT_URL_ENCODE, sizeof(DEFAULT_URL_ENCODE)-1, flags & k_FILTER_FLAG_ENCODE_HIGH, flags & k_FILTER_FLAG_ENCODE_LOW, 1);
+
+    return value_ret;
 }
+
 Variant php_filter_special_chars(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
+
+    unsigned char enc[256] = {0};
+
+    String value_str = php_filter_strip(value.toString(), flags);
+
+    /* encodes ' " < > & \0 to numerical entities */
+    enc['\''] = enc['"'] = enc['<'] = enc['>'] = enc['&'] = enc[0] = 1;
+
+    /* if strip low is not set, then we encode them as &#xx; */
+    memset(enc, 1, 32);
+
+    if (flags & k_FILTER_FLAG_ENCODE_HIGH) {
+        memset(enc + 127, 1, sizeof(enc) - 127);
+    }
+
+    return php_filter_encode_html(value_str, enc);
 }
+
+//TODO imple
 Variant php_filter_full_special_chars(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
+    /**
+    char *buf;
+    int   len, quotes;
+
+    if (!(flags & k_FILTER_FLAG_NO_ENCODE_QUOTES)) {
+        quotes = ENT_QUOTES;
+    } else {
+        quotes = ENT_NOQUOTES;
+    }
+
+    buf = php_escape_html_entities_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 1, quotes, SG(default_charset), 0 TSRMLS_CC);
+    efree(Z_STRVAL_P(value));
+    Z_STRVAL_P(value) = buf;
+    Z_STRLEN_P(value) = len;
+    */
     return value;
 }
+
 Variant php_filter_unsafe_raw(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
+    /* Only if no flags are set (optimization) */
+    if (flags != 0 && value.toString().size() > 0) {
+        unsigned char enc[256] = {0};
+
+        String value_str = php_filter_strip(value.toString(), flags);
+
+        if (flags & k_FILTER_FLAG_ENCODE_AMP) {
+            enc['&'] = 1;
+        }
+        if (flags & k_FILTER_FLAG_ENCODE_LOW) {
+            memset(enc, 1, 32);
+        }
+        if (flags & k_FILTER_FLAG_ENCODE_HIGH) {
+            memset(enc + 127, 1, sizeof(enc) - 127);
+        }
+
+        return php_filter_encode_html(value_str, enc);
+    } else if (flags & k_FILTER_FLAG_EMPTY_STRING_NULL && value.toString().size() == 0) {
+        return null_variant;
+    }
     return value;
+
 }
+
+static String filter_map_apply(CStrRef value,const unsigned char * allowed_list) {
+    unsigned long filter_map[256] = {0};
+    memset(filter_map, 0, 256);
+    int l, i;
+    l = strlen((const char *)allowed_list);
+    for (i = 0; i < l; ++i) {
+        filter_map[allowed_list[i]] = 1;
+    }
+
+    StringBuffer buf;
+    unsigned char *str;
+    int c;
+
+    str = (unsigned char *)value.data();
+    c = 0;
+    for (i = 0; i < value.size(); i++) {
+        if (filter_map[str[i]]) {
+            buf.append(str[i]);
+            ++c;
+        }
+    }
+    return buf.copy();
+}
+
 Variant php_filter_email(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
+    const unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT "!#$%&'*+-=?^_`{|}~@.[]";
+    return filter_map_apply(value.toString(), allowed_list);
 }
+
 Variant php_filter_url(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
+    const unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT SAFE EXTRA NATIONAL PUNCTUATION RESERVED;
+    return filter_map_apply(value.toString(), allowed_list);
 }
 
 Variant php_filter_number_int(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
-}
-Variant php_filter_number_float(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
-}
-Variant php_filter_magic_quotes(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
-}
-Variant php_filter_callback(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    return value;
+    const unsigned char allowed_list[] = "+-" DIGIT;
+    return filter_map_apply(value.toString(), allowed_list);
 }
 
+Variant php_filter_number_float(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
+
+    /* strip everything [^0-9+-] */
+    const unsigned char allowed_list[] = "+-" DIGIT;
+
+    unsigned long filter_map[256] = {0};
+    memset(filter_map, 0, 256);
+    int l, i;
+    l = strlen((const char *)allowed_list);
+    for (i = 0; i < l; ++i) {
+        filter_map[allowed_list[i]] = 1;
+    }
+
+    /* depending on flags, strip '.', 'e', ",", "'" */
+    if (flags & k_FILTER_FLAG_ALLOW_FRACTION) {
+        filter_map['.'] = 2;
+    }
+    if (flags & k_FILTER_FLAG_ALLOW_THOUSAND) {
+        filter_map[','] = 3;
+    }
+    if (flags & k_FILTER_FLAG_ALLOW_SCIENTIFIC) {
+        filter_map['e'] = 4;
+        filter_map['E'] = 4;
+    }
+
+    StringBuffer buf;
+    unsigned char *str;
+    int c;
+
+    str = (unsigned char *)value.toString().data();
+    c = 0;
+    for (i = 0; i < value.toString().size(); i++) {
+        if (filter_map[str[i]]) {
+            buf.append(str[i]);
+            ++c;
+        }
+    }
+    return buf.copy();
+}
+
+Variant php_filter_magic_quotes(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
+    return f_addslashes(value.toString());
+}
+
+//TODO impl
+Variant php_filter_callback(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
+    /**
+    zval *retval_ptr;
+    zval ***args;
+    int status;
+
+    if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, NULL TSRMLS_CC)) {
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback");
+        zval_dtor(value);
+        Z_TYPE_P(value) = IS_NULL;
+        return;
+    }
+
+    args = safe_emalloc(sizeof(zval **), 1, 0);
+    args[0] = &value;
+
+    status = call_user_function_ex(EG(function_table), NULL, option_array, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
+
+    if (status == SUCCESS && retval_ptr != NULL) {
+        if (retval_ptr != value) {
+            zval_dtor(value);
+            COPY_PZVAL_TO_ZVAL(*value, retval_ptr);
+        } else {
+            zval_ptr_dtor(&retval_ptr);
+        }
+    } else {
+        zval_dtor(value);
+        Z_TYPE_P(value) = IS_NULL;
+    }
+
+    efree(args);
+    */
+    return value;
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

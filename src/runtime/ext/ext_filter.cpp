@@ -1419,7 +1419,17 @@ Variant php_filter_full_special_chars(CVarRef value, int64 flags, CVarRef option
     Z_STRVAL_P(value) = buf;
     Z_STRLEN_P(value) = len;
     */
-    return value;
+    int quotes;
+
+    if (!(flags & k_FILTER_FLAG_NO_ENCODE_QUOTES)) {
+        quotes = k_ENT_QUOTES;
+    } else {
+        quotes = k_ENT_NOQUOTES;
+    }
+
+    const char *scharset = charset.data();
+    if (!*scharset) scharset = "UTF-8";
+    return StringUtil::HtmlEncode(value, (StringUtil::QuoteStyle)quotes, scharset, true);
 }
 
 Variant php_filter_unsafe_raw(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {

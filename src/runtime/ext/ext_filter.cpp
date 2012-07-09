@@ -18,9 +18,15 @@
 #include <runtime/ext/ext_filter.h>
 #include <runtime/ext/ext_preg.h>
 #include <runtime/ext/ext_string.h>
+#include <runtime/ext/ext_function.h>
 #include <util/alloc.h>
 #include <util/logger.h>
 #include <runtime/base/zend/zend_url.h>
+#include <runtime/base/base_includes.h>
+#include <runtime/base/zend/zend_string.h>
+#include <runtime/base/zend/zend_printf.h>
+#include <runtime/base/zend/zend_html.h>
+
 
 using namespace HPHP::Util;
 namespace HPHP {
@@ -113,6 +119,9 @@ const int64 k_INPUT_SESSION                     = 6; // not IMPLEMENT
 static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
+
+#define FORMAT_IPV4    4
+#define FORMAT_IPV6    6
 
 Variant filterGetStorage (int64 type);
 Variant php_filter_call(CVarRef filtered, int64 filter, CVarRef filter_args, const int copy, int64  filter_flags);
@@ -971,10 +980,6 @@ Variant php_filter_validate_email(CVarRef value, int64 flags, CVarRef options, C
     return value;
 }
 
-#define FORMAT_IPV4    4
-#define FORMAT_IPV6    6
-
-
 static int _php_filter_validate_ipv4(const char *str, int str_len, int *ip)
 {
         const char * str_val = str;
@@ -1274,7 +1279,8 @@ static String php_filter_encode_html(CStrRef value, const unsigned char *chars)
 		s++;
 	}
        //Logger::Info(str.copy());
-        return str.copy();
+        return str.detach();
+        //return str.copy();
 }
 static String php_filter_strip(CStrRef value, long flags)
 {
@@ -1329,13 +1335,14 @@ static String php_filter_encode_url(CStrRef value, const unsigned char* chars, c
                         stringBuf.append('%');
                         stringBuf.append(hexchars[(char )s[0] >> 4]);
                         stringBuf.append(hexchars[(char) s[0] & 15]);
-                        Logger::Info((const char *)s);
+                        //Logger::Info((const char *)s);
 		} else {
                     stringBuf.append(s[0]);
 		}
 		s++;
 	}
-        return stringBuf.copy();
+        return stringBuf.detach();
+        //return stringBuf.copy();
 }
 
 Variant php_filter_string(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
@@ -1404,21 +1411,7 @@ Variant php_filter_special_chars(CVarRef value, int64 flags, CVarRef options, CS
 
 //TODO imple
 Variant php_filter_full_special_chars(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    /**
-    char *buf;
-    int   len, quotes;
 
-    if (!(flags & k_FILTER_FLAG_NO_ENCODE_QUOTES)) {
-        quotes = ENT_QUOTES;
-    } else {
-        quotes = ENT_NOQUOTES;
-    }
-
-    buf = php_escape_html_entities_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 1, quotes, SG(default_charset), 0 TSRMLS_CC);
-    efree(Z_STRVAL_P(value));
-    Z_STRVAL_P(value) = buf;
-    Z_STRLEN_P(value) = len;
-    */
     int quotes;
 
     if (!(flags & k_FILTER_FLAG_NO_ENCODE_QUOTES)) {
@@ -1478,7 +1471,8 @@ static String filter_map_apply(CStrRef value,const unsigned char * allowed_list)
             ++c;
         }
     }
-    return buf.copy();
+    return buf.detach();
+    //return buf.copy();
 }
 
 Variant php_filter_email(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
@@ -1533,47 +1527,19 @@ Variant php_filter_number_float(CVarRef value, int64 flags, CVarRef options, CSt
             ++c;
         }
     }
-    return buf.copy();
+    return buf.detach();
 }
 
 Variant php_filter_magic_quotes(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
     return f_addslashes(value.toString());
 }
 
-//TODO impl
 Variant php_filter_callback(CVarRef value, int64 flags, CVarRef options, CStrRef charset) {
-    /**
-    zval *retval_ptr;
-    zval ***args;
-    int status;
-
-    if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, NULL TSRMLS_CC)) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback");
-        zval_dtor(value);
-        Z_TYPE_P(value) = IS_NULL;
-        return;
+    if(!options || !f_is_callable(options)) {
+        raise_warning("First argument is expected to be a valid callback");
+        return null_variant;
     }
-
-    args = safe_emalloc(sizeof(zval **), 1, 0);
-    args[0] = &value;
-
-    status = call_user_function_ex(EG(function_table), NULL, option_array, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
-
-    if (status == SUCCESS && retval_ptr != NULL) {
-        if (retval_ptr != value) {
-            zval_dtor(value);
-            COPY_PZVAL_TO_ZVAL(*value, retval_ptr);
-        } else {
-            zval_ptr_dtor(&retval_ptr);
-        }
-    } else {
-        zval_dtor(value);
-        Z_TYPE_P(value) = IS_NULL;
-    }
-
-    efree(args);
-    */
-    return value;
+    return f_call_user_func_array(options, value);
 }
 ///////////////////////////////////////////////////////////////////////////////
 }

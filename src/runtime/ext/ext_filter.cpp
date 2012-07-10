@@ -810,61 +810,8 @@ Variant php_filter_float(CVarRef value, int64 flags, CVarRef options, CStrRef ch
 
 //TODO implement
 Variant php_filter_validate_regexp(CVarRef value, int64 flags, CVarRef options, CStrRef charset){
-//       String str = f_trim(value.toString());
-//       String regexp;
-//       long   option_flags;
-//       int    regexp_set=0, option_flags_set=0;
-//       pcre       *re = NULL;
-//       pcre_extra *pcre_extra = NULL;
-//       int preg_options = 0;
-//
-//       int         ovector[3];
-//       int         matches;
-//       /* Parse options */
-//       if(options && options.toArray().exists(String("regexp"))
-//              && options[String("regexp")]) {
-//               regexp_set = 1;
-//               regexp = options[String("regexp")].toString();
-//       }
-//
-//       if(options && options.toArray().exists(String("flags"))
-//          && options[String("flags")]) {
-//           option_flags_set = 1;
-//           option_flags = options[String("flags")].toInt64();
-//       }
-//
-//       if (!regexp_set) {
-//               Logger::Warning("'regexp' option missing");
-//               if (flags & k_FILTER_NULL_ON_FAILURE) {
-//                   return null_variant;
-//               } else {
-//                   return false;
-//               }
-//       }
-//       //TODO
-//       //re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options );
-//
-//       if (!re) {
-//           if (flags & k_FILTER_NULL_ON_FAILURE) {
-//               return null_variant;
-//           } else {
-//               return false;
-//           }
-//       }
-//       //TODO
-//       //matches = pcre_exec(re, NULL, str, str.size() , 0, 0, ovector, 3);
-//
-//       /* 0 means that the vector is too small to hold all the captured substring offsets */
-//       if (matches < 0) {
-//           if (flags & k_FILTER_NULL_ON_FAILURE) {
-//               return null_variant;
-//           } else {
-//               return false;
-//           }
-//	}
-//
-//    return str;
-    return value;
+  throw NotImplementedException(__func__);
+  return value;
 }
 
 int is_url_allow_char(char c) {

@@ -28,13 +28,18 @@ EXTERNAL_CPPFLAGS += \
 else
 
 EXTERNAL_CPPFLAGS += \
+  -isystem /usr/local/src/dev/source/dev/include/curl \
+  -isystem /usr/local/src/dev/source/dev/include/ \
+  -isystem /usr/local/src/dev/source/dev/lib/ \
+  -isystem /usr/local/include \
+  -isystem /usr/include \
+  -isystem /usr/include/libxml2/ \
   -isystem $(EXT_DIR)/binutils \
   -isystem $(EXT_DIR)/pcre/include \
   -isystem $(EXT_DIR)/libevent/include \
   -isystem $(EXT_DIR)/libcurl/include \
   -isystem $(EXT_DIR)/libafdt/include \
   -isystem $(EXT_DIR)/gd/include \
-  -isystem /usr/local/include \
   -isystem $(EXT_DIR)/boost/include/boost-1_37 \
   -isystem $(EXT_DIR)/mysql/include \
   -isystem $(EXT_DIR)/sqlite/include \
@@ -72,7 +77,7 @@ EXTERNAL_LDFLAGS += -Wl,-rpath -Wl,/usr/local/hphp/lib
 endif
 
 EXTERNAL_LDFLAGS	+= \
-  -L/usr/local/lib
+  -L/usr/local/lib  -L/usr/local/src/dev/source/dev/lib/ -L/usr/lib/x86_64-linux-gnu/
 
 ifdef MAC_OS_X
 LINK_LIBS = -lpthread -lstdc++ -ldl
@@ -93,9 +98,9 @@ BOOST_LIBS = \
 
 else
 BOOST_LIBS = \
-	$(EXT_DIR)/boost/lib/libboost_program_options-gcc40-mt.a \
-	$(EXT_DIR)/boost/lib/libboost_filesystem-gcc40-mt.a \
-	$(EXT_DIR)/boost/lib/libboost_system-gcc40-mt.a \
+	/usr/lib/libboost_program_options-mt.a \
+	/usr/lib/libboost_filesystem-mt.a \
+	/usr/lib/libboost_system-mt.a \
 
 endif
 
@@ -105,69 +110,73 @@ MYSQL_LIBS = -L/usr/local/mysql/lib -lmysqlclient
 
 else
 
-MYSQL_LIBS = $(EXT_DIR)/mysql/lib/mysql/libmysqlclient_r.a \
+MYSQL_LIBS = /usr/lib/x86_64-linux-gnu/libmysqlclient_r.a \
 	-lssl -lcrypto -lcrypt
-ORACLE_LIBS = $(EXT_DIR)/oracle/lib/libclntsh.so.11.1
+#ORACLE_LIBS = $(EXT_DIR)/oracle/lib/libclntsh.so.11.1
 
-SQLITE_LIBS = $(EXT_DIR)/sqlite/lib/libsqlite3.a
+SQLITE_LIBS = $(CMAKE_PREFIX_PATH)/hiphop-php/bin/libsqlite3.a
 
-PCRE_LIBS = $(EXT_DIR)/pcre/lib/libpcre.a
+PCRE_LIBS = /usr/lib/x86_64-linux-gnu/libpcre.a
 
-HTTP_LIBS = $(EXT_DIR)/libafdt/lib/libafdt.a $(EXT_DIR)/libevent/lib/libevent.a
+HTTP_LIBS = $(CMAKE_PREFIX_PATH)/hiphop-php/bin/libafdt.a $(CMAKE_PREFIX_PATH)/lib/libevent.a
 
-MCC_LIBS = $(EXT_DIR)/libmcc/lib/libmcc.a $(EXT_DIR)/libch/lib/libch.a \
-	$(EXT_DIR)/libevent/lib/libevent.a
+#MCC_LIBS = $(EXT_DIR)/libmcc/lib/libmcc.a $(EXT_DIR)/libch/lib/libch.a \
+#	$(EXT_DIR)/libevent/lib/libevent.a
 
-LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
+LIBMEMCACHED_LIBS = /usr/local/src/dev/source/dev/lib/libmemcached.so
+#LIBMEMCACHED_LIBS = /usr/local/src/dev/source/dev/lib/libmemcached.so
 
-LIBCAP_LIBS = $(EXT_DIR)/libcap/lib64/libcap.a
+LIBCAP_LIBS = /lib/x86_64-linux-gnu/libcap.a
 
-IMAP_LIBS = $(EXT_DIR)/imap/lib/c-client.a -lpam -lkrb5
+IMAP_LIBS =-L/usr/lib/x86_64-linux-gnu/  -L/usr/lib/ -lc-client -lpam -lkrb5
+#IMAP_LIBS =-L/usr/lib/x86_64-linux-gnu/  -L/usr/lib/ /usr/lib/libc-client.a -lpam -lkrb5
+#IMAP_LIBS =-L/usr/lib/x86_64-linux-gnu/ /usr/lib/libc-client.a -lpam -lkrb5
 
 EXTERNAL_LIBJPEG_LIBS = -ljpeg
 
-GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a $(EXT_DIR)/libpng/lib/libpng.a \
+GD_LIBS = /usr/lib/x86_64-linux-gnu/libgd.a /usr/lib/x86_64-linux-gnu/libpng.a \
 	$(EXTERNAL_LIBJPEG_LIBS) -lfreetype -lfontconfig
 
-MOZILLA_LIBS = $(EXT_DIR)/mozilla/libmozutil_s.a \
-               $(EXT_DIR)/mozilla/libexpat_s.a \
-               $(EXT_DIR)/mozilla/libsaxp.a \
-               $(EXT_DIR)/mozilla/libunicharutil_s.a \
-               $(EXT_DIR)/mozilla/libxptcmd.a \
-               $(EXT_DIR)/mozilla/libxptcall.a \
-               $(EXT_DIR)/mozilla/libxptinfo.a \
-               $(EXT_DIR)/mozilla/libxpt.a \
-               $(EXT_DIR)/mozilla/libxpcomcomponents_s.a \
-               $(EXT_DIR)/mozilla/libxpcomproxy_s.a \
-               $(EXT_DIR)/mozilla/libxpcomio_s.a \
-               $(EXT_DIR)/mozilla/libxpcomds_s.a \
-               $(EXT_DIR)/mozilla/libxpcomglue.a \
-               $(EXT_DIR)/mozilla/libxpcombase_s.a \
-               $(EXT_DIR)/mozilla/libxpcomthreads_s.a \
-               $(EXT_DIR)/mozilla/libstring_s.a \
-               $(EXT_DIR)/mozilla/libplc4.a \
-               $(EXT_DIR)/mozilla/libplds4.a \
-               $(EXT_DIR)/mozilla/libnspr4.a
+#MOZILLA_LIBS = $(EXT_DIR)/mozilla/libmozutil_s.a \
+#              $(EXT_DIR)/mozilla/libexpat_s.a \
+#              $(EXT_DIR)/mozilla/libsaxp.a \
+#              $(EXT_DIR)/mozilla/libunicharutil_s.a \
+#              $(EXT_DIR)/mozilla/libxptcmd.a \
+#              $(EXT_DIR)/mozilla/libxptcall.a \
+#              $(EXT_DIR)/mozilla/libxptinfo.a \
+#              $(EXT_DIR)/mozilla/libxpt.a \
+#              $(EXT_DIR)/mozilla/libxpcomcomponents_s.a \
+#              $(EXT_DIR)/mozilla/libxpcomproxy_s.a \
+#              $(EXT_DIR)/mozilla/libxpcomio_s.a \
+#              $(EXT_DIR)/mozilla/libxpcomds_s.a \
+#              $(EXT_DIR)/mozilla/libxpcomglue.a \
+#              $(EXT_DIR)/mozilla/libxpcombase_s.a \
+#              $(EXT_DIR)/mozilla/libxpcomthreads_s.a \
+#              $(EXT_DIR)/mozilla/libstring_s.a \
+#              $(EXT_DIR)/mozilla/libplc4.a \
+#              $(EXT_DIR)/mozilla/libplds4.a \
+#              $(EXT_DIR)/mozilla/libnspr4.a
+#
+CURL_LIBS = -L$(CMAKE_PREFIX_PATH)/lib/ -lcurl
+#CURL_LIBS = $(CMAKE_PREFIX_PATH)/lib/libcurl.a  -L$(CMAKE_PREFIX_PATH)/lib/ -lcurl
 
-CURL_LIBS = $(EXT_DIR)/libcurl/lib/libcurl.a
+LIBXML_LIBS = /usr/lib/x86_64-linux-gnu/libxml2.a -lexpat
 
-LIBXML_LIBS = $(EXT_DIR)/libxml2/lib/libxml2.a -lexpat
+TIME_LIBS = $(CMAKE_PREFIX_PATH)/hiphop-php/bin/libtimelib.a
 
-TIME_LIBS = $(EXT_DIR)/timelib/lib/libtimelib.a
+#ifdef DEBUG
+#FBML_LIBS = $(EXT_DIR)/libfbml/lib/libfbml-debug.a $(MOZILLA_LIBS)
+#else
+#FBML_LIBS = $(EXT_DIR)/libfbml/lib/libfbml.a $(MOZILLA_LIBS)
+#endif
 
-ifdef DEBUG
-FBML_LIBS = $(EXT_DIR)/libfbml/lib/libfbml-debug.a $(MOZILLA_LIBS)
-else
-FBML_LIBS = $(EXT_DIR)/libfbml/lib/libfbml.a $(MOZILLA_LIBS)
-endif
-
-MBFL_LIBS = $(EXT_DIR)/libmbfl/lib/libmbfl.a \
-	$(EXT_DIR)/oniguruma/lib/libonig.a
+MBFL_LIBS = /usr/local/src/dev/source/dev/hiphop-php/bin/libmbfl.a \
+	/usr/lib/libonig.a
 
 LIB_UNWIND = $(EXT_DIR)/libunwind/lib/libunwind.a
 
 ifdef USE_JEMALLOC
-JEMALLOC_LIBS = $(EXT_DIR)/jemalloc/lib/libjemalloc.a
+JEMALLOC_LIBS = $(CMAKE_PREFIX_PATH)/lib/libjemalloc.a
 endif
 
 ifdef GOOGLE_HEAP_PROFILER
@@ -185,7 +194,7 @@ endif
 endif
 
 ICU_VERSION = 4_6
-ICU_LIBDIR = $(EXT_DIR)/icu-$(ICU_VERSION)/lib
+ICU_LIBDIR = /usr/lib
 ICU_INCLUDEDIR = $(EXT_DIR)/icu-$(ICU_VERSION)/include
 ICU_LIBS = \
 	$(ICU_LIBDIR)/libicui18n.a \
@@ -194,23 +203,23 @@ ICU_LIBS = \
 
 endif
 
-XHP_LIBS = $(EXT_DIR)/xhp/lib/libxhp.a
+XHP_LIBS = $(CMAKE_PREFIX_PATH)/hiphop-php/bin/libxhp.a
 
-TBB_LIBS = -L$(EXT_DIR)/tbb/lib/ $(EXT_DIR)/tbb/lib/libtbb.a
+TBB_LIBS = -L/usr/lib/ /usr/lib/libtbb.so
 
-MCRYPT_LIBS = $(EXT_DIR)/libmcrypt/lib/libmcrypt.a
+MCRYPT_LIBS =/usr/lib/libmcrypt.a
 
-FBI_LIBS = $(EXT_DIR)/libfbi/lib/libfbi.a
+#$FBI_LIBS = $(EXT_DIR)/libfbi/lib/libfbi.a
 
-LDAP_LIBS = $(EXT_DIR)/ldap/lib/libldap.a $(EXT_DIR)/ldap/lib/liblber.a
+LDAP_LIBS = /usr/lib/x86_64-linux-gnu/libldap.a /usr/lib/x86_64-linux-gnu/liblber.a
 
-READLINE_LIBS = $(EXT_DIR)/readline/lib/libreadline.a \
-	$(EXT_DIR)/readline/lib/libhistory.a -lcurses
+READLINE_LIBS = /usr/lib/x86_64-linux-gnu/libreadline.a \
+ /usr/lib/x86_64-linux-gnu/libhistory.a -lcurses
 
-ZLIB_LIBS = $(EXT_DIR)/zlib/lib/libz.a
+ZLIB_LIBS = /usr/lib/x86_64-linux-gnu/libz.a
 
 ifdef HAVE_SNAPPY
-SNAPPY_LIBS = $(EXT_DIR)/snappy/lib/libsnappy.a
+#SNAPPY_LIBS = $(EXT_DIR)/snappy/lib/libsnappy.a
 endif
 
 EXTERNAL_STATIC_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \

@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "util/arena.h"
-#include <malloc.h>
 #include "util/alloc.h"
 #include "util/assert.h"
 

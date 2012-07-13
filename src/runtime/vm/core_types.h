@@ -48,7 +48,7 @@ const Id kInvalidId = Id(-1);
 
 // Bytecode offsets.  Used for both absolute offsets and relative
 // offsets.
-typedef int Offset;
+typedef int32_t Offset;
 
 /*
  * Various fields in the VM's runtime have indexes that are addressed
@@ -93,13 +93,12 @@ enum Attr {
   AttrTrait     = (1 << 8),      //    X                X    //
   AttrNoInjection = (1 << 9),    //                     X    //
   AttrUnique    = (1 << 10),     //    X                X    //
-  AttrMergeOnly = (1 << 11),     //                     X    //
+  AttrDynamicInvoke = (1 << 11), //                     X    //
   AttrNoExpandTrait = (1 << 12), //    X                     //
   AttrNoOverride= (1 << 13),     //    X                X    //
   AttrClone     = (1 << 14),     //                     X    //
   AttrVariadicByRef = (1 << 15), //                     X    //
-  AttrDynamicInvoke = (1 << 16), //                     X    //
-  AttrMayUseVV  = (1 << 17)      //                     X    //
+  AttrMayUseVV  = (1 << 16)      //                     X    //
 };
 
 static inline const char * attrToVisibilityStr(Attr attr) {

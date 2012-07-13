@@ -23,6 +23,7 @@
 #include "util/trace.h"
 #include "runtime/base/types.h"
 #include "runtime/base/runtime_option.h"
+#include "runtime/vm/stats.h"
 #include "runtime/vm/translator/translator.h"
 #include "runtime/vm/type-profile.h"
  
@@ -54,22 +55,20 @@ struct ValueProfile {
 /* 
  * kNumEntries
  *
- * Tradeoff: size vs. precision.
+ * Tradeoff: size vs. accuracy.
  *
- * ~4 million entries.
+ * ~64K entries.
  *
- * Size: (MaxNumDataTypes = 16) B -> 64 MB.
+ * Size: (sizeof(ValueProfile) == 16) B -> 1MB
  *
- * Precision: If we collide, it will disrupt the precision of our
- * predictions; other sites will mess with our prediction, changing it
- * without reality having changed. www-sized codebases are weighing in
- * around 50MB these days.  Swagging three bytes per instruction, this
- * provides enough space to profile about every eighth instruction before
- * collisions start becoming really problematic.
+ * Accuracy: If we collide further than kLineSize, we toss out perfectly
+ * good evidence. www seems to use about 12000 method names at this
+ * writing, so we have a decent pad for collisions.
  */
 
-static const int kNumEntries = 1 << 22;
-static const int kLineSize = 4;
+static const int kNumEntries = 1 << 16;
+static const int kLineSizeLog2 = 2;
+static const int kLineSize = 1 << kLineSizeLog2;
 static const int kNumLines = kNumEntries / kLineSize;
 static const int kNumLinesMask = kNumLines - 1;
 
@@ -85,7 +84,7 @@ static const int kNumLinesMask = kNumLines - 1;
  * Accuracy: If we set this too low, we'll be "jumpy", eagerly predicting
  * types on the basis of weak evidence.
  */
-static const double kMinInstances = 199.0;
+static const double kMinInstances = 99.0;
 
 typedef ValueProfile ValueProfileLine[kLineSize];
 static ValueProfileLine* profiles;
@@ -140,32 +139,68 @@ profileInit() {
   }
 }
 
+/*
+ * Warmup.
+ *
+ * In cli mode, we only record samples if we're in recording to replay
+ * later.
+ *
+ * For server mode, we record samples for all requests started after
+ * the EvalJitWarmupRequests'th req.
+ */
+bool __thread profileOn = false;
+static int64 numRequests;
+
+static inline bool serverMode() {
+  static bool cli = !strcmp(RuntimeOption::ExecutionMode, "cli");
+  return !cli;
+}
+
+static inline bool warmedUp() {
+  return (numRequests >= RuntimeOption::EvalJitWarmupRequests) ||
+    (!serverMode() && !RuntimeOption::EvalJitProfileRecord);
+}
+
+static inline bool profileThisRequest() {
+  if (warmedUp()) return false;
+  if (serverMode()) return true;
+  return RuntimeOption::EvalJitProfileRecord;
+}
+
+void
+profileRequestStart() {
+  profileOn = profileThisRequest();
+}
+
+void profileRequestEnd() {
+  numRequests++; // racy RMW; ok to miss a rare few.
+}
+
 enum KeyToVPMode {
   Read, Write
 };
 
 uint64_t
 TypeProfileKey::hash() const {
-  /*
-   * The reason we don't use SrcKey::hash() here is that it isn't stable
-   * across runs of the same code, because function IDs depend on the order
-   * of the request stream. This makes debugging this module really
-   * difficult, since the predictions can be wildly different from run to
-   * run. Function names and bytecode offsets are not racy.
-   */
-  return hash_int64_pair(m_func->fullName()->hash(), 
-                         m_offset);
+  return hash_int64_pair(m_kind, m_name->hash());
 }
 
 static inline ValueProfile*
 keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
   ASSERT(profiles);
   uint64_t h = key.hash();
-  ValueProfileLine& l = profiles[h & kNumLinesMask];
+  // Use the low-order kLineSizeLog2 bits to as tag bits to distinguish
+  // within the line, rather than to choose a line. Without the shift, all
+  // the tags in the line would have the same low-order bits, making
+  // collisions kLineSize times more likely.
+  int hidx = (h >> kLineSizeLog2) & kNumLinesMask;
+  ValueProfileLine& l = profiles[hidx];
   int replaceCandidate = 0;
   int minCount = 255;
   for (int i = 0; i < kLineSize; i++) {
     if (l[i].m_tag == uint32_t(h)) {
+      TRACE(2, "Found %d for %s -> %d\n",
+            l[i].m_tag, key.m_name->data(), uint32_t(h));
       return &l[i];
     }
     if (mode == Write && l[i].m_totalSamples < minCount) {
@@ -175,22 +210,35 @@ keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
   }
   if (mode == Write) {
     ASSERT(replaceCandidate >= 0 && replaceCandidate < kLineSize);
-    l[replaceCandidate].m_tag = uint32_t(h);
-    l[replaceCandidate].m_totalSamples = 0;
+    ValueProfile& vp = l[replaceCandidate];
+    Stats::inc(Stats::TypePred_Evict, vp.m_totalSamples != 0);
+    Stats::inc(Stats::TypePred_Insert);
+    TRACE(1, "Killing %d in favor of %s -> %d\n",
+          vp.m_tag, key.m_name->data(), uint32_t(h));
+    vp.m_totalSamples = 0;
+    memset(&vp.m_samples, 0, sizeof(vp.m_samples));
+    // Zero first, then claim. It seems safer to temporarily zero out some
+    // other function's values than to have this new function using the
+    // possibly-non-trivial prediction from an unrelated function.
+    Util::compiler_membar();
+    vp.m_tag = uint32_t(h);
     return &l[replaceCandidate];
   }
   return NULL;
 }
 
-static void bump8(uint8_t& cnt) {
-  if (cnt < 255) cnt++;
-}
-
 void recordType(const TypeProfileKey& key, DataType dt) {
   if (!profiles) return;
+  TRACE(1, "recordType lookup: %s -> %d\n", key.m_name->data(), dt);
   ValueProfile *prof = keyToVP(key, Write);
-  bump8(prof->m_samples[dt]);
-  bump8(prof->m_totalSamples);
+  if (prof->m_totalSamples != UCHAR_MAX) {
+    prof->m_totalSamples++;
+    // NB: we can't quite assert that we have fewer than UCHAR_MAX samples,
+    // because other threads are updating this structure without locks.
+    if (prof->m_samples[dt] < UCHAR_MAX) {
+      prof->m_samples[dt]++;
+    }
+  }
 }
 
 std::pair<DataType, double> predictType(const TypeProfileKey& key) {
@@ -198,21 +246,36 @@ std::pair<DataType, double> predictType(const TypeProfileKey& key) {
     std::make_pair(KindOfUninit, 0.0);
   if (!profiles) return kNullPred;
   const ValueProfile *prof = keyToVP(key, Read);
-  if (!prof) return kNullPred;
-  double total = 0.0;
-  for (int i = 0; i < MaxNumDataTypes; ++i) total += prof->m_samples[i];
+  if (!prof) {
+    TRACE(2, "predictType lookup: %s -> MISS\n", key.m_name->data());
+    Stats::inc(Stats::TypePred_Miss);
+    return kNullPred;
+  }
+  double total = prof->m_totalSamples;
+  if (total < kMinInstances) {
+    Stats::inc(Stats::TypePred_MissTooFew);
+    TRACE(2, "TypePred: hit %s but too few samples numSamples %d\n",
+          key.m_name->data(), prof->m_totalSamples);
+    return kNullPred;
+  }
   double maxProb = 0.0;
   DataType pred = KindOfUninit;
   // If we have fewer than kMinInstances predictions, consider it too
   // little data to be actionable.
-  if (total >= kMinInstances) for (int i = 0; i < MaxNumDataTypes; ++i) {
+  for (int i = 0; i < MaxNumDataTypes; ++i) {
     double prob = (1.0 * prof->m_samples[i]) / total;
     if (prob > maxProb) {
       maxProb = prob;
       pred = (DataType)i;
     }
-    if (prob == 1.0) break;
+    if (prob >= 1.0) break;
   }
+  Stats::inc(Stats::TypePred_Hit, maxProb == 1.0);
+  Stats::inc(Stats::TypePred_MissTooWeak, maxProb < 1.0);
+  TRACE(2, "TypePred: hit %s numSamples %d pred %d prob %g\n",
+        key.m_name->data(), prof->m_totalSamples, pred, maxProb);
+  // Probabilities over 1.0 are possible due to racy updates.
+  if (maxProb > 1.0) maxProb = 1.0;
   return std::make_pair(pred, maxProb);
 }
 

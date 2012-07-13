@@ -32,6 +32,7 @@
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/include_expression.h>
 
 using namespace HPHP;
 
@@ -99,6 +100,47 @@ bool StatementList::hasImpl() const {
     if (m_stmts[i]->hasImpl()) return true;
   }
   return false;
+}
+
+bool StatementList::markMergeable(AnalysisResultConstPtr ar) {
+  for (unsigned int i = 0; i < m_stmts.size(); i++) {
+    StatementPtr s = m_stmts[i];
+    switch (s->getKindOf()) {
+      case KindOfReturnStatement: {
+        ExpressionPtr e = static_pointer_cast<ReturnStatement>(s)->getRetExp();
+        return !e || e->isScalar();
+      }
+      case KindOfFunctionStatement:
+      case KindOfClassStatement:
+      case KindOfInterfaceStatement:
+        break;
+      case KindOfExpStatement: {
+        ExpressionPtr e = static_pointer_cast<ExpStatement>(s)->getExpression();
+        bool ok = false;
+        switch (e->getKindOf()) {
+          case Expression::KindOfIncludeExpression: {
+            IncludeExpressionPtr inc =
+              static_pointer_cast<IncludeExpression>(e);
+            if (FileScopeRawPtr f = inc->getIncludedFile(ar)) {
+              if (StatementListPtr sl = f->getStmt()) {
+                FunctionScopeRawPtr ps = sl->getFunctionScope();
+                ASSERT(ps && ps->inPseudoMain());
+                ok = ps->isMergeable();
+              }
+            }
+            break;
+          }
+          default:
+            break;
+        }
+        if (!ok) return false;
+        break;
+      }
+      default:
+        return false;
+    }
+  }
+  return true;
 }
 
 ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {

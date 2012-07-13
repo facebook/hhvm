@@ -353,10 +353,15 @@ char *string_trim(const char *s, int &len,
     for (int i = len - 1; i >= 0; i--) {
       if (mask[(unsigned char)s[i]]) {
         len--;
+        trimmed++;
       } else {
         break;
       }
     }
+  }
+
+  if (trimmed == 0) {
+    return NULL;
   }
   return string_duplicate(s, len);
 }

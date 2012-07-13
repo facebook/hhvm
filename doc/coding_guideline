@@ -21,15 +21,6 @@ Follow existing code when in doubt.
   };
   }}
 
-- Switch-cases indentations:
-
-  switch (...) {
-    case: {
-    }
-    default: {
-    }
-  }
-
 - Function parameter indentations:
 
   void foo(int param1,
@@ -55,14 +46,13 @@ Follow existing code when in doubt.
   if (...)
     one-liner;
 
-- When possible, fit one function into one screen-ful. Or, no long functions.
+- When possible, fit one function into one screen-full. Or, no long functions.
 
 (5) Naming
 
 - Class instance members start with "<b>m_</b>", unless trivial class/struct.
 - Class static members start with "<b>s_</b>".
 - Class instance methods use <b>camelCase</b>.
-- Class static methods start with <b>CapitalLetters</b>.
 - Global functions use <b>small_underscore_small</b>() style.
 - Enums start with <b>UpperCase</b>.
 
@@ -72,7 +62,6 @@ Follow existing code when in doubt.
 - Try to keep one class one file, unless trivial classes or sub-classes.
 - Try to keep class name consistent with file name so people can find them.
 - Avoid function bodies in header files, unless absolutely necessary.
-- No point to have a virtual function body in header, as it's never inlined.
 
 (7) Implementation Files
 
@@ -99,10 +88,7 @@ Since it doesn't depend on any other libraries, includes can use double-quotes:
 (2) Core Runtime Library
 
 runtime/base and runtime/eval depend on util/. Since there may be file name conflicts,
-ALWAYS use full include paths starting after src/. No double-quote include is
-allowed:
-
-  #include &lt;runtime/base/exceptions.h&gt;
+ALWAYS use full include paths starting after src/.
 
 (3) Extension Library
 

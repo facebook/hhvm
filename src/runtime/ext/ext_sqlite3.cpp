@@ -164,7 +164,6 @@ static void php_sqlite3_callback_final(sqlite3_context *context) {
 
 c_SQLite3::c_SQLite3(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_raw_db(NULL) {
-  CPP_BUILTIN_CLASS_INIT(SQLite3);
 }
 
 c_SQLite3::~c_SQLite3() {
@@ -173,7 +172,12 @@ c_SQLite3::~c_SQLite3() {
   }
 }
 
-void c_SQLite3::t___construct() {
+void c_SQLite3::t___construct(CStrRef filename,
+                       int64 flags /* = k_SQLITE3_OPEN_READWRITE |
+                                      k_SQLITE3_OPEN_CREATE */,
+                       CStrRef encryption_key /* = null_string */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::__construct);
+  t_open(filename, flags, encryption_key);
 }
 
 void c_SQLite3::validate() const {
@@ -209,6 +213,18 @@ void c_SQLite3::t_open(CStrRef filename,
     throw Exception("Unable to open database: %s", sqlite3_errmsg(m_raw_db));
   }
 #endif
+}
+
+bool c_SQLite3::t_busytimeout(int64 msecs) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::busytimeout);
+  validate();
+  int errcode = sqlite3_busy_timeout(m_raw_db, msecs);
+  if (errcode != SQLITE_OK) {
+    raise_warning("Unable to set busy timeout: %d, %s", errcode,
+                  sqlite3_errmsg(m_raw_db));
+    return false;
+  }
+  return true;
 }
 
 bool c_SQLite3::t_close() {
@@ -438,7 +454,6 @@ Variant c_SQLite3::t___destruct() {
 
 c_SQLite3Stmt::c_SQLite3Stmt(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_raw_stmt(NULL) {
-  CPP_BUILTIN_CLASS_INIT(SQLite3Stmt);
 }
 
 c_SQLite3Stmt::~c_SQLite3Stmt() {
@@ -620,7 +635,6 @@ Variant c_SQLite3Stmt::t___destruct() {
 
 c_SQLite3Result::c_SQLite3Result(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(SQLite3Result);
 }
 
 c_SQLite3Result::~c_SQLite3Result() {

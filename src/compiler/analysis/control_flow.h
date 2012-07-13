@@ -17,8 +17,8 @@
 #ifndef __CONTROL_FLOW_H__
 #define __CONTROL_FLOW_H__
 
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
+#include <boost/graph/adjacency_iterator.hpp>
 
 #include <compiler/hphp.h>
 
@@ -310,6 +310,9 @@ inline void put(vertex_color_t c,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+// This needs to come after the definitions of 'out_degree', 'out_edges', etc.
+#include <boost/graph/adjacency_list.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

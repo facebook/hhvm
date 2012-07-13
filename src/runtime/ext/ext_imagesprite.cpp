@@ -447,7 +447,6 @@ void ImageFromHTTP::completed() {
 
 c_ImageSprite::c_ImageSprite(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(ImageSprite);
   m_image_string_buffer = null_string;
   m_image = NULL;
   m_current = false;

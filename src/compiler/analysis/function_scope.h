@@ -280,6 +280,9 @@ public:
   void setLocalRedeclaring() { m_localRedeclaring = true; }
   bool isLocalRedeclaring() const { return m_localRedeclaring; }
 
+  void setMergeable() { m_mergeable = true; }
+  bool isMergeable() const { return m_mergeable; }
+
   /* For function_exists */
   void setVolatile() { m_volatile = true;}
   bool isVolatile() const { return m_volatile;}
@@ -549,6 +552,7 @@ private:
   unsigned m_hasTry : 1;
   unsigned m_hasGoto : 1;
   unsigned m_localRedeclaring : 1;
+  unsigned m_mergeable : 1;
 
   int m_redeclaring; // multiple definition of the same function
   StatementPtr m_stmtCloned; // cloned method body stmt

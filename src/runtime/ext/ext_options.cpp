@@ -26,11 +26,12 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
-#include <runtime/eval/runtime/eval_state.h>
 #include <util/process.h>
 #include <sys/utsname.h>
 #include <pwd.h>
 #include <system/gen/php/globals/constants.h>
+
+#include <runtime/vm/request_arena.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -161,11 +162,11 @@ String f_set_include_path(CStrRef new_include_path) {
 }
 
 Array f_get_included_files() {
-  return Eval::RequestEvalState::GetIncludes()["included"];
+  return Array::Create();
 }
 
 Array f_inclued_get_data() {
-  return Eval::RequestEvalState::GetIncludes()["inclued"];
+  return Array::Create();
 }
 
 int64 f_get_magic_quotes_gpc() {
@@ -658,7 +659,11 @@ int64 f_memory_get_allocation() {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
     const MemoryUsageStats &stats = mm->getStats(true);
-    return stats.totalAlloc;
+    int64 ret = stats.totalAlloc;
+#ifdef HHVM
+    ret -= VM::request_arena().slackEstimate();
+#endif
+    return ret;
   }
   return 0;
 }
@@ -676,7 +681,11 @@ int64 f_memory_get_usage(bool real_usage /* = false */) {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
     const MemoryUsageStats &stats = mm->getStats(true);
-    return real_usage ? stats.usage : stats.alloc;
+    int64 ret = real_usage ? stats.usage : stats.alloc;
+#ifdef HHVM
+    ret -= VM::request_arena().slackEstimate();
+#endif
+    return ret;
   }
   return (int64)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
 }

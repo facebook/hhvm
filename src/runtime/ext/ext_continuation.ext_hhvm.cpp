@@ -199,75 +199,13 @@ TypedValue* fg_hphp_unpack_continuation(HPHP::VM::ActRec *ar) {
 
 
 
-class c_Continuation_Instance : public c_Continuation {
-public:
-  c_Continuation_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_Continuation));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_Continuation) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_Continuation_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_Continuation_Instance *this_ = (c_Continuation_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_Continuation) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_Continuation::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_Continuation::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_Continuation::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_Continuation::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_Continuation_Instance(HPHP::VM::Class* cls) {
-  return c_Continuation_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_Continuation) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_Continuation(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -1100,75 +1038,13 @@ TypedValue* tg_12Continuation___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_GenericContinuation_Instance : public c_GenericContinuation {
-public:
-  c_GenericContinuation_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_GenericContinuation));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_GenericContinuation) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_GenericContinuation_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_GenericContinuation_Instance *this_ = (c_GenericContinuation_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_GenericContinuation) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_GenericContinuation::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_GenericContinuation::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_GenericContinuation::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_GenericContinuation::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_GenericContinuation_Instance(HPHP::VM::Class* cls) {
-  return c_GenericContinuation_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_GenericContinuation) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_GenericContinuation(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -1405,75 +1281,13 @@ TypedValue* tg_19GenericContinuation___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DummyContinuation_Instance : public c_DummyContinuation {
-public:
-  c_DummyContinuation_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DummyContinuation));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DummyContinuation) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DummyContinuation_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DummyContinuation_Instance *this_ = (c_DummyContinuation_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DummyContinuation) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DummyContinuation::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DummyContinuation::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DummyContinuation::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DummyContinuation::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DummyContinuation_Instance(HPHP::VM::Class* cls) {
-  return c_DummyContinuation_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DummyContinuation) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DummyContinuation(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*

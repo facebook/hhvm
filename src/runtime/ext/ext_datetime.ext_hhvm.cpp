@@ -9,75 +9,13 @@
 
 namespace HPHP {
 
-class c_DateTime_Instance : public c_DateTime {
-public:
-  c_DateTime_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DateTime));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DateTime) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DateTime_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DateTime_Instance *this_ = (c_DateTime_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DateTime) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DateTime::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DateTime::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DateTime::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DateTime::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DateTime_Instance(HPHP::VM::Class* cls) {
-  return c_DateTime_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DateTime) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DateTime(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -669,75 +607,13 @@ TypedValue* tg_8DateTime___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DateTimeZone_Instance : public c_DateTimeZone {
-public:
-  c_DateTimeZone_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DateTimeZone));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DateTimeZone) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DateTimeZone_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DateTimeZone_Instance *this_ = (c_DateTimeZone_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DateTimeZone) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DateTimeZone::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DateTimeZone::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DateTimeZone::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DateTimeZone::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DateTimeZone_Instance(HPHP::VM::Class* cls) {
-  return c_DateTimeZone_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DateTimeZone) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DateTimeZone(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*

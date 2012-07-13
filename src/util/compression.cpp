@@ -317,13 +317,13 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
     if ((status = deflateInit2(&stream, level, Z_DEFLATED, -MAX_WBITS,
                                MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY)) != Z_OK) {
       Logger::Warning("%s", zError(status));
-      return false;
+      return NULL;
     }
     break;
   case CODING_DEFLATE:
     if ((status = deflateInit(&stream, level)) != Z_OK) {
       Logger::Warning("%s", zError(status));
-      return false;
+      return NULL;
     }
     break;
   }

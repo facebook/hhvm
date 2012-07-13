@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_global.h>
 #include <runtime/eval/debugger/cmd/cmd_variable.h>
-#include <runtime/eval/runtime/eval_frame_injection.h>
-#include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

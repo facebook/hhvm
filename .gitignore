@@ -4,6 +4,7 @@
 /bin*-O
 /bin/*.so
 /bin/hphp_options
+/bin/systemlib.php
 .mkdir
 hphp.log
 
@@ -23,6 +24,10 @@ hphp.log
 /src/test/vm/perf/*.out
 /src/test/vm/perf/*.diff
 /src/test/vm/perf/*.perf
+/src/runtime/ext_hhvm/xconstants.php
+/src/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
+/src/runtime/ext_hhvm/ext_noinline.cpp
+*.ext_hhvm.cpp
 
 /src/hphp/hphp
 
@@ -30,6 +35,7 @@ hphp.log
 /src/runtime/tmp/run
 /src/runtime/tmp/run.sh
 /src/runtime/tmp/libtest.so
+/src/runtime/vm/repo_schema.h
 
 /src/hphpi/gen
 /src/hphpi/hphpi
@@ -47,6 +53,8 @@ hphp.log
 # Ignore all makefiles generated for fbcode's third-party repo
 /bin/*.mk
 !/bin/run.mk
+
+/facebook/arcanist/.phutil_module_cache
 
 /facebook/autoload_files
 /facebook/hotcold.hdf

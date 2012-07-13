@@ -159,8 +159,8 @@ static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x5C4CA333F4541532LL,0,0,0,68,10,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
-  {0x1429F792A6880074LL,-1,0,0,68,10,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
+  {0x5C4CA333F4541532LL,0,0,0,68,-1,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
+  {0x1429F792A6880074LL,-1,0,0,68,-1,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
 
 };
 static const int cpt_hash_entries[] = {

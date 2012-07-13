@@ -297,7 +297,8 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
       GET_LOCK(m_symOwner);
       ret = m_symOwner->checkProperty(getScope(), m_propSym, type, coerce, ar);
     }
-    assert(m_object->getType()->isSpecificObject());
+    assert(m_object->getActualType() &&
+           m_object->getActualType()->isSpecificObject());
     m_valid = true;
     return ret;
   } else {
@@ -478,7 +479,8 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     if (doExist) cg_printf(", %s", doExist > 0 ? "false" : "true");
     cg_printf(")");
   } else if (m_valid) {
-    assert(m_object->getType()->isSpecificObject());
+    assert(m_object->getActualType() &&
+           m_object->getActualType()->isSpecificObject());
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>(m_property);
     cg_printf("%s%s", Option::PropertyPrefix, name->getString().c_str());
@@ -606,9 +608,8 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
     if (!ok) cg_printf("Variant(");
     m_object->outputCPP(cg, ar);
     if (!ok) cg_printf(")");
-    if (ok && m_object->is(KindOfSimpleVariable) &&
-        static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
-      cg_printf(".get()->");
+    if (ok && m_object->outputCPPGuardedObjectPtr(cg)) {
+      cg_printf("->");
     } else {
       cg_printf(".");
     }

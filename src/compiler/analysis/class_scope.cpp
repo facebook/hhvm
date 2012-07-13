@@ -1194,7 +1194,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   // constants
   m_constants->outputCPPClassMap(cg, ar);
-      
+
   // user attributes
   UserAttributeMap::const_iterator it = m_userAttributes.begin();
   for (; it != m_userAttributes.end(); ++it) {
@@ -1585,14 +1585,6 @@ void ClassScope::outputCPPClassVarInitImpl
   cg_indentBegin("Variant get_class_var_init(CStrRef s, "
                  "const char *var) {\n");
 
-  if (Option::EnableEval == Option::FullEval) {
-    // See if there's an eval'd version
-    cg_indentBegin("{\n");
-    cg_printf("Variant r;\n");
-    cg_printf("if (eval_get_class_var_init_hook(r, s, var)) "
-              "return r;\n");
-    cg_indentEnd("}\n");
-  }
   cg_printf("const ObjectStaticCallbacks *cwo = "
             "get_%sobject_static_callbacks(s);\n"
             "return LIKELY(cwo != 0) ? "
@@ -1644,16 +1636,6 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl(
   cg_indentBegin(
     "bool get_call_info_static_method(MethodCallPackage &mcp) {\n");
 
-  if (Option::EnableEval == Option::FullEval) {
-    cg_printf("bool foundClass = false;\n");
-    cg_printf("if (eval_get_call_info_static_method_hook(mcp, foundClass)) "
-              "return true;\n");
-    cg_indentBegin("else if (foundClass) {\n");
-    cg_printf("mcp.fail();\n");
-    cg_printf("return false;\n");
-    cg_indentEnd("}\n");
-  }
-
   cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
 
   cg_printf("const ObjectStaticCallbacks *cwo = "
@@ -1674,14 +1656,6 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 
   cg_indentBegin("Variant get_static_property(CStrRef s, "
                  "const char *prop) {\n");
-  if (Option::EnableEval == Option::FullEval) {
-    // See if there's an eval'd version
-    cg_indentBegin("{\n");
-    cg_printf("Variant r;\n");
-    cg_printf("if (eval_get_static_property_hook(r, s, prop)) "
-              "return r;\n");
-    cg_indentEnd("}\n");
-  }
 
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
@@ -1692,14 +1666,6 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 
   cg_indentBegin("Variant *get_static_property_lv(CStrRef s, "
                  "const char *prop) {\n");
-  if (Option::EnableEval == Option::FullEval) {
-    // See if there's an eval'd version
-    cg_indentBegin("{\n");
-    cg_printf("Variant *r;\n");
-    cg_printf("if (eval_get_static_property_lv_hook(r, s, prop)) "
-              "return r;\n");
-    cg_indentEnd("}\n");
-  }
 
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
@@ -2077,7 +2043,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
           ExpressionPtr val = getSymInit(sym);
           string name, cls, id;
           int flags = 0;
-          int type = 0;
+          DataType type = KindOfUnknown;
           if (!val) {
             if (sym->isConstant()) {
               name = sym->getName();
@@ -2102,7 +2068,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
           }
           int *p;
           int name_ix = -1, cls_ix = -1;
-          if ((flags & ConstNeedsSysCon) && type != KindOfVariant) {
+          if ((flags & ConstNeedsSysCon) && type != KindOfUnknown) {
             string n = cls + "$$" + name;
             p = &siIndex[n];
             if (!*p) {
@@ -2187,8 +2153,8 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                             Option::ClassPropTablePrefix, svarIndex[id] - 1);
                 }
               }
-            } else if ((flags & ConstNeedsSysCon) && type != KindOfVariant) {
-              cg_printf("0x%08x%07x7", name_ix, type);
+            } else if ((flags & ConstNeedsSysCon) && type != KindOfUnknown) {
+              cg_printf("0x%08x%07x7", name_ix, int(type));
             } else if (flags & ConstMagicIO) {
               cg_printf("(int64)&BuiltinFiles::Get%s, 0x1%07x6",
                         name.c_str(), index++);
@@ -2272,12 +2238,12 @@ void ClassScope::outputCPPGetClassPropTableImpl(
 
           string prop(sym->getName());
           int flags = 0;
-          int dtype = sym->getFinalType()->getDataType();
+          DataType ptype = sym->getFinalType()->getDataType();
           if (sym->isStatic()) {
             flags |= ClassPropTableEntry::Static;
             if (v[k].privIndex < 0) {
               bool needsInit = true;
-              switch (dtype) {
+              switch (ptype) {
                 case KindOfBoolean:
                   if (cflags & ConstFalse) needsInit = false;
                   goto check_plain;
@@ -2288,10 +2254,9 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                   if (cflags & ConstDZero) needsInit = false;
                   goto check_plain;
                 case KindOfString:
-                case KindOfStaticString:
                 case KindOfArray:
                   if (cflags & ConstNull) needsInit = false;
-                case KindOfVariant:
+                case KindOfUnknown:
                 check_plain:
                   if (cflags & ConstPlain && !system) {
                     flags |= ClassPropTableEntry::FastInit;
@@ -2335,7 +2300,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                                 sym->getName().size()),
                     next - cur, off,
                     int(s ? 0 : prop.size() - sym->getName().size()),
-                    flags, dtype);
+                    flags, int(ptype));
           if (s) {
             if (s == 2 && !sym->isDynamic()) {
               cg_printf("0,");

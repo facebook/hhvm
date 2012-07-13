@@ -1076,7 +1076,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     if (!cls) {
       if (m_params) {
         m_params->inferAndCheck(ar, Type::Some, false);
-        m_params->markParams(canInvokeFewArgs());
+        markRefParams(FunctionScopePtr(), m_name, canInvokeFewArgs());
       }
       return checkTypesImpl(ar, type, Type::Variant, coerce);
     }

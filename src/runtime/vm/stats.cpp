@@ -58,9 +58,7 @@ void emitIncTranslOp(x64::X64Assembler&a, Opcode opc) {
 static __thread int64 epoch;
 void dump() {
   if (!enabled()) return;
-  Transport* t = g_context->getTransport();
-  std::string url(t ? std::string(t->getUrl()).substr(0, 50) : "");
-  TRACE(1, "STATS %lld %s\n", epoch, url.c_str());
+  TRACE(1, "STATS %lld %s\n", epoch, g_context->getRequestUrl(50).c_str());
 #include "runtime/vm/stats-opcodeDef.h"
 #define STAT(s) \
   if (tl_counters[s]) TRACE(1, "STAT %-40s %15ld\n", \

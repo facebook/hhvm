@@ -27,17 +27,13 @@ HOT_FUNC
 ArrayInit::ArrayInit(ssize_t n, bool keepRef /* = false */) {
   if (n == 0) {
     if (keepRef) {
-      if (enable_vector_array && RuntimeOption::UseVectorArray) {
-        m_data = StaticEmptyVectorArray::Get();
-      } else {
-        m_data = StaticEmptyZendArray::Get();
-      }
+      m_data = StaticEmptyZendArray::Get();
     } else {
       if (enable_vector_array && RuntimeOption::UseVectorArray) {
         m_data = StaticEmptyVectorArray::Get();
       } else if (hhvm || // HHVM always uses HphpArray
                 (enable_hphp_array && RuntimeOption::UseHphpArray)) {
-        m_data = StaticEmptyHphpArray::Get();
+        m_data = HphpArray::GetStaticEmptyArray();
       } else {
         m_data = StaticEmptyZendArray::Get();
       }

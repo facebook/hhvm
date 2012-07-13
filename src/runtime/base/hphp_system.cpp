@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include <runtime/base/hphp_system.h>
+#include <runtime/base/compiler_id.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,7 +48,7 @@ void Globals::initialize() {
           case KindOfArray:
             *(Array*)addr = v.asCArrRef();
             break;
-          case KindOfVariant:
+          case KindOfUnknown:
             *(Variant*)addr = v;
             break;
           default:
@@ -56,7 +57,7 @@ void Globals::initialize() {
         continue;
       }
       CVarRef v = cpt->getInitVal(p);
-      if (LIKELY(p->type == KindOfVariant)) {
+      if (LIKELY(p->type == KindOfUnknown)) {
         *(Variant*)addr = v;
       } else {
         switch (p->type) {
@@ -179,27 +180,6 @@ ssize_t Globals::iter_rewind(ssize_t prev) const {
   ssize_t next = prev - 1;
   if (next < 0) return ArrayData::invalid_index;
   return next;
-}
-
-bool Globals::isHead(ssize_t pos) const {
-  if (staticSize() > 0) return pos == 0;
-  if (pos < -1) {
-    ArrayData *arr = Array::get();
-    ASSERT(arr);
-    return !arr->empty() && wrapIter(pos) == arr->iter_begin();
-  }
-  return false;
-}
-
-bool Globals::isTail(ssize_t pos) const {
-  ArrayData *arr = Array::get();
-  if (!arr || arr->empty()) {
-    return staticSize() > 0 && pos == staticSize() - 1;
-  }
-  if (pos < -1) {
-    return wrapIter(pos) == arr->iter_end();
-  }
-  return false;
 }
 
 void Globals::getFullPos(FullPos &pos) {

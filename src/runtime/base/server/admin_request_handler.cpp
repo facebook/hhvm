@@ -23,6 +23,7 @@
 #include <runtime/base/util/http_client.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/compiler_id.h>
 #include <util/process.h>
 #include <util/logger.h>
 #include <util/util.h>

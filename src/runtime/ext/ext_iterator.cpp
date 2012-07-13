@@ -445,7 +445,6 @@ String f_hphp_recursivedirectoryiterator_getsubpathname(CObjRef obj) {
 
 c_MutableArrayIterator::c_MutableArrayIterator(const ObjectStaticCallbacks *cb /* = &cw_MIterCtx */)
     : ExtObjectData(cb), m_valid(false) {
-  CPP_BUILTIN_CLASS_INIT(MutableArrayIterator);
 }
 
 c_MutableArrayIterator::~c_MutableArrayIterator() {
@@ -469,7 +468,7 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
   }
   Variant var(strongBind(array));
   TypedValue* tv = (TypedValue*)(&var);
-  ASSERT(tv->m_type == KindOfVariant);
+  ASSERT(tv->m_type == KindOfRef);
   if (tv->m_data.ptv->m_type == KindOfArray) {
     ArrayData* ad = tv->m_data.ptv->m_data.parr;
     if (ad->getCount() > 1) {
@@ -479,7 +478,7 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
       ad = tv->m_data.ptv->m_data.parr = copy;
     }
     MIterCtx& mi = marr();
-    (void) new (&mi) MIterCtx((const Variant*)tv->m_data.ptv);
+    (void) new (&mi) MIterCtx(tv->m_data.pref);
     m_valid = mi.m_mArray->advance();
     if (!m_valid) mi.~MIterCtx();
   } else if (tv->m_data.ptv->m_type == KindOfObject) {

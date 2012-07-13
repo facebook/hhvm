@@ -60,23 +60,25 @@ void print_boolean(int64 val);
 void tv_release_str(StringData* datum);
 void tv_release_arr(ArrayData* datum);
 void tv_release_obj(ObjectData* datum);
-void tv_release_var(Variant* datum);
+void tv_release_ref(RefData* datum);
 
-#define FP2LOC(f, l) ((uintptr_t)f - (uintptr_t)((l+1) * sizeof(TypedValue)))
-#define FP2ITER(f, i)                                                       \
-  (Iter*)(uintptr_t(f)                                                      \
-          - uintptr_t((f)->m_func->numLocals() * sizeof(TypedValue))        \
-          - uintptr_t((i+1) * sizeof(Iter)))
+inline Iter*
+frame_iter(const ActRec* fp, int i) {
+  return (Iter*)(uintptr_t(fp)
+          - uintptr_t(fp->m_func->numLocals() * sizeof(TypedValue))
+          - uintptr_t((i+1) * sizeof(Iter)));
+}
 
 inline TypedValue*
 frame_local(const ActRec* fp, int n) {
-  return (TypedValue*)FP2LOC(fp, n);
+  return (TypedValue*)(uintptr_t(fp) -
+    uintptr_t((n+1) * sizeof(TypedValue)));
 }
 
 inline TypedValue*
 frame_local_inner(const ActRec* fp, int n) {
   TypedValue* ret = frame_local(fp, n);
-  return ret->m_type == KindOfVariant ? ret->m_data.ptv : ret;
+  return ret->m_type == KindOfRef ? ret->m_data.ptv : ret;
 }
 
 inline void ALWAYS_INLINE
@@ -100,7 +102,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     TRACE_MOD(Trace::runtime, 5,
               "RetC: freeing %d'th local of %d\n", i,
               fp->m_func->numLocals());
-    TypedValue* loc = (TypedValue*)FP2LOC(fp, i);
+    TypedValue* loc = frame_local(fp, i);
     DataType t = loc->m_type;
     if (IS_REFCOUNTED_TYPE(t)) {
       uint64_t datum = loc->m_data.num;
@@ -238,8 +240,7 @@ static inline Instance*
 newInstance(Class* cls) {
   ASSERT(cls);
   Instance *inst = Instance::newInstance(cls);
-  if (UNLIKELY(RuntimeOption::EnableObjDestructCall) &&
-      inst->ObjectData::isInstance()) {
+  if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     g_vmContext->m_liveBCObjs.insert(inst);
   }
   return inst;

@@ -33,6 +33,7 @@
 #include <runtime/base/string_data.h>
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/vm/translator/translator-x64.h>
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,7 +157,8 @@ public:
         PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_WRITE) << 8)) {}
 };
 
-HardwareCounter::HardwareCounter() : m_countersSet(false) {
+HardwareCounter::HardwareCounter()
+  : m_countersSet(false), m_pseudoEvents(false) {
   m_instructionCounter = new InstructionCounter();
   if (RuntimeOption::EvalProfileHWEvents == "") {
     m_loadCounter = new LoadCounter();
@@ -321,11 +323,14 @@ bool HardwareCounter::setPerfEvents(CStrRef events) {
   StringData sevents(sd->data(), sd->size(), CopyString);
   char *strtok_buf = NULL;
   char *s = strtok_r(const_cast<char *>(sevents.data()), ",", &strtok_buf);
+  m_pseudoEvents = false;
   while (s) {
     int len = strlen(s);
     char* event = url_decode(s, len);
+    bool isPseudoEvent = TranslatorX64::isPseudoEvent(event);
+    m_pseudoEvents = m_pseudoEvents || isPseudoEvent;
     if (!eventExists(event)) {
-      if (!addPerfEvent(event)) {
+      if (!addPerfEvent(event) && !isPseudoEvent) {
         return false;
       }
     }
@@ -357,6 +362,9 @@ void HardwareCounter::getPerfEvents(Array& ret) {
   }
   for (unsigned i = 0; i < m_counters.size(); i++) {
     ret.set(m_counters[i]->m_desc->data(), m_counters[i]->read());
+  }
+  if (m_pseudoEvents) {
+    TranslatorX64::Get()->getPerfCounters(ret);
   }
 }
 

@@ -19,7 +19,6 @@
 #include <compiler/code_generator.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/analysis_result.h>
-#include <runtime/eval/parser/parser.h>
 #include <util/util.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,26 +69,6 @@ bool TestParser::VerifyParser(const char *input, const char *output,
              file, line);
       printf("[%s]\nExpecting %d: [%s]\nGot %d: [%s]\n",
              input, (int)strlen(output), output,
-             (int)code.str().length(), code.str().c_str());
-      ret = false;
-    }
-  }
-  {
-    std::vector<Eval::StaticStatementPtr> statics;
-    Eval::Block::VariableIndices variableIndices;
-    Eval::Parser::Reset();
-    Eval::StatementPtr tree = Eval::Parser::ParseString(input, NULL,
-                                                        statics,
-                                                        variableIndices);
-    std::ostringstream code;
-    tree->dump(code);
-    if (!SameCode(code.str(), output2)) {
-      printf("======================================\n"
-             "[Interpreter] %s:%d:\n"
-             "======================================\n",
-             file, line);
-      printf("[%s]\nExpecting %d: [%s]\nGot %d: [%s]\n",
-             input, (int)strlen(output2), output2,
              (int)code.str().length(), code.str().c_str());
       ret = false;
     }

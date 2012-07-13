@@ -22,8 +22,6 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/ext/ext_function.h>
 
-#include <runtime/eval/runtime/variable_environment.h>
-#include <runtime/eval/runtime/eval_state.h>
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/func.h>
@@ -36,78 +34,17 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
                                           CStrRef funcname,
                                           CStrRef origFuncName,
                                           CArrRef args /* = null_array */) {
-  if (hhvm) {
-    throw_fatal("hphp_create_continuation is not supported under hhvm");
-  }
-  Array definedVariables;
-  Object obj;
-  Eval::VariableEnvironment *env =
-    FrameInjection::GetVariableEnvironment(true);
-  if (UNLIKELY(!env)) {
-    throw_fatal("Invalid call hphp_create_continuation");
-  }
-  definedVariables = env->getDefinedVariables();
-  obj = FrameInjection::GetThis(true);
-  bool isMethod = !clsname.isNull() && !clsname.empty();
-  int64 callInfo = f_hphp_get_call_info(clsname, funcname);
-  int64 extra = f_hphp_get_call_info_extra(clsname, funcname);
-  if (has_eval_support && isMethod &&
-      Eval::MethodStatementWrapper::isTraitMethod(
-        (const Eval::MethodStatementWrapper *)extra)) {
-    extra = f_hphp_get_call_info_extra(FrameInjection::GetClassName(false),
-                                       funcname);
-  }
-  p_GenericContinuation cont(
-      ((c_GenericContinuation*)coo_GenericContinuation())->
-        create(callInfo, extra, isMethod, origFuncName,
-               definedVariables, obj, args));
-  if (isMethod) {
-    CStrRef cls = f_get_called_class();
-    cont->setCalledClass(cls);
-  }
-
-  return cont;
+  throw_fatal("Invalid call hphp_create_continuation");
+  return NULL;
 }
 
 void f_hphp_pack_continuation(CObjRef continuation,
                               int64 label, CVarRef value) {
-  if (hhvm) {
-    throw_fatal("hphp_pack_continuation is not supported under hhvm");
-  }
-  if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
-    throw_fatal(
-        "Cannot call hphp_pack_continuation with a "
-        "non-GenericContinuation object");
-  }
-  Array definedVariables;
-  Eval::VariableEnvironment *env =
-    FrameInjection::GetVariableEnvironment(true);
-  if (UNLIKELY(!env)) {
-    throw_fatal("Invalid call hphp_pack_continuation");
-  }
-  definedVariables = env->getDefinedVariables();
-  p_GenericContinuation c(
-      static_cast<c_GenericContinuation*>(continuation.get()));
-  c->t_update(label, value, definedVariables);
+  throw_fatal("Invalid call hphp_pack_continuation");
 }
 
 void f_hphp_unpack_continuation(CObjRef continuation) {
-  if (hhvm) {
-    throw_fatal("hphp_unpack_continuation is not supported under hhvm");
-  }
-  if (UNLIKELY(!continuation->o_instanceof("GenericContinuation"))) {
-    throw_fatal(
-        "Cannot call hphp_unpack_continuation with a "
-        "non-GenericContinuation object");
-  }
-  Eval::VariableEnvironment *env =
-    FrameInjection::GetVariableEnvironment(true);
-  if (UNLIKELY(!env)) {
-    throw_fatal("Invalid call hphp_unpack_continuation");
-  }
-  p_GenericContinuation c(
-    static_cast<c_GenericContinuation*>(continuation.get()));
-  extract(env, c->t_getvars(), 256 /* EXTR_REFS */);
+  throw_fatal("Invalid call hphp_unpack_continuation");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,7 +66,6 @@ c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
     ,LABEL_INIT
 #endif
 {
-  CPP_BUILTIN_CLASS_INIT(Continuation);
 }
 #undef LABEL_INIT
 
@@ -403,7 +339,6 @@ HphpArray* c_GenericContinuation::getStaticLocals() {
 
 c_DummyContinuation::c_DummyContinuation(const ObjectStaticCallbacks *cb) :
   ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(DummyContinuation);
 }
 
 c_DummyContinuation::~c_DummyContinuation() {}

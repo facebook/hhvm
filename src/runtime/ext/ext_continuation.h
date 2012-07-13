@@ -33,25 +33,9 @@ void f_hphp_unpack_continuation(CObjRef continuation);
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
 
-#define LABEL_DECL public: int64 m_label;
-
 class c_Continuation : public ExtObjectData {
  public:
   DECLARE_CLASS(Continuation, Continuation, ObjectData)
-
-  // properties
-  public: Object m_obj;
-  public: Array m_args;
-#ifndef HHVM
-  LABEL_DECL
-#endif
-  public: int64 m_index;
-  public: Variant m_value;
-  public: Variant m_received;
-  public: String m_origFuncName;
-  public: String m_called_class;
-  public: bool m_done;
-  public: bool m_running;
 
   // need to implement
   public: c_Continuation(const ObjectStaticCallbacks *cb = &cw_Continuation);
@@ -98,6 +82,7 @@ class c_Continuation : public ExtObjectData {
   // implemented by HPHP
   public: c_Continuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Variant obj = null, Array args = null_array);
   public: static const ClassPropTable os_prop_table;
+
   public: void setCalledClass(CStrRef cls) {
     const_assert(!hhvm);
     m_called_class = cls;
@@ -127,7 +112,20 @@ public:
     }
   }
 
-
+public:
+#define LABEL_DECL int64 m_label;
+  Object m_obj;
+  Array m_args;
+#ifndef HHVM
+  LABEL_DECL
+#endif
+  int64 m_index;
+  Variant m_value;
+  Variant m_received;
+  String m_origFuncName;
+  String m_called_class;
+  bool m_done;
+  bool m_running;
   bool m_should_throw;
   bool m_isMethod;
   const CallInfo *m_callInfo;
@@ -138,8 +136,8 @@ public:
 #ifdef HHVM
   LABEL_DECL
 #endif
-};
 #undef LABEL_DECL
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // class GenericContinuation
@@ -148,22 +146,6 @@ FORWARD_DECLARE_CLASS_BUILTIN(GenericContinuation);
 class c_GenericContinuation : public c_Continuation, public Sweepable {
  public:
   DECLARE_CLASS(GenericContinuation, GenericContinuation, Continuation)
-
-  // properties
-public:
-  TypedValue* m_locals;
-  bool m_hasExtraVars;
-  int m_nLocals;
-  Array m_vars;
-  intptr_t m_vmCalledClass; // Stored with 1 in its low bit
-  VM::Class* getVMCalledClass() {
-    return (VM::Class*)(m_vmCalledClass & ~0x1ll);
-  }
-
-  LVariableTable m_statics;
-  static const ClassPropTable os_prop_table;
-private:
-  SmartPtr<HphpArray> m_VMStatics;
 
   // need to implement
   public: c_GenericContinuation(const ObjectStaticCallbacks *cb = &cw_GenericContinuation);
@@ -179,8 +161,24 @@ private:
 
   // implemented by HPHP
   public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Array vars, Variant obj = null, Array args = null_array);
+  public: static const ClassPropTable os_prop_table;
+
 public:
   HphpArray* getStaticLocals();
+  
+public:
+  TypedValue* m_locals;
+  bool m_hasExtraVars;
+  int m_nLocals;
+  Array m_vars;
+  intptr_t m_vmCalledClass; // Stored with 1 in its low bit
+  VM::Class* getVMCalledClass() {
+    return (VM::Class*)(m_vmCalledClass & ~0x1ll);
+  }
+
+  LVariableTable m_statics;
+private:
+  SmartPtr<HphpArray> m_VMStatics;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

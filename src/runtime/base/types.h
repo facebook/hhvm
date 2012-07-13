@@ -45,6 +45,7 @@ class Object;
 template<typename T> class SmartObject;
 class Variant;
 class VarNR;
+class RefData;
 typedef Variant Numeric;
 typedef Variant Primitive;
 typedef Variant PlusOperand;
@@ -134,6 +135,7 @@ enum DataType {
   // Values below zero are not PHP values, but runtime-internal.
   KindOfClass     = -2,
   KindOfInvalid   = -1,
+  KindOfUnknown   = KindOfInvalid,
 
   /**
    * Beware if you change the order, as we may have a few type checks in the
@@ -148,9 +150,10 @@ enum DataType {
   KindOfString  = 7,
   KindOfArray   = 8,
   KindOfObject  = 9,
-  KindOfVariant = 10,
+  KindOfRef     = 10,
+  KindOfIndirect = 11,
 
-  MaxNumDataTypes = 11, // marker, not a valid type
+  MaxNumDataTypes = 12, // marker, not a valid type
 
   MaxDataType   = 0x7fffffff // Allow KindOf* > 11 in HphpArray.
 };

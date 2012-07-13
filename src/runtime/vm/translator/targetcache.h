@@ -107,6 +107,11 @@ handleToPtr(CacheHandle h) {
   return tl_targetCaches.base + h;
 }
 
+template<class T>
+T& handleToRef(CacheHandle h) {
+  return *static_cast<T*>(handleToPtr(h));
+}
+
 void invalidateForRename(const StringData* name);
 
 /*
@@ -247,14 +252,14 @@ public:
   typedef Cache<Key, uintptr_t, ObjectData*, ns, kPropCacheLines> Parent;
 
   template<bool baseIsLocal>
-  static TypedValue* lookup(CacheHandle handle, ObjectData* base,
-                            StringData* name, TypedValue* stackPtr,
-                            ActRec* fp);
+  static void lookup(CacheHandle handle, ObjectData* base,
+                     StringData* name, TypedValue* stackPtr,
+                     ActRec* fp);
 
   template<bool baseIsLocal>
-  static TypedValue* set(CacheHandle ch, ObjectData* base,
-                         StringData* name, int64 val,
-                         DataType type, ActRec* fp);
+  static void set(CacheHandle ch, ObjectData* base,
+                  StringData* name, int64 val,
+                  DataType type, ActRec* fp);
 
   static inline void incStat();
 };
@@ -351,10 +356,7 @@ typedef PropCacheBase<PropCtxNameKey> PropCtxNameCache;
  *   only if the lookup was successful (or a global was created).
  */
 class GlobalCache {
-  HphpArray* m_globals;
-  int m_hint;
-
-  void checkGlobals();
+  TypedValue* m_tv;
 
 protected:
   static inline GlobalCache* cacheAtHandle(CacheHandle handle) {
@@ -369,7 +371,8 @@ public:
     return ptrToHandle(this);
   }
 
-  static CacheHandle alloc(const StringData* sd = NULL) {
+  static CacheHandle alloc(const StringData* sd) {
+    ASSERT(sd);
     return namedAlloc<NSGlobal>(sd, sizeof(GlobalCache), sizeof(GlobalCache));
   }
 
@@ -383,7 +386,7 @@ public:
    * Note: the returned pointer is a pointer to the outer variant.
    * You'll need to incref (or whatever) it yourself (if desired) and
    * emitDeref if you are going to put it in a register associated
-   * with some vm location.  (Note that KindOfVariant in-register
+   * with some vm location.  (Note that KindOfRef in-register
    * values are the pointers to inner items.)
    */
   static TypedValue* lookup(CacheHandle handle, StringData* nm);

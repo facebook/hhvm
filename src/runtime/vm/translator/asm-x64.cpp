@@ -53,6 +53,11 @@ void DataBlock::init() {
   base = frontier = allocSlab(size);
 }
 
+void DataBlock::init(Address start, size_t sz) {
+  base = frontier = start;
+  size = sz;
+}
+
 void DataBlock::makeExecable() {
   if (mprotect(base, size, PROT_READ | PROT_WRITE | PROT_EXEC)) {
     panic("%s:%d (%s): mprotect @%p %zu bytes failed (%s)\n",

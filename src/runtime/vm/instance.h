@@ -32,18 +32,32 @@ class Instance : public ObjectData {
   // Do not declare any fields directly in Instance; instead embed them in
   // ObjectData, so that a property vector can always reside immediately past
   // the end of an object.
+  
+private:
+  // This constructor is used for all pure classes that are not
+  // descendents of cppext classes
+  explicit Instance(Class* cls) : ObjectData(NULL, false, cls) {
+    instanceInit(cls);
+  }
+
 public:
-  Instance() {}
-  // Used by getVTablePtr().
+  // This constructor is used for all cppext classes (including resources)
+  // and their descendents.
   Instance(const ObjectStaticCallbacks *cb, bool isResource)
-    : ObjectData(cb, isResource) {}
+    : ObjectData(NULL, isResource) {
+    if (ObjectStaticCallbacks::isEncodedVMClass(cb)) {
+      m_cls = ObjectStaticCallbacks::decodeVMClass(cb); 
+    } else {
+      m_cls = *cb->os_cls_ptr;
+    }
+    instanceInit(m_cls);
+  }
+  
+  virtual ~Instance() {}
 
-public:
   static int ObjAllocatorSizeClassCount;
-  //============================================================================
-  // Construction/destruction.
 
-  // Call newInstance() instead of directly calling new.
+  // Call newInstance() to instantiate an Instance
   static Instance* newInstance(Class* cls) {
     const_assert(hhvm);
     if (cls->m_InstanceCtor) {
@@ -64,7 +78,7 @@ public:
   }
 
 private:
-  explicit Instance(Class* cls) : ObjectData(NULL, false, cls) {
+  void instanceInit(Class* cls) {
     /*
      * During the construction of an instance, the instance has a ref
      * count of zero, and no pointer to it yet exists anywhere the
@@ -79,11 +93,8 @@ private:
      * the duration of construction.
      */
     DECLARE_STACK_GC_ROOT(ObjectData, this);
-
+    setAttributes(cls->getODAttrs());
     size_t nProps = cls->numDeclProperties();
-    setAttributes(cls->getODAttrs() | (m_cls->clsInfo() ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this
-                + sizeof(ObjectData));
     if (cls->needInitialization()) {
       cls->initialize();
     }
@@ -94,35 +105,48 @@ private:
         initialize(nProps);
       } else {
         ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0],
+        TypedValue* propVec = (TypedValue *)((uintptr_t)this +
+                               sizeof(ObjectData) + builtinPropSize());
+        memcpy(propVec, &cls->declPropInit()[0],
                nProps * sizeof(TypedValue));
       }
     }
-    if (UNLIKELY(cls->needInstanceInit())) {
-      instanceInit();
+    if (UNLIKELY(cls->callsCustomInstanceInit())) {
+      callCustomInstanceInit();
     }
   }
+
 protected:
   void initialize(Slot nProps);
-  void instanceInit();
-public:
-  virtual ~Instance() {
-  }
+  void callCustomInstanceInit();
+
 public:
   void operator delete(void* p) {
     Instance* this_ = (Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    for (Slot i = 0; i < nProps; ++i) {
-      TypedValue* prop = &this_->m_propVec[i];
+    Class* cls = this_->getVMClass();
+    size_t nProps = cls->numDeclProperties();
+    // cppext classes have their own implementation of delete
+    ASSERT(this_->builtinPropSize() == 0);
+    TypedValue* propVec = (TypedValue *)((uintptr_t)this_ + sizeof(ObjectData));
+    for (unsigned i = 0; i < nProps; ++i) {
+      TypedValue* prop = &propVec[i];
       tvRefcountedDecRef(prop);
     }
     DELETEOBJSZ(sizeForNProps(nProps))(this_);
   }
+
+private:
+  void destructHard(const Func* meth);
+  void forgetSweepable();
+
+  //============================================================================
+  // Virtual ObjectData methods that we need to override
+  
+public:
   virtual void destruct() {
     if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
       forgetSweepable();
     }
-
     if (!noDestruct()) {
       setNoDestruct();
       CountableHelper h(this);
@@ -136,33 +160,6 @@ public:
       }
     }
   }
-
-private:
-  void destructHard(const Func* meth);
-  void forgetSweepable();
-public:
-
-  //============================================================================
-  // Miscellaneous.
-
-  void invokeUserMethod(TypedValue* retval, const Func* method,
-                        CArrRef params);
-
-  const Func* methodNamed(const StringData* sd) const {
-    return getVMClass()->lookupMethod(sd);
-  }
-
-  static size_t sizeForNProps(Slot nProps) {
-    return sizeof(Instance) + (sizeof(TypedValue) * nProps);
-  }
-
-  static Object FromArray(ArrayData *properties);
-
-  //============================================================================
-  // ObjectData glue.
-
-  virtual const String& o_getClassName() const;
-  virtual const String& o_getParentName() const;
 
   virtual Array o_toIterArray(CStrRef context, bool getRef=false);
 
@@ -185,15 +182,32 @@ public:
   virtual String t___tostring();
   virtual Variant t___clone();
 
+  //============================================================================
+  // Miscellaneous.
+
   void cloneSet(ObjectData* clone);
   ObjectData* cloneImpl();
 
-  virtual bool hasCall();
-  virtual bool hasCallStatic();
+  void invokeUserMethod(TypedValue* retval, const Func* method,
+                        CArrRef params);
+
+  const Func* methodNamed(const StringData* sd) const {
+    return getVMClass()->lookupMethod(sd);
+  }
+
+  static size_t sizeForNProps(Slot nProps) {
+    return sizeof(Instance) + (sizeof(TypedValue) * nProps);
+  }
+
+  static Object FromArray(ArrayData *properties);
 
   //============================================================================
   // Properties.
 public:
+  int builtinPropSize() const {
+    return m_cls->builtinPropSize();
+  }
+
   // public for ObjectData access
   void initDynProps(int numDynamic = 0);
   Slot declPropInd(TypedValue* prop) const;
@@ -248,21 +262,26 @@ public:
 namespace HPHP {
 
 #ifdef HHVM
-#define EOD_PARENT HPHP::VM::Instance
-#else
-#define EOD_PARENT ObjectData
-#endif
-class ExtObjectData : public EOD_PARENT {
+class ExtObjectData : public HPHP::VM::Instance {
 public:
-  ExtObjectData(const ObjectStaticCallbacks *cb) :
-      EOD_PARENT(cb, false), root(this) {}
+  ExtObjectData(const ObjectStaticCallbacks *cb)
+    : HPHP::VM::Instance(cb, false) {}
+  virtual void setRoot(ObjectData *r) {}
+  virtual ObjectData *getRoot() { return this; }
+  ObjectData *getBuiltinRoot() { return this; }
+};
+#else
+class ExtObjectData : public ObjectData {
+public:
+  ExtObjectData(const ObjectStaticCallbacks *cb)
+    : ObjectData(cb, false), root(this) {}
   virtual void setRoot(ObjectData *r) { root = r; }
   virtual ObjectData *getRoot() { return root; }
   ObjectData *getBuiltinRoot() { return root; }
-protected: ObjectData *root;
-
+protected:
+  ObjectData *root;
 };
-#undef EOD_PARENT
+#endif
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {
 public:

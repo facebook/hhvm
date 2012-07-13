@@ -51,7 +51,7 @@ string tname(DataType t) {
     CS(String)
     CS(Array)
     CS(Object)
-    CS(Variant)
+    CS(Ref)
     CS(Class)
 #undef CS
     case KindOfInvalid: return string("Invalid");
@@ -136,6 +136,12 @@ const char* moduleName(Module mod) {
   return tokNames[mod];
 }
 
+void flush() {
+  if (!moduleEnabledRelease(Trace::traceAsync)) {
+    fflush(out);
+  }
+}
+
 void vtrace(const char *fmt, va_list ap) {
   static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
   if (moduleEnabledRelease(Trace::ringbuffer, 1)) {
@@ -144,8 +150,8 @@ void vtrace(const char *fmt, va_list ap) {
     vfprintf(out, fmt, ap);
     ONTRACE(1, pthread_mutex_lock(&mtx));
     ONTRACE(1, fprintf(out, "t%#08x: ", int(pthread_self())));
-    fflush(out);
     ONTRACE(1, pthread_mutex_unlock(&mtx));
+    flush();
   }
 }
 

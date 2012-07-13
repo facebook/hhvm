@@ -626,18 +626,18 @@ string Type::getCPPDecl(AnalysisResultConstPtr ar,
 
 DataType Type::getDataType() const {
   switch (m_kindOf) {
-  case KindOfBoolean:     return HPHP::KindOfBoolean;
-  case KindOfInt32:
-  case KindOfInt64:       return HPHP::KindOfInt64;
-  case KindOfDouble:      return HPHP::KindOfDouble;
-  case KindOfString:      return HPHP::KindOfString;
-  case KindOfArray:       return HPHP::KindOfArray;
-  case KindOfObject:      return HPHP::KindOfObject;
-  case KindOfNumeric:
-  case KindOfPrimitive:
-  case KindOfPlusOperand:
-  case KindOfSequence:
-  default:                return HPHP::KindOfVariant;
+    case KindOfBoolean:     return HPHP::KindOfBoolean;
+    case KindOfInt32:
+    case KindOfInt64:       return HPHP::KindOfInt64;
+    case KindOfDouble:      return HPHP::KindOfDouble;
+    case KindOfString:      return HPHP::KindOfString;
+    case KindOfArray:       return HPHP::KindOfArray;
+    case KindOfObject:      return HPHP::KindOfObject;
+    case KindOfNumeric:
+    case KindOfPrimitive:
+    case KindOfPlusOperand:
+    case KindOfSequence:
+    default:                return HPHP::KindOfUnknown;
   }
 }
 

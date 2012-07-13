@@ -1328,6 +1328,7 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
   if (MethodStatementPtr m =
       dynamic_pointer_cast<MethodStatement>(stmt)) {
     WriteLock lock(m->getFunctionScope()->getInlineMutex());
+    bool keepUseKindCaller = false;
     do {
       scope->clearUpdated();
       if (Option::LocalCopyProp || Option::EliminateDeadCode) {
@@ -1339,10 +1340,20 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
         StatementPtr rep = this->visitStmtRecur(stmt);
         assert(!rep);
       }
+      if (hhvm && Option::OutputHHBC) {
+        if (m->getFunctionScope()->inPseudoMain() &&
+            !m->getFunctionScope()->isMergeable()) {
+          if (m->getStmts()->markMergeable(this->m_data.m_ar)) {
+            all_updates |= BlockScope::UseKindCaller;
+            keepUseKindCaller = true;
+          }
+        }
+      }
       updates = scope->getUpdated();
       all_updates |= updates;
     } while (updates);
     if (all_updates & BlockScope::UseKindCaller &&
+        !keepUseKindCaller &&
         !m->getFunctionScope()->getInlineAsExpr()) {
       all_updates &= ~BlockScope::UseKindCaller;
     }
@@ -2307,6 +2318,8 @@ public:
       : m_ar(ar), m_root(root), m_output(output), m_compileDir(compileDir) {
   }
 
+  virtual ~OutputJob() {}
+
   void output() {
     outputImpl();
   }
@@ -2952,14 +2965,10 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
     "}\n";
   if (m_arrayLitstrKeyMaxSize > 0) {
     cg_printf(text1,
-              m_arrayLitstrKeyMaxSize + 1,
-              m_arrayLitstrKeyMaxSize,
               m_arrayLitstrKeyMaxSize + 1);
   }
   if (m_arrayIntegerKeyMaxSize > 0) {
     cg_printf(text2,
-              m_arrayIntegerKeyMaxSize,
-              m_arrayIntegerKeyMaxSize + 1,
               m_arrayIntegerKeyMaxSize,
               m_arrayIntegerKeyMaxSize + 1);
   }
@@ -3085,7 +3094,7 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
     "  hashNodeFile *next;\n"
     "};\n"
     "static hashNodeFile *fileMapTable[%d];\n"
-    "static hashNodeFile fileBuckets[%d];\n"
+    "static hashNodeFile fileBuckets[%zd];\n"
     "\n"
     "static class FileTableInitializer {\n"
     "  public: FileTableInitializer() {\n"
@@ -3240,7 +3249,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     "  hashNodeCon *next;\n"
     "};\n"
     "static hashNodeCon *conMapTable[%d];\n"
-    "static hashNodeCon conBuckets[%d];\n"
+    "static hashNodeCon conBuckets[%zd];\n"
     "\n"
     "void init_%sconstant_table() {\n%s"
     "  const char *conMapData[] = {\n";
@@ -3427,14 +3436,6 @@ void AnalysisResult::outputCPPDynamicConstantTable(
   cg_indentBegin("Variant get_%sconstant(CStrRef name, bool error) {\n",
       system ? "builtin_" : "");
   cg.printDeclareGlobals();
-
-  if (!system && Option::EnableEval == Option::FullEval) {
-    // See if there's an eval'd version
-    cg_indentBegin("{\n");
-    cg_printf("Variant r;\n");
-    cg_printf("if (eval_constant_hook(r, name)) return r;\n");
-    cg_indentEnd("}\n");
-  }
 
   if (useHashTable) {
     if (system) cg_printf("const char* s = name.data();\n");
@@ -4419,7 +4420,7 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
     ASSERT(!func->isUserFunction());
     func->outputCPPClassMap(cg, ar);
   }
-  
+
   cg_printf("NULL,\n"); // methods
   cg_printf("NULL,\n"); // properties
 
@@ -4470,7 +4471,7 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
     ConstantTablePtr constants = m_fileScopes[i]->getConstants();
     constants->outputCPPClassMap(cg, ar, (i == (int)m_fileScopes.size() - 1));
   }
-  
+
   cg_printf("NULL,\n"); // attributes
 
   // system classes

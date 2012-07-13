@@ -168,7 +168,7 @@ inline Object toObject(int     v) { return Variant(v).toObject();}
 inline Object toObject(int64   v) { return Variant(v).toObject();}
 inline Object toObject(double  v) { return Variant(v).toObject();}
 inline Object toObject(litstr  v) { return Variant(v).toObject();}
-inline Object toObject(const StringData *v) { return Variant(v).toObject();}
+inline Object toObject(const StringData *v) { return Variant(StrNR(v)).toObject();}
 inline Object toObject(CStrRef v) { return Variant(v).toObject();}
 Object toObject(ArrayData *v);
 inline Object toObject(CArrRef v) { return toObject(v.get());}

@@ -652,7 +652,6 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
       return null;
     }
 
-    if (has_eval_support) eval_set_callee_alias(methodname);
     if (doBind && !bound) {
       FrameInjection::StaticClassNameHelper scn(
         ThreadInfo::s_threadInfo.getNoCheck(), classname);
@@ -687,8 +686,6 @@ Variant call_user_func_few_args(CVarRef function, int count, ...) {
                                       classname, methodname, doBind))) {
     return null;
   }
-
-  if (has_eval_support) eval_set_callee_alias(methodname);
 
   if (doBind) {
     FrameInjection::StaticClassNameHelper scn(
@@ -1332,42 +1329,34 @@ Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {
 
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-
-  int len1 = s1.size();
-  int len2 = s2.size();
-  int len3 = s3.size();
-  int len = len1 + len2 + len3;
-  char *buf = (char *)malloc(len + 1);
-  if (buf == NULL) {
-    throw FatalErrorException(0, "malloc failed: %d", len);
-  }
-  memcpy(buf, s1.data(), len1);
-  memcpy(buf + len1, s2.data(), len2);
-  memcpy(buf + len1 + len2, s3.data(), len3);
-  buf[len] = 0;
-
-  return String(buf, len, AttachString);
+  StringSlice r1 = s1.slice();
+  StringSlice r2 = s2.slice();
+  StringSlice r3 = s3.slice();
+  int len = r1.len + r2.len + r3.len;
+  StringData* str = NEW(StringData)(len);
+  MutableSlice r = str->mutableSlice();
+  memcpy(r.ptr,                   r1.ptr, r1.len);
+  memcpy(r.ptr + r1.len,          r2.ptr, r2.len);
+  memcpy(r.ptr + r1.len + r2.len, r3.ptr, r3.len);
+  str->setSize(len);
+  return str;
 }
 
 String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-
-  int len1 = s1.size();
-  int len2 = s2.size();
-  int len3 = s3.size();
-  int len4 = s4.size();
-  int len = len1 + len2 + len3 + len4;
-  char *buf = (char *)malloc(len + 1);
-  if (buf == NULL) {
-    throw FatalErrorException(0, "malloc failed: %d", len);
-  }
-  memcpy(buf, s1.data(), len1);
-  memcpy(buf + len1, s2.data(), len2);
-  memcpy(buf + len1 + len2, s3.data(), len3);
-  memcpy(buf + len1 + len2 + len3, s4.data(), len4);
-  buf[len] = 0;
-
-  return String(buf, len, AttachString);
+  StringSlice r1 = s1.slice();
+  StringSlice r2 = s2.slice();
+  StringSlice r3 = s3.slice();
+  StringSlice r4 = s4.slice();
+  int len = r1.len + r2.len + r3.len + r4.len;
+  StringData* str = NEW(StringData)(len);
+  MutableSlice r = str->mutableSlice();
+  memcpy(r.ptr,                            r1.ptr, r1.len);
+  memcpy(r.ptr + r1.len,                   r2.ptr, r2.len);
+  memcpy(r.ptr + r1.len + r2.len,          r3.ptr, r3.len);
+  memcpy(r.ptr + r1.len + r2.len + r3.len, r4.ptr, r4.len);
+  str->setSize(len);
+  return str;
 }
 
 String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {

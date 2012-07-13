@@ -10,8 +10,11 @@ array(4) {
 }
 int(3)
 bar
+one
 win
-array(1) {
+array(2) {
   ["foo"]=>
   string(3) "bar"
+  [1]=>
+  string(3) "one"
 }

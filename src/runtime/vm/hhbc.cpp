@@ -122,9 +122,9 @@ int immSize(const Opcode* opcode, int idx) {
       prefixes = 2;
       vecElemSz = sizeof(uint8_t);
     } else {
-      ASSERT(immType(*opcode, idx) == ILA);
+      ASSERT(immType(*opcode, idx) == BLA);
       prefixes = 1;
-      vecElemSz = sizeof(int32_t);
+      vecElemSz = sizeof(Offset);
     }
     return prefixes * sizeof(int32_t) +
       vecElemSz * *(int32_t*)((int8_t*)opcode + offset);
@@ -136,7 +136,7 @@ int immSize(const Opcode* opcode, int idx) {
 
 bool immIsVector(Opcode opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return (type == MA || type == ILA);
+  return (type == MA || type == BLA);
 }
 
 bool hasImmVector(Opcode opcode) {
@@ -179,6 +179,31 @@ ArgUnion* getImmPtr(const Opcode* opcode, int idx) {
   return (ArgUnion*)ptr;
 }
 
+template<typename T>
+T decodeImm(const unsigned char** immPtr) {
+  T val = *(T*)*immPtr;
+  *immPtr += sizeof(T);
+  return val;
+}
+
+int64 decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode) {
+  switch (mcode) {
+    case MEL:
+    case MPL:
+      return decodeVariableSizeImm(immPtr);
+
+    case MET:
+    case MPT:
+      return decodeImm<int32>(immPtr);
+
+    case MEI:
+      return decodeImm<int64>(immPtr);
+
+    default:
+      not_reached();
+  }
+}
+
 // TODO: merge with emitIVA in unit.h
 size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
   if (LIKELY((n & 0x7f) == n)) {
@@ -192,7 +217,7 @@ size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
 
 void encodeIvaToVector(std::vector<uchar>& out, int32_t val) {
   size_t currentLen = out.size();
-  out.resize(out.size() + 4);
+  out.resize(currentLen + 4);
   out.resize(currentLen + encodeVariableSizeImm(val, &out[currentLen]));
 }
 
@@ -548,7 +573,8 @@ LocationCode parseLocationCode(const char* s) {
   }
 }
 
-const char* const memberNames[] = { "EC", "PC", "EL", "PL", "W" };
+const char* const memberNames[] =
+  { "EC", "PC", "EL", "PL", "ET", "PT", "EI", "W" };
 const size_t memberNamesCount = sizeof(memberNames) /
                                 sizeof(*memberNames);
 
@@ -571,6 +597,8 @@ MemberCode parseMemberCode(const char* s) {
   switch (s[1]) {
   case 'C': return MemberCode(MEC + incr);
   case 'L': return MemberCode(MEL + incr);
+  case 'T': return MemberCode(MET + incr);
+  case 'I': return incr ? InvalidMemberCode : MEI;
   default:  return InvalidMemberCode;
   }
 }
@@ -651,7 +679,17 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
                      memberCodeString(MemberCode(immVal)) : "?");       \
       it += sizeof(uchar);                                              \
       if (memberCodeHasImm(MemberCode(immVal))) {                       \
-        out << ':' << decodeVariableSizeImm(&it);                       \
+        int64 imm = decodeMemberCodeImm(&it, MemberCode(immVal));       \
+        out << ':';                                                     \
+        if (memberCodeImmIsString(MemberCode(immVal)) && u) {           \
+          const StringData* str = u->lookupLitstrId(imm);               \
+          int len = str->size();                                        \
+          char* escaped = string_addslashes(str->data(), len);          \
+          out << '"' << escaped << '"';                                 \
+          free(escaped);                                                \
+        } else {                                                        \
+          out << imm;                                                   \
+        }                                                               \
       }                                                                 \
     }                                                                   \
     ASSERT(reinterpret_cast<const uint8_t*>(it) - start == sz);         \
@@ -682,7 +720,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define THREE(a, b, c) H_##a; H_##b; H_##c;
 #define NA
 #define H_MA READVEC()
-#define H_ILA READIVEC()
+#define H_BLA READIVEC()
 #define H_IVA READV()
 #define H_I64A READ(int64)
 #define H_HA READV()
@@ -767,7 +805,7 @@ ImmVector getImmVector(const Opcode* opcode) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const uint8_t*>(vp));
-    } else if (t == ILA) {
+    } else if (t == BLA) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp));
@@ -793,7 +831,7 @@ const uint8_t* ImmVector::findLastMember() const {
     const uint8_t* ret = vec;
     MemberCode code = MemberCode(*vec++);
     if (memberCodeHasImm(code)) {
-      decodeVariableSizeImm(&vec);
+      decodeMemberCodeImm(&vec, code);
     }
     if (vec - m_start == m_length) {
       return ret;
@@ -803,6 +841,22 @@ const uint8_t* ImmVector::findLastMember() const {
 
   NOT_REACHED();
 }
+
+bool ImmVector::decodeLastMember(const Unit* u,
+                                 StringData*& sdOut,
+                                 MemberCode& membOut,
+                                 int64_t* strIdOut /*=NULL*/) const {
+  const uint8_t* vec = findLastMember();
+  membOut = MemberCode(*vec++);
+  if (memberCodeImmIsString(membOut)) {
+    int64_t strId = decodeMemberCodeImm(&vec, membOut);
+    if (strIdOut) *strIdOut = strId;
+    sdOut = u->lookupLitstrId(strId);
+    return true;
+  }
+  return false;
+}
+
 
 int instrSpToArDelta(const Opcode* opcode) {
   // This function should only be called for instructions that read

@@ -59,6 +59,10 @@ struct PointerList {
   void grow();
   void push(T* val);
   void pop();
+
+private:
+  PointerList(const PointerList&);
+  PointerList& operator=(const PointerList&);
 };
 
 struct PointerListData {

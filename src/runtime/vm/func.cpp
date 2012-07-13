@@ -43,32 +43,28 @@ const StringData* Func::s___callStatic =
 //=============================================================================
 // Func.
 
-static bool decl_incompat(bool failIsFatal, const PreClass* implementor,
+static void decl_incompat(const PreClass* implementor,
                           const Func* imeth) {
-  if (failIsFatal) {
-    const char* name = imeth->name()->data();
-    raise_error("Declaration of %s::%s() must be compatible with "
-                "that of %s::%s()", implementor->name()->data(), name,
-                imeth->cls()->preClass()->name()->data(), name);
-  }
-  return false;
+  const char* name = imeth->name()->data();
+  raise_error("Declaration of %s::%s() must be compatible with "
+              "that of %s::%s()", implementor->name()->data(), name,
+              imeth->cls()->preClass()->name()->data(), name);
 }
 
 // Check compatibility vs interface and abstract declarations
-bool Func::parametersCompat(const PreClass* preClass, const Func* imeth,
-                            bool failIsFatal) const {
+void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
   const Func::ParamInfoVec& params = this->params();
   const Func::ParamInfoVec& iparams = imeth->params();
   // Verify that meth has at least as many parameters as imeth.
   if ((params.size() < iparams.size())) {
-    return decl_incompat(failIsFatal, preClass, imeth);
+    decl_incompat(preClass, imeth);
   }
   // Verify that the typehints for meth's parameters are compatible with
   // imeth's corresponding parameter typehints.
   unsigned firstOptional = 0;
   for (unsigned i = 0; i < iparams.size(); ++i) {
     if (!params[i].typeConstraint().compat(iparams[i].typeConstraint())) {
-      return decl_incompat(failIsFatal, preClass, imeth);
+      decl_incompat(preClass, imeth);
     }
     if (!iparams[i].hasDefaultValue()) {
       // The leftmost of imeth's contiguous trailing optional parameters
@@ -81,10 +77,9 @@ bool Func::parametersCompat(const PreClass* preClass, const Func* imeth,
   // parameters.
   for (unsigned i = firstOptional; i < params.size(); ++i) {
     if (!params[i].hasDefaultValue()) {
-      return decl_incompat(failIsFatal, preClass, imeth);
+      decl_incompat(preClass, imeth);
     }
   }
-  return true;
 }
 
 static Func::FuncId s_nextFuncId = 0;
@@ -583,7 +578,7 @@ void Func::SharedData::release() {
   delete this;
 }
 
-void Func::enableIntercept(CStrRef name) {
+void Func::enableIntercept() {
   // we are protected by s_mutex in intercept.cpp
   if (!s_interceptsEnabled) {
     s_interceptsEnabled = true;
@@ -809,6 +804,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = m_maxStackCells;
+  ASSERT(m_maxStackCells > 0 && "You probably didn't set m_maxStackCells");
   f->shared()->m_staticVars = m_staticVars;
   f->shared()->m_ehtab = m_ehtab;
   f->shared()->m_fpitab = m_fpitab;
@@ -861,7 +857,7 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
       m_attrs = (Attr)(m_attrs | AttrPublic);
     }
   }
-  
+
   for (unsigned i = 0; i < info->parameters.size(); ++i) {
     // For builtin only, we use a dummy ParamInfo
     FuncEmitter::ParamInfo pi;

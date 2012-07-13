@@ -102,16 +102,14 @@
 
   .method [public] print_defaulted {
     This
-    String "defaulted"
-    CGetM <C PC>
+    CGetM <C PT:"defaulted">
     String "\n"
     Concat
     Print
     PopC
 
     This
-    String "badstring"
-    CGetM <C PC>
+    CGetM <C PT:"badstring">
     String "bad string\"\"\"has triple quotes"
     Eq
     JmpZ broken

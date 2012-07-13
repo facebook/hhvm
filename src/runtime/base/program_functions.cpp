@@ -21,8 +21,8 @@
 #include <runtime/base/execution_context.h>
 #include <runtime/base/thread_init_fini.h>
 #include <runtime/base/code_coverage.h>
-#include <runtime/eval/ast/expression.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/compiler_id.h>
 #include <util/shared_memory_allocator.h>
 #include <system/gen/sys/system_globals.h>
 #include <system/gen/php/globals/symbols.h>
@@ -55,15 +55,15 @@
 #include <runtime/base/util/simple_counter.h>
 #include <runtime/base/util/extended_logger.h>
 
+#include <runtime/vm/translator/translator-x64.h>
+
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <libgen.h>
 
-#include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/runtime/file_repository.h>
-#include <runtime/eval/parser/parser.h>
 
 #include <runtime/vm/vm.h>
 #include <runtime/vm/runtime.h>
@@ -929,34 +929,23 @@ static int execute_program_impl(int argc, char **argv) {
   if (!po.lint.empty()) {
     hphp_process_init();
     try {
-      if (hhvm) {
-        HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
-          StringData::GetStaticString(po.lint.c_str()), "", NULL);
-        if (phpFile == NULL) {
-          throw FileOpenException(po.lint.c_str());
-        }
-        VM::Unit* unit = phpFile->unit();
-        const StringData* msg;
-        int line;
-        if (unit->compileTimeFatal(msg, line)) {
-          VMParserFrame parserFrame;
-          parserFrame.filename = po.lint.c_str();
-          parserFrame.lineNumber = line;
-          ArrayPtr bt =
-            ArrayPtr(new Array(
-                       g_vmContext->debugBacktrace(false, true,
-                                                   false, &parserFrame)));
-          throw FatalErrorException(msg->data(), bt);
-        }
-      } else {
-        Scanner scanner(po.lint.c_str(), Scanner::AllowShortTags);
-        std::vector<Eval::StaticStatementPtr> statics;
-        Eval::Parser parser(scanner, po.lint.c_str(), statics);
-        if (!parser.parse()) {
-          throw FatalErrorException(0, "Unable to parse file %s: %s",
-                                    po.lint.c_str(),
-                                    parser.getMessage().c_str());
-        }
+      HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
+        StringData::GetStaticString(po.lint.c_str()), "", NULL);
+      if (phpFile == NULL) {
+        throw FileOpenException(po.lint.c_str());
+      }
+      VM::Unit* unit = phpFile->unit();
+      const StringData* msg;
+      int line;
+      if (unit->compileTimeFatal(msg, line)) {
+        VMParserFrame parserFrame;
+        parserFrame.filename = po.lint.c_str();
+        parserFrame.lineNumber = line;
+        ArrayPtr bt =
+          ArrayPtr(new Array(
+                     g_vmContext->debugBacktrace(false, true,
+                                                 false, &parserFrame)));
+        throw FatalErrorException(msg->data(), bt);
       }
     } catch (FileOpenException &e) {
       Logger::Error("%s", e.getMessage().c_str());
@@ -973,20 +962,19 @@ static int execute_program_impl(int argc, char **argv) {
 
   if (!po.parse.empty()) {
     hphp_process_init();
-    std::vector<Eval::StaticStatementPtr> statics;
-    Eval::Block::VariableIndices variableIndices;
     const StringData *fileName = StringData::GetStaticString(po.parse);
     struct stat s;
     if (!Eval::FileRepository::findFile(fileName, &s)) return 0;
-    Eval::Parser::Reset();
     Eval::FileRepository::FileInfo fileInfo;
     if (!Eval::FileRepository::readFile(fileName, s, fileInfo)) {
       return 0;
     }
     Eval::PhpFile *f = Eval::FileRepository::parseFile(po.parse, fileInfo);
     if (!f) return 0;
-    const Eval::StatementPtr &tree = f->getTree();
-    tree->dump(cout);
+    // TODO: Task #1154018: We should support the "parse" command line option
+    // under the VM or get rid of it. The logic above calls into FileRepository
+    // to load the file. What is missing is the logic that gets fishes the AST
+    // out of the PhpFile and outputs the AST as PHP source to STDOUT.
     return 0;
   }
 
@@ -1131,6 +1119,13 @@ void hphp_process_init() {
   init_literal_varstrings();
 
   if (hhvm) {
+    if (!RuntimeOption::RepoAuthoritative &&
+        RuntimeOption::EvalJitEnableRenameFunction &&
+        RuntimeOption::EvalJit) {
+      VM::Func::enableIntercept();
+      VM::Transl::TranslatorX64* tx64 = VM::Transl::TranslatorX64::Get();
+      tx64->enableIntercepts();
+    }
     bool db = RuntimeOption::EvalDumpBytecode;
     bool p = RuntimeOption::RepoAuthoritative;
     bool rp = RuntimeOption::AlwaysUseRelativePath;
@@ -1144,8 +1139,6 @@ void hphp_process_init() {
     RuntimeOption::RepoAuthoritative = p;
     RuntimeOption::AlwaysUseRelativePath = rp;
     RuntimeOption::SafeFileAccess = sf;
-  } else {
-    Eval::Construct::GetTypeHintTypes();
   }
 
   PageletServer::Restart();
@@ -1316,10 +1309,6 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
   if (hhvm) {
     static_cast<VMExecutionContext*>(
       static_cast<BaseExecutionContext*>(context))->requestExit();
-  } else {
-    if (has_eval_support) {
-      Eval::RequestEvalState::DestructObjects();
-    }
   }
   if (shutdown) {
     context->onRequestShutdown();
@@ -1333,7 +1322,6 @@ void hphp_thread_exit() {
 }
 
 void hphp_session_exit() {
-  Eval::RequestEvalState::Reset();
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();

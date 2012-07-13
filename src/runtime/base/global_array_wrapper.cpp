@@ -39,7 +39,7 @@ CVarRef GlobalArrayWrapper::getValueRef(ssize_t pos) const {
   Variant k;
   return m_globals->getRefByIdx(pos, k);
 }
-bool GlobalArrayWrapper::isGlobalArrayWrapper() const { return true; }
+bool GlobalArrayWrapper::noCopyOnWrite() const { return true; }
 
 bool GlobalArrayWrapper::exists(int64   k) const {
   return exists(Variant(k));
@@ -52,9 +52,6 @@ bool GlobalArrayWrapper::exists(CStrRef k) const {
 }
 bool GlobalArrayWrapper::exists(CVarRef k) const {
   return m_globals->exists(k.toString());
-}
-bool GlobalArrayWrapper::idxExists(ssize_t idx) const {
-  return idx < size();
 }
 
 CVarRef GlobalArrayWrapper::get(int64   k, bool error /* = false */) const {
@@ -77,14 +74,6 @@ CVarRef GlobalArrayWrapper::get(CVarRef k, bool error /* = false */) const {
     return m_globals->get(k);
   }
   return null_variant;
-}
-
-void GlobalArrayWrapper::load(CVarRef k, Variant &v) const {
-  ssize_t idx = getIndex(k);
-  if (idx >= 0) {
-    CVarRef r = getValueRef(idx);
-    v.setWithRef(r);
-  }
 }
 
 ssize_t GlobalArrayWrapper::getIndex(int64 k) const {
@@ -272,18 +261,6 @@ Variant GlobalArrayWrapper::each() {
     return Array(init.create());
   }
   return false;
-}
-
-bool GlobalArrayWrapper::isHead() const {
-  return m_globals->isHead(m_pos);
-}
-
-bool GlobalArrayWrapper::isTail() const {
-  return m_globals->isTail(m_pos);
-}
-
-bool GlobalArrayWrapper::isInvalid() const {
-  return m_pos == ArrayData::invalid_index;
 }
 
 void GlobalArrayWrapper::getFullPos(FullPos &fp) {

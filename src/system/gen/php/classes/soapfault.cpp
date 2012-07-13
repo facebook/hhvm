@@ -244,13 +244,13 @@ static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x223FBAE23D3926D1LL,6,0,0,68,10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),&NAMSTR(s_sys_ssb9540e00, "faultcodens") },
-  {0x6AB66433A5A06842LL,1,0,0,4,10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),&NAMSTR(s_sys_ss5b7cf41f, "faultactor") },
-  {0x3B9257D5A7BFC952LL,2,0,0,68,10,GET_PROPERTY_OFFSET(c_SoapFault, m_detail),&NAMSTR(s_sys_ss2235bf3d, "detail") },
-  {0x7F0FEC816F538D87LL,0,0,0,68,10,GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),&NAMSTR(s_sys_ss40793385, "headerfault") },
-  {0x6C2E2F7FE9DC8A09LL,-1,0,0,68,10,GET_PROPERTY_OFFSET(c_SoapFault, m__name),&NAMSTR(s_sys_ssee3a4fdd, "_name") },
-  {0x58CB312B3F4C8D8DLL,-5,0,0,4,10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),&NAMSTR(s_sys_ssff0553c0, "faultcode") },
-  {0x6CDD9F7B80D687ADLL,-5,0,0,68,10,GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),&NAMSTR(s_sys_ssff4490ec, "faultstring") },
+  {0x223FBAE23D3926D1LL,6,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),&NAMSTR(s_sys_ssb9540e00, "faultcodens") },
+  {0x6AB66433A5A06842LL,1,0,0,4,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),&NAMSTR(s_sys_ss5b7cf41f, "faultactor") },
+  {0x3B9257D5A7BFC952LL,2,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_detail),&NAMSTR(s_sys_ss2235bf3d, "detail") },
+  {0x7F0FEC816F538D87LL,0,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),&NAMSTR(s_sys_ss40793385, "headerfault") },
+  {0x6C2E2F7FE9DC8A09LL,-1,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m__name),&NAMSTR(s_sys_ssee3a4fdd, "_name") },
+  {0x58CB312B3F4C8D8DLL,-5,0,0,4,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),&NAMSTR(s_sys_ssff0553c0, "faultcode") },
+  {0x6CDD9F7B80D687ADLL,-5,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),&NAMSTR(s_sys_ssff4490ec, "faultstring") },
 
 };
 static const int cpt_hash_entries[] = {

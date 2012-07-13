@@ -257,7 +257,7 @@ static Variant _xml_xmlchar_zval(const XML_Char *s, int len,
   }
   int ret_len;
   char * ret = xml_utf8_decode(s, len, &ret_len, encoding);
-  return String(ret, ret_len, AttachString);
+  return String(ret, ret_len, AttachDeprecated);
 }
 
 static char *_xml_decode_tag(XmlParser *parser, const char *tag) {
@@ -455,11 +455,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           if (parser->ctag.toArray().exists("value"))
           {
             myval = parser->ctag.rvalAt("value").toString();
-            myval += String(decoded_value, decoded_len, AttachString);
+            myval += String(decoded_value, decoded_len, AttachDeprecated);
             parser->ctag.set("value", myval);
           } else {
             parser->ctag.set("value",
-                             String(decoded_value,decoded_len,AttachString));
+                             String(decoded_value,decoded_len,AttachDeprecated));
           }
         } else {
           Array tag;
@@ -472,7 +472,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             if (!strcmp(mytype.data(), "cdata")) {
               if (curtag.toArray().exists("value")) {
                 myval = curtag.rvalAt("value").toString();
-                myval += String(decoded_value, decoded_len, AttachString);
+                myval += String(decoded_value, decoded_len, AttachDeprecated);
                 curtag.set("value", myval);
                 return;
               }
@@ -483,7 +483,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
                            parser->toffset);
           tag.set("tag", String(parser->ltags[parser->level-1] +
                                 parser->toffset, CopyString));
-          tag.set("value", String(decoded_value, AttachString));
+          tag.set("value", String(decoded_value, AttachDeprecated));
           tag.set("type", "cdata");
           tag.set("level", parser->level);
           parser->data.append(tag);
@@ -526,8 +526,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         char* val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     &val_len, parser->target_encoding);
-        args.lvalAt(2).set(String(att, AttachString),
-                           String(val, val_len, AttachString));
+        args.lvalAt(2).set(String(att, AttachDeprecated),
+                           String(val, val_len, AttachDeprecated));
         attributes += 2;
       }
 
@@ -557,7 +557,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         char* val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     &val_len, parser->target_encoding);
-        atr.set(String(att, AttachString), String(val, val_len, AttachString));
+        atr.set(String(att, AttachDeprecated), String(val, val_len, AttachDeprecated));
         atcnt++;
         attributes += 2;
       }
@@ -919,7 +919,7 @@ String f_utf8_decode(CStrRef data) {
     ++newlen;
   }
   newbuf[newlen] = '\0';
-  return String(newbuf, newlen, AttachString);
+  return String(newbuf, newlen, AttachDeprecated);
 }
 
 String f_utf8_encode(CStrRef data) {
@@ -945,7 +945,7 @@ String f_utf8_encode(CStrRef data) {
     }
   }
   newbuf[newlen] = '\0';
-  return String(newbuf, newlen, AttachString);
+  return String(newbuf, newlen, AttachDeprecated);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

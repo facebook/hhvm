@@ -108,6 +108,11 @@ struct DataBlock {
   void init();
 
   /*
+   * Uses a preallocated slab of memory
+   */
+  void init(Address start, size_t size);
+
+  /*
    * alloc --
    *
    *   Simple bump allocator.
@@ -133,9 +138,9 @@ struct DataBlock {
     return frontier;
   }
 
-  template<typename T> T* alloc(size_t align = 16) {
+  template<typename T> T* alloc(size_t align = 16, int n = 1) {
     size_t frontierOff = frontier - base;
-    T* retval = (T*)allocAt(frontierOff, sizeof(T), align);
+    T* retval = (T*)allocAt(frontierOff, sizeof(T) * n, align);
     frontier = base + frontierOff;
     return retval;
   }
@@ -798,7 +803,7 @@ struct X64Assembler {
     // jcc is supported, call and jmp are not supported
     ASSERT(op.flags & IF_JCC);
     ssize_t delta = imm - ((ssize_t)code.frontier + 6);
-    char* bdelta = (char*)&delta;
+    uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
     bytes(6, instr);
@@ -1226,6 +1231,7 @@ struct X64Assembler {
   CC(o,   CC_O)         \
   CC(no,  CC_NO)        \
   CC(nae, CC_NAE)       \
+  CC(ae,  CC_AE)        \
   CC(nb,  CC_NB)        \
   CC(e,   CC_E)         \
   CC(z,   CC_Z)         \
@@ -1239,13 +1245,15 @@ struct X64Assembler {
   CC(np,  CC_NP)        \
   CC(nge, CC_NGE)       \
   CC(l,   CC_L)         \
+  CC(ge,  CC_GE)        \
   CC(nl,  CC_NL)        \
   CC(ng,  CC_NG)        \
   CC(le,  CC_LE)        \
   CC(nle, CC_NLE)
 
 #define CC(_nm, _code) \
-  inline void j ## _nm(CodeAddress dest) { jcc(_code, dest); }
+  inline void j ## _nm(CodeAddress dest) { jcc(_code, dest); } \
+  inline void j ## _nm ## 8(CodeAddress dest) { jcc8(_code, dest); }
   CCS
 #undef CC
 

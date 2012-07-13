@@ -115,6 +115,10 @@ public:
   void clearAvailable() { m_flags.available = false; }
   bool isAvailable() const { return m_flags.available; }
 
+  void setNonNull() { m_flags.nonNull = true; }
+  void clearNonNull() { m_flags.nonNull = false; }
+  bool isNonNull() const { return m_flags.nonNull; }
+
   void setLocalExprAltered() { m_flags.localExprNotAltered = false; }
   void clearLocalExprAltered() { m_flags.localExprNotAltered = true; }
   bool isLocalExprAltered() const { return !m_flags.localExprNotAltered; }
@@ -252,20 +256,21 @@ private:
   union {
     unsigned m_flagsVal;
     struct {
-      unsigned fileLevel : 1; // whether this is at top level of a file
-      unsigned topLevel : 1;  // whether this is at top level of a scope
-      unsigned visited : 1;   // general purpose visited flag for walks
-      unsigned anticipated : 1;
-      unsigned available : 1;
+      unsigned fileLevel           : 1; // is it at top level of a file
+      unsigned topLevel            : 1; // is it at top level of a scope
+      unsigned visited             : 1; // general purpose for walks
+      unsigned anticipated         : 1;
+      unsigned available           : 1;
       unsigned localExprNotAltered : 1; // whether this node can be
                                         // altered in this expression
-      unsigned referenced : 1;
-      unsigned referenced_valid : 1; // whether or not the above flag is valid
-      unsigned needed : 1;
-      unsigned needed_valid : 1; // whether or not the above flag is valid
-      unsigned chainRoot : 1; // whether this denotes the begining of a
-                              // CSE chain
-      unsigned noRemove : 1; // DCE should NOT remove this node
+      unsigned nonNull             : 1; // expression is not null
+      unsigned referenced          : 1;
+      unsigned referenced_valid    : 1; // is the above flag is valid
+      unsigned needed              : 1;
+      unsigned needed_valid        : 1; // is the above flag is valid
+      unsigned chainRoot           : 1; // is this the begining of a
+                                        // CSE chain
+      unsigned noRemove            : 1; // DCE should NOT remove this node
     } m_flags;
   };
 protected:

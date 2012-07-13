@@ -30,9 +30,11 @@ struct Location {
     Stack,    // Stack; offset == delta from top
     Local,    // Stack frame's registers; offset == local register
     Iter,     // Stack frame's iterators
+    Litstr,   // Literal string pseudo-location
+    Litint,   // Literal int pseudo-location
   };
   Space space;
-  int offset;
+  int64 offset;
 
   int cmp(const Location &r) const {
 #define CMP(field) do { \
@@ -56,7 +58,7 @@ struct Location {
     return cmp(r) < 0;
   }
 
-  Location(Space spc, int off) : space(spc), offset(off) { }
+  Location(Space spc, int64 off) : space(spc), offset(off) { }
 
   // Hash function.
   size_t operator()(const Location& l) const {
@@ -70,6 +72,8 @@ struct Location {
     case Stack:  return "Stk";
     case Local:  return "Local";
     case Iter:   return "Iter";
+    case Litstr: return "Litstr";
+    case Litint: return "Litint";
     case Invalid:
     default:     return "*invalid*";
     }
@@ -77,7 +81,7 @@ struct Location {
 
   std::string pretty() const {
     char buf[1024];
-    sprintf(buf, "(Location %s %d)", spaceName(), offset);
+    sprintf(buf, "(Location %s %lld)", spaceName(), offset);
     return std::string(buf);
   }
 
@@ -96,10 +100,15 @@ struct Location {
   bool isValid() const {
     return !isInvalid();
   }
+
+  bool isLiteral() const {
+    return space == Litstr || space == Litint;
+  }
 };
 
 struct InputInfo {
-  InputInfo(const Location &l) : loc(l), dontBreak(false), dontGuard(false) {}
+  InputInfo(const Location &l)
+    : loc(l), dontBreak(false), dontGuard(l.isLiteral()) {}
 
   std::string pretty() const {
     std::string p = loc.pretty();
@@ -141,6 +150,7 @@ class RuntimeType {
                                   // KindOfClass: An instance of the current
                                   //   instantiation of the preClass.  The
                                   //   exact class may differ across executions
+        int64 intval;             // KindOfInt64: A literal int
         struct {
           bool boolean;           // KindOfBoolean: A literal bool
                                   // from True or False.
@@ -156,8 +166,8 @@ class RuntimeType {
   inline void consistencyCheck() const {
     ASSERT(m_kind == VALUE || m_kind == ITER);
     if (m_kind == VALUE) {
-      ASSERT(m_value.innerType != KindOfVariant);
-      ASSERT(m_value.outerType == KindOfVariant ||
+      ASSERT(m_value.innerType != KindOfRef);
+      ASSERT(m_value.outerType == KindOfRef ||
              m_value.innerType == KindOfInvalid);
       ASSERT(m_value.outerType == KindOfString ||
              m_value.innerType == KindOfString ||
@@ -166,6 +176,7 @@ class RuntimeType {
              m_value.outerType == KindOfObject ||
              m_value.innerType == KindOfObject ||
              m_value.outerType == KindOfBoolean ||
+             m_value.outerType == KindOfInt64 ||
              m_value.klass == NULL);
       ASSERT(m_value.innerType != KindOfStaticString &&
              m_value.outerType != KindOfStaticString);
@@ -173,10 +184,12 @@ class RuntimeType {
   }
 
  public:
-  RuntimeType(DataType outer, DataType inner = KindOfInvalid, const Class* = NULL);
+  RuntimeType(DataType outer, DataType inner = KindOfInvalid,
+              const Class* = NULL);
   RuntimeType(const StringData*);
   RuntimeType(const Class*);
   explicit RuntimeType(bool value);
+  explicit RuntimeType(int64 value);
   RuntimeType(const RuntimeType& copy);
   RuntimeType();
   RuntimeType(const Iter* iter);
@@ -195,6 +208,8 @@ class RuntimeType {
   const Class* valueClass() const;
   const StringData* valueString() const;
   int valueBoolean() const;
+  int64 valueInt() const;
+  int64 valueGeneric() const;
   Iter::Type iterType() const;
 
   // Helpers for typechecking

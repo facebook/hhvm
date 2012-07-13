@@ -78,20 +78,20 @@ inline void tvDecRefObj(TypedValue* tv) {
   }
 }
 
-// Assumes 'tv' is live and is an inner cell
-inline void tvDecRefVarInternal(TypedValue* tv) {
-  ASSERT(tvIsPlausible(tv));
-  ASSERT(tv->m_type != KindOfVariant);
-  ASSERT(tv->_count > 0);
-  if (((Variant*)tv)->decRefCount() == 0) {
-    ((Variant*)tv)->release();
+// Assumes 'r' is live and points to a RefData
+inline void tvDecRefRefInternal(RefData* r) {
+  ASSERT(tvIsPlausible(r->tv()));
+  ASSERT(r->tv()->m_type != KindOfRef);
+  ASSERT(r->_count > 0);
+  if (r->decRefCount() == 0) {
+    r->release();
   }
 }
 
 // Assumes 'tv' is live
-inline void tvDecRefVar(TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfVariant);
-  tvDecRefVarInternal(tv->m_data.ptv);
+inline void tvDecRefRef(TypedValue* tv) {
+  ASSERT(tv->m_type == KindOfRef);
+  tvDecRefRefInternal(tv->m_data.pref);
 }
 
 inline void tvReleaseHelper(DataType type, uint64_t datum) {
@@ -120,24 +120,15 @@ inline void tvRefcountedDecRef(TypedValue* tv) {
 
 // tvBoxHelper sets the refcount of the newly allocated inner cell to 1
 inline TypedValue* tvBoxHelper(DataType type, uint64_t datum) {
-  TypedValue* innerCell = (TypedValue*)(NEW(Variant)());
-  innerCell->_count = 1;
-  if (!IS_NULL_TYPE(type)) {
-    innerCell->m_data.num = datum;
-    innerCell->m_type = type;
-  } else {
-    // drop uninit null
-    innerCell->m_type = KindOfNull;
-  }
-  return innerCell;
+  return (NEW(RefData)(type, datum))->tv();
 }
 
 // Assumes 'tv' is live
 inline void tvBox(TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
-  ASSERT(tv->m_type != KindOfVariant);
+  ASSERT(tv->m_type != KindOfRef);
   tv->m_data.ptv = tvBoxHelper(tv->m_type, tv->m_data.num);
-  tv->m_type = KindOfVariant;
+  tv->m_type = KindOfRef;
 }
 
 // Assumes 'tv' is live
@@ -156,7 +147,7 @@ inline void tvRefcountedIncRef(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-// Assumes 'tv.m_type == KindOfVariant'
+// Assumes 'tv.m_type == KindOfRef'
 inline void tvUnbox(TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
   TV_UNBOX(tv);
@@ -170,7 +161,7 @@ inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
 }
 
 // Assumes 'fr' is live and 'to' is dead
-// Assumes 'fr->m_type != KindOfVariant'
+// Assumes 'fr->m_type != KindOfRef'
 // NOTE: this helper will initialize to->_count to 0
 inline void tvDupCell(const TypedValue* fr, TypedValue* to) {
   ASSERT(tvIsPlausible(fr));
@@ -178,7 +169,7 @@ inline void tvDupCell(const TypedValue* fr, TypedValue* to) {
 }
 
 // Assumes 'fr' is live and 'to' is dead
-// Assumes 'fr->m_type == KindOfVariant'
+// Assumes 'fr->m_type == KindOfRef'
 // NOTE: this helper will initialize to->_count to 0
 inline void tvDupVar(const TypedValue* fr, TypedValue* to) {
   ASSERT(tvIsPlausible(fr));
@@ -205,12 +196,12 @@ inline void tvWriteUninit(TypedValue* tv) {
 }
 
 // Assumes 'to' and 'fr' are live
-// Assumes that 'fr->m_type != KindOfVariant'
-// If 'to->m_type == KindOfVariant', this will perform the set
+// Assumes that 'fr->m_type != KindOfRef'
+// If 'to->m_type == KindOfRef', this will perform the set
 // operation on the inner cell (to->m_data.ptv)
-inline void tvSet(TypedValue * fr, TypedValue * to) {
-  ASSERT(fr->m_type != KindOfVariant);
-  if (to->m_type == KindOfVariant) {
+inline void tvSet(const TypedValue* fr, TypedValue* to) {
+  ASSERT(fr->m_type != KindOfRef);
+  if (to->m_type == KindOfRef) {
     to = to->m_data.ptv;
   }
   DataType oldType = to->m_type;
@@ -220,9 +211,9 @@ inline void tvSet(TypedValue * fr, TypedValue * to) {
 }
 
 // Assumes 'to' and 'fr' are live
-// Assumes that 'fr->m_type == KindOfVariant'
+// Assumes that 'fr->m_type == KindOfRef'
 inline void tvBind(TypedValue * fr, TypedValue * to) {
-  ASSERT(fr->m_type == KindOfVariant);
+  ASSERT(fr->m_type == KindOfRef);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
   TV_DUP_VAR_NC(fr, to);
@@ -233,6 +224,32 @@ inline void tvBind(TypedValue * fr, TypedValue * to) {
 inline void tvUnset(TypedValue * to) {
   tvRefcountedDecRef(to);
   TV_WRITE_UNINIT(to);
+}
+
+// Assumes `fr' is dead and binds it using KindOfIndirect to `to'.
+inline void tvBindIndirect(TypedValue* fr, TypedValue* to) {
+  ASSERT(tvIsPlausible(to));
+  fr->m_type = KindOfIndirect;
+  fr->m_data.ptv = to;
+}
+
+// If a TypedValue is KindOfIndirect, dereference to the inner
+// TypedValue.
+inline TypedValue* tvDerefIndirect(TypedValue* tv) {
+  return tv->m_type == KindOfIndirect ? tv->m_data.ptv : tv;
+}
+inline const TypedValue* tvDerefIndirect(const TypedValue* tv) {
+  return tvDerefIndirect(const_cast<TypedValue*>(tv));
+}
+
+/*
+ * Returns true if this tv is not a ref-counted type, or if it is a
+ * ref-counted type and the object pointed to is static.
+ */
+inline bool tvIsStatic(const TypedValue* tv) {
+  ASSERT(tvIsPlausible(tv));
+  return !IS_REFCOUNTED_TYPE(tv->m_type) ||
+    tv->m_data.ptv->_count == RefCountStaticValue;
 }
 
 /**
@@ -263,30 +280,30 @@ inline const Variant& tvAsCVarRef(const TypedValue* tv) {
 
 // Assumes 'tv' is live
 inline Variant& tvCellAsVariant(TypedValue* tv) {
-  ASSERT(tv->m_type != KindOfVariant);
+  ASSERT(tv->m_type != KindOfRef);
   return *(Variant*)(tv);
 }
 
 // Assumes 'tv' is live
 inline const Variant& tvCellAsCVarRef(const TypedValue* tv) {
-  ASSERT(tv->m_type != KindOfVariant);
+  ASSERT(tv->m_type != KindOfRef);
   return *(const Variant*)(tv);
 }
 
 // Assumes 'tv' is live
 inline Variant& tvVarAsVariant(TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfVariant);
+  ASSERT(tv->m_type == KindOfRef);
   return *(Variant*)(tv);
 }
 
 // Assumes 'tv' is live
 inline const Variant& tvVarAsCVarRef(const TypedValue* tv) {
-  ASSERT(tv->m_type == KindOfVariant);
+  ASSERT(tv->m_type == KindOfRef);
   return *(const Variant*)(tv);
 }
 
 inline bool tvIsStronglyBound(const TypedValue* tv) {
-  return (tv->m_type == KindOfVariant && tv->m_data.ptv->_count > 1);
+  return (tv->m_type == KindOfRef && tv->m_data.ptv->_count > 1);
 }
 
 inline bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {

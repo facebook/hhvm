@@ -107,7 +107,7 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
 
   Lock lock(s_mutex);
   if (hhvm) {
-    VM::Func::enableIntercept(name);
+    VM::Func::enableIntercept();
     TranslatorX64* tx64 = TranslatorX64::Get();
     if (!tx64->interceptsEnabled()) {
       tx64->acquireWriteLease(true);

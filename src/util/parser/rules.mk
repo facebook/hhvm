@@ -5,7 +5,7 @@ hphp.tab.cpp: $(PROJECT_ROOT)/src/util/parser/hphp.y
 	export BISON_PKGDATADIR=\
 $(realpath $(EXTERNAL_TOOLS_ROOT))/bison/bison-2.4.1/da39a3e/share/bison
 	$(V)$(EXTERNAL_TOOLS_ROOT)/bison/bison-2.4.1/da39a3e/bin/bison \
-		-p$(YYPREFIX) --locations -d -o$@ $<
+		-p$(YYPREFIX) --verbose --locations -d -o$@ $<
 	@perl -p -i -n -e "s/(T_\w+) = ([0-9]+)/YYTOKEN(\\2, \\1)/" \
 		hphp.tab.hpp
 	@php -r "file_put_contents('hphp.tab.hpp', preg_replace('/\{([ \r\n\t]+YYTOKEN\(([0-9]+),)/s', \"{\n#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \$$2\n#endif\$$1\", file_get_contents('hphp.tab.hpp')));"

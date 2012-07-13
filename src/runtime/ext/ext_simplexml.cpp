@@ -71,9 +71,9 @@ static inline bool match_ns(xmlNodePtr node, CStrRef ns, bool is_prefix) {
 
 static String node_list_to_string(xmlDocPtr doc, xmlNodePtr list) {
   xmlChar *tmp = xmlNodeListGetString(doc, list, 1);
-  char *res = strdup((char*)tmp);
+  String res((char*) tmp, CopyString);
   xmlFree(tmp);
-  return String((const char *)res, AttachString);
+  return res;
 }
 
 static Array collect_attributes(xmlNodePtr node, CStrRef ns, bool is_prefix) {
@@ -272,7 +272,6 @@ c_SimpleXMLElement::c_SimpleXMLElement(const ObjectStaticCallbacks *cb) :
       m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
-  CPP_BUILTIN_CLASS_INIT(SimpleXMLElement);
   setAttribute(HasLval);
   m_children = Array::Create();
 }
@@ -984,7 +983,6 @@ void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
 c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(
   const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_parent(), m_iter1(NULL), m_iter2(NULL) {
-  CPP_BUILTIN_CLASS_INIT(SimpleXMLElementIterator);
 }
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
@@ -1124,7 +1122,6 @@ Variant c_SimpleXMLElementIterator::t_valid() {
 
 c_LibXMLError::c_LibXMLError(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(LibXMLError);
 }
 c_LibXMLError::~c_LibXMLError() {
 }

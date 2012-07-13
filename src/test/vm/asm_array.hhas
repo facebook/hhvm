@@ -60,8 +60,17 @@
   SetL $arr
   PopC
 
-  String "foo"
-  CGetM <L:$arr EC>
+  CGetM <L:$arr ET:"foo">
+  String "\n"
+  Concat
+  Print
+  PopC
+
+  String "one"
+  SetM <L:$arr EI:1>
+  PopC
+
+  CGetM <L:$arr EI:1>
   String "\n"
   Concat
   Print

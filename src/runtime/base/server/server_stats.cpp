@@ -22,6 +22,7 @@
 #include <runtime/base/comparisons.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/array/array_init.h>
+#include <runtime/base/compiler_id.h>
 #include <util/json.h>
 #include <util/compatibility.h>
 #include <util/hardware_counter.h>

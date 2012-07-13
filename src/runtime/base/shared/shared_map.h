@@ -62,10 +62,6 @@ public:
   bool exists(CStrRef k) const;
   bool exists(CVarRef k) const;
 
-  bool idxExists(ssize_t idx) const {
-    return idx < size();
-  }
-
   CVarRef get(int64 k, bool error = false) const;
   CVarRef get(litstr k, bool error = false) const;
   CVarRef get(CStrRef k, bool error = false) const;

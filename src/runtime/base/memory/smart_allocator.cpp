@@ -109,6 +109,7 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
     case GlobalVariables:
       m_itemCount = 1;
       break;
+    case RefData:
     case Variant:
     case Array:
     case SharedMap:
@@ -438,6 +439,7 @@ static bool is_object_alive(char* caddr) {
 
 static bool UNUSED is_iterable_type(SmartAllocatorImpl::Name type) {
   return type == SmartAllocatorImpl::Variant ||
+         type == SmartAllocatorImpl::RefData ||
          type == SmartAllocatorImpl::ObjectData ||
          type == SmartAllocatorImpl::StringData ||
          type == SmartAllocatorImpl::HphpArray ||

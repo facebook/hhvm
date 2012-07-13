@@ -19,6 +19,7 @@
 
 #include <runtime/base/complex_types.h>
 #include <runtime/base/memory/sweepable.h>
+#include <runtime/vm/instance.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,10 +28,16 @@ namespace HPHP {
  * Base class of all resources used by extensions for opaquely passing object
  * pointers.
  */
-class ResourceData : public ObjectData {
+#ifdef HHVM
+#define RD_PARENT HPHP::VM::Instance
+#else
+#define RD_PARENT HPHP::ObjectData
+#endif
+class ResourceData : public RD_PARENT {
 public:
   ResourceData();
   virtual ~ResourceData();
+  void operator delete(void* p) { ::operator delete(p); }
 
   // implementing ObjectData
   virtual bool o_instanceof(CStrRef s) const { return false;}
@@ -43,7 +50,10 @@ public:
   virtual int o_getResourceId() const { return o_getId(); }
 
   static int GetMaxResourceId() ATTRIBUTE_COLD;
+
+  static const bool IsResourceClass = true;
 };
+#undef RD_PARENT
 
 /**
  * Rules to avoid memory problems/leaks from ResourceData classes

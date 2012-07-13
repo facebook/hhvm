@@ -29,6 +29,7 @@ namespace VM {
       g_vmContext->m_eventHook->on ## name useargs;                        \
     }                                                                      \
   }                                                                        \
+  static void EG ## name declargs;                                         \
   void on ## name declargs;
 
 class EventHook {
@@ -46,6 +47,7 @@ class EventHook {
   static void Enable();
   static void Disable();
   static void CheckSurprise();
+  static void EGCheckSurprise();
 
   DECLARE_HOOK(FunctionEnter, (const ActRec* ar, int funcType),
                (ar, funcType));

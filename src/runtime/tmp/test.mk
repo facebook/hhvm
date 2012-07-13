@@ -16,7 +16,7 @@ TARGET = hphp
 endif
 ifneq ($(filter TestCodeRunRepo TestCodeRunRepoJit,$(SUITE)),)
 TARGET = hphp
-EXTRA_RUNTIME_OPTIONS:=$(if $(filter TestCodeRunRepoJit,$(SUITE)),-vEval.Jit=1)
+EXTRA_RUNTIME_OPTIONS:=-vEval.Jit=$(if $(filter TestCodeRunRepoJit,$(SUITE)),1,0)
 endif
 
 ZEND = /home/engshare/externals/cpp/hphp/centos-dev/php/bin/php
@@ -25,7 +25,7 @@ ZEND_NOWARN = -ddisplay_errors=off -dapc.enable_cli=1
 
 RUNCMD_jit = $(HHVM) -vEval.Jit=1 $(STD_OPTIONS)
 RUNCMD_hphp = $(HPHP) -l1 $(call GET_OPTIONS,build.opts) $*/main.php --args=" $(OPTIONS)"
-RUNCMD_hhvm = $(HHVM) $(STD_OPTIONS)
+RUNCMD_hhvm = $(HHVM) -vEval.Jit=0 $(STD_OPTIONS)
 RUNCMD_hphpi = $(HPHPI) $(STD_OPTIONS)
 
 BUILD_hphp = $(HPHP) -tcpp -fexe -l1 -k1 -o $*/main $*/main.php $(if $(wildcard $*/config.hdf),-c$*/config.hdf)

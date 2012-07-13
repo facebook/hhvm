@@ -182,10 +182,10 @@ void ProcessInit() {
   SystemLib::s_unit = file->unit();
 
   // Load the systemlib unit to build the Class objects
-  g_vmContext->mergeUnit(SystemLib::s_unit);
+  SystemLib::s_unit->merge();
 
   // load builtins
-  g_vmContext->mergeUnit(SystemLib::s_nativeFuncUnit);
+  SystemLib::s_nativeFuncUnit->merge();
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
@@ -220,8 +220,7 @@ void ProcessInit() {
   SystemLib::s_nativeClassUnit = nativeClassUnit;
 
   // Load the nativelib unit to build the Class objects
-  UNUSED bool success = g_vmContext->mergeUnit(SystemLib::s_nativeClassUnit);
-  ASSERT(success);
+  SystemLib::s_nativeClassUnit->merge();
 
   // Retrieve all of the class pointers
   for (long long i = 0LL; i < hhbc_ext_class_count; ++i) {

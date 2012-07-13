@@ -32,7 +32,7 @@ struct Unit;
 #define ARGTYPES \
   ARGTYPE(NA,    void*)         /* unused */  \
   ARGTYPEVEC(MA, int32_t)       /* Member vector immediate */ \
-  ARGTYPEVEC(ILA,int32_t)       /* 32-bit int vector immediate */ \
+  ARGTYPEVEC(BLA,Offset)        /* Bytecode address vector immediate */ \
   ARGTYPE(IVA,   int32_t)       /* variable size: 8 or 32-bit integer */  \
   ARGTYPE(I64A,  int64_t)       /* 64-bit Integer */ \
   ARGTYPE(HA,    int32_t)       /* Local variable ID: 8 or 32-bit int */  \
@@ -143,6 +143,13 @@ enum MemberCode {
   MEL,
   MPL,
 
+  // Element and property, using a string immediate
+  MET,
+  MPT,
+
+  // Element, using an int64 immediate
+  MEI,
+
   // New element operation.  (No real stack element.)
   MW,
 
@@ -151,7 +158,19 @@ enum MemberCode {
 };
 
 inline bool memberCodeHasImm(MemberCode mc) {
+  return mc == MEL || mc == MPL || mc == MET || mc == MPT || mc == MEI;
+}
+
+inline bool memberCodeImmIsLoc(MemberCode mc) {
   return mc == MEL || mc == MPL;
+}
+
+inline bool memberCodeImmIsString(MemberCode mc) {
+  return mc == MET || mc == MPT;
+}
+
+inline bool memberCodeImmIsInt(MemberCode mc) {
+  return mc == MEI;
 }
 
 // Returns string representation of `mc'.  (Pointer to internal static
@@ -227,8 +246,6 @@ enum SetOpOp {
   O(Mul,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(And,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(Or,              NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Xor,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Not,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(Same,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -261,7 +278,8 @@ enum SetOpOp {
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
-  O(Switch,          ONE(ILA),         ONE(CV),         NOV,        CF_TF) \
+  O(Switch,          THREE(BLA,I64A,IVA),                               \
+                                       ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
   O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
   O(Unwind,          NA,               NOV,             NOV,        CF_TF) \
@@ -492,6 +510,14 @@ struct ImmVector {
    */
   const uint8_t* findLastMember() const;
 
+  /*
+   * Decode the terminating string immediate, if any.
+   */
+  bool decodeLastMember(const Unit*, StringData*& sdOut,
+                        MemberCode& membOut,
+                        int64_t* strIdOut = NULL) const;
+
+
 private:
   int32_t m_length;
   int32_t m_numStack;
@@ -533,12 +559,21 @@ inline int32 decodeVariableSizeImm(const unsigned char** immPtr) {
   }
 }
 
+int64 decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode);
+
 // Encodes a variable sized immediate for `val' into `buf'.  Returns
 // the number of bytes used taken.  At most 4 bytes can be used.
 size_t encodeVariableSizeImm(int32_t val, unsigned char* buf);
 
 // Encodes a variable sized immediate to the end of vec.
 void encodeIvaToVector(std::vector<uchar>& vec, int32_t val);
+
+template<typename T>
+void encodeToVector(std::vector<uchar>& vec, T val) {
+  size_t currentLen = vec.size();
+  vec.resize(currentLen + sizeof(T));
+  memcpy(&vec[currentLen], &val, sizeof(T));
+}
 
 void staticStreamer(TypedValue* tv, std::stringstream& out);
 

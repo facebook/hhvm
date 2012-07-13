@@ -9,10 +9,12 @@ function modify($arr) {
   $arr['a'] += 200;
 }
 
+function rvalue_sort($x) { ksort($x); return $x; }
+
 function ref($a) {
   $b =& $a;
-  var_dump(get_defined_vars());
-  modify(get_defined_vars());
+  var_dump(rvalue_sort(get_defined_vars()));
+  modify(rvalue_sort(get_defined_vars()));
   var_dump($b);
 }
 

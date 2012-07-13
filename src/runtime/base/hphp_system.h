@@ -70,9 +70,6 @@ public:
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
 
-  bool isHead(ssize_t pos) const;
-  bool isTail(ssize_t pos) const;
-
   virtual void getFullPos(FullPos &pos);
   virtual bool setFullPos(const FullPos &pos);
 

@@ -17,14 +17,13 @@
 #ifndef incl_VM_VERIFIER_CFG_H_
 #define incl_VM_VERIFIER_CFG_H_
 
-#include <runtime/vm/repo.h>
-#include <runtime/vm/verifier/util.h>
+#include "runtime/vm/repo.h"
+#include "runtime/vm/verifier/util.h"
+#include "util/arena.h"
 
 namespace HPHP {
 namespace VM {
 namespace Verifier {
-
-class Arena;
 
 /**
  * Block is a standard basic block.  The # of ordinary successors
@@ -123,7 +122,8 @@ class GraphBuilder {
   typedef hphp_hash_map<PC, Block*> BlockMap;
   enum EdgeKind { FallThrough, Taken };
  public:
-  GraphBuilder(Arena& arena, const Func* func) : m_arena(arena), m_func(func),
+  GraphBuilder(Arena& arena, const Func* func)
+    : m_arena(arena), m_func(func),
       m_unit(func->unit()), m_graph(0) {
   }
   Graph* build();
@@ -295,23 +295,33 @@ private:
 class AllFuncs {
  public:
   explicit AllFuncs(const Unit* unit)
-    : fr(&unit->funcs()[0],
-         &unit->funcs()[unit->funcs().size()])
+    : fr(unit->funcs().begin(),
+         unit->funcs().end())
+    , mr(0, 0)
     , cr(unit)
   {
     if (fr.empty()) skip();
   }
-  bool empty() const { return fr.empty() && cr.empty(); }
-  Func* front() const { ASSERT(!empty()); return fr.front(); }
+  bool empty() const { return fr.empty() && mr.empty() && cr.empty(); }
+  Func* front() const {
+    ASSERT(!empty());
+    if (!fr.empty()) return fr.front();
+    ASSERT(!mr.empty());
+    return mr.front();
+  }
   Func* popFront() {
-    Func* f = fr.popFront();
-    if (fr.empty()) skip();
+    Func* f = !fr.empty() ? fr.popFront() :
+              !mr.empty() ? mr.popFront() : 0;
+    ASSERT(f);
+    if (fr.empty() && mr.empty()) skip();
     return f;
   }
  private:
   void skip();
-  typedef IterRange<Func* const*> FuncRange;
+  typedef IterRange<Unit::FuncVec::const_iterator> FuncRange;
   FuncRange fr;
+  typedef IterRange<Func* const*> MethodRange;
+  MethodRange mr;
   PreClassRange cr;
 };
 

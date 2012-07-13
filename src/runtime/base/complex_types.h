@@ -23,6 +23,7 @@
 #include <runtime/base/type_string.h>
 #include <runtime/base/type_array.h>
 #include <runtime/base/type_object.h>
+#include <runtime/base/ref_data.h>
 #include <runtime/base/type_variant.h>
 #include <runtime/base/tv_helpers.h>
 

@@ -698,7 +698,7 @@ void VariableSerializer::writeArrayValue(const ArrayData *arr, CVarRef value) {
   if ((m_type == Serialize || m_type == APCSerialize ||
        m_type == DebuggerSerialize) &&
       !(value.isReferenced() &&
-        m_arrayIds->find(value.getVariantData()) != m_arrayIds->end())) {
+        m_arrayIds->find(value.getRefData()) != m_arrayIds->end())) {
     m_valueCount++;
   }
 

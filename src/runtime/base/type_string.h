@@ -142,6 +142,13 @@ public:
     }
   }
   // attach to null terminated malloc'ed string
+  String(const char *s, AttachDeprecatedMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // attach to null terminated malloc'ed string, maybe free it now.
   String(const char *s, AttachStringMode mode) {
     if (s) {
       m_px = NEW(StringData)(s, mode);
@@ -157,6 +164,13 @@ public:
   }
   // attach to binary string literal
   String(const char *s, int length, AttachLiteralMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, length, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // attach to binary malloc'ed string
+  String(const char *s, int length, AttachDeprecatedMode mode) {
     if (s) {
       m_px = NEW(StringData)(s, length, mode);
       m_px->setRefCount(1);
@@ -207,6 +221,9 @@ public:
   }
   int length() const {
     return m_px ? m_px->size() : 0;
+  }
+  StringSlice slice() const {
+    return m_px ? m_px->slice() : StringSlice("", 0);
   }
   bool isNull() const {
     return m_px == NULL;

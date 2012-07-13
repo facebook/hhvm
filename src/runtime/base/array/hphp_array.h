@@ -32,118 +32,125 @@ public:
   friend class ArrayInit;
 
 public:
-  HphpArray(uint nSize = 0, bool suppressCow = false);
+  static HphpArray* GetStaticEmptyArray() {
+    return &s_theEmptyArray;
+  }
+
+public:
+  HphpArray(uint nSize);
 private:
-  HphpArray(int,int,int);
+  HphpArray();
   static inline const void** getVTablePtr() {
     static const HphpArray tmp(0);
     return (*(void const***)(&tmp));
   }
+
 public:
   virtual ~HphpArray();
 
-  virtual ssize_t vsize() const;
+  // override/implement ArrayData api's
 
-  virtual Variant getKey(ssize_t pos) const;
-  virtual Variant getValue(ssize_t pos) const;
-  virtual CVarRef getValueRef(ssize_t pos) const;
-  virtual bool isVectorData() const;
+  // implements ArrayData
+  ssize_t vsize() const;
+  Variant getKey(ssize_t pos) const;
+  Variant getValue(ssize_t pos) const;
+  CVarRef getValueRef(ssize_t pos) const;
 
-  virtual ssize_t iter_begin() const;
-  virtual ssize_t iter_end() const;
-  virtual ssize_t iter_advance(ssize_t prev) const;
-  virtual ssize_t iter_rewind(ssize_t prev) const;
+  // overrides ArrayData
+  bool isVectorData() const;
+  ssize_t iter_begin() const;
+  ssize_t iter_end() const;
+  ssize_t iter_advance(ssize_t prev) const;
+  ssize_t iter_rewind(ssize_t prev) const;
 
-  ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
+  // overrides ArrayData
+  Variant reset();
+  Variant prev();
+  Variant current() const;
+  Variant next();
+  Variant end();
+  Variant key() const;
+  Variant value(ssize_t& pos) const;
+  Variant each();
 
-  virtual Variant reset();
-  virtual Variant prev();
-  virtual Variant current() const;
-  virtual Variant next();
-  virtual Variant end();
-  virtual Variant key() const;
-  virtual Variant value(ssize_t& pos) const;
-  virtual Variant each();
+  // implements ArrayData
+  bool exists(int64   k) const;
+  bool exists(litstr  k) const;
+  bool exists(CStrRef k) const;
+  bool exists(CVarRef k) const;
 
-  virtual bool isHead() const;
-  virtual bool isTail() const;
-  virtual bool isInvalid() const { return m_pos == invalid_index; }
+  // implements ArrayData
+  CVarRef get(int64   k, bool error=false) const FLATTEN;
+  CVarRef get(litstr  k, bool error=false) const FLATTEN;
+  CVarRef get(CStrRef k, bool error=false) const FLATTEN;
+  CVarRef get(CVarRef k, bool error=false) const FLATTEN;
 
-  virtual bool exists(int64   k) const;
-  virtual bool exists(litstr  k) const;
-  virtual bool exists(CStrRef k) const;
-  virtual bool exists(CVarRef k) const;
+  // implements ArrayData
+  ssize_t getIndex(int64 k) const;
+  ssize_t getIndex(litstr k) const;
+  ssize_t getIndex(CStrRef k) const;
+  ssize_t getIndex(CVarRef k) const;
 
-  virtual bool idxExists(ssize_t idx) const;
-
-  virtual CVarRef get(int64   k, bool error=false) const
-    FLATTEN;
-  virtual CVarRef get(litstr  k, bool error=false) const
-    FLATTEN;
-  virtual CVarRef get(CStrRef k, bool error=false) const
-    FLATTEN;
-  virtual CVarRef get(CVarRef k, bool error=false) const
-    FLATTEN;
-
-  virtual void load(CVarRef k, Variant& v) const;
-
-  Variant fetch(CStrRef k) const;
-
-  virtual ssize_t getIndex(int64 k) const;
-  virtual ssize_t getIndex(litstr k) const;
-  virtual ssize_t getIndex(CStrRef k) const;
-  virtual ssize_t getIndex(CVarRef k) const;
-
-  virtual ArrayData* lval(int64   k, Variant*& ret, bool copy,
+  // implements ArrayData
+  ArrayData* lval(int64   k, Variant*& ret, bool copy,
                           bool checkExist=false);
-  virtual ArrayData* lval(litstr  k, Variant*& ret, bool copy,
+  ArrayData* lval(litstr  k, Variant*& ret, bool copy,
                           bool checkExist=false);
-  virtual ArrayData* lval(CStrRef k, Variant*& ret, bool copy,
+  ArrayData* lval(CStrRef k, Variant*& ret, bool copy,
                           bool checkExist=false);
-  virtual ArrayData* lval(CVarRef k, Variant*& ret, bool copy,
+  ArrayData* lval(CVarRef k, Variant*& ret, bool copy,
                           bool checkExist=false);
-  virtual ArrayData* lvalPtr(CStrRef k, Variant*& ret, bool copy,
+  ArrayData* lvalNew(Variant*& ret, bool copy);
+
+  // overrides ArrayData
+  ArrayData* lvalPtr(CStrRef k, Variant*& ret, bool copy,
                              bool create);
-  virtual ArrayData* lvalPtr(int64   k, Variant*& ret, bool copy,
+  ArrayData* lvalPtr(int64   k, Variant*& ret, bool copy,
                              bool create);
 
-  virtual ArrayData* lvalNew(Variant*& ret, bool copy);
+  // implements ArrayData
+  ArrayData* set(int64   k, CVarRef v, bool copy);
+  ArrayData* set(CStrRef k, CVarRef v, bool copy);
+  ArrayData* set(CVarRef k, CVarRef v, bool copy);
 
-  virtual ArrayData* set(int64   k, CVarRef v, bool copy);
-  virtual ArrayData* set(CStrRef k, CVarRef v, bool copy);
-  virtual ArrayData* set(CVarRef k, CVarRef v, bool copy);
+  // implements ArrayData
+  ArrayData* setRef(int64   k, CVarRef v, bool copy);
+  ArrayData* setRef(CStrRef k, CVarRef v, bool copy);
+  ArrayData* setRef(CVarRef k, CVarRef v, bool copy);
 
-  virtual ArrayData* setRef(int64   k, CVarRef v, bool copy);
-  virtual ArrayData* setRef(CStrRef k, CVarRef v, bool copy);
-  virtual ArrayData* setRef(CVarRef k, CVarRef v, bool copy);
+  // overrides ArrayData
+  ArrayData *add(int64   k, CVarRef v, bool copy);
+  ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  ArrayData *add(CVarRef k, CVarRef v, bool copy);
+  ArrayData *addLval(int64   k, Variant*& ret, bool copy);
+  ArrayData *addLval(CStrRef k, Variant*& ret, bool copy);
+  ArrayData *addLval(CVarRef k, Variant*& ret, bool copy);
 
-  virtual ArrayData *add(int64   k, CVarRef v, bool copy);
-  virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
-  virtual ArrayData *add(CVarRef k, CVarRef v, bool copy);
-  virtual ArrayData *addLval(int64   k, Variant*& ret, bool copy);
-  virtual ArrayData *addLval(CStrRef k, Variant*& ret, bool copy);
-  virtual ArrayData *addLval(CVarRef k, Variant*& ret, bool copy);
+  // implements ArrayData
+  ArrayData* remove(int64   k, bool copy);
+  ArrayData* remove(CStrRef k, bool copy);
+  ArrayData* remove(CVarRef k, bool copy);
 
-  virtual ArrayData* remove(int64   k, bool copy);
-  virtual ArrayData* remove(CStrRef k, bool copy);
-  virtual ArrayData* remove(CVarRef k, bool copy);
+  // overrides/implements ArrayData
+  ArrayData* copy() const;
+  ArrayData* nonSmartCopy() const;
+  ArrayData* append(CVarRef v, bool copy);
+  ArrayData* appendRef(CVarRef v, bool copy);
+  ArrayData* appendWithRef(CVarRef v, bool copy);
+  ArrayData* append(const ArrayData* elems, ArrayOp op, bool copy);
+  ArrayData* pop(Variant& value);
+  ArrayData* dequeue(Variant& value);
+  ArrayData* prepend(CVarRef v, bool copy);
+  void renumber();
+  void onSetEvalScalar();
 
-  virtual ArrayData* copy() const;
-  virtual ArrayData* nonSmartCopy() const;
-  virtual ArrayData* append(CVarRef v, bool copy);
-  virtual ArrayData* appendRef(CVarRef v, bool copy);
-  virtual ArrayData* appendWithRef(CVarRef v, bool copy);
-  virtual ArrayData* append(const ArrayData* elems, ArrayOp op, bool copy);
-  virtual ArrayData* pop(Variant& value);
-  virtual ArrayData* dequeue(Variant& value);
-  virtual ArrayData* prepend(CVarRef v, bool copy);
-  virtual void renumber();
-  virtual void onSetEvalScalar();
+  // overrides ArrayData
+  void getFullPos(FullPos& fp);
+  bool setFullPos(const FullPos& fp);
+  CVarRef currentRef();
+  CVarRef endRef();
 
-  virtual void getFullPos(FullPos& fp);
-  virtual bool setFullPos(const FullPos& fp);
-  virtual CVarRef currentRef();
-  virtual CVarRef endRef();
+  // END overide/implements section
 
   // nvGet, nvSet and friends.
   // "nv" stands for non-variant. If we know the types of keys and values
@@ -155,78 +162,68 @@ public:
 
   // nvGet returns a pointer to the value if the specified key is in the
   // array, NULL otherwise.
-  TypedValue* nvGet(int64 ki, bool error=false) const;
-  TypedValue* nvGet(const StringData* k, bool error=false) const;
-
-  // Hinted nvget: the caller provides an ElmInd where the key is
-  // likely to reside. We fall back to a regular nvGet on a miss, and
-  // mutate *posHintOut if the ultimate location differs from posHint.
-  TypedValue* nvGet(const StringData* k, int posHint,
-                    int* posHintOut,
-                    bool error=false) const;
+  TypedValue* nvGet(int64 ki) const;
+  TypedValue* nvGet(const StringData* k) const;
 
   // nvGetCell works the same as nvGet, except that it will unwrap any
-  // value that is KindOfVariant and return the inner cell.
+  // value that is KindOfRef and return the inner cell.
   TypedValue* nvGetCell(int64 ki, bool error=false) const;
-  inline TypedValue* nvGetCell(const StringData* k, bool error=false) const;
+  TypedValue* nvGetCell(const StringData* k, bool error=false) const;
 
-  inline ArrayData* nvSet(int64 ki, int64 vi, bool copy);
+  ArrayData* nvSet(int64 ki, int64 vi, bool copy);
   ArrayData* nvSet(int64 ki, const TypedValue* v, bool copy);
   ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
-  ArrayData* nvBind(int64 ki, const TypedValue* v, bool copy);
-  ArrayData* nvBind(StringData* k, const TypedValue* v, bool copy);
+  void nvBind(int64 ki, const TypedValue* v);
+  void nvBind(StringData* k, const TypedValue* v);
   ArrayData* nvAppend(const TypedValue* v, bool copy);
-  ArrayData* nvAppendWithRef(const TypedValue* v, bool copy);
+  void nvAppendWithRef(const TypedValue* v);
   ArrayData* nvNew(TypedValue*& v, bool copy);
-  inline ArrayData* nvRemove(int64 ki, bool copy);
-  ArrayData* nvRemove(const StringData* k, bool copy);
-  ssize_t nvSize() const;
   TypedValue* nvGetValueRef(ssize_t pos);
   void nvGetKey(TypedValue* out, ssize_t pos);
   bool nvInsert(StringData* k, TypedValue *v);
 
-  // Assembly linkage helpers. Do not play on or around.
-  static uint offNumElems() { return offsetof(HphpArray, m_nElms); }
-
-  static inline bool isHphpArray(const ArrayData* ad) {
+  static bool isHphpArray(const ArrayData* ad) {
     return *(void const***)ad == getVTablePtr();
   }
-
-  void copyTo(HphpArray* target) const {
-    copyImpl(target);
-  }
-
-  /**
-   * Assumes 'tv' is dead and preserves the element's original value
-   * if the key is already present in the array. If 'tv' is NULL, this
-   * method will migrate the element back to the array.
-   *
-   * Returns the previous fixed memory location that the element lived at,
-   * or NULL if the element used to live in the array.
-   */
-  TypedValue* migrate(StringData* k, TypedValue* tv);
-
-  /**
-   * Assumes 'tv' is live, overwrites the element's value if the key
-   * is already present in the array. 'tv' must not be NULL.
-   *
-   * Returns the previous fixed memory location that the element lived at,
-   * or NULL if the element used to live in the array.
-   */
-  TypedValue* migrateAndSet(StringData* k, TypedValue* tv);
 
   void dumpDebugInfo() const;
 
   // Used in Elm's data.m_type field to denote an invalid Elm.
   static const HPHP::DataType KindOfTombstone = MaxNumDataTypes;
-  static const HPHP::DataType KindOfIndirect =
-      (HPHP::DataType)(MaxNumDataTypes + 1);
 
   // Array element.
   struct Elm {
-    int64       h;    // (key == NULL) ? <integer key value> : <string hash>
-    StringData* key;  // (key != NULL) ? <string key value>
-    TypedValue  data; // (data.m_type != KindOfTombstone) ? <value> : <invalid>
+    /* The key is either a string pointer or an int value, and the _count
+     * field in data is used to discriminate the key type. _count = 0 means
+     * int, nonzero values contain 32 bits of a string's hashcode.
+     * It is critical that when we return &data to clients, that they not
+     * read or write the _count field! */
+    union {
+      int64       ikey;
+      StringData* key;
+    };
+    union {
+      struct {
+        Value v;
+        int32 hash;  // hash == 0 ? ikey is integer key: key is string key
+        DataType m_type;
+      };
+      TypedValue  data; // data.m_type != KindOfTombstone ? <value> : <invalid>
+    };
+    bool hasStrKey() const {
+      return hash != 0;
+    }
+    bool hasIntKey() const {
+      return hash == 0;
+    }
+    void setStrKey(StringData* k, int64 h) {
+      key = k;
+      hash = (int32)h | 0x80000000;
+    }
+    void setIntKey(int64 k) {
+      ikey = k;
+      hash = 0;
+    }
   };
 
   // Element index, with special values < 0 used for hash tables.
@@ -241,24 +238,10 @@ public:
   // Use a minimum of an 8-element hash table.  Valid range: [2..32]
   static const uint32 MinLgTableSize   = 3;
 
-  // The element array is aligned such that elements do not needlessly straddle
-  // cacheline boundaries.
-  static const size_t ElmAlignment     = sizeof(Elm);
-  static const size_t ElmAlignmentMask = ElmAlignment-1;
-
 private:
-  inline TypedValue* nvGetImpl(const StringData* k, int* outHint,
-                               bool error=false) const;
-
-  // Array elements and the hash table are contiguously allocated, such that
-  // elements are naturally aligned.  If necessary, m_data starts and ends with
-  // padding in order to meet the element alignment requirements.
+  // Array elements and the hash table are contiguously allocated, and
+  // elements are pointer aligned.
   //
-  // Given 2^K == m_tableMask+1 && K >= 2 && K <= 32 &&
-  //       block == (void*)(uintptr_t(m_data) - uintptr_t(m_dataPad)):
-  //
-  //            +--------------------+
-  // block -->  | alignment padding? |
   //            +--------------------+
   // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
   //            | slot 1             |
@@ -266,82 +249,67 @@ private:
   //            +--------------------+
   // m_hash --> |                    | 2^K hash table entries.
   //            +--------------------+
-  //            | alignment padding? |
-  //            +--------------------+
-private:
-  void*   m_data;        // Contains elements and hash table.
+
+  Elm*    m_data;        // Contains elements and hash table.
   ElmInd* m_hash;        // Hash table.
   int64   m_nextKI;      // Next integer key to use for append.
   uint32  m_tableMask;   // Bitmask used when indexing into the hash table.
-  ElmInd  m_nElms;       // Total number of elements in array.
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
   ElmInd  m_lastE;       // Index of last used element.
-  char    m_siPastEnd;   // (true) ? strong iterators possibly past end.
-  char    m_suppressCow; // (true) ? suppress copy-on-write (e.g. $GLOBALS).
-#ifndef USE_JEMALLOC
-  uchar   m_dataPad;     // Number of bytes that m_data was advanced to
-                         //   achieve the required alignment.
-#endif
-  ElmInd  m_nIndirectElms; // Total number of elements in the array with
-                           //   m_type == KindOfIndirect.
-
-  inline void* getBlock() const {
-    return ((void*)(uintptr_t(m_data)
-#ifndef USE_JEMALLOC
-            - uintptr_t(m_dataPad)
-#endif
-            ));
-  }
+  bool    m_siPastEnd;   // (true) ? strong iterators possibly past end.
 
   ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
   ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
 
-  inline ssize_t /*ElmInd*/ find(int64 ki) const;
-  inline ssize_t /*ElmInd*/ find(const char* k, int len, int64 prehash) const;
-  inline ElmInd* findForInsert(int64 ki) const;
-  inline ElmInd* findForInsert(const char* k, int len, int64 prehash) const;
+  ssize_t /*ElmInd*/ find(int64 ki) const;
+  ssize_t /*ElmInd*/ find(const char* k, int len, int64 prehash) const;
+  ElmInd* findForInsert(int64 ki) const;
+  ElmInd* findForInsert(const char* k, int len, int64 prehash) const;
+
+  ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
 
   /**
    * findForNewInsert() CANNOT be used unless the caller can guarantee that
    * the relevant key is not already present in the array. Otherwise this can
    * put the array into a bad state; use with caution.
    */
-  inline ElmInd* ALWAYS_INLINE findForNewInsert(size_t h0) const;
+  ElmInd* findForNewInsert(size_t h0) const;
 
   bool nextInsert(CVarRef data);
-  bool nextInsertRef(CVarRef data);
-  bool nextInsertWithRef(CVarRef data);
-  bool addLvalImpl(int64 ki, Variant** pDest, bool doFind=true);
-  bool addLvalImpl(StringData* key, int64 h, Variant** pDest, bool doFind=true);
-  bool addVal(int64 ki, CVarRef data, bool checkExists=true);
-  bool addVal(StringData* key, CVarRef data, bool checkExists=true);
-  bool addValWithRef(int64 ki, CVarRef data, bool checkExists=true);
-  bool addValWithRef(StringData* key, CVarRef data, bool checkExists=true);
+  void nextInsertRef(CVarRef data);
+  void nextInsertWithRef(CVarRef data);
+  void addLvalImpl(int64 ki, Variant** pDest);
+  void addLvalImpl(StringData* key, int64 h, Variant** pDest);
+  void addVal(int64 ki, CVarRef data);
+  void addVal(StringData* key, CVarRef data);
+  void addValWithRef(int64 ki, CVarRef data);
+  void addValWithRef(StringData* key, CVarRef data);
 
-  bool update(int64 ki, CVarRef data);
-  bool update(StringData* key, CVarRef data);
-  bool updateRef(int64 ki, CVarRef data);
-  bool updateRef(StringData* key, CVarRef data);
+  void update(int64 ki, CVarRef data);
+  void update(StringData* key, CVarRef data);
+  void updateRef(int64 ki, CVarRef data);
+  void updateRef(StringData* key, CVarRef data);
 
   void erase(ElmInd* ei, bool updateNext = false);
 
   // nvUpdate: for internal use by the nv* methods.
   bool nvUpdate(int64 ki, int64 vi);
 
-  HphpArray* copyImpl(HphpArray* target = NULL, bool sma = true) const;
+  HphpArray* copyImpl(HphpArray* target) const;
+  HphpArray* copyImpl() const;
 
-  inline Elm* ALWAYS_INLINE allocElm(ElmInd* ei);
-  inline void ALWAYS_INLINE initElm(Elm* e,
-                                    size_t ki,
-                                    StringData* key,
-                                    CVarRef data,
-                                    bool byRef=false);
-  inline void ALWAYS_INLINE allocNewElm(ElmInd* ei,
-                                        size_t ki,
-                                        StringData* key,
-                                        CVarRef data,
-                                        bool byRef=false);
+  Elm* allocElm(ElmInd* ei);
+  void initElm(Elm* e, size_t ki, StringData* key, CVarRef data,
+               bool byRef=false);
+  void allocNewElm(ElmInd* ei, size_t ki, StringData* key, CVarRef data,
+                   bool byRef=false);
   void reallocData(size_t maxElms, size_t tableSize, size_t oldDataSize);
+
+  /**
+   * init(size) allocates space for size elements but initializes
+   * as an empty array
+   */
+  void init(uint size);
 
   /**
    * grow() increases the hash table size and the number of slots for
@@ -367,29 +335,22 @@ private:
    * for a new element and hash entry before growing or compacting the array.
    */
   void resize();
-  inline void ALWAYS_INLINE resizeIfNeeded();
+  void resizeIfNeeded();
 
   // Memory allocator methods.
   DECLARE_SMART_ALLOCATION(HphpArray, SmartAllocatorImpl::NeedSweep);
   void sweep();
-};
-
-class StaticEmptyHphpArray : public HphpArray {
-public:
-  StaticEmptyHphpArray() {
-    setStatic();
-  }
-
-  static HphpArray* Get() {
-    return &s_theEmptyArray;
-  }
 
 private:
-  static StaticEmptyHphpArray s_theEmptyArray;
+  enum EmptyMode { StaticEmptyArray };
+  HphpArray(EmptyMode);
+  // static singleton empty array.  Not a subclass because we want a fast
+  // isHphpArray implementation; HphpArray should be effectively final.
+  static HphpArray s_theEmptyArray;
 };
 
 inline bool IsHphpArray(const ArrayData* ad) {
-  return HphpArray::isHphpArray(ad) || ad == StaticEmptyHphpArray::Get();
+  return HphpArray::isHphpArray(ad);
 }
 
 //=============================================================================

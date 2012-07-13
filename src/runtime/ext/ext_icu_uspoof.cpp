@@ -38,7 +38,6 @@ const int64 q_SpoofChecker$$CHAR_LIMIT = USPOOF_CHAR_LIMIT;
 ///////////////////////////////////////////////////////////////////////////////
 c_SpoofChecker::c_SpoofChecker(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(SpoofChecker);
   UErrorCode status = U_ZERO_ERROR;
   m_spoof_checker = uspoof_open(&status);
 

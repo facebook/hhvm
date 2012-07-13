@@ -1072,11 +1072,7 @@ String f_basename(CStrRef path, CStrRef suffix /* = null_string */) {
       memcmp(cend - sufflen, suffix.data(), sufflen) == 0) {
     cend -= sufflen;
   }
-  int len = cend - comp;
-  char *ret = (char *)malloc(len + 1);
-  memcpy(ret, comp, len);
-  ret[len] = '\0';
-  return String(ret, len, AttachString);
+  return String(comp, cend - comp, CopyString);
 }
 
 bool f_fnmatch(CStrRef pattern, CStrRef filename, int flags /* = 0 */) {

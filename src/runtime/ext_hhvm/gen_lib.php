@@ -248,6 +248,13 @@ class PhpExtFunc {
     $this->isStatic = null;
     $this->mangledName = null;
     $this->initComputedProps();
+
+    if ($this->name != strtolower($this->name)) {
+      echo "Extension function name must be all " .
+           "lowercase: " . $this->name . "\n";
+      echo "ext_hhvm generation failed\n";
+      exit(1);
+    }
   }
 
   public function initMethod($className, $name, $returnType, $returnByRef,

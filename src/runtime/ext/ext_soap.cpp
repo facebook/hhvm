@@ -1820,7 +1820,6 @@ c_SoapServer::c_SoapServer(const ObjectStaticCallbacks *cb) :
     m_typemap(NULL),
     m_features(0),
     m_send_errors(1) {
-  CPP_BUILTIN_CLASS_INIT(SoapServer);
 }
 
 c_SoapServer::~c_SoapServer() {
@@ -2299,7 +2298,6 @@ c_SoapClient::c_SoapClient(const ObjectStaticCallbacks *cb) :
     m_compression(false),
     m_exceptions(true),
     m_trace(false) {
-  CPP_BUILTIN_CLASS_INIT(SoapClient);
 }
 
 c_SoapClient::~c_SoapClient() {
@@ -2761,7 +2759,6 @@ Variant c_SoapClient::t___destruct() {
 // class SoapVar
 
 c_SoapVar::c_SoapVar(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(SoapVar);
 }
 
 c_SoapVar::~c_SoapVar() {
@@ -2803,7 +2800,6 @@ Variant c_SoapVar::t___destruct() {
 // class SoapParam
 
 c_SoapParam::c_SoapParam(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(SoapParam);
 }
 
 c_SoapParam::~c_SoapParam() {
@@ -2829,7 +2825,6 @@ Variant c_SoapParam::t___destruct() {
 
 c_SoapHeader::c_SoapHeader(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(SoapHeader);
 }
 
 c_SoapHeader::~c_SoapHeader() {

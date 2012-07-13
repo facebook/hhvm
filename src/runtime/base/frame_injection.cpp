@@ -22,8 +22,6 @@
 #include <runtime/base/hphp_system.h>
 #include <runtime/base/server/source_root_info.h>
 
-#include <runtime/eval/runtime/eval_frame_injection.h>
-
 #include <util/parser/parser.h>
 
 namespace HPHP {
@@ -146,11 +144,7 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
       if (const char *c = strstr(f, "$$")) {
         frame.set(s_function, String(f, c - f, CopyString), true);
       } else {
-        if (isEvalFrame()) {
-          frame.set(s_function, String(f, CopyString), true);
-        } else {
-          frame.set(s_function, f, true);
-        }
+        frame.set(s_function, f, true);
       }
       break;
     }
@@ -287,21 +281,6 @@ Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
   return Array::Create();
 }
 
-Eval::VariableEnvironment *
-FrameInjection::GetVariableEnvironment(bool skip /* = false */) {
-  const_assert(!hhvm);
-  FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
-  if (skip && t) {
-    t = t->m_prev;
-  }
-  if (t && t->isEvalFrame()) {
-    Eval::EvalFrameInjection* efi =
-      static_cast<Eval::EvalFrameInjection*>(t);
-    return &(efi->getEnv());
-  }
-  return NULL;
-}
-
 int FrameInjection::GetLine(bool skip /* = false */) {
   const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
@@ -367,11 +346,6 @@ FrameInjection *FrameInjection::GetStackFrame(int level) {
 
 CStrRef FrameInjection::getClassName() const {
   const_assert(!hhvm);
-  if (isEvalFrame()) {
-    const Eval::EvalFrameInjection *efi =
-      static_cast<const Eval::EvalFrameInjection*>(this);
-    return efi->getClass();
-  }
   // Otherwise, parse the name and lookup from ClassInfo
   const char *c = strstr(m_name, "::");
   if (!c) return empty_string;
@@ -390,15 +364,6 @@ ObjectData *FrameInjection::GetObjectV(
   const FrameInjection *fi) {
   const_assert(!hhvm);
   do {
-    // Must check first: an EvalFrame can also be
-    // an ObjectMethodFrame (but its still implemented
-    // using EvalFrameInjection).
-    if (UNLIKELY(fi->isEvalFrame())) {
-      const Eval::EvalFrameInjection* efi =
-        static_cast<const Eval::EvalFrameInjection*>(fi);
-      return efi->getThis();
-    }
-
     if (LIKELY(fi->isObjectMethodFrame())) {
       const FrameInjectionObjectMethod* ofi =
         static_cast<const FrameInjectionObjectMethod*>(fi);
@@ -416,18 +381,8 @@ ObjectData *FrameInjection::GetObjectV(
 
 String FrameInjection::getFileName() {
   const_assert(!hhvm);
-  if (isEvalFrame()) {
-    Eval::EvalFrameInjection *efi =
-      static_cast<Eval::EvalFrameInjection*>(this);
-    return efi->getFileNameEval();
-  }
   if (m_flags & PseudoMain) {
     return m_name[0] == '_' ? m_name : m_name + 10;
-  }
-  if (isParserFrame()) {
-    Eval::ParserFrameInjection *pfi =
-      static_cast<Eval::ParserFrameInjection*>(this);
-    return pfi->getFileName();
   }
   const char *f = SourceInfo::TheSourceInfo.getFunctionDeclaringFile(m_name);
   if (f != NULL) {
@@ -445,11 +400,6 @@ String FrameInjection::getFileName() {
 
 Array FrameInjection::getArgs() {
   const_assert(!hhvm);
-  if (m_flags & EvalFrame) {
-    Eval::EvalFrameInjection *efi =
-      static_cast<Eval::EvalFrameInjection*>(this);
-    return efi->getArgsEval();
-  }
   return Array();
 }
 

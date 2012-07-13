@@ -133,75 +133,13 @@ TypedValue* fg__soap_active_version(HPHP::VM::ActRec *ar) {
 
 
 
-class c_SoapServer_Instance : public c_SoapServer {
-public:
-  c_SoapServer_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_SoapServer));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_SoapServer) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_SoapServer_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_SoapServer_Instance *this_ = (c_SoapServer_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_SoapServer) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_SoapServer::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_SoapServer::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_SoapServer::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_SoapServer::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_SoapServer_Instance(HPHP::VM::Class* cls) {
-  return c_SoapServer_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_SoapServer) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_SoapServer(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -780,75 +718,13 @@ TypedValue* tg_10SoapServer___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_SoapClient_Instance : public c_SoapClient {
-public:
-  c_SoapClient_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_SoapClient));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_SoapClient) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_SoapClient_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_SoapClient_Instance *this_ = (c_SoapClient_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_SoapClient) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_SoapClient::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_SoapClient::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_SoapClient::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_SoapClient::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_SoapClient_Instance(HPHP::VM::Class* cls) {
-  return c_SoapClient_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_SoapClient) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_SoapClient(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -1543,75 +1419,13 @@ TypedValue* tg_10SoapClient___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_SoapVar_Instance : public c_SoapVar {
-public:
-  c_SoapVar_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_SoapVar));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_SoapVar) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_SoapVar_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_SoapVar_Instance *this_ = (c_SoapVar_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_SoapVar) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_SoapVar::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_SoapVar::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_SoapVar::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_SoapVar::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_SoapVar_Instance(HPHP::VM::Class* cls) {
-  return c_SoapVar_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_SoapVar) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_SoapVar(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -1735,75 +1549,13 @@ TypedValue* tg_7SoapVar___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_SoapParam_Instance : public c_SoapParam {
-public:
-  c_SoapParam_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_SoapParam));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_SoapParam) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_SoapParam_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_SoapParam_Instance *this_ = (c_SoapParam_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_SoapParam) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_SoapParam::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_SoapParam::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_SoapParam::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_SoapParam::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_SoapParam_Instance(HPHP::VM::Class* cls) {
-  return c_SoapParam_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_SoapParam) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_SoapParam(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -1904,75 +1656,13 @@ TypedValue* tg_9SoapParam___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_SoapHeader_Instance : public c_SoapHeader {
-public:
-  c_SoapHeader_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_SoapHeader));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_SoapHeader) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_SoapHeader_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_SoapHeader_Instance *this_ = (c_SoapHeader_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_SoapHeader) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_SoapHeader::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_SoapHeader::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_SoapHeader::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_SoapHeader::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_SoapHeader_Instance(HPHP::VM::Class* cls) {
-  return c_SoapHeader_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_SoapHeader) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_SoapHeader(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*

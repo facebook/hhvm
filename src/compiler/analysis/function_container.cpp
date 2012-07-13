@@ -289,10 +289,6 @@ void FunctionContainer::outputGetCallInfoHeader(CodeGenerator &cg,
     cg_printf("const char *ss = get_renamed_function(s);\n");
     cg_printf("if (ss != s) { s = ss; hash = -1;};\n");
   }
-  if (!suffix && Option::EnableEval == Option::FullEval) {
-    cg_printf("if (eval_get_call_info_hook(ci, extra, s, hash)) "
-              "return true;\n");
-  }
 }
 
 void FunctionContainer::outputGetCallInfoTail(CodeGenerator &cg,

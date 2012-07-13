@@ -451,7 +451,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_UNSET_CAST:    et = Type::Some;      rt = Type::Variant;    break;
   case T_UNSET:         et = Type::Null;      rt = Type::Variant;    break;
   case T_EXIT:          et = Type::Primitive; rt = Type::Variant;    break;
-  case T_PRINT:         et = Type::String;    rt = Type::Boolean;    break;
+  case T_PRINT:         et = Type::String;    rt = Type::Int64;      break;
   case T_ISSET:         et = Type::Variant;   rt = Type::Boolean;
     setExistContext();
     break;

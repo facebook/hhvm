@@ -146,12 +146,6 @@ namespace HPHP {
                                  int count, INVOKE_FEW_ARGS_IMPL_ARGS); \
   static Variant iw_##methname(void *self, CArrRef params);             \
 
-#define CPP_BUILTIN_CLASS_INIT(name) do { \
-  if (hhvm) { \
-    m_cls = c_##name::s_cls; \
-  } \
-} while (0)
-
 //////////////////////////////////////////////////////////////////////////////
 // jump table entries
 

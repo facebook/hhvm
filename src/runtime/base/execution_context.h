@@ -34,8 +34,6 @@
 #include <util/thread_local.h>
 #include <setjmp.h>
 
-#include <runtime/eval/base/ast_ptr.h>
-
 #define PHP_OUTPUT_HANDLER_START  (1<<0)
 #define PHP_OUTPUT_HANDLER_CONT   (1<<1)
 #define PHP_OUTPUT_HANDLER_END    (1<<2)
@@ -236,6 +234,7 @@ public:
    */
   Transport *getTransport() { return m_transport;}
   void setTransport(Transport *transport) { m_transport = transport;}
+  std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(CStrRef mimetype, CStrRef charset);
   int64 getRequestMemoryMaxBytes() const { return m_maxMemory; }
@@ -445,6 +444,7 @@ public:
   static int unpackContinuation(c_GenericContinuation* cont, TypedValue* dest);
   static void packContinuation(c_GenericContinuation* cont, VM::ActRec* fp,
                                TypedValue* value, int label);
+  void pushLocalsAndIterators(const HPHP::VM::Func* f, int nparams = 0);
 
 private:
   enum VectorLeaveCode {
@@ -454,6 +454,7 @@ private:
   template <bool warn, bool saveResult, VectorLeaveCode mleave>
   void getHelperPre(VM::PC& pc, unsigned& ndiscard,
                     TypedValue*& base, bool& baseStrOff, TypedValue& tvScratch,
+                    TypedValue& tvLiteral,
                     TypedValue& tvRef, TypedValue& tvRef2,
                     VM::MemberCode& mcode, TypedValue*& curMember);
   template <bool saveResult>
@@ -462,6 +463,7 @@ private:
                      TypedValue& tvRef2);
   void getHelper(VM::PC& pc, unsigned& ndiscard, TypedValue*& tvRet,
                  TypedValue*& base, bool& baseStrOff, TypedValue& tvScratch,
+                 TypedValue& tvLiteral,
                  TypedValue& tvRef, TypedValue& tvRef2,
                  VM::MemberCode& mcode, TypedValue*& curMember);
 
@@ -469,6 +471,7 @@ private:
             VectorLeaveCode mleave>
   bool setHelperPre(VM::PC& pc, unsigned& ndiscard, TypedValue*& base,
                     bool& baseStrOff, TypedValue& tvScratch,
+                    TypedValue& tvLiteral,
                     TypedValue& tvRef, TypedValue& tvRef2,
                     VM::MemberCode& mcode, TypedValue*& curMember);
   template <unsigned mdepth>
@@ -479,7 +482,6 @@ private:
   void iop##name(HPHP::VM::PC& pc);
 OPCODES
 #undef O
-  void pushLocalsAndIterators(const HPHP::VM::Func* f, int nparams = 0);
 
   template<bool raise>
   void contSendImpl();
@@ -602,7 +604,6 @@ public:
   bool renameFunction(const StringData* oldName, const StringData* newName);
   bool isFunctionRenameable(const StringData* name);
   void addRenameableFunctions(ArrayData* arr);
-  bool mergeUnit(HPHP::VM::Unit* unit);
   HPHP::Eval::PhpFile* lookupPhpFile(
       StringData* path, const char* currentDir, bool* initial = NULL);
   HPHP::VM::Unit* evalInclude(StringData* path,

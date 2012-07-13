@@ -190,7 +190,7 @@ bool MutableArrayIter::advance() {
     }
     // Create a new strong iterator for the new array
     ASSERT(m_fp.container == NULL);
-    if (data->getCount() > 1 && !data->isGlobalArrayWrapper()) {
+    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
       if (m_var) {
         *const_cast<Variant*>(m_var) = (data = data->copy());
       } else {
@@ -221,8 +221,8 @@ MIterCtx::~MIterCtx() {
   delete m_mArray;
   tvRefcountedDecRef(&m_key);
   tvRefcountedDecRef(&m_val);
-  if (m_var && m_var->decRefCount() == 0) {
-    const_cast<Variant*>(m_var)->release();
+  if (m_ref && m_ref->decRefCount() == 0) {
+    const_cast<RefData*>(m_ref)->release();
   }
 }
 

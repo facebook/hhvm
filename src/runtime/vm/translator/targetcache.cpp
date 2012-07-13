@@ -422,75 +422,57 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
 // GlobalCache
 //  | - BoxedGlobalCache
 
-static inline HphpArray*
-getGlobArray() {
-  SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  return
-    dynamic_cast<HphpArray*>(g->hg_global_storage.getArrayData());
-}
-
 template<bool isBoxed>
 inline TypedValue*
 GlobalCache::lookupImpl(StringData *name, bool allowCreate) {
   bool hit ATTRIBUTE_UNUSED;
-  if (UNLIKELY(m_globals == NULL)) {
-    m_globals = getGlobArray();
-    TRACE(1, "%sGlobalCache %p initializing m_globals %p\n",
-          isBoxed ? "Boxed" : "",
-          this, m_globals);
-    ASSERT(m_hint == 0);
-  } else {
-    TRACE(1, "%sGlobalCache %p cbo %d m_globals %p real globals %p\n",
-          isBoxed ? "Boxed" : "",
-          this, (int)cacheHandle(), m_globals, getGlobArray());
-    ASSERT(m_globals == getGlobArray());
-  }
 
-  UNUSED int oldHint = debug ? m_hint : 0;
   TypedValue* retval;
-  retval = m_globals->nvGet(name, m_hint, &m_hint);
-  if (debug) {
-    if (retval != NULL && m_hint == oldHint) {
-      Stats::inc(Stats::TgtCache_GlobalHit);
-    } else {
-      Stats::inc(Stats::TgtCache_GlobalMiss);
-    }
-  }
-  if (!retval) {
+  if (!m_tv) {
     hit = false;
-
-    if (!allowCreate) goto miss;
 
     VarEnv* ve = g_vmContext->m_varEnvs.front();
     ASSERT(ve->isGlobalScope());
-    ASSERT(ve->lookup(name) == NULL);
-    TypedValue tv;
-    TV_WRITE_NULL(&tv);
-    ve->set(name, &tv);
-    retval = ve->lookup(name);
+    if (allowCreate) {
+      m_tv = ve->lookupAddRawPointer(name);
+    } else {
+      m_tv = ve->lookupRawPointer(name);
+      if (!m_tv) {
+        retval = 0;
+        goto miss;
+      }
+    }
   } else {
     hit = true;
   }
 
-  ASSERT(retval);
-  if (isBoxed && retval->m_type != KindOfVariant) {
-    tvBox(retval);
-    ASSERT(retval->m_type == KindOfVariant);
+  retval = tvDerefIndirect(m_tv);
+  if (retval->m_type == KindOfUninit) {
+    if (!allowCreate) {
+      retval = 0;
+      goto miss;
+    } else {
+      TV_WRITE_NULL(retval);
+    }
   }
-  if (!isBoxed && retval->m_type == KindOfVariant) {
+  if (isBoxed && retval->m_type != KindOfRef) {
+    tvBox(retval);
+  }
+  if (!isBoxed && retval->m_type == KindOfRef) {
     retval = retval->m_data.ptv;
   }
-  ASSERT(!isBoxed || retval->m_type == KindOfVariant);
-  ASSERT(!IS_REFCOUNTED_TYPE(retval->m_type) || retval->_count >= 0);
+  ASSERT(!isBoxed || retval->m_type == KindOfRef);
+  ASSERT(!allowCreate || retval);
 
 miss:
   // decRef the name if we consumed it.  If we didn't get a global, we
   // need to leave the name for the caller to use before decrefing (to
   // emit warnings).
   if (retval && name->decRefCount() == 0) { name->release(); }
-  TRACE(5, "%sGlobalCache::lookup(\"%s\") %p -> (%s) %p t%d\n",
+  TRACE(5, "%sGlobalCache::lookup(\"%s\") tv@%p %p -> (%s) %p t%d\n",
         isBoxed ? "Boxed" : "",
         name->data(),
+        m_tv,
         retval,
         hit ? "hit" : "miss",
         retval ? retval->m_data.ptv : 0,
@@ -502,7 +484,7 @@ TypedValue*
 GlobalCache::lookup(Handle handle, StringData* name) {
   GlobalCache* thiz = (GlobalCache*)GlobalCache::cacheAtHandle(handle);
   TypedValue* retval = thiz->lookupImpl<false>(name, false /* allowCreate */);
-  ASSERT(!retval || retval->m_type != KindOfVariant);
+  ASSERT(!retval || retval->m_type != KindOfRef);
   return retval;
 }
 
@@ -510,7 +492,7 @@ TypedValue*
 GlobalCache::lookupCreate(Handle handle, StringData* name) {
   GlobalCache* thiz = (GlobalCache*)GlobalCache::cacheAtHandle(handle);
   TypedValue* retval = thiz->lookupImpl<false>(name, true /* allowCreate */);
-  ASSERT(retval->m_type != KindOfVariant);
+  ASSERT(retval->m_type != KindOfRef);
   return retval;
 }
 
@@ -519,7 +501,7 @@ BoxedGlobalCache::lookup(Handle handle, StringData* name) {
   BoxedGlobalCache* thiz = (BoxedGlobalCache*)
     BoxedGlobalCache::cacheAtHandle(handle);
   TypedValue* retval = thiz->lookupImpl<true>(name, false /* allowCreate */);
-  ASSERT(!retval || retval->m_type == KindOfVariant);
+  ASSERT(!retval || retval->m_type == KindOfRef);
   return retval;
 }
 
@@ -528,7 +510,7 @@ BoxedGlobalCache::lookupCreate(Handle handle, StringData* name) {
   BoxedGlobalCache* thiz = (BoxedGlobalCache*)
     BoxedGlobalCache::cacheAtHandle(handle);
   TypedValue* retval = thiz->lookupImpl<true>(name, true /* allowCreate */);
-  ASSERT(retval->m_type == KindOfVariant);
+  ASSERT(retval->m_type == KindOfRef);
   return retval;
 }
 
@@ -543,8 +525,8 @@ CacheHandle allocClassInitProp(const StringData* name) {
 }
 
 CacheHandle allocClassInitSProp(const StringData* name) {
-  return namedAlloc<NSClsInitSProp>(name, sizeof(HphpArray*),
-                                    sizeof(HphpArray*));
+  return namedAlloc<NSClsInitSProp>(name, sizeof(TypedValue*),
+                                    sizeof(TypedValue*));
 }
 
 CacheHandle allocFixedFunction(const StringData* name) {
@@ -776,7 +758,7 @@ PropCtxNameCache::incStat() { Stats::inc(Stats::Tx64_PropCtxNameCache); }
 
 template<typename Key, PHPNameSpace ns>
 template<bool baseIsLocal>
-TypedValue*
+void
 PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
                                StringData* name, TypedValue* stackPtr,
                                ActRec* fp) {
@@ -786,84 +768,85 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
   Key key(c, fp, name);
   typename Parent::Self* thiz = Parent::cacheAtHandle(handle);
   typename Parent::Pair* pair = thiz->keyToPair(key);
+  TypedValue* result;
+  RefData* refToFree = baseIsLocal || stackPtr->m_type != KindOfRef ?
+    NULL : stackPtr->m_data.pref;
   if (pair->m_key == key) {
-    TypedValue* result = (TypedValue*)((uintptr_t)base + pair->m_value);
+    result = (TypedValue*)((uintptr_t)base + pair->m_value);
     if (UNLIKELY(result->m_type == KindOfUninit)) {
       VMRegAnchor _;
-      ASSERT(base->isInstance());
       static_cast<Instance*>(base)->raiseUndefProp(name);
       result = (TypedValue*)&init_null_variant;
+    } else if (UNLIKELY(result->m_type == KindOfRef)) {
+      result = result->m_data.ptv;
     }
-
+    tvDupCell(result, stackPtr);
     Stats::inc(Stats::TgtCache_PropGetHit);
-    return result;
-  }
-  if (!pair->m_value) {
-    Stats::inc(Stats::TgtCache_PropGetFill);
+    goto exit;
   } else {
-    Stats::inc(Stats::TgtCache_PropGetMiss);
-  }
-
-  VMRegAnchor _;
-  // For getters and extension objects we must provide our own storage
-  // for the property; we use the stack cell where the value
-  // belongs.
-  TypedValue* result = stackPtr;
-  // Pseudomains don't always have the same context class
-  ASSERT(!curFunc()->isPseudoMain());
-  Class* ctx = arGetContextClass(g_vmContext->getFP());
-  Instance* instance =
-    base->isInstance() ? static_cast<Instance*>(base) : NULL;
-
-  // "Hold" the reference in stackPtr, too.
-  TypedValue &ref = *stackPtr;
-  tvWriteUninit(&ref);
-  EXCEPTION_GATE_ENTER();
-  if (LIKELY(instance != NULL)) {
-    instance->propW(result, ref, ctx, name);
-  } else {
-    CStrRef ctxName = ctx ? ctx->nameRef() : null_string;
-    tvAsVariant(result) = base->o_get(CStrRef(name), true, ctxName);
-  }
-  EXCEPTION_GATE_LEAVE();
-
-  ASSERT(result == stackPtr || instance != NULL);
-  Slot propIndex;
-  if (result == stackPtr) {
-    // The property is already in the right place and we already own
-    // a reference to it. Clean up and tell our caller there's nothing
-    // left to do.
-    if (result->m_type == KindOfVariant) {
-      tvUnbox(result);
+    if (!pair->m_value) {
+      Stats::inc(Stats::TgtCache_PropGetFill);
+    } else {
+      Stats::inc(Stats::TgtCache_PropGetMiss);
     }
-    if (!baseIsLocal && base->decRefCount() == 0) {
+
+    VMRegAnchor _;
+    // Pseudomains don't always have the same context class
+    ASSERT(!curFunc()->isPseudoMain());
+    Class* ctx = arGetContextClass(g_vmContext->getFP());
+    Instance* instance = static_cast<Instance*>(base);
+
+    EXCEPTION_GATE_ENTER();
+    // propW may need temporary storage (for getters, eg)
+    // use the target cell on the stack; this will automatically
+    // be freed (if necessary) when we overwrite it with result
+    tvWriteUninit(stackPtr);
+    if (debug) result = (TypedValue*)-1;
+    instance->propW(result, *stackPtr, ctx, name);
+    EXCEPTION_GATE_LEAVE();
+
+    if (UNLIKELY(result == stackPtr)) {
+      if (UNLIKELY(result->m_type == KindOfRef)) {
+        tvUnbox(result);
+      }
+      Stats::inc(Stats::TgtCache_PropGetFail);
+      goto exit;
+    }
+    Slot propIndex;
+    if ((propIndex = instance->declPropInd(result)) != kInvalidSlot) {
+      // It's a declared property and has a fixed offset from
+      // base. Store this in the cache. We need to hold a reference to
+      // name in case it's not a static string, and to keep things
+      // simple we're relying on these strings getting swept at the end
+      // of the request. If we're evicting an existing value we do the
+      // decRef now to save memory.
+      ASSERT(result != stackPtr);
+      name->incRefCount();
+      pair->m_key.destroy();
+      pair->m_key = key;
+      pair->m_value = c->declPropOffset(propIndex);
+    } else {
+      Stats::inc(Stats::TgtCache_PropGetFail);
+    }
+  }
+  if (UNLIKELY(result->m_type == KindOfRef )) {
+    result = result->m_data.ptv;
+  }
+  tvSet(result, stackPtr);
+
+  exit:
+  if (!baseIsLocal) {
+    if (refToFree) {
+      tvDecRefRefInternal(refToFree);
+    } else if (base->decRefCount() == 0) {
       base->release();
     }
-
-    Stats::inc(Stats::TgtCache_PropGetFail);
-    return NULL;
-  } else if ((propIndex = instance->declPropInd(result)) != kInvalidSlot) {
-    // It's a declared property and has a fixed offset from
-    // base. Store this in the cache. We need to hold a reference to
-    // name in case it's not a static string, and to keep things
-    // simple we're relying on these strings getting swept at the end
-    // of the request. If we're evicting an existing value we do the
-    // decRef now to save memory.
-    ASSERT(result != stackPtr);
-    name->incRefCount();
-    pair->m_key.destroy();
-    pair->m_key = key;
-    pair->m_value = c->declPropOffset(propIndex);
-  } else {
-    Stats::inc(Stats::TgtCache_PropGetFail);
   }
-
-  return result;
 }
 
 template<typename Key, PHPNameSpace ns>
 template<bool baseIsLocal>
-TypedValue*
+void
 PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
                             int64 val, DataType type, ActRec* fp) {
   incStat();
@@ -872,28 +855,27 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
   Key key(c, fp, name);
   typename Parent::Self* thiz = Parent::cacheAtHandle(ch);
   typename Parent::Pair* pair = thiz->keyToPair(key);
-  if (pair->m_key == key) {
-    Stats::inc(Stats::TgtCache_PropSetHit);
-    return (TypedValue*)((uintptr_t)base + pair->m_value);
-  }
-  if (!pair->m_value) {
-    Stats::inc(Stats::TgtCache_PropSetFill);
-  } else {
-    Stats::inc(Stats::TgtCache_PropSetMiss);
-  }
-
-  VMRegAnchor _;
-  // Pseudomains don't always have the same context class
-  ASSERT(!curFunc()->isPseudoMain());
-  Class* ctx = arGetContextClass(g_vmContext->getFP());
-  Instance* instance =
-    base->isInstance() ? static_cast<Instance*>(base) : NULL;
   TypedValue propVal;
-  propVal._count = 0;
+  if (debug) propVal._count = 0;
   propVal.m_type = type;
   propVal.m_data.num = val;
-  EXCEPTION_GATE_ENTER();
-  if (LIKELY(instance != NULL)) {
+  if (pair->m_key == key) {
+    Stats::inc(Stats::TgtCache_PropSetHit);
+    TypedValue* result = (TypedValue*)((uintptr_t)base + pair->m_value);
+    tvSet(&propVal, result);
+  } else {
+    if (!pair->m_value) {
+      Stats::inc(Stats::TgtCache_PropSetFill);
+    } else {
+      Stats::inc(Stats::TgtCache_PropSetMiss);
+    }
+
+    VMRegAnchor _;
+    // Pseudomains don't always have the same context class
+    ASSERT(!curFunc()->isPseudoMain());
+    Class* ctx = arGetContextClass(g_vmContext->getFP());
+    Instance* instance = static_cast<Instance*>(base);
+    EXCEPTION_GATE_ENTER();
     TypedValue* result = instance->setProp(ctx, name, &propVal);
     // setProp will return a real pointer iff it's a declared property
     if (result != NULL) {
@@ -905,17 +887,12 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
     } else {
       Stats::inc(Stats::TgtCache_PropSetFail);
     }
-  } else {
-    base->o_set(CStrRef(name), tvAsCVarRef(&propVal));
-    Stats::inc(Stats::TgtCache_PropSetFail);
+    EXCEPTION_GATE_LEAVE();
   }
-  EXCEPTION_GATE_LEAVE();
 
   if (!baseIsLocal && base->decRefCount() == 0) {
     base->release();
   }
-
-  return NULL;
 }
 
 /*

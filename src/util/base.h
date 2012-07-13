@@ -181,7 +181,7 @@ static const bool hphpiCompat = true;
 #endif
 
 typedef unsigned char uchar;
-typedef char int8;
+typedef signed char int8;
 typedef unsigned char uint8;
 typedef short int16;
 typedef unsigned short uint16;

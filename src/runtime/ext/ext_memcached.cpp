@@ -181,7 +181,6 @@ public:
 
 c_Memcached::c_Memcached(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(Memcached);
 }
 c_Memcached::~c_Memcached() {
 }

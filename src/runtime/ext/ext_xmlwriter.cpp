@@ -284,7 +284,6 @@ static xmlChar *xmls(CStrRef s) {
 
 c_XMLWriter::c_XMLWriter(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
-  CPP_BUILTIN_CLASS_INIT(XMLWriter);
 }
 
 c_XMLWriter::~c_XMLWriter() {

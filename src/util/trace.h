@@ -51,10 +51,12 @@ namespace HPHP {
 namespace Trace {
 
 #define TRACE_MODULES \
-      TM(tprefix)     \
-      TM(ringbuffer)  \
+      TM(tprefix)     /* Meta: prefix with string */          \
+      TM(ringbuffer)  /* Meta: trace to ram */                \
+      TM(traceAsync)  /* Meta: lazy writes to disk */ \
       TM(trans)       \
       TM(tx64)        \
+      TM(tx64stats)   \
       TM(txlease)     \
       TM(fixup)       \
       TM(tcspace)     \
@@ -145,7 +147,7 @@ std::string prettyNode(const char* name, const P1& p1, const P2& p2) {
 extern void traceRelease(const char*, ...);
 extern int levels[NumModules];
 extern const char* moduleName(Module mod);
-static inline bool moduleEnabledRelease(Module tm, int level = 0) {
+static inline bool moduleEnabledRelease(Module tm, int level = 1) {
   return levels[tm] >= level;
 }
 
@@ -153,7 +155,7 @@ static inline bool moduleEnabledRelease(Module tm, int level = 0) {
 #  ifndef USE_TRACE
 #    define USE_TRACE 1
 #  endif
-static inline bool moduleEnabled(Module tm, int level = 0) {
+static inline bool moduleEnabled(Module tm, int level = 1) {
   return moduleEnabledRelease(tm, level);
 }
 
@@ -199,7 +201,7 @@ static const bool enabled = false;
 static inline void trace(const char*, ...)      { }
 static inline void trace(const std::string&)    { }
 static inline void vtrace(const char*, va_list) { }
-static inline bool moduleEnabled(Module t, int level = 0) { return false; }
+static inline bool moduleEnabled(Module t, int level = 1) { return false; }
 static inline int moduleLevel(Module tm) { return 0; }
 #endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
 

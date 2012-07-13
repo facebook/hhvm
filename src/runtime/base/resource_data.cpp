@@ -30,14 +30,24 @@ int ResourceData::GetMaxResourceId() {
   return *(os_max_resource_id.getCheck());
 }
 
-ResourceData::ResourceData() : ObjectData(0, true) {
-  if (hhvm) {
-    m_cls = SystemLib::s_resourceClass;
-  }
+#ifdef HHVM
+#define RD_PARENT HPHP::VM::Instance
+#else
+#define RD_PARENT HPHP::ObjectData
+#endif
+ResourceData::ResourceData()
+#ifdef HHVM
+    : RD_PARENT(
+        ObjectStaticCallbacks::encodeVMClass(SystemLib::s_resourceClass),
+        true) {
+#else
+    : RD_PARENT(NULL, true) {
+#endif
   int &pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;
 }
+#undef RD_PARENT
 
 void ResourceData::o_setId(int id) {
   ASSERT(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR

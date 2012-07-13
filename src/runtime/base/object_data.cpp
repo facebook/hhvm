@@ -25,8 +25,6 @@
 #include <runtime/ext/ext_closure.h>
 #include <runtime/ext/ext_continuation.h>
 
-#include <runtime/eval/ast/function_call_expression.h>
-
 #include <system/lib/systemlib.h>
 
 namespace HPHP {
@@ -125,6 +123,10 @@ void ObjectData::destruct() {
 // class info
 
 CStrRef ObjectData::o_getClassName() const {
+  if (hhvm) {
+    if (isResource()) return o_getClassNameHook();
+    return *(const String*)(&m_cls->m_preClass->nameRef());
+  }
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   if (UNLIKELY(!osc)) {
     return o_getClassNameHook();
@@ -133,6 +135,10 @@ CStrRef ObjectData::o_getClassName() const {
 }
 
 CStrRef ObjectData::o_getParentName() const {
+  if (hhvm) {
+    if (isResource()) return empty_string;
+    return *(const String*)(&m_cls->m_preClass->parentRef());
+  }
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   if (UNLIKELY(!osc)) {
     return GetParentName(o_getClassNameHook());
@@ -152,6 +158,9 @@ CStrRef ObjectData::GetParentName(CStrRef cls) {
 }
 
 const ClassPropTable *ObjectData::o_getClassPropTable() const {
+  if (hhvm) {
+    return 0;
+  }
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   if (UNLIKELY(!osc)) {
     return 0;
@@ -204,11 +213,9 @@ inline ALWAYS_INLINE bool InstanceOfHelper(CStrRef s,
 HOT_FUNC
 bool ObjectData::o_instanceof(CStrRef s) const {
   if (hhvm) {
-    if (isInstance()) {
-      HPHP::VM::Class* cls = VM::Unit::lookupClass(s.get());
-      if (!cls) return false;
-      return m_cls->classof(cls->preClass());
-    }
+    HPHP::VM::Class* cls = VM::Unit::lookupClass(s.get());
+    if (!cls) return false;
+    return m_cls->classof(cls);
   }
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   return InstanceOfHelper(s, this, osc);
@@ -226,15 +233,6 @@ int64 ObjectData::o_toInt64() const {
   raise_notice("Object of class %s could not be converted to int",
                o_getClassName().data());
   return 1;
-}
-
-const Eval::MethodStatementWrapper* ObjectData::getMethodStatementWrapper(
-  CStrRef name) const {
-  return NULL;
-}
-const Eval::MethodStatementWrapper*
-ObjectData::getConstructorStatementWrapper() const {
-  return NULL;
 }
 
 void ObjectData::bindThis(ThreadInfo *info) {
@@ -351,7 +349,7 @@ static void LazyInitializer(const ClassPropTable *cpt, const char *globals) {
       const ClassPropTableEntry *ce = cpt->m_entries + *p;
       CVarRef init = cpt->getInitVal(ce);
       addr = globals + ce->offset;
-      if (LIKELY(ce->type == KindOfVariant)) {
+      if (LIKELY(ce->type == KindOfUnknown)) {
         *(Variant*)addr = init;
       } else {
         switch (ce->type) {
@@ -484,7 +482,7 @@ Variant ObjectStaticCallbacks::os_get(CStrRef s) const {
 
   GlobalVariables *g = get_global_variables();
   char *addr = (char*)g + prop->offset;
-  if (LIKELY(prop->type == KindOfVariant)) {
+  if (LIKELY(prop->type == KindOfUnknown)) {
     return *(Variant*)addr;
   }
 
@@ -498,7 +496,8 @@ Variant &ObjectStaticCallbacks::os_lval(CStrRef s) const {
     ClassPropTableEntry::Static,
     ClassPropTableEntry::Static, this);
 
-  if (LIKELY(prop != 0) && LIKELY(prop->type == KindOfVariant)) {
+  if (LIKELY(prop != 0) &&
+      LIKELY(prop->type == KindOfUnknown)) {
     GlobalVariables *g = get_global_variables();
     char *addr = (char*)g + prop->offset;
     return *(Variant*)addr;
@@ -750,7 +749,7 @@ Variant *ObjectData::RealPropPublicHelper(
                   LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
                                  propName->data()))) {
                 const char *addr = ((const char *)obj) + prop->offset;
-                if (LIKELY(prop->type == KindOfVariant) ||
+                if (LIKELY(prop->type == KindOfUnknown) ||
                     (flags & RealPropExist)) {
                   return (Variant*)addr;
                 }
@@ -786,7 +785,7 @@ Variant *ObjectData::RealPropPublicHelper(
 }
 
 void ObjectData::initProperties(int nProp) {
-  if (hhvm && isInstance()) {
+  if (hhvm) {
     if (!o_properties.get()) ((HPHP::VM::Instance*)this)->initDynProps(nProp);
   } else {
     ASSERT(hhvm || (enable_hphp_array && RuntimeOption::UseHphpArray));
@@ -797,51 +796,49 @@ void ObjectData::initProperties(int nProp) {
 }
 
 void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
-                                  CStrRef context, int *type) const {
-  *type = KindOfVariant;
+                                  CStrRef context, DataType *type) const {
+  *type = KindOfUnknown;
   if (hhvm) {
-    if (isInstance()) {
-      /*
-       * Returns a pointer to a place for a property value. This should never
-       * call the magic methods __get or __set. The flags argument describes the
-       * behavior in cases where the named property is nonexistent or
-       * inaccessible.
-       */
-      HPHP::VM::Class* ctx = NULL;
-      if (!context.empty()) {
-        ctx = VM::Unit::lookupClass(context.get());
-      }
+    /*
+     * Returns a pointer to a place for a property value. This should never
+     * call the magic methods __get or __set. The flags argument describes the
+     * behavior in cases where the named property is nonexistent or
+     * inaccessible.
+     */
+    HPHP::VM::Class* ctx = NULL;
+    if (!context.empty()) {
+      ctx = VM::Unit::lookupClass(context.get());
+    }
 
-      HPHP::VM::Instance* thiz = (HPHP::VM::Instance*)(this);  // sigh
-      bool visible, accessible, unset;
-      TypedValue* ret = (flags & RealPropNoDynamic)
-                        ? thiz->getDeclProp(ctx, propName.get(), visible,
-                                            accessible, unset)
-                        : thiz->getProp(ctx, propName.get(), visible,
-                                        accessible, unset);
-      if (ret == NULL) {
-        // Property is not declared, and not dynamically created yet.
-        if (flags & RealPropCreate) {
-          ASSERT(!(flags & RealPropNoDynamic));
-          if (o_properties.get() == NULL) {
-            thiz->initDynProps();
-          }
-          o_properties.get()->lvalPtr(propName,
-                                      *(Variant**)(&ret), false, true);
-          return (Variant*)ret;
-        } else {
-          return NULL;
+    HPHP::VM::Instance* thiz = (HPHP::VM::Instance*)(this);  // sigh
+    bool visible, accessible, unset;
+    TypedValue* ret = (flags & RealPropNoDynamic)
+                      ? thiz->getDeclProp(ctx, propName.get(), visible,
+                                          accessible, unset)
+                      : thiz->getProp(ctx, propName.get(), visible,
+                                      accessible, unset);
+    if (ret == NULL) {
+      // Property is not declared, and not dynamically created yet.
+      if (flags & RealPropCreate) {
+        ASSERT(!(flags & RealPropNoDynamic));
+        if (o_properties.get() == NULL) {
+          thiz->initDynProps();
         }
-      }
-
-      // ret is non-NULL if we reach here
-      ASSERT(visible);
-      if ((accessible && !unset) ||
-          (flags & (RealPropUnchecked|RealPropExist))) {
+        o_properties.get()->lvalPtr(propName,
+                                    *(Variant**)(&ret), false, true);
         return (Variant*)ret;
       } else {
         return NULL;
       }
+    }
+
+    // ret is non-NULL if we reach here
+    ASSERT(visible);
+    if ((accessible && !unset) ||
+        (flags & (RealPropUnchecked|RealPropExist))) {
+      return (Variant*)ret;
+    } else {
+      return NULL;
     }
   }
 
@@ -918,7 +915,7 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
               LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
                              propName->data()))) {
             char *addr = ((char *)obj) + prop->offset;
-            *type = prop->type;
+            *type = DataType(prop->type);
             return addr;
           }
         } while (!prop++->isLast());
@@ -932,9 +929,9 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
 
 Variant *ObjectData::o_realProp(CStrRef propName, int flags,
                                 CStrRef context /* = null_string */) const {
-  int type;
+  DataType type;
   if (void *p = o_realPropTyped(propName, flags, context, &type)) {
-    if (LIKELY(type == KindOfVariant)) return (Variant*)p;
+    if (LIKELY(type == KindOfUnknown)) return (Variant*)p;
     if (flags & (RealPropCreate|RealPropWrite)) return NULL;
     char *globals = (char*)get_global_variables();
     Variant *res = &((Globals*)globals)->__realPropProxy;
@@ -947,9 +944,7 @@ Variant *ObjectData::o_realProp(CStrRef propName, int flags,
 
 Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
   if (hhvm) {
-    if (isInstance()) {
-      return o_realProp(propName, flags, empty_string);
-    }
+    return o_realProp(propName, flags, empty_string);
   }
   const ObjectStaticCallbacks *orig = o_get_callbacks();
   if (UNLIKELY(!orig)) {
@@ -1351,41 +1346,39 @@ Array ObjectData::o_getDynamicProperties() const {
 Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
                              bool fatal /* = true */) {
   if (hhvm) {
-    if (isInstance()) {
-      // TODO This duplicates some logic from vm_decode_function and
-      // vm_call_user_func, we should refactor this in the near future
-      ObjectData* this_ = this;
-      HPHP::VM::Class* cls = getVMClass();
-      StringData* invName = NULL;
-      // XXX The lookup below doesn't take context into account, so it will lead
-      // to incorrect behavior in some corner cases. o_invoke is gradually being
-      // removed from the HPHP runtime this should be ok for the short term.
-      const HPHP::VM::Func* f = cls->lookupMethod(s.get());
-      if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
-        // If we found a method and its static, null out this_
-        this_ = NULL;
-      } else if (!f) {
-        if (this_) {
-          // If this_ is non-null AND we could not find a method, try
-          // looking up __call in cls's method table
-          f = cls->lookupMethod(s___call.get());
-        }
-        if (!f) {
-          // Bail if we couldn't find the method or __call
-          o_invoke_failed(o_getClassName().data(), s.data(), fatal);
-          return null;
-        }
-        // We found __call! Stash the original name into invName.
-        ASSERT(!(f->attrs() & HPHP::VM::AttrStatic));
-        invName = s.get();
-        invName->incRefCount();
+    // TODO This duplicates some logic from vm_decode_function and
+    // vm_call_user_func, we should refactor this in the near future
+    ObjectData* this_ = this;
+    HPHP::VM::Class* cls = getVMClass();
+    StringData* invName = NULL;
+    // XXX The lookup below doesn't take context into account, so it will lead
+    // to incorrect behavior in some corner cases. o_invoke is gradually being
+    // removed from the HPHP runtime this should be ok for the short term.
+    const HPHP::VM::Func* f = cls->lookupMethod(s.get());
+    if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
+      // If we found a method and its static, null out this_
+      this_ = NULL;
+    } else if (!f) {
+      if (this_) {
+        // If this_ is non-null AND we could not find a method, try
+        // looking up __call in cls's method table
+        f = cls->lookupMethod(s___call.get());
       }
-      ASSERT(f);
-      Variant ret;
-      g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
-                              NULL, invName);
-      return ret;
+      if (!f) {
+        // Bail if we couldn't find the method or __call
+        o_invoke_failed(o_getClassName().data(), s.data(), fatal);
+        return null;
+      }
+      // We found __call! Stash the original name into invName.
+      ASSERT(!(f->attrs() & HPHP::VM::AttrStatic));
+      invName = s.get();
+      invName->incRefCount();
     }
+    ASSERT(f);
+    Variant ret;
+    g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
+                            NULL, invName);
+    return ret;
   }
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
@@ -1413,37 +1406,35 @@ Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
 Variant ObjectData::o_invoke_few_args(CStrRef s, int64 hash, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (hhvm) {
-    if (isInstance()) {
-      Array params = Array::Create();
-      switch(count) {
-        case 1: APPEND_1_ARGS(params);
-                break;
-        case 2: APPEND_2_ARGS(params);
-                break;
-        case 3: APPEND_3_ARGS(params);
-                break;
+    Array params = Array::Create();
+    switch(count) {
+      case 1: APPEND_1_ARGS(params);
+              break;
+      case 2: APPEND_2_ARGS(params);
+              break;
+      case 3: APPEND_3_ARGS(params);
+              break;
 #if INVOKE_FEW_ARGS_COUNT > 3
-        case 4: APPEND_4_ARGS(params);
-                break;
-        case 5: APPEND_5_ARGS(params);
-                break;
-        case 6: APPEND_6_ARGS(params);
-                break;
+      case 4: APPEND_4_ARGS(params);
+              break;
+      case 5: APPEND_5_ARGS(params);
+              break;
+      case 6: APPEND_6_ARGS(params);
+              break;
 #if INVOKE_FEW_ARGS_COUNT > 6
-        case 7: APPEND_7_ARGS(params);
-                break;
-        case 8: APPEND_8_ARGS(params);
-                break;
-        case 9: APPEND_9_ARGS(params);
-                break;
-        case 10: APPEND_10_ARGS(params);
-                break;
+      case 7: APPEND_7_ARGS(params);
+              break;
+      case 8: APPEND_8_ARGS(params);
+              break;
+      case 9: APPEND_9_ARGS(params);
+              break;
+      case 10: APPEND_10_ARGS(params);
+              break;
 #endif
 #endif
-        default: not_implemented();
-      }
-      return o_invoke(s, params, hash);
+      default: not_implemented();
     }
+    return o_invoke(s, params, hash);
   }
   MethodCallPackage mcp;
   mcp.methodCall(this, s, hash);
@@ -1459,45 +1450,43 @@ Variant ObjectData::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
 Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
                                 CArrRef params, bool fatal /* = true */) {
   if (hhvm) {
-    if (isInstance()) {
-      // TODO This duplicates some logic from vm_decode_function and
-      // vm_call_user_func, we should refactor this in the near future
-      ObjectData* this_ = this;
-      HPHP::VM::Class* cls = VM::Unit::lookupClass(clsname.get());
-      if (!cls || !getVMClass()->classof(cls)) {
+    // TODO This duplicates some logic from vm_decode_function and
+    // vm_call_user_func, we should refactor this in the near future
+    ObjectData* this_ = this;
+    HPHP::VM::Class* cls = VM::Unit::lookupClass(clsname.get());
+    if (!cls || !getVMClass()->classof(cls)) {
+      o_invoke_failed(clsname.data(), s.data(), fatal);
+      return null;
+    }
+    StringData* invName = NULL;
+    // XXX The lookup below doesn't take context into account, so it will lead
+    // to incorrect behavior in some corner cases. o_invoke is gradually being
+    // removed from the HPHP runtime this should be ok for the short term.
+    const HPHP::VM::Func* f = cls->lookupMethod(s.get());
+    if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
+      // If we found a method and its static, null out this_
+      this_ = NULL;
+    } else if (!f) {
+      if (this_) {
+        // If this_ is non-null AND we could not find a method, try
+        // looking up __call in cls's method table
+        f = cls->lookupMethod(s___call.get());
+      }
+      if (!f) {
+        // Bail if we couldn't find the method or __call
         o_invoke_failed(clsname.data(), s.data(), fatal);
         return null;
       }
-      StringData* invName = NULL;
-      // XXX The lookup below doesn't take context into account, so it will lead
-      // to incorrect behavior in some corner cases. o_invoke is gradually being
-      // removed from the HPHP runtime this should be ok for the short term.
-      const HPHP::VM::Func* f = cls->lookupMethod(s.get());
-      if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
-        // If we found a method and its static, null out this_
-        this_ = NULL;
-      } else if (!f) {
-        if (this_) {
-          // If this_ is non-null AND we could not find a method, try
-          // looking up __call in cls's method table
-          f = cls->lookupMethod(s___call.get());
-        }
-        if (!f) {
-          // Bail if we couldn't find the method or __call
-          o_invoke_failed(clsname.data(), s.data(), fatal);
-          return null;
-        }
-        // We found __call! Stash the original name into invName.
-        ASSERT(!(f->attrs() & HPHP::VM::AttrStatic));
-        invName = s.get();
-        invName->incRefCount();
-      }
-      ASSERT(f);
-      Variant ret;
-      g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
-                              NULL, invName);
-      return ret;
+      // We found __call! Stash the original name into invName.
+      ASSERT(!(f->attrs() & HPHP::VM::AttrStatic));
+      invName = s.get();
+      invName->incRefCount();
     }
+    ASSERT(f);
+    Variant ret;
+    g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
+                            NULL, invName);
+    return ret;
   }
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
@@ -1539,10 +1528,16 @@ Variant ObjectData::o_throw_fatal(const char *msg) {
 }
 
 bool ObjectData::hasCall() {
+  if (hhvm) {
+    return m_cls->lookupMethod(s___call.get()) != NULL;
+  }
   return getRoot()->getAttribute(HasCall);
 }
 
 bool ObjectData::hasCallStatic() {
+  if (hhvm) {
+    return m_cls->lookupMethod(s___callStatic.get()) != NULL;
+  }
   return getRoot()->getAttribute(HasCallStatic);
 }
 
@@ -1676,10 +1671,8 @@ void ObjectData::dump() const {
 
 ObjectData *ObjectData::clone() {
   if (hhvm) {
-    if (LIKELY(isInstance())) {
-      HPHP::VM::Instance* instance = static_cast<HPHP::VM::Instance*>(this);
-      return instance->cloneImpl();
-    }
+    HPHP::VM::Instance* instance = static_cast<HPHP::VM::Instance*>(this);
+    return instance->cloneImpl();
   }
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   if (UNLIKELY(!osc)) {
@@ -1722,7 +1715,7 @@ ObjectData *ObjectData::clone() {
             case KindOfObject:
               *(Object*)a2 = *(Object*)a1;
               break;
-            case KindOfVariant:
+            case KindOfUnknown:
               ((Variant*)a2)->setWithRef(*(Variant*)a1);
               break;
             default:

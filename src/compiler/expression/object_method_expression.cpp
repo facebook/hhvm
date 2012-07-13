@@ -69,8 +69,15 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
       ClassScopePtr cls = getClassScope();
       if (cls) {
         m_classScope = cls;
-        m_funcScope = func = cls->findFunction(ar, m_name, true, true);
-        if (func) {
+        func = cls->findFunction(ar, m_name, true, true);
+        if (func &&
+            !cls->isInterface() &&
+            !(func->isVirtual() &&
+              (ar->isSystem() || func->isAbstract() ||
+               (func->hasOverride() &&
+                cls->getAttribute(ClassScope::NotFinal))) &&
+              !func->isPerfectVirtual())) {
+          m_funcScope = func;
           func->addCaller(getScope());
         }
       }
@@ -339,15 +346,13 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
   }
 }
 
+
 void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {
   outputCPPObject(cg, ar);
   bool isThis = m_object->isThis();
   if (!isThis) {
-    if (m_object->is(KindOfSimpleVariable) &&
-        static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
-      cg_printf(".get()");
-    }
+    m_object->outputCPPGuardedObjectPtr(cg);
     cg_printf("->");
   }
 
@@ -418,10 +423,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
     }
   } else {
     cg_printf("obj%d", m_ciTemp);
-    if (m_object->is(KindOfSimpleVariable) &&
-        static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
-      cg_printf(".get()");
-    }
+    m_object->outputCPPGuardedObjectPtr(cg);
   }
   cg_printf("), ");
   if (!m_name.empty()) {

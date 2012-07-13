@@ -159,6 +159,16 @@ class Variant : VariantBase {
   Variant(ObjectData *v);
   Variant(Variant *v);
 
+  // These are prohibited, but defined just to prevent accidentally
+  // calling the bool constructor just because we had a pointer to
+  // const.
+private:
+  Variant(const StringData *v); // no definition
+  Variant(const ArrayData *v);  // no definition
+  Variant(const ObjectData *v); // no definition
+  Variant(const Variant *v);    // no definition
+public:
+
 #ifdef INLINE_VARIANT_HELPER
   inline ALWAYS_INLINE Variant(CVarRef v) { constructValHelper(v); }
   inline ALWAYS_INLINE
@@ -266,7 +276,7 @@ class Variant : VariantBase {
 
   inline ALWAYS_INLINE const String & toCStrRef() const {
     ASSERT(is(KindOfString) || is(KindOfStaticString));
-    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr);
+    ASSERT(m_type == KindOfRef ? m_data.pvar->m_data.pstr : m_data.pstr);
     return *(const String*)(
         LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
         this : this->m_data.pvar);
@@ -280,7 +290,7 @@ class Variant : VariantBase {
 
   inline ALWAYS_INLINE String & toStrRef() {
     ASSERT(is(KindOfString) || is(KindOfStaticString));
-    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr);
+    ASSERT(m_type == KindOfRef ? m_data.pvar->m_data.pstr : m_data.pstr);
     return *(String*)(
         LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
         this : this->m_data.pvar);
@@ -297,7 +307,7 @@ class Variant : VariantBase {
 
   inline ALWAYS_INLINE const Array & toCArrRef() const {
     ASSERT(is(KindOfArray));
-    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.parr : m_data.parr);
+    ASSERT(m_type == KindOfRef ? m_data.pvar->m_data.parr : m_data.parr);
     return *(const Array*)(
         LIKELY(m_type == KindOfArray) ?
         this : this->m_data.pvar);
@@ -311,7 +321,7 @@ class Variant : VariantBase {
 
   inline ALWAYS_INLINE Array & toArrRef() {
     ASSERT(is(KindOfArray));
-    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.parr : m_data.parr);
+    ASSERT(m_type == KindOfRef ? m_data.pvar->m_data.parr : m_data.parr);
     return *(Array*)(
         LIKELY(m_type == KindOfArray) ?
         this : this->m_data.pvar);
@@ -328,7 +338,7 @@ class Variant : VariantBase {
 
   inline ALWAYS_INLINE const Object & toCObjRef() const {
     ASSERT(is(KindOfObject));
-    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.pobj : m_data.pobj);
+    ASSERT(m_type == KindOfRef ? m_data.pvar->m_data.pobj : m_data.pobj);
     return *(const Object*)(
         LIKELY(m_type == KindOfObject) ?
         this : this->m_data.pvar);
@@ -342,7 +352,7 @@ class Variant : VariantBase {
 
   inline ALWAYS_INLINE Object & toObjRef() {
     ASSERT(is(KindOfObject));
-    ASSERT(m_type == KindOfVariant ? m_data.pvar->m_data.pobj : m_data.pobj);
+    ASSERT(m_type == KindOfRef ? m_data.pvar->m_data.pobj : m_data.pobj);
     return *(Object*)(
         LIKELY(m_type == KindOfObject) ?
         this : this->m_data.pvar);
@@ -350,7 +360,7 @@ class Variant : VariantBase {
 
   ObjectData *objectForCall() const {
     if (m_type == KindOfObject) return m_data.pobj;
-    if (m_type == KindOfVariant) {
+    if (m_type == KindOfRef) {
       Variant *t = m_data.pvar;
       if (t->m_type == KindOfObject) return t->m_data.pobj;
     }
@@ -362,7 +372,7 @@ class Variant : VariantBase {
    * Type testing functions
    */
   DataType getType() const {
-    return m_type == KindOfVariant ? m_data.pvar->m_type : m_type;
+    return m_type == KindOfRef ? m_data.pvar->m_type : m_type;
   }
   DataType getRawType() const {
     return m_type;
@@ -402,7 +412,7 @@ class Variant : VariantBase {
       case KindOfInt64:
       case KindOfObject:
         return true;
-      case KindOfVariant:
+      case KindOfRef:
         return m_data.pvar->isIntVal();
       default:
         break;
@@ -442,7 +452,7 @@ class Variant : VariantBase {
    * Whether or not there are at least two variables that are strongly bound.
    */
   bool isReferenced() const {
-    return m_type == KindOfVariant && m_data.pvar->getCount() > 1;
+    return m_type == KindOfRef && m_data.pvar->getCount() > 1;
   }
 
   /**
@@ -452,16 +462,16 @@ class Variant : VariantBase {
 
   bool getBoolean() const {
     ASSERT(getType() == KindOfBoolean);
-    bool val = m_type == KindOfVariant ? m_data.pvar->m_data.num : m_data.num;
+    bool val = m_type == KindOfRef ? m_data.pvar->m_data.num : m_data.num;
     return val;
   }
   int64 getInt64() const {
     ASSERT(getType() == KindOfInt64);
-    return m_type == KindOfVariant ? m_data.pvar->m_data.num : m_data.num;
+    return m_type == KindOfRef ? m_data.pvar->m_data.num : m_data.num;
   }
   double getDouble() const {
     ASSERT(getType() == KindOfDouble);
-    return m_type == KindOfVariant ? m_data.pvar->m_data.dbl : m_data.dbl;
+    return m_type == KindOfRef ? m_data.pvar->m_data.dbl : m_data.dbl;
   }
 
   /**
@@ -803,17 +813,13 @@ class Variant : VariantBase {
   const Variant operator[](double  key) const { return rvalAt(key);}
   const Variant operator[](litstr  key) const { return rvalAt(key);}
   const Variant operator[](CStrRef key) const { return rvalAt(key);}
-  const Variant operator[](StringData *key) const {
-    assert(false);
-    return rvalAt(String(key));
-  }
   const Variant operator[](CArrRef key) const { return rvalAt(key);}
   const Variant operator[](CObjRef key) const { return rvalAt(key);}
   const Variant operator[](CVarRef key) const { return rvalAt(key);}
 
   template<typename T>
   Variant &lval(const T &key) {
-    if (m_type == KindOfVariant) {
+    if (m_type == KindOfRef) {
       return m_data.pvar->lval(key);
     }
 
@@ -1043,52 +1049,50 @@ class Variant : VariantBase {
    */
   int64 *getInt64Data() const {
     ASSERT(getType() == KindOfInt64);
-    return m_type == KindOfVariant ? &m_data.pvar->m_data.num : &m_data.num;
+    return m_type == KindOfRef ? &m_data.pvar->m_data.num : &m_data.num;
   }
   double *getDoubleData() const {
     ASSERT(getType() == KindOfDouble);
-    return m_type == KindOfVariant ? &m_data.pvar->m_data.dbl : &m_data.dbl;
+    return m_type == KindOfRef ? &m_data.pvar->m_data.dbl : &m_data.dbl;
   }
   StringData *getStringData() const {
     ASSERT(getType() == KindOfString || getType() == KindOfStaticString);
-    return m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr;
+    return m_type == KindOfRef ? m_data.pvar->m_data.pstr : m_data.pstr;
   }
   StringData *getStringDataOrNull() const {
     // This is a necessary evil because getStringData() returns
     // an undefined result if this is a null variant
     ASSERT(isNull() || is(KindOfString) || is(KindOfStaticString));
-    return m_type == KindOfVariant ?
+    return m_type == KindOfRef ?
       (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.pstr) :
       (m_type <= KindOfNull ? NULL : m_data.pstr);
   }
   ArrayData *getArrayData() const {
     ASSERT(is(KindOfArray));
-    return m_type == KindOfVariant ? m_data.pvar->m_data.parr : m_data.parr;
+    return m_type == KindOfRef ? m_data.pvar->m_data.parr : m_data.parr;
   }
   ArrayData *getArrayDataOrNull() const {
     // This is a necessary evil because getArrayData() returns
     // an undefined result if this is a null variant
     ASSERT(isNull() || is(KindOfArray));
-    return m_type == KindOfVariant ?
+    return m_type == KindOfRef ?
       (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.parr) :
       (m_type <= KindOfNull ? NULL : m_data.parr);
   }
   ObjectData *getObjectData() const {
     ASSERT(is(KindOfObject));
-    return m_type == KindOfVariant ? m_data.pvar->m_data.pobj : m_data.pobj;
+    return m_type == KindOfRef ? m_data.pvar->m_data.pobj : m_data.pobj;
   }
   ObjectData *getObjectDataOrNull() const {
     // This is a necessary evil because getObjectData() returns
     // an undefined result if this is a null variant
     ASSERT(isNull() || is(KindOfObject));
-    return m_type == KindOfVariant ?
+    return m_type == KindOfRef ?
       (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.pobj) :
       (m_type <= KindOfNull ? NULL : m_data.pobj);
   }
-  Variant *getVariantData() const {
-    // Wrap into a referenceable form, if it isn't already.
-    PromoteToVariant(*this);
-    ASSERT(m_type == KindOfVariant);
+  Variant *getRefData() const {
+    ASSERT(m_type == KindOfRef);
     return m_data.pvar;
   }
 
@@ -1107,13 +1111,25 @@ class Variant : VariantBase {
     return (uintptr_t)&v->m_data;
   }
 
+  /*
+   * Access this Variant as a TypedValue.  Differs slightly from
+   * getTypedAccessor() by returning the outer TypedValue if it is
+   * KindOfRef.
+   */
+  TypedValue* asTypedValue() {
+    return reinterpret_cast<TypedValue*>(this);
+  }
+  const TypedValue* asTypedValue() const {
+    return reinterpret_cast<const TypedValue*>(this);
+  }
+
   /**
    * Based on the order in complex_types.h, TypedValue is defined before.
    * TypedValue is binary compatible with Variant
    */
   typedef struct TypedValue* TypedValueAccessor;
   TypedValueAccessor getTypedAccessor() const {
-    const Variant *value = m_type == KindOfVariant ? m_data.pvar : this;
+    const Variant *value = m_type == KindOfRef ? m_data.pvar : this;
     return (TypedValueAccessor)value;
   }
   static DataType GetAccessorType(TypedValueAccessor acc) {
@@ -1184,7 +1200,8 @@ class Variant : VariantBase {
     StringData  *pstr;
     ArrayData   *parr;
     ObjectData  *pobj;
-    Variant     *pvar; // shared data between strongly bound Variants
+    RefData     *pref; // shared data between strongly bound Variants
+    Variant     *pvar; // Deprecated; use pref for KindOfRef.
   } m_data;
  protected:
   union {
@@ -1199,7 +1216,7 @@ class Variant : VariantBase {
  private:
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
-    ASSERT(m_type != KindOfVariant);
+    ASSERT(m_type != KindOfRef);
     return m_type <= KindOfNull ||
       (m_type == KindOfBoolean && !m_data.num) ||
       ((m_type == KindOfString || m_type == KindOfStaticString) &&
@@ -1223,6 +1240,9 @@ class Variant : VariantBase {
   CVarRef set(StringData  *v);
   CVarRef set(ArrayData   *v);
   CVarRef set(ObjectData  *v);
+  CVarRef set(const StringData  *v); // no definition
+  CVarRef set(const ArrayData   *v); // no definition
+  CVarRef set(const ObjectData  *v); // no definition
 
   CVarRef set(CStrRef v) { return set(v.get()); }
   CVarRef set(const StaticString & v);
@@ -1239,8 +1259,8 @@ class Variant : VariantBase {
 
   static inline ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {
-    if (self->m_type == KindOfVariant) self = self->m_data.pvar;
-    if (other->m_type == KindOfVariant) other = other->m_data.pvar;
+    if (self->m_type == KindOfRef) self = self->m_data.pvar;
+    if (other->m_type == KindOfRef) other = other->m_data.pvar;
     if (self != other) {
       DataType mt = other->m_type;
       Data data = other->m_data;
@@ -1256,19 +1276,13 @@ class Variant : VariantBase {
 #ifdef INLINE_VARIANT_HELPER
 public:
 #endif
-  static inline ALWAYS_INLINE void PromoteToVariant(CVarRef v) {
+  static inline ALWAYS_INLINE void PromoteToRef(CVarRef v) {
     ASSERT(hhvm || !v.isVarNR());
     ASSERT(&v != &null_variant);
-    if (v.m_type != KindOfVariant) {
-      Variant *shared = NEW(Variant)(noInit);
-      if (v.m_type == KindOfUninit) {
-        shared->m_type = KindOfNull;
-      } else {
-        *(TypedValue*)shared = *(TypedValue*)&v;
-      }
-      shared->_count = 1;
-      const_cast<Variant&>(v).m_type = KindOfVariant;
-      const_cast<Variant&>(v).m_data.pvar = shared;
+    if (v.m_type != KindOfRef) {
+      RefData *ref = NEW(RefData)(v.m_type, v.m_data.num);
+      const_cast<Variant&>(v).m_type = KindOfRef;
+      const_cast<Variant&>(v).m_data.pref = ref;
     }
   }
 
@@ -1277,24 +1291,24 @@ public:
   }
 
   inline ALWAYS_INLINE void assignRefHelper(CVarRef v) {
-    PromoteToVariant(v);
+    PromoteToRef(v);
     v.m_data.pvar->incRefCount(); // in case destruct() triggers deletion of v
     if (IS_REFCOUNTED_TYPE(m_type)) destruct();
-    m_type = KindOfVariant;
+    m_type = KindOfRef;
     m_data.pvar = v.m_data.pvar;
   }
 
   inline ALWAYS_INLINE void constructRefHelper(CVarRef v) {
-    PromoteToVariant(v);
+    PromoteToRef(v);
     v.m_data.pvar->incRefCount();
     m_data.pvar = v.m_data.pvar;
-    m_type = KindOfVariant;
+    m_type = KindOfRef;
     _count = 0;
   }
 
   inline ALWAYS_INLINE void constructValHelper(CVarRef v) {
     const Variant *other =
-      UNLIKELY(v.m_type == KindOfVariant) ? v.m_data.pvar : &v;
+      UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pvar : &v;
     ASSERT(this != other);
     if (IS_REFCOUNTED_TYPE(other->m_type)) {
       other->m_data.pvar->incRefCount();
@@ -1308,7 +1322,7 @@ public:
   void setWithRefHelper(CVarRef v, const ArrayData *arr, bool destroy) {
     ASSERT(this != &v);
 
-    CVarRef rhs = v.m_type == KindOfVariant && v.m_data.pvar->getCount() <= 1 &&
+    CVarRef rhs = v.m_type == KindOfRef && v.m_data.pvar->getCount() <= 1 &&
       (!arr || v.m_data.pvar->m_data.parr != arr) ?
       *v.m_data.pvar : v;
     if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
@@ -1344,7 +1358,7 @@ private:
 
   template<typename T>
   Variant refvalAtImpl(const T &key) {
-    if (m_type == KindOfVariant) {
+    if (m_type == KindOfRef) {
       return m_data.pvar->refvalAtImpl(key);
     }
     if (is(KindOfArray) || isObjectConvertable()) {
@@ -1358,7 +1372,7 @@ private:
 
   template<class T>
   Variant argvalAtImpl(bool byRef, const T &key) {
-    if (m_type == KindOfVariant) {
+    if (m_type == KindOfRef) {
       return m_data.pvar->argvalAtImpl(byRef, key);
     }
     if (byRef && (m_type == KindOfArray ||
@@ -1388,7 +1402,7 @@ private:
     ASSERT(m_type == KindOfArray);
     if (m_data.parr->getCount() > 1) return true;
     if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
-    if (v.m_type == KindOfVariant) {
+    if (v.m_type == KindOfRef) {
       return m_data.parr == v.m_data.pvar->m_data.parr;
     }
     return false;
@@ -1598,7 +1612,7 @@ private:
     return (Variant*)this;
   }
   bool checkRefCount() {
-    if (m_type == KindOfVariant) return false;
+    if (m_type == KindOfRef) return false;
     if (!IS_REFCOUNTED_TYPE(m_type)) return true;
     if (!isVarNR()) return false;
     switch (m_type) {
@@ -1657,10 +1671,6 @@ inline const Variant Array::operator[](double  key) const {
 }
 
 inline const Variant Array::operator[](litstr  key) const {
-  return rvalAt(key);
-}
-
-inline const Variant Array::operator[](const StringData *key) const {
   return rvalAt(key);
 }
 

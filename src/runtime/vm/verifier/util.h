@@ -20,56 +20,13 @@
 #include <cstddef> // for size_t
 #include <vector>
 #include <stdint.h>
-#include <util/assert.h>
-
 #include <boost/iterator/iterator_traits.hpp>
+#include "util/assert.h"
+#include "util/arena.h"
 
 namespace HPHP {
 namespace VM {
 namespace Verifier {
-
-/**
- * Arena is an allocator that frees all memory when the arena instance
- * is destroyed.  No destructors of allocated objects will be called!
- * It is a bump-pointer allocator.
- *
- * Every allocation is rounded up to 16 bytes and is 16-byte aligned; this
- * mirrors the way stack alignment works in gcc, which should be good enough.
- *
- * If we're out of memory, allocation functions throw an Exception.
- * Blocks smaller than kMinBytes bytes are rounded up to kMinBytes, and
- * all blocks are kMinBytes-aligned.
- */
-class Arena {
-  static const size_t kMinBytes = 16;
-  static const size_t kChunkBytes = 4096;
- public:
-  Arena();
-  ~Arena();
-  void* alloc(size_t nbytes);
- private:
-  // copying Arenas will end badly.
-  Arena(const Arena&);
-  Arena& operator=(const Arena&);
- private:
-  void* alloc_slow(size_t nbytes);
-  char* fill(size_t nbytes);
- private:
-  char* m_next;
-  char* m_limit;
-  std::vector<char*> m_ptrs;
-};
-
-inline void* Arena::alloc(size_t nbytes) {
-  nbytes = (nbytes + (kMinBytes - 1)) & ~(kMinBytes - 1); // round up
-  char* ptr = m_next;
-  char* next = ptr + nbytes;
-  if (next <= m_limit) {
-    m_next = next;
-    return ptr;
-  }
-  return alloc_slow(nbytes);
-}
 
 /**
  * Fixed-sized, arena-based bitset class (size determined on allocation)
@@ -141,16 +98,5 @@ inline bool contains(const C &c, T e) {
 }
 
 }}} // namespace HPHP::VM::Verifier
-
-// These global-operator-new declarations cannot be in a namespace,
-// but since they take Arena arguments we won't overload anything else.
-
-inline void* operator new(size_t nbytes, HPHP::VM::Verifier::Arena& a) {
-  return a.alloc(nbytes);
-}
-
-inline void* operator new[](size_t nbytes, HPHP::VM::Verifier::Arena& a) {
-  return a.alloc(nbytes);
-}
 
 #endif // incl_VM_VERIFIER_UTIL_H

@@ -87,10 +87,10 @@
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
-#include <runtime/vm/unit.h>
-#include <runtime/vm/hhbc.h>
-#include <runtime/base/builtin_functions.h>
-#include <compiler/analysis/emitter.h>
+#include "runtime/vm/unit.h"
+#include "runtime/vm/hhbc.h"
+#include "runtime/base/builtin_functions.h"
+#include "compiler/analysis/emitter.h"
 
 namespace HPHP { namespace VM {
 
@@ -555,7 +555,7 @@ struct AsmState : private boost::noncopyable {
 template<class Target> Target read_opcode_arg(AsmState& as) {
   as.in.skipSpaceTab();
   std::string strVal;
-  as.in.consumePred(!boost::is_any_of(" \t\n#;"),
+  as.in.consumePred(!boost::is_any_of(" \t\n#;>"),
                     std::back_inserter(strVal));
   if (strVal.empty()) {
     as.error("expected opcode or directive argument");
@@ -595,18 +595,26 @@ ArrayData* read_litarray(AsmState& as) {
   return it->second;
 }
 
-// Currently only supporting immediates that are local variable
-// names (will need to support string literals probably eventually).
-void read_immvector_immediate(AsmState& as, std::vector<uchar>& ret) {
-  if (as.in.getc() != '$') {
-    as.error("only local-variable immediates supported in "
-             "vector immediates");
+void read_immvector_immediate(AsmState& as, std::vector<uchar>& ret,
+                              MemberCode mcode = InvalidMemberCode) {
+  if (memberCodeImmIsLoc(mcode) || mcode == InvalidMemberCode) {
+    if (as.in.getc() != '$') {
+      as.error("*L member code in vector immediate must be followed by "
+               "a local variable name");
+    }
+    std::string name;
+    if (!as.in.readword(name)) {
+      as.error("couldn't read name for local variable in vector immediate");
+    }
+    encodeIvaToVector(ret, as.getLocalId("$" + name));
+  } else if (memberCodeImmIsString(mcode)) {
+    encodeToVector<int32>(ret, as.ue->mergeLitstr(read_litstr(as)));
+  } else if (memberCodeImmIsInt(mcode)) {
+    encodeToVector<int64>(ret, read_opcode_arg<int64>(as));
+  } else {
+    as.error(std::string("don't understand immediate for member code ") +
+             memberCodeString(mcode));
   }
-  std::string name;
-  if (!as.in.readword(name)) {
-    as.error("couldn't read name for local variable in vector immediate");
-  }
-  encodeIvaToVector(ret, as.getLocalId("$" + name));
 }
 
 std::vector<uchar> read_immvector(AsmState& as, int& stackCount) {
@@ -643,19 +651,16 @@ std::vector<uchar> read_immvector(AsmState& as, int& stackCount) {
     if (!as.in.readword(word)) {
       as.error("expected member code in immediate vector");
     }
-    MemberCode mcode = parseMemberCode(word.c_str());\
+    MemberCode mcode = parseMemberCode(word.c_str());
     if (mcode == InvalidMemberCode) {
       as.error("unrecognized member code `" + word + "'");
     }
     ret.push_back(uint8_t(mcode));
-    if (word[word.size() - 1] == 'L') {
+    if (memberCodeHasImm(mcode)) {
       if (as.in.getc() != ':') {
         as.error("expected `:' after member code `" + word + "'");
       }
-    }
-
-    if (memberCodeHasImm(mcode)) {
-      read_immvector_immediate(as, ret);
+      read_immvector_immediate(as, ret, mcode);
     } else if (mcode != MW) {
       ++stackCount;
     }
@@ -725,7 +730,7 @@ OpcodeParserMap opcode_parsers;
     as.ue->emitByte(vecImm[i]);                                       \
   }
 
-#define IMM_ILA do {                                    \
+#define IMM_BLA do {                                    \
   std::vector<std::string> vecImm = read_jmpvector(as); \
   as.ue->emitInt32(vecImm.size());                      \
   for (size_t i = 0; i < vecImm.size(); ++i) {          \
@@ -1454,13 +1459,12 @@ void parse_class(AsmState& as) {
   }
 
   as.pce = as.ue->newPreClassEmitter(StringData::GetStaticString(name),
-                                     true /* hoistable */);
+                                     PreClass::MaybeHoistable);
   as.pce->init(as.in.getLineNumber(),
                as.in.getLineNumber() + 1, // XXX
                as.ue->bcPos(),
                attrs,
                StringData::GetStaticString(parentName),
-               true /* hoistable */,
                empty_string.get());
   for (size_t i = 0; i < ifaces.size(); ++i) {
     as.pce->addInterface(StringData::GetStaticString(ifaces[i]));

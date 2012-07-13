@@ -666,133 +666,22 @@ function emitSlowPathHelper($obj, $ext_hhvm_cpp, $indent, $prefix) {
   fwrite($ext_hhvm_cpp, $func_call_suffix);
 }
 
-function emit_instance_definition($out, $cname) {
-  fwrite($out, "class c_" . $cname . "_Instance");
-  fwrite($out, " : public c_" . $cname . " {\n");
-  fwrite($out, "public:\n");
-
-  // constructor
-  fwrite($out, "  c_" . $cname . "_Instance" .
-                        " (HPHP::VM::Class* cls, unsigned nProps) {\n");
-                             // See the comment in instance.h
-                             // about why we need to treat this as
-                             // a GC root during construction.
-  fwrite($out, "    DECLARE_STACK_GC_ROOT(ObjectData, this);\n");
-  fwrite($out, "    m_cls = cls;\n");
-  fwrite($out, "    setAttributes(cls->getODAttrs()\n");
-  fwrite($out, "                  | (cls->clsInfo()\n");
-  fwrite($out, "                     ? 0 : IsInstance));\n");
-  fwrite($out, "    m_propVec = (TypedValue *)((uintptr_t)this" .
-                        " + sizeof(c_" . $cname . "));\n");
-  fwrite($out, "    if (cls->needInitialization()) {\n");
-  fwrite($out, "      cls->initialize();\n");
-  fwrite($out, "    }\n");
-  fwrite($out, "    if (nProps > 0) {\n");
-  fwrite($out, "      if (cls->pinitVec().size() > 0) {\n");
-  fwrite($out, "        initialize(nProps);\n");
-  fwrite($out, "      } else {\n");
-  fwrite($out, "        ASSERT(nProps == " .
-                        "cls->declPropInit().size());\n");
-  fwrite($out, "        memcpy(m_propVec, " .
-                        "&cls->declPropInit()[0], nProps * " .
-                        "sizeof(TypedValue));\n");
-  fwrite($out, "      }\n");
-  fwrite($out, "    }\n");
-  fwrite($out, "  }\n");
-
-  // static method for creating a new instance
-  fwrite($out, "  static HPHP::VM::Instance* new_Instance" .
-                        "(HPHP::VM::Class* cls) {\n");
-  fwrite($out, "    size_t nProps = " .
-                        "cls->numDeclProperties();\n");
-  fwrite($out, "    size_t builtinPropSize = " .
-                        "sizeof(c_" . $cname . ") - sizeof(ObjectData);\n");
-  fwrite($out, "    size_t size = sizeForNProps(nProps)" .
-                        " + builtinPropSize;\n");
-  fwrite($out, "    HPHP::VM::Instance *inst = " .
-                        "(HPHP::VM::Instance*)ALLOCOBJSZ(size);\n");
-  fwrite($out, "    new ((void *)inst) c_" . $cname . "_Instance" .
-                        "(cls, nProps);\n");
-  fwrite($out, "    return inst;\n");
-  fwrite($out, "  }\n");
-
-  // delete operator
-  fwrite($out, "  void operator delete(void *p) {\n");
-  fwrite($out, "    c_${cname}_Instance *this_ = " .
-                        "(c_${cname}_Instance*)p;\n");
-  fwrite($out, "    size_t nProps = " .
-                        "this_->m_cls->numDeclProperties();\n");
-  fwrite($out, "    size_t builtinPropSize UNUSED = " .
-                        "sizeof(c_" . $cname . ") - sizeof(ObjectData);\n");
-  fwrite($out, "    for (size_t i = 0; i < nProps; ++i) {\n");
-  fwrite($out, "      TypedValue *prop = &this_->m_propVec[i];\n");
-  fwrite($out, "      tvRefcountedDecRef(prop);\n");
-  fwrite($out, "    }\n");
-  fwrite($out, "    DELETEOBJSZ(sizeForNProps(nProps) + ".
-               "builtinPropSize)(this_);\n");
-  fwrite($out, "  }\n");
-
-  // virtual methods that need to be redefined in the leaf
-  // o_instanceof()
-  fwrite($out, "  virtual bool o_instanceof" .
-                        "(const HPHP::String& s) const {\n");
-  fwrite($out, "    return Instance::o_instanceof(s) || ".
-                        "c_" . $cname . "::o_instanceof(s);\n");
-  fwrite($out, "  }\n");
-
-  // o_realProp()
-  fwrite($out, "  virtual Variant* o_realProp" .
-                       "(CStrRef s, int flags, CStrRef context) const {\n");
-  fwrite($out, "    Variant *v = " .
-                        "Instance::o_realProp(s, flags, context);\n");
-  fwrite($out, "    if (v) return v;\n");
-  fwrite($out, "    return c_" . $cname .
-                        "::o_realProp(s, flags, context);\n");
-  fwrite($out, "  }\n");
-
-  // o_realPropPublic()
-  fwrite($out, "  virtual Variant* o_realPropPublic" .
-                       "(CStrRef s, int flags) const {\n");
-  fwrite($out, "    Variant *v = " .
-                        "Instance::o_realPropPublic(s, flags);\n");
-  fwrite($out, "    if (v) return v;\n");
-  fwrite($out, "    return c_" . $cname .
-                        "::o_realPropPublic(s, flags);\n");
-  fwrite($out, "  }\n");
-
-  // o_setArray()
-  fwrite($out, "  virtual void o_setArray(CArrRef props) {\n");
-  fwrite($out, "    ClassInfo::SetArray" .
-                        "(this, o_getClassPropTable(), props);\n");
-  fwrite($out, "  }\n");
-
-  // o_getArray()
-  fwrite($out, "  virtual void o_getArray" .
-                        "(Array &props, bool pubOnly) const {\n");
-  fwrite($out, "    ClassInfo::GetArray" .
-                        "(this, o_getClassPropTable(), props, false);\n");
-  fwrite($out, "}\n");
-
-  // cloneImpl
-  fwrite($out, "  virtual ObjectData* cloneImpl() {\n");
-  fwrite($out, "    return Instance::cloneImpl();\n");
-  fwrite($out, "  }\n");
-
-  // cloneSet
-  fwrite($out, "  virtual void cloneSet(ObjectData *clone) {\n");
-  fwrite($out, "    c_" . $cname . "::cloneSet(clone);\n");
-  fwrite($out, "    Instance::cloneSet(clone);\n");
-  fwrite($out, "  }\n");
-
-  fwrite($out, "};\n\n");
-
+function emit_ctor_helper($out, $cname) {
   // Generate code for leaf constructor
   fwrite($out, "HPHP::VM::Instance* new_" . $cname .
                         "_Instance(HPHP::VM::Class* cls) {\n");
-  fwrite($out, "  return c_" . $cname .
-                        "_Instance::new_Instance(cls);\n");
+  fwrite($out, "  size_t nProps = " .
+                        "cls->numDeclProperties();\n");
+  fwrite($out, "  size_t builtinPropSize = " .
+                        "sizeof(c_" . $cname . ") - sizeof(ObjectData);\n");
+  fwrite($out, "  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + " .
+                        "builtinPropSize;\n");
+  fwrite($out, "  HPHP::VM::Instance *inst = " .
+                        "(HPHP::VM::Instance*)ALLOCOBJSZ(size);\n");
+  fwrite($out, "  new ((void *)inst) c_" . $cname .
+               "(ObjectStaticCallbacks::encodeVMClass(cls));\n");
+  fwrite($out, "  return inst;\n");
   fwrite($out, "}\n\n");
-
 }
 
 function phase2() {
@@ -929,7 +818,7 @@ function phase2() {
         // avoid multiple definition issues when an extension class is
         // spread among a few cpp files.
         if ($obj->name == "__construct") {
-          emit_instance_definition($ext_hhvm_cpp, $cname);
+          emit_ctor_helper($ext_hhvm_cpp, $cname);
         }
 
         $indent = '';

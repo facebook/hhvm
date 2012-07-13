@@ -994,15 +994,15 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svs00000000, ""),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x4FDAA620FA5F15F9LL,0,0,3,66,10,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ss87c805e6, "\000*\000severity") },
+  {0x4FDAA620FA5F15F9LL,0,0,3,66,-1,GET_PROPERTY_OFFSET(c_ErrorException, m_severity),&NAMSTR(s_sys_ss87c805e6, "\000*\000severity") },
 
-  {0x0B197E8F85F4DA21LL,6,0,3,2,10,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss597e1acf, "\000*\000previous") },
-  {0x53B04B608CD9E191LL,0,1,3,66,10,GET_PROPERTY_OFFSET(c_Exception, m_inited),&NAMSTR(s_sys_ssca166f68, "\000*\000inited") },
-  {0x3CCB986B2CF0A747LL,-1,0,3,66,10,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss48192147, "\000*\000trace") },
-  {0x58C72230857ACDB9LL,-3,2,3,66,10,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssa0811f17, "\000*\000code") },
-  {0x04AB35CACF8C8C9ALL,-2,0,3,66,10,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ss0c360a27, "\000*\000line") },
-  {0x0247CDBB94C9D47BLL,-2,3,3,66,10,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ssd15ff534, "\000*\000message") },
-  {0x7863294A8F33D14FLL,-2,0,3,66,10,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss04098f94, "\000*\000file") },
+  {0x0B197E8F85F4DA21LL,6,0,3,2,-1,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss597e1acf, "\000*\000previous") },
+  {0x53B04B608CD9E191LL,0,1,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_inited),&NAMSTR(s_sys_ssca166f68, "\000*\000inited") },
+  {0x3CCB986B2CF0A747LL,-1,0,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss48192147, "\000*\000trace") },
+  {0x58C72230857ACDB9LL,-3,2,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ssa0811f17, "\000*\000code") },
+  {0x04AB35CACF8C8C9ALL,-2,0,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ss0c360a27, "\000*\000line") },
+  {0x0247CDBB94C9D47BLL,-2,3,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ssd15ff534, "\000*\000message") },
+  {0x7863294A8F33D14FLL,-2,0,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss04098f94, "\000*\000file") },
 
 };
 static const int cpt_hash_entries[] = {

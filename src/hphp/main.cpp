@@ -41,6 +41,7 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/thread_init_fini.h>
+#include <runtime/base/compiler_id.h>
 #include <runtime/vm/repo.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -891,8 +892,6 @@ int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     return 1;
   }
 
-  Timer timer(Timer::WallTime, type);
-
   /* without this, emitClass allows classes with interfaces to be
      hoistable */
   SystemLib::s_inited = true;
@@ -903,6 +902,7 @@ int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     ret = analyzeTarget(po, ar);
   }
 
+  Timer timer(Timer::WallTime, type);
   Compiler::emitAllHHBC(ar);
 
   if (!po.syncDir.empty()) {
@@ -1076,10 +1076,11 @@ int runTarget(const ProgramOptions &po) {
 
 void createOutputDirectory(ProgramOptions &po) {
   if (po.outputDir.empty()) {
-    string temp = po.outputDir;
-    if (temp.empty()) {
-      temp = "/tmp";
+    const char *t = getenv("TEMP");
+    if (!t) {
+      t = "/tmp";
     }
+    string temp = t;
     temp += "/hphp_XXXXXX";
     char path[PATH_MAX + 1];
     strncpy(path, temp.c_str(), PATH_MAX);

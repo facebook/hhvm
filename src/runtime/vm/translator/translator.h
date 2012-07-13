@@ -251,6 +251,7 @@ class NormalizedInstruction {
                     // instruction has no vector immediate
   std::vector<MemberCode> immVecM;
 
+  unsigned checkedInputs;
   // StackOff: logical delta at *start* of this instruction to
   // stack at tracelet entry.
   int stackOff;
@@ -262,6 +263,21 @@ class NormalizedInstruction {
   bool manuallyAllocInputs;
   bool invertCond;
   bool outputPredicted;
+  bool ignoreInnerType;
+  /*
+   * skipSync indicates that a previous instruction that should have
+   * adjusted the stack (eg FCall, Req*) didnt, because it could see
+   * that the next one was going to immediately adjust it again
+   * (ie at this point, rVmSp holds the "correct" value, rather
+   *  than the value it had at the beginning of the tracelet)
+   */
+  bool skipSync;
+  /*
+   * grouped indicates that the tracelet should not be broken
+   * (eg by a side exit) between the preceding instruction and
+   * this one
+   */
+  bool grouped;
   ArgUnion constImm;
   TXFlags m_txFlags;
 
@@ -280,8 +296,12 @@ class NormalizedInstruction {
     outStack2(NULL),
     outStack3(NULL),
     deadLocs(),
+    checkedInputs(0),
     hasConstImm(false),
     invertCond(false),
+    ignoreInnerType(false),
+    skipSync(false),
+    grouped(false),
     m_txFlags(Interp)
   { }
 
@@ -784,20 +804,19 @@ extern Translator* transl;
 
 int getStackDelta(const NormalizedInstruction& ni);
 
-/*
- * opcodeChangesPC --
- *
- *   Returns true if the instruction can potentially set PC to point
- *   to something other than the next instruction in the bytecode
- */
-static inline bool
-opcodeChangesPC(const Opcode instr) {
+enum ControlFlowInfo {
+  ControlFlowNone,
+  ControlFlowChangesPC,
+  ControlFlowBreaksBB
+};
+
+static inline ControlFlowInfo
+opcodeControlFlowInfo(const Opcode instr) {
   switch (instr) {
     case OpJmp:
     case OpJmpZ:
     case OpJmpNZ:
     case OpSwitch:
-    case OpFCall:
     case OpRetC:
     case OpRetV:
     case OpRaise:
@@ -808,6 +827,11 @@ opcodeChangesPC(const Opcode instr) {
     case OpIterInitM: // May branch to fail case.
     case OpThrow:
     case OpUnwind:
+    case OpEval:
+    case OpNativeImpl:
+    case OpContHandle:
+      return ControlFlowBreaksBB;
+    case OpFCall:
     case OpIncl:
     case OpInclOnce:
     case OpReq:
@@ -815,13 +839,21 @@ opcodeChangesPC(const Opcode instr) {
     case OpReqDoc:
     case OpReqMod:
     case OpReqSrc:
-    case OpEval:
-    case OpNativeImpl:
-    case OpContHandle:
-      return true;
+      return ControlFlowChangesPC;
     default:
-      return false;
+      return ControlFlowNone;
   }
+}
+
+/*
+ * opcodeChangesPC --
+ *
+ *   Returns true if the instruction can potentially set PC to point
+ *   to something other than the next instruction in the bytecode
+ */
+static inline bool
+opcodeChangesPC(const Opcode instr) {
+  return opcodeControlFlowInfo(instr) >= ControlFlowChangesPC;
 }
 
 /*
@@ -833,12 +865,14 @@ opcodeChangesPC(const Opcode instr) {
  */
 static inline bool
 opcodeBreaksBB(const Opcode instr) {
-  return opcodeChangesPC(instr) && instr != OpFCall;
+  return opcodeControlFlowInfo(instr) == ControlFlowBreaksBB;
 }
 
 extern bool tc_dump();
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup);
+
+bool freeLocalsInline();
 
 } } } // HPHP::VM::Transl
 

@@ -154,25 +154,25 @@ private:
 struct MIterCtx {
   TypedValue m_key;
   TypedValue m_val;
-  const Variant* m_var;
+  const RefData* m_ref;
   MutableArrayIter *m_mArray; // big! Defer allocation.
   MIterCtx(ArrayData *ad) {
     ASSERT(!ad->isStatic());
     tvWriteUninit(&m_key);
     tvWriteUninit(&m_val);
-    m_var = NULL;
+    m_ref = NULL;
     m_mArray = new MutableArrayIter(ad, &tvAsVariant(&m_key),
                                     tvAsVariant(&m_val));
   }
-  MIterCtx(const Variant* var) {
+  MIterCtx(const RefData* ref) {
     tvWriteUninit(&m_key);
     tvWriteUninit(&m_val);
-    // var must be an inner cell
-    ASSERT(var->_count > 0);
-    m_var = var;
-    m_var->incRefCount();
-    // Bind var to m_var
-    m_mArray = new MutableArrayIter(m_var,
+    // Reference must be an inner cell
+    ASSERT(ref->_count > 0);
+    m_ref = ref;
+    m_ref->incRefCount();
+    // Bind ref to m_var
+    m_mArray = new MutableArrayIter((Variant*)(ref->tv()),
                                     &tvAsVariant(&m_key),
                                     tvAsVariant(&m_val));
   }

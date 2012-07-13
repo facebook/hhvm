@@ -21,7 +21,6 @@
 #include <runtime/base/hphp_system.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/strings.h>
-#include <runtime/eval/runtime/eval_state.h>
 #include <runtime/ext/ext_class.h>
 #include <runtime/ext/ext_math.h>
 #include <runtime/ext/ext_misc.h>
@@ -106,19 +105,8 @@ bool f_define(CStrRef name, CVarRef value,
     // fatal or fail in some other way.
     return g_vmContext->setCns(name.get(), value, true);
   } else {
-    if (!has_eval_support) {
-      // define() should be turned into constant definition by HPHP
-      ASSERT(false);
-      return false;
-    }
-    if (!value.isAllowedAsConstantValue()) {
-      raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
-      return false;
-    }
-    if (!f_defined(name)) {
-      return Eval::RequestEvalState::declareConstant(name, value);
-    }
-    raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name.data());
+    // define() should be turned into constant definition by HPHP
+    ASSERT(false);
     return false;
   }
 }
@@ -373,6 +361,10 @@ Variant f_hphp_process_abort(CVarRef magic) {
     *((int*)0) = 0xdead;
   }
   return null_variant;
+}
+
+String f_hphp_to_string(CVarRef v) {
+  return v.toString();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

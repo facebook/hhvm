@@ -364,6 +364,7 @@ public:
     m_assertedType = assertedType;
   }
   TypePtr getType();
+  TypePtr getGenType();
   TypePtr getCPPType();
 
   bool isTypeAssertion() const {
@@ -399,6 +400,7 @@ public:
    */
   void computeLocalExprAltered();
 
+  bool outputCPPGuardedObjectPtr(CodeGenerator &cg);
 protected:
   static bool IsIdentifier(const std::string &value);
 
@@ -433,7 +435,6 @@ protected:
                      bool force = false);
 
   void resetTypes();
-
  private:
   static ExprClass Classes[];
   void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);

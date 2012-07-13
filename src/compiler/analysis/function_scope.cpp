@@ -65,6 +65,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_needsObjTemp(false), m_needsCheckMem(false),
       m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
+      m_mergeable(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0) {
   init(ar);
   for (unsigned i = 0; i < attrs.size(); ++i) {
@@ -106,7 +107,7 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_closureGenerator(orig->m_closureGenerator), m_noLSB(orig->m_noLSB),
       m_nextLSB(orig->m_nextLSB), m_hasTry(orig->m_hasTry),
       m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
-      m_redeclaring(orig->m_redeclaring),
+      m_mergeable(orig->m_mergeable), m_redeclaring(orig->m_redeclaring),
       m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction),
       m_nextID(0) {
   init(ar);
@@ -204,7 +205,8 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_directInvoke(false), m_needsRefTemp(false), m_needsObjTemp(false),
       m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
-      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
+      m_mergeable(false), m_redeclaring(-1), m_inlineIndex(0),
+      m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name) ||
     Option::EnableEval == Option::FullEval || Option::AllDynamic;
   m_dynamicInvoke = false;
@@ -442,10 +444,11 @@ void FunctionScope::addCaller(BlockScopePtr caller,
 void FunctionScope::addNewObjCaller(BlockScopePtr caller) {
   addUse(caller, UseKindCaller & ~UseKindCallerReturn);
 }
-  
-bool FunctionScope::mayUseVV() const { 
+
+bool FunctionScope::mayUseVV() const {
   VariableTableConstPtr variables = getVariables();
-  return (inPseudoMain() ||
+  return true || // always return true until Task #1147317 is fixed
+         (inPseudoMain() ||
           isVariableArgument() ||
           isGenerator() ||
           variables->getAttribute(VariableTable::ContainsDynamicVariable) ||

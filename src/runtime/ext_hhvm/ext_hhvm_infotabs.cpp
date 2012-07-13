@@ -1439,6 +1439,7 @@ TypedValue* fg_sys_getloadavg(VM::ActRec *ar);
 TypedValue* fg_token_get_all(VM::ActRec *ar);
 TypedValue* fg_token_name(VM::ActRec *ar);
 TypedValue* fg_hphp_process_abort(VM::ActRec *ar);
+TypedValue* fg_hphp_to_string(VM::ActRec *ar);
 TypedValue* fg_mysql_connect(VM::ActRec *ar);
 TypedValue* fg_mysql_pconnect(VM::ActRec *ar);
 TypedValue* fg_mysql_connect_with_db(VM::ActRec *ar);
@@ -2705,6 +2706,7 @@ TypedValue* tg_10SoapHeader___destruct(VM::ActRec *ar);
 VM::Instance* new_SQLite3_Instance(VM::Class*);
 TypedValue* tg_7SQLite3___construct(VM::ActRec *ar);
 TypedValue* tg_7SQLite3_open(VM::ActRec *ar);
+TypedValue* tg_7SQLite3_busytimeout(VM::ActRec *ar);
 TypedValue* tg_7SQLite3_close(VM::ActRec *ar);
 TypedValue* tg_7SQLite3_exec(VM::ActRec *ar);
 TypedValue* tg_7SQLite3_version(VM::ActRec *ar);
@@ -2815,7 +2817,7 @@ TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter___destruct(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2165;
+const long long hhbc_ext_funcs_count = 2166;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -4249,6 +4251,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "token_get_all", fg_token_get_all },
   { "token_name", fg_token_name },
   { "hphp_process_abort", fg_hphp_process_abort },
+  { "hphp_to_string", fg_hphp_to_string },
   { "mysql_connect", fg_mysql_connect },
   { "mysql_pconnect", fg_mysql_pconnect },
   { "mysql_connect_with_db", fg_mysql_connect_with_db },
@@ -5658,10 +5661,11 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SoapHeader[] = {
   { "__destruct", tg_10SoapHeader___destruct }
 };
 
-static const long long hhbc_ext_method_count_SQLite3 = 18;
+static const long long hhbc_ext_method_count_SQLite3 = 19;
 static const HhbcExtMethodInfo hhbc_ext_methods_SQLite3[] = {
   { "__construct", tg_7SQLite3___construct },
   { "open", tg_7SQLite3_open },
+  { "busytimeout", tg_7SQLite3_busytimeout },
   { "close", tg_7SQLite3_close },
   { "exec", tg_7SQLite3_exec },
   { "version", tg_7SQLite3_version },

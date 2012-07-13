@@ -16,9 +16,7 @@
 
 #include <compiler/expression/user_attribute.h>
 
-using namespace HPHP;
-using namespace boost;
-using namespace std;
+namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -71,3 +69,4 @@ void UserAttribute::outputCPPImpl(CodeGenerator &cg,
                                   AnalysisResultPtr ar) {
 }
 
+}

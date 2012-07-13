@@ -92,7 +92,6 @@ class TranslatorX64 : public Translator, public SpillFill,
   TCA                    m_dtorStubs[MaxNumDataTypes];
   TCA                    m_typedDtorStub;
   TCA                    m_interceptHelper;
-  TCA                    m_requireHelper;
   TCA                    m_toStringReturnHelper;
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
@@ -453,6 +452,9 @@ PSEUDOINSTRS
   void syncOutputs(const NormalizedInstruction& i);
   void syncOutputs(int stackOff);
 
+  static bool isPseudoEvent(const char* event);
+  void getPerfCounters(Array& ret);
+
 private:
   virtual void syncWork();
 
@@ -537,6 +539,7 @@ public:
   REQ(BIND_SIDE_EXIT)    \
   REQ(BIND_JMPCC_FIRST)  \
   REQ(BIND_JMPCC_SECOND) \
+  REQ(BIND_REQUIRE)      \
   REQ(RETRANSLATE)       \
   REQ(INTERPRET)         \
   REQ(POST_INTERP_RET)   \
@@ -560,6 +563,11 @@ public:
 
   void emitGuardChecks(Asm& a, const SrcKey&, const ChangeMap&,
     const RefDeps&, SrcRec&);
+  void emitOneGuard(const Tracelet& t,
+                    const NormalizedInstruction& i,
+                    PhysReg reg, int disp, DataType type,
+                    TCA &sideExit);
+
   void emitVariantGuards(const Tracelet& t, const NormalizedInstruction& i);
   void emitPredictionGuards(const NormalizedInstruction& i);
 
@@ -582,6 +590,7 @@ private:
   static const int kJmpLen = 5;
   static const int kJmpccLen = 6;
   static const int kJcc8Len = 3;
+  static const int kLeaRipLen = 7;
   // Cache alignment is required for mutable instructions to make sure
   // mutations don't "tear" on remote cpus.
   static const size_t kX64CacheLineSize = 64;
@@ -626,6 +635,8 @@ private:
   void emitStackCheck(int funcDepth, Offset pc);
   void emitStackCheckDynamic(int numArgs, Offset pc);
   void emitLoadSurpriseFlags();
+  void emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
+                                   Offset stackOff);
   TCA  emitTransCounterInc(Asm& a);
 
   static void trimExtraArgs(ActRec* ar);
@@ -647,11 +658,11 @@ private:
                        InclOpFlags flags);
   struct ReqLitStaticArgs {
     HPHP::Eval::PhpFile* m_efile;
-    TCA m_fallthrough;
+    TCA m_pseudoMain;
     Offset m_pcOff;
     bool m_local;
   };
-  static uint64 reqLitHelper(const ReqLitStaticArgs* args, Cell *fp, Cell *sp);
+  static void reqLitHelper(const ReqLitStaticArgs* args);
 
   TCA getNativeTrampoline(TCA helperAddress);
   TCA emitNativeTrampoline(TCA helperAddress);

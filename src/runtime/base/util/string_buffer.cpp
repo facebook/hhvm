@@ -30,7 +30,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StringBuffer::StringBuffer(int initialSize /* = 1024 */)
+StringBuffer::StringBuffer(int initialSize /* = 63 */)
   : m_initialSize(initialSize), m_maxBytes(kDefaultOutputLimit),
     m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
@@ -456,7 +456,15 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
 }
 
 void StringBuffer::growBy(int spaceRequired) {
-  long new_size = m_size * 2L;
+  /*
+   * The default initial size is a power-of-two minus 1.
+   * This doubling scheme keeps the total block size a
+   * power of two, which should be good for memory allocators.
+   * But note there is no guarantee either that the initial size
+   * is power-of-two minus 1, or that it stays that way
+   * (new_size < minSize below).
+   */
+  long new_size = m_size * 2L + 1;
   long minSize = m_size + (long)spaceRequired;
   if (new_size < minSize) {
     new_size = minSize;

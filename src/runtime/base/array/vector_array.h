@@ -29,7 +29,7 @@ class VectorArray : public ArrayData {
 public:
   friend class ArrayData;
 
-  static const uint FixedSize = 8;
+  static const uint FixedSize = 4;
 
   VectorArray(uint size = 0);
   VectorArray(const VectorArray *src, uint start = 0, uint size = 0);
@@ -61,23 +61,15 @@ public:
   virtual Variant key() const;
   virtual Variant value(ssize_t &pos) const;
 
-  virtual bool isHead() const { return m_pos == 0; }
-  virtual bool isTail() const { return m_pos == m_size - 1; }
-  virtual bool isInvalid() const { return m_pos == invalid_index; }
-
   virtual bool exists(int64   k) const;
   virtual bool exists(litstr  k) const;
   virtual bool exists(CStrRef k) const;
   virtual bool exists(CVarRef k) const;
 
-  virtual bool idxExists(ssize_t idx) const;
-
   virtual CVarRef get(int64   k, bool error = false) const;
   virtual CVarRef get(litstr  k, bool error = false) const;
   virtual CVarRef get(CStrRef k, bool error = false) const;
   virtual CVarRef get(CVarRef k, bool error = false) const;
-
-  virtual void load(CVarRef k, Variant &v) const { assert(false); }
 
   virtual ssize_t getIndex(int64 k) const;
   virtual ssize_t getIndex(litstr k) const ATTRIBUTE_COLD;
@@ -141,8 +133,8 @@ private:
   enum Flag {
     StrongIteratorPastEnd = ZendArray::StrongIteratorPastEnd,
   };
-  Variant       *m_fixed[FixedSize];
-  Variant      **m_elems;
+  TypedValue     m_fixed[FixedSize];
+  TypedValue    *m_elems;
   uint           m_capacity;
   mutable uint16 m_flag;
 

@@ -294,6 +294,11 @@ void Construct::dumpNode(int spc) {
       } else {
         type_info += ";";
       }
+      if (e->getAssertedType()) {
+        type_info += "!" + e->getAssertedType()->toString();
+      } else {
+        type_info += "!";
+      }
       type_info = "{" + type_info + "} ";
     }
   } else {

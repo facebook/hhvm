@@ -825,7 +825,7 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
     while (*p) {
       UserAttributeInfo *userAttr = new UserAttributeInfo();
       userAttr->name = makeStaticString(*p++);
-      
+
       const char *len = *p++;
       const char *valueText = *p++;
       int64 valueLen = (int64)len;
@@ -945,11 +945,11 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     m_constantsVec.push_back(constant);
   }
   p++;
-  
+
   while (*p) {
     UserAttributeInfo *userAttr = new UserAttributeInfo();
     userAttr->name = makeStaticString(*p++);
-    
+
     const char *len = *p++;
     const char *valueText = *p++;
     int64 valueLen = (int64)len;
@@ -1111,7 +1111,7 @@ Variant ClassPropTable::getInitVal(const ClassPropTableEntry *prop) const {
     }
 
     case 7:
-      return ClassPropTableEntry::GetVariant((id >> 4) & 15,
+      return ClassPropTableEntry::GetVariant(DataType((id >> 4) & 15),
                                              getInitP(id >> 32));
   }
   throw FatalErrorException("Failed to get init val");
@@ -1144,7 +1144,7 @@ static const ClassPropTableEntry *FindRedeclaredProp(
                 flags |= prop->flags;
                 continue;
               }
-              ASSERT(prop->type == KindOfVariant);
+              ASSERT(prop->type == KindOfUnknown);
               return prop;
             }
           } while (!prop++->isLast());
@@ -1233,7 +1233,7 @@ void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
               done.set(p->offset, true_varNR);
             }
             const char *addr = ((const char *)obj) + p->offset;
-            if (LIKELY(p->type == KindOfVariant)) {
+            if (LIKELY(p->type == KindOfUnknown)) {
               if (isInitialized(*(Variant*)addr)) {
                 props.lvalAt(*p->keyName, AccessFlags::Key)
                   .setWithRef(*(Variant*)addr);
@@ -1314,7 +1314,7 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
           continue;
         }
       }
-      if (LIKELY(p->type == KindOfVariant)) {
+      if (LIKELY(p->type == KindOfUnknown)) {
         ((Variant*)addr)->setWithRef(value);
         continue;
       }
@@ -1322,13 +1322,18 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
         case KindOfBoolean: *(bool*)addr = value;   break;
         case KindOfInt64:   *(int64*)addr = value;  break;
         case KindOfDouble:  *(double*)addr = value; break;
-        case KindOfString:  *(String*)addr = value.isString() ?
-          value.getStringData() : NULL; break;
-        case KindOfArray:   *(Array*)addr = value.isArray() ?
-          value.getArrayData() : NULL;  break;
-        case KindOfObject:  *(Object*)addr = value.isObject() ?
-          value.getObjectData() : NULL; break;
-        default:            ASSERT(false);          break;
+        case KindOfString:
+          *(String*)addr = value.isString() ? value.getStringData() : NULL;
+          break;
+        case KindOfArray:
+          *(Array*)addr = value.isArray() ? value.getArrayData() : NULL;
+          break;
+        case KindOfObject:
+          *(Object*)addr = value.isObject() ? value.getObjectData() : NULL;
+          break;
+        default:
+          ASSERT(false);
+          break;
       }
     }
     ct = ct->m_parent;

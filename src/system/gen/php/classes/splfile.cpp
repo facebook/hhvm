@@ -1322,7 +1322,7 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svi90d5f98c, 2LL),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x26C16E62FD792BB7LL,0,0,13,65,10,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
+  {0x26C16E62FD792BB7LL,0,0,13,65,-1,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
 
   {0x54B2A676B563E232LL,1,1,0,100,3,0,&NAMSTR(s_sys_ssb563e232, "SKIP_EMPTY") },
   {0x23519E830A6DEC13LL,0,2,0,100,3,0,&NAMSTR(s_sys_ss0a6dec13, "READ_CSV") },

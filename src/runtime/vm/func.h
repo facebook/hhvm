@@ -133,8 +133,7 @@ struct Func {
   const FPIEnt* findFPI(Offset o) const;
   const FPIEnt* findPrecedingFPI(Offset o) const;
 
-  bool parametersCompat(const PreClass* preClass, const Func* imeth,
-                        bool failIsFatal) const;
+  void parametersCompat(const PreClass* preClass, const Func* imeth) const;
 
   // This can be thought of as "if I look up this Func's name while in fromUnit,
   // will I always get this Func back?" This is important for the translator: if
@@ -244,7 +243,7 @@ struct Func {
   static size_t sharedBaseOffset() {
     return offsetof(SharedData, m_base);
   }
-  static void enableIntercept(CStrRef name);
+  static void enableIntercept();
   char &maybeIntercepted() const { return m_maybeIntercepted; }
   bool checkInterceptable() const {
     if (!m_maybeIntercepted) return false;
@@ -520,7 +519,6 @@ class FuncEmitter {
 
   void addUserAttribute(const StringData* name, TypedValue tv);
 
-  void setIsMergeOnlyCandidate() { m_attrs = Attr(m_attrs | AttrMergeOnly); }
   void commit(RepoTxn& txn) const;
   Func* create(Unit& unit, PreClass* preClass=NULL) const;
 

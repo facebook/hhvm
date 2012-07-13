@@ -64,6 +64,14 @@ RuntimeType::RuntimeType(bool value)
   consistencyCheck();
 }
 
+RuntimeType::RuntimeType(int64 value)
+  : m_kind(VALUE) {
+  m_value.outerType = KindOfInt64;
+  m_value.innerType = KindOfInvalid;
+  m_value.intval = value;
+  consistencyCheck();
+}
+
 RuntimeType::RuntimeType(const Class* klass)
   : m_kind(VALUE) {
   m_value.outerType = KindOfClass;
@@ -90,12 +98,12 @@ RuntimeType::RuntimeType(const Iter* it) :
 
 RuntimeType RuntimeType::box() const {
   ASSERT(m_kind == VALUE);
-  if (m_value.outerType == KindOfVariant) {
+  if (m_value.outerType == KindOfRef) {
     consistencyCheck();
     return *this;
   }
   RuntimeType rtt;
-  rtt.m_value.outerType = KindOfVariant;
+  rtt.m_value.outerType = KindOfRef;
   rtt.m_value.innerType = m_value.outerType;
   rtt.consistencyCheck();
   return rtt;
@@ -103,7 +111,7 @@ RuntimeType RuntimeType::box() const {
 
 RuntimeType RuntimeType::unbox() const {
   ASSERT(m_kind == VALUE);
-  if (m_value.outerType != KindOfVariant) {
+  if (m_value.outerType != KindOfRef) {
     consistencyCheck();
     return *this;
   }
@@ -116,7 +124,7 @@ RuntimeType RuntimeType::unbox() const {
 
 DataType RuntimeType::valueType() const {
   ASSERT(m_kind != ITER);
-  if (outerType() == KindOfVariant) {
+  if (outerType() == KindOfRef) {
     return m_value.innerType;
   }
   return m_value.outerType;
@@ -147,13 +155,29 @@ RuntimeType::valueBoolean() const {
   return m_value.boolValid ? m_value.boolean : -1;
 }
 
+int64
+RuntimeType::valueInt() const {
+  consistencyCheck();
+  ASSERT(m_kind == VALUE);
+  ASSERT(isInt());
+  return m_value.intval;
+}
+
+// Get the value as a blob. Use with care.
+int64
+RuntimeType::valueGeneric() const {
+  consistencyCheck();
+  ASSERT(m_kind == VALUE);
+  return m_value.intval;
+}
+
 RuntimeType
 RuntimeType::setValueType(DataType newInner) const {
   ASSERT(m_kind == VALUE);
   RuntimeType rtt;
   rtt.m_kind = VALUE;
   rtt.m_value.outerType = outerType();
-  if (outerType() == KindOfVariant) {
+  if (outerType() == KindOfRef) {
     rtt.m_value.innerType = newInner;
   } else {
     rtt.m_value.outerType = newInner;
@@ -204,7 +228,7 @@ bool RuntimeType::isIter() const {
 
 bool RuntimeType::isVariant() const {
   ASSERT(m_kind == VALUE);
-  return outerType() == KindOfVariant;
+  return outerType() == KindOfRef;
 }
 
 bool RuntimeType::isVagueValue() const {
@@ -308,7 +332,7 @@ string RuntimeType::pretty() const {
             m_iter.type == Iter::TypeMutableArray ? "mutableArray" : "array");
     return std::string(buf);
   }
-  if (m_value.outerType == KindOfVariant) {
+  if (m_value.outerType == KindOfRef) {
     sprintf(buf, "(Value (Var %s))", tname(m_value.innerType).c_str());
   } else {
     sprintf(buf, "(Value %s)", tname(m_value.outerType).c_str());

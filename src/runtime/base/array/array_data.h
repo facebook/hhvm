@@ -98,15 +98,28 @@ class ArrayData : public Countable {
    */
   virtual Variant getKey(ssize_t pos) const = 0;
   virtual Variant getValue(ssize_t pos) const = 0;
+
   /**
    * getValueRef() gets a reference to value at position "pos".
    */
   virtual CVarRef getValueRef(ssize_t pos) const = 0;
 
-  virtual bool isVectorData() const;
+  /*
+   * Return true for array types that don't have COW semantics.
+   */
+  virtual bool noCopyOnWrite() const { return false; }
+
+  /*
+   * Specific derived class type querying operators.
+   */
   virtual bool isVectorArray() const { return false; }
-  virtual bool isGlobalArrayWrapper() const;
   virtual bool isSharedMap() const { return false; }
+
+  /*
+   * Returns whether or not this array contains "vector-like" data.
+   * I.e. all the keys are contiguous increasing integers.
+   */
+  virtual bool isVectorData() const;
 
   virtual SharedVariant *getSharedVariant() const { return NULL; }
 
@@ -130,8 +143,8 @@ class ArrayData : public Countable {
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
 
-  virtual bool isHead() const { return m_pos == 0; }
-  virtual bool isTail() const { return m_pos == size() - 1; }
+  bool isHead()            const { return m_pos == iter_begin(); }
+  bool isTail()            const { return m_pos == iter_end(); }
   virtual bool isInvalid() const { return m_pos == invalid_index; }
 
   /**
@@ -142,8 +155,6 @@ class ArrayData : public Countable {
   virtual bool exists(CStrRef k) const = 0;
   virtual bool exists(CVarRef k) const = 0;
 
-  virtual bool idxExists(ssize_t idx) const = 0;
-
   /**
    * Getting value at specified key.
    */
@@ -151,12 +162,6 @@ class ArrayData : public Countable {
   virtual CVarRef get(litstr  k, bool error = false) const = 0;
   virtual CVarRef get(CStrRef k, bool error = false) const = 0;
   virtual CVarRef get(CVarRef k, bool error = false) const = 0;
-
-  /**
-   * Loading value at specified key to a variable, preserving reference,
-   * if possible.
-   */
-  virtual void load(CVarRef k, Variant &v) const;
 
   /**
    * Get the numeric index for a key. Only these need to be
@@ -213,11 +218,18 @@ class ArrayData : public Countable {
   virtual ArrayData *setRef(CVarRef k, CVarRef v, bool copy) = 0;
 
   /**
-   * Basically the same as set(), but for adding a new key to the array.
+   * The same as set(), but with the precondition that the key does
+   * not already exist in this array.  (This is to allow more
+   * efficient implementation of this case in some derived classes.)
    */
   virtual ArrayData *add(int64   k, CVarRef v, bool copy);
   virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
   virtual ArrayData *add(CVarRef k, CVarRef v, bool copy);
+
+  /*
+   * Same semantics as lval(), except with the precondition that the
+   * key doesn't already exist in the array.
+   */
   virtual ArrayData *addLval(int64   k, Variant *&ret, bool copy);
   virtual ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
   virtual ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
@@ -252,6 +264,10 @@ class ArrayData : public Countable {
 
   /**
    * Make a copy of myself.
+   *
+   * The nonSmartCopy() version means not to use the smart allocator.
+   * Is only implemented for array types that need to be able to go
+   * into the static array list.
    */
   virtual ArrayData *copy() const = 0;
   virtual ArrayData *nonSmartCopy() const;

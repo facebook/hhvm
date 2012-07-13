@@ -40,7 +40,6 @@ bool TestParserExpr::RunTests(const std::string &which) {
   RUN_TEST(TestBinaryOpExpression);
   RUN_TEST(TestQOpExpression);
   RUN_TEST(TestArrayPairExpression);
-  RUN_TEST(TestShortArrayExpression);
   RUN_TEST(TestClassConstantExpression);
   RUN_TEST(TestParameterExpression);
   RUN_TEST(TestModifierExpression);
@@ -229,7 +228,6 @@ bool TestParserExpr::TestUnaryOpExpression() {
   V("<?php exit($a);",        "exit($a);\n");
   V("<?php @$a;",             "@$a;\n");
   V("<?php array($a);",       "array($a);\n");
-  V("<?php [$a];",            "array($a);\n");
   V("<?php print $a;",        "print $a;\n");
   V("<?php isset($a);",       "isset($a);\n");
   V("<?php empty($a);",       "empty($a);\n");
@@ -314,25 +312,6 @@ bool TestParserExpr::TestArrayPairExpression() {
     "function a() {\nstatic $a = array(a => b, c => d);\n}\n");
   V("<?php function a() { static $a = array(a => b, c => d,);}",
     "function a() {\nstatic $a = array(a => b, c => d);\n}\n");
-  return true;
-}
-
-bool TestParserExpr::TestShortArrayExpression() {
-  V("<?php [];",                     "array();\n");
-  V("<?php [$a];",                   "array($a);\n");
-  V("<?php [1];",                    "array(1);\n");
-  V("<?php [$a, $b];",               "array($a, $b);\n");
-  V("<?php [$a, $b,];",              "array($a, $b);\n");
-  V("<?php [$a => $b];",             "array($a => $b);\n");
-  V("<?php [$a => $b, $c => $d];",   "array($a => $b, $c => $d);\n");
-  V("<?php [$a => $b, $c => $d,];",  "array($a => $b, $c => $d);\n");
-
-  V("<?php [$a[1], $b[$c[4]]];",
-    "array($a[1], $b[$c[4]]);\n");
-
-  V("<?php function a($b = []) { return; }",
-    "function a($b = array()) {\nreturn;\n}\n");
-
   return true;
 }
 

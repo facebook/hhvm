@@ -46,13 +46,15 @@ public:
    * Constructing a string buffer with some initial size, subsequent allocation
    * will double existing size every round.
    */
-  explicit StringBuffer(int initialSize = 1024);
+  explicit StringBuffer(int initialSize = 63);
   explicit StringBuffer(const char *filename);
   StringBuffer(char *data, int len); // attaching
   ~StringBuffer();
 
   static const int kDefaultOutputLimit = INT_MAX;
-  void setOutputLimit(int maxBytes) { m_maxBytes = maxBytes; }
+  void setOutputLimit(int maxBytes) {
+    m_maxBytes = maxBytes > 0 ? maxBytes : kDefaultOutputLimit;
+  }
 
   bool valid() const { return m_buffer != NULL;}
   bool empty() const { return m_pos == 0;}

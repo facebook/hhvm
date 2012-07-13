@@ -74,19 +74,19 @@ Variant VectorArray::getKey(ssize_t pos) const {
 HOT_FUNC_HPHP
 Variant VectorArray::getValue(ssize_t pos) const {
   ASSERT(pos >= 0 && pos < m_size);
-  return *m_elems[pos];
+  return tvAsCVarRef(&m_elems[pos]);
 }
 
 HOT_FUNC_HPHP
 CVarRef VectorArray::getValueRef(ssize_t pos) const {
   ASSERT(pos >= 0 && pos < m_size);
-  return *m_elems[pos];
+  return tvAsCVarRef(&m_elems[pos]);
 }
 
 HOT_FUNC_HPHP
 Variant VectorArray::value(ssize_t &pos) const {
   if (pos >= 0 && pos < m_size) {
-    return *m_elems[pos];
+    return tvAsCVarRef(&m_elems[pos]);
   }
   pos = VectorArray::invalid_index;
   return false;
@@ -101,7 +101,7 @@ Variant VectorArray::key() const {
 
 Variant VectorArray::current() const {
   if (m_pos >= 0 && m_pos < m_size) {
-    return *m_elems[m_pos];
+    return tvAsCVarRef(&m_elems[m_pos]);
   }
   return false;
 }
@@ -112,13 +112,12 @@ Variant VectorArray::next()          { return value(++m_pos);}
 Variant VectorArray::end()           { return value(m_pos = m_size - 1L);}
 
 HOT_FUNC_HPHP
-VectorArray::VectorArray(uint size /* = 0 */) :
+VectorArray::VectorArray(uint capacity /* = 0 */) :
   m_elems(m_fixed), m_capacity(FixedSize), m_flag(0) {
-  ASSERT(size >= 0);
   m_size = 0;
-  if (size > FixedSize) {
-    while (m_capacity < size) m_capacity <<= 1;
-    m_elems = (Variant **)malloc(m_capacity * sizeof(Variant *));
+  if (capacity > FixedSize) {
+    while (m_capacity < capacity) m_capacity <<= 1;
+    m_elems = (TypedValue*)malloc(m_capacity * sizeof(TypedValue));
   }
   m_pos = ArrayData::invalid_index;
 }
@@ -135,12 +134,12 @@ VectorArray::VectorArray(const VectorArray *src, uint start /* = 0 */,
   if (m_size == 0) return;
   if (m_size > FixedSize) {
     while (m_capacity < m_size) m_capacity <<= 1;
-    m_elems = (Variant **)malloc(m_capacity * sizeof(Variant *));
+    m_elems = (TypedValue*)malloc(m_capacity * sizeof(TypedValue));
   }
-  DECLARE_ALLOCATOR(a, Variant, Variant);
   for (uint i = 0; i < m_size; i++) {
-    m_elems[i] = NEWALLOC(a) Variant(Variant::noInit);
-    m_elems[i]->constructWithRefHelper(*src->m_elems[i + start], src);
+    Variant& to = tvAsUninitializedVariant(&m_elems[i]);
+    CVarRef fm = tvAsCVarRef(&src->m_elems[i + start]);
+    to.constructWithRefHelper(fm, src);
   }
 }
 
@@ -151,21 +150,21 @@ VectorArray::VectorArray(uint size, const Variant *values[]) :
   m_size = size;
   if (size > FixedSize) {
     while (m_capacity < size) m_capacity <<= 1;
-    m_elems = (Variant **)malloc(m_capacity * sizeof(Variant *));
+    m_elems = (TypedValue*)malloc(m_capacity * sizeof(TypedValue));
   }
-  DECLARE_ALLOCATOR(a, Variant, Variant);
   for (uint i = 0; i < size; i++) {
-    m_elems[i] = NEWALLOC(a) Variant(*values[i]);
+    Variant& to = tvAsUninitializedVariant(&m_elems[i]);
+    to.constructValHelper(*values[i]);
   }
   ASSERT(m_pos == 0);
 }
 
 HOT_FUNC_HPHP
 VectorArray::~VectorArray() {
-  if (m_size) {
-    DECLARE_ALLOCATOR(a, Variant, Variant);
-    for (uint i = 0; i < m_size; i++) {
-      DEALLOC(a, m_elems[i], Variant);
+  uint size = m_size;
+  if (size) {
+    for (uint i = 0; i < size; i++) {
+      tvAsVariant(&m_elems[i]).~Variant();
     }
   }
   if (m_elems != m_fixed) free(m_elems);
@@ -178,13 +177,14 @@ VectorArray::VectorArray(const VectorArray *src, bool sma /* unused */) :
   ASSERT(src->m_strongIterators.empty());
   if (m_size > FixedSize) {
     while (m_capacity < m_size) m_capacity <<= 1;
-    m_elems = (Variant **)malloc(m_capacity * sizeof(Variant *));
+    m_elems = (TypedValue*)malloc(m_capacity * sizeof(TypedValue));
   }
-  for (uint i = 0; i < m_size; i++) {
-    m_elems[i] = new Variant(Variant::noInit);
-    ASSERT(src->m_elems[i]->getRawType() != KindOfVariant &&
-           src->m_elems[i]->getRawType() != KindOfObject);
-    m_elems[i]->constructWithRefHelper(*src->m_elems[i], src);
+  for (uint i = 0, n = m_size; i < n; i++) {
+    ASSERT(src->m_elems[i].m_type != KindOfRef &&
+           src->m_elems[i].m_type != KindOfObject);
+    Variant& to = tvAsUninitializedVariant(&m_elems[i]);
+    CVarRef fm = tvAsCVarRef(&src->m_elems[i]);
+    to.constructWithRefHelper(fm, src);
   }
   ASSERT(src->m_pos == 0 && m_pos == 0);
 }
@@ -193,10 +193,10 @@ void VectorArray::grow(uint newSize) {
   ASSERT(newSize > FixedSize);
   while (m_capacity < newSize) m_capacity <<= 1;
   if (m_elems == m_fixed) {
-    m_elems = (Variant **)malloc(m_capacity * sizeof(Variant *));
-    for (uint i = 0; i < m_size; i++) m_elems[i] = m_fixed[i];
+    m_elems = (TypedValue*)malloc(m_capacity * sizeof(TypedValue));
+    memcpy(m_elems, m_fixed, m_size * sizeof(TypedValue));
   } else {
-    m_elems = (Variant **)realloc(m_elems, m_capacity * sizeof(Variant *));
+    m_elems = (TypedValue*)realloc(m_elems, m_capacity * sizeof(TypedValue));
   }
 }
 
@@ -240,14 +240,10 @@ bool VectorArray::exists(CVarRef k) const {
   return false;
 }
 
-bool VectorArray::idxExists(ssize_t idx) const {
-  return idx >= 0 && idx < m_size;
-}
-
 HOT_FUNC_HPHP
 CVarRef VectorArray::get(int64 k, bool error /* = false */) const {
   if (LIKELY(k >= 0 && k < m_size)) {
-    return *m_elems[k];
+    return tvAsCVarRef(&m_elems[k]);
   }
   if (error) {
     raise_notice("Undefined index: %lld", k);
@@ -317,7 +313,8 @@ ZendArray *VectorArray::escalateToNonEmptyZendArray() const {
   }
   DECLARE_ALLOCATOR(a, ZendArray::Bucket, Bucket);
   for (int64 i = 0; i < m_size; i++) {
-    pp[i] = NEWALLOC(a) ZendArray::Bucket(i, withRefBind(*m_elems[i]));
+    CVarRef v = tvAsCVarRef(&m_elems[i]);
+    pp[i] = NEWALLOC(a) ZendArray::Bucket(i, withRefBind(v));
   }
   pp[m_size] = NULL;
   ret = NEW(ZendArray)(m_size, m_size, pp);
@@ -386,7 +383,9 @@ ArrayData *VectorArray::lvalNew(Variant *&ret, bool copy) {
   }
   uint index = m_size;
   checkSize();
-  ret = m_elems[index] = NEW(Variant)();
+  Variant& v = tvAsUninitializedVariant(&m_elems[index]);
+  v.setUninitNull();
+  ret = &v;
   checkInsertIterator((ssize_t)index);
   m_size++;
   return NULL;
@@ -394,7 +393,7 @@ ArrayData *VectorArray::lvalNew(Variant *&ret, bool copy) {
 
 ArrayData *VectorArray::lval(int64 k, Variant *&ret, bool copy,
                              bool checkExist /* = false */) {
-  ret = exists(k) ? m_elems[k] : NULL;
+  ret = exists(k) ? &tvAsVariant(&m_elems[k]) : NULL;
   if (ret == NULL && k != m_size) {
     ZendArray *a = escalateToZendArray();
     a->addLvalImpl(k, &ret, false);
@@ -404,7 +403,9 @@ ArrayData *VectorArray::lval(int64 k, Variant *&ret, bool copy,
     if (ret) return NULL;
     ASSERT(m_size == k);
     checkSize();
-    ret = m_elems[k] = NEW(Variant)();
+    Variant& v = tvAsUninitializedVariant(&m_elems[k]);
+    v.setUninitNull();
+    ret = &v;
     checkInsertIterator((ssize_t)k);
     m_size++;
     return NULL;
@@ -414,7 +415,8 @@ ArrayData *VectorArray::lval(int64 k, Variant *&ret, bool copy,
   }
   VectorArray *a = NEW(VectorArray)(this);
   if (ret) {
-    ret = a->m_elems[k];
+    Variant& v = tvAsVariant(&a->m_elems[k]);
+    ret = &v;
     ASSERT(ret);
     return a;
   }
@@ -470,10 +472,10 @@ ArrayData *VectorArray::set(int64 k, CVarRef v, bool copy) {
   if (exists(k)) {
     if (copy) {
       VectorArray *a = NEW(VectorArray)(this);
-      a->m_elems[k]->assignVal(v);
+      tvAsVariant(&a->m_elems[k]).assignVal(v);
       return a;
     }
-    m_elems[k]->assignVal(v);
+    tvAsVariant(&m_elems[k]).assignVal(v);
     return NULL;
   }
   if (k == m_size) return append(v, copy);
@@ -510,11 +512,11 @@ ArrayData *VectorArray::setRef(int64 k, CVarRef v, bool copy) {
     }
   } else {
     if (exists(k)) {
-      m_elems[k]->assignRef(v);
+      tvAsVariant(&m_elems[k]).assignRef(v);
       return NULL;
     } else if (k == m_size) {
       checkSize();
-      m_elems[k] = NEW(Variant)(strongBind(v));
+      tvAsUninitializedVariant(&m_elems[k]).constructRefHelper(v);
       checkInsertIterator((ssize_t)k);
       m_size++;
       return NULL;
@@ -556,13 +558,13 @@ ArrayData *VectorArray::append(CVarRef v, bool copy) {
   if (copy) {
     VectorArray *a = NEW(VectorArray)(this);
     a->checkSize();
-    a->m_elems[index] = NEW(Variant)(v);
+    tvAsUninitializedVariant(&a->m_elems[index]).constructValHelper(v);
     a->checkInsertIterator((ssize_t)index);
     a->m_size++;
     return a;
   }
   checkSize();
-  m_elems[index] = NEW(Variant)(v);
+  tvAsUninitializedVariant(&m_elems[index]).constructValHelper(v);
   checkInsertIterator((ssize_t)index);
   m_size++;
   return NULL;
@@ -576,7 +578,7 @@ ArrayData *VectorArray::appendRef(CVarRef v, bool copy) {
   }
   uint index = m_size;
   checkSize();
-  m_elems[index] = NEW(Variant)(strongBind(v));
+  tvAsUninitializedVariant(&m_elems[index]).constructRefHelper(v);
   checkInsertIterator((ssize_t)index);
   m_size++;
   return NULL;
@@ -590,8 +592,9 @@ ArrayData *VectorArray::appendWithRef(CVarRef v, bool copy) {
   }
   uint index = m_size;
   checkSize();
-  m_elems[index] = NEW(Variant)();
-  m_elems[index]->setWithRef(v);
+  Variant& to = tvAsUninitializedVariant(&m_elems[index]);
+  to.setUninitNull();
+  to.setWithRef(v);
   checkInsertIterator((ssize_t)index);
   m_size++;
   return NULL;
@@ -615,7 +618,9 @@ ArrayData *VectorArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
     if (velems->m_size > m_size) {
       checkSize(velems->m_size - m_size);
       for (uint i = m_size; i < velems->m_size; i++) {
-        m_elems[i] = NEW(Variant)(withRefBind(*velems->m_elems[i]));
+        Variant& to = tvAsUninitializedVariant(&m_elems[i]);
+        CVarRef fm = tvAsCVarRef(&velems->m_elems[i]);
+        to.constructWithRefHelper(fm, 0);
       }
       checkInsertIterator((ssize_t)m_size);
       m_size = velems->m_size;
@@ -625,7 +630,9 @@ ArrayData *VectorArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
     if (velems->m_size > 0) {
       checkSize(velems->m_size);
       for (uint i = m_size; i < m_size + velems->m_size; i++) {
-        m_elems[i] = NEW(Variant)(withRefBind(*velems->m_elems[i - m_size]));
+        Variant& to = tvAsUninitializedVariant(&m_elems[i]);
+        CVarRef fm = tvAsCVarRef(&velems->m_elems[i - m_size]);
+        to.constructWithRefHelper(fm, 0);
       }
       checkInsertIterator((ssize_t)m_size);
       m_size += velems->m_size;
@@ -661,7 +668,7 @@ ArrayData *VectorArray::pop(Variant &value) {
     return NULL;
   }
   if (UNLIKELY(getCount() > 1)) {
-    value = *m_elems[m_size - 1];
+    value = tvAsCVarRef(&m_elems[m_size - 1]);
     if (m_size == 1) {
       return StaticEmptyVectorArray::Get();
     }
@@ -670,8 +677,8 @@ ArrayData *VectorArray::pop(Variant &value) {
     return a;
   }
   ssize_t pos = m_size - 1;
-  value = *m_elems[pos];
-  DELETE(Variant)(m_elems[pos]);
+  value = tvAsCVarRef(&m_elems[pos]);
+  tvAsVariant(&m_elems[pos]).~Variant();
   checkEraseIterator(pos);
   m_size--;
   // To match PHP-like semantics, the pop operation resets the array's
@@ -718,7 +725,9 @@ ArrayData *VectorArray::addLval(int64 k, Variant *&ret, bool copy) {
     return a;
   }
   checkSize();
-  ret = m_elems[index] = NEW(Variant)();
+  Variant& v = tvAsUninitializedVariant(&m_elems[index]);
+  v.setUninitNull();
+  ret = &v;
   checkInsertIterator((ssize_t)index);
   m_size++;
   return NULL;
@@ -754,7 +763,7 @@ ArrayData *VectorArray::remove(int64 k, bool copy) {
     return a;
   }
   ASSERT(m_size > 0 && k == m_size - 1);
-  DELETE(Variant)(m_elems[k]);
+  tvAsCVarRef(&m_elems[k]).~Variant();
   if (m_pos == k) m_pos = ArrayData::invalid_index;
   checkEraseIterator(k);
   m_size--;
@@ -797,9 +806,10 @@ ArrayData *VectorArray::prepend(CVarRef v, bool copy) {
   }
   checkSize();
   for (uint i = m_size; i > 0; i--) {
+    // copying TV's by value, intentionally not refcounting.
     m_elems[i] = m_elems[i-1];
   }
-  m_elems[0] = NEW(Variant)(v);
+  tvAsUninitializedVariant(&m_elems[0]).constructValHelper(v);
   m_size++;
   // To match PHP-like semantics, the prepend operation resets the array's
   // internal iterator
@@ -813,7 +823,7 @@ ArrayData *VectorArray::dequeue(Variant &value) {
     return NULL;
   }
   if (UNLIKELY(getCount() > 1)) {
-    value = *m_elems[0];
+    value = tvAsCVarRef(&m_elems[0]);
     if (m_size == 1) {
       return StaticEmptyVectorArray::Get();
     }
@@ -826,10 +836,11 @@ ArrayData *VectorArray::dequeue(Variant &value) {
   if (!m_strongIterators.empty()) {
     freeStrongIterators();
   }
-  value = *m_elems[0];
+  value = tvAsCVarRef(&m_elems[0]);
   m_size--;
-  DELETE(Variant)(m_elems[0]);
+  tvAsVariant(&m_elems[0]).~Variant();
   for (uint i = 0; i < m_size; i++) {
+    // TypedValue copy without refcounting.
     m_elems[i] = m_elems[i+1];
   }
   // To match PHP-like semantics, the dequeue operation resets the array's
@@ -840,7 +851,7 @@ ArrayData *VectorArray::dequeue(Variant &value) {
 
 void VectorArray::onSetEvalScalar() {
   for (uint i = 0; i < m_size; i++) {
-    m_elems[i]->setEvalScalar();
+    tvAsVariant(&m_elems[i]).setEvalScalar();
   }
 }
 
@@ -865,12 +876,12 @@ bool VectorArray::setFullPos(const FullPos &fp) {
 
 CVarRef VectorArray::currentRef() {
   ASSERT(m_pos >= 0 && m_pos < m_size);
-  return *m_elems[m_pos];
+  return tvAsCVarRef(&m_elems[m_pos]);
 }
 
 CVarRef VectorArray::endRef() {
   ASSERT(m_pos >= 0 && m_pos < m_size);
-  return *m_elems[m_size - 1];
+  return tvAsCVarRef(&m_elems[m_size - 1]);
 }
 
 ArrayData *VectorArray::escalate(bool mutableIteration /* = false */) const {

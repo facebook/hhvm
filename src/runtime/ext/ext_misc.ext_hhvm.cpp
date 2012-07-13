@@ -1472,6 +1472,44 @@ TypedValue* fg_hphp_process_abort(HPHP::VM::ActRec *ar) {
 
 
 
+/*
+HPHP::String HPHP::f_hphp_to_string(HPHP::Variant const&)
+_ZN4HPHP16f_hphp_to_stringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+v => rsi
+*/
+
+Value* fh_hphp_to_string(Value* _rv, TypedValue* v) asm("_ZN4HPHP16f_hphp_to_stringERKNS_7VariantE");
+
+TypedValue* fg_hphp_to_string(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv._count = 0;
+      rv.m_type = KindOfString;
+      fh_hphp_to_string((Value*)(&(rv)), (args-0));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("hphp_to_string", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
 
 } // !HPHP
 

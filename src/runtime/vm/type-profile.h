@@ -20,19 +20,35 @@ namespace HPHP {
 namespace VM {
 
 struct TypeProfileKey {
-  const Func* m_func;
-  const Offset m_offset;
-  TypeProfileKey(const Func* f, Offset off) : m_func(f), m_offset(off) { }
-  TypeProfileKey(const Func* f, const PC pc) : m_func(f),
-    m_offset(m_func->unit()->offsetOf(pc)) { }
+  enum KeyType {
+    MethodName,
+    PropName,
+    EltName
+  } m_kind;
+  const StringData* m_name;
+
+  TypeProfileKey(KeyType kind, const StringData* sd) :
+   m_kind(kind), m_name(sd) { }
+
+  TypeProfileKey(MemberCode mc, const StringData* sd) :
+    m_kind(mc == MET ? EltName : PropName), m_name(sd) { }
   uint64_t hash() const;
 };
 
 // These are both best-effort, and return noisy results.
 void profileInit();
+void profileRequestStart();
+void profileRequestEnd();
 void recordType(const TypeProfileKey& sk, DataType dt);
 std::pair<DataType, double> predictType(const TypeProfileKey& key);
 bool isProfileOpcode(const PC& pc);
+
+extern __thread bool profileOn;
+static inline bool shouldProfile() {
+  return profileOn;
+}
+
+const static bool typeProfileCGetM = false; // Not ready for primetime.
 
 } }
 

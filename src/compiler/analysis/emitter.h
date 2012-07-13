@@ -76,7 +76,7 @@ public:
 #define THREE(typ1, typ2, typ3) \
   typ1 a1, typ2 a2, typ3 a3
 #define MA std::vector<uchar>
-#define ILA std::vector<Label*>&
+#define BLA std::vector<Label*>&
 #define IVA int32
 #define HA int32
 #define IA int32
@@ -120,6 +120,14 @@ struct SymbolicStack {
     CLS_PARENT
   };
 
+  enum MetaType {
+    META_NONE,
+    META_LITSTR,
+    META_CLASS,
+    META_CLASS_NON_NULL,
+    META_DATA_TYPE
+  };
+
 private:
   /**
    * Symbolic stack (m_symStack)
@@ -139,18 +147,22 @@ private:
   struct SymEntry {
     explicit SymEntry(char s = 0)
       : sym(s)
-      , cls(false)
-      , name(NULL)
-      , loc(-1)
+      , metaType(META_NONE)
+      , notRef(false)
+      , intval(-1)
       , unnamedLocalStart(InvalidAbsoluteOffset)
       , clsBaseType(CLS_INVALID)
     {}
     char sym;
-    bool cls;
-    const StringData* name;
-    int loc; // local id (used with the "L" symbolic flavor)
+    MetaType metaType;
+    bool notRef;
+    union {
+      const StringData* name;
+      DataType dt;
+    }   metaData;
+    int64 intval; // used for L and I symbolic flavors
 
-    // If loc is an unnamed local temporary, this offset is the start
+    // If intval is an unnamed local temporary, this offset is the start
     // of the region we are using it (which we will need to have a
     // fault funclet for).
     Offset unnamedLocalStart;
@@ -185,10 +197,15 @@ public:
   std::string pretty() const;
 
   void push(char sym);
+  void setInt(int64 v);
   void setString(const StringData* s);
-  void setCls(const StringData* s); // XXX: rename this?
+  void setKnownCls(const StringData* s, bool nonNull);
+  void setNotRef();
+  bool getNotRef() const;
+  void setKnownType(DataType dt);
+  void cleanTopMeta();
+  DataType getKnownType(int index = -1, bool noRef = true) const;
   void setClsBaseType(ClassBaseType);
-  void setLocal(int localId);
   void setUnnamedLocal(int index, int localId, Offset startOffset);
   void pop();
   char top() const;
@@ -215,6 +232,7 @@ public:
 
   ClassBaseType getClsBaseType(int index) const;
   int getLoc(int index) const;
+  int64 getInt(int index) const;
   Offset getUnnamedLocStart(int index) const;
 
   void pushFDesc();
@@ -267,6 +285,7 @@ public:
   ~EmitterVisitor();
 
   bool visit(ConstructPtr c);
+  bool visitImpl(ConstructPtr c);
   void visitKids(ConstructPtr c);
   void visit(FileScopePtr file);
   void assignLocalVariableIds(FunctionScopePtr fs);
@@ -284,8 +303,8 @@ public:
     m_evalStackIsUnknown = false;
   }
   bool evalStackIsUnknown() { return m_evalStackIsUnknown; }
-  void popEvalStack(char symFlavor);
-  void popSymbolicLocal(Opcode opcode);
+  void popEvalStack(char symFlavor, int arg = -1, int pos = -1);
+  void popSymbolicLocal(Opcode opcode, int arg = -1, int pos = -1);
   void popEvalStackLMany();
   void popEvalStackFMany(int len);
   void pushEvalStack(char symFlavor);
@@ -317,6 +336,8 @@ public:
     EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
   };
 
+  void addMetaInfo(int pos, Unit::MetaInfo::Kind kind,
+                   bool mVector, int arg, Id data);
   void pushIterId(Id id) { m_pendingIters.push_back(id); }
   void popIterId() { m_pendingIters.pop_back(); }
 private:
@@ -446,7 +467,7 @@ private:
   std::deque<FaultRegion*> m_faultRegions;
   std::deque<FPIRegion*> m_fpiRegions;
   std::vector<HphpArray*> m_staticArrays;
-
+  std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::map<StringData*, Label, string_data_lt> m_gotoLabels;
   typedef std::vector<Unit::MetaInfo> MetaVec;
@@ -494,6 +515,8 @@ public:
   void emitClsIfSPropBase(Emitter& e);
   Label* getContinuationGotoLabel(StatementPtr s);
   void emitContinuationSwitch(Emitter& e, SwitchStatementPtr s);
+  bool emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
+                         std::vector<Label>& caseLabels, Label& done);
 
   void markElem(Emitter& e);
   void markNewElem(Emitter& e);
@@ -503,7 +526,7 @@ public:
   void markNameSecond(Emitter& e);
   void markGlobalName(Emitter& e);
 
-  void emitNameString(Emitter& e, ExpressionPtr n);
+  void emitNameString(Emitter& e, ExpressionPtr n, bool allowLiteral = false);
   void emitAssignment(Emitter& e, ExpressionPtr c, int op, bool bind);
   void emitListAssignment(Emitter& e, ListAssignmentPtr lst);
   void postponeMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
@@ -522,7 +545,8 @@ public:
   void emitMetaData();
   void emitFuncCall(Emitter& e, FunctionCallPtr node);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
-  bool emitClass(Emitter& e, ClassScopePtr cNode, bool hoistable);
+  PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
+                                bool topLevel);
   void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,
       Label& brkHand, Label& cntHand, Id iter = -1);
   void emitForeach(Emitter& e, ExpressionPtr val, ExpressionPtr key,

@@ -4,4 +4,6 @@ function foo() {
   $bar = $GLOBALS['asd'];
 }
 foo();
-foreach ($GLOBALS as $k => $v) { echo "$k->$v\n"; }
+$x = array_keys($GLOBALS);
+sort($x);
+foreach ($x as $k) { echo "$k->".$GLOBALS[$k]."\n"; }

@@ -19,11 +19,6 @@
 #include <runtime/ext/ext_math.h>
 #include <runtime/ext/ext_class.h>
 
-#include <runtime/eval/runtime/eval_state.h>
-#include <runtime/eval/ast/class_statement.h>
-#include <runtime/eval/ast/function_statement.h>
-#include <runtime/eval/ast/method_statement.h>
-
 #include <system/lib/systemlib.h>
 
 namespace HPHP {

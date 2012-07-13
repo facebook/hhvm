@@ -81,7 +81,7 @@ Variant f_print_r(CVarRef expression, bool ret /* = false */) {
       res = true;
     }
   } catch (StringBufferLimitException &e) {
-    Logger::Error("print_r() exceeded max bytes limit");
+    raise_notice("print_r() exceeded max bytes limit");
     res = e.m_result;
   }
   return res;
@@ -98,7 +98,7 @@ Variant f_var_export(CVarRef expression, bool ret /* = false */) {
       res = true;
     }
   } catch (StringBufferLimitException &e) {
-    Logger::Error("var_export() exceeded max bytes limit");
+    raise_notice("var_export() exceeded max bytes limit");
   }
   return res;
 }

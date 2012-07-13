@@ -15,53 +15,16 @@
 */
 
 #include <runtime/vm/verifier/util.h>
-#include <util/alloc.h>
 
-#include <vector>
 #include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
 
-using HPHP::Util::safe_malloc;
-
-using namespace HPHP;
-using namespace VM;
-using namespace Verifier;
-
-Arena::Arena() : m_next(0), m_limit(0) {
-  static_assert((kChunkBytes & (kMinBytes - 1)) == 0,
-                "kChunkBytes must be multiple of kMinBytes");
-}
-
-Arena::~Arena() {
-  for (StdRange<std::vector<char*> > r(m_ptrs); !r.empty();) {
-    free(r.popFront());
-  }
-}
-
-void* Arena::alloc_slow(size_t nbytes) {
-  // Large allocations go directly to malloc without discarding our chunk.
-  if (nbytes >= kChunkBytes) return fill(nbytes);
-  char *ptr = fill(kChunkBytes);
-  m_limit = ptr + malloc_usable_size(ptr);
-  m_next = ptr + nbytes;
-  return ptr;
-}
-
-/**
- * malloc nbytes bytes of data and remember the pointer.  We only call this
- * for blocks >= kChunkSize, and therefore assume any self-respecting 
- * malloc implementation will return aligned memory for such a block.
- */
-char* Arena::fill(size_t nbytes) {
-  char* ptr = (char*)safe_malloc(nbytes);
-  ASSERT((intptr_t(ptr) & (kMinBytes - 1)) == 0); // we need aligned blocks.
-  m_ptrs.push_back(ptr);
-  return ptr;
-}
+namespace HPHP { namespace VM { namespace Verifier {
 
 Bits::Bits(Arena& arena, int bit_cap) {
   int word_cap = (bit_cap + BPW - 1) / BPW;
   m_words = new (arena) uintptr_t[word_cap];
   memset(m_words, 0, word_cap * sizeof(*m_words));
 }
+
+}}}

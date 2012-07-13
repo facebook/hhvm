@@ -45,8 +45,6 @@ class SystemGlobals : public Globals {
 public:
   SystemGlobals();
   void initialize();
-  // HHVM global infrastructure
-  Variant hg_global_storage;
 
   Array stgv_Array[1];
   #define s_ReflectionClass$$fetched stgv_Array[0]

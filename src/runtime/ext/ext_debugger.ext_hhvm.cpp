@@ -271,75 +271,13 @@ TypedValue* fg_hphpd_client_ctrl(HPHP::VM::ActRec *ar) {
 
 
 
-class c_DebuggerProxyCmdUser_Instance : public c_DebuggerProxyCmdUser {
-public:
-  c_DebuggerProxyCmdUser_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DebuggerProxyCmdUser));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DebuggerProxyCmdUser) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DebuggerProxyCmdUser_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DebuggerProxyCmdUser_Instance *this_ = (c_DebuggerProxyCmdUser_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DebuggerProxyCmdUser) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DebuggerProxyCmdUser::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DebuggerProxyCmdUser::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DebuggerProxyCmdUser::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DebuggerProxyCmdUser::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DebuggerProxyCmdUser_Instance(HPHP::VM::Class* cls) {
-  return c_DebuggerProxyCmdUser_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DebuggerProxyCmdUser) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DebuggerProxyCmdUser(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -515,75 +453,13 @@ TypedValue* tg_20DebuggerProxyCmdUser___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DebuggerClientCmdUser_Instance : public c_DebuggerClientCmdUser {
-public:
-  c_DebuggerClientCmdUser_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DebuggerClientCmdUser));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DebuggerClientCmdUser) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DebuggerClientCmdUser_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DebuggerClientCmdUser_Instance *this_ = (c_DebuggerClientCmdUser_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DebuggerClientCmdUser) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DebuggerClientCmdUser::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DebuggerClientCmdUser::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DebuggerClientCmdUser::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DebuggerClientCmdUser::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DebuggerClientCmdUser_Instance(HPHP::VM::Class* cls) {
-  return c_DebuggerClientCmdUser_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DebuggerClientCmdUser) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DebuggerClientCmdUser(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -2366,75 +2242,13 @@ TypedValue* tg_21DebuggerClientCmdUser___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DebuggerClient_Instance : public c_DebuggerClient {
-public:
-  c_DebuggerClient_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DebuggerClient));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DebuggerClient) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DebuggerClient_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DebuggerClient_Instance *this_ = (c_DebuggerClient_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DebuggerClient) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DebuggerClient::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DebuggerClient::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DebuggerClient::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DebuggerClient::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DebuggerClient_Instance(HPHP::VM::Class* cls) {
-  return c_DebuggerClient_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DebuggerClient) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DebuggerClient(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*

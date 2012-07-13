@@ -164,7 +164,6 @@ Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DebuggerProxyCmdUser::c_DebuggerProxyCmdUser(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(DebuggerProxyCmdUser);
 }
 
 c_DebuggerProxyCmdUser::~c_DebuggerProxyCmdUser() {
@@ -192,7 +191,6 @@ Variant c_DebuggerProxyCmdUser::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DebuggerClientCmdUser::c_DebuggerClientCmdUser(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(DebuggerClientCmdUser);
 }
 
 c_DebuggerClientCmdUser::~c_DebuggerClientCmdUser() {
@@ -417,7 +415,6 @@ const int64 q_DebuggerClient$$STATE_BUSY
   = DebuggerClient::StateBusy;
 
 c_DebuggerClient::c_DebuggerClient(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(DebuggerClient);
   m_client = NULL;
 }
 

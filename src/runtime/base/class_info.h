@@ -527,7 +527,7 @@ public:
 };
 
 struct ClassPropTableEntry {
-  enum {
+  enum PropFlags {
     Private = 1,
     Protected = 2,
     Public = 4,
@@ -542,8 +542,8 @@ struct ClassPropTableEntry {
   int           next;
   int           init_offset;
   uint16        prop_offset;
-  uint8         flags;
-  uint8         type;
+  uint8         flags; // PropFlags
+  int8         type;  // DataType
   int           offset;
   StaticString *keyName;
   bool isPublic() const { return flags & Public; }
@@ -554,7 +554,7 @@ struct ClassPropTableEntry {
   bool isLast() const { return flags & Last; }
   bool isFastInit() const { return flags & FastInit; }
 
-  static Variant GetVariant(int type, const void *addr) {
+  static Variant GetVariant(DataType type, const void *addr) {
     switch (type) {
       case KindOfBoolean:
         return *(bool*)addr;
@@ -575,7 +575,7 @@ struct ClassPropTableEntry {
   }
 
   Variant getVariant(const void *addr) const {
-    return GetVariant(type, addr);
+    return GetVariant(DataType(type), addr);
   }
 };
 

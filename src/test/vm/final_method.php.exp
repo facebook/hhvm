@@ -1,2 +1,1 @@
-Test begin
 HipHop Fatal error: Cannot override final method C::f() in src/test/vm/final_method.php on line 12

@@ -81,7 +81,7 @@ static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x7347996483D6D541LL,0,0,0,68,10,GET_PROPERTY_OFFSET(c___PHP_Incomplete_Class, m___PHP_Incomplete_Class_Name),&NAMSTR(s_sys_ss360b4ac7, "__PHP_Incomplete_Class_Name") },
+  {0x7347996483D6D541LL,0,0,0,68,-1,GET_PROPERTY_OFFSET(c___PHP_Incomplete_Class, m___PHP_Incomplete_Class_Name),&NAMSTR(s_sys_ss360b4ac7, "__PHP_Incomplete_Class_Name") },
 
 };
 static const int cpt_hash_entries[] = {

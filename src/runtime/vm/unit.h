@@ -25,6 +25,7 @@
 #include "runtime/base/array/hphp_array.h"
 #include "util/parser/location.h"
 #include "runtime/base/md5.h"
+#include "util/tiny_vector.h"
 
 namespace HPHP {
 namespace VM {
@@ -229,15 +230,21 @@ struct Unit {
   friend class FuncDict;
   friend class MetaHandle;
 
+  typedef TinyVector<Func*> FuncVec;
+
   class MetaInfo {
    public:
     enum Kind {
       None,
       String,
       Class,
-      NopOut
+      NopOut,
+      DataType
     };
-    MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {}
+    static const int VectorArg = 1 << 7;
+    MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {
+      ASSERT((int)m_arg == a);
+    }
     MetaInfo() : m_kind(None), m_arg(-1), m_data(0) {}
 
     /*
@@ -329,7 +336,7 @@ struct Unit {
     return m_namedInfo.size();
   }
   StringData* lookupLitstrId(Id id) const {
-    ASSERT(id < Id(m_namedInfo.size()));
+    ASSERT(id >= 0 && id < Id(m_namedInfo.size()));
     return const_cast<StringData*>(m_namedInfo[id].first);
   }
 
@@ -402,13 +409,11 @@ struct Unit {
   }
 
   bool compileTimeFatal(const StringData*& msg, int& line) const;
-  Func *getMain() const {
-    ASSERT(m_main);
-    return m_main;
+  Func* getMain() const {
+    return m_funcs.front();
   }
-  Attr getMainAttrs() const {
-    ASSERT(m_main);
-    return m_mainAttrs;
+  const TypedValue *getMainReturn() const {
+    return &m_mainReturn;
   }
   Func* getLambda() const {
     ASSERT(m_funcs.size() == 2);
@@ -417,7 +422,7 @@ struct Unit {
   void renameFunc(const StringData* oldName, const StringData* newName);
   void mergeFuncs() const;
   static void loadFunc(Func *func);
-  const std::vector<Func*>& funcs() const {
+  const FuncVec& funcs() const {
     return m_funcs;
   }
   Func* lookupFuncId(Id id) const {
@@ -432,7 +437,8 @@ struct Unit {
     ASSERT(id < Id(m_preClasses.size()));
     return m_preClasses[id].get();
   }
-  bool mergeClasses() const;
+  void mergeClasses() const;
+  void merge();
 
   void mergePreConsts() {
     if (LIKELY(RuntimeOption::RepoAuthoritative ||
@@ -448,12 +454,13 @@ struct Unit {
 
   Opcode getOpcode(size_t instrOffset) const {
     ASSERT(instrOffset < m_bclen);
-    return (Opcode)m_bc[instrOffset]; 
+    return (Opcode)m_bc[instrOffset];
   }
 
   const Func* getFunc(Offset pc) const;
   void enableIntercepts();
 
+  bool isMergeOnly() const { return m_mainReturn._count; }
 public:
   static Mutex s_classesMutex;
 
@@ -469,14 +476,17 @@ public: // Translator field access
 private:
   typedef hphp_hash_map<const StringData*, Id,
                         string_data_hash, string_data_same> ArrayIdMap;
-  typedef std::vector<Func*> FuncVec;
   typedef std::vector<PreClassPtr> PreClassPtrVec;
+  typedef std::vector<Func*> HoistableFuncVec;
   typedef std::vector<PreClass*> PreClassVec;
 
 private:
-  Func* m_main; // Cache of m_funcs[0]
-  Attr  m_mainAttrs; // cache of m_funcs[0]->attrs()
-  int m_repoId;
+  /*
+   * pseudoMain's return value, or KindOfUninit if
+   * its not known. Also use _count as a flag to
+   * indicate that this is a mergeOnly unit
+   */
+  TypedValue m_mainReturn;
   int64 m_sn;
   uchar* m_bc;
   size_t m_bclen;
@@ -489,13 +499,15 @@ private:
   ArrayIdMap m_array2id;
   std::vector<const ArrayData*> m_arrays;
   FuncVec m_funcs;
-  FuncVec m_hoistableFuncs;
+  HoistableFuncVec m_hoistableFuncs;
   PreClassPtrVec m_preClasses;
-  PreClassVec m_hoistablePreClasses;
+  PreClassVec m_mergeablePreClasses;
   LineTable m_lineTable;
   FuncTable m_funcTable;
-  PreConstVec m_preConsts;
+  int32 m_numHoistablePreClasses;
+  int8 m_repoId;
   bool m_preConstsMerged;
+  PreConstVec m_preConsts;
   SimpleMutex m_preConstsLock;
 };
 
@@ -515,6 +527,7 @@ class UnitEmitter {
   void setBcMeta(const uchar* bc_meta, size_t bc_meta_len);
   const StringData* getFilepath() { return m_filepath; }
   void setFilepath(const StringData* filepath) { m_filepath = filepath; }
+  void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
   const MD5& md5() const { return m_md5; }
   Id addPreConst(const StringData* name, const TypedValue& value);
   Id mergeLitstr(const StringData* litstr);
@@ -523,7 +536,8 @@ class UnitEmitter {
   void initMain(int line1, int line2);
   FuncEmitter* newFuncEmitter(const StringData* n, bool top);
   FuncEmitter* newMethodEmitter(const StringData* n, PreClassEmitter* pce);
-  PreClassEmitter* newPreClassEmitter(const StringData* n, bool hoistable);
+  PreClassEmitter* newPreClassEmitter(const StringData* n,
+                                      PreClass::Hoistable hoistable);
   PreClassEmitter* pce(Id preClassId) { return m_pceVec[preClassId]; }
 
   /*
@@ -600,6 +614,7 @@ class UnitEmitter {
   size_t m_bclen;
   uchar* m_bc_meta;
   size_t m_bc_meta_len;
+  TypedValue m_mainReturn;
   const StringData* m_filepath;
   MD5 m_md5;
   typedef hphp_hash_map<const StringData*, Id,
@@ -628,7 +643,8 @@ class UnitEmitter {
                         string_data_isame> HoistedPreClassSet;
   HoistedPreClassSet m_hoistablePreClassSet;
   PceVec m_hoistablePceVec;
-
+  PceVec m_remainingPceVec;
+  bool m_allClassesHoistable;
   /*
    * m_sourceLocTab and m_feTab are interval maps.  Each entry encodes
    * an open-closed range of bytecode offsets.
@@ -676,6 +692,7 @@ class UnitRepoProxy : public RepoProxy {
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64& unitSn, const MD5& md5, const uchar* bc,
                 size_t bclen, const uchar* bc_meta, size_t bc_meta_len,
+                const TypedValue* mainReturn,
                 const LineTable& lines);
   };
   class GetUnitStmt : public RepoProxy::Stmt {

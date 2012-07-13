@@ -43,8 +43,8 @@ struct Value {
     ArrayData  *parr;
     ObjectData *pobj;
     VM::Class  *pcls;
-    Variant    *pvar;
-    TypedValue *ptv;
+    RefData    *pref;
+    TypedValue *ptv; // Deprecated; use pref for KindOfRef
   } m_data;
 };
 

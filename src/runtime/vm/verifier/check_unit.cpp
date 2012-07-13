@@ -133,7 +133,7 @@ bool UnitChecker::checkBytecode() {
       continue;
     }
     if (funcs.find(f->base()) != funcs.end()) {
-      printf("Verify: duplicate fuction-base at %d in unit %s\n",
+      printf("Verify: duplicate function-base at %d in unit %s\n",
              f->base(), m_unit->md5().toString().c_str());
       ok = false;
       continue;

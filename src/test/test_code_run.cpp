@@ -1290,6 +1290,39 @@ bool TestCodeRun::TestExceptions() {
        "function f($a) { if ($a) throw new Exception('What?'); }"
        "foo(1);");
 
+  if (Option::EnableEval >= Option::FullEval) {
+    MVCRNW("<?php "
+           "error_reporting(-1);"
+           "set_error_handler('handle');"
+           "function handle() { throw new exception; }"
+           "function foo($a,$b=null) { return $a; }"
+           "function test1() {"
+           "  if (foo(0)) $a=1;"
+           "  $x = new StdClass;"
+           "  return $a;"
+           "}"
+           "function test2() {"
+           "  if (foo(0)) $a=1;"
+           "  return $a | new StdClass;"
+           "}"
+           "function test3() {"
+           "  if (foo(0)) $a=1;"
+           "  $x = new StdClass;"
+           "  return $a::foo;"
+           "}"
+           "function test($f) {"
+           "  try {"
+           "    $f();"
+           "  } catch (Exception $e) {"
+           "    var_dump($f.':Caught');"
+           "  }"
+           "}"
+           "test('test1');"
+           "test('test2');"
+           "test('test3');"
+           "var_dump('not reached');");
+  }
+
   return true;
 }
 
@@ -6146,7 +6179,42 @@ bool TestCodeRun::TestObjectProperty() {
          "function test($x, $v) { unset($x->$v); var_dump($x); }"
          "test(new stdclass, \"\\0foo\");");
 
-      return true;
+  MVCR("<?php "
+       "class X {"
+       "  public $bar = 5;"
+       "  function &foo() { static $v; if (!$v) $v = $this; return $v; }"
+       "}"
+       "function &foo() {"
+       "  static $v;"
+       "  if (!$v) $v = new X;"
+       "  return $v;"
+       "}"
+       "function &bar() {"
+       "  static $v;"
+       "  return $v;"
+       "}"
+       "function test() {"
+       "  $x = new X;"
+       "  var_dump($x->foo()->bar);"
+       "  var_dump($x->foo()->bar);"
+       "  var_dump($x->foo()->bar);"
+       "  var_dump(foo()->bar);"
+       "  foo()->bar = 6;"
+       "  var_dump(foo()->bar);"
+       "  foo()->bar = 7;"
+       "  var_dump(foo()->bar);"
+       "  foo()->bar = 8;"
+       "  var_dump(foo()->bar);"
+       "  bar()->bar = 6;"
+       "  var_dump(bar()->bar);"
+       "  bar()->bar = 7;"
+       "  var_dump(bar()->bar);"
+       "  bar()->bar = 8;"
+       "  var_dump(bar()->bar);"
+       "}"
+       "test();");
+
+     return true;
 }
 
 bool TestCodeRun::TestObjectMethod() {
@@ -8795,7 +8863,7 @@ bool TestCodeRun::TestDynamicVariables() {
        "  $b = &$GLOBALS['b'];\n"
        "  $d = 789; $e = 111;\n"
        "  $c = &$d;\n"
-       " $arr = get_defined_vars(); asort($arr); var_dump($arr); return $arr;\n"
+       " $arr = get_defined_vars(); ksort($arr); var_dump($arr); return $arr;\n"
        "}\n"
        "function bar($arr) {\n"
        "  extract($arr, EXTR_REFS);\n"
@@ -10501,6 +10569,22 @@ bool TestCodeRun::TestCompilation() {
        "  class X {}"
        "}");
 
+  MVCRNW("<?php "
+         "class X { const FOO = 'hello'; }"
+         "function foo(&$a) { static $s; }"
+         "if (class_exists('X')) foo(X::FOO);");
+
+  MVCR("<?php "
+       "class X {"
+       "  static function foo() { return new X; }"
+       "  function bar() { var_dump(__METHOD__); }"
+       "};"
+       "function id($x) { return $x; }"
+       "function test() {"
+       "  id(X::foo(1))->bar();"
+       "}"
+       "test();");
+
   return true;
 }
 
@@ -10999,8 +11083,10 @@ bool TestCodeRun::TestExtMisc() {
   MVCR("<?php var_dump(pack('nvc*', 0x1234, 0x5678, 65, 66));");
   MVCR("<?php var_dump(unpack('nfrist/vsecond/c2chars', "
       "pack('nvc*', 0x1234, 0x5678, 65, 66)));");
-  MVCR("<?php $d=fopen('test/test_code_run.cpp', 'r');"
-       "var_dump(is_object($d));var_dump(is_resource($d));");
+  MVCR("<?php $d=fopen('test/test_code_run.cpp', 'r');\n"
+       "var_dump(is_object($d));\n"
+       "var_dump(is_resource($d));\n"
+       "var_dump(gettype((string)$d));");
 
   MVCR("<?php "
        "class X {};"
@@ -11224,10 +11310,6 @@ bool TestCodeRun::TestSuperGlobals() {
        "  $b = $GLOBALS;\n"
        "  $b['a'] = 0;\n"
        "  var_dump($GLOBALS['a']);\n"
-       "  var_dump(end($GLOBALS));\n"
-       "  reset($GLOBALS);\n"
-       "  end($b);\n"
-       "  var_dump(current($GLOBALS));\n"
        "}\n"
        "f();\n");
 

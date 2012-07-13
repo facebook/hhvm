@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_info.h>
 #include <runtime/eval/debugger/cmd/cmd_variable.h>
-#include <runtime/eval/runtime/eval_frame_injection.h>
-#include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/ext/ext_reflection.h>
 #include <runtime/base/preg.h>
 #include <util/logger.h>

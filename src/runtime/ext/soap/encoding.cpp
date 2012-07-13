@@ -449,7 +449,7 @@ static bool soap_check_zval_ref(CVarRef data, xmlNodePtr node) {
   if (data.isObject()) {
     hash = (int64)data.getObjectData();
   } else if (data.isReferenced()) {
-    hash = (int64)data.getVariantData();
+    hash = (int64)data.getRefData();
   }
   if (hash) {
     Array &ref_map = SOAP_GLOBAL(ref_map);
@@ -513,7 +513,7 @@ static bool soap_check_xml_ref(Variant &data, xmlNodePtr node) {
     if (!(data.isObject() && data2.isObject() &&
           data.getObjectData() == data2.getObjectData()) &&
         !(data.isReferenced() && data2.isReferenced() &&
-          data.getVariantData() == data2.getVariantData())) {
+          data.getRefData() == data2.getRefData())) {
       data.assignRef(data2);
       return true;
     }

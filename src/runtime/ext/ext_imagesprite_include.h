@@ -91,7 +91,7 @@ class Image {
       m_flush[IMAGESPRITE_FLUSH_RIGHT] = false;
     }
 
-    ~Image() {
+    virtual ~Image() {
       reset();
     }
 

@@ -63,8 +63,8 @@ void RTTIInfo::translate_rtti(const char *rttiDirectory) {
     if (m_profData[i][getDataTypeIndex(KindOfObject)]) {
       printf(" o/%u", m_profData[i][getDataTypeIndex(KindOfObject)]);
     }
-    if (m_profData[i][getDataTypeIndex(KindOfVariant)]) {
-      printf(" v/%u", m_profData[i][getDataTypeIndex(KindOfVariant)]);
+    if (m_profData[i][getDataTypeIndex(KindOfRef)]) {
+      printf(" v/%u", m_profData[i][getDataTypeIndex(KindOfRef)]);
     }
     printf("\n");
   }

@@ -34,20 +34,17 @@ public:
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
   virtual CVarRef getValueRef(ssize_t pos) const;
-  virtual bool isGlobalArrayWrapper() const;
+  virtual bool noCopyOnWrite() const;
 
   virtual bool exists(int64   k) const;
   virtual bool exists(litstr  k) const;
   virtual bool exists(CStrRef k) const;
   virtual bool exists(CVarRef k) const;
-  virtual bool idxExists(ssize_t idx) const;
 
   virtual CVarRef get(int64   k, bool error = false) const;
   virtual CVarRef get(litstr  k, bool error = false) const;
   virtual CVarRef get(CStrRef k, bool error = false) const;
   virtual CVarRef get(CVarRef k, bool error = false) const;
-
-  virtual void load(CVarRef k, Variant &v) const;
 
   virtual ssize_t getIndex(int64 k) const;
   virtual ssize_t getIndex(litstr k) const;
@@ -102,10 +99,6 @@ public:
   virtual Variant key() const;
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
-
-  virtual bool isHead() const;
-  virtual bool isTail() const;
-  virtual bool isInvalid() const;
 
   virtual void getFullPos(FullPos &fp);
   virtual bool setFullPos(const FullPos &fp);

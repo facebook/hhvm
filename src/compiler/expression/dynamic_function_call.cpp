@@ -249,8 +249,11 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
 
     if (dynamic) {
-      if (m_class && (!m_class->getActualType() ||
-                      !m_class->getActualType()->is(Type::KindOfString))) {
+      if ((m_class && (!m_class->getActualType() ||
+                       !m_class->getActualType()->is(Type::KindOfString))) ||
+          !getOriginalFunction() ||
+          !getOriginalClass() ||
+          getOriginalFunction()->isStatic()) {
         cg_printf("mcp%d.dynamicNamedCall(cls%d, mth%d);\n",
                   m_ciTemp, m_ciTemp, m_ciTemp);
       } else {

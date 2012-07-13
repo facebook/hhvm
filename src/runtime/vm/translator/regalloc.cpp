@@ -69,9 +69,9 @@ RegAlloc::freeRegInfo(RegInfo *r) {
  */
 RegInfo*
 RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
-                bool needsFill) {
+                bool needsFill, int64 immVal) {
   RegInfo   *retval = NULL;
-  RegContent cont   = RegContent(loc);
+  RegContent cont   = RegContent(loc, immVal);
 
   if (loc.isValid()) {
     // Best possible result: it's already there.
@@ -82,7 +82,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
       ASSERT(retval->m_state == RegInfo::CLEAN ||
              retval->m_state == RegInfo::DIRTY);
       ASSERT(retval->m_cont == cont);
-      TRACE(1, "alloc (%s, %d) t%d state %d hit r%d\n",
+      TRACE(1, "alloc (%s, %lld) t%d state %d hit r%d\n",
             loc.spaceName(), loc.offset, type, state, retval->m_pReg);
       needsFill = false;
     }
@@ -91,7 +91,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
     // Oops, not there yet. First look for a free one.
     retval = findFreeReg(loc);
     if (retval) {
-      TRACE(1, "alloc (%s, %d) found a free reg %d state %d\n",
+      TRACE(1, "alloc (%s, %lld) found a free reg %d state %d\n",
             loc.spaceName(), loc.offset, retval->m_pReg, retval->m_state);
     }
   }
@@ -110,7 +110,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
     // register that still might need preservation.
     ASSERT(retval->m_epoch < m_epoch);
 
-    TRACE(1, "alloc (%s, %d) found a %s victim reg r%d\n",
+    TRACE(1, "alloc (%s, %lld) found a %s victim reg r%d\n",
           loc.spaceName(), loc.offset,
           retval->m_state == RegInfo::CLEAN ? "clean" : "dirty",
           retval->m_pReg);
@@ -130,10 +130,14 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
 
   ASSERT(retval);
   retval->m_epoch = m_epoch;
-  TRACE(1, "alloc (%s, %d) t%d state %d r%d fill? %d\n",
+  TRACE(1, "alloc (%s, %lld) t%d state %d r%d fill? %d\n",
         loc.spaceName(), loc.offset, type, state, retval->m_pReg, needsFill);
-  if (needsFill) {
-    m_spf->fill(loc, retval->m_pReg);
+  if (needsFill && !IS_NULL_TYPE(type)) {
+    if (loc.isLiteral()) {
+      m_spf->loadImm(immVal, retval->m_pReg);
+    } else {
+      m_spf->fill(loc, retval->m_pReg);
+    }
   }
 
   // Can't happen: if we're evicting a dirty register, we should have set
@@ -151,13 +155,19 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
 
 void
 RegAlloc::allocInputReg(const NormalizedInstruction& ni, int index) {
+  Location& loc = ni.inputs[index]->location;
+  if (loc.isLiteral()) {
+    RuntimeType& rtt = ni.inputs[index]->rtt;
+    alloc(loc, rtt.valueType(), RegInfo::CLEAN, true, rtt.valueGeneric());
+    return;
+  }
   const RuntimeType& rtt = ni.inputs[index]->rtt;
   if (rtt.isIter()) {
     return;
   }
   DataType t = rtt.outerType();
   if (t == KindOfInvalid) return;
-  (void) alloc(ni.inputs[index]->location, t, RegInfo::CLEAN, true);
+  (void) alloc(loc, t, RegInfo::CLEAN, true);
 }
 
 void
@@ -345,7 +355,8 @@ void RegAlloc::reconcile(RegAlloc& branch) {
                            r->m_type);
       branch.verify();
 
-      if (r->m_cont.m_kind == RegContent::Int) {
+      if (r->m_cont.m_kind == RegContent::Int ||
+          r->m_cont.m_loc.isLiteral()) {
         ASSERT(r->m_state == RegInfo::CLEAN);
         branch.m_spf->loadImm(r->m_cont.m_int, r->m_pReg);
       } else if (oldReg != InvalidReg) {
@@ -423,11 +434,11 @@ void RegAlloc::spill(RegInfo *toSpill) {
   if (toSpill->m_type == KindOfInvalid) {
     // KindOfInvalid outputs are auto-spilled; it is the translator's
     // responsibility to keep them sync'ed in memory and registers.
-    TRACE(1, "spill: (%s, %d) skipping invalid output\n",
+    TRACE(1, "spill: (%s, %lld) skipping invalid output\n",
           toSpill->m_cont.m_loc.spaceName(), toSpill->m_cont.m_loc.offset);
     return;
   }
-  TRACE(1, "spill: (%s, %d) <- type %d, r%d\n",
+  TRACE(1, "spill: (%s, %lld) <- type %d, r%d\n",
         toSpill->m_cont.m_loc.spaceName(), toSpill->m_cont.m_loc.offset,
         toSpill->m_type, toSpill->m_pReg);
   m_spf->spill(toSpill->m_cont.m_loc, toSpill->m_type, toSpill->m_pReg, true);
@@ -549,8 +560,8 @@ RegAlloc::assignRegInfo(RegInfo *regInfo, const RegContent &cont,
                         RegInfo::State state, DataType type) {
   ASSERT(regInfo);
   ASSERT(cont.isValid());
-  ASSERT(!cont.isInt() || state == RegInfo::CLEAN);
-  ASSERT(!cont.isInt() || type == KindOfInt64);
+  ASSERT(IMPLIES(cont.isInt(), state == RegInfo::CLEAN));
+  ASSERT(IMPLIES(cont.isInt(), type == KindOfInt64));
 
   regInfo->m_cont  = cont;
   regInfo->m_type  = type;
@@ -660,7 +671,7 @@ RegAlloc::scrubStackEntries(int firstUnreachable) {
     if (r->m_cont.isLoc() &&
         r->m_cont.m_loc.space == Location::Stack &&
         r->m_cont.m_loc.offset >= firstUnreachable) {
-      TRACE(1, "scrubbing dead stack value: (Stack, %d)\n",
+      TRACE(1, "scrubbing dead stack value: (Stack, %lld)\n",
             r->m_cont.m_loc.offset);
       ASSERT(r->m_state == RegInfo::CLEAN || r->m_state == RegInfo::DIRTY);
       stateTransition(r, RegInfo::CLEAN);
@@ -676,7 +687,7 @@ RegAlloc::scrubStackRange(int firstToDiscard, int lastToDiscard) {
         r->m_cont.m_loc.space == Location::Stack &&
         r->m_cont.m_loc.offset >= firstToDiscard &&
         r->m_cont.m_loc.offset <= lastToDiscard) {
-      TRACE(1, "scrubbing dead stack value: (Stack, %d)\n",
+      TRACE(1, "scrubbing dead stack value: (Stack, %lld)\n",
             r->m_cont.m_loc.offset);
       ASSERT(r->m_state == RegInfo::CLEAN || r->m_state == RegInfo::DIRTY);
       stateTransition(r, RegInfo::CLEAN);
@@ -749,9 +760,9 @@ RegAlloc::verify() {
     // The location and mapping are consistent.
     ASSERT(ri->m_cont == cont);
     // If it's a location, make sure it's is valid.
-    ASSERT(!(ri->m_cont.isLoc()) || ri->m_cont.m_loc.isValid());
+    ASSERT(IMPLIES(ri->m_cont.isLoc(), ri->m_cont.m_loc.isValid()));
     // If it's an integer/immediate, make sure it's clean.
-    ASSERT(!(ri->m_cont.isInt()) || ri->m_state == RegInfo::CLEAN);
+    ASSERT(IMPLIES(ri->m_cont.isInt(), ri->m_state == RegInfo::CLEAN));
     // The register is live.
     ASSERT(ri->m_state != RegInfo::FREE);
   }

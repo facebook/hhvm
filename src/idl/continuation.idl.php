@@ -154,13 +154,60 @@ BeginClass(
     'name' => 'Continuation',
     'ifaces' => array('Iterator'),
     'footer' => <<<EOT
-public:    void setCalledClass(CStrRef cls) { m_called_class = cls; }
+  public: void setCalledClass(CStrRef cls) {
+    const_assert(!hhvm);
+    m_called_class = cls;
+  }
 protected: virtual bool php_sleep(Variant &ret);
 private:
+  template<typename FI> void nextImpl(FI& fi);
+
+public:
+  inline void preNext() {
+    if (m_done) {
+      throw_exception(Object(SystemLib::AllocExceptionObject(
+                               "Continuation is already finished")));
+    }
+    if (m_running) {
+      throw_exception(Object(SystemLib::AllocExceptionObject(
+                               "Continuation is already running")));
+    }
+    m_running = true;
+    ++m_index;
+  }
+
+  inline void nextCheck() {
+    if (m_index < 0LL) {
+      throw_exception(
+        Object(SystemLib::AllocExceptionObject("Need to call next() first")));
+    }
+  }
+
+public:
+#define LABEL_DECL int64 m_label;
+  Object m_obj;
+  Array m_args;
+#ifndef HHVM
+  LABEL_DECL
+#endif
+  int64 m_index;
+  Variant m_value;
+  Variant m_received;
+  String m_origFuncName;
+  String m_called_class;
+  bool m_done;
+  bool m_running;
   bool m_should_throw;
   bool m_isMethod;
   const CallInfo *m_callInfo;
-  void *m_extra;
+  union {
+    void *m_extra;
+    VM::Func *m_vmFunc;
+  };
+#ifdef HHVM
+  LABEL_DECL
+#endif
+#undef LABEL_DECL
 EOT
 ,
   )
@@ -358,76 +405,6 @@ DefineFunction(
     ),
   ));
 
-DefineProperty(
-  array(
-    'name'  => 'obj',
-    'type'  => Object,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'args',
-    'type'  => VariantVec,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'label',
-    'type'  => Int64,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'index',
-    'type'  => Int64,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'value',
-    'type'  => Variant,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'received',
-    'type'  => Variant,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'origFuncName',
-    'type'  => String,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'called_class',
-    'type'  => String,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'done',
-    'type'  => Boolean,
-    'flags' => IsPrivate,
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'running',
-    'type'  => Boolean,
-    'flags' => IsPrivate,
-  ));
-
 DefineFunction(
   array(
     'name'   => '__clone',
@@ -442,10 +419,25 @@ BeginClass(
   array(
     'name'   => 'GenericContinuation',
     'parent' => 'Continuation',
-    'flags'  =>  NoDefaultSweep,
+    'bases'  => array('Sweepable'),
+    'flags'  => NoDefaultSweep,
     'footer' => <<<EOT
 public:
+  HphpArray* getStaticLocals();
+
+public:
+  TypedValue* m_locals;
+  bool m_hasExtraVars;
+  int m_nLocals;
+  Array m_vars;
+  intptr_t m_vmCalledClass; // Stored with 1 in its low bit
+  VM::Class* getVMCalledClass() {
+    return (VM::Class*)(m_vmCalledClass & ~0x1ll);
+  }
+
   LVariableTable m_statics;
+private:
+  SmartPtr<HphpArray> m_VMStatics;
 EOT
 ,
   )
@@ -519,13 +511,6 @@ DefineFunction(
     'return' => array(
       'type'   => VariantMap,
     ),
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'vars',
-    'type'  => VariantMap,
-    'flags' => IsPrivate,
   ));
 
 EndClass();

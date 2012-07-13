@@ -48,17 +48,13 @@ const StringData *convert_integer_helper(int64 n, StringData *sd) {
   char *p;
   int is_negative;
   int len;
-  char *buf;
 
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-
-  buf = (char*)malloc(len + 1);
-  memcpy(buf, p, len + 1);
   if (sd) {
-    new (sd) StringData(buf, len, AttachString);
+    new (sd) StringData(p, len, CopyString);
   } else {
-    sd = new StringData(buf, len, AttachString);
+    sd = new StringData(p, len, CopyString);
   }
   sd->setStatic();
   if (!String(sd).checkStatic()) {
@@ -98,16 +94,12 @@ StringData* buildStringData(int n) {
   char* p;
   int is_negative;
   int len;
-  char* buf;
 
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
   tmpbuf[11] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[11], &len);
-
-  buf = (char*)malloc(len + 1);
-  memcpy(buf, p, len + 1); // including the null terminator.
-  return NEW(StringData)(buf, len, AttachString);
+  return NEW(StringData)(p, len, CopyString);
 }
 
 String::String(int n) {
@@ -126,16 +118,12 @@ StringData* buildStringData(int64 n) {
   char* p;
   int is_negative;
   int len;
-  char* buf;
 
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-
-  buf = (char*)malloc(len + 1);
-  memcpy(buf, p, len + 1); // including the null terminator.
-  return NEW(StringData)(buf, len, AttachString);
+  return NEW(StringData)(p, len, CopyString);
 }
 
 HOT_FUNC
@@ -174,12 +162,12 @@ StringData* buildStringData(litstr s) {
 
 String String::substr(int start, int length /* = 0x7FFFFFFF */,
                       bool nullable /* = false */) const {
-  int len = size();
-  char *ret = string_substr(data(), len, start, length, nullable);
-  if (ret) {
-    return String(ret, len, AttachString);
+  StringSlice r = slice();
+  // string_substr_check() will update start & length to a legal range.
+  if (string_substr_check(r.len, start, length)) {
+    return String(r.ptr + start, length, CopyString);
   }
-  return String();
+  return nullable ? String() : String("", 0, CopyString);
 }
 
 String String::lastToken(char delimiter) {
@@ -362,16 +350,12 @@ String &String::operator+=(litstr s) {
       m_px = NEW(StringData)(s, AttachLiteral);
       m_px->setRefCount(1);
     } else if (m_px->getCount() == 1) {
-      int len = strlen(s);
-      m_px->append(s, len);
+      m_px->append(s, strlen(s));
     } else {
-      int len;
-      char *ret = string_concat(data(), size(), s, strlen(s), len);
-      if (m_px->decRefCount() == 0) {
-        m_px->release();
-      }
-      m_px = NEW(StringData)(ret, len, AttachString);
-      m_px->setRefCount(1);
+      StringData* px = NEW(StringData)(m_px, s);
+      px->setRefCount(1);
+      if (m_px->decRefCount() == 0) m_px->release();
+      m_px = px;
     }
   }
   return *this;
@@ -382,15 +366,12 @@ String &String::operator+=(CStrRef str) {
     if (empty()) {
       StringBase::operator=(str.m_px);
     } else if (m_px->getCount() == 1) {
-      m_px->append(str.data(), str.size());
+      m_px->append(str.slice());
     } else {
-      int len;
-      char *ret = string_concat(data(), size(), str.data(), str.size(), len);
-      if (m_px->decRefCount() == 0) {
-        m_px->release();
-      }
-      m_px = NEW(StringData)(ret, len, AttachString);
-      m_px->setRefCount(1);
+      StringData* px = NEW(StringData)(m_px, str.slice());
+      if (m_px->decRefCount() == 0) m_px->release();
+      px->setRefCount(1);
+      m_px = px;
     }
   }
   return *this;
@@ -398,27 +379,19 @@ String &String::operator+=(CStrRef str) {
 
 String String::operator+(litstr str) const {
   if (empty()) return str;
-
   if (!str || !*str) return *this;
-
-  int len;
-  char *ret = string_concat(data(), size(), str, strlen(str), len);
-  return NEW(StringData)(ret, len, AttachString);
+  return NEW(StringData)(slice(), str);
 }
 
 HOT_FUNC
 String String::operator+(CStrRef str) const {
   if (empty()) return str;
-
   if (str.empty()) return *this;
-
-  int len;
-  char *ret = string_concat(data(), size(), str.data(), str.size(), len);
-  return NEW(StringData)(ret, len, AttachString);
+  return NEW(StringData)(slice(), str.slice());
 }
 
 String String::operator~() const {
-  String ret(NEW(StringData)(data(), size(), CopyString));
+  String ret(NEW(StringData)(slice(), CopyString));
   ret->negate();
   return ret;
 }
@@ -710,15 +683,16 @@ void String::unserialize(VariableUnserializer *uns,
   if (ch != delimiter0) {
     throw Exception("Expected '%c' but got '%c'", delimiter0, ch);
   }
-
-  char *buf = (char*)malloc(size + 1);
-  uns->read(buf, size);
-  buf[size] = '\0';
+  StringData *px = NEW(StringData)(int(size));
+  MutableSlice buf = px->mutableSlice();
+  ASSERT(size <= buf.len);
+  uns->read(buf.ptr, size);
+  px->setSize(size);
   if (m_px && m_px->decRefCount() == 0) {
     m_px->release();
   }
-  m_px = NEW(StringData)(buf, size, AttachString);
-  m_px->setRefCount(1);
+  m_px = px;
+  px->setRefCount(1);
 
   ch = uns->readChar();
   if (ch != delimiter1) {

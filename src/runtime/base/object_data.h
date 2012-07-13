@@ -29,13 +29,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// Needed for eval
-namespace Eval {
-class MethodStatementWrapper;
-class FunctionCallExpression;
-class VariableEnvironment;
-}
-
 class ArrayIter;
 class MutableArrayIter;
 class ClassPropTable;
@@ -79,7 +72,6 @@ class ObjectData : public CountableNF {
     HasLval       = 0x0080, // defines ___lval
     HasCall       = 0x0100, // defines __call
     HasCallStatic = 0x0200, // defines __callStatic
-    IsInstance    = 0x0400  // isInstance()
   };
   enum {
     RealPropCreate = 1,   // Property should be created if it doesnt exist
@@ -91,9 +83,12 @@ class ObjectData : public CountableNF {
 
   ObjectData(const ObjectStaticCallbacks *cb = NULL, bool noId = false,
              VM::Class* type = NULL)
-      : o_attribute(0), o_callbacks(cb)
+      : o_attribute(0)
 #ifdef HHVM
-        , m_cls(type), m_propVec(NULL)
+        , m_propsOffset(0)
+        , m_cls(type)
+#else
+        , o_callbacks(cb)
 #endif
         {
     if (!noId) {
@@ -195,11 +190,6 @@ class ObjectData : public CountableNF {
   virtual void getConstructor(MethodCallPackage &mcp);
   virtual void destruct();
 
-  virtual const Eval::MethodStatementWrapper* getConstructorStatementWrapper()
-    const;
-  virtual const Eval::MethodStatementWrapper* getMethodStatementWrapper(
-    CStrRef name) const;
-
   static Variant os_invoke(CStrRef c, CStrRef s,
                            CArrRef params, int64 hash, bool fatal = true);
 
@@ -210,7 +200,7 @@ class ObjectData : public CountableNF {
   Variant *o_realProp(CStrRef s, int flags,
                       CStrRef context = null_string) const;
   void *o_realPropTyped(CStrRef s, int flags,
-                        CStrRef context, int *type) const;
+                        CStrRef context, DataType* type) const;
   Variant *o_realPropPublic(CStrRef s, int flags) const;
   virtual Variant *o_realPropHook(CStrRef s, int flags,
                                   CStrRef context = null_string) const;
@@ -284,7 +274,11 @@ class ObjectData : public CountableNF {
                                  INVOKE_FEW_ARGS_DECL_ARGS);
   bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   const ObjectStaticCallbacks *o_get_callbacks() const {
+#ifndef HHVM
     return o_callbacks;
+#else
+    NOT_REACHED();
+#endif
   }
   bool o_get_call_info_ex(const char *clsname,
                           MethodCallPackage &mcp, int64 hash = -1);
@@ -357,30 +351,36 @@ public:
   static Variant *RealPropPublicHelper(CStrRef propName, int64 hash, int flags,
                                        const ObjectData *obj,
                                        const ObjectStaticCallbacks *osc);
+ public:
+  static const bool IsResourceClass = false;
  protected:
   int           o_id;            // a numeric identifier of this object
  private:
   mutable int16 o_attribute;     // various flags
- protected:
-  ArrNR         o_properties;    // dynamic properties
-#ifndef HHVM
-  // For non-HHVM builds, avoid the memory overhead of HHVM-specific fields by
-  // overlaying them onto a field that exists regardless.  This is sufficient
-  // for compilation to succeed, but it is critical that the HHVM-specific
-  // fields only be used if hhvm is true.
-  union {
-#endif
-    const ObjectStaticCallbacks *o_callbacks;
 
-    // All of the fields that would ordinarily reside in HPHP::VM::Instance must
-    // reside here, so that it is possible to dynamically compute the offset of
-    // the property vector that follows an "Instance", regardless of whether the
-    // Instance is actually an extension class that derives from ObjectData.
+  // All of the fields that would ordinarily reside in HPHP::VM::Instance must
+  // reside here, so that it is possible to dynamically compute the offset of
+  // the property vector that follows an "Instance", regardless of whether the
+  // Instance is actually an extension class that derives from ObjectData.
+
+#ifdef HHVM
+  int16         m_propsOffset;   // used for accessing declared properties
+                                 // under the VM
+#endif
+ protected:
+  ArrNR         o_properties;    // dynamic properties (VM and hphpc)
+
+#ifdef HHVM
+  HPHP::VM::Class* m_cls;
+#else
+  union {
+    const ObjectStaticCallbacks *o_callbacks;
+    // m_cls isn't used under hphpc, but we need declare it
+    // so that the compiler doesn't complain
     HPHP::VM::Class* m_cls;
-    TypedValue* m_propVec;
-#ifndef HHVM
   };
 #endif
+
  protected:
   void          cloneDynamic(ObjectData *orig);
 
@@ -390,12 +390,6 @@ public:
   }
 
  public:
-  // true : pure user class or user class deriving from builtin
-  // false: pure builtin
-  bool isInstance() const {
-    return getAttribute(IsInstance);
-  }
-
   void release() {
     ASSERT(getCount() == 0);
     destruct();
@@ -463,6 +457,16 @@ struct ObjectStaticCallbacks {
   const ObjectStaticCallbacks *parent;
   int                         attributes;
   HPHP::VM::Class**           os_cls_ptr;
+
+  static ObjectStaticCallbacks* encodeVMClass(const HPHP::VM::Class* vmClass) {
+    return (ObjectStaticCallbacks*)((intptr_t)vmClass | (intptr_t)1);
+  }
+  static HPHP::VM::Class* decodeVMClass(const ObjectStaticCallbacks* cb) {
+    return (HPHP::VM::Class*)((intptr_t)cb & ~(intptr_t)1); 
+  }
+  static bool isEncodedVMClass(const ObjectStaticCallbacks* cb) {
+    return ((intptr_t)cb & (intptr_t)1);
+  }
 };
 
 struct RedeclaredObjectStaticCallbacks {

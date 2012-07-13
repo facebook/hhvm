@@ -18,53 +18,15 @@
 #define __EVAL_EVAL_H__
 
 #include <runtime/base/base_includes.h>
-#include <runtime/eval/ast/function_call_expression.h>
-#include <runtime/eval/base/function.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
-             bool prepend_php = true);
-
-bool eval_get_class_var_init_hook(Variant &res, CStrRef s,
-                                  const char *var);
 ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root);
-/**
- * eval_try_autoload is hphpi's mechanism for invoking the autoload facility.
- * It returns true if any autoload handlers are executed, false otherwise.
- * When this function returns true, it is the caller's responsibility to check
- * if the given class or interface exists.
- */
-bool eval_try_autoload(CStrRef s);
-bool eval_invoke_static_method_hook(Variant &res, CStrRef s,
-                                    CStrRef method, CArrRef params,
-                                    bool &foundClass);
-bool eval_get_static_property_hook(Variant &res, CStrRef s,
-                                   const char* prop);
-bool eval_get_static_property_lv_hook(Variant *&res, CStrRef s,
-                                      const char *prop);
 bool eval_get_class_constant_hook(Variant &res, CStrRef s,
                                   const char* constant);
-bool eval_constant_hook(Variant &res, CStrRef name);
 bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
                            LVariableTable* variables, const char *currentDir);
-bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
-  int64 hash = -1);
-bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
-    bool &foundClass);
-void eval_set_callee_alias(CStrRef alias);
-
-// Global state getters
-inline void eval_get_static_global_variables(Array &arr) {}
-inline void eval_get_dynamic_global_variables(Array &arr) {}
-void eval_get_method_static_variables(Array &arr);
-inline void eval_get_method_static_inited(Array &arr) {}
-void eval_get_class_static_variables(Array &arr);
-void eval_get_dynamic_constants(Array &arr);
-inline void eval_get_pseudomain_variables(Array &arr) {}
-inline void eval_get_redeclared_functions(Array &arr) {}
-inline void eval_get_redeclared_classes(Array &arr) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

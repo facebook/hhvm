@@ -167,6 +167,11 @@ inline Variant x_hphp_process_abort(CVarRef magic) {
   return f_hphp_process_abort(magic);
 }
 
+inline String x_hphp_to_string(CVarRef v) {
+  FUNCTION_INJECTION_BUILTIN(hphp_to_string);
+  return f_hphp_to_string(v);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

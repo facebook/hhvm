@@ -14,21 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/runtime/file_repository.h>
-#include <runtime/eval/runtime/variable_environment.h>
-#include <runtime/eval/ast/statement.h>
-#include <runtime/eval/parser/parser.h>
-#include <runtime/eval/ast/static_statement.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/zend/zend_string.h>
 #include <util/process.h>
 #include <util/atomic.h>
 #include <util/trace.h>
 #include <util/stat_cache.h>
-#include <runtime/eval/runtime/eval_state.h>
 #include <runtime/base/server/source_root_info.h>
-#include <runtime/eval/ast/scalar_value_expression.h>
 
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/vm/translator/translator-x64.h>
@@ -52,16 +45,6 @@ std::set<string> FileRepository::s_names;
 
 static volatile bool s_interceptsEnabled = false;
 
-PhpFile::PhpFile(StatementPtr tree, const vector<StaticStatementPtr> &statics,
-                 const Block::VariableIndices &variableIndices,
-                 const string &fileName, const string &srcRoot,
-                 const string &relPath, const string &md5)
-    : Block(statics, variableIndices), m_refCount(0), m_id(0), m_tree(tree),
-      m_profName(string("run_init::") + string(m_tree->loc()->file)),
-      m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5),
-      m_unit(NULL) {
-}
-
 PhpFile::PhpFile(const string &fileName, const string &srcRoot,
                  const string &relPath, const string &md5,
                  HPHP::VM::Unit* unit)
@@ -69,13 +52,11 @@ PhpFile::PhpFile(const string &fileName, const string &srcRoot,
       m_profName(string("run_init::") + string(fileName)),
       m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5),
       m_unit(unit) {
-  const_assert(hhvm);
 }
 
 PhpFile::~PhpFile() {
   assert(m_refCount == 0);
   if (m_unit != NULL) {
-    const_assert(hhvm);
     // Deleting a Unit can grab a low-ranked lock and we're probably
     // at a high rank right now
     VM::PendQ::defer(new VM::DeferredDeleter<VM::Unit>(m_unit));
@@ -101,36 +82,6 @@ void PhpFile::decRefAndDelete() {
   if (decRef() == 0) {
     FileRepository::onDelete(this);
   }
-}
-
-Variant PhpFile::eval(LVariableTable *vars) {
-  NestedVariableEnvironment env(vars, *this);
-  DECLARE_THREAD_INFO_NOINIT
-  EvalFrameInjection fi(empty_string, m_profName.c_str(), env,
-                        m_tree->loc()->file, NULL,
-                        FrameInjection::PseudoMain|FrameInjection::Function);
-  restart:
-  try {
-    m_tree->eval(env);
-  } catch (GotoException &e) {
-    goto restart;
-  } catch (UnlimitedGotoException &e) {
-    goto restart;
-  }
-  if (env.isGotoing()) {
-    throw FatalErrorException(0, "Unable to reach goto label %s",
-                              env.getGoto().c_str());
-  }
-  if (env.isGotoing()) {
-    throw FatalErrorException(0, "Unable to reach goto label %s",
-                              env.getGoto().c_str());
-  }
-  if (env.isReturning()) {
-    return env.getRet();
-  } else if (env.isBreaking()) {
-    throw FatalErrorException("Cannot break/continue out of a file");
-  }
-  return true;
 }
 
 ReadWriteMutex FileRepository::s_md5Lock(RankFileMd5);
@@ -230,7 +181,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   }
 
   // If we get here the file was not in s_files or has changed on disk
-  if (!ret && hhvm) {
+  if (!ret) {
     // Try to read Unit from .hhbc repo.
     ret = readHhbc(n->data(), fileInfo);
   }
@@ -249,14 +200,10 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   if (isNew) {
     acc->second = new PhpFileWrapper(s, ret);
     ret->incRef();
-    if (hhvm) {
-      ret->setId(VM::Transl::TargetCache::allocBit());
-    }
+    ret->setId(VM::Transl::TargetCache::allocBit());
   } else {
     PhpFile *f = acc->second->getPhpFile();
-    if (hhvm) {
-      ret->setId(f->getId());
-    }
+    ret->setId(f->getId());
     if (f != ret) {
       tx64->invalidateFile(f); // f has changed
     }
@@ -307,7 +254,6 @@ bool FileRepository::findFile(const StringData *path, struct stat *s) {
 }
 
 String FileRepository::translateFileName(StringData *file) {
-  ASSERT(hhvm || RuntimeOption::SandboxCheckMd5);
   ParsedFilesMap::const_accessor acc;
   if (!s_files.find(acc, file)) return file;
   string srcRoot(SourceRootInfo::GetCurrentSourceRoot());
@@ -338,26 +284,23 @@ void FileRepository::setFileInfo(const StringData *name,
                                  const string& md5,
                                  FileInfo &fileInfo,
                                  bool fromRepo) {
-  if (hhvm) {
-    int md5len;
-    char* md5str;
-    // Incorporate the path into the md5 that is used as the key for file
-    // repository lookups.  This assures that even if two PHP files have
-    // identical content, separate units exist for them (so that
-    // Unit::filepath() and Unit::dirpath() work correctly).
-    string s = md5 + '\0' + name->data();
-    md5str = string_md5(s.c_str(), s.size(), false, md5len);
-    fileInfo.m_md5 = string(md5str, md5len);
-    free(md5str);
+  int md5len;
+  char* md5str;
+  // Incorporate the path into the md5 that is used as the key for file
+  // repository lookups.  This assures that even if two PHP files have
+  // identical content, separate units exist for them (so that
+  // Unit::filepath() and Unit::dirpath() work correctly).
+  string s = md5 + '\0' + name->data();
+  md5str = string_md5(s.c_str(), s.size(), false, md5len);
+  fileInfo.m_md5 = string(md5str, md5len);
+  free(md5str);
 
-    if (fromRepo) {
-      fileInfo.m_unitMd5 = md5;
-    } else {
-      fileInfo.m_unitMd5 = unitMd5(md5);
-    }
+  if (fromRepo) {
+    fileInfo.m_unitMd5 = md5;
   } else {
-    fileInfo.m_md5 = md5;
+    fileInfo.m_unitMd5 = unitMd5(md5);
   }
+
   fileInfo.m_srcRoot = SourceRootInfo::GetCurrentSourceRoot();
   int srcRootLen = fileInfo.m_srcRoot.size();
   if (srcRootLen) {
@@ -455,8 +398,6 @@ bool FileRepository::readFile(const StringData *name,
 
 PhpFile *FileRepository::readHhbc(const std::string &name,
                                   const FileInfo &fileInfo) {
-  const_assert(hhvm);
-
   MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
   VM::Unit* u = VM::Repo::get().loadUnit(name, md5);
   if (u != NULL) {
@@ -470,38 +411,13 @@ PhpFile *FileRepository::readHhbc(const std::string &name,
 
 PhpFile *FileRepository::parseFile(const std::string &name,
                                    const FileInfo &fileInfo) {
-  if (hhvm) {
-    MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
-    VM::Unit* unit = VM::compile_file(fileInfo.m_inputString->data(),
-                                      fileInfo.m_inputString->size(),
-                                      md5, name.c_str());
-    PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
-                             fileInfo.m_md5, unit);
-    return p;
-  } else {
-    vector<StaticStatementPtr> sts;
-    Block::VariableIndices variableIndices;
-    if (RuntimeOption::EnableEvalOptimization) {
-      ScalarValueExpression::initScalarValues();
-    }
-    StatementPtr stmt =
-      Parser::ParseString(fileInfo.m_inputString, name.c_str(),
-                          sts, variableIndices);
-    if (stmt && RuntimeOption::EnableEvalOptimization) {
-      DummyVariableEnvironment env;
-      stmt->optimize(env);
-    }
-    if (stmt) {
-      if (RuntimeOption::EnableEvalOptimization) {
-        ScalarValueExpression::registerScalarValues();
-      }
-      PhpFile *p = new PhpFile(stmt, sts, variableIndices,
-                               name, fileInfo.m_srcRoot,
-                               fileInfo.m_relPath, fileInfo.m_md5);
-      return p;
-    }
-    return NULL;
-  }
+  MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
+  VM::Unit* unit = VM::compile_file(fileInfo.m_inputString->data(),
+                                    fileInfo.m_inputString->size(),
+                                    md5, name.c_str());
+  PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
+                           fileInfo.m_md5, unit);
+  return p;
 }
 
 bool FileRepository::fileStat(const string &name, struct stat *s) {

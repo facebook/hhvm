@@ -15,8 +15,7 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_variable.h>
-#include <runtime/eval/runtime/eval_frame_injection.h>
-#include <runtime/eval/runtime/variable_environment.h>
+#include <runtime/base/hphp_system.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -161,11 +160,6 @@ Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
     ret = GetGlobalVariables();
   } else {
     global = false;
-    if (frame->isEvalFrame()) {
-      EvalFrameInjection *eframe = static_cast<EvalFrameInjection*>(frame);
-      ret = eframe->getEnv().getDefinedVariables();
-      ret.remove("GLOBALS");
-    }
   }
   return ret;
 }

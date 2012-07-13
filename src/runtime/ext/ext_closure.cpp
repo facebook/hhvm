@@ -81,7 +81,6 @@ Variant c_GeneratorClosure::t___destruct() {
 
 c_DummyClosure::c_DummyClosure(const ObjectStaticCallbacks *cb) :
   ExtObjectData(cb) {
-  CPP_BUILTIN_CLASS_INIT(DummyClosure);
 }
 
 c_DummyClosure::~c_DummyClosure() {}

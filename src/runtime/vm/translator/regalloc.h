@@ -127,7 +127,8 @@ struct RegContent {
   int64    m_int;
   Location m_loc;
 
-  RegContent(const Location &loc) : m_kind(Loc), m_int(0), m_loc(loc) { }
+  RegContent(const Location &loc, int64 intval = 0)
+      : m_kind(Loc), m_int(intval), m_loc(loc) { }
 
   RegContent(int64 _m_int) : m_kind(Int), m_int(_m_int), m_loc(Location()) { }
 
@@ -193,9 +194,8 @@ struct RegContent {
 
   // Hash function
   size_t operator()(const RegContent& cont) const {
-    return HPHP::hash_int64_pair(cont.m_kind,
-                                 HPHP::hash_int64_pair(cont.m_int,
-                                                       cont.m_loc(cont.m_loc)));
+    return HPHP::hash_int64_pair(
+      cont.m_kind, cont.isInt() ? cont.m_int : cont.m_loc(cont.m_loc));
   }
 
 };
@@ -274,7 +274,7 @@ class RegAlloc {
   uint64          m_epoch;
 
   RegInfo* alloc(const Location& loc, DataType t, RegInfo::State state,
-                 bool needsFill);
+                 bool needsFill, int64 immVal = 0);
   RegInfo* findFreeReg(const Location& loc);
   void assignRegInfo(RegInfo *regInfo, const RegContent &cont,
                      RegInfo::State state, DataType type);

@@ -13,7 +13,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/debugger/debugger_proxy.h>
 #include <runtime/eval/debugger/cmd/cmd_interrupt.h>
 #include <runtime/eval/debugger/cmd/cmd_flow_control.h>
@@ -21,7 +20,6 @@
 #include <runtime/eval/debugger/cmd/cmd_signal.h>
 #include <runtime/eval/debugger/cmd/cmd_machine.h>
 #include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/frame_injection.h>
 #include <runtime/eval/eval.h>
@@ -351,29 +349,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   if (log) {
     Logger::SetThreadHook(append_stderr, &sb);
   }
-  try {
-    LVariableTable *vars = get_variable_table();
-    FrameInjection *f = FrameInjection::GetStackFrame(frame);
-    if (f && f->isEvalFrame()) {
-      EvalFrameInjection *eframe = static_cast<EvalFrameInjection*>(f);
-      vars = &eframe->getEnv();
-    }
-
-    String code(php.c_str(), php.size(), AttachLiteral);
-    ret = eval(vars, Object(), code, false);
-
-  } catch (InvalidFunctionCallException &e) {
-    sb.append(Debugger::ColorStderr(String(e.what())));
-    sb.append(Debugger::ColorStderr(
-              "You may also need to connect to a host "
-              "(e.g., machine connect localhost)."));
-  } catch (Exception &e) {
-    sb.append(Debugger::ColorStderr(String(e.what())));
-  } catch (Object &e) {
-    sb.append(Debugger::ColorStderr(e.toString()));
-  } catch (...) {
-    sb.append(Debugger::ColorStderr(String("(unknown exception was thrown")));
-  }
+  ret = null;
   g_context->setStdout(NULL, NULL);
   g_context->swapOutputBuffer(save);
   if (log) {

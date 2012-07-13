@@ -720,16 +720,19 @@ descriptors:
 
   EC      - consume a cell from the evaluation stack as an element
   EL:<id> - consume a local given by an immediate id as an element
+  ET:<id> - consume a litstr given by an immediate id as an element
+  EI:<int>- consume a immediate integer as an element
   PC      - consume a cell from the evaluation stack as a property
-  PL:<id> - consume a local given by an immediate id as an element
+  PL:<id> - consume a local given by an immediate id as a property
+  PT:<id> - consume a litstr given by an immediate id as a property
   W       - synthesize a new element (no corresponding local variable or
             evaluation stack slot)
 
 For example, the following correspondence exists (ignoring setup bytecode):
 
   Source code: $a[3][$b][]['hi'] = 42;
-  Bytecode: SetM <L:0 EC EL:1 W EC>
-  Stack:    [3 'hi' 42]  ->  [42]
+  Bytecode: SetM <L:0 EI:3 EL:1 W ET:hi>
+  Stack:    []  ->  [42]
 
 Instructions that have an immediate argument vector have different stack
 transition descriptions depending on the kind of location descriptor and member
@@ -923,14 +926,6 @@ Mod    [C C]  ->  [C:Bool|Int]
   Modulus (%). Pushes ((int)$2 % (int)$1) onto the stack. This instruction
   never throws a fatal error.
 
-And    [C C]  ->  [C:Bool]
-
-  Logical and (and,&&). Pushes ((bool)$2 && (bool)$1) onto the stack.
-
-Or    [C C]  ->  [C:Bool]
-
-  Logical or (or,||). Pushes ((bool)$2 || (bool)$1) onto the stack.
-
 Xor    [C C]  ->  [C:Bool]
 
   Logical xor (xor). Pushes ((bool)$2 xor (bool)$1) onto the stack.
@@ -1101,10 +1096,23 @@ JmpNZ <relative offset>    [C]  ->  []
   Jump if not zero. Conditionally transfers control to the location specified
   by %1 if (bool)$1 != (bool)0.
 
-Switch <offset vector>    [C:Int]  ->  []
+Switch  <offset vector> <base> <bounded>    [C]  ->  []
 
-  $1 must be an integer in the range [0, vector length). Control will be
-  unconditionally transferred to the location specified by vector[$1].
+  Switch over integer case values. If bounded == 0, the implementation will
+  assume that $1 is an integer in the range [0, length(vector)) and
+  unconditionally transfer control to the location specified by
+  vector[$1]. Undefined behavior will result if $1 is not an integer inside
+  this range. If bounded != 0, the following rules take over:
+
+  For a bounded Switch, the last two elements of the offset vector are special:
+  they represent the first non-zero case and the default case,
+  respectively. base + length(vector) - 2 must not be greater than 2^63-1. If
+  $1 === true, control will be transferred to the location specified by
+  vector[length(vector) - 2]. If $1 is equal (as defined by Eq) to any integer
+  $n in the range [base, base + length(vector) - 2), control will be
+  transferred to the location specified by vector[$n - base]. Otherwise,
+  control will be transferred to the location specified by
+  vector[length(vector) - 1].
 
 RetC    [C]  ->  []
 RetV    [V]  ->  []
@@ -2948,6 +2956,11 @@ location code. Next perform a series of intermediate operations depending on
 member code to process all but the last member. Finally, perform a final
 operation depending on member code to process the last member. See the
 instruction-specific tables for details.
+
+The member codes that represent immediate literal data (ET, EI, PT) are
+implemented using the corresponding EC or PC intermediate operation: they
+behave exactly as though that literal data had been pushed on the stack as a
+cell, then consumed by an ElemC* or PropC* operation.
 
 CGetM <loc-desc : M-vector>    [C..C]  ->  [C]
 

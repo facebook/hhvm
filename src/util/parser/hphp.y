@@ -1753,9 +1753,8 @@ expr_without_variable:
   | T_ARRAY  '(' array_pair_list ')'   { _p->onArray($$,$3,T_ARRAY);}
   | T_STRICT_INT_MAP '(' array_pair_list ')' { sm_array_wrapper(_p, $$, $3, "__sm_intmap"); }
   | T_STRICT_STR_MAP '(' array_pair_list ')' { sm_array_wrapper(_p, $$, $3, "__sm_strmap"); }
-  | '[' array_pair_list ']'            { _p->scanner().isStrictMode()
-                                           ? sm_array_wrapper(_p, $$, $2, "__sm_vector")
-                                           : _p->onArray($$,$2,T_ARRAY); }
+  | '[' array_pair_list ']'            { only_in_strict_mode(_p);
+                                         sm_array_wrapper(_p, $$, $2, "__sm_vector"); }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | type_decl function_loc
@@ -2023,7 +2022,6 @@ static_scalar:
   | '-' static_scalar                  { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY);}
-  | '[' static_array_pair_list ']'     { _p->onArray($$,$2,T_ARRAY);}
   | static_class_constant              { $$ = $1;}
 ;
 static_class_constant:

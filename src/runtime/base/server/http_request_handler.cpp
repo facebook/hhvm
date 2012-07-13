@@ -184,7 +184,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
             throw FatalErrorException("cannot unzip compressed data");
           }
           compressed = false;
-          str = NEW(StringData)(data, len, AttachString);
+          str = NEW(StringData)(data, len, AttachDeprecated);
         }
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
         StaticContentCache::TheFileCache->adviseOutMemory();

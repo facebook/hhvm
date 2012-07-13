@@ -96,6 +96,13 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_SpillHome) \
   STAT(Tx64_ClassExistsFast) \
   STAT(Tx64_ClassExistsSlow) \
+  /* Type prediction stats */ \
+  STAT(TypePred_Insert) \
+  STAT(TypePred_Evict) \
+  STAT(TypePred_Hit) \
+  STAT(TypePred_Miss) \
+  STAT(TypePred_MissTooFew) \
+  STAT(TypePred_MissTooWeak) \
   /* Translation cache statistics */ \
   STAT(TC_MissPMain) \
   STAT(TC_MissWriteLease) \
@@ -107,9 +114,8 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Fixup_Find) \
   STAT(Fixup_Probe) \
   /* Execute pseudomain */ \
-  STAT(ExecPS_Always) \
-  STAT(ExecPS_MergeFailed) \
-  STAT(ExecPS_Skipped) \
+  STAT(PseudoMain_Executed) \
+  STAT(PseudoMain_Skipped) \
   STAT(Cont_CreateVerySlow) \
   STAT(Cont_UnpackVerySlow) \
   STAT(Cont_PackVerySlow) \

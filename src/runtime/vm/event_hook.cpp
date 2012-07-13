@@ -45,10 +45,7 @@ void EventHook::CheckSurprise() {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   check_request_surprise(info);
   if (info->m_pendingException) {
-    Transl::VMRegAnchor _;
-    EXCEPTION_GATE_ENTER();
     throw_pending_exception(info);
-    EXCEPTION_GATE_RETURN();
   }
 }
 
@@ -70,6 +67,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
       g_vmContext->m_setprofileCallback.isNull()) {
     return;
   }
+  Transl::VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
@@ -85,7 +83,8 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
       if (fault.m_faultType == Fault::KindOfUserException) {
         frameinfo.set(s_exception, fault.m_userException);
       }
-    } else {
+    } else if (!ar->m_func->isBuiltin()) {
+      // TODO (#1131400) This is wrong for builtins
       frameinfo.set(s_return, tvAsCVarRef(g_vmContext->m_stack.topTV()));
     }
   }
@@ -136,6 +135,24 @@ void EventHook::onFunctionExit(const ActRec* ar) {
     end_profiler_frame(profiler);
   }
 #endif
+}
+
+void EventHook::EGCheckSurprise() {
+  EXCEPTION_GATE_ENTER();
+  EventHook::CheckSurprise();
+  EXCEPTION_GATE_LEAVE();
+}
+
+void EventHook::EGFunctionEnter(const ActRec* ar, int funcType) {
+  EXCEPTION_GATE_ENTER();
+  EventHook::FunctionEnter(ar, funcType);
+  EXCEPTION_GATE_LEAVE();
+}
+
+void EventHook::EGFunctionExit(const ActRec* ar) {
+  EXCEPTION_GATE_ENTER();
+  EventHook::FunctionExit(ar);
+  EXCEPTION_GATE_LEAVE();
 }
 
 } // namespace VM

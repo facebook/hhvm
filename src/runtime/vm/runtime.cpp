@@ -68,9 +68,7 @@ void print_boolean(int64 val) {
  */
 int64 new_iter(Iter* dest, HphpArray* arr) {
   TRACE(2, "new_iter: I %p, arr %p\n", dest, arr);
-  bool empty = IsHphpArray(arr) ? (arr->nvSize() == 0)
-    : arr->empty();
-  if (!empty) {
+  if (!arr->empty()) {
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
     (void) new (&dest->arr()) ArrayIter(arr, 0);
@@ -180,25 +178,15 @@ tvPairToCString(DataType t, uint64_t v,
 StringData*
 concat_ss(StringData* v1, StringData* v2) {
   if (v1->getCount() > 1) {
-    int len1 = v1->size();
-    int len2 = v2->size();
-    int len = len1 + len2;
-    char *buf = (char *)malloc(len + 1);
-    if (buf == NULL) {
-      throw FatalErrorException(0, "malloc failed: %d", len);
-    }
-    memcpy(buf, v1->data(), len1);
-    // memcpy will copy the NULL-terminator for us
-    memcpy(buf + len1, v2->data(), len2+1);
-    StringData* ret = NEW(StringData)(buf, len, AttachString);
-    ret->incRefCount();
+    StringData* ret = NEW(StringData)(v1, v2);
+    ret->setRefCount(1);
     if (v2->decRefCount() == 0) v2->release();
     // Because v1->getCount() is greater than 1, we know we will never
     // have to release the string here
     v1->decRefCount();
     return ret;
   } else {
-    v1->append(v2->data(), v2->size());
+    v1->append(v2->slice());
     if (v2->decRefCount() == 0) v2->release();
     return v1;
   }
@@ -218,16 +206,9 @@ concat_is(int64 v1, StringData* v2) {
     int is_negative;
     intstart = conv_10(v1, &is_negative, intbuf + sizeof(intbuf), &len1);
   }
-  int len2 = v2->size();
-  int len = len1 + len2;
-  char *buf = (char *)malloc(len + 1);
-  if (buf == NULL) {
-    throw FatalErrorException(0, "malloc failed: %d", len);
-  }
-  memcpy(buf, intstart, len1);
-  // memcpy will copy the NULL-terminator for us
-  memcpy(buf + len1, v2->data(), len2+1);
-  StringData* ret = NEW(StringData)(buf, len, AttachString);
+  StringSlice s1(intstart, len1);
+  StringSlice s2 = v2->slice();
+  StringData* ret = NEW(StringData)(s1, s2);
   ret->incRefCount();
   if (v2->decRefCount() == 0) v2->release();
   return ret;
@@ -247,16 +228,9 @@ concat_si(StringData* v1, int64 v2) {
     int is_negative;
     intstart = conv_10(v2, &is_negative, intbuf + sizeof(intbuf), &len2);
   }
-  int len1 = v1->size();
-  int len = len1 + len2;
-  char *buf = (char *)malloc(len + 1);
-  if (buf == NULL) {
-    throw FatalErrorException(0, "malloc failed: %d", len);
-  }
-  memcpy(buf, v1->data(), len1);
-  memcpy(buf + len1, intstart, len2);
-  buf[len] = '\0';
-  StringData* ret = NEW(StringData)(buf, len, AttachString);
+  StringSlice s1 = v1->slice();
+  StringSlice s2(intstart, len2);
+  StringData* ret = NEW(StringData)(s1, s2);
   ret->incRefCount();
   if (v1->decRefCount() == 0) v1->release();
   return ret;
@@ -273,15 +247,9 @@ concat(DataType t1, uint64 v1, DataType t2, uint64 v2) {
   bool free1, free2;
   tvPairToCString(t1, v1, &s1, &s1len, &free1);
   tvPairToCString(t2, v2, &s2, &s2len, &free2);
-  // XXX For now we just use the string_concat defined in
-  // "runtime/base/zend/zend_string.h". We may want to
-  // replace this with something more efficient in the
-  // future
-  char *dest;
-  int outputLen;
-  dest = HPHP::string_concat(s1, s1len, s2, s2len, outputLen);
-
-  StringData* retval = NEW(StringData)(dest, outputLen, AttachString);
+  StringSlice r1(s1, s1len);
+  StringSlice r2(s2, s2len);
+  StringData* retval = NEW(StringData)(r1, r2);
   retval->incRefCount();
   // If tvPairToCString allocated temporary buffers, free them now
   if (free1) free((void*)s1);
@@ -362,12 +330,7 @@ int64 str_to_bool(StringData* sd) {
 }
 
 int64 arr0_to_bool(ArrayData* ad) {
-  if (LIKELY(IsHphpArray(ad))) {
-    HphpArray* ha = (HphpArray*)ad;
-    return (ha->nvSize() != 0);
-  } else {
-    return (ad->size() != 0);
-  }
+  return ad->size() != 0;
 }
 
 int64 arr_to_bool(ArrayData* ad) {
@@ -417,7 +380,7 @@ tv_release_obj(ObjectData* datum) {
 }
 
 void
-tv_release_var(Variant* datum) {
+tv_release_ref(RefData* datum) {
   ASSERT(Transl::tx64->stateIsDirty());
   datum->release();
 }
@@ -496,7 +459,7 @@ HphpArray* pack_args_into_array(ActRec* ar, int nargs) {
   HphpArray* argArray = NEW(HphpArray)(nargs);
   for (int i = 0; i < nargs; ++i) {
     TypedValue* tv = (TypedValue*)(ar) - (i+1);
-    argArray->nvAppendWithRef(tv, false);
+    argArray->nvAppendWithRef(tv);
   }
   if (!ar->hasInvName()) {
     // If this is not a magic call, we're done

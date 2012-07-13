@@ -390,7 +390,7 @@ void Debugger::retireDummySandboxThread(DummySandbox* toRetire) {
 }
 
 void Debugger::cleanupDummySandboxThreads() {
-  DummySandbox* ptr;
+  DummySandbox* ptr = NULL;
   while (m_cleanupDummySandboxQ.try_pop(ptr)) {
     ptr->notify();
     try {

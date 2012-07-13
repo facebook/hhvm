@@ -61,6 +61,9 @@ String StringUtil::Trim(CStrRef input, TrimType type  /* = TrimBoth */,
   int len = input.size();
   char *ret = string_trim(input.data(), len,
                           charlist.data(), charlist.length(), type);
+  if (!ret) {
+      return input;
+  }
   return String(ret, len, AttachString);
 }
 

@@ -240,6 +240,15 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     m_instrs.set(offset(pc) - m_func->base());
     if (Op(*pc) == OpSwitch ||
         instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
+      if (Op(*pc) == OpSwitch) {
+        int64 switchBase = getImm(pc, 1).u_I64A;
+        int32_t len = getImmVector(pc).size();
+        int64 limit = base + len - 2;
+        if (limit < switchBase) {
+          printf("Verify: Overflow in Switch bounds [%d:%d]\n",
+                 base, past);
+        }
+      }
       branches.push_back(pc);
     }
     if (i.empty()) {
@@ -269,7 +278,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     PC branch = i.popFront();
     if (Op(*branch) == OpSwitch) {
       ImmVector vec = getImmVector(branch);
-      const int* v = vec.vec32();
+      const Offset* v = vec.vec32();
       for (int i = 0, n = vec.size(); i < n; i++) {
         Offset target = offset(branch + v[i]);
         ok &= checkOffset("switch target", target, name, base, past);
@@ -418,7 +427,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       }
       break;
     }
-    case ILA: { // vec of int32 for Switch
+    case BLA: { // vec of int32 for Switch
       int len = *(int*)pc;
       if (len < 1) {
         printf("Verify: invalid length of jump table %d at Offset %d\n",

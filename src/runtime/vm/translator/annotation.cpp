@@ -56,6 +56,18 @@ encodeCallAndArgs(const StringData* name, int numArgs) {
   return StringData::GetStaticString(s.get());
 }
 
+void
+decodeNameAndArgs(const StringData* enc, string& outName, int& outNumArgs) {
+  const char* numArgs = strchr(enc->data(), '@');
+  ASSERT(numArgs && *numArgs =='@');
+  numArgs++;
+  outNumArgs = atoi(numArgs);
+  const char* name = strchr(numArgs, '@');
+  ASSERT(name && *name == '@');
+  name++;
+  outName = name;
+}
+
 void recordNameAndArgs(const SrcKey& sk, const StringData* name, int numArgs) {
   CallRecord cr;
   cr.m_type = EncodedNameAndArgs;
@@ -72,28 +84,17 @@ void recordFunc(const SrcKey& sk, const Func* func) {
 
 static void recordActRecPush(const SrcKey& sk,
                              const Unit* unit,
-                             const FPIEnt* fpi,
                              const StringData* name,
                              const StringData* clsName,
                              bool staticCall) {
-  // sk is the address of a FPush* of the function whose static name
-  // is name. The boundaries of FPI regions are such that we can't quite
-  // find the FCall that matches this FuncD without decoding forward to
-  // the end; this is not ideal, but is hopefully affordable at translation
-  // time.
-  ASSERT(name->isStatic());
-  ASSERT(sk.offset() == fpi->m_fpushOff);
-  SrcKey fcall;
   SrcKey next(sk);
   next.advance(unit);
-  do {
-    if (*unit->at(next.offset()) == OpFCall) {
-      // Remember the last FCall in the region; the region might end
-      // with UnboxR, e.g.
-      fcall = next;
-    }
-    next.advance(unit);
-  } while (next.offset() <= fpi->m_fcallOff);
+  const FPIEnt *fpi = curFunc()->findFPI(next.offset());
+  ASSERT(fpi);
+  ASSERT(name->isStatic());
+  ASSERT(sk.offset() == fpi->m_fpushOff);
+  SrcKey fcall = sk;
+  fcall.m_offset = fpi->m_fcallOff;
   ASSERT(*unit->at(fcall.offset()) == OpFCall);
   if (clsName) {
     const Class* cls = Unit::lookupClass(clsName);
@@ -126,8 +127,6 @@ void annotate(NormalizedInstruction* i) {
     case OpFPushFuncD: {
       // When we push predictable action records, we can use a simpler
       // translation for their corresponding FCall.
-      SrcKey next(i->source);
-      next.advance(curUnit());
       const StringData* className = NULL;
       const StringData* funcName = NULL;
       if (i->op() == OpFPushFuncD) {
@@ -153,9 +152,7 @@ void annotate(NormalizedInstruction* i) {
         className = curUnit()->lookupLitstrId(i->imm[2].u_SA);
       }
       ASSERT(funcName->isStatic());
-      const FPIEnt *fe = curFunc()->findFPI(next.m_offset);
-      ASSERT(fe);
-      recordActRecPush(i->source, curUnit(), fe, funcName, className,
+      recordActRecPush(i->source, curUnit(), funcName, className,
                        i->op() == OpFPushClsMethodD ||
                        i->op() == OpFPushClsMethodF);
     } break;
@@ -174,6 +171,21 @@ void annotate(NormalizedInstruction* i) {
     } break;
     default: break;
   }
+}
+
+const StringData*
+fcallToFuncName(const NormalizedInstruction* i) {
+  CallRecord callRec;
+  if (mapGet(s_callDB, i->source, &callRec)) {
+    if (callRec.m_type == Function) {
+      return callRec.m_func->name();
+    }
+    string name;
+    int numArgs;
+    decodeNameAndArgs(callRec.m_encodedName, name, numArgs);
+    return StringData::GetStaticString(name.c_str());
+  }
+  return NULL;
 }
 
 } } }

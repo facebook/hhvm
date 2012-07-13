@@ -133,7 +133,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
       (char *)f->file, 0, 0, 1000, &error);
     if (file == DW_DLV_NOCOUNT) {
       logError("unable to add file declaration");
-      return false;
+      return NULL;
     }
     m_fileDB[f->file] = file;
   } else {

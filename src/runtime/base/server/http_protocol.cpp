@@ -179,7 +179,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       if (needDelete) {
         if (RuntimeOption::AlwaysPopulateRawPostData &&
             size <= (int)StringData::MaxSize) {
-          g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachString);
+          g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachDeprecated);
         } else {
           free((void *)data);
         }

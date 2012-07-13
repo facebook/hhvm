@@ -77,6 +77,7 @@ BaseExecutionContext::BaseExecutionContext() :
 }
 
 VMExecutionContext::VMExecutionContext() :
+    m_constants(0),
 #ifndef HHVM
     NEAR_FIELD_INIT
 #endif
@@ -196,6 +197,15 @@ String BaseExecutionContext::getMimeType() const {
     mimetype = m_transport->getDefaultContentType();
   }
   return mimetype;
+}
+
+std::string BaseExecutionContext::getRequestUrl(size_t szLimit) {
+  Transport* t = getTransport();
+  std::string ret = t ? t->getUrl() : "";
+  if (szLimit != std::string::npos) {
+    ret = ret.substr(0, szLimit);
+  }
+  return ret;
 }
 
 void BaseExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {

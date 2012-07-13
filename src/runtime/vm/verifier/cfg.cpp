@@ -251,10 +251,11 @@ void GraphBuilder::addEdge(Block* from, EdgeKind k, Block* target) {
 }
 
 void AllFuncs::skip() {
-  while (!cr.empty() && fr.empty()) {
+  ASSERT(fr.empty());
+  while (!cr.empty() && mr.empty()) {
     PreClass* c = cr.popFront();
-    fr = FuncRange(c->methods(),
-                   c->methods() + c->numMethods());
+    mr = MethodRange(c->methods(),
+                     c->methods() + c->numMethods());
   }
 }
 

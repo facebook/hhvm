@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfVariant) {
+  if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }
   bool b;
@@ -44,7 +44,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
 }
 
 void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
-  if (tv->m_type == KindOfVariant) {
+  if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }
   int64 i;
@@ -86,7 +86,7 @@ void tvCastToInt64InPlace(TypedValue* tv, int base /* = 10 */) {
 }
 
 void tvCastToDoubleInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfVariant) {
+  if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }
   double d;
@@ -115,7 +115,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
 }
 
 void tvCastToStringInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfVariant) {
+  if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }
   StringData * s;
@@ -141,7 +141,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfVariant) {
+  if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }
   ArrayData * a;
@@ -171,7 +171,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {
-  if (tv->m_type == KindOfVariant) {
+  if (tv->m_type == KindOfRef) {
     tvUnbox(tv);
   }
   ObjectData* o;

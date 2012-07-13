@@ -67,8 +67,7 @@ HOT_FUNC
 ArrayData *ArrayData::Create(CVarRef value) {
   if (enable_vector_array && RuntimeOption::UseVectorArray) {
     VectorArray *va = NEW(VectorArray)(1);
-    va->m_elems[0] = NEW(Variant)(value);
-    va->m_size = 1;
+    va->VectorArray::append(value, false);
     va->m_pos = 0;
     return va;
   }
@@ -87,8 +86,7 @@ ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
 ArrayData *ArrayData::CreateRef(CVarRef value) {
   if (enable_vector_array && RuntimeOption::UseVectorArray) {
     VectorArray *va = NEW(VectorArray)(1);
-    va->m_elems[0] = NEW(Variant)(strongBind(value));
-    va->m_size = 1;
+    va->VectorArray::appendRef(value, false);
     va->m_pos = 0;
     return va;
   }
@@ -127,16 +125,12 @@ Object ArrayData::toObject() const {
 }
 
 bool ArrayData::isVectorData() const {
-  for (ssize_t i = 0; i < size(); i++) {
+  for (ssize_t i = 0, n = size(); i < n; i++) {
     if (getIndex(i) != i) {
       return false;
     }
   }
   return true;
-}
-
-bool ArrayData::isGlobalArrayWrapper() const {
-  return false;
 }
 
 int ArrayData::compare(const ArrayData *v2) const {
@@ -197,10 +191,6 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   }
 
   return true;
-}
-
-void ArrayData::load(CVarRef k, Variant &v) const {
-  if (exists(k)) v = get(k);
 }
 
 ArrayData *ArrayData::lvalPtr(CStrRef k, Variant *&ret, bool copy,
@@ -467,7 +457,7 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
   for (ArrayIter iter(this); iter; ++iter) {
     CVarRef var = iter.secondRef();
     if (var.isReferenced()) {
-      Variant *pvar = var.getVariantData();
+      Variant *pvar = var.getRefData();
       if (vars.find(pvar) != vars.end()) {
         return true;
       }

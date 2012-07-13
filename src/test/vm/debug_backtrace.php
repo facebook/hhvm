@@ -5,7 +5,7 @@ class A {
     var_dump(debug_backtrace());
   }
 
-  function bar($a, $b) {
+  function bar($a, $b, $c = null) {
     $this->foo();
   }
 }
@@ -20,7 +20,7 @@ function foo() {
   call_user_func("bar");
 }
 
-function error_handler($errno, $errstr) {
+function error_handler($errno, $errstr, $errfile, $errline, $errcontext, $extra) {
   // Make sure this function shows up in a backtrace
   var_dump(debug_backtrace());
 }

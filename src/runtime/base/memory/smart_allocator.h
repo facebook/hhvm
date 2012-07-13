@@ -19,6 +19,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 
 #include <util/base.h>
 #include <util/thread_local.h>
@@ -40,13 +41,24 @@ namespace HPHP {
 //#define SMART_ALLOCATOR_DEBUG_FREE
 
 ///////////////////////////////////////////////////////////////////////////////
+
 /**
  * If a class is using SmartAllocator, all "new" and "delete" should be done
  * through these two macros in a form like this,
  *
  *   MyClass *obj = NEW(MyClass)(...);
  *   DELETE(MyClass)(obj);
+ *
+ * Note that these various allocation functions should only be used
+ * for ObjectData-derived classes.  (If you need other
+ * request-lifetime memory you need to do something else.)
  */
+
+template<class T>
+inline void smart_allocator_check_type() {
+  static_assert((boost::is_base_of<ObjectData,T>::value),
+                "Non-ObjectData allocated in smart heap");
+}
 
 #ifdef DEBUGGING_SMART_ALLOCATOR
 #define NEW(T) new T
@@ -61,10 +73,11 @@ namespace HPHP {
 #else
 #define NEW(T) new (T::AllocatorType::getNoCheck()) T
 #define NEWOBJ(T) new                                     \
-  (ThreadLocalSingleton                                   \
+  ((smart_allocator_check_type<T>(), ThreadLocalSingleton \
     <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value> > \
-    ::getNoCheck()) T
-#define NEWOBJSZ(T,SZ) new (info->instanceSizeAllocator(SZ)) T
+    ::getNoCheck())) T
+#define NEWOBJSZ(T,SZ) \
+  new ((smart_allocator_check_type<T>(), info->instanceSizeAllocator(SZ))) T
 #define ALLOCOBJSZ(SZ) (ThreadInfo::s_threadInfo.getNoCheck()->\
                         instanceSizeAllocator(SZ)->alloc())
 #define DELETE(T) T::AllocatorType::getNoCheck()->release
@@ -355,7 +368,23 @@ void *SmartAllocatorInitSetup() {
   public:                                                               \
   static void *ObjAllocatorInitSetup;                                   \
   inline ALWAYS_INLINE void operator delete(void *p) {                  \
-    RELEASEOBJ(NS, T, p);                                               \
+    if (!hhvm || T::IsResourceClass) {                                  \
+      RELEASEOBJ(NS, T, p);                                             \
+      return;                                                           \
+    }                                                                   \
+    HPHP::VM::Instance* this_ = (HPHP::VM::Instance*)p;                 \
+    HPHP::VM::Class* cls = this_->getVMClass();                         \
+    size_t nProps = cls->numDeclProperties();                           \
+    size_t builtinPropSize = cls->builtinPropSize();                    \
+    TypedValue* propVec =                                               \
+      (TypedValue *)((uintptr_t)this_ + sizeof(ObjectData) +            \
+                     builtinPropSize);                                  \
+    for (unsigned i = 0; i < nProps; ++i) {                             \
+      TypedValue* prop = &propVec[i];                                   \
+      tvRefcountedDecRef(prop);                                         \
+    }                                                                   \
+    DELETEOBJSZ(HPHP::VM::Instance::sizeForNProps(nProps) +             \
+                builtinPropSize)(this_);                                \
   }
 
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
@@ -423,11 +452,13 @@ inline void *operator new(size_t sizeT, HPHP::ObjectAllocatorBase *a) {
 template<typename T, int TNameEnum, int F>
 inline void operator delete
 (void *p, HPHP::SmartAllocator<T, TNameEnum, F> *a) {
-  a->release((T*)p);
+  ASSERT(p);
+  a->dealloc((T*)p);
 }
 
 inline void operator delete(void *p , HPHP::ObjectAllocatorBase *a) {
-  a->release(p);
+  ASSERT(p);
+  a->dealloc(p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

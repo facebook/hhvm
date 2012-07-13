@@ -614,6 +614,25 @@ DefineFunction(
     'taint_observer' => false,
   ));
 
+DefineFunction(
+  array(
+    'name'   => "hphp_to_string",
+    'desc'   => "Casts a given value to a string.",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "The result of the string cast.",
+    ),
+    'args'  => array(
+      array(
+        'name'   => "v",
+        'type'   => Variant,
+        'desc'   => "The value being casted to a string.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

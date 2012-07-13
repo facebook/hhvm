@@ -146,7 +146,6 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
                                mcp, classname, methodname, doBind)) {
       return null;
     }
-    if (has_eval_support) eval_set_callee_alias(methodname);
 
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before
@@ -268,7 +267,6 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
                                mcp, classname, methodname, doBind)) {
       return ArrayUtil::Map(inputs, map_func, NULL);
     }
-    if (has_eval_support) eval_set_callee_alias(methodname);
 
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before
@@ -507,7 +505,6 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
                                mcp, classname, methodname, doBind)) {
       return null;
     }
-    if (has_eval_support) eval_set_callee_alias(methodname);
 
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before
@@ -665,7 +662,6 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                                mcp, classname, methodname, doBind)) {
       return null;
     }
-    if (has_eval_support) eval_set_callee_alias(methodname);
 
     PointerSet seen;
     if (doBind) {
@@ -703,7 +699,6 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
                                mcp, classname, methodname, doBind)) {
       return null;
     }
-    if (has_eval_support) eval_set_callee_alias(methodname);
 
     if (doBind) {
       // If 'doBind' is true, we need to set the late bound class before

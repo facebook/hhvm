@@ -2261,9 +2261,10 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
               if (!id) id = m_gidMap.size();
               e->setCanonID(id);
             }
-          } else if ((context & Expression::ObjectContext) &&
-                     m_graph &&
-                     !sym->isReferenced()) {
+          } else if (m_graph &&
+                     !sv->couldBeAliased() &&
+                     sv->getActualType() &&
+                     !Type::IsMappedToVariant(sv->getActualType())) {
             m_objMap[sym->getName()] = sv;
           }
           if ((context & Expression::UnsetContext) &&
@@ -2480,6 +2481,7 @@ static void markAvailable(ExpressionRawPtr e) {
   if (e->is(Expression::KindOfSimpleVariable)) {
     SimpleVariableRawPtr sv(spc(SimpleVariable,e));
     sv->setGuarded();
+    sv->setNonNull();
   } else {
     StaticClassName *scn = dynamic_cast<StaticClassName*>(e.get());
     assert(scn);
@@ -3301,9 +3303,15 @@ public:
         bool set = true, cand = true;
         SimpleVariablePtr sv;
         if (e->is(Expression::KindOfSimpleVariable) &&
-            (e->isThis() || !e->hasContext(Expression::ObjectContext))) {
+            (e->isThis() ||
+             !e->hasContext(Expression::ObjectContext) ||
+             e->getAssertedType())) {
           sv = spc(SimpleVariable, e);
-          cand = e->isThis() && e->hasContext(Expression::ObjectContext);
+          cand = (e->isThis() && e->hasContext(Expression::ObjectContext));
+          if (e->getAssertedType()) {
+            markAvailable(sv);
+            cand = true;
+          }
         } else {
           if (e->is(Expression::KindOfObjectMethodExpression)) {
             ObjectMethodExpressionPtr om(spc(ObjectMethodExpression, e));
@@ -3323,12 +3331,19 @@ public:
               sv = spc(SimpleVariable, ae->getVariable());
             }
           }
-          if (sv && (sv->isThis() || sv->couldBeAliased())) sv.reset();
+          if (sv && sv->isThis()) sv.reset();
         }
-        if (sv) {
+        if (sv && (!cand || !sv->couldBeAliased())) {
           id = m_gidMap["v:" + sv->getName()];
           if (id) {
-            if (cand) {
+            if (sv->hasAllContext(Expression::Declaration) ||
+                       sv->hasAllContext(Expression::UnsetContext|
+                                         Expression::LValue) ||
+                       sv->hasAnyContext(Expression::AssignmentLHS|
+                                         Expression::OprLValue)) {
+              m_block->setBit(DataFlow::Available, id, false);
+              m_block->setBit(DataFlow::Altered, id, true);
+            } else if (cand) {
               sv->setCanonID(id);
               sv->clearAnticipated();
               if (m_block->getBit(DataFlow::Available, id)) {
@@ -3338,17 +3353,10 @@ public:
                   sv->setAnticipated();
                 }
                 if (set && !sv->hasAnyContext(Expression::ExistContext|
-                                             Expression::UnsetContext)) {
+                                              Expression::UnsetContext)) {
                   m_block->setBit(DataFlow::Available, id, true);
                 }
               }
-            } else if (sv->hasAllContext(Expression::Declaration) ||
-                       sv->hasAllContext(Expression::UnsetContext|
-                                        Expression::LValue) ||
-                       sv->hasAnyContext(Expression::AssignmentLHS|
-                                        Expression::OprLValue)) {
-              m_block->setBit(DataFlow::Available, id, false);
-              m_block->setBit(DataFlow::Altered, id, true);
             }
           }
         }
@@ -3605,11 +3613,6 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
              m_objMap.begin(), end = m_objMap.end(); it != end; ++it) {
         SimpleVariablePtr sv = it->second;
         const Symbol *sym = sv->getSymbol();
-        if (sym->isReferenced() ||
-            !sym->getFinalType() ||
-            !sym->getFinalType()->is(Type::KindOfObject)) {
-          continue;
-        }
         int &id = m_gidMap["v:"+sym->getName()];
         ASSERT(!id);
         id = m_gidMap.size();

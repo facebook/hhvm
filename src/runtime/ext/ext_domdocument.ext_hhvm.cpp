@@ -3895,75 +3895,13 @@ TypedValue* fg_dom_xpath_register_php_functions(HPHP::VM::ActRec *ar) {
 
 
 
-class c_DOMNode_Instance : public c_DOMNode {
-public:
-  c_DOMNode_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMNode));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMNode) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMNode_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMNode_Instance *this_ = (c_DOMNode_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMNode) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMNode::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMNode::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMNode::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMNode::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMNode_Instance(HPHP::VM::Class* cls) {
-  return c_DOMNode_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMNode) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMNode(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -5104,75 +5042,13 @@ TypedValue* tg_7DOMNode___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMAttr_Instance : public c_DOMAttr {
-public:
-  c_DOMAttr_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMAttr));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMAttr) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMAttr_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMAttr_Instance *this_ = (c_DOMAttr_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMAttr) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMAttr::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMAttr::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMAttr::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMAttr::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMAttr_Instance(HPHP::VM::Class* cls) {
-  return c_DOMAttr_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMAttr) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMAttr(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -5443,75 +5319,13 @@ TypedValue* tg_7DOMAttr___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMCharacterData_Instance : public c_DOMCharacterData {
-public:
-  c_DOMCharacterData_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMCharacterData));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMCharacterData) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMCharacterData_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMCharacterData_Instance *this_ = (c_DOMCharacterData_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMCharacterData) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMCharacterData::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMCharacterData::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMCharacterData::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMCharacterData::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMCharacterData_Instance(HPHP::VM::Class* cls) {
-  return c_DOMCharacterData_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMCharacterData) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMCharacterData(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -6029,75 +5843,13 @@ TypedValue* tg_16DOMCharacterData___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMComment_Instance : public c_DOMComment {
-public:
-  c_DOMComment_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMComment));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMComment) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMComment_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMComment_Instance *this_ = (c_DOMComment_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMComment) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMComment::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMComment::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMComment::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMComment::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMComment_Instance(HPHP::VM::Class* cls) {
-  return c_DOMComment_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMComment) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMComment(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -6197,75 +5949,13 @@ TypedValue* tg_10DOMComment___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMText_Instance : public c_DOMText {
-public:
-  c_DOMText_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMText));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMText) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMText_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMText_Instance *this_ = (c_DOMText_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMText) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMText::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMText::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMText::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMText::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMText_Instance(HPHP::VM::Class* cls) {
-  return c_DOMText_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMText) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMText(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -6581,75 +6271,13 @@ TypedValue* tg_7DOMText___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMCDATASection_Instance : public c_DOMCDATASection {
-public:
-  c_DOMCDATASection_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMCDATASection));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMCDATASection) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMCDATASection_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMCDATASection_Instance *this_ = (c_DOMCDATASection_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMCDATASection) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMCDATASection::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMCDATASection::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMCDATASection::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMCDATASection::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMCDATASection_Instance(HPHP::VM::Class* cls) {
-  return c_DOMCDATASection_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMCDATASection) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMCDATASection(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -6749,75 +6377,13 @@ TypedValue* tg_15DOMCDATASection___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMDocument_Instance : public c_DOMDocument {
-public:
-  c_DOMDocument_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMDocument));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMDocument) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMDocument_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMDocument_Instance *this_ = (c_DOMDocument_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMDocument) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMDocument::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMDocument::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMDocument::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMDocument::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMDocument_Instance(HPHP::VM::Class* cls) {
-  return c_DOMDocument_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMDocument) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMDocument(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -8778,75 +8344,13 @@ TypedValue* tg_11DOMDocument___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMDocumentFragment_Instance : public c_DOMDocumentFragment {
-public:
-  c_DOMDocumentFragment_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMDocumentFragment));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMDocumentFragment) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMDocumentFragment_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMDocumentFragment_Instance *this_ = (c_DOMDocumentFragment_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMDocumentFragment) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMDocumentFragment::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMDocumentFragment::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMDocumentFragment::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMDocumentFragment::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMDocumentFragment_Instance(HPHP::VM::Class* cls) {
-  return c_DOMDocumentFragment_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMDocumentFragment) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMDocumentFragment(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -8984,75 +8488,13 @@ TypedValue* tg_19DOMDocumentFragment___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMDocumentType_Instance : public c_DOMDocumentType {
-public:
-  c_DOMDocumentType_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMDocumentType));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMDocumentType) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMDocumentType_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMDocumentType_Instance *this_ = (c_DOMDocumentType_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMDocumentType) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMDocumentType::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMDocumentType::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMDocumentType::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMDocumentType::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMDocumentType_Instance(HPHP::VM::Class* cls) {
-  return c_DOMDocumentType_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMDocumentType) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMDocumentType(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -9254,75 +8696,13 @@ TypedValue* tg_15DOMDocumentType___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMElement_Instance : public c_DOMElement {
-public:
-  c_DOMElement_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMElement));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMElement) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMElement_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMElement_Instance *this_ = (c_DOMElement_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMElement) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMElement::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMElement::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMElement::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMElement::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMElement_Instance(HPHP::VM::Class* cls) {
-  return c_DOMElement_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMElement) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMElement(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -10658,75 +10038,13 @@ TypedValue* tg_10DOMElement___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMEntity_Instance : public c_DOMEntity {
-public:
-  c_DOMEntity_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMEntity));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMEntity) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMEntity_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMEntity_Instance *this_ = (c_DOMEntity_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMEntity) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMEntity::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMEntity::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMEntity::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMEntity::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMEntity_Instance(HPHP::VM::Class* cls) {
-  return c_DOMEntity_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMEntity) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMEntity(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -10928,75 +10246,13 @@ TypedValue* tg_9DOMEntity___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMEntityReference_Instance : public c_DOMEntityReference {
-public:
-  c_DOMEntityReference_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMEntityReference));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMEntityReference) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMEntityReference_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMEntityReference_Instance *this_ = (c_DOMEntityReference_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMEntityReference) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMEntityReference::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMEntityReference::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMEntityReference::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMEntityReference::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMEntityReference_Instance(HPHP::VM::Class* cls) {
-  return c_DOMEntityReference_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMEntityReference) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMEntityReference(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -11096,75 +10352,13 @@ TypedValue* tg_18DOMEntityReference___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMNotation_Instance : public c_DOMNotation {
-public:
-  c_DOMNotation_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMNotation));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMNotation) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMNotation_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMNotation_Instance *this_ = (c_DOMNotation_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMNotation) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMNotation::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMNotation::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMNotation::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMNotation::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMNotation_Instance(HPHP::VM::Class* cls) {
-  return c_DOMNotation_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMNotation) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMNotation(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -11366,75 +10560,13 @@ TypedValue* tg_11DOMNotation___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMProcessingInstruction_Instance : public c_DOMProcessingInstruction {
-public:
-  c_DOMProcessingInstruction_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMProcessingInstruction));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMProcessingInstruction) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMProcessingInstruction_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMProcessingInstruction_Instance *this_ = (c_DOMProcessingInstruction_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMProcessingInstruction) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMProcessingInstruction::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMProcessingInstruction::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMProcessingInstruction::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMProcessingInstruction::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMProcessingInstruction_Instance(HPHP::VM::Class* cls) {
-  return c_DOMProcessingInstruction_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMProcessingInstruction) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMProcessingInstruction(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -11666,75 +10798,13 @@ TypedValue* tg_24DOMProcessingInstruction___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMNodeIterator_Instance : public c_DOMNodeIterator {
-public:
-  c_DOMNodeIterator_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMNodeIterator));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMNodeIterator) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMNodeIterator_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMNodeIterator_Instance *this_ = (c_DOMNodeIterator_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMNodeIterator) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMNodeIterator::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMNodeIterator::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMNodeIterator::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMNodeIterator::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMNodeIterator_Instance(HPHP::VM::Class* cls) {
-  return c_DOMNodeIterator_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMNodeIterator) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMNodeIterator(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -12010,75 +11080,13 @@ TypedValue* tg_15DOMNodeIterator___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMNamedNodeMap_Instance : public c_DOMNamedNodeMap {
-public:
-  c_DOMNamedNodeMap_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMNamedNodeMap));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMNamedNodeMap) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMNamedNodeMap_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMNamedNodeMap_Instance *this_ = (c_DOMNamedNodeMap_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMNamedNodeMap) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMNamedNodeMap::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMNamedNodeMap::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMNamedNodeMap::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMNamedNodeMap::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMNamedNodeMap_Instance(HPHP::VM::Class* cls) {
-  return c_DOMNamedNodeMap_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMNamedNodeMap) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMNamedNodeMap(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -12493,75 +11501,13 @@ TypedValue* tg_15DOMNamedNodeMap___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMNodeList_Instance : public c_DOMNodeList {
-public:
-  c_DOMNodeList_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMNodeList));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMNodeList) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMNodeList_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMNodeList_Instance *this_ = (c_DOMNodeList_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMNodeList) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMNodeList::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMNodeList::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMNodeList::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMNodeList::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMNodeList_Instance(HPHP::VM::Class* cls) {
-  return c_DOMNodeList_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMNodeList) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMNodeList(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -12858,75 +11804,13 @@ TypedValue* tg_11DOMNodeList___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMImplementation_Instance : public c_DOMImplementation {
-public:
-  c_DOMImplementation_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMImplementation));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMImplementation) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMImplementation_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMImplementation_Instance *this_ = (c_DOMImplementation_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMImplementation) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMImplementation::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMImplementation::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMImplementation::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMImplementation::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMImplementation_Instance(HPHP::VM::Class* cls) {
-  return c_DOMImplementation_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMImplementation) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMImplementation(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*
@@ -13216,75 +12100,13 @@ TypedValue* tg_17DOMImplementation___destruct(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_RETURN(&ar->m_r);
 }
 
-class c_DOMXPath_Instance : public c_DOMXPath {
-public:
-  c_DOMXPath_Instance (HPHP::VM::Class* cls, unsigned nProps) {
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
-    m_cls = cls;
-    setAttributes(cls->getODAttrs()
-                  | (cls->clsInfo()
-                     ? 0 : IsInstance));
-    m_propVec = (TypedValue *)((uintptr_t)this + sizeof(c_DOMXPath));
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        initialize(nProps);
-      } else {
-        ASSERT(nProps == cls->declPropInit().size());
-        memcpy(m_propVec, &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
-  static HPHP::VM::Instance* new_Instance(HPHP::VM::Class* cls) {
-    size_t nProps = cls->numDeclProperties();
-    size_t builtinPropSize = sizeof(c_DOMXPath) - sizeof(ObjectData);
-    size_t size = sizeForNProps(nProps) + builtinPropSize;
-    HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
-    new ((void *)inst) c_DOMXPath_Instance(cls, nProps);
-    return inst;
-  }
-  void operator delete(void *p) {
-    c_DOMXPath_Instance *this_ = (c_DOMXPath_Instance*)p;
-    size_t nProps = this_->m_cls->numDeclProperties();
-    size_t builtinPropSize UNUSED = sizeof(c_DOMXPath) - sizeof(ObjectData);
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue *prop = &this_->m_propVec[i];
-      tvRefcountedDecRef(prop);
-    }
-    DELETEOBJSZ(sizeForNProps(nProps) + builtinPropSize)(this_);
-  }
-  virtual bool o_instanceof(const HPHP::String& s) const {
-    return Instance::o_instanceof(s) || c_DOMXPath::o_instanceof(s);
-  }
-  virtual Variant* o_realProp(CStrRef s, int flags, CStrRef context) const {
-    Variant *v = Instance::o_realProp(s, flags, context);
-    if (v) return v;
-    return c_DOMXPath::o_realProp(s, flags, context);
-  }
-  virtual Variant* o_realPropPublic(CStrRef s, int flags) const {
-    Variant *v = Instance::o_realPropPublic(s, flags);
-    if (v) return v;
-    return c_DOMXPath::o_realPropPublic(s, flags);
-  }
-  virtual void o_setArray(CArrRef props) {
-    ClassInfo::SetArray(this, o_getClassPropTable(), props);
-  }
-  virtual void o_getArray(Array &props, bool pubOnly) const {
-    ClassInfo::GetArray(this, o_getClassPropTable(), props, false);
-}
-  virtual ObjectData* cloneImpl() {
-    return Instance::cloneImpl();
-  }
-  virtual void cloneSet(ObjectData *clone) {
-    c_DOMXPath::cloneSet(clone);
-    Instance::cloneSet(clone);
-  }
-};
-
 HPHP::VM::Instance* new_DOMXPath_Instance(HPHP::VM::Class* cls) {
-  return c_DOMXPath_Instance::new_Instance(cls);
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_DOMXPath) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_DOMXPath(ObjectStaticCallbacks::encodeVMClass(cls));
+  return inst;
 }
 
 /*

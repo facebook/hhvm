@@ -18,7 +18,7 @@
 #define incl_UTIL_TINYVECTOR_H_
 
 #include <stdlib.h>
-#include <malloc.h>
+#include "util/alloc.h"
 #include <boost/noncopyable.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
 #include <boost/type_traits/has_trivial_copy.hpp>

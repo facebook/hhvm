@@ -760,7 +760,42 @@ bool f_is_uploaded_file(CStrRef filename) {
   return false;
 }
 
+static bool is_file_included(CStrRef file, void* ctx) {
+  // mimic the include_impl_invoke behavior
+  if (file[0] == '/') {
+    if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
+      if (included_php_file(file)) {
+        return true;
+      }
+    }
+    string server_root = RuntimeOption::SourceRoot;
+    if (server_root.empty()) {
+      server_root = string(g_context->getCwd()->data());
+      if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
+        server_root += "/";
+      }
+    }
+
+    String rel_path(Util::relativePath(server_root, string(file.data())));
+
+    return included_php_file(rel_path);
+  } else {
+    return included_php_file(file);
+  }
+}
+
 bool f_file_exists(CStrRef filename) {
+  // check whether it's an included php file
+  if (!resolve_include(filename, "",
+                       &is_file_included, NULL).isNull()) {
+    return true;
+  }
+  // ignore all other php files
+  if (filename.find(".php") == filename.size() - 4) {
+    Logger::Verbose("%s/%d: All .php files that are not built-in are ommited: %s",
+                    __FUNCTION__, __LINE__, filename.data());
+    return false;
+  }
   if (filename.empty() ||
       (access(File::TranslatePath(filename, true).data(), F_OK)) < 0) {
     return false;

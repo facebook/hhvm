@@ -1111,7 +1111,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
       "}\n"
       "\n"
       "#else /* USE_GCC_FAST_TLS */\n"
-      "static ThreadLocal<GlobalVariables *> g_variables;\n"
+      "static ThreadLocalNoCache<GlobalVariables *> g_variables;\n"
       "GlobalVariables *get_global_variables() {\n"
       "  GlobalVariables *g = *(g_variables.getNoCheck());\n"
       "  ASSERT(g);\n"

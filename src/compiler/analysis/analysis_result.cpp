@@ -3059,13 +3059,28 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
     "  }\n"
     "  return NULL;\n"
     "}\n"
-    "\n";
+    "\n"
+    "bool included_php_file(CStrRef file) {\n";
 
   const char text3[] =
+    "  if (findFile(file.c_str(), file->hash()) != NULL) return true;\n"
+    "  struct stat s;\n"
+    "  // With eval support we have to consider every .php file as included.\n"
+    "  String translated = File::TranslatePath(file);\n"
+    "  return stat(translated.data(), &s) == 0 && !S_ISDIR(s.st_mode);\n"
+    "}\n"
+    "\n";
+
+  const char text4[] =
+    "  return findFile(file.c_str(), file->hash()) != NULL;\n"
+    "}\n"
+    "\n";
+
+  const char text5[] =
     "pm_t ptr = findFile(s.c_str(), s->hash());\n"
     "if (ptr) return ptr(once, variables, get_globals());\n";
 
-  const char text4[] =
+  const char text6[] =
   "  return throw_missing_file(s.c_str());\n"
   "}\n";
 
@@ -3084,12 +3099,17 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
     }
   }
   cg_printf(text2, tableSize - 1, tableSize - 1);
+  if (needEvalHook) {
+    cg_printf(text3);
+  } else {
+    cg_printf(text4);
+  }
   outputCPPInvokeFileHeader(cg);
-  cg_printf(text3);
+  cg_printf(text5);
   if (needEvalHook) outputCPPEvalHook(cg);
   if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
   cg_indentEnd();
-  cg_printf(text4);
+  cg_printf(text6);
 }
 
 void AnalysisResult::outputCPPDynamicClassTables(

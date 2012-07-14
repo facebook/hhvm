@@ -127,6 +127,7 @@ extern ObjectData *create_builtin_object_only_no_init(CStrRef s,
  * Dynamically include a file.
  */
 class LVariableTable;
+extern bool included_php_file(CStrRef s);
 extern Variant invoke_file(CStrRef file, bool once = false,
                            LVariableTable* variables = NULL,
                            const char *currentDir = NULL);

@@ -321,6 +321,9 @@ void init_global_variables() {
 void free_global_variables() { g_variables.destroy();}
 void init_literal_varstrings() {}
 bool has_eval_support = true;
+bool included_php_file(CStrRef s) {
+  return false;
+}
 Variant invoke_file(CStrRef path, bool once /* = false */,
                     LVariableTable* variables /* = NULL */,
                     const char *currentDir /* = NULL */) {

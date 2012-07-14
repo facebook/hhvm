@@ -52,6 +52,10 @@ void init_static_variables() {}
 void free_global_variables() {}
 Array get_global_state() { return Array(); }
 
+bool included_php_file(CStrRef s) {
+  return false;
+}
+
 Variant invoke_file(CStrRef path, bool once /* = false */,
                     LVariableTable* variables /* = NULL */,
                     const char *currDir /* = NULL */) {

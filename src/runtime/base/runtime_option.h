@@ -384,6 +384,7 @@ public:
   // preg stack depth and debug support options
   static int PregBacktraceLimit;
   static int PregRecursionLimit;
+  static int PregCacheLimit;
   static bool EnablePregErrorLog;
 };
 

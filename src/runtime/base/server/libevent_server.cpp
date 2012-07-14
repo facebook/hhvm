@@ -152,6 +152,8 @@ LibEventServer::LibEventServer(const std::string &address, int port,
   : Server(address, port, thread),
     m_accept_sock(-1),
     m_accept_sock_ssl(-1),
+    evhttp_sock(NULL),
+    evhttp_sock_ssl(NULL),
     m_timeoutThreadData(thread, timeoutSeconds),
     m_timeoutThread(&m_timeoutThreadData, &TimeoutThread::run),
     m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
@@ -185,15 +187,14 @@ LibEventServer::~LibEventServer() {
 // implementing HttpServer
 
 int LibEventServer::getAcceptSocket() {
-  int ret;
   const char *address = m_address.empty() ? NULL : m_address.c_str();
-  ret = evhttp_bind_socket_backlog_fd(m_server, address,
+  evhttp_sock = evhttp_bind_socket_backlog_with_handle(m_server, address,
                                       m_port, RuntimeOption::ServerBacklog);
-  if (ret < 0) {
+  if (!evhttp_sock) {
     Logger::Error("Fail to bind port %d", m_port);
     return -1;
   }
-  m_accept_sock = ret;
+  m_accept_sock = evhttp_bound_socket_get_fd(evhttp_sock);
   return 0;
 }
 
@@ -311,14 +312,14 @@ bool LibEventServer::enableSSL(void *sslCTX, int port) {
 
 int LibEventServer::getAcceptSocketSSL() {
   const char *address = m_address.empty() ? NULL : m_address.c_str();
-  int ret = evhttp_bind_socket_backlog_fd(m_server_ssl, address,
+  evhttp_sock_ssl = evhttp_bind_socket_backlog_with_handle(m_server_ssl, address,
       m_port_ssl, RuntimeOption::ServerBacklog);
-  if (ret < 0) {
+  if (!evhttp_sock_ssl) {
     Logger::Error("Failed to bind port %d for SSL", m_port_ssl);
     return -1;
   }
   Logger::Info("SSL enabled");
-  m_accept_sock_ssl = ret;
+  m_accept_sock_ssl = evhttp_bound_socket_get_fd(evhttp_sock_ssl);
   return 0;
 }
 

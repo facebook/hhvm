@@ -183,6 +183,7 @@ public:
    * A somewhat unique prefix for system identifiers.
    */
   static std::string IdPrefix;
+  static std::string ScopeIdPrefix;
   static std::string LabelEscape;
   static std::string LambdaPrefix;
   static std::string Tab;

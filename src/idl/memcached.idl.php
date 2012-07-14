@@ -136,199 +136,199 @@ EOT
 DefineConstant(
   array(
     'name'   => "OPT_COMPRESSION",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_SERIALIZER",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "SERIALIZER_PHP",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "SERIALIZER_IGBINARY",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "SERIALIZER_JSON",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_PREFIX_KEY",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_HASH",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_DEFAULT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_MD5",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_CRC",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_FNV1_64",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_FNV1A_64",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_FNV1_32",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_FNV1A_32",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_HSIEH",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "HASH_MURMUR",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_DISTRIBUTION",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "DISTRIBUTION_MODULA",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "DISTRIBUTION_CONSISTENT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_LIBKETAMA_COMPATIBLE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_BUFFER_WRITES",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_BINARY_PROTOCOL",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_NO_BLOCK",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_TCP_NODELAY",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_SOCKET_SEND_SIZE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_SOCKET_RECV_SIZE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_CONNECT_TIMEOUT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_RETRY_TIMEOUT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_SEND_TIMEOUT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_RECV_TIMEOUT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_POLL_TIMEOUT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_CACHE_LOOKUPS",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "OPT_SERVER_FAILURE_LIMIT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
@@ -346,133 +346,133 @@ DefineConstant(
 DefineConstant(
   array(
     'name'   => "GET_PRESERVE_ORDER",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_SUCCESS",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_FAILURE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_HOST_LOOKUP_FAILURE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_UNKNOWN_READ_FAILURE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_PROTOCOL_ERROR",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_CLIENT_ERROR",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_SERVER_ERROR",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_WRITE_FAILURE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_DATA_EXISTS",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_NOTSTORED",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_NOTFOUND",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_PARTIAL_READ",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_SOME_ERRORS",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_NO_SERVERS",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_END",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_ERRNO",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_BUFFERED",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_TIMEOUT",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_BAD_KEY_PROVIDED",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_CONNECTION_SOCKET_CREATE_FAILURE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineConstant(
   array(
     'name'   => "RES_PAYLOAD_FAILURE",
-    'type'   => Int32,
+    'type'   => Int64,
   ));
 
 DefineFunction(

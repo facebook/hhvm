@@ -818,7 +818,7 @@ std::string FunctionScope::getId() const {
   if (m_redeclaring < 0) {
     return name;
   }
-  return name + Option::IdPrefix +
+  return name + Option::ScopeIdPrefix +
     boost::lexical_cast<std::string>(m_redeclaring);
 }
 
@@ -827,7 +827,7 @@ std::string FunctionScope::getDocName() const {
   if (m_redeclaring < 0) {
     return name;
   }
-  return name + Option::IdPrefix +
+  return name + Option::ScopeIdPrefix +
     boost::lexical_cast<std::string>(m_redeclaring);
 }
 
@@ -857,7 +857,7 @@ std::string FunctionScope::getInjectionId() const {
   if (m_redeclaring < 0) {
     return injectionName;
   }
-  const string &redecSuffix = string(Option::IdPrefix) +
+  const string &redecSuffix = string(Option::ScopeIdPrefix) +
     boost::lexical_cast<std::string>(m_redeclaring);
   return injectionName + redecSuffix;
 }

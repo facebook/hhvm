@@ -162,14 +162,22 @@ typedef boost::dynamic_bitset<unsigned long long> FreeMap;
  */
 class GarbageList {
 public:
-  GarbageList() : ptr(NULL), sz(0) {}
+  GarbageList() : ptr(NULL), sz(0) {
+    // We store the free list pointers right at the start of each
+    // object.  The VM also stores a flag into the _count field to
+    // know the object is deallocated---this assert just makes sure
+    // they don't overlap.
+    static_assert((FAST_REFCOUNT_OFFSET >= sizeof(void*)),
+                  "FAST_REFCOUNT_OFFSET has to be larger than "
+                  "sizeof(void*) to work correctly with GarbageList");
+  }
 
   // Pops an item, or returns NULL
   void* maybePop() {
     void** ret = ptr;
     if (ret != NULL) {
       ptr = (void**)*ret;
-      sz --;
+      sz--;
     }
     return ret;
   }
@@ -286,12 +294,12 @@ public:
   void *alloc();
   void *allocHelper() NEVER_INLINE;
   void dealloc(void *obj) {
-    ASSERT(isValid(obj));
-    m_freelist.push(obj);
+    ASSERT(assertValidHelper(obj));
 #ifdef SMART_ALLOCATOR_DEBUG_FREE
     memset(obj, 0xfe, m_itemSize);
 #endif
-    if (hhvm_gc) {
+    m_freelist.push(obj);
+    if (hhvm) {
       int tomb = RefCountTombstoneValue;
       memcpy((char*)obj + FAST_REFCOUNT_OFFSET, &tomb, sizeof tomb);
     }
@@ -299,7 +307,12 @@ public:
     ASSERT(m_stats);
     m_stats->usage -= m_itemSize;
   }
-  bool isValid(void *obj) const;
+
+  /*
+   * Returns whether the given pointer points into this smart
+   * allocator (regardless of whether it is already freed).
+   */
+  bool isFromThisAllocator(void*) const;
 
   /**
    * MemoryManager functions.
@@ -315,6 +328,8 @@ public:
   virtual void dump(void *p) = 0;
 
 private:
+  bool assertValidHelper(void *obj) const;
+
   const Name m_nameEnum;
   const char* m_name;
   int m_itemCount;
@@ -347,10 +362,6 @@ protected:
  * It is legal to deallocate the currently pointed to element during
  * iteration (and will not affect the iteration state).  Other changes
  * to the allocator during iteration do not have guaranteed behavior.
- *
- * NOTE: This iteration support is for experimental work on GC, and
- * only actually works when HHVM_GC is defined, to avoid the need to
- * write back into object data when deallocating in other builds.
  */
 struct SmartAllocatorImpl::Iterator : private boost::noncopyable {
   explicit Iterator(const SmartAllocatorImpl*);

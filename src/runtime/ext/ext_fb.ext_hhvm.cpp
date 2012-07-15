@@ -1848,6 +1848,97 @@ TypedValue* fg_fb_lazy_realpath(HPHP::VM::ActRec *ar) {
 
 
 
+/*
+HPHP::String HPHP::f_fb_gc_collect_cycles()
+_ZN4HPHP22f_fb_gc_collect_cyclesEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_fb_gc_collect_cycles(Value* _rv) asm("_ZN4HPHP22f_fb_gc_collect_cyclesEv");
+
+TypedValue* fg_fb_gc_collect_cycles(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfString;
+      fh_fb_gc_collect_cycles((Value*)(&(rv)));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("fb_gc_collect_cycles", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
+/*
+void HPHP::f_fb_gc_detect_cycles(HPHP::String const&)
+_ZN4HPHP21f_fb_gc_detect_cyclesERKNS_6StringE
+
+filename => rdi
+*/
+
+void fh_fb_gc_detect_cycles(Value* filename) asm("_ZN4HPHP21f_fb_gc_detect_cyclesERKNS_6StringE");
+
+TypedValue * fg1_fb_gc_detect_cycles(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_gc_detect_cycles(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_data.num = 0LL;
+  rv->_count = 0;
+  rv->m_type = KindOfNull;
+  tvCastToStringInPlace(args-0);
+  fh_fb_gc_detect_cycles((Value*)(args-0));
+  return rv;
+}
+
+TypedValue* fg_fb_gc_detect_cycles(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_data.num = 0LL;
+        rv._count = 0;
+        rv.m_type = KindOfNull;
+        fh_fb_gc_detect_cycles((Value*)(args-0));
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_fb_gc_detect_cycles(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("fb_gc_detect_cycles", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
 
 } // !HPHP
 

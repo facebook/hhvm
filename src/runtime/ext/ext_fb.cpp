@@ -32,6 +32,7 @@
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_trace.h>
 #include <runtime/base/taint/taint_warning.h>
+#include <runtime/vm/backup_gc.h>
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
 
@@ -1146,6 +1147,15 @@ Variant f_fb_lazy_lstat(CStrRef filename) {
 
 String f_fb_lazy_realpath(CStrRef filename) {
   return StatCache::realpath(filename.c_str());
+}
+
+String f_fb_gc_collect_cycles() {
+  std::string s = VM::gc_collect_cycles();
+  return String(s);
+}
+
+void f_fb_gc_detect_cycles(CStrRef filename) {
+  VM::gc_detect_cycles(std::string(filename.c_str()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

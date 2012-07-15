@@ -1,0 +1,406 @@
+-------------------decl---------------------------
+graph [
+  directed 1
+  node [ id 1
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 2
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 3
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 4
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 5
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 6
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 7
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  edge [
+    source 1
+    target 7
+  ]
+  edge [
+    source 2
+    target 3
+  ]
+  edge [
+    source 3
+    target 2
+  ]
+  edge [
+    source 4
+    target 5
+  ]
+  edge [
+    source 5
+    target 6
+  ]
+  edge [
+    source 5
+    target 1
+  ]
+  edge [
+    source 6
+    target 4
+  ]
+]
+released 7/14 objects; survival% = 50.00; 
+string(18) "uncollected string"
+-------------------dyn---------------------------
+graph [
+  directed 1
+  node [ id 1
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 2
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 3
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 4
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 5
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 6
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 7
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 8
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 9
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 10
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 11
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 12
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  edge [
+    source 1
+    target 11
+  ]
+  edge [
+    source 2
+    target 12
+  ]
+  edge [
+    source 3
+    target 9
+  ]
+  edge [
+    source 4
+    target 8
+  ]
+  edge [
+    source 4
+    target 6
+  ]
+  edge [
+    source 5
+    target 10
+  ]
+  edge [
+    source 6
+    target 7
+  ]
+  edge [
+    source 8
+    target 5
+  ]
+  edge [
+    source 9
+    target 4
+  ]
+  edge [
+    source 10
+    target 3
+  ]
+  edge [
+    source 11
+    target 2
+  ]
+  edge [
+    source 12
+    target 1
+  ]
+]
+released 12/19 objects; survival% = 36.84; 
+string(18) "uncollected string"
+-------------------array---------------------------
+graph [
+  directed 1
+  node [ id 1
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 2
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 3
+    graphics [
+      type "roundrectangle"
+      fill "#CCCCFF"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "array()"
+    ]
+  ]
+  node [ id 4
+    graphics [
+      type "roundrectangle"
+      fill "#FFCC00"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "Cycler"
+    ]
+  ]
+  node [ id 5
+    graphics [
+      type "roundrectangle"
+      fill "#33CCCC"
+    ]
+    LabelGraphics [
+      anchor "e"
+      alignment "left"
+      fontName "Consolas"
+      text "RefData"
+    ]
+  ]
+  edge [
+    source 1
+    target 5
+  ]
+  edge [
+    source 2
+    target 4
+  ]
+  edge [
+    source 3
+    target 2
+  ]
+  edge [
+    source 3
+    target 1
+  ]
+  edge [
+    source 4
+    target 5
+  ]
+  edge [
+    source 5
+    target 3
+  ]
+]
+released 5/12 objects; survival% = 58.33; 
+string(18) "uncollected string"

@@ -234,7 +234,7 @@ void *SmartAllocatorImpl::allocHelper() {
   return ret;
 }
 
-bool SmartAllocatorImpl::isValid(void *obj) const {
+bool SmartAllocatorImpl::assertValidHelper(void *obj) const {
   if (obj) {
 #ifdef DETECT_DOUBLE_FREE
     GarbageList *fl = const_cast<GarbageList *>(&m_freelist);
@@ -249,6 +249,15 @@ bool SmartAllocatorImpl::isValid(void *obj) const {
     char *block = m_blocks[idx];
     return obj >= block && obj < block + m_colMax &&
            (((char*)obj - block) % m_itemSize) == 0;
+  }
+  return false;
+}
+
+bool SmartAllocatorImpl::isFromThisAllocator(void* p) const {
+  for (size_t i = 0; i < m_blocks.size(); ++i) {
+    if (p >= m_blocks[i] && p < m_blocks[i] + m_colMax) {
+      return true;
+    }
   }
   return false;
 }
@@ -426,7 +435,7 @@ SmartAllocatorImpl::Iterator::Iterator(const SmartAllocatorImpl* sa)
   , m_row(0)
   , m_col(-m_sa.m_itemSize)
 {
-  ASSERT(hhvm_gc);
+  ASSERT(hhvm);
   ASSERT(is_iterable_type(sa->getAllocatorType()));
   next();
 }

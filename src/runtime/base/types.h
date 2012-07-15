@@ -77,7 +77,7 @@ extern const Array null_array;
  * want to use hphp (if it's not, you'll hit compile-time assertions
  * in the relevant classes and may have to fiddle with this).
  */
-#define FAST_REFCOUNT_OFFSET (sizeof(void*))
+const size_t FAST_REFCOUNT_OFFSET = sizeof(void*);
 
 /**
  * These are underlying data structures for the above complex data types. Since

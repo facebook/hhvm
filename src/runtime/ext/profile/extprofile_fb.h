@@ -299,6 +299,16 @@ inline void x_fb_setprofile(CVarRef callback) {
   f_fb_setprofile(callback);
 }
 
+inline String x_fb_gc_collect_cycles() {
+  FUNCTION_INJECTION_BUILTIN(fb_gc_collect_cycles);
+  return f_fb_gc_collect_cycles();
+}
+
+inline void x_fb_gc_detect_cycles(CStrRef filename) {
+  FUNCTION_INJECTION_BUILTIN(fb_gc_detect_cycles);
+  f_fb_gc_detect_cycles(filename);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

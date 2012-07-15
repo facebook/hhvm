@@ -72,6 +72,8 @@ int64 f_fb_get_last_flush_size();
 Variant f_fb_lazy_stat(CStrRef filename);
 Variant f_fb_lazy_lstat(CStrRef filename);
 String f_fb_lazy_realpath(CStrRef filename);
+String f_fb_gc_collect_cycles();
+void f_fb_gc_detect_cycles(CStrRef filename);
 extern const int64 k_FB_UNSERIALIZE_NONSTRING_VALUE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;

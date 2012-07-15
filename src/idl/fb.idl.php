@@ -1224,6 +1224,30 @@ DefineFunction(
     'taint_observer' => false,
   ));
 
+DefineFunction(
+  array(
+    'name'    => "fb_gc_collect_cycles",
+    'desc'    => "Invoke the backup cycle collector",
+    'flags'   => HasDocComment | HipHopSpecific,
+    'return'  => array(
+      'type'    => String,
+      'desc'    => "Some interesting statistics"
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'    => "fb_gc_detect_cycles",
+    'desc'    => "Detect cyclic garbage in the heap and print information about it to a file",
+    'flags'   => HasDocComment | HipHopSpecific,
+    'args'    => array(
+      array(
+        'name' => 'filename',
+        'type' => String,
+        'desc' => 'filename to write information about cyclic garbage to',
+      ),
+    ),
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

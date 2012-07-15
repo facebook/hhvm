@@ -54,8 +54,8 @@ public:
   virtual Array getMetaData();
   virtual int64 tell();
 
-  // allows SSLSocket to perform special checking
-  virtual bool checkLiveness() { return true;}
+  // check if the socket is open
+  virtual bool checkLiveness();
 
   void setError(int err);
   int getError() const { return m_error;}

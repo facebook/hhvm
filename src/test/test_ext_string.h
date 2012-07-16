@@ -38,6 +38,7 @@ class TestExtString : public TestCppExt {
   bool test_str_shuffle();
   bool test_strrev();
   bool test_strtolower();
+  bool test_lcfirst();
   bool test_strtoupper();
   bool test_ucfirst();
   bool test_ucwords();

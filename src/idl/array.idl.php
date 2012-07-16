@@ -433,7 +433,7 @@ DefineFunction(
       array(
         'name'   => "search_value",
         'type'   => Variant,
-        'value'  => "null_variant",
+        'value'  => "not_given_variant",
         'desc'   => "If specified, then only keys containing these values are returned.",
       ),
       array(

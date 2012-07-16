@@ -313,7 +313,6 @@ private:
   void print(const char *msg, bool indent = true);
   void printSubstring(const char *start, int length);
   void printIndent();
-  std::string getFormattedName(const std::string &file);
 };
 
 #define STR(x) #x

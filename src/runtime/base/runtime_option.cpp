@@ -194,6 +194,7 @@ std::string RuntimeOption::RequestInitFunction;
 std::string RuntimeOption::RequestInitDocument;
 std::vector<std::string> RuntimeOption::ThreadDocuments;
 std::vector<std::string> RuntimeOption::ThreadLoopDocuments;
+int RuntimeOption::ThreadLoopDocumentsSleepSeconds = 0;
 
 bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
@@ -696,6 +697,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     for (unsigned int i = 0; i < ThreadLoopDocuments.size(); i++) {
       normalizePath(ThreadLoopDocuments[i]);
     }
+    ThreadLoopDocumentsSleepSeconds = server["ThreadLoopDocumentsSleepSeconds"].getInt32(0);
 
     SafeFileAccess = server["SafeFileAccess"].getBool();
     server["AllowedDirectories"].get(AllowedDirectories);

@@ -91,7 +91,11 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
     return null;
   }
 
-  return json;
+  if (json_options & k_JSON_FB_LOOSE) {
+    return json;
+  } else {
+    return null;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -89,6 +89,12 @@ bool TestExtJson::test_json_decode() {
   VS(f_json_decode("[]",        true, k_JSON_FB_LOOSE), Array::Create());
   VS(f_json_decode("{}",        true),       Array::Create());
   VS(f_json_decode("{}",        true, k_JSON_FB_LOOSE), Array::Create());
+  VS(f_json_decode("test",      true),       null);
+  VS(f_json_decode("test",      true, k_JSON_FB_LOOSE), "test");
+  VS(f_json_decode("'test'",    true),       null);
+  VS(f_json_decode("'test'",    true, k_JSON_FB_LOOSE), "test");
+  VS(f_json_decode("\"test\"",  true),       "test");
+  VS(f_json_decode("\"test\"",  true, k_JSON_FB_LOOSE), "test");
 
   VS(f_json_decode("[{\"a\":\"apple\"},{\"b\":\"banana\"}]", true),
      CREATE_VECTOR2(CREATE_MAP1("a", "apple"), CREATE_MAP1("b", "banana")));

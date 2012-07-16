@@ -58,6 +58,9 @@ void ServiceThread::threadRun() {
     ReplayTransport rt;
     rt.replayInput(hdf);
     handler.handleRequest(&rt);
+    if (RuntimeOption::ThreadLoopDocumentsSleepSeconds) {
+       sleep(RuntimeOption::ThreadLoopDocumentsSleepSeconds);
+    }
   } while (m_loop && !m_stopped);
 
   Logger::Info("Service thread %s stopped", m_url.c_str());

@@ -2371,6 +2371,7 @@ public:
     m_ar->outputCPPFileImpl(cg, m_file);
     string code = out.str();
     m_ar->addPregeneratedCPP(m_file->getName(), code);
+    m_ar->savePregeneratedClasses(m_file->getName(), cg.getClasses());
   }
 
 private:
@@ -4748,6 +4749,7 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
   BOOST_FOREACH(FileScopePtr fs, files) {
     if (m_pregenerated) {
       const string &code = getPregeneratedCPP(fs->getName());
+      loadPregeneratedClasses(fs->getName(), cg);
       if (Option::GenerateSourceInfo) {
         int offset = cg.getLineNo(CodeGenerator::PrimaryStream) - 1;
         movePregeneratedSourceInfo(fs->getName(), cg.getFileName(), offset);
@@ -4798,11 +4800,36 @@ void AnalysisResult::addPregeneratedCPP(const std::string &name,
   code.swap(m_pregenMap[name]);
 }
 
+void AnalysisResult::savePregeneratedClasses(const std::string &name,
+                                             const StringToClassScopePtrVecMap &classScopes) {
+  Lock lock(m_pregenClassesMapMutex);
+  m_pregenClassesMap[name] = classScopes;
+}
+
 const string &AnalysisResult::getPregeneratedCPP(const string &name) {
   Lock lock(m_pregenMapMutex);
   StringMap::const_iterator iter = m_pregenMap.find(name);
   ASSERT(iter != m_pregenMap.end());
   return iter->second;
+}
+
+void AnalysisResult::loadPregeneratedClasses(const string &name, CodeGenerator &cg) {
+  Lock lock(m_pregenClassesMapMutex);
+
+  StringToClassesMap::const_iterator iter = m_pregenClassesMap.find(name);
+  ASSERT(iter != m_pregenClassesMap.end());
+
+  StringToClassScopePtrVecMap classScopes = iter->second;
+
+  for (StringToClassScopePtrVecMap::const_iterator iter = classScopes.begin();
+       iter != classScopes.end(); ++iter) {
+	const std::string &className = iter->first;
+    const ClassScopePtrVec &classes = iter->second;
+    for (unsigned int i = 0; i < classes.size(); i++) {
+      ClassScopePtr cls = classes[i];
+      cg.addClass(className, cls);
+    }
+  }
 }
 
 void AnalysisResult::movePregeneratedSourceInfo(const std::string &source,

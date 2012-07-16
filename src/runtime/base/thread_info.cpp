@@ -69,7 +69,19 @@ void ThreadInfo::onSessionInit() {
     struct rlimit rl;
 
     getrlimit(RLIMIT_STACK, &rl);
-    m_stacklimit = (char *)&marker - (rl.rlim_cur - StackSlack);
+    if (LIKELY(rl.rlim_cur != -1)) {
+      m_stacklimit = (char *)&marker - (rl.rlim_cur - StackSlack);
+    } else {
+      // RLIMIT_STACK might get lost after fork or exec on linux
+      // let's just calculate in the old way with default thread stack size
+      pthread_attr_t info;
+      size_t m_stacksize;
+      pthread_attr_init(&info);
+      pthread_attr_getstacksize(&info, &m_stacksize);
+      pthread_attr_destroy(&info);
+
+      m_stacklimit = (char *)&marker - (m_stacksize - StackSlack);
+  }
   } else {
     m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
     ASSERT(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));

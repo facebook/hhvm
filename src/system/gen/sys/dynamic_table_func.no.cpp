@@ -262,6 +262,14 @@ Variant ifa_reset(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_reset(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_reset);
 }
+Variant ifa_lcfirst(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("lcfirst", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_lcfirst(arg0));
+}
+Variant i_lcfirst(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_lcfirst);
+}
 Variant ifa_deg2rad(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("deg2rad", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -21400,6 +21408,7 @@ CallInfo ci_realpath((void*)&i_realpath, (void*)&ifa_realpath, 1, 0, 0x000000000
 CallInfo ci_mb_strstr((void*)&i_mb_strstr, (void*)&ifa_mb_strstr, 4, 0, 0x0000000000000000LL);
 CallInfo ci_spl_object_hash((void*)&i_spl_object_hash, (void*)&ifa_spl_object_hash, 1, 0, 0x0000000000000000LL);
 CallInfo ci_reset((void*)&i_reset, (void*)&ifa_reset, 1, 0, 0x0000000000000001LL);
+CallInfo ci_lcfirst((void*)&i_lcfirst, (void*)&ifa_lcfirst, 1, 0, 0x0000000000000000LL);
 CallInfo ci_deg2rad((void*)&i_deg2rad, (void*)&ifa_deg2rad, 1, 0, 0x0000000000000000LL);
 CallInfo ci_shm_put_var((void*)&i_shm_put_var, (void*)&ifa_shm_put_var, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imap_append((void*)&i_imap_append, (void*)&ifa_imap_append, 4, 0, 0x0000000000000000LL);
@@ -30863,6 +30872,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 4782:
       HASH_GUARD(0x36AB9E6AA687F2AELL, xmlwriter_start_dtd_element) {
         ci = &ci_xmlwriter_start_dtd_element;
+        return true;
+      }
+      break;
+    case 4787:
+      HASH_GUARD(0x7448B5BAF0B032B3LL, lcfirst) {
+        ci = &ci_lcfirst;
         return true;
       }
       break;

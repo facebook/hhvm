@@ -32,6 +32,7 @@
 
 namespace HPHP {
     ///////////////////////////////////////////////////////////////////////////////
+    /**
     class eArrayVal {
         public:
         int      layer ;
@@ -41,6 +42,17 @@ namespace HPHP {
             this->arr    = array;
             this->layer  = layerP;
         }
+    };
+    */
+    struct eArrayVal
+    {
+        eArrayVal(Array * z, int l) :
+            arr(z), layer(l)
+        {
+        }
+
+        Array *	        arr;
+        int		layer ;
     };
 
     class XmlArrResult {
@@ -72,13 +84,6 @@ namespace HPHP {
         }
     };
 
-//   #define XML_ARR_STACK (*estack.get())
-//   #define XML_ARR_STACK_PTR estack.get()
-//   #define XML_ARR_STACK_TOP (*estack.get()).top()
-//   #define XML_ARR_STACK_TOP_ARR ((*estack.get()).top().arr)
-//   #define XML_ARR_STACK_TOP_ARR_PTR ((*estack.get()).top().arr)
-//   #define XML_ARR_STACK_PUSH(arr, level) (*estack.get()).push(eArrayVal(arr,level))
-
     #define XML_CREATE_ARR_DATA ((XmlArrResult *)(data))->create_array()
     #define XML_CREATE_ARR1_DATA ((XmlArrResult *)(data))->create_tmp1_array()
     #define XML_CREATE_ARR2_DATA ((XmlArrResult *)(data))->create_tmp2_array()
@@ -103,7 +108,7 @@ namespace HPHP {
     void xml_start(void *data, const xmlChar *xmlName, const xmlChar **attr);
     void ignorableWhitespace(void * ctx, const xmlChar * ch, int len);
     static void xml_end(void *data, const xmlChar *el);
-    static void xml_text(void *userData, const xmlChar *c, int len);
+    static void xml_text(void * ctx, const xmlChar *c, int len);
     static void xml_attr(void * data, const xmlChar **attr);
 
 
@@ -171,7 +176,9 @@ namespace HPHP {
         xmlSubstituteEntitiesDefault(1);
         xmlParserCtxtPtr ctxt = NULL;
         xmlDocPtr ret;
+        /**
         xmlInitParser();
+        **/
         xmlSAXHandlerPtr saxHandlerPtr = (xmlSAXHandlerPtr)calloc(1, sizeof(xmlSAXHandler));
         saxHandlerPtr->cdataBlock = xml_cdata;
         saxHandlerPtr->startElement= xml_start;
@@ -191,9 +198,9 @@ namespace HPHP {
             xmlParseDocument(ctxt);
             if (ctxt->wellFormed) {
                 ret = ctxt->myDoc;
-               // if (ret->URL == NULL && ctxt->directory != NULL) {
-                  //  ret->URL = xmlCharStrdup(ctxt->directory);
-                //}
+                if (ret && ret->URL == NULL && ctxt->directory != NULL) {
+                    ret->URL = xmlCharStrdup(ctxt->directory);
+                }
             } else {
                 ret = NULL;
                 xmlFreeDoc(ctxt->myDoc);
@@ -212,7 +219,6 @@ namespace HPHP {
         }
 
         free(saxHandlerPtr);
-        xmlCleanupParser();
         return xmlResult->result;
     }
 
@@ -232,8 +238,7 @@ namespace HPHP {
         return 0;
     }
 
-    void xml_cdata(void * ctx, const xmlChar *cdata , int len) {
-
+    void xml_cdata(void * data, const xmlChar *cdata , int len) {
         char *c = (char *)cdata;
         String v_name("_v");
         String c_string (c, len, CopyString);
@@ -241,7 +246,7 @@ namespace HPHP {
         if(is_multibyte((char *)cdata, len)) {
             c_string = f_iconv("UTF-8","GBK//IGNORE", c_string);
         }
-        //XML_STACK_TOP_ARR_CTX->set(v_name, c_string) ;
+        XML_STACK_TOP_ARR_DATA->set(v_name, c_string) ;
         return;
     }
 
@@ -255,7 +260,6 @@ namespace HPHP {
                 XML_STACK_TOP_ARR_DATA->set(name_str, Array::Create());
                 Array &arr_input(XML_STACK_TOP_ARR_DATA->lvalAt(name_str).toArrRef());
                 ((XmlArrResult *)(data))->astack.push(eArrayVal((&arr_input),1));
-
 		xml_attr(data, attr);
 		return ;
 	}
@@ -266,23 +270,25 @@ namespace HPHP {
         }
 
         Array &zvalue_arr(XML_STACK_TOP_ARR_DATA->lvalAt(name_str).toArrRef());
-        ((XmlArrResult *)(data))->astack.push(eArrayVal((&zvalue_arr),1));
-
         if(!zvalue_arr.exists(0)) {
-		Array old_array((*XML_STACK_TOP_ARR_DATA)[name_str].toArray());
+		Array old_array = (*XML_STACK_TOP_ARR_DATA)[name_str].toArray();
                 Array new_array = Array::Create();
                 new_array.set(0, old_array);
                 new_array.set(1, Array::Create());
                 XML_STACK_TOP_ARR_DATA->set(name_str, new_array);
                 Array &new_array_ref(XML_STACK_TOP_ARR_DATA->lvalAt(name_str).toArrRef());
-                Array &one_array_ref(new_array_ref.lvalAt(1).toArrRef());
-                ((XmlArrResult *)(data))->astack.push(eArrayVal((&one_array_ref),2));
+                Array &top_array_ref(new_array_ref.lvalAt(1).toArrRef());
+
+                ((XmlArrResult *)(data))->astack.push(eArrayVal((&new_array_ref),1));
+                ((XmlArrResult *)(data))->astack.push(eArrayVal(&top_array_ref,2));
                 xml_attr(data, attr);
 	} else {
-                int top_array_size = XML_STACK_TOP_ARR_DATA->size();
-                XML_STACK_TOP_ARR_DATA->append(Array::Create());
+                Array &zvalue_arr(XML_STACK_TOP_ARR_DATA->lvalAt(name_str).toArrRef());
+                ((XmlArrResult *)(data))->astack.push(eArrayVal((&zvalue_arr),1));
+                int top_array_size = zvalue_arr->size();
+                XML_STACK_TOP_ARR_DATA->set(top_array_size,Array::Create());
                 Array &top_array_ref(XML_STACK_TOP_ARR_DATA->lvalAt(top_array_size).toArrRef());
-                ((XmlArrResult *)(data))->astack.push(eArrayVal((&top_array_ref),2));
+                ((XmlArrResult *)(data))->astack.push(eArrayVal(&top_array_ref,2));
                 xml_attr(data, attr);
 	}
 	return ;
@@ -290,7 +296,8 @@ namespace HPHP {
 
 
     static void xml_end(void *data, const xmlChar *el) {
-        for ( int i = 0 ; i < XML_ARR_STACK_TOP.layer ; i++ ) {
+        int pop_loop = XML_ARR_STACK_TOP.layer;
+        for ( int i = 0 ; i < pop_loop ; i++ ) {
             XML_ARR_STACK_POP;
         }
         return ;
@@ -301,7 +308,7 @@ namespace HPHP {
     }
 
     //Ã²ËÆºÜ¼òµ¥
-    static void xml_text(void *data, const xmlChar *c, int len)
+    static void xml_text(void * data, const xmlChar *c, int len)
     {
         const char *s= (const char *)c;
         String v_name("_v");
@@ -310,13 +317,22 @@ namespace HPHP {
         if(is_multibyte((char *)c, len)) {
             s_string = f_iconv("UTF-8","GBK//IGNORE", s_string);
         }
-        XML_STACK_TOP_ARR_DATA->set(v_name, s_string);
+
+	if ( !XML_STACK_TOP_ARR_DATA->exists(v_name)) {
+            XML_STACK_TOP_ARR_DATA->set(v_name, s_string);
+	} else if ( (*XML_STACK_TOP_ARR_DATA)[v_name].is(KindOfString)) {
+            s_string = (*XML_STACK_TOP_ARR_DATA)[v_name].toString() + s_string;
+            XML_STACK_TOP_ARR_DATA->set(v_name, s_string);
+        } else {
+            raise_warning("xml_array: invalid text");
+	}
         return ;
     }
 
     static void xml_attr(void *data, const xmlChar **attr) {
+        /**
+        //SIMPLE IT
 	char *key, *value;
-
         if (attr != NULL) {
             Array attrs = Array::Create();
             while ( (key = (char*)*attr++) && (value = (char*)*attr++) ) {
@@ -328,6 +344,28 @@ namespace HPHP {
             }
             XML_STACK_TOP_ARR_DATA->set(String("_p"), attrs);
         }
+        */
+	char *key, *value;
+        String p_name("_p");
+        if (attr != NULL) {
+            while ( (key = (char*)*attr++) && (value = (char*)*attr++) ) {
+                String value_str(value);
+
+                if(is_multibyte(value, strlen(value))) {
+                    value_str = f_iconv("UTF-8","GBK//IGNORE", value_str);
+                }
+
+                if(!XML_STACK_TOP_ARR_DATA->exists(p_name)) {
+                    Array new_array = Array::Create();
+                    new_array.set(String(key), String(value));
+                    XML_STACK_TOP_ARR_DATA->set(p_name, new_array);
+                } else {
+                    Array &p(XML_STACK_TOP_ARR_DATA->lvalAt(p_name).toArrRef());
+                    p.set(String(key), String(value));
+                }
+            }
+        }
+
 	return;
     }
     ///////////////////////////////////////////////////////////////////////////////

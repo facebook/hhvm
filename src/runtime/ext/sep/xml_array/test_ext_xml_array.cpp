@@ -34,7 +34,7 @@ bool TestExtXml_array::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtXml_array::test_xml_array() {
-  String s = f_file_get_contents("http://blog.00rz.com/feed");
+  String s = f_file_get_contents("http://news.baidu.com/n?cmd=1&class=civilnews&tn=rss");
   f_var_dump(s);
   Array r = f_xml_array(s);
   f_var_dump(r);

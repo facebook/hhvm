@@ -27,6 +27,7 @@
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/runtime_option.h>
 #include <util/lock.h>
 #include <util/logger.h>
 #include <util/compatibility.h>
@@ -34,6 +35,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <libmemcached/memcached.h>
+#include <zlib.h>
 
 using namespace std;
 
@@ -185,7 +188,12 @@ public:
                      ini_on_update_string,         &m_hash_func);
     IniSetting::Bind("session.hash_bits_per_character", "4",
                      ini_on_update_long,           &m_hash_bits_per_character);
-  }
+
+    IniSetting::Set("session.save_handler", RuntimeOption::SessionHandler);
+    IniSetting::Set("session.save_path", RuntimeOption::SessionPath);
+    IniSetting::Set("session.hash_bits_per_character", (int64)RuntimeOption::SessionHashBitsPerCharacter);
+    IniSetting::Set("session.gc_maxlifetime", (int64)RuntimeOption::SessionMaxLifetime);
+ }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
 #define PS(name) s_session->m_ ## name
@@ -329,7 +337,7 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = f_hash_final(context);
+  String hashed = f_hash_final(context, true);
 
   if (PS(hash_bits_per_character) < 4 || PS(hash_bits_per_character) > 6) {
     PS(hash_bits_per_character) = 4;
@@ -341,6 +349,204 @@ String SessionModule::create_sid() {
   bin_to_readable(hashed, readable, PS(hash_bits_per_character));
   return readable.detach();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// MemcachedSessionModule
+class MemcachedSessionData {
+public:
+  MemcachedSessionData() : m_mem(NULL), m_lock_key(NULL) {
+  }
+
+  bool lock(const char *key) {
+    char *lock_key = NULL;
+    int lock_key_len = 0;
+    unsigned long attempts;
+    time_t expiration;
+    memcached_return status;
+
+    const long lock_maxwait = 5; // php.ini max_execution_time conf.
+    const long lock_wait = 150000;
+
+    expiration = time(NULL) + lock_maxwait + 1; // 31 secs from now
+    attempts = (unsigned long)((1000000.0 / lock_wait) * lock_maxwait);
+   
+    lock_key = (char *)malloc(strlen(key) + 5 + 1);
+    snprintf(lock_key, strlen(key) + 5, "lock.%s", key);
+    lock_key_len = strlen(lock_key);
+
+    do {
+      status = memcached_add(m_mem, lock_key, lock_key_len, "1", strlen("1"), expiration, 0);
+      if (status == MEMCACHED_SUCCESS) {
+        m_lock_key = lock_key;
+        m_lock_key_len = lock_key_len;
+        return true;
+      } else if (status != MEMCACHED_NOTSTORED && status != MEMCACHED_DATA_EXISTS) {
+        break;
+      }
+      usleep(lock_wait); // wait 100 ms before retry to acquire lock
+    } while (--attempts > 0);
+    free(lock_key);
+    return false;
+  }
+
+  void unlock() {
+    if (m_lock_key) {
+      memcached_delete(m_mem, m_lock_key, m_lock_key_len, 0);
+      free(m_lock_key);
+      m_lock_key = NULL;
+      m_lock_key_len = 0;
+    }
+  }
+
+  bool open(const char *save_path, const char *session_name) { 
+    memcached_server_st *servers = memcached_servers_parse(save_path);
+    if (!servers)
+      raise_warning("Could not parse Session.Path, make sure it is in the format: ip:port,ip:port,...,ip:port\n");
+
+    m_mem = memcached_create(NULL);
+    if (!m_mem)
+    {
+      memcached_server_list_free(servers);
+      raise_warning("Could not create memcached instance\n");
+    }
+
+    //memcached_behavior_set(m_mem, MEMCACHED_BEHAVIOR_CONNECT_TIMEOUT, 2000); 
+    //memcached_behavior_set(m_mem, MEMCACHED_BEHAVIOR_CONNECT_TIMEOUT, 2000); 
+
+    m_timeout = 2 * 60 * 60;
+
+    m_rc = memcached_server_push(m_mem, servers);
+    if (m_rc != MEMCACHED_SUCCESS)
+      raise_warning("Error: %s\n", memcached_strerror(m_mem, m_rc));
+
+    memcached_server_list_free(servers);
+    return true;
+  }
+
+  bool close() {
+    unlock();
+    if (m_mem) memcached_free(m_mem);
+    m_mem = NULL;
+    return true;
+  }
+
+  bool read(const char *key, String &value) {
+    size_t len = 0;
+    uint32_t flags = 0;
+    int retry = 0;
+    char *val = NULL;
+
+    if (!lock(key)) return false;
+
+    while (!val) {
+      val = memcached_get(m_mem, key, strlen(key), &len, &flags, &m_rc);
+      if (m_rc == MEMCACHED_SUCCESS) break;
+      retry++;
+      if (retry > 4) return false;
+    }
+
+    bool done = false;
+    if (flags & 2) { // compressed
+      std::vector<char> buffer;
+      unsigned long bufferSize = 0;
+      for (int factor = 3; !done && factor <= 16; ++factor) {
+        bufferSize = len * (1 << factor) + 1;
+        buffer.resize(bufferSize);
+        if (uncompress((Bytef *)buffer.data(), &bufferSize, (const Bytef *)val, len) == Z_OK) {
+          done = true;
+        }
+        if (!done) {
+          raise_warning("Session data uncompress failed.\n");
+        }
+
+        value = String(buffer.data(), bufferSize, CopyString);
+	free(val);
+      } 
+    }
+    else {
+      value = String(val, len, AttachString);
+      done = true;
+    }
+    return done;
+  }
+
+  bool write(const char *key, CStrRef value) {
+
+    int key_len = strlen(key) + 5 + 1;
+    if (key_len <= 0 || key_len >= MEMCACHED_MAX_KEY) {
+      raise_warning("The session id is too long or contains illegal characters");
+      PS(invalid_session_id) = 1;
+      return false;
+    }
+
+    time_t expiration = m_timeout;
+    if (PS(gc_maxlifetime) > 0) expiration = PS(gc_maxlifetime);
+
+    uint32_t flags = 0;
+    if (value.size() > 100) {
+      size_t outLen = compressBound(value.size());
+      char *out = (char *)malloc(outLen);
+      if (out != NULL && compress2((Bytef *)out, &outLen, (const Bytef *)value.data(), value.size(), 6) == Z_OK) {
+        flags |= 2;
+        m_rc = memcached_set(m_mem, key, strlen(key), out, outLen, expiration, flags);
+        if (m_rc != MEMCACHED_SUCCESS)
+          raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
+      }
+      else {
+        raise_warning("Session compression failed.\n");
+      }
+
+      if (out) free(out);
+    }
+    else {
+      m_rc = memcached_set(m_mem, key, strlen(key), value.data(), value.size(), expiration, flags);
+      if (m_rc != MEMCACHED_SUCCESS)
+        raise_warning("Error: %s", memcached_strerror(m_mem, m_rc));
+    }
+    return true;
+  }
+
+  bool destroy(const char *key) {
+    return close();
+  }
+
+  bool gc(int maxlifetime, int *nrdels) {
+    return true;
+  }
+
+private:
+  memcached_st *m_mem;
+  memcached_return m_rc;
+  time_t m_timeout;
+  char *m_lock_key;
+  int m_lock_key_len;
+};
+IMPLEMENT_THREAD_LOCAL(MemcachedSessionData, s_memcached_session_data);
+
+class MemcachedSessionModule : public SessionModule {
+public:
+  MemcachedSessionModule() : SessionModule("memcached") {
+  }
+  virtual bool open(const char *save_path, const char *session_name) {
+    return s_memcached_session_data->open(save_path, session_name);
+  }
+  virtual bool close() {
+    return s_memcached_session_data->close();
+  }
+  virtual bool read(const char *key, String &value) {
+    return s_memcached_session_data->read(key, value);
+  }
+  virtual bool write(const char *key, CStrRef value) {
+    return s_memcached_session_data->write(key, value);
+  }
+  virtual bool destroy(const char *key) {
+    return s_memcached_session_data->destroy(key);
+  }
+  virtual bool gc(int maxlifetime, int *nrdels) {
+    return s_memcached_session_data->gc(maxlifetime, nrdels);
+  }
+};
+static MemcachedSessionModule s_memcached_session_module;
 
 ///////////////////////////////////////////////////////////////////////////////
 // FileSessionModule

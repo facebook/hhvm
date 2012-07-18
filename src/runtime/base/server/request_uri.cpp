@@ -207,8 +207,10 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
                                    const string &sourceRoot,
                                    const string &pathTranslation,
                                    CStrRef filename) {
-  if (filename.empty() || filename.charAt(filename.length() - 1) == '/') {
+  if (filename.empty())
     return false;
+  if (filename.charAt(filename.length() - 1) == '/' && RuntimeOption::DefaultDocument.size()) {
+    return virtualFileExists(vhost, sourceRoot, pathTranslation, String(filename.data() + RuntimeOption::DefaultDocument));
   }
   if (!vhost->getDocumentRoot().empty()) {
     string fullname = filename.data();

@@ -376,6 +376,11 @@ int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
 int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
+std::string RuntimeOption::SessionPath = "";
+std::string RuntimeOption::SessionHandler = "files";
+long RuntimeOption::SessionHashBitsPerCharacter = 4;
+long RuntimeOption::SessionMaxLifetime = 2 * 60 * 60;
+
 ///////////////////////////////////////////////////////////////////////////////
 // keep this block after all the above static variables, or we will have
 // static variable dependency problems on initialization
@@ -585,6 +590,15 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   }
   {
     Hdf server = config["Server"];
+
+    {
+      Hdf session = server["Session"];
+      SessionPath = session["Path"].getString("");
+      SessionHandler = session["Handler"].getString("files");
+      SessionHashBitsPerCharacter = session["HashBitsPerCharacter"].getInt64(4);
+      SessionMaxLifetime = session["MaxLifetime"].getInt64(2 * 60 * 60);
+    }
+
     Host = server["Host"].getString();
     DefaultServerNameSuffix = server["DefaultServerNameSuffix"].getString();
     ServerIP = server["IP"].getString();

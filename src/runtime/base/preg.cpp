@@ -135,7 +135,7 @@ static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
      * We use a quick pcre_info() check to see whether cache is corrupted,
      * and if it is, we flush it and compile the pattern from scratch.
      */
-    if (pcre_info(pce->re, NULL, NULL) == PCRE_ERROR_BADMAGIC) {
+    if (pcre_fullinfo(pce->re, NULL, NULL, NULL) == PCRE_ERROR_BADMAGIC) {
       pcre_cache.cleanup();
     } else {
 #if HAVE_SETLOCALE

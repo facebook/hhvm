@@ -29,12 +29,26 @@ typedef boost::aligned_storage<sizeof(RequestArena),sizeof(void*)>::type
         RequestArenaStorage;
 extern __thread RequestArenaStorage s_requestArenaStorage;
 
+typedef Arena VarEnvArena;
+typedef boost::aligned_storage<sizeof(VarEnvArena),sizeof(void*)>::type
+        VarEnvArenaStorage;
+extern __thread VarEnvArenaStorage s_varEnvArenaStorage;
+
 /*
  * Access to a request-lifetime arena allocator.
  */
 inline RequestArena& request_arena() {
   void* vp = &s_requestArenaStorage;
   return *static_cast<RequestArena*>(vp);
+}
+
+/*
+ * Access to a arena that has allocation lifetimes matching the
+ * current VarEnv.
+ */
+inline VarEnvArena& varenv_arena() {
+  void* vp = &s_varEnvArenaStorage;
+  return *static_cast<VarEnvArena*>(vp);
 }
 
 //////////////////////////////////////////////////////////////////////

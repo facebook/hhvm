@@ -14,53 +14,72 @@
    +----------------------------------------------------------------------+
 */
 #include "util/arena.h"
-#include "util/alloc.h"
+#include "util/util.h"
 #include "util/assert.h"
+#include "util/malloc_size_class.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 template<size_t kChunkBytes>
-ArenaImpl<kChunkBytes>::ArenaImpl() : m_next(0), m_limit(0) {
+ArenaImpl<kChunkBytes>::ArenaImpl() {
+  static_assert(kChunkBytes <= 4294967295U,
+                "Arena slab size may not be larger than UINT32_MAX");
+  static_assert(is_malloc_size_class<kChunkBytes>::value,
+                "ArenaImpl instantiated with size that was not a "
+                "malloc size class");
   static_assert((kChunkBytes & (kMinBytes - 1)) == 0,
                 "kChunkBytes must be multiple of kMinBytes");
+
+  memset(&m_frame, 0, sizeof m_frame);
+  m_current = static_cast<char*>(malloc(kChunkBytes));
+  m_ptrs.push_back(m_current);
 }
 
 template<size_t kChunkBytes>
 ArenaImpl<kChunkBytes>::~ArenaImpl() {
-  for (size_t i = 0; i < m_ptrs.size(); ++i) {
+  for (size_t i = 0, sz = m_ptrs.size(); i < sz; ++i) {
     free(m_ptrs[i]);
+  }
+  for (size_t i = 0, sz = m_externalPtrs.size(); i < sz; ++i) {
+    free(m_externalPtrs.get(i));
   }
 }
 
 template<size_t kChunkBytes>
-void* ArenaImpl<kChunkBytes>::alloc_slow(size_t nbytes) {
-  // Large allocations go directly to malloc without discarding our chunk.
-  if (nbytes >= kChunkBytes) return fill(nbytes);
-  char *ptr = fill(kChunkBytes);
-  m_limit = ptr + malloc_usable_size(ptr);
-  m_next = ptr + nbytes;
-  return ptr;
+void* ArenaImpl<kChunkBytes>::allocSlow(size_t nbytes) {
+  // Large allocations go directly to malloc without discarding our
+  // current chunk.
+  if (UNLIKELY(nbytes >= kChunkBytes)) {
+    char* ptr = static_cast<char*>(malloc(nbytes));
+    m_externalPtrs.push(ptr);
+    ASSERT((intptr_t(ptr) & (kMinBytes - 1)) == 0);
+    return ptr;
+  }
+  createSlab();
+  return alloc(nbytes);
 }
 
-/**
- * malloc nbytes bytes of data and remember the pointer.  We only call this
- * for blocks >= kChunkBytes, and therefore assume any self-respecting 
- * malloc implementation will return aligned memory for such a block.
- */
 template<size_t kChunkBytes>
-char* ArenaImpl<kChunkBytes>::fill(size_t nbytes) {
-  char* ptr = (char*)Util::safe_malloc(nbytes);
-  ASSERT((intptr_t(ptr) & (kMinBytes - 1)) == 0); // we need aligned blocks.
-  m_ptrs.push_back(ptr);
-  return ptr;
+void ArenaImpl<kChunkBytes>::createSlab() {
+  ++m_frame.index;
+  m_frame.offset = 0;
+  if (m_frame.index < m_ptrs.size()) {
+    m_current = m_ptrs[m_frame.index];
+  } else {
+    m_current = static_cast<char*>(malloc(kChunkBytes));
+    m_ptrs.push_back(m_current);
+  }
+  ASSERT((intptr_t(m_current) & (kMinBytes - 1)) == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 template class ArenaImpl<4096>;
 template class ArenaImpl<32 * 1024>;
+
+//////////////////////////////////////////////////////////////////////
 
 }
 

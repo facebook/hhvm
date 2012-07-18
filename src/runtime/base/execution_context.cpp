@@ -147,12 +147,6 @@ VMExecutionContext::~VMExecutionContext() {
        it != m_createdFuncs.end(); ++it) {
     delete *it;
   }
-  // delete global varEnv
-  if (m_globalVarEnv) {
-    // can only have one left
-    ASSERT(m_topVarEnv = m_globalVarEnv);
-    VM::VarEnv::destroy(m_globalVarEnv);
-  }
 
   delete m_eventHook;
   delete m_injTables;

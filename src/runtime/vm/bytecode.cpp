@@ -65,7 +65,6 @@
 
 #include "runtime/vm/name_value_table_wrapper.h"
 #include "runtime/vm/request_arena.h"
-#include "util/exp_arena.h"
 #include "util/arena.h"
 
 using std::string;
@@ -203,12 +202,12 @@ static inline Class* frameStaticClass(ActRec* fp) {
 // VarEnv.
 
 VarEnv::VarEnv()
-  : m_cfp(NULL)
+  : m_depth(0)
+  , m_malloced(false)
+  , m_cfp(0)
   , m_previous(0)
-  , m_extraArgs(NULL)
   , m_nvTable(boost::in_place<NameValueTable>(
       RuntimeOption::EvalVMInitialGlobalTableSize))
-  , m_depth(0)
 {
   // The global scope always contains certain special names.
   {
@@ -243,9 +242,10 @@ VarEnv::VarEnv()
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
-  : m_cfp(fp)
-  , m_extraArgs(eArgs)
+  : m_extraArgs(eArgs) // move
   , m_depth(1)
+  , m_malloced(false)
+  , m_cfp(fp)
 {
   const Func* func = fp->m_func;
   const Id numNames = func->numNamedLocals();
@@ -271,11 +271,13 @@ VarEnv::~VarEnv() {
   ASSERT(g_vmContext->m_topVarEnv == this);
   g_vmContext->m_topVarEnv = m_previous;
 
-  if (m_extraArgs) {
-    delete m_extraArgs;
-  }
   ASSERT(m_cfp == NULL);
-  if (isGlobalScope()) {
+  if (!isGlobalScope()) {
+    if (LIKELY(!m_malloced)) {
+      varenv_arena().endFrame();
+      return;
+    }
+  } else {
     /*
      * When detaching the global scope, we leak any live objects (and
      * let the smart allocator clean them up).  This is because we're
@@ -291,19 +293,33 @@ VarEnv* VarEnv::createLazyAttach(ActRec* fp,
   const Func* func = fp->m_func;
   const size_t numNames = func->numNamedLocals();
   ExtraArgs* eArgs = fp->getExtraArgs();
+  const size_t neededSz = sizeof(VarEnv) +
+                          sizeof(TypedValue*) * numNames;
 
-  void* mem = malloc(sizeof(VarEnv) + sizeof(TypedValue*) * numNames);
-  VarEnv* ret = new (mem) VarEnv(fp, eArgs);
-  TRACE(3, "Creating lazily attached VarEnv %p\n", mem);
-  if (!skipInsert) {
+  TRACE(3, "Creating lazily attached VarEnv\n");
+
+  if (LIKELY(!skipInsert)) {
+    varenv_arena().beginFrame();
+    void* mem = varenv_arena().alloc(neededSz);
+    VarEnv* ret = new (mem) VarEnv(fp, eArgs);
+    TRACE(3, "Creating lazily attached VarEnv %p\n", mem);
     ret->setPrevious(g_vmContext->m_topVarEnv);
     g_vmContext->m_topVarEnv = ret;
-  } else {
-    // The caller must immediately setPrevious, so don't bother
-    // setting it to an invalid pointer except in a debug build.
-    if (debug) {
-      ret->setPrevious((VarEnv*)-1);
-    }
+    return ret;
+  }
+
+  /*
+   * For skipInsert == true, we're adding a VarEnv in the middle of
+   * the chain, which means we can't use the stack allocation.
+   *
+   * The caller must immediately setPrevious, so don't bother setting
+   * it to an invalid pointer except in a debug build.
+   */
+  void* mem = malloc(neededSz);
+  VarEnv* ret = new (mem) VarEnv(fp, eArgs);
+  ret->m_malloced = true;
+  if (debug) {
+    ret->setPrevious((VarEnv*)-1);
   }
   return ret;
 }
@@ -312,16 +328,16 @@ VarEnv* VarEnv::createGlobal() {
   ASSERT(!g_vmContext->m_globalVarEnv);
   ASSERT(!g_vmContext->m_topVarEnv);
 
-  void* mem = malloc(sizeof(VarEnv));
-  VarEnv* ret = new (mem) VarEnv();
-  TRACE(3, "Creating VarEnv %p [global scope]\n", mem);
+  VarEnv* ret = new (request_arena()) VarEnv();
+  TRACE(3, "Creating VarEnv %p [global scope]\n", ret);
   g_vmContext->m_globalVarEnv = g_vmContext->m_topVarEnv = ret;
   return ret;
 }
 
 void VarEnv::destroy(VarEnv* ve) {
+  bool malloced = ve->m_malloced;
   ve->~VarEnv();
-  free(ve);
+  if (UNLIKELY(malloced)) free(ve);
 }
 
 void VarEnv::attach(ActRec* fp) {
@@ -345,9 +361,8 @@ void VarEnv::attach(ActRec* fp) {
     m_nvTable = boost::in_place<NameValueTable>(numNames);
   }
 
-  TypedValue** origLocs =
-      (TypedValue**)malloc(func->numNamedLocals() * sizeof(TypedValue*));
-
+  TypedValue** origLocs = new (varenv_arena()) TypedValue*[
+    func->numNamedLocals()];
   TypedValue* loc = frame_local(fp, 0);
   for (Id i = 0; i < numNames; ++i, --loc) {
     ASSERT(func->lookupVarId(func->localVarName(i)) == (int)i);
@@ -383,7 +398,6 @@ void VarEnv::detach(ActRec* fp) {
     }
     if (!m_restoreLocations.empty()) {
       m_restoreLocations.pop_back();
-      free(origLocs);
     }
   }
 
@@ -476,12 +490,12 @@ Array VarEnv::getDefinedVariables() const {
 }
 
 unsigned VarEnv::numExtraArgs() const {
-  return m_extraArgs ? m_extraArgs->numExtraArgs() : 0;
+  return m_extraArgs.numExtraArgs();
 }
 
 TypedValue* VarEnv::getExtraArg(unsigned argInd) const {
   ASSERT(numExtraArgs());
-  return m_extraArgs->getExtraArg(argInd);
+  return m_extraArgs.getExtraArg(argInd);
 }
 
 //=============================================================================
@@ -492,12 +506,26 @@ ExtraArgs::ExtraArgs()
   , m_numExtraArgs(0)
 {}
 
+ExtraArgs::ExtraArgs(ExtraArgs* o)
+  : m_extraArgs(o ? o->m_extraArgs : 0)
+  , m_numExtraArgs(o ? o->m_numExtraArgs : 0)
+{
+  if (o) {
+    o->m_extraArgs = 0;
+    o->m_numExtraArgs = 0;
+  }
+}
+
 ExtraArgs::~ExtraArgs() {
   if (m_extraArgs != NULL) {
     for (unsigned i = 0; i < m_numExtraArgs; i++) {
       tvRefcountedDecRef(&m_extraArgs[i]);
     }
-    free(m_extraArgs);
+    free(m_extraArgs); // XXX: use varenv arena?
+    if (debug) {
+      m_extraArgs = 0;
+      m_numExtraArgs = 0;
+    }
   }
 }
 
@@ -1029,6 +1057,7 @@ bool Stack::wouldOverflow(int numCells) const {
 }
 
 __thread RequestArenaStorage s_requestArenaStorage;
+__thread VarEnvArenaStorage s_varEnvArenaStorage;
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace VM
@@ -1680,7 +1709,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
           // inheriting a VarEnv
           ASSERT(!m_fp->m_varEnv);
           // Extra parameters must be moved off the stack.
-          m_fp->setExtraArgs(new ExtraArgs());
+          m_fp->setExtraArgs(ExtraArgs::alloc());
           int numExtras = nargs - nparams;
           m_fp->getExtraArgs()->copyExtraArgs(
             (TypedValue*)(uintptr_t(m_fp) - nargs * sizeof(TypedValue)),
@@ -1719,7 +1748,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
       // there.
       int numExtras = ar->numArgs() - ar->m_func->numParams();
       ASSERT(numExtras > 0);
-      ar->setExtraArgs(new ExtraArgs());
+      ar->setExtraArgs(ExtraArgs::alloc());
       ar->getExtraArgs()->setExtraArgs(extraArgs, numExtras);
     }
   }
@@ -7002,6 +7031,7 @@ void VMExecutionContext::requestInit() {
   ASSERT(SystemLib::s_nativeClassUnit);
 
   new (&s_requestArenaStorage) RequestArena();
+  new (&s_varEnvArenaStorage) VarEnvArena();
   m_stack.requestInit();
   tx64 = nextTx64;
   tx64->requestInit();
@@ -7021,12 +7051,21 @@ void VMExecutionContext::requestInit() {
 
 void VMExecutionContext::requestExit() {
   const_assert(hhvm);
+
   destructObjects();
   tx64->requestExit();
   tx64 = NULL;
   m_stack.requestExit();
   profileRequestEnd();
   EventHook::Disable();
+
+  if (m_globalVarEnv) {
+    ASSERT(m_topVarEnv = m_globalVarEnv);
+    VM::VarEnv::destroy(m_globalVarEnv);
+    m_globalVarEnv = m_topVarEnv = 0;
+  }
+
+  varenv_arena().~VarEnvArena();
   request_arena().~RequestArena();
 }
 

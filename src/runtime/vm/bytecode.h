@@ -40,6 +40,7 @@
 #include "runtime/vm/instance.h"
 #include "runtime/vm/unit.h"
 #include "runtime/vm/name_value_table.h"
+#include "runtime/vm/request_arena.h"
 
 namespace HPHP {
 
@@ -82,7 +83,21 @@ private:
 
 public:
   ExtraArgs();
+  ExtraArgs(ExtraArgs*); // move (may take a null)
   ~ExtraArgs();
+
+  static ExtraArgs* alloc() {
+    /*
+     * Extra args can't last longer than the current VarEnv.  (And if
+     * there is no current one except the global, we're going to leak
+     * this until the end of the request.)
+     */
+    return new (varenv_arena()) ExtraArgs();
+  }
+  static void destroy(ExtraArgs* ea) {
+    ea->~ExtraArgs();
+  }
+
   void setExtraArgs(TypedValue* args, unsigned nargs);
   void copyExtraArgs(TypedValue* args, unsigned nargs);
   unsigned numExtraArgs() const;
@@ -110,16 +125,16 @@ public:
  */
 class VarEnv {
  private:
+  ExtraArgs m_extraArgs;
+  uint16_t m_depth;
+  bool m_malloced;
   ActRec* m_cfp;
   VarEnv* m_previous;
   // TODO remove vector (#1099580).  Note: trying changing this to a
   // TinyVector<> for now increased icache misses, but maybe will be
   // feasable later (see D511561).
   std::vector<TypedValue**> m_restoreLocations;
-  ExtraArgs* m_extraArgs;
   boost::optional<NameValueTable> m_nvTable;
-
-  uint16_t m_depth;
 
  private:
   explicit VarEnv();

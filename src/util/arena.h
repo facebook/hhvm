@@ -20,6 +20,7 @@
 #include <cstdlib>
 
 #include "util/tiny_vector.h"
+#include "util/pointer_list.h"
 
 namespace HPHP {
 
@@ -30,10 +31,17 @@ namespace HPHP {
  * arena instance is destroyed.  No destructors of allocated objects
  * will be called!  It is a bump-pointer allocator.
  *
- * If we're out of memory, allocation functions throw an exception.
- * Blocks smaller than kMinBytes bytes are rounded up to kMinBytes,
- * and all blocks are kMinBytes-aligned.  This mirrors the way stack
- * alignment works in gcc, which should be good enough.
+ * At various points in the lifetime of the arena, you can introduce a
+ * new `frame' by calling beginFrame.  This is essentially a marker of
+ * the current allocator state, which you can pop back to by calling
+ * endFrame.
+ *
+ * Allocations smaller than kMinBytes bytes are rounded up to
+ * kMinBytes, and all allocations are kMinBytes-aligned.  This mirrors
+ * the way stack alignment works in gcc, which should be good enough.
+ *
+ * Allocations larger than kChunkBytes are acquired directly from
+ * malloc, and don't (currently) get freed with frames.
  *
  * The Arena typedef is for convenience when you want a default
  * configuration.  Use ArenaImpl if you want something specific.
@@ -46,6 +54,7 @@ typedef ArenaImpl<4096> Arena;
 template<size_t kChunkBytes>
 class ArenaImpl {
   static const size_t kMinBytes = 16;
+
  public:
   ArenaImpl();
   ~ArenaImpl();
@@ -60,19 +69,45 @@ class ArenaImpl {
    * Note that this is only an estimate, because we will include
    * fragmentation on the ends of slabs or due to alignment.
    */
-  size_t slackEstimate() const { return size_t(m_limit - m_next); }
+  size_t slackEstimate() const { return kChunkBytes - m_frame.offset; }
+
+  /*
+   * Framed arena allocation.
+   *
+   * Nesting allocations between beginFrame() and endFrame() will
+   * release memory in a stack-like fashion.  Calling endFrame() more
+   * times than beginFrame() will break things.
+   *
+   * Chunks allocated larger than kChunkBytes are not freed until the
+   * entire arena is destroyed.
+   *
+   * Memory is not released back to malloc until the entire arena is
+   * destroyed.
+   */
+  void beginFrame();
+  void endFrame();
 
  private:
   // copying Arenas will end badly.
   ArenaImpl(const ArenaImpl&);
   ArenaImpl& operator=(const ArenaImpl&);
+
  private:
-  void* alloc_slow(size_t nbytes);
-  char* fill(size_t nbytes);
+  struct Frame {
+    Frame*   prev;
+    uint32_t index;
+    uint32_t offset;
+  };
+
  private:
-  char* m_next;
-  char* m_limit;
-  TinyVector<char*> m_ptrs;
+  void* allocSlow(size_t nbytes);
+  void createSlab();
+
+ private:
+  char* m_current;
+  Frame m_frame;
+  TinyVector<char*> m_ptrs; // inlines 1 pointer, may not be optimal
+  PointerList<char> m_externalPtrs;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -80,13 +115,28 @@ class ArenaImpl {
 template<size_t kChunkBytes>
 inline void* ArenaImpl<kChunkBytes>::alloc(size_t nbytes) {
   nbytes = (nbytes + (kMinBytes - 1)) & ~(kMinBytes - 1); // round up
-  char* ptr = m_next;
-  char* next = ptr + nbytes;
-  if (next <= m_limit) {
-    m_next = next;
+  size_t newOff = m_frame.offset + nbytes;
+  if (newOff <= kChunkBytes) {
+    char* ptr = m_current + m_frame.offset;
+    m_frame.offset = newOff;
     return ptr;
   }
-  return alloc_slow(nbytes);
+  return allocSlow(nbytes);
+}
+
+template<size_t kChunkBytes>
+inline void ArenaImpl<kChunkBytes>::beginFrame() {
+  Frame curFrame = m_frame; // don't include the Frame allocation
+  Frame* oldFrame = static_cast<Frame*>(alloc(sizeof(Frame)));
+  *oldFrame = curFrame;
+  m_frame.prev = oldFrame;
+}
+
+template<size_t kChunkBytes>
+inline void ArenaImpl<kChunkBytes>::endFrame() {
+  ASSERT(m_frame.prev);
+  m_frame = *m_frame.prev;
+  m_current = m_ptrs[m_frame.index];
 }
 
 //////////////////////////////////////////////////////////////////////

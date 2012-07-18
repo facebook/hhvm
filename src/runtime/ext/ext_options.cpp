@@ -657,7 +657,8 @@ int64 f_memory_get_allocation() {
     const MemoryUsageStats &stats = mm->getStats(true);
     int64 ret = stats.totalAlloc;
 #ifdef HHVM
-    ret -= VM::request_arena().slackEstimate();
+    ret -= VM::request_arena().slackEstimate() +
+           VM::varenv_arena().slackEstimate();
 #endif
     return ret;
   }
@@ -679,7 +680,8 @@ int64 f_memory_get_usage(bool real_usage /* = false */) {
     const MemoryUsageStats &stats = mm->getStats(true);
     int64 ret = real_usage ? stats.usage : stats.alloc;
 #ifdef HHVM
-    ret -= VM::request_arena().slackEstimate();
+    ret -= VM::request_arena().slackEstimate() +
+           VM::varenv_arena().slackEstimate();
 #endif
     return ret;
   }

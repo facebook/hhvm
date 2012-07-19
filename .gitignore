@@ -96,6 +96,13 @@ cmake_install.cmake
 # fbcode output directory
 /bin/_fbcode_bin/
 
+# Generated makefiles
+/src/test/Makefile
+/src/hphp/Makefile
+/src/compiler/Makefile
+/src/Makefile
+/Makefile
+
 # eclipse files
 .project
 .cproject

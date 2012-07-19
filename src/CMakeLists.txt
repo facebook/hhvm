@@ -28,6 +28,8 @@ endif()
 
 if (USE_HHVM)
 	ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/src/hhvm/hhvm\\\"")
+else()
+	ADD_DEFINITIONS("-DHHVM_PATH=\"\"")
 endif(USE_HHVM)
 
 if (USE_HHVM)

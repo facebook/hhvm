@@ -15,9 +15,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/base.h>
+#include "test_ext_iplocation.h"
+#include <runtime/ext/ext_iplocation.h>
+#include <util/logger.h>
+
+IMPLEMENT_SEP_EXTENSION_TEST(Iplocation);
 ///////////////////////////////////////////////////////////////////////////////
 
-extern "C" {
-  extern const char **xml_array_map[];
+bool TestExtIplocation::RunTests(const std::string &which) {
+  bool ret = true;
+
+  RUN_TEST(test_ip_get_location);
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TestExtIplocation::test_ip_get_location() {
+  //IpLocMap::init(String("/home/admin/php/lib/php/extensions/no-debug-zts-20090626/ipdata.txt"));
+  String ip = String("202.98.0.68");
+  String addr =  f_ip_get_location(ip);
+  printf("%s\n",addr.data());
+  return Count(true);
 }

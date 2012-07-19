@@ -21,9 +21,10 @@
 #include <runtime/base/ini_setting.h>
 #include <runtime/ext/ext_network.h>
 #include <util/logger.h>
-using namespace HPHP;
 namespace HPHP {
-    class IpLocKey {
+///////////////////////////////////////////////////////////////////////////////
+
+   class IpLocKey {
     public:
         int64 s;
         int64 e;
@@ -76,7 +77,7 @@ namespace HPHP {
         }
 
         static void init() {
-            IniSetting::Bind("location.data_file_path", "/usr/local/src/dev/source/dev/hiphop-php/src/runtime/ext/sep/iplocation/ipdata.txt.gbk", ini_on_update_string, &ipDataPath);
+            IniSetting::Bind("location.data_file_path", "/home/admin/opt/ipdata.txt.gbk", ini_on_update_string, &ipDataPath);
             Logger::Info("load ip data " + ipDataPath);
             char buffer[1024];
             std::fstream out;
@@ -135,6 +136,7 @@ namespace HPHP {
         Variant ipint = f_ip2long(ip);
         if(same(ipint, false)) {
             raise_warning(ip + " is not a validate ip");
+            return String("");
         }
         return IpLocMap::find(ipint.toInt64());
     }
@@ -146,4 +148,6 @@ namespace HPHP {
         }
     } s_iplocation_extension;
     ///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 }

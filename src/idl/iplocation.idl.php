@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "ip_get_location",
     'desc'   => "ip location read the the data like 18350336,18350591,1.24.1.0,1.24.1.255,中国,内蒙古自治区, 呼和浩特市,,联通 and return the ip assoc data",
+    'flags'  =>  HasDocComment | AllowIntercept,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the the location of the ip ",

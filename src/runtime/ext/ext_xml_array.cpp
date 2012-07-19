@@ -57,50 +57,23 @@ namespace HPHP {
 
     class XmlArrResult {
     public:
-        std::stack<eArrayVal> astack;
-        Array current;
         Array result;
-        Array tmp1;
-        Array tmp2;
+        std::stack<eArrayVal> astack;
         XmlArrResult(){
-            current = Array::Create();
-            result  = Array::Create();
+            //result  = Array::Create();
             astack.push(eArrayVal(&result, 1));
         }
 
-        Array * create_array() {
-            current = Array::Create();
-            return &current;
-        }
-
-        Array * create_tmp1_array() {
-            tmp1 = Array::Create();
-            return &tmp1;
-        }
-
-        Array * create_tmp2_array() {
-            tmp2 = Array::Create();
-            return &tmp2;
+        ~XmlArrResult() {
+            while(astack.size() > 0) {
+                astack.pop();
+            }
         }
     };
 
-    #define XML_CREATE_ARR_DATA ((XmlArrResult *)(data))->create_array()
-    #define XML_CREATE_ARR1_DATA ((XmlArrResult *)(data))->create_tmp1_array()
-    #define XML_CREATE_ARR2_DATA ((XmlArrResult *)(data))->create_tmp2_array()
-
     #define XML_STACK_TOP_ARR_DATA ((XmlArrResult *)(data))->astack.top().arr
-    #define XML_STACK_TOP_ARR_CTX  ((XmlArrResult *)(((xmlParserCtxtPtr)ctx)->userData))->astack.top().arr
-
-    #define XML_CREATE_ARR_CTX ((XmlArrResult *)(ctx->userData))->create_array()
-    #define XML_CREATE_ARR1_CTX ((XmlArrResult *)(ctx->userData))->create_tmp1_array()
-    #define XML_CREATE_ARR2_CTX ((XmlArrResult *)(ctx->userData))->create_tmp2_array()
-
     #define XML_ARR_STACK_POP ((XmlArrResult *)(data))->astack.pop()
     #define XML_ARR_STACK_TOP ((XmlArrResult *)(data))->astack.top()
-    #define XML_ARR_STACK_CTX_TOP ((XmlArrResult *)(ctx->userData))->astack.top()
-
-    #define XML_ARR_STACK_PUSH_BY_TOP_KEY(key,layer) Array &arr_##key(XML_STACK_TOP_ARR_DATA->lvalAt(key).toArrRef());\
-            ((XmlArrResult *)(data))->astack.push(eArrayVal((&arr_##key),1));
 
     Array xml_proc(CStrRef xmlStr);
     int is_multibyte(const char *s, int len);
@@ -171,7 +144,6 @@ namespace HPHP {
     }
 
     Array xml_proc(CStrRef xmlStr) {
-
         XmlArrResult *xmlResult = new XmlArrResult;
         xmlSubstituteEntitiesDefault(1);
         xmlParserCtxtPtr ctxt = NULL;
@@ -179,15 +151,15 @@ namespace HPHP {
         /**
         xmlInitParser();
         **/
-        xmlSAXHandlerPtr saxHandlerPtr = (xmlSAXHandlerPtr)calloc(1, sizeof(xmlSAXHandler));
-        saxHandlerPtr->cdataBlock = xml_cdata;
-        saxHandlerPtr->startElement= xml_start;
-        saxHandlerPtr->endElement= xml_end;
-        saxHandlerPtr->ignorableWhitespace = ignorableWhitespace;
-        saxHandlerPtr->characters =  xml_text;
 
         ctxt = xmlCreateMemoryParserCtxt(xmlStr.data(), xmlStr.size());
         if (ctxt) {
+            xmlSAXHandlerPtr saxHandlerPtr = (xmlSAXHandlerPtr)calloc(1, sizeof(xmlSAXHandler));
+            saxHandlerPtr->cdataBlock = xml_cdata;
+            saxHandlerPtr->startElement= xml_start;
+            saxHandlerPtr->endElement= xml_end;
+            saxHandlerPtr->ignorableWhitespace = ignorableWhitespace;
+            saxHandlerPtr->characters =  xml_text;
             ctxt->sax = saxHandlerPtr;
             ctxt->disableSAX = 0;
             ctxt->keepBlanks = 0;
@@ -206,7 +178,10 @@ namespace HPHP {
                 xmlFreeDoc(ctxt->myDoc);
                 ctxt->myDoc = NULL;
             }
+            xmlFree(saxHandlerPtr);
+            ctxt->sax = NULL;
             xmlFreeParserCtxt(ctxt);
+            ctxt = NULL;
         } else {
             ret = NULL;
         }
@@ -218,8 +193,12 @@ namespace HPHP {
             cleanup_xml_node((xmlNodePtr)ret);
         }
 
-        free(saxHandlerPtr);
-        return xmlResult->result;
+
+        Array ret_arr(xmlResult->result);
+
+        delete xmlResult;
+
+        return ret_arr;
     }
 
     /**
@@ -239,13 +218,13 @@ namespace HPHP {
     }
 
     void xml_cdata(void * data, const xmlChar *cdata , int len) {
-        char *c = (char *)cdata;
         String v_name("_v");
-        String c_string (c, len, CopyString);
+        String c_string ((const char *)cdata, len, CopyString);
 
-        if(is_multibyte((char *)cdata, len)) {
-            c_string = f_iconv("UTF-8","GBK//IGNORE", c_string);
+        if(is_multibyte((char *)c_string.data(), c_string.size())) {
+            c_string = f_iconv("UTF-8","GBK//IGNORE", c_string.data());
         }
+
         XML_STACK_TOP_ARR_DATA->set(v_name, c_string) ;
         return;
     }
@@ -257,7 +236,8 @@ namespace HPHP {
         String name_str(name,strlen(name),CopyString);
 
         if(!XML_STACK_TOP_ARR_DATA->exists(name_str)){
-                XML_STACK_TOP_ARR_DATA->set(name_str, Array::Create());
+                Array new_array(Array::Create());
+                XML_STACK_TOP_ARR_DATA->set(name_str, new_array);
                 Array &arr_input(XML_STACK_TOP_ARR_DATA->lvalAt(name_str).toArrRef());
                 ((XmlArrResult *)(data))->astack.push(eArrayVal((&arr_input),1));
 		xml_attr(data, attr);
@@ -270,11 +250,13 @@ namespace HPHP {
         }
 
         Array &zvalue_arr(XML_STACK_TOP_ARR_DATA->lvalAt(name_str).toArrRef());
-        if(!zvalue_arr.exists(0)) {
+        int64 zero = 0l;
+        if(!zvalue_arr.exists(zero)) {
 		Array old_array = (*XML_STACK_TOP_ARR_DATA)[name_str].toArray();
-                Array new_array = Array::Create();
-                new_array.set(0, old_array);
-                new_array.set(1, Array::Create());
+                Array new_array(Array::Create());
+                Array one_array(Array::Create());
+                new_array.set(zero, old_array);
+                new_array.set(zero+1, one_array);
                 XML_STACK_TOP_ARR_DATA->set(name_str, new_array);
                 Array &new_array_ref(XML_STACK_TOP_ARR_DATA->lvalAt(name_str).toArrRef());
                 Array &top_array_ref(new_array_ref.lvalAt(1).toArrRef());
@@ -286,7 +268,8 @@ namespace HPHP {
                 Array &zvalue_arr(XML_STACK_TOP_ARR_DATA->lvalAt(name_str).toArrRef());
                 ((XmlArrResult *)(data))->astack.push(eArrayVal((&zvalue_arr),1));
                 int top_array_size = zvalue_arr->size();
-                XML_STACK_TOP_ARR_DATA->set(top_array_size,Array::Create());
+                Array one_array (Array::Create());
+                XML_STACK_TOP_ARR_DATA->set(top_array_size,one_array);
                 Array &top_array_ref(XML_STACK_TOP_ARR_DATA->lvalAt(top_array_size).toArrRef());
                 ((XmlArrResult *)(data))->astack.push(eArrayVal(&top_array_ref,2));
                 xml_attr(data, attr);
@@ -310,12 +293,11 @@ namespace HPHP {
     //Ã²ËÆºÜ¼òµ¥
     static void xml_text(void * data, const xmlChar *c, int len)
     {
-        const char *s= (const char *)c;
         String v_name("_v");
-        String s_string(s,len, CopyString);
+        String s_string((const char *)c,len, CopyString);
 
         if(is_multibyte((char *)c, len)) {
-            s_string = f_iconv("UTF-8","GBK//IGNORE", s_string);
+            s_string = f_iconv("UTF-8","GBK//IGNORE", s_string.data());
         }
 
 	if ( !XML_STACK_TOP_ARR_DATA->exists(v_name)) {
@@ -349,23 +331,23 @@ namespace HPHP {
         String p_name("_p");
         if (attr != NULL) {
             while ( (key = (char*)*attr++) && (value = (char*)*attr++) ) {
-                String value_str(value);
+                String value_str(value,strlen(value), CopyString);
+                String key_str(key,strlen(key), CopyString);
 
-                if(is_multibyte(value, strlen(value))) {
-                    value_str = f_iconv("UTF-8","GBK//IGNORE", value_str);
+                if(is_multibyte(value_str.data(), value_str.size())) {
+                    value_str = f_iconv("UTF-8","GBK//IGNORE", value_str.data());
                 }
 
                 if(!XML_STACK_TOP_ARR_DATA->exists(p_name)) {
-                    Array new_array = Array::Create();
-                    new_array.set(String(key), String(value));
+                    Array new_array(Array::Create());
+                    new_array.set(key_str, String(value_str));
                     XML_STACK_TOP_ARR_DATA->set(p_name, new_array);
                 } else {
                     Array &p(XML_STACK_TOP_ARR_DATA->lvalAt(p_name).toArrRef());
-                    p.set(String(key), String(value));
+                    p.set(key_str, value_str);
                 }
             }
         }
-
 	return;
     }
     ///////////////////////////////////////////////////////////////////////////////

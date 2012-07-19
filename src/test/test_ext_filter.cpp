@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,9 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#include <util/base.h>
+#include <test/test_ext_filter.h>
+#include <runtime/ext/ext_filter.h>
+
+IMPLEMENT_SEP_EXTENSION_TEST(Filter);
 ///////////////////////////////////////////////////////////////////////////////
 
-extern "C" {
-  extern const char **iplocation_map[];
+bool TestExtFilter::RunTests(const std::string &which) {
+  bool ret = true;
+
+  RUN_TEST(test_filter_input);
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TestExtFilter::test_filter_input() {
+  return Count(true);
 }

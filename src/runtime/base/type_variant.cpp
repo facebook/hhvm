@@ -177,10 +177,6 @@ Variant::Variant(CVarWithRefBind v) {
   constructWithRefHelper(variant(v), 0);
 }
 
-void Variant::reset() {
-  m_type = KindOfNull;
-}
-
 HOT_FUNC
 static void destructString(void *p)  { ((StringData *)p)->release(); }
 HOT_FUNC

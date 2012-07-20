@@ -108,20 +108,27 @@ int64 iter_next_array(Iter* iter) {
  */
 void iter_value_cell(Iter* iter, TypedValue* out) {
   TRACE(2, "iter_value_cell: I %p, out %p\n", iter, out);
-  ASSERT(iter->m_itype == Iter::TypeArray ||
-         iter->m_itype == Iter::TypeIterator);
+  ASSERT(iter->m_itype == Iter::TypeArray);
   ArrayIter& arr = iter->arr();
   if (LIKELY(arr.isHphpArray())) {
     TypedValue* cur = arr.nvSecond();
-    TV_READ_CELL(cur, out);
+    if (UNLIKELY(cur->m_type == KindOfRef)) cur = cur->m_data.ptv;
+    tvRefcountedIncRef(cur);
+    TV_DUP_CELL_NC(cur, out);
     return;
   }
   Variant val = arr.second();
-  TV_READ_CELL((TypedValue*)&val, out);
+  ASSERT(val.getRawType() != KindOfRef);
+  TV_DUP_CELL_NC((TypedValue*)&val, out);
+  val.reset();
 }
 
 void iter_value_cell_local(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
+  if (UNLIKELY(oldType == KindOfRef)) {
+    out = out->m_data.ptv;
+    oldType = out->m_type;
+  }
   uint64_t oldDatum = out->m_data.num;
   iter_value_cell(iter, out);
   tvRefcountedDecRefHelper(oldType, oldDatum);
@@ -129,8 +136,7 @@ void iter_value_cell_local(Iter* iter, TypedValue* out) {
 
 void iter_key_cell(Iter* iter, TypedValue* out) {
   TRACE(2, "iter_key_cell: I %p, out %p\n", iter, out);
-  ASSERT(iter->m_itype == Iter::TypeArray ||
-         iter->m_itype == Iter::TypeIterator);
+  ASSERT(iter->m_itype == Iter::TypeArray);
   ArrayIter& arr = iter->arr();
   if (LIKELY(arr.isHphpArray())) {
     arr.nvFirst(out);
@@ -138,11 +144,16 @@ void iter_key_cell(Iter* iter, TypedValue* out) {
   }
   Variant key = arr.first();
   ASSERT(key.getRawType() == KindOfInt64 || IS_STRING_TYPE(key.getRawType()));
-  TV_READ_CELL((TypedValue*)&key, out);
+  TV_DUP_CELL_NC((TypedValue*)&key, out);
+  key.reset();
 }
 
 void iter_key_cell_local(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
+  if (UNLIKELY(oldType == KindOfRef)) {
+    out = out->m_data.ptv;
+    oldType = out->m_type;
+  }
   uint64_t oldDatum = out->m_data.num;
   iter_key_cell(iter, out);
   tvRefcountedDecRefHelper(oldType, oldDatum);

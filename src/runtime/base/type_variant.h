@@ -124,7 +124,10 @@ class Variant : VariantBase {
   // D462768 showed no gain from inlining, even just with INLINE_VARIANT_HELPER.
   ~Variant();
 
-  void reset(); // only for special memory sweeping!
+  void reset() {
+    // only for special memory sweeping!
+    m_type = KindOfNull;
+  }
 
   /**
    * Constructors. We can't really use template<T> here, since that will make

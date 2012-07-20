@@ -25,6 +25,16 @@
 }
 
 // Assumes 'tv' is live
+// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
+// Assumes 'tv' is not shared (ie KindOfRef
+//              or KindOfObject)
+#define TV_INCREF_NOT_SHARED(tv) { \
+  ASSERT((tv)->m_type == KindOfObject || \
+         (tv)->m_type == KindOfRef); \
+  (tv)->m_data.pobj->incRefCount(); \
+}
+
+// Assumes 'tv' is live
 #define TV_UNBOX(tvptr) { \
   ASSERT((tvptr)->m_type == KindOfRef); \
   RefData* r = (tvptr)->m_data.pref; \
@@ -71,7 +81,7 @@
   ASSERT((fr)->m_type == KindOfRef); \
   (to)->m_data.num = (fr)->m_data.num; \
   (to)->m_type = KindOfRef; \
-  TV_INCREF(to); \
+  TV_INCREF_NOT_SHARED(to); \
 }
 
 // Assumes 'fr' is live and 'to' is dead

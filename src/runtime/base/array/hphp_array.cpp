@@ -1764,12 +1764,12 @@ TypedValue* HphpArray::nvGetValueRef(ssize_t pos) {
   return &e->data;
 }
 
-// nvGetKey sets out->_count to 0, so out cannot be an inner cell
+// nvGetKey does not touch out->_count, so can be used
+// for inner or outer cells.
 void HphpArray::nvGetKey(TypedValue* out, ssize_t pos) {
   ASSERT(pos != ArrayData::invalid_index);
   ASSERT(m_data[pos].data.m_type != KindOfTombstone);
   Elm* e = &m_data[/*(ElmInd)*/pos];
-  out->_count = 0;
   if (e->hasIntKey()) {
     out->m_data.num = e->ikey;
     out->m_type = KindOfInt64;
@@ -2159,8 +2159,29 @@ array_mutate_pre(ArrayData* ad) {
   return (HphpArray*)ad;
 }
 
-Variant toVar(int64 i)        { return Variant(i); }
-Variant toVar(TypedValue* tv) { return tvCellAsVariant(tv); }
+VarNR toVar(int64 i)        { return VarNR(i); }
+Variant &toVar(TypedValue* tv) { return tvCellAsVariant(tv); }
+
+template<bool CheckInt>
+inline ArrayData* adSet(ArrayData* ad, int64 key, CVarRef val, bool copy) {
+  return ad->set(key, val, copy);
+}
+
+template<bool CheckInt>
+inline ArrayData* adSet(ArrayData* ad, const StringData* key,
+                        CVarRef val, bool copy) {
+  return ad->set(key, val, copy);
+}
+
+template<>
+inline ArrayData* adSet<true>(ArrayData* ad, const StringData* key,
+                       CVarRef val, bool copy) {
+  int64 lval;
+  if (UNLIKELY(key->isStrictlyInteger(lval))) {
+    return ad->set(lval, val, copy);
+  }
+  return ad->set(StrNR(key), val, copy);
+}
 
 static inline ArrayData*
 array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
@@ -2191,9 +2212,7 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
       nvCheckedSet(ha, key, value, copy)
       : ha->nvSet(key, value, copy);
   } else {
-    String s(key);
-    Variant vVal = toVar(value);
-    retval = ad->set(s, vVal, copy);
+    retval = adSet<CheckInt>(ad, key, toVar(value), copy);
   }
   if (DecRefKey) setmDecRef(key);
   if (DecRefValue) setmDecRef(value);

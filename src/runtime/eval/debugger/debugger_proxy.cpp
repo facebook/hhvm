@@ -757,6 +757,7 @@ int DebuggerProxyVM::getStackDepth() {
   int depth = 0;
   VMExecutionContext* context = g_vmContext;
   HPHP::VM::ActRec *fp = context->getFP();
+  if (!fp) return 0;
   HPHP::VM::ActRec *prev = context->arGetSfp(fp);
   while (fp != prev) {
     fp = prev;

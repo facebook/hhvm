@@ -560,6 +560,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     Logger::MaxMessagesPerRequest =
       logger["MaxMessagesPerRequest"].getInt32(-1);
 
+    Logger::UseSyslog = logger["UseSyslog"].getBool(false);
     Logger::UseLogFile = logger["UseLogFile"].getBool(true);
     Logger::UseCronolog = logger["UseCronolog"].getBool(false);
     if (Logger::UseLogFile) {

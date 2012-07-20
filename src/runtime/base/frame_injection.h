@@ -53,6 +53,10 @@ class FrameInjectionVM {
   void setStaticClassName(CStrRef cls) {
     assert(false);
   }
+
+  ThreadInfo* getThreadInfo() const { 
+    assert(false);
+  }
 };
 
 class FrameInjection {
@@ -64,7 +68,7 @@ public:
     Function        =  1 << 3,
     StaticMethod    =  1 << 4,
     ObjectMethod    =  1 << 5
- };
+  };
 
   static ObjectData *GetObjectV(const FrameInjection *fi);
   static CStrRef GetClassName(bool skip = false);

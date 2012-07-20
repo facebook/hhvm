@@ -98,7 +98,6 @@ VMExecutionContext::VMExecutionContext() :
   CT_ASSERT(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff);
 #endif
 
-  m_transl = VM::Transl::Translator::Get();
   {
     Lock lock(s_threadIdxLock);
     pid_t tid = Process::GetThreadPid();
@@ -147,10 +146,10 @@ VMExecutionContext::~VMExecutionContext() {
     delete *it;
   }
   // delete global varEnv
-  if (!m_varEnvs.empty()) {
+  if (m_globalVarEnv) {
     // can only have one left
-    ASSERT(m_varEnvs.front() == m_varEnvs.back());
-    VM::VarEnv::destroy(m_varEnvs.front());
+    ASSERT(m_topVarEnv = m_globalVarEnv);
+    VM::VarEnv::destroy(m_globalVarEnv);
   }
 
   delete m_eventHook;
@@ -657,7 +656,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
       }
     }
 
-    Logger::Log(true, prefix.c_str(), ee, file, line);
+    Logger::Log(Logger::LogError, prefix.c_str(), ee, file, line);
   }
 }
 
@@ -728,7 +727,7 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
     }
   }
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(true, "HipHop Fatal error: ", e, file, line);
+    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e, file, line);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
@@ -736,7 +735,7 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(true, "HipHop Fatal error: ", e, file, line);
+    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e, file, line);
   }
   return handled;
 }

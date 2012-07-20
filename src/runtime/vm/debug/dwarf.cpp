@@ -176,18 +176,20 @@ const char *DwarfInfo::lookupFile(const Unit *unit) {
   return file;
 }
 
-void DwarfInfo::addLineEntries(TCA start, TCA end, const Unit *unit,
-  const Opcode *instr, FunctionInfo* f) {
+void DwarfInfo::addLineEntries(TCRange range,
+                               const Unit *unit,
+                               const Opcode *instr,
+                               FunctionInfo* f) {
   if (unit == NULL || instr == NULL) {
     // For stubs, just add line 0
-    f->m_lineTable.push_back(LineEntry(start, end, 0));
+    f->m_lineTable.push_back(LineEntry(range, 0));
     return;
   }
   Offset offset = unit->offsetOf(instr);
 
   int lineNum = unit->getLineNumber(offset);
   if (lineNum >= 0) {
-    f->m_lineTable.push_back(LineEntry(start, end, lineNum));
+    f->m_lineTable.push_back(LineEntry(range, lineNum));
   }
 }
 
@@ -225,10 +227,10 @@ void DwarfInfo::compactChunks() {
 
 static Mutex s_lock(RankLeaf);
 
-DwarfChunk* DwarfInfo::addTracelet(TCA start, TCA end, const char* name,
+DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
   const Unit *unit, const Opcode *instr, bool exit, bool inPrologue) {
   DwarfChunk* chunk = NULL;
-  FunctionInfo* f = new FunctionInfo(start, end, exit);
+  FunctionInfo* f = new FunctionInfo(range, exit);
   if (name) {
     f->name = std::string(name);
   } else {
@@ -236,16 +238,20 @@ DwarfChunk* DwarfInfo::addTracelet(TCA start, TCA end, const char* name,
   }
   f->file = lookupFile(unit);
 
+  TCA start = range.begin();
+  const TCA end = range.end();
   {
     Lock lock(s_lock);
-    FuncDB::iterator it = m_functions.lower_bound(start);
-    if (it != m_functions.end() && it->second->name == f->name
-      && it->second->file == f->file
-      && start > it->second->start && end > it->second->end) {
+    FuncDB::iterator it = m_functions.lower_bound(range.begin());
+    FunctionInfo* fi = it->second;
+    if (it != m_functions.end() && fi->name == f->name &&
+        fi->file == f->file &&
+        start > fi->range.begin() &&
+        end > fi->range.end()) {
       // XXX: verify that overlapping address come from jmp fixups
-      start = it->second->end;
-      it->second->end = end;
-      m_functions[end] = it->second;
+      start = fi->range.end();
+      fi->range.truncate(end);
+      m_functions[end] = fi;
       m_functions.erase(it);
       delete(f);
       f = m_functions[end];
@@ -257,7 +263,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCA start, TCA end, const char* name,
     }
   }
 
-  addLineEntries(start, end, unit, instr, f);
+  addLineEntries(TCRange(start, end), unit, instr, f);
 
   if (f->m_chunk == NULL) {
     Lock lock(s_lock);

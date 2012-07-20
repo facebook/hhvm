@@ -447,8 +447,7 @@ void FunctionScope::addNewObjCaller(BlockScopePtr caller) {
 
 bool FunctionScope::mayUseVV() const {
   VariableTableConstPtr variables = getVariables();
-  return true || // always return true until Task #1147317 is fixed
-         (inPseudoMain() ||
+  return (inPseudoMain() ||
           isVariableArgument() ||
           isGenerator() ||
           variables->getAttribute(VariableTable::ContainsDynamicVariable) ||

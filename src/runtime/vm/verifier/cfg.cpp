@@ -16,6 +16,7 @@
 
 #include <runtime/vm/verifier/cfg.h>
 #include <runtime/vm/verifier/util.h>
+#include <util/range.h>
 
 namespace HPHP {
 namespace VM {
@@ -45,7 +46,7 @@ void GraphBuilder::createBlocks() {
   // DV entry points
   m_graph->entries = new (m_arena) Block*[m_graph->param_count + 1];
   int dv_index = 0;
-  for (StdRange<Func::ParamInfoVec> p(m_func->params()); !p.empty(); ) {
+  for (Range<Func::ParamInfoVec> p(m_func->params()); !p.empty(); ) {
     const Func::ParamInfo& param = p.popFront();
     m_graph->entries[dv_index++] = !param.hasDefaultValue() ? 0 :
                                    createBlock(param.funcletOff());
@@ -117,13 +118,13 @@ void GraphBuilder::linkBlocks() {
  */
 void GraphBuilder::createExBlocks() {
   m_graph->exn_cap = m_func->ehtab().size();
-  for (StdRange<Func::EHEntVec> i(m_func->ehtab()); !i.empty(); ) {
+  for (Range<Func::EHEntVec> i(m_func->ehtab()); !i.empty(); ) {
     const EHEnt& handler = i.popFront();
     createBlock(handler.m_base);
     createBlock(handler.m_past);
     if (handler.m_ehtype == EHEnt::EHType_Catch) {
       m_graph->exn_cap += handler.m_catches.size() - 1;
-      for (StdRange<EHEnt::CatchVec> c(handler.m_catches); !c.empty(); ) {
+      for (Range<EHEnt::CatchVec> c(handler.m_catches); !c.empty(); ) {
         createBlock(c.popFront().second);
       }
     } else {
@@ -139,7 +140,7 @@ void GraphBuilder::createExBlocks() {
  */
 const EHEnt* findFunclet(const Func::EHEntVec& ehtab, Offset off) {
   const EHEnt* nearest = 0;
-  for (StdRange<Func::EHEntVec> i(ehtab); !i.empty(); ) {
+  for (Range<Func::EHEntVec> i(ehtab); !i.empty(); ) {
     const EHEnt* eh = &i.popFront();
     if (eh->m_ehtype != EHEnt::EHType_Fault) continue;
     if (eh->m_fault <= off && (!nearest || eh->m_fault > nearest->m_fault)) {
@@ -183,7 +184,7 @@ void GraphBuilder::linkExBlocks() {
       ASSERT(eh->m_base <= off && off < eh->m_past);
       if (eh->m_ehtype == EHEnt::EHType_Catch) {
         // each catch block is reachable from b
-        for (StdRange<EHEnt::CatchVec> j(eh->m_catches); !j.empty(); ) {
+        for (Range<EHEnt::CatchVec> j(eh->m_catches); !j.empty(); ) {
           exns(b)[exn_index++] = at(j.popFront().second);
         }
         eh = nextOuter(ehtab, eh);
@@ -201,7 +202,7 @@ void GraphBuilder::linkExBlocks() {
       while (eh) {
         if (eh->m_ehtype == EHEnt::EHType_Catch) {
           // each catch target for eh is reachable from b
-          for (StdRange<EHEnt::CatchVec> j(eh->m_catches); !j.empty(); ) {
+          for (Range<EHEnt::CatchVec> j(eh->m_catches); !j.empty(); ) {
             exns(b)[exn_index++] = at(j.popFront().second);
           }
           eh = nextOuter(ehtab, eh);
@@ -248,15 +249,6 @@ Block* GraphBuilder::at(PC target) {
 void GraphBuilder::addEdge(Block* from, EdgeKind k, Block* target) {
   ASSERT(target != 0);
   from->succs[k] = target;
-}
-
-void AllFuncs::skip() {
-  ASSERT(fr.empty());
-  while (!cr.empty() && mr.empty()) {
-    PreClass* c = cr.popFront();
-    mr = MethodRange(c->methods(),
-                     c->methods() + c->numMethods());
-  }
 }
 
 /**

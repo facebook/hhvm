@@ -25,7 +25,9 @@
 #include <google/malloc_extension.h>
 #endif
 
-#ifndef NO_JEMALLOC
+#ifdef NO_JEMALLOC
+#include "malloc.h"
+#else
 #include <jemalloc/jemalloc.h>
 #endif
 

@@ -293,20 +293,18 @@ function emitExtCall($obj, $ext_hhvm_cpp, $indent, $prefix) {
 function emitBuildExtraArgs($obj, $ext_hhvm_cpp, $indent) {
   fwrite($ext_hhvm_cpp, $indent . "Array extraArgs;\n");
   fwrite($ext_hhvm_cpp, $indent . "{\n");
-  fwrite($ext_hhvm_cpp, $indent . '  HPHP::VM::ExtraArgs* ea UNUSED = ' .
-                                  'ar->getExtraArgs();' . "\n");
-  $argstr = 'extraArg';
   fwrite($ext_hhvm_cpp, $indent . "  ArrayInit ai(count-" . $obj->maxNumParams .
          ", false);\n");
   fwrite($ext_hhvm_cpp, $indent . "  for (long long i = " . $obj->maxNumParams .
          "; i < count; ++i) {\n");
-  fwrite($ext_hhvm_cpp, $indent . '    TypedValue* extraArg = ea->getExtraArg(i-' . $obj->maxNumParams . ');'."\n");
-  fwrite($ext_hhvm_cpp, $indent . "    if (tvIsStronglyBound(" . $argstr . ")) {\n");
+  fwrite($ext_hhvm_cpp, $indent . '    TypedValue* extraArg = ar->getExtraArg(i-' .
+         $obj->maxNumParams . ');'."\n");
+  fwrite($ext_hhvm_cpp, $indent . "    if (tvIsStronglyBound(extraArg)) {\n");
   fwrite($ext_hhvm_cpp, $indent . "      ai.setRef(i-" . $obj->maxNumParams .
-         ", tvAsVariant(" . $argstr . "));\n");
+         ", tvAsVariant(extraArg));\n");
   fwrite($ext_hhvm_cpp, $indent . "    } else {\n");
   fwrite($ext_hhvm_cpp, $indent . "      ai.set(i-" . $obj->maxNumParams .
-         ", tvAsVariant(" . $argstr . "));\n");
+         ", tvAsVariant(extraArg));\n");
   fwrite($ext_hhvm_cpp, $indent . "    }\n");
   fwrite($ext_hhvm_cpp, $indent . "  }\n");
   fwrite($ext_hhvm_cpp, $indent . "  extraArgs = ai.create();\n");

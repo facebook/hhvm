@@ -1422,13 +1422,8 @@ void EmitterVisitor::visit(FileScopePtr file) {
         StringData::GetStaticString(meth->getOriginalName());
       m_methLabels[methName] = new Label();
       // Emit afterwards
-      FuncEmitter* fe = m_ue.newFuncEmitter(methName, true);
-      bool isGenerator = meth->getFunctionScope()->isGenerator();
-      fe->setIsGenerator(isGenerator);
-      fe->setIsGeneratorFromClosure(
-        meth->getFunctionScope()->isGeneratorFromClosure());
-      postponeMeth(meth, fe, true);
-      if (isGenerator) {
+      postponeMeth(meth, NULL, true);
+      if (meth->getFunctionScope()->isGenerator()) {
         newContinuationClass(methName);
       }
     }
@@ -1460,50 +1455,56 @@ void EmitterVisitor::visit(FileScopePtr file) {
           if (h < allHoistable) allHoistable = h;
           break;
         }
-        case Statement::KindOfReturnStatement: {
-          ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(s));
-          Variant v(Variant::nullInit);
-          if (r->getRetExp() &&
-              (!r->getRetExp()->getScalarValue(v) ||
-               v.isArray())) {
+        case Statement::KindOfReturnStatement:
+          if (mainReturn.m_type != KindOfInvalid) break;
+          if (notMergeOnly) {
             TV_WRITE_UNINIT(&mainReturn);
+            m_ue.returnSeen();
             goto fail;
-          }
-          if (mainReturn.m_type == KindOfInvalid ||
-              v.same(tvAsVariant(&mainReturn))) {
-            mainReturn = *v.getTypedAccessor();
           } else {
-            TV_WRITE_UNINIT(&mainReturn);
+            ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(s));
+            Variant v(Variant::nullInit);
+            if (r->getRetExp() &&
+                (!r->getRetExp()->getScalarValue(v) ||
+                 v.isArray())) {
+              TV_WRITE_UNINIT(&mainReturn);
+              goto fail;
+            }
+            mainReturn = *v.getTypedAccessor();
+            m_ue.returnSeen();
           }
           break;
-        }
-        case Statement::KindOfExpStatement: {
-          ExpressionPtr e =
-            static_pointer_cast<ExpStatement>(s)->getExpression();
-          switch (e->getKindOf()) {
-            case Expression::KindOfIncludeExpression: {
-              IncludeExpressionPtr inc =
-                static_pointer_cast<IncludeExpression>(e);
-              if (FileScopeRawPtr f = inc->getIncludedFile(ar)) {
-                if (StatementListPtr sl = f->getStmt()) {
-                  FunctionScopeRawPtr ps = sl->getFunctionScope();
-                  ASSERT(ps && ps->inPseudoMain());
-                  if (false && ps->isMergeable()) {
-                    /*
-                     * TODO: implement the code to deal with this
-                     * case in Unit::merge, and then enable it
-                     */
-                    continue;
+        case Statement::KindOfExpStatement:
+          if (mainReturn.m_type == KindOfInvalid) {
+            ExpressionPtr e =
+              static_pointer_cast<ExpStatement>(s)->getExpression();
+            switch (e->getKindOf()) {
+              case Expression::KindOfIncludeExpression: {
+                IncludeExpressionPtr inc =
+                  static_pointer_cast<IncludeExpression>(e);
+                if (FileScopeRawPtr f = inc->getIncludedFile(ar)) {
+                  if (StatementListPtr sl = f->getStmt()) {
+                    FunctionScopeRawPtr ps = sl->getFunctionScope();
+                    ASSERT(ps && ps->inPseudoMain());
+                    if (false && ps->isMergeable()) {
+                      /*
+                       * TODO: implement the code to deal with this
+                       * case in Unit::merge, and then enable it
+                       */
+                      continue;
+                    }
                   }
                 }
+                break;
               }
-              break;
+              default:
+                break;
             }
-            default:
-              break;
-          }
-        } // fall through
-        default: fail:
+          } // fall through
+        default:
+          if (mainReturn.m_type != KindOfInvalid) break;
+          // fall through
+        fail:
           notMergeOnly = true;
           visit(s);
       }
@@ -2171,11 +2172,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             return false;
           }
 
-          FuncEmitter* fe = m_ue.newFuncEmitter(nName, true);
-          fe->setIsGenerator(true);
-          fe->setIsGeneratorFromClosure(
-            m->getFunctionScope()->isGeneratorFromClosure());
-          postponeMeth(m, fe, true);
+          postponeMeth(m, NULL, true);
           newContinuationClass(nName);
         } else {
           FuncEmitter* fe = m_ue.newFuncEmitter(nName, false);
@@ -4507,11 +4504,23 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
 }
 
 void EmitterVisitor::emitPostponedMeths() {
+  vector<FuncEmitter*> top_fes;
   while (!m_postponedMeths.empty()) {
     ASSERT(m_actualStackHighWater == 0);
     ASSERT(m_fdescHighWater == 0);
     PostponedMeth& p = m_postponedMeths.front();
     FuncEmitter* fe = p.m_fe;
+    if (!fe) {
+      ASSERT(p.m_top);
+      const StringData* methName =
+        StringData::GetStaticString(p.m_meth->getOriginalName());
+      fe = new FuncEmitter(m_ue, -1, -1, methName);
+      fe->setIsGenerator(p.m_meth->getFunctionScope()->isGenerator());
+      fe->setIsGeneratorFromClosure(
+        p.m_meth->getFunctionScope()->isGeneratorFromClosure());
+      p.m_fe = fe;
+      top_fes.push_back(fe);
+    }
     FunctionScopePtr funcScope = p.m_meth->getFunctionScope();
     const FunctionScope::UserAttributeMap& userAttrs =
       funcScope->userAttributes();
@@ -4720,6 +4729,10 @@ void EmitterVisitor::emitPostponedMeths() {
       e.Jmp(topOfBody);
     }
     m_postponedMeths.pop_front();
+  }
+
+  for (size_t i = 0; i < top_fes.size(); i++) {
+    m_ue.appendTopEmitter(top_fes[i]);
   }
 }
 

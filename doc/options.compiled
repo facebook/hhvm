@@ -47,6 +47,7 @@ flood error logs.
     # error log settings
     UseLogFile = true
     File = filename
+    UseSyslog = false
 
     # access log settings
     AccessLogDefaultFormat = %h %l %u %t \"%r\" %>s %b

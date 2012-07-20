@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 224 */
+/* SRC: classes/exception.php line 232 */
 FORWARD_DECLARE_CLASS(LengthException);
 extern const ObjectStaticCallbacks cw_LengthException;
 class c_LengthException : public c_LogicException {

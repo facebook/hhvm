@@ -79,12 +79,6 @@ static int findIndex(const vector<char *> &blocks,
   return blockIndex.find(hit)->second;
 }
 
-#ifdef SMART_ALLOCATOR_STACKTRACE
-Mutex SmartAllocatorImpl::s_st_mutex;
-std::map<void*, StackTrace> SmartAllocatorImpl::s_st_allocs;
-std::map<void*, StackTrace> SmartAllocatorImpl::s_st_deallocs;
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
@@ -174,15 +168,6 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 
 HOT_FUNC
 void *SmartAllocatorImpl::alloc() {
-#ifdef SMART_ALLOCATOR_STACKTRACE
-  {
-    Lock lock(s_st_mutex);
-    bool enabled = StackTrace::Enabled;
-    StackTrace::Enabled = true;
-    s_st_allocs.operator[](m_freelist.back());
-    StackTrace::Enabled = enabled;
-  }
-#endif
   ASSERT(m_stats);
   // Just update the usage, while the peakUsage is maintained by
   // FrameInjection.
@@ -195,15 +180,13 @@ void *SmartAllocatorImpl::alloc() {
       MemoryManager::TheMemoryManager()->refreshStats();
     }
   }
+  void* freelist_value = NULL;
+
 #ifndef SMART_ALLOCATOR_DEBUG_FREE
-  if (m_freelist.size() > 0) {
-#else
-  if (0) {
+  freelist_value = m_freelist.maybePop();
 #endif
-    // Fast path
-    void *ret = m_freelist.back();
-    m_freelist.pop_back();
-    return ret;
+  if (freelist_value) {
+    return freelist_value;
   } else if (m_col < m_colMax) {
     char *ret = m_blocks[m_row] + m_col;
     m_col += m_itemSize;
@@ -251,8 +234,8 @@ void *SmartAllocatorImpl::allocHelper() {
 bool SmartAllocatorImpl::isValid(void *obj) const {
   if (obj) {
 #ifdef DETECT_DOUBLE_FREE
-    FreeList *fl = const_cast<FreeList *>(&m_freelist);
-    for (FreeList::iterator it = fl->begin(); it != fl->end(); ++it) {
+    GarbageList *fl = const_cast<GarbageList *>(&m_freelist);
+    for (GarbageList::iterator it = fl->begin(); it != fl->end(); ++it) {
       void *p = *it;
       if (p == obj) return false;
     }
@@ -349,7 +332,7 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
     int index = 0;
 #define MAX_REPORT 10
     int count = MAX_REPORT;
-    for (FreeList::iterator it = m_freelist.begin();
+    for (GarbageList::iterator it = m_freelist.begin();
          it != m_freelist.end(); ++it) {
       void *p = *it;
       if (freelist.find(p) != freelist.end()) {
@@ -359,10 +342,6 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
         } else if (count > 0) {
           printf("Double-freed Item %d:\n", ++index);
           dump(p);
-#ifdef SMART_ALLOCATOR_STACKTRACE
-          Lock lock(s_st_mutex);
-          printf("%s\n", s_st_deallocs[p].toString().c_str());
-#endif
         }
       } else {
         freelist.insert(p);
@@ -383,10 +362,6 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
           } else if (count > 0) {
             printf("Leaked Item at {%d:%d} %d:\n", i, j/m_itemSize, ++index);
             dump(p);
-#ifdef SMART_ALLOCATOR_STACKTRACE
-            Lock lock(s_st_mutex);
-            printf("%s\n", s_st_allocs[p].toString().c_str());
-#endif
           }
         } else {
           freelist.erase(p);
@@ -403,11 +378,6 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
       } else if (count > 0) {
         void *p = *iter;
         printf("Invalid Item %p:\n", p);
-#ifdef SMART_ALLOCATOR_STACKTRACE
-        Lock lock(s_st_mutex);
-        printf("%s\n", s_st_deallocs[p].toString().c_str());
-        ASSERT(s_st_allocs.find(p) == s_st_allocs.end());
-#endif
       }
     }
   }
@@ -417,7 +387,7 @@ HOT_FUNC
 void SmartAllocatorImpl::prepareFreeMap(FreeMap& freeMap) const {
   ASSERT(freeMap.empty());
   freeMap.resize(m_blocks.size() * m_itemCount);
-  for (FreeList::iterator it = m_freelist.begin(); it != m_freelist.end();
+  for (GarbageList::iterator it = m_freelist.begin(); it != m_freelist.end();
        ++it) {
     int64 freed = (int64)(*it);
     int idx = findIndex(m_blocks, m_blockIndex, freed, m_colMax);

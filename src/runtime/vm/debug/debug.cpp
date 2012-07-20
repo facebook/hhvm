@@ -26,60 +26,95 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <runtime/vm/translator/translator-x64.h>
+
 using namespace HPHP::VM::Transl;
 
 namespace HPHP {
 namespace VM {
 namespace Debug {
 
-/*
- * Stuff to output symbol names to /tmp/perf-%d.map files.  This stuff
- * can be read by perf top/record, etc.
- */
-static char perfMapName[64];
-FILE* perfMap;
-
-static void deleteMap() {
-  if (perfMap) fclose(perfMap);
-  unlink(perfMapName);
+DebugInfo* DebugInfo::Get() {
+  return tx64->getDebugInfo();
 }
 
-static void openMap() {
-  snprintf(perfMapName, sizeof perfMapName, "/tmp/perf-%d.map", getpid());
-  perfMap = fopen(perfMapName, "w");
-  atexit(deleteMap);
+DebugInfo::DebugInfo() {
+  snprintf(m_perfMapName,
+           sizeof m_perfMapName,
+           "/tmp/perf-%d.map", getpid());
+  m_perfMap = fopen(m_perfMapName, "w");
 }
 
-void recordPerfMap(const DwarfChunk* chunk) {
-  if (!perfMap) return;
+DebugInfo::~DebugInfo() {
+  if (m_perfMap) fclose(m_perfMap);
+  unlink(m_perfMapName);
+}
+
+void DebugInfo::recordStub(TCRange range, const char* name) {
+  m_dwarfInfo.addTracelet(range, name, NULL, NULL, false, false);
+}
+
+void DebugInfo::recordPerfMap(DwarfChunk* chunk) {
+  if (!m_perfMap) return;
   if (RuntimeOption::EvalProfileBC) return;
   for (FuncPtrDB::const_iterator it = chunk->m_functions.begin();
       it != chunk->m_functions.end();
       ++it) {
-    if (!(*it)->perfSynced()) {
-      fprintf(perfMap, "%lx %x %s\n",
-        reinterpret_cast<uintptr_t>((*it)->start),
-        static_cast<uint32_t>((*it)->end - (*it)->start),
-        (*it)->name.c_str());
-      (*it)->setPerfSynced();
+    FunctionInfo* fi = *it;
+    if (!fi->perfSynced()) {
+      fprintf(m_perfMap, "%lx %x %s\n",
+	      reinterpret_cast<uintptr_t>(fi->range.begin()),
+	      fi->range.size(),
+	      fi->name.c_str());
+      fi->setPerfSynced();
     }
   }
-  fflush(perfMap);
+  fflush(m_perfMap);
 }
 
-DebugInfo::DebugInfo() {
-  ASSERT(!perfMap);
-  openMap();
+void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
+  static const char* opcodeName[] = {
+#define O(name, imm, push, pop, flags) \
+#name,
+    OPCODES
+#undef O
+  };
+
+  static const char* astubOpcodeName[] = {
+    "OpAstubStart",
+#define O(name, imm, push, pop, flags) \
+#name "-Astub",
+    OPCODES
+#undef O
+  };
+
+  static const char* highOpcodeName[] = {
+    "OpHighStart",
+#define O(name) \
+#name,
+    HIGH_OPCODES
+#undef O
+  };
+
+
+  if (RuntimeOption::EvalProfileBC) {
+    if (!m_perfMap) return;
+    const char* name;
+    if (op < Op_count) {
+      name = opcodeName[op];
+    } else if (op < OpAstubCount) {
+      name = astubOpcodeName[op - OpAstubStart];
+    } else {
+      name = highOpcodeName[op - OpHighStart];
+    }
+    fprintf(m_perfMap, "%lx %x %s\n",
+	    uintptr_t(range.begin()), range.size(), name);
+  }
 }
 
-void DebugInfo::recordStub(TCA start, TCA end, const char* name) {
-  m_dwarfInfo.addTracelet(start, end, name, NULL, NULL, false, false);
-}
-
-void DebugInfo::recordTracelet(TCA start, TCA end, const Unit *unit,
+void DebugInfo::recordTracelet(TCRange range, const Unit *unit,
     const Opcode *instr, bool exit, bool inPrologue) {
-  m_dwarfInfo.addTracelet(start, end, NULL, unit, instr,
-                                              exit, inPrologue);
+  m_dwarfInfo.addTracelet(range, NULL, unit, instr, exit, inPrologue);
 }
 
 void DebugInfo::debugSync() {

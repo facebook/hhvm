@@ -17,12 +17,15 @@
 #ifndef incl_VM_UNIT_H_
 #define incl_VM_UNIT_H_
 
+#include <tbb/concurrent_unordered_map.h>
+
 // Expects that runtime/vm/core_types.h is already included.
 #include "runtime/base/runtime_option.h"
 #include "runtime/vm/hhbc.h"
 #include "runtime/vm/class.h"
 #include "runtime/vm/repo_helpers.h"
 #include "runtime/base/array/hphp_array.h"
+#include "util/range.h"
 #include "util/parser/location.h"
 #include "runtime/base/md5.h"
 #include "util/tiny_vector.h"
@@ -54,6 +57,9 @@ struct NamedEntity {
   Func* getCachedFunc() const;
 };
 
+typedef tbb::concurrent_unordered_map<const StringData *, NamedEntity,
+                                      string_data_hash,
+                                      string_data_isame> NamedEntityMap;
 typedef std::pair<const StringData*,const NamedEntity*> NamedEntityPair;
 
 // Exception handler table entry.
@@ -213,6 +219,7 @@ struct PreConst {
   void* owner;
   const StringData* name;
 };
+
 typedef std::vector<PreConst> PreConstVec;
 
 //==============================================================================
@@ -230,7 +237,8 @@ struct Unit {
   friend class FuncDict;
   friend class MetaHandle;
 
-  typedef TinyVector<Func*> FuncVec;
+  typedef IterRange<Func* const*> FuncRange;
+  typedef IterRange<Func**> MutableFuncRange;
 
   class MetaInfo {
    public:
@@ -409,27 +417,49 @@ struct Unit {
   }
 
   bool compileTimeFatal(const StringData*& msg, int& line) const;
-  Func* getMain() const {
-    return m_funcs.front();
-  }
   const TypedValue *getMainReturn() const {
     return &m_mainReturn;
   }
+private:
+  // Raw iterators; use with care as they override const.
+  Func** funcBegin() const {
+    return (Func**)&m_mergeables[0];
+  }
+  Func** funcEnd() const {
+    return (Func**)&m_mergeables[m_firstHoistablePreClass];
+  }
+public:
+  Func* getMain() const {
+    return *funcBegin();
+  }
+  // Ranges for iterating over functions.
+  Func** funcHoistableBegin() const {
+    return (Func**)&m_mergeables[m_firstHoistableFunc];
+  }
+  MutableFuncRange nonMainFuncs() const {
+    return MutableFuncRange(funcBegin() + 1, funcEnd());
+  }
+  MutableFuncRange hoistableFuncs() const {
+    return MutableFuncRange(funcHoistableBegin(), funcEnd());
+  }
   Func* getLambda() const {
-    ASSERT(m_funcs.size() == 2);
-    return m_funcs[1];
+    ASSERT(m_firstHoistableFunc == 1);
+    ASSERT(m_firstHoistablePreClass == 2);
+    return (Func*)m_mergeables[1];
   }
   void renameFunc(const StringData* oldName, const StringData* newName);
   void mergeFuncs() const;
-  static void loadFunc(Func *func);
-  const FuncVec& funcs() const {
-    return m_funcs;
+  static void loadFunc(const Func *func);
+  FuncRange funcs() const {
+    return FuncRange(funcBegin(), funcEnd());
+  }
+  MutableFuncRange mutableFuncs() {
+    return MutableFuncRange(funcBegin(), funcEnd());
   }
   Func* lookupFuncId(Id id) const {
-    ASSERT(id < Id(m_funcs.size()));
-    return m_funcs[id];
+    ASSERT(id < Id(m_firstHoistablePreClass));
+    return (Func*)m_mergeables[id];
   }
-
   size_t numPreClasses() const {
     return (size_t)m_preClasses.size();
   }
@@ -437,15 +467,14 @@ struct Unit {
     ASSERT(id < Id(m_preClasses.size()));
     return m_preClasses[id].get();
   }
-  void mergeClasses() const;
+  typedef std::vector<PreClassPtr> PreClassPtrVec;
+  typedef std::vector<PreClass*> PreClassVec;
+  typedef Range<PreClassPtrVec> PreClassRange;
   void merge();
-
-  void mergePreConsts() {
-    if (LIKELY(RuntimeOption::RepoAuthoritative ||
-               atomic_acquire_load(&m_preConstsMerged))) return;
-    mergePreConstsWork();
+  PreClassRange preclasses() const {
+    return PreClassRange(m_preClasses);
   }
-  void mergePreConstsWork();
+  bool mergeClasses() const;
 
   int getLineNumber(Offset pc) const;
   bool getSourceLoc(Offset pc, SourceLoc& sLoc) const;
@@ -476,9 +505,7 @@ public: // Translator field access
 private:
   typedef hphp_hash_map<const StringData*, Id,
                         string_data_hash, string_data_same> ArrayIdMap;
-  typedef std::vector<PreClassPtr> PreClassPtrVec;
-  typedef std::vector<Func*> HoistableFuncVec;
-  typedef std::vector<PreClass*> PreClassVec;
+  typedef std::vector<void*> MergeablesVec;
 
 private:
   /*
@@ -498,15 +525,15 @@ private:
   std::vector<NamedEntityPair> m_namedInfo;
   ArrayIdMap m_array2id;
   std::vector<const ArrayData*> m_arrays;
-  FuncVec m_funcs;
-  HoistableFuncVec m_hoistableFuncs;
   PreClassPtrVec m_preClasses;
-  PreClassVec m_mergeablePreClasses;
+  MergeablesVec m_mergeables;
+  unsigned m_firstHoistableFunc;
+  unsigned m_firstHoistablePreClass;
+  unsigned m_firstMergablePreClass;
+  int8 m_repoId;
+  bool m_initialMergeDone;
   LineTable m_lineTable;
   FuncTable m_funcTable;
-  int32 m_numHoistablePreClasses;
-  int8 m_repoId;
-  bool m_preConstsMerged;
   PreConstVec m_preConsts;
   SimpleMutex m_preConstsLock;
 };
@@ -535,6 +562,7 @@ class UnitEmitter {
   FuncEmitter* getMain();
   void initMain(int line1, int line2);
   FuncEmitter* newFuncEmitter(const StringData* n, bool top);
+  void appendTopEmitter(FuncEmitter* func);
   FuncEmitter* newMethodEmitter(const StringData* n, PreClassEmitter* pce);
   PreClassEmitter* newPreClassEmitter(const StringData* n,
                                       PreClass::Hoistable hoistable);
@@ -601,7 +629,7 @@ class UnitEmitter {
                 const StringData* name, Attr attrs, bool top,
                 const StringData* docComment, int numParams);
   Unit* create();
-
+  void returnSeen() { m_returnSeen = true; }
  private:
   void setLines(const LineTable& lines);
 
@@ -645,6 +673,7 @@ class UnitEmitter {
   PceVec m_hoistablePceVec;
   PceVec m_remainingPceVec;
   bool m_allClassesHoistable;
+  bool m_returnSeen;
   /*
    * m_sourceLocTab and m_feTab are interval maps.  Each entry encodes
    * an open-closed range of bytecode offsets.
@@ -775,8 +804,91 @@ class UnitRepoProxy : public RepoProxy {
 #undef URP_OP
 };
 
-// hphp_compiler_parse() is defined in the compiler, but we must use
-// dlsym() to get at it. CompileStringFn matches its signature.
+/**
+ * AllFuncs
+ * MutableAllFuncs
+ *
+ * Range over all Func's in a single unit.
+ */
+
+struct ConstPreClassMethodRanger {
+  typedef Func* const* Iter;
+  typedef const Func* Value;
+  static Iter get(PreClassPtr pc) {
+    return pc->methods();
+  }
+};
+
+struct MutablePreClassMethodRanger {
+  typedef Func** Iter;
+  typedef Func* Value;
+  static Func** get(PreClassPtr pc) {
+    return pc->mutableMethods();
+  }
+};
+template<typename FuncRange,
+         typename GetMethods>
+class AllFuncsImpl {
+ public:
+  explicit AllFuncsImpl(const Unit* unit)
+    : fr(unit->funcs())
+    , mr(0, 0)
+    , cr(unit->preclasses())
+  {
+    if (fr.empty()) skip();
+  }
+  bool empty() const { return fr.empty() && mr.empty() && cr.empty(); }
+  typedef typename GetMethods::Value FuncPtr;
+  FuncPtr front() const {
+    ASSERT(!empty());
+    if (!fr.empty()) return fr.front();
+    ASSERT(!mr.empty());
+    return mr.front();
+  }
+  FuncPtr popFront() {
+    FuncPtr f = !fr.empty() ? fr.popFront() :
+      !mr.empty() ? mr.popFront() : 0;
+    ASSERT(f);
+    if (fr.empty() && mr.empty()) skip();
+    return f;
+  }
+ private:
+  void skip() {
+    ASSERT(fr.empty());
+    while (!cr.empty() && mr.empty()) {
+      PreClassPtr c = cr.popFront();
+      mr = Unit::FuncRange(GetMethods::get(c),
+                           GetMethods::get(c) + c->numMethods());
+    }
+  }
+
+  Unit::FuncRange fr;
+  Unit::FuncRange mr;
+  Unit::PreClassRange cr;
+};
+
+typedef AllFuncsImpl<Unit::FuncRange, ConstPreClassMethodRanger> AllFuncs;
+typedef AllFuncsImpl<Unit::MutableFuncRange, MutablePreClassMethodRanger> MutableAllFuncs;
+
+/**
+ *
+ * Range over all defined classes.
+ */
+class AllClasses {
+protected:
+  NamedEntityMap::iterator m_next, m_end;
+  void skip();
+public:
+  AllClasses();
+  bool empty() const;
+  Class* front() const;
+  Class* popFront();
+};
+
+/*
+ * hphp_compiler_parse() is defined in the compiler, but we must use
+ * dlsym() to get at it. CompileStringFn matches its signature.
+ */
 typedef Unit*(*CompileStringFn)(const char*, int, const MD5&, const char*);
 
 } } // HPHP::VM

@@ -70,6 +70,7 @@ struct IndexedStringMap {
   bool contains(const StringData* k) const { return m_map.find(k); }
   Index size() const { return m_size; }
   const T* accessList() const { return m_vec; }
+  T* mutableAccessList() { return m_vec; }
 
   // Find the index for an entry by name.  Returns InvalidIndex if
   // there is no entry with this name.

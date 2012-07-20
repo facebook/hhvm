@@ -73,7 +73,6 @@ using namespace HPHP::x64::reg;
 using namespace HPHP::Util;
 using namespace HPHP::Trace;
 using std::max;
-using namespace HPHP::VM::Debug;
 
 namespace HPHP {
 namespace VM {
@@ -127,8 +126,11 @@ static const bool debug = false;
 
 typedef const size_t COff; // Const offsets
 
-// tx64: shared across all threads and requests.
-TranslatorX64* tx64;
+// nextTx64: Global shared state. The tx64 that should be used for
+// new requests going forward.
+TranslatorX64* volatile nextTx64;
+// tx64: Thread-local state. The tx64 we're using for the current request.
+__thread TranslatorX64* tx64;
 
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = REGSTATE_CLEAN;
@@ -666,131 +668,6 @@ struct IfCountNotStatic {
     delete m_cb;
   }
 };
-
-bool
-TranslatorX64::Lease::amOwner() const {
-  return m_held && m_owner == pthread_self();
-}
-
-/*
- * Multi-threaded scenarios for lease interleaving are hard to tease out.
- * The "gremlin" is a pseudo-thread that sometimes steals our lease while
- * we're running in the TC.
- *
- * The gremlin's pthread id is the bitwise negation of our own. Yes,
- * hypothetical wacky pthread implementations can break this. It's
- * DEBUG-only, folks.
- */
-void
-TranslatorX64::Lease::gremlinLock() {
-  TRACE_SET_MOD(txlease);
-  if (amOwner()) {
-    TRACE(2, "Lease: gremlinLock dropping lease\n");
-    drop();
-  }
-  pthread_mutex_lock(&m_lock);
-  TRACE(2, "Lease: gremlin grabbed lock\n ");
-  m_held = true;
-  m_owner = ~pthread_self();
-}
-
-void
-TranslatorX64::Lease::gremlinUnlock() {
-  TRACE_SET_MOD(txlease);
-  if (m_held && m_owner == ~pthread_self()) {
-    TRACE(2, "Lease: gremlin dropping lock\n ");
-    pthread_mutex_unlock(&m_lock);
-    m_held = false;
-  }
-}
-
-// acquire: also returns true if we are already the writer.
-bool
-TranslatorX64::Lease::acquire(bool blocking /* = false */ ) {
-  TRACE_SET_MOD(txlease);
-  if (amOwner()) {
-    return true;
-  }
-  int64 expire = m_hintExpire;
-  int64 expireDiff = expire - Timer::GetCurrentTimeMicros();
-  if (!blocking && (m_held ||
-                    (expireDiff > 0 && m_owner != pthread_self()))) {
-    return false;
-  }
-  checkRank(RankWriteLease);
-  if (0 == (blocking ?
-            pthread_mutex_lock(&m_lock) :
-            pthread_mutex_trylock(&m_lock))) {
-    TRACE(4, "thr%lx: acquired lease, called by %p,%p\n",
-          pthread_self(), __builtin_return_address(0),
-          __builtin_return_address(1));
-    if (debug) {
-      pushRank(RankWriteLease);
-      if (expire != 0 && m_owner != pthread_self()) {
-        m_hintGrabbed++;
-        TRACE(3, "thr%lx acquired hinted lease: expired %lldus ago\n",
-              pthread_self(), -expireDiff);
-      } else if (expire != 0 && m_owner == pthread_self()) {
-        m_hintKept++;
-      }
-      mprotect(tx64->a.code.base, tx64->a.code.size,
-               PROT_READ | PROT_WRITE | PROT_EXEC);
-    }
-
-    m_owner = pthread_self();
-    m_hintExpire = 0;
-    m_held = true;
-    return true;
-  }
-  if (blocking) {
-    TRACE(3, "thr%lx: failed to acquired lease in blocking mode\n",
-          pthread_self());
-  }
-  return false;
-}
-
-void
-TranslatorX64::Lease::drop(int64 hintExpireDelay) {
-  TRACE_SET_MOD(txlease);
-  ASSERT(amOwner());
-  TRACE(4, "thr%lx: dropping lease, called by %p,%p\n",
-        pthread_self(), __builtin_return_address(0),
-        __builtin_return_address(1));
-  if (debug) {
-    popRank(RankWriteLease);
-    mprotect(tx64->a.code.base, tx64->a.code.size, PROT_READ | PROT_EXEC);
-  }
-  m_hintExpire = hintExpireDelay > 0 ?
-    Timer::GetCurrentTimeMicros() + hintExpireDelay : 0;
-  m_held = false;
-  pthread_mutex_unlock(&m_lock);
-}
-
-TranslatorX64::LeaseHolderBase::LeaseHolderBase(Lease& l, LeaseAcquire acquire,
-                                                bool blocking)
-  : m_lease(l), m_haveLock(false), m_acquired(false) {
-  ASSERT(IMPLIES(blocking, acquire == ACQUIRE));
-  if (!m_lease.amOwner() && acquire == ACQUIRE) {
-    m_acquired = m_lease.acquire(blocking);
-  }
-  m_haveLock = m_lease.amOwner();
-}
-
-TranslatorX64::LeaseHolderBase::~LeaseHolderBase() {
-  if (m_acquired && m_lease.amOwner()) {
-    m_lease.drop(Lease::kStandardHintExpireInterval);
-  }
-}
-
-bool
-TranslatorX64::LeaseHolderBase::acquire() {
-  ASSERT(!m_acquired);
-  ASSERT(m_haveLock == m_lease.amOwner());
-  if (m_haveLock) {
-    return true;
-  }
-  return m_haveLock = m_acquired = m_lease.acquire();
-}
 
 // Segfault handler: figure out if it's an intentional segfault
 // (timeout exception) and if so, act appropriately. Otherwise, pass
@@ -1755,7 +1632,7 @@ TCA TranslatorX64::retranslate(SrcKey sk, bool align) {
     SKTRACE(1, sk, "retranslate abort due to debugger\n");
     return NULL;
   }
-  LeaseHolder writer(m_writeLease);
+  LeaseHolder writer(s_writeLease);
   if (!writer) return NULL;
   SKTRACE(1, sk, "retranslate\n");
   return translate(&sk, align);
@@ -1835,7 +1712,7 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align) {
    * lottery at the dawn of time. Hopefully lots of requests won't require
    * any new translation.
    */
-  LeaseHolder writer(m_writeLease);
+  LeaseHolder writer(s_writeLease);
   if (!writer) return NULL;
   if (SrcRec* sr = m_srcDB.find(*sk)) {
     // Handle extremely unlikely race; someone may have just already
@@ -1943,6 +1820,17 @@ TranslatorX64::smash(X64Assembler &a, TCA src, TCA dest) {
   } else {
     a.    jmp(dest);
   }
+}
+
+void TranslatorX64::protectCode() {
+  mprotect(tx64->a.code.base, tx64->a.code.size, PROT_READ | PROT_EXEC);
+
+}
+
+void TranslatorX64::unprotectCode() {
+  mprotect(tx64->a.code.base, tx64->a.code.size,
+      PROT_READ | PROT_WRITE | PROT_EXEC);
+
 }
 
 void
@@ -2337,10 +2225,23 @@ skipFuncCheck(TCA dest) {
  * Also, we are called from two distinct environments. From REQ_BIND_CALL,
  * we're running "between" basic blocks, with all VM registers sync'ed.
  * However, we're also called in the middle of basic blocks, when dropping
- * entries into the FuncCache. So don't go around using the
+ * entries into func->m_prologues. So don't go around using the
  * translation-time values of vmfp()/vmsp(), since they have an
  * unpredictable relationship to the source.
  */
+bool
+TranslatorX64::checkCachedPrologue(const Func* func, int paramIdx,
+                                   TCA& prologue) const {
+  prologue = (TCA)func->getPrologue(paramIdx);
+  if (prologue != (TCA)fcallHelperThunk && !s_replaceInFlight) {
+    TRACE(1, "cached prologue %s(%d) -> cached %p\n",
+          func->fullName()->data(), paramIdx, prologue);
+    ASSERT(isValidCodeAddress(prologue));
+    return true;
+  }
+  return false;
+}
+
 TCA
 TranslatorX64::funcPrologue(Func* func, int nPassed) {
   func->validate();
@@ -2351,17 +2252,17 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   bool funcIsMagic = func->isMagic();
 
   // Do a quick test before grabbing the write lease
-  TCA prologue = (TCA)func->getPrologue(paramIndex);
-  ASSERT(prologue);
-  if (prologue != (TCA)fcallHelperThunk) return prologue;
+  TCA prologue;
+  if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
-  LeaseHolder writer(m_writeLease);
-  if (!writer) return NULL;
+  // If the translator is getting replaced out from under us, refuse to
+  // provide a prologue; we don't know whether this request is running on the
+  // old or new context.
+  LeaseHolder writer(s_writeLease);
+  if (!writer || s_replaceInFlight) return NULL;
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
-  prologue = (TCA)func->getPrologue(paramIndex);
-  ASSERT(prologue);
-  if (prologue != (TCA)fcallHelperThunk) return prologue;
+  if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
   SpaceRecorder sr("_FuncPrologue", a);
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
@@ -2389,6 +2290,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   if (RuntimeOption::EvalJitTransCounters) {
     emitTransCounterInc(a);
   }
+
   if (!funcIsMagic) {
     // entry point for magic methods comes later
     emitRB(a, RBTypeFuncEntry, func->fullName()->data());
@@ -2428,15 +2330,19 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
     start = magicStart;
   }
   ASSERT(funcGuardIsForFunc(start, func));
+  TRACE(2, "funcPrologue tx64 %p %s(%d) setting prologue %p\n",
+        this, func->fullName()->data(), nPassed, start);
+  ASSERT(isValidCodeAddress(start));
   func->setPrologue(paramIndex, start);
 
   addTranslation(TransRec(skFuncBody, func->unit()->md5(),
                           TransProlog, aStart, a.code.frontier - aStart,
                           stubStart, astubs.code.frontier - stubStart));
 
-  recordGdbTranslation(skFuncBody, func->unit(), aStart,
-                       a.code.frontier - aStart, false, true);
-  Debug::recordBCInstr(OpFuncPrologue, start, a.code.frontier);
+  recordGdbTranslation(skFuncBody, func->unit(),
+                       a, aStart,
+                       false, true);
+  recordBCInstr(OpFuncPrologue, a, start);
 
   return start;
 }
@@ -2495,8 +2401,8 @@ TranslatorX64::interceptPrologues(Func* func) {
     return;
   }
   func->maybeIntercepted() = -1;
-  ASSERT(m_writeLease.amOwner());
-  int maxNumPrologues = Func::getMaxNumPrologues(func->numParams());
+  ASSERT(s_writeLease.amOwner());
+  int maxNumPrologues = func->numPrologues();
   for (int i = 0; i < maxNumPrologues; i++) {
     TCA prologue = func->getPrologue(i);
     if (prologue == (unsigned char*)fcallHelperThunk)
@@ -2519,7 +2425,7 @@ TranslatorX64::interceptPrologues(Func* func) {
     ASSERT(funcGuardIsForFunc(addr, func));
     ASSERT(addr);
     func->setPrologue(i, addr);
-    TRACE(1, "%s.prologue[%d]=%p\n",
+    TRACE(1, "interceptPrologues %s prologue[%d]=%p\n",
           func->fullName()->data(), i, (void*)addr);
   }
 }
@@ -2815,7 +2721,7 @@ TCA
 TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk, bool isAddr) {
   TCA tDest = getTranslation(&destSk, false);
   if (!tDest) return NULL;
-  LeaseHolder writer(m_writeLease);
+  LeaseHolder writer(s_writeLease);
   if (!writer) return tDest;
   SrcRec* sr = getSrcRec(destSk);
   if (isAddr) {
@@ -2855,7 +2761,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
                               bool taken,
                               ConditionCode cc) {
   const Func* f = curFunc();
-  LeaseHolder writer(m_writeLease);
+  LeaseHolder writer(s_writeLease);
   if (!writer) return NULL;
   Offset offWillExplore = taken ? offTaken : offNotTaken;
   Offset offWillDefer = taken ? offNotTaken : offTaken;
@@ -2885,7 +2791,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
   if (!tDest) {
     return 0;
   }
-  ASSERT(m_writeLease.amOwner());
+  ASSERT(s_writeLease.amOwner());
   /*
    * Roll over the jcc and the jmp/fallthru. E.g., from:
    *
@@ -2913,7 +2819,7 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
   const Func* f = curFunc();
   SrcKey dest(f, off);
   TCA branch = getTranslation(&dest, true);
-  LeaseHolder writer(m_writeLease, NO_ACQUIRE);
+  LeaseHolder writer(s_writeLease, NO_ACQUIRE);
   if (branch && writer.acquire()) {
     SrcRec* destRec = getSrcRec(dest);
     destRec->chainFrom(getAsmFor(toSmash), IncomingBranch(cc, toSmash));
@@ -3255,7 +3161,7 @@ TranslatorX64::enterTC(SrcKey sk) {
 
     TRACE(4, "enterTC: %p fp%p(%s) sp%p enter {\n", start,
           vmfp(), ((ActRec*)vmfp())->m_func->name()->data(), vmsp());
-    m_writeLease.gremlinUnlock();
+    s_writeLease.gremlinUnlock();
     // Keep dispatching until we end up somewhere the translator
     // recognizes, or we luck out and the leaseholder exits.
     while (!start) {
@@ -3271,8 +3177,9 @@ TranslatorX64::enterTC(SrcKey sk) {
       start = getTranslation(&sk, true);
     }
     ASSERT(start);
+    ASSERT(isValidCodeAddress(start));
     tl_regState = REGSTATE_DIRTY;
-    ASSERT(!m_writeLease.amOwner());
+    ASSERT(!s_writeLease.amOwner());
     curFunc()->validate();
     INC_TPC(enter_tc);
     enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
@@ -3281,7 +3188,7 @@ TranslatorX64::enterTC(SrcKey sk) {
     // Debugging code: cede the write lease half the time.
     if (debug && (RuntimeOption::EvalJitStressLease)) {
       if (d.m_depth == 1 && (rand() % 2) == 0) {
-        m_writeLease.gremlinLock();
+        s_writeLease.gremlinLock();
       }
     }
 
@@ -3336,7 +3243,7 @@ TranslatorX64::enterTC(SrcKey sk) {
           TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
                 func->name()->data(), dest);
         }
-        LeaseHolder writer(m_writeLease, NO_ACQUIRE);
+        LeaseHolder writer(s_writeLease, NO_ACQUIRE);
         if (dest && writer.acquire()) {
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
           smash(tx64->getAsmFor(toSmash), toSmash, dest);
@@ -3509,7 +3416,7 @@ TranslatorX64::emitServiceReqVA(bool align, ServiceRequest req, int numArgs,
    * Weird hand-shaking with enterTC: reverse-call a service routine.
    */
   astubs.    ret();
-  Debug::recordBCInstr(OpServiceRequest, retval, astubs.code.frontier);
+  recordBCInstr(OpServiceRequest, astubs, retval);
   translator_not_reached(astubs);
   return retval;
 }
@@ -3640,7 +3547,7 @@ TranslatorX64::syncOutputs(int stackOff) {
   }
   // All registers have been smashed for realz, yo
   m_regMap.smashRegs(kAllRegs);
-  Debug::recordBCInstr(OpSyncOutputs, start, a.code.frontier);
+  recordBCInstr(OpSyncOutputs, a, start);
 }
 
 /*
@@ -4750,6 +4657,10 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
 
 static void
 planPop(NormalizedInstruction& i) {
+  if (i.prev && i.prev->outputPredicted) {
+    i.prev->outputPredicted = false;
+    i.inputs[0]->rtt = RuntimeType(KindOfInvalid);
+  }
   DataType type = i.inputs[0]->outerType();
   i.m_txFlags =
     (type == KindOfInvalid || IS_REFCOUNTED_TYPE(type)) ? Supported : Native;
@@ -5523,18 +5434,21 @@ void TranslatorX64::toStringHelper(ObjectData *obj) {
   register ActRec *ar asm("r15");
   register ActRec *rbp asm("rbp");
 
-  // ar->m_savedRbp set by caller
-  ar->m_savedRip = rbp->m_savedRip;
-
   const Class* cls = obj->getVMClass();
   const Func* toString = cls->getToString();
   if (!toString) {
     EXCEPTION_GATE_ENTER();
+    // the unwinder will restore rVmSp to
+    // &ar->m_r, so we'd better make sure its
+    // got a valid TypedValue there.
+    TV_WRITE_UNINIT(&ar->m_r);
     std::string msg = cls->preClass()->name()->data();
     msg += "::__toString() was not defined";
     throw BadTypeConversionException(msg.c_str());
     EXCEPTION_GATE_LEAVE();
   }
+  // ar->m_savedRbp set by caller
+  ar->m_savedRip = rbp->m_savedRip;
   ar->m_func = toString;
   // ar->m_soff set by caller
   ar->initNumArgs(0);
@@ -7673,7 +7587,7 @@ TranslatorX64::analyzeVGetG(Tracelet& t, NormalizedInstruction& i) {
 }
 
 static TypedValue* lookupAddBoxedGlobal(StringData* name) {
-  VarEnv* ve = g_vmContext->m_varEnvs.front();
+  VarEnv* ve = g_vmContext->m_globalVarEnv;
   TypedValue* r = ve->lookupAdd(name);
   if (r->m_type != KindOfRef) {
     tvBox(r);
@@ -7720,7 +7634,7 @@ TranslatorX64::translateVGetM(const Tracelet& t,
 }
 
 static TypedValue* lookupGlobal(StringData* name) {
-  VarEnv* ve = g_vmContext->m_varEnvs.front();
+  VarEnv* ve = g_vmContext->m_globalVarEnv;
   TypedValue* r = ve->lookup(name);
   // If the global didn't exist, we need to leave name un-decref'd for
   // the caller to raise warnings.
@@ -7732,7 +7646,7 @@ static TypedValue* lookupGlobal(StringData* name) {
 }
 
 static TypedValue* lookupAddGlobal(StringData* name) {
-  VarEnv* ve = g_vmContext->m_varEnvs.front();
+  VarEnv* ve = g_vmContext->m_globalVarEnv;
   TypedValue* r = ve->lookupAdd(name);
   if (r->m_type == KindOfRef) r = r->m_data.ptv;
   LITSTR_DECREF(name);
@@ -8522,8 +8436,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
     m_trampolineSize = atrampolines.code.frontier - trampAddr;
     ASSERT(m_trampolineSize >= kMinPerTrampolineSize);
   }
-  Debug::recordBCInstr(OpNativeTrampoline, trampAddr,
-                       atrampolines.code.frontier);
+  recordBCInstr(OpNativeTrampoline, atrampolines, trampAddr);
   return trampAddr;
 }
 
@@ -8892,24 +8805,84 @@ TranslatorX64::translateFPushObjMethodD(const Tracelet &t,
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(baseClass, name, magicCall,
                                            false /* staticLookup */);
-  m_regMap.allocOutputRegs(i);
   m_regMap.scrubStackRange(i.stackOff - 1,
                            i.stackOff - 1 + kNumActRecCells);
   // Popped one cell, pushed an actrec
   int startOfActRec = int(sizeof(Cell)) - int(sizeof(ActRec));
   size_t thisOff = AROFF(m_this) + startOfActRec;
-  // Save $this before we lose it in the helper call.
-  if (!func || !(func->attrs() & AttrStatic)) {
-    emitVStackStore(a, i, getReg(objLoc), thisOff, sz::qword);
-  } else {
-    emitVStackStoreImm(a, i, uintptr_t(baseClass) | 1, thisOff, sz::qword);
-  }
+  size_t funcOff = AROFF(m_func) + startOfActRec;
   emitPushAR(i, func, sizeof(Cell) /*bytesPopped*/,
              false /* isCtor */, false /* clearThis */,
              func && magicCall ? uintptr_t(name) | 1 : 0 /* varEnvInvName */);
+
+  if (!func) {
+    if (baseClass && !(baseClass->attrs() & AttrInterface)) {
+      MethodLookup::LookupResult res =
+        g_vmContext->lookupObjMethod(func, baseClass, name, false);
+      if ((res == MethodLookup::MethodFoundWithThis ||
+           res == MethodLookup::MethodFoundNoThis) &&
+          !func->isAbstract()) {
+        /*
+         * if we found the func in baseClass, then either:
+         *  - its private, and this is always going to be the
+         *    called function, or
+         *  - any derived class must have a func that matches in
+         *    staticness, and is at least as accessible (and in
+         *    particular, you cant override a public/protected
+         *    method with a private method)
+         */
+        if (func->attrs() & AttrPrivate) {
+          emitVStackStoreImm(a, i, uintptr_t(func), funcOff, sz::qword);
+        } else {
+          Offset methodsOff = Class::getMethodsOffset();
+          Offset vecOff = methodsOff + Class::MethodMap::vecOff();
+          ScratchReg scratch(m_regMap);
+          // get the object's class into *scratch
+          a.   load_reg64_disp_reg64(getReg(objLoc),
+                                     ObjectData::getVMClassOffset(),
+                                     *scratch);
+          if (res == MethodLookup::MethodFoundNoThis) {
+            emitDecRef(a, i, getReg(objLoc), KindOfObject);
+            a.   lea_reg64_disp_reg64(*scratch, 1, getReg(objLoc));
+          }
+          emitVStackStore(a, i, getReg(objLoc), thisOff, sz::qword);
+
+          // get the method vector into *scratch
+          a.   load_reg64_disp_reg64(*scratch, vecOff, *scratch);
+          // get the func
+          a.   load_reg64_disp_reg64(*scratch,
+                                     func->methodSlot() * sizeof(Func*),
+                                     *scratch);
+          emitVStackStore(a, i, *scratch, funcOff, sz::qword);
+          Stats::emitInc(a, Stats::TgtCache_MethodFast);
+          return;
+        }
+      } else {
+        func = NULL;
+      }
+    }
+  }
+
   if (func) {
+    if (func->attrs() & AttrStatic) {
+      if (func->attrs() & AttrPrivate) {
+        emitVStackStoreImm(a, i, uintptr_t(curFunc()->cls()) | 1,
+                           thisOff, sz::qword);
+      } else {
+        ScratchReg scratch(m_regMap);
+        a.   load_reg64_disp_reg64(getReg(objLoc),
+                                   ObjectData::getVMClassOffset(),
+                                   *scratch);
+        a.   or_imm32_reg64(1, *scratch);
+        emitVStackStore(a, i, *scratch, thisOff, sz::qword);
+      }
+      emitDecRef(a, i, getReg(objLoc), KindOfObject);
+    } else {
+      emitVStackStore(a, i, getReg(objLoc), thisOff, sz::qword);
+    }
     Stats::emitInc(a, Stats::TgtCache_MethodBypass);
   } else {
+    emitVStackStore(a, i, getReg(objLoc), thisOff, sz::qword);
     using namespace TargetCache;
     CacheHandle ch = MethodCache::alloc();
     if (false) { // typecheck
@@ -9863,21 +9836,51 @@ TranslatorX64::emitVariantGuards(const Tracelet& t,
   }
 }
 
-bool
-NormalizedInstruction::outStackIsUsed() const {
+NormalizedInstruction::OutputUse
+NormalizedInstruction::outputIsUsed(DynLocation* output) const {
   for (NormalizedInstruction* succ = next;
        succ; succ = succ->next) {
     for (size_t i = 0; i < succ->inputs.size(); ++i) {
-      if (succ->inputs[i] == outStack) return true;
+      if (succ->inputs[i] == output) {
+        if (succ->inputWasInferred(i)) {
+          return OutputInferred;
+        }
+        if (Translator::Get()->dontGuardAnyInputs(succ->op())) {
+          /* the consumer doesnt care about its inputs
+             but we may still have inferred something about
+             its outputs that a later instruction may depend on
+          */
+          if (!outputDependsOnInput(succ->op()) ||
+              !(succ->outStack && !succ->outStack->rtt.isVagueValue() &&
+                succ->outputIsUsed(succ->outStack) != OutputUsed) ||
+              !(succ->outLocal && !succ->outLocal->rtt.isVagueValue() &&
+                succ->outputIsUsed(succ->outLocal)) != OutputUsed) {
+            return OutputDoesntCare;
+          }
+        }
+        return OutputUsed;
+      }
     }
   }
-  return false;
+  return OutputUnused;
 }
 
 void
 TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
-  if (!i.outputPredicted || i.breaksBB || !i.outStackIsUsed())
-    return;
+  if (!i.outputPredicted || i.breaksBB) return;
+  NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
+  switch (u) {
+    case NormalizedInstruction::OutputUsed:
+      break;
+    case NormalizedInstruction::OutputUnused:
+      return;
+    case NormalizedInstruction::OutputInferred:
+      Stats::emitInc(a, Stats::TC_TypePredOverridden);
+      return;
+    case NormalizedInstruction::OutputDoesntCare:
+      Stats::emitInc(a, Stats::TC_TypePredUnneeded);
+      return;
+  }
 
   ASSERT(i.outStack);
   PhysReg base;
@@ -9939,29 +9942,27 @@ TranslatorX64::translateInstr(const Tracelet& t,
   m_regMap.bumpEpoch();
 
   if (debug) {
-    if (unsigned ci = i.checkedInputs) {
-      for (int j = 0; ci; j++, ci >>= 1) {
-        if (ci & 1) {
-          DynLocation* dl = i.inputs[j];
-          ASSERT(dl->rtt.isValue() &&
-                 !dl->rtt.isVagueValue() &&
-                 dl->outerType() != KindOfInvalid);
-          PhysReg base;
-          int disp = 0;
-          locToRegDisp(dl->location, &base, &disp);
-          if (IS_STRING_TYPE(dl->rtt.typeCheckValue())) {
-            ScratchReg sc(m_regMap);
-            emitStringCheck(a, base, disp + dl->rtt.typeCheckOffset(), *sc);
-          } else {
-            a.   cmp_imm32_disp_reg32(dl->rtt.typeCheckValue(),
-                                      disp + dl->rtt.typeCheckOffset(),
-                                      base);
-          }
-          {
-            UnlikelyIfBlock<CC_NZ> typePredFailed(a, astubs);
-            EMIT_CALL0(astubs, failedTypePred);
-            recordReentrantStubCall(i);
-          }
+    for (unsigned j = 0; j < i.inputs.size(); j++) {
+      if (i.inputWasInferred(j)) {
+        DynLocation* dl = i.inputs[j];
+        ASSERT(dl->rtt.isValue() &&
+               !dl->rtt.isVagueValue() &&
+               dl->outerType() != KindOfInvalid);
+        PhysReg base;
+        int disp = 0;
+        locToRegDisp(dl->location, &base, &disp);
+        if (IS_STRING_TYPE(dl->rtt.typeCheckValue())) {
+          ScratchReg sc(m_regMap);
+          emitStringCheck(a, base, disp + dl->rtt.typeCheckOffset(), *sc);
+        } else {
+          a.   cmp_imm32_disp_reg32(dl->rtt.typeCheckValue(),
+                                    disp + dl->rtt.typeCheckOffset(),
+                                    base);
+        }
+        {
+          UnlikelyIfBlock<CC_NZ> typePredFailed(a, astubs);
+          EMIT_CALL0(astubs, failedTypePred);
+          recordReentrantStubCall(i);
         }
       }
     }
@@ -10005,10 +10006,8 @@ TranslatorX64::translateInstr(const Tracelet& t,
   }
 
   emitPredictionGuards(i);
-  Debug::recordBCInstr(op, start, a.code.frontier);
-  if (astubs.code.frontier != astart) {
-    Debug::recordBCInstr(op + Op_count, astart, astubs.code.frontier);
-  }
+  recordBCInstr(op, a, start);
+  recordBCInstr(op + Op_count, astubs, astart);
 
   if (i.breaksBB && !i.changesPC) {
     // If this instruction's opcode always ends the tracelet then the
@@ -10166,9 +10165,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
 
     emitRB(a, RBTypeTraceletBody, t.m_sk);
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
-    if (a.code.frontier != start) {
-      Debug::recordBCInstr(OpTraceletGuard, start, a.code.frontier);
-    }
+    recordBCInstr(OpTraceletGuard, a, start);
 
     // Translate each instruction in the tracelet
     for (NormalizedInstruction* ni = t.m_instrStream.first; ni; ni = ni->next) {
@@ -10217,12 +10214,10 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
                           a.code.frontier - start, stubStart,
                           astubs.code.frontier - stubStart, bcMapping));
 
-  recordGdbTranslation(sk, curUnit(), start, a.code.frontier - start,
+  recordGdbTranslation(sk, curUnit(), a, start,
                        false, false);
-  if (astubs.code.frontier != stubStart) {
-    recordGdbTranslation(sk, curUnit(), stubStart,
-                         astubs.code.frontier - stubStart, false, false);
-  }
+  recordGdbTranslation(sk, curUnit(), astubs, stubStart,
+                       false, false);
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
@@ -10252,10 +10247,17 @@ TranslatorX64::TranslatorX64()
 
 TranslatorX64*
 TranslatorX64::Get() {
-  if (!tx64) {
-    tx64 = new TranslatorX64();
-    transl = tx64;
+  /*
+   * Called from outrageously early, pre-main code, and will
+   * allocate the first translator space.
+   */
+  if (!nextTx64) {
+    nextTx64 = new TranslatorX64();
   }
+  if (!tx64) {
+    tx64 = nextTx64;
+  }
+  ASSERT(tx64);
   return tx64;
 }
 
@@ -10406,12 +10408,12 @@ TranslatorX64::requestInit() {
 
 void
 TranslatorX64::requestExit() {
-  if (m_writeLease.amOwner()) {
-    m_writeLease.drop();
+  if (s_writeLease.amOwner()) {
+    s_writeLease.drop();
   }
   TRACE_MOD(txlease, 2, "%lx write lease stats: %15lld kept, %15lld grabbed\n",
-            pthread_self(), m_writeLease.m_hintKept,
-            m_writeLease.m_hintGrabbed);
+            pthread_self(), s_writeLease.m_hintKept,
+            s_writeLease.m_hintGrabbed);
   PendQ::drain();
   Treadmill::finishRequest(g_vmContext->m_currentThreadIdx);
   TRACE(1, "done requestExit(%ld)\n", g_vmContext->m_currentThreadIdx);
@@ -10449,31 +10451,34 @@ TranslatorX64::getPerfCounters(Array& ret) {
   }
 }
 
+static const size_t kASize = 512 << 20;
+static const size_t kAStubsSize = 512 << 20;
+static const size_t kGDataSize = kASize / 4;
+static const size_t kTotalSize =
+  kASize + kAStubsSize + kTrampolinesBlockSize + kGDataSize;
 void TranslatorX64::processInit() {
-  static const size_t aSize = 512 << 20;
-  static const size_t astubsSize = 512 << 20;
-  static const size_t trampolinesSize = kTrampolinesBlockSize;
-  static const size_t gDataSize = aSize;
-  static const size_t totalSize =
-    aSize + astubsSize + trampolinesSize + gDataSize;
-  static_assert(totalSize < (2ul << 30),
+  static_assert(kTotalSize < (2ul << 30),
                 "Combined size of all code/data blocks in TranslatorX64 "
                 "must be < 2GiB to support 32-bit relative addresses");
 
-  profileInit();
+  static bool profileUp = false;
+  if (!profileUp) {
+    profileInit();
+    profileUp = true;
+  }
 
   // We want to ensure that the block for "a", "astubs",
   // "atrampolines", and "m_globalData" are nearby so that we can
   // short jump/point between them. Thus we allocate one slab and
   // divide it between "a", "astubs", and "atrampolines".
-  uint8_t *base = allocSlab(totalSize);
-  atrampolines.init(base, trampolinesSize);
-  base += trampolinesSize;
-  a.init(base, aSize);
-  base += aSize;
-  astubs.init(base, astubsSize);
-  base += astubsSize;
-  m_globalData.init(base, gDataSize);
+  uint8_t *base = allocSlab(kTotalSize);
+  atrampolines.init(base, kTrampolinesBlockSize);
+  base += kTrampolinesBlockSize;
+  a.init(base, kASize);
+  base += kASize;
+  astubs.init(base, kAStubsSize);
+  base += kAStubsSize;
+  m_globalData.init(base, kGDataSize);
 
   // Emit some special helpers that are shared across translations.
 
@@ -10486,11 +10491,11 @@ void TranslatorX64::processInit() {
   // returnRIP-1, since the AR was set up manually. For this frame,
   // record the tracelet address as starting from callToExit-1, so gdb
   // does not barf
-  recordGdbStub(m_callToExit - 1, astubs.code.frontier, "HHVM::callToExit");
+  recordGdbStub(astubs, m_callToExit - 1, "HHVM::callToExit");
 
   m_retHelper = emitRetFromInterpretedFrame();
-  Debug::recordBCInstr(OpRetFromInterp, m_retHelper, astubs.code.frontier);
-  recordGdbStub(m_retHelper - 1, astubs.code.frontier, "HHVM::retHelper");
+  recordBCInstr(OpRetFromInterp, astubs, m_retHelper);
+  recordGdbStub(astubs, m_retHelper - 1, "HHVM::retHelper");
 
   moveToAlign(astubs);
   m_resumeHelper = astubs.code.frontier;
@@ -10500,7 +10505,7 @@ void TranslatorX64::processInit() {
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
                                        Stack::topOfStackOffset(), rVmSp);
   emitServiceReq(false, REQ_RESUME, 0ull);
-  Debug::recordBCInstr(OpResumeHelper, m_resumeHelper, astubs.code.frontier);
+  recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
 
   {
     // Helper for return from non-instance toString
@@ -10526,7 +10531,7 @@ void TranslatorX64::processInit() {
                               offsetof(VMExecutionContext, m_stack) +
                               Stack::topOfStackOffset(), rEC);
   a.   jmp((TCA)defClsHelper);
-  Debug::recordBCInstr(OpDefClsHelper, m_defClsHelper, a.code.frontier);
+  recordBCInstr(OpDefClsHelper, a, m_defClsHelper);
 
   moveToAlign(astubs);
   m_stackOverflowHelper = astubs.code.frontier;
@@ -10561,9 +10566,8 @@ void TranslatorX64::processInit() {
   m_dtorStubs[KindOfRef]           = emitUnaryStub(a, vp(tv_release_ref));
   m_dtorGenericStub                = genericRefCountStub(a);
   m_typedDtorStub                  = emitBinaryStub(a, vp(tv_release_typed));
-  Debug::recordBCInstr(OpDtorStub, m_dtorStubs[BitwiseKindOfString],
-                       a.code.frontier);
-  recordGdbStub(m_dtorStubs[BitwiseKindOfString], a.code.frontier,
+  recordBCInstr(OpDtorStub, a, m_dtorStubs[BitwiseKindOfString]);
+  recordGdbStub(a, m_dtorStubs[BitwiseKindOfString],
                     "HHVM::destructorStub");
 
   if (trustSigSegv) {
@@ -10583,22 +10587,41 @@ void TranslatorX64::processInit() {
   }
 }
 
+TranslatorX64::~TranslatorX64() {
+  freeSlab(atrampolines.code.base, kTotalSize);
+}
+
+static Debug::TCRange rangeFrom(const X64Assembler& a, const TCA addr) {
+  ASSERT(a.code.isValidAddress(addr));
+  return Debug::TCRange(addr, a.code.frontier);
+}
+
+void TranslatorX64::recordBCInstr(uint32_t op,
+                                  const X64Assembler& a,
+                                  const TCA addr) {
+  if (addr != a.code.frontier) {
+    m_debugInfo.recordBCInstr(Debug::TCRange(addr, a.code.frontier), op);
+  }
+}
+
 void TranslatorX64::recordGdbTranslation(const SrcKey& sk,
                                          const Unit* srcUnit,
-                                         TCA start,
-                                         int numTCBytes, bool exit,
+                                         const X64Assembler& a,
+                                         const TCA start,
+                                         bool exit,
                                          bool inPrologue) {
-  if (!RuntimeOption::EvalJitNoGdb) {
-    ASSERT(m_writeLease.amOwner());
-    m_debugInfo.recordTracelet(start, start + numTCBytes, srcUnit,
+  if (start != a.code.frontier && !RuntimeOption::EvalJitNoGdb) {
+    ASSERT(s_writeLease.amOwner());
+    m_debugInfo.recordTracelet(rangeFrom(a, start), srcUnit,
                                srcUnit->at(sk.offset()),
                                exit, inPrologue);
   }
 }
 
-void TranslatorX64::recordGdbStub(TCA start, TCA end, const char* name) {
+void TranslatorX64::recordGdbStub(const X64Assembler& a,
+                                  const TCA start, const char* name) {
   if (!RuntimeOption::EvalJitNoGdb) {
-    m_debugInfo.recordStub(start, end, name);
+    m_debugInfo.recordStub(rangeFrom(a, start), name);
   }
 }
 
@@ -10625,7 +10648,7 @@ std::string TranslatorX64::getUsage() {
 bool TranslatorX64::addDbgGuards(const Unit* unit) {
   // TODO refactor
   // It grabs the write lease and iterating through whole SrcDB...
-  bool locked = m_writeLease.acquire(true);
+  bool locked = s_writeLease.acquire(true);
   if (!locked) {
     return false;
   }
@@ -10642,7 +10665,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
       addDbgGuardImpl(sk, sr);
     }
   }
-  m_writeLease.drop();
+  s_writeLease.drop();
   gettime(CLOCK_MONOTONIC, &tsEnd);
   int64 elapsed = gettime_diff_us(tsBegin, tsEnd);
   if (Trace::moduleEnabledRelease(Trace::tx64, 5)) {
@@ -10669,7 +10692,7 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
       return false;
     }
   }
-  bool locked = m_writeLease.acquire(true);
+  bool locked = s_writeLease.acquire(true);
   if (!locked) {
     return false;
   }
@@ -10678,7 +10701,7 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
       addDbgGuardImpl(sk, *sr);
     }
   }
-  m_writeLease.drop();
+  s_writeLease.drop();
   return true;
 }
 
@@ -10751,12 +10774,12 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
 
 // Returns true on success
 bool TranslatorX64::dumpTC() {
-  if (!m_writeLease.acquire(true)) return false;
+  if (!s_writeLease.acquire(true)) return false;
   bool success = dumpTCData();
   if (success) {
     success = dumpTCCode("/tmp/tc_dump");
   }
-  m_writeLease.drop();
+  s_writeLease.drop();
   return success;
 }
 
@@ -10866,7 +10889,7 @@ SUPPORTED_OPS()
 
 void TranslatorX64::invalidateSrcKey(const SrcKey& sk) {
   ASSERT(!RuntimeOption::RepoAuthoritative);
-  ASSERT(m_writeLease.amOwner());
+  ASSERT(s_writeLease.amOwner());
   /*
    * Reroute existing translations for SrcKey to an as-yet indeterminate
    * new one.
@@ -10921,6 +10944,7 @@ bool TranslatorX64::invalidateFile(Eval::PhpFile* f) {
 } // HPHP::VM::Transl
 
 static const Trace::Module TRACEMOD = Trace::tx64;
+
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
   PendQ::defer(new DeferredPathInvalidate(path));

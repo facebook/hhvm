@@ -216,7 +216,7 @@ ArrayData *MutableArrayIter::getData() {
   }
   return NULL;
 }
-  
+
 MIterCtx::~MIterCtx() {
   delete m_mArray;
   tvRefcountedDecRef(&m_key);

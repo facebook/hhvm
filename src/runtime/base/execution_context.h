@@ -426,9 +426,6 @@ public:
   typedef std::set<HPHP::ObjectData*> LiveObjSet;
   LiveObjSet m_liveBCObjs;
 
-private:
-  VM::Transl::Translator* m_transl;
-
 public:
   void requestInit();
   void requestExit();
@@ -560,7 +557,8 @@ public:
   static void DumpStack();
   static void DumpCurUnit(int skip = 0);
 
-  std::list<HPHP::VM::VarEnv*> m_varEnvs;
+  VM::VarEnv* m_globalVarEnv;
+  VM::VarEnv* m_topVarEnv;
 
   HPHP::VM::RenamedFuncDict m_renamedFuncs;
   EvaledFilesMap m_evaledFiles;

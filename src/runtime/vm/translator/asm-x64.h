@@ -92,6 +92,7 @@ atomic_store64(volatile uint64_t* dest, uint64_t value) {
 
 
 Address allocSlab(size_t size);
+void freeSlab(Address addr, size_t size);
 
 /*
  * This needs to be a POD type (no user-declared constructors is the most

@@ -23,6 +23,7 @@
 #include <runtime/ext_hhvm/ext_hhvm.h>
 #include <util/parser/location.h>
 #include <util/fixed_vector.h>
+#include <util/range.h>
 #include <runtime/vm/fixed_string_map.h>
 #include <runtime/vm/indexed_string_map.h>
 
@@ -205,13 +206,25 @@ class PreClass : public AtomicCountable {
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes() const { return m_userAttributes; }
 
-  Func* const* methods()    const { return m_methods.accessList(); }
-  Prop* const* properties() const { return m_properties.accessList(); }
-  Const* const* constants() const { return m_constants.accessList(); }
-
-  size_t numMethods()    const { return m_methods.size(); }
-  size_t numProperties() const { return m_properties.size(); }
-  size_t numConstants()  const { return m_constants.size(); }
+  /*
+   *  Funcs, Consts, and Props all behave similarly. Define raw accessors
+   *  foo() and numFoos() for people munging by hand, and ranges.
+   *    methods(); numMethods(); FuncRange allMethods();
+   *    consts(); numConsts(); ConstRange allConsts();
+   *    properties; numProperties(); PropRange allProperties();
+   */
+#define DEF_ACCESSORS(Type, fields, Fields)                                 \
+  Type* const* fields() const { return m_##fields.accessList(); }           \
+  Type**       mutable##Fields() { return m_##fields.mutableAccessList(); } \
+  size_t num##Fields()  const { return m_##fields.size(); }                 \
+  typedef IterRange<Type* const*> Type##Range;                              \
+  Type##Range all##Fields() const {                                         \
+    return Type##Range(fields(), fields() + m_##fields.size() - 1);         \
+  }
+  DEF_ACCESSORS(Func, methods, Methods)
+  DEF_ACCESSORS(Const, constants, Constants)
+  DEF_ACCESSORS(Prop, properties, Properties)
+#undef DEF_ACCESSORS
 
   bool hasMethod(const StringData* methName) const {
     return m_methods.contains(methName);
@@ -535,6 +548,15 @@ public:
 
   Func* const* methods() const { return m_methods.accessList(); }
   size_t numMethods() const { return m_methods.size(); }
+  typedef IterRange<Func*const*> MethodRange;
+  MethodRange methodRange() const {
+    return MethodRange(methods(), methods() + numMethods());
+  }
+  typedef IterRange<Func**> MutableMethodRange;
+  MutableMethodRange mutableMethodRange() {
+    return MutableMethodRange(m_methods.mutableAccessList(),
+                              m_methods.mutableAccessList() + m_methods.size());
+  }
   const SProp* staticProperties() const
     { return m_staticProperties.accessList(); }
   size_t numStaticProperties() const { return m_staticProperties.size(); }
@@ -622,13 +644,14 @@ public:
 
   void getClassInfo(ClassInfoVM* ci);
 
-public: // Offset accessors for the translator
   size_t declPropOffset(Slot index) const {
     ASSERT(index >= 0);
     return sizeof(ObjectData) + m_builtinPropSize
       + index * sizeof(TypedValue);
   }
   static size_t preClassOff() { return offsetof(Class, m_preClass); }
+  static Offset getMethodsOffset() { return offsetof(Class, m_methods); }
+  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
 
 public:
   static hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
@@ -643,7 +666,6 @@ private:
         m_trait(trait), m_method(method), m_modifiers(modifiers) { }
   };
 
-  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
   typedef IndexedStringMap<Const,true,Slot> ConstMap;
   typedef IndexedStringMap<Prop,true,Slot> PropMap;
   typedef IndexedStringMap<SProp,true,Slot> SPropMap;
@@ -651,7 +673,6 @@ private:
   typedef hphp_hash_map<const StringData*, TraitMethodList, string_data_hash,
                         string_data_isame> MethodToTraitListMap;
 
-private:
   void initialize(TypedValue*& sPropData) const;
   HphpArray* initClsCnsData() const;
   PropInitVec* initProps() const;
@@ -706,7 +727,6 @@ private:
   void setClassVec();
   void setUsedTraits();
 
-private:
   PreClassPtr m_preClass;
   ClassPtr m_parent;
   std::vector<ClassPtr> m_declInterfaces; // interfaces this class declares in

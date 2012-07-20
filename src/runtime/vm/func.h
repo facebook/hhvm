@@ -76,7 +76,7 @@ struct Func {
     void setTypeConstraint(const TypeConstraint& tc) { m_typeConstraint = tc; }
     const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
 
-   private:
+  private:
     Offset m_funcletOff; // If no default: InvalidAbsoluteOffset.
     TypedValue m_defVal; // Set to uninit null if there is no default value
                          // or if there is a non-scalar default value.
@@ -99,15 +99,15 @@ struct Func {
   static const FuncId InvalidId = -1LL;
 
   typedef hphp_hash_map<const StringData*, TypedValue, string_data_hash,
-                        string_data_isame> UserAttributeMap;
+  string_data_isame> UserAttributeMap;
 
   Func(Unit& unit, Id id, int line1, int line2, Offset base,
-       Offset past, const StringData* name, Attr attrs, bool top,
-       const StringData* docComment, int numParams);
+      Offset past, const StringData* name, Attr attrs, bool top,
+      const StringData* docComment, int numParams);
   Func(Unit& unit, PreClass* preClass, int line1,
-       int line2, Offset base, Offset past,
-       const StringData* name, Attr attrs, bool top,
-       const StringData* docComment, int numParams);
+      int line2, Offset base, Offset past,
+      const StringData* name, Attr attrs, bool top,
+      const StringData* docComment, int numParams);
   ~Func();
 
   Func* clone() const;
@@ -226,7 +226,7 @@ struct Func {
     return *(String*)(&m_name);
   }
   const StringData* fullName() const {
-    ASSERT(m_fullName != NULL);
+    if (m_fullName == NULL) return m_name;
     return m_fullName;
   }
   CStrRef fullNameRef() const {
@@ -248,7 +248,7 @@ struct Func {
   bool checkInterceptable() const {
     if (!m_maybeIntercepted) return false;
     return m_maybeIntercepted > 0 ||
-      get_intercept_handler(fullNameRef(), &m_maybeIntercepted);
+    get_intercept_handler(fullNameRef(), &m_maybeIntercepted);
   }
   int numParams() const { return m_numParams; }
   const ParamInfoVec& params() const { return shared()->m_params; }
@@ -284,7 +284,7 @@ struct Func {
   const ClassInfo::MethodInfo* info() const { return shared()->m_info; }
   bool isIgnoreRedefinition() const {
     return shared()->m_info &&
-      shared()->m_info->attribute & ClassInfo::IgnoreRedefinition;
+    (shared()->m_info->attribute & ClassInfo::IgnoreRedefinition);
   }
   const BuiltinFunction& builtinFuncPtr() const {
     return shared()->m_builtinFuncPtr;
@@ -301,12 +301,20 @@ struct Func {
   unsigned char* getPrologue(int index) const {
     return m_prologueTable[index];
   }
+  int numPrologues() const {
+    return getMaxNumPrologues(m_numParams);
+  }
   static int getMaxNumPrologues(int numParams) {
     // maximum number of prologues is numParams+2. The extra 2 are for
     // the case where the number of actual params equals numParams and
     // the case where the number of actual params is greater than
     // numParams.
     return numParams + 2;
+  }
+  void resetPrologues() {
+    // Useful when killing code; forget what we've learned about the contents
+    // of the translation cache.
+    initPrologues(m_numParams);
   }
 
   const NamedEntity* getNamedEntity() const {
@@ -324,6 +332,7 @@ struct Func {
   Func** getCachedAddr();
   Func* getCached() { return *getCachedAddr(); }
   void setCached();
+  unsigned getCachedOffset() const { return m_cachedOffset; }
 
 public: // Offset accessors for the translator.
 #define X(f) static size_t f##Off() { return offsetof(Func, m_##f); }
@@ -365,10 +374,10 @@ private:
     bool m_isGeneratorFromClosure : 1;
     UserAttributeMap m_userAttributes;
     SharedData(PreClass* preClass, const ClassInfo::MethodInfo* info,
-               BuiltinFunction funcPtr);
+        BuiltinFunction funcPtr);
     SharedData(PreClass* preClass, Id id, Offset base,
-               Offset past, int line1, int line2, bool top,
-               const StringData* docComment);
+        Offset past, int line1, int line2, bool top,
+        const StringData* docComment);
     ~SharedData();
     void release();
   };
@@ -427,12 +436,12 @@ private:
 };
 
 class FuncEmitter {
- public:
+public:
   typedef std::vector<Func::SVInfo> SVInfoVec;
   typedef std::vector<EHEnt> EHEntVec;
   typedef std::vector<FPIEnt> FPIEntVec;
 
-  struct ParamInfo : public Func::ParamInfo {
+  struct ParamInfo: public Func::ParamInfo {
     ParamInfo() : m_ref(false) {}
 
     void setRef(bool ref) { m_ref = ref; }
@@ -444,18 +453,18 @@ class FuncEmitter {
       sd(m_ref);
     }
 
-   private:
+  private:
     bool m_ref; // True if parameter is passed by reference.
   };
   typedef std::vector<ParamInfo> ParamInfoVec;
 
   FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n);
   FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
-              PreClassEmitter* pce);
+      PreClassEmitter* pce);
   ~FuncEmitter();
 
   void init(int line1, int line2, Offset base, Attr attrs, bool top,
-            const StringData* docComment);
+      const StringData* docComment);
   void finish(Offset past, bool load);
 
   template<class SerDe> void serdeMetaData(SerDe&);
@@ -487,6 +496,10 @@ class FuncEmitter {
 
   UnitEmitter& ue() const { return m_ue; }
   PreClassEmitter* pce() const { return m_pce; }
+  void setIds(int sn, Id id) {
+    m_sn = sn;
+    m_id = id;
+  }
   int sn() const { return m_sn; }
   Id id() const {
     ASSERT(m_pce == NULL);
@@ -520,12 +533,12 @@ class FuncEmitter {
   void addUserAttribute(const StringData* name, TypedValue tv);
 
   void commit(RepoTxn& txn) const;
-  Func* create(Unit& unit, PreClass* preClass=NULL) const;
+  Func* create(Unit& unit, PreClass* preClass = NULL) const;
 
   void setBuiltinFunc(const ClassInfo::MethodInfo* info,
-                      BuiltinFunction funcPtr, Offset base);
+      BuiltinFunction funcPtr, Offset base);
 
- private:
+private:
   void sortEHTab();
   void sortFPITab(bool load);
 
@@ -568,7 +581,7 @@ class FuncEmitter {
 class FuncRepoProxy : public RepoProxy {
   friend class Func;
   friend class FuncEmitter;
- public:
+public:
   FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
@@ -579,14 +592,14 @@ class FuncRepoProxy : public RepoProxy {
   FRP_IOP(Func) \
   FRP_GOP(Funcs)
   class InsertFuncStmt : public RepoProxy::Stmt {
-   public:
+  public:
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const FuncEmitter& fe,
                 RepoTxn& txn, int64 unitSn, int funcSn, Id preClassId,
                 const StringData* name, bool top);
   };
   class GetFuncsStmt : public RepoProxy::Stmt {
-   public:
+  public:
     GetFuncsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue);
   };
@@ -597,7 +610,7 @@ class FuncRepoProxy : public RepoProxy {
   c##Stmt m_##o##Local; \
   c##Stmt m_##o##Central; \
   c##Stmt* m_##o[RepoIdCount];
-  FRP_OPS
+FRP_OPS
 #undef FRP_OP
 };
 

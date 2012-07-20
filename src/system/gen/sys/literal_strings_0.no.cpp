@@ -1043,6 +1043,10 @@ StaticStringProxy s_sys_sspc4385198;
 #ifndef s_sys_ssc4385198
 #define s_sys_ssc4385198 (*(StaticString *)(&s_sys_sspc4385198))
 #endif
+StaticStringProxy s_sys_sspc453e9e9;
+#ifndef s_sys_ssc453e9e9
+#define s_sys_ssc453e9e9 (*(StaticString *)(&s_sys_sspc453e9e9))
+#endif
 StaticStringProxy s_sys_sspc483d02b;
 #ifndef s_sys_ssc483d02b
 #define s_sys_ssc483d02b (*(StaticString *)(&s_sys_sspc483d02b))
@@ -1154,10 +1158,6 @@ StaticStringProxy s_sys_sspc9f88dec;
 StaticStringProxy s_sys_sspca0f1ff4;
 #ifndef s_sys_ssca0f1ff4
 #define s_sys_ssca0f1ff4 (*(StaticString *)(&s_sys_sspca0f1ff4))
-#endif
-StaticStringProxy s_sys_sspca166f68;
-#ifndef s_sys_ssca166f68
-#define s_sys_ssca166f68 (*(StaticString *)(&s_sys_sspca166f68))
 #endif
 StaticStringProxy s_sys_sspca26e208;
 #ifndef s_sys_ssca26e208
@@ -1758,6 +1758,10 @@ StaticStringProxy s_sys_sspf0e3c7d6;
 StaticStringProxy s_sys_sspf0ea8ac1;
 #ifndef s_sys_ssf0ea8ac1
 #define s_sys_ssf0ea8ac1 (*(StaticString *)(&s_sys_sspf0ea8ac1))
+#endif
+StaticStringProxy s_sys_sspf16c4399;
+#ifndef s_sys_ssf16c4399
+#define s_sys_ssf16c4399 (*(StaticString *)(&s_sys_sspf16c4399))
 #endif
 StaticStringProxy s_sys_sspf1bd1a9d;
 #ifndef s_sys_ssf1bd1a9d
@@ -2611,6 +2615,10 @@ StaticStringProxy s_sys_ssp26fb679a;
 #ifndef s_sys_ss26fb679a
 #define s_sys_ss26fb679a (*(StaticString *)(&s_sys_ssp26fb679a))
 #endif
+StaticStringProxy s_sys_ssp2717cc0c;
+#ifndef s_sys_ss2717cc0c
+#define s_sys_ss2717cc0c (*(StaticString *)(&s_sys_ssp2717cc0c))
+#endif
 StaticStringProxy s_sys_ssp274b0685;
 #ifndef s_sys_ss274b0685
 #define s_sys_ss274b0685 (*(StaticString *)(&s_sys_ssp274b0685))
@@ -2646,6 +2654,10 @@ StaticStringProxy s_sys_ssp28d27535;
 StaticStringProxy s_sys_ssp28e44b58;
 #ifndef s_sys_ss28e44b58
 #define s_sys_ss28e44b58 (*(StaticString *)(&s_sys_ssp28e44b58))
+#endif
+StaticStringProxy s_sys_ssp28f3debd;
+#ifndef s_sys_ss28f3debd
+#define s_sys_ss28f3debd (*(StaticString *)(&s_sys_ssp28f3debd))
 #endif
 StaticStringProxy s_sys_ssp2933dfc3;
 #ifndef s_sys_ss2933dfc3
@@ -2762,6 +2774,10 @@ StaticStringProxy s_sys_ssp30dbc573;
 StaticStringProxy s_sys_ssp31a11388;
 #ifndef s_sys_ss31a11388
 #define s_sys_ss31a11388 (*(StaticString *)(&s_sys_ssp31a11388))
+#endif
+StaticStringProxy s_sys_ssp31ad4ebc;
+#ifndef s_sys_ss31ad4ebc
+#define s_sys_ss31ad4ebc (*(StaticString *)(&s_sys_ssp31ad4ebc))
 #endif
 StaticStringProxy s_sys_ssp31ec77af;
 #ifndef s_sys_ss31ec77af
@@ -4250,6 +4266,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_sspc2df217e, (const char *)"getName",
   (const char *)&s_sys_sspc2fd8845, (const char *)"setIndent",
   (const char *)&s_sys_sspc4385198, (const char *)"endDTD",
+  (const char *)&s_sys_sspc453e9e9, (const char *)"getTraceOptions",
   (const char *)&s_sys_sspc483d02b, (const char *)"relaxNGValidateSource",
   (const char *)&s_sys_sspc4b24f6c, (const char *)"LEAVES_ONLY",
   (const char *)&s_sys_sspc556d1b5, (const char *)"isFinal",
@@ -4420,6 +4437,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_sspf0db3c19, (const char *)"moveToAttributeNo",
   (const char *)&s_sys_sspf0e3c7d6, (const char *)"getSubPathname",
   (const char *)&s_sys_sspf0ea8ac1, (const char *)"RecursiveDirectoryIterator::__construct(",
+  (const char *)&s_sys_sspf16c4399, (const char *)"setTraceOptions",
   (const char *)&s_sys_sspf1bd1a9d, (const char *)"getPosition",
   (const char *)&s_sys_sspf1d09588, (const char *)"bindvalue",
   (const char *)&s_sys_sspf1ebb708, (const char *)"RFC822",
@@ -4628,6 +4646,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp28057784, (const char *)"FETCH_NUM",
   (const char *)&s_sys_ssp28d27535, (const char *)"tokPtr",
   (const char *)&s_sys_ssp28e44b58, (const char *)"setAttributeNode",
+  (const char *)&s_sys_ssp28f3debd, (const char *)"traceOpts",
   (const char *)&s_sys_ssp2933dfc3, (const char *)"ON",
   (const char *)&s_sys_ssp2966e7a2, (const char *)"RES_PROTOCOL_ERROR",
   (const char *)&s_sys_ssp29d06307, (const char *)"helpSection",
@@ -4657,6 +4676,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp309aefff, (const char *)"msg",
   (const char *)&s_sys_ssp30dbc573, (const char *)"END_ENTITY",
   (const char *)&s_sys_ssp31a11388, (const char *)"errorcode",
+  (const char *)&s_sys_ssp31ad4ebc, (const char *)"initTrace",
   (const char *)&s_sys_ssp31ec77af, (const char *)"insertBefore",
   (const char *)&s_sys_ssp325815c1, (const char *)"setValue",
   (const char *)&s_sys_ssp326d0922, (const char *)"RES_CLIENT_ERROR",
@@ -4962,7 +4982,6 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_sspa0811f17, (const char *)"\000*\000code", (const char *)7LL,
   (const char *)&s_sys_sspb3fce46e, (const char *)"\000AppendIterator\000iterators", (const char *)25LL,
   (const char *)&s_sys_sspc4be4990, (const char *)"\000FilterIterator\000it", (const char *)18LL,
-  (const char *)&s_sys_sspca166f68, (const char *)"\000*\000inited", (const char *)9LL,
   (const char *)&s_sys_sspd15ff534, (const char *)"\000*\000message", (const char *)10LL,
   (const char *)&s_sys_sspef33be8d, (const char *)"\000SplObjectStorage\000index", (const char *)23LL,
   (const char *)&s_sys_ssp00000000_1, (const char *)"\000", (const char *)1LL,
@@ -4970,6 +4989,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp0c360a27, (const char *)"\000*\000line", (const char *)7LL,
   (const char *)&s_sys_ssp246080da, (const char *)"\000RecursiveIteratorIterator\000rsrc", (const char *)31LL,
   (const char *)&s_sys_ssp25b53cd5, (const char *)"\000SplFileInfo\000rsrc", (const char *)17LL,
+  (const char *)&s_sys_ssp2717cc0c, (const char *)"\000Exception\000inited", (const char *)17LL,
   (const char *)&s_sys_ssp48192147, (const char *)"\000*\000trace", (const char *)8LL,
   (const char *)&s_sys_ssp5596f6c8, (const char *)"\000ReflectionExtension\000info", (const char *)25LL,
   (const char *)&s_sys_ssp597e1acf, (const char *)"\000*\000previous", (const char *)11LL,
@@ -4977,7 +4997,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp747206d2, (const char *)"\000*\000arr", (const char *)6LL,
   (const char *)&s_sys_ssp78cb1b27, (const char *)"\000SplObjectStorage\000storage", (const char *)25LL,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 946, 21);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 950, 21);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs8ce7db5b, (const char *)&s_sys_ss8ce7db5b,
   (const char *)&s_sys_svs90269404, (const char *)&s_sys_ss90269404,

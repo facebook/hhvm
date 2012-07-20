@@ -18,7 +18,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <stdint.h>
-#include "util/alloc.h" 
+#include "util/alloc.h"
 #include "util/util.h"
 #include "util/assert.h"
 

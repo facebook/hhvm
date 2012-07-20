@@ -18,13 +18,13 @@
 #define incl_UTIL_TINYVECTOR_H_
 
 #include <stdlib.h>
-#include "util/alloc.h"
 #include <boost/noncopyable.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
 #include <boost/type_traits/has_trivial_copy.hpp>
 #include <boost/type_traits/has_trivial_assign.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <algorithm>
+#include "util/alloc.h"
 #include "util/assert.h"
 #include "util/compact_sized_ptr.h"
 

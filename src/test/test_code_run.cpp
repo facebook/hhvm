@@ -1323,6 +1323,81 @@ bool TestCodeRun::TestExceptions() {
            "var_dump('not reached');");
   }
 
+
+  MVCRO("<?php\n"
+        "class C {\n"
+        "  function g() {\n"
+        "    $ex = new Exception();\n"
+        "    $bt = $ex->getTrace();\n"
+        "    foreach ($bt as $k => $_) {\n"
+        "      $frame = $bt[$k];\n"
+        "      unset($frame['file']);\n"
+        "      unset($frame['line']);\n"
+        "      unset($frame['args']);\n"
+        "      ksort($frame);\n"
+        "      $bt[$k] = $frame;\n"
+        "    }\n"
+        "    var_dump($bt);\n"
+        "  }\n"
+        "  function f() {\n"
+        "    $this->g();\n"
+        "  }\n"
+        "}\n"
+        "$obj = new C;\n"
+        "$obj->f();\n"
+        "echo \"==========\\n\";\n"
+        "Exception::setTraceOptions(true);\n"
+        "$obj->f();\n"
+        ,
+        "array(2) {\n"
+        "  [0]=>\n"
+        "  array(3) {\n"
+        "    [\"class\"]=>\n"
+        "    string(1) \"C\"\n"
+        "    [\"function\"]=>\n"
+        "    string(1) \"g\"\n"
+        "    [\"type\"]=>\n"
+        "    string(2) \"->\"\n"
+        "  }\n"
+        "  [1]=>\n"
+        "  array(3) {\n"
+        "    [\"class\"]=>\n"
+        "    string(1) \"C\"\n"
+        "    [\"function\"]=>\n"
+        "    string(1) \"f\"\n"
+        "    [\"type\"]=>\n"
+        "    string(2) \"->\"\n"
+        "  }\n"
+        "}\n"
+        "==========\n"
+        "array(2) {\n"
+        "  [0]=>\n"
+        "  array(4) {\n"
+        "    [\"class\"]=>\n"
+        "    string(1) \"C\"\n"
+        "    [\"function\"]=>\n"
+        "    string(1) \"g\"\n"
+        "    [\"object\"]=>\n"
+        "    object(C)#1 (0) {\n"
+        "    }\n"
+        "    [\"type\"]=>\n"
+        "    string(2) \"->\"\n"
+        "  }\n"
+        "  [1]=>\n"
+        "  array(4) {\n"
+        "    [\"class\"]=>\n"
+        "    string(1) \"C\"\n"
+        "    [\"function\"]=>\n"
+        "    string(1) \"f\"\n"
+        "    [\"object\"]=>\n"
+        "    object(C)#1 (0) {\n"
+        "    }\n"
+        "    [\"type\"]=>\n"
+        "    string(2) \"->\"\n"
+        "  }\n"
+        "}\n"
+        );
+
   return true;
 }
 
@@ -10584,6 +10659,19 @@ bool TestCodeRun::TestCompilation() {
        "  id(X::foo(1))->bar();"
        "}"
        "test();");
+
+  MVCRNW("<?php "
+         "class X {"
+         "  function bar(X $x) {"
+         "    $x->foo();"
+         "    $x->foo();"
+         "  }"
+         "  function foo() { var_dump(__METHOD__); }"
+         "}"
+         "function test() {"
+         "  X::bar(null);"
+         "}"
+         "test();");
 
   return true;
 }
@@ -20202,7 +20290,26 @@ bool TestCodeRun::TestAPC() {
           ")\n"
           );
   }
-  return true;
+
+  MVCRO("<?php "
+        "function test($x) {"
+        "  apc_store('foo', array('a'.$x, array($x)));"
+        "  $a = apc_fetch('foo');"
+        "  $x = array_intersect($a, $a);"
+        "  var_dump($x);"
+        "}"
+        "test('foo');",
+        "array(2) {\n"
+        "  [0]=>\n"
+        "  string(4) \"afoo\"\n"
+        "  [1]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    string(3) \"foo\"\n"
+        "  }\n"
+        "}\n");
+
+ return true;
 }
 
 bool TestCodeRun::TestInlining() {

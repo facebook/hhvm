@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 316 */
+/* SRC: classes/exception.php line 324 */
 FORWARD_DECLARE_CLASS(DOMException);
 extern const ObjectStaticCallbacks cw_DOMException;
 class c_DOMException : public c_Exception {

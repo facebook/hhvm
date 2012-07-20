@@ -109,6 +109,26 @@ void Socket::setTimeout(struct timeval &tv) {
   }
 }
 
+bool Socket::checkLiveness() {
+  if (m_fd == -1 || m_timedOut) {
+    return false;
+  }
+
+  pollfd p;
+  p.fd = m_fd;
+  p.events = POLLIN | POLLERR | POLLHUP | POLLPRI;
+  p.revents = 0;
+  if (poll(&p, 1, 0) > 0 && p.revents > 0) {
+    char buf;
+    if (0 == recv(m_fd, &buf, sizeof(buf), MSG_PEEK) &&
+        errno != EAGAIN) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool Socket::setBlocking(bool blocking) {
   int flags = fcntl(m_fd, F_GETFL, 0);
   if (blocking) {

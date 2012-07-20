@@ -376,12 +376,16 @@ Variant *get_static_property_lv(CStrRef s, const char *prop) {
   return NULL;
 }
 
-bool get_call_info_static_method(MethodCallPackage &info) {
-  return NULL;
+bool get_call_info_static_method(MethodCallPackage &mcp) {
+  StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);
+  const ObjectStaticCallbacks *cwo = get_object_static_callbacks(s);
+  if (LIKELY(cwo != 0)) return ObjectStaticCallbacks::GetCallInfo(cwo, mcp, -1);
+  if (mcp.m_fatal) throw_missing_class(s->data());
+  return false;
 }
 
 const ObjectStaticCallbacks * get_object_static_callbacks(CStrRef s) {
-  return NULL;
+  return get_builtin_object_static_callbacks(s);;
 }
 
 Array get_global_state() { return Array(); }

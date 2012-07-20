@@ -50,6 +50,7 @@ TRACE_SET_MOD(trans)
 
 static __thread BiasedCoin *dbgTranslateCoin;
 Translator* transl;
+Lease Translator::s_writeLease;
 
 void InstrStream::append(NormalizedInstruction* ni) {
   if (last) {
@@ -436,10 +437,6 @@ predictOutputs(NormalizedInstruction* ni) {
             invName->data(),
             pred.first,
             pred.second);
-      // For FCalls that return null, this is probably a procedure rather
-      // than a function. The PopC handles this better than our type
-      // prediction machinery.
-      if (pred.first == KindOfNull) pred.second = 0.0;
     }
   }
   if (pred.second >= 1.00) {
@@ -1214,8 +1211,8 @@ void Translator::analyzeSecondPass(Tracelet& t) {
   }
 }
 
-static NormalizedInstruction* findGenerator(NormalizedInstruction* ni,
-                                            DynLocation* dl) {
+static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
+                                           DynLocation* dl) {
   while (ni != NULL) {
     if (ni->outStack == dl ||
         ni->outLocal == dl ||
@@ -1267,70 +1264,100 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
 
     switch (info.m_kind) {
-    case Unit::MetaInfo::DataType: {
-      ASSERT((unsigned)arg < inputInfos.size());
-      InputInfo& ii = inputInfos[arg];
-      ii.dontGuard = true;
-      DynLocation* dl = tas.recordRead(ii);
-      if (dl->rtt.outerType() != info.m_data &&
-          (!dl->isString() || info.m_data != KindOfString)) {
-        if (dl->rtt.outerType() != KindOfInvalid) {
-          // Either static analysis is wrong, or
-          // this was mis-predicted by the type
-          // profiler
-          ASSERT(mapContains(tas.m_changeSet, dl->location));
-          NormalizedInstruction *gen =
-            findGenerator(tas.m_t->m_instrStream.last, dl);
-          ASSERT(gen->outputPredicted);
-          gen->outputPredicted = false;
-        }
-        dl->rtt = RuntimeType((DataType)info.m_data);
-        if (debug && arg < 32) {
-          ni->checkedInputs |= 1u << arg;
-        }
-      }
-      break;
-    }
-    case Unit::MetaInfo::String: {
-      const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
-      ASSERT((unsigned)arg < inputInfos.size());
-      InputInfo& ii = inputInfos[arg];
-      ii.dontGuard = true;
-      DynLocation* dl = tas.recordRead(ii);
-      ASSERT(!dl->rtt.isString() || !dl->rtt.valueString() ||
-             dl->rtt.valueString() == sd);
-      SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
-                 arg, dl->pretty().c_str());
-      dl->rtt = RuntimeType(sd);
-      break;
-    }
-    case Unit::MetaInfo::Class: {
-      ASSERT((unsigned)arg < inputInfos.size());
-      InputInfo& ii = inputInfos[arg];
-      DynLocation* dl = tas.recordRead(ii);
-      if (dl->rtt.valueType() != KindOfObject) {
-        continue;
-      }
-      const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
-      ASSERT(!dl->rtt.valueClass() ||
-             dl->rtt.valueClass()->name() == sd);
-      SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
-                             "class; old type = %s\n",
-                 arg, dl->pretty().c_str());
-      Class* cls = Unit::lookupClass(sd);
-      if (cls) {
-        if (dl->rtt.isVariant()) {
-          dl->rtt = RuntimeType(KindOfRef, KindOfObject, cls);
+      case Unit::MetaInfo::DataType: {
+        ASSERT((unsigned)arg < inputInfos.size());
+        InputInfo& ii = inputInfos[arg];
+        ii.dontGuard = true;
+        DynLocation* dl = tas.recordRead(ii);
+        if (dl->rtt.outerType() != info.m_data &&
+            (!dl->isString() || info.m_data != KindOfString)) {
+          if (dl->rtt.outerType() != KindOfInvalid) {
+            // Either static analysis is wrong, or
+            // this was mis-predicted by the type
+            // profiler, or this code is unreachable,
+            // and there's an earlier bytecode in the tracelet
+            // thats going to fatal
+            NormalizedInstruction *src = NULL;
+            if(mapContains(tas.m_changeSet, dl->location)) {
+              src = findInputSrc(tas.m_t->m_instrStream.last, dl);
+              if (src && src->outputPredicted) {
+                src->outputPredicted = false;
+              } else {
+                src = NULL;
+              }
+            }
+            if (!src) {
+              // Not a type-profiler mis-predict
+              if (tas.m_t->m_instrStream.first) {
+                // We're not the first instruction, so punt
+                // If this bytecode /is/ reachable, we'll
+                // get here again, and that time, we will
+                // be the first instruction
+                punt();
+              }
+              assert(false);
+            }
+          }
+          dl->rtt = RuntimeType((DataType)info.m_data);
+          ni->markInputInferred(arg);
         } else {
-          dl->rtt = RuntimeType(KindOfObject, KindOfInvalid, cls);
+          /*
+           * Static inference confirmed the expected type
+           * but if the expected type was provided by the type
+           * profiler we want to clear outputPredicted to
+           * avoid unneeded guards
+           */
+          if (mapContains(tas.m_changeSet, dl->location)) {
+            NormalizedInstruction *src =
+              findInputSrc(tas.m_t->m_instrStream.last, dl);
+            if (src->outputPredicted) {
+              src->outputPredicted = false;
+              ni->markInputInferred(arg);
+            }
+          }
         }
+        break;
       }
-      break;
-    }
-    case Unit::MetaInfo::NopOut:
-      return true;
-    case Unit::MetaInfo::None:
-      break;
+      case Unit::MetaInfo::String: {
+        const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
+        ASSERT((unsigned)arg < inputInfos.size());
+        InputInfo& ii = inputInfos[arg];
+        ii.dontGuard = true;
+        DynLocation* dl = tas.recordRead(ii);
+        ASSERT(!dl->rtt.isString() || !dl->rtt.valueString() ||
+               dl->rtt.valueString() == sd);
+        SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
+                arg, dl->pretty().c_str());
+        dl->rtt = RuntimeType(sd);
+        break;
+      }
+      case Unit::MetaInfo::Class: {
+        ASSERT((unsigned)arg < inputInfos.size());
+        InputInfo& ii = inputInfos[arg];
+        DynLocation* dl = tas.recordRead(ii);
+        if (dl->rtt.valueType() != KindOfObject) {
+          continue;
+        }
+        const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
+        ASSERT(!dl->rtt.valueClass() ||
+               dl->rtt.valueClass()->name() == sd);
+        SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
+                "class; old type = %s\n",
+                arg, dl->pretty().c_str());
+        Class* cls = Unit::lookupClass(sd);
+        if (cls) {
+          if (dl->rtt.isVariant()) {
+            dl->rtt = RuntimeType(KindOfRef, KindOfObject, cls);
+          } else {
+            dl->rtt = RuntimeType(KindOfObject, KindOfInvalid, cls);
+          }
+        }
+        break;
+      }
+      case Unit::MetaInfo::NopOut:
+        return true;
+      case Unit::MetaInfo::None:
+        break;
     }
   }
 
@@ -1551,6 +1578,28 @@ void Translator::getInputs(Tracelet& t,
       inputs[i].dontGuard = true;
     }
   }
+}
+
+bool outputDependsOnInput(const Opcode instr) {
+  switch (instrInfo[instr].type) {
+    case OutNull:
+    case OutString:
+    case OutStringImm:
+    case OutDouble:
+    case OutBoolean:
+    case OutBooleanImm:
+    case OutInt64:
+    case OutArray:
+    case OutObject:
+    case OutUnknown:
+    case OutVUnknown:
+    case OutClassRef:
+    case OutNone:
+      return false;
+    default:
+      break;
+  }
+  return true;
 }
 
 /*
@@ -2579,13 +2628,12 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
        */
       func = NULL;
     }
-  } else {
+  } else if (!(func->attrs() & AttrPrivate)) {
     if (magicCall || func->attrs() & AttrStatic) {
       if (!(cls->preClass()->attrs() & AttrNoOverride)) {
         func = NULL;
       }
-    } else if (!(func->attrs() & AttrPrivate) &&
-               !(func->attrs() & AttrNoOverride && !func->hasStaticLocals()) &&
+    } else if (!(func->attrs() & AttrNoOverride && !func->hasStaticLocals()) &&
                !(cls->preClass()->attrs() & AttrNoOverride)) {
       func = NULL;
     }

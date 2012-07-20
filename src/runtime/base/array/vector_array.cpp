@@ -106,10 +106,30 @@ Variant VectorArray::current() const {
   return false;
 }
 
-Variant VectorArray::reset()         { return value(m_pos = 0);}
-Variant VectorArray::prev()          { return value(--m_pos);}
-Variant VectorArray::next()          { return value(++m_pos);}
-Variant VectorArray::end()           { return value(m_pos = m_size - 1L);}
+Variant VectorArray::reset() {
+  ssize_t pos = 0;
+  Variant v = value(pos);
+  if (m_pos != pos) m_pos = pos;
+  return v;
+}
+Variant VectorArray::prev() {
+  ssize_t pos = m_pos - 1;
+  Variant v = value(pos);
+  if (m_pos != pos) m_pos = pos;
+  return v;
+}
+Variant VectorArray::next() {
+  ssize_t pos = m_pos + 1;
+  Variant v = value(pos);
+  if (m_pos != pos) m_pos = pos;
+  return v;
+}
+Variant VectorArray::end() {
+  ssize_t pos = (ssize_t)m_size - 1;
+  Variant v = value(pos);
+  if (m_pos != pos) m_pos = pos;
+  return v;
+}
 
 HOT_FUNC_HPHP
 VectorArray::VectorArray(uint capacity /* = 0 */) :

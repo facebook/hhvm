@@ -51,44 +51,6 @@ class Bits {
   uintptr_t* m_words;
 };
 
-template <class C>
-class StdRange {
- typedef typename C::value_type V;
- public:
-  explicit StdRange(const C& c) : m_p(c.begin()), m_end(c.end()) {}
-  bool empty() const { return m_p == m_end; }
-  const V& front() const {
-    ASSERT(!empty());
-    return *m_p;
-  }
-  const V& popFront() {
-    const V& f = front();
-    ++m_p;
-    return f;
-  }
- private:
-  typename C::const_iterator m_p, m_end;
-};
-
-// Range over a pair of ForwardIterators.
-template <class Iterator>
-struct IterRange {
-  typedef typename boost::iterator_value<Iterator>::type value_type;
-
-  IterRange(Iterator first, Iterator last)
-    : m_first(first)
-    , m_last(last)
-  {}
-
-  const value_type& front() const { return *m_first; }
-  bool empty() const { return m_first == m_last; }
-  value_type popFront() { return *m_first++; }
-
-private:
-  Iterator m_first;
-  Iterator m_last;
-};
-
 /**
  * Return true if container c contains e, otherwise false.
  */

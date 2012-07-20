@@ -24,7 +24,6 @@
 #include <util/base.h>
 #include <util/thread_local.h>
 #include <util/stack_trace.h>
-#include <util/chunk_list.h>
 #include <util/lock.h>
 #include <runtime/base/types.h>
 #include <runtime/base/util/countable.h>
@@ -37,7 +36,6 @@ namespace HPHP {
 #endif
 
 //#define DEBUGGING_SMART_ALLOCATOR 1
-//#define SMART_ALLOCATOR_STACKTRACE 1
 //#define SMART_ALLOCATOR_DEBUG_FREE
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -155,10 +153,97 @@ void InitAllocatorThreadLocal() ATTRIBUTE_COLD;
 #define MAX_OBJECT_COUNT_PER_SLAB 64
 #define SLAB_SIZE (128 * 1024)
 
-typedef ChunkList<void *, SLAB_SIZE> FreeList;
-
 typedef hphp_hash_map<int64, int, int64_hash> BlockIndexMap;
 typedef boost::dynamic_bitset<unsigned long long> FreeMap;
+
+/**
+ * A garbage list is a freelist of items that uses the space in the items
+ * to store a singly linked list.
+ */
+class GarbageList {
+public:
+  GarbageList() : ptr(NULL), sz(0) {}
+
+  // Pops an item, or returns NULL
+  void* maybePop() {
+    void** ret = ptr;
+    if (ret != NULL) {
+      ptr = (void**)*ret;
+      sz --;
+    }
+    return ret;
+  }
+
+  // Pushes an item on to the list. The item must be larger than
+  // sizeof(void*)
+  void push(void* val) {
+    void** convval = (void**)val;
+    *convval = ptr;
+    ptr = convval;
+    sz++;
+  }
+
+  // Number of items on the list.
+  int size() const {
+    return sz;
+  }
+
+  // Remove all items from this list
+  void clear() {
+    ptr = NULL;
+    sz = 0;
+  }
+
+  class Iterator {
+  public:
+    Iterator(const GarbageList& l) : curptr(l.ptr) {}
+
+    Iterator(const Iterator &other) : curptr(other.curptr) {}
+    Iterator() : curptr(NULL) {}
+
+    bool operator==(const Iterator &it) {
+      return curptr == it.curptr;
+    }
+
+    bool operator!=(const Iterator &it) {
+      return !operator==(it);
+    }
+
+    Iterator &operator++() {
+      if (curptr) {
+        curptr = (void**)*curptr;
+      }
+      return *this;
+    }
+
+    Iterator operator++(int) {
+      Iterator ret(*this);
+      operator++();
+      return ret;
+    }
+
+    void* operator*() const {
+      return curptr;
+    }
+
+  private:
+    void** curptr;
+  };
+
+  Iterator begin() const {
+    return Iterator(*this);
+  }
+
+  Iterator end() const {
+    return Iterator();
+  }
+
+  typedef Iterator iterator;
+
+private:
+  void** ptr;
+  int sz;
+};
 
 /**
  * Just a simple free-list based memory allocator.
@@ -201,29 +286,8 @@ public:
   void *alloc();
   void *allocHelper() NEVER_INLINE;
   void dealloc(void *obj) {
-#ifdef SMART_ALLOCATOR_STACKTRACE
-    if (!isValid(obj)) {
-      Lock lock(s_st_mutex);
-      if (s_st_allocs.find(obj) != s_st_allocs.end()) {
-        printf("Object %p was allocated from a different thread: %s\n",
-               obj, s_st_allocs[obj].toString().c_str());
-      } else {
-        printf("Object %p was not smart allocated\n", obj);
-      }
-    }
-    s_st_allocs.erase(obj);
-#endif
     ASSERT(isValid(obj));
-    m_freelist.push_back(obj);
-#ifdef SMART_ALLOCATOR_STACKTRACE
-    {
-      Lock lock(s_st_mutex);
-      bool enabled = StackTrace::Enabled;
-      StackTrace::Enabled = true;
-      s_st_deallocs.operator[](obj);
-      StackTrace::Enabled = enabled;
-    }
-#endif
+    m_freelist.push(obj);
 #ifdef SMART_ALLOCATOR_DEBUG_FREE
     memset(obj, 0xfe, m_itemSize);
 #endif
@@ -263,7 +327,7 @@ private:
   int m_col; // inner position
   int m_colMax;
 
-  FreeList m_freelist;
+  GarbageList m_freelist;
 
   int m_allocatedBlocks;  // how many blocks are left in the last batch
   int m_multiplier;       // allocate m_multiplier blocks at once
@@ -271,12 +335,6 @@ private:
   int m_targetMultiplier; // updated upon rollback
 
 protected:
-
-#ifdef SMART_ALLOCATOR_STACKTRACE
-  static Mutex s_st_mutex;
-  static std::map<void*, StackTrace> s_st_allocs;
-  static std::map<void*, StackTrace> s_st_deallocs;
-#endif
 
   MemoryUsageStats *m_stats;
 
@@ -319,7 +377,8 @@ class SmartAllocator : public SmartAllocatorImpl {
    * footprint.
    */
   SmartAllocator(int itemCount = -1)
-    : SmartAllocatorImpl(TNameEnum, itemCount, sizeof(T), flag) {}
+    : SmartAllocatorImpl(TNameEnum, itemCount,
+                         std::max(sizeof(T), sizeof(void*)), flag) {}
 
   void release(T *p) {
     if (p) {

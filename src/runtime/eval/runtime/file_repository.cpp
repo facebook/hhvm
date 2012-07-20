@@ -125,6 +125,14 @@ void FileRepository::onDelete(PhpFile *f) {
   delete f;
 }
 
+void FileRepository::forEachUnit(VM::UnitVisitor& uit) {
+  ReadLock lock(s_md5Lock);
+  for (Md5FileMap::const_iterator it = s_md5Files.begin();
+       it != s_md5Files.end(); ++it) {
+    uit(it->second->unit());
+  }
+}
+
 PhpFile *FileRepository::checkoutFile(StringData *rname,
                                       const struct stat &s) {
   FileInfo fileInfo;

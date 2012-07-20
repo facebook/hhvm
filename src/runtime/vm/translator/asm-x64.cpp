@@ -49,6 +49,13 @@ Address allocSlab(size_t size) {
   return result;
 }
 
+void freeSlab(Address addr, size_t size) {
+  int result = munmap(addr, size);
+  if (result != 0) {
+    perror("freeSlab: munmap");
+  }
+}
+
 void DataBlock::init() {
   base = frontier = allocSlab(size);
 }

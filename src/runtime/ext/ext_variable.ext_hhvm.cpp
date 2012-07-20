@@ -321,10 +321,9 @@ TypedValue* fg_var_dump(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfNull;
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {

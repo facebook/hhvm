@@ -1811,10 +1811,9 @@ TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, HPHP::VM::ActRec* ar
   tvCastToInt64InPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-1, false);
     for (long long i = 1; i < count; ++i) {
-      TypedValue* extraArg = ea->getExtraArg(i-1);
+      TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
       } else {
@@ -1840,10 +1839,9 @@ TypedValue* tg_12PDOStatement_setfetchmode(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfBoolean;
           Array extraArgs;
           {
-            HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
             ArrayInit ai(count-1, false);
             for (long long i = 1; i < count; ++i) {
-              TypedValue* extraArg = ea->getExtraArg(i-1);
+              TypedValue* extraArg = ar->getExtraArg(i-1);
               if (tvIsStronglyBound(extraArg)) {
                 ai.setRef(i-1, tvAsVariant(extraArg));
               } else {

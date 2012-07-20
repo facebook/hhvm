@@ -643,7 +643,7 @@ bool f_shm_detach(int64 shm_identifier) {
     return false;
   }
   g_shms.erase(iter);
-  delete *iter;
+  delete (sysvshm_shm*)shm_identifier;
   return true;
 }
 

@@ -32,6 +32,10 @@ namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::bcinterp;
 
+static inline Transl::Translator* transl() {
+  return Transl::Translator::Get();
+}
+
 void phpDebuggerHook(const uchar* pc) {
   TRACE(5, "in phpDebuggerHook()\n");
   if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
@@ -78,12 +82,19 @@ static void blacklistRangesInJit(const Unit* unit,
        it != offsets.end(); ++it) {
     for (PC pc = unit->at(it->m_base); pc < unit->at(it->m_past);
          pc += instrLen((Opcode*)pc)) {
-      Transl::transl->addDbgBLPC(pc);
+      transl()->addDbgBLPC(pc);
     }
   }
-  if (!Transl::transl->addDbgGuards(unit)) {
+  if (!transl()->addDbgGuards(unit)) {
     Logger::Warning("Failed to set breakpoints in Jitted code");
   }
+}
+
+static void blacklistFuncInJit(const Func* f) {
+  Unit* unit = f->unit();
+  OffsetRangeVec ranges;
+  ranges.push_back(OffsetRange(f->base(), f->past()));
+  blacklistRangesInJit(unit, ranges);
 }
 
 static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
@@ -132,9 +143,9 @@ static void addBreakPointFuncEntry(const Func* f) {
         f->fullName()->data(), f->unit(), f->base());
   g_vmContext->m_breakPointFilter->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (Transl::transl->addDbgBLPC(pc)) {
+    if (transl()->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!Transl::transl->addDbgGuard(f, f->base())) {
+      if (!transl()->addDbgGuard(f, f->base())) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }
@@ -149,6 +160,12 @@ static void addBreakPointsClass(Eval::DebuggerProxy* proxy,
     if (proxy->couldBreakEnterFunc(funcs[i]->fullName())) {
       addBreakPointFuncEntry(funcs[i]);
     }
+  }
+}
+    
+void phpDebuggerEvalHook(const Func* f) {
+  if (RuntimeOption::EvalJit) {
+    blacklistFuncInJit(f);
   }
 }
 

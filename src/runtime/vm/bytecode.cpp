@@ -79,6 +79,8 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 namespace VM {
 
+using Transl::tx64;
+
 #if DEBUG
 #define OPTBLD_INLINE
 #else
@@ -187,11 +189,11 @@ static inline Class* frameStaticClass(ActRec* fp) {
 
 VarEnv::VarEnv()
   : m_cfp(NULL)
+  , m_previous(0)
   , m_extraArgs(NULL)
   , m_nvTable(boost::in_place<NameValueTable>(
       RuntimeOption::EvalVMInitialGlobalTableSize))
   , m_depth(0)
-  , m_isGlobalScope(true)
 {
   // The global scope always contains certain special names.
   {
@@ -229,7 +231,6 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
   : m_cfp(fp)
   , m_extraArgs(eArgs)
   , m_depth(1)
-  , m_isGlobalScope(false)
 {
   const Func* func = fp->m_func;
   const Id numNames = func->numNamedLocals();
@@ -250,16 +251,16 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
 VarEnv::~VarEnv() {
   TRACE(3, "Destroying VarEnv %p [%s]\n",
            this,
-           m_isGlobalScope ? "global scope" : "local scope");
-  ASSERT(g_vmContext->m_varEnvs.back() == this);
+           isGlobalScope() ? "global scope" : "local scope");
   ASSERT(m_restoreLocations.empty());
-  g_vmContext->m_varEnvs.pop_back();
+  ASSERT(g_vmContext->m_topVarEnv == this);
+  g_vmContext->m_topVarEnv = m_previous;
 
   if (m_extraArgs) {
     delete m_extraArgs;
   }
   ASSERT(m_cfp == NULL);
-  if (m_isGlobalScope) {
+  if (isGlobalScope()) {
     /*
      * When detaching the global scope, we leak any live objects (and
      * let the smart allocator clean them up).  This is because we're
@@ -274,24 +275,32 @@ VarEnv* VarEnv::createLazyAttach(ActRec* fp,
                                  bool skipInsert /* = false */) {
   const Func* func = fp->m_func;
   const size_t numNames = func->numNamedLocals();
-  ExtraArgs *eArgs = fp->getExtraArgs();
+  ExtraArgs* eArgs = fp->getExtraArgs();
 
   void* mem = malloc(sizeof(VarEnv) + sizeof(TypedValue*) * numNames);
   VarEnv* ret = new (mem) VarEnv(fp, eArgs);
   TRACE(3, "Creating lazily attached VarEnv %p\n", mem);
   if (!skipInsert) {
-    g_vmContext->m_varEnvs.push_back(ret);
+    ret->setPrevious(g_vmContext->m_topVarEnv);
+    g_vmContext->m_topVarEnv = ret;
+  } else {
+    // The caller must immediately setPrevious, so don't bother
+    // setting it to an invalid pointer except in a debug build.
+    if (debug) {
+      ret->setPrevious((VarEnv*)-1);
+    }
   }
   return ret;
 }
 
 VarEnv* VarEnv::createGlobal() {
-  ASSERT(g_vmContext->m_varEnvs.empty());
+  ASSERT(!g_vmContext->m_globalVarEnv);
+  ASSERT(!g_vmContext->m_topVarEnv);
 
   void* mem = malloc(sizeof(VarEnv));
   VarEnv* ret = new (mem) VarEnv();
   TRACE(3, "Creating VarEnv %p [global scope]\n", mem);
-  g_vmContext->m_varEnvs.push_back(ret);
+  g_vmContext->m_globalVarEnv = g_vmContext->m_topVarEnv = ret;
   return ret;
 }
 
@@ -303,7 +312,7 @@ void VarEnv::destroy(VarEnv* ve) {
 void VarEnv::attach(ActRec* fp) {
   TRACE(3, "Attaching VarEnv %p [%s] %d fp @%p\n",
            this,
-           m_isGlobalScope ? "global scope" : "local scope",
+           isGlobalScope() ? "global scope" : "local scope",
            int(fp->m_func->numNamedLocals()), fp);
   ASSERT(m_depth == 0 || g_vmContext->arGetSfp(fp) == m_cfp ||
          (g_vmContext->arGetSfp(fp) == fp && g_vmContext->isNested()));
@@ -335,7 +344,7 @@ void VarEnv::attach(ActRec* fp) {
 void VarEnv::detach(ActRec* fp) {
   TRACE(3, "Detaching VarEnv %p [%s] @%p\n",
            this,
-           m_isGlobalScope ? "global scope" : "local scope",
+           isGlobalScope() ? "global scope" : "local scope",
            fp);
   ASSERT(fp == m_cfp);
   ASSERT(m_depth > 0);
@@ -348,7 +357,7 @@ void VarEnv::detach(ActRec* fp) {
      * for the first (lazy) attach stored immediately following the
      * VarEnv in memory.  In this case m_restoreLocations will be empty.
      */
-    ASSERT((!m_isGlobalScope && m_depth == 1) == m_restoreLocations.empty());
+    ASSERT((!isGlobalScope() && m_depth == 1) == m_restoreLocations.empty());
     TypedValue** origLocs =
       !m_restoreLocations.empty()
         ? m_restoreLocations.back()
@@ -366,11 +375,11 @@ void VarEnv::detach(ActRec* fp) {
   VMExecutionContext* context = g_vmContext;
   m_cfp = context->getPrevVMState(fp);
   m_depth--;
-  // don't free global varEnv
   if (m_depth == 0) {
     m_cfp = NULL;
-    if (context->m_varEnvs.front() != this) {
-      ASSERT(!m_isGlobalScope);
+    // don't free global varEnv
+    if (context->m_globalVarEnv != this) {
+      ASSERT(!isGlobalScope());
       destroy(this);
     }
   }
@@ -449,6 +458,15 @@ Array VarEnv::getDefinedVariables() const {
   }
 
   return ret;
+}
+
+unsigned VarEnv::numExtraArgs() const {
+  return m_extraArgs ? m_extraArgs->numExtraArgs() : 0;
+}
+
+TypedValue* VarEnv::getExtraArg(unsigned argInd) const {
+  ASSERT(numExtraArgs());
+  return m_extraArgs->getExtraArg(argInd);
 }
 
 //=============================================================================
@@ -1446,7 +1464,7 @@ bool VMExecutionContext::setCns(StringData* cns, CVarRef val, bool dynamic) {
     if (dynamic) {
       newPreConst(cns, *tv);
     }
-    m_transl->defineCns(cns);
+    tx64->defineCns(cns);
   }
   return true;
 }
@@ -1490,13 +1508,14 @@ VarEnv* VMExecutionContext::getVarEnv(bool skipBuiltin) {
       // If the builtin function has its own VarEnv, we temporarily
       // remove it from the list before making a VarEnv for the calling
       // function to satisfy various ASSERTs
-      ASSERT(builtinVarEnv == g_vmContext->m_varEnvs.back());
-      g_vmContext->m_varEnvs.pop_back();
+      ASSERT(builtinVarEnv == m_topVarEnv);
+      m_topVarEnv = m_topVarEnv->previous();
     }
     fp->m_varEnv = VarEnv::createLazyAttach(fp);
     if (builtinVarEnv) {
       // Put the builtin function's VarEnv back in the list
-      g_vmContext->m_varEnvs.push_back(builtinVarEnv);
+      builtinVarEnv->setPrevious(fp->m_varEnv);
+      m_topVarEnv = builtinVarEnv;
     }
   }
   return fp->m_varEnv;
@@ -1692,7 +1711,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
 
 void VMExecutionContext::syncGdbState() {
   if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitNoGdb) {
-    ((VM::Transl::TranslatorX64*)m_transl)->m_debugInfo.debugSync();
+    tx64->m_debugInfo.debugSync();
   }
 }
 
@@ -1710,7 +1729,7 @@ void VMExecutionContext::enterVMWork(ActRec* ar, bool enterFn) {
       LIKELY(!DEBUGGER_FORCE_INTR)) {
     Transl::SrcKey sk(Transl::curFunc(), m_pc);
     (void) curUnit()->offsetOf(m_pc); /* assert */
-    m_transl->resume(sk);
+    tx64->resume(sk);
   } else {
     dispatch();
   }
@@ -1739,7 +1758,7 @@ void VMExecutionContext::enterVM(TypedValue* retval,
     ar->getExtraArgs()->setExtraArgs(extraArgs, numExtras);
   }
 
-  ar->m_savedRip = (uintptr_t)m_transl->getCallToExit();
+  ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
   m_firstAR = ar;
   m_halted = false;
 
@@ -1978,16 +1997,11 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
 
 void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
   Func* func = unit->getMain();
-  VarEnv* varEnv;
-  if (g_vmContext->m_varEnvs.empty()) {
-    // The global variable environment hasn't been created yet, so
-    // create it
-    varEnv = VarEnv::createGlobal();
-  } else {
-    // Get the global variable environment
-    varEnv = g_vmContext->m_varEnvs.front();
+  if (!m_globalVarEnv) {
+    VarEnv::createGlobal();
   }
-  invokeFunc(retval, func, Array::Create(), NULL, NULL, varEnv, NULL, unit);
+  invokeFunc(retval, func, Array::Create(), NULL, NULL,
+             m_globalVarEnv, NULL, unit);
 }
 
 
@@ -2231,8 +2245,8 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
         args.append(tvAsVariant(arg));
       }
       for (; i < nargs; i++) {
-        ASSERT(fp->hasExtraArgs());
-        TypedValue *arg = fp->getExtraArgs()->getExtraArg(i - nparams);
+        ASSERT(fp->numExtraArgs());
+        TypedValue *arg = fp->getExtraArg(i - nparams);
         args.append(tvAsVariant(arg));
       }
     }
@@ -2585,7 +2599,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   arSetSfp(ar, m_fp);
   ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
                          m_fp->m_func->base());
-  ar->m_savedRip = (uintptr_t)m_transl->getRetFromInterpretedFrame();
+  ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
   pushLocalsAndIterators(func);
   if (local) {
     ar->m_varEnv = 0;
@@ -2688,8 +2702,7 @@ CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
   StringData* newName = StringData::GetStaticString(newNameStr.str());
   unit->renameFunc(oldName, newName);
   m_createdFuncs.push_back(unit);
-  unit->mergePreConsts();
-  unit->mergeFuncs();
+  unit->merge();
 
   // Technically we shouldn't have to eval the unit right now (it'll execute
   // the pseudo-main, which should be empty) and could get away with just
@@ -2716,40 +2729,39 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     return;
   }
 
-  bool temporaryVarEnv = false;
-
   VarEnv *varEnv = NULL;
   ActRec *fp = m_fp;
   ActRec *cfpSave = NULL;
   if (fp) {
-    ASSERT(!g_vmContext->m_varEnvs.empty());
-    std::list<HPHP::VM::VarEnv*>::iterator it = g_vmContext->m_varEnvs.end();
+    VM::VarEnv* vit = 0;
     for (; frame > 0; --frame) {
       if (fp->hasVarEnv()) {
-        if (it == g_vmContext->m_varEnvs.end() || *it != fp->m_varEnv) {
-          --it;
+        if (!vit) {
+          vit = m_topVarEnv;
+        } else if (vit != fp->m_varEnv) {
+          vit = vit->previous();
         }
-        ASSERT(*it == fp->m_varEnv);
+        ASSERT(vit == fp->m_varEnv);
       }
-      ActRec *prevFp = getPrevVMState(fp);
+      ActRec* prevFp = getPrevVMState(fp);
       if (!prevFp) {
         // To be safe in case we failed to get prevFp
+        // XXX: it's unclear why this is possible, but it was
+        // causing some crashes.
         break;
       }
       fp = prevFp;
     }
     if (!fp->hasVarEnv()) {
-      const bool skipInsert = true;
-      if (!(fp->m_func->attrs() & AttrMayUseVV)) {
-        // We creating a VarEnv for a function is not marked as "MayUseVV",
-        // so that we can access its local variables. We must make sure to
-        // dispose of this VarEnv before we allow execution to resume.
-        temporaryVarEnv = true;
+      if (!vit) {
+        fp->m_varEnv = VarEnv::createLazyAttach(fp);
+      } else {
+        const bool skipInsert = true;
+        fp->m_varEnv = VarEnv::createLazyAttach(fp, skipInsert);
+        // Slide it in front of the VarEnv most recently above it.
+        fp->m_varEnv->setPrevious(vit->previous());
+        vit->setPrevious(fp->m_varEnv);
       }
-      fp->m_varEnv = VarEnv::createLazyAttach(fp, skipInsert);
-      g_vmContext->m_varEnvs.insert(it, fp->m_varEnv);
-    } else {
-      ASSERT(fp->m_func->attrs() & AttrMayUseVV);
     }
     varEnv = fp->m_varEnv;
     cfpSave = varEnv->getCfp();
@@ -2762,6 +2774,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     } else if (fp->hasClass()) {
       cls = fp->getClass();
     }
+    phpDebuggerEvalHook(fp->m_func);
   }
 
   const static StaticString s_cppException("Hit an exception");
@@ -2785,13 +2798,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     g_vmContext->write(os.str());
   } catch (Eval::DebuggerException &e) {
     if (varEnv) {
-      if (temporaryVarEnv) {
-        varEnv->setCfp(NULL);
-        VarEnv::destroy(varEnv);
-        fp->m_varEnv = NULL;
-      } else {
-        varEnv->setCfp(cfpSave);
-      }
+      varEnv->setCfp(cfpSave);
     }
     throw;
   } catch (Exception &e) {
@@ -2813,19 +2820,10 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   }
 
   if (varEnv) {
-    if (temporaryVarEnv) {
-      // We created a VarEnv for a function not marked as "AttrMayUseVV",
-      // so we need to tear down the VarEnv before allowing execution to
-      // resume
-      varEnv->setCfp(NULL);
-      VarEnv::destroy(varEnv);
-      fp->m_varEnv = NULL;
-    } else {
-      // The debugger eval frame may have attached to the VarEnv from a
-      // frame that was not the top frame, so we need to manually set
-      // cfp back to what it was before
-      varEnv->setCfp(cfpSave);
-    }
+    // The debugger eval frame may have attached to the VarEnv from a
+    // frame that was not the top frame, so we need to manually set
+    // cfp back to what it was before
+    varEnv->setCfp(cfpSave);
   }
 }
 
@@ -2834,12 +2832,10 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   if (!s_debuggerDummy) {
     s_debuggerDummy = compile_string("<?php?>", 7);
   }
-  VarEnv* varEnv = NULL;
-  if (g_vmContext->m_varEnvs.empty()) {
-    varEnv = VarEnv::createGlobal();
-  } else {
-    varEnv = g_vmContext->m_varEnvs.back();
+  if (!m_globalVarEnv) {
+    VarEnv::createGlobal();
   }
+  VarEnv* varEnv = m_topVarEnv;
   if (!m_fp) {
     ASSERT(m_stack.count() == 0);
     ActRec* ar = m_stack.allocA();
@@ -2847,7 +2843,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
     ar->setThis(NULL);
     ar->m_soff = 0;
     ar->m_savedRbp = 0;
-    ar->m_savedRip = (uintptr_t)m_transl->getCallToExit();
+    ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
     m_fp = ar;
     m_pc = s_debuggerDummy->entry();
     m_firstAR = ar;
@@ -2859,10 +2855,9 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
 }
 
 void VMExecutionContext::exitDebuggerDummyEnv() {
-  ASSERT(!g_vmContext->m_varEnvs.empty());
-  ASSERT(g_vmContext->m_varEnvs.front() == g_vmContext->m_varEnvs.back());
-  VarEnv* varEnv = g_vmContext->m_varEnvs.front();
-  varEnv->detach(m_fp);
+  ASSERT(m_topVarEnv);
+  ASSERT(m_globalVarEnv == m_topVarEnv);
+  m_globalVarEnv->detach(m_fp);
 }
 
 static inline StringData* lookup_name(TypedValue* key) {
@@ -2917,10 +2912,8 @@ static inline void lookup_gbl(ActRec* fp,
                               TypedValue* key,
                               TypedValue*& val) {
   name = lookup_name(key);
-  ASSERT(!g_vmContext->m_varEnvs.empty());
-  VarEnv* varEnv = g_vmContext->m_varEnvs.front();
-  ASSERT(varEnv != NULL);
-  val = varEnv->lookup(name);
+  ASSERT(g_vmContext->m_globalVarEnv);
+  val = g_vmContext->m_globalVarEnv->lookup(name);
 }
 
 static inline void lookupd_gbl(ActRec* fp,
@@ -2928,9 +2921,8 @@ static inline void lookupd_gbl(ActRec* fp,
                                TypedValue* key,
                                TypedValue*& val) {
   name = lookup_name(key);
-  ASSERT(!g_vmContext->m_varEnvs.empty());
-  VarEnv* varEnv = g_vmContext->m_varEnvs.front();
-  ASSERT(varEnv != NULL);
+  ASSERT(g_vmContext->m_globalVarEnv);
+  VarEnv* varEnv = g_vmContext->m_globalVarEnv;
   val = varEnv->lookup(name);
   if (val == NULL) {
     TypedValue tv;
@@ -5222,7 +5214,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetG(PC& pc) {
   NEXT();
   TypedValue* tv1 = m_stack.topTV();
   StringData* name = lookup_name(tv1);
-  VarEnv* varEnv = g_vmContext->m_varEnvs.front();
+  VarEnv* varEnv = m_globalVarEnv;
   ASSERT(varEnv != NULL);
   varEnv->unset(name);
   m_stack.popC();
@@ -5701,7 +5693,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
 template <bool handle_throw>
 void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   ASSERT(ar->m_savedRbp == (uint64_t)m_fp);
-  ar->m_savedRip = (uintptr_t)m_transl->getRetFromInterpretedFrame();
+  ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
         m_fp->m_func->unit()->entry(),
         int(m_fp->m_func->base()));
@@ -6932,7 +6924,8 @@ void VMExecutionContext::requestInit() {
 
   new (&s_requestArenaStorage) RequestArena();
   m_stack.requestInit();
-  m_transl->requestInit();
+  tx64 = nextTx64;
+  tx64->requestInit();
 
   // Merge the systemlib unit into the ExecutionContext
   SystemLib::s_unit->merge();
@@ -6950,7 +6943,8 @@ void VMExecutionContext::requestInit() {
 void VMExecutionContext::requestExit() {
   const_assert(hhvm);
   destructObjects();
-  m_transl->requestExit();
+  tx64->requestExit();
+  tx64 = NULL;
   m_stack.requestExit();
   profileRequestEnd();
   EventHook::Disable();

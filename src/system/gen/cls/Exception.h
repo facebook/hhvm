@@ -50,7 +50,7 @@ class c_Exception : public ExtObjectData {
   Variant m_file;
   Variant m_line;
   Variant m_trace;
-  Variant m_inited;
+  bool m_inited;
 
   // Destructor
   ~c_Exception() NEVER_INLINE {}
@@ -72,6 +72,9 @@ class c_Exception : public ExtObjectData {
   public: Variant t_gettrace();
   public: String t_gettraceasstring();
   public: String t___tostring();
+  public: void t_inittrace();
+  public: static Variant t_gettraceoptions();
+  public: static void t_settraceoptions(CVarRef v_opts);
   DECLARE_METHOD_INVOKE_HELPERS(__init__);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(getmessage);
@@ -82,6 +85,9 @@ class c_Exception : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(gettrace);
   DECLARE_METHOD_INVOKE_HELPERS(gettraceasstring);
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(inittrace);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraceoptions);
+  DECLARE_METHOD_INVOKE_HELPERS(settraceoptions);
 };
 ObjectData *coo_Exception() NEVER_INLINE;
 

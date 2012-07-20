@@ -16,7 +16,9 @@
 */
 
 #include <runtime/ext/ext_array.h>
+#include <runtime/ext/ext_iterator.h>
 #include <runtime/ext/ext_function.h>
+#include <runtime/ext/ext_continuation.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_collator.h>
 #include <runtime/base/builtin_functions.h>
@@ -821,13 +823,19 @@ int64 f_count(CVarRef var, bool recursive /* = false */) {
   return 1;
 }
 
+static StaticString s_Iterator("Iterator");
+static StaticString s_IteratorAggregate("IteratorAggregate");
+static StaticString s_getIterator("getIterator");
+static StaticString s_next("next");
+
 static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   if (iterable.isArray()) {
     if (isMutable) {
-      return create_object("MutableArrayIterator",
+      return create_object(c_MutableArrayIterator::s_class_name,
                            CREATE_VECTOR1(ref(iterable)));
     }
-    return create_object("ArrayIterator", CREATE_VECTOR1(iterable));
+    return create_object(c_ArrayIterator::s_class_name,
+                         CREATE_VECTOR1(iterable));
   }
   if (iterable.isObject()) {
     CStrRef context = hhvm
@@ -835,47 +843,43 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
                       : FrameInjection::GetClassName(true);
 
     ObjectData *obj = iterable.getObjectData();
+    Variant iterator;
+    while (obj->o_instanceof(s_IteratorAggregate)) {
+      iterator = obj->o_invoke(s_getIterator, Array());
+      if (!iterator.isObject()) break;
+      obj = iterator.getObjectData();
+    }
     if (isMutable) {
-      while (obj->o_instanceof("IteratorAggregate")) {
-        Variant iterator = obj->o_invoke("getiterator", Array());
-        if (!iterator.isObject()) break;
-        obj = iterator.getObjectData();
-      }
-      if (obj->o_instanceof("Iterator")) {
+      if (obj->o_instanceof(s_Iterator)) {
         throw FatalErrorException("An iterator cannot be used for "
                                   "iteration by reference");
       }
       Array properties = obj->o_toIterArray(context, true);
-      return create_object("MutableArrayIterator",
+      return create_object(c_MutableArrayIterator::s_class_name,
                            CREATE_VECTOR1(ref(properties)));
-    }
-
-    while (obj->o_instanceof("IteratorAggregate")) {
-      Variant iterator = obj->o_invoke("getiterator", Array());
-      if (!iterator.isObject()) break;
-      obj = iterator.getObjectData();
-    }
-    if (obj->o_instanceof("Iterator")) {
-      // Queue up any continuations to the first element
-      if (obj->o_instanceof("Continuation")) {
-        obj->o_invoke("next", Array());
+    } else {
+      if (obj->o_instanceof(s_Iterator)) {
+        // Queue up any continuations to the first element
+        if (obj->o_instanceof(c_Continuation::s_class_name)) {
+          obj->o_invoke(s_next, Array());
+        }
+        return obj;
       }
-      return obj;
+      return create_object(c_ArrayIterator::s_class_name,
+                           CREATE_VECTOR1(obj->o_toIterArray(context)));
     }
-
-    return create_object("ArrayIterator",
-                         CREATE_VECTOR1(obj->o_toIterArray(context)));
   }
   raise_warning("Invalid argument supplied for iteration");
   if (isMutable) {
-    return create_object("MutableArrayIterator",
+    return create_object(c_MutableArrayIterator::s_class_name,
                          CREATE_VECTOR1(Array::Create()));
   }
-  return create_object("ArrayIterator", CREATE_VECTOR1(Array::Create()));
+  return create_object(c_ArrayIterator::s_class_name,
+                       CREATE_VECTOR1(Array::Create()));
 }
 
 Variant f_hphp_get_iterator(CVarRef iterable) {
-  return f_hphp_get_iterator(iterable, false);
+  return f_hphp_get_iterator(directRef(iterable), false);
 }
 
 Variant f_hphp_get_mutable_iterator(VRefParam iterable) {

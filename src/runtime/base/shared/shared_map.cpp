@@ -30,19 +30,36 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
-  Variant *pv = m_localCache.lvalPtr((int64)pos, false, false);
-  if (pv) return *pv;
-  Variant &r = m_localCache.addLval((int64)pos);
-  r = sv->toLocal();
-  return r;
+  if (LIKELY(m_localCache != NULL)) {
+    Variant *pv;
+    ArrayData *escalated DEBUG_ONLY =
+      m_localCache->ZendArray::lvalPtr((int64)pos, pv, false, false);
+    ASSERT(!escalated);
+    if (pv) return *pv;
+  } else {
+    m_localCache = NEW(ZendArray)();
+    m_localCache->incRefCount();
+  }
+  Variant v = sv->toLocal();
+  Variant *r;
+  ArrayData *escalated DEBUG_ONLY =
+    m_localCache->ZendArray::addLval((int64)pos, r, false);
+  ASSERT(!escalated);
+  *r = v;
+  return *r;
 }
 
 Variant SharedMap::getValueUncached(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
-  Variant *pv = m_localCache.lvalPtr((int64)pos, false, false);
-  if (pv) return *pv;
+  if (LIKELY(m_localCache != NULL)) {
+    Variant *pv;
+    ArrayData *escalated DEBUG_ONLY =
+      m_localCache->ZendArray::lvalPtr((int64)pos, pv, false, false);
+    ASSERT(!escalated);
+    if (pv) return *pv;
+  }
   return sv->toLocal();
 }
 

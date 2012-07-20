@@ -37,8 +37,6 @@ namespace Debug {
 
 static const Trace::Module TRACEMOD = Trace::debuginfo;
 
-extern void recordPerfMap(const DwarfChunk* chunk);
-
 void ElfWriter::logError(const string& msg) {
   perror("");
   std::cerr << msg << '\n';
@@ -150,7 +148,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
 
   /* Add lower PC bound to function DIE */
   at = dwarf_add_AT_targ_address(m_dwarfProducer, func, DW_AT_low_pc,
-    reinterpret_cast<Dwarf_Unsigned>(f->start), 0, &error);
+    reinterpret_cast<Dwarf_Unsigned>(f->range.begin()), 0, &error);
   if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
     logError("unable to add low_pc attribute to function");
     return NULL;
@@ -158,7 +156,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
 
   /* add upper PC bound to function DIE */
   at = dwarf_add_AT_targ_address(m_dwarfProducer, func, DW_AT_high_pc,
-    reinterpret_cast<Dwarf_Unsigned>(f->end), 0, &error);
+    reinterpret_cast<Dwarf_Unsigned>(f->range.end()), 0, &error);
   if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
     logError("unable to add high_pc attribute to function");
     return NULL;
@@ -168,7 +166,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
    * 1. register start address */
   Dwarf_Unsigned u;
   u = dwarf_lne_set_address(m_dwarfProducer,
-    reinterpret_cast<Dwarf_Addr>(f->start), 0, &error);
+    reinterpret_cast<Dwarf_Addr>(f->range.begin()), 0, &error);
   if (u != 0) {
     logError("unable to set line start address");
     return NULL;
@@ -178,19 +176,19 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f) {
   std::vector<LineEntry>::iterator it2;
   for (it2 = f->m_lineTable.begin(); it2 != f->m_lineTable.end(); it2++) {
     u = dwarf_add_line_entry(m_dwarfProducer,
-      file, reinterpret_cast<Dwarf_Addr>(it2->start), it2->lineNumber,
+      file, reinterpret_cast<Dwarf_Addr>(it2->range.begin()), it2->lineNumber,
       0, 1, 0, &error);
     if (u != 0) {
       logError("unable to add line entry");
       return NULL;
     }
     TRACE(1, "elfwriter tracelet: %s %p %p\n",
-          m_filename.c_str(), it2->start, it2->end);
+          m_filename.c_str(), it2->range.begin(), it2->range.end());
   }
 
   /* 3. register end address of function */
   u = dwarf_lne_end_sequence(m_dwarfProducer,
-    reinterpret_cast<Dwarf_Addr>(f->end), &error);
+    reinterpret_cast<Dwarf_Addr>(f->range.end()), &error);
   if (u != 0) {
     logError("unable to set line end address");
     return NULL;
@@ -295,8 +293,8 @@ bool ElfWriter::addFrameInfo(DwarfChunk* d) {
     }
     Dwarf_Unsigned fde_index = dwarf_add_frame_fde(
       m_dwarfProducer, fde, 0, cie_index,
-      (Dwarf_Unsigned)((*it)->start),
-      (*it)->end - (*it)->start,
+      (Dwarf_Unsigned)((*it)->range.begin()),
+      (*it)->range.size(),
       0, &error);
     if (fde_index == DW_DLV_BADADDR) {
       logError("Unable to add FDE");
@@ -450,7 +448,7 @@ ElfWriter::ElfWriter(DwarfChunk* d):
     return;
   }
   register_gdb_hook(symfile, elf_size, d);
-  recordPerfMap(d);
+  DebugInfo::Get()->recordPerfMap(d);
   d->setSynced();
 }
 

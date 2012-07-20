@@ -6,6 +6,7 @@ class Bar {
     $this->x = "dtor";
   }
 };
+
 function foo() {
   $a = new Bar();
   $a->x = &$a;

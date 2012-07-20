@@ -59,6 +59,7 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TgtCache_FixedCallMiss) \
   STAT(TgtCache_MethodHit) \
   STAT(TgtCache_MethodMiss) \
+  STAT(TgtCache_MethodFast) \
   STAT(TgtCache_MethodBypass) \
   STAT(TgtCache_GlobalHit) \
   STAT(TgtCache_GlobalMiss) \
@@ -110,6 +111,8 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TC_Sync) \
   STAT(TC_TypePredHit) \
   STAT(TC_TypePredMiss) \
+  STAT(TC_TypePredUnneeded) \
+  STAT(TC_TypePredOverridden) \
   /* Fixup */ \
   STAT(Fixup_Find) \
   STAT(Fixup_Probe) \

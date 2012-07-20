@@ -30,6 +30,13 @@
 namespace HPHP {
 namespace VM {
 class Unit;
+
+/* UnitVisitor: abstract interface for running code on each Unit. */
+class UnitVisitor {
+public:
+  virtual ~UnitVisitor() { }
+  virtual void operator()(Unit *u) = 0;
+};
 }
 }
 
@@ -152,6 +159,7 @@ public:
   static String translateFileName(StringData *file);
   static void enableIntercepts();
   static void onDelete(PhpFile *f);
+  static void forEachUnit(VM::UnitVisitor& uit);
 private:
   static ParsedFilesMap s_files;
   static UnitMd5Map s_unitMd5Map;
@@ -161,7 +169,6 @@ private:
   static bool fileStat(const std::string &name, struct stat *s);
   static std::set<std::string> s_names;
 };
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

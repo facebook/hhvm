@@ -31,6 +31,7 @@ namespace VM {
 void phpDebuggerHook(const uchar* pc);
 void phpExceptionHook(ObjectData* e);
 
+void phpDebuggerEvalHook(const Func* f);
 void phpBreakPointHook(Eval::DebuggerProxyVM* proxy);
 void phpFileLoadHook(Eval::PhpFile* efile);
 

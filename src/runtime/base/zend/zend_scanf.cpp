@@ -21,7 +21,6 @@
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 
-namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 /*
   scanf.c --
@@ -99,7 +98,7 @@ namespace HPHP {
  * The following structure contains the information associated with
  * a character set.
  */
-struct Range {
+  struct Range {
   char start;
   char end;
 };
@@ -112,6 +111,7 @@ typedef struct CharSet {
   Range *ranges;
 } CharSet;
 
+namespace HPHP {
 /**
  *----------------------------------------------------------------------
  *
@@ -160,7 +160,7 @@ static const char *BuildCharSet(CharSet *cset, const char *format) {
 
   cset->chars = (char *)malloc(end - format - 1);
   if (nranges > 0) {
-    cset->ranges = (struct Range *)malloc(sizeof(struct Range) * nranges);
+    cset->ranges = (::Range*)malloc(sizeof(::Range) * nranges);
   } else {
     cset->ranges = NULL;
   }

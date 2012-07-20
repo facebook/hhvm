@@ -30,6 +30,7 @@
 #include "runtime/eval/runtime/file_repository.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/blob_helper.h"
+#include "runtime/vm/func_inline.h"
 
 namespace HPHP {
 namespace VM {
@@ -116,8 +117,9 @@ void Func::initPrologues(int numParams) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
-                                          : kNumFixedPrologues;
-  for (int i=0; i < numPrologues; i++) {
+                                         : kNumFixedPrologues;
+  TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
+  for (int i = 0; i < numPrologues; i++) {
     m_prologueTable[i] = fcallHelper;
   }
 }
@@ -587,23 +589,11 @@ void Func::enableIntercept() {
 
 Func** Func::getCachedAddr() {
   ASSERT(!isMethod());
-  if (UNLIKELY(m_cachedOffset == (unsigned)-1)) {
-    Unit::loadFunc(this);
-  }
-  return (Func**)Transl::TargetCache::handleToPtr(m_cachedOffset);
+  return getCachedFuncAddr(m_cachedOffset);
 }
 
 void Func::setCached() {
-  ASSERT(!isMethod());
-  Func** funcAddr = getCachedAddr();
-  if (UNLIKELY(*funcAddr != NULL)) {
-    if (*funcAddr == this) return;
-    if (!(*funcAddr)->isIgnoreRedefinition()) {
-      raise_error(Strings::FUNCTION_ALREADY_DEFINED, name()->data());
-    }
-  }
-  *funcAddr = this;
-  DEBUGGER_ATTACHED_ONLY(phpDefFuncHook(this));
+  setCachedFunc(this, isDebuggerAttached());
 }
 
 const Func* Func::getGeneratorBody(const StringData* name) const {

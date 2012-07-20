@@ -30,10 +30,9 @@ TypedValue* fg_min(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -82,10 +81,9 @@ TypedValue* fg_max(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {

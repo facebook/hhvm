@@ -495,10 +495,9 @@ TypedValue * fg1_setlocale(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
   tvCastToInt64InPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-2, false);
     for (long long i = 2; i < count; ++i) {
-      TypedValue* extraArg = ea->getExtraArg(i-2);
+      TypedValue* extraArg = ar->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-2, tvAsVariant(extraArg));
       } else {
@@ -521,10 +520,9 @@ TypedValue* fg_setlocale(HPHP::VM::ActRec *ar) {
       if ((args-0)->m_type == KindOfInt64) {
         Array extraArgs;
         {
-          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-2, false);
           for (long long i = 2; i < count; ++i) {
-            TypedValue* extraArg = ea->getExtraArg(i-2);
+            TypedValue* extraArg = ar->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-2, tvAsVariant(extraArg));
             } else {
@@ -620,10 +618,9 @@ TypedValue * fg1_sscanf(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   }
   Array extraArgs;
   {
-    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-2, false);
     for (long long i = 2; i < count; ++i) {
-      TypedValue* extraArg = ea->getExtraArg(i-2);
+      TypedValue* extraArg = ar->getExtraArg(i-2);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-2, tvAsVariant(extraArg));
       } else {
@@ -646,10 +643,9 @@ TypedValue* fg_sscanf(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-2, false);
           for (long long i = 2; i < count; ++i) {
-            TypedValue* extraArg = ea->getExtraArg(i-2);
+            TypedValue* extraArg = ar->getExtraArg(i-2);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-2, tvAsVariant(extraArg));
             } else {

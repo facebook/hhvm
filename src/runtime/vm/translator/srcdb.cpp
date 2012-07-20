@@ -182,7 +182,7 @@ void SrcRec::patch(Asm& a, IncomingBranch branch, TCA dest) {
 
 void SrcDB::recordDependencyWork(const Eval::PhpFile* file, const SrcKey& sk) {
   if (RuntimeOption::RepoAuthoritative) return;
-  ASSERT(tx64->m_writeLease.amOwner());
+  ASSERT(Translator::WriteLease().amOwner());
   std::pair<FileDepMap::iterator, bool> insRet =
     m_deps.insert(FileDepMap::value_type(file, NULL));
   if (insRet.second) {
@@ -201,7 +201,7 @@ size_t SrcDB::invalidateCode(const Eval::PhpFile* file) {
    * Hold the write lease; otherwise some other thread may have started
    * translating this very file.
    */
-  TranslatorX64::BlockingLeaseHolder writer(tx64->m_writeLease);
+  BlockingLeaseHolder writer(Translator::WriteLease());
 
   ASSERT(!RuntimeOption::RepoAuthoritative);
   unsigned i = 0;

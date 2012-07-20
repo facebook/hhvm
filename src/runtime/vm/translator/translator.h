@@ -33,6 +33,7 @@
 #include <runtime/vm/translator/immstack.h>
 #include <runtime/vm/translator/runtime-type.h>
 #include <runtime/vm/translator/fixup.h>
+#include <runtime/vm/translator/writelease.h>
 #include <runtime/vm/debugger_hook.h>
 #include <runtime/base/md5.h>
 
@@ -44,6 +45,10 @@ namespace Transl {
 static const bool trustSigSegv = false;
 
 static const uint32 transCountersPerChunk = 1024 * 1024 / 8;
+
+class TranslatorX64;
+extern TranslatorX64* volatile nextTx64;
+extern __thread TranslatorX64* tx64;
 
 /*
  * REGSTATE_DIRTY when the live register state is spread across the
@@ -322,7 +327,21 @@ class NormalizedInstruction {
     return (m_txFlags & Native) == Native;
   }
 
-  bool outStackIsUsed() const;
+  void markInputInferred(int i) {
+    if (i < 32) checkedInputs |= 1u << i;
+  }
+
+  bool inputWasInferred(int i) const {
+    return i < 32 && ((checkedInputs >> i) & 1);
+  }
+
+  enum OutputUse {
+    OutputUsed,
+    OutputUnused,
+    OutputInferred,
+    OutputDoesntCare
+  };
+  OutputUse outputIsUsed(DynLocation* output) const;
 };
 
 class TranslationFailedExc : public std::exception {
@@ -638,12 +657,6 @@ private:
 
   virtual void syncWork() = 0;
   virtual void invalidateSrcKey(const SrcKey& sk) = 0;
-  /*
-   * If this returns true, we dont generate guards for any of the
-   * inputs to this instruction (this is essentially to avoid
-   * generating guards on behalf of interpreted instructions).
-   */
-  virtual bool dontGuardAnyInputs(Opcode op) { return false; }
 
 protected:
   struct PendingFixup {
@@ -664,11 +677,20 @@ protected:
   vector<TransRec> m_translations;
   vector<uint64*>  m_transCounters;
 
+  static Lease s_writeLease;
+  static volatile bool s_replaceInFlight;
+
 public:
 
   Translator();
   virtual ~Translator();
   static Translator* Get();
+  static Lease& WriteLease() {
+    return s_writeLease;
+  }
+  static bool ReplaceInFlight() {
+    return s_replaceInFlight;
+  }
 
   /*
    * Interface between the arch-dependent translator and outside world.
@@ -686,6 +708,9 @@ public:
   virtual bool dumpTC() = 0;
   virtual bool dumpTCCode(const char *filename) = 0;
   virtual bool dumpTCData() = 0;
+  virtual void protectCode() = 0;
+  virtual void unprotectCode() = 0;
+  virtual bool isValidCodeAddress(TCA) const = 0;
 
   enum FuncPrologueFlags {
     FuncPrologueNormal      = 0,
@@ -783,6 +808,13 @@ public:
     return debug || RuntimeOption::EvalDumpTC;
   }
 
+  /*
+   * If this returns true, we dont generate guards for any of the
+   * inputs to this instruction (this is essentially to avoid
+   * generating guards on behalf of interpreted instructions).
+   */
+  virtual bool dontGuardAnyInputs(Opcode op) { return false; }
+
 protected:
   PCFilter m_dbgBLPC;
   SrcKeySet m_dbgBLSrcKey;
@@ -799,8 +831,6 @@ public:
     return m_resumeHelper;
   }
 };
-
-extern Translator* transl;
 
 int getStackDelta(const NormalizedInstruction& ni);
 
@@ -867,6 +897,8 @@ static inline bool
 opcodeBreaksBB(const Opcode instr) {
   return opcodeControlFlowInfo(instr) == ControlFlowBreaksBB;
 }
+
+bool outputDependsOnInput(const Opcode instr);
 
 extern bool tc_dump();
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,

@@ -352,26 +352,18 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
   Pair* pair = thiz->keyToPair(c);
   const Func* func = NULL;
   bool isMagicCall = false;
-  if (pair->m_key == c) {
+  if (LIKELY(pair->m_key == c)) {
     func = pair->m_value.getFunc();
     ASSERT(func);
     isMagicCall = pair->m_value.isMagicCall();
     Stats::inc(Stats::TgtCache_MethodHit);
   } else {
     ASSERT(IMPLIES(pair->m_key, pair->m_value.getFunc()));
-    if (pair->m_key &&
-        (func = c->wouldCall(pair->m_value.getFunc())) != NULL) {
-      if (UNLIKELY(pair->m_value.isMagicCall())) {
-        /*
-         * Don't accept another class's __call method as evidence that we
-         * don't have a definition for this method.
-         */
-        func = NULL;
-      }
-      // Leave isMagicCall false
-    }
-    Stats::inc(Stats::TgtCache_MethodHit, func != NULL);
-    if (!func) {
+    if (LIKELY(pair->m_key != NULL) &&
+        LIKELY((func = c->wouldCall(pair->m_value.getFunc())) != NULL) &&
+        LIKELY(!pair->m_value.isMagicCall())) {
+      Stats::inc(Stats::TgtCache_MethodHit, func != NULL);
+    } else {
       // lookupObjMethod uses the current frame pointer to resolve context,
       // so we'd better sync regs.
       Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
@@ -380,17 +372,16 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
       func = g_vmContext->lookupMethodCtx(c, name, ctx, ObjMethod, false);
       if (UNLIKELY(!func)) {
         isMagicCall = true;
-        func = g_vmContext->lookupMethodCtx(c, s___call.get(), ctx, ObjMethod,
-                                            false);
+        func = c->lookupMethod(s___call.get());
         if (UNLIKELY(!func)) {
           // Do it again, but raise the error this time. Keeps the VMRegAnchor
           // off the hot path; this should be wildly unusual, since we're
           // probably about to fatal.
           VMRegAnchor _;
           EXCEPTION_GATE_ENTER();
-          (void) g_vmContext->lookupObjMethod(func, c, name, true);
+          (void) g_vmContext->lookupMethodCtx(c, name, ctx, ObjMethod, true);
           EXCEPTION_GATE_LEAVE();
-          // Yet somehow we succeeded. private __call? Keep going.
+          NOT_REACHED();
         }
       }
     }
@@ -431,7 +422,7 @@ GlobalCache::lookupImpl(StringData *name, bool allowCreate) {
   if (!m_tv) {
     hit = false;
 
-    VarEnv* ve = g_vmContext->m_varEnvs.front();
+    VarEnv* ve = g_vmContext->m_globalVarEnv;
     ASSERT(ve->isGlobalScope());
     if (allowCreate) {
       m_tv = ve->lookupAddRawPointer(name);

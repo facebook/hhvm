@@ -111,6 +111,7 @@ public:
 class VarEnv {
  private:
   ActRec* m_cfp;
+  VarEnv* m_previous;
   // TODO remove vector (#1099580).  Note: trying changing this to a
   // TinyVector<> for now increased icache misses, but maybe will be
   // feasable later (see D511561).
@@ -119,11 +120,10 @@ class VarEnv {
   boost::optional<NameValueTable> m_nvTable;
 
   uint16_t m_depth;
-  bool m_isGlobalScope;
 
  private:
-  explicit VarEnv(); // create global fp
-  explicit VarEnv(ActRec* fp, ExtraArgs* eArgs); // attach to fp
+  explicit VarEnv();
+  explicit VarEnv(ActRec* fp, ExtraArgs* eArgs);
   VarEnv(const VarEnv&);
   VarEnv& operator=(const VarEnv&);
   ~VarEnv();
@@ -140,9 +140,11 @@ class VarEnv {
    * (because we're about to attach a callee frame using attach()) but
    * don't actually have one.
    *
-   * `skipInsert' means not to insert the new VarEnv in
-   * g_vmContext->m_varEnvs---this is used for creating VarEnvs for
-   * frames in the middle of the ActRec chain.
+   * `skipInsert' means not to insert the new VarEnv on the front of
+   * g_vmContext->m_topVarEnv.  In this case the caller must
+   * immediately call setPrevious() as appropriate---this is used to
+   * support the debugger, creating VarEnvs for frames in the middle
+   * of the ActRec chain.
    */
   static VarEnv* createLazyAttach(ActRec* fp, bool skipInsert = false);
 
@@ -150,6 +152,14 @@ class VarEnv {
   static VarEnv* createGlobal();
 
   static void destroy(VarEnv*);
+
+  /*
+   * Walk the VarEnv chain.  Returns null when we're out of variable
+   * environments.  You can change the chain with setPrevious (see
+   * evalPHPDebugger).
+   */
+  VarEnv* previous() { return m_previous; }
+  void setPrevious(VarEnv* p) { m_previous = p; }
 
   void attach(ActRec* fp);
   void detach(ActRec* fp);
@@ -168,7 +178,11 @@ class VarEnv {
   // Used for save/store m_cfp for debugger
   void setCfp(ActRec* fp) { m_cfp = fp; }
   ActRec* getCfp() const { return m_cfp; }
-  bool isGlobalScope() const { return m_isGlobalScope; }
+  bool isGlobalScope() const { return !m_previous; }
+
+  // Access to wrapped ExtraArgs, if we have one.
+  unsigned numExtraArgs() const;
+  TypedValue* getExtraArg(unsigned argInd) const;
 };
 
 /**
@@ -334,6 +348,19 @@ struct ActRec {
                          m_invName, ExtraArgs, ExtraArgs*, m_extraArgs)
 
 #undef UNION_FIELD_ACCESSORS
+
+  // Accessors for extra arg queries.
+  int numExtraArgs() const {
+    return hasExtraArgs() ? getExtraArgs()->numExtraArgs() :
+           hasVarEnv()    ? getVarEnv()->numExtraArgs() :
+           0;
+  }
+  TypedValue* getExtraArg(unsigned ind) const {
+    ASSERT(hasExtraArgs() || hasVarEnv());
+    return hasExtraArgs() ? getExtraArgs()->getExtraArg(ind) :
+           hasVarEnv()    ? getVarEnv()->getExtraArg(ind) :
+           static_cast<TypedValue*>(0);
+  }
 };
 
 inline int32 arOffset(const ActRec* ar, const ActRec* other) {

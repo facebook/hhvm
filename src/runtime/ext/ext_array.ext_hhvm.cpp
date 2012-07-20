@@ -422,10 +422,9 @@ TypedValue* fg_array_map(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -474,10 +473,9 @@ TypedValue* fg_array_merge_recursive(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -526,10 +524,9 @@ TypedValue* fg_array_merge(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -578,10 +575,9 @@ TypedValue* fg_array_replace_recursive(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -630,10 +626,9 @@ TypedValue* fg_array_replace(HPHP::VM::ActRec *ar) {
     if (count >= 1LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -683,10 +678,9 @@ TypedValue* fg_array_multisort(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfBoolean;
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -825,10 +819,9 @@ TypedValue* fg_array_push(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1287,10 +1280,9 @@ TypedValue* fg_array_unshift(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfInt64;
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1452,10 +1444,9 @@ TypedValue* fg_compact(HPHP::VM::ActRec *ar) {
       rv.m_type = KindOfArray;
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-1, false);
         for (long long i = 1; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-1);
+          TypedValue* extraArg = ar->getExtraArg(i-1);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-1, tvAsVariant(extraArg));
           } else {
@@ -1761,10 +1752,9 @@ TypedValue* fg_array_diff(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1815,10 +1805,9 @@ TypedValue* fg_array_udiff(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-3);
+          TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -1868,10 +1857,9 @@ TypedValue* fg_array_diff_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -1922,10 +1910,9 @@ TypedValue* fg_array_diff_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-3);
+          TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -1976,10 +1963,9 @@ TypedValue* fg_array_udiff_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-3);
+          TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2031,10 +2017,9 @@ TypedValue* fg_array_udiff_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 4LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-4, false);
         for (long long i = 4; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-4);
+          TypedValue* extraArg = ar->getExtraArg(i-4);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-4, tvAsVariant(extraArg));
           } else {
@@ -2084,10 +2069,9 @@ TypedValue* fg_array_diff_key(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -2138,10 +2122,9 @@ TypedValue* fg_array_diff_ukey(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-3);
+          TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2191,10 +2174,9 @@ TypedValue* fg_array_intersect(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -2245,10 +2227,9 @@ TypedValue* fg_array_uintersect(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-3);
+          TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2298,10 +2279,9 @@ TypedValue* fg_array_intersect_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -2352,10 +2332,9 @@ TypedValue* fg_array_intersect_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-3);
+          TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2406,10 +2385,9 @@ TypedValue* fg_array_uintersect_assoc(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-3);
+          TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {
@@ -2461,10 +2439,9 @@ TypedValue* fg_array_uintersect_uassoc(HPHP::VM::ActRec *ar) {
     if (count >= 4LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-4, false);
         for (long long i = 4; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-4);
+          TypedValue* extraArg = ar->getExtraArg(i-4);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-4, tvAsVariant(extraArg));
           } else {
@@ -2514,10 +2491,9 @@ TypedValue* fg_array_intersect_key(HPHP::VM::ActRec *ar) {
     if (count >= 2LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-2, false);
         for (long long i = 2; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-2);
+          TypedValue* extraArg = ar->getExtraArg(i-2);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-2, tvAsVariant(extraArg));
           } else {
@@ -2568,10 +2544,9 @@ TypedValue* fg_array_intersect_ukey(HPHP::VM::ActRec *ar) {
     if (count >= 3LL) {
       Array extraArgs;
       {
-        HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
         ArrayInit ai(count-3, false);
         for (long long i = 3; i < count; ++i) {
-          TypedValue* extraArg = ea->getExtraArg(i-3);
+          TypedValue* extraArg = ar->getExtraArg(i-3);
           if (tvIsStronglyBound(extraArg)) {
             ai.setRef(i-3, tvAsVariant(extraArg));
           } else {

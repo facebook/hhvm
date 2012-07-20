@@ -265,66 +265,6 @@ inline Offset fpiPast(const FPIEnt& fpi, PC bc) {
   return fcall + instrLen((Opcode*)fcall) - bc;
 }
 
-/**
- * Range that visits each PreClass in a Unit.
- */
-class PreClassRange {
-public:
-  PreClassRange(const Unit* unit) : m_unit(unit), m_id(0) {
-  }
-  bool empty() const {
-    return size_t(m_id) >= m_unit->numPreClasses();
-  }
-  PreClass* front() const {
-    ASSERT(!empty());
-    return m_unit->lookupPreClassId(m_id);
-  }
-  PreClass* popFront() {
-    PreClass* c = front();
-    ++m_id;
-    return c;
-  }
-private:
-  const Unit* m_unit;
-  Id m_id;
-};
-
-/**
- * Range over all Func's in a single unit.
- */
-class AllFuncs {
- public:
-  explicit AllFuncs(const Unit* unit)
-    : fr(unit->funcs().begin(),
-         unit->funcs().end())
-    , mr(0, 0)
-    , cr(unit)
-  {
-    if (fr.empty()) skip();
-  }
-  bool empty() const { return fr.empty() && mr.empty() && cr.empty(); }
-  Func* front() const {
-    ASSERT(!empty());
-    if (!fr.empty()) return fr.front();
-    ASSERT(!mr.empty());
-    return mr.front();
-  }
-  Func* popFront() {
-    Func* f = !fr.empty() ? fr.popFront() :
-              !mr.empty() ? mr.popFront() : 0;
-    ASSERT(f);
-    if (fr.empty() && mr.empty()) skip();
-    return f;
-  }
- private:
-  void skip();
-  typedef IterRange<Unit::FuncVec::const_iterator> FuncRange;
-  FuncRange fr;
-  typedef IterRange<Func* const*> MethodRange;
-  MethodRange mr;
-  PreClassRange cr;
-};
-
 }}} // HPHP::VM::Verifier
 
 #endif // incl_VM_VERIFIER_CFG_H_

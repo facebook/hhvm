@@ -31,6 +31,8 @@
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/verifier/check.h>
+#include <runtime/base/strings.h>
+#include <runtime/vm/func_inline.h>
 
 namespace HPHP {
 namespace VM {
@@ -45,10 +47,6 @@ Mutex Unit::s_classesMutex;
  * (unless they are deleted, which never happens here). Any standard
  * associative container will meet this requirement.
  */
-typedef tbb::concurrent_unordered_map<const StringData *, NamedEntity,
-                                      string_data_hash,
-                                      string_data_isame> NamedEntityMap;
-
 static NamedEntityMap *s_namedDataMap;
 
 const NamedEntity* Unit::GetNamedEntity(const StringData *str) {
@@ -89,20 +87,82 @@ Array Unit::getUserFunctions() {
   return a;
 }
 
+AllClasses::AllClasses() 
+  : m_next(s_namedDataMap->begin())
+  , m_end(s_namedDataMap->end()) {
+  skip();
+}
+
+void AllClasses::skip() {
+  Class* cls;
+  do {
+    cls = *m_next->second.clsList();
+    if (!cls) ++m_next;
+  } while (!empty() && !cls);
+  ASSERT(empty() || front());
+}
+
+bool AllClasses::empty() const {
+  return m_next == m_end;
+}
+
+Class* AllClasses::front() const {
+  ASSERT(!empty());
+  Class* cls = *m_next->second.clsList();
+  ASSERT(cls);
+  return cls;
+}
+
+Class* AllClasses::popFront() {
+  Class* cls = front();
+  ++m_next;
+  skip();
+  return cls;
+}
+
+class AllCachedClasses {
+  NamedEntityMap::iterator m_next, m_end;
+
+  void skip() {
+    Class* cls;
+    do {
+      cls = *m_next->second.clsList();
+      if (!cls || !cls->getCached()) ++m_next;
+    } while (!empty() && !cls);
+  }
+
+public:
+AllCachedClasses()
+  : m_next(s_namedDataMap->begin())
+  , m_end(s_namedDataMap->end()) {
+    skip();
+  }
+  bool empty() const {
+    return m_next == m_end;
+  }
+  Class* front() {
+    ASSERT(!empty());
+    Class* c = *m_next->second.clsList();
+    ASSERT(c);
+    c = c->getCached();
+    ASSERT(c);
+    return c;
+  }
+  Class* popFront() {
+    Class* c = front();
+    ++m_next;
+    skip();
+    return c;
+  }
+};
+
 Array Unit::getClassesInfo() {
   // Return an array of all defined class names.  This method is used to
   // support get_declared_classes().
   Array a = Array::Create();
   if (s_namedDataMap) {
-    for (NamedEntityMap::const_iterator it = s_namedDataMap->begin();
-         it != s_namedDataMap->end(); ++it) {
-      Class* class_ = *it->second.clsList();
-      if (!class_) continue;
-      class_ = class_->getCached();
-      if (class_ &&
-          !(class_->attrs() & (AttrInterface | AttrTrait))) {
-        a.append(class_->nameRef());
-      }
+    for (AllCachedClasses ac; !ac.empty();) {
+      a.append(ac.popFront()->nameRef());
     }
   }
   return a;
@@ -113,14 +173,10 @@ Array Unit::getInterfacesInfo() {
   // support get_declared_interfaces().
   Array a = Array::Create();
   if (s_namedDataMap) {
-    for (NamedEntityMap::const_iterator it = s_namedDataMap->begin();
-         it != s_namedDataMap->end(); ++it) {
-      Class* class_ = *it->second.clsList();
-      if (!class_) continue;
-      class_ = class_->getCached();
-      if (class_ &&
-          class_->attrs() & AttrInterface) {
-        a.append(class_->nameRef());
+    for (AllCachedClasses ac; !ac.empty();) {
+      Class* c = ac.popFront();
+      if (c->attrs() & AttrInterface) {
+        a.append(c->nameRef());
       }
     }
   }
@@ -132,14 +188,10 @@ Array Unit::getTraitsInfo() {
   // support get_declared_traits().
   Array array = Array::Create();
   if (s_namedDataMap) {
-    for (NamedEntityMap::const_iterator it = s_namedDataMap->begin();
-         it != s_namedDataMap->end(); it++) {
-      Class* class_ = *it->second.clsList();
-      if (!class_) continue;
-      class_ = class_->getCached();
-      if (class_ &&
-          class_->attrs() & AttrTrait) {
-        array.append(class_->nameRef());
+    for (AllCachedClasses ac; !ac.empty(); ) {
+      Class* c = ac.popFront();
+      if (c->attrs() & AttrTrait) {
+        array.append(c->nameRef());
       }
     }
   }
@@ -194,8 +246,11 @@ bool Unit::MetaHandle::nextArg(MetaInfo& info) {
 Unit::Unit()
     : m_sn(-1), m_bc(NULL), m_bclen(0),
       m_bc_meta(NULL), m_bc_meta_len(0), m_filepath(NULL),
-      m_dirpath(NULL), m_md5(), m_numHoistablePreClasses(0),
-      m_repoId(-1), m_preConstsMerged(false),
+      m_dirpath(NULL), m_md5(),
+      m_firstHoistableFunc(0),
+      m_firstHoistablePreClass(0),
+      m_firstMergablePreClass(0),
+      m_repoId(-1), m_initialMergeDone(false),
       m_preConstsLock(false /* reentrant */, RankUnitPreConst) {
   TV_WRITE_UNINIT(&m_mainReturn);
   m_mainReturn._count = 0; // flag for whether or not the unit is mergeable
@@ -210,10 +265,7 @@ Unit::~Unit() {
   free(m_bc_meta);
 
   // Delete all Func's.
-  for (FuncVec::const_iterator it = m_funcs.begin(); it != m_funcs.end();
-       ++it) {
-    delete *it;
-  }
+  range_foreach(mutableFuncs(), boost::checked_deleter<Func>());
 
   // ExecutionContext and the TC may retain references to Class'es, so
   // it is possible for Class'es to outlive their Unit.
@@ -234,7 +286,7 @@ Unit::~Unit() {
     }
   }
 
-  if (!RuntimeOption::RepoAuthoritative && m_preConstsMerged) {
+  if (!RuntimeOption::RepoAuthoritative && m_initialMergeDone) {
     Transl::unmergePreConsts(m_preConsts, this);
   }
 }
@@ -270,7 +322,7 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
 
 Class* Unit::defClass(PreClass* preClass,
                       bool failIsFatal /* = true */) {
-  Class*const* clsList = preClass->namedEntity()->clsList();
+  Class* const* clsList = preClass->namedEntity()->clsList();
   Class* top = *clsList;
   if (top) {
     Class *cls = top->getCached();
@@ -386,12 +438,12 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
   // We do a linear scan over all the functions in the unit searching for the
   // func with a given name; in practice this is okay because the units created
   // by create_function() will always have the function being renamed at the
-  // beginning of m_hoistableFuncs.
+  // beginning
   ASSERT(oldName && oldName->isStatic());
   ASSERT(newName && newName->isStatic());
-  for (HoistableFuncVec::iterator it = m_hoistableFuncs.begin();
-       it != m_hoistableFuncs.end(); ++it) {
-    Func* func = *it;
+
+  for (MutableFuncRange fr(hoistableFuncs()); !fr.empty(); ) {
+    Func* func = fr.popFront();
     const StringData* name = func->name();
     ASSERT(name);
     if (name->same(oldName)) {
@@ -433,36 +485,49 @@ bool Unit::classExists(const StringData* name, bool autoload, Attr typeAttrs) {
   return cls && (cls->attrs() & (AttrInterface | AttrTrait)) == typeAttrs;
 }
 
-void Unit::mergeFuncs() const {
-  for (HoistableFuncVec::const_iterator it = m_hoistableFuncs.begin();
-       it != m_hoistableFuncs.end(); ++it) {
-    (*it)->setCached();
-  }
-}
-
-void Unit::loadFunc(Func *func) {
+void Unit::loadFunc(const Func *func) {
   ASSERT(!func->isMethod());
   const NamedEntity *ne = func->getNamedEntity();
   if (UNLIKELY(!ne->m_cachedFuncOffset)) {
     const_cast<NamedEntity*>(ne)->m_cachedFuncOffset =
       Transl::TargetCache::allocFixedFunction(func->name());
   }
-  func->m_cachedOffset = ne->m_cachedFuncOffset;
+  const_cast<Func*>(func)->m_cachedOffset = ne->m_cachedFuncOffset;
 }
 
-/*
-  Attempt to instantiate the hoistable classes.
+void Unit::merge() {
+  if (UNLIKELY(!m_initialMergeDone)) {
+    SimpleLock lock(m_preConstsLock);
+    if (LIKELY(!m_initialMergeDone)) {
+      if (!RuntimeOption::RepoAuthoritative) {
+        Transl::mergePreConsts(m_preConsts);
+      }
+      for (MutableFuncRange fr(nonMainFuncs()); !fr.empty();) {
+        loadFunc(fr.popFront());
+      }
+      m_initialMergeDone = true;
+    }
+  }
 
-  returns true iff every hoistable class is instantiated
-*/
-void Unit::mergeClasses() const {
+  Func** it = funcHoistableBegin();
+  Func** fend = funcEnd();
+  if (it != fend) {
+    bool debugger = isDebuggerAttached();
+    do {
+      Func* func = *it;
+      ASSERT(func->top());
+      setCachedFunc(func, debugger);
+    } while (++it != fend);
+  }
+
   bool redoHoistable = false;
-  int ix = 0;
-  int end = m_numHoistablePreClasses;
+  int ix = m_firstHoistablePreClass;
+  int end = m_firstMergablePreClass;
   // iterate over all the potentially hoistable classes
   // with no fatals on failure
   while (ix < end) {
-    if (!defClass(m_mergeablePreClasses[ix++], false)) redoHoistable = true;
+    PreClass* pre = (PreClass*)m_mergeables[ix++];
+    if (!defClass(pre, false)) redoHoistable = true;
   }
   if (UNLIKELY(redoHoistable)) {
     // if this unit isnt mergeOnly, we're done
@@ -483,28 +548,15 @@ void Unit::mergeClasses() const {
     // because now A and D go on the maybe-hoistable list
     // B goes on the never hoistable list, and we
     // fatal trying to instantiate D before B
-    if (end == (int)m_mergeablePreClasses.size()) ix = 0;
+    if (end == (int)m_mergeables.size()) ix = m_firstHoistablePreClass;
   }
-  end = m_mergeablePreClasses.size();
+  end = m_mergeables.size();
   // iterate over all but the guaranteed hoistable classes
   // fataling if we fail.
   while (ix < end) {
-    defClass(m_mergeablePreClasses[ix++], true);
+    PreClass* pre = (PreClass*)m_mergeables[ix++];
+    defClass(pre, true);
   }
-}
-
-void Unit::mergePreConstsWork() {
-  ASSERT(!RuntimeOption::RepoAuthoritative);
-  SimpleLock lock(m_preConstsLock);
-  if (m_preConstsMerged) return;
-  Transl::mergePreConsts(m_preConsts);
-  atomic_release_store(&m_preConstsMerged, true);
-}
-
-void Unit::merge() {
-  mergePreConsts();
-  mergeFuncs();
-  mergeClasses();
 }
 
 int Unit::getLineNumber(Offset pc) const {
@@ -569,8 +621,9 @@ const Func* Unit::getFunc(Offset pc) const {
 void Unit::prettyPrint(std::ostream &out, size_t startOffset,
                        size_t stopOffset) const {
   std::map<Offset,const Func*> funcMap;
-  for (size_t i = 0; i < m_funcs.size(); ++i) {
-    funcMap[m_funcs[i]->base()] = m_funcs[i];
+  for (FuncRange fr(funcs()); !fr.empty();) {
+    const Func* f = fr.popFront();
+    funcMap[f->base()] = f;
   }
   for (PreClassPtrVec::const_iterator it = m_preClasses.begin();
       it != m_preClasses.end(); ++it) {
@@ -649,9 +702,8 @@ std::string Unit::toString() const {
       it != m_preClasses.end(); ++it) {
     (*it).get()->prettyPrint(ss);
   }
-  for (FuncVec::const_iterator it = m_funcs.begin(); it != m_funcs.end();
-       ++it) {
-    (*it)->prettyPrint(ss);
+  for (FuncRange fr(funcs()); !fr.empty();) {
+    fr.popFront()->prettyPrint(ss);
   }
   return ss.str();
 }
@@ -664,15 +716,14 @@ void Unit::enableIntercepts() {
   TranslatorX64* tx64 = TranslatorX64::Get();
   // Its ok to set maybeIntercepted(), because
   // we are protected by s_mutex in intercept.cpp
-  for (unsigned i = 0; i < m_funcs.size(); i++) {
-    Func *func = m_funcs[i];
+  for (MutableFuncRange fr(nonMainFuncs()); !fr.empty(); ) {
+    Func *func = fr.popFront();
     if (func->isPseudoMain()) {
       // pseudomain's can't be intercepted
       continue;
     }
     tx64->interceptPrologues(func);
   }
-
   {
     Lock lock(s_classesMutex);
     for (int i = m_preClasses.size(); i--; ) {
@@ -1186,7 +1237,8 @@ bool UnitRepoProxy::GetBaseOffsetAfterPCLocStmt
 UnitEmitter::UnitEmitter(const MD5& md5)
   : m_repoId(-1), m_sn(-1), m_bcmax(BCMaxInit), m_bc((uchar*)malloc(BCMaxInit)),
     m_bclen(0), m_bc_meta(NULL), m_bc_meta_len(0), m_filepath(NULL),
-    m_md5(md5), m_nextFuncSn(0), m_allClassesHoistable(true) {
+    m_md5(md5), m_nextFuncSn(0),
+    m_allClassesHoistable(true), m_returnSeen(false) {
   TV_WRITE_UNINIT(&m_mainReturn);
   m_mainReturn._count = 0;
 }
@@ -1307,6 +1359,11 @@ FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* n, bool top) {
   return fe;
 }
 
+void UnitEmitter::appendTopEmitter(FuncEmitter* fe) {
+  fe->setIds(m_nextFuncSn++, m_fes.size());
+  m_fes.push_back(fe);
+}
+
 FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* n,
                                            PreClassEmitter* pce) {
   return new FuncEmitter(*this, m_nextFuncSn++, n, pce);
@@ -1339,7 +1396,11 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(const StringData* n,
   }
   if (hoistable >= PreClass::Mergeable &&
       hoistable < PreClass::AlwaysHoistable) {
-    m_remainingPceVec.push_back(pce);
+    if (m_returnSeen) {
+      m_allClassesHoistable = false;
+    } else {
+      m_remainingPceVec.push_back(pce);
+    }
   }
   m_pceVec.push_back(pce);
   return pce;
@@ -1482,27 +1543,42 @@ Unit* UnitEmitter::create() {
   for (unsigned i = 0; i < m_arrays.size(); ++i) {
     u->m_arrays.push_back(m_arrays[i].array);
   }
-  for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
-    Func* func = (*it)->create(*u);
-    u->m_funcs.push_back(func);
-    if (func->top()) {
-      u->m_hoistableFuncs.push_back(func);
-    }
-  }
-  ASSERT(u->getMain()->isPseudoMain());
   for (PceVec::const_iterator it = m_pceVec.begin(); it != m_pceVec.end();
        ++it) {
     u->m_preClasses.push_back(PreClassPtr((*it)->create(*u)));
   }
+  size_t mergeablesSize = m_fes.size() + m_hoistablePceVec.size();
+  if (m_mainReturn._count && !m_allClassesHoistable) {
+    mergeablesSize += m_remainingPceVec.size();
+  }
+  u->m_mergeables.reserve(mergeablesSize);
+  u->m_firstHoistableFunc = 0;
+  for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
+    Func* func = (*it)->create(*u);
+    if (func->top()) {
+      if (!u->m_firstHoistableFunc) {
+        u->m_firstHoistableFunc = u->m_mergeables.size();
+      }
+    } else {
+      ASSERT(!u->m_firstHoistableFunc);
+    }
+    u->m_mergeables.push_back(func);
+  }
+  ASSERT(u->getMain()->isPseudoMain());
+  if (!u->m_firstHoistableFunc) {
+    u->m_firstHoistableFunc =  u->m_mergeables.size();
+  }
+  u->m_firstHoistablePreClass = u->m_mergeables.size();
+  ASSERT(m_fes.size());
   for (PceVec::const_iterator it = m_hoistablePceVec.begin();
        it != m_hoistablePceVec.end(); ++it) {
-    u->m_mergeablePreClasses.push_back(u->m_preClasses[(*it)->id()].get());
+    u->m_mergeables.push_back(u->m_preClasses[(*it)->id()].get());
   }
-  u->m_numHoistablePreClasses = m_hoistablePceVec.size();
+  u->m_firstMergablePreClass = u->m_mergeables.size();
   if (m_mainReturn._count && !m_allClassesHoistable) {
     for (PceVec::const_iterator it = m_remainingPceVec.begin();
          it != m_remainingPceVec.end(); ++it) {
-      u->m_mergeablePreClasses.push_back(u->m_preClasses[(*it)->id()].get());
+      u->m_mergeables.push_back(u->m_preClasses[(*it)->id()].get());
     }
   }
   u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
@@ -1536,6 +1612,7 @@ Unit* UnitEmitter::create() {
   }
   return u;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

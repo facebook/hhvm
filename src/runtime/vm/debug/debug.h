@@ -27,14 +27,31 @@ namespace Debug {
 
 using namespace HPHP::VM::Transl;
 
-struct DebugInfo {
+class DebugInfo {
+ public:
   DebugInfo();
+  ~DebugInfo();
 
-  DwarfInfo m_dwarfInfo;
-  void recordTracelet(TCA start, TCA end, const Unit *unit,
-    const Opcode *instr, bool exit, bool inPrologue);
-  void recordStub(TCA start, TCA end, const char* name);
+  void recordTracelet(TCRange range, 
+                      const Unit *unit,
+                      const Opcode *instr, bool exit,
+                      bool inPrologue);
+  void recordStub(TCRange range,
+                  const char* name);
+  void recordPerfMap(DwarfChunk* d);
+  void recordBCInstr(TCRange range, uint32_t op);
+
   void debugSync();
+  static DebugInfo* Get();
+
+ private:
+  DwarfInfo m_dwarfInfo;
+  /*
+   * Stuff to output symbol names to /tmp/perf-%d.map files.  This stuff
+   * can be read by perf top/record, etc.
+   */
+  FILE* m_perfMap;
+  char m_perfMapName[64];
 };
 
 /*
@@ -45,46 +62,6 @@ std::string lookupFunction(const Unit *unit,
                            bool exit,
                            bool inPrologue,
                            bool pseudoWithFileName);
-
-extern FILE* perfMap;
-static const char* opcodeName[] = {
-#define O(name, imm, push, pop, flags) \
-  #name,
-  OPCODES
-#undef O
-};
-
-static const char* astubOpcodeName[] = {
-  "OpAstubStart",
-#define O(name, imm, push, pop, flags) \
-  #name "-Astub",
-  OPCODES
-#undef O
-};
-
-static const char* highOpcodeName[] = {
-  "OpHighStart",
-#define O(name) \
-  #name,
-  HIGH_OPCODES
-#undef O
-};
-
-static inline void recordBCInstr(uint32_t op, TCA start, TCA end) {
-  if (RuntimeOption::EvalProfileBC) {
-    if (!perfMap) return;
-    const char* name;
-    if (op < Op_count) {
-      name = opcodeName[op];
-    } else if (op < OpAstubCount) {
-      name = astubOpcodeName[op - OpAstubStart];
-    } else {
-      name = highOpcodeName[op - OpHighStart];
-    }
-    fprintf(perfMap, "%lx %x %s\n", (long unsigned int)start,
-              (unsigned int)(end - start), name);
-  }
-}
 
 }
 }

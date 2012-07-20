@@ -435,10 +435,9 @@ TypedValue * fg1_mb_convert_variables(TypedValue* rv, HPHP::VM::ActRec* ar, long
   tvCastToStringInPlace(args-0);
   Array extraArgs;
   {
-    HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
     ArrayInit ai(count-3, false);
     for (long long i = 3; i < count; ++i) {
-      TypedValue* extraArg = ea->getExtraArg(i-3);
+      TypedValue* extraArg = ar->getExtraArg(i-3);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-3, tvAsVariant(extraArg));
       } else {
@@ -461,10 +460,9 @@ TypedValue* fg_mb_convert_variables(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Array extraArgs;
         {
-          HPHP::VM::ExtraArgs* ea UNUSED = ar->getExtraArgs();
           ArrayInit ai(count-3, false);
           for (long long i = 3; i < count; ++i) {
-            TypedValue* extraArg = ea->getExtraArg(i-3);
+            TypedValue* extraArg = ar->getExtraArg(i-3);
             if (tvIsStronglyBound(extraArg)) {
               ai.setRef(i-3, tvAsVariant(extraArg));
             } else {

@@ -69,7 +69,7 @@ struct VMRegAnchor : private boost::noncopyable {
       ASSERT((sp & 0xf) == 0);
     }
     m_old = tl_regState;
-    transl->sync();
+    Translator::Get()->sync();
   }
   VMRegAnchor(ActRec* ar, bool atFCall=false) {
     // Some C++ entry points have an ActRec prepared from after a call

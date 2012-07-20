@@ -323,13 +323,11 @@ Variant f_func_get_arg(int arg_num) {
       return tvAsVariant(loc);
     }
 
-    // Not a formal parameter. Value is in the ExtraArgs.
+    // Not a formal parameter.  Value is potentially in the
+    // ExtraArgs/VarEnv.
     int extraArgNum = arg_num - numParams;
-    HPHP::VM::ExtraArgs* eArgs = ar->getExtraArgs();
-    int extraArgs = (eArgs ? eArgs->numExtraArgs() : 0);
-
-    if (extraArgNum < extraArgs) {
-      return tvAsVariant(eArgs->getExtraArg(extraArgNum));
+    if (extraArgNum < ar->numExtraArgs()) {
+      return tvAsVariant(ar->getExtraArg(extraArgNum));
     }
 
     return false;
@@ -361,7 +359,6 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   if (ar == NULL) {
     return Array();
   }
-  HPHP::VM::ExtraArgs* eArgs = ar->getExtraArgs();
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
   HphpArray* retval = NEW(HphpArray)(numArgs);
@@ -375,9 +372,8 @@ Array hhvm_get_frame_args(const ActRec* ar) {
       --local;
     } else {
       // This is not a formal parameter, so it's in the ExtraArgs.
-      ASSERT(eArgs);
-      ASSERT(i - numParams < (int)eArgs->numExtraArgs());
-      retval->nvAppend(eArgs->getExtraArg(i - numParams), false);
+      ASSERT(i - numParams < (int)ar->numExtraArgs());
+      retval->nvAppend(ar->getExtraArg(i - numParams), false);
     }
   }
 

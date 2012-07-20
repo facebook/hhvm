@@ -18,6 +18,7 @@
 
 #include <signal.h>
 #include <boost/noncopyable.hpp>
+
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/asm-x64.h>
@@ -48,9 +49,6 @@ struct TraceletCountersVec {
   TraceletCountersVec() : m_size(0), m_elms(NULL), m_lock() { }
 };
 
-class TranslatorX64;
-extern TranslatorX64* tx64;
-
 class TranslatorX64 : public Translator, public SpillFill,
   public boost::noncopyable {
   friend class SrcRec; // so it can smash code.
@@ -60,6 +58,7 @@ class TranslatorX64 : public Translator, public SpillFill,
   friend class DiamondGuard;
   friend class DiamondReturn;
   friend class RedirectSpillFill;
+  friend class Tx64Reaper;
   template<int, int, int> friend class CondBlock;
   template<int> friend class JccBlock;
   template<int> friend class IfElseBlock;
@@ -199,7 +198,7 @@ class TranslatorX64 : public Translator, public SpillFill,
                                   const DynLocation& propInput,
                                   PhysReg scr);
 
-  inline bool isValidCodeAddress(TCA tca) {
+  inline bool isValidCodeAddress(TCA tca) const {
     return a.code.isValidAddress(tca) || astubs.code.isValidAddress(tca) ||
       atrampolines.code.isValidAddress(tca);
   }
@@ -394,7 +393,7 @@ PSEUDOINSTRS
  public:
   template<typename T>
   void invalidateSrcKeys(const T& keys) {
-    BlockingLeaseHolder writer(m_writeLease);
+    BlockingLeaseHolder writer(s_writeLease);
     ASSERT(writer);
     for (typename T::const_iterator i = keys.begin(); i != keys.end(); ++i) {
       invalidateSrcKey(*i);
@@ -417,7 +416,7 @@ PSEUDOINSTRS
   void poison(PhysReg dest);
 
   // public for syncing gdb state
-  HPHP::VM::Debug::DebugInfo m_debugInfo;
+  Debug::DebugInfo m_debugInfo;
 
   void fixup(VMExecutionContext* ec) const;
 
@@ -425,7 +424,7 @@ PSEUDOINSTRS
   SrcRec* getSrcRec(const SrcKey& sk) {
     // TODO: add a insert-or-find primitive to THM
     if (SrcRec* r = m_srcDB.find(sk)) return r;
-    ASSERT(m_writeLease.amOwner());
+    ASSERT(s_writeLease.amOwner());
     return m_srcDB.insert(sk);
   }
 
@@ -458,77 +457,6 @@ PSEUDOINSTRS
 private:
   virtual void syncWork();
 
-  /*
-   * The write Lease guards write access to the translation cache,
-   * srcDB, and TransDB. The term "lease" is meant to indicate that
-   * the right of ownership is conferred for a long, variable time:
-   * often the entire length of a request. If a request is not
-   * actively translating, it will perform a "hinted drop" of the lease:
-   * the lease is unlocked but all calls to acquire(false) from other
-   * threads will fail for a short period of time.
-   */
-  struct Lease {
-    static const int64 kStandardHintExpireInterval = 750;
-    pthread_t       m_owner;
-    pthread_mutex_t m_lock;
-    // m_held: since there's no portable, universally invalid pthread_t,
-    // explicitly represent the held <-> unheld state machine.
-    volatile bool   m_held;
-    int64           m_hintExpire;
-    int64           m_hintKept;
-    int64           m_hintGrabbed;
-
-    Lease() : m_held(false), m_hintExpire(0), m_hintKept(0), m_hintGrabbed(0) {
-      pthread_mutex_init(&m_lock, NULL);
-    }
-    ~Lease() {
-      if (m_held && m_owner == pthread_self()) {
-        // Can happen, e.g., in exception scenarios.
-        pthread_mutex_unlock(&m_lock);
-      }
-      pthread_mutex_destroy(&m_lock);
-    }
-    bool amOwner() const;
-    // acquire: also returns true if we are already the writer.
-    bool acquire(bool blocking = false);
-    void drop(int64 hintExpireDelay = 0);
-
-    /*
-     * A malevolent entity sometimes takes the write lease out from under us
-     * for debugging purposes.
-     */
-    void gremlinLock();
-    void gremlinUnlock();
-  };
-
-  enum LeaseAcquire {
-    ACQUIRE,
-    NO_ACQUIRE,
-  };
-  struct LeaseHolderBase {
-  protected:
-    LeaseHolderBase(Lease& l, LeaseAcquire acquire, bool blocking);
-
-  public:
-    ~LeaseHolderBase();
-    operator bool() const { return m_haveLock; }
-    bool acquire();
-
-  private:
-    Lease& m_lease;
-    bool m_haveLock;
-    bool m_acquired;
-  };
-  struct LeaseHolder : public LeaseHolderBase {
-    LeaseHolder(Lease& l, LeaseAcquire acquire = ACQUIRE)
-        : LeaseHolderBase(l, acquire, false) {}
-  };
-  struct BlockingLeaseHolder : public LeaseHolderBase {
-    BlockingLeaseHolder(Lease& l)
-        : LeaseHolderBase(l, ACQUIRE, true) {}
-  };
-  Lease m_writeLease;
-
 public:
 
 #define SERVICE_REQUESTS \
@@ -554,10 +482,10 @@ public:
 
   void analyzeInstr(Tracelet& t, NormalizedInstruction& i);
   bool acquireWriteLease(bool blocking) {
-    return m_writeLease.acquire(blocking);
+    return s_writeLease.acquire(blocking);
   }
   void dropWriteLease() {
-    m_writeLease.drop();
+    s_writeLease.drop();
   }
   void interceptPrologues(Func* func);
 
@@ -570,6 +498,8 @@ public:
 
   void emitVariantGuards(const Tracelet& t, const NormalizedInstruction& i);
   void emitPredictionGuards(const NormalizedInstruction& i);
+
+  Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
 
 private:
   TCA getInterceptHelper();
@@ -628,9 +558,12 @@ private:
   void emitMovRegReg(PhysReg src, PhysReg dest);
   void enterTC(SrcKey sk);
 
-  void recordGdbTranslation(const SrcKey& sk, const Unit* u, TCA start,
-                            int numTCBytes, bool exit, bool inPrologue);
-  void recordGdbStub(TCA start, TCA end, const char* name);
+  void recordGdbTranslation(const SrcKey& sk, const Unit* u,
+                            const Asm& a,
+                            const TCA start,
+                            bool exit, bool inPrologue);
+  void recordGdbStub(const Asm& a, TCA start, const char* name);
+  void recordBCInstr(uint32_t op, const Asm& a, const TCA addr);
 
   void emitStackCheck(int funcDepth, Offset pc);
   void emitStackCheckDynamic(int numArgs, Offset pc);
@@ -644,6 +577,7 @@ private:
   static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
                              DataType t);
   TCA funcPrologue(Func* func, int nArgs);
+  bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
   void emitNativeImpl(const Func*, bool emitSavedRIPReturn);
   TCA emitInterceptPrologue(Func* func, TCA next=NULL);
@@ -672,6 +606,7 @@ public:
   TCA translate(const SrcKey *sk, bool align);
 
   TranslatorX64();
+  virtual ~TranslatorX64();
 
   static TranslatorX64* Get();
 
@@ -693,7 +628,7 @@ public:
   // true iff calling thread is sole writer.
   static bool canWrite() {
     // We can get called early in boot, so allow null tx64.
-    return !tx64 || tx64->m_writeLease.amOwner();
+    return !tx64 || s_writeLease.amOwner();
   }
 
   // Returns true on success
@@ -708,6 +643,14 @@ public:
   // Async hook for file modifications.
   bool invalidateFile(Eval::PhpFile* f);
   void invalidateFileWork(Eval::PhpFile* f);
+
+  // Start a new translation space. Returns true IFF this thread created
+  // a new space.
+  bool replace();
+
+  // Debugging interfaces to prevent tampering with code.
+  void protectCode();
+  void unprotectCode();
 
 protected:
   virtual bool addDbgGuards(const Unit* unit);
@@ -739,7 +682,6 @@ class CodeCursor {
   }
 };
 
-// length in bytes of the code block holding trampolines
 const size_t kTrampolinesBlockSize = 8 << 12;
 
 // minimum length in bytes of each trampoline code sequence

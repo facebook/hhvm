@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 322 */
+/* SRC: classes/exception.php line 330 */
 FORWARD_DECLARE_CLASS(PDOException);
 extern const ObjectStaticCallbacks cw_PDOException;
 class c_PDOException : public c_Exception {

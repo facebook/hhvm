@@ -38,7 +38,9 @@
 #include <runtime/vm/repo.h>
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/translator-deps.h>
+#include <runtime/vm/translator/translator-x64.h>
 #include <util/alloc.h>
+#include <util/timer.h>
 #include <runtime/ext/ext_fb.h>
 #include <runtime/ext/ext_apc.h>
 
@@ -206,6 +208,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
         "/vm-preconsts:    show information about preconsts\n"
+        "/vm-tcreset:      throw away translations and start over\n"
 #endif
       ;
 #ifndef NO_TCMALLOC
@@ -908,7 +911,8 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   if (cmd == "vm-tcspace") {
     transport->sendString(VM::Transl::Translator::Get()->getUsage());
     return true;
-  } else if (cmd == "vm-preconsts") {
+  }
+  if (cmd == "vm-preconsts") {
     InfoMap counts;
     using namespace HPHP::VM::Transl;
     for (PreConstDepMap::iterator i = gPreConsts.begin(); i != gPreConsts.end();
@@ -935,11 +939,24 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     }
     transport->sendString(out.str());
     return true;
-  } else if (cmd == "vm-dump-tc") {
+  }
+  if (cmd == "vm-dump-tc") {
     if (HPHP::VM::Transl::tc_dump()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");
+    }
+    return true;
+  }
+  if (cmd == "vm-tcreset") {
+    int64 start = Timer::GetCurrentTimeMicros();
+    if (HPHP::VM::Transl::tx64->replace()) {
+      string msg;
+      Util::string_printf(msg, "Done %ld ms",
+                          (Timer::GetCurrentTimeMicros() - start) / 1000);
+      transport->sendString(msg);
+    } else {
+      transport->sendString("Failed");
     }
     return true;
   }

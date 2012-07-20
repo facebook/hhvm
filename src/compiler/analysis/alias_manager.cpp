@@ -3361,6 +3361,12 @@ public:
           }
         }
       }
+    } else if (static_pointer_cast<Statement>(cp)->is(
+                 Statement::KindOfReturnStatement)) {
+      int id = m_gidMap["v:this"];
+      if (id && m_block->getBit(DataFlow::Available, id)) {
+        cp->setGuarded();
+      }
     }
     return WalkContinue;
   }
@@ -3370,9 +3376,13 @@ private:
 
 class ConstructMarker : public ControlFlowGraphWalker {
 public:
-  ConstructMarker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
+  ConstructMarker(ControlFlowGraph *g, std::map<std::string,int> &gidMap) :
+      ControlFlowGraphWalker(g), m_gidMap(gidMap),
+      m_top(g->getMethod()->getStmts()) {}
 
-  void walk() { ControlFlowGraphWalker::walk(*this); }
+  void walk() {
+    ControlFlowGraphWalker::walk(*this);
+  }
   int after(ConstructRawPtr cp) {
     if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cp)) {
       if (int id = e->getCanonID()) {
@@ -3380,9 +3390,20 @@ public:
           markAvailable(e);
         }
       }
+    } else if (cp == m_top ||
+               static_pointer_cast<Statement>(cp)->is(
+                 Statement::KindOfReturnStatement)) {
+      int id = m_gidMap["v:this"];
+      if (id && m_block->getBit(cp == m_top ?
+                                DataFlow::AvailOut : DataFlow::AvailIn, id)) {
+        cp->setGuarded();
+      }
     }
     return WalkContinue;
   }
+private:
+  std::map<std::string,int> &m_gidMap;
+  ConstructPtr m_top;
 };
 
 class Propagater : public ControlFlowGraphWalker {
@@ -3633,7 +3654,7 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
     DataFlow::ComputeAvailable(*m_graph);
 
-    ConstructMarker cm(m_graph);
+    ConstructMarker cm(m_graph, m_gidMap);
     cm.walk();
 
     if (Option::VariableCoalescing &&

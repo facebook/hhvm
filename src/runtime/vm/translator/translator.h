@@ -260,15 +260,15 @@ class NormalizedInstruction {
   // StackOff: logical delta at *start* of this instruction to
   // stack at tracelet entry.
   int stackOff;
-  bool hasConstImm;
-  bool breaksBB;
-  bool changesPC;
-  bool fuseBranch;
-  bool preppedByRef;    // For FPass*; indicates parameter reffiness
-  bool manuallyAllocInputs;
-  bool invertCond;
-  bool outputPredicted;
-  bool ignoreInnerType;
+  unsigned hasConstImm:1;
+  unsigned breaksBB:1;
+  unsigned changesPC:1;
+  unsigned fuseBranch:1;
+  unsigned preppedByRef;    // For FPass*:1; indicates parameter reffiness
+  unsigned manuallyAllocInputs:1;
+  unsigned invertCond:1;
+  unsigned outputPredicted:1;
+  unsigned ignoreInnerType:1;
   /*
    * skipSync indicates that a previous instruction that should have
    * adjusted the stack (eg FCall, Req*) didnt, because it could see
@@ -276,13 +276,23 @@ class NormalizedInstruction {
    * (ie at this point, rVmSp holds the "correct" value, rather
    *  than the value it had at the beginning of the tracelet)
    */
-  bool skipSync;
+  unsigned skipSync:1;
   /*
    * grouped indicates that the tracelet should not be broken
    * (eg by a side exit) between the preceding instruction and
    * this one
    */
-  bool grouped;
+  unsigned grouped:1;
+  /*
+   * guardedThis indicates that we know that ar->m_this is
+   * a valid $this. eg:
+   *
+   *   $this->foo = 1; # needs to check that $this is non-null
+   *   $this->bar = 2; # can skip the check
+   *   return 5;       # can decRef ar->m_this unconditionally
+   */
+  unsigned guardedThis:1;
+
   ArgUnion constImm;
   TXFlags m_txFlags;
 
@@ -307,6 +317,7 @@ class NormalizedInstruction {
     ignoreInnerType(false),
     skipSync(false),
     grouped(false),
+    guardedThis(false),
     m_txFlags(Interp)
   { }
 

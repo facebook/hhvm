@@ -37,8 +37,7 @@ SimpleVariable::SimpleVariable
     m_name(name), m_docComment(docComment),
     m_sym(NULL), m_originalSym(NULL),
     m_this(false), m_globals(false),
-    m_superGlobal(false), m_alwaysStash(false),
-    m_guarded(false) {
+    m_superGlobal(false), m_alwaysStash(false) {
   setContext(Expression::NoLValueWrapper);
 }
 

@@ -1264,6 +1264,9 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
 
     switch (info.m_kind) {
+      case Unit::MetaInfo::GuardedThis:
+        ni->guardedThis = true;
+        break;
       case Unit::MetaInfo::DataType: {
         ASSERT((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];

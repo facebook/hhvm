@@ -112,6 +112,7 @@ public:
   edge_iterator         eend() const { return m_edges.end(); }
   ControlBlock          *add_vertex(AstWalkerStateVec &s);
   ControlEdge           *add_edge(ControlBlock *a, ControlBlock *b);
+  MethodStatementPtr    getMethod() { return m_stmt; }
 private:
   MethodStatementPtr         m_stmt;
   BitSetVec                  m_bitSetVec;

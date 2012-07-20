@@ -146,6 +146,10 @@ public:
   void clearNoRemove() { m_flags.noRemove = false; }
   bool isNoRemove() const { return m_flags.noRemove; }
 
+  void setGuarded() { m_flags.guarded = true; }
+  void clearGuarded() { m_flags.guarded = false; }
+  bool isGuarded() const { return m_flags.guarded; }
+
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
   FileScopeRawPtr getFileScope() const {
@@ -271,6 +275,7 @@ private:
       unsigned chainRoot           : 1; // is this the begining of a
                                         // CSE chain
       unsigned noRemove            : 1; // DCE should NOT remove this node
+      unsigned guarded             : 1; // previously used
     } m_flags;
   };
 protected:

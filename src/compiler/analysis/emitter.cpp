@@ -1882,19 +1882,27 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Statement::KindOfReturnStatement: {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
+        bool retV = false;
         if (visit(r->getRetExp())) {
           if (r->getRetExp()->getContext() & Expression::RefValue) {
             emitConvertToVar(e);
             emitFreePendingIters(e);
-            e.RetV();
+            retV = true;
           } else {
             emitConvertToCell(e);
             emitFreePendingIters(e);
-            e.RetC();
           }
         } else {
           emitFreePendingIters(e);
           e.Null();
+        }
+        if (r->isGuarded()) {
+          addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                      false, 0, 0);
+        }
+        if (retV) {
+          e.RetV();
+        } else {
           e.RetC();
         }
         return false;
@@ -3082,6 +3090,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(node));
         if (sv->isThis()) {
           if (sv->hasContext(Expression::ObjectContext)) {
+            if (sv->isGuarded()) {
+              addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                          false, 0, 0);
+            }
             e.This();
           } else {
             static const StringData* thisStr =
@@ -4658,13 +4670,18 @@ void EmitterVisitor::emitPostponedMeths() {
         // Emit code to unpack the instance variables (which store the
         // use-variables) into locals. Some of the use-variables may have the
         // same name, in which case the last one wins.
-        unsigned n = (*p.m_closureUseVars).size();
+        unsigned n = p.m_closureUseVars->size();
         for (unsigned i = 0; i < n; ++i) {
           StringData* name = (*p.m_closureUseVars)[i].first;
           bool byRef = (*p.m_closureUseVars)[i].second;
           emitVirtualLocal(fe->lookupVarId(name));
+          if (i) {
+            addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                        false, 0, 0);
+          }
           e.This();
-          e.String(name);
+          m_evalStack.push(StackSym::T);
+          m_evalStack.setString(name);
           markProp(e);
           if (byRef) {
             emitVGet(e);
@@ -4708,6 +4725,11 @@ void EmitterVisitor::emitPostponedMeths() {
     // return null
     if (currentPositionIsReachable()) {
       e.Null();
+      if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded()) ||
+          (fe->isClosureBody() && p.m_closureUseVars->size())) {
+        addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                    false, 0, 0);
+      }
       e.RetC();
     } // -- Method emission ends --
 
@@ -4941,9 +4963,13 @@ void EmitterVisitor::emitPostponedClosureCtors() {
         FuncEmitter::ParamInfo pi;
         pi.setRef(useVars[i].second);
         fe->appendParam(StringData::GetStaticString(num.str()), pi);
-
+        if (i) {
+          addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                      false, 0, 0);
+        }
         e.This();
-        e.String(useVars[i].first);
+        m_evalStack.push(StackSym::T);
+        m_evalStack.setString(useVars[i].first);
         markProp(e);
         emitVirtualLocal(i);
         if (useVars[i].second) {
@@ -4957,6 +4983,10 @@ void EmitterVisitor::emitPostponedClosureCtors() {
       }
     }
     e.Null();
+    if (n > 0) {
+      addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                  false, 0, 0);
+    }
     e.RetC();
 
     m_postponedClosureCtors.pop_front();

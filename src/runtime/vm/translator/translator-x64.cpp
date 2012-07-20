@@ -5935,7 +5935,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
         UnlikelyIfBlock<CC_NZ> varEnvCheck(a, astubs, dr.get());
         if (i.grouped) {
           emitStoreImm(astubs, tv.m_type,
-                       rVmSp, retvalSrcBase + 12, sz::dword);
+                       rVmSp, retvalSrcBase + TVOFF(m_type), sz::dword);
           if (tv.m_type != KindOfNull) {
             emitStoreImm(astubs, tv.m_data.num,
                          rVmSp, retvalSrcBase, sz::qword);
@@ -5968,10 +5968,14 @@ TranslatorX64::translateRetC(const Tracelet& t,
       // m_this and m_cls share a slot in the ActRec, so we check the
       // lowest bit (0 -> m_this, 1 -> m_cls)
       a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), rdi);
-      a.      test_imm32_reg64(1, rdi);
-      {
-        JccBlock<CC_NZ> ifZero(a);
-        emitDecRef(i, rdi, KindOfObject); // this. decref it.
+      if (i.guardedThis) {
+        emitDecRef(i, rdi, KindOfObject);
+      } else {
+        a.      test_imm32_reg64(1, rdi);
+        {
+          JccBlock<CC_NZ> ifZero(a);
+          emitDecRef(i, rdi, KindOfObject); // this. decref it.
+        }
       }
     } else if (curFunc()->isPseudoMain()) {
       a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), rdi);
@@ -8982,17 +8986,19 @@ TranslatorX64::translateThis(const Tracelet &t,
   PhysReg out = getReg(i.outStack->location);
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), out);
 
-  if (curFunc()->cls() == NULL) {  // Non-class
-    a.   test_reg64_reg64(out, out);
-    a.   jz(astubs.code.frontier); // jz if_null
-  }
+  if (!i.guardedThis) {
+    if (curFunc()->cls() == NULL) {  // Non-class
+      a.   test_reg64_reg64(out, out);
+      a.   jz(astubs.code.frontier); // jz if_null
+    }
 
-  a.   test_imm32_reg64(1, out);
-  {
-    UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs);
-    // if_null:
-    EMIT_CALL0(astubs, fatalNullThis);
-    recordReentrantStubCall(i);
+    a.   test_imm32_reg64(1, out);
+    {
+      UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs);
+      // if_null:
+      EMIT_CALL0(astubs, fatalNullThis);
+      recordReentrantStubCall(i);
+    }
   }
   emitIncRef(out, KindOfObject);
 }

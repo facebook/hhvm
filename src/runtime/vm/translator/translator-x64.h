@@ -91,7 +91,6 @@ class TranslatorX64 : public Translator, public SpillFill,
   TCA                    m_dtorStubs[MaxNumDataTypes];
   TCA                    m_typedDtorStub;
   TCA                    m_interceptHelper;
-  TCA                    m_toStringReturnHelper;
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
   DataBlock              m_globalData;

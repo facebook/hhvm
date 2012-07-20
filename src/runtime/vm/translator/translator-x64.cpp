@@ -10242,7 +10242,6 @@ TranslatorX64::TranslatorX64()
   m_trampolineSize(0),
   m_spillFillCode(&a),
   m_interceptHelper(0),
-  m_toStringReturnHelper(0),
   m_defClsHelper(0),
   m_funcPrologueRedispatch(0),
   m_regMap(kCallerSaved, kCalleeSaved, this),
@@ -10512,14 +10511,6 @@ void TranslatorX64::processInit() {
                                        Stack::topOfStackOffset(), rVmSp);
   emitServiceReq(false, REQ_RESUME, 0ull);
   recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
-
-  {
-    // Helper for return from non-instance toString
-    m_toStringReturnHelper = TCA(a.code.frontier);
-    a.   load_reg64_disp_reg64(rVmSp, AROFF(m_savedRip), rax);
-    a.   add_imm32_reg64(cellsToBytes(kNumActRecCells - 1), rVmSp);
-    a.   jmp_reg(rax);
-  }
 
   // Helper for DefCls
   if (false) {

@@ -113,14 +113,12 @@ void iter_value_cell(Iter* iter, TypedValue* out) {
   if (LIKELY(arr.isHphpArray())) {
     TypedValue* cur = arr.nvSecond();
     if (UNLIKELY(cur->m_type == KindOfRef)) cur = cur->m_data.ptv;
-    tvRefcountedIncRef(cur);
     TV_DUP_CELL_NC(cur, out);
     return;
   }
   Variant val = arr.second();
   ASSERT(val.getRawType() != KindOfRef);
   TV_DUP_CELL_NC((TypedValue*)&val, out);
-  val.reset();
 }
 
 void iter_value_cell_local(Iter* iter, TypedValue* out) {
@@ -145,7 +143,6 @@ void iter_key_cell(Iter* iter, TypedValue* out) {
   Variant key = arr.first();
   ASSERT(key.getRawType() == KindOfInt64 || IS_STRING_TYPE(key.getRawType()));
   TV_DUP_CELL_NC((TypedValue*)&key, out);
-  key.reset();
 }
 
 void iter_key_cell_local(Iter* iter, TypedValue* out) {

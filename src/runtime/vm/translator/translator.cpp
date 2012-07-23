@@ -1139,7 +1139,9 @@ void Translator::analyzeSecondPass(Tracelet& t) {
     const bool isOptimizable = prevOp == OpSetL ||
       prevOp == OpBindL ||
       prevOp == OpIncDecL ||
-      prevOp == OpPrint;
+      prevOp == OpPrint ||
+      prevOp == OpSetM;
+
     if (isPop && isOptimizable) {
       // If one of these instructions already has a null outStack, we
       // already hoisted a pop into it.
@@ -1152,6 +1154,15 @@ void Translator::analyzeSecondPass(Tracelet& t) {
           prev->deadLocs.push_back(ni->deadLocs[i]);
         }
         t.m_instrStream.remove(ni);
+        if (prevOp == OpSetM && prev->prev && prev->prev->op() == OpCGetL &&
+            prev->prev->inputs[0]->outerType() != KindOfUninit) {
+          ASSERT(prev->prev->outStack);
+          prev->prev->outStack = 0;
+          prev->prev->manuallyAllocInputs = false;
+          prev->prev->ignoreInnerType = true;
+          prev->inputs[0] = prev->prev->inputs[0];
+          prev->grouped = true;
+        }
         continue;
       }
     }
@@ -1973,6 +1984,7 @@ Translator::findImmable(ImmStack &stack,
 
   case OpFPassM:
   case OpCGetM:
+  case OpSetM:
   case OpIssetM: {
     // If this is "<VecInstr>M <... EC>"
     const ImmVector& iv = ni->immVec;

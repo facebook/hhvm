@@ -407,6 +407,10 @@ ArrayData* array_setm_s0k1_v(TypedValue* cell, ArrayData* ad, StringData* key,
                              TypedValue* value);
 ArrayData* array_setm_s0k1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
                               TypedValue* value);
+ArrayData* array_setm_s0k1nc_v(TypedValue* cell, ArrayData* ad, StringData* key,
+                               TypedValue* value);
+ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
+                                StringData* key, TypedValue* value);
 ArrayData* array_setm_wk1_v(TypedValue* cell, ArrayData* ad,
                             TypedValue* value);
 ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,

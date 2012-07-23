@@ -4898,8 +4898,6 @@ TranslatorX64::translateAddElemC(const Tracelet& t,
       printf("%p", ret); // use ret
       ret = array_setm_sk1_v0(cell, arr, strkey, rhs);
       printf("%p", ret); // use ret
-      ret = array_setm_s0k1_v0(cell, arr, strkey, rhs);
-      printf("%p", ret); // use ret
     }
     // Otherwise, we pass the rhs by address
     fptr = key.rtt.isString() ? (void*)array_setm_sk1_v0 :
@@ -7941,11 +7939,13 @@ void
 TranslatorX64::emitPropSet(const NormalizedInstruction& i,
                            const DynLocation& base,
                            const DynLocation& rhs,
+                           PhysReg rhsReg,
                            PhysReg fieldAddr) {
-  PhysReg rhsReg = getReg(rhs.location);
-  DataType rhsType = rhs.rtt.outerType();
+  DataType rhsType = rhs.rtt.valueType();
 
-  emitIncRef(rhsReg, rhsType);
+  if (i.outStack || rhs.isLocal()) {
+    emitIncRef(rhsReg, rhsType);
+  }
 
   // If the field is a Var, we need to dereference the Var so that
   // fieldAddr holds the address of the inner cell.
@@ -7969,26 +7969,43 @@ void
 TranslatorX64::translateSetMProp(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   using namespace TargetCache;
-  ASSERT(i.inputs.size() == 3 && i.outStack);
+  ASSERT(i.inputs.size() == 3);
 
   const int kRhsIdx       = 0;
-  const int kBaseIdx = 1;
+  const int kBaseIdx      = 1;
   const DynLocation& val  = *i.inputs[kRhsIdx];
   const DynLocation& base = *i.inputs[kBaseIdx];
   const DynLocation& prop = *i.inputs[2];
-  const Slot propOffset    = getPropertyOffset(i, 2, 1);
-  ASSERT(val.isStack() && val.outerType() != KindOfRef);
+  const Slot propOffset   = getPropertyOffset(i, 2, 1);
 
   const Location& valLoc  = val.location;
   const Location& baseLoc = base.location;
   const Location& propLoc = prop.location;
+
+  // We only combine a CGetL with a SetM if the SetM's value
+  // is unused. Otherwise we'd need to do the same incRef
+  // on the result of CGetL that CGetL already does for us.
+  ASSERT(!i.outStack || !val.isLocal());
+  // We cant get a variant unless we combined a CGetL
+  ASSERT(val.isLocal() || !val.isVariant());
+
+  bool decRefRhs = !i.outStack && !val.isLocal();
+
+  LazyScratchReg rhsTmp(m_regMap);
+  PhysReg rhsReg = getReg(valLoc);
+  if (val.isVariant()) {
+    rhsTmp.alloc();
+    emitDeref(a, rhsReg, *rhsTmp);
+    rhsReg = *rhsTmp;
+  }
 
   if (propOffset != kInvalidSlot && i.immVec.locationCode() == LC) {
     ASSERT(!base.isLocal() && !base.isVariant());
     Stats::emitInc(a, Stats::Tx64_PropSetFast);
     ScratchReg rField(m_regMap);
     a.lea_reg64_disp_reg64(getReg(baseLoc), int(propOffset), *rField);
-    emitPropSet(i, base, val, *rField);
+    emitPropSet(i, base, val, rhsReg, *rField);
+    decRefRhs = false;
   } else {
     Stats::emitInc(a, Stats::Tx64_PropSetSlow);
     bool useCtx = !isContextFixed();
@@ -8006,28 +8023,37 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
                  IMM(ch),
                  base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
                  V(propLoc),
-                 V(valLoc),
-                 IMM(val.rtt.outerType()),
+                 R(rhsReg),
+                 IMM(val.rtt.valueType()),
                  R(rVmFp));
     } else {
       EMIT_CALL5(a, setFn,
                  IMM(ch),
                  base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
                  V(propLoc),
-                 V(valLoc),
-                 IMM(val.rtt.outerType()));
+                 R(rhsReg),
+                 IMM(val.rtt.valueType()));
     }
     recordReentrantCall(i);
-    m_regMap.allocInputReg(i, kRhsIdx);
     if (!base.isLocal() && base.isVariant()) {
       m_regMap.allocInputReg(i, kBaseIdx);
       emitDecRef(i, getReg(baseLoc), KindOfRef);
     }
+    if (i.outStack || decRefRhs) {
+      m_regMap.allocInputReg(i, kRhsIdx);
+      rhsReg = getReg(valLoc);
+    }
   }
 
-  m_regMap.allocOutputRegs(i);
-  PhysReg rhsReg = getReg(i.inputs[kRhsIdx]->location);
-  emitMovRegReg(rhsReg, getReg(i.outStack->location));
+  if (i.outStack) {
+    ASSERT(!val.isVariant());
+    m_regMap.cleanRegs(RegSet(rhsReg));
+    m_regMap.invalidate(valLoc);
+    m_regMap.bind(rhsReg, i.outStack->location,
+                  val.valueType(), RegInfo::DIRTY);
+  } else if (decRefRhs) {
+    emitDecRef(i, rhsReg, val.outerType());
+  }
 }
 
 void
@@ -8047,13 +8073,29 @@ TranslatorX64::translateSetM(const Tracelet& t,
     return;
   }
 
-  ASSERT(i.outStack);
   ASSERT(i.inputs.size() == 3);
   const DynLocation& val = *i.inputs[0];
   const DynLocation& arr = *i.inputs[1];
   const DynLocation& key = *i.inputs[2];
-  ASSERT(val.isStack() && val.outerType() != KindOfRef);
   ASSERT(arr.isLocal());
+
+  ASSERT(val.isLocal() || !val.isVariant());
+  ASSERT(!i.outStack || !val.isLocal());
+
+  bool forceIncDec = false;
+  if (val.isLocal() &&
+      (val.location == arr.location ||
+       (val.isVariant() && arr.isVariant() &&
+        val.valueType() == arr.valueType()))) {
+    /*
+     * cant avoid the inc/dec on val
+     * in the case of $a[...] = $a;
+     */
+    forceIncDec = true;
+    /* we dont allow a local input unless we also folded
+       a following pop */
+    ASSERT(!i.outStack);
+  }
 
   const Location valLoc = val.location;
   const Location arrLoc = arr.location;
@@ -8075,44 +8117,60 @@ TranslatorX64::translateSetM(const Tracelet& t,
     UNUSED ArrayData* ret = array_setm_ik1_iv(cell, arr, 12, 3);
     ret = array_setm_ik1_v(cell, arr, 12, rhs);
     ret = array_setm_sk1_v(cell, arr, strKey, rhs);
+    ret = array_setm_sk1_v0(cell, arr, strKey, rhs);
     ret = array_setm_s0k1_v(cell, arr, strKey, rhs);
+    ret = array_setm_s0k1_v0(cell, arr, strKey, rhs);
+    ret = array_setm_s0k1nc_v(cell, arr, strKey, rhs);
+    ret = array_setm_s0k1nc_v0(cell, arr, strKey, rhs);
   }
-  if (key.isInt() && val.isInt()) {
-    // If the rhs is Int64, we can use a specialized helper
-    if (useBoxedForm) {
-      EMIT_CALL4(a, array_setm_ik1_iv,
-                 V(arrLoc),
-                 DEREF(arrLoc),
-                 V(keyLoc),
-                 V(valLoc));
-    } else {
-      EMIT_CALL4(a, array_setm_ik1_iv,
-                 IMM(0),
-                 V(arrLoc),
-                 V(keyLoc),
-                 V(valLoc));
-    }
+  bool isInt = key.isInt() && IS_INT_TYPE(val.rtt.valueType());
+  if (isInt) {
+    // If the key and rhs are Int64, we can use a specialized helper
+    fptr = (void*)array_setm_ik1_iv;
   } else {
-    // Otherwise, we pass the rhs by address
     bool decRefKey = key.rtt.isString() && keyLoc.isStack();
-    fptr = key.rtt.isString() ?
-      (decRefKey ? (void*)array_setm_sk1_v :
-                   (void*)array_setm_s0k1_v) :
-              (void*)array_setm_ik1_v;
-    if (useBoxedForm) {
-      EMIT_CALL4(a, fptr,
-                 V(arrLoc),
-                 DEREF(arrLoc),
-                 V(keyLoc),
-                 A(valLoc));
-    } else {
-      EMIT_CALL4(a, fptr,
-                 IMM(0),
-                 V(arrLoc),
-                 V(keyLoc),
-                 A(valLoc));
-    }
+    bool decRefValue = forceIncDec ||
+      (!i.outStack && !val.isLocal() &&
+       IS_REFCOUNTED_TYPE(val.rtt.valueType()));
+    fptr = decRefValue ?
+      (key.rtt.isString() ?
+       (decRefKey ? (void*)array_setm_sk1_v0 :
+        (i.hasConstImm ? (void*)array_setm_s0k1nc_v0 :
+         (void*)array_setm_s0k1_v0)) :
+       (void*)array_setm_ik1_v0) :
+      (key.rtt.isString() ?
+       (decRefKey ? (void*)array_setm_sk1_v :
+        (i.hasConstImm ? (void*)array_setm_s0k1nc_v :
+         (void*)array_setm_s0k1_v)) :
+       (void*)array_setm_ik1_v);
   }
+
+  if (forceIncDec) {
+    LazyScratchReg tmp(m_regMap);
+    PhysReg rhsReg = getReg(valLoc);
+    if (val.isVariant()) {
+      tmp.alloc();
+      emitDeref(a, rhsReg, *tmp);
+      rhsReg = *tmp;
+    }
+    emitIncRef(rhsReg, KindOfArray);
+  }
+  /*
+   * Fourth parameter to fptr can be A, V or DEREF according to:
+   *
+   *                       | val.isVariant() | !val.isVariant()
+   * ----------------------+-----------------+-----------------------------
+   * int key + int value   | DEREF(valLoc)   | V(valLoc)
+   * everything else       | V(valLoc)       | A(valLoc)
+   */
+  int deRefLevel = isInt + val.isVariant();
+  EMIT_CALL4(a, fptr,
+             useBoxedForm ? V(arrLoc) : IMM(0),
+             useBoxedForm ? DEREF(arrLoc) : V(arrLoc),
+             V(keyLoc),
+             deRefLevel == 2 ? DEREF(valLoc) :
+             deRefLevel == 1 ? V(valLoc) : A(valLoc));
+
   recordReentrantCall(i);
   // If we did not used boxed form, we need to tell the register allocator
   // to associate rax with arrLoc
@@ -8123,12 +8181,15 @@ TranslatorX64::translateSetM(const Tracelet& t,
     m_regMap.bind(rax, arrLoc, KindOfArray, RegInfo::DIRTY);
   }
 
-  // Bring the output value into its correct location on the stack.
-  // Note that this has to happen after all of the above, since it
-  // needs to read the key from this location.
-  m_regMap.allocInputReg(i, 0);
-  m_regMap.bind(getReg(valLoc), i.outStack->location,
-                val.outerType(), RegInfo::DIRTY);
+  if (i.outStack) {
+    ASSERT(!val.isVariant());
+    // Bring the output value into its correct location on the stack.
+    // Note that this has to happen after all of the above, since it
+    // needs to read the key from this location.
+    m_regMap.allocInputReg(i, 0);
+    m_regMap.bind(getReg(valLoc), i.outStack->location,
+                  val.outerType(), RegInfo::DIRTY);
+  }
 }
 
 void
@@ -9959,7 +10020,14 @@ TranslatorX64::translateInstr(const Tracelet& t,
     }
   }
 
-  emitVariantGuards(t, i);
+  if (!i.grouped) {
+    emitVariantGuards(t, i);
+    const NormalizedInstruction* n = &i;
+    while (n->next && n->next->grouped) {
+      n = n->next;
+      emitVariantGuards(t, *n);
+    }
+  }
 
   // Allocate the input regs upfront unless instructed otherwise
   // or the instruction is interpreted

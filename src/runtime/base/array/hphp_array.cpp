@@ -2181,7 +2181,7 @@ inline ArrayData* adSet(ArrayData* ad, int64 key, CVarRef val, bool copy) {
 template<bool CheckInt>
 inline ArrayData* adSet(ArrayData* ad, const StringData* key,
                         CVarRef val, bool copy) {
-  return ad->set(key, val, copy);
+  return ad->set(StrNR(key), val, copy);
 }
 
 template<>
@@ -2280,31 +2280,49 @@ array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,
  *    array_setm_sk1_v0 --
  *      Like above, but don't count the new reference.
  *
+ *    array_setm_s0k1_v --
  *    array_setm_s0k1_v0 --
- *    array_setm_s0k1_v0 --
- *       Skip checks for $key that is really an integer.
+ *      As above, but dont decRef the key
+ *
+ *    array_setm_s0k1nc_v --
+ *    array_setm_s0k1nc_v0 --
+ *       Dont decRef the key, and skip the check for
+ *       whether the key is really an integer.
  */
 ArrayData* array_setm_sk1_v(TypedValue* cell, ArrayData* ad, StringData* key,
                             TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, false, true, false>
-    (cell, ad, key, value);
+  return array_setm<StringData*, TypedValue*, false, true, true>(
+    cell, ad, key, value);
 }
 
 ArrayData* array_setm_sk1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
                              TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, true, true, false>(cell, ad, key, value);
+  return array_setm<StringData*, TypedValue*, true, true, true>(
+    cell, ad, key, value);
 }
 
 ArrayData* array_setm_s0k1_v(TypedValue* cell, ArrayData* ad, StringData* key,
                              TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, false, true, false>
-    (cell, ad, key, value);
+  return array_setm<StringData*, TypedValue*, false, true, false>(
+    cell, ad, key, value);
 }
 
 ArrayData* array_setm_s0k1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
                               TypedValue* value) {
-  return array_setm<StringData*, TypedValue*, true, true, true>
-    (cell, ad, key, value);
+  return array_setm<StringData*, TypedValue*, true, true, false>(
+    cell, ad, key, value);
+}
+
+ArrayData* array_setm_s0k1nc_v(TypedValue* cell, ArrayData* ad, StringData* key,
+                               TypedValue* value) {
+  return array_setm<StringData*, TypedValue*, false, false, false>(
+    cell, ad, key, value);
+}
+
+ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
+                                StringData* key, TypedValue* value) {
+  return array_setm<StringData*, TypedValue*, true, false, false>(
+    cell, ad, key, value);
 }
 
 /**

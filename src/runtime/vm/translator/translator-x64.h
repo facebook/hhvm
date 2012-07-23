@@ -369,6 +369,7 @@ PSEUDOINSTRS
   void emitPropSet(const NormalizedInstruction& i,
                    const DynLocation& base,
                    const DynLocation& rhs,
+                   PhysReg rhsReg,
                    PhysReg fieldAddr);
   void translateSetMProp(const Tracelet &t, const NormalizedInstruction& i);
   void emitPropGet(const NormalizedInstruction& i,

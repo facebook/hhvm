@@ -603,6 +603,47 @@ getDynLocType(const vector<DynLocation*>& inputs,
         // Dup takes a single element.
         op == OpDup
       );
+
+      if (op == OpSetM || op == OpBindM) {
+        /*
+         * these return null for "invalid" inputs
+         * if we cant prove everything's ok, we will
+         * have to insert a side exit
+         */
+        bool ok = inputs.size() <= 3;
+        if (ok) {
+          switch (inputs[1]->rtt.valueType()) {
+            case KindOfObject:
+              ok = mcodeMaybePropName(ni->immVecM[0]);
+              break;
+            case KindOfArray:
+              ok = mcodeMaybeArrayKey(ni->immVecM[0]);
+              break;
+            case KindOfNull:
+            case KindOfUninit:
+              break;
+            default:
+              ok = false;
+          }
+        }
+        if (ok) {
+          for (int i = inputs.size(); --i >= 2; ) {
+            switch (inputs[i]->rtt.valueType()) {
+              case KindOfObject:
+              case KindOfArray:
+                ok = false;
+                break;
+              default:
+                continue;
+            }
+            break;
+          }
+        }
+        if (!ok) {
+          ni->outputPredicted = true;
+        }
+      }
+
       const int idx = 0; // all currently supported cases.
 
       if (debug) {

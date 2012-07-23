@@ -613,6 +613,27 @@ int instrNumPushes(const Opcode* opcode);
 StackTransInfo instrStackTransInfo(const Opcode* opcode);
 int instrSpToArDelta(const Opcode* opcode);
 
+inline bool
+mcodeMaybePropName(MemberCode mcode) {
+  return mcode == MPC || mcode == MPL || mcode == MPT;
+}
+
+inline bool
+mcodeMaybeArrayKey(MemberCode mcode) {
+  return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
+}
+
+inline bool
+mcodeMaybeArrayStringKey(MemberCode mcode) {
+  return mcode == MEC || mcode == MEL || mcode == MET;
+}
+
+inline bool
+mcodeMaybeArrayIntKey(MemberCode mcode) {
+  return mcode == MEC || mcode == MEL || mcode == MEI;
+}
+
+
 } }
 
 #endif

@@ -7119,26 +7119,6 @@ void TranslatorX64::translateSetG(const Tracelet& t,
 }
 
 static bool
-mcodeMaybePropName(MemberCode mcode) {
-  return mcode == MPC || mcode == MPL || mcode == MPT;
-}
-
-static bool
-mcodeMaybeArrayKey(MemberCode mcode) {
-  return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
-}
-
-static bool
-mcodeMaybeArrayStringKey(MemberCode mcode) {
-  return mcode == MEC || mcode == MEL || mcode == MET;
-}
-
-static bool
-mcodeMaybeArrayIntKey(MemberCode mcode) {
-  return mcode == MEC || mcode == MEL || mcode == MEI;
-}
-
-static bool
 isNormalPropertyAccess(const NormalizedInstruction& i,
                        int propInput,
                        int objInput) {

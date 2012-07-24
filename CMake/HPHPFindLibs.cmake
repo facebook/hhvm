@@ -129,7 +129,7 @@ if (ICU_FOUND)
 	include_directories(${ICU_INCLUDE_DIRS})
 endif (ICU_FOUND)
 
-# (google heap OR cpu profiler) AND libunwind 
+# (google heap OR cpu profiler) AND libunwind
 FIND_LIBRARY(UNWIND_LIB unwind)
 
 # jemalloc/tmalloc and profiler
@@ -158,16 +158,12 @@ endif()
 
 if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED
 		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
-	FIND_LIBRARY(JEMALLOC_LIB jemalloc)
+    #FIND_LIBRARY(JEMALLOC_LIB jemalloc)
+    FIND_PATH(JEMALLOC_INCLUDE_DIR NAMES jemalloc.h HINTS "" PATH_SUFFIXES include/jemalloc)
+    FIND_LIBRARY(JEMALLOC_LIB NAMES jemalloc HINTS "" PATH_SUFFIXES lib64 lib)
+
 	if (JEMALLOC_LIB)
-		CHECK_LIBRARY_EXISTS(jemalloc mallctl "" HAVE_JEMALLOC_FUN)
-		if (HAVE_JEMALLOC_FUN)
-			message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
-			set(JEMALLOC_ENABLED 1)
-		else()
-			message(STATUS "Found jemalloc at ${JEMALLOC_LIB}, but unable to find its API "
-			               "(maybe the library was configured with a non-empty function prefix?)")
-		endif()
+        set(JEMALLOC_ENABLED 1)
 	else()
 		message(STATUS "Can't find jemalloc")
 	endif()

@@ -108,25 +108,25 @@ Variant VectorArray::current() const {
 
 Variant VectorArray::reset() {
   ssize_t pos = 0;
-  Variant v = value(pos);
+  Variant v = VectorArray::value(pos);
   if (m_pos != pos) m_pos = pos;
   return v;
 }
 Variant VectorArray::prev() {
   ssize_t pos = m_pos - 1;
-  Variant v = value(pos);
+  Variant v = VectorArray::value(pos);
   if (m_pos != pos) m_pos = pos;
   return v;
 }
 Variant VectorArray::next() {
   ssize_t pos = m_pos + 1;
-  Variant v = value(pos);
+  Variant v = VectorArray::value(pos);
   if (m_pos != pos) m_pos = pos;
   return v;
 }
 Variant VectorArray::end() {
   ssize_t pos = (ssize_t)m_size - 1;
-  Variant v = value(pos);
+  Variant v = VectorArray::value(pos);
   if (m_pos != pos) m_pos = pos;
   return v;
 }
@@ -241,9 +241,16 @@ inline static StringData *getStringKey(Variant::TypedValueAccessor tva) {
   return Variant::GetStringData(tva);
 }
 
+/*
+ * Do unsigned comparison to cheaply exclude k < 0
+ */
+inline ALWAYS_INLINE bool inRange(int64_t k, uint size) {
+  return size_t(k) < size_t(size);
+}
+
 HOT_FUNC_HPHP
-bool VectorArray::exists(int64   k) const {
-  return (k >= 0 && k < m_size);
+bool VectorArray::exists(int64 k) const {
+  return inRange(k, m_size);
 }
 
 bool VectorArray::exists(litstr  k) const {
@@ -262,7 +269,7 @@ bool VectorArray::exists(CVarRef k) const {
 
 HOT_FUNC_HPHP
 CVarRef VectorArray::get(int64 k, bool error /* = false */) const {
-  if (LIKELY(k >= 0 && k < m_size)) {
+  if (LIKELY(inRange(k, m_size))) {
     return tvAsCVarRef(&m_elems[k]);
   }
   if (error) {
@@ -288,7 +295,7 @@ CVarRef VectorArray::get(CStrRef k, bool error /* = false */) const {
 CVarRef VectorArray::get(CVarRef k, bool error /* = false */) const {
   Variant::TypedValueAccessor tva = k.getTypedAccessor();
   if (isIntKey(tva)) {
-    return get(getIntKey(tva), error);
+    return VectorArray::get(getIntKey(tva), error);
   }
   if (error) {
     raise_notice("Undefined index: %s", k.toString().data());
@@ -312,7 +319,7 @@ ssize_t VectorArray::getIndex(CStrRef k) const {
 ssize_t VectorArray::getIndex(CVarRef k) const {
   Variant::TypedValueAccessor tva = k.getTypedAccessor();
   if (isIntKey(tva)) {
-    return getIndex(getIntKey(tva));
+    return VectorArray::getIndex(getIntKey(tva));
   }
   return ArrayData::invalid_index;
 }
@@ -398,7 +405,7 @@ inline void ALWAYS_INLINE VectorArray::checkInsertIterator(ssize_t pos) {
 ArrayData *VectorArray::lvalNew(Variant *&ret, bool copy) {
   if (UNLIKELY(copy)) {
     VectorArray *a = NEW(VectorArray)(this);
-    a->lvalNew(ret, false);
+    a->VectorArray::lvalNew(ret, false);
     return a;
   }
   uint index = m_size;
@@ -413,7 +420,7 @@ ArrayData *VectorArray::lvalNew(Variant *&ret, bool copy) {
 
 ArrayData *VectorArray::lval(int64 k, Variant *&ret, bool copy,
                              bool checkExist /* = false */) {
-  ret = exists(k) ? &tvAsVariant(&m_elems[k]) : NULL;
+  ret = inRange(k, m_size) ? &tvAsVariant(&m_elems[k]) : NULL;
   if (ret == NULL && k != m_size) {
     ZendArray *a = escalateToZendArray();
     a->addLvalImpl(k, &ret, false);
@@ -441,7 +448,7 @@ ArrayData *VectorArray::lval(int64 k, Variant *&ret, bool copy,
     return a;
   }
   ASSERT(m_size == k);
-  a->lvalNew(ret, false);
+  a->VectorArray::lvalNew(ret, false);
   return a;
 }
 
@@ -464,7 +471,7 @@ ArrayData *VectorArray::lval(CVarRef k, Variant *&ret, bool copy,
                              bool checkExist /* = false */) {
   Variant::TypedValueAccessor tva = k.getTypedAccessor();
   if (isIntKey(tva)) {
-    return lval(getIntKey(tva), ret, copy, checkExist);
+    return VectorArray::lval(getIntKey(tva), ret, copy, checkExist);
   }
   ASSERT(k.isString());
   ZendArray *a = escalateToZendArray();
@@ -489,7 +496,7 @@ ArrayData *VectorArray::lvalPtr(int64 k, Variant *&ret, bool copy,
 
 HOT_FUNC_HPHP
 ArrayData *VectorArray::set(int64 k, CVarRef v, bool copy) {
-  if (exists(k)) {
+  if (inRange(k, m_size)) {
     if (copy) {
       VectorArray *a = NEW(VectorArray)(this);
       tvAsVariant(&a->m_elems[k]).assignVal(v);
@@ -498,7 +505,7 @@ ArrayData *VectorArray::set(int64 k, CVarRef v, bool copy) {
     tvAsVariant(&m_elems[k]).assignVal(v);
     return NULL;
   }
-  if (k == m_size) return append(v, copy);
+  if (k == m_size) return VectorArray::append(v, copy);
   ZendArray *a = escalateToZendArray();
   a->add(k, v, false);
   return a;
@@ -515,7 +522,7 @@ HOT_FUNC_HPHP
 ArrayData *VectorArray::set(CVarRef k, CVarRef v, bool copy) {
   Variant::TypedValueAccessor tva = k.getTypedAccessor();
   if (isIntKey(tva)) {
-    return set(getIntKey(tva), v, copy);
+    return VectorArray::set(getIntKey(tva), v, copy);
   }
   ASSERT(k.isString());
   ZendArray *a = escalateToZendArray();
@@ -525,13 +532,13 @@ ArrayData *VectorArray::set(CVarRef k, CVarRef v, bool copy) {
 
 ArrayData *VectorArray::setRef(int64 k, CVarRef v, bool copy) {
   if (UNLIKELY(copy)) {
-    if (exists(k) || k == m_size) {
+    if (inRange(k, m_size) || k == m_size) {
       VectorArray *a = NEW(VectorArray)(this);
-      a->setRef(k, v, false);
+      a->VectorArray::setRef(k, v, false);
       return a;
     }
   } else {
-    if (exists(k)) {
+    if (inRange(k, m_size)) {
       tvAsVariant(&m_elems[k]).assignRef(v);
       return NULL;
     } else if (k == m_size) {
@@ -556,7 +563,7 @@ ArrayData *VectorArray::setRef(CStrRef k, CVarRef v, bool copy) {
 ArrayData *VectorArray::setRef(CVarRef k, CVarRef v, bool copy) {
   Variant::TypedValueAccessor tva = k.getTypedAccessor();
   if (isIntKey(tva)) {
-    return setRef(getIntKey(tva), v, copy);
+    return VectorArray::setRef(getIntKey(tva), v, copy);
   }
   ASSERT(k.isString());
   ZendArray *a = escalateToZendArray();
@@ -593,7 +600,7 @@ ArrayData *VectorArray::append(CVarRef v, bool copy) {
 ArrayData *VectorArray::appendRef(CVarRef v, bool copy) {
   if (UNLIKELY(copy)) {
     VectorArray *a = NEW(VectorArray)(this);
-    a->appendRef(v, false);
+    a->VectorArray::appendRef(v, false);
     return a;
   }
   uint index = m_size;
@@ -607,7 +614,7 @@ ArrayData *VectorArray::appendRef(CVarRef v, bool copy) {
 ArrayData *VectorArray::appendWithRef(CVarRef v, bool copy) {
   if (UNLIKELY(copy)) {
     VectorArray *a = NEW(VectorArray)(this);
-    a->appendWithRef(v, false);
+    a->VectorArray::appendWithRef(v, false);
     return a;
   }
   uint index = m_size;
@@ -629,7 +636,7 @@ ArrayData *VectorArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
   }
   if (UNLIKELY(copy)) {
     VectorArray *a = NEW(VectorArray)(this);
-    a->append(elems, op, false);
+    a->VectorArray::append(elems, op, false);
     return a;
   }
   ASSERT(dynamic_cast<const VectorArray *>(elems));
@@ -709,7 +716,7 @@ ArrayData *VectorArray::pop(Variant &value) {
 
 ArrayData *VectorArray::add(int64 k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
-  if (k == m_size) return append(v, copy);
+  if (k == m_size) return VectorArray::append(v, copy);
   ZendArray *a = escalateToZendArray();
   a->add(k, v, false);
   return a;
@@ -724,7 +731,7 @@ ArrayData *VectorArray::add(CStrRef k, CVarRef v, bool copy) {
 ArrayData *VectorArray::add(CVarRef k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
   Variant::TypedValueAccessor tva = k.getTypedAccessor();
-  if (isIntKey(tva)) return add(getIntKey(tva), v, copy);
+  if (isIntKey(tva)) return VectorArray::add(getIntKey(tva), v, copy);
   ASSERT(k.isString());
   ZendArray *a = escalateToZendArray();
   a->add(StrNR(getStringKey(tva)), v, false);
@@ -741,7 +748,7 @@ ArrayData *VectorArray::addLval(int64 k, Variant *&ret, bool copy) {
   uint index = m_size;
   if (UNLIKELY(copy)) {
     VectorArray *a = NEW(VectorArray)(this);
-    a->addLval(k, ret, false);
+    a->VectorArray::addLval(k, ret, false);
     return a;
   }
   checkSize();
@@ -762,7 +769,7 @@ ArrayData *VectorArray::addLval(CStrRef k, Variant *&ret, bool copy) {
 ArrayData *VectorArray::addLval(CVarRef k, Variant *&ret, bool copy) {
   ASSERT(!exists(k));
   Variant::TypedValueAccessor tva = k.getTypedAccessor();
-  if (isIntKey(tva)) return addLval(getIntKey(tva), ret, copy);
+  if (isIntKey(tva)) return VectorArray::addLval(getIntKey(tva), ret, copy);
   ASSERT(k.isString());
   ZendArray *a = escalateToZendArray();
   a->addLval(StrNR(getStringKey(tva)), ret, false);
@@ -770,14 +777,15 @@ ArrayData *VectorArray::addLval(CVarRef k, Variant *&ret, bool copy) {
 }
 
 ArrayData *VectorArray::remove(int64 k, bool copy) {
-  if (!exists(k)) return NULL;
+  if (!inRange(k, m_size)) return NULL;
   if (k != m_size - 1L) {
     ArrayData *a = escalateToNonEmptyZendArray();
     a->remove(k, false);
     return a;
   }
+  // k == m_size-1
   if (copy) {
-    if (m_size == 1) return StaticEmptyVectorArray::Get();
+    if (k == 0) return StaticEmptyVectorArray::Get();
     VectorArray *a = NEW(VectorArray)(this, 0, m_size - 1);
     if (a->m_pos == m_size - 1) a->m_pos = ArrayData::invalid_index;
     return a;
@@ -797,7 +805,7 @@ ArrayData *VectorArray::remove(CStrRef k, bool copy) {
 ArrayData *VectorArray::remove(CVarRef k, bool copy) {
   Variant::TypedValueAccessor tva = k.getTypedAccessor();
   if (isIntKey(tva)) {
-    return remove(getIntKey(tva), copy);
+    return VectorArray::remove(getIntKey(tva), copy);
   }
   ASSERT(k.isString());
   return NULL;

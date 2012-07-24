@@ -130,10 +130,13 @@ static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
   pcre_cache_entry *pce = pcre_cache.find(regex);
   if (pce) {
     /**
-     * We use a quick pcre_info() check to see whether cache is corrupted,
-     * and if it is, we flush it and compile the pattern from scratch.
+     * We use a simple pcre_fullinfo() check to see whether cache is
+     * corrupted, and if it is, we flush it and compile the pattern
+     * from scratch.
      */
-    if (pcre_info(pce->re, NULL, NULL) == PCRE_ERROR_BADMAGIC) {
+    size_t pcre_size;
+    if (pcre_fullinfo(pce->re, NULL, PCRE_INFO_SIZE, &pcre_size)
+                                                 == PCRE_ERROR_BADMAGIC) {
       pcre_cache.cleanup();
     } else {
 #if HAVE_SETLOCALE

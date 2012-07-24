@@ -33,6 +33,7 @@
 #include <test/test_ext_error.h>
 #include <test/test_ext_fb.h>
 #include <test/test_ext_file.h>
+#include <test/test_ext_filter.h>
 #include <test/test_ext_function.h>
 #include <test/test_ext_hash.h>
 #include <test/test_ext_iconv.h>
@@ -44,6 +45,7 @@
 #include <test/test_ext_imap.h>
 #include <test/test_ext_intl.h>
 #include <test/test_ext_ipc.h>
+#include <test/test_ext_iplocation.h>
 #include <test/test_ext_iterator.h>
 #include <test/test_ext_json.h>
 #include <test/test_ext_ldap.h>
@@ -80,6 +82,7 @@
 #include <test/test_ext_url.h>
 #include <test/test_ext_variable.h>
 #include <test/test_ext_xml.h>
+#include <test/test_ext_xml_array.h>
 #include <test/test_ext_xmlreader.h>
 #include <test/test_ext_xmlwriter.h>
 #include <test/test_ext_zlib.h>

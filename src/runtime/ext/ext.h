@@ -35,6 +35,7 @@
 #include <runtime/ext/profile/extprofile_error.h>
 #include <runtime/ext/profile/extprofile_fb.h>
 #include <runtime/ext/profile/extprofile_file.h>
+#include <runtime/ext/profile/extprofile_filter.h>
 #include <runtime/ext/profile/extprofile_function.h>
 #include <runtime/ext/profile/extprofile_hash.h>
 #include <runtime/ext/profile/extprofile_iconv.h>
@@ -46,6 +47,7 @@
 #include <runtime/ext/profile/extprofile_imap.h>
 #include <runtime/ext/profile/extprofile_intl.h>
 #include <runtime/ext/profile/extprofile_ipc.h>
+#include <runtime/ext/profile/extprofile_iplocation.h>
 #include <runtime/ext/profile/extprofile_iterator.h>
 #include <runtime/ext/profile/extprofile_json.h>
 #include <runtime/ext/profile/extprofile_ldap.h>
@@ -82,6 +84,7 @@
 #include <runtime/ext/profile/extprofile_url.h>
 #include <runtime/ext/profile/extprofile_variable.h>
 #include <runtime/ext/profile/extprofile_xml.h>
+#include <runtime/ext/profile/extprofile_xml_array.h>
 #include <runtime/ext/profile/extprofile_xmlreader.h>
 #include <runtime/ext/profile/extprofile_xmlwriter.h>
 #include <runtime/ext/profile/extprofile_zlib.h>

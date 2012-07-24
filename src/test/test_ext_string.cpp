@@ -895,6 +895,9 @@ bool TestExtString::test_count_chars() {
 
 bool TestExtString::test_str_word_count() {
   VS(f_str_word_count("Two Ts and one F."), 5);
+  VS(f_str_word_count("", 2), Array::Create());
+  VS(f_str_word_count(1, 2), Array::Create());
+  VS(f_str_word_count("1 2", 2), Array::Create());
   return Count(true);
 }
 

@@ -621,7 +621,7 @@ Variant f_str_word_count(CStrRef str, int64 format /* = 0 */,
   if (!format) {
     return word_count;
   }
-  return ret;
+  return ret.isNull() ? Array::Create() : ret;
 }
 
 Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {

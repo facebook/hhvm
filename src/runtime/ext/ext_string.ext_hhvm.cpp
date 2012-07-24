@@ -890,22 +890,33 @@ TypedValue* fg_strrchr(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::Variant HPHP::f_strstr(HPHP::String const&, HPHP::Variant const&)
-_ZN4HPHP8f_strstrERKNS_6StringERKNS_7VariantE
+HPHP::Variant HPHP::f_strstr(HPHP::String const&, HPHP::Variant const&, bool)
+_ZN4HPHP8f_strstrERKNS_6StringERKNS_7VariantEb
 
 (return value) => rax
 _rv => rdi
 haystack => rsi
 needle => rdx
+before_needle => rcx
 */
 
-TypedValue* fh_strstr(TypedValue* _rv, Value* haystack, TypedValue* needle) asm("_ZN4HPHP8f_strstrERKNS_6StringERKNS_7VariantE");
+TypedValue* fh_strstr(TypedValue* _rv, Value* haystack, TypedValue* needle, bool before_needle) asm("_ZN4HPHP8f_strstrERKNS_6StringERKNS_7VariantEb");
 
 TypedValue * fg1_strstr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_strstr(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  tvCastToStringInPlace(args-0);
-  fh_strstr((rv), (Value*)(args-0), (args-1));
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfBoolean) {
+      tvCastToBooleanInPlace(args-2);
+    }
+  case 2:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  fh_strstr((rv), (Value*)(args-0), (args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -915,26 +926,26 @@ TypedValue* fg_strstr(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_strstr((&(rv)), (Value*)(args-0), (args-1));
+    if (count >= 2LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
+        fh_strstr((&(rv)), (Value*)(args-0), (args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_strstr(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("strstr", count, 2, 2, 1);
+      throw_wrong_arguments_nr("strstr", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
+    frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   EXCEPTION_GATE_RETURN(&ar->m_r);

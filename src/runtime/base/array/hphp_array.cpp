@@ -1294,7 +1294,7 @@ ArrayData *HphpArray::lvalPtr(CStrRef k, Variant*& ret, bool copy,
   } else {
     ssize_t /*ElmInd*/ pos = t->find(key->data(), key->size(), prehash);
     if (pos != (ssize_t)ElmIndEmpty) {
-      Elm* e = &m_data[pos];
+      Elm* e = &t->m_data[pos];
       ret = &tvAsVariant(&e->data);
     } else {
       ret = NULL;
@@ -1316,7 +1316,7 @@ ArrayData *HphpArray::lvalPtr(int64 k, Variant*& ret, bool copy,
   } else {
     ElmInd pos = t->find(k);
     if (pos != ElmIndEmpty) {
-      Elm* e = &m_data[pos];
+      Elm* e = &t->m_data[pos];
       ret = &tvAsVariant(&e->data);
     } else {
       ret = NULL;

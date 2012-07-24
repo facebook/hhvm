@@ -35,7 +35,7 @@ int64 f_error_reporting(CVarRef level = null);
 bool f_restore_error_handler();
 bool f_restore_exception_handler();
 Variant f_set_error_handler(CVarRef error_handler, int error_types = k_E_ALL);
-String f_set_exception_handler(CVarRef exception_handler);
+Variant f_set_exception_handler(CVarRef exception_handler);
 void f_hphp_set_error_page(CStrRef page);
 void f_hphp_throw_fatal_error(CStrRef error_msg);
 void f_hphp_clear_unflushed();

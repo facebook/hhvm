@@ -205,7 +205,7 @@ DefineFunction(
     'desc'   => "Sets the default exception handler if an exception is not caught within a try/catch block. Execution will stop after the exception_handler is called.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => String,
+      'type'   => Variant,
       'desc'   => "Returns the name of the previously defined exception handler, or NULL on error. If no previous handler was defined, NULL is also returned.",
     ),
     'args'   => array(

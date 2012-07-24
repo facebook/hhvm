@@ -372,7 +372,7 @@ TypedValue* fg_set_error_handler(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::String HPHP::f_set_exception_handler(HPHP::Variant const&)
+HPHP::Variant HPHP::f_set_exception_handler(HPHP::Variant const&)
 _ZN4HPHP23f_set_exception_handlerERKNS_7VariantE
 
 (return value) => rax
@@ -380,7 +380,7 @@ _rv => rdi
 exception_handler => rsi
 */
 
-Value* fh_set_exception_handler(Value* _rv, TypedValue* exception_handler) asm("_ZN4HPHP23f_set_exception_handlerERKNS_7VariantE");
+TypedValue* fh_set_exception_handler(TypedValue* _rv, TypedValue* exception_handler) asm("_ZN4HPHP23f_set_exception_handlerERKNS_7VariantE");
 
 TypedValue* fg_set_exception_handler(HPHP::VM::ActRec *ar) {
   EXCEPTION_GATE_ENTER();
@@ -388,10 +388,8 @@ TypedValue* fg_set_exception_handler(HPHP::VM::ActRec *ar) {
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
-      rv.m_type = KindOfString;
-      fh_set_exception_handler((Value*)(&(rv)), (args-0));
-      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      fh_set_exception_handler((&(rv)), (args-0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 1);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;

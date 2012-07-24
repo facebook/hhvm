@@ -446,10 +446,10 @@ inline Variant x_strrchr(CStrRef haystack, CVarRef needle) {
   return f_strrchr(haystack, needle);
 }
 
-inline Variant x_strstr(CStrRef haystack, CVarRef needle) {
+inline Variant x_strstr(CStrRef haystack, CVarRef needle, bool before_needle = false) {
   FUNCTION_INJECTION_BUILTIN(strstr);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-  return f_strstr(haystack, needle);
+  return f_strstr(haystack, needle, before_needle);
 }
 
 inline Variant x_stristr(CStrRef haystack, CVarRef needle) {

@@ -2029,6 +2029,12 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "If needle is not a string, it is converted to an integer and applied as the ordinal value of a character.",
       ),
+      array(
+        'name'   => 'before_needle',
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "If TRUE, strstr() returns the part of the haystack before the first occurrence of the needle (excluding the needle).",
+      ),
     ),
     'taint_observer' => array(
       'set_mask'   => "TAINT_BIT_MUTATED",

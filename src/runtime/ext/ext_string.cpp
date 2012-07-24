@@ -328,12 +328,17 @@ Variant f_strrchr(CStrRef haystack, CVarRef needle) {
   return haystack.substr(ret.toInt32());
 }
 
-Variant f_strstr(CStrRef haystack, CVarRef needle) {
+Variant f_strstr(CStrRef haystack, CVarRef needle,
+                 bool before_needle /* =false */) {
   Variant ret = f_strpos(haystack, needle);
   if (same(ret, false)) {
     return false;
   }
-  return haystack.substr(ret.toInt32());
+  if (before_needle) {
+    return haystack.substr(0, ret.toInt32());
+  } else {
+    return haystack.substr(ret.toInt32());
+  }
 }
 
 Variant f_stristr(CStrRef haystack, CVarRef needle) {

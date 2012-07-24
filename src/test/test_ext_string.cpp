@@ -820,6 +820,8 @@ bool TestExtString::test_strrchr() {
 bool TestExtString::test_strstr() {
   String email  = "name@example.com";
   VS(f_strstr(email, "@"), "@example.com");
+  VS(f_strstr(email, "@", true), "name");
+  VS(f_strstr(email, "@", false), "@example.com");
   return Count(true);
 }
 

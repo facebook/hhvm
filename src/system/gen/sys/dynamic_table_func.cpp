@@ -19345,10 +19345,12 @@ Variant i_memcache_get_stats(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_memcache_get_stats);
 }
 Variant ifa_strstr(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("strstr", count, 2, 2, 1);
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("strstr", count, 2, 3, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  return (x_strstr(arg0, arg1));
+  if (count <= 2) return (x_strstr(arg0, arg1));
+  CVarRef arg2(a2);
+  return (x_strstr(arg0, arg1, arg2));
 }
 Variant i_strstr(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_strstr);
@@ -23531,7 +23533,7 @@ extern const CallInfo ci_checkdnsrr = {(void*)&i_checkdnsrr, (void*)&ifa_checkdn
 extern const CallInfo ci_apc_filehits = {(void*)&i_apc_filehits, (void*)&ifa_apc_filehits, 0, 0, 0x0000000000000000LL};
 extern const CallInfo ci_bcpowmod = {(void*)&i_bcpowmod, (void*)&ifa_bcpowmod, 4, 0, 0x0000000000000000LL};
 extern const CallInfo ci_memcache_get_stats = {(void*)&i_memcache_get_stats, (void*)&ifa_memcache_get_stats, 4, 0, 0x0000000000000000LL};
-extern const CallInfo ci_strstr = {(void*)&i_strstr, (void*)&ifa_strstr, 2, 0, 0x0000000000000000LL};
+extern const CallInfo ci_strstr = {(void*)&i_strstr, (void*)&ifa_strstr, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_rsort = {(void*)&i_rsort, (void*)&ifa_rsort, 3, 0, 0x0000000000000001LL};
 extern const CallInfo ci___halt_compiler = {(void*)&i___halt_compiler, (void*)&ifa___halt_compiler, 0, 0, 0x0000000000000000LL};
 extern const CallInfo ci_uasort = {(void*)&i_uasort, (void*)&ifa_uasort, 2, 0, 0x0000000000000001LL};

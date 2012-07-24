@@ -301,7 +301,7 @@ Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
                          int length = INT_MAX, bool case_insensitivity = false);
 
 Variant f_strrchr(CStrRef haystack, CVarRef needle);
-Variant f_strstr(CStrRef haystack, CVarRef needle);
+Variant f_strstr(CStrRef haystack, CVarRef needle, bool before_needle = false);
 Variant f_stristr(CStrRef haystack, CVarRef needle);
 Variant f_strpbrk(CStrRef haystack, CStrRef char_list);
 

@@ -257,6 +257,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
     Offset curPos UNUSED = getUnitEmitter().bcPos(); \
     getEmitterVisitor().prepareEvalStack(); \
     POP_##pop; \
+    const int nIn UNUSED = COUNT_##pop; \
     POP_HA_##imm; \
     PUSH_##push; \
     getUnitEmitter().emitOp(Op##name); \
@@ -266,6 +267,15 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
     if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack(); \
     getEmitterVisitor().setPrevOpcode(opcode); \
   }
+
+#define COUNT_NOV 0
+#define COUNT_ONE(t) 1
+#define COUNT_TWO(t1,t2) 2
+#define COUNT_THREE(t1,t2,t3) 3
+#define COUNT_LMANY() 0
+#define COUNT_C_LMANY() 0
+#define COUNT_V_LMANY() 0
+#define COUNT_FMANY 0
 
 #define ONE(t) \
   DEC_##t a1
@@ -315,14 +325,14 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 
 // Pop of virtual "locs" on the stack that turn into immediates.
 #define POP_HA_ONE(t) \
-  POP_HA_##t(0)
+  POP_HA_##t((nIn+0))
 #define POP_HA_TWO(t1, t2) \
-  POP_HA_##t1(0)           \
-  POP_HA_##t2(1)
+  POP_HA_##t1((nIn+0))     \
+  POP_HA_##t2((nIn+1))
 #define POP_HA_THREE(t1, t2, t3) \
-  POP_HA_##t1(0)                 \
-  POP_HA_##t2(1)                 \
-  POP_HA_##t3(2)
+  POP_HA_##t1((nIn+0))           \
+  POP_HA_##t2((nIn+1))           \
+  POP_HA_##t3((nIn+2))
 
 #define POP_HA_NA
 #define POP_HA_MA(i)
@@ -1624,13 +1634,20 @@ void EmitterVisitor::visitKids(ConstructPtr c) {
 
 bool EmitterVisitor::visit(ConstructPtr node) {
   bool ret = visitImpl(node);
-  if (!Option::WholeProgram || !ret || !node->isNonNull()) return ret;
+  if (!Option::WholeProgram || !ret) return ret;
   ExpressionPtr e = boost::dynamic_pointer_cast<Expression>(node);
   if (!e || e->isScalar()) return ret;
-  TypePtr act = e->getActualType();
-  if (!act) return ret;
-  DataType dt = act->getDataType();
-  if (dt == KindOfUnknown) return ret;
+  DataType dt = KindOfUnknown;
+  if (!e->maybeInited()) {
+    dt = KindOfUninit;
+  } else if (node->isNonNull()) {
+    TypePtr act = e->getActualType();
+    if (!act) return ret;
+    dt = act->getDataType();
+    if (dt == KindOfUnknown) return ret;
+  } else {
+    return ret;
+  }
   char sym = m_evalStack.top();
   if (StackSym::GetMarker(sym)) return ret;
   switch (StackSym::GetSymFlavor(sym)) {

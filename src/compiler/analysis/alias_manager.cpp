@@ -2261,10 +2261,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
               if (!id) id = m_gidMap.size();
               e->setCanonID(id);
             }
-          } else if (m_graph &&
-                     !sv->couldBeAliased() &&
-                     sv->getActualType() &&
-                     !Type::IsMappedToVariant(sv->getActualType())) {
+          } else if (m_graph) {
             m_objMap[sym->getName()] = sv;
           }
           if ((context & Expression::UnsetContext) &&
@@ -3281,71 +3278,160 @@ static bool isNewResult(ExpressionPtr e) {
   return false;
 }
 
-class ConstructTagger : public ControlFlowGraphWalker {
+class ConstructTagger : public DataFlowWalker {
 public:
   ConstructTagger(ControlFlowGraph *g,
                   std::map<std::string,int> &gidMap) :
-      ControlFlowGraphWalker(g), m_gidMap(gidMap) {}
+      DataFlowWalker(g), m_gidMap(gidMap) {}
 
-  void walk() { ControlFlowGraphWalker::walk(*this); }
-  int after(ConstructRawPtr cp) {
-    if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cp)) {
-      int id = e->getCanonID();
-      if (id) {
-        if (m_block->getBit(DataFlow::Available, id)) {
-          markAvailable(e);
-          e->clearAnticipated();
-        } else {
-          m_block->setBit(DataFlow::Available, id);
-          e->setAnticipated();
+  void walk(MethodStatementPtr m) {
+    DataFlowWalker::walk();
+    ControlBlock *b = m_graph.getDfBlock(1);
+    std::map<std::string,int>::iterator it = m_gidMap.find("v:this");
+    if (m->getOrigGeneratorFunc()) {
+      BitOps::set(m_gidMap.size(), b->getRow(DataFlow::PRefIn),
+                  BitOps::Bits(-1));
+      BitOps::set(m_gidMap.size(), b->getRow(DataFlow::PInitIn),
+                  BitOps::Bits(-1));
+    } else {
+      if (it != m_gidMap.end() && it->second) {
+        b->setBit(DataFlow::PRefIn, it->second);
+        b->setBit(DataFlow::PInitIn, it->second);
+      }
+      updateParamInfo(m->getParams(), hhvm && Option::HardTypeHints);
+      updateParamInfo(m->getFunctionScope()->getClosureVars(), false);
+    }
+  }
+
+  void updateParamInfo(ExpressionListPtr el, bool useDefaults) {
+    if (!el) return;
+    ControlBlock *b = m_graph.getDfBlock(1);
+    for (int i = el->getCount(); i--; ) {
+      ParameterExpressionPtr p =
+        static_pointer_cast<ParameterExpression>((*el)[i]);
+      std::map<std::string,int>::iterator it =
+        m_gidMap.find("v:" + p->getName());
+      if (it != m_gidMap.end() && it->second) {
+        if (useDefaults && p->hasTypeHint() && !p->defaultValue()) {
+          b->setBit(DataFlow::AvailIn, it->second);
+        }
+        b->setBit(DataFlow::PRefIn, it->second);
+        b->setBit(DataFlow::PInitIn, it->second);
+      }
+    }
+  }
+
+  void processAccess(ExpressionPtr e) {
+    int id = e->getCanonID();
+    if (id) {
+      if (m_block->getBit(DataFlow::Available, id)) {
+        markAvailable(e);
+        e->clearAnticipated();
+      } else {
+        m_block->setBit(DataFlow::Available, id);
+        e->setAnticipated();
+      }
+    } else {
+      bool set = true, maybeRef = true;
+      SimpleVariablePtr sv;
+      if (e->is(Expression::KindOfSimpleVariable)) {
+        sv = spc(SimpleVariable, e);
+        set = (e->isThis() && e->hasContext(Expression::ObjectContext));
+        if (e->getAssertedType()) {
+          markAvailable(sv);
+          set = true;
         }
       } else {
-        bool set = true, cand = true;
-        SimpleVariablePtr sv;
-        if (e->is(Expression::KindOfSimpleVariable) &&
-            (e->isThis() ||
-             !e->hasContext(Expression::ObjectContext) ||
-             e->getAssertedType())) {
-          sv = spc(SimpleVariable, e);
-          cand = (e->isThis() && e->hasContext(Expression::ObjectContext));
-          if (e->getAssertedType()) {
-            markAvailable(sv);
-            cand = true;
-          }
-        } else {
-          if (e->is(Expression::KindOfObjectMethodExpression)) {
-            ObjectMethodExpressionPtr om(spc(ObjectMethodExpression, e));
-            if (om->getObject()->is(Expression::KindOfSimpleVariable)) {
-              sv = spc(SimpleVariable, om->getObject());
-            }
-          } else if (e->is(Expression::KindOfObjectPropertyExpression)) {
-            ObjectPropertyExpressionPtr op(spc(ObjectPropertyExpression, e));
-            if (op->getObject()->is(Expression::KindOfSimpleVariable)) {
-              sv = spc(SimpleVariable, op->getObject());
-              set = false;
-            }
-          } else if (e->is(Expression::KindOfAssignmentExpression)) {
-            AssignmentExpressionPtr ae(spc(AssignmentExpression, e));
-            if (ae->getVariable()->is(Expression::KindOfSimpleVariable) &&
-                isNewResult(ae->getValue())) {
-              sv = spc(SimpleVariable, ae->getVariable());
+        if (e->is(Expression::KindOfObjectMethodExpression)) {
+          ExpressionPtr a(spc(ObjectMethodExpression, e)->getObject());
+          while (true) {
+            if (a->is(Expression::KindOfObjectPropertyExpression)) {
+              a = spc(ObjectPropertyExpression, a)->getObject();
+            } else if (a->is(Expression::KindOfArrayElementExpression)) {
+              a = spc(ArrayElementExpression, a)->getVariable();
+            } else if (a->is(Expression::KindOfAssignmentExpression)) {
+              a = spc(AssignmentExpression, a)->getValue();
+            } else if (a->is(Expression::KindOfExpressionList)) {
+              a = spc(ExpressionList, a)->listValue();
+            } else {
+              break;
             }
           }
-          if (sv && sv->isThis()) sv.reset();
+          if (a->is(Expression::KindOfSimpleVariable)) {
+            sv = spc(SimpleVariable, a);
+          }
+        } else if (e->is(Expression::KindOfObjectPropertyExpression)) {
+          ObjectPropertyExpressionPtr op(spc(ObjectPropertyExpression, e));
+          if (op->getObject()->is(Expression::KindOfSimpleVariable)) {
+            sv = spc(SimpleVariable, op->getObject());
+            set = false;
+          }
+        } else if (e->is(Expression::KindOfAssignmentExpression)) {
+          AssignmentExpressionPtr ae(spc(AssignmentExpression, e));
+          if (ae->getVariable()->is(Expression::KindOfSimpleVariable)) {
+            sv = spc(SimpleVariable, ae->getVariable());
+            set = isNewResult(ae->getValue());
+            if (!sv->couldBeAliased() &&
+                (ae->getValue()->isScalar() ||
+                 (ae->getValue()->getActualType() &&
+                  ae->getValue()->getActualType()->getKindOf() <
+                  Type::KindOfString))) {
+              maybeRef = false;
+            }
+          }
         }
-        if (sv && (!cand || !sv->couldBeAliased())) {
-          id = m_gidMap["v:" + sv->getName()];
-          if (id) {
-            if (sv->hasAllContext(Expression::Declaration) ||
-                       sv->hasAllContext(Expression::UnsetContext|
-                                         Expression::LValue) ||
-                       sv->hasAnyContext(Expression::AssignmentLHS|
-                                         Expression::OprLValue)) {
+        if (sv && sv->isThis()) sv.reset();
+      }
+      if (sv) {
+        id = m_gidMap["v:" + sv->getName()];
+        if (id) {
+          if (sv == e) {
+            sv->setCanonID(id);
+            sv->clearAnticipated();
+            if (m_block->getBit(DataFlow::Killed, id)) {
+              sv->setKilled();
+            } else {
+              sv->clearKilled();
+            }
+            if (m_block->getBit(DataFlow::Referenced, id)) {
+              sv->setRefCounted();
+            }
+            if (m_block->getBit(DataFlow::Inited, id)) {
+              sv->setInited();
+            }
+            if (sv->hasAllContext(Expression::UnsetContext|
+                                  Expression::LValue)) {
               m_block->setBit(DataFlow::Available, id, false);
               m_block->setBit(DataFlow::Altered, id, true);
-            } else if (cand) {
-              sv->setCanonID(id);
-              sv->clearAnticipated();
+              m_block->setBit(DataFlow::Killed, id, true);
+              m_block->setBit(DataFlow::Referenced, id, false);
+              m_block->setBit(DataFlow::Inited, id, false);
+              return;
+            }
+            bool ref = sv->hasAnyContext(Expression::RefValue|
+                                         Expression::InvokeArgument|
+                                         Expression::DeepReference|
+                                         Expression::DeepAssignmentLHS|
+                                         Expression::DeepOprLValue);
+
+            bool mod =
+              sv->hasAllContext(Expression::Declaration) ||
+              sv->hasAnyContext(Expression::AssignmentLHS|
+                                Expression::OprLValue) ||
+              (!ref && sv->hasContext(Expression::LValue));
+
+            if (mod) {
+              m_block->setBit(DataFlow::Available, id, false);
+              m_block->setBit(DataFlow::Altered, id, true);
+            }
+            if (mod || ref) {
+              m_block->setBit(DataFlow::Referenced, id, true);
+              m_block->setBit(DataFlow::Inited, id, true);
+              m_block->setBit(DataFlow::Killed, id, true);
+              return;
+            }
+
+            if (!sv->couldBeAliased()) {
               if (m_block->getBit(DataFlow::Available, id)) {
                 markAvailable(sv);
               } else {
@@ -3358,48 +3444,75 @@ public:
                 }
               }
             }
+          } else {
+            if (!maybeRef) {
+              ASSERT(m_block->getBit(DataFlow::Killed, id));
+              m_block->setBit(DataFlow::Referenced, id, false);
+            }
+            if (set && !sv->hasAnyContext(Expression::ExistContext|
+                                          Expression::UnsetContext)) {
+              m_block->setBit(DataFlow::Available, id, true);
+            }
           }
         }
       }
-    } else if (static_pointer_cast<Statement>(cp)->is(
-                 Statement::KindOfReturnStatement)) {
+    }
+  }
+
+  int after(ConstructPtr cp) {
+    if (ReturnStatementPtr rs = dynamic_pointer_cast<ReturnStatement>(cp)) {
       int id = m_gidMap["v:this"];
       if (id && m_block->getBit(DataFlow::Available, id)) {
         cp->setGuarded();
       }
     }
-    return WalkContinue;
+    return DataFlowWalker::after(cp);
   }
 private:
   std::map<std::string,int> &m_gidMap;
 };
 
-class ConstructMarker : public ControlFlowGraphWalker {
+class ConstructMarker : public DataFlowWalker {
 public:
   ConstructMarker(ControlFlowGraph *g, std::map<std::string,int> &gidMap) :
-      ControlFlowGraphWalker(g), m_gidMap(gidMap),
+      DataFlowWalker(g), m_gidMap(gidMap),
       m_top(g->getMethod()->getStmts()) {}
 
   void walk() {
-    ControlFlowGraphWalker::walk(*this);
+    DataFlowWalker::walk();
   }
-  int after(ConstructRawPtr cp) {
-    if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cp)) {
-      if (int id = e->getCanonID()) {
-        if (e->isAnticipated() && m_block->getBit(DataFlow::AvailIn, id)) {
-          markAvailable(e);
+
+  void processAccess(ExpressionPtr e) {
+    if (int id = e->getCanonID()) {
+      if (e->isAnticipated() && m_block->getBit(DataFlow::AvailIn, id)) {
+        markAvailable(e);
+      }
+      if (e->is(Expression::KindOfSimpleVariable) && !e->isKilled()) {
+        if (m_block->getBit(DataFlow::PRefIn, id)) {
+          e->setRefCounted();
+        } else {
+          e->clearRefCounted();
+        }
+        if (m_block->getBit(DataFlow::PInitIn, id)) {
+          e->setInited();
+        } else {
+          e->clearInited();
         }
       }
-    } else if (cp == m_top ||
-               static_pointer_cast<Statement>(cp)->is(
-                 Statement::KindOfReturnStatement)) {
+    }
+  }
+
+  int after(ConstructRawPtr cp) {
+    if (cp == m_top ||
+        static_pointer_cast<Statement>(cp)->is(
+          Statement::KindOfReturnStatement)) {
       int id = m_gidMap["v:this"];
       if (id && m_block->getBit(cp == m_top ?
                                 DataFlow::AvailOut : DataFlow::AvailIn, id)) {
         cp->setGuarded();
       }
     }
-    return WalkContinue;
+    return DataFlowWalker::after(cp);
   }
 private:
   std::map<std::string,int> &m_gidMap;
@@ -3643,16 +3756,21 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
     {
       static int rows[] = {
         DataFlow::Available, DataFlow::Altered,
-        DataFlow::AvailIn, DataFlow::AvailOut
+        DataFlow::Inited, DataFlow::Referenced, DataFlow::Killed,
+        DataFlow::AvailIn, DataFlow::AvailOut,
+        DataFlow::PInitIn, DataFlow::PInitOut,
+        DataFlow::PRefIn, DataFlow::PRefOut
       };
       m_graph->allocateDataFlow(m_gidMap.size()+1,
                                 sizeof(rows)/sizeof(rows[0]), rows);
     }
 
     ConstructTagger ct(m_graph, m_gidMap);
-    ct.walk();
+    ct.walk(m);
 
     DataFlow::ComputeAvailable(*m_graph);
+    DataFlow::ComputePartialReferenced(*m_graph);
+    DataFlow::ComputePartialInited(*m_graph);
 
     ConstructMarker cm(m_graph, m_gidMap);
     cm.walk();

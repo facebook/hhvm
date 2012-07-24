@@ -31,6 +31,7 @@ DECLARE_BOOST_TYPES(ListAssignment);
     x(Altered,0),                               \
     x(Available,0),                             \
     x(Referenced,0),                            \
+    x(Inited,0),                                \
     x(Killed,0),                                \
     x(Object,0),                                \
     x(NotObject,0),                             \
@@ -44,6 +45,8 @@ DECLARE_BOOST_TYPES(ListAssignment);
     x(PAvailOut,0),                             \
     x(PRefIn,0),                                \
     x(PRefOut,0),                               \
+    x(PInitIn,0),                               \
+    x(PInitOut,0),                              \
     x(PObjIn,0),                                \
     x(PObjOut,0),                               \
     x(PAntIn,0),                                \
@@ -74,6 +77,7 @@ public:
   static void ComputePartialNeeded(const ControlFlowGraph &g);
   static void ComputeUsed(const ControlFlowGraph &g);
   static void ComputePartialDying(const ControlFlowGraph &g);
+  static void ComputePartialInited(const ControlFlowGraph &g);
 private:
   template <typename T>
   static void ComputeForwards(T func, const ControlFlowGraph &g,

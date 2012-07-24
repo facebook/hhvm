@@ -192,6 +192,13 @@ void DataFlow::ComputePartialNeeded(const ControlFlowGraph &g) {
     DataFlow::PObjIn, DataFlow::PObjOut);
 }
 
+void DataFlow::ComputePartialInited(const ControlFlowGraph &g) {
+  DataFlow::ComputeForwards(
+    BitOps::bit_or, g,
+    DataFlow::Inited, DataFlow::Killed,
+    DataFlow::PInitIn, DataFlow::PInitOut);
+}
+
 void DataFlow::ComputeUsed(const ControlFlowGraph &g) {
   int num = g.getNumBlocks();
   size_t width = g.bitWidth();

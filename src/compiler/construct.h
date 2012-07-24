@@ -150,6 +150,22 @@ public:
   void clearGuarded() { m_flags.guarded = false; }
   bool isGuarded() const { return m_flags.guarded; }
 
+  void setRefCounted() { m_flags.refCounted = 3; }
+  void clearRefCounted() { m_flags.refCounted = 2; }
+  bool maybeRefCounted() const {
+    return !(m_flags.refCounted & 2) || (m_flags.refCounted & 1);
+  }
+
+  void setInited() { m_flags.inited = 3; }
+  void clearInited() { m_flags.inited = 2; }
+  bool maybeInited() const {
+    return !(m_flags.inited & 2) || (m_flags.inited & 1);
+  }
+
+  void setKilled() { m_flags.killed = true; }
+  void clearKilled() { m_flags.killed = false; }
+  bool isKilled() const { return m_flags.killed; }
+
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
   FileScopeRawPtr getFileScope() const {
@@ -276,6 +292,9 @@ private:
                                         // CSE chain
       unsigned noRemove            : 1; // DCE should NOT remove this node
       unsigned guarded             : 1; // previously used
+      unsigned killed              : 1;
+      unsigned refCounted          : 2; // high bit indicates whether its valid
+      unsigned inited              : 2; // high bit indicates whether its valid
     } m_flags;
   };
 protected:

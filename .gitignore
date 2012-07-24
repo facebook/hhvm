@@ -97,6 +97,7 @@ cmake_install.cmake
 /bin/_fbcode_bin/
 
 # Generated makefiles
+/src/runtime/ext_hhvm/Makefile
 /src/test/Makefile
 /src/hphp/Makefile
 /src/compiler/Makefile

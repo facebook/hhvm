@@ -1353,105 +1353,69 @@ ArrayData* HphpArray::lvalNew(Variant*& ret, bool copy) {
 }
 
 ArrayData* HphpArray::set(int64 k, CVarRef v, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->update(k, v);
-    return a;
-  }
-  update(k, v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->update(k, v);
+  return t;
 }
 
 ArrayData* HphpArray::set(CStrRef k, CVarRef v, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->update(k.get(), v);
-    return a;
-  }
-  update(k.get(), v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->update(k.get(), v);
+  return t;
 }
 
 ArrayData* HphpArray::set(CVarRef k, CVarRef v, bool copy) {
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
   if (isIntegerKey(k)) {
-    if (copy) {
-      HphpArray* a = copyImpl();
-      a->update(k.toInt64(), v);
-      return a;
-    }
-    update(k.toInt64(), v);
-    return NULL;
+    a->update(k.toInt64(), v);
+  } else {
+    a->update(k.getStringData(), v);
   }
-  StringData* sd = k.getStringData();
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->update(sd, v);
-    return a;
-  }
-  update(sd, v);
-  return NULL;
+  return t;
 }
 
 ArrayData* HphpArray::setRef(int64 k, CVarRef v, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->updateRef(k, v);
-    return a;
-  }
-  updateRef(k, v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->updateRef(k, v);
+  return t;
 }
 
 ArrayData* HphpArray::setRef(CStrRef k, CVarRef v, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->updateRef(k.get(), v);
-    return a;
-  }
-  updateRef(k.get(), v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->updateRef(k.get(), v);
+  return t;
 }
 
 ArrayData* HphpArray::setRef(CVarRef k, CVarRef v, bool copy) {
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
   if (isIntegerKey(k)) {
-    if (copy) {
-      HphpArray* a = copyImpl();
-      a->updateRef(k.toInt64(), v);
-      return a;
-    }
-    updateRef(k.toInt64(), v);
-    return NULL;
+    a->updateRef(k.toInt64(), v);
+  } else {
+    a->updateRef(k.getStringData(), v);
   }
-  StringData* sd = k.getStringData();
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->updateRef(sd, v);
-    return a;
-  }
-  updateRef(sd, v);
-  return NULL;
+  return t;
 }
 
 ArrayData* HphpArray::add(int64 k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
-    HphpArray* result = copyImpl();
-    result->addVal(k, v);
-    return result;
-  }
-  addVal(k, v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->addVal(k, v);
+  return t;
 }
 
 ArrayData* HphpArray::add(CStrRef k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
-    HphpArray* result = copyImpl();
-    result->addVal(k.get(), v);
-    return result;
-  }
-  addVal(k.get(), v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->addVal(k.get(), v);
+  return t;
 }
 
 ArrayData* HphpArray::add(CVarRef k, CVarRef v, bool copy) {
@@ -1464,45 +1428,32 @@ ArrayData* HphpArray::add(CVarRef k, CVarRef v, bool copy) {
 
 ArrayData* HphpArray::addLval(int64 k, Variant*& ret, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
-    HphpArray* result = copyImpl();
-    result->addLvalImpl(k, &ret);
-    return result;
-  }
-  addLvalImpl(k, &ret);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->addLvalImpl(k, &ret);
+  return t;
 }
 
 ArrayData* HphpArray::addLval(CStrRef k, Variant*& ret, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
-    HphpArray* result = copyImpl();
-    result->addLvalImpl(k.get(), k->hash(), &ret);
-    return result;
-  }
-  addLvalImpl(k.get(), k->hash(), &ret);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  StringData* key = k.get();
+  a->addLvalImpl(key, key->hash(), &ret);
+  return t;
 }
 
 ArrayData* HphpArray::addLval(CVarRef k, Variant*& ret, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
-    HphpArray* a = copyImpl();
-    if (isIntegerKey(k)) {
-      a->addLvalImpl(k.toInt64(), &ret);
-    } else {
-      StringData* sd = k.getStringData();
-      a->addLvalImpl(sd, sd->hash(), &ret);
-    }
-    return a;
-  }
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
   if (isIntegerKey(k)) {
-    addLvalImpl(k.toInt64(), &ret);
+    a->addLvalImpl(k.toInt64(), &ret);
   } else {
     StringData* sd = k.getStringData();
-    addLvalImpl(sd, sd->hash(), &ret);
+    a->addLvalImpl(sd, sd->hash(), &ret);
   }
-  return NULL;
+  return t;
 }
 
 //=============================================================================
@@ -1598,46 +1549,30 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
 }
 
 ArrayData* HphpArray::remove(int64 k, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->erase(a->findForInsert(k));
-    return a;
-  }
-  erase(findForInsert(k));
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->erase(a->findForInsert(k));
+  return t;
 }
 
 ArrayData* HphpArray::remove(CStrRef k, bool copy) {
-  strhash_t prehash = k->hash();
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->erase(a->findForInsert(k.get(), prehash));
-    return a;
-  }
-  erase(findForInsert(k.get(), prehash));
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  StringData* key = k.get();
+  a->erase(a->findForInsert(key, key->hash()));
+  return t;
 }
 
 ArrayData* HphpArray::remove(CVarRef k, bool copy) {
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
   if (isIntegerKey(k)) {
-    if (copy) {
-      HphpArray* a = copyImpl();
-      a->erase(a->findForInsert(k.toInt64()));
-      return a;
-    }
-    erase(findForInsert(k.toInt64()));
-    return NULL;
+    a->erase(a->findForInsert(k.toInt64()));
   } else {
     StringData* key = k.getStringData();
-    strhash_t prehash = key->hash();
-    if (copy) {
-      HphpArray* a = copyImpl();
-      a->erase(a->findForInsert(key, prehash));
-      return a;
-    }
-    erase(findForInsert(key, prehash));
-    return NULL;
+    a->erase(a->findForInsert(key, key->hash()));
   }
+  return t;
 }
 
 ArrayData* HphpArray::copy() const {
@@ -1758,26 +1693,16 @@ void HphpArray::nvAppendWithRef(const TypedValue* v) {
 }
 
 ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    if (UNLIKELY(!a->nextInsert(null))) {
-      ret = NULL;
-      return a;
-    }
-    ASSERT(a->m_lastE != ElmIndEmpty);
-    ssize_t lastE = (ssize_t)a->m_lastE;
-    Elm* aElms = a->m_data;
-    ret = &aElms[lastE].data;
-    return a;
-  }
-  if (UNLIKELY(!nextInsert(null))) {
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  if (UNLIKELY(!a->nextInsert(null))) {
     ret = NULL;
-    return NULL;
+    return t;
   }
-  ASSERT(m_lastE != ElmIndEmpty);
-  ssize_t lastE = (ssize_t)m_lastE;
-  ret = &m_data[lastE].data;
-  return NULL;
+  ASSERT(a->m_lastE != ElmIndEmpty);
+  ssize_t lastE = (ssize_t)a->m_lastE;
+  ret = &a->m_data[lastE].data;
+  return t;
 }
 
 TypedValue* HphpArray::nvGetValueRef(ssize_t pos) {
@@ -1920,33 +1845,24 @@ HphpArray* HphpArray::copyImpl(HphpArray* target) const {
 }
 
 ArrayData* HphpArray::append(CVarRef v, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->nextInsert(v);
-    return a;
-  }
-  nextInsert(v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->nextInsert(v);
+  return t;
 }
 
 ArrayData* HphpArray::appendRef(CVarRef v, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    a->nextInsertRef(v);
-    return a;
-  }
-  nextInsertRef(v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->nextInsertRef(v);
+  return t;
 }
 
 ArrayData *HphpArray::appendWithRef(CVarRef v, bool copy) {
-  if (copy) {
-    HphpArray *a = copyImpl();
-    a->nextInsertWithRef(v);
-    return a;
-  }
-  nextInsertWithRef(v);
-  return NULL;
+  HphpArray *a = this, *t = 0;
+  if (copy) a = t = copyImpl();
+  a->nextInsertWithRef(v);
+  return t;
 }
 
 ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {

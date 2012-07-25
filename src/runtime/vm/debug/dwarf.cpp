@@ -263,8 +263,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
     }
   }
 
-  addLineEntries(TCRange(start, end), unit, instr, f);
-
+  addLineEntries(TCRange(start, end, range.isAstubs()), unit, instr, f);
   if (f->m_chunk == NULL) {
     Lock lock(s_lock);
     if (m_dwarfChunks.size() == 0 || m_dwarfChunks[0] == NULL) {

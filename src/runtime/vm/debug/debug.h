@@ -45,7 +45,13 @@ class DebugInfo {
   static DebugInfo* Get();
 
  private:
-  DwarfInfo m_dwarfInfo;
+  /* maintain separate dwarf info for a and astubs, so that we
+   * don't emit dwarf info for the two in the same ELF file.
+   * gdb tends to get confused when it sees dwarf info for
+   * widely separated addresses ranges in the same ELF file.
+   */
+  DwarfInfo m_aDwarfInfo;
+  DwarfInfo m_astubsDwarfInfo;
   /*
    * Stuff to output symbol names to /tmp/perf-%d.map files.  This stuff
    * can be read by perf top/record, etc.

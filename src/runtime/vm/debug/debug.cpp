@@ -51,7 +51,11 @@ DebugInfo::~DebugInfo() {
 }
 
 void DebugInfo::recordStub(TCRange range, const char* name) {
-  m_dwarfInfo.addTracelet(range, name, NULL, NULL, false, false);
+  if (range.isAstubs()) {
+    m_astubsDwarfInfo.addTracelet(range, name, NULL, NULL, false, false);
+  } else {
+    m_aDwarfInfo.addTracelet(range, name, NULL, NULL, false, false);
+  }
 }
 
 void DebugInfo::recordPerfMap(DwarfChunk* chunk) {
@@ -114,11 +118,16 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 
 void DebugInfo::recordTracelet(TCRange range, const Unit *unit,
     const Opcode *instr, bool exit, bool inPrologue) {
-  m_dwarfInfo.addTracelet(range, NULL, unit, instr, exit, inPrologue);
+  if (range.isAstubs()) {
+    m_astubsDwarfInfo.addTracelet(range, NULL, unit, instr, exit, inPrologue);
+  } else {
+    m_aDwarfInfo.addTracelet(range, NULL, unit, instr, exit, inPrologue);
+  }
 }
 
 void DebugInfo::debugSync() {
-  m_dwarfInfo.syncChunks();
+  m_aDwarfInfo.syncChunks();
+  m_astubsDwarfInfo.syncChunks();
 }
 
 std::string lookupFunction(const Unit *unit,

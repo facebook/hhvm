@@ -60,15 +60,19 @@ extern int g_dwarfCallback(char *name, int size, Dwarf_Unsigned type,
 
 class TCRange {
   TCA m_start, m_end;
+  bool m_isAstubs;
   void V() const { ASSERT(isValid()); }
  public:
-  TCRange() : m_start(NULL), m_end(NULL) { ASSERT(!isValid()); }
-  TCRange(const TCA start, const TCA end) :
-    m_start(start), m_end(end) { V(); }
+  TCRange() : m_start(NULL), m_end(NULL), m_isAstubs(false) {
+    ASSERT(!isValid());
+  }
+  TCRange(const TCA start, const TCA end, bool isAstubs) :
+    m_start(start), m_end(end), m_isAstubs(isAstubs) { V(); }
 
   TCRange& operator=(const TCRange& r) {
     m_start = r.m_start;
     m_end = r.m_end;
+    m_isAstubs = r.m_isAstubs;
     V();
     return *this;
   }
@@ -79,6 +83,7 @@ class TCRange {
     ASSERT(m_start || (m_end - m_start) < 1ull << 32);
     return bool(m_start);
   }
+  bool isAstubs() const { return m_isAstubs; }
   const TCA begin() const { V(); return m_start; }
   const TCA end() const   { V(); return m_end; };
   uint32_t size() const   { V(); return m_end - m_start; }

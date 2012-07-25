@@ -10568,16 +10568,18 @@ TranslatorX64::~TranslatorX64() {
   freeSlab(atrampolines.code.base, kTotalSize);
 }
 
-static Debug::TCRange rangeFrom(const X64Assembler& a, const TCA addr) {
+static Debug::TCRange rangeFrom(const X64Assembler& a, const TCA addr,
+                                bool isAstubs) {
   ASSERT(a.code.isValidAddress(addr));
-  return Debug::TCRange(addr, a.code.frontier);
+  return Debug::TCRange(addr, a.code.frontier, isAstubs);
 }
 
 void TranslatorX64::recordBCInstr(uint32_t op,
                                   const X64Assembler& a,
                                   const TCA addr) {
   if (addr != a.code.frontier) {
-    m_debugInfo.recordBCInstr(Debug::TCRange(addr, a.code.frontier), op);
+    m_debugInfo.recordBCInstr(Debug::TCRange(addr, a.code.frontier,
+                                             &a == &astubs ? true : false), op);
   }
 }
 
@@ -10589,7 +10591,9 @@ void TranslatorX64::recordGdbTranslation(const SrcKey& sk,
                                          bool inPrologue) {
   if (start != a.code.frontier && !RuntimeOption::EvalJitNoGdb) {
     ASSERT(s_writeLease.amOwner());
-    m_debugInfo.recordTracelet(rangeFrom(a, start), srcUnit,
+    m_debugInfo.recordTracelet(rangeFrom(a, start,
+                                         &a == &astubs ? true : false),
+                               srcUnit,
                                srcUnit->at(sk.offset()),
                                exit, inPrologue);
   }
@@ -10598,7 +10602,8 @@ void TranslatorX64::recordGdbTranslation(const SrcKey& sk,
 void TranslatorX64::recordGdbStub(const X64Assembler& a,
                                   const TCA start, const char* name) {
   if (!RuntimeOption::EvalJitNoGdb) {
-    m_debugInfo.recordStub(rangeFrom(a, start), name);
+    m_debugInfo.recordStub(rangeFrom(a, start, &a == &astubs ? true : false),
+                           name);
   }
 }
 

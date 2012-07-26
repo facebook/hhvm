@@ -284,6 +284,7 @@ void PageletServer::Restart() {
       (RuntimeOption::PageletServerThreadCount,
        RuntimeOption::PageletServerThreadRoundRobin,
        RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
+       RuntimeOption::PageletServerThreadDropCacheExpensiveTimeoutSeconds,
        RuntimeOption::PageletServerThreadDropStack,
        NULL);
     Logger::Info("pagelet server started");

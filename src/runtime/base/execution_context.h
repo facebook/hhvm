@@ -764,6 +764,7 @@ public:
   void set(const char *type, const char *name, ResourceData *obj);
   ResourceData *get(const char *type, const char *name);
   void remove(const char *type, const char *name);
+  void clear();
 
   const ResourceMap &getMap(const char *type);
 

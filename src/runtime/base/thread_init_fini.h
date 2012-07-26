@@ -27,6 +27,7 @@ void init_thread_locals(void *arg = NULL) ATTRIBUTE_COLD
 void finish_thread_locals(void *arg = NULL) ATTRIBUTE_COLD
   NEVER_INLINE;
 
+void flush_thread_locals() ATTRIBUTE_COLD NEVER_INLINE;
 struct InitFiniNode {
   InitFiniNode(void(*f)(), bool init);
   void (*func)();

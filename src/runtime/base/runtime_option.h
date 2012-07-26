@@ -92,6 +92,7 @@ public:
   static int ServerThreadCount;
   static bool ServerThreadRoundRobin;
   static int ServerThreadDropCacheTimeoutSeconds;
+  static int ServerThreadDropCacheExpensiveTimeoutSeconds;
   static bool ServerThreadJobLIFO;
   static bool ServerThreadDropStack;
   static bool ServerHttpSafeMode;
@@ -99,6 +100,7 @@ public:
   static int PageletServerThreadCount;
   static bool PageletServerThreadRoundRobin;
   static int PageletServerThreadDropCacheTimeoutSeconds;
+  static int PageletServerThreadDropCacheExpensiveTimeoutSeconds;
   static int PageletServerQueueLimit;
   static bool PageletServerThreadDropStack;
 

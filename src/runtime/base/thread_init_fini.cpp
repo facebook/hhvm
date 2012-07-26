@@ -16,6 +16,7 @@
 
 #include <runtime/base/thread_init_fini.h>
 #include <runtime/base/memory/smart_allocator.h>
+#include <runtime/base/memory/sweepable.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/base/preg.h>
 #include <runtime/base/server/server_stats.h>
@@ -61,6 +62,11 @@ void init_thread_locals(void *arg /* = NULL */) {
   for (InitFiniNode *in = extra_init; in; in = in->next) {
     in->func();
   }
+}
+
+void flush_thread_locals() {
+  g_persistentObjects->clear();
+  Sweepable::SweepAll();
 }
 
 void finish_thread_locals(void *arg /* = NULL */) {

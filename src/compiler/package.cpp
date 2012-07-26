@@ -242,7 +242,7 @@ bool Package::parse(bool check) {
   if (threadCount <= 0) threadCount = 1;
 
   JobQueueDispatcher<ParserWorker::JobType, ParserWorker>
-    dispatcher(threadCount, true, 0, false, this);
+    dispatcher(threadCount, true, 0, 0, false, this);
 
   m_dispatcher = &dispatcher;
 

@@ -26,7 +26,7 @@
 #include "alloc.h"
 #include "exception.h"
 #include "runtime/vm/bytecode.h"
-
+#include "runtime/base/thread_init_fini.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -82,10 +82,12 @@ public:
    * Constructor.
    */
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
-           bool dropStack, bool lifo)
+           int dropCacheTimeoutExpensive, bool dropStack, bool lifo)
       : SynchronizableMulti(threadRoundRobin ? 1 : threadCount),
         m_jobCount(0), m_stopped(false), m_workerCount(0),
-        m_dropCacheTimeout(dropCacheTimeout), m_dropStack(dropStack),
+        m_dropCacheTimeout(dropCacheTimeout),
+        m_dropCacheTimeoutExpensive(dropCacheTimeoutExpensive),
+        m_dropStack(dropStack),
         m_lifo(lifo) {
   }
 
@@ -106,17 +108,21 @@ public:
    */
   TJob dequeue(int id, bool inc = false) {
     Lock lock(this);
-    bool flushed = false;
+    int flushed = 0;
     while (m_jobs.empty()) {
       if (m_stopped) {
         throw StopSignal();
       }
-      if (m_dropCacheTimeout <= 0 || flushed) {
+      if (m_dropCacheTimeout <= 0 || flushed == 2) {
         wait(id, false);
-      } else if (!wait(id, true, m_dropCacheTimeout)) {
+      } else if (!wait(id, true, flushed == 0 ?
+            m_dropCacheTimeout : m_dropCacheTimeoutExpensive)) {
         // since we timed out, maybe we can turn idle without holding memory
         if (m_jobs.empty()) {
           ScopedUnlock unlock(this);
+          if (flushed == 1) {
+            flush_thread_locals();
+          }
           Util::flush_thread_caches();
           if (m_dropStack && Util::s_stackLimit) {
             Util::flush_thread_stack();
@@ -124,7 +130,7 @@ public:
           if (hhvm) {
             VM::Stack::flush();
           }
-          flushed = true;
+          flushed++;
         }
       }
     }
@@ -178,6 +184,7 @@ public:
   bool m_stopped;
   int m_workerCount;
   int m_dropCacheTimeout;
+  int m_dropCacheTimeoutExpensive;
   bool m_dropStack;
   bool m_lifo;
 };
@@ -186,9 +193,9 @@ template<typename TJob>
 class JobQueue<TJob,true> : public JobQueue<TJob,false> {
 public:
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
-           bool dropStack, bool lifo) :
+           int dropCacheTimeoutExpensive, bool dropStack, bool lifo) :
     JobQueue<TJob,false>(threadCount, threadRoundRobin, dropCacheTimeout,
-                         dropStack, lifo) {
+                         dropCacheTimeoutExpensive, dropStack, lifo) {
     pthread_cond_init(&m_cond, NULL);
   }
   ~JobQueue() {
@@ -304,12 +311,13 @@ public:
    * Constructor.
    */
   JobQueueDispatcher(int threadCount, bool threadRoundRobin,
-                     int dropCacheTimeout, bool dropStack, void *opaque,
+                     int dropCacheTimeout, int dropCacheExpensiveTimeout,
+                     bool dropStack, void *opaque,
                      bool lifo = false)
       : m_stopped(true), m_id(0), m_opaque(opaque),
         m_maxThreadCount(threadCount),
-        m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
-                lifo) {
+        m_queue(threadCount, threadRoundRobin, dropCacheTimeout,
+           dropCacheExpensiveTimeout, dropStack, lifo) {
     ASSERT(threadCount >= 1);
     if (!TWorker::CountActive) {
       // If TWorker does not support counting the number of

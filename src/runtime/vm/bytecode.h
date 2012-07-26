@@ -557,6 +557,11 @@ public:
         invName->release();
       }
     }
+
+    // This should only be used on a pre-live ActRec.
+    ASSERT(!ar->hasVarEnv());
+    ASSERT(!ar->hasExtraArgs());
+
     m_top += kNumActRecCells;
     ASSERT((uintptr_t)m_top <= (uintptr_t)m_base);
   }

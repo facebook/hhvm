@@ -624,12 +624,6 @@ public:
                          const StringData *cls, const StringData *func);
   int m_lambdaCounter;
   std::vector<jmp_buf *> m_jmpBufs;
-  enum {
-    SETJMP = 0,
-    LONGJUMP_PROPAGATE,
-    LONGJUMP_RESUMEVM,
-    LONGJUMP_DEBUGGER
-  };
   std::vector<VMState> m_nestedVMs;
 
   typedef hphp_hash_map<const HPHP::VM::ActRec*, int,
@@ -667,14 +661,14 @@ public:
   void doFCall(HPHP::VM::ActRec* ar, HPHP::VM::PC& pc);
   CVarRef getEvaledArg(const StringData* val);
 private:
-  void enterVMWork(HPHP::VM::ActRec* ar, bool enterFn);
+  void enterVMWork(VM::ActRec* enterFnAr);
   void enterVM(TypedValue* retval,
                HPHP::VM::ActRec* ar,
                TypedValue* extraArgs);
   void unwindBuiltinFrame();
   template <bool reenter, bool handle_throw>
-  bool prepareFuncEntry(HPHP::VM::ActRec *ar, HPHP::VM::PC& pc);
-  void recordCodeCoverage(HPHP::VM::PC pc);
+  bool prepareFuncEntry(VM::ActRec* ar, VM::PC& pc, TypedValue* extraArgs);
+  void recordCodeCoverage(VM::PC pc);
   int m_coverPrevLine;
   HPHP::VM::Unit* m_coverPrevUnit;
   Array m_evaledArgs;

@@ -894,6 +894,7 @@ void Stack::clearEvalStack(ActRec *fp, int32 numLocals) {
 UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
                                PC& pc, Fault& f) {
   const Func* func = fp->m_func;
+  TRACE(1, "unwindFrag: func %s\n", func->fullName()->data());
   TypedValue* evalTop = (TypedValue*)((uintptr_t)fp
                   - (uintptr_t)(func->numLocals()) * sizeof(TypedValue)
                   - (uintptr_t)(func->numIterators() * sizeof(Iter)));
@@ -985,6 +986,8 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
     // taken care of in frame_free_locals, called from unwindFrag()
     discardAR();
     if (prevFp == fp) {
+      TRACE(1, "unwindFrame: reached the end of this nesting's ActRec "
+               "chain\n");
       break;
     }
     // Keep the pc up to date while unwinding.
@@ -1600,7 +1603,9 @@ static inline void checkStack(Stack& stk, const Func* f) {
 }
 
 template <bool reenter, bool handle_throw>
-bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
+bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
+                                          PC& pc,
+                                          TypedValue* extraArgs) {
   const Func* func = ar->m_func;
   if (!reenter) {
     // For the reenter case, intercept and magic shuffling are handled
@@ -1650,9 +1655,10 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       }
       ASSERT(m_fp->m_func == func);
     } else {
-      // For the reenter case, extra arguments are handled by invokeFunc()
-      // and enterVM(), so we should only execute the logic below for the
-      // non-reenter case.
+      // For the reenter case, extra arguments are handled below (with
+      // the extraArgs vector passed to this function).  The below
+      // handles pulling extra args from the execution stack in a
+      // non-reentry case.
       if (!reenter) {
         if (func->attrs() & AttrMayUseVV) {
           // If there are extra parameters then we cannot be a pseudomain
@@ -1680,27 +1686,49 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
     }
   }
   pushLocalsAndIterators(func, nparams);
-  if (raiseMissingArgumentWarnings) {
-    // cppext functions/methods have their own logic for raising warnings
-    // for missing arguments, so we only need to do this work for non-cppext
-    // functions/methods
-    if (!func->isBuiltin()) {
-      pc = func->getEntry();
-      // m_pc is not set to callee. if the callee is in a different unit,
-      // debugBacktrace() can barf in unit->offsetOf(m_pc) where it
-      // asserts that m_pc >= m_bc && m_pc < m_bc + m_bclen. Sync m_fp
-      // to function entry point in called unit.
-      SYNC();
-      const Func::ParamInfoVec& paramInfo = func->params();
-      for (int i = nargs; i < nparams; ++i) {
-        Offset dvInitializer = paramInfo[i].funcletOff();
-        if (dvInitializer == InvalidAbsoluteOffset) {
-          raise_warning("Missing argument %d to %s()",
-                        i + 1, func->name()->data());
-        }
+
+  /*
+   * If we're reentering, make sure to finalize the ActRec before
+   * possibly raising any exceptions, so unwinding won't get confused.
+   */
+  if (reenter) {
+    if (ar->hasVarEnv()) {
+      // If this is a pseudomain inheriting a VarEnv from our caller,
+      // there cannot be extra arguments
+      ASSERT(!extraArgs);
+      // Now that locals have been initialized, it is safe to attach
+      // the VarEnv inherited from our caller to the current frame
+      ar->m_varEnv->attach(ar);
+    } else if (extraArgs) {
+      // Create a new ExtraArgs structure and stash the extra args in
+      // there.
+      int numExtras = ar->numArgs() - ar->m_func->numParams();
+      ASSERT(numExtras > 0);
+      ar->setExtraArgs(new ExtraArgs());
+      ar->getExtraArgs()->setExtraArgs(extraArgs, numExtras);
+    }
+  }
+
+  // cppext functions/methods have their own logic for raising
+  // warnings for missing arguments, so we only need to do this work
+  // for non-cppext functions/methods
+  if (raiseMissingArgumentWarnings && !func->isBuiltin()) {
+    pc = func->getEntry();
+    // m_pc is not set to callee. if the callee is in a different unit,
+    // debugBacktrace() can barf in unit->offsetOf(m_pc) where it
+    // asserts that m_pc >= m_bc && m_pc < m_bc + m_bclen. Sync m_fp
+    // to function entry point in called unit.
+    SYNC();
+    const Func::ParamInfoVec& paramInfo = func->params();
+    for (int i = nargs; i < nparams; ++i) {
+      Offset dvInitializer = paramInfo[i].funcletOff();
+      if (dvInitializer == InvalidAbsoluteOffset) {
+        raise_warning("Missing argument %d to %s()",
+                      i + 1, func->name()->data());
       }
     }
   }
+
   if (firstDVInitializer != InvalidAbsoluteOffset) {
     pc = func->unit()->entry() + firstDVInitializer;
   } else {
@@ -1715,11 +1743,10 @@ void VMExecutionContext::syncGdbState() {
   }
 }
 
-void VMExecutionContext::enterVMWork(ActRec* ar, bool enterFn) {
-  EXCEPTION_GATE_ENTER();
-  if (enterFn) {
-    EventHook::FunctionEnter(ar, EventHook::NormalFunc);
-    INST_HOOK_FENTRY(ar->m_func->fullName());
+void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
+  if (enterFnAr) {
+    EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc);
+    INST_HOOK_FENTRY(enterFnAr->m_func->fullName());
   }
   Stats::inc(Stats::VMEnter);
   if (RuntimeOption::EvalJit &&
@@ -1733,90 +1760,122 @@ void VMExecutionContext::enterVMWork(ActRec* ar, bool enterFn) {
   } else {
     dispatch();
   }
-  EXCEPTION_GATE_RETURN();
 }
+
+// Enumeration codes for the setjmp handling of VM exceptions.
+enum {
+  SETJMP = 0,
+  LONGJUMP_PROPAGATE,
+  LONGJUMP_RESUMEVM,
+  LONGJUMP_DEBUGGER
+};
 
 void VMExecutionContext::enterVM(TypedValue* retval,
                                  ActRec* ar,
                                  TypedValue* extraArgs) {
-  // It is the caller's responsibility to perform a stack overflow
-  // check if necessary before calling enterVM() or reenterVM()
-  bool enter = prepareFuncEntry<true, true>(ar, m_pc);
-
-  if (ar->hasVarEnv()) {
-    // If this is a pseudomain inheriting a VarEnv from our caller,
-    // there cannot be extra arguments
-    ASSERT(!extraArgs);
-    // Now that locals have been initialized, it is safe to attach
-    // the VarEnv inherited from our caller to the current frame
-    ar->m_varEnv->attach(ar);
-  } else if (extraArgs) {
-    // Create a new VarEnv and stash the extra args in there
-    int numExtras = ar->numArgs() - ar->m_func->numParams();
-    ASSERT(numExtras > 0);
-    ar->setExtraArgs(new ExtraArgs());
-    ar->getExtraArgs()->setExtraArgs(extraArgs, numExtras);
-  }
-
-  ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
   m_firstAR = ar;
+  ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
   m_halted = false;
 
-  if (enter) {
-    jmp_buf buf;
-    m_jmpBufs.push_back(&buf);
-    Util::compiler_membar();
-    switch (setjmp(buf)) {
+  /*
+   * Some exception handling implementation notes:
+   *
+   * Propagation of exceptions in HHVM uses a mix of C++ exceptions
+   * and setjmp/longjmp.  An exception can originate from C++ code
+   * or from user code, and during unwinding we switch back and
+   * forth between propagating using the C++ exception handling
+   * mechanism and doing propagation through the user's stack frames
+   * (with our own unwinding and longjmping to this setjmp).  The VM
+   * can be entered recursively, and each entry includes one of
+   * these setjmp guards.
+   *
+   * When an exception is thrown from C++, it propagates until it hits
+   * an "exception gate" (see exception_gate.h).  When the exception
+   * gate takes over, it performs unwinding of the execution stack,
+   * looking for user-defined catch or fault handlers.  In the case of
+   * an exception from user code (iopThrow), it just starts by
+   * unwinding the user stack.
+   *
+   * After the stack is "sufficiently unwound" for what we know about
+   * within this nesting of the VM, the unwinder returns here (either
+   * via longjmp or by short_jump below).  Part of the reason to allow
+   * longjmps is that there may be intermediate frames generated by
+   * the JIT, so we can't throw C++ exceptions through them to do the
+   * control transfer.  Once here, we either need to start execution
+   * at a fault/catch handler within this nesting level
+   * (LONGJUMP_RESUMEVM), or we need to exit this nesting level and
+   * possibly continue to some calling function or a less-nested VM
+   * (LONGJUMP_PROPAGATE).
+   *
+   * In the propagation case, we convert back to C++ exception
+   * handling, since portions of the C++ stack in between us and the
+   * less-nested VM may have destructors or catch handlers that need
+   * to execute.  There is a try/catch around this switch on each VM
+   * entry that counts as an exception gate, so if if there is another
+   * VM around this one, the unwinding of its portion of the execution
+   * stack will resume there if the exception propagates that far.
+   */
+  jmp_buf buf;
+  m_jmpBufs.push_back(&buf);
+  Util::compiler_membar();
+  int jumpCode = setjmp(buf);
+  Util::compiler_membar();
+
+short_jump:
+  try {
+    switch (jumpCode) {
     case SETJMP:
-      Util::compiler_membar();
-      enterVMWork(ar, true);
+      if (prepareFuncEntry<true,true>(ar, m_pc, extraArgs)) {
+        enterVMWork(ar);
+      }
       break;
     case LONGJUMP_PROPAGATE:
-      Util::compiler_membar();
-      m_jmpBufs.pop_back();
-      ASSERT(m_faults.size() > 0);
-      {
-        Fault fault = m_faults.back();
-        m_faults.pop_back();
-        switch (fault.m_faultType) {
-          case Fault::KindOfUserException: {
-            Object obj = fault.m_userException;
-            fault.m_userException->decRefCount();
-            throw obj;
-          }
-          case Fault::KindOfCPPException: {
-            // throwException() will take care of deleting heap-allocated
-            // exception object for us
-            fault.m_cppException->throwException();
-          }
-          default: {
-            not_implemented();
-          }
-        }
-      }
-      NOT_REACHED();
-      break;
+      // Jump out of this try/catch before throwing.
+      goto propagate;
     case LONGJUMP_RESUMEVM:
-      Util::compiler_membar();
-      enterVMWork(ar, false);
+      enterVMWork(0);
       break;
     case LONGJUMP_DEBUGGER:
       // Triggered by switchMode() to switch VM mode
       // do nothing but reenter the VM with same VM stack
-      ar = m_fp;
-      enterVMWork(ar, false);
+      enterVMWork(0);
       break;
     default:
       NOT_REACHED();
     }
-    m_jmpBufs.pop_back();
+  } catch (...) {
+    jumpCode = exception_gate_handle();
+    ASSERT(jumpCode != SETJMP);
+    goto short_jump;
   }
 
-  m_nestedVMMap.erase(ar);
-  m_halted = false;
+  m_jmpBufs.pop_back();
 
+  m_halted = false;
   memcpy(retval, m_stack.topTV(), sizeof(TypedValue));
   m_stack.discard();
+  return;
+
+propagate:
+  m_jmpBufs.pop_back();
+  ASSERT(m_faults.size() > 0);
+  Fault fault = m_faults.back();
+  m_faults.pop_back();
+  switch (fault.m_faultType) {
+  case Fault::KindOfUserException: {
+    Object obj = fault.m_userException;
+    fault.m_userException->decRefCount();
+    throw obj;
+  }
+  case Fault::KindOfCPPException:
+    // throwException() will take care of deleting heap-allocated
+    // exception object for us
+    fault.m_cppException->throwException();
+    NOT_REACHED();
+  default:
+    not_implemented();
+  }
+  NOT_REACHED();
 }
 
 void VMExecutionContext::reenterVM(TypedValue* retval,
@@ -1829,12 +1888,13 @@ void VMExecutionContext::reenterVM(TypedValue* retval,
   TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
   pushVMState(savedVM);
   ASSERT(m_nestedVMs.size() >= 1);
-  enterVM(retval, ar, extraArgs);
-  m_pc = savedVM.pc;
-  m_fp = savedVM.fp;
-  m_firstAR = savedVM.firstAR;
-  ASSERT(m_stack.top() == savedVM.sp);
-  popVMState();
+  try {
+    enterVM(retval, ar, extraArgs);
+    popVMState();
+  } catch (...) {
+    popVMState();
+    throw;
+  }
   TRACE(1, "Reentry: exit fp %p pc %p\n", m_fp, m_pc);
 }
 
@@ -1898,6 +1958,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   checkStack(m_stack, f);
 
   ActRec* ar = m_stack.allocA();
+  ar->m_soff = 0;
   ar->m_savedRbp = 0;
   ar->m_func = f;
   if (this_) {
@@ -4119,15 +4180,6 @@ VMExecutionContext::handleUnwind(UnwindStatus unwindType) {
       m_halted = true;
       m_fp = NULL;
       m_pc = NULL;
-    } else {
-      VMState savedVM;
-      m_nestedVMMap.erase(m_firstAR);
-      memcpy(&savedVM, &m_nestedVMs.back(), sizeof(savedVM));
-      m_pc = savedVM.pc;
-      m_fp = savedVM.fp;
-      m_firstAR = savedVM.firstAR;
-      ASSERT(m_stack.top() == savedVM.sp);
-      popVMState();
     }
   } else {
     ASSERT(unwindType == UnwindResumeVM);
@@ -5699,7 +5751,7 @@ void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
   ASSERT(pcOff() > m_fp->m_func->base());
-  prepareFuncEntry<false, handle_throw>(ar, pc);
+  prepareFuncEntry<false, handle_throw>(ar, pc, 0);
   SYNC();
   EventHook::FunctionEnter(ar, EventHook::NormalFunc);
   INST_HOOK_FENTRY(ar->m_func->fullName());
@@ -6894,6 +6946,15 @@ void VMExecutionContext::pushVMState(VMState &savedVM) {
 
 void VMExecutionContext::popVMState() {
   ASSERT(m_nestedVMs.size() >= 1);
+
+  VMState savedVM;
+  m_nestedVMMap.erase(m_firstAR);
+  memcpy(&savedVM, &m_nestedVMs.back(), sizeof(savedVM));
+  m_pc = savedVM.pc;
+  m_fp = savedVM.fp;
+  m_firstAR = savedVM.firstAR;
+  ASSERT(m_stack.top() == savedVM.sp);
+
   if (debug) {
     const VMState& savedVM = m_nestedVMs.back();
     if (savedVM.fp &&

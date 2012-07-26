@@ -1465,10 +1465,16 @@ void EmitterVisitor::visit(FileScopePtr file) {
             ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(s));
             Variant v(Variant::nullInit);
             if (r->getRetExp() &&
-                (!r->getRetExp()->getScalarValue(v) ||
-                 v.isArray())) {
+                !r->getRetExp()->getScalarValue(v)) {
               TV_WRITE_UNINIT(&mainReturn);
               goto fail;
+            }
+            if (v.isString()) {
+              v = String(StringData::GetStaticString(v.asCStrRef().get()));
+            } else if (v.isArray()) {
+              v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
+            } else {
+              ASSERT(!IS_REFCOUNTED_TYPE(v.getType()));
             }
             mainReturn = *v.getTypedAccessor();
             m_ue.returnSeen();

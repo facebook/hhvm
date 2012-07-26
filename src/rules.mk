@@ -197,6 +197,11 @@ CPPFLAGS += -MMD
 # allowing "and", "or" to be re-defined
 CXXFLAGS += -fno-operator-names -ffunction-sections #-std=gnu++0x
 
+# For now, only enable C++11 in DEBUG builds.
+ifdef DEBUG
+CXXFLAGS += -std=gnu++0x
+endif
+
 # Include frame pointers to make it easier to generate callgraphs in oprofile
 CPPFLAGS += -fno-omit-frame-pointer $(if $(USE_ICC),,-momit-leaf-frame-pointer)
 

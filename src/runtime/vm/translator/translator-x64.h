@@ -237,6 +237,13 @@ class TranslatorX64 : public Translator, public SpillFill,
   void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
               RegSet toSave = RegSet());
 
+  enum {
+    ArgDontAllocate = -1,
+    ArgAnyReg = -2
+  };
+  void allocInputsForCall(const NormalizedInstruction& i,
+                          const int* args);
+
 #define INSTRS \
   CASE(PopC) \
   CASE(PopV) \

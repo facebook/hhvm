@@ -274,7 +274,7 @@ class RegAlloc {
   uint64          m_epoch;
 
   RegInfo* alloc(const Location& loc, DataType t, RegInfo::State state,
-                 bool needsFill, int64 immVal = 0);
+                 bool needsFill, int64 immVal = 0, PhysReg target = InvalidReg);
   RegInfo* findFreeReg(const Location& loc);
   void assignRegInfo(RegInfo *regInfo, const RegContent &cont,
                      RegInfo::State state, DataType type);
@@ -319,7 +319,8 @@ class RegAlloc {
   }
 
   // allocInputRegs: given an instruction, find/fill its inputs.
-  void allocInputReg(const NormalizedInstruction& ni, int index);
+  void allocInputReg(const NormalizedInstruction& ni, int index,
+                     PhysReg target = InvalidReg);
   void allocInputRegs(const NormalizedInstruction& ni);
   // allocOutputRegs: destructively mark output registers. Should only
   // be done when we know that the code we're emitting will drive valid

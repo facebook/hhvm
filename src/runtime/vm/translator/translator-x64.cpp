@@ -1205,6 +1205,57 @@ TranslatorX64::emitRB(X64Assembler& a,
   a.    call((TCA)ringbufferMsg);
 }
 
+/*
+ * allocate the input registers for i, trying to
+ * match inputs to call arguments.
+ * if args[j] == ArgDontAllocate, the arg is skipped
+ * if args[j] == ArgAnyReg, it will be allocated as normal
+ * otherwise, args[j] should be a positional call argument,
+ * and allocInputsForCall will attempt to allocate it to
+ * argNumToRegName[args[j]].
+ */
+void
+TranslatorX64::allocInputsForCall(const NormalizedInstruction& i,
+                                  const int* args) {
+  int blackList = 0;
+  int arg;
+  /*
+   * If any of the inputs is already in an argument
+   * register, blacklist it. ArgManager already takes
+   * care of shuffling registers efficiently
+   */
+  for (arg = i.inputs.size(); arg--; ) {
+    if (args[arg] >= 0 && m_regMap.hasReg(i.inputs[arg]->location)) {
+      blackList |= 1 << getReg(i.inputs[arg]->location);
+    }
+  }
+  bool hasAnyReg = false;
+  for (arg = i.inputs.size(); arg--; ) {
+    if (args[arg] != ArgDontAllocate &&
+        !m_regMap.hasReg(i.inputs[arg]->location)) {
+      if (args[arg] != ArgAnyReg) {
+        PhysReg target = argNumToRegName[args[arg]];
+        if (!(blackList & (1 << target))) {
+          m_regMap.cleanRegs(RegSet(target));
+          m_regMap.smashRegs(RegSet(target));
+        } else {
+          target = InvalidReg;
+        }
+        m_regMap.allocInputReg(i, arg, target);
+      } else {
+        hasAnyReg = true;
+      }
+    }
+  }
+  if (hasAnyReg) {
+    for (arg = i.inputs.size(); arg--; ) {
+      if (args[arg] == ArgAnyReg) {
+        m_regMap.allocInputReg(i, arg);
+      }
+    }
+  }
+}
+
 void ArgManager::shuffleRegisters(std::map<PhysReg, size_t> &used,
                                   std::vector<PhysReg> &actual) {
   size_t n = m_args.size();
@@ -3914,6 +3965,7 @@ void
 TranslatorX64::analyzeSameOp(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(!(planSameOp_SameTypes(i) && planSameOp_DifferentTypes(i)));
   i.m_txFlags = TXFlags(planSameOp_SameTypes(i) | planSameOp_DifferentTypes(i));
+  i.manuallyAllocInputs = true;
 }
 
 void
@@ -3926,7 +3978,7 @@ TranslatorX64::translateSameOp(const Tracelet& t,
   ASSERT(inputs.size() == 2);
   ASSERT(i.outStack && !i.outLocal);
   DataType leftType = i.inputs[0]->outerType();
-  DataType rightType = i.inputs[1]->outerType();
+  DataType rightType DEBUG_ONLY = i.inputs[1]->outerType();
   ASSERT(leftType != KindOfRef);
   ASSERT(rightType != KindOfRef);
 
@@ -3935,11 +3987,8 @@ TranslatorX64::translateSameOp(const Tracelet& t,
     // NSame -> true and Same -> false.
     SKTRACE(1, i.source, "different types %d %d\n",
             leftType, rightType);
-    // decRef the left hand side and right hand side as appropriate
-    PhysReg src, srcdest;
-    getBinaryStackInputs(m_regMap, i, src, srcdest);
-    emitDecRef(i, src, leftType);
-    emitDecRef(i, srcdest, rightType);
+    emitDecRefInput(a, i, 0);
+    emitDecRefInput(a, i, 1);
     m_regMap.allocOutputRegs(i);
     emitImmReg(a, instrNeg, getReg(i.outStack->location));
     return; // Done
@@ -3955,6 +4004,10 @@ TranslatorX64::translateSameOp(const Tracelet& t,
     return; // Done
   }
   if (IS_STRING_TYPE(leftType)) {
+    int args[2];
+    args[0] = 0;
+    args[1] = 1;
+    allocInputsForCall(i, args);
     EMIT_CALL2(a, same_str_str,
                V(inputs[0]->location),
                V(inputs[1]->location));
@@ -3965,9 +4018,10 @@ TranslatorX64::translateSameOp(const Tracelet& t,
                   RegInfo::DIRTY);
     return; // Done
   }
-  m_regMap.allocOutputRegs(i);
+  m_regMap.allocInputRegs(i);
   PhysReg src, srcdest;
   getBinaryStackInputs(m_regMap, i, src, srcdest);
+  m_regMap.allocOutputRegs(i);
   ASSERT(getReg(i.outStack->location) == srcdest);
   a.    cmp_reg64_reg64(src, srcdest);
   if (op == OpSame) {
@@ -7094,6 +7148,7 @@ void TranslatorX64::analyzeSetG(Tracelet& t, NormalizedInstruction& i) {
     i.inputs[1]->isString() &&
     !i.inputs[0]->isVariant()
   );
+  if (i.m_txFlags) i.manuallyAllocInputs = true;
 }
 
 void TranslatorX64::translateSetG(const Tracelet& t,
@@ -7261,6 +7316,7 @@ isSupportedCGetM(const NormalizedInstruction& i) {
 void
 TranslatorX64::analyzeCGetM(Tracelet& t, NormalizedInstruction& i) {
   i.m_txFlags = supportedPlan(isSupportedCGetM(i));
+  if (i.m_txFlags) i.manuallyAllocInputs = true;
 }
 
 static const char* getContextName() {
@@ -7323,6 +7379,7 @@ TranslatorX64::translateCGetMProp(const Tracelet& t,
   const Slot propOffset   = getPropertyOffset(i, 1, 0);
 
   if (propOffset != kInvalidSlot && i.immVec.locationCode() == LC) {
+    m_regMap.allocInputReg(i, 0);
     ASSERT(!base.isLocal() && !base.isVariant());
     Stats::emitInc(a, Stats::Tx64_PropGetFast);
     ScratchReg fieldAddr(m_regMap);
@@ -7331,12 +7388,17 @@ TranslatorX64::translateCGetMProp(const Tracelet& t,
     a.cmp_imm32_disp_reg32(KindOfUninit, TVOFF(m_type), *fieldAddr);
     {
       UnlikelyIfBlock<CC_Z> ifUninit(a, astubs);
-      EMIT_CALL2(astubs, raiseUndefProp, V(baseLoc), V(propLoc));
+      EMIT_CALL2(astubs, raiseUndefProp,
+                 V(baseLoc), IMM((uint64_t)prop.rtt.valueString()));
       recordReentrantStubCall(i);
       emitImmReg(astubs, (intptr_t)&init_null_variant, *fieldAddr);
     }
     emitPropGet(i, base, *fieldAddr, outLoc);
   } else {
+    int args[2];
+    args[0] = base.isVariant() ? ArgAnyReg : 1;
+    args[1] = 2;
+    allocInputsForCall(i, args);
     Stats::emitInc(a, Stats::Tx64_PropGetSlow);
     bool useCtx = !isContextFixed();
     const StringData* name = prop.rtt.valueString();
@@ -7460,19 +7522,18 @@ TranslatorX64::translateCGetM_LEE(const Tracelet& t,
   bool decRefStrKey =
     key2.isStack() && key2.rtt.valueString() == NULL;
   fptr = decRefStrKey ? ((void*)array_getm_is) : ((void*)array_getm_is0);
-  if (array.isVariant()) {
-    EMIT_CALL4(a, fptr,
-               DEREF(array.location),
-               V(key1.location),
-               V(key2.location),
-               A(outLoc));
-  } else {
-    EMIT_CALL4(a, fptr,
-               V(array.location),
-               V(key1.location),
-               V(key2.location),
-               A(outLoc));
-  }
+
+  int args[3];
+  args[0] = array.isVariant() ? ArgAnyReg : 0;
+  args[1] = 1;
+  args[2] = 2;
+  allocInputsForCall(i, args);
+
+  EMIT_CALL4(a, fptr,
+             array.isVariant() ? DEREF(array.location) : V(array.location),
+             V(key1.location),
+             V(key2.location),
+             A(outLoc));
   recordReentrantCall(i);
   m_regMap.invalidate(outLoc);
 }
@@ -7508,7 +7569,7 @@ void TranslatorX64::translateCGetM_GE(const Tracelet& t,
   }
 
   emitIncRefGeneric(rax, 0);
-  m_regMap.allocInputReg(i, keyIdx);
+  m_regMap.allocInputReg(i, keyIdx, argNumToRegName[1]);
   // We're going to be making a function call in both branches so
   // let's only emit the spilling code once.
   emitCallSaveRegs();
@@ -7551,6 +7612,10 @@ TranslatorX64::translateCGetM(const Tracelet& t,
 
   const DynLocation& base = *i.inputs[0];
   const DynLocation& key  = *i.inputs[1];
+  int args[2];
+  args[0] = base.isVariant() ? ArgAnyReg : 0;
+  args[1] = 1;
+  allocInputsForCall(i, args);
 
   PhysReg baseReg = getReg(base.location);
   LazyScratchReg baseScratch(m_regMap);
@@ -7654,6 +7719,7 @@ TranslatorX64::emitGetGlobal(const NormalizedInstruction& i, int nameIdx,
 
   const StringData *maybeName = i.inputs[nameIdx]->rtt.valueString();
   if (!maybeName) {
+    m_regMap.allocInputReg(i, nameIdx, argNumToRegName[0]);
     // Always do a lookup when there's no statically-known name.
     // There's not much we can really cache here right now anyway.
     EMIT_CALL1(a, allowCreate ? lookupAddGlobal : lookupGlobal,
@@ -7672,7 +7738,7 @@ TranslatorX64::emitGetGlobal(const NormalizedInstruction& i, int nameIdx,
   EMIT_CALL2(a, allowCreate ? GlobalCache::lookupCreate
                             : GlobalCache::lookup,
              IMM(ch),
-             V(i.inputs[nameIdx]->location));
+             IMM((uint64_t)maybeName));
   recordCall(i);
 }
 
@@ -7685,6 +7751,7 @@ isSupportedInstrCGetG(const NormalizedInstruction& i) {
 void
 TranslatorX64::analyzeCGetG(Tracelet& t, NormalizedInstruction& i) {
   i.m_txFlags = simplePlan(isSupportedInstrCGetG(i));
+  if (i.m_txFlags) i.manuallyAllocInputs = true;
 }
 
 void
@@ -7973,10 +8040,11 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
 
   const int kRhsIdx       = 0;
   const int kBaseIdx      = 1;
+  const int kPropIdx      = 2;
   const DynLocation& val  = *i.inputs[kRhsIdx];
   const DynLocation& base = *i.inputs[kBaseIdx];
-  const DynLocation& prop = *i.inputs[2];
-  const Slot propOffset   = getPropertyOffset(i, 2, 1);
+  const DynLocation& prop = *i.inputs[kPropIdx];
+  const Slot propOffset   = getPropertyOffset(i, kPropIdx, 1);
 
   const Location& valLoc  = val.location;
   const Location& baseLoc = base.location;
@@ -7991,6 +8059,14 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
 
   bool decRefRhs = !i.outStack && !val.isLocal();
 
+  bool fastSet = propOffset != kInvalidSlot && i.immVec.locationCode() == LC;
+
+  int args[3];
+  args[kRhsIdx] = fastSet ? ArgAnyReg : 3;
+  args[kBaseIdx] = fastSet || base.isVariant() ? ArgAnyReg : 1;
+  args[kPropIdx] = fastSet ? ArgDontAllocate : 2;
+  allocInputsForCall(i, args);
+
   LazyScratchReg rhsTmp(m_regMap);
   PhysReg rhsReg = getReg(valLoc);
   if (val.isVariant()) {
@@ -7999,7 +8075,7 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
     rhsReg = *rhsTmp;
   }
 
-  if (propOffset != kInvalidSlot && i.immVec.locationCode() == LC) {
+  if (fastSet) {
     ASSERT(!base.isLocal() && !base.isVariant());
     Stats::emitInc(a, Stats::Tx64_PropSetFast);
     ScratchReg rField(m_regMap);
@@ -8007,6 +8083,7 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
     emitPropSet(i, base, val, rhsReg, *rField);
     decRefRhs = false;
   } else {
+
     Stats::emitInc(a, Stats::Tx64_PropSetSlow);
     bool useCtx = !isContextFixed();
     const StringData* name = prop.rtt.valueString();
@@ -8063,6 +8140,9 @@ TranslatorX64::analyzeSetM(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(!(isSupportedSetMProp(i) && isSupportedSetMArray(i)));
   i.m_txFlags = supportedPlan(isSupportedSetMProp(i) ||
                               isSupportedSetMArray(i));
+  if (i.m_txFlags) {
+    i.manuallyAllocInputs = true;
+  }
 }
 
 void
@@ -8124,6 +8204,23 @@ TranslatorX64::translateSetM(const Tracelet& t,
     ret = array_setm_s0k1nc_v0(cell, arr, strKey, rhs);
   }
   bool isInt = key.isInt() && IS_INT_TYPE(val.rtt.valueType());
+
+  /*
+   * The value can be passed as A, V or DEREF according to:
+   *
+   *                       | val.isVariant() | !val.isVariant()
+   * ----------------------+-----------------+-----------------------------
+   * int key + int value   | DEREF(valLoc)   | V(valLoc)
+   * everything else       | V(valLoc)       | A(valLoc)
+   */
+  int deRefLevel = isInt + val.isVariant();
+
+  int args[3];
+  args[0] = deRefLevel == 1 ? 3 : deRefLevel == 2 ? ArgAnyReg : ArgDontAllocate;
+  args[1] = useBoxedForm ? 0 : 1;
+  args[2] = 2;
+  allocInputsForCall(i, args);
+
   if (isInt) {
     // If the key and rhs are Int64, we can use a specialized helper
     fptr = (void*)array_setm_ik1_iv;
@@ -8155,15 +8252,6 @@ TranslatorX64::translateSetM(const Tracelet& t,
     }
     emitIncRef(rhsReg, KindOfArray);
   }
-  /*
-   * Fourth parameter to fptr can be A, V or DEREF according to:
-   *
-   *                       | val.isVariant() | !val.isVariant()
-   * ----------------------+-----------------+-----------------------------
-   * int key + int value   | DEREF(valLoc)   | V(valLoc)
-   * everything else       | V(valLoc)       | A(valLoc)
-   */
-  int deRefLevel = isInt + val.isVariant();
   EMIT_CALL4(a, fptr,
              useBoxedForm ? V(arrLoc) : IMM(0),
              useBoxedForm ? DEREF(arrLoc) : V(arrLoc),
@@ -9396,6 +9484,7 @@ TranslatorX64::analyzeVerifyParamType(Tracelet& t, NormalizedInstruction& i) {
     // will continue failing.
     bool compileTimeCheck = tc.check(frame_local(curFrame(), param), curFunc());
     i.m_txFlags = nativePlan(compileTimeCheck);
+    i.manuallyAllocInputs = true;
   } else {
     bool trace = i.inputs[0]->isObject() ||
                  (i.inputs[0]->isNull() && tc.nullable());

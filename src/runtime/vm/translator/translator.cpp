@@ -1057,7 +1057,7 @@ int getStackDelta(const NormalizedInstruction& ni) {
 /*
  * analyzeSecondPass --
  *
- *   Whole-tracelete analysis pass, after we've set up the dataflow
+ *   Whole-tracelet analysis pass, after we've set up the dataflow
  *   graph. Modifies the instruction stream, and further annotates
  *   individual instructions.
  */
@@ -1158,7 +1158,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
             prev->prev->inputs[0]->outerType() != KindOfUninit) {
           ASSERT(prev->prev->outStack);
           prev->prev->outStack = 0;
-          prev->prev->manuallyAllocInputs = false;
+          prev->prev->manuallyAllocInputs = true;
           prev->prev->ignoreInnerType = true;
           prev->inputs[0] = prev->prev->inputs[0];
           prev->grouped = true;
@@ -1195,17 +1195,16 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       ASSERT(prev->outStack);
       ni->inputs[0] = prev->inputs[0];
       /*
-        We should skip checking the inner type
-        on the InstanceOfD, because we will already
-        have checked it on the CGetL, and because
-        allowing a side exit between the CGetL and
-        the InstanceOfD would be wrong - the InstanceOfD
-        in the new tracelet wouldnt know that it must not
-        DecRef its input.
+        the CGetL becomes a no-op (other
+        than checking for UninitNull), but
+        we mark the InstanceOfD as grouped to
+        avoid breaking the tracelet between the
+        two.
       */
-      ni->ignoreInnerType = true;
+      prev->ignoreInnerType = true;
       prev->outStack = 0;
-      prev->manuallyAllocInputs = false;
+      prev->manuallyAllocInputs = true;
+      ni->grouped = true;
     }
 
     /*
@@ -2442,6 +2441,41 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     postAnalyze(ni, sk, stackFrameOffset, t, tas);
   }
 breakBB:
+  NormalizedInstruction* ni = t.m_instrStream.last;
+  while (ni) {
+    switch (ni->op()) {
+      // We dont want to end a tracelet with a literal;
+      // it will cause the literal to be pushed on the
+      // stack, and the next tracelet will have to guard
+      // on the type.
+      case OpNull:
+      case OpTrue:
+      case OpFalse:
+      case OpInt:
+      case OpDouble:
+      case OpString:
+      case OpArray:
+      // Similarly, This, Self and Parent will lose
+      // type information thats only useful in the
+      // following tracelet.
+      case OpThis:
+      case OpSelf:
+      case OpParent:
+        ni = ni->prev;
+        continue;
+      default:
+        break;
+    }
+    break;
+  }
+  if (ni) {
+    while (ni != t.m_instrStream.last) {
+      t.m_stackChange -= getStackDelta(*t.m_instrStream.last);
+      sk = t.m_instrStream.last->source;
+      t.m_instrStream.remove(t.m_instrStream.last);
+      --t.m_numOpcodes;
+    }
+  }
   analyzeSecondPass(t);
 
   // Mark the last instruction appropriately

@@ -69,7 +69,7 @@ RegAlloc::freeRegInfo(RegInfo *r) {
  */
 RegInfo*
 RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
-                bool needsFill, int64 immVal) {
+                bool needsFill, int64 immVal, PhysReg target) {
   RegInfo   *retval = NULL;
   RegContent cont   = RegContent(loc, immVal);
 
@@ -89,7 +89,13 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
   }
   if (!retval) {
     // Oops, not there yet. First look for a free one.
-    retval = findFreeReg(loc);
+    if (target != InvalidReg) {
+      ASSERT(regIsFree(target));
+      retval = physRegToInfo(target);
+      m_spf->poison(retval->m_pReg);
+    } else {
+      retval = findFreeReg(loc);
+    }
     if (retval) {
       TRACE(1, "alloc (%s, %lld) found a free reg %d state %d\n",
             loc.spaceName(), loc.offset, retval->m_pReg, retval->m_state);
@@ -154,20 +160,24 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
 }
 
 void
-RegAlloc::allocInputReg(const NormalizedInstruction& ni, int index) {
-  Location& loc = ni.inputs[index]->location;
-  if (loc.isLiteral()) {
-    RuntimeType& rtt = ni.inputs[index]->rtt;
-    alloc(loc, rtt.valueType(), RegInfo::CLEAN, true, rtt.valueGeneric());
-    return;
-  }
-  const RuntimeType& rtt = ni.inputs[index]->rtt;
+RegAlloc::allocInputReg(const NormalizedInstruction& ni, int index,
+                        PhysReg target /* = InvalidReg */) {
+  RuntimeType& rtt = ni.inputs[index]->rtt;
   if (rtt.isIter()) {
     return;
   }
+
   DataType t = rtt.outerType();
   if (t == KindOfInvalid) return;
-  (void) alloc(loc, t, RegInfo::CLEAN, true);
+
+  Location& loc = ni.inputs[index]->location;
+
+  int64 litVal = 0;
+  if (loc.isLiteral()) {
+    litVal = rtt.valueGeneric();
+  }
+
+  (void) alloc(loc, t, RegInfo::CLEAN, true, litVal, target);
 }
 
 void

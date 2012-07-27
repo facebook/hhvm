@@ -284,6 +284,32 @@ void BreakPointInfo::setClause(const std::string &clause, bool check) {
   m_check = check;
 }
 
+void BreakPointInfo::changeBreakPointDepth(int stackDepth) {
+  // if the breakpoint is equal or lower than the stack depth
+  // delete it
+  breakDepthStack.remove_if(
+      std::bind2nd(std::greater_equal<int>(), stackDepth)
+  );
+}
+
+void BreakPointInfo::unsetBreakable(int stackDepth) {
+  breakDepthStack.push_back(stackDepth);
+}
+
+void BreakPointInfo::setBreakable(int stackDepth) {
+  if (!breakDepthStack.empty() && breakDepthStack.back() == stackDepth) {
+    breakDepthStack.pop_back();
+  }
+}
+
+bool BreakPointInfo::breakable(int stackDepth) const {
+  if (!breakDepthStack.empty() && breakDepthStack.back() == stackDepth) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 void BreakPointInfo::toggle() {
   switch (m_state) {
     case Always:   setState(Once);     break;

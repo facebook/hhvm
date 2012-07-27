@@ -178,6 +178,11 @@ public:
   static void RecvImpl(BreakPointInfoPtrVec &bps,
                        DebuggerThriftBuffer &thrift);
 
+  bool breakable(int stackDepth) const;
+  void unsetBreakable(int stackDepth);
+  void setBreakable(int stackDepth);
+  void changeBreakPointDepth(int stackDepth);
+
   int16 m_index; // client side index number
 
   int8 m_state;
@@ -220,6 +225,7 @@ private:
   // exception class
   std::string m_namespace;
   std::string m_class;
+  std::list<int> breakDepthStack;
 
   static bool Match(const char *haystack, int haystack_len,
                     const std::string &needle, bool regex, bool exact);

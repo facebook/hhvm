@@ -282,6 +282,7 @@ bool CmdInterrupt::onServer(DebuggerProxy *proxy) {
 }
 
 bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
+
   switch (m_interrupt) {
     case SessionStarted:
     case SessionEnded:
@@ -296,7 +297,7 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
       if (m_site) {
         for (unsigned int i = 0; i < bps.size(); i++) {
           if (bps[i]->m_state != BreakPointInfo::Disabled &&
-              bps[i]->match((InterruptType)m_interrupt, *m_site)) {
+              bps[i]->match(getInterruptType(), *getSite())) {
             BreakPointInfoPtr bp(new BreakPointInfo());
             *bp = *bps[i]; // make a copy
             m_matched.push_back(bp);

@@ -120,7 +120,7 @@ protected:
 
   // helpers
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
-  bool checkBreakPoints(CmdInterrupt &cmd);
+  virtual bool checkBreakPoints(CmdInterrupt &cmd);
   bool checkJumpFlowBreak(CmdInterrupt &cmd);
   virtual bool processJumpFlowBreak(CmdInterrupt &cmd);
   void processInterrupt(CmdInterrupt &cmd);
@@ -150,9 +150,12 @@ public:
   void setInjTables(HPHP::VM::InjectionTables* tables) { m_injTables = tables;}
   void readInjTablesFromThread();
   void writeInjTablesToThread();
+  void changeBreakPointDepth(CmdInterrupt& cmd);
+  BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
 
 private:
   int getStackDepth();
+  int getRealStackDepth();
 
   virtual void processFlowControl(CmdInterrupt &cmd);
   virtual bool breakByFlowControl(CmdInterrupt &cmd);

@@ -5093,6 +5093,8 @@ TranslatorX64::analyzeDefCns(Tracelet& t,
   i.m_txFlags = supportedPlan(!g_vmContext->getCns(name, true, false));
 }
 
+typedef void (*defCnsHelper_func_t)(TargetCache::CacheHandle ch, Variant *inout,
+                                    StringData *name, size_t bit);
 template<bool setBit>
 static void defCnsHelper(TargetCache::CacheHandle ch, Variant *inout,
                          StringData *name, size_t bit) {
@@ -5144,10 +5146,12 @@ TranslatorX64::translateDefCns(const Tracelet& t,
 
   m_regMap.cleanLoc(i.inputs[0]->location);
   if (RuntimeOption::RepoAuthoritative) {
-    EMIT_CALL3(a, defCnsHelper<false>, IMM(ch), A(i.inputs[0]->location),
+    EMIT_CALL3(a, (defCnsHelper_func_t)defCnsHelper<false>,
+               IMM(ch), A(i.inputs[0]->location),
                IMM((uint64)name));
   } else {
-    EMIT_CALL4(a, defCnsHelper<true>, IMM(ch), A(i.inputs[0]->location),
+    EMIT_CALL4(a, (defCnsHelper_func_t)defCnsHelper<true>,
+               IMM(ch), A(i.inputs[0]->location),
                IMM((uint64)name), IMM(allocCnsBit(name)));
   }
   recordReentrantCall(i);
@@ -6175,7 +6179,8 @@ TranslatorX64::emitStringToKnownClass(const NormalizedInstruction& i,
     }
     // We're only passing two arguments to lookupKnownClass because
     // the third is ignored in the checkOnly == false case
-    EMIT_CALL2(astubs, TargetCache::lookupKnownClass<false>,
+    EMIT_CALL2(astubs, ((TargetCache::lookupKnownClass_func_t)
+                         TargetCache::lookupKnownClass<false>),
                R(*clsPtr), IMM((uintptr_t)clsName));
     recordReentrantStubCall(i);
     // UnlikelyIfBlock will restore cls's SCRATCH state but not its
@@ -6915,7 +6920,7 @@ void TranslatorX64::translateClassExistsImpl(const Tracelet& t,
         // return the Class's flags. Otherwise, it will return a set
         // of flags such that our flag check at the join point below
         // will fail.
-        EMIT_CALL3(astubs, lookupKnownClass<true>,
+        EMIT_CALL3(astubs, (lookupKnownClass_func_t)lookupKnownClass<true>,
                    RPLUS(rVmTl, ch),
                    IMM((uintptr_t)name),
                    IMM(isClass));
@@ -7340,7 +7345,7 @@ TranslatorX64::translateCGetMProp(const Tracelet& t,
     ASSERT(name == NULL || name->isStatic());
 
     CacheHandle ch;
-    void* lookupFn = propLookupPrep(
+    TargetCache::pcb_lookup_func_t lookupFn = propLookupPrep(
       ch, useCtx ? name : propCacheName(name).get(),
       base.isLocal() ? BASE_LOCAL : BASE_CELL,
       useCtx ? DYN_CONTEXT : STATIC_CONTEXT,
@@ -7991,7 +7996,7 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
     ASSERT(name == NULL || name->isStatic());
 
     CacheHandle ch;
-    void* setFn = propSetPrep(
+    TargetCache::pcb_set_func_t setFn = propSetPrep(
       ch, useCtx ? name : propCacheName(name).get(),
       base.isLocal() || base.isVariant() ? BASE_LOCAL : BASE_CELL,
       useCtx ? DYN_CONTEXT : STATIC_CONTEXT,

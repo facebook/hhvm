@@ -245,6 +245,13 @@ typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
  */
 static const int kPropCacheLines = 8;
 
+typedef void (*pcb_lookup_func_t)(CacheHandle handle, ObjectData* base,
+                                  StringData* name, TypedValue* stackPtr,
+                                  ActRec* fp);
+typedef void (*pcb_set_func_t)(CacheHandle ch, ObjectData* base,
+                               StringData* name, int64 val,
+                               DataType type, ActRec* fp);
+
 template<typename Key, PHPNameSpace ns = NSInvalid>
 class PropCacheBase : public Cache<Key, uintptr_t, ObjectData*, ns,
                                    kPropCacheLines> {
@@ -279,10 +286,10 @@ enum NameState {
 
 // These functions allocate a CacheHandle of the appropriate type and
 // return a pointer to the C++ helper to call.
-void* propLookupPrep(CacheHandle& ch, const StringData* name,
-                     HomeState hs, CtxState cs, NameState ns);
-void* propSetPrep(CacheHandle& ch, const StringData* name,
-                  HomeState hs, CtxState cs, NameState ns);
+pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
+                                 HomeState hs, CtxState cs, NameState ns);
+pcb_set_func_t propSetPrep(CacheHandle& ch, const StringData* name,
+                           HomeState hs, CtxState cs, NameState ns);
 
 struct PropKey {
   Class* cls;
@@ -400,6 +407,9 @@ public:
  * the class name is known at translation time.
  */
 CacheHandle allocKnownClass(const StringData* name);
+typedef Class* (*lookupKnownClass_func_t)(Class** cache,
+                                          const StringData* clsName,
+                                          bool isClass);
 template<bool checkOnly>
 Class* lookupKnownClass(Class** cache, const StringData* clsName,
                         bool isClass);

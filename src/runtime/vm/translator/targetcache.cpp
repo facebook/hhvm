@@ -597,8 +597,8 @@ ClassCache::lookup(Handle handle, StringData *name,
 //=============================================================================
 // PropCache
 
-void* propLookupPrep(CacheHandle& ch, const StringData* name,
-                     HomeState hs, CtxState cs, NameState ns) {
+pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
+                                 HomeState hs, CtxState cs, NameState ns) {
   if (false) {
     CacheHandle ch = 0;
     ObjectData* base = NULL;
@@ -619,32 +619,32 @@ void* propLookupPrep(CacheHandle& ch, const StringData* name,
     if (ns == STATIC_NAME) {
       ch = PropCache::alloc(name);
       if (hs == BASE_CELL) {
-        return (void*)PropCache::lookup<false>;
+        return PropCache::lookup<false>;
       } else if (hs == BASE_LOCAL) {
-        return (void*)PropCache::lookup<true>;
+        return PropCache::lookup<true>;
       }
     } else if (ns == DYN_NAME) {
       ch = PropNameCache::alloc();
       if (hs == BASE_CELL) {
-        return (void*)PropNameCache::lookup<false>;
+        return PropNameCache::lookup<false>;
       } else if (hs == BASE_LOCAL) {
-        return (void*)PropNameCache::lookup<true>;
+        return PropNameCache::lookup<true>;
       }
     }
   } else if (cs == DYN_CONTEXT) {
     if (ns == STATIC_NAME) {
       ch = PropCtxCache::alloc(name);
       if (hs == BASE_CELL) {
-        return (void*)PropCtxCache::lookup<false>;
+        return PropCtxCache::lookup<false>;
       } else if (hs == BASE_LOCAL) {
-        return (void*)PropCtxCache::lookup<true>;
+        return PropCtxCache::lookup<true>;
       }
     } else if (ns == DYN_NAME) {
       ch = PropCtxNameCache::alloc();
       if (hs == BASE_CELL) {
-        return (void*)PropCtxNameCache::lookup<false>;
+        return PropCtxNameCache::lookup<false>;
       } else if (hs == BASE_LOCAL) {
-        return (void*)PropCtxNameCache::lookup<true>;
+        return PropCtxNameCache::lookup<true>;
       }
     }
   }
@@ -652,8 +652,8 @@ void* propLookupPrep(CacheHandle& ch, const StringData* name,
   NOT_REACHED();
 }
 
-void* propSetPrep(CacheHandle& ch, const StringData* name,
-                  HomeState hs, CtxState cs, NameState ns) {
+pcb_set_func_t propSetPrep(CacheHandle& ch, const StringData* name,
+                           HomeState hs, CtxState cs, NameState ns) {
   if (false) {
     CacheHandle ch = 0;
     ObjectData* base = NULL;
@@ -675,32 +675,32 @@ void* propSetPrep(CacheHandle& ch, const StringData* name,
     if (ns == STATIC_NAME) {
       ch = PropCache::alloc(name);
       if (hs == BASE_CELL) {
-        return (void*)PropCache::set<false>;
+        return PropCache::set<false>;
       } else if (hs == BASE_LOCAL) {
-        return (void*)PropCache::set<true>;
+        return PropCache::set<true>;
       }
     } else if (ns == DYN_NAME) {
       ch = PropNameCache::alloc();
       if (hs == BASE_CELL) {
-        return (void*)PropNameCache::set<false>;
+        return PropNameCache::set<false>;
       } else if (hs == BASE_LOCAL) {
-        return (void*)PropNameCache::set<true>;
+        return PropNameCache::set<true>;
       }
     }
   } else if (cs == DYN_CONTEXT) {
     if (ns == STATIC_NAME) {
       ch = PropCtxCache::alloc(name);
       if (hs == BASE_CELL) {
-        return (void*)PropCtxCache::set<false>;
+        return PropCtxCache::set<false>;
       } else if (hs == BASE_LOCAL) {
-        return (void*)PropCtxCache::set<true>;
+        return PropCtxCache::set<true>;
       }
     } else if (ns == DYN_NAME) {
       ch = PropCtxNameCache::alloc();
       if (hs == BASE_CELL) {
-        return (void*)PropCtxNameCache::set<false>;
+        return PropCtxNameCache::set<false>;
       } else if (hs == BASE_LOCAL) {
-        return (void*)PropCtxNameCache::set<true>;
+        return PropCtxNameCache::set<true>;
       }
     }
   }

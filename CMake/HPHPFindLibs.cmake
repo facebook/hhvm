@@ -302,6 +302,9 @@ endif()
 
 if (FREEBSD)
 	FIND_LIBRARY (EXECINFO_LIB execinfo)
+	if (NOT EXECINFO_LIB)
+		message(FATAL_ERROR "You need to install libexecinfo")
+	endif()
 endif()
 
 #find_package(BISON REQUIRED)

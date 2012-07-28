@@ -23,6 +23,7 @@
 #include <set>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <arpa/inet.h> // For htonl().
 
 /**
  * Simple utility functions.
@@ -34,7 +35,23 @@ namespace HPHP { namespace Util {
 #define NEVER_INLINE  __attribute__((noinline))
 #define LIKELY(pred)   __builtin_expect((pred), true)
 #define UNLIKELY(pred) __builtin_expect((pred), false)
+#define UNUSED         __attribute__((unused))
+#define FLATTEN        __attribute__((flatten))
 #define HOT_FUNC       __attribute__ ((section (".text.hot.builtin")))
+
+#ifdef DEBUG
+#define DEBUG_ONLY /* nop */
+#else
+#define DEBUG_ONLY UNUSED
+#endif
+
+#ifdef HHVM
+#define HOT_FUNC_VM HOT_FUNC
+#define HOT_FUNC_HPHP
+#else
+#define HOT_FUNC_VM
+#define HOT_FUNC_HPHP HOT_FUNC
+#endif
 
 /*
  * we need to keep some unreferenced functions from being removed by
@@ -143,17 +160,39 @@ std::string safe_strerror(int errnum);
 /**
  * Thread-safe dirname().
  */
+std::string safe_dirname(const char *path, int len);
 std::string safe_dirname(const char *path);
+std::string safe_dirname(const std::string& path);
+
+/**
+ * Helper function for safe_dirname.
+ */
+size_t dirname_helper(char *path, int len);
 
 /**
  * Check if value is a power of two.
  */
-bool isPowerOfTwo(int value);
+template<typename Int>
+static inline bool isPowerOfTwo(Int value) {
+  return (value > 0 && (value & (value-1)) == 0);
+}
 
 /**
  * Round up value to the nearest power of two
  */
-int roundUpToPowerOfTwo(int value);
+template<typename Int>
+static inline Int roundUpToPowerOfTwo(Int value) {
+#ifdef DEBUG
+  (void) (0 / value); // fail for 0; ASSERT is a pain.
+#endif
+  --value;
+  // Verified that gcc is smart enough to unroll this and emit
+  // constant shifts.
+  for (unsigned i = 1; i < sizeof(Int) * 8; i *= 2)
+    value |= value >> i;
+  ++value;
+  return value;
+}
 
 /**
  * Duplicate a buffer of given size, null-terminate the result.
@@ -198,6 +237,35 @@ void find(std::vector<std::string> &out,
  * Format a regex pattern by surrounding with slashes and escaping pattern.
  */
 std::string format_pattern(const std::string &pattern, bool prefixSlash);
+
+static inline void compiler_membar( ) {
+  asm volatile("" : : :"memory");
+}
+
+/**
+ * Given the address of a C++ function, returns that function's name
+ * or a hex string representation of the address if it can't find
+ * the function's name. Attempts to demangle C++ function names. It's
+ * the caller's responsibility to free the returned C string.
+ */
+char* getNativeFunctionName(void* codeAddr);
+
+/**
+ * 64-bit equivalents of 32-bit htonl() and ntohq().
+ */
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define htonq(a) a
+#define ntohq(a) a
+#else
+#define ntohq(a)                                                              \
+  (uint64_t)(((uint64_t) (ntohl((uint32_t) ((a) >> 32))))                     \
+             | (((uint64_t) (ntohl((uint32_t)                                 \
+                ((a) & 0x00000000ffffffff)))) << 32))
+#define htonq(a)                                                              \
+  (uint64_t) (((uint64_t) (htonl((uint32_t) ((a) >> 32))))                    \
+              | (((uint64_t) (htonl((uint32_t)                                \
+                 ((a) & 0x00000000ffffffff)))) << 32))
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

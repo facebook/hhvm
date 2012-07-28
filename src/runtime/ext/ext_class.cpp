@@ -17,17 +17,40 @@
 
 #include <runtime/ext/ext_class.h>
 #include <runtime/base/class_info.h>
+#include <runtime/vm/translator/translator.h>
+#include <runtime/vm/translator/translator-inline.h>
 #include <util/util.h>
 
 namespace HPHP {
+
+using VM::Transl::CallerFrame;
+using VM::Transl::VMRegAnchor;
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static String get_classname(Variant class_or_object) {
+static String get_classname(CVarRef class_or_object) {
   if (class_or_object.is(KindOfObject)) {
-    return class_or_object.toObject()->o_getClassName();
+    return class_or_object.toCObjRef().get()->o_getClassName();
   }
   return class_or_object.toString();
+}
+
+static inline CStrRef ctxClassName() {
+  return hhvm ?
+    g_vmContext->getContextClassName(true) :
+    FrameInjection::GetClassName(true);
+}
+
+static const VM::Class* get_cls(CVarRef class_or_object) {
+  VM::Class* cls = NULL;
+  if (class_or_object.is(KindOfObject)) {
+    ObjectData* obj = class_or_object.toCObjRef().get();
+    cls = obj->getVMClass();
+  } else {
+    cls = VM::Unit::lookupClass(class_or_object.toString().get());
+  }
+  return cls;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,6 +68,9 @@ Array f_get_declared_traits() {
 }
 
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
+  if (hhvm) {
+    return VM::Unit::classExists(class_name.get(), autoload, VM::AttrNone);
+  }
   const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(class_name);
 
   if (info) {
@@ -59,6 +85,10 @@ bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
 }
 
 bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
+  if (hhvm) {
+    return VM::Unit::classExists(interface_name.get(), autoload,
+                                 VM::AttrInterface);
+  }
   const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(interface_name);
 
   if (info) {
@@ -72,6 +102,9 @@ bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
 }
 
 bool f_trait_exists(CStrRef trait_name, bool autoload /* = true */) {
+  if (hhvm) {
+    return VM::Unit::classExists(trait_name.get(), autoload, VM::AttrTrait);
+  }
   const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(trait_name);
 
   if (info) {
@@ -85,12 +118,23 @@ bool f_trait_exists(CStrRef trait_name, bool autoload /* = true */) {
 }
 
 Array f_get_class_methods(CVarRef class_or_object) {
+  if (hhvm) {
+    const VM::Class* cls = get_cls(class_or_object);
+    if (!cls) return Array();
+    VMRegAnchor _;
+
+    HphpArray* retVal = NEW(HphpArray)(cls->numMethods());
+    cls->getMethodNames(arGetContextClassFromBuiltin(g_vmContext->getFP()),
+                        retVal);
+    return Array(retVal).keys();
+  }
+
   ClassInfo::MethodVec methods;
   CStrRef class_name = get_classname(class_or_object);
   if (!ClassInfo::GetClassMethods(methods, class_name)) return Array();
-  CStrRef klass = FrameInjection::GetClassName(true);
-
+  CStrRef klass = ctxClassName();
   bool allowPrivate = !klass.empty() && klass->isame(class_name.get());
+
   Array ret = Array::Create();
   for (unsigned int i = 0; i < methods.size(); i++) {
     if ((methods[i]->attribute & ClassInfo::IsPublic) || allowPrivate) {
@@ -100,7 +144,32 @@ Array f_get_class_methods(CVarRef class_or_object) {
   return ret.keys();
 }
 
+Array vm_get_class_constants(CStrRef className) {
+  HPHP::VM::Class* cls = HPHP::VM::Unit::lookupClass(className.get());
+  if (cls == NULL) {
+    return NEW(HphpArray)(0);
+  }
+
+  size_t numConstants = cls->numConstants();
+  HphpArray* retVal = NEW(HphpArray)(numConstants);
+  const VM::Class::Const* consts = cls->constants();
+  for (size_t i = 0; i < numConstants; i++) {
+    // Note: hphpi/hphpc don't include inherited constants in
+    // get_class_constants(), so mimic that behavior
+    if (consts[i].m_class == cls) {
+      StringData* name  = const_cast<StringData*>(consts[i].m_name);
+      TypedValue* value = cls->clsCnsGet(consts[i].m_name);
+      retVal->nvSet(name, value, false);
+    }
+  }
+
+  return retVal;
+}
+
 Array f_get_class_constants(CStrRef class_name) {
+  if (hhvm) {
+    return vm_get_class_constants(class_name.get());
+  }
   const ClassInfo *cls = ClassInfo::FindClass(class_name);
   Array ret = Array::Create();
   if (cls) {
@@ -113,7 +182,61 @@ Array f_get_class_constants(CStrRef class_name) {
   return ret;
 }
 
+Array vm_get_class_vars(CStrRef className) {
+  HPHP::VM::Class* cls = HPHP::VM::Unit::lookupClass(className.get());
+  if (cls == NULL) {
+    raise_error("Unknown class %s", className->data());
+  }
+  cls->initialize();
+
+  const VM::Class::SProp* sPropInfo = cls->staticProperties();
+  const size_t numSProps = cls->numStaticProperties();
+  const VM::Class::Prop* propInfo = cls->declProperties();
+  const size_t numDeclProps = cls->numDeclProperties();
+
+  // The class' instance property initialization template is in different
+  // places, depending on whether it has any request-dependent initializers
+  // (i.e. constants)
+  const VM::Class::PropInitVec& declPropInitVec = cls->declPropInit();
+  const VM::Class::PropInitVec* propVals = !cls->pinitVec().empty()
+    ? cls->getPropData() : &declPropInitVec;
+  ASSERT(propVals != NULL);
+  ASSERT(propVals->size() == numDeclProps);
+
+  // For visibility checks
+  CallerFrame cf;
+  HPHP::VM::Class* ctx = arGetContextClass(cf());
+  const ClassInfo* ctxCI =
+    (ctx == NULL ? NULL : g_vmContext->findClassInfo(CStrRef(ctx->nameRef())));
+  ClassInfo::PropertyMap propMap;
+  g_vmContext->findClassInfo(className)->getAllProperties(propMap);
+
+  HphpArray* ret = NEW(HphpArray)(numDeclProps + numSProps);
+
+  for (size_t i = 0; i < numDeclProps; ++i) {
+    StringData* name = const_cast<StringData*>(propInfo[i].m_name);
+    // Empty names are used for invisible/private parent properties; skip them
+    if (name->size() == 0) continue;
+    if (propMap[String(name)]->isVisible(ctxCI)) {
+      const TypedValue* value = &((*propVals)[i]);
+      ret->nvSet(name, value, false);
+    }
+  }
+
+  for (size_t i = 0; i < numSProps; ++i) {
+    bool vis, access;
+    TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
+    if (vis) {
+      ret->nvSet(const_cast<StringData*>(sPropInfo[i].m_name), value, false);
+    }
+  }
+
+  return ret;
+}
+
 Array f_get_class_vars(CStrRef class_name) {
+  if (hhvm) return vm_get_class_vars(class_name.get());
+
   ClassInfo::PropertyVec properties;
   ClassInfo::GetClassProperties(properties, class_name);
   CStrRef context = FrameInjection::GetClassName(true);
@@ -144,11 +267,39 @@ Array f_get_class_vars(CStrRef class_name) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_get_class(CVarRef object /* = null_variant */) {
+  if (object.isNull()) {
+    // No arg passed.
+    String ret;
+    if (hhvm) {
+      CallerFrame cf;
+      HPHP::VM::Class* cls = HPHP::VM::arGetContextClassImpl<true>(cf());
+      if (cls) {
+        ret = CStrRef(cls->nameRef());
+      }
+    } else {
+      ret = FrameInjection::GetClassName(true);
+    }
+    if (ret.empty()) {
+      raise_warning("get_class() called without object from outside a class");
+      return false;
+    }
+    return ret;
+  }
   if (!object.isObject()) return false;
   return object.toObject()->o_getClassName();
 }
 
 Variant f_get_parent_class(CVarRef object /* = null_variant */) {
+  if (hhvm) {
+    if (!object.isInitialized()) {
+      CallerFrame cf;
+      HPHP::VM::Class* cls = arGetContextClass(cf());
+      if (cls && cls->parent()) {
+        return CStrRef(cls->parentRef());
+      }
+      return false;
+    }
+  }
   Variant class_name;
   if (object.isObject()) {
     class_name = f_get_class(object);
@@ -172,6 +323,14 @@ bool f_is_a(CObjRef object, CStrRef class_name) {
 }
 
 bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name) {
+  if (hhvm) {
+    const VM::Class* cls = get_cls(class_or_object);
+    if (!cls || cls->attrs() & (VM::AttrInterface|VM::AttrTrait)) return false;
+    const VM::Class* other = VM::Unit::lookupClass(class_name.get());
+    if (other == NULL ||
+       (other->attrs() & (VM::AttrInterface|VM::AttrTrait))) return false;
+    return cls->classof(other);
+  }
   const ClassInfo *classInfo =
     ClassInfo::FindClass(get_classname(class_or_object));
   if (classInfo) {
@@ -181,8 +340,22 @@ bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name) {
 }
 
 bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
+  if (hhvm) {
+    const VM::Class* cls = get_cls(class_or_object);
+    if (!cls) return false;
+    if (cls->lookupMethod(method_name.get()) != NULL) return true;
+    if (cls->attrs() & VM::AttrAbstract) {
+      const VM::ClassSet& ifaces = cls->allInterfaces();
+      for (VM::ClassSet::const_iterator it = ifaces.begin();
+          it != ifaces.end();
+          ++it) {
+        if ((*it)->lookupMethod(method_name.get())) return true;
+      }
+    }
+    return false;
+  }
   const ClassInfo *classInfo =
-    ClassInfo::FindClass(get_classname(class_or_object));
+    ClassInfo::FindClassInterfaceOrTrait(get_classname(class_or_object));
   if (classInfo) {
     ClassInfo *defClass;
     return classInfo->hasMethod(method_name, defClass) != NULL;
@@ -192,8 +365,9 @@ bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
 
 bool f_property_exists(CVarRef class_or_object, CStrRef property) {
   if (class_or_object.isObject()) {
+    CStrRef context = ctxClassName();
     // Call o_exists for objects, to include dynamic properties.
-    return class_or_object.toObject()->o_propExists(property);
+    return class_or_object.toObject()->o_propExists(property, context);
   }
   const ClassInfo *classInfo =
     ClassInfo::FindClass(get_classname(class_or_object));
@@ -209,9 +383,10 @@ bool f_property_exists(CVarRef class_or_object, CStrRef property) {
 
 Variant f_get_object_vars(CVarRef object) {
   if (object.isObject()) {
-    return object.toObject()->o_toIterArray(FrameInjection::GetClassName(true));
+    return object.toObject()->o_toIterArray(ctxClassName());
   }
-  return false;
+  raise_warning("get_object_vars() expects parameter 1 to be object");
+  return Variant(Variant::nullInit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

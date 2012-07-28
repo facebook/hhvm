@@ -131,6 +131,7 @@ public:
 
   void get(std::vector<std::string> &values) const;
   void get(std::set<std::string> &values) const;
+  void get(std::set<std::string, stdltistr> &values) const;
   void get(std::map<std::string, std::string> &values) const;
   void get(hphp_string_imap<std::string> &values) const;
 
@@ -375,6 +376,7 @@ public:
   HdfException(const char *fmt, ...) {
     va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
   }
+  EXCEPTION_COMMON_IMPL(HdfException);
 };
 
 /**
@@ -386,6 +388,7 @@ public:
     : HdfException("HDF node [%s]'s value \"%s\" is not %s",
                    hdf->getFullPath().c_str(), value, type) {
   }
+  EXCEPTION_COMMON_IMPL(HdfDataTypeException);
 };
 
 /**
@@ -397,6 +400,7 @@ public:
     : HdfException("HDF node [%s]'s value \"%s\" is not expected %s",
                    hdf->getFullPath().c_str(), hdf->get(""), expected) {
   }
+  EXCEPTION_COMMON_IMPL(HdfDataValueException);
 };
 
 /**
@@ -407,6 +411,7 @@ public:
   HdfInvalidOperation(const char *operation)
     : HdfException("Invalid operation: %s", operation) {
   }
+  EXCEPTION_COMMON_IMPL(HdfInvalidOperation);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -24,22 +24,25 @@
 class VCRInfo {
 public:
   VCRInfo(const char *i, const char *o, const char *f = "", int l = 0,
-          bool nw = false)
-  : input(i), output(o), file(f), line(l), nowarnings(nw) { }
+          bool nw = false, bool fo = false)
+  : input(i), output(o), file(f), line(l), nowarnings(nw), fileoutput(fo) { }
 
   const char *input;
   const char *output;
   const char *file;
   int line;
   bool nowarnings;
+  bool fileoutput;
 };
 
 typedef std::vector<VCRInfo> VCRInfoVec;
 
+class OptionSetter;
 /**
  * Testing PHP -> C++ -> execution.
  */
 class TestCodeRun : public TestBase {
+  friend class OptionSetter;
  public:
   TestCodeRun();
 
@@ -123,6 +126,7 @@ class TestCodeRun : public TestBase {
   bool TestGetParentClass();
   bool TestRedeclaredFunctions();
   bool TestRedeclaredClasses();
+  bool TestReassignThis();
   bool TestClone();
   bool TestEvalOrder();
   bool TestGetObjectVars();
@@ -171,7 +175,6 @@ class TestCodeRun : public TestBase {
   bool TestExtSoap();
   bool TestExtCollator();
   bool TestExtSocket();
-  bool TestFiber();
   bool TestAPC();
   bool TestInlining();
   bool TestCopyProp();
@@ -181,6 +184,7 @@ class TestCodeRun : public TestBase {
   bool TestParser();
   bool TestTypeAssertions();
   bool TestSerialize();
+  bool TestHoisting();
 
   // PHP 5.3
   bool TestVariableClassName();
@@ -198,30 +202,68 @@ class TestCodeRun : public TestBase {
   // HipHop specific
   bool TestYield();
   bool TestHint();
+  bool TestUserAttributes();
 #ifdef TAINTED
   bool TestTaint();
   bool TestTaintExt();
 #endif
+  bool TestStrictMode();
 
   // debugging purpose
   bool TestAdHoc();
 
   static bool FastMode;
+  static const char *Filter;
 
  protected:
   bool CleanUp();
   bool GenerateFiles(const char *input, const char *subdir = "");
   bool CompileFiles();
   bool RecordMulti(const char *input, const char *output, const char *file,
-                   int line, bool flag);
+                   int line, bool nowarnings, bool fileoutput);
 
   bool MultiVerifyCodeRun();
   bool VerifyCodeRun(const char *input, const char *output,
                      const char *file = "", int line = 0,
-                     bool nowarnings = false);
+                     bool nowarnings = false, bool fileoutput = false);
 
   bool m_perfMode;
   VCRInfoVec m_infos;
+  std::string m_compileOptions;
+  std::string m_runtimeOptions;
+  std::string m_envVars;
+  int m_test;
+};
+
+class OptionSetter {
+public:
+  enum Kind { CompileTime, RunTime, Env };
+  OptionSetter(TestCodeRun *tcr, Kind k, const char *opt) :
+    m_str(Get(tcr,k)), m_saved(m_str) {
+    m_str += opt;
+    m_str += "\n";
+  }
+  ~OptionSetter() {
+    m_str = m_saved;
+  }
+private:
+  std::string &Get(TestCodeRun *tcr, Kind k) {
+    if (k == CompileTime) return tcr->m_compileOptions;
+    if (k == RunTime) return tcr->m_runtimeOptions;
+    return tcr->m_envVars;
+  }
+  std::string &m_str;
+  std::string m_saved;
+};
+
+class HipHopSyntax {
+public:
+  HipHopSyntax(TestCodeRun *tcr) :
+    m_compile(tcr, OptionSetter::CompileTime, "-vEnableHipHopSyntax=1"),
+    m_runtime(tcr, OptionSetter::RunTime, "-vEval.EnableHipHopSyntax=1") {}
+private:
+  OptionSetter m_compile;
+  OptionSetter m_runtime;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -238,16 +280,19 @@ class TestCodeRun : public TestBase {
 
 // Multi VCR
 #define MVCR(a)                                                         \
-  if (!RecordMulti(a,NULL,__FILE__,__LINE__,false)) return false;
+  if (!RecordMulti(a,NULL,__FILE__,__LINE__,false,false)) return false;
 
 #define MVCRO(a, b)                                                     \
-  if (!RecordMulti(a, b, __FILE__,__LINE__,false)) return false;
+  if (!RecordMulti(a, b, __FILE__,__LINE__,false,false)) return false;
+
+#define MVCROF(a, b)                                                     \
+  if (!RecordMulti(a, b, __FILE__,__LINE__,false,true)) return false;
 
 #define MVCRNW(a)                                                       \
-  if (!RecordMulti(a,NULL,__FILE__,__LINE__,true)) return false;
+  if (!RecordMulti(a,NULL,__FILE__,__LINE__,true,false)) return false;
 
 #define MVCRONW(a,b)                                                     \
-  if (!RecordMulti(a,b,__FILE__,__LINE__,true)) return false;
+  if (!RecordMulti(a,b,__FILE__,__LINE__,true,false)) return false;
 
 ///////////////////////////////////////////////////////////////////////////////
 

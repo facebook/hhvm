@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 87 */
+/* SRC: classes/iterator.php line 103 */
 FORWARD_DECLARE_GENERIC_INTERFACE(Traversable);
 class c_Traversable {
 };

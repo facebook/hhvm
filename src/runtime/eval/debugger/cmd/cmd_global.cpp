@@ -16,10 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_global.h>
 #include <runtime/eval/debugger/cmd/cmd_variable.h>
-#include <runtime/eval/runtime/eval_frame_injection.h>
-#include <runtime/eval/runtime/variable_environment.h>
-
-using namespace std;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,10 +60,26 @@ bool CmdGlobal::onClient(DebuggerClient *client) {
   if (cmd->m_globals.empty()) {
     client->info("(no global variable was found)");
   } else {
+    m_globals = cmd->m_globals;
     CmdVariable::PrintVariables(client, cmd->m_globals, true, text);
   }
 
   return true;
+}
+
+void CmdGlobal::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  for (ArrayIter iter(m_globals); iter; ++iter) {
+    String name = iter.first().toString();
+    if (client->getDebuggerClientApiModeSerialize()) {
+      values.set(name,
+                 DebuggerClient::FormatVariable(iter.second(), 200));
+    } else {
+      values.set(name, iter.second());
+    }
+  }
+  client->setOTValues(values);
 }
 
 bool CmdGlobal::onServer(DebuggerProxy *proxy) {

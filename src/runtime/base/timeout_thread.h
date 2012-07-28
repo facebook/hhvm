@@ -41,7 +41,11 @@ public:
   void onTimer(int index);
 
 private:
-  int m_index;
+  void checkForNewWorkers();
+  void drainPipe();
+
+  int m_numWorkers;
+  int m_numTimers;
   bool m_stopped;
 
   event_base *m_eventBase;
@@ -49,9 +53,9 @@ private:
   std::vector<RequestInjectionData*> m_timeoutData;
   int m_timeoutSeconds;
 
-  // signal to stop the thread
-  event m_eventStop;
-  CPipe m_pipeStop;
+  // signal to wake up the thread
+  event m_eventPipe;
+  CPipe m_pipe;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

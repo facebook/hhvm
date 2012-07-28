@@ -92,7 +92,7 @@ DefineFunction(
     'desc'   => "xml_parse() parses an XML document. The handlers for the configured events are called as many times as necessary.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns 1 on success or 0 on failure.\n\nFor unsuccessful parses, error information can be retrieved with xml_get_error_code(), xml_error_string(), xml_get_current_line_number(), xml_get_current_column_number() and xml_get_current_byte_index().\n\nEntity errors are reported at the end of the data thus only if is_final is set and TRUE.",
     ),
     'args'   => array(
@@ -121,7 +121,7 @@ DefineFunction(
     'desc'   => "This function parses an XML file into 2 parallel array structures, one (index) containing pointers to the location of the appropriate values in the values array. These last two parameters must be passed by reference.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "xml_parse_into_struct() returns 0 for failure and 1 for success. This is not the same as FALSE and TRUE, be careful with operators such as ===.",
     ),
     'args'   => array(
@@ -453,7 +453,7 @@ DefineFunction(
     'desc'   => "Gets the current byte index of the given XML parser.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it returns which byte index the parser is currently at in its data buffer (starting at 0).",
     ),
     'args'   => array(
@@ -471,7 +471,7 @@ DefineFunction(
     'desc'   => "Gets the current column number of the given XML parser.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it returns which column on the current line (as given by xml_get_current_line_number()) the parser is currently at.",
     ),
     'args'   => array(
@@ -489,7 +489,7 @@ DefineFunction(
     'desc'   => "Gets the current line number for the given XML parser.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it returns which line the parser is currently at in its data buffer.",
     ),
     'args'   => array(
@@ -507,7 +507,7 @@ DefineFunction(
     'desc'   => "Gets the XML parser error code.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it returns one of the error codes listed in the error codes section.",
     ),
     'args'   => array(

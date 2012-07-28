@@ -22,6 +22,7 @@
 #include <util/async_func.h>
 #include <runtime/base/file/socket.h>
 #include <runtime/eval/debugger/dummy_sandbox.h>
+#include <runtime/vm/instrumentation.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,6 +32,7 @@ DECLARE_BOOST_TYPES(DebuggerProxy);
 DECLARE_BOOST_TYPES(DebuggerCommand);
 DECLARE_BOOST_TYPES(CmdFlowControl);
 DECLARE_BOOST_TYPES(CmdJump);
+
 class DebuggerProxy : public Synchronizable,
                       public boost::enable_shared_from_this<DebuggerProxy> {
 public:
@@ -47,46 +49,65 @@ public:
 
 public:
   DebuggerProxy(SmartPtr<Socket> socket, bool local);
-  ~DebuggerProxy();
+  virtual ~DebuggerProxy();
 
   bool isLocal() const { return m_local;}
+
   const char *getThreadType() const;
   DSandboxInfo getSandbox() const;
   std::string getSandboxId() const;
+  const DSandboxInfo& getDummyInfo() const { return m_dummyInfo; }
+
   void getThreads(DThreadInfoPtrVec &threads);
-
-  void startDummySandbox();
-  void startSignalThread();
-
-  void switchSandbox(const std::string &newId);
+  bool switchSandbox(const std::string &newId, bool force);
   void updateSandbox(DSandboxInfoPtr sandbox);
   bool switchThread(DThreadInfoPtr thread);
   void switchThreadMode(ThreadMode mode, int64 threadId = 0);
-  void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
 
-  bool needInterrupt();
-  void interrupt(CmdInterrupt &cmd);
-  bool send(DebuggerCommand *cmd);
-
-  void pollSignal(); // for signal polling thread
+  void startDummySandbox();
   void notifyDummySandbox();
 
-private:
+  virtual void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
+  void getBreakPoints(BreakPointInfoPtrVec &breakpoints);
+  bool couldBreakEnterClsMethod(const StringData* className);
+  bool couldBreakEnterFunc(const StringData* funcFullName);
+  void getBreakClsMethods(std::vector<const StringData*>& classNames);
+  void getBreakFuncs(std::vector<const StringData*>& funcFullNames);
+
+  bool needInterrupt();
+  bool needInterruptForNonBreak();
+  virtual void interrupt(CmdInterrupt &cmd);
+  bool send(DebuggerCommand *cmd);
+
+  void startSignalThread();
+  void pollSignal(); // for signal polling thread
+
+  void checkStop();
+  void forceQuit();
+
+protected:
   bool m_stopped;
 
   bool m_local;
   DebuggerThriftBuffer m_thrift;
-  DummySandboxPtr m_dummySandbox;
+  DummySandbox* m_dummySandbox;
 
   mutable Mutex m_mutex;
+  ReadWriteMutex m_breakMutex;
   bool m_hasBreakPoints;
   BreakPointInfoPtrVec m_breakpoints;
   DSandboxInfo m_sandbox;
+  DSandboxInfo m_dummyInfo;
 
   ThreadMode m_threadMode;
   int64 m_thread;
   DThreadInfoPtr m_newThread;
   std::map<int64, DThreadInfoPtr> m_threads;
+
+  typedef tbb::concurrent_hash_map<const StringData*, void*,
+                                   StringDataHashCompare> StringDataMap;
+  StringDataMap m_breaksEnterClsMethod;
+  StringDataMap m_breaksEnterFunc;
 
   CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
   CmdJumpPtr m_jump;
@@ -101,11 +122,43 @@ private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
   bool checkBreakPoints(CmdInterrupt &cmd);
   bool checkJumpFlowBreak(CmdInterrupt &cmd);
-  bool processJumpFlowBreak(CmdInterrupt &cmd);
+  virtual bool processJumpFlowBreak(CmdInterrupt &cmd);
   void processInterrupt(CmdInterrupt &cmd);
-  void processFlowControl(CmdInterrupt &cmd);
-  bool breakByFlowControl(CmdInterrupt &cmd);
+  virtual void processFlowControl(CmdInterrupt &cmd);
+  virtual bool breakByFlowControl(CmdInterrupt &cmd);
+
   DThreadInfoPtr createThreadInfo(const std::string &desc);
+};
+
+class DebuggerProxyVM : public DebuggerProxy {
+public:
+  static Variant ExecutePHP(const std::string &php, String &output, bool log,
+                            int frame);
+
+public:
+  DebuggerProxyVM(SmartPtr<Socket> socket, bool local)
+    : DebuggerProxy(socket, local), m_injTables(NULL) {
+  }
+  virtual ~DebuggerProxyVM() {
+    delete m_injTables;
+  }
+  virtual void interrupt(CmdInterrupt &cmd);
+  virtual void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
+
+  // For instrumentation
+  HPHP::VM::InjectionTables* getInjTables() const { return m_injTables; }
+  void setInjTables(HPHP::VM::InjectionTables* tables) { m_injTables = tables;}
+  void readInjTablesFromThread();
+  void writeInjTablesToThread();
+
+private:
+  int getStackDepth();
+
+  virtual void processFlowControl(CmdInterrupt &cmd);
+  virtual bool breakByFlowControl(CmdInterrupt &cmd);
+
+  // For instrumentation
+  HPHP::VM::InjectionTables* m_injTables;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -31,7 +31,8 @@ public:
                  int type, const std::string &name,
                  const std::string &parent, ExpressionListPtr base,
                  const std::string &docComment,
-                 StatementListPtr stmt);
+                 StatementListPtr stmt,
+                 ExpressionListPtr attrList);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasDecl() const { return true; }

@@ -26,14 +26,16 @@ DECLARE_BOOST_TYPES(CmdMachine);
 class CmdMachine : public DebuggerCommand {
 public:
   static bool AttachSandbox(DebuggerClient *client, const char *user = NULL,
-                            const char *name = NULL);
+                            const char *name = NULL, bool force = false);
   static bool AttachSandbox(DebuggerClient *client,
-                            DSandboxInfoPtr sandbox);
+                            DSandboxInfoPtr sandbox,
+                            bool force = false);
   static void UpdateIntercept(DebuggerClient *client,
                               const std::string &host, int port);
 
 public:
-  CmdMachine() : DebuggerCommand(KindOfMachine) {}
+  CmdMachine() : DebuggerCommand(KindOfMachine),
+                 m_force(false), m_succeed(false) {}
 
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
@@ -47,6 +49,8 @@ public:
 private:
   DSandboxInfoPtrVec m_sandboxes;
   Array m_rpcConfig;
+  bool m_force;
+  bool m_succeed;
 
   bool processList(DebuggerClient *client, bool output = true);
 };

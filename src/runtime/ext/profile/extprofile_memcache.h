@@ -96,7 +96,7 @@ inline bool x_memcache_setoptimeout(CObjRef memcache, int timeoutms) {
   return f_memcache_setoptimeout(memcache, timeoutms);
 }
 
-inline int x_memcache_get_server_status(CObjRef memcache, CStrRef host, int port = 0) {
+inline int64 x_memcache_get_server_status(CObjRef memcache, CStrRef host, int port = 0) {
   FUNCTION_INJECTION_BUILTIN(memcache_get_server_status);
   return f_memcache_get_server_status(memcache, host, port);
 }

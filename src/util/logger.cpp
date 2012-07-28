@@ -23,35 +23,37 @@
 #include "log_aggregator.h"
 #include "text_color.h"
 #include <util/atomic.h>
+#include <syslog.h>
 
-using namespace std;
-
-#define IMPLEMENT_LOGLEVEL(LOGLEVEL, err)                               \
+#define IMPLEMENT_LOGLEVEL(LOGLEVEL)                               \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
-    va_list ap; va_start(ap, fmt); Log(err, fmt, ap); va_end(ap);       \
+    va_list ap; va_start(ap, fmt);                                      \
+    Log(Log ## LOGLEVEL, fmt, ap);                                      \
+    va_end(ap);                                                         \
   }                                                                     \
   void Logger::LOGLEVEL(const std::string &msg) {                       \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
-    Log(err, msg, NULL);                                                \
+    Log(Log ## LOGLEVEL, msg, NULL);                                    \
   }                                                                     \
   void Logger::Raw ## LOGLEVEL(const std::string &msg) {                \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
-    Log(err, msg, NULL, false);                                         \
+    Log(Log ## LOGLEVEL, msg, NULL, false);                             \
   }                                                                     \
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_LOGLEVEL(Error,   true);
-IMPLEMENT_LOGLEVEL(Warning, true);
-IMPLEMENT_LOGLEVEL(Info,    false);
-IMPLEMENT_LOGLEVEL(Verbose, false);
+IMPLEMENT_LOGLEVEL(Error);
+IMPLEMENT_LOGLEVEL(Warning);
+IMPLEMENT_LOGLEVEL(Info);
+IMPLEMENT_LOGLEVEL(Verbose);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 bool Logger::UseLogAggregator = false;
+bool Logger::UseSyslog = false;
 bool Logger::UseLogFile = true;
 bool Logger::UseCronolog = true;
 bool Logger::IsPipeOutput = false;
@@ -69,39 +71,39 @@ IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 Logger *Logger::s_logger = new Logger();
 
-void Logger::Log(bool err, const char *fmt, va_list ap) {
-  if (!UseLogAggregator && !UseLogFile) return;
+void Logger::Log(LogLevelType level, const char *fmt, va_list ap) {
+  if (!IsEnabled()) return;
 
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  Log(err, msg, NULL);
+  Log(level, msg, NULL);
 }
 
-void Logger::LogEscapeMore(bool err, const char *fmt, va_list ap) {
-  if (!UseLogAggregator && !UseLogFile) return;
+void Logger::LogEscapeMore(LogLevelType level, const char *fmt, va_list ap) {
+  if (!IsEnabled()) return;
 
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  Log(err, msg, NULL, true, true);
+  Log(level, msg, NULL, true, true);
 }
 
-void Logger::Log(bool err, const char *type, const Exception &e,
+void Logger::Log(LogLevelType level, const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
-  s_logger->log(err, type, e, file, line);
+  s_logger->log(level, type, e, file, line);
 }
 
-void Logger::log(bool err, const char *type, const Exception &e,
+void Logger::log(LogLevelType level, const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
-  if (!UseLogAggregator && !UseLogFile) return;
+  if (!IsEnabled()) return;
 
   std::string msg = type;
   msg += e.getMessage();
   if (file && file[0]) {
-    ostringstream os;
+    std::ostringstream os;
     os << " in " << file << " on line " << line;
     msg += os.str();
   }
-  Log(err, msg, &e.getStackTrace());
+  Log(level, msg, &e.getStackTrace());
 }
 
 void Logger::OnNewRequest() {
@@ -116,13 +118,27 @@ void Logger::ResetRequestCount() {
   threadData->message = 0;
 }
 
-void Logger::Log(bool err, const std::string &msg,
+void Logger::Log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
                  bool escape /* = true */, bool escapeMore /* = false */) {
-  s_logger->log(err, msg, stackTrace, escape, escapeMore);
+  s_logger->log(level, msg, stackTrace, escape, escapeMore);
 }
 
-void Logger::log(bool err, const std::string &msg,
+FILE *Logger::GetStandardOut(LogLevelType level) {
+  return level <= LogWarning ? stderr : stdout;
+}
+
+int Logger::GetSyslogLevel(LogLevelType level) {
+  switch (level) {
+  case LogError:   return LOG_ERR;
+  case LogWarning: return LOG_WARNING;
+  case LogInfo:    return LOG_INFO;
+  case LogVerbose: return LOG_DEBUG;
+  default:         return LOG_NOTICE;
+  }
+}
+
+void Logger::log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
                  bool escape /* = true */, bool escapeMore /* = false */) {
   ASSERT(!escapeMore || escape);
@@ -141,7 +157,10 @@ void Logger::log(bool err, const std::string &msg,
   if (UseLogAggregator) {
     LogAggregator::TheLogAggregator.log(*stackTrace, msg);
   }
-  FILE *stdf = err ? stderr : stdout;
+  if (UseSyslog) {
+    syslog(GetSyslogLevel(level), "%s", msg.c_str());
+  }
+  FILE *stdf = GetStandardOut(level);
   if (UseLogFile) {
     FILE *f;
     if (UseCronolog) {
@@ -248,7 +267,7 @@ char *Logger::EscapeString(const std::string &msg) {
 bool Logger::checkDropCache(int &bytesWritten, int &prevBytesWritten,
                             FILE *f) {
   if (bytesWritten - prevBytesWritten > Logger::DropCacheChunkSize) {
-    Util::drop_cache(f, (off_t)bytesWritten);
+    Util::drop_cache(f);
     prevBytesWritten = bytesWritten;
     return true;
   }

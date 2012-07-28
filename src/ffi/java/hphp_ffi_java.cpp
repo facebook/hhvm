@@ -30,7 +30,6 @@
 #include "hphp_ffi_java.h"
 
 using namespace HPHP;
-using namespace std;
 
 ExecutionContext *context = NULL;
 vector <Variant *> pointers;

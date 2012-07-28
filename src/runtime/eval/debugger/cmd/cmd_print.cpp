@@ -17,8 +17,7 @@
 #include <runtime/eval/debugger/cmd/cmd_print.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/string_util.h>
-
-using namespace std;
+#include <runtime/vm/debugger_hook.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,7 +103,7 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
         sb.append(buf);
       }
     }
-    return sb.data();
+    return sb.data() ? sb.data() : "";
   }
   if (strcmp(format, "time") == 0) {
     DateTime dt;
@@ -127,7 +126,11 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   if (m_printLevel > 0) {
     g_context->setDebuggerPrintLevel(m_printLevel);
   }
-  thrift.write(m_ret);
+  {
+    String sdata;
+    DebuggerWireHelpers::WireSerialize(m_ret, sdata);
+    thrift.write(sdata);
+  }
   if (m_printLevel > 0) {
     g_context->setDebuggerPrintLevel(-1);
   }
@@ -135,15 +138,28 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_frame);
   thrift.write(m_bypassAccessCheck);
   thrift.write(m_printLevel);
+  thrift.write(m_noBreak);
 }
 
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
-  thrift.read(m_ret);
+  {
+    String sdata;
+    thrift.read(sdata);
+    int error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
+    if (error) {
+      m_ret = null;
+    }
+    if (error == DebuggerWireHelpers::HitLimit) {
+      m_wireError = "Hit unserialization limit. "
+                    "Try with smaller print level";
+    }
+  }
   thrift.read(m_output);
   thrift.read(m_frame);
   thrift.read(m_bypassAccessCheck);
   thrift.read(m_printLevel);
+  thrift.read(m_noBreak);
 }
 
 void CmdPrint::list(DebuggerClient *client) {
@@ -250,15 +266,23 @@ bool CmdPrint::processClear(DebuggerClient *client) {
   return true;
 }
 
-void CmdPrint::processWatch(DebuggerClient *client, const char *format,
+Variant CmdPrint::processWatch(DebuggerClient *client, const char *format,
                             const std::string &php) {
   m_body = php;
   m_frame = client->getFrame();
+  m_noBreak = true;
   CmdPrintPtr res = client->xend<CmdPrint>(this);
   if (!res->m_output.empty()) {
     client->output(res->m_output);
   }
-  client->output(FormatResult(format, res->m_ret));
+  return res->m_ret;
+}
+
+void CmdPrint::handleReply(DebuggerClient *client) {
+  if (!m_output.empty()) {
+    client->output(m_output);
+  }
+  client->output(m_ret);
 }
 
 bool CmdPrint::onClient(DebuggerClient *client) {
@@ -267,18 +291,19 @@ bool CmdPrint::onClient(DebuggerClient *client) {
     return help(client);
   }
 
-  bool watch = false;
   int index = 1;
   if (client->arg(1, "always")) {
+    m_isForWatch = true;
     if (client->argCount() == 1) {
       client->error("'[p]rint [a]lways' needs an expression to watch.");
       return true;
     }
-    watch = true;
     index++;
   } else if (client->arg(1, "list")) {
+    m_isForWatch = true;
     return processList(client);
   } else if (client->arg(1, "clear")) {
+    m_isForWatch = true;
     return processClear(client);
   }
 
@@ -291,14 +316,53 @@ bool CmdPrint::onClient(DebuggerClient *client) {
     }
   }
   m_body = client->argRest(index);
-  m_bypassAccessCheck = client->getBypassAccessCheck();
-  m_printLevel = client->getPrintLevel();
-  ASSERT(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
-  if (watch) {
+  if (m_isForWatch) {
     client->addWatch(format, m_body);
+    return true;
   }
-  processWatch(client, format, m_body);
+  m_bypassAccessCheck = client->getDebuggerBypassCheck();
+  m_printLevel = client->getDebuggerPrintLevel();
+  ASSERT(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
+  m_frame = client->getFrame();
+  CmdPrintPtr res = client->xend<CmdPrint>(this);
+  if (!res->is(m_type)) {
+    ASSERT(client->isApiMode());
+    m_incomplete = true;
+    res->setClientOutput(client);
+  } else {
+    m_output = res->m_output;
+    m_ret = res->m_ret;
+    if (!m_output.empty()) {
+      client->output(m_output);
+    }
+    client->output(FormatResult(format, m_ret));
+  }
   return true;
+}
+
+void CmdPrint::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  if (m_isForWatch) {
+    // Manipulating the watch list, output the current list
+    DebuggerClient::WatchPtrVec &watches = client->getWatches();
+    for (int i = 0; i < (int)watches.size(); i++) {
+      Array watch;
+      watch.set("format", watches[i]->first);
+      watch.set("php", watches[i]->second);
+      values.append(watch);
+    }
+  } else {
+    // Just print an expression, do similar output as eval
+    values.set("body", m_body);
+    if (client->getDebuggerClientApiModeSerialize()) {
+      values.set("value_serialize",
+                 DebuggerClient::FormatVariable(m_ret, 200));
+    } else {
+      values.set("value", m_ret);
+    }
+  }
+  client->setOTValues(values);
 }
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
@@ -306,6 +370,21 @@ bool CmdPrint::onServer(DebuggerProxy *proxy) {
   m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
                                     m_output, !proxy->isLocal(), m_frame);
   g_context->setDebuggerBypassCheck(false);
+  return proxy->send(this);
+}
+
+bool CmdPrint::onServerVM(DebuggerProxy *proxy) {
+  VM::PCFilter* locSave = g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = new VM::PCFilter();
+  g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
+  {
+    EvalBreakControl eval(m_noBreak);
+    m_ret = DebuggerProxyVM::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
+                                        m_output, !proxy->isLocal(), m_frame);
+  }
+  g_vmContext->setDebuggerBypassCheck(false);
+  delete g_vmContext->m_lastLocFilter;
+  g_vmContext->m_lastLocFilter = locSave;
   return proxy->send(this);
 }
 

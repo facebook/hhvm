@@ -22,6 +22,7 @@
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_html.h>
+#include <runtime/base/bstring.h>
 #include <langinfo.h>
 
 namespace HPHP {
@@ -164,6 +165,12 @@ inline String f_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
   return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
                                 scharset, false);
 }
+inline String f_fb_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
+                                    CStrRef charset = "ISO-8859-1",
+                                    CArrRef extra = Array()) {
+  return StringUtil::HtmlEncodeExtra(str, (StringUtil::QuoteStyle)quote_style,
+                                     charset.data(), false, extra);
+}
 inline String f_quoted_printable_encode(CStrRef str) {
   return StringUtil::QuotedPrintableEncode(str);
 }
@@ -264,37 +271,37 @@ String f_number_format(double number, int decimals = 0, CStrRef dec_point = ".",
 ///////////////////////////////////////////////////////////////////////////////
 // analysis
 
-inline int f_strcmp(CStrRef str1, CStrRef str2) {
+inline int64 f_strcmp(CStrRef str1, CStrRef str2) {
   return string_strcmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
-inline int f_strncmp(CStrRef str1, CStrRef str2, int len) {
+inline int64 f_strncmp(CStrRef str1, CStrRef str2, int len) {
   return string_strncmp(str1.data(), str1.size(), str2.data(), str2.size(),
                         len);
 }
-inline int f_strnatcmp(CStrRef str1, CStrRef str2) {
+inline int64 f_strnatcmp(CStrRef str1, CStrRef str2) {
   return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             false);
 }
-inline int f_strcasecmp(CStrRef str1, CStrRef str2) {
-  return string_strcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
+inline int64 f_strcasecmp(CStrRef str1, CStrRef str2) {
+  return bstrcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
-inline int f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
+inline int64 f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
   return string_strncasecmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             len);
 }
-inline int f_strnatcasecmp(CStrRef str1, CStrRef str2) {
+inline int64 f_strnatcasecmp(CStrRef str1, CStrRef str2) {
   return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             true);
 }
-inline int f_strcoll(CStrRef str1, CStrRef str2) {
+inline int64 f_strcoll(CStrRef str1, CStrRef str2) {
   return strcoll(str1, str2);
 }
 
 Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
-                         int length = 0, bool case_insensitivity = false);
+                         int length = INT_MAX, bool case_insensitivity = false);
 
 Variant f_strrchr(CStrRef haystack, CVarRef needle);
-Variant f_strstr(CStrRef haystack, CVarRef needle);
+Variant f_strstr(CStrRef haystack, CVarRef needle, bool before_needle = false);
 Variant f_stristr(CStrRef haystack, CVarRef needle);
 Variant f_strpbrk(CStrRef haystack, CStrRef char_list);
 
@@ -313,7 +320,7 @@ Variant f_strspn(CStrRef str1, CStrRef str2, int start = 0,
                  int length = 0x7FFFFFFF);
 Variant f_strcspn(CStrRef str1, CStrRef str2, int start = 0,
                   int length = 0x7FFFFFFF);
-inline int f_strlen(CStrRef str) {
+inline int64 f_strlen(CStrRef str) {
   return str.size();
 }
 
@@ -321,12 +328,12 @@ Variant f_count_chars(CStrRef str, int64 mode = 0);
 
 Variant f_str_word_count(CStrRef str, int64 format = 0, CStrRef charlist = "");
 
-inline int f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1,
+inline int64 f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1,
                          int cost_rep = 1, int cost_del = 1) {
   return string_levenshtein(str1, str1.size(), str2, str2.size(),
                             cost_ins, cost_rep, cost_del);
 }
-inline int f_similar_text(CStrRef first, CStrRef second, VRefParam percent = null) {
+inline int64 f_similar_text(CStrRef first, CStrRef second, VRefParam percent = null) {
   float p;
   int ret = string_similar_text(first, first.size(), second, second.size(),
                                 &p);

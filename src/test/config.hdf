@@ -10,7 +10,6 @@ ErrorHandling {
 
 Server {
   Port = 8080
-  EnableMemoryManager = false
   APC.AllowObject = true
 
   AllowedFiles {
@@ -23,10 +22,10 @@ VirtualHost {
   }
 }
 
-Fiber {
-  ThreadCount = 5
-}
-
-Eval {
-  EnableHipHopSyntax = true
+Repo {
+  Local.Mode = r-
+  Central.Path = /var/facebook/hhvm/cli.hhbc
+  Eval.Mode = readonly
+  Commit = true
+  DebugInfo = false
 }

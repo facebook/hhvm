@@ -48,49 +48,9 @@ bool is_valid_var_name(const char *var_name, int len);
 /**
  * Adapted from ap_php_conv_10 for fast signed integer to string conversion.
  */
-inline char *
+char *
 conv_10(register int64 num, register int *is_negative, char *buf_end,
-        register int *len)
-{
-  register char *p = buf_end;
-  register uint64 magnitude;
-
-  *is_negative = (num < 0);
-
-  /*
-   * On a 2's complement machine, negating the most negative integer
-   * results in a number that cannot be represented as a signed integer.
-   * Here is what we do to obtain the number's magnitude:
-   *      a. add 1 to the number
-   *      b. negate it (becomes positive)
-   *      c. convert it to unsigned
-   *      d. add 1
-   */
-  if (*is_negative) {
-    int64 t = num + 1;
-    magnitude = ((uint64) - t) + 1;
-  } else {
-    magnitude = (uint64) num;
-  }
-
-  /*
-   * We use a do-while loop so that we write at least 1 digit
-   */
-  do {
-    uint64 new_magnitude = magnitude / 10;
-
-    *--p = (char)(magnitude - new_magnitude * 10 + '0');
-    magnitude = new_magnitude;
-  }
-  while (magnitude);
-
-  if (*is_negative) {
-    *--p = '-';
-  }
-
-  *len = buf_end - p;
-  return (p);
-}
+        register int *len);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

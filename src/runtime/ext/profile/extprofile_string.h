@@ -238,6 +238,12 @@ inline String x_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT, CS
   return f_htmlspecialchars(str, quote_style, charset, double_encode);
 }
 
+inline String x_fb_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "ISO-8859-1", CArrRef extra = Array()) {
+  FUNCTION_INJECTION_BUILTIN(fb_htmlspecialchars);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_fb_htmlspecialchars(str, quote_style, charset, extra);
+}
+
 inline String x_quoted_printable_encode(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(quoted_printable_encode);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
@@ -388,42 +394,42 @@ inline String x_number_format(double number, int decimals = 0, CStrRef dec_point
   return f_number_format(number, decimals, dec_point, thousands_sep);
 }
 
-inline int x_strcmp(CStrRef str1, CStrRef str2) {
+inline int64 x_strcmp(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strcmp);
   return f_strcmp(str1, str2);
 }
 
-inline int x_strncmp(CStrRef str1, CStrRef str2, int len) {
+inline int64 x_strncmp(CStrRef str1, CStrRef str2, int len) {
   FUNCTION_INJECTION_BUILTIN(strncmp);
   return f_strncmp(str1, str2, len);
 }
 
-inline int x_strnatcmp(CStrRef str1, CStrRef str2) {
+inline int64 x_strnatcmp(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strnatcmp);
   return f_strnatcmp(str1, str2);
 }
 
-inline int x_strcasecmp(CStrRef str1, CStrRef str2) {
+inline int64 x_strcasecmp(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strcasecmp);
   return f_strcasecmp(str1, str2);
 }
 
-inline int x_strncasecmp(CStrRef str1, CStrRef str2, int len) {
+inline int64 x_strncasecmp(CStrRef str1, CStrRef str2, int len) {
   FUNCTION_INJECTION_BUILTIN(strncasecmp);
   return f_strncasecmp(str1, str2, len);
 }
 
-inline int x_strnatcasecmp(CStrRef str1, CStrRef str2) {
+inline int64 x_strnatcasecmp(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strnatcasecmp);
   return f_strnatcasecmp(str1, str2);
 }
 
-inline int x_strcoll(CStrRef str1, CStrRef str2) {
+inline int64 x_strcoll(CStrRef str1, CStrRef str2) {
   FUNCTION_INJECTION_BUILTIN(strcoll);
   return f_strcoll(str1, str2);
 }
 
-inline Variant x_substr_compare(CStrRef main_str, CStrRef str, int offset, int length = 0, bool case_insensitivity = false) {
+inline Variant x_substr_compare(CStrRef main_str, CStrRef str, int offset, int length = INT_MAX, bool case_insensitivity = false) {
   FUNCTION_INJECTION_BUILTIN(substr_compare);
   return f_substr_compare(main_str, str, offset, length, case_insensitivity);
 }
@@ -440,10 +446,10 @@ inline Variant x_strrchr(CStrRef haystack, CVarRef needle) {
   return f_strrchr(haystack, needle);
 }
 
-inline Variant x_strstr(CStrRef haystack, CVarRef needle) {
+inline Variant x_strstr(CStrRef haystack, CVarRef needle, bool before_needle = false) {
   FUNCTION_INJECTION_BUILTIN(strstr);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-  return f_strstr(haystack, needle);
+  return f_strstr(haystack, needle, before_needle);
 }
 
 inline Variant x_stristr(CStrRef haystack, CVarRef needle) {
@@ -493,7 +499,7 @@ inline Variant x_strcspn(CStrRef str1, CStrRef str2, int start = 0, int length =
   return f_strcspn(str1, str2, start, length);
 }
 
-inline int x_strlen(CStrRef str) {
+inline int64 x_strlen(CStrRef str) {
   FUNCTION_INJECTION_BUILTIN(strlen);
   return f_strlen(str);
 }
@@ -508,12 +514,12 @@ inline Variant x_str_word_count(CStrRef str, int64 format = 0, CStrRef charlist 
   return f_str_word_count(str, format, charlist);
 }
 
-inline int x_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1, int cost_rep = 1, int cost_del = 1) {
+inline int64 x_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1, int cost_rep = 1, int cost_del = 1) {
   FUNCTION_INJECTION_BUILTIN(levenshtein);
   return f_levenshtein(str1, str2, cost_ins, cost_rep, cost_del);
 }
 
-inline int x_similar_text(CStrRef first, CStrRef second, VRefParam percent = null) {
+inline int64 x_similar_text(CStrRef first, CStrRef second, VRefParam percent = null) {
   FUNCTION_INJECTION_BUILTIN(similar_text);
   return f_similar_text(first, second, percent);
 }

@@ -140,7 +140,7 @@ inline Variant x_ldap_compare(CObjRef link, CStrRef dn, CStrRef attribute, CStrR
   return f_ldap_compare(link, dn, attribute, value);
 }
 
-inline int x_ldap_errno(CObjRef link) {
+inline int64 x_ldap_errno(CObjRef link) {
   FUNCTION_INJECTION_BUILTIN(ldap_errno);
   return f_ldap_errno(link);
 }
@@ -155,7 +155,7 @@ inline Variant x_ldap_get_dn(CObjRef link, CObjRef result_entry) {
   return f_ldap_get_dn(link, result_entry);
 }
 
-inline int x_ldap_count_entries(CObjRef link, CObjRef result) {
+inline int64 x_ldap_count_entries(CObjRef link, CObjRef result) {
   FUNCTION_INJECTION_BUILTIN(ldap_count_entries);
   return f_ldap_count_entries(link, result);
 }

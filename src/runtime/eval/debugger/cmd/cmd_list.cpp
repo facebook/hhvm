@@ -19,8 +19,6 @@
 #include <runtime/base/file/file.h>
 #include <runtime/ext/ext_file.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -278,8 +276,13 @@ bool CmdList::onServer(DebuggerProxy *proxy) {
   m_code = f_file_get_contents(m_file.c_str());
   if (!m_code && m_file[0] != '/') {
     DSandboxInfo info = proxy->getSandbox();
-    std::string full_path = info.m_path + m_file;
-    m_code = f_file_get_contents(full_path.c_str());
+    if (info.m_path.empty()) {
+      raise_warning("path for sandbox %s is not setup, run a web request",
+                    info.desc().c_str());
+    } else {
+      std::string full_path = info.m_path + m_file;
+      m_code = f_file_get_contents(full_path.c_str());
+    }
   }
   return proxy->send(this);
 }

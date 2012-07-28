@@ -17,42 +17,53 @@
 #ifndef __HPHP_MEMORY_MANAGER_H__
 #define __HPHP_MEMORY_MANAGER_H__
 
-#include <runtime/base/memory/smart_allocator.h>
-#include <runtime/base/memory/linear_allocator.h>
-#include <runtime/base/memory/unsafe_pointer.h>
+#include <boost/noncopyable.hpp>
+#include <util/thread_local.h>
+#include <runtime/base/memory/memory_usage_stats.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class SmartAllocatorImpl;
+
 /**
- * MemoryManager categorizes memory usage into 4 categories and maintain some
+ * MemoryManager categorizes memory usage into 3 categories and maintain some
  * of them with different strategy:
  *
  *  1. Fixed size objects: de/allocated by SmartAllocators, these objects have
  *     exactly the same size.
  *  2. Interally malloc-ed and variable sized memory held by fixed size
- *     objects, for example, StringData's m_data. These memory can be backed up
- *     and restored by LinearAllocator.
- *  3. Unsafe pointers held by fixed size objects, for example, ObjectData*
- *     held by Object. These pointers point to some external memory that's out
- *     of the control of MemoryManager, and therefore they are only interfaced
- *     through UnsafePointer class to make sure they are protected when these
- *     pointers are backed up to LinearAllocator.
- *  4. Freelance memory, malloced by extensions or STL classes, that are
+ *     objects, for example, StringData's m_data.
+ *  3. Freelance memory, malloced by extensions or STL classes, that are
  *     completely out of MemoryManager's control.
  */
-class MemoryManager {
+class MemoryManager : boost::noncopyable {
 public:
   static ThreadLocalNoCheck<MemoryManager> &TheMemoryManager();
 
   MemoryManager();
 
+  // State for iteration over all the smart allocators registered in a
+  // memory manager.
+  struct AllocIterator {
+    explicit AllocIterator(const MemoryManager* mman);
+
+    // Returns null if we're at the end.
+    SmartAllocatorImpl* current() const;
+    void next();
+
+  private:
+    const MemoryManager& m_mman;
+    std::vector<SmartAllocatorImpl*>::const_iterator m_it;
+  };
+
   /**
    * Without calling this, everything should work as if there is no memory
    * manager.
    */
-  void enable() { m_enabled = true;}
-  void disable() { m_enabled = false;}
+  void enable() { m_enabled = true; }
+  void disable() { m_enabled = false; }
+  bool isEnabled() { return m_enabled; }
 
   /**
    * Register a smart allocator. Done by SmartAlloctorImpl's constructor.
@@ -60,46 +71,11 @@ public:
   void add(SmartAllocatorImpl *allocator);
 
   /**
-   * Register an unsafe pointer. Done by UnsafePointer's constructor.
-   */
-  void add(UnsafePointer *p);
-
-  /**
-   * Register an unsafe pointer. Done by UnsafePointer's destructor.
-   */
-  void remove(UnsafePointer *p);
-
-  /**
-   * Whether a checkpoint has been taken.
-   */
-  bool beforeCheckpoint() const {
-    return m_enabled && !m_checkpoint;
-  }
-  bool afterCheckpoint() const {
-    return m_enabled && m_checkpoint;
-  }
-
-  /**
-   * Mark current allocator's position as starting point of a new generation.
-   */
-  void checkpoint();
-
-  /**
    * Mark current allocator's position as ending point of a generation and
-   * sweep all memory that has allocated since the previous check point.
+   * sweep all memory that has allocated.
    */
   void sweepAll();
   void rollback();
-
-  /**
-   * For any objects that need to do extra work during thread shutdown time.
-   */
-  void cleanup();
-
-  /**
-   * Protect the unsafe pointers.
-   */
-  void protectUnsafePointers();
 
   /**
    * Write stats to ServerStats.
@@ -139,14 +115,19 @@ public:
     //
     //   int64 musage = delta - delta0;
     //
-    // Note however, that SmartAllocator subtracts from m_stats.usage when it
-    // calls malloc(), so that later smart allocations that adjust m_stats.usage
-    // don't double-count memory.  Thus musage in the example code may well
-    // substantially exceed m_stats.usage.
+    // Note however, that SmartAllocator adds to m_stats.jemallocDebt
+    // when it calls malloc(), so that this function can avoid
+    // double-counting the malloced memory. Thus musage in the example
+    // code may well substantially exceed m_stats.usage.
     if (s_statsEnabled) {
       int64 delta = int64(*m_allocated) - int64(*m_deallocated);
       int64 deltaAllocated = int64(*m_allocated) - m_prevAllocated;
-      m_stats.usage += delta - m_delta;
+      if (hhvm) {
+        m_stats.usage += delta - m_delta - m_stats.jemallocDebt;
+        m_stats.jemallocDebt = 0;
+      } else {
+        m_stats.usage += delta - m_delta;
+      }
       m_stats.totalAlloc += deltaAllocated;
       m_delta = delta;
       m_prevAllocated = int64(*m_allocated);
@@ -207,11 +188,8 @@ private:
   static DECLARE_THREAD_LOCAL_NO_CHECK(MemoryManager, s_singleton);
 
   bool m_enabled;
-  bool m_checkpoint;
 
   std::vector<SmartAllocatorImpl*> m_smartAllocators;
-  LinearAllocator m_linearAllocator;
-  std::set<UnsafePointer*> m_unsafePointers;
 
   MemoryUsageStats m_stats;
 #ifdef USE_JEMALLOC

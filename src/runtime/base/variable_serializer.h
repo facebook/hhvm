@@ -19,6 +19,8 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/util/string_buffer.h>
+#include <runtime/vm/class.h>
+#include <runtime/vm/unit.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +61,8 @@ public:
    * Top level entry function called by f_ functions.
    */
   String serialize(CVarRef v, bool ret);
+  String serializeValue(CVarRef v, bool limit);
+
   // Serialize with limit size of output, always return the serialized string.
   // It does not work with Serialize, JSON, APCSerialize, DebuggerSerialize.
   String serializeWithLimit(CVarRef v, int limit);
@@ -74,7 +78,6 @@ public:
   void write(double  v);
   void write(const char *v, int len = -1, bool isArrayKey = false);
   void write(CStrRef v);
-  void write(CArrRef v);
   void write(CObjRef v);
   void write(CVarRef v, bool isArrayKey = false);
 
@@ -121,7 +124,6 @@ private:
   int m_maxLevelDebugger;        // for max level of DebuggerSerialize
 
   struct ArrayInfo {
-    const ClassInfo *class_info; // The class info if an object
     bool is_object;     // nested arrays or objects
     bool is_vector;     // whether current array is a vector
     bool first_element; // whether this is first array element
@@ -129,8 +131,7 @@ private:
   };
   std::vector<ArrayInfo> m_arrayInfos;
 
-  void writePropertyPrivacy(CStrRef prop, const ClassInfo *cls);
-  void writeSerializedProperty(CStrRef prop, const ClassInfo *cls);
+  void writePropertyKey(CStrRef prop);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

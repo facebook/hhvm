@@ -22,8 +22,6 @@
 #include <compiler/analysis/class_scope.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -45,7 +43,7 @@ StatementPtr TraitPrecStatement::clone() {
   return new_stmt;
 }
 
-void TraitPrecStatement::getOtherTraitNames(set<string> &namesSet) const {
+void TraitPrecStatement::getOtherTraitNames(std::set<string> &namesSet) const {
   vector<string> namesVec;
   m_otherTraitNames->getStrings(namesVec);
   for (unsigned int i = 0; i < namesVec.size(); i++) {

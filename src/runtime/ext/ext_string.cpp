@@ -21,6 +21,7 @@
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_scanf.h>
+#include <runtime/base/bstring.h>
 #include <runtime/base/util/request_local.h>
 #include <util/lock.h>
 #include <locale.h>
@@ -28,8 +29,6 @@
 #include <runtime/base/server/http_protocol.h>
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_observer.h>
-
-using namespace std;
 
 namespace HPHP {
 
@@ -174,7 +173,7 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
 
 Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                       VRefParam count /* = null */) {
-  int nCount;
+  int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, true);
   count = nCount;
   return ret;
@@ -182,7 +181,7 @@ Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
 
 Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
                        VRefParam count /* = null */) {
-  int nCount;
+  int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, false);
   count = nCount;
   return ret;
@@ -297,7 +296,7 @@ String f_number_format(double number, int decimals /* = 0 */,
 }
 
 Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
-                         int length /* = 0 */,
+                         int length /* = INT_MAX */,
                          bool case_insensitivity /* = false */) {
   int s1_len = main_str.size();
   int s2_len = str.size();
@@ -306,19 +305,17 @@ Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
     offset = s1_len + offset;
     if (offset < 0) offset = 0;
   }
-  if (offset > s1_len || length > s1_len - offset) {
+  if (offset >= s1_len || length <= 0) {
     return false;
   }
 
-  int cmp_len = length;
-  if (length == 0) {
-    cmp_len = s1_len - offset;
-    if (cmp_len < s2_len) cmp_len = s2_len;
-  }
+  int cmp_len = s1_len - offset;
+  if (cmp_len < s2_len) cmp_len = s2_len;
+  if (cmp_len > length) cmp_len = length;
 
   const char *s1 = main_str.data();
   if (case_insensitivity) {
-    return string_ncasecmp(s1 + offset, str, cmp_len);
+    return bstrcasecmp(s1 + offset, cmp_len, str, cmp_len);
   }
   return string_ncmp(s1 + offset, str, cmp_len);
 }
@@ -331,12 +328,17 @@ Variant f_strrchr(CStrRef haystack, CVarRef needle) {
   return haystack.substr(ret.toInt32());
 }
 
-Variant f_strstr(CStrRef haystack, CVarRef needle) {
+Variant f_strstr(CStrRef haystack, CVarRef needle,
+                 bool before_needle /* =false */) {
   Variant ret = f_strpos(haystack, needle);
   if (same(ret, false)) {
     return false;
   }
-  return haystack.substr(ret.toInt32());
+  if (before_needle) {
+    return haystack.substr(0, ret.toInt32());
+  } else {
+    return haystack.substr(ret.toInt32());
+  }
 }
 
 Variant f_stristr(CStrRef haystack, CVarRef needle) {
@@ -360,6 +362,10 @@ Variant f_strpbrk(CStrRef haystack, CStrRef char_list) {
 }
 
 Variant f_strpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
+  if (offset < 0 || offset > haystack.size()) {
+    raise_warning("Offset not contained in string");
+    return false;
+  }
   int pos;
   if (needle.isString()) {
     String n(needle.toString());
@@ -376,6 +382,10 @@ Variant f_strpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
 }
 
 Variant f_stripos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
+  if (offset < 0 || offset > haystack.size()) {
+    raise_warning("Offset not contained in string");
+    return false;
+  }
   int pos;
   if (needle.isString()) {
     pos = haystack.find(needle.toString(), offset, false);
@@ -387,6 +397,10 @@ Variant f_stripos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
 }
 
 Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
+  if (offset < -haystack.size() || offset > haystack.size()) {
+    raise_warning("Offset is greater than the length of haystack string");
+    return false;
+  }
   int pos;
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset);
@@ -398,6 +412,10 @@ Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
 }
 
 Variant f_strripos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
+  if (offset < -haystack.size() || offset > haystack.size()) {
+    raise_warning("Offset is greater than the length of haystack string");
+    return false;
+  }
   int pos;
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset, false);
@@ -608,7 +626,7 @@ Variant f_str_word_count(CStrRef str, int64 format /* = 0 */,
   if (!format) {
     return word_count;
   }
-  return ret;
+  return ret.isNull() ? Array::Create() : ret;
 }
 
 Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {

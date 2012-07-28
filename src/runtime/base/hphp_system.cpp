@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include <runtime/base/hphp_system.h>
-
-using namespace std;
+#include <runtime/base/compiler_id.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,9 +36,6 @@ void Globals::initialize() {
           case KindOfBoolean:
             *(bool*)addr = v.asBooleanVal();
             break;
-          case KindOfInt32:
-            *(int*)addr = v.asInt64Val();
-            break;
           case KindOfInt64:
             *(int64*)addr = v.asInt64Val();
             break;
@@ -52,7 +48,7 @@ void Globals::initialize() {
           case KindOfArray:
             *(Array*)addr = v.asCArrRef();
             break;
-          case KindOfVariant:
+          case KindOfUnknown:
             *(Variant*)addr = v;
             break;
           default:
@@ -61,15 +57,12 @@ void Globals::initialize() {
         continue;
       }
       CVarRef v = cpt->getInitVal(p);
-      if (LIKELY(p->type == KindOfVariant)) {
+      if (LIKELY(p->type == KindOfUnknown)) {
         *(Variant*)addr = v;
       } else {
         switch (p->type) {
           case KindOfBoolean:
             *(bool*)addr = v;
-            break;
-          case KindOfInt32:
-            *(int*)addr = v;
             break;
           case KindOfInt64:
             *(int64*)addr = v;
@@ -107,23 +100,6 @@ bool Globals::declareConstant(CStrRef name, Variant &constant,
   return false;
 }
 
-void Globals::declareFunction(const char *name) {
-  String func(Util::toLower(name));
-  if (m_volatileFunctions.exists(func)) {
-    raise_error("Cannot redeclare %s()", name);
-  } else {
-    m_volatileFunctions.set(func, true);
-  }
-}
-
-void Globals::declareFunctionLit(CStrRef name) {
-  if (m_volatileFunctions.exists(name)) {
-    raise_error("Cannot redeclare %s()", name.data());
-  } else {
-    m_volatileFunctions.set(name, true);
-  }
-}
-
 bool Globals::defined(CStrRef name) {
   return m_dynamicConstants.exists(name);
 }
@@ -134,14 +110,6 @@ Variant Globals::getConstant(CStrRef name) {
 
 Array Globals::getDynamicConstants() const {
   return m_dynamicConstants;
-}
-
-bool Globals::function_exists(CStrRef name) {
-  return m_volatileFunctions.exists(Util::toLower(name.data()).c_str(), true);
-}
-
-bool Globals::class_exists(CStrRef name) {
-  return false;
 }
 
 Variant Globals::getByIdx(ssize_t pos, Variant& k) {
@@ -214,27 +182,6 @@ ssize_t Globals::iter_rewind(ssize_t prev) const {
   return next;
 }
 
-bool Globals::isHead(ssize_t pos) const {
-  if (staticSize() > 0) return pos == 0;
-  if (pos < -1) {
-    ArrayData *arr = Array::get();
-    ASSERT(arr);
-    return !arr->empty() && wrapIter(pos) == arr->iter_begin();
-  }
-  return false;
-}
-
-bool Globals::isTail(ssize_t pos) const {
-  ArrayData *arr = Array::get();
-  if (!arr || arr->empty()) {
-    return staticSize() > 0 && pos == staticSize() - 1;
-  }
-  if (pos < -1) {
-    return wrapIter(pos) == arr->iter_end();
-  }
-  return false;
-}
-
 void Globals::getFullPos(FullPos &pos) {
   ArrayData *arr = Array::get();
   arr->getFullPos(pos);
@@ -261,30 +208,6 @@ ssize_t Globals::wrapIter(ssize_t it) const {
     return -(it+2);
   }
   return ArrayData::invalid_index;
-}
-
-void Globals::fiberMarshal(Globals *src, FiberReferenceMap &refMap) {
-  if (src->FVF(__autoload)) FVF(__autoload) = true;
-  Array dynamicConstants(src->m_dynamicConstants.fiberMarshal(refMap));
-  for (ArrayIter iter(dynamicConstants); iter; ++iter) {
-    m_dynamicConstants.set(iter.first(), iter.second());
-  }
-  Array volatileFunctions(src->m_volatileFunctions.fiberMarshal(refMap));
-  for (ArrayIter iter(volatileFunctions); iter; ++iter) {
-    m_volatileFunctions.set(iter.first(), iter.second());
-  }
-}
-
-void Globals::fiberUnmarshal(Globals *src, FiberReferenceMap &refMap) {
-  if (src->FVF(__autoload)) FVF(__autoload) = true;
-  Array dynamicConstants(src->m_dynamicConstants.fiberUnmarshal(refMap));
-  for (ArrayIter iter(dynamicConstants); iter; ++iter) {
-    m_dynamicConstants.set(iter.first(), iter.second());
-  }
-  Array volatileFunctions(src->m_volatileFunctions.fiberUnmarshal(refMap));
-  for (ArrayIter iter(volatileFunctions); iter; ++iter) {
-    m_volatileFunctions.set(iter.first(), iter.second());
-  }
 }
 
 #ifdef HPHP_VERSION

@@ -180,6 +180,25 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
+    'args'   => array(
+      array(
+        'name'   => "filename",
+        'type'   => String,
+        'desc'   => "Path to the SQLite database.",
+      ),
+      array(
+        'name'   => "flags",
+        'type'   => Int64,
+        'value'  => "k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE",
+        'desc'   => "Optional flags used to determine how to open the SQLite database. By default, open uses SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE.\n\nSQLITE3_OPEN_READONLY: Open the database for reading only.\n\nSQLITE3_OPEN_READWRITE: Open the database for reading and writing.\n\nSQLITE3_OPEN_CREATE: Create the database if it does not exist.",
+      ),
+      array(
+        'name'   => "encryption_key",
+        'type'   => String,
+        'value'  => "null_string",
+        'desc'   => "An optional encryption key used when encrypting and decrypting an SQLite database.",
+      ),
+    ),
   ));
 
 DefineFunction(
@@ -208,6 +227,24 @@ DefineFunction(
         'type'   => String,
         'value'  => "null_string",
         'desc'   => "An optional encryption key used when encrypting and decrypting an SQLite database.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "busytimeout",
+    'desc'   => "Sets a busy handler that will sleep until the database is not locked or the timeout is reached.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE on success, FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "msecs",
+        'type'   => Int64,
+        'desc'   => "The milliseconds to sleep. Setting this value to a value less than or equal to zero, will turn off an already set timeout handler.",
       ),
     ),
   ));

@@ -56,6 +56,28 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+class DebuggerWireHelpers {
+public:
+  enum SError { // SerializationError
+    NoError,
+    HitLimit,
+    UnknownError,
+    TypeMismatch,
+  };
+  // Serialization functions for Array, Object, and Variant
+  // Return true on success, false on error
+  // On error, the result would be a special string indicating the error
+  static int WireSerialize(CArrRef data, String& sdata);
+  static int WireSerialize(CObjRef data, String& sdata);
+  static int WireSerialize(CVarRef data, String& sdata);
+  static int WireUnserialize(String& sdata, Array& data);
+  static int WireUnserialize(String& sdata, Object& data);
+  static int WireUnserialize(String& sdata, Variant& data);
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // __HPHP_DEBUGGER_THRIFT_BUFFER_H__

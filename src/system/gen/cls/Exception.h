@@ -25,11 +25,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern StaticString s_sys_ss00000000;
+extern StaticStringProxy s_sys_ssp00000000;
+#ifndef s_sys_ss00000000
+#define s_sys_ss00000000 (*(StaticString *)(&s_sys_ssp00000000))
+#endif
 
 extern const VarNR &s_sys_svif01bca90;
 
-extern VarNR s_sys_svs00000000;
+extern VariantProxy s_sys_svsp00000000;
+#ifndef s_sys_svs00000000
+#define s_sys_svs00000000 (*(Variant *)&s_sys_svsp00000000)
+#endif
 
 /* SRC: classes/exception.php line 10 */
 FORWARD_DECLARE_CLASS(Exception);
@@ -44,11 +50,16 @@ class c_Exception : public ExtObjectData {
   Variant m_file;
   Variant m_line;
   Variant m_trace;
+  bool m_inited;
 
+  // Destructor
+  ~c_Exception() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(Exception, Exception, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_Exception(const ObjectStaticCallbacks *cb = &cw_Exception) : ExtObjectData(cb), m_previous(Variant::nullInit), m_file(Variant::nullInit), m_line(Variant::nullInit), m_trace(Variant::nullInit) {}
+  c_Exception(const ObjectStaticCallbacks *cb = &cw_Exception) : ExtObjectData(cb), m_previous(Variant::nullInit), m_file(Variant::nullInit), m_line(Variant::nullInit), m_trace(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   void init();
   public: void t___init__();
   public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_previous = null);
@@ -61,6 +72,9 @@ class c_Exception : public ExtObjectData {
   public: Variant t_gettrace();
   public: String t_gettraceasstring();
   public: String t___tostring();
+  public: void t_inittrace();
+  public: static Variant t_gettraceoptions();
+  public: static void t_settraceoptions(CVarRef v_opts);
   DECLARE_METHOD_INVOKE_HELPERS(__init__);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(getmessage);
@@ -71,6 +85,9 @@ class c_Exception : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(gettrace);
   DECLARE_METHOD_INVOKE_HELPERS(gettraceasstring);
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(inittrace);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraceoptions);
+  DECLARE_METHOD_INVOKE_HELPERS(settraceoptions);
 };
 ObjectData *coo_Exception() NEVER_INLINE;
 

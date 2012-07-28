@@ -1,0 +1,133 @@
+NULL
+---------
+string(5) "blarg"
+
+
+bool(true)
+bool(true)
+---------
+bool(true)
+
+
+bool(false)
+---------
+string(5) "blarg"
+
+
+int(0)
+---------
+string(5) "blarg"
+
+
+int(1)
+int(1)
+---------
+int(1)
+
+
+float(0)
+---------
+string(5) "blarg"
+
+
+float(1)
+float(1)
+---------
+float(1)
+
+
+string(0) ""
+---------
+string(5) "blarg"
+
+
+string(3) "foo"
+string(3) "foo"
+---------
+string(3) "foo"
+
+
+array(0) {
+}
+---------
+string(5) "blarg"
+
+
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+---------
+array(1) {
+  [0]=>
+  int(1)
+}
+
+
+********************
+NULL
+---------
+string(5) "blarg"
+
+
+bool(true)
+---------
+bool(true)
+
+
+bool(false)
+---------
+string(5) "blarg"
+
+
+int(0)
+---------
+string(5) "blarg"
+
+
+int(1)
+---------
+int(1)
+
+
+float(0)
+---------
+string(5) "blarg"
+
+
+float(1)
+---------
+float(1)
+
+
+string(0) ""
+---------
+string(5) "blarg"
+
+
+string(3) "foo"
+---------
+string(3) "foo"
+
+
+array(0) {
+}
+---------
+string(5) "blarg"
+
+
+array(1) {
+  [0]=>
+  int(1)
+}
+---------
+array(1) {
+  [0]=>
+  int(1)
+}
+
+

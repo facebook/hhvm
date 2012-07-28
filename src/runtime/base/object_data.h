@@ -20,25 +20,27 @@
 #include <runtime/base/util/countable.h>
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/types.h>
-#include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/macros.h>
 #include <runtime/base/runtime_error.h>
 
+#include <boost/mpl/eval_if.hpp>
+#include <boost/mpl/int.hpp>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-// Needed for eval
-namespace Eval {
-class MethodStatement;
-class FunctionCallExpression;
-class VariableEnvironment;
-}
 
 class ArrayIter;
 class MutableArrayIter;
 class ClassPropTable;
 struct ObjectStaticCallbacks;
 struct MethodCallInfoTable;
+
+class HphpArray;
+class TypedValue;
+namespace VM {
+  class PreClass;
+  class Class;
+}
 
 /**
  * Base class of all user-defined classes. All data members and methods in
@@ -61,52 +63,65 @@ struct MethodCallInfoTable;
 class ObjectData : public CountableNF {
  public:
   enum Attribute {
-    InConstructor = 1,    // __construct()
-    InDestructor  = 2,    // __destruct()
-    HasSleep      = 4,    // __sleep()
-    UseSet        = 8,    // __set()
-    UseGet        = 16,   // __get()
-    UseIsset      = 32,   // __isset()
-    UseUnset      = 64,   // __unset()
-    HasLval       = 128,  // defines ___lval
-    HasCall       = 256,  // defines __call
-    HasCallStatic = 512,  // defines __callStatic
+    NoDestructor  = 0x0002, // __destruct()
+    HasSleep      = 0x0004, // __sleep()
+    UseSet        = 0x0008, // __set()
+    UseGet        = 0x0010, // __get()
+    UseIsset      = 0x0020, // __isset()
+    UseUnset      = 0x0040, // __unset()
+    HasLval       = 0x0080, // defines ___lval
+    HasCall       = 0x0100, // defines __call
+    HasCallStatic = 0x0200, // defines __callStatic
   };
   enum {
     RealPropCreate = 1,   // Property should be created if it doesnt exist
     RealPropWrite = 2,    // Property could be modified
     RealPropNoDynamic = 4,// Dont return dynamic properties
     RealPropUnchecked = 8,// Dont check property accessibility
+    RealPropExist = 16,   // For property_exists
   };
 
-  ObjectData(const ObjectStaticCallbacks *cb, bool isResource) :
-      o_attribute(0), o_callbacks(cb) {
-    if (!isResource) {
+  ObjectData(const ObjectStaticCallbacks *cb = NULL, bool noId = false,
+             VM::Class* type = NULL)
+      : o_attribute(0)
+#ifdef HHVM
+        , m_propsOffset(0)
+        , m_cls(type)
+#else
+        , o_callbacks(cb)
+#endif
+        {
+    if (!noId) {
       o_id = ++(*os_max_id);
     }
   }
 
+  void setId(const ObjectData *r) { if (r) o_id = r->o_id; }
+
   virtual ~ObjectData(); // all PHP classes need virtual tables
+
+  HPHP::VM::Class* getVMClass() const {
+    const_assert(hhvm);
+    return m_cls;
+  }
+  static size_t getVMClassOffset() {
+    // For assembly linkage.
+    const_assert(hhvm);
+    return offsetof(ObjectData, m_cls);
+  }
+  HPHP::VM::Class* instanceof(const HPHP::VM::PreClass* pc) const;
+  bool instanceof(const HPHP::VM::Class* c) const;
 
   void setAttributes(int attrs) { o_attribute |= attrs; }
   void setAttributes(const ObjectData *o) { o_attribute |= o->o_attribute; }
   bool getAttribute(Attribute attr) const { return o_attribute & attr; }
   void setAttribute(Attribute attr) const { o_attribute |= attr;}
   void clearAttribute(Attribute attr) const { o_attribute &= ~attr;}
-  bool inDtor() { return getAttribute(InDestructor); }
-  bool inCtor() { return getAttribute(InConstructor); }
-  bool inCtorDtor() { return inCtor() || inDtor(); }
-  void setInDtor() { setAttribute(InDestructor); }
-  bool gasInCtor(bool inCtor) { // get and set InConstructor
-    bool oldInCtor = getAttribute(InConstructor);
-    if (inCtor) {
-      setAttribute(InConstructor);
-    } else {
-      clearAttribute(InConstructor);
-    }
-    return oldInCtor;
-  }
+  bool noDestruct() const { return getAttribute(NoDestructor); }
+  void setNoDestruct() { setAttribute(NoDestructor); }
+  ObjectData *clearNoDestruct() { clearAttribute(NoDestructor); return this; }
 
+  Object iterableObject(bool& isInstanceofIterator);
   ArrayIter begin(CStrRef context = null_string);
   MutableArrayIter begin(Variant *key, Variant &val,
                          CStrRef context = null_string);
@@ -123,7 +138,13 @@ class ObjectData : public CountableNF {
   virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info
+#ifdef HHVM
+  virtual
+#endif
   CStrRef o_getClassName() const;
+#ifdef HHVM
+  virtual
+#endif
   CStrRef o_getParentName() const;
   virtual CStrRef o_getClassNameHook() const;
   static CStrRef GetParentName(CStrRef cls);
@@ -167,12 +188,7 @@ class ObjectData : public CountableNF {
   virtual void init() {}
   ObjectData *create() { CountableHelper h(this); init(); return this;}
   virtual void getConstructor(MethodCallPackage &mcp);
-  void release(); // for SmartPtr<T>
   virtual void destruct();
-
-  virtual const Eval::MethodStatement* getConstructorStatement() const;
-  virtual const Eval::MethodStatement* getMethodStatement(const char* name)
-      const;
 
   static Variant os_invoke(CStrRef c, CStrRef s,
                            CArrRef params, int64 hash, bool fatal = true);
@@ -183,6 +199,8 @@ class ObjectData : public CountableNF {
   virtual Array o_getDynamicProperties() const;
   Variant *o_realProp(CStrRef s, int flags,
                       CStrRef context = null_string) const;
+  void *o_realPropTyped(CStrRef s, int flags,
+                        CStrRef context, DataType* type) const;
   Variant *o_realPropPublic(CStrRef s, int flags) const;
   virtual Variant *o_realPropHook(CStrRef s, int flags,
                                   CStrRef context = null_string) const;
@@ -226,11 +244,16 @@ class ObjectData : public CountableNF {
   virtual Variant o_setError(CStrRef prop, CStrRef context);
   /**
    * This is different from o_exists(), which is isset() semantics. This one
-   * is property_exists() semantics that check whether it was unset before.
-   * This is used for deciding what property_exists() returns and whether or
-   * not this property should be part of an iteration in foreach ($obj as ...)
+   * is property_exists() semantics. ie, accessibility is ignored, and declared
+   * but unset properties still return true.
    */
   bool o_propExists(CStrRef s, CStrRef context = null_string);
+
+  /**
+   * This is different from o_exists(), which is isset() semantics; this one
+   * returns true even if the property is set to null.
+   */
+  bool o_propForIteration(CStrRef s, CStrRef context = null_string);
 
   static Object FromArray(ArrayData *properties);
 
@@ -251,7 +274,11 @@ class ObjectData : public CountableNF {
                                  INVOKE_FEW_ARGS_DECL_ARGS);
   bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   const ObjectStaticCallbacks *o_get_callbacks() const {
+#ifndef HHVM
     return o_callbacks;
+#else
+    NOT_REACHED();
+#endif
   }
   bool o_get_call_info_ex(const char *clsname,
                           MethodCallPackage &mcp, int64 hash = -1);
@@ -260,7 +287,8 @@ class ObjectData : public CountableNF {
 
   // misc
   Variant o_throw_fatal(const char *msg);
-  virtual void serialize(VariableSerializer *serializer) const;
+  void serialize(VariableSerializer *serializer) const;
+  virtual void serializeImpl(VariableSerializer *serializer) const;
   virtual void dump() const;
   virtual ObjectData *clone();
   virtual void setRoot(ObjectData *root) {}
@@ -295,12 +323,6 @@ class ObjectData : public CountableNF {
   template<typename T, int op>
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
-  /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   */
-  virtual Object fiberMarshal(FiberReferenceMap &refMap) const;
-  virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
-
   static Variant callHandler(MethodCallPackage &info, CArrRef params);
   static Variant callHandlerFewArgs(MethodCallPackage &info, int count,
       INVOKE_FEW_ARGS_IMPL_ARGS);
@@ -313,7 +335,8 @@ class ObjectData : public CountableNF {
 public:
   bool hasCall();
   bool hasCallStatic();
-
+  CArrRef getProperties() const { return o_properties; }
+  void initProperties(int nProp);
  private:
   ObjectData(const ObjectData &) { ASSERT(false);}
   inline Variant o_getImpl(CStrRef propName, int flags,
@@ -328,51 +351,66 @@ public:
   static Variant *RealPropPublicHelper(CStrRef propName, int64 hash, int flags,
                                        const ObjectData *obj,
                                        const ObjectStaticCallbacks *osc);
+ public:
+  static const bool IsResourceClass = false;
  protected:
   int           o_id;            // a numeric identifier of this object
  private:
   mutable int16 o_attribute;     // various flags
- protected:
-  Array         o_properties;    // dynamic properties
-  const ObjectStaticCallbacks *o_callbacks;
 
+  // All of the fields that would ordinarily reside in HPHP::VM::Instance must
+  // reside here, so that it is possible to dynamically compute the offset of
+  // the property vector that follows an "Instance", regardless of whether the
+  // Instance is actually an extension class that derives from ObjectData.
+
+#ifdef HHVM
+  int16         m_propsOffset;   // used for accessing declared properties
+                                 // under the VM
+#endif
+ protected:
+  ArrNR         o_properties;    // dynamic properties (VM and hphpc)
+
+#ifdef HHVM
+  HPHP::VM::Class* m_cls;
+#else
+  union {
+    const ObjectStaticCallbacks *o_callbacks;
+    // m_cls isn't used under hphpc, but we need declare it
+    // so that the compiler doesn't complain
+    HPHP::VM::Class* m_cls;
+  };
+#endif
+
+ protected:
   void          cloneDynamic(ObjectData *orig);
 
-#ifdef FAST_REFCOUNT_FOR_VARIANT
  private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET);
   }
-#endif
+
+ public:
+  void release() {
+    ASSERT(getCount() == 0);
+    destruct();
+    if (UNLIKELY(getCount() != 0)) {
+      // Object was resurrected.
+      return;
+    }
+    delete this;
+  }
 };
 
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
 typedef ObjectData c_ObjectData; // purely for easier code generation
 
-class ExtObjectData : public ObjectData {
-public:
-  ExtObjectData(const ObjectStaticCallbacks *cb) :
-      ObjectData(cb, false), root(this) {}
-  virtual void setRoot(ObjectData *r) { root = r; }
-  virtual ObjectData *getRoot() { return root; }
-protected: ObjectData *root;
-
-};
-
-template <int flags> class ExtObjectDataFlags : public ExtObjectData {
-public:
-  ExtObjectDataFlags(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
-    ObjectData::setAttributes(flags);
-  }
-};
-
 struct MethodCallInfoTable {
-  int64       hash;
-  int         flags;
-  int         len;
-  const char *name;
-  CallInfo   *ci;
+  int64          hash;
+  int            flags;
+  int            len;
+  const char     *name;
+  const CallInfo *ci;
 };
 
 struct InstanceOfInfo {
@@ -403,7 +441,6 @@ struct ObjectStaticCallbacks {
                             MethodCallPackage &mcp, int64 hash);
 
   bool checkAttribute(int attrs) const;
-  operator const ObjectStaticCallbacks*() const { return this; }
   const ObjectStaticCallbacks* operator->() const { return this; }
   GlobalVariables *lazy_initializer(GlobalVariables *g) const;
 
@@ -419,13 +456,24 @@ struct ObjectStaticCallbacks {
   int64                       redeclaredParent;
   const ObjectStaticCallbacks *parent;
   int                         attributes;
+  HPHP::VM::Class**           os_cls_ptr;
+
+  static ObjectStaticCallbacks* encodeVMClass(const HPHP::VM::Class* vmClass) {
+    return (ObjectStaticCallbacks*)((intptr_t)vmClass | (intptr_t)1);
+  }
+  static HPHP::VM::Class* decodeVMClass(const ObjectStaticCallbacks* cb) {
+    return (HPHP::VM::Class*)((intptr_t)cb & ~(intptr_t)1); 
+  }
+  static bool isEncodedVMClass(const ObjectStaticCallbacks* cb) {
+    return ((intptr_t)cb & (intptr_t)1);
+  }
 };
 
 struct RedeclaredObjectStaticCallbacks {
   ObjectStaticCallbacks oscb;
   int id;
 
-  operator const ObjectStaticCallbacks*() const { return &oscb; }
+  const RedeclaredObjectStaticCallbacks* operator->() const { return this; }
   int getRedeclaringId() const { return id; }
 
   Variant os_getInit(CStrRef s) const;
@@ -437,7 +485,6 @@ struct RedeclaredObjectStaticCallbacks {
   Object create(CArrRef params, bool init = true,
                 ObjectData* root = NULL) const;
   Object createOnly(ObjectData *root = NULL) const;
-  const RedeclaredObjectStaticCallbacks* operator->() const { return this; }
 };
 
 typedef const RedeclaredObjectStaticCallbacks
@@ -450,35 +497,92 @@ ObjectData *coo_ObjectData(ObjectData *);
 
 #define WORD_SIZE sizeof(void *)
 #define ALIGN_WORD(n) ((n) + (WORD_SIZE - (n) % WORD_SIZE) % WORD_SIZE)
-#define UNIT_SIZE sizeof(ObjectData)
 
-template<int M>
-class ItemSize {
- private:
+// Mapping from index to size class for objects.  Mapping in the other
+// direction is available from ObjectSizeClass<> below.
+template<int Idx> class ObjectSizeTable {
+  enum { prevSize = ObjectSizeTable<Idx - 1>::value };
+public:
   enum {
-    prev = (M + M + 3) / 3 >= UNIT_SIZE ? (M + M + 3) / 3 : UNIT_SIZE,
-    pval = ItemSize<prev>::value
-  };
- public:
-  enum {
-    value = (pval < M ? ALIGN_WORD(pval + (pval >> 1)) : pval)
+    value = ALIGN_WORD(prevSize + (prevSize >> 1))
   };
 };
 
-template<>
-class ItemSize<UNIT_SIZE> {
- public:
+template<> struct ObjectSizeTable<0> {
+  enum { value = sizeof(ObjectData) };
+};
+
+#undef WORD_SIZE
+#undef ALIGN_WORD
+
+/*
+ * This determines the highest size class we can have by looking for
+ * the first entry in our table that is larger than the hard coded
+ * SmartAllocator SLAB_SIZE.  This is because you can't (currently)
+ * SmartAllocate chunks that are potentially bigger than a slab. If
+ * you introduce a bigger size class, SmartAllocator will hit an
+ * assertion at runtime.  The last size class currently goes up to
+ * 97096 bytes -- enough room for 6064 TypedValues. Hopefully that's
+ * enough.
+ */
+template<int Index>
+struct DetermineLargestSizeClass {
+  typedef typename boost::mpl::eval_if_c<
+    (ObjectSizeTable<Index>::value > SLAB_SIZE),
+    boost::mpl::int_<Index>,
+    DetermineLargestSizeClass<Index + 1>
+  >::type type;
+};
+const int NumObjectSizeClasses = DetermineLargestSizeClass<0>::type::value;
+
+template<size_t Sz, int Index> struct LookupObjSizeIndex {
+  enum { index =
+    Sz <= ObjectSizeTable<Index>::value
+      ? Index : LookupObjSizeIndex<Sz,Index + 1>::index };
+};
+template<size_t Sz> struct LookupObjSizeIndex<Sz,NumObjectSizeClasses> {
+  enum { index = NumObjectSizeClasses };
+};
+
+template<size_t Sz>
+struct ObjectSizeClass {
   enum {
-    value = UNIT_SIZE
+    index = LookupObjSizeIndex<Sz,0>::index,
+    value = ObjectSizeTable<index>::value
   };
+};
+
+typedef ObjectAllocatorBase *(*ObjectAllocatorBaseGetter)(void);
+
+class ObjectAllocatorCollector {
+public:
+  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
+    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
+    return wrappers;
+  }
 };
 
 template <typename T>
 void *ObjectAllocatorInitSetup() {
-  ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
+  ThreadLocalSingleton<ObjectAllocator<
+    ObjectSizeClass<sizeof(T)>::value> > tls;
+  if (hhvm) {
+    int index = ObjectSizeClass<sizeof(T)>::index;
+    ObjectAllocatorCollector::getWrappers()[index] =
+      (ObjectAllocatorBaseGetter)tls.getCheck;
+  }
   GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
-  return (void *)tls.getNoCheck;
+  return (void*)tls.getNoCheck;
 }
+
+/*
+ * Return the index in ThreadInfo::m_allocators for the allocator
+ * responsible for a given object size.
+ *
+ * There is a maximum limit on the size of allocatable objects.  If
+ * this is reached, this function returns -1.
+ */
+int object_alloc_size_to_index(size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Attribute helpers

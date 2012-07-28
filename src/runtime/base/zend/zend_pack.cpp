@@ -20,8 +20,6 @@
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 
-using namespace std;
-
 namespace HPHP {
 
 #define INC_OUTPUTPOS(a,b)                                              \
@@ -726,7 +724,12 @@ Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
           }
 
           v |= unpack(&input[inputpos], 4, issigned, map);
-          ret.set(String(n, CopyString), v);
+          if (type == 'l') {
+            ret.set(String(n, CopyString), v);
+          } else {
+            uint64 u64 = uint32_t(v);
+            ret.set(String(n, CopyString), u64);
+          }
           break;
         }
 

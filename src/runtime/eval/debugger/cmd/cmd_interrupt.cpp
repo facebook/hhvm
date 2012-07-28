@@ -18,9 +18,6 @@
 #include <runtime/eval/debugger/cmd/cmd_break.h>
 #include <runtime/eval/debugger/cmd/cmd_print.h>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -127,6 +124,13 @@ std::string CmdInterrupt::desc() const {
 
 bool CmdInterrupt::onClient(DebuggerClient *client) {
   client->setCurrentLocation(m_threadId, m_bpi);
+  if (!client->getDebuggerSmallStep()) {
+    // Adjust line and char if it's not small stepping
+    if (m_bpi->m_line1 == m_bpi->m_line2) {
+      m_bpi->m_char1 = 1;
+      m_bpi->m_char2 = 100;
+    }
+  }
   client->setMatchedBreakPoints(m_matched);
 
   switch (m_interrupt) {
@@ -246,12 +250,31 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
       for (int i = 0; i < (int)watches.size(); i++) {
         if (i > 0) client->output("");
         client->info("Watch %d: %s =", i + 1, watches[i]->second.c_str());
-        CmdPrint().processWatch(client, watches[i]->first, watches[i]->second);
+        Variant v = CmdPrint().processWatch(client, watches[i]->first,
+                                            watches[i]->second);
+        client->output(CmdPrint::FormatResult(watches[i]->first, v));
       }
     }
   }
 
   return true;
+}
+
+void CmdInterrupt::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTCodeLoc);
+  client->setOTFileLine(m_bpi->m_file, m_bpi->m_line1);
+  Array values;
+  DebuggerClient::WatchPtrVec &watches = client->getWatches();
+  for (int i = 0; i < (int)watches.size(); i++) {
+    Array watch;
+    watch.set("format", watches[i]->first);
+    watch.set("php", watches[i]->second);
+    Variant v = CmdPrint().processWatch(client, watches[i]->first,
+                                        watches[i]->second);
+    watch.set("value", CmdPrint::FormatResult(watches[i]->first, v));
+    values.append(watch);
+  }
+  client->setOTValues(values);
 }
 
 bool CmdInterrupt::onServer(DebuggerProxy *proxy) {
@@ -284,6 +307,16 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
   }
   ASSERT(false);
   return false;
+}
+
+FrameInjection *CmdInterrupt::getFrame() {
+  if (m_site) {
+    InterruptSiteFI *site = dynamic_cast<InterruptSiteFI*>(m_site);
+    if (site) {
+      return site->getFrame();
+    }
+  }
+  return NULL;
 }
 
 std::string CmdInterrupt::getFileLine() const {

@@ -27,6 +27,7 @@ DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(LoopStatement);
 
 class CodeGenerator {
@@ -41,6 +42,8 @@ public:
     FileCPP,    // 1 to 1 from php to cpp file
     ClusterCPP, // each directory up to a certain depth to a cpp file
     SystemCPP,  // special mode for generating builtin classes
+    TextHHBC,   // HHBC dump in human-readable format
+    BinaryHHBC, // serialized HHBC
   };
 
   enum Stream {
@@ -90,6 +93,27 @@ public:
     StaticCases  = 0x40000000,
     BreakScopeBitMask = InsideSwitch | StaticCases
   };
+
+  class ClassScopeCompare {
+  public:
+    bool operator()(const ClassScopeRawPtr &p1,
+                    const ClassScopeRawPtr &p2) const {
+      return cmp(p1, p2) < 0;
+    }
+    int cmp(const ClassScopeRawPtr &p1, const ClassScopeRawPtr &p2) const;
+  };
+  typedef std::set<ClassScopeRawPtr,ClassScopeCompare> ClassScopeSet;
+  typedef std::pair<ClassScopeRawPtr, std::string> UsedClassConst;
+  class ClassConstCompare : public ClassScopeCompare {
+  public:
+    bool operator()(const UsedClassConst &p1,
+                    const UsedClassConst &p2) const {
+      int d = cmp(p1.first, p2.first);
+      if (d) return d < 0;
+      return p1.second < p2.second;
+    }
+  };
+  typedef std::set<UsedClassConst,ClassConstCompare> UsedClassConstSet;
 
 public:
   /**
@@ -268,6 +292,9 @@ public:
     m_classes[name].push_back(cls);
   }
   void clearClasses() { m_classes.clear(); }
+  bool insertDeclaredClosure(const FunctionScope *f) {
+    return m_declaredClosures.insert(f).second;
+  }
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -300,6 +327,7 @@ private:
   LoopStatementPtr m_loopStatement;
   bool m_insideScalarArray;
   StringToClassScopePtrVecMap m_classes;
+  std::set<const FunctionScope*> m_declaredClosures;
 
   int m_itemIndex;
 

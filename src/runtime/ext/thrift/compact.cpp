@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/thrift/transport.h>
+#include <runtime/ext/ext_reflection.h>
 #include <runtime/ext/ext_thrift.h>
 
 #include <stack>
@@ -136,7 +137,7 @@ enum TError {
   ERR_BAD_VERSION = 4
 };
 
-static void thrift_error(CStrRef what, TError why) __attribute__((noreturn));
+static void thrift_error(CStrRef what, TError why) ATTRIBUTE_NORETURN;
 static void thrift_error(CStrRef what, TError why) {
   throw create_object("TProtocolException", CREATE_VECTOR2(what, why));
 }
@@ -180,7 +181,7 @@ class CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      CArrRef spec = get_static_property(obj->o_getClassName(), "_TSPEC")
+      CArrRef spec = f_hphp_get_static_property(obj->o_getClassName(), "_TSPEC")
         .toArray();
 
       // Write each member
@@ -199,7 +200,7 @@ class CompactWriter {
         TType fieldType = (TType)fieldSpec
           .rvalAt(s_type, AccessFlags::Error_Key).toByte();
 
-        Variant fieldVal = obj->o_get(fieldName);
+        Variant fieldVal = obj->o_get(fieldName, true, obj->o_getClassName());
 
         if (!fieldVal.isNull()) {
           writeFieldBegin(fieldNo, fieldType);
@@ -466,12 +467,12 @@ class CompactReader {
 
       if (type == T_REPLY) {
         Object ret = create_object(resultClassName, Array());
-        Variant spec = get_static_property(resultClassName, "_TSPEC");
+        Variant spec = f_hphp_get_static_property(resultClassName, "_TSPEC");
         readStruct(ret, spec);
         return ret;
       } else if (type == T_EXCEPTION) {
         Object exn = create_object("TApplicationException", Array());
-        Variant spec = get_static_property("TApplicationException", "_TSPEC");
+        Variant spec = f_hphp_get_static_property("TApplicationException", "_TSPEC");
         readStruct(exn, spec);
         throw exn;
       } else {
@@ -511,7 +512,7 @@ class CompactReader {
           if (typesAreCompatible(fieldType, expectedType)) {
             readComplete = true;
             Variant fieldValue = readField(fieldSpec, fieldType);
-            dest->set(fieldName, fieldValue);
+            dest->o_set(fieldName, fieldValue, dest->o_getClassName());
           }
         }
 
@@ -591,7 +592,7 @@ class CompactReader {
             }
 
             Variant newStructSpec =
-              get_static_property(classNameString, "_TSPEC");
+              f_hphp_get_static_property(classNameString, "_TSPEC");
 
             if (!newStructSpec.is(KindOfArray)) {
               thrift_error("invalid type of spec", ERR_INVALID_DATA);

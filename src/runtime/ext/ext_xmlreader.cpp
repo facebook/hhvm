@@ -17,6 +17,8 @@
 
 #include <runtime/ext/ext_xmlreader.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(xmlreader);
 ///////////////////////////////////////////////////////////////////////////////

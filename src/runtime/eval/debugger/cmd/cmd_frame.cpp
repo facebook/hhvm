@@ -18,8 +18,6 @@
 #include <runtime/eval/debugger/cmd/cmd_up.h>
 #include <runtime/eval/debugger/cmd/cmd_where.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -45,10 +43,11 @@ bool CmdFrame::onClient(DebuggerClient *client) {
 
   CmdWhere().fetchStackTrace(client);
   client->moveToFrame(CmdUp::ParseNumber(client));
-  if (client->isApiMode()){
-    client->setStackTrace(null_array);
-  }
   return true;
+}
+
+void CmdFrame::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTStacktrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

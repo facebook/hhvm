@@ -42,7 +42,7 @@ Variant f_bzopen(CStrRef filename, CStrRef mode);
 Variant f_bzflush(CObjRef bz);
 String f_bzerrstr(CObjRef bz);
 Variant f_bzerror(CObjRef bz);
-int f_bzerrno(CObjRef bz);
+int64 f_bzerrno(CObjRef bz);
 Variant f_bzcompress(CStrRef source, int blocksize = 4, int workfactor = 0);
 Variant f_bzdecompress(CStrRef source, int small = 0);
 

@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1869 */
+/* SRC: classes/reflection.php line 1991 */
 FORWARD_DECLARE_CLASS(ReflectionExtension);
 extern const ObjectStaticCallbacks cw_ReflectionExtension;
 class c_ReflectionExtension : public ExtObjectData {
@@ -34,16 +34,20 @@ class c_ReflectionExtension : public ExtObjectData {
 
   // Properties
   Variant m_name;
-  Variant m_info;
+  Array m_info;
 
+  // Destructor
+  ~c_ReflectionExtension() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionExtension, ReflectionExtension, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_ReflectionExtension(const ObjectStaticCallbacks *cb = &cw_ReflectionExtension) : ExtObjectData(cb), m_name(Variant::nullInit), m_info(Variant::nullInit) {}
+  c_ReflectionExtension(const ObjectStaticCallbacks *cb = &cw_ReflectionExtension) : ExtObjectData(cb), m_name(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_name);
   public: c_ReflectionExtension *create(CVarRef v_name);
   public: String t___tostring();
-  public: static Variant t_export(CVarRef v_name, CVarRef v_ret);
+  public: static Variant t_export(CVarRef v_name, CVarRef v_ret = false_varNR);
   public: Variant t_getname();
   public: Variant t_getversion();
   public: Variant t_getfunctions();

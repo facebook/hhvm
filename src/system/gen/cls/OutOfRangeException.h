@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 227 */
+/* SRC: classes/exception.php line 240 */
 FORWARD_DECLARE_CLASS(OutOfRangeException);
 extern const ObjectStaticCallbacks cw_OutOfRangeException;
 class c_OutOfRangeException : public c_LogicException {
@@ -36,16 +36,9 @@ class c_OutOfRangeException : public c_LogicException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(OutOfRangeException, OutOfRangeException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_OutOfRangeException(const ObjectStaticCallbacks *cb = &cw_OutOfRangeException) : c_LogicException(cb) {}
+  c_OutOfRangeException(const ObjectStaticCallbacks *cb = &cw_OutOfRangeException) : c_LogicException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_OutOfRangeException() NEVER_INLINE;
 

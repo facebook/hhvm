@@ -9,7 +9,7 @@ FIND_PATH(CCLIENT_INCLUDE_PATH
 )
 
 FIND_LIBRARY(CCLIENT_LIBRARY
-  NAMES c-client
+  NAMES c-client c-client4
   PATHS /lib /usr/lib /usr/local/lib /usr/pkg/lib
 )
 

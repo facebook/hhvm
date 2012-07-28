@@ -16,7 +16,6 @@
 
 #include <test/test_ext_function.h>
 #include <runtime/ext/ext_function.h>
-#include <runtime/base/fiber_async_func.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -28,9 +27,6 @@ bool TestExtFunction::RunTests(const std::string &which) {
   RUN_TEST(test_is_callable);
   RUN_TEST(test_call_user_func_array);
   RUN_TEST(test_call_user_func);
-  RUN_TEST(test_call_user_func_array_async);
-  RUN_TEST(test_call_user_func_async);
-  RUN_TEST(test_end_user_func_async);
   RUN_TEST(test_forward_static_call_array);
   RUN_TEST(test_forward_static_call);
   RUN_TEST(test_create_function);
@@ -77,37 +73,6 @@ bool TestExtFunction::test_call_user_func() {
   Variant ret = f_call_user_func(1, "TEst", CREATE_VECTOR1("param"));
   VS(ret, "param");
   return Count(true);
-}
-
-bool TestExtFunction::test_call_user_func_array_async() {
-  Array params = CREATE_VECTOR1("param");
-  // sanity tests
-  {
-    RuntimeOption::FiberCount = 0;
-    FiberAsyncFunc::Restart();
-    Object handle = f_call_user_func_array_async("Test", params);
-    Variant ret = f_end_user_func_async(handle);
-    VS(ret, "param");
-  }
-  {
-    RuntimeOption::FiberCount = 1;
-    FiberAsyncFunc::Restart();
-    Object handle = f_call_user_func_array_async("Test", params);
-    Variant ret = f_end_user_func_async(handle);
-    VS(ret, "param");
-  }
-  // more testing in TestCodeRun::TestFiber()
-  return Count(true);
-}
-
-bool TestExtFunction::test_call_user_func_async() {
-  // tested in test_call_user_func_array_async
-  return true;
-}
-
-bool TestExtFunction::test_end_user_func_async() {
-  // tested in test_call_user_func_array_async
-  return true;
 }
 
 bool TestExtFunction::test_forward_static_call_array() {

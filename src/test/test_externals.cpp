@@ -21,8 +21,9 @@
 #include <runtime/ext/ext_soap.h>
 #include <runtime/base/program_functions.h>
 #include <system/gen/sys/system_globals.h>
+#include <runtime/ext_hhvm/ext_hhvm.h>
 
-using namespace std;
+using std::pair;
 
 ///////////////////////////////////////////////////////////////////////////////
 // These are normally code-generated and we are implementing them here
@@ -37,7 +38,7 @@ static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
 }
 
 #define CLASS_INFO_EMPTY_ENTRY   "", NULL, NULL, NULL
-#define METHOD_INFO_EMPTY_ENTRY  NULL, NULL, NULL, NULL, NULL
+#define METHOD_INFO_EMPTY_ENTRY  NULL, NULL, NULL, NULL, NULL, NULL
 
 const char *g_class_map[] = {
   /* header */ (const char *)ClassInfo::IsSystem,
@@ -62,6 +63,8 @@ const char *g_class_map[] = {
   NULL,
   /* constants */
   NULL,
+  /* user attributes */
+  NULL,
 
   /* header */ (const char *)ClassInfo::IsNothing,
   NULL, CLASS_INFO_EMPTY_ENTRY,
@@ -72,6 +75,8 @@ const char *g_class_map[] = {
   /* properties */
   NULL,
   /* constants */
+  NULL,
+  /* user attributes */
   NULL,
 
   /* header */ (const char *)ClassInfo::IsSystem,
@@ -91,6 +96,8 @@ const char *g_class_map[] = {
   /* constants */
   "const_foo", (const char*)ClassInfo::IsInterface, "s:1:\"f\";",
   NULL,
+  /* user attributes */
+  NULL,
 
   /* header */ (const char *)ClassInfo::IsInterface,
   "itestable", CLASS_INFO_EMPTY_ENTRY,
@@ -103,6 +110,8 @@ const char *g_class_map[] = {
   /* properties */
   NULL,
   /* constants */
+  NULL,
+  /* user attributes */
   NULL,
 
   NULL
@@ -286,7 +295,8 @@ Variant invokeImpl(void *extra, CArrRef params) {
 
   return true;
 }
-CallInfo invokeImplCallInfo((void*)invokeImpl, NULL, 0, CallInfo::VarArgs, 0);
+CallInfoWithConstructor invokeImplCallInfo((void*)invokeImpl, NULL, 0,
+                                           CallInfo::VarArgs, 0);
 bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
                    int64 hash /* = -1 */) {
   if (!strcasecmp(s, "nontest")) {
@@ -318,7 +328,8 @@ void init_global_variables() {
   ThreadInfo::s_threadInfo->m_globals = g;
   g->initialize();
 }
-void free_global_variables() { g_variables.destroy();}
+void free_global_variables() { g_variables.destroy(); }
+void free_global_variables_after_sweep() { g_variables.nullOut(); }
 void init_literal_varstrings() {}
 bool has_eval_support = true;
 Variant invoke_file(CStrRef path, bool once /* = false */,
@@ -365,25 +376,29 @@ Variant *get_static_property_lv(CStrRef s, const char *prop) {
   return NULL;
 }
 
-bool get_call_info_static_method(MethodCallPackage &info) {
-  return NULL;
+bool get_call_info_static_method(MethodCallPackage &mcp) {
+  StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);
+  const ObjectStaticCallbacks *cwo = get_object_static_callbacks(s);
+  if (LIKELY(cwo != 0)) return ObjectStaticCallbacks::GetCallInfo(cwo, mcp, -1);
+  if (mcp.m_fatal) throw_missing_class(s->data());
+  return false;
 }
 
 const ObjectStaticCallbacks * get_object_static_callbacks(CStrRef s) {
-  return NULL;
-}
-
-void fiber_marshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
-                                FiberReferenceMap &refMap) {
-}
-
-void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
-                                  FiberReferenceMap &refMap,
-                                  char defstrategy,
-                                  const vector<pair<string, char> > &resolver){
+  return get_builtin_object_static_callbacks(s);;
 }
 
 Array get_global_state() { return Array(); }
 
+HphpBinary::Type getHphpBinaryType() {
+  return HphpBinary::test;
+}
+
+#ifdef HHVM
+const long long hhbc_ext_funcs_count = 0;
+const HhbcExtFuncInfo hhbc_ext_funcs[] = {};
+const long long hhbc_ext_class_count = 0;
+const HhbcExtClassInfo hhbc_ext_classes[] = {};
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 }

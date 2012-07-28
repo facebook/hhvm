@@ -1,0 +1,35 @@
+_fbcufa_init.php begin
+_fbcufa_init.php end
+--------------------
+_fbcufa_init.php begin
+_fbcufa_init.php end
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+string(5) "blarg"
+int(42)
+--------------------
+_fbcufa_init.php begin
+_fbcufa_init.php end
+int(126)
+--------------------
+_fbcufa_init.php begin
+_fbcufa_init.php end
+int(126)
+--------------------
+_fbcufa_init.php begin
+_fbcufa_init.php end
+int(862)
+--------------------
+_fbcufa_init.php begin
+_fbcufa_init.php end
+HipHop Fatal error: Uncaught exception 'Exception' with message 'blah' in src/test/vm/_fbcufa_init.php:4
+Stack trace:
+#0 (): doThrow()
+#1 (): xbox_process_call_message()
+#2 {main}

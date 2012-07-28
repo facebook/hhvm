@@ -63,7 +63,7 @@ public:
 
   int64 getLiteralInteger() const;
   std::string getIdentifier() const;
-  Variant getVariant();
+  Variant getVariant() const;
   int64 getHash() const;
 
   void setComment(const std::string &comment) { m_comment = comment;}

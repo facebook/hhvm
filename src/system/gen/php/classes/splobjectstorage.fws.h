@@ -23,17 +23,50 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // 1. Static Strings
-extern StaticString s_sys_ssef33be8d;
-extern StaticString s_sys_ss78cb1b27;
-extern StaticString s_sys_ss8e95cc19;
-extern StaticString s_sys_ss3382a209;
-extern StaticString s_sys_ss0d54babb;
-extern StaticString s_sys_ssb3a5c1b3;
-extern StaticString s_sys_ss4e3b07b3;
-extern StaticString s_sys_ss12e90587;
-extern StaticString s_sys_ss50652d33;
-extern StaticString s_sys_ss941ca25f;
-extern StaticString s_sys_ss9943cbf4;
+extern StaticStringProxy s_sys_sspef33be8d;
+#ifndef s_sys_ssef33be8d
+#define s_sys_ssef33be8d (*(StaticString *)(&s_sys_sspef33be8d))
+#endif
+extern StaticStringProxy s_sys_ssp78cb1b27;
+#ifndef s_sys_ss78cb1b27
+#define s_sys_ss78cb1b27 (*(StaticString *)(&s_sys_ssp78cb1b27))
+#endif
+extern StaticStringProxy s_sys_ssp8e95cc19;
+#ifndef s_sys_ss8e95cc19
+#define s_sys_ss8e95cc19 (*(StaticString *)(&s_sys_ssp8e95cc19))
+#endif
+extern StaticStringProxy s_sys_ssp3382a209;
+#ifndef s_sys_ss3382a209
+#define s_sys_ss3382a209 (*(StaticString *)(&s_sys_ssp3382a209))
+#endif
+extern StaticStringProxy s_sys_ssp0d54babb;
+#ifndef s_sys_ss0d54babb
+#define s_sys_ss0d54babb (*(StaticString *)(&s_sys_ssp0d54babb))
+#endif
+extern StaticStringProxy s_sys_sspb3a5c1b3;
+#ifndef s_sys_ssb3a5c1b3
+#define s_sys_ssb3a5c1b3 (*(StaticString *)(&s_sys_sspb3a5c1b3))
+#endif
+extern StaticStringProxy s_sys_ssp4e3b07b3;
+#ifndef s_sys_ss4e3b07b3
+#define s_sys_ss4e3b07b3 (*(StaticString *)(&s_sys_ssp4e3b07b3))
+#endif
+extern StaticStringProxy s_sys_ssp12e90587;
+#ifndef s_sys_ss12e90587
+#define s_sys_ss12e90587 (*(StaticString *)(&s_sys_ssp12e90587))
+#endif
+extern StaticStringProxy s_sys_ssp50652d33;
+#ifndef s_sys_ss50652d33
+#define s_sys_ss50652d33 (*(StaticString *)(&s_sys_ssp50652d33))
+#endif
+extern StaticStringProxy s_sys_ssp941ca25f;
+#ifndef s_sys_ss941ca25f
+#define s_sys_ss941ca25f (*(StaticString *)(&s_sys_ssp941ca25f))
+#endif
+extern StaticStringProxy s_sys_ssp9943cbf4;
+#ifndef s_sys_ss9943cbf4
+#define s_sys_ss9943cbf4 (*(StaticString *)(&s_sys_ssp9943cbf4))
+#endif
 
 // 2. Static Arrays
 extern StaticArray s_sys_sa00000000;

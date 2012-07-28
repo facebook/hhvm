@@ -1,0 +1,4 @@
+string(9) "old value"
+string(9) "new value"
+string(31) "You asked for property fakeprop"
+Pretending to set fakeprop2 to blah

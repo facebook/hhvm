@@ -64,8 +64,13 @@ bool equalAsStr(int v1, const StringData *v2) {
   char *p;
   int is_negative;
   int len;
-  tmpbuf[11] = '\0';
-  p = conv_10(v1, &is_negative, &tmpbuf[11], &len);
+  const StringData *sd = String::GetIntegerStringData(v1);
+  if (sd) {
+    p = (char *)sd->data();
+    len = sd->size();
+  } else {
+    p = conv_10(v1, &is_negative, &tmpbuf[11], &len);
+  }
   if (len != v2->size()) {
     return false;
   }
@@ -77,8 +82,13 @@ bool equalAsStr(int64 v1, const StringData *v2) {
   char *p;
   int is_negative;
   int len;
-  tmpbuf[20] = '\0';
-  p = conv_10(v1, &is_negative, &tmpbuf[20], &len);
+  const StringData *sd = String::GetIntegerStringData(v1);
+  if (sd) {
+    p = (char *)sd->data();
+    len = sd->size();
+  } else {
+    p = conv_10(v1, &is_negative, &tmpbuf[20], &len);
+  }
   if (len != v2->size()) {
     return false;
   }
@@ -90,8 +100,14 @@ bool equalAsStr(int64 v1, litstr  v2) {
   char *p;
   int is_negative;
   int len;
-  tmpbuf[20] = '\0';
-  p = conv_10(v1, &is_negative, &tmpbuf[20], &len);
+  const StringData *sd = String::GetIntegerStringData(v1);
+  if (sd) {
+    p = (char *)sd->data();
+    len = sd->size();
+  } else {
+    tmpbuf[20] = '\0';
+    p = conv_10(v1, &is_negative, &tmpbuf[20], &len);
+  }
   return strcmp(p, v2) == 0;
 }
 

@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 268 */
+/* SRC: classes/exception.php line 281 */
 FORWARD_DECLARE_CLASS(UnderflowException);
 extern const ObjectStaticCallbacks cw_UnderflowException;
 class c_UnderflowException : public c_RuntimeException {
@@ -36,16 +36,9 @@ class c_UnderflowException : public c_RuntimeException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(UnderflowException, UnderflowException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_UnderflowException(const ObjectStaticCallbacks *cb = &cw_UnderflowException) : c_RuntimeException(cb) {}
+  c_UnderflowException(const ObjectStaticCallbacks *cb = &cw_UnderflowException) : c_RuntimeException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_UnderflowException() NEVER_INLINE;
 

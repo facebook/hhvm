@@ -22,18 +22,31 @@
 #ifndef __HPHP_ARRAY_H__
 #define __HPHP_ARRAY_H__
 
+#include <boost/static_assert.hpp>
+
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/types.h>
 #include <runtime/base/array/array_data.h>
 #include <runtime/base/type_string.h>
 #include <runtime/base/hphp_value.h>
+#include <runtime/base/gc_roots.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+inline int64 ToKey(double d) {
+  return d > std::numeric_limits<uint64>::max() ? 0u : (uint64)d;
+}
+
 // forward declaration
 class ArrayIter;
 class StaticArray;
+
+#ifdef HHVM_GC
+typedef GCRootTracker<ArrayData> ArrayBase;
+#else
+typedef SmartPtr<ArrayData> ArrayBase;
+#endif
 
 /**
  * Array type wrapping around 2 types of ArrayData to implement reference
@@ -44,12 +57,12 @@ class StaticArray;
  * type of ArrayData to accomplish the task. This "upgrade" is called
  * escalation. This describes all possible escalation paths:
  *
- *   SmallArray --> ZendArray
+ *   VectorArray --> ZendArray
  *
- * SmallArray escalates to ZendArray when the capacity of the SmallArray is
- * exceeded.
+ * VectorArray escalates to ZendArray when the layout of keys is no longer
+ * a dense 0-based range of ints.
  */
-class Array : public SmartPtr<ArrayData> {
+class Array : protected ArrayBase {
  public:
   /**
    * Create an empty array or an array with one element. Note these are
@@ -63,6 +76,11 @@ class Array : public SmartPtr<ArrayData> {
   Array() {}
   ~Array();
 
+  ArrayData* get() const { return m_px; }
+  void reset() { ArrayBase::reset(); }
+
+  // Deliberately doesn't throw_null_pointer_exception as a perf
+  // optimization.
   ArrayData *operator->() const {
     return m_px;
   }
@@ -72,8 +90,8 @@ class Array : public SmartPtr<ArrayData> {
    * array value from the parameter, and they are NOT constructing an array
    * with that single value (then one should use Array::Create() functions).
    */
-  Array(ArrayData *data) : SmartPtr<ArrayData>(data) { }
-  Array(CArrRef arr) : SmartPtr<ArrayData>(arr.m_px) { }
+  Array(ArrayData *data) : ArrayBase(data) { }
+  Array(CArrRef arr) : ArrayBase(arr.m_px) { }
 
   /**
    * Informational
@@ -157,8 +175,7 @@ class Array : public SmartPtr<ArrayData> {
   /**
    * Iterator functions. See array_iterator.h for end() and next().
    */
-  ArrayIter begin(CStrRef context = null_string,
-                  bool setIterDirty = false) const;
+  ArrayIter begin(CStrRef context = null_string) const;
 
   void escalate(bool mutableIteration = false);
 
@@ -269,18 +286,17 @@ class Array : public SmartPtr<ArrayData> {
   const Variant operator[](int64   key) const;
   const Variant operator[](double  key) const;
   const Variant operator[](litstr  key) const;
-  const Variant operator[](const StringData *key) const;
   const Variant operator[](CStrRef key) const;
   const Variant operator[](CVarRef key) const;
 
   Variant &lval(int64 key) {
     if (!m_px) {
-      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+      ArrayBase::operator=(ArrayData::Create());
     }
     Variant *ret = NULL;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
     ASSERT(ret);
     return *ret;
@@ -288,12 +304,12 @@ class Array : public SmartPtr<ArrayData> {
 
   Variant &lval(CStrRef key) {
     if (!m_px) {
-      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+      ArrayBase::operator=(ArrayData::Create());
     }
     Variant *ret = NULL;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
     ASSERT(ret);
     return *ret;
@@ -314,7 +330,7 @@ class Array : public SmartPtr<ArrayData> {
     return lvalAtImpl(key, flags);
   }
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL) {
-    return lvalAtImpl((int64)key, flags);
+    return lvalAtImpl(ToKey(key), flags);
   }
   Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
@@ -334,7 +350,7 @@ class Array : public SmartPtr<ArrayData> {
   }
   CVarRef set(int64   key, CVarRef v);
   CVarRef set(double  key, CVarRef v) {
-    return set((int64)key, v);
+    return set(ToKey(key), v);
   }
 
   CVarRef set(litstr  key, CVarRef v, bool isKey = false);
@@ -366,7 +382,7 @@ class Array : public SmartPtr<ArrayData> {
   }
   CVarRef setRef(int64   key, CVarRef v);
   CVarRef setRef(double  key, CVarRef v) {
-    return setRef((int64)key, v);
+    return setRef(ToKey(key), v);
   }
 
   CVarRef setRef(litstr  key, CVarRef v, bool isKey = false);
@@ -385,7 +401,7 @@ class Array : public SmartPtr<ArrayData> {
   }
   CVarRef add(int64   key, CVarRef v);
   CVarRef add(double  key, CVarRef v) {
-    return add((int64)key, v);
+    return add(ToKey(key), v);
   }
 
   CVarRef add(litstr  key, CVarRef v, bool isKey = false);
@@ -396,12 +412,12 @@ class Array : public SmartPtr<ArrayData> {
   template<typename T>
   Variant &addLvalImpl(const T &key) {
     if (!m_px) {
-      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+      ArrayBase::operator=(ArrayData::Create());
     }
     Variant *ret = NULL;
     ArrayData *escalated = m_px->addLval(key, ret, m_px->getCount() > 1);
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
     ASSERT(ret);
     return *ret;
@@ -410,12 +426,6 @@ class Array : public SmartPtr<ArrayData> {
   Variant &addLval(bool    key) {
     return addLvalImpl(key ? 1LL : 0LL);
   }
-  Variant &addLval(char    key) {
-    return addLvalImpl((int64)key);
-  }
-  Variant &addLval(short   key) {
-    return addLvalImpl((int64)key);
-  }
   Variant &addLval(int     key) {
     return addLvalImpl((int64)key);
   }
@@ -423,7 +433,7 @@ class Array : public SmartPtr<ArrayData> {
     return addLvalImpl(key);
   }
   Variant &addLval(double  key) {
-    return addLvalImpl((int64)key);
+    return addLvalImpl(ToKey(key));
   }
 
   Variant &addLval(litstr  key, bool isKey = false);
@@ -438,8 +448,8 @@ class Array : public SmartPtr<ArrayData> {
 
   // defined in type_variant.h
   template<typename T>
-  Variant argvalAt(bool byRef, const T &key);
-  Variant argvalAt(bool byRef, CStrRef key, bool isString = false);
+  Variant argvalAt(bool byRef, const T &key) const;
+  Variant argvalAt(bool byRef, CStrRef key, bool isString = false) const;
 
   /**
    * Membership functions.
@@ -465,7 +475,7 @@ class Array : public SmartPtr<ArrayData> {
     return existsImpl(key);
   }
   bool exists(double  key) const {
-    return existsImpl((int64)key);
+    return existsImpl(ToKey(key));
   }
   bool exists(litstr  key, bool isKey = false) const;
   bool exists(CStrRef key, bool isKey = false) const;
@@ -477,7 +487,7 @@ class Array : public SmartPtr<ArrayData> {
       ArrayData *escalated =
         m_px->remove(key, (m_px->getCount() > 1));
       if (escalated) {
-        SmartPtr<ArrayData>::operator=(escalated);
+        ArrayBase::operator=(escalated);
       }
     }
   }
@@ -497,7 +507,7 @@ class Array : public SmartPtr<ArrayData> {
     removeImpl(key);
   }
   void remove(double  key) {
-    removeImpl((int64)key);
+    removeImpl(ToKey(key));
   }
   void remove(litstr  key, bool isString = false);
   void remove(CStrRef key, bool isString = false);
@@ -535,12 +545,6 @@ class Array : public SmartPtr<ArrayData> {
   void unserialize(VariableUnserializer *uns);
 
   /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   */
-  Array fiberMarshal(FiberReferenceMap &refMap) const;
-  Array fiberUnmarshal(FiberReferenceMap &refMap) const;
-
-  /**
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION_NOCALLBACKS(Array);
@@ -550,12 +554,7 @@ class Array : public SmartPtr<ArrayData> {
     return m_px;
   }
 
-  void setStatic() const {
-    if (m_px) {
-      m_px->setStatic();
-      m_px->onSetStatic();
-    }
-  }
+  void setEvalScalar() const;
 
  private:
   // helpers
@@ -569,14 +568,14 @@ class Array : public SmartPtr<ArrayData> {
   template<typename T>
   Variant &lvalAtImpl(const T &key, ACCESSPARAMS_DECL) {
     if (!m_px) {
-      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+      ArrayBase::operator=(ArrayData::Create());
     }
     Variant *ret = NULL;
     ArrayData *escalated =
       m_px->lval(key, ret, m_px->getCount() > 1,
                  flags & AccessFlags::CheckExist);
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
     ASSERT(ret);
     return *ret;
@@ -584,6 +583,7 @@ class Array : public SmartPtr<ArrayData> {
 
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(Array, m_px) == offsetof(Value, m_data));
+    BOOST_STATIC_ASSERT((offsetof(Array, m_px) == kExpectedMPxOffset));
   }
 };
 
@@ -599,8 +599,6 @@ class StaticArray : public Array {
 public:
   StaticArray() { }
   StaticArray(ArrayData *data) : Array(data) {
-    m_px->setStatic();
-    m_px->onSetStatic();
   }
   ~StaticArray() {
     // prevent ~SmartPtr from calling decRefCount after data is released
@@ -612,16 +610,30 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // ArrNR
 
-class ArrNR : public Array {
-public:
-  ArrNR(ArrayData *data) {
+struct ArrNR {
+  explicit ArrNR(ArrayData *data = 0) {
     m_px = data;
   }
   ArrNR(const ArrNR &a) {
     m_px = a.m_px;
   }
-  ~ArrNR() {
-    m_px = NULL;
+
+  operator CArrRef() const { return asArray(); }
+
+  Array& asArray() {
+    return *reinterpret_cast<Array*>(this); // XXX
+  }
+
+  const Array& asArray() const {
+    return const_cast<ArrNR*>(this)->asArray();
+  }
+
+  ArrayData* get() const { return m_px; }
+
+protected:
+  ArrayData *m_px;
+  static void compileTimeAssertions() {
+    BOOST_STATIC_ASSERT((offsetof(ArrNR, m_px) == kExpectedMPxOffset));
   }
 };
 

@@ -20,8 +20,9 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/base/thread_init_fini.h>
-#include <runtime/eval/ast/expression.h>
+#include <runtime/base/code_coverage.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/compiler_id.h>
 #include <util/shared_memory_allocator.h>
 #include <system/gen/sys/system_globals.h>
 #include <system/gen/php/globals/symbols.h>
@@ -39,6 +40,7 @@
 #include <util/timer.h>
 #include <util/stack_trace.h>
 #include <util/light_process.h>
+#include <util/stat_cache.h>
 #include <runtime/base/source_info.h>
 #include <runtime/base/rtti_info.h>
 #include <runtime/base/frame_injection.h>
@@ -48,12 +50,12 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/ext/ext_apc.h>
 #include <runtime/ext/ext_function.h>
-#include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/debugger/debugger_client.h>
-#include <runtime/base/fiber_async_func.h>
 #include <runtime/base/util/simple_counter.h>
 #include <runtime/base/util/extended_logger.h>
+
+#include <runtime/vm/translator/translator-x64.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -61,12 +63,15 @@
 #include <boost/program_options/parsers.hpp>
 #include <libgen.h>
 
-#include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/runtime/file_repository.h>
-#include <runtime/eval/parser/parser.h>
 
-using namespace std;
+#include <runtime/vm/vm.h>
+#include <runtime/vm/runtime.h>
+#include <runtime/vm/repo.h>
+#include <runtime/vm/translator/translator.h>
+
 using namespace boost::program_options;
+using std::cout;
 extern char **environ;
 
 #define MAX_INPUT_NESTING_LEVEL 64
@@ -118,7 +123,7 @@ static void process_cmd_arguments(int argc, char **argv) {
 }
 
 void process_env_variables(Variant &variables) {
-  for (map<string, string>::const_iterator iter =
+  for (std::map<string, string>::const_iterator iter =
          RuntimeOption::EnvVariables.begin();
        iter != RuntimeOption::EnvVariables.end(); ++iter) {
     variables.set(String(iter->first), String(iter->second));
@@ -242,34 +247,52 @@ void register_variable(Variant &variables, char *name, CVarRef value,
 }
 
 enum ContextOfException {
-  WarmupDocException = 0,
-  ReqInitException,
+  ReqInitException = 1,
   InvokeException,
   HandlerException,
 };
 
-static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
-                             ContextOfException where, bool &error) {
-  bool ret = false;
+static void handle_exception_append_bt(std::string& errorMsg,
+                                       const ExtendedException& e) {
+  ArrayPtr bt = e.getBackTrace();
+  if (!bt->empty()) {
+    errorMsg += ExtendedLogger::StringOfStackTrace(*bt);
+  }
+}
+
+static void handle_exception_helper(bool& ret,
+                                    ExecutionContext* context,
+                                    std::string& errorMsg,
+                                    ContextOfException where,
+                                    bool& error,
+                                    bool richErrorMsg) {
   try {
     throw;
   } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {
-    ret = true;
     // ExitException is fine
-    if (!context->getExitCallback().isNull() &&
+    if (where != HandlerException &&
+        !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
       Array stack = e.getBackTrace()->get();
       Array argv = CREATE_VECTOR2(e.ExitCode, stack);
       f_call_user_func_array(context->getExitCallback(), argv);
     }
   } catch (const PhpFileDoesNotExistException &e) {
-    if (where == WarmupDocException) {
-      Logger::Error("warmup error: %s", e.getMessage().c_str());
+    ret = false;
+    if (where != HandlerException) {
+      raise_notice("%s", e.getMessage().c_str());
+    } else {
+      Logger::Error("%s", e.getMessage().c_str());
     }
-    raise_notice(e.getMessage().c_str());
+    if (richErrorMsg) {
+      handle_exception_append_bt(errorMsg, e);
+    }
   } catch (const UncatchableException &e) {
+    ret = false;
+    error = true;
+    errorMsg = "";
     if (RuntimeOption::ServerStackTrace) {
       errorMsg = e.what();
     } else if (RuntimeOption::InjectedStackTrace) {
@@ -282,8 +305,16 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       errorMsg += e.getMessage();
     }
     Logger::Error("%s", errorMsg.c_str());
-    error = true;
+    if (richErrorMsg) {
+      handle_exception_append_bt(errorMsg, e);
+    }
   } catch (const Exception &e) {
+    bool oldRet = ret;
+    bool origError = error;
+    std::string origErrorMsg = errorMsg;
+    ret = false;
+    error = true;
+    errorMsg = "";
     if (where == HandlerException) {
       errorMsg = "Exception handler threw an exception: ";
     }
@@ -295,13 +326,28 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       errorMsg += e.getMessage();
     }
     if (where == InvokeException) {
-      ret = context->onFatalError(e);
-      error = !ret;
+      bool handlerRet = context->onFatalError(e);
+      if (handlerRet) {
+        ret = oldRet;
+        error = origError;
+        errorMsg = origErrorMsg;
+      }
     } else {
-      error = true;
       Logger::Error("%s", errorMsg.c_str());
     }
+    if (richErrorMsg) {
+      const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
+      if (ee) {
+        handle_exception_append_bt(errorMsg, *ee);
+      }
+    }
   } catch (const Object &e) {
+    bool oldRet = ret;
+    bool origError = error;
+    std::string origErrorMsg = errorMsg;
+    ret = false;
+    error = true;
+    errorMsg = "";
     if (where == HandlerException) {
       errorMsg = "Exception handler threw an object exception: ";
     }
@@ -311,18 +357,21 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       errorMsg += "(unable to call toString())";
     }
     if (where == InvokeException) {
-      ret = context->onUnhandledException(e);
+      bool handlerRet = context->onUnhandledException(e);
+      if (handlerRet) {
+        ret = oldRet;
+        error = origError;
+        errorMsg = origErrorMsg;
+      }
     } else {
       Logger::Error("%s", errorMsg.c_str());
     }
-    error = true;
   } catch (...) {
-    if (where == InvokeException) throw;
+    ret = false;
+    error = true;
     errorMsg = "(unknown exception was thrown)";
     Logger::Error("%s", errorMsg.c_str());
-    error = true;
   }
-  return ret;
 }
 
 static bool hphp_chdir_file(const string filename) {
@@ -356,8 +405,17 @@ void handle_destructor_exception() {
     throw;
   } catch (ExitException &e) {
     // ExitException is fine
+    return;
+  } catch (Object &e) {
+    // For user exceptions, invoke the user exception handler
+    errorMsg = "Destructor threw an object exception: ";
+    try {
+      errorMsg += e.toString().data();
+    } catch (...) {
+      errorMsg += "(unable to call toString())";
+    }
   } catch (Exception &e) {
-    errorMsg = "Destructor threw an exception: ";
+    errorMsg = "Destructor raised a fatal error: ";
     if (RuntimeOption::ServerStackTrace) {
       errorMsg += e.what();
     } else {
@@ -365,18 +423,18 @@ void handle_destructor_exception() {
       errorMsg += " ";
       errorMsg += e.getMessage();
     }
-    Logger::Error("%s", errorMsg.c_str());
-  } catch (Object &e) {
-    errorMsg = "Destructor threw an object exception: ";
-    try {
-      errorMsg += e.toString().data();
-    } catch (...) {
-      errorMsg += "(unable to call toString())";
-    }
-    Logger::Error("%s", errorMsg.c_str());
   } catch (...) {
-    errorMsg = "(unknown exception was thrown from destructor)";
-    Logger::Error("%s", errorMsg.c_str());
+    errorMsg = "Destructor threw an unknown exception";
+  }
+  // For fatal errors and unknown exceptions, we raise a warning.
+  // If there is a user error handler it will be invoked, otherwise
+  // the default error handler will be invoked.
+  try {
+    raise_debugging("%s", errorMsg.c_str());
+  } catch (...) {
+    // The user error handler fataled or threw an exception,
+    // print out the error message directly to the log
+    Logger::Warning("%s", errorMsg.c_str());
   }
 }
 
@@ -400,6 +458,16 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 
   process_env_variables(g->GV(_ENV));
   g->GV(_ENV).set("HPHP", 1);
+  switch (getHphpBinaryType()) {
+  case HphpBinary::hhvm:
+    g->GV(_ENV).set("HHVM", 1);
+    if (RuntimeOption::EvalJit) {
+      g->GV(_ENV).set("HHVM_JIT", 1);
+    }
+    break;
+  case HphpBinary::hphpi: g->GV(_ENV).set("HPHPI", 1); break;
+  default: break;
+  }
 
   process_cmd_arguments(argc, argv);
 
@@ -434,14 +502,20 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+
+  if (RuntimeOption::EvalJit && RuntimeOption::EvalDumpTC) {
+    HPHP::VM::Transl::tc_dump();
+  }
+
   if (xhprof) {
     f_var_dump(f_json_encode(f_xhprof_disable()));
   }
   hphp_context_exit(g_context.getNoCheck(), true, true, program);
   hphp_session_exit();
-  if (coverage && RuntimeOption::RecordCodeCoverage &&
+  if (coverage && ti->m_reqInjectionData.coverage &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
-    Eval::CodeCoverage::Report(RuntimeOption::CodeCoverageOutputFile);
+    ti->m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
   }
 }
 
@@ -512,6 +586,10 @@ static int start_server(const std::string &username) {
       config.cert_file = (char*)RuntimeOption::SSLCertificateFile.c_str();
       config.pk_file = (char*)RuntimeOption::SSLCertificateKeyFile.c_str();
       sslCTX = evhttp_init_openssl(&config);
+      if (!RuntimeOption::SSLCertificateDir.empty()) {
+        ServerNameIndication::load(sslCTX, config,
+                                   RuntimeOption::SSLCertificateDir);
+      }
     } else {
       Logger::Error("Invalid certificate file or key file");
     }
@@ -544,7 +622,7 @@ string translate_stack(const char *hexencoded, bool with_frame_numbers) {
   StackTrace::FramePtrVec frames;
   st.get(frames);
 
-  ostringstream out;
+  std::ostringstream out;
   for (unsigned int i = 0; i < frames.size(); i++) {
     StackTrace::FramePtr f = frames[i];
     if (with_frame_numbers) {
@@ -648,6 +726,7 @@ static int execute_program_impl(int argc, char **argv) {
 #ifdef COMPILER_ID
     ("compiler-id", "display the git hash for the compiler id")
 #endif
+    ("repo-schema", "display the repo schema id used by this app")
     ("taint-status", "check if the compiler was built with taint enabled")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
@@ -732,14 +811,16 @@ static int execute_program_impl(int argc, char **argv) {
 #define HPHP_VERSION(v) const char *version = #v;
 #include "../../version"
 
-    if (po.mode == "debug") {
-      cout << "HipHop Debugger v" << version << "\n";
-    } else {
-      cout << "Compiled by HipHop Compiler v" << version << "\n";
+    switch (getHphpBinaryType()) {
+    case HphpBinary::hhvm: { cout << "HipHop VM"; break; }
+    case HphpBinary::hphpi: { cout << "HipHop Interpreter"; break; }
+    default: { cout << "Compiled by HipHop Compiler"; break; }
     }
+    cout << " v" << version << " (" << (debug ? "dbg" : "rel") << ")\n";
 #ifdef COMPILER_ID
     cout << "Compiler: " << COMPILER_ID << "\n";
 #endif
+    cout << "Repo schema: " << VM::Repo::kSchemaId << "\n";
     return 0;
   }
 #ifdef COMPILER_ID
@@ -748,6 +829,11 @@ static int execute_program_impl(int argc, char **argv) {
     return 0;
   }
 #endif
+
+  if (vm.count("repo-schema")) {
+    cout << VM::Repo::kSchemaId << "\n";
+    return 0;
+  }
 
   if (vm.count("taint-status")) {
 #ifdef TAINTED
@@ -818,6 +904,22 @@ static int execute_program_impl(int argc, char **argv) {
                            RuntimeOption::LightProcessCount,
                            inherited_fds);
 
+  {
+    const size_t stackSizeMinimum = 8 * 1024 * 1024;
+    struct rlimit rlim;
+    if (getrlimit(RLIMIT_STACK, &rlim) == 0 &&
+        (rlim.rlim_cur == RLIM_INFINITY ||
+         rlim.rlim_cur < stackSizeMinimum)) {
+      rlim.rlim_cur = stackSizeMinimum;
+      if (stackSizeMinimum > rlim.rlim_max) {
+        rlim.rlim_max = stackSizeMinimum;
+      }
+      if (setrlimit(RLIMIT_STACK, &rlim)) {
+        Logger::Error("failed to set stack limit to %lld\n", stackSizeMinimum);
+      }
+    }
+  }
+
   if (po.mode == "d") po.mode = "debug";
   if (po.mode == "s") po.mode = "server";
   if (po.mode == "t") po.mode = "translate";
@@ -825,39 +927,54 @@ static int execute_program_impl(int argc, char **argv) {
   ShmCounters::initialize(true, Logger::Error);
 
   if (!po.lint.empty()) {
-    int ret = 0;
+    hphp_process_init();
     try {
-      Scanner scanner(po.lint.c_str(), Scanner::AllowShortTags);
-      std::vector<Eval::StaticStatementPtr> statics;
-      Eval::Parser parser(scanner, po.lint.c_str(), statics);
-      if (!parser.parse()) {
-        Logger::Error("Unable to parse file %s: %s", po.lint.c_str(),
-                      parser.getMessage().c_str());
-        ret = 1;
-      } else {
-        Logger::Info("No syntax errors detected in %s", po.lint.c_str());
+      HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
+        StringData::GetStaticString(po.lint.c_str()), "", NULL);
+      if (phpFile == NULL) {
+        throw FileOpenException(po.lint.c_str());
+      }
+      VM::Unit* unit = phpFile->unit();
+      const StringData* msg;
+      int line;
+      if (unit->compileTimeFatal(msg, line)) {
+        VMParserFrame parserFrame;
+        parserFrame.filename = po.lint.c_str();
+        parserFrame.lineNumber = line;
+        ArrayPtr bt =
+          ArrayPtr(new Array(
+                     g_vmContext->debugBacktrace(false, true,
+                                                 false, &parserFrame)));
+        throw FatalErrorException(msg->data(), bt);
       }
     } catch (FileOpenException &e) {
       Logger::Error("%s", e.getMessage().c_str());
-      ret = 1;
+      return 1;
+    } catch (const FatalErrorException& e) {
+      RuntimeOption::CallUserHandlerOnFatals = false;
+      RuntimeOption::AlwaysLogUnhandledExceptions = true;
+      g_context->onFatalError(e);
+      return 1;
     }
-    return ret;
+    Logger::Info("No syntax errors detected in %s", po.lint.c_str());
+    return 0;
   }
 
   if (!po.parse.empty()) {
     hphp_process_init();
-    std::vector<Eval::StaticStatementPtr> statics;
-    Eval::Block::VariableIndices variableIndices;
-    std::string &fileName = po.parse;
+    const StringData *fileName = StringData::GetStaticString(po.parse);
     struct stat s;
     if (!Eval::FileRepository::findFile(fileName, &s)) return 0;
-    Eval::Parser::Reset();
     Eval::FileRepository::FileInfo fileInfo;
-    if (!Eval::FileRepository::readFile(fileName, s, fileInfo)) return 0;
-    Eval::PhpFile *f = Eval::FileRepository::parseFile(fileName, fileInfo);
+    if (!Eval::FileRepository::readFile(fileName, s, fileInfo)) {
+      return 0;
+    }
+    Eval::PhpFile *f = Eval::FileRepository::parseFile(po.parse, fileInfo);
     if (!f) return 0;
-    const Eval::StatementPtr &tree = f->getTree();
-    tree->dump(cout);
+    // TODO: Task #1154018: We should support the "parse" command line option
+    // under the VM or get rid of it. The logic above calls into FileRepository
+    // to load the file. What is missing is the logic that gets fishes the AST
+    // out of the PhpFile and outputs the AST as PHP source to STDOUT.
     return 0;
   }
 
@@ -868,33 +985,38 @@ static int execute_program_impl(int argc, char **argv) {
     char **new_argv;
     prepare_args(new_argc, new_argv, po.args, po.file.c_str());
 
+    if (hhvm) {
+      if (!po.file.empty()) {
+        VM::Repo::setCliFile(po.file);
+      } else if (new_argc >= 2) {
+        VM::Repo::setCliFile(new_argv[1]);
+      }
+    }
+
     int ret = 0;
     hphp_process_init();
 
     if (po.mode == "debug") {
       RuntimeOption::EnableDebugger = true;
-      Eval::Debugger::StartClient(po.debugger_options);
-
+      Eval::DebuggerProxyPtr proxy =
+        Eval::Debugger::StartClient(po.debugger_options);
+      if (!proxy) {
+        Logger::Error("Failed to start debugger client\n\n");
+        return 1;
+      }
+      Eval::Debugger::RegisterSandbox(proxy->getDummyInfo());
+      Eval::Debugger::RegisterThread();
       string file = po.file;
-      StringVecPtr client_args; bool restarting = false;
+      StringVecPtr client_args;
+      bool restart = false;
       ret = 0;
       while (true) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-
-          if (po.debugger_options.extension.empty()) {
-            // even if it's empty, still need to call for warmup
-            hphp_invoke_simple("", true); // not to run the 1st file if compiled
-          } else {
-            hphp_invoke_simple(po.debugger_options.extension);
-          }
-          Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
-          if (!restarting) {
-            Eval::Debugger::InterruptSessionStarted(new_argv[0]);
-          }
-          hphp_invoke_simple(file);
-          Eval::Debugger::InterruptSessionEnded(new_argv[0]);
-          execute_command_line_end(po.xhprofFlags, true, new_argv[0]);
+          g_context->setSandboxId(proxy->getDummyInfo().id());
+          Eval::Debugger::DebuggerSession(po.debugger_options, file, restart);
+          restart = false;
+          execute_command_line_end(po.xhprofFlags, true, file.c_str());
         } catch (const Eval::DebuggerRestartException &e) {
           execute_command_line_end(0, false, NULL);
 
@@ -904,7 +1026,7 @@ static int execute_program_impl(int argc, char **argv) {
             free(new_argv);
             prepare_args(new_argc, new_argv, *client_args, NULL);
           }
-          restarting = true;
+          restart = true;
         } catch (const Eval::DebuggerClientExitException &e) {
           execute_command_line_end(0, false, NULL);
           break; // end user quitting debugger
@@ -970,7 +1092,7 @@ static int execute_program_impl(int argc, char **argv) {
 String canonicalize_path(CStrRef p, const char* root, int rootLen) {
   String path(Util::canonicalize(p.c_str(), p.size()), AttachString);
   if (path.charAt(0) == '/') {
-    string &sourceRoot = RuntimeOption::SourceRoot;
+    const string &sourceRoot = RuntimeOption::SourceRoot;
     int len = sourceRoot.size();
     if (len && strncmp(path.data(), sourceRoot.c_str(), len) == 0) {
       return path.substr(len);
@@ -985,31 +1107,42 @@ String canonicalize_path(CStrRef p, const char* root, int rootLen) {
 ///////////////////////////////////////////////////////////////////////////////
 // C++ ffi
 
-class WarmupState {
-public:
-  WarmupState() : done(false), enabled(false),
-                  atCheckpoint(false), failed(false) {}
-  bool done;
-  bool enabled;
-  bool atCheckpoint;
-  bool failed;
-};
-static IMPLEMENT_THREAD_LOCAL(WarmupState, s_warmup_state);
-
 extern "C" void hphp_fatal_error(const char *s) {
   throw_fatal(s);
 }
 
 void hphp_process_init() {
-  Variant::RuntimeCheck();
   init_thread_locals();
   ClassInfo::Load();
   Process::InitProcessStatics();
   init_static_variables();
   init_literal_varstrings();
+
+  if (hhvm) {
+    if (!RuntimeOption::RepoAuthoritative &&
+        RuntimeOption::EvalJitEnableRenameFunction &&
+        RuntimeOption::EvalJit) {
+      VM::Func::enableIntercept();
+      VM::Transl::TranslatorX64* tx64 = VM::Transl::TranslatorX64::Get();
+      tx64->enableIntercepts();
+    }
+    bool db = RuntimeOption::EvalDumpBytecode;
+    bool p = RuntimeOption::RepoAuthoritative;
+    bool rp = RuntimeOption::AlwaysUseRelativePath;
+    bool sf = RuntimeOption::SafeFileAccess;
+    RuntimeOption::EvalDumpBytecode = false;
+    RuntimeOption::RepoAuthoritative = false;
+    RuntimeOption::AlwaysUseRelativePath = false;
+    RuntimeOption::SafeFileAccess = false;
+    HPHP::VM::ProcessInit();
+    RuntimeOption::EvalDumpBytecode = db;
+    RuntimeOption::RepoAuthoritative = p;
+    RuntimeOption::AlwaysUseRelativePath = rp;
+    RuntimeOption::SafeFileAccess = sf;
+  }
+
   PageletServer::Restart();
   XboxServer::Restart();
-  FiberAsyncFunc::Restart();
   Extension::InitModules();
   apc_load(RuntimeOption::ApcLoadThread);
   StaticString::FinishInit();
@@ -1020,42 +1153,43 @@ void hphp_process_init() {
   new (context) ExecutionContext();
 }
 
+static void handle_exception(bool& ret, ExecutionContext* context,
+                             std::string& errorMsg, ContextOfException where,
+                             bool& error, bool richErrorMsg) {
+  ASSERT(where == InvokeException || where == ReqInitException);
+  try {
+    handle_exception_helper(ret, context, errorMsg, where, error, richErrorMsg);
+  } catch (const ExitException &e) {
+    // Got an ExitException during exception handling, handle
+    // similarly to the case below but don't call obEndAll().
+  } catch (...) {
+    handle_exception_helper(ret, context, errorMsg, HandlerException, error,
+                            richErrorMsg);
+    context->obEndAll();
+  }
+}
+
+static void handle_reqinit_exception(bool &ret, ExecutionContext *context,
+                                     std::string &errorMsg, bool &error) {
+  handle_exception(ret, context, errorMsg, ReqInitException, error, false);
+}
+
+static void handle_invoke_exception(bool &ret, ExecutionContext *context,
+                                    std::string &errorMsg, bool &error,
+                                    bool richErrorMsg) {
+  handle_exception(ret, context, errorMsg, InvokeException, error,
+                   richErrorMsg);
+}
+
 static bool hphp_warmup(ExecutionContext *context,
-                        const string &warmupDoc,
                         const string &reqInitFunc,
                         const string &reqInitDoc, bool &error) {
   bool ret = true;
   error = false;
   std::string errorMsg;
-  if (!s_warmup_state->done) {
-    MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
-    if (mm->beforeCheckpoint()) {
-      if (!s_warmup_state->failed) {
-        s_warmup_state->enabled = true;
-        if (!warmupDoc.empty()) {
-          try {
-            ServerStatsHelper ssh("warmup");
-            include_impl_invoke(warmupDoc, true, get_variable_table());
-          } catch (...) {
-            ret = handle_exception(context, errorMsg, WarmupDocException,
-                                   error);
-          }
-        }
-      }
-      if (!ret) {
-        hphp_session_init();
-        s_warmup_state->enabled = false;
-        s_warmup_state->failed = true;
-        return ret;
-      }
-      s_warmup_state->done = true;
-      mm->checkpoint();
-      s_warmup_state->atCheckpoint = true;
-      context->backupSession();
-    }
-  }
 
-  if (s_warmup_state->enabled && s_warmup_state->atCheckpoint) {
+  MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
+  if (mm->isEnabled()) {
     ServerStatsHelper ssh("reqinit");
     try {
       if (!reqInitDoc.empty()) {
@@ -1066,31 +1200,32 @@ static bool hphp_warmup(ExecutionContext *context,
       }
       context->backupSession();
     } catch (...) {
-      ret = handle_exception(context, errorMsg, ReqInitException, error);
+      handle_reqinit_exception(ret, context, errorMsg, error);
     }
   }
 
-  s_warmup_state->atCheckpoint = false;
   return ret;
 }
 
-void hphp_session_init(bool blank_warmup /* = false */) {
+void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MemoryManager::TheMemoryManager()->resetStats();
-  if (!s_warmup_state->done) {
-    free_global_variables(); // just to be safe
-    init_global_variables();
-  }
+  init_global_variables();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
   StackTrace::Enabled = true;
 #endif
 
-  if (blank_warmup) {
-    bool error;
-    hphp_warmup(g_context.getNoCheck(), "", "", "", error);
+  if (has_eval_support) {
+    // Ordering is sensitive; StatCache::requestInit produces work that
+    // must be done in VMExecutionContext::requestInit.
+    StatCache::requestInit();
+  }
+
+  if (hhvm) {
+    g_vmContext->requestInit();
   }
 }
 
@@ -1099,11 +1234,8 @@ void hphp_thread_init() {
 }
 
 bool hphp_is_warmup_enabled() {
-  return s_warmup_state->enabled;
-}
-
-void hphp_set_warmup_enabled() {
-  s_warmup_state->enabled = true;
+  MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
+  return mm->isEnabled();
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1113,58 +1245,27 @@ ExecutionContext *hphp_context_init() {
   return context;
 }
 
-static void handle_invoke_exception(bool &ret, ExecutionContext *context,
-                                    std::string &errorMsg, bool &error) {
-  try {
-    if (!handle_exception(context, errorMsg, InvokeException, error)) {
-      ret = false;
-    }
-  } catch (const ExitException &e) {
-    // Got an ExitException during exception handling, handle similarly to
-    // handle_exception, except not calling the callback
-  } catch (...) {
-    if (!handle_exception(context, errorMsg, HandlerException, error)) {
-      ret = false;
-      context->obEndAll();
-    }
-  }
-}
-
 bool hphp_invoke_simple(const std::string &filename,
                         bool warmupOnly /* = false */) {
   bool error; string errorMsg;
   return hphp_invoke(g_context.getNoCheck(), filename, false, null_array, null,
-                     "", "", "", error, errorMsg, true, warmupOnly);
+                     "", "", error, errorMsg, true, warmupOnly);
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, CArrRef funcParams, VRefParam funcRet,
-                 const string &warmupDoc, const string &reqInitFunc,
-                 const string &reqInitDoc,
+                 const string &reqInitFunc, const string &reqInitDoc,
                  bool &error, string &errorMsg,
-                 bool once /* = true */, bool warmupOnly /* = false */) {
+                 bool once /* = true */, bool warmupOnly /* = false */,
+                 bool richErrorMsg /* = false */) {
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
   error = false;
-
-  if (RuntimeOption::SandboxMode && !warmupDoc.empty()) {
-    // Sandbox mode shouldn't do warmup, because
-    //   (1) The checkpoint after warmup only records smart-allocated
-    //       objects, not things like ClassInfo.
-    //   (2) The php files under sandbox mode is subject to frequent change,
-    //       which might invalidate the warmed-up state.
-    Logger::Warning("WarmupDocument is ignored under the sandbox mode; "
-                    "use RequestInitDocument instead.");
-  }
 
   String oldCwd;
   if (isServer) {
     oldCwd = context->getCwd();
-    if (!warmupDoc.empty() && !RuntimeOption::SandboxMode) {
-      hphp_chdir_file(warmupDoc);
-    }
   }
-  if (!hphp_warmup(context, RuntimeOption::SandboxMode ? "" : warmupDoc,
-                   reqInitFunc, reqInitDoc, error)) {
+  if (!hphp_warmup(context, reqInitFunc, reqInitDoc, error)) {
     if (isServer) context->setCwd(oldCwd);
     return false;
   }
@@ -1180,14 +1281,14 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         include_impl_invoke(cmd.c_str(), once, get_variable_table());
       }
     } catch (...) {
-      handle_invoke_exception(ret, context, errorMsg, error);
+      handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);
     }
   }
 
   try {
     context->onShutdownPreSend();
   } catch (...) {
-    handle_invoke_exception(ret, context, errorMsg, error);
+    handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);
   }
 
   if (isServer) context->setCwd(oldCwd);
@@ -1205,8 +1306,9 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
       Eval::Debugger::InterruptPSPEnded(program);
     } catch (const Eval::DebuggerException &e) {}
   }
-  if (has_eval_support) {
-    Eval::RequestEvalState::DestructObjects();
+  if (hhvm) {
+    static_cast<VMExecutionContext*>(
+      static_cast<BaseExecutionContext*>(context))->requestExit();
   }
   if (shutdown) {
     context->onRequestShutdown();
@@ -1220,8 +1322,6 @@ void hphp_thread_exit() {
 }
 
 void hphp_session_exit() {
-  FiberAsyncFunc::OnRequestExit();
-  Eval::RequestEvalState::Reset();
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
@@ -1238,21 +1338,24 @@ void hphp_session_exit() {
   }
   mm->resetStats();
 
-  if (mm->afterCheckpoint()) {
+  if (mm->isEnabled()) {
     ServerStatsHelper ssh("rollback");
-
-    g_context.getCheck(); // sweep may call g_context->, which is a noCheck
+    // sweep may call g_context->, which is a noCheck, so we need to
+    // reinitialize g_context here
+    g_context.getCheck();
+    // MemoryManager::sweepAll() will handle sweeping for PHP objects and
+    // PHP resources (ex. File, Collator, XmlReader, etc.)
     mm->sweepAll();
-
-    /**
-     * We have to do it again, because g_context.getCheck() creates a new
-     * ExecutionContext object that has SmartAllocated data members. These
-     * members cannot survive over rollback(), so we need to delete g_context.
-     */
+    // Destroy g_context again because ExecutionContext has SmartAllocated
+    // data members. These members cannot survive over rollback(), so we need
+    // to destroy g_context before calling rollback().
     g_context.destroy();
-
+    // MemoryManager::rollback() will handle sweeping for all types that have
+    // dedicated allocators (ex. StringData, ZendArray, HphpArray, etc.) and
+    // it reset all of the allocators in preparation for the next request.
     mm->rollback();
-    s_warmup_state->atCheckpoint = true;
+    // Do any post-sweep cleanup necessary for global variables
+    free_global_variables_after_sweep();
     g_context.getCheck();
   } else {
     g_context.getCheck();
@@ -1264,7 +1367,7 @@ void hphp_session_exit() {
 }
 
 void hphp_process_exit() {
-  FiberAsyncFunc::Stop();
+  XboxServer::Stop();
   Eval::Debugger::Stop();
   Extension::ShutdownModules();
   LightProcess::Close();

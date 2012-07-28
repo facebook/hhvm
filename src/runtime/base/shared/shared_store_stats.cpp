@@ -20,7 +20,8 @@
 #include <util/json.h>
 #include <pcre.h>
 
-using namespace std;
+using std::ostream;
+using std::ostringstream;
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
@@ -236,7 +237,16 @@ int64 SharedStoreStats::s_dataTotalSize = 0;
 int64 SharedStoreStats::s_deleteSize = 0;
 int64 SharedStoreStats::s_replaceSize = 0;
 
-Mutex SharedStoreStats::s_lock;
+int32 SharedStoreStats::s_addCount = 0;
+int32 SharedStoreStats::s_primeCount = 0;
+int32 SharedStoreStats::s_fromFileCount = 0;
+int32 SharedStoreStats::s_updateCount = 0;
+int32 SharedStoreStats::s_deleteCount = 0;
+int32 SharedStoreStats::s_expireCount = 0;
+
+int32 SharedStoreStats::s_expireQueueSize = 0;
+int64 SharedStoreStats::s_purgingTime = 0;
+
 ReadWriteMutex SharedStoreStats::s_rwlock;
 
 SharedStoreStats::StatsMap SharedStoreStats::s_statsMap,
@@ -251,7 +261,15 @@ string SharedStoreStats::report_basic() {
   writeEntryInt(out, "Key_Count", s_keyCount, false, 1, true);
   writeEntryInt(out, "Size_Total", s_keySize + s_dataTotalSize, false, 1, true);
   writeEntryInt(out, "Size_Key", s_keySize, false, 1, true);
-  writeEntryInt(out, "Size_Data", s_dataTotalSize, true, 1, true);
+  writeEntryInt(out, "Size_Data", s_dataTotalSize, false, 1, true);
+  writeEntryInt(out, "Add_Count", s_addCount, false, 1, true);
+  writeEntryInt(out, "Prime_Count", s_primeCount, false, 1, true);
+  writeEntryInt(out, "From_File_Count", s_fromFileCount, false, 1, true);
+  writeEntryInt(out, "Update_Count", s_updateCount, false, 1, true);
+  writeEntryInt(out, "Delete_Count", s_deleteCount, false, 1, true);
+  writeEntryInt(out, "Expire_Count", s_expireCount, false, 1, true);
+  writeEntryInt(out, "Expire_Queue_Size", s_expireQueueSize, false, 1, true);
+  writeEntryInt(out, "Purging_Time", s_purgingTime, true, 1, true);
   out << "}\n";
   return out.str();
 }
@@ -262,6 +280,14 @@ string SharedStoreStats::report_basic_flat() {
       << ", " << "\"hphp.apc.key_count\":" << s_keyCount
       << ", " << "\"hphp.apc.size_key\":" << s_keySize
       << ", " << "\"hphp.apc.size_data\":" << s_dataTotalSize
+      << ", " << "\"hphp.apc.add_count\":" << s_addCount
+      << ", " << "\"hphp.apc.prime_count\":" << s_primeCount
+      << ", " << "\"hphp.apc.from_file_count\":" << s_fromFileCount
+      << ", " << "\"hphp.apc.update_count\":" << s_updateCount
+      << ", " << "\"hphp.apc.delete_count\":" << s_deleteCount
+      << ", " << "\"hphp.apc.expire_count\":" << s_expireCount
+      << ", " << "\"hphp.apc.expire_queue_size\":" << s_expireQueueSize
+      << ", " << "\"hphp.apc.purging_time\":" << s_purgingTime
       << "}\n";
   return out.str();
 }
@@ -286,7 +312,7 @@ string SharedStoreStats::report_keys() {
 }
 
 bool SharedStoreStats::snapshot(const char *filename, std::string& keySample) {
-  ofstream out(filename);
+  std::ofstream out(filename);
   if (out.fail()) {
     return false;
   }
@@ -357,45 +383,39 @@ void SharedStoreStats::add(SharedValueProfile *svp) {
 //////////////////////////////////////////////////////////////////////////////
 // Hooks
 
-void SharedStoreStats::addDirect(int32 keySize, int32 dataTotal) {
-  lock();
-  s_keyCount++;
-  s_keySize += keySize;
-  s_dataTotalSize += dataTotal;
-  unlock();
+void SharedStoreStats::addDirect(int32 keySize, int32 dataTotal, bool prime,
+                                 bool file) {
+  atomic_inc(s_keyCount);
+  atomic_add(s_keySize, keySize);
+  atomic_add(s_dataTotalSize, (int64)dataTotal);
+  atomic_inc(s_addCount);
+  if (prime) {
+    atomic_inc(s_primeCount);
+  }
+  if (file) {
+    atomic_inc(s_fromFileCount);
+  }
 }
 
-void SharedStoreStats::removeDirect(int32 keySize, int32 dataTotal) {
-  lock();
-  s_keyCount--;
-  s_keySize -= keySize;
-  s_dataTotalSize -= dataTotal;
-  unlock();
+void SharedStoreStats::removeDirect(int32 keySize, int32 dataTotal, bool exp) {
+  atomic_dec(s_keyCount);
+  atomic_add(s_keySize, 0 - keySize);
+  atomic_add(s_dataTotalSize, 0 - (int64)dataTotal);
+  if (exp) {
+    atomic_inc(s_expireCount);
+  } else {
+    atomic_inc(s_deleteCount);
+  }
 }
 
 void SharedStoreStats::updateDirect(int32 dataTotalOld, int32 dataTotalNew) {
-  lock();
-  s_dataTotalSize -= dataTotalOld;
-  s_dataTotalSize += dataTotalNew;
-  unlock();
+  atomic_add(s_dataTotalSize, 0 - (int64)dataTotalOld);
+  atomic_add(s_dataTotalSize, (int64)dataTotalNew);
+  atomic_inc(s_updateCount);
 }
 
-void SharedStoreStats::onClear() {
-  WriteLock l(s_rwlock);
-  StatsMap::iterator iter;
-  for (iter = s_statsMap.begin(); iter != s_statsMap.end();) {
-    delete (iter++)->second;
-  }
-  s_statsMap.clear();
-  if (RuntimeOption::EnableAPCSizeDetail) {
-    for (iter = s_detailMap.begin(); iter != s_detailMap.end();) {
-      delete (iter++)->second;
-    }
-    s_detailMap.clear();
-  }
-  lock();
-  resetStats();
-  unlock();
+void SharedStoreStats::addPurgingTime(int64 purgingTime) {
+  atomic_add(s_purgingTime, purgingTime);
 }
 
 void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,

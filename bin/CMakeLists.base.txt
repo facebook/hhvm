@@ -22,6 +22,10 @@ IF("$ENV{HPHP_HOME}" STREQUAL "")
         message(FATAL_ERROR "You should set the HPHP_HOME environmental")
 ENDIF()
 
+IF("$ENV{USE_HHVM}" STREQUAL "1")
+	SET(USE_HHVM TRUE)
+ENDIF()
+
 file(TO_CMAKE_PATH "$ENV{HPHP_HOME}" HPHP_HOME)
 
 IF(NOT IS_DIRECTORY ${HPHP_HOME})
@@ -43,6 +47,10 @@ include(HPHPSetup)
 if ("${PROGRAM_NAME}" STREQUAL "")
 	set(PROGRAM_NAME program)
 endif()
+
+if (USE_HHVM)
+	ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/src/hhvm\\\"")
+endif(USE_HHVM)
 
 auto_sources(SOURCES "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -78,6 +86,22 @@ SET_PROPERTY(TARGET afdt PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libafdt.a"
 add_library(mbfl STATIC IMPORTED)
 SET_PROPERTY(TARGET mbfl PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libmbfl.a")
 
-target_link_libraries(${PROGRAM_NAME} libhphp_runtime)
+if (USE_HHVM)
+
+	add_library(libext_hhvm STATIC IMPORTED)
+SET_PROPERTY(TARGET libext_hhvm PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libext_hhvm.a")
+
+	add_library(libanalysis STATIC IMPORTED)
+SET_PROPERTY(TARGET libanalysis PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libhphp_analysis.a")
+
+	SET_TARGET_PROPERTIES(${PROGRAM_NAME} PROPERTIES LINK_FLAGS -Wl,-u,hphp_compiler_parse,-u,hphp_build_native_func_unit,-u,hphp_build_native_class_unit,${HPHP_HOME}/bin/libhphp_analysis.a)
+
+	target_link_libraries(${PROGRAM_NAME} libhphp_runtime libext_hhvm libanalysis)
+else()
+
+	target_link_libraries(${PROGRAM_NAME} libhphp_runtime)
+
+endif(USE_HHVM)
+
 
 hphp_link(${PROGRAM_NAME})

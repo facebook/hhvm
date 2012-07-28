@@ -26,7 +26,8 @@
 #include <util/lock.h>
 #include <util/logger.h>
 
-using namespace std;
+using std::set;
+using std::deque;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

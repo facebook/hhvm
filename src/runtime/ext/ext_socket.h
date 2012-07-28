@@ -54,7 +54,7 @@ Variant f_socket_recvfrom(CObjRef socket, VRefParam buf, int len, int flags,
 bool f_socket_shutdown(CObjRef socket, int how = 0);
 void f_socket_close(CObjRef socket);
 String f_socket_strerror(int errnum);
-int f_socket_last_error(CObjRef socket = null_object);
+int64 f_socket_last_error(CObjRef socket = null_object);
 void f_socket_clear_error(CObjRef socket = null_object);
 Variant f_getaddrinfo(CStrRef host, CStrRef port, int family = 0,
                       int socktype = 0, int protocol = 0, int flags = 0);

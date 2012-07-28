@@ -21,9 +21,6 @@
 #include <util/logger.h>
 #include <util/timer.h>
 
-using namespace std;
-using namespace boost;
-
 // libevent is not exposing this data structure, but we need it.
 struct evkeyvalq_ {
   struct evkeyval *tqh_first;
@@ -83,7 +80,8 @@ LibEventHttpClientPtr LibEventHttpClient::Get(const std::string &address,
   int maxConnection = 0;
   {
     ReadLock lock(ConnectionPoolMutex);
-    map<string, int>::const_iterator iter = ConnectionPoolConfig.find(hash);
+    std::map<string, int>::const_iterator iter =
+      ConnectionPoolConfig.find(hash);
     if (iter == ConnectionPoolConfig.end()) {
       // not configured to cache
       ServerStats::Log("evhttp.skip", 1);

@@ -19,6 +19,7 @@
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/server/http_protocol.h>
+#include <runtime/eval/debugger/debugger.h>
 #include <util/compatibility.h>
 #include <util/logger.h>
 
@@ -135,13 +136,15 @@ void LibEventWorker::onThreadEnter() {
   ASSERT(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
   server->onThreadEnter();
+  if (RuntimeOption::EnableDebugger) {
+    Eval::Debugger::RegisterThread();
+  }
 }
 
 void LibEventWorker::onThreadExit() {
   ASSERT(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
   server->onThreadExit(m_handler);
-  MemoryManager::TheMemoryManager().getNoCheck()->cleanup();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -284,6 +287,11 @@ void LibEventServer::stop() {
     // an error occured but we're in shutdown already, so ignore
   }
   m_dispatcherThread.waitForEnd();
+
+  // wait for the timeout thread to stop
+  m_timeoutThreadData.stop();
+  m_timeoutThread.waitForEnd();
+
   evhttp_free(m_server);
   m_server = NULL;
 }
@@ -349,6 +357,12 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
                                 int code, LibEventTransport *transport) {
   int nwritten = 0;
   bool skip_sync = false;
+
+  if (request->evcon == NULL) {
+    evhttp_request_free(request);
+    return;
+  }
+
 #ifdef _EVENT_USE_OPENSSL
   skip_sync = evhttp_is_connection_ssl(request->evcon);
 #endif
@@ -478,6 +492,11 @@ void PendingResponseQueue::process() {
     Response &res = *responses[i];
     evhttp_request *request = res.request;
     int code = res.code;
+
+    if (request->evcon == NULL) {
+      evhttp_request_free(request);
+      continue;
+    }
 
     bool skip_sync = false;
 #ifdef _EVENT_USE_OPENSSL

@@ -32,7 +32,6 @@
 #include <iomanip>
 
 using namespace HPHP;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -122,7 +121,7 @@ std::string Construct::getText(bool useCache /* = false */,
                                /* = AnalysisResultPtr() */) {
   std::string &text = m_text;
   if (useCache && !text.empty()) return text;
-  ostringstream o;
+  std::ostringstream o;
   CodeGenerator cg(&o, CodeGenerator::PickledPHP);
   cg.translatePredefined(translate);
   outputPHP(cg, ar);
@@ -295,6 +294,11 @@ void Construct::dumpNode(int spc) {
       } else {
         type_info += ";";
       }
+      if (e->getAssertedType()) {
+        type_info += "!" + e->getAssertedType()->toString();
+      } else {
+        type_info += "!";
+      }
       type_info = "{" + type_info + "} ";
     }
   } else {
@@ -308,7 +312,8 @@ void Construct::dumpNode(int spc) {
     s -= n;
   }
 
-  std::cout << "-> 0x" << hex << setfill('0') << setw(10) << (int64)this << dec;
+  std::cout << "-> 0x" << std::hex << std::setfill('0')
+            << std::setw(10) << (int64)this << std::dec;
 
   std::cout << " " << name << "(" << type << ") ";
   if (id) {
@@ -316,11 +321,13 @@ void Construct::dumpNode(int spc) {
   }
   if (idPtr) {
     std::cout << "idp=0x" <<
-      hex << setfill('0') << setw(10) << (int64)idPtr.get() << " ";
+      std::hex << std::setfill('0') << std::setw(10) <<
+      (int64)idPtr.get() << " ";
   }
   if (idCsePtr) {
     std::cout << "idcsep=0x" <<
-      hex << setfill('0') << setw(10) << (int64)idCsePtr.get() << " ";
+      std::hex << std::setfill('0') << std::setw(10) <<
+      (int64)idCsePtr.get() << " ";
   }
 
   if (value != "") {
@@ -453,4 +460,15 @@ void Construct::dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,
                      ConstructPtr endBefore, ConstructPtr endAfter) {
   ConstructDumper cd(spc, ar, functionOnly);
   cd.walk(state, endBefore, endAfter);
+}
+
+void Construct::parseTimeFatal(Compiler::ErrorType err, const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  string msg;
+  Util::string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+
+  if (err != Compiler::NoError) Compiler::Error(err, shared_from_this());
+  throw ParseTimeFatalException(m_loc->file, m_loc->line0, "%s", msg.c_str());
 }

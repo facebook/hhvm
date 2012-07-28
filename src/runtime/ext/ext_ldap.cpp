@@ -972,7 +972,7 @@ Variant f_ldap_compare(CObjRef link, CStrRef dn, CStrRef attribute,
   return -1LL;
 }
 
-int f_ldap_errno(CObjRef link) {
+int64 f_ldap_errno(CObjRef link) {
   LdapLink *ld = link.getTyped<LdapLink>();
   return _get_lderrno(ld->link);
 }
@@ -996,7 +996,7 @@ Variant f_ldap_get_dn(CObjRef link, CObjRef result_entry) {
   return false;
 }
 
-int f_ldap_count_entries(CObjRef link, CObjRef result) {
+int64 f_ldap_count_entries(CObjRef link, CObjRef result) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
   return ldap_count_entries(ld->link, res->data);

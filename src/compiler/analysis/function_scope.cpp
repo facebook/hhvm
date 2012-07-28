@@ -40,8 +40,6 @@
 #include <runtime/base/zend/zend_string.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -51,6 +49,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
                              ModifierExpressionPtr modifiers,
                              int attribute, const std::string &docComment,
                              FileScopePtr file,
+                             const std::vector<UserAttributePtr> &attrs,
                              bool inPseudoMain /* = false */)
     : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
       m_minParam(minParam), m_maxParam(maxParam), m_attribute(attribute),
@@ -62,11 +61,21 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_containsThis(false), m_containsBareThis(false), m_nrvoFix(true),
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
-      m_directInvoke(false), m_needsRefTemp(false), m_needsCheckMem(false),
+      m_directInvoke(false), m_needsRefTemp(false),
+      m_needsObjTemp(false), m_needsCheckMem(false),
       m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
-      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
+      m_mergeable(false),
+      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0) {
   init(ar);
+  for (unsigned i = 0; i < attrs.size(); ++i) {
+    if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
+      attrs[i]->parseTimeFatal(Compiler::DeclaredAttributeTwice,
+                               "Redeclared attribute %s",
+                               attrs[i]->getName().c_str());
+    }
+    m_userAttributes[attrs[i]->getName()] = attrs[i]->getExp();
+  }
 }
 
 FunctionScope::FunctionScope(FunctionScopePtr orig,
@@ -79,9 +88,9 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
                  BlockScope::FunctionScope),
       m_minParam(orig->m_minParam), m_maxParam(orig->m_maxParam),
       m_attribute(orig->m_attribute), m_modifiers(modifiers),
-      m_hasVoid(orig->m_hasVoid), m_method(orig->m_method),
-      m_refReturn(orig->m_refReturn), m_virtual(orig->m_virtual),
-      m_hasOverride(orig->m_hasOverride),
+      m_userAttributes(orig->m_userAttributes), m_hasVoid(orig->m_hasVoid),
+      m_method(orig->m_method), m_refReturn(orig->m_refReturn),
+      m_virtual(orig->m_virtual), m_hasOverride(orig->m_hasOverride),
       m_perfectVirtual(orig->m_perfectVirtual),
       m_overriding(orig->m_overriding), m_volatile(orig->m_volatile),
       m_pseudoMain(orig->m_pseudoMain), m_magicMethod(orig->m_magicMethod),
@@ -93,18 +102,21 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_contextSensitive(orig->m_contextSensitive),
       m_directInvoke(orig->m_directInvoke),
       m_needsRefTemp(orig->m_needsRefTemp),
+      m_needsObjTemp(orig->m_needsObjTemp),
       m_needsCheckMem(orig->m_needsCheckMem),
       m_closureGenerator(orig->m_closureGenerator), m_noLSB(orig->m_noLSB),
       m_nextLSB(orig->m_nextLSB), m_hasTry(orig->m_hasTry),
       m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
-      m_redeclaring(orig->m_redeclaring),
-      m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction) {
+      m_mergeable(orig->m_mergeable), m_redeclaring(orig->m_redeclaring),
+      m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction),
+      m_nextID(0) {
   init(ar);
   m_originalName = originalName;
   setParamCounts(ar, m_minParam, m_maxParam);
 }
 
 void FunctionScope::init(AnalysisResultConstPtr ar) {
+  m_dynamicInvoke = false;
   bool canInline = true;
   if (m_pseudoMain) {
     canInline = false;
@@ -121,8 +133,8 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
   }
 
   // FileScope's flags are from parser, but VariableTable has more flags
-  // coming from type inference phase. So we are tranferring these two
-  // flags just for better modularization between FileScope and VariableTable.
+  // coming from type inference phase. So we are tranferring these flags
+  // just for better modularization between FileScope and VariableTable.
   if (m_attribute & FileScope::ContainsDynamicVariable) {
     m_variables->setAttribute(VariableTable::ContainsDynamicVariable);
   }
@@ -148,8 +160,10 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
 
   m_dynamic = Option::IsDynamicFunction(m_method, m_name) ||
     Option::EnableEval == Option::FullEval || Option::AllDynamic;
-  m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
-    Option::DynamicInvokeFunctions.end();
+  if (!m_method && Option::DynamicInvokeFunctions.find(m_name) !=
+      Option::DynamicInvokeFunctions.end()) {
+    setDynamicInvoke();
+  }
   if (m_modifiers) {
     m_virtual = m_modifiers->isAbstract();
   }
@@ -188,14 +202,23 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_containsThis(false), m_containsBareThis(false), m_nrvoFix(true),
       m_inlineAsExpr(false), m_inlineSameContext(false),
       m_contextSensitive(false),
-      m_directInvoke(false), m_needsRefTemp(false),
+      m_directInvoke(false), m_needsRefTemp(false), m_needsObjTemp(false),
       m_closureGenerator(false), m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
-      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
+      m_mergeable(false), m_redeclaring(-1), m_inlineIndex(0),
+      m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name) ||
     Option::EnableEval == Option::FullEval || Option::AllDynamic;
-  m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
-    Option::DynamicInvokeFunctions.end();
+  m_dynamicInvoke = false;
+  if (!method && Option::DynamicInvokeFunctions.find(m_name) !=
+      Option::DynamicInvokeFunctions.end()) {
+    setDynamicInvoke();
+  }
+}
+
+void FunctionScope::setDynamicInvoke() {
+  m_returnType = Type::Variant;
+  m_dynamicInvoke = true;
 }
 
 void FunctionScope::setParamCounts(AnalysisResultConstPtr ar, int minParam,
@@ -422,6 +445,18 @@ void FunctionScope::addNewObjCaller(BlockScopePtr caller) {
   addUse(caller, UseKindCaller & ~UseKindCallerReturn);
 }
 
+bool FunctionScope::mayUseVV() const {
+  VariableTableConstPtr variables = getVariables();
+  return (inPseudoMain() ||
+          isVariableArgument() ||
+          isGenerator() ||
+          variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
+          variables->getAttribute(VariableTable::ContainsExtract) ||
+          variables->getAttribute(VariableTable::ContainsCompact) ||
+          variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
+          variables->getAttribute(VariableTable::ContainsDynamicFunctionCall));
+}
+
 bool FunctionScope::matchParams(FunctionScopePtr func) {
   // leaving them alone for now
   if (m_overriding || func->m_overriding) return false;
@@ -486,7 +521,7 @@ bool FunctionScope::needsClassParam() {
   return getVariables()->hasStatic();
 }
 
-const char *FunctionScope::getPrefix(ExpressionListPtr params) {
+const char *FunctionScope::getPrefix(AnalysisResultPtr ar, ExpressionListPtr params) {
   bool isMethod = getContainingClass();
   bool callInner = false;
   if (Option::HardTypeHints && !Option::SystemGen &&
@@ -500,7 +535,7 @@ const char *FunctionScope::getPrefix(ExpressionListPtr params) {
           if (Type::SameType(spec, m_paramTypes[i])) {
             ExpressionPtr p = (*params)[i];
             TypePtr at = p->getActualType();
-            if (!Type::SameType(spec, at)) {
+            if (!Type::SubType(ar, at, spec)) {
               callInner = false;
               break;
             }
@@ -721,7 +756,7 @@ void FunctionScope::setReturnType(AnalysisResultConstPtr ar, TypePtr type) {
     getInferTypesMutex().assertOwnedBySelf();
   }
   // no change can be made to virtual function's prototype
-  if (m_overriding) return;
+  if (m_overriding || m_dynamicInvoke) return;
 
   if (!type) {
     m_hasVoid = true;
@@ -741,13 +776,17 @@ void FunctionScope::pushReturnType() {
   getInferTypesMutex().assertOwnedBySelf();
   m_prevReturn = m_returnType;
   m_hasVoid = false;
-  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
+  if (m_overriding || m_dynamicInvoke || m_perfectVirtual || m_pseudoMain) {
+    return;
+  }
   m_returnType.reset();
 }
 
 bool FunctionScope::popReturnType() {
   getInferTypesMutex().assertOwnedBySelf();
-  if (m_overriding || m_perfectVirtual || m_pseudoMain) return false;
+  if (m_overriding || m_dynamicInvoke || m_perfectVirtual || m_pseudoMain) {
+    return false;
+  }
 
   if (m_returnType) {
     if (m_prevReturn) {
@@ -775,7 +814,9 @@ bool FunctionScope::popReturnType() {
 
 void FunctionScope::resetReturnType() {
   getInferTypesMutex().assertOwnedBySelf();
-  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
+  if (m_overriding || m_dynamicInvoke || m_perfectVirtual || m_pseudoMain) {
+    return;
+  }
   m_returnType = m_prevReturn;
   m_prevReturn.reset();
 }
@@ -870,6 +911,22 @@ void FunctionScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   BlockScope::outputPHP(cg, ar);
+}
+
+void FunctionScope::outputCPPDef(CodeGenerator &cg) {
+  if (isVolatile()) {
+    string name = CodeGenerator::FormatLabel(m_name);
+    if (isRedeclaring()) {
+      cg_printf("extern const %sCallInfo %s%s;\n",
+                isRedeclaring() ? "Redeclared" : "",
+                Option::CallInfoPrefix, getId().c_str());
+      cg_printf("g->GCI(%s) = &%s%s;\n",
+                name.c_str(),
+                Option::CallInfoPrefix,
+                getId().c_str());
+    }
+    cg_printf("g->FVF(%s) = true;\n", name.c_str());
+  }
 }
 
 void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -1082,8 +1139,12 @@ void FunctionScope::outputCPPParamsImpl(CodeGenerator &cg,
     } else {
       cg_printf(", ");
     }
-    TypePtr type = getParamType(i);
-    type->outputCPPDecl(cg, ar, BlockScopeRawPtr(this));
+    if (isRefParam(i)) {
+      cg_printf("VRefParam");
+    } else {
+      TypePtr type = getParamType(i);
+      type->outputCPPDecl(cg, ar, BlockScopeRawPtr(this));
+    }
     cg_printf(" a%d", i);
   }
 
@@ -1159,7 +1220,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     cg_printf("Array(");
     if (m_maxParam) {
       // param arrays are always vectors
-      cg_printf("ArrayInit(%d).", m_maxParam);
+      cg_printf("ArrayInit(%d, ArrayInit::vectorInit).", m_maxParam);
     }
   }
   for (int i = 0; i < m_maxParam; i++) {
@@ -1262,7 +1323,8 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
             return;
           }
         }
-        cg_printf("Array(ArrayInit(%d).", paramCount - i);
+        cg_printf("Array(ArrayInit(%d, ArrayInit::vectorInit).",
+                  paramCount - i);
       }
     }
     if (extra) {
@@ -1800,6 +1862,10 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
   outputCPPParamsCall(cg, ar, false);
   cg.setContext(context);
   cg_printf(");\n");
+  if (scope->derivesFromRedeclaring() ||
+      scope->hasAttribute(ClassScope::HasDestructor, ar)) {
+    cg_printf("clearNoDestruct();\n");
+  }
   cg_printf("return this;\n");
   cg_indentEnd("}\n");
 }
@@ -1810,6 +1876,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   int attribute = ClassInfo::IsNothing;
   if (!isUserFunction()) attribute |= ClassInfo::IsSystem;
+  if (!m_method && isSepExtension()) attribute |= ClassInfo::IsPrivate;
   if (isVolatile() && !isRedeclaring()) attribute |= ClassInfo::IsVolatile;
   if (isRefReturn()) attribute |= ClassInfo::IsReference;
 
@@ -1843,6 +1910,10 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     attribute &= ~ClassInfo::HasDocComment;
   }
 
+  if (m_method && isConstructor(getContainingClass())) {
+    attribute |= ClassInfo::IsConstructor;
+  }
+
   // Use the original cased name, for reflection to work correctly.
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\", (const char *)%d, "
             "(const char *)%d,\n", attribute,
@@ -1866,27 +1937,26 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   Variant defArg;
   for (int i = 0; i < m_maxParam; i++) {
     int attr = ClassInfo::IsNothing;
-    if (i >= m_minParam) attr |= ClassInfo::IsOptional;
     if (isRefParam(i)) attr |= ClassInfo::IsReference;
 
-    const std::string &tname = m_paramTypeSpecs[i] ?
-      m_paramTypeSpecs[i]->getPHPName() : "";
-    cg_printf("(const char *)0x%04X, \"%s\", \"%s\", ",
-              attr, m_paramNames[i].c_str(),
-              Util::toLower(tname).c_str());
+    cg_printf("(const char *)0x%04X, \"%s\", ",
+              attr, m_paramNames[i].c_str());
 
-    if (i >= m_minParam) {
-      MethodStatementPtr m =
-        dynamic_pointer_cast<MethodStatement>(getStmt());
-      if (m) {
-        ExpressionListPtr params = m->getParams();
-        assert(i < params->getCount());
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-        assert(param);
-        ExpressionPtr def = param->defaultValue();
+    MethodStatementPtr m =
+      dynamic_pointer_cast<MethodStatement>(getStmt());
+    if (m) {
+      ExpressionListPtr params = m->getParams();
+      assert(i < params->getCount());
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+      assert(param);
+      cg_printf("\"%s\", ", param->hasTypeHint() ?
+                            param->getOriginalTypeHint().c_str() : "");
+      ExpressionPtr def = param->defaultValue();
+      if (def) {
         string sdef = def->getText();
         char *esdef = string_cplus_escape(sdef.data(), sdef.size());
+        ASSERT(esdef);
         if (!def->isScalar() || !def->getScalarValue(defArg)) {
           /**
            * Special value runtime/ext/ext_reflection.cpp can check and throw.
@@ -1903,21 +1973,37 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
         }
         free(esdef);
       } else {
-        char *def = string_cplus_escape(m_paramDefaults[i].data(),
-                                        m_paramDefaults[i].size());
-        char *defText = string_cplus_escape(m_paramDefaultTexts[i].data(),
-                                            m_paramDefaultTexts[i].size());
-        cg_printf("\"%s\", \"%s\",\n", def, defText);
-        free(def);
-        free(defText);
+        cg_printf("\"\", \"\",\n");
       }
     } else {
-      cg_printf("\"\", \"\",\n");
+      cg_printf("\"\", ");
+      char *def = string_cplus_escape(m_paramDefaults[i].data(),
+                                      m_paramDefaults[i].size());
+      char *defText = string_cplus_escape(m_paramDefaultTexts[i].data(),
+                                          m_paramDefaultTexts[i].size());
+      cg_printf("\"%s\", \"%s\",\n", def ? def : "", defText ? defText : "");
+      free(def);
+      free(defText);
     }
   }
   cg_printf("NULL,\n");
 
   m_variables->outputCPPStaticVariables(cg, ar);
+
+  // user attributes
+  UserAttributeMap::const_iterator it = m_userAttributes.begin();
+  for (; it != m_userAttributes.end(); ++it) {
+    ExpressionPtr expr = it->second;
+    Variant v;
+    bool isScalar UNUSED = expr->getScalarValue(v);
+    ASSERT(isScalar);
+    int valueLen = 0;
+    string valueText = SymbolTable::getEscapedText(v, valueLen);
+    cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
+              CodeGenerator::EscapeLabel(it->first).c_str(),
+              valueLen, valueText.c_str());
+  }
+  cg_printf("NULL,\n");
 }
 
 void FunctionScope::outputCPPHelperClassAlloc(CodeGenerator &cg,
@@ -1972,37 +2058,41 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     ClassScopePtr scope = getContainingClass();
     string clsName = scope->getId();
 
-    cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
-              clsName.c_str(), Option::CallInfoPrefix, id.c_str(),
+    cg.printf("extern const CallInfo %s%s%s%s = { (void*)&%s%s::%s%s, ",
+              Option::CallInfoPrefix, clsName.c_str(),
+              Option::IdPrefix.c_str(), id.c_str(),
               Option::ClassPrefix, clsName.c_str(), Option::InvokePrefix,
               id.c_str());
     cg.printf("(void*)&%s%s::%s%s", Option::ClassPrefix, clsName.c_str(),
               Option::InvokeFewArgsPrefix, id.c_str());
     if (m_name == "__invoke" &&
         strcasecmp(clsName.c_str(), "closure")) {
-      cg.printf(", %d, %d, 0x%.16llXLL);\n",
+      cg.printf(", %d, %d, 0x%.16llXLL};\n",
                 m_maxParam, flags, refflags);
 
       // need to generate an extra call info for an extra wrapper
-      cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
-                clsName.c_str(), Option::CallInfoWrapperPrefix, id.c_str(),
+      cg.printf("const CallInfo %s%s%s%s = { (void*)&%s%s::%s%s, ",
+                Option::CallInfoWrapperPrefix, clsName.c_str(),
+                Option::IdPrefix.c_str(), id.c_str(),
                 Option::ClassPrefix, clsName.c_str(),
                 Option::InvokeWrapperPrefix, id.c_str());
       cg.printf("(void*)&%s%s::%s%s", Option::ClassPrefix, clsName.c_str(),
                 Option::InvokeWrapperFewArgsPrefix, id.c_str());
     }
   } else {
-    cg.printf("%sCallInfo %s%s(",
+    cg.printf("extern const %sCallInfo %s%s = {",
               isRedeclaring() ? "Redeclared" : "",
               Option::CallInfoPrefix, id.c_str());
-    if (isRedeclaring()) {
-      cg_printf("%d, ", getRedeclaringId());
-    }
+    if (isRedeclaring()) cg_printf("{");
     cg_printf("(void*)&%s%s, (void*)&%s%s",
               Option::InvokePrefix, id.c_str(),
               Option::InvokeFewArgsPrefix, id.c_str());
   }
-  cg.printf(", %d, %d, 0x%.16llXLL);\n", m_maxParam, flags, refflags);
+  cg.printf(", %d, %d, 0x%.16llXLL", m_maxParam, flags, refflags);
+  if (isRedeclaring()) {
+    cg_printf("}, %d", getRedeclaringId());
+  }
+  cg_printf("};\n");
 }
 
 void FunctionScope::getClosureUseVars(
@@ -2023,7 +2113,7 @@ void FunctionScope::getClosureUseVars(
 }
 
 template <class U, class V>
-static U pair_first_elem(pair<U, V> p) { return p.first; }
+static U pair_first_elem(std::pair<U, V> p) { return p.first; }
 
 bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
   useVars.clear();
@@ -2071,16 +2161,26 @@ void FunctionScope::outputCPPSubClassParam(CodeGenerator &cg,
 }
 
 void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (!getContainingClass()) {
-    // spit out extern CallInfo decl
-    cg_printf("extern %sCallInfo %s%s;\n",
-              isRedeclaring() ? "Redeclared" : "",
-              Option::CallInfoPrefix, getId().c_str());
+  ClassScopeRawPtr cls = getContainingClass();
+  if (!cls) {
+    if (!inPseudoMain()) {
+      // spit out extern CallInfo decl
+      cg_printf("extern const %sCallInfo %s%s;\n",
+                isRedeclaring() ? "Redeclared" : "",
+                Option::CallInfoPrefix, getId().c_str());
+    }
+  } else {
+    if (isGenerator()) {
+      cg_printf("extern const CallInfo %s%s%s%s;\n",
+                Option::CallInfoPrefix, getContainingClass()->getId().c_str(),
+                Option::IdPrefix.c_str(), getId().c_str());
+    }
   }
 
   const string &funcName = CodeGenerator::FormatLabel(m_name);
   ParameterExpressionPtrVec useVars;
-  if (needsAnonClosureClass(useVars)) {
+  if (needsAnonClosureClass(useVars) &&
+      cg.insertDeclaredClosure(this)) {
     cg_printf("FORWARD_DECLARE_CLASS(Closure$%s);\n", funcName.c_str());
     cg_indentBegin("class %sClosure$%s : public %sClosure {\n",
                    Option::ClassPrefix, funcName.c_str(),
@@ -2155,6 +2255,14 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_indentBegin("class %sContinuation$%s : public %sContinuation {\n",
                    Option::ClassPrefix, funcName.c_str(), Option::ClassPrefix);
 
+    if (cls && cls->derivedByDynamic()) {
+      /*
+       * The m_obj property is potentially a redeclared-parent. We
+       * need to keep a reference to the root object too, to ensure
+       * that the root object doesnt get destroyed before m_obj
+       */
+      cg_printf("Object o_rootObj;\n");
+    }
     cg_printf("public:\n");
 
     cg_printf("DECLARE_OBJECT_ALLOCATION_NO_SWEEP(%sContinuation$%s)\n",
@@ -2225,6 +2333,9 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
 
     if (hasEmit) cg_printf(", ");
+    if (cls && cls->derivedByDynamic()) {
+      cg_printf("CObjRef rootObj, ");
+    }
     cg_indentBegin("CVarRef obj, CArrRef args) {\n");
     cg_printf("%sContinuation$%s cont = "
               "%sContinuation$%s(NEWOBJ(%sContinuation$%s)());\n",
@@ -2234,6 +2345,9 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("cont->%s__construct"
               "(func, extra, isMethod, origFuncName, obj, args);\n",
               Option::MethodPrefix);
+    if (cls && cls->derivedByDynamic()) {
+      cg_printf("cont->o_rootObj = rootObj;\n");
+    }
 
     BOOST_FOREACH(ParameterExpressionPtr param, ctorParams) {
       const string& name = param->getName();

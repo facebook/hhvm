@@ -1,0 +1,31 @@
+bool(false)
+bool(false)
+**************
+bool(true)
+string(1) "C"
+bool(true)
+string(1) "D"
+**************
+bool(true)
+string(1) "C"
+bool(true)
+string(1) "D"
+**************
+bool(false)
+string(1) "C"
+bool(false)
+string(1) "D"
+**************
+bool(false)
+string(1) "C"
+bool(false)
+string(1) "D"
+**************
+bool(true)
+string(1) "D"
+bool(true)
+string(1) "D"
+bool(false)
+string(1) "D"
+bool(false)
+string(1) "C"

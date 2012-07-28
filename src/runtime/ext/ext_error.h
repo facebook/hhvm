@@ -28,13 +28,14 @@ namespace HPHP {
 Array f_debug_backtrace(bool provide_object = true);
 Array f_hphp_debug_caller_info();
 void f_debug_print_backtrace();
+String debug_string_backtrace(bool skip);
 Array f_error_get_last();
 bool f_error_log(CStrRef message, int message_type = 0, CStrRef destination = null_string, CStrRef extra_headers = null_string);
-int f_error_reporting(CVarRef level = null);
+int64 f_error_reporting(CVarRef level = null);
 bool f_restore_error_handler();
 bool f_restore_exception_handler();
 Variant f_set_error_handler(CVarRef error_handler, int error_types = k_E_ALL);
-String f_set_exception_handler(CVarRef exception_handler);
+Variant f_set_exception_handler(CVarRef exception_handler);
 void f_hphp_set_error_page(CStrRef page);
 void f_hphp_throw_fatal_error(CStrRef error_msg);
 void f_hphp_clear_unflushed();

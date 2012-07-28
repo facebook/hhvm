@@ -195,7 +195,7 @@ public:
     unsigned int m_pos;
   };
 
-  Iterator begin() {
+  Iterator begin() const {
     if (m_size == 0) return end();
     return Iterator(this, m_head->next, 0);
   }

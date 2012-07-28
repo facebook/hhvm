@@ -39,7 +39,7 @@ bool f_memcache_debug(bool onoff);
 Variant f_memcache_get_version(CObjRef memcache);
 bool f_memcache_flush(CObjRef memcache, int timestamp = 0);
 bool f_memcache_setoptimeout(CObjRef memcache, int timeoutms);
-int f_memcache_get_server_status(CObjRef memcache, CStrRef host, int port = 0);
+int64 f_memcache_get_server_status(CObjRef memcache, CStrRef host, int port = 0);
 bool f_memcache_set_compress_threshold(CObjRef memcache, int threshold, double min_savings = 0.2);
 Array f_memcache_get_stats(CObjRef memcache, CStrRef type = null_string, int slabid = 0, int limit = 100);
 Array f_memcache_get_extended_stats(CObjRef memcache, CStrRef type = null_string, int slabid = 0, int limit = 100);
@@ -85,7 +85,7 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(setoptimeout);
   public: bool t_close();
   DECLARE_METHOD_INVOKE_HELPERS(close);
-  public: int t_getserverstatus(CStrRef host, int port = 0);
+  public: int64 t_getserverstatus(CStrRef host, int port = 0);
   DECLARE_METHOD_INVOKE_HELPERS(getserverstatus);
   public: bool t_setcompressthreshold(int threshold, double min_savings = 0.2);
   DECLARE_METHOD_INVOKE_HELPERS(setcompressthreshold);

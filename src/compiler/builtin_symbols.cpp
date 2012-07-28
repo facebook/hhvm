@@ -33,8 +33,6 @@
 #include <dlfcn.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 #define BF_COLUMN_COUNT  3
 #define BF_COLUMN_NAME   0
@@ -567,12 +565,10 @@ void BuiltinSymbols::LoadSuperGlobals() {
 
 bool BuiltinSymbols::IsSuperGlobal(const std::string &name) {
   if (NoSuperGlobals) return false;
-  LoadSuperGlobals();
   return s_superGlobals.find(name) != s_superGlobals.end();
 }
 
 TypePtr BuiltinSymbols::GetSuperGlobalType(const std::string &name) {
-  LoadSuperGlobals();
   StringToTypePtrMap::const_iterator iter = s_superGlobals.find(name);
   if (iter != s_superGlobals.end()) {
     return iter->second;

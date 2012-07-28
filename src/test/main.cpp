@@ -20,12 +20,11 @@
 #include <dlfcn.h>
 
 using namespace HPHP;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
-  string suite, which, set;
+  std::string suite, which, set;
   void (*compiler_hook_initialize)();
   compiler_hook_initialize =
     (void (*)())dlsym(NULL, "compiler_hook_initialize");
@@ -46,10 +45,14 @@ int main(int argc, char **argv) {
     Test::logger.log_url = argv[5];
   }
 
+  // Initialize the runtime options with their default values
+  {
+    Hdf empty;
+    RuntimeOption::Load(empty);
+  }
+
   hphp_process_init();
+  init_global_variables();
   Test test;
-  Hdf empty;
-  vector<string> emptyConfStrings;
-  RuntimeOption::Load(empty, &emptyConfStrings);
   return test.RunTests(suite, which, set) ? 0 : -1;
 }

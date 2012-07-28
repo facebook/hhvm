@@ -25,8 +25,6 @@
 #include <compiler/option.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -50,6 +48,11 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
                                  ClassScopePtr scope) {
   ConstantTablePtr constants = scope->getConstants();
 
+  if (scope->isTrait()) {
+    parseTimeFatal(Compiler::InvalidTraitStatement,
+                   "Traits cannot have constants");
+  }
+
   for (int i = 0; i < m_exp->getCount(); i++) {
     AssignmentExpressionPtr assignment =
       dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
@@ -58,8 +61,10 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
     const std::string &name =
       dynamic_pointer_cast<ConstantExpression>(var)->getName();
     if (constants->isPresent(name)) {
-      Compiler::Error(Compiler::DeclaredConstantTwice, assignment);
-      m_exp->removeElement(i--);
+      assignment->parseTimeFatal(Compiler::DeclaredConstantTwice,
+                                 "Cannot redeclare %s::%s",
+                                 scope->getOriginalName().c_str(),
+                                 name.c_str());
     } else {
       assignment->onParseRecur(ar, scope);
     }
@@ -163,8 +168,22 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 Option::IdPrefix.c_str(), var->getName().c_str());
       break;
     case CodeGenerator::CppClassConstantsImpl: {
-      cg_printf("const ");
       bool isString = type->is(Type::KindOfString);
+      bool isVariant = Type::IsMappedToVariant(type);
+      ScalarExpressionPtr scalarExp =
+        dynamic_pointer_cast<ScalarExpression>(value);
+      bool stringForVariant = false;
+      if (isVariant && scalarExp &&
+          scalarExp->getActualType() &&
+          scalarExp->getActualType()->is(Type::KindOfString)) {
+        cg_printf("static const StaticString %s%s%s%s%sv(LITSTR_INIT(%s));\n",
+                  Option::ClassConstantPrefix, scope->getId().c_str(),
+                  Option::IdPrefix.c_str(), var->getName().c_str(),
+                  Option::IdPrefix.c_str(),
+                  scalarExp->getCPPLiteralString().c_str());
+        stringForVariant = true;
+      }
+      cg_printf("const ");
       if (isString) {
         cg_printf("StaticString");
       } else {
@@ -175,9 +194,12 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 Option::ClassConstantPrefix, scope->getId().c_str(),
                 Option::IdPrefix.c_str(), var->getName().c_str());
       cg_printf(isString ? "(" : " = ");
-      ScalarExpressionPtr scalarExp =
-        dynamic_pointer_cast<ScalarExpression>(value);
-      if (isString && scalarExp) {
+      if (stringForVariant) {
+        cg_printf("%s%s%s%s%sv",
+                  Option::ClassConstantPrefix, scope->getId().c_str(),
+                  Option::IdPrefix.c_str(), var->getName().c_str(),
+                  Option::IdPrefix.c_str());
+      } else if (isString && scalarExp) {
         cg_printf("LITSTR_INIT(%s)",
                   scalarExp->getCPPLiteralString().c_str());
       } else {

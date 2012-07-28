@@ -64,7 +64,7 @@ inline String x_preg_quote(CStrRef str, CStrRef delimiter = null_string) {
   return f_preg_quote(str, delimiter);
 }
 
-inline int x_preg_last_error() {
+inline int64 x_preg_last_error() {
   FUNCTION_INJECTION_BUILTIN(preg_last_error);
   return f_preg_last_error();
 }

@@ -68,6 +68,48 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_get_method_info",
+    'desc'   => "Internally used by ReflectionClass for getting a method's information.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => VariantMap,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "cls",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_get_class_constant",
+    'desc'   => "Internally used by ReflectionClass for getting a default parameters value.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "cls",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "hphp_get_class_info",
     'desc'   => "Internally used by ReflectionClass for getting a class's information.",
     'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
@@ -305,6 +347,17 @@ DefineFunction(
         'name'   => "name",
         'type'   => String,
       ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_scalar_typehints_enabled",
+    'desc'   => "Internally used by ReflectionClass for checking whether scalar typehints are enabled.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => Boolean,
     ),
     'taint_observer' => false,
   ));

@@ -48,10 +48,10 @@ Variant f_ldap_search(CVarRef link, CVarRef base_dn, CVarRef filter, CArrRef att
 bool f_ldap_rename(CObjRef link, CStrRef dn, CStrRef newrdn, CStrRef newparent, bool deleteoldrdn);
 bool f_ldap_delete(CObjRef link, CStrRef dn);
 Variant f_ldap_compare(CObjRef link, CStrRef dn, CStrRef attribute, CStrRef value);
-int f_ldap_errno(CObjRef link);
+int64 f_ldap_errno(CObjRef link);
 String f_ldap_error(CObjRef link);
 Variant f_ldap_get_dn(CObjRef link, CObjRef result_entry);
-int f_ldap_count_entries(CObjRef link, CObjRef result);
+int64 f_ldap_count_entries(CObjRef link, CObjRef result);
 Variant f_ldap_get_entries(CObjRef link, CObjRef result);
 Variant f_ldap_first_entry(CObjRef link, CObjRef result);
 Variant f_ldap_next_entry(CObjRef link, CObjRef result_entry);

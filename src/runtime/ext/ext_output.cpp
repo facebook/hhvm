@@ -18,6 +18,7 @@
 #include <runtime/ext/ext_output.h>
 #include <runtime/ext/ext_json.h>
 #include <runtime/base/runtime_option.h>
+#include <util/hardware_counter.h>
 #include <util/lock.h>
 #include <util/logger.h>
 
@@ -171,6 +172,7 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   const timespec &tsQueue = transport->getQueueTime();
   const timespec &tsWall = transport->getWallTime();
   const timespec &tsCpu = transport->getCpuTime();
+  const int64 &instStart = transport->getInstructions();
 
   Array ret;
   if (get_as_float) {
@@ -182,6 +184,7 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
     ret.set("process-wall", ts_microtime(tsWall));
     ret.set("process-cpu",  ts_microtime(tsCpu));
   }
+  ret.set("process-inst", instStart);
   return ret;
 }
 
@@ -192,6 +195,25 @@ Variant f_hphp_output_global_state(bool serialize /* = true */) {
   } else {
     return r;
   }
+}
+
+int64 f_hphp_instruction_counter(void) {
+  return Util::HardwareCounter::GetInstructionCount();
+}
+
+Variant f_hphp_get_hardware_counters(void) {
+  Array ret;
+
+  Util::HardwareCounter::GetPerfEvents(ret);
+  return ret;
+}
+
+bool f_hphp_set_hardware_events(CStrRef events /* = null */) {
+  return Util::HardwareCounter::SetPerfEvents(events);
+}
+
+void f_hphp_clear_hardware_events() {
+  Util::HardwareCounter::ClearPerfEvents();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

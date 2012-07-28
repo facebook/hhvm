@@ -38,8 +38,6 @@
 #include <runtime/base/array/array_iterator.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,9 +52,9 @@ Expression::ExprClass Expression::Classes[] = {
 };
 
 Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
-    : Construct(scope, loc), m_kindOf(kindOf), m_context(RValue),
-      m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0),
-      m_unused(false) {
+    : Construct(scope, loc), m_context(RValue), m_kindOf(kindOf),
+      m_originalScopeSet(false), m_unused(false), m_canon_id(0), m_error(0),
+      m_canonPtr() {
 }
 
 ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
@@ -247,6 +245,13 @@ TypePtr Expression::getType() {
   return Type::Any;
 }
 
+TypePtr Expression::getGenType() {
+  if (m_expectedType) return m_expectedType;
+  if (m_implementedType) return m_implementedType;
+  if (m_actualType) return m_actualType;
+  return Type::Any;
+}
+
 TypePtr Expression::getCPPType() {
   if (m_implementedType) return m_implementedType;
   if (m_actualType) return m_actualType;
@@ -258,6 +263,9 @@ TypePtr Expression::propagateTypes(AnalysisResultConstPtr ar, TypePtr inType) {
   TypePtr ret = inType;
 
   while (e) {
+    if (e->getAssertedType() && !getAssertedType()) {
+      setAssertedType(e->getAssertedType());
+    }
     TypePtr inferred = Type::Inferred(ar, ret, e->m_actualType);
     if (!inferred) {
       break;
@@ -371,7 +379,7 @@ void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
   }
 
   if (m_actualType->isSpecificObject()) {
-    const_pointer_cast<AnalysisResult>(ar)->
+    boost::const_pointer_cast<AnalysisResult>(ar)->
       addClassDependency(getFileScope(), m_actualType->getName());
   }
 }
@@ -460,6 +468,9 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
   TypePtr ret = type;
   if (value) {
     ret = value->inferAndCheck(ar, Type::Some, false);
+    if (value->isLiteralNull()) {
+      ret = Type::Null;
+    }
     ASSERT(ret);
   }
 
@@ -473,13 +484,6 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
     scope->getConstants()->check(getScope(), exp->getName(), ret,
                                  true, ar, variable,
                                  bases, defScope);
-  } else if (variable->is(Expression::KindOfSimpleVariable)) {
-    SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-    if (var->getName() == "this" && getClassScope()) {
-      if (getScope()->isFirstPass()) {
-        Compiler::Error(Compiler::ReassignThis, variable);
-      }
-    }
   }
 
   m_implementedType.reset();
@@ -596,6 +600,10 @@ bool Expression::equals(ExpressionPtr other) {
     ExpressionPtr thisKid = getNthExpr(i);
     ExpressionPtr otherKid = other->getNthExpr(i);
 
+    if (!thisKid || !otherKid) {
+      if (thisKid == otherKid) continue;
+      return false;
+    }
     if (!thisKid->equals(otherKid)) {
       return false;
     }
@@ -609,21 +617,38 @@ ExpressionPtr Expression::getCanonTypeInfPtr() const {
   if (!(m_context & (LValue|RefValue|UnsetContext|DeepReference))) {
     return m_canonPtr;
   }
-  if (!m_canonPtr->getActualType()) return ExpressionPtr();
+  if (!hasAnyContext(AccessContext|ObjectContext) ||
+      !m_canonPtr->getActualType()) {
+    return ExpressionPtr();
+  }
   switch (m_canonPtr->getActualType()->getKindOf()) {
   case Type::KindOfArray:
     {
-      if (!is(Expression::KindOfSimpleVariable)) return ExpressionPtr();
+      if (!hasContext(AccessContext)) break;
+      if (m_canonPtr->getAssertedType()) return m_canonPtr;
+      if (!is(Expression::KindOfSimpleVariable)) break;
       SimpleVariableConstPtr sv(
         static_pointer_cast<const SimpleVariable>(shared_from_this()));
       if (sv->couldBeAliased()) return ExpressionPtr();
-      if ((hasContext(LValue) && hasContext(AccessContext)) &&
+      if (hasContext(LValue) &&
           !(m_context & (RefValue | UnsetContext | DeepReference))) {
         return m_canonPtr;
       }
     }
     break;
-  // TODO(stephentu): more cases for strings + objects
+  case Type::KindOfObject:
+    {
+      if (!hasContext(ObjectContext)) break;
+      if (m_canonPtr->getAssertedType()) return m_canonPtr;
+      if (!is(Expression::KindOfSimpleVariable)) break;
+      SimpleVariableConstPtr sv(
+        static_pointer_cast<const SimpleVariable>(shared_from_this()));
+      if (sv->couldBeAliased()) return ExpressionPtr();
+      if (hasContext(LValue) &&
+          !(m_context & (RefValue | UnsetContext | DeepReference))) {
+        return m_canonPtr;
+      }
+    }
   default:
     break;
   }
@@ -651,6 +676,13 @@ void Expression::computeLocalExprAltered() {
   if (res) {
     setLocalExprAltered();
   }
+}
+
+bool Expression::isArray() const {
+  if (is(KindOfUnaryOpExpression)) {
+    return static_cast<const UnaryOpExpression*>(this)->getOp() == T_ARRAY;
+  }
+  return false;
 }
 
 bool Expression::isUnquotedScalar() const {
@@ -932,13 +964,20 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                 t.c_str());
 
       int closeParen = 0;
+      string method = Type::GetFastCastMethod(
+        m_actualType, isReferenced, constRef);
       if (!Type::SameType(m_actualType, dstType)) {
         dstType->outputCPPCast(cg, ar, getScope());
         cg_printf("(");
         closeParen++;
-      }
-
-      if (m_actualType->isSpecificObject()) {
+        if (m_actualType->is(Type::KindOfObject)) {
+          method = "getObjectDataOrNull";
+        } else if (m_actualType->is(Type::KindOfString)) {
+          method = "getStringDataOrNull";
+        } else if (m_actualType->is(Type::KindOfArray)) {
+          method = "getArrayDataOrNull";
+        }
+      } else if (m_actualType->isSpecificObject()) {
         cg_printf("(");
         closeParen++;
         m_actualType->outputCPPFastObjectCast(
@@ -947,8 +986,6 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
         closeParen++;
       }
 
-      const string& method = Type::GetFastCastMethod(
-          m_actualType, isReferenced, constRef);
       cg_printf("%s.%s()", t.c_str(), method.c_str());
 
       for (int i = 0; i < closeParen; i++) cg_printf(")");
@@ -1358,6 +1395,10 @@ bool Expression::getTypeCastPtrs(
       !Type::SameType(m_implementedType, srcType)) {
     srcType = m_implementedType;
   }
+  if (!srcType && dstType && Type::IsCastNeeded(ar, Type::Variant, dstType)) {
+    srcType = Type::Variant;
+    return true;
+  }
   return dstType && srcType && ((m_context & LValue) == 0) &&
       Type::IsCastNeeded(ar, srcType, dstType);
 }
@@ -1403,12 +1444,39 @@ bool Expression::canUseFastCast(AnalysisResultPtr ar) {
   // with a fast cast method, and we have a dst type that
   // is not Variant (in CPP), then we have something to benefit
   // from doing a fast cast and should emit one.
-  return m_implementedType &&
-         Type::IsMappedToVariant(m_implementedType) &&
-         m_actualType &&
-         Type::HasFastCastMethod(m_actualType) &&
-         dstType &&
-         !Type::IsMappedToVariant(dstType);
+  if (m_implementedType &&
+      Type::IsMappedToVariant(m_implementedType) &&
+      m_actualType &&
+      Type::HasFastCastMethod(m_actualType) &&
+      dstType &&
+      !Type::IsMappedToVariant(dstType)) {
+    if (m_assertedType) return true;
+    if (is(KindOfSimpleVariable) &&
+        static_cast<SimpleVariable*>(this)->isGuarded()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Expression::outputCPPGuardedObjectPtr(CodeGenerator &cg) {
+  if (is(KindOfSimpleVariable) &&
+      static_cast<SimpleVariable*>(this)->isGuarded()) {
+    TypePtr at = getActualType();
+    if (at && at->is(Type::KindOfObject)) {
+      TypePtr it = getImplementedType();
+      if (it && !it->is(Type::KindOfObject)) {
+        TypePtr et = getExpectedType();
+        if (!et || !et->is(Type::KindOfObject)) {
+          cg_printf(".getObjectData()");
+          return true;
+        }
+      }
+      cg_printf(".get()");
+      return true;
+    }
+  }
+  return false;
 }
 
 void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -1431,7 +1499,7 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (needsCast) {
     ASSERT(dstType);
-    bool isSpecObj = m_actualType->isSpecificObject();
+    bool isSpecObj = m_actualType && m_actualType->isSpecificObject();
     if (!useFastCast ||
         !Type::SameType(m_actualType, dstType) ||
         isSpecObj) {
@@ -1440,20 +1508,20 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
           dstType->outputCPPCast(cg, ar, getScope());
           cg_printf("(");
           closeParen++;
+        } else {
+          // specific object is special, since we do not have
+          // a fast cast method into a specific object on Variant,
+          // we must emit an additional (but also fast) cast.
+          // In the end, the cast will look like (for example):
+          //
+          //    (const X&)(v_var.asCObjRef())
+
+          cg_printf("(");
+          closeParen++;
+          m_actualType->outputCPPFastObjectCast(cg, ar, getScope(), !isLval);
+          cg_printf("(");
+          closeParen++;
         }
-
-        // specific object is special, since we do not have
-        // a fast cast method into a specific object on Variant,
-        // we must emit an additional (but also fast) cast.
-        // In the end, the cast will look like (for example):
-        //
-        //    (const X&)(v_var.asCObjRef())
-
-        cg_printf("(");
-        closeParen++;
-        m_actualType->outputCPPFastObjectCast(cg, ar, getScope(), !isLval);
-        cg_printf("(");
-        closeParen++;
       } else {
         dstType->outputCPPCast(cg, ar, getScope());
         cg_printf("(");
@@ -1514,9 +1582,21 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (useFastCast) {
     ASSERT(srcType == m_implementedType);
-    const string& method = Type::GetFastCastMethod(
+    string method;
+    if (!Type::SameType(m_actualType, dstType)) {
+      if (m_actualType->is(Type::KindOfObject)) {
+        method = "getObjectDataOrNull";
+      } else if (m_actualType->is(Type::KindOfString)) {
+        method = "getStringDataOrNull";
+      } else if (m_actualType->is(Type::KindOfArray)) {
+        method = "getArrayDataOrNull";
+      }
+    }
+    if (method.empty()) {
+      method = Type::GetFastCastMethod(
         m_actualType, isReferenced,
         !isLval && !(m_context & UnsetContext));
+    }
     cg_printf(".%s()", method.c_str());
   }
 

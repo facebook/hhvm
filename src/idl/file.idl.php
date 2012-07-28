@@ -923,7 +923,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "md5_file",
-    'desc'   => "Calculates the MD5 hash of the file specified by the filename parameter using the » RSA Data Security, Inc. MD5 Message-Digest Algorithm, and returns that hash. The hash is a 32-character hexadecimal number.",
+    'desc'   => "Calculates the MD5 hash of the file specified by the filename parameter using the RSA Data Security, Inc. MD5 Message-Digest Algorithm, and returns that hash. The hash is a 32-character hexadecimal number.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -1176,7 +1176,7 @@ DefineFunction(
     'desc'   => "umask() sets PHP's umask to mask & 0777 and returns the old umask. When PHP is being used as a server module, the umask is restored when each request is finished.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "umask() without arguments simply returns the current umask otherwise the old umask is returned.",
     ),
     'args'   => array(

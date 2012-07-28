@@ -37,17 +37,21 @@ class c_SplObjectStorage : public ExtObjectData {
   Variant m_storage;
   int64 m_index;
 
+  // Destructor
+  ~c_SplObjectStorage() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SplObjectStorage, SplObjectStorage, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_SplObjectStorage(const ObjectStaticCallbacks *cb = &cw_SplObjectStorage) : ExtObjectData(cb), m_index(0LL) {}
+  c_SplObjectStorage(const ObjectStaticCallbacks *cb = &cw_SplObjectStorage) : ExtObjectData(cb), m_index(0LL) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   void init();
   public: void t_rewind();
   public: bool t_valid();
   public: int64 t_key();
   public: Variant t_current();
   public: void t_next();
-  public: int t_count();
+  public: int64 t_count();
   public: bool t_contains(CVarRef v_obj);
   public: void t_attach(CVarRef v_obj);
   public: void t_detach(CVarRef v_obj);

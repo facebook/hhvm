@@ -50,8 +50,7 @@
 #include <util/util.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
+using std::map;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -60,12 +59,13 @@ MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const string &name,
  ExpressionListPtr params, StatementListPtr stmt, int attr,
- const string &docComment, bool method /* = true */)
+ const string &docComment, ExpressionListPtr attrList,
+ bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
-    m_method(method), m_modifiers(modifiers),
-    m_ref(ref), m_originalName(name),
-    m_params(params), m_stmt(stmt), m_attribute(attr),
-    m_docComment(docComment), m_cppLength(-1) {
+    m_method(method), m_ref(ref), m_attribute(attr),
+    m_cppLength(-1), m_modifiers(modifiers),
+    m_originalName(name), m_params(params), m_stmt(stmt),
+    m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
 }
 
@@ -73,12 +73,13 @@ MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const string &name,
  ExpressionListPtr params, StatementListPtr stmt, int attr,
- const string &docComment, bool method /* = true */)
+ const string &docComment, ExpressionListPtr attrList,
+ bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement)),
-    m_method(method), m_modifiers(modifiers),
-    m_ref(ref), m_originalName(name),
-    m_params(params), m_stmt(stmt), m_attribute(attr),
-    m_docComment(docComment), m_cppLength(-1) {
+    m_method(method), m_ref(ref), m_attribute(attr), m_cppLength(-1),
+    m_modifiers(modifiers), m_originalName(name),
+    m_params(params), m_stmt(stmt),
+    m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
 }
 
@@ -142,7 +143,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   minParam = maxParam = 0;
   bool hasRef = false;
   if (m_params) {
-    set<string> names, allDeclNames;
+    std::set<string> names, allDeclNames;
     int i = 0;
     maxParam = m_params->getCount();
     for (i = maxParam; i--; ) {
@@ -179,10 +180,19 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
     m_attribute |= FileScope::ContainsReference;
   }
 
+  vector<UserAttributePtr> attrs;
+  if (m_attrList) {
+    for (int i = 0; i < m_attrList->getCount(); ++i) {
+      UserAttributePtr a =
+        dynamic_pointer_cast<UserAttribute>((*m_attrList)[i]);
+      attrs.push_back(a);
+    }
+  }
+
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   FunctionScopePtr funcScope
     (new FunctionScope(ar, m_method, m_name, stmt, m_ref, minParam, maxParam,
-                       m_modifiers, m_attribute, m_docComment, fs));
+                       m_modifiers, m_attribute, m_docComment, fs, attrs));
   if (!m_stmt) {
     funcScope->setVirtual();
   }
@@ -194,14 +204,63 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
 
 void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
                                    ClassScopePtr classScope) {
+
+  if (m_modifiers) {
+    if (classScope->isInterface()) {
+      if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||
+          m_modifiers->isAbstract()  || m_modifiers->isFinal()) {
+        m_modifiers->parseTimeFatal(
+          Compiler::InvalidAttribute,
+          "Access type for interface method %s::%s() must be omitted",
+          classScope->getOriginalName().c_str(), getOriginalName().c_str());
+      }
+    }
+    if (m_modifiers->isAbstract()) {
+      if (m_modifiers->isPrivate() || m_modifiers->isFinal()) {
+        m_modifiers->parseTimeFatal(
+          Compiler::InvalidAttribute,
+          "Cannot declare abstract method %s::%s() %s",
+          classScope->getOriginalName().c_str(),
+          getOriginalName().c_str(),
+          m_modifiers->isPrivate() ? "private" : "final");
+      }
+      if (!classScope->isInterface() && !classScope->isAbstract()) {
+        /* note that classScope->isAbstract() returns true for traits */
+        m_modifiers->parseTimeFatal(Compiler::InvalidAttribute,
+                                    "Class %s contains abstract method %s and "
+                                    "must therefore be declared abstract",
+                                    classScope->getOriginalName().c_str(),
+                                    getOriginalName().c_str());
+      }
+      if (getStmts()) {
+        parseTimeFatal(Compiler::InvalidAttribute,
+                       "Abstract method %s::%s() cannot contain body",
+                       classScope->getOriginalName().c_str(),
+                       getOriginalName().c_str());
+      }
+    }
+  }
+  if ((!m_modifiers || !m_modifiers->isAbstract()) &&
+      !getStmts() && !classScope->isInterface()) {
+    parseTimeFatal(Compiler::InvalidAttribute,
+                   "Non-abstract method %s::%s() must contain body",
+                   classScope->getOriginalName().c_str(),
+                   getOriginalName().c_str());
+  }
+
   FunctionScopeRawPtr fs = getFunctionScope();
 
   classScope->addFunction(ar, fs);
 
-  setSpecialMethod(classScope);
-
   m_className = classScope->getName();
   m_originalClassName = classScope->getOriginalName();
+
+  setSpecialMethod(classScope);
+
+  if (Option::DynamicInvokeFunctions.find(getFullName()) !=
+      Option::DynamicInvokeFunctions.end()) {
+    fs->setDynamicInvoke();
+  }
   if (m_params) {
     for (int i = 0; i < m_params->getCount(); i++) {
       ParameterExpressionPtr param =
@@ -212,27 +271,76 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
   FunctionScope::RecordFunctionInfo(m_name, fs);
 }
 
+void MethodStatement::fixupSelfAndParentTypehints(ClassScopePtr scope) {
+  if (m_params) {
+    for (int i = 0; i < m_params->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      param->fixupSelfAndParentTypehints(scope);
+    }
+  }
+}
+
 void MethodStatement::setSpecialMethod(ClassScopePtr classScope) {
+  if (m_name.size() < 2 || m_name.substr(0,2) != "__") {
+    return;
+  }
+  int numArgs = -1;
+  bool isStatic = false;
   if (m_name == "__construct") {
     classScope->setAttribute(ClassScope::HasConstructor);
   } else if (m_name == "__destruct") {
     classScope->setAttribute(ClassScope::HasDestructor);
   } else if (m_name == "__call") {
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
+    numArgs = 2;
   } else if (m_name == "__get") {
     classScope->setAttribute(ClassScope::HasUnknownPropGetter);
+    numArgs = 1;
   } else if (m_name == "__set") {
     classScope->setAttribute(ClassScope::HasUnknownPropSetter);
+    numArgs = 2;
   } else if (m_name == "__isset") {
     classScope->setAttribute(ClassScope::HasUnknownPropTester);
+    numArgs = 1;
   } else if (m_name == "__unset") {
     classScope->setAttribute(ClassScope::HasPropUnsetter);
+    numArgs = 1;
   } else if (m_name == "__call") {
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
+    numArgs = 2;
   } else if (m_name == "__callstatic") {
     classScope->setAttribute(ClassScope::HasUnknownStaticMethodHandler);
+    numArgs = 2;
+    isStatic = true;
   } else if (m_name == "__invoke") {
     classScope->setAttribute(ClassScope::HasInvokeMethod);
+  } else if (m_name == "__tostring") {
+    numArgs = 0;
+  }
+  if (numArgs >= 0) {
+    // Fatal if the number of arguments is wrong
+    int n = m_params ? m_params->getCount() : 0;
+    if (numArgs != n) {
+      parseTimeFatal(Compiler::InvalidMagicMethod,
+        "Method %s::%s() must take exactly %d argument%s",
+        m_originalClassName.c_str(), m_originalName.c_str(),
+        numArgs, (numArgs == 1) ? "" : "s");
+    }
+    // Fatal if any arguments are pass by reference
+    if (m_params && hasRefParam()) {
+      parseTimeFatal(Compiler::InvalidMagicMethod,
+        "Method %s::%s() cannot take arguments by reference",
+        m_originalClassName.c_str(), m_originalName.c_str());
+    }
+    // Fatal if protected/private or if the staticness is wrong
+    if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||
+        m_modifiers->isStatic() != isStatic) {
+      parseTimeFatal(Compiler::InvalidMagicMethod,
+        "Method %s::%s() must have public visibility and %sbe static",
+        m_originalClassName.c_str(), m_originalName.c_str(),
+        isStatic ? "" : "cannot ");
+    }
   }
 }
 
@@ -329,7 +437,7 @@ public:
   }
 
   void findTryingGotosRecur(StatementPtr s) {
-    if (FunctionWalker::SkipRecurse(s)) return;
+    if (!s || FunctionWalker::SkipRecurse(s)) return;
     switch (s->getKindOf()) {
       case Statement::KindOfLabelStatement:
         if (trys.size()) {
@@ -551,10 +659,15 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
     }
+#ifndef HHVM
+    // This is an hphpc-only transformation to deal with gotos that jump into
+    // try/catch blocks. The VM does not need this transformation, and it does
+    // not support this transformation.
     if (funcScope->hasGoto() && funcScope->hasTry()) {
       TryingGotoFixer tgf(ar);
       tgf.fixTryingGotos(m_stmt);
     }
+#endif
     // TODO: this may have to expand to a concept of "virtual" functions...
     if (m_method) {
       funcScope->disableInline();
@@ -939,14 +1052,12 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           } else {
             outputCPPArgInjections(cg, ar, origFuncName.c_str(),
                                    scope, funcScope);
-            if (funcScope->isConstructor(scope)) {
-              cg_printf("bool oldInCtor = gasInCtor(true);\n");
-            } else if (m_name == "__destruct") {
-              cg_printf("setInDtor();\n");
-            }
             funcScope->outputCPP(cg, ar);
             if (funcScope->needsRefTemp()) {
               cg.genReferenceTemp(shared_from_this());
+            }
+            if (funcScope->needsObjTemp()) {
+              cg_printf("ObjectData *obj_tmp UNUSED;\n");
             }
             cg.setContext(
               CodeGenerator::NoContext); // no inner functions/classes
@@ -1040,7 +1151,7 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
         if (ar->m_arrayIntegerKeyMaxSize < n) ar->m_arrayIntegerKeyMaxSize = n;
         outputParamArrayCreate(cg, true);
       } else {
-        cg_printf("(Array(ArrayInit(%d)", n);
+        cg_printf("(Array(ArrayInit(%d, ArrayInit::vectorInit)", n);
         for (int i = 0; i < n; i++) {
           ParameterExpressionPtr param =
             dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
@@ -1090,13 +1201,48 @@ void MethodStatement::outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg.addHoistedClass(s->getClassScope()->getName());
         }
       }
+      bool seenOther = false;
       for (i = 0; i < n; ++i) {
         StatementPtr s((*m_stmt)[i]);
-        if (s->is(Statement::KindOfFunctionStatement) ||
-            ((s->is(Statement::KindOfClassStatement) ||
-              s->is(Statement::KindOfInterfaceStatement)) &&
-             s->getClassScope()->isBaseClass())) {
+        if (!s || !s->hasImpl()) continue;
+        if (s->is(Statement::KindOfFunctionStatement)) {
           s->outputCPP(cg, ar);
+          continue;
+        }
+        if (s->is(Statement::KindOfClassStatement) ||
+            s->is(Statement::KindOfInterfaceStatement)) {
+          ClassScopeRawPtr cls = s->getClassScope();
+          if (cls->isBaseClass() ||
+              !cls->isVolatile() ||
+              !cls->hasUnknownBases()) {
+            cls->outputCPPDef(cg);
+            continue;
+          }
+          const string &parent = cls->getOriginalParent();
+          if (cls->getBases().size() > (parent.empty() ? 0 : 1)) {
+            // the class is not hoistable because it implements
+            // an interface
+            continue;
+          }
+          assert(!parent.empty());
+          if (seenOther) {
+            ClassScopePtr pcls = ar->findClass(parent);
+            if (pcls) {
+              if (pcls->isVolatile()) {
+                cg_indentBegin("if (%s->CDEC(%s)) {\n",
+                               cg.getGlobals(ar),
+                               CodeGenerator::FormatLabel(
+                                 pcls->getName()).c_str());
+              }
+              cls->outputCPPDef(cg);
+              if (pcls->isVolatile()) {
+                cg_indentEnd("}\n");
+              }
+              continue;
+            }
+          }
+        } else {
+          seenOther = true;
         }
       }
       cg.collectHoistedClasses(false);
@@ -1105,7 +1251,10 @@ void MethodStatement::outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (s->is(Statement::KindOfFunctionStatement)) continue;
         if (s->is(Statement::KindOfClassStatement) ||
             s->is(Statement::KindOfInterfaceStatement)) {
-          if (s->getClassScope()->isBaseClass()) {
+          ClassScopeRawPtr cls = s->getClassScope();
+          if (cls->isBaseClass() ||
+              !cls->isVolatile() ||
+              !cls->hasUnknownBases()) {
             continue;
           }
           cg.collectHoistedClasses(true);
@@ -1118,12 +1267,6 @@ void MethodStatement::outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg.endHoistedClasses();
     } else {
       m_stmt->outputCPP(cg, ar);
-    }
-    if (!m_stmt->hasRetExp()) {
-      ClassScopePtr cls = getClassScope();
-      if (funcScope->isConstructor(cls)) {
-        cg_printf("gasInCtor(oldInCtor);\n");
-      }
     }
   }
 }
@@ -1590,7 +1733,7 @@ void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
               (isStatic ? "static " : ""),
               (!ret && !inClass ? "void" : "HphpVariant"),
               originalName.c_str());
-    ostringstream args;
+    std::ostringstream args;
     bool first = true;
     if (!isStatic) {
       // instance method has an additional parameter
@@ -1702,7 +1845,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
   cg_printf("%s(JNIEnv *env, %s target", mangledName.c_str(),
             (isStatic ? "jclass" : "jobject"));
 
-  ostringstream args;
+  std::ostringstream args;
   bool first = true;
   if (!isStatic) {
     // instance method also gets an additional argument, which is a Variant
@@ -1774,7 +1917,7 @@ void MethodStatement::outputSwigFFIStub(CodeGenerator &cg,
   }
 
   cg_printf("Variant *%s(HphpSession *s", originalName.c_str());
-  ostringstream args;
+  std::ostringstream args;
   bool first = true;
   for (int i = 0; i < ac; i++) {
     cg_printf(", Variant *a%d", i);

@@ -40,7 +40,7 @@ static char *_read_file(FILE *f) {
   size_t nread;
   char *buf = ret;
   int len = size;
-  while (nread = fread(buf, 1, len, f)) {
+  while ((nread = fread(buf, 1, len, f))) {
     buf += nread;
     len -= nread;
     if (len == 0) {
@@ -1696,12 +1696,19 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
       while (*s && (isalnum(*s) || *s == '_' || *s == '.' || *s == '*')) s++;
       SKIPWS(s);
 
-      char num[16];
+      char num[256];
       static int counter = 0;
-      if (*name == '*') {
-        snprintf(num, sizeof(num), "%d", counter++);
-        name = num;
+      char *p;
+      int i = 0;
+      for (p = name; p < s && i < 200; p++) {
+        if (*p != '*') {
+          num[i++] = *p;
+        } else {
+          i += snprintf(num + i, 256 - i, "%d", counter++);
+          name = num;
+        }
       }
+      num[i] = '\0';
 
       if (s[0] == '[') /* attributes */
       {

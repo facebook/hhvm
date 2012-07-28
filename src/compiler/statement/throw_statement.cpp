@@ -17,8 +17,6 @@
 #include <compiler/statement/throw_statement.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors

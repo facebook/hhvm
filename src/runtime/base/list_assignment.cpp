@@ -17,8 +17,6 @@
 #include <runtime/base/list_assignment.h>
 #include <runtime/base/complex_types.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // ListAssignmentElement

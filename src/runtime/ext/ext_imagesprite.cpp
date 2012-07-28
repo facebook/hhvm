@@ -25,6 +25,8 @@
 #include <vector>
 #include <queue>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

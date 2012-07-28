@@ -15,6 +15,8 @@
 */
 
 #include <runtime/eval/debugger/debugger_thrift_buffer.h>
+#include <runtime/base/variable_serializer.h>
+#include <runtime/base/variable_unserializer.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,6 +34,89 @@ void DebuggerThriftBuffer::flushImpl(CStrRef data) {
 
 void DebuggerThriftBuffer::throwError(const char *msg, int code) {
   throw Exception("Protocol Error (%d): %s", code, msg);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static StaticString s_hit_limit(LITSTR_INIT("Hit serialization limit"));
+static StaticString s_unknown_exp(LITSTR_INIT("Hit unknown exception"));
+static StaticString s_type_mismatch(LITSTR_INIT("Type mismatch"));
+
+template<typename T>
+static inline int serializeImpl(T data, String& sdata) {
+  VariableSerializer vs(VariableSerializer::DebuggerSerialize);
+  try {
+    sdata = vs.serialize(data, true);
+  } catch (StringBufferLimitException &e) {
+    sdata = s_hit_limit;
+    return DebuggerWireHelpers::HitLimit;
+  } catch (...) {
+    sdata = s_unknown_exp;
+    return DebuggerWireHelpers::UnknownError;
+  }
+  return DebuggerWireHelpers::NoError;
+}
+
+static inline int unserializeImpl(CStrRef sdata, Variant& data) {
+  if (sdata.same(s_hit_limit)) {
+    return DebuggerWireHelpers::HitLimit;
+  }
+  if (sdata.same(s_unknown_exp)) {
+    return DebuggerWireHelpers::UnknownError;
+  }
+  VariableUnserializer vu(sdata.data(), sdata.size(),
+                          VariableUnserializer::Serialize, true);
+  try {
+    data = vu.unserialize();
+  } catch (Exception &e) {
+    data = null_variant;
+    return DebuggerWireHelpers::UnknownError;
+  }
+  return DebuggerWireHelpers::NoError;
+}
+
+int DebuggerWireHelpers::WireSerialize(CArrRef data, String& sdata) {
+  return serializeImpl(data, sdata);
+}
+
+int DebuggerWireHelpers::WireSerialize(CObjRef data, String& sdata) {
+  return serializeImpl(data, sdata);
+}
+
+int DebuggerWireHelpers::WireSerialize(CVarRef data, String& sdata) {
+  return serializeImpl(data, sdata);
+}
+
+int DebuggerWireHelpers::WireUnserialize(String& sdata, Array& data) {
+  Variant v;
+  int ret = unserializeImpl(sdata, v);
+  if (ret != NoError) {
+    return ret;
+  }
+  if (!v.isArray() && !v.isNull()) {
+    sdata = s_type_mismatch;
+    return TypeMismatch;
+  }
+  data = v;
+  return NoError;
+}
+
+int DebuggerWireHelpers::WireUnserialize(String& sdata, Object& data) {
+  Variant v;
+  int ret = unserializeImpl(sdata, v);
+  if (ret != NoError) {
+    return ret;
+  }
+  if (!v.isObject() && !v.isNull()) {
+    sdata = s_type_mismatch;
+    return TypeMismatch;
+  }
+  data = v;
+  return NoError;
+}
+
+int DebuggerWireHelpers::WireUnserialize(String& sdata, Variant& data) {
+  return unserializeImpl(sdata, data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

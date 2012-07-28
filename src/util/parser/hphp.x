@@ -1,4 +1,4 @@
-%{
+%{ /* -*- mode: c++ -*- */
 #include <util/parser/scanner.h>
 
 // macros for flex
@@ -65,7 +65,7 @@ LABEL   [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 NOTLABEL   [^a-zA-Z_\x7f-\xff]
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
-TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
+TOKENS [;:,.\[\]()|^&+\-*/=%!~$<>?@]
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
 XHPLABEL {LABEL}([:-]{LABEL})*
@@ -75,7 +75,7 @@ XHPLABEL {LABEL}([:-]{LABEL})*
  * or a { and therefore will be taken literally. The case of literal $ before
  * a variable or "${" is handled in a rule for each string type
  */
-DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{]|("\\"{ANY_CHAR})))
+DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$\"\\{]|("\\"{ANY_CHAR})))
 BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{]|("\\"{ANY_CHAR})))
 
 /*
@@ -86,7 +86,7 @@ BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{]|("\\"{ANY_CHAR})))
  * For heredocs, matching continues across/after newlines if/when it's known
  * that the next line doesn't contain a possible ending label
  */
-DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
+DOUBLE_QUOTES_CHARS ("{"*([^$\"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
 BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 %%
@@ -246,6 +246,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"XOR"                { SETTOKEN; return T_LOGICAL_XOR;}
 <ST_IN_SCRIPTING>"<<"                 { STEPPOS; return T_SL;}
 <ST_IN_SCRIPTING>">>"                 { STEPPOS; return T_SR;}
+<ST_IN_SCRIPTING>"..."                { SETTOKEN; return T_VARARG; }
+<ST_IN_SCRIPTING>"intmap"             { SETTOKEN; return _scanner->isStrictMode() ? T_STRICT_INT_MAP : T_STRING; }
+<ST_IN_SCRIPTING>"strmap"             { SETTOKEN; return _scanner->isStrictMode() ? T_STRICT_STR_MAP : T_STRING; }
+
 
 <ST_IN_SCRIPTING>":"{XHPLABEL}  {
   switch (_scanner->lastToken()) {
@@ -264,6 +268,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     case T_CLASS:
     case T_XHP_ATTRIBUTE:
     case -1:
+    case ':': // so that we can correctly parse function foo(): :ui:box {}
+    case T_PRIVATE:  // for types on class variables
+    case T_PROTECTED:
+    case T_PUBLIC:
       yytext++; yyleng--; // skipping the first colon
       SETTOKEN;
       return T_XHP_LABEL;
@@ -329,6 +337,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoll(yytext, NULL, 0);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Dec number is too big: %s", yytext);
+                if (_scanner->isStrictMode()) {
+                        return T_STRICT_ERROR;
+                }
         }
         return T_LNUMBER;
 }
@@ -339,6 +350,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoull(yytext, NULL, 16);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Hex number is too big: %s", yytext);
+                if (_scanner->isStrictMode()) {
+                        return T_STRICT_ERROR;
+                }
         }
         return T_LNUMBER;
 }
@@ -349,6 +363,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoll(yytext, NULL, 0);
         if (ret == LLONG_MAX && errno == ERANGE) {
                 _scanner->error("Offset number is too big: %s", yytext);
+                if (_scanner->isStrictMode()) {
+                        return T_STRICT_ERROR;
+                }
         }
         return T_NUM_STRING;
 }
@@ -427,6 +444,17 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_OPEN_TAG;
 }
 
+<INITIAL,ST_IN_HTML>"<?hh"([ \t]|{NEWLINE}) {
+        if (YY_START != INITIAL) {
+                _scanner->error("Strict mode: content before <?hh");
+                return T_STRICT_ERROR;
+        }
+        STEPPOS;
+        BEGIN(ST_IN_SCRIPTING);
+        _scanner->setStrictMode();
+        return T_OPEN_TAG;
+}
+
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
         _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1);
         return T_VARIABLE;
@@ -451,13 +479,13 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return ']';
 }
 
-<ST_VAR_OFFSET>{TOKENS}|[{}"`] {
+<ST_VAR_OFFSET>{TOKENS}|[{}\"`] {
         /* Only '[' can be valid, but returning other tokens will allow
            a more explicit parse error */
         return yytext[0];
 }
 
-<ST_VAR_OFFSET>[ \n\r\t\\'#] {
+<ST_VAR_OFFSET>[ \n\r\t\\\'#] {
         /* Invalid rule to return a more explicit parse error with proper
            line number */
         yyless(0);
@@ -515,6 +543,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_ONE_LINE_COMMENT>"?>"|"%>" {
+        if (_scanner->isStrictMode()) {
+          _scanner->error("Strict mode: ?> not allowed");
+          return T_STRICT_ERROR;
+        }
         if (_scanner->aspTags() || yytext[yyleng-2] != '%') {
                 _scanner->setToken(yytext, yyleng-2, yytext, yyleng-2);
                 yyless(yyleng-2);
@@ -569,6 +601,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
+        if (_scanner->isStrictMode()) {
+          _scanner->error("Strict mode: ?> not allowed");
+          return T_STRICT_ERROR;
+        }
         STEPPOS;
         BEGIN(ST_IN_HTML);
         if (_scanner->full()) {
@@ -610,7 +646,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         }
 }
 
-<ST_IN_SCRIPTING>(b?["]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)["]) {
+<ST_IN_SCRIPTING>(b?[\"]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)[\"]) {
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         std::string strval =
           _scanner->escape(yytext + bprefix + 1,
@@ -619,16 +655,17 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_CONSTANT_ENCAPSED_STRING;
 }
 
-<ST_IN_SCRIPTING>(b?[']([^'\\]|("\\"{ANY_CHAR}))*[']) {
+<ST_IN_SCRIPTING>(b?[\']([^\'\\]|("\\"{ANY_CHAR}))*[\']?) {
         int bprefix = (yytext[0] != '\'') ? 1 : 0;
+        int closed = (yytext[yyleng - 1] == '\'');
         std::string strval =
           _scanner->escape(yytext + bprefix + 1,
                            yyleng - bprefix - 2, '\'');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
-        return T_CONSTANT_ENCAPSED_STRING;
+        return closed ? T_CONSTANT_ENCAPSED_STRING : T_ENCAPSED_AND_WHITESPACE;
 }
 
-<ST_IN_SCRIPTING>b?["] {
+<ST_IN_SCRIPTING>b?[\"] {
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         _scanner->setToken(yytext, yyleng, yytext + bprefix, yyleng - bprefix);
         BEGIN(ST_DOUBLE_QUOTES);
@@ -686,11 +723,16 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   _scanner->xhpReset();
   return '{';
 }
-<ST_XHP_ATTRIBUTE>["][^"]*["] {
+<ST_XHP_ATTRIBUTE>["][^\"]*["] {
   _scanner->setToken(yytext, yyleng, yytext+1, yyleng-2);
   _scanner->xhpReset();
   return T_XHP_TEXT;
 }
+<ST_XHP_ATTRIBUTE>{ANY_CHAR} {
+  _scanner->xhpReset();
+  yyless(0);
+}
+
 <ST_XHP_CLOSE_TAG>[>] {
   STEPPOS;
   _scanner->xhpReset();
@@ -914,7 +956,7 @@ nowdoc_scan_done:
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
-<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)["])) {
+<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)[\"])) {
         yyless(yyleng - 1);
         std::string strval = _scanner->escape(yytext, yyleng, '"');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
@@ -934,12 +976,12 @@ nowdoc_scan_done:
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
-<ST_DOUBLE_QUOTES>["] {
+<ST_DOUBLE_QUOTES>[\"] {
         BEGIN(ST_IN_SCRIPTING);
         return '"';
 }
 
-<ST_BACKQUOTE>[`] {
+<ST_BACKQUOTE>[\`] {
         BEGIN(ST_IN_SCRIPTING);
         return '`';
 }
@@ -949,7 +991,7 @@ nowdoc_scan_done:
         return 0;
 }
 
-<ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
+<*>{ANY_CHAR} {
         _scanner->error("Unexpected character in input: '%c' (ASCII=%d)",
                         yytext[0], yytext[0]);
 }

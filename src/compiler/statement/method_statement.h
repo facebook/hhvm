@@ -32,16 +32,16 @@ class MethodStatement : public Statement, public IParseHandler {
 protected:
   MethodStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
-                  const std::string &name,
-                  ExpressionListPtr params, StatementListPtr stmt, int attr,
-                  const std::string &docComment,
+                  const std::string &name, ExpressionListPtr params,
+                  StatementListPtr stmt, int attr,
+                  const std::string &docComment, ExpressionListPtr attrList,
                   bool method = true);
 public:
   MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
-                  const std::string &name,
-                  ExpressionListPtr params, StatementListPtr stmt, int attr,
-                  const std::string &docComment,
+                  const std::string &name, ExpressionListPtr params,
+                  StatementListPtr stmt, int attr,
+                  const std::string &docComment, ExpressionListPtr attrList,
                   bool method = true);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
@@ -51,6 +51,8 @@ public:
   virtual int getRecursiveCount() const;
   // implementing IParseHandler
   virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
+
+  void fixupSelfAndParentTypehints(ClassScopePtr scope);
 
   const std::string &getOriginalName() const { return m_originalName;}
   std::string getName() const { return m_name;}
@@ -117,19 +119,20 @@ public:
 
 protected:
   bool m_method;
-  ModifierExpressionPtr m_modifiers;
   bool m_ref;
+  int m_attribute;
+  int m_cppLength;
+  ModifierExpressionPtr m_modifiers;
   std::string m_name;
   std::string m_originalName;
   std::string m_className;
   std::string m_originalClassName;
   ExpressionListPtr m_params;
   StatementListPtr m_stmt;
-  int m_attribute;
   std::string m_docComment;
-  int m_cppLength;
   MethodStatementRawPtr m_origGeneratorFunc;
   MethodStatementRawPtr m_generatorFunc;
+  ExpressionListPtr m_attrList;
 
   void setSpecialMethod(ClassScopePtr classScope);
 

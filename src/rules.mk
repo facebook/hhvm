@@ -66,7 +66,7 @@ endif
 GCC_VERSION := $(shell gcc --version | sed -e '1!d' -e 's%^.*LLVM.*$$%gcc x 4.4.0%' -e 's%^gcc \S\+ \(\S\+\).*$$%\1%')
 
 ###############################################################################
-# Directories an command line switches
+# Directories and command line switches
 
 include $(PROJECT_ROOT)/src/dirs.mk
 
@@ -132,6 +132,9 @@ pic_objects = $(patsubst %.o, %.pic.o, $(1))
 endif # USE_NO_PIC
 endif # USE_PIC_ONLY
 
+# Always excludes emacs temporary backup files
+EXCLUDES += .#%
+
 INTERMEDIATE_FILES += $(GENERATED_SOURCES) time_build.out
 SOURCES += $(filter-out $(EXCLUDES), $(ALL_SOURCES))
 OBJECTS += $(addprefix $(OUT_DIR),$(patsubst %.S, %.o, $(patsubst %.cpp, %.o, $(SOURCES:.c=.o))))
@@ -192,10 +195,30 @@ LD = $(CXX)
 CPPFLAGS += -MMD
 
 # allowing "and", "or" to be re-defined
-CXXFLAGS += -fno-operator-names -ffunction-sections
+CXXFLAGS += -fno-operator-names -ffunction-sections #-std=gnu++0x
 
 # Include frame pointers to make it easier to generate callgraphs in oprofile
 CPPFLAGS += -fno-omit-frame-pointer $(if $(USE_ICC),,-momit-leaf-frame-pointer)
+
+ifdef VALGRIND
+CPPFLAGS += -DVALGRIND
+endif
+
+ifeq ($(USE_HHVM),1)
+CPPFLAGS += -DHHVM
+ifeq ($(USE_HHVM_GC),1)
+CPPFLAGS += -DHHVM_GC
+endif
+# The user can set the intended install path for systemlib.php as follows if
+# intending to install hhvm somewhere other than HPHP_LIB:
+#
+#   make HHVM_LIB_PATH_DEFAULT=/usr/local/hhvm <target>
+ifeq ($(HHVM_LIB_PATH_DEFAULT),)
+CPPFLAGS += -DHHVM_LIB_PATH_DEFAULT='"$(HPHP_LIB)"'
+else
+CPPFLAGS += -DHHVM_LIB_PATH_DEFAULT='"$(HHVM_LIB_PATH_DEFAULT)"'
+endif
+endif
 
 ifdef MAC_OS_X
 
@@ -209,6 +232,11 @@ else
 CPPFLAGS += \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
+
+ifneq ($(wildcard $(PROJECT_ROOT)/facebook/extensions),)
+CPPFLAGS += \
+  -I $(PROJECT_ROOT)/facebook/extensions
+endif
 
 ifdef GOOGLE_CPU_PROFILER
 GOOGLE_TOOLS = 1
@@ -250,6 +278,21 @@ CPPFLAGS += -DDEBUG
 OPT =
 endif
 
+# HHVM never uses VectorArray
+ifeq ($(USE_HHVM),1)
+  ENABLE_VECTOR_ARRAY=
+else
+  ENABLE_VECTOR_ARRAY=1
+endif
+
+ifdef ENABLE_HPHP_ARRAY
+CPPFLAGS += -DENABLE_HPHP_ARRAY
+endif
+
+ifdef ENABLE_VECTOR_ARRAY
+CPPFLAGS += -DENABLE_VECTOR_ARRAY
+endif
+
 ifdef DEBUG_MEMORY_LEAK
 CPPFLAGS += -DDEBUG_MEMORY_LEAK
 OPT =
@@ -264,17 +307,21 @@ CPPFLAGS += -DDEBUG_RACE_CONDITION
 OPT =
 endif
 
-ifdef RELEASE
-CPPFLAGS += -DRELEASE -fmerge-all-constants
+ifneq ($(RELEASE)$(CHECKED),)
+CPPFLAGS += $(if $(RELEASE),-DRELEASE) -fmerge-all-constants
 ifdef OPT_SIZE
 OPT = -Os
 else
 OPT = -O3
 
 ifndef USE_ICC
-# Disable global common subexpression elimination, which made binary code
-# larger, but not faster.
-OPT += -fno-gcse
+# Disable global common subexpression elimination and a few other flags
+# which made binary code larger, but not faster.
+OPT += -fno-gcse\
+       -fno-tree-vectorize -fno-ipa-cp-clone\
+       -fno-unswitch-loops -fno-prefetch-loop-arrays
+# Increase the inline limit for functions not declared inline (faster)
+OPT += --param max-inline-insns-auto=60
 endif
 
 endif
@@ -362,9 +409,6 @@ ifdef NO_TLS
 CPPFLAGS += -DNO_TLS
 endif
 
-ifndef TAINTED
-TAINTED := $(shell test -f $(HPHP_LIB)/tainted_build && echo 1)
-endif
 ifneq ($(TAINTED),)
 CPPFLAGS += -DTAINTED
 endif
@@ -389,10 +433,10 @@ ifdef ENABLE_INTERCEPT
 CPPFLAGS += -DENABLE_INTERCEPT
 endif
 
+ifneq ($(wildcard $(PROJECT_ROOT)/facebook),)
 # facebook specific stuff
 CPPFLAGS += -DFACEBOOK -DHAVE_QUICKLZ
-CPPFLAGS += -DCUF_ASYNC_DEPRECATION_MSG='"call_user_func_async() is deprecated, please use fb_call_user_func_async() instead"'
-CPPFLAGS += -DCUFA_ASYNC_DEPRECATION_MSG='"call_user_func_array_async() is deprecated, please use fb_call_user_func_array_async() instead"'
+endif
 
 MYSQL_UNIX_SOCK_ADDR := $(shell mysql_config --socket)
 ifneq ($(MYSQL_UNIX_SOCK_ADDR), "")
@@ -407,6 +451,7 @@ AR = ar
 endif
 ifndef LINKER
 LINKER = $(CXX)
+unexport LINKER
 endif
 
 AR_CMD = $(TIMECMD) $(AR) -crs
@@ -418,9 +463,8 @@ else
 LDFLAGS += -rdynamic
 endif
 
-ifdef LINKER_SCRIPT
-LDFLAGS += -Wl,--script=$(LINKER_SCRIPT)
-endif
+SCRIPT_ARGS = -Wl,--script=$(LINKER_SCRIPT)
+LDFLAGS += $(if $(LINKER_SCRIPT),$(SCRIPT_ARGS))
 
 # Add library search paths here.
 LDFLAGS	+= \
@@ -442,9 +486,31 @@ endif
 # These have to be libraries that nearly ALL programs need to link with. Do
 # NOT add something that not everyone wants.
 
-# Default to using HPHP's own externals tree
-EXTERNALS ?= hphp
-include $(PROJECT_ROOT)/src/externals/$(EXTERNALS).mk
+# Default externals tree to use
+EXTERNALS ?= gcc-4.6.2-glibc-2.13
+
+$(LIB_DIR)/hphp.mk:
+	$(V)cp $(PROJECT_ROOT)/src/externals/hphp.mk $@
+
+# Generate the fbcode platform makefiles so that we can include them
+$(LIB_DIR)/%.mk: \
+		$(PROJECT_ROOT)/src/externals/fbcode/gen_makefile.py \
+		$(PROJECT_ROOT)/src/externals/fbcode/external_deps.py \
+		$(PROJECT_ROOT)/src/dirs.mk
+	@echo "Generating $@"
+	@python $(PROJECT_ROOT)/src/externals/fbcode/gen_makefile.py \
+		$(FBCODE_EXTERNALS_ROOT) $(EXTERNALS) \
+		$(PROJECT_ROOT)/src/externals/fbcode/external_deps.py > $@.tmp
+	@mv -f $@.tmp $@
+
+# Make sure a 'make clean' removes the generated makefiles
+INTERMEDIATE_FILES += $(LIB_DIR)/gcc-*.mk
+INTERMEDIATE_FILES += $(LIB_DIR)/gcc-*.mk.tmp
+
+# Import the platform-specific makefiles
+ifeq ($(filter clean clobber,$(MAKECMDGOALS)),)
+  -include $(LIB_DIR)/$(EXTERNALS).mk
+endif
 
 CXX = $(EXTERNAL_CXX)
 CC = $(EXTERNAL_CC)
@@ -476,11 +542,10 @@ overall: all quiet-1
 %.h %.hpp %.hh %.inc:
 	@
 
-DEPEND_FILES := $(OBJECTS:.o=.d) $(PIC_OBJECTS:.o=.d)
+DEPEND_FILES := $(wildcard $(OBJECTS:.o=.d) $(PIC_OBJECTS:.o=.d) $(BOOTSTRAP_CXX_SOURCES:.cpp=.d))
 
 ifneq ($(DEPEND_FILES),)
-$(OBJECTS) $(PIC_OBJECTS): %.o : %.d
-
+$(DEPEND_FILES:.d=.o): %.o : %.d
 -include $(DEPEND_FILES)
 endif
 
@@ -510,7 +575,7 @@ endif
 define COMPILE_IT
 $(ECHO_COMPILE)
 $(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) \
- $(if $(filter %.pic.o,$@),-fPIC,$(CPP_MALLOC_FLAGS)) \
+ $(sort $(if $(filter %.pic.o,$@),-fPIC,$(CPP_MALLOC_FLAGS))) \
  $(CPPFLAGS) $(2) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 endef
 
@@ -540,6 +605,9 @@ endif
 $(call OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.o:%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS))
 
+$(BOOTSTRAP_CXX_SOURCES:.cpp=.o): %.o:%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
 $(call OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES) $(TEST_SOURCES),cpp): $(OUT_DIR)%.o:%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
@@ -554,6 +622,9 @@ $(call OBJECT_FILES,$(ASM_SOURCES),S): $(OUT_DIR)%.o:%.S
 
 $(call PIC_OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS))
+
+$(BOOTSTRAP_CXX_SOURCES:.cpp=.pic.o): %.pic.o:%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(call PIC_OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
@@ -593,8 +664,9 @@ $(OUT_DIR)%.cpp.E:$(OUT_DIR)%.cpp
 
 
 .EXPORT_ALL_VARIABLES:;
-unexport CXX_NOOPT_SOURCES CXX_SOURCES ASM_SOURCES C_SOURCES GENERATED_CXX_NOOPT_SOURCES GENERATED_CXX_SOURCES GENERATED_C_SOURCES GENERATED_CPP_SOURCES ALL_SOURCES SOURCES OBJECTS DEPEND_FILES CPPFLAGS CXXFLAGS LDFLAGS PROGRAMS LIB_TARGETS DEP_LIBS
+unexport CXX_NOOPT_SOURCES CXX_SOURCES ASM_SOURCES C_SOURCES GENERATED_CXX_NOOPT_SOURCES GENERATED_CXX_SOURCES GENERATED_C_SOURCES GENERATED_CPP_SOURCES ALL_SOURCES SOURCES OBJECTS PIC_OBJECTS DEPEND_FILES CPPFLAGS CXXFLAGS LDFLAGS PROGRAMS LIB_TARGETS DEP_LIBS
 unexport LINK_OBJECTS MAKEFILE_LIST COMPILE_IT OBJECT_DIR_DEPS REC_SOURCES PREPROCESS_IT WWW_SHARED_FILES FLIB_FILES SIZE_SORTED_SOURCES ADDITIONAL_OBJS RECURSIVE_SOURCES AUTO_SOURCES_RECURSIVE AUTO_SOURCES
+unexport EXTERNAL_SHARED_LIBS LIB_PATHS EXTERNAL_STATIC_LIBS EXTERNAL_CPPFLAGS EXTERNAL EXTERNAL_LIB_PATHS ALL_LIBS
 
 # Since these variables start with += in this file, when calling submake,
 # they will not start with empty list. SUB_XXX will always start with empty.
@@ -621,11 +693,13 @@ ifdef SHOW_LINK
 
 $(SHARED_LIB): $(PIC_OBJECTS)
 	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
-			$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
+			$(SO_LDFLAGS) -o $@ $(sort $(PIC_OBJECTS)) $(EXTERNAL)
 
+ifneq ($(USE_STATIC_LIB_RULE),0)
 $(STATIC_LIB): $(OBJECTS)
 	$(V)$(RM) $@
-	$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
+	$(AR_CMD) $@ $(sort $(OBJECTS) $(ADDITIONAL_OBJS))
+endif
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	$(LD_CMD) -o $@ $(LDFLAGS) $< $(LIBS)
@@ -635,12 +709,14 @@ else
 $(SHARED_LIB): $(PIC_OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
-		$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
+		$(SO_LDFLAGS) -o $@ $(sort $(PIC_OBJECTS)) $(EXTERNAL)
 
+ifneq ($(USE_STATIC_LIB_RULE),0)
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(RM) $@
-	$(V)$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
+	$(V)$(AR_CMD) $@ $(sort $(OBJECTS) $(ADDITIONAL_OBJS))
+endif
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	@echo 'Linking $@ ...'
@@ -651,7 +727,6 @@ endif
 .PHONY:out-of-date do-setup
 
 do-setup: quiet-4
-
 
 ifdef LINK_LOCAL
 #pragma runlocal

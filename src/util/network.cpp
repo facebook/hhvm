@@ -23,8 +23,6 @@
 #include <arpa/nameser.h>
 #include <resolv.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // without calling res_init(), any call to getaddrinfo() may leak memory:

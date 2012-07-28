@@ -21,16 +21,20 @@
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
-#include <runtime/base/class_info.h>
 #include <math.h>
+#include <cmath>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/ext/ext_json.h>
 
-using namespace std;
-
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+// static strings
+
+static StaticString s_JsonSerializable("JsonSerializable");
+static StaticString s_jsonSerialize("jsonSerialize");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
@@ -66,6 +70,8 @@ String VariableSerializer::serialize(CVarRef v, bool ret) {
   m_buf = &buf;
   if (ret) {
     buf.setOutputLimit(RuntimeOption::SerializationSizeLimit);
+  } else {
+    buf.setOutputLimit(StringData::MaxSize);
   }
   m_valueCount = 1;
   write(v);
@@ -76,6 +82,17 @@ String VariableSerializer::serialize(CVarRef v, bool ret) {
     g_context->write(str);
   }
   return null_string;
+}
+
+String VariableSerializer::serializeValue(CVarRef v, bool limit) {
+  StringBuffer buf;
+  m_buf = &buf;
+  if (limit) {
+    buf.setOutputLimit(RuntimeOption::SerializationSizeLimit);
+  }
+  m_valueCount = 1;
+  write(v);
+  return m_buf->detach();
 }
 
 String VariableSerializer::serializeWithLimit(CVarRef v, int limit) {
@@ -168,7 +185,7 @@ void VariableSerializer::write(int64 v) {
 void VariableSerializer::write(double v) {
   switch (m_type) {
   case JSON:
-    if (!isinf(v) && !isnan(v)) {
+    if (!std::isinf(v) && !std::isnan(v)) {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
       vspprintf(&buf, 0, "%.*k", 14, v);
@@ -208,9 +225,9 @@ void VariableSerializer::write(double v) {
   case APCSerialize:
   case DebuggerSerialize:
     m_buf->append("d:");
-    if (isnan(v)) {
+    if (std::isnan(v)) {
       m_buf->append("NAN");
-    } else if (isinf(v)) {
+    } else if (std::isinf(v)) {
       if (v < 0) m_buf->append('-');
       m_buf->append("INF");
     } else {
@@ -286,7 +303,6 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
       if (m_option & k_JSON_NUMERIC_CHECK) {
         int64 lval; double dval;
         switch (is_numeric_string(v, len, &lval, &dval, 0)) {
-          case KindOfInt32:
           case KindOfInt64:
             write(lval);
             return;
@@ -322,28 +338,24 @@ void VariableSerializer::write(CStrRef v) {
   }
 }
 
-void VariableSerializer::write(CArrRef v) {
-  if (m_type == APCSerialize && !v.isNull() && v->isStatic()) {
-    union {
-      char buf[8];
-      ArrayData *ad;
-    } u;
-    u.ad = v.get();
-    m_buf->append("A:");
-    m_buf->append(u.buf, 8);
-    m_buf->append(';');
-  } else {
-    v.serialize(this);
-  }
-}
-
 void VariableSerializer::write(CObjRef v) {
   if (!v.isNull() && m_type == JSON) {
+
+    if (v.instanceof(s_JsonSerializable)) {
+      Variant ret = v->o_invoke(s_jsonSerialize, null_array, -1);
+      // for non objects or when $this is returned
+      if (!ret.isObject() || (ret.isObject() && !ret.same(v))) {
+        write(ret);
+        return;
+      }
+    }
+
     if (incNestedLevel(v.get(), true)) {
       writeOverflow(v.get(), true);
     } else {
       Array props(ArrayData::Create());
-      ClassInfo::GetArray(v.get(), v->o_getClassPropTable(), props, true);
+      ClassInfo::GetArray(v.get(), v->o_getClassPropTable(), props,
+                          ClassInfo::GetArrayPublic);
       setObjectInfo(v->o_getClassName(), v->o_getId());
       props.serialize(this);
     }
@@ -532,24 +544,10 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
     m_indent += (info.indent_delta = 2);
     break;
   case Serialize:
+  case APCSerialize:
   case DebuggerSerialize:
     if (!m_objClass.empty()) {
       m_buf->append("O:");
-      m_buf->append((int)m_objClass.size());
-      m_buf->append(":\"");
-      m_buf->append(m_objClass);
-      m_buf->append("\":");
-      m_buf->append(size);
-      m_buf->append(":{");
-    } else {
-      m_buf->append("a:");
-      m_buf->append(size);
-      m_buf->append(":{");
-    }
-    break;
-  case APCSerialize:
-    if (!m_objClass.empty()) {
-      m_buf->append("o:");
       m_buf->append((int)m_objClass.size());
       m_buf->append(":\"");
       m_buf->append(m_objClass);
@@ -583,9 +581,6 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
 
   // ...so we don't mess up next array output
   if (!m_objClass.empty() || !m_rsrcName.empty()) {
-    if (!m_objClass.empty()) {
-      info.class_info = ClassInfo::FindClass(m_objClass);
-    }
     m_objClass.clear();
     info.is_object = true;
   } else {
@@ -593,97 +588,51 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   }
 }
 
-void VariableSerializer::writePropertyPrivacy(CStrRef prop,
-                                              const ClassInfo *cls) {
-  if (!cls) return;
-  const ClassInfo *origCls = cls;
-  ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop);
-  while (!p && cls) {
-    cls = cls->getParentClassInfo();
-    if (cls) p = cls->getPropertyInfo(prop);
-  }
-  if (!p) return;
-  ClassInfo::Attribute a = p->attribute;
-  if (a & ClassInfo::IsProtected) {
-    m_buf->append(":protected");
-  } else if (a & ClassInfo::IsPrivate && cls == origCls) {
-    m_buf->append(":private");
+void VariableSerializer::writePropertyKey(CStrRef prop) {
+  const char *key = prop.data();
+  int kl = prop.size();
+  if (!*key && kl) {
+    const char *cls = key + 1;
+    if (*cls == '*') {
+      ASSERT(key[2] == 0);
+      m_buf->append(key + 3, kl - 3);
+      const char prot[] = "\":protected";
+      int o = m_type == PrintR ? 1 : 0;
+      m_buf->append(prot + o, sizeof(prot) - 1 - o);
+    } else {
+      int l = strlen(cls);
+      m_buf->append(cls + l + 1, kl - l - 2);
+      int o = m_type == PrintR ? 1 : 0;
+      m_buf->append("\":\"" + o, 3 - 2*o);
+      m_buf->append(cls, l);
+      const char priv[] = "\":private";
+      m_buf->append(priv + o, sizeof(priv) - 1 - o);
+    }
+  } else {
+    m_buf->append(prop);
+    if (m_type != PrintR) m_buf->append('"');
   }
 }
 
-void VariableSerializer::writeSerializedProperty(CStrRef prop,
-                                                 const ClassInfo *cls) {
-  ASSERT(m_type == Serialize || m_type == DebuggerSerialize);
-  const ClassInfo *origCls = cls;
-  if (cls) {
-    ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop);
-    // Try to find defining class
-    while (!p && cls) {
-      cls = cls->getParentClassInfo();
-      if (cls) p = cls->getPropertyInfo(prop);
-    }
-    if (p) {
-      const ClassInfo *dcls = p->owner;
-      ClassInfo::Attribute a = p->attribute;
-      if (a & ClassInfo::IsProtected) {
-        m_buf->append("s:");
-        m_buf->append(prop.size() + 3);
-        m_buf->append(":\"");
-        m_buf->append("\0*\0", 3);
-        m_buf->append(prop);
-        m_buf->append("\";");
-        return;
-      } else if (a & ClassInfo::IsPrivate && cls == origCls) {
-        const char *clsname = dcls->getName();
-        int clsLen = strlen(clsname);
-
-        m_buf->append("s:");
-        m_buf->append(prop.size() + clsLen + 2);
-        m_buf->append(":\"\0", 3);
-        m_buf->append(clsname, clsLen);
-        m_buf->append('\0');
-        m_buf->append(prop);
-        m_buf->append("\";");
-        return;
-      }
-    }
-  }
-  write(prop);
-}
-
+/* key MUST be a non-reference string or int */
 void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
-  if (m_type == APCSerialize && key.isString()) {
-    write(key.toString());
+  Variant::TypedValueAccessor tva = key.getTypedAccessor();
+  bool skey = Variant::IsString(tva);
+  if (skey && m_type == APCSerialize) {
+    write(Variant::GetAsString(tva));
     return;
   }
   ArrayInfo &info = m_arrayInfos.back();
-  const ClassInfo *cls = info.class_info;
-  if (info.is_object) {
-    String ks(key.toString());
-    if (ks.size() > 0 && ks.charAt(0) == '\0') {
-      // fast path for serializing private properties
-      if (m_type == Serialize) {
-        write(ks);
-        return;
-      }
-      int span = ks.find('\0', 1);
-      ASSERT(span != String::npos);
-      String cl(ks.substr(1, span - 1));
-      cls = ClassInfo::FindClass(cl);
-      ASSERT(cls);
-      key = ks.substr(span + 1);
-    }
-  }
   switch (m_type) {
   case PrintR: {
     indent();
     m_buf->append('[');
-      String keyStr = key.toString();
-      const char *p = keyStr;
-      int len = keyStr.length();
-      m_buf->append(p, len);
-      if (info.is_object) writePropertyPrivacy(keyStr, cls);
-      m_buf->append("] => ");
+    if (info.is_object && skey) {
+      writePropertyKey(Variant::GetAsString(tva));
+    } else {
+      m_buf->append(key);
+    }
+    m_buf->append("] => ");
     break;
   }
   case VarExport:
@@ -694,28 +643,25 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
   case VarDump:
   case DebugDump:
     indent();
-    if (key.isNumeric()) {
-      m_buf->append('[');
-      m_buf->append((const char *)key.toString());
-      m_buf->append("]=>\n");
+    m_buf->append('[');
+    if (!skey) {
+      m_buf->append(Variant::GetInt64(tva));
     } else {
-      m_buf->append("[\"");
-      String keyStr = key.toString();
-      const char *p = keyStr;
-      int len = keyStr.length();
-      m_buf->append(p, len);
-      if (info.is_object) writePropertyPrivacy(keyStr, cls);
-      m_buf->append("\"]=>\n");
+      m_buf->append('"');
+      if (info.is_object) {
+        writePropertyKey(Variant::GetAsString(tva));
+      } else {
+        m_buf->append(Variant::GetAsString(tva));
+        m_buf->append('"');
+      }
     }
+    m_buf->append("]=>\n");
     break;
-  case Serialize:
   case APCSerialize:
+    ASSERT(!info.is_object);
+  case Serialize:
   case DebuggerSerialize:
-    if (info.is_object) {
-      writeSerializedProperty(key.toString(), cls);
-    } else {
-      write(key);
-    }
+    write(key);
     break;
   case JSON:
   case DebuggerDump:
@@ -723,7 +669,21 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
       m_buf->append(',');
     }
     if (!info.is_vector) {
-      write(key.toString());
+      if (skey) {
+        CStrRef s = Variant::GetAsString(tva);
+        const char *k = s.data();
+        int len = s.size();
+        if (info.is_object && !*k && len) {
+          while (*++k) len--;
+          k++;
+          len -= 2;
+        }
+        write(k, len);
+      } else {
+        m_buf->append('"');
+        m_buf->append(Variant::GetInt64(tva));
+        m_buf->append('"');
+      }
       m_buf->append(':');
     }
     break;
@@ -738,7 +698,7 @@ void VariableSerializer::writeArrayValue(const ArrayData *arr, CVarRef value) {
   if ((m_type == Serialize || m_type == APCSerialize ||
        m_type == DebuggerSerialize) &&
       !(value.isReferenced() &&
-        m_arrayIds->find(value.getVariantData()) != m_arrayIds->end())) {
+        m_arrayIds->find(value.getRefData()) != m_arrayIds->end())) {
     m_valueCount++;
   }
 

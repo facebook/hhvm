@@ -18,8 +18,6 @@
 #include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors

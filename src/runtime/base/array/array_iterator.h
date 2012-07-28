@@ -20,9 +20,12 @@
 #include <runtime/base/types.h>
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/array/hphp_array.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct TypedValue;
 
 /**
  * An iteration normally looks like this:
@@ -42,6 +45,7 @@ public:
    */
   ArrayIter();
   ArrayIter(const ArrayData *data);
+  ArrayIter(const ArrayData *data, int);
   ArrayIter(CArrRef array);
   ArrayIter(ObjectData *obj, bool rewind = true);
   ~ArrayIter();
@@ -50,13 +54,13 @@ public:
   void operator++() { next(); }
 
   bool end() {
-    if (!m_obj) {
+    if (LIKELY(!m_obj)) {
       return m_pos == ArrayData::invalid_index;
     }
     return endHelper();
   }
   void next() {
-    if (!m_obj) {
+    if (LIKELY(!m_obj)) {
       ASSERT(m_data);
       ASSERT(m_pos != ArrayData::invalid_index);
       m_pos = m_data->iter_advance(m_pos);
@@ -65,7 +69,7 @@ public:
     return nextHelper();
   }
   Variant first() {
-    if (!m_obj) {
+    if (LIKELY(!m_obj)) {
       ASSERT(m_data);
       ASSERT(m_pos != ArrayData::invalid_index);
       return m_data->getKey(m_pos);
@@ -74,7 +78,7 @@ public:
   }
   Variant second();
   void second(Variant &v) {
-    if (!m_obj) {
+    if (LIKELY(!m_obj)) {
       ASSERT(m_data);
       ASSERT(m_pos != ArrayData::invalid_index);
       v = m_data->getValueRef(m_pos);
@@ -83,6 +87,26 @@ public:
     secondHelper(v);
   }
   CVarRef secondRef();
+
+  bool isHphpArray() {
+    return IsHphpArray(m_data);
+  }
+
+  void nvFirst(TypedValue* out) {
+    ASSERT(m_data);
+    ASSERT(m_pos != ArrayData::invalid_index);
+    ASSERT(isHphpArray());
+    HphpArray* ha = (HphpArray*)m_data;
+    ha->nvGetKey(out, m_pos);
+  }
+
+  TypedValue* nvSecond() {
+    ASSERT(m_data);
+    ASSERT(m_pos != ArrayData::invalid_index);
+    ASSERT(isHphpArray());
+    HphpArray* ha = (HphpArray*)m_data;
+    return ha->nvGetValueRef(m_pos);
+  }
 
 private:
   const ArrayData *m_data;
@@ -125,6 +149,34 @@ private:
   FullPos m_fp;
   int size();
   ArrayData* getData();
+};
+
+struct MIterCtx {
+  TypedValue m_key;
+  TypedValue m_val;
+  const RefData* m_ref;
+  MutableArrayIter *m_mArray; // big! Defer allocation.
+  MIterCtx(ArrayData *ad) {
+    ASSERT(!ad->isStatic());
+    tvWriteUninit(&m_key);
+    tvWriteUninit(&m_val);
+    m_ref = NULL;
+    m_mArray = new MutableArrayIter(ad, &tvAsVariant(&m_key),
+                                    tvAsVariant(&m_val));
+  }
+  MIterCtx(const RefData* ref) {
+    tvWriteUninit(&m_key);
+    tvWriteUninit(&m_val);
+    // Reference must be an inner cell
+    ASSERT(ref->_count > 0);
+    m_ref = ref;
+    m_ref->incRefCount();
+    // Bind ref to m_var
+    m_mArray = new MutableArrayIter((Variant*)(ref->tv()),
+                                    &tvAsVariant(&m_key),
+                                    tvAsVariant(&m_val));
+  }
+  ~MIterCtx();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

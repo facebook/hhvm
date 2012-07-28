@@ -27,18 +27,24 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Forward declaration.
+namespace VM {
+  class Class;
+}
+
 struct TypedValue;
 
 struct Value {
   mutable union {
-    int64        num;
-    double       dbl;
-    litstr       str;
-    StringData  *pstr;
-    ArrayData   *parr;
-    ObjectData  *pobj;
-    Variant     *pvar;
-    TypedValue  *ptv;
+    int64       num;
+    double      dbl;
+    litstr      str;
+    StringData *pstr;
+    ArrayData  *parr;
+    ObjectData *pobj;
+    VM::Class  *pcls;
+    RefData    *pref;
+    TypedValue *ptv; // Deprecated; use pref for KindOfRef
   } m_data;
 };
 
@@ -47,8 +53,9 @@ struct TypedValue : public Value {
    * The order of the data members is significant. The _count field must
    * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
    */
-  mutable int _count;
+  mutable int32_t _count;
   mutable DataType m_type;
+  std::string pretty() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

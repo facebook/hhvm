@@ -14,13 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "synchronizable.h"
 #include "compatibility.h"
+#include "rank.h"
+#include "synchronizable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Synchronizable::Synchronizable() {
+Synchronizable::Synchronizable() : m_mutex(RankLeaf) {
   pthread_cond_init(&m_cond, NULL);
 }
 

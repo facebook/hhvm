@@ -11,6 +11,12 @@
 # directory, not the one that make was invoked from
 CWD := $(shell readlink -f `pwd`)
 
+ifdef USE_HHVM
+ifneq ($(USE_HHVM),1)
+$(error USE_HHVM must either be unset, or equal to 1)
+endif
+endif
+
 ifeq ($(notdir $(MAKE)),emake)
 export MAKE
 override USE_CCACHE :=
@@ -28,6 +34,22 @@ overall: all quiet-1
 .PHONY: quiet quiet-%
 quiet quiet-%:
 	@true
+
+###############################################################################
+# The exact revision of external repositories that HPHP builds against.
+
+FBCODE_REV = 0c8b962b192eb655b7da1d9dcc1730427705c160
+FBCODE_THIRD_PARTY_REV = 1b76b1fdef117650883ae1568fcf2777ad9a00c1
+
+ifndef FBCODE_EXTERNALS_ROOT
+FBCODE_EXTERNALS_ROOT = /mnt/gvfs/third-party/$(FBCODE_THIRD_PARTY_REV)
+endif
+
+ifndef FBCODE_HOME
+export FBCODE_HOME=/mnt/gvfs/fbcode/$(FBCODE_REV)
+endif
+
+export FBCODE_BIN=$(LIB_DIR)/_fbcode_bin
 
 ###############################################################################
 # Command line switches. For example, "make RELEASE=1".
@@ -50,15 +72,27 @@ MYSQL_MILLISECOND_TIMEOUT = 1
 #DEBUG_APC_LEAK = 1
 #DEBUG_RACE_CONDITION = 1
 
+ifdef VALGRIND
+
+DEBUG_MEMORY_LEAK=1
+NO_TCMALLOC=1
+
+else
+
 ifdef RELEASE
 override DEBUG=
+unexport DEBUG
 override DEBUG_MEMORY_LEAK=
 override DEBUG_RACE_CONDITION=
 override RELEASE=1
 endif
 
-ifndef DEBUG_MEMORY_LEAK
-ifndef DEBUG_RACE_CONDITION
+endif # VALGRIND
+
+# Use jemalloc by default.
+ifndef NO_JEMALLOC
+USE_JEMALLOC = 1
+endif
 
 # This normally adds -O3 tag to generate the most optimized code targeted for
 # production build.
@@ -66,13 +100,11 @@ ifndef DEBUG
 RELEASE = 1
 endif
 
+ifndef DEBUG_MEMORY_LEAK
+ifndef DEBUG_RACE_CONDITION
+
 # For hotprofiler instrumentation
 HOTPROFILER = 1
-
-# Use jemalloc by default.
-ifndef NO_JEMALLOC
-USE_JEMALLOC = 1
-endif
 
 # Only use jemalloc *or* tcmalloc.
 ifdef USE_JEMALLOC
@@ -95,8 +127,8 @@ endif
 # For GNU coverage - gcov.
 #COVERAGE = 1
 
-endif
-endif
+endif # DEBUG_RACE_CONDITION
+endif # DEBUG_MEMORY_LEAK
 
 ifndef NO_SNAPPY
 HAVE_SNAPPY = 1
@@ -116,11 +148,15 @@ ifndef OUTPUT_ROOT
 OUTPUT_ROOT := bin
 endif
 OUT_EXTS := \
+	$(if $(USE_HHVM),-hhvm) \
+	$(if $(USE_HHVM_GC),-gc) \
 	$(if $(USE_LLVM),-llvm) \
 	$(if $(USE_ICC),-icc) \
 	$(if $(USE_JEMALLOC),-je) \
 	$(if $(NO_TCMALLOC),,-tc) \
 	$(if $(PROFILE),-pg) \
+	$(if $(CHECKED),-ck) \
+	$(if $(VALGRIND),-vg) \
 	$(if $(DEBUG),-g,-O)
 
 EMPTY:=
@@ -132,32 +168,34 @@ ABS_PROJECT_ROOT := $(shell cd $(PROJECT_ROOT) && readlink -f `pwd`)
 
 ifdef OUTPUT_ROOT
 
-REL := $(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))
-
+OUT_DIRNAME := $(OUTPUT_ROOT)$(OUT_EXT)
 OUTPUT_REL := $(patsubst /%,,$(patsubst ~%,,$(OUTPUT_ROOT)))
-OUT_TOP_BASE := $(if $(OUTPUT_REL),$(ABS_PROJECT_ROOT)/)$(OUTPUT_ROOT)
 
-OUT_TOP := $(OUT_TOP_BASE)$(OUT_EXT)
-OUT_ABS := $(OUT_TOP)$(REL)
+OUT_TOP := $(if $(OUTPUT_REL),$(ABS_PROJECT_ROOT)/)$(OUT_DIRNAME)
+OUT_ABS := $(OUT_TOP)$(patsubst $(ABS_PROJECT_ROOT)%,%,$(CWD))
 OUT_DIR := $(OUT_ABS)/
+
 LIB_DIR := $(OUT_TOP)
+HPHP_LIB := $(LIB_DIR)
 OUT_TOP := $(OUT_TOP)/
 HPHP := $(OUT_TOP)hphp
-HPHPI := $(OUT_TOP)hphpi
+HHVM := $(OUT_TOP)hhvm
+HPHP_OPTIONS := $(OUT_TOP)hphp_options
 
 else
 
 OUT_TOP :=
 OUT_DIR :=
 OUT_ABS := $(shell pwd)
-LIB_DIR := $(PROJECT_ROOT)/bin
+LIB_DIR := $(ABS_PROJECT_ROOT)/bin
 ifdef HPHP_LIB
 ifneq ($(HPHP_LIB),$(HPHP_ROOT)/bin)
 LIB_DIR := $(HPHP_LIB)
 endif
 endif
 HPHP := $(PROJECT_ROOT)/src/hphp/hphp
-HPHPI := $(PROJECT_ROOT)/src/hphpi/hphpi
+HHVM := $(PROJECT_ROOT)/src/hhvm/hhvm
+HPHP_OPTIONS := $(LIB_DIR)/hphp_options
 
 endif
 
@@ -176,13 +214,16 @@ endif
 
 MKDIR = mkdir -p
 RMDIR = rm -fR
-EXT_DIR = $(PROJECT_ROOT)/external-$(OS)
+EXT_DIR = /home/engshare/externals/cpp/hphp/$(OS)
 
 %/.mkdir :
 	$(V)-$(MKDIR) $(@D)
 	$(V)touch $@
 
 dirinfo:
-	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(PROFILE),P)$(if $(DEBUG),D,R)$(if $(USE_ICC),-I)$(if $(USE_LLVM),-L)
+	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) \
+$(if $(VALGRIND),VG-)$(if $(USE_HHVM),VM)\
+$(if $(USE_HHVM_GC),GC)$(if $(PROFILE),P)$(if $(DEBUG),D,R)\
+$(if $(CHECKED),C)$(if $(USE_ICC),-I)$(if $(USE_LLVM),-L)\
 
 endif

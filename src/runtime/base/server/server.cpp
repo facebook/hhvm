@@ -20,8 +20,6 @@
 #include <runtime/base/preg.h>
 #include <signal.h>
 
-using namespace std;
-
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
@@ -57,7 +55,7 @@ Server::Server(const std::string &address, int port, int threadCount)
 
 bool Server::shouldHandle(const std::string &cmd) {
   String url(cmd.c_str(), cmd.size(), AttachLiteral);
-  for (set<string>::const_iterator iter =
+  for (std::set<string>::const_iterator iter =
          SatelliteServerInfo::InternalURLs.begin();
        iter != SatelliteServerInfo::InternalURLs.end(); ++iter) {
     Variant ret = preg_match

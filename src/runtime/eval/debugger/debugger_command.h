@@ -63,11 +63,13 @@ public:
     KindOfExtended            = 24,
     KindOfUser                = 25,
     KindOfZend                = 26,
+    KindOfComplete            = 27,
 
     KindOfEval                = 1000,
     KindOfShell               = 1001,
     KindOfMacro               = 1002,
     KindOfConfig              = 1003,
+    KindOfInstrument          = 1004,
 
     // DebuggerProxy -> DebuggerClient
     KindOfInterrupt           = 10000,
@@ -79,7 +81,8 @@ public:
 
 public:
   DebuggerCommand(Type type)
-      : m_type(type), m_version(0), m_exitInterrupt(false) {}
+    : m_type(type), m_version(0), m_exitInterrupt(false),
+      m_incomplete(false) {}
 
   bool is(Type type) const { return m_type == type;}
   Type getType() const { return m_type;}
@@ -90,15 +93,29 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
   virtual bool onClient(DebuggerClient *client);
+  virtual bool onClientVM(DebuggerClient *client) { return onClient(client); }
+  virtual void setClientOutput(DebuggerClient *client);
+  bool onClientD(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServerVM(DebuggerProxy *proxy) { return onServer(proxy); }
+  bool onServerD(DebuggerProxy *proxy) {
+    if (hhvm) {
+      return onServerVM(proxy);
+    } else {
+      return onServer(proxy);
+    }
+  }
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
+
+  virtual void handleReply(DebuggerClient *client) { ASSERT(false); }
 
   /**
    * A server command processing can set m_exitInterrupt to true to break
    * message loop in DebuggerProxy::processInterrupt().
    */
   virtual bool shouldExitInterrupt() { return m_exitInterrupt;}
+  String getWireError() const { return m_wireError; }
 
 protected:
   Type m_type;
@@ -107,6 +124,8 @@ protected:
   int m_version;
 
   bool m_exitInterrupt; // server side breaking out of message loop
+  String m_wireError; // used to save temporary error happened on the wire
+  bool m_incomplete; // another interrupt comes before the command could finish
 };
 
 ///////////////////////////////////////////////////////////////////////////////

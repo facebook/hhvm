@@ -35,67 +35,126 @@ const StaticString empty_string("");
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-String String::FromChar(char ch) {
-  char tmpbuf[2];
-  tmpbuf[0] = ch;
-  tmpbuf[1] = 0;
-  return String(tmpbuf, CopyString);
+#define NUM_CONVERTED_INTEGERS \
+  (String::MaxPrecomputedInteger - String::MinPrecomputedInteger + 1)
+
+StringData *String::converted_integers_raw;
+StringData *String::converted_integers;
+
+String::IntegerStringDataMap String::integer_string_data_map;
+
+const StringData *convert_integer_helper(int64 n, StringData *sd) {
+  char tmpbuf[21];
+  char *p;
+  int is_negative;
+  int len;
+
+  tmpbuf[20] = '\0';
+  p = conv_10(n, &is_negative, &tmpbuf[20], &len);
+  if (sd) {
+    new (sd) StringData(p, len, CopyString);
+  } else {
+    sd = new StringData(p, len, CopyString);
+  }
+  sd->setStatic();
+  if (!String(sd).checkStatic()) {
+    StaticString::TheStaticStringSet().insert(sd);
+  }
+  return sd;
 }
+
+void String::PreConvertInteger(int64 n) {
+  IntegerStringDataMap::const_iterator it =
+    integer_string_data_map.find(n);
+  if (it != integer_string_data_map.end()) return;
+  integer_string_data_map[n] = convert_integer_helper(n, NULL);
+}
+
+static int precompute_integers() ATTRIBUTE_COLD;
+static int precompute_integers() {
+  String::converted_integers_raw =
+    (StringData *)malloc(NUM_CONVERTED_INTEGERS * sizeof(StringData));
+  String::converted_integers = String::converted_integers_raw - SCHAR_MIN;
+  for (int n = SCHAR_MIN; n < 65536; n++) {
+    StringData *sd = String::converted_integers + n;
+    convert_integer_helper(n, sd);
+  }
+  return NUM_CONVERTED_INTEGERS;
+}
+
+static int ATTRIBUTE_UNUSED initIntegers = precompute_integers();
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors
 
 String::~String() {}
 
-String::String(int n) {
+StringData* buildStringData(int n) {
   char tmpbuf[12];
-  char *p;
+  char* p;
   int is_negative;
   int len;
-  char *buf;
 
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
   tmpbuf[11] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[11], &len);
+  return NEW(StringData)(p, len, CopyString);
+}
 
-  buf = (char*)malloc(len + 1);
-  memcpy(buf, p, len + 1); // including the null terminator.
-  m_px = NEW(StringData)(buf, len, AttachString);
+String::String(int n) {
+  const StringData *sd = GetIntegerStringData(n);
+  if (sd) {
+    ASSERT(sd->isStatic());
+    m_px = (StringData *)sd;
+    return;
+  }
+  m_px = buildStringData(n);
   m_px->setRefCount(1);
 }
 
-String::String(int64 n) {
+StringData* buildStringData(int64 n) {
   char tmpbuf[21];
-  char *p;
+  char* p;
   int is_negative;
   int len;
-  char *buf;
 
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
+  return NEW(StringData)(p, len, CopyString);
+}
 
-  buf = (char*)malloc(len + 1);
-  memcpy(buf, p, len + 1); // including the null terminator.
-  m_px = NEW(StringData)(buf, len, AttachString);
+HOT_FUNC
+String::String(int64 n) {
+  const StringData *sd = GetIntegerStringData(n);
+  if (sd) {
+    ASSERT(sd->isStatic());
+    m_px = (StringData *)sd;
+    return;
+  }
+  m_px = buildStringData(n);
   m_px->setRefCount(1);
 }
 
-String::String(double n) {
+StringData* buildStringData(double n) {
   char *buf;
 
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
   vspprintf(&buf, 0, "%.*G", 14, n);
-  m_px = NEW(StringData)(buf, AttachString);
+  return NEW(StringData)(buf, AttachString);
+}
+
+String::String(double n) {
+  m_px = buildStringData(n);
   m_px->setRefCount(1);
 }
 
-String::String(const AtomicString &s) {
-  m_px = s.get();
+StringData* buildStringData(litstr s) {
+  return NEW(StringData)(s, AttachLiteral);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,12 +162,12 @@ String::String(const AtomicString &s) {
 
 String String::substr(int start, int length /* = 0x7FFFFFFF */,
                       bool nullable /* = false */) const {
-  int len = size();
-  char *ret = string_substr(data(), len, start, length, nullable);
-  if (ret) {
-    return String(ret, len, AttachString);
+  StringSlice r = slice();
+  // string_substr_check() will update start & length to a legal range.
+  if (string_substr_check(r.len, start, length)) {
+    return String(r.ptr + start, length, CopyString);
   }
-  return String();
+  return nullable ? String() : String("", 0, CopyString);
 }
 
 String String::lastToken(char delimiter) {
@@ -151,7 +210,7 @@ int String::find(CStrRef s, int pos /* = 0 */,
                      s.dataIgnoreTaint(), s.size(), pos, caseSensitive);
 }
 
-int String::rfind(char ch, int pos /* = -1 */,
+int String::rfind(char ch, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   // Ignore taint in comparison functions.
@@ -159,7 +218,7 @@ int String::rfind(char ch, int pos /* = -1 */,
                       pos, caseSensitive);
 }
 
-int String::rfind(const char *s, int pos /* = -1 */,
+int String::rfind(const char *s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   ASSERT(s);
   if (empty()) return -1;
@@ -171,7 +230,7 @@ int String::rfind(const char *s, int pos /* = -1 */,
                       pos, caseSensitive);
 }
 
-int String::rfind(CStrRef s, int pos /* = -1 */,
+int String::rfind(CStrRef s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
@@ -259,7 +318,7 @@ String &String::operator=(litstr s) {
 }
 
 String &String::operator=(StringData *data) {
-  SmartPtr<StringData>::operator=(data);
+  StringBase::operator=(data);
   return *this;
 }
 
@@ -274,16 +333,12 @@ String &String::operator=(const std::string & s) {
 
 HOT_FUNC
 String &String::operator=(CStrRef str) {
-  SmartPtr<StringData>::operator=(str.m_px);
+  StringBase::operator=(str.m_px);
   return *this;
 }
 
 String &String::operator=(CVarRef var) {
   return operator=(var.toString());
-}
-
-String &String::operator=(const AtomicString &s) {
-  return operator=(s.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -295,16 +350,12 @@ String &String::operator+=(litstr s) {
       m_px = NEW(StringData)(s, AttachLiteral);
       m_px->setRefCount(1);
     } else if (m_px->getCount() == 1) {
-      int len = strlen(s);
-      m_px->append(s, len);
+      m_px->append(s, strlen(s));
     } else {
-      int len;
-      char *ret = string_concat(data(), size(), s, strlen(s), len);
-      if (m_px->decRefCount() == 0) {
-        m_px->release();
-      }
-      m_px = NEW(StringData)(ret, len, AttachString);
-      m_px->setRefCount(1);
+      StringData* px = NEW(StringData)(m_px, s);
+      px->setRefCount(1);
+      if (m_px->decRefCount() == 0) m_px->release();
+      m_px = px;
     }
   }
   return *this;
@@ -313,17 +364,14 @@ String &String::operator+=(litstr s) {
 String &String::operator+=(CStrRef str) {
   if (!str.empty()) {
     if (empty()) {
-      SmartPtr<StringData>::operator=(str.m_px);
+      StringBase::operator=(str.m_px);
     } else if (m_px->getCount() == 1) {
-      m_px->append(str.data(), str.size());
+      m_px->append(str.slice());
     } else {
-      int len;
-      char *ret = string_concat(data(), size(), str.data(), str.size(), len);
-      if (m_px->decRefCount() == 0) {
-        m_px->release();
-      }
-      m_px = NEW(StringData)(ret, len, AttachString);
-      m_px->setRefCount(1);
+      StringData* px = NEW(StringData)(m_px, str.slice());
+      if (m_px->decRefCount() == 0) m_px->release();
+      px->setRefCount(1);
+      m_px = px;
     }
   }
   return *this;
@@ -331,27 +379,19 @@ String &String::operator+=(CStrRef str) {
 
 String String::operator+(litstr str) const {
   if (empty()) return str;
-
   if (!str || !*str) return *this;
-
-  int len;
-  char *ret = string_concat(data(), size(), str, strlen(str), len);
-  return NEW(StringData)(ret, len, AttachString);
+  return NEW(StringData)(slice(), str);
 }
 
 HOT_FUNC
 String String::operator+(CStrRef str) const {
   if (empty()) return str;
-
   if (str.empty()) return *this;
-
-  int len;
-  char *ret = string_concat(data(), size(), str.data(), str.size(), len);
-  return NEW(StringData)(ret, len, AttachString);
+  return NEW(StringData)(slice(), str.slice());
 }
 
 String String::operator~() const {
-  String ret(NEW(StringData)(data(), size(), CopyString));
+  String ret(NEW(StringData)(slice(), CopyString));
   ret->negate();
   return ret;
 }
@@ -443,13 +483,14 @@ String &String::operator^=(CStrRef v) {
 ///////////////////////////////////////////////////////////////////////////////
 // conversions
 
+HOT_FUNC
 VarNR String::toKey() const {
-  if (!m_px) return empty_string;
+  if (!m_px) return VarNR(empty_string);
   int64 n = 0;
   if (m_px->isStrictlyInteger(n)) {
-    return n;
+    return VarNR(n);
   } else {
-    return m_px;
+    return VarNR(m_px);
   }
 }
 
@@ -642,15 +683,16 @@ void String::unserialize(VariableUnserializer *uns,
   if (ch != delimiter0) {
     throw Exception("Expected '%c' but got '%c'", delimiter0, ch);
   }
-
-  char *buf = (char*)malloc(size + 1);
-  uns->read(buf, size);
-  buf[size] = '\0';
+  StringData *px = NEW(StringData)(int(size));
+  MutableSlice buf = px->mutableSlice();
+  ASSERT(size <= buf.len);
+  uns->read(buf.ptr, size);
+  px->setSize(size);
   if (m_px && m_px->decRefCount() == 0) {
     m_px->release();
   }
-  m_px = NEW(StringData)(buf, size, AttachString);
-  m_px->setRefCount(1);
+  m_px = px;
+  px->setRefCount(1);
 
   ch = uns->readChar();
   if (ch != delimiter1) {
@@ -667,18 +709,11 @@ bool String::checkStatic() {
     // no need to upgrade when the initialization is done.
     StringDataSet::iterator it = set.find(m_px);
     if (it != set.end()) {
-      SmartPtr<StringData>::operator=(*it);
+      StringBase::operator=(*it);
       return true;
     }
   }
   return false;
-}
-
-String String::fiberCopy() const {
-  if (m_px) {
-    return m_px->copy();
-  }
-  return String();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -696,7 +731,7 @@ void String::dump() const {
 // StaticString
 
 StaticString::StaticString(litstr s) : m_data(s) {
-  String::operator=(&m_data);
+  m_px = &m_data;
   if (has_eval_support) {
     m_px = StringData::GetStaticString(m_px);
     return;
@@ -709,7 +744,7 @@ StaticString::StaticString(litstr s) : m_data(s) {
 
 StaticString::StaticString(litstr s, int length)
   : m_data(s, length, AttachLiteral) {
-  String::operator=(&m_data);
+  m_px = &m_data;
   if (has_eval_support) {
     m_px = StringData::GetStaticString(m_px);
     return;
@@ -778,7 +813,7 @@ StringDataSet &StaticString::TheStaticStringSet() {
 
 void StaticString::FinishInit() {
   if (has_eval_support) {
-    ASSERT(s_stringSet->size() == 0);
+    ASSERT(s_stringSet->size() == NUM_CONVERTED_INTEGERS);
   }
   // release the memory
   StringDataSet empty;
@@ -798,55 +833,6 @@ public:
   }
 };
 static StaticStringUninitializer s_static_string_uninitializer;
-
-//////////////////////////////////////////////////////////////////////////////
-// AtomicString
-
-AtomicString::AtomicString(const char *s,
-                           StringDataMode mode /* = AttachLiteral */) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  m_px = s ? (new StringData(s, mode)) : NULL;
-  if (m_px) {
-    m_px->setAtomic();
-    m_px->incAtomicCount();
-    m_px->preCompute();
-  }
-}
-
-AtomicString::AtomicString(const std::string &s) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  m_px = new StringData(s.c_str(), s.size(), CopyString);
-  if (m_px) {
-    m_px->setAtomic();
-    m_px->incAtomicCount();
-    m_px->preCompute();
-  }
-}
-
-AtomicString::AtomicString(StringData *str) {
-  if (str) {
-    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-    if (str->isRefCounted()) {
-      str = new StringData(str->data(), str->size(), CopyString);
-    }
-    AtomicSmartPtr<StringData>::operator=(str);
-  }
-  if (m_px) m_px->preCompute();
-}
-
-AtomicString &AtomicString::operator=(const AtomicString &s) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  AtomicSmartPtr<StringData>::operator=(s);
-  if (m_px) m_px->preCompute();
-  return *this;
-}
-
-AtomicString &AtomicString::operator=(const std::string &s) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  AtomicSmartPtr<StringData>::operator=(new StringData(s.c_str(), s.size(),
-                                                       CopyString));
-  return *this;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 }

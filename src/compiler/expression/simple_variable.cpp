@@ -25,8 +25,6 @@
 #include <util/parser/parser.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -39,8 +37,7 @@ SimpleVariable::SimpleVariable
     m_name(name), m_docComment(docComment),
     m_sym(NULL), m_originalSym(NULL),
     m_this(false), m_globals(false),
-    m_superGlobal(false), m_alwaysStash(false),
-    m_guardedThis(false) {
+    m_superGlobal(false), m_alwaysStash(false) {
   setContext(Expression::NoLValueWrapper);
 }
 
@@ -115,10 +112,9 @@ bool SimpleVariable::canKill(bool isref) const {
     return isref && !getScope()->inPseudoMain();
   }
 
-  return isref || (
-    isReferencedValid() ?
-      !isReferenced() : !m_sym->isReferenced()
-    );
+  return
+    (isref && (m_sym->isHidden() || !getScope()->inPseudoMain())) ||
+    (isReferencedValid() ? !isReferenced() : !m_sym->isReferenced());
 }
 
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
@@ -131,7 +127,9 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   } else if (m_name == "GLOBALS") {
     m_globals = true;
   } else {
-    m_sym = variables->addSymbol(m_name);
+    m_sym = variables->addDeclaredSymbol(
+      m_name, hhvm && Option::OutputHHBC ?
+      shared_from_this() : ConstructPtr());
   }
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
@@ -229,6 +227,15 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                    UnsetContext | InvokeArgument | OprLValue | DeepOprLValue)) {
     m_sym->setLvalParam();
   }
+
+  if (coerce && m_sym && type && type->is(Type::KindOfAutoSequence)) {
+    TypePtr t = m_sym->getType();
+    if (!t || t->is(Type::KindOfVoid) ||
+        t->is(Type::KindOfSome) || t->is(Type::KindOfArray)) {
+      type = Type::Array;
+    }
+  }
+
   if (m_this) {
     ret = Type::Object;
     ClassScopePtr cls = getOriginalClass();

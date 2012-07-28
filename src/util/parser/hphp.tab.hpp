@@ -1,9 +1,10 @@
-/* A Bison parser, made by GNU Bison 2.4.3.  */
+
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton interface for Bison's Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-   2009, 2010 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -179,10 +180,14 @@
      YYTOKEN(389, T_XHP_REQUIRED),
      YYTOKEN(390, T_TRAIT),
      YYTOKEN(391, T_INSTEADOF),
-     YYTOKEN(392, T_TRAIT_C)
+     YYTOKEN(392, T_TRAIT_C),
+     YYTOKEN(393, T_VARARG),
+     YYTOKEN(394, T_STRICT_INT_MAP),
+     YYTOKEN(395, T_STRICT_STR_MAP),
+     YYTOKEN(396, T_STRICT_ERROR)
    };
 #ifndef YYTOKEN_MAX
-#define YYTOKEN_MAX 392
+#define YYTOKEN_MAX 396
 #endif
 
 #endif

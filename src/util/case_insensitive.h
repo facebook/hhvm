@@ -39,12 +39,16 @@ struct string_hashi {
     return hash_string_i(s.data(), s.size());
   }
 };
-struct string_eqstri {
-  bool operator()(const std::string &s1, const std::string &s2) const {
+
+template<typename S, typename S2=S>
+struct stringlike_eqstri {
+  bool operator()(const S &s1, const S2 &s2) const {
     return s1.size() == s2.size() &&
       strncasecmp(s1.data(), s2.data(), s1.size()) == 0;
   }
 };
+typedef stringlike_eqstri<std::string> string_eqstri;
+
 struct string_lessi {
   bool operator()(const std::string &s1, const std::string &s2) const {
     return strcasecmp(s1.data(), s2.data()) < 0;

@@ -25,6 +25,7 @@
 bool TestExtNetwork::RunTests(const std::string &which) {
   bool ret = true;
 
+  RUN_TEST(test_gethostname);
   RUN_TEST(test_gethostbyaddr);
   RUN_TEST(test_gethostbyname);
   RUN_TEST(test_gethostbynamel);
@@ -49,6 +50,7 @@ bool TestExtNetwork::RunTests(const std::string &which) {
   RUN_TEST(test_header);
   RUN_TEST(test_headers_list);
   RUN_TEST(test_headers_sent);
+  RUN_TEST(test_header_register_callback);
   RUN_TEST(test_header_remove);
   RUN_TEST(test_setcookie);
   RUN_TEST(test_setrawcookie);
@@ -61,6 +63,11 @@ bool TestExtNetwork::RunTests(const std::string &which) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool TestExtNetwork::test_gethostname() {
+  VERIFY(f_gethostname() != Variant(false));
+  return Count(true);
+}
 
 bool TestExtNetwork::test_gethostbyaddr() {
   VS(f_gethostbyaddr("127.0.0.1"), "localhost.localdomain");
@@ -221,6 +228,10 @@ bool TestExtNetwork::test_headers_list() {
 bool TestExtNetwork::test_headers_sent() {
   f_header("Location: http://www.facebook.com");
   VERIFY(!f_headers_sent());
+  return Count(true);
+}
+
+bool TestExtNetwork::test_header_register_callback() {
   return Count(true);
 }
 

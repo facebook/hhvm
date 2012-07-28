@@ -21,8 +21,14 @@
 #include <runtime/base/runtime_option.h>
 #include <util/logger.h>
 
-using namespace std;
-using namespace boost;
+/*
+ * Enabling these will prevent us from allocating out of the free list
+ * and cause deallocated objects to be filled with garbage.  This is
+ * intended for detecting data that is freed too eagerly.
+ */
+#if defined(SMART_ALLOCATOR_DEBUG_FREE) && !defined(DETECT_DOUBLE_FREE)
+# define DETECT_DOUBLE_FREE
+#endif
 
 namespace HPHP {
 
@@ -73,24 +79,23 @@ static int findIndex(const vector<char *> &blocks,
   return blockIndex.find(hit)->second;
 }
 
-#ifdef SMART_ALLOCATOR_STACKTRACE
-Mutex SmartAllocatorImpl::s_st_mutex;
-std::map<void*, StackTrace> SmartAllocatorImpl::s_st_allocs;
-std::map<void*, StackTrace> SmartAllocatorImpl::s_st_deallocs;
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
 SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
                                        int itemSize, int flag)
-  : m_itemCount(itemCount), m_itemSize(itemSize),
-    m_flag(flag), m_row(0), m_col(0),
-    m_rowChecked(0), m_colChecked(0), m_linearSize(0), m_linearCount(0),
-    m_allocatedBlocks(0), m_multiplier(1), m_maxMultiplier(1),
-    m_targetMultiplier(1),
-    m_linearized(false), m_stats(NULL) {
-
+  : m_nameEnum(Name(nameEnum))
+  , m_itemCount(itemCount)
+  , m_itemSize(itemSize)
+  , m_flag(flag)
+  , m_row(0)
+  , m_col(0)
+  , m_allocatedBlocks(0)
+  , m_multiplier(1)
+  , m_maxMultiplier(1)
+  , m_targetMultiplier(1)
+  , m_stats(NULL)
+{
   // automatically pick a good per slab item count
   if (m_itemCount <= 0) {
     m_itemCount = SLAB_SIZE / m_itemSize;
@@ -98,6 +103,7 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
     case GlobalVariables:
       m_itemCount = 1;
       break;
+    case RefData:
     case Variant:
     case Array:
     case SharedMap:
@@ -113,6 +119,8 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
     case Bucket:
       m_itemCount *= 4; // we need lots of Buckets
       break;
+    default:
+      break;
     }
   }
 
@@ -126,10 +134,8 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
   char *p = (char *)malloc(m_colMax);
   m_blocks.push_back(p);
   m_blockIndex[((int64)p) / m_colMax] = 0;
-#ifdef USE_JEMALLOC
   // Cancel out jemalloc's accounting for this slab.
-  m_stats->usage -= m_colMax;
-#endif
+  JEMALLOC_STATS_ADJUST(m_stats, m_colMax);
   m_stats->alloc += m_colMax;
   if (m_stats->alloc > m_stats->peakAlloc) {
     m_stats->peakAlloc = m_stats->alloc;
@@ -152,13 +158,8 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
 
 SmartAllocatorImpl::~SmartAllocatorImpl() {
   unsigned int size = m_blocks.size();
-  for (unsigned int i = m_backupBlocks.size(); i < size; i += m_multiplier) {
+  for (unsigned int i = 0; i < size; i += m_multiplier) {
     free(m_blocks[i]);
-  }
-  size = m_backupBlocks.size();
-  for (unsigned int i = 0; i < size; i++) {
-    free(m_blocks[i]);
-    free(m_backupBlocks[i]);
   }
 }
 
@@ -167,24 +168,25 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 
 HOT_FUNC
 void *SmartAllocatorImpl::alloc() {
-#ifdef SMART_ALLOCATOR_STACKTRACE
-  {
-    Lock lock(s_st_mutex);
-    bool enabled = StackTrace::Enabled;
-    StackTrace::Enabled = true;
-    s_st_allocs.operator[](m_freelist.back());
-    StackTrace::Enabled = enabled;
-  }
-#endif
   ASSERT(m_stats);
   // Just update the usage, while the peakUsage is maintained by
   // FrameInjection.
   m_stats->usage += m_itemSize;
-  if (m_freelist.size() > 0) {
-    // Fast path
-    void *ret = m_freelist.back();
-    m_freelist.pop_back();
-    return ret;
+  if (hhvm) {
+    // It's possible that this simplified check will trip later than
+    // it should in a perfect world but it's cheaper than a full call
+    // to refreshStats on every alloc().
+    if (m_stats->maxBytes > 0 && UNLIKELY(m_stats->usage > m_stats->maxBytes)) {
+      MemoryManager::TheMemoryManager()->refreshStats();
+    }
+  }
+  void* freelist_value = NULL;
+
+#ifndef SMART_ALLOCATOR_DEBUG_FREE
+  freelist_value = m_freelist.maybePop();
+#endif
+  if (freelist_value) {
+    return freelist_value;
   } else if (m_col < m_colMax) {
     char *ret = m_blocks[m_row] + m_col;
     m_col += m_itemSize;
@@ -198,15 +200,13 @@ void *SmartAllocatorImpl::allocHelper() {
   ASSERT(m_col >= m_colMax);
   if (m_allocatedBlocks == 0) {
     // used up the last batch
-    ASSERT((m_blocks.size() - m_backupBlocks.size()) % m_multiplier == 0);
+    ASSERT(m_blocks.size() % m_multiplier == 0);
     size_t size = m_colMax * m_multiplier;
     char *p = (char *)malloc(size);
     m_blocks.push_back(p);
     m_blockIndex[((int64)p) / m_colMax] = m_blocks.size() - 1;
-#ifdef USE_JEMALLOC
     // Cancel out jemalloc's accounting for this slab.
-    m_stats->usage -= size;
-#endif
+    JEMALLOC_STATS_ADJUST(m_stats, size);
     m_allocatedBlocks = m_multiplier - 1;
 
     m_stats->alloc += size;
@@ -234,8 +234,8 @@ void *SmartAllocatorImpl::allocHelper() {
 bool SmartAllocatorImpl::isValid(void *obj) const {
   if (obj) {
 #ifdef DETECT_DOUBLE_FREE
-    FreeList *fl = const_cast<FreeList *>(&m_freelist);
-    for (FreeList::iterator it = fl->begin(); it != fl->end(); ++it) {
+    GarbageList *fl = const_cast<GarbageList *>(&m_freelist);
+    for (GarbageList::iterator it = fl->begin(); it != fl->end(); ++it) {
       void *p = *it;
       if (p == obj) return false;
     }
@@ -253,104 +253,10 @@ bool SmartAllocatorImpl::isValid(void *obj) const {
 ///////////////////////////////////////////////////////////////////////////////
 // SmartAllocatorManager methods
 
-/**
- * When we restore, destination's size is always bigger, therefore, we can
- * fully restore destination's old contents WITHOUT malloc-ing new memory. This
- * is crucial in understanding why internal pointers between fixed size objects
- * are able to get maintained during the process.
- */
-void SmartAllocatorImpl::copyMemoryBlocks(std::vector<char *> &dest,
-                                          const std::vector<char *> &src,
-                                          int lastCol,
-                                          int lastBlockSize) {
-  int sizeDest = dest.size();
-  int sizeSrc = src.size();
-  ASSERT(lastCol <= lastBlockSize && lastBlockSize <= m_colMax);
-  ASSERT(sizeSrc > 0);
-  if (sizeDest < sizeSrc) {
-    dest.resize(sizeSrc);
-    for (int i = sizeDest; i < sizeSrc - 1; i++) {
-      dest[i] = (char *)malloc(m_colMax);
-    }
-    dest[sizeSrc - 1] = (char *)malloc(lastBlockSize);
-  } else if (sizeDest > sizeSrc) {
-    for (int i = sizeSrc; i < sizeDest; i++) {
-      free(dest[i]);
-    }
-    dest.resize(sizeSrc);
-  }
-  for (int i = 0; i < sizeSrc - 1; i++) {
-    memcpy(dest[i], src[i], m_colMax);
-  }
-  memcpy(dest[sizeSrc - 1], src[sizeSrc - 1], lastCol);
-}
-
-int SmartAllocatorImpl::calculateObjects(LinearAllocator &allocator,
-                                         int &size) {
-  int count = 0;
-  int oldSize = size;
-  if (m_flag & (NeedRestore | NeedRestoreOnce)) {
-    FreeMap freeMap;
-    prepareFreeMap(freeMap);
-    int max = m_colMax;
-    int bitIndex = 0;
-    for (unsigned int i = 0; i < m_blocks.size(); i++) {
-      if (i == m_blocks.size() - 1) max = m_col;
-      char *start = (char *)m_blocks[i];
-      for (char *obj = start; obj < start + max;
-           obj += m_itemSize, bitIndex++) {
-        if (!freeMap.test(bitIndex)) {
-          if (calculate(obj, size)) {
-            ++count;
-          }
-        }
-      }
-    }
-    ++count; // we need NULL termination for each type
-  }
-  m_linearSize = size - oldSize;
-  m_linearCount = count;
-  return count;
-}
-
-void SmartAllocatorImpl::backupObjects(LinearAllocator &allocator) {
-  // backup internal pointers
-  m_rowChecked = m_row;
-  m_colChecked = m_col;
-
-  // backup fixed size memory
-  copyMemoryBlocks(m_backupBlocks, m_blocks, m_col, m_col);
-
-  // backup free list
-  m_backupFreelist.copy(m_freelist);
-
-  // backup variable sized memory
-  if (m_flag & (NeedRestore | NeedRestoreOnce)) {
-    FreeMap freeMap;
-    prepareFreeMap(freeMap);
-    int max = m_colMax;
-    int bitIndex = 0;
-    for (unsigned int i = 0; i < m_blocks.size(); i++) {
-      if (i == m_blocks.size() - 1) max = m_col;
-      char *start = (char *)m_blocks[i];
-      for (char *obj = start; obj < start + max;
-           obj += m_itemSize, bitIndex++) {
-        if (!freeMap.test(bitIndex)) {
-          int size = 0;
-          if (calculate(obj, size)) {
-            allocator.backup(obj);
-            backup(obj, allocator);
-          }
-        }
-      }
-    }
-    allocator.backup((void*)NULL); // indicating end of this type
-  }
-}
-
-void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
+HOT_FUNC
+void SmartAllocatorImpl::rollbackObjects() {
   // sweep dangling objects
-  if (m_flag & (NeedRestore | NeedRestoreOnce | NeedSweep)) {
+  if (m_flag & NeedSweep) {
     FreeMap freeMap;
     prepareFreeMap(freeMap);
     int max = m_colMax;
@@ -367,23 +273,12 @@ void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
     }
   }
 
-  // restore internal pointers
-  m_row = m_rowChecked;
-  m_col = m_colChecked;
-
-  // restore freelist if back'ed up
-  if (!(m_flag & RestoreDisabled)) {
-    m_freelist.copy(m_backupFreelist);
-  } else {
-    m_freelist.clear();
-  }
-
-  // restore fixed size memory
-  ASSERT(m_blocks.size() >= m_backupBlocks.size());
-  ASSERT(m_freelist.capacity() >= m_backupFreelist.capacity());
+  m_row = 0;
+  m_col = 0;
+  m_freelist.clear();
 
   // update the target multiplier
-  m_targetMultiplier += m_blocks.size() - m_backupBlocks.size();
+  m_targetMultiplier += m_blocks.size();
   m_targetMultiplier >>= 1;
 
   int newMultiplier = m_multiplier;
@@ -396,56 +291,23 @@ void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
   }
 
   m_blockIndex.clear();
-  if (m_backupBlocks.empty()) {
-    // this happens when SmartAllocator was created after checkpoint was taken
-    ASSERT(m_row == 0);
-    ASSERT(m_col == 0);
-    ASSERT(m_freelist.size() == 0);
-    for (unsigned int i = m_multiplier; i < m_blocks.size();
-         i += m_multiplier) {
-      free(m_blocks[i]);
-    }
-    m_blocks.resize(1);
-    if (m_multiplier != newMultiplier) {
-      char *p = (char *)realloc(m_blocks[0], m_colMax * newMultiplier);
-      m_blocks[0] = p;
-    }
-    m_blockIndex[((int64)m_blocks[0]) / m_colMax] = 0;
 
-    m_multiplier = newMultiplier;
-    m_allocatedBlocks = m_multiplier - 1;
-  } else {
-    for (unsigned int i = m_backupBlocks.size(); i < m_blocks.size();
-         i += m_multiplier) {
-      free(m_blocks[i]);
-    }
-    m_blocks.resize(m_backupBlocks.size());
-    copyMemoryBlocks(m_blocks, m_backupBlocks, m_colChecked, m_colMax);
-    for (unsigned i = 0; i < m_blocks.size(); i++) {
-      m_blockIndex[((int64)m_blocks[i]) / m_colMax] = i;
-    }
-
-    // restore variable sized memory
-    if (((m_flag & RestoreDisabled) == 0)) {
-      if (m_linearized) {
-        allocator.advance(m_linearSize, m_linearCount);
-      } else if (m_flag & (NeedRestore | NeedRestoreOnce)) {
-        void *p;
-        const char *data;
-        while ((p = allocator.restore(data)) != NULL) {
-          restore(p, data);
-        }
-        if (m_flag & NeedRestoreOnce) {
-          copyMemoryBlocks(m_backupBlocks, m_blocks,
-                           m_colChecked, m_colChecked);
-          m_linearized = true;
-        }
-      }
-    }
-
-    m_multiplier = newMultiplier;
-    m_allocatedBlocks = 0;
+  ASSERT(m_row == 0);
+  ASSERT(m_col == 0);
+  ASSERT(m_freelist.size() == 0);
+  for (unsigned int i = m_multiplier; i < m_blocks.size();
+       i += m_multiplier) {
+    free(m_blocks[i]);
   }
+  m_blocks.resize(1);
+  if (m_multiplier != newMultiplier) {
+    char *p = (char *)realloc(m_blocks[0], m_colMax * newMultiplier);
+    m_blocks[0] = p;
+  }
+  m_blockIndex[((int64)m_blocks[0]) / m_colMax] = 0;
+
+  m_multiplier = newMultiplier;
+  m_allocatedBlocks = m_multiplier - 1;
 }
 
 void SmartAllocatorImpl::logStats() {
@@ -470,7 +332,7 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
     int index = 0;
 #define MAX_REPORT 10
     int count = MAX_REPORT;
-    for (FreeList::iterator it = m_freelist.begin();
+    for (GarbageList::iterator it = m_freelist.begin();
          it != m_freelist.end(); ++it) {
       void *p = *it;
       if (freelist.find(p) != freelist.end()) {
@@ -480,10 +342,6 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
         } else if (count > 0) {
           printf("Double-freed Item %d:\n", ++index);
           dump(p);
-#ifdef SMART_ALLOCATOR_STACKTRACE
-          Lock lock(s_st_mutex);
-          printf("%s\n", s_st_deallocs[p].toString().c_str());
-#endif
         }
       } else {
         freelist.insert(p);
@@ -504,10 +362,6 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
           } else if (count > 0) {
             printf("Leaked Item at {%d:%d} %d:\n", i, j/m_itemSize, ++index);
             dump(p);
-#ifdef SMART_ALLOCATOR_STACKTRACE
-            Lock lock(s_st_mutex);
-            printf("%s\n", s_st_allocs[p].toString().c_str());
-#endif
           }
         } else {
           freelist.erase(p);
@@ -524,30 +378,77 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
       } else if (count > 0) {
         void *p = *iter;
         printf("Invalid Item %p:\n", p);
-#ifdef SMART_ALLOCATOR_STACKTRACE
-        Lock lock(s_st_mutex);
-        printf("%s\n", s_st_deallocs[p].toString().c_str());
-        ASSERT(s_st_allocs.find(p) == s_st_allocs.end());
-#endif
       }
     }
   }
 }
 
-void SmartAllocatorImpl::prepareFreeMap(FreeMap &freeMap) {
+HOT_FUNC
+void SmartAllocatorImpl::prepareFreeMap(FreeMap& freeMap) const {
   ASSERT(freeMap.empty());
   freeMap.resize(m_blocks.size() * m_itemCount);
-  for (FreeList::iterator it = m_freelist.begin(); it != m_freelist.end();
+  for (GarbageList::iterator it = m_freelist.begin(); it != m_freelist.end();
        ++it) {
     int64 freed = (int64)(*it);
     int idx = findIndex(m_blocks, m_blockIndex, freed, m_colMax);
 
     // no double free!
     ASSERT(!freeMap.test(idx * m_itemCount +
-                         (freed - (int64)m_blocks[idx]) / m_itemSize));
+           (freed - (int64)m_blocks[idx]) / m_itemSize));
     freeMap.set(idx * m_itemCount +
                 (freed - (int64)m_blocks[idx]) / m_itemSize);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static bool is_object_alive(char* caddr) {
+  return *reinterpret_cast<int*>(caddr + FAST_REFCOUNT_OFFSET) !=
+    RefCountTombstoneValue;
+}
+
+static bool UNUSED is_iterable_type(SmartAllocatorImpl::Name type) {
+  return type == SmartAllocatorImpl::Variant ||
+         type == SmartAllocatorImpl::RefData ||
+         type == SmartAllocatorImpl::ObjectData ||
+         type == SmartAllocatorImpl::StringData ||
+         type == SmartAllocatorImpl::HphpArray ||
+         type == SmartAllocatorImpl::Array ||
+         type == SmartAllocatorImpl::VectorArray ||
+         type == SmartAllocatorImpl::ZendArray;
+}
+
+SmartAllocatorImpl::Iterator::Iterator(const SmartAllocatorImpl* sa)
+  : m_sa(*sa)
+  , m_row(0)
+  , m_col(-m_sa.m_itemSize)
+{
+  ASSERT(hhvm_gc);
+  ASSERT(is_iterable_type(sa->getAllocatorType()));
+  next();
+}
+
+void* SmartAllocatorImpl::Iterator::current() const {
+  return m_row == -1 ? 0 : m_sa.m_blocks[m_row] + m_col;
+}
+
+void SmartAllocatorImpl::Iterator::next() {
+  do {
+    m_col += m_sa.m_itemSize;
+    if (m_col >= m_sa.m_colMax) {
+      ASSERT(m_col == m_sa.m_colMax);
+      if (++m_row >= m_sa.m_row) {
+        m_row = -1;
+        return;
+      }
+      m_col = 0;
+    }
+
+    if (m_row == m_sa.m_row && m_col >= m_sa.m_col) {
+      m_row = -1;
+      return;
+    }
+  } while (!is_object_alive(static_cast<char*>(current())));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -556,18 +457,6 @@ void SmartAllocatorImpl::prepareFreeMap(FreeMap &freeMap) {
 ObjectAllocatorBase::ObjectAllocatorBase(int itemSize)
   : SmartAllocatorImpl(SmartAllocatorImpl::ObjectData, -1, itemSize,
                        SmartAllocatorImpl::NoCallbacks) { }
-
-int ObjectAllocatorBase::calculate(void *p, int &size) {
-  return false;
-}
-
-void ObjectAllocatorBase::backup(void *p, LinearAllocator &allocator) {
-  // do nothing
-}
-
-void ObjectAllocatorBase::restore(void *p, const char *&data) {
-  // do nothing
-}
 
 void ObjectAllocatorBase::sweep(void *p) {
   // do nothing

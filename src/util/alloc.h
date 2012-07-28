@@ -25,7 +25,9 @@
 #include <google/malloc_extension.h>
 #endif
 
-#ifndef NO_JEMALLOC
+#ifdef NO_JEMALLOC
+#include "malloc.h"
+#else
 #include <jemalloc/jemalloc.h>
 #endif
 
@@ -56,6 +58,7 @@ public:
   OutOfMemoryException(size_t size)
       : Exception("Unable to allocate %zu bytes of memory", size) {}
   virtual ~OutOfMemoryException() throw() {}
+  EXCEPTION_COMMON_IMPL(OutOfMemoryException);
 };
 
 namespace Util {
@@ -80,6 +83,19 @@ void flush_thread_caches();
  * and predicted to continue to be idle for a while.
  */
 void flush_thread_stack();
+
+/**
+ * Like scoped_ptr, but calls free() on destruct
+ */
+class ScopedMem {
+  ScopedMem(const ScopedMem&); // disable copying
+  ScopedMem& operator=(const ScopedMem&); 
+ public:
+  ScopedMem(void* ptr) : m_ptr(ptr) {}
+  ~ScopedMem() { free(m_ptr); }
+ private:
+  void* m_ptr;
+};
 
 extern __thread uintptr_t s_stackLimit;
 extern __thread size_t s_stackSize;

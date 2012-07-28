@@ -17,8 +17,6 @@
 #include <test/test_performance.h>
 #include <util/util.h>
 
-using namespace std;
-
 #define PERF_LOOP_COUNT "500"
 
 #define PERF_START                                      \

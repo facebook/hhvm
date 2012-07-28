@@ -1,0 +1,1 @@
+HipHop Fatal error: Call to undefined method c::foo from anonymous context in src/test/vm/method-undefined.php on line 8

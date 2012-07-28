@@ -1,0 +1,161 @@
+# Some tests for fault regions and catch regions.
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function throw_stuff($msg) {
+  .try_fault fault {
+    String "about to throw: "
+    CGetL $msg
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+
+    FPushCtorD 1 "Exception"
+    FPassL 0 $msg
+    FCall 1
+    PopR
+    Throw
+  }
+
+fault:
+  String "throw_stuff's fault ...\n"
+  Print
+  PopC
+  Unwind
+}
+
+.function foo() {
+  String "testing fault region\n"
+  Print
+  PopC
+
+  .try_fault handler {
+    String "In region\n"
+    Print
+    PopC
+
+    FPushFuncD 1 "throw_stuff"
+    String "the message"
+    FPassC 0
+    FCall 1
+    PopR
+
+    String "unreached\n"
+    Print
+    PopC
+  }
+
+  True
+  RetC
+
+handler:
+  String "In foo's fault handler\n"
+  Print
+  PopC
+  Unwind
+}
+
+.class One extends Exception {}
+.class Two extends Exception {}
+.class Three extends Exception {}
+
+.function throw_various() {
+           Int 0
+           SetL $counter
+           PopC
+
+repeat:
+           .try_catch (One on_one)
+                      (Two on_two)
+                      (Three on_three) {
+             CGetL $counter
+             Switch <make_one make_two make_three> 0 0
+
+make_one:    FPushCtorD 0 "One"
+             FCall 0
+             PopR
+             Throw
+make_two:    FPushCtorD 0 "Two"
+             FCall 0
+             PopR
+             Throw
+make_three:  FPushCtorD 1 "Three"
+             String "third exception from throw_various"
+             FPassC 0
+             FCall 1
+             PopR
+             Throw
+           }
+
+on_one:    String "one\n"
+           Print
+           PopC
+           Int 1
+           SetL $counter
+           Catch #weird
+           PopC
+           PopC
+           Jmp repeat
+on_two:    Catch
+           PopC
+           String "two\n"
+           Print
+           PopC
+           Int 2
+           SetL $counter
+           PopC
+           Jmp repeat
+on_three:  String "three\n"
+           Print
+           PopC
+           Catch
+           Throw
+
+}
+
+.function main() {
+         False
+         SetL $ever_caught
+         PopC
+
+         .try_catch (Exception catcher) {
+            FPushFuncD 0 "foo"
+            FCall 0
+            PopR
+         }
+
+resume:  .try_catch (Exception catcher) {
+           FPushFuncD 0 "throw_various"
+           FCall 0
+           PopR
+         }
+
+resume2: True
+         RetC
+
+catcher: String "top-level catch handler got: "
+         Catch
+         FPushObjMethodD 0 "getMessage"
+         FCall 0
+         UnboxR
+         Concat
+         String "\n"
+         Concat
+         Print
+         PopC
+         # This might be illegal hhbc?
+         CGetL $ever_caught
+         True
+         SetL $ever_caught
+         PopC
+         JmpZ resume
+         Jmp resume2
+}

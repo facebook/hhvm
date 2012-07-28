@@ -24,8 +24,6 @@
 #include <util/logger.h>
 #include <util/process.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,24 +31,42 @@ DummySandbox::DummySandbox(DebuggerProxy *proxy,
                            const std::string &defaultPath,
                            const std::string &startupFile)
     : m_proxy(proxy), m_defaultPath(defaultPath), m_startupFile(startupFile),
-      m_thread(this, &DummySandbox::run), m_inited(false), m_stopped(false),
+      m_stopped(false),
       m_signum(CmdSignal::SignalNone) {
+  m_thread = new AsyncFunc<DummySandbox>(this, &DummySandbox::run);
 }
 
-DummySandbox::~DummySandbox() {
-  stop();
+bool DummySandbox::waitForEnd(int seconds) {
+  bool ret = m_thread->waitForEnd(seconds);
+  if (ret) {
+    delete m_thread;
+  }
+  return ret;
 }
 
 void DummySandbox::start() {
-  m_thread.start();
+  m_thread->start();
 }
 
 void DummySandbox::stop() {
   m_stopped = true;
-  m_thread.waitForEnd();
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  if (ti->m_reqInjectionData.dummySandbox) {
+    // called from dummy sandbox thread itself, schedule retirement
+    Debugger::RetireDummySandboxThread(this);
+  } else {
+    // called from worker thread, we wait for the dummySandbox to end
+    m_thread->waitForEnd();
+    // we are sure it's always created by new and this is the last thing
+    // on this object
+    delete this;
+  }
 }
 
 void DummySandbox::run() {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  Debugger::RegisterThread();
+  ti->m_reqInjectionData.dummySandbox = true;
   while (!m_stopped) {
     try {
       char *argv[] = {"", NULL};
@@ -60,7 +76,7 @@ void DummySandbox::run() {
 
       DSandboxInfo sandbox = m_proxy->getSandbox();
       string msg;
-      if (m_inited) {
+      if (sandbox.valid()) {
         SystemGlobals *g = (SystemGlobals *)get_global_variables();
         SourceRootInfo sri(sandbox.m_user, sandbox.m_name);
         if (sandbox.m_path.empty()) {
@@ -69,17 +85,18 @@ void DummySandbox::run() {
         if (!sri.sandboxOn()) {
           msg = "Invalid sandbox was specified. "
             "PHP files may not be loaded properly.\n";
-          // force HPHP_SANDBOX_ID to be set, so we can still talk to client
-          g->GV(_SERVER).set("HPHP_SANDBOX_ID", sandbox.id());
         } else {
           sri.setServerVariables(g->GV(_SERVER));
         }
+        Debugger::RegisterSandbox(sandbox);
+        g_context->setSandboxId(sandbox.id());
 
         Logger::Info("Start loading startup doc");
         std::string doc = getStartupDoc(sandbox);
         bool error; string errorMsg;
         bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
-                               null, "", "", "", error, errorMsg);
+                               null, "", "", error, errorMsg, true, false,
+                               true);
         if (!ret || error) {
           msg += "Unable to pre-load " + doc;
           if (!errorMsg.empty()) {
@@ -87,11 +104,15 @@ void DummySandbox::run() {
           }
         }
         Logger::Info("Startup doc " + doc + " loaded");
+      } else {
+        g_context->setSandboxId(m_proxy->getDummyInfo().id());
       }
 
-      m_inited = true;
-      Debugger::RegisterSandbox(sandbox);
-      Debugger::InterruptSessionStarted(NULL, msg.c_str());
+      ti->m_reqInjectionData.debugger = true;
+      {
+        DebuggerDummyEnv dde;
+        Debugger::InterruptSessionStarted(NULL, msg.c_str());
+      }
 
       // Blocking until Ctrl-C is issued by end user and DebuggerProxy cannot
       // find a real sandbox thread to handle it.
@@ -100,11 +121,21 @@ void DummySandbox::run() {
         while (!m_stopped && m_signum != CmdSignal::SignalBreak) {
           wait(1);
         }
+        if (m_stopped) {
+          // stopped by worker thread
+          break;
+        }
         m_signum = CmdSignal::SignalNone;
       }
-    } catch (const DebuggerException &e) {}
+    } catch (const DebuggerClientExitException &e) {
+      // stopped by the dummy sandbox thread itself
+      break;
+    } catch (const DebuggerException &e) {
+    }
+    ti->m_reqInjectionData.debugger = false;
     execute_command_line_end(0, false, NULL);
   }
+  Debugger::UnregisterSandbox(g_context->getSandboxId());
 }
 
 void DummySandbox::notifySignal(int signum) {

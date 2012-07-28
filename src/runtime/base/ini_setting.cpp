@@ -24,8 +24,6 @@
 #include <runtime/ext/extension.h>
 #include <util/lock.h>
 
-using namespace std;
-
 ///////////////////////////////////////////////////////////////////////////////
 // defined in zend/zend_ini.tab.cpp
 

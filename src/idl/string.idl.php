@@ -276,7 +276,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strtolower",
-    'desc'   => "Returns string with all alphabetic characters converted to lowercase.\n\nNote that 'alphabetic' is determined by the current locale. This means that in i.e. the default \"C\" locale, characters such as umlaut-A (Ã„) will not be converted.",
+    'desc'   => "Returns string with all alphabetic characters converted to lowercase.\n\nNote that 'alphabetic' is determined by the current locale. This means that in i.e. the default \"C\" locale, characters such as umlaut-A () will not be converted.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
@@ -298,7 +298,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strtoupper",
-    'desc'   => "Returns string with all alphabetic characters converted to uppercase.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (Ã¤) will not be converted.",
+    'desc'   => "Returns string with all alphabetic characters converted to uppercase.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a () will not be converted.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
@@ -320,7 +320,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ucfirst",
-    'desc'   => "Returns a string with the first character of str capitalized, if that character is alphabetic.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (Ã¤) will not be converted.",
+    'desc'   => "Returns a string with the first character of str capitalized, if that character is alphabetic.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a () will not be converted.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
@@ -943,7 +943,7 @@ DefineFunction(
         'name'   => "charset",
         'type'   => String,
         'value'  => "\"ISO-8859-1\"",
-        'desc'   => "The ISO-8859-1 character set is used as default for the optional third charset. This defines the character set used in conversion.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
+        'desc'   => "The ISO-8859-1 character set is used as default for the optional third charset. This defines the character set used in conversion.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
       ),
     ),
     'taint_observer' => array(
@@ -977,7 +977,7 @@ DefineFunction(
         'name'   => "charset",
         'type'   => String,
         'value'  => "\"ISO-8859-1\"",
-        'desc'   => "Like htmlspecialchars(), it takes an optional third argument charset which defines character set used in conversion. Presently, the ISO-8859-1 character set is used as the default.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
+        'desc'   => "Like htmlspecialchars(), it takes an optional third argument charset which defines character set used in conversion. Presently, the ISO-8859-1 character set is used as the default.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
       ),
       array(
         'name'   => "double_encode",
@@ -1045,7 +1045,7 @@ DefineFunction(
         'name'   => "charset",
         'type'   => String,
         'value'  => "\"ISO-8859-1\"",
-        'desc'   => "Defines character set used in conversion. The default character set is ISO-8859-1.\n\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
+        'desc'   => "Defines character set used in conversion. The default character set is ISO-8859-1.\n\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
       ),
       array(
         'name'   => "double_encode",
@@ -1062,8 +1062,48 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fb_htmlspecialchars",
+    'desc'   => "Certain characters have special significance in HTML, and should be represented by HTML entities if they are to preserve their meanings. This function returns a string with some of these conversions made; the translations made are those most useful for everyday web programming. If you require all HTML character entities to be translated, use htmlentities() instead. This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application.\n\nThe translations performed are: '&' (ampersand) becomes '&amp;' '\"' (double quote) becomes '&quot;' when ENT_NOQUOTES is not set. ''' (single quote) becomes '&#039;' only when ENT_QUOTES is set. '<' (less than) becomes '&lt;' '>' (greater than) becomes '&gt;'",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "The converted string.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "str",
+        'type'   => String,
+        'desc'   => "The string being converted.",
+      ),
+      array(
+        'name'   => "quote_style",
+        'type'   => Int32,
+        'value'  => "k_ENT_COMPAT",
+        'desc'   => "The optional second argument, quote_style, tells the function what to do with single and double quote characters. The default mode, ENT_COMPAT, is the backwards compatible mode which only translates the double-quote character and leaves the single-quote untranslated. If ENT_QUOTES is set, both single and double quotes are translated and if ENT_NOQUOTES is set neither single nor double quotes are translated.",
+      ),
+      array(
+        'name'   => "charset",
+        'type'   => String,
+        'value'  => "\"ISO-8859-1\"",
+        'desc'   => "Defines character set used in conversion. The default character set is ISO-8859-1.\n\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
+      ),
+      array(
+        'name'   => "extra",
+        'type'   => StringVec,
+        'value'  => "Array()",
+        'desc'   => "An array of extra ascii chars to be encoded.",
+      ),
+    ),
+    'taint_observer' => array(
+      'set_mask'   => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "quoted_printable_encode",
-    'desc'   => "Returns a quoted printable string created according to » RFC2045, section 6.7.\n\nThis function is similar to imap_8bit(), except this one does not require the IMAP module to work.",
+    'desc'   => "Returns a quoted printable string created according to  RFC2045, section 6.7.\n\nThis function is similar to imap_8bit(), except this one does not require the IMAP module to work.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
@@ -1085,7 +1125,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "quoted_printable_decode",
-    'desc'   => "This function returns an 8-bit binary string corresponding to the decoded quoted printable string (according to » RFC2045, section 6.7, not » RFC2821, section 4.5.2, so additional periods are not stripped from the beginning of line).\n\nThis function is similar to imap_qprint(), except this one does not require the IMAP module to work.",
+    'desc'   => "This function returns an 8-bit binary string corresponding to the decoded quoted printable string (according to  RFC2045, section 6.7, not  RFC2821, section 4.5.2, so additional periods are not stripped from the beginning of line).\n\nThis function is similar to imap_qprint(), except this one does not require the IMAP module to work.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
@@ -1220,7 +1260,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "md5",
-    'desc'   => "Calculates the MD5 hash of str using the » RSA Data Security, Inc. MD5 Message-Digest Algorithm, and returns that hash.",
+    'desc'   => "Calculates the MD5 hash of str using the RSA Data Security, Inc. MD5 Message-Digest Algorithm, and returns that hash.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => String,
@@ -1426,7 +1466,7 @@ DefineFunction(
     'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the new current locale, or FALSE if the locale functionality is not implemented on your platform, the specified locale does not exist or the category name is invalid.\n\nAn invalid category name also causes a warning message. Category/locale names can be found in » RFC 1766 and » ISO 639. Different systems have different naming schemes for locales.\n\nThe return value of setlocale() depends on the system that PHP is running. It returns exactly what the system setlocale function returns.",
+      'desc'   => "Returns the new current locale, or FALSE if the locale functionality is not implemented on your platform, the specified locale does not exist or the category name is invalid.\n\nAn invalid category name also causes a warning message. Category/locale names can be found in  RFC 1766 and  ISO 639. Different systems have different naming schemes for locales.\n\nThe return value of setlocale() depends on the system that PHP is running. It returns exactly what the system setlocale function returns.",
     ),
     'args'   => array(
       array(
@@ -1706,7 +1746,7 @@ DefineFunction(
     'name'   => "strcmp",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
     ),
     'args'   => array(
@@ -1730,7 +1770,7 @@ DefineFunction(
     'desc'   => "This function is similar to strcmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.\n\nNote that this comparison is case sensitive.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
     ),
     'args'   => array(
@@ -1759,7 +1799,7 @@ DefineFunction(
     'desc'   => "This function implements a comparison algorithm that orders alphanumeric strings in the way a human being would, this is described as a \"natural ordering\". Note that this comparison is case sensitive.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Similar to other string comparison functions, this one returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
     ),
     'args'   => array(
@@ -1783,7 +1823,7 @@ DefineFunction(
     'desc'   => "Binary safe case-insensitive string comparison.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
     ),
     'args'   => array(
@@ -1807,7 +1847,7 @@ DefineFunction(
     'desc'   => "This function is similar to strcasecmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
     ),
     'args'   => array(
@@ -1833,10 +1873,10 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strnatcasecmp",
-    'desc'   => "This function implements a comparison algorithm that orders alphanumeric strings in the way a human being would. The behaviour of this function is similar to strnatcmp(), except that the comparison is not case sensitive. For more information see: Martin Pool's » Natural Order String Comparison page.",
+    'desc'   => "This function implements a comparison algorithm that orders alphanumeric strings in the way a human being would. The behaviour of this function is similar to strnatcmp(), except that the comparison is not case sensitive. For more information see: Martin Pool's  Natural Order String Comparison page.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Similar to other string comparison functions, this one returns < 0 if str1 is less than str2 > 0 if str1 is greater than str2, and 0 if they are equal.",
     ),
     'args'   => array(
@@ -1860,7 +1900,7 @@ DefineFunction(
     'desc'   => "Note that this comparison is case sensitive, and unlike strcmp() this function is not binary safe.\n\nstrcoll() uses the current locale for doing the comparisons. If the current locale is C or POSIX, this function is equivalent to strcmp().",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
     ),
     'args'   => array(
@@ -1906,7 +1946,7 @@ DefineFunction(
       array(
         'name'   => "length",
         'type'   => Int32,
-        'value'  => "0",
+        'value'  => "INT_MAX",
         'desc'   => "The length of the comparison. The default value is the largest of the length of the str compared to the length of main_str less the offset.",
       ),
       array(
@@ -1988,6 +2028,12 @@ DefineFunction(
         'name'   => "needle",
         'type'   => Variant,
         'desc'   => "If needle is not a string, it is converted to an integer and applied as the ordinal value of a character.",
+      ),
+      array(
+        'name'   => 'before_needle',
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "If TRUE, strstr() returns the part of the haystack before the first occurrence of the needle (excluding the needle).",
       ),
     ),
     'taint_observer' => array(
@@ -2284,7 +2330,7 @@ DefineFunction(
     'desc'   => "Returns the length of the given string.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "The length of the string on success, and 0 if the string is empty.",
     ),
     'args'   => array(
@@ -2359,7 +2405,7 @@ DefineFunction(
     'desc'   => "The Levenshtein distance is defined as the minimal number of characters you have to replace, insert or delete to transform str1 into str2. The complexity of the algorithm is O(m*n), where n and m are the length of str1 and str2 (rather good when compared to similar_text(), which is O(max(n,m)**3), but still expensive).\n\nIn its simplest form the function will take only the two strings as parameter and will calculate just the number of insert, replace and delete operations needed to transform str1 into str2.\n\nA second variant will take three additional parameters that define the cost of insert, replace and delete operations. This is more general and adaptive than variant one, but not as efficient.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "This function returns the Levenshtein-Distance between the two argument strings or -1, if one of the argument strings is longer than the limit of 255 characters.",
     ),
     'args'   => array(
@@ -2401,7 +2447,7 @@ DefineFunction(
     'desc'   => "This calculates the similarity between two strings as described in Oliver [1993]. Note that this implementation does not use a stack as in Oliver's pseudo code, but recursive calls which may or may not speed up the whole process. Note also that the complexity of this algorithm is O(N**3) where N is the length of the longest string.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the number of matching chars in both strings.",
     ),
     'args'   => array(

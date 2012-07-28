@@ -45,12 +45,12 @@ inline Array x_mcrypt_list_modes(CStrRef lib_dir = null_string) {
   return f_mcrypt_list_modes(lib_dir);
 }
 
-inline int x_mcrypt_module_get_algo_block_size(CStrRef algorithm, CStrRef lib_dir = null_string) {
+inline int64 x_mcrypt_module_get_algo_block_size(CStrRef algorithm, CStrRef lib_dir = null_string) {
   FUNCTION_INJECTION_BUILTIN(mcrypt_module_get_algo_block_size);
   return f_mcrypt_module_get_algo_block_size(algorithm, lib_dir);
 }
 
-inline int x_mcrypt_module_get_algo_key_size(CStrRef algorithm, CStrRef lib_dir = null_string) {
+inline int64 x_mcrypt_module_get_algo_key_size(CStrRef algorithm, CStrRef lib_dir = null_string) {
   FUNCTION_INJECTION_BUILTIN(mcrypt_module_get_algo_key_size);
   return f_mcrypt_module_get_algo_key_size(algorithm, lib_dir);
 }
@@ -136,7 +136,7 @@ inline Variant x_mcrypt_get_iv_size(CStrRef cipher, CStrRef mode) {
   return f_mcrypt_get_iv_size(cipher, mode);
 }
 
-inline int x_mcrypt_get_key_size(CStrRef cipher, CStrRef module) {
+inline int64 x_mcrypt_get_key_size(CStrRef cipher, CStrRef module) {
   FUNCTION_INJECTION_BUILTIN(mcrypt_get_key_size);
   return f_mcrypt_get_key_size(cipher, module);
 }
@@ -146,17 +146,17 @@ inline String x_mcrypt_enc_get_algorithms_name(CObjRef td) {
   return f_mcrypt_enc_get_algorithms_name(td);
 }
 
-inline int x_mcrypt_enc_get_block_size(CObjRef td) {
+inline int64 x_mcrypt_enc_get_block_size(CObjRef td) {
   FUNCTION_INJECTION_BUILTIN(mcrypt_enc_get_block_size);
   return f_mcrypt_enc_get_block_size(td);
 }
 
-inline int x_mcrypt_enc_get_iv_size(CObjRef td) {
+inline int64 x_mcrypt_enc_get_iv_size(CObjRef td) {
   FUNCTION_INJECTION_BUILTIN(mcrypt_enc_get_iv_size);
   return f_mcrypt_enc_get_iv_size(td);
 }
 
-inline int x_mcrypt_enc_get_key_size(CObjRef td) {
+inline int64 x_mcrypt_enc_get_key_size(CObjRef td) {
   FUNCTION_INJECTION_BUILTIN(mcrypt_enc_get_key_size);
   return f_mcrypt_enc_get_key_size(td);
 }
@@ -186,7 +186,7 @@ inline bool x_mcrypt_enc_is_block_mode(CObjRef td) {
   return f_mcrypt_enc_is_block_mode(td);
 }
 
-inline int x_mcrypt_enc_self_test(CObjRef td) {
+inline int64 x_mcrypt_enc_self_test(CObjRef td) {
   FUNCTION_INJECTION_BUILTIN(mcrypt_enc_self_test);
   return f_mcrypt_enc_self_test(td);
 }
@@ -197,7 +197,7 @@ inline Variant x_mcrypt_generic(CObjRef td, CStrRef data) {
   return f_mcrypt_generic(td, data);
 }
 
-inline int x_mcrypt_generic_init(CObjRef td, CStrRef key, CStrRef iv) {
+inline int64 x_mcrypt_generic_init(CObjRef td, CStrRef key, CStrRef iv) {
   FUNCTION_INJECTION_BUILTIN(mcrypt_generic_init);
   return f_mcrypt_generic_init(td, key, iv);
 }

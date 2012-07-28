@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/array/array_util.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/externals.h>
@@ -23,8 +24,6 @@
 #include <util/util.h>
 #include <util/lock.h>
 #include <util/logger.h>
-
-using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,9 +62,19 @@ Array ClassInfo::GetUserFunctions() {
     Array dyn = s_hook->getUserFunctions();
     if (!dyn.isNull()) {
       ret.merge(dyn);
+      // De-dup values, then renumber (for aesthetics).
+      ret = ArrayUtil::StringUnique(ret).toArrRef();
+      ret->renumber();
     }
   }
   return ret;
+}
+
+const ClassInfo::MethodInfo *ClassInfo::FindSystemFunction(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
+
+  return s_systemFuncs->getMethodInfo(name);
 }
 
 const ClassInfo::MethodInfo *ClassInfo::FindFunction(CStrRef name) {
@@ -120,10 +129,44 @@ const ClassInfo *ClassInfo::FindTrait(CStrRef name) {
   return 0;
 }
 
+const ClassInfo *ClassInfo::FindSystemClassInterfaceOrTrait(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
+
+  ClassMap::const_iterator iter = s_class_like.find(name);
+  if (iter != s_class_like.end()) {
+    const ClassInfo *ci = iter->second;
+    if (ci->m_attribute & IsSystem) return ci;
+  }
+
+  return 0;
+}
+
+const ClassInfo *ClassInfo::FindSystemClass(CStrRef name) {
+  if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
+    return r->getAttribute() & (IsTrait|IsInterface) ? 0 : r;
+  }
+  return 0;
+}
+
+const ClassInfo *ClassInfo::FindSystemInterface(CStrRef name) {
+  if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
+    return r->getAttribute() & IsInterface ? r : 0;
+  }
+  return 0;
+}
+
+const ClassInfo *ClassInfo::FindSystemTrait(CStrRef name) {
+  if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
+    return r->getAttribute() & IsTrait ? r : 0;
+  }
+  return 0;
+}
+
 Array ClassInfo::GetClassLike(unsigned mask, unsigned value) {
   ASSERT(s_loaded);
 
-  Array ret;
+  Array ret = Array::Create();
   for (ClassMap::const_iterator iter = s_class_like.begin();
        iter != s_class_like.end(); ++iter) {
     const ClassInfo *info = iter->second->getDeclared();
@@ -135,16 +178,25 @@ Array ClassInfo::GetClassLike(unsigned mask, unsigned value) {
       Array dyn = s_hook->getInterfaces();
       if (!dyn.isNull()) {
         ret.merge(dyn);
+        // De-dup values, then renumber (for aesthetics).
+        ret = ArrayUtil::StringUnique(ret).toArrRef();
+        ret->renumber();
       }
     } else if (value & IsTrait) {
       Array dyn = s_hook->getTraits();
       if (!dyn.isNull()) {
         ret.merge(dyn);
+        // De-dup values, then renumber (for aesthetics).
+        ret = ArrayUtil::StringUnique(ret).toArrRef();
+        ret->renumber();
       }
     } else {
       Array dyn = s_hook->getClasses();
       if (!dyn.isNull()) {
         ret.merge(dyn);
+        // De-dup values, then renumber (for aesthetics).
+        ret = ArrayUtil::StringUnique(ret).toArrRef();
+        ret->renumber();
       }
     }
   }
@@ -196,7 +248,7 @@ void ClassInfo::ConstantInfo::setValue(CVarRef value) {
 
 void ClassInfo::ConstantInfo::setStaticValue(CVarRef v) {
   value = v;
-  value.setStatic();
+  value.setEvalScalar();
   deferred = false;
 }
 
@@ -227,6 +279,18 @@ Array ClassInfo::GetConstants() {
     res.merge(dyn);
   }
   return res;
+}
+
+ClassInfo::UserAttributeInfo::UserAttributeInfo() {
+}
+
+Variant ClassInfo::UserAttributeInfo::getValue() const {
+  return value;
+}
+
+void ClassInfo::UserAttributeInfo::setStaticValue(CVarRef v) {
+  value = v;
+  value.setEvalScalar();
 }
 
 bool ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
@@ -377,8 +441,10 @@ void ClassInfo::GetSymbolNames(std::vector<String> &classes,
                       clsMethods, clsProperties, clsConstants);
   GetClassSymbolNames(GetInterfaces(), true, false, classes,
                       clsMethods, clsProperties, clsConstants);
-  GetClassSymbolNames(GetTraits(), false, true, classes,
-                      clsMethods, clsProperties, clsConstants);
+  if (!hhvm) {
+    GetClassSymbolNames(GetTraits(), false, true, classes,
+                        clsMethods, clsProperties, clsConstants);
+  }
 
   if (clsMethods && methodSize < clsMethods->size()) {
     methodSize = clsMethods->size();
@@ -537,9 +603,15 @@ bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
     clsInfo->hasMethod(methodName, defClass);
   if (!methodInfo) return false;
   if (methodInfo->attribute & ClassInfo::IsPublic) return true;
-  const ClassInfo *ctxClass =
-    ClassInfo::FindClass(FrameInjection::GetClassName(true));
-  bool hasObject = hasCallObject || FrameInjection::GetThis(true);
+  CStrRef ctxName = hhvm
+                    ? g_vmContext->getContextClassName(true)
+                    : FrameInjection::GetClassName(true);
+  if (ctxName->size() == 0) {
+    return false;
+  }
+  const ClassInfo *ctxClass = ClassInfo::FindClass(ctxName);
+  bool hasObject = hasCallObject ||
+    (hhvm ? g_vmContext->getThis(true) : FrameInjection::GetThis(true));
   if (ctxClass) {
     return ctxClass->checkAccess(defClass, methodInfo, staticCall, hasObject);
   }
@@ -664,15 +736,26 @@ bool ClassInfo::PropertyInfo::isVisible(const ClassInfo *context) const {
 // load functions
 
 static String makeStaticString(const char *s) {
-  if (!s) return null_string;
-  String str(s);
-  if (!str.checkStatic()) {
-    str->setStatic();
-    if (!has_eval_support) {
-      StaticString::TheStaticStringSet().insert(str.get());
-    }
+  if (!s) {
+    return null_string;
   }
-  return str;
+  if (has_eval_support) {
+    // hphpi and hhvm use GetStaticString
+    return StringData::GetStaticString(s);
+  }
+  // binaries compiled with hphpc don't use GetStaticString(), and
+  // instead they use TheStaticStringSet; see "type_string.cpp" for
+  // details
+  StringData* sd = new StringData(s, AttachLiteral);
+  sd->setStatic();
+  StringDataSet& set = StaticString::TheStaticStringSet();
+  StringDataSet::iterator it = set.find(sd);
+  if (it != set.end()) {
+    delete sd;
+    return *it;
+  }
+  set.insert(sd);
+  return sd;
 }
 
 ClassInfo::MethodInfo *ClassInfo::MethodInfo::getDeclared() {
@@ -714,7 +797,6 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       parameter->attribute = (Attribute)(int64)(*p++);
       parameter->name = *p++;
       parameter->type = *p++;
-      ASSERT(Util::toLower(parameter->type) == parameter->type);
       parameter->value = *p++;
       parameter->valueText = *p++;
 
@@ -737,6 +819,23 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       }
       staticVariables.push_back(staticVariable);
     }
+    p++;
+
+    // user attributes
+    while (*p) {
+      UserAttributeInfo *userAttr = new UserAttributeInfo();
+      userAttr->name = makeStaticString(*p++);
+
+      const char *len = *p++;
+      const char *valueText = *p++;
+      int64 valueLen = (int64)len;
+      VariableUnserializer vu(valueText,
+                              valueLen,
+                              VariableUnserializer::Serialize);
+      userAttr->setStaticValue(vu.unserialize());
+
+      userAttrs.push_back(userAttr);
+    }
   }
 
   p++;
@@ -752,6 +851,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   // because the underlying static StringData will not be released.
   m_name = makeStaticString(*p++);
   m_parent = makeStaticString(*p++);
+  m_parentInfo = 0;
 
   m_file = *p++;
   m_line1 = (int)(int64)(*p++);
@@ -787,7 +887,8 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     while (*p) {
       String new_name = makeStaticString(*p++);
       String old_name = makeStaticString(*p++);
-      m_traitAliasesVec.push_back(pair<String, String>(new_name, old_name));
+      m_traitAliasesVec.push_back(std::pair<String, String>(
+        new_name, old_name));
     }
     p++;
   }
@@ -844,6 +945,39 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     m_constantsVec.push_back(constant);
   }
   p++;
+
+  while (*p) {
+    UserAttributeInfo *userAttr = new UserAttributeInfo();
+    userAttr->name = makeStaticString(*p++);
+
+    const char *len = *p++;
+    const char *valueText = *p++;
+    int64 valueLen = (int64)len;
+    VariableUnserializer vu(valueText,
+                            valueLen,
+                            VariableUnserializer::Serialize);
+    userAttr->setStaticValue(vu.unserialize());
+
+    m_userAttrVec.push_back(userAttr);
+  }
+  p++;
+}
+
+const ClassInfo *ClassInfoUnique::getParentClassInfo() const {
+  if (m_parentInfo) return m_parentInfo;
+  if (m_parent.empty()) return NULL;
+  return FindClass(m_parent);
+}
+
+void ClassInfoUnique::postInit() {
+  if (m_parent.empty()) return;
+  const ClassInfo *ci = FindClassInterfaceOrTrait(m_parent);
+  if (!ci) return;
+  if ((m_attribute & IsInterface) !=
+      (ci->getAttribute() & (IsInterface|IsTrait|IsRedeclared))) {
+    return;
+  }
+  m_parentInfo = ci;
 }
 
 ClassInfoRedeclared::ClassInfoRedeclared(const char **&p) {
@@ -866,6 +1000,12 @@ const ClassInfo *ClassInfoRedeclared::getCurrentOrNull() const {
     return m_redeclaredClasses[id];
   }
   return 0;
+}
+
+void ClassInfoRedeclared::postInit() {
+  for (int i = m_redeclaredClasses.size(); i--; ) {
+    m_redeclaredClasses[i]->postInit();
+  }
 }
 
 void ClassInfo::Load() {
@@ -895,7 +1035,14 @@ void ClassInfo::Load() {
   ASSERT(s_systemFuncs);
   ASSERT(s_userFuncs);
   s_loaded = true;
+
+  for (ClassMap::iterator it = s_class_like.begin(), end = s_class_like.end();
+       it != end; ++it) {
+    it->second->postInit();
+  }
 }
+
+void ClassInfo::postInit() {}
 
 ClassInfo::MethodInfo::~MethodInfo() {
   if (attribute & ClassInfo::IsRedeclared) {
@@ -964,54 +1111,176 @@ Variant ClassPropTable::getInitVal(const ClassPropTableEntry *prop) const {
     }
 
     case 7:
-      return ClassPropTableEntry::GetVariant((id >> 4) & 15,
+      return ClassPropTableEntry::GetVariant(DataType((id >> 4) & 15),
                                              getInitP(id >> 32));
   }
   throw FatalErrorException("Failed to get init val");
 }
 
+static const ClassPropTableEntry *FindRedeclaredProp(
+  const ObjectData *&obj, const ClassPropTableEntry *p, int &flags) {
+  const ObjectStaticCallbacks *osc = obj->o_get_callbacks();
+  const char *globals = 0;
+  ASSERT(osc);
+  const ClassPropTable *cpt = osc->cpt->m_parent;
+
+  while (true) {
+    while (cpt) {
+      if (cpt->m_size_mask >= 0) {
+        const int *ix = cpt->m_hash_entries;
+        int h = p->hash & cpt->m_size_mask;
+        int o = ix[h];
+        if (o >= 0) {
+          const ClassPropTableEntry *prop = cpt->m_entries + o;
+          do {
+            if (p->hash != prop->hash ||
+                prop->isPrivate()) {
+              continue;
+            }
+
+            if (LIKELY(!strcmp(prop->keyName->data() + prop->prop_offset,
+                               p->keyName->data() + p->prop_offset))) {
+              if (prop->isOverride() && !prop->offset) {
+                flags |= prop->flags;
+                continue;
+              }
+              ASSERT(prop->type == KindOfUnknown);
+              return prop;
+            }
+          } while (!prop++->isLast());
+        }
+      }
+      cpt = cpt->m_parent;
+    }
+    if (LIKELY(!osc->redeclaredParent)) break;
+    if (LIKELY(!globals)) {
+      globals = (char*)get_global_variables();
+    }
+    osc = *(ObjectStaticCallbacks**)(globals + osc->redeclaredParent);
+    obj = obj->getRedeclaredParent();
+    cpt = osc->cpt;
+  }
+
+  return NULL;
+}
+
 void ClassInfo::GetArray(const ObjectData *obj, const ClassPropTable *ct,
-                         Array &props, bool pubOnly) {
-  while (ct) {
-    const ClassPropTableEntry *p = ct->m_entries;
-    int off = ct->m_offset;
-    if (off >= 0) do {
-      p += off;
-      if (!pubOnly || p->isPublic()) {
-        if (p->isOverride()) {
-          /* The actual property is stored in a base class,
-             but we need to set the entry here, to get the
-             iteration order right */
-          props.set(*p->keyName, null_variant, true);
-          continue;
-        }
-        const char *addr = ((const char *)obj) + p->offset;
-        if (LIKELY(p->type == KindOfVariant)) {
-          if (isInitialized(*(Variant*)addr)) {
-            props.lvalAt(*p->keyName, AccessFlags::Key)
-                 .setWithRef(*(Variant*)addr);
+                         Array &props, GetArrayKind kind) {
+  if (ct) {
+    Array done;
+    const ObjectData *base = 0;
+    do {
+      const ClassPropTableEntry *p = ct->m_entries;
+      int off = ct->m_offset;
+      if (off >= 0) {
+        do {
+          p += off;
+          if ((kind & GetArrayPrivate) || p->isPublic()) {
+            if (done.get() && done.get()->exists(p->offset)) continue;
+            if (p->isOverride()) {
+              /* The actual property is stored in a base class.
+                 It might have been promoted from protected,
+                 so mark here that the prop does not need to be
+                 set again.
+              */
+              if (UNLIKELY(!p->offset)) {
+                /*
+                  Its stored in a redeclared base. We have to find
+                  the value, and update it now.
+                */
+                const ObjectData *parent = obj;
+                int flags = 0;
+                if (const ClassPropTableEntry *pp =
+                    FindRedeclaredProp(parent, p, flags)) {
+
+                  if (done.get() && done.get()->exists(pp->offset)) continue;
+                  const char *addr = ((const char *)parent) + pp->offset;
+
+                  props.lvalAt(*p->keyName, AccessFlags::Key)
+                    .setWithRef(*(Variant*)addr);
+
+                  done.set(pp->offset, true_varNR);
+                  continue;
+                }
+                /*
+                  Its a dynamic property. If this is a protected prop,
+                  need to prevent it being added again when we deal
+                  with dynamic props. Otherwise, we just insert it now
+                  (to get the order right), and let it get set later.
+                */
+                if (p->isPublic() &&
+                    !(flags & ClassPropTableEntry::Protected)) {
+                  props.set(*p->keyName, null_variant, true);
+                } else {
+                  CArrRef oprop = parent->getProperties();
+                  if (oprop.get()) {
+                    String name(p->keyName->data() + p->prop_offset,
+                                p->keyName->size() - p->prop_offset,
+                                AttachLiteral);
+                    if (done.get() && done.get()->exists(name)) continue;
+
+                    CVarRef val = oprop.get()->get(name);
+                    if (val.isInitialized()) {
+                      props.lvalAt(*p->keyName, AccessFlags::Key)
+                        .setWithRef(val);
+                      base = parent;
+                      done.set(name, false_varNR);
+                    }
+                  }
+                }
+                continue;
+              }
+              done.set(p->offset, true_varNR);
+            }
+            const char *addr = ((const char *)obj) + p->offset;
+            if (LIKELY(p->type == KindOfUnknown)) {
+              if (isInitialized(*(Variant*)addr)) {
+                props.lvalAt(*p->keyName, AccessFlags::Key)
+                  .setWithRef(*(Variant*)addr);
+              }
+              continue;
+            }
+            Variant v = p->getVariant(addr);
+            if (p->isPrivate()) {
+              props.add(*p->keyName, v, true);
+            } else {
+              props.set(*p->keyName, v, true);
+            }
           }
-          continue;
-        }
-        Variant v = p->getVariant(addr);
-        if (p->isPrivate()) {
-          props.add(*p->keyName, v, true);
-        } else {
-          props.set(*p->keyName, v, true);
+        } while ((off = p->next) != 0);
+      }
+      ct = ct->m_parent;
+      if (!ct) {
+        ObjectData *parent = obj->getRedeclaredParent();
+        if (parent) {
+          ASSERT(parent != obj);
+          obj = parent;
+          ct = obj->o_getClassPropTable();
         }
       }
-    } while ((off = p->next) != 0);
-    ct = ct->m_parent;
-    if (!ct) {
-      ObjectData *parent = obj->getRedeclaredParent();
-      if (parent) {
-        ASSERT(parent != obj);
-        obj = parent;
-        ct = obj->o_getClassPropTable();
+    } while (ct);
+    if (base) {
+      if (LIKELY(kind & GetArrayDynamic)) {
+        for (ArrayIter it(base->getProperties()); !it.end(); it.next()) {
+          Variant key = it.first();
+          if (!done.get()->exists(key)) {
+            CVarRef value = it.secondRef();
+            props.lvalAt(key, AccessFlags::Key).setWithRef(value);
+          }
+        }
       }
+      return;
     }
   }
-  obj->o_getArray(props, pubOnly);
+  if (LIKELY(kind & GetArrayDynamic)) {
+    if (hhvm) {
+      HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(
+        const_cast<ObjectData*>(obj));
+      inst->HPHP::VM::Instance::o_getArray(props, !(kind & GetArrayPrivate));
+    } else {
+      obj->o_getArray(props, !(kind & GetArrayPrivate));
+    }
+  }
 }
 
 void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
@@ -1019,24 +1288,52 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
   while (ct) {
     for (const int *ppi = ct->privates(); *ppi >= 0; ppi++) {
       const ClassPropTableEntry *p = ct->m_entries + *ppi;
-      ASSERT(p->isPrivate());
+      ASSERT(!p->isPublic());
+      CVarRef value = props->get(*p->keyName);
+      if (!value.isInitialized()) continue;
       const char *addr = ((const char *)obj) + p->offset;
-      if (LIKELY(p->type == KindOfVariant)) {
-        props->load(*p->keyName, *(Variant*)addr);
+      if (UNLIKELY(!p->offset)) {
+        /*
+          Its stored in a redeclared base. We have to find
+          the value, and update it now.
+        */
+        const ObjectData *parent = obj;
+        int flags = 0;
+        if (const ClassPropTableEntry *pp =
+            FindRedeclaredProp(parent, p, flags)) {
+
+          p = pp;
+          addr = ((const char *)parent) + pp->offset;
+        } else {
+          String name(p->keyName->data() + p->prop_offset,
+                      p->keyName->size() - p->prop_offset,
+                      AttachLiteral);
+          Variant *val = parent->ObjectData::o_realPropHook(
+            name, ObjectData::RealPropCreate|ObjectData::RealPropWrite);
+          val->setWithRef(value);
+          continue;
+        }
+      }
+      if (LIKELY(p->type == KindOfUnknown)) {
+        ((Variant*)addr)->setWithRef(value);
         continue;
       }
-      if (!props->exists(*p->keyName)) continue;
-
-      CVarRef value = props->get(*p->keyName);
       switch (p->type) {
-      case KindOfBoolean: *(bool*)addr = value;   break;
-      case KindOfInt32:   *(int*)addr = value;    break;
-      case KindOfInt64:   *(int64*)addr = value;  break;
-      case KindOfDouble:  *(double*)addr = value; break;
-      case KindOfString:  *(String*)addr = value; break;
-      case KindOfArray:   *(Array*)addr = value;  break;
-      case KindOfObject:  *(Object*)addr = value; break;
-      default:            ASSERT(false);          break;
+        case KindOfBoolean: *(bool*)addr = value;   break;
+        case KindOfInt64:   *(int64*)addr = value;  break;
+        case KindOfDouble:  *(double*)addr = value; break;
+        case KindOfString:
+          *(String*)addr = value.isString() ? value.getStringData() : NULL;
+          break;
+        case KindOfArray:
+          *(Array*)addr = value.isArray() ? value.getArrayData() : NULL;
+          break;
+        case KindOfObject:
+          *(Object*)addr = value.isObject() ? value.getObjectData() : NULL;
+          break;
+        default:
+          ASSERT(false);
+          break;
       }
     }
     ct = ct->m_parent;
@@ -1049,7 +1346,12 @@ void ClassInfo::SetArray(ObjectData *obj, const ClassPropTable *ct,
       }
     }
   }
-  obj->o_setArray(props);
+  if (hhvm) {
+    HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(obj);
+    inst->HPHP::VM::Instance::o_setArray(props);
+  } else {
+    obj->o_setArray(props);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

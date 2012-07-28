@@ -32,7 +32,6 @@
 #include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
-using namespace boost;
 using std::vector;
 
 ///////////////////////////////////////////////////////////////////////////////

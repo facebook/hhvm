@@ -175,7 +175,7 @@ inline Variant x_array_unique(CVarRef array, int sort_flags = 2) {
   return f_array_unique(array, sort_flags);
 }
 
-inline int x_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array) {
+inline int64 x_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(array_unshift);
   return f_array_unshift(_argc, array, var, _argv);
 }
@@ -205,12 +205,12 @@ inline bool x_shuffle(VRefParam array) {
   return f_shuffle(array);
 }
 
-inline int x_count(CVarRef var, bool recursive = false) {
+inline int64 x_count(CVarRef var, bool recursive = false) {
   FUNCTION_INJECTION_BUILTIN(count);
   return f_count(var, recursive);
 }
 
-inline int x_sizeof(CVarRef var, bool recursive = false) {
+inline int64 x_sizeof(CVarRef var, bool recursive = false) {
   FUNCTION_INJECTION_BUILTIN(sizeof);
   return f_sizeof(var, recursive);
 }

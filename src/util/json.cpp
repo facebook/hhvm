@@ -16,14 +16,12 @@
 
 #include "json.h"
 
-using namespace std;
-
 namespace HPHP { namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-string Escape(const char *s) {
-  string ret;
+std::string Escape(const char *s) {
+  std::string ret;
   char hex[3];
   for (const char *p = s; *p; p++) {
     switch (*p) {
@@ -36,7 +34,7 @@ string Escape(const char *s) {
     default:
       if (*p < ' ') {
         snprintf(hex, sizeof(hex), "%02x", *p);
-        ret += "\\u00" + string(hex);
+        ret += "\\u00" + std::string(hex);
       } else {
         ret += *p;
       }

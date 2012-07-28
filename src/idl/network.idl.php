@@ -51,6 +51,18 @@ CPP
 
 DefineFunction(
   array(
+    'name'   => "gethostname",
+    'desc'   => "Gets the standard host name for the local machine.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns a string with the hostname on success, otherwise FALSE is returned.",
+    ),
+    'args'   => array(),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "gethostbyaddr",
     'desc'   => "Returns the host name of the Internet host specified by ip_address.",
     'flags'  =>  HasDocComment,
@@ -586,6 +598,24 @@ DefineFunction(
         'type'   => Variant | Reference,
         'value'  => "null",
         'desc'   => "The line number where the output started.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "header_register_callback",
+    'desc'   => "Registers a function that will be called when PHP starts sending output.",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+        'desc'   => "Function called just before the headers are sent. It gets no parameters and the return value is ignored.",
       ),
     ),
   ));

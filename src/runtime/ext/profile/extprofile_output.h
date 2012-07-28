@@ -79,13 +79,13 @@ inline String x_ob_get_flush() {
   return f_ob_get_flush();
 }
 
-inline int x_ob_get_length() {
+inline int64 x_ob_get_length() {
   FUNCTION_INJECTION_BUILTIN(ob_get_length);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ob_get_length();
 }
 
-inline int x_ob_get_level() {
+inline int64 x_ob_get_level() {
   FUNCTION_INJECTION_BUILTIN(ob_get_level);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_ob_get_level();
@@ -179,6 +179,26 @@ inline Variant x_hphp_output_global_state(bool serialize = true) {
   FUNCTION_INJECTION_BUILTIN(hphp_output_global_state);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_hphp_output_global_state(serialize);
+}
+
+inline int64 x_hphp_instruction_counter() {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_hphp_instruction_counter();
+}
+
+inline Variant x_hphp_get_hardware_counters() {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_hphp_get_hardware_counters();
+}
+
+inline bool x_hphp_set_hardware_events(CStrRef events = null) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_hphp_set_hardware_events(events);
+}
+
+inline void x_hphp_clear_hardware_events() {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  f_hphp_clear_hardware_events();
 }
 
 

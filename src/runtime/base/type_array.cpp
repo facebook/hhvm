@@ -18,7 +18,7 @@
 #include <runtime/base/types.h>
 #include <runtime/base/comparisons.h>
 #include <util/exception.h>
-#include <runtime/base/array/small_array.h>
+#include <runtime/base/array/vector_array.h>
 #include <runtime/base/shared/shared_map.h>
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/variable_unserializer.h>
@@ -32,13 +32,23 @@
 #include <unicode/coll.h> // icu
 #include <util/parser/hphp.tab.hpp>
 
-using namespace std;
-
 namespace HPHP {
 
 const Array null_array = Array();
 
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Array);
+
+void Array::setEvalScalar() const {
+  Array* thisPtr = const_cast<Array*>(this);
+  if (!m_px) {
+    *thisPtr = ArrayData::Create();
+  }
+  if (!m_px->isStatic()) {
+    ArrayData *ad = ArrayData::GetScalarArray(m_px);
+    *thisPtr = ad;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructors
 
@@ -52,12 +62,13 @@ Array::~Array() {}
 // operators
 
 Array &Array::operator=(ArrayData *data) {
-  SmartPtr<ArrayData>::operator=(data);
+  ArrayBase::operator=(data);
   return *this;
 }
 
+HOT_FUNC
 Array &Array::operator=(CArrRef arr) {
-  SmartPtr<ArrayData>::operator=(arr.m_px);
+  ArrayBase::operator=(arr.m_px);
   return *this;
 }
 
@@ -65,6 +76,7 @@ Array &Array::operator=(CVarRef var) {
   return operator=(var.toArray());
 }
 
+HOT_FUNC
 Array &Array::operator=(const StaticArray &arr) {
   if (m_px != arr.m_px) {
     if (m_px && m_px->decRefCount() == 0) {
@@ -267,17 +279,18 @@ Array &Array::merge(CArrRef arr) {
   return mergeImpl(arr.m_px, ArrayData::Merge);
 }
 
+HOT_FUNC
 Array &Array::mergeImpl(ArrayData *data, ArrayData::ArrayOp op) {
   if (m_px == NULL || data == NULL) {
     throw BadArrayMergeException();
   }
   if (!data->empty()) {
     if (op != ArrayData::Merge && m_px->empty()) {
-      SmartPtr<ArrayData>::operator=(data);
+      ArrayBase::operator=(data);
     } else if (m_px != data || op == ArrayData::Merge) {
       ArrayData *escalated = m_px->append(data, op, m_px->getCount() > 1);
       if (escalated) {
-        SmartPtr<ArrayData>::operator=(escalated);
+        ArrayBase::operator=(escalated);
       }
     }
   } else if (op == ArrayData::Merge) {
@@ -384,15 +397,14 @@ bool Array::more(CVarRef v2) const {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator
 
-ArrayIter Array::begin(CStrRef context /* = null_string */,
-                       bool setIterDirty /* = false */) const {
-  if (setIterDirty && m_px) m_px->iter_dirty_set();
+HOT_FUNC
+ArrayIter Array::begin(CStrRef context /* = null_string */) const {
   return m_px;
 }
 
 void Array::escalate(bool mutableIteration /* = false */) {
   if (m_px) {
-    SmartPtr<ArrayData>::operator=(m_px->escalate(mutableIteration));
+    ArrayBase::operator=(m_px->escalate(mutableIteration));
   }
 }
 
@@ -430,12 +442,12 @@ CVarRef Array::rvalAtRef(int64 key, ACCESSPARAMS_IMPL) const {
 }
 
 Variant Array::rvalAt(double key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get((int64)key, flags & AccessFlags::Error);
+  if (m_px) return m_px->get(ToKey(key), flags & AccessFlags::Error);
   return null_variant;
 }
 
 CVarRef Array::rvalAtRef(double key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get((int64)key, flags & AccessFlags::Error);
+  if (m_px) return m_px->get(ToKey(key), flags & AccessFlags::Error);
   return null_variant;
 }
 
@@ -458,6 +470,7 @@ Variant Array::rvalAt(litstr key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
+HOT_FUNC_HPHP
 CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;
@@ -477,6 +490,7 @@ Variant Array::rvalAt(CStrRef key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
+HOT_FUNC_HPHP
 CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
   if (!m_px) return null_variant;
   switch (key.m_type) {
@@ -484,7 +498,6 @@ CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     return m_px->get(empty_string, flags & AccessFlags::Error);
   case KindOfBoolean:
-  case KindOfInt32:
   case KindOfInt64:
     return m_px->get(key.m_data.num, flags & AccessFlags::Error);
   case KindOfDouble:
@@ -508,7 +521,7 @@ CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
     }
     throw_bad_type_exception("Invalid type used as key");
     break;
-  case KindOfVariant:
+  case KindOfRef:
     return rvalAtRef(*(key.m_data.pvar), flags);
   default:
     ASSERT(false);
@@ -521,10 +534,11 @@ Variant Array::rvalAt(CVarRef key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
+HOT_FUNC_HPHP
 Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
   if (create) {
     if (!m_px) {
-      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+      ArrayBase::operator=(ArrayData::Create());
     }
     return &lvalAt(key, AccessFlags::Key);
   }
@@ -534,16 +548,17 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
                                          forWrite && m_px->getCount() > 1,
                                          false);
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
   }
   return ret;
 }
 
+HOT_FUNC_HPHP
 Variant *Array::lvalPtr(int64 key, bool forWrite, bool create) {
   if (create) {
     if (!m_px) {
-      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+      ArrayBase::operator=(ArrayData::Create());
     }
     return &lvalAt(key, AccessFlags::None);
   }
@@ -553,7 +568,7 @@ Variant *Array::lvalPtr(int64 key, bool forWrite, bool create) {
                                          forWrite && m_px->getCount() > 1,
                                          false);
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
   }
   return ret;
@@ -561,13 +576,13 @@ Variant *Array::lvalPtr(int64 key, bool forWrite, bool create) {
 
 Variant &Array::lvalAt() {
   if (!m_px) {
-    SmartPtr<ArrayData>::operator=(ArrayData::Create());
+    ArrayBase::operator=(ArrayData::Create());
   }
   Variant *ret = NULL;
   ArrayData *arr = m_px;
   ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
   if (escalated) {
-    SmartPtr<ArrayData>::operator=(escalated);
+    ArrayBase::operator=(escalated);
   }
   ASSERT(ret);
   return *ret;
@@ -582,6 +597,7 @@ Variant &Array::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   return lvalAtImpl(key.toKey(), flags);
 }
+HOT_FUNC_HPHP
 Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   VarNR k(key.toKey());
@@ -596,12 +612,12 @@ inline ALWAYS_INLINE
 CVarRef Array::setImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
-    SmartPtr<ArrayData>::operator=(data);
+    ArrayBase::operator=(data);
   } else {
     ArrayData *escalated =
       m_px->set(key, v, (m_px->getCount() > 1));
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
   }
   return v;
@@ -612,13 +628,13 @@ inline ALWAYS_INLINE
 CVarRef Array::setRefImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::CreateRef(key, v);
-    SmartPtr<ArrayData>::operator=(data);
+    ArrayBase::operator=(data);
   } else {
     escalate();
     ArrayData *escalated =
       m_px->setRef(key, v, (m_px->getCount() > 1));
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
   }
   return v;
@@ -629,11 +645,11 @@ inline ALWAYS_INLINE
 CVarRef Array::addImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
-    SmartPtr<ArrayData>::operator=(data);
+    ArrayBase::operator=(data);
   } else {
     ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
   }
   return v;
@@ -648,11 +664,13 @@ CVarRef Array::set(litstr  key, CVarRef v, bool isKey /* = false */) {
   return setImpl(String(key).toKey(), v);
 }
 
+HOT_FUNC_HPHP
 CVarRef Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
   return setImpl(key.toKey(), v);
 }
 
+HOT_FUNC_HPHP
 CVarRef Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) {
     return setImpl(key.getNumData(), v);
@@ -738,9 +756,11 @@ Variant Array::refvalAt(CStrRef key, bool isString /* = false */) {
   return strongBind(lvalAt(key, AccessFlags::IsKey(isString)));
 }
 
-Variant Array::argvalAt(bool byRef, CStrRef key, bool isString /* = false */) {
+Variant Array::argvalAt(bool byRef, CStrRef key,
+                        bool isString /* = false */) const {
   if (byRef) {
-    return strongBind(lvalAt(key, AccessFlags::IsKey(isString)));
+    return strongBind(
+      const_cast<Array*>(this)->lvalAt(key, AccessFlags::IsKey(isString)));
   } else {
     return rvalAtRef(key);
   }
@@ -773,7 +793,7 @@ Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
 Array Array::keys(CVarRef search_value /* = null_variant */,
                   bool strict /* = false */) const {
   if (search_value.isNull()) {
-    ArrayInit ai(size());
+    ArrayInit ai(size(), ArrayInit::vectorInit);
     for (ArrayIter iter(*this); iter; ++iter) {
       ai.set(iter.first());
     }
@@ -791,7 +811,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
 }
 
 Array Array::values() const {
-  ArrayInit ai(size());
+  ArrayInit ai(size(), ArrayInit::vectorInit);
   for (ArrayIter iter(*this); iter; ++iter) {
     ai.set(iter.secondRef());
   }
@@ -811,7 +831,6 @@ bool Array::exists(CStrRef key, bool isKey /* = false */) const {
 bool Array::exists(CVarRef key, bool isKey /* = false */) const {
   switch(key.getType()) {
   case KindOfBoolean:
-  case KindOfInt32:
   case KindOfInt64:
     return existsImpl(key.toInt64());
   default:
@@ -840,10 +859,10 @@ void Array::remove(CStrRef key, bool isString /* = false */) {
   }
 }
 
+HOT_FUNC_HPHP
 void Array::remove(CVarRef key) {
   switch(key.getType()) {
   case KindOfBoolean:
-  case KindOfInt32:
   case KindOfInt64:
     removeImpl(key.toInt64());
     return;
@@ -860,13 +879,14 @@ void Array::removeAll() {
   operator=(Create());
 }
 
+HOT_FUNC_HPHP
 CVarRef Array::append(CVarRef v) {
   if (!m_px) {
-    SmartPtr<ArrayData>::operator=(ArrayData::Create(v));
+    ArrayBase::operator=(ArrayData::Create(v));
   } else {
     ArrayData *escalated = m_px->append(v, (m_px->getCount() > 1));
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
   }
   return v;
@@ -874,11 +894,11 @@ CVarRef Array::append(CVarRef v) {
 
 CVarRef Array::appendRef(CVarRef v) {
   if (!m_px) {
-    SmartPtr<ArrayData>::operator=(ArrayData::CreateRef(v));
+    ArrayBase::operator=(ArrayData::CreateRef(v));
   } else {
     ArrayData *escalated = m_px->appendRef(v, (m_px->getCount() > 1));
     if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
+      ArrayBase::operator=(escalated);
     }
   }
   return v;
@@ -886,23 +906,23 @@ CVarRef Array::appendRef(CVarRef v) {
 
 CVarRef Array::appendWithRef(CVarRef v) {
   if (!m_px) {
-    SmartPtr<ArrayData>::operator=(ArrayData::Create());
+    ArrayBase::operator=(ArrayData::Create());
   }
   ArrayData *escalated = m_px->appendWithRef(v, (m_px->getCount() > 1));
   if (escalated) {
-    SmartPtr<ArrayData>::operator=(escalated);
+    ArrayBase::operator=(escalated);
   }
   return v;
 }
 
 Variant Array::appendOpEqual(int op, CVarRef v) {
   if (!m_px) {
-    SmartPtr<ArrayData>::operator=(ArrayData::Create());
+    ArrayBase::operator=(ArrayData::Create());
   }
   Variant *cv = NULL;
   ArrayData *escalated = m_px->lvalNew(cv, m_px->getCount() > 1);
   if (escalated) {
-    SmartPtr<ArrayData>::operator=(escalated);
+    ArrayBase::operator=(escalated);
   }
   ASSERT(cv);
   switch (op) {
@@ -927,7 +947,7 @@ Variant Array::pop() {
     Variant ret;
     ArrayData *newarr = m_px->pop(ret);
     if (newarr) {
-      SmartPtr<ArrayData>::operator=(newarr);
+      ArrayBase::operator=(newarr);
     }
     return ret;
   }
@@ -939,7 +959,7 @@ Variant Array::dequeue() {
     Variant ret;
     ArrayData *newarr = m_px->dequeue(ret);
     if (newarr) {
-      SmartPtr<ArrayData>::operator=(newarr);
+      ArrayBase::operator=(newarr);
     }
     return ret;
   }
@@ -954,7 +974,7 @@ void Array::prepend(CVarRef v) {
 
   ArrayData *newarr = m_px->prepend(v, (m_px->getCount() > 1));
   if (newarr) {
-    SmartPtr<ArrayData>::operator=(newarr);
+    ArrayBase::operator=(newarr);
   }
 }
 
@@ -1003,42 +1023,6 @@ void Array::unserialize(VariableUnserializer *uns) {
   if (sep != '}') {
     throw Exception("Expected '}' but got '%c'", sep);
   }
-}
-
-Array Array::fiberMarshal(FiberReferenceMap &refMap) const {
-  if (m_px) {
-    Array ret = Array::Create();
-    if (m_px->isGlobalArrayWrapper()) {
-      ret = get_global_array_wrapper();
-    } else if (m_px->isSharedMap()) {
-      return ((SharedMap *)m_px)->fiberCopy();
-    } else {
-      for (ArrayIter iter(*this); iter; ++iter) {
-        ret.set(iter.first().fiberMarshal(refMap),
-                ref(iter.secondRef().fiberMarshal(refMap)));
-      }
-    }
-    return ret;
-  }
-  return Array();
-}
-
-Array Array::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  if (m_px) {
-    Array ret = Array::Create();
-    if (m_px->isGlobalArrayWrapper()) {
-      ret = get_global_array_wrapper();
-    } else if (m_px->isSharedMap()) {
-      return ((SharedMap *)m_px)->fiberCopy();
-    } else {
-      for (ArrayIter iter(*this); iter; ++iter) {
-        ret.set(iter.first().fiberUnmarshal(refMap),
-                ref(iter.secondRef().fiberUnmarshal(refMap)));
-      }
-    }
-    return ret;
-  }
-  return Array();
 }
 
 void Array::dump() {
@@ -1128,9 +1112,10 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
   for (int i = 0; i < count; i++) {
     ssize_t pos = opaque.positions[indices[i]];
     if (renumber) {
-      sorted.append(m_px->getValueRef(pos));
+      sorted.appendWithRef(m_px->getValueRef(pos));
     } else {
-      sorted.set(m_px->getKey(pos), m_px->getValueRef(pos));
+      sorted.addLval(m_px->getKey(pos), true).
+        setWithRef(m_px->getValueRef(pos));
     }
   }
   operator=(sorted);

@@ -22,9 +22,9 @@
 #include <util/case_insensitive.h>
 #include <runtime/base/types.h>
 
-#define NEW_TYPE(s) TypePtr(new Type(Type::KindOf ## s))
 
 class TestCodeRun;
+class TestCodeError;
 struct ProgramOptions;
 int process(const ProgramOptions&);
 
@@ -40,8 +40,8 @@ DECLARE_BOOST_TYPES(ClassScope);
 
 class Type : public JSON::CodeError::ISerializable,
              public JSON::DocTarget::ISerializable {
-  friend int ::process(const ProgramOptions&);
   friend class ::TestCodeRun;
+  friend class ::TestCodeError;
 public:
   typedef int KindOf;
 
@@ -80,9 +80,8 @@ public:
   /**
    * Inferred types: types that a variable or a constant is sure to be.
    */
+  static TypePtr Null;
   static TypePtr Boolean;
-  static TypePtr Byte;
-  static TypePtr Int16;
   static TypePtr Int32;
   static TypePtr Int64;
   static TypePtr Double;
@@ -176,6 +175,12 @@ public:
   static bool SameType(TypePtr type1, TypePtr type2);
 
   /**
+   * Return true if SameType(type1,type2) or if type1 and type2
+   * are objects and type1 derives from type2.
+   */
+  static bool SubType(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2);
+
+  /**
    * Testing type conversion for constants.
    */
   static bool IsExactType(KindOf kindOf);
@@ -210,7 +215,8 @@ public:
   bool isSpecificObject() const;
   bool isNonConvertibleType() const; // other types cannot convert to them
   bool isPrimitive() const {
-    return IsExactType(m_kindOf) && (m_kindOf <= KindOfDouble);
+    return IsExactType(m_kindOf) && (m_kindOf <= KindOfDouble) &&
+      (m_kindOf != KindOfVoid);
   }
   bool isNoObjectInvolved() const;
   const std::string &getName() const { return m_name;}
@@ -223,7 +229,8 @@ public:
    * Generate type specifier in C++.
    */
   std::string getCPPDecl(AnalysisResultConstPtr ar,
-                         BlockScopeRawPtr scope);
+                         BlockScopeRawPtr scope,
+                         CodeGenerator *cg = 0);
   DataType getDataType() const;
 
   void outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
@@ -273,11 +280,11 @@ public:
    */
   void count(std::map<std::string, int> &counts);
 
-private:
   /**
    * Must not be invoked concurrently
    */
   static void InitTypeHintMap();
+private:
 
   /**
    * Must not be invoked concurrently

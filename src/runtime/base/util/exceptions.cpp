@@ -17,6 +17,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/frame_injection.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/execution_context.h>
 
 namespace HPHP {
 
@@ -24,15 +25,23 @@ int ExitException::ExitCode = 0;
 ///////////////////////////////////////////////////////////////////////////////
 
 ExtendedException::ExtendedException() : Exception() {
-  if (RuntimeOption::InjectedStackTrace) {
-    m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+  if (hhvm) {
+    m_bt = ArrayPtr(new Array(g_vmContext->debugBacktrace(false, true)));
+  } else {
+    if (RuntimeOption::InjectedStackTrace) {
+      m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+    }
   }
 }
 
 ExtendedException::ExtendedException(const std::string &msg) {
   m_msg = msg;
-  if (RuntimeOption::InjectedStackTrace) {
-    m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+  if (hhvm) {
+    m_bt = ArrayPtr(new Array(g_vmContext->debugBacktrace(false, true)));
+  } else {
+    if (RuntimeOption::InjectedStackTrace) {
+      m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+    }
   }
 }
 
@@ -41,8 +50,12 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   va_start(ap, fmt);
   format(fmt, ap);
   va_end(ap);
-  if (RuntimeOption::InjectedStackTrace) {
-    m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+  if (hhvm) {
+    m_bt = ArrayPtr(new Array(g_vmContext->debugBacktrace(false, true)));
+  } else {
+    if (RuntimeOption::InjectedStackTrace) {
+      m_bt = ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+    }
   }
 }
 

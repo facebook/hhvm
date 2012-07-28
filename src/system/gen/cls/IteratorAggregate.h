@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 771 */
+/* SRC: classes/iterator.php line 775 */
 FORWARD_DECLARE_GENERIC_INTERFACE(IteratorAggregate);
 class c_IteratorAggregate {
   // public: virtual void t_getiterator() = 0;

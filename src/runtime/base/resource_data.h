@@ -19,6 +19,7 @@
 
 #include <runtime/base/complex_types.h>
 #include <runtime/base/memory/sweepable.h>
+#include <runtime/vm/instance.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,10 +28,16 @@ namespace HPHP {
  * Base class of all resources used by extensions for opaquely passing object
  * pointers.
  */
-class ResourceData: public ObjectData, public UnsafePointer {
+#ifdef HHVM
+#define RD_PARENT HPHP::VM::Instance
+#else
+#define RD_PARENT HPHP::ObjectData
+#endif
+class ResourceData : public RD_PARENT {
 public:
   ResourceData();
   virtual ~ResourceData();
+  void operator delete(void* p) { ::operator delete(p); }
 
   // implementing ObjectData
   virtual bool o_instanceof(CStrRef s) const { return false;}
@@ -38,37 +45,15 @@ public:
   virtual String t___tostring();
   virtual int64 o_toInt64() const { return o_getId();}
   void o_setId(int id); // only for BuiltinFiles
-  void serialize(VariableSerializer *serializer) const;
+  virtual void serializeImpl(VariableSerializer *serializer) const;
   virtual CStrRef o_getResourceName() const;
   virtual int o_getResourceId() const { return o_getId(); }
 
-  // implementing UnsafePointer
-  virtual void protect() { m_static = true; }
-
-  // override CountableNF by using its own flag
-  void incRefCount() const {
-    if (m_static) return;
-    ObjectData::incRefCount();
-  }
-  int decRefCount() const {
-    if (m_static) return _count;
-    return ObjectData::decRefCount();
-  }
-
   static int GetMaxResourceId() ATTRIBUTE_COLD;
 
-  /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   *
-   * ResourceData cannot be copied across fiber in general, unless a derived
-   * class overwrites this behavior by providing its own copying.
-   */
-  virtual Object fiberMarshal(FiberReferenceMap &refMap) const;
-  virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
-
-private:
-  bool m_static;
+  static const bool IsResourceClass = true;
 };
+#undef RD_PARENT
 
 /**
  * Rules to avoid memory problems/leaks from ResourceData classes

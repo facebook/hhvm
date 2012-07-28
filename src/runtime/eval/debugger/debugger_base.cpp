@@ -20,8 +20,6 @@
 #include <util/parser/scanner.h>
 #include <util/util.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -38,6 +36,12 @@ const std::string DSandboxInfo::desc() const {
     ret += " at " + m_path;
   }
   return ret;
+}
+
+DSandboxInfo DSandboxInfo::CreateDummyInfo(uint64 unique) {
+  char buf[64];
+  snprintf(buf, 64, "dummy\t0x%llu", unique);
+  return DSandboxInfo(std::string(buf));
 }
 
 void DSandboxInfo::set(const std::string &id) {
@@ -101,6 +105,14 @@ void DFunctionInfo::recvImpl(ThriftBuffer &thrift) {
   thrift.read(m_namespace);
   thrift.read(m_class);
   thrift.read(m_function);
+}
+
+std::string DFunctionInfo::getName() const {
+  if (m_function.empty() || m_class.empty()) {
+    return m_function;
+  } else {
+    return m_class + "::" + m_function;
+  }
 }
 
 std::string DFunctionInfo::site(std::string &preposition) const {
@@ -451,7 +463,7 @@ String highlight_php(CStrRef source, int line /* = 0 */,
   Scanner scanner(source.data(), source.size(),
                   Scanner::AllowShortTags | Scanner::ReturnAllTokens);
   ScannerToken tok1, tok2;
-  std::vector<pair<int, string> > ahead_tokens;
+  std::vector<std::pair<int, string> > ahead_tokens;
   Location loc1, loc2;
 
   const char *colorComment = NULL, *endComment = NULL;
@@ -474,7 +486,7 @@ String highlight_php(CStrRef source, int line /* = 0 */,
         text = hcolor + text + ANSI_COLOR_END;
       }
 
-      ahead_tokens.push_back(pair<int, string>(next, text));
+      ahead_tokens.push_back(std::pair<int, string>(next, text));
       next = scanner.getNextToken(tok2, loc2);
     }
 

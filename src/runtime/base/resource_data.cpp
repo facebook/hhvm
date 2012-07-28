@@ -18,6 +18,8 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/variable_serializer.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -28,11 +30,24 @@ int ResourceData::GetMaxResourceId() {
   return *(os_max_resource_id.getCheck());
 }
 
-ResourceData::ResourceData() : ObjectData(0, true), m_static(false) {
+#ifdef HHVM
+#define RD_PARENT HPHP::VM::Instance
+#else
+#define RD_PARENT HPHP::ObjectData
+#endif
+ResourceData::ResourceData()
+#ifdef HHVM
+    : RD_PARENT(
+        ObjectStaticCallbacks::encodeVMClass(SystemLib::s_resourceClass),
+        true) {
+#else
+    : RD_PARENT(NULL, true) {
+#endif
   int &pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;
 }
+#undef RD_PARENT
 
 void ResourceData::o_setId(int id) {
   ASSERT(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
@@ -55,30 +70,17 @@ String ResourceData::t___tostring() {
   return String("Resource id #") + String(o_getId());
 }
 
-void ResourceData::serialize(VariableSerializer *serializer) const {
-  if (serializer->incNestedLevel((void*)this, true)) {
-    serializer->writeOverflow((void*)this, true);
-  } else {
-    String saveName;
-    int saveId;
-    serializer->getResourceInfo(saveName, saveId);
-    serializer->setResourceInfo(o_getResourceName(), o_getResourceId());
-    o_toArray().serialize(serializer);
-    serializer->setResourceInfo(saveName, saveId);
-  }
-  serializer->decNestedLevel((void*)this);
+void ResourceData::serializeImpl(VariableSerializer *serializer) const {
+  String saveName;
+  int saveId;
+  serializer->getResourceInfo(saveName, saveId);
+  serializer->setResourceInfo(o_getResourceName(), o_getResourceId());
+  o_toArray().serialize(serializer);
+  serializer->setResourceInfo(saveName, saveId);
 }
 
 CStrRef ResourceData::o_getResourceName() const {
   return o_getClassName();
-}
-
-Object ResourceData::fiberMarshal(FiberReferenceMap &refMap) const {
-  return Object();
-}
-
-Object ResourceData::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  return Object();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

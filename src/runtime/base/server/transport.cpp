@@ -24,19 +24,20 @@
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/access_log.h>
+#include <runtime/ext/ext_openssl.h>
 #include <util/compression.h>
 #include <util/util.h>
 #include <util/logger.h>
 #include <util/compatibility.h>
-
-using namespace std;
+#include <util/hardware_counter.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Transport::Transport()
-  : m_url(NULL), m_postData(NULL), m_postDataParsed(false),
+  : m_instructions(0), m_url(NULL), m_postData(NULL), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
+    m_headerCallback(null), m_headerCallbackDone(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
     m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
     m_flushTimeUs(0), m_sendContentType(true),
@@ -45,6 +46,7 @@ Transport::Transport()
   memset(&m_queueTime, 0, sizeof(m_queueTime));
   memset(&m_wallTime, 0, sizeof(m_wallTime));
   memset(&m_cpuTime, 0, sizeof(m_cpuTime));
+  m_chunksSentSizes.clear();
 }
 
 Transport::~Transport() {
@@ -57,12 +59,19 @@ Transport::~Transport() {
   if (m_compressor) {
     delete m_compressor;
   }
+  m_chunksSentSizes.clear();
 }
 
 void Transport::onRequestStart(const timespec &queueTime) {
   m_queueTime = queueTime;
   gettime(CLOCK_MONOTONIC, &m_wallTime);
   gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuTime);
+  /*
+   * The hardware counter is only 48 bits, so reset this at the beginning
+   * of every request to make sure we don't overflow.
+   */
+  Util::HardwareCounter::Reset();
+  m_instructions = Util::HardwareCounter::GetInstructionCount();
 }
 
 const char *Transport::getMethodName() {
@@ -167,8 +176,6 @@ void Transport::parseQuery(char *query, ParamMap &params) {
 }
 
 void Transport::parseGetParams() {
-  FiberWriteLock lock(this);
-
   if (m_url == NULL) {
     const char *url = getServerObject();
     ASSERT(url);
@@ -185,8 +192,6 @@ void Transport::parseGetParams() {
 }
 
 void Transport::parsePostParams() {
-  FiberWriteLock lock(this);
-
   if (!m_postDataParsed) {
     ASSERT(m_postData == NULL);
     int size;
@@ -203,11 +208,8 @@ void Transport::parsePostParams() {
 
 bool Transport::paramExists(const char *name, Method method /* = GET */) {
   ASSERT(name && *name);
-  FiberReadLock lock(this);
-
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
-      FiberReadLockViolator unlock(this);
       parseGetParams();
     }
     if (m_getParams.find(name) != m_getParams.end()) {
@@ -217,7 +219,6 @@ bool Transport::paramExists(const char *name, Method method /* = GET */) {
 
   if (method == POST || method == AUTO) {
     if (!m_postDataParsed) {
-      FiberReadLockViolator unlock(this);
       parsePostParams();
     }
     if (m_postParams.find(name) != m_postParams.end()) {
@@ -230,11 +231,9 @@ bool Transport::paramExists(const char *name, Method method /* = GET */) {
 
 std::string Transport::getParam(const char *name,  Method method /* = GET */) {
   ASSERT(name && *name);
-  FiberReadLock lock(this);
 
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
-      FiberReadLockViolator unlock(this);
       parseGetParams();
     }
     ParamMap::const_iterator iter = m_getParams.find(name);
@@ -245,7 +244,6 @@ std::string Transport::getParam(const char *name,  Method method /* = GET */) {
 
   if (method == POST || method == AUTO) {
     if (!m_postDataParsed) {
-      FiberReadLockViolator unlock(this);
       parsePostParams();
     }
     ParamMap::const_iterator iter = m_postParams.find(name);
@@ -277,11 +275,8 @@ long long Transport::getInt64Param(const char *name,
 void Transport::getArrayParam(const char *name,
                               std::vector<std::string> &values,
                               Method method /* = GET */) {
-  FiberReadLock lock(this);
-
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
-      FiberReadLockViolator unlock(this);
       parseGetParams();
     }
     ParamMap::const_iterator iter = m_getParams.find(name);
@@ -293,7 +288,6 @@ void Transport::getArrayParam(const char *name,
 
   if (method == POST || method == AUTO) {
     if (!m_postDataParsed) {
-      FiberReadLockViolator unlock(this);
       parsePostParams();
     }
     ParamMap::const_iterator iter = m_postParams.find(name);
@@ -356,8 +350,12 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
 
   if (!m_firstHeaderSet) {
     m_firstHeaderSet = true;
-    m_firstHeaderFile = FrameInjection::GetContainingFileName(true).data();
-    m_firstHeaderLine = FrameInjection::GetLine(true);
+    m_firstHeaderFile = hhvm
+                        ? g_vmContext->getContainingFileName(true).data()
+                        : FrameInjection::GetContainingFileName(true).data();
+    m_firstHeaderLine = hhvm
+                        ? g_vmContext->getLine(true)
+                        : FrameInjection::GetLine(true);
   }
 
   string svalue = value;
@@ -382,7 +380,6 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
 void Transport::addHeader(const char *name, const char *value) {
   ASSERT(name && *name);
   ASSERT(value);
-  FiberWriteLock lock(this);
   addHeaderNoLock(name, value);
 }
 
@@ -397,7 +394,6 @@ void Transport::addHeader(CStrRef header) {
 void Transport::replaceHeader(const char *name, const char *value) {
   ASSERT(name && *name);
   ASSERT(value);
-  FiberWriteLock lock(this);
   m_responseHeaders[name].clear();
   addHeaderNoLock(name, value);
 }
@@ -412,7 +408,6 @@ void Transport::replaceHeader(CStrRef header) {
 
 void Transport::removeHeader(const char *name) {
   if (name && *name) {
-    FiberWriteLock lock(this);
     m_responseHeaders.erase(name);
     if (strcasecmp(name, "Set-Cookie") == 0) {
       m_responseCookies.clear();
@@ -421,13 +416,11 @@ void Transport::removeHeader(const char *name) {
 }
 
 void Transport::removeAllHeaders() {
-  FiberWriteLock lock(this);
   m_responseHeaders.clear();
   m_responseCookies.clear();
 }
 
 void Transport::getResponseHeaders(HeaderMap &headers) {
-  FiberReadLock lock(this);
   headers = m_responseHeaders;
 
   vector<string> &cookies = headers["Set-Cookie"];
@@ -509,12 +502,10 @@ std::string Transport::getHTTPVersion() const {
 }
 
 void Transport::setMimeType(CStrRef mimeType) {
-  FiberWriteLock lock(this);
   m_mimeType = mimeType.data();
 }
 
 String Transport::getMimeType() {
-  FiberReadLock lock(this);
   return String(m_mimeType);
 }
 
@@ -599,7 +590,6 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int64 expire /* = 0 */,
     cookie += "; httponly";
   }
 
-  FiberWriteLock lock(this);
   m_responseCookies[name.data()] = cookie;
   return true;
 }
@@ -642,9 +632,23 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
     addHeaderImpl("X-Powered-By", "HPHP");
   }
 
-  if (RuntimeOption::ExposeXFBServer &&
-      m_responseHeaders.find("X-FB-Server") == m_responseHeaders.end()) {
-    addHeaderImpl("X-FB-Server", String(RuntimeOption::ServerPrimaryIP));
+  if ((RuntimeOption::ExposeXFBServer || RuntimeOption::ExposeXFBDebug) &&
+      !RuntimeOption::XFBDebugSSLKey.empty() &&
+      m_responseHeaders.find("X-FB-Debug") == m_responseHeaders.end()) {
+    String ip = RuntimeOption::ServerPrimaryIP;
+    String key = RuntimeOption::XFBDebugSSLKey;
+    String cipher("AES-256-CBC");
+    int iv_len = f_openssl_cipher_iv_length(cipher);
+    String iv = f_openssl_random_pseudo_bytes(iv_len);
+    String encrypted =
+      f_openssl_encrypt(ip, cipher, key, k_OPENSSL_RAW_DATA, iv);
+    String output = StringUtil::Base64Encode(iv + encrypted);
+    if (debug) {
+      String decrypted =
+        f_openssl_decrypt(encrypted, cipher, key, k_OPENSSL_RAW_DATA, iv);
+      ASSERT(decrypted->same(ip.get()));
+    }
+    addHeaderImpl("X-FB-Debug", output);
   }
 
   // shutting down servers, so need to terminate all Keep-Alive connections
@@ -700,6 +704,15 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   return response;
 }
 
+bool Transport::setHeaderCallback(CVarRef callback) {
+  if (m_headerCallback) {
+    // return false if a callback has already been set.
+    return false;
+  }
+  m_headerCallback = callback;
+  return true;
+}
+
 void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
                               bool compressed /* = false */,
                               bool chunked /* = false */,
@@ -720,6 +733,16 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
   // out headers earlier, which seems to be a useless feature.
   if (chunked && size == 0) {
     return;
+  }
+
+  if (!m_headerCallbackDone && !m_headerCallback.isNull()) {
+    // We could use m_headerSent here, however it seems we can still
+    // end up in an infinite loop when:
+    // m_headerCallback calls flush()
+    // flush() triggers php's recursion guard
+    // the recursion guard calls back into m_headerCallback
+    m_headerCallbackDone = true;
+    call_user_func0(m_headerCallback);
   }
 
   // compression handling
@@ -754,12 +777,10 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
                         bool chunked /* = false */,
                         const char *codeInfo /* = "" */
                         ) {
-  FiberWriteLock lock(this);
   sendRawLocked(data, size, code, compressed, chunked, codeInfo);
 }
 
 void Transport::onSendEnd() {
-  FiberWriteLock lock(this);
   if (m_compressor && m_chunkedEncoding) {
     bool compressed = false;
     String response = prepareResponse("", 0, compressed, true);
@@ -770,7 +791,6 @@ void Transport::onSendEnd() {
 
 void Transport::redirect(const char *location, int code /* = 302 */,
                          const char *info) {
-  FiberWriteLock lock(this);
   addHeaderImpl("Location", location);
   setResponse(code, info);
   sendStringLocked(location, code);
@@ -779,6 +799,23 @@ void Transport::redirect(const char *location, int code /* = 302 */,
 void Transport::onFlushProgress(int writtenSize, int64 delayUs) {
   m_responseSentSize += writtenSize;
   m_flushTimeUs += delayUs;
+  m_chunksSentSizes.push_back(writtenSize);
+}
+
+void Transport::onChunkedProgress(int writtenSize) {
+  m_responseSentSize += writtenSize;
+  m_chunksSentSizes.push_back(writtenSize);
+}
+
+void Transport::getChunkSentSizes(Array &ret) {
+  for (unsigned int i = 0; i < m_chunksSentSizes.size(); i++) {
+    ret.append(m_chunksSentSizes[i]);
+  }
+}
+
+int Transport::getLastChunkSentSize() {
+  size_t size = m_chunksSentSizes.size();
+  return size == 0 ? 0 : m_chunksSentSizes.back();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

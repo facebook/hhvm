@@ -71,12 +71,10 @@ virtual functions that will be called by execution engine at startup and
 shutdown time of an HTTP request.
 
 
-<h2>Memory Allocators</h2>
+<h2>SmartAllocator</h2>
 
-Two speciailized memory allocators are implemented in HipHop, in addition to
-the general purpose tcmalloc we used for replacing glic's malloc/free.
-
-1. SmartAllocator<T>
+When Server.EnableMemoryManager is set to true, HipHop will use speciailized
+memory allocators called SmartAllocators.
 
 A SmartAllocator simply allocates one slab of multiple objects with the same
 size a time. Then it will use replacement new (macro-ed as NEW in HipHop code
@@ -92,25 +90,3 @@ operations on the free list, with some rare malloc/free calls for slabs.
 The tradeoff is, each object will take an extra 64-bit pointer storage in
 free list.
 
-2. LinearAllocator
-
-HipHop supports memory state check points, so that on subsequent requests,
-certain user PHP code doesn't have to be executed again, if its sole purpose
-is to initialize global states to certain values.
-
-To support this feature, we also implemented a so-called "linear allocator"
-to allocate variable-sized objects during backup time of doing a checkpoint.
-
-For example, a String class wraps StringData that's in fixed size. So
-StringData may use SmartAllocator for its allocation/deallocation. But
-StringData may internally keep a char pointer that has a variable size. This
-string pointer will be allocated through general purpose malloc/free initially,
-but it will be copied into linear allocator, if it is allocated before a
-check point is taken. When we restore a checkpoint, we then don't have to
-make a new copy of the string any more, as all we have to do is to copy over
-the string pointer that's always valid, as long as we hold the linear allocator
-memory for the entire life.
-
-By doing so, we can memcpy entire linear allocator's memory each time we
-restore a checkpoint, thus making it cheaper than many smaller malloc/free
-calls.

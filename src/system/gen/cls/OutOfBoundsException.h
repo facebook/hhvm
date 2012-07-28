@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 243 */
+/* SRC: classes/exception.php line 256 */
 FORWARD_DECLARE_CLASS(OutOfBoundsException);
 extern const ObjectStaticCallbacks cw_OutOfBoundsException;
 class c_OutOfBoundsException : public c_RuntimeException {
@@ -36,16 +36,9 @@ class c_OutOfBoundsException : public c_RuntimeException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(OutOfBoundsException, OutOfBoundsException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_OutOfBoundsException(const ObjectStaticCallbacks *cb = &cw_OutOfBoundsException) : c_RuntimeException(cb) {}
+  c_OutOfBoundsException(const ObjectStaticCallbacks *cb = &cw_OutOfBoundsException) : c_RuntimeException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_OutOfBoundsException() NEVER_INLINE;
 

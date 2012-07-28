@@ -716,7 +716,7 @@ DefineFunction(
     'desc'   => "Returns the standardized error number returned by the last LDAP command. This number can be converted into a textual error message using ldap_err2str().",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Return the LDAP error number of the last LDAP command for this link.",
     ),
     'args'   => array(
@@ -774,7 +774,7 @@ DefineFunction(
     'desc'   => "Returns the number of entries stored in the result of previous search operations.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns number of entries in the result or FALSE on error.",
     ),
     'args'   => array(

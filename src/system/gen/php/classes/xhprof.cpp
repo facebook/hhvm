@@ -30,19 +30,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
-extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/xhprof.php line 6 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(XhprofFrame)
-const InstanceOfInfo c_XhprofFrame::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_XhprofFrame$$instanceof_table[] = {
   {0x3D290BF933ED12FDLL,1,"XhprofFrame",&cw_XhprofFrame},
 };
-const int c_XhprofFrame::s_instanceof_index[] = {
+const int cw_XhprofFrame$$instanceof_index[] = {
   1,
   -1,0,
 };
-CallInfo c_XhprofFrame::ci___destruct((void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000LL);
-CallInfo c_XhprofFrame::ci___construct((void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL);
+extern const CallInfo ci_XhprofFrame$$__destruct = { (void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_XhprofFrame$$__construct = { (void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL};
 Variant c_XhprofFrame::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -66,12 +65,11 @@ Variant c_XhprofFrame::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
   return (self->t___destruct());
 }
-const MethodCallInfoTable c_XhprofFrame::s_call_info_table[] = {
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_XhprofFrame::ci___construct },
-  { 0x7F974836AACC1EF3LL, 0, 10, "__destruct", &c_XhprofFrame::ci___destruct },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_XhprofFrame$$call_info_table[] = {
+  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &ci_XhprofFrame$$__construct },
+  { 0x7F974836AACC1EF3LL, 1, 10, "__destruct", &ci_XhprofFrame$$__destruct },
 };
-const int c_XhprofFrame::s_call_info_index[] = {
+extern const int cw_XhprofFrame$$call_info_index[] = {
   3,
   -1,-1,-1,0,
 };
@@ -79,25 +77,28 @@ c_XhprofFrame *c_XhprofFrame::create(CVarRef v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
+  clearNoDestruct();
   return this;
 }
+extern const MethodCallInfoTable cw_XhprofFrame$$call_info_table[];
+extern const int cw_XhprofFrame$$call_info_index[];
+extern const InstanceOfInfo cw_XhprofFrame$$instanceof_table[];
+extern const int cw_XhprofFrame$$instanceof_index[];
 const ObjectStaticCallbacks cw_XhprofFrame = {
   (ObjectData*(*)(ObjectData*))coo_XhprofFrame,
-  c_XhprofFrame::s_call_info_table,c_XhprofFrame::s_call_info_index,
-  c_XhprofFrame::s_instanceof_table,c_XhprofFrame::s_instanceof_index,
+  cw_XhprofFrame$$call_info_table,cw_XhprofFrame$$call_info_index,
+  cw_XhprofFrame$$instanceof_table,cw_XhprofFrame$$instanceof_index,
   &c_XhprofFrame::s_class_name,
-  0,&c_XhprofFrame::ci___construct,0,0,0x0
+  0,&ci_XhprofFrame$$__construct,0,0,0x0,
+  &c_XhprofFrame::s_cls
 };
 /* SRC: classes/xhprof.php line 7 */
 void c_XhprofFrame::t___construct(Variant v_name) {
-  bool oldInCtor = gasInCtor(true);
   x_xhprof_frame_begin(toString(v_name));
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/xhprof.php line 10 */
 Variant c_XhprofFrame::t___destruct() {
-  setInDtor();
   x_xhprof_frame_end();
   return null;
 }

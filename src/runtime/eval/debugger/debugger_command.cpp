@@ -21,8 +21,6 @@
 
 #define POLLING_SECONDS 1
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 // send/recv
@@ -118,6 +116,8 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfSignal   :  cmd = DebuggerCommandPtr(new CmdSignal   ()); break;
     case KindOfShell    :  cmd = DebuggerCommandPtr(new CmdShell    ()); break;
 
+    case KindOfInstrument: cmd = DebuggerCommandPtr(new CmdInstrument()); break;
+
     case KindOfExtended: {
       ASSERT(!clsname.empty());
       cmd = CmdExtended::CreateExtendedCommand(clsname);
@@ -153,6 +153,24 @@ bool DebuggerCommand::onClient(DebuggerClient *client) {
     return help(client);
   }
   return false;
+}
+
+void DebuggerCommand::setClientOutput(DebuggerClient *client) {
+  // Just default to text
+  client->setOutputType(DebuggerClient::OTText);
+}
+
+bool DebuggerCommand::onClientD(DebuggerClient *client) {
+  bool ret;
+  if (hhvm) {
+    ret = onClientVM(client);
+  } else {
+    ret = onClient(client);
+  }
+  if (client->isApiMode() && !m_incomplete) {
+    setClientOutput(client);
+  }
+  return ret;
 }
 
 bool DebuggerCommand::onServer(DebuggerProxy *proxy) {

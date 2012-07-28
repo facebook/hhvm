@@ -1,0 +1,2 @@
+#!/bin/bash
+sed -e 's/\/.*src/src/g; s/, expecting [A-Z_]*//'

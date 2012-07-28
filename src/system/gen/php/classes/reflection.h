@@ -21,6 +21,13 @@
 #include <runtime/base/hphp_system.h>
 #include <system/gen/sys/literal_strings_remap.h>
 #include <system/gen/sys/scalar_arrays_remap.h>
+#include <cls/ReflectionClass.h>
+#include <cls/ReflectionExtension.h>
+#include <cls/ReflectionFunction.h>
+#include <cls/ReflectionFunctionAbstract.h>
+#include <cls/ReflectionMethod.h>
+#include <cls/ReflectionParameter.h>
+#include <cls/ReflectionProperty.h>
 
 // Declarations
 #include <cls/ReflectionParameter.h>

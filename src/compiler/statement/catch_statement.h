@@ -19,13 +19,14 @@
 
 #include <compiler/statement/statement.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/expression/static_class_name.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(CatchStatement);
 
-class CatchStatement : public Statement {
+class CatchStatement : public Statement, public StaticClassName {
 public:
   CatchStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                  const std::string &className, const std::string &variable,
@@ -43,8 +44,6 @@ public:
   StatementPtr getStmt() const { return m_stmt; }
   void setStmt(StatementPtr s) { m_stmt = s; }
 private:
-  std::string m_className;
-  std::string m_originalClassName;
   SimpleVariablePtr m_variable;
   StatementPtr m_stmt;
   bool m_valid;

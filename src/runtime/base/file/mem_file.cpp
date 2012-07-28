@@ -22,8 +22,6 @@
 #include <util/compression.h>
 #include <util/logger.h>
 
-using namespace std;
-
 namespace HPHP {
 
 IMPLEMENT_OBJECT_ALLOCATION(MemFile)

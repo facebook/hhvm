@@ -200,17 +200,24 @@ private:
  */
 class ServerStatsHelper {
 public:
-  ServerStatsHelper(const char *section, bool trackMem = false);
+  enum {
+    TRACK_MEMORY = 0x00000001,
+    TRACK_HWINST = 0x00000002,
+  };
+  ServerStatsHelper(const char *section, uint32 track = 0);
   ~ServerStatsHelper();
 
 private:
   const char *m_section;
   timespec m_wallStart;
   timespec m_cpuStart;
-  bool m_trackMemory;
+  int64 m_instStart;
+  uint32 m_track;
 
   void logTime(const std::string &prefix, const timespec &start,
                const timespec &end);
+  void logTime(const std::string &prefix, const int64 &start,
+               const int64 &end);
 };
 
 /**

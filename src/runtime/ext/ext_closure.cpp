@@ -22,6 +22,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Closure::c_Closure(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+  const_assert(!hhvm);
   throw_fatal("Cannot explicitly instantiate and/or subclass Closure");
 }
 c_Closure::~c_Closure() {}
@@ -73,6 +74,22 @@ void c_GeneratorClosure::t___construct() {
 
 Variant c_GeneratorClosure::t___destruct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(GeneratorClosure, GeneratorClosure::__destruct);
+  return null;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+c_DummyClosure::c_DummyClosure(const ObjectStaticCallbacks *cb) :
+  ExtObjectData(cb) {
+}
+
+c_DummyClosure::~c_DummyClosure() {}
+
+void c_DummyClosure::t___construct() {
+}
+
+Variant c_DummyClosure::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DummyClosure, DummyClosure::__destruct);
   return null;
 }
 

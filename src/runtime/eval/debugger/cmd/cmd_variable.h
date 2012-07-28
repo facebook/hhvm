@@ -36,7 +36,9 @@ public:
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);
+  virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServerVM(DebuggerProxy *proxy);
 
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);

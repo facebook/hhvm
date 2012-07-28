@@ -18,6 +18,7 @@
 
 #include "capability.h"
 #include <util/logger.h>
+#include <linux/types.h>
 #include <sys/capability.h>
 #include <sys/prctl.h>
 #include <sys/types.h>

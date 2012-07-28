@@ -19,6 +19,7 @@
 #include <compiler/expression/expression_list.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/class_scope.h>
+#include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/statement/statement.h>
 #include <util/util.h>
@@ -29,8 +30,6 @@
 #include <compiler/parser/parser.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -70,8 +69,15 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
       ClassScopePtr cls = getClassScope();
       if (cls) {
         m_classScope = cls;
-        m_funcScope = func = cls->findFunction(ar, m_name, true, true);
-        if (func) {
+        func = cls->findFunction(ar, m_name, true, true);
+        if (func &&
+            !cls->isInterface() &&
+            !(func->isVirtual() &&
+              (ar->isSystem() || func->isAbstract() ||
+               (func->hasOverride() &&
+                cls->getAttribute(ClassScope::NotFinal))) &&
+              !func->isPerfectVirtual())) {
+          m_funcScope = func;
           func->addCaller(getScope());
         }
       }
@@ -151,6 +157,15 @@ ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (m_classScope && m_funcScope &&
       (!m_funcScope->isVirtual() ||
        (!ar->isSystem() && !m_funcScope->hasOverride()))) {
+
+    if (Option::DynamicInvokeFunctions.size()) {
+      if (Option::DynamicInvokeFunctions.find(
+            m_classScope->getName() + "::" + m_funcScope->getName()) !=
+          Option::DynamicInvokeFunctions.end()) {
+        setNoInline();
+      }
+    }
+
     return inliner(ar, m_object, "");
   }
 
@@ -190,6 +205,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     m_classScope.reset();
     m_funcScope.reset();
 
+    m_valid = false;
     setInvokeParams(ar);
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
@@ -203,7 +219,8 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   if (!func) {
     func = cls->findFunction(ar, m_name, true, true);
     if (!func) {
-      if (!cls->getAttribute(ClassScope::MayHaveUnknownMethodHandler) &&
+      if (!cls->isTrait() &&
+          !cls->getAttribute(ClassScope::MayHaveUnknownMethodHandler) &&
           !cls->getAttribute(ClassScope::HasUnknownMethodHandler) &&
           !cls->getAttribute(ClassScope::InheritsUnknownMethodHandler)) {
         if (ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
@@ -329,26 +346,17 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
   }
 }
 
+
 void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {
   outputCPPObject(cg, ar);
   bool isThis = m_object->isThis();
   if (!isThis) {
-    string objType;
-    TypePtr type = m_object->getType();
-    if (type->isSpecificObject() && !m_name.empty() && m_valid) {
-      objType = type->getName();
-      ClassScopePtr cls = ar->findClass(objType);
-      objType = cls->getId();
-    } else {
-      objType = "ObjectData";
-    }
-    if (m_bindClass) {
-      cg_printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
-    } else {
-      cg_printf("->");
-    }
-  } else if (m_bindClass && m_classScope) {
+    m_object->outputCPPGuardedObjectPtr(cg);
+    cg_printf("->");
+  }
+
+  if (m_bindClass && m_classScope) {
     cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
   }
 }
@@ -408,13 +416,14 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   cg_printf("mcp%d.methodCall((", m_ciTemp);
   if (isThis) {
     if (!getClassScope() || getClassScope()->derivedByDynamic() ||
-        !static_pointer_cast<SimpleVariable>(m_object)->isGuardedThis()) {
+        !static_pointer_cast<SimpleVariable>(m_object)->isGuarded()) {
       cg_printf("GET_THIS_VALID()");
     } else {
       cg_printf("this");
     }
   } else {
     cg_printf("obj%d", m_ciTemp);
+    m_object->outputCPPGuardedObjectPtr(cg);
   }
   cg_printf("), ");
   if (!m_name.empty()) {
@@ -445,10 +454,13 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
 void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   if (!m_name.empty() && m_valid && m_object->getType()->isSpecificObject()) {
-    // Static method call
+    // Direct method call
+    ClassScopePtr cls(m_object->getType()->getClass(ar, getScope()));
+    if (cls) getFileScope()->addUsedClassFullHeader(cls);
+
     outputCPPObjectCall(cg, ar);
     cg_printf("%s%s(", m_funcScope ?
-              m_funcScope->getPrefix(m_params) : Option::MethodPrefix,
+              m_funcScope->getPrefix(ar, m_params) : Option::MethodPrefix,
               m_name.c_str());
 
     FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,

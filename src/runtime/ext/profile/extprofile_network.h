@@ -25,6 +25,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+inline Variant x_gethostname() {
+  FUNCTION_INJECTION_BUILTIN(gethostname);
+  return f_gethostname();
+}
+
 inline Variant x_gethostbyaddr(CStrRef ip_address) {
   FUNCTION_INJECTION_BUILTIN(gethostbyaddr);
   return f_gethostbyaddr(ip_address);
@@ -143,6 +148,11 @@ inline Array x_headers_list() {
 inline bool x_headers_sent(VRefParam file = null, VRefParam line = null) {
   FUNCTION_INJECTION_BUILTIN(headers_sent);
   return f_headers_sent(file, line);
+}
+
+inline bool x_header_register_callback(CVarRef callback) {
+  FUNCTION_INJECTION_BUILTIN(header_register_callback);
+  return f_header_register_callback(callback);
 }
 
 inline void x_header_remove(CStrRef name = null_string) {

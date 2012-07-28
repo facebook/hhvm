@@ -22,7 +22,6 @@
 
 namespace hphp_impl_starter {}
 
-using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -390,6 +389,8 @@ extern const int64 k_ENCQUOTEDPRINTABLE;
 extern const int64 k_ENT_COMPAT;
 extern const int64 k_ENT_NOQUOTES;
 extern const int64 k_ENT_QUOTES;
+extern const int64 k_ENT_FB_UTF8;
+extern const int64 k_ENT_FB_UTF8_ONLY;
 extern const int64 k_ERA;
 extern const int64 k_ERA_D_FMT;
 extern const int64 k_ERA_D_T_FMT;
@@ -499,6 +500,7 @@ extern const int64 k_IMAGETYPE_TIFF_II;
 extern const int64 k_IMAGETYPE_TIFF_MM;
 extern const int64 k_IMAGETYPE_WBMP;
 extern const int64 k_IMAGETYPE_XBM;
+extern const int64 k_IMAGETYPE_ICO;
 extern const int64 k_IMAP_CLOSETIMEOUT;
 extern const int64 k_IMAP_OPENTIMEOUT;
 extern const int64 k_IMAP_READTIMEOUT;
@@ -2089,7 +2091,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2110];
+static hashNodeCon conBuckets[2115];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2457,6 +2459,8 @@ void init_builtin_constant_table() {
       (const char *)"ENCOTHER", (const char *)-1, (const char *)32, (const char *)&k_ENCOTHER,
       (const char *)"ENCQUOTEDPRINTABLE", (const char *)-1, (const char *)32, (const char *)&k_ENCQUOTEDPRINTABLE,
       (const char *)"ENT_COMPAT", (const char *)-1, (const char *)32, (const char *)&k_ENT_COMPAT,
+      (const char *)"ENT_FB_UTF8", (const char *)-1, (const char *)32, (const char *)&k_ENT_FB_UTF8,
+      (const char *)"ENT_FB_UTF8_ONLY", (const char *)-1, (const char *)32, (const char *)&k_ENT_FB_UTF8_ONLY,
       (const char *)"ENT_NOQUOTES", (const char *)-1, (const char *)32, (const char *)&k_ENT_NOQUOTES,
       (const char *)"ENT_QUOTES", (const char *)-1, (const char *)32, (const char *)&k_ENT_QUOTES,
       (const char *)"ERA", (const char *)-1, (const char *)32, (const char *)&k_ERA,
@@ -2557,6 +2561,7 @@ void init_builtin_constant_table() {
       (const char *)"IDNA_STRINGPREP_ERROR", (const char *)-1, (const char *)32, (const char *)&k_IDNA_STRINGPREP_ERROR,
       (const char *)"IMAGETYPE_BMP", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_BMP,
       (const char *)"IMAGETYPE_GIF", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_GIF,
+      (const char *)"IMAGETYPE_ICO", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_ICO,
       (const char *)"IMAGETYPE_IFF", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_IFF,
       (const char *)"IMAGETYPE_JB2", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_JB2,
       (const char *)"IMAGETYPE_JP2", (const char *)-1, (const char *)32, (const char *)&k_IMAGETYPE_JP2,
@@ -2625,7 +2630,9 @@ void init_builtin_constant_table() {
       (const char *)"INI_SYSTEM", (const char *)-1, (const char *)32, (const char *)&k_INI_SYSTEM,
       (const char *)"INI_USER", (const char *)-1, (const char *)32, (const char *)&k_INI_USER,
       (const char *)"INTL_MAX_LOCALE_LEN", (const char *)-1, (const char *)32, (const char *)&k_INTL_MAX_LOCALE_LEN,
+      (const char *)"JSON_FB_EXTRA_ESCAPES", (const char *)-1, (const char *)32, (const char *)&k_JSON_FB_EXTRA_ESCAPES,
       (const char *)"JSON_FB_LOOSE", (const char *)-1, (const char *)32, (const char *)&k_JSON_FB_LOOSE,
+      (const char *)"JSON_FB_UNLIMITED", (const char *)-1, (const char *)32, (const char *)&k_JSON_FB_UNLIMITED,
       (const char *)"JSON_FORCE_OBJECT", (const char *)-1, (const char *)32, (const char *)&k_JSON_FORCE_OBJECT,
       (const char *)"JSON_HEX_AMP", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_AMP,
       (const char *)"JSON_HEX_APOS", (const char *)-1, (const char *)32, (const char *)&k_JSON_HEX_APOS,

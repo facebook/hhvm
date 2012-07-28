@@ -213,7 +213,7 @@ DefineFunction(
     'desc'   => "Returns the error number of any bzip2 error returned by the given file pointer.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "Returns the error number as an integer.",
     ),
     'args'   => array(

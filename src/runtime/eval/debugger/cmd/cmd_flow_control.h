@@ -26,9 +26,11 @@ DECLARE_BOOST_TYPES(CmdFlowControl);
 class CmdFlowControl : public DebuggerCommand {
 public:
   CmdFlowControl(Type type)
-      : DebuggerCommand(type), m_count(1), m_frame(NULL), m_nframe(NULL) {}
+      : DebuggerCommand(type), m_count(1), m_frame(NULL), m_nframe(NULL),
+        m_stackDepth(0), m_vmDepth(0) { }
 
   int decCount() { ASSERT(m_count > 0); return --m_count;}
+  int getCount() const { ASSERT(m_count > 0); return m_count;}
   void setFrame(FrameInjection *frame) { m_frame = frame;}
   FrameInjection *getFrame() const { return m_frame;}
   void setNegativeFrame(FrameInjection *frame) { m_nframe = frame;}
@@ -42,11 +44,20 @@ public:
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
+  void setStackDepth(int depth) { m_stackDepth = depth; }
+  int getStackDepth() const { return m_stackDepth; }
+  void setVMDepth(int depth) { m_vmDepth = depth; }
+  int getVMDepth() const { return m_vmDepth; }
+
 private:
   int16 m_count;
   FrameInjection *m_frame;  // which frame to break next time
   FrameInjection *m_nframe; // definitely not to break with this frame
   std::string m_loc; // last break's source location
+  bool m_smallStep;
+
+  int m_stackDepth;
+  int m_vmDepth;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

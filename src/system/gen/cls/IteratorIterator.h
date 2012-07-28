@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 657 */
+/* SRC: classes/iterator.php line 661 */
 FORWARD_DECLARE_CLASS(IteratorIterator);
 extern const ObjectStaticCallbacks cw_IteratorIterator;
 class c_IteratorIterator : public ExtObjectData {
@@ -35,11 +35,14 @@ class c_IteratorIterator : public ExtObjectData {
   // Properties
   Variant m_iterator;
 
+  // Destructor
+  ~c_IteratorIterator() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(IteratorIterator, IteratorIterator, ObjectData)
   static const ClassPropTable os_prop_table;
   c_IteratorIterator(const ObjectStaticCallbacks *cb = &cw_IteratorIterator) : ExtObjectData(cb), m_iterator(Variant::nullInit) {
     setAttribute(HasCall);
+    if (!hhvm) setAttribute(NoDestructor);
   }
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct(Variant v_iterator);

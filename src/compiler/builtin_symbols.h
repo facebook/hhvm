@@ -53,6 +53,7 @@ public:
   static TypePtr GetSuperGlobalType(const std::string &name);
 
   static bool IsDeclaredDynamic(const std::string& name);
+  static void LoadSuperGlobals();
 
   static StringToFunctionScopePtrMap s_functions;
   static StringToFunctionScopePtrMap s_helperFunctions;
@@ -71,7 +72,6 @@ private:
   static AnalysisResultPtr LoadGlobalSymbols(const char *fileName);
 
   static StringToTypePtrMap s_superGlobals;
-  static void LoadSuperGlobals();
 
   static std::set<std::string> s_declaredDynamic;
 

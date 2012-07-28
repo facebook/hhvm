@@ -23,8 +23,6 @@
 
 #include <pwd.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -550,6 +548,7 @@ std::string Process::GetAppVersion() {
 
 std::string Process::GetHostName() {
   char hostbuf[128];
+  hostbuf[0] = '\0'; // for cleaner valgrind output when gethostname() fails
   gethostname(hostbuf, 127);
   hostbuf[127] = '\0';
   return hostbuf;

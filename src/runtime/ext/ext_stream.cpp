@@ -59,8 +59,11 @@ Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
     return false;
   }
   if (offset > 0 && !srcFile->seek(offset, SEEK_SET) ) {
-    raise_warning("Failed to seek to position %ld in the stream", offset);
+    raise_warning("Failed to seek to position %d in the stream", offset);
     return false;
+  }
+  if (destFile->seekable()) {
+    (void)destFile->seek(0, SEEK_END);
   }
   int cbytes = 0;
   if (maxlength == 0) maxlength = INT_MAX;
@@ -90,7 +93,7 @@ Variant f_stream_get_contents(CObjRef handle, int maxlen /* = 0 */,
 
   File *file = handle.getTyped<File>();
   if (offset > 0 && !file->seek(offset, SEEK_SET) ) {
-    raise_warning("Failed to seek to position %ld in the stream", offset);
+    raise_warning("Failed to seek to position %d in the stream", offset);
     return false;
   }
 
@@ -144,7 +147,7 @@ bool f_stream_set_timeout(CObjRef stream, int seconds,
   return false;
 }
 
-int f_stream_set_write_buffer(CObjRef stream, int buffer) {
+int64 f_stream_set_write_buffer(CObjRef stream, int buffer) {
   PlainFile *file = stream.getTyped<PlainFile>(false, true);
   if (file) {
     switch (buffer) {
@@ -274,6 +277,10 @@ Variant f_stream_socket_accept(CObjRef server_socket,
     Socket *new_sock = socket_accept_impl(server_socket, &sa, &salen);
     peername = get_sockaddr_name(&sa, salen);
     if (new_sock) return Object(new_sock);
+  } else if (n < 0) {
+    sock->setError(errno);
+  } else {
+    sock->setError(ETIMEDOUT);
   }
   return false;
 }

@@ -21,8 +21,6 @@
 #include <runtime/base/server/static_content_cache.h>
 #include <runtime/base/string_util.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,1 @@
+HipHop Fatal error: Uncaught exception 'BadMethodCallException' with message 'Call to a member function bar() on a non-object' in src/test/vm/method-non-object2.php:5\nStack trace:\n#0 {main}

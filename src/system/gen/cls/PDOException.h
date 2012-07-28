@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 317 */
+/* SRC: classes/exception.php line 330 */
 FORWARD_DECLARE_CLASS(PDOException);
 extern const ObjectStaticCallbacks cw_PDOException;
 class c_PDOException : public c_Exception {
@@ -36,7 +36,9 @@ class c_PDOException : public c_Exception {
 
   // Class Map
   DECLARE_CLASS_NO_SWEEP(PDOException, PDOException, Exception)
-  c_PDOException(const ObjectStaticCallbacks *cb = &cw_PDOException) : c_Exception(cb) {}
+  c_PDOException(const ObjectStaticCallbacks *cb = &cw_PDOException) : c_Exception(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct();
   public: c_PDOException *create();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);

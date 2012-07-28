@@ -21,8 +21,6 @@
 #include <runtime/ext/ext_file.h>
 #include <test/test_mysql_info.inc>
 
-using namespace std;
-
 IMPLEMENT_SEP_EXTENSION_TEST(Pdo);
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -71,7 +69,12 @@ bool TestExtPdo::test_pdo_mysql() {
 
   try {
     string source = "mysql:host=";
-    source += TEST_HOSTNAME;
+    string host = TEST_HOSTNAME;
+    size_t pos = host.find(':');
+    if (pos != string::npos) {
+      host.replace(pos, 1, ";port=");
+    }
+    source += host;
     source += ";dbname=";
     source += TEST_DATABASE;
 

@@ -23,8 +23,6 @@
 #include <util/logger.h>
 #include <util/ssl_init.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -20,8 +20,6 @@
 #include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
-using namespace boost;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -151,26 +149,6 @@ void ArrayPairExpression::outputCPPImpl(CodeGenerator &cg,
     cg_printf(", ");
   }
   m_value->outputCPP(cg, ar);
-  if (m_name) {
-    if (keyConverted) cg_printf(", true");
-  }
-}
-
-void ArrayPairExpression::outputCPPControlledEval(CodeGenerator &cg,
-                                                  AnalysisResultPtr ar,
-                                                  int temp) {
-  bool keyConverted = false;
-  if (m_name) {
-    keyConverted = outputCPPName(cg, ar);
-    cg_printf(", ");
-  }
-  if (m_value->isScalar() || temp == -1) {
-    // scalars do not need order enforcement; effectless non-scalars
-    // after the last effect element do not need order enforcement either.
-    m_value->outputCPP(cg, ar);
-  } else {
-    cg_printf("%s%d", Option::EvalOrderTempPrefix, temp);
-  }
   if (m_name) {
     if (keyConverted) cg_printf(", true");
   }

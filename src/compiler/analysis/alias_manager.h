@@ -251,6 +251,7 @@ class AliasManager {
   std::string               m_returnVar;
   int                       m_nrvoFix;
 
+  int                       m_inCall;
   bool                      m_inlineAsExpr;
   bool                      m_noAdd;
   bool                      m_preOpt;
@@ -265,6 +266,7 @@ class AliasManager {
 
   ControlFlowGraph          *m_graph;
   std::map<std::string,int> m_gidMap;
+  std::map<std::string,SimpleVariablePtr> m_objMap;
 
   ExpressionPtr             m_expr;
   int                       m_exprIdx;

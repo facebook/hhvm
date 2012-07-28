@@ -40,8 +40,6 @@
     pdo_handle_error(stmt->dbh, stmt);                  \
   }                                                     \
 
-using namespace std;
-
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(PDO);
 ///////////////////////////////////////////////////////////////////////////////
@@ -885,14 +883,15 @@ public:
   }
 
   virtual void requestShutdown() {
-    for (set<PDOConnection*>::iterator iter = m_persistent_connections.begin();
+    for (std::set<PDOConnection*>::iterator iter =
+            m_persistent_connections.begin();
          iter != m_persistent_connections.end(); ++iter) {
       (*iter)->persistentSave();
     }
   }
 
 public:
-  set<PDOConnection*> m_persistent_connections;
+  std::set<PDOConnection*> m_persistent_connections;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 
@@ -1833,8 +1832,9 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
         return false;
       }
       if (stmt->fetch.constructor && (flags & PDO_FETCH_PROPS_LATE)) {
-        ret.toObject()->o_invoke(stmt->fetch.constructor,
-                                 stmt->fetch.ctor_args, -1);
+        ret.asCObjRef().get()->o_invoke(stmt->fetch.constructor,
+                                        stmt->fetch.ctor_args, -1);
+        ret.asCObjRef().get()->clearNoDestruct();
       }
     }
     break;
@@ -1970,7 +1970,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     if (stmt->fetch.constructor &&
         !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
       ret.toObject()->o_invoke(stmt->fetch.constructor, stmt->fetch.ctor_args,
-                              -1);
+                               -1);
+      ret.toObject()->clearNoDestruct();
     }
     if (flags & PDO_FETCH_CLASSTYPE) {
       stmt->fetch.clsname = old_clsname;
@@ -2476,7 +2477,6 @@ safe:
             plc->quoted = "NULL";
             break;
 
-          case KindOfInt32:
           case KindOfInt64:
           case KindOfDouble:
             plc->quoted = param->parameter.toString();
@@ -2504,7 +2504,7 @@ rewrite:
     /* allocate output buffer */
     newbuffer = (char*)malloc(newbuffer_len + 1);
     newbuffer[newbuffer_len] = '\0';
-    out = String(newbuffer, newbuffer_len, AttachString);
+    out = String(newbuffer, newbuffer_len, AttachDeprecated);
 
     /* and build the query */
     plc = placeholders;

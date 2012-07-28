@@ -25,15 +25,39 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern StaticString s_sys_ss00000000;
-extern StaticString s_sys_ss914a58e9;
-extern StaticString s_sys_ss5d909898;
-extern StaticString s_sys_ss0d42ecf6;
+extern StaticStringProxy s_sys_ssp00000000;
+#ifndef s_sys_ss00000000
+#define s_sys_ss00000000 (*(StaticString *)(&s_sys_ssp00000000))
+#endif
+extern StaticStringProxy s_sys_ssp914a58e9;
+#ifndef s_sys_ss914a58e9
+#define s_sys_ss914a58e9 (*(StaticString *)(&s_sys_ssp914a58e9))
+#endif
+extern StaticStringProxy s_sys_ssp5d909898;
+#ifndef s_sys_ss5d909898
+#define s_sys_ss5d909898 (*(StaticString *)(&s_sys_ssp5d909898))
+#endif
+extern StaticStringProxy s_sys_ssp0d42ecf6;
+#ifndef s_sys_ss0d42ecf6
+#define s_sys_ss0d42ecf6 (*(StaticString *)(&s_sys_ssp0d42ecf6))
+#endif
 
-extern VarNR s_sys_svs00000000;
-extern VarNR s_sys_svs914a58e9;
-extern VarNR s_sys_svs5d909898;
-extern VarNR s_sys_svs0d42ecf6;
+extern VariantProxy s_sys_svsp00000000;
+#ifndef s_sys_svs00000000
+#define s_sys_svs00000000 (*(Variant *)&s_sys_svsp00000000)
+#endif
+extern VariantProxy s_sys_svsp914a58e9;
+#ifndef s_sys_svs914a58e9
+#define s_sys_svs914a58e9 (*(Variant *)&s_sys_svsp914a58e9)
+#endif
+extern VariantProxy s_sys_svsp5d909898;
+#ifndef s_sys_svs5d909898
+#define s_sys_svs5d909898 (*(Variant *)&s_sys_svsp5d909898)
+#endif
+extern VariantProxy s_sys_svsp0d42ecf6;
+#ifndef s_sys_svs0d42ecf6
+#define s_sys_svs0d42ecf6 (*(Variant *)&s_sys_svsp0d42ecf6)
+#endif
 
 /* SRC: classes/splfile.php line 11 */
 FORWARD_DECLARE_CLASS(SplFileInfo);
@@ -44,10 +68,14 @@ class c_SplFileInfo : public ExtObjectData {
   // Properties
   Variant m_rsrc;
 
+  // Destructor
+  ~c_SplFileInfo() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(SplFileInfo, SplFileInfo, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_SplFileInfo(const ObjectStaticCallbacks *cb = &cw_SplFileInfo) : ExtObjectData(cb), m_rsrc(Variant::nullInit) {}
+  c_SplFileInfo(const ObjectStaticCallbacks *cb = &cw_SplFileInfo) : ExtObjectData(cb), m_rsrc(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_file_name);
   public: c_SplFileInfo *create(CVarRef v_file_name);
   public: String t_getpath();

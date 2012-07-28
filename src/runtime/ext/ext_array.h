@@ -102,7 +102,7 @@ Variant f_array_splice(VRefParam input, int offset,
 Variant f_array_sum(CVarRef array);
 Variant f_array_unique(CVarRef array, int sort_flags = 2);
 
-int f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
+int64 f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
 
 Variant f_array_values(CVarRef input);
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
@@ -121,17 +121,15 @@ Array compact(LVariableTable *variables, int _argc, CVarRef varname,
               CArrRef _argv = null_array);
 
 bool f_shuffle(VRefParam array);
-int f_count(CVarRef var, bool recursive = false);
+int64 f_count(CVarRef var, bool recursive = false);
 
-inline int f_sizeof(CVarRef var, bool recursive = false) {
+inline int64 f_sizeof(CVarRef var, bool recursive = false) {
   return f_count(var, recursive);
 }
 inline Variant f_each(VRefParam array) {
-  array.array_iter_dirty_check();
   return array.array_iter_each();
 }
 inline Variant f_current(VRefParam array) {
-  array.array_iter_dirty_check();
   return array.array_iter_current();
 }
 inline Variant f_hphp_current_ref(VRefParam array) {
@@ -142,27 +140,21 @@ inline Variant f_hphp_current_ref(VRefParam array) {
   return strongBind(array.array_iter_current_ref());
 }
 inline Variant f_next(VRefParam array) {
-  array.array_iter_dirty_check();
   return array.array_iter_next();
 }
 inline Variant f_pos(VRefParam array) {
-  array.array_iter_dirty_check();
   return array.array_iter_current();
 }
 inline Variant f_prev(VRefParam array) {
-  array.array_iter_dirty_check();
   return array.array_iter_prev();
 }
 inline Variant f_reset(VRefParam array) {
-  array.array_iter_dirty_reset();
   return array.array_iter_reset();
 }
 inline Variant f_end(VRefParam array) {
-  array.array_iter_dirty_reset();
   return array.array_iter_end();
 }
 inline Variant f_key(VRefParam array) {
-  array.array_iter_dirty_check();
   return array.array_iter_key();
 }
 

@@ -24,9 +24,6 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/server/rpc_request_handler.h>
 
-using namespace std;
-using namespace boost;
-
 #define DANGLING_HEADER "HPHP_DANGLING"
 
 namespace HPHP {
@@ -183,7 +180,32 @@ int64 f_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
 }
 
-int f_xbox_get_thread_timeout() {
+Variant f_xbox_process_call_message(CStrRef msg) {
+  Variant v = f_unserialize(msg);
+  if (!v.isArray()) {
+    raise_error("Error decoding xbox call message");
+  }
+  Array arr = v.toArray();
+  if (arr.size() != 2 || !arr.exists(0) || !arr.exists(1)) {
+    raise_error("Error decoding xbox call message");
+  }
+  Variant fn = arr.rvalAt(0);
+  if (fn.isArray()) {
+    Array farr = fn.toArray();
+    if (!array_is_valid_callback(farr)) {
+      raise_error("Error decoding xbox call message");
+    }
+  } else if (!fn.isString()) {
+    raise_error("Error decoding xbox call message");
+  }
+  Variant args = arr.rvalAt(1);
+  if (!args.isArray()) {
+    raise_error("Error decoding xbox call message");
+  }
+  return f_call_user_func_array(fn, args.toArray());
+}
+
+int64 f_xbox_get_thread_timeout() {
   XboxServerInfoPtr server_info = XboxServer::GetServerInfo();
   if (server_info) {
     return server_info->getMaxDuration();
@@ -213,7 +235,7 @@ void f_xbox_schedule_thread_reset() {
   }
 }
 
-int f_xbox_get_thread_time() {
+int64 f_xbox_get_thread_time() {
   RPCRequestHandler *handler = XboxServer::GetRequestHandler();
   if (handler) {
     return time(NULL) - handler->getCreationTime();

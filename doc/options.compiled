@@ -47,6 +47,7 @@ flood error logs.
     # error log settings
     UseLogFile = true
     File = filename
+    UseSyslog = false
 
     # access log settings
     AccessLogDefaultFormat = %h %l %u %t \"%r\" %>s %b
@@ -156,8 +157,8 @@ flood error logs.
     # maximum memory size for image processing
     ImageMemoryMaxBytes = UploadMaxFileSize * 2
 
-    # Recommend to turn this on to avoid memory leaks and to enable warmup
-    # document features.
+    # Recommended to turn this on to avoid memory leaks and to enable the
+    # RequestInitDocument and RequestInitFunction features.
     EnableMemoryManager = false
 
     # Only for debugging memory problems. When turned on, server will report
@@ -166,9 +167,8 @@ flood error logs.
 
     # Recommend to turn this on for faster array operations.
     UseZendArray = true
-    # Faster data structure for arrays of size < 8. Requires UseZendArray=true.
-    # Recommend to turn this on.
-    UseSmallArray = true
+    # Faster data structure for arrays of size < 8.  Deprecated and ignored.
+    UseSmallArray = false
 
     # If ServerName is not specified for a virtual host, use prefix + this
     # suffix to compose one. If "Pattern" was specified, matched pattern,
@@ -183,7 +183,6 @@ flood error logs.
     TakeoverFilename = filename   # for port takeover between server instances
     DefaultDocument = index.php
     StartupDocument = filename
-    WarmupDocument = filename
     RequestInitFunction = function_name
     RequestInitDocument = filename
     ThreadDocuments {
@@ -466,7 +465,6 @@ These are experimental LFU settings.
       MaxRequest = 500
       MaxDuration = 120    # in seconds
       TimeoutSeconds = 30  # default to RequestTimeoutSeconds
-      WarmupDocument = filename
       RequestInitFunction = on_init
       RequestInitDocument = filename
       Password = authentication
@@ -495,7 +493,6 @@ patterns for pages to server over this port.
       Port = 0
       MaxRequest = 500
       MaxDuration = 120
-      WarmupDocument =
       RequestInitFunction =
       RequestInitDocument =
     }

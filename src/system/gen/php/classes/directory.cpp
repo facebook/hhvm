@@ -30,21 +30,20 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
-extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/directory.php line 3 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Directory)
-const InstanceOfInfo c_Directory::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_Directory$$instanceof_table[] = {
   {0x34C95AF311506C8FLL,1,"Directory",&cw_Directory},
 };
-const int c_Directory::s_instanceof_index[] = {
+const int cw_Directory$$instanceof_index[] = {
   1,
   -1,0,
 };
-CallInfo c_Directory::ci_close((void*)&c_Directory::i_close, (void*)&c_Directory::ifa_close, 0, 4, 0x0000000000000000LL);
-CallInfo c_Directory::ci_rewind((void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 4, 0x0000000000000000LL);
-CallInfo c_Directory::ci___construct((void*)&c_Directory::i___construct, (void*)&c_Directory::ifa___construct, 1, 4, 0x0000000000000000LL);
-CallInfo c_Directory::ci_read((void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000LL);
+extern const CallInfo ci_Directory$$close = { (void*)&c_Directory::i_close, (void*)&c_Directory::ifa_close, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Directory$$rewind = { (void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Directory$$__construct = { (void*)&c_Directory::i___construct, (void*)&c_Directory::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Directory$$read = { (void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000LL};
 Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -90,14 +89,13 @@ Variant c_Directory::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Directory::close", 0, 1);
   return (self->t_close(), null);
 }
-const MethodCallInfoTable c_Directory::s_call_info_table[] = {
-  { 0x1F479267E49EF301LL, 1, 4, "read", &c_Directory::ci_read },
-  { 0x78AE97BFBEBF5341LL, 0, 5, "close", &c_Directory::ci_close },
-  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &c_Directory::ci_rewind },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_Directory::ci___construct },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_Directory$$call_info_table[] = {
+  { 0x1F479267E49EF301LL, 0, 4, "read", &ci_Directory$$read },
+  { 0x78AE97BFBEBF5341LL, 1, 5, "close", &ci_Directory$$close },
+  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &ci_Directory$$rewind },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &ci_Directory$$__construct },
 };
-const int c_Directory::s_call_info_index[] = {
+extern const int cw_Directory$$call_info_index[] = {
   7,
   -1,0,2,-1,-1,-1,-1,3,
 
@@ -108,40 +106,47 @@ c_Directory *c_Directory::create(CVarRef v_path) {
   t___construct(v_path);
   return this;
 }
+extern const MethodCallInfoTable cw_Directory$$call_info_table[];
+extern const int cw_Directory$$call_info_index[];
+extern const InstanceOfInfo cw_Directory$$instanceof_table[];
+extern const int cw_Directory$$instanceof_index[];
 const ObjectStaticCallbacks cw_Directory = {
   (ObjectData*(*)(ObjectData*))coo_Directory,
-  c_Directory::s_call_info_table,c_Directory::s_call_info_index,
-  c_Directory::s_instanceof_table,c_Directory::s_instanceof_index,
+  cw_Directory$$call_info_table,cw_Directory$$call_info_index,
+  cw_Directory$$instanceof_table,cw_Directory$$instanceof_index,
   &c_Directory::s_class_name,
-  &c_Directory::os_prop_table,&c_Directory::ci___construct,0,0,0x0
+  &c_Directory::os_prop_table,&ci_Directory$$__construct,0,0,0x0,
+  &c_Directory::s_cls
 };
 /* SRC: classes/directory.php line 7 */
 void c_Directory::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::__construct);
-  bool oldInCtor = gasInCtor(true);
+  ObjectData *obj_tmp UNUSED;
   m_path.assignVal(v_path);
   {
     const Variant &tmp0((x_opendir(toString(v_path))));
     m_handle.assignVal(tmp0);
   }
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/directory.php line 12 */
 Variant c_Directory::t_read() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::read);
+  ObjectData *obj_tmp UNUSED;
   return x_readdir(toObject(m_handle));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/directory.php line 16 */
 void c_Directory::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::rewind);
+  ObjectData *obj_tmp UNUSED;
   x_rewinddir(toObject(m_handle));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/directory.php line 20 */
 void c_Directory::t_close() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::close);
+  ObjectData *obj_tmp UNUSED;
   x_closedir(toObject(m_handle));
 }
 namespace hphp_impl_splitter {}
@@ -154,8 +159,8 @@ static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x5C4CA333F4541532LL,0,0,0,68,10,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
-  {0x1429F792A6880074LL,-1,0,0,68,10,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
+  {0x5C4CA333F4541532LL,0,0,0,68,-1,GET_PROPERTY_OFFSET(c_Directory, m_handle),&NAMSTR(s_sys_ss46eeef5c, "handle") },
+  {0x1429F792A6880074LL,-1,0,0,68,-1,GET_PROPERTY_OFFSET(c_Directory, m_path),&NAMSTR(s_sys_ssf362b3c4, "path") },
 
 };
 static const int cpt_hash_entries[] = {

@@ -20,8 +20,6 @@
 #include <runtime/base/preg.h>
 #include <util/util.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

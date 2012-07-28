@@ -21,8 +21,6 @@
 #include <compiler/analysis/file_scope.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors

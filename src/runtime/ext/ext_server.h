@@ -49,10 +49,11 @@ bool f_xbox_post_message(CStrRef msg, CStrRef host = "localhost");
 Object f_xbox_task_start(CStrRef message);
 bool f_xbox_task_status(CObjRef task);
 int64 f_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret);
-int f_xbox_get_thread_timeout();
+Variant f_xbox_process_call_message(CStrRef msg);
+int64 f_xbox_get_thread_timeout();
 void f_xbox_set_thread_timeout(int timeout);
 void f_xbox_schedule_thread_reset();
-int f_xbox_get_thread_time();
+int64 f_xbox_get_thread_time();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

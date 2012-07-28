@@ -22,6 +22,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Careful in these functions: they can be called when tl_regState is
+ * REGSTATE_DIRTY.  VMExecutionContext::handleError is dirty-reg safe,
+ * but evaluate other functions that you might need here.
+ */
+
 void raise_error(const std::string &msg) {
   int errnum = ErrorConstants::ERROR;
   g_context->handleError(msg, errnum, false,
@@ -123,7 +129,7 @@ void raise_warning(const char *fmt, ...) {
 void raise_debugging(const std::string &msg) {
   g_context->handleError(msg, ErrorConstants::WARNING, true,
                          ExecutionContext::NeverThrow,
-                         "HipHop Debugging:  ");
+                         "HipHop Warning:  ");
 }
 
 void raise_debugging(const char *fmt, ...) {

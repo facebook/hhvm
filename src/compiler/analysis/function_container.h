@@ -55,7 +55,7 @@ public:
                              FunctionScopePtrVec &funcs,
                              bool excludePseudoMains = false) const;
   void outputCPPCodeInfoTable(
-    CodeGenerator &cg, AnalysisResultPtr ar, bool support,
+    CodeGenerator &cg, AnalysisResultPtr ar, bool useSwitch,
     const StringToFunctionScopePtrMap &functions);
 
 protected:

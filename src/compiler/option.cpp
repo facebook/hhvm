@@ -28,8 +28,10 @@
 #include <runtime/base/preg.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
+
+using std::set;
+using std::map;
+using std::map;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +75,11 @@ set<string> Option::DynamicInvokeFunctions;
 set<string> Option::VolatileClasses;
 
 map<string, string> Option::FunctionSections;
+
+bool Option::GenerateTextHHBC = false;
+bool Option::GenerateBinaryHHBC = false;
+string Option::RepoCentralPath;
+bool Option::RepoDebugInfo = false;
 
 #if defined(HPHP_OSS)
 string Option::IdPrefix = "___";
@@ -135,10 +142,12 @@ const char *Option::SilencerPrefix = "sil_";
 const char *Option::ScalarPrefix = "s_";
 const char *Option::SysPrefix = "sys_";
 const char *Option::StaticStringPrefix = "ss";
+const char *Option::StaticStringProxyPrefix = "ssp";
 const char *Option::StaticArrayPrefix = "sa";
 const char *Option::StaticVarIntPrefix = "svi";
 const char *Option::StaticVarDblPrefix = "svd";
 const char *Option::StaticVarStrPrefix = "svs";
+const char *Option::StaticVarStrProxyPrefix = "svsp";
 const char *Option::StaticVarArrPrefix = "sva";
 
 const char *Option::FFIFnPrefix = "ffi_";
@@ -164,7 +173,7 @@ int Option::ScalarArrayOverflowLimit = 2000;
 bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
 bool Option::UseNamedScalarArray = true;
-int Option::LiteralStringFileCount = 10;
+int Option::LiteralStringFileCount = 2;
 bool Option::AnalyzePerfectVirtuals = true;
 bool Option::HardTypeHints = true;
 
@@ -180,6 +189,7 @@ bool Option::GenerateCPPMetaInfo = true;
 bool Option::GenerateCPPNameSpace = true;
 bool Option::GenArrayCreate = true;
 bool Option::UseScalarVariant = true;
+bool Option::UseStaticStringProxy = true;
 bool Option::UseCallUserFuncFewArgs = true;
 bool Option::GenGlobalState = false;
 bool Option::KeepStatementsWithNoEffect = false;
@@ -199,6 +209,7 @@ std::string Option::ProgramName;
 std::string Option::PreprocessedPartitionConfig;
 
 bool Option::ParseTimeOpts = true;
+bool Option::OutputHHBC = false;
 bool Option::EnableHipHopSyntax = false;
 bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
@@ -380,10 +391,20 @@ void Option::Load(Hdf &config) {
     }
   }
 
+  {
+    Hdf repo = config["Repo"];
+    {
+      Hdf repoCentral = repo["Central"];
+      RepoCentralPath = repoCentral["Path"].getString();
+    }
+    RepoDebugInfo = repo["DebugInfo"].getBool(false);
+  }
+
   ScalarArrayFileCount = config["ScalarArrayFileCount"].getByte(1);
   if (ScalarArrayFileCount <= 0) ScalarArrayFileCount = 1;
-  LiteralStringFileCount = config["LiteralStringFileCount"].getInt32(10);
-  if (LiteralStringFileCount <= 0) LiteralStringFileCount = 10;
+  LiteralStringFileCount = config["LiteralStringFileCount"].getInt32(2);
+  if (LiteralStringFileCount <= 0) LiteralStringFileCount = 2;
+  UseStaticStringProxy = config["UseStaticStringProxy"].getBool(true);
   HardTypeHints = config["HardTypeHints"].getBool(true);
   ScalarArrayOverflowLimit = config["ScalarArrayOverflowLimit"].getInt32(2000);
   if (ScalarArrayOverflowLimit <= 0) ScalarArrayOverflowLimit = 2000;

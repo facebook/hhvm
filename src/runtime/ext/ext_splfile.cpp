@@ -33,19 +33,36 @@ IMPLEMENT_OBJECT_ALLOCATION(SplFileInfo)
 IMPLEMENT_OBJECT_ALLOCATION(SplFileObject)
 
 static SplFileInfo *get_splfileinfo(CObjRef obj) {
-  c_SplFileInfo *c_splfi = obj.getTyped<c_SplFileInfo>();
-  return c_splfi->m_rsrc.toObject().getTyped<SplFileInfo>();
+  if (!obj->o_instanceof("SplFileInfo")) {
+    throw InvalidObjectTypeException(obj->o_getClassName());
+  }
+  CObjRef rsrc = obj->o_get("rsrc", true, "SplFileInfo");
+  return rsrc.getTyped<SplFileInfo>();
 }
 
 static SplFileObject *get_splfileobject(CObjRef obj) {
-  c_SplFileObject *c_splfo = obj.getTyped<c_SplFileObject>();
-  return c_splfo->m_rsrc.toObject().getTyped<SplFileObject>();
+  if (!obj->o_instanceof("SplFileObject")) {
+    throw InvalidObjectTypeException(obj->o_getClassName());
+  }
+  // "SplFileInfo" as context -- rsrc is a private property
+  CObjRef rsrc = obj->o_get("rsrc", true, "SplFileInfo");
+  return rsrc.getTyped<SplFileObject>();
 }
 
 Object f_hphp_splfileinfo___construct(CObjRef obj, CStrRef file_name) {
-  c_SplFileInfo *c_splfi = obj.getTyped<c_SplFileInfo>();
-  c_splfi->m_rsrc = NEWOBJ(SplFileInfo)(file_name);
-  return c_splfi;
+  int len = file_name.size();
+  const char *data = file_name.data();
+  ObjectData *fi;
+  if (len && data[len-1] == '/') {
+    do {
+      len--;
+    } while (len && data[len-1] == '/');
+    fi = NEWOBJ(SplFileInfo)(String(data, len, CopyString));
+  } else {
+    fi = NEWOBJ(SplFileInfo)(file_name);
+  }
+  obj->o_set("rsrc", fi, "SplFileInfo");
+  return obj;
 }
 
 int64 f_hphp_splfileinfo_getatime(CObjRef obj) {
@@ -87,7 +104,7 @@ String f_hphp_splfileinfo_getlinktarget(CObjRef obj) {
   String ret = f_readlink_internal(fileInfo->getFileName(), false);
   if (!ret.size())  {
     throw Object(SystemLib::AllocExceptionObject(Variant(
-      "Unable to read link "+fileInfo->getFileName() +
+      "Unable to read link "+std::string(fileInfo->getFileName()) +
       ", error: no such file or directory")));
   }
   return ret;
@@ -193,9 +210,8 @@ String f_hphp_splfileinfo___tostring(CObjRef obj) {
 Object f_hphp_splfileobject___construct(CObjRef obj, CStrRef filename, CStrRef open_mode, bool use_include_path, CVarRef context) {
   Variant f = f_fopen(filename, open_mode, use_include_path,
                       context.isNull() ? null_object : context.toObject());
-  c_SplFileObject *c_splfo = obj.getTyped<c_SplFileObject>();
-  c_splfo->m_rsrc = NEWOBJ(SplFileObject)(f);
-  return c_splfo;
+  obj->o_set("rsrc", NEWOBJ(SplFileObject)(f), "SplFileInfo");
+  return obj;
 }
 
 Variant f_hphp_splfileobject_current(CObjRef obj) {

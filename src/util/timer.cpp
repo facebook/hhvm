@@ -49,11 +49,15 @@ static int64 to_usec(const timeval& tv) {
   return (int64(tv.tv_sec) * 1000000) + tv.tv_usec;
 }
 
+int64 Timer::GetCurrentTimeMicros() {
+  struct timeval tv;
+  gettimeofday(&tv, 0);
+  return to_usec(tv);
+}
+
 int64 Timer::measure() const {
   if (m_type == WallTime) {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return to_usec(tv);
+    return GetCurrentTimeMicros();
   }
 
   struct rusage ru;

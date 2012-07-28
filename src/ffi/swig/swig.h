@@ -160,7 +160,6 @@ int hphpGetType(HPHP::HphpSession *s, HPHP::Variant *v) {
     return TypeNull;
   case HPHP::KindOfBoolean:
     return TypeBoolean;
-  case HPHP::KindOfInt32:
   case HPHP::KindOfInt64:
     return TypeInt;
   case HPHP::KindOfDouble:

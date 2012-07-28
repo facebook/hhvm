@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sed -e 's, in [^ ]*src/, in src/,' | sed 's/(.*)/()/g'

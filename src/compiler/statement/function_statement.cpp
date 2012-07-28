@@ -29,8 +29,6 @@
 #include <sstream>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -38,10 +36,11 @@ using namespace boost;
 FunctionStatement::FunctionStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  bool ref, const std::string &name, ExpressionListPtr params,
- StatementListPtr stmt, int attr, const std::string &docComment)
+ StatementListPtr stmt, int attr, const std::string &docComment,
+ ExpressionListPtr attrList)
   : MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(FunctionStatement),
                     ModifierExpressionPtr(), ref, name, params, stmt, attr,
-                    docComment, false), m_ignored(false) {
+                    docComment, attrList, false), m_ignored(false) {
 }
 
 StatementPtr FunctionStatement::clone() {
@@ -56,6 +55,16 @@ StatementPtr FunctionStatement::clone() {
 // parser functions
 
 void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+  // Correctness checks are normally done before adding function to scope.
+  if (m_params) {
+    for (int i = 0; i < m_params->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      if (param->hasTypeHint() && param->defaultValue()) {
+        param->compatibleDefault();
+      }
+    }
+  }
   // note it's important to add to scope, not a pushed FunctionContainer,
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
@@ -129,7 +138,7 @@ void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 bool FunctionStatement::hasImpl() const {
-  return getFunctionScope()->isVolatile();
+  return getFunctionScope()->isVolatile() || (hhvm && Option::OutputHHBC);
 }
 
 void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
@@ -145,17 +154,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   if (outputFFI(cg, ar)) return;
 
   if (context == CodeGenerator::NoContext) {
-    if (funcScope->isVolatile()) {
-      string rname = CodeGenerator::FormatLabel(m_name);
-      if (funcScope->isRedeclaring()) {
-        cg.printf("g->GCI(%s) = &%s%s;\n", rname.c_str(),
-                  Option::CallInfoPrefix, fname.c_str());
-      }
-      cg_printf("g->declareFunctionLit(");
-      cg_printString(m_name, ar, shared_from_this());
-      cg_printf(");\n");
-      cg_printf("g->FVF(%s) = true;\n", rname.c_str());
-    }
+    funcScope->outputCPPDef(cg);
     return;
   }
 
@@ -288,6 +287,9 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
         }
         funcScope->outputCPP(cg, ar);
         if (funcScope->needsRefTemp()) cg.genReferenceTemp(shared_from_this());
+        if (funcScope->needsObjTemp()) {
+          cg_printf("ObjectData *obj_tmp UNUSED;\n");
+        }
         cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
         outputCPPStmt(cg, ar);
         if (funcScope->needsRefTemp()) cg.clearRefereceTemp();

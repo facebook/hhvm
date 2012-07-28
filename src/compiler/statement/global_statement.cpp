@@ -26,8 +26,6 @@
 #include <compiler/analysis/function_scope.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -37,7 +35,7 @@ GlobalStatement::GlobalStatement
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(GlobalStatement)),
     m_exp(exp) {
 
-  set<string> seen;
+  std::set<string> seen;
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
     exp->setContext(Expression::Declaration);

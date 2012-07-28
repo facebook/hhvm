@@ -20,8 +20,6 @@
 #include <system/gen/sys/system_globals.h>
 #include <runtime/base/runtime_error.h>
 
-using namespace std;
-
 namespace HPHP {
 
 IMPLEMENT_OBJECT_ALLOCATION(UrlFile)

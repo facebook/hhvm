@@ -27,8 +27,9 @@ Both functions have to be called on per-thread basis.
 
 If memory leak is detected, it may mean the PHP library has objects or arrays
 forming cycles when referring to each other. This is problematic to reference
-counting based memory deallocation, but it can be solved by using
-MemoryManager that can sweep dangling memory periodically.
+counting based memory deallocation, but it can be solved by enabling the
+MemoryManager feature which sweeps memory when the current session is torn
+down.
 
 To enable MemorManager, this has to be set at program startup time, and it
 cannot be turned off afterwards:
@@ -40,27 +41,15 @@ cannot be turned off afterwards:
 
 (same as above)
 
-(2) Taking a checkpoint
+(2) Recycle the session periodically
 
-The memory manager is powerful enough to take a snapshot of the memory at any
-time by doing
-
-  hphp_session_init(); // required, same as above
-  // optionally update more global states
-  MemoryManager::TheMemoryManager()->checkpoint();
-
-We only recommend to take checkpoint just once on per-thread basis, because
-we have not tested what will happen when multiple checkpoint() is called.
-
-(3) Rollback periodically
-
-Call this once per end of "session":
-
-  hphp_session_exit();
+It is a good idea to recycle the session periodically. The current session can
+be torn down by calling hphp_session_exit(), and subsequently a fresh session
+can be started by calling hphp_session_init().
 
 Please make sure there is no stack variables that are still alive when calling
-rollback(). Otherwise, rollback() will release the memory to the pool, causing
-that stack variable's destructor to work on collected memory.
+hphp_session_exit(). Otherwise, hphp_session_exit() will release the memory
+while there are still stack variables pointing to that memory.
 
 
 3. Thread Local Memory Management

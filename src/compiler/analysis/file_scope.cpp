@@ -27,22 +27,24 @@
 #include <compiler/parser/parser.h>
 #include <util/logger.h>
 #include <util/util.h>
+#include <util/base.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/statement/function_statement.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/expression/simple_function_call.h>
+#include <compiler/expression/include_expression.h>
+#include <compiler/expression/user_attribute.h>
 #include <runtime/base/complex_types.h>
 
 using namespace HPHP;
-using namespace boost;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-FileScope::FileScope(const string &fileName, int fileSize)
+FileScope::FileScope(const string &fileName, int fileSize, const MD5 &md5)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
-    m_size(fileSize), m_fileName(fileName), m_redeclaredFunctions(0),
-    m_hasNonPrivateInclude(false) {
+    m_size(fileSize), m_md5(md5), m_module(false), m_privateInclude(false),
+    m_externInclude(false),
+    m_includeState(0), m_fileName(fileName), m_redeclaredFunctions(0) {
   pushAttribute(); // for global scope
 }
 
@@ -71,12 +73,41 @@ FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
   return createPseudoMain(ar);
 }
 
-void FileScope::cleanupForError() {
+void FileScope::cleanupForError(AnalysisResultConstPtr ar,
+                                int line, const string &msg) {
+  for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
+       iter != m_classes.end(); ++iter) {
+    BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+      cls->getVariables()->cleanupForError(ar);
+    }
+  }
+
+  getConstants()->cleanupForError(ar);
+
   StringToFunctionScopePtrMap().swap(m_functions);
   delete m_redeclaredFunctions;
   m_redeclaredFunctions = 0;
   StringToClassScopePtrVecMap().swap(m_classes);
   m_pseudoMain.reset();
+  m_tree.reset();
+  LocationPtr loc(new Location());
+  loc->file = m_fileName.c_str();
+  loc->first(line, 0);
+  loc->last(line, 0);
+  BlockScopePtr scope;
+  ExpressionListPtr args(new ExpressionList(scope, loc));
+  args->addElement(Expression::MakeScalarExpression(ar, scope, loc, msg));
+  SimpleFunctionCallPtr e(
+    new SimpleFunctionCall(scope, loc, "throw_fatal", args, ExpressionPtr()));
+  e->setThrowFatal();
+  ExpStatementPtr exp(new ExpStatement(scope, loc, e));
+  StatementListPtr stmts(new StatementList(scope, loc));
+  stmts->addElement(exp);
+
+  FunctionScopePtr fs = setTree(ar, stmts);
+  fs->setOuterScope(shared_from_this());
+  fs->getStmt()->resetScope(fs);
+  fs->getStmt()->setLocation(loc);
 }
 
 bool FileScope::addFunction(AnalysisResultConstPtr ar,
@@ -162,9 +193,9 @@ int FileScope::getGlobalAttribute() const {
 
 bool FileScope::needPseudoMainVariables() const {
   VariableTablePtr variables = m_pseudoMain->getVariables();
-  return  (m_hasNonPrivateInclude ||
-           variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
-           variables->getSymbols().size() > 0);
+  return
+    variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
+    variables->getSymbols().size() > 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,18 +259,144 @@ void FileScope::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
+ClassScopeRawPtr FileScope::resolveClass(ClassScopeRawPtr cls) {
+  BlockScopeSet::iterator it = m_providedDefs.find(cls);
+  if (it != m_providedDefs.end()) {
+    return ClassScopeRawPtr(static_cast<HPHP::ClassScope*>(it->get()));
+  }
+  return ClassScopeRawPtr();
+}
+
+bool FileScope::checkClass(const string &cls) {
+  return m_redecBases.find(cls) != m_redecBases.end();
+}
+
+FunctionScopeRawPtr FileScope::resolveFunction(FunctionScopeRawPtr func) {
+  BlockScopeSet::iterator it = m_providedDefs.find(func);
+  if (it != m_providedDefs.end()) {
+    return FunctionScopeRawPtr(static_cast<HPHP::FunctionScope*>(it->get()));
+  }
+  return FunctionScopeRawPtr();
+}
+
+/*
+ * Insert the class, and its parents (recursively) into m_providedDefs,
+ * returning true if the class was already known to exist.
+ * If def is true, this is the actual definition for the class,
+ * so set the hasBase flags.
+ */
+bool FileScope::insertClassUtil(AnalysisResultPtr ar,
+                                ClassScopeRawPtr cls, bool def) {
+  if (!m_providedDefs.insert(cls).second) return true;
+
+  const vector<string> &bases = cls->getBases();
+  bool topBasesKnown = def && bases.size() > 31;
+  for (unsigned i = 0; i < bases.size(); i++) {
+    const string &s = bases[i];
+    ClassScopeRawPtr c = ar->findClass(s);
+    if (c) {
+      if (c->isRedeclaring()) {
+        ClassScopeRawPtr cr = resolveClass(c);
+        if (!cr) {
+          if (i >= 31) topBasesKnown = false;
+          m_redecBases.insert(c->getName());
+          continue;
+        }
+        c = cr;
+      } else if (!c->isVolatile()) {
+        if (def && i < 31) cls->setKnownBase(i);
+        continue;
+      }
+      if (insertClassUtil(ar, c, false)) {
+        if (def && i < 31) cls->setKnownBase(i);
+      } else {
+        if (i >= 31) topBasesKnown = false;
+      }
+    }
+  }
+
+  if (topBasesKnown) cls->setKnownBase(31);
+  return false;
+}
+
+void FileScope::analyzeIncludesHelper(AnalysisResultPtr ar) {
+  m_includeState = 1;
+  if (m_pseudoMain) {
+    StatementList &stmts = *getStmt();
+    bool hoistOnly = false;
+    for (int i = 0, n = stmts.getCount(); i < n; i++) {
+      StatementPtr s = stmts[i];
+      if (!s) continue;
+      if (s->is(Statement::KindOfClassStatement) ||
+          s->is(Statement::KindOfInterfaceStatement)) {
+
+        ClassScopeRawPtr cls(
+          static_pointer_cast<InterfaceStatement>(s)->getClassScope());
+        if (hoistOnly) {
+          const string &parent = cls->getOriginalParent();
+          if (cls->getBases().size() > (parent.empty() ? 0 : 1)) {
+            continue;
+          }
+          if (!parent.empty()) {
+            ClassScopeRawPtr c = ar->findClass(parent);
+            if (!c || (c->isVolatile() &&
+                       !resolveClass(c) && !checkClass(parent))) {
+              continue;
+            }
+          }
+        }
+        if (cls->isVolatile()) {
+          insertClassUtil(ar, cls, true);
+        }
+        continue;
+      }
+      if (s->is(Statement::KindOfFunctionStatement)) {
+        FunctionScopeRawPtr func(
+          static_pointer_cast<FunctionStatement>(s)->getFunctionScope());
+        if (func->isVolatile()) m_providedDefs.insert(func);
+        continue;
+      }
+      if (!hoistOnly && s->is(Statement::KindOfExpStatement)) {
+        ExpressionRawPtr exp(
+          static_pointer_cast<ExpStatement>(s)->getExpression());
+        if (exp && exp->is(Expression::KindOfIncludeExpression)) {
+          FileScopeRawPtr fs(
+            static_pointer_cast<IncludeExpression>(exp)->getIncludedFile(ar));
+          if (fs && fs->m_includeState != 1) {
+            if (!fs->m_includeState) {
+              if (m_module && fs->m_privateInclude) {
+                BOOST_FOREACH(BlockScopeRawPtr bs, m_providedDefs) {
+                  fs->m_providedDefs.insert(bs);
+                }
+              }
+              fs->analyzeIncludesHelper(ar);
+            }
+            BOOST_FOREACH(BlockScopeRawPtr bs, fs->m_providedDefs) {
+              m_providedDefs.insert(bs);
+            }
+            continue;
+          }
+        }
+      }
+      hoistOnly = true;
+    }
+  }
+  m_includeState = 2;
+}
+
+void FileScope::analyzeIncludes(AnalysisResultPtr ar) {
+  if (!m_privateInclude && !m_includeState) {
+    analyzeIncludesHelper(ar);
+  }
+}
+
+
 void FileScope::visit(AnalysisResultPtr ar,
                       void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                       void *data)
 {
   if (m_pseudoMain) {
     cb(ar, m_pseudoMain->getStmt(), data);
-  }
-}
-
-void FileScope::inferTypes(AnalysisResultPtr ar) {
-  if (m_pseudoMain) {
-    m_pseudoMain->getStmt()->inferTypes(ar);
   }
 }
 
@@ -255,7 +412,8 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   FunctionStatementPtr f
     (new FunctionStatement(BlockScopePtr(), LocationPtr(),
                            false, pseudoMainName(),
-                           ExpressionListPtr(), st, 0, ""));
+                           ExpressionListPtr(), st, 0, "",
+                           ExpressionListPtr()));
   f->setFileLevel();
   FunctionScopePtr pseudoMain(
     new HPHP::FunctionScope(ar, true,
@@ -264,6 +422,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
                             ModifierExpressionPtr(),
                             m_attributes[0], "",
                             shared_from_this(),
+                            vector<UserAttributePtr>(),
                             true));
   f->setBlockScope(pseudoMain);
   FunctionScopePtr &fs = m_functions[pseudoMainName()];
@@ -390,6 +549,9 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       func->outputCPPPreface(cg, ar);
     }
   }
+  BOOST_FOREACH(FunctionScopeRawPtr closure, m_usedClosures) {
+    closure->outputCPPPreface(cg, ar);
+  }
 
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
@@ -434,9 +596,8 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
   cg.setContext(CodeGenerator::CppForwardDeclaration);
 
-  BOOST_FOREACH(const string &dep, m_usedClassesFullHeader) {
-    ClassScopePtr cls = ar->findClass(dep);
-    if (cls && cls->isUserClass()) {
+  BOOST_FOREACH(ClassScopeRawPtr cls, m_usedClassesFullHeader) {
+    if (cls->isUserClass()) {
       cg_printInclude(cls->getHeaderFilename());
     }
   }
@@ -449,7 +610,16 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     string lisnam = ar->getLiteralStringName(stringId, index);
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
-    cg_printf("extern StaticString %s;\n", lisnam.c_str());
+    if (Option::UseStaticStringProxy) {
+      string proxyNam = ar->getLiteralStringName(stringId, index, true);
+      cg_printf("extern StaticStringProxy %s;\n", proxyNam.c_str());
+      cg_printf("#ifndef %s\n", lisnam.c_str());
+      cg_printf("#define %s (*(StaticString *)(&%s))\n",
+                lisnam.c_str(), proxyNam.c_str());
+      cg_printf("#endif\n");
+    } else {
+      cg_printf("extern StaticString %s;\n", lisnam.c_str());
+    }
   }
 
   first = true;
@@ -482,7 +652,16 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     string lisnam = ar->getLitVarStringName(stringId, index);
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
-    cg_printf("extern VarNR %s;\n", lisnam.c_str());
+    if (Option::UseStaticStringProxy) {
+      string proxyName = ar->getLitVarStringName(stringId, index, true);
+      cg_printf("extern VariantProxy %s;\n", proxyName.c_str());
+      cg_printf("#ifndef %s\n", lisnam.c_str());
+      cg_printf("#define %s (*(Variant *)&%s)\n",
+                lisnam.c_str(), proxyName.c_str());
+      cg_printf("#endif\n");
+    } else {
+      cg_printf("extern VarNR %s;\n", lisnam.c_str());
+    }
   }
 
   first = true;
@@ -519,17 +698,15 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
 
 
   first = true;
-  BOOST_FOREACH(const UsedClassConst& item, m_usedClassConstsHeader) {
-    ClassScopePtr cls = ar->findClass(item.first);
-    assert(cls);
+  BOOST_FOREACH(const CodeGenerator::UsedClassConst& item,
+                m_usedClassConstsHeader) {
+    ClassScopePtr cls = item.first;
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
     cls->getConstants()->outputSingleConstant(cg, ar, item.second);
   }
 
-  BOOST_FOREACH(const string &str, m_usedClassesHeader) {
-    ClassScopePtr usedClass = ar->findClass(str);
-    assert(usedClass);
+  BOOST_FOREACH(ClassScopeRawPtr usedClass, m_usedClassesHeader) {
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
     usedClass->outputForwardDeclaration(cg);
@@ -548,7 +725,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     outputCPPHelper(cg, ar);
     cg.namespaceEnd();
   } else {
-    set<FileScopePtr> done;
+    std::set<FileScopePtr> done;
     done.insert(shared_from_this());
 
     // Class declarations cunningly expressed as includes so I don't
@@ -612,7 +789,16 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
     int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
     assert(index != -1);
     string lisnam = ar->getLiteralStringName(stringId, index);
-    cg_printf("extern StaticString %s;\n", lisnam.c_str());
+    if (Option::UseStaticStringProxy) {
+      string proxyNam = ar->getLiteralStringName(stringId, index, true);
+      cg_printf("extern StaticStringProxy %s;\n", proxyNam.c_str());
+      cg_printf("#ifndef %s\n", lisnam.c_str());
+      cg_printf("#define %s (*(StaticString *)(&%s))\n",
+                lisnam.c_str(), proxyNam.c_str());
+      cg_printf("#endif\n");
+    } else {
+      cg_printf("extern StaticString %s;\n", lisnam.c_str());
+    }
   }
   cg_printf("\n");
   cg.printSection("2. Static Arrays", false);
@@ -665,7 +851,16 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
       int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
       assert(index != -1);
       string lisnam = ar->getLitVarStringName(stringId, index);
-      cg_printf("extern VarNR %s;\n", lisnam.c_str());
+      if (Option::UseStaticStringProxy) {
+        string proxyName = ar->getLitVarStringName(stringId, index, true);
+        cg_printf("extern VariantProxy %s;\n", proxyName.c_str());
+        cg_printf("#ifndef %s\n", lisnam.c_str());
+        cg_printf("#define %s (*(Variant *)&%s)\n",
+                  lisnam.c_str(), proxyName.c_str());
+        cg_printf("#endif\n");
+      } else {
+        cg_printf("extern VarNR %s;\n", lisnam.c_str());
+      }
     }
     cg_printf("\n");
     BOOST_FOREACH(str, m_usedScalarVarArrays) {

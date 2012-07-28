@@ -38,8 +38,6 @@
 #include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -186,11 +184,11 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           string ptype;
           if (!m_params || m_params->getCount() <= i) {
             if (i >= m_funcScope->getMinParamCount()) break;
-            fmt = "%s: parameter %d of %s() requires %s, none given";
+            fmt = "parameter %d of %s() requires %s, none given";
           } else {
             ExpressionPtr param = (*m_params)[i];
             if (!Type::Inferred(ar, param->getType(), specType)) {
-              fmt = "%s: parameter %d of %s() requires %s, called with %s";
+              fmt = "parameter %d of %s() requires %s, called with %s";
             }
             ptype = param->getType()->toString();
           }
@@ -198,8 +196,6 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
             string msg;
             Util::string_printf
               (msg, fmt,
-               Util::escapeStringForCPP(
-                 m_funcScope->getContainingFile()->getName()).c_str(),
                i + 1,
                Util::escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
                specType->toString().c_str(), ptype.c_str());
@@ -398,8 +394,7 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
   VariableTablePtr vt = fs->getVariables();
   int nAct = m_params ? m_params->getCount() : 0;
   int nMax = m_funcScope->getMaxParamCount();
-  if (unsigned(nAct - m_funcScope->getMinParamCount()) > (unsigned)nMax ||
-      !m->getStmts()) {
+  if (nAct < m_funcScope->getMinParamCount() || !m->getStmts()) {
     return ExpressionPtr();
   }
 
@@ -452,20 +447,26 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
 
   int i;
 
-  for (i = 0; i < nMax; i++) {
+  for (i = 0; i < nMax || i < nAct; i++) {
     ParameterExpressionPtr param
-      (dynamic_pointer_cast<ParameterExpression>((*plist)[i]));
+      (i < nMax ?
+       dynamic_pointer_cast<ParameterExpression>((*plist)[i]) :
+       ParameterExpressionPtr());
     ExpressionPtr arg = i < nAct ? (*m_params)[i] :
       Clone(param->defaultValue(), getScope());
     SimpleVariablePtr var
       (new SimpleVariable(getScope(),
                           (i < nAct ? arg.get() : this)->getLocation(),
-                          prefix + param->getName()));
+                          prefix + (param ?
+                                    param->getName() :
+                                    lexical_cast<string>(i))));
     var->updateSymbol(SimpleVariablePtr());
     var->getSymbol()->setHidden();
     var->getSymbol()->setUsed();
     var->getSymbol()->setReferenced();
-    bool ref = m_funcScope->isRefParam(i) || arg->hasContext(RefParameter);
+    bool ref =
+      (i < nMax && m_funcScope->isRefParam(i)) ||
+      arg->hasContext(RefParameter);
     arg->clearContext(RefParameter);
     AssignmentExpressionPtr ae
       (new AssignmentExpression(getScope(),
@@ -556,6 +557,9 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
             func->isStatic() || func->isFinal() || func->isPrivate()) {
           Compiler::Error(Compiler::UseVoidReturn, self);
         }
+      }
+      if (!Type::IsMappedToVariant(type)) {
+        setExpectedType(type);
       }
       m_voidWrapper = true;
     }
@@ -700,13 +704,32 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (m_voidReturn) clearContext(RefValue);
+  TypePtr eType = getExpectedType();
   bool wrap = m_voidWrapper && m_cppTemp.empty() && !isUnused();
   if (wrap) {
     cg_printf("(");
+    setExpectedType(TypePtr());
   }
   Expression::outputCPP(cg, ar);
   if (wrap) {
-    cg_printf(", null)");
+    setExpectedType(eType);
+    if (eType && !Type::IsMappedToVariant(eType)) {
+      if (eType->is(Type::KindOfBoolean)) {
+        cg_printf(", false)");
+      } else if (eType->isInteger()) {
+        cg_printf(", 0)");
+      } else if (eType->is(Type::KindOfDouble)) {
+        cg_printf(", 0.0)");
+      } else if (eType->is(Type::KindOfString)) {
+        cg_printf(", empty_string)");
+      } else {
+        cg_printf(", ");
+        eType->outputCPPCast(cg, ar, getScope());
+        cg_printf("(null))");
+      }
+    } else {
+      cg_printf(", null)");
+    }
   }
 
   if (staticClassName) {

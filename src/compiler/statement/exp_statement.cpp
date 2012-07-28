@@ -26,8 +26,6 @@
 #include <compiler/analysis/file_scope.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -48,6 +46,7 @@ StatementPtr ExpStatement::clone() {
 // parser functions
 
 void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+  if (Option::OutputHHBC && !ar->isParseOnDemand()) return;
   if (!m_exp->is(Expression::KindOfAssignmentExpression)) return;
 
   AssignmentExpressionPtr assign =
@@ -73,6 +72,12 @@ void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   } else {
     file = path + file;
   }
+
+  if (Option::OutputHHBC) {
+    ar->parseOnDemand(file);
+    return;
+  }
+
   ScalarExpressionPtr exp
     (new ScalarExpression(getScope(), assign->getValue()->getLocation(),
                           T_STRING, file, true));

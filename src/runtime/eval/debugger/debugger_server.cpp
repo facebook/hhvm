@@ -113,7 +113,7 @@ void DebuggerServer::accept() {
                                         m_sock->getType());
           SmartPtr<Socket> ret(new_sock);
           if (new_sock->valid()) {
-            Debugger::RegisterProxy(ret, false);
+            Debugger::CreateProxy(ret, false);
           } else {
             Logger::Error("unable to accept incoming debugger request");
           }
@@ -126,6 +126,8 @@ void DebuggerServer::accept() {
         }
       }
     } // else timed out, then we have a chance to check m_stopped bit
+    // cleanup the dummy sandbox threads it created
+    Debugger::CleanupDummySandboxThreads();
   }
 
   m_sock.reset();

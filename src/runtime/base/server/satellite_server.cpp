@@ -23,7 +23,7 @@
 #include <runtime/base/preg.h>
 #include <util/util.h>
 
-using namespace std;
+using std::set;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,6 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_maxDuration = hdf["MaxDuration"].getInt32(120);
   m_timeoutSeconds =
     hdf["TimeoutSeconds"].getInt32(RuntimeOption::RequestTimeoutSeconds);
-  m_warmupDoc = hdf["WarmupDocument"].getString("");
   m_reqInitFunc = hdf["RequestInitFunction"].getString("");
   m_reqInitDoc = hdf["RequestInitDocument"].getString("");
   m_password = hdf["Password"].getString("");

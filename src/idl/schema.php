@@ -136,8 +136,8 @@ print $output;
 ///////////////////////////////////////////////////////////////////////////////
 // output helpers
 
-function idx_flags($arr, $name) {
-  return get_flag_names($arr, $name);
+function idx_flags($arr, $name, $global_function) {
+  return get_flag_names($arr, $name, $global_function);
 }
 
 function idx_type($arr, $name) {
@@ -244,7 +244,7 @@ function define_class($class) {
   out_fmt('ifaces', idx_array ($class, 'ifaces'));
   out_fmt('bases',  idx_array ($class, 'bases'));
   out_str('desc',   $desc);
-  out_fmt('flags',  idx_flags ($class, 'flags'));
+  out_fmt('flags',  idx_flags ($class, 'flags', false));
   out_str('note',   idx_string($class, 'note'));
   out_doc('footer', idx_string($class, 'footer'));
   end_array(false);
@@ -311,19 +311,23 @@ function define_function($func, $clsname = 'function') {
 
   $taint_observer = '';
   if (isset($func['taint_observer'])) {
-    push_globals();
-    begin_array(false);
-    out_str('set_mask', $func['taint_observer']['set_mask']);
-    out_str('clear_mask', $func['taint_observer']['clear_mask']);
-    end_array(false);
-    $taint_observer = pop_globals();
+    if (is_array($func['taint_observer'])) {
+      push_globals();
+      begin_array(false);
+      out_str('set_mask', $func['taint_observer']['set_mask']);
+      out_str('clear_mask', $func['taint_observer']['clear_mask']);
+      end_array(false);
+      $taint_observer = pop_globals();
+    } else {
+      $taint_observer = "false";
+    }
   }
 
   begin_function('DefineFunction');
   begin_array();
   out_str('name',   $func['name'], true);
   out_str('desc',   $desc);
-  out_fmt('flags',  idx_flags($func, 'flags'));
+  out_fmt('flags',  idx_flags($func, 'flags', $clsname == 'function'));
   out_str('opt',    idx_string($func, 'opt'));
   out_fmt('return', $return);
   out_fmt('args',   $args);
@@ -351,7 +355,7 @@ function define_properties($properties) {
     begin_array();
     out_str('name',  $property['name'], true);
     out_fmt('type',  idx_type  ($property, 'type'));
-    out_fmt('flags', idx_flags ($property, 'flags'));
+    out_fmt('flags', idx_flags ($property, 'flags', false));
     out_str('desc',  idx_string($property, 'desc'));
     out_str('note',  idx_string($property, 'note'));
     end_array(false);

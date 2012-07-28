@@ -89,33 +89,27 @@ public:
 
 class SharedStoreStats {
 public:
-  static void onClear();
   static void onStore(StringData *key, SharedVariant *var, int64 ttl,
                       bool prime);
   static void onDelete(StringData *key, SharedVariant *var, bool replace,
                        bool noTTL);
   static void onGet(StringData *key, SharedVariant *var);
-  static void resetStats() {
-    s_keyCount = 0;
-    s_keySize = 0;
-    s_variantCount = 0;
-    s_dataSize = 0;
-    s_dataTotalSize = 0;
-    s_deleteSize = 0;
-    s_replaceSize = 0;
-  }
 
   static std::string report_basic();
   static std::string report_basic_flat();
   static std::string report_keys();
   static bool snapshot(const char *filename, std::string& keySample);
 
-  static void addDirect(int32 keySize, int32 dataTotal);
-  static void removeDirect(int32 keySize, int32 dataTotal);
+  static void addDirect(int32 keySize, int32 dataTotal, bool prime, bool file);
+  static void removeDirect(int32 keySize, int32 dataTotal, bool exp);
   static void updateDirect(int32 dataTotalOld, int32 dataTotalNew);
 
+  static void setExpireQueueSize(int32 size) {
+    s_expireQueueSize = size;
+  }
+  static void addPurgingTime(int64 purgingTime);
+
 protected:
-  static Mutex s_lock;
   static ReadWriteMutex s_rwlock;
 
   static int32 s_keyCount; // how many distinct keys
@@ -127,15 +121,18 @@ protected:
   static int64 s_deleteSize;
   static int64 s_replaceSize;
 
+  static int32 s_addCount;
+  static int32 s_primeCount;
+  static int32 s_fromFileCount;
+  static int32 s_updateCount;
+  static int32 s_deleteCount;
+  static int32 s_expireCount;
+
+  static int32 s_expireQueueSize;
+  static int64 s_purgingTime;
+
   static void remove(SharedValueProfile *svp, bool replace);
   static void add(SharedValueProfile *svp);
-
-  static void lock() {
-    s_lock.lock();
-  }
-  static void unlock() {
-    s_lock.unlock();
-  }
 
   struct charHashCompare {
     bool equal(const char *s1, const char *s2) const {

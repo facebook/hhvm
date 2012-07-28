@@ -31,6 +31,7 @@ public:
     va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
   }
   int m_code;
+  EXCEPTION_COMMON_IMPL(DatabaseException);
 };
 
 class DBConnectionException : public DatabaseException {
@@ -40,6 +41,7 @@ public:
       : DatabaseException(code, "Failed to connect to %s %s: %s (%d)",
                           ip, database, msg, code) {
   }
+  EXCEPTION_COMMON_IMPL(DBConnectionException);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +50,8 @@ public:
  * What it takes to connect to a MySQL server.
  */
 DECLARE_BOOST_TYPES(ServerData);
+
+typedef std::vector<std::pair<std::string, std::string> > SessionVariableVec;
 
 class ServerData {
  public:
@@ -64,14 +68,17 @@ class ServerData {
 
  public:
   ServerData();
-  ServerData(const char *ip, const char *database, int port = 0,
-             const char *username = NULL, const char *password = NULL);
+  ServerData(const char *ip, const char *database, int port,
+             const char *username, const char *password, 
+             const SessionVariableVec &sessionVariables);
 
   const std::string &getIP() const { return m_ip;}
   int getPort() const;
   const std::string &getUserName() const;
   const std::string &getPassword() const;
   const std::string &getDatabase() const { return m_database;}
+  const SessionVariableVec &getSessionVariables() const 
+    { return m_sessionVariables; }
 
  private:
   std::string m_ip;
@@ -79,6 +86,7 @@ class ServerData {
   std::string m_username;
   std::string m_password;
   std::string m_database;
+  SessionVariableVec m_sessionVariables;
 };
 
 typedef std::pair<ServerDataPtr, std::string> ServerQuery;
@@ -167,7 +175,8 @@ class DBConn {
 
   static void ClearLocalDatabases();
   static void AddLocalDB(int dbId, const char *ip, const char *db,
-                         int port, const char *username, const char *password);
+                         int port, const char *username, const char *password, 
+                         const SessionVariableVec &sessionVariables);
 
  private:
   static Mutex s_mutex;

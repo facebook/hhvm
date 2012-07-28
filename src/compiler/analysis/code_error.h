@@ -33,7 +33,8 @@ enum ErrorType {
 #define CODE_ERROR_ENTRY(x) x,
 #include "compiler/analysis/code_error.inc"
 #undef CODE_ERROR_ENTRY
-  ErrorCount
+  ErrorCount,
+  NoError
 };
 
 /**

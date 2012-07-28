@@ -35,11 +35,12 @@ public:
   static StaticString s_class_name;
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
-  virtual bool isResource() const { return !m_fileName.empty();}
+  virtual bool isResource() const { return !m_fileName.empty(); }
 
-  const std::string &getFileName() { return m_fileName;}
+  CStrRef getFileName() const { return m_fileName; }
+
 public:
-  std::string m_fileName;
+  String m_fileName;
 };
 
 class SplFileObject: public ResourceData {

@@ -29,7 +29,8 @@ namespace HPHP {
 bool f_hphpd_install_user_command(CStrRef cmd, CStrRef clsname);
 Array f_hphpd_get_user_commands();
 void f_hphpd_break(bool condition = true);
-Variant f_hphpd_get_client(CStrRef name = null);
+Variant f_hphpd_get_client(CStrRef name);
+Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerProxyCmdUser
@@ -115,7 +116,7 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getcommand);
   public: bool t_arg(int index, CStrRef str);
   DECLARE_METHOD_INVOKE_HELPERS(arg);
-  public: int t_argcount();
+  public: int64 t_argcount();
   DECLARE_METHOD_INVOKE_HELPERS(argcount);
   public: String t_argvalue(int index);
   DECLARE_METHOD_INVOKE_HELPERS(argvalue);
@@ -131,7 +132,7 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getcurrentlocation);
   public: Variant t_getstacktrace();
   DECLARE_METHOD_INVOKE_HELPERS(getstacktrace);
-  public: int t_getframe();
+  public: int64 t_getframe();
   DECLARE_METHOD_INVOKE_HELPERS(getframe);
   public: void t_printframe(int index);
   DECLARE_METHOD_INVOKE_HELPERS(printframe);
@@ -158,7 +159,7 @@ extern const int64 q_DebuggerClient$$STATE_READY_FOR_COMMAND;
 extern const int64 q_DebuggerClient$$STATE_BUSY;
 
 FORWARD_DECLARE_CLASS_BUILTIN(DebuggerClient);
-class c_DebuggerClient : public ExtObjectData {
+class c_DebuggerClient : public ExtObjectData, public Sweepable {
  public:
   DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
 
@@ -173,8 +174,6 @@ class c_DebuggerClient : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(init);
   public: Variant t_processcmd(CVarRef cmdName, CVarRef args);
   DECLARE_METHOD_INVOKE_HELPERS(processcmd);
-  public: Variant t_interrupt();
-  DECLARE_METHOD_INVOKE_HELPERS(interrupt);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 

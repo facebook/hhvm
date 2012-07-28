@@ -33,7 +33,6 @@
 #include <compiler/statement/loop_statement.h>
 
 using namespace HPHP;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -289,6 +288,7 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
         ExpressionPtr rep(new UnaryOpExpression(
                             getScope(), getLocation(),
                             m_exp2, T_STRING_CAST, true));
+        rep->setActualType(Type::String);
         return rep;
       }
     }
@@ -321,6 +321,7 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(
         ExpressionPtr rep(new UnaryOpExpression(
                             getScope(), getLocation(),
                             m_exp1, T_STRING_CAST, true));
+        rep->setActualType(Type::String);
         return rep;
       }
     }
@@ -461,6 +462,23 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
     try {
+      if (hhvm &&
+          Option::OutputHHBC &&
+          (!Option::WholeProgram || !Option::ParseTimeOpts)) {
+        // In the VM, don't optimize __CLASS__ if within a trait, since
+        // __CLASS__ is not resolved yet.
+        ClassScopeRawPtr clsScope = getOriginalClass();
+        if (clsScope && clsScope->isTrait()) {
+          ScalarExpressionPtr scalar1 =
+            dynamic_pointer_cast<ScalarExpression>(m_exp1);
+          ScalarExpressionPtr scalar2 =
+            dynamic_pointer_cast<ScalarExpression>(m_exp2);
+          if ((scalar1 && scalar1->getType() == T_CLASS_C) ||
+              (scalar2 && scalar2->getType() == T_CLASS_C)) {
+            return ExpressionPtr();
+          }
+        }
+      }
       Variant result;
       switch (m_op) {
         case T_LOGICAL_XOR:
@@ -883,8 +901,18 @@ void BinaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                         int state) {
   if (hasCPPTemp() || isScalar()) return;
   if (m_op == '.' && (state & FixOrder)) {
-    if (m_exp1) m_exp1->preOutputStash(cg, ar, state|StashVars);
-    if (m_exp2) m_exp2->preOutputStash(cg, ar, state|StashVars);
+    if (m_exp1) {
+      if (!m_exp1->getActualType() && m_exp1->hasCPPTemp()) {
+        cg_printf("id(%s);\n", m_exp1->cppTemp().c_str());
+      }
+      m_exp1->preOutputStash(cg, ar, state|StashVars);
+    }
+    if (m_exp2) {
+      if (!m_exp2->getActualType() && m_exp2->hasCPPTemp()) {
+        cg_printf("id(%s);\n", m_exp2->cppTemp().c_str());
+      }
+      m_exp2->preOutputStash(cg, ar, state|StashVars);
+    }
   } else {
     Expression::preOutputStash(cg, ar, state);
   }

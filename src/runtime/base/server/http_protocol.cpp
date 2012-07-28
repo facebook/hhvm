@@ -37,7 +37,7 @@
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
-using namespace std;
+using std::map;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,10 +97,24 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   // $_ENV
   process_env_variables(g->GV(_ENV));
   g->GV(_ENV).set("HPHP", 1);
-  g->GV(_ENV).set("HPHP_SERVER", 1);
+  switch (getHphpBinaryType()) {
+  case HphpBinary::hhvm:
+    g->GV(_ENV).set("HHVM", 1);
+    if (RuntimeOption::EvalJit) {
+      g->GV(_ENV).set("HHVM_JIT", 1);
+    }
+    break;
+  case HphpBinary::hphpi: g->GV(_ENV).set("HPHPI", 1); break;
+  default: break;
+  }
+
+  bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
+  if (isServer) {
+    g->GV(_ENV).set("HPHP_SERVER", 1);
 #ifdef HOTPROFILER
-  g->GV(_ENV).set("HPHP_HOTPROFILER", 1);
+    g->GV(_ENV).set("HPHP_HOTPROFILER", 1);
 #endif
+  }
 
   Variant &request = g->GV(_REQUEST);
 
@@ -164,14 +178,14 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       CopyParams(request, g->GV(_POST));
       if (needDelete) {
         if (RuntimeOption::AlwaysPopulateRawPostData &&
-            size <= (int)StringData::LenMask) {
-          g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachString);
+            size <= (int)StringData::MaxSize) {
+          g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachDeprecated);
         } else {
           free((void *)data);
         }
       } else {
         // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
-        if (size <= (int)StringData::LenMask) {
+        if (size <= (int)StringData::MaxSize) {
           g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachLiteral);
         }
       }

@@ -20,6 +20,8 @@
 #include <util/lock.h>
 #include <runtime/eval/debugger/debugger_proxy.h>
 #include <runtime/base/program_functions.h>
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_queue.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,22 +32,38 @@ public:
    * Start/stop Debugger for remote debugging.
    */
   static bool StartServer();
-  static void StartClient(const DebuggerClientOptions &options);
+  static DebuggerProxyPtr StartClient(const DebuggerClientOptions &options);
   static void Stop();
 
   /**
    * Add a new sandbox a debugger can connect to.
    */
   static void RegisterSandbox(const DSandboxInfo &sandbox);
-  static void GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes);
-  static bool IsThreadDebugging(int64 id);
+  static void UnregisterSandbox(CStrRef id);
+  static void RegisterThread();
 
   /**
    * Add/remove/change DebuggerProxy.
    */
-  static void RegisterProxy(SmartPtr<Socket> socket, bool local);
+  static DebuggerProxyPtr CreateProxy(SmartPtr<Socket> socket, bool local);
   static void RemoveProxy(DebuggerProxyPtr proxy);
-  static void SwitchSandbox(DebuggerProxyPtr proxy, const std::string &newId);
+  static bool SwitchSandbox(DebuggerProxyPtr proxy, const std::string &newId,
+                            bool force);
+  static int CountConnectedProxy();
+  static DebuggerProxyPtr GetProxy();
+
+  static void GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes);
+  static bool IsThreadDebugging(int64 tid);
+
+  static void RetireDummySandboxThread(DummySandbox* toRetire);
+  static void CleanupDummySandboxThreads();
+
+  // Request interrupt on threads that a proxy is attached to
+  static void RequestInterrupt(DebuggerProxyPtr proxy);
+
+  // Debugger session to be called in a loop
+  static void DebuggerSession(const DebuggerClientOptions& options,
+                              const std::string& file, bool restart);
 
   /**
    * Called from differnt time point of execution thread.
@@ -65,6 +83,12 @@ public:
   static bool InterruptException(CVarRef e);
 
   /**
+   * Interrupt from VM
+   */
+  static void InterruptVMHook(int type = BreakPointReached,
+                              CVarRef e = null_variant);
+
+  /**
    * Surround text with color, if set.
    */
   static void SetTextColors();
@@ -73,43 +97,72 @@ public:
 
 private:
   static Debugger s_debugger;
+  static bool s_clientStarted;
 
-  static DebuggerProxyPtr GetProxy();
   static void Interrupt(int type, const char *program,
                         InterruptSite *site = NULL, const char *error = NULL);
 
-  ReadWriteMutex m_mutex;
-  StringToDebuggerProxyPtrMap m_proxies;
-  StringToDSandboxInfoPtrMap m_sandboxes;
+  typedef tbb::concurrent_hash_map<const StringData*, DebuggerProxyPtr,
+                                   StringDataHashCompare> ProxyMap;
+  ProxyMap m_proxyMap;
 
-  /**
-   * m_sandboxThreads stores threads by sandbox id. These threads were started
-   * without finding a matched DebuggerProxy. Newly attached DebuggerProxy
-   * can check this set to mark them with "debugger" flag on ThreadInfo's
-   * RequestInjectionData. This way, these threads will start to interrupt.
-   * The whole purpose of doing this is to make sure threads that don't have
-   * debugger attached will not keep checking whether a DebuggerProxy has been
-   * attached.
-   */
+  typedef tbb::concurrent_hash_map<const StringData*, DSandboxInfoPtr,
+                                   StringDataHashCompare> SandboxMap;
+  SandboxMap m_sandboxMap;
+
   typedef std::set<ThreadInfo*> ThreadInfoSet;
-  typedef std::map<int64, ThreadInfo*> ThreadInfoMap;
-  typedef std::map<std::string, ThreadInfoSet> StringToThreadInfoSet;
-  ThreadInfoMap m_threadInfos;
-  StringToThreadInfoSet m_sandboxThreads;
+  typedef tbb::concurrent_hash_map<const StringData*, ThreadInfoSet,
+                                   StringDataHashCompare> SandboxThreadInfoMap;
+  SandboxThreadInfoMap m_sandboxThreadInfoMap;
 
-  void flagDebugger(const std::string &id);
+  typedef tbb::concurrent_hash_map<int64, ThreadInfo*> ThreadInfoMap;
+  ThreadInfoMap m_threadInfos; // tid => ThreadInfo*
+
+  typedef tbb::concurrent_queue<DummySandbox*> DummySandboxQ;
+  DummySandboxQ m_cleanupDummySandboxQ;
+
   bool isThreadDebugging(int64 id);
-
-  void stop();
-
-  void addSandbox(const DSandboxInfo &sandbox);
+  void registerThread();
+  void updateSandbox(const DSandboxInfo &sandbox);
+  DSandboxInfoPtr getSandbox(const StringData* sid);
   void getSandboxes(DSandboxInfoPtrVec &sandboxes);
+  void registerSandbox(const DSandboxInfo &sandbox);
+  void unregisterSandbox(const StringData* sandboxId);
 
-  void addProxy(SmartPtr<Socket> socket, bool local);
+  void getSandboxThreads(const DSandboxInfo &sandbox,
+                         std::set<ThreadInfo*>& set);
+
+  void requestInterrupt(DebuggerProxyPtr proxy);
+  void setDebuggerFlag(const StringData* sandboxId, bool flag);
+
+  DebuggerProxyPtr createProxy(SmartPtr<Socket> socket, bool local);
   void removeProxy(DebuggerProxyPtr proxy);
+  DebuggerProxyPtr findProxy(const StringData* sandboxId);
+  int countConnectedProxy() { return m_proxyMap.size(); } ;
 
-  DebuggerProxyPtr findProxy(const std::string &id);
-  void switchSandbox(DebuggerProxyPtr proxy, const std::string &newId);
+  void updateProxySandbox(DebuggerProxyPtr proxy,
+                          const StringData* sandboxId);
+  bool switchSandboxImpl(DebuggerProxyPtr proxy,
+                         const StringData* newSid,
+                         bool force);
+  bool switchSandbox(DebuggerProxyPtr proxy, const std::string &newId,
+                     bool force);
+  void retireDummySandboxThread(DummySandbox* toRetire);
+  void cleanupDummySandboxThreads();
+};
+
+class DebuggerDummyEnv {
+public:
+  DebuggerDummyEnv();
+  ~DebuggerDummyEnv();
+};
+
+class EvalBreakControl {
+public:
+  EvalBreakControl(bool noBreak);
+  ~EvalBreakControl();
+private:
+  bool m_noBreakSave;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

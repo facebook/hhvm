@@ -18,7 +18,6 @@
 #include <runtime/ext/ext_array.h>
 #include <util/text_art.h>
 
-using namespace std;
 using namespace HPHP::Util::TextArt;
 
 namespace HPHP { namespace Eval {
@@ -46,9 +45,9 @@ void CmdExtension::list(DebuggerClient *client) {
   } else {
     // This is cheating, assuming server has same list of extensions.
     Array exts = Extension::GetLoadedExtensions();
-    vector<String> items;
+    vector<std::string> items;
     for (ArrayIter iter(exts); iter; ++iter) {
-      items.push_back(iter.second().toString());
+      items.push_back(iter.second().toString()->toCPPString());
     }
     client->addCompletion(items);
   }

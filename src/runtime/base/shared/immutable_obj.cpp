@@ -21,17 +21,20 @@
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/class_info.h>
 
+#include <util/logger.h>
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 ImmutableObj::ImmutableObj(ObjectData *obj) {
   // This function assumes the object and object/array down the tree have no
-  // internal refernece and does not implements serializable interface.
+  // internal reference and does not implements serializable interface.
   ASSERT(!obj->o_instanceof("Serializable"));
   m_cls = obj->o_getClassName()->copy(true);
   Array props;
-  ClassInfo::GetArray(obj, obj->o_getClassPropTable(), props, false);
+  ClassInfo::GetArray(obj, obj->o_getClassPropTable(), props,
+                      ClassInfo::GetArrayAll);
   if (props.empty()) {
     m_props = NULL;
     m_propCount = 0;
@@ -58,8 +61,11 @@ Object ImmutableObj::getObject() {
   try {
     obj = create_object_only(m_cls);
   } catch (ClassNotFoundException &e) {
-    ASSERT(false);
+    Logger::Error("ImmutableObj::getObject(): Cannot find class %s",
+                  m_cls->data());
+    return obj;
   }
+  obj.get()->clearNoDestruct();
   ArrayInit ai(m_propCount);
   for (int i = 0; i < m_propCount; i++) {
     ai.add(String(m_props[i].name->copy()),

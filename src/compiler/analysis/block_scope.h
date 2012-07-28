@@ -152,6 +152,17 @@ public:
     MarkProcessed
   };
 
+  class ScopeCompare {
+  public:
+    bool operator()(const BlockScopeRawPtr &p1,
+                    const BlockScopeRawPtr &p2) const {
+      return cmp(p1,p2) < 0;
+    }
+    int cmp(const BlockScopeRawPtr &p1, const BlockScopeRawPtr &p2) const;
+  };
+  typedef std::set<BlockScopeRawPtr, ScopeCompare> BlockScopeSet;
+  friend class ScopeCompare;
+
   BlockScope(const std::string &name, const std::string &docComment,
              StatementPtr stmt, KindOf kind);
   virtual ~BlockScope() {}
@@ -171,7 +182,9 @@ public:
   }
   FileScopeRawPtr getContainingFile();
   AnalysisResultRawPtr getContainingProgram();
-  ClassScopePtr findExactClass(const std::string &className);
+
+  ClassScopeRawPtr findExactClass(ClassScopeRawPtr cls);
+  FunctionScopeRawPtr findExactFunction(FunctionScopeRawPtr func);
 
   bool hasUser(BlockScopeRawPtr user, int useFlags) const;
   void addUse(BlockScopeRawPtr user, int useFlags);
@@ -201,12 +214,13 @@ public:
   void inferTypes(AnalysisResultPtr ar);
 
   /**
-   * Generate constant and variable declarations.
+   * Code gen
    */
+  virtual void outputCPPDef(CodeGenerator &cg) {}
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  virtual bool inPseudoMain() {
+  virtual bool inPseudoMain() const {
     return false;
   }
 

@@ -29,6 +29,7 @@ public:
 
   virtual bool help(DebuggerClient *client);
   virtual bool onClient(DebuggerClient *client);
+  virtual void setClientOutput(DebuggerClient *client);
 private:
   void listVars(DebuggerClient *client);
 };

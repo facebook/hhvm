@@ -160,16 +160,8 @@ if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED
 		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
 	FIND_LIBRARY(JEMALLOC_LIB jemalloc)
 	if (JEMALLOC_LIB)
-		CHECK_LIBRARY_EXISTS(jemalloc mallctl "" HAVE_JEMALLOC_FUN)
-		if (HAVE_JEMALLOC_FUN)
-			message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
-			set(JEMALLOC_ENABLED 1)
-		else()
-			message(STATUS "Found jemalloc at ${JEMALLOC_LIB}, but unable to find its API "
-			               "(maybe the library was configured with a non-empty function prefix?)")
-		endif()
-	else()
-		message(STATUS "Can't find jemalloc")
+		message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
+		set(JEMALLOC_ENABLED 1)
 	endif()
 endif()
 
@@ -247,6 +239,12 @@ include_directories(${READLINE_INCLUDE_DIR})
 find_package(CClient REQUIRED)
 include_directories(${CCLIENT_INCLUDE_PATH})
 
+find_package(LibDwarf REQUIRED)
+include_directories(${LIBDWARF_INCLUDE_DIRS})
+
+find_package(LibElf REQUIRED)
+include_directories(${LIBELF_INCLUDE_DIRS})
+
 CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/utf8.h" U8T_DECOMPOSE RECENT_CCLIENT)
 if (NOT RECENT_CCLIENT)
 	unset(RECENT_CCLIENT CACHE)
@@ -304,6 +302,9 @@ endif()
 
 if (FREEBSD)
 	FIND_LIBRARY (EXECINFO_LIB execinfo)
+	if (NOT EXECINFO_LIB)
+		message(FATAL_ERROR "You need to install libexecinfo")
+	endif()
 endif()
 
 #find_package(BISON REQUIRED)
@@ -397,5 +398,8 @@ endif()
 	if (CCLIENT_NEEDS_PAM)
 		target_link_libraries(${target} ${PAM_LIBRARY})
 	endif()
+
+        target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
+        target_link_libraries(${target} ${LIBELF_LIBRARIES})
 
 endmacro()

@@ -24,13 +24,21 @@
 #include <runtime/base/zend/zend_math.h>
 #include <util/async_func.h>
 #include <util/alloc.h>
+#include <util/hardware_counter.h>
 #include <runtime/ext/ext_icu.h>
-#include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/base/intercept.h>
-#include <runtime/base/array/arg_array.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+InitFiniNode *extra_init, *extra_fini;
+
+InitFiniNode::InitFiniNode(void(*f)(), bool init) {
+  InitFiniNode *&ifn = init ? extra_init : extra_fini;
+  func = f;
+  next = ifn;
+  ifn = this;
+}
 
 void init_thread_locals(void *arg /* = NULL */) {
   ObjectData::GetMaxId();
@@ -44,14 +52,15 @@ void init_thread_locals(void *arg /* = NULL */) {
   Sweepable::GetSweepData();
   MemoryManager::TheMemoryManager().getCheck();
   InitAllocatorThreadLocal();
+  RefData::AllocatorType::getCheck();
   get_global_variables_check();
   ThreadInfo::s_threadInfo.getCheck();
   g_context.getCheck();
   icu_get_checks();
   s_hasRenamedFunction.getCheck();
-  if (has_eval_support) {
-    Eval::VariableEnvironment::InitTempStack();
-    ArgArray::s_stack.getCheck();
+  Util::HardwareCounter::s_counter.getCheck();
+  for (InitFiniNode *in = extra_init; in; in = in->next) {
+    in->func();
   }
 }
 

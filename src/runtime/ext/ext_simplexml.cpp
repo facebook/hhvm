@@ -30,7 +30,7 @@ IMPLEMENT_DEFAULT_EXTENSION(SimpleXML);
 // it go out of scope.
 class XmlDocWrapper : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(XmlDocWrapper)
+  DECLARE_OBJECT_ALLOCATION_NO_SWEEP(XmlDocWrapper)
 
   static StaticString s_class_name;
   // overriding ResourceData
@@ -39,16 +39,16 @@ public:
   XmlDocWrapper(xmlDocPtr doc) : m_doc(doc) {
   }
 
-  ~XmlDocWrapper() {
+  void sweep() {
     if (m_doc) {
       xmlFreeDoc(m_doc);
     }
   }
-
+  ~XmlDocWrapper() { XmlDocWrapper::sweep(); }
 private:
   xmlDocPtr m_doc;
 };
-IMPLEMENT_OBJECT_ALLOCATION(XmlDocWrapper)
+IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(XmlDocWrapper)
 
 StaticString XmlDocWrapper::s_class_name("xmlDoc");
 
@@ -71,9 +71,9 @@ static inline bool match_ns(xmlNodePtr node, CStrRef ns, bool is_prefix) {
 
 static String node_list_to_string(xmlDocPtr doc, xmlNodePtr list) {
   xmlChar *tmp = xmlNodeListGetString(doc, list, 1);
-  char *res = strdup((char*)tmp);
+  String res((char*) tmp, CopyString);
   xmlFree(tmp);
-  return String((const char *)res, AttachString);
+  return res;
 }
 
 static Array collect_attributes(xmlNodePtr node, CStrRef ns, bool is_prefix) {
@@ -268,7 +268,8 @@ c_SimpleXMLElement::c_SimpleXMLElement(const ObjectStaticCallbacks *cb) :
     ExtObjectDataFlags<ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
-                       ObjectData::UseUnset>(cb), m_node(NULL), m_is_text(false), m_free_text(false),
+                       ObjectData::UseUnset>(cb),
+      m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
   setAttribute(HasLval);
@@ -276,6 +277,10 @@ c_SimpleXMLElement::c_SimpleXMLElement(const ObjectStaticCallbacks *cb) :
 }
 
 c_SimpleXMLElement::~c_SimpleXMLElement() {
+  c_SimpleXMLElement::sweep();
+}
+
+void c_SimpleXMLElement::sweep() {
   if (m_xpath) {
     xmlXPathFreeContext(m_xpath);
   }
@@ -796,7 +801,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
                   "(duplicate subnodes or attr detected)");
   } else if (m_is_attribute) {
     if (name.isInteger()) {
-      raise_warning("Cannot change attribute number %lld when only %d "
+      raise_warning("Cannot change attribute number %lld when only %ld "
                     "attributes exist", name.toInt64(),
                     m_attributes.toArray().size());
     } else {
@@ -827,7 +832,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 }
 
 bool c_SimpleXMLElement::o_toBoolean() const {
-  return m_node != NULL || o_properties.size();
+  return m_node != NULL || getProperties().size();
 }
 
 int64 c_SimpleXMLElement::o_toInt64() const {
@@ -981,6 +986,10 @@ c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(
 }
 
 c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
+  c_SimpleXMLElementIterator::sweep();
+}
+
+void c_SimpleXMLElementIterator::sweep() {
   delete m_iter1;
   delete m_iter2;
 }
@@ -1199,12 +1208,12 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
 
 static Object create_libxmlerror(xmlError &error) {
   Object ret(NEWOBJ(c_LibXMLError)());
-  ret->o_set("level",   error.level);
-  ret->o_set("code",    error.code);
-  ret->o_set("column",  error.int2);
-  ret->o_set("message", String(error.message, CopyString));
-  ret->o_set("file",    String(error.file, CopyString));
-  ret->o_set("line",    error.line);
+  ret->o_setPublic("level",   error.level);
+  ret->o_setPublic("code",    error.code);
+  ret->o_setPublic("column",  error.int2);
+  ret->o_setPublic("message", String(error.message, CopyString));
+  ret->o_setPublic("file",    String(error.file, CopyString));
+  ret->o_setPublic("line",    error.line);
   return ret;
 }
 

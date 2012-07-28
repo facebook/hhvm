@@ -20,8 +20,6 @@
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/analysis_result.h>
 
-using namespace std;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestParserStmt::RunTests(const std::string &which) {
@@ -153,12 +151,6 @@ bool TestParserStmt::TestClassVariable() {
   V("<?php class Test { static $data;}",
     "class Test {\npublic static $data;\n}\n");
 
-  V("<?php class Test { abstract $data;}",
-    "class Test {\npublic abstract $data;\n}\n");
-
-  V("<?php class Test { final $data;}",
-    "class Test {\npublic final $data;\n}\n");
-
   V("<?php class Test { private static $data;}",
     "class Test {\nprivate static $data;\n}\n");
 
@@ -195,8 +187,8 @@ bool TestParserStmt::TestClassConstant() {
 }
 
 bool TestParserStmt::TestMethodStatement() {
-  V("<?php class A {abstract function test();}",
-    "class A {\npublic abstract function test();\n}\n");
+  V("<?php abstract class A {abstract function test();}",
+    "abstract class A {\npublic abstract function test();\n}\n");
   V("<?php class A {function test() {}}",
     "class A {\npublic function test() {\n}\n}\n");
   V("<?php class A {function test() {return 0;}}",
@@ -600,10 +592,10 @@ bool TestParserStmt::TestForEachStatement() {
   V("<?php foreach ($a + $b as $b => $c) : $a = 1; $b = 2; endforeach;",
     "foreach ($a + $b as $b => $c) {\n$a = 1;\n$b = 2;\n}\n");
 
-  V("<?php foreach ($a as &$name => &$b) ;",
+  V("<?php foreach ($a as $name => &$b) ;",
     "foreach ($a as $name => &$b) {}\n");
 
-  V("<?php foreach ($a as &$name => $b) ;",
+  V("<?php foreach ($a as $name => $b) ;",
     "foreach ($a as $name => $b) {}\n");
 
   return true;

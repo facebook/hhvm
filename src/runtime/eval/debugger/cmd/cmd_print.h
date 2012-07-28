@@ -29,19 +29,24 @@ public:
   static std::string FormatResult(const char *format, CVarRef ret);
 
 public:
-  CmdPrint() : DebuggerCommand(KindOfPrint), m_bypassAccessCheck(false) {}
+  CmdPrint() : DebuggerCommand(KindOfPrint), m_bypassAccessCheck(false),
+               m_isForWatch(false), m_noBreak(false) {}
 
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);
+  virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServerVM(DebuggerProxy *proxy);
 
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
-  void processWatch(DebuggerClient *client, const char *format,
+  Variant processWatch(DebuggerClient *client, const char *format,
                     const std::string &php);
+
+  virtual void handleReply(DebuggerClient *client);
 
 private:
   Variant m_ret;
@@ -49,6 +54,8 @@ private:
   int m_frame;
   bool m_bypassAccessCheck;
   int m_printLevel;
+  bool m_isForWatch;
+  bool m_noBreak;
 
   bool processList(DebuggerClient *client);
   bool processClear(DebuggerClient *client);

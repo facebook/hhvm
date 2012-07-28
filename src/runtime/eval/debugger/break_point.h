@@ -36,24 +36,24 @@ enum InterruptType {
 
 class InterruptSite {
 public:
-  InterruptSite(FrameInjection *frame, CVarRef e = null_variant,
-                int char0 = 0, int line1 = 0, int char1 = 0)
-      : m_frame(frame), m_exception(e), m_function(NULL), m_file_strlen(-1),
-        m_jumping(false), m_char0(char0), m_line1(line1), m_char1(char1) {
-    ASSERT(m_frame);
-  }
+  InterruptSite(CVarRef e = null_variant, const char *cls = NULL,
+                const char *function = NULL, StringData *file = NULL,
+                int line0 = 0, int char0 = 0, int line1 = 0, int char1 = 0)
+    : m_exception(e), m_class(cls), m_function(function), m_file(file),
+      m_line0(line0), m_char0(char0), m_line1(line1), m_char1(char1),
+      m_jumping(false) { }
 
-  FrameInjection *getFrame() const { return m_frame;}
-  const char *getFile() const;
-  int32 getLine0() const { return m_frame->getLine();}
+  virtual const char *getFile() const = 0;
+  virtual const char *getClass() const = 0;
+  virtual const char *getFunction() const = 0;
+  virtual const char *getNamespace() const { return NULL; }
+  int getFileLen() const;
+
+  int32 getLine0() const { return m_line0;}
   int32 getChar0() const { return m_char0;}
   int32 getLine1() const { return m_line1;}
   int32 getChar1() const { return m_char1;}
   CVarRef getException() { return m_exception;}
-  const char *getNamespace() const { return NULL;}
-  const char *getClass() const { return m_frame->getClassName();}
-  const char *getFunction() const;
-  int getFileLen() const;
 
   std::string &url() const { return m_url;}
   std::string desc() const;
@@ -61,23 +61,70 @@ public:
   bool isJumping() const { return m_jumping;}
   void setJumping() { m_jumping = true;}
 
-private:
-  FrameInjection *m_frame;
+protected:
   Variant m_exception;
 
   // cached
-  mutable String m_file;
+  mutable const char *m_class;
   mutable const char *m_function;
-  mutable int m_file_strlen;
+  mutable String m_file;
   mutable std::string m_url;
 
-  // jump instruction
-  bool m_jumping;
-
-  // additional source location only available from hphpi
+  int32 m_line0;
   int32 m_char0;
   int32 m_line1;
   int32 m_char1;
+
+  // jump instruction
+  bool m_jumping;
+};
+
+class InterruptSiteFI : public InterruptSite {
+public:
+  InterruptSiteFI(FrameInjection *frame, CVarRef e = null_variant,
+                  int char0 = 0, int line1 = 0, int char1 = 0)
+      : InterruptSite(e) {
+    m_frame = frame;
+    ASSERT(m_frame);
+    m_line0 = m_frame->getLine();
+    m_char0 = char0;
+    m_line1 = line1;
+    m_char1 = char1;
+  }
+
+  FrameInjection *getFrame() const { return m_frame;}
+
+  virtual const char *getFile() const;
+  virtual const char *getClass() const;
+  virtual const char *getFunction() const;
+
+private:
+  FrameInjection *m_frame;
+};
+
+class InterruptSiteVM : public InterruptSite {
+public:
+  InterruptSiteVM(bool hardBreakPoint = false, CVarRef e = null_variant);
+  virtual const char *getFile() const;
+  virtual const char *getClass() const;
+  virtual const char *getFunction() const;
+  const VM::SourceLoc *getSourceLoc() const {
+    return &m_sourceLoc;
+  }
+  const VM::OffsetRangeVec& getCurOffsetRange() const {
+    return m_offsetRangeVec;
+  }
+  const VM::Unit* getUnit() const {
+    return m_unit;
+  }
+  bool valid() const { return m_valid; }
+  bool funcEntry() const { return m_funcEntry; }
+private:
+  VM::SourceLoc m_sourceLoc;
+  VM::OffsetRangeVec m_offsetRangeVec;
+  VM::Unit* m_unit;
+  bool m_valid;
+  bool m_funcEntry;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,6 +144,8 @@ public:
   static const char *GetInterruptName(InterruptType interrupt);
   static bool MatchFile(const char *haystack, int haystack_len,
                         const std::string &needle);
+  static bool MatchFile(const std::string& file, const std::string& fullPath,
+                        const std::string& relPath);
 
 public:
   BreakPointInfo() : m_index(0) {} // for thrift
@@ -109,6 +158,7 @@ public:
 
   void setClause(const std::string &clause, bool check);
   void toggle();
+  void setState(State state) { m_state = state; }
 
   bool valid();
   bool same(BreakPointInfoPtr bpi);
@@ -147,6 +197,8 @@ public:
   std::string getNamespace() const;
   std::string getClass() const;
   std::string getFunction() const;
+  std::string getFuncName() const;
+  std::string getExceptionClass() const { return m_class; }
 
   // URL
   std::string m_url;

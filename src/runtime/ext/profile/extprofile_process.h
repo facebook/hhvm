@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int x_pcntl_alarm(int seconds) {
+inline int64 x_pcntl_alarm(int seconds) {
   FUNCTION_INJECTION_BUILTIN(pcntl_alarm);
   return f_pcntl_alarm(seconds);
 }
@@ -35,7 +35,7 @@ inline void x_pcntl_exec(CStrRef path, CArrRef args = null_array, CArrRef envs =
   f_pcntl_exec(path, args, envs);
 }
 
-inline int x_pcntl_fork() {
+inline int64 x_pcntl_fork() {
   FUNCTION_INJECTION_BUILTIN(pcntl_fork);
   return f_pcntl_fork();
 }
@@ -55,17 +55,17 @@ inline bool x_pcntl_signal(int signo, CVarRef handler, bool restart_syscalls = t
   return f_pcntl_signal(signo, handler, restart_syscalls);
 }
 
-inline int x_pcntl_wait(VRefParam status, int options = 0) {
+inline int64 x_pcntl_wait(VRefParam status, int options = 0) {
   FUNCTION_INJECTION_BUILTIN(pcntl_wait);
   return f_pcntl_wait(status, options);
 }
 
-inline int x_pcntl_waitpid(int pid, VRefParam status, int options = 0) {
+inline int64 x_pcntl_waitpid(int pid, VRefParam status, int options = 0) {
   FUNCTION_INJECTION_BUILTIN(pcntl_waitpid);
   return f_pcntl_waitpid(pid, status, options);
 }
 
-inline int x_pcntl_wexitstatus(int status) {
+inline int64 x_pcntl_wexitstatus(int status) {
   FUNCTION_INJECTION_BUILTIN(pcntl_wexitstatus);
   return f_pcntl_wexitstatus(status);
 }
@@ -85,12 +85,12 @@ inline bool x_pcntl_wifstopped(int status) {
   return f_pcntl_wifstopped(status);
 }
 
-inline int x_pcntl_wstopsig(int status) {
+inline int64 x_pcntl_wstopsig(int status) {
   FUNCTION_INJECTION_BUILTIN(pcntl_wstopsig);
   return f_pcntl_wstopsig(status);
 }
 
-inline int x_pcntl_wtermsig(int status) {
+inline int64 x_pcntl_wtermsig(int status) {
   FUNCTION_INJECTION_BUILTIN(pcntl_wtermsig);
   return f_pcntl_wtermsig(status);
 }
@@ -130,7 +130,7 @@ inline bool x_proc_terminate(CObjRef process, int signal = 0) {
   return f_proc_terminate(process, signal);
 }
 
-inline int x_proc_close(CObjRef process) {
+inline int64 x_proc_close(CObjRef process) {
   FUNCTION_INJECTION_BUILTIN(proc_close);
   return f_proc_close(process);
 }

@@ -21,8 +21,6 @@
 #include <compiler/code_generator.h>
 #include <compiler/option.h>
 
-using namespace std;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 TestCodeError::TestCodeError() {
@@ -41,6 +39,10 @@ bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
                            const char *file, int line, bool exists) {
   Compiler::ClearErrors();
 
+  Type::ResetTypeHintTypes();
+  Type::InitTypeHintMap();
+  BuiltinSymbols::LoadSuperGlobals();
+
   AnalysisResultPtr ar(new AnalysisResult());
   // for TestPHPIncludeFileNotInLib
   Compiler::Parser::ParseString("<?php ", ar, "f2");
@@ -50,9 +52,9 @@ bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
   ar->inferTypes();
   ar->analyzeProgramFinal();
   if (Compiler::HasError(type) != exists) {
-    ostringstream code;
+    std::ostringstream code;
     ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, NULL);
-    ostringstream error;
+    std::ostringstream error;
     JSON::CodeError::OutputStream out(error, ar);
     Compiler::SaveErrors(out);
     printf("%s:%d: parsing %s\ncode error missing\n%s\n", file, line, src,
@@ -110,6 +112,19 @@ bool TestCodeError::TestUnknownClass() {
   VE(UnknownClass, "<?php $a = new T();");
 
   VEN(UnknownClass, "<?php class A { function foo(self $a) {}}");
+  VEN(UnknownClass,
+      "<?php "
+      "trait A {"
+      "  function foo($f) {"
+      "    echo self::FOO+parent::FOO;"
+      "    echo self::$f()+parent::$f();"
+      "    var_dump(new self, new parent);"
+      "    echo self::bar()+parent::bar();"
+      "    echo self::$foo+parent::$foo;"
+      "    try {} catch (self $p) {}"
+      "    try {} catch (parent $p) {}"
+      "  }"
+      "}");
   return true;
 }
 
@@ -174,6 +189,19 @@ bool TestCodeError::TestDeclaredVariableTwice() {
 bool TestCodeError::TestDeclaredConstantTwice() {
   VE(DeclaredConstantTwice, "<?php define('t', 1); define('t', 2);");
   VE(DeclaredConstantTwice, "<?php class T { const A = 1; const A = 1;}");
+  return true;
+}
+
+bool TestCodeError::TestDeclaredMethodTwice() {
+  VE(DeclaredMethodTwice, "<?php class T { function foo(){} function foo(){}}");
+  return true;
+}
+
+bool TestCodeError::TestDeclaredAttributeTwice() {
+  WithOpt w0(Option::EnableHipHopSyntax);
+
+  VE(DeclaredAttributeTwice, "<?php << Foo, Foo >> class C {}");
+  VE(DeclaredAttributeTwice, "<?php << Foo, Foo >> function f() {}");
   return true;
 }
 
@@ -344,21 +372,6 @@ bool TestCodeError::TestInvalidOverride() {
   return true;
 }
 
-bool TestCodeError::TestReassignThis() {
-  VE(ReassignThis,
-     "<?php "
-     "class Foo {"
-     "  function Bar() {"
-     "    $__this = $this;"
-     "    $this = null;"
-     "    debug_backtrace();"
-     "    $this = $__this;"
-     "  }"
-     "}");
-
-  return true;
-}
-
 bool TestCodeError::TestMissingAbstractMethodImpl() {
   VE(MissingAbstractMethodImpl,
      "<?php "
@@ -518,12 +531,39 @@ bool TestCodeError::TestGotoInvalidBlock() {
   return true;
 }
 
-bool TestCodeError::TestAbstractProperty() {
-  VE(AbstractProperty,
+bool TestCodeError::TestInvalidAttribute() {
+  VE(InvalidAttribute,
      "<?php abstract class F { abstract $f; }");
 
-  VE(AbstractProperty,
+  VE(InvalidAttribute,
      "<?php class F { abstract $f; }");
+
+  VE(InvalidAttribute,
+     "<?php final class F { final $f; }");
+
+  VE(InvalidAttribute,
+     "<?php class F { final $f; }");
+
+  VE(InvalidAttribute,
+     "<?php interface I { final function foo(); }");
+
+  VE(InvalidAttribute,
+     "<?php interface I { private function foo(); }");
+
+  VE(InvalidAttribute,
+     "<?php interface I { protected function foo(); }");
+
+  VE(InvalidAttribute,
+     "<?php interface I { abstract function foo(); }");
+
+  VE(InvalidAttribute,
+     "<?php class a { static function a() {} }");
+
+  VE(InvalidAttribute,
+     "<?php class a { static function __construct() {} }");
+
+  VEN(InvalidAttribute,
+      "<?php class a { function __construct() {} static function a() {} }");
 
   return true;
 }
@@ -697,9 +737,27 @@ bool TestCodeError::TestRedeclaredTrait() {
 bool TestCodeError::TestInvalidInstantiation() {
   VE(InvalidInstantiation, "<?php interface T {}; $a = new T();");
   VE(InvalidInstantiation,
-     "<?php abstract class T { function foo(); };"
+     "<?php abstract class T { abstract function foo(); };"
      "$a = new T();");
 
   VEN(InvalidInstantiation, "<?php class T {}; $a = new T();");
+  return true;
+}
+
+bool TestCodeError::TestInvalidYield() {
+  WithOpt w0(Option::EnableHipHopSyntax);
+
+  VE(InvalidYield, "<?php function f() { yield 1; return 2; }");
+  VE(InvalidYield, "<?php yield 1; }");
+  VE(InvalidYield, "<?php class X { function __get() { yield 1; } }");
+  VE(InvalidYield, "<?php class X { function X() { yield 1; } }");
+  return true;
+}
+
+bool TestCodeError::TestBadDefaultValueType() {
+  WithOpt w0(Option::EnableHipHopSyntax);
+
+  VE(BadDefaultValueType, "<?php class C { function f(int $i1 = array()) {} }");
+  VE(BadDefaultValueType, "<?php function f(int $i1 = array()) {}");
   return true;
 }

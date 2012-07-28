@@ -27,8 +27,6 @@
 #include <compiler/expression/constant_expression.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -167,18 +165,11 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
-  ClassScopePtr cls = resolveClass();
+  ClassScopePtr cls = resolveClassWithChecks();
   if (!cls) {
-    if (isRedeclared()) {
-      getScope()->getVariables()->
-        setAttribute(VariableTable::NeedGlobalPointer);
-    } else if (getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::UnknownClass, self);
-    }
     return Type::Variant;
   }
 
-  ASSERT(cls);
   ClassScopePtr defClass = cls;
   ConstructPtr decl =
     cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
@@ -269,16 +260,18 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
                 cg.getGlobals(ar));
       if (cg.isFileOrClassHeader()) {
         if (getClassScope()) {
-          getClassScope()->addUsedClassFullHeader(trueClassName);
+          getClassScope()->addUsedClassFullHeader(ClassScopeRawPtr(cls));
         } else {
-          getFileScope()->addUsedClassFullHeader(trueClassName);
+          getFileScope()->addUsedClassFullHeader(ClassScopeRawPtr(cls));
         }
       }
     } else if (cg.isFileOrClassHeader()) {
       if (getClassScope()) {
-        getClassScope()->addUsedClassConstHeader(trueClassName, m_varName);
+        getClassScope()->addUsedClassConstHeader(ClassScopeRawPtr(cls),
+                                                 m_varName);
       } else {
-        getFileScope()->addUsedClassConstHeader(trueClassName, m_varName);
+        getFileScope()->addUsedClassConstHeader(ClassScopeRawPtr(cls),
+                                                m_varName);
       }
     }
     cg_printf("%s%s%s%s",

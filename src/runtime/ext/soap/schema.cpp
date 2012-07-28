@@ -18,9 +18,6 @@
 #include <runtime/ext/soap/sdl.h>
 #include <runtime/ext/soap/soap.h>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

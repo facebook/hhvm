@@ -19,14 +19,17 @@
 #include <runtime/ext/ext_string.h>
 #include <runtime/eval/debugger/cmd/cmd_user.h>
 #include <runtime/eval/debugger/cmd/cmd_interrupt.h>
+#include <runtime/vm/debugger_hook.h>
+#include <runtime/vm/translator/translator-inline.h>
 #include <tbb/concurrent_hash_map.h>
 #include <util/logger.h>
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using namespace Eval;
-using namespace boost;
+using HPHP::VM::Transl::CallerFrame;
 
 const int64 q_DebuggerClientCmdUser$$AUTO_COMPLETE_FILENAMES =
   DebuggerClient::AutoCompleteFileNames;
@@ -59,42 +62,103 @@ Array f_hphpd_get_user_commands() {
   return CmdUser::GetCommands();
 }
 
+static const Trace::Module TRACEMOD = Trace::bcinterp;
+
 void f_hphpd_break(bool condition /* = true */) {
-  if (RuntimeOption::EnableDebugger && condition) {
+  TRACE(5, "in f_hphpd_break()\n");
+  if (!RuntimeOption::EnableDebugger || !condition ||
+      g_vmContext->m_dbgNoBreak) {
+    TRACE(5, "bail !%d || !%d || %d\n", RuntimeOption::EnableDebugger,
+          condition, g_vmContext->m_dbgNoBreak);
+    return;
+  }
+  if (hhvm) {
+    CallerFrame cf;
+    Debugger::InterruptVMHook(HardBreakPoint);
+    if (RuntimeOption::EvalJit && !g_vmContext->m_interpreting &&
+        DEBUGGER_FORCE_INTR) {
+      TRACE(5, "switch mode\n");
+      throw VMSwitchModeException(true);
+    }
+  } else {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
     FrameInjection *frame = FrameInjection::GetStackFrame(1);
     if (frame && ti->m_reqInjectionData.debugger) {
-      Eval::InterruptSite site(frame);
+      Eval::InterruptSiteFI site(frame);
       Eval::Debugger::InterruptHard(site);
     }
   }
+  TRACE(5, "out f_hphpd_break()\n");
 }
 
-// TODO: cleanup, maybe in Extension::ShutdownModules
-typedef tbb::concurrent_hash_map<StringData*, DebuggerClient*,
-                                 StringDataHashICompare> DbgCltMap;
+typedef tbb::concurrent_hash_map<std::string, DebuggerClient*> DbgCltMap;
 static DbgCltMap s_dbgCltMap;
 
-// FIXME: For now it assumes only one active thread from UI can call this
-// function and use the client. If that assumption doesn't hold, we need to
-// figure out someway to deal with concurrent accesses.
-
+// if the DebuggerClient with the same name is already in use, return null
 Variant f_hphpd_get_client(CStrRef name /* = null */) {
+  if (name.empty()) {
+    return null;
+  }
   DebuggerClient *client = NULL;
-  StringData* sd = new StringData(name.data(), name.size(), CopyString);
+  std::string nameStr = name->toCPPString();
   {
     DbgCltMap::accessor acc;
-    if (s_dbgCltMap.insert(acc, sd)) {
-      client = new DebuggerClient();
+    if (s_dbgCltMap.insert(acc, nameStr)) {
+      client = new DebuggerClient(nameStr);
       acc->second = client;
     } else {
-      free(sd);
       client = acc->second;
+    }
+    if (!client->apiGrab()) {
+      // already grabbed by another request
+      return null;
     }
   }
   p_DebuggerClient clt(NEWOBJ(c_DebuggerClient));
   clt->m_client = client;
   return clt;
+}
+
+Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
+  DebuggerClient *client = NULL;
+  std::string nameStr = name->toCPPString();
+  {
+    DbgCltMap::const_accessor acc;
+    if (!s_dbgCltMap.find(acc, nameStr)) {
+      if (op.equal("getstate")) {
+        return q_DebuggerClient$$STATE_INVALID;
+      } else {
+        raise_warning("client %s does not exist", name.data());
+        return null;
+      }
+    }
+    client = acc->second;
+  }
+  if (op.equal("interrupt")) {
+    if (client->getClientState() < DebuggerClient::StateReadyForCommand) {
+      raise_warning("client is not initialized");
+      return null;
+    }
+    if (client->getClientState() != DebuggerClient::StateBusy) {
+      raise_warning("client is not in a busy state");
+      return null;
+    }
+    client->onSignal(SIGINT);
+    return null;
+  } else if (op.equal("getstate")) {
+    return client->getClientState();
+  } else if (op.equal("reset")) {
+    // To handle the case when client is in a bad state, e.g. the grabbing
+    // request encountered error and did not get chance to destruct or call
+    // sweep. It will remove the client from the map. Here we'd rather take
+    // the risk of leaking the client than the risk of chasing dangling
+    // pointers.
+    return s_dbgCltMap.erase(nameStr);
+  }
+
+  raise_warning("unknown op %s", op.data());
+
+  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -250,7 +314,7 @@ bool c_DebuggerClientCmdUser::t_arg(int index, CStrRef str) {
   return m_client->arg(index + 1, str.data());
 }
 
-int c_DebuggerClientCmdUser::t_argcount() {
+int64 c_DebuggerClientCmdUser::t_argcount() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::argcount);
   return m_client->argCount() - 1;
 }
@@ -309,7 +373,7 @@ Variant c_DebuggerClientCmdUser::t_getstacktrace() {
   return m_client->getStackTrace();
 }
 
-int c_DebuggerClientCmdUser::t_getframe() {
+int64 c_DebuggerClientCmdUser::t_getframe() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::getframe);
   return m_client->getFrame();
 }
@@ -325,9 +389,9 @@ void c_DebuggerClientCmdUser::t_addcompletion(CVarRef list) {
     m_client->addCompletion((DebuggerClient::AutoComplete)list.toInt64());
   } else {
     Array arr = list.toArray(); // handles string, array and iterators
-    std::vector<String> items;
+    std::vector<std::string> items;
     for (ArrayIter iter(arr); iter; ++iter) {
-      items.push_back(iter.second().toString());
+      items.push_back(iter.second().toString()->toCPPString());
     }
     m_client->addCompletion(items);
   }
@@ -355,6 +419,7 @@ c_DebuggerClient::c_DebuggerClient(const ObjectStaticCallbacks *cb) : ExtObjectD
 }
 
 c_DebuggerClient::~c_DebuggerClient() {
+  sweep();
 }
 
 void c_DebuggerClient::t___construct() {
@@ -387,28 +452,28 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
   ops.apiMode = true;
 
   Array opsArr = options.toArray();
-  if (opsArr.exists("configFName")) {
-    ops.configFName = opsArr.rvalAtRef("configFName").toString().data();
+  if (opsArr.exists("user")) {
+    ops.user = opsArr.rvalAtRef("user").toString().data();
   } else {
-    raise_warning("must specify config file name (configFName) in options");
+    raise_warning("must specify user in options");
     return false;
   }
 
-  FILE *f = fopen(ops.configFName.c_str(), "r");
-  if (!f) {
-    raise_warning("cannot access config file %s", ops.configFName.c_str());
-    return false;
+  if (opsArr.exists("configFName")) {
+    ops.configFName = opsArr.rvalAtRef("configFName").toString().data();
+    FILE *f = fopen(ops.configFName.c_str(), "r");
+    if (!f) {
+      raise_warning("cannot access config file %s", ops.configFName.c_str());
+      return false;
+    }
+    fclose(f);
   }
-  fclose(f);
 
   if (opsArr.exists("host")) {
     ops.host = opsArr.rvalAtRef("host").toString().data();
   }
   if (opsArr.exists("port")) {
-    ops.port = opsArr.rvalAtRef("configFName").toInt32();
-  }
-  if (opsArr.exists("user")) {
-    ops.user = opsArr.rvalAtRef("user").toString().data();
+    ops.port = opsArr.rvalAtRef("port").toInt32();
   }
   if (opsArr.exists("sandbox")) {
     ops.sandbox = opsArr.rvalAtRef("sandbox").toString().data();
@@ -478,8 +543,27 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
     return null;
   }
 
-  // TODO: special handling some command,
-  // e.g. multi-line input("<?php"), macro, etc.
+  static const char *s_allowedCmds[] = {
+    "break", "continue", "down", "exception", "frame", "global",
+    "help", "info", "konstant", "next", "out", "print", "quit", "step",
+    "up", "variable", "where", "bt", "set", "inst", "=", "@", NULL
+  };
+
+  bool allowed = false;
+  for (int i = 0; ; i++) {
+    const char *cmd = s_allowedCmds[i];
+    if (cmd == NULL) {
+      break;
+    }
+    if (cmdName.same(cmd)) {
+      allowed = true;
+      break;
+    }
+  }
+  if (!allowed) {
+    raise_warning("unsupported command %s", cmdName.toString().data());
+    return null;
+  }
 
   m_client->setCommand(cmdName.toString().data());
   StringVec *clientArgs = m_client->args();
@@ -500,42 +584,42 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
     m_client->setTakingInterrupt();
     m_client->setClientState(DebuggerClient::StateBusy);
     DebuggerCommandPtr cmd = m_client->waitForNextInterrupt();
-    if (!cmd || !cmd->is(DebuggerCommand::KindOfInterrupt)) {
-      raise_warning("not getting an interrupt");
-    } else {
+    if (!cmd) {
+      raise_warning("not getting a command");
+    } else if (cmd->is(DebuggerCommand::KindOfInterrupt)) {
       CmdInterruptPtr cmdInterrupt = dynamic_pointer_cast<CmdInterrupt>(cmd);
-      cmdInterrupt->onClient(m_client);
-      Logger::Info("debugger client ready for command");
+      cmdInterrupt->onClientD(m_client);
+    } else {
+      // Previous pending commands
+      cmd->handleReply(m_client);
+      cmd->setClientOutput(m_client);
     }
+    Logger::Info("debugger client ready for command");
   } catch (DebuggerClientExitException &e) {
-    raise_warning("DebuggerClientExitException");
-    return null;
+    const std::string& nameStr = m_client->getNameApi();
+    Logger::Info("client %s disconnected", nameStr.c_str());
+    s_dbgCltMap.erase(nameStr);
+    delete m_client;
+    m_client = NULL;
+    return true;
   } catch (DebuggerProtocolException &e) {
     raise_warning("DebuggerProtocolException");
     return null;
   }
 
-  return m_client->getPrintString();
-}
-
-Variant c_DebuggerClient::t_interrupt() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::interrupt);
-  if (!m_client ||
-      m_client->getClientState() < DebuggerClient::StateReadyForCommand) {
-    raise_warning("client is not initialized");
-    return false;
-  }
-  if (m_client->getClientState() != DebuggerClient::StateBusy) {
-    raise_warning("client is not in a busy state");
-    return false;
-  }
-  m_client->onSignal(SIGINT);
-  return m_client->getPrintString();
+  return m_client->getOutputArray();
 }
 
 Variant c_DebuggerClient::t___destruct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::__destruct);
   return null;
+}
+
+void c_DebuggerClient::sweep() {
+  if (m_client) {
+    m_client->clearCachedLocal();
+    m_client->apiFree();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 219 */
+/* SRC: classes/exception.php line 232 */
 FORWARD_DECLARE_CLASS(LengthException);
 extern const ObjectStaticCallbacks cw_LengthException;
 class c_LengthException : public c_LogicException {
@@ -36,16 +36,9 @@ class c_LengthException : public c_LogicException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(LengthException, LengthException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_LengthException(const ObjectStaticCallbacks *cb = &cw_LengthException) : c_LogicException(cb) {}
+  c_LengthException(const ObjectStaticCallbacks *cb = &cw_LengthException) : c_LogicException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_LengthException() NEVER_INLINE;
 

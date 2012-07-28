@@ -322,9 +322,7 @@ bool TestParserExpr::TestClassConstantExpression() {
 }
 
 bool TestParserExpr::TestParameterExpression() {
-  V2("<?php function a($a=1,$b) {}",
-     "function a($a = 1, $b) {\n}\n",
-     "function a($a = 1, $b = null) {\n}\n");
+  V("<?php function a($a=1,$b) {}",  "function a($a = 1, $b) {\n}\n");
 
   V("<?php function a() {}",         "function a() {\n}\n");
   V("<?php function a($a) {}",       "function a($a) {\n}\n");
@@ -345,11 +343,6 @@ bool TestParserExpr::TestModifierExpression() {
   V("<?php class a { private $a;}",   "class a {\nprivate $a;\n}\n");
   V("<?php class a { static $a;}",
     "class a {\npublic static $a;\n}\n");
-  V("<?php class a { abstract $a;}",
-    "class a {\npublic abstract $a;\n}\n");
-  V("<?php class a { final $a;}",
-    "class a {\npublic final $a;\n}\n");
-
   V("<?php class a { public static $a;}",
     "class a {\npublic static $a;\n}\n");
 

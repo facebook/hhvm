@@ -68,13 +68,36 @@
                         PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT| \
                         PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // DNS
 
 static Mutex NetworkMutex;
+
+Variant f_gethostname() {
+  struct addrinfo hints, *res;
+  char h_name[NI_MAXHOST];
+  int error;
+  String canon_hname;
+
+  error = gethostname(h_name, NI_MAXHOST);
+  if (error) {
+    return false;
+  }
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_flags = AI_CANONNAME;
+
+  error = getaddrinfo(h_name, NULL, &hints, &res);
+  if (error) {
+    return String(h_name, CopyString);
+  }
+
+  canon_hname = String(res->ai_canonname, CopyString);
+  freeaddrinfo(res);
+  return canon_hname;
+}
 
 Variant f_gethostbyaddr(CStrRef ip_address) {
   IOStatusHelper io("gethostbyaddr", ip_address.data());
@@ -318,7 +341,7 @@ typedef union {
 static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
                                   int type_to_fetch, bool store,
                                   Array &subarray) {
-  unsigned short type, cls, dlen;
+  unsigned short type, cls ATTRIBUTE_UNUSED, dlen;
   unsigned long ttl;
   int64 n, i;
   unsigned short s;
@@ -804,7 +827,7 @@ void f_header(CStrRef str, bool replace /* = true */,
   // new line safety check
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad
   // for security?
-  if (header.find('\n') >= 0) {
+  if (header.find('\n') >= 0 || header.find('\r') >= 0) {
     raise_warning("Header may not contain more than a single header, "
                   "new line detected");
     return;
@@ -881,6 +904,19 @@ bool f_headers_sent(VRefParam file /* = null */, VRefParam line /* = null */) {
     return transport->headersSent();
   }
   return false;
+}
+
+bool f_header_register_callback(CVarRef callback) {
+  Transport *transport = g_context->getTransport();
+  if (!transport) {
+    // fail if there is no transport
+    return false;
+  }
+  if (transport->headersSent()) {
+    // fail if headers have already been sent
+    return false;
+  }
+  return transport->setHeaderCallback(callback);
 }
 
 void f_header_remove(CStrRef name /* = null_string */) {

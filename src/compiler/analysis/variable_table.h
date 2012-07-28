@@ -56,6 +56,7 @@ public:
     NeedGlobalPointer = 256,
     ContainsDynamicStatic  = 512,
     ContainsGetDefinedVars = 1024,
+    ContainsDynamicFunctionCall = 2048,
   };
 
   enum JumpTableType {
@@ -145,6 +146,8 @@ public:
   std::string getGlobalVariableName(AnalysisResultConstPtr ar,
                                     const std::string &name) const;
 
+  void getLocalVariableNames(std::vector<std::string> &syms) const;
+
   /**
    * Get all variable's names.
    */
@@ -153,6 +156,10 @@ public:
 
   Symbol *addSymbol(const std::string &name) {
     return genSymbol(name, false);
+  }
+
+  Symbol *addDeclaredSymbol(const std::string &name, ConstructPtr construct) {
+    return genSymbol(name, false, construct);
   }
 
   /**
@@ -253,7 +260,7 @@ public:
                          bool member = false);
   void addStaticVariable(Symbol *sym, AnalysisResultPtr ar,
                          bool member = false);
-
+  void cleanupForError(AnalysisResultConstPtr ar);
 
   /**
    * Set all matching variables to variants, since l-dynamic value was used.
@@ -283,7 +290,7 @@ public:
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPPropertyDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+  bool outputCPPPropertyDecl(CodeGenerator &cg, AnalysisResultPtr ar,
       bool dynamicObject = false);
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPStaticVariables(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -329,8 +336,8 @@ public:
   struct StaticGlobalInfo {
     Symbol *sym;
     VariableTable *variables; // where this variable was from
-    ClassScopePtr cls;
-    FunctionScopePtr func;
+    ClassScopeRawPtr cls;     // these need to be raw to avoid reference cycles
+    FunctionScopeRawPtr func;
 
     // get unique identifier for this variable
     static std::string GetId(ClassScopePtr cls,

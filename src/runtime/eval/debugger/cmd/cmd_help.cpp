@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_help.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -295,6 +293,7 @@ bool CmdHelp::onClient(DebuggerClient *client) {
     if (!processTutorial(client)) {
       return help(client);
     }
+    return true;
   }
 
   client->swapHelp();

@@ -25,7 +25,6 @@
 #include <compiler/statement/method_statement.h>
 
 using namespace HPHP;
-using namespace boost;
 using std::vector;
 
 ///////////////////////////////////////////////////////////////////////////////

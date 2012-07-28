@@ -41,6 +41,8 @@ Variant f_qlzcompress(CStrRef data, int level = 1);
 Variant f_qlzuncompress(CStrRef data, int level = 1);
 Variant f_sncompress(CStrRef data);
 Variant f_snuncompress(CStrRef data);
+Variant f_nzcompress(CStrRef uncompressed);
+Variant f_nzuncompress(CStrRef compressed);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions

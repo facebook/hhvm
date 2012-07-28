@@ -23,7 +23,6 @@
 
 using namespace HPHP;
 using std::pair;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -61,18 +60,18 @@ void DataFlow::ComputeForwards(T func, const ControlFlowGraph &g,
     for (int i = 1; i <= num; i++) {
       ControlBlock *b = g.getDfBlock(i);
       std::pair<in_edge_iterator, in_edge_iterator> vi =
-        in_edges(b, g);
+        boost::in_edges(b, g);
       BitOps::Bits *ain = b->getRow(inAttr);
 
       if (vi.first != vi.second) {
-        ControlBlock *p = source(*vi.first, g);
+        ControlBlock *p = boost::source(*vi.first, g);
         if (++vi.first != vi.second) {
           if (!changed) BitOps::bit_copy(width, tmp1, ain);
           func(width, ain,
                p->getRow(outAttr),
-               source(*vi.first, g)->getRow(outAttr));
+               boost::source(*vi.first, g)->getRow(outAttr));
           while (++vi.first != vi.second) {
-            p = source(*vi.first, g);
+            p = boost::source(*vi.first, g);
             func(width, ain, ain, p->getRow(outAttr));
           }
           if (!changed) changed = !BitOps::bit_equal(width, tmp1, ain);
@@ -114,18 +113,18 @@ void DataFlow::ComputeBackwards(T func, const ControlFlowGraph &g,
     for (int i = num; i ; i--) {
       ControlBlock *b = g.getDfBlock(i);
       std::pair<out_edge_iterator, out_edge_iterator> vi =
-        out_edges(b, g);
+        boost::out_edges(b, g);
       BitOps::Bits *aout = b->getRow(outAttr);
 
       if (vi.first != vi.second) {
-        ControlBlock *s = target(*vi.first, g);
+        ControlBlock *s = boost::target(*vi.first, g);
         if (++vi.first != vi.second) {
           if (!changed) BitOps::bit_copy(width, tmp1, aout);
           func(width, aout,
                s->getRow(inAttr),
-               target(*vi.first, g)->getRow(inAttr));
+               boost::target(*vi.first, g)->getRow(inAttr));
           while (++vi.first != vi.second) {
-            s = target(*vi.first, g);
+            s = boost::target(*vi.first, g);
             func(width, aout, aout, s->getRow(inAttr));
           }
           if (!changed) changed = !BitOps::bit_equal(width, tmp1, aout);

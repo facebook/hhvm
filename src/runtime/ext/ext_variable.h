@@ -265,8 +265,8 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix = "");
 /**
  * LVariableTable parameter is added by HPHP.
  */
-int f_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE,
-              CStrRef prefix = "");
+int64 f_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE,
+                CStrRef prefix = "");
 int extract(LVariableTable *variables, CArrRef var_array,
             int extract_type = EXTR_OVERWRITE, String prefix = "");
 

@@ -1,0 +1,1 @@
+HipHop Fatal error: Declaration of B::s() must be compatible with that of A::s() in src/test/vm/impl_abstract_dv_is.php on line 3

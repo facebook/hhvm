@@ -49,11 +49,14 @@ class DebuggerProtocolException    : public DebuggerClientException {};
 class DebuggerServerLostException  : public DebuggerClientException {};
 
 // both client and server side exception
-class DebuggerException            : public Exception {};
+class DebuggerException            : public Exception {
+  EXCEPTION_COMMON_IMPL(DebuggerException);
+};
 class DebuggerClientExitException  : public DebuggerException {
   virtual const char *what() const throw() {
     return "Debugger client has just quit.";
   }
+  EXCEPTION_COMMON_IMPL(DebuggerClientExitException);
 };
 class DebuggerRestartException     : public DebuggerException {
 public:
@@ -63,6 +66,7 @@ public:
   virtual const char *what() const throw() {
     return "Debugger restarting program or aborting web request.";
   }
+  EXCEPTION_COMMON_IMPL(DebuggerRestartException);
 
   StringVecPtr m_args;
 };
@@ -131,7 +135,9 @@ public:
 
   const std::string &id() const;
   const std::string desc() const;
+  static DSandboxInfo CreateDummyInfo(uint64 unique);
 
+  bool valid() const { return !m_user.empty(); }
   void set(const std::string &id);
   void update(const DSandboxInfo &src);
 
@@ -168,6 +174,7 @@ public:
   std::string m_class;
   std::string m_function;
 
+  std::string getName() const;
   std::string site(std::string &preposition) const;
   std::string desc(const BreakPointInfo *bpi) const;
 

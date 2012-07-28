@@ -57,8 +57,6 @@ public:
   bool getAlwaysStash() const { return m_alwaysStash; }
   void setAlwaysStash() { m_alwaysStash = true; }
   void updateSymbol(SimpleVariablePtr src);
-  void setGuardedThis() { m_guardedThis = true; }
-  bool isGuardedThis() const { return m_guardedThis; }
   void coalesce(SimpleVariablePtr other);
 
   bool hasAssignableCPPVariable() const;
@@ -78,7 +76,6 @@ private:
   unsigned m_globals : 1; // whether is is $GLOBAL
   unsigned m_superGlobal : 1;
   unsigned m_alwaysStash : 1;
-  unsigned m_guardedThis : 1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

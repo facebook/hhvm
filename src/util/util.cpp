@@ -26,8 +26,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <libgen.h>
-
-using namespace std;
+#include <execinfo.h>
+#include <cxxabi.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -185,7 +185,7 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
 
   dirent *e;
 
-  set<string> todelete;
+  std::set<string> todelete;
   while ((e = readdir(ddest))) {
     if (strcmp(e->d_name, ".") == 0 ||
         strcmp(e->d_name, "..") == 0) {
@@ -228,7 +228,7 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
 
   // delete the ones to delete
   if (!todelete.empty()) {
-    for (set<string>::const_iterator iter = todelete.begin();
+    for (std::set<string>::const_iterator iter = todelete.begin();
          iter != todelete.end(); ++iter) {
       Logger::Info("sync: deleting %s", iter->c_str());
       boost::filesystem::remove_all(*iter);
@@ -396,30 +396,67 @@ std::string Util::safe_strerror(int errnum) {
 #endif
 }
 
-std::string Util::safe_dirname(const char *path) {
-  char* tmp_path = strdup(path);
-  std::string ret;
-
-  {
-    Lock lock(s_file_mutex);
-    char* dir = dirname(tmp_path);
-    ASSERT(dir);
-    ret.assign(dir);
+size_t Util::dirname_helper(char *path, int len) {
+  if (len == 0) {
+    /* Illegal use of this function */
+    return 0;
   }
 
+  /* Strip trailing slashes */
+  register char *end = path + len - 1;
+  while (end >= path && *end == '/') {
+    end--;
+  }
+  if (end < path) {
+    /* The path only contained slashes */
+    path[0] = '/';
+    path[1] = '\0';
+    return 1;
+  }
+
+  /* Strip filename */
+  while (end >= path && *end != '/') {
+    end--;
+  }
+  if (end < path) {
+    /* No slash found, therefore return '.' */
+    path[0] = '.';
+    path[1] = '\0';
+    return 1;
+  }
+
+  /* Strip slashes which came before the file name */
+  while (end >= path && *end == '/') {
+    end--;
+  }
+  if (end < path) {
+    path[0] = '/';
+    path[1] = '\0';
+    return 1;
+  }
+  *(end+1) = '\0';
+
+  return end + 1 - path;
+}
+
+std::string Util::safe_dirname(const char *path, int len) {
+  char* tmp_path = (char*)malloc(len+1);
+  memcpy(tmp_path, path, len);
+  tmp_path[len] = '\0';
+  size_t newLen = dirname_helper(tmp_path, len);
+  std::string ret;
+  ret.assign(tmp_path, newLen);
   free((void *) tmp_path);
   return ret;
 }
 
-bool Util::isPowerOfTwo(int value) {
-  return (value > 0 && (value & (value-1)) == 0);
+std::string Util::safe_dirname(const char *path) {
+  int len = strlen(path);
+  return safe_dirname(path, len);
 }
 
-int Util::roundUpToPowerOfTwo(int value) {
-  while (value & (value - 1)) {
-    value = (value | (value - 1)) + 1;
-  }
-  return (value);
+std::string Util::safe_dirname(const std::string& path) {
+  return safe_dirname(path.c_str(), path.size());
 }
 
 std::string Util::relativePath(const std::string fromDir,
@@ -767,8 +804,9 @@ void Util::find(std::vector<std::string> &out,
       isPHP = (strncmp(p + 1, "php", 3) == 0);
     } else {
       try {
-        string line; ifstream fin(fe.c_str());
-        if (getline(fin, line)) {
+        string line;
+        std::ifstream fin(fe.c_str());
+        if (std::getline(fin, line)) {
           if (line[0] == '#' && line[1] == '!' &&
               line.find("php") != string::npos) {
             isPHP = true;
@@ -814,6 +852,49 @@ std::string Util::format_pattern(const std::string &pattern,
   }
   ret += '#';
   return ret;
+}
+
+char* Util::getNativeFunctionName(void* codeAddr) {
+  void* buf[1] = {codeAddr};
+  char** symbols = backtrace_symbols(buf, 1);
+  char* functionName = NULL;
+  if (symbols != NULL) {
+    //
+    // the output from backtrace_symbols looks like this:
+    // ../src/hhvm/hhvm(_ZN4HPHP2VM6Transl17interpOneIterInitEv+0) [0x17cebe9]
+    //
+    // we first want to extract the mangled name from it to get this:
+    // _ZN4HPHP2VM6Transl17interpOneIterInitEv
+    //
+    // and then pass this to abi::__cxa_demangle to get the demanged name:
+    // HPHP::VM::Transl::interpOneIterInit()
+    //
+    // Sometimes, though, backtrace_symbols can't find the function name
+    // and ends up giving us a blank managled name, like this:
+    // ../src/hhvm/hhvm() [0x17e4d01]
+    //
+    char* start = strchr(*symbols, '(')+1;
+    char* end = strchr(start, '+');
+    if (end != NULL) {
+      size_t len = end-start;
+      functionName = new char[len+1];
+      strncpy(functionName, start, len);
+      functionName[len] = '\0';
+      int status;
+      char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
+      if (status == 0) {
+        free(functionName);
+        functionName = demangledName;
+      }
+    }
+  }
+  free(symbols);
+  if (functionName == NULL) {
+#define MAX_ADDR_HEX_LEN 40
+    functionName = new char[MAX_ADDR_HEX_LEN + 3];
+    sprintf(functionName, "%40p", codeAddr);
+  }
+  return functionName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

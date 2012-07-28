@@ -32,8 +32,6 @@
 #include <runtime/base/time/datetime.h>
 #include <runtime/eval/debugger/debugger.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -115,7 +113,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
   transport->enableCompression();
 
-  ServerStatsHelper ssh("all", true);
+  ServerStatsHelper ssh("all", ServerStatsHelper::TRACK_MEMORY);
   Logger::Verbose("receiving %s", transport->getCommand().c_str());
 
   // will clear all extra logging when this function goes out of scope
@@ -186,7 +184,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
             throw FatalErrorException("cannot unzip compressed data");
           }
           compressed = false;
-          str = NEW(StringData)(data, len, AttachString);
+          str = NEW(StringData)(data, len, AttachDeprecated);
         }
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
         StaticContentCache::TheFileCache->adviseOutMemory();
@@ -294,6 +292,12 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   {
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
+
+    if (RuntimeOption::EnableDebugger) {
+      Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();
+      Eval::Debugger::RegisterSandbox(sInfo);
+      context->setSandboxId(sInfo.id());
+    }
     reqURI.clear();
     sourceRootInfo.clear();
   }
@@ -301,71 +305,67 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   int code;
   bool ret = true;
 
+  if (RuntimeOption::EnableDebugger) {
+    Eval::Debugger::InterruptRequestStarted(transport->getUrl());
+  }
+
+  bool error = false;
+  std::string errorMsg = "Internal Server Error";
+  ret = hphp_invoke(context, file, false, Array(), null,
+                    RuntimeOption::RequestInitFunction,
+                    RuntimeOption::RequestInitDocument,
+                    error, errorMsg);
+
   if (ret) {
-    if (RuntimeOption::EnableDebugger) {
-      Eval::Debugger::InterruptRequestStarted(transport->getUrl());
+    String content = context->obDetachContents();
+    if (cachableDynamicContent && !content.empty()) {
+      ASSERT(transport->getUrl());
+      string key = file + transport->getUrl();
+      DynamicContentCache::TheCache.store(key, content.data(),
+                                          content.size());
     }
+    transport->sendRaw((void*)content.data(), content.size());
+    code = transport->getResponseCode();
+  } else if (error) {
+    code = 500;
 
-    bool error = false;
-    std::string errorMsg = "Internal Server Error";
-    ret = hphp_invoke(context, file, false, Array(), null,
-                      RuntimeOption::WarmupDocument,
-                      RuntimeOption::RequestInitFunction,
-                      RuntimeOption::RequestInitDocument,
-                      error, errorMsg);
-
-    if (ret) {
-      String content = context->obDetachContents();
-      if (cachableDynamicContent && !content.empty()) {
-        ASSERT(transport->getUrl());
-        string key = file + transport->getUrl();
-        DynamicContentCache::TheCache.store(key, content.data(),
-                                            content.size());
-      }
-      transport->sendRaw((void*)content.data(), content.size());
-      code = transport->getResponseCode();
-    } else if (error) {
-      code = 500;
-
-      string errorPage = context->getErrorPage().data();
-      if (errorPage.empty()) {
-        errorPage = RuntimeOption::ErrorDocument500;
-      }
-      if (!errorPage.empty()) {
-        context->obProtect(false);
-        context->obEndAll();
-        context->obStart();
-        context->obProtect(true);
-        ret = hphp_invoke(context, errorPage, false, Array(), null,
-                          RuntimeOption::WarmupDocument,
-                          RuntimeOption::RequestInitFunction,
-                          RuntimeOption::RequestInitDocument,
-                          error, errorMsg);
-        if (ret) {
-          String content = context->obDetachContents();
-          transport->sendRaw((void*)content.data(), content.size());
-          code = transport->getResponseCode();
-        } else {
-          Logger::Error("Unable to invoke error page %s", errorPage.c_str());
-          errorPage.clear(); // so we fall back to 500 return
-        }
-      }
-      if (errorPage.empty()) {
-        if (RuntimeOption::ServerErrorMessage) {
-          transport->sendString(errorMsg, 500, false, false, "hphp_invoke");
-        } else {
-          transport->sendString(RuntimeOption::FatalErrorMessage,
-                                500, false, false, "hphp_invoke");
-        }
-      }
-    } else {
-      code = 404;
-      transport->sendString("Not Found", 404);
+    string errorPage = context->getErrorPage().data();
+    if (errorPage.empty()) {
+      errorPage = RuntimeOption::ErrorDocument500;
     }
-
-    if (RuntimeOption::EnableDebugger) {
-      Eval::Debugger::InterruptRequestEnded(transport->getUrl());
+    if (!errorPage.empty()) {
+      context->obProtect(false);
+      context->obEndAll();
+      context->obStart();
+      context->obProtect(true);
+      ret = hphp_invoke(context, errorPage, false, Array(), null,
+                        RuntimeOption::RequestInitFunction,
+                        RuntimeOption::RequestInitDocument,
+                        error, errorMsg);
+      if (ret) {
+        String content = context->obDetachContents();
+        transport->sendRaw((void*)content.data(), content.size());
+        code = transport->getResponseCode();
+      } else {
+        Logger::Error("Unable to invoke error page %s", errorPage.c_str());
+        errorPage.clear(); // so we fall back to 500 return
+      }
     }
+    if (errorPage.empty()) {
+      if (RuntimeOption::ServerErrorMessage) {
+        transport->sendString(errorMsg, 500, false, false, "hphp_invoke");
+      } else {
+        transport->sendString(RuntimeOption::FatalErrorMessage,
+                              500, false, false, "hphp_invoke");
+      }
+    }
+  } else {
+    code = 404;
+    transport->sendString("Not Found", 404);
+  }
+
+  if (RuntimeOption::EnableDebugger) {
+    Eval::Debugger::InterruptRequestEnded(transport->getUrl());
   }
 
   transport->onSendEnd();

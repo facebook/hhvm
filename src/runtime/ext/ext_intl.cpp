@@ -29,6 +29,8 @@
 #include <unicode/utypes.h>
 #include <unicode/unorm.h>
 
+#include <system/lib/systemlib.h>
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(idn);
 ///////////////////////////////////////////////////////////////////////////////

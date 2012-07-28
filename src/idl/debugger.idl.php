@@ -108,7 +108,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphpd_get_client",
-    'desc'   => "Gets an hphpd client with a string key. With the same key, it guarantees to get the same debugger client across multiple requests.",
+    'desc'   => "Gets an hphpd client with a string key (creating on-demand). With the same key, it guarantees to get the same debugger client across multiple requests. One hphpd client can only be gotten by a single request at any given time. Will return null if the client is already gotten.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
@@ -119,6 +119,29 @@ DefineFunction(
         'type'   => String,
         'value'  => "null",
         'desc'   => "the name to identify the debugger client",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphpd_client_ctrl",
+    'desc'   => "Make special operations on a client, such as interrupt a waiting client.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+        'desc'   => "the name to identify the debugger client",
+      ),
+      array(
+        'name'   => "op",
+        'type'   => String,
+        'desc'   => "the string to represent the operation",
       ),
     ),
     'taint_observer' => false,
@@ -619,7 +642,7 @@ DefineFunction(
     'desc'   => "Count of total arguments.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "The count, not including user command itself.",
     ),
   ));
@@ -733,7 +756,7 @@ DefineFunction(
     'desc'   => "Returns current frame index.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Int32,
+      'type'   => Int64,
       'desc'   => "An index indicating which frame end user has moved to for inspection.",
     ),
   ));
@@ -792,7 +815,8 @@ BeginClass(
   array(
     'name'   => "DebuggerClient",
     'desc'   => "",
-    'flags'  =>  HasDocComment | HipHopSpecific,
+    'bases'  => array('Sweepable'),
+    'flags'  =>  HasDocComment | HipHopSpecific | NoDefaultSweep,
     'footer' => <<<EOT
 
  public:
@@ -890,17 +914,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "A vector array of strings to be used as arguments",
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "interrupt",
-    'desc'   => "make debugger client issue an CmdSignal as user doing Ctrl_C",
-    'flags'  => HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => Variant,
-      'desc'   => "TBD",
     ),
   ));
 

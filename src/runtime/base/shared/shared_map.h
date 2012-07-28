@@ -20,6 +20,7 @@
 #include <util/shared_memory_allocator.h>
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/array/array_data.h>
+#include <runtime/base/array/zend_array.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/builtin_functions.h>
 
@@ -31,9 +32,12 @@ namespace HPHP {
  */
 class SharedMap : public ArrayData {
 public:
-  SharedMap(SharedVariant* source);
+  SharedMap(SharedVariant* source) : m_arr(source), m_localCache(NULL) {
+    source->incRef();
+  }
 
   ~SharedMap() {
+    if (m_localCache) m_localCache->release();
     m_arr->decRef();
   }
 
@@ -44,7 +48,7 @@ public:
     return m_arr;
   }
 
-  ssize_t size() const {
+  ssize_t vsize() const {
     return m_arr->arrSize();
   }
 
@@ -59,10 +63,6 @@ public:
   bool exists(litstr k) const;
   bool exists(CStrRef k) const;
   bool exists(CVarRef k) const;
-
-  bool idxExists(ssize_t idx) const {
-    return idx < size();
-  }
 
   CVarRef get(int64 k, bool error = false) const;
   CVarRef get(litstr k, bool error = false) const;
@@ -99,8 +99,6 @@ public:
   /**
    * Copy (escalate) the SharedMap without triggering local cache.
    */
-  ArrayData *fiberCopy() const;
-
   ArrayData *append(CVarRef v, bool copy);
   ArrayData *appendRef(CVarRef v, bool copy);
   ArrayData *appendWithRef(CVarRef v, bool copy);
@@ -111,19 +109,14 @@ public:
   /**
    * Memory allocator methods.
    */
-  DECLARE_SMART_ALLOCATION(SharedMap, SmartAllocatorImpl::NeedRestore);
-  bool calculate(int &size) { return true;}
-  void backup(LinearAllocator &allocator) {
-    m_arr->incRef(); // protect it
-  }
-  void restore(const char *&data) { m_arr->incRef();}
+  DECLARE_SMART_ALLOCATION(SharedMap, SmartAllocatorImpl::NeedSweep);
   void sweep() { m_arr->decRef();}
 
   virtual ArrayData *escalate(bool mutableIteration = false) const;
 
 private:
   SharedVariant *m_arr;
-  mutable Array m_localCache;
+  mutable ZendArray *m_localCache;
 
   Variant getValueUncached(ssize_t pos) const;
 };

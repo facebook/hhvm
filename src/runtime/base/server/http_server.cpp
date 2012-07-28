@@ -41,9 +41,6 @@
 #include <signal.h>
 #include <util/ssl_init.h>
 
-using namespace boost;
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -88,7 +85,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   }
 
   if (RuntimeOption::EnableSSL && m_sslCTX) {
-    SSLInit::Init();
+    ASSERT(SSLInit::IsInited());
     m_pageServer->enableSSL(m_sslCTX, RuntimeOption::SSLPort);
   }
 
@@ -171,6 +168,8 @@ void HttpServer::onServerShutdown() {
   if (RuntimeOption::EnableDebuggerServer) {
     Logger::Info("debugger server stopped");
   }
+
+  XboxServer::Stop();
 
   // When a new instance of HPHP has taken over our page server socket,
   // stop our admin server and satellites so it can acquire those ports.
@@ -378,13 +377,13 @@ void HttpServer::flushLog() {
   if (!Logger::UseLogAggregator) return;
 
   ServerDataPtr database;
-  ostream *out = NULL;
+  std::ostream *out = NULL;
   if (!RuntimeOption::LogAggregatorDatabase.empty()) {
     database = ServerData::Create(RuntimeOption::LogAggregatorDatabase);
   } else if (!RuntimeOption::LogAggregatorFile.empty()) {
-    out = new ofstream(RuntimeOption::LogAggregatorFile.c_str());
+    out = new std::ofstream(RuntimeOption::LogAggregatorFile.c_str());
   } else {
-    out = &cout;
+    out = &std::cout;
   }
 
   bool stopped = false;
@@ -400,7 +399,7 @@ void HttpServer::flushLog() {
     stopped = m_stopped;
   }
 
-  if (out != &cout) {
+  if (out != &std::cout) {
     delete out;
   }
 }

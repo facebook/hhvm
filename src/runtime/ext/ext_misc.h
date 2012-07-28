@@ -25,9 +25,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-int f_connection_aborted();
-int f_connection_status();
-int f_connection_timeout();
+int64 f_connection_aborted();
+int64 f_connection_status();
+int64 f_connection_timeout();
 Variant f_constant(CStrRef name);
 bool f_define(CStrRef name, CVarRef value, bool case_insensitive = false);
 bool f_defined(CStrRef name);
@@ -39,11 +39,11 @@ void f___halt_compiler();
 Variant f_highlight_file(CStrRef filename, bool ret = false);
 Variant f_show_source(CStrRef filename, bool ret = false);
 Variant f_highlight_string(CStrRef str, bool ret = false);
-int f_ignore_user_abort(bool setting = false);
+int64 f_ignore_user_abort(bool setting = false);
 Variant f_pack(int _argc, CStrRef format, CArrRef _argv = null_array);
 bool f_php_check_syntax(CStrRef filename, VRefParam error_message = null);
 String f_php_strip_whitespace(CStrRef filename);
-int f_sleep(int seconds);
+int64 f_sleep(int seconds);
 void f_usleep(int micro_seconds);
 Variant f_time_nanosleep(int seconds, int nanoseconds);
 bool f_time_sleep_until(double timestamp);
@@ -52,6 +52,8 @@ Variant f_unpack(CStrRef format, CStrRef data);
 Array f_sys_getloadavg();
 Array f_token_get_all(CStrRef source);
 String f_token_name(int64 token);
+Variant f_hphp_process_abort(CVarRef magic);
+String f_hphp_to_string(CVarRef v);
 extern const double k_INF;
 extern const double k_NAN;
 

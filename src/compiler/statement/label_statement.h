@@ -35,7 +35,7 @@ public:
   void invalidate() { m_isValid = false; }
 private:
   std::string m_label;
-	bool m_isValid;
+  bool m_isValid;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

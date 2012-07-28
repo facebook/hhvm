@@ -52,7 +52,7 @@ void taint_array_variant(Variant& v, const std::string s, bool iskey) {
   }
 
   if (v.isArray()) {
-    CArrRef a = v.asCArrRef();
+    CArrRef a = v.toCArrRef();
     for (ArrayIter iter(a); iter; ++iter) {
       // Taint the key if it is actually a string (in cases where we have a
       // URI like /foo.php?123=hello, the key will have type int, so we skip

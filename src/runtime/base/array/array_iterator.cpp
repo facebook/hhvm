@@ -16,6 +16,7 @@
 
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/array/array_data.h>
+#include <runtime/base/array/hphp_array.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/object_data.h>
 
@@ -37,6 +38,7 @@ static StaticString s_Continuation("Continuation");
 ArrayIter::ArrayIter()
   : m_data(NULL), m_obj(NULL), m_pos(ArrayData::invalid_index) { }
 
+HOT_FUNC
 ArrayIter::ArrayIter(const ArrayData *data) : m_data(data), m_obj(NULL) {
   if (m_data) {
     m_data->incRefCount();
@@ -46,6 +48,18 @@ ArrayIter::ArrayIter(const ArrayData *data) : m_data(data), m_obj(NULL) {
   }
 }
 
+// Special constructor used by the VM. This constructor does not
+// increment the refcount of the specified array.
+ArrayIter::ArrayIter(const ArrayData *data, int)
+  : m_data(data), m_obj(NULL), m_pos(0) {
+  if (m_data) {
+    m_pos = m_data->iter_begin();
+  } else {
+    m_pos = ArrayData::invalid_index;
+  }
+}
+
+HOT_FUNC
 ArrayIter::ArrayIter(CArrRef array)
   : m_data(array.get()), m_obj(NULL), m_pos(0) {
   if (m_data) {
@@ -69,6 +83,7 @@ ArrayIter::ArrayIter(ObjectData *obj, bool rewind /* = true */)
   // If it is from IteratorAggregate, there is no need to rewind.
 }
 
+HOT_FUNC
 ArrayIter::~ArrayIter() {
   if (m_data && m_data->decRefCount() == 0) {
     const_cast<ArrayData*>(m_data)->release();
@@ -94,6 +109,7 @@ Variant ArrayIter::firstHelper() {
   return m_obj->o_invoke(s_key, Array());
 }
 
+HOT_FUNC
 Variant ArrayIter::second() {
   if (m_obj) {
     return m_obj->o_invoke(s_current, Array());
@@ -108,6 +124,7 @@ void ArrayIter::secondHelper(Variant & v) {
   v = m_obj->o_invoke(s_current, Array());
 }
 
+HOT_FUNC
 CVarRef ArrayIter::secondRef() {
   if (m_obj) {
     throw FatalErrorException("taking reference on iterator objects");
@@ -126,7 +143,7 @@ MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
   ASSERT(m_var);
   ArrayData *data = getData();
   if (data) {
-    ASSERT(data->getCount() <= 1);
+    ASSERT(!data->isStatic());
     data->reset();
     data->newFullPos(m_fp);
     ASSERT(m_fp.container == data);
@@ -137,6 +154,7 @@ MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
                                    Variant &val)
   : m_var(NULL), m_data(data), m_key(key), m_val(val), m_fp() {
   if (data) {
+    ASSERT(!data->isStatic());
     ASSERT(data->getCount() <= 1);
     // protect the data which may be owned by a C++ temp
     data->incRefCount();
@@ -172,7 +190,7 @@ bool MutableArrayIter::advance() {
     }
     // Create a new strong iterator for the new array
     ASSERT(m_fp.container == NULL);
-    if (data->getCount() > 1 && !data->isGlobalArrayWrapper()) {
+    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
       if (m_var) {
         *const_cast<Variant*>(m_var) = (data = data->copy());
       } else {
@@ -192,10 +210,21 @@ bool MutableArrayIter::advance() {
 }
 
 ArrayData *MutableArrayIter::getData() {
+  ASSERT(m_var);
   if (m_var->is(KindOfArray)) {
     return m_var->getArrayData();
   }
   return NULL;
 }
+
+MIterCtx::~MIterCtx() {
+  delete m_mArray;
+  tvRefcountedDecRef(&m_key);
+  tvRefcountedDecRef(&m_val);
+  if (m_ref && m_ref->decRefCount() == 0) {
+    const_cast<RefData*>(m_ref)->release();
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

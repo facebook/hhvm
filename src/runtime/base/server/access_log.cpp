@@ -25,9 +25,12 @@
 #include <util/atomic.h>
 #include <util/compatibility.h>
 #include <util/util.h>
+#include <util/hardware_counter.h>
+
+using std::endl;
 
 namespace HPHP {
-using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 AccessLog::~AccessLog() {
@@ -148,7 +151,7 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
 int AccessLog::writeLog(Transport *transport, const VirtualHost *vhost,
                         FILE *outFile, const char *format) {
    char c;
-   ostringstream out;
+   std::ostringstream out;
    while (c = *format++) {
      if (c != '%') {
        out << c;
@@ -224,7 +227,7 @@ void AccessLog::skipField(const char* &format) {
   format++;
 }
 
-static void escape_data(ostringstream &out, const char *s, int len)
+static void escape_data(std::ostringstream &out, const char *s, int len)
 {
   static const char digits[] = "0123456789abcdef";
 
@@ -249,7 +252,7 @@ static void escape_data(ostringstream &out, const char *s, int len)
   }
 }
 
-bool AccessLog::genField(ostringstream &out, const char* &format,
+bool AccessLog::genField(std::ostringstream &out, const char* &format,
                          Transport *transport, const VirtualHost *vhost,
                          const string &arg) {
   int responseSize = transport->getResponseSize();
@@ -385,6 +388,15 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
         out << sname;
       }
     }
+    break;
+  case 'Y':
+    {
+      int64 now = Util::HardwareCounter::GetInstructionCount();
+      out << now - transport->getInstructions();
+    }
+    break;
+  case 'y':
+    out << ServerStats::Get("page.inst.psp");
     break;
   case 'Z':
      out << ServerStats::Get("page.wall.psp");

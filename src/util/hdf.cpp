@@ -17,8 +17,6 @@
 #include "hdf.h"
 #include "lock.h"
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -328,6 +326,13 @@ void Hdf::get(std::vector<std::string> &values) const {
 }
 
 void Hdf::get(std::set<std::string> &values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values.insert(hdf.getString(""));
+  }
+}
+
+void Hdf::get(std::set<std::string, stdltistr> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
     values.insert(hdf.getString(""));

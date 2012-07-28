@@ -23,22 +23,24 @@
 #include <runtime/base/string_util.h>
 #include <util/util.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static VirtualHost s_default_vhost;
-
-VirtualHost &VirtualHost::GetDefault() { return s_default_vhost; }
+VirtualHost &VirtualHost::GetDefault() {
+  // VirtualHost acquires global mutexes in its constructor, so we allocate
+  // s_default_vhost lazily to ensure that all of the global mutexes have
+  // been initialized before we enter the constructor.
+  static VirtualHost s_default_vhost;
+  return s_default_vhost;
+}
 
 void VirtualHost::SetCurrent(VirtualHost *vhost) {
-  g_context->setVirtualHost(vhost ? vhost : &s_default_vhost);
+  g_context->setVirtualHost(vhost ? vhost : &VirtualHost::GetDefault());
 }
 
 const VirtualHost *VirtualHost::GetCurrent() {
   const VirtualHost *ret = g_context->getVirtualHost();
-  if (!ret) ret = &s_default_vhost;
+  if (!ret) ret = &VirtualHost::GetDefault();
   return ret;
 }
 

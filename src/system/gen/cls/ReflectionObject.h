@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1317 */
+/* SRC: classes/reflection.php line 1403 */
 FORWARD_DECLARE_CLASS(ReflectionObject);
 extern const ObjectStaticCallbacks cw_ReflectionObject;
 class c_ReflectionObject : public c_ReflectionClass {
@@ -36,8 +36,10 @@ class c_ReflectionObject : public c_ReflectionClass {
 
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ReflectionObject, ReflectionObject, ReflectionClass)
-  c_ReflectionObject(const ObjectStaticCallbacks *cb = &cw_ReflectionObject) : c_ReflectionClass(cb) {}
-  public: static Variant t_export(Variant v_obj, CVarRef v_ret);
+  c_ReflectionObject(const ObjectStaticCallbacks *cb = &cw_ReflectionObject) : c_ReflectionClass(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
+  public: static Variant t_export(Variant v_obj, CVarRef v_ret = false_varNR);
   DECLARE_METHOD_INVOKE_HELPERS(export);
 };
 ObjectData *coo_ReflectionObject() NEVER_INLINE;

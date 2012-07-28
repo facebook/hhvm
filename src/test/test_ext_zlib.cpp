@@ -50,6 +50,8 @@ bool TestExtZlib::RunTests(const std::string &which) {
   RUN_TEST(test_qlzuncompress);
   RUN_TEST(test_sncompress);
   RUN_TEST(test_snuncompress);
+  RUN_TEST(test_nzcompress);
+  RUN_TEST(test_nzuncompress);
 
   return ret;
 }
@@ -236,5 +238,54 @@ bool TestExtZlib::test_snuncompress() {
   } catch (NotSupportedException e) {
     SKIP("No sncompress() support");
   }
+  return Count(true);
+}
+
+bool TestExtZlib::test_nzcompress() {
+  char compressable[1025];
+  memset(compressable, 'A', 1024);
+  compressable[1024] = '\0';
+  String s(compressable, CopyString);
+  String t(f_nzcompress(s).asStrRef());
+  if (s.size() <= t.size()) {
+    return Count(false);
+  }
+  String u(f_nzuncompress(t).asStrRef());
+  if (s != u) {
+    return Count(false);
+  }
+  char *p = (char*)malloc(t.size());
+  if (p == NULL) {
+    return Count(false);
+  }
+
+  memset(compressable, '\0', 1025);
+  String bs(compressable, 1024, CopyString);
+  String bt(f_nzcompress(bs).asStrRef());
+  if (bs.size() <= bt.size()) {
+    return Count(false);
+  }
+  String bu(f_nzuncompress(bt).asStrRef());
+  if (bu != bs || bu.size() != 1024) {
+    return Count(false);
+  }
+
+  return Count(true);
+}
+
+bool TestExtZlib::test_nzuncompress() {
+  String s("garbage stuff", AttachLiteral);
+  Variant v = f_nzuncompress(s);
+  if (v != Variant(false)) {
+    return Count(false);
+  }
+
+  String empty("", AttachLiteral);
+  String c(f_nzcompress(empty).asStrRef());
+  String d(f_nzuncompress(c).asStrRef());
+  if (d != empty) {
+    return Count(false);
+  }
+
   return Count(true);
 }

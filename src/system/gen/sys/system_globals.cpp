@@ -28,7 +28,7 @@ SystemGlobals::SystemGlobals() {
   memset(&stgv_int, 0, sizeof(stgv_int));
   memset(&stgv_int64, 0, sizeof(stgv_int64));
   memset(&stgv_double, 0, sizeof(stgv_double));
-  memset(&stgv_CallInfoPtr, 0, sizeof(stgv_CallInfoPtr));
+  memset(&stgv_RedeclaredCallInfoConstPtr, 0, sizeof(stgv_RedeclaredCallInfoConstPtr));
 
   // Redeclared Classes
 }

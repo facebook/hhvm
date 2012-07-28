@@ -10,78 +10,78 @@
  *
  */
 $php53 = array();
-@include $argv[1];
-
-$constants = get_defined_constants();
-
-///////////////////////////////////////////////////////////////////////////////
+$all = count($argv) <= 2;
+if ($all) {
+  @require $argv[1];
+  $constants = get_defined_constants();
 
 // imap constants
-$constants['NIL'] = 0;
-$constants['IMAP_OPENTIMEOUT'] = 1;
-$constants['IMAP_READTIMEOUT'] = 2;
-$constants['IMAP_WRITETIMEOUT'] = 3;
-$constants['IMAP_CLOSETIMEOUT'] = 4;
-$constants['OP_DEBUG'] = 1;
-$constants['OP_READONLY'] = 2;
-$constants['OP_ANONYMOUS'] = 4;
-$constants['OP_SHORTCACHE'] = 8;
-$constants['OP_SILENT'] = 16;
-$constants['OP_PROTOTYPE'] = 32;
-$constants['OP_HALFOPEN'] = 64;
-$constants['OP_EXPUNGE'] = 128;
-$constants['OP_SECURE'] = 256;
-$constants['CL_EXPUNGE'] = 32768;
-$constants['FT_UID'] = 1;
-$constants['FT_PEEK'] = 2;
-$constants['FT_NOT'] = 4;
-$constants['FT_INTERNAL'] = 8;
-$constants['FT_PREFETCHTEXT'] = 32;
-$constants['ST_UID'] = 1;
-$constants['ST_SILENT'] = 2;
-$constants['ST_SET'] = 4;
-$constants['CP_UID'] = 1;
-$constants['CP_MOVE'] = 2;
-$constants['SE_UID'] = 1;
-$constants['SE_FREE'] = 2;
-$constants['SE_NOPREFETCH'] = 4;
-$constants['SO_FREE'] = 8;
-$constants['SO_NOSERVER'] = 16;
-$constants['SA_MESSAGES'] = 1;
-$constants['SA_RECENT'] = 2;
-$constants['SA_UNSEEN'] = 4;
-$constants['SA_UIDNEXT'] = 8;
-$constants['SA_UIDVALIDITY'] = 16;
-$constants['SA_ALL'] = 31;
-$constants['LATT_NOINFERIORS'] = 1;
-$constants['LATT_NOSELECT'] = 2;
-$constants['LATT_MARKED'] = 4;
-$constants['LATT_UNMARKED'] = 8;
-$constants['LATT_REFERRAL'] = 16;
-$constants['LATT_HASCHILDREN'] = 32;
-$constants['LATT_HASNOCHILDREN'] = 64;
-$constants['SORTDATE'] = 0;
-$constants['SORTARRIVAL'] = 1;
-$constants['SORTFROM'] = 2;
-$constants['SORTSUBJECT'] = 3;
-$constants['SORTTO'] = 4;
-$constants['SORTCC'] = 5;
-$constants['SORTSIZE'] = 6;
-$constants['TYPETEXT'] = 0;
-$constants['TYPEMULTIPART'] = 1;
-$constants['TYPEMESSAGE'] = 2;
-$constants['TYPEAPPLICATION'] = 3;
-$constants['TYPEAUDIO'] = 4;
-$constants['TYPEIMAGE'] = 5;
-$constants['TYPEVIDEO'] = 6;
-$constants['TYPEMODEL'] = 7;
-$constants['TYPEOTHER'] = 8;
-$constants['ENC7BIT'] = 0;
-$constants['ENC8BIT'] = 1;
-$constants['ENCBINARY'] = 2;
-$constants['ENCBASE64'] = 3;
-$constants['ENCQUOTEDPRINTABLE'] = 4;
-$constants['ENCOTHER'] = 5;
+  $constants['NIL'] = 0;
+  $constants['IMAP_OPENTIMEOUT'] = 1;
+  $constants['IMAP_READTIMEOUT'] = 2;
+  $constants['IMAP_WRITETIMEOUT'] = 3;
+  $constants['IMAP_CLOSETIMEOUT'] = 4;
+  $constants['OP_DEBUG'] = 1;
+  $constants['OP_READONLY'] = 2;
+  $constants['OP_ANONYMOUS'] = 4;
+  $constants['OP_SHORTCACHE'] = 8;
+  $constants['OP_SILENT'] = 16;
+  $constants['OP_PROTOTYPE'] = 32;
+  $constants['OP_HALFOPEN'] = 64;
+  $constants['OP_EXPUNGE'] = 128;
+  $constants['OP_SECURE'] = 256;
+  $constants['CL_EXPUNGE'] = 32768;
+  $constants['FT_UID'] = 1;
+  $constants['FT_PEEK'] = 2;
+  $constants['FT_NOT'] = 4;
+  $constants['FT_INTERNAL'] = 8;
+  $constants['FT_PREFETCHTEXT'] = 32;
+  $constants['ST_UID'] = 1;
+  $constants['ST_SILENT'] = 2;
+  $constants['ST_SET'] = 4;
+  $constants['CP_UID'] = 1;
+  $constants['CP_MOVE'] = 2;
+  $constants['SE_UID'] = 1;
+  $constants['SE_FREE'] = 2;
+  $constants['SE_NOPREFETCH'] = 4;
+  $constants['SO_FREE'] = 8;
+  $constants['SO_NOSERVER'] = 16;
+  $constants['SA_MESSAGES'] = 1;
+  $constants['SA_RECENT'] = 2;
+  $constants['SA_UNSEEN'] = 4;
+  $constants['SA_UIDNEXT'] = 8;
+  $constants['SA_UIDVALIDITY'] = 16;
+  $constants['SA_ALL'] = 31;
+  $constants['LATT_NOINFERIORS'] = 1;
+  $constants['LATT_NOSELECT'] = 2;
+  $constants['LATT_MARKED'] = 4;
+  $constants['LATT_UNMARKED'] = 8;
+  $constants['LATT_REFERRAL'] = 16;
+  $constants['LATT_HASCHILDREN'] = 32;
+  $constants['LATT_HASNOCHILDREN'] = 64;
+  $constants['SORTDATE'] = 0;
+  $constants['SORTARRIVAL'] = 1;
+  $constants['SORTFROM'] = 2;
+  $constants['SORTSUBJECT'] = 3;
+  $constants['SORTTO'] = 4;
+  $constants['SORTCC'] = 5;
+  $constants['SORTSIZE'] = 6;
+  $constants['TYPETEXT'] = 0;
+  $constants['TYPEMULTIPART'] = 1;
+  $constants['TYPEMESSAGE'] = 2;
+  $constants['TYPEAPPLICATION'] = 3;
+  $constants['TYPEAUDIO'] = 4;
+  $constants['TYPEIMAGE'] = 5;
+  $constants['TYPEVIDEO'] = 6;
+  $constants['TYPEMODEL'] = 7;
+  $constants['TYPEOTHER'] = 8;
+  $constants['ENC7BIT'] = 0;
+  $constants['ENC8BIT'] = 1;
+  $constants['ENCBINARY'] = 2;
+  $constants['ENCBASE64'] = 3;
+  $constants['ENCQUOTEDPRINTABLE'] = 4;
+  $constants['ENCOTHER'] = 5;
+}
 
 // HPHP system constants
 $constants['HPHP_TRIM_CHARLIST'] = " \n\r\t\v\0";
@@ -136,10 +136,14 @@ foreach ($constants as $name => $value) {
   }
   $str = var_export($value, true);
 
-  // PHP has a bug, turning "\0" incorrectly into '\000', not "\000"
-  if (is_string($value)) {
-    $str = '"' . substr($str, 1, strlen($str) - 2) . '"';
-  }
+  // Protect special characters.
+  $str = str_replace(array("\n", "\r", "\t", "\v", "\0"),
+                     array("\\n", "\\r", "\\t", "\\v", "\\0"),
+                     $str);
 
-  print "define('$name', $str);\n";
+  if ($all) {
+    print "define('$name', $str);\n";
+  } else {
+    print "if (!defined('$name')) {define('$name', $str);}\n";
+  }
 }

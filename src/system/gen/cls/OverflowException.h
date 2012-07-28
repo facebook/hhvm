@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 251 */
+/* SRC: classes/exception.php line 264 */
 FORWARD_DECLARE_CLASS(OverflowException);
 extern const ObjectStaticCallbacks cw_OverflowException;
 class c_OverflowException : public c_RuntimeException {
@@ -36,16 +36,9 @@ class c_OverflowException : public c_RuntimeException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(OverflowException, OverflowException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_OverflowException(const ObjectStaticCallbacks *cb = &cw_OverflowException) : c_RuntimeException(cb) {}
+  c_OverflowException(const ObjectStaticCallbacks *cb = &cw_OverflowException) : c_RuntimeException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_OverflowException() NEVER_INLINE;
 

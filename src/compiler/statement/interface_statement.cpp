@@ -28,8 +28,6 @@
 #include <compiler/parser/parser.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -37,10 +35,11 @@ using namespace boost;
 InterfaceStatement::InterfaceStatement
 (STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
  const std::string &name, ExpressionListPtr base,
- const std::string &docComment, StatementListPtr stmt)
+ const std::string &docComment, StatementListPtr stmt,
+ ExpressionListPtr attrList)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     m_originalName(name), m_base(base),
-    m_docComment(docComment), m_stmt(stmt) {
+    m_docComment(docComment), m_stmt(stmt), m_attrList(attrList) {
   m_name = Util::toLower(name);
   if (m_base) m_base->toLower();
 }
@@ -48,10 +47,11 @@ InterfaceStatement::InterfaceStatement
 InterfaceStatement::InterfaceStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  const std::string &name, ExpressionListPtr base,
- const std::string &docComment, StatementListPtr stmt)
+ const std::string &docComment, StatementListPtr stmt,
+ ExpressionListPtr attrList)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(InterfaceStatement)),
     m_originalName(name), m_base(base),
-    m_docComment(docComment), m_stmt(stmt) {
+    m_docComment(docComment), m_stmt(stmt), m_attrList(attrList) {
   m_name = Util::toLower(name);
   if (m_base) m_base->toLower();
 }
@@ -65,7 +65,7 @@ StatementPtr InterfaceStatement::clone() {
 
 bool InterfaceStatement::hasImpl() const {
   ClassScopeRawPtr cls = getClassScope();
-  return cls->isVolatile();
+  return cls->isVolatile() || (hhvm && Option::OutputHHBC);
 }
 
 int InterfaceStatement::getRecursiveCount() const {
@@ -77,12 +77,22 @@ int InterfaceStatement::getRecursiveCount() const {
 void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
                                  FileScopePtr scope) {
   vector<string> bases;
-  if (m_base) m_base->getStrings(bases);
+  if (m_base) m_base->getOriginalStrings(bases);
 
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
+
+  vector<UserAttributePtr> attrs;
+  if (m_attrList) {
+    for (int i = 0; i < m_attrList->getCount(); ++i) {
+      UserAttributePtr a =
+        dynamic_pointer_cast<UserAttribute>((*m_attrList)[i]);
+      attrs.push_back(a);
+    }
+  }
+
   ClassScopePtr classScope
     (new ClassScope(ClassScope::KindOfInterface, m_name, "", bases,
-                    m_docComment, stmt));
+                    m_docComment, stmt, attrs));
   setBlockScope(classScope);
   scope->addClass(ar, classScope);
 
@@ -245,15 +255,24 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
   ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
-      string name = CodeGenerator::FormatLabel(m_name);
-      if (classScope->isRedeclaring()) {
-        cg_printf("g->%s%s = &%s%s;\n",
-                  Option::ClassStaticsCallbackPrefix,
-                  name.c_str(),
-                  Option::ClassStaticsCallbackPrefix,
-                  classScope->getId().c_str());
+      const vector<string> &bases = classScope->getBases();
+      for (unsigned i = 0; i < bases.size(); ++i) {
+        const string &name = bases[i];
+        if (cg.checkHoistedClass(name) ||
+            classScope->hasKnownBase(i)) {
+          continue;
+        }
+        ClassScopePtr base = ar->findClass(name);
+        if (base && base->isVolatile()) {
+          cg_printf("checkClassExistsThrow(");
+          cg_printString(name, ar, shared_from_this());
+          cg_printf(", &%s->CDEC(%s));\n",
+                    cg.getGlobals(ar),
+                    CodeGenerator::FormatLabel(base->getName()).c_str());
+        }
       }
-      cg_printf("g->CDEC(%s) = true;\n", name.c_str());
+      classScope->outputCPPDef(cg);
+      cg.addHoistedClass(m_name);
     }
     return;
   }
@@ -290,7 +309,17 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
       }
       cg_indentBegin(" {\n");
       if (m_stmt) m_stmt->outputCPP(cg, ar);
+
+      bool hasPropTable = classScope->checkHasPropTable();
+      if (hasPropTable) {
+        cg_printf("public: static const ClassPropTable %sprop_table;\n",
+                  Option::ObjectStaticPrefix);
+      }
+
       cg_indentEnd("};\n");
+      if (hasPropTable) {
+        classScope->outputCPPGlobalTableWrappersDecl(cg, ar);
+      }
       if (m_stmt) {
         cg.setContext(CodeGenerator::CppClassConstantsDecl);
         m_stmt->outputCPP(cg, ar);
@@ -305,7 +334,10 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
         m_stmt->outputCPP(cg, ar);
         cg.setContext(CodeGenerator::CppImplementation);
       }
-      if (classScope->isRedeclaring()) {
+
+      cg.addClass(getClassScope()->getName(), getClassScope());
+
+      if (classScope->isRedeclaring() || classScope->checkHasPropTable()) {
         classScope->outputCPPGlobalTableWrappersImpl(cg, ar);
       }
     }
@@ -327,7 +359,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
 
       // uses a different cg to generate a separate file for each PHP class
       string clsFile = outputDir + getOriginalName() + ".java";
-      ofstream fcls(clsFile.c_str());
+      std::ofstream fcls(clsFile.c_str());
       CodeGenerator cgCls(&fcls, CodeGenerator::FileCPP);
       cgCls.setContext(CodeGenerator::JavaFFIInterface);
 

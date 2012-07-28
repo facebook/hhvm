@@ -816,7 +816,7 @@ DefineFunction(
       array(
         'name'   => "paramtype",
         'type'   => Int64,
-        'value'  => "q_PDO$$PARAM_STR",
+        'value'  => "q_PDO\$\$PARAM_STR",
         'desc'   => "Provides a data type hint for drivers that have alternate quoting styles.",
       ),
     ),
@@ -928,7 +928,7 @@ DefineFunction(
       array(
         'name'   => "orientation",
         'type'   => Int64,
-        'value'  => "q_PDO$$FETCH_ORI_NEXT",
+        'value'  => "q_PDO\$\$FETCH_ORI_NEXT",
         'desc'   => "For a PDOStatement object representing a scrollable cursor, this value determines which row will be returned to the caller. This value must be one of the PDO::FETCH_ORI_* constants, defaulting to PDO::FETCH_ORI_NEXT. To request a scrollable cursor for your PDOStatement object, you must set the PDO::ATTR_CURSOR attribute to PDO::CURSOR_SCROLL when you prepare the SQL statement with PDO::prepare().",
       ),
       array(
@@ -1037,7 +1037,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_PDO$$PARAM_STR",
+        'value'  => "q_PDO\$\$PARAM_STR",
         'desc'   => "Explicit data type for the parameter using the PDO::PARAM_* constants.",
       ),
     ),
@@ -1066,7 +1066,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_PDO$$PARAM_STR",
+        'value'  => "q_PDO\$\$PARAM_STR",
         'desc'   => "Explicit data type for the parameter using the PDO::PARAM_* constants. To return an INOUT parameter from a stored procedure, use the bitwise OR operator to set the PDO::PARAM_INPUT_OUTPUT bits for the data_type parameter.",
       ),
       array(
@@ -1106,7 +1106,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_PDO$$PARAM_STR",
+        'value'  => "q_PDO\$\$PARAM_STR",
         'desc'   => "Data type of the parameter, specified by the PDO::PARAM_* constants.",
       ),
       array(

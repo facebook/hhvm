@@ -23,30 +23,43 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION(SharedMap, SmartAllocatorImpl::NeedRestore);
+IMPLEMENT_SMART_ALLOCATION_HOT(SharedMap, SmartAllocatorImpl::NeedSweep);
 ///////////////////////////////////////////////////////////////////////////////
-
-SharedMap::SharedMap(SharedVariant* source) : m_arr(source) {
-  source->incRef();
-}
-
+HOT_FUNC
 CVarRef SharedMap::getValueRef(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
-  Variant *pv = m_localCache.lvalPtr((int64)pos, false, false);
-  if (pv) return *pv;
-  Variant &r = m_localCache.addLval((int64)pos);
-  r = sv->toLocal();
-  return r;
+  if (LIKELY(m_localCache != NULL)) {
+    Variant *pv;
+    ArrayData *escalated DEBUG_ONLY =
+      m_localCache->ZendArray::lvalPtr((int64)pos, pv, false, false);
+    ASSERT(!escalated);
+    if (pv) return *pv;
+  } else {
+    m_localCache = NEW(ZendArray)();
+    m_localCache->incRefCount();
+  }
+  Variant v = sv->toLocal();
+  Variant *r;
+  ArrayData *escalated DEBUG_ONLY =
+    m_localCache->ZendArray::addLval((int64)pos, r, false);
+  ASSERT(!escalated);
+  *r = v;
+  return *r;
 }
 
 Variant SharedMap::getValueUncached(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
-  Variant *pv = m_localCache.lvalPtr((int64)pos, false, false);
-  if (pv) return *pv;
+  if (LIKELY(m_localCache != NULL)) {
+    Variant *pv;
+    ArrayData *escalated DEBUG_ONLY =
+      m_localCache->ZendArray::lvalPtr((int64)pos, pv, false, false);
+    ASSERT(!escalated);
+    if (pv) return *pv;
+  }
   return sv->toLocal();
 }
 
@@ -113,7 +126,7 @@ CVarRef SharedMap::get(int64 k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
     if (error) {
-      raise_notice("Undefined index: %ld", k);
+      raise_notice("Undefined index: %lld", k);
     }
     return null_variant;
   }
@@ -255,14 +268,6 @@ ArrayData *SharedMap::remove(CVarRef k, bool copy) {
 
 ArrayData *SharedMap::copy() const {
   return escalate();
-}
-
-ArrayData *SharedMap::fiberCopy() const {
-  ArrayInit ai(size());
-  for (int i = 0; i < size(); i++) {
-    ai.add(getKey(i), getValueUncached(i), true);
-  }
-  return ai.create();
 }
 
 ArrayData *SharedMap::append(CVarRef v, bool copy) {

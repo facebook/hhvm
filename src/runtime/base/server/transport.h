@@ -21,7 +21,6 @@
 #include <util/compression.h>
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/fiber_safe.h>
 #include <runtime/base/debuggable.h>
 #include <runtime/base/runtime_option.h>
 
@@ -41,7 +40,7 @@ typedef std::map<std::string, std::string, stdltistr> CookieMap;
  * Note that one transport object is created for each request, and
  * one transport is ONLY accessed from one single thread.
  */
-class Transport : public FiberSafe, public IDebuggable {
+class Transport : public IDebuggable {
 public:
   enum Method {
     UnknownMethod,
@@ -88,6 +87,7 @@ public:
   const timespec &getQueueTime() const { return m_queueTime;}
   const timespec &getWallTime() const { return m_wallTime;}
   const timespec &getCpuTime() const { return m_cpuTime;}
+  const int64 &getInstructions() const { return m_instructions;}
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -287,6 +287,7 @@ public:
   }
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
+  bool setHeaderCallback(CVarRef callback);
 private:
   void sendRawLocked(void *data, int size, int code = 200,
                      bool compressed = false, bool chunked = false,
@@ -326,8 +327,11 @@ public:
   int getResponseTotalSize() const { return m_responseTotalSize; }
   int getResponseSentSize() const { return m_responseSentSize; }
   int64 getFlushTime() const { return m_flushTimeUs; }
+  int getLastChunkSentSize();
+  void getChunkSentSizes(Array &ret);
   void onFlushBegin(int totalSize) { m_responseTotalSize = totalSize; }
   void onFlushProgress(int writtenSize, int64 delayUs);
+  void onChunkedProgress(int writtenSize);
 
   void setThreadType(ThreadType type) { m_threadType = type;}
   ThreadType getThreadType() const { return m_threadType;}
@@ -355,6 +359,8 @@ protected:
   timespec m_wallTime;
   timespec m_cpuTime;
 
+  int64 m_instructions;
+
   // input
   char *m_url;
   char *m_postData;
@@ -365,6 +371,8 @@ protected:
   // output
   bool m_chunkedEncoding;
   bool m_headerSent;
+  Variant m_headerCallback;
+  bool m_headerCallbackDone;  // used to prevent infinite loops
   int m_responseCode;
   std::string m_responseCodeInfo;
   HeaderMap m_responseHeaders;
@@ -376,6 +384,8 @@ protected:
   int m_responseTotalSize; // including added headers
   int m_responseSentSize;
   int64 m_flushTimeUs;
+
+  std::vector<int> m_chunksSentSizes;
 
   std::string m_mimeType;
   bool m_sendContentType;

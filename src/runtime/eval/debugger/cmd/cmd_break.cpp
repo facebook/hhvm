@@ -16,8 +16,6 @@
 
 #include <runtime/eval/debugger/cmd/cmd_break.h>
 
-using namespace std;
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -45,6 +43,8 @@ void CmdBreak::list(DebuggerClient *client) {
       "list",
       "clear",
       "toggle",
+      "enable",
+      "disable",
       NULL
     };
     client->addCompletion(keywords1);
@@ -53,7 +53,7 @@ void CmdBreak::list(DebuggerClient *client) {
     client->addCompletion(DebuggerClient::AutoCompleteClasses);
     client->addCompletion(DebuggerClient::AutoCompleteClassMethods);
   } else if (client->argCount() == 1) {
-    if (client->arg(1, "clear") || client->arg(1, "toggle")) {
+    if (hasUpdateArg(client)) {
       client->addCompletion("all");
     } else if (!client->arg(1, "list")) {
       client->addCompletion(DebuggerClient::AutoCompleteFileNames);
@@ -68,11 +68,7 @@ bool CmdBreak::help(DebuggerClient *client) {
   client->helpCmds(
     "[b]reak",                  "breaks at current line of code",
     "[b]reak {exp}",            "breaks at matching location",
-    "[b]reak [s]tart {url}",    "breaks at start of web request",
-    "[b]reak [e]nd   {url}",    "breaks at end of web request",
-    "[b]reak [p]sp   {url}",    "breaks at end of psp",
     "",                         "",
-    "[b]reak [r]egex {above}",  "breaks at matching regex pattern",
     "[b]reak [o]nce  {above}",  "breaks just once then disables it",
     "",                         "",
     "[b]reak {above} if {php}", "breaks if condition meets",
@@ -85,78 +81,30 @@ bool CmdBreak::help(DebuggerClient *client) {
     "[b]reak [t]oggle {index}", "toggles the n-th breakpoint on list",
     "[b]reak [t]oggle [a]ll",   "toggles all breakpoints",
     "[b]reak [t]oggle",         "toggles current breakpoint",
+    "[b]reak [e]nable {index}", "enables the n-th breakpoint on list",
+    "[b]reak [e]nable [a]ll",   "enables all breakpoints",
+    "[b]reak [e]nable",         "enables current breakpoint",
+    "[b]reak [d]isable {index}","disables the n-th breakpoint on list",
+    "[b]reak [d]isable [a]ll",  "disables all breakpoints",
+    "[b]reak [d]isable",        "disables current breakpoint",
     NULL
   );
 
   client->helpTitle("Where to break?");
   client->helpSection(
     "There are many ways to specify a source file location to set a "
-    "breakpoint, but it's ONE single string without whitespaces. The complete "
-    "format, though every field is optional, looks like this,\n"
+    "breakpoint, but it's ONE single string without whitespaces. The"
+    "format looks like this,\n"
     "\n"
-    "\t{file location}:{call}=>{call}()@{url}\n"
-    "\t{call}=>{call}():{file location}@{url}\n"
-    "\n"
-    "\tfile location: {file}:{line1}-{line2}\n"
-    "\tfunction call: {namespace}::{cls}::{func}\n"
-    "\turl matching:  @{url}\n"
-    "\n"
-    "1) Url has to be specified at end.\n"
-    "\n"
-    "2) Function calls can be 1, 2 or more, matching a call chain. If more "
-    "than one function are specified, they don't have to be direct callers "
-    "to match. It will match any caller on the stack.\n"
-    "\n"
-    "3) Pay attention to those delimiters, and they are required to tell "
-    "what a field should be interpreted as, unless it is a number, then it "
-    "must be line numbers. Otherwise, use them to indicate what the names "
-    "are:\n"
-    "\n"
-    "\t{file}:                filename\n"
-    "\t{line1}-{line2}        any line between them (inclusive)\n"
-    "\t{line}                 single line, if without dashes around\n"
-    "\t{line}:                needs colon if anything after\n"
-    "\t{namespace}::{cls}::   a class in specified namespace\n"
-    "\t{cls}::                a class in any namespace\n"
-    "\t{func}()               function or method\n"
-    "\t{func}=>{func}()       function called by specified function\n"
-    "\t{cls}::{method}()      class method (static or instance)\n"
-    "\t@{url}                 breaks only when this URL is visited\n"
+    "\tfile location: {file}:{line}\n"
+    "\tfunction call: {func}()\n"
+    "\tmethod invoke: {cls}::{method}()\n"
     "\n"
     "For examples,\n"
     "\n"
     "\tb mypage.php:123\n"
-    "\tb 456\n"
     "\tb foo()\n"
     "\tb MyClass::foo()\n"
-    "\tb mypage.php:foo()\n"
-    "\tb html/mypage.php:MyClass::foo()\n"
-    "\tb mypage.php:123@index.php\n"
-    "\n"
-    "4) You may also use regular expressions to match any of these names, "
-    "except line numbers. For examples,\n"
-    "\n"
-    "\tb r Feed.*::on.*()\n"
-    "\n"
-    "This may match FeedStory::onLoad(), FeedFilter::onclick(), etc.. Note "
-    "that it uses PCRE format, not shell format. So you will have to use "
-    "\".*\" instead of just \"*\" for wildcard match."
-  );
-
-  client->helpTitle("Special Breakpoints");
-  client->helpSection(
-    "There are special breakpoints that can only be set by names:\n"
-    "\n"
-    "\tstart\n"
-    "\tend\n"
-    "\tpsp\n"
-    "\n"
-    "They represent different time points of a web request. \"start\" is at "
-    "beginning of a web request, when no PHP file is invoked yet, but query "
-    "strings and server variables are already prepared. \"end\" is at end of "
-    "a web request, but BEFORE post-send processing (psp). \"psp\" is at "
-    "END of psp, not beginning. To set a breakpoint at beginning of psp, use "
-    "\"end\", because end of a request is the same as beginning of psp."
   );
 
   client->helpTitle("Conditional Breakpoints and Watchpoints");
@@ -244,11 +192,17 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
       }
       if (bp) {
         const char *action;
-        if (client->arg(1, "clear")) {
+        if (hasClearArg(client)) {
           action = "cleared";
           bps->erase(bps->begin() + index);
+        } else if (hasEnableArg(client)) {
+          action = "updated";
+          bp->setState(BreakPointInfo::Always);
+        } else if (hasDisableArg(client)) {
+          action = "updated";
+          bp->setState(BreakPointInfo::Disabled);
         } else {
-          ASSERT(client->arg(1, "toggle"));
+          ASSERT(hasToggleArg(client));
           action = "updated";
           bp->toggle();
         }
@@ -258,8 +212,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
       }
     }
     if (found) {
-      m_body = "update";
-      client->send(this);
+      updateImpl(client);
       return true;
     }
 
@@ -268,21 +221,28 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
   }
 
   if (client->arg(2, "all")) {
-    if (client->arg(1, "clear")) {
+    if (hasClearArg(client)) {
       m_breakpoints->clear();
-      m_body = "update";
-      client->send(this);
+      updateImpl(client);
       client->info("All breakpoints are cleared.");
       return true;
     }
 
-    ASSERT(client->arg(1, "toggle"));
     for (unsigned int i = 0; i < m_breakpoints->size(); i++) {
       BreakPointInfoPtr bpi = (*m_breakpoints)[i];
-      bpi->toggle();
+      if (hasEnableArg(client)) {
+        bpi->setState(BreakPointInfo::Always);
+      }
+      else if (hasDisableArg(client)) {
+        bpi->setState(BreakPointInfo::Disabled);
+      }
+      else {
+        ASSERT(hasToggleArg(client));
+        bpi->toggle();
+      }
     }
-    m_body = "update";
-    client->send(this);
+
+    updateImpl(client);
     return processList(client);
   }
 
@@ -312,17 +272,25 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
   }
 
   BreakPointInfoPtr bpi = (*m_breakpoints)[index];
-  if (client->arg(1, "clear")) {
+  if (hasClearArg(client)) {
     m_breakpoints->erase(m_breakpoints->begin() + index);
-    m_body = "update";
-    client->send(this);
+    updateImpl(client);
     client->info("Breakpoint %d cleared %s", bpi->index(),
                  bpi->desc().c_str());
+  } else if (hasEnableArg(client)) {
+    bpi->setState(BreakPointInfo::Always);
+    updateImpl(client);
+    client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
+                 bpi->state(false).c_str());
+  } else if (hasDisableArg(client)) {
+    bpi->setState(BreakPointInfo::Disabled);
+    updateImpl(client);
+    client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
+                 bpi->state(false).c_str());
   } else {
-    ASSERT(client->arg(1, "toggle"));
+    ASSERT(hasToggleArg(client));
     bpi->toggle();
-    m_body = "update";
-    client->send(this);
+    updateImpl(client);
     client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
                  bpi->state(false).c_str());
   }
@@ -330,11 +298,15 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
   return true;
 }
 
-bool CmdBreak::update(DebuggerClient *client) {
+bool CmdBreak::updateImpl(DebuggerClient *client) {
   m_body = "update";
-  m_breakpoints = client->getBreakPoints();
-  client->send(this);
+  client->xend<CmdBreak>(this);
   return true;
+}
+
+bool CmdBreak::update(DebuggerClient *client) {
+  m_breakpoints = client->getBreakPoints();
+  return updateImpl(client);
 }
 
 bool CmdBreak::validate(DebuggerClient *client, BreakPointInfoPtr bpi,
@@ -355,8 +327,7 @@ bool CmdBreak::validate(DebuggerClient *client, BreakPointInfoPtr bpi,
       }
     }
     m_breakpoints->push_back(bpi);
-    m_body = "update";
-    client->send(this);
+    updateImpl(client);
     client->info("Breakpoint %d set %s", bpi->index(), bpi->desc().c_str());
     return true;
   }
@@ -384,7 +355,7 @@ bool CmdBreak::onClient(DebuggerClient *client) {
     index++;
   } else if (client->arg(1, "list")) {
     return processList(client);
-  } else if (client->arg(1, "clear") || client->arg(1, "toggle")) {
+  } else if (hasUpdateArg(client)) {
     return processUpdate(client);
   }
 
@@ -433,27 +404,84 @@ bool CmdBreak::onClient(DebuggerClient *client) {
     client->tutorial(
       "This is the order of different arguments:\n"
       "\n"
-      "\t[b]reak [r]egex|[o]nce {special}|{exp} if|&& {php}\n"
+      "\t[b]reak [o]nce {exp} if|&& {php}\n"
       "\n"
       "These are the components in a breakpoint {exp}:\n"
       "\n"
-      "\t{file location}:{call}=>{call}()@{url}\n"
-      "\t{call}=>{call}():{file location}@{url}\n"
-      "\n"
-      "\tfile location: {file}:{line1}-{line2}\n"
-      "\tfunction call: {namespace}::{cls}::{func}\n"
-      "\turl matching:  @{url}\n"
+      "\tfile location: {file}:{line}\n"
+      "\tfunction call: {func}()\n"
+      "\tmethod invoke: {cls}::{method}()\n"
     );
   }
   return true;
 }
 
+void CmdBreak::setClientOutput(DebuggerClient *client) {
+  // Output an array of current breakpoints including exceptions
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  m_breakpoints = client->getBreakPoints();
+  for (int i = 0; i < (int)m_breakpoints->size(); i++) {
+    BreakPointInfoPtr bpi = m_breakpoints->at(i);
+    Array breakpoint;
+    breakpoint.set("id", bpi->index());
+    breakpoint.set("state", bpi->state(false));
+    if (bpi->m_interrupt == ExceptionThrown) {
+      breakpoint.set("is_exception", true);
+      breakpoint.set("exception_class", bpi->getExceptionClass());
+    } else {
+      breakpoint.set("is_exception", false);
+      breakpoint.set("file", bpi->m_file);
+      breakpoint.set("line1", bpi->m_line1);
+      breakpoint.set("line2", bpi->m_line2);
+      breakpoint.set("namespace", bpi->getNamespace());
+      breakpoint.set("func", bpi->getFunction());
+      breakpoint.set("class", bpi->getClass());
+    }
+    breakpoint.set("url", bpi->m_url);
+    breakpoint.set("use_regex", bpi->m_regex);
+    breakpoint.set("cluase_type", bpi->m_check ? "if" : "&&");
+    breakpoint.set("clause", bpi->m_clause);
+    breakpoint.set("desc", bpi->desc());
+    values.append(breakpoint);
+  }
+  client->setOTValues(values);
+}
+
 bool CmdBreak::onServer(DebuggerProxy *proxy) {
   if (m_body == "update") {
+    if (!m_bps.empty()) {
+      RequestInjectionData &rjdata =
+        ThreadInfo::s_threadInfo->m_reqInjectionData;
+      rjdata.debuggerIdle = 0;
+    }
     proxy->setBreakPoints(m_bps);
-    return true;
+    m_breakpoints = &m_bps;
+    return proxy->send(this);
   }
   return false;
+}
+
+bool CmdBreak::hasUpdateArg(DebuggerClient *client) {
+  return
+    hasClearArg(client) || hasEnableArg(client) ||
+    hasDisableArg(client) || hasToggleArg(client);
+}
+
+bool CmdBreak::hasEnableArg(DebuggerClient *client) {
+  return client->arg(1, "enable");
+}
+
+bool CmdBreak::hasDisableArg(DebuggerClient *client) {
+  return client->arg(1, "disable");
+}
+
+bool CmdBreak::hasClearArg(DebuggerClient *client) {
+  return client->arg(1, "clear");
+}
+
+bool CmdBreak::hasToggleArg(DebuggerClient *client) {
+  return client->arg(1, "toggle");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

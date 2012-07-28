@@ -28,6 +28,10 @@ endif
 
 include $(PROJECT_ROOT)/src/rules.mk
 
+ifneq ($(wildcard $(HPHP_LIB)/src),)
+CPPFLAGS += -I$(HPHP_LIB)/src
+endif
+
 ifdef SHARED
 EXTERNAL += $(LIB_DIR)/libhphp_runtime.so
 endif

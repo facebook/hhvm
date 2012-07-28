@@ -16,16 +16,14 @@
 
 #include <runtime/base/shared/shared_store.h>
 
-using namespace std;
-using namespace boost;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void LockedSharedStore::clear() {
+bool LockedSharedStore::clear() {
   lockMap();
   clearImpl();
   unlockMap();
+  return true;
 }
 
 bool LockedSharedStore::get(CStrRef key, Variant &value) {
@@ -82,7 +80,7 @@ bool LockedSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
 
   lockMap();
   StoreValue *sval;
-  SharedVariant* var = construct(key, val);
+  SharedVariant* var = construct(val);
   bool expired = false;
   bool added = false;
   if (find(key, sval, expired) || expired) {
@@ -152,7 +150,7 @@ bool LfuTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
     CStrRef key;
     StringData *newkey;
   };
-  SharedVariant* var = construct(key, val);
+  SharedVariant* var = construct(val);
   StoreUpdater updater(ttl, var, key, overwrite);
   m_vars.atomicUpdate(updater.newKey(), updater, true);
   if (!updater.added) {
@@ -198,7 +196,7 @@ int64 LockedSharedStore::inc(CStrRef key, int64 step, bool &found) {
     Variant v = getVar(val->var)->toLocal();
     ret = v.toInt64() + step;
     v = ret;
-    SharedVariant *var = construct(key, v);
+    SharedVariant *var = construct(v);
     getVar(val->var)->decRef();
     val->var = putVar(var);
     found = true;
@@ -227,7 +225,7 @@ int64 LfuTableSharedStore::inc(CStrRef key, int64 step, bool &found) {
       Variant v = val.var->toLocal();
       ret = v.toInt64() + step;
       v = ret;
-      SharedVariant *var = store->construct(key, v);
+      SharedVariant *var = store->construct(v);
       val.var->decRef();
       val.var = var;
       found = true;
@@ -260,7 +258,7 @@ bool LockedSharedStore::cas(CStrRef key, int64 old, int64 val) {
     Variant v = getVar(sval->var)->toLocal();
     if (v.toInt64() == old) {
       v = val;
-      SharedVariant *var = construct(key, v);
+      SharedVariant *var = construct(v);
       getVar(sval->var)->decRef();
       sval->var = putVar(var);
       success = true;
@@ -289,7 +287,7 @@ bool LfuTableSharedStore::cas(CStrRef key, int64 old, int64 val) {
       Variant v = sval.var->toLocal();
       if (v.toInt64() == old) {
         v = val;
-        SharedVariant *var = store->construct(key, v);
+        SharedVariant *var = store->construct(v);
         sval.var->decRef();
         sval.var = var;
         success = true;
@@ -310,24 +308,6 @@ bool LfuTableSharedStore::cas(CStrRef key, int64 old, int64 val) {
     ServerStats::Log("apc.cas", 1);
   }
   return updater.success;
-}
-
-static std::string appendElement(int indent, const char *name, int value) {
-  string ret;
-  for (int i = 0; i < indent; i++) {
-    ret += "  ";
-  }
-  ret += "<"; ret += name; ret += ">";
-  ret += lexical_cast<string>(value);
-  ret += "</"; ret += name; ret += ">\n";
-  return ret;
-}
-
-std::string LfuTableSharedStore::reportStats(int &reachable, int indent) {
-  string ret = SharedStore::reportStats(reachable, indent);
-  ret += appendElement(indent, "Immortal", m_vars.immortalCount());
-  ret += appendElement(indent, "Maximum Capacity", m_vars.maximumCapacity());
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

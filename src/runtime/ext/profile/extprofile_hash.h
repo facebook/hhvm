@@ -70,7 +70,7 @@ inline bool x_hash_update_file(CObjRef init_context, CStrRef filename, CObjRef s
   return f_hash_update_file(init_context, filename, stream_context);
 }
 
-inline int x_hash_update_stream(CObjRef context, CObjRef handle, int length = -1) {
+inline int64 x_hash_update_stream(CObjRef context, CObjRef handle, int length = -1) {
   FUNCTION_INJECTION_BUILTIN(hash_update_stream);
   return f_hash_update_stream(context, handle, length);
 }
@@ -80,7 +80,7 @@ inline bool x_hash_update(CObjRef context, CStrRef data) {
   return f_hash_update(context, data);
 }
 
-inline int x_furchash_hphp_ext(CStrRef key, int len, int nPart) {
+inline int64 x_furchash_hphp_ext(CStrRef key, int len, int nPart) {
   FUNCTION_INJECTION_BUILTIN(furchash_hphp_ext);
   return f_furchash_hphp_ext(key, len, nPart);
 }

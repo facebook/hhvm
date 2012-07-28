@@ -61,7 +61,10 @@ class c_EncodingDetector : public ExtObjectData {
   public: c_EncodingDetector *create();
 
 
-  private: UCharsetDetector *m_encoding_detector;
+ private:
+  UCharsetDetector *m_encoding_detector;
+  String m_text;
+  String m_declaredencoding;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,7 +84,7 @@ class c_EncodingMatch : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(isvalid);
   public: String t_getencoding();
   DECLARE_METHOD_INVOKE_HELPERS(getencoding);
-  public: int t_getconfidence();
+  public: int64 t_getconfidence();
   DECLARE_METHOD_INVOKE_HELPERS(getconfidence);
   public: String t_getlanguage();
   DECLARE_METHOD_INVOKE_HELPERS(getlanguage);

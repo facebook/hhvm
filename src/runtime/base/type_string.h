@@ -27,63 +27,169 @@
 #include <runtime/base/string_offset.h>
 #include <runtime/base/types.h>
 #include <runtime/base/hphp_value.h>
+#include <runtime/base/gc_roots.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 class Array;
 class String;
 class VarNR;
-class AtomicString;
+
+// helpers
+StringData* buildStringData(int     n);
+StringData* buildStringData(int64   n);
+StringData* buildStringData(double  n);
+StringData* buildStringData(litstr  s);
+
+#ifdef HHVM_GC
+typedef GCRootTracker<StringData> StringBase;
+#else
+typedef SmartPtr<StringData> StringBase;
+#endif
 
 /**
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-class String : public SmartPtr<StringData> {
+class String : protected StringBase {
 public:
+  typedef hphp_hash_map<int64, const StringData *, int64_hash>
+    IntegerStringDataMap;
+  static const int MinPrecomputedInteger = SCHAR_MIN;
+  static const int MaxPrecomputedInteger = 65535;
+  static StringData *converted_integers_raw;
+  static StringData *converted_integers;
+  static IntegerStringDataMap integer_string_data_map;
+
+  static bool HasConverted(int64 n) {
+    return MinPrecomputedInteger <= n && n <= MaxPrecomputedInteger;
+  }
+  static bool HasConverted(int n) {
+    return HasConverted((int64)n);
+  }
+  static void PreConvertInteger(int64 n) ATTRIBUTE_COLD;
+
   // create a string from a character
-  static String FromChar(char ch);
+  static String FromChar(char ch) {
+    return StringData::GetStaticString(ch);
+  }
+
+  static const StringData *GetIntegerStringData(int64 n) {
+    if (HasConverted(n)) {
+      const StringData *sd = converted_integers + n;
+      return sd;
+    }
+    IntegerStringDataMap::const_iterator it =
+      integer_string_data_map.find(n);
+    if (it != integer_string_data_map.end()) return it->second;
+    return NULL;
+  }
+  static const StringData *GetIntegerStringData(int n) {
+    return GetIntegerStringData((int64)n);
+  }
+  static const char *GetIntegerString(int64 n) {
+    const StringData *sd = GetIntegerStringData(n);
+    if (sd) return sd->data();
+    return NULL;
+  }
+  static const char *GetIntegerString(int n) {
+    return GetIntegerString((int64)n);
+  }
 
 public:
   String() {}
   ~String();
 
-  StringData *operator->() const {
+  StringData* get() const { return m_px; }
+  void reset() { StringBase::reset(); }
+
+  // Deliberately doesn't throw_null_pointer_exception as a perf
+  // optimization.
+  StringData* operator->() const {
     return m_px;
+  }
+
+  // Transfer ownership of our reference to this StringData.
+  StringData* detach() {
+    StringData* ret = m_px;
+    m_px = 0;
+    return ret;
   }
 
   /**
    * Constructors
    */
-  String(StringData *data) : SmartPtr<StringData>(data) { }
+  String(StringData *data) : StringBase(data) { }
   String(int     n);
   String(int64   n);
   String(double  n);
   String(litstr  s) {
     if (s) {
-      m_px = NEW(StringData)(s, AttachLiteral);
+      m_px = buildStringData(s);
       m_px->setRefCount(1);
     }
   }
-  String(CStrRef str)
-    : SmartPtr<StringData>(str.m_px) { }
+  String(CStrRef str) : StringBase(str.m_px) { }
   String(const std::string &s) { // always make a copy
     m_px = NEW(StringData)(s.data(), s.size(), CopyString);
     m_px->setRefCount(1);
   }
-  String(const char *s, StringDataMode mode) { // null-terminated string
+  // attach to null terminated string literal
+  String(const char *s, AttachLiteralMode mode) {
     if (s) {
       m_px = NEW(StringData)(s, mode);
       m_px->setRefCount(1);
     }
   }
-  String(const char *s, int length, StringDataMode mode) { // binary string
+  // attach to null terminated malloc'ed string
+  String(const char *s, AttachDeprecatedMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // attach to null terminated malloc'ed string, maybe free it now.
+  String(const char *s, AttachStringMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // copy a null terminated string
+  String(const char *s, CopyStringMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // attach to binary string literal
+  String(const char *s, int length, AttachLiteralMode mode) {
     if (s) {
       m_px = NEW(StringData)(s, length, mode);
       m_px->setRefCount(1);
     }
   }
-  String(const AtomicString &s);
+  // attach to binary malloc'ed string
+  String(const char *s, int length, AttachDeprecatedMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, length, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // attach to binary malloc'ed string
+  String(const char *s, int length, AttachStringMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, length, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // make copy of binary binary string
+  String(const char *s, int length, CopyStringMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, length, mode);
+      m_px->setRefCount(1);
+    }
+  }
 
   void clear() { reset();}
   /**
@@ -115,6 +221,9 @@ public:
   }
   int length() const {
     return m_px ? m_px->size() : 0;
+  }
+  StringSlice slice() const {
+    return m_px ? m_px->slice() : StringSlice("", 0);
   }
   bool isNull() const {
     return m_px == NULL;
@@ -182,9 +291,9 @@ public:
   int find(char ch, int pos = 0, bool caseSensitive = true) const;
   int find(const char *s, int pos = 0, bool caseSensitive = true) const;
   int find(CStrRef s, int pos = 0, bool caseSensitive = true) const;
-  int rfind(char ch, int pos = -1, bool caseSensitive = true) const;
-  int rfind(const char *s, int pos = -1, bool caseSensitive = true) const;
-  int rfind(CStrRef s, int pos = -1, bool caseSensitive = true) const;
+  int rfind(char ch, int pos = 0, bool caseSensitive = true) const;
+  int rfind(const char *s, int pos = 0, bool caseSensitive = true) const;
+  int rfind(CStrRef s, int pos = 0, bool caseSensitive = true) const;
 
   /**
    * Replace a substr with another and return replaced one. Note, read
@@ -208,7 +317,6 @@ public:
   String &operator =  (CStrRef v);
   String &operator =  (CVarRef v);
   String &operator =  (const std::string &s);
-  String &operator =  (const AtomicString &s);
   String  operator +  (litstr  v) const;
   String  operator +  (CStrRef v) const;
   String &operator += (litstr  v);
@@ -342,19 +450,15 @@ public:
   bool checkStatic();
 
   /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   */
-  String fiberCopy() const;
-
-  /**
    * Debugging
    */
   void dump() const;
 
  private:
+
   StringOffset lvalAtImpl(int key) {
     StringData *s = StringData::Escalate(m_px);
-    SmartPtr<StringData>::operator=(s);
+    StringBase::operator=(s);
     return StringOffset(m_px, key);
   }
 
@@ -367,6 +471,7 @@ public:
 
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(String, m_px) == offsetof(Value, m_data));
+    BOOST_STATIC_ASSERT((offsetof(String, m_px) == kExpectedMPxOffset));
   }
 };
 
@@ -394,8 +499,24 @@ struct string_data_isame {
   }
 };
 
+struct string_data_lt {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    int len1 = s1->size();
+    int len2 = s2->size();
+    if (len1 < len2) {
+      return (len1 == 0) || (memcmp(s1->data(), s2->data(), len1) <= 0);
+    } else if (len1 == len2) {
+      return (len1 != 0) && (memcmp(s1->data(), s2->data(), len1) < 0);
+    } else /* len1 > len2 */ {
+      return ((len2 != 0) && (memcmp(s1->data(), s2->data(), len2) < 0));
+    }
+  }
+};
+
 typedef hphp_hash_set<StringData *, string_data_hash, string_data_same>
   StringDataSet;
+typedef hphp_hash_set<const StringData*, string_data_hash, string_data_same>
+  ConstStringDataSet;
 
 struct hphp_string_hash {
   size_t operator()(CStrRef s) const {
@@ -416,7 +537,7 @@ struct hphp_string_isame {
 };
 
 struct StringDataHashCompare {
-  bool equal(StringData *s1, StringData *s2) const {
+  bool equal(const StringData *s1, const StringData *s2) const {
     ASSERT(s1 && s2);
     return s1->same(s2);
   }
@@ -427,22 +548,13 @@ struct StringDataHashCompare {
 };
 
 struct StringDataHashICompare {
-  bool equal(StringData *s1, StringData *s2) const {
+  bool equal(const StringData *s1, const StringData *s2) const {
     ASSERT(s1 && s2);
     return s1->isame(s2);
   }
   size_t hash(const StringData *s) const {
     ASSERT(s);
     return s->hash();
-  }
-};
-
-struct stringHashCompare {
-  bool equal(const std::string &s1, const std::string &s2) const {
-    return s1 == s2;
-  }
-  size_t hash(const std::string &s) const {
-    return hash_string(s.c_str());
   }
 };
 
@@ -457,6 +569,39 @@ typedef hphp_hash_set<String, hphp_string_hash, hphp_string_same> StringSet;
 template<typename T>
 class StringMap :
   public hphp_hash_map<String, T, hphp_string_hash, hphp_string_same> { };
+
+///////////////////////////////////////////////////////////////////////////////
+// StrNR
+
+class StrNR {
+public:
+  explicit StrNR(StringData *data) {
+    m_px = data;
+  }
+  explicit StrNR(const StringData *data) {
+    m_px = const_cast<StringData*>(data);
+  }
+  explicit StrNR(const String &s) { // XXX
+    m_px = s.get();
+  }
+
+  operator CStrRef() const { return asString(); }
+  const char *data() const { return m_px ? m_px->data() : ""; }
+
+  String& asString() {
+    return *reinterpret_cast<String*>(this);
+  }
+
+  const String& asString() const {
+    return const_cast<StrNR*>(this)->asString();
+  }
+
+protected:
+  StringData *m_px;
+  static void compileTimeAssertions() {
+    BOOST_STATIC_ASSERT((offsetof(StrNR, m_px) == kExpectedMPxOffset));
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -474,7 +619,6 @@ public:
 
 public:
   friend class StringUtil;
-  friend class LiteralStringInitializer;
 
   StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
@@ -494,48 +638,15 @@ private:
   static StringDataSet *s_stringSet;
 };
 
+typedef struct StaticStringProxy {
+  union {
+    char m_data[sizeof(StaticString)];
+    void *p_dummy;
+    int64 i_dummy;
+  };
+} StaticStringProxy;
+
 extern const StaticString empty_string;
-
-///////////////////////////////////////////////////////////////////////////////
-// StrNR
-
-class StrNR : public String {
-public:
-  StrNR(StringData *data) {
-    m_px = data;
-  }
-  StrNR(const StrNR &s) {
-    m_px = s.m_px;
-  }
-  ~StrNR() {
-    m_px = NULL;
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// AtomicString
-
-class AtomicString : public AtomicSmartPtr<StringData> {
-public:
-  AtomicString() { }
-  AtomicString(const char *s, StringDataMode mode = AttachLiteral);
-  AtomicString(const std::string &s);
-  AtomicString(StringData *str);
-  AtomicString(const AtomicString &s) : AtomicSmartPtr<StringData>(s.m_px) { }
-
-  AtomicString &operator=(const AtomicString &s);
-  AtomicString &operator=(const std::string &s);
-
-  const char *c_str() const {
-    return m_px ? m_px->data() : "";
-  }
-  bool empty() const {
-    return m_px ? m_px->empty() : true;
-  }
-  int size() const {
-    return m_px ? m_px->size() : 0;
-  }
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

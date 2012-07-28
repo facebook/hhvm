@@ -28,6 +28,7 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/simple_function_call.h>
 #include <compiler/option.h>
 #include <compiler/parser/parser.h>
 #include <compiler/statement/interface_statement.h>
@@ -44,25 +45,35 @@
 #include <util/util.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
+using std::map;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 ClassScope::ClassScope(KindOf kindOf, const std::string &name,
                        const std::string &parent,
                        const vector<string> &bases,
-                       const std::string &docComment, StatementPtr stmt)
+                       const std::string &docComment, StatementPtr stmt,
+                       const std::vector<UserAttributePtr> &attrs)
   : BlockScope(name, docComment, stmt, BlockScope::ClassScope),
     m_parent(parent), m_bases(bases), m_attribute(0), m_redeclaring(-1),
     m_kindOf(kindOf), m_derivesFromRedeclaring(FromNormal),
     m_traitStatus(NOT_FLATTENED), m_volatile(false), m_derivedByDynamic(false),
-    m_sep(false), m_needsCppCtor(false), m_needsInit(true) {
+    m_sep(false), m_needsCppCtor(false), m_needsInit(true), m_knownBases(0),
+    m_needsEnableDestructor(0) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
   // dynamic class is also volatile
   m_volatile = Option::AllVolatile || m_dynamic;
+
+  for (unsigned i = 0; i < attrs.size(); ++i) {
+    if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
+      attrs[i]->parseTimeFatal(Compiler::DeclaredAttributeTwice,
+                               "Redeclared attribute %s",
+                               attrs[i]->getName().c_str());
+    }
+    m_userAttributes[attrs[i]->getName()] = attrs[i]->getExp();
+  }
 
   ASSERT(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
 }
@@ -78,7 +89,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_kindOf(KindOfObjectClass), m_derivesFromRedeclaring(FromNormal),
     m_traitStatus(NOT_FLATTENED), m_dynamic(false), m_volatile(false),
     m_derivedByDynamic(false), m_sep(false), m_needsCppCtor(false),
-    m_needsInit(true) {
+    m_needsInit(true), m_knownBases(0), m_needsEnableDestructor(0) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -136,34 +147,52 @@ void ClassScope::derivedMagicMethods(ClassScopePtr super) {
   if (derivedByDynamic()) {
     super->m_derivedByDynamic = true;
   }
-  if (m_attribute & (HasUnknownPropGetter|MayHaveUnknownPropGetter)) {
+  if (m_attribute & (HasUnknownPropGetter|
+                     MayHaveUnknownPropGetter|
+                     InheritsUnknownPropGetter)) {
     super->setAttribute(MayHaveUnknownPropGetter);
   }
-  if (m_attribute & (HasUnknownPropSetter|MayHaveUnknownPropSetter)) {
+  if (m_attribute & (HasUnknownPropSetter|
+                     MayHaveUnknownPropSetter|
+                     InheritsUnknownPropSetter)) {
     super->setAttribute(MayHaveUnknownPropSetter);
   }
-  if (m_attribute & (HasUnknownPropTester|MayHaveUnknownPropTester)) {
+  if (m_attribute & (HasUnknownPropTester|
+                     MayHaveUnknownPropTester|
+                     InheritsUnknownPropTester)) {
     super->setAttribute(MayHaveUnknownPropTester);
   }
-  if (m_attribute & (HasPropUnsetter|MayHavePropUnsetter)) {
+  if (m_attribute & (HasPropUnsetter|
+                     MayHavePropUnsetter|
+                     InheritsPropUnsetter)) {
     super->setAttribute(MayHavePropUnsetter);
   }
-  if (m_attribute & (HasUnknownMethodHandler|MayHaveUnknownMethodHandler)) {
+  if (m_attribute & (HasUnknownMethodHandler|
+                     MayHaveUnknownMethodHandler|
+                     InheritsUnknownMethodHandler)) {
     super->setAttribute(MayHaveUnknownMethodHandler);
   }
-  if (m_attribute &
-      (HasUnknownStaticMethodHandler|MayHaveUnknownStaticMethodHandler)) {
+  if (m_attribute & (HasUnknownStaticMethodHandler|
+                     MayHaveUnknownStaticMethodHandler|
+                     InheritsUnknownStaticMethodHandler)) {
     super->setAttribute(MayHaveUnknownStaticMethodHandler);
   }
-  if (m_attribute & (HasInvokeMethod|MayHaveInvokeMethod)) {
+  if (m_attribute & (HasInvokeMethod|
+                     MayHaveInvokeMethod|
+                     InheritsInvokeMethod)) {
     super->setAttribute(MayHaveInvokeMethod);
   }
-  if (m_attribute & (HasArrayAccess|MayHaveArrayAccess)) {
+  if (m_attribute & (HasArrayAccess|
+                     MayHaveArrayAccess|
+                     InheritsArrayAccess)) {
     super->setAttribute(MayHaveArrayAccess);
   }
 }
 
 void ClassScope::inheritedMagicMethods(ClassScopePtr super) {
+  if (super->m_attribute & UsesUnknownTrait) {
+    setAttribute(UsesUnknownTrait);
+  }
   if (super->m_attribute &
       (HasUnknownPropGetter|InheritsUnknownPropGetter)) {
     setAttribute(InheritsUnknownPropGetter);
@@ -235,7 +264,7 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
     }
     bases.insert(base);
 
-    ClassScopePtrVec parents = ar->findClasses(base);
+    ClassScopePtrVec parents = ar->findClasses(Util::toLower(base));
     for (unsigned int j = 0; j < parents.size(); j++) {
       parents[j]->checkDerivation(ar, seen);
     }
@@ -262,8 +291,13 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
       fs->setVirtual();
       fs->setHasOverride();
       if (fs->isFinal()) {
-        Compiler::Error(Compiler::InvalidOverride,
-                        fs->getStmt(), func->getStmt());
+        std::string s__MockClass = "__MockClass";
+        ClassScopePtr derivedClass = func->getContainingClass();
+        if (derivedClass->m_userAttributes.find(s__MockClass) ==
+            derivedClass->m_userAttributes.end()) {
+          Compiler::Error(Compiler::InvalidOverride,
+                          fs->getStmt(), func->getStmt());
+        }
       }
     }
   }
@@ -276,19 +310,21 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
     if (super) {
       if (super->isRedeclaring()) {
         if (forInvoke) continue;
+
+        const ClassScopePtrVec &classes = ar->findRedeclaredClasses(base);
+        StringToFunctionScopePtrMap pristine(funcs);
+        BOOST_FOREACH(ClassScopePtr cls, classes) {
+          cls->m_derivedByDynamic = true;
+          StringToFunctionScopePtrMap cur(pristine);
+          derivedMagicMethods(cls);
+          cls->collectMethods(ar, cur, false, forInvoke);
+          inheritedMagicMethods(cls);
+          funcs.insert(cur.begin(), cur.end());
+          cls->getVariables()->
+            forceVariants(ar, VariableTable::AnyNonPrivateVars);
+        }
+
         if (base == m_parent) {
-          const ClassScopePtrVec &classes = ar->findRedeclaredClasses(m_parent);
-          StringToFunctionScopePtrMap pristine(funcs);
-          BOOST_FOREACH(ClassScopePtr cls, classes) {
-            cls->m_derivedByDynamic = true;
-            StringToFunctionScopePtrMap cur(pristine);
-            derivedMagicMethods(cls);
-            cls->collectMethods(ar, cur, false, forInvoke);
-            inheritedMagicMethods(cls);
-            funcs.insert(cur.begin(), cur.end());
-            cls->getVariables()->
-              forceVariants(ar, VariableTable::AnyNonPrivateVars);
-          }
           m_derivesFromRedeclaring = DirectFromRedeclared;
           getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars,
                                         false);
@@ -356,25 +392,25 @@ void ClassScope::importTraitProperties(AnalysisResultPtr ar) {
   }
 }
 
-void ClassScope::importTraitMethod(const TraitMethod &traitMethod,
-                                   AnalysisResultPtr ar,
-                                   const string &methName) {
+MethodStatementPtr
+ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
+                              AnalysisResultPtr   ar,
+                              string              methName,
+                              GeneratorRenameMap& genRenameMap,
+                              const std::map<string, MethodStatementPtr>&
+                              importedTraitMethods) {
   MethodStatementPtr meth = traitMethod.m_method;
-  const string &origMethName = traitMethod.m_originalName;
+  string origMethName = traitMethod.m_originalName;
   ModifierExpressionPtr modifiers = traitMethod.m_modifiers;
 
-  // For abstract methods, simply return if method already exists in the class
-  if ((modifiers && modifiers->isAbstract()) ||
-      (!modifiers && meth->getModifiers()->isAbstract())) {
-    if (findFunction(ar, methName, true)) {
-      return;
+  if (meth->getOrigGeneratorFunc()) {
+    const string &name = meth->getOrigGeneratorFunc()->getName();
+    if (!importedTraitMethods.count(name)) {
+      // Dont import the generator, if the origGenerator wasnt imported
+      // this happens when a generator in the trait is hidden by a non-generator
+      // method in the importing class.
+      return MethodStatementPtr();
     }
-  }
-
-  // Check for errors before cloning
-  if (modifiers && modifiers->isStatic()) {
-    Compiler::Error(Compiler::InvalidAccessModifier, traitMethod.m_ruleStmt);
-    return;
   }
 
   MethodStatementPtr cloneMeth = dynamic_pointer_cast<MethodStatement>(
@@ -386,6 +422,19 @@ void ClassScope::importTraitMethod(const TraitMethod &traitMethod,
     cloneMeth->setModifiers(modifiers);
   }
   FunctionScopePtr funcScope = meth->getFunctionScope();
+
+  // Trait method typehints, self and parent, need to be converted
+  ClassScopePtr cScope = dynamic_pointer_cast<ClassScope>(shared_from_this());
+  cloneMeth->fixupSelfAndParentTypehints( cScope );
+
+  // Generator methods need to be renamed, otherwise code gen produces multiple
+  // continuation classes with the same name
+  if (funcScope->isGenerator()) {
+    const string& newName = getNewGeneratorName(funcScope, genRenameMap);
+    methName = origMethName = newName;
+    cloneMeth->setName(newName);
+    cloneMeth->setOriginalName(newName);
+  }
   FunctionScopePtr cloneFuncScope
     (new HPHP::FunctionScope(funcScope, ar, methName, origMethName, cloneMeth,
                              cloneMeth->getModifiers()));
@@ -394,7 +443,11 @@ void ClassScope::importTraitMethod(const TraitMethod &traitMethod,
 
   cloneMeth->addTraitMethodToScope(ar,
                dynamic_pointer_cast<ClassScope>(shared_from_this()));
-  cloneMeth->analyzeProgram(ar);
+
+  ar->recordFunctionSource(cloneMeth->getFullName(), meth->getLocation(),
+                           meth->getFileScope()->getName());
+
+  return cloneMeth;
 }
 
 void ClassScope::addImportTraitMethod(const TraitMethod &traitMethod,
@@ -421,7 +474,7 @@ MethodStatementPtr
 ClassScope::findTraitMethod(AnalysisResultPtr ar,
                             ClassScopePtr trait,
                             const string &methodName,
-                            set<ClassScopePtr> &visitedTraits) {
+                            std::set<ClassScopePtr> &visitedTraits) {
   if (visitedTraits.find(trait) != visitedTraits.end()) {
     return MethodStatementPtr();
   }
@@ -481,7 +534,7 @@ void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
 void ClassScope::applyTraitPrecRule(TraitPrecStatementPtr stmt) {
   const string methodName = Util::toLower(stmt->getMethodName());
   const string selectedTraitName = Util::toLower(stmt->getTraitName());
-  set<string> otherTraitNames;
+  std::set<string> otherTraitNames;
   stmt->getOtherTraitNames(otherTraitNames);
 
   map<string,TraitMethodList>::iterator methIter =
@@ -547,7 +600,7 @@ void ClassScope::addTraitAlias(TraitAliasStatementPtr aliasStmt) {
   const string &newMethName = aliasStmt->getNewMethodName();
   string origName = traitName.empty() ? "(null)" : traitName;
   origName += "::" + origMethName;
-  m_traitAliases.push_back(pair<string, string>(newMethName, origName));
+  m_traitAliases.push_back(std::pair<string, string>(newMethName, origName));
 }
 
 void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
@@ -572,7 +625,7 @@ void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
   addTraitAlias(stmt);
 
   // Get the method
-  set<ClassScopePtr> visitedTraits;
+  std::set<ClassScopePtr> visitedTraits;
   MethodStatementPtr methStmt = findTraitMethod(ar, traitCls, origMethName,
                                                 visitedTraits);
   if (!methStmt) {
@@ -620,33 +673,120 @@ void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
   }
 }
 
-void ClassScope::removeImplTraitAbstractMethods(AnalysisResultPtr ar) {
+// This method removes trait abstract methods that are either:
+//   1) implemented by other traits
+//   2) duplicate
+void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
   for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
        iter != m_importMethToTraitMap.end(); iter++) {
 
     TraitMethodList& tMethList = iter->second;
-    // Check if there's any non-abstract method imported
     bool hasNonAbstractMeth = false;
+    unsigned countAbstractMeths = 0;
+
     for (TraitMethodList::const_iterator traitMethIter = tMethList.begin();
          traitMethIter != tMethList.end(); traitMethIter++) {
       ModifierExpressionPtr modifiers = traitMethIter->m_modifiers ?
         traitMethIter->m_modifiers : traitMethIter->m_method->getModifiers();
       if (!(modifiers->isAbstract())) {
         hasNonAbstractMeth = true;
-        break;
+      } else {
+        countAbstractMeths++;
       }
     }
-    if (hasNonAbstractMeth) {
-      // Erase abstract declarations
+    if (hasNonAbstractMeth || countAbstractMeths > 1) {
+      // Erase spare abstract declarations
+      bool firstAbstractMeth = true;
       for (TraitMethodList::iterator nextTraitIter = tMethList.begin();
            nextTraitIter != tMethList.end(); ) {
         TraitMethodList::iterator traitIter = nextTraitIter++;
         ModifierExpressionPtr modifiers = traitIter->m_modifiers ?
           traitIter->m_modifiers : traitIter->m_method->getModifiers();
         if (modifiers->isAbstract()) {
-          tMethList.erase(traitIter);
+          if (hasNonAbstractMeth || !firstAbstractMeth) {
+            tMethList.erase(traitIter);
+          }
+          firstAbstractMeth = false;
         }
       }
+    }
+  }
+}
+
+const string& ClassScope::getNewGeneratorName(
+  FunctionScopePtr genFuncScope, GeneratorRenameMap &genRenameMap) {
+  ASSERT(genFuncScope->isGenerator());
+  const string& oldName = genFuncScope->getName();
+  GeneratorRenameMap::iterator mapIt = genRenameMap.find(oldName);
+  if (mapIt != genRenameMap.end()) {
+    return mapIt->second;
+  }
+  string newName = oldName + "_" +
+    lexical_cast<string>(genFuncScope->getNewID());
+  genRenameMap[oldName] = newName;
+  return genRenameMap[oldName];
+}
+
+void
+ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
+                                          ConstructPtr      c,
+                                          ImportedMethodMap &importedMethods) {
+  if (!c) return;
+  SimpleFunctionCallPtr funcCall = dynamic_pointer_cast<SimpleFunctionCall>(c);
+  if (funcCall && funcCall->getName() == "hphp_create_continuation") {
+
+    ExpressionListPtr params = funcCall->getParams();
+    ASSERT(params->getCount() >= 2);
+    const string &oldClassName =
+      dynamic_pointer_cast<ScalarExpression>((*params)[0])->getString();
+    ClassScopePtr oldClassScope = ar->findClass(oldClassName);
+    if (!oldClassScope || !oldClassScope->isTrait()) return;
+
+    const string &oldGenName =
+      dynamic_pointer_cast<ScalarExpression>((*params)[1])->getString();
+
+    MethodStatementPtr origGenStmt = importedMethods[oldGenName];
+    ASSERT(origGenStmt);
+
+    const string &newGenName = origGenStmt->getOriginalName();
+    ExpressionPtr newGenExpr = funcCall->makeScalarExpression(ar, newGenName);
+    ExpressionPtr newClsExpr = funcCall->makeScalarExpression(ar, getName());
+    (*params)[0] = newClsExpr;
+    (*params)[1] = newGenExpr;
+    funcCall->analyzeProgram(ar);
+    return;
+  }
+  for (int i=0; i < c->getKidCount(); i++) {
+    renameCreateContinuationCalls(ar, c->getNthKid(i), importedMethods);
+  }
+}
+
+void ClassScope::relinkGeneratorMethods(
+  AnalysisResultPtr ar,
+  ImportedMethodMap &importedMethods) {
+  for (ImportedMethodMap::const_iterator methIt =
+         importedMethods.begin(); methIt != importedMethods.end(); methIt++) {
+    MethodStatementPtr newMeth = methIt->second;
+
+    // Skip non-generator methods
+    if (!newMeth) continue;
+
+    if (newMeth->getOrigGeneratorFunc()) {
+      // Get corresponding original generator method in the current class
+      const string& origGenName = newMeth->getOrigGeneratorFunc()->getName();
+      MethodStatementPtr origGenStmt = importedMethods[origGenName];
+      ASSERT(origGenStmt);
+      // It must be an orig gen func already, we're just updating to point
+      // to the corresponding method cloned from the trait
+      ASSERT(origGenStmt->getGeneratorFunc());
+      newMeth->setOrigGeneratorFunc(origGenStmt);
+      origGenStmt->setGeneratorFunc(newMeth);
+    }
+
+    // OrigGenerator methods need to have their hphp_create_continuation calls
+    // patched to the new generator name.
+    if (newMeth->getGeneratorFunc()) {
+      renameCreateContinuationCalls(ar, newMeth, importedMethods);
     }
   }
 }
@@ -667,6 +807,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
     ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
     if (!tCls || !(tCls->isTrait())) {
+      setAttribute(UsesUnknownTrait);
       Compiler::Error(Compiler::UnknownTrait, getStmt());
       continue;
     }
@@ -679,8 +820,8 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   // Apply rules
   applyTraitRules(ar);
 
-  // Check for trait abstract methods provided by other traits
-  removeImplTraitAbstractMethods(ar);
+  // Remove trait abstract methods provided by other traits and duplicates
+  removeSpareTraitAbstractMethods(ar);
 
   // Apply precedence of current class over used traits
   for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
@@ -691,6 +832,11 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
       m_importMethToTraitMap.erase(thisiter);
     }
   }
+
+  std::map<string, MethodStatementPtr> importedTraitMethods;
+  std::vector<std::pair<string,const TraitMethod*> > importedTraitsWithOrigName;
+
+  GeneratorRenameMap genRenameMap;
 
   // Actually import the methods
   for (MethodToTraitListMap::const_iterator
@@ -707,9 +853,43 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
       Compiler::Error(Compiler::MethodInMultipleTraits, getStmt());
     } else {
       TraitMethodList::const_iterator traitMethIter = iter->second.begin();
-      importTraitMethod(*traitMethIter, ar, iter->first);
+      if ((traitMethIter->m_modifiers ? traitMethIter->m_modifiers :
+           traitMethIter->m_method->getModifiers())->isAbstract()) {
+        // Skip abstract methods, if method already exists in the class
+        if (findFunction(ar, iter->first, true) ||
+            importedTraitMethods.count(iter->first)) {
+          continue;
+        }
+      }
+      if (traitMethIter->m_modifiers &&
+          traitMethIter->m_modifiers->isStatic()) {
+        Compiler::Error(Compiler::InvalidAccessModifier,
+                        traitMethIter->m_modifiers);
+        continue;
+      }
+
+      string sourceName = traitMethIter->m_ruleStmt ?
+        Util::toLower(((TraitAliasStatement*)traitMethIter->m_ruleStmt.get())->
+                      getMethodName()) : iter->first;
+      importedTraitMethods[sourceName] = MethodStatementPtr();
+      importedTraitsWithOrigName.push_back(
+        make_pair(sourceName, &*traitMethIter));
     }
   }
+
+  for (unsigned i = 0; i < importedTraitsWithOrigName.size(); i++) {
+    const string &sourceName = importedTraitsWithOrigName[i].first;
+    const TraitMethod *traitMethod = importedTraitsWithOrigName[i].second;
+    MethodStatementPtr newMeth = importTraitMethod(
+      *traitMethod, ar, Util::toLower(traitMethod->m_originalName),
+      genRenameMap, importedTraitMethods);
+    if (newMeth) {
+      importedTraitMethods[sourceName] = newMeth;
+    }
+  }
+
+  // Relink generator and origGenerator methods
+  relinkGeneratorMethods(ar, importedTraitMethods);
 
   // Import trait properties
   importTraitProperties(ar);
@@ -1009,9 +1189,26 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   cg_printf("NULL,\n");
 
-  // properties && constants
+  // properties
   m_variables->outputCPPClassMap(cg, ar);
+
+  // constants
   m_constants->outputCPPClassMap(cg, ar);
+
+  // user attributes
+  UserAttributeMap::const_iterator it = m_userAttributes.begin();
+  for (; it != m_userAttributes.end(); ++it) {
+    ExpressionPtr expr = it->second;
+    Variant v;
+    bool isScalar UNUSED = expr->getScalarValue(v);
+    ASSERT(isScalar);
+    int valueLen = 0;
+    string valueText = SymbolTable::getEscapedText(v, valueLen);
+    cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
+              CodeGenerator::EscapeLabel(it->first).c_str(),
+              valueLen, valueText.c_str());
+  }
+  cg_printf("NULL,\n");
 }
 
 bool ClassScope::hasConst(const string &name) const {
@@ -1073,7 +1270,7 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
   if (recursive && !m_parent.empty()) {
     ClassScopePtr cls(ar->findClass(m_parent));
     if (cls && cls->isRedeclaring()) {
-      cls = self->findExactClass(m_parent);
+      cls = self->findExactClass(cls);
     }
     if (cls) cls->getInterfaces(ar, names, true);
   }
@@ -1084,7 +1281,7 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
          it != m_bases.end(); ++it) {
       ClassScopePtr cls(ar->findClass(*it));
       if (cls && cls->isRedeclaring()) {
-        cls = self->findExactClass(*it);
+        cls = self->findExactClass(cls);
       }
       if (cls) names.push_back(cls->getDocName());
       else     names.push_back(*it);
@@ -1102,8 +1299,8 @@ ClassScopePtr ClassScope::getParentScope(AnalysisResultConstPtr ar) const {
 
 void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
   JSON::CodeError::MapStream ms(out);
-  map<string, int> propMap;
-  set<string> names;
+  std::map<string, int> propMap;
+  std::set<string> names;
   m_variables->getNames(names);
   BOOST_FOREACH(string name, names) {
     int pm = 0;
@@ -1147,7 +1344,7 @@ static inline string GetDocName(AnalysisResultPtr ar,
                                 const string &name) {
   ClassScopePtr c(ar->findClass(name));
   if (c && c->isRedeclaring()) {
-    ClassScopePtr exact(scope->findExactClass(name));
+    ClassScopePtr exact(scope->findExactClass(c));
     return exact ?
       exact->getDocName() :
       c->getOriginalName(); // if we can't tell which redec class,
@@ -1388,14 +1585,6 @@ void ClassScope::outputCPPClassVarInitImpl
   cg_indentBegin("Variant get_class_var_init(CStrRef s, "
                  "const char *var) {\n");
 
-  if (Option::EnableEval == Option::FullEval) {
-    // See if there's an eval'd version
-    cg_indentBegin("{\n");
-    cg_printf("Variant r;\n");
-    cg_printf("if (eval_get_class_var_init_hook(r, s, var)) "
-              "return r;\n");
-    cg_indentEnd("}\n");
-  }
   cg_printf("const ObjectStaticCallbacks *cwo = "
             "get_%sobject_static_callbacks(s);\n"
             "return LIKELY(cwo != 0) ? "
@@ -1447,16 +1636,6 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl(
   cg_indentBegin(
     "bool get_call_info_static_method(MethodCallPackage &mcp) {\n");
 
-  if (Option::EnableEval == Option::FullEval) {
-    cg_printf("bool foundClass = false;\n");
-    cg_printf("if (eval_get_call_info_static_method_hook(mcp, foundClass)) "
-              "return true;\n");
-    cg_indentBegin("else if (foundClass) {\n");
-    cg_printf("mcp.fail();\n");
-    cg_printf("return false;\n");
-    cg_indentEnd("}\n");
-  }
-
   cg_printf("StringData *s ATTRIBUTE_UNUSED (mcp.rootCls);\n");
 
   cg_printf("const ObjectStaticCallbacks *cwo = "
@@ -1477,14 +1656,6 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 
   cg_indentBegin("Variant get_static_property(CStrRef s, "
                  "const char *prop) {\n");
-  if (Option::EnableEval == Option::FullEval) {
-    // See if there's an eval'd version
-    cg_indentBegin("{\n");
-    cg_printf("Variant r;\n");
-    cg_printf("if (eval_get_static_property_hook(r, s, prop)) "
-              "return r;\n");
-    cg_indentEnd("}\n");
-  }
 
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
@@ -1495,14 +1666,6 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 
   cg_indentBegin("Variant *get_static_property_lv(CStrRef s, "
                  "const char *prop) {\n");
-  if (Option::EnableEval == Option::FullEval) {
-    // See if there's an eval'd version
-    cg_indentBegin("{\n");
-    cg_printf("Variant *r;\n");
-    cg_printf("if (eval_get_static_property_lv_hook(r, s, prop)) "
-              "return r;\n");
-    cg_indentEnd("}\n");
-  }
 
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
@@ -1601,7 +1764,8 @@ static bool buildClassPropTableMap(
           int pix = -1;
           switch (s) {
             case 0:
-              if (sym->isPrivate()) {
+              if (sym->isPrivate() ||
+                  (sym->isProtected() && !sym->isOverride())) {
                 pix = p++;
               }
               break;
@@ -1879,7 +2043,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
           ExpressionPtr val = getSymInit(sym);
           string name, cls, id;
           int flags = 0;
-          int type = 0;
+          DataType type = KindOfUnknown;
           if (!val) {
             if (sym->isConstant()) {
               name = sym->getName();
@@ -1904,7 +2068,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
           }
           int *p;
           int name_ix = -1, cls_ix = -1;
-          if ((flags & ConstNeedsSysCon) && type != KindOfVariant) {
+          if ((flags & ConstNeedsSysCon) && type != KindOfUnknown) {
             string n = cls + "$$" + name;
             p = &siIndex[n];
             if (!*p) {
@@ -1989,8 +2153,8 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                             Option::ClassPropTablePrefix, svarIndex[id] - 1);
                 }
               }
-            } else if ((flags & ConstNeedsSysCon) && type != KindOfVariant) {
-              cg_printf("0x%08x%07x7", name_ix, type);
+            } else if ((flags & ConstNeedsSysCon) && type != KindOfUnknown) {
+              cg_printf("0x%08x%07x7", name_ix, int(type));
             } else if (flags & ConstMagicIO) {
               cg_printf("(int64)&BuiltinFiles::Get%s, 0x1%07x6",
                         name.c_str(), index++);
@@ -2074,30 +2238,33 @@ void ClassScope::outputCPPGetClassPropTableImpl(
 
           string prop(sym->getName());
           int flags = 0;
-          int dtype = sym->getFinalType()->getDataType();
+          DataType ptype = sym->getFinalType()->getDataType();
           if (sym->isStatic()) {
             flags |= ClassPropTableEntry::Static;
             if (v[k].privIndex < 0) {
               bool needsInit = true;
-              switch (dtype) {
+              switch (ptype) {
                 case KindOfBoolean:
                   if (cflags & ConstFalse) needsInit = false;
                   goto check_plain;
-                case KindOfInt32:
                 case KindOfInt64:
                   if (cflags & ConstZero) needsInit = false;
                   goto check_plain;
                 case KindOfDouble:
                   if (cflags & ConstDZero) needsInit = false;
                   goto check_plain;
-                case KindOfVariant:
                 case KindOfString:
-                case KindOfStaticString:
                 case KindOfArray:
+                  if (cflags & ConstNull) needsInit = false;
+                case KindOfUnknown:
                 check_plain:
                   if (cflags & ConstPlain && !system) {
                     flags |= ClassPropTableEntry::FastInit;
                   }
+                  break;
+                case KindOfObject:
+                  ASSERT(cflags & ConstNull);
+                  needsInit = false;
                   break;
                 default:
                   break;
@@ -2116,10 +2283,15 @@ void ClassScope::outputCPPGetClassPropTableImpl(
             if (!sym->isStatic()) {
               prop = '\0' + cls->getOriginalName() + '\0' + prop;
             }
-          } else if (sym->isOverride() ||
-                     (!sym->isStatic() && cls->derivesFromRedeclaring())) {
-            ASSERT(!system);
-            flags |= ClassPropTableEntry::Override;
+          } else {
+            if (sym->isProtected() && !sym->isStatic()) {
+              prop = string("\0*\0", 3) + prop;
+            }
+            if (sym->isOverride() ||
+                (!sym->isStatic() && cls->derivesFromRedeclaring())) {
+              ASSERT(!system);
+              flags |= ClassPropTableEntry::Override;
+            }
           }
           if (k == sz - 1) flags |= ClassPropTableEntry::Last;
           curEntry++;
@@ -2128,7 +2300,7 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                                 sym->getName().size()),
                     next - cur, off,
                     int(s ? 0 : prop.size() - sym->getName().size()),
-                    flags, dtype);
+                    flags, int(ptype));
           if (s) {
             if (s == 2 && !sym->isDynamic()) {
               cg_printf("0,");
@@ -2142,7 +2314,8 @@ void ClassScope::outputCPPGetClassPropTableImpl(
                         Option::IdPrefix.c_str(), sym->getName().c_str());
             }
           } else {
-            if (flags & ClassPropTableEntry::Override) {
+            if (flags & ClassPropTableEntry::Override &&
+                cls->derivesFromRedeclaring()) {
               cg_printf("0,");
             } else {
               cg_printf("GET_PROPERTY_OFFSET(%s%s, %s%s),",
@@ -2374,12 +2547,26 @@ string ClassScope::getHeaderFilename() {
   return getBaseHeaderFilename() + ".h";
 }
 
+void ClassScope::outputCPPDef(CodeGenerator &cg) {
+  if (isVolatile()) {
+    string name = CodeGenerator::FormatLabel(m_name);
+    if (isRedeclaring()) {
+      cg_printf("g->%s%s = &%s%s;\n",
+                Option::ClassStaticsCallbackPrefix,
+                name.c_str(),
+                Option::ClassStaticsCallbackPrefix,
+                getId().c_str());
+    }
+    cg_printf("g->CDEC(%s) = true;\n", name.c_str());
+  }
+}
+
 void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
                                  CodeGenerator::Output output) {
   string filename = getHeaderFilename();
   string root = ar->getOutputPath() + "/";
   Util::mkdir(root + filename);
-  ofstream f((root + filename).c_str());
+  std::ofstream f((root + filename).c_str());
   CodeGenerator cg(&f, output);
   cg.setFileOrClassHeader(true);
 
@@ -2413,8 +2600,7 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   cg.setContext(CodeGenerator::CppForwardDeclaration);
 
-  BOOST_FOREACH(const string &dep, m_usedClassesFullHeader) {
-    ClassScopePtr cls = ar->findClass(dep);
+  BOOST_FOREACH(ClassScopeRawPtr cls, m_usedClassesFullHeader) {
     if (cls && cls->isUserClass()) {
       cg_printInclude(cls->getHeaderFilename());
     }
@@ -2427,7 +2613,16 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &cg,
     assert(index != -1);
     string lisnam = ar->getLiteralStringName(stringId, index);
     done = true;
-    cg_printf("extern StaticString %s;\n", lisnam.c_str());
+    if (Option::UseStaticStringProxy) {
+      string proxyNam = ar->getLiteralStringName(stringId, index, true);
+      cg_printf("extern StaticStringProxy %s;\n", proxyNam.c_str());
+      cg_printf("#ifndef %s\n", lisnam.c_str());
+      cg_printf("#define %s (*(StaticString *)(&%s))\n",
+                lisnam.c_str(), proxyNam.c_str());
+      cg_printf("#endif\n");
+    } else {
+      cg_printf("extern StaticString %s;\n", lisnam.c_str());
+    }
   }
   if (done) cg_printf("\n");
 
@@ -2460,7 +2655,16 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &cg,
     assert(index != -1);
     string lisnam = ar->getLitVarStringName(stringId, index);
     done = true;
-    cg_printf("extern VarNR %s;\n", lisnam.c_str());
+    if (Option::UseStaticStringProxy) {
+      string proxyName = ar->getLitVarStringName(stringId, index, true);
+      cg_printf("extern VariantProxy %s;\n", proxyName.c_str());
+      cg_printf("#ifndef %s\n", lisnam.c_str());
+      cg_printf("#define %s (*(Variant *)&%s)\n",
+                lisnam.c_str(), proxyName.c_str());
+      cg_printf("#endif\n");
+    } else {
+      cg_printf("extern VarNR %s;\n", lisnam.c_str());
+    }
   }
   if (done) cg_printf("\n");
 
@@ -2497,18 +2701,25 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &cg,
   if (done) cg_printf("\n");
 
   done = false;
-  BOOST_FOREACH(const UsedClassConst& item, m_usedClassConstsHeader) {
-    ClassScopePtr cls = ar->findClass(item.first);
-    assert(cls);
+  BOOST_FOREACH(const CodeGenerator::UsedClassConst& item,
+                m_usedClassConstsHeader) {
+    ClassScopePtr cls = item.first;
     done = true;
     cls->getConstants()->outputSingleConstant(cg, ar, item.second);
   }
   if (done) cg_printf("\n");
 
+  const vector<Symbol*> &symbols = getVariables()->getSymbols();
+  for (unsigned i = 0; i < symbols.size(); i++) {
+    const Symbol *sym = symbols[i];
+    TypePtr type = sym->getFinalType();
+    if (type->isSpecificObject()) {
+      ClassScopePtr cls = type->getClass(ar, shared_from_this());
+      if (cls) m_usedClassesHeader.insert(cls);
+    }
+  }
   done = false;
-  BOOST_FOREACH(const string &str, m_usedClassesHeader) {
-    ClassScopePtr usedClass = ar->findClass(str);
-    assert(usedClass);
+  BOOST_FOREACH(ClassScopeRawPtr usedClass, m_usedClassesHeader) {
     done = true;
     usedClass->outputForwardDeclaration(cg);
   }
@@ -2544,8 +2755,9 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     for (unsigned int i = 0; i < bases.size(); i++) {
       ancestors.push_back(bases[i].c_str());
     }
-    cg_indentBegin("const InstanceOfInfo %s%s::s_instanceof_table[] = {\n",
-                   Option::ClassPrefix, clsName);
+    cg_indentBegin("extern const InstanceOfInfo %s%s%sinstanceof_table[] = {\n",
+                   Option::ClassStaticsCallbackPrefix, clsName,
+                   Option::IdPrefix.c_str());
     vector<int> offsets;
     int n = 0;
     JumpTable jt(cg, ancestors, true, false, true, true);
@@ -2588,8 +2800,9 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       }
     }
     cg_indentEnd("};\n");
-    cg_indentBegin("const int %s%s::s_instanceof_index[] = {\n",
-                   Option::ClassPrefix, clsName);
+    cg_indentBegin("const int %s%s%sinstanceof_index[] = {\n",
+                   Option::ClassStaticsCallbackPrefix, clsName,
+                   Option::IdPrefix.c_str());
     cg_printf("%d,\n", jt.size() - 1);
     for (int i = 0, e = jt.size(), s = offsets.size(); i < e; i++) {
       cg_printf("%d,", i < s ? offsets[i] : -1);
@@ -2609,29 +2822,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     cg_indentEnd("}\n");
   }
 
-  // __invoke
-  if (getAttribute(ClassScope::HasInvokeMethod)) {
-    FunctionScopePtr func = findFunction(ar, "__invoke", false);
-    ASSERT(func);
-    if (!func->isAbstract()) {
-      // the closure class will generate its own version of
-      // t___invokeCallInfoHelper, which will avoid a level
-      // of indirection
-      if (strcasecmp(clsName, "closure")) {
-        cg_indentBegin("const CallInfo *"
-                       "%s%s::t___invokeCallInfoHelper(void *&extra) {\n",
-                       Option::ClassPrefix, clsName);
-        cg_printf("extra = (void*) this;\n");
-        cg_printf("return &%s%s::%s%s;\n",
-                  Option::ClassPrefix,
-                  clsName,
-                  Option::CallInfoWrapperPrefix,
-                  CodeGenerator::FormatLabel("__invoke").c_str());
-        cg_indentEnd("}\n");
-      }
-    }
-  }
-
   if (isRedeclaring() && !derivesFromRedeclaring() && derivedByDynamic()) {
     cg_indentBegin("Variant %s%s::doRootCall(Variant v_name, Variant "
                    "v_arguments, bool fatal) {\n",
@@ -2646,7 +2836,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     outputCPPCallInfoTableSupport(cg, ar, 0, hasRedec);
     outputCPPHelperClassAllocSupport(cg, ar, 0);
     vector<const char *> funcs;
-    findJumpTableMethods(cg, ar, false, funcs);
+    findJumpTableMethods(cg, ar, funcs);
     outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, false);
     outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, true);
     if (getAttribute(ClassScope::HasInvokeMethod)) {
@@ -2672,6 +2862,28 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     }
   }
 
+  // __invoke
+  if (getAttribute(ClassScope::HasInvokeMethod)) {
+    FunctionScopePtr func = findFunction(ar, "__invoke", false);
+    ASSERT(func);
+    if (!func->isAbstract()) {
+      // the closure class will generate its own version of
+      // t___invokeCallInfoHelper, which will avoid a level
+      // of indirection
+      if (strcasecmp(clsName, "closure")) {
+        cg_indentBegin("const CallInfo *"
+                       "%s%s::t___invokeCallInfoHelper(void *&extra) {\n",
+                       Option::ClassPrefix, clsName);
+        cg_printf("extra = (void*) this;\n");
+        cg_printf("return &%s%s%s__invoke;\n",
+                  Option::CallInfoWrapperPrefix,
+                  clsName,
+                  Option::IdPrefix.c_str());
+        cg_indentEnd("}\n");
+      }
+    }
+  }
+
   // Create method
   if (getAttribute(ClassScope::HasConstructor) ||
       getAttribute(ClassScope::ClassNameConstructor)) {
@@ -2688,7 +2900,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
 
 void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
                                                AnalysisResultPtr ar,
-                                               set<string> &done,
+                                               std::set<string> &done,
                                                const char *cls) {
   for (FunctionScopePtrVec::const_iterator it = m_functionsVec.begin();
        it != m_functionsVec.end(); ++it) {
@@ -2730,75 +2942,120 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
   string prop = getClassPropTableId(ar);
+  string constructor = "0,";
+  if (!isInterface()) {
+    FunctionScopeRawPtr fs = findConstructor(ar, true);
+    if (fs && !fs->isAbstract()) {
+      constructor =
+        Option::CallInfoPrefix +
+        fs->getContainingClass()->getId() +
+        Option::IdPrefix +
+        CodeGenerator::FormatLabel(fs->getName());
+
+      if (fs->getContainingClass().get() != this) {
+        cg_printf("extern const CallInfo %s;\n", constructor.c_str());
+      }
+      constructor = "&" + constructor + ",";
+    }
+  }
+
+  bool hasCallInfo = hasJumpTableMethods(cg, ar);
+  if (hasCallInfo) {
+    cg_printf("extern const MethodCallInfoTable %s%s%scall_info_table[];\n",
+              Option::ClassStaticsCallbackPrefix, id.c_str(),
+              Option::IdPrefix.c_str());
+    cg_printf("extern const int %s%s%scall_info_index[];\n",
+              Option::ClassStaticsCallbackPrefix, id.c_str(),
+              Option::IdPrefix.c_str());
+  }
+  cg_printf("extern const InstanceOfInfo %s%s%sinstanceof_table[];\n",
+            Option::ClassStaticsCallbackPrefix, id.c_str(),
+            Option::IdPrefix.c_str());
+  cg_printf("extern const int %s%s%sinstanceof_index[];\n",
+            Option::ClassStaticsCallbackPrefix, id.c_str(),
+            Option::IdPrefix.c_str());
+
   cg_indentBegin("const %sObjectStaticCallbacks %s%s = {\n",
                  isRedeclaring() ? "Redeclared" : "",
                  Option::ClassStaticsCallbackPrefix, id.c_str());
   if (isRedeclaring()) {
     cg_indentBegin("{\n");
   }
-  if (isInterface()) {
-    cg_printf("0,0,0,0,0,0,0,0,0,0,0\n");
-  } else {
+
+  if (!isInterface()) {
     cg_printf("(ObjectData*(*)(ObjectData*))%s%s,\n",
               Option::CreateObjectOnlyPrefix, id.c_str());
-    cg_printf("%s%s::s_call_info_table,%s%s::s_call_info_index,\n",
-              Option::ClassPrefix, id.c_str(),
-              Option::ClassPrefix, id.c_str());
-    cg_printf("%s%s::s_instanceof_table,%s%s::s_instanceof_index,\n",
-              Option::ClassPrefix, id.c_str(),
-              Option::ClassPrefix, id.c_str());
+  } else {
+    cg_printf("0,");
+  }
+  if (hasCallInfo) {
+    cg_printf("%s%s%scall_info_table,%s%s%scall_info_index,\n",
+              Option::ClassStaticsCallbackPrefix, id.c_str(),
+              Option::IdPrefix.c_str(),
+              Option::ClassStaticsCallbackPrefix, id.c_str(),
+              Option::IdPrefix.c_str());
+  } else {
+    cg_printf("0,0,\n");
+  }
+  if (!isInterface()) {
+    cg_printf("%s%s%sinstanceof_table,%s%s%sinstanceof_index,\n",
+              Option::ClassStaticsCallbackPrefix, id.c_str(),
+              Option::IdPrefix.c_str(),
+              Option::ClassStaticsCallbackPrefix, id.c_str(),
+              Option::IdPrefix.c_str());
     cg_printf("&%s%s::s_class_name,\n", Option::ClassPrefix, id.c_str());
-    if (prop.empty()) {
-      cg_printf("0,");
-    } else {
-      cg_printf("&%s%s::%sprop_table,",
-                Option::ClassPrefix, prop.c_str(),
-                Option::ObjectStaticPrefix);
-    }
+  } else {
+    cg_printf("0,0,0,\n");
+  }
+  if (prop.empty()) {
+    cg_printf("0,");
+  } else {
+    cg_printf("&%s%s::%sprop_table,",
+              Option::ClassPrefix, prop.c_str(),
+              Option::ObjectStaticPrefix);
+  }
 
-    FunctionScopeRawPtr fs = findConstructor(ar, true);
-    if (fs && !fs->isAbstract()) {
-      cg_printf("&%s%s::%s%s,",
-                Option::ClassPrefix, fs->getContainingClass()->getId().c_str(),
-                Option::CallInfoPrefix,
-                CodeGenerator::FormatLabel(fs->getName()).c_str());
-    } else {
-      cg_printf("0,");
-    }
+  cg_printf("%s", constructor.c_str());
 
-    ClassScopeRawPtr par;
-    if (derivesFromRedeclaring() != FromNormal) {
-      par = ClassScopeRawPtr(this);
-      do {
-        par = par->getParentScope(ar);
-      } while (par && !par->isRedeclaring());
-    }
-    if (par) {
-      cg_printf("offsetof(GlobalVariables, %s%s),",
-                Option::ClassStaticsCallbackPrefix,
-                CodeGenerator::FormatLabel(par->m_name).c_str());
-    } else {
-      cg_printf("0,");
-    }
+  ClassScopeRawPtr par;
+  if (derivesFromRedeclaring() != FromNormal) {
+    par = ClassScopeRawPtr(this);
+    do {
+      par = par->getParentScope(ar);
+    } while (par && !par->isRedeclaring());
+  }
+  if (par) {
+    cg_printf("offsetof(GlobalVariables, %s%s),",
+              Option::ClassStaticsCallbackPrefix,
+              CodeGenerator::FormatLabel(par->m_name).c_str());
+  } else {
+    cg_printf("0,");
+  }
 
-    if (derivesFromRedeclaring() != DirectFromRedeclared &&
-        (par = getParentScope(ar))) {
-      cg_printf("&%s%s",
-                Option::ClassStaticsCallbackPrefix, par->getId().c_str());
-    } else {
-      cg_printf("0");
-    }
+  if (derivesFromRedeclaring() != DirectFromRedeclared &&
+      (par = getParentScope(ar))) {
+    cg_printf("&%s%s",
+              Option::ClassStaticsCallbackPrefix, par->getId().c_str());
+  } else {
+    cg_printf("0");
+  }
 
-    int attributes = 0;
-    if (m_attribute & (HasUnknownStaticMethodHandler|
-                       InheritsUnknownStaticMethodHandler)) {
-      attributes |= ObjectData::HasCallStatic;
-    }
-    if (m_attribute & (HasUnknownMethodHandler|
-                       InheritsUnknownMethodHandler)) {
-      attributes |= ObjectData::HasCall;
-    }
-    cg_printf(",0x%x\n", attributes);
+  int attributes = 0;
+  if (m_attribute & (HasUnknownStaticMethodHandler|
+                     InheritsUnknownStaticMethodHandler)) {
+    attributes |= ObjectData::HasCallStatic;
+  }
+  if (m_attribute & (HasUnknownMethodHandler|
+                     InheritsUnknownMethodHandler)) {
+    attributes |= ObjectData::HasCall;
+  }
+  cg_printf(",0x%x,", attributes);
+
+  if (isInterface()) {
+    cg_printf("0\n");
+  } else {
+    cg_printf("\n");
+    cg_printf("&%s%s::s_cls\n", Option::ClassPrefix, id.c_str());
   }
 
   if (isRedeclaring()) {
@@ -2812,8 +3069,10 @@ bool ClassScope::addFunction(AnalysisResultConstPtr ar,
                              FunctionScopePtr funcScope) {
   FunctionScopePtr &func = m_functions[funcScope->getName()];
   if (func) {
-    throw Exception("Redeclared method %s::%s",
-                    getOriginalName().c_str(), func->getOriginalName().c_str());
+    func->getStmt()->parseTimeFatal(Compiler::DeclaredMethodTwice,
+                                    "Redeclared method %s::%s",
+                                    getOriginalName().c_str(),
+                                    func->getOriginalName().c_str());
   }
   func = funcScope;
   m_functionsVec.push_back(funcScope);
@@ -2821,7 +3080,6 @@ bool ClassScope::addFunction(AnalysisResultConstPtr ar,
 }
 
 void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
-                                      bool staticOnly,
                                       vector<const char *> &funcs) {
   bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
   // output invoke support methods
@@ -2830,11 +3088,25 @@ void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
     FunctionScopePtr func = *iter;
     ASSERT(!func->isRedeclaring());
     if (func->isAbstract() ||
-        (staticOnly && !func->isStatic()) ||
         !(systemcpp || func->isDynamic() || func->isVirtual())) continue;
     const char *name = func->getName().c_str();
     funcs.push_back(name);
   }
+}
+
+bool ClassScope::hasJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar) {
+  if (isInterface()) return false;
+  bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
+  // output invoke support methods
+  for (FunctionScopePtrVec::const_iterator iter =
+         m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
+    FunctionScopePtr func = *iter;
+    ASSERT(!func->isRedeclaring());
+    if (func->isAbstract() ||
+        !(systemcpp || func->isDynamic() || func->isVirtual())) continue;
+    return true;
+  }
+  return false;
 }
 
 void ClassScope::outputCPPMethodInvokeBareObjectSupport(
@@ -2990,22 +3262,19 @@ void ClassScope::outputCPPMethodInvokeTable(
   ClassScopePtr self = dynamic_pointer_cast<ClassScope>(shared_from_this());
 
   string clsid = self->getId();
-  shared_ptr<JumpTable> jt(new JumpTable(cg, keys, true, true, true, true));
+  JumpTable jt(cg, keys, true, true, true, true);
   vector<int> offsets;
-  int prev = -1;
-  cg_indentBegin("const MethodCallInfoTable %s%s::s_call_info_table[] = {\n",
-                 Option::ClassPrefix, clsid.c_str());
-  for (int n = 0; jt->ready(); ++n, jt->next()) {
-    int cur = jt->current();
-    bool changed = false;
-    if (prev != cur) {
-      changed = true;
-      while (++prev != cur) {
-        offsets.push_back(-1);
-      }
+  cg_indentBegin("extern const MethodCallInfoTable "
+                 "%s%s%scall_info_table[] = {\n",
+                 Option::ClassStaticsCallbackPrefix, clsid.c_str(),
+                 Option::IdPrefix.c_str());
+  for (int n = 0; jt.ready(); ++n, jt.next()) {
+    unsigned cur = jt.current();
+    if (offsets.size() <= cur) {
+      offsets.resize(cur, -1);
       offsets.push_back(n);
     }
-    const char *name = jt->key();
+    const char *name = jt.key();
     string lname = CodeGenerator::FormatLabel(name);
     StringToFunctionScopePtrMap::const_iterator iterFuncs =
       funcScopes.find(name);
@@ -3027,23 +3296,23 @@ void ClassScope::outputCPPMethodInvokeTable(
     string id = func->getContainingClass()->getId();
     int index = -1;
     cg.checkLiteralString(origName, index, ar, shared_from_this());
-    cg_printf("{ 0x%016llXLL, %d, %d, \"%s\", &%s%s::%s%s },\n",
+    cg_printf("{ 0x%016llXLL, %d, %d, \"%s\", &%s%s%s%s },\n",
               hash_string_i(origName.c_str()),
-              (int)changed,
+              jt.last(),
               (int)origName.size(),
               CodeGenerator::EscapeLabel(origName).c_str(),
-              Option::ClassPrefix, id.c_str(),
-              Option::CallInfoPrefix, lname.c_str());
+              Option::CallInfoPrefix, id.c_str(),
+              Option::IdPrefix.c_str(), lname.c_str());
   }
-  cg_printf("{ 0, 1, 0, 0 }\n");
   cg_indentEnd("};\n");
-  cg_indentBegin("const int %s%s::s_call_info_index[] = {\n",
-                 Option::ClassPrefix, clsid.c_str());
-  if (!jt->size()) {
+  cg_indentBegin("extern const int %s%s%scall_info_index[] = {\n",
+                 Option::ClassStaticsCallbackPrefix, clsid.c_str(),
+                 Option::IdPrefix.c_str());
+  if (!jt.size()) {
     cg_printf("0,-1");
   } else {
-    cg_printf("%d,\n", jt->size() - 1);
-    for (int i = 0, e = jt->size(), s = offsets.size(); i < e; i++) {
+    cg_printf("%d,\n", jt.size() - 1);
+    for (int i = 0, e = jt.size(), s = offsets.size(); i < e; i++) {
       cg_printf("%d,", i < s ? offsets[i] : -1);
       if ((i & 7) == 7) cg_printf("\n");
     }
@@ -3140,14 +3409,53 @@ void ClassScope::outputMethodWrappers(CodeGenerator &cg,
   }
 }
 
-bool ClassScope::canSkipCreateMethod() const {
+/*
+ * A class without a constructor, but with a destructor may need a special
+ * create method to clear the NoDestructor flag - but only if
+ * there is a constructor somewhere above us, and if /that/ constructor
+ * doesnt need to clear the NoDestructor flag.
+ */
+bool ClassScope::needsEnableDestructor(
+  AnalysisResultConstPtr ar) const {
+  if (m_needsEnableDestructor & 2) {
+    return m_needsEnableDestructor & 1;
+  }
+  bool ret =
+    (!derivesFromRedeclaring() &&
+     !getAttribute(HasConstructor) &&
+     !getAttribute(ClassNameConstructor));
+
+  if (ret) {
+    if (!getAttribute(HasDestructor) && !m_parent.empty()) {
+      if (ClassScopePtr parent = getParentScope(ar)) {
+        if (!parent->needsEnableDestructor(ar)) {
+          ret = false;
+        }
+      }
+    }
+  }
+
+  m_needsEnableDestructor = ret ? 3 : 2;
+  return ret;
+}
+
+bool ClassScope::canSkipCreateMethod(AnalysisResultConstPtr ar) const {
   // create() is not necessary if
   // 1) not inheriting from any class
   // 2) no constructor defined (__construct or class name)
   // 3) no init() defined
-  if (!m_parent.empty())                  return false;
-  if (getAttribute(HasConstructor) ||
-      getAttribute(ClassNameConstructor)) return false;
-  if (needsInitMethod())                  return false;
+
+  if (derivesFromRedeclaring() ||
+      getAttribute(HasConstructor) ||
+      getAttribute(ClassNameConstructor) ||
+      needsInitMethod()) {
+    return false;
+  }
+
+  if (!m_parent.empty()) {
+    ClassScopePtr parent = getParentScope(ar);
+    if (parent) return parent->canSkipCreateMethod(ar);
+  }
+
   return true;
 }

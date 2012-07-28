@@ -1,0 +1,100 @@
+#
+# Try out dv initializers in the assembler
+#
+
+.main {
+  String "beginning...\n"
+  Print
+  PopC
+
+  FPushFuncD 0 "main"
+  FCall 0
+  UnboxR
+  RetC
+}
+
+.function foo($x, $y = y_init) {
+  entry:
+          CGetL $x
+          CGetL $y
+          Concat
+          Print
+          RetC
+
+  y_init: String " default Y value\n"
+          SetL $y
+          PopC
+          Jmp entry
+}
+
+.function multiple($x = x_init,
+                   $y = y_init,
+                   $z = z_init) {
+  entry:  String "x = "
+          CGetL $x
+          Concat
+          Print
+          PopC
+
+          String "y = "
+          CGetL $y
+          Concat
+          Print
+          PopC
+
+          String "z = "
+          CGetL $z
+          Concat
+          Print
+          PopC
+
+          True
+          RetC
+
+  x_init: String "defaultx\n"
+          SetL $x
+          PopC
+  y_init: String "defaulty\n"
+          SetL $y
+          PopC
+  z_init: String "defaultz\n"
+          SetL $z
+          PopC
+          Jmp entry
+}
+
+.function main() {
+  FPushFuncD 1 "foo"
+  String "sup: "
+  FPassC 0
+  FCall 1
+  PopR
+
+  FPushFuncD 2 "foo"
+  String "sup: "
+  FPassC 0
+  String " non-default y value\n"
+  FPassC 1
+  FCall 2
+  PopR
+
+  FPushFuncD 0 "multiple"
+  FCall 0
+  PopR
+  FPushFuncD 1 "multiple"
+  String "nondef\n"
+  FPassC 0
+  FCall 1
+  PopR
+  FPushFuncD 2 "multiple"
+  String "nondef1\n"
+  FPassC 0
+  String "nondef2\n"
+  FPassC 1
+  FCall 2
+  PopR
+
+  String "done\n"
+  Print
+  RetC
+}

@@ -46,6 +46,7 @@ public:
 
   ClassScopePtr resolveClass();
   bool checkPresent();
+  ClassScopePtr resolveClassWithChecks();
 protected:
   ExpressionPtr m_class;
   std::string m_origClassName;

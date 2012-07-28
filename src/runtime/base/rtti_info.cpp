@@ -25,8 +25,6 @@
 #include <util/lock.h>
 #include <util/util.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -51,8 +49,7 @@ void RTTIInfo::translate_rtti(const char *rttiDirectory) {
     if (m_profData[i][getDataTypeIndex(KindOfBoolean)]) {
       printf(" b/%u", m_profData[i][getDataTypeIndex(KindOfBoolean)]);
     }
-    int totalInt = m_profData[i][getDataTypeIndex(KindOfInt32)] +
-                   m_profData[i][getDataTypeIndex(KindOfInt64)];
+    int totalInt = m_profData[i][getDataTypeIndex(KindOfInt64)];
     if (totalInt) printf(" i/%u", totalInt);
     if (m_profData[i][getDataTypeIndex(KindOfDouble)]) {
       printf(" d/%u", m_profData[i][getDataTypeIndex(KindOfDouble)]);
@@ -66,8 +63,8 @@ void RTTIInfo::translate_rtti(const char *rttiDirectory) {
     if (m_profData[i][getDataTypeIndex(KindOfObject)]) {
       printf(" o/%u", m_profData[i][getDataTypeIndex(KindOfObject)]);
     }
-    if (m_profData[i][getDataTypeIndex(KindOfVariant)]) {
-      printf(" v/%u", m_profData[i][getDataTypeIndex(KindOfVariant)]);
+    if (m_profData[i][getDataTypeIndex(KindOfRef)]) {
+      printf(" v/%u", m_profData[i][getDataTypeIndex(KindOfRef)]);
     }
     printf("\n");
   }

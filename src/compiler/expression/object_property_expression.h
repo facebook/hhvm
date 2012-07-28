@@ -55,6 +55,8 @@ public:
   void outputCPPProperty(CodeGenerator &cg, AnalysisResultPtr ar);
   bool outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar,
                        bool noEvalOnError = false);
+  void outputCPPValidObject(CodeGenerator &cg, AnalysisResultPtr ar,
+                            bool guarded);
 private:
   ExpressionPtr m_object;
   ExpressionPtr m_property;

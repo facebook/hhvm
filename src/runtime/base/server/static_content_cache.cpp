@@ -22,8 +22,6 @@
 #include <util/util.h>
 #include <util/compression.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -57,7 +55,7 @@ void StaticContentCache::load() {
   // get a list of all files, one for each extension
   Logger::Info("searching all files under source root...");
   int count = 0;
-  map<string, vector<string> > ext2files;
+  std::map<string, vector<string> > ext2files;
   {
     const char *argv[] = {"", (char*)RuntimeOption::SourceRoot.c_str(),
                           "-type", "f", NULL};

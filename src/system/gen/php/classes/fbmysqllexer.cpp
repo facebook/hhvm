@@ -30,26 +30,25 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
-extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/fbmysqllexer.php line 40 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(FB_MySQLLexer)
-const InstanceOfInfo c_FB_MySQLLexer::s_instanceof_table[] = {
+extern const InstanceOfInfo cw_FB_MySQLLexer$$instanceof_table[] = {
   {0x286D5ADE799762BALL,1,"FB_MySQLLexer",&cw_FB_MySQLLexer},
 };
-const int c_FB_MySQLLexer::s_instanceof_index[] = {
+const int cw_FB_MySQLLexer$$instanceof_index[] = {
   1,
   0,-1,
 };
-CallInfo c_FB_MySQLLexer::ci_lex((void*)&c_FB_MySQLLexer::i_lex, (void*)&c_FB_MySQLLexer::ifa_lex, 0, 4, 0x0000000000000000LL);
-CallInfo c_FB_MySQLLexer::ci_unget((void*)&c_FB_MySQLLexer::i_unget, (void*)&c_FB_MySQLLexer::ifa_unget, 0, 4, 0x0000000000000000LL);
-CallInfo c_FB_MySQLLexer::ci_iscompop((void*)&c_FB_MySQLLexer::i_iscompop, (void*)&c_FB_MySQLLexer::ifa_iscompop, 1, 4, 0x0000000000000000LL);
-CallInfo c_FB_MySQLLexer::ci___construct((void*)&c_FB_MySQLLexer::i___construct, (void*)&c_FB_MySQLLexer::ifa___construct, 2, 4, 0x0000000000000000LL);
-CallInfo c_FB_MySQLLexer::ci_get((void*)&c_FB_MySQLLexer::i_get, (void*)&c_FB_MySQLLexer::ifa_get, 0, 4, 0x0000000000000000LL);
-CallInfo c_FB_MySQLLexer::ci_revert((void*)&c_FB_MySQLLexer::i_revert, (void*)&c_FB_MySQLLexer::ifa_revert, 0, 4, 0x0000000000000000LL);
-CallInfo c_FB_MySQLLexer::ci_skip((void*)&c_FB_MySQLLexer::i_skip, (void*)&c_FB_MySQLLexer::ifa_skip, 0, 4, 0x0000000000000000LL);
-CallInfo c_FB_MySQLLexer::ci_nexttoken((void*)&c_FB_MySQLLexer::i_nexttoken, (void*)&c_FB_MySQLLexer::ifa_nexttoken, 0, 4, 0x0000000000000000LL);
-CallInfo c_FB_MySQLLexer::ci_pushback((void*)&c_FB_MySQLLexer::i_pushback, (void*)&c_FB_MySQLLexer::ifa_pushback, 0, 4, 0x0000000000000000LL);
+extern const CallInfo ci_FB_MySQLLexer$$lex = { (void*)&c_FB_MySQLLexer::i_lex, (void*)&c_FB_MySQLLexer::ifa_lex, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$unget = { (void*)&c_FB_MySQLLexer::i_unget, (void*)&c_FB_MySQLLexer::ifa_unget, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$iscompop = { (void*)&c_FB_MySQLLexer::i_iscompop, (void*)&c_FB_MySQLLexer::ifa_iscompop, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$__construct = { (void*)&c_FB_MySQLLexer::i___construct, (void*)&c_FB_MySQLLexer::ifa___construct, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$get = { (void*)&c_FB_MySQLLexer::i_get, (void*)&c_FB_MySQLLexer::ifa_get, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$revert = { (void*)&c_FB_MySQLLexer::i_revert, (void*)&c_FB_MySQLLexer::ifa_revert, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$skip = { (void*)&c_FB_MySQLLexer::i_skip, (void*)&c_FB_MySQLLexer::ifa_skip, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$nexttoken = { (void*)&c_FB_MySQLLexer::i_nexttoken, (void*)&c_FB_MySQLLexer::ifa_nexttoken, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$pushback = { (void*)&c_FB_MySQLLexer::i_pushback, (void*)&c_FB_MySQLLexer::ifa_pushback, 0, 4, 0x0000000000000000LL};
 Variant c_FB_MySQLLexer::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -154,19 +153,18 @@ Variant c_FB_MySQLLexer::ifa_nexttoken(MethodCallPackage &mcp, int count, INVOKE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::nextToken", 0, 1);
   return (self->t_nexttoken());
 }
-const MethodCallInfoTable c_FB_MySQLLexer::s_call_info_table[] = {
-  { 0x285FB8CD753ED923LL, 1, 8, "isCompop", &c_FB_MySQLLexer::ci_iscompop },
-  { 0x1721E9197DB002A7LL, 1, 3, "lex", &c_FB_MySQLLexer::ci_lex },
-  { 0x25DCCC35D69AD828LL, 1, 3, "get", &c_FB_MySQLLexer::ci_get },
-  { 0x3A1B838A356694ECLL, 1, 6, "revert", &c_FB_MySQLLexer::ci_revert },
-  { 0x330502D614CBAFB1LL, 1, 8, "pushBack", &c_FB_MySQLLexer::ci_pushback },
-  { 0x1CC2918CD94564B4LL, 1, 4, "skip", &c_FB_MySQLLexer::ci_skip },
-  { 0x4C42B2DB4CBBE314LL, 0, 9, "nextToken", &c_FB_MySQLLexer::ci_nexttoken },
-  { 0x4839431A7B8EC915LL, 1, 5, "unget", &c_FB_MySQLLexer::ci_unget },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &c_FB_MySQLLexer::ci___construct },
-  { 0, 1, 0, 0 }
+extern const MethodCallInfoTable cw_FB_MySQLLexer$$call_info_table[] = {
+  { 0x285FB8CD753ED923LL, 1, 8, "isCompop", &ci_FB_MySQLLexer$$iscompop },
+  { 0x1721E9197DB002A7LL, 1, 3, "lex", &ci_FB_MySQLLexer$$lex },
+  { 0x25DCCC35D69AD828LL, 1, 3, "get", &ci_FB_MySQLLexer$$get },
+  { 0x3A1B838A356694ECLL, 1, 6, "revert", &ci_FB_MySQLLexer$$revert },
+  { 0x330502D614CBAFB1LL, 1, 8, "pushBack", &ci_FB_MySQLLexer$$pushback },
+  { 0x1CC2918CD94564B4LL, 0, 4, "skip", &ci_FB_MySQLLexer$$skip },
+  { 0x4C42B2DB4CBBE314LL, 1, 9, "nextToken", &ci_FB_MySQLLexer$$nexttoken },
+  { 0x4839431A7B8EC915LL, 1, 5, "unget", &ci_FB_MySQLLexer$$unget },
+  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &ci_FB_MySQLLexer$$__construct },
 };
-const int c_FB_MySQLLexer::s_call_info_index[] = {
+extern const int cw_FB_MySQLLexer$$call_info_index[] = {
   31,
   -1,-1,-1,0,-1,-1,-1,1,
   2,-1,-1,-1,3,-1,-1,-1,
@@ -182,12 +180,17 @@ c_FB_MySQLLexer *c_FB_MySQLLexer::create(CVarRef v_string //  = NAMVAR(s_sys_svs
   t___construct(v_string, v_lookahead);
   return this;
 }
+extern const MethodCallInfoTable cw_FB_MySQLLexer$$call_info_table[];
+extern const int cw_FB_MySQLLexer$$call_info_index[];
+extern const InstanceOfInfo cw_FB_MySQLLexer$$instanceof_table[];
+extern const int cw_FB_MySQLLexer$$instanceof_index[];
 const ObjectStaticCallbacks cw_FB_MySQLLexer = {
   (ObjectData*(*)(ObjectData*))coo_FB_MySQLLexer,
-  c_FB_MySQLLexer::s_call_info_table,c_FB_MySQLLexer::s_call_info_index,
-  c_FB_MySQLLexer::s_instanceof_table,c_FB_MySQLLexer::s_instanceof_index,
+  cw_FB_MySQLLexer$$call_info_table,cw_FB_MySQLLexer$$call_info_index,
+  cw_FB_MySQLLexer$$instanceof_table,cw_FB_MySQLLexer$$instanceof_index,
   &c_FB_MySQLLexer::s_class_name,
-  &c_FB_MySQLLexer::os_prop_table,&c_FB_MySQLLexer::ci___construct,0,0,0x0
+  &c_FB_MySQLLexer::os_prop_table,&ci_FB_MySQLLexer$$__construct,0,0,0x0,
+  &c_FB_MySQLLexer::s_cls
 };
 void c_FB_MySQLLexer::init() {
   m_symbols = s_sys_sa00000000;
@@ -210,19 +213,19 @@ void c_FB_MySQLLexer::t___construct(Variant v_string //  = NAMSTR(s_sys_ss000000
 , Variant v_lookahead //  = 0LL
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::__construct);
-  bool oldInCtor = gasInCtor(true);
+  ObjectData *obj_tmp UNUSED;
   m_string.assignVal(v_string);
   {
-    int tmp0((x_strlen(toString(v_string))));
+    int64 tmp0((x_strlen(toString(v_string))));
     m_stringLen = tmp0;
   }
   m_lookahead.assignVal(v_lookahead);
-  gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 76 */
 Variant c_FB_MySQLLexer::t_get() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::get);
+  ObjectData *obj_tmp UNUSED;
   ++m_tokPtr;
   ++m_tokLen;
   return (not_more(m_tokPtr, m_stringLen) ? ((Variant)(m_string.rvalAt((m_tokPtr - 1LL), AccessFlags::Error))) : ((Variant)(null)));
@@ -231,6 +234,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 82 */
 void c_FB_MySQLLexer::t_unget() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::unget);
+  ObjectData *obj_tmp UNUSED;
   --m_tokPtr;
   --m_tokLen;
 }
@@ -238,6 +242,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 87 */
 Variant c_FB_MySQLLexer::t_skip() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::skip);
+  ObjectData *obj_tmp UNUSED;
   ++m_tokStart;
   {
     Variant tmp0;
@@ -254,6 +259,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 92 */
 void c_FB_MySQLLexer::t_revert() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::revert);
+  ObjectData *obj_tmp UNUSED;
   m_tokPtr.assignVal(m_tokStart);
   m_tokLen = 0LL;
 }
@@ -267,12 +273,13 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 109 */
 void c_FB_MySQLLexer::t_pushback() {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::pushBack);
+  ObjectData *obj_tmp UNUSED;
   {
     bool tmp0;
     {
       bool tmp1 = (more(m_lookahead, 0LL));
       if (tmp1) {
-        int tmp2((x_count(m_tokenStack)));
+        int64 tmp2((x_count(m_tokenStack)));
         tmp1 = (more(tmp2, 0LL));
       }
       tmp0 = ((tmp1 && more(m_stackPtr, 0LL)));
@@ -292,13 +299,14 @@ Variant c_FB_MySQLLexer::t_lex() {
   int64 v_i = 0;
 
   Variant tmp_ref;
+  ObjectData *obj_tmp UNUSED;
   if (more(m_lookahead, 0LL)) {
     {
       {
         bool tmp0;
         {
           Variant tmp1((m_stackPtr));
-          int tmp2((x_count(m_tokenStack)));
+          int64 tmp2((x_count(m_tokenStack)));
           tmp0 = (less(tmp1, tmp2));
         }
         if (tmp0) {
@@ -333,7 +341,7 @@ Variant c_FB_MySQLLexer::t_lex() {
                   LOOP_COUNTER(1);
                   for (v_i = 0LL; ; v_i++) {
                     {
-                      int tmp0((x_count(m_tokenStack)));
+                      int64 tmp0((x_count(m_tokenStack)));
                       int64 tmp1(((tmp0 - 1LL)));
                       if (!((less(v_i, tmp1)))) break;
                     }
@@ -381,6 +389,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
   bool v_bail = false;
   String v_text;
 
+  ObjectData *obj_tmp UNUSED;
   if (equal(m_string, NAMSTR(s_sys_ss00000000, ""))) {
     return null;
   }
@@ -1059,20 +1068,20 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svs00000000, ""),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x248E65D880040DC0LL,9,0,0,4,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_symbols),&NAMSTR(s_sys_ssb35c39ca, "symbols") },
-  {0x13EBDD7E6C565160LL,4,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokStart),&NAMSTR(s_sys_ss1ee01d21, "tokStart") },
-  {0x01005D7EBD85DE21LL,10,2,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_skipText),&NAMSTR(s_sys_ssb8d0aa49, "skipText") },
-  {0x61CF13C309782043LL,10,0,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokenStack),&NAMSTR(s_sys_ss44d65cff, "tokenStack") },
-  {0x318650FB7A090D24LL,4,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stringLen),&NAMSTR(s_sys_ss6c97e639, "stringLen") },
-  {0x7FEE9661F51EE4C7LL,1,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokLen),&NAMSTR(s_sys_ss2dcf782a, "tokLen") },
-  {0x178F0505D6C37A48LL,5,2,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokText),&NAMSTR(s_sys_ss55febcf5, "tokText") },
-  {0x15B369BE0D0C8149LL,-3,2,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_string),&NAMSTR(s_sys_ss69ad4382, "string") },
-  {0x0BC6CA8DD32C6CCELL,-6,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokAbsStart),&NAMSTR(s_sys_ssadd58f33, "tokAbsStart") },
-  {0x6E634F0BAFC45E90LL,-8,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokPtr),&NAMSTR(s_sys_ss28d27535, "tokPtr") },
-  {0x19F6B86C2F758F12LL,-3,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineBegin),&NAMSTR(s_sys_ss8d52a69c, "lineBegin") },
-  {0x261E0580F7E6D414LL,-1,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineNo),&NAMSTR(s_sys_ssf44f6ae2, "lineNo") },
-  {0x3254D99EAA8F8659LL,-9,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lookahead),&NAMSTR(s_sys_ssfa697dda, "lookahead") },
-  {0x36111B1F5D9ACBDELL,0,1,0,68,10,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stackPtr),&NAMSTR(s_sys_ss8b06f0b2, "stackPtr") },
+  {0x248E65D880040DC0LL,9,0,0,4,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_symbols),&NAMSTR(s_sys_ssb35c39ca, "symbols") },
+  {0x13EBDD7E6C565160LL,4,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokStart),&NAMSTR(s_sys_ss1ee01d21, "tokStart") },
+  {0x01005D7EBD85DE21LL,10,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_skipText),&NAMSTR(s_sys_ssb8d0aa49, "skipText") },
+  {0x61CF13C309782043LL,10,0,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokenStack),&NAMSTR(s_sys_ss44d65cff, "tokenStack") },
+  {0x318650FB7A090D24LL,4,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stringLen),&NAMSTR(s_sys_ss6c97e639, "stringLen") },
+  {0x7FEE9661F51EE4C7LL,1,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokLen),&NAMSTR(s_sys_ss2dcf782a, "tokLen") },
+  {0x178F0505D6C37A48LL,5,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokText),&NAMSTR(s_sys_ss55febcf5, "tokText") },
+  {0x15B369BE0D0C8149LL,-3,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_string),&NAMSTR(s_sys_ss69ad4382, "string") },
+  {0x0BC6CA8DD32C6CCELL,-6,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokAbsStart),&NAMSTR(s_sys_ssadd58f33, "tokAbsStart") },
+  {0x6E634F0BAFC45E90LL,-8,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokPtr),&NAMSTR(s_sys_ss28d27535, "tokPtr") },
+  {0x19F6B86C2F758F12LL,-3,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineBegin),&NAMSTR(s_sys_ss8d52a69c, "lineBegin") },
+  {0x261E0580F7E6D414LL,-1,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineNo),&NAMSTR(s_sys_ssf44f6ae2, "lineNo") },
+  {0x3254D99EAA8F8659LL,-9,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lookahead),&NAMSTR(s_sys_ssfa697dda, "lookahead") },
+  {0x36111B1F5D9ACBDELL,0,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stackPtr),&NAMSTR(s_sys_ss8b06f0b2, "stackPtr") },
 
 };
 static const int cpt_hash_entries[] = {

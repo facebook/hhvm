@@ -245,7 +245,7 @@ DefineFunction(
     'desc'   => "Gets the confidence number of the encoding match",
     'flags'  =>  HasDocComment,
     'return' => array(
-        'type'   => Int32,
+        'type'   => Int64,
         'desc'   => "Confidence number from 0 (no confidence) to 100 (complete confidence)",
       ),
     )

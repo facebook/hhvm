@@ -19,8 +19,8 @@
 #include <runtime/base/source_info.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/frame_injection.h>
-
-#include <runtime/eval/runtime/eval_frame_injection.h>
+#include <runtime/base/hphp_system.h>
+#include <runtime/base/server/source_root_info.h>
 
 #include <util/parser/parser.h>
 
@@ -41,6 +41,7 @@ static StaticString s_closureGenBrackets("{closureGen}");
 ///////////////////////////////////////////////////////////////////////////////
 
 CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
+  const_assert(!hhvm); // VM should use ExecutionContext::getContextClassName()
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -61,6 +62,7 @@ CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
 }
 
 CStrRef FrameInjection::GetParentClassName(bool skip /* = false */) {
+  const_assert(!hhvm);
   CStrRef cls = GetClassName(skip);
   if (cls.empty()) return cls;
   const ClassInfo *classInfo = ClassInfo::FindClass(cls);
@@ -74,6 +76,7 @@ CStrRef FrameInjection::GetParentClassName(bool skip /* = false */) {
 }
 
 ObjectData *FrameInjection::GetThis(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -85,6 +88,7 @@ ObjectData *FrameInjection::GetThis(bool skip /* = false */) {
 }
 
 String FrameInjection::GetContainingFileName(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -96,6 +100,7 @@ String FrameInjection::GetContainingFileName(bool skip /* = false */) {
 }
 
 Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
+  const_assert(!hhvm);
   Array frame = Array::Create();
 
   if (m_prev) {
@@ -139,11 +144,7 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
       if (const char *c = strstr(f, "$$")) {
         frame.set(s_function, String(f, c - f, CopyString), true);
       } else {
-        if (isEvalFrame()) {
-          frame.set(s_function, String(f, CopyString), true);
-        } else {
-          frame.set(s_function, f, true);
-        }
+        frame.set(s_function, f, true);
       }
       break;
     }
@@ -161,6 +162,7 @@ Array FrameInjection::getStackFrame(bool withSelf, bool withThis) {
 Array FrameInjection::GetBacktrace(bool skip /* = false */,
                                    bool withSelf /* = false */,
                                    bool withThis /* = true */) {
+  const_assert(!hhvm);
   Array bt = Array::Create();
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (skip && t) {
@@ -229,14 +231,19 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   return bt;
 }
 
+static bool IsCallUserFunc(const char* name) {
+  return strcasecmp(name, "call_user_func") == 0 ||
+    strcasecmp(name, "call_user_func_array") == 0;
+}
+
 Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (skip && t) {
     t = t->m_prev;
   }
   while (t) {
-    if (strcasecmp(t->m_name, "call_user_func") == 0 ||
-        strcasecmp(t->m_name, "call_user_func_array") == 0) {
+    if (IsCallUserFunc(t->m_name)) {
       t = t->m_prev;
     } else {
       break;
@@ -246,14 +253,26 @@ Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
     String file = t->m_prev->getFileName();
     if (!file.empty() && t->m_prev->m_line) {
       Array result = Array::Create();
+      if (getHphpBinaryType() == HphpBinary::program) {
+        // GetCallerInfo() must always return the absolute file path.
+        // getFileName() returns a relative path under hphpc, so we
+        // we convert it to an absolute path here.
+        const string& srcRoot = SourceRootInfo::GetCurrentSourceRoot();
+        ASSERT(!file.size() || file[0] != '/');
+        ASSERT(srcRoot.size() && srcRoot[srcRoot.size()-1] == '/');
+        file = srcRoot + file.data();
+      } else {
+        // If we are not under hphpc, then getFileName() should return
+        // an absolute path.
+        ASSERT(!file.size() || file[0] == '/');
+      }
       result.set(s_file, file, true);
       result.set(s_line, t->m_prev->m_line, true);
       return result;
     }
     t = t->m_prev;
     if (t) {
-      if (strcasecmp(t->m_name, "call_user_func") == 0 ||
-          strcasecmp(t->m_name, "call_user_func_array") == 0) {
+      if (IsCallUserFunc(t->m_name)) {
         continue;
       }
     }
@@ -262,21 +281,8 @@ Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
   return Array::Create();
 }
 
-Eval::VariableEnvironment *
-FrameInjection::GetVariableEnvironment(bool skip /* = false */) {
-  FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
-  if (skip && t) {
-    t = t->m_prev;
-  }
-  if (t && t->isEvalFrame()) {
-    Eval::EvalFrameInjection* efi =
-      static_cast<Eval::EvalFrameInjection*>(t);
-    return &(efi->getEnv());
-  }
-  return NULL;
-}
-
 int FrameInjection::GetLine(bool skip /* = false */) {
+  const_assert(!hhvm);
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -288,6 +294,7 @@ int FrameInjection::GetLine(bool skip /* = false */) {
 }
 
 CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
+  const_assert(!hhvm);
   ASSERT(info);
   for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
     if (t != info->m_top) {
@@ -306,10 +313,12 @@ CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
 }
 
 bool FrameInjection::IsGlobalScope() {
+  const_assert(!hhvm);
   return IsGlobalScope(ThreadInfo::s_threadInfo->m_top);
 }
 
 bool FrameInjection::IsGlobalScope(FrameInjection *frame) {
+  const_assert(!hhvm);
   while (frame) {
     if ((frame->m_flags & PseudoMain) == 0) {
       return false;
@@ -320,6 +329,7 @@ bool FrameInjection::IsGlobalScope(FrameInjection *frame) {
 }
 
 FrameInjection *FrameInjection::GetStackFrame(int level) {
+  const_assert(!hhvm);
   FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
   for (int i = 0; i < level && frame; i++) {
     while (frame && (frame->m_flags & PseudoMain)) {
@@ -335,11 +345,7 @@ FrameInjection *FrameInjection::GetStackFrame(int level) {
 ///////////////////////////////////////////////////////////////////////////////
 
 CStrRef FrameInjection::getClassName() const {
-  if (isEvalFrame()) {
-    const Eval::EvalFrameInjection *efi =
-      static_cast<const Eval::EvalFrameInjection*>(this);
-    return efi->getClass();
-  }
+  const_assert(!hhvm);
   // Otherwise, parse the name and lookup from ClassInfo
   const char *c = strstr(m_name, "::");
   if (!c) return empty_string;
@@ -356,16 +362,8 @@ CStrRef FrameInjection::getClassName() const {
 
 ObjectData *FrameInjection::GetObjectV(
   const FrameInjection *fi) {
+  const_assert(!hhvm);
   do {
-    // Must check first: an EvalFrame can also be
-    // an ObjectMethodFrame (but its still implemented
-    // using EvalFrameInjection).
-    if (UNLIKELY(fi->isEvalFrame())) {
-      const Eval::EvalFrameInjection* efi =
-        static_cast<const Eval::EvalFrameInjection*>(fi);
-      return efi->getThis();
-    }
-
     if (LIKELY(fi->isObjectMethodFrame())) {
       const FrameInjectionObjectMethod* ofi =
         static_cast<const FrameInjectionObjectMethod*>(fi);
@@ -382,38 +380,26 @@ ObjectData *FrameInjection::GetObjectV(
 }
 
 String FrameInjection::getFileName() {
-  if (isEvalFrame()) {
-    Eval::EvalFrameInjection *efi =
-      static_cast<Eval::EvalFrameInjection*>(this);
-    return efi->getFileNameEval();
-  }
+  const_assert(!hhvm);
   if (m_flags & PseudoMain) {
     return m_name[0] == '_' ? m_name : m_name + 10;
   }
-  if (isParserFrame()) {
-    Eval::ParserFrameInjection *pfi =
-      static_cast<Eval::ParserFrameInjection*>(this);
-    return pfi->getFileName();
-  }
-  const char *c = strstr(m_name, "::");
-  const char *f = NULL;
-  if (c) {
-    f = SourceInfo::TheSourceInfo.getClassDeclaringFile(getClassName());
-  } else {
-    f = SourceInfo::TheSourceInfo.getFunctionDeclaringFile(m_name);
-  }
+  const char *f = SourceInfo::TheSourceInfo.getFunctionDeclaringFile(m_name);
   if (f != NULL) {
     return f;
+  }
+  const char *c = strstr(m_name, "::");
+  if (c) {
+    f = SourceInfo::TheSourceInfo.getClassDeclaringFile(getClassName());
+    if (f != NULL) {
+      return f;
+    }
   }
   return null_string;
 }
 
 Array FrameInjection::getArgs() {
-  if (m_flags & EvalFrame) {
-    Eval::EvalFrameInjection *efi =
-      static_cast<Eval::EvalFrameInjection*>(this);
-    return efi->getArgsEval();
-  }
+  const_assert(!hhvm);
   return Array();
 }
 
@@ -433,39 +419,39 @@ ObjectData *FrameInjectionFunction::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionMem::FIFunctionMem(const char *name)
   : FrameInjectionFunction(name, 0) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionMem::~FIFunctionMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionNoMem::FIFunctionNoMem(const char *name)
   : FrameInjectionFunction(name, 0) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionNoMem::~FIFunctionNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);
 #endif
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionFS::FIFunctionFS(const char *name, int fs)
   : FrameInjectionFunction(name, fs) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIFunctionFS::~FIFunctionFS() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
@@ -474,26 +460,26 @@ FIFunctionFS::~FIFunctionFS() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIStaticMethodMem::FIStaticMethodMem(const char *name)
   : FrameInjectionStaticMethod(name) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIStaticMethodMem::~FIStaticMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIStaticMethodNoMem::FIStaticMethodNoMem(const char *name)
   : FrameInjectionStaticMethod(name) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIStaticMethodNoMem::~FIStaticMethodNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);
@@ -502,6 +488,7 @@ FIStaticMethodNoMem::~FIStaticMethodNoMem() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+HOT_FUNC_HPHP
 ObjectData *FrameInjectionObjectMethod::getThis() const {
   if (!m_object->o_getId()) {
     return NULL;
@@ -516,26 +503,26 @@ ObjectData *FrameInjectionObjectMethod::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIObjectMethodMem::FIObjectMethodMem(const char *name, ObjectData *obj)
  : FrameInjectionObjectMethod(name, obj) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIObjectMethodMem::~FIObjectMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIObjectMethodNoMem::FIObjectMethodNoMem(const char *name, ObjectData *obj)
  : FrameInjectionObjectMethod(name, obj) {
   // Do nothing
 }
 
-HOT_FUNC
+HOT_FUNC_HPHP
 FIObjectMethodNoMem::~FIObjectMethodNoMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout_nomemcheck(m_info);

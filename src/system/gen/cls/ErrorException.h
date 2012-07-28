@@ -26,13 +26,19 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern StaticString s_sys_ss00000000;
+extern StaticStringProxy s_sys_ssp00000000;
+#ifndef s_sys_ss00000000
+#define s_sys_ss00000000 (*(StaticString *)(&s_sys_ssp00000000))
+#endif
 
 extern const VarNR &s_sys_svif01bca90;
 
-extern VarNR s_sys_svs00000000;
+extern VariantProxy s_sys_svsp00000000;
+#ifndef s_sys_svs00000000
+#define s_sys_svs00000000 (*(Variant *)&s_sys_svsp00000000)
+#endif
 
-/* SRC: classes/exception.php line 286 */
+/* SRC: classes/exception.php line 299 */
 FORWARD_DECLARE_CLASS(ErrorException);
 extern const ObjectStaticCallbacks cw_ErrorException;
 class c_ErrorException : public c_Exception {
@@ -41,10 +47,14 @@ class c_ErrorException : public c_Exception {
   // Properties
   Variant m_severity;
 
+  // Destructor
+  ~c_ErrorException() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ErrorException, ErrorException, Exception)
   static const ClassPropTable os_prop_table;
-  c_ErrorException(const ObjectStaticCallbacks *cb = &cw_ErrorException) : c_Exception(cb), m_severity(Variant::nullInit) {}
+  c_ErrorException(const ObjectStaticCallbacks *cb = &cw_ErrorException) : c_Exception(cb), m_severity(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
   public: c_ErrorException *create(CVarRef v_message = NAMVAR(s_sys_svs00000000, ""), CVarRef v_code = NAMVAR(s_sys_svif01bca90, 0LL), CVarRef v_severity = NAMVAR(s_sys_svif01bca90, 0LL), CVarRef v_filename = null_variant, CVarRef v_lineno = null_variant);
   public: Variant t_getseverity();

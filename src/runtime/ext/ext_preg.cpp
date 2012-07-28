@@ -76,7 +76,7 @@ String f_preg_quote(CStrRef str, CStrRef delimiter /* = null_string */) {
   return preg_quote(str, delimiter);
 }
 
-int f_preg_last_error() {
+int64 f_preg_last_error() {
   return preg_last_error();
 }
 

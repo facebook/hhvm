@@ -97,10 +97,16 @@ public:
   };
 
 public:
-  Scanner(const char *filename, int type);
-  Scanner(std::istream &stream, int type, const char *fileName = "");
-  Scanner(const char *source, int len, int type, const char *fileName = "");
+  Scanner(const char *filename, int type, bool md5 = false);
+  Scanner(std::istream &stream, int type, const char *fileName = "",
+          bool md5 = false);
+  Scanner(const char *source, int len, int type, const char *fileName = "",
+          bool md5 = false);
   ~Scanner();
+
+  const std::string &getMd5() const {
+    return m_md5;
+  }
 
   /**
    * Called by parser or tokenizer.
@@ -199,7 +205,17 @@ public:
     m_heredocLabel.clear();
   }
 
+  void setStrictMode() {
+    m_isStrictMode = 1;
+  }
+
+  bool isStrictMode() {
+    return m_isStrictMode;
+  }
+
 private:
+  void computeMd5();
+
   std::string m_filename;
   bool m_streamOwner;
   std::istream *m_stream;
@@ -207,6 +223,7 @@ private:
   const char *m_source;
   int m_len;
   int m_pos;
+  std::string m_md5;
 
   enum State {
     Start = -1,
@@ -234,6 +251,7 @@ private:
   Location m_lookaheadTokenLoc;
   int m_lookaheadTokid;
   void incLoc(const char *rawText, int rawLeng);
+  bool m_isStrictMode;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

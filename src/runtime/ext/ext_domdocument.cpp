@@ -20,6 +20,7 @@
 #include <runtime/ext/ext_class.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/ext/ext_function.h>
+#include <runtime/vm/translator/translator-inline.h>
 
 #include <system/lib/systemlib.h>
 
@@ -34,8 +35,6 @@
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
 #define DOM_NODESET XML_XINCLUDE_START
-
-using namespace std;
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(dom);
@@ -108,6 +107,13 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
     }
   }
 }
+
+/**
+ * The error handler callbacks below are called from libxml code
+ * that is compiled without frame pointers, so it's necessary to do
+ * SYNC_VM_REGS_SCOPED() before calling libxml code that uses these
+ * error handler callbacks.
+ */
 
 static void php_libxml_ctx_error(void *ctx, const char *msg, ...) {
   va_list args;
@@ -1167,7 +1173,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
     ASSERT(doc->m_classmap[clsname].isString()); // or const char * is not safe
     clsname = doc->m_classmap[clsname].toString().data();
   }
-  Object wrapper = create_object(clsname, Array(), false);
+  Object wrapper = create_object_only(clsname);
   c_DOMNode *nodeobj = wrapper.getTyped<c_DOMNode>();
   nodeobj->m_doc = doc;
   nodeobj->m_node = obj;
@@ -3424,6 +3430,7 @@ Variant c_DOMDocument::t_importnode(CObjRef importednode,
 
 Variant c_DOMDocument::t_load(CStrRef filename, int64 options /* = 0 */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::load);
+  SYNC_VM_REGS_SCOPED();
   String translated = File::TranslatePath(filename);
   if (translated.empty()) {
     raise_warning("Unable to read file: %s", filename.data());
@@ -3434,11 +3441,13 @@ Variant c_DOMDocument::t_load(CStrRef filename, int64 options /* = 0 */) {
 
 Variant c_DOMDocument::t_loadhtml(CStrRef source) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::loadhtml);
+  SYNC_VM_REGS_SCOPED();
   return dom_load_html(this, source, DOM_LOAD_STRING);
 }
 
 Variant c_DOMDocument::t_loadhtmlfile(CStrRef filename) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::loadhtmlfile);
+  SYNC_VM_REGS_SCOPED();
   String translated = File::TranslatePath(filename);
   if (translated.empty()) {
     raise_warning("Unable to read file: %s", filename.data());
@@ -3449,6 +3458,7 @@ Variant c_DOMDocument::t_loadhtmlfile(CStrRef filename) {
 
 Variant c_DOMDocument::t_loadxml(CStrRef source, int64 options /* = 0 */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::loadxml);
+  SYNC_VM_REGS_SCOPED();
   return dom_parse_document(this, source, options, DOM_LOAD_STRING);
 }
 
@@ -3483,11 +3493,13 @@ bool c_DOMDocument::t_registernodeclass(CStrRef baseclass,
 
 bool c_DOMDocument::t_relaxngvalidate(CStrRef filename) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::relaxngvalidate);
+  SYNC_VM_REGS_SCOPED();
   return _dom_document_relaxNG_validate(this, filename, DOM_LOAD_FILE);
 }
 
 bool c_DOMDocument::t_relaxngvalidatesource(CStrRef source) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::relaxngvalidatesource);
+  SYNC_VM_REGS_SCOPED();
   return _dom_document_relaxNG_validate(this, source, DOM_LOAD_STRING);
 }
 
@@ -3612,16 +3624,19 @@ Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
 
 bool c_DOMDocument::t_schemavalidate(CStrRef filename) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::schemavalidate);
+  SYNC_VM_REGS_SCOPED();
   return _dom_document_schema_validate(this, filename, DOM_LOAD_FILE);
 }
 
 bool c_DOMDocument::t_schemavalidatesource(CStrRef source) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::schemavalidatesource);
+  SYNC_VM_REGS_SCOPED();
   return _dom_document_schema_validate(this, source, DOM_LOAD_STRING);
 }
 
 bool c_DOMDocument::t_validate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::validate);
+  SYNC_VM_REGS_SCOPED();
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlValidCtxt *cvp;
   if (docp->intSubset == NULL) {
@@ -5068,7 +5083,8 @@ Variant c_DOMNodeList::t_getiterator() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMImplementation::c_DOMImplementation(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
+c_DOMImplementation::c_DOMImplementation(const ObjectStaticCallbacks *cb)
+  : ExtObjectData(cb) {
 }
 
 c_DOMImplementation::~c_DOMImplementation() {

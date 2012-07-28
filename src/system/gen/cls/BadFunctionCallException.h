@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 183 */
+/* SRC: classes/exception.php line 196 */
 FORWARD_DECLARE_CLASS(BadFunctionCallException);
 extern const ObjectStaticCallbacks cw_BadFunctionCallException;
 class c_BadFunctionCallException : public c_LogicException {
@@ -36,16 +36,9 @@ class c_BadFunctionCallException : public c_LogicException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(BadFunctionCallException, BadFunctionCallException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_BadFunctionCallException(const ObjectStaticCallbacks *cb = &cw_BadFunctionCallException) : c_LogicException(cb) {}
+  c_BadFunctionCallException(const ObjectStaticCallbacks *cb = &cw_BadFunctionCallException) : c_LogicException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_BadFunctionCallException() NEVER_INLINE;
 

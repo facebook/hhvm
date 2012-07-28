@@ -17,8 +17,6 @@
 #include <test/test_ext_mailparse.h>
 #include <runtime/ext/ext.h>
 
-using namespace std;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtMailparse::RunTests(const std::string &which) {

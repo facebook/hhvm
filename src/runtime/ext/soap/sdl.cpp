@@ -18,8 +18,6 @@
 #include <runtime/ext/soap/sdl.h>
 #include <runtime/ext/soap/soap.h>
 
-using namespace std;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -161,7 +159,9 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
     }
     String msg = response.detach();
     wsdl = soap_xmlParseMemory(msg.data(), msg.size(), false);
-    wsdl->URL = xmlCharStrdup(struri);
+    if (wsdl) {
+      wsdl->URL = xmlCharStrdup(struri);
+    }
   } else {
     wsdl = soap_xmlParseFile(struri);
   }

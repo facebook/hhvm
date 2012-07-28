@@ -21,8 +21,7 @@
 #include <runtime/base/util/libevent_http_client.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_stats.h>
-
-using namespace std;
+#include <runtime/vm/translator/translator-inline.h>
 
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914
@@ -72,7 +71,6 @@ private:
     vector<char*>          str;
     vector<curl_httppost*> post;
     vector<curl_slist*>    slist;
-    map<long, Variant>     opts;
 
     ~ToFree() {
       for (unsigned int i = 0; i < str.size(); i++) {
@@ -170,12 +168,17 @@ public:
     close();
   }
 
-  void close() {
+  void closeForSweep() {
     if (m_cp) {
       curl_easy_cleanup(m_cp);
       m_cp = NULL;
     }
     m_to_free.reset();
+  }
+
+  void close() {
+    closeForSweep();
+    m_opts.clear();
   }
 
   Variant execute() {
@@ -194,6 +197,7 @@ public:
 
     {
       IOStatusHelper io("curl_easy_perform", m_url.data());
+      SYNC_VM_REGS_SCOPED();
       m_error_no = curl_easy_perform(m_cp);
     }
     set_curl_statuses(m_cp, m_url.data());
@@ -509,11 +513,12 @@ public:
       break;
 
     default:
+      m_error_no = CURLE_FAILED_INIT;
       throw_invalid_argument("option: %d", option);
       break;
     }
 
-    m_to_free->opts[option] = value;
+    m_opts.set(int64(option), value);
 
     return m_error_no == CURLE_OK;
   }
@@ -521,22 +526,13 @@ public:
   Variant getOption(long option) {
 
     if (option != 0) {
-      std::map<long, Variant>::iterator it = m_to_free->opts.find(option);
-      if (it == m_to_free->opts.end()) {
+      if (!m_opts.exists(int64(option))) {
         return false;
       }
-
-      return it->second;
+      return m_opts[int64(option)];
     }
 
-    Array ret;
-    for (std::map<long, Variant>::iterator it = m_to_free->opts.begin();
-         it != m_to_free->opts.end();
-         it++) {
-      ret.set(Variant(it->first), it->second);
-    }
-
-    return ret;
+    return m_opts;
   }
 
   static int curl_debug(CURL *cp, curl_infotype type, char *buf,
@@ -668,6 +664,7 @@ private:
 
   String m_url;
   String m_header;
+  Array  m_opts;
 
   WriteHandler m_write;
   WriteHandler m_write_header;
@@ -679,7 +676,7 @@ IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);
 void CurlResource::sweep() {
   m_write.buf.release();
   m_write_header.buf.release();
-  close();
+  closeForSweep();
 }
 
 StaticString CurlResource::s_class_name("cURL handle");
@@ -1019,6 +1016,7 @@ Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = still_running;
   IOStatusHelper io("curl_multi_exec");
+  SYNC_VM_REGS_SCOPED();
   int result = curl_multi_perform(curlm->get(), &running);
   still_running = running;
   return result;
@@ -1199,11 +1197,17 @@ static Array prepare_response(LibEventHttpClientPtr client) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void f_evhttp_set_cache(CStrRef address, int max_conn, int port /* = 80 */) {
+  if (RuntimeOption::ServerHttpSafeMode) {
+    throw_fatal("evhttp_set_cache is disabled");
+  }
   LibEventHttpClient::SetCache(address.data(), port, max_conn);
 }
 
 Variant f_evhttp_get(CStrRef url, CArrRef headers /* = null_array */,
                      int timeout /* = 5 */) {
+  if (RuntimeOption::ServerHttpSafeMode) {
+    throw_fatal("evhttp_set_cache is disabled");
+  }
   LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
                                                 false, false);
   if (client) {
@@ -1217,6 +1221,9 @@ Variant f_evhttp_get(CStrRef url, CArrRef headers /* = null_array */,
 Variant f_evhttp_post(CStrRef url, CStrRef data,
                       CArrRef headers /* = null_array */,
                       int timeout /* = 5 */) {
+  if (RuntimeOption::ServerHttpSafeMode) {
+    throw_fatal("evhttp_post is disabled");
+  }
   LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
                                                 false, true);
   if (client) {
@@ -1229,6 +1236,9 @@ Variant f_evhttp_post(CStrRef url, CStrRef data,
 
 Variant f_evhttp_async_get(CStrRef url, CArrRef headers /* = null_array */,
                            int timeout /* = 5 */) {
+  if (RuntimeOption::ServerHttpSafeMode) {
+    throw_fatal("evhttp_async_get is disabled");
+  }
   LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
                                                 true, false);
   if (client) {
@@ -1240,6 +1250,9 @@ Variant f_evhttp_async_get(CStrRef url, CArrRef headers /* = null_array */,
 Variant f_evhttp_async_post(CStrRef url, CStrRef data,
                             CArrRef headers /* = null_array */,
                             int timeout /* = 5 */) {
+  if (RuntimeOption::ServerHttpSafeMode) {
+    throw_fatal("evhttp_async_post is disabled");
+  }
   LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
                                                 true, true);
   if (client) {
@@ -1249,6 +1262,9 @@ Variant f_evhttp_async_post(CStrRef url, CStrRef data,
 }
 
 Variant f_evhttp_recv(CObjRef handle) {
+  if (RuntimeOption::ServerHttpSafeMode) {
+    throw_fatal("evhttp_recv is disabled");
+  }
   LibEventHttpHandle *obj = handle.getTyped<LibEventHttpHandle>();
   if (obj->m_client) {
     return prepare_response(obj->m_client);

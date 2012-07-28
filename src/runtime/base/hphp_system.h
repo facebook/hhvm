@@ -54,14 +54,9 @@ public:
   Globals() : FVF(__autoload)(false) {}
   void initialize();
   bool declareConstant(CStrRef name, Variant &constant, CVarRef value);
-  void declareFunction(const char *name);
-  void declareFunctionLit(CStrRef name);
   bool defined(CStrRef name);
   Variant getConstant(CStrRef name);
   Array getDynamicConstants() const;
-  bool function_exists(CStrRef name);
-
-  virtual bool class_exists(CStrRef name);
 
   virtual Variant getByIdx(ssize_t pos, Variant& k);
   virtual CVarRef getRefByIdx(ssize_t pos, Variant& k);
@@ -75,20 +70,10 @@ public:
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
 
-  bool isHead(ssize_t pos) const;
-  bool isTail(ssize_t pos) const;
-
   virtual void getFullPos(FullPos &pos);
   virtual bool setFullPos(const FullPos &pos);
 
   virtual Array getDefinedVars();
-
-  /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
-   * Called by generated fiber_un/marshal_global_state().
-   */
-  void fiberMarshal(Globals *src, FiberReferenceMap &refMap);
-  void fiberUnmarshal(Globals *src, FiberReferenceMap &refMap);
 
 public:
   Variant __lvalProxy;
@@ -106,13 +91,13 @@ public:
   }                      *s_next_inits;
 private:
   Array m_dynamicConstants;  // declared constants
-  Array m_volatileFunctions; // declared functions
 
   ssize_t wrapIter(ssize_t it) const;
 };
 
 const char* getHphpCompilerVersion();
 const char* getHphpCompilerId();
+HphpBinary::Type getHphpBinaryType();
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

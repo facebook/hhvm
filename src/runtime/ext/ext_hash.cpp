@@ -34,7 +34,7 @@
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal
 #else
-#include <ch/hash.h>
+#include <memcache/ch/hash.h>
 #endif
 
 namespace HPHP {
@@ -336,7 +336,7 @@ bool f_hash_update_file(CObjRef init_context, CStrRef filename,
   return true;
 }
 
-int f_hash_update_stream(CObjRef context, CObjRef handle,
+int64 f_hash_update_stream(CObjRef context, CObjRef handle,
                          int length /* = -1 */) {
   HashContext *hash = context.getTyped<HashContext>();
   int didread = 0;
@@ -374,11 +374,8 @@ String f_hash_final(CObjRef context, bool raw_output /* = false */) {
   return StringUtil::HexEncode(raw);
 }
 
-int f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
-  if (len > key.size()) {
-    len = key.size();
-  }
-
+int64 f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
+  len = std::max(std::min(len, key.size()), 0);
   return furc_hash(key, len, nPart);
 }
 
@@ -387,9 +384,7 @@ bool f_furchash_hphp_ext_supported() {
 }
 
 int64 f_hphp_murmurhash(CStrRef key, int len, int seed) {
-  if (len > key.size()) {
-    len = key.size();
-  }
+  len = std::max(std::min(len, key.size()), 0);
   return murmur_hash_64A(key, len, seed);
 }
 

@@ -28,8 +28,6 @@
 #include <compiler/option.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -108,7 +106,8 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
       if (m_resolvedClass) {
         m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
         if (!sym && !m_dynamicClass && !name.empty() &&
-            ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+            ar->getPhase() == AnalysisResult::AnalyzeFinal &&
+            !m_resolvedClass->isTrait()) {
           Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
         }
       }
@@ -228,7 +227,12 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
   m_valid = findMember(ar, name, sym);
   if (!m_valid) {
     if (getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::UnknownClass, self);
+      ClassScopeRawPtr cscope = getClassScope();
+      if (!cscope ||
+          !cscope->isTrait() ||
+          (!isSelf() && !isParent())) {
+        Compiler::Error(Compiler::UnknownClass, self);
+      }
     }
   } else if (m_resolvedClass) {
     m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
@@ -431,6 +435,11 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     ASSERT(m_resolvedClass);
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
     string clsId = m_resolvedClass->getId();
+    TypePtr type = getCPPType();
+    bool close = type->isSpecificObject();
+    if (close) {
+      cg_printf("((%s&)", type->getCPPDecl(ar, getScope()).c_str());
+    }
     if (m_resolvedClass->needLazyStaticInitializer()) {
       cg_printf("%s%s->lazy_initializer(g)->%s%s%s%s",
                 Option::ClassStaticsCallbackPrefix, clsId.c_str(),
@@ -442,6 +451,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
                 Option::IdPrefix.c_str(),
                 CodeGenerator::FormatLabel(var->getString()).c_str());
     }
+    if (close) cg_printf(")");
   } else {
     if (m_context & (LValue | RefValue | UnsetContext)) {
       if (isRedeclared()) cg_printf("g->");

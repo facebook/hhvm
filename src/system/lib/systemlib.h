@@ -22,12 +22,46 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class ObjectData;
+namespace VM {
+  class Unit;
+  class Class;
+}
+namespace Eval {
+  class PhpFile;
+}
+
 class SystemLib {
  public:
+  static bool s_inited;
+  static HPHP::Eval::PhpFile* s_phpFile;
+  static HPHP::VM::Unit* s_unit;
+  static HPHP::VM::Unit* s_nativeFuncUnit;
+  static HPHP::VM::Unit* s_nativeClassUnit;
+  static HPHP::VM::Class* s_stdclassClass;
+  static HPHP::VM::Class* s_ExceptionClass;
+  static HPHP::VM::Class* s_BadMethodCallExceptionClass;
+  static HPHP::VM::Class* s_pinitSentinelClass;
+  static HPHP::VM::Class* s_resourceClass;
+  static HPHP::VM::Class* s_DirectoryClass;
+  static HPHP::VM::Class* s_RecursiveDirectoryIteratorClass;
+  static HPHP::VM::Class* s_SplFileInfoClass;
+  static HPHP::VM::Class* s_SplFileObjectClass;
+  static HPHP::VM::Class* s_DOMExceptionClass;
+  static HPHP::VM::Class* s_PDOExceptionClass;
+  static HPHP::VM::Class* s_SoapFaultClass;
+
+
   static ObjectData* AllocStdClassObject();
+  static ObjectData* AllocPinitSentinel();
   static ObjectData* AllocExceptionObject(CVarRef message);
+  static ObjectData* AllocBadMethodCallExceptionObject(CVarRef message);
   static ObjectData* AllocDOMExceptionObject(CVarRef message,
                                              CVarRef code);
+  static ObjectData* AllocDirectoryObject();
+  static ObjectData* AllocRecursiveDirectoryIteratorObject();
+  static ObjectData* AllocSplFileInfoObject();
+  static ObjectData* AllocSplFileObjectObject();
   static ObjectData* AllocPDOExceptionObject();
   static ObjectData* AllocSoapFaultObject(CVarRef code,
                                           CVarRef message,

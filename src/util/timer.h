@@ -38,6 +38,7 @@ public:
   Timer(Type type, const char *name = NULL);
   ~Timer();
 
+  static int64 GetCurrentTimeMicros();
   const char *getName() const;
   int64 getMicroSeconds() const;
   void report() const;

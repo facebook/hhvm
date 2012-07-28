@@ -250,7 +250,7 @@ inline bool x_rename(CStrRef oldname, CStrRef newname, CVarRef context = null) {
   return f_rename(oldname, newname, context);
 }
 
-inline int x_umask(CVarRef mask = null_variant) {
+inline int64 x_umask(CVarRef mask = null_variant) {
   FUNCTION_INJECTION_BUILTIN(umask);
   return f_umask(mask);
 }

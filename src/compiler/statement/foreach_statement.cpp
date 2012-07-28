@@ -25,8 +25,6 @@
 #include <util/util.h>
 
 using namespace HPHP;
-using namespace std;
-using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -260,7 +258,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     } else {
       cg_printf(", null_string");
     }
-    cg_printf(", true); %s%d.advance();", Option::IterPrefix, iterId);
+    cg_printf("); %s%d.advance();", Option::IterPrefix, iterId);
   } else {
     if (passTemp) {
       cg_printf("ArrayIter %s%d = %s%d.begin(",
@@ -272,7 +270,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         cg_printf("null_string");
       }
-      cg_printf(", true); ");
+      cg_printf("); ");
       cg_printf("!%s%d.end(); %s%d.next()",
                 Option::IterPrefix, iterId,
                 Option::IterPrefix, iterId);
@@ -290,7 +288,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         cg_printf("null_string");
       }
-      cg_printf(", true); ");
+      cg_printf("); ");
       cg_printf("!%s%d.end(); ", Option::IterPrefix, iterId);
       cg_printf("++%s%d", Option::IterPrefix, iterId);
     }

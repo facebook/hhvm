@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot override final method Foo::foo() in src/test/vm/final_method3.php on line 16

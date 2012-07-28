@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 277 */
+/* SRC: classes/exception.php line 290 */
 FORWARD_DECLARE_CLASS(UnexpectedValueException);
 extern const ObjectStaticCallbacks cw_UnexpectedValueException;
 class c_UnexpectedValueException : public c_RuntimeException {
@@ -36,16 +36,9 @@ class c_UnexpectedValueException : public c_RuntimeException {
 
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(UnexpectedValueException, UnexpectedValueException)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c_UnexpectedValueException(const ObjectStaticCallbacks *cb = &cw_UnexpectedValueException) : c_RuntimeException(cb) {}
+  c_UnexpectedValueException(const ObjectStaticCallbacks *cb = &cw_UnexpectedValueException) : c_RuntimeException(cb) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo_UnexpectedValueException() NEVER_INLINE;
 

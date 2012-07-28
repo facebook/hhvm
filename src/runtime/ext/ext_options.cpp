@@ -26,13 +26,12 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
-#include <runtime/eval/runtime/eval_state.h>
 #include <util/process.h>
 #include <sys/utsname.h>
 #include <pwd.h>
 #include <system/gen/php/globals/constants.h>
 
-using namespace std;
+#include <runtime/vm/request_arena.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,7 +103,7 @@ Variant f_assert(CVarRef assertion) {
   return null;
 }
 
-int f_dl(CStrRef library) {
+int64 f_dl(CStrRef library) {
   return 0;
 }
 
@@ -163,18 +162,18 @@ String f_set_include_path(CStrRef new_include_path) {
 }
 
 Array f_get_included_files() {
-  return Eval::RequestEvalState::GetIncludes()["included"];
+  return Array::Create();
 }
 
 Array f_inclued_get_data() {
-  return Eval::RequestEvalState::GetIncludes()["inclued"];
+  return Array::Create();
 }
 
-int f_get_magic_quotes_gpc() {
+int64 f_get_magic_quotes_gpc() {
   return RuntimeOption::EnableMagicQuotesGpc ? 1 : 0;
 }
 
-int f_get_magic_quotes_runtime() {
+int64 f_get_magic_quotes_runtime() {
   throw NotSupportedException(__func__, "not using magic quotes");
 }
 
@@ -190,23 +189,23 @@ Variant f_getenv(CStrRef varname) {
   return false;
 }
 
-int f_getlastmod() {
+int64 f_getlastmod() {
   throw NotSupportedException(__func__, "page modified time not supported");
 }
 
-int f_getmygid() {
+int64 f_getmygid() {
   return getgid();
 }
 
-int f_getmyinode() {
+int64 f_getmyinode() {
   throw NotSupportedException(__func__, "not exposing operating system info");
 }
 
-int f_getmypid() {
+int64 f_getmypid() {
   return getpid();
 }
 
-int f_getmyuid() {
+int64 f_getmyuid() {
   return getuid();
 }
 
@@ -660,7 +659,11 @@ int64 f_memory_get_allocation() {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
     const MemoryUsageStats &stats = mm->getStats(true);
-    return stats.totalAlloc;
+    int64 ret = stats.totalAlloc;
+#ifdef HHVM
+    ret -= VM::request_arena().slackEstimate();
+#endif
+    return ret;
   }
   return 0;
 }
@@ -678,7 +681,11 @@ int64 f_memory_get_usage(bool real_usage /* = false */) {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
     const MemoryUsageStats &stats = mm->getStats(true);
-    return real_usage ? stats.usage : stats.alloc;
+    int64 ret = real_usage ? stats.usage : stats.alloc;
+#ifdef HHVM
+    ret -= VM::request_arena().slackEstimate();
+#endif
+    return ret;
   }
   return (int64)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
 }
@@ -755,6 +762,10 @@ void f_set_time_limit(int seconds) {
   TimeoutThread::DeferTimeout(seconds);
   // Just for ini_get
   g_context->setRequestTimeLimit(seconds);
+  if (strcmp(RuntimeOption::ExecutionMode, "cli") == 0 &&
+      seconds != 0) {
+    raise_warning("set_time_limit is not supported in client mode");
+  }
 }
 
 String f_sys_get_temp_dir() {
@@ -767,7 +778,7 @@ String f_zend_logo_guid() {
   throw NotSupportedException(__func__, "not zend anymore");
 }
 
-int f_zend_thread_id() {
+int64 f_zend_thread_id() {
   throw NotSupportedException(__func__, "not zend anymore");
 }
 

@@ -18,6 +18,8 @@
 #include <runtime/base/zend/zend_html.h>
 #include <runtime/base/complex_types.h>
 #include <util/lock.h>
+#include <unicode/uchar.h>
+#include <unicode/utf8.h>
 
 namespace HPHP {
 
@@ -368,7 +370,7 @@ static enum entity_charset determine_charset(const char *charset_hint) {
   }
 
   if (!found) {
-    raise_warning("Charset `%' not supported, assuming utf-8", charset_hint);
+    raise_warning("Charset `%s' not supported, assuming utf-8", charset_hint);
   }
 
   return charset;
@@ -499,10 +501,6 @@ static void init_entity_table() {
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
                          bool encode_single_quote, bool utf8, bool nbsp) {
   ASSERT(input);
-  if (!*input) {
-    return NULL;
-  }
-
   /**
    * Though seems to be wasting memory a lot, we have to realize most of the
    * time this function is called with small strings, or fragments of HTMLs.
@@ -517,12 +515,12 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
    * 2. take a guess and double buffer size when over: still wasting, and
    *    it may not save that much.
    */
-  char *ret = (char *)malloc(len * 6 + 1);
+  char *ret = (char *)malloc(len * 6uL + 1);
   if (!ret) {
     return NULL;
   }
   char *q = ret;
-  for (const char *p = input; *p; p++) {
+  for (const char *p = input, *end = input + len; p < end; p++) {
     char c = *p;
     switch (c) {
     case '"':
@@ -567,6 +565,116 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
       *q++ = c;
       break;
     }
+  }
+  if (q - ret > INT_MAX) {
+    free(ret);
+    return NULL;
+  }
+  *q = 0;
+  len = q - ret;
+  return ret;
+}
+
+char *string_html_encode_extra(const char *input, int &len,
+                               StringHtmlEncoding flags,
+                               const AsciiMap *asciiMap) {
+  ASSERT(input);
+  /**
+   * Though seems to be wasting memory a lot, we have to realize most of the
+   * time this function is called with small strings, or fragments of HTMLs.
+   * Allocating/deallocating anything less than 1K is trivial these days, and
+   * we want avoid string copying as much as possible. Of course, the return
+   * char * is really sent back at large, occupying unnessary space for
+   * potentially longer time than we need, we have to realize the two closest
+   * solutions are not that much better, either:
+   *
+   * 1. pre-calculate size by iterating through the string once: too time
+   *    consuming;
+   * 2. take a guess and double buffer size when over: still wasting, and
+   *    it may not save that much.
+   */
+  char *ret = (char *)malloc(len * 8uL + 1);
+  if (!ret) {
+    return NULL;
+  }
+  char *q = ret;
+  const char *rep = "\ufffd";
+  int32_t srcPosBytes;
+  for (srcPosBytes = 0; srcPosBytes < len; /* incremented in-loop */) {
+    unsigned char c = input[srcPosBytes];
+    if (c && c < 128) {
+      srcPosBytes++; // Optimize US-ASCII case
+      if ((asciiMap->map[c & 64 ? 1 : 0] >> (c & 63)) & 1) {
+        switch (c) {
+          case '"':
+            *q++ = '&'; *q++ = 'q'; *q++ = 'u';
+            *q++ = 'o'; *q++ = 't'; *q++ = ';';
+            break;
+          case '\'':
+            *q++ = '&'; *q++ = '#'; *q++ = '0';
+            *q++ = '3'; *q++ = '9'; *q++ = ';';
+            break;
+          case '<':
+            *q++ = '&'; *q++ = 'l'; *q++ = 't'; *q++ = ';';
+            break;
+          case '>':
+            *q++ = '&'; *q++ = 'g'; *q++ = 't'; *q++ = ';';
+            break;
+          case '&':
+            *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';';
+            break;
+          default:
+            *q++ = '&'; *q++ = '#';
+            *q++ = c >= 100 ? '1' : '0';
+            *q++ = ((c / 10) % 10) + '0';
+            *q++ = (c % 10) + '0';
+            *q++ = ';';
+            break;
+        }
+      } else {
+        *q++ = c;
+      }
+    } else if (flags & STRING_HTML_ENCODE_UTF8) {
+      UChar32 curCodePoint;
+      U8_NEXT(input, srcPosBytes, len, curCodePoint);
+      if ((flags & STRING_HTML_ENCODE_NBSP) && curCodePoint == 0xC2A0) {
+        *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
+      } else if (curCodePoint <= 0) {
+        if (flags & STRING_HTML_ENCODE_UTF8IZE_REPLACE) {
+          if (flags & STRING_HTML_ENCODE_HIGH) {
+            *q++ = '&'; *q++ = '#'; *q++ = 'x';
+            *q++ = 'f'; *q++ = 'f'; *q++ = 'f'; *q++ = 'd';
+            *q++ = ';';
+          } else {
+            const char *r = rep;
+            while (*r) *q++ = *r++;
+          }
+        }
+      } else if (flags & STRING_HTML_ENCODE_HIGH) {
+        q += sprintf(q, "&#x%x;", curCodePoint);
+      } else {
+        int32_t pos = 0;
+        U8_APPEND_UNSAFE(q, pos, curCodePoint);
+        q += pos;
+      }
+    } else {
+      srcPosBytes++; // Optimize US-ASCII case
+      if (c == 0xa0) {
+        *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
+      } else if (flags & STRING_HTML_ENCODE_HIGH) {
+        *q++ = '&'; *q++ = '#';
+        *q++ = c >= 200 ? '2' : '1';
+        *q++ = ((c / 10) % 10) + '0';
+        *q++ = (c % 10) + '0';
+        *q++ = ';';
+      } else {
+        *q++ = c;
+      }
+    }
+  }
+  if (q - ret > INT_MAX) {
+    free(ret);
+    return NULL;
   }
   *q = 0;
   len = q - ret;
@@ -687,9 +795,6 @@ char *string_html_decode(const char *input, int &len,
                          const char *charset_hint, bool all,
                          bool xhp /* = false */) {
   ASSERT(input);
-  if (!*input) {
-    return NULL;
-  }
 
   if (!EntityMapInited) {
     Lock lock(EntityMapMutex);
@@ -703,7 +808,7 @@ char *string_html_decode(const char *input, int &len,
 
   char *ret = (char *)malloc(len + 1);
   char *q = ret;
-  for (const char *p = input; *p; p++) {
+  for (const char *p = input; *p || UNLIKELY(p - input < len); p++) {
     char ch = *p;
     if (ch != '&') {
       *q++ = ch;

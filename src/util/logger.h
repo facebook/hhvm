@@ -48,6 +48,7 @@ public:
   };
 
   static bool UseLogAggregator;
+  static bool UseSyslog;
   static bool UseLogFile;
   static bool IsPipeOutput;
   static bool UseCronolog;
@@ -78,7 +79,7 @@ public:
   static void RawInfo(const std::string &msg);
   static void RawVerbose(const std::string &msg);
 
-  static void Log(bool err, const char *type, const Exception &e,
+  static void Log(LogLevelType level, const char *type, const Exception &e,
                   const char *file = NULL, int line = 0);
 
   static void OnNewRequest();
@@ -108,7 +109,8 @@ public:
 protected:
   class ThreadData {
   public:
-    ThreadData() : request(0), message(0), log(NULL), hook(NULL) {}
+    ThreadData() : request(0), message(0), bytesWritten(0), prevBytesWritten(0),
+                   log(NULL), hook(NULL) {}
     int request;
     int message;
     int bytesWritten;
@@ -119,18 +121,25 @@ protected:
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 
-  static void Log(bool err, const char *fmt, va_list ap);
-  static void LogEscapeMore(bool err, const char *fmt, va_list ap);
-  static void Log(bool err, const std::string &msg,
+  static void Log(LogLevelType level, const char *fmt, va_list ap);
+  static void LogEscapeMore(LogLevelType level, const char *fmt, va_list ap);
+  static void Log(LogLevelType level, const std::string &msg,
                   const StackTrace *stackTrace,
                   bool escape = true, bool escapeMore = false);
+
+  static inline bool IsEnabled() {
+    return Logger::UseLogFile || Logger::UseSyslog || Logger::UseLogAggregator;
+  }
+
+  static FILE *GetStandardOut(LogLevelType level);
+  static int GetSyslogLevel(LogLevelType level);
 
   /**
    * For subclasses to override, e.g., to support injected stack trace.
    */
-  virtual void log(bool err, const char *type, const Exception &e,
+  virtual void log(LogLevelType level, const char *type, const Exception &e,
                    const char *file = NULL, int line = 0);
-  virtual void log(bool err, const std::string &msg,
+  virtual void log(LogLevelType level, const std::string &msg,
                    const StackTrace *stackTrace,
                    bool escape = true, bool escapeMore = false);
 

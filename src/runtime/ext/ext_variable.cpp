@@ -29,7 +29,6 @@ String f_gettype(CVarRef v) {
   case KindOfUninit:
   case KindOfNull:    return "NULL";
   case KindOfBoolean: return "boolean";
-  case KindOfInt32:
   case KindOfInt64:   return "integer";
   case KindOfDouble:  return "double";
   case KindOfStaticString:
@@ -82,7 +81,7 @@ Variant f_print_r(CVarRef expression, bool ret /* = false */) {
       res = true;
     }
   } catch (StringBufferLimitException &e) {
-    Logger::Error("print_r() exceeded max bytes limit");
+    raise_notice("print_r() exceeded max bytes limit");
     res = e.m_result;
   }
   return res;
@@ -99,13 +98,13 @@ Variant f_var_export(CVarRef expression, bool ret /* = false */) {
       res = true;
     }
   } catch (StringBufferLimitException &e) {
-    Logger::Error("var_export() exceeded max bytes limit");
+    raise_notice("var_export() exceeded max bytes limit");
   }
   return res;
 }
 
 void f_var_dump(CVarRef v) {
-  VariableSerializer vs(VariableSerializer::VarDump);
+  VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
   // manipulate maxCount to match PHP behavior
   if (!v.isObject()) {
     vs.incMaxCount();
@@ -130,7 +129,16 @@ void f_debug_zval_dump(CVarRef variable) {
 // variable table
 
 Array f_get_defined_vars() {
-  return Array::Create();
+  if (hhvm) {
+    HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+    if (v) {
+      return v->getDefinedVariables();
+    } else {
+      return Array::Create();
+    }
+  } else {
+    return Array::Create();
+  }
 }
 
 Array get_defined_vars(LVariableTable *variables) {
@@ -142,13 +150,75 @@ Array get_defined_vars(RVariableTable *variables) {
 }
 
 bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
-  throw NotSupportedException(__func__, "It is bad coding practice to remove scoping of variables just to achieve coding convenience, esp. in a language that encourages global variables. This is possible to implement though, by declaring those global variables beforehand and assign with scoped ones when this function is called.");
+  throw NotSupportedException(__func__,
+                              "It is bad coding practice to remove scoping "
+                              "of variables just to achieve coding convenience, "
+                              "esp. in a language that encourages global "
+                              "variables. This is possible to implement "
+                              "though, by declaring those global variables "
+                              "beforehand and assign with scoped ones when "
+                              "this function is called.");
 }
 
-int f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
-              CStrRef prefix /* = "" */) {
-  throw FatalErrorException("bad HPHP code generation");
+int64 f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
+                CStrRef prefix /* = "" */) {
+  if (hhvm) {
+    bool reference = extract_type & EXTR_REFS;
+    extract_type &= ~EXTR_REFS;
+
+    HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+    if (!v) return 0;
+    int count = 0;
+    for (ArrayIter iter(var_array); iter; ++iter) {
+      String name = iter.first();
+      StringData* nameData = name.get();
+      switch (extract_type) {
+        case EXTR_SKIP:
+          if (v->lookup(nameData) != NULL) {
+            continue;
+          }
+          break;
+        case EXTR_IF_EXISTS:
+          if (v->lookup(nameData) == NULL) {
+            continue;
+          }
+          break;
+        case EXTR_PREFIX_SAME:
+          if (v->lookup(nameData) != NULL) {
+            name = prefix + "_" + name;
+          }
+          break;
+        case EXTR_PREFIX_ALL:
+          name = prefix + "_" + name;
+          break;
+        case EXTR_PREFIX_INVALID:
+          if (!nameData->isValidVariableName()) {
+            name = prefix + "_" + name;
+          }
+          break;
+        case EXTR_PREFIX_IF_EXISTS:
+          if (v->lookup(nameData) == NULL) {
+            continue;
+          }
+          name = prefix + "_" + name;
+          break;
+        default:
+          break;
+      }
+      nameData = name.get();
+      // skip invalid variable names, as in PHP
+      if (!nameData->isValidVariableName()) {
+        continue;
+      }
+      g_vmContext->setVar(nameData, iter.nvSecond(), reference);
+      count++;
+    }
+    return count;
+  } else {
+    throw FatalErrorException("bad HPHP code generation");
+  }
 }
+
 int extract(LVariableTable *variables, CArrRef var_array,
             int extract_type /* = EXTR_OVERWRITE */,
             String prefix /* = "" */) {

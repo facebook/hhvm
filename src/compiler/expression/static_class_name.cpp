@@ -19,10 +19,8 @@
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/file_scope.h>
+#include <compiler/analysis/variable_table.h>
 #include <util/util.h>
-
-using namespace std;
-using namespace boost;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,6 +56,12 @@ void StaticClassName::updateClassName() {
   }
 }
 
+static BlockScopeRawPtr originalScope(StaticClassName *scn) {
+  Expression *e = dynamic_cast<Expression*>(scn);
+  if (e) return e->getOriginalScope();
+  return dynamic_cast<Statement*>(scn)->getScope();
+}
+
 void StaticClassName::resolveStatic(const string &name) {
   assert(isStatic());
   m_static = m_self = m_parent = false;
@@ -71,10 +75,11 @@ ClassScopePtr StaticClassName::resolveClass() {
   m_present = false;
   m_unknown = true;
   if (m_class) return ClassScopePtr();
-  BlockScopeRawPtr scope = dynamic_cast<Expression*>(this)->getOriginalScope();
+  BlockScopeRawPtr scope = originalScope(this);
   if (m_self) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       m_className = self->getName();
+      m_origClassName = self->getOriginalName();
       m_present = true;
       m_unknown = false;
       return self;
@@ -83,24 +88,31 @@ ClassScopePtr StaticClassName::resolveClass() {
     if (ClassScopePtr self = scope->getContainingClass()) {
       if (!self->getOriginalParent().empty()) {
         m_className = Util::toLower(self->getOriginalParent());
+        m_origClassName = self->getOriginalParent();
         m_present = true;
       }
-    } else {
+    } else if (!hhvm) {
+      // When generating hhvm bytecodes, the following statement
+      // causes EmitterVisitor::emitFuncCall to not generate a Parent
+      // byte code. It's unclear whether removing it would break hphpc
+      // so this code is left here under a hhvm flag check for now.
       m_parent = false;
     }
   }
   ClassScopePtr cls = scope->getContainingProgram()->findClass(m_className);
   if (cls) {
     m_unknown = false;
-    if (cls->isRedeclaring()) {
-      cls = scope->findExactClass(m_className);
-      if (!cls) {
-        m_redeclared = true;
-      } else {
-        m_present = true;
+    if (cls->isVolatile()) {
+      ClassScopeRawPtr c = scope->getContainingFile()->resolveClass(cls);
+      if (!c) {
+        c = scope->getContainingClass();
+        if (c && c->getName() != m_className) c.reset();
       }
-    } else if (cls->isVolatile()) {
-      m_present = checkPresent();
+      m_present = c.get() != 0;
+      if (cls->isRedeclaring()) {
+        cls = c;
+        if (!m_present) m_redeclared = true;
+      }
     } else {
       m_present = true;
     }
@@ -108,9 +120,38 @@ ClassScopePtr StaticClassName::resolveClass() {
   return cls;
 }
 
+ClassScopePtr StaticClassName::resolveClassWithChecks() {
+  ClassScopePtr cls = resolveClass();
+  if (!m_class && !cls) {
+    Construct *self = dynamic_cast<Construct*>(this);
+    BlockScopeRawPtr scope = self->getScope();
+    if (isRedeclared()) {
+      scope->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
+    } else if (scope->isFirstPass()) {
+      ClassScopeRawPtr cscope = scope->getContainingClass();
+      if (!cscope ||
+          !cscope->isTrait() ||
+          (!isSelf() && !isParent())) {
+        Compiler::Error(Compiler::UnknownClass, self->shared_from_this());
+      }
+    }
+  }
+  return cls;
+}
+
 bool StaticClassName::checkPresent() {
   if (m_self || m_parent || m_static) return true;
-  BlockScopeRawPtr scope = dynamic_cast<Expression*>(this)->getOriginalScope();
+  BlockScopeRawPtr scope = originalScope(this);
+  FileScopeRawPtr currentFile = scope->getContainingFile();
+  if (currentFile) {
+    AnalysisResultPtr ar = currentFile->getContainingProgram();
+    ClassScopeRawPtr cls = ar->findClass(m_className);
+    if (!cls) return false;
+    if (!cls->isVolatile()) return true;
+    if (currentFile->resolveClass(cls)) return true;
+    if (currentFile->checkClass(m_className)) return true;
+  }
+
   if (ClassScopePtr self = scope->getContainingClass()) {
     if (m_className == self->getName() ||
         self->derivesFrom(scope->getContainingProgram(), m_className,
@@ -118,23 +159,7 @@ bool StaticClassName::checkPresent() {
       return true;
     }
   }
-  if (FileScopePtr currentFile = scope->getContainingFile()) {
-    StatementList &stmts = *currentFile->getStmt();
-    for (int i = stmts.getCount(); i--; ) {
-      StatementPtr s = stmts[i];
-      if (s && s->is(Statement::KindOfClassStatement)) {
-        ClassScopePtr cls =
-          static_pointer_cast<ClassStatement>(s)->getClassScope();
-        if (m_className == cls->getName()) {
-          return true;
-        }
-        if (cls->derivesFrom(scope->getContainingProgram(), m_className,
-                             true, false)) {
-          return true;
-        }
-      }
-    }
-  }
+
   return false;
 }
 

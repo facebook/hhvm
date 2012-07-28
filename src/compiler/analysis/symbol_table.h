@@ -274,6 +274,7 @@ class SymbolTable : public boost::enable_shared_from_this<SymbolTable>,
 public:
   static Mutex AllSymbolTablesMutex;
   static SymbolTablePtrList AllSymbolTables; // for stats purpose
+  static void Purge();
   static void CountTypes(std::map<std::string, int> &counts);
   BlockScope *getScopePtr() const { return &m_blockScope; }
   BlockScopeRawPtr getBlockScope() const {
@@ -364,6 +365,8 @@ public:
   static std::string getEscapedText(Variant v, int &len);
 protected:
   Symbol *genSymbol(const std::string &name, bool konst);
+  Symbol *genSymbol(const std::string &name, bool konst,
+                    ConstructPtr construct);
   typedef std::map<std::string,Symbol> StringToSymbolMap;
   BlockScope &m_blockScope;     // owner
 

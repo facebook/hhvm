@@ -28,10 +28,14 @@ public:
   CmdEval() : DebuggerCommand(KindOfEval), m_bypassAccessCheck(false) {}
 
   virtual bool onClient(DebuggerClient *client);
+  virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
+  virtual bool onServerVM(DebuggerProxy *proxy);
 
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
+
+  virtual void handleReply(DebuggerClient *client);
 
 private:
   String m_output;

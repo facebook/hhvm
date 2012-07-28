@@ -39,8 +39,6 @@ public:
   virtual int getLocalEffects() const { return NoEffect; }
   bool isScalarArrayPair() const;
 
-  void outputCPPControlledEval(CodeGenerator &cg, AnalysisResultPtr ar,
-                               int temp);
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
 

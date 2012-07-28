@@ -85,7 +85,12 @@ inline int64 x_xbox_task_result(CObjRef task, int64 timeout_ms, VRefParam ret) {
   return f_xbox_task_result(task, timeout_ms, ret);
 }
 
-inline int x_xbox_get_thread_timeout() {
+inline Variant x_xbox_process_call_message(CStrRef msg) {
+  FUNCTION_INJECTION_BUILTIN(xbox_process_call_message);
+  return f_xbox_process_call_message(msg);
+}
+
+inline int64 x_xbox_get_thread_timeout() {
   FUNCTION_INJECTION_BUILTIN(xbox_get_thread_timeout);
   return f_xbox_get_thread_timeout();
 }
@@ -100,7 +105,7 @@ inline void x_xbox_schedule_thread_reset() {
   f_xbox_schedule_thread_reset();
 }
 
-inline int x_xbox_get_thread_time() {
+inline int64 x_xbox_get_thread_time() {
   FUNCTION_INJECTION_BUILTIN(xbox_get_thread_time);
   return f_xbox_get_thread_time();
 }

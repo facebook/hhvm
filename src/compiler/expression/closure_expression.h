@@ -32,13 +32,15 @@ public:
                     FunctionStatementPtr func, ExpressionListPtr vars);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  virtual bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 
   virtual ConstructPtr getNthKid(int n) const;
   virtual void setNthKid(int n, ConstructPtr cp);
   virtual int getKidCount() const;
 
   FunctionStatementPtr getClosureFunction() { return m_func; }
-
+  ExpressionListPtr getClosureVariables() { return m_vars; }
+  ExpressionListPtr getClosureValues() { return m_values; }
 private:
   FunctionStatementPtr m_func;
   ExpressionListPtr m_vars;

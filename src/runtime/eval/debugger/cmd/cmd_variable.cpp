@@ -15,10 +15,7 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_variable.h>
-#include <runtime/eval/runtime/eval_frame_injection.h>
-#include <runtime/eval/runtime/variable_environment.h>
-
-using namespace std;
+#include <runtime/base/hphp_system.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,14 +23,26 @@ namespace HPHP { namespace Eval {
 void CmdVariable::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_frame);
-  thrift.write(m_variables);
+  {
+    String sdata;
+    DebuggerWireHelpers::WireSerialize(m_variables, sdata);
+    thrift.write(sdata);
+  }
   thrift.write(m_global);
 }
 
 void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_frame);
-  thrift.read(m_variables);
+  {
+    String sdata;
+    thrift.read(sdata);
+    if (DebuggerWireHelpers::WireUnserialize(sdata, m_variables) !=
+        DebuggerWireHelpers::NoError) {
+      m_variables = null_array;
+      m_wireError = sdata;
+    }
+  }
   thrift.read(m_global);
 }
 
@@ -115,10 +124,26 @@ bool CmdVariable::onClient(DebuggerClient *client) {
   if (cmd->m_variables.empty()) {
     client->info("(no variable was defined)");
   } else {
+    m_variables = cmd->m_variables;
     PrintVariables(client, cmd->m_variables, cmd->m_global, text);
   }
 
   return true;
+}
+
+void CmdVariable::setClientOutput(DebuggerClient *client) {
+  client->setOutputType(DebuggerClient::OTValues);
+  Array values;
+  for (ArrayIter iter(m_variables); iter; ++iter) {
+    String name = iter.first().toString();
+    if (client->getDebuggerClientApiModeSerialize()) {
+      values.set(name,
+                 DebuggerClient::FormatVariable(iter.second(), 200));
+    } else {
+      values.set(name, iter.second());
+    }
+  }
+  client->setOTValues(values);
 }
 
 Array CmdVariable::GetGlobalVariables() {
@@ -128,17 +153,13 @@ Array CmdVariable::GetGlobalVariables() {
 }
 
 Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
+  const_assert(!hhvm);
   Array ret;
   if (!frame || FrameInjection::IsGlobalScope(frame)) {
     global = true;
     ret = GetGlobalVariables();
   } else {
     global = false;
-    if (frame->isEvalFrame()) {
-      EvalFrameInjection *eframe = static_cast<EvalFrameInjection*>(frame);
-      ret = eframe->getEnv().getDefinedVariables();
-      ret.remove("GLOBALS");
-    }
   }
   return ret;
 }
@@ -146,6 +167,12 @@ Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
 bool CmdVariable::onServer(DebuggerProxy *proxy) {
   FrameInjection *frame = FrameInjection::GetStackFrame(m_frame);
   m_variables = GetLocalVariables(frame, m_global);
+  return proxy->send(this);
+}
+
+bool CmdVariable::onServerVM(DebuggerProxy *proxy) {
+  const_assert(hhvm);
+  m_variables = g_vmContext->getLocalDefinedVariables(m_frame);
   return proxy->send(this);
 }
 

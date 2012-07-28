@@ -106,6 +106,7 @@ public:
                                    const std::string &name,
                                    ClassScopePtr &defClass) const;
 
+  void cleanupForError(AnalysisResultConstPtr ar);
 private:
   bool m_hasDynamic;
 

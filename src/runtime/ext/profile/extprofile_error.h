@@ -45,7 +45,7 @@ inline bool x_error_log(CStrRef message, int message_type = 0, CStrRef destinati
   return f_error_log(message, message_type, destination, extra_headers);
 }
 
-inline int x_error_reporting(CVarRef level = null) {
+inline int64 x_error_reporting(CVarRef level = null) {
   FUNCTION_INJECTION_BUILTIN(error_reporting);
   return f_error_reporting(level);
 }
@@ -65,7 +65,7 @@ inline Variant x_set_error_handler(CVarRef error_handler, int error_types = k_E_
   return f_set_error_handler(error_handler, error_types);
 }
 
-inline String x_set_exception_handler(CVarRef exception_handler) {
+inline Variant x_set_exception_handler(CVarRef exception_handler) {
   FUNCTION_INJECTION_BUILTIN(set_exception_handler);
   return f_set_exception_handler(exception_handler);
 }

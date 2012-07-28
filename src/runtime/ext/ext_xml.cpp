@@ -18,6 +18,8 @@
 #include <runtime/ext/ext_xml.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
+#include <runtime/vm/translator/translator.h>
+#include <runtime/vm/translator/translator-inline.h>
 #include <expat.h>
 
 namespace HPHP {
@@ -255,7 +257,7 @@ static Variant _xml_xmlchar_zval(const XML_Char *s, int len,
   }
   int ret_len;
   char * ret = xml_utf8_decode(s, len, &ret_len, encoding);
-  return String(ret, ret_len, CopyString);
+  return String(ret, ret_len, AttachDeprecated);
 }
 
 static char *_xml_decode_tag(XmlParser *parser, const char *tag) {
@@ -264,7 +266,9 @@ static char *_xml_decode_tag(XmlParser *parser, const char *tag) {
   newstr = xml_utf8_decode((const XML_Char*)tag, strlen(tag), &out_len,
                            parser->target_encoding);
   if (parser->case_folding) {
-    newstr = string_to_upper(newstr, out_len);
+    char* oldstr = newstr;
+    newstr = string_to_upper(oldstr, out_len);
+    free(oldstr);
   }
   return newstr;
 }
@@ -451,11 +455,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           if (parser->ctag.toArray().exists("value"))
           {
             myval = parser->ctag.rvalAt("value").toString();
-            myval += String(decoded_value, decoded_len, CopyString);
-            parser->ctag.set("value",myval);
+            myval += String(decoded_value, decoded_len, AttachDeprecated);
+            parser->ctag.set("value", myval);
           } else {
             parser->ctag.set("value",
-                             String(decoded_value,decoded_len,AttachString));
+                             String(decoded_value,decoded_len,AttachDeprecated));
           }
         } else {
           Array tag;
@@ -468,9 +472,8 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             if (!strcmp(mytype.data(), "cdata")) {
               if (curtag.toArray().exists("value")) {
                 myval = curtag.rvalAt("value").toString();
-                myval += String(decoded_value, decoded_len, CopyString);
-                curtag.set("value",myval);
-                free(decoded_value);
+                myval += String(decoded_value, decoded_len, AttachDeprecated);
+                curtag.set("value", myval);
                 return;
               }
             }
@@ -480,7 +483,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
                            parser->toffset);
           tag.set("tag", String(parser->ltags[parser->level-1] +
                                 parser->toffset, CopyString));
-          tag.set("value", String(decoded_value, AttachString));
+          tag.set("value", String(decoded_value, AttachDeprecated));
           tag.set("type", "cdata");
           tag.set("level", parser->level);
           parser->data.append(tag);
@@ -504,16 +507,13 @@ void _xml_defaultHandler(void *userData, const XML_Char *s, int len) {
 void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Char **attributes) {
   XmlParser *parser = (XmlParser *)userData;
   const char **attrs = (const char **) attributes;
-  char *tag_name;
-  char *att, *val;
-  int val_len;
   Variant retval;
   Array args = Array::Create();
 
   if (parser) {
     parser->level++;
 
-    tag_name = _xml_decode_tag(parser, (const char*)name);
+    char* tag_name = _xml_decode_tag(parser, (const char*)name);
 
     if (parser->startElementHandler) {
       args.append(parser);
@@ -521,12 +521,13 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
       args.append(Array::Create());
 
       while (attributes && *attributes) {
-        att = _xml_decode_tag(parser, (const char*)attributes[0]);
-        val = xml_utf8_decode(attributes[1],
-                              strlen((const char*)attributes[1]),
-                              &val_len, parser->target_encoding);
-        args.lvalAt(2).set(String(att, AttachString),
-                           String(val, val_len, AttachString));
+        char* att = _xml_decode_tag(parser, (const char*)attributes[0]);
+        int val_len;
+        char* val = xml_utf8_decode(attributes[1],
+                                    strlen((const char*)attributes[1]),
+                                    &val_len, parser->target_encoding);
+        args.lvalAt(2).set(String(att, AttachDeprecated),
+                           String(val, val_len, AttachDeprecated));
         attributes += 2;
       }
 
@@ -551,11 +552,12 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
       attributes = (const XML_Char **) attrs;
 
       while (attributes && *attributes) {
-        att = _xml_decode_tag(parser, (const char*)attributes[0]);
-        val = xml_utf8_decode(attributes[1],
-                              strlen((const char*)attributes[1]),
-                              &val_len, parser->target_encoding);
-        atr.set(String(att, AttachString), String(val, val_len, AttachString));
+        char* att = _xml_decode_tag(parser, (const char*)attributes[0]);
+        int val_len;
+        char* val = xml_utf8_decode(attributes[1],
+                                    strlen((const char*)attributes[1]),
+                                    &val_len, parser->target_encoding);
+        atr.set(String(att, AttachDeprecated), String(val, val_len, AttachDeprecated));
         atcnt++;
         attributes += 2;
       }
@@ -697,7 +699,11 @@ bool f_xml_parser_free(CObjRef parser) {
   return true;
 }
 
-int f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
+int64 f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
+  // XML_Parse can reenter the VM, and it will do so after we've lost
+  // the frame pointer by calling through the system's copy of XML_Parse
+  // in libexpat.so.
+  SYNC_VM_REGS_SCOPED();
   XmlParser * p = parser.getTyped<XmlParser>();
   int ret;
   long isFinal = is_final ? 1 : 0;
@@ -708,7 +714,7 @@ int f_xml_parse(CObjRef parser, CStrRef data, bool is_final /* = true */) {
   return ret;
 }
 
-int f_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values,
+int64 f_xml_parse_into_struct(CObjRef parser, CStrRef data, VRefParam values,
                             VRefParam index /* = null */) {
   int ret;
   XmlParser * p = parser.getTyped<XmlParser>();
@@ -848,22 +854,22 @@ bool f_xml_set_object(CObjRef parser, VRefParam object) {
   return true;
 }
 
-int f_xml_get_current_byte_index(CObjRef parser) {
+int64 f_xml_get_current_byte_index(CObjRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentByteIndex(p->parser);
 }
 
-int f_xml_get_current_column_number(CObjRef parser) {
+int64 f_xml_get_current_column_number(CObjRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentColumnNumber(p->parser);
 }
 
-int f_xml_get_current_line_number(CObjRef parser) {
+int64 f_xml_get_current_line_number(CObjRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentLineNumber(p->parser);
 }
 
-int f_xml_get_error_code(CObjRef parser) {
+int64 f_xml_get_error_code(CObjRef parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetErrorCode(p->parser);
 }
@@ -913,7 +919,7 @@ String f_utf8_decode(CStrRef data) {
     ++newlen;
   }
   newbuf[newlen] = '\0';
-  return String(newbuf, newlen, AttachString);
+  return String(newbuf, newlen, AttachDeprecated);
 }
 
 String f_utf8_encode(CStrRef data) {
@@ -939,7 +945,7 @@ String f_utf8_encode(CStrRef data) {
     }
   }
   newbuf[newlen] = '\0';
-  return String(newbuf, newlen, AttachString);
+  return String(newbuf, newlen, AttachDeprecated);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,8 +17,8 @@
 #ifndef __CONTROL_FLOW_H__
 #define __CONTROL_FLOW_H__
 
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
+#include <boost/graph/adjacency_iterator.hpp>
 
 #include <compiler/hphp.h>
 
@@ -112,6 +112,7 @@ public:
   edge_iterator         eend() const { return m_edges.end(); }
   ControlBlock          *add_vertex(AstWalkerStateVec &s);
   ControlEdge           *add_edge(ControlBlock *a, ControlBlock *b);
+  MethodStatementPtr    getMethod() { return m_stmt; }
 private:
   MethodStatementPtr         m_stmt;
   BitSetVec                  m_bitSetVec;
@@ -137,8 +138,8 @@ public:
   int                   getDfn() const { return m_dfn; }
   BitOps::Bits          *getRow(int row) { return m_bitBlock.getRow(row); }
 
-  void                  setBit(int row, int id) {
-    m_bitBlock.setBit(row, id, true);
+  void                  setBit(int row, int id, bool flag = true) {
+    m_bitBlock.setBit(row, id, flag);
   }
   bool                  getBit(int row, int id) const {
     return m_bitBlock.getBit(row, id);
@@ -310,6 +311,9 @@ inline void put(vertex_color_t c,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+// This needs to come after the definitions of 'out_degree', 'out_edges', etc.
+#include <boost/graph/adjacency_list.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

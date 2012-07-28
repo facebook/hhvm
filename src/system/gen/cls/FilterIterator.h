@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 711 */
+/* SRC: classes/iterator.php line 715 */
 FORWARD_DECLARE_CLASS(FilterIterator);
 extern const ObjectStaticCallbacks cw_FilterIterator;
 class c_FilterIterator : public c_IteratorIterator {
@@ -35,11 +35,14 @@ class c_FilterIterator : public c_IteratorIterator {
   // Properties
   Variant m_it;
 
+  // Destructor
+  ~c_FilterIterator() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(FilterIterator, FilterIterator, IteratorIterator)
   static const ClassPropTable os_prop_table;
   c_FilterIterator(const ObjectStaticCallbacks *cb = &cw_FilterIterator) : c_IteratorIterator(cb), m_it(Variant::nullInit) {
     setAttribute(HasCall);
+    if (!hhvm) setAttribute(NoDestructor);
   }
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct(Variant v_it);

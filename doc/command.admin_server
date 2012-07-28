@@ -75,12 +75,8 @@ If program was compiled with USE_JEMALLOC, these commands will become available,
 
 /free-mem:        ask jemalloc to release memory to system
 /jemalloc-stats:  get internal jemalloc stats
-/jemalloc-stats-print:
-                  get comprehensive jemalloc stats in human-readable form
-/jemalloc-prof-activate:
-                  activate heap profiling
-/jemalloc-prof-deactivate:
-                  deactivate heap profiling
-/jemalloc-prof-dump:
-                  dump heap profile
+/jemalloc-stats-print: get comprehensive jemalloc stats in human-readable form
+/jemalloc-prof-activate: activate heap profiling
+/jemalloc-prof-deactivate: deactivate heap profiling
+/jemalloc-prof-dump: dump heap profile
     file          optional, filesystem path

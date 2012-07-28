@@ -30,7 +30,7 @@ namespace HPHP {
 
 extern const VarNR &s_sys_svif01bca90;
 
-/* SRC: classes/iterator.php line 329 */
+/* SRC: classes/iterator.php line 345 */
 FORWARD_DECLARE_CLASS(ArrayIterator);
 extern const ObjectStaticCallbacks cw_ArrayIterator;
 class c_ArrayIterator : public ExtObjectData {
@@ -40,22 +40,26 @@ class c_ArrayIterator : public ExtObjectData {
   Variant m_arr;
   Variant m_flags;
 
+  // Destructor
+  ~c_ArrayIterator() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_NO_SWEEP(ArrayIterator, ArrayIterator, ObjectData)
   static const ClassPropTable os_prop_table;
-  c_ArrayIterator(const ObjectStaticCallbacks *cb = &cw_ArrayIterator) : ExtObjectData(cb), m_arr(Variant::nullInit), m_flags(Variant::nullInit) {}
+  c_ArrayIterator(const ObjectStaticCallbacks *cb = &cw_ArrayIterator) : ExtObjectData(cb), m_arr(Variant::nullInit), m_flags(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
   public: void t___construct(Variant v_array, Variant v_flags = 0LL);
   public: c_ArrayIterator *create(CVarRef v_array, CVarRef v_flags = NAMVAR(s_sys_svif01bca90, 0LL));
   public: void t_append(CVarRef v_value);
-  public: void t_asort();
-  public: int t_count();
+  public: bool t_asort();
+  public: int64 t_count();
   public: Variant t_current();
   public: Variant t_getarraycopy();
   public: Variant t_getflags();
   public: Variant t_key();
-  public: void t_ksort();
-  public: void t_natcasesort();
-  public: void t_natsort();
+  public: bool t_ksort();
+  public: Variant t_natcasesort();
+  public: Variant t_natsort();
   public: void t_next();
   public: bool t_offsetexists(CVarRef v_index);
   public: Variant t_offsetget(Variant v_index);
@@ -65,8 +69,8 @@ class c_ArrayIterator : public ExtObjectData {
   public: void t_rewind();
   public: void t_seek(CVarRef v_position);
   public: void t_setflags(CVarRef v_flags);
-  public: void t_uasort(CVarRef v_cmp_function);
-  public: void t_uksort(CVarRef v_cmp_function);
+  public: bool t_uasort(CVarRef v_cmp_function);
+  public: bool t_uksort(CVarRef v_cmp_function);
   public: bool t_valid();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(append);

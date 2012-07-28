@@ -98,7 +98,11 @@ public:
     return m_data.str->hash();
   }
 
-  size_t arrSize() const;
+  size_t arrSize() const {
+    ASSERT(is(KindOfArray));
+    if (getIsVector()) return m_data.vec->size;
+    return m_data.map->size();
+  }
   int getIndex(CVarRef key);
   int getIndex(CStrRef key);
   int getIndex(litstr key);

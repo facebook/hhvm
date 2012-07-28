@@ -32,19 +32,16 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   public:
 
   // Properties
+  Variant m___PHP_Incomplete_Class_Name;
 
+  // Destructor
+  ~c___PHP_Incomplete_Class() NEVER_INLINE {}
   // Class Map
   DECLARE_CLASS_COMMON_NO_SWEEP(__PHP_Incomplete_Class, __PHP_Incomplete_Class)
-
-  // DECLARE_STATIC_PROP_OPS
-  public:
-
-  // DECLARE_COMMON_INVOKE
-  static const int s_call_info_table = 0;
-  static const int s_call_info_index = 0;
-
-  public:
-  c___PHP_Incomplete_Class(const ObjectStaticCallbacks *cb = &cw___PHP_Incomplete_Class) : ExtObjectData(cb) {}
+  static const ClassPropTable os_prop_table;
+  c___PHP_Incomplete_Class(const ObjectStaticCallbacks *cb = &cw___PHP_Incomplete_Class) : ExtObjectData(cb), m___PHP_Incomplete_Class_Name(Variant::nullInit) {
+    if (!hhvm) setAttribute(NoDestructor);
+  }
 };
 ObjectData *coo___PHP_Incomplete_Class() NEVER_INLINE;
 

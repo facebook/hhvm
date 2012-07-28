@@ -34,6 +34,7 @@ public:
    * Start or restart xbox server.
    */
   static void Restart();
+  static void Stop();
 
 public:
   /**
@@ -51,7 +52,7 @@ public:
   /**
    * Local tasklet for parallel processing.
    */
-  static Object TaskStart(CStrRef message);
+  static Object TaskStart(CStrRef msg, CStrRef reqInitDoc = "");
   static bool TaskStatus(CObjRef task);
   static int TaskResult(CObjRef task, int timeout_ms, Variant &ret);
 
@@ -78,7 +79,6 @@ public:
     m_port        = RuntimeOption::XboxServerPort;
     m_maxRequest  = RuntimeOption::XboxServerInfoMaxRequest;
     m_maxDuration = RuntimeOption::XboxServerInfoDuration;
-    m_warmupDoc   = RuntimeOption::XboxServerInfoWarmupDoc;
     m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
     m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
     m_alwaysReset = RuntimeOption::XboxServerInfoAlwaysReset;

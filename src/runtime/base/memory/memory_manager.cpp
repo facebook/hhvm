@@ -23,8 +23,10 @@
 #include <stdint.h>
 
 #include <runtime/base/memory/memory_manager.h>
+#include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/memory/sweepable.h>
+#include <runtime/base/builtin_functions.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/http_server.h>
 #include <util/alloc.h>
@@ -122,7 +124,21 @@ ThreadLocalNoCheck<MemoryManager> &MemoryManager::TheMemoryManager() {
   return s_singleton;
 }
 
-MemoryManager::MemoryManager() : m_enabled(false), m_checkpoint(false) {
+MemoryManager::AllocIterator::AllocIterator(const MemoryManager* mman)
+  : m_mman(*mman)
+  , m_it(m_mman.m_smartAllocators.begin())
+{}
+
+SmartAllocatorImpl*
+MemoryManager::AllocIterator::current() const {
+  return m_it == m_mman.m_smartAllocators.end() ? 0 : *m_it;
+}
+
+void MemoryManager::AllocIterator::next() {
+  ++m_it;
+}
+
+MemoryManager::MemoryManager() : m_enabled(false) {
   if (RuntimeOption::EnableMemoryManager) {
     m_enabled = true;
   }
@@ -141,6 +157,9 @@ void MemoryManager::resetStats() {
   m_stats.totalAlloc = 0;
 #ifdef USE_JEMALLOC
   if (s_statsEnabled) {
+#ifdef HHVM
+    m_stats.jemallocDebt = 0;
+#endif
     m_prevAllocated = int64(*m_allocated);
     m_delta = m_prevAllocated - int64(*m_deallocated);
   }
@@ -148,9 +167,8 @@ void MemoryManager::resetStats() {
 }
 
 void MemoryManager::refreshStatsHelperExceeded() {
-  RequestInjectionData &data =
-    ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
-  data.setMemExceededFlag();
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  info->m_reqInjectionData.setMemExceededFlag();
 }
 
 #ifdef USE_JEMALLOC
@@ -166,70 +184,26 @@ void MemoryManager::add(SmartAllocatorImpl *allocator) {
   ASSERT(allocator);
   m_smartAllocators.push_back(allocator);
   ASSERT(&allocator->getStats() == &m_stats);
-
-  /**
-   * If a SmartAllocator is registered later than checkpoint, there must be no
-   * historical objects to restore. But this allocator still needs to be
-   * registered to rollback new objects after checkpoints.
-   */
-  if (m_checkpoint) {
-    allocator->disableRestore();
-  }
-}
-
-void MemoryManager::add(UnsafePointer *p) {
-  ASSERT(p);
-  ASSERT(!m_checkpoint);
-  m_unsafePointers.insert(p);
-}
-
-void MemoryManager::remove(UnsafePointer *p) {
-  ASSERT(p);
-  ASSERT(!m_checkpoint);
-  m_unsafePointers.erase(p);
-}
-
-void MemoryManager::protectUnsafePointers() {
-  for (std::set<UnsafePointer*>::iterator iter = m_unsafePointers.begin();
-       iter != m_unsafePointers.end(); ++iter) {
-    UnsafePointer *p = *iter;
-    ASSERT(p);
-    p->protect();
-  }
-}
-
-void MemoryManager::checkpoint() {
-  ASSERT(!m_checkpoint);
-  m_checkpoint = true;
-
-  protectUnsafePointers();
-  int size = 0;
-  int count = 0;
-  for (unsigned int i = 0; i < m_smartAllocators.size(); i++) {
-    count += m_smartAllocators[i]->calculateObjects(m_linearAllocator, size);
-  }
-
-  m_linearAllocator.beginBackup(size, count);
-  for (unsigned int i = 0; i < m_smartAllocators.size(); i++) {
-    m_smartAllocators[i]->backupObjects(m_linearAllocator);
-  }
-  m_linearAllocator.endBackup();
 }
 
 void MemoryManager::sweepAll() {
   Sweepable::SweepAll();
+#ifdef HHVM_GC
+  GCRootTracker<StringData>::clear();
+  GCRootTracker<ArrayData>::clear();
+  GCRootTracker<ObjectData>::clear();
+  GCRootTracker<Variant>::clear();
+  GCRoot<StringData>::clear();
+  GCRoot<ArrayData>::clear();
+  GCRoot<ObjectData>::clear();
+  GCRoot<Variant>::clear();
+#endif
 }
 
 void MemoryManager::rollback() {
-  m_linearAllocator.beginRestore();
   for (unsigned int i = 0; i < m_smartAllocators.size(); i++) {
-    m_smartAllocators[i]->rollbackObjects(m_linearAllocator);
+    m_smartAllocators[i]->rollbackObjects();
   }
-  m_linearAllocator.endRestore();
-  protectUnsafePointers();
-}
-
-void MemoryManager::cleanup() {
 }
 
 void MemoryManager::logStats() {
@@ -251,8 +225,6 @@ void MemoryManager::checkMemory(bool detailed) {
   for (unsigned int i = 0; i < m_smartAllocators.size(); i++) {
     m_smartAllocators[i]->checkMemory(detailed);
   }
-  m_linearAllocator.checkMemory(detailed);
-  printf("Unsafe pointers: %d\n", (int)m_unsafePointers.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

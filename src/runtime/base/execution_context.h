@@ -586,7 +586,6 @@ public:
 #endif
 #undef NEAR_FIELD_DECL
   HPHP::VM::ActRec* m_firstAR;
-  bool m_halted;
   std::vector<HPHP::VM::Fault> m_faults;
 
   HPHP::VM::ActRec* getStackFrame();
@@ -723,8 +722,6 @@ OPCODES
 
   // dispatchBB() tries to run until a control-flow instruction has been run.
   void dispatchBB();
-
-  inline bool isHalted() { return m_halted; }
 
 private:
   VM::PreConstVec m_preConsts;

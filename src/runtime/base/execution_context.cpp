@@ -83,7 +83,7 @@ VMExecutionContext::VMExecutionContext() :
 #ifndef HHVM
     NEAR_FIELD_INIT
 #endif
-    m_halted(false), m_lambdaCounter(0), m_nesting(0),
+    m_lambdaCounter(0), m_nesting(0),
     m_injTables(NULL), m_breakPointFilter(NULL), m_lastLocFilter(NULL),
     m_interpreting(false), m_dbgNoBreak(false),
     m_coverPrevLine(-1), m_coverPrevUnit(NULL),

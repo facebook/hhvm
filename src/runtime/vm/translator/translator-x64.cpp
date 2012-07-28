@@ -3199,7 +3199,15 @@ TranslatorX64::enterTC(SrcKey sk) {
   CT_ASSERT(rVmTl == r12);
   TCA start = getTranslation(&sk, true);
 
-  DepthGuard d;
+  /*
+   * Important note: this frame can be longjmp'd over from under the
+   * call to enterTCHelper when an exception occurs.  Don't use any
+   * stack objects with destructors that matter between here and
+   * there.
+   */
+
+  DepthGuard d; // Technically broken during exceptions, but only used
+                // for debugging.
   TReqInfo info;
   const uintptr_t& requestNum = info.requestNum;
   uintptr_t* args = info.args;
@@ -3219,10 +3227,6 @@ TranslatorX64::enterTC(SrcKey sk) {
       g_vmContext->m_pc = curUnit()->at(sk.offset());
       INC_TPC(interp_bb);
       g_vmContext->dispatchBB();
-      if (UNLIKELY(g_vmContext->isHalted() ||
-                   g_vmContext->getPC() == NULL)) {
-        return;
-      }
       sk = SrcKey(curFunc(), g_vmContext->getPC());
       start = getTranslation(&sk, true);
     }
@@ -3244,9 +3248,6 @@ TranslatorX64::enterTC(SrcKey sk) {
 
     TRACE(4, "enterTC: %p fp%p sp%p } return\n", start,
           vmfp(), vmsp());
-    if (g_vmContext->isHalted()) {
-      return;
-    }
     TRACE(4, "enterTC: request(%s) args: %lx %lx %lx %lx %lx\n",
           reqName(requestNum),
           args[0], args[1], args[2], args[3], args[4]);
@@ -3372,9 +3373,6 @@ TranslatorX64::enterTC(SrcKey sk) {
           // numInstrs == 0 means it wants to dispatch until BB ends
           INC_TPC(interp_bb);
           g_vmContext->dispatchBB();
-        }
-        if (UNLIKELY(g_vmContext->getPC() == NULL)) {
-          return;
         }
         SrcKey newSk(curFunc(), g_vmContext->getPC());
         SKTRACE(5, newSk, "interp: exit\n");

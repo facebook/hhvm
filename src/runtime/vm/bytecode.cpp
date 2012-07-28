@@ -88,6 +88,14 @@ using Transl::tx64;
 #endif
 static const Trace::Module TRACEMOD = Trace::bcinterp;
 
+namespace {
+
+struct HaltVM : std::exception {
+  const char* what() const throw() { return "HaltVM"; }
+};
+
+}
+
 template <>
 Class* arGetContextClassImpl<false>(const ActRec* ar) {
   if (ar == NULL) {
@@ -1775,7 +1783,6 @@ void VMExecutionContext::enterVM(TypedValue* retval,
                                  TypedValue* extraArgs) {
   m_firstAR = ar;
   ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
-  m_halted = false;
 
   /*
    * Some exception handling implementation notes:
@@ -1843,6 +1850,7 @@ short_jump:
     default:
       NOT_REACHED();
     }
+  } catch (const HaltVM&) {
   } catch (...) {
     jumpCode = exception_gate_handle();
     ASSERT(jumpCode != SETJMP);
@@ -1850,8 +1858,6 @@ short_jump:
   }
 
   m_jmpBufs.pop_back();
-
-  m_halted = false;
   memcpy(retval, m_stack.topTV(), sizeof(TypedValue));
   m_stack.discard();
   return;
@@ -2909,7 +2915,6 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
     m_pc = s_debuggerDummy->entry();
     m_firstAR = ar;
     m_nestedVMMap[ar] = m_nestedVMs.size() - 1;
-    m_halted = false;
   }
   m_fp->setVarEnv(varEnv);
   varEnv->attach(m_fp);
@@ -4177,7 +4182,6 @@ VMExecutionContext::handleUnwind(UnwindStatus unwindType) {
   if (unwindType == UnwindPropagate) {
     longJumpType = LONGJUMP_PROPAGATE;
     if (m_nestedVMs.empty()) {
-      m_halted = true;
       m_fp = NULL;
       m_pc = NULL;
     }
@@ -4414,9 +4418,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {
                            "%p)\n", os.str().c_str(), m_fp));
     }
 #endif
-    pc = NULL;
     m_fp = NULL;
-    g_vmContext->m_halted = true;
+    m_pc = NULL;
+    throw HaltVM();
   }
 }
 
@@ -6275,9 +6279,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNativeImpl(PC& pc) {
                            "%p)\n", os.str().c_str(), m_fp));
     }
 #endif
-    pc = NULL;
     m_fp = NULL;
-    g_vmContext->m_halted = true;
+    m_pc = NULL;
+    throw HaltVM();
   }
 }
 
@@ -6667,7 +6671,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopTraitExists(PC& pc) {
 
 string
 VMExecutionContext::prettyStack(const string& prefix) const {
-  if (m_halted) {
+  if (!m_fp) {
     string s("__Halted");
     return s;
   }
@@ -6845,9 +6849,6 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
   Label##name: {                                                              \
     iop##name(pc);                                                            \
     SYNC();                                                                   \
-    if (g_vmContext->m_halted) {                                              \
-      return;                                                                 \
-    }                                                                         \
     if (breakOnCtlFlow) {                                                     \
       isCtlFlow = instrIsControlFlow(Op##name);                               \
       Stats::incOp(Op##name);                                                 \

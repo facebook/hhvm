@@ -44,6 +44,112 @@ namespace HPHP {
 static const Trace::Module TRACEMOD = Trace::runtime;
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Allocation of HphpArray buffers works like this: the smallest buffer
+ * size is allocated inline in HphpArray.  The next group of ^2 sizes is
+ * SmartAllocated, and big buffers are malloc'd.  HphpArray::m_allocMode
+ * tracks the state as it progresses from
+ *
+ *   kInline -> kSmart -> kMalloc
+ *
+ * Hashtables never shrink, so the allocMode Never goes backwards.
+ * If an array is pre-sized, we might skip directly to kSmart or kMalloc.
+ * If an array is created via nonSmartCopy(), we skip kSmart.
+ *
+ * For kInline, we use space in HphpArray defined as InlineSlots.
+ * The next couple size classes are declared below, using SlotsImpl as
+ * a helper.  Each concrete class just needs to instantiate the smart
+ * allocator members.
+ *
+ * Since size reallocations always follow a known sequence, each concrete
+ * Slots class's alloc() method takes care of copying data from the next
+ * size-class down and freeing it without any indirection.
+ *
+ * Finally we have allocSlots() and freeSlots() which take care of
+ * using the proper concrete class, with minimum fuss and boilerplate.
+ *
+ * SlotsImpl declares space for both the Elm slots and the ElmInd
+ * hashtable.  For small and medium-sized tables, the hashtable
+ * still fits in-line in HphpArray even when the slots don't.
+ * We handle that in the template by declaring hash[0], and
+ * HphpArray::allocData/reallocData point m_hash to the inline space
+ * instead of the space in the Slots class.
+ *
+ * For larger smart-allocated tables, m_hash will point to the hash[]
+ * table declared here, just like we do for malloc.
+ */
+
+typedef HphpArray::Elm Elm;
+typedef HphpArray::ElmInd ElmInd;
+typedef HphpArray::InlineSlots InlineSlots;
+
+/*
+ * This is the implementation guts for each smart-allocated buffer;
+ * size is compile-time constant.
+ */
+template <int Size, class Self, class Half>
+struct SlotsImpl {
+  static const uint HashCap = Size * sizeof(ElmInd) <= sizeof(InlineSlots) ?
+                              0 : Size;
+  static const uint Cap = Size - Size / HphpArray::LoadScale;
+  Elm slots[Cap];
+  ElmInd hash[HashCap];
+  void dump() {}
+
+  // allocate an instance of Self, copy data from the given instance
+  // of Half, then free Half if necessary.
+  static Elm* alloc(Elm* old_data) {
+    Elm* data = (NEW(Self)())->slots;
+    if (old_data) {
+      memcpy(data, old_data, sizeof(Half::slots));
+      Half::rel(old_data);
+    }
+    return data;
+  }
+
+  // Free an instance, given a pointer to its interior slots[] array.
+  static void rel(Elm* data) {
+    Self* p = (Self*)(uintptr_t(data) - offsetof(Self, slots));
+    DELETE(Self)(p);
+  }
+};
+
+struct Slots8: SlotsImpl<8, Slots8, InlineSlots> {
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Slots8);
+};
+struct Slots16: SlotsImpl<16, Slots16, Slots8> {
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Slots16);
+};
+struct Slots32: SlotsImpl<32, Slots32, Slots16> {
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Slots32);
+};
+struct Slots64: SlotsImpl<64, Slots64, Slots32> {
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Slots64);
+};
+const uint MaxSmartCap = Slots64::Cap;
+
+Elm* allocSlots(uint cap, Elm* data) {
+  ASSERT(cap <= MaxSmartCap);
+  return cap <= Slots8::Cap  ? Slots8::alloc(data) :
+         cap <= Slots16::Cap ? Slots16::alloc(data) :
+         cap <= Slots32::Cap ? Slots32::alloc(data) :
+                               Slots64::alloc(data);
+}
+
+void freeSlots(uint mask, Elm* data) {
+  ASSERT(mask >= 7 && mask <= 63);
+  switch (mask) {
+    case 7:  Slots8::rel(data);  break;
+    case 15: Slots16::rel(data); break;
+    case 31: Slots32::rel(data); break;
+    default: Slots64::rel(data); break;
+  }
+}
+
+IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Slots8);
+IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Slots16);
+IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Slots32);
+IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Slots64);
 IMPLEMENT_SMART_ALLOCATION(HphpArray, SmartAllocatorImpl::NeedSweep);
 //=============================================================================
 // Static members.
@@ -58,7 +164,7 @@ static inline size_t computeTableSize(uint32 tableMask) {
 }
 
 static inline size_t computeMaxElms(uint32 tableMask) {
-  return size_t(tableMask) - (size_t(tableMask) >> 2);
+  return size_t(tableMask) - size_t(tableMask) / HphpArray::LoadScale;
 }
 
 static inline size_t computeDataSize(uint32 tableMask) {
@@ -120,15 +226,14 @@ inline void HphpArray::init(uint size) {
   m_tableMask = computeMaskFromNumElms(size);
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
-  reallocData(maxElms, tableSize, 0);
+  allocData(maxElms, tableSize);
   initHash(m_hash, tableSize);
   m_pos = ArrayData::invalid_index;
 }
 
 HphpArray::HphpArray(uint size)
   : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_siPastEnd(false)
-{
+    m_siPastEnd(false), m_nonsmart(false) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
@@ -139,14 +244,13 @@ HphpArray::HphpArray(uint size)
 
 HphpArray::HphpArray(EmptyMode)
   : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_siPastEnd(false)
-{
+    m_siPastEnd(false), m_nonsmart(false) {
   init(0);
   setStatic();
 }
 
 // Empty constructor for internal use by nonSmartCopy() and copyImpl()
-HphpArray::HphpArray() {
+HphpArray::HphpArray(CopyMode mode) : m_nonsmart(mode == kNonSmartCopy) {
 }
 
 HOT_FUNC_VM
@@ -168,10 +272,12 @@ HphpArray::~HphpArray() {
       tvDecRef(tv);
     }
   }
-  if (m_data != m_inline_data.data) {
+  if (m_allocMode == kSmart) {
+    freeSlots(m_tableMask, m_data);
+  } else if (m_allocMode == kMalloc) {
+    free(m_data);
     adjustUsageStats(-computeDataSize(m_tableMask));
   }
-  freeData();
 }
 
 ssize_t HphpArray::vsize() const {
@@ -764,45 +870,61 @@ void HphpArray::allocNewElm(ElmInd* ei, size_t hki, StringData* key,
   initElm(e, hki, key, data, byRef);
 }
 
-void HphpArray::reallocData(size_t maxElms, size_t tableSize,
-                            size_t oldDataSize) {
+void HphpArray::allocData(size_t maxElms, size_t tableSize) {
+  ASSERT(!m_data);
   if (maxElms <= SmallSize) {
-    ASSERT(m_data == NULL);
-    m_data = m_inline_data.data;
+    m_data = m_inline_data.slots;
     m_hash = m_inline_data.hash;
+    m_allocMode = kInline;
     return;
   }
-  size_t dataSize = maxElms * sizeof(Elm);
   size_t hashSize = tableSize * sizeof(ElmInd);
-  size_t allocSize = hashSize <= sizeof(m_inline_hash) ? dataSize :
-                     dataSize + hashSize;
-#ifdef USE_JEMALLOC
-  if (m_data == NULL || m_data == m_inline_data.data) {
-    if (allocm((void**)&m_data, NULL, allocSize, 0)) {
-      throw OutOfMemoryException(allocSize);
-    }
-    memcpy(m_data, m_inline_data.data, oldDataSize);
-    adjustUsageStats(allocSize);
+  size_t dataSize = maxElms * sizeof(Elm);
+  if (maxElms <= MaxSmartCap && !m_nonsmart) {
+    m_data = allocSlots(maxElms, 0);
+    m_allocMode = kSmart;
   } else {
-    if (rallocm((void**)&m_data, NULL, allocSize, 0, 0)) {
-      throw OutOfMemoryException(allocSize);
-    }
-    adjustUsageStats(allocSize - oldDataSize, true);
-  }
-#else
-  if (m_data == NULL || m_data == m_inline_data.data) {
+    size_t allocSize = hashSize <= sizeof(m_inline_hash) ? dataSize :
+                       dataSize + hashSize;
     void* block = malloc(allocSize);
-    if (block == NULL) throw OutOfMemoryException(allocSize);
+    if (!block) throw OutOfMemoryException(allocSize);
     m_data = (Elm*) block;
-    memcpy(block, m_inline_data.data, oldDataSize);
+    m_allocMode = kMalloc;
     adjustUsageStats(allocSize);
-  } else {
-    void* block = realloc(m_data, allocSize);
-    if (block == NULL) throw OutOfMemoryException(allocSize);
-    m_data = (Elm*) block;
-    adjustUsageStats(allocSize - oldDataSize, oldDataSize > 0);
   }
-#endif
+  m_hash = hashSize <= sizeof(m_inline_hash) ? m_inline_hash :
+           (ElmInd*)(uintptr_t(m_data) + dataSize);
+}
+
+void HphpArray::reallocData(size_t maxElms, size_t tableSize, uint oldMask) {
+  ASSERT(m_data && oldMask > 0 && maxElms > SmallSize);
+  size_t hashSize = tableSize * sizeof(ElmInd);
+  size_t dataSize = maxElms * sizeof(Elm);
+  if (maxElms <= MaxSmartCap && !m_nonsmart) {
+    m_data = allocSlots(maxElms, m_data);
+    m_allocMode = kSmart;
+  } else {
+    size_t allocSize = hashSize <= sizeof(m_inline_hash) ? dataSize :
+                       dataSize + hashSize;
+    size_t oldDataSize = computeMaxElms(oldMask) * sizeof(Elm); // slots only.
+    if (m_allocMode != kMalloc) {
+      void* block = malloc(allocSize);
+      if (block == NULL) throw OutOfMemoryException(allocSize);
+      memcpy(block, m_data, oldDataSize);
+      if (m_allocMode == kSmart) freeSlots(oldMask, m_data);
+      m_data = (Elm*) block;
+      m_allocMode = kMalloc;
+      adjustUsageStats(allocSize);
+    } else {
+      void* block = realloc(m_data, allocSize);
+      if (block == NULL) throw OutOfMemoryException(allocSize);
+      m_data = (Elm*) block;
+      size_t oldHashSize = computeTableSize(oldMask) * sizeof(ElmInd);
+      size_t oldAllocSize = oldHashSize <= sizeof(m_inline_hash) ? oldDataSize :
+                             oldDataSize + oldHashSize;
+      adjustUsageStats(allocSize - oldAllocSize, true);
+    }
+  }
   m_hash = hashSize <= sizeof(m_inline_hash) ? m_inline_hash :
            (ElmInd*)(uintptr_t(m_data) + dataSize);
 }
@@ -849,7 +971,7 @@ void HphpArray::grow() {
   m_tableMask = (uint)(size_t(m_tableMask) + size_t(m_tableMask) + size_t(1));
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
-  reallocData(maxElms, tableSize, computeDataSize(oldMask));
+  reallocData(maxElms, tableSize, oldMask);
 
   // All the elements have been copied and their offsets from the base are
   // still the same, so we just need to build the new hash table.
@@ -1836,11 +1958,11 @@ bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
 }
 
 ArrayData* HphpArray::nonSmartCopy() const {
-  return copyImpl(new HphpArray());
+  return copyImpl(new HphpArray(kNonSmartCopy));
 }
 
 HphpArray* HphpArray::copyImpl() const {
-  return copyImpl(NEW(HphpArray)());
+  return copyImpl(NEW(HphpArray)(kSmartCopy));
 }
 
 HphpArray* HphpArray::copyImpl(HphpArray* target) const {
@@ -1854,7 +1976,7 @@ HphpArray* HphpArray::copyImpl(HphpArray* target) const {
   target->m_siPastEnd = false;
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
-  target->reallocData(maxElms, tableSize, 0);
+  target->allocData(maxElms, tableSize);
   // Copy the hash.
   memcpy(target->m_hash, m_hash, tableSize * sizeof(ElmInd));
   // Copy the elements and bump up refcounts as needed.
@@ -2118,15 +2240,8 @@ CVarRef HphpArray::endRef() {
 //=============================================================================
 // Memory allocator methods.
 
-void HphpArray::freeData() {
-  if (m_data != m_inline_data.data) {
-    free(m_data);
-    m_data = NULL;
-  }
-}
-
 void HphpArray::sweep() {
-  freeData();
+  if (m_allocMode == kMalloc) free(m_data);
   m_strongIterators.clear();
   // Its okay to skip calling adjustUsageStats() in the sweep phase.
 }

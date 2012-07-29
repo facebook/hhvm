@@ -28,8 +28,16 @@ namespace HPHP {
 class ArrayInit;
 
 class HphpArray : public ArrayData {
+  enum CopyMode { kSmartCopy, kNonSmartCopy };
+  enum AllocMode { kInline, kSmart, kMalloc };
 public:
   friend class ArrayInit;
+
+  // Load factor scaler.  If S is the # of elements, C is the
+  // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
+  // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
+  // 0.125 load factor.  Use powers of 2 to enable shift-divide.
+  static const uint LoadScale = 4;
 
 public:
   static HphpArray* GetStaticEmptyArray() {
@@ -39,10 +47,9 @@ public:
 public:
   HphpArray(uint nSize);
 private:
-  HphpArray();
+  HphpArray(CopyMode);
   static inline const void** getVTablePtr() {
-    static const HphpArray tmp(0);
-    return (*(void const***)(&tmp));
+    return (*(void const***)(&s_theEmptyArray));
   }
 
 public:
@@ -238,7 +245,13 @@ public:
   // Use a minimum of an 4-element hash table.  Valid range: [2..32]
   static const uint32 MinLgTableSize = 2;
   static const uint32 SmallHashSize = 1 << MinLgTableSize;
-  static const uint32 SmallSize = SmallHashSize - SmallHashSize / 4;
+  static const uint32 SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+
+  struct InlineSlots {
+    Elm slots[SmallSize];
+    ElmInd hash[SmallHashSize];
+    static void rel(Elm*) { /* nop */ };
+  };
 
 private:
   // Small: Array elements and the hash table are allocated inline.
@@ -285,11 +298,10 @@ private:
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
   ElmInd  m_lastE;       // Index of last used element.
   bool    m_siPastEnd;   // (true) ? strong iterators possibly past end.
+  uint8_t m_allocMode;   // enum AllocMode
+  const bool m_nonsmart; // never use smartalloc to allocate Elms
   union {
-    struct {
-      Elm data[SmallSize];
-      ElmInd hash[SmallHashSize];
-    } m_inline_data;
+    InlineSlots m_inline_data;
     ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
   };
 
@@ -338,8 +350,8 @@ private:
                bool byRef=false);
   void allocNewElm(ElmInd* ei, size_t ki, StringData* key, CVarRef data,
                    bool byRef=false);
-  void reallocData(size_t maxElms, size_t tableSize, size_t oldDataSize);
-  void freeData();
+  void allocData(size_t maxElms, size_t tableSize);
+  void reallocData(size_t maxElms, size_t tableSize, uint oldMask);
 
   /**
    * init(size) allocates space for size elements but initializes

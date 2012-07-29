@@ -84,7 +84,6 @@ static inline size_t computeMaskFromNumElms(uint32 numElms) {
   size_t lgSize = HphpArray::MinLgTableSize;
   size_t maxElms = (size_t(3U)) << (lgSize-2);
   ASSERT(lgSize >= 2);
-  ASSERT(lgSize <= 32);
   while (maxElms < numElms) {
     ++lgSize;
     maxElms <<= 1;
@@ -92,13 +91,8 @@ static inline size_t computeMaskFromNumElms(uint32 numElms) {
   ASSERT(lgSize <= 32);
   // return 2^lgSize - 1
   return ((size_t(1U)) << lgSize) - 1;
-}
-
-static inline HphpArray::ElmInd* elms2Hash(HphpArray::Elm* elms,
-                                           size_t maxElms) {
-  HphpArray::ElmInd* hash = (HphpArray::ElmInd*)(uintptr_t(elms)
-                            + (maxElms * sizeof(HphpArray::Elm)));
-  return hash;
+  static_assert(HphpArray::MinLgTableSize >= 2,
+                "lower limit for 0.75 load factor");
 }
 
 static inline bool validElmInd(ssize_t /*HphpArray::ElmInd*/ ei) {
@@ -127,7 +121,6 @@ inline void HphpArray::init(uint size) {
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
   reallocData(maxElms, tableSize, 0);
-  m_hash = elms2Hash(m_data, maxElms);
   initHash(m_hash, tableSize);
   m_pos = ArrayData::invalid_index;
 }
@@ -158,10 +151,6 @@ HphpArray::HphpArray() {
 
 HOT_FUNC_VM
 HphpArray::~HphpArray() {
-  if (m_data != NULL) {
-    adjustUsageStats(-computeDataSize(m_tableMask));
-  }
-
   Elm* elms = m_data;
   ssize_t lastE = (ssize_t)m_lastE;
   for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
@@ -179,9 +168,10 @@ HphpArray::~HphpArray() {
       tvDecRef(tv);
     }
   }
-  if (m_data != NULL) {
-    free(m_data);
+  if (m_data != m_inline_data.data) {
+    adjustUsageStats(-computeDataSize(m_tableMask));
   }
+  freeData();
 }
 
 ssize_t HphpArray::vsize() const {
@@ -776,25 +766,46 @@ void HphpArray::allocNewElm(ElmInd* ei, size_t hki, StringData* key,
 
 void HphpArray::reallocData(size_t maxElms, size_t tableSize,
                             size_t oldDataSize) {
-  size_t allocSize = (maxElms * sizeof(Elm)) + (tableSize * sizeof(ElmInd));
+  if (maxElms <= SmallSize) {
+    ASSERT(m_data == NULL);
+    m_data = m_inline_data.data;
+    m_hash = m_inline_data.hash;
+    return;
+  }
+  size_t dataSize = maxElms * sizeof(Elm);
+  size_t hashSize = tableSize * sizeof(ElmInd);
+  size_t allocSize = hashSize <= sizeof(m_inline_hash) ? dataSize :
+                     dataSize + hashSize;
 #ifdef USE_JEMALLOC
-  if (m_data == NULL) {
+  if (m_data == NULL || m_data == m_inline_data.data) {
+    m_data = NULL;
     if (allocm((void**)&m_data, NULL, allocSize, 0)) {
       throw OutOfMemoryException(allocSize);
     }
+    memcpy(m_data, m_inline_data.data, oldDataSize);
+    adjustUsageStats(allocSize);
   } else {
     if (rallocm((void**)&m_data, NULL, allocSize, 0, 0)) {
       throw OutOfMemoryException(allocSize);
     }
+    adjustUsageStats(allocSize - oldDataSize, true);
   }
 #else
-  void* block = realloc(m_data, allocSize);
-  if (block == NULL) {
-    throw OutOfMemoryException(allocSize);
+  if (m_data == NULL || m_data == m_inline_data.data) {
+    void* block = malloc(allocSize);
+    if (block == NULL) throw OutOfMemoryException(allocSize);
+    memcpy(m_data, m_inline_data.data, oldDataSize);
+    adjustUsageStats(allocSize);
+    m_data = (Elm*) block;
+  } else {
+    void* block = realloc(m_data, allocSize);
+    if (block == NULL) throw OutOfMemoryException(allocSize);
+    adjustUsageStats(allocSize - oldDataSize, oldDataSize > 0);
+    m_data = (Elm*) block;
   }
-  m_data = (Elm*)block;
 #endif
-  adjustUsageStats(allocSize - oldDataSize, true);
+  m_hash = hashSize <= sizeof(m_inline_hash) ? m_inline_hash :
+           (ElmInd*)(uintptr_t(m_data) + dataSize);
 }
 
 inline ALWAYS_INLINE void HphpArray::resizeIfNeeded() {
@@ -840,8 +851,6 @@ void HphpArray::grow() {
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
   reallocData(maxElms, tableSize, computeDataSize(oldMask));
-  // m_hash is currently invalid.
-  m_hash = elms2Hash(m_data, maxElms);
 
   // All the elements have been copied and their offsets from the base are
   // still the same, so we just need to build the new hash table.
@@ -1119,11 +1128,9 @@ inline void HphpArray::addVal(StringData* key, CVarRef data) {
   TypedValue* to = (TypedValue*)(&e->data);
   TypedValue* fr = (TypedValue*)(&data);
   ELEMENT_CONSTRUCT(fr, to);
-  if (e) {
-    // Set the key after data is written
-    e->setStrKey(key, h);
-    e->key->incRefCount();
-  }
+  // Set the key after data is written
+  e->setStrKey(key, h);
+  e->key->incRefCount();
 }
 
 inline void HphpArray::addValWithRef(int64 ki, CVarRef data) {
@@ -1849,13 +1856,12 @@ HphpArray* HphpArray::copyImpl(HphpArray* target) const {
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
   target->reallocData(maxElms, tableSize, 0);
-  Elm* targetElms = target->m_data;
-  target->m_hash = elms2Hash(targetElms, maxElms);
   // Copy the hash.
   memcpy(target->m_hash, m_hash, tableSize * sizeof(ElmInd));
   // Copy the elements and bump up refcounts as needed.
   if (m_size > 0) {
     Elm* elms = m_data;
+    Elm* targetElms = target->m_data;
     ssize_t lastE = (ssize_t)m_lastE;
     for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
       Elm* e = &elms[pos];
@@ -2113,12 +2119,17 @@ CVarRef HphpArray::endRef() {
 //=============================================================================
 // Memory allocator methods.
 
-void HphpArray::sweep() {
-  if (m_data != NULL) {
+void HphpArray::freeData() {
+  if (m_data != m_inline_data.data) {
     free(m_data);
     m_data = NULL;
   }
+}
+
+void HphpArray::sweep() {
+  freeData();
   m_strongIterators.clear();
+  // Its okay to skip calling adjustUsageStats() in the sweep phase.
 }
 
 //=============================================================================

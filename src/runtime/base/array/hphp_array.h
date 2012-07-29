@@ -235,11 +235,39 @@ public:
   static const ElmInd ElmIndEmpty      = -1; // == ArrayData::invalid_index
   static const ElmInd ElmIndTombstone  = -2;
 
-  // Use a minimum of an 8-element hash table.  Valid range: [2..32]
-  static const uint32 MinLgTableSize   = 3;
+  // Use a minimum of an 4-element hash table.  Valid range: [2..32]
+  static const uint32 MinLgTableSize = 2;
+  static const uint32 SmallHashSize = 1 << MinLgTableSize;
+  static const uint32 SmallSize = SmallHashSize - SmallHashSize / 4;
 
 private:
-  // Array elements and the hash table are contiguously allocated, and
+  // Small: Array elements and the hash table are allocated inline.
+  //
+  //            +--------------------+
+  // this -->   | HphpArray fields   |
+  //            +--------------------+
+  // m_data --> | slot 0 ...         | SmallSize slots for elements.
+  //            | slot SmallSize-1   |
+  //            +--------------------+
+  // m_hash --> |                    | 2^MinLgTableSize hash table entries.
+  //            +--------------------+
+  //
+  // Medium: Just the hash table is allocated inline, array elements
+  // are allocated from malloc.
+  //
+  //            +--------------------+
+  // this -->   | HphpArray fields   |
+  //            +--------------------+
+  // m_hash --> |                    | 2^K hash table entries
+  //            +--------------------+
+  //
+  //            +--------------------+
+  // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
+  //            | slot 1             |
+  //            | ...                |
+  //            +--------------------+
+  //
+  // Big: Array elements and the hash table are contiguously allocated, and
   // elements are pointer aligned.
   //
   //            +--------------------+
@@ -257,6 +285,13 @@ private:
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
   ElmInd  m_lastE;       // Index of last used element.
   bool    m_siPastEnd;   // (true) ? strong iterators possibly past end.
+  union {
+    struct {
+      Elm data[SmallSize];
+      ElmInd hash[SmallHashSize];
+    } m_inline_data;
+    ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
+  };
 
   ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
   ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
@@ -304,6 +339,7 @@ private:
   void allocNewElm(ElmInd* ei, size_t ki, StringData* key, CVarRef data,
                    bool byRef=false);
   void reallocData(size_t maxElms, size_t tableSize, size_t oldDataSize);
+  void freeData();
 
   /**
    * init(size) allocates space for size elements but initializes

@@ -146,7 +146,7 @@ MemoryManager::MemoryManager() : m_enabled(false) {
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
   resetStats();
-  m_stats.maxBytes = 0;
+  m_stats.maxBytes = INT64_MAX;
 }
 
 void MemoryManager::resetStats() {

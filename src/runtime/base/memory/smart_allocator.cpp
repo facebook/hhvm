@@ -169,14 +169,17 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 HOT_FUNC
 void *SmartAllocatorImpl::alloc() {
   ASSERT(m_stats);
+  MemoryUsageStats* stats = m_stats;
   // Just update the usage, while the peakUsage is maintained by
   // FrameInjection.
-  m_stats->usage += m_itemSize;
+  int64 usage = stats->usage + m_itemSize;
+  stats->usage = usage;
   if (hhvm) {
     // It's possible that this simplified check will trip later than
     // it should in a perfect world but it's cheaper than a full call
     // to refreshStats on every alloc().
-    if (m_stats->maxBytes > 0 && UNLIKELY(m_stats->usage > m_stats->maxBytes)) {
+    ASSERT(stats->maxBytes > 0);
+    if (UNLIKELY(usage > stats->maxBytes)) {
       MemoryManager::TheMemoryManager()->refreshStats();
     }
   }

@@ -59,7 +59,6 @@ BaseExecutionContext::BaseExecutionContext() :
     NEAR_FIELD_INIT
 #endif
     m_transport(NULL),
-    m_maxMemory(RuntimeOption::RequestMemoryMaxBytes),
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
     m_out(NULL), m_implicitFlush(false), m_protectedLevel(0),
@@ -69,7 +68,7 @@ BaseExecutionContext::BaseExecutionContext() :
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
     m_vhost(NULL) {
 
-  MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
+  setRequestMemoryMaxBytes(RuntimeOption::RequestMemoryMaxBytes);
   m_include_paths = Array::Create();
   for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
     m_include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
@@ -219,6 +218,7 @@ void BaseExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {
 }
 
 void BaseExecutionContext::setRequestMemoryMaxBytes(int64 max) {
+  ASSERT(max > 0);
   m_maxMemory = max;
   MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
 }

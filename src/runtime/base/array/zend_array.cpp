@@ -91,42 +91,35 @@ StaticEmptyZendArray StaticEmptyZendArray::s_theEmptyArray;
 ///////////////////////////////////////////////////////////////////////////////
 // construction/destruciton
 
+void ZendArray::init(uint nSize) {
+  uint size = MinSize;
+  if (nSize >= 0x80000000) {
+    size = 0x80000000; // prevent overflow
+  } else {
+    while (size < nSize) size <<= 1;
+  }
+  m_nTableMask = size - 1;
+  if (size <= MinSize) {
+    m_arBuckets = m_inlineBuckets;
+    memset(m_inlineBuckets, 0, MinSize * sizeof(Bucket*));
+  } else {
+    m_arBuckets = (Bucket **)calloc(tableSize(), sizeof(Bucket*));
+  }
+}
+
 HOT_FUNC_HPHP
 ZendArray::ZendArray(uint nSize) :
-  m_nNextFreeElement(0),
-  m_pListHead(NULL), m_pListTail(NULL), m_arBuckets(NULL), m_flag(0) {
+  m_flag(0), m_pListHead(NULL), m_pListTail(NULL), m_nNextFreeElement(0) {
   m_size = 0;
-  if (nSize >= 0x80000000) {
-    m_nTableSize = 0x80000000; // prevent overflow
-  } else {
-    uint i = 3;
-    while ((1U << i) < nSize) {
-      i++;
-    }
-    m_nTableSize = 1 << i;
-  }
-  m_nTableMask = m_nTableSize - 1;
-  m_arBuckets = (Bucket **)calloc(m_nTableSize, sizeof(Bucket *));
+  init(nSize);
 }
 
 HOT_FUNC_HPHP
 ZendArray::ZendArray(uint nSize, int64 n, Bucket *bkts[]) :
-  m_nNextFreeElement(n),
-  m_pListHead(bkts[0]), m_pListTail(NULL), m_flag(0) {
+  m_flag(0), m_pListHead(bkts[0]), m_pListTail(0), m_nNextFreeElement(n) {
   m_pos = (ssize_t)(m_pListHead);
-
   m_size = nSize;
-  if (nSize >= 0x80000000) {
-    m_nTableSize = 0x80000000; // prevent overflow
-  } else {
-    uint i = 3;
-    while ((1U << i) < nSize) {
-      i++;
-    }
-    m_nTableSize = 1 << i;
-  }
-  m_nTableMask = m_nTableSize - 1;
-  m_arBuckets = (Bucket **)calloc(m_nTableSize, sizeof(Bucket *));
+  init(nSize);
   for (Bucket **b = bkts; *b; b++) {
     Bucket *p = *b;
     uint nIndex = (p->hashKey() & m_nTableMask);
@@ -144,7 +137,7 @@ ZendArray::~ZendArray() {
     p = p->pListNext;
     DELETE(Bucket)(q);
   }
-  if (m_arBuckets) {
+  if (m_arBuckets != m_inlineBuckets) {
     free(m_arBuckets);
   }
 }
@@ -549,17 +542,20 @@ ssize_t ZendArray::getIndex(CVarRef k) const {
 
 HOT_FUNC_HPHP
 void ZendArray::resize() {
-  int curSize = m_nTableSize * sizeof(Bucket *);
+  uint newSize = tableSize() << 1;
   // No need to use calloc() or memset(), as rehash() is going to clear
   // m_arBuckets any way.
-  m_arBuckets = (Bucket **)realloc(m_arBuckets, curSize << 1);
-  m_nTableSize <<= 1;
-  m_nTableMask = m_nTableSize - 1;
+  if (m_arBuckets == m_inlineBuckets) {
+    m_arBuckets = (Bucket**)malloc(newSize * sizeof(Bucket*));
+  } else {
+    m_arBuckets = (Bucket **)realloc(m_arBuckets, newSize * sizeof(Bucket*));
+  }
+  m_nTableMask = newSize - 1;
   rehash();
 }
 
 void ZendArray::rehash() {
-  memset(m_arBuckets, 0, m_nTableSize * sizeof(Bucket *));
+  memset(m_arBuckets, 0, tableSize() * sizeof(Bucket*));
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
     uint nIndex = (p->hashKey() & m_nTableMask);
     CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
@@ -582,7 +578,7 @@ bool ZendArray::nextInsert(CVarRef data) {
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
   m_nNextFreeElement = h + 1;
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -602,7 +598,7 @@ bool ZendArray::nextInsertRef(CVarRef data) {
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
   m_nNextFreeElement = h + 1;
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -617,7 +613,7 @@ bool ZendArray::nextInsertWithRef(CVarRef data) {
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
   m_nNextFreeElement = h + 1;
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -647,7 +643,7 @@ bool ZendArray::addLvalImpl(int64 h, Variant **pDest,
   if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = h + 1;
   }
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -672,7 +668,7 @@ bool ZendArray::addLvalImpl(StringData *key, int64 h, Variant **pDest,
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -693,7 +689,7 @@ bool ZendArray::addValWithRef(int64 h, CVarRef data) {
   if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = h + 1;
   }
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -712,7 +708,7 @@ bool ZendArray::addValWithRef(StringData *key, CVarRef data) {
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -737,7 +733,7 @@ bool ZendArray::update(int64 h, CVarRef data) {
   if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = h + 1;
   }
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -760,7 +756,7 @@ bool ZendArray::update(StringData *key, CVarRef data) {
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
 
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -784,7 +780,7 @@ bool ZendArray::updateRef(int64 h, CVarRef data) {
   if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = h + 1;
   }
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -806,7 +802,7 @@ bool ZendArray::updateRef(StringData *key, CVarRef data) {
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
 
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return true;
@@ -1047,7 +1043,7 @@ ArrayData *ZendArray::add(int64 k, CVarRef v, bool copy) {
   if (k >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = k + 1;
   }
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return NULL;
@@ -1068,7 +1064,7 @@ ArrayData *ZendArray::add(CStrRef k, CVarRef v, bool copy) {
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
-  if (++m_size > m_nTableSize) {
+  if (++m_size > tableSize()) {
     resize();
   }
   return NULL;
@@ -1509,9 +1505,9 @@ CVarRef ZendArray::endRef() {
 // memory allocator methods.
 
 void ZendArray::sweep() {
-  if (m_arBuckets) {
+  if (m_arBuckets != m_inlineBuckets) {
     free(m_arBuckets);
-    m_arBuckets = NULL;
+    m_arBuckets = m_inlineBuckets;
   }
   m_strongIterators.clear();
 }

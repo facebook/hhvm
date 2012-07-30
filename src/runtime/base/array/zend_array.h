@@ -28,16 +28,16 @@ namespace HPHP {
 class ArrayInit;
 
 class ZendArray : public ArrayData {
+  static const uint LgMinSize = 3;
+  static const uint MinSize = 1 << LgMinSize;
 public:
   friend class ArrayInit;
   friend class VectorArray;
 
-  ZendArray() :
-    m_nTableSize(8), m_nTableMask(8 - 1),
-    m_nNextFreeElement(0),
-    m_pListHead(NULL), m_pListTail(NULL), m_arBuckets(NULL), m_flag(0) {
-      m_size = 0;
-      m_arBuckets = (Bucket **)calloc(m_nTableSize, sizeof(Bucket *));
+  ZendArray() : m_arBuckets(m_inlineBuckets), m_nTableMask(MinSize - 1),
+    m_flag(0), m_pListHead(0), m_pListTail(0), m_nNextFreeElement(0) {
+    m_size = 0;
+    memset(m_inlineBuckets, 0, MinSize * sizeof(Bucket*));
   }
 
   ZendArray(uint nSize);
@@ -230,13 +230,15 @@ private:
     StrongIteratorPastEnd = 1,
   };
 
-  uint             m_nTableSize;
-  uint             m_nTableMask;
-  int64            m_nNextFreeElement;
-  Bucket         * m_pListHead;
-  Bucket         * m_pListTail;
   Bucket         **m_arBuckets;
+  uint             m_nTableMask;
   mutable uint16   m_flag;
+  Bucket         * m_pListHead;
+  Bucket          *m_inlineBuckets[MinSize];
+  Bucket         * m_pListTail;
+  int64            m_nNextFreeElement;
+
+  uint tableSize() const { return m_nTableMask + 1; }
 
   Bucket *find(int64 h) const;
   Bucket *find(const char *k, int len, int64 prehash) const;
@@ -265,6 +267,7 @@ private:
   ZendArray *copyImpl() const;
   ZendArray *copyImplHelper(bool sma) const;
 
+  void init(uint nSize);
   void resize();
   void rehash();
 

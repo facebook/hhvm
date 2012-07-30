@@ -30,7 +30,16 @@ namespace Transl {
 typedef unsigned char* TCA; // "Translation cache adddress."
 typedef const unsigned char* CTCA;
 
-using std::vector;
+struct ctca_identity_hash {
+  size_t operator()(CTCA val) const {
+    // Experiments show that this is a sufficient "hash function" on
+    // TCAs for now; using stronger functions didn't help given current
+    // data. Patterns of code emission in the translator could invalidate
+    // this finding going forward, though; e.g., if we frequently emit
+    // a call instruction N bytes into a cache-aligned region.
+    return uintptr_t(val);
+  }
+};
 
 }}}
 

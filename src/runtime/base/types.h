@@ -138,8 +138,10 @@ enum DataType {
   KindOfUnknown   = KindOfInvalid,
 
   /**
-   * Beware if you change the order, as we may have a few type checks in the
-   * code that depend on the order.
+   * Beware if you change the order, as we may have a few type checks
+   * in the code that depend on the order.  Also beware of adding to
+   * the number of bits needed to represent this.  (Known dependency
+   * in unwind-x64.h.)
    */
   KindOfUninit  = 0,
   KindOfNull    = 1,

@@ -256,7 +256,15 @@ bool ElfWriter::addFrameInfo(DwarfChunk* d) {
   b.dwarf_cfa_offset_extended_sf(RIP, -1);
   /* Previous RBP is at CFA - 2 . DWARF_DATA_ALIGN (8) */
   b.dwarf_cfa_offset_extended_sf(RBP, -2);
-  /* RSP is unchanged in VM frames */
+  /*
+   * RSP is unchanged in VM frames, except for some rare cases with
+   * calls to functions that we assume don't throw.  (Technically
+   * debug information will be wrong if we stop under one of those
+   * cases.)
+   *
+   * Note: if rVmSp is ever changed to refer to rsp, this code needs
+   * to change.
+   */
   b.dwarf_cfa_same_value(RSP);
 
   /* register above rules in a CIE (common information entry) */

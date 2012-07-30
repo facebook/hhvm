@@ -17,6 +17,8 @@
 #ifndef incl_RUNTIME_TYPE_H_
 #define incl_RUNTIME_TYPE_H_
 
+#include "runtime/vm/bytecode.h"
+
 namespace HPHP {
 namespace VM {
 namespace Transl {

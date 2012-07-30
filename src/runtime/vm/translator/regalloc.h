@@ -262,9 +262,9 @@ class RegAlloc {
   RegInfo         m_info[kMaxRegs];
 
   // Secondary indices on m_info.
-  int             m_numRegs;          // Number of real registers, <= kMaxRegs
   RegSet          m_callerSaved;      // Good short-lived regs
   RegSet          m_calleeSaved;      // Good long-lived regs
+  int             m_numRegs;          // Number of real registers, <= kMaxRegs
   RegSet          m_allRegs;
   PhysReg         m_lru[kMaxRegs];    // lru order over registers
   typedef hphp_hash_map<RegContent, PhysReg, RegContent> ContToRegMap;
@@ -304,7 +304,6 @@ class RegAlloc {
     return ri->m_pReg;
   }
 
-  // Handy for debugging.
   const RegInfo* getInfo(PhysReg pr) const {
     return physRegToInfo(pr);
   }

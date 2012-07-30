@@ -670,15 +670,6 @@ private:
   virtual void invalidateSrcKey(const SrcKey& sk) = 0;
 
 protected:
-  struct PendingFixup {
-    TCA m_tca;
-    Fixup m_fixup;
-    PendingFixup() { }
-    PendingFixup(TCA tca, Fixup fixup) :
-      m_tca(tca), m_fixup(fixup) { }
-  };
-  vector<PendingFixup> m_pendingFixups;
-  FixupMap m_fixupMap;
   void requestResetHighLevelTranslator();
 
   TCA m_resumeHelper;

@@ -109,6 +109,7 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TC_MissWriteLease) \
   STAT(TC_Hit) \
   STAT(TC_Sync) \
+  STAT(TC_SyncUnwind) \
   STAT(TC_TypePredHit) \
   STAT(TC_TypePredMiss) \
   STAT(TC_TypePredUnneeded) \

@@ -400,7 +400,7 @@ static bool hphp_chdir_file(const string filename) {
   return ret;
 }
 
-void handle_destructor_exception() {
+void handle_destructor_exception(const char* situation) {
   string errorMsg;
   try {
     throw;
@@ -409,14 +409,16 @@ void handle_destructor_exception() {
     return;
   } catch (Object &e) {
     // For user exceptions, invoke the user exception handler
-    errorMsg = "Destructor threw an object exception: ";
+    errorMsg = situation;
+    errorMsg += " threw an object exception: ";
     try {
       errorMsg += e.toString().data();
     } catch (...) {
       errorMsg += "(unable to call toString())";
     }
   } catch (Exception &e) {
-    errorMsg = "Destructor raised a fatal error: ";
+    errorMsg = situation;
+    errorMsg += " raised a fatal error: ";
     if (RuntimeOption::ServerStackTrace) {
       errorMsg += e.what();
     } else {
@@ -425,7 +427,8 @@ void handle_destructor_exception() {
       errorMsg += e.getMessage();
     }
   } catch (...) {
-    errorMsg = "Destructor threw an unknown exception";
+    errorMsg = situation;
+    errorMsg += " threw an unknown exception";
   }
   // For fatal errors and unknown exceptions, we raise a warning.
   // If there is a user error handler it will be invoked, otherwise

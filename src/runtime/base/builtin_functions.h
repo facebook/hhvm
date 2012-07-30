@@ -472,10 +472,12 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
                                     const char *expected, CVarRef val);
 
 /**
- * Handler for exceptions thrown from object destructors. Implemented in
+ * Handler for exceptions thrown from user functions that we don't
+ * allow exception propagation from.  E.g., object destructors or
+ * certain callback hooks (user profiler). Implemented in
  * program_functions.cpp.
  */
-void handle_destructor_exception();
+void handle_destructor_exception(const char* situation = "Destructor");
 
 /**
  * If RuntimeOption::ThrowBadTypeExceptions is on, we are running in

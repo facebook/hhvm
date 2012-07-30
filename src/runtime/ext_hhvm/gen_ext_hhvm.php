@@ -731,7 +731,6 @@ function phase2() {
       fwrite($ext_hhvm_cpp, "TypedValue* fg_" . $obj->name .
         "(HPHP::VM::ActRec *ar) {\n");
       $indent = '  ';
-      fwrite($ext_hhvm_cpp, $indent . "EXCEPTION_GATE_ENTER();\n");
       $indent .= '  ';
       fwrite($ext_hhvm_cpp, $indent . "TypedValue rv;\n");
       fwrite($ext_hhvm_cpp, $indent . "long long count = ar->numArgs();\n");
@@ -801,7 +800,7 @@ function phase2() {
         fwrite($ext_hhvm_cpp, copyAndReturnRV($indent, $obj));
       }
       $indent = substr($indent, 2);
-      fwrite($ext_hhvm_cpp, $indent . "EXCEPTION_GATE_RETURN(&ar->m_r);\n");
+      fwrite($ext_hhvm_cpp, $indent . "return &ar->m_r;\n");
       fwrite($ext_hhvm_cpp, "}\n\n\n\n");
     }
 
@@ -841,7 +840,6 @@ function phase2() {
         fwrite($ext_hhvm_cpp, "TypedValue* tg_" . getUniqueFuncName($obj) .
           "(HPHP::VM::ActRec *ar) {\n");
         $indent = '  ';
-        fwrite($ext_hhvm_cpp, $indent . "EXCEPTION_GATE_ENTER();\n");
         $indent .= '  ';
         fwrite($ext_hhvm_cpp, $indent . "TypedValue rv;\n");
         fwrite($ext_hhvm_cpp, $indent . "long long count = ar->numArgs();\n");
@@ -942,7 +940,7 @@ function phase2() {
         }
 
         $indent = substr($indent, 2);
-        fwrite($ext_hhvm_cpp, $indent . "EXCEPTION_GATE_RETURN(&ar->m_r);\n");
+        fwrite($ext_hhvm_cpp, $indent . "return &ar->m_r;\n");
         fwrite($ext_hhvm_cpp, "}\n\n");
       }
     }

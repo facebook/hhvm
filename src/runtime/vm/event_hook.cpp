@@ -16,7 +16,6 @@
 
 #include "runtime/base/types.h"
 #include "runtime/vm/event_hook.h"
-#include "runtime/vm/exception_gate.h"
 #include "runtime/vm/func.h"
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/base/builtin_functions.h"
@@ -70,29 +69,36 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
   Transl::VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
-  Array params;
-  Array frameinfo;
+  try {
+    Array params;
+    Array frameinfo;
 
-  if (mode == ProfileEnter) {
-    params.append(s_enter);
-    frameinfo.set(s_args, hhvm_get_frame_args(ar));
-  } else {
-    params.append(s_exit);
-    if (!g_vmContext->m_faults.empty()) {
-      Fault fault = g_vmContext->m_faults.back();
-      if (fault.m_faultType == Fault::KindOfUserException) {
-        frameinfo.set(s_exception, fault.m_userException);
+    if (mode == ProfileEnter) {
+      params.append(s_enter);
+      frameinfo.set(s_args, hhvm_get_frame_args(ar));
+    } else {
+      params.append(s_exit);
+      if (!g_vmContext->m_faults.empty()) {
+        Fault fault = g_vmContext->m_faults.back();
+        if (fault.m_faultType == Fault::KindOfUserException) {
+          frameinfo.set(s_exception, fault.m_userException);
+        }
+      } else if (!ar->m_func->isBuiltin()) {
+        // TODO (#1131400) This is wrong for builtins
+        frameinfo.set(s_return, tvAsCVarRef(g_vmContext->m_stack.topTV()));
       }
-    } else if (!ar->m_func->isBuiltin()) {
-      // TODO (#1131400) This is wrong for builtins
-      frameinfo.set(s_return, tvAsCVarRef(g_vmContext->m_stack.topTV()));
     }
-  }
 
-  params.append(VarNR(ar->m_func->fullName()));
-  params.append(frameinfo);
+    params.append(VarNR(ar->m_func->fullName()));
+    params.append(frameinfo);
 
-  f_call_user_func_array(g_vmContext->m_setprofileCallback, params);
+    try {
+      f_call_user_func_array(g_vmContext->m_setprofileCallback, params);
+    } catch (...) {
+      handle_destructor_exception("Profiler hook");
+    }
+
+  } catch (...) {}
 }
 
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
@@ -128,31 +134,16 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar) {
+  // *Don't* call CheckSurprise.  We need to be nothrow.
   RunUserProfiler(ar, ProfileExit);
 #ifdef HOTPROFILER
-  Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
-  if (profiler != NULL) {
-    end_profiler_frame(profiler);
-  }
+  try {
+    Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
+    if (profiler != NULL) {
+      end_profiler_frame(profiler);
+    }
+  } catch (...) {}
 #endif
-}
-
-void EventHook::EGCheckSurprise() {
-  EXCEPTION_GATE_ENTER();
-  EventHook::CheckSurprise();
-  EXCEPTION_GATE_LEAVE();
-}
-
-void EventHook::EGFunctionEnter(const ActRec* ar, int funcType) {
-  EXCEPTION_GATE_ENTER();
-  EventHook::FunctionEnter(ar, funcType);
-  EXCEPTION_GATE_LEAVE();
-}
-
-void EventHook::EGFunctionExit(const ActRec* ar) {
-  EXCEPTION_GATE_ENTER();
-  EventHook::FunctionExit(ar);
-  EXCEPTION_GATE_LEAVE();
 }
 
 } // namespace VM

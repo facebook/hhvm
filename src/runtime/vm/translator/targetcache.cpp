@@ -30,7 +30,6 @@
 #include <runtime/vm/translator/annotation.h>
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/exception_gate.h>
 #include <system/gen/sys/system_globals.h>
 #include <runtime/vm/stats.h>
 
@@ -58,9 +57,7 @@ typedef CacheHandle Handle;
 void
 undefinedError(const char* msg, const char* name) {
   VMRegAnchor _;
-  EXCEPTION_GATE_ENTER();
   raise_error(msg, name);
-  EXCEPTION_GATE_RETURN();
 }
 
 // Targetcache memory. See the comment in targetcache.h
@@ -389,9 +386,7 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
           // off the hot path; this should be wildly unusual, since we're
           // probably about to fatal.
           VMRegAnchor _;
-          EXCEPTION_GATE_ENTER();
           (void) g_vmContext->lookupMethodCtx(c, name, ctx, ObjMethod, true);
-          EXCEPTION_GATE_LEAVE();
           NOT_REACHED();
         }
       }
@@ -550,7 +545,6 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
   Class* cls = *cache;
   ASSERT(!cls); // the caller should already have checked
   VMRegAnchor _;
-  EXCEPTION_GATE_ENTER();
   AutoloadHandler::s_instance->invokeHandler(clsName->data());
   cls = *cache;
 
@@ -562,7 +556,6 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
   } else if (UNLIKELY(!cls)) {
     undefinedError(Strings::UNKNOWN_CLASS, clsName->data());
   }
-  EXCEPTION_GATE_LEAVE();
   return cls;
 }
 template Class* lookupKnownClass<true>(Class**, const StringData*, bool);
@@ -589,9 +582,7 @@ ClassCache::lookup(Handle handle, StringData *name,
     const NamedEntity *ne = Unit::GetNamedEntity(name);
     Class *c = Unit::lookupClass(ne);
     if (UNLIKELY(!c)) {
-      EXCEPTION_GATE_ENTER();
       c = Unit::loadMissingClass(ne, name);
-      EXCEPTION_GATE_LEAVE();
       if (UNLIKELY(!c)) {
         undefinedError(Strings::UNKNOWN_CLASS, name->data());
       }
@@ -802,14 +793,12 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
     Class* ctx = arGetContextClass(g_vmContext->getFP());
     Instance* instance = static_cast<Instance*>(base);
 
-    EXCEPTION_GATE_ENTER();
     // propW may need temporary storage (for getters, eg)
     // use the target cell on the stack; this will automatically
     // be freed (if necessary) when we overwrite it with result
     tvWriteUninit(stackPtr);
     if (debug) result = (TypedValue*)-1;
     instance->propW(result, *stackPtr, ctx, name);
-    EXCEPTION_GATE_LEAVE();
 
     if (UNLIKELY(result == stackPtr)) {
       if (UNLIKELY(result->m_type == KindOfRef)) {
@@ -881,7 +870,6 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
     ASSERT(!curFunc()->isPseudoMain());
     Class* ctx = arGetContextClass(g_vmContext->getFP());
     Instance* instance = static_cast<Instance*>(base);
-    EXCEPTION_GATE_ENTER();
     TypedValue* result = instance->setProp(ctx, name, &propVal);
     // setProp will return a real pointer iff it's a declared property
     if (result != NULL) {
@@ -893,7 +881,6 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
     } else {
       Stats::inc(Stats::TgtCache_PropSetFail);
     }
-    EXCEPTION_GATE_LEAVE();
   }
 
   if (!baseIsLocal && base->decRefCount() == 0) {
@@ -949,9 +936,7 @@ lookupClassConstant(TypedValue* cache,
   Stats::inc(Stats::TgtCache_ClsCnsMiss, 1);
 
   TypedValue* clsCns;
-  EXCEPTION_GATE_ENTER();
   clsCns = g_vmContext->lookupClsCns(ne, cls, cns);
-  EXCEPTION_GATE_LEAVE();
   *cache = *clsCns;
 
   return cache;
@@ -977,9 +962,7 @@ SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
   ASSERT(ctx == arGetContextClass((ActRec*)vmfp()));
   bool visible, accessible;
   TypedValue* val;
-  EXCEPTION_GATE_ENTER();
   val = cls->getSProp(ctx, name, visible, accessible);
-  EXCEPTION_GATE_LEAVE();
   if (UNLIKELY(!visible)) {
     string methodName;
     string_printf(methodName, "%s::$%s",
@@ -1052,7 +1035,6 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
   VMRegAnchor _; // needed for lookupClsMethod.
 
   ActRec* ar = reinterpret_cast<ActRec*>(vmsp() - kNumActRecCells);
-  EXCEPTION_GATE_ENTER();
   const Func* f;
   VMExecutionContext* ec = g_vmContext;
   const Class* cls = Unit::loadClass(ne, clsName);
@@ -1090,7 +1072,6 @@ StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
   // Don't update the cache; this case was too scary to memoize.
   TRACE(1, "unfillable miss %s :: %s -> %p\n", clsName->data(),
         methName->data(), ar->m_func);
-  EXCEPTION_GATE_LEAVE();
   // Indicate to the caller that there is no work to do.
   return NULL;
 }
@@ -1105,7 +1086,6 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
   VMRegAnchor _; // needed for lookupClsMethod.
 
-  EXCEPTION_GATE_ENTER();
   const Func* f;
   VMExecutionContext* ec = g_vmContext;
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
@@ -1137,7 +1117,6 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
   Stats::inc(Stats::Instr_TC, -1);
   Stats::inc(Stats::Instr_InterpOneFPushClsMethodF);
   ec->opFPushClsMethodF();
-  EXCEPTION_GATE_LEAVE();
 
   // We already did all the work so tell our caller to do nothing.
   TRACE(1, "miss staticfcache %s :: %s -> intractable null\n",

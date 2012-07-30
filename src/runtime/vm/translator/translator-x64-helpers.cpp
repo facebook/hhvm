@@ -13,7 +13,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/vm/exception_gate.h>
 #include <runtime/vm/translator/translator-deps.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/translator/translator-x64.h>
@@ -58,14 +57,12 @@ void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
   ec->m_stack.top() = sp + 1;
   PC pc = curUnit()->at(args->m_pcOff);
 
-  EXCEPTION_GATE_ENTER();
   tl_regState = REGSTATE_CLEAN;
   Unit *unit = efile->unit();
   bool runPseudoMain = ec->evalUnit(unit, args->m_local, pc,
                                     EventHook::PseudoMain);
   tl_regState = REGSTATE_DIRTY;
   if (!runPseudoMain) return;
-  EXCEPTION_GATE_LEAVE();
 
   ec->m_fp->m_savedRip = rbp->m_savedRip;
   // smash our return and rbp chain

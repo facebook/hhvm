@@ -43,9 +43,12 @@ RegAlloc::RegAlloc(RegSet callerSaved,
                    SpillFill* spf)
   : m_callerSaved(callerSaved),
     m_calleeSaved(calleeSaved),
+    m_numRegs(callerSaved.size() + calleeSaved.size()),
     m_allRegs(callerSaved | calleeSaved),
-    m_spf(spf), m_freezeCount(0) {
-    m_numRegs = callerSaved.size() + calleeSaved.size();
+    m_spf(spf),
+    m_freezeCount(0)
+{
+  ASSERT(m_calleeSaved - m_callerSaved == m_calleeSaved);
   reset();
 }
 
@@ -164,6 +167,8 @@ RegAlloc::allocInputReg(const NormalizedInstruction& ni, int index,
                         PhysReg target /* = InvalidReg */) {
   RuntimeType& rtt = ni.inputs[index]->rtt;
   if (rtt.isIter()) {
+    // Note: if this changes to enregister iterators unwinding will
+    // have to be updated.
     return;
   }
 
@@ -715,6 +720,8 @@ RegAlloc::swapRegisters(PhysReg r1, PhysReg r2) {
   RegContent c1 = m_info[r1].m_cont;
   RegContent c2 = m_info[r2].m_cont;
   std::swap(m_info[r1], m_info[r2]);
+
+  TRACE(1, "swap registers %d <---> %d\n", r1, r2);
 
   // pReg
   m_info[r1].m_pReg = r1;

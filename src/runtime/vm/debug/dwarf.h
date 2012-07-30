@@ -50,9 +50,8 @@ typedef enum {
   RIP
 } x86_64_regnum_t;
 
-#define STACK_GROWTH_DIR                       -1
-#define DWARF_CODE_ALIGN                        1
-#define DWARF_DATA_ALIGN                        8
+const int DWARF_CODE_ALIGN = 1;
+const int DWARF_DATA_ALIGN = 8;
 
 extern int g_dwarfCallback(char *name, int size, Dwarf_Unsigned type,
   Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
@@ -97,7 +96,7 @@ class TCRange {
 
 struct DwarfBuf {
   vector<uint8_t> m_buf;
-  DwarfBuf();
+
   void byte(uint8_t c);
   void byte(int off, uint8_t c);
   void word(uint16_t w);
@@ -170,7 +169,6 @@ struct DwarfInfo {
    * that it can be partially full. All other chunks are completely full.
    */
   FuncDB m_functions;
-  DwarfInfo();
 
   const char *lookupFile(const Unit *unit);
   void addLineEntries(TCRange range, const Unit *unit,

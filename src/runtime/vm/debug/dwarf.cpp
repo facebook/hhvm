@@ -159,12 +159,6 @@ void DwarfBuf::dwarf_cfa_offset_extended_sf(uint8_t reg, int8_t offset) {
   byte(offset & 0x7f);
 }
 
-DwarfBuf::DwarfBuf() {
-}
-
-DwarfInfo::DwarfInfo() {
-}
-
 const char *DwarfInfo::lookupFile(const Unit *unit) {
   const char *file = NULL;
   if (unit && unit->filepath()) {

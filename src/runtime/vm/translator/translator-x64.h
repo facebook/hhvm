@@ -23,6 +23,7 @@
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/asm-x64.h>
 #include <runtime/vm/translator/srcdb.h>
+#include <runtime/vm/translator/unwind-x64.h>
 #include <runtime/vm/translator/regalloc.h>
 #include <tbb/concurrent_hash_map.h>
 #include <util/ringbuffer.h>
@@ -108,6 +109,19 @@ class TranslatorX64 : public Translator, public SpillFill,
   RegAlloc                   m_regMap;
   std::stack<SavedRegState>  m_savedRegMaps;
   volatile bool              m_interceptsEnabled;
+  FixupMap                   m_fixupMap;
+  UnwindRegMap               m_unwindRegMap;
+  UnwindInfoHandle           m_unwindRegistrar;
+
+  struct PendingFixup {
+    TCA m_tca;
+    Fixup m_fixup;
+    PendingFixup() { }
+    PendingFixup(TCA tca, Fixup fixup) :
+      m_tca(tca), m_fixup(fixup) { }
+  };
+  vector<PendingFixup> m_pendingFixups;
+  UnwindRegInfo        m_pendingUnwindRegInfo;
 
   void drawCFG(std::ofstream& out) const;
   static vector<PhysReg> x64TranslRegs();
@@ -147,6 +161,7 @@ class TranslatorX64 : public Translator, public SpillFill,
                   bool clearThis = true, uintptr_t varEnvInvName = 0);
 
   void emitCallSaveRegs();
+  void prepareCallSaveRegs();
   void emitCallPassLoc(const Location& loc, int argNum);
   void emitCallPassLocAddr(const Location& loc, int argNum);
   void emitCall(Asm& a, TCA dest, bool killRegs=false);
@@ -407,6 +422,10 @@ PSEUDOINSTRS
     }
   }
 
+  const UnwindRegInfo* getUnwindInfo(CTCA ip) const {
+    return m_unwindRegMap.find(ip);
+  }
+
   void enableIntercepts() {m_interceptsEnabled = true;}
   bool interceptsEnabled() {return m_interceptsEnabled;}
 
@@ -425,6 +444,7 @@ PSEUDOINSTRS
   // public for syncing gdb state
   Debug::DebugInfo m_debugInfo;
 
+  void fixupWork(VMExecutionContext* ec, ActRec* startRbp) const;
   void fixup(VMExecutionContext* ec) const;
 
   // helpers for srcDB.
@@ -659,7 +679,7 @@ public:
   void protectCode();
   void unprotectCode();
 
-protected:
+private:
   virtual bool addDbgGuards(const Unit* unit);
   virtual bool addDbgGuard(const Func* func, Offset offset);
   void addDbgGuardImpl(const SrcKey& sk, SrcRec& sr);

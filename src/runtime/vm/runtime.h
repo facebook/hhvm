@@ -21,7 +21,6 @@
 #include <runtime/vm/funcdict.h>
 #include <runtime/base/tv_macros.h>
 #include <runtime/base/builtin_functions.h>
-#include <runtime/vm/exception_gate.h>
 #include <runtime/vm/translator/translator-inline.h>
 
 namespace HPHP {

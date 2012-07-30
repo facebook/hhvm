@@ -29,7 +29,6 @@ namespace VM {
       g_vmContext->m_eventHook->on ## name useargs;                        \
     }                                                                      \
   }                                                                        \
-  static void EG ## name declargs;                                         \
   void on ## name declargs;
 
 class EventHook {
@@ -47,14 +46,23 @@ class EventHook {
   static void Enable();
   static void Disable();
   static void CheckSurprise();
-  static void EGCheckSurprise();
 
+  /*
+   * Can throw from user-defined signal handlers, or OOM or timeout
+   * exceptions.
+   */
   DECLARE_HOOK(FunctionEnter, (const ActRec* ar, int funcType),
                (ar, funcType));
-  DECLARE_HOOK(FunctionExit, (const ActRec* ar), (ar));
+
+  /*
+   * FunctionExit is nothrow, because we need to be able to call it
+   * while tearing down frames (which might be because an exception is
+   * propagating).
+   */
+  DECLARE_HOOK(FunctionExit, (const ActRec* ar), (ar)); // nothrow
 
 private:
-  static void RunUserProfiler(const ActRec* ar, int mode);
+  static void RunUserProfiler(const ActRec* ar, int mode); // nothrow
 };
 
 #undef DECLARE_HOOK

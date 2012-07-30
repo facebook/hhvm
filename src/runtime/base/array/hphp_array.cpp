@@ -30,7 +30,6 @@
 #include <util/util.h>
 #include <runtime/base/tv_macros.h>
 #include <runtime/base/execution_context.h>
-#include <runtime/vm/exception_gate.h>
 #include <runtime/vm/stats.h>
 
 // If PEDANTIC is defined, extra checks are performed to ensure correct
@@ -2326,7 +2325,6 @@ template<typename Key, typename Value,
 static inline
 ArrayData*
 array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
-  EXCEPTION_GATE_ENTER();
   ArrayData* retval;
   bool copy = ad->getCount() > 1;
   if (LIKELY(IsHphpArray(ad))) {
@@ -2341,7 +2339,7 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
   }
   if (DecRefKey) setmDecRef(key);
   if (DecRefValue) setmDecRef(value);
-  EXCEPTION_GATE_RETURN(array_mutate_post(cell, ad, retval));
+  return array_mutate_post(cell, ad, retval);
 }
 
 template<typename Value, bool DecRefValue>
@@ -2500,7 +2498,6 @@ static void elem(ArrayData* ad, StringData* sd, TypedValue* dest) {
  */
 ArrayData*
 array_getm_i(void* dptr, int64 key, TypedValue* out) {
-  EXCEPTION_GATE_ENTER();
   ASSERT(dptr);
   ArrayData* ad = (ArrayData*)dptr;
   if (UNLIKELY(!IsHphpArray(ad))) {
@@ -2517,7 +2514,7 @@ array_getm_i(void* dptr, int64 key, TypedValue* out) {
       tvDup(ret, out);
     }
   }
-  EXCEPTION_GATE_RETURN(ad);
+  return ad;
 }
 
 #define ARRAY_GETM_IMPL(ad, sd, out, body, drKey) do {    \
@@ -2540,9 +2537,8 @@ array_getm_i(void* dptr, int64 key, TypedValue* out) {
 
 #define ARRAY_GETM_BODY(dptr, sd, out, body, drKey) do {  \
   ArrayData* ad = (ArrayData*)dptr;                       \
-  EXCEPTION_GATE_ENTER();                                 \
   ARRAY_GETM_IMPL(ad, sd, out, body, drKey);              \
-  EXCEPTION_GATE_RETURN(ad);                              \
+  return ad;                                              \
 } while(0)
 
 #define ARRAY_GETM_TRACE() do {                           \
@@ -2625,7 +2621,6 @@ inline void
 array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
   TypedValue* base2;
 
-  EXCEPTION_GATE_ENTER();
   if (UNLIKELY(!IsHphpArray(ad))) {
     base2 = (TypedValue*)&ad->get(ik, true);
   } else {
@@ -2642,7 +2637,6 @@ array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
     ARRAY_GETM_IMPL(ad, sd, out, nv_get_cell_with_integer_check(ha, sd),
                     decRefKey);
   }
-  EXCEPTION_GATE_LEAVE();
 }
 
 /**
@@ -2720,7 +2714,6 @@ uint64 array_issetm_i(const void* dptr, int64_t key) {
 }
 
 ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
-  EXCEPTION_GATE_ENTER();
   if (!a2->empty()) {
     if (a1->empty()) {
       if (a1->decRefCount() == 0) a1->release();
@@ -2738,7 +2731,7 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
     }
   }
   if (a2->decRefCount() == 0) a2->release();
-  EXCEPTION_GATE_RETURN(a1);
+  return a1;
 }
 
 /**

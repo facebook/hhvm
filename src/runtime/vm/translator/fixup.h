@@ -21,6 +21,7 @@
 #include <runtime/vm/translator/types.h>
 #include <runtime/base/execution_context.h>
 #include "runtime/vm/tread_hash_map.h"
+#include "runtime/vm/translator/types.h"
 #include "util/atomic.h"
 
 namespace HPHP {
@@ -40,23 +41,13 @@ namespace VM { namespace Transl {
 struct Fixup {
   int32 m_pcOffset;
   int32 m_spOffset;
+
   Fixup(int32_t pcOff, int32_t spOff) : m_pcOffset(pcOff), m_spOffset(spOff)
   {
     ASSERT(m_pcOffset >= 0);
     ASSERT(m_spOffset >= 0);
   }
   Fixup() : m_pcOffset(-1), m_spOffset(-1) { }
-};
-
-struct ctca_identity_hash {
-  size_t operator()(CTCA val) const {
-    // Experiments show that this is a sufficient "hash function" on
-    // TCAs for now; using stronger functions didn't help given current
-    // data. Patterns of code emission in the translator could invalidate
-    // this finding going forward, though; e.g., if we frequently emit
-    // a call instruction N bytes into a cache-aligned region.
-    return uintptr_t(val);
-  }
 };
 
 class FixupMap {

@@ -430,7 +430,6 @@ function emit_all_includes($out, $sepExtHeaders) {
   emit_include($out, "runtime/ext/ext.h");
   emit_include($out, "runtime/vm/class.h");
   emit_include($out, "runtime/vm/runtime.h");
-  emit_include($out, "runtime/vm/exception_gate.h");
   emit_include($out, "exception");
   foreach($sepExtHeaders as $header) {
     emit_include($out, $header);

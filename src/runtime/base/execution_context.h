@@ -622,7 +622,6 @@ public:
   bool getCallInfoStatic(const CallInfo *&ci, void *&extra,
                          const StringData *cls, const StringData *func);
   int m_lambdaCounter;
-  std::vector<jmp_buf *> m_jmpBufs;
   std::vector<VMState> m_nestedVMs;
 
   typedef hphp_hash_map<const HPHP::VM::ActRec*, int,
@@ -637,7 +636,6 @@ public:
   void pushVMState(VMState &savedVM);
   void popVMState();
 
-  void hhvmThrow(int longJumpType) ATTRIBUTE_NORETURN;
   int hhvmPrepareThrow();
   HPHP::VM::ActRec* getPrevVMState(const HPHP::VM::ActRec* fp,
                                    HPHP::VM::Offset* prevPc = NULL,

@@ -271,8 +271,9 @@ static void handle_exception_helper(bool& ret,
   } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {
-    // ExitException is fine
-    if (where != HandlerException &&
+    if (where == ReqInitException) {
+      ret = false;
+    } else if (where != HandlerException &&
         !context->getExitCallback().isNull() &&
         f_is_callable(context->getExitCallback())) {
       Array stack = e.getBackTrace()->get();

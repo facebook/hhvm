@@ -778,7 +778,6 @@ void HphpArray::reallocData(size_t maxElms, size_t tableSize,
                      dataSize + hashSize;
 #ifdef USE_JEMALLOC
   if (m_data == NULL || m_data == m_inline_data.data) {
-    m_data = NULL;
     if (allocm((void**)&m_data, NULL, allocSize, 0)) {
       throw OutOfMemoryException(allocSize);
     }
@@ -794,14 +793,14 @@ void HphpArray::reallocData(size_t maxElms, size_t tableSize,
   if (m_data == NULL || m_data == m_inline_data.data) {
     void* block = malloc(allocSize);
     if (block == NULL) throw OutOfMemoryException(allocSize);
-    memcpy(m_data, m_inline_data.data, oldDataSize);
-    adjustUsageStats(allocSize);
     m_data = (Elm*) block;
+    memcpy(block, m_inline_data.data, oldDataSize);
+    adjustUsageStats(allocSize);
   } else {
     void* block = realloc(m_data, allocSize);
     if (block == NULL) throw OutOfMemoryException(allocSize);
-    adjustUsageStats(allocSize - oldDataSize, oldDataSize > 0);
     m_data = (Elm*) block;
+    adjustUsageStats(allocSize - oldDataSize, oldDataSize > 0);
   }
 #endif
   m_hash = hashSize <= sizeof(m_inline_hash) ? m_inline_hash :

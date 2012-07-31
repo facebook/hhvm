@@ -3484,6 +3484,7 @@ public:
 
   void processAccess(ExpressionPtr e) {
     if (int id = e->getCanonID()) {
+      if (!m_block->getDfn()) return;
       if (e->isAnticipated() && m_block->getBit(DataFlow::AvailIn, id)) {
         markAvailable(e);
       }
@@ -3506,10 +3507,12 @@ public:
     if (cp == m_top ||
         static_pointer_cast<Statement>(cp)->is(
           Statement::KindOfReturnStatement)) {
-      int id = m_gidMap["v:this"];
-      if (id && m_block->getBit(cp == m_top ?
-                                DataFlow::AvailOut : DataFlow::AvailIn, id)) {
-        cp->setGuarded();
+      if (m_block->getDfn()) {
+        int id = m_gidMap["v:this"];
+        if (id && m_block->getBit(cp == m_top ?
+                                  DataFlow::AvailOut : DataFlow::AvailIn, id)) {
+          cp->setGuarded();
+        }
       }
     }
     return DataFlowWalker::after(cp);

@@ -574,7 +574,7 @@ private:
 
   void emitStackCheck(int funcDepth, Offset pc);
   void emitStackCheckDynamic(int numArgs, Offset pc);
-  void emitLoadSurpriseFlags();
+  void emitTestSurpriseFlags();
   void emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
                                    Offset stackOff);
   TCA  emitTransCounterInc(Asm& a);

@@ -18,14 +18,14 @@
 
 #include "runtime/base/execution_context.h"
 #include "runtime/vm/bytecode.h"
+#include "runtime/vm/translator/targetcache.h"
 
 namespace HPHP {
 namespace VM {
 
 #define DECLARE_HOOK(name, declargs, useargs)                              \
   static inline void name declargs {                                       \
-    if (UNLIKELY(                                                          \
-           ThreadInfo::s_threadInfo->m_reqInjectionData.conditionFlags)) { \
+    if (UNLIKELY(Transl::TargetCache::loadConditionFlags())) {             \
       g_vmContext->m_eventHook->on ## name useargs;                        \
     }                                                                      \
   }                                                                        \

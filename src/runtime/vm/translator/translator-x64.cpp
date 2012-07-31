@@ -1881,8 +1881,7 @@ void TranslatorX64::protectCode() {
 
 void TranslatorX64::unprotectCode() {
   mprotect(tx64->a.code.base, tx64->a.code.size,
-      PROT_READ | PROT_WRITE | PROT_EXEC);
-
+           PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
 void
@@ -1896,21 +1895,18 @@ TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
   // Success.
 }
 
-// Loads ThreadInfo::s_threadInfo->m_reqInjectionData.conditionFlags
-// into rScratch
+// Tests the surprise flags for the current thread. Should be used
+// before a jnz to surprise handling code.
 void
-TranslatorX64::emitLoadSurpriseFlags() {
-  emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rScratch);
-  static COff flagOff = offsetof(ThreadInfo, m_reqInjectionData) +
-    offsetof(RequestInjectionData, conditionFlags);
-  a.load_reg64_disp_reg64(rScratch, flagOff, rScratch);
+TranslatorX64::emitTestSurpriseFlags() {
+  CT_ASSERT(sizeof(RequestInjectionData::conditionFlags) == 8);
+  a.test_imm64_disp_reg64(-1, TargetCache::kConditionFlagsOff, rVmTl);
 }
 
 void
 TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
                                            Offset stackOff) {
-  emitLoadSurpriseFlags();
-  a.test_reg64_reg64(rScratch, rScratch);
+  emitTestSurpriseFlags();
   {
     UnlikelyIfBlock<CC_NZ> ifTracer(a, astubs);
     if (false) { // typecheck
@@ -5651,8 +5647,7 @@ TranslatorX64::translateJmp(const Tracelet& t,
       recordStubCall(i);
       astubs.jmp(a.code.frontier);
     } else {
-      emitLoadSurpriseFlags();
-      a.test_reg64_reg64(rScratch, rScratch);
+      emitTestSurpriseFlags();
       {
         UnlikelyIfBlock<CC_NZ> ifSurprise(a, astubs);
         astubs.call((TCA)&EventHook::EGCheckSurprise);
@@ -6048,8 +6043,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
     }
 
     m_regMap.smashRegs(kAllRegs);
-    emitLoadSurpriseFlags();
-    a.test_reg64_reg64(rScratch, rScratch);
+    emitTestSurpriseFlags();
     {
       UnlikelyIfBlock<CC_NZ> ifTracer(a, astubs);
       if (i.grouped) {
@@ -10551,7 +10545,6 @@ TranslatorX64::requestInit() {
   tl_regState = REGSTATE_CLEAN;
   PendQ::drain();
   requestResetHighLevelTranslator();
-  TargetCache::requestInit();
   Treadmill::startRequest(g_vmContext->m_currentThreadIdx);
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
 }

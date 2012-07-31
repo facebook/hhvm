@@ -37,6 +37,8 @@ void requestInit(void);
 extern __thread HPHP::x64::DataBlock tl_targetCaches;
 extern size_t s_frontier;
 
+static const int kConditionFlagsOff = 0;
+
 /*
  * Some caches have different numbers of lines. This is our default.
  */
@@ -110,6 +112,14 @@ handleToPtr(CacheHandle h) {
 template<class T>
 T& handleToRef(CacheHandle h) {
   return *static_cast<T*>(handleToPtr(h));
+}
+
+inline ssize_t* conditionFlagsPtr() {
+  return ((ssize_t*)handleToPtr(kConditionFlagsOff));
+}
+
+inline ssize_t loadConditionFlags() {
+  return atomic_acquire_load(conditionFlagsPtr());
 }
 
 void invalidateForRename(const StringData* name);

@@ -65,7 +65,8 @@ undefinedError(const char* msg, const char* name) {
 
 // Targetcache memory. See the comment in targetcache.h
 __thread HPHP::x64::DataBlock tl_targetCaches = {0, 0, kNumTargetCacheBytes};
-size_t s_frontier;
+CT_ASSERT(kConditionFlagsOff + sizeof(ssize_t) <= 64);
+size_t s_frontier = kConditionFlagsOff + 64;
 static size_t s_next_bit;
 static size_t s_bits_to_go;
 
@@ -267,8 +268,6 @@ requestInit() {
   TRACE(1, "TargetCaches: @%p\n", tl_targetCaches.base);
   if (!tl_targetCaches.base) {
     tl_targetCaches.init();
-    // allocate a bit so that target cache offsets don't start at 0
-    allocBit();
   }
   TRACE(1, "TargetCaches: bzeroing %zd bytes: %p\n", s_frontier,
         tl_targetCaches.base);

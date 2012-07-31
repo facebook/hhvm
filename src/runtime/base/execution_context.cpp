@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
 #include <runtime/base/execution_context.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/type_conversions.h>
@@ -218,7 +221,9 @@ void BaseExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {
 }
 
 void BaseExecutionContext::setRequestMemoryMaxBytes(int64 max) {
-  ASSERT(max > 0);
+  if (max <= 0) {
+    max = INT64_MAX;
+  }
   m_maxMemory = max;
   MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
 }

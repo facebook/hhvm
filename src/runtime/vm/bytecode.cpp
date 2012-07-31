@@ -4165,11 +4165,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFatal(PC& pc) {
   raise_error(msg);
 }
 
-#define JMP_SURPRISE_CHECK()                                            \
-  if (offset < 0 && UNLIKELY(                                           \
-        ThreadInfo::s_threadInfo->m_reqInjectionData.conditionFlags)) { \
-    SYNC();                                                             \
-    EventHook::CheckSurprise();                                         \
+#define JMP_SURPRISE_CHECK()                                               \
+  if (offset < 0 && UNLIKELY(Transl::TargetCache::loadConditionFlags())) { \
+    SYNC();                                                                \
+    EventHook::CheckSurprise();                                            \
   }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopJmp(PC& pc) {

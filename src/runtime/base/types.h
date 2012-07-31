@@ -248,9 +248,23 @@ public:
       debuggerIntr(false), coverage(false) {
   }
 
-  volatile ssize_t conditionFlags; // condition flags can indicate if a thread
-                                   // has exceeded the memory limit, timed out,
-                                   // or received a signal
+  inline volatile ssize_t* getConditionFlags() {
+    if (hhvm) {
+      ASSERT(cflagsPtr);
+      return cflagsPtr;
+    } else {
+      return &conditionFlags;
+    }
+  }
+
+  union {
+    volatile ssize_t conditionFlags; // condition flags can indicate if a
+                                     // thread has exceeded the memory limit,
+                                     // timed out, or received a signal
+    ssize_t* cflagsPtr;              // under hhvm, this will point to the real
+                                     // condition flags, somewhere in the
+                                     // thread's targetcache
+  };
   void *surprisePage;              // beginning address of page to
                                    // protect for error conditions
   Mutex surpriseLock;              // mutex controlling access to surprisePage
@@ -377,12 +391,14 @@ extern void check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 extern bool SegFaulting;
 
 inline void check_request_timeout(ThreadInfo *info) {
+  const_assert(!hhvm);
   if (SegFaulting) pause_and_exit();
   info->m_mm->refreshStats();
   if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
 }
 
 inline void check_request_timeout_nomemcheck(ThreadInfo *info) {
+  const_assert(!hhvm);
   if (SegFaulting) pause_and_exit();
   if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
 }

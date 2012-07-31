@@ -306,6 +306,7 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
     TypePtr thisImplType(m_object->getImplementedType());
     TypePtr thisActType (m_object->getActualType());
     bool close = false;
+    bool checkedThis = getFunctionScope()->isStatic();
     if (thisImplType) {
       ASSERT(thisActType);
       ASSERT(!Type::SameType(thisActType, thisImplType));
@@ -319,13 +320,18 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
         ClassScopePtr cls(thisActType->getClass(ar, getScope()));
         ASSERT(cls && !cls->derivedByDynamic()); // since we don't do type
                                                  // assertions for these
+        if (!cls->derivesFrom(ar, thisImplType->getName(), true, false)) {
+          ASSERT(cls->derivesFromRedeclaring() &&
+                 implCls->derivedByDynamic());
+          checkedThis = true;
+        }
         cg_printf("static_cast<%s%s*>(",
                   Option::ClassPrefix,
                   cls->getId().c_str());
         close = true;
       }
     }
-    if (getFunctionScope()->isStatic()) {
+    if (checkedThis) {
       if (close) {
         cg_printf("GET_THIS_VALID()");
       } else {

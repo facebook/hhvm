@@ -8146,6 +8146,20 @@ bool TestCodeRun::TestObjectPropertyExpression() {
        "$x = new X;"
        "$x->foo('this');");
 
+  MVCR("<?php "
+       "class X {"
+       "  public function foo($q) {"
+       "    $s =& $this;"
+       "    $s->q = $q;"
+       "  }"
+       "}"
+       "function test() {"
+       "  $x = new X;"
+       "  $x->foo('hello');"
+       "  var_dump($x);"
+       "}"
+       "test();");
+
   if (Option::EnableEval >= Option::FullEval) {
     MVCRONW("<?php "
             "class X {"

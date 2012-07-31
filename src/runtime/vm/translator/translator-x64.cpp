@@ -1225,15 +1225,16 @@ TranslatorX64::allocInputsForCall(const NormalizedInstruction& i,
    * care of shuffling registers efficiently
    */
   for (arg = i.inputs.size(); arg--; ) {
-    if (args[arg] >= 0 && m_regMap.hasReg(i.inputs[arg]->location)) {
+    if (args[arg] != ArgDontAllocate &&
+        m_regMap.hasReg(i.inputs[arg]->location)) {
       blackList |= 1 << getReg(i.inputs[arg]->location);
     }
   }
   bool hasAnyReg = false;
   for (arg = i.inputs.size(); arg--; ) {
-    if (args[arg] != ArgDontAllocate &&
+    if (args[arg] != ArgAnyReg) {
+      if (args[arg] != ArgDontAllocate &&
         !m_regMap.hasReg(i.inputs[arg]->location)) {
-      if (args[arg] != ArgAnyReg) {
         PhysReg target = argNumToRegName[args[arg]];
         if (!(blackList & (1 << target))) {
           m_regMap.cleanRegs(RegSet(target));
@@ -1242,9 +1243,9 @@ TranslatorX64::allocInputsForCall(const NormalizedInstruction& i,
           target = InvalidReg;
         }
         m_regMap.allocInputReg(i, arg, target);
-      } else {
-        hasAnyReg = true;
       }
+    } else {
+      hasAnyReg = true;
     }
   }
   if (hasAnyReg) {
@@ -2188,9 +2189,11 @@ static const int kFuncGuardLen = 23;
 template<typename T>
 static T*
 funcGuardToFuncImm(TCA funcGuard) {
-  T* retval = (T*)(funcGuard + kFuncMovImm);
-  // We padded these so that the immediate is on a qword boundary.
-  ASSERT((uintptr_t(retval) & 0x7) == 0);
+  T* retval = (T*)(funcGuard + kFuncMovImm + (2 - sizeof(T)/4));
+  // We padded these so the immediate would fit inside an aligned 8 byte region
+  // so the xor of the address of the first byte, with the address of the last
+  // byte should only be non zero in the bottom 3 bits.
+  ASSERT(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) & ~7) == 0);
   return retval;
 }
 

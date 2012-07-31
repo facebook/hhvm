@@ -433,12 +433,13 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         tvCastToInt64InPlace(&tv);
         x = tv.m_data.num;
       }
-      if (x < 0) {
+      if (x < 0 || x >= StringData::MaxSize) {
         raise_warning("Illegal string offset: %lld", x);
         break;
       }
-      // Compute how long the resulting string will be.
-      int slen;
+      // Compute how long the resulting string will be. Type needs
+      // to agree with x.
+      int64 slen;
       if (x >= baseLen) {
         slen = x + 1;
       } else {

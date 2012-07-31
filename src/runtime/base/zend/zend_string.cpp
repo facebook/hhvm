@@ -2313,7 +2313,7 @@ int string_crc32(const char *p, int len) {
 // crypt
 
 #include <unistd.h>
-#if !defined(__APPLE__) && !defined(__FREEBSD__)
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 # include <crypt.h>
 #endif
 

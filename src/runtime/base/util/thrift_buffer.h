@@ -22,7 +22,7 @@
 #include <runtime/base/variable_serializer.h>
 
 #include <arpa/inet.h>
-#if defined(__FREEBSD__)
+#if defined(__FreeBSD__)
 # include <sys/endian.h>
 # elif defined(__APPLE__)
 # include <machine/endian.h>
@@ -34,7 +34,7 @@
 #if !defined(htonll) && !defined(ntohll)
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-# if defined(__FREEBSD__)
+# if defined(__FreeBSD__)
 #  define htonll(x) bswap64(x)
 #  define ntohll(x) bswap64(x)
 # elif defined(__APPLE__)

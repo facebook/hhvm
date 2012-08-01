@@ -457,6 +457,15 @@ Variant f_fb_unserialize(CVarRef thing, VRefParam success,
   return f_fb_thrift_unserialize(thing, ref(success), ref(errcode));
 }
 
+Variant f_fb_compact_serialize(CVarRef thing) {
+  throw NotImplementedException(__func__);
+}
+
+Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
+                                 VRefParam errcode /* = null_variant */) {
+  throw NotImplementedException(__func__);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static void output_dataset(Array &ret, int affected, DBDataSet &ds,

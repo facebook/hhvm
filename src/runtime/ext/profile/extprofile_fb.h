@@ -49,6 +49,18 @@ inline Variant x_fb_unserialize(CVarRef thing, VRefParam success, VRefParam errc
   return f_fb_unserialize(thing, success, errcode);
 }
 
+inline Variant x_fb_compact_serialize(CVarRef thing) {
+  FUNCTION_INJECTION_BUILTIN(fb_compact_serialize);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_fb_compact_serialize(thing);
+}
+
+inline Variant x_fb_compact_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant) {
+  FUNCTION_INJECTION_BUILTIN(fb_compact_unserialize);
+  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
+  return f_fb_compact_unserialize(thing, success, errcode);
+}
+
 inline bool x_fb_intercept(CStrRef name, CVarRef handler, CVarRef data = null_variant) {
   FUNCTION_INJECTION_BUILTIN(fb_intercept);
   TAINT_OBSERVER(, );

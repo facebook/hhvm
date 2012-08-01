@@ -10104,6 +10104,14 @@ Variant ifa_drawgetfillcolor(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
 Variant i_drawgetfillcolor(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_drawgetfillcolor);
 }
+Variant ifa_fb_compact_serialize(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("fb_compact_serialize", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (x_fb_compact_serialize(arg0));
+}
+Variant i_fb_compact_serialize(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_fb_compact_serialize);
+}
 Variant ifa_magickreadimagefile(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 2)) return throw_wrong_arguments("magickreadimagefile", count, 2, 2, 1);
   CVarRef arg0(a0);
@@ -18860,6 +18868,17 @@ Variant ifa_posix_getuid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_posix_getuid(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_posix_getuid);
 }
+Variant ifa_fb_compact_unserialize(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("fb_compact_unserialize", count, 2, 3, 1);
+   CVarRef arg0(a0);
+  VRefParam arg1(vref(a1));
+  if (count <= 2) return (x_fb_compact_unserialize(arg0, arg1));
+  VRefParam arg2(vref(a2));
+  return (x_fb_compact_unserialize(arg0, arg1, arg2));
+}
+Variant i_fb_compact_unserialize(void *extra, CArrRef params) {
+  return invoke_func_few_handler(extra, params, &ifa_fb_compact_unserialize);
+}
 Variant ifa_ldap_close(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("ldap_close", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -22603,6 +22622,7 @@ extern const CallInfo ci_parse_hdf_string = {(void*)&i_parse_hdf_string, (void*)
 extern const CallInfo ci_mb_strwidth = {(void*)&i_mb_strwidth, (void*)&ifa_mb_strwidth, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_apc_add = {(void*)&i_apc_add, (void*)&ifa_apc_add, 4, 0, 0x0000000000000000LL};
 extern const CallInfo ci_drawgetfillcolor = {(void*)&i_drawgetfillcolor, (void*)&ifa_drawgetfillcolor, 1, 0, 0x0000000000000000LL};
+extern const CallInfo ci_fb_compact_serialize = {(void*)&i_fb_compact_serialize, (void*)&ifa_fb_compact_serialize, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_magickreadimagefile = {(void*)&i_magickreadimagefile, (void*)&ifa_magickreadimagefile, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_dom_node_has_child_nodes = {(void*)&i_dom_node_has_child_nodes, (void*)&ifa_dom_node_has_child_nodes, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_phpversion = {(void*)&i_phpversion, (void*)&ifa_phpversion, 1, 0, 0x0000000000000000LL};
@@ -23484,6 +23504,7 @@ extern const CallInfo ci_imap_setacl = {(void*)&i_imap_setacl, (void*)&ifa_imap_
 extern const CallInfo ci_posix_times = {(void*)&i_posix_times, (void*)&ifa_posix_times, 0, 0, 0x0000000000000000LL};
 extern const CallInfo ci_xml_parser_set_option = {(void*)&i_xml_parser_set_option, (void*)&ifa_xml_parser_set_option, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_posix_getuid = {(void*)&i_posix_getuid, (void*)&ifa_posix_getuid, 0, 0, 0x0000000000000000LL};
+extern const CallInfo ci_fb_compact_unserialize = {(void*)&i_fb_compact_unserialize, (void*)&ifa_fb_compact_unserialize, 3, 0, 0x0000000000000006LL};
 extern const CallInfo ci_ldap_close = {(void*)&i_ldap_close, (void*)&ifa_ldap_close, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_hphp_create_object = {(void*)&i_hphp_create_object, (void*)&ifa_hphp_create_object, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_chmod = {(void*)&i_chmod, (void*)&ifa_chmod, 2, 0, 0x0000000000000000LL};
@@ -24223,6 +24244,7 @@ static const hashNodeFunc funcBuckets[] = {
  {0x0A5EFECAE87EA6ECLL,0,1,"hphp_splfileobject_eof",&ci_hphp_splfileobject_eof},
  {0x2B661CD43C6006EDLL,0,1,"hphpd_break",&ci_hphpd_break},
  {0x0FA74D85885F86EFLL,0,1,"output_add_rewrite_var",&ci_output_add_rewrite_var},
+ {0x514356D6DE0D06F0LL,0,1,"fb_compact_serialize",&ci_fb_compact_serialize},
  {0x6B7347DF1AA7E6F1LL,0,1,"drawpopdefs",&ci_drawpopdefs},
  {0x314DA880FE2CE6F2LL,0,1,"session_start",&ci_session_start},
  {0x5768A80BB0B926F3LL,0,1,"apd_set_session_trace_socket",&ci_apd_set_session_trace_socket},
@@ -24568,6 +24590,7 @@ static const hashNodeFunc funcBuckets[] = {
  {0x7046755D8374EBD0LL,0,1,"ctype_digit",&ci_ctype_digit},
  {0x5B2F2A23D8368BD4LL,0,1,"magickraiseimage",&ci_magickraiseimage},
  {0x06D5979AB150EBD8LL,0,1,"dom_node_lookup_namespace_uri",&ci_dom_node_lookup_namespace_uri},
+ {0x086AA6707AD4ABE3LL,0,1,"fb_compact_unserialize",&ci_fb_compact_unserialize},
  {0x0E804FCE5C14CBE5LL,0,1,"imap_sort",&ci_imap_sort},
  {0x1BB5D99C1D29CBE7LL,0,1,"strstr",&ci_strstr},
  {0x4E903B706977ABE8LL,0,1,"imagepsslantfont",&ci_imagepsslantfont},

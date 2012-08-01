@@ -282,6 +282,61 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fb_compact_serialize",
+    'desc'   => "Serialize data into a compact format that can be unserialized by fb_compact_unserialize(). In general produces smaller output compared to fb_serialize().",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Serialized data.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "thing",
+        'type'   => Variant,
+        'desc'   => "What to serialize. Note that objects are not supported.",
+      ),
+    ),
+    'taint_observer' => array(
+      'set_mask' => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_compact_unserialize",
+    'desc'   => "Unserialize a previously fb_compact_serialize()-ed data.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Unserialized data.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "thing",
+        'type'   => Variant,
+        'desc'   => "What to unserialize.",
+      ),
+      array(
+        'name'   => "success",
+        'type'   => Variant | Reference,
+        'desc'   => "Whether it was successful or not.",
+      ),
+      array(
+        'name'   => "errcode",
+        'type'   => Variant | Reference,
+        'value'  => "null_variant",
+        'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
+      ),
+    ),
+    'taint_observer' => array(
+      'set_mask' => "TAINT_BIT_MUTATED",
+      'clear_mask' => "TAINT_BIT_NONE",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fb_intercept",
     'desc'   => "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler(\$name, \$obj, \$params, \$data, &\$done)\", where \$name is orginal function's name, \$obj is \$this for an instance method call or null for static method call or function calls, and \$params are original call's parameters. \$data is what's passed to fb_intercept() and set \$done to false to indicate function should continue its execution with old function as if interception did not happen. By default \$done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
     'flags'  =>  HasDocComment | HipHopSpecific,

@@ -29,6 +29,8 @@ Variant f_fb_thrift_serialize(CVarRef thing);
 Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
 Variant f_fb_serialize(CVarRef thing);
 Variant f_fb_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
+Variant f_fb_compact_serialize(CVarRef thing);
+Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success, VRefParam errcode = null_variant);
 bool f_fb_intercept(CStrRef name, CVarRef handler, CVarRef data = null_variant);
 Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done);
 Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, VRefParam done);

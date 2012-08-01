@@ -160,6 +160,81 @@ TypedValue* fg_fb_unserialize(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_fb_compact_serialize(HPHP::Variant const&)
+_ZN4HPHP22f_fb_compact_serializeERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+thing => rsi
+*/
+
+TypedValue* fh_fb_compact_serialize(TypedValue* _rv, TypedValue* thing) asm("_ZN4HPHP22f_fb_compact_serializeERKNS_7VariantE");
+
+TypedValue* fg_fb_compact_serialize(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      fh_fb_compact_serialize((&(rv)), (args-0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("fb_compact_serialize", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_fb_compact_unserialize(HPHP::Variant const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
+_ZN4HPHP24f_fb_compact_unserializeERKNS_7VariantERKNS_14VRefParamValueES5_
+
+(return value) => rax
+_rv => rdi
+thing => rsi
+success => rdx
+errcode => rcx
+*/
+
+TypedValue* fh_fb_compact_unserialize(TypedValue* _rv, TypedValue* thing, TypedValue* success, TypedValue* errcode) asm("_ZN4HPHP24f_fb_compact_unserializeERKNS_7VariantERKNS_14VRefParamValueES5_");
+
+TypedValue* fg_fb_compact_unserialize(HPHP::VM::ActRec *ar) {
+  EXCEPTION_GATE_ENTER();
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      VRefParamValue defVal2 = null_variant;
+      fh_fb_compact_unserialize((&(rv)), (args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 3);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("fb_compact_unserialize", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  EXCEPTION_GATE_RETURN(&ar->m_r);
+}
+
+
+
+/*
 bool HPHP::f_fb_intercept(HPHP::String const&, HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP14f_fb_interceptERKNS_6StringERKNS_7VariantES5_
 

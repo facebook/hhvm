@@ -75,8 +75,8 @@ const int64 k_TAINT_TRACE_SELF = TAINT_BIT_TRACE_SELF;
 #define ntohll(n) (n)
 #define htonll(n) (n)
 #else
-#define ntohll(n) ( (((uint64_t)ntohl(n)) << 32) | ((uint64_t)ntohl(n >> 32) & 0x00000000ffffffff) )
-#define htonll(n) ( (((uint64_t)htonl(n)) << 32) | ((uint64_t)htonl(n >> 32) & 0x00000000ffffffff) )
+#define ntohll(n) ( (((uint64_t)ntohl(n)) << 32) | ((uint64_t)ntohl((n) >> 32) & 0x00000000ffffffff) )
+#define htonll(n) ( (((uint64_t)htonl(n)) << 32) | ((uint64_t)htonl((n) >> 32) & 0x00000000ffffffff) )
 #endif
 
 /* enum of thrift types */
@@ -427,6 +427,9 @@ Variant f_fb_thrift_serialize(CVarRef thing) {
   return String(buff, len, AttachString);
 }
 
+int fb_compact_unserialize_from_buffer(
+  Variant& out, const char* buf, int n, int& p);
+
 Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success,
                                 VRefParam errcode /* = null_variant */) {
   int pos = 0;
@@ -436,8 +439,15 @@ Variant f_fb_thrift_unserialize(CVarRef thing, VRefParam success,
   success = false;
   if (thing.isString()) {
     String sthing = thing.toString();
-    if ((errcd = fb_unserialize_from_buffer(ret, sthing.data(), sthing.size(),
-                                            &pos))) {
+    // high bit set: it's a fb_compact_serialize'd string
+    if (!sthing.empty() && (sthing[0] & 0x80)) {
+      errcd = fb_compact_unserialize_from_buffer(
+        ret, sthing.data(), sthing.size(), pos);
+    } else {
+      errcd = fb_unserialize_from_buffer(
+        ret, sthing.data(), sthing.size(), &pos);
+    }
+    if (errcd) {
       errcode = errcd;
     } else {
       success = true;
@@ -458,13 +468,527 @@ Variant f_fb_unserialize(CVarRef thing, VRefParam success,
   return f_fb_thrift_unserialize(thing, ref(success), ref(errcode));
 }
 
-Variant f_fb_compact_serialize(CVarRef thing) {
-  throw NotImplementedException(__func__);
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ *                         FB Compact Serialize
+ *                         ====================
+ *
+ * === Compatibility with fb_unserialize ===
+ *
+ * Check the high bit in the first byte of the serialized string.
+ * If it's set, the string is fb_compact_serialize'd, otherwise it's
+ * fb_serialize'd.
+ *
+ * === Format ===
+ *
+ * A value is serialized as a string <c> <data> where c is a byte (0xf0 | code),
+ * code being one of:
+ *
+ *  0 (INT16): data is 2 bytes, network order signed int16
+ *  1 (INT32): data is 4 bytes, network order signed int32
+ *  2 (INT64): data is 8 bytes, network order signed int64
+ *      All of these represent an int64 value.
+ *
+ *  3 (NULL): no data, null value
+ *
+ *  4 (TRUE),
+ *  5 (FALSE): no data, boolean value
+ *
+ *  6 (DOUBLE): data is 8 bytes, double value
+ *
+ *  7 (STRING_0): no data
+ *  8 (STRING_1): one char of data
+ *  9 (STRING_N): followed by n as a serialized int64, followed by n characters
+ *      All of these represent a string value.
+ *
+ *  10 (LIST): followed by serialized values until STOP is seen.
+ *      Represents an array with numeric keys 0, 1, ..., n-1.
+ *
+ *  11 (MAP): followed by serialized key/value pairs until STOP
+ *      is seen.  Represents an array with arbitrary keys.
+ *
+ *  12 (STOP): no data
+ *      Marks the end of a LIST or a MAP.
+ *
+ *  13 (SKIP): no data
+ *      If seen as an entry in a LIST, the next index in the sequence will be
+ *      skipped. E.g. array(0 => 'a', 1 => 'b', 3 => 'c) will be encoded as
+ *      (LIST, 'a', 'b', SKIP, 'c') instead of (MAP, 0, 'a', 1, 'b', 3, 'c').
+ *
+ *  In addition, if <c> & 0xf0 != 0xf0, most significant bits of <c> mean:
+ *
+ *  - 0....... 7-bit unsigned int
+ *      (NOTE: not used for the sole int value due to the compatibility
+ *       requirement above)
+ *  - 10...... + 6 more bytes, 54-bit unsigned int
+ *  - 110..... + 1 more byte,  13-bit unsigned int
+ *  - 1110.... + 2 more bytes, 20-bit unsigned int
+ *
+ *  All of these represent an int64 value.
+ */
+
+enum FbCompactSerializeCode {
+  FB_CS_INT16      = 0,
+  FB_CS_INT32      = 1,
+  FB_CS_INT64      = 2,
+  FB_CS_NULL       = 3,
+  FB_CS_TRUE       = 4,
+  FB_CS_FALSE      = 5,
+  FB_CS_DOUBLE     = 6,
+  FB_CS_STRING_0   = 7,
+  FB_CS_STRING_1   = 8,
+  FB_CS_STRING_N   = 9,
+  FB_CS_LIST       = 10,
+  FB_CS_MAP        = 11,
+  FB_CS_STOP       = 12,
+  FB_CS_SKIP       = 13,
+  FB_CS_MAX_CODE   = 15,
+};
+
+// 1 byte: 0<7 bits>
+const uint64_t kInt7Mask            = 0x7f;
+const uint64_t kInt7Prefix          = 0x00;
+
+// 2 bytes: 110<13 bits>
+const uint64_t kInt13Mask           = (1ULL << 13) - 1;
+const uint64_t kInt13PrefixMsbMask  = 0xe0;
+const uint64_t kInt13PrefixMsb      = 0xc0;
+const uint64_t kInt13Prefix         = kInt13PrefixMsb << (1 * 8);
+
+// 3 bytes: 1110<20 bits>
+const uint64_t kInt20Mask           = (1ULL << 20) - 1;
+const uint64_t kInt20PrefixMsbMask  = 0xf0;
+const uint64_t kInt20PrefixMsb      = 0xe0;
+const uint64_t kInt20Prefix         = kInt20PrefixMsb << (2 * 8);
+
+// 7 bytes: 10<54 bits>
+const uint64_t kInt54Mask           = (1ULL << 54) - 1;
+const uint64_t kInt54PrefixMsbMask  = 0xc0;
+const uint64_t kInt54PrefixMsb      = 0x80;
+const uint64_t kInt54Prefix         = kInt54PrefixMsb << (6 * 8);
+
+// 1 byte: 1111<4 bits>
+const uint64_t kCodeMask            = 0x0f;
+const uint64_t kCodePrefix          = 0xf0;
+
+
+static void fb_compact_serialize_code(
+  StringData* sd, FbCompactSerializeCode code) {
+
+  ASSERT(code == (code & kCodeMask));
+  uint8_t v = (kCodePrefix | code);
+  sd->append(reinterpret_cast<char*>(&v), 1);
 }
 
-Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
-                                 VRefParam errcode /* = null_variant */) {
-  throw NotImplementedException(__func__);
+static void fb_compact_serialize_int64(StringData* sd, int64_t val) {
+  if (val >= 0 && (uint64_t)val <= kInt7Mask) {
+    uint8_t nval = val;
+    sd->append(reinterpret_cast<char*>(&nval), 1);
+
+  } else if (val >= 0 && (uint64_t)val <= kInt13Mask) {
+    uint16_t nval = htons(kInt13Prefix | val);
+    sd->append(reinterpret_cast<char*>(&nval), 2);
+
+  } else if (val == (int64_t)(int16_t)val) {
+    fb_compact_serialize_code(sd, FB_CS_INT16);
+    uint16_t nval = htons(val);
+    sd->append(reinterpret_cast<char*>(&nval), 2);
+
+  } else if (val >= 0 && (uint64_t)val <= kInt20Mask) {
+    uint32_t nval = htonl(kInt20Prefix | val);
+    // Skip most significant byte
+    sd->append(reinterpret_cast<char*>(&nval) + 1, 3);
+
+  } else if (val == (int64_t)(int32_t)val) {
+    fb_compact_serialize_code(sd, FB_CS_INT32);
+    uint32_t nval = htonl(val);
+    sd->append(reinterpret_cast<char*>(&nval), 4);
+
+  } else if (val >= 0 && (uint64_t)val <= kInt54Mask) {
+    uint64_t nval = htonll(kInt54Prefix | val);
+    // Skip most significant byte
+    sd->append(reinterpret_cast<char*>(&nval) + 1, 7);
+
+  } else {
+    fb_compact_serialize_code(sd, FB_CS_INT64);
+    uint64_t nval = htonll(val);
+    sd->append(reinterpret_cast<char*>(&nval), 8);
+  }
+}
+
+static void fb_compact_serialize_string(StringData* sd, CStrRef str) {
+  int len = str.size();
+  if (len == 0) {
+    fb_compact_serialize_code(sd, FB_CS_STRING_0);
+  } else {
+    if (len == 1) {
+      fb_compact_serialize_code(sd, FB_CS_STRING_1);
+    } else {
+      fb_compact_serialize_code(sd, FB_CS_STRING_N);
+      fb_compact_serialize_int64(sd, len);
+    }
+    sd->append(str.data(), len);
+  }
+}
+
+static bool fb_compact_serialize_is_list(CArrRef arr, int64_t& index_limit) {
+  index_limit = arr.size();
+  int64_t max_index = 0;
+  for (ArrayIter it(arr); it; ++it) {
+    Variant key = it.first();
+    if (!key.isNumeric()) {
+      return false;
+    }
+    int64_t index = key.toInt64();
+    if (index < 0) {
+      return false;
+    }
+    if (index > max_index) {
+      max_index = index;
+    }
+  }
+
+  if (max_index >= arr.size() * 2) {
+    // Might as well store it as a map
+    return false;
+  }
+
+  index_limit = max_index + 1;
+  return true;
+}
+
+static int fb_compact_serialize_variant(StringData* sd, CVarRef var, int depth);
+
+static void fb_compact_serialize_list(
+  StringData* sd, CArrRef arr, int64_t index_limit, int depth) {
+
+  fb_compact_serialize_code(sd, FB_CS_LIST);
+  for (int64 i = 0; i < index_limit; ++i) {
+    if (arr.exists(i)) {
+      fb_compact_serialize_variant(sd, arr[i], depth + 1);
+    } else {
+      fb_compact_serialize_code(sd, FB_CS_SKIP);
+    }
+  }
+  fb_compact_serialize_code(sd, FB_CS_STOP);
+}
+
+static void fb_compact_serialize_map(
+  StringData* sd, CArrRef arr, int depth) {
+
+  fb_compact_serialize_code(sd, FB_CS_MAP);
+  for (ArrayIter it(arr); it; ++it) {
+    Variant key = it.first();
+    if (key.isNumeric()) {
+      fb_compact_serialize_int64(sd, key.toInt64());
+    } else {
+      fb_compact_serialize_string(sd, key.toString());
+    }
+    fb_compact_serialize_variant(sd, it.second(), depth + 1);
+  }
+  fb_compact_serialize_code(sd, FB_CS_STOP);
+}
+
+
+static int fb_compact_serialize_variant(
+  StringData* sd, CVarRef var, int depth) {
+
+  if (depth > 256) {
+    return 1;
+  }
+
+  switch (var.getType()) {
+    case KindOfUninit:
+    case KindOfNull:
+      fb_compact_serialize_code(sd, FB_CS_NULL);
+      break;
+
+    case KindOfBoolean:
+      if (var.toInt64()) {
+        fb_compact_serialize_code(sd, FB_CS_TRUE);
+      } else {
+        fb_compact_serialize_code(sd, FB_CS_FALSE);
+      }
+      break;
+
+    case KindOfInt64:
+      fb_compact_serialize_int64(sd, var.toInt64());
+      break;
+
+    case KindOfDouble:
+    {
+      fb_compact_serialize_code(sd, FB_CS_DOUBLE);
+      double d = var.toDouble();
+      sd->append(reinterpret_cast<char*>(&d), 8);
+      break;
+    }
+
+    case KindOfStaticString:
+    case KindOfString:
+      fb_compact_serialize_string(sd, var.toString());
+      break;
+
+    case KindOfArray:
+    {
+      Array arr = var.toArray();
+      int64_t index_limit;
+      if (fb_compact_serialize_is_list(arr, index_limit)) {
+        fb_compact_serialize_list(sd, arr, index_limit, depth);
+      } else {
+        fb_compact_serialize_map(sd, arr, depth);
+      }
+      break;
+    }
+
+    default:
+      return 1;
+  }
+
+  return 0;
+}
+
+Variant f_fb_compact_serialize(CVarRef thing) {
+  /**
+   * If thing is a single int value [0, 127] normally we would serialize
+   * it as a single byte (7 bit unsigned int).
+   *
+   * However, we want highest bit of the first byte to always be set so
+   * that we can tell if the string is fb_serialize'd or fb_compact_serialize'd.
+   *
+   * So we force to serialize it as 13 bit unsigned int instead.
+   */
+  if (thing.getType() == KindOfInt64) {
+    int64_t val = thing.toInt64();
+    if (val >= 0 && (uint64_t)val <= kInt7Mask) {
+      char* buf = (char*)malloc(2);
+      *(uint16_t*)(buf) = (uint16_t)htons(kInt13Prefix | val);
+      return String(buf, 2, AttachString);
+    }
+  }
+
+  StringData* sd = NEW(StringData);
+  // StringData will throw a FatalErrorException if we try to grow it too large,
+  // so no need to check for length.
+  if (fb_compact_serialize_variant(sd, thing, 0)) {
+    DELETE(StringData)(sd);
+    return null;
+  }
+
+  return String(sd);
+}
+
+int fb_compact_unserialize_int64_from_buffer(
+  int64_t& out, const char* buf, int n, int& p) {
+
+  CHECK_ENOUGH(1, p, n);
+  uint64_t first = (unsigned char)buf[p];
+  if ((first & ~kInt7Mask) == kInt7Prefix) {
+    p += 1;
+    out = first & kInt7Mask;
+
+  } else if ((first & kInt13PrefixMsbMask) == kInt13PrefixMsb) {
+    CHECK_ENOUGH(2, p, n);
+    uint16_t val = (uint16_t)ntohs(*reinterpret_cast<const uint16_t*>(buf + p));
+    p += 2;
+    out = val & kInt13Mask;
+
+  } else if (first == (kCodePrefix | FB_CS_INT16)) {
+    p += 1;
+    CHECK_ENOUGH(2, p, n);
+    int16_t val = (int16_t)ntohs(*reinterpret_cast<const int16_t*>(buf + p));
+    p += 2;
+    out = val;
+
+  } else if ((first & kInt20PrefixMsbMask) == kInt20PrefixMsb) {
+    CHECK_ENOUGH(3, p, n);
+    char b[4];
+    memcpy(b, buf + p, 3);
+    uint32_t val = (uint32_t)ntohl(*reinterpret_cast<const uint32_t*>(b));
+    p += 3;
+    out = (val >> 8) & kInt20Mask;
+
+  } else if (first == (kCodePrefix | FB_CS_INT32)) {
+    p += 1;
+    CHECK_ENOUGH(4, p, n);
+    int32_t val = (int32_t)ntohl(*reinterpret_cast<const int32_t*>(buf + p));
+    p += 4;
+    out = val;
+
+  } else if ((first & kInt54PrefixMsbMask) == kInt54PrefixMsb) {
+    CHECK_ENOUGH(7, p, n);
+    char b[8];
+    memcpy(b, buf + p, 7);
+    uint64_t val = (uint64_t)ntohll(*reinterpret_cast<const uint64_t*>(b));
+    p += 7;
+    out = (val >> 8) & kInt54Mask;
+
+  } else if (first == (kCodePrefix | FB_CS_INT64)) {
+    p += 1;
+    CHECK_ENOUGH(8, p, n);
+    int64 val = (int64_t)ntohll(*reinterpret_cast<const int64_t*>(buf + p));
+    p += 8;
+    out = val;
+
+  } else {
+    return FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
+  }
+
+  return 0;
+}
+
+int fb_compact_unserialize_from_buffer(
+  Variant& out, const char* buf, int n, int& p) {
+
+  CHECK_ENOUGH(1, p, n);
+  int code = (unsigned char)buf[p];
+  if ((code & ~kCodeMask) != kCodePrefix ||
+      (code & kCodeMask) == FB_CS_INT16 ||
+      (code & kCodeMask) == FB_CS_INT32 ||
+      (code & kCodeMask) == FB_CS_INT64) {
+
+    int64_t val;
+    int err = fb_compact_unserialize_int64_from_buffer(val, buf, n, p);
+    if (err) {
+      return err;
+    }
+    out = (int64)val;
+    return 0;
+  }
+  p += 1;
+  code &= kCodeMask;
+  switch (code) {
+    case FB_CS_NULL:
+      out = null;
+      break;
+
+    case FB_CS_TRUE:
+      out = true;
+      break;
+
+    case FB_CS_FALSE:
+      out = false;
+      break;
+
+    case FB_CS_DOUBLE:
+    {
+      CHECK_ENOUGH(8, p, n);
+      double d = *reinterpret_cast<const double*>(buf + p);
+      p += 8;
+      out = d;
+      break;
+    }
+
+    case FB_CS_STRING_0:
+    {
+      StringData* sd = NEW(StringData);
+      out = sd;
+      break;
+    }
+
+    case FB_CS_STRING_1:
+    case FB_CS_STRING_N:
+    {
+      int64_t len = 1;
+      if (code == FB_CS_STRING_N) {
+        int err = fb_compact_unserialize_int64_from_buffer(len, buf, n, p);
+        if (err) {
+          return err;
+        }
+      }
+
+      CHECK_ENOUGH(len, p, n);
+      StringData* sd = NEW(StringData)(buf + p, len, CopyString);
+      p += len;
+      out = sd;
+      break;
+    }
+
+    case FB_CS_LIST:
+    {
+      Array arr = Array::Create();
+      int64 i = 0;
+      while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
+        if (buf[p] == (char)(kCodePrefix | FB_CS_SKIP)) {
+          ++i;
+          ++p;
+        } else {
+          Variant value;
+          int err = fb_compact_unserialize_from_buffer(value, buf, n, p);
+          if (err) {
+            return err;
+          }
+          arr.set(i++, value);
+        }
+      }
+
+      // Consume STOP
+      CHECK_ENOUGH(1, p, n);
+      p += 1;
+
+      out = arr;
+      break;
+    }
+
+    case FB_CS_MAP:
+    {
+      Array arr = Array::Create();
+      while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
+        Variant key;
+        int err = fb_compact_unserialize_from_buffer(key, buf, n, p);
+        if (err) {
+          return err;
+        }
+        Variant value;
+        err = fb_compact_unserialize_from_buffer(value, buf, n, p);
+        if (err) {
+          return err;
+        }
+        if (key.getType() == KindOfInt64) {
+          arr.set(key.toInt64(), value);
+        } else if (key.getType() == KindOfString ||
+                   key.getType() == KindOfStaticString) {
+          arr.set(key, value);
+        } else {
+          return FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
+        }
+      }
+
+      // Consume STOP
+      CHECK_ENOUGH(1, p, n);
+      p += 1;
+
+      out = arr;
+      break;
+    }
+
+    default:
+      return FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
+  }
+
+  return 0;
+}
+
+Variant f_fb_compact_unserialize(
+  CVarRef thing, VRefParam success, VRefParam errcode /* = null_variant */) {
+
+  if (!thing.isString()) {
+    success = false;
+    errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
+    return false;
+  }
+  Variant ret;
+  String s = thing.toString();
+  int p = 0;
+  int err = fb_compact_unserialize_from_buffer(ret, s.data(), s.size(), p);
+  if (err) {
+    success = false;
+    errcode = err;
+    return false;
+  }
+  success = true;
+  errcode = null;
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,6 +25,8 @@
 bool TestExtFb::RunTests(const std::string &which) {
   bool ret = true;
 
+  RUN_TEST(test_fb_compact_serialize);
+  RUN_TEST(test_fb_compact_unserialize);
   RUN_TEST(test_fb_thrift_serialize);
   RUN_TEST(test_fb_thrift_unserialize);
   RUN_TEST(test_fb_rename_function);
@@ -40,6 +42,75 @@ bool TestExtFb::RunTests(const std::string &which) {
   RUN_TEST(test_fb_crossall_query);
 
   return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+#define fb_cs_test(v) do {                                              \
+    Variant ret;                                                        \
+    Variant v_ = v;                                                     \
+    Variant s_ = f_fb_compact_serialize(v_);                            \
+    VERIFY(s_.isString());                                              \
+    String ss_ = s_.toString();                                         \
+    VERIFY(!ss_.empty());                                               \
+    /* check high bit of first character always set */                  \
+    VERIFY(ss_[0] & 0x80);                                              \
+    VS(f_fb_compact_unserialize(s_, ref(ret)), v_);                     \
+    VERIFY(same(ret, true));                                            \
+    ret = null;                                                         \
+    VS(f_fb_unserialize(s_, ref(ret)), v_);                             \
+    VERIFY(same(ret, true));                                            \
+  } while(0)
+
+bool TestExtFb::test_fb_compact_serialize() {
+  fb_cs_test(null);
+  fb_cs_test(true);
+  fb_cs_test(false);
+  fb_cs_test(1234.5678);
+  fb_cs_test("");
+  fb_cs_test("a");
+  fb_cs_test("\0");
+  fb_cs_test("\0 a");
+  fb_cs_test("0123012301230123");
+  fb_cs_test("0123012301230123a");
+  fb_cs_test("012301230123012");
+  fb_cs_test(Array());
+  fb_cs_test(CREATE_VECTOR1(12345));
+  fb_cs_test(CREATE_VECTOR3(12345,"abc",0.1234));
+  fb_cs_test(CREATE_MAP1(1, 12345));
+  fb_cs_test(CREATE_MAP3(1, 12345, "a", 123124, "sdf", 0.1234));
+  fb_cs_test(CREATE_VECTOR1(CREATE_VECTOR1("a")));
+  fb_cs_test(CREATE_VECTOR2(1, CREATE_VECTOR1("a")));
+  fb_cs_test(CREATE_VECTOR2(CREATE_VECTOR1("a"), 1));
+  fb_cs_test(CREATE_VECTOR2(CREATE_VECTOR1("a"), CREATE_VECTOR1(1)));
+
+  // Test skips
+  fb_cs_test(CREATE_MAP3(0, "a", 1, "b", 3, "c"));
+  fb_cs_test(CREATE_MAP3(1, "a", 2, "b", 3, "c"));
+  fb_cs_test(CREATE_MAP3(0, "a", 2, "b", 3, "c"));
+  fb_cs_test(CREATE_MAP1(3, "a"));
+  // Test for overflow
+  fb_cs_test(CREATE_MAP1((int64)((1ULL << 63) - 1), "a"));
+
+  // Test each power of two, +/- 1 and the negatives of them
+  // Test a single number and packed inside an array
+  for (int i = 0; i < 64; ++i) {
+    int64 n = (1ULL << i);
+    fb_cs_test(n);    fb_cs_test(CREATE_VECTOR1(n));
+    fb_cs_test(n-1);  fb_cs_test(CREATE_VECTOR1(n-1));
+    fb_cs_test(n+1);  fb_cs_test(CREATE_VECTOR1(n+1));
+    fb_cs_test(-n);   fb_cs_test(CREATE_VECTOR1(-n));
+    fb_cs_test(-n-1); fb_cs_test(CREATE_VECTOR1(-n-1));
+    fb_cs_test(-n+1); fb_cs_test(CREATE_VECTOR1(-n+1));
+  }
+  return Count(true);
+}
+
+#undef fb_cs_test
+
+bool TestExtFb::test_fb_compact_unserialize() {
+  // tested above
+  return Count(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

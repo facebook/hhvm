@@ -283,7 +283,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_compact_serialize",
-    'desc'   => "Serialize data into a compact format that can be unserialized by fb_compact_unserialize(). In general produces smaller output compared to fb_serialize().",
+    'desc'   => "Serialize data into a compact format that can be unserialized by fb_compact_unserialize(). In general produces smaller output compared to fb_serialize(). Largest savings are on arrays with sequential (or almost sequential) indexes, i.e. simple arrays like array(\$a, \$b, \$c). NOTE: unlike serialize(), does not preserve internal references, i.e. array(&\$a, &\$a) will become array(\$a, \$a).",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,

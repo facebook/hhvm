@@ -27,6 +27,8 @@ class TestExtFb : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 
+  bool test_fb_compact_serialize();
+  bool test_fb_compact_unserialize();
   bool test_fb_thrift_serialize();
   bool test_fb_thrift_unserialize();
   bool test_fb_rename_function();

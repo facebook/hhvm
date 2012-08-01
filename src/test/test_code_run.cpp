@@ -614,11 +614,19 @@ bool TestCodeRun::RunTests(const std::string &which) {
   GEN_TEST(TestAdHoc);
 
   {
+    int cpus = Process::GetCPUCount();
+    if (Test::s_suite == "TestCodeRun") {
+      char* jobs = getenv("HPHP_SLOW_TESTS_JOBS");
+      int n;
+      if (jobs && (n = atoi(jobs)) > 0) {
+        cpus = n;
+      }
+    }
     string cmd =
       "env -u MFLAGS -u MAKEFLAGS "
       "make -f runtime/tmp/test.mk --no-print-directory "
       "SUITE="+Test::s_suite +
-      " -j" + boost::lexical_cast<string>(Process::GetCPUCount());
+      " -j" + boost::lexical_cast<string>(cpus);
 
     if (::system(cmd.c_str())) {
       printf("Failed to run testsuite: %s\n", Test::s_suite.c_str());

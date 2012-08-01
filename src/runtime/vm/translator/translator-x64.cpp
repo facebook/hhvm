@@ -5024,7 +5024,7 @@ TranslatorX64::translateAddNewElemC(const Tracelet& t,
 static void undefCns(const StringData* nm) {
   EXCEPTION_GATE_ENTER();
   VMRegAnchor _;
-  TypedValue *cns = g_vmContext->getCns(const_cast<StringData*>(nm), false);
+  TypedValue *cns = g_vmContext->getCns(const_cast<StringData*>(nm));
   if (!cns) {
     raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
     g_vmContext->getStack().pushStringNoRc(const_cast<StringData*>(nm));
@@ -5079,7 +5079,7 @@ TranslatorX64::translateCns(const Tracelet& t,
     }
   }
   using namespace TargetCache;
-  if (tv) {
+  if (tv && tvIsStatic(tv)) {
     m_regMap.allocOutputRegs(i);
     if (checkDefined) {
       size_t bit = allocCnsBit(name);

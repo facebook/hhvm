@@ -1,0 +1,2 @@
+#!/bin/sh
+sed -e 's%> .*\(src/test/vm/\)%> \1%'

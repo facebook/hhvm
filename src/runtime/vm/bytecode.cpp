@@ -2203,6 +2203,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
   static StringData* s_class = StringData::GetStaticString("class");
   static StringData* s_object = StringData::GetStaticString("object");
   static StringData* s_type = StringData::GetStaticString("type");
+  static StringData* s_include = StringData::GetStaticString("include");
 
   Array bt = Array::Create();
 
@@ -2234,6 +2235,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     ASSERT(unit);
     pc = unit->offsetOf(m_pc);
   }
+  int depth = 0;
   // Handle the top frame
   if (withSelf) {
     // Builtins don't have a file and line number
@@ -2247,10 +2249,11 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       frame.set(String(s_file), filename, true);
       frame.set(String(s_line), unit->getLineNumber(off), true);
       if (parserFrame) {
-        frame.set(String(s_function), "include", true);
+        frame.set(String(s_function), String(s_include), true);
         frame.set(String(s_args), Array::Create(parserFrame->filename), true);
       }
       bt.append(frame);
+      depth++;
     }
   }
   // Handle the subsequent VM frames
@@ -2280,45 +2283,57 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     }
     // check for pseudomain
     if (funcname->empty()) {
-      continue;
+      if (!prevFp) continue;
+      funcname = s_include;
     }
     frame.set(String(s_function), String(funcname), true);
-    // Closures have an m_this but they aren't in object context
-    Class* ctx = arGetContextClass(fp);
-    if (ctx != NULL && !fp->m_func->isClosureBody()) {
-      frame.set(String(s_class), ctx->name()->data(), true);
-      if (fp->hasThis()) {
-        if (withThis) {
-          frame.set(String(s_object), Object(fp->getThis()), true);
+    if (funcname != s_include) {
+      // Closures have an m_this but they aren't in object context
+      Class* ctx = arGetContextClass(fp);
+      if (ctx != NULL && !fp->m_func->isClosureBody()) {
+        frame.set(String(s_class), ctx->name()->data(), true);
+        if (fp->hasThis()) {
+          if (withThis) {
+            frame.set(String(s_object), Object(fp->getThis()), true);
+          }
+          frame.set(String(s_type), "->", true);
+        } else {
+          frame.set(String(s_type), "::", true);
         }
-        frame.set(String(s_type), "->", true);
-      } else {
-        frame.set(String(s_type), "::", true);
       }
     }
     Array args = Array::Create();
-    int nparams = fp->m_func->numParams();
-    int nargs = fp->numArgs();
-    /* builtin extra args are not stored in varenv */
-    if (nargs <= nparams) {
-      for (int i = 0; i < nargs; i++) {
-        TypedValue *arg = frame_local(fp, i);
-        args.append(tvAsVariant(arg));
+    if (funcname == s_include) {
+      if (depth) {
+        args.append(String(const_cast<StringData*>(
+                             fp->m_func->unit()->filepath())));
+        frame.set(String(s_args), args, true);
       }
     } else {
-      int i;
-      for (i = 0; i < nparams; i++) {
-        TypedValue *arg = frame_local(fp, i);
-        args.append(tvAsVariant(arg));
+      int nparams = fp->m_func->numParams();
+      int nargs = fp->numArgs();
+      /* builtin extra args are not stored in varenv */
+      if (nargs <= nparams) {
+        for (int i = 0; i < nargs; i++) {
+          TypedValue *arg = frame_local(fp, i);
+          args.append(tvAsVariant(arg));
+        }
+      } else {
+        int i;
+        for (i = 0; i < nparams; i++) {
+          TypedValue *arg = frame_local(fp, i);
+          args.append(tvAsVariant(arg));
+        }
+        for (; i < nargs; i++) {
+          ASSERT(fp->numExtraArgs());
+          TypedValue *arg = fp->getExtraArg(i - nparams);
+          args.append(tvAsVariant(arg));
+        }
       }
-      for (; i < nargs; i++) {
-        ASSERT(fp->numExtraArgs());
-        TypedValue *arg = fp->getExtraArg(i - nparams);
-        args.append(tvAsVariant(arg));
-      }
+      frame.set(String(s_args), args, true);
     }
-    frame.set(String(s_args), args, true);
     bt.append(frame);
+    depth++;
   }
   return bt;
 }

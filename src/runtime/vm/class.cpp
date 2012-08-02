@@ -1389,7 +1389,7 @@ void Class::importTraitMethods(MethodMap::Builder& builder) {
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
   // Skip special methods
-  if (Func::isSpecial(method->name())) return;
+  if (isdigit((uchar)method->name()->data()[0])) return;
 
   if ((parentMethod->attrs() & AttrFinal)) {
     static StringData* sd___MockClass =

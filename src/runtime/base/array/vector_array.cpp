@@ -326,6 +326,7 @@ ssize_t VectorArray::getIndex(CVarRef k) const {
 
 void VectorArray::sweep() {
   if (m_elems != m_fixed) free(m_elems);
+  m_strongIterators.clear();
 }
 
 ZendArray *VectorArray::escalateToNonEmptyZendArray() const {
@@ -359,7 +360,7 @@ ZendArray *VectorArray::escalateToNonEmptyZendArray() const {
     if (fp->pos != ArrayData::invalid_index) {
       fp->pos = ret->getIndex(fp->pos);
     } else {
-      fp->pos = 0;
+      fp->pos = 0; // 0 is the invalid pos for ZendArray.
     }
   }
   ret->setFlag(m_flag);

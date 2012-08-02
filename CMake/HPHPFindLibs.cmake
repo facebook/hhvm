@@ -28,6 +28,13 @@ endif()
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
+find_package(Libiconv REQUIRED)
+include_directories(${LIBICONV_INCLUDE_DIR})
+if (LIBICONV_CONST)
+  message(STATUS "Using const for input to iconv() call")
+  add_definitions("-DICONV_CONST=const")
+endif()
+
 # mysql checks
 find_package(MySQL REQUIRED)
 include_directories(${MYSQL_INCLUDE_DIR})

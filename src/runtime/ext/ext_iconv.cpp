@@ -26,7 +26,7 @@
 
 /**
  * libiconv sometimes defines the second parameter of its
- * main function as (char*), and sometimes as (const char*) but
+ * main function as (char**), and sometimes as (const char**) but
  * provides no means to detect this. Let build system determine
  * which is appropriate and (optionally) define ICONV_CONST=const
  * if such is needed in the cast.

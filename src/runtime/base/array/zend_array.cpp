@@ -25,11 +25,54 @@
 #include <runtime/base/externals.h>
 #include <util/hash.h>
 #include <util/lock.h>
+#include <util/util.h>
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template <class Elm, int Size, class Self>
+struct BucketsImpl {
+  Elm slots[Size];
+  void dump() {}
+  static Elm* alloc() {
+    return (NEW(Self)())->slots;
+  }
+  static void rel(Elm* data) {
+    Self* p = (Self*)(uintptr_t(data) - offsetof(Self, slots));
+    DELETE(Self)(p);
+  }
+};
+
+struct Buckets16: BucketsImpl<ZendArray::Bucket*, 16, Buckets16> {
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Buckets16);
+};
+struct Buckets32: BucketsImpl<ZendArray::Bucket*, 32, Buckets32> {
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Buckets32);
+};
+struct Buckets64: BucketsImpl<ZendArray::Bucket*, 64, Buckets64> {
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Buckets64);
+};
+static const uint MaxSmartSize = 64;
+
+ZendArray::Bucket** ZendArray::smartAlloc(uint cap) {
+  ASSERT(cap <= 64);
+  return cap <= 16 ? Buckets16::alloc() :
+         cap <= 32 ? Buckets32::alloc() :
+                     Buckets64::alloc();
+}
+void ZendArray::smartFree(Bucket** data, uint cap) {
+  ASSERT(cap == Util::nextPower2(cap) && cap <= MaxSmartSize);
+  switch (cap) {
+    case 16: Buckets16::rel(data); break;
+    case 32: Buckets32::rel(data); break;
+    default: Buckets64::rel(data); break;
+  }
+}
+
+IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(Buckets16);
+IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(Buckets32);
+IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(Buckets64);
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_CLS(ZendArray, Bucket);
 IMPLEMENT_SMART_ALLOCATION_HOT(ZendArray, SmartAllocatorImpl::NeedSweep);
 
@@ -95,28 +138,36 @@ void ZendArray::init(uint nSize) {
   uint size = MinSize;
   if (nSize >= 0x80000000) {
     size = 0x80000000; // prevent overflow
-  } else {
-    while (size < nSize) size <<= 1;
+  } else if (size < nSize) {
+    size = Util::nextPower2(nSize);
   }
   m_nTableMask = size - 1;
   if (size <= MinSize) {
     m_arBuckets = m_inlineBuckets;
     memset(m_inlineBuckets, 0, MinSize * sizeof(Bucket*));
+    m_allocMode = kInline;
+  } else if (size <= MaxSmartSize && !m_nonsmart) {
+    m_arBuckets = smartAlloc(size);
+    memset(m_arBuckets, 0, size * sizeof(Bucket*));
+    m_allocMode = kSmart;
   } else {
-    m_arBuckets = (Bucket **)calloc(tableSize(), sizeof(Bucket*));
+    m_arBuckets = (Bucket **)calloc(size, sizeof(Bucket*));
+    m_allocMode = kMalloc;
   }
 }
 
 HOT_FUNC_HPHP
-ZendArray::ZendArray(uint nSize) :
-  m_flag(0), m_pListHead(NULL), m_pListTail(NULL), m_nNextFreeElement(0) {
+ZendArray::ZendArray(uint nSize, bool nonsmart) :
+  m_flag(0), m_nonsmart(nonsmart), m_pListHead(NULL), m_pListTail(NULL),
+  m_nNextFreeElement(0) {
   m_size = 0;
   init(nSize);
 }
 
 HOT_FUNC_HPHP
 ZendArray::ZendArray(uint nSize, int64 n, Bucket *bkts[]) :
-  m_flag(0), m_pListHead(bkts[0]), m_pListTail(0), m_nNextFreeElement(n) {
+  m_flag(0), m_nonsmart(false), m_pListHead(bkts[0]), m_pListTail(0),
+  m_nNextFreeElement(n) {
   m_pos = (ssize_t)(m_pListHead);
   m_size = nSize;
   init(nSize);
@@ -137,7 +188,9 @@ ZendArray::~ZendArray() {
     p = p->pListNext;
     DELETE(Bucket)(q);
   }
-  if (m_arBuckets != m_inlineBuckets) {
+  if (m_allocMode == kSmart) {
+    smartFree(m_arBuckets, tableSize());
+  } else if (m_allocMode == kMalloc) {
     free(m_arBuckets);
   }
 }
@@ -542,13 +595,24 @@ ssize_t ZendArray::getIndex(CVarRef k) const {
 
 HOT_FUNC_HPHP
 void ZendArray::resize() {
-  uint newSize = tableSize() << 1;
-  // No need to use calloc() or memset(), as rehash() is going to clear
-  // m_arBuckets any way.
-  if (m_arBuckets == m_inlineBuckets) {
-    m_arBuckets = (Bucket**)malloc(newSize * sizeof(Bucket*));
+  uint oldSize = tableSize();
+  uint newSize = oldSize << 1;
+  // No need to use calloc() or memset(), since rehash() is going to clear
+  // m_arBuckets any way.  We don't use realloc, because for small size
+  // classes, it is guaranteed to move, and the implicit memcpy is a waste.
+  // For large size classes, it might not move, but since we don't need
+  // memcpy, why take the chance.
+  if (m_allocMode == kSmart) {
+    smartFree(m_arBuckets, oldSize);
+  } else if (m_allocMode == kMalloc) {
+    free(m_arBuckets);
+  }
+  if (newSize <= MaxSmartSize && !m_nonsmart) {
+    m_arBuckets = smartAlloc(newSize);
+    m_allocMode = kSmart;
   } else {
-    m_arBuckets = (Bucket **)realloc(m_arBuckets, newSize * sizeof(Bucket*));
+    m_arBuckets = (Bucket**) malloc(newSize * sizeof(Bucket*));
+    m_allocMode = kMalloc;
   }
   m_nTableMask = newSize - 1;
   rehash();
@@ -1246,7 +1310,7 @@ ArrayData *ZendArray::copyWithStrongIterators() const {
 
 inline ALWAYS_INLINE ZendArray *ZendArray::copyImplHelper(bool sma) const {
   ZendArray *target = LIKELY(sma) ? NEW(ZendArray)(m_size)
-                                  : new ZendArray(m_size);
+                                  : new ZendArray(m_size, true /* !smart */);
   Bucket *last = NULL;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
     Bucket *np = LIKELY(sma) ? NEW(Bucket)(Variant::noInit)
@@ -1536,9 +1600,8 @@ CVarRef ZendArray::endRef() {
 // memory allocator methods.
 
 void ZendArray::sweep() {
-  if (m_arBuckets != m_inlineBuckets) {
+  if (m_allocMode == kMalloc) {
     free(m_arBuckets);
-    m_arBuckets = m_inlineBuckets;
   }
   m_strongIterators.clear();
 }

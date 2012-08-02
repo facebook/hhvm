@@ -130,16 +130,22 @@ public:
 
   void sweep();
 private:
+  enum AllocMode { kInline, kSmart, kMalloc };
   TypedValue     m_fixed[FixedSize];
   TypedValue    *m_elems;
   uint           m_capacity;
+  int8_t         m_allocMode; // AllocMode
+  const bool     m_nonsmart;
 
   ZendArray *escalateToNonEmptyZendArray() const NEVER_INLINE;
   ZendArray *escalateToZendArray() const NEVER_INLINE;
 
+  void alloc(uint cap);
   void grow(uint newSize) NEVER_INLINE;
   void checkSize(uint n = 1);
   void checkInsertIterator(ssize_t pos);
+  static TypedValue* smartAlloc(uint cap);
+  static void smartFree(TypedValue* data, uint cap);
 };
 
 class StaticEmptyVectorArray : public VectorArray {

@@ -196,6 +196,31 @@ static inline Int roundUpToPowerOfTwo(Int value) {
 }
 
 /**
+ * Return log-base-2 of the next power of 2, i.e. CLZ
+ */
+static inline int lgNextPower2(uint64_t value) {
+#ifdef DEBUG
+  (void) (0 / value); // fail for 0; ASSERT is a pain.
+#endif
+  return 64 - __builtin_clzll(value - 1);
+}
+
+static inline int lgNextPower2(uint32_t value) {
+#ifdef DEBUG
+  (void) (0 / value); // fail for 0; ASSERT is a pain.
+#endif
+  return 32 - __builtin_clz(value - 1);
+}
+
+static inline uint64_t nextPower2(uint64_t value) {
+  return uint64_t(1) << lgNextPower2(value);
+}
+
+static inline uint32_t nextPower2(uint32_t value) {
+  return uint32_t(1) << lgNextPower2(value);
+}
+
+/**
  * Duplicate a buffer of given size, null-terminate the result.
  */
 const void *buffer_duplicate(const void *src, int size);

@@ -32,7 +32,15 @@
 #include <runtime/base/util/request_local.h>
 #include <util/case_insensitive.h>
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
+/**
+ * We don't actually use param.h in this file,
+ * but other files which use us do, and we want
+ * to enforce clearing of the isset macro from
+ * that header by handling the header now
+ * and wiping it out.
+ */
+# include <sys/param.h>
 # ifdef isset
 #  undef isset
 # endif

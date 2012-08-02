@@ -21,6 +21,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <arpa/inet.h> // For htonl().

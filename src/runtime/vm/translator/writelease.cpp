@@ -37,6 +37,10 @@ Lease::amOwner() const {
  * hypothetical wacky pthread implementations can break this. It's
  * DEBUG-only, folks.
  */
+static inline pthread_t gremlinize_threadid(pthread_t tid) {
+  return (pthread_t)(~((int64)tid));
+}
+
 void Lease::gremlinLock() {
   if (amOwner()) {
     TRACE(2, "Lease: gremlinLock dropping lease\n");
@@ -45,12 +49,12 @@ void Lease::gremlinLock() {
   pthread_mutex_lock(&m_lock);
   TRACE(2, "Lease: gremlin grabbed lock\n ");
   m_held = true;
-  m_owner = ~pthread_self();
+  m_owner = gremlinize_threadid(pthread_self());
 }
 
 void
 Lease::gremlinUnlock() {
-  if (m_held && m_owner == ~pthread_self()) {
+  if (m_held && m_owner == gremlinize_threadid(pthread_self())) {
     TRACE(2, "Lease: gremlin dropping lock\n ");
     pthread_mutex_unlock(&m_lock);
     m_held = false;

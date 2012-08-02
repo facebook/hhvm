@@ -119,7 +119,17 @@ public:
    * Thread's process identifier.
    */
   static pid_t GetThreadPid() {
+#ifdef __FreeBSD__
+# if __FreeBSD__version > 900030
+    return pthread_getthreadid_np();
+# else
+    long tid;
+    syscall(SYS_thr_self, &tid);
+    return (pid_t) tid;
+# endif
+#else
     return syscall(SYS_gettid);
+#endif
   }
 
   /**

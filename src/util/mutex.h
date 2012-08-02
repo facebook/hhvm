@@ -34,11 +34,11 @@ private:
   static const int kMagic = 0xba5eba11;
   int          m_magic;
   Rank         m_rank;
-  // members for keeping track of lock ownership, useful for debugging
-  bool         m_hasOwner;
+  // m_owner/m_hasOwner for keeping track of lock ownership, useful for debugging
   pthread_t    m_owner;
   unsigned int m_acquires;
-  bool         m_reentrant;
+  bool         m_recursive;
+  bool         m_hasOwner;
 #endif
   inline void recordAcquisition() {
 #ifdef DEBUG
@@ -51,7 +51,7 @@ private:
       m_hasOwner = true;
       m_owner    = pthread_self();
       m_acquires++;
-      assert(m_reentrant || m_acquires == 1);
+      assert(m_recursive || m_acquires == 1);
     }
 #endif
   }
@@ -67,7 +67,7 @@ private:
 #ifdef DEBUG
     if (enableAssertions) {
       popRank(m_rank);
-      assertOwnedBySelfImpl();
+      assertOwnedBySelf();
       assert(m_acquires > 0);
       if (--m_acquires == 0) {
         m_hasOwner = false;
@@ -75,8 +75,8 @@ private:
     }
 #endif
   }
-protected:
-  inline void assertNotOwnedImpl() const {
+public:
+  inline void assertNotOwned() const {
 #ifdef DEBUG
     if (enableAssertions) {
       assert(!m_hasOwner);
@@ -84,7 +84,7 @@ protected:
     }
 #endif
   }
-  inline void assertOwnedBySelfImpl() const {
+  inline void assertOwnedBySelf() const {
 #ifdef DEBUG
     if (enableAssertions) {
       assert(m_hasOwner);
@@ -94,9 +94,9 @@ protected:
 #endif
   }
 public:
-  BaseMutex(bool reentrant = true, Rank r = RankUnranked) {
+  BaseMutex(bool recursive = true, Rank r = RankUnranked) {
     pthread_mutexattr_init(&m_mutexattr);
-    if (reentrant) {
+    if (recursive) {
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
     } else {
 #if defined(__APPLE__)
@@ -110,14 +110,14 @@ public:
     m_rank = r;
     m_magic = kMagic;
     invalidateOwner();
-    m_reentrant = reentrant;
+    m_recursive = recursive;
 #endif
   }
   ~BaseMutex() {
 #ifdef DEBUG
     assert(m_magic == kMagic);
 #endif
-    assertNotOwnedImpl();
+    assertNotOwned();
     pthread_mutex_destroy(&m_mutex);
     pthread_mutexattr_destroy(&m_mutexattr);
 #ifdef DEBUG
@@ -132,7 +132,7 @@ public:
     bool success = !pthread_mutex_trylock(&m_mutex);
     if (success) {
       recordAcquisition();
-      assertOwnedBySelfImpl();
+      assertOwnedBySelf();
     }
     return success;
   }
@@ -147,7 +147,7 @@ public:
     bool success = !pthread_mutex_timedlock(&m_mutex, &delta);
     if (success) {
       recordAcquisition();
-      assertOwnedBySelfImpl();
+      assertOwnedBySelf();
     }
     return success;
   }
@@ -164,7 +164,7 @@ public:
 #endif
     }
     recordAcquisition();
-    assertOwnedBySelfImpl();
+    assertOwnedBySelf();
   }
 
   void unlock() {
@@ -195,8 +195,8 @@ protected:
  */
 class Mutex : public BaseMutex<false> {
 public:
-  Mutex(bool reentrant = true, Rank rank = RankUnranked) :
-    BaseMutex<false>(reentrant, rank) {}
+  Mutex(bool recursive = true, Rank rank = RankUnranked) :
+    BaseMutex<false>(recursive, rank) {}
   pthread_mutex_t &getRaw() { return m_mutex; }
 };
 
@@ -206,14 +206,8 @@ public:
  */
 class SimpleMutex : public BaseMutex<true> {
 public:
-  SimpleMutex(bool reentrant = true, Rank rank = RankUnranked) :
-    BaseMutex<true>(reentrant, rank) {}
-  inline void assertNotOwned() const {
-    assertNotOwnedImpl();
-  }
-  inline void assertOwnedBySelf() const {
-    assertOwnedBySelfImpl();
-  }
+  SimpleMutex(bool recursive = true, Rank rank = RankUnranked) :
+    BaseMutex<true>(recursive, rank) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

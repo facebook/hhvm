@@ -5289,6 +5289,7 @@ TranslatorX64::translateConcat(const Tracelet& t,
       StringData* retval = concat_ss(v1, v2);
       printf("%p", retval); // use retval
     }
+
     // The concat helper will decRef the inputs and incRef the output
     // for us if appropriate
     EMIT_CALL2(a, fptr,
@@ -5297,6 +5298,7 @@ TranslatorX64::translateConcat(const Tracelet& t,
     ASSERT(i.outStack->rtt.isString());
     m_regMap.bind(rax, i.outStack->location, i.outStack->outerType(),
                   RegInfo::DIRTY);
+
   } else {
     // Otherwise, use the generic concat helper
     if (false) { // type check

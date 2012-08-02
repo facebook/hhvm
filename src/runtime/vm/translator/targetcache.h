@@ -462,6 +462,7 @@ private:
   static inline SPropCache* cacheAtHandle(CacheHandle handle) {
     return (SPropCache*)(uintptr_t(tl_targetCaches.base) + handle);
   }
+  CacheHandle allocConstantLocked(StringData* name);
 public:
   TypedValue* m_tv;  // public; it is used from TC and we assert the offset
   static CacheHandle alloc(const StringData* sd = NULL) {

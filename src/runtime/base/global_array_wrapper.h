@@ -106,6 +106,14 @@ public:
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
+  virtual ArrayData* escalateForSort();
+  virtual void ksort(int sort_flags, bool ascending);
+  virtual void sort(int sort_flags, bool ascending);
+  virtual void asort(int sort_flags, bool ascending);
+  virtual void uksort(CVarRef cmp_function);
+  virtual void usort(CVarRef cmp_function);
+  virtual void uasort(CVarRef cmp_function);
+
 private:
   Globals* m_globals;
 };

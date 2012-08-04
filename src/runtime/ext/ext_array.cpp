@@ -22,15 +22,13 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_collator.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/base/sort_flags.h>
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/eval/eval.h>
+#include <runtime/base/array/hphp_array.h>
+#include <runtime/base/array/zend_array.h>
 #include <util/logger.h>
-
-#define SORT_REGULAR            0
-#define SORT_NUMERIC            1
-#define SORT_STRING             2
-#define SORT_LOCALE_STRING      5
 
 #define SORT_DESC               3
 #define SORT_ASC                4
@@ -1247,107 +1245,96 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   }
 }
 
+#define SORT_BODY(sort_func, sort_flags, ascending) \
+  do { \
+    getCheckedArrayRetType(array, false, Array &); \
+    ArrayData* ad; \
+    arr_array = ad = arr_array->escalateForSort(); \
+    ad->sort_func(sort_flags, ascending); \
+    return true; \
+  } while (0)
+
+#define SORT_BODY_WITH_COLLATOR_CHECK(sort_func, sort_flags, ascending) \
+  do { \
+    getCheckedArrayRetType(array, false, Array &); \
+    if (use_collator && sort_flags != SORT_LOCALE_STRING) { \
+      UCollator *coll = s_collator->getCollator(); \
+      if (coll) { \
+        intl_error &errcode = s_collator->getErrorCodeRef(); \
+        return collator_##sort_func(array, sort_flags, ascending, \
+                                    coll, &errcode); \
+      } \
+    } \
+    ArrayData* ad; \
+    arr_array = ad = arr_array->escalateForSort(); \
+    ad->sort_func(sort_flags, ascending); \
+    return true; \
+  } while (0)
+
+#define USER_SORT_BODY(sort_func) \
+  do { \
+    getCheckedArrayRetType(array, false, Array &); \
+    ArrayData* ad; \
+    arr_array = ad = arr_array->escalateForSort(); \
+    ad->sort_func(cmp_function); \
+    return true; \
+  } while (0)
+
 bool f_sort(VRefParam array, int sort_flags /* = 0 */,
             bool use_collator /* = false */) {
-  getCheckedArrayRetType(array, false, Array &);
-  if (use_collator && sort_flags != SORT_LOCALE_STRING) {
-    UCollator *coll = s_collator->getCollator();
-    if (coll) {
-      intl_error &errcode = s_collator->getErrorCodeRef();
-      return collator_sort(array, sort_flags, true, coll, &errcode);
-    }
-  }
-  arr_array.sort(get_cmp_func(sort_flags, true), false, true);
-  return true;
+  SORT_BODY_WITH_COLLATOR_CHECK(sort, sort_flags, true);
 }
 
 bool f_rsort(VRefParam array, int sort_flags /* = 0 */,
              bool use_collator /* = false */) {
-  getCheckedArrayRetType(array, false, Array &);
-  if (use_collator && sort_flags != SORT_LOCALE_STRING) {
-    UCollator *coll = s_collator->getCollator();
-    if (coll) {
-      intl_error &errcode = s_collator->getErrorCodeRef();
-      return collator_sort(array, sort_flags, false, coll, &errcode);
-    }
-  }
-  arr_array.sort(get_cmp_func(sort_flags, false), false, true);
-  return true;
+  SORT_BODY_WITH_COLLATOR_CHECK(sort, sort_flags, false);
 }
 
 bool f_asort(VRefParam array, int sort_flags /* = 0 */,
              bool use_collator /* = false */) {
-  getCheckedArrayRetType(array, false, Array &);
-  if (use_collator && sort_flags != SORT_LOCALE_STRING) {
-    UCollator *coll = s_collator->getCollator();
-    if (coll) {
-      intl_error &errcode = s_collator->getErrorCodeRef();
-      return collator_asort(array, sort_flags, true, coll, &errcode);
-    }
-  }
-  arr_array.sort(get_cmp_func(sort_flags, true), false, false);
-  return true;
+  SORT_BODY_WITH_COLLATOR_CHECK(asort, sort_flags, true);
 }
 
 bool f_arsort(VRefParam array, int sort_flags /* = 0 */,
               bool use_collator /* = false */) {
-  getCheckedArrayRetType(array, false, Array &);
-  if (use_collator && sort_flags != SORT_LOCALE_STRING) {
-    UCollator *coll = s_collator->getCollator();
-    if (coll) {
-      intl_error &errcode = s_collator->getErrorCodeRef();
-      return collator_asort(array, sort_flags, false, coll, &errcode);
-    }
-  }
-  arr_array.sort(get_cmp_func(sort_flags, false), false, false);
-  return true;
+  SORT_BODY_WITH_COLLATOR_CHECK(asort, sort_flags, false);
 }
 
 bool f_ksort(VRefParam array, int sort_flags /* = 0 */) {
-  getCheckedArrayRetType(array, false, Array &);
-  arr_array.sort(get_cmp_func(sort_flags, true), true, false);
-  return true;
+  SORT_BODY(ksort, sort_flags, true);
 }
 
 bool f_krsort(VRefParam array, int sort_flags /* = 0 */) {
-  getCheckedArrayRetType(array, false, Array &);
-  arr_array.sort(get_cmp_func(sort_flags, false), true, false);
-  return true;
+  SORT_BODY(ksort, sort_flags, false);
 }
 
-bool f_usort(VRefParam array, CVarRef cmp_function) {
-  getCheckedArrayRetType(array, false, Array &);
-  arr_array.sort(cmp_func, false, true, &cmp_function);
-  return true;
-}
-
-bool f_uasort(VRefParam array, CVarRef cmp_function) {
-  getCheckedArrayRetType(array, false, Array &);
-  arr_array.sort(cmp_func, false, false, &cmp_function);
-  return true;
-}
-
-bool f_uksort(VRefParam array, CVarRef cmp_function) {
-  getCheckedArrayRetType(array, false, Array &);
-  arr_array.sort(cmp_func, true, false, &cmp_function);
-  return true;
-}
+// NOTE: PHP's implementation of natsort and natcasesort accepts ArrayAccess
+// objects as well, which does not make much sense, and which is not supported
+// here.
 
 Variant f_natsort(VRefParam array) {
-  // NOTE, PHP natsort accepts ArrayAccess objects as well,
-  // which does not make much sense, and which is not supported here.
-  getCheckedArrayRetType(array, false, Array &);
-  arr_array.sort(Array::SortNatural, false, false);
-  return true;
+  SORT_BODY(asort, SORT_NATURAL, true);
 }
 
 Variant f_natcasesort(VRefParam array) {
-  // NOTE, PHP natcasesort accepts ArrayAccess objects as well,
-  // which does not make much sense, and which is not supported here.
-  getCheckedArrayRetType(array, false, Array &);
-  arr_array.sort(Array::SortNaturalCase, false, false);
-  return true;
+  SORT_BODY(asort, SORT_NATURAL_CASE, true);
 }
+
+bool f_usort(VRefParam array, CVarRef cmp_function) {
+  USER_SORT_BODY(usort);
+}
+
+bool f_uasort(VRefParam array, CVarRef cmp_function) {
+  USER_SORT_BODY(uasort);
+}
+
+bool f_uksort(VRefParam array, CVarRef cmp_function) {
+  USER_SORT_BODY(uksort);
+}
+
+#undef SORT_BODY
+#undef SORT_BODY_WITH_COLLATOR_CHECK
+#undef USER_SORT_BODY
 
 bool f_array_multisort(int _argc, VRefParam ar1,
                        CArrRef _argv /* = null_array */) {

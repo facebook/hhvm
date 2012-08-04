@@ -21,6 +21,7 @@
 #include <runtime/base/array/array_data.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/comparisons.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,6 +31,9 @@ class ArrayInit;
 class ZendArray : public ArrayData {
   static const uint LgMinSize = 3;
   static const uint MinSize = 1 << LgMinSize;
+  enum Flag { StrongIteratorPastEnd = 1 };
+  enum AllocMode { kInline, kSmart, kMalloc };
+  enum SortFlavor { IntegerSort, StringSort, GenericSort };
 public:
   friend class ArrayInit;
   friend class VectorArray;
@@ -227,13 +231,6 @@ public:
   ZendArray(uint nSize, int64 n, Bucket *bkts[]);
 
 private:
-  enum Flag {
-    StrongIteratorPastEnd = 1,
-  };
-  enum AllocMode {
-    kInline, kSmart, kMalloc
-  };
-
   Bucket         **m_arBuckets;
   uint             m_nTableMask;
   uint8_t          m_allocMode;
@@ -276,6 +273,21 @@ private:
   void resize();
   void rehash();
 
+  template <typename AccessorT>
+  SortFlavor preSort(Bucket** buffer, const AccessorT& acc, bool checkTypes);
+
+  void postSort(Bucket** buffer, bool resetKeys);
+
+public:
+  ArrayData* escalateForSort();
+  void ksort(int sort_flags, bool ascending);
+  void sort(int sort_flags, bool ascending);
+  void asort(int sort_flags, bool ascending);
+  void uksort(CVarRef cmp_function);
+  void usort(CVarRef cmp_function);
+  void uasort(CVarRef cmp_function);
+
+private:
   /**
    * Memory allocator methods.
    */

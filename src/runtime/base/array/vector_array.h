@@ -126,6 +126,8 @@ public:
   virtual CVarRef endRef();
   virtual ArrayData *escalate(bool mutableIteration = false) const;
 
+  virtual ArrayData* escalateForSort();
+
   DECLARE_SMART_ALLOCATION(VectorArray);
 
 private:

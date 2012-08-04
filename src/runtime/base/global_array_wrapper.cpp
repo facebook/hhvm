@@ -298,5 +298,16 @@ CVarRef GlobalArrayWrapper::endRef() {
   return m_globals->getRefByIdx(m_globals->iter_end(), k);
 }
 
+ArrayData* GlobalArrayWrapper::escalateForSort() {
+  raise_warning("Sorting the $GLOBALS array is not supported");
+  return this;
+}
+void GlobalArrayWrapper::ksort(int sort_flags, bool ascending) {}
+void GlobalArrayWrapper::sort(int sort_flags, bool ascending) {}
+void GlobalArrayWrapper::asort(int sort_flags, bool ascending) {}
+void GlobalArrayWrapper::uksort(CVarRef cmp_function) {}
+void GlobalArrayWrapper::usort(CVarRef cmp_function) {}
+void GlobalArrayWrapper::uasort(CVarRef cmp_function) {}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

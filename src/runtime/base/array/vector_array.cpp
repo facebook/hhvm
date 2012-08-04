@@ -861,5 +861,9 @@ ArrayData *VectorArray::escalate(bool mutableIteration /* = false */) const {
   return const_cast<VectorArray *>(this);
 }
 
+ArrayData* VectorArray::escalateForSort() {
+  return escalateToZendArray();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -67,12 +67,17 @@ namespace HPHP {
  */
 class ArrayInit {
 public:
-  enum VectorInit{ vectorInit };
+  enum VectorInit { vectorInit };
+  enum MapInit { mapInit };
   ArrayInit(ssize_t n, bool keepRef = false);
   ArrayInit(ssize_t n, VectorInit) {
     m_data = CreateVector(n);
   }
+  ArrayInit(ssize_t n, MapInit) {
+    m_data = CreateMap(n);
+  }
   static ArrayData *CreateVector(ssize_t n);
+  static ArrayData *CreateMap(ssize_t n);
   ~ArrayInit() {
     // In case an exception interrupts the initialization.
     if (m_data) m_data->release();

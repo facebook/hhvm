@@ -132,6 +132,14 @@ public: // ArrayData implementation
   virtual void getFullPos(FullPos&);
   virtual bool setFullPos(const FullPos&);
 
+  virtual ArrayData* escalateForSort();
+  virtual void ksort(int sort_flags, bool ascending);
+  virtual void sort(int sort_flags, bool ascending);
+  virtual void asort(int sort_flags, bool ascending);
+  virtual void uksort(CVarRef cmp_function);
+  virtual void usort(CVarRef cmp_function);
+  virtual void uasort(CVarRef cmp_function);
+
 private:
   NameValueTable* const m_tab;
 };

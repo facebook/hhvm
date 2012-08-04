@@ -347,6 +347,30 @@ CVarRef ArrayData::endRef() {
   }
   throw FatalErrorException("invalid ArrayData::m_pos");
 }
+ArrayData* ArrayData::escalateForSort() {
+  if (getCount() > 1) {
+    return copy();
+  }
+  return this;
+}
+void ArrayData::ksort(int sort_flags, bool ascending) {
+  throw FatalErrorException("Unimplemented ArrayData::ksort");
+}
+void ArrayData::sort(int sort_flags, bool ascending) {
+  throw FatalErrorException("Unimplemented ArrayData::sort");
+}
+void ArrayData::asort(int sort_flags, bool ascending) {
+  throw FatalErrorException("Unimplemented ArrayData::asort");
+}
+void ArrayData::uksort(CVarRef cmp_function) {
+  throw FatalErrorException("Unimplemented ArrayData::uksort");
+}
+void ArrayData::usort(CVarRef cmp_function) {
+  throw FatalErrorException("Unimplemented ArrayData::usort");
+}
+void ArrayData::uasort(CVarRef cmp_function) {
+  throw FatalErrorException("Unimplemented ArrayData::uasort");
+}
 ArrayData* ArrayData::copyWithStrongIterators() const {
   throw FatalErrorException("Unimplemented ArrayData::copyWithStrongIterators");
 }

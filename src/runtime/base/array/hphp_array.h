@@ -30,6 +30,7 @@ class ArrayInit;
 class HphpArray : public ArrayData {
   enum CopyMode { kSmartCopy, kNonSmartCopy };
   enum AllocMode { kInline, kSmart, kMalloc };
+  enum SortFlavor { IntegerSort, StringSort, GenericSort };
 public:
   friend class ArrayInit;
 
@@ -210,6 +211,21 @@ public:
   void nvGetKey(TypedValue* out, ssize_t pos);
   bool nvInsert(StringData* k, TypedValue *v);
 
+private:
+  template <typename AccessorT>
+  SortFlavor preSort(const AccessorT& acc, bool checkTypes);
+
+  void postSort(bool resetKeys);
+
+public:
+  ArrayData* escalateForSort();
+  void ksort(int sort_flags, bool ascending);
+  void sort(int sort_flags, bool ascending);
+  void asort(int sort_flags, bool ascending);
+  void uksort(CVarRef cmp_function);
+  void usort(CVarRef cmp_function);
+  void uasort(CVarRef cmp_function);
+
   // Assembly linkage
   static uint32_t getMaskOff() {
     return (uintptr_t)&((HphpArray*)0)->m_tableMask;
@@ -377,8 +393,19 @@ private:
    * the relevant key is not already present in the array. Otherwise this can
    * put the array into a bad state; use with caution.
    */
-  ElmInd* findForNewInsert(size_t h0) const;
   ElmInd* findForNewInsertLoop(size_t tableMask, size_t h0) const;
+
+  inline ALWAYS_INLINE
+  ElmInd* findForNewInsert(size_t h0) const {
+    size_t tableMask = m_tableMask;
+    size_t probeIndex = h0 & tableMask;
+    ElmInd* ei = &m_hash[probeIndex];
+    ssize_t /*ElmInd*/ pos = *ei;
+    if (LIKELY(!validElmInd(pos))) {
+      return ei;
+    }
+    return findForNewInsertLoop(tableMask, h0);
+  }
 
   bool nextInsert(CVarRef data);
   void nextInsertRef(CVarRef data);
@@ -459,6 +486,29 @@ private:
   // static singleton empty array.  Not a subclass because we want a fast
   // isHphpArray implementation; HphpArray should be effectively final.
   static HphpArray s_theEmptyArray;
+
+  static void initHash(HphpArray::ElmInd* hash, size_t tableSize) {
+    ASSERT(HphpArray::ElmIndEmpty == -1);
+    memset(hash, 0xffU, tableSize * sizeof(HphpArray::ElmInd));
+  }
+
+public:
+  static bool validElmInd(ssize_t /*HphpArray::ElmInd*/ ei) {
+    return (ei > ssize_t(HphpArray::ElmIndEmpty));
+  }
+
+  static size_t computeTableSize(uint32 tableMask) {
+    return size_t(tableMask) + size_t(1U);
+  }
+
+  static size_t computeMaxElms(uint32 tableMask) {
+    return size_t(tableMask) - size_t(tableMask) / HphpArray::LoadScale;
+  }
+
+  static size_t computeDataSize(uint32 tableMask) {
+    return computeTableSize(tableMask) * sizeof(HphpArray::ElmInd) +
+      computeMaxElms(tableMask) * sizeof(HphpArray::Elm);
+  }
 };
 
 inline bool IsHphpArray(const ArrayData* ad) {

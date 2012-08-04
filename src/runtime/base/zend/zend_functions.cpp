@@ -80,7 +80,7 @@ DataType is_numeric_string(const char *str, int length, int64 *lval,
   int base = 10, digits = 0, dp_or_e = 0;
   double local_dval = 0.0;
 
-  if (!length) {
+  if (!length || ((unsigned char)(*str)) > '9') {
     return KindOfNull;
   }
 

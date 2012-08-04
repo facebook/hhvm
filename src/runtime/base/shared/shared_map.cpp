@@ -344,5 +344,14 @@ TypedValue* SharedMap::nvGetCell(const StringData* key, bool error) const {
   return error ? nvGetNotFound(key) : NULL;
 }
 
+ArrayData* SharedMap::escalateForSort() {
+  ArrayData *ret = NULL;
+  bool keepRef = false;
+  bool mapInit = true;
+  m_arr->loadElems(ret, *this, keepRef, mapInit);
+  ASSERT(!ret->isStatic());
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

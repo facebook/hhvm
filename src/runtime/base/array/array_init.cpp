@@ -57,7 +57,17 @@ ArrayData *ArrayInit::CreateVector(ssize_t n) {
   if (enable_vector_array && RuntimeOption::UseVectorArray) {
     return NEW(VectorArray)(n);
   }
-  if (hhvm || (enable_hphp_array && RuntimeOption::UseHphpArray)) {
+  if (hhvm || // HHVM always uses HphpArray
+      (enable_hphp_array && RuntimeOption::UseHphpArray)) {
+    return NEW(HphpArray)(n);
+  }
+  return NEW(ZendArray)(n);
+}
+
+HOT_FUNC
+ArrayData *ArrayInit::CreateMap(ssize_t n) {
+  if (hhvm || // HHVM always uses HphpArray
+      (enable_hphp_array && RuntimeOption::UseHphpArray)) {
     return NEW(HphpArray)(n);
   }
   return NEW(ZendArray)(n);

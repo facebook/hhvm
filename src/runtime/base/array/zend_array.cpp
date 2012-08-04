@@ -19,6 +19,7 @@
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/array/sort_helpers.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>

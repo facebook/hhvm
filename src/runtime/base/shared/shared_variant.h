@@ -109,7 +109,7 @@ public:
   int getIndex(int64 key);
 
   void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
-                         bool keepRef = false);
+                 bool keepRef = false, bool mapInit = false);
 
   Variant getKey(ssize_t pos) const;
 

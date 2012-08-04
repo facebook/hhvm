@@ -76,19 +76,6 @@ HphpArray HphpArray::s_theEmptyArray(StaticEmptyArray);
 //=============================================================================
 // Helpers.
 
-static inline size_t computeTableSize(uint32 tableMask) {
-  return size_t(tableMask) + size_t(1U);
-}
-
-static inline size_t computeMaxElms(uint32 tableMask) {
-  return size_t(tableMask) - size_t(tableMask) / HphpArray::LoadScale;
-}
-
-static inline size_t computeDataSize(uint32 tableMask) {
-  return computeTableSize(tableMask) * sizeof(HphpArray::ElmInd) +
-    computeMaxElms(tableMask) * sizeof(HphpArray::Elm);
-}
-
 static inline size_t computeMaskFromNumElms(uint32 numElms) {
   ASSERT(numElms <= 0x7fffffffU);
   size_t lgSize = HphpArray::MinLgTableSize;
@@ -103,15 +90,6 @@ static inline size_t computeMaskFromNumElms(uint32 numElms) {
   return ((size_t(1U)) << lgSize) - 1;
   static_assert(HphpArray::MinLgTableSize >= 2,
                 "lower limit for 0.75 load factor");
-}
-
-static inline bool validElmInd(ssize_t /*HphpArray::ElmInd*/ ei) {
-  return (ei > ssize_t(HphpArray::ElmIndEmpty));
-}
-
-static inline void initHash(HphpArray::ElmInd* hash, size_t tableSize) {
-  ASSERT(HphpArray::ElmIndEmpty == -1);
-  memset(hash, 0xffU, tableSize * sizeof(HphpArray::ElmInd));
 }
 
 static inline bool isIntegerKey(CVarRef v) __attribute__((always_inline));
@@ -603,18 +581,6 @@ HphpArray::ElmInd* HphpArray::findForInsert(const StringData* s,
 }
 #undef FIND_FOR_INSERT_BODY
 
-inline ALWAYS_INLINE
-HphpArray::ElmInd* HphpArray::findForNewInsert(size_t h0) const {
-  size_t tableMask = m_tableMask;
-  size_t probeIndex = h0 & tableMask;
-  ElmInd* ei = &m_hash[probeIndex];
-  ssize_t /*ElmInd*/ pos = *ei;
-  if (LIKELY(!validElmInd(pos))) {
-    return ei;
-  }
-  return findForNewInsertLoop(tableMask, h0);
-}
-
 NEVER_INLINE HphpArray::ElmInd*
 HphpArray::findForNewInsertLoop(size_t tableMask, size_t h0) const {
   /* Quadratic probe. */
@@ -916,7 +882,6 @@ void HphpArray::grow() {
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
   reallocData(maxElms, tableSize, oldMask);
-
   // All the elements have been copied and their offsets from the base are
   // still the same, so we just need to build the new hash table.
   initHash(m_hash, tableSize);
@@ -927,7 +892,6 @@ void HphpArray::grow() {
 #else
   m_hLoad = m_size;
 #endif
-
   if (m_size > 0) {
     Elm* elms = m_data;
     for (ElmInd pos = 0; pos <= m_lastE; ++pos) {

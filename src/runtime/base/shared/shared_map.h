@@ -126,6 +126,8 @@ public:
 
   virtual ArrayData *escalate(bool mutableIteration = false) const;
 
+  virtual ArrayData* escalateForSort();
+
 private:
   SharedVariant *m_arr;
   mutable ZendArray *m_localCache;

@@ -337,6 +337,17 @@ bool NameValueTableWrapper::setFullPos(const FullPos& fp) {
   return false;
 }
 
+ArrayData* NameValueTableWrapper::escalateForSort() {
+  raise_warning("Sorting the $GLOBALS array is not supported");
+  return this;
+}
+void NameValueTableWrapper::ksort(int sort_flags, bool ascending) {}
+void NameValueTableWrapper::sort(int sort_flags, bool ascending) {}
+void NameValueTableWrapper::asort(int sort_flags, bool ascending) {}
+void NameValueTableWrapper::uksort(CVarRef cmp_function) {}
+void NameValueTableWrapper::usort(CVarRef cmp_function) {}
+void NameValueTableWrapper::uasort(CVarRef cmp_function) {}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

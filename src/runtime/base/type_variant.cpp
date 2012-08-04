@@ -19,6 +19,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/externals.h>
+#include <runtime/base/strings.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/zend/zend_string.h>
@@ -2686,7 +2687,7 @@ Variant Variant::o_set(CStrRef propName, CVarRef val,
   } else if (m_type == KindOfRef) {
     return m_data.pvar->o_set(propName, val, context);
   } else if (isObjectConvertable()) {
-    set(Object(SystemLib::AllocStdClassObject()));
+    setToDefaultObject();
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -2701,7 +2702,7 @@ Variant Variant::o_setRef(CStrRef propName, CVarRef val,
   } else if (m_type == KindOfRef) {
     return m_data.pvar->o_setRef(propName, val, context);
   } else if (isObjectConvertable()) {
-    set(Object(SystemLib::AllocStdClassObject()));
+    setToDefaultObject();
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -2715,7 +2716,7 @@ Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
   } else if (m_type == KindOfRef) {
     return m_data.pvar->o_setPublic(propName, val);
   } else if (isObjectConvertable()) {
-    set(Object(SystemLib::AllocStdClassObject()));
+    setToDefaultObject();
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -2729,7 +2730,7 @@ Variant Variant::o_setPublicRef(CStrRef propName, CVarRef val) {
   } else if (m_type == KindOfRef) {
     return m_data.pvar->o_setPublicRef(propName, val);
   } else if (isObjectConvertable()) {
-    set(Object(SystemLib::AllocStdClassObject()));
+    setToDefaultObject();
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -2812,7 +2813,7 @@ Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
   } else if (m_type == KindOfRef) {
     return m_data.pvar->o_lval(propName, tmpForGet, context);
   } else if (isObjectConvertable()) {
-    set(Object(SystemLib::AllocStdClassObject()));
+    setToDefaultObject();
     return m_data.pobj->o_lval(propName, tmpForGet, context);
   } else {
     // Raise a warning
@@ -3542,6 +3543,11 @@ void Variant::setEvalScalar() const {
     break;
   }
 }
+    
+void Variant::setToDefaultObject() {
+  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  set(Object(SystemLib::AllocStdClassObject()));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
@@ -4102,7 +4108,7 @@ T Variant::o_assign_op(CStrRef propName, CVarRef val,
   } else if (m_type == KindOfRef) {
     return (T)m_data.pvar->template o_assign_op<T,op>(propName, val, context);
   } else if (isObjectConvertable()) {
-    set(Object(SystemLib::AllocStdClassObject()));
+    setToDefaultObject();
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -4114,13 +4120,11 @@ T Variant::o_assign_op(CStrRef propName, CVarRef val,
 template<typename T, int op>
 T Object::o_assign_op(CStrRef propName, CVarRef val,
                       CStrRef context /* = null_string */) {
-  ObjectData *obj = m_px;
-  if (UNLIKELY(!obj)) {
-    obj = SystemLib::AllocStdClassObject();
-    ObjectBase::operator=(obj);
+  if (UNLIKELY(!m_px)) {
+    setToDefaultObject();
   }
-
-  return obj->template o_assign_op<T,op>(propName, val, context);
+  ASSERT(m_px);
+  return m_px->template o_assign_op<T,op>(propName, val, context);
 }
 
 template<typename T, int op>

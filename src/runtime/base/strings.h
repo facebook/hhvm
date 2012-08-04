@@ -41,6 +41,8 @@ const char* const UNDEFINED_INDEX =
   "Undefined index: %s";
 const char* const CANNOT_USE_SCALAR_AS_ARRAY =
   "Cannot use a scalar value as an array";
+const char* const CREATING_DEFAULT_OBJECT =
+  "Creating default object from empty value";
 
 } // namespace Strings
 } // namespace HPHP

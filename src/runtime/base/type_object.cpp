@@ -19,6 +19,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/strings.h>
 
 #include <system/lib/systemlib.h>
 
@@ -113,7 +114,7 @@ Variant Object::o_getPublic(CStrRef propName, bool error /* = true */) const {
 Variant Object::o_set(CStrRef propName, CVarRef val,
                       CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(SystemLib::AllocStdClassObject());
+    setToDefaultObject();
   }
   return m_px->o_set(propName, val, context);
 }
@@ -121,7 +122,7 @@ Variant Object::o_set(CStrRef propName, CVarRef val,
 Variant Object::o_setRef(CStrRef propName, CVarRef val,
                          CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(SystemLib::AllocStdClassObject());
+    setToDefaultObject();
   }
   return m_px->o_setRef(propName, val, context);
 }
@@ -133,14 +134,14 @@ Variant Object::o_set(CStrRef propName, RefResult val,
 
 Variant Object::o_setPublic(CStrRef propName, CVarRef val) {
   if (!m_px) {
-    operator=(SystemLib::AllocStdClassObject());
+    setToDefaultObject();
   }
   return m_px->o_setPublic(propName, val);
 }
 
 Variant Object::o_setPublicRef(CStrRef propName, CVarRef val) {
   if (!m_px) {
-    operator=(SystemLib::AllocStdClassObject());
+    setToDefaultObject();
   }
   return m_px->o_setPublicRef(propName, val);
 }
@@ -152,7 +153,7 @@ Variant Object::o_setPublic(CStrRef propName, RefResult val) {
 Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
                         CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(SystemLib::AllocStdClassObject());
+    setToDefaultObject();
   }
   return m_px->o_lval(propName, tmpForGet, context);
 }
@@ -204,6 +205,11 @@ void Object::serialize(VariableSerializer *serializer) const {
 
 bool Object::unserialize(std::istream &in) {
   throw NotImplementedException(__func__);
+}
+    
+void Object::setToDefaultObject() {
+  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  operator=(SystemLib::AllocStdClassObject());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

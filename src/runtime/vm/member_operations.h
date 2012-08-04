@@ -24,7 +24,6 @@
 #include "runtime/base/builtin_functions.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/runtime.h"
-//XXX#include "runtime/vm/instance.h"
 
 namespace HPHP {
 namespace VM {
@@ -970,6 +969,11 @@ static inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
   }
   return KindOfNull;
 }
+static inline Instance* createDefaultObject() {
+  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  Instance* obj = newInstance(SystemLib::s_stdclassClass);
+  return obj;
+}
 template <bool warn, bool define>
 static inline DataType propPreStdclass(TypedValue& tvScratch,
                                        TypedValue*& result, TypedValue* base,
@@ -977,15 +981,12 @@ static inline DataType propPreStdclass(TypedValue& tvScratch,
   if (!define) {
     return propPreNull<warn>(tvScratch, result);
   }
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
+  Instance* obj = createDefaultObject();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
   obj->incRefCount();
   result = base;
-  if (warn) {
-    raise_warning("Cannot access property on non-object");
-  }
   keySD = prepareKey(key).detach();
   return KindOfObject;
 }
@@ -1151,7 +1152,7 @@ static inline void SetPropNull(Cell* val) {
 }
 static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
                                    Cell* val) {
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
+  Instance* obj = createDefaultObject();
   obj->incRefCount();
   StringData* keySD = prepareKey(key).detach();
   obj->setProp(NULL, keySD, (TypedValue*)val);
@@ -1214,7 +1215,7 @@ static inline TypedValue* SetOpPropNull(TypedValue& tvScratch) {
 static inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
                                             TypedValue* base, TypedValue* key,
                                             Cell* rhs) {
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
+  Instance* obj = createDefaultObject();
   obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
@@ -1280,7 +1281,7 @@ static inline void IncDecPropNull(TypedValue& dest) {
 }
 static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
                                       TypedValue* key, TypedValue& dest) {
-  Instance* obj = newInstance(SystemLib::s_stdclassClass);
+  Instance* obj = createDefaultObject();
   obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;

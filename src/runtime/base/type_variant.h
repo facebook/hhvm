@@ -1105,6 +1105,8 @@ public:
   bool isStatic() const { return _count == RefCountStaticValue; }
   void setEvalScalar() const;
 
+  void setToDefaultObject();
+
   static size_t getTypeOffset() {
     Variant *v = 0;
     return (uintptr_t)&v->m_type;

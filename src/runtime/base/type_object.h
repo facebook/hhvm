@@ -209,6 +209,8 @@ class Object : protected ObjectBase {
   void serialize(VariableSerializer *serializer) const;
   bool unserialize(std::istream &in);
 
+  void setToDefaultObject();
+
   // Transfer ownership of our reference to this object.
   ObjectData *detach() {
     ObjectData *ret = m_px;

@@ -47,6 +47,7 @@ E Object
 
     [p] => 1
 )
+HipHop Warning:  Creating default object from empty value in src/test/vm/SetOpProp.php on line 59
 stdClass Object
 (
     [a] => <a>

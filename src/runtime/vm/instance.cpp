@@ -95,8 +95,7 @@ void Instance::invokeUserMethod(TypedValue* retval, const Func* method,
 
 Object Instance::FromArray(ArrayData *properties) {
   ASSERT(hhvm);
-  Instance* retval =
-    Instance::newInstance(SystemLib::s_stdclassClass);
+  Instance* retval = Instance::newInstance(SystemLib::s_stdclassClass);
   retval->initDynProps();
   HphpArray* props = static_cast<HphpArray*>(retval->o_properties.get());
   if (LIKELY(HphpArray::isHphpArray(properties))) {

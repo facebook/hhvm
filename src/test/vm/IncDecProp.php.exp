@@ -122,6 +122,7 @@ E Object
     [postDec] => -1
 )
 --- null ---
+HipHop Warning:  Creating default object from empty value in src/test/vm/IncDecProp.php on line 98
 int(1)
 NULL
 NULL

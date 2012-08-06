@@ -980,14 +980,19 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
       m_dbh = dynamic_cast<PDOConnection*>
         (g_persistentObjects->get(PDOConnection::PersistentKey,
                                   shashkey.data()));
-      m_dbh->persistentRestore();
-      s_pdo_request_data->m_persistent_connections.insert(m_dbh.get());
 
-      /* is the connection still alive ? */
-      if (m_dbh->support(PDOConnection::MethodCheckLiveness) &&
-          !m_dbh->checkLiveness()) {
-        /* nope... need to kill it */
-        m_dbh = NULL;
+      if (m_dbh.get()) {
+        m_dbh->persistentRestore();
+
+        /* is the connection still alive ? */
+        if (m_dbh->support(PDOConnection::MethodCheckLiveness) &&
+            !m_dbh->checkLiveness()) {
+          /* nope... need to kill it */
+          m_dbh = NULL;
+        } else {
+          /* Yep, use it and mark it for saving at rshutdown */
+          s_pdo_request_data->m_persistent_connections.insert(m_dbh.get());
+        }
       }
 
       if (m_dbh.get()) {

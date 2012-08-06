@@ -609,15 +609,11 @@ bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec) {
 }
 
 bool f_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec) {
-#if defined(__APPLE__)
-  throw NotSupportedException(__func__, "feature not supported on OSX");
-#else
   struct timespec ts;
-  int ret = clock_gettime(clk_id, &ts);
+  int ret = gettime(clk_id, &ts);
   sec = (int64)ts.tv_sec;
   nsec = (int64)ts.tv_nsec;
   return ret == 0;
-#endif
 }
 
 bool f_clock_settime(int clk_id, int64 sec, int64 nsec) {

@@ -15,6 +15,7 @@
 */
 
 #include "compatibility.h"
+#include "vdso.h"
 
 #if defined(__APPLE__)
 # include <mach/mach_time.h>
@@ -56,19 +57,24 @@ int dprintf(int fd, const char *format, ...) {
 }
 #endif
 
-void gettime(clockid_t which_clock, struct timespec *tp) {
+int gettime(clockid_t which_clock, struct timespec *tp) {
 #if defined(__APPLE__)
   if (which_clock == CLOCK_THREAD_CPUTIME_ID) {
     tp->tv_sec = 0;
     tp->tv_nsec = mach_absolute_time();
-  } else {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    tp->tv_sec = tv.tv_sec;
-    tp->tv_nsec = tv.tv_usec * 1000;
+    return 0;
   }
+  struct timeval tv;
+  int ret = gettimeofday(&tv, NULL);
+  tp->tv_sec = tv.tv_sec;
+  tp->tv_nsec = tv.tv_usec * 1000;
+  return ret;
 #else
-  clock_gettime(which_clock, tp);
+  static int vdso_usable =
+    Util::Vdso::ClockGetTime(which_clock, tp);
+  if (vdso_usable == 0)
+    return Util::Vdso::ClockGetTime(which_clock, tp);
+  return clock_gettime(which_clock, tp);
 #endif
 }
 

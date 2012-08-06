@@ -14,25 +14,33 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __COMPATIBILITY_H__
-#define __COMPATIBILITY_H__
+#ifndef __HPHP_UTIL_VDSO_H
+#define __HPHP_UTIL_VDSO_H
 
 #include "base.h"
+#include "util/util.h"
 
-namespace HPHP {
+namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define PHP_DIR_SEPARATOR '/'
+class Vdso {
+public:
+  Vdso();
+  ~Vdso();
+  
+  static int64 ClockGetTimeNS(int clk_id);
+  static int ClockGetTime(int clk_id, timespec *ts);
 
-#if defined(__APPLE__)
-char *strndup(const char* str, size_t len);
-int dprintf(int fd, const char *format, ...);
-#endif
+  inline ALWAYS_INLINE int clockGetTime(int clk_id, timespec *ts);
+  inline ALWAYS_INLINE int64 clockGetTimeNS(int clk_id);
 
-int gettime(clockid_t which_clock, struct timespec *tp);
-int64 gettime_diff_us(const timespec &start, const timespec &end);
+private:
+  void *m_handle;
+  int (*m_clock_gettime)(clockid_t, timespec *ts);
+  int64 (*m_clock_gettime_ns)(clockid_t);
+};
 
 ///////////////////////////////////////////////////////////////////////////////
-}
+}}
 
-#endif // __COMPATIBILITY_H__
+#endif // __HPHP_UTIL_HARDWARE_COUNTER_H__

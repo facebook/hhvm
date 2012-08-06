@@ -23,6 +23,7 @@
 #include <runtime/base/ini_setting.h>
 #include <runtime/vm/event_hook.h>
 #include <util/alloc.h>
+#include <util/vdso.h>
 
 #ifdef __FreeBSD__
 # include <sys/resource.h>
@@ -306,12 +307,21 @@ tv_to_cycles(const struct timeval& tv, int64 MHz)
 static inline uint64
 to_usec(int64 cycles, int64 MHz)
 {
+  static int64 vdso_usable =
+    Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+
+  if (vdso_usable >= 0)
+    return cycles / 1000;
   return (cycles + MHz/2) / MHz;
 }
 
 static esyscall vtsc_syscall("vtsc");
 
 static inline uint64 vtsc(int64 MHz) {
+  uint64 rval = Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+  if (rval >= 0) {
+    return rval;
+  }
   if (vtsc_syscall.num > 0) {
     return syscall(vtsc_syscall.num);
   }
@@ -1634,8 +1644,10 @@ void f_xhprof_frame_end() {
 void f_xhprof_enable(int flags/* = 0 */,
                      CArrRef args /* = null_array */) {
 #ifdef HOTPROFILER
-  if (vtsc_syscall.num <= 0) {
-    flags &= ~TrackVtsc; }
+  if (vtsc_syscall.num <= 0 &&
+      Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1) {
+    flags &= ~TrackVtsc;
+  }
   if (flags & TrackVtsc) {
     flags |= TrackCPU;
   }

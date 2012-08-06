@@ -28,6 +28,8 @@ namespace Transl {
 namespace TargetCache {
 
 void requestInit(void);
+void threadInit(void);
+void threadExit(void);
 
 /*
  * The targetCaches are physically thread-private, but they share their

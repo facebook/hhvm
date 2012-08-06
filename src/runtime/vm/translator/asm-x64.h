@@ -107,6 +107,10 @@ struct DataBlock {
    * mmap()s in the desired amount of memory. The size member must be set.
    */
   void init();
+  /*
+   * munmap()s the DataBlock's memory
+   */
+  void free();
 
   /*
    * Uses a preallocated slab of memory

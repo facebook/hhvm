@@ -54,6 +54,9 @@ ThreadInfo::ThreadInfo()
   m_pendingException = false;
   m_coverage = new CodeCoverage();
 
+  if (hhvm) {
+    VM::Transl::TargetCache::threadInit();
+  }
   onSessionInit();
 
   Lock lock(s_thread_info_mutex);
@@ -66,6 +69,9 @@ ThreadInfo::~ThreadInfo() {
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
   delete m_coverage;
+  if (hhvm) {
+    VM::Transl::TargetCache::threadExit();
+  }
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {

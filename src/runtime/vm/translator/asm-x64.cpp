@@ -60,6 +60,12 @@ void DataBlock::init() {
   base = frontier = allocSlab(size);
 }
 
+void DataBlock::free() {
+  freeSlab(base, size);
+  base = frontier = NULL;
+  size = 0;
+}
+
 void DataBlock::init(Address start, size_t sz) {
   base = frontier = start;
   size = sz;

@@ -256,14 +256,20 @@ invalidateForRename(const StringData* name) {
   }
 }
 
+void threadInit() {
+  tl_targetCaches.init();
+}
+
+void threadExit() {
+  tl_targetCaches.free();
+}
+
 // requestInit --
 //   Per-request work.
 void
 requestInit() {
+  ASSERT(tl_targetCaches.base);
   TRACE(1, "TargetCaches: @%p\n", tl_targetCaches.base);
-  if (!tl_targetCaches.base) {
-    tl_targetCaches.init();
-  }
   TRACE(1, "TargetCaches: bzeroing %zd bytes: %p\n", s_frontier,
         tl_targetCaches.base);
   if (madvise(tl_targetCaches.base, s_frontier, MADV_DONTNEED) < 0) {

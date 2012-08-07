@@ -81,13 +81,8 @@ bool Option::GenerateBinaryHHBC = false;
 string Option::RepoCentralPath;
 bool Option::RepoDebugInfo = false;
 
-#if defined(HPHP_OSS)
-string Option::IdPrefix = "___";
-string Option::LabelEscape = "___";
-#else
 string Option::IdPrefix = "$$";
 string Option::LabelEscape = "$";
-#endif
 
 string Option::LambdaPrefix = "df_";
 string Option::Tab = "  ";

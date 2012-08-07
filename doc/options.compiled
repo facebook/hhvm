@@ -165,8 +165,6 @@ flood error logs.
     # SmartAllocator's usage for each thread to stdout.
     CheckMemory = false
 
-    # Recommend to turn this on for faster array operations.
-    UseZendArray = true
     # Faster data structure for arrays of size < 8.  Deprecated and ignored.
     UseSmallArray = false
 

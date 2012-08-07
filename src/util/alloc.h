@@ -26,9 +26,14 @@
 #endif
 
 #ifdef NO_JEMALLOC
-#include "malloc.h"
+# ifdef __FreeBSD__
+#  include "stdlib.h"
+#  include "malloc_np.h"
+# else
+#  include "malloc.h"
+# endif
 #else
-#include <jemalloc/jemalloc.h>
+# include <jemalloc/jemalloc.h>
 #endif
 
 extern "C" {

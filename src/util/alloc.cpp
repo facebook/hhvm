@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "alloc.h"
 #include <sys/mman.h>
 #include <sys/user.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "alloc.h"
 #include "util.h"
 #include "logger.h"
 

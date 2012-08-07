@@ -25,6 +25,14 @@
 #include <queue>
 #include <zlib.h>
 
+#ifdef __FreeBSD__
+# include <ucontext.h>
+typedef __sighandler_t *sighandler_t;
+# define RIP_REGISTER(v) (v).mc_rip
+#else
+# define RIP_REGISTER(v) (v).gregs[REG_RIP]
+#endif
+
 #include <boost/bind.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
@@ -678,7 +686,7 @@ void TranslatorX64::SEGVHandler(int signum, siginfo_t *info, void *ctx) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.surprisePage;
   if (info->si_addr == surprisePage) {
     ucontext_t *ucontext = (ucontext_t*)ctx;
-    TCA rip = (TCA)ucontext->uc_mcontext.gregs[REG_RIP];
+    TCA rip = (TCA)RIP_REGISTER(ucontext->uc_mcontext);
     SignalStubMap::const_accessor a;
     if (!self->m_segvStubs.find(a, rip)) {
       NOT_REACHED();
@@ -687,7 +695,7 @@ void TranslatorX64::SEGVHandler(int signum, siginfo_t *info, void *ctx) {
 
     // When this handler returns, "call" the astubs code for this
     // surprise check.
-    ucontext->uc_mcontext.gregs[REG_RIP] = (uintptr_t)astubsCall;
+    RIP_REGISTER(ucontext->uc_mcontext) = (uintptr_t)astubsCall;
 
     // We've processed this event; reset the page in case execution
     // continues normally.

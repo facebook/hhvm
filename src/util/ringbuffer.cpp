@@ -95,7 +95,7 @@ allocEntry(RingBufferType t) {
   } while (!atomic_cas(&g_ringIdx, oldRingPos, newRingPos));
   rb->m_ts = uint32_t(_rdtsc());
   rb->m_type = t;
-  rb->m_threadId = (uint32_t)pthread_self();
+  rb->m_threadId = (uint32_t)((int64)pthread_self() & 0xFFFFFFFF);
   return rb;
 }
 

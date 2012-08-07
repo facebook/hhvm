@@ -149,7 +149,7 @@ void vtrace(const char *fmt, va_list ap) {
   } else {
     vfprintf(out, fmt, ap);
     ONTRACE(1, pthread_mutex_lock(&mtx));
-    ONTRACE(1, fprintf(out, "t%#08x: ", int(pthread_self())));
+    ONTRACE(1, fprintf(out, "t%#08x: ", int((int64)pthread_self() & 0xFFFFFFFF)));
     ONTRACE(1, pthread_mutex_unlock(&mtx));
     flush();
   }

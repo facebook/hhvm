@@ -200,7 +200,6 @@ private:
   int64  m_prevAllocated;
   size_t* m_cactive;
   size_t m_cactiveLimit;
-  bool m_stopped; // Set to true if m_cactive exceeded limit.
 
 public:
   static bool s_statsEnabled;

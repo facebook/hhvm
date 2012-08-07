@@ -5851,19 +5851,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
   DECODE_IA(itId);
   DECODE(Offset, offset);
   Var* v1 = m_stack.topV();
-  tvAsVariant(v1).escalate(true);
   ASSERT(v1->m_type == KindOfRef);
   if (v1->m_data.ptv->m_type == KindOfArray) {
     ArrayData* ad = v1->m_data.ptv->m_data.parr;
     if (!ad->empty()) {
       Iter* it = frame_iter(m_fp, itId);
       MIterCtx& mi = it->marr();
-      if (ad->getCount() > 1) {
-        ArrayData* copy = ad->copy();
-        copy->incRefCount();
-        ad->decRefCount();  // count > 1 to begin with; don't need release
-        v1->m_data.ptv->m_data.parr = copy;
-      }
       (void) new (&mi) MIterCtx(v1->m_data.pref);
       it->m_itype = Iter::TypeMutableArray;
       mi.m_mArray->advance();
@@ -5880,16 +5873,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
       raise_error("An iterator cannot be used with foreach by reference");
     }
     Array iterArray = obj->o_toIterArray(ctxStr, true);
-    ArrayData* ad = iterArray.getArrayData();
-    if (ad->empty()) {
+    if (iterArray->empty()) {
       ITER_SKIP(offset);
     } else {
-      if (ad->getCount() > 1) {
-        ArrayData* copy = ad->copy();
-        copy->incRefCount();
-        ad->decRefCount();  // count > 1 to begin with; don't need release
-        ad = copy;
-      }
+      ArrayData* ad = iterArray.detach();
       Iter* it = frame_iter(m_fp, itId);
       MIterCtx& mi = it->marr();
       (void) new (&mi) MIterCtx(ad);

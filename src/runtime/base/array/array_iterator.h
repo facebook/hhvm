@@ -149,6 +149,8 @@ private:
   FullPos m_fp;
   int size();
   ArrayData* getData();
+  ArrayData* cowCheck();
+  void escalateCheck();
 };
 
 struct MIterCtx {

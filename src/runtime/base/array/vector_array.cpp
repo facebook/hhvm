@@ -133,7 +133,7 @@ Variant VectorArray::end() {
 
 HOT_FUNC_HPHP
 VectorArray::VectorArray(uint capacity /* = 0 */) :
-  m_elems(m_fixed), m_capacity(FixedSize), m_flag(0) {
+    m_elems(m_fixed), m_capacity(FixedSize) {
   m_size = 0;
   if (capacity > FixedSize) {
     while (m_capacity < capacity) m_capacity <<= 1;
@@ -145,9 +145,9 @@ VectorArray::VectorArray(uint capacity /* = 0 */) :
 HOT_FUNC_HPHP
 VectorArray::VectorArray(const VectorArray *src, uint start /* = 0 */,
   uint size /* = 0 */) :
-  ArrayData(src), m_elems(m_fixed), m_capacity(FixedSize), m_flag(0) {
+    ArrayData(src), m_elems(m_fixed), m_capacity(FixedSize) {
   ASSERT(src);
-  ASSERT (size == 0 || (size == src->m_size - 1L && size > 0));
+  ASSERT(size == 0 || (size == src->m_size - 1L && size > 0));
   ASSERT(src->m_strongIterators.empty());
   ASSERT(m_pos == src->m_pos);
   m_size = size ? size : src->m_size;
@@ -165,7 +165,7 @@ VectorArray::VectorArray(const VectorArray *src, uint start /* = 0 */,
 
 HOT_FUNC_HPHP
 VectorArray::VectorArray(uint size, const Variant *values[]) :
-  m_elems(m_fixed), m_capacity(FixedSize), m_flag(0) {
+    m_elems(m_fixed), m_capacity(FixedSize) {
   ASSERT(size > 0);
   m_size = size;
   if (size > FixedSize) {
@@ -191,7 +191,7 @@ VectorArray::~VectorArray() {
 }
 
 VectorArray::VectorArray(const VectorArray *src, bool sma /* unused */) :
-  ArrayData(src), m_elems(m_fixed), m_capacity(FixedSize), m_flag(0) {
+    ArrayData(src), m_elems(m_fixed), m_capacity(FixedSize) {
   m_size = src->m_size;
   ASSERT(src);
   ASSERT(src->m_strongIterators.empty());
@@ -326,7 +326,7 @@ ssize_t VectorArray::getIndex(CVarRef k) const {
 
 void VectorArray::sweep() {
   if (m_elems != m_fixed) free(m_elems);
-  m_strongIterators.clear();
+  ASSERT(m_strongIterators.empty());
 }
 
 ZendArray *VectorArray::escalateToNonEmptyZendArray() const {
@@ -352,19 +352,6 @@ ZendArray *VectorArray::escalateToNonEmptyZendArray() const {
   } else {
     ret->setPosition(0);
   }
-  if (m_strongIterators.empty()) return ret;
-  ASSERT(getCount() == 1);
-  for (int i = 0; i < m_strongIterators.size(); ++i) {
-    FullPos *fp = m_strongIterators.get(i);
-    ASSERT(fp->container == this);
-    if (fp->pos != ArrayData::invalid_index) {
-      fp->pos = ret->getIndex(fp->pos);
-    } else {
-      fp->pos = 0; // 0 is the invalid pos for ZendArray.
-    }
-  }
-  ret->setFlag(m_flag);
-  m_flag &= ~(StrongIteratorPastEnd);
   return ret;
 }
 
@@ -377,30 +364,8 @@ ZendArray *VectorArray::escalateToZendArray() const {
   return escalateToNonEmptyZendArray();
 }
 
-void VectorArray::checkInsertIteratorHelper(ssize_t pos) {
-  ASSERT(m_flag & StrongIteratorPastEnd);
-  m_flag &= ~StrongIteratorPastEnd;
-  int sz = m_strongIterators.size();
-  bool shouldWarn = false;
-  for (int i = 0; i < sz; ++i) {
-    if (m_strongIterators.get(i)->pos == ArrayData::invalid_index) {
-      m_strongIterators.get(i)->pos = pos;
-      shouldWarn = true;
-    }
-  }
-  if (shouldWarn) {
-    raise_warning("An element was added to an array inside foreach "
-                  "by reference when iterating over the last "
-                  "element. This may lead to unexpeced results.");
-  }
-}
-
 inline void ALWAYS_INLINE VectorArray::checkInsertIterator(ssize_t pos) {
   if (m_pos == ArrayData::invalid_index) m_pos = pos;
-  /* If there could be any strong iterators that are past the end,
-     we need to a pass and update these iterators to point to the
-     newly added element. */
-  if (m_flag & StrongIteratorPastEnd) checkInsertIteratorHelper(pos);
 }
 
 ArrayData *VectorArray::lvalNew(Variant *&ret, bool copy) {
@@ -669,27 +634,6 @@ ArrayData *VectorArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
   return NULL;
 }
 
-void VectorArray::checkEraseIterator(ssize_t pos) {
-  ASSERT(m_size && pos == m_size - 1L);
-  bool nextElementUnsetInsideForeachByReference = false;
-  int sz = m_strongIterators.size();
-  for (int i = 0; i < sz; ++i) {
-    if (m_strongIterators.get(i)->pos == (ssize_t)pos) {
-      nextElementUnsetInsideForeachByReference = true;
-      m_strongIterators.get(i)->pos = ArrayData::invalid_index;
-      // Record that there is a strong iterator out there
-      // that is past the end
-      m_flag |= StrongIteratorPastEnd;
-    }
-  }
-  if (nextElementUnsetInsideForeachByReference) {
-    if (RuntimeOption::EnableHipHopErrors) {
-      raise_warning("The next element was unset inside foreach by reference. "
-                    "This may lead to unexpeced results.");
-    }
-  }
-}
-
 ArrayData *VectorArray::pop(Variant &value) {
   if (UNLIKELY(!m_size)) {
     value.setNull();
@@ -707,7 +651,7 @@ ArrayData *VectorArray::pop(Variant &value) {
   ssize_t pos = m_size - 1;
   value = tvAsCVarRef(&m_elems[pos]);
   tvAsVariant(&m_elems[pos]).~Variant();
-  checkEraseIterator(pos);
+  ASSERT(m_size && pos == m_size - 1L);
   m_size--;
   // To match PHP-like semantics, the pop operation resets the array's
   // internal iterator
@@ -794,7 +738,7 @@ ArrayData *VectorArray::remove(int64 k, bool copy) {
   ASSERT(m_size > 0 && k == m_size - 1);
   tvAsCVarRef(&m_elems[k]).~Variant();
   if (m_pos == k) m_pos = ArrayData::invalid_index;
-  checkEraseIterator(k);
+  ASSERT(m_size && k == m_size - 1L);
   m_size--;
   return NULL;
 }
@@ -828,11 +772,6 @@ ArrayData *VectorArray::prepend(CVarRef v, bool copy) {
     ASSERT(!aa);
     return a;
   }
-  // To match PHP-like semantics, we invalidate all strong iterators
-  // when an element is added to the beginning of the array
-  if (!m_strongIterators.empty()) {
-    freeStrongIterators();
-  }
   checkSize();
   for (uint i = m_size; i > 0; i--) {
     // copying TV's by value, intentionally not refcounting.
@@ -860,11 +799,6 @@ ArrayData *VectorArray::dequeue(Variant &value) {
     a->m_pos = (ssize_t)0;
     return a;
   }
-  // To match PHP-like semantics, we invalidate all strong iterators
-  // when an element is removed from the beginning of the array
-  if (!m_strongIterators.empty()) {
-    freeStrongIterators();
-  }
   value = tvAsCVarRef(&m_elems[0]);
   m_size--;
   tvAsVariant(&m_elems[0]).~Variant();
@@ -887,11 +821,6 @@ void VectorArray::onSetEvalScalar() {
 void VectorArray::getFullPos(FullPos &fp) {
   ASSERT(fp.container == (ArrayData*)this);
   fp.pos = m_pos;
-  if (fp.pos == ArrayData::invalid_index) {
-    // Record that there is a strong iterator out there
-    // that is past the end
-    m_flag |= StrongIteratorPastEnd;
-  }
 }
 
 bool VectorArray::setFullPos(const FullPos &fp) {
@@ -914,7 +843,9 @@ CVarRef VectorArray::endRef() {
 }
 
 ArrayData *VectorArray::escalate(bool mutableIteration /* = false */) const {
-  // VectorArray doesn't need to be escalated for most of the time.
+  if (mutableIteration) {
+    return escalateToZendArray();
+  }
   return const_cast<VectorArray *>(this);
 }
 

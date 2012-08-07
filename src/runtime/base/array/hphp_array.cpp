@@ -1751,6 +1751,27 @@ ArrayData* HphpArray::copy() const {
   return copyImpl();
 }
 
+ArrayData* HphpArray::copyWithStrongIterators() const {
+  HphpArray* copied = copyImpl();
+  // Transfer strong iterators
+  if (!m_strongIterators.empty()) {
+    // Copy over all of the strong iterators, and update the iterators
+    // to point to the new array
+    for (int k = 0; k < m_strongIterators.size(); ++k) {
+      FullPos* fp = m_strongIterators.get(k);
+      fp->container = copied;
+      copied->m_strongIterators.push(fp);
+    }
+    // Copy flags to new array
+    copied->m_siPastEnd = m_siPastEnd;
+    // Clear the strong iterator list and flags from the original array
+    HphpArray* src = const_cast<HphpArray*>(this);
+    src->m_strongIterators.clear();
+    src->m_siPastEnd = 0;
+  }
+  return copied;
+}
+
 //=============================================================================
 // non-variant interface
 

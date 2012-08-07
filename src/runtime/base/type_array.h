@@ -543,6 +543,13 @@ class Array : protected ArrayBase {
   void serialize(VariableSerializer *serializer,
                  bool isObject = false) const;
   void unserialize(VariableUnserializer *uns);
+  
+  // Transfer ownership of our reference to this ArrayData.
+  ArrayData* detach() {
+    ArrayData* ret = m_px;
+    m_px = NULL;
+    return ret;
+  }
 
   /**
    * Memory allocator methods.

@@ -141,9 +141,9 @@ MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
                                    Variant &val)
   : m_var(var), m_data(NULL), m_key(key), m_val(val), m_fp() {
   ASSERT(m_var);
-  ArrayData *data = getData();
+  escalateCheck();
+  ArrayData* data = cowCheck();
   if (data) {
-    ASSERT(!data->isStatic());
     data->reset();
     data->newFullPos(m_fp);
     ASSERT(m_fp.container == data);
@@ -154,10 +154,8 @@ MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
                                    Variant &val)
   : m_var(NULL), m_data(data), m_key(key), m_val(val), m_fp() {
   if (data) {
-    ASSERT(!data->isStatic());
-    ASSERT(data->getCount() <= 1);
-    // protect the data which may be owned by a C++ temp
-    data->incRefCount();
+    escalateCheck();
+    data = cowCheck();
     data->reset();
     data->newFullPos(m_fp);
     ASSERT(m_fp.container == data);
@@ -188,16 +186,17 @@ bool MutableArrayIter::advance() {
     if (m_fp.container != NULL) {
       m_fp.container->freeFullPos(m_fp);
     }
-    // Create a new strong iterator for the new array
     ASSERT(m_fp.container == NULL);
-    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
-      if (m_var) {
-        *const_cast<Variant*>(m_var) = (data = data->copy());
-      } else {
-        m_data = data = data->copy();
-      }
-    }
+    // If needed, escalate the array to an array type that can support
+    // foreach by reference
+    escalateCheck();
+    // Trigger COW if needed, copying over strong iterators
+    data = cowCheck();
+    // Create a new strong iterator for the new array
     data->newFullPos(m_fp);
+  } else {
+    // Trigger COW if needed, copying over strong iterators
+    data = cowCheck();
   }
   ASSERT(m_fp.container == data);
   if (!data->setFullPos(m_fp)) return false;
@@ -209,7 +208,53 @@ bool MutableArrayIter::advance() {
   return true;
 }
 
-ArrayData *MutableArrayIter::getData() {
+void MutableArrayIter::escalateCheck() {
+  ArrayData* data;
+  if (m_var) {
+    data = getData();
+    if (!data) return;
+    ArrayData* esc = data->escalate(true);
+    if (data != esc) {
+      *const_cast<Variant*>(m_var) = esc;
+    }
+  } else {
+    ASSERT(m_data);
+    data = m_data;
+    ArrayData* esc = data->escalate(true);
+    if (data != esc) {
+      esc->incRefCount();
+      if (data->decRefCount() == 0) {
+        data->release();
+      }
+      m_data = esc;
+    }
+  } 
+}
+
+ArrayData* MutableArrayIter::cowCheck() {
+  ArrayData* data;
+  if (m_var) {
+    data = getData();
+    if (!data) return NULL;
+    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
+      *const_cast<Variant*>(m_var) = (data = data->copyWithStrongIterators());
+    }
+  } else {
+    ASSERT(m_data);
+    data = m_data;
+    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
+      ArrayData* copied = data->copyWithStrongIterators();
+      copied->incRefCount();
+      if (data->decRefCount() == 0) {
+        data->release();
+      }
+      m_data = data = copied;
+    }
+  }
+  return data;
+}
+
+ArrayData* MutableArrayIter::getData() {
   ASSERT(m_var);
   if (m_var->is(KindOfArray)) {
     return m_var->getArrayData();

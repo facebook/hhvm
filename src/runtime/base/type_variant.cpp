@@ -1525,14 +1525,6 @@ MutableArrayIter Variant::begin(Variant *key, Variant &val,
   if (is(KindOfObject)) {
     return getObjectData()->begin(key, val, context);
   }
-  // we are about to modify an array that has other weak references, so
-  // we have to make a copy to preserve other instances
-  if (is(KindOfArray)) {
-    ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->noCopyOnWrite()) {
-      set(arr->copy());
-    }
-  }
   return MutableArrayIter(this, key, val);
 }
 

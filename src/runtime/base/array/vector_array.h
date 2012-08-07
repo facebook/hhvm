@@ -130,22 +130,16 @@ public:
 
   void sweep();
 private:
-  enum Flag {
-    StrongIteratorPastEnd = ZendArray::StrongIteratorPastEnd,
-  };
   TypedValue     m_fixed[FixedSize];
   TypedValue    *m_elems;
   uint           m_capacity;
-  mutable uint16 m_flag;
 
   ZendArray *escalateToNonEmptyZendArray() const NEVER_INLINE;
   ZendArray *escalateToZendArray() const NEVER_INLINE;
 
   void grow(uint newSize) NEVER_INLINE;
   void checkSize(uint n = 1);
-  void checkInsertIteratorHelper(ssize_t pos) NEVER_INLINE;
   void checkInsertIterator(ssize_t pos);
-  void checkEraseIterator(ssize_t pos);
 };
 
 class StaticEmptyVectorArray : public VectorArray {

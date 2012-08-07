@@ -140,6 +140,7 @@ public:
 
   // overrides/implements ArrayData
   ArrayData* copy() const;
+  ArrayData* copyWithStrongIterators() const;
   ArrayData* nonSmartCopy() const;
   ArrayData* append(CVarRef v, bool copy);
   ArrayData* appendRef(CVarRef v, bool copy);

@@ -470,13 +470,6 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
   TypedValue* tv = (TypedValue*)(&var);
   ASSERT(tv->m_type == KindOfRef);
   if (tv->m_data.ptv->m_type == KindOfArray) {
-    ArrayData* ad = tv->m_data.ptv->m_data.parr;
-    if (ad->getCount() > 1) {
-      ArrayData* copy = ad->copy();
-      copy->incRefCount();
-      ad->decRefCount();  // count > 1 to begin with; don't need release
-      ad = tv->m_data.ptv->m_data.parr = copy;
-    }
     MIterCtx& mi = marr();
     (void) new (&mi) MIterCtx(tv->m_data.pref);
     m_valid = mi.m_mArray->advance();
@@ -491,13 +484,7 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
       raise_error("An iterator cannot be used with foreach by reference");
     }
     Array iterArray = obj->o_toIterArray(ctxStr, true);
-    ArrayData* ad = iterArray.getArrayData();
-    if (ad->getCount() > 1) {
-      ArrayData* copy = ad->copy();
-      copy->incRefCount();
-      ad->decRefCount();  // count > 1 to begin with; don't need release
-      ad = copy;
-    }
+    ArrayData* ad = iterArray.detach();
     MIterCtx& mi = marr();
     (void) new (&mi) MIterCtx(ad);
     m_valid = mi.m_mArray->advance();

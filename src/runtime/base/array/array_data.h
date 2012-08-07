@@ -270,6 +270,7 @@ class ArrayData : public Countable {
    * into the static array list.
    */
   virtual ArrayData *copy() const = 0;
+  virtual ArrayData *copyWithStrongIterators() const;
   virtual ArrayData *nonSmartCopy() const;
 
   /**

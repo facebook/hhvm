@@ -210,9 +210,6 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     m_array->outputCPP(cg, ar);
     cg.printf("%s;\n", close);
-    if (m_ref) {
-      cg.printf("%s%d.escalate(true);\n", Option::MapPrefix, mapId);
-    }
     m_array->setExpectedType(expectedType);
     if (wrap) {
       m_array->outputCPPEnd(cg, ar);

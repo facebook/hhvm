@@ -345,6 +345,9 @@ CVarRef ArrayData::endRef() {
   }
   throw FatalErrorException("invalid ArrayData::m_pos");
 }
+ArrayData* ArrayData::copyWithStrongIterators() const {
+  throw FatalErrorException("Unimplemented ArrayData::copyWithStrongIterators");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Default implementation of position-based iterations.

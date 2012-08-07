@@ -702,7 +702,6 @@ void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
 
   Variant k;
   Variant v;
-  input->escalate(true);
   for (MutableArrayIter iter = input->begin(&k, v); iter.advance(); ) {
     if (recursive && v.is(KindOfArray)) {
       ASSERT(seen);

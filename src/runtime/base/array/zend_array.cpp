@@ -1213,6 +1213,37 @@ ArrayData *ZendArray::copy() const {
   return copyImpl();
 }
 
+ArrayData *ZendArray::copyWithStrongIterators() const {
+  ZendArray* copied = copyImpl();
+  // Transfer strong iterators
+  if (!m_strongIterators.empty()) {
+    for (int k = 0; k < m_strongIterators.size(); ++k) {
+      FullPos* fp = m_strongIterators.get(k);
+      // Update fp.pos to point to the corresponding element in 'copied'
+      Bucket* p = reinterpret_cast<Bucket*>(fp->pos);
+      if (p) {
+        Bucket* copiedP;
+        if (p->hasStrKey()) {
+          copiedP = copied->find(p->skey->data(), p->skey->size(),
+                                 (int64)p->hash());
+        } else {
+          copiedP = copied->find((int64)p->ikey);
+        }
+        fp->pos = (ssize_t)copiedP;
+      }
+      fp->container = copied;
+      copied->m_strongIterators.push(fp);
+    }
+    // Copy the flags
+    copied->m_flag |= (m_flag & StrongIteratorPastEnd);
+    // Clear the strong iterator list and flags from the original array
+    ZendArray* src = const_cast<ZendArray*>(this);
+    src->m_strongIterators.clear();
+    src->m_flag &= ~StrongIteratorPastEnd;
+  }
+  return copied;
+}
+
 inline ALWAYS_INLINE ZendArray *ZendArray::copyImplHelper(bool sma) const {
   ZendArray *target = LIKELY(sma) ? NEW(ZendArray)(m_size)
                                   : new ZendArray(m_size);

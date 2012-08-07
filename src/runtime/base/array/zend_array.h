@@ -115,6 +115,7 @@ public:
   virtual ArrayData *remove(CVarRef k, bool copy);
 
   virtual ArrayData *copy() const;
+  virtual ArrayData *copyWithStrongIterators() const;
   virtual ArrayData *nonSmartCopy() const;
   virtual ArrayData *append(CVarRef v, bool copy);
   virtual ArrayData *appendRef(CVarRef v, bool copy);

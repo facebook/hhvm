@@ -28,12 +28,16 @@
 #include <sys/shm.h>
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
-#include <sys/msgbuf.h>
-#define MSGBUF_MTYPE(b) (b)->msg_magic
-#define MSGBUF_MTEXT(b) (b)->msg_bufc
+# include <sys/msgbuf.h>
+# define MSGBUF_MTYPE(b) (b)->msg_magic
+# ifdef __APPLE__
+#  define MSGBUF_MTEXT(b) (b)->msg_bufc
+# else
+#  define MSGBUF_MTEXT(b) (b)->msg_ptr
+# endif
 #else
-#define MSGBUF_MTYPE(b) (b)->mtype
-#define MSGBUF_MTEXT(b) (b)->mtext
+# define MSGBUF_MTYPE(b) (b)->mtype
+# define MSGBUF_MTEXT(b) (b)->mtext
 #endif
 
 using HPHP::Util::ScopedMem;

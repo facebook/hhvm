@@ -17,6 +17,8 @@
 #ifndef __HPHP_CONCURRENT_SHARED_STORE_H__
 #define __HPHP_CONCURRENT_SHARED_STORE_H__
 
+#define TBB_PREVIEW_CONCURRENT_PRIORITY_QUEUE 1
+
 #include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/shared/shared_variant.h>

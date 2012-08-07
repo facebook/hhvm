@@ -118,6 +118,9 @@ void ThreadInfo::clearPendingException() {
 
 void ThreadInfo::onSessionExit() {
   m_reqInjectionData.reset();
+  if (hhvm) {
+    VM::Transl::TargetCache::requestExit();
+  }
 }
 
 void RequestInjectionData::onSessionInit() {

@@ -28,6 +28,7 @@ namespace Transl {
 namespace TargetCache {
 
 void requestInit(void);
+void requestExit(void);
 void threadInit(void);
 void threadExit(void);
 

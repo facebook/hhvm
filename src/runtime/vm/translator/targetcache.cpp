@@ -264,16 +264,27 @@ void threadExit() {
   tl_targetCaches.free();
 }
 
-// requestInit --
-//   Per-request work.
+static const bool zeroViaMemset = false;
+
 void
 requestInit() {
   ASSERT(tl_targetCaches.base);
   TRACE(1, "TargetCaches: @%p\n", tl_targetCaches.base);
-  TRACE(1, "TargetCaches: bzeroing %zd bytes: %p\n", s_frontier,
-        tl_targetCaches.base);
-  if (madvise(tl_targetCaches.base, s_frontier, MADV_DONTNEED) < 0) {
-    not_reached();
+  if (zeroViaMemset) {
+    TRACE(1, "TargetCaches: bzeroing %zd bytes: %p\n", s_frontier,
+          tl_targetCaches.base);
+    memset(tl_targetCaches.base, 0, s_frontier);
+  }
+}
+
+void
+requestExit() {
+  if (!zeroViaMemset) {
+    TRACE(1, "TargetCaches: bzeroing %zd bytes: %p\n", s_frontier,
+          tl_targetCaches.base);
+    if (madvise(tl_targetCaches.base, s_frontier, MADV_DONTNEED) < 0) {
+      not_reached();
+    }
   }
 }
 

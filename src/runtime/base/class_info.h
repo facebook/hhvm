@@ -271,6 +271,7 @@ public:
    *   type: 0: unknown; 1: class; 2: interface
    */
   static bool GetClassMethods(MethodVec &ret, CStrRef classname, int type = 0);
+  static bool GetClassMethods(MethodVec &ret, const ClassInfo *classInfo);
 
   /**
    * Return all properties a class has, including the ones on base classes and

@@ -48,7 +48,7 @@ static const VM::Class* get_cls(CVarRef class_or_object) {
     ObjectData* obj = class_or_object.toCObjRef().get();
     cls = obj->getVMClass();
   } else {
-    cls = VM::Unit::lookupClass(class_or_object.toString().get());
+    cls = VM::Unit::loadClass(class_or_object.toString().get());
   }
   return cls;
 }
@@ -131,7 +131,16 @@ Array f_get_class_methods(CVarRef class_or_object) {
 
   ClassInfo::MethodVec methods;
   CStrRef class_name = get_classname(class_or_object);
-  if (!ClassInfo::GetClassMethods(methods, class_name)) return Array();
+  const ClassInfo *classInfo = NULL;
+  for (int i = 0; ; ++i) {
+    classInfo = ClassInfo::FindClassInterfaceOrTrait(class_name);
+    if (classInfo) break;
+    if (i) return Array();
+    AutoloadHandler::s_instance->invokeHandler(class_name);
+  }
+
+  if (!ClassInfo::GetClassMethods(methods, classInfo)) return Array();
+
   CStrRef klass = ctxClassName();
   bool allowPrivate = !klass.empty() && klass->isame(class_name.get());
 
@@ -327,14 +336,21 @@ bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name) {
     const VM::Class* cls = get_cls(class_or_object);
     if (!cls || cls->attrs() & (VM::AttrInterface|VM::AttrTrait)) return false;
     const VM::Class* other = VM::Unit::lookupClass(class_name.get());
-    if (other == NULL ||
-       (other->attrs() & (VM::AttrInterface|VM::AttrTrait))) return false;
+    if (other == NULL || other == cls ||
+        (other->attrs() & (VM::AttrInterface|VM::AttrTrait))) return false;
     return cls->classof(other);
   }
-  const ClassInfo *classInfo =
-    ClassInfo::FindClass(get_classname(class_or_object));
-  if (classInfo) {
-    return classInfo->derivesFrom(class_name, false);
+  CStrRef this_class = get_classname(class_or_object);
+  for (int i = 0; ; ++i) {
+    const ClassInfo *classInfo =
+      ClassInfo::FindClassInterfaceOrTrait(this_class);
+    if (classInfo) {
+      return !(classInfo->getAttribute() &
+               (ClassInfo::IsTrait|ClassInfo::IsInterface)) &&
+        classInfo->derivesFrom(class_name, false);
+    }
+    if (i) break;
+    AutoloadHandler::s_instance->invokeHandler(this_class);
   }
   return false;
 }
@@ -347,18 +363,23 @@ bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
     if (cls->attrs() & VM::AttrAbstract) {
       const VM::ClassSet& ifaces = cls->allInterfaces();
       for (VM::ClassSet::const_iterator it = ifaces.begin();
-          it != ifaces.end();
-          ++it) {
+           it != ifaces.end();
+           ++it) {
         if ((*it)->lookupMethod(method_name.get())) return true;
       }
     }
     return false;
   }
-  const ClassInfo *classInfo =
-    ClassInfo::FindClassInterfaceOrTrait(get_classname(class_or_object));
-  if (classInfo) {
-    ClassInfo *defClass;
-    return classInfo->hasMethod(method_name, defClass) != NULL;
+  CStrRef class_name = get_classname(class_or_object);
+  for (int i = 0; ; ++i) {
+    const ClassInfo *classInfo =
+      ClassInfo::FindClassInterfaceOrTrait(class_name);
+    if (classInfo) {
+      ClassInfo *defClass;
+      return classInfo->hasMethod(method_name, defClass) != NULL;
+    }
+    if (i) break;
+    AutoloadHandler::s_instance->invokeHandler(class_name);
   }
   return false;
 }

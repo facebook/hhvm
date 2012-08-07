@@ -300,15 +300,7 @@ bool ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
   const ClassInfo *classInfo = NULL;
   switch (type) {
     case 0:
-      classInfo = FindClass(classname);
-      if (classInfo == NULL) {
-        classInfo = FindInterface(classname);
-        type = 2;
-      }
-      if (classInfo == NULL) {
-        classInfo = FindTrait(classname);
-        type = 3;
-      }
+      classInfo = FindClassInterfaceOrTrait(classname);
       break;
     case 1:
       classInfo = FindClass(classname);
@@ -324,11 +316,14 @@ bool ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
   }
 
   if (!classInfo) return false;
+  return GetClassMethods(ret, classInfo);
+}
 
+bool ClassInfo::GetClassMethods(MethodVec &ret, const ClassInfo *classInfo) {
   const ClassInfo::MethodVec &methods = classInfo->getMethodsVec();
   ret.insert(ret.end(), methods.begin(), methods.end());
 
-  if (type < 2) {
+  if (!(classInfo->getAttribute() & (IsInterface|IsTrait))) {
     CStrRef parentClass = classInfo->getParentClass();
     if (!parentClass.empty()) {
       if (!GetClassMethods(ret, parentClass, 1)) return false;

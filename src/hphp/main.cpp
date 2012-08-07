@@ -569,7 +569,7 @@ cout << "Compiler: " << COMPILER_ID << "\n";
 
 int process(const ProgramOptions &po) {
   if (po.coredump) {
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__FreeBSD__)
     struct rlimit rl;
     getrlimit(RLIMIT_CORE, &rl);
     rl.rlim_cur = 80000000LL;

@@ -269,7 +269,7 @@ bool Debugger::isThreadDebugging(int64 tid) {
 
 void Debugger::registerThread() {
   ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
-  int64 tid = Process::GetThreadId();
+  int64 tid = (int64)Process::GetThreadId();
   ThreadInfoMap::accessor acc;
   m_threadInfos.insert(acc, tid);
   acc->second = ti;

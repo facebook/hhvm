@@ -105,7 +105,9 @@ void ProcessInit() {
   VM::compile_file(0, 0, MD5(), 0);
   // Install VM's ClassInfoHook
   ClassInfo::SetHook(&vm_class_info_hook);
-  VM::Transl::Translator::Get()->processInit();
+
+  // ensure that nextTx64 and tx64 are set
+  (void)VM::Transl::Translator::Get();
 
   Transl::TargetCache::requestInit();
 

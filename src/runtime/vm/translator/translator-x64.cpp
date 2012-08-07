@@ -10376,6 +10376,12 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   }
 }
 
+static const size_t kASize = 512 << 20;
+static const size_t kAStubsSize = 512 << 20;
+static const size_t kGDataSize = kASize / 4;
+static const size_t kTotalSize = kASize + kAStubsSize +
+                                         kTrampolinesBlockSize + kGDataSize;
+
 TranslatorX64::TranslatorX64()
 : Translator(),
   m_numNativeTrampolines(0),
@@ -10389,6 +10395,129 @@ TranslatorX64::TranslatorX64()
   m_unwindRegMap(128)
 {
   TRACE(1, "TranslatorX64@%p startup\n", this);
+  tx64 = this;
+
+  static_assert(kTotalSize < (2ul << 30),
+                "Combined size of all code/data blocks in TranslatorX64 "
+                "must be < 2GiB to support 32-bit relative addresses");
+
+  static bool profileUp = false;
+  if (!profileUp) {
+    profileInit();
+    profileUp = true;
+  }
+
+  // We want to ensure that the block for "a", "astubs",
+  // "atrampolines", and "m_globalData" are nearby so that we can
+  // short jump/point between them. Thus we allocate one slab and
+  // divide it between "a", "astubs", and "atrampolines".
+  uint8_t *base = allocSlab(kTotalSize);
+  atrampolines.init(base, kTrampolinesBlockSize);
+  base += kTrampolinesBlockSize;
+  a.init(base, kASize);
+  m_unwindRegistrar = register_unwind_region(base, kTotalSize);
+  base += kASize;
+  astubs.init(base, kAStubsSize);
+  base += kAStubsSize;
+  m_globalData.init(base, kGDataSize);
+
+  // Emit some special helpers that are shared across translations.
+
+  // Call to exit with whatever value the program leaves on
+  // the return stack.
+  m_callToExit = emitServiceReq(false, REQ_EXIT, 0ull);
+
+  // On a backtrace, gdb tries to locate the calling frame at address
+  // returnRIP-1. However, for the first VM frame, there is no code at
+  // returnRIP-1, since the AR was set up manually. For this frame,
+  // record the tracelet address as starting from callToExit-1, so gdb
+  // does not barf
+  recordGdbStub(astubs, m_callToExit - 1, "HHVM::callToExit");
+
+  m_retHelper = emitRetFromInterpretedFrame();
+  recordBCInstr(OpRetFromInterp, astubs, m_retHelper);
+  recordGdbStub(astubs, m_retHelper - 1, "HHVM::retHelper");
+
+  moveToAlign(astubs);
+  m_resumeHelper = astubs.code.frontier;
+  emitGetGContext(astubs, rax);
+  astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_fp),
+                                       rVmFp);
+  astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
+                                       Stack::topOfStackOffset(), rVmSp);
+  emitServiceReq(false, REQ_RESUME, 0ull);
+  recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
+
+  // Helper for DefCls
+  if (false) {
+    PreClass *preClass = 0;
+    defClsHelper(preClass);
+  }
+  m_defClsHelper = TCA(a.code.frontier);
+  PhysReg rEC = argNumToRegName[2];
+  emitGetGContext(a, rEC);
+  a.   store_reg64_disp_reg64(rVmFp, offsetof(VMExecutionContext, m_fp), rEC);
+  a.   store_reg64_disp_reg64(argNumToRegName[1],
+                              offsetof(VMExecutionContext, m_pc), rEC);
+  // rax holds the up-to-date top of stack pointer
+  a.   store_reg64_disp_reg64(rax,
+                              offsetof(VMExecutionContext, m_stack) +
+                              Stack::topOfStackOffset(), rEC);
+  a.   jmp((TCA)defClsHelper);
+  recordBCInstr(OpDefClsHelper, a, m_defClsHelper);
+
+  moveToAlign(astubs);
+  m_stackOverflowHelper = astubs.code.frontier;
+  // We are called from emitStackCheck, with the new stack frame in
+  // rStashedAR. Get the caller's PC into rdi and save it off.
+  astubs.    load_reg64_disp_reg64(rVmFp, AROFF(m_func), rax);
+  astubs.    load_reg64_disp_reg32(rStashedAR, AROFF(m_soff), rdi);
+  astubs.    load_reg64_disp_reg64(rax, Func::sharedOffset(), rax);
+  astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
+  astubs.    add_reg32_reg32(rax, rdi);
+
+  emitEagerVMRegSave(astubs, SaveFP | SavePC);
+  emitServiceReq(false, REQ_STACK_OVERFLOW, 0ull);
+
+  // The decRef helper for when we bring the count down to zero. Callee needs to
+  // bring the value into rdi. These can be burned in for all time, and for all
+  // translations.
+  if (false) { // type-check
+    StringData* str = NULL;
+    ArrayData* arr = NULL;
+    ObjectData* obj = NULL;
+    RefData* ref = NULL;
+    tv_release_str(str);
+    tv_release_arr(arr);
+    tv_release_obj(obj);
+    tv_release_ref(ref);
+  }
+  typedef void* vp;
+  m_dtorStubs[BitwiseKindOfString] = emitUnaryStub(a, vp(tv_release_str));
+  m_dtorStubs[KindOfArray]         = emitUnaryStub(a, vp(tv_release_arr));
+  m_dtorStubs[KindOfObject]        = emitUnaryStub(a, vp(tv_release_obj));
+  m_dtorStubs[KindOfRef]           = emitUnaryStub(a, vp(tv_release_ref));
+  m_dtorGenericStub                = genericRefCountStub(a);
+  m_typedDtorStub                  = emitBinaryStub(a, vp(tv_release_typed));
+  recordBCInstr(OpDtorStub, a, m_dtorStubs[BitwiseKindOfString]);
+  recordGdbStub(a, m_dtorStubs[BitwiseKindOfString],
+                    "HHVM::destructorStub");
+
+  if (trustSigSegv) {
+    // Install SIGSEGV handler for timeout exceptions
+    struct sigaction sa;
+    struct sigaction old_sa;
+    sa.sa_sigaction = &TranslatorX64::SEGVHandler;
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    if (sigaction(SIGSEGV, &sa, &old_sa) != 0) {
+      throw std::runtime_error(
+        std::string("Failed to install SIGSEGV handler: ") +
+          strerror(errno));
+    }
+    m_segvChain = old_sa.sa_flags & SA_SIGINFO ?
+      old_sa.sa_sigaction : (sigaction_t)old_sa.sa_handler;
+  }
 }
 
 TranslatorX64*
@@ -10602,135 +10731,6 @@ TranslatorX64::getPerfCounters(Array& ret) {
     // an appropriate range, we have to fudge these numbers so they
     // look more like reasonable hardware counter values.
     ret.set(kPerfCounterNames[i], s_perfCounters[i] * 1000);
-  }
-}
-
-static const size_t kASize = 512 << 20;
-static const size_t kAStubsSize = 512 << 20;
-static const size_t kGDataSize = kASize / 4;
-static const size_t kTotalSize =
-  kASize + kAStubsSize + kTrampolinesBlockSize + kGDataSize;
-void TranslatorX64::processInit() {
-  static_assert(kTotalSize < (2ul << 30),
-                "Combined size of all code/data blocks in TranslatorX64 "
-                "must be < 2GiB to support 32-bit relative addresses");
-
-  static bool profileUp = false;
-  if (!profileUp) {
-    profileInit();
-    profileUp = true;
-  }
-
-  // We want to ensure that the block for "a", "astubs",
-  // "atrampolines", and "m_globalData" are nearby so that we can
-  // short jump/point between them. Thus we allocate one slab and
-  // divide it between "a", "astubs", and "atrampolines".
-  uint8_t *base = allocSlab(kTotalSize);
-  atrampolines.init(base, kTrampolinesBlockSize);
-  base += kTrampolinesBlockSize;
-  a.init(base, kASize);
-  m_unwindRegistrar = register_unwind_region(base, kTotalSize);
-  base += kASize;
-  astubs.init(base, kAStubsSize);
-  base += kAStubsSize;
-  m_globalData.init(base, kGDataSize);
-
-  // Emit some special helpers that are shared across translations.
-
-  // Call to exit with whatever value the program leaves on
-  // the return stack.
-  m_callToExit = emitServiceReq(false, REQ_EXIT, 0ull);
-
-  // On a backtrace, gdb tries to locate the calling frame at address
-  // returnRIP-1. However, for the first VM frame, there is no code at
-  // returnRIP-1, since the AR was set up manually. For this frame,
-  // record the tracelet address as starting from callToExit-1, so gdb
-  // does not barf
-  recordGdbStub(astubs, m_callToExit - 1, "HHVM::callToExit");
-
-  m_retHelper = emitRetFromInterpretedFrame();
-  recordBCInstr(OpRetFromInterp, astubs, m_retHelper);
-  recordGdbStub(astubs, m_retHelper - 1, "HHVM::retHelper");
-
-  moveToAlign(astubs);
-  m_resumeHelper = astubs.code.frontier;
-  emitGetGContext(astubs, rax);
-  astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_fp),
-                                       rVmFp);
-  astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
-                                       Stack::topOfStackOffset(), rVmSp);
-  emitServiceReq(false, REQ_RESUME, 0ull);
-  recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
-
-  // Helper for DefCls
-  if (false) {
-    PreClass *preClass = 0;
-    defClsHelper(preClass);
-  }
-  m_defClsHelper = TCA(a.code.frontier);
-  PhysReg rEC = argNumToRegName[2];
-  emitGetGContext(a, rEC);
-  a.   store_reg64_disp_reg64(rVmFp, offsetof(VMExecutionContext, m_fp), rEC);
-  a.   store_reg64_disp_reg64(argNumToRegName[1],
-                              offsetof(VMExecutionContext, m_pc), rEC);
-  // rax holds the up-to-date top of stack pointer
-  a.   store_reg64_disp_reg64(rax,
-                              offsetof(VMExecutionContext, m_stack) +
-                              Stack::topOfStackOffset(), rEC);
-  a.   jmp((TCA)defClsHelper);
-  recordBCInstr(OpDefClsHelper, a, m_defClsHelper);
-
-  moveToAlign(astubs);
-  m_stackOverflowHelper = astubs.code.frontier;
-  // We are called from emitStackCheck, with the new stack frame in
-  // rStashedAR. Get the caller's PC into rdi and save it off.
-  astubs.    load_reg64_disp_reg64(rVmFp, AROFF(m_func), rax);
-  astubs.    load_reg64_disp_reg32(rStashedAR, AROFF(m_soff), rdi);
-  astubs.    load_reg64_disp_reg64(rax, Func::sharedOffset(), rax);
-  astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
-  astubs.    add_reg32_reg32(rax, rdi);
-
-  emitEagerVMRegSave(astubs, SaveFP | SavePC);
-  emitServiceReq(false, REQ_STACK_OVERFLOW, 0ull);
-
-  // The decRef helper for when we bring the count down to zero. Callee needs to
-  // bring the value into rdi. These can be burned in for all time, and for all
-  // translations.
-  if (false) { // type-check
-    StringData* str = NULL;
-    ArrayData* arr = NULL;
-    ObjectData* obj = NULL;
-    RefData* ref = NULL;
-    tv_release_str(str);
-    tv_release_arr(arr);
-    tv_release_obj(obj);
-    tv_release_ref(ref);
-  }
-  typedef void* vp;
-  m_dtorStubs[BitwiseKindOfString] = emitUnaryStub(a, vp(tv_release_str));
-  m_dtorStubs[KindOfArray]         = emitUnaryStub(a, vp(tv_release_arr));
-  m_dtorStubs[KindOfObject]        = emitUnaryStub(a, vp(tv_release_obj));
-  m_dtorStubs[KindOfRef]           = emitUnaryStub(a, vp(tv_release_ref));
-  m_dtorGenericStub                = genericRefCountStub(a);
-  m_typedDtorStub                  = emitBinaryStub(a, vp(tv_release_typed));
-  recordBCInstr(OpDtorStub, a, m_dtorStubs[BitwiseKindOfString]);
-  recordGdbStub(a, m_dtorStubs[BitwiseKindOfString],
-                    "HHVM::destructorStub");
-
-  if (trustSigSegv) {
-    // Install SIGSEGV handler for timeout exceptions
-    struct sigaction sa;
-    struct sigaction old_sa;
-    sa.sa_sigaction = &TranslatorX64::SEGVHandler;
-    sa.sa_flags = SA_SIGINFO;
-    sigemptyset(&sa.sa_mask);
-    if (sigaction(SIGSEGV, &sa, &old_sa) != 0) {
-      throw std::runtime_error(
-        std::string("Failed to install SIGSEGV handler: ") +
-          strerror(errno));
-    }
-    m_segvChain = old_sa.sa_flags & SA_SIGINFO ?
-      old_sa.sa_sigaction : (sigaction_t)old_sa.sa_handler;
   }
 }
 

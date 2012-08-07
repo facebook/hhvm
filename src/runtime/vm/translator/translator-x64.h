@@ -637,9 +637,6 @@ public:
 
   static TranslatorX64* Get();
 
-  // Called once at the dawn of time.
-  void processInit();
-
   // Called before entering a new PHP "world."
   void requestInit();
 

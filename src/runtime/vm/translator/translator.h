@@ -697,7 +697,6 @@ public:
   /*
    * Interface between the arch-dependent translator and outside world.
    */
-  virtual void processInit() = 0;
   virtual void requestInit() = 0;
   virtual void requestExit() = 0;
   virtual void analyzeInstr(Tracelet& t, NormalizedInstruction& i) = 0;

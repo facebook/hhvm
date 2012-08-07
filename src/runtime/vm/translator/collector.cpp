@@ -124,10 +124,8 @@ bool TranslatorX64::replace() {
   // old prologues; these are external references to the old code.
 
   s_replaceInFlight = true;
-  TranslatorX64* n00b = new TranslatorX64();
   severFuncReferences(tx64);
-  tx64 = n00b; // processInit() relies on tx64 being set
-  n00b->processInit();
+  TranslatorX64* n00b = new TranslatorX64();
   // m_interceptsEnabled should persist across TC spaces.
   n00b->m_interceptsEnabled = m_interceptsEnabled;
   TRACE(0, "Tx64: replace %p a.code %p -> %p a.code %p complete\n",

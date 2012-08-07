@@ -433,7 +433,8 @@ Array static memcache_build_stats(const memcached_st *ptr,
                                 memcached_stat_st *memc_stat,
                                 memcached_return_t *ret) {
   char **curr_key;
-  char **stat_keys = memcached_stat_get_keys(ptr, memc_stat, ret);
+  char **stat_keys = memcached_stat_get_keys(const_cast<memcached_st*>(ptr),
+                                             memc_stat, ret);
 
   if (*ret != MEMCACHED_SUCCESS) {
     if (stat_keys) {

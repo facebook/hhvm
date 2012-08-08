@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _DWARF_H_
-#define _DWARF_H_
+#ifndef _HPHP_DWARF_H_
+#define _HPHP_DWARF_H_
 
 #include <string>
 

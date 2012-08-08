@@ -345,8 +345,8 @@ const X64Instr instr_sub =     { { 0x29,0x2B,0x81,0x05,0x2D,0xF1 }, 0x0810 };
 const X64Instr instr_and =     { { 0x21,0x23,0x81,0x04,0x25,0xF1 }, 0x0810 };
 const X64Instr instr_or  =     { { 0x09,0x0B,0x81,0x01,0x0D,0xF1 }, 0x0810 };
 const X64Instr instr_xor =     { { 0x31,0x33,0x81,0x06,0x35,0xF1 }, 0x0810 };
-const X64Instr instr_movb =    { { 0x88,0x8A,0xC6,0x00,0xF1,0xB0 }, 0x0210 };
-const X64Instr instr_mov =     { { 0x89,0x8B,0xC7,0x00,0xF1,0xB8 }, 0x0200 };
+const X64Instr instr_movb =    { { 0x88,0x8A,0xC6,0x00,0xF1,0xB0 }, 0x0610 };
+const X64Instr instr_mov =     { { 0x89,0x8B,0xC7,0x00,0xF1,0xB8 }, 0x0600 };
 const X64Instr instr_test =    { { 0x85,0x85,0xF7,0x00,0xA9,0xF1 }, 0x0800 };
 const X64Instr instr_cmp =     { { 0x39,0x3B,0x81,0x07,0x3D,0xF1 }, 0x0810 };
 const X64Instr instr_sbb =     { { 0x19,0x1B,0x81,0x03,0x1D,0xF1 }, 0x0810 };
@@ -525,11 +525,7 @@ struct X64Assembler {
     if (!deltaFits(imm, sz::dword)) {
       return sz::qword;
     }
-    int immSize = sz::dword;
-    if (deltaFits(imm, sz::byte) && (op.flags & IF_HAS_IMM8) != 0) {
-      immSize = sz::byte;
-    }
-    return immSize;
+    return computeImmediateSize(op, imm);
   }
 
   inline void emitImmediate(X64Instr op, ssize_t imm, int immSize)
@@ -686,9 +682,9 @@ struct X64Assembler {
       emitImmediate(op, imm, immSize);
       return;
     }
-    // Use the compact-R encoding if this is a mov instruction with
-    // a 64-bit immediate
-    if (immSize == sz::qword && (op.flags & IF_MOV)) {
+    // Use the compact-R encoding if the operand size and the immediate
+    // size are the same
+    if ((op.flags & IF_COMPACTR) && immSize == opSz) {
       byte(op.table[5] | (r & 7));
       emitImmediate(op, imm, immSize);
       return;
@@ -1167,8 +1163,8 @@ struct X64Assembler {
    */
   inline void jmp(CodeAddress dest) {
     if (!jmpDeltaFits(dest)) {
-      mov_imm64_reg   ((uint64_t)dest, reg::rScratch);
-      jmp_reg        (reg::rScratch);
+      emitImmReg((int64_t)dest, reg::rScratch);
+      jmp_reg(reg::rScratch);
       return;
     }
     emitJ32(instr_jmp, (ssize_t)dest);
@@ -1209,8 +1205,8 @@ struct X64Assembler {
    */
   inline void call(CodeAddress dest) {
     if (!jmpDeltaFits(dest)) {
-      mov_imm64_reg   ((int64_t)dest, reg::rScratch);
-      call_reg        (reg::rScratch);
+      emitImmReg((int64_t)dest, reg::rScratch);
+      call_reg(reg::rScratch);
       return;
     }
     emitJ32(instr_call, (ssize_t)dest);
@@ -1544,7 +1540,24 @@ struct X64Assembler {
     emitModrmDisp(7, disp, base);
     byte(imm & 0xFF); // 8-bit immediate
   }
+  inline void emitImmReg(int64_t imm, x64::register_name_t dest) {
+    if (imm == 0) {
+      xor_reg32_reg32(dest, dest);
+      return;
+    }
+    if (LIKELY(imm > 0 && x64::deltaFits(imm, x64::sz::dword))) {
+      // This will zero out the high-order bits.
+      mov_imm32_reg32(imm, dest);
+      return;
+    }
+    mov_imm64_reg(imm, dest);
+  }
 };
+
+inline void emitImmReg(X64Assembler& a, int64_t imm,
+                       x64::register_name_t dest) {
+  a.emitImmReg(imm, dest);
+}
 
 } } // HPHP::x64
 

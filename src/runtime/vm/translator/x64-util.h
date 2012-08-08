@@ -23,20 +23,6 @@ namespace HPHP {
 namespace VM {
 namespace Transl {
 
-static void
-emitImmReg(x64::X64Assembler& a, uint64_t imm, x64::register_name_t dest) {
-  if (imm == 0) {
-    a.  xor_reg32_reg32(dest, dest);
-    return;
-  }
-  if (LIKELY(int32(imm) > 0 && x64::deltaFits(imm, x64::sz::dword))) {
-    // This will zero out the high-order bits.
-    a.  mov_imm32_reg32(imm, dest);
-    return;
-  }
-  a.    mov_imm64_reg(imm, dest);
-}
-
 static inline void
 translator_not_reached(x64::X64Assembler &a) {
   if (debug) {

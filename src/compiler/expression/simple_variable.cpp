@@ -204,7 +204,7 @@ static inline TypePtr GetAssertedInType(AnalysisResultPtr ar,
                                         TypePtr ret) {
   ASSERT(assertedType);
   if (!ret) return assertedType;
-  TypePtr res = Type::Inferred(ar, assertedType, ret);
+  TypePtr res = Type::Inferred(ar, ret, assertedType);
   // if the asserted type and the symbol table type are compatible, then use
   // the result of Inferred() (which is at least as strict as assertedType).
   // otherwise, go with the asserted type

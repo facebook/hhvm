@@ -1777,8 +1777,10 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align) {
   {
     if (const SrcRec* sr = m_srcDB.find(*sk)) {
       TCA tca = sr->getTopTranslation();
-      SKTRACE(2, *sk, "getTranslation: found %p\n", tca);
-      return tca;
+      if (tca) {
+        SKTRACE(2, *sk, "getTranslation: found %p\n", tca);
+        return tca;
+      }
     }
   }
 
@@ -1791,10 +1793,18 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align) {
   LeaseHolder writer(s_writeLease);
   if (!writer) return NULL;
   if (SrcRec* sr = m_srcDB.find(*sk)) {
-    // Handle extremely unlikely race; someone may have just already
-    // added the first instance of this SrcRec while we did a
-    // non-blocking wait on the write lease.
-    return sr->getTopTranslation();
+    TCA tca = sr->getTopTranslation();
+    if (tca) {
+      // Handle extremely unlikely race; someone may have just already
+      // added the first instance of this SrcRec while we did a
+      // non-blocking wait on the write lease.
+      return tca;
+    } else {
+      // Since we are holding the write lease, we know that sk is properly
+      // initialized, except that it has no translations (due to
+      // replaceOldTranslations)
+      return retranslate(*sk, align);
+    }
   }
 
   // We put retranslate requests at the end of our slab to more frequently
@@ -3388,7 +3398,13 @@ TranslatorX64::enterTC(SrcKey sk) {
         ReqLitStaticArgs* rlsa = (ReqLitStaticArgs*)args[0];
         sk = SrcKey((Func*)args[1], (Offset)args[2]);
         start = getTranslation(&sk, true);
-        if (start) rlsa->m_pseudoMain = start;
+        if (start) {
+          LeaseHolder writer(s_writeLease);
+          if (writer) {
+            SrcRec* sr = getSrcRec(sk);
+            sr->chainFrom(a, IncomingBranch(&rlsa->m_pseudoMain));
+          }
+        }
       } break;
 
       case REQ_RETRANSLATE: {
@@ -11047,13 +11063,7 @@ void TranslatorX64::invalidateSrcKey(const SrcKey& sk) {
   /*
    * Reroute existing translations for SrcKey to an as-yet indeterminate
    * new one.
-   *
-   * XXX/TODO: we don't really need to re-emit an anchor translation
-   * here.  We could just use the old one and smash all the jumps back
-   * to it.
    */
-  TCA newDest = emitServiceReq(false, REQ_RETRANSLATE,
-                               1, uint64_t(sk.offset()));
   SrcRec* sr = m_srcDB.find(sk);
   ASSERT(sr);
   /*
@@ -11061,7 +11071,7 @@ void TranslatorX64::invalidateSrcKey(const SrcKey& sk) {
    * just created some garbage in the TC. We currently have no mechanism
    * to reclaim this.
    */
-  sr->replaceOldTranslations(a, astubs, newDest);
+  sr->replaceOldTranslations(a, astubs);
 }
 
 void TranslatorX64::invalidateFileWork(Eval::PhpFile* f) {

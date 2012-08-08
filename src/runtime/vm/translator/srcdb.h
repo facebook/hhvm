@@ -83,7 +83,7 @@ struct SrcRec {
   void chainFrom(Asm& a, IncomingBranch br);
   void emitFallbackJump(Asm &a, IncomingBranch incoming);
   void newTranslation(Asm& a, Asm &astubs, TCA newStart);
-  void replaceOldTranslations(Asm& a, Asm& astubs, TCA newDest);
+  void replaceOldTranslations(Asm& a, Asm& astubs);
   void addDebuggerGuard(Asm& a, Asm &astubs, TCA dbgGuard,
                         TCA m_dbgBranchGuardSrc);
   bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != NULL; }
@@ -105,7 +105,7 @@ struct SrcRec {
 
 private:
   TCA getFallbackTranslation() const;
-  void patch(Asm& a, IncomingBranch branch, TCA dest);
+  void patch(Asm* a, IncomingBranch branch, TCA dest);
   void patchIncomingBranches(Asm& a, Asm& astubs, TCA newStart);
 
 private:

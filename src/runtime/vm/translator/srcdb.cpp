@@ -54,7 +54,7 @@ void SrcRec::chainFrom(Asm& a, IncomingBranch br) {
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p; %zd incoming branches\n",
         this,
         a.code.frontier, destAddr, m_incomingBranches.size());
-  patch(a, br, destAddr);
+  patch(&a, br, destAddr);
 }
 
 void SrcRec::emitFallbackJump(Asm &a, IncomingBranch incoming) {
@@ -68,7 +68,7 @@ void SrcRec::emitFallbackJump(Asm &a, IncomingBranch incoming) {
     a.jcc(incoming.m_cc, a.code.frontier);
   }
 
-  patch(a, incoming, destAddr);
+  patch(&a, incoming, destAddr);
 
   // We'll need to know the location of this jump later so we can
   // patch it to new translations added to the chain.
@@ -102,7 +102,7 @@ void SrcRec::newTranslation(Asm& a, Asm &astubs, TCA newStart) {
    */
   for (size_t i = 0; i < m_tailFallbackJumps.size(); ++i) {
     Asm& as = Asm::Choose(a, astubs, m_tailFallbackJumps[i].m_src);
-    patch(as, m_tailFallbackJumps[i], newStart);
+    patch(&as, m_tailFallbackJumps[i], newStart);
   }
 
   // This is the new tail translation, so store the fallback jump list
@@ -142,38 +142,39 @@ void SrcRec::patchIncomingBranches(Asm& a, Asm &astubs, TCA newStart) {
   for (unsigned i = 0; i < change.size(); ++i) {
     TRACE(1, "SrcRec(%p)::newTranslation rechaining @%p -> %p\n",
           this, change[i].m_src, newStart);
-    Asm &as = Asm::Choose(a, astubs, change[i].m_src);
+    Asm *as = change[i].m_type == IncomingBranch::ADDR ?
+      NULL : &Asm::Choose(a, astubs, change[i].m_src);
     patch(as, change[i], newStart);
   }
 }
 
-void SrcRec::replaceOldTranslations(Asm& a, Asm& astubs, TCA newDest) {
-  // This is a totally new anchor, and everyone needs to give up on
-  // old translations.
+void SrcRec::replaceOldTranslations(Asm& a, Asm& astubs) {
+  // Everyone needs to give up on old translations; send them to the anchor,
+  // which is a REQ_RETRANSLATE
   m_translations.clear();
-  m_anchorTranslation = newDest;
   m_tailFallbackJumps.clear();
   atomic_release_store(&m_topTranslation, static_cast<TCA>(0));
-  patchIncomingBranches(a, astubs, newDest);
+  patchIncomingBranches(a, astubs, m_anchorTranslation);
 }
 
-void SrcRec::patch(Asm& a, IncomingBranch branch, TCA dest) {
-  CodeCursor cg(a, branch.m_src);
+void SrcRec::patch(Asm* a, IncomingBranch branch, TCA dest) {
+  if (branch.m_type == IncomingBranch::ADDR) {
+    // Note that this effectively ignores a
+    atomic_release_store(branch.m_addr, dest);
+    return;
+  }
+
+  CodeCursor cg(*a, branch.m_src);
 
   // modifying reachable code
   switch(branch.m_type) {
   case IncomingBranch::JMP:
-    TranslatorX64::smash(a, branch.m_src, dest);
+    TranslatorX64::smash(*a, branch.m_src, dest);
     break;
   case IncomingBranch::JCC:
-    ASSERT(TranslatorX64::isSmashable(a,
+    ASSERT(TranslatorX64::isSmashable(*a,
                                       TranslatorX64::kJmpccLen));
-    a.jcc(branch.m_cc, dest);
-    break;
-  case IncomingBranch::ADDR:
-    ASSERT(TranslatorX64::isSmashable(a,
-                                      sizeof(TCA)));
-    *branch.m_addr = dest;
+    a->jcc(branch.m_cc, dest);
     break;
   default:
     not_implemented();

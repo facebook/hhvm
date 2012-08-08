@@ -84,17 +84,17 @@ static int findIndex(const vector<char *> &blocks,
 
 SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
                                        int itemSize, int flag)
-  : m_nameEnum(Name(nameEnum))
-  , m_itemCount(itemCount)
+  : m_stats(NULL)
   , m_itemSize(itemSize)
-  , m_flag(flag)
   , m_row(0)
   , m_col(0)
+  , m_nameEnum(Name(nameEnum))
+  , m_itemCount(itemCount)
+  , m_flag(flag)
   , m_allocatedBlocks(0)
   , m_multiplier(1)
   , m_maxMultiplier(1)
   , m_targetMultiplier(1)
-  , m_stats(NULL)
 {
   // automatically pick a good per slab item count
   if (m_itemCount <= 0) {
@@ -174,23 +174,17 @@ void *SmartAllocatorImpl::alloc() {
   // FrameInjection.
   int64 usage = stats->usage + m_itemSize;
   stats->usage = usage;
-  if (hhvm) {
+  if (hhvm && UNLIKELY(usage > stats->maxBytes)) {
     // It's possible that this simplified check will trip later than
     // it should in a perfect world but it's cheaper than a full call
     // to refreshStats on every alloc().
-    ASSERT(stats->maxBytes > 0);
-    if (UNLIKELY(usage > stats->maxBytes)) {
-      MemoryManager::TheMemoryManager()->refreshStats();
-    }
+    statsHelper();
   }
-  void* freelist_value = NULL;
-
 #ifndef SMART_ALLOCATOR_DEBUG_FREE
-  freelist_value = m_freelist.maybePop();
+  void* freelist_value = m_freelist.maybePop();
+  if (LIKELY(freelist_value != NULL)) return freelist_value;
 #endif
-  if (freelist_value) {
-    return freelist_value;
-  } else if (m_col < m_colMax) {
+  if (LIKELY(m_col < m_colMax)) {
     char *ret = m_blocks[m_row] + m_col;
     m_col += m_itemSize;
     return ret;
@@ -232,6 +226,13 @@ void *SmartAllocatorImpl::allocHelper() {
   char *ret = m_blocks[m_row] + m_col;
   m_col += m_itemSize;
   return ret;
+}
+
+// cold-path helper function, only called when request memory overflow
+// is likely.
+void SmartAllocatorImpl::statsHelper() {
+  ASSERT(m_stats->maxBytes > 0);
+  MemoryManager::TheMemoryManager()->refreshStats();
 }
 
 bool SmartAllocatorImpl::assertValidHelper(void *obj) const {
@@ -306,7 +307,7 @@ void SmartAllocatorImpl::rollbackObjects() {
 
   ASSERT(m_row == 0);
   ASSERT(m_col == 0);
-  ASSERT(m_freelist.size() == 0);
+  ASSERT(m_freelist.empty());
   for (unsigned int i = m_multiplier; i < m_blocks.size();
        i += m_multiplier) {
     free(m_blocks[i]);

@@ -175,7 +175,7 @@ public:
   // Pops an item, or returns NULL
   void* maybePop() {
     void** ret = ptr;
-    if (ret != NULL) {
+    if (LIKELY(ret != NULL)) {
       ptr = (void**)*ret;
       sz--;
     }
@@ -194,6 +194,10 @@ public:
   // Number of items on the list.
   int size() const {
     return sz;
+  }
+
+  bool empty() const {
+    return ptr == NULL;
   }
 
   // Remove all items from this list
@@ -292,7 +296,6 @@ public:
    * Allocation/deallocation of object memory.
    */
   void *alloc();
-  void *allocHelper() NEVER_INLINE;
   void dealloc(void *obj) {
     ASSERT(assertValidHelper(obj));
 #ifdef SMART_ALLOCATOR_DEBUG_FREE
@@ -328,30 +331,33 @@ public:
   virtual void dump(void *p) = 0;
 
 private:
+  void* allocHelper() NEVER_INLINE;
+  void statsHelper() NEVER_INLINE;
   bool assertValidHelper(void *obj) const;
 
-  const Name m_nameEnum;
-  const char* m_name;
-  int m_itemCount;
+  // keep these frequently used fields together.
+protected:
+  MemoryUsageStats *m_stats;
+private:
+  GarbageList m_freelist;
   const int m_itemSize;
-  int m_flag;
-
-  std::vector<char *> m_blocks;
-  BlockIndexMap m_blockIndex;
   int m_row; // outer index
   int m_col; // inner position
   int m_colMax;
+  std::vector<char *> m_blocks;
 
-  GarbageList m_freelist;
+  // these are less frequently used and can be packed.
+  const Name m_nameEnum;
+  const char* m_name;
+  int m_itemCount;
+  int m_flag;
+
+  BlockIndexMap m_blockIndex;
 
   int m_allocatedBlocks;  // how many blocks are left in the last batch
   int m_multiplier;       // allocate m_multiplier blocks at once
   int m_maxMultiplier;    // the max possible multiplier
   int m_targetMultiplier; // updated upon rollback
-
-protected:
-
-  MemoryUsageStats *m_stats;
 
   void prepareFreeMap(FreeMap& freeMap) const;
 };

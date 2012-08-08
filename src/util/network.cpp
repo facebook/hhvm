@@ -32,6 +32,11 @@ class ResolverLibInitializer {
 public:
   ResolverLibInitializer() {
     res_init();
+    // We call sethostent with stayopen = 1 to keep /etc/hosts open across calls
+    // to prevent mmap contention inside the kernel.  Two calls are necessary to
+    // properly initialize the stayopen flag in glibc.
+    sethostent(1);
+    sethostent(1);
   }
 };
 static ResolverLibInitializer _resolver_lib_initializer;

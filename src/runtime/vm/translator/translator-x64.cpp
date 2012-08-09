@@ -1953,40 +1953,6 @@ TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
 }
 
 void
-TranslatorX64::trimExtraArgs(ActRec* ar) {
-  ASSERT(!ar->hasInvName());
-
-  const Func* f = ar->m_func;
-  int numParams = f->numParams();
-  int numArgs = ar->numArgs();
-  ASSERT(numArgs > numParams);
-  int numExtra = numArgs - numParams;
-
-  TRACE(1, "trimExtraArgs: %d args, function %s takes only %d, ar %p\n",
-        numArgs, f->name()->data(), numParams, ar);
-
-  if (f->attrs() & AttrMayUseVV) {
-    if (!ar->hasExtraArgs()) {
-      VMRegAnchor _(ar);
-      ar->setExtraArgs(new ExtraArgs());
-    }
-    // Stash the excess args in the VarEnv attached to the ActRec. They'll be
-    // decref'ed, if needed, when the VarEnv gets destructed.
-    ar->getExtraArgs()->copyExtraArgs(
-      (TypedValue*)(uintptr_t(ar) - numArgs * sizeof(TypedValue)),
-      numArgs - numParams);
-  } else {
-    // Function is not marked as "MayUseVV", so discard the extra arguments
-    TypedValue* tv = (TypedValue*)(uintptr_t(ar) - numArgs*sizeof(TypedValue));
-    for (int i = 0; i < numExtra; ++i) {
-      tvRefcountedDecRef(tv);
-      ++tv;
-    }
-    ar->setNumArgs(numParams);
-  }
-}
-
-void
 TranslatorX64::setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
                               DataType t) {
   TypedValue* tv =
@@ -2031,43 +1997,86 @@ TranslatorX64::shuffleArgsForMagicCall(ActRec* ar) {
   return 1;
 }
 
-static uint64 run_intercept_helper(ActRec* ar, Variant* ihandler) {
-  /*
-   * The standard VMRegAnchor treatment won't work here.
-   *
-   * The fp sync machinery is fundamentally based on the notion that
-   * instruction pointers in the TC are uniquely associated with source
-   * HHBC instructions, and that source HHBC instructions are in turn
-   * uniquely associated with SP->FP deltas.
-   *
-   * run_intercept_helper is called from the prologue of the callee. The
-   * prologue is 1) still in the caller frame for now, and 2) shared across
-   * multiple call sites. 1 means that we have the fp from the caller's
-   * frame, and 2 means that this fp is not enough to figure out sp.
-   *
-   * However, the prologue passes us the callee actRec, whose predecessor
-   * has to be the caller. So we can sync sp and fp by ourselves here.
-   * Geronimo!
-   *
-   */
+/*
+ * The standard VMRegAnchor treatment won't work for some cases called
+ * during function preludes.
+ *
+ * The fp sync machinery is fundamentally based on the notion that
+ * instruction pointers in the TC are uniquely associated with source
+ * HHBC instructions, and that source HHBC instructions are in turn
+ * uniquely associated with SP->FP deltas.
+ *
+ * run_intercept_helper/trimExtraArgs is called from the prologue of
+ * the callee. The prologue is 1) still in the caller frame for now,
+ * and 2) shared across multiple call sites. 1 means that we have the
+ * fp from the caller's frame, and 2 means that this fp is not enough
+ * to figure out sp.
+ *
+ * However, the prologue passes us the callee actRec, whose predecessor
+ * has to be the caller. So we can sync sp and fp by ourselves here.
+ * Geronimo!
+ */
+static void sync_regstate_to_caller(ActRec* preLive) {
   ASSERT(tl_regState == REGSTATE_DIRTY);
-  vmfp() = (TypedValue*)ar->m_savedRbp;
-  vmsp() = (TypedValue*)ar - ar->numArgs();
-  if (ActRec *fp = g_vmContext->m_fp) {
+  vmfp() = (TypedValue*)preLive->m_savedRbp;
+  vmsp() = (TypedValue*)preLive - preLive->numArgs();
+  if (ActRec* fp = g_vmContext->m_fp) {
     if (fp->m_func && fp->m_func->unit()) {
-      vmpc() = fp->m_func->unit()->at(fp->m_func->base() + ar->m_soff);
+      vmpc() = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
     }
   }
   tl_regState = REGSTATE_CLEAN;
+}
+
+static uint64 run_intercept_helper(ActRec* ar, Variant* ihandler) {
+  sync_regstate_to_caller(ar);
   bool ret = run_intercept_handler<true>(ar, ihandler);
   /*
-   * Restore tl_regState manually in the no-exception case only.  When
-   * there is an exception, we must not restore the state, because as
-   * far as this frame is concerned regstate is actually clean still.
-   * We also don't have this CTCA registered in the fixup map.
+   * Restore tl_regState manually in the no-exception case only.  (The
+   * VM regs are clean here---we only need to set them dirty if we are
+   * stopping to execute in the TC again, which we won't be doing if
+   * an exception is propagating.)
    */
   tl_regState = REGSTATE_DIRTY;
   return ret;
+}
+
+void
+TranslatorX64::trimExtraArgs(ActRec* ar) {
+  ASSERT(!ar->hasInvName());
+
+  sync_regstate_to_caller(ar);
+  const Func* f = ar->m_func;
+  int numParams = f->numParams();
+  int numArgs = ar->numArgs();
+  ASSERT(numArgs > numParams);
+  int numExtra = numArgs - numParams;
+
+  TRACE(1, "trimExtraArgs: %d args, function %s takes only %d, ar %p\n",
+        numArgs, f->name()->data(), numParams, ar);
+
+  if (f->attrs() & AttrMayUseVV) {
+    if (!ar->hasExtraArgs()) {
+      ar->setExtraArgs(new ExtraArgs());
+    }
+    // Stash the excess args in the VarEnv attached to the ActRec. They'll be
+    // decref'ed, if needed, when the VarEnv gets destructed.
+    ar->getExtraArgs()->copyExtraArgs(
+      (TypedValue*)(uintptr_t(ar) - numArgs * sizeof(TypedValue)),
+      numArgs - numParams);
+  } else {
+    // Function is not marked as "MayUseVV", so discard the extra arguments
+    TypedValue* tv = (TypedValue*)(uintptr_t(ar) - numArgs*sizeof(TypedValue));
+    for (int i = 0; i < numExtra; ++i) {
+      tvRefcountedDecRef(tv);
+      ++tv;
+    }
+    ar->setNumArgs(numParams);
+  }
+
+  // Only go back to dirty in a non-exception case.  (Same reason as
+  // above.)
+  tl_regState = REGSTATE_DIRTY;
 }
 
 TCA

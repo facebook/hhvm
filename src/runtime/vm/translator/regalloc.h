@@ -42,7 +42,7 @@ static const int kMaxRegs = 64;
  * actually be able to allocate registers.
  */
 typedef register_name_t PhysReg;
-static const PhysReg InvalidReg = -1;
+static const PhysReg InvalidReg = x64::reg::noreg;
 
 class RegSet {
   uint64_t m_bits;
@@ -53,7 +53,7 @@ class RegSet {
 
  public:
   RegSet() : m_bits(0) { }
-  explicit RegSet(PhysReg pr) : m_bits(1 << pr) { }
+  explicit RegSet(PhysReg pr) : m_bits(1 << int(pr)) { }
 
   // union
   RegSet operator| (const RegSet& rhs) const {
@@ -88,12 +88,12 @@ class RegSet {
   }
 
   RegSet remove(PhysReg pr) {
-    m_bits = m_bits & ~(1 << pr);
+    m_bits = m_bits & ~(1 << int(pr));
     return *this;
   }
 
   bool contains(PhysReg pr) const {
-    return bool(m_bits & (1 << pr));
+    return bool(m_bits & (1 << int(pr)));
   }
 
   // For iterating over present registers, e.g.:
@@ -105,7 +105,7 @@ class RegSet {
     uint64_t out;
     bool retval = ffs64(m_bits, out);
     reg = PhysReg(out);
-    ASSERT(!retval || (reg >= 0 && reg < 64));
+    ASSERT(!retval || (int(reg) >= 0 && int(reg) < 64));
     return retval;
   }
 
@@ -113,7 +113,7 @@ class RegSet {
     uint64_t out;
     bool retval = fls64(m_bits, out);
     reg = PhysReg(out);
-    ASSERT(!retval || (reg >= 0 && reg < 64));
+    ASSERT(!retval || (int(reg) >= 0 && int(reg) < 64));
     return retval;
   }
 };
@@ -280,7 +280,9 @@ class RegAlloc {
                      RegInfo::State state, DataType type);
   void stateTransition(RegInfo* r, RegInfo::State to);
 
-  static bool isValidReg(PhysReg pr) { return pr >= 0 && pr < kMaxRegs; }
+  static bool isValidReg(PhysReg pr) {
+    return int(pr) >= 0 && int(pr) < kMaxRegs;
+  }
 
   // lru operations are O(numRegs), but numRegs is small.
   void lruFront(RegInfo *r);

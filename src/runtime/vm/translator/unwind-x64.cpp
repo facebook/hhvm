@@ -200,7 +200,7 @@ void UnwindRegInfo::add(x64::register_name_t reg,
    * They happen to be the same for the specific (callee-saved) regs
    * we care about right now, so this is ok.  See kCalleeSaved.
    */
-  ent.reg = reg;
+  ent.reg = int(reg);
 
   for (int i = 0; i < kMaxCalleeSaved; ++i) {
     if (!m_regs[i].dirty) {

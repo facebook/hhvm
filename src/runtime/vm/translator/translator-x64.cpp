@@ -1001,18 +1001,8 @@ TranslatorX64::emitPushAR(const NormalizedInstruction& i, const Func* func,
 
 static inline bool
 regIsInCallingSequence(PhysReg r) {
-  switch(r) {
-    case rax:
-    case rdi:
-    case rsi:
-    case rcx:
-    case rdx:
-    case r8:
-    case r9:
-      return true;
-    default:
-      return false;
-  }
+  return r == rax || r == rdi || r == rsi || r == rcx || r == rdx ||
+         r == r8  || r == r9;
 }
 
 /*
@@ -1235,7 +1225,7 @@ TranslatorX64::emitRB(X64Assembler& a,
 void
 TranslatorX64::allocInputsForCall(const NormalizedInstruction& i,
                                   const int* args) {
-  int blackList = 0;
+  RegSet blackList;
   int arg;
   /*
    * If any of the inputs is already in an argument
@@ -1245,7 +1235,7 @@ TranslatorX64::allocInputsForCall(const NormalizedInstruction& i,
   for (arg = i.inputs.size(); arg--; ) {
     if (args[arg] != ArgDontAllocate &&
         m_regMap.hasReg(i.inputs[arg]->location)) {
-      blackList |= 1 << getReg(i.inputs[arg]->location);
+      blackList |= RegSet(getReg(i.inputs[arg]->location));
     }
   }
   bool hasAnyReg = false;
@@ -1254,7 +1244,7 @@ TranslatorX64::allocInputsForCall(const NormalizedInstruction& i,
       if (args[arg] != ArgDontAllocate &&
         !m_regMap.hasReg(i.inputs[arg]->location)) {
         PhysReg target = argNumToRegName[args[arg]];
-        if (!(blackList & (1 << target))) {
+        if (!blackList.contains(target)) {
           m_regMap.cleanRegs(RegSet(target));
           m_regMap.smashRegs(RegSet(target));
         } else {

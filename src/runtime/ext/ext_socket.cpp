@@ -312,7 +312,7 @@ Variant f_socket_create(int domain, int type, int protocol) {
   int socketId = socket(domain, type, protocol);
   if (socketId == -1) {
     Socket dummySock; // for setting last socket error
-    SOCKET_ERROR((&dummySock), "Unable to create socket [%d]: %s", errno);
+    SOCKET_ERROR((&dummySock), "Unable to create socket", errno);
     return false;
   }
   Socket *sock = new Socket(socketId, domain);
@@ -359,7 +359,7 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   int fds_array[2];
   if (socketpair(domain, type, protocol, fds_array) != 0) {
     Socket dummySock; // for setting last socket error
-    SOCKET_ERROR((&dummySock), "unable to create socket pair [%d]: %s", errno);
+    SOCKET_ERROR((&dummySock), "unable to create socket pair", errno);
     return false;
   }
 

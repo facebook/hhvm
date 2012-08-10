@@ -164,7 +164,10 @@ Array Unit::getClassesInfo() {
   Array a = Array::Create();
   if (s_namedDataMap) {
     for (AllCachedClasses ac; !ac.empty();) {
-      a.append(ac.popFront()->nameRef());
+      Class* c = ac.popFront();
+      if (!(c->attrs() & (AttrInterface|AttrTrait))) {
+        a.append(c->nameRef());
+      }
     }
   }
   return a;

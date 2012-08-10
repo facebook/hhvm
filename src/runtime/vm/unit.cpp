@@ -87,7 +87,7 @@ Array Unit::getUserFunctions() {
   return a;
 }
 
-AllClasses::AllClasses() 
+AllClasses::AllClasses()
   : m_next(s_namedDataMap->begin())
   , m_end(s_namedDataMap->end()) {
   skip();
@@ -95,10 +95,11 @@ AllClasses::AllClasses()
 
 void AllClasses::skip() {
   Class* cls;
-  do {
+  while (!empty()) {
     cls = *m_next->second.clsList();
-    if (!cls) ++m_next;
-  } while (!empty() && !cls);
+    if (cls) break;
+    ++m_next;
+  }
   ASSERT(empty() || front());
 }
 
@@ -125,10 +126,11 @@ class AllCachedClasses {
 
   void skip() {
     Class* cls;
-    do {
+    while (!empty()) {
       cls = *m_next->second.clsList();
-      if (!cls || !cls->getCached()) ++m_next;
-    } while (!empty() && !cls);
+      if (cls && cls->getCached()) break;
+      ++m_next;
+    }
   }
 
 public:

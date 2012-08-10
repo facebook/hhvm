@@ -44,7 +44,6 @@ void init_thread_locals(void *arg /* = NULL */) {
   ObjectData::GetMaxId();
   ResourceData::GetMaxResourceId();
   ServerStats::GetLogger();
-  preg_get_pcre_cache();
   zend_get_bigint_data();
   zend_get_rand_data();
   get_server_note();

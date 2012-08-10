@@ -24,6 +24,7 @@
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/taint/taint_observer.h>
+#include <tbb/concurrent_hash_map.h>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2
@@ -53,100 +54,80 @@ namespace HPHP {
 // regex cache and helpers
 
 class pcre_cache_entry {
+  pcre_cache_entry(const pcre_cache_entry&);
+  pcre_cache_entry& operator=(const pcre_cache_entry&);
+
 public:
+  pcre_cache_entry() {}
   ~pcre_cache_entry() {
-    free(re);
-    if (extra) free(extra);
-#if HAVE_SETLOCALE
-    free(locale);
-    if (tables) free(tables);
-#endif
+    if (extra) free(extra); // we don't have pcre_free_study yet
+    pcre_free(re);
   }
 
   pcre *re;
   pcre_extra *extra; // Holds results of studying
   int preg_options;
-#if HAVE_SETLOCALE
-  char *locale;
-  unsigned const char *tables;
-#endif
   int compile_options;
 };
 
-typedef hphp_hash_map<StringData *, pcre_cache_entry*,
-                      string_data_hash, string_data_same> PCREStringMap;
+typedef tbb::concurrent_hash_map<const StringData*,const pcre_cache_entry*,
+                                StringDataHashCompare> PCREStringMap;
 
-// TODO LRU cache
-class PCRECache {
-public:
-  ~PCRECache() { }
+static PCREStringMap s_pcreCacheMap;
 
-  void cleanup() {
-    TAINT_OBSERVER_CAP_STACK();
-    for (PCREStringMap::iterator it = m_cache.begin(); it != m_cache.end();
-         ++it) {
-      delete it->second;
-      if (!it->first->isStatic()) {
-        delete it->first;
-      }
-    }
+static const pcre_cache_entry* lookup_cached_pcre(CStrRef regex) {
+  TAINT_OBSERVER_CAP_STACK();
+  PCREStringMap::const_accessor acc;
+  if (s_pcreCacheMap.find(acc, regex.get())) {
+    return acc->second;
   }
-
-  pcre_cache_entry *find(CStrRef regex) {
-    TAINT_OBSERVER_CAP_STACK();
-    PCREStringMap::const_iterator it = m_cache.find(regex.get());
-    if (it != m_cache.end()) return it->second;
-    return NULL;
-  }
-
-  void set(CStrRef regex, pcre_cache_entry *pce) {
-    TAINT_OBSERVER_CAP_STACK();
-    PCREStringMap::iterator it = m_cache.find(regex.get());
-    if (it != m_cache.end()) {
-      delete it->second;
-      it->second = pce;
-    } else {
-      m_cache[regex->copy(true)] = pce;
-    }
-  }
-
-  int error_code;
-  pcre_extra extra_data;
-
-private:
-  PCREStringMap m_cache;
-};
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(PCRECache, s_pcre_cache);
-
-void preg_get_pcre_cache() {
-  s_pcre_cache.getCheck();
+  return 0;
 }
 
-static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
-  PCRECache &pcre_cache = *s_pcre_cache;
+static const pcre_cache_entry*
+insert_cached_pcre(CStrRef regex, const pcre_cache_entry* ent) {
+  TAINT_OBSERVER_CAP_STACK();
+  PCREStringMap::accessor acc;
+  if (s_pcreCacheMap.insert(acc, StringData::GetStaticString(regex.get()))) {
+    acc->second = ent;
+    return ent;
+  }
+  delete ent;
+  return acc->second;
+}
 
+/*
+ * When a cached compiled pcre doesn't have pcre_extra, we use this
+ * one.
+ *
+ * FIXME: It's unclear why this needs to be thread-local data instead
+ * of just existing on the stack during the calls to preg_ functions.
+ */
+static __thread pcre_extra t_extra_data;
+
+// The last pcre error code is available for the whole thread.
+static __thread int t_last_error_code;
+
+namespace {
+
+struct FreeHelper {
+  explicit FreeHelper(void* p) : p(p) {}
+  ~FreeHelper() { free(p); }
+
+private:
+  FreeHelper(const FreeHelper&);
+  FreeHelper& operator=(const FreeHelper&);
+
+  void* p;
+};
+
+}
+
+static const pcre_cache_entry* pcre_get_compiled_regex_cache(CStrRef regex) {
   /* Try to lookup the cached regex entry, and if successful, just pass
      back the compiled pattern, otherwise go on and compile it. */
-  pcre_cache_entry *pce = pcre_cache.find(regex);
-  if (pce) {
-    /**
-     * We use a simple pcre_fullinfo() check to see whether cache is
-     * corrupted, and if it is, we flush it and compile the pattern
-     * from scratch.
-     */
-    size_t pcre_size;
-    if (pcre_fullinfo(pce->re, NULL, PCRE_INFO_SIZE, &pcre_size)
-                                                 == PCRE_ERROR_BADMAGIC) {
-      pcre_cache.cleanup();
-    } else {
-#if HAVE_SETLOCALE
-      if (!strcmp(pce->locale, locale)) {
-#endif
-        return pce;
-#if HAVE_SETLOCALE
-      }
-#endif
-    }
+  if (const pcre_cache_entry* pce = lookup_cached_pcre(regex)) {
+    return pce;
   }
 
   /* Parse through the leading whitespace, and display a warning if we
@@ -253,24 +234,15 @@ static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
     }
   }
 
-  unsigned const char *tables = NULL;
-#if HAVE_SETLOCALE
-  if (strcmp(locale, "C")) {
-    tables = pcre_maketables();
-  }
-#endif
-
   /* Compile pattern and display a warning if compilation failed. */
   const char  *error;
   int erroffset;
-  pcre *re = pcre_compile(pattern, coptions, &error, &erroffset, tables);
+  pcre *re = pcre_compile(pattern, coptions, &error, &erroffset, 0);
   if (re == NULL) {
     raise_warning("Compilation failed: %s at offset %d", error, erroffset);
-    if (tables) {
-      free((void*)tables);
-    }
     return NULL;
   }
+  // Careful: from here 're' needs to be freed if something throws.
 
   /* If study option was specified, study the pattern and
      store the result in extra for passing to pcre_exec. */
@@ -283,7 +255,12 @@ static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
         PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     }
     if (error != NULL) {
-      raise_warning("Error while studying pattern");
+      try {
+        raise_warning("Error while studying pattern");
+      } catch (...) {
+        pcre_free(re);
+        throw;
+      }
     }
   }
 
@@ -293,18 +270,12 @@ static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
   new_entry->extra = extra;
   new_entry->preg_options = poptions;
   new_entry->compile_options = coptions;
-#if HAVE_SETLOCALE
-  char *locale = setlocale(LC_CTYPE, NULL);
-  new_entry->locale = strdup(locale);
-  new_entry->tables = tables;
-#endif
-  pcre_cache.set(regex, new_entry);
-  return new_entry;
+  return insert_cached_pcre(regex, new_entry);
 }
 
-static void set_extra_limits(pcre_extra *&extra) {
+static void set_extra_limits(pcre_extra*& extra) {
   if (extra == NULL) {
-    pcre_extra &extra_data = s_pcre_cache->extra_data;
+    pcre_extra& extra_data = t_extra_data;
     extra_data.flags = PCRE_EXTRA_MATCH_LIMIT |
       PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     extra = &extra_data;
@@ -313,7 +284,8 @@ static void set_extra_limits(pcre_extra *&extra) {
   extra->match_limit_recursion = RuntimeOption::PregRecursionLimit;
 }
 
-static int *create_offset_array(pcre_cache_entry *pce, int &size_offsets) {
+static int *create_offset_array(const pcre_cache_entry *pce,
+                                int &size_offsets) {
   pcre_extra *extra = pce->extra;
   set_extra_limits(extra);
 
@@ -331,7 +303,7 @@ static int *create_offset_array(pcre_cache_entry *pce, int &size_offsets) {
 
 static pcre* pcre_get_compiled_regex(CStrRef regex, pcre_extra **extra,
                                      int *preg_options) {
-  pcre_cache_entry *pce = pcre_get_compiled_regex_cache(regex);
+  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(regex);
   if (extra) {
     *extra = pce ? pce->extra : NULL;
   }
@@ -409,13 +381,13 @@ static void pcre_handle_exec_error(int pcre_code) {
     preg_code = PHP_PCRE_INTERNAL_ERROR;
     break;
   }
-  s_pcre_cache->error_code = preg_code;
+  t_last_error_code = preg_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
-  pcre_cache_entry *pce = pcre_get_compiled_regex_cache(pattern);
+  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == NULL) {
     return false;
   }
@@ -425,10 +397,11 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
   if (offsets == NULL) {
     return false;
   }
+  FreeHelper freer(offsets);
 
   /* Initialize return array */
   Array ret = Array::Create();
-  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
+  t_last_error_code = PHP_PCRE_NO_ERROR;
 
   /* Go through the input array */
   bool invert = (flags & PREG_GREP_INVERT);
@@ -467,8 +440,6 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
     }
   }
 
-  /* Clean up */
-  free(offsets);
   return ret;
 }
 
@@ -477,7 +448,7 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
 static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
                                Variant *subpats, int flags, int start_offset,
                                bool global) {
-  pcre_cache_entry *pce = pcre_get_compiled_regex_cache(pattern);
+  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == NULL) {
     return false;
   }
@@ -518,6 +489,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
 
   int size_offsets = 0;
   int *offsets = create_offset_array(pce, size_offsets);
+  FreeHelper offsetsFreer(offsets);
   int num_subpats = size_offsets / 3;
   if (offsets == NULL) {
     return false;
@@ -529,6 +501,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
    * avoids somewhat more complicated logic in the inner loops.
    */
   char **subpat_names = (char **)malloc(num_subpats * sizeof(char *));
+  FreeHelper subpatFreer(subpat_names);
   memset(subpat_names, 0, sizeof(char *) * num_subpats);
   {
     int name_cnt = 0, name_size, ni = 0;
@@ -538,8 +511,6 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
     int rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMECOUNT, &name_cnt);
     if (rc < 0) {
       raise_warning("Internal pcre_fullinfo() error %d", rc);
-      free(offsets);
-      free(subpat_names);
       return false;
     }
     if (name_cnt > 0) {
@@ -549,8 +520,6 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
       rc = rc2 ? rc2 : rc1;
       if (rc < 0) {
         raise_warning("Internal pcre_fullinfo() error %d", rc);
-        free(offsets);
-        free(subpat_names);
         return false;
       }
 
@@ -562,8 +531,6 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
                               strlen(subpat_names[name_idx]),
                               NULL, NULL, 0) != KindOfNull) {
           raise_warning("Numeric named subpatterns are not allowed");
-          free(offsets);
-          free(subpat_names);
           return false;
         }
         name_table += name_size;
@@ -581,7 +548,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
   }
 
   int matched = 0;
-  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
+  t_last_error_code = PHP_PCRE_NO_ERROR;
 
   Variant result_set; // Holds a set of subpatterns after a global match
   int g_notempty = 0; // If the match should not be empty
@@ -607,8 +574,6 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
       // Try to get the list of substrings and display a warning if failed.
       if (pcre_get_substring_list(subject.data(), offsets, count,
                                   &stringlist) < 0) {
-        free(offsets);
-        free(subpat_names);
         raise_warning("Get subpatterns list failed");
         return false;
       }
@@ -725,8 +690,6 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
     }
   }
 
-  free(offsets);
-  free(subpat_names);
   return matched;
 }
 
@@ -765,8 +728,8 @@ static String preg_do_repl_func(CVarRef function, CStrRef subject,
 }
 
 static bool preg_get_backref(const char **str, int *backref) {
-  register char in_brace = 0;
-  register const char *walk = *str;
+  char in_brace = 0;
+  const char *walk = *str;
 
   if (walk[1] == 0) {
     return false;
@@ -804,7 +767,7 @@ static bool preg_get_backref(const char **str, int *backref) {
 static String php_pcre_replace(CStrRef pattern, CStrRef subject,
                                CVarRef replace_var, bool callable,
                                int limit, int *replace_count) {
-  pcre_cache_entry *pce = pcre_get_compiled_regex_cache(pattern);
+  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == NULL) {
     return false;
   }
@@ -819,6 +782,7 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
 
   int size_offsets;
   int *offsets = create_offset_array(pce, size_offsets);
+  FreeHelper offsetsFreer(offsets);
   if (offsets == NULL) {
     return false;
   }
@@ -856,203 +820,208 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
   int alloc_len = 2 * subject.size() + 1;
   char *result = (char *)malloc(alloc_len);
 
-  /* Initialize */
-  const char *match = NULL;
-  int start_offset = 0;
-  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
-  pcre_extra *extra = pce->extra;
-  set_extra_limits(extra);
+  try {
 
-  int result_len = 0;
-  int new_len;        // Length of needed storage
-  const char *walk;   // Used to walk the replacement string
-  char walk_last;     // Last walked character
-  char *walkbuf;      // Location of current replacement in the result
-  int match_len;      // Length of the current match
-  int backref;        // Backreference number
-  int g_notempty = 0; // If the match should not be empty
-  while (1) {
-    /* Execute the regular expression. */
-    int count = pcre_exec(pce->re, extra, subject.data(), subject.size(),
-                          start_offset, g_notempty, offsets, size_offsets);
+    /* Initialize */
+    const char *match = NULL;
+    int start_offset = 0;
+    t_last_error_code = PHP_PCRE_NO_ERROR;
+    pcre_extra *extra = pce->extra;
+    set_extra_limits(extra);
 
-    /* Check for too many substrings condition. */
-    if (count == 0) {
-      raise_warning("Matched, but too many substrings");
-      count = size_offsets / 3;
-    }
+    int result_len = 0;
+    int new_len;        // Length of needed storage
+    const char *walk;   // Used to walk the replacement string
+    char walk_last;     // Last walked character
+    char *walkbuf;      // Location of current replacement in the result
+    int match_len;      // Length of the current match
+    int backref;        // Backreference number
+    int g_notempty = 0; // If the match should not be empty
+    while (1) {
+      /* Execute the regular expression. */
+      int count = pcre_exec(pce->re, extra, subject.data(), subject.size(),
+                            start_offset, g_notempty, offsets, size_offsets);
 
-    const char *piece = subject.data() + start_offset;
-    if (count > 0 && (limit == -1 || limit > 0)) {
-      if (replace_count) {
-        ++*replace_count;
+      /* Check for too many substrings condition. */
+      if (count == 0) {
+        raise_warning("Matched, but too many substrings");
+        count = size_offsets / 3;
       }
-      /* Set the match location in subject */
-      match = subject.data() + offsets[0];
-      new_len = result_len + offsets[0] - start_offset; //part before the match
 
-      /* If evaluating, do it and add the return string's length */
-      String eval_result;
-      if (callable) {
-        /* Use custom function to get replacement string and its length. */
-        eval_result = preg_do_repl_func(replace_var, subject, offsets, count);
-        new_len += eval_result.size();
-      } else { /* do regular substitution */
-        walk = replace;
-        walk_last = 0;
-        while (walk < replace_end) {
-          if ('\\' == *walk || '$' == *walk) {
-            if (walk_last == '\\') {
-              walk++;
-              walk_last = 0;
-              continue;
-            }
-            if (preg_get_backref(&walk, &backref)) {
-              if (backref < count) {
-                new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
+      const char *piece = subject.data() + start_offset;
+      if (count > 0 && (limit == -1 || limit > 0)) {
+        if (replace_count) {
+          ++*replace_count;
+        }
+        /* Set the match location in subject */
+        match = subject.data() + offsets[0];
+        new_len = result_len + offsets[0] - start_offset; //part before the match
+
+        /* If evaluating, do it and add the return string's length */
+        String eval_result;
+        if (callable) {
+          /* Use custom function to get replacement string and its length. */
+          eval_result = preg_do_repl_func(replace_var, subject, offsets, count);
+          new_len += eval_result.size();
+        } else { /* do regular substitution */
+          walk = replace;
+          walk_last = 0;
+          while (walk < replace_end) {
+            if ('\\' == *walk || '$' == *walk) {
+              if (walk_last == '\\') {
+                walk++;
+                walk_last = 0;
+                continue;
               }
-              continue;
-            }
-          }
-          new_len++;
-          walk++;
-          walk_last = walk[-1];
-        }
-      }
-
-      if (new_len + 1 > alloc_len) {
-        alloc_len = 1 + alloc_len + 2 * new_len;
-        result = (char *)realloc(result, alloc_len);
-      }
-      /* copy the part of the string before the match */
-      memcpy(&result[result_len], piece, match-piece);
-      result_len += match-piece;
-
-      /* copy replacement and backrefs */
-      walkbuf = result + result_len;
-
-      /* If evaluating or using custom function, copy result to the buffer
-       * and clean up. */
-      if (callable) {
-        memcpy(walkbuf, eval_result.data(), eval_result.size());
-        result_len += eval_result.size();
-      } else { /* do regular backreference copying */
-        walk = replace;
-        walk_last = 0;
-        Array params;
-        const char* lastStart = NULL;
-        while (walk < replace_end) {
-          bool handleQuote = eval && '"' == *walk && walk_last != '\\';
-          if (handleQuote && lastStart != NULL) {
-            String str(lastStart, walkbuf - lastStart, CopyString);
-            params.append(str);
-            lastStart = NULL;
-            handleQuote = false;
-          }
-          if ('\\' == *walk || '$' == *walk) {
-            if (walk_last == '\\') {
-              *(walkbuf-1) = *walk++;
-              walk_last = 0;
-              continue;
-            }
-            if (preg_get_backref(&walk, &backref)) {
-              if (backref < count) {
-                match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-                memcpy(walkbuf, subject.data() + offsets[backref<<1],
-                       match_len);
-                walkbuf += match_len;
+              if (preg_get_backref(&walk, &backref)) {
+                if (backref < count) {
+                  new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
+                }
+                continue;
               }
-              continue;
             }
-          }
-          *walkbuf++ = *walk++;
-          walk_last = walk[-1];
-          if (handleQuote && lastStart == NULL) {
-            lastStart = walkbuf;
+            new_len++;
+            walk++;
+            walk_last = walk[-1];
           }
         }
-        *walkbuf = '\0';
-        if (eval) {
-          eval_result = f_call_user_func_array(eval_fn, params);
-          memcpy(result + result_len, eval_result.data(), eval_result.size());
-          result_len += eval_result.size();
-        } else {
-          /* increment the result length by how much we've added to the string */
-          result_len += walkbuf - (result + result_len);
-        }
-      }
 
-      if (limit != -1) {
-        limit--;
-      }
-
-    } else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
-      /* If we previously set PCRE_NOTEMPTY after a null match,
-         this is not necessarily the end. We need to advance
-         the start offset, and continue. Fudge the offset values
-         to achieve this, unless we're already at the end of the string. */
-      if (g_notempty != 0 && start_offset < subject.size()) {
-        offsets[0] = start_offset;
-        offsets[1] = start_offset + 1;
-        memcpy(&result[result_len], piece, 1);
-        (result_len)++;
-      } else {
-        new_len = result_len + subject.size() - start_offset;
         if (new_len + 1 > alloc_len) {
-          alloc_len = new_len + 1; /* now we know exactly how long it is */
+          alloc_len = 1 + alloc_len + 2 * new_len;
           result = (char *)realloc(result, alloc_len);
         }
-        /* stick that last bit of string on our output */
-        memcpy(&result[result_len], piece, subject.size() - start_offset);
-        result_len += subject.size() - start_offset;
-        result[result_len] = '\0';
+        /* copy the part of the string before the match */
+        memcpy(&result[result_len], piece, match-piece);
+        result_len += match-piece;
+
+        /* copy replacement and backrefs */
+        walkbuf = result + result_len;
+
+        /* If evaluating or using custom function, copy result to the buffer
+         * and clean up. */
+        if (callable) {
+          memcpy(walkbuf, eval_result.data(), eval_result.size());
+          result_len += eval_result.size();
+        } else { /* do regular backreference copying */
+          walk = replace;
+          walk_last = 0;
+          Array params;
+          const char* lastStart = NULL;
+          while (walk < replace_end) {
+            bool handleQuote = eval && '"' == *walk && walk_last != '\\';
+            if (handleQuote && lastStart != NULL) {
+              String str(lastStart, walkbuf - lastStart, CopyString);
+              params.append(str);
+              lastStart = NULL;
+              handleQuote = false;
+            }
+            if ('\\' == *walk || '$' == *walk) {
+              if (walk_last == '\\') {
+                *(walkbuf-1) = *walk++;
+                walk_last = 0;
+                continue;
+              }
+              if (preg_get_backref(&walk, &backref)) {
+                if (backref < count) {
+                  match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
+                  memcpy(walkbuf, subject.data() + offsets[backref<<1],
+                         match_len);
+                  walkbuf += match_len;
+                }
+                continue;
+              }
+            }
+            *walkbuf++ = *walk++;
+            walk_last = walk[-1];
+            if (handleQuote && lastStart == NULL) {
+              lastStart = walkbuf;
+            }
+          }
+          *walkbuf = '\0';
+          if (eval) {
+            eval_result = f_call_user_func_array(eval_fn, params);
+            memcpy(result + result_len, eval_result.data(), eval_result.size());
+            result_len += eval_result.size();
+          } else {
+            /* increment the result length by how much we've added to the string */
+            result_len += walkbuf - (result + result_len);
+          }
+        }
+
+        if (limit != -1) {
+          limit--;
+        }
+
+      } else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
+        /* If we previously set PCRE_NOTEMPTY after a null match,
+           this is not necessarily the end. We need to advance
+           the start offset, and continue. Fudge the offset values
+           to achieve this, unless we're already at the end of the string. */
+        if (g_notempty != 0 && start_offset < subject.size()) {
+          offsets[0] = start_offset;
+          offsets[1] = start_offset + 1;
+          memcpy(&result[result_len], piece, 1);
+          (result_len)++;
+        } else {
+          new_len = result_len + subject.size() - start_offset;
+          if (new_len + 1 > alloc_len) {
+            alloc_len = new_len + 1; /* now we know exactly how long it is */
+            result = (char *)realloc(result, alloc_len);
+          }
+          /* stick that last bit of string on our output */
+          memcpy(&result[result_len], piece, subject.size() - start_offset);
+          result_len += subject.size() - start_offset;
+          result[result_len] = '\0';
+          break;
+        }
+      } else {
+        if (pcre_need_log_error(count)) {
+          const char *s;
+          int size;
+          String stemp;
+          if (callable) {
+            if (replace_var.isObject()) {
+              stemp =
+                replace_var.objectForCall()->o_getClassName() + "::__invoke";
+            } else {
+              stemp = replace_var.toString();
+            }
+            s = stemp.data();
+            size = stemp.size();
+          } else {
+            s = replace_val.data();
+            size = replace_val.size();
+          }
+          pcre_log_error(__FUNCTION__, __LINE__, count,
+                         pattern.data(), pattern.size(),
+                         subject.data(), subject.size(),
+                         s, size,
+                         callable, limit, start_offset, g_notempty);
+        }
+        pcre_handle_exec_error(count);
+        free(result);
+        result = NULL;
         break;
       }
-    } else {
-      if (pcre_need_log_error(count)) {
-        const char *s;
-        int size;
-        String stemp;
-        if (callable) {
-          if (replace_var.isObject()) {
-            stemp =
-              replace_var.objectForCall()->o_getClassName() + "::__invoke";
-          } else {
-            stemp = replace_var.toString();
-          }
-          s = stemp.data();
-          size = stemp.size();
-        } else {
-          s = replace_val.data();
-          size = replace_val.size();
-        }
-        pcre_log_error(__FUNCTION__, __LINE__, count,
-                       pattern.data(), pattern.size(),
-                       subject.data(), subject.size(),
-                       s, size,
-                       callable, limit, start_offset, g_notempty);
-      }
-      pcre_handle_exec_error(count);
-      free(result);
-      result = NULL;
-      break;
+
+      /* If we have matched an empty string, mimic what Perl's /g options does.
+         This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+         the match again at the same point. If this fails (picked up above) we
+         advance to the next character. */
+      g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
+
+      /* Advance to the next piece. */
+      start_offset = offsets[1];
     }
 
-    /* If we have matched an empty string, mimic what Perl's /g options does.
-       This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
-       the match again at the same point. If this fails (picked up above) we
-       advance to the next character. */
-    g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
-
-    /* Advance to the next piece. */
-    start_offset = offsets[1];
+    if (result) {
+      return String(result, result_len, AttachString);
+    }
+    return String();
+  } catch (...) {
+    if (result) free(result);
+    throw;
   }
-
-  free(offsets);
-  if (result) {
-    return String(result, result_len, AttachString);
-  }
-  return String();
 }
 
 static String php_replace_in_subject(CVarRef regex, CVarRef replace,
@@ -1147,7 +1116,8 @@ int preg_replace_callback(Variant &result, CVarRef pattern, CVarRef callback,
 
 Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
                    int flags /* = 0 */) {
-  pcre_cache_entry *pce = pcre_get_compiled_regex_cache(pattern.toString());
+  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(
+    pattern.toString());
   if (pce == NULL) {
     return false;
   }
@@ -1162,6 +1132,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
 
   int size_offsets = 0;
   int *offsets = create_offset_array(pce, size_offsets);
+  FreeHelper offsetsFreer(offsets);
   if (offsets == NULL) {
     return false;
   }
@@ -1172,7 +1143,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
   int start_offset = 0;
   int next_offset = 0;
   const char *last_match = ssubject.data();
-  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
+  t_last_error_code = PHP_PCRE_NO_ERROR;
   pcre_extra *extra = pce->extra;
 
   // Get next piece if no limit or limit not yet reached and something matched
@@ -1307,8 +1278,6 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
     }
   }
 
-  /* Clean up */
-  free(offsets);
   return return_value;
 }
 
@@ -1368,7 +1337,7 @@ String preg_quote(CStrRef str, CStrRef delimiter /* = null_string */) {
 }
 
 int preg_last_error() {
-  return s_pcre_cache->error_code;
+  return t_last_error_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

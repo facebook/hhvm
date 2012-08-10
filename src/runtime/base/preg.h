@@ -52,7 +52,6 @@ Variant php_split(CStrRef spliton, CStrRef str, int count, bool icase);
 
 int preg_last_error();
 
-void preg_get_pcre_cache() ATTRIBUTE_COLD;
 ///////////////////////////////////////////////////////////////////////////////
 }
 

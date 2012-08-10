@@ -31,12 +31,17 @@ StaticString PlainFile::s_class_name("PlainFile");
 // constructor and destructor
 
 PlainFile::PlainFile(FILE *stream, bool nonblocking)
-  : File(nonblocking), m_stream(stream), m_eof(false) {
-  if (stream) m_fd = fileno(stream);
+  : File(nonblocking), m_stream(stream), m_eof(false), m_buffer(NULL) {
+  if (stream) {
+    m_fd = fileno(stream);
+    m_buffer = (char *)malloc(BUFSIZ);
+    if (m_buffer)
+      setbuffer(stream, m_buffer, BUFSIZ);
+  }
 }
 
 PlainFile::PlainFile(int fd, bool nonblocking)
-  : File(nonblocking), m_stream(NULL), m_eof(false) {
+  : File(nonblocking), m_stream(NULL), m_eof(false), m_buffer(NULL) {
   m_fd = fd;
 }
 
@@ -82,6 +87,9 @@ bool PlainFile::open(CStrRef filename, CStrRef mode) {
   }
   m_stream = f;
   m_fd = fileno(f);
+  m_buffer = (char *)malloc(BUFSIZ);
+  if (m_buffer)
+    setbuffer(f, m_buffer, BUFSIZ);
   return true;
 }
 
@@ -98,6 +106,10 @@ bool PlainFile::closeImpl() {
       m_stream = NULL;
     } else if (m_fd >= 0) {
       s_file_data->m_pcloseRet = ::close(m_fd);
+    }
+    if (m_buffer) {
+      free(m_buffer);
+      m_buffer = NULL;
     }
     ret = (s_file_data->m_pcloseRet == 0);
     m_closed = true;

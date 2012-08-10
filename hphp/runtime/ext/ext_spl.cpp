@@ -295,7 +295,7 @@ Variant f_spl_autoload_functions() {
 }
 
 void f_spl_autoload_call(CStrRef class_name) {
-  AutoloadHandler::s_instance->invokeHandler(class_name, NULL, true);
+  AutoloadHandler::s_instance->invokeHandler(class_name, true);
 }
 
 namespace {

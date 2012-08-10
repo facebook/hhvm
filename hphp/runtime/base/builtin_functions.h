@@ -591,8 +591,7 @@ public:
   void removeAllHandlers();
   bool isRunning();
 
-  bool invokeHandler(CStrRef className, const bool *declared = nullptr,
-                     bool forceSplStack = false);
+  bool invokeHandler(CStrRef className, bool forceSplStack = false);
   bool autoloadFunc(CStrRef name);
   bool autoloadConstant(CStrRef name);
   bool setMap(CArrRef map, CStrRef root);
@@ -609,61 +608,6 @@ private:
   Array m_handlers;
   bool m_running;
 };
-
-/**
- * The check/autoload helpers below are used by generated code to invoke
- * the autoload facility. These helpers should only be used by generated
- * code produced by hphpc.
- *
- * All of the helpers take a 'declared' pointer which points to the flag
- * corresponding to the given class or interface.
- * When the autoload handlers execute they will set the flag to true if the
- * given class or interface is found. If 'declared' is non-NULL, these helpers
- * will execute the autoload handlers and then return the value of the flag.
- * If 'declared' is NULL, these helpers will execute the autoload hanlders
- * and then return false.
- */
-
-bool autoloadClassThrow(CStrRef name, bool *declared);
-bool autoloadClassNoThrow(CStrRef name, bool *declared);
-bool autoloadInterfaceThrow(CStrRef name, bool *declared);
-bool autoloadInterfaceNoThrow(CStrRef name, bool *declared);
-bool autoloadFunctionNoThrow(CStrRef name, bool *declared);
-
-inline ALWAYS_INLINE bool checkClassExistsThrow(CStrRef name,
-                                                bool *declared) {
-  assert(declared);
-  if (LIKELY(*declared)) return true;
-  return autoloadClassThrow(name, declared);
-}
-
-inline ALWAYS_INLINE bool checkClassExistsNoThrow(CStrRef name,
-                                                  bool *declared) {
-  assert(declared);
-  if (LIKELY(*declared)) return true;
-  return autoloadClassNoThrow(name, declared);
-}
-
-inline ALWAYS_INLINE bool checkInterfaceExistsThrow(CStrRef name,
-                                                    bool *declared) {
-  assert(declared);
-  if (LIKELY(*declared)) return true;
-  return autoloadInterfaceThrow(name, declared);
-}
-
-inline ALWAYS_INLINE bool checkInterfaceExistsNoThrow(CStrRef name,
-                                                      bool *declared) {
-  assert(declared);
-  if (LIKELY(*declared)) return true;
-  return autoloadInterfaceNoThrow(name, declared);
-}
-
-inline ALWAYS_INLINE bool checkFunctionExistsNoThrow(CStrRef name,
-                                                     bool *declared) {
-  assert(declared);
-  if (LIKELY(*declared)) return true;
-  return autoloadFunctionNoThrow(name, declared);
-}
 
 class CallInfo;
 

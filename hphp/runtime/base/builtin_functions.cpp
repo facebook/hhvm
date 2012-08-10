@@ -1394,16 +1394,10 @@ bool AutoloadHandler::setMap(CArrRef map, CStrRef root) {
 
 class ClassExistsChecker {
  public:
-  ClassExistsChecker(const bool *declared) : m_declared(declared) {}
+  ClassExistsChecker() {}
   bool operator()(CStrRef name) const {
-    if (m_declared) {
-      return *m_declared;
-    } else {
-      return VM::Unit::lookupClass(name.get()) != nullptr;
-    }
+    return VM::Unit::lookupClass(name.get()) != nullptr;
   }
- private:
-  const bool* m_declared;
 };
 
 class ConstantExistsChecker {
@@ -1485,10 +1479,9 @@ bool AutoloadHandler::autoloadConstant(CStrRef name) {
  * responsibility to check if the given class or interface exists.
  */
 bool AutoloadHandler::invokeHandler(CStrRef className,
-                                    const bool *declared /* = NULL */,
                                     bool forceSplStack /* = false */) {
   if (!m_map.isNull()) {
-    ClassExistsChecker ce(declared);
+    ClassExistsChecker ce;
     Result res = loadFromMap(className, s_class, true, ce);
     if (res == ContinueAutoloading) {
       if (ce(className)) return true;
@@ -1531,9 +1524,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
         autoloadException = ex;
       }
     }
-    // TODO: f_class_exists() does not check interfaces. We need to
-    // fix this to check for both classes and interfaces.
-    if (declared ? *declared : f_class_exists(className, false)) {
+    if (VM::Unit::lookupClass(className.get()) != nullptr) {
       break;
     }
   }
@@ -1601,37 +1592,6 @@ String AutoloadHandler::getSignature(CVarRef handler) {
 
 bool function_exists(CStrRef function_name) {
   return HPHP::VM::Unit::lookupFunc(function_name.get()) != nullptr;
-}
-
-bool autoloadClassThrow(CStrRef name, bool *declared) {
-  if (autoloadClassNoThrow(name, declared)) return true;
-  string msg = "unknown class ";
-  msg += name.c_str();
-  throw_fatal(msg.c_str());
-  return false;
-}
-
-bool autoloadClassNoThrow(CStrRef name, bool *declared) {
-  AutoloadHandler::s_instance->invokeHandler(name, declared);
-  return declared && *declared;
-}
-
-bool autoloadInterfaceThrow(CStrRef name, bool *declared) {
-  if (autoloadInterfaceNoThrow(name, declared)) return true;
-  string msg = "unknown interface ";
-  msg += name.c_str();
-  throw_fatal(msg.c_str());
-  return false;
-}
-
-bool autoloadInterfaceNoThrow(CStrRef name, bool *declared) {
-  AutoloadHandler::s_instance->invokeHandler(name, declared);
-  return declared && *declared;
-}
-
-bool autoloadFunctionNoThrow(CStrRef name, bool *declared) {
-  AutoloadHandler::s_instance->autoloadFunc(name);
-  return *declared;
 }
 
 HOT_FUNC_HPHP

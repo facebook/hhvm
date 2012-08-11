@@ -787,7 +787,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
   mysql->status = MYSQL_STATUS_READY;
   Variant result = Object(NEWOBJ(MySQLResult)(NULL, true));
   if (!php_mysql_read_rows(mysql, result)) {
-    return true;
+    return false;
   }
 
   // clean up

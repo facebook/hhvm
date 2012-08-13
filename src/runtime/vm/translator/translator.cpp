@@ -423,14 +423,15 @@ predictOutputs(NormalizedInstruction* ni) {
     MemberCode mc;
     if (immVec.decodeLastMember(curUnit(), name, mc)) {
       pred = predictType(TypeProfileKey(mc, name));
-      TRACE(1, "prediction for %s named %s: %d, %f\n",
+      TRACE(0, "prediction for %s named %s: %d, %f\n",
             mc == MET ? "elt" : "prop",
             name->data(),
             pred.first,
             pred.second);
     }
   }
-  if (pred.second < 1.00) {
+  static const double kAccept = 1.00;
+  if (debug && pred.second < kAccept) {
     if (const StringData* invName = fcallToFuncName(ni)) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
       TRACE(1, "prediction for methods named %s: %d, %f\n",
@@ -439,7 +440,7 @@ predictOutputs(NormalizedInstruction* ni) {
             pred.second);
     }
   }
-  if (pred.second >= 1.00) {
+  if (pred.second >= kAccept) {
     ni->outputPredicted = true;
     TRACE(1, "accepting prediction of type %d\n", pred.first);
     return pred.first;

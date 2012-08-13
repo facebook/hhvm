@@ -534,6 +534,9 @@ private:
   bool checkTranslationLimit(const SrcKey&, const SrcRec&) const;
   void translateTracelet(const Tracelet& t);
   void emitStringCheck(Asm& _a, PhysReg base, int offset, PhysReg tmp);
+  void emitTypeCheck(Asm& _a, DataType dt,
+                     PhysReg base, int offset,
+                     PhysReg tmp = InvalidReg);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,
     SrcRec& fail);
   void checkRefs(Asm&, const SrcKey&, const RefDeps&, SrcRec&);

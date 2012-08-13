@@ -57,16 +57,16 @@ struct ValueProfile {
  *
  * Tradeoff: size vs. accuracy.
  *
- * ~64K entries.
+ * ~256K entries.
  *
- * Size: (sizeof(ValueProfile) == 16) B -> 1MB
+ * Size: (sizeof(ValueProfile) == 16) B -> 4MB
  *
  * Accuracy: If we collide further than kLineSize, we toss out perfectly
  * good evidence. www seems to use about 12000 method names at this
  * writing, so we have a decent pad for collisions.
  */
 
-static const int kNumEntries = 1 << 16;
+static const int kNumEntries = 1 << 18;
 static const int kLineSizeLog2 = 2;
 static const int kLineSize = 1 << kLineSizeLog2;
 static const int kNumLines = kNumEntries / kLineSize;
@@ -214,7 +214,7 @@ keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
     Stats::inc(Stats::TypePred_Evict, vp.m_totalSamples != 0);
     Stats::inc(Stats::TypePred_Insert);
     TRACE(1, "Killing %d in favor of %s -> %d\n",
-          vp.m_tag, key.m_name->data(), uint32_t(h));
+          vp.m_tag, key.m_name ? key.m_name->data() : "NULL", uint32_t(h));
     vp.m_totalSamples = 0;
     memset(&vp.m_samples, 0, sizeof(vp.m_samples));
     // Zero first, then claim. It seems safer to temporarily zero out some
@@ -229,6 +229,9 @@ keyToVP(const TypeProfileKey& key, KeyToVPMode mode) {
 
 void recordType(const TypeProfileKey& key, DataType dt) {
   if (!profiles) return;
+  if (!shouldProfile()) return;
+  // Normalize strings to KindOfString.
+  if (dt == KindOfStaticString) dt = KindOfString;
   TRACE(1, "recordType lookup: %s -> %d\n", key.m_name->data(), dt);
   ValueProfile *prof = keyToVP(key, Write);
   if (prof->m_totalSamples != UCHAR_MAX) {

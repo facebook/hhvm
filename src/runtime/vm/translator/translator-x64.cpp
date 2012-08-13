@@ -2951,6 +2951,23 @@ TranslatorX64::emitStringCheck(X64Assembler& _a,
 }
 
 void
+TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
+                             PhysReg base, int offset,
+                             PhysReg tmp/*= InvalidReg*/) {
+  offset += TVOFF(m_type);
+  if (IS_STRING_TYPE(dt)) {
+    LazyScratchReg scr(m_regMap);
+    if (tmp == InvalidReg) {
+      scr.alloc();
+      tmp = *scr;
+    }
+    emitStringCheck(_a, base, offset, tmp);
+  } else {
+    _a. cmp_imm32_disp_reg32(dt, offset, base);
+  }
+}
+
+void
 TranslatorX64::checkType(X64Assembler& a,
                          const Location& l,
                          const RuntimeType& rtt,
@@ -2973,13 +2990,12 @@ TranslatorX64::checkType(X64Assembler& a,
   if (Trace::moduleEnabled(Trace::stats, 2)) {
     Stats::emitInc(a, Stats::TraceletGuard_branch);
   }
-  if (rtt.isValue() && IS_STRING_TYPE(rtt.typeCheckValue())) {
-    emitStringCheck(a, base, disp + rtt.typeCheckOffset(), rax);
-  } else {
-    ASSERT(rtt.typeCheckValue() != KindOfInvalid);
+  if (rtt.isIter()) {
     a.   cmp_imm32_disp_reg32(rtt.typeCheckValue(),
                               disp + rtt.typeCheckOffset(),
                               base);
+  } else {
+    emitTypeCheck(a, rtt.typeCheckValue(), base, disp, rax);
   }
   emitFallbackJmp(fail);
 }
@@ -9908,12 +9924,7 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
                                  PhysReg reg, int disp, DataType type,
                                  TCA &sideExit) {
   bool isFirstInstr = (&i == t.m_instrStream.first);
-  if (IS_STRING_TYPE(type)) {
-    ScratchReg tmp(m_regMap);
-    emitStringCheck(a, reg, disp + TVOFF(m_type), *tmp);
-  } else {
-    a.  cmp_imm32_disp_reg32(type, disp + TVOFF(m_type), reg);
-  }
+  emitTypeCheck(a, type, reg, disp);
   if (isFirstInstr) {
     SrcRec& srcRec = *getSrcRec(t.m_sk);
     // If it's the first instruction, we haven't made any forward
@@ -9930,7 +9941,6 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
   } else {
     a.    jnz(sideExit);
   }
-
 }
 
 void
@@ -10027,12 +10037,11 @@ TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
   PhysReg base;
   int disp;
   locToRegDisp(i.outStack->location, &base, &disp);
-  int off = disp + TVOFF(m_type);
   ASSERT(base == rVmSp);
   TRACE(1, "PREDGUARD: %p dt %d offset %d voffset %lld\n",
-        a.code.frontier, i.outStack->outerType(), off,
+        a.code.frontier, i.outStack->outerType(), disp,
         i.outStack->location.offset);
-  a.  cmp_imm32_disp_reg32(i.outStack->outerType(), off, rVmSp);
+  emitTypeCheck(a, i.outStack->outerType(), rVmSp, disp);
   {
     UnlikelyIfBlock<CC_NZ> branchToSideExit(a, astubs);
     Stats::emitInc(astubs, Stats::TC_TypePredMiss);
@@ -10088,16 +10097,9 @@ TranslatorX64::translateInstr(const Tracelet& t,
                !dl->rtt.isVagueValue() &&
                dl->outerType() != KindOfInvalid);
         PhysReg base;
-        int disp = 0;
+        int disp;
         locToRegDisp(dl->location, &base, &disp);
-        if (IS_STRING_TYPE(dl->rtt.typeCheckValue())) {
-          ScratchReg sc(m_regMap);
-          emitStringCheck(a, base, disp + dl->rtt.typeCheckOffset(), *sc);
-        } else {
-          a.   cmp_imm32_disp_reg32(dl->rtt.typeCheckValue(),
-                                    disp + dl->rtt.typeCheckOffset(),
-                                    base);
-        }
+        emitTypeCheck(a, dl->rtt.typeCheckValue(), base, disp);
         {
           UnlikelyIfBlock<CC_NZ> typePredFailed(a, astubs);
           EMIT_CALL(astubs, failedTypePred);

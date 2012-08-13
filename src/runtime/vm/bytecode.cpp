@@ -4666,11 +4666,21 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetS(PC& pc) {
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCGetM(PC& pc) {
+  PC oldPC = pc;
   NEXT();
   DECLARE_GETHELPER_ARGS
   getHelper(GETHELPER_ARGS);
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
+  }
+  if (typeProfileCGetM) {
+    ASSERT(hasImmVector(*oldPC));
+    const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
+    StringData* name;
+    MemberCode mc;
+    if (immVec.decodeLastMember(curUnit(), name, mc)) {
+      recordType(TypeProfileKey(mc, name), m_stack.top()->m_type);
+    }
   }
 }
 

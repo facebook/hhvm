@@ -341,6 +341,7 @@ public:
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
+  static bool EnableFinallyStatement;
   static bool NativeXHP;
   static int ScannerType;
   static int ParserThreadCount;

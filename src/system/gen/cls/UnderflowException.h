@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 281 */
+/* SRC: classes/exception.php line 295 */
 FORWARD_DECLARE_CLASS(UnderflowException);
 extern const ObjectStaticCallbacks cw_UnderflowException;
 class c_UnderflowException : public c_RuntimeException {

@@ -30,16 +30,27 @@ TryStatement::TryStatement
     m_tryStmt(tryStmt), m_catches(catches) {
 }
 
+TryStatement::TryStatement
+(STATEMENT_CONSTRUCTOR_PARAMETERS,
+ StatementPtr tryStmt, StatementListPtr catches, StatementPtr finallyStmt)
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(TryStatement)),
+    m_tryStmt(tryStmt), m_catches(catches), m_finallyStmt(finallyStmt) {
+}
+
 StatementPtr TryStatement::clone() {
   TryStatementPtr stmt(new TryStatement(*this));
   stmt->m_tryStmt = Clone(m_tryStmt);
-  stmt->m_catches = Clone(m_catches);
+  if (m_catches)
+    stmt->m_catches = Clone(m_catches);
+  if (m_finallyStmt)
+    stmt->m_finallyStmt = Clone(m_finallyStmt);
   return stmt;
 }
 
 int TryStatement::getRecursiveCount() const {
   return (m_tryStmt ? m_tryStmt->getRecursiveCount() : 0) +
-    (m_catches ? m_catches->getRecursiveCount() : 0);
+    (m_catches->getCount() ? m_catches->getRecursiveCount() : 0) + 
+    (m_finallyStmt ? m_finallyStmt->getRecursiveCount() : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +61,10 @@ int TryStatement::getRecursiveCount() const {
 
 void TryStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_tryStmt) m_tryStmt->analyzeProgram(ar);
-  m_catches->analyzeProgram(ar);
+  if (m_catches)
+    m_catches->analyzeProgram(ar);
+  if (m_finallyStmt)
+    m_finallyStmt->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     FunctionScopeRawPtr fs = getFunctionScope();
     if (fs) fs->setHasTry();
@@ -59,12 +73,16 @@ void TryStatement::analyzeProgram(AnalysisResultPtr ar) {
 
 bool TryStatement::hasDecl() const {
   if (m_tryStmt && m_tryStmt->hasDecl()) return true;
-  return m_catches->hasDecl();
+  if (m_catches && m_catches->hasDecl()) return true;
+  if (m_finallyStmt && m_finallyStmt->hasDecl()) return true;
+  return false;
 }
 
 bool TryStatement::hasRetExp() const {
   if (m_tryStmt && m_tryStmt->hasRetExp()) return true;
-  return m_catches->hasRetExp();
+  if (m_catches && m_catches->hasRetExp()) return true;
+  if (m_finallyStmt && m_finallyStmt->hasRetExp()) return true;
+  return false;
 }
 
 ConstructPtr TryStatement::getNthKid(int n) const {
@@ -73,6 +91,8 @@ ConstructPtr TryStatement::getNthKid(int n) const {
       return m_tryStmt;
     case 1:
       return m_catches;
+    case 2:
+      return m_finallyStmt;
     default:
       ASSERT(false);
       break;
@@ -81,7 +101,7 @@ ConstructPtr TryStatement::getNthKid(int n) const {
 }
 
 int TryStatement::getKidCount() const {
-  return 2;
+  return 3;
 }
 
 void TryStatement::setNthKid(int n, ConstructPtr cp) {
@@ -92,6 +112,8 @@ void TryStatement::setNthKid(int n, ConstructPtr cp) {
     case 1:
       m_catches = boost::dynamic_pointer_cast<StatementList>(cp);
       break;
+    case 2:
+      m_finallyStmt = boost::dynamic_pointer_cast<Statement>(cp);
     default:
       ASSERT(false);
       break;
@@ -100,7 +122,8 @@ void TryStatement::setNthKid(int n, ConstructPtr cp) {
 
 void TryStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_tryStmt) m_tryStmt->inferTypes(ar);
-  m_catches->inferTypes(ar);
+  if (m_catches) m_catches->inferTypes(ar);
+  if (m_finallyStmt) m_finallyStmt->inferTypes(ar);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,23 +133,45 @@ void TryStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin("try {\n");
   if (m_tryStmt) m_tryStmt->outputPHP(cg, ar);
   cg_indentEnd("}");
-  m_catches->outputPHP(cg, ar);
+  if (m_catches->getCount())
+    m_catches->outputPHP(cg, ar);
   cg_printf("\n");
 }
 
 void TryStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ASSERT(m_catches->getCount());
+  int c_count = m_catches->getCount();
+  bool has_finally = m_finallyStmt ? true : false;
+  
+  ASSERT(c_count || has_finally);
 
-  cg_indentBegin("try {\n");
-  if (m_tryStmt) m_tryStmt->outputCPP(cg, ar);
-  cg_indentEnd("}");
-  cg_indentBegin(" catch (Object e) {\n");
-  for (int i = 0; i < m_catches->getCount(); i++) {
-    if (i > 0) cg_printf(" else ");
-    (*m_catches)[i]->outputCPP(cg, ar);
+  if (has_finally) {
+    cg_indentBegin("{\n");
+    cg_printf("Object exception;\n");
+    cg_printf("bool has_exception = false;\n");
+    cg_indentBegin("try {\n");
   }
-  cg_printf(" else {\n");
-  cg_printf("  throw;\n");
-  cg_printf("}\n");
-  cg_indentEnd("}\n");
+  if (c_count) cg_indentBegin("try {\n");
+  if (m_tryStmt) m_tryStmt->outputCPP(cg, ar);
+  if (c_count) cg_indentEnd("}");
+  if (c_count) {
+    cg_indentBegin(" catch (Object e) {\n");
+    for (int i = 0; i < c_count; i++) {
+      if (i > 0) cg_printf(" else ");
+      (*m_catches)[i]->outputCPP(cg, ar);
+    }
+    cg_printf(" else {\n");
+    cg_printf("  throw;\n");
+    cg_printf("}\n");
+    cg_indentEnd("}\n");
+  }
+  if (has_finally) {
+    cg_indentEnd("}");
+    cg_indentBegin(" catch (Object e) {\n");
+    cg_printf("exception = e;\n");
+    cg_printf("has_exception = true;\n");
+    cg_indentEnd("}\n");
+    m_finallyStmt->outputCPP(cg, ar);
+    cg_printf("if (has_exception) throw exception;\n");
+    cg_indentEnd("}\n");
+  }
 }

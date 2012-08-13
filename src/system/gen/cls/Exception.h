@@ -66,6 +66,8 @@ class c_Exception : public ExtObjectData {
   public: c_Exception *create(CVarRef v_message = NAMVAR(s_sys_svs00000000, ""), CVarRef v_code = NAMVAR(s_sys_svif01bca90, 0LL), CVarRef v_previous = null_variant);
   public: Variant t_getmessage();
   public: Variant t_getprevious();
+  public: void t_setprevious(CVarRef v_previous);
+  public: void t_setpreviouschain(CVarRef v_previous);
   public: Variant t_getcode();
   public: Variant t_getfile();
   public: Variant t_getline();
@@ -79,6 +81,8 @@ class c_Exception : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(getmessage);
   DECLARE_METHOD_INVOKE_HELPERS(getprevious);
+  DECLARE_METHOD_INVOKE_HELPERS(setprevious);
+  DECLARE_METHOD_INVOKE_HELPERS(setpreviouschain);
   DECLARE_METHOD_INVOKE_HELPERS(getcode);
   DECLARE_METHOD_INVOKE_HELPERS(getfile);
   DECLARE_METHOD_INVOKE_HELPERS(getline);

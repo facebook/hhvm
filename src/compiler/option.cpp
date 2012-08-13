@@ -210,6 +210,7 @@ bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = true;
+bool Option::EnableFinallyStatement = false;
 bool Option::NativeXHP = true;
 int Option::ScannerType = Scanner::AllowShortTags;
 int Option::ParserThreadCount = 0;
@@ -428,6 +429,8 @@ void Option::Load(Hdf &config) {
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
+
+  EnableFinallyStatement = config["EnableFinallyStatement"].getBool();
 
   RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);

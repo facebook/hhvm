@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 196 */
+/* SRC: classes/exception.php line 210 */
 FORWARD_DECLARE_CLASS(BadFunctionCallException);
 extern const ObjectStaticCallbacks cw_BadFunctionCallException;
 class c_BadFunctionCallException : public c_LogicException {

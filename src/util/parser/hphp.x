@@ -99,6 +99,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"yield"                { SETTOKEN; return T_YIELD;}
 <ST_IN_SCRIPTING>"try"                  { SETTOKEN; return T_TRY;}
 <ST_IN_SCRIPTING>"catch"                { SETTOKEN; return T_CATCH;}
+<ST_IN_SCRIPTING>"finally"              { SETTOKEN; return T_FINALLY;}
 <ST_IN_SCRIPTING>"throw"                { SETTOKEN; return T_THROW;}
 <ST_IN_SCRIPTING>"if"                   { SETTOKEN; return T_IF;}
 <ST_IN_SCRIPTING>"elseif"               { SETTOKEN; return T_ELSEIF;}

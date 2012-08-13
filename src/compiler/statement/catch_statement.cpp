@@ -44,10 +44,24 @@ CatchStatement::CatchStatement
   m_variable->setContext(Expression::LValue);
 }
 
+CatchStatement::CatchStatement
+(STATEMENT_CONSTRUCTOR_PARAMETERS,
+ const std::string &className, const std::string &variable,
+ StatementPtr stmt, StatementPtr finallyStmt)
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(CatchStatement)),
+    StaticClassName(ExpressionPtr(
+                      new ScalarExpression(scope, loc,
+                                           T_STRING, className, false))),
+    m_variable(new SimpleVariable(scope, loc, variable)),
+    m_stmt(stmt), m_finallyStmt(finallyStmt), m_valid(true) {
+  m_variable->setContext(Expression::LValue);
+}
+
 StatementPtr CatchStatement::clone() {
   CatchStatementPtr stmt(new CatchStatement(*this));
   stmt->m_stmt = Clone(m_stmt);
   stmt->m_variable = Clone(m_variable);
+  stmt->m_finallyStmt = Clone(m_finallyStmt);
   return stmt;
 }
 
@@ -77,6 +91,8 @@ ConstructPtr CatchStatement::getNthKid(int n) const {
       return m_variable;
     case 1:
       return m_stmt;
+    case 2:
+      return m_finallyStmt;
     default:
       ASSERT(false);
       break;
@@ -85,7 +101,7 @@ ConstructPtr CatchStatement::getNthKid(int n) const {
 }
 
 int CatchStatement::getKidCount() const {
-  return 2;
+  return 2 + (m_finallyStmt ? 1 : 0);
 }
 
 void CatchStatement::setNthKid(int n, ConstructPtr cp) {
@@ -96,6 +112,8 @@ void CatchStatement::setNthKid(int n, ConstructPtr cp) {
     case 1:
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
+    case 2:
+      m_finallyStmt = boost::dynamic_pointer_cast<Statement>(cp);
     default:
       ASSERT(false);
       break;

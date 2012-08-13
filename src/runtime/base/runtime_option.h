@@ -368,6 +368,7 @@ public:
   static bool NativeXHP;
   static int ScannerType;
   static int MaxUserFunctionId;
+  static bool EnableFinallyStatement;
 
 #ifdef TAINTED
   static bool EnableTaintWarnings;

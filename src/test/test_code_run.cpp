@@ -1405,6 +1405,87 @@ bool TestCodeRun::TestExceptions() {
         "}\n"
         );
 
+  if (!hhvm) {
+    FinallyStatement w(this);
+
+    MVCRO("<?php\n"
+          "$var = 1;\n"
+          "try {\n"
+          "  $var += 2;\n"
+          "} catch (Exception $e) {\n"
+          "  $var += 4;\n"
+          "} finally {\n"
+          "  $var += 8;\n"
+          "}\n"
+          "print $var;",
+          "11");
+
+    MVCRO("<?php\n"
+          "$var = 1;\n"
+          "try {\n"
+          "  try {\n"
+          "    $var += 2;\n"
+          "    throw new Exception();\n"
+          "    $var += 4;\n"
+          "  } finally {\n"
+          "    $var += 8;\n"
+          "  }\n"
+          "} catch (Exception $e) {\n"
+          "  $var += 16;\n"
+          "}\n"
+          "print $var;",
+          "27");
+
+    MVCRO("<?php\n"
+          "function throwemup() {\n"
+          "  try {\n"
+          "    throw new Exception('Exception 1', 9);\n"
+          "  } catch (Exception $e) {\n"
+          "    throw new Exception('Exception 2', 8, $e);\n"
+          "  } finally {\n"
+          "    $tmp = new Exception('Exception 3', 7);\n"
+          "    throw new Exception('Exception 4', 6, $tmp);\n"
+          "  }\n"
+          "}\n"
+          "try {\n"
+          "  throwemup();\n"
+          "} catch (Exception $e) {\n"
+          "  for ($i = 4; $i--;) {\n"
+          "    print $e->getMessage();\n"
+          "    $e = $e->getPrevious();\n"
+          "  }\n"
+          "}\n",
+          "Exception 4"
+          "Exception 3"
+          "Exception 2"
+          "Exception 1");
+
+    MVCRO("<?php\n"
+          "try {\n"
+          "} finally {\n"
+          "  $a = 1;\n"
+          "}\n"
+          "print $a;\n",
+          "1");
+
+    MVCRO("<?php\n"
+          "function func() {\n"
+          "  try {} finally {}\n"
+          "  try {\n"
+          "    $a = 1;\n"
+          "    throw new Exception();\n"
+          "    $a += 2;\n"
+          "  } catch (Exception $e) {\n"
+          "  } finally {\n"
+          "    $a += 4;\n"
+          "  }\n"
+          "  print $a;\n"
+          "}\n"
+          "func();",
+          "5");
+    
+  }
+
   return true;
 }
 

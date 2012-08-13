@@ -104,6 +104,7 @@ public:
   virtual void error(const char* fmt, ...);
   virtual bool enableXHP();
   virtual bool enableHipHopSyntax();
+  virtual bool enableFinallyStatement();
   IMPLEMENT_XHP_ATTRIBUTES;
 
   virtual void fatal(Location *loc, const char *msg);
@@ -218,9 +219,11 @@ public:
   void onForEach(Token &out, Token &arr, Token &name, Token &value,
                  Token &stmt);
   void onTry(Token &out, Token &tryStmt, Token &className, Token &var,
-             Token &catchStmt, Token &catches);
+             Token &catchStmt, Token &catches, Token &finallyStmt);
+  void onTry(Token &out, Token &tryStmt, Token &finallyStmt);
   void onCatch(Token &out, Token &catches, Token &className, Token &var,
                Token &stmt);
+  void onFinally(Token &out, Token &stmt);
   void onThrow(Token &out, Token &expr);
 
   void onClosure(Token &out, Token &ret, Token &ref, Token &params,

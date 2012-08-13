@@ -32,20 +32,27 @@ public:
                  const std::string &className, const std::string &variable,
                  StatementPtr stmt);
 
+  CatchStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
+                 const std::string &className, const std::string &variable,
+                 StatementPtr stmt, StatementPtr finallyStmt);
+
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
   virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
   virtual int getRecursiveCount() const {
-    return (m_stmt ? m_stmt->getRecursiveCount() : 0);
+    return (m_stmt ? m_stmt->getRecursiveCount() : 0) 
+           + (m_finallyStmt ? m_finallyStmt->getRecursiveCount() : 0); 
   }
   const std::string &getVariableName() const { return m_variable->getName(); }
   const std::string &getClassName() const { return m_className; }
   SimpleVariablePtr getVariable() const { return m_variable; }
   StatementPtr getStmt() const { return m_stmt; }
+  StatementPtr getFinally() const { return m_finallyStmt; }
   void setStmt(StatementPtr s) { m_stmt = s; }
 private:
   SimpleVariablePtr m_variable;
   StatementPtr m_stmt;
+  StatementPtr m_finallyStmt;
   bool m_valid;
 };
 

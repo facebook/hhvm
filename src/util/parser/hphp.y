@@ -512,6 +512,12 @@ static void user_attribute_check(Parser *_p) {
   }
 }
 
+static void finally_statement(Parser *_p) {
+  if (!_p->enableFinallyStatement()) {
+    HPHP_PARSER_ERROR("Finally statement is not enabled", _p);
+  }
+}
+
 static void constant_ae(Parser *_p, Token &out, Token &value) {
   const std::string& valueStr = value.text();
   if (valueStr.size() < 3 || valueStr.size() > 5 ||
@@ -987,6 +993,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_STRICT_INT_MAP
 %token T_STRICT_STR_MAP
 %token T_STRICT_ERROR
+%token T_FINALLY
 
 %%
 
@@ -1158,7 +1165,14 @@ statement_without_expr:
     fully_qualified_class_name
     T_VARIABLE ')' '{'
     inner_statement_list '}'
-    additional_catches                 { _p->onTry($$,$3,$7,$8,$11,$13);}
+    additional_catches
+    optional_finally                   { _p->onTry($$,$3,$7,$8,$11,$13,$14);}
+
+  
+  | T_TRY '{'
+    inner_statement_list '}'
+    finally                            { _p->onTry($$, $3, $5);}
+
 
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
   | T_GOTO T_STRING ';'                { _p->onGoto($$, $2, true);
@@ -1173,6 +1187,17 @@ additional_catches:
     T_VARIABLE ')'
     '{'
     inner_statement_list '}'           { _p->onCatch($$, $1, $4, $5, $8);}
+  |                                    { $$.reset();}
+;
+
+finally:
+                                       { finally_statement(_p);}
+    T_FINALLY '{'
+    inner_statement_list '}'           { _p->onFinally($$, $4);}
+;
+
+optional_finally:
+    finally
   |                                    { $$.reset();}
 ;
 
@@ -1861,6 +1886,7 @@ xhp_bareword:
   | T_YIELD                            { $$ = $1;}
   | T_TRY                              { $$ = $1;}
   | T_CATCH                            { $$ = $1;}
+  | T_FINALLY                          { $$ = $1;}
   | T_THROW                            { $$ = $1;}
   | T_IF                               { $$ = $1;}
   | T_ELSEIF                           { $$ = $1;}

@@ -267,6 +267,16 @@ private:
   OptionSetter m_runtime;
 };
 
+class FinallyStatement {
+public:
+  FinallyStatement(TestCodeRun *tcr) :
+    m_compile(tcr, OptionSetter::CompileTime, "-vEnableFinallyStatement=1"),
+    m_runtime(tcr, OptionSetter::RunTime, "-vEval.EnableFinallyStatement=1") {}
+private:
+  OptionSetter m_compile;
+  OptionSetter m_runtime;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // macros
 

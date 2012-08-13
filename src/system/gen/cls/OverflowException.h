@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 264 */
+/* SRC: classes/exception.php line 278 */
 FORWARD_DECLARE_CLASS(OverflowException);
 extern const ObjectStaticCallbacks cw_OverflowException;
 class c_OverflowException : public c_RuntimeException {

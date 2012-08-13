@@ -2018,8 +2018,16 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
     endScope();
     clear();
     canonicalizeKid(s, trs->getCatches(), 1);
+    if (trs->getFinally()) {
+      clear();
+      canonicalizeKid(s, trs->getFinally(), 2);
+    }
     ret = Converge;
     start = nkid;
+    break;
+  }
+
+  case Statement::KindOfFinallyStatement: {
     break;
   }
 

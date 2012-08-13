@@ -32,6 +32,7 @@
 #include "compiler/statement/switch_statement.h"
 #include "compiler/statement/break_statement.h"
 #include "compiler/statement/try_statement.h"
+#include "compiler/statement/finally_statement.h"
 #include "compiler/statement/label_statement.h"
 #include "compiler/statement/goto_statement.h"
 #include "compiler/statement/case_statement.h"
@@ -268,12 +269,17 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
             TryStatementPtr t = static_pointer_cast<TryStatement>(s);
             StatementListPtr catches = t->getCatches();
             StatementPtr body = t->getBody();
+            FinallyStatementPtr finally = static_pointer_cast<FinallyStatement>(t->getFinally());
             if (body) {
               for (int n = catches->getCount(), j = 0; j < n; ++j) {
                 addEdge(body, BeforeConstruct,
                         (*catches)[j], BeforeConstruct);
                 addEdge(body, AfterConstruct,
                         (*catches)[j], BeforeConstruct);
+              }
+              if (finally) {
+                addEdge(body, BeforeConstruct, finally, BeforeConstruct);
+                addEdge(body, AfterConstruct, finally, BeforeConstruct);
               }
               addEdge(body, AfterConstruct, t, AfterConstruct);
               noFallThrough(body);
@@ -295,6 +301,9 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
             }
             break;
           }
+
+          case Statement::KindOfFinallyStatement:
+            break;
 
           case Statement::KindOfCatchStatement:
             break;

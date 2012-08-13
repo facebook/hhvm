@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 256 */
+/* SRC: classes/exception.php line 270 */
 FORWARD_DECLARE_CLASS(OutOfBoundsException);
 extern const ObjectStaticCallbacks cw_OutOfBoundsException;
 class c_OutOfBoundsException : public c_RuntimeException {

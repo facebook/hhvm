@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 292 */
+/* SRC: classes/exception.php line 306 */
 FORWARD_DECLARE_CLASS(InvalidOperationException);
 extern const ObjectStaticCallbacks cw_InvalidOperationException;
 class c_InvalidOperationException : public c_RuntimeException {

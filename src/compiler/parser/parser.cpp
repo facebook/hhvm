@@ -70,6 +70,7 @@
 #include <compiler/statement/foreach_statement.h>
 #include <compiler/statement/catch_statement.h>
 #include <compiler/statement/try_statement.h>
+#include <compiler/statement/finally_statement.h>
 #include <compiler/statement/throw_statement.h>
 #include <compiler/statement/goto_statement.h>
 #include <compiler/statement/label_statement.h>
@@ -217,6 +218,10 @@ bool Parser::enableXHP() {
 
 bool Parser::enableHipHopSyntax() {
   return Option::EnableHipHopSyntax;
+}
+
+bool Parser::enableFinallyStatement() {
+  return Option::EnableFinallyStatement;
 }
 
 void Parser::pushComment() {
@@ -1465,7 +1470,7 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
 }
 
 void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
-                   Token &catchStmt, Token &catches) {
+                   Token &catchStmt, Token &catches, Token &finallyStmt) {
   StatementPtr stmtList;
   if (catches->stmt) {
     stmtList = catches->stmt;
@@ -1475,7 +1480,14 @@ void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
   stmtList->insertElement(NEW_STMT(CatchStatement, className->text(),
                                    var->text(), catchStmt->stmt));
   out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
-                       dynamic_pointer_cast<StatementList>(stmtList));
+                       dynamic_pointer_cast<StatementList>(stmtList),
+                       finallyStmt->stmt);
+}
+ 
+void Parser::onTry(Token &out, Token &tryStmt, Token &finallyStmt) {
+  out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
+                       dynamic_pointer_cast<StatementList>(NEW_STMT0(StatementList)),
+                       finallyStmt->stmt);
 }
 
 void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
@@ -1489,6 +1501,10 @@ void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
   stmtList->addElement(NEW_STMT(CatchStatement, className->text(),
                                 var->text(), stmt->stmt));
   out->stmt = stmtList;
+}
+
+void Parser::onFinally(Token &out, Token &stmt) {
+  out->stmt = NEW_STMT(FinallyStatement, stmt->stmt);
 }
 
 void Parser::onThrow(Token &out, Token &expr) {

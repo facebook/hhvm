@@ -358,6 +358,7 @@ bool RuntimeOption::CheckSymLink = false;
 bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
+bool RuntimeOption::EnableFinallyStatement = false;
 
 #ifdef TAINTED
 bool RuntimeOption::EnableTaintWarnings = false;
@@ -1137,6 +1138,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     else ScannerType &= ~Scanner::PreprocessXHP;
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
+
+    EnableFinallyStatement = eval["EnableFinallyStatement"].getBool();
 
 #ifdef TAINTED
     EnableTaintWarnings = eval["EnableTaintWarnings"].getBool();

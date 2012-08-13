@@ -2169,6 +2169,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         return false;
       }
 
+      case Statement::KindOfFinallyStatement: {
+        return false;
+      }
+
       case Statement::KindOfTryStatement: {
         if (!m_evalStack.empty()) {
           InvariantViolation(

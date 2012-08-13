@@ -27,8 +27,14 @@ DECLARE_BOOST_TYPES(TryStatement);
 
 class TryStatement : public Statement {
 public:
+  
   TryStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                StatementPtr tryStmt, StatementListPtr catches);
+
+  TryStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
+               StatementPtr tryStmt, StatementListPtr catches,
+               StatementPtr finallyStmt);
+
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasDecl() const;
@@ -37,9 +43,11 @@ public:
 
   StatementPtr getBody() const { return m_tryStmt; }
   StatementListPtr getCatches() const { return m_catches; }
+  StatementPtr getFinally() const { return m_finallyStmt; }
 private:
   StatementPtr m_tryStmt;
   StatementListPtr m_catches;
+  StatementPtr m_finallyStmt;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

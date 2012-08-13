@@ -2091,6 +2091,10 @@ StaticStringProxy s_sys_ssp42a11cef;
 #ifndef s_sys_ss42a11cef
 #define s_sys_ss42a11cef (*(StaticString *)(&s_sys_ssp42a11cef))
 #endif
+StaticStringProxy s_sys_ssp42a311ac;
+#ifndef s_sys_ss42a311ac
+#define s_sys_ss42a311ac (*(StaticString *)(&s_sys_ssp42a311ac))
+#endif
 StaticStringProxy s_sys_ssp42b93220;
 #ifndef s_sys_ss42b93220
 #define s_sys_ss42b93220 (*(StaticString *)(&s_sys_ssp42b93220))
@@ -3407,6 +3411,10 @@ StaticStringProxy s_sys_ssp6ac4979f;
 #ifndef s_sys_ss6ac4979f
 #define s_sys_ss6ac4979f (*(StaticString *)(&s_sys_ssp6ac4979f))
 #endif
+StaticStringProxy s_sys_ssp6acf71c9;
+#ifndef s_sys_ss6acf71c9
+#define s_sys_ss6acf71c9 (*(StaticString *)(&s_sys_ssp6acf71c9))
+#endif
 StaticStringProxy s_sys_ssp6ae7fa54;
 #ifndef s_sys_ss6ae7fa54
 #define s_sys_ss6ae7fa54 (*(StaticString *)(&s_sys_ssp6ae7fa54))
@@ -4079,6 +4087,10 @@ StaticStringProxy s_sys_ssp7e98adf4;
 #ifndef s_sys_ss7e98adf4
 #define s_sys_ss7e98adf4 (*(StaticString *)(&s_sys_ssp7e98adf4))
 #endif
+StaticStringProxy s_sys_ssp7eb28461;
+#ifndef s_sys_ss7eb28461
+#define s_sys_ss7eb28461 (*(StaticString *)(&s_sys_ssp7eb28461))
+#endif
 StaticStringProxy s_sys_ssp7ebd5e9a;
 #ifndef s_sys_ss7ebd5e9a
 #define s_sys_ss7ebd5e9a (*(StaticString *)(&s_sys_ssp7ebd5e9a))
@@ -4607,6 +4619,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp4272dc9e, (const char *)"IS_PROTECTED",
   (const char *)&s_sys_ssp428c3a20, (const char *)"PRIMARY",
   (const char *)&s_sys_ssp42a11cef, (const char *)"setobject",
+  (const char *)&s_sys_ssp42a311ac, (const char *)"setPreviousChain",
   (const char *)&s_sys_ssp42b93220, (const char *)"getAttributeRecursive",
   (const char *)&s_sys_ssp42defd5c, (const char *)"setAttributeNS",
   (const char *)&s_sys_ssp42df217e, (const char *)"getName",
@@ -4922,6 +4935,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp6a9626a3, (const char *)"seek",
   (const char *)&s_sys_ssp6aa5ef61, (const char *)"helpBody",
   (const char *)&s_sys_ssp6ac4979f, (const char *)"get",
+  (const char *)&s_sys_ssp6acf71c9, (const char *)"Exception",
   (const char *)&s_sys_ssp6ae7fa54, (const char *)"addByKey",
   (const char *)&s_sys_ssp6b305eaa, (const char *)"CURSOR_SCROLL",
   (const char *)&s_sys_ssp6b51d6cb, (const char *)"getcolumnmeta",
@@ -5081,6 +5095,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp7e5fc106, (const char *)"\"",
   (const char *)&s_sys_ssp7e91db32, (const char *)"HASH_MD5",
   (const char *)&s_sys_ssp7e98adf4, (const char *)"getIterator",
+  (const char *)&s_sys_ssp7eb28461, (const char *)"setPrevious",
   (const char *)&s_sys_ssp7ebd5e9a, (const char *)"natsort",
   (const char *)&s_sys_ssp7ec3a5d3, (const char *)"MYSQL_ATTR_COMPRESS",
   (const char *)&s_sys_ssp7ef23ee0, (const char *)"getErrors",
@@ -5112,7 +5127,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp747206d2, (const char *)"\000*\000arr", (const char *)6LL,
   (const char *)&s_sys_ssp78cb1b27, (const char *)"\000SplObjectStorage\000storage", (const char *)25LL,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 973, 21);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 976, 21);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs00000000, (const char *)&s_sys_ss00000000,
   (const char *)&s_sys_svs0ce7db5b, (const char *)&s_sys_ss0ce7db5b,

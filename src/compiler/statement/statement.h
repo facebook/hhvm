@@ -71,6 +71,7 @@ DECLARE_BOOST_TYPES(Statement);
     x(UnsetStatement),                          \
     x(ExpStatement),                            \
     x(ForEachStatement),                        \
+    x(FinallyStatement),                        \
     x(CatchStatement),                          \
     x(TryStatement),                            \
     x(ThrowStatement),                          \

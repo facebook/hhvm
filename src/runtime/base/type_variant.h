@@ -1201,7 +1201,6 @@ public:
   mutable union Data {
     int64        num;
     double       dbl;
-    litstr       str;
     StringData  *pstr;
     ArrayData   *parr;
     ObjectData  *pobj;

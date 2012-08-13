@@ -38,7 +38,6 @@ struct Value {
   mutable union {
     int64       num;
     double      dbl;
-    litstr      str;
     StringData *pstr;
     ArrayData  *parr;
     ObjectData *pobj;

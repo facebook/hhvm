@@ -139,6 +139,7 @@ public:
   virtual int getQueuedJobs() {
     return m_dispatcher.getQueuedJobs();
   }
+  int getLibEventConnectionCount();
 
   void onThreadEnter();
 

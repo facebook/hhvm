@@ -132,6 +132,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/check-load:      how many threads are actively handling requests\n"
         "/check-queued:    how many http requests are queued waiting to be\n"
         "                  handled\n"
+        "/check-ev:        how many http requests are active by libevent\n"
         "/check-pl-load:   how many pagelet threads are actively handling\n"
         "                  requests\n"
         "/check-pl-queued: how many pagelet requests are queued waiting to\n"
@@ -544,6 +545,12 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "check-load") {
     int count = HttpServer::Server->getPageServer()->getActiveWorker();
+    transport->sendString(lexical_cast<string>(count));
+    return true;
+  }
+  if (cmd == "check-ev") {
+    int count =
+      HttpServer::Server->getPageServer()->getLibEventConnectionCount();
     transport->sendString(lexical_cast<string>(count));
     return true;
   }

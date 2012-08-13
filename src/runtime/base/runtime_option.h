@@ -112,6 +112,8 @@ public:
   static int ServerDanglingWait;
   static bool ServerHarshShutdown;
   static bool ServerEvilShutdown;
+  static int ServerShutdownListenWait;
+  static int ServerShutdownListenNoWork;
   static int GzipCompressionLevel;
   static std::string ForceCompressionURL;
   static std::string ForceCompressionCookie;

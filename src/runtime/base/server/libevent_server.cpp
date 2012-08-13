@@ -200,6 +200,10 @@ int LibEventServer::getAcceptSocket() {
   return 0;
 }
 
+int LibEventServer::getLibEventConnectionCount() {
+  return evhttp_get_connection_count(m_server);
+}
+
 void LibEventServer::start() {
   if (getStatus() == RUNNING) return;
 
@@ -274,6 +278,39 @@ void LibEventServer::dispatch() {
 void LibEventServer::stop() {
   Lock lock(m_mutex);
   if (getStatus() != RUNNING || m_server == NULL) return;
+
+#define SHUT_FBLISTEN 3
+  /*
+   * Modifications to the Linux kernel to support shutting down a listen
+   * socket for new connections only, but anything which has completed 
+   * the TCP handshake will still be accepted.  This allows for un-accepted
+   * connections to be queued and then wait until all queued requests are
+   * actively being processed.
+   */
+  if (RuntimeOption::ServerShutdownListenWait > 0 &&
+      m_accept_sock != -1 && shutdown(m_accept_sock, SHUT_FBLISTEN) == 0) {
+    int noWorkCount = 0;
+    for (int i = 0; i < RuntimeOption::ServerShutdownListenWait; i++) {
+      // Give the acceptor thread time to clean out all requests
+      Logger::Info(
+          "LibEventServer stopping port %d: [%d/%d] a/q/e %d/%d/%d",
+          m_port, i, RuntimeOption::ServerShutdownListenWait,
+          getActiveWorker(), getQueuedJobs(), getLibEventConnectionCount());
+      sleep(1);
+
+      // If we're not doing anything, break out quickly
+      noWorkCount += (getQueuedJobs() == 0 && getActiveWorker() == 0);
+      if (RuntimeOption::ServerShutdownListenNoWork > 0 &&
+          noWorkCount >= RuntimeOption::ServerShutdownListenNoWork)
+        break;
+      if (getLibEventConnectionCount() == 0 &&
+          getQueuedJobs() == 0 && getActiveWorker() == 0)
+        break;
+    }
+    Logger::Info("LibEventServer stopped port %d: a/q/e %d/%d/%d",
+        m_port, getActiveWorker(), getQueuedJobs(),
+        getLibEventConnectionCount());
+  }
 
   // inform LibEventServer::onRequest() to stop queuing
   setStatus(STOPPING);

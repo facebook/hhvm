@@ -160,6 +160,8 @@ public:
    */
   virtual int getQueuedJobs() = 0;
 
+  virtual int getLibEventConnectionCount() = 0;
+
   /**
    * This is for TypedServer to specialize a worker class to use.
    */

@@ -121,6 +121,8 @@ int RuntimeOption::ServerGracefulShutdownWait;
 bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
 int RuntimeOption::ServerDanglingWait;
+int RuntimeOption::ServerShutdownListenWait = 0;
+int RuntimeOption::ServerShutdownListenNoWork = -1;
 int RuntimeOption::GzipCompressionLevel = 3;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
@@ -682,6 +684,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     ServerHarshShutdown = server["HarshShutdown"].getBool(true);
     ServerEvilShutdown = server["EvilShutdown"].getBool(true);
     ServerDanglingWait = server["DanglingWait"].getInt16(0);
+    ServerShutdownListenWait = server["ShutdownListenWait"].getInt16(0);
+    ServerShutdownListenNoWork = server["ShutdownListenNoWork"].getInt16(-1);
     if (ServerGracefulShutdownWait < ServerDanglingWait) {
       ServerGracefulShutdownWait = ServerDanglingWait;
     }

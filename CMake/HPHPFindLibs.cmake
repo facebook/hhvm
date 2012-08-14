@@ -28,6 +28,11 @@ endif()
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
+# unwind checks
+find_package(Libunwind REQUIRED)
+include_directories(${LIBUNWIND_INCLUDE_DIR})
+
+# iconv checks
 find_package(Libiconv REQUIRED)
 include_directories(${LIBICONV_INCLUDE_DIR})
 if (LIBICONV_CONST)

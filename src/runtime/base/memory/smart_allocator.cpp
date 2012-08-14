@@ -87,7 +87,6 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
   : m_stats(NULL)
   , m_itemSize(itemSize)
   , m_row(0)
-  , m_col(0)
   , m_nameEnum(Name(nameEnum))
   , m_itemCount(itemCount)
   , m_flag(flag)
@@ -127,11 +126,13 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
   ASSERT(itemCount);
   ASSERT(itemSize);
 
-  registerStats(&MemoryManager::TheMemoryManager()->getStats());
-  ASSERT(m_stats);
+  MemoryManager* mm = MemoryManager::TheMemoryManager().getNoCheck();
+  m_stats = &mm->getStats();
 
   m_colMax = m_itemSize * m_itemCount;
   char *p = (char *)malloc(m_colMax);
+  m_next = p;
+  m_limit = p + m_colMax;
   m_blocks.push_back(p);
   m_blockIndex[((int64)p) / m_colMax] = 0;
   // Cancel out jemalloc's accounting for this slab.
@@ -153,7 +154,7 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
     m_name = TypeNames[nameEnum];
   }
 
-  MemoryManager::TheMemoryManager()->add(this);
+  mm->add(this);
 }
 
 SmartAllocatorImpl::~SmartAllocatorImpl() {
@@ -167,12 +168,13 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 // alloc/dealloc helpers
 
 HOT_FUNC
-void *SmartAllocatorImpl::alloc() {
-  ASSERT(m_stats);
+void *SmartAllocatorImpl::alloc(size_t nbytes) {
+  ASSERT(m_stats && nbytes == size_t(m_itemSize));
+  ASSERT(m_next && m_next <= m_limit);
   MemoryUsageStats* stats = m_stats;
   // Just update the usage, while the peakUsage is maintained by
   // FrameInjection.
-  int64 usage = stats->usage + m_itemSize;
+  int64 usage = stats->usage + nbytes;
   stats->usage = usage;
   if (hhvm && UNLIKELY(usage > stats->maxBytes)) {
     // It's possible that this simplified check will trip later than
@@ -184,17 +186,17 @@ void *SmartAllocatorImpl::alloc() {
   void* freelist_value = m_freelist.maybePop();
   if (LIKELY(freelist_value != NULL)) return freelist_value;
 #endif
-  if (LIKELY(m_col < m_colMax)) {
-    char *ret = m_blocks[m_row] + m_col;
-    m_col += m_itemSize;
-    return ret;
+  char* p = m_next;
+  if (LIKELY(p + nbytes <= m_limit)) {
+    m_next = p + nbytes;
+    return p;
   }
   // Slow path
   return allocHelper();
 }
 
 void *SmartAllocatorImpl::allocHelper() {
-  ASSERT(m_col >= m_colMax);
+  ASSERT(m_next == m_limit);
   if (m_allocatedBlocks == 0) {
     // used up the last batch
     ASSERT(m_blocks.size() % m_multiplier == 0);
@@ -220,12 +222,10 @@ void *SmartAllocatorImpl::allocHelper() {
 
   m_row++;
   ASSERT(m_row == (int)m_blocks.size() - 1);
-  ASSERT(m_col == m_colMax);
-  m_col = 0;
-
-  char *ret = m_blocks[m_row] + m_col;
-  m_col += m_itemSize;
-  return ret;
+  char *p = m_blocks[m_row];
+  m_next = p + m_itemSize;
+  m_limit = p + m_colMax;
+  return p;
 }
 
 // cold-path helper function, only called when request memory overflow
@@ -275,8 +275,8 @@ void SmartAllocatorImpl::rollbackObjects() {
     int max = m_colMax;
     int bitIndex = 0;
     for (unsigned int i = 0; i < m_blocks.size(); i++) {
-      if (i == m_blocks.size() - 1) max = m_col;
       char *start = (char *)m_blocks[i];
+      if (i == m_blocks.size() - 1) max = m_next - start;
       for (char *obj = start; obj < start + max;
            obj += m_itemSize, bitIndex++) {
         if (!freeMap.test(bitIndex)) {
@@ -286,8 +286,6 @@ void SmartAllocatorImpl::rollbackObjects() {
     }
   }
 
-  m_row = 0;
-  m_col = 0;
   m_freelist.clear();
 
   // update the target multiplier
@@ -305,8 +303,6 @@ void SmartAllocatorImpl::rollbackObjects() {
 
   m_blockIndex.clear();
 
-  ASSERT(m_row == 0);
-  ASSERT(m_col == 0);
   ASSERT(m_freelist.empty());
   for (unsigned int i = m_multiplier; i < m_blocks.size();
        i += m_multiplier) {
@@ -314,17 +310,23 @@ void SmartAllocatorImpl::rollbackObjects() {
   }
   m_blocks.resize(1);
   if (m_multiplier != newMultiplier) {
-    char *p = (char *)realloc(m_blocks[0], m_colMax * newMultiplier);
-    m_blocks[0] = p;
+    // don't use realloc because we don't want to pay for its memcpy.
+    free(m_blocks[0]);
+    m_blocks[0] = (char*) malloc(m_colMax * newMultiplier);
   }
   m_blockIndex[((int64)m_blocks[0]) / m_colMax] = 0;
-
   m_multiplier = newMultiplier;
+
+  // reset for new allocations
   m_allocatedBlocks = m_multiplier - 1;
+  m_row = 0;
+  m_next = m_blocks[0];
+  m_limit = m_next + m_colMax;
 }
 
 void SmartAllocatorImpl::logStats() {
-  int allocated = m_itemCount * m_row + (m_col / m_itemSize);
+  int col = m_next - m_blocks[m_row];
+  int allocated = m_itemCount * m_row + (col / m_itemSize);
   int freed = m_freelist.size();
 
   string key = string("mem.") + m_name + "." +
@@ -334,7 +336,8 @@ void SmartAllocatorImpl::logStats() {
 }
 
 void SmartAllocatorImpl::checkMemory(bool detailed) {
-  int allocated = m_itemCount * m_row + (m_col / m_itemSize);
+  int col = m_next - m_blocks[m_row];
+  int allocated = m_itemCount * m_row + (col / m_itemSize);
   int freed = m_freelist.size();
   printf("%16s (%6d bytes %6d x %3d): %s %8d alloc %8d free\n",
          m_name, m_itemSize, m_itemCount, (m_row + 1),
@@ -365,7 +368,7 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
     count = MAX_REPORT;
     for (int i = 0; i <= m_row; i++) {
       int jmax = m_colMax;
-      if (i == m_row) jmax = m_col;
+      if (i == m_row) jmax = m_next - m_blocks[i];
       for (int j = 0; j < jmax; j += m_itemSize) {
         void *p = m_blocks[i] + j;
         if (freelist.find(p) == freelist.end()) {
@@ -457,7 +460,8 @@ void SmartAllocatorImpl::Iterator::next() {
       m_col = 0;
     }
 
-    if (m_row == m_sa.m_row && m_col >= m_sa.m_col) {
+    int col = m_sa.m_next - m_sa.m_blocks[m_sa.m_row];
+    if (m_row == m_sa.m_row && m_col >= col) {
       m_row = -1;
       return;
     }

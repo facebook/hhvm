@@ -183,7 +183,6 @@ void MemoryManager::refreshStatsHelperStop() {
 void MemoryManager::add(SmartAllocatorImpl *allocator) {
   ASSERT(allocator);
   m_smartAllocators.push_back(allocator);
-  ASSERT(&allocator->getStats() == &m_stats);
 }
 
 void MemoryManager::sweepAll() {

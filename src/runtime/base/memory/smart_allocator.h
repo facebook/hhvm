@@ -280,22 +280,14 @@ public:
   SmartAllocatorImpl(int nameEnum, int itemCount, int itemSize, int flag);
   virtual ~SmartAllocatorImpl();
 
-  /**
-   * Called by MemoryManager to store its usage stats pointer inside this
-   * allocator for easy access during alloc/free time.
-   */
-  void registerStats(MemoryUsageStats *stats) { m_stats = stats;}
-  MemoryUsageStats & getStats() { return *m_stats; }
-
   Name getAllocatorType() const { return m_nameEnum; }
-  const char* getAllocatorName() const { return m_name; }
   int getItemSize() const { return m_itemSize;}
-  int getItemCount() const { return m_itemCount;}
 
   /**
    * Allocation/deallocation of object memory.
    */
-  void *alloc();
+  void* alloc() { return alloc(m_itemSize); }
+  void* alloc(size_t size);
   void dealloc(void *obj) {
     ASSERT(assertValidHelper(obj));
 #ifdef SMART_ALLOCATOR_DEBUG_FREE
@@ -340,9 +332,10 @@ protected:
   MemoryUsageStats *m_stats;
 private:
   GarbageList m_freelist;
+  char* m_next;
+  char* m_limit;
   const int m_itemSize;
   int m_row; // outer index
-  int m_col; // inner position
   int m_colMax;
   std::vector<char *> m_blocks;
 
@@ -516,12 +509,13 @@ public:
 }
 
 template<typename T, int TNameEnum, int F>
-inline void *operator new
-(size_t sizeT, HPHP::SmartAllocator<T, TNameEnum, F> *a) {
-  return a->alloc();
+inline void *operator new(size_t sizeT,
+                          HPHP::SmartAllocator<T, TNameEnum, F> *a) {
+  return a->alloc(sizeT);
 }
 
 inline void *operator new(size_t sizeT, HPHP::ObjectAllocatorBase *a) {
+  ASSERT(sizeT <= size_t(a->getItemSize()));
   return a->alloc();
 }
 

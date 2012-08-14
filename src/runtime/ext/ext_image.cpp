@@ -36,6 +36,28 @@ IMPLEMENT_DEFAULT_EXTENSION(gd);
 
 StaticString Image::s_class_name("gd");
 
+#define HAS_GDIMAGESETANTIALIASED
+
+#if defined(HAS_GDIMAGEANTIALIAS)
+
+#define SetAntiAliased(gd, flag) gdImageAntialias(gd, flag)
+#define SetupAntiAliasedColor(gd, color) (color)
+
+#elif defined(HAS_GDIMAGESETANTIALIASED)
+
+#define SetAntiAliased(gd, flag) ((gd)->AA = (flag))
+#define SetupAntiAliasedColor(gd, color)                \
+  ((gd)->AA ?                                           \
+   gdImageSetAntiAliased(im, color), gdAntiAliased :    \
+   color)
+
+#else
+
+#define SetAntiAliased(gd, flag)
+#define SetupAntiAliasedColor(gd, color) (color)
+
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Image::~Image() {
@@ -2560,6 +2582,7 @@ static bool php_imagepolygon(CObjRef image, CArrRef points, int num_points,
   if (filled) {
     gdImageFilledPolygon(im, pts, num_points, color);
   } else {
+    color = SetupAntiAliasedColor(im, color);
     gdImagePolygon(im, pts, num_points, color);
   }
 
@@ -3776,6 +3799,7 @@ bool f_imagesetpixel(CObjRef image, int x, int y, int color) {
 bool f_imageline(CObjRef image, int x1, int y1, int x2, int y2, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
+  color = SetupAntiAliasedColor(im, color);
   gdImageLine(im, x1, y1, x2, y2, color);
   return true;
 }
@@ -3810,6 +3834,7 @@ bool f_imagearc(CObjRef image, int cx, int cy, int width, int height,
   if (!im) return false;
   if (end < 0) end %= 360;
   if (start < 0) start %= 360;
+  color = SetupAntiAliasedColor(im, color);
   gdImageArc(im, cx, cy, width, height, start, end, color);
   return true;
 }
@@ -3818,6 +3843,7 @@ bool f_imageellipse(CObjRef image, int cx, int cy, int width, int height,
                     int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
+  color = SetupAntiAliasedColor(im, color);
   gdImageArc(im, cx, cy, width, height, 0, 360, color);
   return true;
 }
@@ -4241,11 +4267,10 @@ bool f_imageconvolution(CObjRef image, CArrRef matrix,
 }
 
 bool f_imageantialias(CObjRef image, bool on) {
-  throw NotSupportedException(__func__, "gdImageAntialias does not exist");
-  // gdImagePtr im = image.getTyped<Image>()->get();
-  // if (!im) return false;
-  // gdImageAntialias(im, on);
-  // return true;
+  gdImagePtr im = image.getTyped<Image>()->get();
+  if (!im) return false;
+  SetAntiAliased(im, on);
+  return true;
 }
 
 // PHP extension STANDARD: iptc.c

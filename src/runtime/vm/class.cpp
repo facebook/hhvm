@@ -41,6 +41,10 @@
 namespace HPHP {
 namespace VM {
 
+static StringData* sd86ctor = StringData::GetStaticString("86ctor");
+static StringData* sd86pinit = StringData::GetStaticString("86pinit");
+static StringData* sd86sinit = StringData::GetStaticString("86sinit");
+
 hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
               string_data_hash, string_data_isame> Class::s_extClassHash;
 
@@ -1064,6 +1068,17 @@ void Class::setParent() {
   }
 }
 
+static Func* findSpecialMethod(Class* cls, const StringData* name) {
+  if (!cls->preClass()->hasMethod(name)) return NULL;
+  Func* f = cls->preClass()->lookupMethod(name);
+  f = f->clone();
+  f->setNewFuncId();
+  f->setCls(cls);
+  f->setBaseCls(cls);
+  f->setHasPrivateAncestor(false);
+  return f;
+}
+
 void Class::setSpecial() {
   static StringData* sd_toString = StringData::GetStaticString("__toString");
   m_toString = lookupMethod(sd_toString);
@@ -1093,15 +1108,14 @@ void Class::setSpecial() {
   }
 
   // Look for parent constructor other than 86ctor().
-  static StringData* sd86ctor = StringData::GetStaticString("86ctor");
   if (m_parent.get() != NULL &&
-      m_parent->m_ctor->name()->compare(sd86ctor)) {
+      m_parent->m_ctor->name() != sd86ctor) {
     m_ctor = m_parent->m_ctor;
     return;
   }
 
   // Use 86ctor(), since no program-supplied constructor exists
-  m_ctor = lookupMethod(sd86ctor);
+  m_ctor = findSpecialMethod(this, sd86ctor);
   ASSERT(m_ctor && "class had no user-defined constructor or 86ctor");
   ASSERT(m_ctor->attrs() == AttrPublic);
 }
@@ -1463,6 +1477,17 @@ void Class::setMethods() {
   // parent.
   for (size_t methI = 0; methI < m_preClass->numMethods(); ++methI) {
     Func* method = m_preClass->methods()[methI];
+    if (Func::isSpecial(method->name())) {
+      if (method->name() == sd86ctor ||
+          method->name() == sd86sinit ||
+          method->name() == sd86pinit) {
+        /*
+         * we could also skip the cinit function here, but
+         * that would mean storing it somewhere else.
+         */
+        continue;
+      }
+    }
     MethodMap::Builder::iterator it2 = builder.find(method->name());
     if (it2 != builder.end()) {
       Func* parentMethod = builder[it2->second];
@@ -1954,15 +1979,13 @@ void Class::setInitializers() {
   // vectors of __[ps]init() methods, so that reverse iteration of the vectors
   // runs this class's __[ps]init() first, in case multiple classes in the
   // hierarchy initialize the same property.
-  static StringData* sd86pinit = StringData::GetStaticString("86pinit");
-  const Func* meth86pinit = lookupMethod(sd86pinit);
+  const Func* meth86pinit = findSpecialMethod(this, sd86pinit);
   if (meth86pinit != NULL) {
     m_pinitVec.push_back(meth86pinit);
   }
   addTraitPropInitializers(false);
-  static StringData* sd86sinit = StringData::GetStaticString("86sinit");
-  const Func* sinit = lookupMethod(sd86sinit);
-  if (sinit && sinit->cls() == this) {
+  const Func* sinit = findSpecialMethod(this, sd86sinit);
+  if (sinit) {
     m_sinitVec.push_back(sinit);
   }
   addTraitPropInitializers(true);
@@ -2187,13 +2210,13 @@ void Class::getClassInfo(ClassInfoVM* ci) {
 
   // Methods: in source order (from our PreClass), then traits.
   for (size_t i = 0; i < m_preClass->numMethods(); ++i) {
+    const StringData* name = m_preClass->methods()[i]->name();
+    // Filter out special methods
+    if (isdigit(name->data()[0])) continue;
     Func* func = lookupMethod(m_preClass->methods()[i]->name());
-    // Filter out 86ctor() and 86*init().
     ASSERT(func);
-    if (func && !isdigit(func->name()->data()[0])) {
-      ASSERT(declaredMethod(func));
-      SET_FUNCINFO_BODY;
-    }
+    ASSERT(declaredMethod(func));
+    SET_FUNCINFO_BODY;
   }
 
   for (Slot i = m_traitsBeginIdx; i < m_traitsEndIdx; ++i) {

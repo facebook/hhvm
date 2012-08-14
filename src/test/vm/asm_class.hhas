@@ -11,7 +11,7 @@
 }
 
 .class Base {
-  .method [public] 86ctor {
+  .method [public] __construct {
     String "default constructor\n"
     Print
     PopC

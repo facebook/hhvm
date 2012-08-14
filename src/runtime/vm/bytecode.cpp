@@ -1127,23 +1127,23 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     ASSERT(callType == ObjMethod || callType == ClsMethod);
     ASSERT(methodName != NULL);
     method = cls->lookupMethod(methodName);
-    if (!method) {
+    while (!method) {
       static StringData* sd__construct
         = StringData::GetStaticString("__construct");
       if (UNLIKELY(methodName == sd__construct)) {
         // We were looking up __construct and failed to find it. Fall back
         // to old-style constructor: same as class name.
         method = cls->getCtor();
-      } else {
-        if (raise) {
-          raise_error("Call to undefined method %s::%s from %s%s",
-                      cls->name()->data(),
-                      methodName->data(),
-                      ctx ? "context " : "anonymous context",
-                      ctx ? ctx->name()->data() : "");
-        }
-        return NULL;
+        if (!Func::isSpecial(method->name())) break;
       }
+      if (raise) {
+        raise_error("Call to undefined method %s::%s from %s%s",
+                    cls->name()->data(),
+                    methodName->data(),
+                    ctx ? "context " : "anonymous context",
+                    ctx ? ctx->name()->data() : "");
+      }
+      return NULL;
     }
   }
   ASSERT(method);
@@ -1301,13 +1301,16 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
 LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
                                                   const Class* cls,
                                                   bool raise /* = false */) {
-  Class* ctx = arGetContextClass(m_fp);
-  f = lookupMethodCtx(cls, NULL, ctx, CtorMethod, raise);
-  if (!f) {
-    // If raise was true than lookupMethodCtx should have thrown,
-    // so we should only be able to get here if raise was false
-    ASSERT(!raise);
-    return MethodNotFound;
+  f = cls->getCtor();
+  if (!(f->attrs() & AttrPublic)) {
+    Class* ctx = arGetContextClass(m_fp);
+    f = lookupMethodCtx(cls, NULL, ctx, CtorMethod, raise);
+    if (!f) {
+      // If raise was true than lookupMethodCtx should have thrown,
+      // so we should only be able to get here if raise was false
+      ASSERT(!raise);
+      return MethodNotFound;
+    }
   }
   return MethodFoundWithThis;
 }

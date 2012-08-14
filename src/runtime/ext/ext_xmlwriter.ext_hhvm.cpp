@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -36,7 +35,6 @@ _rv => rdi
 TypedValue* fh_xmlwriter_open_memory(TypedValue* _rv) asm("_ZN4HPHP23f_xmlwriter_open_memoryEv");
 
 TypedValue* fg_xmlwriter_open_memory(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -55,7 +53,7 @@ TypedValue* fg_xmlwriter_open_memory(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -83,7 +81,6 @@ TypedValue * fg1_xmlwriter_open_uri(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* fg_xmlwriter_open_uri(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -111,7 +108,7 @@ TypedValue* fg_xmlwriter_open_uri(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -143,7 +140,6 @@ TypedValue * fg1_xmlwriter_set_indent_string(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_xmlwriter_set_indent_string(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -170,7 +166,7 @@ TypedValue* fg_xmlwriter_set_indent_string(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -202,7 +198,6 @@ TypedValue * fg1_xmlwriter_set_indent(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* fg_xmlwriter_set_indent(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -229,7 +224,7 @@ TypedValue* fg_xmlwriter_set_indent(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -277,7 +272,6 @@ TypedValue * fg1_xmlwriter_start_document(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_xmlwriter_start_document(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -305,7 +299,7 @@ TypedValue* fg_xmlwriter_start_document(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -337,7 +331,6 @@ TypedValue * fg1_xmlwriter_start_element(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_xmlwriter_start_element(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -364,7 +357,7 @@ TypedValue* fg_xmlwriter_start_element(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -404,7 +397,6 @@ TypedValue * fg1_xmlwriter_start_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_xmlwriter_start_element_ns(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -431,7 +423,7 @@ TypedValue* fg_xmlwriter_start_element_ns(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -480,7 +472,6 @@ TypedValue * fg1_xmlwriter_write_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_xmlwriter_write_element_ns(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -507,7 +498,7 @@ TypedValue* fg_xmlwriter_write_element_ns(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -548,7 +539,6 @@ TypedValue * fg1_xmlwriter_write_element(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_xmlwriter_write_element(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -575,7 +565,7 @@ TypedValue* fg_xmlwriter_write_element(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -601,7 +591,6 @@ TypedValue * fg1_xmlwriter_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* fg_xmlwriter_end_element(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -628,7 +617,7 @@ TypedValue* fg_xmlwriter_end_element(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -654,7 +643,6 @@ TypedValue * fg1_xmlwriter_full_end_element(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_xmlwriter_full_end_element(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -681,7 +669,7 @@ TypedValue* fg_xmlwriter_full_end_element(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -721,7 +709,6 @@ TypedValue * fg1_xmlwriter_start_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_xmlwriter_start_attribute_ns(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -748,7 +735,7 @@ TypedValue* fg_xmlwriter_start_attribute_ns(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -780,7 +767,6 @@ TypedValue * fg1_xmlwriter_start_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_xmlwriter_start_attribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -807,7 +793,7 @@ TypedValue* fg_xmlwriter_start_attribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -851,7 +837,6 @@ TypedValue * fg1_xmlwriter_write_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_xmlwriter_write_attribute_ns(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -878,7 +863,7 @@ TypedValue* fg_xmlwriter_write_attribute_ns(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -914,7 +899,6 @@ TypedValue * fg1_xmlwriter_write_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_xmlwriter_write_attribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -941,7 +925,7 @@ TypedValue* fg_xmlwriter_write_attribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -967,7 +951,6 @@ TypedValue * fg1_xmlwriter_end_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_xmlwriter_end_attribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -994,7 +977,7 @@ TypedValue* fg_xmlwriter_end_attribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1020,7 +1003,6 @@ TypedValue * fg1_xmlwriter_start_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* fg_xmlwriter_start_cdata(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1047,7 +1029,7 @@ TypedValue* fg_xmlwriter_start_cdata(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1079,7 +1061,6 @@ TypedValue * fg1_xmlwriter_write_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* fg_xmlwriter_write_cdata(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1106,7 +1087,7 @@ TypedValue* fg_xmlwriter_write_cdata(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1132,7 +1113,6 @@ TypedValue * fg1_xmlwriter_end_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_xmlwriter_end_cdata(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1159,7 +1139,7 @@ TypedValue* fg_xmlwriter_end_cdata(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1185,7 +1165,6 @@ TypedValue * fg1_xmlwriter_start_comment(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_xmlwriter_start_comment(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1212,7 +1191,7 @@ TypedValue* fg_xmlwriter_start_comment(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1244,7 +1223,6 @@ TypedValue * fg1_xmlwriter_write_comment(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_xmlwriter_write_comment(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1271,7 +1249,7 @@ TypedValue* fg_xmlwriter_write_comment(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1297,7 +1275,6 @@ TypedValue * fg1_xmlwriter_end_comment(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* fg_xmlwriter_end_comment(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1324,7 +1301,7 @@ TypedValue* fg_xmlwriter_end_comment(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1350,7 +1327,6 @@ TypedValue * fg1_xmlwriter_end_document(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* fg_xmlwriter_end_document(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1377,7 +1353,7 @@ TypedValue* fg_xmlwriter_end_document(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1409,7 +1385,6 @@ TypedValue * fg1_xmlwriter_start_pi(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* fg_xmlwriter_start_pi(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1436,7 +1411,7 @@ TypedValue* fg_xmlwriter_start_pi(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1472,7 +1447,6 @@ TypedValue * fg1_xmlwriter_write_pi(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* fg_xmlwriter_write_pi(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1499,7 +1473,7 @@ TypedValue* fg_xmlwriter_write_pi(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1525,7 +1499,6 @@ TypedValue * fg1_xmlwriter_end_pi(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* fg_xmlwriter_end_pi(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1552,7 +1525,7 @@ TypedValue* fg_xmlwriter_end_pi(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1584,7 +1557,6 @@ TypedValue * fg1_xmlwriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 }
 
 TypedValue* fg_xmlwriter_text(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1611,7 +1583,7 @@ TypedValue* fg_xmlwriter_text(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1643,7 +1615,6 @@ TypedValue * fg1_xmlwriter_write_raw(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_xmlwriter_write_raw(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1670,7 +1641,7 @@ TypedValue* fg_xmlwriter_write_raw(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1716,7 +1687,6 @@ TypedValue * fg1_xmlwriter_start_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_xmlwriter_start_dtd(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1743,7 +1713,7 @@ TypedValue* fg_xmlwriter_start_dtd(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1794,7 +1764,6 @@ TypedValue * fg1_xmlwriter_write_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_xmlwriter_write_dtd(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1821,7 +1790,7 @@ TypedValue* fg_xmlwriter_write_dtd(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1853,7 +1822,6 @@ TypedValue * fg1_xmlwriter_start_dtd_element(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_xmlwriter_start_dtd_element(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1880,7 +1848,7 @@ TypedValue* fg_xmlwriter_start_dtd_element(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1916,7 +1884,6 @@ TypedValue * fg1_xmlwriter_write_dtd_element(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_xmlwriter_write_dtd_element(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1943,7 +1910,7 @@ TypedValue* fg_xmlwriter_write_dtd_element(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1969,7 +1936,6 @@ TypedValue * fg1_xmlwriter_end_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_xmlwriter_end_dtd_element(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1996,7 +1962,7 @@ TypedValue* fg_xmlwriter_end_dtd_element(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2028,7 +1994,6 @@ TypedValue * fg1_xmlwriter_start_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_xmlwriter_start_dtd_attlist(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2055,7 +2020,7 @@ TypedValue* fg_xmlwriter_start_dtd_attlist(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2091,7 +2056,6 @@ TypedValue * fg1_xmlwriter_write_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_xmlwriter_write_dtd_attlist(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2118,7 +2082,7 @@ TypedValue* fg_xmlwriter_write_dtd_attlist(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2144,7 +2108,6 @@ TypedValue * fg1_xmlwriter_end_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_xmlwriter_end_dtd_attlist(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2171,7 +2134,7 @@ TypedValue* fg_xmlwriter_end_dtd_attlist(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2207,7 +2170,6 @@ TypedValue * fg1_xmlwriter_start_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_xmlwriter_start_dtd_entity(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2234,7 +2196,7 @@ TypedValue* fg_xmlwriter_start_dtd_entity(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2294,7 +2256,6 @@ TypedValue * fg1_xmlwriter_write_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_xmlwriter_write_dtd_entity(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2321,7 +2282,7 @@ TypedValue* fg_xmlwriter_write_dtd_entity(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2347,7 +2308,6 @@ TypedValue * fg1_xmlwriter_end_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_xmlwriter_end_dtd_entity(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2374,7 +2334,7 @@ TypedValue* fg_xmlwriter_end_dtd_entity(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2400,7 +2360,6 @@ TypedValue * fg1_xmlwriter_end_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* fg_xmlwriter_end_dtd(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2427,7 +2386,7 @@ TypedValue* fg_xmlwriter_end_dtd(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2464,7 +2423,6 @@ TypedValue * fg1_xmlwriter_flush(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* fg_xmlwriter_flush(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2490,7 +2448,7 @@ TypedValue* fg_xmlwriter_flush(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2529,7 +2487,6 @@ TypedValue * fg1_xmlwriter_output_memory(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_xmlwriter_output_memory(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2557,7 +2514,7 @@ TypedValue* fg_xmlwriter_output_memory(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2581,7 +2538,6 @@ this_ => rdi
 void th_9XMLWriter___construct(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter13t___constructEv");
 
 TypedValue* tg_9XMLWriter___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2607,7 +2563,7 @@ TypedValue* tg_9XMLWriter___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2621,7 +2577,6 @@ this_ => rdi
 bool th_9XMLWriter_openMemory(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t_openmemoryEv");
 
 TypedValue* tg_9XMLWriter_openMemory(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2646,7 +2601,7 @@ TypedValue* tg_9XMLWriter_openMemory(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2671,7 +2626,6 @@ TypedValue* tg1_9XMLWriter_openURI(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* tg_9XMLWriter_openURI(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2703,7 +2657,7 @@ TypedValue* tg_9XMLWriter_openURI(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2728,7 +2682,6 @@ TypedValue* tg1_9XMLWriter_setIndentString(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_9XMLWriter_setIndentString(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2760,7 +2713,7 @@ TypedValue* tg_9XMLWriter_setIndentString(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2785,7 +2738,6 @@ TypedValue* tg1_9XMLWriter_setIndent(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* tg_9XMLWriter_setIndent(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2817,7 +2769,7 @@ TypedValue* tg_9XMLWriter_setIndent(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2860,7 +2812,6 @@ TypedValue* tg1_9XMLWriter_startDocument(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_9XMLWriter_startDocument(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2893,7 +2844,7 @@ TypedValue* tg_9XMLWriter_startDocument(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2918,7 +2869,6 @@ TypedValue* tg1_9XMLWriter_startElement(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_9XMLWriter_startElement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2950,7 +2900,7 @@ TypedValue* tg_9XMLWriter_startElement(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2985,7 +2935,6 @@ TypedValue* tg1_9XMLWriter_startElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_9XMLWriter_startElementNS(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3017,7 +2966,7 @@ TypedValue* tg_9XMLWriter_startElementNS(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3061,7 +3010,6 @@ TypedValue* tg1_9XMLWriter_writeElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_9XMLWriter_writeElementNS(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3093,7 +3041,7 @@ TypedValue* tg_9XMLWriter_writeElementNS(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3129,7 +3077,6 @@ TypedValue* tg1_9XMLWriter_writeElement(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_9XMLWriter_writeElement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3161,7 +3108,7 @@ TypedValue* tg_9XMLWriter_writeElement(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3175,7 +3122,6 @@ this_ => rdi
 bool th_9XMLWriter_endElement(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t_endelementEv");
 
 TypedValue* tg_9XMLWriter_endElement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3200,7 +3146,7 @@ TypedValue* tg_9XMLWriter_endElement(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3214,7 +3160,6 @@ this_ => rdi
 bool th_9XMLWriter_fullEndElement(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter16t_fullendelementEv");
 
 TypedValue* tg_9XMLWriter_fullEndElement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3239,7 +3184,7 @@ TypedValue* tg_9XMLWriter_fullEndElement(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3274,7 +3219,6 @@ TypedValue* tg1_9XMLWriter_startAttributens(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_9XMLWriter_startAttributens(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3306,7 +3250,7 @@ TypedValue* tg_9XMLWriter_startAttributens(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3331,7 +3275,6 @@ TypedValue* tg1_9XMLWriter_startAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_9XMLWriter_startAttribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3363,7 +3306,7 @@ TypedValue* tg_9XMLWriter_startAttribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3402,7 +3345,6 @@ TypedValue* tg1_9XMLWriter_writeAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_9XMLWriter_writeAttributeNS(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3434,7 +3376,7 @@ TypedValue* tg_9XMLWriter_writeAttributeNS(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3465,7 +3407,6 @@ TypedValue* tg1_9XMLWriter_writeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_9XMLWriter_writeAttribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3497,7 +3438,7 @@ TypedValue* tg_9XMLWriter_writeAttribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3511,7 +3452,6 @@ this_ => rdi
 bool th_9XMLWriter_endAttribute(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter14t_endattributeEv");
 
 TypedValue* tg_9XMLWriter_endAttribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3536,7 +3476,7 @@ TypedValue* tg_9XMLWriter_endAttribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3550,7 +3490,6 @@ this_ => rdi
 bool th_9XMLWriter_startCData(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t_startcdataEv");
 
 TypedValue* tg_9XMLWriter_startCData(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3575,7 +3514,7 @@ TypedValue* tg_9XMLWriter_startCData(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3600,7 +3539,6 @@ TypedValue* tg1_9XMLWriter_writeCData(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* tg_9XMLWriter_writeCData(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3632,7 +3570,7 @@ TypedValue* tg_9XMLWriter_writeCData(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3646,7 +3584,6 @@ this_ => rdi
 bool th_9XMLWriter_endCData(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter10t_endcdataEv");
 
 TypedValue* tg_9XMLWriter_endCData(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3671,7 +3608,7 @@ TypedValue* tg_9XMLWriter_endCData(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3685,7 +3622,6 @@ this_ => rdi
 bool th_9XMLWriter_startComment(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter14t_startcommentEv");
 
 TypedValue* tg_9XMLWriter_startComment(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3710,7 +3646,7 @@ TypedValue* tg_9XMLWriter_startComment(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3735,7 +3671,6 @@ TypedValue* tg1_9XMLWriter_writeComment(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_9XMLWriter_writeComment(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3767,7 +3702,7 @@ TypedValue* tg_9XMLWriter_writeComment(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3781,7 +3716,6 @@ this_ => rdi
 bool th_9XMLWriter_endComment(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t_endcommentEv");
 
 TypedValue* tg_9XMLWriter_endComment(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3806,7 +3740,7 @@ TypedValue* tg_9XMLWriter_endComment(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3820,7 +3754,6 @@ this_ => rdi
 bool th_9XMLWriter_endDocument(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter13t_enddocumentEv");
 
 TypedValue* tg_9XMLWriter_endDocument(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3845,7 +3778,7 @@ TypedValue* tg_9XMLWriter_endDocument(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3870,7 +3803,6 @@ TypedValue* tg1_9XMLWriter_startPI(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* tg_9XMLWriter_startPI(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3902,7 +3834,7 @@ TypedValue* tg_9XMLWriter_startPI(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3933,7 +3865,6 @@ TypedValue* tg1_9XMLWriter_writePI(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* tg_9XMLWriter_writePI(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3965,7 +3896,7 @@ TypedValue* tg_9XMLWriter_writePI(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -3979,7 +3910,6 @@ this_ => rdi
 bool th_9XMLWriter_endPI(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter7t_endpiEv");
 
 TypedValue* tg_9XMLWriter_endPI(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4004,7 +3934,7 @@ TypedValue* tg_9XMLWriter_endPI(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4029,7 +3959,6 @@ TypedValue* tg1_9XMLWriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 }
 
 TypedValue* tg_9XMLWriter_text(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4061,7 +3990,7 @@ TypedValue* tg_9XMLWriter_text(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4086,7 +4015,6 @@ TypedValue* tg1_9XMLWriter_writeRaw(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* tg_9XMLWriter_writeRaw(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4118,7 +4046,7 @@ TypedValue* tg_9XMLWriter_writeRaw(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4159,7 +4087,6 @@ TypedValue* tg1_9XMLWriter_startDTD(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* tg_9XMLWriter_startDTD(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4191,7 +4118,7 @@ TypedValue* tg_9XMLWriter_startDTD(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4237,7 +4164,6 @@ TypedValue* tg1_9XMLWriter_writeDTD(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* tg_9XMLWriter_writeDTD(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4269,7 +4195,7 @@ TypedValue* tg_9XMLWriter_writeDTD(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4294,7 +4220,6 @@ TypedValue* tg1_9XMLWriter_startDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_9XMLWriter_startDTDElement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4326,7 +4251,7 @@ TypedValue* tg_9XMLWriter_startDTDElement(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4357,7 +4282,6 @@ TypedValue* tg1_9XMLWriter_writeDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_9XMLWriter_writeDTDElement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4389,7 +4313,7 @@ TypedValue* tg_9XMLWriter_writeDTDElement(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4403,7 +4327,6 @@ this_ => rdi
 bool th_9XMLWriter_endDTDElement(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter15t_enddtdelementEv");
 
 TypedValue* tg_9XMLWriter_endDTDElement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4428,7 +4351,7 @@ TypedValue* tg_9XMLWriter_endDTDElement(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4453,7 +4376,6 @@ TypedValue* tg1_9XMLWriter_startDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_9XMLWriter_startDTDAttlist(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4485,7 +4407,7 @@ TypedValue* tg_9XMLWriter_startDTDAttlist(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4516,7 +4438,6 @@ TypedValue* tg1_9XMLWriter_writeDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_9XMLWriter_writeDTDAttlist(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4548,7 +4469,7 @@ TypedValue* tg_9XMLWriter_writeDTDAttlist(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4562,7 +4483,6 @@ this_ => rdi
 bool th_9XMLWriter_endDTDAttlist(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter15t_enddtdattlistEv");
 
 TypedValue* tg_9XMLWriter_endDTDAttlist(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4587,7 +4507,7 @@ TypedValue* tg_9XMLWriter_endDTDAttlist(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4618,7 +4538,6 @@ TypedValue* tg1_9XMLWriter_startDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_9XMLWriter_startDTDEntity(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4650,7 +4569,7 @@ TypedValue* tg_9XMLWriter_startDTDEntity(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4705,7 +4624,6 @@ TypedValue* tg1_9XMLWriter_writeDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_9XMLWriter_writeDTDEntity(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4737,7 +4655,7 @@ TypedValue* tg_9XMLWriter_writeDTDEntity(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4751,7 +4669,6 @@ this_ => rdi
 bool th_9XMLWriter_endDTDEntity(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter14t_enddtdentityEv");
 
 TypedValue* tg_9XMLWriter_endDTDEntity(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4776,7 +4693,7 @@ TypedValue* tg_9XMLWriter_endDTDEntity(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4790,7 +4707,6 @@ this_ => rdi
 bool th_9XMLWriter_endDTD(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter8t_enddtdEv");
 
 TypedValue* tg_9XMLWriter_endDTD(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4815,7 +4731,7 @@ TypedValue* tg_9XMLWriter_endDTD(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4840,7 +4756,6 @@ TypedValue* tg1_9XMLWriter_flush(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* tg_9XMLWriter_flush(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4871,7 +4786,7 @@ TypedValue* tg_9XMLWriter_flush(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4898,7 +4813,6 @@ TypedValue* tg1_9XMLWriter_outputMemory(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_9XMLWriter_outputMemory(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4931,7 +4845,7 @@ TypedValue* tg_9XMLWriter_outputMemory(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -4946,7 +4860,6 @@ this_ => rsi
 TypedValue* th_9XMLWriter___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t___destructEv");
 
 TypedValue* tg_9XMLWriter___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4970,7 +4883,7 @@ TypedValue* tg_9XMLWriter___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

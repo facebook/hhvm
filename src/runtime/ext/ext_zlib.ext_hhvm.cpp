@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -57,7 +56,6 @@ TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 }
 
 TypedValue* fg_readgzfile(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -83,7 +81,7 @@ TypedValue* fg_readgzfile(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -120,7 +118,6 @@ TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
 }
 
 TypedValue* fg_gzfile(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -146,7 +143,7 @@ TypedValue* fg_gzfile(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -183,7 +180,6 @@ TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 }
 
 TypedValue* fg_gzcompress(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -209,7 +205,7 @@ TypedValue* fg_gzcompress(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -246,7 +242,6 @@ TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_gzuncompress(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -272,7 +267,7 @@ TypedValue* fg_gzuncompress(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -309,7 +304,6 @@ TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 }
 
 TypedValue* fg_gzdeflate(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -335,7 +329,7 @@ TypedValue* fg_gzdeflate(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -372,7 +366,6 @@ TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 }
 
 TypedValue* fg_gzinflate(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -398,7 +391,7 @@ TypedValue* fg_gzinflate(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -440,7 +433,6 @@ TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 }
 
 TypedValue* fg_gzencode(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -466,7 +458,7 @@ TypedValue* fg_gzencode(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -492,7 +484,6 @@ TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 }
 
 TypedValue* fg_gzdecode(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -518,7 +509,7 @@ TypedValue* fg_gzdecode(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -561,7 +552,6 @@ TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
 }
 
 TypedValue* fg_gzopen(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -589,7 +579,7 @@ TypedValue* fg_gzopen(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -626,7 +616,6 @@ TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_qlzcompress(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -652,7 +641,7 @@ TypedValue* fg_qlzcompress(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -689,7 +678,6 @@ TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 }
 
 TypedValue* fg_qlzuncompress(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -715,7 +703,7 @@ TypedValue* fg_qlzuncompress(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -741,7 +729,6 @@ TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 }
 
 TypedValue* fg_sncompress(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -767,7 +754,7 @@ TypedValue* fg_sncompress(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -793,7 +780,6 @@ TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_snuncompress(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -819,7 +805,7 @@ TypedValue* fg_snuncompress(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -845,7 +831,6 @@ TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 }
 
 TypedValue* fg_nzcompress(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -871,7 +856,7 @@ TypedValue* fg_nzcompress(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -897,7 +882,6 @@ TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_nzuncompress(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -923,7 +907,7 @@ TypedValue* fg_nzuncompress(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -72,7 +71,6 @@ TypedValue* tg1_7SQLite3___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* tg_7SQLite3___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -105,7 +103,7 @@ TypedValue* tg_7SQLite3___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -146,7 +144,6 @@ TypedValue* tg1_7SQLite3_open(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* tg_7SQLite3_open(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -179,7 +176,7 @@ TypedValue* tg_7SQLite3_open(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -204,7 +201,6 @@ TypedValue* tg1_7SQLite3_busytimeout(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* tg_7SQLite3_busytimeout(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -236,7 +232,7 @@ TypedValue* tg_7SQLite3_busytimeout(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -250,7 +246,6 @@ this_ => rdi
 bool th_7SQLite3_close(ObjectData* this_) asm("_ZN4HPHP9c_SQLite37t_closeEv");
 
 TypedValue* tg_7SQLite3_close(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -275,7 +270,7 @@ TypedValue* tg_7SQLite3_close(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -300,7 +295,6 @@ TypedValue* tg1_7SQLite3_exec(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* tg_7SQLite3_exec(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -332,7 +326,7 @@ TypedValue* tg_7SQLite3_exec(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -347,7 +341,6 @@ this_ => rsi
 Value* th_7SQLite3_version(Value* _rv, ObjectData* this_) asm("_ZN4HPHP9c_SQLite39t_versionEv");
 
 TypedValue* tg_7SQLite3_version(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -373,7 +366,7 @@ TypedValue* tg_7SQLite3_version(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -387,7 +380,6 @@ this_ => rdi
 long long th_7SQLite3_lastinsertrowid(ObjectData* this_) asm("_ZN4HPHP9c_SQLite317t_lastinsertrowidEv");
 
 TypedValue* tg_7SQLite3_lastinsertrowid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -412,7 +404,7 @@ TypedValue* tg_7SQLite3_lastinsertrowid(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -426,7 +418,6 @@ this_ => rdi
 long long th_7SQLite3_lasterrorcode(ObjectData* this_) asm("_ZN4HPHP9c_SQLite315t_lasterrorcodeEv");
 
 TypedValue* tg_7SQLite3_lasterrorcode(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -451,7 +442,7 @@ TypedValue* tg_7SQLite3_lasterrorcode(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -466,7 +457,6 @@ this_ => rsi
 Value* th_7SQLite3_lasterrormsg(Value* _rv, ObjectData* this_) asm("_ZN4HPHP9c_SQLite314t_lasterrormsgEv");
 
 TypedValue* tg_7SQLite3_lasterrormsg(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -492,7 +482,7 @@ TypedValue* tg_7SQLite3_lasterrormsg(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -517,7 +507,6 @@ TypedValue* tg1_7SQLite3_loadextension(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* tg_7SQLite3_loadextension(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -549,7 +538,7 @@ TypedValue* tg_7SQLite3_loadextension(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -563,7 +552,6 @@ this_ => rdi
 long long th_7SQLite3_changes(ObjectData* this_) asm("_ZN4HPHP9c_SQLite39t_changesEv");
 
 TypedValue* tg_7SQLite3_changes(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -588,7 +576,7 @@ TypedValue* tg_7SQLite3_changes(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -615,7 +603,6 @@ TypedValue* tg1_7SQLite3_escapestring(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* tg_7SQLite3_escapestring(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -648,7 +635,7 @@ TypedValue* tg_7SQLite3_escapestring(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -673,7 +660,6 @@ TypedValue* tg1_7SQLite3_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* tg_7SQLite3_prepare(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -704,7 +690,7 @@ TypedValue* tg_7SQLite3_prepare(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -729,7 +715,6 @@ TypedValue* tg1_7SQLite3_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 }
 
 TypedValue* tg_7SQLite3_query(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -760,7 +745,7 @@ TypedValue* tg_7SQLite3_query(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -796,7 +781,6 @@ TypedValue* tg1_7SQLite3_querysingle(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* tg_7SQLite3_querysingle(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -827,7 +811,7 @@ TypedValue* tg_7SQLite3_querysingle(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -864,7 +848,6 @@ TypedValue* tg1_7SQLite3_createfunction(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_7SQLite3_createfunction(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -896,7 +879,7 @@ TypedValue* tg_7SQLite3_createfunction(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -934,7 +917,6 @@ TypedValue* tg1_7SQLite3_createaggregate(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_7SQLite3_createaggregate(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -966,7 +948,7 @@ TypedValue* tg_7SQLite3_createaggregate(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1010,7 +992,6 @@ TypedValue* tg1_7SQLite3_openblob(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* tg_7SQLite3_openblob(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1042,7 +1023,7 @@ TypedValue* tg_7SQLite3_openblob(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1057,7 +1038,6 @@ this_ => rsi
 TypedValue* th_7SQLite3___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP9c_SQLite312t___destructEv");
 
 TypedValue* tg_7SQLite3___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1081,7 +1061,7 @@ TypedValue* tg_7SQLite3___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_SQLite3Stmt_Instance(HPHP::VM::Class* cls) {
@@ -1121,7 +1101,6 @@ TypedValue* tg1_11SQLite3Stmt___construct(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_11SQLite3Stmt___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1154,7 +1133,7 @@ TypedValue* tg_11SQLite3Stmt___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1168,7 +1147,6 @@ this_ => rdi
 long long th_11SQLite3Stmt_paramcount(ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt12t_paramcountEv");
 
 TypedValue* tg_11SQLite3Stmt_paramcount(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1193,7 +1171,7 @@ TypedValue* tg_11SQLite3Stmt_paramcount(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1207,7 +1185,6 @@ this_ => rdi
 bool th_11SQLite3Stmt_close(ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt7t_closeEv");
 
 TypedValue* tg_11SQLite3Stmt_close(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1232,7 +1209,7 @@ TypedValue* tg_11SQLite3Stmt_close(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1246,7 +1223,6 @@ this_ => rdi
 bool th_11SQLite3Stmt_reset(ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt7t_resetEv");
 
 TypedValue* tg_11SQLite3Stmt_reset(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1271,7 +1247,7 @@ TypedValue* tg_11SQLite3Stmt_reset(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1285,7 +1261,6 @@ this_ => rdi
 bool th_11SQLite3Stmt_clear(ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt7t_clearEv");
 
 TypedValue* tg_11SQLite3Stmt_clear(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1310,7 +1285,7 @@ TypedValue* tg_11SQLite3Stmt_clear(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1337,7 +1312,6 @@ TypedValue* tg1_11SQLite3Stmt_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_11SQLite3Stmt_bindparam(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1369,7 +1343,7 @@ TypedValue* tg_11SQLite3Stmt_bindparam(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1396,7 +1370,6 @@ TypedValue* tg1_11SQLite3Stmt_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_11SQLite3Stmt_bindvalue(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1428,7 +1401,7 @@ TypedValue* tg_11SQLite3Stmt_bindvalue(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1443,7 +1416,6 @@ this_ => rsi
 TypedValue* th_11SQLite3Stmt_execute(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt9t_executeEv");
 
 TypedValue* tg_11SQLite3Stmt_execute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1467,7 +1439,7 @@ TypedValue* tg_11SQLite3Stmt_execute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1482,7 +1454,6 @@ this_ => rsi
 TypedValue* th_11SQLite3Stmt___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt12t___destructEv");
 
 TypedValue* tg_11SQLite3Stmt___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1506,7 +1477,7 @@ TypedValue* tg_11SQLite3Stmt___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_SQLite3Result_Instance(HPHP::VM::Class* cls) {
@@ -1528,7 +1499,6 @@ this_ => rdi
 void th_13SQLite3Result___construct(ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result13t___constructEv");
 
 TypedValue* tg_13SQLite3Result___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1554,7 +1524,7 @@ TypedValue* tg_13SQLite3Result___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1568,7 +1538,6 @@ this_ => rdi
 long long th_13SQLite3Result_numcolumns(ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result12t_numcolumnsEv");
 
 TypedValue* tg_13SQLite3Result_numcolumns(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1593,7 +1562,7 @@ TypedValue* tg_13SQLite3Result_numcolumns(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1620,7 +1589,6 @@ TypedValue* tg1_13SQLite3Result_columnname(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_13SQLite3Result_columnname(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1653,7 +1621,7 @@ TypedValue* tg_13SQLite3Result_columnname(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1678,7 +1646,6 @@ TypedValue* tg1_13SQLite3Result_columntype(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_13SQLite3Result_columntype(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1710,7 +1677,7 @@ TypedValue* tg_13SQLite3Result_columntype(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1735,7 +1702,6 @@ TypedValue* tg1_13SQLite3Result_fetcharray(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_13SQLite3Result_fetcharray(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1766,7 +1732,7 @@ TypedValue* tg_13SQLite3Result_fetcharray(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1780,7 +1746,6 @@ this_ => rdi
 bool th_13SQLite3Result_reset(ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result7t_resetEv");
 
 TypedValue* tg_13SQLite3Result_reset(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1805,7 +1770,7 @@ TypedValue* tg_13SQLite3Result_reset(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1819,7 +1784,6 @@ this_ => rdi
 bool th_13SQLite3Result_finalize(ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result10t_finalizeEv");
 
 TypedValue* tg_13SQLite3Result_finalize(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1844,7 +1808,7 @@ TypedValue* tg_13SQLite3Result_finalize(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1859,7 +1823,6 @@ this_ => rsi
 TypedValue* th_13SQLite3Result___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result12t___destructEv");
 
 TypedValue* tg_13SQLite3Result___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1883,7 +1846,7 @@ TypedValue* tg_13SQLite3Result___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

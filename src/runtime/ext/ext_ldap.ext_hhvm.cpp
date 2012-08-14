@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -58,7 +57,6 @@ TypedValue * fg1_ldap_connect(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_ldap_connect(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -84,7 +82,7 @@ TypedValue* fg_ldap_connect(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -116,7 +114,6 @@ TypedValue * fg1_ldap_explode_dn(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* fg_ldap_explode_dn(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -142,7 +139,7 @@ TypedValue* fg_ldap_explode_dn(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -168,7 +165,6 @@ TypedValue * fg1_ldap_dn2ufn(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_ldap_dn2ufn(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -194,7 +190,7 @@ TypedValue* fg_ldap_dn2ufn(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -222,7 +218,6 @@ TypedValue * fg1_ldap_err2str(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_ldap_err2str(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -250,7 +245,7 @@ TypedValue* fg_ldap_err2str(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -286,7 +281,6 @@ TypedValue * fg1_ldap_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 }
 
 TypedValue* fg_ldap_add(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -313,7 +307,7 @@ TypedValue* fg_ldap_add(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -349,7 +343,6 @@ TypedValue * fg1_ldap_mod_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_ldap_mod_add(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -376,7 +369,7 @@ TypedValue* fg_ldap_mod_add(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -412,7 +405,6 @@ TypedValue * fg1_ldap_mod_del(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_ldap_mod_del(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -439,7 +431,7 @@ TypedValue* fg_ldap_mod_del(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -475,7 +467,6 @@ TypedValue * fg1_ldap_mod_replace(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* fg_ldap_mod_replace(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -502,7 +493,7 @@ TypedValue* fg_ldap_mod_replace(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -538,7 +529,6 @@ TypedValue * fg1_ldap_modify(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_ldap_modify(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -565,7 +555,7 @@ TypedValue* fg_ldap_modify(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -607,7 +597,6 @@ TypedValue * fg1_ldap_bind(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 }
 
 TypedValue* fg_ldap_bind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -634,7 +623,7 @@ TypedValue* fg_ldap_bind(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -661,7 +650,6 @@ TypedValue * fg1_ldap_set_rebind_proc(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* fg_ldap_set_rebind_proc(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -688,7 +676,7 @@ TypedValue* fg_ldap_set_rebind_proc(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -724,7 +712,6 @@ TypedValue * fg1_ldap_sort(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 }
 
 TypedValue* fg_ldap_sort(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -751,7 +738,7 @@ TypedValue* fg_ldap_sort(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -777,7 +764,6 @@ TypedValue * fg1_ldap_start_tls(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 }
 
 TypedValue* fg_ldap_start_tls(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -804,7 +790,7 @@ TypedValue* fg_ldap_start_tls(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -830,7 +816,6 @@ TypedValue * fg1_ldap_unbind(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_ldap_unbind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -857,7 +842,7 @@ TypedValue* fg_ldap_unbind(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -890,7 +875,6 @@ TypedValue * fg1_ldap_get_option(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* fg_ldap_get_option(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -917,7 +901,7 @@ TypedValue* fg_ldap_get_option(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -945,7 +929,6 @@ TypedValue * fg1_ldap_set_option(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* fg_ldap_set_option(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -972,7 +955,7 @@ TypedValue* fg_ldap_set_option(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -998,7 +981,6 @@ TypedValue * fg1_ldap_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 }
 
 TypedValue* fg_ldap_close(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1025,7 +1007,7 @@ TypedValue* fg_ldap_close(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1081,7 +1063,6 @@ TypedValue * fg1_ldap_list(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 }
 
 TypedValue* fg_ldap_list(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1107,7 +1088,7 @@ TypedValue* fg_ldap_list(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1163,7 +1144,6 @@ TypedValue * fg1_ldap_read(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 }
 
 TypedValue* fg_ldap_read(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1189,7 +1169,7 @@ TypedValue* fg_ldap_read(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1245,7 +1225,6 @@ TypedValue * fg1_ldap_search(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_ldap_search(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1271,7 +1250,7 @@ TypedValue* fg_ldap_search(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1315,7 +1294,6 @@ TypedValue * fg1_ldap_rename(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_ldap_rename(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1342,7 +1320,7 @@ TypedValue* fg_ldap_rename(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1374,7 +1352,6 @@ TypedValue * fg1_ldap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_ldap_delete(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1401,7 +1378,7 @@ TypedValue* fg_ldap_delete(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1441,7 +1418,6 @@ TypedValue * fg1_ldap_compare(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_ldap_compare(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1467,7 +1443,7 @@ TypedValue* fg_ldap_compare(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1493,7 +1469,6 @@ TypedValue * fg1_ldap_errno(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 }
 
 TypedValue* fg_ldap_errno(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1520,7 +1495,7 @@ TypedValue* fg_ldap_errno(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1548,7 +1523,6 @@ TypedValue * fg1_ldap_error(TypedValue* rv, HPHP::VM::ActRec* ar, long long coun
 }
 
 TypedValue* fg_ldap_error(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1576,7 +1550,7 @@ TypedValue* fg_ldap_error(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1608,7 +1582,6 @@ TypedValue * fg1_ldap_get_dn(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_ldap_get_dn(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1634,7 +1607,7 @@ TypedValue* fg_ldap_get_dn(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1666,7 +1639,6 @@ TypedValue * fg1_ldap_count_entries(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* fg_ldap_count_entries(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1693,7 +1665,7 @@ TypedValue* fg_ldap_count_entries(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1725,7 +1697,6 @@ TypedValue * fg1_ldap_get_entries(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* fg_ldap_get_entries(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1751,7 +1722,7 @@ TypedValue* fg_ldap_get_entries(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1783,7 +1754,6 @@ TypedValue * fg1_ldap_first_entry(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* fg_ldap_first_entry(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1809,7 +1779,7 @@ TypedValue* fg_ldap_first_entry(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1841,7 +1811,6 @@ TypedValue * fg1_ldap_next_entry(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* fg_ldap_next_entry(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1867,7 +1836,7 @@ TypedValue* fg_ldap_next_entry(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1901,7 +1870,6 @@ TypedValue * fg1_ldap_get_attributes(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_ldap_get_attributes(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1929,7 +1897,7 @@ TypedValue* fg_ldap_get_attributes(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1961,7 +1929,6 @@ TypedValue * fg1_ldap_first_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* fg_ldap_first_attribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1987,7 +1954,7 @@ TypedValue* fg_ldap_first_attribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2019,7 +1986,6 @@ TypedValue * fg1_ldap_next_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_ldap_next_attribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2045,7 +2011,7 @@ TypedValue* fg_ldap_next_attribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2077,7 +2043,6 @@ TypedValue * fg1_ldap_first_reference(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* fg_ldap_first_reference(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2103,7 +2068,7 @@ TypedValue* fg_ldap_first_reference(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2135,7 +2100,6 @@ TypedValue * fg1_ldap_next_reference(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_ldap_next_reference(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2161,7 +2125,7 @@ TypedValue* fg_ldap_next_reference(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2194,7 +2158,6 @@ TypedValue * fg1_ldap_parse_reference(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* fg_ldap_parse_reference(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2221,7 +2184,7 @@ TypedValue* fg_ldap_parse_reference(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2267,7 +2230,6 @@ TypedValue * fg1_ldap_parse_result(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* fg_ldap_parse_result(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2297,7 +2259,7 @@ TypedValue* fg_ldap_parse_result(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2323,7 +2285,6 @@ TypedValue * fg1_ldap_free_result(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* fg_ldap_free_result(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2350,7 +2311,7 @@ TypedValue* fg_ldap_free_result(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2386,7 +2347,6 @@ TypedValue * fg1_ldap_get_values_len(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_ldap_get_values_len(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2412,7 +2372,7 @@ TypedValue* fg_ldap_get_values_len(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2448,7 +2408,6 @@ TypedValue * fg1_ldap_get_values(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* fg_ldap_get_values(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2474,7 +2433,7 @@ TypedValue* fg_ldap_get_values(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

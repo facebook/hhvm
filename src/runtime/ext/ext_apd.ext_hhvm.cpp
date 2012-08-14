@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -56,7 +55,6 @@ TypedValue * fg1_override_function(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* fg_override_function(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -83,7 +81,7 @@ TypedValue* fg_override_function(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -115,7 +113,6 @@ TypedValue * fg1_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* fg_rename_function(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -142,7 +139,7 @@ TypedValue* fg_rename_function(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -156,7 +153,6 @@ _ZN4HPHP23f_apd_set_browser_traceEv
 void fh_apd_set_browser_trace() asm("_ZN4HPHP23f_apd_set_browser_traceEv");
 
 TypedValue* fg_apd_set_browser_trace(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -177,7 +173,7 @@ TypedValue* fg_apd_set_browser_trace(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -217,7 +213,6 @@ TypedValue * fg1_apd_set_pprof_trace(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_apd_set_pprof_trace(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -245,7 +240,7 @@ TypedValue* fg_apd_set_pprof_trace(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -285,7 +280,6 @@ TypedValue * fg1_apd_set_session_trace_socket(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_apd_set_session_trace_socket(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -312,7 +306,7 @@ TypedValue* fg_apd_set_session_trace_socket(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -326,7 +320,6 @@ _ZN4HPHP16f_apd_stop_traceEv
 void fh_apd_stop_trace() asm("_ZN4HPHP16f_apd_stop_traceEv");
 
 TypedValue* fg_apd_stop_trace(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -347,7 +340,7 @@ TypedValue* fg_apd_stop_trace(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -362,7 +355,6 @@ _ZN4HPHP16f_apd_breakpointEv
 bool fh_apd_breakpoint() asm("_ZN4HPHP16f_apd_breakpointEv");
 
 TypedValue* fg_apd_breakpoint(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -382,7 +374,7 @@ TypedValue* fg_apd_breakpoint(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -397,7 +389,6 @@ _ZN4HPHP14f_apd_continueEv
 bool fh_apd_continue() asm("_ZN4HPHP14f_apd_continueEv");
 
 TypedValue* fg_apd_continue(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -417,7 +408,7 @@ TypedValue* fg_apd_continue(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -443,7 +434,6 @@ TypedValue * fg1_apd_echo(TypedValue* rv, HPHP::VM::ActRec* ar, long long count)
 }
 
 TypedValue* fg_apd_echo(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -470,7 +460,7 @@ TypedValue* fg_apd_echo(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

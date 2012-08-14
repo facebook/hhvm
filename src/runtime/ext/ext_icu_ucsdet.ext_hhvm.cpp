@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -44,7 +43,6 @@ this_ => rdi
 void th_16EncodingDetector___construct(ObjectData* this_) asm("_ZN4HPHP18c_EncodingDetector13t___constructEv");
 
 TypedValue* tg_16EncodingDetector___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -70,7 +68,7 @@ TypedValue* tg_16EncodingDetector___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -95,7 +93,6 @@ TypedValue* tg1_16EncodingDetector_setText(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_16EncodingDetector_setText(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -128,7 +125,7 @@ TypedValue* tg_16EncodingDetector_setText(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -153,7 +150,6 @@ TypedValue* tg1_16EncodingDetector_setDeclaredEncoding(TypedValue* rv, HPHP::VM:
 }
 
 TypedValue* tg_16EncodingDetector_setDeclaredEncoding(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -186,7 +182,7 @@ TypedValue* tg_16EncodingDetector_setDeclaredEncoding(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -201,7 +197,6 @@ this_ => rsi
 Value* th_16EncodingDetector_detect(Value* _rv, ObjectData* this_) asm("_ZN4HPHP18c_EncodingDetector8t_detectEv");
 
 TypedValue* tg_16EncodingDetector_detect(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -227,7 +222,7 @@ TypedValue* tg_16EncodingDetector_detect(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -242,7 +237,6 @@ this_ => rsi
 Value* th_16EncodingDetector_detectAll(Value* _rv, ObjectData* this_) asm("_ZN4HPHP18c_EncodingDetector11t_detectallEv");
 
 TypedValue* tg_16EncodingDetector_detectAll(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -268,7 +262,7 @@ TypedValue* tg_16EncodingDetector_detectAll(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -283,7 +277,6 @@ this_ => rsi
 TypedValue* th_16EncodingDetector___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP18c_EncodingDetector12t___destructEv");
 
 TypedValue* tg_16EncodingDetector___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -307,7 +300,7 @@ TypedValue* tg_16EncodingDetector___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_EncodingMatch_Instance(HPHP::VM::Class* cls) {
@@ -329,7 +322,6 @@ this_ => rdi
 void th_13EncodingMatch___construct(ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch13t___constructEv");
 
 TypedValue* tg_13EncodingMatch___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -355,7 +347,7 @@ TypedValue* tg_13EncodingMatch___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -369,7 +361,6 @@ this_ => rdi
 bool th_13EncodingMatch_isValid(ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch9t_isvalidEv");
 
 TypedValue* tg_13EncodingMatch_isValid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -394,7 +385,7 @@ TypedValue* tg_13EncodingMatch_isValid(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -409,7 +400,6 @@ this_ => rsi
 Value* th_13EncodingMatch_getEncoding(Value* _rv, ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch13t_getencodingEv");
 
 TypedValue* tg_13EncodingMatch_getEncoding(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -435,7 +425,7 @@ TypedValue* tg_13EncodingMatch_getEncoding(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -449,7 +439,6 @@ this_ => rdi
 long long th_13EncodingMatch_getConfidence(ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch15t_getconfidenceEv");
 
 TypedValue* tg_13EncodingMatch_getConfidence(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -474,7 +463,7 @@ TypedValue* tg_13EncodingMatch_getConfidence(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -489,7 +478,6 @@ this_ => rsi
 Value* th_13EncodingMatch_getLanguage(Value* _rv, ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch13t_getlanguageEv");
 
 TypedValue* tg_13EncodingMatch_getLanguage(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -515,7 +503,7 @@ TypedValue* tg_13EncodingMatch_getLanguage(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -530,7 +518,6 @@ this_ => rsi
 Value* th_13EncodingMatch_getUTF8(Value* _rv, ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch9t_getutf8Ev");
 
 TypedValue* tg_13EncodingMatch_getUTF8(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -556,7 +543,7 @@ TypedValue* tg_13EncodingMatch_getUTF8(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -571,7 +558,6 @@ this_ => rsi
 TypedValue* th_13EncodingMatch___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch12t___destructEv");
 
 TypedValue* tg_13EncodingMatch___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -595,7 +581,7 @@ TypedValue* tg_13EncodingMatch___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

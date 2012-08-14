@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -44,7 +43,6 @@ this_ => rdi
 void th_12DummyClosure___construct(ObjectData* this_) asm("_ZN4HPHP14c_DummyClosure13t___constructEv");
 
 TypedValue* tg_12DummyClosure___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -70,7 +68,7 @@ TypedValue* tg_12DummyClosure___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -85,7 +83,6 @@ this_ => rsi
 TypedValue* th_12DummyClosure___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_DummyClosure12t___destructEv");
 
 TypedValue* tg_12DummyClosure___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -109,7 +106,7 @@ TypedValue* tg_12DummyClosure___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

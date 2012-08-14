@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -57,7 +56,6 @@ TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_apache_note(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -83,7 +81,7 @@ TypedValue* fg_apache_note(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -99,7 +97,6 @@ _rv => rdi
 Value* fh_apache_request_headers(Value* _rv) asm("_ZN4HPHP24f_apache_request_headersEv");
 
 TypedValue* fg_apache_request_headers(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -120,7 +117,7 @@ TypedValue* fg_apache_request_headers(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -136,7 +133,6 @@ _rv => rdi
 Value* fh_apache_response_headers(Value* _rv) asm("_ZN4HPHP25f_apache_response_headersEv");
 
 TypedValue* fg_apache_response_headers(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -157,7 +153,7 @@ TypedValue* fg_apache_response_headers(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -198,7 +194,6 @@ TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, long long c
 }
 
 TypedValue* fg_apache_setenv(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -225,7 +220,7 @@ TypedValue* fg_apache_setenv(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -241,7 +236,6 @@ _rv => rdi
 Value* fh_getallheaders(Value* _rv) asm("_ZN4HPHP15f_getallheadersEv");
 
 TypedValue* fg_getallheaders(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -262,7 +256,7 @@ TypedValue* fg_getallheaders(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -288,7 +282,6 @@ TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) 
 }
 
 TypedValue* fg_virtual(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -315,7 +308,7 @@ TypedValue* fg_virtual(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -331,7 +324,6 @@ _rv => rdi
 TypedValue* fh_apache_get_config(TypedValue* _rv) asm("_ZN4HPHP19f_apache_get_configEv");
 
 TypedValue* fg_apache_get_config(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -350,7 +342,7 @@ TypedValue* fg_apache_get_config(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -366,7 +358,6 @@ _rv => rdi
 TypedValue* fh_apache_get_scoreboard(TypedValue* _rv) asm("_ZN4HPHP23f_apache_get_scoreboardEv");
 
 TypedValue* fg_apache_get_scoreboard(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -385,7 +376,7 @@ TypedValue* fg_apache_get_scoreboard(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -401,7 +392,6 @@ _rv => rdi
 TypedValue* fh_apache_get_rewrite_rules(TypedValue* _rv) asm("_ZN4HPHP26f_apache_get_rewrite_rulesEv");
 
 TypedValue* fg_apache_get_rewrite_rules(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -420,7 +410,7 @@ TypedValue* fg_apache_get_rewrite_rules(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

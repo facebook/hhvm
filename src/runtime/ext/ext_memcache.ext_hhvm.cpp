@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -69,7 +68,6 @@ TypedValue * fg1_memcache_connect(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* fg_memcache_connect(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -97,7 +95,7 @@ TypedValue* fg_memcache_connect(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -146,7 +144,6 @@ TypedValue * fg1_memcache_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* fg_memcache_pconnect(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -174,7 +171,7 @@ TypedValue* fg_memcache_pconnect(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -221,7 +218,6 @@ TypedValue * fg1_memcache_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_memcache_add(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -248,7 +244,7 @@ TypedValue* fg_memcache_add(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -295,7 +291,6 @@ TypedValue * fg1_memcache_set(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_memcache_set(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -322,7 +317,7 @@ TypedValue* fg_memcache_set(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -369,7 +364,6 @@ TypedValue * fg1_memcache_replace(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* fg_memcache_replace(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -396,7 +390,7 @@ TypedValue* fg_memcache_replace(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -425,7 +419,6 @@ TypedValue * fg1_memcache_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* fg_memcache_get(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -452,7 +445,7 @@ TypedValue* fg_memcache_get(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -493,7 +486,6 @@ TypedValue * fg1_memcache_delete(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* fg_memcache_delete(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -520,7 +512,7 @@ TypedValue* fg_memcache_delete(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -561,7 +553,6 @@ TypedValue * fg1_memcache_increment(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* fg_memcache_increment(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -588,7 +579,7 @@ TypedValue* fg_memcache_increment(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -629,7 +620,6 @@ TypedValue * fg1_memcache_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* fg_memcache_decrement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -656,7 +646,7 @@ TypedValue* fg_memcache_decrement(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -682,7 +672,6 @@ TypedValue * fg1_memcache_close(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 }
 
 TypedValue* fg_memcache_close(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -709,7 +698,7 @@ TypedValue* fg_memcache_close(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -735,7 +724,6 @@ TypedValue * fg1_memcache_debug(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 }
 
 TypedValue* fg_memcache_debug(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -762,7 +750,7 @@ TypedValue* fg_memcache_debug(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -788,7 +776,6 @@ TypedValue * fg1_memcache_get_version(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* fg_memcache_get_version(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -814,7 +801,7 @@ TypedValue* fg_memcache_get_version(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -851,7 +838,6 @@ TypedValue * fg1_memcache_flush(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 }
 
 TypedValue* fg_memcache_flush(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -878,7 +864,7 @@ TypedValue* fg_memcache_flush(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -910,7 +896,6 @@ TypedValue * fg1_memcache_setoptimeout(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* fg_memcache_setoptimeout(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -937,7 +922,7 @@ TypedValue* fg_memcache_setoptimeout(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -978,7 +963,6 @@ TypedValue * fg1_memcache_get_server_status(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_memcache_get_server_status(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1005,7 +989,7 @@ TypedValue* fg_memcache_get_server_status(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1046,7 +1030,6 @@ TypedValue * fg1_memcache_set_compress_threshold(TypedValue* rv, HPHP::VM::ActRe
 }
 
 TypedValue* fg_memcache_set_compress_threshold(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1073,7 +1056,7 @@ TypedValue* fg_memcache_set_compress_threshold(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1122,7 +1105,6 @@ TypedValue * fg1_memcache_get_stats(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* fg_memcache_get_stats(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1150,7 +1132,7 @@ TypedValue* fg_memcache_get_stats(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1199,7 +1181,6 @@ TypedValue * fg1_memcache_get_extended_stats(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_memcache_get_extended_stats(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1227,7 +1208,7 @@ TypedValue* fg_memcache_get_extended_stats(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1285,7 +1266,6 @@ TypedValue * fg1_memcache_set_server_params(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_memcache_set_server_params(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1312,7 +1292,7 @@ TypedValue* fg_memcache_set_server_params(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1385,7 +1365,6 @@ TypedValue * fg1_memcache_add_server(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* fg_memcache_add_server(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1412,7 +1391,7 @@ TypedValue* fg_memcache_add_server(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 10);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1436,7 +1415,6 @@ this_ => rdi
 void th_8Memcache___construct(ObjectData* this_) asm("_ZN4HPHP10c_Memcache13t___constructEv");
 
 TypedValue* tg_8Memcache___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1462,7 +1440,7 @@ TypedValue* tg_8Memcache___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1508,7 +1486,6 @@ TypedValue* tg1_8Memcache_connect(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* tg_8Memcache_connect(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1540,7 +1517,7 @@ TypedValue* tg_8Memcache_connect(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1586,7 +1563,6 @@ TypedValue* tg1_8Memcache_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* tg_8Memcache_pconnect(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1618,7 +1594,7 @@ TypedValue* tg_8Memcache_pconnect(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1660,7 +1636,6 @@ TypedValue* tg1_8Memcache_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* tg_8Memcache_add(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1692,7 +1667,7 @@ TypedValue* tg_8Memcache_add(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1734,7 +1709,6 @@ TypedValue* tg1_8Memcache_set(TypedValue* rv, HPHP::VM::ActRec* ar, long long co
 }
 
 TypedValue* tg_8Memcache_set(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1766,7 +1740,7 @@ TypedValue* tg_8Memcache_set(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1808,7 +1782,6 @@ TypedValue* tg1_8Memcache_replace(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* tg_8Memcache_replace(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1840,7 +1813,7 @@ TypedValue* tg_8Memcache_replace(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1857,7 +1830,6 @@ flags => rcx
 TypedValue* th_8Memcache_get(TypedValue* _rv, ObjectData* this_, TypedValue* key, TypedValue* flags) asm("_ZN4HPHP10c_Memcache5t_getERKNS_7VariantERKNS_14VRefParamValueE");
 
 TypedValue* tg_8Memcache_get(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1882,7 +1854,7 @@ TypedValue* tg_8Memcache_get(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1918,7 +1890,6 @@ TypedValue* tg1_8Memcache_delete(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* tg_8Memcache_delete(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1950,7 +1921,7 @@ TypedValue* tg_8Memcache_delete(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1986,7 +1957,6 @@ TypedValue* tg1_8Memcache_increment(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* tg_8Memcache_increment(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2018,7 +1988,7 @@ TypedValue* tg_8Memcache_increment(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2054,7 +2024,6 @@ TypedValue* tg1_8Memcache_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* tg_8Memcache_decrement(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2086,7 +2055,7 @@ TypedValue* tg_8Memcache_decrement(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2101,7 +2070,6 @@ this_ => rsi
 TypedValue* th_8Memcache_getversion(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP10c_Memcache12t_getversionEv");
 
 TypedValue* tg_8Memcache_getversion(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2125,7 +2093,7 @@ TypedValue* tg_8Memcache_getversion(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2150,7 +2118,6 @@ TypedValue* tg1_8Memcache_flush(TypedValue* rv, HPHP::VM::ActRec* ar, long long 
 }
 
 TypedValue* tg_8Memcache_flush(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2182,7 +2149,7 @@ TypedValue* tg_8Memcache_flush(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2207,7 +2174,6 @@ TypedValue* tg1_8Memcache_setoptimeout(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* tg_8Memcache_setoptimeout(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2239,7 +2205,7 @@ TypedValue* tg_8Memcache_setoptimeout(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2253,7 +2219,6 @@ this_ => rdi
 bool th_8Memcache_close(ObjectData* this_) asm("_ZN4HPHP10c_Memcache7t_closeEv");
 
 TypedValue* tg_8Memcache_close(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2278,7 +2243,7 @@ TypedValue* tg_8Memcache_close(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2314,7 +2279,6 @@ TypedValue* tg1_8Memcache_getserverstatus(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_8Memcache_getserverstatus(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2346,7 +2310,7 @@ TypedValue* tg_8Memcache_getserverstatus(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2382,7 +2346,6 @@ TypedValue* tg1_8Memcache_setcompressthreshold(TypedValue* rv, HPHP::VM::ActRec*
 }
 
 TypedValue* tg_8Memcache_setcompressthreshold(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2414,7 +2377,7 @@ TypedValue* tg_8Memcache_setcompressthreshold(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2458,7 +2421,6 @@ TypedValue* tg1_8Memcache_getstats(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* tg_8Memcache_getstats(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2491,7 +2453,7 @@ TypedValue* tg_8Memcache_getstats(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2535,7 +2497,6 @@ TypedValue* tg1_8Memcache_getextendedstats(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_8Memcache_getextendedstats(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2568,7 +2529,7 @@ TypedValue* tg_8Memcache_getextendedstats(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2621,7 +2582,6 @@ TypedValue* tg1_8Memcache_setserverparams(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_8Memcache_setserverparams(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2653,7 +2613,7 @@ TypedValue* tg_8Memcache_setserverparams(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2721,7 +2681,6 @@ TypedValue* tg1_8Memcache_addserver(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* tg_8Memcache_addserver(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2753,7 +2712,7 @@ TypedValue* tg_8Memcache_addserver(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 9);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2768,7 +2727,6 @@ this_ => rsi
 TypedValue* th_8Memcache___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP10c_Memcache12t___destructEv");
 
 TypedValue* tg_8Memcache___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2792,7 +2750,7 @@ TypedValue* tg_8Memcache___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

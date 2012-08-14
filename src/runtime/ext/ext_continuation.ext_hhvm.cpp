@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -67,7 +66,6 @@ TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_create_continuation(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -95,7 +93,7 @@ TypedValue* fg_hphp_create_continuation(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -128,7 +126,6 @@ TypedValue * fg1_hphp_pack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* fg_hphp_pack_continuation(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -156,7 +153,7 @@ TypedValue* fg_hphp_pack_continuation(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -182,7 +179,6 @@ TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_unpack_continuation(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -210,7 +206,7 @@ TypedValue* fg_hphp_unpack_continuation(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -272,7 +268,6 @@ TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -306,7 +301,7 @@ TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -332,7 +327,6 @@ TypedValue* tg1_12Continuation_update(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* tg_12Continuation_update(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -365,7 +359,7 @@ TypedValue* tg_12Continuation_update(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -378,7 +372,6 @@ this_ => rdi
 void th_12Continuation_done(ObjectData* this_) asm("_ZN4HPHP14c_Continuation6t_doneEv");
 
 TypedValue* tg_12Continuation_done(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -404,7 +397,7 @@ TypedValue* tg_12Continuation_done(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -418,7 +411,6 @@ this_ => rdi
 long long th_12Continuation_getLabel(ObjectData* this_) asm("_ZN4HPHP14c_Continuation10t_getlabelEv");
 
 TypedValue* tg_12Continuation_getLabel(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -443,7 +435,7 @@ TypedValue* tg_12Continuation_getLabel(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -457,7 +449,6 @@ this_ => rdi
 long long th_12Continuation_num_args(ObjectData* this_) asm("_ZN4HPHP14c_Continuation10t_num_argsEv");
 
 TypedValue* tg_12Continuation_num_args(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -482,7 +473,7 @@ TypedValue* tg_12Continuation_num_args(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -497,7 +488,6 @@ this_ => rsi
 Value* th_12Continuation_get_args(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_Continuation10t_get_argsEv");
 
 TypedValue* tg_12Continuation_get_args(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -523,7 +513,7 @@ TypedValue* tg_12Continuation_get_args(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -548,7 +538,6 @@ TypedValue* tg1_12Continuation_get_arg(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* tg_12Continuation_get_arg(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -579,7 +568,7 @@ TypedValue* tg_12Continuation_get_arg(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -594,7 +583,6 @@ this_ => rsi
 TypedValue* th_12Continuation_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_Continuation9t_currentEv");
 
 TypedValue* tg_12Continuation_current(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -618,7 +606,7 @@ TypedValue* tg_12Continuation_current(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -632,7 +620,6 @@ this_ => rdi
 long long th_12Continuation_key(ObjectData* this_) asm("_ZN4HPHP14c_Continuation5t_keyEv");
 
 TypedValue* tg_12Continuation_key(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -657,7 +644,7 @@ TypedValue* tg_12Continuation_key(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -670,7 +657,6 @@ this_ => rdi
 void th_12Continuation_next(ObjectData* this_) asm("_ZN4HPHP14c_Continuation6t_nextEv");
 
 TypedValue* tg_12Continuation_next(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -696,7 +682,7 @@ TypedValue* tg_12Continuation_next(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -709,7 +695,6 @@ this_ => rdi
 void th_12Continuation_rewind(ObjectData* this_) asm("_ZN4HPHP14c_Continuation8t_rewindEv");
 
 TypedValue* tg_12Continuation_rewind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -735,7 +720,7 @@ TypedValue* tg_12Continuation_rewind(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -749,7 +734,6 @@ this_ => rdi
 bool th_12Continuation_valid(ObjectData* this_) asm("_ZN4HPHP14c_Continuation7t_validEv");
 
 TypedValue* tg_12Continuation_valid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -774,7 +758,7 @@ TypedValue* tg_12Continuation_valid(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -788,7 +772,6 @@ v => rsi
 void th_12Continuation_send(ObjectData* this_, TypedValue* v) asm("_ZN4HPHP14c_Continuation6t_sendERKNS_7VariantE");
 
 TypedValue* tg_12Continuation_send(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -814,7 +797,7 @@ TypedValue* tg_12Continuation_send(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -828,7 +811,6 @@ v => rsi
 void th_12Continuation_raise(ObjectData* this_, TypedValue* v) asm("_ZN4HPHP14c_Continuation7t_raiseERKNS_7VariantE");
 
 TypedValue* tg_12Continuation_raise(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -854,7 +836,7 @@ TypedValue* tg_12Continuation_raise(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -867,7 +849,6 @@ this_ => rdi
 void th_12Continuation_raised(ObjectData* this_) asm("_ZN4HPHP14c_Continuation8t_raisedEv");
 
 TypedValue* tg_12Continuation_raised(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -893,7 +874,7 @@ TypedValue* tg_12Continuation_raised(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -908,7 +889,6 @@ this_ => rsi
 TypedValue* th_12Continuation_receive(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_Continuation9t_receiveEv");
 
 TypedValue* tg_12Continuation_receive(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -932,7 +912,7 @@ TypedValue* tg_12Continuation_receive(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -947,7 +927,6 @@ this_ => rsi
 Value* th_12Continuation_getOrigFuncName(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_Continuation17t_getorigfuncnameEv");
 
 TypedValue* tg_12Continuation_getOrigFuncName(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -973,7 +952,7 @@ TypedValue* tg_12Continuation_getOrigFuncName(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -988,7 +967,6 @@ this_ => rsi
 TypedValue* th_12Continuation___clone(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_Continuation9t___cloneEv");
 
 TypedValue* tg_12Continuation___clone(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1012,7 +990,7 @@ TypedValue* tg_12Continuation___clone(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1027,7 +1005,6 @@ this_ => rsi
 TypedValue* th_12Continuation___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_Continuation12t___destructEv");
 
 TypedValue* tg_12Continuation___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1051,7 +1028,7 @@ TypedValue* tg_12Continuation___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_GenericContinuation_Instance(HPHP::VM::Class* cls) {
@@ -1115,7 +1092,6 @@ TypedValue* tg1_19GenericContinuation___construct(TypedValue* rv, HPHP::VM::ActR
 }
 
 TypedValue* tg_19GenericContinuation___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1149,7 +1125,7 @@ TypedValue* tg_19GenericContinuation___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1181,7 +1157,6 @@ TypedValue* tg1_19GenericContinuation_update(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_19GenericContinuation_update(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1214,7 +1189,7 @@ TypedValue* tg_19GenericContinuation_update(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1229,7 +1204,6 @@ this_ => rsi
 Value* th_19GenericContinuation_getVars(Value* _rv, ObjectData* this_) asm("_ZN4HPHP21c_GenericContinuation9t_getvarsEv");
 
 TypedValue* tg_19GenericContinuation_getVars(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1255,7 +1229,7 @@ TypedValue* tg_19GenericContinuation_getVars(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1270,7 +1244,6 @@ this_ => rsi
 TypedValue* th_19GenericContinuation___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP21c_GenericContinuation12t___destructEv");
 
 TypedValue* tg_19GenericContinuation___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1294,7 +1267,7 @@ TypedValue* tg_19GenericContinuation___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_DummyContinuation_Instance(HPHP::VM::Class* cls) {
@@ -1316,7 +1289,6 @@ this_ => rdi
 void th_17DummyContinuation___construct(ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation13t___constructEv");
 
 TypedValue* tg_17DummyContinuation___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1342,7 +1314,7 @@ TypedValue* tg_17DummyContinuation___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1357,7 +1329,6 @@ this_ => rsi
 TypedValue* th_17DummyContinuation_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation9t_currentEv");
 
 TypedValue* tg_17DummyContinuation_current(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1381,7 +1352,7 @@ TypedValue* tg_17DummyContinuation_current(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1395,7 +1366,6 @@ this_ => rdi
 long long th_17DummyContinuation_key(ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation5t_keyEv");
 
 TypedValue* tg_17DummyContinuation_key(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1420,7 +1390,7 @@ TypedValue* tg_17DummyContinuation_key(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1433,7 +1403,6 @@ this_ => rdi
 void th_17DummyContinuation_next(ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation6t_nextEv");
 
 TypedValue* tg_17DummyContinuation_next(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1459,7 +1428,7 @@ TypedValue* tg_17DummyContinuation_next(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1472,7 +1441,6 @@ this_ => rdi
 void th_17DummyContinuation_rewind(ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation8t_rewindEv");
 
 TypedValue* tg_17DummyContinuation_rewind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1498,7 +1466,7 @@ TypedValue* tg_17DummyContinuation_rewind(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1512,7 +1480,6 @@ this_ => rdi
 bool th_17DummyContinuation_valid(ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation7t_validEv");
 
 TypedValue* tg_17DummyContinuation_valid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1537,7 +1504,7 @@ TypedValue* tg_17DummyContinuation_valid(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1552,7 +1519,6 @@ this_ => rsi
 TypedValue* th_17DummyContinuation___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP19c_DummyContinuation12t___destructEv");
 
 TypedValue* tg_17DummyContinuation___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1576,7 +1542,7 @@ TypedValue* tg_17DummyContinuation___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

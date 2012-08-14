@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -46,7 +45,6 @@ TypedValue * fg1_use_soap_error_handler(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* fg_use_soap_error_handler(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -73,7 +71,7 @@ TypedValue* fg_use_soap_error_handler(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -89,7 +87,6 @@ fault => rdi
 bool fh_is_soap_fault(TypedValue* fault) asm("_ZN4HPHP15f_is_soap_faultERKNS_7VariantE");
 
 TypedValue* fg_is_soap_fault(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -109,7 +106,7 @@ TypedValue* fg_is_soap_fault(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -124,7 +121,6 @@ _ZN4HPHP22f__soap_active_versionEv
 long long fh__soap_active_version() asm("_ZN4HPHP22f__soap_active_versionEv");
 
 TypedValue* fg__soap_active_version(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -144,7 +140,7 @@ TypedValue* fg__soap_active_version(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -181,7 +177,6 @@ TypedValue* tg1_10SoapServer___construct(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_10SoapServer___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -214,7 +209,7 @@ TypedValue* tg_10SoapServer___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -254,7 +249,6 @@ TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* tg_10SoapServer_setclass(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -300,7 +294,7 @@ TypedValue* tg_10SoapServer_setclass(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -325,7 +319,6 @@ TypedValue* tg1_10SoapServer_setobject(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* tg_10SoapServer_setobject(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -358,7 +351,7 @@ TypedValue* tg_10SoapServer_setobject(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -372,7 +365,6 @@ func => rsi
 void th_10SoapServer_addfunction(ObjectData* this_, TypedValue* func) asm("_ZN4HPHP12c_SoapServer13t_addfunctionERKNS_7VariantE");
 
 TypedValue* tg_10SoapServer_addfunction(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -398,7 +390,7 @@ TypedValue* tg_10SoapServer_addfunction(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -413,7 +405,6 @@ this_ => rsi
 TypedValue* th_10SoapServer_getfunctions(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapServer14t_getfunctionsEv");
 
 TypedValue* tg_10SoapServer_getfunctions(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -437,7 +428,7 @@ TypedValue* tg_10SoapServer_getfunctions(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -462,7 +453,6 @@ TypedValue* tg1_10SoapServer_handle(TypedValue* rv, HPHP::VM::ActRec* ar, long l
 }
 
 TypedValue* tg_10SoapServer_handle(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -495,7 +485,7 @@ TypedValue* tg_10SoapServer_handle(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -520,7 +510,6 @@ TypedValue* tg1_10SoapServer_setpersistence(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_10SoapServer_setpersistence(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -553,7 +542,7 @@ TypedValue* tg_10SoapServer_setpersistence(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -598,7 +587,6 @@ TypedValue* tg1_10SoapServer_fault(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* tg_10SoapServer_fault(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -632,7 +620,7 @@ TypedValue* tg_10SoapServer_fault(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -657,7 +645,6 @@ TypedValue* tg1_10SoapServer_addsoapheader(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_10SoapServer_addsoapheader(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -690,7 +677,7 @@ TypedValue* tg_10SoapServer_addsoapheader(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -705,7 +692,6 @@ this_ => rsi
 TypedValue* th_10SoapServer___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapServer12t___destructEv");
 
 TypedValue* tg_10SoapServer___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -729,7 +715,7 @@ TypedValue* tg_10SoapServer___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_SoapClient_Instance(HPHP::VM::Class* cls) {
@@ -764,7 +750,6 @@ TypedValue* tg1_10SoapClient___construct(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_10SoapClient___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -797,7 +782,7 @@ TypedValue* tg_10SoapClient___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -814,7 +799,6 @@ args => rcx
 TypedValue* th_10SoapClient___call(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* args) asm("_ZN4HPHP12c_SoapClient8t___callENS_7VariantES1_");
 
 TypedValue* tg_10SoapClient___call(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -838,7 +822,7 @@ TypedValue* tg_10SoapClient___call(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -883,7 +867,6 @@ TypedValue* tg1_10SoapClient___soapcall(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_10SoapClient___soapcall(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -915,7 +898,7 @@ TypedValue* tg_10SoapClient___soapcall(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -930,7 +913,6 @@ this_ => rsi
 TypedValue* th_10SoapClient___getlastrequest(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapClient18t___getlastrequestEv");
 
 TypedValue* tg_10SoapClient___getlastrequest(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -954,7 +936,7 @@ TypedValue* tg_10SoapClient___getlastrequest(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -969,7 +951,6 @@ this_ => rsi
 TypedValue* th_10SoapClient___getlastresponse(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapClient19t___getlastresponseEv");
 
 TypedValue* tg_10SoapClient___getlastresponse(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -993,7 +974,7 @@ TypedValue* tg_10SoapClient___getlastresponse(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1008,7 +989,6 @@ this_ => rsi
 TypedValue* th_10SoapClient___getlastrequestheaders(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapClient25t___getlastrequestheadersEv");
 
 TypedValue* tg_10SoapClient___getlastrequestheaders(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1032,7 +1012,7 @@ TypedValue* tg_10SoapClient___getlastrequestheaders(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1047,7 +1027,6 @@ this_ => rsi
 TypedValue* th_10SoapClient___getlastresponseheaders(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapClient26t___getlastresponseheadersEv");
 
 TypedValue* tg_10SoapClient___getlastresponseheaders(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1071,7 +1050,7 @@ TypedValue* tg_10SoapClient___getlastresponseheaders(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1086,7 +1065,6 @@ this_ => rsi
 TypedValue* th_10SoapClient___getfunctions(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapClient16t___getfunctionsEv");
 
 TypedValue* tg_10SoapClient___getfunctions(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1110,7 +1088,7 @@ TypedValue* tg_10SoapClient___getfunctions(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1125,7 +1103,6 @@ this_ => rsi
 TypedValue* th_10SoapClient___gettypes(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapClient12t___gettypesEv");
 
 TypedValue* tg_10SoapClient___gettypes(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1149,7 +1126,7 @@ TypedValue* tg_10SoapClient___gettypes(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1197,7 +1174,6 @@ TypedValue* tg1_10SoapClient___dorequest(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_10SoapClient___dorequest(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1228,7 +1204,7 @@ TypedValue* tg_10SoapClient___dorequest(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1264,7 +1240,6 @@ TypedValue* tg1_10SoapClient___setcookie(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_10SoapClient___setcookie(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1295,7 +1270,7 @@ TypedValue* tg_10SoapClient___setcookie(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1320,7 +1295,6 @@ TypedValue* tg1_10SoapClient___setlocation(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_10SoapClient___setlocation(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1351,7 +1325,7 @@ TypedValue* tg_10SoapClient___setlocation(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1366,7 +1340,6 @@ headers => rsi
 bool th_10SoapClient___setsoapheaders(ObjectData* this_, TypedValue* headers) asm("_ZN4HPHP12c_SoapClient18t___setsoapheadersERKNS_7VariantE");
 
 TypedValue* tg_10SoapClient___setsoapheaders(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1391,7 +1364,7 @@ TypedValue* tg_10SoapClient___setsoapheaders(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1406,7 +1379,6 @@ this_ => rsi
 TypedValue* th_10SoapClient___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapClient12t___destructEv");
 
 TypedValue* tg_10SoapClient___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1430,7 +1402,7 @@ TypedValue* tg_10SoapClient___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_SoapVar_Instance(HPHP::VM::Class* cls) {
@@ -1488,7 +1460,6 @@ TypedValue* tg1_7SoapVar___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* tg_7SoapVar___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1521,7 +1492,7 @@ TypedValue* tg_7SoapVar___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1536,7 +1507,6 @@ this_ => rsi
 TypedValue* th_7SoapVar___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP9c_SoapVar12t___destructEv");
 
 TypedValue* tg_7SoapVar___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1560,7 +1530,7 @@ TypedValue* tg_7SoapVar___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_SoapParam_Instance(HPHP::VM::Class* cls) {
@@ -1595,7 +1565,6 @@ TypedValue* tg1_9SoapParam___construct(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* tg_9SoapParam___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1628,7 +1597,7 @@ TypedValue* tg_9SoapParam___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1643,7 +1612,6 @@ this_ => rsi
 TypedValue* th_9SoapParam___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP11c_SoapParam12t___destructEv");
 
 TypedValue* tg_9SoapParam___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1667,7 +1635,7 @@ TypedValue* tg_9SoapParam___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_SoapHeader_Instance(HPHP::VM::Class* cls) {
@@ -1722,7 +1690,6 @@ TypedValue* tg1_10SoapHeader___construct(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_10SoapHeader___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1757,7 +1724,7 @@ TypedValue* tg_10SoapHeader___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1772,7 +1739,6 @@ this_ => rsi
 TypedValue* th_10SoapHeader___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_SoapHeader12t___destructEv");
 
 TypedValue* tg_10SoapHeader___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1796,7 +1762,7 @@ TypedValue* tg_10SoapHeader___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

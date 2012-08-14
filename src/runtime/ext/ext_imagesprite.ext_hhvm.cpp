@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -44,7 +43,6 @@ this_ => rdi
 void th_11ImageSprite___construct(ObjectData* this_) asm("_ZN4HPHP13c_ImageSprite13t___constructEv");
 
 TypedValue* tg_11ImageSprite___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -70,7 +68,7 @@ TypedValue* tg_11ImageSprite___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -109,7 +107,6 @@ TypedValue* tg1_11ImageSprite_addFile(TypedValue* rv, HPHP::VM::ActRec* ar, long
 }
 
 TypedValue* tg_11ImageSprite_addFile(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -143,7 +140,7 @@ TypedValue* tg_11ImageSprite_addFile(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -186,7 +183,6 @@ TypedValue* tg1_11ImageSprite_addString(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_11ImageSprite_addString(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -220,7 +216,7 @@ TypedValue* tg_11ImageSprite_addString(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -264,7 +260,6 @@ TypedValue* tg1_11ImageSprite_addUrl(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* tg_11ImageSprite_addUrl(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -298,7 +293,7 @@ TypedValue* tg_11ImageSprite_addUrl(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -314,7 +309,6 @@ paths => rdx
 Value* th_11ImageSprite_clear(Value* _rv, ObjectData* this_, TypedValue* paths) asm("_ZN4HPHP13c_ImageSprite7t_clearERKNS_7VariantE");
 
 TypedValue* tg_11ImageSprite_clear(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -341,7 +335,7 @@ TypedValue* tg_11ImageSprite_clear(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -368,7 +362,6 @@ TypedValue* tg1_11ImageSprite_loadDims(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* tg_11ImageSprite_loadDims(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -401,7 +394,7 @@ TypedValue* tg_11ImageSprite_loadDims(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -428,7 +421,6 @@ TypedValue* tg1_11ImageSprite_loadImages(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_11ImageSprite_loadImages(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -461,7 +453,7 @@ TypedValue* tg_11ImageSprite_loadImages(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -506,7 +498,6 @@ TypedValue* tg1_11ImageSprite_output(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* tg_11ImageSprite_output(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -540,7 +531,7 @@ TypedValue* tg_11ImageSprite_output(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -588,7 +579,6 @@ TypedValue* tg1_11ImageSprite_css(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* tg_11ImageSprite_css(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -621,7 +611,7 @@ TypedValue* tg_11ImageSprite_css(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -636,7 +626,6 @@ this_ => rsi
 Value* th_11ImageSprite_getErrors(Value* _rv, ObjectData* this_) asm("_ZN4HPHP13c_ImageSprite11t_geterrorsEv");
 
 TypedValue* tg_11ImageSprite_getErrors(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -662,7 +651,7 @@ TypedValue* tg_11ImageSprite_getErrors(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -677,7 +666,6 @@ this_ => rsi
 Value* th_11ImageSprite_mapping(Value* _rv, ObjectData* this_) asm("_ZN4HPHP13c_ImageSprite9t_mappingEv");
 
 TypedValue* tg_11ImageSprite_mapping(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -703,7 +691,7 @@ TypedValue* tg_11ImageSprite_mapping(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -718,7 +706,6 @@ this_ => rsi
 TypedValue* th_11ImageSprite___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_ImageSprite12t___destructEv");
 
 TypedValue* tg_11ImageSprite___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -742,7 +729,7 @@ TypedValue* tg_11ImageSprite___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

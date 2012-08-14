@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -36,7 +35,6 @@ _rv => rdi
 Value* fh_pdo_drivers(Value* _rv) asm("_ZN4HPHP13f_pdo_driversEv");
 
 TypedValue* fg_pdo_drivers(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -57,7 +55,7 @@ TypedValue* fg_pdo_drivers(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -114,7 +112,6 @@ TypedValue* tg1_3PDO___construct(TypedValue* rv, HPHP::VM::ActRec* ar, long long
 }
 
 TypedValue* tg_3PDO___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -147,7 +144,7 @@ TypedValue* tg_3PDO___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -183,7 +180,6 @@ TypedValue* tg1_3PDO_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* tg_3PDO_prepare(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -214,7 +210,7 @@ TypedValue* tg_3PDO_prepare(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -228,7 +224,6 @@ this_ => rdi
 bool th_3PDO_begintransaction(ObjectData* this_) asm("_ZN4HPHP5c_PDO18t_begintransactionEv");
 
 TypedValue* tg_3PDO_begintransaction(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -253,7 +248,7 @@ TypedValue* tg_3PDO_begintransaction(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -267,7 +262,6 @@ this_ => rdi
 bool th_3PDO_commit(ObjectData* this_) asm("_ZN4HPHP5c_PDO8t_commitEv");
 
 TypedValue* tg_3PDO_commit(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -292,7 +286,7 @@ TypedValue* tg_3PDO_commit(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -306,7 +300,6 @@ this_ => rdi
 bool th_3PDO_rollback(ObjectData* this_) asm("_ZN4HPHP5c_PDO10t_rollbackEv");
 
 TypedValue* tg_3PDO_rollback(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -331,7 +324,7 @@ TypedValue* tg_3PDO_rollback(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -357,7 +350,6 @@ TypedValue* tg1_3PDO_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* tg_3PDO_setattribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -389,7 +381,7 @@ TypedValue* tg_3PDO_setattribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -414,7 +406,6 @@ TypedValue* tg1_3PDO_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* tg_3PDO_getattribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -445,7 +436,7 @@ TypedValue* tg_3PDO_getattribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -470,7 +461,6 @@ TypedValue* tg1_3PDO_exec(TypedValue* rv, HPHP::VM::ActRec* ar, long long count,
 }
 
 TypedValue* tg_3PDO_exec(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -501,7 +491,7 @@ TypedValue* tg_3PDO_exec(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -526,7 +516,6 @@ TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* tg_3PDO_lastinsertid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -557,7 +546,7 @@ TypedValue* tg_3PDO_lastinsertid(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -572,7 +561,6 @@ this_ => rsi
 TypedValue* th_3PDO_errorcode(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO11t_errorcodeEv");
 
 TypedValue* tg_3PDO_errorcode(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -596,7 +584,7 @@ TypedValue* tg_3PDO_errorcode(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -611,7 +599,6 @@ this_ => rsi
 Value* th_3PDO_errorinfo(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO11t_errorinfoEv");
 
 TypedValue* tg_3PDO_errorinfo(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -637,7 +624,7 @@ TypedValue* tg_3PDO_errorinfo(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -662,7 +649,6 @@ TypedValue* tg1_3PDO_query(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 }
 
 TypedValue* tg_3PDO_query(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -693,7 +679,7 @@ TypedValue* tg_3PDO_query(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -729,7 +715,6 @@ TypedValue* tg1_3PDO_quote(TypedValue* rv, HPHP::VM::ActRec* ar, long long count
 }
 
 TypedValue* tg_3PDO_quote(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -760,7 +745,7 @@ TypedValue* tg_3PDO_quote(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -775,7 +760,6 @@ this_ => rsi
 TypedValue* th_3PDO___wakeup(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO10t___wakeupEv");
 
 TypedValue* tg_3PDO___wakeup(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -799,7 +783,7 @@ TypedValue* tg_3PDO___wakeup(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -814,7 +798,6 @@ this_ => rsi
 TypedValue* th_3PDO___sleep(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO9t___sleepEv");
 
 TypedValue* tg_3PDO___sleep(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -838,7 +821,7 @@ TypedValue* tg_3PDO___sleep(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -853,7 +836,6 @@ cls_ => rsi
 Value* th_3PDO_getavailabledrivers(Value* _rv, char const* cls_) asm("_ZN4HPHP5c_PDO22ti_getavailabledriversEPKc");
 
 TypedValue* tg_3PDO_getavailabledrivers(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -874,7 +856,7 @@ TypedValue* tg_3PDO_getavailabledrivers(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -889,7 +871,6 @@ this_ => rsi
 TypedValue* th_3PDO___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO12t___destructEv");
 
 TypedValue* tg_3PDO___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -913,7 +894,7 @@ TypedValue* tg_3PDO___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_PDOStatement_Instance(HPHP::VM::Class* cls) {
@@ -935,7 +916,6 @@ this_ => rdi
 void th_12PDOStatement___construct(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t___constructEv");
 
 TypedValue* tg_12PDOStatement___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -961,7 +941,7 @@ TypedValue* tg_12PDOStatement___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -986,7 +966,6 @@ TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, HPHP::VM::ActRec* ar, lon
 }
 
 TypedValue* tg_12PDOStatement_execute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1017,7 +996,7 @@ TypedValue* tg_12PDOStatement_execute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1059,7 +1038,6 @@ TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, long 
 }
 
 TypedValue* tg_12PDOStatement_fetch(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1090,7 +1068,7 @@ TypedValue* tg_12PDOStatement_fetch(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1117,7 +1095,6 @@ TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_12PDOStatement_fetchobject(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1149,7 +1126,7 @@ TypedValue* tg_12PDOStatement_fetchobject(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1174,7 +1151,6 @@ TypedValue* tg1_12PDOStatement_fetchcolumn(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* tg_12PDOStatement_fetchcolumn(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1205,7 +1181,7 @@ TypedValue* tg_12PDOStatement_fetchcolumn(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1234,7 +1210,6 @@ TypedValue* tg1_12PDOStatement_fetchall(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* tg_12PDOStatement_fetchall(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1267,7 +1242,7 @@ TypedValue* tg_12PDOStatement_fetchall(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1294,7 +1269,6 @@ TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_12PDOStatement_bindvalue(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1326,7 +1300,7 @@ TypedValue* tg_12PDOStatement_bindvalue(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1368,7 +1342,6 @@ TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_12PDOStatement_bindparam(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1401,7 +1374,7 @@ TypedValue* tg_12PDOStatement_bindparam(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1443,7 +1416,6 @@ TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* tg_12PDOStatement_bindcolumn(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1476,7 +1448,7 @@ TypedValue* tg_12PDOStatement_bindcolumn(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1490,7 +1462,6 @@ this_ => rdi
 long long th_12PDOStatement_rowcount(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement10t_rowcountEv");
 
 TypedValue* tg_12PDOStatement_rowcount(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1515,7 +1486,7 @@ TypedValue* tg_12PDOStatement_rowcount(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1530,7 +1501,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement_errorcode(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement11t_errorcodeEv");
 
 TypedValue* tg_12PDOStatement_errorcode(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1554,7 +1524,7 @@ TypedValue* tg_12PDOStatement_errorcode(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1569,7 +1539,6 @@ this_ => rsi
 Value* th_12PDOStatement_errorinfo(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement11t_errorinfoEv");
 
 TypedValue* tg_12PDOStatement_errorinfo(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1595,7 +1564,7 @@ TypedValue* tg_12PDOStatement_errorinfo(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1621,7 +1590,6 @@ TypedValue* tg1_12PDOStatement_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_12PDOStatement_setattribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1652,7 +1620,7 @@ TypedValue* tg_12PDOStatement_setattribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1677,7 +1645,6 @@ TypedValue* tg1_12PDOStatement_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_12PDOStatement_getattribute(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1708,7 +1675,7 @@ TypedValue* tg_12PDOStatement_getattribute(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1722,7 +1689,6 @@ this_ => rdi
 long long th_12PDOStatement_columncount(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t_columncountEv");
 
 TypedValue* tg_12PDOStatement_columncount(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1747,7 +1713,7 @@ TypedValue* tg_12PDOStatement_columncount(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1772,7 +1738,6 @@ TypedValue* tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_12PDOStatement_getcolumnmeta(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1803,7 +1768,7 @@ TypedValue* tg_12PDOStatement_getcolumnmeta(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1843,7 +1808,6 @@ TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_12PDOStatement_setfetchmode(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1888,7 +1852,7 @@ TypedValue* tg_12PDOStatement_setfetchmode(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1902,7 +1866,6 @@ this_ => rdi
 bool th_12PDOStatement_nextrowset(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement12t_nextrowsetEv");
 
 TypedValue* tg_12PDOStatement_nextrowset(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1927,7 +1890,7 @@ TypedValue* tg_12PDOStatement_nextrowset(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1941,7 +1904,6 @@ this_ => rdi
 bool th_12PDOStatement_closecursor(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t_closecursorEv");
 
 TypedValue* tg_12PDOStatement_closecursor(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1966,7 +1928,7 @@ TypedValue* tg_12PDOStatement_closecursor(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1981,7 +1943,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement_debugdumpparams(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement17t_debugdumpparamsEv");
 
 TypedValue* tg_12PDOStatement_debugdumpparams(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2005,7 +1966,7 @@ TypedValue* tg_12PDOStatement_debugdumpparams(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2020,7 +1981,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement9t_currentEv");
 
 TypedValue* tg_12PDOStatement_current(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2044,7 +2004,7 @@ TypedValue* tg_12PDOStatement_current(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2059,7 +2019,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement5t_keyEv");
 
 TypedValue* tg_12PDOStatement_key(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2083,7 +2042,7 @@ TypedValue* tg_12PDOStatement_key(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2098,7 +2057,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement_next(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement6t_nextEv");
 
 TypedValue* tg_12PDOStatement_next(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2122,7 +2080,7 @@ TypedValue* tg_12PDOStatement_next(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2137,7 +2095,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement_rewind(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement8t_rewindEv");
 
 TypedValue* tg_12PDOStatement_rewind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2161,7 +2118,7 @@ TypedValue* tg_12PDOStatement_rewind(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2176,7 +2133,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement_valid(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement7t_validEv");
 
 TypedValue* tg_12PDOStatement_valid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2200,7 +2156,7 @@ TypedValue* tg_12PDOStatement_valid(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2215,7 +2171,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement___wakeup(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement10t___wakeupEv");
 
 TypedValue* tg_12PDOStatement___wakeup(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2239,7 +2194,7 @@ TypedValue* tg_12PDOStatement___wakeup(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2254,7 +2209,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement___sleep(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement9t___sleepEv");
 
 TypedValue* tg_12PDOStatement___sleep(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2278,7 +2232,7 @@ TypedValue* tg_12PDOStatement___sleep(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2293,7 +2247,6 @@ this_ => rsi
 TypedValue* th_12PDOStatement___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement12t___destructEv");
 
 TypedValue* tg_12PDOStatement___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2317,7 +2270,7 @@ TypedValue* tg_12PDOStatement___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

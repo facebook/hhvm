@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -52,7 +51,6 @@ TypedValue * fg1_hphpd_install_user_command(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_hphpd_install_user_command(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -79,7 +77,7 @@ TypedValue* fg_hphpd_install_user_command(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -95,7 +93,6 @@ _rv => rdi
 Value* fh_hphpd_get_user_commands(Value* _rv) asm("_ZN4HPHP25f_hphpd_get_user_commandsEv");
 
 TypedValue* fg_hphpd_get_user_commands(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -116,7 +113,7 @@ TypedValue* fg_hphpd_get_user_commands(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -142,7 +139,6 @@ TypedValue * fg1_hphpd_break(TypedValue* rv, HPHP::VM::ActRec* ar, long long cou
 }
 
 TypedValue* fg_hphpd_break(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -170,7 +166,7 @@ TypedValue* fg_hphpd_break(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -197,7 +193,6 @@ TypedValue * fg1_hphpd_get_client(TypedValue* rv, HPHP::VM::ActRec* ar, long lon
 }
 
 TypedValue* fg_hphpd_get_client(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -224,7 +219,7 @@ TypedValue* fg_hphpd_get_client(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -256,7 +251,6 @@ TypedValue * fg1_hphpd_client_ctrl(TypedValue* rv, HPHP::VM::ActRec* ar, long lo
 }
 
 TypedValue* fg_hphpd_client_ctrl(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -282,7 +276,7 @@ TypedValue* fg_hphpd_client_ctrl(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -306,7 +300,6 @@ this_ => rdi
 void th_20DebuggerProxyCmdUser___construct(ObjectData* this_) asm("_ZN4HPHP22c_DebuggerProxyCmdUser13t___constructEv");
 
 TypedValue* tg_20DebuggerProxyCmdUser___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -332,7 +325,7 @@ TypedValue* tg_20DebuggerProxyCmdUser___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -346,7 +339,6 @@ this_ => rdi
 bool th_20DebuggerProxyCmdUser_isLocal(ObjectData* this_) asm("_ZN4HPHP22c_DebuggerProxyCmdUser9t_islocalEv");
 
 TypedValue* tg_20DebuggerProxyCmdUser_isLocal(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -371,7 +363,7 @@ TypedValue* tg_20DebuggerProxyCmdUser_isLocal(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -396,7 +388,6 @@ TypedValue* tg1_20DebuggerProxyCmdUser_send(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_20DebuggerProxyCmdUser_send(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -427,7 +418,7 @@ TypedValue* tg_20DebuggerProxyCmdUser_send(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -442,7 +433,6 @@ this_ => rsi
 TypedValue* th_20DebuggerProxyCmdUser___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_DebuggerProxyCmdUser12t___destructEv");
 
 TypedValue* tg_20DebuggerProxyCmdUser___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -466,7 +456,7 @@ TypedValue* tg_20DebuggerProxyCmdUser___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_DebuggerClientCmdUser_Instance(HPHP::VM::Class* cls) {
@@ -488,7 +478,6 @@ this_ => rdi
 void th_21DebuggerClientCmdUser___construct(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser13t___constructEv");
 
 TypedValue* tg_21DebuggerClientCmdUser___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -514,7 +503,7 @@ TypedValue* tg_21DebuggerClientCmdUser___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -527,7 +516,6 @@ this_ => rdi
 void th_21DebuggerClientCmdUser_quit(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_quitEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_quit(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -553,7 +541,7 @@ TypedValue* tg_21DebuggerClientCmdUser_quit(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -593,7 +581,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_print(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -639,7 +626,7 @@ TypedValue* tg_21DebuggerClientCmdUser_print(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -679,7 +666,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_help(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -725,7 +711,7 @@ TypedValue* tg_21DebuggerClientCmdUser_help(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -765,7 +751,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_info(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -811,7 +796,7 @@ TypedValue* tg_21DebuggerClientCmdUser_info(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -851,7 +836,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, HPHP::VM::ActRec*
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_output(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -897,7 +881,7 @@ TypedValue* tg_21DebuggerClientCmdUser_output(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -937,7 +921,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_error(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -983,7 +966,7 @@ TypedValue* tg_21DebuggerClientCmdUser_error(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1029,7 +1012,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_code(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_code(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1062,7 +1044,7 @@ TypedValue* tg_21DebuggerClientCmdUser_code(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1102,7 +1084,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_ask(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_ask(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1146,7 +1127,7 @@ TypedValue* tg_21DebuggerClientCmdUser_ask(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1173,7 +1154,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_wrap(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_wrap(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1206,7 +1186,7 @@ TypedValue* tg_21DebuggerClientCmdUser_wrap(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1231,7 +1211,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpTitle(TypedValue* rv, HPHP::VM::ActR
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_helpTitle(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1264,7 +1243,7 @@ TypedValue* tg_21DebuggerClientCmdUser_helpTitle(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1310,7 +1289,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, HPHP::VM::ActRe
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_helpCmds(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1356,7 +1334,7 @@ TypedValue* tg_21DebuggerClientCmdUser_helpCmds(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1381,7 +1359,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpBody(TypedValue* rv, HPHP::VM::ActRe
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_helpBody(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1414,7 +1391,7 @@ TypedValue* tg_21DebuggerClientCmdUser_helpBody(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1439,7 +1416,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpSection(TypedValue* rv, HPHP::VM::Ac
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_helpSection(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1472,7 +1448,7 @@ TypedValue* tg_21DebuggerClientCmdUser_helpSection(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1497,7 +1473,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_tutorial(TypedValue* rv, HPHP::VM::ActRe
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_tutorial(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1530,7 +1505,7 @@ TypedValue* tg_21DebuggerClientCmdUser_tutorial(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1545,7 +1520,6 @@ this_ => rsi
 Value* th_21DebuggerClientCmdUser_getCode(Value* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser9t_getcodeEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_getCode(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1571,7 +1545,7 @@ TypedValue* tg_21DebuggerClientCmdUser_getCode(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1586,7 +1560,6 @@ this_ => rsi
 Value* th_21DebuggerClientCmdUser_getCommand(Value* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser12t_getcommandEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_getCommand(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1612,7 +1585,7 @@ TypedValue* tg_21DebuggerClientCmdUser_getCommand(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1643,7 +1616,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_arg(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_arg(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1675,7 +1647,7 @@ TypedValue* tg_21DebuggerClientCmdUser_arg(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1689,7 +1661,6 @@ this_ => rdi
 long long th_21DebuggerClientCmdUser_argCount(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_argcountEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_argCount(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1714,7 +1685,7 @@ TypedValue* tg_21DebuggerClientCmdUser_argCount(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1741,7 +1712,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_argValue(TypedValue* rv, HPHP::VM::ActRe
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_argValue(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1774,7 +1744,7 @@ TypedValue* tg_21DebuggerClientCmdUser_argValue(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1801,7 +1771,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_argRest(TypedValue* rv, HPHP::VM::ActRec
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_argRest(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1834,7 +1803,7 @@ TypedValue* tg_21DebuggerClientCmdUser_argRest(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1849,7 +1818,6 @@ this_ => rsi
 Value* th_21DebuggerClientCmdUser_args(Value* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_argsEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_args(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1875,7 +1843,7 @@ TypedValue* tg_21DebuggerClientCmdUser_args(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1900,7 +1868,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_send(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_send(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1931,7 +1898,7 @@ TypedValue* tg_21DebuggerClientCmdUser_send(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1956,7 +1923,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_xend(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_xend(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1987,7 +1953,7 @@ TypedValue* tg_21DebuggerClientCmdUser_xend(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2002,7 +1968,6 @@ this_ => rsi
 TypedValue* th_21DebuggerClientCmdUser_getCurrentLocation(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser20t_getcurrentlocationEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_getCurrentLocation(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2026,7 +1991,7 @@ TypedValue* tg_21DebuggerClientCmdUser_getCurrentLocation(HPHP::VM::ActRec *ar) 
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2041,7 +2006,6 @@ this_ => rsi
 TypedValue* th_21DebuggerClientCmdUser_getStackTrace(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser15t_getstacktraceEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_getStackTrace(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2065,7 +2029,7 @@ TypedValue* tg_21DebuggerClientCmdUser_getStackTrace(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2079,7 +2043,6 @@ this_ => rdi
 long long th_21DebuggerClientCmdUser_getFrame(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_getframeEv");
 
 TypedValue* tg_21DebuggerClientCmdUser_getFrame(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2104,7 +2067,7 @@ TypedValue* tg_21DebuggerClientCmdUser_getFrame(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2129,7 +2092,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_printFrame(TypedValue* rv, HPHP::VM::Act
 }
 
 TypedValue* tg_21DebuggerClientCmdUser_printFrame(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2162,7 +2124,7 @@ TypedValue* tg_21DebuggerClientCmdUser_printFrame(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2176,7 +2138,6 @@ list => rsi
 void th_21DebuggerClientCmdUser_addCompletion(ObjectData* this_, TypedValue* list) asm("_ZN4HPHP23c_DebuggerClientCmdUser15t_addcompletionERKNS_7VariantE");
 
 TypedValue* tg_21DebuggerClientCmdUser_addCompletion(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2202,7 +2163,7 @@ TypedValue* tg_21DebuggerClientCmdUser_addCompletion(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2217,7 +2178,6 @@ this_ => rsi
 TypedValue* th_21DebuggerClientCmdUser___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser12t___destructEv");
 
 TypedValue* tg_21DebuggerClientCmdUser___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2241,7 +2201,7 @@ TypedValue* tg_21DebuggerClientCmdUser___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 HPHP::VM::Instance* new_DebuggerClient_Instance(HPHP::VM::Class* cls) {
@@ -2263,7 +2223,6 @@ this_ => rdi
 void th_14DebuggerClient___construct(ObjectData* this_) asm("_ZN4HPHP16c_DebuggerClient13t___constructEv");
 
 TypedValue* tg_14DebuggerClient___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2289,7 +2248,7 @@ TypedValue* tg_14DebuggerClient___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2303,7 +2262,6 @@ this_ => rdi
 long long th_14DebuggerClient_getState(ObjectData* this_) asm("_ZN4HPHP16c_DebuggerClient10t_getstateEv");
 
 TypedValue* tg_14DebuggerClient_getState(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2328,7 +2286,7 @@ TypedValue* tg_14DebuggerClient_getState(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2344,7 +2302,6 @@ options => rdx
 TypedValue* th_14DebuggerClient_init(TypedValue* _rv, ObjectData* this_, TypedValue* options) asm("_ZN4HPHP16c_DebuggerClient6t_initERKNS_7VariantE");
 
 TypedValue* tg_14DebuggerClient_init(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2368,7 +2325,7 @@ TypedValue* tg_14DebuggerClient_init(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2385,7 +2342,6 @@ args => rcx
 TypedValue* th_14DebuggerClient_processCmd(TypedValue* _rv, ObjectData* this_, TypedValue* cmdName, TypedValue* args) asm("_ZN4HPHP16c_DebuggerClient12t_processcmdERKNS_7VariantES3_");
 
 TypedValue* tg_14DebuggerClient_processCmd(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2409,7 +2365,7 @@ TypedValue* tg_14DebuggerClient_processCmd(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -2424,7 +2380,6 @@ this_ => rsi
 TypedValue* th_14DebuggerClient___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP16c_DebuggerClient12t___destructEv");
 
 TypedValue* tg_14DebuggerClient___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2448,7 +2403,7 @@ TypedValue* tg_14DebuggerClient___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

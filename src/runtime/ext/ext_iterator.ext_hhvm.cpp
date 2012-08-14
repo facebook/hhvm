@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -62,7 +61,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator___construct(TypedValue* rv, HPHP
 }
 
 TypedValue* fg_hphp_recursiveiteratoriterator___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -90,7 +88,7 @@ TypedValue* fg_hphp_recursiveiteratoriterator___construct(HPHP::VM::ActRec *ar) 
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -118,7 +116,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_getinneriterator(TypedValue* rv,
 }
 
 TypedValue* fg_hphp_recursiveiteratoriterator_getinneriterator(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -146,7 +143,7 @@ TypedValue* fg_hphp_recursiveiteratoriterator_getinneriterator(HPHP::VM::ActRec 
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -172,7 +169,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_current(TypedValue* rv, HPHP::VM
 }
 
 TypedValue* fg_hphp_recursiveiteratoriterator_current(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -198,7 +194,7 @@ TypedValue* fg_hphp_recursiveiteratoriterator_current(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -224,7 +220,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_key(TypedValue* rv, HPHP::VM::Ac
 }
 
 TypedValue* fg_hphp_recursiveiteratoriterator_key(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -250,7 +245,7 @@ TypedValue* fg_hphp_recursiveiteratoriterator_key(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -276,7 +271,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_next(TypedValue* rv, HPHP::VM::A
 }
 
 TypedValue* fg_hphp_recursiveiteratoriterator_next(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -304,7 +298,7 @@ TypedValue* fg_hphp_recursiveiteratoriterator_next(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -330,7 +324,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_rewind(TypedValue* rv, HPHP::VM:
 }
 
 TypedValue* fg_hphp_recursiveiteratoriterator_rewind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -358,7 +351,7 @@ TypedValue* fg_hphp_recursiveiteratoriterator_rewind(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -384,7 +377,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_valid(TypedValue* rv, HPHP::VM::
 }
 
 TypedValue* fg_hphp_recursiveiteratoriterator_valid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -411,7 +403,7 @@ TypedValue* fg_hphp_recursiveiteratoriterator_valid(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -443,7 +435,6 @@ TypedValue * fg1_hphp_directoryiterator___construct(TypedValue* rv, HPHP::VM::Ac
 }
 
 TypedValue* fg_hphp_directoryiterator___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -470,7 +461,7 @@ TypedValue* fg_hphp_directoryiterator___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -496,7 +487,6 @@ TypedValue * fg1_hphp_directoryiterator_key(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_hphp_directoryiterator_key(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -522,7 +512,7 @@ TypedValue* fg_hphp_directoryiterator_key(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -548,7 +538,6 @@ TypedValue * fg1_hphp_directoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_hphp_directoryiterator_next(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -576,7 +565,7 @@ TypedValue* fg_hphp_directoryiterator_next(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -602,7 +591,6 @@ TypedValue * fg1_hphp_directoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec*
 }
 
 TypedValue* fg_hphp_directoryiterator_rewind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -630,7 +618,7 @@ TypedValue* fg_hphp_directoryiterator_rewind(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -662,7 +650,6 @@ TypedValue * fg1_hphp_directoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_hphp_directoryiterator_seek(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -690,7 +677,7 @@ TypedValue* fg_hphp_directoryiterator_seek(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -716,7 +703,6 @@ TypedValue * fg1_hphp_directoryiterator_current(TypedValue* rv, HPHP::VM::ActRec
 }
 
 TypedValue* fg_hphp_directoryiterator_current(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -742,7 +728,7 @@ TypedValue* fg_hphp_directoryiterator_current(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -770,7 +756,6 @@ TypedValue * fg1_hphp_directoryiterator___tostring(TypedValue* rv, HPHP::VM::Act
 }
 
 TypedValue* fg_hphp_directoryiterator___tostring(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -798,7 +783,7 @@ TypedValue* fg_hphp_directoryiterator___tostring(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -824,7 +809,6 @@ TypedValue * fg1_hphp_directoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_directoryiterator_valid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -851,7 +835,7 @@ TypedValue* fg_hphp_directoryiterator_valid(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -877,7 +861,6 @@ TypedValue * fg1_hphp_directoryiterator_isdot(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_directoryiterator_isdot(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -904,7 +887,7 @@ TypedValue* fg_hphp_directoryiterator_isdot(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -940,7 +923,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator___construct(TypedValue* rv, HPH
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -967,7 +949,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator___construct(HPHP::VM::ActRec *ar)
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -993,7 +975,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_key(TypedValue* rv, HPHP::VM::A
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_key(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1019,7 +1000,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_key(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1045,7 +1026,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_next(TypedValue* rv, HPHP::VM::
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_next(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1073,7 +1053,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_next(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1099,7 +1079,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_rewind(TypedValue* rv, HPHP::VM
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_rewind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1127,7 +1106,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_rewind(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1159,7 +1138,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_seek(TypedValue* rv, HPHP::VM::
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_seek(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1187,7 +1165,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_seek(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1213,7 +1191,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_current(TypedValue* rv, HPHP::V
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_current(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1239,7 +1216,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_current(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1267,7 +1244,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator___tostring(TypedValue* rv, HPHP
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator___tostring(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1295,7 +1271,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator___tostring(HPHP::VM::ActRec *ar) 
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1321,7 +1297,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_valid(TypedValue* rv, HPHP::VM:
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_valid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1348,7 +1323,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_valid(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1374,7 +1349,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_haschildren(TypedValue* rv, HPH
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_haschildren(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1401,7 +1375,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_haschildren(HPHP::VM::ActRec *ar)
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1429,7 +1403,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_getchildren(TypedValue* rv, HPH
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_getchildren(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1457,7 +1430,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getchildren(HPHP::VM::ActRec *ar)
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1485,7 +1458,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpath(TypedValue* rv, HPHP
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_getsubpath(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1513,7 +1485,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getsubpath(HPHP::VM::ActRec *ar) 
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1541,7 +1513,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpathname(TypedValue* rv, 
 }
 
 TypedValue* fg_hphp_recursivedirectoryiterator_getsubpathname(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1569,7 +1540,7 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getsubpathname(HPHP::VM::ActRec *
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1594,7 +1565,6 @@ array => rsi
 void th_20MutableArrayIterator___construct(ObjectData* this_, TypedValue* array) asm("_ZN4HPHP22c_MutableArrayIterator13t___constructERKNS_14VRefParamValueE");
 
 TypedValue* tg_20MutableArrayIterator___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1620,7 +1590,7 @@ TypedValue* tg_20MutableArrayIterator___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1635,7 +1605,6 @@ this_ => rsi
 TypedValue* th_20MutableArrayIterator_currentRef(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator12t_currentrefEv");
 
 TypedValue* tg_20MutableArrayIterator_currentRef(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1659,7 +1628,7 @@ TypedValue* tg_20MutableArrayIterator_currentRef(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1674,7 +1643,6 @@ this_ => rsi
 TypedValue* th_20MutableArrayIterator_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator9t_currentEv");
 
 TypedValue* tg_20MutableArrayIterator_current(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1698,7 +1666,7 @@ TypedValue* tg_20MutableArrayIterator_current(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1713,7 +1681,6 @@ this_ => rsi
 TypedValue* th_20MutableArrayIterator_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator5t_keyEv");
 
 TypedValue* tg_20MutableArrayIterator_key(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1737,7 +1704,7 @@ TypedValue* tg_20MutableArrayIterator_key(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1750,7 +1717,6 @@ this_ => rdi
 void th_20MutableArrayIterator_next(ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator6t_nextEv");
 
 TypedValue* tg_20MutableArrayIterator_next(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1776,7 +1742,7 @@ TypedValue* tg_20MutableArrayIterator_next(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1790,7 +1756,6 @@ this_ => rdi
 bool th_20MutableArrayIterator_valid(ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator7t_validEv");
 
 TypedValue* tg_20MutableArrayIterator_valid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1815,7 +1780,7 @@ TypedValue* tg_20MutableArrayIterator_valid(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -1830,7 +1795,6 @@ this_ => rsi
 TypedValue* th_20MutableArrayIterator___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator12t___destructEv");
 
 TypedValue* tg_20MutableArrayIterator___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1854,7 +1818,7 @@ TypedValue* tg_20MutableArrayIterator___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

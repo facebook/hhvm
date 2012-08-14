@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -54,7 +53,6 @@ TypedValue * fg1_hphp_splfileinfo___construct(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileinfo___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -82,7 +80,7 @@ TypedValue* fg_hphp_splfileinfo___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -108,7 +106,6 @@ TypedValue * fg1_hphp_splfileinfo_getatime(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileinfo_getatime(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -135,7 +132,7 @@ TypedValue* fg_hphp_splfileinfo_getatime(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -169,7 +166,6 @@ TypedValue * fg1_hphp_splfileinfo_getbasename(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileinfo_getbasename(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -197,7 +193,7 @@ TypedValue* fg_hphp_splfileinfo_getbasename(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -223,7 +219,6 @@ TypedValue * fg1_hphp_splfileinfo_getctime(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileinfo_getctime(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -250,7 +245,7 @@ TypedValue* fg_hphp_splfileinfo_getctime(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -284,7 +279,6 @@ TypedValue * fg1_hphp_splfileinfo_getfileinfo(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileinfo_getfileinfo(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -312,7 +306,7 @@ TypedValue* fg_hphp_splfileinfo_getfileinfo(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -340,7 +334,6 @@ TypedValue * fg1_hphp_splfileinfo_getfilename(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileinfo_getfilename(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -368,7 +361,7 @@ TypedValue* fg_hphp_splfileinfo_getfilename(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -394,7 +387,6 @@ TypedValue * fg1_hphp_splfileinfo_getgroup(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileinfo_getgroup(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -421,7 +413,7 @@ TypedValue* fg_hphp_splfileinfo_getgroup(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -447,7 +439,6 @@ TypedValue * fg1_hphp_splfileinfo_getinode(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileinfo_getinode(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -474,7 +465,7 @@ TypedValue* fg_hphp_splfileinfo_getinode(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -502,7 +493,6 @@ TypedValue * fg1_hphp_splfileinfo_getlinktarget(TypedValue* rv, HPHP::VM::ActRec
 }
 
 TypedValue* fg_hphp_splfileinfo_getlinktarget(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -530,7 +520,7 @@ TypedValue* fg_hphp_splfileinfo_getlinktarget(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -556,7 +546,6 @@ TypedValue * fg1_hphp_splfileinfo_getmtime(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileinfo_getmtime(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -583,7 +572,7 @@ TypedValue* fg_hphp_splfileinfo_getmtime(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -609,7 +598,6 @@ TypedValue * fg1_hphp_splfileinfo_getowner(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileinfo_getowner(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -636,7 +624,7 @@ TypedValue* fg_hphp_splfileinfo_getowner(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -664,7 +652,6 @@ TypedValue * fg1_hphp_splfileinfo_getpath(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileinfo_getpath(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -692,7 +679,7 @@ TypedValue* fg_hphp_splfileinfo_getpath(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -726,7 +713,6 @@ TypedValue * fg1_hphp_splfileinfo_getpathinfo(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileinfo_getpathinfo(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -754,7 +740,7 @@ TypedValue* fg_hphp_splfileinfo_getpathinfo(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -782,7 +768,6 @@ TypedValue * fg1_hphp_splfileinfo_getpathname(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileinfo_getpathname(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -810,7 +795,7 @@ TypedValue* fg_hphp_splfileinfo_getpathname(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -836,7 +821,6 @@ TypedValue * fg1_hphp_splfileinfo_getperms(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileinfo_getperms(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -863,7 +847,7 @@ TypedValue* fg_hphp_splfileinfo_getperms(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -889,7 +873,6 @@ TypedValue * fg1_hphp_splfileinfo_getrealpath(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileinfo_getrealpath(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -915,7 +898,7 @@ TypedValue* fg_hphp_splfileinfo_getrealpath(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -941,7 +924,6 @@ TypedValue * fg1_hphp_splfileinfo_getsize(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileinfo_getsize(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -968,7 +950,7 @@ TypedValue* fg_hphp_splfileinfo_getsize(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -996,7 +978,6 @@ TypedValue * fg1_hphp_splfileinfo_gettype(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileinfo_gettype(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1024,7 +1005,7 @@ TypedValue* fg_hphp_splfileinfo_gettype(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1050,7 +1031,6 @@ TypedValue * fg1_hphp_splfileinfo_isdir(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* fg_hphp_splfileinfo_isdir(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1077,7 +1057,7 @@ TypedValue* fg_hphp_splfileinfo_isdir(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1103,7 +1083,6 @@ TypedValue * fg1_hphp_splfileinfo_isexecutable(TypedValue* rv, HPHP::VM::ActRec*
 }
 
 TypedValue* fg_hphp_splfileinfo_isexecutable(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1130,7 +1109,7 @@ TypedValue* fg_hphp_splfileinfo_isexecutable(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1156,7 +1135,6 @@ TypedValue * fg1_hphp_splfileinfo_isfile(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_hphp_splfileinfo_isfile(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1183,7 +1161,7 @@ TypedValue* fg_hphp_splfileinfo_isfile(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1209,7 +1187,6 @@ TypedValue * fg1_hphp_splfileinfo_islink(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_hphp_splfileinfo_islink(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1236,7 +1213,7 @@ TypedValue* fg_hphp_splfileinfo_islink(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1262,7 +1239,6 @@ TypedValue * fg1_hphp_splfileinfo_isreadable(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_hphp_splfileinfo_isreadable(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1289,7 +1265,7 @@ TypedValue* fg_hphp_splfileinfo_isreadable(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1315,7 +1291,6 @@ TypedValue * fg1_hphp_splfileinfo_iswritable(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_hphp_splfileinfo_iswritable(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1342,7 +1317,7 @@ TypedValue* fg_hphp_splfileinfo_iswritable(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1381,7 +1356,6 @@ TypedValue * fg1_hphp_splfileinfo_openfile(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileinfo_openfile(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1409,7 +1383,7 @@ TypedValue* fg_hphp_splfileinfo_openfile(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1441,7 +1415,6 @@ TypedValue * fg1_hphp_splfileinfo_setfileclass(TypedValue* rv, HPHP::VM::ActRec*
 }
 
 TypedValue* fg_hphp_splfileinfo_setfileclass(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1469,7 +1442,7 @@ TypedValue* fg_hphp_splfileinfo_setfileclass(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1501,7 +1474,6 @@ TypedValue * fg1_hphp_splfileinfo_setinfoclass(TypedValue* rv, HPHP::VM::ActRec*
 }
 
 TypedValue* fg_hphp_splfileinfo_setinfoclass(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1529,7 +1501,7 @@ TypedValue* fg_hphp_splfileinfo_setinfoclass(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1557,7 +1529,6 @@ TypedValue * fg1_hphp_splfileinfo___tostring(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_hphp_splfileinfo___tostring(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1585,7 +1556,7 @@ TypedValue* fg_hphp_splfileinfo___tostring(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1628,7 +1599,6 @@ TypedValue * fg1_hphp_splfileobject___construct(TypedValue* rv, HPHP::VM::ActRec
 }
 
 TypedValue* fg_hphp_splfileobject___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1656,7 +1626,7 @@ TypedValue* fg_hphp_splfileobject___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1682,7 +1652,6 @@ TypedValue * fg1_hphp_splfileobject_current(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_hphp_splfileobject_current(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1708,7 +1677,7 @@ TypedValue* fg_hphp_splfileobject_current(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1734,7 +1703,6 @@ TypedValue * fg1_hphp_splfileobject_eof(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* fg_hphp_splfileobject_eof(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1761,7 +1729,7 @@ TypedValue* fg_hphp_splfileobject_eof(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1787,7 +1755,6 @@ TypedValue * fg1_hphp_splfileobject_fflush(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileobject_fflush(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1814,7 +1781,7 @@ TypedValue* fg_hphp_splfileobject_fflush(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1842,7 +1809,6 @@ TypedValue * fg1_hphp_splfileobject_fgetc(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileobject_fgetc(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1870,7 +1836,7 @@ TypedValue* fg_hphp_splfileobject_fgetc(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1910,7 +1876,6 @@ TypedValue * fg1_hphp_splfileobject_fgetcsv(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* fg_hphp_splfileobject_fgetcsv(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1936,7 +1901,7 @@ TypedValue* fg_hphp_splfileobject_fgetcsv(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -1964,7 +1929,6 @@ TypedValue * fg1_hphp_splfileobject_fgets(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileobject_fgets(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1992,7 +1956,7 @@ TypedValue* fg_hphp_splfileobject_fgets(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2026,7 +1990,6 @@ TypedValue * fg1_hphp_splfileobject_fgetss(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileobject_fgetss(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2054,7 +2017,7 @@ TypedValue* fg_hphp_splfileobject_fgetss(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2081,7 +2044,6 @@ TypedValue * fg1_hphp_splfileobject_flock(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileobject_flock(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2108,7 +2070,7 @@ TypedValue* fg_hphp_splfileobject_flock(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2134,7 +2096,6 @@ TypedValue * fg1_hphp_splfileobject_fpassthru(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileobject_fpassthru(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2161,7 +2122,7 @@ TypedValue* fg_hphp_splfileobject_fpassthru(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2198,7 +2159,6 @@ TypedValue * fg1_hphp_splfileobject_fscanf(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileobject_fscanf(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2224,7 +2184,7 @@ TypedValue* fg_hphp_splfileobject_fscanf(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2260,7 +2220,6 @@ TypedValue * fg1_hphp_splfileobject_fseek(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileobject_fseek(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2287,7 +2246,7 @@ TypedValue* fg_hphp_splfileobject_fseek(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2313,7 +2272,6 @@ TypedValue * fg1_hphp_splfileobject_fstat(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileobject_fstat(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2339,7 +2297,7 @@ TypedValue* fg_hphp_splfileobject_fstat(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2365,7 +2323,6 @@ TypedValue * fg1_hphp_splfileobject_ftell(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileobject_ftell(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2392,7 +2349,7 @@ TypedValue* fg_hphp_splfileobject_ftell(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2424,7 +2381,6 @@ TypedValue * fg1_hphp_splfileobject_ftruncate(TypedValue* rv, HPHP::VM::ActRec* 
 }
 
 TypedValue* fg_hphp_splfileobject_ftruncate(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2451,7 +2407,7 @@ TypedValue* fg_hphp_splfileobject_ftruncate(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2487,7 +2443,6 @@ TypedValue * fg1_hphp_splfileobject_fwrite(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileobject_fwrite(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2514,7 +2469,7 @@ TypedValue* fg_hphp_splfileobject_fwrite(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2540,7 +2495,6 @@ TypedValue * fg1_hphp_splfileobject_getcvscontrol(TypedValue* rv, HPHP::VM::ActR
 }
 
 TypedValue* fg_hphp_splfileobject_getcvscontrol(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2566,7 +2520,7 @@ TypedValue* fg_hphp_splfileobject_getcvscontrol(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2592,7 +2546,6 @@ TypedValue * fg1_hphp_splfileobject_getflags(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_hphp_splfileobject_getflags(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2619,7 +2572,7 @@ TypedValue* fg_hphp_splfileobject_getflags(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2645,7 +2598,6 @@ TypedValue * fg1_hphp_splfileobject_getmaxlinelen(TypedValue* rv, HPHP::VM::ActR
 }
 
 TypedValue* fg_hphp_splfileobject_getmaxlinelen(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2672,7 +2624,7 @@ TypedValue* fg_hphp_splfileobject_getmaxlinelen(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2698,7 +2650,6 @@ TypedValue * fg1_hphp_splfileobject_key(TypedValue* rv, HPHP::VM::ActRec* ar, lo
 }
 
 TypedValue* fg_hphp_splfileobject_key(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2725,7 +2676,7 @@ TypedValue* fg_hphp_splfileobject_key(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2751,7 +2702,6 @@ TypedValue * fg1_hphp_splfileobject_next(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_hphp_splfileobject_next(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2779,7 +2729,7 @@ TypedValue* fg_hphp_splfileobject_next(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2805,7 +2755,6 @@ TypedValue * fg1_hphp_splfileobject_rewind(TypedValue* rv, HPHP::VM::ActRec* ar,
 }
 
 TypedValue* fg_hphp_splfileobject_rewind(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2833,7 +2782,7 @@ TypedValue* fg_hphp_splfileobject_rewind(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2859,7 +2808,6 @@ TypedValue * fg1_hphp_splfileobject_valid(TypedValue* rv, HPHP::VM::ActRec* ar, 
 }
 
 TypedValue* fg_hphp_splfileobject_valid(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2886,7 +2834,7 @@ TypedValue* fg_hphp_splfileobject_valid(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2918,7 +2866,6 @@ TypedValue * fg1_hphp_splfileobject_seek(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* fg_hphp_splfileobject_seek(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2946,7 +2893,7 @@ TypedValue* fg_hphp_splfileobject_seek(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -2986,7 +2933,6 @@ TypedValue * fg1_hphp_splfileobject_setcsvcontrol(TypedValue* rv, HPHP::VM::ActR
 }
 
 TypedValue* fg_hphp_splfileobject_setcsvcontrol(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3014,7 +2960,7 @@ TypedValue* fg_hphp_splfileobject_setcsvcontrol(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -3046,7 +2992,6 @@ TypedValue * fg1_hphp_splfileobject_setflags(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* fg_hphp_splfileobject_setflags(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3074,7 +3019,7 @@ TypedValue* fg_hphp_splfileobject_setflags(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 
@@ -3106,7 +3051,6 @@ TypedValue * fg1_hphp_splfileobject_setmaxlinelen(TypedValue* rv, HPHP::VM::ActR
 }
 
 TypedValue* fg_hphp_splfileobject_setmaxlinelen(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3134,7 +3078,7 @@ TypedValue* fg_hphp_splfileobject_setmaxlinelen(HPHP::VM::ActRec *ar) {
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

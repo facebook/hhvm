@@ -20,7 +20,6 @@
 #include <runtime/ext/ext.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/exception_gate.h>
 #include <exception>
 
 namespace HPHP {
@@ -44,7 +43,6 @@ this_ => rdi
 void th_12SpoofChecker___construct(ObjectData* this_) asm("_ZN4HPHP14c_SpoofChecker13t___constructEv");
 
 TypedValue* tg_12SpoofChecker___construct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -70,7 +68,7 @@ TypedValue* tg_12SpoofChecker___construct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -97,7 +95,6 @@ TypedValue* tg1_12SpoofChecker_isSuspicious(TypedValue* rv, HPHP::VM::ActRec* ar
 }
 
 TypedValue* tg_12SpoofChecker_isSuspicious(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -130,7 +127,7 @@ TypedValue* tg_12SpoofChecker_isSuspicious(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -168,7 +165,6 @@ TypedValue* tg1_12SpoofChecker_areConfusable(TypedValue* rv, HPHP::VM::ActRec* a
 }
 
 TypedValue* tg_12SpoofChecker_areConfusable(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -201,7 +197,7 @@ TypedValue* tg_12SpoofChecker_areConfusable(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -226,7 +222,6 @@ TypedValue* tg1_12SpoofChecker_setAllowedLocales(TypedValue* rv, HPHP::VM::ActRe
 }
 
 TypedValue* tg_12SpoofChecker_setAllowedLocales(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -259,7 +254,7 @@ TypedValue* tg_12SpoofChecker_setAllowedLocales(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -284,7 +279,6 @@ TypedValue* tg1_12SpoofChecker_setChecks(TypedValue* rv, HPHP::VM::ActRec* ar, l
 }
 
 TypedValue* tg_12SpoofChecker_setChecks(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -317,7 +311,7 @@ TypedValue* tg_12SpoofChecker_setChecks(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 /*
@@ -332,7 +326,6 @@ this_ => rsi
 TypedValue* th_12SpoofChecker___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_SpoofChecker12t___destructEv");
 
 TypedValue* tg_12SpoofChecker___destruct(HPHP::VM::ActRec *ar) {
-  EXCEPTION_GATE_ENTER();
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -356,7 +349,7 @@ TypedValue* tg_12SpoofChecker___destruct(HPHP::VM::ActRec *ar) {
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
-  EXCEPTION_GATE_RETURN(&ar->m_r);
+  return &ar->m_r;
 }
 
 

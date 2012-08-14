@@ -1775,6 +1775,10 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align) {
   SKTRACE(2, *sk, "   funcId: %llx\n",
           curFunc()->getFuncId());
   {
+    if (curFrame()->hasVarEnv() && curFrame()->getVarEnv()->isGlobalScope()) {
+      SKTRACE(2, *sk, "punting on pseudoMain\n");
+      return NULL;
+    }
     if (const SrcRec* sr = m_srcDB.find(*sk)) {
       TCA tca = sr->getTopTranslation();
       if (tca) {

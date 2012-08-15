@@ -11,13 +11,13 @@ endif()
 if(CMAKE_COMPILER_IS_GNUCC)
 	INCLUDE(CheckCSourceCompiles)
 	CHECK_C_SOURCE_COMPILES("#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-#if GCC_VERSION < 40300
-#error Need GCC 4.3.0+
+#if GCC_VERSION < 40600
+#error Need GCC 4.6.0+
 #endif
-int main() { return 0; }" HAVE_GCC_43)
+int main() { return 0; }" HAVE_GCC_46)
 
-	if(NOT HAVE_GCC_43)
-		message(FATAL_ERROR "Need at least GCC 4.3")
+	if(NOT HAVE_GCC_46)
+		message(FATAL_ERROR "Need at least GCC 4.6")
 	endif()
 
 endif()

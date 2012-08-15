@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
 #include <runtime/base/ini_setting.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/type_conversions.h>
@@ -211,7 +214,9 @@ bool IniSetting::Get(CStrRef name, String &value) {
     return true;
   }
   if (name == "memory_limit") {
-    value = String((int64)g_context->getRequestMemoryMaxBytes());
+    int64 v = g_context->getRequestMemoryMaxBytes();
+    if (v == INT64_MAX) v = -1;
+    value = String(v);
     return true;
   }
   if (name == "max_execution_time" || name == "maximum_execution_time") {

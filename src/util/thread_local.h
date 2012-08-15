@@ -21,6 +21,7 @@
 #include "exception.h"
 #include <errno.h>
 #include <util/util.h>
+#include <boost/aligned_storage.hpp>
 
 namespace HPHP {
 
@@ -124,7 +125,7 @@ struct ThreadLocal {
     delete m_node.m_p;
     m_node.m_p = NULL;
   }
-  
+
   void nullOut() {
     m_node.m_p = NULL;
   }
@@ -215,22 +216,20 @@ public:
   static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
 
   static T* getNoCheck() {
-    T *& p = s_singleton;
-    ASSERT(p);
-    return p;
+    ASSERT(s_singleton == (T*)&s_storage);
+    return (T*)&s_storage;
   }
-
-  static void create(T *& p) NEVER_INLINE;
 
   static bool isNull() { return s_singleton == NULL; }
 
   static void destroy() {
-    T *& p = s_singleton;
+    ASSERT(!s_singleton || s_singleton == (T*)&s_storage);
+    T* p = s_singleton;
     if (p) {
       T::Delete(p);
-      p = NULL;
+      s_singleton = NULL;
+      pthread_setspecific(s_key, NULL);
     }
-    pthread_setspecific(s_key, NULL);
   }
 
   T *operator->() const {
@@ -243,7 +242,10 @@ public:
 
 private:
   static pthread_key_t s_key;
-  static __thread T * s_singleton;
+  static __thread T *s_singleton;
+  typedef typename boost::aligned_storage<sizeof(T), sizeof(void*)>::type
+          StorageType;
+  static __thread StorageType s_storage;
 
   static pthread_key_t getKey() {
     if (s_key == 0) {
@@ -254,23 +256,21 @@ private:
 };
 
 template<typename T>
-void ThreadLocalSingleton<T>::create(T *& p) {
-  p = T::Create();
-  pthread_setspecific(s_key, p);
-}
-template<typename T>
 T *ThreadLocalSingleton<T>::getCheck() {
-  T *& p = s_singleton;
-  if (p == NULL) {
-    create(p);
+  if (!s_singleton) {
+    T* p = (T*) &s_storage;
+    T::Create(p);
+    s_singleton = p;
+    pthread_setspecific(s_key, p);
   }
-  return p;
+  return s_singleton;
 }
 
-template <typename T>
-pthread_key_t ThreadLocalSingleton<T>::s_key;
-template<typename T>
-__thread T *ThreadLocalSingleton<T>::s_singleton;
+template<typename T> pthread_key_t ThreadLocalSingleton<T>::s_key;
+template<typename T> __thread T *ThreadLocalSingleton<T>::s_singleton;
+template<typename T> __thread typename ThreadLocalSingleton<T>::StorageType
+                              ThreadLocalSingleton<T>::s_storage;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all
@@ -372,7 +372,7 @@ public:
     delete (T*)pthread_getspecific(m_key);
     pthread_setspecific(m_key, NULL);
   }
- 
+
   void nullOut() {
     pthread_setspecific(m_key, NULL);
   }
@@ -448,6 +448,7 @@ T *ThreadLocalNoCheck<T>::getCheck() const {
 template<typename T>
 static void ThreadLocalSingletonOnThreadExit(void *obj) {
   T::OnThreadExit((T*)obj);
+  free(obj);
 }
 
 // ThreadLocalSingleton has NoCheck property
@@ -466,7 +467,9 @@ public:
   bool isNull() const { return pthread_getspecific(s_key) == NULL; }
 
   void destroy() {
-    T::Delete((T*)pthread_getspecific(s_key));
+    void* p = pthread_get_specific(s_key);
+    T::Delete((T*)p);
+    free(p);
     pthread_setspecific(s_key, NULL);
   }
 
@@ -493,7 +496,8 @@ template<typename T>
 T *ThreadLocalSingleton<T>::getCheck() {
   T *obj = (T*)pthread_getspecific(s_key);
   if (obj == NULL) {
-    obj = T::Create();
+    obj = (T*)malloc(sizeof(T));
+    T::Create(obj);
     pthread_setspecific(s_key, obj);
   }
   return obj;

@@ -386,8 +386,7 @@ class SmartAllocator : public SmartAllocatorImpl {
    * times to grow the memory, but the higher chance of increasing memory
    * footprint.
    */
-  SmartAllocator(int itemCount = -1)
-    : SmartAllocatorImpl(TNameEnum, itemCount, sizeof(T), flag) {
+  SmartAllocator() : SmartAllocatorImpl(TNameEnum, -1, sizeof(T), flag) {
   }
 
   void release(T *p) {
@@ -410,14 +409,14 @@ class SmartAllocator : public SmartAllocatorImpl {
     }
   }
 
-  static SmartAllocator<T, TNameEnum, flag> *Create() {
-    return new SmartAllocator<T, TNameEnum, flag>();
+  static void Create(void* storage) {
+    new (storage) SmartAllocator<T, TNameEnum, flag>();
   }
   static void Delete(SmartAllocator *p) {
-    delete p;
+    p->~SmartAllocator();
   }
   static void OnThreadExit(SmartAllocator *p) {
-    delete p;
+    p->~SmartAllocator();
   }
 };
 
@@ -430,8 +429,6 @@ void *SmartAllocatorInitSetup() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // This allocator is for unknown but fixed sized classes, like ObjectData.
-// NS::T::s_T_initializer allows private inner classes to be initialized,
-// this is completely hidden by using a nested private llocatorInitializer
 
 #define DECLARE_OBJECT_ALLOCATION_NO_SWEEP(T)                           \
   public:                                                               \
@@ -492,14 +489,14 @@ public:
 template<int S>
 class ObjectAllocator : public ObjectAllocatorBase {
 public:
-  static ObjectAllocator<S> *Create() {
-    return new ObjectAllocator<S>();
+  static void Create(void* storage) {
+    new (storage) ObjectAllocator<S>();
   }
   static void Delete(ObjectAllocator *p) {
-    delete p;
+    p->~ObjectAllocator();
   }
   static void OnThreadExit(ObjectAllocator *p) {
-    delete p;
+    p->~ObjectAllocator();
   }
 
   ObjectAllocator() : ObjectAllocatorBase(S) { }

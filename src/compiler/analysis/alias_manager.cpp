@@ -494,6 +494,18 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
           {
             SimpleVariablePtr sv2 = spc(SimpleVariable, e2);
             if (sv1->getName() == sv2->getName()) {
+              if (sv1->SimpleVariable::isThis() &&
+                  sv1->hasContext(Expression::ObjectContext) !=
+                  sv2->hasContext(Expression::ObjectContext) &&
+                  m_variables->getAttribute(
+                    VariableTable::ContainsLDynamicVariable)) {
+                /*
+                 * $this not in object context may not be the same as
+                 * $this in object context if there have been writes
+                 * through a variable table
+                 */
+                return InterfAccess;
+              }
               return SameAccess;
             }
 

@@ -244,6 +244,9 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     if (!hasContext(ObjectContext) &&
         variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
+      if (variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
+        ret = Type::Variant;
+      }
       ret = variables->add(m_sym, ret, true, ar,
                            construct, scope->getModifiers());
     }

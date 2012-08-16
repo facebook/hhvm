@@ -325,14 +325,14 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 
 // Pop of virtual "locs" on the stack that turn into immediates.
 #define POP_HA_ONE(t) \
-  POP_HA_##t((nIn+0))
+  POP_HA_##t(nIn)
 #define POP_HA_TWO(t1, t2) \
-  POP_HA_##t1((nIn+0))     \
-  POP_HA_##t2((nIn+1))
+  POP_HA_##t1(nIn)     \
+  POP_HA_##t2(nIn)
 #define POP_HA_THREE(t1, t2, t3) \
-  POP_HA_##t1((nIn+0))           \
-  POP_HA_##t2((nIn+1))           \
-  POP_HA_##t3((nIn+2))
+  POP_HA_##t1(nIn)           \
+  POP_HA_##t2(nIn)           \
+  POP_HA_##t3(nIn)
 
 #define POP_HA_NA
 #define POP_HA_MA(i)
@@ -1653,7 +1653,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   switch (StackSym::GetSymFlavor(sym)) {
     case StackSym::C:
       m_evalStack.setNotRef();
+      m_evalStack.setKnownType(dt);
+      break;
     case StackSym::L:
+      if (dt == KindOfUninit ||
+          !e->maybeRefCounted() ||
+          (e->is(Expression::KindOfSimpleVariable) &&
+           !static_pointer_cast<SimpleVariable>(e)->couldBeAliased())) {
+        m_evalStack.setNotRef();
+      }
       m_evalStack.setKnownType(dt);
       break;
   }

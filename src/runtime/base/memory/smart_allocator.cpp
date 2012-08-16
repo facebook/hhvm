@@ -324,17 +324,6 @@ void SmartAllocatorImpl::rollbackObjects() {
   m_limit = m_next + m_colMax;
 }
 
-void SmartAllocatorImpl::logStats() {
-  int col = m_next - m_blocks[m_row];
-  int allocated = m_itemCount * m_row + (col / m_itemSize);
-  int freed = m_freelist.size();
-
-  string key = string("mem.") + m_name + "." +
-    lexical_cast<string>(m_itemSize);
-  ServerStats::Log(key + ".alloc", allocated);
-  ServerStats::Log(key + ".freed", freed);
-}
-
 void SmartAllocatorImpl::checkMemory(bool detailed) {
   int col = m_next - m_blocks[m_row];
   int allocated = m_itemCount * m_row + (col / m_itemSize);

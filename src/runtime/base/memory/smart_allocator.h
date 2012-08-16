@@ -162,7 +162,7 @@ typedef boost::dynamic_bitset<unsigned long long> FreeMap;
  */
 class GarbageList {
 public:
-  GarbageList() : ptr(NULL), sz(0) {
+  GarbageList() : ptr(NULL) {
     // We store the free list pointers right at the start of each
     // object.  The VM also stores a flag into the _count field to
     // know the object is deallocated---this assert just makes sure
@@ -177,7 +177,6 @@ public:
     void** ret = ptr;
     if (LIKELY(ret != NULL)) {
       ptr = (void**)*ret;
-      sz--;
     }
     return ret;
   }
@@ -188,11 +187,12 @@ public:
     void** convval = (void**)val;
     *convval = ptr;
     ptr = convval;
-    sz++;
   }
 
   // Number of items on the list.
   int size() const {
+    int sz = 0;
+    for (Iterator it = begin(), e = end(); it != e; ++it, ++sz) {}
     return sz;
   }
 
@@ -203,7 +203,6 @@ public:
   // Remove all items from this list
   void clear() {
     ptr = NULL;
-    sz = 0;
   }
 
   class Iterator {
@@ -254,7 +253,6 @@ public:
 
 private:
   void** ptr;
-  int sz;
 };
 
 /**
@@ -316,7 +314,6 @@ public:
    * MemoryManager functions.
    */
   void rollbackObjects();
-  void logStats();
   void checkMemory(bool detailed);
 
   /**

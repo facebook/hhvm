@@ -118,9 +118,6 @@ apc.cas:    number of cas() call
 
 4. Memory Stats:
 
-mem.[type].[size].alloc: total number of objects allocated of the type
-mem.[type].[size].freed: total number of objects freed of the type
-
 These two stats are only available when Google heap profler is turned on for
 debugging purposes:
 

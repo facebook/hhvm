@@ -206,9 +206,6 @@ void MemoryManager::rollback() {
 }
 
 void MemoryManager::logStats() {
-  for (unsigned int i = 0; i < m_smartAllocators.size(); i++) {
-    m_smartAllocators[i]->logStats();
-  }
   LeakDetectable::LogMallocStats();
 }
 

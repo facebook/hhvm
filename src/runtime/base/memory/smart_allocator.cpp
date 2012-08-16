@@ -85,7 +85,7 @@ static int findIndex(const vector<char *> &blocks,
 SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
                                        int itemSize, int flag)
   : m_stats(NULL)
-  , m_itemSize(itemSize)
+  , m_itemSize(roundup(itemSize))
   , m_row(0)
   , m_nameEnum(Name(nameEnum))
   , m_itemCount(itemCount)

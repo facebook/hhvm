@@ -276,12 +276,18 @@ public:
 
   struct Iterator;
 
+  // Ensure we have room for freelist and _count tombstone
+  static const size_t MinItemSize = 16;
+
 public:
   SmartAllocatorImpl(int nameEnum, int itemCount, int itemSize, int flag);
   virtual ~SmartAllocatorImpl();
 
   Name getAllocatorType() const { return m_nameEnum; }
   int getItemSize() const { return m_itemSize;}
+  static size_t roundup(size_t n) {
+    return n >= MinItemSize ? n : MinItemSize;
+  }
 
   /**
    * Allocation/deallocation of object memory.
@@ -387,8 +393,8 @@ class SmartAllocator : public SmartAllocatorImpl {
    * footprint.
    */
   SmartAllocator(int itemCount = -1)
-    : SmartAllocatorImpl(TNameEnum, itemCount,
-                         std::max(sizeof(T), sizeof(void*)), flag) {}
+    : SmartAllocatorImpl(TNameEnum, itemCount, sizeof(T), flag) {
+  }
 
   void release(T *p) {
     if (p) {
@@ -511,7 +517,8 @@ public:
 template<typename T, int TNameEnum, int F>
 inline void *operator new(size_t sizeT,
                           HPHP::SmartAllocator<T, TNameEnum, F> *a) {
-  return a->alloc(sizeT);
+  ASSERT(sizeT == sizeof(T));
+  return a->alloc(HPHP::SmartAllocatorImpl::roundup(sizeof(T)));
 }
 
 inline void *operator new(size_t sizeT, HPHP::ObjectAllocatorBase *a) {

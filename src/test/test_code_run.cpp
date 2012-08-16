@@ -6415,6 +6415,14 @@ bool TestCodeRun::TestObjectProperty() {
          "function test($x, $v) { unset($x->$v); var_dump($x); }"
          "test(new stdclass, \"\\0foo\");");
 
+  MVCRNW("<?php "
+         "$x = new stdclass;"
+         "var_dump($z =& $x->$y);");
+
+  MVCRNW("<?php "
+         "$x = new stdclass;"
+         "var_dump($x->$y =& $z);");
+
   MVCR("<?php "
        "class X {"
        "  public $bar = 5;"

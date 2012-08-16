@@ -259,7 +259,7 @@ void Instance::propImpl(TypedValue*& retval, TypedValue& tvRef,
                     m_cls->m_preClass->name()->data(), key->data());
       }
     }
-  } else if (warn && UNLIKELY(!*key->data())) {
+  } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else {
     if (getAttribute(UseGet)) {

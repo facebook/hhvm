@@ -922,6 +922,49 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "gc_enabled",
+    'desc'   => "Returns status of the circular reference collector.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE if the garbage collector is enabled, ".
+                  "FALSE otherwise.",
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "gc_enable",
+    'desc'   => "Activates the circular reference collector.",
+    'flags'  =>  HasDocComment,
+    'return' => null,
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "gc_disable",
+    'desc'   => "Deactivates the circular reference collector.",
+    'flags'  =>  HasDocComment,
+    'return' => null,
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "gc_collect_cycles",
+    'desc'   => "Forces collection of any existing garbage cycles.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "Returns number of collected cycles.",
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "zend_logo_guid",
     'desc'   => "This function returns the ID which can be used to display the Zend logo using the built-in image.",
     'flags'  =>  HasDocComment,

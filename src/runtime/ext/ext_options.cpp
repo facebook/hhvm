@@ -981,5 +981,25 @@ Variant f_version_compare(CStrRef version1, CStrRef version2,
   return null;
 }
 
+bool f_gc_enabled() {
+  return false;
+}
+
+void f_gc_enable() {
+  raise_warning("HipHop currently does not support circular reference "
+                "collection");
+}
+
+void f_gc_disable() {
+  raise_warning("HipHop currently does not support circular reference "
+                "collection");
+}
+
+int64 f_gc_collect_cycles() {
+  raise_warning("HipHop currently does not support circular reference "
+                "collection");
+  return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

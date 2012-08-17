@@ -273,6 +273,26 @@ inline Variant x_version_compare(CStrRef version1, CStrRef version2, CStrRef sop
   return f_version_compare(version1, version2, sop);
 }
 
+inline bool x_gc_enabled() {
+  FUNCTION_INJECTION_BUILTIN(gc_enabled);
+  return f_gc_enabled();
+}
+
+inline void x_gc_enable() {
+  FUNCTION_INJECTION_BUILTIN(gc_enable);
+  f_gc_enable();
+}
+
+inline void x_gc_disable() {
+  FUNCTION_INJECTION_BUILTIN(gc_disable);
+  f_gc_disable();
+}
+
+inline int64 x_gc_collect_cycles() {
+  FUNCTION_INJECTION_BUILTIN(gc_collect_cycles);
+  return f_gc_collect_cycles();
+}
+
 inline String x_zend_logo_guid() {
   FUNCTION_INJECTION_BUILTIN(zend_logo_guid);
   return f_zend_logo_guid();

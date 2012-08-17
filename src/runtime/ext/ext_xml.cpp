@@ -669,7 +669,7 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 }
 
 static void xml_set_handler(Variant * handler, CVarRef data) {
-  if (data.isString() ||
+  if (data.same(false) || data.isString() ||
       (data.isArray() && data.getArrayData()->size() == 2 &&
        (data[0].isString() || data[0].isObject()) &&
        data[1].isString())) {

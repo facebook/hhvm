@@ -17523,6 +17523,22 @@ bool TestCodeRun::TestXML() {
     "$xml_parser = new xml();\n"
     "$xml_parser->parse('<A ID=\"hallo\">PHP</A>');\n"
   );
+  MVCR("<?php\n"
+       "function parse_callback() {\n"
+       "  var_dump(func_get_args());\n"
+       "}\n"
+       "function main() {\n"
+       "  $p = xml_parser_create();\n"
+       "  xml_set_element_handler($p, 'parse_callback', 'parse_callback');\n"
+       "  xml_set_element_handler($p, false, 'parse_callback');\n"
+       "  xml_parse($p, \"<tag><child/></tag>\", true);\n"
+       "\n"
+       "  $p = xml_parser_create();\n"
+       "  xml_set_element_handler($p, 'parse_callback', 'parse_callback');\n"
+       "  xml_set_element_handler($p, 'parse_callback', '');\n"
+       "  xml_parse($p, \"<tag><child/></tag>\", true);\n"
+       "}\n"
+       "main();\n");
   return true;
 }
 

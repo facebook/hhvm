@@ -347,7 +347,7 @@ private:
 #define STR(x) #x
 #define XSTR(x) STR(x)
 #define FLANN(stream,func,nl) (Option::FlAnnotate ?                           \
-               stream.printf("/* %s:" XSTR(__LINE__) "*/"nl, __func__):       \
+               stream.printf("/* %s:" XSTR(__LINE__) "*/" nl, __func__):       \
                void()), stream.func
 #define cg_printf FLANN(cg,printf,"")
 #define m_cg_printf FLANN(m_cg,printf,"")

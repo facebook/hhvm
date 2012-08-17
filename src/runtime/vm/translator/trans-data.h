@@ -30,6 +30,7 @@ typedef hphp_hash_set<TransID> TransIDSet;
 
 class TransData {
 public:
+  virtual ~TransData() {}
   virtual uint32 getNumTrans() const = 0;
 
   virtual const TransRec* getTransRec(TransID id) const = 0;

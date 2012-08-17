@@ -1808,7 +1808,7 @@ void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
   cg.namespaceBegin();
   if ((sizeof(VarNR) % sizeof(int64) != 0)) assert(false);
   int multiple = (sizeof(VarNR) / sizeof(int64));
-  cg_indentBegin("static const int64 ivalues[] = {\n");
+  cg_indentBegin("static const uint64 ivalues[] = {\n");
   for (map<int, vector<string> >::const_iterator it =
        m_namedScalarVarIntegers.begin(); it != m_namedScalarVarIntegers.end();
        it++) {
@@ -1876,7 +1876,7 @@ void AnalysisResult::outputCPPNamedScalarVarDoubles(const std::string &file) {
   if ((sizeof(int64) != sizeof(double))) assert(false);
   if ((sizeof(VarNR) % sizeof(double) != 0)) assert(false);
   int multiple = (sizeof(VarNR) / sizeof(double));
-  cg_indentBegin("static const int64 dvalues[] = {\n");
+  cg_indentBegin("static const uint64 dvalues[] = {\n");
   for (map<int, vector<string> >::const_iterator it =
        m_namedScalarVarDoubles.begin(); it != m_namedScalarVarDoubles.end();
        it++) {
@@ -2929,7 +2929,7 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
     "  SmartAllocator<HPHP::ZendArray::Bucket, SmartAllocatorImpl::Bucket,\n"
     "    SmartAllocatorImpl::NoCallbacks> *a =\n"
     "      ZendArray::Bucket::AllocatorType::getNoCheck();\n"
-    "  for (int64 k = 0; k < n; k++) {\n"
+    "  for (int64 kk = 0; kk < n; kk++) {\n"
     "    const String *k = va_arg(ap, const String *);\n"
     "    const Variant *v = va_arg(ap, const Variant *);\n"
     "    *pp++ = new (a) ZendArray::Bucket(k->get(), *v);\n"

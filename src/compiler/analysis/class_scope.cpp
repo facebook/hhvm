@@ -3191,6 +3191,7 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
                   funcSection.c_str());
       }
     }
+    if (fewArgs) cg_printf(" NEVER_INLINE");
     cg_indentBegin(" %s%s::%s%s(MethodCallPackage &mcp, ",
                    Option::ClassPrefix, id.c_str(),
                    fewArgs ? Option::InvokeFewArgsPrefix : Option::InvokePrefix,

@@ -161,7 +161,7 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 #define DECODE_JMP(type, var)                                                 \
   type var __attribute__((unused)) = *(type*)pc;                              \
   ONTRACE(1,                                                                  \
-          Trace::trace("decode:     Immediate %s %"PRIi64"\n", #type,         \
+          Trace::trace("decode:     Immediate %s %" PRIi64"\n", #type,         \
                        (int64_t)var));
 #define ITER_SKIP(offset)  pc = origPc + (offset);
 
@@ -171,7 +171,7 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 #define DECODE_IVA(var)                                                       \
   int32 var UNUSED = decodeVariableSizeImm(&pc);                              \
   ONTRACE(1,                                                                  \
-          Trace::trace("decode:     Immediate int32 %"PRIi64"\n",             \
+          Trace::trace("decode:     Immediate int32 %" PRIi64"\n",             \
                        (int64_t)var));
 #define DECODE_LITSTR(var)                                \
   StringData* var;                                        \

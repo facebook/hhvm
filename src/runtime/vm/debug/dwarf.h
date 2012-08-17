@@ -78,8 +78,8 @@ class TCRange {
 
   bool isValid() const {
     ASSERT(bool(m_start) == bool(m_end));
-    ASSERT(m_start || m_start < m_end);
-    ASSERT(m_start || (m_end - m_start) < 1ull << 32);
+    ASSERT(!m_start || m_start < m_end);
+    ASSERT(!m_start || (m_end - m_start) < (1ll << 32));
     return bool(m_start);
   }
   bool isAstubs() const { return m_isAstubs; }

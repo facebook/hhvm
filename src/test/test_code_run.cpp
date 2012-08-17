@@ -614,13 +614,11 @@ bool TestCodeRun::RunTests(const std::string &which) {
   GEN_TEST(TestAdHoc);
 
   {
-    int cpus = Process::GetCPUCount();
-    if (Test::s_suite == "TestCodeRun") {
-      char* jobs = getenv("HPHP_SLOW_TESTS_JOBS");
-      int n;
-      if (jobs && (n = atoi(jobs)) > 0) {
-        cpus = n;
-      }
+    int cpus = std::min(20, Process::GetCPUCount());
+    char* jobs = getenv("HPHP_SLOW_TESTS_JOBS");
+    int n;
+    if (jobs && (n = atoi(jobs)) > 0) {
+      cpus = n;
     }
     string cmd =
       "env -u MFLAGS -u MAKEFLAGS "

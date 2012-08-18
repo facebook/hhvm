@@ -296,15 +296,12 @@ public:
   void* alloc(size_t size);
   void dealloc(void *obj) {
     ASSERT(assertValidHelper(obj));
-#ifdef SMART_ALLOCATOR_DEBUG_FREE
-    memset(obj, 0xfe, m_itemSize);
-#endif
+    ASSERT(memset(obj, 0x5a, m_itemSize));
     m_freelist.push(obj);
     if (hhvm) {
       int tomb = RefCountTombstoneValue;
       memcpy((char*)obj + FAST_REFCOUNT_OFFSET, &tomb, sizeof tomb);
     }
-
     ASSERT(m_stats);
     m_stats->usage -= m_itemSize;
   }

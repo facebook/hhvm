@@ -1296,10 +1296,11 @@ public:
 
   inline ALWAYS_INLINE void assignRefHelper(CVarRef v) {
     PromoteToRef(v);
-    v.m_data.pvar->incRefCount(); // in case destruct() triggers deletion of v
+    RefData* r = v.m_data.pref;
+    r->incRefCount(); // in case destruct() triggers deletion of v
     if (IS_REFCOUNTED_TYPE(m_type)) destruct();
     m_type = KindOfRef;
-    m_data.pvar = v.m_data.pvar;
+    m_data.pref = r;
   }
 
   inline ALWAYS_INLINE void constructRefHelper(CVarRef v) {

@@ -42,10 +42,6 @@ if(APPLE)
 	endif()
 endif()
 
-if(NOT LINUX)
-	add_definitions(-DNO_HARDWARE_COUNTERS)
-endif()
-
 include(HPHPFunctions)
 include(HPHPFindLibs)
 

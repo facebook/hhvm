@@ -351,6 +351,7 @@ macro(hphp_link target)
 	endif()
 
 	target_link_libraries(${target} ${Boost_LIBRARIES})
+	target_link_libraries(${target} ${LIBUNWIND_LIBRARY})
 	target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
 	target_link_libraries(${target} ${PCRE_LIBRARY})
 	target_link_libraries(${target} ${ICU_LIBRARIES} ${ICU_I18N_LIBRARIES})
@@ -360,6 +361,11 @@ macro(hphp_link target)
 if (LIBINOTIFY_LIBRARY)
 	target_link_libraries(${target} ${LIBINOTIFY_LIBRARY})
 endif()
+
+if (LIBICONV_LIBRARY)
+	target_link_libraries(${target} ${LIBICONV_LIBRARY})
+endif()
+
 
 if (LINUX)
 	target_link_libraries(${target} ${CAP_LIB})

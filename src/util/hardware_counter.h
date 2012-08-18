@@ -18,11 +18,12 @@
 #define __HPHP_UTIL_HARDWARE_COUNTER_H__
 
 #include <util/thread_local.h>
-#include <linux/perf_event.h>
 #include <runtime/base/complex_types.h>
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifndef NO_HARDWARE_COUNTERS
 
 class InstructionCounter;
 class LoadCounter;
@@ -68,6 +69,59 @@ private:
   std::vector<HardwareCounterImpl *> m_counters;
   bool m_pseudoEvents;
 };
+
+#else // NO_HARDWARE_COUNTERS
+
+/* Stub implementation for platforms without hardware counters (non-linux)
+ * This mock class pretends to track performance events, but just returns
+ * static values, so it doesn't even need to worry about thread safety
+ * for the one static instance of itself.
+ */
+class HardwareCounter {
+public:
+  HardwareCounter() : m_countersSet(false) { }
+  ~HardwareCounter() { }
+
+  static void  Reset(void)
+         { s_counter.reset(); }
+  static int64 GetInstructionCount(void)
+         { return s_counter.getInstructionCount(); }
+  static int64 GetLoadCount(void)
+         { return s_counter.getLoadCount(); }
+  static int64 GetStoreCount(void)
+         { return s_counter.getStoreCount(); }
+  static bool SetPerfEvents(CStrRef events)
+         { return s_counter.setPerfEvents(events); }
+  static void GetPerfEvents(Array& ret)
+         { s_counter.getPerfEvents(ret); }
+  static void ClearPerfEvents()
+         { s_counter.clearPerfEvents(); }
+
+  void  reset(void) { }
+  int64 getInstructionCount(void)
+        { return 0; }
+  int64 getLoadCount(void)
+        { return 0; }
+  int64 getStoreCount(void)
+        { return 0; }
+  bool  eventExists(char *event)
+        { return false; }
+  bool  addPerfEvent(char* event)
+        { return false; }
+  bool  setPerfEvents(CStrRef events)
+        { return false; }
+  void  getPerfEvents(Array& ret) { }
+  void  clearPerfEvents() { }
+
+  // Normally exposed by DECLARE_THREAD_LOCAL_NO_CHECK
+  void getCheck() { }
+
+  static HardwareCounter s_counter;
+  bool m_countersSet;
+};
+
+#endif // NO_HARDWARE_COUNTERS
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

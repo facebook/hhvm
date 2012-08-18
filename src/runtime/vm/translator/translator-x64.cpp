@@ -1927,7 +1927,7 @@ TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
 // before a jnz to surprise handling code.
 void
 TranslatorX64::emitTestSurpriseFlags() {
-  CT_ASSERT(sizeof(RequestInjectionData::conditionFlags) == 8);
+  CT_ASSERT(sizeof(((RequestInjectionData*)0)->conditionFlags) == 8);
   a.test_imm64_disp_reg64(-1, TargetCache::kConditionFlagsOff, rVmTl);
 }
 

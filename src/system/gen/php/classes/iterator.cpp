@@ -78,7 +78,7 @@ Variant c_RecursiveIteratorIterator::i_rewind(MethodCallPackage &mcp, CArrRef pa
 Variant c_RecursiveIteratorIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_valid);
 }
-Variant c_RecursiveIteratorIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveIteratorIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_RecursiveIteratorIterator);
   }
@@ -91,7 +91,7 @@ Variant c_RecursiveIteratorIterator::ifa___construct(MethodCallPackage &mcp, int
   CVarRef arg2(a2);
   return (self->t___construct(arg0, arg1, arg2), null);
 }
-Variant c_RecursiveIteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveIteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinneriterator, coo_RecursiveIteratorIterator);
   }
@@ -99,7 +99,7 @@ Variant c_RecursiveIteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
 }
-Variant c_RecursiveIteratorIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveIteratorIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_RecursiveIteratorIterator);
   }
@@ -107,7 +107,7 @@ Variant c_RecursiveIteratorIterator::ifa_current(MethodCallPackage &mcp, int cou
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
   return (self->t_current());
 }
-Variant c_RecursiveIteratorIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveIteratorIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_RecursiveIteratorIterator);
   }
@@ -115,7 +115,7 @@ Variant c_RecursiveIteratorIterator::ifa_key(MethodCallPackage &mcp, int count, 
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
   return (self->t_key());
 }
-Variant c_RecursiveIteratorIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveIteratorIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_RecursiveIteratorIterator);
   }
@@ -123,7 +123,7 @@ Variant c_RecursiveIteratorIterator::ifa_next(MethodCallPackage &mcp, int count,
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
   return (self->t_next(), null);
 }
-Variant c_RecursiveIteratorIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveIteratorIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_RecursiveIteratorIterator);
   }
@@ -131,7 +131,7 @@ Variant c_RecursiveIteratorIterator::ifa_rewind(MethodCallPackage &mcp, int coun
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-Variant c_RecursiveIteratorIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveIteratorIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_RecursiveIteratorIterator);
   }
@@ -276,7 +276,7 @@ Variant c_FilterIterator::i_getinneriterator(MethodCallPackage &mcp, CArrRef par
 Variant c_FilterIterator::i___call(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___call);
 }
-Variant c_FilterIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_FilterIterator);
   }
@@ -286,7 +286,7 @@ Variant c_FilterIterator::ifa___construct(MethodCallPackage &mcp, int count, INV
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
-Variant c_FilterIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_FilterIterator);
   }
@@ -294,7 +294,7 @@ Variant c_FilterIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_F
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-Variant c_FilterIterator::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_fetch, coo_FilterIterator);
   }
@@ -302,7 +302,7 @@ Variant c_FilterIterator::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::fetch", 0, 1);
   return (self->t_fetch(), null);
 }
-Variant c_FilterIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_FilterIterator);
   }
@@ -310,7 +310,7 @@ Variant c_FilterIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::next", 0, 1);
   return (self->t_next(), null);
 }
-Variant c_FilterIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_FilterIterator);
   }
@@ -318,7 +318,7 @@ Variant c_FilterIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::valid", 0, 1);
   return (self->t_valid());
 }
-Variant c_FilterIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_FilterIterator);
   }
@@ -326,7 +326,7 @@ Variant c_FilterIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::key", 0, 1);
   return (self->t_key());
 }
-Variant c_FilterIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_FilterIterator);
   }
@@ -334,7 +334,7 @@ Variant c_FilterIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::current", 0, 1);
   return (self->t_current());
 }
-Variant c_FilterIterator::ifa___clone(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa___clone(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___clone, coo_FilterIterator);
   }
@@ -342,7 +342,7 @@ Variant c_FilterIterator::ifa___clone(MethodCallPackage &mcp, int count, INVOKE_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::__clone", 0, 1);
   return (self->t___clone());
 }
-Variant c_FilterIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinneriterator, coo_FilterIterator);
   }
@@ -350,7 +350,7 @@ Variant c_FilterIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FilterIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
 }
-Variant c_FilterIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FilterIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___call, coo_FilterIterator);
   }
@@ -587,7 +587,7 @@ Variant c_IteratorIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
 Variant c_IteratorIterator::i___call(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___call);
 }
-Variant c_IteratorIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_IteratorIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_IteratorIterator);
   }
@@ -597,7 +597,7 @@ Variant c_IteratorIterator::ifa___construct(MethodCallPackage &mcp, int count, I
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
-Variant c_IteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_IteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinneriterator, coo_IteratorIterator);
   }
@@ -605,7 +605,7 @@ Variant c_IteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp, int cou
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
 }
-Variant c_IteratorIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_IteratorIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_IteratorIterator);
   }
@@ -613,7 +613,7 @@ Variant c_IteratorIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::valid", 0, 1);
   return (self->t_valid());
 }
-Variant c_IteratorIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_IteratorIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_IteratorIterator);
   }
@@ -621,7 +621,7 @@ Variant c_IteratorIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::key", 0, 1);
   return (self->t_key());
 }
-Variant c_IteratorIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_IteratorIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_IteratorIterator);
   }
@@ -629,7 +629,7 @@ Variant c_IteratorIterator::ifa_current(MethodCallPackage &mcp, int count, INVOK
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::current", 0, 1);
   return (self->t_current());
 }
-Variant c_IteratorIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_IteratorIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_IteratorIterator);
   }
@@ -637,7 +637,7 @@ Variant c_IteratorIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_F
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::next", 0, 1);
   return (self->t_next());
 }
-Variant c_IteratorIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_IteratorIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_IteratorIterator);
   }
@@ -645,7 +645,7 @@ Variant c_IteratorIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("IteratorIterator::rewind", 0, 1);
   return (self->t_rewind());
 }
-Variant c_IteratorIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_IteratorIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___call, coo_IteratorIterator);
   }
@@ -906,7 +906,7 @@ Variant c_ArrayIterator::i_uksort(MethodCallPackage &mcp, CArrRef params) {
 Variant c_ArrayIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_valid);
 }
-Variant c_ArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ArrayIterator);
   }
@@ -917,7 +917,7 @@ Variant c_ArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVO
   CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
-Variant c_ArrayIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_append, coo_ArrayIterator);
   }
@@ -926,7 +926,7 @@ Variant c_ArrayIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FE
   CVarRef arg0(a0);
   return (self->t_append(arg0), null);
 }
-Variant c_ArrayIterator::ifa_asort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_asort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_asort, coo_ArrayIterator);
   }
@@ -934,7 +934,7 @@ Variant c_ArrayIterator::ifa_asort(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
   return (self->t_asort());
 }
-Variant c_ArrayIterator::ifa_count(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_count(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_count, coo_ArrayIterator);
   }
@@ -942,7 +942,7 @@ Variant c_ArrayIterator::ifa_count(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
   return (self->t_count());
 }
-Variant c_ArrayIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_ArrayIterator);
   }
@@ -950,7 +950,7 @@ Variant c_ArrayIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_F
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
   return (self->t_current());
 }
-Variant c_ArrayIterator::ifa_getarraycopy(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_getarraycopy(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getarraycopy, coo_ArrayIterator);
   }
@@ -958,7 +958,7 @@ Variant c_ArrayIterator::ifa_getarraycopy(MethodCallPackage &mcp, int count, INV
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
   return (self->t_getarraycopy());
 }
-Variant c_ArrayIterator::ifa_getflags(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_getflags(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getflags, coo_ArrayIterator);
   }
@@ -966,7 +966,7 @@ Variant c_ArrayIterator::ifa_getflags(MethodCallPackage &mcp, int count, INVOKE_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
   return (self->t_getflags());
 }
-Variant c_ArrayIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_ArrayIterator);
   }
@@ -974,7 +974,7 @@ Variant c_ArrayIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
   return (self->t_key());
 }
-Variant c_ArrayIterator::ifa_ksort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_ksort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_ksort, coo_ArrayIterator);
   }
@@ -982,7 +982,7 @@ Variant c_ArrayIterator::ifa_ksort(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
   return (self->t_ksort());
 }
-Variant c_ArrayIterator::ifa_natcasesort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_natcasesort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_natcasesort, coo_ArrayIterator);
   }
@@ -990,7 +990,7 @@ Variant c_ArrayIterator::ifa_natcasesort(MethodCallPackage &mcp, int count, INVO
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
   return (self->t_natcasesort());
 }
-Variant c_ArrayIterator::ifa_natsort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_natsort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_natsort, coo_ArrayIterator);
   }
@@ -998,7 +998,7 @@ Variant c_ArrayIterator::ifa_natsort(MethodCallPackage &mcp, int count, INVOKE_F
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
   return (self->t_natsort());
 }
-Variant c_ArrayIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_ArrayIterator);
   }
@@ -1006,7 +1006,7 @@ Variant c_ArrayIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
   return (self->t_next(), null);
 }
-Variant c_ArrayIterator::ifa_offsetexists(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_offsetexists(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_offsetexists, coo_ArrayIterator);
   }
@@ -1015,7 +1015,7 @@ Variant c_ArrayIterator::ifa_offsetexists(MethodCallPackage &mcp, int count, INV
   CVarRef arg0(a0);
   return (self->t_offsetexists(arg0));
 }
-Variant c_ArrayIterator::ifa_offsetget(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_offsetget(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_offsetget, coo_ArrayIterator);
   }
@@ -1024,7 +1024,7 @@ Variant c_ArrayIterator::ifa_offsetget(MethodCallPackage &mcp, int count, INVOKE
   CVarRef arg0(a0);
   return (self->t_offsetget(arg0));
 }
-Variant c_ArrayIterator::ifa_offsetset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_offsetset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_offsetset, coo_ArrayIterator);
   }
@@ -1034,7 +1034,7 @@ Variant c_ArrayIterator::ifa_offsetset(MethodCallPackage &mcp, int count, INVOKE
   CVarRef arg1(a1);
   return (self->t_offsetset(arg0, arg1));
 }
-Variant c_ArrayIterator::ifa_offsetunset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_offsetunset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_offsetunset, coo_ArrayIterator);
   }
@@ -1043,7 +1043,7 @@ Variant c_ArrayIterator::ifa_offsetunset(MethodCallPackage &mcp, int count, INVO
   CVarRef arg0(a0);
   return (self->t_offsetunset(arg0));
 }
-Variant c_ArrayIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_ArrayIterator);
   }
@@ -1051,7 +1051,7 @@ Variant c_ArrayIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-Variant c_ArrayIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_seek, coo_ArrayIterator);
   }
@@ -1060,7 +1060,7 @@ Variant c_ArrayIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_
   CVarRef arg0(a0);
   return (self->t_seek(arg0), null);
 }
-Variant c_ArrayIterator::ifa_setflags(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_setflags(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_setflags, coo_ArrayIterator);
   }
@@ -1069,7 +1069,7 @@ Variant c_ArrayIterator::ifa_setflags(MethodCallPackage &mcp, int count, INVOKE_
   CVarRef arg0(a0);
   return (self->t_setflags(arg0), null);
 }
-Variant c_ArrayIterator::ifa_uasort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_uasort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_uasort, coo_ArrayIterator);
   }
@@ -1078,7 +1078,7 @@ Variant c_ArrayIterator::ifa_uasort(MethodCallPackage &mcp, int count, INVOKE_FE
   CVarRef arg0(a0);
   return (self->t_uasort(arg0));
 }
-Variant c_ArrayIterator::ifa_uksort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_uksort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_uksort, coo_ArrayIterator);
   }
@@ -1087,7 +1087,7 @@ Variant c_ArrayIterator::ifa_uksort(MethodCallPackage &mcp, int count, INVOKE_FE
   CVarRef arg0(a0);
   return (self->t_uksort(arg0));
 }
-Variant c_ArrayIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ArrayIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_ArrayIterator);
   }
@@ -1387,7 +1387,7 @@ Variant c_AppendIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
 Variant c_AppendIterator::i___call(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___call);
 }
-Variant c_AppendIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_AppendIterator);
   }
@@ -1395,7 +1395,7 @@ Variant c_AppendIterator::ifa___construct(MethodCallPackage &mcp, int count, INV
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
   return (self->t___construct(), null);
 }
-Variant c_AppendIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_append, coo_AppendIterator);
   }
@@ -1405,7 +1405,7 @@ Variant c_AppendIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_F
   CVarRef arg0(a0);
   return (self->t_append(arg0), null);
 }
-Variant c_AppendIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getinneriterator, coo_AppendIterator);
   }
@@ -1413,7 +1413,7 @@ Variant c_AppendIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
 }
-Variant c_AppendIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_AppendIterator);
   }
@@ -1421,7 +1421,7 @@ Variant c_AppendIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_F
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-Variant c_AppendIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_AppendIterator);
   }
@@ -1429,7 +1429,7 @@ Variant c_AppendIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
   return (self->t_valid());
 }
-Variant c_AppendIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_AppendIterator);
   }
@@ -1437,7 +1437,7 @@ Variant c_AppendIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::current", 0, 1);
   return (self->t_current());
 }
-Variant c_AppendIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_AppendIterator);
   }
@@ -1445,7 +1445,7 @@ Variant c_AppendIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::key", 0, 1);
   return (self->t_key());
 }
-Variant c_AppendIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_AppendIterator);
   }
@@ -1453,7 +1453,7 @@ Variant c_AppendIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("AppendIterator::next", 0, 1);
   return (self->t_next(), null);
 }
-Variant c_AppendIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_AppendIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___call, coo_AppendIterator);
   }

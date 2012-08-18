@@ -105,7 +105,7 @@ Variant c_RecursiveDirectoryIterator::i_getsubpath(MethodCallPackage &mcp, CArrR
 Variant c_RecursiveDirectoryIterator::i_getsubpathname(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getsubpathname);
 }
-Variant c_RecursiveDirectoryIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_RecursiveDirectoryIterator);
   }
@@ -116,7 +116,7 @@ Variant c_RecursiveDirectoryIterator::ifa___construct(MethodCallPackage &mcp, in
   CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
-Variant c_RecursiveDirectoryIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_RecursiveDirectoryIterator);
   }
@@ -124,7 +124,7 @@ Variant c_RecursiveDirectoryIterator::ifa_current(MethodCallPackage &mcp, int co
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
   return (self->t_current());
 }
-Variant c_RecursiveDirectoryIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_RecursiveDirectoryIterator);
   }
@@ -132,7 +132,7 @@ Variant c_RecursiveDirectoryIterator::ifa_key(MethodCallPackage &mcp, int count,
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
   return (self->t_key());
 }
-Variant c_RecursiveDirectoryIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_RecursiveDirectoryIterator);
   }
@@ -140,7 +140,7 @@ Variant c_RecursiveDirectoryIterator::ifa_next(MethodCallPackage &mcp, int count
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
   return (self->t_next(), null);
 }
-Variant c_RecursiveDirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_RecursiveDirectoryIterator);
   }
@@ -148,7 +148,7 @@ Variant c_RecursiveDirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int cou
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-Variant c_RecursiveDirectoryIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_seek, coo_RecursiveDirectoryIterator);
   }
@@ -157,7 +157,7 @@ Variant c_RecursiveDirectoryIterator::ifa_seek(MethodCallPackage &mcp, int count
   CVarRef arg0(a0);
   return (self->t_seek(arg0), null);
 }
-Variant c_RecursiveDirectoryIterator::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_RecursiveDirectoryIterator);
   }
@@ -165,7 +165,7 @@ Variant c_RecursiveDirectoryIterator::ifa___tostring(MethodCallPackage &mcp, int
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
   return (self->t___tostring());
 }
-Variant c_RecursiveDirectoryIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_RecursiveDirectoryIterator);
   }
@@ -173,7 +173,7 @@ Variant c_RecursiveDirectoryIterator::ifa_valid(MethodCallPackage &mcp, int coun
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
   return (self->t_valid());
 }
-Variant c_RecursiveDirectoryIterator::ifa_haschildren(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_haschildren(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_haschildren, coo_RecursiveDirectoryIterator);
   }
@@ -181,7 +181,7 @@ Variant c_RecursiveDirectoryIterator::ifa_haschildren(MethodCallPackage &mcp, in
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
   return (self->t_haschildren());
 }
-Variant c_RecursiveDirectoryIterator::ifa_getchildren(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_getchildren(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getchildren, coo_RecursiveDirectoryIterator);
   }
@@ -189,7 +189,7 @@ Variant c_RecursiveDirectoryIterator::ifa_getchildren(MethodCallPackage &mcp, in
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
   return (self->t_getchildren());
 }
-Variant c_RecursiveDirectoryIterator::ifa_getsubpath(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_getsubpath(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getsubpath, coo_RecursiveDirectoryIterator);
   }
@@ -197,7 +197,7 @@ Variant c_RecursiveDirectoryIterator::ifa_getsubpath(MethodCallPackage &mcp, int
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
   return (self->t_getsubpath());
 }
-Variant c_RecursiveDirectoryIterator::ifa_getsubpathname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_RecursiveDirectoryIterator::ifa_getsubpathname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getsubpathname, coo_RecursiveDirectoryIterator);
   }
@@ -377,7 +377,7 @@ Variant c_DirectoryIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
 Variant c_DirectoryIterator::i_isdot(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_isdot);
 }
-Variant c_DirectoryIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DirectoryIterator);
   }
@@ -386,7 +386,7 @@ Variant c_DirectoryIterator::ifa___construct(MethodCallPackage &mcp, int count, 
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
-Variant c_DirectoryIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_current, coo_DirectoryIterator);
   }
@@ -394,7 +394,7 @@ Variant c_DirectoryIterator::ifa_current(MethodCallPackage &mcp, int count, INVO
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
   return (self->t_current());
 }
-Variant c_DirectoryIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_key, coo_DirectoryIterator);
   }
@@ -402,7 +402,7 @@ Variant c_DirectoryIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_F
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
   return (self->t_key());
 }
-Variant c_DirectoryIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_next, coo_DirectoryIterator);
   }
@@ -410,7 +410,7 @@ Variant c_DirectoryIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
   return (self->t_next(), null);
 }
-Variant c_DirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_rewind, coo_DirectoryIterator);
   }
@@ -418,7 +418,7 @@ Variant c_DirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOK
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
-Variant c_DirectoryIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_seek, coo_DirectoryIterator);
   }
@@ -427,7 +427,7 @@ Variant c_DirectoryIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_
   CVarRef arg0(a0);
   return (self->t_seek(arg0), null);
 }
-Variant c_DirectoryIterator::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_DirectoryIterator);
   }
@@ -435,7 +435,7 @@ Variant c_DirectoryIterator::ifa___tostring(MethodCallPackage &mcp, int count, I
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
   return (self->t___tostring());
 }
-Variant c_DirectoryIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_valid, coo_DirectoryIterator);
   }
@@ -443,7 +443,7 @@ Variant c_DirectoryIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
   return (self->t_valid());
 }
-Variant c_DirectoryIterator::ifa_isdot(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DirectoryIterator::ifa_isdot(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_isdot, coo_DirectoryIterator);
   }

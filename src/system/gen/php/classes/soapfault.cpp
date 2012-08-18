@@ -50,7 +50,7 @@ Variant c_SoapFault::i___construct(MethodCallPackage &mcp, CArrRef params) {
 Variant c_SoapFault::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___tostring);
 }
-Variant c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_SoapFault);
   }
@@ -68,7 +68,7 @@ Variant c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   CVarRef arg5(a5);
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
 }
-Variant c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_SoapFault);
   }

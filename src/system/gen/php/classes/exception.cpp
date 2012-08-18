@@ -139,7 +139,7 @@ Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) 
 Variant c_ErrorException::i_getseverity(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getseverity);
 }
-Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_ErrorException);
   }
@@ -157,7 +157,7 @@ Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INV
   CVarRef arg4(a4);
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
 }
-Variant c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getseverity, coo_ErrorException);
   }
@@ -264,7 +264,7 @@ extern const CallInfo ci_PDOException$$__construct = { (void*)&c_PDOException::i
 Variant c_PDOException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
-Variant c_PDOException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_PDOException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_PDOException);
   }
@@ -431,7 +431,7 @@ Variant c_Exception::i_gettraceoptions(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Exception::i_settraceoptions(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_settraceoptions);
 }
-Variant c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___init__, coo_Exception);
   }
@@ -439,7 +439,7 @@ Variant c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::__init__", 0, 1);
   return (self->t___init__(), null);
 }
-Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_Exception);
   }
@@ -453,7 +453,7 @@ Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   CVarRef arg2(a2);
   return (self->t___construct(arg0, arg1, arg2), null);
 }
-Variant c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getmessage, coo_Exception);
   }
@@ -461,7 +461,7 @@ Variant c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getMessage", 0, 1);
   return (self->t_getmessage());
 }
-Variant c_Exception::ifa_getprevious(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_getprevious(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getprevious, coo_Exception);
   }
@@ -469,7 +469,7 @@ Variant c_Exception::ifa_getprevious(MethodCallPackage &mcp, int count, INVOKE_F
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getPrevious", 0, 1);
   return (self->t_getprevious());
 }
-Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getcode, coo_Exception);
   }
@@ -477,7 +477,7 @@ Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getCode", 0, 1);
   return (self->t_getcode());
 }
-Variant c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getfile, coo_Exception);
   }
@@ -485,7 +485,7 @@ Variant c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getFile", 0, 1);
   return (self->t_getfile());
 }
-Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getline, coo_Exception);
   }
@@ -493,7 +493,7 @@ Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getLine", 0, 1);
   return (self->t_getline());
 }
-Variant c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_gettrace, coo_Exception);
   }
@@ -501,7 +501,7 @@ Variant c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTrace", 0, 1);
   return (self->t_gettrace());
 }
-Variant c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_gettraceasstring, coo_Exception);
   }
@@ -509,7 +509,7 @@ Variant c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INV
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
   return (self->t_gettraceasstring());
 }
-Variant c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_Exception);
   }
@@ -517,7 +517,7 @@ Variant c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::__toString", 0, 1);
   return (self->t___tostring());
 }
-Variant c_Exception::ifa_inittrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_inittrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_inittrace, coo_Exception);
   }
@@ -525,11 +525,11 @@ Variant c_Exception::ifa_inittrace(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::initTrace", 0, 1);
   return (self->t_inittrace(), null);
 }
-Variant c_Exception::ifa_gettraceoptions(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_gettraceoptions(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("Exception::getTraceOptions", 0, 1);
   return (c_Exception::t_gettraceoptions());
 }
-Variant c_Exception::ifa_settraceoptions(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_Exception::ifa_settraceoptions(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("Exception::setTraceOptions", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (c_Exception::t_settraceoptions(arg0), null);
@@ -890,7 +890,7 @@ extern const CallInfo ci_DOMException$$__construct = { (void*)&c_DOMException::i
 Variant c_DOMException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
-Variant c_DOMException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DOMException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DOMException);
   }

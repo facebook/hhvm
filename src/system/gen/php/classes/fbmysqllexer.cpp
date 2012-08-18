@@ -76,7 +76,7 @@ Variant c_FB_MySQLLexer::i_lex(MethodCallPackage &mcp, CArrRef params) {
 Variant c_FB_MySQLLexer::i_nexttoken(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_nexttoken);
 }
-Variant c_FB_MySQLLexer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_FB_MySQLLexer);
   }
@@ -88,7 +88,7 @@ Variant c_FB_MySQLLexer::ifa___construct(MethodCallPackage &mcp, int count, INVO
   CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
-Variant c_FB_MySQLLexer::ifa_get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa_get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_get, coo_FB_MySQLLexer);
   }
@@ -96,7 +96,7 @@ Variant c_FB_MySQLLexer::ifa_get(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::get", 0, 1);
   return (self->t_get());
 }
-Variant c_FB_MySQLLexer::ifa_unget(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa_unget(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_unget, coo_FB_MySQLLexer);
   }
@@ -104,7 +104,7 @@ Variant c_FB_MySQLLexer::ifa_unget(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::unget", 0, 1);
   return (self->t_unget(), null);
 }
-Variant c_FB_MySQLLexer::ifa_skip(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa_skip(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_skip, coo_FB_MySQLLexer);
   }
@@ -112,7 +112,7 @@ Variant c_FB_MySQLLexer::ifa_skip(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::skip", 0, 1);
   return (self->t_skip());
 }
-Variant c_FB_MySQLLexer::ifa_revert(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa_revert(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_revert, coo_FB_MySQLLexer);
   }
@@ -120,7 +120,7 @@ Variant c_FB_MySQLLexer::ifa_revert(MethodCallPackage &mcp, int count, INVOKE_FE
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::revert", 0, 1);
   return (self->t_revert(), null);
 }
-Variant c_FB_MySQLLexer::ifa_iscompop(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa_iscompop(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_iscompop, coo_FB_MySQLLexer);
   }
@@ -129,7 +129,7 @@ Variant c_FB_MySQLLexer::ifa_iscompop(MethodCallPackage &mcp, int count, INVOKE_
   CVarRef arg0(a0);
   return (self->t_iscompop(arg0));
 }
-Variant c_FB_MySQLLexer::ifa_pushback(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa_pushback(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_pushback, coo_FB_MySQLLexer);
   }
@@ -137,7 +137,7 @@ Variant c_FB_MySQLLexer::ifa_pushback(MethodCallPackage &mcp, int count, INVOKE_
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::pushBack", 0, 1);
   return (self->t_pushback(), null);
 }
-Variant c_FB_MySQLLexer::ifa_lex(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa_lex(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_lex, coo_FB_MySQLLexer);
   }
@@ -145,7 +145,7 @@ Variant c_FB_MySQLLexer::ifa_lex(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("FB_MySQLLexer::lex", 0, 1);
   return (self->t_lex());
 }
-Variant c_FB_MySQLLexer::ifa_nexttoken(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_FB_MySQLLexer::ifa_nexttoken(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_nexttoken, coo_FB_MySQLLexer);
   }

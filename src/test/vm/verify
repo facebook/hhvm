@@ -32,6 +32,9 @@ $opt_server = 0;
 $opt_port = 8080;
 $opt_home = ".";
 $opt_threads = `cat /proc/cpuinfo | grep '^processor' | wc -l`;
+if ($opt_threads > 20) {
+    $opt_threads = 20;
+}
 
 $opt_retval =
 &GetOptions("h|help" => \$opt_help,

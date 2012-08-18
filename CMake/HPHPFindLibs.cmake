@@ -28,6 +28,12 @@ endif()
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
+# inotify checks
+find_package(Libinotify)
+if (LIBINOTIFY_INCLUDE_DIR)
+	include_directories(${LIBINOTIFY_INCLUDE_DIR})
+endif()
+
 # unwind checks
 find_package(Libunwind REQUIRED)
 include_directories(${LIBUNWIND_INCLUDE_DIR})
@@ -350,6 +356,10 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${ICU_LIBRARIES} ${ICU_I18N_LIBRARIES})
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
+
+if (LIBINOTIFY_LIBRARY)
+	target_link_libraries(${target} ${LIBINOTIFY_LIBRARY})
+endif()
 
 if (LINUX)
 	target_link_libraries(${target} ${CAP_LIB})

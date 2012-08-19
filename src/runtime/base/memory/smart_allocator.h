@@ -285,7 +285,7 @@ public:
 
   Name getAllocatorType() const { return m_nameEnum; }
   int getItemSize() const { return m_itemSize;}
-  static size_t roundup(size_t n) {
+  static size_t itemSizeRoundup(size_t n) {
     return n >= MinItemSize ? n : MinItemSize;
   }
 
@@ -518,7 +518,7 @@ template<typename T, int TNameEnum, int F>
 inline void *operator new(size_t sizeT,
                           HPHP::SmartAllocator<T, TNameEnum, F> *a) {
   ASSERT(sizeT == sizeof(T));
-  return a->alloc(HPHP::SmartAllocatorImpl::roundup(sizeof(T)));
+  return a->alloc(HPHP::SmartAllocatorImpl::itemSizeRoundup(sizeof(T)));
 }
 
 inline void *operator new(size_t sizeT, HPHP::ObjectAllocatorBase *a) {

@@ -3757,7 +3757,8 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
   gatherInfo(ar, m);
   if (m_graph) {
-    if (!m_variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
+    if (!m_inPseudoMain &&
+        !m_variables->getAttribute(VariableTable::ContainsLDynamicVariable)) {
       for (std::map<string,SimpleVariablePtr>::iterator it =
              m_objMap.begin(), end = m_objMap.end(); it != end; ++it) {
         SimpleVariablePtr sv = it->second;

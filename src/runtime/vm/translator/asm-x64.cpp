@@ -41,7 +41,7 @@ static void panic(const char *fmt, ...) {
 Address allocSlab(size_t size) {
   Address result = (Address)
     // XXX: ponder MAP_SHARED?
-    mmap(0, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, 0, 0);
+    mmap(0, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
   if (result == MAP_FAILED) {
     panic("%s:%d: (%s) map of %zu bytes failed (%s)\n",
           __FILE__, __LINE__, __func__, size, strerror(errno));

@@ -150,6 +150,11 @@ Expression::ExprClass Expression::getExprClass() const {
   return cls;
 }
 
+FileScopeRawPtr Expression::getUsedScalarScope(CodeGenerator& cg) {
+  return cg.getLiteralScope() ?
+    cg.getLiteralScope() : getFileScope();
+}
+
 bool Expression::getEffectiveScalar(Variant &v) {
   if (is(KindOfExpressionList)) {
     ExpressionRawPtr sub = static_cast<ExpressionList*>(this)->listValue();

@@ -28,6 +28,7 @@ DECLARE_BOOST_TYPES(Construct);
 DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
+DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(LoopStatement);
 
 class CodeGenerator {
@@ -295,6 +296,12 @@ public:
   bool insertDeclaredClosure(const FunctionScope *f) {
     return m_declaredClosures.insert(f).second;
   }
+  void setLiteralScope(FileScopeRawPtr fs) {
+    m_literalScope = fs;
+  }
+  FileScopeRawPtr getLiteralScope() const {
+    return m_literalScope;
+  }
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -328,6 +335,7 @@ private:
   bool m_insideScalarArray;
   StringToClassScopePtrVecMap m_classes;
   std::set<const FunctionScope*> m_declaredClosures;
+  FileScopeRawPtr m_literalScope;
 
   int m_itemIndex;
 

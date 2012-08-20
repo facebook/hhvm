@@ -769,7 +769,7 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         Option::UseScalarVariant && cg.hasScalarVariant();
       if (scalarVariant) {
         ar->addNamedScalarVarArray(text);
-        getFileScope()->addUsedScalarVarArray(text);
+        getUsedScalarScope(cg)->addUsedScalarVarArray(text);
       }
       if (Option::UseNamedScalarArray && cg.isFileOrClassHeader()) {
         if (getClassScope()) {

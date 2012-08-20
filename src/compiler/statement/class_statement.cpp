@@ -77,7 +77,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     bases.push_back(m_originalParent);
   }
   if (m_base) m_base->getOriginalStrings(bases);
-  
+
   vector<UserAttributePtr> attrs;
   if (m_attrList) {
     for (int i = 0; i < m_attrList->getCount(); ++i) {
@@ -444,7 +444,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                     parCls->getId().c_str());
         }
 
-        if (classScope->checkHasPropTable()) {
+        if (classScope->checkHasPropTable(ar)) {
           cg_printf("static const ClassPropTable %sprop_table;\n",
                     Option::ObjectStaticPrefix);
         }

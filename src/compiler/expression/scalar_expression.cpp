@@ -497,7 +497,7 @@ void ScalarExpression::outputCPPNamedInteger(CodeGenerator &cg,
   string name = ar->getScalarVarIntegerName(intId, index);
   cg_printf("NAMVAR(%s, %lldLL)", name.c_str(), val);
 
-  getFileScope()->addUsedScalarVarInteger(val);
+  getUsedScalarScope(cg)->addUsedScalarVarInteger(val);
   if (cg.isFileOrClassHeader()) {
     if (getClassScope()) {
       getClassScope()->addUsedScalarVarIntegerHeader(val);
@@ -529,7 +529,7 @@ void ScalarExpression::outputCPPNamedDouble(CodeGenerator &cg,
     cg_printf("NAMVAR(%s, ", name.c_str());
     ar->outputCPPFiniteDouble(cg, dval);
     cg_printf(")");
-    getFileScope()->addUsedScalarVarDouble(dval);
+    getUsedScalarScope(cg)->addUsedScalarVarDouble(dval);
     if (cg.isFileOrClassHeader()) {
       if (getClassScope()) {
         getClassScope()->addUsedScalarVarDoubleHeader(dval);

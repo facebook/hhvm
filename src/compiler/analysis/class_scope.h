@@ -511,7 +511,7 @@ public:
 
   bool needsEnableDestructor(AnalysisResultConstPtr ar) const;
   bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
-  bool checkHasPropTable();
+  bool checkHasPropTable(AnalysisResultConstPtr ar);
 
   struct IndexedSym {
     IndexedSym(int i, int p, const Symbol *s) :

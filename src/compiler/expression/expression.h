@@ -259,6 +259,7 @@ public:
   bool isArray() const;
   virtual bool isRefable(bool checkError = false) const { return false; }
   virtual bool getScalarValue(Variant &value) { return false; }
+  FileScopeRawPtr getUsedScalarScope(CodeGenerator& cg);
   bool getEffectiveScalar(Variant &value);
   virtual ExpressionPtr clone() {
     ASSERT(false);

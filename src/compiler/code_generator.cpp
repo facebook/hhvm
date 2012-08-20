@@ -560,6 +560,9 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
     assert(false);
   }
   int stringId = ar->getLiteralStringId(str, index);
+  if (m_literalScope) {
+    bs = m_literalScope;
+  }
   if (bs && bs != ar) {
     FileScopePtr fs = bs->getContainingFile();
     if (fs) {
@@ -577,6 +580,7 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
       }
     }
   }
+
   return stringId;
 }
 

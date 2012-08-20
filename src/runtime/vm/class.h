@@ -454,7 +454,8 @@ class PreClassRepoProxy : public RepoProxy {
 };
 
 typedef AtomicSmartPtr<Class> ClassPtr;
-struct Class : public AtomicCountable {
+class Class : public AtomicCountable {
+public:
   friend class ExecutionContext;
   friend class HPHP::ObjectData;
   friend class Instance;
@@ -564,7 +565,10 @@ public:
   size_t numDeclProperties() const { return m_declProperties.size(); }
   const Const* constants() const { return m_constants.accessList(); }
   size_t numConstants() const { return m_constants.size(); }
-  Attr attrs() const { return m_preClass->attrs(); }
+  Attr attrs() const {
+    ASSERT(Attr(m_attrCopy) == m_preClass->attrs());
+    return Attr(m_attrCopy);
+  }
   const Func* getCtor() const { return m_ctor; }
   const Func* getToString() const { return m_toString; }
   const PreClass* preClass() const { return m_preClass.get(); }
@@ -759,9 +763,10 @@ private:
   InitVec m_pinitVec;
   InitVec m_sinitVec;
   const ClassInfo* m_clsInfo;
-  bool m_needInitialization; // True if there are any __[ps]init() methods.
-  bool m_callsCustomInstanceInit; // True if we should always call __init__
-                                  // on new instances of this class
+  unsigned m_needInitialization : 1;      // any __[ps]init() methods?
+  unsigned m_callsCustomInstanceInit : 1; // should we always call __init__
+                                          // on new instances?
+  unsigned m_attrCopy : 30;               // cache of m_preClass->attrs().
   int m_ODAttrs;
 
   int m_builtinPropSize;

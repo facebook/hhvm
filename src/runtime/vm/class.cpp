@@ -631,8 +631,8 @@ Class* Class::classof(const PreClass* preClass) const {
 }
 
 bool Class::classof(const Class* cls) const {
-  if (UNLIKELY((m_preClass->attrs() & (AttrInterface | AttrTrait)) ||
-               (cls->m_preClass->attrs() & (AttrInterface | AttrTrait)))) {
+  if (UNLIKELY((attrs() & (AttrInterface | AttrTrait)) ||
+               (cls->attrs() & (AttrInterface | AttrTrait)))) {
     return (classof(cls->m_preClass.get()) == cls);
   }
   if (m_classVecLen >= cls->m_classVecLen) {
@@ -1042,7 +1042,7 @@ DataType Class::clsCnsType(const StringData* cnsName) const {
 void Class::setParent() {
   // Validate the parent
   if (m_parent.get() != NULL) {
-    Attr attrs = m_parent->m_preClass->attrs();
+    Attr attrs = m_parent->attrs();
     if (UNLIKELY(attrs & (AttrFinal | AttrInterface | AttrTrait))) {
       static StringData* sd___MockClass =
         StringData::GetStaticString("__MockClass");
@@ -1057,6 +1057,8 @@ void Class::setParent() {
       }
     }
   }
+  // Cache m_preClass->attrs()
+  m_attrCopy = m_preClass->attrs();
   // Handle stuff specific to cppext classes
   if (m_preClass->instanceCtor()) {
     m_InstanceCtor = m_preClass->instanceCtor();
@@ -1087,7 +1089,7 @@ void Class::setSpecial() {
   static StringData* sd__construct = StringData::GetStaticString("__construct");
   Func* fConstruct = lookupMethod(sd__construct);
   if (fConstruct && (fConstruct->preClass() == m_preClass.get() ||
-                       fConstruct->preClass()->attrs() & AttrTrait)) {
+                       fConstruct->attrs() & AttrTrait)) {
     m_ctor = fConstruct;
     return;
   }
@@ -1213,7 +1215,7 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule) {
     traitCls = Unit::loadClass(traitName);
   }
 
-  if (!traitCls.get() || (!(traitCls->m_preClass->attrs() & AttrTrait))) {
+  if (!traitCls.get() || (!(traitCls->attrs() & AttrTrait))) {
     raise_error("unknown trait '%s'", traitName->data());
   }
 
@@ -1552,7 +1554,7 @@ void Class::setMethods() {
   }
 
   // If class is not abstract, check that all abstract methods have been defined
-  if (!(m_preClass->attrs() & (AttrTrait | AttrInterface | AttrAbstract))) {
+  if (!(attrs() & (AttrTrait | AttrInterface | AttrAbstract))) {
     for (Slot i = 0; i < builder.size(); i++) {
       const Func* meth = builder[i];
       if (meth->attrs() & AttrAbstract) {
@@ -1929,7 +1931,7 @@ void Class::importTraitStaticProp(ClassPtr trait,
 // returns true in case of error, false on success
 void Class::importTraitProps(PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap) {
-  if (m_preClass->attrs() & AttrNoExpandTrait) return;
+  if (attrs() & AttrNoExpandTrait) return;
   for (size_t t = 0; t < m_usedTraits.size(); t++) {
     ClassPtr trait = m_usedTraits[t];
 
@@ -1951,7 +1953,7 @@ void Class::importTraitProps(PropMap::Builder& curPropMap,
 }
 
 void Class::addTraitPropInitializers(bool staticProps) {
-  if (m_preClass->attrs() & AttrNoExpandTrait) return;
+  if (attrs() & AttrNoExpandTrait) return;
   for (unsigned t = 0; t < m_usedTraits.size(); t++) {
     ClassPtr trait = m_usedTraits[t];
     InitVec& traitInitVec = staticProps ? trait->m_sinitVec : trait->m_pinitVec;
@@ -2021,7 +2023,7 @@ void Class::checkInterfaceMethods() {
 
       Func* meth = lookupMethod(methName);
 
-      if (m_preClass->attrs() & (AttrTrait | AttrInterface | AttrAbstract)) {
+      if (attrs() & (AttrTrait | AttrInterface | AttrAbstract)) {
         if (meth == NULL) {
           // Skip unimplemented method.
           continue;
@@ -2057,7 +2059,7 @@ void Class::checkInterfaceMethods() {
 }
 
 void Class::setInterfaces() {
-  if (m_preClass->attrs() & AttrInterface) {
+  if (attrs() & AttrInterface) {
     m_allInterfaces.insert(this);
   }
   if (m_parent.get() != NULL) {
@@ -2071,7 +2073,7 @@ void Class::setInterfaces() {
     if (cp.get() == NULL) {
       raise_error("Undefined interface: %s", (*it)->data());
     }
-    if (!(cp->m_preClass->attrs() & AttrInterface)) {
+    if (!(cp->attrs() & AttrInterface)) {
       raise_error("%s cannot implement %s - it is not an interface",
                   m_preClass->name()->data(), cp->name()->data());
     }
@@ -2090,7 +2092,7 @@ void Class::setUsedTraits() {
     if (classPtr.get() == NULL) {
       raise_error("Trait '%s' not found", (*it)->data());
     }
-    if (!(classPtr->m_preClass->attrs() & AttrTrait)) {
+    if (!(classPtr->attrs() & AttrTrait)) {
       raise_error("%s cannot use %s - it is not a trait",
                   m_preClass->name()->data(),
                   classPtr->name()->data());
@@ -2156,7 +2158,7 @@ void Class::getClassInfo(ClassInfoVM* ci) {
   ASSERT(ci);
 
   // Miscellaneous.
-  Attr clsAttrs = m_preClass->attrs();
+  Attr clsAttrs = attrs();
   int attr = 0;
   if (clsAttrs & AttrInterface) attr |= ClassInfo::IsInterface;
   if (clsAttrs & AttrAbstract)  attr |= ClassInfo::IsAbstract;

@@ -853,39 +853,47 @@ public:
 };
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TestGlobals);
 
+/* Pull 32bit Big Endian words from an in6_addr */
+static inline long in6addrWord(struct in6_addr addr, char wordNo) {
+  return ((addr.s6_addr[(wordNo*4)+0] << 24) |
+          (addr.s6_addr[(wordNo*4)+1] << 16) |
+          (addr.s6_addr[(wordNo*4)+2] <<  8) |
+          (addr.s6_addr[(wordNo*4)+3] <<  0)) & 0xFFFFFFFF;
+}
+
 bool TestCppBase::TestIpBlockMap() {
   struct in6_addr addr;
   int bits;
 
   VERIFY(IpBlockMap::ReadIPv6Address("204.15.21.0/22", &addr, bits));
   VS(bits, 118);
-  VS((long)addr.s6_addr32[0], (long)htonl(0x00000000));
-  VS((long)addr.s6_addr32[1], (long)htonl(0x00000000));
-  VS((long)addr.s6_addr32[2], (long)htonl(0x0000FFFF));
-  VS((long)addr.s6_addr32[3], (long)htonl(0xCC0F1500));
+  VS(in6addrWord(addr, 0), 0x00000000L);
+  VS(in6addrWord(addr, 1), 0x00000000L);
+  VS(in6addrWord(addr, 2), 0x0000FFFFL);
+  VS(in6addrWord(addr, 3), 0xCC0F1500L);
 
   VERIFY(IpBlockMap::ReadIPv6Address("127.0.0.1", &addr, bits));
   VS(bits, 128);
-  VS((long)addr.s6_addr32[0], (long)htonl(0x00000000));
-  VS((long)addr.s6_addr32[1], (long)htonl(0x00000000));
-  VS((long)addr.s6_addr32[2], (long)htonl(0x0000FFFF));
-  VS((long)addr.s6_addr32[3], (long)htonl(0x7F000001));
+  VS(in6addrWord(addr, 0), 0x00000000L);
+  VS(in6addrWord(addr, 1), 0x00000000L);
+  VS(in6addrWord(addr, 2), 0x0000FFFFL);
+  VS(in6addrWord(addr, 3), 0x7F000001L);
 
   VERIFY(IpBlockMap::ReadIPv6Address(
     "1111:2222:3333:4444:5555:6666:789a:bcde", &addr, bits));
   VS(bits, 128);
-  VS((long)addr.s6_addr32[0], (long)htonl(0x11112222));
-  VS((long)addr.s6_addr32[1], (long)htonl(0x33334444));
-  VS((long)addr.s6_addr32[2], (long)htonl(0x55556666));
-  VS((long)addr.s6_addr32[3], (long)htonl(0x789abcde));
+  VS(in6addrWord(addr, 0), 0x11112222L);
+  VS(in6addrWord(addr, 1), 0x33334444L);
+  VS(in6addrWord(addr, 2), 0x55556666L);
+  VS(in6addrWord(addr, 3), 0x789abcdeL);
 
   VERIFY(IpBlockMap::ReadIPv6Address(
     "1111:2222:3333:4444:5555:6666:789a:bcde/68", &addr, bits));
   VS(bits, 68);
-  VS((long)addr.s6_addr32[0], (long)htonl(0x11112222));
-  VS((long)addr.s6_addr32[1], (long)htonl(0x33334444));
-  VS((long)addr.s6_addr32[2], (long)htonl(0x55556666));
-  VS((long)addr.s6_addr32[3], (long)htonl(0x789abcde));
+  VS(in6addrWord(addr, 0), 0x11112222L);
+  VS(in6addrWord(addr, 1), 0x33334444L);
+  VS(in6addrWord(addr, 2), 0x55556666L);
+  VS(in6addrWord(addr, 3), 0x789abcdeL);
 
   IpBlockMap::BinaryPrefixTrie root(true);
   unsigned char value[16];

@@ -1674,9 +1674,6 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
   int nargs = ar->numArgs();
   // Set pc below, once we know that DV dispatch is unnecessary.
   m_fp = ar;
-  if (reenter) {
-    m_nestedVMMap[ar] = m_nestedVMs.size() - 1;
-  }
   bool raiseMissingArgumentWarnings = false;
   int nparams = func->numParams();
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -1951,7 +1948,7 @@ void VMExecutionContext::reenterVM(TypedValue* retval,
   ar->m_savedRbp = 0;
   VMState savedVM = { m_pc, m_fp, m_firstAR, savedSP };
   TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
-  pushVMState(savedVM);
+  pushVMState(savedVM, ar);
   ASSERT(m_nestedVMs.size() >= 1);
   try {
     enterVM(retval, ar, extraArgs);
@@ -2231,17 +2228,20 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
     if (prevPc) *prevPc = prevFp->m_func->base() + fp->m_soff;
     return prevFp;
   }
-  int k;
-  if (!mapGet(m_nestedVMMap, fp, &k) || k < 0) {
-    return NULL;
+  // Linear search from end of m_nestedVMs. In practice, we're probably
+  // looking for something recently pushed.
+  int i = m_nestedVMs.size() - 1;
+  for (; i >= 0; --i) {
+    if (m_nestedVMs[i].m_entryFP == fp) break;
   }
-  ASSERT(k < (int)m_nestedVMs.size());
-  prevFp = m_nestedVMs[k].fp;
+  if (i == -1) return NULL;
+  const VMState& vmstate = m_nestedVMs[i].m_savedState;
+  prevFp = vmstate.fp;
   ASSERT(prevFp);
   ASSERT(prevFp->m_func->unit());
-  if (prevSp) *prevSp = m_nestedVMs[k].sp;
+  if (prevSp) *prevSp = vmstate.sp;
   if (prevPc) {
-    *prevPc = prevFp->m_func->unit()->offsetOf(m_nestedVMs[k].pc);
+    *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
   }
   return prevFp;
 }
@@ -2984,7 +2984,6 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
     m_fp = ar;
     m_pc = s_debuggerDummy->entry();
     m_firstAR = ar;
-    m_nestedVMMap[ar] = m_nestedVMs.size() - 1;
   }
   m_fp->setVarEnv(varEnv);
   varEnv->attach(m_fp);
@@ -6987,7 +6986,8 @@ void VMExecutionContext::resetCoverageCounters() {
   m_coverPrevUnit = NULL;
 }
 
-void VMExecutionContext::pushVMState(VMState &savedVM) {
+void VMExecutionContext::pushVMState(VMState &savedVM,
+                                     const ActRec* reentryAR) {
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
       savedVM.fp->m_func->unit()) {
@@ -7001,7 +7001,7 @@ void VMExecutionContext::pushVMState(VMState &savedVM) {
           func->unit()->offsetOf(savedVM.pc),
           savedVM.fp);
   }
-  m_nestedVMs.push_back(savedVM);
+  m_nestedVMs.push_back(ReentryRecord(savedVM, reentryAR));
   m_nesting++;
 }
 
@@ -7009,7 +7009,6 @@ void VMExecutionContext::popVMState() {
   ASSERT(m_nestedVMs.size() >= 1);
 
   VMState savedVM;
-  m_nestedVMMap.erase(m_firstAR);
   memcpy(&savedVM, &m_nestedVMs.back(), sizeof(savedVM));
   m_pc = savedVM.pc;
   m_fp = savedVM.fp;
@@ -7017,7 +7016,8 @@ void VMExecutionContext::popVMState() {
   ASSERT(m_stack.top() == savedVM.sp);
 
   if (debug) {
-    const VMState& savedVM = m_nestedVMs.back();
+    const ReentryRecord& rr = m_nestedVMs.back();
+    const VMState& savedVM = rr.m_savedState;
     if (savedVM.fp &&
         savedVM.fp->m_func &&
         savedVM.fp->m_func->unit()) {

@@ -622,24 +622,25 @@ public:
   bool getCallInfoStatic(const CallInfo *&ci, void *&extra,
                          const StringData *cls, const StringData *func);
   int m_lambdaCounter;
-  std::vector<VMState> m_nestedVMs;
-
-  typedef hphp_hash_map<const HPHP::VM::ActRec*, int,
-                        pointer_hash<HPHP::VM::ActRec> > NestedVMMap;
-  NestedVMMap m_nestedVMMap; // Given an ActRec* whose previous frame is a
-                             // native frame, this function will give the
-                             // index into m_nestedVMs corresponding to the
-                             // previous VM.
+  struct ReentryRecord {
+    VMState m_savedState;
+    const VM::ActRec* m_entryFP;
+    ReentryRecord(const VMState &s, const VM::ActRec* entryFP) :
+        m_savedState(s), m_entryFP(entryFP) { }
+    ReentryRecord() {}
+  };
+  typedef TinyVector<ReentryRecord, 32> NestedVMVec;
+  NestedVMVec m_nestedVMs;
 
   int m_nesting;
   bool isNested() { return m_nesting != 0; }
-  void pushVMState(VMState &savedVM);
+  void pushVMState(VMState &savedVM, const VM::ActRec* reentryAR);
   void popVMState();
 
   int hhvmPrepareThrow();
-  HPHP::VM::ActRec* getPrevVMState(const HPHP::VM::ActRec* fp,
-                                   HPHP::VM::Offset* prevPc = NULL,
-                                   TypedValue** prevSp = NULL);
+  VM::ActRec* getPrevVMState(const VM::ActRec* fp,
+                             VM::Offset* prevPc = NULL,
+                             TypedValue** prevSp = NULL);
   Array debugBacktrace(bool skip = false,
                        bool withSelf = false,
                        bool withThis = false,

@@ -216,6 +216,8 @@ void StringData::initConcat(StringSlice r1, StringSlice r2) {
     m_data = m_small;
     m_small[len] = 0;
     m_small[MaxSmallSize] = 0;
+  } else if (UNLIKELY(uint32_t(len) > MaxSize)) {
+    throw FatalErrorException(0, "String length exceeded 2^30 - 1: %d", len);
   } else {
     char* buf = string_concat(r1.ptr, r1.len, r2.ptr, r2.len, len);
     m_len = len;
@@ -234,6 +236,9 @@ StringData::StringData(int cap) {
     m_small[0] = 0;
     m_small[MaxSmallSize] = 0;
   } else {
+    if (UNLIKELY(uint32_t(cap) >= MaxSize)) {
+      throw InvalidArgumentException("len>=2^30", cap);
+    }
     m_len = 0;
     m_data = (char*) malloc(cap + 1);
     m_big.cap = cap | IsMalloc;
@@ -243,8 +248,12 @@ StringData::StringData(int cap) {
 void StringData::append(const char *s, int len) {
   ASSERT(!isStatic()); // never mess around with static strings!
   if (len == 0) return;
-  if (uint32_t(len) > MaxSize) {
+  if (UNLIKELY(uint32_t(len) > MaxSize)) {
     throw InvalidArgumentException("len>=2^30", len);
+  }
+  if (UNLIKELY(len + m_len > MaxSize)) {
+    throw FatalErrorException(0, "String length exceeded 2^30 - 1: %u",
+                              len + m_len);
   }
   int newlen;
   // TODO: t1122987: in any of the cases below where we need a bigger buffer,
@@ -306,13 +315,7 @@ void StringData::append(const char *s, int len) {
     m_big.cap = newlen | IsMalloc;
     m_hash = 0;
   }
-  if (uint32_t(newlen) > MaxSize) {
-    releaseData();
-    m_len = 0;
-    m_data = NULL;
-    m_big.cap = 0;
-    throw FatalErrorException(0, "String length exceeded 2^30 - 1: %d", newlen);
-  }
+  ASSERT(uint32_t(newlen) <= MaxSize);
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
   ASSERT(checkSane());
 }

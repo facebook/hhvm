@@ -1089,7 +1089,7 @@ void Class::setSpecial() {
   static StringData* sd__construct = StringData::GetStaticString("__construct");
   Func* fConstruct = lookupMethod(sd__construct);
   if (fConstruct && (fConstruct->preClass() == m_preClass.get() ||
-                       fConstruct->attrs() & AttrTrait)) {
+                     fConstruct->preClass()->attrs() & AttrTrait)) {
     m_ctor = fConstruct;
     return;
   }

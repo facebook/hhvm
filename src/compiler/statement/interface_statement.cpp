@@ -310,7 +310,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
       cg_indentBegin(" {\n");
       if (m_stmt) m_stmt->outputCPP(cg, ar);
 
-      bool hasPropTable = classScope->checkHasPropTable(ar);
+      bool hasPropTable = classScope->checkHasPropTable();
       if (hasPropTable) {
         cg_printf("public: static const ClassPropTable %sprop_table;\n",
                   Option::ObjectStaticPrefix);
@@ -337,7 +337,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
 
       cg.addClass(getClassScope()->getName(), getClassScope());
 
-      if (classScope->isRedeclaring() || classScope->checkHasPropTable(ar)) {
+      if (classScope->isRedeclaring() || classScope->checkHasPropTable()) {
         classScope->outputCPPGlobalTableWrappersImpl(cg, ar);
       }
     }

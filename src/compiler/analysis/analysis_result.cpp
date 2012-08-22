@@ -3181,7 +3181,7 @@ void AnalysisResult::outputCPPDynamicClassTables(
            iter2 != iter->second.end(); ++iter2) {
         cls = *iter2;
         if (cls->isUserClass() &&
-            (!cls->isInterface() || cls->checkHasPropTable(ar))) {
+            (!cls->isInterface() || cls->checkHasPropTable())) {
           classes.push_back(cls->getOriginalName().c_str());
           classScopes[cls->getName()].push_back(cls);
           if (!cls->isRedeclaring()) {

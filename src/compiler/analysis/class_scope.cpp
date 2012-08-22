@@ -1715,17 +1715,6 @@ static int propTableSize(int entries) {
   return size < 8 ? 8 : size;
 }
 
-static void getConstantEntries(ClassScopeRawPtr cls, bool system,
-                               vector<const Symbol *> &entries) {
-  const std::vector<Symbol*> &constVec =
-    cls->getConstants()->getSymbols();
-  for (unsigned j = 0; j < constVec.size(); j++) {
-    const Symbol *sym = constVec[j];
-    if (!system && !sym->getValue()) continue;
-    entries.push_back(sym);
-  }
-}
-
 static bool buildClassPropTableMap(
   CodeGenerator &cg, AnalysisResultPtr ar,
   const StringToClassScopePtrVecMap &classScopes,
@@ -1748,15 +1737,12 @@ static bool buildClassPropTableMap(
         assert(!sym->isStatic() || !sym->isOverride());
         entries[sym->isStatic()].push_back(sym);
       }
-
-      getConstantEntries(cls, system, entries[2]);
-      for (unsigned k = 0; k < cls->getBases().size(); k++) {
-        const string &base = cls->getBases()[k];
-        if (k > 0 || base != cls->getOriginalParent()) {
-          ClassScopeRawPtr bCls = ar->findExactClass(cls->getStmt(), base);
-          if (!bCls) continue;
-          getConstantEntries(bCls, system, entries[2]);
-        }
+      const std::vector<Symbol*> &constVec =
+        cls->getConstants()->getSymbols();
+      for (unsigned j = 0; j < constVec.size(); j++) {
+        const Symbol *sym = constVec[j];
+        if (!system && !sym->getValue()) continue;
+        entries[2].push_back(sym);
       }
 
       if (!entries[0].size() && !entries[1].size() && !entries[2].size()) {
@@ -1817,30 +1803,17 @@ static bool buildClassPropTableMap(
   return ret;
 }
 
-static bool hasConstTable(ClassScopeRawPtr cls) {
-  ConstantTablePtr constants = cls->getConstants();
-  const std::vector<Symbol*> &constVec = constants->getSymbols();
-  if (!constVec.size()) return false;
-  for (int i = 0, sz = constVec.size(); i < sz; i++) {
-    const Symbol *sym = constVec[i];
-    if (cls->getAttribute(ClassScope::System) || sym->getValue()) return true;
-  }
-  return false;
-}
-
-bool ClassScope::checkHasPropTable(AnalysisResultConstPtr ar) {
+bool ClassScope::checkHasPropTable() {
   VariableTablePtr variables = getVariables();
 
   if (variables->getSymbols().size()) return true;
 
-  if (hasConstTable(ClassScopeRawPtr(this))) return true;
-
-  for (unsigned k = 0; k < m_bases.size(); k++) {
-    const string &base = m_bases[k];
-    if (k > 0 || base != m_parent) {
-      ClassScopeRawPtr bCls = ar->findExactClass(getStmt(), base);
-      if (bCls && hasConstTable(bCls)) return true;
-    }
+  ConstantTablePtr constants = getConstants();
+  const std::vector<Symbol*> &constVec = constants->getSymbols();
+  if (!constVec.size()) return false;
+  for (int i = 0, sz = constVec.size(); i < sz; i++) {
+    const Symbol *sym = constVec[i];
+    if (getAttribute(ClassScope::System) || sym->getValue()) return true;
   }
 
   return false;
@@ -1850,7 +1823,7 @@ ClassScopePtr ClassScope::getNextParentWithProp(AnalysisResultPtr ar) {
 
   if (derivesFromRedeclaring() == DirectFromRedeclared) return ClassScopePtr();
   ClassScopePtr parentCls = getParentScope(ar);
-  while (parentCls && !parentCls->checkHasPropTable(ar)) {
+  while (parentCls && !parentCls->checkHasPropTable()) {
     parentCls = parentCls->getParentScope(ar);
   }
   return parentCls;
@@ -2954,7 +2927,7 @@ void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
 }
 
 string ClassScope::getClassPropTableId(AnalysisResultPtr ar) {
-  if (checkHasPropTable(ar)) return getId();
+  if (checkHasPropTable()) return getId();
 
   if (derivesFromRedeclaring() != DirectFromRedeclared) {
     if (ClassScopePtr p = getParentScope(ar)) {

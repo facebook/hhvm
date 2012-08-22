@@ -46,6 +46,8 @@ public:
   int isFatalFunction() const { return m_type == ThrowFatalFunction; }
   int isStaticCompact() const { return m_type == StaticCompactFunction; }
 
+  // define(<literal-string>, <scalar>);
+  bool isSimpleDefine(StringData **name, TypedValue *value) const;
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
 
@@ -71,8 +73,8 @@ public:
   bool writesLocals() const;
   void updateVtFlags();
   void setLocalThis(const std::string &name) { m_localThis = name; }
-  bool isCallToFunction(const char *name);
-  bool isCompilerCallToFunction(const char *name);
+  bool isCallToFunction(const char *name) const;
+  bool isCompilerCallToFunction(const char *name) const;
 protected:
   enum FunctionType {
     UnknownType,

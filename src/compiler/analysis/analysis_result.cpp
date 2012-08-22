@@ -1328,7 +1328,6 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
   if (MethodStatementPtr m =
       dynamic_pointer_cast<MethodStatement>(stmt)) {
     WriteLock lock(m->getFunctionScope()->getInlineMutex());
-    bool keepUseKindCaller = false;
     do {
       scope->clearUpdated();
       if (Option::LocalCopyProp || Option::EliminateDeadCode) {
@@ -1340,20 +1339,10 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
         StatementPtr rep = this->visitStmtRecur(stmt);
         assert(!rep);
       }
-      if (hhvm && Option::OutputHHBC) {
-        if (m->getFunctionScope()->inPseudoMain() &&
-            !m->getFunctionScope()->isMergeable()) {
-          if (m->getStmts()->markMergeable(this->m_data.m_ar)) {
-            all_updates |= BlockScope::UseKindCaller;
-            keepUseKindCaller = true;
-          }
-        }
-      }
       updates = scope->getUpdated();
       all_updates |= updates;
     } while (updates);
     if (all_updates & BlockScope::UseKindCaller &&
-        !keepUseKindCaller &&
         !m->getFunctionScope()->getInlineAsExpr()) {
       all_updates &= ~BlockScope::UseKindCaller;
     }

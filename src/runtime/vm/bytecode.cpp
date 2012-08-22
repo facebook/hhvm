@@ -2670,11 +2670,13 @@ HPHP::VM::Unit* VMExecutionContext::evalIncludeRoot(
 
 HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
                                                            InclOpFlags flags,
-                                                           bool* initial) {
+                                                           bool* initial,
+                                                           Unit* unit) {
   String absPath;
   if ((flags & InclOpRelative)) {
     namespace fs = boost::filesystem;
-    fs::path currentUnit(m_fp->m_func->unit()->filepath()->data());
+    if (!unit) unit = m_fp->m_func->unit();
+    fs::path currentUnit(unit->filepath()->data());
     fs::path currentDir(currentUnit.branch_path());
     absPath = currentDir.string() + '/';
     TRACE(2, "lookupIncludeRoot(%s): relative -> %s\n",
@@ -6138,7 +6140,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterFree(PC& pc) {
   it->m_itype = Iter::TypeUndefined;
 }
 
-inline void OPTBLD_INLINE inclOp(VMExecutionContext *ec, PC &pc, InclOpFlags flags) {
+inline void OPTBLD_INLINE inclOp(VMExecutionContext *ec, PC &pc,
+                                 InclOpFlags flags) {
   NEXT();
   Cell* c1 = ec->m_stack.topC();
   String path(prepareKey(c1));
@@ -6165,6 +6168,7 @@ inline void OPTBLD_INLINE inclOp(VMExecutionContext *ec, PC &pc, InclOpFlags fla
     if (!(flags & InclOpOnce) || initial) {
       ec->evalUnit(u, (flags & InclOpLocal), pc, EventHook::PseudoMain);
     } else {
+      Stats::inc(Stats::PseudoMain_Guarded);
       ec->m_stack.pushTrue();
     }
   }

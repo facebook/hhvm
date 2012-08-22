@@ -42,7 +42,7 @@ enum Rank {
    */
   RankFbml = RankBase,
 
-  RankUnitPreConst,
+  RankUnitInit,
   RankEvaledUnits,
   RankWriteLease,
 

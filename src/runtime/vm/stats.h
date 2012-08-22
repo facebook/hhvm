@@ -118,8 +118,11 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Fixup_Find) \
   STAT(Fixup_Probe) \
   /* Execute pseudomain */ \
+  STAT(PseudoMain_Reentered) \
   STAT(PseudoMain_Executed) \
   STAT(PseudoMain_Skipped) \
+  STAT(PseudoMain_SkipDeep) \
+  STAT(PseudoMain_Guarded) \
   STAT(Cont_CreateVerySlow) \
   STAT(Cont_UnpackVerySlow) \
   STAT(Cont_PackVerySlow) \

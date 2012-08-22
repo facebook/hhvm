@@ -23,6 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(AssignmentExpression);
+struct TypedValue;
 
 class AssignmentExpression : public Expression, public IParseHandler {
 public:
@@ -55,6 +56,8 @@ public:
                                 ExpressionPtr rval,
                                 const char *rvalStr, bool ref);
 
+  // $GLOBALS[<literal-string>] = <scalar>;
+  bool isSimpleGlobalAssign(StringData **name, TypedValue *tv) const;
 private:
   ExpressionPtr optimize(AnalysisResultConstPtr ar);
 

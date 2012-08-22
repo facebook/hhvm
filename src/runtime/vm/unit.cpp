@@ -34,6 +34,8 @@
 #include <runtime/vm/verifier/check.h>
 #include <runtime/base/strings.h>
 #include <runtime/vm/func_inline.h>
+#include <runtime/eval/runtime/file_repository.h>
+#include <runtime/vm/stats.h>
 
 namespace HPHP {
 namespace VM {
@@ -253,11 +255,12 @@ Unit::Unit()
     : m_sn(-1), m_bc(NULL), m_bclen(0),
       m_bc_meta(NULL), m_bc_meta_len(0), m_filepath(NULL),
       m_dirpath(NULL), m_md5(),
+      m_mergeables(NULL),
       m_firstHoistableFunc(0),
       m_firstHoistablePreClass(0),
       m_firstMergablePreClass(0),
-      m_repoId(-1), m_initialMergeDone(false),
-      m_preConstsLock(false /* reentrant */, RankUnitPreConst) {
+      m_mergeablesSize(0),
+      m_repoId(-1), m_initialMergeState(UnitMergeStateUninit) {
   TV_WRITE_UNINIT(&m_mainReturn);
   m_mainReturn._count = 0; // flag for whether or not the unit is mergeable
 }
@@ -292,9 +295,11 @@ Unit::~Unit() {
     }
   }
 
-  if (!RuntimeOption::RepoAuthoritative && m_initialMergeDone) {
+  if (!RuntimeOption::RepoAuthoritative && m_initialMergeState) {
     Transl::unmergePreConsts(m_preConsts, this);
   }
+
+  free(m_mergeables);
 }
 
 bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
@@ -501,18 +506,110 @@ void Unit::loadFunc(const Func *func) {
   const_cast<Func*>(func)->m_cachedOffset = ne->m_cachedFuncOffset;
 }
 
-void Unit::merge() {
-  if (UNLIKELY(!m_initialMergeDone)) {
-    SimpleLock lock(m_preConstsLock);
-    if (LIKELY(!m_initialMergeDone)) {
-      if (!RuntimeOption::RepoAuthoritative) {
-        Transl::mergePreConsts(m_preConsts);
-      }
-      for (MutableFuncRange fr(nonMainFuncs()); !fr.empty();) {
-        loadFunc(fr.popFront());
-      }
-      m_initialMergeDone = true;
+static SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
+
+void Unit::initialMerge() {
+  unitInitLock.assertOwnedBySelf();
+  if (LIKELY(m_initialMergeState == UnitMergeStateUninit)) {
+    m_initialMergeState = UnitMergeStateMerging;
+    for (MutableFuncRange fr(nonMainFuncs()); !fr.empty();) {
+      loadFunc(fr.popFront());
     }
+    if (!RuntimeOption::RepoAuthoritative) {
+      Transl::mergePreConsts(m_preConsts);
+    } else if (isMergeOnly()) {
+      /*
+       * The mergeables array begins with the hoistable Func*s,
+       * followed by the (potenitally) hoistable Class*s.
+       *
+       * If the Unit is merge only, it then contains enough information
+       * to simulate executing the pseudomain. Normally, this is just
+       * the Class*s that might not be hoistable. In RepoAuthoritative
+       * mode it also includes assignments of the form:
+       *  $GLOBALS[string-literal] = scalar;
+       * defines of the form:
+       *  define(string-literal, scalar);
+       * and requires.
+       *
+       * These cases are differentiated using the bottom 3 bits
+       * of the pointer. In the case of a define or a global,
+       * the pointer will be followed by a TypedValue representing
+       * the value being defined/assigned.
+       */
+      for (int ix = m_firstMergablePreClass, end = m_mergeablesSize;
+           ix < end; ++ix) {
+        void *obj = mergeableObj(ix);
+        InclOpFlags flags = InclOpDefault;
+        UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
+        switch (k) {
+          case UnitMergeKindDone: ASSERT(false);
+          case UnitMergeKindClass: break;
+          case UnitMergeKindReqMod:
+            flags = InclOpDocRoot | InclOpLocal;
+            goto inc;
+          case UnitMergeKindReqSrc:
+            flags = InclOpRelative | InclOpLocal;
+            goto inc;
+          case UnitMergeKindReqDoc:
+            flags = InclOpDocRoot;
+            goto inc;
+          inc: {
+              StringData* s = (StringData*)((char*)obj - (int)k);
+              HPHP::Eval::PhpFile* efile =
+                g_vmContext->lookupIncludeRoot(s, flags, NULL, this);
+              ASSERT(efile);
+              Unit* unit = efile->unit();
+              unit->initialMerge();
+              mergeableObj(ix) = (void*)((char*)unit + (int)k);
+            }
+            break;
+          case UnitMergeKindDefine: {
+            StringData* s = (StringData*)((char*)obj - (int)k);
+            TypedValue* v = (TypedValue*)mergeableData(ix + 1);
+            ix += sizeof(TypedValue) / sizeof(void*);
+            v->_count = TargetCache::allocConstant(s);
+            break;
+          }
+          case UnitMergeKindGlobal: {
+            StringData* s = (StringData*)((char*)obj - (int)k);
+            TypedValue* v = (TypedValue*)mergeableData(ix + 1);
+            ix += sizeof(TypedValue) / sizeof(void*);
+            v->_count = TargetCache::GlobalCache::alloc(s);
+            break;
+          }
+        }
+      }
+    }
+    m_initialMergeState = UnitMergeStateMerged;
+  }
+}
+
+static void mergeCns(TargetCache::CacheHandle ch, TypedValue *value,
+                     StringData *name) {
+  using namespace TargetCache;
+  TypedValue *tv = (TypedValue*)handleToPtr(ch);
+  if (LIKELY(tv->m_type == KindOfUninit &&
+             g_vmContext->m_constants.nvInsert(name, value))) {
+    tvDup(value, tv);
+    return;
+  }
+
+  raise_warning(Strings::CONSTANT_ALREADY_DEFINED, name->data());
+}
+
+static void setGlobal(TargetCache::CacheHandle ch, TypedValue *value,
+                      StringData *name) {
+  using namespace TargetCache;
+  TypedValue* g = GlobalCache::lookupCreate(ch, name);
+  tvSet(value, g);
+}
+
+void Unit::merge() {
+  if (UNLIKELY(m_initialMergeState != UnitMergeStateMerged)) {
+    SimpleLock lock(unitInitLock);
+    ASSERT(m_initialMergeState != UnitMergeStateMerging);
+    initialMerge();
+    ASSERT(m_initialMergeState == UnitMergeStateMerged);
   }
 
   Func** it = funcHoistableBegin();
@@ -532,7 +629,7 @@ void Unit::merge() {
   // iterate over all the potentially hoistable classes
   // with no fatals on failure
   while (ix < end) {
-    PreClass* pre = (PreClass*)m_mergeables[ix++];
+    PreClass* pre = (PreClass*)mergeableObj(ix++);
     if (!defClass(pre, false)) redoHoistable = true;
   }
   if (UNLIKELY(redoHoistable)) {
@@ -554,15 +651,75 @@ void Unit::merge() {
     // because now A and D go on the maybe-hoistable list
     // B goes on the never hoistable list, and we
     // fatal trying to instantiate D before B
-    if (end == (int)m_mergeables.size()) ix = m_firstHoistablePreClass;
+    if (end == (int)m_mergeablesSize) ix = m_firstHoistablePreClass;
   }
-  end = m_mergeables.size();
+
   // iterate over all but the guaranteed hoistable classes
   // fataling if we fail.
-  while (ix < end) {
-    PreClass* pre = (PreClass*)m_mergeables[ix++];
-    defClass(pre, true);
-  }
+  void* obj = mergeableObj(ix);
+  UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
+  do {
+    switch(k) {
+      case UnitMergeKindClass:
+        do {
+          defClass((PreClass*)obj, true);
+          obj = mergeableObj(++ix);
+          k = UnitMergeKind(uintptr_t(obj) & 7);
+        } while (!k);
+        continue;
+
+      case UnitMergeKindDefine:
+        do {
+          StringData* name = (StringData*)((char*)obj - (int)k);
+          TypedValue *v = (TypedValue*)mergeableData(ix + 1);
+          mergeCns(v->_count, v, name);
+          ix += 1 + sizeof(TypedValue) / sizeof(void*);
+          obj = mergeableObj(ix);
+          k = UnitMergeKind(uintptr_t(obj) & 7);
+        } while (k == UnitMergeKindDefine);
+        continue;
+
+      case UnitMergeKindGlobal:
+        do {
+          StringData* name = (StringData*)((char*)obj - (int)k);
+          TypedValue *v = (TypedValue*)mergeableData(ix + 1);
+          setGlobal(v->_count, v, name);
+          ix += 1 + sizeof(TypedValue) / sizeof(void*);
+          obj = mergeableObj(ix);
+          k = UnitMergeKind(uintptr_t(obj) & 7);
+        } while (k == UnitMergeKindGlobal);
+        continue;
+
+      case UnitMergeKindReqMod:
+      case UnitMergeKindReqSrc:
+      case UnitMergeKindReqDoc:
+        do {
+          Unit *unit = (Unit*)((char*)obj - (int)k);
+          if (!TargetCache::testAndSetBit(unit->m_cacheId)) {
+            unit->merge();
+            if (UNLIKELY(!unit->isMergeOnly())) {
+              Stats::inc(Stats::PseudoMain_Reentered);
+              TypedValue ret;
+              g_vmContext->invokeFunc(&ret, unit->getMain(), Array(),
+                                      NULL, NULL, NULL, NULL, unit);
+              tvRefcountedDecRef(&ret);
+            } else {
+              Stats::inc(Stats::PseudoMain_SkipDeep);
+            }
+          } else {
+            Stats::inc(Stats::PseudoMain_Guarded);
+          }
+          obj = mergeableObj(++ix);
+          k = UnitMergeKind(uintptr_t(obj) & 7);
+        } while (isMergeKindReq(k));
+        continue;
+      case UnitMergeKindDone:
+        ASSERT((unsigned)ix == m_mergeablesSize);
+        return;
+    }
+    // Normal cases should continue, KindDone returns
+    NOT_REACHED();
+  } while (true);
 }
 
 int Unit::getLineNumber(Offset pc) const {
@@ -837,17 +994,26 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   }
   {
     std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitSourceLoc")
-             << "(unitSn INTEGER, pastOffset INTEGER, line0 INTEGER,"
-                " char0 INTEGER, line1 INTEGER, char1 INTEGER,"
-                " PRIMARY KEY (unitSn, pastOffset));";
+    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitPreConst")
+             << "(unitSn INTEGER, name TEXT, value BLOB, preConstId INTEGER,"
+                " PRIMARY KEY (unitSn, preConstId));";
     txn.exec(ssCreate.str());
   }
   {
     std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitPreConst")
-             << "(unitSn INTEGER, name TEXT, value BLOB, preConstId INTEGER,"
-                " PRIMARY KEY (unitSn, preConstId));";
+    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitMergeables")
+             << "(unitSn INTEGER, mergeableIx INTEGER,"
+                " mergeableKind INTEGER, mergeableId INTEGER,"
+                " mergeableValue BLOB,"
+                " PRIMARY KEY (unitSn, mergeableIx));";
+    txn.exec(ssCreate.str());
+  }
+  {
+    std::stringstream ssCreate;
+    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitSourceLoc")
+             << "(unitSn INTEGER, pastOffset INTEGER, line0 INTEGER,"
+                " char0 INTEGER, line1 INTEGER, char1 INTEGER,"
+                " PRIMARY KEY (unitSn, pastOffset));";
     txn.exec(ssCreate.str());
   }
 }
@@ -872,6 +1038,7 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
     getUnitArrays(repoId).get(ue);
     getUnitPreConsts(repoId).get(ue);
     m_repo.pcrp().getPreClasses(repoId).get(ue);
+    getUnitMergeables(repoId).get(ue);
     m_repo.frp().getFuncs(repoId).get(ue);
   } catch (RepoExc& re) {
     TRACE(0, "Repo error loading '%s' (0x%016llx%016llx) from '%s': %s\n",
@@ -1073,6 +1240,87 @@ void UnitRepoProxy::GetUnitPreConstsStmt
       Id id;            /**/ query.getId(2, id);
       UNUSED Id addedId = ue.addPreConst(name, value);
       ASSERT(id == addedId);
+    }
+  } while (!query.done());
+  txn.commit();
+}
+
+void UnitRepoProxy::InsertUnitMergeableStmt
+                  ::insert(RepoTxn& txn, int64 unitSn,
+                           int ix, UnitMergeKind kind, Id id,
+                           TypedValue* value) {
+  if (!prepared()) {
+    std::stringstream ssInsert;
+    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitMergeables")
+             << " VALUES(@unitSn, @mergeableIx, @mergeableKind,"
+                " @mergeableId, @mergeableValue);";
+    txn.prepare(*this, ssInsert.str());
+  }
+
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  query.bindInt("@mergeableIx", ix);
+  query.bindInt("@mergeableKind", (int)kind);
+  query.bindId("@mergeableId", id);
+  if (value) {
+    ASSERT(kind == UnitMergeKindDefine ||
+           kind == UnitMergeKindGlobal);
+    query.bindTypedValue("@mergeableValue", *value);
+  } else {
+    ASSERT(kind == UnitMergeKindReqMod ||
+           kind == UnitMergeKindReqSrc ||
+           kind == UnitMergeKindReqDoc);
+    query.bindNull("@mergeableValue");
+  }
+  query.exec();
+}
+
+void UnitRepoProxy::GetUnitMergeablesStmt
+                  ::get(UnitEmitter& ue) {
+  RepoTxn txn(m_repo);
+  if (!prepared()) {
+    std::stringstream ssSelect;
+    ssSelect << "SELECT mergeableIx,mergeableKind,mergeableId,mergeableValue"
+                " FROM "
+             << m_repo.table(m_repoId, "UnitMergeables")
+             << " WHERE unitSn == @unitSn ORDER BY mergeableIx ASC;";
+    txn.prepare(*this, ssSelect.str());
+  }
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", ue.sn());
+  do {
+    query.step();
+    if (query.row()) {
+      if (UNLIKELY(!RuntimeOption::RepoAuthoritative)) {
+        /*
+         * We're using a repo generated in WholeProgram mode,
+         * but we're not using it in RepoAuthoritative mode
+         * (this is dodgy to start with). We're not going to
+         * deal with requires at merge time, so drop them
+         * here, and clear the mergeOnly flag for the unit
+         */
+        ue.markNotMergeOnly();
+        break;
+      }
+      int mergeableIx;           /**/ query.getInt(0, mergeableIx);
+      int mergeableKind;         /**/ query.getInt(1, mergeableKind);
+      Id mergeableId;            /**/ query.getInt(2, mergeableId);
+      switch (mergeableKind) {
+        case UnitMergeKindReqMod:
+        case UnitMergeKindReqSrc:
+        case UnitMergeKindReqDoc:
+          ue.insertMergeableInclude(mergeableIx,
+                                    (UnitMergeKind)mergeableKind, mergeableId);
+          break;
+        case UnitMergeKindDefine:
+        case UnitMergeKindGlobal: {
+          TypedValue mergeableValue; /**/ query.getTypedValue(3,
+                                                              mergeableValue);
+          ue.insertMergeableDef(mergeableIx, (UnitMergeKind)mergeableKind,
+                                mergeableId, mergeableValue);
+          break;
+        }
+      }
     }
   } while (!query.done());
   txn.commit();
@@ -1373,6 +1621,41 @@ void UnitEmitter::appendTopEmitter(FuncEmitter* fe) {
   m_fes.push_back(fe);
 }
 
+void UnitEmitter::pushMergeableClass(PreClassEmitter* e) {
+  m_mergeableStmts.push_back(std::make_pair(UnitMergeKindClass, e->id()));
+}
+
+void UnitEmitter::pushMergeableInclude(UnitMergeKind kind,
+                                       const StringData* unitName) {
+  m_mergeableStmts.push_back(
+    std::make_pair(kind, mergeLitstr(unitName)));
+  m_allClassesHoistable = false;
+}
+
+void UnitEmitter::insertMergeableInclude(int ix, UnitMergeKind kind, int id) {
+  ASSERT(size_t(ix) <= m_mergeableStmts.size());
+  m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
+                          std::make_pair(kind, id));
+  m_allClassesHoistable = false;
+}
+
+void UnitEmitter::pushMergeableDef(UnitMergeKind kind,
+                                   const StringData* name,
+                                   const TypedValue& tv) {
+  m_mergeableStmts.push_back(std::make_pair(kind, m_mergeableValues.size()));
+  m_mergeableValues.push_back(std::make_pair(mergeLitstr(name), tv));
+  m_allClassesHoistable = false;
+}
+
+void UnitEmitter::insertMergeableDef(int ix, UnitMergeKind kind,
+                                     Id id, const TypedValue& tv) {
+  ASSERT(size_t(ix) <= m_mergeableStmts.size());
+  m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
+                          std::make_pair(kind, m_mergeableValues.size()));
+  m_mergeableValues.push_back(std::make_pair(id, tv));
+  m_allClassesHoistable = false;
+}
+
 FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* n,
                                            PreClassEmitter* pce) {
   return new FuncEmitter(*this, m_nextFuncSn++, n, pce);
@@ -1399,7 +1682,7 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(const StringData* n,
 
   if (hoistable >= PreClass::MaybeHoistable) {
     m_hoistablePreClassSet.insert(n);
-    m_hoistablePceVec.push_back(pce);
+    m_hoistablePceIdVec.push_back(pce->id());
   } else {
     m_allClassesHoistable = false;
   }
@@ -1408,7 +1691,7 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(const StringData* n,
     if (m_returnSeen) {
       m_allClassesHoistable = false;
     } else {
-      m_remainingPceVec.push_back(pce);
+      pushMergeableClass(pce);
     }
   }
   m_pceVec.push_back(pce);
@@ -1503,6 +1786,29 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
          ++it) {
       (*it)->commit(txn);
     }
+    for (int i = 0, n = m_mergeableStmts.size(); i < n; i++) {
+      switch (m_mergeableStmts[i].first) {
+        case UnitMergeKindDone: ASSERT(false);
+        case UnitMergeKindClass: break;
+        case UnitMergeKindReqMod:
+        case UnitMergeKindReqSrc:
+        case UnitMergeKindReqDoc: {
+          urp.insertUnitMergeable(repoId).insert(
+            txn, usn, i,
+            m_mergeableStmts[i].first, m_mergeableStmts[i].second, NULL);
+          break;
+        }
+        case UnitMergeKindDefine:
+        case UnitMergeKindGlobal: {
+          int ix = m_mergeableStmts[i].second;
+          urp.insertUnitMergeable(repoId).insert(
+            txn, usn, i,
+            m_mergeableStmts[i].first,
+            m_mergeableValues[ix].first, &m_mergeableValues[ix].second);
+          break;
+        }
+      }
+    }
     if (RuntimeOption::RepoDebugInfo) {
       for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
         SourceLoc& e = m_sourceLocTab[i].second;
@@ -1556,40 +1862,87 @@ Unit* UnitEmitter::create() {
        ++it) {
     u->m_preClasses.push_back(PreClassPtr((*it)->create(*u)));
   }
-  size_t mergeablesSize = m_fes.size() + m_hoistablePceVec.size();
-  if (m_mainReturn._count && !m_allClassesHoistable) {
-    mergeablesSize += m_remainingPceVec.size();
+  size_t ix = m_fes.size() + m_hoistablePceIdVec.size();
+  if (u->m_mainReturn._count && !m_allClassesHoistable) {
+    size_t extra = 0;
+    for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
+         it != m_mergeableStmts.end(); ++it) {
+      extra++;
+      if (!RuntimeOption::RepoAuthoritative) {
+        if (it->first != UnitMergeKindClass) {
+          extra = 0;
+          u->m_mainReturn._count = 0;
+          break;
+        }
+      } else switch (it->first) {
+          case UnitMergeKindDefine:
+          case UnitMergeKindGlobal:
+            extra += sizeof(TypedValue) / sizeof(void*);
+            break;
+          default:
+            break;
+        }
+    }
+    ix += extra;
   }
-  u->m_mergeables.reserve(mergeablesSize);
+  u->m_mergeables = malloc((ix+1) * sizeof(void*));
+  u->m_mergeablesSize = ix;
   u->m_firstHoistableFunc = 0;
+  ix = 0;
   for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
     Func* func = (*it)->create(*u);
     if (func->top()) {
       if (!u->m_firstHoistableFunc) {
-        u->m_firstHoistableFunc = u->m_mergeables.size();
+        u->m_firstHoistableFunc = ix;
       }
     } else {
       ASSERT(!u->m_firstHoistableFunc);
     }
-    u->m_mergeables.push_back(func);
+    u->mergeableObj(ix++) = func;
   }
   ASSERT(u->getMain()->isPseudoMain());
   if (!u->m_firstHoistableFunc) {
-    u->m_firstHoistableFunc =  u->m_mergeables.size();
+    u->m_firstHoistableFunc =  ix;
   }
-  u->m_firstHoistablePreClass = u->m_mergeables.size();
+  u->m_firstHoistablePreClass = ix;
   ASSERT(m_fes.size());
-  for (PceVec::const_iterator it = m_hoistablePceVec.begin();
-       it != m_hoistablePceVec.end(); ++it) {
-    u->m_mergeables.push_back(u->m_preClasses[(*it)->id()].get());
+  for (IdVec::const_iterator it = m_hoistablePceIdVec.begin();
+       it != m_hoistablePceIdVec.end(); ++it) {
+    u->mergeableObj(ix++) = u->m_preClasses[*it].get();
   }
-  u->m_firstMergablePreClass = u->m_mergeables.size();
-  if (m_mainReturn._count && !m_allClassesHoistable) {
-    for (PceVec::const_iterator it = m_remainingPceVec.begin();
-         it != m_remainingPceVec.end(); ++it) {
-      u->m_mergeables.push_back(u->m_preClasses[(*it)->id()].get());
+  u->m_firstMergablePreClass = ix;
+  if (u->m_mainReturn._count && !m_allClassesHoistable) {
+    for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
+         it != m_mergeableStmts.end(); ++it) {
+      switch (it->first) {
+        case UnitMergeKindClass:
+          u->mergeableObj(ix++) = u->m_preClasses[it->second].get();
+          break;
+        case UnitMergeKindReqMod:
+        case UnitMergeKindReqSrc:
+        case UnitMergeKindReqDoc: {
+          ASSERT(RuntimeOption::RepoAuthoritative);
+          void* name = u->lookupLitstrId(it->second);
+          u->mergeableObj(ix++) = (char*)name + (int)it->first;
+          break;
+        }
+        case UnitMergeKindDefine:
+        case UnitMergeKindGlobal: {
+          ASSERT(RuntimeOption::RepoAuthoritative);
+          void* name = u->lookupLitstrId(m_mergeableValues[it->second].first);
+          u->mergeableObj(ix++) = (char*)name + (int)it->first;
+          *(TypedValue*)u->mergeableData(ix) =
+            m_mergeableValues[it->second].second;
+          ix += sizeof(TypedValue) / sizeof(void*);
+          ASSERT(sizeof(TypedValue) % sizeof(void*) == 0);
+          break;
+        }
+        case UnitMergeKindDone: ASSERT(false);
+      }
     }
   }
+  ASSERT(ix == u->m_mergeablesSize);
+  u->mergeableObj(ix) = (void*)UnitMergeKindDone;
   u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
   for (size_t i = 0; i < m_feTab.size(); ++i) {
     ASSERT(m_feTab[i].second->past() == m_feTab[i].first);

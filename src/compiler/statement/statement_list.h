@@ -34,7 +34,6 @@ public:
   virtual bool hasDecl() const;
   virtual bool hasImpl() const;
   ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
-  bool markMergeable(AnalysisResultConstPtr ar);
   virtual bool hasBody() const;
   virtual bool hasRetExp() const;
 

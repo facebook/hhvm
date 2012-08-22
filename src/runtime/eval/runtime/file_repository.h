@@ -69,7 +69,7 @@ public:
   const std::string &getMd5() const { return m_md5; }
   HPHP::VM::Unit* unit() const { return m_unit; }
   int getId() const { return m_id; }
-  void setId(int id) { m_id = id; }
+  void setId(int id);
 
 private:
   int m_refCount;

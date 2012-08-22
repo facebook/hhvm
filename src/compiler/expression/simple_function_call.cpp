@@ -514,13 +514,32 @@ void SimpleFunctionCall::updateVtFlags() {
   }
 }
 
-bool SimpleFunctionCall::isCallToFunction(const char *name) {
+bool SimpleFunctionCall::isCallToFunction(const char *name) const {
   return !strcasecmp(getName().c_str(), name) &&
     !getClass() && getClassName().empty();
 }
 
-bool SimpleFunctionCall::isCompilerCallToFunction(const char *name) {
+bool SimpleFunctionCall::isCompilerCallToFunction(const char *name) const {
   return m_fromCompiler && isCallToFunction(name);
+}
+
+bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
+                                        TypedValue *outValue) const {
+  if (!isCallToFunction("define")) return false;
+  if (!m_params || m_params->getCount() != 2) return false;
+  Variant v;
+  if (!(*m_params)[0]->getScalarValue(v) || !v.isString()) return false;
+  if (outName) {
+    *outName = StringData::GetStaticString(v.toCStrRef().get());
+  }
+  if (!(*m_params)[1]->getScalarValue(v) || v.isArray()) return false;
+  if (outValue) {
+    if (v.isString()) {
+      v = StringData::GetStaticString(v.toCStrRef().get());
+    }
+    *outValue = *v.asTypedValue();
+  }
+  return true;
 }
 
 bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {

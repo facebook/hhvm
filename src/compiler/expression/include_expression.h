@@ -41,17 +41,16 @@ public:
   // implementing IParseHandler
   virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
 
+  bool isReqLit() const;
   void setDocumentRoot() { m_documentRoot = true;}
-  bool isDocumentRoot() { return m_documentRoot;}
+  bool isDocumentRoot() const { return m_documentRoot;}
   void setPrivateScope() { m_privateScope = true; }
   bool isPrivateScope() const { return m_privateScope; }
   void setPrivateInclude() { m_privateInclude = true; }
   bool isPrivateInclude() const { return m_privateInclude; }
   void setModule() { m_module = 1; }
   bool isModule() const { return m_module; }
-  std::string includePath() const {
-    return m_documentRoot || !m_privateScope ? m_include : "";
-  }
+  std::string includePath() const;
   FileScopeRawPtr getIncludedFile(AnalysisResultConstPtr) const;
 private:
   /**

@@ -19,6 +19,7 @@
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/vm/event_hook.h>
+#include <runtime/vm/stats.h>
 
 namespace HPHP {
 namespace VM {
@@ -45,6 +46,7 @@ void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
 
   HPHP::Eval::PhpFile* efile = args->m_efile;
   if (!checkEval(efile)) {
+    Stats::inc(Stats::PseudoMain_Guarded);
     sp->m_type = KindOfBoolean;
     sp->m_data.num = 1;
     return;

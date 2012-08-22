@@ -195,6 +195,23 @@ FileScopeRawPtr IncludeExpression::getIncludedFile(
   return ar->findFileScope(m_include);
 }
 
+std::string IncludeExpression::includePath() const {
+  if (m_documentRoot || !m_privateScope) return m_include;
+
+  Variant v;
+  if (m_exp && m_exp->getScalarValue(v) &&
+      v.isString()) {
+    return v.toString()->data();
+  }
+  return "";
+}
+
+bool IncludeExpression::isReqLit() const {
+  return !m_include.empty() &&
+    m_op == T_REQUIRE_ONCE &&
+    (isDocumentRoot() || isPrivateScope());
+}
+
 bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
                                        const std::string &include) {
   ConstructPtr self = shared_from_this();

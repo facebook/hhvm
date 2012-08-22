@@ -33,6 +33,7 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/expression/include_expression.h>
+#include <compiler/expression/simple_function_call.h>
 
 using namespace HPHP;
 
@@ -100,47 +101,6 @@ bool StatementList::hasImpl() const {
     if (m_stmts[i]->hasImpl()) return true;
   }
   return false;
-}
-
-bool StatementList::markMergeable(AnalysisResultConstPtr ar) {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    StatementPtr s = m_stmts[i];
-    switch (s->getKindOf()) {
-      case KindOfReturnStatement: {
-        ExpressionPtr e = static_pointer_cast<ReturnStatement>(s)->getRetExp();
-        return !e || e->isScalar();
-      }
-      case KindOfFunctionStatement:
-      case KindOfClassStatement:
-      case KindOfInterfaceStatement:
-        break;
-      case KindOfExpStatement: {
-        ExpressionPtr e = static_pointer_cast<ExpStatement>(s)->getExpression();
-        bool ok = false;
-        switch (e->getKindOf()) {
-          case Expression::KindOfIncludeExpression: {
-            IncludeExpressionPtr inc =
-              static_pointer_cast<IncludeExpression>(e);
-            if (FileScopeRawPtr f = inc->getIncludedFile(ar)) {
-              if (StatementListPtr sl = f->getStmt()) {
-                FunctionScopeRawPtr ps = sl->getFunctionScope();
-                ASSERT(ps && ps->inPseudoMain());
-                ok = ps->isMergeable();
-              }
-            }
-            break;
-          }
-          default:
-            break;
-        }
-        if (!ok) return false;
-        break;
-      }
-      default:
-        return false;
-    }
-  }
-  return true;
 }
 
 ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
@@ -427,7 +387,15 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
     }
 
     if (s) {
-      if (s->is(KindOfBlockStatement)) {
+      if (s->is(KindOfStatementList) && !s->hasDecl()) {
+        StatementListPtr stmts(static_pointer_cast<StatementList>(s));
+        removeElement(i);
+        m_stmts.insert(m_stmts.begin() + i,
+                       stmts->m_stmts.begin(), stmts->m_stmts.end());
+        i--;
+        changed = true;
+        continue;
+      } else if (s->is(KindOfBlockStatement)) {
         BlockStatementPtr bs(static_pointer_cast<BlockStatement>(s));
         StatementListPtr stmts(bs->getStmts());
         if (!stmts) {

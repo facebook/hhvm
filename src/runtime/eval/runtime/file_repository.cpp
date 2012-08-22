@@ -84,6 +84,11 @@ void PhpFile::decRefAndDelete() {
   }
 }
 
+void PhpFile::setId(int id) {
+  m_id = id;
+  m_unit->setCacheId(id);
+}
+
 ReadWriteMutex FileRepository::s_md5Lock(RankFileMd5);
 ParsedFilesMap FileRepository::s_files;
 Md5FileMap FileRepository::s_md5Files;
@@ -211,8 +216,8 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     ret->setId(VM::Transl::TargetCache::allocBit());
   } else {
     PhpFile *f = acc->second->getPhpFile();
-    ret->setId(f->getId());
     if (f != ret) {
+      ret->setId(f->getId());
       tx64->invalidateFile(f); // f has changed
     }
     f->decRefAndDelete();

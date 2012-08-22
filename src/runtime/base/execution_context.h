@@ -608,7 +608,8 @@ public:
   HPHP::VM::Unit* evalIncludeRoot(StringData* path,
                                   InclOpFlags flags, bool* initial);
   HPHP::Eval::PhpFile* lookupIncludeRoot(StringData* path,
-                                         InclOpFlags flags, bool* initial);
+                                         InclOpFlags flags, bool* initial,
+                                         HPHP::VM::Unit* unit = 0);
   bool evalUnit(HPHP::VM::Unit* unit, bool local,
                 HPHP::VM::PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, HPHP::VM::Unit* unit);

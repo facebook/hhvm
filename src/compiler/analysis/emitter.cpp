@@ -1542,18 +1542,47 @@ void EmitterVisitor::visit(FileScopePtr file) {
             ExpressionPtr e =
               static_pointer_cast<ExpStatement>(s)->getExpression();
             switch (e->getKindOf()) {
+              case Expression::KindOfSimpleFunctionCall: {
+                SimpleFunctionCallPtr func =
+                  static_pointer_cast<SimpleFunctionCall>(e);
+                StringData *name;
+                TypedValue tv;
+                if (func->isSimpleDefine(&name, &tv)) {
+                  m_ue.pushMergeableDef(UnitMergeKindDefine, name, tv);
+                  visit(s);
+                  continue;
+                }
+                break;
+              }
+              case Expression::KindOfAssignmentExpression: {
+                AssignmentExpressionPtr ae(
+                  static_pointer_cast<AssignmentExpression>(e));
+                StringData *name;
+                TypedValue tv;
+                if (ae->isSimpleGlobalAssign(&name, &tv)) {
+                  m_ue.pushMergeableDef(UnitMergeKindGlobal, name, tv);
+                  visit(s);
+                  continue;
+                }
+                break;
+              }
               case Expression::KindOfIncludeExpression: {
                 IncludeExpressionPtr inc =
                   static_pointer_cast<IncludeExpression>(e);
-                if (FileScopeRawPtr f = inc->getIncludedFile(ar)) {
-                  if (StatementListPtr sl = f->getStmt()) {
-                    FunctionScopeRawPtr ps = sl->getFunctionScope();
-                    ASSERT(ps && ps->inPseudoMain());
-                    if (false && ps->isMergeable()) {
-                      /*
-                       * TODO: implement the code to deal with this
-                       * case in Unit::merge, and then enable it
-                       */
+                if (inc->isReqLit()) {
+                  if (FileScopeRawPtr f = inc->getIncludedFile(ar)) {
+                    if (StatementListPtr sl = f->getStmt()) {
+                      FunctionScopeRawPtr ps DEBUG_ONLY =
+                        sl->getFunctionScope();
+                      ASSERT(ps && ps->inPseudoMain());
+                      UnitMergeKind kind = inc->isPrivateScope() ?
+                        (inc->isDocumentRoot() ?
+                         UnitMergeKindReqMod : UnitMergeKindReqSrc) :
+                        UnitMergeKindReqDoc;
+                      m_ue.pushMergeableInclude(
+                        kind,
+                        StringData::GetStaticString(inc->includePath()));
+                      visit(s);
                       continue;
                     }
                   }
@@ -2847,11 +2876,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Expression::KindOfIncludeExpression: {
         IncludeExpressionPtr ie(static_pointer_cast<IncludeExpression>(node));
-        std::string path = ie->includePath();
-        if (!path.empty() &&
-            ie->getOp() == T_REQUIRE_ONCE &&
-            (ie->isDocumentRoot() || ie->isPrivateScope())) {
-          StringData* nValue = StringData::GetStaticString(path);
+        if (ie->isReqLit()) {
+          StringData* nValue = StringData::GetStaticString(ie->includePath());
           e.String(nValue);
         } else {
           visit(ie->getExpression());

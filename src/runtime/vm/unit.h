@@ -38,6 +38,26 @@ enum UnitOrigin {
   UnitOriginEval = 1
 };
 
+enum UnitMergeKind {
+  UnitMergeKindClass = 0,
+  UnitMergeKindDefine = 1,
+  UnitMergeKindGlobal = 2,
+  UnitMergeKindDone = 3,
+  UnitMergeKindReqMod = 4, // used by isMergeKindReq
+  UnitMergeKindReqSrc = 5, // "
+  UnitMergeKindReqDoc = 6, // "
+};
+
+enum UnitMergeState {
+  UnitMergeStateUninit = 0,
+  UnitMergeStateMerging = 1,
+  UnitMergeStateMerged = 2
+};
+
+inline bool ALWAYS_INLINE isMergeKindReq(UnitMergeKind k) {
+  return k & 4;
+}
+
 typedef const uchar* PC;
 
 // Forward declarations.
@@ -424,18 +444,20 @@ struct Unit {
 private:
   // Raw iterators; use with care as they override const.
   Func** funcBegin() const {
-    return (Func**)&m_mergeables[0];
+    return (Func**)m_mergeables;
   }
   Func** funcEnd() const {
-    return (Func**)&m_mergeables[m_firstHoistablePreClass];
+    return funcBegin() + m_firstHoistablePreClass;
   }
+  void*& mergeableObj(int ix) { return ((void**)m_mergeables)[ix]; }
+  void* mergeableData(int ix) { return (char*)m_mergeables + ix*sizeof(void*); }
 public:
   Func* getMain() const {
     return *funcBegin();
   }
   // Ranges for iterating over functions.
   Func** funcHoistableBegin() const {
-    return (Func**)&m_mergeables[m_firstHoistableFunc];
+    return funcBegin() + m_firstHoistableFunc;
   }
   MutableFuncRange nonMainFuncs() const {
     return MutableFuncRange(funcBegin() + 1, funcEnd());
@@ -446,7 +468,7 @@ public:
   Func* getLambda() const {
     ASSERT(m_firstHoistableFunc == 1);
     ASSERT(m_firstHoistablePreClass == 2);
-    return (Func*)m_mergeables[1];
+    return funcBegin()[1];
   }
   void renameFunc(const StringData* oldName, const StringData* newName);
   void mergeFuncs() const;
@@ -459,7 +481,7 @@ public:
   }
   Func* lookupFuncId(Id id) const {
     ASSERT(id < Id(m_firstHoistablePreClass));
-    return (Func*)m_mergeables[id];
+    return funcBegin()[id];
   }
   size_t numPreClasses() const {
     return (size_t)m_preClasses.size();
@@ -471,6 +493,7 @@ public:
   typedef std::vector<PreClassPtr> PreClassPtrVec;
   typedef std::vector<PreClass*> PreClassVec;
   typedef Range<PreClassPtrVec> PreClassRange;
+  void initialMerge();
   void merge();
   PreClassRange preclasses() const {
     return PreClassRange(m_preClasses);
@@ -490,7 +513,9 @@ public:
   const Func* getFunc(Offset pc) const;
   void enableIntercepts();
 
+  void setCacheId(unsigned id) { m_cacheId = id; }
   bool isMergeOnly() const { return m_mainReturn._count; }
+  void clearMergeOnly() { m_mainReturn._count = 0; }
 public:
   static Mutex s_classesMutex;
 
@@ -527,16 +552,17 @@ private:
   ArrayIdMap m_array2id;
   std::vector<const ArrayData*> m_arrays;
   PreClassPtrVec m_preClasses;
-  MergeablesVec m_mergeables;
+  void* m_mergeables;
   unsigned m_firstHoistableFunc;
   unsigned m_firstHoistablePreClass;
   unsigned m_firstMergablePreClass;
+  unsigned m_mergeablesSize;
+  unsigned m_cacheId;
   int8 m_repoId;
-  bool m_initialMergeDone;
+  int8 m_initialMergeState;
   LineTable m_lineTable;
   FuncTable m_funcTable;
   PreConstVec m_preConsts;
-  SimpleMutex m_preConstsLock;
 };
 
 class UnitEmitter {
@@ -556,6 +582,7 @@ class UnitEmitter {
   const StringData* getFilepath() { return m_filepath; }
   void setFilepath(const StringData* filepath) { m_filepath = filepath; }
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
+  void markNotMergeOnly() { m_mainReturn._count = 0; }
   const MD5& md5() const { return m_md5; }
   Id addPreConst(const StringData* name, const TypedValue& value);
   Id mergeLitstr(const StringData* litstr);
@@ -631,6 +658,13 @@ class UnitEmitter {
                 const StringData* docComment, int numParams);
   Unit* create();
   void returnSeen() { m_returnSeen = true; }
+  void pushMergeableClass(PreClassEmitter* e);
+  void pushMergeableInclude(UnitMergeKind kind, const StringData* unitName);
+  void insertMergeableInclude(int ix, UnitMergeKind kind, Id id);
+  void pushMergeableDef(UnitMergeKind kind,
+                        const StringData* name, const TypedValue& tv);
+  void insertMergeableDef(int ix, UnitMergeKind kind,
+                          Id id, const TypedValue& tv);
  private:
   void setLines(const LineTable& lines);
 
@@ -667,12 +701,15 @@ class UnitEmitter {
                         pointer_hash<FuncEmitter> > FMap;
   FMap m_fMap;
   typedef std::vector<PreClassEmitter*> PceVec;
+  typedef std::vector<Id> IdVec;
   PceVec m_pceVec;
   typedef hphp_hash_set<const StringData*, string_data_hash,
                         string_data_isame> HoistedPreClassSet;
   HoistedPreClassSet m_hoistablePreClassSet;
-  PceVec m_hoistablePceVec;
-  PceVec m_remainingPceVec;
+  IdVec m_hoistablePceIdVec;
+  typedef std::vector<std::pair<UnitMergeKind, Id> > MergeableStmtVec;
+  MergeableStmtVec m_mergeableStmts;
+  std::vector<std::pair<Id,TypedValue> > m_mergeableValues;
   bool m_allClassesHoistable;
   bool m_returnSeen;
   /*
@@ -711,6 +748,8 @@ class UnitRepoProxy : public RepoProxy {
   URP_GOP(UnitArrays) \
   URP_IOP(UnitPreConst) \
   URP_GOP(UnitPreConsts) \
+  URP_IOP(UnitMergeable) \
+  URP_GOP(UnitMergeables) \
   URP_IOP(UnitSourceLoc) \
   URP_GOP(SourceLoc) \
   URP_GOP(SourceLocPastOffsets) \
@@ -761,6 +800,18 @@ class UnitRepoProxy : public RepoProxy {
   class GetUnitPreConstsStmt : public RepoProxy::Stmt {
   public:
     GetUnitPreConstsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue);
+  };
+  class InsertUnitMergeableStmt : public RepoProxy::Stmt {
+   public:
+    InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn, int64 unitSn,
+                int ix, UnitMergeKind kind,
+                Id id, TypedValue *value);
+  };
+  class GetUnitMergeablesStmt : public RepoProxy::Stmt {
+   public:
+    GetUnitMergeablesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue);
   };
   class InsertUnitSourceLocStmt : public RepoProxy::Stmt {

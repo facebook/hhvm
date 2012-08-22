@@ -123,7 +123,6 @@ BaseExecutionContext::~BaseExecutionContext() {
 }
 
 VMExecutionContext::~VMExecutionContext() {
-  syncGdbState();
   // Discard any ConstInfo objects that were created to support reflection.
   for (ConstInfoMap::const_iterator it = m_constInfo.begin();
        it != m_constInfo.end(); ++it) {

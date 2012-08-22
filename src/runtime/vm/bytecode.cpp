@@ -7066,6 +7066,7 @@ void VMExecutionContext::requestExit() {
   const_assert(hhvm);
 
   destructObjects();
+  syncGdbState();
   tx64->requestExit();
   tx64 = NULL;
   m_stack.requestExit();

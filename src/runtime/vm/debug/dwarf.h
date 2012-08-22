@@ -87,8 +87,8 @@ class TCRange {
   const TCA end() const   { V(); return m_end; };
   uint32_t size() const   { V(); return m_end - m_start; }
 
-  void truncate(const TCA newEnd) {
-    ASSERT(newEnd <= m_end);
+  void extend(const TCA newEnd) {
+    ASSERT(newEnd >= m_end);
     m_end = newEnd;
     V();
   }

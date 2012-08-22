@@ -244,7 +244,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
         end > fi->range.end()) {
       // XXX: verify that overlapping address come from jmp fixups
       start = fi->range.end();
-      fi->range.truncate(end);
+      fi->range.extend(end);
       m_functions[end] = fi;
       m_functions.erase(it);
       delete(f);

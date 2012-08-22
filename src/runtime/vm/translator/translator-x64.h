@@ -638,6 +638,7 @@ public:
   TranslatorX64();
   virtual ~TranslatorX64();
 
+  void initGdb();
   static TranslatorX64* Get();
 
   // Called before entering a new PHP "world."

@@ -10435,20 +10435,16 @@ TranslatorX64::TranslatorX64()
 
   // Emit some special helpers that are shared across translations.
 
+  // Emit a byte of padding. This is a kind of hacky way to
+  // avoid hitting an assert in recordGdbStub when we call
+  // it with m_callToExit - 1 as the start address.
+  astubs.emitNop(1);
+
   // Call to exit with whatever value the program leaves on
   // the return stack.
   m_callToExit = emitServiceReq(false, REQ_EXIT, 0ull);
 
-  // On a backtrace, gdb tries to locate the calling frame at address
-  // returnRIP-1. However, for the first VM frame, there is no code at
-  // returnRIP-1, since the AR was set up manually. For this frame,
-  // record the tracelet address as starting from callToExit-1, so gdb
-  // does not barf
-  recordGdbStub(astubs, m_callToExit - 1, "HHVM::callToExit");
-
   m_retHelper = emitRetFromInterpretedFrame();
-  recordBCInstr(OpRetFromInterp, astubs, m_retHelper);
-  recordGdbStub(astubs, m_retHelper - 1, "HHVM::retHelper");
 
   moveToAlign(astubs);
   m_resumeHelper = astubs.code.frontier;
@@ -10458,7 +10454,6 @@ TranslatorX64::TranslatorX64()
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_stack) +
                                        Stack::topOfStackOffset(), rVmSp);
   emitServiceReq(false, REQ_RESUME, 0ull);
-  recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
 
   // Helper for DefCls
   if (false) {
@@ -10476,7 +10471,6 @@ TranslatorX64::TranslatorX64()
                               offsetof(VMExecutionContext, m_stack) +
                               Stack::topOfStackOffset(), rEC);
   a.   jmp((TCA)defClsHelper);
-  recordBCInstr(OpDefClsHelper, a, m_defClsHelper);
 
   moveToAlign(astubs);
   m_stackOverflowHelper = astubs.code.frontier;
@@ -10511,9 +10505,6 @@ TranslatorX64::TranslatorX64()
   m_dtorStubs[KindOfRef]           = emitUnaryStub(a, vp(tv_release_ref));
   m_dtorGenericStub                = genericRefCountStub(a);
   m_typedDtorStub                  = emitBinaryStub(a, vp(tv_release_typed));
-  recordBCInstr(OpDtorStub, a, m_dtorStubs[BitwiseKindOfString]);
-  recordGdbStub(a, m_dtorStubs[BitwiseKindOfString],
-                    "HHVM::destructorStub");
 
   if (trustSigSegv) {
     // Install SIGSEGV handler for timeout exceptions
@@ -10532,6 +10523,26 @@ TranslatorX64::TranslatorX64()
   }
 }
 
+// do gdb specific initialization. This has to happen after
+// the TranslatorX64 constructor is called, because gdb initialization
+// calls backs into TranslatorX64::Get()
+void TranslatorX64::initGdb() {
+  // On a backtrace, gdb tries to locate the calling frame at address
+  // returnRIP-1. However, for the first VM frame, there is no code at
+  // returnRIP-1, since the AR was set up manually. For this frame,
+  // record the tracelet address as starting from callToExit-1, so gdb
+  // does not barf
+  recordGdbStub(astubs, m_callToExit - 1, "HHVM::callToExit");
+
+  recordBCInstr(OpRetFromInterp, astubs, m_retHelper);
+  recordGdbStub(astubs, m_retHelper - 1, "HHVM::retHelper");
+  recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
+  recordBCInstr(OpDefClsHelper, a, m_defClsHelper);
+  recordBCInstr(OpDtorStub, a, m_dtorStubs[BitwiseKindOfString]);
+  recordGdbStub(a, m_dtorStubs[BitwiseKindOfString],
+                    "HHVM::destructorStub");
+}
+
 TranslatorX64*
 TranslatorX64::Get() {
   /*
@@ -10540,6 +10551,7 @@ TranslatorX64::Get() {
    */
   if (!nextTx64) {
     nextTx64 = new TranslatorX64();
+    nextTx64->initGdb();
   }
   if (!tx64) {
     tx64 = nextTx64;

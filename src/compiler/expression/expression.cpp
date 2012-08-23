@@ -1053,6 +1053,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (!ret || cg.inExpression()) {
+    if (paramList) kidState |= FixOrder;
     bool skipLast = !stashAll;
     int lastState = kidState | StashByRef;
     if (stashAll) lastState |= StashVars;

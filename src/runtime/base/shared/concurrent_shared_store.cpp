@@ -174,6 +174,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
                            RuntimeOption::ApcFileStorageAdviseOutPeriod);
       continue;
     }
+    m_expMap.erase(tmp.first);
     eraseImpl(tmp.first, true);
     free((void *)tmp.first);
     ++i;
@@ -183,6 +184,23 @@ void ConcurrentTableSharedStore::purgeExpired() {
   SharedStoreStats::addPurgingTime(elapsed);
   // Size could be inaccurate, but for stats reporting, it is good enough
   SharedStoreStats::setExpireQueueSize(m_expQueue.size());
+}
+
+void ConcurrentTableSharedStore::addToExpirationQueue(const char* key, int64 etime) {
+  ExpMap::accessor acc;
+  if (m_expMap.find(acc, key)) {
+    acc->second++;
+    return;
+  }
+
+  const char *copy = strdup(key);
+  if (!m_expMap.insert(acc, copy)) {
+    free((void *)copy);
+    acc->second++;
+    return;
+  }
+  ExpirationPair p(copy, etime);
+  m_expQueue.push(p);
 }
 
 bool ConcurrentTableSharedStore::handleUpdate(CStrRef key,

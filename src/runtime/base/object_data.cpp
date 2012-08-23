@@ -177,7 +177,7 @@ inline ALWAYS_INLINE bool InstanceOfHelper(CStrRef s,
                                            const ObjectData *obj,
                                            const ObjectStaticCallbacks *osc) {
   const char *globals = 0;
-  int64 hash = s->hash();
+  strhash_t hash = s->hash();
 
   if (UNLIKELY(!osc)) {
     return obj->o_instanceof_hook(s);
@@ -321,7 +321,7 @@ Variant RedeclaredObjectStaticCallbacks::os_constant(const char *s) const {
   return oscb.os_constant(s);
 }
 bool RedeclaredObjectStaticCallbacks::os_get_call_info(
-  MethodCallPackage &info, int64 hash) const {
+  MethodCallPackage &info, strhash_t hash) const {
   return oscb.os_get_call_info(info, hash);
 }
 ObjectData *RedeclaredObjectStaticCallbacks::createOnlyNoInit(
@@ -369,7 +369,7 @@ static void LazyInitializer(const ClassPropTable *cpt, const char *globals) {
 inline ALWAYS_INLINE
 const ClassPropTableEntry *PropertyFinder(
   const ClassPropTable **resTable,
-  CStrRef propName, int64 hash, int flagsMask, int flagsVal,
+  CStrRef propName, strhash_t hash, int flagsMask, int flagsVal,
   const ObjectStaticCallbacks *osc) {
   const char *globals = 0;
   do {
@@ -553,7 +553,7 @@ Object ObjectStaticCallbacks::createOnly(ObjectData* root /* = NULL */) const {
 inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
                                             const ObjectStaticCallbacks *osc,
                                             MethodCallPackage &mcp,
-                                            int64 hash) {
+                                            strhash_t hash) {
   const char *globals = 0;
   CStrRef s = *mcp.name;
   if (hash < 0) hash = s->hash();
@@ -641,14 +641,14 @@ inline ALWAYS_INLINE bool GetCallInfoHelper(bool ex, const char *cls,
 HOT_FUNC_HPHP
 bool ObjectStaticCallbacks::GetCallInfo(const ObjectStaticCallbacks *osc,
                                         MethodCallPackage &mcp,
-                                        int64 hash) {
+                                        strhash_t hash) {
   return GetCallInfoHelper(false, 0, osc, mcp, hash);
 }
 
 bool ObjectStaticCallbacks::GetCallInfoEx(const char *cls,
                                           const ObjectStaticCallbacks *osc,
                                           MethodCallPackage &mcp,
-                                          int64 hash) {
+                                          strhash_t hash) {
   return GetCallInfoHelper(true, cls, osc, mcp, hash);
 }
 
@@ -663,7 +663,7 @@ bool ObjectStaticCallbacks::checkAttribute(int attrs) const {
 }
 
 Variant ObjectData::os_invoke(CStrRef c, CStrRef s,
-                              CArrRef params, int64 hash,
+                              CArrRef params, strhash_t hash,
                               bool fatal /* = true */) {
   Object obj = FrameInjection::GetThis();
   if (!obj.instanceof(c)) {
@@ -726,7 +726,7 @@ MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
 
 HOT_FUNC_HPHP
 Variant *ObjectData::RealPropPublicHelper(
-  CStrRef propName, int64 hash, int flags, const ObjectData *obj,
+  CStrRef propName, strhash_t hash, int flags, const ObjectData *obj,
   const ObjectStaticCallbacks *osc) {
   const char *globals = 0;
   do {
@@ -845,7 +845,7 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
 
   const char *globals = 0;
 
-  int64 hash = propName->hash();
+  strhash_t hash = propName->hash();
 
   const StringData *sdctx = context.get();
   if (!sdctx) {
@@ -863,7 +863,7 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
   if (!(flags & RealPropExist) && sdctx->size()) {
     const ObjectStaticCallbacks *osc = orig;
     const ObjectData *obj = this;
-    int64 c_hash = sdctx->hash();
+    strhash_t c_hash = sdctx->hash();
     do {
       if (const int *ix = osc->instanceof_index) {
         const InstanceOfInfo *info = osc->instanceof_table;
@@ -1339,7 +1339,8 @@ Array ObjectData::o_getDynamicProperties() const {
   return o_properties;
 }
 
-Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
+Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
+                             strhash_t hash /* = -1 */,
                              bool fatal /* = true */) {
   if (hhvm) {
     // TODO This duplicates some logic from vm_decode_function and
@@ -1383,7 +1384,7 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
 }
 
 Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
-                                  int64 hash /* = -1 */,
+                                  strhash_t hash /* = -1 */,
                                   bool fatal /* = true */) {
   return getRoot()->o_invoke(s, params, hash, fatal);
 }
@@ -1399,7 +1400,7 @@ Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
 #define APPEND_9_ARGS(params) APPEND_8_ARGS(params); params.append(a8)
 #define APPEND_10_ARGS(params)  APPEND_9_ARGS(params); params.append(a9)
 
-Variant ObjectData::o_invoke_few_args(CStrRef s, int64 hash, int count,
+Variant ObjectData::o_invoke_few_args(CStrRef s, strhash_t hash, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (hhvm) {
     Array params = Array::Create();
@@ -1437,7 +1438,7 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, int64 hash, int count,
   return (mcp.ci->getMethFewArgs())(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
-Variant ObjectData::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
+Variant ObjectData::o_root_invoke_few_args(CStrRef s, strhash_t hash, int count,
                                            INVOKE_FEW_ARGS_IMPL_ARGS) {
   return getRoot()->o_invoke_few_args(s, hash, count,
                                       INVOKE_FEW_ARGS_PASS_ARGS);
@@ -1498,7 +1499,7 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
 
 HOT_FUNC_HPHP
 bool ObjectData::o_get_call_info(MethodCallPackage &mcp,
-                                 int64 hash /* = -1 */) {
+                                 strhash_t hash /* = -1 */) {
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   mcp.obj = this;
   return ObjectStaticCallbacks::GetCallInfo(osc, mcp, hash);
@@ -1506,7 +1507,7 @@ bool ObjectData::o_get_call_info(MethodCallPackage &mcp,
 
 bool ObjectData::o_get_call_info_ex(const char *clsname,
                                     MethodCallPackage &mcp,
-                                    int64 hash /* = -1 */) {
+                                    strhash_t hash /* = -1 */) {
   const ObjectStaticCallbacks *osc = o_get_callbacks();
   mcp.obj = this;
   return ObjectStaticCallbacks::GetCallInfoEx(clsname, osc, mcp, hash);
@@ -1514,7 +1515,7 @@ bool ObjectData::o_get_call_info_ex(const char *clsname,
 
 bool ObjectData::o_get_call_info_hook(const char *clsname,
                                       MethodCallPackage &mcp,
-                                      int64 hash /* = -1 */) {
+                                      strhash_t hash /* = -1 */) {
   return false;
 }
 

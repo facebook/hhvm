@@ -1516,7 +1516,7 @@ void ClassScope::outputCPPHashTableClasses
       StringToClassScopePtrVecMap::const_iterator iterClasses =
         classScopes.find(clsName);
       ClassScopeRawPtr cls = iterClasses->second[0];
-      cg_printf("  {0x%016llXLL,%d,",
+      cg_printf("  {" STRHASH_FMT ",%d,",
                 hash_string_i(clsName), jt.last() ? 1 : 0);
       if (cls->isVolatile()) {
         cg_printf("offsetof(GlobalVariables,CDEC(%s))",
@@ -1773,8 +1773,8 @@ static bool buildClassPropTableMap(
         unsigned p = 0;
         for (unsigned j = 0; j < entries[s].size(); j++) {
           const Symbol *sym = entries[s][j];
-          int hash = hash_string_i(sym->getName().c_str(),
-                                   sym->getName().size()) & (tableSize - 1);
+          strhash_t hash = hash_string_i(sym->getName().c_str(),
+                                      sym->getName().size()) & (tableSize - 1);
           int pix = -1;
           switch (s) {
             case 0:
@@ -2327,7 +2327,9 @@ void ClassScope::outputCPPGetClassPropTableImpl(
           }
           if (k == sz - 1) flags |= ClassPropTableEntry::Last;
           curEntry++;
-          cg_printf("{0x%016llXLL,%d,%d,%d,%d,%d,",
+          ASSERT(int16_t(next - cur) == int32_t(next - cur));
+          ASSERT(int16_t(off) == int32_t(off));
+          cg_printf("{" STRHASH_FMT ",%d,%d,%d,%d,%d,",
                     hash_string(sym->getName().c_str(),
                                 sym->getName().size()),
                     next - cur, off,
@@ -2813,7 +2815,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       if (knownClass) {
         name = cls->getOriginalName().c_str();
       }
-      cg_printf("{0x%016llXLL,%d,\"%s\",",
+      cg_printf("{" STRHASH_FMT ",%d,\"%s\",",
                 hash_string_i(name), jt.last(),
                 CodeGenerator::EscapeLabel(name).c_str());
       if (knownClass) {
@@ -3330,7 +3332,7 @@ void ClassScope::outputCPPMethodInvokeTable(
     string id = func->getContainingClass()->getId();
     int index = -1;
     cg.checkLiteralString(origName, index, ar, shared_from_this());
-    cg_printf("{ 0x%016llXLL, %d, %d, \"%s\", &%s%s%s%s },\n",
+    cg_printf("{ " STRHASH_FMT ", %d, %d, \"%s\", &%s%s%s%s },\n",
               hash_string_i(origName.c_str()),
               jt.last(),
               (int)origName.size(),

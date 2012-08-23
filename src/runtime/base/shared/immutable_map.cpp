@@ -66,8 +66,8 @@ void ImmutableMap::add(SharedVariant *key, SharedVariant *val) {
 
 HOT_FUNC
 int ImmutableMap::indexOf(StringData* key) {
-  int64 hash = key->hash();
-  size_t hash_pos = hash & (int64)m_capacity_mask;
+  strhash_t hash = key->hash();
+  size_t hash_pos = hash & m_capacity_mask;
   for (int bucket = m_hash[hash_pos]; bucket != -1;
        bucket = m_buckets[bucket].next) {
     if ((m_buckets[bucket].key->is(KindOfString) ||

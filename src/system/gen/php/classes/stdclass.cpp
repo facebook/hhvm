@@ -34,7 +34,7 @@ namespace HPHP {
 /* SRC: classes/stdclass.php line 8 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(__PHP_Incomplete_Class)
 extern const InstanceOfInfo cw___PHP_Incomplete_Class$$instanceof_table[] = {
-  {0x6576EACCCE24D694LL,1,"__PHP_Incomplete_Class",&cw___PHP_Incomplete_Class},
+  {0x4E24D694,1,"__PHP_Incomplete_Class",&cw___PHP_Incomplete_Class},
 };
 const int cw___PHP_Incomplete_Class$$instanceof_index[] = {
   1,
@@ -53,7 +53,7 @@ const ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
 /* SRC: classes/stdclass.php line 4 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(stdClass)
 extern const InstanceOfInfo cw_stdClass$$instanceof_table[] = {
-  {0x3D69936178BA13F7LL,1,"stdClass",&cw_stdClass},
+  {0x78BA13F7,1,"stdClass",&cw_stdClass},
 };
 const int cw_stdClass$$instanceof_index[] = {
   1,
@@ -81,7 +81,7 @@ static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x7347996483D6D541LL,0,0,0,68,-1,GET_PROPERTY_OFFSET(c___PHP_Incomplete_Class, m___PHP_Incomplete_Class_Name),&NAMSTR(s_sys_ss360b4ac7, "__PHP_Incomplete_Class_Name") },
+  {0x03D6D541,0,0,0,68,-1,GET_PROPERTY_OFFSET(c___PHP_Incomplete_Class, m___PHP_Incomplete_Class_Name),&NAMSTR(s_sys_ss360b4ac7, "__PHP_Incomplete_Class_Name") },
 
 };
 static const int cpt_hash_entries[] = {

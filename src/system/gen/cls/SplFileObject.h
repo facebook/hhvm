@@ -33,13 +33,13 @@ extern StaticStringProxy s_sys_ssp7e5fc106;
 #ifndef s_sys_ss7e5fc106
 #define s_sys_ss7e5fc106 (*(StaticString *)(&s_sys_ssp7e5fc106))
 #endif
-extern StaticStringProxy s_sys_sspd332baa7;
-#ifndef s_sys_ssd332baa7
-#define s_sys_ssd332baa7 (*(StaticString *)(&s_sys_sspd332baa7))
+extern StaticStringProxy s_sys_ssp5332baa7;
+#ifndef s_sys_ss5332baa7
+#define s_sys_ss5332baa7 (*(StaticString *)(&s_sys_ssp5332baa7))
 #endif
-extern StaticStringProxy s_sys_sspd59e789f;
-#ifndef s_sys_ssd59e789f
-#define s_sys_ssd59e789f (*(StaticString *)(&s_sys_sspd59e789f))
+extern StaticStringProxy s_sys_ssp559e789f;
+#ifndef s_sys_ss559e789f
+#define s_sys_ss559e789f (*(StaticString *)(&s_sys_ssp559e789f))
 #endif
 extern StaticStringProxy s_sys_ssp0d42ecf6;
 #ifndef s_sys_ss0d42ecf6
@@ -50,13 +50,13 @@ extern VariantProxy s_sys_svsp7e5fc106;
 #ifndef s_sys_svs7e5fc106
 #define s_sys_svs7e5fc106 (*(Variant *)&s_sys_svsp7e5fc106)
 #endif
-extern VariantProxy s_sys_svspd332baa7;
-#ifndef s_sys_svsd332baa7
-#define s_sys_svsd332baa7 (*(Variant *)&s_sys_svspd332baa7)
+extern VariantProxy s_sys_svsp5332baa7;
+#ifndef s_sys_svs5332baa7
+#define s_sys_svs5332baa7 (*(Variant *)&s_sys_svsp5332baa7)
 #endif
-extern VariantProxy s_sys_svspd59e789f;
-#ifndef s_sys_svsd59e789f
-#define s_sys_svsd59e789f (*(Variant *)&s_sys_svspd59e789f)
+extern VariantProxy s_sys_svsp559e789f;
+#ifndef s_sys_svs559e789f
+#define s_sys_svs559e789f (*(Variant *)&s_sys_svsp559e789f)
 #endif
 extern VariantProxy s_sys_svsp0d42ecf6;
 #ifndef s_sys_svs0d42ecf6
@@ -83,7 +83,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: bool t_eof();
   public: bool t_fflush();
   public: String t_fgetc();
-  public: Variant t_fgetcsv(CVarRef v_delimiter = NAMVAR(s_sys_svsd332baa7, ","), CVarRef v_enclosure = NAMVAR(s_sys_svs7e5fc106, "\""), CVarRef v_escape = NAMVAR(s_sys_svsd59e789f, "\\"));
+  public: Variant t_fgetcsv(CVarRef v_delimiter = NAMVAR(s_sys_svs5332baa7, ","), CVarRef v_enclosure = NAMVAR(s_sys_svs7e5fc106, "\""), CVarRef v_escape = NAMVAR(s_sys_svs559e789f, "\\"));
   public: String t_fgets();
   public: String t_fgetss(CVarRef v_allowable_tags);
   public: bool t_flock(CVarRef v_operation, VRefParam rv_wouldblock);
@@ -103,7 +103,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: void t_next();
   public: void t_rewind();
   public: void t_seek(CVarRef v_line_pos);
-  public: void t_setcsvcontrol(CVarRef v_delimiter = NAMVAR(s_sys_svsd332baa7, ","), CVarRef v_enclosure = NAMVAR(s_sys_svs7e5fc106, "\""), CVarRef v_escape = NAMVAR(s_sys_svsd59e789f, "\\"));
+  public: void t_setcsvcontrol(CVarRef v_delimiter = NAMVAR(s_sys_svs5332baa7, ","), CVarRef v_enclosure = NAMVAR(s_sys_svs7e5fc106, "\""), CVarRef v_escape = NAMVAR(s_sys_svs559e789f, "\\"));
   public: void t_setflags(CVarRef v_flags);
   public: void t_setmaxlinelen(CVarRef v_max_len);
   public: bool t_valid();

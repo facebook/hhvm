@@ -39,12 +39,12 @@ const int64 q_SplFileObject$$SKIP_EMPTY = 6LL;
 const int64 q_SplFileObject$$READ_CSV = 8LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplFileObject)
 extern const InstanceOfInfo cw_SplFileObject$$instanceof_table[] = {
-  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
-  {0x297ECCC7A259EDD2LL,1,"SplFileObject",&cw_SplFileObject},
-  {0x191964700AF036D3LL,0,"RecursiveIterator",(const ObjectStaticCallbacks*)2},
-  {0x60C47E7FE145DC43LL,1,"SeekableIterator",(const ObjectStaticCallbacks*)2},
-  {0x71089C29FE923FA7LL,1,"SplFileInfo",&cw_SplFileInfo},
-  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
+  {0x45E6F0A1,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x2259EDD2,1,"SplFileObject",&cw_SplFileObject},
+  {0x0AF036D3,0,"RecursiveIterator",(const ObjectStaticCallbacks*)2},
+  {0x6145DC43,1,"SeekableIterator",(const ObjectStaticCallbacks*)2},
+  {0x7E923FA7,1,"SplFileInfo",&cw_SplFileInfo},
+  {0x4AF9D29E,1,"Iterator",(const ObjectStaticCallbacks*)2},
 };
 const int cw_SplFileObject$$instanceof_index[] = {
   15,
@@ -52,35 +52,35 @@ const int cw_SplFileObject$$instanceof_index[] = {
   -1,-1,-1,-1,-1,-1,5,-1,
 
 };
-extern const CallInfo ci_SplFileObject$$setcsvcontrol = { (void*)&c_SplFileObject::i_setcsvcontrol, (void*)&c_SplFileObject::ifa_setcsvcontrol, 3, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$getmaxlinelen = { (void*)&c_SplFileObject::i_getmaxlinelen, (void*)&c_SplFileObject::ifa_getmaxlinelen, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fseek = { (void*)&c_SplFileObject::i_fseek, (void*)&c_SplFileObject::ifa_fseek, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileObject$$key = { (void*)&c_SplFileObject::i_key, (void*)&c_SplFileObject::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fscanf = { (void*)&c_SplFileObject::i_fscanf, (void*)&c_SplFileObject::ifa_fscanf, 1, 5, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fwrite = { (void*)&c_SplFileObject::i_fwrite, (void*)&c_SplFileObject::ifa_fwrite, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$haschildren = { (void*)&c_SplFileObject::i_haschildren, (void*)&c_SplFileObject::ifa_haschildren, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileObject$$getcsvcontrol = { (void*)&c_SplFileObject::i_getcsvcontrol, (void*)&c_SplFileObject::ifa_getcsvcontrol, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$rewind = { (void*)&c_SplFileObject::i_rewind, (void*)&c_SplFileObject::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$seek = { (void*)&c_SplFileObject::i_seek, (void*)&c_SplFileObject::ifa_seek, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fgetss = { (void*)&c_SplFileObject::i_fgetss, (void*)&c_SplFileObject::ifa_fgetss, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$valid = { (void*)&c_SplFileObject::i_valid, (void*)&c_SplFileObject::ifa_valid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$setflags = { (void*)&c_SplFileObject::i_setflags, (void*)&c_SplFileObject::ifa_setflags, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$ftruncate = { (void*)&c_SplFileObject::i_ftruncate, (void*)&c_SplFileObject::ifa_ftruncate, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$setmaxlinelen = { (void*)&c_SplFileObject::i_setmaxlinelen, (void*)&c_SplFileObject::ifa_setmaxlinelen, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fflush = { (void*)&c_SplFileObject::i_fflush, (void*)&c_SplFileObject::ifa_fflush, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fgetc = { (void*)&c_SplFileObject::i_fgetc, (void*)&c_SplFileObject::ifa_fgetc, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fgetcsv = { (void*)&c_SplFileObject::i_fgetcsv, (void*)&c_SplFileObject::ifa_fgetcsv, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileObject$$getflags = { (void*)&c_SplFileObject::i_getflags, (void*)&c_SplFileObject::ifa_getflags, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileObject$$next = { (void*)&c_SplFileObject::i_next, (void*)&c_SplFileObject::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$getchildren = { (void*)&c_SplFileObject::i_getchildren, (void*)&c_SplFileObject::ifa_getchildren, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$haschildren = { (void*)&c_SplFileObject::i_haschildren, (void*)&c_SplFileObject::ifa_haschildren, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$setmaxlinelen = { (void*)&c_SplFileObject::i_setmaxlinelen, (void*)&c_SplFileObject::ifa_setmaxlinelen, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fgetc = { (void*)&c_SplFileObject::i_fgetc, (void*)&c_SplFileObject::ifa_fgetc, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$__construct = { (void*)&c_SplFileObject::i___construct, (void*)&c_SplFileObject::ifa___construct, 4, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$setflags = { (void*)&c_SplFileObject::i_setflags, (void*)&c_SplFileObject::ifa_setflags, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$setcsvcontrol = { (void*)&c_SplFileObject::i_setcsvcontrol, (void*)&c_SplFileObject::ifa_setcsvcontrol, 3, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$ftruncate = { (void*)&c_SplFileObject::i_ftruncate, (void*)&c_SplFileObject::ifa_ftruncate, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$seek = { (void*)&c_SplFileObject::i_seek, (void*)&c_SplFileObject::ifa_seek, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$current = { (void*)&c_SplFileObject::i_current, (void*)&c_SplFileObject::ifa_current, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fstat = { (void*)&c_SplFileObject::i_fstat, (void*)&c_SplFileObject::ifa_fstat, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fgetss = { (void*)&c_SplFileObject::i_fgetss, (void*)&c_SplFileObject::ifa_fgetss, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fgets = { (void*)&c_SplFileObject::i_fgets, (void*)&c_SplFileObject::ifa_fgets, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fwrite = { (void*)&c_SplFileObject::i_fwrite, (void*)&c_SplFileObject::ifa_fwrite, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fpassthru = { (void*)&c_SplFileObject::i_fpassthru, (void*)&c_SplFileObject::ifa_fpassthru, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$fscanf = { (void*)&c_SplFileObject::i_fscanf, (void*)&c_SplFileObject::ifa_fscanf, 1, 5, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$valid = { (void*)&c_SplFileObject::i_valid, (void*)&c_SplFileObject::ifa_valid, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$eof = { (void*)&c_SplFileObject::i_eof, (void*)&c_SplFileObject::ifa_eof, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileObject$$flock = { (void*)&c_SplFileObject::i_flock, (void*)&c_SplFileObject::ifa_flock, 2, 4, 0x0000000000000002LL};
 extern const CallInfo ci_SplFileObject$$ftell = { (void*)&c_SplFileObject::i_ftell, (void*)&c_SplFileObject::ifa_ftell, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fgets = { (void*)&c_SplFileObject::i_fgets, (void*)&c_SplFileObject::ifa_fgets, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$getmaxlinelen = { (void*)&c_SplFileObject::i_getmaxlinelen, (void*)&c_SplFileObject::ifa_getmaxlinelen, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fflush = { (void*)&c_SplFileObject::i_fflush, (void*)&c_SplFileObject::ifa_fflush, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fpassthru = { (void*)&c_SplFileObject::i_fpassthru, (void*)&c_SplFileObject::ifa_fpassthru, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$current = { (void*)&c_SplFileObject::i_current, (void*)&c_SplFileObject::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fseek = { (void*)&c_SplFileObject::i_fseek, (void*)&c_SplFileObject::ifa_fseek, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fgetcsv = { (void*)&c_SplFileObject::i_fgetcsv, (void*)&c_SplFileObject::ifa_fgetcsv, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$eof = { (void*)&c_SplFileObject::i_eof, (void*)&c_SplFileObject::ifa_eof, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$fstat = { (void*)&c_SplFileObject::i_fstat, (void*)&c_SplFileObject::ifa_fstat, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileObject$$__construct = { (void*)&c_SplFileObject::i___construct, (void*)&c_SplFileObject::ifa___construct, 4, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$getchildren = { (void*)&c_SplFileObject::i_getchildren, (void*)&c_SplFileObject::ifa_getchildren, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileObject$$rewind = { (void*)&c_SplFileObject::i_rewind, (void*)&c_SplFileObject::ifa_rewind, 0, 4, 0x0000000000000000LL};
 Variant c_SplFileObject::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -450,35 +450,35 @@ Variant NEVER_INLINE c_SplFileObject::ifa_valid(MethodCallPackage &mcp, int coun
   return (self->t_valid());
 }
 extern const MethodCallInfoTable cw_SplFileObject$$call_info_table[] = {
-  { 0x09637D7CA2E33F00LL, 1, 5, "fgetc", &ci_SplFileObject$$fgetc },
-  { 0x794FAFD4412AEFC3LL, 0, 3, "eof", &ci_SplFileObject$$eof },
-  { 0x5ACCF9166CD9D043LL, 1, 9, "ftruncate", &ci_SplFileObject$$ftruncate },
-  { 0x6413CB5154808C44LL, 1, 5, "valid", &ci_SplFileObject$$valid },
-  { 0x44CE4DB1CE7E9F86LL, 1, 5, "flock", &ci_SplFileObject$$flock },
-  { 0x4282E0231F600049LL, 1, 5, "fseek", &ci_SplFileObject$$fseek },
-  { 0x2FC3A6941D522E0ALL, 1, 8, "setFlags", &ci_SplFileObject$$setflags },
-  { 0x7E978C38D741664ELL, 1, 7, "fgetcsv", &ci_SplFileObject$$fgetcsv },
-  { 0x732EC1BDA8EC520FLL, 1, 11, "getChildren", &ci_SplFileObject$$getchildren },
-  { 0x3A335010F905ACD0LL, 1, 13, "setCsvControl", &ci_SplFileObject$$setcsvcontrol },
-  { 0x56EDB60C824E8C51LL, 1, 3, "key", &ci_SplFileObject$$key },
-  { 0x40044334DA397C15LL, 1, 11, "hasChildren", &ci_SplFileObject$$haschildren },
-  { 0x2B7CAC006AF27F9ALL, 0, 6, "fflush", &ci_SplFileObject$$fflush },
-  { 0x25F68E7910FE9CDALL, 1, 13, "getMaxLineLen", &ci_SplFileObject$$getmaxlinelen },
-  { 0x5B33B55D4B7E339BLL, 1, 9, "fpassthru", &ci_SplFileObject$$fpassthru },
-  { 0x5B3A4A72846B21DCLL, 1, 7, "current", &ci_SplFileObject$$current },
-  { 0x3E4E7C561D3A541ELL, 1, 6, "fgetss", &ci_SplFileObject$$fgetss },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &ci_SplFileObject$$__construct },
-  { 0x27E7DBA875AD17E1LL, 1, 8, "getFlags", &ci_SplFileObject$$getflags },
-  { 0x6FE9F691E4A6D962LL, 1, 13, "getCsvControl", &ci_SplFileObject$$getcsvcontrol },
-  { 0x044B276686B77923LL, 1, 6, "fscanf", &ci_SplFileObject$$fscanf },
-  { 0x05D72365192CE465LL, 1, 6, "fwrite", &ci_SplFileObject$$fwrite },
-  { 0x7EF5445C77054C67LL, 1, 4, "seek", &ci_SplFileObject$$seek },
-  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &ci_SplFileObject$$rewind },
-  { 0x1C1216F2B7C16CADLL, 1, 5, "ftell", &ci_SplFileObject$$ftell },
-  { 0x7AE1BE187F18FDF3LL, 1, 5, "fgets", &ci_SplFileObject$$fgets },
-  { 0x4CEC6AA30E43D437LL, 1, 13, "setMaxLineLen", &ci_SplFileObject$$setmaxlinelen },
-  { 0x0890F9052322E838LL, 0, 5, "fstat", &ci_SplFileObject$$fstat },
-  { 0x3C6D50F3BB8102B8LL, 1, 4, "next", &ci_SplFileObject$$next },
+  { 0x22E33F00, 1, 5, "fgetc", &ci_SplFileObject$$fgetc },
+  { 0x412AEFC3, 0, 3, "eof", &ci_SplFileObject$$eof },
+  { 0x6CD9D043, 1, 9, "ftruncate", &ci_SplFileObject$$ftruncate },
+  { 0x54808C44, 1, 5, "valid", &ci_SplFileObject$$valid },
+  { 0x4E7E9F86, 1, 5, "flock", &ci_SplFileObject$$flock },
+  { 0x1F600049, 1, 5, "fseek", &ci_SplFileObject$$fseek },
+  { 0x1D522E0A, 1, 8, "setFlags", &ci_SplFileObject$$setflags },
+  { 0x5741664E, 1, 7, "fgetcsv", &ci_SplFileObject$$fgetcsv },
+  { 0x28EC520F, 1, 11, "getChildren", &ci_SplFileObject$$getchildren },
+  { 0x7905ACD0, 1, 13, "setCsvControl", &ci_SplFileObject$$setcsvcontrol },
+  { 0x024E8C51, 1, 3, "key", &ci_SplFileObject$$key },
+  { 0x5A397C15, 1, 11, "hasChildren", &ci_SplFileObject$$haschildren },
+  { 0x6AF27F9A, 0, 6, "fflush", &ci_SplFileObject$$fflush },
+  { 0x10FE9CDA, 1, 13, "getMaxLineLen", &ci_SplFileObject$$getmaxlinelen },
+  { 0x4B7E339B, 1, 9, "fpassthru", &ci_SplFileObject$$fpassthru },
+  { 0x046B21DC, 1, 7, "current", &ci_SplFileObject$$current },
+  { 0x1D3A541E, 1, 6, "fgetss", &ci_SplFileObject$$fgetss },
+  { 0x229C615F, 1, 11, "__construct", &ci_SplFileObject$$__construct },
+  { 0x75AD17E1, 1, 8, "getFlags", &ci_SplFileObject$$getflags },
+  { 0x64A6D962, 1, 13, "getCsvControl", &ci_SplFileObject$$getcsvcontrol },
+  { 0x06B77923, 1, 6, "fscanf", &ci_SplFileObject$$fscanf },
+  { 0x192CE465, 1, 6, "fwrite", &ci_SplFileObject$$fwrite },
+  { 0x77054C67, 1, 4, "seek", &ci_SplFileObject$$seek },
+  { 0x5E27AF6A, 1, 6, "rewind", &ci_SplFileObject$$rewind },
+  { 0x37C16CAD, 1, 5, "ftell", &ci_SplFileObject$$ftell },
+  { 0x7F18FDF3, 1, 5, "fgets", &ci_SplFileObject$$fgets },
+  { 0x0E43D437, 1, 13, "setMaxLineLen", &ci_SplFileObject$$setmaxlinelen },
+  { 0x2322E838, 0, 5, "fstat", &ci_SplFileObject$$fstat },
+  { 0x3B8102B8, 1, 4, "next", &ci_SplFileObject$$next },
 };
 extern const int cw_SplFileObject$$call_info_index[] = {
   63,
@@ -547,9 +547,9 @@ String c_SplFileObject::t_fgetc() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 482 */
-Variant c_SplFileObject::t_fgetcsv(CVarRef v_delimiter //  = NAMVAR(s_sys_svsd332baa7, ",")
+Variant c_SplFileObject::t_fgetcsv(CVarRef v_delimiter //  = NAMVAR(s_sys_svs5332baa7, ",")
 , CVarRef v_enclosure //  = NAMVAR(s_sys_svs7e5fc106, "\"")
-, CVarRef v_escape //  = NAMVAR(s_sys_svsd59e789f, "\\")
+, CVarRef v_escape //  = NAMVAR(s_sys_svs559e789f, "\\")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgetcsv);
   return x_hphp_splfileobject_fgetcsv(GET_THIS_TYPED(SplFileObject), toString(v_delimiter), toString(v_enclosure), toString(v_escape));
@@ -682,9 +682,9 @@ void c_SplFileObject::t_seek(CVarRef v_line_pos) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 809 */
-void c_SplFileObject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMVAR(s_sys_svsd332baa7, ",")
+void c_SplFileObject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMVAR(s_sys_svs5332baa7, ",")
 , CVarRef v_enclosure //  = NAMVAR(s_sys_svs7e5fc106, "\"")
-, CVarRef v_escape //  = NAMVAR(s_sys_svsd59e789f, "\\")
+, CVarRef v_escape //  = NAMVAR(s_sys_svs559e789f, "\\")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setCsvControl);
   x_hphp_splfileobject_setcsvcontrol(GET_THIS_TYPED(SplFileObject), toString(v_delimiter), toString(v_enclosure), toString(v_escape));
@@ -711,40 +711,40 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 11 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplFileInfo)
 extern const InstanceOfInfo cw_SplFileInfo$$instanceof_table[] = {
-  {0x71089C29FE923FA7LL,1,"SplFileInfo",&cw_SplFileInfo},
+  {0x7E923FA7,1,"SplFileInfo",&cw_SplFileInfo},
 };
 const int cw_SplFileInfo$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_SplFileInfo$$getperms = { (void*)&c_SplFileInfo::i_getperms, (void*)&c_SplFileInfo::ifa_getperms, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$isfile = { (void*)&c_SplFileInfo::i_isfile, (void*)&c_SplFileInfo::ifa_isfile, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$setfileclass = { (void*)&c_SplFileInfo::i_setfileclass, (void*)&c_SplFileInfo::ifa_setfileclass, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getinode = { (void*)&c_SplFileInfo::i_getinode, (void*)&c_SplFileInfo::ifa_getinode, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$isdir = { (void*)&c_SplFileInfo::i_isdir, (void*)&c_SplFileInfo::ifa_isdir, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$setinfoclass = { (void*)&c_SplFileInfo::i_setinfoclass, (void*)&c_SplFileInfo::ifa_setinfoclass, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getsize = { (void*)&c_SplFileInfo::i_getsize, (void*)&c_SplFileInfo::ifa_getsize, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getrealpath = { (void*)&c_SplFileInfo::i_getrealpath, (void*)&c_SplFileInfo::ifa_getrealpath, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getgroup = { (void*)&c_SplFileInfo::i_getgroup, (void*)&c_SplFileInfo::ifa_getgroup, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$__tostring = { (void*)&c_SplFileInfo::i___tostring, (void*)&c_SplFileInfo::ifa___tostring, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileInfo$$getfileinfo = { (void*)&c_SplFileInfo::i_getfileinfo, (void*)&c_SplFileInfo::ifa_getfileinfo, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$isexecutable = { (void*)&c_SplFileInfo::i_isexecutable, (void*)&c_SplFileInfo::ifa_isexecutable, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getinode = { (void*)&c_SplFileInfo::i_getinode, (void*)&c_SplFileInfo::ifa_getinode, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getpathname = { (void*)&c_SplFileInfo::i_getpathname, (void*)&c_SplFileInfo::ifa_getpathname, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getpath = { (void*)&c_SplFileInfo::i_getpath, (void*)&c_SplFileInfo::ifa_getpath, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getpathinfo = { (void*)&c_SplFileInfo::i_getpathinfo, (void*)&c_SplFileInfo::ifa_getpathinfo, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$gettype = { (void*)&c_SplFileInfo::i_gettype, (void*)&c_SplFileInfo::ifa_gettype, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$__construct = { (void*)&c_SplFileInfo::i___construct, (void*)&c_SplFileInfo::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$islink = { (void*)&c_SplFileInfo::i_islink, (void*)&c_SplFileInfo::ifa_islink, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getatime = { (void*)&c_SplFileInfo::i_getatime, (void*)&c_SplFileInfo::ifa_getatime, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$isdir = { (void*)&c_SplFileInfo::i_isdir, (void*)&c_SplFileInfo::ifa_isdir, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getowner = { (void*)&c_SplFileInfo::i_getowner, (void*)&c_SplFileInfo::ifa_getowner, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getfilename = { (void*)&c_SplFileInfo::i_getfilename, (void*)&c_SplFileInfo::ifa_getfilename, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$isfile = { (void*)&c_SplFileInfo::i_isfile, (void*)&c_SplFileInfo::ifa_isfile, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$iswritable = { (void*)&c_SplFileInfo::i_iswritable, (void*)&c_SplFileInfo::ifa_iswritable, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$setinfoclass = { (void*)&c_SplFileInfo::i_setinfoclass, (void*)&c_SplFileInfo::ifa_setinfoclass, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileInfo$$isreadable = { (void*)&c_SplFileInfo::i_isreadable, (void*)&c_SplFileInfo::ifa_isreadable, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileInfo$$getbasename = { (void*)&c_SplFileInfo::i_getbasename, (void*)&c_SplFileInfo::ifa_getbasename, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getctime = { (void*)&c_SplFileInfo::i_getctime, (void*)&c_SplFileInfo::ifa_getctime, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$__tostring = { (void*)&c_SplFileInfo::i___tostring, (void*)&c_SplFileInfo::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getpath = { (void*)&c_SplFileInfo::i_getpath, (void*)&c_SplFileInfo::ifa_getpath, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getmtime = { (void*)&c_SplFileInfo::i_getmtime, (void*)&c_SplFileInfo::ifa_getmtime, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getrealpath = { (void*)&c_SplFileInfo::i_getrealpath, (void*)&c_SplFileInfo::ifa_getrealpath, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getfilename = { (void*)&c_SplFileInfo::i_getfilename, (void*)&c_SplFileInfo::ifa_getfilename, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$gettype = { (void*)&c_SplFileInfo::i_gettype, (void*)&c_SplFileInfo::ifa_gettype, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getatime = { (void*)&c_SplFileInfo::i_getatime, (void*)&c_SplFileInfo::ifa_getatime, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getpathinfo = { (void*)&c_SplFileInfo::i_getpathinfo, (void*)&c_SplFileInfo::ifa_getpathinfo, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getgroup = { (void*)&c_SplFileInfo::i_getgroup, (void*)&c_SplFileInfo::ifa_getgroup, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getlinktarget = { (void*)&c_SplFileInfo::i_getlinktarget, (void*)&c_SplFileInfo::ifa_getlinktarget, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$islink = { (void*)&c_SplFileInfo::i_islink, (void*)&c_SplFileInfo::ifa_islink, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplFileInfo$$openfile = { (void*)&c_SplFileInfo::i_openfile, (void*)&c_SplFileInfo::ifa_openfile, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getowner = { (void*)&c_SplFileInfo::i_getowner, (void*)&c_SplFileInfo::ifa_getowner, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getpathname = { (void*)&c_SplFileInfo::i_getpathname, (void*)&c_SplFileInfo::ifa_getpathname, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$getsize = { (void*)&c_SplFileInfo::i_getsize, (void*)&c_SplFileInfo::ifa_getsize, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$__construct = { (void*)&c_SplFileInfo::i___construct, (void*)&c_SplFileInfo::ifa___construct, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$iswritable = { (void*)&c_SplFileInfo::i_iswritable, (void*)&c_SplFileInfo::ifa_iswritable, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplFileInfo$$isexecutable = { (void*)&c_SplFileInfo::i_isexecutable, (void*)&c_SplFileInfo::ifa_isexecutable, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getlinktarget = { (void*)&c_SplFileInfo::i_getlinktarget, (void*)&c_SplFileInfo::ifa_getlinktarget, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getperms = { (void*)&c_SplFileInfo::i_getperms, (void*)&c_SplFileInfo::ifa_getperms, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getmtime = { (void*)&c_SplFileInfo::i_getmtime, (void*)&c_SplFileInfo::ifa_getmtime, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$getctime = { (void*)&c_SplFileInfo::i_getctime, (void*)&c_SplFileInfo::ifa_getctime, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplFileInfo$$setfileclass = { (void*)&c_SplFileInfo::i_setfileclass, (void*)&c_SplFileInfo::ifa_setfileclass, 1, 4, 0x0000000000000000LL};
 Variant c_SplFileInfo::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1071,34 +1071,34 @@ Variant NEVER_INLINE c_SplFileInfo::ifa_setinfoclass(MethodCallPackage &mcp, int
   return (self->t_setinfoclass(arg0), null);
 }
 extern const MethodCallInfoTable cw_SplFileInfo$$call_info_table[] = {
-  { 0x5676046725D241C5LL, 1, 12, "setInfoClass", &ci_SplFileInfo$$setinfoclass },
-  { 0x1D3B08AA0AF50F06LL, 0, 7, "getType", &ci_SplFileInfo$$gettype },
-  { 0x6B2EAD4A44934786LL, 1, 11, "getRealPath", &ci_SplFileInfo$$getrealpath },
-  { 0x1ADA46FCC8EFEC08LL, 1, 5, "isDir", &ci_SplFileInfo$$isdir },
-  { 0x01A800A73CD2604ALL, 1, 8, "getInode", &ci_SplFileInfo$$getinode },
-  { 0x1930CE336D39474DLL, 1, 11, "getFilename", &ci_SplFileInfo$$getfilename },
-  { 0x32ABF385AD4BE48ELL, 1, 8, "getOwner", &ci_SplFileInfo$$getowner },
-  { 0x569FC7D8E9401C4FLL, 1, 10, "isReadable", &ci_SplFileInfo$$isreadable },
-  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_SplFileInfo$$__tostring },
-  { 0x1D5801BB72C51C58LL, 1, 6, "isLink", &ci_SplFileInfo$$islink },
-  { 0x572E108C6731E29CLL, 1, 11, "getBasename", &ci_SplFileInfo$$getbasename },
-  { 0x4C43532D60465F1DLL, 1, 6, "isFile", &ci_SplFileInfo$$isfile },
-  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &ci_SplFileInfo$$__construct },
-  { 0x4BC19906B553C59FLL, 1, 8, "getATime", &ci_SplFileInfo$$getatime },
-  { 0x638F2A56B8463A63LL, 1, 10, "isWritable", &ci_SplFileInfo$$iswritable },
-  { 0x5948407CA9CC4DA5LL, 1, 12, "setFileClass", &ci_SplFileInfo$$setfileclass },
-  { 0x00DCC39EDB16AFE7LL, 1, 11, "getPathInfo", &ci_SplFileInfo$$getpathinfo },
-  { 0x6615B5496D03A6EALL, 0, 7, "getSize", &ci_SplFileInfo$$getsize },
-  { 0x0F9EDEC32565D86ALL, 1, 8, "getGroup", &ci_SplFileInfo$$getgroup },
-  { 0x0D6276BAB75513ABLL, 1, 13, "getLinkTarget", &ci_SplFileInfo$$getlinktarget },
-  { 0x5640A4755D0078AFLL, 1, 8, "getCTime", &ci_SplFileInfo$$getctime },
-  { 0x265BDC54C992EE74LL, 1, 8, "getMTime", &ci_SplFileInfo$$getmtime },
-  { 0x337DEC2D48BDFE35LL, 1, 8, "openFile", &ci_SplFileInfo$$openfile },
-  { 0x25070641C3D924F8LL, 1, 11, "getPathname", &ci_SplFileInfo$$getpathname },
-  { 0x3786834B2A0CCB7ALL, 1, 12, "isExecutable", &ci_SplFileInfo$$isexecutable },
-  { 0x4351578037A06E7DLL, 1, 8, "getPerms", &ci_SplFileInfo$$getperms },
-  { 0x04C642C6C162243FLL, 0, 7, "getPath", &ci_SplFileInfo$$getpath },
-  { 0x7D50FA42F9D4923FLL, 1, 11, "getFileInfo", &ci_SplFileInfo$$getfileinfo },
+  { 0x25D241C5, 1, 12, "setInfoClass", &ci_SplFileInfo$$setinfoclass },
+  { 0x0AF50F06, 0, 7, "getType", &ci_SplFileInfo$$gettype },
+  { 0x44934786, 1, 11, "getRealPath", &ci_SplFileInfo$$getrealpath },
+  { 0x48EFEC08, 1, 5, "isDir", &ci_SplFileInfo$$isdir },
+  { 0x3CD2604A, 1, 8, "getInode", &ci_SplFileInfo$$getinode },
+  { 0x6D39474D, 1, 11, "getFilename", &ci_SplFileInfo$$getfilename },
+  { 0x2D4BE48E, 1, 8, "getOwner", &ci_SplFileInfo$$getowner },
+  { 0x69401C4F, 1, 10, "isReadable", &ci_SplFileInfo$$isreadable },
+  { 0x14B34A13, 1, 10, "__toString", &ci_SplFileInfo$$__tostring },
+  { 0x72C51C58, 1, 6, "isLink", &ci_SplFileInfo$$islink },
+  { 0x6731E29C, 1, 11, "getBasename", &ci_SplFileInfo$$getbasename },
+  { 0x60465F1D, 1, 6, "isFile", &ci_SplFileInfo$$isfile },
+  { 0x229C615F, 0, 11, "__construct", &ci_SplFileInfo$$__construct },
+  { 0x3553C59F, 1, 8, "getATime", &ci_SplFileInfo$$getatime },
+  { 0x38463A63, 1, 10, "isWritable", &ci_SplFileInfo$$iswritable },
+  { 0x29CC4DA5, 1, 12, "setFileClass", &ci_SplFileInfo$$setfileclass },
+  { 0x5B16AFE7, 1, 11, "getPathInfo", &ci_SplFileInfo$$getpathinfo },
+  { 0x6D03A6EA, 0, 7, "getSize", &ci_SplFileInfo$$getsize },
+  { 0x2565D86A, 1, 8, "getGroup", &ci_SplFileInfo$$getgroup },
+  { 0x375513AB, 1, 13, "getLinkTarget", &ci_SplFileInfo$$getlinktarget },
+  { 0x5D0078AF, 1, 8, "getCTime", &ci_SplFileInfo$$getctime },
+  { 0x4992EE74, 1, 8, "getMTime", &ci_SplFileInfo$$getmtime },
+  { 0x48BDFE35, 1, 8, "openFile", &ci_SplFileInfo$$openfile },
+  { 0x43D924F8, 1, 11, "getPathname", &ci_SplFileInfo$$getpathname },
+  { 0x2A0CCB7A, 1, 12, "isExecutable", &ci_SplFileInfo$$isexecutable },
+  { 0x37A06E7D, 1, 8, "getPerms", &ci_SplFileInfo$$getperms },
+  { 0x4162243F, 0, 7, "getPath", &ci_SplFileInfo$$getpath },
+  { 0x79D4923F, 1, 11, "getFileInfo", &ci_SplFileInfo$$getfileinfo },
 };
 extern const int cw_SplFileInfo$$call_info_index[] = {
   63,
@@ -1300,7 +1300,7 @@ void c_SplFileInfo::t_setfileclass(CVarRef v_class_name //  = NAMVAR(s_sys_svs5d
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/splfile.php line 372 */
-void c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMVAR(s_sys_svs914a58e9, "SplFileInfo")
+void c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMVAR(s_sys_svs114a58e9, "SplFileInfo")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setInfoClass);
   x_hphp_splfileinfo_setinfoclass(GET_THIS_TYPED(SplFileInfo), toString(v_class_name));
@@ -1322,12 +1322,12 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svi90d5f98c, 2LL),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x26C16E62FD792BB7LL,0,0,13,65,-1,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
+  {0x7D792BB7,0,0,13,65,-1,GET_PROPERTY_OFFSET(c_SplFileInfo, m_rsrc),&NAMSTR(s_sys_ss25b53cd5, "\000SplFileInfo\000rsrc") },
 
-  {0x54B2A676B563E232LL,1,1,0,100,3,0,&NAMSTR(s_sys_ssb563e232, "SKIP_EMPTY") },
-  {0x23519E830A6DEC13LL,0,2,0,100,3,0,&NAMSTR(s_sys_ss0a6dec13, "READ_CSV") },
-  {0x05ABC27224BDAC64LL,1,3,0,100,3,0,&NAMSTR(s_sys_ss24bdac64, "DROP_NEW_LINE") },
-  {0x6ABD9DCA7D94431ELL,-3,4,0,100,3,0,&NAMSTR(s_sys_ss7d94431e, "READ_AHEAD") },
+  {0x3563E232,1,1,0,100,3,0,&NAMSTR(s_sys_ss3563e232, "SKIP_EMPTY") },
+  {0x0A6DEC13,0,2,0,100,3,0,&NAMSTR(s_sys_ss0a6dec13, "READ_CSV") },
+  {0x24BDAC64,1,3,0,100,3,0,&NAMSTR(s_sys_ss24bdac64, "DROP_NEW_LINE") },
+  {0x7D94431E,-3,4,0,100,3,0,&NAMSTR(s_sys_ss7d94431e, "READ_AHEAD") },
 
 };
 static const int cpt_hash_entries[] = {

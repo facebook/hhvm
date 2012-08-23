@@ -83,8 +83,8 @@ enum CopyStringMode { CopyString };
  * A StringData can be in two formats, small or big.  Small format
  * stores the string inline by overlapping with some fields, as follows:
  *
- * small: [m_shared|m_hash]:8, _count:4, m_len:4, m_data:8, m_small:40
- * big:   [m_shared|m_hash]:8, _count:4, m_len:4, m_data:8, junk[32], cap:8
+ * small: m_data:8, _count:4, m_len:4, m_hash:4, m_small:44
+ * big:   m_data:8, _count:4, m_len:4, m_hash:4, junk[28], shared:8, cap:8
  *
  * If the format is IsLiteral or IsShared, we always use the "big" layout.
  * resemblences to fbstring are not accidental.
@@ -102,7 +102,7 @@ class StringData {
   };
 
  public:
-  const static uint32_t MaxSmallSize = 39;
+  const static uint32_t MaxSmallSize = 43;
   const static uint32_t MaxSize = 0x3fffffff; // 2^30-1
 
   /**
@@ -121,7 +121,7 @@ class StringData {
    * Get the wrapped SharedVariant.
    */
   SharedVariant *getSharedVariant() const {
-    if (isShared()) return m_shared;
+    if (isShared()) return m_big.shared;
     return NULL;
   }
 
@@ -133,8 +133,8 @@ class StringData {
    */
   void destruct() const { if (!isStatic()) delete this; }
 
-  StringData() : _count(0), m_len(0), m_data(0) {
-    m_hash = 0;
+  StringData() : m_data(0), _count(0), m_len(0), m_hash(0) {
+    m_big.shared = 0;
     m_big.cap = 0;
   }
 
@@ -296,16 +296,14 @@ public:
   double toDouble () const;
   DataType toNumeric(int64 &lval, double &dval) const;
 
-  int64 getPrecomputedHash() const {
+  strhash_t getPrecomputedHash() const {
     ASSERT(!isShared());
-    return m_hash & 0x7fffffffffffffffull;
+    return m_hash & STRHASH_MASK;
   }
 
-  int64 hash() const {
-    if (isShared()) return getSharedStringHash();
-    int64 h = m_hash & 0x7fffffffffffffffull;
-    if (h == 0) return hashHelper();
-    return h;
+  strhash_t hash() const {
+    strhash_t h = m_hash & STRHASH_MASK;
+    return h ? h : hashHelper();
   }
 
   bool same(const StringData *s) const {
@@ -350,8 +348,8 @@ public:
    */
  private:
   union {
-    SharedVariant *m_shared;
-    mutable int64_t m_hash;   // precompute hash codes for static strings
+    const char* m_cdata;
+    char* m_data;
   };
  protected:
   mutable int32_t _count;
@@ -362,13 +360,11 @@ public:
   // If frequent callers are refacotred to use slice() then we could
   // revisit this decision.
   uint32_t m_len;
-  union {
-    const char* m_cdata;
-    char* m_data;
-  };
+  mutable strhash_t m_hash;   // precompute hash codes for static strings
   union __attribute__((__packed__)) {
     struct __attribute__((__packed__)) {
-      char junk[32];
+      char junk[28];
+      SharedVariant *shared;
       uint64_t cap;
     } m_big;
     char m_small[sizeof(m_big)];
@@ -395,8 +391,7 @@ public:
   void escalate(); // change to malloc-ed string
   void attach(char *data, int len);
 
-  int64 getSharedStringHash() const;
-  int64 hashHelper() const NEVER_INLINE;
+  strhash_t hashHelper() const NEVER_INLINE;
 
   bool checkSane() const;
   const char* rawdata() const { return m_data; }

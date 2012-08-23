@@ -161,8 +161,8 @@ public:
 
     // set the top bit for string hashes to make sure the hash
     // value is never zero. hash value 0 corresponds to integer key.
-    static inline int32 encodeHash(int32 h) {
-      return (h | 0x80000000);
+    static inline int32_t encodeHash(strhash_t h) {
+      return int32_t(h) | 0x80000000;
     }
 
     // These special constructors do not setup all the member fields.
@@ -194,7 +194,7 @@ public:
     Variant     data;
     inline bool hasStrKey() const { return data._count != 0; }
     inline bool hasIntKey() const { return data._count == 0; }
-    inline void setStrKey(StringData* k, int64 h) {
+    inline void setStrKey(StringData* k, strhash_t h) {
       skey = k;
       skey->incRefCount();
       data._count = encodeHash(h);
@@ -206,7 +206,7 @@ public:
     inline int64 hashKey() const {
       return data._count == 0 ? ikey : data._count;
     }
-    inline int32 hash() const {
+    inline int32_t hash() const {
       return data._count;
     }
 
@@ -242,19 +242,19 @@ private:
   uint tableSize() const { return m_nTableMask + 1; }
 
   Bucket *find(int64 h) const;
-  Bucket *find(const char *k, int len, int64 prehash) const;
+  Bucket *find(const char *k, int len, strhash_t prehash) const;
   Bucket *findForInsert(int64 h) const;
-  Bucket *findForInsert(const char *k, int len, int64 prehash) const;
+  Bucket *findForInsert(const char *k, int len, strhash_t prehash) const;
 
   Bucket ** findForErase(int64 h) const;
-  Bucket ** findForErase(const char *k, int len, int64 prehash) const;
+  Bucket ** findForErase(const char *k, int len, strhash_t prehash) const;
   Bucket ** findForErase(Bucket * bucketPtr) const;
 
   bool nextInsert(CVarRef data);
   bool nextInsertWithRef(CVarRef data);
   bool nextInsertRef(CVarRef data);
   bool addLvalImpl(int64 h, Variant **pDest, bool doFind = true);
-  bool addLvalImpl(StringData *key, int64 h, Variant **pDest,
+  bool addLvalImpl(StringData *key, strhash_t h, Variant **pDest,
                    bool doFind = true);
   bool addValWithRef(int64 h, CVarRef data);
   bool addValWithRef(StringData *key, CVarRef data);

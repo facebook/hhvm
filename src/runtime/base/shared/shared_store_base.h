@@ -172,8 +172,8 @@ private:
   std::vector<std::string> m_fileNames;
 
   Mutex m_lock;
-  static const int64 TombHash = 0xdeadbeefdeadbeefLL;
-  static const int PaddingSize = sizeof(int64) + // hash
+  static const strhash_t TombHash = 0xdeadbeef;
+  static const int PaddingSize = sizeof(strhash_t) + // hash
                                  sizeof(int32) + // len
                                  sizeof(char); // '\0'
 };

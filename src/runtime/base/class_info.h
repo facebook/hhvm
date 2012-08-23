@@ -539,13 +539,13 @@ struct ClassPropTableEntry {
     FastInit = 128
   };
 
-  int64         hash;
-  int           next;
-  int           init_offset;
-  uint16        prop_offset;
-  uint8         flags; // PropFlags
-  int8         type;  // DataType
-  int           offset;
+  strhash_t     hash;
+  int16_t       next;
+  uint16_t      init_offset; // change to uint32 if we overflow
+  uint16_t      prop_offset;
+  uint8_t       flags; // PropFlags
+  int8_t        type;  // DataType
+  int32_t       offset;
   StaticString *keyName;
   bool isPublic() const { return flags & Public; }
   bool isPrivate() const { return flags & Private; }

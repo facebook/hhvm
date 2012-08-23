@@ -22,6 +22,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+typedef int32_t strhash_t;
+const strhash_t STRHASH_MASK = 0x7fffffff;
+const strhash_t STRHASH_MSB  = 0x80000000;
+#define STRHASH_FMT "0x%08X"
+
 /*
  * "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
  * http://www.concentric.net/~ttwang/tech/inthash.htm
@@ -52,7 +57,7 @@ inline long long hash_int64_pair(long long k1, long long k2) {
  * do not change the correctness.
  */
 
-inline long long hash_string_cs(const char *arKey, int nKeyLength) {
+inline strhash_t hash_string_cs(const char *arKey, int nKeyLength) {
   const long long m = 0xc6a4a7935bd1e995LL;
   const int r = 47;
 
@@ -89,14 +94,13 @@ inline long long hash_string_cs(const char *arKey, int nKeyLength) {
   h *= m;
   h ^= h >> r;
 
-  return h & 0x7fffffffffffffffLL;
+  return strhash_t(h & STRHASH_MASK);
 }
 
-long long hash_string_i(const char *arKey, int nKeyLength);
-long long hash_string(const char *arKey, int nKeyLength);
+strhash_t hash_string_i(const char *arKey, int nKeyLength);
+strhash_t hash_string(const char *arKey, int nKeyLength);
 
-inline long long hash_string_i_inline(
-  const char *arKey, int nKeyLength) {
+inline strhash_t hash_string_i_inline(const char *arKey, int nKeyLength) {
   const unsigned long long m = 0xc6a4a7935bd1e995ULL;
   const int r = 47;
 
@@ -134,10 +138,10 @@ inline long long hash_string_i_inline(
   h *= m;
   h ^= h >> r;
 
-  return h & 0x7fffffffffffffffULL;
+  return strhash_t(h & STRHASH_MASK);
 }
 
-inline long long hash_string_inline(const char *arKey, int nKeyLength) {
+inline strhash_t hash_string_inline(const char *arKey, int nKeyLength) {
   return hash_string_i(arKey, nKeyLength);
 }
 
@@ -146,10 +150,10 @@ inline long long hash_string_inline(const char *arKey, int nKeyLength) {
  * where a binary string is treated as a NULL-terminated literal. Do we ever
  * allow binary strings as array keys or symbol names?
  */
-inline long long hash_string(const char *arKey) {
+inline strhash_t hash_string(const char *arKey) {
   return hash_string(arKey, strlen(arKey));
 }
-inline long long hash_string_i(const char *arKey) {
+inline strhash_t hash_string_i(const char *arKey) {
   return hash_string_i(arKey, strlen(arKey));
 }
 
@@ -200,7 +204,8 @@ inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
       }
     }
     if (good) {
-      if (num <= 0x7FFFFFFFFFFFFFFEULL || (neg && num == 0x7FFFFFFFFFFFFFFFULL)) {
+      if (num <= 0x7FFFFFFFFFFFFFFEULL ||
+          (neg && num == 0x7FFFFFFFFFFFFFFFULL)) {
         res = neg ? 0 - num : (long long)num;
         return true;
       }

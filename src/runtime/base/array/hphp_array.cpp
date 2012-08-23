@@ -550,10 +550,10 @@ Variant HphpArray::each() {
 //=============================================================================
 // Lookup.
 
-#define STRING_HASH(x)   ((int32)x | 0x80000000)
+#define STRING_HASH(x)   (int32_t(x) | 0x80000000)
 
 static bool hitStringKey(const HphpArray::Elm* e, const char* k, int len,
-                         int32 hash) {
+                         int32_t hash) {
   // hitStringKey() should only be called on an Elm that is referenced by a
   // hash table entry. HphpArray guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
@@ -612,7 +612,7 @@ ssize_t /*ElmInd*/ HphpArray::find(int64 ki) const {
 }
 
 ssize_t /*ElmInd*/ HphpArray::find(const char* k, int len,
-                                   int64 prehash) const {
+                                   strhash_t prehash) const {
   FIND_BODY(prehash, hitStringKey(&elms[pos], k, len, STRING_HASH(prehash)));
 }
 #undef FIND_BODY
@@ -656,7 +656,7 @@ HphpArray::ElmInd* HphpArray::findForInsert(int64 ki) const {
 }
 
 HphpArray::ElmInd* HphpArray::findForInsert(const char* k, int len,
-                                            int64 prehash) const {
+                                            strhash_t prehash) const {
   FIND_FOR_INSERT_BODY(prehash, hitStringKey(&elms[pos], k, len,
                                              STRING_HASH(prehash)));
 }
@@ -734,7 +734,7 @@ CVarRef HphpArray::get(litstr k, bool error /* = false */) const {
 
 CVarRef HphpArray::get(CStrRef k, bool error /* = false */) const {
   StringData* key = k.get();
-  int64 prehash = key->hash();
+  strhash_t prehash = key->hash();
   ElmInd pos = find(key->data(), key->size(), prehash);
   if (pos != ElmIndEmpty) {
     Elm* e = &m_data[pos];
@@ -756,7 +756,7 @@ CVarRef HphpArray::get(CVarRef k, bool error /* = false */) const {
     }
   } else {
     StringData* strkey = k.getStringData();
-    int64 prehash = strkey->hash();
+    strhash_t prehash = strkey->hash();
     pos = find(strkey->data(), strkey->size(), prehash);
     if (pos != ElmIndEmpty) {
       Elm* e = &m_data[pos];
@@ -1234,7 +1234,7 @@ inline void HphpArray::addVal(int64 ki, CVarRef data) {
 }
 
 inline void HphpArray::addVal(StringData* key, CVarRef data) {
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key->data(), key->size(), h);
   Elm *e = allocElm(ei);
   if (UNLIKELY(e == NULL)) {
@@ -1274,7 +1274,7 @@ inline void HphpArray::addValWithRef(int64 ki, CVarRef data) {
 
 inline void HphpArray::addValWithRef(StringData* key, CVarRef data) {
   resizeIfNeeded();
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key->data(), key->size(), h);
   if (validElmInd(*ei)) {
     return;
@@ -1304,7 +1304,7 @@ void HphpArray::update(int64 ki, CVarRef data) {
 
 HOT_FUNC_VM
 void HphpArray::update(StringData* key, CVarRef data) {
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key->data(), key->size(), h);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
@@ -1330,7 +1330,7 @@ void HphpArray::updateRef(int64 ki, CVarRef data) {
 }
 
 void HphpArray::updateRef(StringData* key, CVarRef data) {
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key->data(), key->size(), h);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
@@ -1374,7 +1374,7 @@ ArrayData* HphpArray::lval(litstr k, Variant*& ret, bool copy,
 ArrayData* HphpArray::lval(CStrRef k, Variant*& ret, bool copy,
                            bool checkExist /* = false */) {
   StringData* key = k.get();
-  int64 prehash = key->hash();
+  strhash_t prehash = key->hash();
   if (!copy) {
     addLvalImpl(key, prehash, &ret);
     return NULL;
@@ -1410,7 +1410,7 @@ ArrayData* HphpArray::lval(CVarRef k, Variant*& ret, bool copy,
 ArrayData *HphpArray::lvalPtr(CStrRef k, Variant*& ret, bool copy,
                               bool create) {
   StringData* key = k.get();
-  int64 prehash = key->hash();
+  strhash_t prehash = key->hash();
   HphpArray* a = 0;
   HphpArray* t = this;
   if (copy) {
@@ -1715,7 +1715,7 @@ ArrayData* HphpArray::remove(int64 k, bool copy) {
 }
 
 ArrayData* HphpArray::remove(CStrRef k, bool copy) {
-  int64 prehash = k->hash();
+  strhash_t prehash = k->hash();
   if (copy) {
     HphpArray* a = copyImpl();
     a->erase(a->findForInsert(k.data(), k.size(), prehash));
@@ -1736,7 +1736,7 @@ ArrayData* HphpArray::remove(CVarRef k, bool copy) {
     return NULL;
   } else {
     StringData* key = k.getStringData();
-    int64 prehash = key->hash();
+    strhash_t prehash = key->hash();
     if (copy) {
       HphpArray* a = copyImpl();
       a->erase(a->findForInsert(key->data(), key->size(), prehash));
@@ -1968,7 +1968,7 @@ bool HphpArray::nvUpdate(int64 ki, int64 vi) {
  * already exists.
  */
 bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
-  int64 h = k->hash();
+  strhash_t h = k->hash();
   ElmInd* ei = findForInsert(k->data(), k->size(), h);
   if (validElmInd(*ei)) {
     return false;

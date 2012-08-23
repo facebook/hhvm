@@ -213,7 +213,7 @@ public:
     union {
       struct {
         Value v;
-        int32 hash;  // hash == 0 ? ikey is integer key: key is string key
+        int32_t hash;  // hash == 0 ? ikey is integer key: key is string key
         DataType m_type;
       };
       TypedValue  data; // data.m_type != KindOfTombstone ? <value> : <invalid>
@@ -224,9 +224,9 @@ public:
     bool hasIntKey() const {
       return hash == 0;
     }
-    void setStrKey(StringData* k, int64 h) {
+    void setStrKey(StringData* k, strhash_t h) {
       key = k;
-      hash = (int32)h | 0x80000000;
+      hash = int32_t(h) | 0x80000000;
     }
     void setIntKey(int64 k) {
       ikey = k;
@@ -310,9 +310,9 @@ private:
   ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
 
   ssize_t /*ElmInd*/ find(int64 ki) const;
-  ssize_t /*ElmInd*/ find(const char* k, int len, int64 prehash) const;
+  ssize_t /*ElmInd*/ find(const char* k, int len, strhash_t prehash) const;
   ElmInd* findForInsert(int64 ki) const;
-  ElmInd* findForInsert(const char* k, int len, int64 prehash) const;
+  ElmInd* findForInsert(const char* k, int len, strhash_t prehash) const;
 
   ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
 

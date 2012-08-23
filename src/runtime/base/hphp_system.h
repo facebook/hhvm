@@ -60,7 +60,7 @@ public:
 
   virtual Variant getByIdx(ssize_t pos, Variant& k);
   virtual CVarRef getRefByIdx(ssize_t pos, Variant& k);
-  virtual ssize_t getIndex(const char* s, int64 prehash) const;
+  virtual ssize_t getIndex(const char* s, strhash_t prehash) const;
   virtual ssize_t size() const;
   virtual bool empty() const;
   virtual ssize_t staticSize() const;

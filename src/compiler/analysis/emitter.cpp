@@ -6033,7 +6033,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     const HhbcExtFuncInfo* info = &builtinFuncs[i];
     StringData* name = StringData::GetStaticString(info->m_name);
     BuiltinFunction bif = (BuiltinFunction)info->m_pGenericFunc;
-    const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name->data());
+    const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, base);

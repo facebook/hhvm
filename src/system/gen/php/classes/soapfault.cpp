@@ -35,8 +35,8 @@ namespace HPHP {
 /* SRC: classes/soapfault.php line 3 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SoapFault)
 extern const InstanceOfInfo cw_SoapFault$$instanceof_table[] = {
-  {0x47D93E6F80B66A94LL,1,"Exception",&cw_Exception},
-  {0x32E5C767255D2515LL,1,"SoapFault",&cw_SoapFault},
+  {0x00B66A94,1,"Exception",&cw_Exception},
+  {0x255D2515,1,"SoapFault",&cw_SoapFault},
 };
 const int cw_SoapFault$$instanceof_index[] = {
   3,
@@ -77,8 +77,8 @@ Variant NEVER_INLINE c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int cou
   return (self->t___tostring());
 }
 extern const MethodCallInfoTable cw_SoapFault$$call_info_table[] = {
-  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &ci_SoapFault$$__construct },
-  { 0x642C2D2994B34A13LL, 1, 10, "__toString", &ci_SoapFault$$__tostring },
+  { 0x229C615F, 0, 11, "__construct", &ci_SoapFault$$__construct },
+  { 0x14B34A13, 1, 10, "__toString", &ci_SoapFault$$__tostring },
 };
 extern const int cw_SoapFault$$call_info_index[] = {
   3,
@@ -187,7 +187,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
   v_SOAP_1_1 = 1LL;
   v_SOAP_1_2 = 2LL;
   v_SOAP_1_1_ENV_NAMESPACE = NAMSTR(s_sys_ss3f0eec1a, "http://schemas.xmlsoap.org/soap/envelope/");
-  v_SOAP_1_2_ENV_NAMESPACE = NAMSTR(s_sys_ssb0600dcf, "http://www.w3.org/2003/05/soap-envelope");
+  v_SOAP_1_2_ENV_NAMESPACE = NAMSTR(s_sys_ss30600dcf, "http://www.w3.org/2003/05/soap-envelope");
   {
     int64 tmp0((x__soap_active_version()));
     v_soap_version = tmp0;
@@ -196,7 +196,7 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
     {
       if (equal(v_soap_version, v_SOAP_1_1)) {
         {
-          if ((((equal(m_faultcode, NAMSTR(s_sys_ss971ea9d1, "Client")) || equal(m_faultcode, NAMSTR(s_sys_ss95d41015, "Server"))) || equal(m_faultcode, NAMSTR(s_sys_ssb7f9ce9a, "VersionMismatch"))) || equal(m_faultcode, NAMSTR(s_sys_ssf93fc318, "MustUnderstand")))) {
+          if ((((equal(m_faultcode, NAMSTR(s_sys_ss171ea9d1, "Client")) || equal(m_faultcode, NAMSTR(s_sys_ss15d41015, "Server"))) || equal(m_faultcode, NAMSTR(s_sys_ss37f9ce9a, "VersionMismatch"))) || equal(m_faultcode, NAMSTR(s_sys_ss793fc318, "MustUnderstand")))) {
             {
               m_faultcodens = v_SOAP_1_1_ENV_NAMESPACE;
             }
@@ -205,19 +205,19 @@ void c_SoapFault::t___construct(Variant v_code, Variant v_message, Variant v_act
       }
       else if (equal(v_soap_version, v_SOAP_1_2)) {
         {
-          if (equal(m_faultcode, NAMSTR(s_sys_ss971ea9d1, "Client"))) {
+          if (equal(m_faultcode, NAMSTR(s_sys_ss171ea9d1, "Client"))) {
             {
-              m_faultcode = NAMSTR(s_sys_ssa8d233c8, "Sender");
+              m_faultcode = NAMSTR(s_sys_ss28d233c8, "Sender");
               m_faultcodens = v_SOAP_1_2_ENV_NAMESPACE;
             }
           }
-          else if (equal(m_faultcode, NAMSTR(s_sys_ss95d41015, "Server"))) {
+          else if (equal(m_faultcode, NAMSTR(s_sys_ss15d41015, "Server"))) {
             {
               m_faultcode = NAMSTR(s_sys_ss47955b0c, "Receiver");
               m_faultcodens = v_SOAP_1_2_ENV_NAMESPACE;
             }
           }
-          else if (((equal(m_faultcode, NAMSTR(s_sys_ssb7f9ce9a, "VersionMismatch")) || equal(m_faultcode, NAMSTR(s_sys_ssf93fc318, "MustUnderstand"))) || equal(m_faultcode, NAMSTR(s_sys_ss3ff88d3e, "DataEncodingUnknown")))) {
+          else if (((equal(m_faultcode, NAMSTR(s_sys_ss37f9ce9a, "VersionMismatch")) || equal(m_faultcode, NAMSTR(s_sys_ss793fc318, "MustUnderstand"))) || equal(m_faultcode, NAMSTR(s_sys_ss3ff88d3e, "DataEncodingUnknown")))) {
             {
               m_faultcodens = v_SOAP_1_2_ENV_NAMESPACE;
             }
@@ -244,13 +244,13 @@ static const int64 cpt_static_inits[] = {
   (int64)&null_variant,
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x223FBAE23D3926D1LL,6,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),&NAMSTR(s_sys_ssb9540e00, "faultcodens") },
-  {0x6AB66433A5A06842LL,1,0,0,4,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),&NAMSTR(s_sys_ss5b7cf41f, "faultactor") },
-  {0x3B9257D5A7BFC952LL,2,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_detail),&NAMSTR(s_sys_ss2235bf3d, "detail") },
-  {0x7F0FEC816F538D87LL,0,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),&NAMSTR(s_sys_ss40793385, "headerfault") },
-  {0x6C2E2F7FE9DC8A09LL,-1,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m__name),&NAMSTR(s_sys_ssee3a4fdd, "_name") },
-  {0x58CB312B3F4C8D8DLL,-5,0,0,4,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),&NAMSTR(s_sys_ssff0553c0, "faultcode") },
-  {0x6CDD9F7B80D687ADLL,-5,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),&NAMSTR(s_sys_ssff4490ec, "faultstring") },
+  {0x3D3926D1,6,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcodens),&NAMSTR(s_sys_ss39540e00, "faultcodens") },
+  {0x25A06842,1,0,0,4,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultactor),&NAMSTR(s_sys_ss5b7cf41f, "faultactor") },
+  {0x27BFC952,2,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_detail),&NAMSTR(s_sys_ss2235bf3d, "detail") },
+  {0x6F538D87,0,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_headerfault),&NAMSTR(s_sys_ss40793385, "headerfault") },
+  {0x69DC8A09,-1,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m__name),&NAMSTR(s_sys_ss6e3a4fdd, "_name") },
+  {0x3F4C8D8D,-5,0,0,4,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultcode),&NAMSTR(s_sys_ss7f0553c0, "faultcode") },
+  {0x00D687AD,-5,0,0,68,-1,GET_PROPERTY_OFFSET(c_SoapFault, m_faultstring),&NAMSTR(s_sys_ss7f4490ec, "faultstring") },
 
 };
 static const int cpt_hash_entries[] = {

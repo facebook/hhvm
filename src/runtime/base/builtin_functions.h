@@ -656,11 +656,11 @@ public:
   MethodCallPackage();
 
   // e->n() style method call
-  bool methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {
+  bool methodCall(CObjRef self, CStrRef method, strhash_t prehash = -1) {
     return methodCall(self.objectForCall(), method, prehash);
   }
-  bool methodCall(ObjectData *self, CStrRef method, int64 prehash = -1);
-  bool methodCall(CVarRef self, CStrRef method, int64 prehash = -1);
+  bool methodCall(ObjectData *self, CStrRef method, strhash_t prehash = -1);
+  bool methodCall(CVarRef self, CStrRef method, strhash_t prehash = -1);
   // K::n() style call, where K is a parent and n is not static and in an
   // instance method. Lookup is done outside since K is known.
   void methodCallEx(CObjRef self, CStrRef method) {
@@ -679,9 +679,9 @@ public:
     name = &method;
   }
   // e::n() call. e could evaluate to be either a string or object.
-  bool dynamicNamedCall(CVarRef self, CStrRef method, int64 prehash = -1);
+  bool dynamicNamedCall(CVarRef self, CStrRef method, strhash_t prehash = -1);
   // e::n() call where e is definitely a string
-  bool dynamicNamedCall(CStrRef self, CStrRef method, int64 prehash = -1);
+  bool dynamicNamedCall(CStrRef self, CStrRef method, strhash_t prehash = -1);
   // function call
   void functionNamedCall(CVarRef func);
   void functionNamedCall(CStrRef func);

@@ -93,7 +93,7 @@ public:
     return m_data.str->size();
   }
 
-  int64 stringHash() const {
+  strhash_t stringHash() const {
     ASSERT(is(KindOfString) || is(KindOfStaticString));
     return m_data.str->hash();
   }

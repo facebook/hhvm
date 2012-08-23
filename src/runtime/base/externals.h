@@ -34,13 +34,13 @@ namespace HPHP {
 /**
  * Invoking an arbitrary user-defined function.
  */
-Variant invoke(const char *function, CArrRef params, int64 hash = -1,
+Variant invoke(const char *function, CArrRef params, strhash_t hash = -1,
     bool tryInterp = true, bool fatal = true);
 
 /**
  * Invoking an arbitrary system function. This is the fallback for invoke.
  */
-Variant invoke_builtin(const char *s, const Array &params, int64 hash,
+Variant invoke_builtin(const char *s, const Array &params, strhash_t hash,
     bool fatal);
 
 /**
@@ -89,11 +89,11 @@ extern Variant get_class_constant(CStrRef s, const char *prop,
  * Getting function info
  */
 extern bool get_call_info(const CallInfo *&ci, void *&extra,
-                          const char *s, int64 hash = -1);
+                          const char *s, strhash_t hash = -1);
 extern bool get_call_info_no_eval(const CallInfo *&ci, void *&extra,
-                                  const char *s, int64 hash = -1);
+                                  const char *s, strhash_t hash = -1);
 extern bool get_call_info_builtin(const CallInfo *&ci, void *&extra,
-    const char *s, int64 hash = -1);
+    const char *s, strhash_t hash = -1);
 extern bool get_call_info_static_method(MethodCallPackage &info);
 
 /**

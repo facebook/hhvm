@@ -35,25 +35,25 @@ namespace HPHP {
 /* SRC: classes/splobjectstorage.php line 12 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(SplObjectStorage)
 extern const InstanceOfInfo cw_SplObjectStorage$$instanceof_table[] = {
-  {0x795F86375EE263D1LL,0,"Countable",(const ObjectStaticCallbacks*)2},
-  {0x66679538C5E6F0A1LL,1,"Traversable",(const ObjectStaticCallbacks*)2},
-  {0x0636A5F84AF9D29ELL,1,"Iterator",(const ObjectStaticCallbacks*)2},
-  {0x5BA243B9FBA7A64FLL,1,"SplObjectStorage",&cw_SplObjectStorage},
+  {0x5EE263D1,0,"Countable",(const ObjectStaticCallbacks*)2},
+  {0x45E6F0A1,1,"Traversable",(const ObjectStaticCallbacks*)2},
+  {0x4AF9D29E,1,"Iterator",(const ObjectStaticCallbacks*)2},
+  {0x7BA7A64F,1,"SplObjectStorage",&cw_SplObjectStorage},
 };
 const int cw_SplObjectStorage$$instanceof_index[] = {
   7,
   -1,0,-1,-1,-1,-1,2,3,
 
 };
-extern const CallInfo ci_SplObjectStorage$$contains = { (void*)&c_SplObjectStorage::i_contains, (void*)&c_SplObjectStorage::ifa_contains, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$rewind = { (void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$attach = { (void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$next = { (void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplObjectStorage$$current = { (void*)&c_SplObjectStorage::i_current, (void*)&c_SplObjectStorage::ifa_current, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SplObjectStorage$$valid = { (void*)&c_SplObjectStorage::i_valid, (void*)&c_SplObjectStorage::ifa_valid, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplObjectStorage$$attach = { (void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplObjectStorage$$count = { (void*)&c_SplObjectStorage::i_count, (void*)&c_SplObjectStorage::ifa_count, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplObjectStorage$$key = { (void*)&c_SplObjectStorage::i_key, (void*)&c_SplObjectStorage::ifa_key, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplObjectStorage$$contains = { (void*)&c_SplObjectStorage::i_contains, (void*)&c_SplObjectStorage::ifa_contains, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplObjectStorage$$valid = { (void*)&c_SplObjectStorage::i_valid, (void*)&c_SplObjectStorage::ifa_valid, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplObjectStorage$$rewind = { (void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SplObjectStorage$$detach = { (void*)&c_SplObjectStorage::i_detach, (void*)&c_SplObjectStorage::ifa_detach, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SplObjectStorage$$next = { (void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 4, 0x0000000000000000LL};
 Variant c_SplObjectStorage::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_rewind);
 }
@@ -157,15 +157,15 @@ Variant NEVER_INLINE c_SplObjectStorage::ifa_detach(MethodCallPackage &mcp, int 
   return (self->t_detach(arg0), null);
 }
 extern const MethodCallInfoTable cw_SplObjectStorage$$call_info_table[] = {
-  { 0x6413CB5154808C44LL, 1, 5, "valid", &ci_SplObjectStorage$$valid },
-  { 0x1670096FDE27AF6ALL, 1, 6, "rewind", &ci_SplObjectStorage$$rewind },
-  { 0x62DD82BFEB88A4ACLL, 1, 6, "attach", &ci_SplObjectStorage$$attach },
-  { 0x5CEFA5A265104D10LL, 0, 5, "count", &ci_SplObjectStorage$$count },
-  { 0x61B94551FA22D290LL, 1, 8, "contains", &ci_SplObjectStorage$$contains },
-  { 0x56EDB60C824E8C51LL, 1, 3, "key", &ci_SplObjectStorage$$key },
-  { 0x3C7D0AC0EBA9A695LL, 1, 6, "detach", &ci_SplObjectStorage$$detach },
-  { 0x3C6D50F3BB8102B8LL, 1, 4, "next", &ci_SplObjectStorage$$next },
-  { 0x5B3A4A72846B21DCLL, 1, 7, "current", &ci_SplObjectStorage$$current },
+  { 0x54808C44, 1, 5, "valid", &ci_SplObjectStorage$$valid },
+  { 0x5E27AF6A, 1, 6, "rewind", &ci_SplObjectStorage$$rewind },
+  { 0x6B88A4AC, 1, 6, "attach", &ci_SplObjectStorage$$attach },
+  { 0x65104D10, 0, 5, "count", &ci_SplObjectStorage$$count },
+  { 0x7A22D290, 1, 8, "contains", &ci_SplObjectStorage$$contains },
+  { 0x024E8C51, 1, 3, "key", &ci_SplObjectStorage$$key },
+  { 0x6BA9A695, 1, 6, "detach", &ci_SplObjectStorage$$detach },
+  { 0x3B8102B8, 1, 4, "next", &ci_SplObjectStorage$$next },
+  { 0x046B21DC, 1, 7, "current", &ci_SplObjectStorage$$current },
 };
 extern const int cw_SplObjectStorage$$call_info_index[] = {
   31,
@@ -297,7 +297,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
                 m_storage.weakRemove(v_idx);
                 {
                   MethodCallPackage mcp0;
-                  mcp0.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
+                  mcp0.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss141ca25f, "rewind"), 0x5E27AF6A);
                   const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
                   (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
                 }
@@ -321,8 +321,8 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svif01bca90, 0LL),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x17AC96477E2B6DC3LL,1,0,18,65,-1,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage") },
-  {0x4B27521443880CAELL,0,1,18,65,3,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index") },
+  {0x7E2B6DC3,1,0,18,65,-1,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage") },
+  {0x43880CAE,0,1,18,65,3,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ss6f33be8d, "\000SplObjectStorage\000index") },
 
 };
 static const int cpt_hash_entries[] = {

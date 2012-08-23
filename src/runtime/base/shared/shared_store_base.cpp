@@ -170,8 +170,8 @@ char *SharedStoreFileStorage::put(const char *data, int32 len) {
   }
   ASSERT(m_current);
   ASSERT(len + PaddingSize <= m_chunkRemain);
-  int64 h = hash_string_inline(data, len);
-  *(int64*)m_current = h;
+  strhash_t h = hash_string_inline(data, len);
+  *(strhash_t*)m_current = h;
   m_current += sizeof(h);
   *(int32*)m_current = len;
   m_current += sizeof(len);
@@ -180,7 +180,7 @@ char *SharedStoreFileStorage::put(const char *data, int32 len) {
   char *addr = m_current;
   addr[len] = '\0';
   m_current += len + sizeof(char);
-  *(int64*)m_current = TombHash;
+  *(strhash_t*)m_current = TombHash;
   m_chunkRemain -= len + PaddingSize;
   return addr;
 }
@@ -218,7 +218,7 @@ bool SharedStoreFileStorage::hashCheck() {
     char *current = (char*)m_chunks[i];
     char *boundary = (char*)m_chunks[i] + m_chunkSize;
     while (1) {
-      int64 h = *(int64*)current;
+      strhash_t h = *(strhash_t*)current;
       if (h == TombHash) {
         break;
       }
@@ -231,7 +231,7 @@ bool SharedStoreFileStorage::hashCheck() {
                       (int64)current - (int64)m_chunks[i]);
         return false;
       }
-      int64 h_data = hash_string_inline(current, len);
+      strhash_t h_data = hash_string_inline(current, len);
       if (h_data != h) {
         Logger::Error("invalid hash at chunk %d offset %lld", i,
                       (int64)current - (int64)m_chunks[i]);
@@ -263,7 +263,7 @@ bool SharedStoreFileStorage::addFile() {
     return false;
   }
   char name[PATH_MAX];
-  snprintf(name, 256, "%s.XXXXXX", m_prefix.c_str());
+  snprintf(name, sizeof(name), "%s.XXXXXX", m_prefix.c_str());
   int fd = mkstemp(name);
   if (fd < 0) {
     Logger::Error("Failed to open temp file");

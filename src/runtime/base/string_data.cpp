@@ -170,9 +170,10 @@ StringData::StringData(SharedVariant *shared)
   : _count(0) {
   ASSERT(shared);
   shared->incRef();
-  m_shared = shared;
+  m_hash = 0;
   m_len = shared->stringLength();
   m_cdata = shared->stringData();
+  m_big.shared = shared;
   m_big.cap = m_len | IsShared;
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
@@ -189,7 +190,7 @@ void StringData::releaseData() {
   }
   if (f == IsShared) {
     ASSERT(checkSane());
-    m_shared->decRef();
+    m_big.shared->decRef();
     return;
   }
   // Nothing to do for literals, which are rarely destructed anyway.
@@ -262,9 +263,9 @@ void StringData::append(const char *s, int len) {
   if (isShared() || isLiteral()) {
     // buffer is immutable, don't modify it.
     // We are mutating, so we don't need to repropagate our own taint
-    if (isShared()) m_shared->decRef();
     StringSlice r = slice();
     char* newdata = string_concat(r.ptr, r.len, s, len, newlen);
+    if (isShared()) m_big.shared->decRef();
     m_len = newlen;
     m_data = newdata;
     m_big.cap = newlen | IsMalloc;
@@ -490,7 +491,7 @@ void StringData::preCompute() const {
   ASSERT(m_hash >= 0);
   int64 lval; double dval;
   if (isNumericWithVal(lval, dval, 1) == KindOfNull) {
-    m_hash |= (1ull << 63);
+    m_hash |= STRHASH_MSB;
   }
 }
 
@@ -511,7 +512,7 @@ DataType StringData::isNumericWithVal(int64 &lval, double &dval,
     // Not involved in further string construction/mutation; no taint pickup
     ret = is_numeric_string(s.ptr, s.len, &lval, &dval, allow_errors);
     if (ret == KindOfNull && !isShared() && allow_errors) {
-      m_hash |= (1ull << 63);
+      m_hash |= STRHASH_MSB;
     }
   }
   return ret;
@@ -680,16 +681,11 @@ int StringData::compare(const StringData *v2) const {
 }
 
 HOT_FUNC
-int64 StringData::getSharedStringHash() const {
-  ASSERT(isShared());
-  return m_shared->stringHash();
-}
-
-HOT_FUNC
-int64 StringData::hashHelper() const {
+strhash_t StringData::hashHelper() const {
   // We don't want to collect taint for a hash
-  StringSlice s = slice();
-  int64 h = hash_string_inline(s.ptr, s.len);
+  strhash_t h = isShared() ? m_big.shared->stringHash() :
+                             hash_string_inline(m_data, m_len);
+  ASSERT(h >= 0);
   m_hash |= h;
   return h;
 }

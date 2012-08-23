@@ -135,7 +135,7 @@ void Instance::initDynProps(int numDynamic /* = 0 */) {
 
 Slot Instance::declPropInd(TypedValue* prop) const {
   // Do an address range check to determine whether prop physically resides
-  // in propVec. 
+  // in propVec.
   TypedValue* propVec = (TypedValue *)((uintptr_t)this +
                          sizeof(ObjectData) + builtinPropSize());
   if (uintptr_t(prop) >= uintptr_t(propVec) && uintptr_t(prop) <
@@ -749,7 +749,7 @@ void Instance::o_getArray(Array& props, bool pubOnly /* = false */) const {
 
 bool Instance::o_get_call_info_hook(const char *clsname,
                                     MethodCallPackage &mcp,
-                                    int64 hash /* = -1 */) {
+                                    strhash_t hash /* = -1 */) {
   return false;
 }
 

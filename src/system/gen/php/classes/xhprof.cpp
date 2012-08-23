@@ -34,7 +34,7 @@ namespace HPHP {
 /* SRC: classes/xhprof.php line 6 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(XhprofFrame)
 extern const InstanceOfInfo cw_XhprofFrame$$instanceof_table[] = {
-  {0x3D290BF933ED12FDLL,1,"XhprofFrame",&cw_XhprofFrame},
+  {0x33ED12FD,1,"XhprofFrame",&cw_XhprofFrame},
 };
 const int cw_XhprofFrame$$instanceof_index[] = {
   1,
@@ -66,8 +66,8 @@ Variant NEVER_INLINE c_XhprofFrame::ifa___destruct(MethodCallPackage &mcp, int c
   return (self->t___destruct());
 }
 extern const MethodCallInfoTable cw_XhprofFrame$$call_info_table[] = {
-  { 0x0D31D0AC229C615FLL, 0, 11, "__construct", &ci_XhprofFrame$$__construct },
-  { 0x7F974836AACC1EF3LL, 1, 10, "__destruct", &ci_XhprofFrame$$__destruct },
+  { 0x229C615F, 0, 11, "__construct", &ci_XhprofFrame$$__construct },
+  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_XhprofFrame$$__destruct },
 };
 extern const int cw_XhprofFrame$$call_info_index[] = {
   3,

@@ -25,23 +25,23 @@
 #include <cls/Exception.h>
 
 // Declarations
-#include <cls/OutOfRangeException.h>
-#include <cls/RuntimeException.h>
-#include <cls/BadFunctionCallException.h>
-#include <cls/DomainException.h>
-#include <cls/ErrorException.h>
-#include <cls/BadMethodCallException.h>
 #include <cls/PDOException.h>
+#include <cls/DomainException.h>
+#include <cls/BadMethodCallException.h>
+#include <cls/ErrorException.h>
+#include <cls/BadFunctionCallException.h>
 #include <cls/RangeException.h>
-#include <cls/UnexpectedValueException.h>
 #include <cls/UnderflowException.h>
-#include <cls/Exception.h>
-#include <cls/LogicException.h>
 #include <cls/LengthException.h>
-#include <cls/InvalidArgumentException.h>
-#include <cls/DOMException.h>
 #include <cls/OverflowException.h>
+#include <cls/OutOfRangeException.h>
+#include <cls/Exception.h>
+#include <cls/DOMException.h>
+#include <cls/UnexpectedValueException.h>
+#include <cls/LogicException.h>
+#include <cls/InvalidArgumentException.h>
 #include <cls/OutOfBoundsException.h>
+#include <cls/RuntimeException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

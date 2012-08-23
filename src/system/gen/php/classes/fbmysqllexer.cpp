@@ -34,21 +34,21 @@ namespace HPHP {
 /* SRC: classes/fbmysqllexer.php line 40 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(FB_MySQLLexer)
 extern const InstanceOfInfo cw_FB_MySQLLexer$$instanceof_table[] = {
-  {0x286D5ADE799762BALL,1,"FB_MySQLLexer",&cw_FB_MySQLLexer},
+  {0x799762BA,1,"FB_MySQLLexer",&cw_FB_MySQLLexer},
 };
 const int cw_FB_MySQLLexer$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_FB_MySQLLexer$$lex = { (void*)&c_FB_MySQLLexer::i_lex, (void*)&c_FB_MySQLLexer::ifa_lex, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$unget = { (void*)&c_FB_MySQLLexer::i_unget, (void*)&c_FB_MySQLLexer::ifa_unget, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_FB_MySQLLexer$$iscompop = { (void*)&c_FB_MySQLLexer::i_iscompop, (void*)&c_FB_MySQLLexer::ifa_iscompop, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$__construct = { (void*)&c_FB_MySQLLexer::i___construct, (void*)&c_FB_MySQLLexer::ifa___construct, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$unget = { (void*)&c_FB_MySQLLexer::i_unget, (void*)&c_FB_MySQLLexer::ifa_unget, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_FB_MySQLLexer$$get = { (void*)&c_FB_MySQLLexer::i_get, (void*)&c_FB_MySQLLexer::ifa_get, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$revert = { (void*)&c_FB_MySQLLexer::i_revert, (void*)&c_FB_MySQLLexer::ifa_revert, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$skip = { (void*)&c_FB_MySQLLexer::i_skip, (void*)&c_FB_MySQLLexer::ifa_skip, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_FB_MySQLLexer$$nexttoken = { (void*)&c_FB_MySQLLexer::i_nexttoken, (void*)&c_FB_MySQLLexer::ifa_nexttoken, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_FB_MySQLLexer$$pushback = { (void*)&c_FB_MySQLLexer::i_pushback, (void*)&c_FB_MySQLLexer::ifa_pushback, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$nexttoken = { (void*)&c_FB_MySQLLexer::i_nexttoken, (void*)&c_FB_MySQLLexer::ifa_nexttoken, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$revert = { (void*)&c_FB_MySQLLexer::i_revert, (void*)&c_FB_MySQLLexer::ifa_revert, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$lex = { (void*)&c_FB_MySQLLexer::i_lex, (void*)&c_FB_MySQLLexer::ifa_lex, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$__construct = { (void*)&c_FB_MySQLLexer::i___construct, (void*)&c_FB_MySQLLexer::ifa___construct, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_FB_MySQLLexer$$skip = { (void*)&c_FB_MySQLLexer::i_skip, (void*)&c_FB_MySQLLexer::ifa_skip, 0, 4, 0x0000000000000000LL};
 Variant c_FB_MySQLLexer::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -154,15 +154,15 @@ Variant NEVER_INLINE c_FB_MySQLLexer::ifa_nexttoken(MethodCallPackage &mcp, int 
   return (self->t_nexttoken());
 }
 extern const MethodCallInfoTable cw_FB_MySQLLexer$$call_info_table[] = {
-  { 0x285FB8CD753ED923LL, 1, 8, "isCompop", &ci_FB_MySQLLexer$$iscompop },
-  { 0x1721E9197DB002A7LL, 1, 3, "lex", &ci_FB_MySQLLexer$$lex },
-  { 0x25DCCC35D69AD828LL, 1, 3, "get", &ci_FB_MySQLLexer$$get },
-  { 0x3A1B838A356694ECLL, 1, 6, "revert", &ci_FB_MySQLLexer$$revert },
-  { 0x330502D614CBAFB1LL, 1, 8, "pushBack", &ci_FB_MySQLLexer$$pushback },
-  { 0x1CC2918CD94564B4LL, 0, 4, "skip", &ci_FB_MySQLLexer$$skip },
-  { 0x4C42B2DB4CBBE314LL, 1, 9, "nextToken", &ci_FB_MySQLLexer$$nexttoken },
-  { 0x4839431A7B8EC915LL, 1, 5, "unget", &ci_FB_MySQLLexer$$unget },
-  { 0x0D31D0AC229C615FLL, 1, 11, "__construct", &ci_FB_MySQLLexer$$__construct },
+  { 0x753ED923, 1, 8, "isCompop", &ci_FB_MySQLLexer$$iscompop },
+  { 0x7DB002A7, 1, 3, "lex", &ci_FB_MySQLLexer$$lex },
+  { 0x569AD828, 1, 3, "get", &ci_FB_MySQLLexer$$get },
+  { 0x356694EC, 1, 6, "revert", &ci_FB_MySQLLexer$$revert },
+  { 0x14CBAFB1, 1, 8, "pushBack", &ci_FB_MySQLLexer$$pushback },
+  { 0x594564B4, 0, 4, "skip", &ci_FB_MySQLLexer$$skip },
+  { 0x4CBBE314, 1, 9, "nextToken", &ci_FB_MySQLLexer$$nexttoken },
+  { 0x7B8EC915, 1, 5, "unget", &ci_FB_MySQLLexer$$unget },
+  { 0x229C615F, 1, 11, "__construct", &ci_FB_MySQLLexer$$__construct },
 };
 extern const int cw_FB_MySQLLexer$$call_info_index[] = {
   31,
@@ -267,7 +267,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 97 */
 bool c_FB_MySQLLexer::t_iscompop(CVarRef v_c) {
   INSTANCE_METHOD_INJECTION_BUILTIN(FB_MySQLLexer, FB_MySQLLexer::isCompop);
-  return (((equal(v_c, NAMSTR(s_sys_ss2e7b6cab, "<")) || equal(v_c, NAMSTR(s_sys_ss9767c666, ">"))) || equal(v_c, NAMSTR(s_sys_ss7adc04d2, "="))) || equal(v_c, NAMSTR(s_sys_ssdfdeba7c, "!")));
+  return (((equal(v_c, NAMSTR(s_sys_ss2e7b6cab, "<")) || equal(v_c, NAMSTR(s_sys_ss1767c666, ">"))) || equal(v_c, NAMSTR(s_sys_ss7adc04d2, "="))) || equal(v_c, NAMSTR(s_sys_ss5fdeba7c, "!")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/fbmysqllexer.php line 109 */
@@ -319,7 +319,7 @@ Variant c_FB_MySQLLexer::t_lex() {
             }
             {
               Variant tmp0((m_stackPtr));
-              const Variant &tmp1((m_tokenStack.rvalRef(tmp0, tmp_ref, AccessFlags::Error).rvalAt(NAMSTR(s_sys_ssb8d0aa49, "skipText"), AccessFlags::Error_Key)));
+              const Variant &tmp1((m_tokenStack.rvalRef(tmp0, tmp_ref, AccessFlags::Error).rvalAt(NAMSTR(s_sys_ss38d0aa49, "skipText"), AccessFlags::Error_Key)));
               m_skipText.assignVal(tmp1);
               tmp_ref.unset();
             }
@@ -362,7 +362,7 @@ Variant c_FB_MySQLLexer::t_lex() {
               const Variant &tmp0((t_nexttoken()));
               v_token.assignVal(tmp0);
             }
-            m_tokenStack.set(m_stackPtr, (VarNR(Array(ArrayInit(3).add(NAMSTR(s_sys_ss111a03e7, "token"), v_token, true).add(NAMSTR(s_sys_ss55febcf5, "tokText"), m_tokText, true).add(NAMSTR(s_sys_ssb8d0aa49, "skipText"), m_skipText, true).create()))));
+            m_tokenStack.set(m_stackPtr, (VarNR(Array(ArrayInit(3).add(NAMSTR(s_sys_ss111a03e7, "token"), v_token, true).add(NAMSTR(s_sys_ss55febcf5, "tokText"), m_tokText, true).add(NAMSTR(s_sys_ss38d0aa49, "skipText"), m_skipText, true).create()))));
             m_stackPtr++;
             return v_token;
           }
@@ -418,12 +418,12 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
             }
             LOOP_COUNTER(3);
             {
-              while ((((equal(v_c, NAMSTR(s_sys_ssfcae4ca0, " ")) || equal(v_c, NAMSTR(s_sys_ss03a6ba5d, "\t"))) || equal(v_c, NAMSTR(s_sys_ss66d2232c, "\n"))) || equal(v_c, NAMSTR(s_sys_ssca90151e, "\r")))) {
+              while ((((equal(v_c, NAMSTR(s_sys_ss7cae4ca0, " ")) || equal(v_c, NAMSTR(s_sys_ss03a6ba5d, "\t"))) || equal(v_c, NAMSTR(s_sys_ss66d2232c, "\n"))) || equal(v_c, NAMSTR(s_sys_ss4a90151e, "\r")))) {
                 LOOP_COUNTER_CHECK(3);
                 {
-                  if ((equal(v_c, NAMSTR(s_sys_ss66d2232c, "\n")) || equal(v_c, NAMSTR(s_sys_ssca90151e, "\r")))) {
+                  if ((equal(v_c, NAMSTR(s_sys_ss66d2232c, "\n")) || equal(v_c, NAMSTR(s_sys_ss4a90151e, "\r")))) {
                     {
-                      if (equal(v_c, NAMSTR(s_sys_ssca90151e, "\r"))) {
+                      if (equal(v_c, NAMSTR(s_sys_ss4a90151e, "\r"))) {
                         {
                           {
                             const Variant &tmp0((t_skip()));
@@ -446,13 +446,13 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 }
               }
             }
-            if (equal(v_c, NAMSTR(s_sys_ssd59e789f, "\\"))) {
+            if (equal(v_c, NAMSTR(s_sys_ss559e789f, "\\"))) {
               {
                 {
                   const Variant &tmp0((t_get()));
                   v_t.assignVal(tmp0);
                 }
-                if (((equal(v_t, NAMSTR(s_sys_sse07b87c4, "'")) || equal(v_t, NAMSTR(s_sys_ssd59e789f, "\\"))) || equal(v_t, NAMSTR(s_sys_ss7e5fc106, "\"")))) {
+                if (((equal(v_t, NAMSTR(s_sys_ss607b87c4, "'")) || equal(v_t, NAMSTR(s_sys_ss559e789f, "\\"))) || equal(v_t, NAMSTR(s_sys_ss7e5fc106, "\"")))) {
                   {
                     m_tokText.assignVal(v_t);
                     m_tokStart.assignVal(m_tokPtr);
@@ -468,7 +468,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 }
               }
             }
-            if ((equal(v_c, NAMSTR(s_sys_sse07b87c4, "'")) || equal(v_c, NAMSTR(s_sys_ss7e5fc106, "\"")))) {
+            if ((equal(v_c, NAMSTR(s_sys_ss607b87c4, "'")) || equal(v_c, NAMSTR(s_sys_ss7e5fc106, "\"")))) {
               {
                 v_quote.assignVal(v_c);
                 v_state = 12LL;
@@ -481,7 +481,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 break;
               }
             }
-            if (equal(v_c, NAMSTR(s_sys_ssddcae8d1, "`"))) {
+            if (equal(v_c, NAMSTR(s_sys_ss5dcae8d1, "`"))) {
               {
                 v_state = 20LL;
                 break;
@@ -543,19 +543,19 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                 }
               }
             }
-            if (equal(v_c, NAMSTR(s_sys_ss8dc355aa, "#"))) {
+            if (equal(v_c, NAMSTR(s_sys_ss0dc355aa, "#"))) {
               {
                 v_state = 14LL;
                 break;
               }
             }
-            if (equal(v_c, NAMSTR(s_sys_ss935fd125, "-"))) {
+            if (equal(v_c, NAMSTR(s_sys_ss135fd125, "-"))) {
               {
                 {
                   const Variant &tmp0((t_get()));
                   v_t.assignVal(tmp0);
                 }
-                if (equal(v_t, NAMSTR(s_sys_ss935fd125, "-"))) {
+                if (equal(v_t, NAMSTR(s_sys_ss135fd125, "-"))) {
                   {
                     v_state = 14LL;
                     break;
@@ -605,7 +605,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                     v_c.assignVal(tmp0);
                   }
                 }
-              } while (!equal(NAMSTR(s_sys_ssddcae8d1, "`"), v_c));
+              } while (!equal(NAMSTR(s_sys_ss5dcae8d1, "`"), v_c));
             }
             {
               const Variant &tmp0((t_get()));
@@ -648,10 +648,10 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                   }
                   m_tokStart.assignVal(m_tokPtr);
                   {
-                    const String &tmp0((x_trim(toString(m_tokText), NAMSTR(s_sys_ssddcae8d1, "`"))));
+                    const String &tmp0((x_trim(toString(m_tokText), NAMSTR(s_sys_ss5dcae8d1, "`"))));
                     m_tokText = tmp0;
                   }
-                  return NAMSTR(s_sys_ssa3455f47, "ident");
+                  return NAMSTR(s_sys_ss23455f47, "ident");
                 }
               }
             }
@@ -714,7 +714,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
               m_skipText.assignVal(tmp0);
             }
             m_tokStart.assignVal(m_tokPtr);
-            return NAMSTR(s_sys_ssb24f875e, "int_val");
+            return NAMSTR(s_sys_ss324f875e, "int_val");
             break;
           }
         case 7LL:
@@ -751,7 +751,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
               m_skipText.assignVal(tmp0);
             }
             m_tokStart.assignVal(m_tokPtr);
-            return NAMSTR(s_sys_ssdc06d1b5, "real_val");
+            return NAMSTR(s_sys_ss5c06d1b5, "real_val");
           }
         case 10LL:
           {
@@ -804,7 +804,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                   {
                     Variant switch7 = (v_c);
                     if (equal(switch7, (NAMSTR(s_sys_ss00000000, "")))) goto case_7_0;
-                    if (equal(switch7, (NAMSTR(s_sys_ssd59e789f, "\\")))) goto case_7_1;
+                    if (equal(switch7, (NAMSTR(s_sys_ss559e789f, "\\")))) goto case_7_1;
                     if (equal(switch7, (v_quote))) goto case_7_2;
                     goto case_7_3;
                   }
@@ -826,7 +826,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                         switch9 = (v_c);
                         bool needsOrder;
                         int64 hash;
-                        hash = switch9.hashForStringSwitch(8635490932455966459LL, 0LL, 0LL, 0LL, 0LL, 8LL, needsOrder);
+                        hash = switch9.hashForStringSwitch(304416507LL, 0LL, 0LL, 0LL, 0LL, 8LL, needsOrder);
                         switch (((uint64) hash) & 7UL) {
                         case 0UL:
                           if (equal(switch9, (NAMSTR(s_sys_ss40fdaad5, "0")))) goto case_9_0;
@@ -834,12 +834,12 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                           goto case_9_4;
                         case_9_h_s2:
                         case 1UL:
-                          if (equal(switch9, (NAMSTR(s_sys_sse4662809, "n")))) goto case_9_2;
+                          if (equal(switch9, (NAMSTR(s_sys_ss64662809, "n")))) goto case_9_2;
                           if (UNLIKELY(needsOrder)) goto case_9_h_s3;
                           goto case_9_4;
                         case_9_h_s3:
                         case 2UL:
-                          if (equal(switch9, (NAMSTR(s_sys_ssaf66e5e2, "Z")))) goto case_9_3;
+                          if (equal(switch9, (NAMSTR(s_sys_ss2f66e5e2, "Z")))) goto case_9_3;
                           goto case_9_4;
                         case_9_h_s1:
                         case 3UL:
@@ -856,7 +856,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                         }
                       case_9_1:
                         {
-                          concat_assign(v_text, NAMSTR(s_sys_ssca90151e, "\r"));
+                          concat_assign(v_text, NAMSTR(s_sys_ss4a90151e, "\r"));
                           goto break8;
                         }
                       case_9_2:
@@ -866,7 +866,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
                         }
                       case_9_3:
                         {
-                          concat_assign(v_text, NAMSTR(s_sys_ss95202a3c, "\032"));
+                          concat_assign(v_text, NAMSTR(s_sys_ss15202a3c, "\032"));
                           goto break8;
                         }
                       case_9_4:
@@ -926,9 +926,9 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
               const Variant &tmp0((t_skip()));
               v_c.assignVal(tmp0);
             }
-            if (((equal(v_c, NAMSTR(s_sys_ss66d2232c, "\n")) || equal(v_c, NAMSTR(s_sys_ssca90151e, "\r"))) || equal(v_c, NAMSTR(s_sys_ss00000000, "")))) {
+            if (((equal(v_c, NAMSTR(s_sys_ss66d2232c, "\n")) || equal(v_c, NAMSTR(s_sys_ss4a90151e, "\r"))) || equal(v_c, NAMSTR(s_sys_ss00000000, "")))) {
               {
-                if (equal(v_c, NAMSTR(s_sys_ssca90151e, "\r"))) {
+                if (equal(v_c, NAMSTR(s_sys_ss4a90151e, "\r"))) {
                   {
                     {
                       const Variant &tmp0((t_skip()));
@@ -964,7 +964,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
               const Variant &tmp0((t_get()));
               v_c.assignVal(tmp0);
             }
-            if ((equal(v_c, NAMSTR(s_sys_ss935fd125, "-")) || equal(v_c, NAMSTR(s_sys_ssfaed5cac, "+")))) {
+            if ((equal(v_c, NAMSTR(s_sys_ss135fd125, "-")) || equal(v_c, NAMSTR(s_sys_ss7aed5cac, "+")))) {
               {
                 v_state = 16LL;
                 break;
@@ -1030,7 +1030,7 @@ Variant c_FB_MySQLLexer::t_nexttoken() {
               m_skipText.assignVal(tmp0);
             }
             m_tokStart.assignVal(m_tokPtr);
-            return NAMSTR(s_sys_ssbbfd18ca, "sys_var");
+            return NAMSTR(s_sys_ss3bfd18ca, "sys_var");
           }
         case 999LL:
           {
@@ -1074,20 +1074,20 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svs00000000, ""),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x248E65D880040DC0LL,9,0,0,4,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_symbols),&NAMSTR(s_sys_ssb35c39ca, "symbols") },
-  {0x13EBDD7E6C565160LL,4,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokStart),&NAMSTR(s_sys_ss1ee01d21, "tokStart") },
-  {0x01005D7EBD85DE21LL,10,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_skipText),&NAMSTR(s_sys_ssb8d0aa49, "skipText") },
-  {0x61CF13C309782043LL,10,0,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokenStack),&NAMSTR(s_sys_ss44d65cff, "tokenStack") },
-  {0x318650FB7A090D24LL,4,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stringLen),&NAMSTR(s_sys_ss6c97e639, "stringLen") },
-  {0x7FEE9661F51EE4C7LL,1,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokLen),&NAMSTR(s_sys_ss2dcf782a, "tokLen") },
-  {0x178F0505D6C37A48LL,5,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokText),&NAMSTR(s_sys_ss55febcf5, "tokText") },
-  {0x15B369BE0D0C8149LL,-3,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_string),&NAMSTR(s_sys_ss69ad4382, "string") },
-  {0x0BC6CA8DD32C6CCELL,-6,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokAbsStart),&NAMSTR(s_sys_ssadd58f33, "tokAbsStart") },
-  {0x6E634F0BAFC45E90LL,-8,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokPtr),&NAMSTR(s_sys_ss28d27535, "tokPtr") },
-  {0x19F6B86C2F758F12LL,-3,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineBegin),&NAMSTR(s_sys_ss8d52a69c, "lineBegin") },
-  {0x261E0580F7E6D414LL,-1,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineNo),&NAMSTR(s_sys_ssf44f6ae2, "lineNo") },
-  {0x3254D99EAA8F8659LL,-9,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lookahead),&NAMSTR(s_sys_ssfa697dda, "lookahead") },
-  {0x36111B1F5D9ACBDELL,0,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stackPtr),&NAMSTR(s_sys_ss8b06f0b2, "stackPtr") },
+  {0x00040DC0,9,0,0,4,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_symbols),&NAMSTR(s_sys_ss335c39ca, "symbols") },
+  {0x6C565160,4,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokStart),&NAMSTR(s_sys_ss1ee01d21, "tokStart") },
+  {0x3D85DE21,10,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_skipText),&NAMSTR(s_sys_ss38d0aa49, "skipText") },
+  {0x09782043,10,0,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokenStack),&NAMSTR(s_sys_ss44d65cff, "tokenStack") },
+  {0x7A090D24,4,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stringLen),&NAMSTR(s_sys_ss6c97e639, "stringLen") },
+  {0x751EE4C7,1,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokLen),&NAMSTR(s_sys_ss2dcf782a, "tokLen") },
+  {0x56C37A48,5,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokText),&NAMSTR(s_sys_ss55febcf5, "tokText") },
+  {0x0D0C8149,-3,2,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_string),&NAMSTR(s_sys_ss69ad4382, "string") },
+  {0x532C6CCE,-6,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokAbsStart),&NAMSTR(s_sys_ss2dd58f33, "tokAbsStart") },
+  {0x2FC45E90,-8,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_tokPtr),&NAMSTR(s_sys_ss28d27535, "tokPtr") },
+  {0x2F758F12,-3,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineBegin),&NAMSTR(s_sys_ss0d52a69c, "lineBegin") },
+  {0x77E6D414,-1,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lineNo),&NAMSTR(s_sys_ss744f6ae2, "lineNo") },
+  {0x2A8F8659,-9,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_lookahead),&NAMSTR(s_sys_ss7a697dda, "lookahead") },
+  {0x5D9ACBDE,0,1,0,68,-1,GET_PROPERTY_OFFSET(c_FB_MySQLLexer, m_stackPtr),&NAMSTR(s_sys_ss0b06f0b2, "stackPtr") },
 
 };
 static const int cpt_hash_entries[] = {

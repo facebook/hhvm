@@ -97,7 +97,7 @@ protected:
   Mutex *m_locks;
 
   inline Mutex* getLock(const char *data, int len) {
-    ssize_t hash = hash_string(data, len);
+    strhash_t hash = hash_string(data, len);
     return &m_locks[hash % SHARED_STORE_LOCK_CNT];
   }
   Mutex* getLock(CStrRef key) {

@@ -126,7 +126,7 @@ CVarRef Globals::getRefByIdx(ssize_t pos, Variant& k) {
   ASSERT(false);
   throw FatalErrorException("bad code generation");
 }
-ssize_t Globals::getIndex(const char* s, int64 prehash) const {
+ssize_t Globals::getIndex(const char* s, strhash_t prehash) const {
   return Array::get()->getIndex(s);
 }
 ssize_t Globals::size() const {

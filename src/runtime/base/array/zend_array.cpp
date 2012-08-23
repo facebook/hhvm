@@ -298,7 +298,7 @@ Variant ZendArray::each() {
 // lookups
 
 static bool hit_string_key(const ZendArray::Bucket *p, const char *k, int len,
-                           int32 hash) {
+                           int32_t hash) {
   if (!p->hasStrKey()) return false;
   const char *data = p->skey->data();
   return data == k || p->hash() == hash
@@ -316,8 +316,8 @@ ZendArray::Bucket *ZendArray::find(int64 h) const {
 }
 
 ZendArray::Bucket *ZendArray::find(const char *k, int len,
-                                   int64 prehash) const {
-  int32 hash = ZendArray::Bucket::encodeHash(prehash);
+                                   strhash_t prehash) const {
+  int32_t hash = ZendArray::Bucket::encodeHash(prehash);
   for (Bucket *p = m_arBuckets[prehash & m_nTableMask]; p; p = p->pNext) {
     if (hit_string_key(p, k, len, hash)) return p;
   }
@@ -351,9 +351,9 @@ ZendArray::Bucket *ZendArray::findForInsert(int64 h) const {
 }
 
 ZendArray::Bucket *ZendArray::findForInsert(const char *k, int len,
-                                            int64 prehash) const {
+                                            strhash_t prehash) const {
   int n = 0;
-  int32 hash = ZendArray::Bucket::encodeHash(prehash);
+  int32_t hash = ZendArray::Bucket::encodeHash(prehash);
   for (Bucket *p = m_arBuckets[prehash & m_nTableMask]; p; p = p->pNext) {
     if (hit_string_key(p, k, len, hash)) return p;
     n++;
@@ -378,10 +378,10 @@ ZendArray::Bucket ** ZendArray::findForErase(int64 h) const {
 }
 
 ZendArray::Bucket ** ZendArray::findForErase(const char *k, int len,
-                                             int64 prehash) const {
+                                             strhash_t prehash) const {
   Bucket ** ret = &(m_arBuckets[prehash & m_nTableMask]);
   Bucket * p = *ret;
-  int32 hash = ZendArray::Bucket::encodeHash(prehash);
+  int32_t hash = ZendArray::Bucket::encodeHash(prehash);
   while (p) {
     if (hit_string_key(p, k, len, hash)) return ret;
     ret = &(p->pNext);
@@ -467,7 +467,7 @@ CVarRef ZendArray::get(litstr k, bool error /* = false */) const {
 HOT_FUNC_HPHP
 CVarRef ZendArray::get(CStrRef k, bool error /* = false */) const {
   StringData *key = k.get();
-  int64 prehash = key->hash();
+  strhash_t prehash = key->hash();
   Bucket *p = find(key->data(), key->size(), prehash);
   if (p) {
     return p->data;
@@ -487,7 +487,7 @@ CVarRef ZendArray::get(CVarRef k, bool error /* = false */) const {
   } else {
     ASSERT(k.isString());
     StringData *strkey = getStringKey(tva);
-    int64 prehash = strkey->hash();
+    strhash_t prehash = strkey->hash();
     p = find(strkey->data(), strkey->size(), prehash);
   }
   if (p) {
@@ -650,7 +650,7 @@ bool ZendArray::addLvalImpl(int64 h, Variant **pDest,
 }
 
 HOT_FUNC_HPHP
-bool ZendArray::addLvalImpl(StringData *key, int64 h, Variant **pDest,
+bool ZendArray::addLvalImpl(StringData *key, strhash_t h, Variant **pDest,
                             bool doFind /* = true */) {
   ASSERT(key != NULL && pDest != NULL);
   Bucket *p;
@@ -697,7 +697,7 @@ bool ZendArray::addValWithRef(int64 h, CVarRef data) {
 
 HOT_FUNC_HPHP
 bool ZendArray::addValWithRef(StringData *key, CVarRef data) {
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   Bucket *p = findForInsert(key->data(), key->size(), h);
   if (p) {
     return false;
@@ -741,7 +741,7 @@ bool ZendArray::update(int64 h, CVarRef data) {
 
 HOT_FUNC_HPHP
 bool ZendArray::update(StringData *key, CVarRef data) {
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   Bucket *p = findForInsert(key->data(), key->size(), h);
   if (p) {
     p->data.assignValHelper(data);
@@ -787,7 +787,7 @@ bool ZendArray::updateRef(int64 h, CVarRef data) {
 }
 
 bool ZendArray::updateRef(StringData *key, CVarRef data) {
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   Bucket *p = findForInsert(key->data(), key->size(), h);
   if (p) {
     p->data.assignRefHelper(data);
@@ -834,7 +834,7 @@ HOT_FUNC_HPHP
 ArrayData *ZendArray::lval(CStrRef k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   StringData *key = k.get();
-  int64 prehash = key->hash();
+  strhash_t prehash = key->hash();
   if (!copy) {
     addLvalImpl(key, prehash, &ret);
     return NULL;
@@ -859,7 +859,7 @@ HOT_FUNC_HPHP
 ArrayData *ZendArray::lvalPtr(CStrRef k, Variant *&ret, bool copy,
                               bool create) {
   StringData *key = k.get();
-  int64 prehash = key->hash();
+  strhash_t prehash = key->hash();
   ZendArray *a = 0, *t = this;
   if (UNLIKELY(copy)) {
     a = t = copyImpl();
@@ -1057,7 +1057,7 @@ ArrayData *ZendArray::add(CStrRef k, CVarRef v, bool copy) {
     result->add(k, v, false);
     return result;
   }
-  int64 h = k->hash();
+  strhash_t h = k->hash();
   Bucket *p = NEW(Bucket)(v);
   p->setStrKey(k.get(), h);
   uint nIndex = (h & m_nTableMask);
@@ -1175,7 +1175,7 @@ ArrayData *ZendArray::remove(int64 k, bool copy) {
 }
 
 ArrayData *ZendArray::remove(CStrRef k, bool copy) {
-  int64 prehash = k->hash();
+  strhash_t prehash = k->hash();
   if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->erase(a->findForErase(k.data(), k.size(), prehash));
@@ -1198,7 +1198,7 @@ ArrayData *ZendArray::remove(CVarRef k, bool copy) {
   } else {
     ASSERT(k.isString());
     StringData *key = getStringKey(tva);
-    int64 prehash = key->hash();
+    strhash_t prehash = key->hash();
     if (UNLIKELY(copy)) {
       ZendArray *a = copyImpl();
       a->erase(a->findForErase(key->data(), key->size(), prehash));
@@ -1225,7 +1225,7 @@ ArrayData *ZendArray::copyWithStrongIterators() const {
         Bucket* copiedP;
         if (p->hasStrKey()) {
           copiedP = copied->find(p->skey->data(), p->skey->size(),
-                                 (int64)p->hash());
+                                 (strhash_t)p->hash());
         } else {
           copiedP = copied->find((int64)p->ikey);
         }
@@ -1288,7 +1288,7 @@ inline ALWAYS_INLINE ZendArray *ZendArray::copyImplHelper(bool sma) const {
     if (p->hasStrKey()) {
       target->m_pos = (ssize_t)target->find(p->skey->data(),
                                             p->skey->size(),
-                                            (int64)p->hash());
+                                            (strhash_t)p->hash());
     } else {
       target->m_pos = (ssize_t)target->find((int64)p->ikey);
     }

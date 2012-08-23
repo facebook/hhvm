@@ -433,9 +433,9 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   }
   cg_printf("), ");
   if (!m_name.empty()) {
-    uint64 hash = hash_string_i(m_name.c_str());
+    strhash_t hash = hash_string_i(m_name.c_str());
     cg_printString(m_origName, ar, shared_from_this());
-    cg_printf(", 0x%016llXLL);\n", hash);
+    cg_printf(", " STRHASH_FMT ");\n", hash);
   } else {
     cg_printf("mth%d, -1);\n", m_ciTemp);
   }

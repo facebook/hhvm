@@ -726,7 +726,7 @@ Variant invoke_func_few_handler(void *extra, CArrRef params,
   return few_args(extra, s, INVOKE_FEW_ARGS_PASS_ARR_ARGS);
 }
 
-Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
+Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   StringData *sd = function.get();
   ASSERT(sd && sd->data());
@@ -734,7 +734,7 @@ Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
                 tryInterp, fatal);
 }
 
-Variant invoke(const char *function, CArrRef params, int64 hash /* = -1*/,
+Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   const CallInfo *ci;
   void *extra;
@@ -761,7 +761,8 @@ Variant invoke(CVarRef function, CArrRef params,
   return invoke_failed(function, params, fatal);
 }
 
-Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant invoke_builtin(const char *s, CArrRef params, strhash_t hash,
+                       bool fatal) {
   const CallInfo *ci;
   void *extra;
   if (LIKELY(get_call_info_builtin(ci, extra, s, hash))) {
@@ -1919,7 +1920,7 @@ MethodCallPackage::MethodCallPackage()
 
 HOT_FUNC_HPHP
 bool MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
-                                   int64 prehash /* = -1 */) {
+                                   strhash_t prehash /* = -1 */) {
   isObj = true;
   rootObj = self;
   name = &method;
@@ -1928,7 +1929,7 @@ bool MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
 
 HOT_FUNC_HPHP
 bool MethodCallPackage::methodCall(CVarRef self, CStrRef method,
-                                   int64 prehash /* = -1 */) {
+                                   strhash_t prehash /* = -1 */) {
   isObj = true;
   ObjectData *s = self.objectForCall();
   rootObj = s;
@@ -1937,7 +1938,7 @@ bool MethodCallPackage::methodCall(CVarRef self, CStrRef method,
 }
 
 bool MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
-                                         int64 prehash /* = -1 */) {
+                                         strhash_t prehash /* = -1 */) {
   const_assert(!hhvm);
   name = &method;
   if (self.is(KindOfObject)) {
@@ -1959,7 +1960,7 @@ bool MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
 }
 
 bool MethodCallPackage::dynamicNamedCall(CStrRef self, CStrRef method,
-                                         int64 prehash /* = -1 */) {
+                                         strhash_t prehash /* = -1 */) {
   const_assert(!hhvm);
   rootCls = self.get();
   name = &method;

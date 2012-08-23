@@ -191,7 +191,7 @@ class ObjectData : public CountableNF {
   virtual void destruct();
 
   static Variant os_invoke(CStrRef c, CStrRef s,
-                           CArrRef params, int64 hash, bool fatal = true);
+                           CArrRef params, strhash_t hash, bool fatal = true);
 
   // properties
   virtual Array o_toArray() const;
@@ -264,15 +264,15 @@ class ObjectData : public CountableNF {
                       CArrRef params, bool fatal = true);
 
   // method invocation with CStrRef
-  Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1,
+  Variant o_invoke(CStrRef s, CArrRef params, strhash_t hash = -1,
                    bool fatal = true);
-  Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1,
+  Variant o_root_invoke(CStrRef s, CArrRef params, strhash_t hash = -1,
                         bool fatal = false);
-  Variant o_invoke_few_args(CStrRef s, int64 hash, int count,
+  Variant o_invoke_few_args(CStrRef s, strhash_t hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
-  Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
+  Variant o_root_invoke_few_args(CStrRef s, strhash_t hash, int count,
                                  INVOKE_FEW_ARGS_DECL_ARGS);
-  bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  bool o_get_call_info(MethodCallPackage &mcp, strhash_t hash = -1);
   const ObjectStaticCallbacks *o_get_callbacks() const {
 #ifndef HHVM
     return o_callbacks;
@@ -281,9 +281,10 @@ class ObjectData : public CountableNF {
 #endif
   }
   bool o_get_call_info_ex(const char *clsname,
-                          MethodCallPackage &mcp, int64 hash = -1);
+                          MethodCallPackage &mcp, strhash_t hash = -1);
   virtual bool o_get_call_info_hook(const char *clsname,
-                                    MethodCallPackage &mcp, int64 hash = -1);
+                                    MethodCallPackage &mcp,
+                                    strhash_t hash = -1);
 
   // misc
   Variant o_throw_fatal(const char *msg);
@@ -348,8 +349,8 @@ public:
   template <typename T>
   inline Variant o_setPublicImpl(CStrRef propName, T v, bool forInit);
 
-  static Variant *RealPropPublicHelper(CStrRef propName, int64 hash, int flags,
-                                       const ObjectData *obj,
+  static Variant *RealPropPublicHelper(CStrRef propName, strhash_t hash,
+                                       int flags, const ObjectData *obj,
                                        const ObjectStaticCallbacks *osc);
  public:
   static const bool IsResourceClass = false;
@@ -406,15 +407,15 @@ template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 typedef ObjectData c_ObjectData; // purely for easier code generation
 
 struct MethodCallInfoTable {
-  int64          hash;
-  int            flags;
-  int            len;
+  strhash_t      hash;
+  int16_t        flags; // 0 or 1
+  int16_t        len; // length of name
   const char     *name;
   const CallInfo *ci;
 };
 
 struct InstanceOfInfo {
-  int64                       hash;
+  strhash_t                   hash;
   int                         flags;
   const char                  *name;
   const ObjectStaticCallbacks *cb;
@@ -427,7 +428,8 @@ struct ObjectStaticCallbacks {
   Object create(CArrRef params, bool init = true,
                 ObjectData* root = NULL) const;
   Object createOnly(ObjectData *root = NULL) const;
-  inline bool os_get_call_info(MethodCallPackage &info, int64 hash = -1) const {
+  inline bool os_get_call_info(MethodCallPackage &info,
+                               strhash_t hash = -1) const {
     return GetCallInfo(this, info, hash);
   }
   Variant os_getInit(CStrRef s) const;
@@ -435,10 +437,10 @@ struct ObjectStaticCallbacks {
   Variant &os_lval(CStrRef s) const;
   Variant os_constant(const char *s) const;
   static bool GetCallInfo(const ObjectStaticCallbacks *osc,
-                          MethodCallPackage &mcp, int64 hash);
+                          MethodCallPackage &mcp, strhash_t hash);
   static bool GetCallInfoEx(const char *cls,
                             const ObjectStaticCallbacks *osc,
-                            MethodCallPackage &mcp, int64 hash);
+                            MethodCallPackage &mcp, strhash_t hash);
 
   bool checkAttribute(int attrs) const;
   const ObjectStaticCallbacks* operator->() const { return this; }
@@ -462,7 +464,7 @@ struct ObjectStaticCallbacks {
     return (ObjectStaticCallbacks*)((intptr_t)vmClass | (intptr_t)1);
   }
   static HPHP::VM::Class* decodeVMClass(const ObjectStaticCallbacks* cb) {
-    return (HPHP::VM::Class*)((intptr_t)cb & ~(intptr_t)1); 
+    return (HPHP::VM::Class*)((intptr_t)cb & ~(intptr_t)1);
   }
   static bool isEncodedVMClass(const ObjectStaticCallbacks* cb) {
     return ((intptr_t)cb & (intptr_t)1);
@@ -480,7 +482,7 @@ struct RedeclaredObjectStaticCallbacks {
   Variant os_get(CStrRef s) const;
   Variant &os_lval(CStrRef s) const;
   Variant os_constant(const char *s) const;
-  bool os_get_call_info(MethodCallPackage &info, int64 hash = -1) const;
+  bool os_get_call_info(MethodCallPackage &info, strhash_t hash = -1) const;
   ObjectData *createOnlyNoInit(ObjectData* root = NULL) const;
   Object create(CArrRef params, bool init = true,
                 ObjectData* root = NULL) const;

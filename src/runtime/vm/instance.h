@@ -32,7 +32,7 @@ class Instance : public ObjectData {
   // Do not declare any fields directly in Instance; instead embed them in
   // ObjectData, so that a property vector can always reside immediately past
   // the end of an object.
-  
+
 private:
   // This constructor is used for all pure classes that are not
   // descendents of cppext classes
@@ -46,13 +46,13 @@ public:
   Instance(const ObjectStaticCallbacks *cb, bool isResource)
     : ObjectData(NULL, isResource) {
     if (ObjectStaticCallbacks::isEncodedVMClass(cb)) {
-      m_cls = ObjectStaticCallbacks::decodeVMClass(cb); 
+      m_cls = ObjectStaticCallbacks::decodeVMClass(cb);
     } else {
       m_cls = *cb->os_cls_ptr;
     }
     instanceInit(m_cls);
   }
-  
+
   virtual ~Instance() {}
 
   static int ObjAllocatorSizeClassCount;
@@ -141,7 +141,7 @@ private:
 
   //============================================================================
   // Virtual ObjectData methods that we need to override
-  
+
 public:
   virtual void destruct() {
     if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
@@ -167,7 +167,8 @@ public:
   virtual void o_getArray(Array& props, bool pubOnly=false) const;
 
   virtual bool o_get_call_info_hook(const char *clsname,
-                                    MethodCallPackage &mcp, int64 hash = -1);
+                                    MethodCallPackage &mcp,
+                                    strhash_t hash = -1);
 
   virtual Variant t___destruct();
   virtual Variant t___call(Variant v_name, Variant v_arguments);

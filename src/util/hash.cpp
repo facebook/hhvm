@@ -20,11 +20,11 @@
 namespace HPHP {
 
 HOT_FUNC
-long long hash_string_i(const char *arKey, int nKeyLength) {
+strhash_t hash_string_i(const char *arKey, int nKeyLength) {
   return hash_string_i_inline(arKey, nKeyLength);
 }
 
-long long hash_string(const char *arKey, int nKeyLength) {
+strhash_t hash_string(const char *arKey, int nKeyLength) {
   return hash_string_i_inline(arKey, nKeyLength);
 }
 

@@ -800,11 +800,12 @@ void ServerStats::Report(string &output, Format format,
   output = out.str();
 }
 
-static std::string format_duration(int64 duration) {
+static std::string format_duration(timeval &duration) {
   string ret;
-  if (duration > 0) {
-    int seconds = duration % 60;
-    int minutes = duration / 60;
+  if (duration.tv_sec > 0 || duration.tv_usec > 0) {
+    int milliseconds = duration.tv_usec / 1000;
+    double seconds = duration.tv_sec % 60 + milliseconds * .001;
+    int minutes = duration.tv_sec / 60;
     int hours = minutes / 60;
     minutes = minutes % 60;
     if (hours) {
@@ -816,11 +817,14 @@ static std::string format_duration(int64 duration) {
       ret += (minutes == 1) ? " " : "s ";
     }
     if (seconds || minutes || hours) {
-      ret += lexical_cast<string>(seconds) + " second";
+      char buf[7];
+      snprintf(buf, sizeof(buf), "%.3f", seconds);
+      buf[sizeof(buf) - 1] = '\0';
+      ret += lexical_cast<string>(buf) + " second";
       ret += (seconds == 1) ? "" : "s";
     }
-  } else if (duration == 0) {
-    ret = "0 seconds";
+  } else {
+   ret = "0 seconds";
   }
   return ret;
 }
@@ -862,11 +866,14 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   w->writeEntry("hotprofiler", "no");
 #endif
 
+  timeval up;
+  up.tv_sec = now - HttpServer::StartTime;
+  up.tv_usec = 0;
   w->writeEntry("now", DateTime(now).
                 toString(DateTime::DateFormatCookie).data());
   w->writeEntry("start", DateTime(HttpServer::StartTime).
                 toString(DateTime::DateFormatCookie).data());
-  w->writeEntry("up", format_duration(now - HttpServer::StartTime));
+  w->writeEntry("up", format_duration(up));
   w->endObject("process");
 
   w->beginList("threads");
@@ -874,10 +881,17 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     ThreadStatus &ts = s_loggers[i]->m_threadStatus;
 
-    int64 duration = 0;
-    if (ts.m_done > ts.m_start) {
-      duration = ts.m_done - ts.m_start;
+    timeval duration;
+    if (ts.m_start.tv_sec > 0 && ts.m_done.tv_sec > 0) {
+      timersub(&ts.m_done, &ts.m_start, &duration);
+    } else if (ts.m_start.tv_sec > 0) {
+      timeval current;
+      gettimeofday(&current, 0);
+      timersub(&current, &ts.m_start, &duration);
+    } else {
+      memset(&duration, 0, sizeof(duration));
     }
+
     const char *mode = "(unknown)";
     switch (ts.m_mode) {
     case Idling:         mode = "idle";    break;
@@ -891,9 +905,19 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     w->writeEntry("id", (int64)ts.m_threadId);
     w->writeEntry("req", ts.m_requestCount);
     w->writeEntry("bytes", ts.m_writeBytes);
-    w->writeEntry("start", DateTime(ts.m_start).
+    w->writeEntry("start", DateTime(ts.m_start.tv_sec).
                   toString(DateTime::DateFormatCookie).data());
     w->writeEntry("duration", format_duration(duration));
+    if (ts.m_requestCount > 0 && ts.m_mm->isEnabled()) {
+      MemoryUsageStats stats;
+      ts.m_mm->getStatsSafe(stats);
+      w->beginObject("memory");
+      w->writeEntry("current usage", stats.usage);
+      w->writeEntry("current alloc", stats.alloc);
+      w->writeEntry("peak usage", stats.peakUsage);
+      w->writeEntry("peak alloc", stats.peakAlloc);
+      w->endObject("memory");
+    }
     w->writeEntry("io", ts.m_ioInProcess);
 
     // Only in the event that we are currently in the process of an io, will
@@ -955,9 +979,10 @@ Array ServerStats::EndNetworkProfile() {
 ///////////////////////////////////////////////////////////////////////////////
 
 ServerStats::ThreadStatus::ThreadStatus()
-    : m_requestCount(0), m_writeBytes(0), m_start(0), m_done(0),
-      m_mode(Idling), m_ioInProcess(false) {
+    : m_requestCount(0), m_writeBytes(0), m_mode(Idling), m_ioInProcess(false) {
   m_threadId = Process::GetThreadId();
+  memset(&m_start, 0, sizeof(m_start));
+  memset(&m_done, 0, sizeof(m_done));
   memset(m_ioName, 0, sizeof(m_ioName));
   memset(m_ioLogicalName, 0, sizeof(m_ioLogicalName));
   memset(m_ioAddr, 0, sizeof(m_ioAddr));
@@ -1044,7 +1069,7 @@ void ServerStats::logPage(const string &url, int code) {
   }
 
   m_threadStatus.m_mode = Idling;
-  m_threadStatus.m_done = time(0);
+  gettimeofday(&m_threadStatus.m_done, 0);
 }
 
 void ServerStats::reset() {
@@ -1091,8 +1116,10 @@ static void safe_copy(char *dest, const char *src, int max) {
 void ServerStats::startRequest(const char *url, const char *clientIP,
                                const char *vhost) {
   ++m_threadStatus.m_requestCount;
-  m_threadStatus.m_start = time(0);
-  m_threadStatus.m_done = 0;
+
+  m_threadStatus.m_mm = ThreadInfo::s_threadInfo->m_mm;
+  gettimeofday(&m_threadStatus.m_start, 0);
+  memset(&m_threadStatus.m_done, 0, sizeof(m_threadStatus.m_done));
   m_threadStatus.m_mode = Processing;
   m_threadStatus.m_ioStatuses.clear();
 

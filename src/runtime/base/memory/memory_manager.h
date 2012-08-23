@@ -98,15 +98,34 @@ public:
   }
 
   /**
+   * Get most recent stats data, as one would with getStats(true) without
+   * altering the underlying data in m_stats. Used for obtaining debug info.
+   */
+  void getStatsSafe(MemoryUsageStats &stats) {
+    stats = m_stats;
+    refreshStats<false>(stats);
+  }
+
+  /**
    * Called during session starts to reset all usage stats.
    */
   void resetStats();
 
+  void refreshStats() {
+    refreshStats<true>(m_stats);
+  }
+
   /**
    * Refresh stats to reflect directly malloc()ed memory, and determine whether
    * the request memory limit has been exceeded.
+   * The stats parameter allows the updates to be applied to either m_stats as
+   * in refreshStats() or to a seperate MemoryUsageStats struct as in
+   * getStatsSafe().
+   * The template variable live controls whether or not MemoryManager member
+   * variables are updated and whether or not to call helper methods in
+   * response to memory anomolies.
    */
-  void refreshStats() {
+  template<bool live> void refreshStats(MemoryUsageStats &stats) {
 #ifdef USE_JEMALLOC
     // Incrementally incorporate the difference between the previous and current
     // deltas into the memory usage statistic.  For reference, the total
@@ -123,22 +142,24 @@ public:
       int64 delta = int64(*m_allocated) - int64(*m_deallocated);
       int64 deltaAllocated = int64(*m_allocated) - m_prevAllocated;
       if (hhvm) {
-        m_stats.usage += delta - m_delta - m_stats.jemallocDebt;
-        m_stats.jemallocDebt = 0;
+        stats.usage += delta - m_delta - stats.jemallocDebt;
+        stats.jemallocDebt = 0;
       } else {
-        m_stats.usage += delta - m_delta;
+        stats.usage += delta - m_delta;
       }
-      m_stats.totalAlloc += deltaAllocated;
-      m_delta = delta;
-      m_prevAllocated = int64(*m_allocated);
+      stats.totalAlloc += deltaAllocated;
+      if (live) {
+        m_delta = delta;
+        m_prevAllocated = int64(*m_allocated);
+      }
     }
 #endif
-    if (m_stats.usage > m_stats.peakUsage) {
+    if (stats.usage > stats.peakUsage) {
       // NOTE: the peak memory usage monotonically increases, so there cannot
       // be a second OOM exception in one request.
-      ASSERT(m_stats.maxBytes > 0);
-      if (m_stats.peakUsage <= m_stats.maxBytes &&
-          m_stats.usage > m_stats.maxBytes) {
+      ASSERT(stats.maxBytes > 0);
+      if (live && stats.peakUsage <= stats.maxBytes &&
+          stats.usage > stats.maxBytes) {
         refreshStatsHelperExceeded();
       }
       // Check whether the process's active memory limit has been exceeded, and
@@ -154,11 +175,11 @@ public:
       // that we do not use an atomic operation here means that we could get a
       // stale read, but in practice that poses no problems for how we are
       // using the value.
-      if (s_statsEnabled && *m_cactive > m_cactiveLimit) {
+      if (live && s_statsEnabled && *m_cactive > m_cactiveLimit) {
         refreshStatsHelperStop();
       }
 #endif
-      m_stats.peakUsage = m_stats.usage;
+      stats.peakUsage = stats.usage;
     }
   }
 

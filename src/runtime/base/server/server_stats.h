@@ -165,13 +165,15 @@ private:
 
     pthread_t m_threadId;
 
+    MemoryManager* m_mm;
+
     // total traffic
     int64 m_requestCount;
     int64 m_writeBytes;
 
     // current request
-    time_t m_start;
-    time_t m_done;
+    timeval m_start;
+    timeval m_done;
     ThreadMode m_mode;
 
     // Whether or not an io is in process.

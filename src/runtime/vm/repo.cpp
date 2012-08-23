@@ -24,25 +24,27 @@ namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
 
-class Sqlite3Initializer {
-  Sqlite3Initializer() {
-    if (!sqlite3_threadsafe()) {
-      TRACE(0, "SQLite was compiled without thread support; aborting\n");
-      abort();
-    }
-    if (sqlite3_config(SQLITE_CONFIG_MULTITHREAD) != SQLITE_OK) {
-      TRACE(1, "Failed to set default SQLite multi-threading mode\n");
-    }
-  }
-  static Sqlite3Initializer s_initializer;
-};
-
 const char* Repo::kSchemaId = REPO_SCHEMA;
 const char* Repo::kMagicProduct =
   "facebook.com HipHop Virtual Machine bytecode repository";
 const char* Repo::kSchemaPlaceholder = "%{schema}";
 const char* Repo::kDbs[RepoIdCount] = { "main",   // Central.
                                         "local"}; // Local.
+
+void initialize_repo() {
+  if (!sqlite3_threadsafe()) {
+    TRACE(0, "SQLite was compiled without thread support; aborting\n");
+    abort();
+  }
+  if (sqlite3_config(SQLITE_CONFIG_MULTITHREAD) != SQLITE_OK) {
+    TRACE(1, "Failed to set default SQLite multi-threading mode\n");
+  }
+
+  if (const char* schemaOverride = getenv("HHVM_REPO_SCHEMA")) {
+    TRACE(1, "Schema override: HHVM_REPO_SCHEMA=%s\n", schemaOverride);
+    Repo::kSchemaId = schemaOverride;
+  }
+}
 
 IMPLEMENT_THREAD_LOCAL(Repo, t_dh);
 

@@ -61,7 +61,7 @@ can be used to control repo behavior:
 * Repo.Central.Path (overrides HHVM_REPO_CENTRAL_PATH)
   There is always a central read-write repo. Non-eval units prefer to be written
   in the local repo, but are written in the central repo if the local repo isn't
-  writable. If unsepcified, or unusable, will fall back first to
+  writable. If unspecified, or unusable, will fall back first to
   $HHVM_REPO_CENTRAL_PATH, and then to ~user/.hhvm.hhbc
 * Repo.Eval.Mode: local, central, or readonly(*)
   local: Write eval units to the local repo if it is writable; otherwise write
@@ -79,3 +79,4 @@ can be used to control repo behavior:
   not consult filesystem to check for existence of file or parse it.
   Otherwise, fall back to parsing file from filesystem if unit
   is not found in Repo.
+* The environment variable $HHVM_REPO_SCHEMA will override the schema id.

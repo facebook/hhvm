@@ -41,6 +41,7 @@ const long long hhbc_ext_class_count = 0;
 const HhbcExtClassInfo hhbc_ext_classes[] = {};
 #endif
 namespace VM {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s_stdclass(LITSTR_INIT("stdclass"));
@@ -103,6 +104,10 @@ static VMClassInfoHook vm_class_info_hook;
 void ProcessInit() {
   // Initialize compiler state
   VM::compile_file(0, 0, MD5(), 0);
+
+  extern void initialize_repo();
+  initialize_repo();
+
   // Install VM's ClassInfoHook
   ClassInfo::SetHook(&vm_class_info_hook);
 

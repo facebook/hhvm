@@ -1598,8 +1598,7 @@ void Class::setConstants() {
 
   if (m_parent.get() != NULL) {
     for (Slot i = 0; i < m_parent->m_constants.size(); ++i) {
-      // Copy parent's constants.  These may be overlaid below by this
-      // class's constants.
+      // Copy parent's constants.
       builder.add(m_parent->m_constants[i].m_name, m_parent->m_constants[i]);
     }
   }
@@ -1627,9 +1626,16 @@ void Class::setConstants() {
     const PreClass::Const* preConst = &m_preClass->constants()[i];
     ConstMap::Builder::iterator it2 = builder.find(preConst->name());
     if (it2 != builder.end()) {
-      // Overlay ancestor's constant.
-      builder[it2->second].m_class = this;
-      builder[it2->second].m_val = preConst->val();
+      if (!(builder[it2->second].m_class->attrs() & AttrInterface)) {
+        // Overlay ancestor's constant, only if it was not an interface const.
+        builder[it2->second].m_class = this;
+        builder[it2->second].m_val = preConst->val();
+      } else {
+        raise_error("Cannot override previously defined constant %s::%s in %s",
+                  builder[it2->second].m_class->name()->data(),
+                  preConst->name()->data(),
+                  m_preClass->name()->data());
+      }
     } else {
       // Append constant.
       Const constant;

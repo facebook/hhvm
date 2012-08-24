@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot override previously defined constant A::FOO in B in src/test/vm/clsconstant_redecl1.php on line 9

@@ -24,6 +24,7 @@
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/compiler_id.h>
+#include <runtime/base/preg.h>
 #include <util/process.h>
 #include <util/logger.h>
 #include <util/util.h>
@@ -187,6 +188,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  /tmp/const_map_dump\n"
         "/dump-file-repo:  dump file repository to /tmp/file_repo_dump\n"
 
+        "/pcre-cache-size: get pcre cache map size\n"
+
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
         "/prof-cpu-off:    turn off CPU profiler\n"
@@ -324,6 +327,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "vm-", 3) == 0 &&
         handleVMRequest(cmd, transport)) {
+      break;
+    }
+
+    if (cmd == "pcre-cache-size") {
+      std::ostringstream size;
+      size << preg_pcre_cache_size() << endl;
+      transport->sendString(size.str());
       break;
     }
 

@@ -1340,6 +1340,10 @@ int preg_last_error() {
   return t_last_error_code;
 }
 
+size_t preg_pcre_cache_size() {
+  return (size_t)s_pcreCacheMap.size();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // regexec
 

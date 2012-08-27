@@ -708,8 +708,8 @@ void ControlFlowBuilder::getTrueFalseBranches(
 }
 
 void ControlFlowBuilder::addCFEdge(ControlBlock *b1, ControlBlock *b2) {
-  if (!boost::edge(b1, b2, *m_graph).second) {
-    boost::add_edge(b1, b2, *m_graph);
+  if (!edge(b1, b2, *m_graph).second) {
+    add_edge(b1, b2, *m_graph);
   }
 }
 
@@ -783,21 +783,21 @@ void ControlBlock::dump(int spc, AnalysisResultConstPtr ar,
                         const ControlFlowGraph *graph) {
   printf("%08llx (%d)\n  InDegree: %d\n  OutDegree: %d\n",
          (unsigned long long)this, m_dfn,
-         (int)boost::in_degree(this, *graph),
-         (int)boost::out_degree(this, *graph));
+         (int)in_degree(this, *graph),
+         (int)out_degree(this, *graph));
 
   {
     ControlFlowGraph::graph_traits::in_edge_iterator i, end;
-    for (boost::tie(i, end) = boost::in_edges(this, *graph); i != end; ++i) {
-      ControlBlock *t = boost::source(*i, *graph);
+    for (boost::tie(i, end) = in_edges(this, *graph); i != end; ++i) {
+      ControlBlock *t = source(*i, *graph);
       printf("    <- %08llx\n", (unsigned long long)t);
     }
   }
   {
     ControlFlowGraph::graph_traits::out_edge_iterator i, end;
-    for (boost::tie(i, end) = boost::out_edges(this, *graph);
+    for (boost::tie(i, end) = out_edges(this, *graph);
         i != end; ++i) {
-      ControlBlock *t = boost::target(*i, *graph);
+      ControlBlock *t = target(*i, *graph);
       printf("    -> %08llx\n", (unsigned long long)t);
     }
   }
@@ -867,7 +867,7 @@ void ControlFlowGraph::dfnAdd(ControlBlock *cb) {
 void ControlFlowGraph::allocateDataFlow(size_t width, int rows, int *rowIds) {
   m_bitSetVec.alloc(m_nextDfn, width, rows, rowIds);
   graph_traits::vertex_iterator i,e;
-  for (boost::tie(i, e) = boost::vertices(*this); i != e; ++i) {
+  for (boost::tie(i, e) = vertices(*this); i != e; ++i) {
     ControlBlock *cb = *i;
     cb->setBlock(m_bitSetVec.getBlock(cb->getDfn()));
   }

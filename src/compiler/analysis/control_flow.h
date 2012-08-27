@@ -19,6 +19,7 @@
 
 #include <boost/graph/properties.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #include <compiler/hphp.h>
 
@@ -64,6 +65,14 @@ struct graph_traits<HPHP::ControlFlowGraph> {
   typedef int vertices_size_type;
   typedef int edges_size_type;
   typedef std::list<HPHP::ControlEdge*>::size_type degree_size_type;
+};
+
+template<>
+struct property_traits<vertex_color_t> {
+  typedef default_color_type value_type;
+  typedef HPHP::ControlBlock *key_type;
+  typedef default_color_type &reference;
+  typedef lvalue_property_map_tag category;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,131 +200,111 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 
-namespace boost {
-///////////////////////////////////////////////////////////////////////////////
-
-
-inline graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor
-source(graph_traits<HPHP::ControlFlowGraph>::edge_descriptor e,
-       const HPHP::ControlFlowGraph& g) {
+inline boost::graph_traits<ControlFlowGraph>::vertex_descriptor
+source(boost::graph_traits<ControlFlowGraph>::edge_descriptor e,
+       const ControlFlowGraph& g) {
   return e->first;
 }
 
-inline graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor
-target(graph_traits<HPHP::ControlFlowGraph>::edge_descriptor e,
-       const HPHP::ControlFlowGraph& g) {
+inline boost::graph_traits<ControlFlowGraph>::vertex_descriptor
+target(boost::graph_traits<ControlFlowGraph>::edge_descriptor e,
+       const ControlFlowGraph& g) {
   return e->second;
 }
 
 inline std::pair<
-  graph_traits<HPHP::ControlFlowGraph>::vertex_iterator,
-  graph_traits<HPHP::ControlFlowGraph>::vertex_iterator>
-vertices(const HPHP::ControlFlowGraph &g) {
+  boost::graph_traits<ControlFlowGraph>::vertex_iterator,
+  boost::graph_traits<ControlFlowGraph>::vertex_iterator>
+vertices(const ControlFlowGraph &g) {
   return std::make_pair(g.vbegin(), g.vend());
 }
 
 inline std::pair<
-  graph_traits<HPHP::ControlFlowGraph>::edge_iterator,
-  graph_traits<HPHP::ControlFlowGraph>::edge_iterator>
-edges(const HPHP::ControlFlowGraph &g) {
+  boost::graph_traits<ControlFlowGraph>::edge_iterator,
+  boost::graph_traits<ControlFlowGraph>::edge_iterator>
+edges(const ControlFlowGraph &g) {
   return std::make_pair(g.ebegin(), g.eend());
 }
 
 inline std::pair<
-  graph_traits<HPHP::ControlFlowGraph>::out_edge_iterator,
-  graph_traits<HPHP::ControlFlowGraph>::out_edge_iterator>
+  boost::graph_traits<ControlFlowGraph>::out_edge_iterator,
+  boost::graph_traits<ControlFlowGraph>::out_edge_iterator>
 in_edges(
-  graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor u,
-  const HPHP::ControlFlowGraph &g) {
+  boost::graph_traits<ControlFlowGraph>::vertex_descriptor u,
+  const ControlFlowGraph &g) {
   return std::make_pair(u->ibegin(), u->iend());
 }
 
 inline std::pair<
-  graph_traits<HPHP::ControlFlowGraph>::out_edge_iterator,
-  graph_traits<HPHP::ControlFlowGraph>::out_edge_iterator>
+  boost::graph_traits<ControlFlowGraph>::out_edge_iterator,
+  boost::graph_traits<ControlFlowGraph>::out_edge_iterator>
 out_edges(
-  graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor u,
-  const HPHP::ControlFlowGraph &g) {
+  boost::graph_traits<ControlFlowGraph>::vertex_descriptor u,
+  const ControlFlowGraph &g) {
   return std::make_pair(u->obegin(), u->oend());
 }
 
 inline std::pair<
-  graph_traits<HPHP::ControlFlowGraph>::adjacency_iterator,
-  graph_traits<HPHP::ControlFlowGraph>::adjacency_iterator>
+  boost::graph_traits<ControlFlowGraph>::adjacency_iterator,
+  boost::graph_traits<ControlFlowGraph>::adjacency_iterator>
 adjacent_vertices(
-  graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor u,
-  const HPHP::ControlFlowGraph &g) {
+  boost::graph_traits<ControlFlowGraph>::vertex_descriptor u,
+  const ControlFlowGraph &g) {
   return std::make_pair(u->abegin(g), u->aend(g));
 }
 
 inline std::pair<
-  graph_traits<HPHP::ControlFlowGraph>::inv_adjacency_iterator,
-  graph_traits<HPHP::ControlFlowGraph>::inv_adjacency_iterator>
+  boost::graph_traits<ControlFlowGraph>::inv_adjacency_iterator,
+  boost::graph_traits<ControlFlowGraph>::inv_adjacency_iterator>
 inv_adjacent_vertices(
-  graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor u,
-  const HPHP::ControlFlowGraph &g) {
+  boost::graph_traits<ControlFlowGraph>::vertex_descriptor u,
+  const ControlFlowGraph &g) {
   return std::make_pair(u->iabegin(g), u->iaend(g));
 }
 
 inline std::pair<
-  graph_traits<HPHP::ControlFlowGraph>::edge_descriptor, bool>
-edge(graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor a,
-     graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor b,
-     const HPHP::ControlFlowGraph &g) {
-  graph_traits<HPHP::ControlFlowGraph>::edge_descriptor e = a->find_to(b);
+  boost::graph_traits<ControlFlowGraph>::edge_descriptor, bool>
+edge(boost::graph_traits<ControlFlowGraph>::vertex_descriptor a,
+     boost::graph_traits<ControlFlowGraph>::vertex_descriptor b,
+     const ControlFlowGraph &g) {
+  boost::graph_traits<ControlFlowGraph>::edge_descriptor e = a->find_to(b);
   return std::make_pair(e, e != 0);
 }
 
-inline void add_edge(graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor a,
-                     graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor b,
-                     HPHP::ControlFlowGraph &g) {
+inline void add_edge(boost::graph_traits<ControlFlowGraph>::vertex_descriptor a,
+                     boost::graph_traits<ControlFlowGraph>::vertex_descriptor b,
+                     ControlFlowGraph &g) {
   g.add_edge(a, b);
 }
 
-inline int in_degree(graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor a,
-                     const HPHP::ControlFlowGraph &g) {
+inline int in_degree(boost::graph_traits<ControlFlowGraph>::vertex_descriptor a,
+                     const ControlFlowGraph &g) {
   return a->in_size();
 }
 
-inline int out_degree(graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor a,
-                      const HPHP::ControlFlowGraph &g) {
+inline int out_degree(boost::graph_traits<ControlFlowGraph>::vertex_descriptor a,
+                      const ControlFlowGraph &g) {
   return a->out_size();
 }
 
 template <typename P>
-inline P get(P p, HPHP::ControlFlowGraph &g) {
+inline P get(P p, ControlFlowGraph &g) {
   return p;
 }
 
-template<>
-struct property_traits<vertex_color_t> {
-  typedef default_color_type value_type;
-  typedef HPHP::ControlBlock *key_type;
-  typedef default_color_type &reference;
-  typedef lvalue_property_map_tag category;
-};
-
-inline default_color_type get(
-  vertex_color_t c,
-  graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor a) {
+inline boost::default_color_type get(
+  boost::vertex_color_t c,
+  boost::graph_traits<ControlFlowGraph>::vertex_descriptor a) {
   return a->get_color();
 }
 
-inline void put(vertex_color_t c,
-                graph_traits<HPHP::ControlFlowGraph>::vertex_descriptor a,
-                default_color_type value) {
+inline void put(boost::vertex_color_t c,
+                boost::graph_traits<ControlFlowGraph>::vertex_descriptor a,
+                boost::default_color_type value) {
   a->set_color(value);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-}
-
-// This needs to come after the definitions of 'out_degree', 'out_edges', etc.
-#include <boost/graph/adjacency_list.hpp>
-
-namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ControlFlowGraphWalker : public FunctionWalker {
@@ -324,7 +313,7 @@ public:
   template <class T>
   void walk(T &t) {
     std::pair<ControlFlowGraph::vertex_iterator,
-      ControlFlowGraph::vertex_iterator> v(boost::vertices(m_graph));
+      ControlFlowGraph::vertex_iterator> v(vertices(m_graph));
     while (v.first != v.second) {
       ControlBlock *b = *v.first;
       m_block = b;

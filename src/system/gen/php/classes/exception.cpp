@@ -740,8 +740,9 @@ void c_Exception::t_inittrace() {
     mcp0.staticMethodCall(NAMSTR(s_sys_ssf08d205d, "static"), NAMSTR(s_sys_ssc453e9e9, "getTraceOptions"));
     mcp0.lateStaticBind(fi.getThreadInfo());
     cit0 = mcp0.ci;
-    const Array &tmp1((x_debug_backtrace(toBoolean((cit0->getMeth0Args())(mcp0, 0)))));
-    m_trace = tmp1;
+    bool tmp1((toBoolean((cit0->getMeth0Args())(mcp0, 0))));
+    const Array &tmp2((x_debug_backtrace(tmp1)));
+    m_trace = tmp2;
   }
   LOOP_COUNTER(1);
   {
@@ -755,19 +756,23 @@ void c_Exception::t_inittrace() {
         {
           bool tmp0;
           {
-            bool tmp1 = ((isset(v_top, NAMSTR(s_sys_ssc82dbd12, "class"), true) && isset(v_top, NAMSTR(s_sys_ss52403931, "function"), true)));
+            bool tmp1 = (isset(v_top, NAMSTR(s_sys_ssc82dbd12, "class"), true));
             if (tmp1) {
-              const String &tmp2((toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-              int64 tmp3((x_strcasecmp(tmp2, NAMSTR(s_sys_ssae8717ad, "exception"))));
-              tmp1 = (same(tmp3, 0LL));
+              tmp1 = (isset(v_top, NAMSTR(s_sys_ss52403931, "function"), true));
             }
-            bool tmp4 = (tmp1);
-            if (tmp4) {
-              const String &tmp5((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key))));
-              int64 tmp6((x_strcasecmp(tmp5, NAMSTR(s_sys_ssa26bedd7, "__init__"))));
-              tmp4 = (same(tmp6, 0LL));
+            bool tmp2 = (tmp1);
+            if (tmp2) {
+              const String &tmp3((toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+              int64 tmp4((x_strcasecmp(tmp3, NAMSTR(s_sys_ssae8717ad, "exception"))));
+              tmp2 = (same(tmp4, 0LL));
             }
-            tmp0 = (tmp4);
+            bool tmp5 = (tmp2);
+            if (tmp5) {
+              const String &tmp6((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key))));
+              int64 tmp7((x_strcasecmp(tmp6, NAMSTR(s_sys_ssa26bedd7, "__init__"))));
+              tmp5 = (same(tmp7, 0LL));
+            }
+            tmp0 = (tmp5);
           }
           if (tmp0) {
             {
@@ -775,16 +780,28 @@ void c_Exception::t_inittrace() {
                 const Variant &tmp0((x_array_shift(ref(m_trace))));
                 v_frame.assignVal(tmp0);
               }
-              if (isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true)) {
+              {
+                bool tmp0;
                 {
-                  const Variant &tmp0((v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key)));
-                  m_file.assignVal(tmp0);
+                  tmp0 = (isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true));
+                }
+                if (tmp0) {
+                  {
+                    const Variant &tmp0((v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key)));
+                    m_file.assignVal(tmp0);
+                  }
                 }
               }
-              if (isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true)) {
+              {
+                bool tmp0;
                 {
-                  const Variant &tmp0((v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key)));
-                  m_line.assignVal(tmp0);
+                  tmp0 = (isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true));
+                }
+                if (tmp0) {
+                  {
+                    const Variant &tmp0((v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key)));
+                    m_line.assignVal(tmp0);
+                  }
                 }
               }
               return;

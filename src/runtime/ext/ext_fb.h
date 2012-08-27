@@ -98,6 +98,8 @@ extern const int64 k_TAINT_TRACE_SELF;
 
 int fb_unserialize_from_buffer(Variant &res, const char *buff, int buff_len,
                                int *pos);
+int fb_compact_unserialize_from_buffer(Variant &res, const char *buff,
+                                       int buff_len, int &pos);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

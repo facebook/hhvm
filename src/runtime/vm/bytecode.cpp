@@ -247,6 +247,8 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
   , m_malloced(false)
   , m_cfp(fp)
 {
+  delete eArgs;
+
   const Func* func = fp->m_func;
   const Id numNames = func->numNamedLocals();
 
@@ -521,7 +523,7 @@ ExtraArgs::~ExtraArgs() {
     for (unsigned i = 0; i < m_numExtraArgs; i++) {
       tvRefcountedDecRef(&m_extraArgs[i]);
     }
-    free(m_extraArgs); // XXX: use varenv arena?
+    free(m_extraArgs);
     if (debug) {
       m_extraArgs = 0;
       m_numExtraArgs = 0;
@@ -1709,7 +1711,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
           // inheriting a VarEnv
           ASSERT(!m_fp->m_varEnv);
           // Extra parameters must be moved off the stack.
-          m_fp->setExtraArgs(ExtraArgs::alloc());
+          m_fp->setExtraArgs(new ExtraArgs());
           int numExtras = nargs - nparams;
           m_fp->getExtraArgs()->copyExtraArgs(
             (TypedValue*)(uintptr_t(m_fp) - nargs * sizeof(TypedValue)),
@@ -1748,7 +1750,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
       // there.
       int numExtras = ar->numArgs() - ar->m_func->numParams();
       ASSERT(numExtras > 0);
-      ar->setExtraArgs(ExtraArgs::alloc());
+      ar->setExtraArgs(new ExtraArgs());
       ar->getExtraArgs()->setExtraArgs(extraArgs, numExtras);
     }
   }

@@ -86,18 +86,6 @@ public:
   ExtraArgs(ExtraArgs*); // move (may take a null)
   ~ExtraArgs();
 
-  static ExtraArgs* alloc() {
-    /*
-     * Extra args can't last longer than the current VarEnv.  (And if
-     * there is no current one except the global, we're going to leak
-     * this until the end of the request.)
-     */
-    return new (varenv_arena()) ExtraArgs();
-  }
-  static void destroy(ExtraArgs* ea) {
-    ea->~ExtraArgs();
-  }
-
   void setExtraArgs(TypedValue* args, unsigned nargs);
   void copyExtraArgs(TypedValue* args, unsigned nargs);
   unsigned numExtraArgs() const;

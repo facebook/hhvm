@@ -196,9 +196,6 @@ void SharedStoreFileStorage::seal() {
   m_state = StateSealed;
 
   for (int i = 0; i < (int)m_chunks.size(); i++) {
-    if (msync(m_chunks[i], m_chunkSize, MS_SYNC) < 0) {
-      Logger::Error("Failed to msync chunk %d", i);
-    }
     if (mprotect(m_chunks[i], m_chunkSize, PROT_READ) < 0) {
       Logger::Error("Failed to mprotect chunk %d", i);
     }

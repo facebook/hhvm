@@ -30,7 +30,7 @@ namespace VM {
 class Class;
 class Stack;
 void tv_release_generic(TypedValue* tv);
-void tv_release_typed(void*, DataType dt);
+void tv_release_typed(RefData*, DataType dt);
 }
 }
 
@@ -95,7 +95,7 @@ inline void tvDecRefRef(TypedValue* tv) {
 }
 
 inline void tvReleaseHelper(DataType type, uint64_t datum) {
-  VM::tv_release_typed((void*)datum, type);
+  VM::tv_release_typed((RefData*)datum, type);
 }
 
 // Assumes 'tv' is live
@@ -119,15 +119,15 @@ inline void tvRefcountedDecRef(TypedValue* tv) {
 }
 
 // tvBoxHelper sets the refcount of the newly allocated inner cell to 1
-inline TypedValue* tvBoxHelper(DataType type, uint64_t datum) {
-  return (NEW(RefData)(type, datum))->tv();
+inline RefData* tvBoxHelper(DataType type, uint64_t datum) {
+  return NEW(RefData)(type, datum);
 }
 
 // Assumes 'tv' is live
 inline void tvBox(TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
   ASSERT(tv->m_type != KindOfRef);
-  tv->m_data.ptv = tvBoxHelper(tv->m_type, tv->m_data.num);
+  tv->m_data.pref = tvBoxHelper(tv->m_type, tv->m_data.num);
   tv->m_type = KindOfRef;
 }
 
@@ -198,11 +198,11 @@ inline void tvWriteUninit(TypedValue* tv) {
 // Assumes 'to' and 'fr' are live
 // Assumes that 'fr->m_type != KindOfRef'
 // If 'to->m_type == KindOfRef', this will perform the set
-// operation on the inner cell (to->m_data.ptv)
+// operation on the inner cell (to->m_data.pref)
 inline void tvSet(const TypedValue* fr, TypedValue* to) {
   ASSERT(fr->m_type != KindOfRef);
   if (to->m_type == KindOfRef) {
-    to = to->m_data.ptv;
+    to = to->m_data.pref->tv();
   }
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
@@ -230,13 +230,13 @@ inline void tvUnset(TypedValue * to) {
 inline void tvBindIndirect(TypedValue* fr, TypedValue* to) {
   ASSERT(tvIsPlausible(to));
   fr->m_type = KindOfIndirect;
-  fr->m_data.ptv = to;
+  fr->m_data.pind = to;
 }
 
 // If a TypedValue is KindOfIndirect, dereference to the inner
 // TypedValue.
 inline TypedValue* tvDerefIndirect(TypedValue* tv) {
-  return tv->m_type == KindOfIndirect ? tv->m_data.ptv : tv;
+  return tv->m_type == KindOfIndirect ? tv->m_data.pind : tv;
 }
 inline const TypedValue* tvDerefIndirect(const TypedValue* tv) {
   return tvDerefIndirect(const_cast<TypedValue*>(tv));
@@ -249,7 +249,7 @@ inline const TypedValue* tvDerefIndirect(const TypedValue* tv) {
 inline bool tvIsStatic(const TypedValue* tv) {
   ASSERT(tvIsPlausible(tv));
   return !IS_REFCOUNTED_TYPE(tv->m_type) ||
-    tv->m_data.ptv->_count == RefCountStaticValue;
+    tv->m_data.pref->_count == RefCountStaticValue;
 }
 
 /**
@@ -303,7 +303,7 @@ inline const Variant& tvVarAsCVarRef(const TypedValue* tv) {
 }
 
 inline bool tvIsStronglyBound(const TypedValue* tv) {
-  return (tv->m_type == KindOfRef && tv->m_data.ptv->_count > 1);
+  return (tv->m_type == KindOfRef && tv->m_data.pref->_count > 1);
 }
 
 inline bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {

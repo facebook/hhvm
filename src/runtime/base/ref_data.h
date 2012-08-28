@@ -45,6 +45,9 @@ public:
 
   const TypedValue* tv() const { return &m_tv; }
   TypedValue* tv() { return &m_tv; }
+  const Variant* var() const { return (const Variant*)&m_tv; }
+  Variant* var() { return (Variant*)&m_tv; }
+
 
 private:
   // initialize this value by laundering uninitNull -> Null

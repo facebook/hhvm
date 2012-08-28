@@ -3674,7 +3674,7 @@ getBinaryStackInputs(const RegAlloc& regmap, const NormalizedInstruction& i,
 void
 TranslatorX64::emitBox(DataType t, PhysReg rSrc) {
   if (false) { // typecheck
-    TypedValue* retval = tvBoxHelper(KindOfArray, 0xdeadbeef01ul);
+    RefData* retval = tvBoxHelper(KindOfArray, 0xdeadbeef01ul);
     (void)retval;
   }
   // tvBoxHelper will set the refcount of the inner cell to 1
@@ -7731,7 +7731,7 @@ static TypedValue* lookupGlobal(StringData* name) {
   // the caller to raise warnings.
   if (r) {
     LITSTR_DECREF(name);
-    if (r->m_type == KindOfRef) r = r->m_data.ptv;
+    if (r->m_type == KindOfRef) r = r->m_data.pref->tv();
   }
   return r;
 }
@@ -7739,7 +7739,7 @@ static TypedValue* lookupGlobal(StringData* name) {
 static TypedValue* lookupAddGlobal(StringData* name) {
   VarEnv* ve = g_vmContext->m_globalVarEnv;
   TypedValue* r = ve->lookupAdd(name);
-  if (r->m_type == KindOfRef) r = r->m_data.ptv;
+  if (r->m_type == KindOfRef) r = r->m_data.pref->tv();
   LITSTR_DECREF(name);
   return r;
 }

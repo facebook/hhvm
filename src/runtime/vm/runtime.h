@@ -77,7 +77,7 @@ frame_local(const ActRec* fp, int n) {
 inline TypedValue*
 frame_local_inner(const ActRec* fp, int n) {
   TypedValue* ret = frame_local(fp, n);
-  return ret->m_type == KindOfRef ? ret->m_data.ptv : ret;
+  return ret->m_type == KindOfRef ? ret->m_data.pref->tv() : ret;
 }
 
 inline void ALWAYS_INLINE

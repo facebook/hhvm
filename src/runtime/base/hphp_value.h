@@ -36,14 +36,14 @@ struct TypedValue;
 
 struct Value {
   mutable union {
-    int64       num;
-    double      dbl;
-    StringData *pstr;
-    ArrayData  *parr;
-    ObjectData *pobj;
-    VM::Class  *pcls;
-    RefData    *pref;
-    TypedValue *ptv; // Deprecated; use pref for KindOfRef
+    int64       num;  // KindOfInt64, KindOfBool
+    double      dbl;  // KindOfDouble
+    StringData *pstr; // KindOfString, KindOfStaticString
+    ArrayData  *parr; // KindOfArray
+    ObjectData *pobj; // KindOfObject
+    VM::Class  *pcls; // only in vm stack, no type tag.
+    RefData    *pref; // KindOfRef
+    TypedValue *pind; // only for KindOfIndirect
   } m_data;
 };
 

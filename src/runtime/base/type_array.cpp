@@ -522,7 +522,7 @@ CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
     throw_bad_type_exception("Invalid type used as key");
     break;
   case KindOfRef:
-    return rvalAtRef(*(key.m_data.pvar), flags);
+    return rvalAtRef(*(key.m_data.pref->var()), flags);
   default:
     ASSERT(false);
     break;

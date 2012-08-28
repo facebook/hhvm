@@ -112,7 +112,7 @@ void iter_value_cell(Iter* iter, TypedValue* out) {
   ArrayIter& arr = iter->arr();
   if (LIKELY(arr.isHphpArray())) {
     TypedValue* cur = arr.nvSecond();
-    if (UNLIKELY(cur->m_type == KindOfRef)) cur = cur->m_data.ptv;
+    if (UNLIKELY(cur->m_type == KindOfRef)) cur = cur->m_data.pref->tv();
     TV_DUP_CELL_NC(cur, out);
     return;
   }
@@ -124,7 +124,7 @@ void iter_value_cell(Iter* iter, TypedValue* out) {
 void iter_value_cell_local(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
   if (UNLIKELY(oldType == KindOfRef)) {
-    out = out->m_data.ptv;
+    out = out->m_data.pref->tv();
     oldType = out->m_type;
   }
   uint64_t oldDatum = out->m_data.num;
@@ -148,7 +148,7 @@ void iter_key_cell(Iter* iter, TypedValue* out) {
 void iter_key_cell_local(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
   if (UNLIKELY(oldType == KindOfRef)) {
-    out = out->m_data.ptv;
+    out = out->m_data.pref->tv();
     oldType = out->m_type;
   }
   uint64_t oldDatum = out->m_data.num;

@@ -204,7 +204,7 @@ Translator::liveType(const Cell* outer, const Location& l) {
   const Cell* valCell = outer;
   if (outerType == KindOfRef) {
     // Variant. Pick up the inner type, too.
-    valCell = outer->m_data.ptv;
+    valCell = outer->m_data.pref->tv();
     DataType innerType = valCell->m_type;
     valueType = innerType;
     ASSERT(innerType != KindOfRef);

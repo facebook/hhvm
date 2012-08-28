@@ -130,7 +130,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit>,
     }
     TypedValue* tv = &m_data[key];
     tvRefcountedDecRef(tv);
-    tv->m_data.num = val->m_data.num; 
+    tv->m_data.num = val->m_data.num;
     tv->m_type = val->m_type;
   }
   public: void add(TypedValue* val) {
@@ -143,7 +143,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit>,
       TV_INCREF(val);
     }
     TypedValue* tv = &m_data[m_size];
-    tv->m_data.num = val->m_data.num; 
+    tv->m_data.num = val->m_data.num;
     tv->m_type = val->m_type;
     tv->_count = 0;
     ++m_size;
@@ -153,7 +153,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit>,
   public: void resize(int64 sz, TypedValue* val);
   public: bool contains(int64 key);
   public: int getVersionNumber() { return m_versionNumber; }
-  
+
   public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   public: static void OffsetSet(ObjectData* obj, TypedValue* key,
                                 TypedValue* val);
@@ -280,7 +280,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit>,
   DECLARE_METHOD_INVOKE_HELPERS(fromiterable);
 
   public: static void throwOOB() ATTRIBUTE_COLD;
-  
+
   public: TypedValue* at(int64 key) {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return (TypedValue*)&p->data;
@@ -328,12 +328,12 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit>,
   public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  
+
   public: ObjectData* clone();
 
   // implemented by HPHP
   public: c_Map *create();
-  
+
 public:
   class Bucket {
   public:
@@ -448,11 +448,11 @@ private:
     int64_t* ptr = (int64_t*)data;
     return (Bucket*)(&ptr[index]);
   }
-  
+
   Bucket* fetchBucket(intptr_t slot) const {
     return fetchBucket(m_data, slot);
   }
-  
+
   Bucket* find(int64 h) const;
   Bucket* find(const char* k, int len, int64 prehash) const;
   Bucket* findForInsert(int64 h) const;
@@ -575,7 +575,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit>,
     return ti_fromiterable("map", vec);
   }
   DECLARE_METHOD_INVOKE_HELPERS(fromiterable);
-  
+
   public: TypedValue* at(int64 key) {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return (TypedValue*)&p->data;
@@ -625,12 +625,12 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit>,
   public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  
+
   public: ObjectData* clone();
 
   // implemented by HPHP
   public: c_StableMap *create();
-  
+
 public:
   class Bucket {
   public:
@@ -902,7 +902,7 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
 inline Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
   TypedValue* key = (TypedValue*)(&offset);
   if (key->m_type == KindOfRef) {
-    key = key->m_data.ptv;
+    key = key->m_data.pref->tv();
   }
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
@@ -932,7 +932,7 @@ inline Variant& collectionOffsetGet(ObjectData* obj, litstr offset) {
 inline void collectionOffsetSet(ObjectData* obj, int64 offset, CVarRef val) {
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.ptv;
+    tv = tv->m_data.pref->tv();
   }
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
@@ -956,7 +956,7 @@ inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
   StringData* key = offset.get();
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.ptv;
+    tv = tv->m_data.pref->tv();
   }
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
@@ -980,11 +980,11 @@ inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
 inline void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
   TypedValue* key = (TypedValue*)(&offset);
   if (UNLIKELY(key->m_type == KindOfRef)) {
-    key = key->m_data.ptv;
+    key = key->m_data.pref->tv();
   }
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.ptv;
+    tv = tv->m_data.pref->tv();
   }
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
@@ -1016,7 +1016,7 @@ inline void collectionOffsetSet(ObjectData* obj, litstr offset, CVarRef val) {
 inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
   TypedValue* key = (TypedValue*)(&offset);
   if (key->m_type == KindOfRef) {
-    key = key->m_data.ptv;
+    key = key->m_data.pref->tv();
   }
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
@@ -1034,7 +1034,7 @@ inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
 inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
   TypedValue* key = (TypedValue*)(&offset);
   if (key->m_type == KindOfRef) {
-    key = key->m_data.ptv;
+    key = key->m_data.pref->tv();
   }
   int ct = obj->getCollectionType();
   if (ct == Collection::VectorType) {
@@ -1052,7 +1052,7 @@ inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
 inline void collectionOffsetUnset(ObjectData* obj, CVarRef offset) {
   TypedValue* key = (TypedValue*)(&offset);
   if (UNLIKELY(key->m_type == KindOfRef)) {
-    key = key->m_data.ptv;
+    key = key->m_data.pref->tv();
   }
   collectionUnset(obj, key);
 }
@@ -1060,7 +1060,7 @@ inline void collectionOffsetUnset(ObjectData* obj, CVarRef offset) {
 inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.ptv;
+    tv = tv->m_data.pref->tv();
   }
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);

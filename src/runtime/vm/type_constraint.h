@@ -88,7 +88,7 @@ public:
 
     // This is part of the interpreter runtime; perf matters.
     if (tv->m_type == KindOfRef) {
-      tv = tv->m_data.ptv;
+      tv = tv->m_data.pref->tv();
     }
     if (m_nullable && IS_NULL_TYPE(tv->m_type)) return true;
 

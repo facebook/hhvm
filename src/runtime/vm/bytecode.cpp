@@ -692,16 +692,16 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
     return;
   }
   ASSERT(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
-  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.ptv->_count <= 0) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->_count <= 0) {
     // OK in the invoking frame when running a destructor.
-    os << " ??? inner_count " << tv->m_data.ptv->_count << " ";
+    os << " ??? inner_count " << tv->m_data.pref->_count << " ";
     return;
   }
   switch (tv->m_type) {
   case KindOfRef:
     os << "V:(";
-    os << "@" << tv->m_data.ptv;
-    tv = tv->m_data.ptv;  // Unbox so contents get printed below
+    os << "@" << tv->m_data.pref;
+    tv = tv->m_data.pref->tv();  // Unbox so contents get printed below
     ASSERT(tv->m_type != KindOfRef);
     toStringElm(os, tv, fp);
     os << ")";
@@ -754,7 +754,7 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
     break;
   }
   case KindOfObject: {
-    ASSERT(tv->m_data.ptv->_count > 0);
+    ASSERT(tv->m_data.pobj->getCount() > 0);
     os << tv->m_data.pobj << ":Object("
        << tvAsVariant(tv).asObjRef().get()->o_getClassName().get()->data()
        << ")";
@@ -3109,7 +3109,8 @@ static inline void lookupClsRef(TypedValue* input,
 
 static UNUSED int innerCount(const TypedValue* tv) {
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-    return tv->m_data.ptv->_count;
+    // We're using pref here arbitrarily; any refcounted union member works.
+    return tv->m_data.pref->_count;
   }
   return -1;
 }
@@ -3932,7 +3933,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopConcat(PC& pc) {
     tvCellAsVariant(c2) = concat(tvCellAsVariant(c2).toString(),
                                  tvCellAsCVarRef(c1).toString());
   }
-  ASSERT(c2->m_data.ptv->_count > 0);
+  ASSERT(c2->m_data.pstr->getCount() > 0);
   m_stack.popC();
 }
 
@@ -5873,7 +5874,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInit(PC& pc) {
     bool isIterator;
     if (c1->m_data.pobj->isCollection()) {
       isIterator = true;
-      (void) new (&it->arr()) ArrayIter(c1->m_data.pobj); 
+      (void) new (&it->arr()) ArrayIter(c1->m_data.pobj);
     } else {
       Object obj = c1->m_data.pobj->iterableObject(isIterator);
       if (isIterator) {
@@ -5906,8 +5907,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
   DECODE(Offset, offset);
   Var* v1 = m_stack.topV();
   ASSERT(v1->m_type == KindOfRef);
-  if (v1->m_data.ptv->m_type == KindOfArray) {
-    ArrayData* ad = v1->m_data.ptv->m_data.parr;
+  TypedValue* rtv = v1->m_data.pref->tv();
+  if (rtv->m_type == KindOfArray) {
+    ArrayData* ad = rtv->m_data.parr;
     if (!ad->empty()) {
       Iter* it = frame_iter(m_fp, itId);
       MIterCtx& mi = it->marr();
@@ -5917,14 +5919,14 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
     } else {
       ITER_SKIP(offset);
     }
-  } else if (v1->m_data.ptv->m_type == KindOfObject)  {
+  } else if (rtv->m_type == KindOfObject)  {
     Class* ctx = arGetContextClass(m_fp);
     CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
-    if (v1->m_data.ptv->m_data.pobj->getCollectionType() != 0) {
+    if (rtv->m_data.pobj->getCollectionType() != 0) {
       raise_error("Collection elements cannot be taken by reference");
     }
     bool isIterator;
-    Object obj = v1->m_data.ptv->m_data.pobj->iterableObject(isIterator);
+    Object obj = rtv->m_data.pobj->iterableObject(isIterator);
     if (isIterator) {
       raise_error("An iterator cannot be used with foreach by reference");
     }

@@ -450,7 +450,7 @@ GlobalCache::lookupImpl(StringData *name, bool allowCreate) {
     tvBox(retval);
   }
   if (!isBoxed && retval->m_type == KindOfRef) {
-    retval = retval->m_data.ptv;
+    retval = retval->m_data.pref->tv();
   }
   ASSERT(!isBoxed || retval->m_type == KindOfRef);
   ASSERT(!allowCreate || retval);
@@ -466,7 +466,7 @@ miss:
         m_tv,
         retval,
         hit ? "hit" : "miss",
-        retval ? retval->m_data.ptv : 0,
+        retval ? retval->m_data.pref : 0,
         retval ? retval->m_type : 0);
   return retval;
 }
@@ -765,7 +765,7 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
       static_cast<Instance*>(base)->raiseUndefProp(name);
       result = (TypedValue*)&init_null_variant;
     } else if (UNLIKELY(result->m_type == KindOfRef)) {
-      result = result->m_data.ptv;
+      result = result->m_data.pref->tv();
     }
     tvDupCell(result, stackPtr);
     Stats::inc(Stats::TgtCache_PropGetHit);
@@ -814,8 +814,8 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
       Stats::inc(Stats::TgtCache_PropGetFail);
     }
   }
-  if (UNLIKELY(result->m_type == KindOfRef )) {
-    result = result->m_data.ptv;
+  if (UNLIKELY(result->m_type == KindOfRef)) {
+    result = result->m_data.pref->tv();
   }
   tvSet(result, stackPtr);
 
@@ -958,7 +958,7 @@ SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
         cls->name()->data(),
         name->data(),
         val,
-        val->m_data.ptv,
+        val->m_data.pref,
         val->m_type);
   ASSERT(val->m_type >= MinDataType && val->m_type < MaxNumDataTypes);
   return val;

@@ -1098,7 +1098,7 @@ void HphpArray::compact(bool renumber /* = false */) {
 }
 
 #define ELEMENT_CONSTRUCT(fr, to) \
-  if (fr->m_type == KindOfRef) fr = fr->m_data.ptv; \
+  if (fr->m_type == KindOfRef) fr = fr->m_data.pref->tv(); \
   TV_DUP_CELL_NC(fr, to); \
 
 bool HphpArray::nextInsert(CVarRef data) {
@@ -1780,11 +1780,8 @@ TypedValue* HphpArray::nvGetCell(int64 ki, bool error /* = false */) const {
   if (LIKELY(pos != ElmIndEmpty)) {
     Elm* e = &m_data[pos];
     TypedValue* tv = &e->data;
-    if (tv->m_type != KindOfRef) {
-      return tv;
-    } else {
-      return tv->m_data.ptv;
-    }
+    return (tv->m_type != KindOfRef) ? tv :
+           tv->m_data.pref->tv();
   }
   if (error) {
     raise_notice("Undefined index: %lld", ki);
@@ -1802,7 +1799,7 @@ HphpArray::nvGetCell(const StringData* k, bool error /* = false */) const {
       return tv;
     }
     if (LIKELY(tv->m_type == KindOfRef)) {
-      return tv->m_data.ptv;
+      return tv->m_data.pref->tv();
     }
   }
   if (error) {
@@ -1933,7 +1930,7 @@ bool HphpArray::nvUpdate(int64 ki, int64 vi) {
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
     TypedValue* to = (TypedValue*)(&e->data);
-    if (to->m_type == KindOfRef) to = to->m_data.ptv;
+    if (to->m_type == KindOfRef) to = to->m_data.pref->tv();
     DataType oldType = to->m_type;
     uint64_t oldDatum = to->m_data.num;
     if (IS_REFCOUNTED_TYPE(oldType)) {

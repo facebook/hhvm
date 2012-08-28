@@ -948,8 +948,8 @@ void Instance::cloneSet(ObjectData* clone) {
       if (LIKELY(val->m_type != KindOfRef)) {
         iclone->o_properties.get()->set(*(const String *)&key.m_data.pstr,
                                         tvAsCVarRef(val), false);
-      } else if (val->m_data.ptv->_count <= 1) {
-        val = val->m_data.ptv;
+      } else if (val->m_data.pref->_count <= 1) {
+        val = val->m_data.pref->tv();
         iclone->o_properties.get()->set(*(const String *)&key.m_data.pstr,
                                         tvAsCVarRef(val), false);
       } else {

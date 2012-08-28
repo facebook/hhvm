@@ -55,9 +55,10 @@
       TV_INCREF(to); \
     } \
   } else { \
-    (to)->m_data.num = (fr)->m_data.ptv->m_data.num; \
+    TypedValue* fr2 = (fr)->m_data.pref->tv(); \
+    (to)->m_data.num = fr2->m_data.num; \
     (to)->_count = 0; \
-    (to)->m_type = (fr)->m_data.ptv->m_type; \
+    (to)->m_type = fr2->m_type; \
     if (IS_REFCOUNTED_TYPE((to)->m_type)) { \
       TV_INCREF(to); \
     } \
@@ -123,10 +124,10 @@
 #define TV_DUP_FLATTEN_VARS(fr, to, container) { \
   if (LIKELY(fr->m_type != KindOfRef)) { \
     TV_DUP_CELL_NC(fr, to); \
-  } else if (fr->m_data.ptv->_count <= 1 && \
+  } else if (fr->m_data.pref->_count <= 1 && \
              ((container) == NULL || \
-              fr->m_data.ptv->m_data.parr != container)) { \
-    fr = fr->m_data.ptv; \
+              fr->m_data.pref->tv()->m_data.parr != container)) { \
+    fr = fr->m_data.pref->tv(); \
     TV_DUP_CELL_NC(fr, to); \
   } else { \
     TV_DUP_VAR_NC(fr, to); \

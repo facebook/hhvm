@@ -469,20 +469,21 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
   Variant var(strongBind(array));
   TypedValue* tv = (TypedValue*)(&var);
   ASSERT(tv->m_type == KindOfRef);
-  if (tv->m_data.ptv->m_type == KindOfArray) {
+  TypedValue* rtv = tv->m_data.pref->tv();
+  if (rtv->m_type == KindOfArray) {
     MIterCtx& mi = marr();
     (void) new (&mi) MIterCtx(tv->m_data.pref);
     m_valid = mi.m_mArray->advance();
     if (!m_valid) mi.~MIterCtx();
-  } else if (tv->m_data.ptv->m_type == KindOfObject) {
+  } else if (rtv->m_type == KindOfObject) {
     CStrRef ctxStr = hhvm
                      ? g_vmContext->getContextClassName(true)
                      : FrameInjection::GetClassName(true);
-    if (tv->m_data.ptv->m_data.pobj->isCollection()) {
+    if (rtv->m_data.pobj->isCollection()) {
       raise_error("Collection elements cannot be taken by reference");
     }
     bool isIterator;
-    Object obj = tv->m_data.ptv->m_data.pobj->iterableObject(isIterator);
+    Object obj = rtv->m_data.pobj->iterableObject(isIterator);
     if (isIterator) {
       raise_error("An iterator cannot be used with foreach by reference");
     }

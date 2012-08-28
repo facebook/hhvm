@@ -42,7 +42,7 @@ void c_Vector::sweep() {
     m_data = NULL;
   }
 }
-  
+
 void c_Vector::t___construct() {
 }
 
@@ -98,7 +98,7 @@ Object c_Vector::t_add(CVarRef val) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::add);
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.ptv;
+    tv = tv->m_data.pref->tv();
   }
   add(tv);
   return this;
@@ -108,7 +108,7 @@ Object c_Vector::t_append(CVarRef val) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::append);
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.ptv;
+    tv = tv->m_data.pref->tv();
   }
   add(tv);
   return this;
@@ -142,7 +142,7 @@ void c_Vector::t_resize(CVarRef sz, CVarRef value) {
   }
   TypedValue* val = (TypedValue*)(&value);
   if (UNLIKELY(val->m_type == KindOfRef)) {
-    val = val->m_data.ptv;
+    val = val->m_data.pref->tv();
   }
   resize(intSz, val);
 }
@@ -165,7 +165,7 @@ bool c_Vector::t_isempty() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::isempty);
   return (m_size == 0);
 }
-  
+
 int64 c_Vector::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::count);
   return m_size;
@@ -236,11 +236,11 @@ void c_Vector::t_sort(CVarRef col /* = null */) {
   }
   ArrayData* ad = arr.getArrayData();
   int sz = ad->size();
-  ssize_t pos = ad->iter_begin(); 
+  ssize_t pos = ad->iter_begin();
   for (int i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     ASSERT(pos != ArrayData::invalid_index);
     tvAsVariant(&m_data[i]) = ad->getValue(pos);
-  } 
+  }
 }
 
 void c_Vector::t_reverse() {
@@ -350,7 +350,7 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
   if (key.isInteger()) {
     TypedValue* tv = (TypedValue*)(&value);
     if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.ptv;
+      tv = tv->m_data.pref->tv();
     }
     put(key.toInt64(), tv);
     return this;
@@ -378,12 +378,12 @@ Variant c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   vec->m_capacity = vec->m_size = sz;
   TypedValue* data;
   vec->m_data = data = (TypedValue*)malloc(sz * sizeof(TypedValue));
-  ssize_t pos = ad->iter_begin(); 
+  ssize_t pos = ad->iter_begin();
   for (int i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     ASSERT(pos != ArrayData::invalid_index);
     TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
     if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.ptv;
+      tv = tv->m_data.pref->tv();
     }
     tvRefcountedIncRef(tv);
     data[i].m_data.num = tv->m_data.num;
@@ -405,7 +405,7 @@ Variant c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
       "vec must be an instance of Vector"));
     throw e;
   }
-  c_Vector* v = static_cast<c_Vector*>(obj); 
+  c_Vector* v = static_cast<c_Vector*>(obj);
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
   int sz = v->m_size;
@@ -444,7 +444,7 @@ Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
   }
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
-  c_Vector* v = static_cast<c_Vector*>(obj); 
+  c_Vector* v = static_cast<c_Vector*>(obj);
   int64 startPos = offset.toInt64();
   if (UNLIKELY(uint64_t(startPos) >= uint64_t(v->m_size))) {
     if (startPos >= 0) {
@@ -636,7 +636,7 @@ void c_Map::deleteBuckets() {
     }
   }
 }
-  
+
 void c_Map::t___construct() {
 }
 
@@ -672,7 +672,7 @@ ObjectData* c_Map::clone() {
 
   return obj;
 }
-  
+
 Object c_Map::t_clear() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::clear);
   deleteBuckets();
@@ -720,7 +720,7 @@ Object c_Map::t_put(CVarRef key, CVarRef value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::put);
   TypedValue* val = (TypedValue*)(&value);
   if (UNLIKELY(val->m_type == KindOfRef)) {
-    val = val->m_data.ptv;
+    val = val->m_data.pref->tv();
   }
   if (key.isInteger()) {
     update(key.toInt64(), val);
@@ -857,7 +857,7 @@ Object c_Map::t_updatefromarray(CVarRef arr) {
     Variant k = ad->getKey(pos);
     TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
     if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.ptv;
+      tv = tv->m_data.pref->tv();
     }
     if (k.isInteger()) {
       update(k.toInt64(), (TypedValue*)(&ad->getValueRef(pos)));
@@ -896,7 +896,7 @@ Object c_Map::t_updatefromiterable(CVarRef it) {
     Variant v = iter.second();
     TypedValue* tv = (TypedValue*)(&v);
     if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.ptv;
+      tv = tv->m_data.pref->tv();
     }
     if (k.isInteger()) {
       update(k.toInt64(), tv);
@@ -973,7 +973,7 @@ Variant c_Map::ti_fromarray(const char* cls, CVarRef arr) {
     Variant k = ad->getKey(pos);
     TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
     if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.ptv;
+      tv = tv->m_data.pref->tv();
     }
     if (k.isInteger()) {
       mp->update(k.toInt64(), tv);
@@ -1005,7 +1005,7 @@ Variant c_Map::ti_fromiterable(const char* cls, CVarRef it) {
     Variant v = iter.second();
     TypedValue* tv = (TypedValue*)(&v);
     if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.ptv;
+      tv = tv->m_data.pref->tv();
     }
     if (k.isInteger()) {
       target->update(k.toInt64(), tv);
@@ -1110,7 +1110,7 @@ c_Map::Bucket* c_Map::findForInsert(int64 h) const {
 }
 
 c_Map::Bucket* c_Map::findForInsert(const char* k, int len,
-                                    int64 prehash) const { 
+                                    int64 prehash) const {
   int32 hash = c_Map::Bucket::encodeHash(prehash);
   Bucket* p = fetchBucket(prehash & m_nLastSlot);
   if (LIKELY((p->validValue() && hit_string_key(p, k, len, hash)) ||
@@ -1503,7 +1503,7 @@ void c_StableMap::deleteBuckets() {
     DELETE(Bucket)(q);
   }
 }
-  
+
 void c_StableMap::t___construct() {
 }
 
@@ -1852,7 +1852,7 @@ Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
   if (obj->getCollectionType() == Collection::StableMapType) {
     ret = obj->clone();
     return ret;
-  } 
+  }
   c_StableMap* target;
   ret = target = NEWOBJ(c_StableMap)();
   for (ArrayIter iter = obj->begin(); iter; ++iter) {
@@ -1868,7 +1868,7 @@ Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
 }
 
 bool lm_hit_string_key(const c_StableMap::Bucket* p,
-                       const char* k, int len, int32 hash) 
+                       const char* k, int len, int32 hash)
                        ALWAYS_INLINE;
 bool lm_hit_string_key(const c_StableMap::Bucket* p,
                        const char* k, int len, int32 hash) {

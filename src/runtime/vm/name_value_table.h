@@ -154,10 +154,10 @@ struct NameValueTable : private boost::noncopyable {
     TypedValue* tv = e->m_tv;
     ASSERT(tv->m_type == KindOfIndirect);
     if (!origLoc) {
-      *tv = *tv->m_data.ptv;
+      *tv = *tv->m_data.pind;
     } else {
-      *origLoc = *tv->m_data.ptv;
-      tv->m_data.ptv = origLoc;
+      *origLoc = *tv->m_data.pind;
+      tv->m_data.pind = origLoc;
     }
   }
 
@@ -167,7 +167,7 @@ struct NameValueTable : private boost::noncopyable {
    */
   TypedValue* set(const StringData* name, const TypedValue* val) {
     TypedValue* target = findTypedValue(name);
-    tvSet(val->m_type == KindOfRef ? val->m_data.ptv : val,
+    tvSet(val->m_type == KindOfRef ? val->m_data.pref->tv() : val,
           target);
     return target;
   }
@@ -331,8 +331,8 @@ private:
 
     TypedValue* ours = elm->m_tv;
     if (ours->m_type == KindOfIndirect) {
-      TypedValue* old = ours->m_data.ptv;
-      ours->m_data.ptv = loc;
+      TypedValue* old = ours->m_data.pind;
+      ours->m_data.pind = loc;
       if (retainValue) {
         *loc = *old;
       }
@@ -396,7 +396,7 @@ struct NameValueTable::Iterator {
   {
     if (!valid()) next();
   }
-  
+
   static Iterator getEnd(const NameValueTable* tab) {
     Iterator it;
     it.m_tab = tab;

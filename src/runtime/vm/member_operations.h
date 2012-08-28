@@ -59,7 +59,7 @@ static inline void opPre(TypedValue*& base, DataType& type) {
   // Get inner variant if necessary.
   type = base->m_type;
   if (type == KindOfRef) {
-    base = base->m_data.ptv;
+    base = base->m_data.pref->tv();
     type = base->m_type;
   }
 }

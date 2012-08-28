@@ -578,7 +578,7 @@ void gc_detect_cycles(const std::string& filename) {
       color = "#33CCCC";
       break;
     default:
-      ASSERT(false);
+      not_reached();
     }
     out << "  node [ id " << thisNodeId << "\n"
            "    graphics [\n"

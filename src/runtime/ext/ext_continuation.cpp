@@ -275,23 +275,14 @@ Variant c_Continuation::t___destruct() {
 }
 
 c_GenericContinuation::c_GenericContinuation(const ObjectStaticCallbacks *cb) :
-    c_Continuation(cb), m_locals(NULL), m_hasExtraVars(false), m_nLocals(0),
+    c_Continuation(cb), m_hasExtraVars(false), m_nLocals(0),
     m_vmCalledClass(0ll) {}
 c_GenericContinuation::~c_GenericContinuation() {
-  if (hhvm && m_locals != NULL) {
+  if (hhvm) {
+    TypedValue* locs = locals();
     for (int i = 0; i < m_nLocals; ++i) {
-      tvRefcountedDecRef(&m_locals[i]);
+      tvRefcountedDecRef(&locs[i]);
     }
-  }
-  c_GenericContinuation::sweep();
-}
-
-void c_GenericContinuation::sweep() {
-  if (hhvm && m_locals != NULL) {
-    free(m_locals);
-    m_locals = NULL;
-  } else {
-    ASSERT(m_locals == NULL);
   }
 }
 

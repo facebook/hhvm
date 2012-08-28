@@ -6548,9 +6548,9 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
       (origFunc->lookupVarId(thisStr) == kInvalidId);
     ScratchReg rDest(m_regMap);
     if (origLocals > 0 || fillThis) {
-      a.load_reg64_disp_reg64(rax,
-                              offsetof(c_GenericContinuation, m_locals),
-                              *rDest);
+      a.lea_reg64_disp_reg64(rax,
+                             c_GenericContinuation::localsOffset(),
+                             *rDest);
     }
     for (int i = 0; i < origLocals; ++i) {
       ASSERT(mapContains(params, i));
@@ -6645,9 +6645,9 @@ void TranslatorX64::translateUnpackCont(const Tracelet& t,
     ScratchReg rSrc(m_regMap);
     ScratchReg rZero(m_regMap);
     if (nCopy > 0) {
-      a.  load_reg64_disp_reg64(rCont,
-                                offsetof(c_GenericContinuation, m_locals),
-                                *rSrc);
+      a.  lea_reg64_disp_reg64(rCont,
+                               c_GenericContinuation::localsOffset(),
+                               *rSrc);
       a.  xor_reg32_reg32(*rZero, *rZero);
     }
     for (int srcOff = 0, destOff = localOffset(nCopy);
@@ -6720,9 +6720,9 @@ void TranslatorX64::translatePackCont(const Tracelet& t,
   ScratchReg rDest(m_regMap);
   ScratchReg rZero(m_regMap);
   if (nCopy > 0) {
-    a.  load_reg64_disp_reg64(rCont,
-                              offsetof(c_GenericContinuation, m_locals),
-                              *rDest);
+    a.  lea_reg64_disp_reg64(rCont,
+                             c_GenericContinuation::localsOffset(),
+                             *rDest);
     a.  xor_reg32_reg32(*rZero, *rZero);
   }
   for (int idx = nCopy, destOff = 0, srcOff = localOffset(nCopy);

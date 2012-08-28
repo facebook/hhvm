@@ -6391,9 +6391,10 @@ VMExecutionContext::createContinuation(ActRec* fp,
   static const StringData* closure = StringData::GetStaticString("{closure}");
   const StringData* origName =
     origFunc->isClosureBody() ? closure : origFunc->fullName();
+  int nLocals = genFunc->numNamedLocals() - 1; //Don't need space for __cont__
   c_GenericContinuation* cont =
-    dynamic_cast<c_GenericContinuation*>(newInstance(genClass));
-  ASSERT(cont);
+    c_GenericContinuation::alloc(genClass, nLocals);
+  memset(cont->locals(), 0, sizeof(TypedValue) * nLocals);
   cont->create((int64)&ci_callUserFunc, (int64)genFunc, isMethod,
                StrNR(const_cast<StringData*>(origName)), Array(), obj, args);
   cont->incRefCount();
@@ -6402,8 +6403,6 @@ VMExecutionContext::createContinuation(ActRec* fp,
     cont->m_vmCalledClass = (intptr_t)frameStaticClass(fp) | 0x1ll;
   }
 
-  int nLocals = genFunc->numNamedLocals() - 1; //Don't need space for __cont__
-  cont->m_locals = (TypedValue*)calloc(nLocals, sizeof(TypedValue));
   cont->m_nLocals = nLocals;
   return cont;
 }
@@ -6416,7 +6415,7 @@ static inline void setContVar(const Func* genFunc,
   Variant* dest;
   Id id = genFunc->lookupVarId(name);
   if (id != kInvalidId) {
-    dest = &tvAsVariant(&cont->m_locals[nLocals - id]);
+    dest = &tvAsVariant(&cont->locals()[nLocals - id]);
   } else {
     dest = &cont->m_vars.lval(*(String*)&name);
   }
@@ -6430,9 +6429,9 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
                                          c_GenericContinuation* cont) {
   // For functions that contain only named locals, the variable
   // environment is saved and restored by teleporting the values (and
-  // their references) between the evaluation stack and m_locals using
-  // memcpy. Any variables in a VarEnv are saved and restored from
-  // m_vars as usual.
+  // their references) between the evaluation stack and the local
+  // space at the end of the object using memcpy. Any variables in a
+  // VarEnv are saved and restored from m_vars as usual.
   static const StringData* thisStr = StringData::GetStaticString("this");
   int nLocals = cont->m_nLocals;
   bool skipThis;
@@ -6459,7 +6458,7 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   if (!skipThis && cont->m_obj.get()) {
     Id id = genFunc->lookupVarId(thisStr);
     if (id != kInvalidId) {
-      tvAsVariant(&cont->m_locals[nLocals - id]) = cont->m_obj;
+      tvAsVariant(&cont->locals()[nLocals - id]) = cont->m_obj;
     }
   }
   return cont;
@@ -6500,7 +6499,7 @@ int VMExecutionContext::unpackContinuation(c_GenericContinuation* cont,
   // the runtime stack so we don't have to do any refcounting in the
   // fast case
   int nCopy = cont->m_nLocals;
-  TypedValue* src = &cont->m_locals[0];
+  TypedValue* src = cont->locals();
   memcpy(dest, src, nCopy * sizeof(TypedValue));
   memset(src, 0x0, nCopy * sizeof(TypedValue));
 
@@ -6540,7 +6539,7 @@ void VMExecutionContext::packContinuation(c_GenericContinuation* cont,
                                           int label) {
   int nCopy = cont->m_nLocals;
   TypedValue* src = frame_local(fp, nCopy);
-  TypedValue* dest = &cont->m_locals[0];
+  TypedValue* dest = cont->locals();
   memcpy(dest, src, nCopy * sizeof(TypedValue));
   memset(src, 0x0, nCopy * sizeof(TypedValue));
 

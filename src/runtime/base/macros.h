@@ -98,14 +98,21 @@ namespace HPHP {
   INVOKE_FEW_ARGS(PASS_ARR,INVOKE_FEW_ARGS_COUNT)
 #define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS(IMPL,INVOKE_FEW_ARGS_COUNT)
 
-#define DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName) \
+#define DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                \
   DECLARE_OBJECT_ALLOCATION_NO_SWEEP(c_##cls)                           \
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
   static HPHP::VM::Class* s_cls;                                        \
 
-#define DECLARE_CLASS_COMMON(cls, originalName) \
+#define DECLARE_CLASS_COMMON_NO_ALLOCATION(cls, originalName)           \
+  public:                                                               \
+  static void *ObjAllocatorInitSetup;                                   \
+  static const char *GetClassName() { return #originalName; }           \
+  static StaticString s_class_name;                                     \
+  static HPHP::VM::Class* s_cls;                                        \
+
+#define DECLARE_CLASS_COMMON(cls, originalName)                         \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
@@ -114,6 +121,10 @@ namespace HPHP {
 
 #define DECLARE_CLASS_NO_SWEEP(cls, originalName, parent)               \
   DECLARE_CLASS_COMMON_NO_SWEEP(cls, originalName)                      \
+  public:                                                               \
+
+#define DECLARE_CLASS_NO_ALLOCATION(cls, originalName, parent)          \
+  DECLARE_CLASS_COMMON_NO_ALLOCATION(cls, originalName)                 \
   public:                                                               \
 
 #define DECLARE_CLASS(cls, originalName, parent)                        \

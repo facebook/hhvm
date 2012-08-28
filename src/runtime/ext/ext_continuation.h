@@ -143,9 +143,21 @@ public:
 // class GenericContinuation
 
 FORWARD_DECLARE_CLASS_BUILTIN(GenericContinuation);
-class c_GenericContinuation : public c_Continuation, public Sweepable {
+class c_GenericContinuation : public c_Continuation {
  public:
-  DECLARE_CLASS(GenericContinuation, GenericContinuation, Continuation)
+  DECLARE_CLASS_NO_ALLOCATION(GenericContinuation, GenericContinuation, Continuation)
+
+  static c_GenericContinuation* alloc(VM::Class* cls, int nLocals) {
+    c_GenericContinuation* cont =
+      (c_GenericContinuation*)ALLOCOBJSZ(sizeForNLocals(nLocals));
+    new ((void *)cont) c_GenericContinuation(
+      ObjectStaticCallbacks::encodeVMClass(cls));
+    return cont;
+  }
+  void operator delete(void* p) {
+    c_GenericContinuation* this_ = (c_GenericContinuation*)p;
+    DELETEOBJSZ(sizeForNLocals(this_->m_nLocals))(this_);
+  }
 
   // need to implement
   public: c_GenericContinuation(const ObjectStaticCallbacks *cb = &cw_GenericContinuation);
@@ -165,9 +177,17 @@ class c_GenericContinuation : public c_Continuation, public Sweepable {
 
 public:
   HphpArray* getStaticLocals();
-  
+  static size_t sizeForNLocals(int n) {
+    return sizeof(c_GenericContinuation) + sizeof(TypedValue) * n;
+  }
+  static size_t localsOffset() {
+    return sizeof(c_GenericContinuation);
+  }
+  TypedValue* locals() {
+    return (TypedValue*)((uintptr_t)this + localsOffset());
+  }
+
 public:
-  TypedValue* m_locals;
   bool m_hasExtraVars;
   int m_nLocals;
   Array m_vars;

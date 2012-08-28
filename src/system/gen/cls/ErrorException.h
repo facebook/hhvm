@@ -38,7 +38,7 @@ extern VariantProxy s_sys_svsp00000000;
 #define s_sys_svs00000000 (*(Variant *)&s_sys_svsp00000000)
 #endif
 
-/* SRC: classes/exception.php line 299 */
+/* SRC: classes/exception.php line 301 */
 FORWARD_DECLARE_CLASS(ErrorException);
 extern const ObjectStaticCallbacks cw_ErrorException;
 class c_ErrorException : public c_Exception {

@@ -9,6 +9,7 @@
 #include "bzip2.inc"
 #include "class.inc"
 #include "closure.inc"
+#include "collection.inc"
 #include "continuation.inc"
 #include "ctype.inc"
 #include "curl.inc"

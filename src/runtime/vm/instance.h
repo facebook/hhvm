@@ -171,7 +171,7 @@ public:
   virtual Variant t___call(Variant v_name, Variant v_arguments);
   virtual Variant t___set(Variant v_name, Variant v_value);
   virtual Variant t___get(Variant v_name);
-  virtual Variant& ___offsetget_lval(Variant v_name);
+  virtual Variant& ___offsetget_lval(Variant key);
   virtual bool t___isset(Variant v_name);
   virtual Variant t___unset(Variant v_name);
   virtual Variant t___sleep();

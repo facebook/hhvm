@@ -62,6 +62,7 @@
 #include <runtime/base/util/extended_logger.h>
 
 #include <system/lib/systemlib.h>
+#include <runtime/ext/ext_collection.h>
 
 #include "runtime/vm/name_value_table_wrapper.h"
 #include "runtime/vm/request_arena.h"
@@ -3464,6 +3465,7 @@ VMExecutionContext::getElem(TypedValue* base, TypedValue* key,
 template <bool warn,
           bool define,
           bool unset,
+          bool reffy,
           unsigned mdepth, // extra args on stack for set (e.g. rhs)
           VMExecutionContext::VectorLeaveCode mleave>
 inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
@@ -3623,7 +3625,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
       if (unset) {
         result = ElemU(tvScratch, tvRef, base, curMember);
       } else if (define) {
-        result = ElemD<warn>(tvScratch, tvRef, base, curMember);
+        result = ElemD<warn,reffy>(tvScratch, tvRef, base, curMember);
       } else {
         result = Elem<warn>(tvScratch, tvRef, base, baseStrOff, curMember);
       }
@@ -4737,7 +4739,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetM(PC& pc) {
   DECLARE_SETHELPER_ARGS
   TypedValue* tv1 = m_stack.allocTV();
   tvWriteUninit(tv1);
-  if (!setHelperPre<false, true, false, 1, ConsumeAll>(SETHELPERPRE_ARGS)) {
+  if (!setHelperPre<false, true, false, true, 1,
+      ConsumeAll>(SETHELPERPRE_ARGS)) {
     if (base->m_type != KindOfRef) {
       tvBox(base);
     }
@@ -5024,7 +5027,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetS(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopSetM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
-  if (!setHelperPre<false, true, false, 1, LeaveLast>(SETHELPERPRE_ARGS)) {
+  if (!setHelperPre<false, true, false, false, 1,
+      LeaveLast>(SETHELPERPRE_ARGS)) {
     Cell* c1 = m_stack.topC();
 
     if (mcode == MW) {
@@ -5126,7 +5130,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
   NEXT();
   DECODE(unsigned char, op);
   DECLARE_SETHELPER_ARGS
-  if (!setHelperPre<MoreWarnings, true, false, 1,
+  if (!setHelperPre<MoreWarnings, true, false, false, 1,
       LeaveLast>(SETHELPERPRE_ARGS)) {
     TypedValue* result;
     Cell* rhs = m_stack.topC();
@@ -5218,7 +5222,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecM(PC& pc) {
   DECLARE_SETHELPER_ARGS
   TypedValue to;
   tvWriteUninit(&to);
-  if (!setHelperPre<MoreWarnings, true, false, 0,
+  if (!setHelperPre<MoreWarnings, true, false, false, 0,
       LeaveLast>(SETHELPERPRE_ARGS)) {
     if (mcode == MW) {
       IncDecNewElem(tvScratch, tvRef, op, base, to);
@@ -5308,7 +5312,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   TypedValue* tv1 = m_stack.topTV();
-  if (!setHelperPre<false, true, false, 1, ConsumeAll>(SETHELPERPRE_ARGS)) {
+  if (!setHelperPre<false, true, false, true, 1,
+      ConsumeAll>(SETHELPERPRE_ARGS)) {
     // Bind the element/property with the var on the top of the stack
     tvBind(tv1, base);
   }
@@ -5353,7 +5358,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetG(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopUnsetM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
-  if (!setHelperPre<false, false, true, 0, LeaveLast>(SETHELPERPRE_ARGS)) {
+  if (!setHelperPre<false, false, true, false, 0,
+      LeaveLast>(SETHELPERPRE_ARGS)) {
     switch (mcode) {
     case MEL:
     case MEC:
@@ -5805,7 +5811,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
     DECLARE_SETHELPER_ARGS
     TypedValue* tv1 = m_stack.allocTV();
     tvWriteUninit(tv1);
-    if (!setHelperPre<false, true, false, 1,
+    if (!setHelperPre<false, true, false, true, 1,
         ConsumeAll>(SETHELPERPRE_ARGS)) {
       if (base->m_type != KindOfRef) {
         tvBox(base);
@@ -5865,13 +5871,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInit(PC& pc) {
     Iter* it = frame_iter(m_fp, itId);
     CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
     bool isIterator;
-    Object obj = c1->m_data.pobj->iterableObject(isIterator);
-    if (isIterator) {
-      (void) new (&it->arr()) ArrayIter(obj.get());
+    if (c1->m_data.pobj->isCollection()) {
+      isIterator = true;
+      (void) new (&it->arr()) ArrayIter(c1->m_data.pobj); 
     } else {
-      Array iterArray(obj->o_toIterArray(ctxStr));
-      ArrayData* ad = iterArray.getArrayData();
-      (void) new (&it->arr()) ArrayIter(ad);
+      Object obj = c1->m_data.pobj->iterableObject(isIterator);
+      if (isIterator) {
+        (void) new (&it->arr()) ArrayIter(obj.get());
+      } else {
+        Array iterArray(obj->o_toIterArray(ctxStr));
+        ArrayData* ad = iterArray.getArrayData();
+        (void) new (&it->arr()) ArrayIter(ad);
+      }
     }
     if (it->arr().end()) {
       // Iterator was empty; call the destructor on the iterator we
@@ -5909,7 +5920,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
   } else if (v1->m_data.ptv->m_type == KindOfObject)  {
     Class* ctx = arGetContextClass(m_fp);
     CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
-
+    if (v1->m_data.ptv->m_data.pobj->getCollectionType() != 0) {
+      raise_error("Collection elements cannot be taken by reference");
+    }
     bool isIterator;
     Object obj = v1->m_data.ptv->m_data.pobj->iterableObject(isIterator);
     if (isIterator) {

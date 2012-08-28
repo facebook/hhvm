@@ -441,6 +441,9 @@ inline Variant throw_missing_file(const char *cls) {
 }
 void throw_instance_method_fatal(const char *name);
 
+void throw_collection_modified();
+void throw_iterator_not_valid();
+
 /**
  * Argument count handling.
  *   - When level is 2, it's from constructors that turn these into fatals

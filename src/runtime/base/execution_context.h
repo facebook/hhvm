@@ -464,7 +464,7 @@ private:
                  TypedValue& tvRef, TypedValue& tvRef2,
                  VM::MemberCode& mcode, TypedValue*& curMember);
 
-  template <bool warn, bool define, bool unset, unsigned mdepth,
+  template <bool warn, bool define, bool unset, bool reffy, unsigned mdepth,
             VectorLeaveCode mleave>
   bool setHelperPre(VM::PC& pc, unsigned& ndiscard, TypedValue*& base,
                     bool& baseStrOff, TypedValue& tvScratch,

@@ -9,6 +9,7 @@ RUN_TESTSUITE(TestExtBcmath);
 RUN_TESTSUITE(TestExtBzip2);
 RUN_TESTSUITE(TestExtClass);
 RUN_TESTSUITE(TestExtClosure);
+RUN_TESTSUITE(TestExtCollection);
 RUN_TESTSUITE(TestExtContinuation);
 RUN_TESTSUITE(TestExtCtype);
 RUN_TESTSUITE(TestExtCurl);

@@ -24,6 +24,7 @@
 #include <runtime/base/class_info.h>
 #include <runtime/ext/ext_closure.h>
 #include <runtime/ext/ext_continuation.h>
+#include <runtime/ext/ext_collection.h>
 
 #include <system/lib/systemlib.h>
 
@@ -43,6 +44,7 @@ static CallInfoWithConstructor s_ObjectData_call_handler(
   (void*)ObjectData::callHandlerFewArgs, 0,
   CallInfo::VarArgs | CallInfo::Method | CallInfo::CallMagicMethod, 0);
 
+static StaticString s_offsetGet("offsetGet");
 static StaticString s___call("__call");
 static StaticString s___callStatic("__callStatic");
 static StaticString s_serialize("serialize");
@@ -703,6 +705,9 @@ Object ObjectData::iterableObject(bool& isInstanceofIterator) {
 
 ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
   bool isInstanceofIterator;
+  if (isCollection()) {
+    return ArrayIter(this);
+  }
   Object iterable = iterableObject(isInstanceofIterator);
   if (isInstanceofIterator) {
     return ArrayIter(iterable.get());
@@ -714,6 +719,9 @@ ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
 MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
                                    CStrRef context /* = null_string */) {
   bool isInstanceofIterator;
+  if (isCollection()) {
+    raise_error("Collection elements cannot be taken by reference");
+  }
   Object iterable = iterableObject(isInstanceofIterator);
   if (isInstanceofIterator) {
     throw FatalErrorException("An iterator cannot be used with "
@@ -1832,9 +1840,19 @@ Variant *ObjectData::___lval(Variant v_name) {
   return NULL;
 }
 
-Variant &ObjectData::___offsetget_lval(Variant v_name) {
-  return o_properties.asArray().lvalAt(v_name, AccessFlags::Key);
+Variant& ObjectData::___offsetget_lval(Variant key) {
+  if (isCollection()) {
+    return collectionOffsetGet(this, key);
+  } else {
+    if (!o_instanceof("ArrayAccess")) {
+      throw InvalidOperandException("not ArrayAccess objects");
+    }
+    Variant &v = get_system_globals()->__lvalProxy;
+    v = o_invoke_few_args(s_offsetGet, -1, 1, key);
+    return v;
+  }
 }
+
 bool ObjectData::t___isset(Variant v_name) {
   return false;
 }

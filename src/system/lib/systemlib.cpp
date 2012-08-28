@@ -49,6 +49,10 @@ HPHP::VM::Unit* SystemLib::s_nativeClassUnit = NULL;
 HPHP::VM::Class* SystemLib::s_stdclassClass = NULL;
 HPHP::VM::Class* SystemLib::s_ExceptionClass = NULL;
 HPHP::VM::Class* SystemLib::s_BadMethodCallExceptionClass = NULL;
+HPHP::VM::Class* SystemLib::s_InvalidArgumentExceptionClass = NULL;
+HPHP::VM::Class* SystemLib::s_RuntimeExceptionClass = NULL;
+HPHP::VM::Class* SystemLib::s_OutOfBoundsExceptionClass = NULL;
+HPHP::VM::Class* SystemLib::s_InvalidOperationExceptionClass = NULL;
 HPHP::VM::Class* SystemLib::s_pinitSentinelClass = NULL;
 HPHP::VM::Class* SystemLib::s_resourceClass = NULL;
 HPHP::VM::Class* SystemLib::s_DOMExceptionClass = NULL;
@@ -94,6 +98,38 @@ ObjectData* SystemLib::AllocBadMethodCallExceptionObject(CVarRef message) {
     CREATE_AND_CONSTRUCT(BadMethodCallException, CREATE_VECTOR1(message));
   } else {
     return (NEWOBJ(c_BadMethodCallException)())->create(message);
+  }
+}
+
+ObjectData* SystemLib::AllocInvalidArgumentExceptionObject(CVarRef message) {
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(InvalidArgumentException, CREATE_VECTOR1(message));
+  } else {
+    return (NEWOBJ(c_InvalidArgumentException)())->create(message);
+  }
+}
+
+ObjectData* SystemLib::AllocRuntimeExceptionObject(CVarRef message) {
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(RuntimeException, CREATE_VECTOR1(message));
+  } else {
+    return (NEWOBJ(c_RuntimeException)())->create(message);
+  }
+}
+
+ObjectData* SystemLib::AllocOutOfBoundsExceptionObject(CVarRef message) {
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(OutOfBoundsException, CREATE_VECTOR1(message));
+  } else {
+    return (NEWOBJ(c_OutOfBoundsException)())->create(message);
+  }
+}
+
+ObjectData* SystemLib::AllocInvalidOperationExceptionObject(CVarRef message) {
+  if (hhvm) {
+    CREATE_AND_CONSTRUCT(InvalidOperationException, CREATE_VECTOR1(message));
+  } else {
+    return (NEWOBJ(c_InvalidOperationException)())->create(message);
   }
 }
 

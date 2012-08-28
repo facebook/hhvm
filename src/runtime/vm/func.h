@@ -373,8 +373,6 @@ private:
     bool m_isGenerator : 1;
     bool m_isGeneratorFromClosure : 1;
     UserAttributeMap m_userAttributes;
-    SharedData(PreClass* preClass, const ClassInfo::MethodInfo* info,
-        BuiltinFunction funcPtr);
     SharedData(PreClass* preClass, Id id, Offset base,
         Offset past, int line1, int line2, bool top,
         const StringData* docComment);

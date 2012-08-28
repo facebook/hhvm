@@ -24,6 +24,7 @@
 #include "runtime/base/builtin_functions.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/runtime.h"
+#include "runtime/ext/ext_collection.h"
 
 namespace HPHP {
 namespace VM {
@@ -35,9 +36,13 @@ static const bool MoreWarnings = false;
 void objArrayAccess(TypedValue* base);
 TypedValue* objOffsetGet(TypedValue& tvRef, TypedValue* base,
                          CVarRef offset, bool validate=true);
-bool objOffsetExists(TypedValue* base, CVarRef offset);
+bool objOffsetIsset(TypedValue& tvRef, TypedValue* base, CVarRef offset,
+                    bool validate=true);
+bool objOffsetEmpty(TypedValue& tvRef, TypedValue* base, CVarRef offset,
+                    bool validate=true);
 void objOffsetSet(TypedValue* base, CVarRef offset, TypedValue* val,
                   bool validate=true);
+void objOffsetAppend(TypedValue* base, TypedValue* val, bool validate=true);
 void objOffsetUnset(TypedValue* base, CVarRef offset);
 
 static inline String prepareKey(TypedValue* tv) {
@@ -161,7 +166,11 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      result = collectionGet(base->m_data.pobj, key);
+    } else {
+      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+    }
     break;
   }
   default: {
@@ -199,7 +208,7 @@ static inline TypedValue* ElemDArray(TypedValue* base, TypedValue* key) {
 // \____ ____/
 //      v
 //   $result
-template <bool warn>
+template <bool warn, bool reffy>
 static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
                                 TypedValue* base, TypedValue* key) {
   TypedValue* result;
@@ -261,7 +270,16 @@ static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      if (reffy) {
+        raise_error("Collection elements cannot be taken by reference");
+        result = NULL;
+      } else {
+        result = collectionGet(base->m_data.pobj, key);
+      }
+    } else {
+      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+    }
     break;
   }
   default: {
@@ -314,7 +332,11 @@ static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      result = collectionGet(base->m_data.pobj, key);
+    } else {
+      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+    }
     break;
   }
   default: {
@@ -369,7 +391,12 @@ static inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    result = objOffsetGet(tvRef, base, null_variant);
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      raise_error("Cannot use [] for reading");
+      result = NULL;
+    } else {
+      result = objOffsetGet(tvRef, base, init_null_variant);
+    }
     break;
   }
   default: {
@@ -530,7 +557,11 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
     break;
   }
   case KindOfObject: {
-    objOffsetSet(base, tvAsCVarRef(key), (TypedValue*)value);
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      collectionSet(base->m_data.pobj, key, (TypedValue*)value);
+    } else {
+      objOffsetSet(base, tvAsCVarRef(key), (TypedValue*)value);
+    }
     break;
   }
   default: ASSERT(false);
@@ -592,7 +623,11 @@ static inline void SetNewElem(TypedValue* base, Cell* value) {
     break;
   }
   case KindOfObject: {
-    objOffsetSet(base, init_null_variant, (TypedValue*)value);
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      collectionAppend(base->m_data.pobj, (TypedValue*)value);
+    } else {
+      objOffsetAppend(base, (TypedValue*)value);
+    }
     break;
   }
   default: ASSERT(false);
@@ -655,9 +690,14 @@ static inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    result = objOffsetGet(tvRef, base, tvAsCVarRef(key));
-    SETOP_BODY(result, op, rhs);
-    objOffsetSet(base, tvAsCVarRef(key), result, false);
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      result = collectionGet(base->m_data.pobj, key);
+      SETOP_BODY(result, op, rhs);
+    } else {
+      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+      SETOP_BODY(result, op, rhs);
+      objOffsetSet(base, tvAsCVarRef(key), result, false);
+    }
     break;
   }
   default: {
@@ -720,9 +760,14 @@ static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    result = objOffsetGet(tvRef, base, init_null_variant);
-    SETOP_BODY(result, op, rhs);
-    objOffsetSet(base, init_null_variant, result, false);
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      raise_error("Cannot use [] for reading");
+      result = NULL;
+    } else {
+      result = objOffsetGet(tvRef, base, init_null_variant);
+      SETOP_BODY(result, op, rhs);
+      objOffsetAppend(base, result, false);
+    }
     break;
   }
   default: {
@@ -851,7 +896,12 @@ static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    TypedValue* result = objOffsetGet(tvRef, base, tvAsCVarRef(key));
+    TypedValue* result;
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      result = collectionGet(base->m_data.pobj, key);
+    } else {
+      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+    }
     IncDecBody(op, result, &dest);
     break;
   }
@@ -908,9 +958,14 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    TypedValue* result = objOffsetGet(tvRef, base,
-                                      init_null_variant);
-    IncDecBody(op, result, &dest);
+    TypedValue* result;
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      raise_error("Cannot use [] for reading");
+      result = NULL;
+    } else {
+      result = objOffsetGet(tvRef, base, init_null_variant);
+      IncDecBody(op, result, &dest);
+    }
     break;
   }
   default: ASSERT(false);
@@ -953,7 +1008,11 @@ static inline void UnsetElem(TypedValue* base, TypedValue* member) {
     break;
   }
   case KindOfObject: {
-    objOffsetUnset(base, tvAsCVarRef(member));
+    if (LIKELY(base->m_data.pobj->isCollection())) {
+      collectionUnset(base->m_data.pobj, member);
+    } else {
+      objOffsetUnset(base, tvAsCVarRef(member));
+    }
     break;
   }
   default: break; // Do nothing.
@@ -1099,13 +1158,19 @@ static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    if (!useEmpty) {
-      return objOffsetExists(base, tvAsCVarRef(key));
+    if (useEmpty) {
+      if (LIKELY(base->m_data.pobj->isCollection())) {
+        return collectionEmpty(base->m_data.pobj, key);
+      } else {
+        return objOffsetEmpty(tvRef, base, tvCellAsCVarRef(key));
+      }
+    } else {
+      if (LIKELY(base->m_data.pobj->isCollection())) {
+        return collectionIsset(base->m_data.pobj, key);
+      } else {
+        return objOffsetIsset(tvRef, base, tvCellAsCVarRef(key));
+      }
     }
-    if (!objOffsetExists(base, tvAsCVarRef(key))) {
-      return true;
-    }
-    result = objOffsetGet(tvRef, base, tvAsCVarRef(key), false);
     break;
   }
   default: {

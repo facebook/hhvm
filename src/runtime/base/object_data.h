@@ -63,16 +63,23 @@ namespace VM {
 class ObjectData : public CountableNF {
  public:
   enum Attribute {
-    NoDestructor  = 0x0002, // __destruct()
-    HasSleep      = 0x0004, // __sleep()
-    UseSet        = 0x0008, // __set()
-    UseGet        = 0x0010, // __get()
-    UseIsset      = 0x0020, // __isset()
-    UseUnset      = 0x0040, // __unset()
-    HasLval       = 0x0080, // defines ___lval
-    HasCall       = 0x0100, // defines __call
-    HasCallStatic = 0x0200, // defines __callStatic
+    NoDestructor  = 0x0001, // __destruct()
+    HasSleep      = 0x0002, // __sleep()
+    UseSet        = 0x0004, // __set()
+    UseGet        = 0x0008, // __get()
+    UseIsset      = 0x0010, // __isset()
+    UseUnset      = 0x0020, // __unset()
+    HasLval       = 0x0040, // defines ___lval
+    HasCall       = 0x0080, // defines __call
+    HasCallStatic = 0x0100, // defines __callStatic
+    // The top 3 bits of o_attributes are reserved to indicate the
+    // type of collection
+    CollectionTypeAttrMask = (7 << 13),
+    VectorAttrInit = (Collection::VectorType << 13),
+    MapAttrInit = (Collection::MapType << 13),
+    StableMapAttrInit = (Collection::StableMapType << 13),
   };
+
   enum {
     RealPropCreate = 1,   // Property should be created if it doesnt exist
     RealPropWrite = 2,    // Property could be modified
@@ -111,6 +118,14 @@ class ObjectData : public CountableNF {
   }
   HPHP::VM::Class* instanceof(const HPHP::VM::PreClass* pc) const;
   bool instanceof(const HPHP::VM::Class* c) const;
+
+  bool isCollection() {
+    return getCollectionType() != Collection::InvalidType;
+  }
+  int getCollectionType() {
+    // Return the upper 3 bits of o_attribute
+    return (int)(o_attribute >> 13) & 7;
+  }
 
   void setAttributes(int attrs) { o_attribute |= attrs; }
   void setAttributes(const ObjectData *o) { o_attribute |= o->o_attribute; }
@@ -312,7 +327,7 @@ class ObjectData : public CountableNF {
   virtual Variant t___set(Variant v_name, Variant v_value);
   virtual Variant t___get(Variant v_name);
   virtual Variant *___lval(Variant v_name);
-  virtual Variant &___offsetget_lval(Variant v_name);
+  virtual Variant &___offsetget_lval(Variant key);
   virtual bool t___isset(Variant v_name);
   virtual Variant t___unset(Variant v_name);
   virtual Variant t___sleep();

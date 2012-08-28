@@ -548,17 +548,6 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
   }
 }
 
-Func::SharedData::SharedData(PreClass* preClass,
-                             const ClassInfo::MethodInfo* info,
-                             BuiltinFunction builtinFuncPtr)
-  : m_preClass(preClass), m_id(-1), m_base(0),
-    m_numLocals(0), m_numIterators(0),
-    m_past(0), m_line1(0), m_line2(0),
-    m_info(info), m_refBitVec(NULL), m_builtinFuncPtr(builtinFuncPtr),
-    m_docComment(NULL), m_top(false), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false) {
-}
-
 Func::SharedData::SharedData(PreClass* preClass, Id id,
                              Offset base, Offset past, int line1, int line2,
                              bool top, const StringData* docComment)
@@ -629,7 +618,7 @@ FuncEmitter::~FuncEmitter() {
 
 void FuncEmitter::init(int line1, int line2, Offset base, Attr attrs, bool top,
                        const StringData* docComment) {
-  m_line1 = line1;
+  m_line1 = line1; 
   m_line2 = line2;
   m_base = base;
   m_attrs = attrs;
@@ -815,6 +804,8 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   m_base = base;
   m_top = true;
   m_docComment = StringData::GetStaticString(info->docComment);
+  m_line1 = 0;
+  m_line2 = 0;
   m_attrs = AttrNone;
   // TODO: Task #1137917: See if we can avoid marking most builtins with
   // "MayUseVV" and still make things work

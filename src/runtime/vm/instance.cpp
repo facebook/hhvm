@@ -830,16 +830,24 @@ Variant Instance::t___unset(Variant v_name) {
 DECLARE_THREAD_LOCAL(Variant, __lvalProxy);
 DECLARE_THREAD_LOCAL(Variant, nullProxy);
 
-Variant& Instance::___offsetget_lval(Variant v_name) {
-  static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
-  const Func* method = m_cls->lookupMethod(sd__offsetGet);
-  if (method) {
-    Variant *v = __lvalProxy.get();
-    g_vmContext->invokeFunc((TypedValue*)v, method,
-                          CREATE_VECTOR1(v_name), this);
-    return *v;
+Variant& Instance::___offsetget_lval(Variant key) {
+  if (isCollection()) {
+    return collectionOffsetGet(this, key);
   } else {
-    return *nullProxy.get();
+    if (!o_instanceof("ArrayAccess")) {
+      throw InvalidOperandException("not ArrayAccess objects");
+    }
+    static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
+    const Func* method = m_cls->lookupMethod(sd__offsetGet);
+    ASSERT(method);
+    if (method) {
+      Variant *v = __lvalProxy.get();
+      g_vmContext->invokeFunc((TypedValue*)v, method,
+                              CREATE_VECTOR1(key), this);
+      return *v;
+    } else {
+      return *nullProxy.get();
+    }
   }
 }
 

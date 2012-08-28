@@ -231,21 +231,14 @@ function EndClass() {
   global $classes, $current_class;
 
   $have_ctor = false;
-  $have_dtor = false;
   foreach ($classes[$current_class]['methods'] as $method) {
     if ($method['name'] == '__construct') $have_ctor = true;
-    if ($method['name'] == '__destruct') $have_dtor = true;
   }
 
   // We don't have the information to autogenerate a ctor def,
   // so make the user do it.
   if (!$have_ctor) {
     throw new Exception("No constructor defined for class $current_class");
-  }
-  // Generate the appropriate IDL for the dtor, if it doesn't exist.
-  if (!$have_dtor) {
-    DefineFunction(array('name' => '__destruct',
-                         'return' => array('type' => Variant)));
   }
 
   $current_class = '';

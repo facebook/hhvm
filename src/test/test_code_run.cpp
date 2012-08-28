@@ -31299,7 +31299,7 @@ bool TestCodeRun::TestStrictMode() {
 
   // Kitchen sink
   MVCRO("<?hh\n"
-        "function vidx<X>(vector<X> $list, int $idx):X {\n"
+        "function vidx<X>(blarg<X> $list, int $idx):X {\n"
         "  return $list->d[$idx];\n"
         "}\n"
         "function pair<X,Y>(X $x, Y $y):(X,Y) { return array($x, $y); }\n"
@@ -31308,8 +31308,8 @@ bool TestCodeRun::TestStrictMode() {
         "}\n"
         "interface Face<A> {\n"
         "}\n"
-        "class vector<X> { function __construct($x) { $this->d = $x; } }\n"
-        "function vector<X>(/*...*/):vector<X> { return new vector(func_get_args()); }\n"
+        "class blarg<X> { function __construct($x) { $this->d = $x; } }\n"
+        "function blarg<X>(/*...*/):blarg<X> { return new blarg(func_get_args()); }\n"
         "\n"
         "class Foo<X> implements Face<X> {\n"
         "  const string BLEH = \"b\";\n"
@@ -31322,7 +31322,7 @@ bool TestCodeRun::TestStrictMode() {
         "         (function(Foo,Bar):C) $d) {\n"
         "}\n"
         "\n"
-        "$a = vector('a','aa','aaa');\n"
+        "$a = blarg('a','aa','aaa');\n"
         "$d = (function():UNICORNS{return 'd';});\n"
         "echo vidx($a, 0), Foo::BLEH, car($blork), $d();\n",
 

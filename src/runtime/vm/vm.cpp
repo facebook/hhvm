@@ -48,6 +48,13 @@ static StaticString s_stdclass(LITSTR_INIT("stdclass"));
 static StaticString s_Exception(LITSTR_INIT("Exception"));
 static StaticString s_BadMethodCallException(
   LITSTR_INIT("BadMethodCallException"));
+static StaticString s_InvalidArgumentException(
+  LITSTR_INIT("InvalidArgumentException"));
+static StaticString s_RuntimeException(LITSTR_INIT("RuntimeException"));
+static StaticString s_OutOfBoundsException(
+  LITSTR_INIT("OutOfBoundsException"));
+static StaticString s_InvalidOperationException(
+  LITSTR_INIT("InvalidOperationException"));
 static StaticString s_Directory(LITSTR_INIT("Directory"));
 static StaticString s_RecursiveDirectoryIterator(
   LITSTR_INIT("RecursiveDirectoryIterator"));
@@ -206,6 +213,10 @@ void ProcessInit() {
   INIT_SYSTEMLIB_CLASS_FIELD(stdclass);
   INIT_SYSTEMLIB_CLASS_FIELD(Exception);
   INIT_SYSTEMLIB_CLASS_FIELD(BadMethodCallException);
+  INIT_SYSTEMLIB_CLASS_FIELD(InvalidArgumentException);
+  INIT_SYSTEMLIB_CLASS_FIELD(RuntimeException);
+  INIT_SYSTEMLIB_CLASS_FIELD(OutOfBoundsException);
+  INIT_SYSTEMLIB_CLASS_FIELD(InvalidOperationException);
   INIT_SYSTEMLIB_CLASS_FIELD(Directory);
   INIT_SYSTEMLIB_CLASS_FIELD(RecursiveDirectoryIterator);
   INIT_SYSTEMLIB_CLASS_FIELD(SplFileInfo);

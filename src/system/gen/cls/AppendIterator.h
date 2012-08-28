@@ -28,7 +28,7 @@ namespace HPHP {
 
 FORWARD_DECLARE_CLASS(ArrayIterator);
 
-/* SRC: classes/iterator.php line 800 */
+/* SRC: classes/iterator.php line 802 */
 FORWARD_DECLARE_CLASS(AppendIterator);
 extern const ObjectStaticCallbacks cw_AppendIterator;
 class c_AppendIterator : public ExtObjectData {

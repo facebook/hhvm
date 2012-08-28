@@ -26,6 +26,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TypedValue;
+class c_Vector;
+class c_Map;
+class c_StableMap;
 
 /**
  * An iteration normally looks like this:
@@ -44,44 +47,47 @@ public:
    * Constructors.
    */
   ArrayIter();
-  ArrayIter(const ArrayData *data);
-  ArrayIter(const ArrayData *data, int);
+  ArrayIter(const ArrayData* data);
+  ArrayIter(const ArrayData* data, int);
   ArrayIter(CArrRef array);
-  ArrayIter(ObjectData *obj, bool rewind = true);
+  ArrayIter(ObjectData* obj, bool rewind = true);
   ~ArrayIter();
 
   operator bool() { return !end(); }
   void operator++() { next(); }
 
   bool end() {
-    if (LIKELY(!m_obj)) {
+    if (LIKELY(hasArrayData())) {
       return m_pos == ArrayData::invalid_index;
     }
     return endHelper();
   }
   void next() {
-    if (LIKELY(!m_obj)) {
-      ASSERT(m_data);
+    if (LIKELY(hasArrayData())) {
+      const ArrayData* ad = getArrayData();
+      ASSERT(ad);
       ASSERT(m_pos != ArrayData::invalid_index);
-      m_pos = m_data->iter_advance(m_pos);
+      m_pos = ad->iter_advance(m_pos);
       return;
     }
-    return nextHelper();
+    nextHelper();
   }
   Variant first() {
-    if (LIKELY(!m_obj)) {
-      ASSERT(m_data);
+    if (LIKELY(hasArrayData())) {
+      const ArrayData* ad = getArrayData();
+      ASSERT(ad);
       ASSERT(m_pos != ArrayData::invalid_index);
-      return m_data->getKey(m_pos);
+      return ad->getKey(m_pos);
     }
     return firstHelper();
   }
   Variant second();
   void second(Variant &v) {
-    if (LIKELY(!m_obj)) {
-      ASSERT(m_data);
+    if (LIKELY(hasArrayData())) {
+      const ArrayData* ad = getArrayData();
+      ASSERT(ad);
       ASSERT(m_pos != ArrayData::invalid_index);
-      v = m_data->getValueRef(m_pos);
+      v = ad->getValueRef(m_pos);
       return;
     }
     secondHelper(v);
@@ -89,29 +95,93 @@ public:
   CVarRef secondRef();
 
   bool isHphpArray() {
-    return IsHphpArray(m_data);
+    ASSERT(hasArrayData());
+    const ArrayData* ad = getArrayData();
+    ASSERT(ad);
+    return IsHphpArray(ad);
   }
 
   void nvFirst(TypedValue* out) {
-    ASSERT(m_data);
+    ASSERT(hasArrayData());
+    const ArrayData* ad = getArrayData();
+    ASSERT(ad);
     ASSERT(m_pos != ArrayData::invalid_index);
     ASSERT(isHphpArray());
-    HphpArray* ha = (HphpArray*)m_data;
+    HphpArray* ha = (HphpArray*)ad;
     ha->nvGetKey(out, m_pos);
   }
 
   TypedValue* nvSecond() {
-    ASSERT(m_data);
+    ASSERT(hasArrayData());
+    const ArrayData* ad = getArrayData();
+    ASSERT(ad);
     ASSERT(m_pos != ArrayData::invalid_index);
     ASSERT(isHphpArray());
-    HphpArray* ha = (HphpArray*)m_data;
+    HphpArray* ha = (HphpArray*)ad;
     return ha->nvGetValueRef(m_pos);
   }
 
 private:
-  const ArrayData *m_data;
-  ObjectData *m_obj;
+  union {
+    const ArrayData* m_data;
+    ObjectData* m_obj;
+  };
   ssize_t m_pos;
+  int m_versionNumber;
+
+  bool hasArrayData() {
+    return !((intptr_t)m_data & 1);
+  }
+  bool hasVector() {
+    return (!hasArrayData() &&
+            getRawObject()->getCollectionType() == Collection::VectorType);
+  }
+  bool hasMap() {
+    return (!hasArrayData() &&
+            getRawObject()->getCollectionType() == Collection::MapType);
+  }
+  bool hasStableMap() {
+    return (!hasArrayData() &&
+            getRawObject()->getCollectionType() == Collection::StableMapType);
+  }
+  bool hasObject() {
+    return (!hasArrayData() &&
+            getRawObject()->getCollectionType() == Collection::InvalidType);
+  }
+
+  const ArrayData* getArrayData() {
+    ASSERT(hasArrayData());
+    return m_data;
+  }
+  c_Vector* getVector() {
+    ASSERT(hasVector());
+    return (c_Vector*)((intptr_t)m_obj & ~1);
+  }
+  c_Map* getMap() {
+    ASSERT(hasMap());
+    return (c_Map*)((intptr_t)m_obj & ~1);
+  }
+  c_StableMap* getStableMap() {
+    ASSERT(hasStableMap());
+    return (c_StableMap*)((intptr_t)m_obj & ~1);
+  }
+  ObjectData* getObject() {
+    ASSERT(hasObject());
+    return (ObjectData*)((intptr_t)m_obj & ~1);
+  }
+  ObjectData* getRawObject() {
+    ASSERT(!hasArrayData());
+    return (ObjectData*)((intptr_t)m_obj & ~1);
+  }
+
+  void setArrayData(const ArrayData* ad) {
+    ASSERT((intptr_t(ad) & 1) == 0);
+    m_data = ad;
+  }
+  void setObject(ObjectData* obj) {
+    ASSERT((intptr_t(obj) & 1) == 0);
+    m_obj = (ObjectData*)((intptr_t)obj | 1);
+  }
 
   bool endHelper();
   void nextHelper();

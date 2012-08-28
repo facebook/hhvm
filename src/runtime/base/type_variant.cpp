@@ -28,6 +28,7 @@
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/runtime.h>
 #include <system/lib/systemlib.h>
+#include <runtime/ext/ext_collection.h>
 
 #include <util/logger.h>
 
@@ -1997,7 +1998,13 @@ ObjectData *Variant::getArrayAccess() const {
 }
 
 void Variant::callOffsetUnset(CVarRef key) {
-  getArrayAccess()->o_invoke(s_offsetUnset, Array::Create(key));
+  ASSERT(getType() == KindOfObject);
+  ObjectData* obj = getObjectData();
+  if (LIKELY(obj->isCollection())) {
+    collectionOffsetUnset(obj, key);
+  } else {
+    getArrayAccess()->o_invoke(s_offsetUnset, Array::Create(key));
+  }
 }
 
 static void raise_bad_offset_notice() {
@@ -2014,10 +2021,17 @@ static void raise_bad_offset_notice() {
     case KindOfStaticString:                                            \
     case KindOfString:                                                  \
       return m_data.pstr->getChar((int)offset);                         \
-    case KindOfObject:                                                  \
-      return getArrayAccess()->o_invoke(s_offsetGet,                    \
-                                        Array::Create(offset));         \
-    case KindOfRef:                                                 \
+    case KindOfObject: {                                                \
+      ObjectData* obj = m_data.pobj;                                    \
+      if (obj->isCollection()) {                                        \
+        return collectionOffsetGet(obj, offset);                        \
+      } else {                                                          \
+        return getArrayAccess()->o_invoke(s_offsetGet,                  \
+                                          Array::Create(offset));       \
+      }                                                                 \
+      break;                                                            \
+    }                                                                   \
+    case KindOfRef:                                                     \
       return m_data.pvar->rvalAt(offset, flags);                        \
     case KindOfUninit:                                                  \
     case KindOfNull:                                                    \
@@ -2043,8 +2057,15 @@ Variant Variant::rvalAtHelper(int64 offset, ACCESSPARAMS_IMPL) const {
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar((int)offset);
-  case KindOfObject:
-    return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+  case KindOfObject: {
+    ObjectData* obj = m_data.pobj;
+    if (LIKELY(obj->isCollection())) {
+      return collectionOffsetGet(obj, offset);
+    } else {
+      return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+    }
+    break;
+  }
   case KindOfRef:
     return m_data.pvar->rvalAt(offset, flags);
   case KindOfUninit:
@@ -2077,8 +2098,16 @@ Variant Variant::rvalAt(litstr offset, ACCESSPARAMS_IMPL) const {
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(StringData(offset).toInt32());
-  case KindOfObject:
-    return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+  case KindOfObject: {
+    ObjectData* obj = m_data.pobj;
+    if (LIKELY(obj->isCollection())) {
+      String s = offset;
+      return collectionOffsetGet(obj, s);
+    } else {
+      return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+    }
+    break;
+  }
   case KindOfRef:
     return m_data.pvar->rvalAt(offset, flags);
   case KindOfUninit:
@@ -2112,8 +2141,15 @@ Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
-  case KindOfObject:
-    return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+  case KindOfObject: {
+    ObjectData* obj = m_data.pobj;
+    if (LIKELY(obj->isCollection())) {
+      return collectionOffsetGet(obj, offset);
+    } else {
+      return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+    }
+    break;
+  }
   case KindOfRef:
     return m_data.pvar->rvalAt(offset, flags);
   case KindOfUninit:
@@ -2172,8 +2208,15 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
-  case KindOfObject:
-    return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+  case KindOfObject: {
+    ObjectData* obj = m_data.pobj;
+    if (LIKELY(obj->isCollection())) {
+      return collectionOffsetGet(obj, offset);
+    } else {
+      return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+    }
+    break;
+  }
   case KindOfRef:
     return m_data.pvar->rvalAt(offset, flags);
   case KindOfUninit:
@@ -2195,10 +2238,17 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   case KindOfString:
     const_cast<Variant&>(tmp) = m_data.pstr->getChar(HPHP::toInt32(offset));
     return tmp;
-  case KindOfObject:
-    const_cast<Variant&>(tmp) =
-      getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
-    return tmp;
+  case KindOfObject: {
+    ObjectData* obj = m_data.pobj;
+    if (LIKELY(obj->isCollection())) {
+      return collectionOffsetGet(obj, offset);
+    } else {
+      const_cast<Variant&>(tmp) =
+        getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+      return tmp;
+    }
+    break;
+  }
   case KindOfRef:
     return m_data.pvar->rvalRef(offset, tmp, flags);
   case KindOfUninit:
@@ -2397,6 +2447,9 @@ head:
     goto head;
   }
   if (self->m_type == KindOfObject) {
+    if (self->m_data.pobj->isCollection()) {
+      raise_error("Cannot use [] for reading");
+    }
     Variant *ret = &(self->getArrayAccess()->___offsetget_lval(key));
     if (!blackHole) {
       *tmp = *ret;
@@ -2488,6 +2541,10 @@ Variant &Variant::lvalAt() {
     return m_data.pvar->lvalAt();
   case KindOfObject:
     {
+      ObjectData* obj = m_data.pobj;
+      if (obj->isCollection()) {
+        raise_error("Cannot use [] for reading");
+      }
       Array params = CREATE_VECTOR1(null);
       Variant& ret = lvalBlackHole();
       ret = m_data.pobj->o_invoke(s_offsetGet, params);
@@ -2866,7 +2923,7 @@ check_array:                                                            \
   case KindOfNull:                                                      \
     set(ArrayData::Create(ToKey(key), null));                           \
     goto check_array;                                                   \
-  case KindOfRef:                                                   \
+  case KindOfRef:                                                       \
     m_data.pvar->setOpEqual(op, key, v);                                \
     break;                                                              \
   case KindOfStaticString:                                              \
@@ -2880,11 +2937,18 @@ check_array:                                                            \
     break;                                                              \
   }                                                                     \
   case KindOfObject: {                                                  \
-    ObjectData *aa = getArrayAccess();                                  \
-    Variant &cv = aa->___offsetget_lval(key);                           \
-    OPEQUAL(op, cv, v);                                                 \
-    aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);             \
-    return cv;                                                          \
+    ObjectData* obj = m_data.pobj;                                      \
+    if (obj->isCollection()) {                                          \
+      Variant &cv = collectionOffsetGet(obj, key);                      \
+      OPEQUAL(op, cv, v);                                               \
+      return cv;                                                        \
+    } else {                                                            \
+      ObjectData *aa = getArrayAccess();                                \
+      Variant &cv = aa->___offsetget_lval(key);                         \
+      OPEQUAL(op, cv, v);                                               \
+      aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);           \
+      return cv;                                                        \
+    }                                                                   \
   }                                                                     \
   default:                                                              \
     throw_bad_type_exception("not array objects");                      \
@@ -2942,9 +3006,15 @@ inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
     if (es != s) self->set(es);
     break;
   }
-  case KindOfObject:
-    self->getArrayAccess()->o_invoke_few_args(s_offsetSet, -1, 2, key, v);
+  case KindOfObject: {
+    ObjectData* obj = self->getObjectData();
+    if (obj->isCollection()) {
+      collectionOffsetSet(obj, key, v);
+    } else {
+      self->getArrayAccess()->o_invoke_few_args(s_offsetSet, -1, 2, key, v);
+    }
     break;
+  }
   default:
     throw_bad_type_exception("not array objects");
     break;
@@ -3001,8 +3071,13 @@ CVarRef Variant::append(CVarRef v) {
     break;
   case KindOfObject:
     {
-      Array params = CREATE_VECTOR2(null, v);
-      m_data.pobj->o_invoke(s_offsetSet, params);
+      ObjectData* obj = m_data.pobj;
+      if (LIKELY(obj->isCollection())) {
+        collectionOffsetAppend(obj, v);
+      } else {
+        Array params = CREATE_VECTOR2(null, v);
+        obj->o_invoke(s_offsetSet, params);
+      }
       break;
     }
   case KindOfStaticString:
@@ -3065,9 +3140,13 @@ inline ALWAYS_INLINE CVarRef Variant::SetRefImpl(Variant *self, T key,
     throw_bad_type_exception("binding assignment to stringoffset");
     break;
   }
-  case KindOfObject:
+  case KindOfObject: {
+    if (self->m_data.pobj->isCollection()) {
+      raise_error("An element of a collection cannot be taken by reference");
+    }
     self->getArrayAccess()->o_invoke_few_args(s_offsetSet, -1, 2, key, v);
     break;
+  }
   default:
     throw_bad_type_exception("not array objects");
     break;
@@ -3121,8 +3200,12 @@ CVarRef Variant::appendRef(CVarRef v) {
     break;
   case KindOfObject:
     {
-      m_data.pobj->o_invoke_few_args(s_offsetSet, -1, 2, null, v);
-      break;
+      ObjectData* obj = m_data.pobj;
+      if (LIKELY(obj->isCollection())) {
+        raise_error("Collection elements cannot be taken by reference");
+      } else {
+        obj->o_invoke_few_args(s_offsetSet, -1, 2, null, v);
+      }
     }
   case KindOfStaticString:
   case KindOfString:
@@ -3201,11 +3284,18 @@ check_array:
     break;
   }
   case KindOfObject: {
-    ObjectData *aa = getArrayAccess();
-    Variant &cv = aa->___offsetget_lval(key);
-    OPEQUAL(op, cv, v);
-    aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);
-    return cv;
+    ObjectData* obj = m_data.pobj;
+    if (obj->isCollection()) {
+      Variant &cv = collectionOffsetGet(obj, key);
+      OPEQUAL(op, cv, v);
+      return cv;
+    } else {
+      ObjectData *aa = getArrayAccess();
+      Variant &cv = aa->___offsetget_lval(key);
+      OPEQUAL(op, cv, v);
+      aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);
+      return cv;
+    }
   }
   default:
     throw_bad_type_exception("not array objects");
@@ -3258,11 +3348,18 @@ check_array:
     break;
   }
   case KindOfObject: {
-    ObjectData *aa = getArrayAccess();
-    Variant &cv = aa->___offsetget_lval(key);
-    OPEQUAL(op, cv, v);
-    aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);
-    return cv;
+    ObjectData* obj = m_data.pobj;
+    if (obj->isCollection()) {
+      Variant &cv = collectionOffsetGet(obj, key);
+      OPEQUAL(op, cv, v);
+      return cv;
+    } else {
+      ObjectData *aa = getArrayAccess();
+      Variant &cv = aa->___offsetget_lval(key);
+      OPEQUAL(op, cv, v);
+      aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);
+      return cv;
+    }
   }
   default:
     throw_bad_type_exception("not array objects");
@@ -3315,6 +3412,9 @@ check_array:
     m_data.pvar->appendOpEqual(op, v);
     break;
   case KindOfObject: {
+    if (m_data.pobj->isCollection()) {
+      raise_error("Cannot use [] for reading");
+    }
     ObjectData *aa = getArrayAccess();
     Variant &cv = aa->___offsetget_lval(null_variant);
     switch (op) {

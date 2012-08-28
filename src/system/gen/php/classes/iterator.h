@@ -32,6 +32,7 @@
 #include <cls/FilterIterator.h>
 #include <cls/AppendIterator.h>
 #include <cls/Traversable.h>
+#include <cls/Iterable.h>
 #include <cls/IteratorIterator.h>
 #include <cls/SeekableIterator.h>
 #include <cls/IteratorAggregate.h>

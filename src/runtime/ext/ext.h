@@ -26,6 +26,7 @@
 #include <runtime/ext/profile/extprofile_bzip2.h>
 #include <runtime/ext/profile/extprofile_class.h>
 #include <runtime/ext/profile/extprofile_closure.h>
+#include <runtime/ext/profile/extprofile_collection.h>
 #include <runtime/ext/profile/extprofile_continuation.h>
 #include <runtime/ext/profile/extprofile_ctype.h>
 #include <runtime/ext/profile/extprofile_curl.h>

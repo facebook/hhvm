@@ -182,6 +182,16 @@ inline int getDataTypeIndex(DataType t) {
 #define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
 
+namespace Collection {
+enum Type {
+  InvalidType = 0,
+  VectorType = 1,
+  MapType = 2,
+  StableMapType = 3,
+  MaxNumTypes = 4
+};
+}
+
 /**
  * Some of these typedefs are for platform independency, including "int64".
  * Some of them are for clarity, for example, "litstr". Some of them are purely

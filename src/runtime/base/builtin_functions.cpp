@@ -30,6 +30,7 @@
 #include <runtime/ext/ext_class.h>
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_file.h>
+#include <runtime/ext/ext_collection.h>
 #include <runtime/base/array/vector_array.h>
 #include <util/logger.h>
 #include <util/util.h>
@@ -938,6 +939,18 @@ void throw_instance_method_fatal(const char *name) {
   }
 }
 
+void NEVER_INLINE throw_collection_modified() {
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(
+    "Collection was modified during iteration"));
+  throw e;
+}
+
+void NEVER_INLINE throw_iterator_not_valid() {
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(
+    "Iterator is not valid"));
+  throw e;
+}
+
 Object create_object(CStrRef s, CArrRef params, bool init /* = true */,
                      ObjectData *root /* = NULL */) {
   if (hhvm) {
@@ -1450,11 +1463,16 @@ bool empty(CVarRef v, CVarRef offset) {
     return empty(Variant::GetAsArray(tva).rvalAtRef(offset));
   }
   if (Variant::GetAccessorType(tva) == KindOfObject) {
-    if (!Variant::GetArrayAccess(tva)->
-        o_invoke(s_offsetExists, Array::Create(offset))) {
-      return true;
+    ObjectData* obj = Variant::GetObjectData(tva);
+    if (obj->isCollection()) {
+      return collectionOffsetEmpty(obj, offset);
+    } else {
+      if (!Variant::GetArrayAccess(tva)->
+          o_invoke(s_offsetExists, Array::Create(offset))) {
+        return true;
+      }
+      return empty(v.rvalAt(offset));
     }
-    // fall through to check for 'empty'ness of the value.
   } else if (Variant::IsString(tva)) {
     uint64 pos = offset.toInt64();
     if (pos >= (uint64)Variant::GetStringData(tva)->size()) {
@@ -1493,8 +1511,13 @@ bool isset(CVarRef v, int64   offset) {
     return isset(Variant::GetArrayData(tva)->get(offset));
   }
   if (Variant::GetAccessorType(tva) == KindOfObject) {
-    return Variant::GetArrayAccess(tva)->
-      o_invoke(s_offsetExists, Array::Create(offset), -1);
+    ObjectData* obj = Variant::GetObjectData(tva);
+    if (obj->isCollection()) {
+      return collectionOffsetIsset(obj, offset);
+    } else {
+      return Variant::GetArrayAccess(tva)->
+        o_invoke(s_offsetExists, Array::Create(offset), -1);
+    }
   }
   if (Variant::IsString(tva)) {
     return (uint64)offset < (uint64)Variant::GetStringData(tva)->size();
@@ -1517,8 +1540,13 @@ bool isset(CVarRef v, CVarRef offset) {
     return isset(Variant::GetAsArray(tva).rvalAtRef(offset));
   }
   if (Variant::GetAccessorType(tva) == KindOfObject) {
-    return Variant::GetArrayAccess(tva)->
-      o_invoke(s_offsetExists, Array::Create(offset), -1);
+    ObjectData* obj = Variant::GetObjectData(tva);
+    if (obj->isCollection()) {
+      return collectionOffsetEmpty(obj, offset);
+    } else {
+      return Variant::GetArrayAccess(tva)->
+        o_invoke(s_offsetExists, Array::Create(offset), -1);
+    }
   }
   if (Variant::IsString(tva)) {
     uint64 pos = offset.toInt64();

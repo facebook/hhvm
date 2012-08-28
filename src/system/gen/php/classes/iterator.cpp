@@ -747,7 +747,7 @@ const ObjectStaticCallbacks cw_FilterIterator = {
   cw_FilterIterator$$call_info_table,cw_FilterIterator$$call_info_index,
   cw_FilterIterator$$instanceof_table,cw_FilterIterator$$instanceof_index,
   &c_FilterIterator::s_class_name,
-  &c_FilterIterator::os_prop_table,&ci_FilterIterator$$__construct,0,&cw_IteratorIterator,0x100,
+  &c_FilterIterator::os_prop_table,&ci_FilterIterator$$__construct,0,&cw_IteratorIterator,0x80,
   &c_FilterIterator::s_cls
 };
 /* SRC: classes/iterator.php line 718 */
@@ -891,7 +891,7 @@ Variant c_FilterIterator::t___call(Variant v_func, Variant v_params) {
   return x_call_user_func_array(VarNR(Array(ArrayInit(2).set(m_it).set(v_func).create())), toArray(v_params));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 800 */
+/* SRC: classes/iterator.php line 802 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(AppendIterator)
 extern const InstanceOfInfo cw_AppendIterator$$instanceof_table[] = {
   {0x549781C8,1,"AppendIterator",&cw_AppendIterator},
@@ -1053,10 +1053,10 @@ const ObjectStaticCallbacks cw_AppendIterator = {
   cw_AppendIterator$$call_info_table,cw_AppendIterator$$call_info_index,
   cw_AppendIterator$$instanceof_table,cw_AppendIterator$$instanceof_index,
   &c_AppendIterator::s_class_name,
-  &c_AppendIterator::os_prop_table,&ci_AppendIterator$$__construct,0,0,0x100,
+  &c_AppendIterator::os_prop_table,&ci_AppendIterator$$__construct,0,0,0x80,
   &c_AppendIterator::s_cls
 };
-/* SRC: classes/iterator.php line 803 */
+/* SRC: classes/iterator.php line 805 */
 void c_AppendIterator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   ObjectData *obj_tmp UNUSED;
@@ -1066,7 +1066,7 @@ void c_AppendIterator::t___construct() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 818 */
+/* SRC: classes/iterator.php line 820 */
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
   if(!v_it.instanceof(NAMSTR(s_sys_ss2fd353cc, "iterator"))) {
@@ -1077,7 +1077,7 @@ void c_AppendIterator::t_append(CVarRef v_it) {
   m_iterators->t_append(v_it);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 832 */
+/* SRC: classes/iterator.php line 834 */
 Variant c_AppendIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
   ObjectData *obj_tmp UNUSED;
@@ -1090,7 +1090,7 @@ Variant c_AppendIterator::t_getinneriterator() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 846 */
+/* SRC: classes/iterator.php line 848 */
 void c_AppendIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
   ObjectData *obj_tmp UNUSED;
@@ -1127,7 +1127,7 @@ void c_AppendIterator::t_rewind() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 862 */
+/* SRC: classes/iterator.php line 864 */
 bool c_AppendIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
   ObjectData *obj_tmp UNUSED;
@@ -1151,7 +1151,7 @@ bool c_AppendIterator::t_valid() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 875 */
+/* SRC: classes/iterator.php line 877 */
 Variant c_AppendIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
   ObjectData *obj_tmp UNUSED;
@@ -1177,7 +1177,7 @@ Variant c_AppendIterator::t_current() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 893 */
+/* SRC: classes/iterator.php line 895 */
 Variant c_AppendIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
   ObjectData *obj_tmp UNUSED;
@@ -1203,7 +1203,7 @@ Variant c_AppendIterator::t_key() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 907 */
+/* SRC: classes/iterator.php line 909 */
 void c_AppendIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::next);
   ObjectData *obj_tmp UNUSED;
@@ -1309,7 +1309,7 @@ void c_AppendIterator::t_next() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 925 */
+/* SRC: classes/iterator.php line 927 */
 Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
@@ -1472,7 +1472,7 @@ const ObjectStaticCallbacks cw_IteratorIterator = {
   cw_IteratorIterator$$call_info_table,cw_IteratorIterator$$call_info_index,
   cw_IteratorIterator$$instanceof_table,cw_IteratorIterator$$instanceof_index,
   &c_IteratorIterator::s_class_name,
-  &c_IteratorIterator::os_prop_table,&ci_IteratorIterator$$__construct,0,0,0x100,
+  &c_IteratorIterator::os_prop_table,&ci_IteratorIterator$$__construct,0,0,0x80,
   &c_IteratorIterator::s_cls
 };
 /* SRC: classes/iterator.php line 664 */

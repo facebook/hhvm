@@ -82,6 +82,9 @@ class Variant : VariantBase {
  public:
   friend class Array;
   friend class VariantVectorBase;
+  friend class c_Vector;
+  friend class c_Map;
+  friend class c_StableMap;
 
   /**
    * Variant does not formally derive from Countable, however it has a
@@ -772,7 +775,7 @@ public:
   Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CStrRef offset, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CVarRef offset, ACCESSPARAMS_DECL) const;
-
+ 
   template <typename T>
   CVarRef rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
   CVarRef rvalRef(int offset, CVarRef tmp, ACCESSPARAMS_DECL) const {

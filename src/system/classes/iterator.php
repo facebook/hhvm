@@ -786,6 +786,8 @@ interface IteratorAggregate extends Traversable {
   public function getIterator();
 }
 
+interface Iterable extends IteratorAggregate {
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // http://www.php.net/~helly/php/ext/spl/appenditerator_8inc-source.html

@@ -40,6 +40,7 @@
 #include <cls/UnexpectedValueException.h>
 #include <cls/LogicException.h>
 #include <cls/InvalidArgumentException.h>
+#include <cls/InvalidOperationException.h>
 #include <cls/OutOfBoundsException.h>
 #include <cls/RuntimeException.h>
 

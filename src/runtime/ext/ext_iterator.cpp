@@ -478,6 +478,9 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
     CStrRef ctxStr = hhvm
                      ? g_vmContext->getContextClassName(true)
                      : FrameInjection::GetClassName(true);
+    if (tv->m_data.ptv->m_data.pobj->isCollection()) {
+      raise_error("Collection elements cannot be taken by reference");
+    }
     bool isIterator;
     Object obj = tv->m_data.ptv->m_data.pobj->iterableObject(isIterator);
     if (isIterator) {

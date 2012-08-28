@@ -149,13 +149,10 @@ public:
     }
     if (!noDestruct()) {
       setNoDestruct();
-      CountableHelper h(this);
-      static StringData* sd__destruct
-        = StringData::GetStaticString("__destruct");
-      const Func* meth = m_cls->lookupMethod(sd__destruct);
-      if (meth != NULL) {
+      if (const Func* meth = m_cls->getDtor()) {
         // We raise the refcount around the call to __destruct(). This is to
         // prevent the refcount from going to zero when the destructor returns.
+        CountableHelper h(this);
         destructHard(meth);
       }
     }

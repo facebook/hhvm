@@ -1083,11 +1083,16 @@ static Func* findSpecialMethod(Class* cls, const StringData* name) {
 
 void Class::setSpecial() {
   static StringData* sd_toString = StringData::GetStaticString("__toString");
+  static StringData* sd_uuconstruct =
+    StringData::GetStaticString("__construct");
+  static StringData* sd_uudestruct =
+    StringData::GetStaticString("__destruct");
+
   m_toString = lookupMethod(sd_toString);
+  m_dtor = lookupMethod(sd_uudestruct);
 
   // Look for __construct() declared in either this class or a trait
-  static StringData* sd__construct = StringData::GetStaticString("__construct");
-  Func* fConstruct = lookupMethod(sd__construct);
+  Func* fConstruct = lookupMethod(sd_uuconstruct);
   if (fConstruct && (fConstruct->preClass() == m_preClass.get() ||
                      fConstruct->preClass()->attrs() & AttrTrait)) {
     m_ctor = fConstruct;

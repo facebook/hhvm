@@ -570,6 +570,7 @@ public:
     return Attr(m_attrCopy);
   }
   const Func* getCtor() const { return m_ctor; }
+  const Func* getDtor() const { return m_dtor; }
   const Func* getToString() const { return m_toString; }
   const PreClass* preClass() const { return m_preClass.get(); }
   const ClassInfo* clsInfo() const { return m_clsInfo; }
@@ -750,6 +751,7 @@ private:
   Slot m_traitsBeginIdx;
   Slot m_traitsEndIdx;
   Func* m_ctor;
+  Func* m_dtor;
   Func* m_toString;
 
   // Vector of 86pinit() methods that need to be called to complete instance

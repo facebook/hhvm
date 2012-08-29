@@ -34,6 +34,7 @@ extern const int64 k_JSON_HEX_QUOT;
 extern const int64 k_JSON_FORCE_OBJECT;
 extern const int64 k_JSON_NUMERIC_CHECK;
 extern const int64 k_JSON_UNESCAPED_SLASHES;
+extern const int64 k_JSON_PRETTY_PRINT;
 extern const int64 k_JSON_FB_LOOSE;
 extern const int64 k_JSON_FB_LOOSE;
 ///////////////////////////////////////////////////////////////////////////////

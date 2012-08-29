@@ -69,6 +69,12 @@ DefineConstant(
 
 DefineConstant(
   array(
+    'name'   => "JSON_PRETTY_PRINT",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
     'name'   => "JSON_FB_LOOSE",
     'type'   => Int64,
   ));

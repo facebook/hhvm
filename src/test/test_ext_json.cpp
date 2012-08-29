@@ -46,6 +46,40 @@ bool TestExtJson::test_json_encode() {
   VS(f_json_encode(CREATE_VECTOR1(CREATE_MAP1("a", "apple"))),
      "[{\"a\":\"apple\"}]");
 
+  VS(f_json_encode(CREATE_VECTOR1(CREATE_MAP1("a", "apple")),
+                   k_JSON_PRETTY_PRINT),
+    "[\n    {\n        \"a\": \"apple\"\n    }\n]");
+
+  VS(f_json_encode(CREATE_VECTOR4(1, 2, 3, CREATE_VECTOR3(1, 2, 3)),
+                   k_JSON_PRETTY_PRINT),
+    "[\n"
+    "    1,\n"
+    "    2,\n"
+    "    3,\n"
+    "    [\n"
+    "        1,\n"
+    "        2,\n"
+    "        3\n"
+    "    ]\n"
+    "]");
+
+  Array arr = CREATE_MAP3(
+    "a", 1,
+    "b", CREATE_VECTOR2(1, 2),
+    "c", CREATE_MAP1("d", 42)
+  );
+  VS(f_json_encode(arr, k_JSON_PRETTY_PRINT),
+    "{\n"
+    "    \"a\": 1,\n"
+    "    \"b\": [\n"
+    "        1,\n"
+    "        2\n"
+    "    ],\n"
+    "    \"c\": {\n"
+    "        \"d\": 42\n"
+    "    }\n"
+    "}");
+
   return Count(true);
 }
 

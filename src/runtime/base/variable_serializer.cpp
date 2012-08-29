@@ -573,6 +573,11 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
     } else {
       m_buf->append('{');
     }
+
+    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+      m_indent += (info.indent_delta = 4);
+    }
+
     break;
   default:
     ASSERT(false);
@@ -668,6 +673,10 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
     if (!info.first_element) {
       m_buf->append(',');
     }
+    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+      m_buf->append("\n");
+      indent();
+    }
     if (!info.is_vector) {
       if (skey) {
         CStrRef s = Variant::GetAsString(tva);
@@ -685,6 +694,9 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
         m_buf->append('"');
       }
       m_buf->append(':');
+      if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+        m_buf->append(' ');
+      }
     }
     break;
   default:
@@ -754,6 +766,10 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
     break;
   case JSON:
   case DebuggerDump:
+    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+      m_buf->append("\n");
+      indent();
+    }
     if (info.is_vector) {
       m_buf->append(']');
     } else {

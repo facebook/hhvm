@@ -30,6 +30,7 @@ const int64 k_JSON_HEX_QUOT      = 1<<3;
 const int64 k_JSON_FORCE_OBJECT  = 1<<4;
 const int64 k_JSON_NUMERIC_CHECK = 1<<5;
 const int64 k_JSON_UNESCAPED_SLASHES = 1<<6;
+const int64 k_JSON_PRETTY_PRINT  = 1<<7;
 // intentionally higher so when PHP adds more options we're fine
 const int64 k_JSON_FB_LOOSE      = 1<<20;
 const int64 k_JSON_FB_UNLIMITED  = 1<<21;

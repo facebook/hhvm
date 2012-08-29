@@ -125,7 +125,7 @@ public:
   HandleInfo<where >= FirstCaseSensitive>::getHandleMap(where)
 
 static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
-  s_handleMutex.assertOwnedBySelf();
+  Lock l(s_handleMutex);
   ASSERT_NOT_IMPLEMENTED(ns == NSInvalid || ns >= FirstCaseSensitive);
   HandleMapCS& map = HandleInfo<true>::getHandleMap(ns);
   Handle handle;
@@ -149,18 +149,11 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
 }
 
 size_t allocBit() {
-  Lock l(s_handleMutex);
   return allocBitImpl(NULL, NSInvalid);
 }
 
-static inline size_t allocCnsBitLocked(const StringData* name) {
-  s_handleMutex.assertOwnedBySelf();
-  return allocBitImpl(name, NSCnsBits);
-}
-
 size_t allocCnsBit(const StringData* name) {
-  Lock l(s_handleMutex);
-  return allocCnsBitLocked(name);
+  return allocBitImpl(name, NSCnsBits);
 }
 
 Handle bitOffToHandleAndMask(size_t bit, uint32 &mask) {
@@ -210,6 +203,7 @@ template<bool sensitive>
 Handle
 namedAlloc(PHPNameSpace where, const StringData* name,
            int numBytes, int align) {
+  Lock l(s_handleMutex);
   ASSERT(!name || (where >= 0 && where < NumNameSpaces));
   Handle retval;
   typedef HandleInfo<sensitive> HI;
@@ -513,24 +507,20 @@ BoxedGlobalCache::lookupCreate(Handle handle, StringData* name) {
 
 CacheHandle allocKnownClass(const StringData* name) {
   ASSERT(name != NULL);
-  Lock l(s_handleMutex);
   return namedAlloc<NSKnownClass>(name, sizeof(Class*), sizeof(Class*));
 }
 
 CacheHandle allocClassInitProp(const StringData* name) {
-  Lock l(s_handleMutex);
   return namedAlloc<NSClsInitProp>(name, sizeof(Class::PropInitVec*),
                                    sizeof(Class::PropInitVec*));
 }
 
 CacheHandle allocClassInitSProp(const StringData* name) {
-  Lock l(s_handleMutex);
   return namedAlloc<NSClsInitSProp>(name, sizeof(TypedValue*),
                                     sizeof(TypedValue*));
 }
 
 CacheHandle allocFixedFunction(const StringData* name) {
-  Lock l(s_handleMutex);
   return namedAlloc<NSFunction>(name, sizeof(Func*), sizeof(Func*));
 }
 
@@ -894,35 +884,26 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
  * definition is hooked in the runtime to allocate and update these
  * structures.
  */
-CacheHandle allocConstantLocked(StringData* name) {
-  s_handleMutex.assertOwnedBySelf();
+CacheHandle allocConstant(StringData* name) {
   BOOST_STATIC_ASSERT(KindOfUninit == 0);
   return namedAlloc<NSConstant>(name, sizeof(TypedValue), sizeof(TypedValue));
 }
 
-CacheHandle allocConstant(StringData* name) {
-  Lock l(s_handleMutex);
-  return allocConstantLocked(name);
-}
-
 CacheHandle allocStatic() {
-  return ptrToHandle(tl_targetCaches.allocAt(s_frontier, sizeof(TypedValue*),
-                                             sizeof(TypedValue*)));
+  return namedAlloc<NSInvalid>(NULL, sizeof(TypedValue*), sizeof(TypedValue*));
 }
 
 void
 fillConstant(StringData* name) {
-  Lock l(s_handleMutex);
   ASSERT(name);
-  Handle ch = allocConstantLocked(name);
-  testAndSetBit(allocCnsBitLocked(name));
+  Handle ch = allocConstant(name);
+  testAndSetBit(allocCnsBit(name));
   TypedValue *val = g_vmContext->getCns(name);
   ASSERT(val);
   *(TypedValue*)handleToPtr(ch) = *val;
 }
 
 CacheHandle allocClassConstant(StringData* name) {
-  Lock l(s_handleMutex);
   return namedAlloc<NSClassConstant>(name,
                                      sizeof(TypedValue), sizeof(TypedValue));
 }
@@ -1002,7 +983,6 @@ allocStaticMethodCache(const StringData* clsName,
                                 String(methName->data()) + String(":") +
                                 String(ctxName));
 
-  Lock l(s_handleMutex);
   return namedAlloc<ns>(joinedName, sizeof(T), sizeof(T));
 }
 

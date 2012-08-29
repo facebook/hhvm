@@ -1151,6 +1151,9 @@ void hphp_process_init() {
   apc_load(RuntimeOption::ApcLoadThread);
   StaticString::FinishInit();
 
+  if (hhvm) {
+    VM::Transl::TargetCache::requestExit();
+  }
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
   context->~ExecutionContext();

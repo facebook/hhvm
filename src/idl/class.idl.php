@@ -266,14 +266,20 @@ DefineFunction(
     ),
     'args'   => array(
       array(
-        'name'   => "object",
-        'type'   => Object,
+        'name'   => "class_or_object",
+        'type'   => Variant,
         'desc'   => "The tested object",
       ),
       array(
         'name'   => "class_name",
         'type'   => String,
         'desc'   => "The class name",
+      ),
+      array(
+        'name'   => 'allow_string',
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "If this parameter set to false (default), string class name as object is not allowed. This also prevents from calling autoloader if the class doesn't exist.",
       ),
     ),
     'taint_observer' => false,
@@ -298,6 +304,12 @@ DefineFunction(
         'name'   => "class_name",
         'type'   => String,
         'desc'   => "The class name",
+      ),
+      array(
+        'name'   => "allow_string",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "If this parameter set to false, string class name as object is not allowed. This also prevents from calling autoloader if the class doesn't exist.",
       ),
     ),
     'taint_observer' => false,

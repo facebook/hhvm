@@ -539,28 +539,34 @@ TypedValue* fg_get_parent_class(HPHP::VM::ActRec *ar) {
 
 
 /*
-bool HPHP::f_is_a(HPHP::Object const&, HPHP::String const&)
-_ZN4HPHP6f_is_aERKNS_6ObjectERKNS_6StringE
+bool HPHP::f_is_a(HPHP::Variant const&, HPHP::String const&, bool)
+_ZN4HPHP6f_is_aERKNS_7VariantERKNS_6StringEb
 
 (return value) => rax
-object => rdi
+class_or_object => rdi
 class_name => rsi
+allow_string => rdx
 */
 
-bool fh_is_a(Value* object, Value* class_name) asm("_ZN4HPHP6f_is_aERKNS_6ObjectERKNS_6StringE");
+bool fh_is_a(TypedValue* class_or_object, Value* class_name, bool allow_string) asm("_ZN4HPHP6f_is_aERKNS_7VariantERKNS_6StringEb");
 
 TypedValue * fg1_is_a(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_is_a(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfBoolean) {
+      tvCastToBooleanInPlace(args-2);
+    }
+  case 2:
+    break;
+  }
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  if ((args-0)->m_type != KindOfObject) {
-    tvCastToObjectInPlace(args-0);
-  }
-  rv->m_data.num = (fh_is_a((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_is_a((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -568,27 +574,27 @@ TypedValue* fg_is_a(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
+    if (count >= 2LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type)) {
         rv._count = 0;
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_is_a((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 2);
+        rv.m_data.num = (fh_is_a((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_is_a(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("is_a", count, 2, 2, 1);
+      throw_wrong_arguments_nr("is_a", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
+    frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -597,23 +603,34 @@ TypedValue* fg_is_a(HPHP::VM::ActRec *ar) {
 
 
 /*
-bool HPHP::f_is_subclass_of(HPHP::Variant const&, HPHP::String const&)
-_ZN4HPHP16f_is_subclass_ofERKNS_7VariantERKNS_6StringE
+bool HPHP::f_is_subclass_of(HPHP::Variant const&, HPHP::String const&, bool)
+_ZN4HPHP16f_is_subclass_ofERKNS_7VariantERKNS_6StringEb
 
 (return value) => rax
 class_or_object => rdi
 class_name => rsi
+allow_string => rdx
 */
 
-bool fh_is_subclass_of(TypedValue* class_or_object, Value* class_name) asm("_ZN4HPHP16f_is_subclass_ofERKNS_7VariantERKNS_6StringE");
+bool fh_is_subclass_of(TypedValue* class_or_object, Value* class_name, bool allow_string) asm("_ZN4HPHP16f_is_subclass_ofERKNS_7VariantERKNS_6StringEb");
 
 TypedValue * fg1_is_subclass_of(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_is_subclass_of(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfBoolean;
-  tvCastToStringInPlace(args-1);
-  rv->m_data.num = (fh_is_subclass_of((args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfBoolean) {
+      tvCastToBooleanInPlace(args-2);
+    }
+  case 2:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  rv->m_data.num = (fh_is_subclass_of((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -621,27 +638,27 @@ TypedValue* fg_is_subclass_of(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if (IS_STRING_TYPE((args-1)->m_type)) {
+    if (count >= 2LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type)) {
         rv._count = 0;
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_is_subclass_of((args-0), (Value*)(args-1))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 2);
+        rv.m_data.num = (fh_is_subclass_of((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_is_subclass_of(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("is_subclass_of", count, 2, 2, 1);
+      throw_wrong_arguments_nr("is_subclass_of", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
+    frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

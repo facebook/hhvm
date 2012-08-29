@@ -16750,10 +16750,12 @@ Variant i_posix_ctermid(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_posix_ctermid);
 }
 Variant ifa_is_a(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("is_a", count, 2, 2, 1);
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("is_a", count, 2, 3, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  return (x_is_a(arg0, arg1));
+  if (count <= 2) return (x_is_a(arg0, arg1));
+  CVarRef arg2(a2);
+  return (x_is_a(arg0, arg1, arg2));
 }
 Variant i_is_a(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_is_a);
@@ -21072,10 +21074,12 @@ Variant i_get_class_constants(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_get_class_constants);
 }
 Variant ifa_is_subclass_of(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 2)) return throw_wrong_arguments("is_subclass_of", count, 2, 2, 1);
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("is_subclass_of", count, 2, 3, 1);
   CVarRef arg0(a0);
   CVarRef arg1(a1);
-  return (x_is_subclass_of(arg0, arg1));
+  if (count <= 2) return (x_is_subclass_of(arg0, arg1));
+  CVarRef arg2(a2);
+  return (x_is_subclass_of(arg0, arg1, arg2));
 }
 Variant i_is_subclass_of(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_is_subclass_of);
@@ -23350,7 +23354,7 @@ extern const CallInfo ci_magickgetimageheight = {(void*)&i_magickgetimageheight,
 extern const CallInfo ci_fb_enable_code_coverage = {(void*)&i_fb_enable_code_coverage, (void*)&ifa_fb_enable_code_coverage, 0, 0, 0x0000000000000000LL};
 extern const CallInfo ci_drawpopdefs = {(void*)&i_drawpopdefs, (void*)&ifa_drawpopdefs, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_posix_ctermid = {(void*)&i_posix_ctermid, (void*)&ifa_posix_ctermid, 0, 0, 0x0000000000000000LL};
-extern const CallInfo ci_is_a = {(void*)&i_is_a, (void*)&ifa_is_a, 2, 0, 0x0000000000000000LL};
+extern const CallInfo ci_is_a = {(void*)&i_is_a, (void*)&ifa_is_a, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_magickgetimagesblob = {(void*)&i_magickgetimagesblob, (void*)&ifa_magickgetimagesblob, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_hphp_splfileinfo_getatime = {(void*)&i_hphp_splfileinfo_getatime, (void*)&ifa_hphp_splfileinfo_getatime, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_xmlwriter_start_cdata = {(void*)&i_xmlwriter_start_cdata, (void*)&ifa_xmlwriter_start_cdata, 1, 0, 0x0000000000000000LL};
@@ -23777,7 +23781,7 @@ extern const CallInfo ci_strcasecmp = {(void*)&i_strcasecmp, (void*)&ifa_strcase
 extern const CallInfo ci_rename_function = {(void*)&i_rename_function, (void*)&ifa_rename_function, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_quoted_printable_decode = {(void*)&i_quoted_printable_decode, (void*)&ifa_quoted_printable_decode, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_get_class_constants = {(void*)&i_get_class_constants, (void*)&ifa_get_class_constants, 1, 0, 0x0000000000000000LL};
-extern const CallInfo ci_is_subclass_of = {(void*)&i_is_subclass_of, (void*)&ifa_is_subclass_of, 2, 0, 0x0000000000000000LL};
+extern const CallInfo ci_is_subclass_of = {(void*)&i_is_subclass_of, (void*)&ifa_is_subclass_of, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_magickspliceimage = {(void*)&i_magickspliceimage, (void*)&ifa_magickspliceimage, 5, 0, 0x0000000000000000LL};
 extern const CallInfo ci_hphpd_install_user_command = {(void*)&i_hphpd_install_user_command, (void*)&ifa_hphpd_install_user_command, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_imageistruecolor = {(void*)&i_imageistruecolor, (void*)&ifa_imageistruecolor, 1, 0, 0x0000000000000000LL};

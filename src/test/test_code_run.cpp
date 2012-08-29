@@ -11063,6 +11063,114 @@ bool TestCodeRun::TestReflection() {
        "var_dump('OK!');",
        "string(3) \"OK!\"\n");
 
+  /* is_a - objects */
+  MVCRO("<?php "
+        "class A {} class B extends A {}"
+        "$a = new A; $b = new B;"
+        "var_dump(is_a($a, 'A'));"
+        "var_dump(is_a($a, 'B'));"
+        "var_dump(is_a($b, 'A'));"
+        "var_dump(is_a($b, 'A', true));"
+       ,
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+       );
+
+  /* is_a - classes */
+  MVCRO("<?php "
+        "class A {}"
+        "class B extends A {}"
+        "class C extends B {}"
+        "$a = new A; $b = new B;"
+        "var_dump(is_a('a', 'A', true));"
+        "var_dump(is_a('a', 'A', false));"
+        "var_dump(is_a('b', 'A', true));"
+        "var_dump(is_a('a', 'B', true));"
+        "var_dump(is_a('c', 'A', true));"
+       ,
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+       );
+
+  /* is_a - interfaces */
+  MVCRO("<?php "
+        "interface A {}"
+        "interface B extends A {}"
+        "interface C extends B {}"
+        "class D implements A {}"
+        "$d = new D;"
+        "var_dump(is_a($d, 'A'));"
+        "var_dump(is_a($d, 'B'));"
+        "var_dump(is_a('B', 'A', true));"
+        "var_dump(is_a('B', 'B', true));"
+        "var_dump(is_a('C', 'A', true));"
+       ,
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+       );
+
+  /* is_subclass_of - objects */
+  MVCRO("<?php "
+        "class A {} class B extends A {}"
+        "$a = new A; $b = new B;"
+        "var_dump(is_subclass_of($a, 'A'));"
+        "var_dump(is_subclass_of($a, 'B'));"
+        "var_dump(is_subclass_of($b, 'A'));"
+        "var_dump(is_subclass_of($b, 'A', false));"
+       ,
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(true)\n"
+       );
+
+  /* is_subclass_of - classes */
+  MVCRO("<?php "
+        "class A {}"
+        "class B extends A {}"
+        "class C extends B {}"
+        "$a = new A; $b = new B;"
+        "var_dump(is_subclass_of('a', 'A', true));"
+        "var_dump(is_subclass_of('a', 'A', false));"
+        "var_dump(is_subclass_of('b', 'A', true));"
+        "var_dump(is_subclass_of('a', 'B', true));"
+        "var_dump(is_subclass_of('c', 'A', true));"
+       ,
+        "bool(false)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+       );
+
+  /* is_subclass_of - interfaces */
+  MVCRO("<?php "
+        "interface A {}"
+        "interface B extends A {}"
+        "interface C extends B {}"
+        "class D implements A {}"
+        "$d = new D;"
+        "var_dump(is_subclass_of($d, 'A'));"
+        "var_dump(is_subclass_of($d, 'B'));"
+        "var_dump(is_subclass_of('B', 'A'));"
+        "var_dump(is_subclass_of('B', 'B'));"
+        "var_dump(is_subclass_of('C', 'A'));"
+       ,
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n"
+       );
+
   return true;
 }
 

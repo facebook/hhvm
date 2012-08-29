@@ -9080,10 +9080,8 @@ void TranslatorX64::analyzeFPushCtorD(Tracelet& t,
   i.m_txFlags = supportedPlan(true);
 }
 
-static Instance*
-newInstanceHelper(Class** classCache,
-                  const StringData* clsName, int numArgs,
-                  ActRec* ar, ActRec* prevAr) {
+static inline ALWAYS_INLINE Class* getKnownClass(Class** classCache,
+                                                 const StringData* clsName) {
   Class* cls = *classCache;
   if (UNLIKELY(cls == NULL)) {
     // lookupKnownClass does its own VMRegAnchor'ing.
@@ -9091,6 +9089,24 @@ newInstanceHelper(Class** classCache,
     ASSERT(*classCache && *classCache == cls);
   }
   ASSERT(cls);
+  return cls;
+}
+
+static Instance*
+HOT_FUNC_VM
+newInstanceHelperNoCtor(Class** classCache, const StringData* clsName) {
+  Class* cls = getKnownClass(classCache, clsName);
+  Instance* ret = newInstance(cls);
+  ret->incRefCount();
+  return ret;
+}
+
+static Instance*
+HOT_FUNC_VM
+newInstanceHelper(Class** classCache,
+                  const StringData* clsName, int numArgs,
+                  ActRec* ar, ActRec* prevAr) {
+  Class* cls = getKnownClass(classCache, clsName);
   const Func* f = cls->getCtor();
   Instance* ret = NULL;
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
@@ -9111,7 +9127,7 @@ newInstanceHelper(Class** classCache,
   ar->setVarEnv(NULL);
   arSetSfp(ar, prevAr);
   TRACE(2, "newInstanceHelper: AR %p: f %p, savedRbp %#lx, savedRip %#lx"
-           " this %p\n",
+        " this %p\n",
         ar, ar->m_func, ar->m_savedRbp, ar->m_savedRip, ar->m_this);
   return ret;
 }
@@ -9130,12 +9146,18 @@ void TranslatorX64::translateFPushCtorD(const Tracelet& t,
   // ready.
   int arOff = vstackOffset(i, -int(sizeof(ActRec)) - cellsToBytes(1));
   m_regMap.scrubStackRange(i.stackOff, i.stackOff + kNumActRecCells + 1);
-  EMIT_CALL(a, newInstanceHelper,
-             R(*scr),
-             IMM(uintptr_t(clsName)),
-             IMM(numArgs),
-             RPLUS(rVmSp, arOff),     // ActRec
-             R(rVmFp));               // prevAR
+  if (i.noCtor) {
+    EMIT_CALL(a, newInstanceHelperNoCtor,
+              R(*scr),
+              IMM(uintptr_t(clsName)));
+  } else {
+    EMIT_CALL(a, newInstanceHelper,
+              R(*scr),
+              IMM(uintptr_t(clsName)),
+              IMM(numArgs),
+              RPLUS(rVmSp, arOff),     // ActRec
+              R(rVmFp));               // prevAR
+  }
   recordReentrantCall(i);
   // The callee takes care of initializing the actRec, and returns the new
   // object.

@@ -264,7 +264,7 @@ class NormalizedInstruction {
   unsigned breaksBB:1;
   unsigned changesPC:1;
   unsigned fuseBranch:1;
-  unsigned preppedByRef;    // For FPass*:1; indicates parameter reffiness
+  unsigned preppedByRef:1;    // For FPass*; indicates parameter reffiness
   unsigned manuallyAllocInputs:1;
   unsigned invertCond:1;
   unsigned outputPredicted:1;
@@ -292,6 +292,11 @@ class NormalizedInstruction {
    *   return 5;       # can decRef ar->m_this unconditionally
    */
   unsigned guardedThis:1;
+  /*
+    noCtor is set on FPushCtorD to say that the ctor is
+    going to be skipped (so dont setup an actrec)
+  */
+  unsigned noCtor:1;
 
   ArgUnion constImm;
   TXFlags m_txFlags;
@@ -318,6 +323,7 @@ class NormalizedInstruction {
     skipSync(false),
     grouped(false),
     guardedThis(false),
+    noCtor(false),
     m_txFlags(Interp)
   { }
 

@@ -1129,6 +1129,30 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       }
     }
 
+    if (RuntimeOption::RepoAuthoritative &&
+        prevOp == OpFPushCtorD &&
+        !prev->noCtor &&
+        prev->imm[0].u_IVA == 0 &&
+        op == OpFCall && (ni->m_txFlags & Supported) &&
+        ni->next && (ni->next->m_txFlags & Supported) &&
+        ni->next->op() == OpPopR) {
+      /* new obj with a ctor that takes no args */
+      const NamedEntityPair& np =
+        curUnit()->lookupNamedEntityPairId(prev->imm[1].u_SA);
+      const Class* cls = Unit::lookupClass(np.second);
+      if (cls && (cls->attrs() & AttrUnique) &&
+          Func::isSpecial(cls->getCtor()->name())) {
+        /* its the generated 86ctor, so no need to call it */
+        next = next->next;
+        t.m_instrStream.remove(ni->next);
+        t.m_instrStream.remove(ni);
+        prev->noCtor = 1;
+        SKTRACE(1, prev->source, "FPushCtorD: killing ctor for %s in %s\n",
+                np.first->data(), curFunc()->fullName()->data());
+        continue;
+      }
+    }
+
     /*
      * If this is a Pop instruction the previous instruction is an
      * instruction that pushed a single return value cell on the stack,

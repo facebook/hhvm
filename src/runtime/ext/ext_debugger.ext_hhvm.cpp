@@ -421,44 +421,6 @@ TypedValue* tg_20DebuggerProxyCmdUser_send(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DebuggerProxyCmdUser::t___destruct()
-_ZN4HPHP22c_DebuggerProxyCmdUser12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_20DebuggerProxyCmdUser___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_DebuggerProxyCmdUser12t___destructEv");
-
-TypedValue* tg_20DebuggerProxyCmdUser___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_20DebuggerProxyCmdUser___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DebuggerProxyCmdUser::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DebuggerProxyCmdUser::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DebuggerClientCmdUser_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DebuggerClientCmdUser) - sizeof(ObjectData);
@@ -2161,44 +2123,6 @@ TypedValue* tg_21DebuggerClientCmdUser_addCompletion(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DebuggerClientCmdUser::t___destruct()
-_ZN4HPHP23c_DebuggerClientCmdUser12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_21DebuggerClientCmdUser___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser12t___destructEv");
-
-TypedValue* tg_21DebuggerClientCmdUser___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_21DebuggerClientCmdUser___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DebuggerClientCmdUser::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DebuggerClientCmdUser::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

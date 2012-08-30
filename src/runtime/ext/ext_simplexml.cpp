@@ -885,11 +885,6 @@ int64 c_SimpleXMLElement::t_count() {
   return m_children.toArray().size();
 }
 
-Variant c_SimpleXMLElement::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // implementing ArrayAccess
 
@@ -1044,11 +1039,6 @@ void c_SimpleXMLElementIterator::reset_iterator() {
 void c_SimpleXMLElementIterator::t___construct() {
 }
 
-Variant c_SimpleXMLElementIterator::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::__destruct);
-  return null;
-}
-
 Variant c_SimpleXMLElementIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::current);
   if (m_iter1 == NULL) return null;
@@ -1126,11 +1116,6 @@ c_LibXMLError::c_LibXMLError(const ObjectStaticCallbacks *cb) :
 c_LibXMLError::~c_LibXMLError() {
 }
 void c_LibXMLError::t___construct() {
-}
-
-Variant c_LibXMLError::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(LibXMLError, LibXMLError::__destruct);
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

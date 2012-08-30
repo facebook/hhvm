@@ -1612,44 +1612,6 @@ TypedValue* tg_8Collator_sort(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_Collator::t___destruct()
-_ZN4HPHP10c_Collator12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_8Collator___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP10c_Collator12t___destructEv");
-
-TypedValue* tg_8Collator___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_8Collator___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("Collator::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("Collator::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_Locale_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_Locale) - sizeof(ObjectData);
@@ -1687,44 +1649,6 @@ TypedValue* tg_6Locale___construct(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("Locale::__construct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_Locale::t___destruct()
-_ZN4HPHP8c_Locale12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_6Locale___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Locale12t___destructEv");
-
-TypedValue* tg_6Locale___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_6Locale___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("Locale::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("Locale::__destruct");
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
@@ -1899,44 +1823,6 @@ TypedValue* tg_10Normalizer_normalize(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_Normalizer::t___destruct()
-_ZN4HPHP12c_Normalizer12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_10Normalizer___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_Normalizer12t___destructEv");
-
-TypedValue* tg_10Normalizer___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_10Normalizer___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("Normalizer::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("Normalizer::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

@@ -236,17 +236,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'desc'   => "Destructor of DebuggerProxyCmdUser.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => Variant,
-      'desc'   => "Always returns null.",
-    ),
-  ));
-
 EndClass(
 );
 
@@ -792,17 +781,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "A single string, an AUTO_COMPLETE_ constant or an array of strings.",
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'desc'   => "Destructor of DebuggerClientCmdUser.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => Variant,
-      'desc'   => "Always returns null.",
     ),
   ));
 

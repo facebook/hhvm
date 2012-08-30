@@ -90,7 +90,6 @@ extern const CallInfo ci_SoapClient$$__call = { (void*)&c_SoapClient::i___call, 
 extern const CallInfo ci_SoapClient$$__construct = { (void*)&c_SoapClient::i___construct, (void*)&c_SoapClient::ifa___construct, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapClient$$__getlastresponse = { (void*)&c_SoapClient::i___getlastresponse, (void*)&c_SoapClient::ifa___getlastresponse, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapClient$$__dorequest = { (void*)&c_SoapClient::i___dorequest, (void*)&c_SoapClient::ifa___dorequest, 5, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapClient$$__destruct = { (void*)&c_SoapClient::i___destruct, (void*)&c_SoapClient::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapClient$$__getlastrequest = { (void*)&c_SoapClient::i___getlastrequest, (void*)&c_SoapClient::ifa___getlastrequest, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapClient$$__setlocation = { (void*)&c_SoapClient::i___setlocation, (void*)&c_SoapClient::ifa___setlocation, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapClient$$__getlastrequestheaders = { (void*)&c_SoapClient::i___getlastrequestheaders, (void*)&c_SoapClient::ifa___getlastrequestheaders, 0, 4, 0x0000000000000000LL};
@@ -137,9 +136,6 @@ Variant c_SoapClient::i___setlocation(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SoapClient::i___setsoapheaders(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___setsoapheaders);
-}
-Variant c_SoapClient::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SoapClient::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -271,20 +267,11 @@ Variant NEVER_INLINE c_SoapClient::ifa___setsoapheaders(MethodCallPackage &mcp, 
   CVarRef arg0(a0);
   return (self->t___setsoapheaders(arg0));
 }
-Variant NEVER_INLINE c_SoapClient::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SoapClient);
-  }
-  c_SoapClient *self ATTRIBUTE_UNUSED (static_cast<c_SoapClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SoapClient$$call_info_table[] = {
   { 0x2140F6E4, 1, 16, "__getlastrequest", &ci_SoapClient$$__getlastrequest },
   { 0x53CEEB6C, 0, 6, "__call", &ci_SoapClient$$__call },
   { 0x3B37DE8C, 1, 23, "__getlastrequestheaders", &ci_SoapClient$$__getlastrequestheaders },
   { 0x5FC59871, 1, 14, "__getfunctions", &ci_SoapClient$$__getfunctions },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SoapClient$$__destruct },
   { 0x31035A54, 1, 17, "__getlastresponse", &ci_SoapClient$$__getlastresponse },
   { 0x7604B9D5, 0, 10, "__gettypes", &ci_SoapClient$$__gettypes },
   { 0x7E8AAEF5, 0, 11, "__dorequest", &ci_SoapClient$$__dorequest },
@@ -299,15 +286,14 @@ extern const int cw_SoapClient$$call_info_index[] = {
   31,
   -1,-1,-1,-1,0,-1,-1,-1,
   -1,-1,-1,-1,1,-1,-1,-1,
-  -1,3,-1,4,5,6,-1,-1,
-  -1,9,10,11,-1,-1,-1,12,
+  -1,3,-1,-1,4,5,-1,-1,
+  -1,8,9,10,-1,-1,-1,11,
 
 };
 c_SoapClient *c_SoapClient::create(Variant a0, Array a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SoapClient$$call_info_table[];
@@ -344,7 +330,6 @@ extern const CallInfo ci_DOMElement$$getattributenodens = { (void*)&c_DOMElement
 extern const CallInfo ci_DOMElement$$__set = { (void*)&c_DOMElement::i___set, (void*)&c_DOMElement::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMElement$$getelementsbytagname = { (void*)&c_DOMElement::i_getelementsbytagname, (void*)&c_DOMElement::ifa_getelementsbytagname, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMElement$$__construct = { (void*)&c_DOMElement::i___construct, (void*)&c_DOMElement::ifa___construct, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMElement$$__destruct = { (void*)&c_DOMElement::i___destruct, (void*)&c_DOMElement::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMElement$$setidattributens = { (void*)&c_DOMElement::i_setidattributens, (void*)&c_DOMElement::ifa_setidattributens, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMElement$$setattributens = { (void*)&c_DOMElement::i_setattributens, (void*)&c_DOMElement::ifa_setattributens, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMElement$$getattributens = { (void*)&c_DOMElement::i_getattributens, (void*)&c_DOMElement::ifa_getattributens, 2, 4, 0x0000000000000000LL};
@@ -422,9 +407,6 @@ Variant c_DOMElement::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMElement::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMElement::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMElement::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -641,14 +623,6 @@ Variant NEVER_INLINE c_DOMElement::ifa___isset(MethodCallPackage &mcp, int count
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMElement::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMElement);
-  }
-  c_DOMElement *self ATTRIBUTE_UNUSED (static_cast<c_DOMElement*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMElement$$call_info_table[] = {
   { 0x6CAB93CA, 0, 20, "getElementsByTagName", &ci_DOMElement$$getelementsbytagname },
   { 0x4A4817CA, 0, 22, "getElementsByTagNameNS", &ci_DOMElement$$getelementsbytagnamens },
@@ -671,7 +645,6 @@ extern const MethodCallInfoTable cw_DOMElement$$call_info_table[] = {
   { 0x3944FFEC, 1, 12, "hasAttribute", &ci_DOMElement$$hasattribute },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMElement$$__isset },
   { 0x462E1E2F, 1, 15, "removeAttribute", &ci_DOMElement$$removeattribute },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMElement$$__destruct },
   { 0x3B5AB1FE, 1, 16, "getAttributeNode", &ci_DOMElement$$getattributenode },
 };
 extern const int cw_DOMElement$$call_info_index[] = {
@@ -682,15 +655,14 @@ extern const int cw_DOMElement$$call_info_index[] = {
   12,13,-1,-1,14,-1,-1,15,
   -1,-1,-1,-1,-1,-1,-1,-1,
   16,-1,17,-1,18,-1,19,20,
-  -1,-1,-1,21,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,22,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,21,-1,
 
 };
 c_DOMElement *c_DOMElement::create(String a0, String a1, String a2) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMElement$$call_info_table[];
@@ -719,7 +691,6 @@ const int cw_DOMEntity$$instanceof_index[] = {
 };
 extern const CallInfo ci_DOMEntity$$__isset = { (void*)&c_DOMEntity::i___isset, (void*)&c_DOMEntity::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMEntity$$__get = { (void*)&c_DOMEntity::i___get, (void*)&c_DOMEntity::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMEntity$$__destruct = { (void*)&c_DOMEntity::i___destruct, (void*)&c_DOMEntity::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMEntity$$__set = { (void*)&c_DOMEntity::i___set, (void*)&c_DOMEntity::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMEntity$$__construct = { (void*)&c_DOMEntity::i___construct, (void*)&c_DOMEntity::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_DOMEntity::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -733,9 +704,6 @@ Variant c_DOMEntity::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMEntity::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMEntity::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMEntity::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -773,32 +741,21 @@ Variant NEVER_INLINE c_DOMEntity::ifa___isset(MethodCallPackage &mcp, int count,
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMEntity::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMEntity);
-  }
-  c_DOMEntity *self ATTRIBUTE_UNUSED (static_cast<c_DOMEntity*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMEntity$$call_info_table[] = {
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMEntity$$__destruct },
   { 0x03340395, 1, 5, "__set", &ci_DOMEntity$$__set },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMEntity$$__isset },
   { 0x229C615F, 0, 11, "__construct", &ci_DOMEntity$$__construct },
   { 0x74FA338F, 1, 5, "__get", &ci_DOMEntity$$__get },
 };
 extern const int cw_DOMEntity$$call_info_index[] = {
-  15,
-  -1,-1,-1,0,-1,1,-1,-1,
-  -1,-1,-1,-1,-1,-1,2,3,
+  7,
+  -1,-1,-1,-1,-1,0,1,2,
 
 };
 c_DOMEntity *c_DOMEntity::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMEntity$$call_info_table[];
@@ -827,7 +784,6 @@ const int cw_DOMProcessingInstruction$$instanceof_index[] = {
 };
 extern const CallInfo ci_DOMProcessingInstruction$$__isset = { (void*)&c_DOMProcessingInstruction::i___isset, (void*)&c_DOMProcessingInstruction::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMProcessingInstruction$$__get = { (void*)&c_DOMProcessingInstruction::i___get, (void*)&c_DOMProcessingInstruction::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMProcessingInstruction$$__destruct = { (void*)&c_DOMProcessingInstruction::i___destruct, (void*)&c_DOMProcessingInstruction::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMProcessingInstruction$$__set = { (void*)&c_DOMProcessingInstruction::i___set, (void*)&c_DOMProcessingInstruction::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMProcessingInstruction$$__construct = { (void*)&c_DOMProcessingInstruction::i___construct, (void*)&c_DOMProcessingInstruction::ifa___construct, 2, 4, 0x0000000000000000LL};
 Variant c_DOMProcessingInstruction::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -841,9 +797,6 @@ Variant c_DOMProcessingInstruction::i___set(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_DOMProcessingInstruction::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMProcessingInstruction::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMProcessingInstruction::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -884,32 +837,21 @@ Variant NEVER_INLINE c_DOMProcessingInstruction::ifa___isset(MethodCallPackage &
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMProcessingInstruction::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMProcessingInstruction);
-  }
-  c_DOMProcessingInstruction *self ATTRIBUTE_UNUSED (static_cast<c_DOMProcessingInstruction*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMProcessingInstruction$$call_info_table[] = {
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMProcessingInstruction$$__destruct },
   { 0x03340395, 1, 5, "__set", &ci_DOMProcessingInstruction$$__set },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMProcessingInstruction$$__isset },
   { 0x229C615F, 0, 11, "__construct", &ci_DOMProcessingInstruction$$__construct },
   { 0x74FA338F, 1, 5, "__get", &ci_DOMProcessingInstruction$$__get },
 };
 extern const int cw_DOMProcessingInstruction$$call_info_index[] = {
-  15,
-  -1,-1,-1,0,-1,1,-1,-1,
-  -1,-1,-1,-1,-1,-1,2,3,
+  7,
+  -1,-1,-1,-1,-1,0,1,2,
 
 };
 c_DOMProcessingInstruction *c_DOMProcessingInstruction::create(String a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMProcessingInstruction$$call_info_table[];
@@ -958,7 +900,6 @@ extern const CallInfo ci_PDOStatement$$valid = { (void*)&c_PDOStatement::i_valid
 extern const CallInfo ci_PDOStatement$$closecursor = { (void*)&c_PDOStatement::i_closecursor, (void*)&c_PDOStatement::ifa_closecursor, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDOStatement$$fetchcolumn = { (void*)&c_PDOStatement::i_fetchcolumn, (void*)&c_PDOStatement::ifa_fetchcolumn, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDOStatement$$columncount = { (void*)&c_PDOStatement::i_columncount, (void*)&c_PDOStatement::ifa_columncount, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDOStatement$$__destruct = { (void*)&c_PDOStatement::i___destruct, (void*)&c_PDOStatement::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDOStatement$$__wakeup = { (void*)&c_PDOStatement::i___wakeup, (void*)&c_PDOStatement::ifa___wakeup, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDOStatement$$execute = { (void*)&c_PDOStatement::i_execute, (void*)&c_PDOStatement::ifa_execute, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDOStatement$$bindcolumn = { (void*)&c_PDOStatement::i_bindcolumn, (void*)&c_PDOStatement::ifa_bindcolumn, 5, 4, 0x0000000000000002LL};
@@ -1058,9 +999,6 @@ Variant c_PDOStatement::i___wakeup(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_PDOStatement::i___sleep(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___sleep);
-}
-Variant c_PDOStatement::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_PDOStatement::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -1329,14 +1267,6 @@ Variant NEVER_INLINE c_PDOStatement::ifa___sleep(MethodCallPackage &mcp, int cou
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__sleep", 0, 1);
   return (self->t___sleep());
 }
-Variant NEVER_INLINE c_PDOStatement::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_PDOStatement);
-  }
-  c_PDOStatement *self ATTRIBUTE_UNUSED (static_cast<c_PDOStatement*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_PDOStatement$$call_info_table[] = {
   { 0x65EB8E41, 1, 8, "fetchall", &ci_PDOStatement$$fetchall },
   { 0x3628E403, 1, 9, "bindvalue", &ci_PDOStatement$$bindvalue },
@@ -1362,7 +1292,6 @@ extern const MethodCallInfoTable cw_PDOStatement$$call_info_table[] = {
   { 0x6612FC28, 1, 12, "getattribute", &ci_PDOStatement$$getattribute },
   { 0x5E27AF6A, 1, 6, "rewind", &ci_PDOStatement$$rewind },
   { 0x5ADBC02D, 1, 7, "__sleep", &ci_PDOStatement$$__sleep },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_PDOStatement$$__destruct },
   { 0x3B8102B8, 1, 4, "next", &ci_PDOStatement$$next },
   { 0x3B90B0FB, 0, 5, "fetch", &ci_PDOStatement$$fetch },
   { 0x06E717FB, 1, 13, "getcolumnmeta", &ci_PDOStatement$$getcolumnmeta },
@@ -1375,15 +1304,14 @@ extern const int cw_PDOStatement$$call_info_index[] = {
   -1,11,12,-1,13,15,17,18,
   -1,19,20,-1,-1,-1,-1,-1,
   21,-1,22,-1,-1,23,-1,-1,
-  -1,-1,-1,24,-1,-1,-1,-1,
-  25,-1,-1,26,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  24,-1,-1,25,-1,-1,-1,-1,
 
 };
 c_PDOStatement *c_PDOStatement::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_PDOStatement$$call_info_table[];
@@ -1409,12 +1337,11 @@ const int cw_EncodingDetector$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_EncodingDetector$$setdeclaredencoding = { (void*)&c_EncodingDetector::i_setdeclaredencoding, (void*)&c_EncodingDetector::ifa_setdeclaredencoding, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingDetector$$settext = { (void*)&c_EncodingDetector::i_settext, (void*)&c_EncodingDetector::ifa_settext, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_EncodingDetector$$detect = { (void*)&c_EncodingDetector::i_detect, (void*)&c_EncodingDetector::ifa_detect, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingDetector$$__destruct = { (void*)&c_EncodingDetector::i___destruct, (void*)&c_EncodingDetector::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_EncodingDetector$$detectall = { (void*)&c_EncodingDetector::i_detectall, (void*)&c_EncodingDetector::ifa_detectall, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_EncodingDetector$$setdeclaredencoding = { (void*)&c_EncodingDetector::i_setdeclaredencoding, (void*)&c_EncodingDetector::ifa_setdeclaredencoding, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_EncodingDetector$$__construct = { (void*)&c_EncodingDetector::i___construct, (void*)&c_EncodingDetector::ifa___construct, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_EncodingDetector$$settext = { (void*)&c_EncodingDetector::i_settext, (void*)&c_EncodingDetector::ifa_settext, 1, 4, 0x0000000000000000LL};
 Variant c_EncodingDetector::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -1429,9 +1356,6 @@ Variant c_EncodingDetector::i_detect(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_EncodingDetector::i_detectall(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_detectall);
-}
-Variant c_EncodingDetector::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_EncodingDetector::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -1475,33 +1399,23 @@ Variant NEVER_INLINE c_EncodingDetector::ifa_detectall(MethodCallPackage &mcp, i
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("detectall", 0, 1);
   return (self->t_detectall());
 }
-Variant NEVER_INLINE c_EncodingDetector::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_EncodingDetector);
-  }
-  c_EncodingDetector *self ATTRIBUTE_UNUSED (static_cast<c_EncodingDetector*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_EncodingDetector$$call_info_table[] = {
   { 0x3C385B00, 1, 6, "detect", &ci_EncodingDetector$$detect },
-  { 0x0F751823, 0, 9, "detectAll", &ci_EncodingDetector$$detectall },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_EncodingDetector$$__destruct },
+  { 0x0F751823, 1, 9, "detectAll", &ci_EncodingDetector$$detectall },
   { 0x6C2096A6, 0, 7, "setText", &ci_EncodingDetector$$settext },
   { 0x32322946, 1, 19, "setDeclaredEncoding", &ci_EncodingDetector$$setdeclaredencoding },
   { 0x229C615F, 1, 11, "__construct", &ci_EncodingDetector$$__construct },
 };
 extern const int cw_EncodingDetector$$call_info_index[] = {
   15,
-  0,-1,-1,1,-1,-1,3,-1,
-  -1,-1,-1,-1,-1,-1,-1,5,
+  0,-1,-1,1,-1,-1,2,-1,
+  -1,-1,-1,-1,-1,-1,-1,4,
 
 };
 c_EncodingDetector *c_EncodingDetector::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_EncodingDetector$$call_info_table[];
@@ -1528,7 +1442,6 @@ const int cw_Normalizer$$instanceof_index[] = {
   0,-1,
 };
 extern const CallInfo ci_Normalizer$$isnormalized = { (void*)&c_Normalizer::i_isnormalized, (void*)&c_Normalizer::ifa_isnormalized, 2, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Normalizer$$__destruct = { (void*)&c_Normalizer::i___destruct, (void*)&c_Normalizer::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Normalizer$$normalize = { (void*)&c_Normalizer::i_normalize, (void*)&c_Normalizer::ifa_normalize, 2, 12, 0x0000000000000000LL};
 extern const CallInfo ci_Normalizer$$__construct = { (void*)&c_Normalizer::i___construct, (void*)&c_Normalizer::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_Normalizer::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -1539,9 +1452,6 @@ Variant c_Normalizer::i_isnormalized(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Normalizer::i_normalize(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_normalize);
-}
-Variant c_Normalizer::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_Normalizer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -1565,30 +1475,20 @@ Variant NEVER_INLINE c_Normalizer::ifa_normalize(MethodCallPackage &mcp, int cou
   CVarRef arg1(a1);
   return (c_Normalizer::t_normalize(arg0, arg1));
 }
-Variant NEVER_INLINE c_Normalizer::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_Normalizer);
-  }
-  c_Normalizer *self ATTRIBUTE_UNUSED (static_cast<c_Normalizer*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_Normalizer$$call_info_table[] = {
   { 0x42CB6C5A, 1, 9, "normalize", &ci_Normalizer$$normalize },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_Normalizer$$__destruct },
   { 0x5F66ED1D, 1, 12, "isnormalized", &ci_Normalizer$$isnormalized },
   { 0x229C615F, 1, 11, "__construct", &ci_Normalizer$$__construct },
 };
 extern const int cw_Normalizer$$call_info_index[] = {
   7,
-  -1,-1,0,1,-1,2,-1,3,
+  -1,-1,0,-1,-1,1,-1,2,
 
 };
 c_Normalizer *c_Normalizer::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_Normalizer$$call_info_table[];
@@ -1616,7 +1516,6 @@ const int cw_DOMXPath$$instanceof_index[] = {
 };
 extern const CallInfo ci_DOMXPath$$__set = { (void*)&c_DOMXPath::i___set, (void*)&c_DOMXPath::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMXPath$$__get = { (void*)&c_DOMXPath::i___get, (void*)&c_DOMXPath::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMXPath$$__destruct = { (void*)&c_DOMXPath::i___destruct, (void*)&c_DOMXPath::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMXPath$$query = { (void*)&c_DOMXPath::i_query, (void*)&c_DOMXPath::ifa_query, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMXPath$$evaluate = { (void*)&c_DOMXPath::i_evaluate, (void*)&c_DOMXPath::ifa_evaluate, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMXPath$$__isset = { (void*)&c_DOMXPath::i___isset, (void*)&c_DOMXPath::ifa___isset, 1, 4, 0x0000000000000000LL};
@@ -1646,9 +1545,6 @@ Variant c_DOMXPath::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMXPath::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMXPath::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMXPath::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -1729,38 +1625,26 @@ Variant NEVER_INLINE c_DOMXPath::ifa___isset(MethodCallPackage &mcp, int count, 
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMXPath::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMXPath);
-  }
-  c_DOMXPath *self ATTRIBUTE_UNUSED (static_cast<c_DOMXPath*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMXPath$$call_info_table[] = {
   { 0x3374AB82, 1, 20, "registerPHPFunctions", &ci_DOMXPath$$registerphpfunctions },
-  { 0x0681B0E8, 1, 17, "registerNamespace", &ci_DOMXPath$$registernamespace },
-  { 0x2E2178EE, 1, 7, "__isset", &ci_DOMXPath$$__isset },
-  { 0x6F3C912F, 0, 8, "evaluate", &ci_DOMXPath$$evaluate },
-  { 0x74FA338F, 1, 5, "__get", &ci_DOMXPath$$__get },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMXPath$$__destruct },
   { 0x03340395, 1, 5, "__set", &ci_DOMXPath$$__set },
   { 0x414DA377, 1, 5, "query", &ci_DOMXPath$$query },
-  { 0x229C615F, 1, 11, "__construct", &ci_DOMXPath$$__construct },
+  { 0x0681B0E8, 1, 17, "registerNamespace", &ci_DOMXPath$$registernamespace },
+  { 0x2E2178EE, 1, 7, "__isset", &ci_DOMXPath$$__isset },
+  { 0x229C615F, 0, 11, "__construct", &ci_DOMXPath$$__construct },
+  { 0x6F3C912F, 0, 8, "evaluate", &ci_DOMXPath$$evaluate },
+  { 0x74FA338F, 1, 5, "__get", &ci_DOMXPath$$__get },
 };
 extern const int cw_DOMXPath$$call_info_index[] = {
-  31,
-  -1,-1,0,-1,-1,-1,-1,-1,
-  1,-1,-1,-1,-1,-1,2,3,
-  -1,-1,-1,5,-1,6,-1,7,
-  -1,-1,-1,-1,-1,-1,-1,8,
+  15,
+  -1,-1,0,-1,-1,1,-1,2,
+  3,-1,-1,-1,-1,-1,4,5,
 
 };
 c_DOMXPath *c_DOMXPath::create(Variant a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMXPath$$call_info_table[];
@@ -1786,7 +1670,6 @@ const int cw_DOMImplementation$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DOMImplementation$$__destruct = { (void*)&c_DOMImplementation::i___destruct, (void*)&c_DOMImplementation::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMImplementation$$createdocumenttype = { (void*)&c_DOMImplementation::i_createdocumenttype, (void*)&c_DOMImplementation::ifa_createdocumenttype, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMImplementation$$hasfeature = { (void*)&c_DOMImplementation::i_hasfeature, (void*)&c_DOMImplementation::ifa_hasfeature, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMImplementation$$__construct = { (void*)&c_DOMImplementation::i___construct, (void*)&c_DOMImplementation::ifa___construct, 0, 4, 0x0000000000000000LL};
@@ -1802,9 +1685,6 @@ Variant c_DOMImplementation::i_createdocumenttype(MethodCallPackage &mcp, CArrRe
 }
 Variant c_DOMImplementation::i_hasfeature(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_hasfeature);
-}
-Variant c_DOMImplementation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMImplementation::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -1852,32 +1732,21 @@ Variant NEVER_INLINE c_DOMImplementation::ifa_hasfeature(MethodCallPackage &mcp,
   CVarRef arg1(a1);
   return (self->t_hasfeature(arg0, arg1));
 }
-Variant NEVER_INLINE c_DOMImplementation::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMImplementation);
-  }
-  c_DOMImplementation *self ATTRIBUTE_UNUSED (static_cast<c_DOMImplementation*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMImplementation$$call_info_table[] = {
   { 0x6F3DBAC3, 0, 18, "createDocumentType", &ci_DOMImplementation$$createdocumenttype },
-  { 0x4306A6A3, 0, 10, "hasFeature", &ci_DOMImplementation$$hasfeature },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMImplementation$$__destruct },
+  { 0x4306A6A3, 1, 10, "hasFeature", &ci_DOMImplementation$$hasfeature },
   { 0x337D1B4E, 1, 14, "createDocument", &ci_DOMImplementation$$createdocument },
   { 0x229C615F, 1, 11, "__construct", &ci_DOMImplementation$$__construct },
 };
 extern const int cw_DOMImplementation$$call_info_index[] = {
-  15,
-  -1,-1,-1,0,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,3,4,
+  7,
+  -1,-1,-1,0,-1,-1,2,3,
 
 };
 c_DOMImplementation *c_DOMImplementation::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMImplementation$$call_info_table[];
@@ -1903,13 +1772,9 @@ const int cw_SoapParam$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_SoapParam$$__destruct = { (void*)&c_SoapParam::i___destruct, (void*)&c_SoapParam::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapParam$$__construct = { (void*)&c_SoapParam::i___construct, (void*)&c_SoapParam::ifa___construct, 2, 4, 0x0000000000000000LL};
 Variant c_SoapParam::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_SoapParam::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SoapParam::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -1921,27 +1786,17 @@ Variant NEVER_INLINE c_SoapParam::ifa___construct(MethodCallPackage &mcp, int co
   CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
-Variant NEVER_INLINE c_SoapParam::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SoapParam);
-  }
-  c_SoapParam *self ATTRIBUTE_UNUSED (static_cast<c_SoapParam*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SoapParam$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_SoapParam$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SoapParam$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_SoapParam$$__construct },
 };
 extern const int cw_SoapParam$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_SoapParam *c_SoapParam::create(Variant a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SoapParam$$call_info_table[];
@@ -1974,7 +1829,6 @@ extern const CallInfo ci_DOMNamedNodeMap$$getiterator = { (void*)&c_DOMNamedNode
 extern const CallInfo ci_DOMNamedNodeMap$$__set = { (void*)&c_DOMNamedNodeMap::i___set, (void*)&c_DOMNamedNodeMap::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNamedNodeMap$$getnameditemns = { (void*)&c_DOMNamedNodeMap::i_getnameditemns, (void*)&c_DOMNamedNodeMap::ifa_getnameditemns, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNamedNodeMap$$__get = { (void*)&c_DOMNamedNodeMap::i___get, (void*)&c_DOMNamedNodeMap::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNamedNodeMap$$__destruct = { (void*)&c_DOMNamedNodeMap::i___destruct, (void*)&c_DOMNamedNodeMap::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNamedNodeMap$$getnameditem = { (void*)&c_DOMNamedNodeMap::i_getnameditem, (void*)&c_DOMNamedNodeMap::ifa_getnameditem, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNamedNodeMap$$__isset = { (void*)&c_DOMNamedNodeMap::i___isset, (void*)&c_DOMNamedNodeMap::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNamedNodeMap$$__construct = { (void*)&c_DOMNamedNodeMap::i___construct, (void*)&c_DOMNamedNodeMap::ifa___construct, 0, 4, 0x0000000000000000LL};
@@ -2002,9 +1856,6 @@ Variant c_DOMNamedNodeMap::i___isset(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMNamedNodeMap::i_getiterator(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getiterator);
-}
-Variant c_DOMNamedNodeMap::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMNamedNodeMap::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2078,38 +1929,26 @@ Variant NEVER_INLINE c_DOMNamedNodeMap::ifa_getiterator(MethodCallPackage &mcp, 
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
 }
-Variant NEVER_INLINE c_DOMNamedNodeMap::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMNamedNodeMap);
-  }
-  c_DOMNamedNodeMap *self ATTRIBUTE_UNUSED (static_cast<c_DOMNamedNodeMap*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMNamedNodeMap$$call_info_table[] = {
   { 0x32A12503, 1, 11, "getIterator", &ci_DOMNamedNodeMap$$getiterator },
-  { 0x030902C6, 1, 4, "item", &ci_DOMNamedNodeMap$$item },
-  { 0x2E2178EE, 1, 7, "__isset", &ci_DOMNamedNodeMap$$__isset },
-  { 0x74FA338F, 1, 5, "__get", &ci_DOMNamedNodeMap$$__get },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMNamedNodeMap$$__destruct },
   { 0x03340395, 1, 5, "__set", &ci_DOMNamedNodeMap$$__set },
+  { 0x030902C6, 1, 4, "item", &ci_DOMNamedNodeMap$$item },
   { 0x7F9ADC3A, 1, 12, "getNamedItem", &ci_DOMNamedNodeMap$$getnameditem },
   { 0x7F4F0F1B, 1, 14, "getNamedItemNS", &ci_DOMNamedNodeMap$$getnameditemns },
-  { 0x229C615F, 1, 11, "__construct", &ci_DOMNamedNodeMap$$__construct },
+  { 0x2E2178EE, 1, 7, "__isset", &ci_DOMNamedNodeMap$$__isset },
+  { 0x229C615F, 0, 11, "__construct", &ci_DOMNamedNodeMap$$__construct },
+  { 0x74FA338F, 1, 5, "__get", &ci_DOMNamedNodeMap$$__get },
 };
 extern const int cw_DOMNamedNodeMap$$call_info_index[] = {
-  31,
-  -1,-1,-1,0,-1,-1,1,-1,
-  -1,-1,-1,-1,-1,-1,2,3,
-  -1,-1,-1,4,-1,5,-1,-1,
-  -1,-1,6,7,-1,-1,-1,8,
+  15,
+  -1,-1,-1,0,-1,1,2,-1,
+  -1,-1,3,4,-1,-1,5,6,
 
 };
 c_DOMNamedNodeMap *c_DOMNamedNodeMap::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMNamedNodeMap$$call_info_table[];
@@ -2136,13 +1975,9 @@ const int cw_DOMEntityReference$$instanceof_index[] = {
   3,
   -1,-1,0,-1,
 };
-extern const CallInfo ci_DOMEntityReference$$__destruct = { (void*)&c_DOMEntityReference::i___destruct, (void*)&c_DOMEntityReference::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMEntityReference$$__construct = { (void*)&c_DOMEntityReference::i___construct, (void*)&c_DOMEntityReference::ifa___construct, 1, 4, 0x0000000000000000LL};
 Variant c_DOMEntityReference::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_DOMEntityReference::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMEntityReference::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2153,27 +1988,17 @@ Variant NEVER_INLINE c_DOMEntityReference::ifa___construct(MethodCallPackage &mc
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
-Variant NEVER_INLINE c_DOMEntityReference::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMEntityReference);
-  }
-  c_DOMEntityReference *self ATTRIBUTE_UNUSED (static_cast<c_DOMEntityReference*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMEntityReference$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_DOMEntityReference$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMEntityReference$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_DOMEntityReference$$__construct },
 };
 extern const int cw_DOMEntityReference$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_DOMEntityReference *c_DOMEntityReference::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMEntityReference$$call_info_table[];
@@ -2202,7 +2027,6 @@ const int cw_DateTimeZone$$instanceof_index[] = {
 extern const CallInfo ci_DateTimeZone$$listidentifiers = { (void*)&c_DateTimeZone::i_listidentifiers, (void*)&c_DateTimeZone::ifa_listidentifiers, 0, 12, 0x0000000000000000LL};
 extern const CallInfo ci_DateTimeZone$$getname = { (void*)&c_DateTimeZone::i_getname, (void*)&c_DateTimeZone::ifa_getname, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTimeZone$$gettransitions = { (void*)&c_DateTimeZone::i_gettransitions, (void*)&c_DateTimeZone::ifa_gettransitions, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTimeZone$$__destruct = { (void*)&c_DateTimeZone::i___destruct, (void*)&c_DateTimeZone::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTimeZone$$listabbreviations = { (void*)&c_DateTimeZone::i_listabbreviations, (void*)&c_DateTimeZone::ifa_listabbreviations, 0, 12, 0x0000000000000000LL};
 extern const CallInfo ci_DateTimeZone$$__construct = { (void*)&c_DateTimeZone::i___construct, (void*)&c_DateTimeZone::ifa___construct, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTimeZone$$getoffset = { (void*)&c_DateTimeZone::i_getoffset, (void*)&c_DateTimeZone::ifa_getoffset, 1, 4, 0x0000000000000000LL};
@@ -2223,9 +2047,6 @@ Variant c_DateTimeZone::i_listabbreviations(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_DateTimeZone::i_listidentifiers(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_listidentifiers);
-}
-Variant c_DateTimeZone::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DateTimeZone::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2269,17 +2090,8 @@ Variant NEVER_INLINE c_DateTimeZone::ifa_listidentifiers(MethodCallPackage &mcp,
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("listidentifiers", 0, 1);
   return (c_DateTimeZone::t_listidentifiers());
 }
-Variant NEVER_INLINE c_DateTimeZone::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DateTimeZone);
-  }
-  c_DateTimeZone *self ATTRIBUTE_UNUSED (static_cast<c_DateTimeZone*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DateTimeZone$$call_info_table[] = {
-  { 0x3A93D063, 0, 15, "listIdentifiers", &ci_DateTimeZone$$listidentifiers },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DateTimeZone$$__destruct },
+  { 0x3A93D063, 1, 15, "listIdentifiers", &ci_DateTimeZone$$listidentifiers },
   { 0x04CE93F4, 1, 14, "getTransitions", &ci_DateTimeZone$$gettransitions },
   { 0x4C198965, 1, 7, "getName", &ci_DateTimeZone$$getname },
   { 0x6C3ED068, 1, 17, "listAbbreviations", &ci_DateTimeZone$$listabbreviations },
@@ -2288,15 +2100,14 @@ extern const MethodCallInfoTable cw_DateTimeZone$$call_info_table[] = {
 };
 extern const int cw_DateTimeZone$$call_info_index[] = {
   15,
-  -1,-1,-1,0,2,3,-1,-1,
-  4,-1,-1,5,-1,-1,-1,6,
+  -1,-1,-1,0,1,2,-1,-1,
+  3,-1,-1,4,-1,-1,-1,5,
 
 };
 c_DateTimeZone *c_DateTimeZone::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DateTimeZone$$call_info_table[];
@@ -2327,7 +2138,6 @@ const int cw_DOMNodeIterator$$instanceof_index[] = {
 };
 extern const CallInfo ci_DOMNodeIterator$$current = { (void*)&c_DOMNodeIterator::i_current, (void*)&c_DOMNodeIterator::ifa_current, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeIterator$$key = { (void*)&c_DOMNodeIterator::i_key, (void*)&c_DOMNodeIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeIterator$$__destruct = { (void*)&c_DOMNodeIterator::i___destruct, (void*)&c_DOMNodeIterator::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeIterator$$valid = { (void*)&c_DOMNodeIterator::i_valid, (void*)&c_DOMNodeIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeIterator$$__construct = { (void*)&c_DOMNodeIterator::i___construct, (void*)&c_DOMNodeIterator::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeIterator$$rewind = { (void*)&c_DOMNodeIterator::i_rewind, (void*)&c_DOMNodeIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
@@ -2349,9 +2159,6 @@ Variant c_DOMNodeIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMNodeIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_valid);
-}
-Variant c_DOMNodeIterator::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMNodeIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2401,17 +2208,8 @@ Variant NEVER_INLINE c_DOMNodeIterator::ifa_valid(MethodCallPackage &mcp, int co
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
 }
-Variant NEVER_INLINE c_DOMNodeIterator::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMNodeIterator);
-  }
-  c_DOMNodeIterator *self ATTRIBUTE_UNUSED (static_cast<c_DOMNodeIterator*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMNodeIterator$$call_info_table[] = {
   { 0x024E8C51, 1, 3, "key", &ci_DOMNodeIterator$$key },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMNodeIterator$$__destruct },
   { 0x54808C44, 1, 5, "valid", &ci_DOMNodeIterator$$valid },
   { 0x3B8102B8, 1, 4, "next", &ci_DOMNodeIterator$$next },
   { 0x5E27AF6A, 1, 6, "rewind", &ci_DOMNodeIterator$$rewind },
@@ -2420,15 +2218,14 @@ extern const MethodCallInfoTable cw_DOMNodeIterator$$call_info_table[] = {
 };
 extern const int cw_DOMNodeIterator$$call_info_index[] = {
   15,
-  -1,0,-1,1,2,-1,-1,-1,
-  3,-1,4,-1,5,-1,-1,6,
+  -1,0,-1,-1,1,-1,-1,-1,
+  2,-1,3,-1,4,-1,-1,5,
 
 };
 c_DOMNodeIterator *c_DOMNodeIterator::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMNodeIterator$$call_info_table[];
@@ -2459,7 +2256,6 @@ extern const CallInfo ci_SQLite3Result$$fetcharray = { (void*)&c_SQLite3Result::
 extern const CallInfo ci_SQLite3Result$$finalize = { (void*)&c_SQLite3Result::i_finalize, (void*)&c_SQLite3Result::ifa_finalize, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Result$$columnname = { (void*)&c_SQLite3Result::i_columnname, (void*)&c_SQLite3Result::ifa_columnname, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Result$$reset = { (void*)&c_SQLite3Result::i_reset, (void*)&c_SQLite3Result::ifa_reset, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Result$$__destruct = { (void*)&c_SQLite3Result::i___destruct, (void*)&c_SQLite3Result::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Result$$__construct = { (void*)&c_SQLite3Result::i___construct, (void*)&c_SQLite3Result::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Result$$columntype = { (void*)&c_SQLite3Result::i_columntype, (void*)&c_SQLite3Result::ifa_columntype, 1, 4, 0x0000000000000000LL};
 Variant c_SQLite3Result::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -2482,9 +2278,6 @@ Variant c_SQLite3Result::i_reset(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SQLite3Result::i_finalize(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_finalize);
-}
-Variant c_SQLite3Result::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SQLite3Result::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2546,17 +2339,8 @@ Variant NEVER_INLINE c_SQLite3Result::ifa_finalize(MethodCallPackage &mcp, int c
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("finalize", 0, 1);
   return (self->t_finalize());
 }
-Variant NEVER_INLINE c_SQLite3Result::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SQLite3Result);
-  }
-  c_SQLite3Result *self ATTRIBUTE_UNUSED (static_cast<c_SQLite3Result*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SQLite3Result$$call_info_table[] = {
   { 0x22A924E0, 1, 5, "reset", &ci_SQLite3Result$$reset },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SQLite3Result$$__destruct },
   { 0x22784996, 1, 10, "numcolumns", &ci_SQLite3Result$$numcolumns },
   { 0x6E7E47F8, 1, 10, "columnname", &ci_SQLite3Result$$columnname },
   { 0x6F1C3A6B, 1, 10, "fetcharray", &ci_SQLite3Result$$fetcharray },
@@ -2566,15 +2350,14 @@ extern const MethodCallInfoTable cw_SQLite3Result$$call_info_table[] = {
 };
 extern const int cw_SQLite3Result$$call_info_index[] = {
   15,
-  0,-1,-1,1,-1,-1,2,-1,
-  3,-1,-1,4,5,6,-1,7,
+  0,-1,-1,-1,-1,-1,1,-1,
+  2,-1,-1,3,4,5,-1,6,
 
 };
 c_SQLite3Result *c_SQLite3Result::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SQLite3Result$$call_info_table[];
@@ -2605,7 +2388,6 @@ const int cw_SimpleXMLElementIterator$$instanceof_index[] = {
 };
 extern const CallInfo ci_SimpleXMLElementIterator$$current = { (void*)&c_SimpleXMLElementIterator::i_current, (void*)&c_SimpleXMLElementIterator::ifa_current, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElementIterator$$key = { (void*)&c_SimpleXMLElementIterator::i_key, (void*)&c_SimpleXMLElementIterator::ifa_key, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElementIterator$$__destruct = { (void*)&c_SimpleXMLElementIterator::i___destruct, (void*)&c_SimpleXMLElementIterator::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElementIterator$$valid = { (void*)&c_SimpleXMLElementIterator::i_valid, (void*)&c_SimpleXMLElementIterator::ifa_valid, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElementIterator$$__construct = { (void*)&c_SimpleXMLElementIterator::i___construct, (void*)&c_SimpleXMLElementIterator::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElementIterator$$rewind = { (void*)&c_SimpleXMLElementIterator::i_rewind, (void*)&c_SimpleXMLElementIterator::ifa_rewind, 0, 4, 0x0000000000000000LL};
@@ -2627,9 +2409,6 @@ Variant c_SimpleXMLElementIterator::i_rewind(MethodCallPackage &mcp, CArrRef par
 }
 Variant c_SimpleXMLElementIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_valid);
-}
-Variant c_SimpleXMLElementIterator::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SimpleXMLElementIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2679,17 +2458,8 @@ Variant NEVER_INLINE c_SimpleXMLElementIterator::ifa_valid(MethodCallPackage &mc
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
 }
-Variant NEVER_INLINE c_SimpleXMLElementIterator::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SimpleXMLElementIterator);
-  }
-  c_SimpleXMLElementIterator *self ATTRIBUTE_UNUSED (static_cast<c_SimpleXMLElementIterator*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SimpleXMLElementIterator$$call_info_table[] = {
   { 0x024E8C51, 1, 3, "key", &ci_SimpleXMLElementIterator$$key },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SimpleXMLElementIterator$$__destruct },
   { 0x54808C44, 1, 5, "valid", &ci_SimpleXMLElementIterator$$valid },
   { 0x3B8102B8, 1, 4, "next", &ci_SimpleXMLElementIterator$$next },
   { 0x5E27AF6A, 1, 6, "rewind", &ci_SimpleXMLElementIterator$$rewind },
@@ -2698,15 +2468,14 @@ extern const MethodCallInfoTable cw_SimpleXMLElementIterator$$call_info_table[] 
 };
 extern const int cw_SimpleXMLElementIterator$$call_info_index[] = {
   15,
-  -1,0,-1,1,2,-1,-1,-1,
-  3,-1,4,-1,5,-1,-1,6,
+  -1,0,-1,-1,1,-1,-1,-1,
+  2,-1,3,-1,4,-1,-1,5,
 
 };
 c_SimpleXMLElementIterator *c_SimpleXMLElementIterator::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SimpleXMLElementIterator$$call_info_table[];
@@ -2733,7 +2502,6 @@ const int cw_DOMDocumentFragment$$instanceof_index[] = {
   3,
   -1,0,1,-1,
 };
-extern const CallInfo ci_DOMDocumentFragment$$__destruct = { (void*)&c_DOMDocumentFragment::i___destruct, (void*)&c_DOMDocumentFragment::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocumentFragment$$appendxml = { (void*)&c_DOMDocumentFragment::i_appendxml, (void*)&c_DOMDocumentFragment::ifa_appendxml, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocumentFragment$$__construct = { (void*)&c_DOMDocumentFragment::i___construct, (void*)&c_DOMDocumentFragment::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_DOMDocumentFragment::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -2741,9 +2509,6 @@ Variant c_DOMDocumentFragment::i___construct(MethodCallPackage &mcp, CArrRef par
 }
 Variant c_DOMDocumentFragment::i_appendxml(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_appendxml);
-}
-Variant c_DOMDocumentFragment::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMDocumentFragment::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2762,29 +2527,18 @@ Variant NEVER_INLINE c_DOMDocumentFragment::ifa_appendxml(MethodCallPackage &mcp
   CVarRef arg0(a0);
   return (self->t_appendxml(arg0));
 }
-Variant NEVER_INLINE c_DOMDocumentFragment::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMDocumentFragment);
-  }
-  c_DOMDocumentFragment *self ATTRIBUTE_UNUSED (static_cast<c_DOMDocumentFragment*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMDocumentFragment$$call_info_table[] = {
   { 0x41920931, 1, 9, "appendXML", &ci_DOMDocumentFragment$$appendxml },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMDocumentFragment$$__destruct },
   { 0x229C615F, 1, 11, "__construct", &ci_DOMDocumentFragment$$__construct },
 };
 extern const int cw_DOMDocumentFragment$$call_info_index[] = {
-  7,
-  -1,0,-1,1,-1,-1,-1,2,
-
+  3,
+  -1,0,-1,1,
 };
 c_DOMDocumentFragment *c_DOMDocumentFragment::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMDocumentFragment$$call_info_table[];
@@ -2928,7 +2682,6 @@ const int cw_DebuggerProxyCmdUser$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DebuggerProxyCmdUser$$__destruct = { (void*)&c_DebuggerProxyCmdUser::i___destruct, (void*)&c_DebuggerProxyCmdUser::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerProxyCmdUser$$islocal = { (void*)&c_DebuggerProxyCmdUser::i_islocal, (void*)&c_DebuggerProxyCmdUser::ifa_islocal, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerProxyCmdUser$$send = { (void*)&c_DebuggerProxyCmdUser::i_send, (void*)&c_DebuggerProxyCmdUser::ifa_send, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerProxyCmdUser$$__construct = { (void*)&c_DebuggerProxyCmdUser::i___construct, (void*)&c_DebuggerProxyCmdUser::ifa___construct, 0, 4, 0x0000000000000000LL};
@@ -2940,9 +2693,6 @@ Variant c_DebuggerProxyCmdUser::i_islocal(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_DebuggerProxyCmdUser::i_send(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_send);
-}
-Variant c_DebuggerProxyCmdUser::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DebuggerProxyCmdUser::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2969,30 +2719,20 @@ Variant NEVER_INLINE c_DebuggerProxyCmdUser::ifa_send(MethodCallPackage &mcp, in
   CVarRef arg0(a0);
   return (self->t_send(arg0));
 }
-Variant NEVER_INLINE c_DebuggerProxyCmdUser::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DebuggerProxyCmdUser);
-  }
-  c_DebuggerProxyCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerProxyCmdUser*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DebuggerProxyCmdUser$$call_info_table[] = {
   { 0x002E3888, 1, 4, "send", &ci_DebuggerProxyCmdUser$$send },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DebuggerProxyCmdUser$$__destruct },
   { 0x529D270C, 1, 7, "isLocal", &ci_DebuggerProxyCmdUser$$islocal },
   { 0x229C615F, 1, 11, "__construct", &ci_DebuggerProxyCmdUser$$__construct },
 };
 extern const int cw_DebuggerProxyCmdUser$$call_info_index[] = {
   7,
-  0,-1,-1,1,2,-1,-1,3,
+  0,-1,-1,-1,1,-1,-1,2,
 
 };
 c_DebuggerProxyCmdUser *c_DebuggerProxyCmdUser::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DebuggerProxyCmdUser$$call_info_table[];
@@ -3018,12 +2758,11 @@ const int cw_SpoofChecker$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_SpoofChecker$$areconfusable = { (void*)&c_SpoofChecker::i_areconfusable, (void*)&c_SpoofChecker::ifa_areconfusable, 3, 4, 0x0000000000000004LL};
-extern const CallInfo ci_SpoofChecker$$setallowedlocales = { (void*)&c_SpoofChecker::i_setallowedlocales, (void*)&c_SpoofChecker::ifa_setallowedlocales, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SpoofChecker$$setchecks = { (void*)&c_SpoofChecker::i_setchecks, (void*)&c_SpoofChecker::ifa_setchecks, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SpoofChecker$$__destruct = { (void*)&c_SpoofChecker::i___destruct, (void*)&c_SpoofChecker::ifa___destruct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SpoofChecker$$__construct = { (void*)&c_SpoofChecker::i___construct, (void*)&c_SpoofChecker::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SpoofChecker$$issuspicious = { (void*)&c_SpoofChecker::i_issuspicious, (void*)&c_SpoofChecker::ifa_issuspicious, 2, 4, 0x0000000000000002LL};
+extern const CallInfo ci_SpoofChecker$$setallowedlocales = { (void*)&c_SpoofChecker::i_setallowedlocales, (void*)&c_SpoofChecker::ifa_setallowedlocales, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_SpoofChecker$$areconfusable = { (void*)&c_SpoofChecker::i_areconfusable, (void*)&c_SpoofChecker::ifa_areconfusable, 3, 4, 0x0000000000000004LL};
+extern const CallInfo ci_SpoofChecker$$__construct = { (void*)&c_SpoofChecker::i___construct, (void*)&c_SpoofChecker::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_SpoofChecker::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3038,9 +2777,6 @@ Variant c_SpoofChecker::i_setallowedlocales(MethodCallPackage &mcp, CArrRef para
 }
 Variant c_SpoofChecker::i_setchecks(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_setchecks);
-}
-Variant c_SpoofChecker::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SpoofChecker::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -3091,17 +2827,8 @@ Variant NEVER_INLINE c_SpoofChecker::ifa_setchecks(MethodCallPackage &mcp, int c
   CVarRef arg0(a0);
   return (self->t_setchecks(arg0), null);
 }
-Variant NEVER_INLINE c_SpoofChecker::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SpoofChecker);
-  }
-  c_SpoofChecker *self ATTRIBUTE_UNUSED (static_cast<c_SpoofChecker*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SpoofChecker$$call_info_table[] = {
-  { 0x7874FF63, 0, 9, "setChecks", &ci_SpoofChecker$$setchecks },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SpoofChecker$$__destruct },
+  { 0x7874FF63, 1, 9, "setChecks", &ci_SpoofChecker$$setchecks },
   { 0x6CE73BD9, 1, 13, "areConfusable", &ci_SpoofChecker$$areconfusable },
   { 0x3612B4AA, 1, 12, "isSuspicious", &ci_SpoofChecker$$issuspicious },
   { 0x4F1204BD, 1, 17, "setAllowedLocales", &ci_SpoofChecker$$setallowedlocales },
@@ -3110,14 +2837,13 @@ extern const MethodCallInfoTable cw_SpoofChecker$$call_info_table[] = {
 extern const int cw_SpoofChecker$$call_info_index[] = {
   15,
   -1,-1,-1,0,-1,-1,-1,-1,
-  -1,2,3,-1,-1,4,-1,5,
+  -1,1,2,-1,-1,3,-1,4,
 
 };
 c_SpoofChecker *c_SpoofChecker::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SpoofChecker$$call_info_table[];
@@ -3276,7 +3002,6 @@ const int cw_DOMDocumentType$$instanceof_index[] = {
 };
 extern const CallInfo ci_DOMDocumentType$$__isset = { (void*)&c_DOMDocumentType::i___isset, (void*)&c_DOMDocumentType::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocumentType$$__get = { (void*)&c_DOMDocumentType::i___get, (void*)&c_DOMDocumentType::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocumentType$$__destruct = { (void*)&c_DOMDocumentType::i___destruct, (void*)&c_DOMDocumentType::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocumentType$$__set = { (void*)&c_DOMDocumentType::i___set, (void*)&c_DOMDocumentType::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocumentType$$__construct = { (void*)&c_DOMDocumentType::i___construct, (void*)&c_DOMDocumentType::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_DOMDocumentType::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -3290,9 +3015,6 @@ Variant c_DOMDocumentType::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMDocumentType::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMDocumentType::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMDocumentType::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -3330,32 +3052,21 @@ Variant NEVER_INLINE c_DOMDocumentType::ifa___isset(MethodCallPackage &mcp, int 
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMDocumentType::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMDocumentType);
-  }
-  c_DOMDocumentType *self ATTRIBUTE_UNUSED (static_cast<c_DOMDocumentType*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMDocumentType$$call_info_table[] = {
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMDocumentType$$__destruct },
   { 0x03340395, 1, 5, "__set", &ci_DOMDocumentType$$__set },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMDocumentType$$__isset },
   { 0x229C615F, 0, 11, "__construct", &ci_DOMDocumentType$$__construct },
   { 0x74FA338F, 1, 5, "__get", &ci_DOMDocumentType$$__get },
 };
 extern const int cw_DOMDocumentType$$call_info_index[] = {
-  15,
-  -1,-1,-1,0,-1,1,-1,-1,
-  -1,-1,-1,-1,-1,-1,2,3,
+  7,
+  -1,-1,-1,-1,-1,0,1,2,
 
 };
 c_DOMDocumentType *c_DOMDocumentType::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMDocumentType$$call_info_table[];
@@ -3382,12 +3093,11 @@ const int cw_DOMAttr$$instanceof_index[] = {
   3,
   0,-1,1,-1,
 };
-extern const CallInfo ci_DOMAttr$$isid = { (void*)&c_DOMAttr::i_isid, (void*)&c_DOMAttr::ifa_isid, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMAttr$$__set = { (void*)&c_DOMAttr::i___set, (void*)&c_DOMAttr::ifa___set, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMAttr$$__get = { (void*)&c_DOMAttr::i___get, (void*)&c_DOMAttr::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMAttr$$__destruct = { (void*)&c_DOMAttr::i___destruct, (void*)&c_DOMAttr::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMAttr$$__isset = { (void*)&c_DOMAttr::i___isset, (void*)&c_DOMAttr::ifa___isset, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMAttr$$__get = { (void*)&c_DOMAttr::i___get, (void*)&c_DOMAttr::ifa___get, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMAttr$$__set = { (void*)&c_DOMAttr::i___set, (void*)&c_DOMAttr::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMAttr$$__construct = { (void*)&c_DOMAttr::i___construct, (void*)&c_DOMAttr::ifa___construct, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DOMAttr$$isid = { (void*)&c_DOMAttr::i_isid, (void*)&c_DOMAttr::ifa_isid, 0, 4, 0x0000000000000000LL};
 Variant c_DOMAttr::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3402,9 +3112,6 @@ Variant c_DOMAttr::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMAttr::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMAttr::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMAttr::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -3453,16 +3160,7 @@ Variant NEVER_INLINE c_DOMAttr::ifa___isset(MethodCallPackage &mcp, int count, I
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMAttr::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMAttr);
-  }
-  c_DOMAttr *self ATTRIBUTE_UNUSED (static_cast<c_DOMAttr*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMAttr$$call_info_table[] = {
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMAttr$$__destruct },
   { 0x15D17F24, 1, 4, "isId", &ci_DOMAttr$$isid },
   { 0x03340395, 1, 5, "__set", &ci_DOMAttr$$__set },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMAttr$$__isset },
@@ -3471,15 +3169,14 @@ extern const MethodCallInfoTable cw_DOMAttr$$call_info_table[] = {
 };
 extern const int cw_DOMAttr$$call_info_index[] = {
   15,
-  -1,-1,-1,0,1,2,-1,-1,
-  -1,-1,-1,-1,-1,-1,3,4,
+  -1,-1,-1,-1,0,1,-1,-1,
+  -1,-1,-1,-1,-1,-1,2,3,
 
 };
 c_DOMAttr *c_DOMAttr::create(String a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMAttr$$call_info_table[];
@@ -3505,13 +3202,9 @@ const int cw_SoapHeader$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_SoapHeader$$__destruct = { (void*)&c_SoapHeader::i___destruct, (void*)&c_SoapHeader::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapHeader$$__construct = { (void*)&c_SoapHeader::i___construct, (void*)&c_SoapHeader::ifa___construct, 5, 4, 0x0000000000000000LL};
 Variant c_SoapHeader::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_SoapHeader::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SoapHeader::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -3529,27 +3222,17 @@ Variant NEVER_INLINE c_SoapHeader::ifa___construct(MethodCallPackage &mcp, int c
   CVarRef arg4(a4);
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
 }
-Variant NEVER_INLINE c_SoapHeader::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SoapHeader);
-  }
-  c_SoapHeader *self ATTRIBUTE_UNUSED (static_cast<c_SoapHeader*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SoapHeader$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_SoapHeader$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SoapHeader$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_SoapHeader$$__construct },
 };
 extern const int cw_SoapHeader$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_SoapHeader *c_SoapHeader::create(String a0, String a1, Variant a2, bool a3, Variant a4) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SoapHeader$$call_info_table[];
@@ -3584,7 +3267,6 @@ extern const CallInfo ci_SQLite3$$lasterrorcode = { (void*)&c_SQLite3::i_lasterr
 extern const CallInfo ci_SQLite3$$__construct = { (void*)&c_SQLite3::i___construct, (void*)&c_SQLite3::ifa___construct, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3$$createfunction = { (void*)&c_SQLite3::i_createfunction, (void*)&c_SQLite3::ifa_createfunction, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3$$lasterrormsg = { (void*)&c_SQLite3::i_lasterrormsg, (void*)&c_SQLite3::ifa_lasterrormsg, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3$$__destruct = { (void*)&c_SQLite3::i___destruct, (void*)&c_SQLite3::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3$$prepare = { (void*)&c_SQLite3::i_prepare, (void*)&c_SQLite3::ifa_prepare, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3$$busytimeout = { (void*)&c_SQLite3::i_busytimeout, (void*)&c_SQLite3::ifa_busytimeout, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3$$query = { (void*)&c_SQLite3::i_query, (void*)&c_SQLite3::ifa_query, 1, 4, 0x0000000000000000LL};
@@ -3647,9 +3329,6 @@ Variant c_SQLite3::i_createaggregate(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SQLite3::i_openblob(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_openblob);
-}
-Variant c_SQLite3::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SQLite3::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -3828,14 +3507,6 @@ Variant NEVER_INLINE c_SQLite3::ifa_openblob(MethodCallPackage &mcp, int count, 
   CVarRef arg3(a3);
   return (self->t_openblob(arg0, arg1, arg2, arg3));
 }
-Variant NEVER_INLINE c_SQLite3::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SQLite3);
-  }
-  c_SQLite3 *self ATTRIBUTE_UNUSED (static_cast<c_SQLite3*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SQLite3$$call_info_table[] = {
   { 0x3EBF5341, 1, 5, "close", &ci_SQLite3$$close },
   { 0x094466C2, 0, 12, "lasterrormsg", &ci_SQLite3$$lasterrormsg },
@@ -3853,7 +3524,6 @@ extern const MethodCallInfoTable cw_SQLite3$$call_info_table[] = {
   { 0x7F63D86A, 1, 7, "version", &ci_SQLite3$$version },
   { 0x4132ABEE, 1, 11, "querysingle", &ci_SQLite3$$querysingle },
   { 0x4BA591AF, 1, 7, "prepare", &ci_SQLite3$$prepare },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SQLite3$$__destruct },
   { 0x3B251635, 1, 12, "escapestring", &ci_SQLite3$$escapestring },
   { 0x414DA377, 1, 5, "query", &ci_SQLite3$$query },
 };
@@ -3865,7 +3535,7 @@ extern const int cw_SQLite3$$call_info_index[] = {
   -1,8,-1,-1,-1,-1,-1,9,
   -1,10,-1,-1,11,-1,12,-1,
   -1,-1,13,-1,-1,-1,14,15,
-  -1,-1,-1,16,-1,17,-1,18,
+  -1,-1,-1,-1,-1,16,-1,17,
   -1,-1,-1,-1,-1,-1,-1,-1,
 
 };
@@ -3873,7 +3543,6 @@ c_SQLite3 *c_SQLite3::create(String a0, int64 a1, String a2) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SQLite3$$call_info_table[];
@@ -4374,7 +4043,6 @@ extern const CallInfo ci_EncodingMatch$$getutf8 = { (void*)&c_EncodingMatch::i_g
 extern const CallInfo ci_EncodingMatch$$isvalid = { (void*)&c_EncodingMatch::i_isvalid, (void*)&c_EncodingMatch::ifa_isvalid, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_EncodingMatch$$getencoding = { (void*)&c_EncodingMatch::i_getencoding, (void*)&c_EncodingMatch::ifa_getencoding, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_EncodingMatch$$getconfidence = { (void*)&c_EncodingMatch::i_getconfidence, (void*)&c_EncodingMatch::ifa_getconfidence, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_EncodingMatch$$__destruct = { (void*)&c_EncodingMatch::i___destruct, (void*)&c_EncodingMatch::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_EncodingMatch$$getlanguage = { (void*)&c_EncodingMatch::i_getlanguage, (void*)&c_EncodingMatch::ifa_getlanguage, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_EncodingMatch$$__construct = { (void*)&c_EncodingMatch::i___construct, (void*)&c_EncodingMatch::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_EncodingMatch::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -4394,9 +4062,6 @@ Variant c_EncodingMatch::i_getlanguage(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_EncodingMatch::i_getutf8(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getutf8);
-}
-Variant c_EncodingMatch::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_EncodingMatch::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -4446,16 +4111,7 @@ Variant NEVER_INLINE c_EncodingMatch::ifa_getutf8(MethodCallPackage &mcp, int co
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("getutf8", 0, 1);
   return (self->t_getutf8());
 }
-Variant NEVER_INLINE c_EncodingMatch::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_EncodingMatch);
-  }
-  c_EncodingMatch *self ATTRIBUTE_UNUSED (static_cast<c_EncodingMatch*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_EncodingMatch$$call_info_table[] = {
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_EncodingMatch$$__destruct },
   { 0x4D474FB7, 1, 11, "getEncoding", &ci_EncodingMatch$$getencoding },
   { 0x2CA9872B, 1, 7, "isValid", &ci_EncodingMatch$$isvalid },
   { 0x080ED08C, 0, 13, "getConfidence", &ci_EncodingMatch$$getconfidence },
@@ -4465,15 +4121,14 @@ extern const MethodCallInfoTable cw_EncodingMatch$$call_info_table[] = {
 };
 extern const int cw_EncodingMatch$$call_info_index[] = {
   15,
-  -1,-1,-1,0,-1,-1,-1,1,
-  -1,-1,-1,2,3,-1,-1,6,
+  -1,-1,-1,-1,-1,-1,-1,0,
+  -1,-1,-1,1,2,-1,-1,5,
 
 };
 c_EncodingMatch *c_EncodingMatch::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_EncodingMatch$$call_info_table[];
@@ -4499,13 +4154,9 @@ const int cw_Locale$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_Locale$$__destruct = { (void*)&c_Locale::i___destruct, (void*)&c_Locale::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Locale$$__construct = { (void*)&c_Locale::i___construct, (void*)&c_Locale::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_Locale::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_Locale::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_Locale::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -4515,27 +4166,17 @@ Variant NEVER_INLINE c_Locale::ifa___construct(MethodCallPackage &mcp, int count
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
 }
-Variant NEVER_INLINE c_Locale::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_Locale);
-  }
-  c_Locale *self ATTRIBUTE_UNUSED (static_cast<c_Locale*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_Locale$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_Locale$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_Locale$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_Locale$$__construct },
 };
 extern const int cw_Locale$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_Locale *c_Locale::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_Locale$$call_info_table[];
@@ -4583,7 +4224,6 @@ extern const CallInfo ci_DebuggerClientCmdUser$$quit = { (void*)&c_DebuggerClien
 extern const CallInfo ci_DebuggerClientCmdUser$$arg = { (void*)&c_DebuggerClientCmdUser::i_arg, (void*)&c_DebuggerClientCmdUser::ifa_arg, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$info = { (void*)&c_DebuggerClientCmdUser::i_info, (void*)&c_DebuggerClientCmdUser::ifa_info, 1, 5, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$argcount = { (void*)&c_DebuggerClientCmdUser::i_argcount, (void*)&c_DebuggerClientCmdUser::ifa_argcount, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$__destruct = { (void*)&c_DebuggerClientCmdUser::i___destruct, (void*)&c_DebuggerClientCmdUser::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$getstacktrace = { (void*)&c_DebuggerClientCmdUser::i_getstacktrace, (void*)&c_DebuggerClientCmdUser::ifa_getstacktrace, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$getcurrentlocation = { (void*)&c_DebuggerClientCmdUser::i_getcurrentlocation, (void*)&c_DebuggerClientCmdUser::ifa_getcurrentlocation, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$helptitle = { (void*)&c_DebuggerClientCmdUser::i_helptitle, (void*)&c_DebuggerClientCmdUser::ifa_helptitle, 1, 4, 0x0000000000000000LL};
@@ -4762,9 +4402,6 @@ Variant c_DebuggerClientCmdUser::i_printframe(MethodCallPackage &mcp, CArrRef pa
 }
 Variant c_DebuggerClientCmdUser::i_addcompletion(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_addcompletion);
-}
-Variant c_DebuggerClientCmdUser::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DebuggerClientCmdUser::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -5067,14 +4704,6 @@ Variant NEVER_INLINE c_DebuggerClientCmdUser::ifa_addcompletion(MethodCallPackag
   CVarRef arg0(a0);
   return (self->t_addcompletion(arg0), null);
 }
-Variant NEVER_INLINE c_DebuggerClientCmdUser::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DebuggerClientCmdUser);
-  }
-  c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DebuggerClientCmdUser$$call_info_table[] = {
   { 0x0B181780, 1, 13, "addCompletion", &ci_DebuggerClientCmdUser$$addcompletion },
   { 0x3FF5AA42, 1, 3, "ask", &ci_DebuggerClientCmdUser$$ask },
@@ -5097,7 +4726,6 @@ extern const MethodCallInfoTable cw_DebuggerClientCmdUser$$call_info_table[] = {
   { 0x0516B6AC, 1, 8, "tutorial", &ci_DebuggerClientCmdUser$$tutorial },
   { 0x3E2B4C6F, 0, 11, "helpSection", &ci_DebuggerClientCmdUser$$helpsection },
   { 0x2A696DEF, 1, 8, "argCount", &ci_DebuggerClientCmdUser$$argcount },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DebuggerClientCmdUser$$__destruct },
   { 0x5FD23534, 0, 4, "help", &ci_DebuggerClientCmdUser$$help },
   { 0x5A99F6F4, 1, 3, "arg", &ci_DebuggerClientCmdUser$$arg },
   { 0x1024B7B6, 1, 4, "xend", &ci_DebuggerClientCmdUser$$xend },
@@ -5115,15 +4743,14 @@ extern const int cw_DebuggerClientCmdUser$$call_info_index[] = {
   -1,-1,-1,-1,-1,-1,-1,12,
   -1,-1,-1,15,-1,-1,16,-1,
   17,-1,-1,-1,18,-1,-1,19,
-  -1,-1,-1,21,22,-1,24,25,
-  -1,27,28,-1,-1,-1,-1,29,
+  -1,-1,-1,-1,21,-1,23,24,
+  -1,26,27,-1,-1,-1,-1,28,
 
 };
 c_DebuggerClientCmdUser *c_DebuggerClientCmdUser::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DebuggerClientCmdUser$$call_info_table[];
@@ -5154,7 +4781,6 @@ extern const CallInfo ci_SQLite3Stmt$$close = { (void*)&c_SQLite3Stmt::i_close, 
 extern const CallInfo ci_SQLite3Stmt$$reset = { (void*)&c_SQLite3Stmt::i_reset, (void*)&c_SQLite3Stmt::ifa_reset, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Stmt$$bindvalue = { (void*)&c_SQLite3Stmt::i_bindvalue, (void*)&c_SQLite3Stmt::ifa_bindvalue, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Stmt$$paramcount = { (void*)&c_SQLite3Stmt::i_paramcount, (void*)&c_SQLite3Stmt::ifa_paramcount, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SQLite3Stmt$$__destruct = { (void*)&c_SQLite3Stmt::i___destruct, (void*)&c_SQLite3Stmt::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Stmt$$execute = { (void*)&c_SQLite3Stmt::i_execute, (void*)&c_SQLite3Stmt::ifa_execute, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Stmt$$__construct = { (void*)&c_SQLite3Stmt::i___construct, (void*)&c_SQLite3Stmt::ifa___construct, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SQLite3Stmt$$bindparam = { (void*)&c_SQLite3Stmt::i_bindparam, (void*)&c_SQLite3Stmt::ifa_bindparam, 3, 4, 0x0000000000000002LL};
@@ -5181,9 +4807,6 @@ Variant c_SQLite3Stmt::i_bindvalue(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SQLite3Stmt::i_execute(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_execute);
-}
-Variant c_SQLite3Stmt::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SQLite3Stmt::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -5259,38 +4882,26 @@ Variant NEVER_INLINE c_SQLite3Stmt::ifa_execute(MethodCallPackage &mcp, int coun
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("execute", 0, 1);
   return (self->t_execute());
 }
-Variant NEVER_INLINE c_SQLite3Stmt::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SQLite3Stmt);
-  }
-  c_SQLite3Stmt *self ATTRIBUTE_UNUSED (static_cast<c_SQLite3Stmt*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SQLite3Stmt$$call_info_table[] = {
   { 0x22A924E0, 1, 5, "reset", &ci_SQLite3Stmt$$reset },
   { 0x3EBF5341, 1, 5, "close", &ci_SQLite3Stmt$$close },
   { 0x3628E403, 1, 9, "bindvalue", &ci_SQLite3Stmt$$bindvalue },
+  { 0x1BA41696, 1, 9, "bindparam", &ci_SQLite3Stmt$$bindparam },
+  { 0x01E93357, 0, 10, "paramcount", &ci_SQLite3Stmt$$paramcount },
   { 0x5A226667, 1, 5, "clear", &ci_SQLite3Stmt$$clear },
   { 0x6B57714E, 1, 7, "execute", &ci_SQLite3Stmt$$execute },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SQLite3Stmt$$__destruct },
-  { 0x1BA41696, 1, 9, "bindparam", &ci_SQLite3Stmt$$bindparam },
-  { 0x01E93357, 1, 10, "paramcount", &ci_SQLite3Stmt$$paramcount },
   { 0x229C615F, 1, 11, "__construct", &ci_SQLite3Stmt$$__construct },
 };
 extern const int cw_SQLite3Stmt$$call_info_index[] = {
-  31,
-  0,1,-1,2,-1,-1,-1,3,
-  -1,-1,-1,-1,-1,-1,4,-1,
-  -1,-1,-1,5,-1,-1,6,7,
-  -1,-1,-1,-1,-1,-1,-1,8,
+  15,
+  0,1,-1,2,-1,-1,3,4,
+  -1,-1,-1,-1,-1,-1,6,7,
 
 };
 c_SQLite3Stmt *c_SQLite3Stmt::create(Object a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SQLite3Stmt$$call_info_table[];
@@ -5352,7 +4963,6 @@ extern const CallInfo ci_XMLWriter$$writeattribute = { (void*)&c_XMLWriter::i_wr
 extern const CallInfo ci_XMLWriter$$startattribute = { (void*)&c_XMLWriter::i_startattribute, (void*)&c_XMLWriter::ifa_startattribute, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLWriter$$flush = { (void*)&c_XMLWriter::i_flush, (void*)&c_XMLWriter::ifa_flush, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLWriter$$writeelementns = { (void*)&c_XMLWriter::i_writeelementns, (void*)&c_XMLWriter::ifa_writeelementns, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLWriter$$__destruct = { (void*)&c_XMLWriter::i___destruct, (void*)&c_XMLWriter::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLWriter$$startdtdelement = { (void*)&c_XMLWriter::i_startdtdelement, (void*)&c_XMLWriter::ifa_startdtdelement, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLWriter$$endattribute = { (void*)&c_XMLWriter::i_endattribute, (void*)&c_XMLWriter::ifa_endattribute, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLWriter$$openuri = { (void*)&c_XMLWriter::i_openuri, (void*)&c_XMLWriter::ifa_openuri, 1, 4, 0x0000000000000000LL};
@@ -5488,9 +5098,6 @@ Variant c_XMLWriter::i_flush(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_XMLWriter::i_outputmemory(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_outputmemory);
-}
-Variant c_XMLWriter::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_XMLWriter::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -5908,14 +5515,6 @@ Variant NEVER_INLINE c_XMLWriter::ifa_outputmemory(MethodCallPackage &mcp, int c
   CVarRef arg0(a0);
   return (self->t_outputmemory(arg0));
 }
-Variant NEVER_INLINE c_XMLWriter::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_XMLWriter);
-  }
-  c_XMLWriter *self ATTRIBUTE_UNUSED (static_cast<c_XMLWriter*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_XMLWriter$$call_info_table[] = {
   { 0x6B6B0982, 1, 10, "writeCData", &ci_XMLWriter$$writecdata },
   { 0x696ACF83, 1, 8, "startDTD", &ci_XMLWriter$$startdtd },
@@ -5956,7 +5555,6 @@ extern const MethodCallInfoTable cw_XMLWriter$$call_info_table[] = {
   { 0x5E12E169, 1, 14, "startElementNS", &ci_XMLWriter$$startelementns },
   { 0x542B7D70, 1, 15, "startDTDAttlist", &ci_XMLWriter$$startdtdattlist },
   { 0x552E1771, 1, 13, "endDTDAttlist", &ci_XMLWriter$$enddtdattlist },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_XMLWriter$$__destruct },
   { 0x0EBA2AF8, 1, 15, "startDTDElement", &ci_XMLWriter$$startdtdelement },
   { 0x5B005E7A, 1, 5, "flush", &ci_XMLWriter$$flush },
   { 0x0BFB9FFE, 1, 14, "fullEndElement", &ci_XMLWriter$$fullendelement },
@@ -5978,15 +5576,14 @@ extern const int cw_XMLWriter$$call_info_index[] = {
   29,30,-1,-1,31,32,-1,33,
   -1,-1,34,-1,-1,35,-1,-1,
   -1,36,-1,-1,-1,-1,-1,-1,
-  37,38,-1,39,-1,-1,-1,-1,
-  40,-1,41,-1,-1,-1,42,43,
+  37,38,-1,-1,-1,-1,-1,-1,
+  39,-1,40,-1,-1,-1,41,42,
 
 };
 c_XMLWriter *c_XMLWriter::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_XMLWriter$$call_info_table[];
@@ -6333,7 +5930,6 @@ extern const CallInfo ci_SimpleXMLElement$$__set = { (void*)&c_SimpleXMLElement:
 extern const CallInfo ci_SimpleXMLElement$$__construct = { (void*)&c_SimpleXMLElement::i___construct, (void*)&c_SimpleXMLElement::ifa___construct, 5, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElement$$__tostring = { (void*)&c_SimpleXMLElement::i___tostring, (void*)&c_SimpleXMLElement::ifa___tostring, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElement$$asxml = { (void*)&c_SimpleXMLElement::i_asxml, (void*)&c_SimpleXMLElement::ifa_asxml, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SimpleXMLElement$$__destruct = { (void*)&c_SimpleXMLElement::i___destruct, (void*)&c_SimpleXMLElement::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElement$$addchild = { (void*)&c_SimpleXMLElement::i_addchild, (void*)&c_SimpleXMLElement::ifa_addchild, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElement$$attributes = { (void*)&c_SimpleXMLElement::i_attributes, (void*)&c_SimpleXMLElement::ifa_attributes, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SimpleXMLElement$$count = { (void*)&c_SimpleXMLElement::i_count, (void*)&c_SimpleXMLElement::ifa_count, 0, 4, 0x0000000000000000LL};
@@ -6413,9 +6009,6 @@ Variant c_SimpleXMLElement::i___isset(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SimpleXMLElement::i___unset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___unset);
-}
-Variant c_SimpleXMLElement::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SimpleXMLElement::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -6639,14 +6232,6 @@ Variant NEVER_INLINE c_SimpleXMLElement::ifa___unset(MethodCallPackage &mcp, int
   CVarRef arg0(a0);
   return (self->t___unset(arg0));
 }
-Variant NEVER_INLINE c_SimpleXMLElement::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SimpleXMLElement);
-  }
-  c_SimpleXMLElement *self ATTRIBUTE_UNUSED (static_cast<c_SimpleXMLElement*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SimpleXMLElement$$call_info_table[] = {
   { 0x742FC700, 1, 12, "offsetExists", &ci_SimpleXMLElement$$offsetexists },
   { 0x32A12503, 1, 11, "getIterator", &ci_SimpleXMLElement$$getiterator },
@@ -6667,7 +6252,6 @@ extern const MethodCallInfoTable cw_SimpleXMLElement$$call_info_table[] = {
   { 0x1E2E82AD, 1, 8, "children", &ci_SimpleXMLElement$$children },
   { 0x2E2178EE, 1, 7, "__isset", &ci_SimpleXMLElement$$__isset },
   { 0x0B2F34F1, 1, 16, "getDocNamespaces", &ci_SimpleXMLElement$$getdocnamespaces },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SimpleXMLElement$$__destruct },
   { 0x248AF738, 1, 9, "offsetSet", &ci_SimpleXMLElement$$offsetset },
   { 0x66369ABA, 1, 11, "offsetUnset", &ci_SimpleXMLElement$$offsetunset },
   { 0x7854F83D, 1, 22, "registerXPathNamespace", &ci_SimpleXMLElement$$registerxpathnamespace },
@@ -6680,15 +6264,14 @@ extern const int cw_SimpleXMLElement$$call_info_index[] = {
   8,-1,-1,9,-1,11,-1,12,
   -1,-1,-1,-1,-1,13,14,-1,
   -1,-1,-1,-1,-1,16,17,-1,
-  -1,18,-1,19,-1,-1,-1,-1,
-  20,-1,21,-1,-1,22,-1,-1,
+  -1,18,-1,-1,-1,-1,-1,-1,
+  19,-1,20,-1,-1,21,-1,-1,
 
 };
 c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64 a1, bool a2, String a3, bool a4) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SimpleXMLElement$$call_info_table[];
@@ -6723,7 +6306,6 @@ extern const CallInfo ci_DOMNode$$__construct = { (void*)&c_DOMNode::i___constru
 extern const CallInfo ci_DOMNode$$issupported = { (void*)&c_DOMNode::i_issupported, (void*)&c_DOMNode::ifa_issupported, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNode$$hasattributes = { (void*)&c_DOMNode::i_hasattributes, (void*)&c_DOMNode::ifa_hasattributes, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNode$$lookupprefix = { (void*)&c_DOMNode::i_lookupprefix, (void*)&c_DOMNode::ifa_lookupprefix, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNode$$__destruct = { (void*)&c_DOMNode::i___destruct, (void*)&c_DOMNode::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNode$$normalize = { (void*)&c_DOMNode::i_normalize, (void*)&c_DOMNode::ifa_normalize, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNode$$getlineno = { (void*)&c_DOMNode::i_getlineno, (void*)&c_DOMNode::ifa_getlineno, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNode$$__isset = { (void*)&c_DOMNode::i___isset, (void*)&c_DOMNode::ifa___isset, 1, 4, 0x0000000000000000LL};
@@ -6798,9 +6380,6 @@ Variant c_DOMNode::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMNode::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMNode::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMNode::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7006,14 +6585,6 @@ Variant NEVER_INLINE c_DOMNode::ifa___isset(MethodCallPackage &mcp, int count, I
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMNode::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMNode);
-  }
-  c_DOMNode *self ATTRIBUTE_UNUSED (static_cast<c_DOMNode*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMNode$$call_info_table[] = {
   { 0x716AE343, 1, 11, "getNodePath", &ci_DOMNode$$getnodepath },
   { 0x4582ED8A, 1, 4, "c14n", &ci_DOMNode$$c14n },
@@ -7032,8 +6603,7 @@ extern const MethodCallInfoTable cw_DOMNode$$call_info_table[] = {
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMNode$$__isset },
   { 0x4A2EC6EF, 1, 10, "isSameNode", &ci_DOMNode$$issamenode },
   { 0x76F5AEB1, 1, 13, "hasAttributes", &ci_DOMNode$$hasattributes },
-  { 0x1185C433, 0, 12, "insertBefore", &ci_DOMNode$$insertbefore },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMNode$$__destruct },
+  { 0x1185C433, 1, 12, "insertBefore", &ci_DOMNode$$insertbefore },
   { 0x4F365A75, 1, 8, "c14nfile", &ci_DOMNode$$c14nfile },
   { 0x250595FA, 0, 13, "hasChildNodes", &ci_DOMNode$$haschildnodes },
   { 0x14B7677A, 1, 11, "isSupported", &ci_DOMNode$$issupported },
@@ -7046,15 +6616,14 @@ extern const int cw_DOMNode$$call_info_index[] = {
   7,-1,8,-1,-1,9,-1,11,
   -1,12,-1,-1,13,-1,-1,-1,
   -1,-1,-1,-1,-1,-1,14,15,
-  -1,16,-1,17,-1,19,-1,-1,
-  -1,-1,20,-1,-1,-1,-1,-1,
+  -1,16,-1,17,-1,18,-1,-1,
+  -1,-1,19,-1,-1,-1,-1,-1,
 
 };
 c_DOMNode *c_DOMNode::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMNode$$call_info_table[];
@@ -7082,7 +6651,6 @@ const int cw_PDO$$instanceof_index[] = {
 };
 extern const CallInfo ci_PDO$$getattribute = { (void*)&c_PDO::i_getattribute, (void*)&c_PDO::ifa_getattribute, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDO$$__construct = { (void*)&c_PDO::i___construct, (void*)&c_PDO::ifa___construct, 4, 4, 0x0000000000000000LL};
-extern const CallInfo ci_PDO$$__destruct = { (void*)&c_PDO::i___destruct, (void*)&c_PDO::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDO$$prepare = { (void*)&c_PDO::i_prepare, (void*)&c_PDO::ifa_prepare, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDO$$errorinfo = { (void*)&c_PDO::i_errorinfo, (void*)&c_PDO::ifa_errorinfo, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_PDO$$__sleep = { (void*)&c_PDO::i___sleep, (void*)&c_PDO::ifa___sleep, 0, 4, 0x0000000000000000LL};
@@ -7144,9 +6712,6 @@ Variant c_PDO::i___sleep(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_PDO::i_getavailabledrivers(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getavailabledrivers);
-}
-Variant c_PDO::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_PDO::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7292,50 +6857,36 @@ Variant NEVER_INLINE c_PDO::ifa_getavailabledrivers(MethodCallPackage &mcp, int 
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("getavailabledrivers", 0, 1);
   return (c_PDO::t_getavailabledrivers());
 }
-Variant NEVER_INLINE c_PDO::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_PDO);
-  }
-  c_PDO *self ATTRIBUTE_UNUSED (static_cast<c_PDO*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_PDO$$call_info_table[] = {
+  { 0x65E3F324, 1, 6, "commit", &ci_PDO$$commit },
   { 0x2372F2C7, 1, 9, "errorcode", &ci_PDO$$errorcode },
+  { 0x6612FC28, 1, 12, "getattribute", &ci_PDO$$getattribute },
   { 0x44F4AB8A, 1, 12, "setattribute", &ci_PDO$$setattribute },
   { 0x3087208C, 1, 4, "exec", &ci_PDO$$exec },
-  { 0x2C38340E, 1, 19, "getavailabledrivers", &ci_PDO$$getavailabledrivers },
-  { 0x3A2D7C12, 1, 12, "lastinsertid", &ci_PDO$$lastinsertid },
-  { 0x2A085CDC, 1, 8, "__wakeup", &ci_PDO$$__wakeup },
-  { 0x7F04605E, 1, 9, "errorinfo", &ci_PDO$$errorinfo },
-  { 0x229C615F, 1, 11, "__construct", &ci_PDO$$__construct },
-  { 0x65E3F324, 1, 6, "commit", &ci_PDO$$commit },
-  { 0x6612FC28, 1, 12, "getattribute", &ci_PDO$$getattribute },
   { 0x5ADBC02D, 1, 7, "__sleep", &ci_PDO$$__sleep },
-  { 0x049464EE, 1, 5, "quote", &ci_PDO$$quote },
+  { 0x049464EE, 0, 5, "quote", &ci_PDO$$quote },
+  { 0x2C38340E, 1, 19, "getavailabledrivers", &ci_PDO$$getavailabledrivers },
   { 0x4BA591AF, 1, 7, "prepare", &ci_PDO$$prepare },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_PDO$$__destruct },
+  { 0x3A2D7C12, 1, 12, "lastinsertid", &ci_PDO$$lastinsertid },
   { 0x6D79EC36, 1, 8, "rollback", &ci_PDO$$rollback },
   { 0x414DA377, 1, 5, "query", &ci_PDO$$query },
   { 0x5C33E23B, 1, 16, "begintransaction", &ci_PDO$$begintransaction },
+  { 0x2A085CDC, 1, 8, "__wakeup", &ci_PDO$$__wakeup },
+  { 0x7F04605E, 1, 9, "errorinfo", &ci_PDO$$errorinfo },
+  { 0x229C615F, 1, 11, "__construct", &ci_PDO$$__construct },
 };
 extern const int cw_PDO$$call_info_index[] = {
-  63,
-  -1,-1,-1,-1,-1,-1,-1,0,
-  -1,-1,1,-1,2,-1,3,-1,
-  -1,-1,4,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,5,-1,6,7,
-  -1,-1,-1,-1,8,-1,-1,-1,
-  9,-1,-1,-1,-1,10,11,12,
-  -1,-1,-1,13,-1,-1,14,15,
-  -1,-1,-1,16,-1,-1,-1,-1,
+  31,
+  -1,-1,-1,-1,0,-1,-1,1,
+  2,-1,3,-1,4,5,6,8,
+  -1,-1,9,-1,-1,-1,10,11,
+  -1,-1,-1,12,13,-1,14,15,
 
 };
 c_PDO *c_PDO::create(String a0, String a1, String a2, Array a3) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_PDO$$call_info_table[];
@@ -7368,7 +6919,6 @@ extern const CallInfo ci_DOMText$$splittext = { (void*)&c_DOMText::i_splittext, 
 extern const CallInfo ci_DOMText$$iswhitespaceinelementcontent = { (void*)&c_DOMText::i_iswhitespaceinelementcontent, (void*)&c_DOMText::ifa_iswhitespaceinelementcontent, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMText$$__set = { (void*)&c_DOMText::i___set, (void*)&c_DOMText::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMText$$__get = { (void*)&c_DOMText::i___get, (void*)&c_DOMText::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMText$$__destruct = { (void*)&c_DOMText::i___destruct, (void*)&c_DOMText::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMText$$__isset = { (void*)&c_DOMText::i___isset, (void*)&c_DOMText::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMText$$__construct = { (void*)&c_DOMText::i___construct, (void*)&c_DOMText::ifa___construct, 1, 4, 0x0000000000000000LL};
 Variant c_DOMText::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -7388,9 +6938,6 @@ Variant c_DOMText::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMText::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMText::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMText::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7447,16 +6994,7 @@ Variant NEVER_INLINE c_DOMText::ifa___isset(MethodCallPackage &mcp, int count, I
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMText::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMText);
-  }
-  c_DOMText *self ATTRIBUTE_UNUSED (static_cast<c_DOMText*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMText$$call_info_table[] = {
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMText$$__destruct },
   { 0x03340395, 1, 5, "__set", &ci_DOMText$$__set },
   { 0x0D8212B7, 1, 9, "splitText", &ci_DOMText$$splittext },
   { 0x0F6C02DD, 1, 28, "isWhitespaceInElementContent", &ci_DOMText$$iswhitespaceinelementcontent },
@@ -7466,15 +7004,14 @@ extern const MethodCallInfoTable cw_DOMText$$call_info_table[] = {
 };
 extern const int cw_DOMText$$call_info_index[] = {
   15,
-  -1,-1,-1,0,-1,1,-1,2,
-  -1,-1,-1,-1,-1,3,4,5,
+  -1,-1,-1,-1,-1,0,-1,1,
+  -1,-1,-1,-1,-1,2,3,4,
 
 };
 c_DOMText *c_DOMText::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMText$$call_info_table[];
@@ -7506,7 +7043,6 @@ extern const CallInfo ci_DOMCharacterData$$deletedata = { (void*)&c_DOMCharacter
 extern const CallInfo ci_DOMCharacterData$$substringdata = { (void*)&c_DOMCharacterData::i_substringdata, (void*)&c_DOMCharacterData::ifa_substringdata, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMCharacterData$$replacedata = { (void*)&c_DOMCharacterData::i_replacedata, (void*)&c_DOMCharacterData::ifa_replacedata, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMCharacterData$$__get = { (void*)&c_DOMCharacterData::i___get, (void*)&c_DOMCharacterData::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMCharacterData$$__destruct = { (void*)&c_DOMCharacterData::i___destruct, (void*)&c_DOMCharacterData::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMCharacterData$$appenddata = { (void*)&c_DOMCharacterData::i_appenddata, (void*)&c_DOMCharacterData::ifa_appenddata, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMCharacterData$$__isset = { (void*)&c_DOMCharacterData::i___isset, (void*)&c_DOMCharacterData::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMCharacterData$$insertdata = { (void*)&c_DOMCharacterData::i_insertdata, (void*)&c_DOMCharacterData::ifa_insertdata, 2, 4, 0x0000000000000000LL};
@@ -7537,9 +7073,6 @@ Variant c_DOMCharacterData::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMCharacterData::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMCharacterData::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMCharacterData::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7627,20 +7160,11 @@ Variant NEVER_INLINE c_DOMCharacterData::ifa___isset(MethodCallPackage &mcp, int
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMCharacterData::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMCharacterData);
-  }
-  c_DOMCharacterData *self ATTRIBUTE_UNUSED (static_cast<c_DOMCharacterData*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMCharacterData$$call_info_table[] = {
   { 0x1FD2D92D, 1, 10, "appendData", &ci_DOMCharacterData$$appenddata },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMCharacterData$$__isset },
   { 0x74FA338F, 1, 5, "__get", &ci_DOMCharacterData$$__get },
   { 0x42149972, 1, 13, "substringData", &ci_DOMCharacterData$$substringdata },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMCharacterData$$__destruct },
   { 0x21F3D4B4, 1, 11, "replaceData", &ci_DOMCharacterData$$replacedata },
   { 0x03340395, 1, 5, "__set", &ci_DOMCharacterData$$__set },
   { 0x6714D118, 1, 10, "deleteData", &ci_DOMCharacterData$$deletedata },
@@ -7651,15 +7175,14 @@ extern const int cw_DOMCharacterData$$call_info_index[] = {
   31,
   -1,-1,-1,-1,-1,-1,-1,-1,
   -1,-1,-1,-1,-1,0,1,2,
-  -1,-1,3,4,5,6,-1,-1,
-  7,-1,-1,-1,-1,8,-1,9,
+  -1,-1,3,-1,4,5,-1,-1,
+  6,-1,-1,-1,-1,7,-1,8,
 
 };
 c_DOMCharacterData *c_DOMCharacterData::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMCharacterData$$call_info_table[];
@@ -7689,13 +7212,9 @@ const int cw_DOMCDATASection$$instanceof_index[] = {
   -1,-1,0,1,2,3,-1,-1,
 
 };
-extern const CallInfo ci_DOMCDATASection$$__destruct = { (void*)&c_DOMCDATASection::i___destruct, (void*)&c_DOMCDATASection::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMCDATASection$$__construct = { (void*)&c_DOMCDATASection::i___construct, (void*)&c_DOMCDATASection::ifa___construct, 1, 4, 0x0000000000000000LL};
 Variant c_DOMCDATASection::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_DOMCDATASection::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMCDATASection::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7706,27 +7225,17 @@ Variant NEVER_INLINE c_DOMCDATASection::ifa___construct(MethodCallPackage &mcp, 
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
-Variant NEVER_INLINE c_DOMCDATASection::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMCDATASection);
-  }
-  c_DOMCDATASection *self ATTRIBUTE_UNUSED (static_cast<c_DOMCDATASection*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMCDATASection$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_DOMCDATASection$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMCDATASection$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_DOMCDATASection$$__construct },
 };
 extern const int cw_DOMCDATASection$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_DOMCDATASection *c_DOMCDATASection::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMCDATASection$$call_info_table[];
@@ -7752,13 +7261,9 @@ const int cw_SoapVar$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_SoapVar$$__destruct = { (void*)&c_SoapVar::i___destruct, (void*)&c_SoapVar::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapVar$$__construct = { (void*)&c_SoapVar::i___construct, (void*)&c_SoapVar::ifa___construct, 6, 4, 0x0000000000000000LL};
 Variant c_SoapVar::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_SoapVar::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SoapVar::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7778,27 +7283,17 @@ Variant NEVER_INLINE c_SoapVar::ifa___construct(MethodCallPackage &mcp, int coun
   CVarRef arg5(a5);
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
 }
-Variant NEVER_INLINE c_SoapVar::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SoapVar);
-  }
-  c_SoapVar *self ATTRIBUTE_UNUSED (static_cast<c_SoapVar*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SoapVar$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_SoapVar$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SoapVar$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_SoapVar$$__construct },
 };
 extern const int cw_SoapVar$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_SoapVar *c_SoapVar::create(Variant a0, Variant a1, String a2, String a3, String a4, String a5) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SoapVar$$call_info_table[];
@@ -7829,7 +7324,6 @@ extern const CallInfo ci_Collator$$asort = { (void*)&c_Collator::i_asort, (void*
 extern const CallInfo ci_Collator$$__construct = { (void*)&c_Collator::i___construct, (void*)&c_Collator::ifa___construct, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Collator$$getstrength = { (void*)&c_Collator::i_getstrength, (void*)&c_Collator::ifa_getstrength, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Collator$$getlocale = { (void*)&c_Collator::i_getlocale, (void*)&c_Collator::ifa_getlocale, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Collator$$__destruct = { (void*)&c_Collator::i___destruct, (void*)&c_Collator::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Collator$$sort = { (void*)&c_Collator::i_sort, (void*)&c_Collator::ifa_sort, 2, 4, 0x0000000000000001LL};
 extern const CallInfo ci_Collator$$geterrormessage = { (void*)&c_Collator::i_geterrormessage, (void*)&c_Collator::ifa_geterrormessage, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Collator$$create = { (void*)&c_Collator::i_create, (void*)&c_Collator::ifa_create, 1, 12, 0x0000000000000000LL};
@@ -7876,9 +7370,6 @@ Variant c_Collator::i_sortwithsortkeys(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Collator::i_sort(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_sort);
-}
-Variant c_Collator::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_Collator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7997,14 +7488,6 @@ Variant NEVER_INLINE c_Collator::ifa_sort(MethodCallPackage &mcp, int count, INV
   CVarRef arg1(a1);
   return (self->t_sort(arg0, arg1));
 }
-Variant NEVER_INLINE c_Collator::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_Collator);
-  }
-  c_Collator *self ATTRIBUTE_UNUSED (static_cast<c_Collator*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_Collator$$call_info_table[] = {
   { 0x4D6296E0, 1, 12, "geterrorcode", &ci_Collator$$geterrorcode },
   { 0x2965CE02, 1, 9, "getlocale", &ci_Collator$$getlocale },
@@ -8015,7 +7498,6 @@ extern const MethodCallInfoTable cw_Collator$$call_info_table[] = {
   { 0x23442BEE, 1, 5, "asort", &ci_Collator$$asort },
   { 0x0C437CD1, 1, 15, "geterrormessage", &ci_Collator$$geterrormessage },
   { 0x3DECF352, 1, 7, "compare", &ci_Collator$$compare },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_Collator$$__destruct },
   { 0x10518456, 1, 6, "create", &ci_Collator$$create },
   { 0x4CBF9ED7, 1, 11, "setstrength", &ci_Collator$$setstrength },
   { 0x205B4C5E, 1, 11, "getstrength", &ci_Collator$$getstrength },
@@ -8025,15 +7507,14 @@ extern const int cw_Collator$$call_info_index[] = {
   31,
   0,-1,1,-1,-1,-1,-1,-1,
   2,-1,3,5,-1,-1,6,-1,
-  -1,7,8,9,-1,-1,10,11,
-  -1,-1,-1,-1,-1,-1,12,13,
+  -1,7,8,-1,-1,-1,9,10,
+  -1,-1,-1,-1,-1,-1,11,12,
 
 };
 c_Collator *c_Collator::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_Collator$$call_info_table[];
@@ -8563,7 +8044,6 @@ extern const CallInfo ci_SoapServer$$fault = { (void*)&c_SoapServer::i_fault, (v
 extern const CallInfo ci_SoapServer$$setpersistence = { (void*)&c_SoapServer::i_setpersistence, (void*)&c_SoapServer::ifa_setpersistence, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapServer$$getfunctions = { (void*)&c_SoapServer::i_getfunctions, (void*)&c_SoapServer::ifa_getfunctions, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapServer$$addsoapheader = { (void*)&c_SoapServer::i_addsoapheader, (void*)&c_SoapServer::ifa_addsoapheader, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_SoapServer$$__destruct = { (void*)&c_SoapServer::i___destruct, (void*)&c_SoapServer::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapServer$$setclass = { (void*)&c_SoapServer::i_setclass, (void*)&c_SoapServer::ifa_setclass, 1, 5, 0x0000000000000000LL};
 extern const CallInfo ci_SoapServer$$__construct = { (void*)&c_SoapServer::i___construct, (void*)&c_SoapServer::ifa___construct, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_SoapServer$$addfunction = { (void*)&c_SoapServer::i_addfunction, (void*)&c_SoapServer::ifa_addfunction, 1, 4, 0x0000000000000000LL};
@@ -8605,9 +8085,6 @@ Variant c_SoapServer::i_fault(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_SoapServer::i_addsoapheader(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_addsoapheader);
-}
-Variant c_SoapServer::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_SoapServer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -8705,20 +8182,11 @@ Variant NEVER_INLINE c_SoapServer::ifa_addsoapheader(MethodCallPackage &mcp, int
   CVarRef arg0(a0);
   return (self->t_addsoapheader(arg0), null);
 }
-Variant NEVER_INLINE c_SoapServer::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_SoapServer);
-  }
-  c_SoapServer *self ATTRIBUTE_UNUSED (static_cast<c_SoapServer*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_SoapServer$$call_info_table[] = {
   { 0x590FE203, 1, 5, "fault", &ci_SoapServer$$fault },
   { 0x60A69328, 1, 14, "setpersistence", &ci_SoapServer$$setpersistence },
   { 0x622F17AF, 1, 12, "getfunctions", &ci_SoapServer$$getfunctions },
   { 0x74541532, 1, 6, "handle", &ci_SoapServer$$handle },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_SoapServer$$__destruct },
   { 0x44F70834, 1, 8, "setclass", &ci_SoapServer$$setclass },
   { 0x4FE626B9, 1, 9, "setobject", &ci_SoapServer$$setobject },
   { 0x4A74963E, 1, 13, "addsoapheader", &ci_SoapServer$$addsoapheader },
@@ -8729,15 +8197,14 @@ extern const int cw_SoapServer$$call_info_index[] = {
   31,
   -1,-1,-1,0,-1,-1,-1,-1,
   1,-1,-1,-1,-1,-1,-1,2,
-  -1,-1,3,4,5,-1,-1,-1,
-  -1,6,-1,-1,-1,-1,7,8,
+  -1,-1,3,-1,4,-1,-1,-1,
+  -1,5,-1,-1,-1,-1,6,7,
 
 };
 c_SoapServer *c_SoapServer::create(Variant a0, Array a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_SoapServer$$call_info_table[];
@@ -9250,7 +8717,6 @@ extern const CallInfo ci_DOMDocument$$getelementbyid = { (void*)&c_DOMDocument::
 extern const CallInfo ci_DOMDocument$$savehtmlfile = { (void*)&c_DOMDocument::i_savehtmlfile, (void*)&c_DOMDocument::ifa_savehtmlfile, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocument$$load = { (void*)&c_DOMDocument::i_load, (void*)&c_DOMDocument::ifa_load, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocument$$createattributens = { (void*)&c_DOMDocument::i_createattributens, (void*)&c_DOMDocument::ifa_createattributens, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMDocument$$__destruct = { (void*)&c_DOMDocument::i___destruct, (void*)&c_DOMDocument::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocument$$xinclude = { (void*)&c_DOMDocument::i_xinclude, (void*)&c_DOMDocument::ifa_xinclude, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocument$$createelementns = { (void*)&c_DOMDocument::i_createelementns, (void*)&c_DOMDocument::ifa_createelementns, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMDocument$$registernodeclass = { (void*)&c_DOMDocument::i_registernodeclass, (void*)&c_DOMDocument::ifa_registernodeclass, 2, 4, 0x0000000000000000LL};
@@ -9357,9 +8823,6 @@ Variant c_DOMDocument::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMDocument::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMDocument::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMDocument::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -9689,14 +9152,6 @@ Variant NEVER_INLINE c_DOMDocument::ifa___isset(MethodCallPackage &mcp, int coun
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMDocument::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMDocument);
-  }
-  c_DOMDocument *self ATTRIBUTE_UNUSED (static_cast<c_DOMDocument*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMDocument$$call_info_table[] = {
   { 0x6601E385, 1, 14, "getElementById", &ci_DOMDocument$$getelementbyid },
   { 0x4E4A4E8A, 1, 8, "xinclude", &ci_DOMDocument$$xinclude },
@@ -9729,7 +9184,6 @@ extern const MethodCallInfoTable cw_DOMDocument$$call_info_table[] = {
   { 0x16B7EBEB, 1, 15, "createElementNS", &ci_DOMDocument$$createelementns },
   { 0x46E7BA6D, 1, 27, "createProcessingInstruction", &ci_DOMDocument$$createprocessinginstruction },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMDocument$$__isset },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMDocument$$__destruct },
   { 0x0E1EB375, 1, 17, "registerNodeClass", &ci_DOMDocument$$registernodeclass },
   { 0x74EA46F8, 1, 22, "createDocumentFragment", &ci_DOMDocument$$createdocumentfragment },
   { 0x1855D7FB, 1, 14, "createTextNode", &ci_DOMDocument$$createtextnode },
@@ -9750,15 +9204,14 @@ extern const int cw_DOMDocument$$call_info_index[] = {
   -1,-1,-1,-1,-1,-1,-1,24,
   -1,-1,-1,-1,-1,26,-1,-1,
   -1,-1,27,28,-1,29,30,-1,
-  -1,-1,-1,31,-1,32,-1,-1,
-  33,-1,-1,34,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,31,-1,-1,
+  32,-1,-1,33,-1,-1,-1,-1,
 
 };
 c_DOMDocument *c_DOMDocument::create(String a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMDocument$$call_info_table[];
@@ -10608,7 +10061,6 @@ extern const CallInfo ci_Memcached$$setbykey = { (void*)&c_Memcached::i_setbykey
 extern const CallInfo ci_Memcached$$flush = { (void*)&c_Memcached::i_flush, (void*)&c_Memcached::ifa_flush, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Memcached$$addserver = { (void*)&c_Memcached::i_addserver, (void*)&c_Memcached::ifa_addserver, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Memcached$$deletebykey = { (void*)&c_Memcached::i_deletebykey, (void*)&c_Memcached::ifa_deletebykey, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Memcached$$__destruct = { (void*)&c_Memcached::i___destruct, (void*)&c_Memcached::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Memcached$$replace = { (void*)&c_Memcached::i_replace, (void*)&c_Memcached::ifa_replace, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Memcached$$addbykey = { (void*)&c_Memcached::i_addbykey, (void*)&c_Memcached::ifa_addbykey, 4, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Memcached$$getstats = { (void*)&c_Memcached::i_getstats, (void*)&c_Memcached::ifa_getstats, 0, 4, 0x0000000000000000LL};
@@ -10726,9 +10178,6 @@ Variant c_Memcached::i_setmultibykey(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Memcached::i_setoption(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_setoption);
-}
-Variant c_Memcached::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_Memcached::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -11148,14 +10597,6 @@ Variant NEVER_INLINE c_Memcached::ifa_setoption(MethodCallPackage &mcp, int coun
   CVarRef arg1(a1);
   return (self->t_setoption(arg0, arg1));
 }
-Variant NEVER_INLINE c_Memcached::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_Memcached);
-  }
-  c_Memcached *self ATTRIBUTE_UNUSED (static_cast<c_Memcached*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_Memcached$$call_info_table[] = {
   { 0x58382D82, 1, 13, "getMultiByKey", &ci_Memcached$$getmultibykey },
   { 0x4341F605, 0, 8, "getMulti", &ci_Memcached$$getmulti },
@@ -11188,7 +10629,6 @@ extern const MethodCallInfoTable cw_Memcached$$call_info_table[] = {
   { 0x6237AAE6, 1, 9, "addServer", &ci_Memcached$$addserver },
   { 0x4A56B46E, 1, 12, "prependByKey", &ci_Memcached$$prependbykey },
   { 0x10B990F2, 1, 11, "deleteByKey", &ci_Memcached$$deletebykey },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_Memcached$$__destruct },
   { 0x774FA276, 1, 10, "getDelayed", &ci_Memcached$$getdelayed },
   { 0x47097177, 0, 8, "addByKey", &ci_Memcached$$addbykey },
   { 0x68684D77, 1, 13, "setMultiByKey", &ci_Memcached$$setmultibykey },
@@ -11213,15 +10653,14 @@ extern const int cw_Memcached$$call_info_index[] = {
   -1,24,25,-1,-1,-1,-1,26,
   27,-1,-1,-1,-1,-1,28,-1,
   -1,-1,-1,-1,-1,-1,29,-1,
-  -1,-1,30,31,-1,-1,32,33,
-  -1,35,36,37,-1,38,-1,-1,
+  -1,-1,30,-1,-1,-1,31,32,
+  -1,34,35,36,-1,37,-1,-1,
 
 };
 c_Memcached *c_Memcached::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_Memcached$$call_info_table[];
@@ -11365,13 +10804,9 @@ const int cw_LibXMLError$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_LibXMLError$$__destruct = { (void*)&c_LibXMLError::i___destruct, (void*)&c_LibXMLError::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_LibXMLError$$__construct = { (void*)&c_LibXMLError::i___construct, (void*)&c_LibXMLError::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_LibXMLError::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_LibXMLError::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_LibXMLError::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -11381,27 +10816,17 @@ Variant NEVER_INLINE c_LibXMLError::ifa___construct(MethodCallPackage &mcp, int 
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
 }
-Variant NEVER_INLINE c_LibXMLError::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_LibXMLError);
-  }
-  c_LibXMLError *self ATTRIBUTE_UNUSED (static_cast<c_LibXMLError*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_LibXMLError$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_LibXMLError$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_LibXMLError$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_LibXMLError$$__construct },
 };
 extern const int cw_LibXMLError$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_LibXMLError *c_LibXMLError::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_LibXMLError$$call_info_table[];
@@ -11430,13 +10855,9 @@ const int cw_DOMComment$$instanceof_index[] = {
   0,-1,1,2,-1,-1,-1,-1,
 
 };
-extern const CallInfo ci_DOMComment$$__destruct = { (void*)&c_DOMComment::i___destruct, (void*)&c_DOMComment::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMComment$$__construct = { (void*)&c_DOMComment::i___construct, (void*)&c_DOMComment::ifa___construct, 1, 4, 0x0000000000000000LL};
 Variant c_DOMComment::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_DOMComment::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMComment::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -11448,27 +10869,17 @@ Variant NEVER_INLINE c_DOMComment::ifa___construct(MethodCallPackage &mcp, int c
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
 }
-Variant NEVER_INLINE c_DOMComment::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMComment);
-  }
-  c_DOMComment *self ATTRIBUTE_UNUSED (static_cast<c_DOMComment*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMComment$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_DOMComment$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMComment$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_DOMComment$$__construct },
 };
 extern const int cw_DOMComment$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_DOMComment *c_DOMComment::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMComment$$call_info_table[];
@@ -11726,7 +11137,6 @@ extern const CallInfo ci_DateTime$$settimezone = { (void*)&c_DateTime::i_settime
 extern const CallInfo ci_DateTime$$setisodate = { (void*)&c_DateTime::i_setisodate, (void*)&c_DateTime::ifa_setisodate, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$settime = { (void*)&c_DateTime::i_settime, (void*)&c_DateTime::ifa_settime, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$modify = { (void*)&c_DateTime::i_modify, (void*)&c_DateTime::ifa_modify, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$__destruct = { (void*)&c_DateTime::i___destruct, (void*)&c_DateTime::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$__construct = { (void*)&c_DateTime::i___construct, (void*)&c_DateTime::ifa___construct, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$getoffset = { (void*)&c_DateTime::i_getoffset, (void*)&c_DateTime::ifa_getoffset, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$setdate = { (void*)&c_DateTime::i_setdate, (void*)&c_DateTime::ifa_setdate, 3, 4, 0x0000000000000000LL};
@@ -11757,9 +11167,6 @@ Variant c_DateTime::i_settime(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DateTime::i_settimezone(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_settimezone);
-}
-Variant c_DateTime::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DateTime::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -11851,20 +11258,11 @@ Variant NEVER_INLINE c_DateTime::ifa_settimezone(MethodCallPackage &mcp, int cou
   CVarRef arg0(a0);
   return (self->t_settimezone(arg0));
 }
-Variant NEVER_INLINE c_DateTime::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DateTime);
-  }
-  c_DateTime *self ATTRIBUTE_UNUSED (static_cast<c_DateTime*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DateTime$$call_info_table[] = {
   { 0x0F080587, 1, 6, "modify", &ci_DateTime$$modify },
   { 0x0B55BD0B, 0, 9, "getOffset", &ci_DateTime$$getoffset },
   { 0x5C9D120B, 1, 7, "setDate", &ci_DateTime$$setdate },
   { 0x3BE7716C, 1, 11, "getTimezone", &ci_DateTime$$gettimezone },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DateTime$$__destruct },
   { 0x6EE55A74, 1, 10, "setISODate", &ci_DateTime$$setisodate },
   { 0x34F4C258, 0, 7, "setTime", &ci_DateTime$$settime },
   { 0x0B957CB8, 1, 11, "setTimezone", &ci_DateTime$$settimezone },
@@ -11875,15 +11273,14 @@ extern const int cw_DateTime$$call_info_index[] = {
   31,
   -1,-1,-1,-1,-1,-1,-1,0,
   -1,-1,-1,1,3,-1,-1,-1,
-  -1,-1,-1,4,5,-1,-1,-1,
-  6,-1,-1,8,-1,-1,-1,9,
+  -1,-1,-1,-1,4,-1,-1,-1,
+  5,-1,-1,7,-1,-1,-1,8,
 
 };
 c_DateTime *c_DateTime::create(String a0, Object a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DateTime$$call_info_table[];
@@ -11912,7 +11309,6 @@ const int cw_DOMNotation$$instanceof_index[] = {
 };
 extern const CallInfo ci_DOMNotation$$__isset = { (void*)&c_DOMNotation::i___isset, (void*)&c_DOMNotation::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNotation$$__get = { (void*)&c_DOMNotation::i___get, (void*)&c_DOMNotation::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNotation$$__destruct = { (void*)&c_DOMNotation::i___destruct, (void*)&c_DOMNotation::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNotation$$__set = { (void*)&c_DOMNotation::i___set, (void*)&c_DOMNotation::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNotation$$__construct = { (void*)&c_DOMNotation::i___construct, (void*)&c_DOMNotation::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_DOMNotation::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -11926,9 +11322,6 @@ Variant c_DOMNotation::i___set(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMNotation::i___isset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___isset);
-}
-Variant c_DOMNotation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMNotation::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -11966,32 +11359,21 @@ Variant NEVER_INLINE c_DOMNotation::ifa___isset(MethodCallPackage &mcp, int coun
   CVarRef arg0(a0);
   return (self->t___isset(arg0));
 }
-Variant NEVER_INLINE c_DOMNotation::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMNotation);
-  }
-  c_DOMNotation *self ATTRIBUTE_UNUSED (static_cast<c_DOMNotation*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMNotation$$call_info_table[] = {
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMNotation$$__destruct },
   { 0x03340395, 1, 5, "__set", &ci_DOMNotation$$__set },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMNotation$$__isset },
   { 0x229C615F, 0, 11, "__construct", &ci_DOMNotation$$__construct },
   { 0x74FA338F, 1, 5, "__get", &ci_DOMNotation$$__get },
 };
 extern const int cw_DOMNotation$$call_info_index[] = {
-  15,
-  -1,-1,-1,0,-1,1,-1,-1,
-  -1,-1,-1,-1,-1,-1,2,3,
+  7,
+  -1,-1,-1,-1,-1,0,1,2,
 
 };
 c_DOMNotation *c_DOMNotation::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMNotation$$call_info_table[];
@@ -12141,7 +11523,6 @@ const int cw_DebuggerClient$$instanceof_index[] = {
 };
 extern const CallInfo ci_DebuggerClient$$processcmd = { (void*)&c_DebuggerClient::i_processcmd, (void*)&c_DebuggerClient::ifa_processcmd, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClient$$init = { (void*)&c_DebuggerClient::i_init, (void*)&c_DebuggerClient::ifa_init, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClient$$__destruct = { (void*)&c_DebuggerClient::i___destruct, (void*)&c_DebuggerClient::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClient$$__construct = { (void*)&c_DebuggerClient::i___construct, (void*)&c_DebuggerClient::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClient$$getstate = { (void*)&c_DebuggerClient::i_getstate, (void*)&c_DebuggerClient::ifa_getstate, 0, 4, 0x0000000000000000LL};
 Variant c_DebuggerClient::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -12155,9 +11536,6 @@ Variant c_DebuggerClient::i_init(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DebuggerClient::i_processcmd(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_processcmd);
-}
-Variant c_DebuggerClient::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DebuggerClient::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -12194,32 +11572,21 @@ Variant NEVER_INLINE c_DebuggerClient::ifa_processcmd(MethodCallPackage &mcp, in
   CVarRef arg1(a1);
   return (self->t_processcmd(arg0, arg1));
 }
-Variant NEVER_INLINE c_DebuggerClient::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DebuggerClient);
-  }
-  c_DebuggerClient *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClient*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DebuggerClient$$call_info_table[] = {
-  { 0x6B435A03, 0, 4, "init", &ci_DebuggerClient$$init },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DebuggerClient$$__destruct },
+  { 0x6B435A03, 1, 4, "init", &ci_DebuggerClient$$init },
   { 0x3E95130C, 1, 8, "getState", &ci_DebuggerClient$$getstate },
   { 0x0BD0F64E, 1, 10, "processCmd", &ci_DebuggerClient$$processcmd },
   { 0x229C615F, 1, 11, "__construct", &ci_DebuggerClient$$__construct },
 };
 extern const int cw_DebuggerClient$$call_info_index[] = {
-  15,
-  -1,-1,-1,0,-1,-1,-1,-1,
-  -1,-1,-1,-1,2,-1,3,4,
+  7,
+  -1,-1,-1,0,1,-1,2,3,
 
 };
 c_DebuggerClient *c_DebuggerClient::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DebuggerClient$$call_info_table[];
@@ -12415,7 +11782,6 @@ const int cw_DOMNodeList$$instanceof_index[] = {
 extern const CallInfo ci_DOMNodeList$$getiterator = { (void*)&c_DOMNodeList::i_getiterator, (void*)&c_DOMNodeList::ifa_getiterator, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeList$$__set = { (void*)&c_DOMNodeList::i___set, (void*)&c_DOMNodeList::ifa___set, 2, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeList$$__get = { (void*)&c_DOMNodeList::i___get, (void*)&c_DOMNodeList::ifa___get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DOMNodeList$$__destruct = { (void*)&c_DOMNodeList::i___destruct, (void*)&c_DOMNodeList::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeList$$__isset = { (void*)&c_DOMNodeList::i___isset, (void*)&c_DOMNodeList::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeList$$__construct = { (void*)&c_DOMNodeList::i___construct, (void*)&c_DOMNodeList::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DOMNodeList$$item = { (void*)&c_DOMNodeList::i_item, (void*)&c_DOMNodeList::ifa_item, 1, 4, 0x0000000000000000LL};
@@ -12436,9 +11802,6 @@ Variant c_DOMNodeList::i___isset(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DOMNodeList::i_getiterator(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getiterator);
-}
-Variant c_DOMNodeList::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DOMNodeList::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -12493,17 +11856,8 @@ Variant NEVER_INLINE c_DOMNodeList::ifa_getiterator(MethodCallPackage &mcp, int 
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
 }
-Variant NEVER_INLINE c_DOMNodeList::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DOMNodeList);
-  }
-  c_DOMNodeList *self ATTRIBUTE_UNUSED (static_cast<c_DOMNodeList*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DOMNodeList$$call_info_table[] = {
-  { 0x32A12503, 0, 11, "getIterator", &ci_DOMNodeList$$getiterator },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DOMNodeList$$__destruct },
+  { 0x32A12503, 1, 11, "getIterator", &ci_DOMNodeList$$getiterator },
   { 0x03340395, 1, 5, "__set", &ci_DOMNodeList$$__set },
   { 0x030902C6, 1, 4, "item", &ci_DOMNodeList$$item },
   { 0x2E2178EE, 1, 7, "__isset", &ci_DOMNodeList$$__isset },
@@ -12512,15 +11866,14 @@ extern const MethodCallInfoTable cw_DOMNodeList$$call_info_table[] = {
 };
 extern const int cw_DOMNodeList$$call_info_index[] = {
   15,
-  -1,-1,-1,0,-1,2,3,-1,
-  -1,-1,-1,-1,-1,-1,4,5,
+  -1,-1,-1,0,-1,1,2,-1,
+  -1,-1,-1,-1,-1,-1,3,4,
 
 };
 c_DOMNodeList *c_DOMNodeList::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DOMNodeList$$call_info_table[];

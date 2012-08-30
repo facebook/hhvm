@@ -678,15 +678,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -705,15 +696,6 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -790,15 +772,6 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "valid",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,

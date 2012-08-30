@@ -2329,7 +2329,6 @@ TypedValue* tg_8DateTime_setDate(VM::ActRec *ar);
 TypedValue* tg_8DateTime_setISODate(VM::ActRec *ar);
 TypedValue* tg_8DateTime_setTime(VM::ActRec *ar);
 TypedValue* tg_8DateTime_setTimezone(VM::ActRec *ar);
-TypedValue* tg_8DateTime___destruct(VM::ActRec *ar);
 VM::Instance* new_DateTimeZone_Instance(VM::Class*);
 TypedValue* tg_12DateTimeZone___construct(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_getName(VM::ActRec *ar);
@@ -2337,12 +2336,10 @@ TypedValue* tg_12DateTimeZone_getOffset(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_getTransitions(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_listAbbreviations(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_listIdentifiers(VM::ActRec *ar);
-TypedValue* tg_12DateTimeZone___destruct(VM::ActRec *ar);
 VM::Instance* new_DebuggerProxyCmdUser_Instance(VM::Class*);
 TypedValue* tg_20DebuggerProxyCmdUser___construct(VM::ActRec *ar);
 TypedValue* tg_20DebuggerProxyCmdUser_isLocal(VM::ActRec *ar);
 TypedValue* tg_20DebuggerProxyCmdUser_send(VM::ActRec *ar);
-TypedValue* tg_20DebuggerProxyCmdUser___destruct(VM::ActRec *ar);
 VM::Instance* new_DebuggerClientCmdUser_Instance(VM::Class*);
 TypedValue* tg_21DebuggerClientCmdUser___construct(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_quit(VM::ActRec *ar);
@@ -2373,7 +2370,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getStackTrace(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_getFrame(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_printFrame(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_addCompletion(VM::ActRec *ar);
-TypedValue* tg_21DebuggerClientCmdUser___destruct(VM::ActRec *ar);
 VM::Instance* new_DebuggerClient_Instance(VM::Class*);
 TypedValue* tg_14DebuggerClient___construct(VM::ActRec *ar);
 TypedValue* tg_14DebuggerClient_getState(VM::ActRec *ar);
@@ -2401,14 +2397,12 @@ TypedValue* tg_7DOMNode_getNodePath(VM::ActRec *ar);
 TypedValue* tg_7DOMNode___get(VM::ActRec *ar);
 TypedValue* tg_7DOMNode___set(VM::ActRec *ar);
 TypedValue* tg_7DOMNode___isset(VM::ActRec *ar);
-TypedValue* tg_7DOMNode___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMAttr_Instance(VM::Class*);
 TypedValue* tg_7DOMAttr___construct(VM::ActRec *ar);
 TypedValue* tg_7DOMAttr_isId(VM::ActRec *ar);
 TypedValue* tg_7DOMAttr___get(VM::ActRec *ar);
 TypedValue* tg_7DOMAttr___set(VM::ActRec *ar);
 TypedValue* tg_7DOMAttr___isset(VM::ActRec *ar);
-TypedValue* tg_7DOMAttr___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMCharacterData_Instance(VM::Class*);
 TypedValue* tg_16DOMCharacterData___construct(VM::ActRec *ar);
 TypedValue* tg_16DOMCharacterData_appendData(VM::ActRec *ar);
@@ -2419,10 +2413,8 @@ TypedValue* tg_16DOMCharacterData_substringData(VM::ActRec *ar);
 TypedValue* tg_16DOMCharacterData___get(VM::ActRec *ar);
 TypedValue* tg_16DOMCharacterData___set(VM::ActRec *ar);
 TypedValue* tg_16DOMCharacterData___isset(VM::ActRec *ar);
-TypedValue* tg_16DOMCharacterData___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMComment_Instance(VM::Class*);
 TypedValue* tg_10DOMComment___construct(VM::ActRec *ar);
-TypedValue* tg_10DOMComment___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMText_Instance(VM::Class*);
 TypedValue* tg_7DOMText___construct(VM::ActRec *ar);
 TypedValue* tg_7DOMText_isWhitespaceInElementContent(VM::ActRec *ar);
@@ -2430,10 +2422,8 @@ TypedValue* tg_7DOMText_splitText(VM::ActRec *ar);
 TypedValue* tg_7DOMText___get(VM::ActRec *ar);
 TypedValue* tg_7DOMText___set(VM::ActRec *ar);
 TypedValue* tg_7DOMText___isset(VM::ActRec *ar);
-TypedValue* tg_7DOMText___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMCDATASection_Instance(VM::Class*);
 TypedValue* tg_15DOMCDATASection___construct(VM::ActRec *ar);
-TypedValue* tg_15DOMCDATASection___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMDocument_Instance(VM::Class*);
 TypedValue* tg_11DOMDocument___construct(VM::ActRec *ar);
 TypedValue* tg_11DOMDocument_createAttribute(VM::ActRec *ar);
@@ -2469,17 +2459,14 @@ TypedValue* tg_11DOMDocument_xinclude(VM::ActRec *ar);
 TypedValue* tg_11DOMDocument___get(VM::ActRec *ar);
 TypedValue* tg_11DOMDocument___set(VM::ActRec *ar);
 TypedValue* tg_11DOMDocument___isset(VM::ActRec *ar);
-TypedValue* tg_11DOMDocument___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMDocumentFragment_Instance(VM::Class*);
 TypedValue* tg_19DOMDocumentFragment___construct(VM::ActRec *ar);
 TypedValue* tg_19DOMDocumentFragment_appendXML(VM::ActRec *ar);
-TypedValue* tg_19DOMDocumentFragment___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMDocumentType_Instance(VM::Class*);
 TypedValue* tg_15DOMDocumentType___construct(VM::ActRec *ar);
 TypedValue* tg_15DOMDocumentType___get(VM::ActRec *ar);
 TypedValue* tg_15DOMDocumentType___set(VM::ActRec *ar);
 TypedValue* tg_15DOMDocumentType___isset(VM::ActRec *ar);
-TypedValue* tg_15DOMDocumentType___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMElement_Instance(VM::Class*);
 TypedValue* tg_10DOMElement___construct(VM::ActRec *ar);
 TypedValue* tg_10DOMElement_getAttribute(VM::ActRec *ar);
@@ -2503,28 +2490,23 @@ TypedValue* tg_10DOMElement_setIDAttributeNS(VM::ActRec *ar);
 TypedValue* tg_10DOMElement___get(VM::ActRec *ar);
 TypedValue* tg_10DOMElement___set(VM::ActRec *ar);
 TypedValue* tg_10DOMElement___isset(VM::ActRec *ar);
-TypedValue* tg_10DOMElement___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMEntity_Instance(VM::Class*);
 TypedValue* tg_9DOMEntity___construct(VM::ActRec *ar);
 TypedValue* tg_9DOMEntity___get(VM::ActRec *ar);
 TypedValue* tg_9DOMEntity___set(VM::ActRec *ar);
 TypedValue* tg_9DOMEntity___isset(VM::ActRec *ar);
-TypedValue* tg_9DOMEntity___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMEntityReference_Instance(VM::Class*);
 TypedValue* tg_18DOMEntityReference___construct(VM::ActRec *ar);
-TypedValue* tg_18DOMEntityReference___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMNotation_Instance(VM::Class*);
 TypedValue* tg_11DOMNotation___construct(VM::ActRec *ar);
 TypedValue* tg_11DOMNotation___get(VM::ActRec *ar);
 TypedValue* tg_11DOMNotation___set(VM::ActRec *ar);
 TypedValue* tg_11DOMNotation___isset(VM::ActRec *ar);
-TypedValue* tg_11DOMNotation___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMProcessingInstruction_Instance(VM::Class*);
 TypedValue* tg_24DOMProcessingInstruction___construct(VM::ActRec *ar);
 TypedValue* tg_24DOMProcessingInstruction___get(VM::ActRec *ar);
 TypedValue* tg_24DOMProcessingInstruction___set(VM::ActRec *ar);
 TypedValue* tg_24DOMProcessingInstruction___isset(VM::ActRec *ar);
-TypedValue* tg_24DOMProcessingInstruction___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMNodeIterator_Instance(VM::Class*);
 TypedValue* tg_15DOMNodeIterator___construct(VM::ActRec *ar);
 TypedValue* tg_15DOMNodeIterator_current(VM::ActRec *ar);
@@ -2532,7 +2514,6 @@ TypedValue* tg_15DOMNodeIterator_key(VM::ActRec *ar);
 TypedValue* tg_15DOMNodeIterator_next(VM::ActRec *ar);
 TypedValue* tg_15DOMNodeIterator_rewind(VM::ActRec *ar);
 TypedValue* tg_15DOMNodeIterator_valid(VM::ActRec *ar);
-TypedValue* tg_15DOMNodeIterator___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMNamedNodeMap_Instance(VM::Class*);
 TypedValue* tg_15DOMNamedNodeMap___construct(VM::ActRec *ar);
 TypedValue* tg_15DOMNamedNodeMap_getNamedItem(VM::ActRec *ar);
@@ -2542,7 +2523,6 @@ TypedValue* tg_15DOMNamedNodeMap___get(VM::ActRec *ar);
 TypedValue* tg_15DOMNamedNodeMap___set(VM::ActRec *ar);
 TypedValue* tg_15DOMNamedNodeMap___isset(VM::ActRec *ar);
 TypedValue* tg_15DOMNamedNodeMap_getIterator(VM::ActRec *ar);
-TypedValue* tg_15DOMNamedNodeMap___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMNodeList_Instance(VM::Class*);
 TypedValue* tg_11DOMNodeList___construct(VM::ActRec *ar);
 TypedValue* tg_11DOMNodeList_item(VM::ActRec *ar);
@@ -2550,13 +2530,11 @@ TypedValue* tg_11DOMNodeList___get(VM::ActRec *ar);
 TypedValue* tg_11DOMNodeList___set(VM::ActRec *ar);
 TypedValue* tg_11DOMNodeList___isset(VM::ActRec *ar);
 TypedValue* tg_11DOMNodeList_getIterator(VM::ActRec *ar);
-TypedValue* tg_11DOMNodeList___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMImplementation_Instance(VM::Class*);
 TypedValue* tg_17DOMImplementation___construct(VM::ActRec *ar);
 TypedValue* tg_17DOMImplementation_createDocument(VM::ActRec *ar);
 TypedValue* tg_17DOMImplementation_createDocumentType(VM::ActRec *ar);
 TypedValue* tg_17DOMImplementation_hasFeature(VM::ActRec *ar);
-TypedValue* tg_17DOMImplementation___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMXPath_Instance(VM::Class*);
 TypedValue* tg_8DOMXPath___construct(VM::ActRec *ar);
 TypedValue* tg_8DOMXPath_evaluate(VM::ActRec *ar);
@@ -2566,14 +2544,12 @@ TypedValue* tg_8DOMXPath_registerPHPFunctions(VM::ActRec *ar);
 TypedValue* tg_8DOMXPath___get(VM::ActRec *ar);
 TypedValue* tg_8DOMXPath___set(VM::ActRec *ar);
 TypedValue* tg_8DOMXPath___isset(VM::ActRec *ar);
-TypedValue* tg_8DOMXPath___destruct(VM::ActRec *ar);
 VM::Instance* new_EncodingDetector_Instance(VM::Class*);
 TypedValue* tg_16EncodingDetector___construct(VM::ActRec *ar);
 TypedValue* tg_16EncodingDetector_setText(VM::ActRec *ar);
 TypedValue* tg_16EncodingDetector_setDeclaredEncoding(VM::ActRec *ar);
 TypedValue* tg_16EncodingDetector_detect(VM::ActRec *ar);
 TypedValue* tg_16EncodingDetector_detectAll(VM::ActRec *ar);
-TypedValue* tg_16EncodingDetector___destruct(VM::ActRec *ar);
 VM::Instance* new_EncodingMatch_Instance(VM::Class*);
 TypedValue* tg_13EncodingMatch___construct(VM::ActRec *ar);
 TypedValue* tg_13EncodingMatch_isValid(VM::ActRec *ar);
@@ -2581,14 +2557,12 @@ TypedValue* tg_13EncodingMatch_getEncoding(VM::ActRec *ar);
 TypedValue* tg_13EncodingMatch_getConfidence(VM::ActRec *ar);
 TypedValue* tg_13EncodingMatch_getLanguage(VM::ActRec *ar);
 TypedValue* tg_13EncodingMatch_getUTF8(VM::ActRec *ar);
-TypedValue* tg_13EncodingMatch___destruct(VM::ActRec *ar);
 VM::Instance* new_SpoofChecker_Instance(VM::Class*);
 TypedValue* tg_12SpoofChecker___construct(VM::ActRec *ar);
 TypedValue* tg_12SpoofChecker_isSuspicious(VM::ActRec *ar);
 TypedValue* tg_12SpoofChecker_areConfusable(VM::ActRec *ar);
 TypedValue* tg_12SpoofChecker_setAllowedLocales(VM::ActRec *ar);
 TypedValue* tg_12SpoofChecker_setChecks(VM::ActRec *ar);
-TypedValue* tg_12SpoofChecker___destruct(VM::ActRec *ar);
 VM::Instance* new_ImageSprite_Instance(VM::Class*);
 TypedValue* tg_11ImageSprite___construct(VM::ActRec *ar);
 TypedValue* tg_11ImageSprite_addFile(VM::ActRec *ar);
@@ -2616,15 +2590,12 @@ TypedValue* tg_8Collator_setattribute(VM::ActRec *ar);
 TypedValue* tg_8Collator_setstrength(VM::ActRec *ar);
 TypedValue* tg_8Collator_sortwithsortkeys(VM::ActRec *ar);
 TypedValue* tg_8Collator_sort(VM::ActRec *ar);
-TypedValue* tg_8Collator___destruct(VM::ActRec *ar);
 VM::Instance* new_Locale_Instance(VM::Class*);
 TypedValue* tg_6Locale___construct(VM::ActRec *ar);
-TypedValue* tg_6Locale___destruct(VM::ActRec *ar);
 VM::Instance* new_Normalizer_Instance(VM::Class*);
 TypedValue* tg_10Normalizer___construct(VM::ActRec *ar);
 TypedValue* tg_10Normalizer_isnormalized(VM::ActRec *ar);
 TypedValue* tg_10Normalizer_normalize(VM::ActRec *ar);
-TypedValue* tg_10Normalizer___destruct(VM::ActRec *ar);
 VM::Instance* new_MutableArrayIterator_Instance(VM::Class*);
 TypedValue* tg_20MutableArrayIterator___construct(VM::ActRec *ar);
 TypedValue* tg_20MutableArrayIterator_currentRef(VM::ActRec *ar);
@@ -2693,7 +2664,6 @@ TypedValue* tg_9Memcached_setByKey(VM::ActRec *ar);
 TypedValue* tg_9Memcached_setMulti(VM::ActRec *ar);
 TypedValue* tg_9Memcached_setMultiByKey(VM::ActRec *ar);
 TypedValue* tg_9Memcached_setOption(VM::ActRec *ar);
-TypedValue* tg_9Memcached___destruct(VM::ActRec *ar);
 VM::Instance* new_PDO_Instance(VM::Class*);
 TypedValue* tg_3PDO___construct(VM::ActRec *ar);
 TypedValue* tg_3PDO_prepare(VM::ActRec *ar);
@@ -2711,7 +2681,6 @@ TypedValue* tg_3PDO_quote(VM::ActRec *ar);
 TypedValue* tg_3PDO___wakeup(VM::ActRec *ar);
 TypedValue* tg_3PDO___sleep(VM::ActRec *ar);
 TypedValue* tg_3PDO_getavailabledrivers(VM::ActRec *ar);
-TypedValue* tg_3PDO___destruct(VM::ActRec *ar);
 VM::Instance* new_PDOStatement_Instance(VM::Class*);
 TypedValue* tg_12PDOStatement___construct(VM::ActRec *ar);
 TypedValue* tg_12PDOStatement_execute(VM::ActRec *ar);
@@ -2740,7 +2709,6 @@ TypedValue* tg_12PDOStatement_rewind(VM::ActRec *ar);
 TypedValue* tg_12PDOStatement_valid(VM::ActRec *ar);
 TypedValue* tg_12PDOStatement___wakeup(VM::ActRec *ar);
 TypedValue* tg_12PDOStatement___sleep(VM::ActRec *ar);
-TypedValue* tg_12PDOStatement___destruct(VM::ActRec *ar);
 VM::Instance* new_SimpleXMLElement_Instance(VM::Class*);
 TypedValue* tg_16SimpleXMLElement___construct(VM::ActRec *ar);
 TypedValue* tg_16SimpleXMLElement_offsetExists(VM::ActRec *ar);
@@ -2764,10 +2732,8 @@ TypedValue* tg_16SimpleXMLElement___get(VM::ActRec *ar);
 TypedValue* tg_16SimpleXMLElement___set(VM::ActRec *ar);
 TypedValue* tg_16SimpleXMLElement___isset(VM::ActRec *ar);
 TypedValue* tg_16SimpleXMLElement___unset(VM::ActRec *ar);
-TypedValue* tg_16SimpleXMLElement___destruct(VM::ActRec *ar);
 VM::Instance* new_LibXMLError_Instance(VM::Class*);
 TypedValue* tg_11LibXMLError___construct(VM::ActRec *ar);
-TypedValue* tg_11LibXMLError___destruct(VM::ActRec *ar);
 VM::Instance* new_SimpleXMLElementIterator_Instance(VM::Class*);
 TypedValue* tg_24SimpleXMLElementIterator___construct(VM::ActRec *ar);
 TypedValue* tg_24SimpleXMLElementIterator_current(VM::ActRec *ar);
@@ -2775,7 +2741,6 @@ TypedValue* tg_24SimpleXMLElementIterator_key(VM::ActRec *ar);
 TypedValue* tg_24SimpleXMLElementIterator_next(VM::ActRec *ar);
 TypedValue* tg_24SimpleXMLElementIterator_rewind(VM::ActRec *ar);
 TypedValue* tg_24SimpleXMLElementIterator_valid(VM::ActRec *ar);
-TypedValue* tg_24SimpleXMLElementIterator___destruct(VM::ActRec *ar);
 VM::Instance* new_SoapServer_Instance(VM::Class*);
 TypedValue* tg_10SoapServer___construct(VM::ActRec *ar);
 TypedValue* tg_10SoapServer_setclass(VM::ActRec *ar);
@@ -2786,7 +2751,6 @@ TypedValue* tg_10SoapServer_handle(VM::ActRec *ar);
 TypedValue* tg_10SoapServer_setpersistence(VM::ActRec *ar);
 TypedValue* tg_10SoapServer_fault(VM::ActRec *ar);
 TypedValue* tg_10SoapServer_addsoapheader(VM::ActRec *ar);
-TypedValue* tg_10SoapServer___destruct(VM::ActRec *ar);
 VM::Instance* new_SoapClient_Instance(VM::Class*);
 TypedValue* tg_10SoapClient___construct(VM::ActRec *ar);
 TypedValue* tg_10SoapClient___call(VM::ActRec *ar);
@@ -2801,16 +2765,12 @@ TypedValue* tg_10SoapClient___dorequest(VM::ActRec *ar);
 TypedValue* tg_10SoapClient___setcookie(VM::ActRec *ar);
 TypedValue* tg_10SoapClient___setlocation(VM::ActRec *ar);
 TypedValue* tg_10SoapClient___setsoapheaders(VM::ActRec *ar);
-TypedValue* tg_10SoapClient___destruct(VM::ActRec *ar);
 VM::Instance* new_SoapVar_Instance(VM::Class*);
 TypedValue* tg_7SoapVar___construct(VM::ActRec *ar);
-TypedValue* tg_7SoapVar___destruct(VM::ActRec *ar);
 VM::Instance* new_SoapParam_Instance(VM::Class*);
 TypedValue* tg_9SoapParam___construct(VM::ActRec *ar);
-TypedValue* tg_9SoapParam___destruct(VM::ActRec *ar);
 VM::Instance* new_SoapHeader_Instance(VM::Class*);
 TypedValue* tg_10SoapHeader___construct(VM::ActRec *ar);
-TypedValue* tg_10SoapHeader___destruct(VM::ActRec *ar);
 VM::Instance* new_SQLite3_Instance(VM::Class*);
 TypedValue* tg_7SQLite3___construct(VM::ActRec *ar);
 TypedValue* tg_7SQLite3_open(VM::ActRec *ar);
@@ -2830,7 +2790,6 @@ TypedValue* tg_7SQLite3_querysingle(VM::ActRec *ar);
 TypedValue* tg_7SQLite3_createfunction(VM::ActRec *ar);
 TypedValue* tg_7SQLite3_createaggregate(VM::ActRec *ar);
 TypedValue* tg_7SQLite3_openblob(VM::ActRec *ar);
-TypedValue* tg_7SQLite3___destruct(VM::ActRec *ar);
 VM::Instance* new_SQLite3Stmt_Instance(VM::Class*);
 TypedValue* tg_11SQLite3Stmt___construct(VM::ActRec *ar);
 TypedValue* tg_11SQLite3Stmt_paramcount(VM::ActRec *ar);
@@ -2840,7 +2799,6 @@ TypedValue* tg_11SQLite3Stmt_clear(VM::ActRec *ar);
 TypedValue* tg_11SQLite3Stmt_bindparam(VM::ActRec *ar);
 TypedValue* tg_11SQLite3Stmt_bindvalue(VM::ActRec *ar);
 TypedValue* tg_11SQLite3Stmt_execute(VM::ActRec *ar);
-TypedValue* tg_11SQLite3Stmt___destruct(VM::ActRec *ar);
 VM::Instance* new_SQLite3Result_Instance(VM::Class*);
 TypedValue* tg_13SQLite3Result___construct(VM::ActRec *ar);
 TypedValue* tg_13SQLite3Result_numcolumns(VM::ActRec *ar);
@@ -2849,7 +2807,6 @@ TypedValue* tg_13SQLite3Result_columntype(VM::ActRec *ar);
 TypedValue* tg_13SQLite3Result_fetcharray(VM::ActRec *ar);
 TypedValue* tg_13SQLite3Result_reset(VM::ActRec *ar);
 TypedValue* tg_13SQLite3Result_finalize(VM::ActRec *ar);
-TypedValue* tg_13SQLite3Result___destruct(VM::ActRec *ar);
 VM::Instance* new_XMLReader_Instance(VM::Class*);
 TypedValue* tg_9XMLReader___construct(VM::ActRec *ar);
 TypedValue* tg_9XMLReader_open(VM::ActRec *ar);
@@ -2922,7 +2879,6 @@ TypedValue* tg_9XMLWriter_endDTDEntity(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
-TypedValue* tg_9XMLWriter___destruct(VM::ActRec *ar);
 
 const long long hhbc_ext_funcs_count = 2174;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
@@ -5255,7 +5211,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DummyContinuation[] = {
   { "valid", tg_17DummyContinuation_valid }
 };
 
-static const long long hhbc_ext_method_count_DateTime = 10;
+static const long long hhbc_ext_method_count_DateTime = 9;
 static const HhbcExtMethodInfo hhbc_ext_methods_DateTime[] = {
   { "__construct", tg_8DateTime___construct },
   { "format", tg_8DateTime_format },
@@ -5265,30 +5221,27 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DateTime[] = {
   { "setDate", tg_8DateTime_setDate },
   { "setISODate", tg_8DateTime_setISODate },
   { "setTime", tg_8DateTime_setTime },
-  { "setTimezone", tg_8DateTime_setTimezone },
-  { "__destruct", tg_8DateTime___destruct }
+  { "setTimezone", tg_8DateTime_setTimezone }
 };
 
-static const long long hhbc_ext_method_count_DateTimeZone = 7;
+static const long long hhbc_ext_method_count_DateTimeZone = 6;
 static const HhbcExtMethodInfo hhbc_ext_methods_DateTimeZone[] = {
   { "__construct", tg_12DateTimeZone___construct },
   { "getName", tg_12DateTimeZone_getName },
   { "getOffset", tg_12DateTimeZone_getOffset },
   { "getTransitions", tg_12DateTimeZone_getTransitions },
   { "listAbbreviations", tg_12DateTimeZone_listAbbreviations },
-  { "listIdentifiers", tg_12DateTimeZone_listIdentifiers },
-  { "__destruct", tg_12DateTimeZone___destruct }
+  { "listIdentifiers", tg_12DateTimeZone_listIdentifiers }
 };
 
-static const long long hhbc_ext_method_count_DebuggerProxyCmdUser = 4;
+static const long long hhbc_ext_method_count_DebuggerProxyCmdUser = 3;
 static const HhbcExtMethodInfo hhbc_ext_methods_DebuggerProxyCmdUser[] = {
   { "__construct", tg_20DebuggerProxyCmdUser___construct },
   { "isLocal", tg_20DebuggerProxyCmdUser_isLocal },
-  { "send", tg_20DebuggerProxyCmdUser_send },
-  { "__destruct", tg_20DebuggerProxyCmdUser___destruct }
+  { "send", tg_20DebuggerProxyCmdUser_send }
 };
 
-static const long long hhbc_ext_method_count_DebuggerClientCmdUser = 30;
+static const long long hhbc_ext_method_count_DebuggerClientCmdUser = 29;
 static const HhbcExtMethodInfo hhbc_ext_methods_DebuggerClientCmdUser[] = {
   { "__construct", tg_21DebuggerClientCmdUser___construct },
   { "quit", tg_21DebuggerClientCmdUser_quit },
@@ -5318,8 +5271,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DebuggerClientCmdUser[] = {
   { "getStackTrace", tg_21DebuggerClientCmdUser_getStackTrace },
   { "getFrame", tg_21DebuggerClientCmdUser_getFrame },
   { "printFrame", tg_21DebuggerClientCmdUser_printFrame },
-  { "addCompletion", tg_21DebuggerClientCmdUser_addCompletion },
-  { "__destruct", tg_21DebuggerClientCmdUser___destruct }
+  { "addCompletion", tg_21DebuggerClientCmdUser_addCompletion }
 };
 
 static const long long hhbc_ext_method_count_DebuggerClient = 4;
@@ -5330,7 +5282,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DebuggerClient[] = {
   { "processCmd", tg_14DebuggerClient_processCmd }
 };
 
-static const long long hhbc_ext_method_count_DOMNode = 22;
+static const long long hhbc_ext_method_count_DOMNode = 21;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMNode[] = {
   { "__construct", tg_7DOMNode___construct },
   { "appendChild", tg_7DOMNode_appendChild },
@@ -5352,21 +5304,19 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DOMNode[] = {
   { "getNodePath", tg_7DOMNode_getNodePath },
   { "__get", tg_7DOMNode___get },
   { "__set", tg_7DOMNode___set },
-  { "__isset", tg_7DOMNode___isset },
-  { "__destruct", tg_7DOMNode___destruct }
+  { "__isset", tg_7DOMNode___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMAttr = 6;
+static const long long hhbc_ext_method_count_DOMAttr = 5;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMAttr[] = {
   { "__construct", tg_7DOMAttr___construct },
   { "isId", tg_7DOMAttr_isId },
   { "__get", tg_7DOMAttr___get },
   { "__set", tg_7DOMAttr___set },
-  { "__isset", tg_7DOMAttr___isset },
-  { "__destruct", tg_7DOMAttr___destruct }
+  { "__isset", tg_7DOMAttr___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMCharacterData = 10;
+static const long long hhbc_ext_method_count_DOMCharacterData = 9;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMCharacterData[] = {
   { "__construct", tg_16DOMCharacterData___construct },
   { "appendData", tg_16DOMCharacterData_appendData },
@@ -5376,34 +5326,30 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DOMCharacterData[] = {
   { "substringData", tg_16DOMCharacterData_substringData },
   { "__get", tg_16DOMCharacterData___get },
   { "__set", tg_16DOMCharacterData___set },
-  { "__isset", tg_16DOMCharacterData___isset },
-  { "__destruct", tg_16DOMCharacterData___destruct }
+  { "__isset", tg_16DOMCharacterData___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMComment = 2;
+static const long long hhbc_ext_method_count_DOMComment = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMComment[] = {
-  { "__construct", tg_10DOMComment___construct },
-  { "__destruct", tg_10DOMComment___destruct }
+  { "__construct", tg_10DOMComment___construct }
 };
 
-static const long long hhbc_ext_method_count_DOMText = 7;
+static const long long hhbc_ext_method_count_DOMText = 6;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMText[] = {
   { "__construct", tg_7DOMText___construct },
   { "isWhitespaceInElementContent", tg_7DOMText_isWhitespaceInElementContent },
   { "splitText", tg_7DOMText_splitText },
   { "__get", tg_7DOMText___get },
   { "__set", tg_7DOMText___set },
-  { "__isset", tg_7DOMText___isset },
-  { "__destruct", tg_7DOMText___destruct }
+  { "__isset", tg_7DOMText___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMCDATASection = 2;
+static const long long hhbc_ext_method_count_DOMCDATASection = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMCDATASection[] = {
-  { "__construct", tg_15DOMCDATASection___construct },
-  { "__destruct", tg_15DOMCDATASection___destruct }
+  { "__construct", tg_15DOMCDATASection___construct }
 };
 
-static const long long hhbc_ext_method_count_DOMDocument = 35;
+static const long long hhbc_ext_method_count_DOMDocument = 34;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMDocument[] = {
   { "__construct", tg_11DOMDocument___construct },
   { "createAttribute", tg_11DOMDocument_createAttribute },
@@ -5438,27 +5384,24 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DOMDocument[] = {
   { "xinclude", tg_11DOMDocument_xinclude },
   { "__get", tg_11DOMDocument___get },
   { "__set", tg_11DOMDocument___set },
-  { "__isset", tg_11DOMDocument___isset },
-  { "__destruct", tg_11DOMDocument___destruct }
+  { "__isset", tg_11DOMDocument___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMDocumentFragment = 3;
+static const long long hhbc_ext_method_count_DOMDocumentFragment = 2;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMDocumentFragment[] = {
   { "__construct", tg_19DOMDocumentFragment___construct },
-  { "appendXML", tg_19DOMDocumentFragment_appendXML },
-  { "__destruct", tg_19DOMDocumentFragment___destruct }
+  { "appendXML", tg_19DOMDocumentFragment_appendXML }
 };
 
-static const long long hhbc_ext_method_count_DOMDocumentType = 5;
+static const long long hhbc_ext_method_count_DOMDocumentType = 4;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMDocumentType[] = {
   { "__construct", tg_15DOMDocumentType___construct },
   { "__get", tg_15DOMDocumentType___get },
   { "__set", tg_15DOMDocumentType___set },
-  { "__isset", tg_15DOMDocumentType___isset },
-  { "__destruct", tg_15DOMDocumentType___destruct }
+  { "__isset", tg_15DOMDocumentType___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMElement = 23;
+static const long long hhbc_ext_method_count_DOMElement = 22;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMElement[] = {
   { "__construct", tg_10DOMElement___construct },
   { "getAttribute", tg_10DOMElement_getAttribute },
@@ -5481,55 +5424,49 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DOMElement[] = {
   { "setIDAttributeNS", tg_10DOMElement_setIDAttributeNS },
   { "__get", tg_10DOMElement___get },
   { "__set", tg_10DOMElement___set },
-  { "__isset", tg_10DOMElement___isset },
-  { "__destruct", tg_10DOMElement___destruct }
+  { "__isset", tg_10DOMElement___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMEntity = 5;
+static const long long hhbc_ext_method_count_DOMEntity = 4;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMEntity[] = {
   { "__construct", tg_9DOMEntity___construct },
   { "__get", tg_9DOMEntity___get },
   { "__set", tg_9DOMEntity___set },
-  { "__isset", tg_9DOMEntity___isset },
-  { "__destruct", tg_9DOMEntity___destruct }
+  { "__isset", tg_9DOMEntity___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMEntityReference = 2;
+static const long long hhbc_ext_method_count_DOMEntityReference = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMEntityReference[] = {
-  { "__construct", tg_18DOMEntityReference___construct },
-  { "__destruct", tg_18DOMEntityReference___destruct }
+  { "__construct", tg_18DOMEntityReference___construct }
 };
 
-static const long long hhbc_ext_method_count_DOMNotation = 5;
+static const long long hhbc_ext_method_count_DOMNotation = 4;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMNotation[] = {
   { "__construct", tg_11DOMNotation___construct },
   { "__get", tg_11DOMNotation___get },
   { "__set", tg_11DOMNotation___set },
-  { "__isset", tg_11DOMNotation___isset },
-  { "__destruct", tg_11DOMNotation___destruct }
+  { "__isset", tg_11DOMNotation___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMProcessingInstruction = 5;
+static const long long hhbc_ext_method_count_DOMProcessingInstruction = 4;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMProcessingInstruction[] = {
   { "__construct", tg_24DOMProcessingInstruction___construct },
   { "__get", tg_24DOMProcessingInstruction___get },
   { "__set", tg_24DOMProcessingInstruction___set },
-  { "__isset", tg_24DOMProcessingInstruction___isset },
-  { "__destruct", tg_24DOMProcessingInstruction___destruct }
+  { "__isset", tg_24DOMProcessingInstruction___isset }
 };
 
-static const long long hhbc_ext_method_count_DOMNodeIterator = 7;
+static const long long hhbc_ext_method_count_DOMNodeIterator = 6;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMNodeIterator[] = {
   { "__construct", tg_15DOMNodeIterator___construct },
   { "current", tg_15DOMNodeIterator_current },
   { "key", tg_15DOMNodeIterator_key },
   { "next", tg_15DOMNodeIterator_next },
   { "rewind", tg_15DOMNodeIterator_rewind },
-  { "valid", tg_15DOMNodeIterator_valid },
-  { "__destruct", tg_15DOMNodeIterator___destruct }
+  { "valid", tg_15DOMNodeIterator_valid }
 };
 
-static const long long hhbc_ext_method_count_DOMNamedNodeMap = 9;
+static const long long hhbc_ext_method_count_DOMNamedNodeMap = 8;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMNamedNodeMap[] = {
   { "__construct", tg_15DOMNamedNodeMap___construct },
   { "getNamedItem", tg_15DOMNamedNodeMap_getNamedItem },
@@ -5538,31 +5475,28 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DOMNamedNodeMap[] = {
   { "__get", tg_15DOMNamedNodeMap___get },
   { "__set", tg_15DOMNamedNodeMap___set },
   { "__isset", tg_15DOMNamedNodeMap___isset },
-  { "getIterator", tg_15DOMNamedNodeMap_getIterator },
-  { "__destruct", tg_15DOMNamedNodeMap___destruct }
+  { "getIterator", tg_15DOMNamedNodeMap_getIterator }
 };
 
-static const long long hhbc_ext_method_count_DOMNodeList = 7;
+static const long long hhbc_ext_method_count_DOMNodeList = 6;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMNodeList[] = {
   { "__construct", tg_11DOMNodeList___construct },
   { "item", tg_11DOMNodeList_item },
   { "__get", tg_11DOMNodeList___get },
   { "__set", tg_11DOMNodeList___set },
   { "__isset", tg_11DOMNodeList___isset },
-  { "getIterator", tg_11DOMNodeList_getIterator },
-  { "__destruct", tg_11DOMNodeList___destruct }
+  { "getIterator", tg_11DOMNodeList_getIterator }
 };
 
-static const long long hhbc_ext_method_count_DOMImplementation = 5;
+static const long long hhbc_ext_method_count_DOMImplementation = 4;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMImplementation[] = {
   { "__construct", tg_17DOMImplementation___construct },
   { "createDocument", tg_17DOMImplementation_createDocument },
   { "createDocumentType", tg_17DOMImplementation_createDocumentType },
-  { "hasFeature", tg_17DOMImplementation_hasFeature },
-  { "__destruct", tg_17DOMImplementation___destruct }
+  { "hasFeature", tg_17DOMImplementation_hasFeature }
 };
 
-static const long long hhbc_ext_method_count_DOMXPath = 9;
+static const long long hhbc_ext_method_count_DOMXPath = 8;
 static const HhbcExtMethodInfo hhbc_ext_methods_DOMXPath[] = {
   { "__construct", tg_8DOMXPath___construct },
   { "evaluate", tg_8DOMXPath_evaluate },
@@ -5571,39 +5505,35 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DOMXPath[] = {
   { "registerPHPFunctions", tg_8DOMXPath_registerPHPFunctions },
   { "__get", tg_8DOMXPath___get },
   { "__set", tg_8DOMXPath___set },
-  { "__isset", tg_8DOMXPath___isset },
-  { "__destruct", tg_8DOMXPath___destruct }
+  { "__isset", tg_8DOMXPath___isset }
 };
 
-static const long long hhbc_ext_method_count_EncodingDetector = 6;
+static const long long hhbc_ext_method_count_EncodingDetector = 5;
 static const HhbcExtMethodInfo hhbc_ext_methods_EncodingDetector[] = {
   { "__construct", tg_16EncodingDetector___construct },
   { "setText", tg_16EncodingDetector_setText },
   { "setDeclaredEncoding", tg_16EncodingDetector_setDeclaredEncoding },
   { "detect", tg_16EncodingDetector_detect },
-  { "detectAll", tg_16EncodingDetector_detectAll },
-  { "__destruct", tg_16EncodingDetector___destruct }
+  { "detectAll", tg_16EncodingDetector_detectAll }
 };
 
-static const long long hhbc_ext_method_count_EncodingMatch = 7;
+static const long long hhbc_ext_method_count_EncodingMatch = 6;
 static const HhbcExtMethodInfo hhbc_ext_methods_EncodingMatch[] = {
   { "__construct", tg_13EncodingMatch___construct },
   { "isValid", tg_13EncodingMatch_isValid },
   { "getEncoding", tg_13EncodingMatch_getEncoding },
   { "getConfidence", tg_13EncodingMatch_getConfidence },
   { "getLanguage", tg_13EncodingMatch_getLanguage },
-  { "getUTF8", tg_13EncodingMatch_getUTF8 },
-  { "__destruct", tg_13EncodingMatch___destruct }
+  { "getUTF8", tg_13EncodingMatch_getUTF8 }
 };
 
-static const long long hhbc_ext_method_count_SpoofChecker = 6;
+static const long long hhbc_ext_method_count_SpoofChecker = 5;
 static const HhbcExtMethodInfo hhbc_ext_methods_SpoofChecker[] = {
   { "__construct", tg_12SpoofChecker___construct },
   { "isSuspicious", tg_12SpoofChecker_isSuspicious },
   { "areConfusable", tg_12SpoofChecker_areConfusable },
   { "setAllowedLocales", tg_12SpoofChecker_setAllowedLocales },
-  { "setChecks", tg_12SpoofChecker_setChecks },
-  { "__destruct", tg_12SpoofChecker___destruct }
+  { "setChecks", tg_12SpoofChecker_setChecks }
 };
 
 static const long long hhbc_ext_method_count_ImageSprite = 12;
@@ -5622,7 +5552,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_ImageSprite[] = {
   { "__destruct", tg_11ImageSprite___destruct }
 };
 
-static const long long hhbc_ext_method_count_Collator = 14;
+static const long long hhbc_ext_method_count_Collator = 13;
 static const HhbcExtMethodInfo hhbc_ext_methods_Collator[] = {
   { "__construct", tg_8Collator___construct },
   { "asort", tg_8Collator_asort },
@@ -5636,22 +5566,19 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Collator[] = {
   { "setattribute", tg_8Collator_setattribute },
   { "setstrength", tg_8Collator_setstrength },
   { "sortwithsortkeys", tg_8Collator_sortwithsortkeys },
-  { "sort", tg_8Collator_sort },
-  { "__destruct", tg_8Collator___destruct }
+  { "sort", tg_8Collator_sort }
 };
 
-static const long long hhbc_ext_method_count_Locale = 2;
+static const long long hhbc_ext_method_count_Locale = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_Locale[] = {
-  { "__construct", tg_6Locale___construct },
-  { "__destruct", tg_6Locale___destruct }
+  { "__construct", tg_6Locale___construct }
 };
 
-static const long long hhbc_ext_method_count_Normalizer = 4;
+static const long long hhbc_ext_method_count_Normalizer = 3;
 static const HhbcExtMethodInfo hhbc_ext_methods_Normalizer[] = {
   { "__construct", tg_10Normalizer___construct },
   { "isnormalized", tg_10Normalizer_isnormalized },
-  { "normalize", tg_10Normalizer_normalize },
-  { "__destruct", tg_10Normalizer___destruct }
+  { "normalize", tg_10Normalizer_normalize }
 };
 
 static const long long hhbc_ext_method_count_MutableArrayIterator = 6;
@@ -5689,7 +5616,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Memcache[] = {
   { "__destruct", tg_8Memcache___destruct }
 };
 
-static const long long hhbc_ext_method_count_Memcached = 39;
+static const long long hhbc_ext_method_count_Memcached = 38;
 static const HhbcExtMethodInfo hhbc_ext_methods_Memcached[] = {
   { "__construct", tg_9Memcached___construct },
   { "add", tg_9Memcached_add },
@@ -5728,11 +5655,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Memcached[] = {
   { "setByKey", tg_9Memcached_setByKey },
   { "setMulti", tg_9Memcached_setMulti },
   { "setMultiByKey", tg_9Memcached_setMultiByKey },
-  { "setOption", tg_9Memcached_setOption },
-  { "__destruct", tg_9Memcached___destruct }
+  { "setOption", tg_9Memcached_setOption }
 };
 
-static const long long hhbc_ext_method_count_PDO = 17;
+static const long long hhbc_ext_method_count_PDO = 16;
 static const HhbcExtMethodInfo hhbc_ext_methods_PDO[] = {
   { "__construct", tg_3PDO___construct },
   { "prepare", tg_3PDO_prepare },
@@ -5749,11 +5675,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_PDO[] = {
   { "quote", tg_3PDO_quote },
   { "__wakeup", tg_3PDO___wakeup },
   { "__sleep", tg_3PDO___sleep },
-  { "getavailabledrivers", tg_3PDO_getavailabledrivers },
-  { "__destruct", tg_3PDO___destruct }
+  { "getavailabledrivers", tg_3PDO_getavailabledrivers }
 };
 
-static const long long hhbc_ext_method_count_PDOStatement = 28;
+static const long long hhbc_ext_method_count_PDOStatement = 27;
 static const HhbcExtMethodInfo hhbc_ext_methods_PDOStatement[] = {
   { "__construct", tg_12PDOStatement___construct },
   { "execute", tg_12PDOStatement_execute },
@@ -5781,11 +5706,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_PDOStatement[] = {
   { "rewind", tg_12PDOStatement_rewind },
   { "valid", tg_12PDOStatement_valid },
   { "__wakeup", tg_12PDOStatement___wakeup },
-  { "__sleep", tg_12PDOStatement___sleep },
-  { "__destruct", tg_12PDOStatement___destruct }
+  { "__sleep", tg_12PDOStatement___sleep }
 };
 
-static const long long hhbc_ext_method_count_SimpleXMLElement = 23;
+static const long long hhbc_ext_method_count_SimpleXMLElement = 22;
 static const HhbcExtMethodInfo hhbc_ext_methods_SimpleXMLElement[] = {
   { "__construct", tg_16SimpleXMLElement___construct },
   { "offsetExists", tg_16SimpleXMLElement_offsetExists },
@@ -5808,28 +5732,25 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SimpleXMLElement[] = {
   { "__get", tg_16SimpleXMLElement___get },
   { "__set", tg_16SimpleXMLElement___set },
   { "__isset", tg_16SimpleXMLElement___isset },
-  { "__unset", tg_16SimpleXMLElement___unset },
-  { "__destruct", tg_16SimpleXMLElement___destruct }
+  { "__unset", tg_16SimpleXMLElement___unset }
 };
 
-static const long long hhbc_ext_method_count_LibXMLError = 2;
+static const long long hhbc_ext_method_count_LibXMLError = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_LibXMLError[] = {
-  { "__construct", tg_11LibXMLError___construct },
-  { "__destruct", tg_11LibXMLError___destruct }
+  { "__construct", tg_11LibXMLError___construct }
 };
 
-static const long long hhbc_ext_method_count_SimpleXMLElementIterator = 7;
+static const long long hhbc_ext_method_count_SimpleXMLElementIterator = 6;
 static const HhbcExtMethodInfo hhbc_ext_methods_SimpleXMLElementIterator[] = {
   { "__construct", tg_24SimpleXMLElementIterator___construct },
   { "current", tg_24SimpleXMLElementIterator_current },
   { "key", tg_24SimpleXMLElementIterator_key },
   { "next", tg_24SimpleXMLElementIterator_next },
   { "rewind", tg_24SimpleXMLElementIterator_rewind },
-  { "valid", tg_24SimpleXMLElementIterator_valid },
-  { "__destruct", tg_24SimpleXMLElementIterator___destruct }
+  { "valid", tg_24SimpleXMLElementIterator_valid }
 };
 
-static const long long hhbc_ext_method_count_SoapServer = 10;
+static const long long hhbc_ext_method_count_SoapServer = 9;
 static const HhbcExtMethodInfo hhbc_ext_methods_SoapServer[] = {
   { "__construct", tg_10SoapServer___construct },
   { "setclass", tg_10SoapServer_setclass },
@@ -5839,11 +5760,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SoapServer[] = {
   { "handle", tg_10SoapServer_handle },
   { "setpersistence", tg_10SoapServer_setpersistence },
   { "fault", tg_10SoapServer_fault },
-  { "addsoapheader", tg_10SoapServer_addsoapheader },
-  { "__destruct", tg_10SoapServer___destruct }
+  { "addsoapheader", tg_10SoapServer_addsoapheader }
 };
 
-static const long long hhbc_ext_method_count_SoapClient = 14;
+static const long long hhbc_ext_method_count_SoapClient = 13;
 static const HhbcExtMethodInfo hhbc_ext_methods_SoapClient[] = {
   { "__construct", tg_10SoapClient___construct },
   { "__call", tg_10SoapClient___call },
@@ -5857,29 +5777,25 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SoapClient[] = {
   { "__dorequest", tg_10SoapClient___dorequest },
   { "__setcookie", tg_10SoapClient___setcookie },
   { "__setlocation", tg_10SoapClient___setlocation },
-  { "__setsoapheaders", tg_10SoapClient___setsoapheaders },
-  { "__destruct", tg_10SoapClient___destruct }
+  { "__setsoapheaders", tg_10SoapClient___setsoapheaders }
 };
 
-static const long long hhbc_ext_method_count_SoapVar = 2;
+static const long long hhbc_ext_method_count_SoapVar = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_SoapVar[] = {
-  { "__construct", tg_7SoapVar___construct },
-  { "__destruct", tg_7SoapVar___destruct }
+  { "__construct", tg_7SoapVar___construct }
 };
 
-static const long long hhbc_ext_method_count_SoapParam = 2;
+static const long long hhbc_ext_method_count_SoapParam = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_SoapParam[] = {
-  { "__construct", tg_9SoapParam___construct },
-  { "__destruct", tg_9SoapParam___destruct }
+  { "__construct", tg_9SoapParam___construct }
 };
 
-static const long long hhbc_ext_method_count_SoapHeader = 2;
+static const long long hhbc_ext_method_count_SoapHeader = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_SoapHeader[] = {
-  { "__construct", tg_10SoapHeader___construct },
-  { "__destruct", tg_10SoapHeader___destruct }
+  { "__construct", tg_10SoapHeader___construct }
 };
 
-static const long long hhbc_ext_method_count_SQLite3 = 19;
+static const long long hhbc_ext_method_count_SQLite3 = 18;
 static const HhbcExtMethodInfo hhbc_ext_methods_SQLite3[] = {
   { "__construct", tg_7SQLite3___construct },
   { "open", tg_7SQLite3_open },
@@ -5898,11 +5814,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SQLite3[] = {
   { "querysingle", tg_7SQLite3_querysingle },
   { "createfunction", tg_7SQLite3_createfunction },
   { "createaggregate", tg_7SQLite3_createaggregate },
-  { "openblob", tg_7SQLite3_openblob },
-  { "__destruct", tg_7SQLite3___destruct }
+  { "openblob", tg_7SQLite3_openblob }
 };
 
-static const long long hhbc_ext_method_count_SQLite3Stmt = 9;
+static const long long hhbc_ext_method_count_SQLite3Stmt = 8;
 static const HhbcExtMethodInfo hhbc_ext_methods_SQLite3Stmt[] = {
   { "__construct", tg_11SQLite3Stmt___construct },
   { "paramcount", tg_11SQLite3Stmt_paramcount },
@@ -5911,11 +5826,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SQLite3Stmt[] = {
   { "clear", tg_11SQLite3Stmt_clear },
   { "bindparam", tg_11SQLite3Stmt_bindparam },
   { "bindvalue", tg_11SQLite3Stmt_bindvalue },
-  { "execute", tg_11SQLite3Stmt_execute },
-  { "__destruct", tg_11SQLite3Stmt___destruct }
+  { "execute", tg_11SQLite3Stmt_execute }
 };
 
-static const long long hhbc_ext_method_count_SQLite3Result = 8;
+static const long long hhbc_ext_method_count_SQLite3Result = 7;
 static const HhbcExtMethodInfo hhbc_ext_methods_SQLite3Result[] = {
   { "__construct", tg_13SQLite3Result___construct },
   { "numcolumns", tg_13SQLite3Result_numcolumns },
@@ -5923,8 +5837,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SQLite3Result[] = {
   { "columntype", tg_13SQLite3Result_columntype },
   { "fetcharray", tg_13SQLite3Result_fetcharray },
   { "reset", tg_13SQLite3Result_reset },
-  { "finalize", tg_13SQLite3Result_finalize },
-  { "__destruct", tg_13SQLite3Result___destruct }
+  { "finalize", tg_13SQLite3Result_finalize }
 };
 
 static const long long hhbc_ext_method_count_XMLReader = 27;
@@ -5958,7 +5871,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLReader[] = {
   { "setRelaxNGSchemaSource", tg_9XMLReader_setRelaxNGSchemaSource }
 };
 
-static const long long hhbc_ext_method_count_XMLWriter = 44;
+static const long long hhbc_ext_method_count_XMLWriter = 43;
 static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
   { "__construct", tg_9XMLWriter___construct },
   { "openMemory", tg_9XMLWriter_openMemory },
@@ -6002,8 +5915,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
   { "endDTDEntity", tg_9XMLWriter_endDTDEntity },
   { "endDTD", tg_9XMLWriter_endDTD },
   { "flush", tg_9XMLWriter_flush },
-  { "outputMemory", tg_9XMLWriter_outputMemory },
-  { "__destruct", tg_9XMLWriter___destruct }
+  { "outputMemory", tg_9XMLWriter_outputMemory }
 };
 
 const long long hhbc_ext_class_count = 59;

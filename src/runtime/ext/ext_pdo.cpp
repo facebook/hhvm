@@ -1487,11 +1487,6 @@ Array c_PDO::ti_getavailabledrivers(const char* cls) {
   return f_pdo_drivers();
 }
 
-Variant c_PDO::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static inline bool rewrite_name_to_position(sp_PDOStatement stmt,
@@ -3169,11 +3164,6 @@ Variant c_PDOStatement::t___sleep() {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::__sleep);
   throw_pdo_exception(null, null, "You cannot serialize or unserialize "
                       "PDOStatement instances");
-  return null;
-}
-
-Variant c_PDOStatement::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::__destruct);
   return null;
 }
 

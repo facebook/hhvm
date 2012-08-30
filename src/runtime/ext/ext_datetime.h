@@ -66,8 +66,6 @@ class c_DateTime : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(settime);
   public: Object t_settimezone(CObjRef timezone);
   DECLARE_METHOD_INVOKE_HELPERS(settimezone);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DateTime *create(String time = "now",
@@ -141,8 +139,6 @@ class c_DateTimeZone : public ExtObjectData {
     return ti_listidentifiers("datetimezone");
   }
   DECLARE_METHOD_INVOKE_HELPERS(listidentifiers);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DateTimeZone *create(String timezone);

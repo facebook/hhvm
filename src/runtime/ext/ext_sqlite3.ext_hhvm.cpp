@@ -1026,44 +1026,6 @@ TypedValue* tg_7SQLite3_openblob(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_SQLite3::t___destruct()
-_ZN4HPHP9c_SQLite312t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_7SQLite3___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP9c_SQLite312t___destructEv");
-
-TypedValue* tg_7SQLite3___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_7SQLite3___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("SQLite3::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("SQLite3::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_SQLite3Stmt_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_SQLite3Stmt) - sizeof(ObjectData);
@@ -1442,44 +1404,6 @@ TypedValue* tg_11SQLite3Stmt_execute(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_SQLite3Stmt::t___destruct()
-_ZN4HPHP13c_SQLite3Stmt12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_11SQLite3Stmt___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt12t___destructEv");
-
-TypedValue* tg_11SQLite3Stmt___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_11SQLite3Stmt___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("SQLite3Stmt::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("SQLite3Stmt::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_SQLite3Result_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_SQLite3Result) - sizeof(ObjectData);
@@ -1801,44 +1725,6 @@ TypedValue* tg_13SQLite3Result_finalize(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("SQLite3Result::finalize");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_SQLite3Result::t___destruct()
-_ZN4HPHP15c_SQLite3Result12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_13SQLite3Result___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result12t___destructEv");
-
-TypedValue* tg_13SQLite3Result___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_13SQLite3Result___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("SQLite3Result::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("SQLite3Result::__destruct");
     }
     rv.m_data.num = 0LL;
     rv._count = 0;

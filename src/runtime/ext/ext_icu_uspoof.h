@@ -61,8 +61,6 @@ class c_SpoofChecker : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(setallowedlocales);
   public: void t_setchecks(int checks);
   DECLARE_METHOD_INVOKE_HELPERS(setchecks);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SpoofChecker *create();

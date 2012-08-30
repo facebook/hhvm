@@ -207,11 +207,6 @@ void c_Memcached::t___construct(CStrRef persistent_id /*= null_string*/) {
   }
 }
 
-Variant c_Memcached::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::__destruct);
-  return null;
-}
-
 Variant c_Memcached::t_get(CStrRef key, CVarRef cache_cb /*= null_variant*/,
                            VRefParam cas_token /*= null_variant*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcached, Memcached::get);

@@ -804,10 +804,5 @@ String c_XMLWriter::t_outputmemory(bool flush /* = true */) {
   return t_flush(flush);
 }
 
-Variant c_XMLWriter::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -58,8 +58,6 @@ class c_SoapServer : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(fault);
   public: void t_addsoapheader(CObjRef fault);
   DECLARE_METHOD_INVOKE_HELPERS(addsoapheader);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapServer *create(Variant wsdl, Array options = null_array);
@@ -119,8 +117,6 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   DECLARE_METHOD_INVOKE_HELPERS(__setlocation);
   public: bool t___setsoapheaders(CVarRef headers = null_variant);
   DECLARE_METHOD_INVOKE_HELPERS(__setsoapheaders);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapClient *create(Variant wsdl, Array options = null_array);
@@ -174,8 +170,6 @@ class c_SoapVar : public ExtObjectData {
   public: ~c_SoapVar();
   public: void t___construct(CVarRef data, CVarRef type, CStrRef type_name = null_string, CStrRef type_namespace = null_string, CStrRef node_name = null_string, CStrRef node_namespace = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapVar *create(Variant data, Variant type, String type_name = null_string, String type_namespace = null_string, String node_name = null_string, String node_namespace = null_string);
@@ -202,8 +196,6 @@ class c_SoapParam : public ExtObjectData {
   public: ~c_SoapParam();
   public: void t___construct(CVarRef data, CStrRef name);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapParam *create(Variant data, String name);
@@ -226,8 +218,6 @@ class c_SoapHeader : public ExtObjectData {
   public: ~c_SoapHeader();
   public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = null, bool mustunderstand = false, CVarRef actor = null);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapHeader *create(String ns, String name, Variant data = null, bool mustunderstand = false, Variant actor = null);

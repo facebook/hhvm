@@ -574,44 +574,6 @@ TypedValue* tg_8DateTime_setTimezone(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DateTime::t___destruct()
-_ZN4HPHP10c_DateTime12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_8DateTime___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP10c_DateTime12t___destructEv");
-
-TypedValue* tg_8DateTime___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_8DateTime___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DateTime::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DateTime::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DateTimeZone_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DateTimeZone) - sizeof(ObjectData);
@@ -879,44 +841,6 @@ TypedValue* tg_12DateTimeZone_listIdentifiers(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DateTimeZone::t___destruct()
-_ZN4HPHP14c_DateTimeZone12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_12DateTimeZone___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_DateTimeZone12t___destructEv");
-
-TypedValue* tg_12DateTimeZone___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12DateTimeZone___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DateTimeZone::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DateTimeZone::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

@@ -168,8 +168,6 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(flush);
   public: String t_outputmemory(bool flush = true);
   DECLARE_METHOD_INVOKE_HELPERS(outputmemory);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_XMLWriter *create();

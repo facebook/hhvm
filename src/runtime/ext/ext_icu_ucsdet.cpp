@@ -113,11 +113,6 @@ Array c_EncodingDetector::t_detectall() {
   return ret;
 }
 
-Variant c_EncodingDetector::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingDetector, EncodingDetector::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 c_EncodingMatch::c_EncodingMatch(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb), m_encoding_match(0) {
@@ -216,11 +211,6 @@ String c_EncodingMatch::t_getutf8() {
   std::string utf8str;
   ustr.toUTF8String(utf8str);
   return String(utf8str);
-}
-
-Variant c_EncodingMatch::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingMatch, EncodingMatch::__destruct);
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

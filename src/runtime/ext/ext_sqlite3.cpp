@@ -445,11 +445,6 @@ bool c_SQLite3::t_openblob(CStrRef table, CStrRef column, int64 rowid,
   throw NotSupportedException(__func__, "sqlite3 stream");
 }
 
-Variant c_SQLite3::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 c_SQLite3Stmt::c_SQLite3Stmt(const ObjectStaticCallbacks *cb) :
@@ -626,11 +621,6 @@ Variant c_SQLite3Stmt::t_execute() {
   return false;
 }
 
-Variant c_SQLite3Stmt::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 c_SQLite3Result::c_SQLite3Result(const ObjectStaticCallbacks *cb) :
@@ -709,11 +699,6 @@ bool c_SQLite3Result::t_finalize() {
   validate();
   m_stmt.reset();
   return true;
-}
-
-Variant c_SQLite3Result::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Result, SQLite3Result::__destruct);
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

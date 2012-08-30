@@ -49,8 +49,6 @@ class c_DebuggerProxyCmdUser : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(islocal);
   public: Variant t_send(CObjRef cmd);
   DECLARE_METHOD_INVOKE_HELPERS(send);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DebuggerProxyCmdUser *create();
@@ -138,8 +136,6 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(printframe);
   public: void t_addcompletion(CVarRef list);
   DECLARE_METHOD_INVOKE_HELPERS(addcompletion);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DebuggerClientCmdUser *create();
@@ -174,8 +170,6 @@ class c_DebuggerClient : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(init);
   public: Variant t_processcmd(CVarRef cmdName, CVarRef args);
   DECLARE_METHOD_INVOKE_HELPERS(processcmd);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DebuggerClient *create();

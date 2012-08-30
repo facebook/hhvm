@@ -136,10 +136,5 @@ void c_SpoofChecker::t_setchecks(int checks) {
   }
 }
 
-Variant c_SpoofChecker::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SpoofChecker, SpoofChecker::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

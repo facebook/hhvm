@@ -1436,14 +1436,5 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );

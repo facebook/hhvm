@@ -54,8 +54,6 @@ class c_EncodingDetector : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(detect);
   public: Array t_detectall();
   DECLARE_METHOD_INVOKE_HELPERS(detectall);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_EncodingDetector *create();
@@ -90,8 +88,6 @@ class c_EncodingMatch : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getlanguage);
   public: String t_getutf8();
   DECLARE_METHOD_INVOKE_HELPERS(getutf8);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_EncodingMatch *create();

@@ -4925,44 +4925,6 @@ TypedValue* tg_7DOMNode___isset(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DOMNode::t___destruct()
-_ZN4HPHP9c_DOMNode12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_7DOMNode___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP9c_DOMNode12t___destructEv");
-
-TypedValue* tg_7DOMNode___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_7DOMNode___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMNode::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMNode::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DOMAttr_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DOMAttr) - sizeof(ObjectData);
@@ -5191,44 +5153,6 @@ TypedValue* tg_7DOMAttr___isset(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMAttr::t___destruct()
-_ZN4HPHP9c_DOMAttr12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_7DOMAttr___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP9c_DOMAttr12t___destructEv");
-
-TypedValue* tg_7DOMAttr___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_7DOMAttr___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMAttr::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMAttr::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -5710,44 +5634,6 @@ TypedValue* tg_16DOMCharacterData___isset(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DOMCharacterData::t___destruct()
-_ZN4HPHP18c_DOMCharacterData12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_16DOMCharacterData___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP18c_DOMCharacterData12t___destructEv");
-
-TypedValue* tg_16DOMCharacterData___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_16DOMCharacterData___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMCharacterData::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMCharacterData::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DOMComment_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DOMComment) - sizeof(ObjectData);
@@ -5809,44 +5695,6 @@ TypedValue* tg_10DOMComment___construct(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMComment::t___destruct()
-_ZN4HPHP12c_DOMComment12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_10DOMComment___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_DOMComment12t___destructEv");
-
-TypedValue* tg_10DOMComment___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_10DOMComment___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMComment::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMComment::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -6129,44 +5977,6 @@ TypedValue* tg_7DOMText___isset(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DOMText::t___destruct()
-_ZN4HPHP9c_DOMText12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_7DOMText___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP9c_DOMText12t___destructEv");
-
-TypedValue* tg_7DOMText___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_7DOMText___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMText::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMText::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DOMCDATASection_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DOMCDATASection) - sizeof(ObjectData);
@@ -6228,44 +6038,6 @@ TypedValue* tg_15DOMCDATASection___construct(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMCDATASection::t___destruct()
-_ZN4HPHP17c_DOMCDATASection12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_15DOMCDATASection___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMCDATASection12t___destructEv");
-
-TypedValue* tg_15DOMCDATASection___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_15DOMCDATASection___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMCDATASection::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMCDATASection::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -8165,44 +7937,6 @@ TypedValue* tg_11DOMDocument___isset(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DOMDocument::t___destruct()
-_ZN4HPHP13c_DOMDocument12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_11DOMDocument___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_DOMDocument12t___destructEv");
-
-TypedValue* tg_11DOMDocument___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_11DOMDocument___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMDocument::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMDocument::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DOMDocumentFragment_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DOMDocumentFragment) - sizeof(ObjectData);
@@ -8301,44 +8035,6 @@ TypedValue* tg_19DOMDocumentFragment_appendXML(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMDocumentFragment::t___destruct()
-_ZN4HPHP21c_DOMDocumentFragment12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_19DOMDocumentFragment___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP21c_DOMDocumentFragment12t___destructEv");
-
-TypedValue* tg_19DOMDocumentFragment___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_19DOMDocumentFragment___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMDocumentFragment::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMDocumentFragment::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -8504,44 +8200,6 @@ TypedValue* tg_15DOMDocumentType___isset(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMDocumentType::t___destruct()
-_ZN4HPHP17c_DOMDocumentType12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_15DOMDocumentType___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMDocumentType12t___destructEv");
-
-TypedValue* tg_15DOMDocumentType___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_15DOMDocumentType___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMDocumentType::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMDocumentType::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -9828,44 +9486,6 @@ TypedValue* tg_10DOMElement___isset(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DOMElement::t___destruct()
-_ZN4HPHP12c_DOMElement12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_10DOMElement___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP12c_DOMElement12t___destructEv");
-
-TypedValue* tg_10DOMElement___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_10DOMElement___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMElement::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMElement::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DOMEntity_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DOMEntity) - sizeof(ObjectData);
@@ -10031,44 +9651,6 @@ TypedValue* tg_9DOMEntity___isset(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DOMEntity::t___destruct()
-_ZN4HPHP11c_DOMEntity12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_9DOMEntity___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP11c_DOMEntity12t___destructEv");
-
-TypedValue* tg_9DOMEntity___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_9DOMEntity___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMEntity::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMEntity::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DOMEntityReference_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DOMEntityReference) - sizeof(ObjectData);
@@ -10130,44 +9712,6 @@ TypedValue* tg_18DOMEntityReference___construct(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMEntityReference::t___destruct()
-_ZN4HPHP20c_DOMEntityReference12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_18DOMEntityReference___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP20c_DOMEntityReference12t___destructEv");
-
-TypedValue* tg_18DOMEntityReference___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_18DOMEntityReference___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMEntityReference::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMEntityReference::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -10333,44 +9877,6 @@ TypedValue* tg_11DOMNotation___isset(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMNotation::t___destruct()
-_ZN4HPHP13c_DOMNotation12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_11DOMNotation___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_DOMNotation12t___destructEv");
-
-TypedValue* tg_11DOMNotation___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_11DOMNotation___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMNotation::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMNotation::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -10566,44 +10072,6 @@ TypedValue* tg_24DOMProcessingInstruction___isset(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMProcessingInstruction::t___destruct()
-_ZN4HPHP26c_DOMProcessingInstruction12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_24DOMProcessingInstruction___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP26c_DOMProcessingInstruction12t___destructEv");
-
-TypedValue* tg_24DOMProcessingInstruction___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_24DOMProcessingInstruction___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMProcessingInstruction::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMProcessingInstruction::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -10836,44 +10304,6 @@ TypedValue* tg_15DOMNodeIterator_valid(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("DOMNodeIterator::valid");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMNodeIterator::t___destruct()
-_ZN4HPHP17c_DOMNodeIterator12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_15DOMNodeIterator___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMNodeIterator12t___destructEv");
-
-TypedValue* tg_15DOMNodeIterator___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_15DOMNodeIterator___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMNodeIterator::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMNodeIterator::__destruct");
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
@@ -11258,44 +10688,6 @@ TypedValue* tg_15DOMNamedNodeMap_getIterator(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DOMNamedNodeMap::t___destruct()
-_ZN4HPHP17c_DOMNamedNodeMap12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_15DOMNamedNodeMap___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMNamedNodeMap12t___destructEv");
-
-TypedValue* tg_15DOMNamedNodeMap___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_15DOMNamedNodeMap___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMNamedNodeMap::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMNamedNodeMap::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DOMNodeList_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DOMNodeList) - sizeof(ObjectData);
@@ -11554,44 +10946,6 @@ TypedValue* tg_11DOMNodeList_getIterator(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_DOMNodeList::t___destruct()
-_ZN4HPHP13c_DOMNodeList12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_11DOMNodeList___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_DOMNodeList12t___destructEv");
-
-TypedValue* tg_11DOMNodeList___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_11DOMNodeList___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMNodeList::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMNodeList::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DOMImplementation_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DOMImplementation) - sizeof(ObjectData);
@@ -11840,44 +11194,6 @@ TypedValue* tg_17DOMImplementation_hasFeature(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMImplementation::t___destruct()
-_ZN4HPHP19c_DOMImplementation12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_17DOMImplementation___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP19c_DOMImplementation12t___destructEv");
-
-TypedValue* tg_17DOMImplementation___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_17DOMImplementation___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMImplementation::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMImplementation::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -12278,44 +11594,6 @@ TypedValue* tg_8DOMXPath___isset(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_DOMXPath::t___destruct()
-_ZN4HPHP10c_DOMXPath12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_8DOMXPath___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP10c_DOMXPath12t___destructEv");
-
-TypedValue* tg_8DOMXPath___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_8DOMXPath___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("DOMXPath::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("DOMXPath::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

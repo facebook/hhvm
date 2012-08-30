@@ -2273,11 +2273,6 @@ void c_SoapServer::t_addsoapheader(CObjRef fault) {
   m_soap_headers.append(obj);
 }
 
-Variant c_SoapServer::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapClient
 
@@ -2750,11 +2745,6 @@ bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
   return true;
 }
 
-Variant c_SoapClient::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapVar
 
@@ -2791,11 +2781,6 @@ void c_SoapVar::t___construct(CVarRef data, CVarRef type,
   if (!node_namespace.empty()) m_namens = node_namespace;
 }
 
-Variant c_SoapVar::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapVar, SoapVar::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapParam
 
@@ -2813,11 +2798,6 @@ void c_SoapParam::t___construct(CVarRef data, CStrRef name) {
   }
   m_name = name;
   m_data = data;
-}
-
-Variant c_SoapParam::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapParam, SoapParam::__destruct);
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2859,11 +2839,6 @@ void c_SoapHeader::t___construct(CStrRef ns, CStrRef name,
   } else if (!actor.isNull()) {
     raise_warning("Invalid actor");
   }
-}
-
-Variant c_SoapHeader::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(SoapHeader, SoapHeader::__destruct);
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

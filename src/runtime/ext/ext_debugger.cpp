@@ -183,11 +183,6 @@ Variant c_DebuggerProxyCmdUser::t_send(CObjRef cmd) {
   return m_proxy->send(&cmdUser);
 }
 
-Variant c_DebuggerProxyCmdUser::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerProxyCmdUser, DebuggerProxyCmdUser::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DebuggerClientCmdUser::c_DebuggerClientCmdUser(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
@@ -397,11 +392,6 @@ void c_DebuggerClientCmdUser::t_addcompletion(CVarRef list) {
   }
 }
 
-Variant c_DebuggerClientCmdUser::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 const int64 q_DebuggerClient$$STATE_INVALID = -1;
@@ -608,11 +598,6 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
   }
 
   return m_client->getOutputArray();
-}
-
-Variant c_DebuggerClient::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::__destruct);
-  return null;
 }
 
 void c_DebuggerClient::sweep() {

@@ -151,8 +151,6 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMNode *create();
@@ -186,8 +184,6 @@ class c_DOMAttr : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMAttr *create(String name, String value = null_string);
@@ -224,8 +220,6 @@ class c_DOMCharacterData : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMCharacterData *create();
@@ -246,8 +240,6 @@ class c_DOMComment : public c_DOMCharacterData {
   public: ~c_DOMComment();
   public: void t___construct(CStrRef value = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMComment *create(String value = null_string);
@@ -278,8 +270,6 @@ class c_DOMText : public c_DOMCharacterData {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMText *create(String value = null_string);
@@ -300,8 +290,6 @@ class c_DOMCDATASection : public c_DOMText {
   public: ~c_DOMCDATASection();
   public: void t___construct(CStrRef value);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMCDATASection *create(String value);
@@ -388,8 +376,6 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMDocument *create(String version = null_string, String encoding = null_string);
@@ -424,8 +410,6 @@ class c_DOMDocumentFragment : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_appendxml(CStrRef data);
   DECLARE_METHOD_INVOKE_HELPERS(appendxml);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMDocumentFragment *create();
@@ -452,8 +436,6 @@ class c_DOMDocumentType : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMDocumentType *create();
@@ -516,8 +498,6 @@ class c_DOMElement : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMElement *create(String name, String value = null_string, String namespaceuri = null_string);
@@ -544,8 +524,6 @@ class c_DOMEntity : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMEntity *create();
@@ -566,8 +544,6 @@ class c_DOMEntityReference : public c_DOMNode {
   public: ~c_DOMEntityReference();
   public: void t___construct(CStrRef name);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMEntityReference *create(String name);
@@ -594,8 +570,6 @@ class c_DOMNotation : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMNotation *create();
@@ -622,8 +596,6 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMProcessingInstruction *create(String name, String value = null_string);
@@ -654,8 +626,6 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
   public: Variant t_valid();
   DECLARE_METHOD_INVOKE_HELPERS(valid);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMNodeIterator *create();
@@ -699,8 +669,6 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t_getiterator();
   DECLARE_METHOD_INVOKE_HELPERS(getiterator);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMNamedNodeMap *create();
@@ -731,8 +699,6 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t_getiterator();
   DECLARE_METHOD_INVOKE_HELPERS(getiterator);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMNodeList *create();
@@ -759,8 +725,6 @@ class c_DOMImplementation : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(createdocumenttype);
   public: bool t_hasfeature(CStrRef feature, CStrRef version);
   DECLARE_METHOD_INVOKE_HELPERS(hasfeature);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMImplementation *create();
@@ -795,8 +759,6 @@ class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseS
   DECLARE_METHOD_INVOKE_HELPERS(__set);
   public: bool t___isset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DOMXPath *create(Variant doc);

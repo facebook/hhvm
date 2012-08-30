@@ -84,8 +84,6 @@ class c_SQLite3 : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(createaggregate);
   public: bool t_openblob(CStrRef table, CStrRef column, int64 rowid, CStrRef dbname = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(openblob);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SQLite3 *create(String filename, int64 flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, String encryption_key = null_string);
@@ -129,8 +127,6 @@ class c_SQLite3Stmt : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(bindvalue);
   public: Variant t_execute();
   DECLARE_METHOD_INVOKE_HELPERS(execute);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SQLite3Stmt *create(Object dbobject, String statement);
@@ -173,8 +169,6 @@ class c_SQLite3Result : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(reset);
   public: bool t_finalize();
   DECLARE_METHOD_INVOKE_HELPERS(finalize);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SQLite3Result *create();

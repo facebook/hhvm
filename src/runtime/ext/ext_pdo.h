@@ -154,8 +154,6 @@ class c_PDO : public ExtObjectData, public Sweepable {
     return ti_getavailabledrivers("pdo");
   }
   DECLARE_METHOD_INVOKE_HELPERS(getavailabledrivers);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_PDO *create(String dsn, String username = null_string, String password = null_string, Array options = null_array);
@@ -230,8 +228,6 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(__wakeup);
   public: Variant t___sleep();
   DECLARE_METHOD_INVOKE_HELPERS(__sleep);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_PDOStatement *create();

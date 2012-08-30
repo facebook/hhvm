@@ -8,6 +8,11 @@ $files = array();
 exec($inputs, $files);
 
 foreach ($files as $file) {
+  // Skip injection macros for the collection classes
+  if (preg_match("#/ext_collection\\.cpp$#", $file)) {
+    continue;
+  }
+
   $contents = file_get_contents($file);
   if ($contents === false) {
     exit("unable to read $file\n");

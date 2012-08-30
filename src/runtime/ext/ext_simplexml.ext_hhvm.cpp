@@ -1562,44 +1562,6 @@ TypedValue* tg_16SimpleXMLElement___unset(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_SimpleXMLElement::t___destruct()
-_ZN4HPHP18c_SimpleXMLElement12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_16SimpleXMLElement___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP18c_SimpleXMLElement12t___destructEv");
-
-TypedValue* tg_16SimpleXMLElement___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_16SimpleXMLElement___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("SimpleXMLElement::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("SimpleXMLElement::__destruct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_LibXMLError_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_LibXMLError) - sizeof(ObjectData);
@@ -1637,44 +1599,6 @@ TypedValue* tg_11LibXMLError___construct(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("LibXMLError::__construct");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_LibXMLError::t___destruct()
-_ZN4HPHP13c_LibXMLError12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_11LibXMLError___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_LibXMLError12t___destructEv");
-
-TypedValue* tg_11LibXMLError___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_11LibXMLError___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("LibXMLError::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("LibXMLError::__destruct");
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
@@ -1912,44 +1836,6 @@ TypedValue* tg_24SimpleXMLElementIterator_valid(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("SimpleXMLElementIterator::valid");
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-HPHP::Variant HPHP::c_SimpleXMLElementIterator::t___destruct()
-_ZN4HPHP26c_SimpleXMLElementIterator12t___destructEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-TypedValue* th_24SimpleXMLElementIterator___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP26c_SimpleXMLElementIterator12t___destructEv");
-
-TypedValue* tg_24SimpleXMLElementIterator___destruct(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_24SimpleXMLElementIterator___destruct((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("SimpleXMLElementIterator::__destruct", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("SimpleXMLElementIterator::__destruct");
     }
     rv.m_data.num = 0LL;
     rv._count = 0;

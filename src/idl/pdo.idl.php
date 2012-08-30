@@ -851,15 +851,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -1328,15 +1319,6 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__sleep",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,

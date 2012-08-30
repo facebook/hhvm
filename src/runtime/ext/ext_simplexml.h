@@ -94,8 +94,6 @@ class c_SimpleXMLElement :
   DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___unset(Variant name);
   DECLARE_METHOD_INVOKE_HELPERS(__unset);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SimpleXMLElement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
@@ -132,8 +130,6 @@ class c_LibXMLError : public ExtObjectData {
   public: ~c_LibXMLError();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_LibXMLError *create();
@@ -163,8 +159,6 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
   public: Variant t_valid();
   DECLARE_METHOD_INVOKE_HELPERS(valid);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SimpleXMLElementIterator *create();

@@ -2054,15 +2054,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -2153,15 +2144,6 @@ DefineFunction(
         'name'   => "name",
         'type'   => Variant,
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -2351,15 +2333,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -2386,15 +2359,6 @@ DefineFunction(
         'type'   => String,
         'value'  => "null_string",
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -2505,15 +2469,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -2539,15 +2494,6 @@ DefineFunction(
         'name'   => "value",
         'type'   => String,
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -3233,15 +3179,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -3279,15 +3216,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "XML to append.",
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -3359,15 +3287,6 @@ DefineFunction(
         'name'   => "name",
         'type'   => Variant,
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -3842,15 +3761,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -3922,15 +3832,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -3956,15 +3857,6 @@ DefineFunction(
         'name'   => "name",
         'type'   => String,
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -4036,15 +3928,6 @@ DefineFunction(
         'name'   => "name",
         'type'   => Variant,
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -4130,15 +4013,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -4212,15 +4086,6 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "valid",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -4367,15 +4232,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -4469,15 +4325,6 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getIterator",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -4587,15 +4434,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The version number of the feature to test. In level 2, this can be either 2.0 or 1.0.",
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -4773,15 +4611,6 @@ DefineFunction(
         'name'   => "name",
         'type'   => Variant,
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 

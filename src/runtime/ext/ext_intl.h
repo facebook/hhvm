@@ -113,8 +113,6 @@ class c_Collator : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(sortwithsortkeys);
   public: bool t_sort(VRefParam arr, int64 sort_flag = q_Collator$$SORT_REGULAR);
   DECLARE_METHOD_INVOKE_HELPERS(sort);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_Collator *create(String locale);
@@ -141,8 +139,6 @@ class c_Locale : public ExtObjectData {
   public: ~c_Locale();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_Locale *create();
@@ -183,8 +179,6 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
     return ti_normalize("normalizer", input, form);
   }
   DECLARE_METHOD_INVOKE_HELPERS(normalize);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_Normalizer *create();

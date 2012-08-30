@@ -1250,15 +1250,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -1437,15 +1428,6 @@ DefineFunction(
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns array on success or FALSE on failure.",
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 

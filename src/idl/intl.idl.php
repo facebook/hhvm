@@ -882,15 +882,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass(
 );
 
@@ -921,15 +912,6 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 
@@ -1051,15 +1033,6 @@ DefineFunction(
         'type'   => Int64,
         'value'  => "q_Normalizer\$\$FORM_C",
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "__destruct",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 

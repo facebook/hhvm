@@ -77,6 +77,9 @@ extern char **environ;
 #define MAX_INPUT_NESTING_LEVEL 64
 
 namespace HPHP {
+
+namespace VM { void initialize_repo(); }
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -663,6 +666,7 @@ static void prepare_args(int &argc, char **&argv, const StringVec &args,
 static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   try {
+    if (hhvm) VM::initialize_repo();
     init_thread_locals();
     return execute_program_impl(argc, argv);
   } catch (const Exception &e) {

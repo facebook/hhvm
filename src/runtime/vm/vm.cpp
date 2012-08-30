@@ -112,9 +112,6 @@ void ProcessInit() {
   // Initialize compiler state
   VM::compile_file(0, 0, MD5(), 0);
 
-  extern void initialize_repo();
-  initialize_repo();
-
   // Install VM's ClassInfoHook
   ClassInfo::SetHook(&vm_class_info_hook);
 

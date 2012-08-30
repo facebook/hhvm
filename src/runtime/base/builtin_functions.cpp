@@ -1542,7 +1542,7 @@ bool isset(CVarRef v, CVarRef offset) {
   if (Variant::GetAccessorType(tva) == KindOfObject) {
     ObjectData* obj = Variant::GetObjectData(tva);
     if (obj->isCollection()) {
-      return collectionOffsetEmpty(obj, offset);
+      return collectionOffsetIsset(obj, offset);
     } else {
       return Variant::GetArrayAccess(tva)->
         o_invoke(s_offsetExists, Array::Create(offset), -1);

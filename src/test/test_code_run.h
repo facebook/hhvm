@@ -92,6 +92,7 @@ class TestCodeRun : public TestBase {
   bool TestObjectAssignment();
   bool TestNewObjectExpression();
   bool TestObjectPropertyExpression();
+  bool TestCollectionClasses();
   bool TestComparisons();
   bool TestTernary();
   bool TestTypes();

@@ -186,6 +186,10 @@ public:
   TypedValue* locals() {
     return (TypedValue*)((uintptr_t)this + localsOffset());
   }
+  TypedValue* props() {
+    ASSERT(m_nLocals == 0);
+    return locals();
+  }
 
 public:
   bool m_hasExtraVars;

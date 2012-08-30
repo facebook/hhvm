@@ -283,6 +283,13 @@ c_GenericContinuation::~c_GenericContinuation() {
     for (int i = 0; i < m_nLocals; ++i) {
       tvRefcountedDecRef(&locs[i]);
     }
+    int nProps = m_cls->numDeclProperties();
+    ASSERT(nProps == 0 || m_nLocals == 0);
+    for (int i = 0; i < nProps; i++) {
+      tvRefcountedDecRef(props() + i);
+    }
+    // Avoid having to recompute nProps in operator delete.
+    m_nLocals += nProps;
   }
 }
 

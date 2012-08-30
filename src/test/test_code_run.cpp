@@ -18099,6 +18099,15 @@ bool TestCodeRun::TestDOMDocument() {
         "string(5) \"World\"\n"
        );
 
+  /* github issue #556 */
+  MVCR( "<?php "
+        "class MyNode extends DOMNode {}"
+        "class MyElement extends DOMElement {}"
+        "$dom = new DOMDocument;"
+        "var_dump($dom->registerNodeClass('DOMNode', 'MyNode'));"
+        "var_dump($dom->registerNodeClass('DOMElement', 'MyElement'));"
+       );
+
   return true;
 }
 

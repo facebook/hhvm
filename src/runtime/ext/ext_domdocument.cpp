@@ -3474,8 +3474,8 @@ bool c_DOMDocument::t_registernodeclass(CStrRef baseclass,
     raise_error("Class %s does not exist", baseclass.data());
     return false;
   }
-  if (!f_is_subclass_of(baseclass, "DOMNode")) {
-    raise_error("Class %s is not derived from DOMNode.", baseclass.data());
+  if (!f_is_a(baseclass, "DOMNode", true)) {
+    raise_error("Class %s is not DOMNode or derived from it.", baseclass.data());
     return false;
   }
   if (!class_exists(extendedclass)) {

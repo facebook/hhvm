@@ -38,19 +38,25 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 
 TRACE_SET_MOD(runtime);
 
-//=============================================================================
-// Instance.
-
 int HPHP::VM::Instance::ObjAllocatorSizeClassCount =
   HPHP::VM::InitializeAllocators();
+
+TypedValue* Instance::propVec() {
+  uintptr_t ret = (uintptr_t)this + sizeof(ObjectData) + builtinPropSize();
+  // TODO(#1432007): some builtins still do not have TypedValue-aligned sizes.
+  ASSERT(ret % sizeof(TypedValue) == builtinPropSize() % sizeof(TypedValue));
+  return (TypedValue*) ret;
+}
+
+const TypedValue* Instance::propVec() const {
+  return const_cast<Instance*>(this)->propVec();
+}
 
 void Instance::initialize(Slot nProps) {
   const Class::PropInitVec* propInitVec = m_cls->getPropData();
   ASSERT(propInitVec != NULL);
   ASSERT(nProps == propInitVec->size());
-  TypedValue* propVec = (TypedValue *)((uintptr_t)this +
-                         sizeof(ObjectData) + builtinPropSize());
-  memcpy(propVec, &(*propInitVec)[0], nProps * sizeof(TypedValue));
+  memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
 }
 
 void Instance::callCustomInstanceInit() {
@@ -136,11 +142,9 @@ void Instance::initDynProps(int numDynamic /* = 0 */) {
 Slot Instance::declPropInd(TypedValue* prop) const {
   // Do an address range check to determine whether prop physically resides
   // in propVec.
-  TypedValue* propVec = (TypedValue *)((uintptr_t)this +
-                         sizeof(ObjectData) + builtinPropSize());
-  if (uintptr_t(prop) >= uintptr_t(propVec) && uintptr_t(prop) <
-      uintptr_t(&propVec[m_cls->numDeclProperties()])) {
-    return (uintptr_t(prop) - uintptr_t(propVec)) / sizeof(TypedValue);
+  const TypedValue* pv = propVec();
+  if (prop >= pv && prop < &pv[m_cls->numDeclProperties()]) {
+    return prop - pv;
   } else {
     return kInvalidSlot;
   }
@@ -155,11 +159,9 @@ TypedValue* Instance::getPropImpl(Class* ctx, const StringData* key,
   Slot propInd = m_cls->getDeclPropIndex(ctx, key, accessible);
   visible = (propInd != kInvalidSlot);
   if (propInd != kInvalidSlot) {
-    TypedValue* propVec = (TypedValue *)((uintptr_t)this +
-                           sizeof(ObjectData) + builtinPropSize());
     // We found a visible property, but it might not be accessible.
     // No need to check if there is a dynamic property with this name.
-    prop = &propVec[propInd];
+    prop = &propVec()[propInd];
     if (prop->m_type == KindOfUninit) {
       unset = true;
     }
@@ -688,9 +690,7 @@ void Instance::getProp(const Class* klass, bool pubOnly,
 
   Slot propInd = klass->lookupDeclProp(prop->name());
   ASSERT(propInd != kInvalidSlot);
-  TypedValue* propVec = (TypedValue *)((uintptr_t)this +
-                         sizeof(ObjectData) + builtinPropSize());
-  TypedValue* propVal = &propVec[propInd];
+  const TypedValue* propVal = &propVec()[propInd];
 
   if ((!pubOnly || (prop->attrs() & AttrPublic)) &&
       propVal->m_type != KindOfUninit &&
@@ -926,13 +926,11 @@ Variant Instance::t___clone() {
 void Instance::cloneSet(ObjectData* clone) {
   Instance* iclone = static_cast<Instance*>(clone);
   Slot nProps = m_cls->numDeclProperties();
-  TypedValue* propVec = (TypedValue *)((uintptr_t)this +
-                         sizeof(ObjectData) + builtinPropSize());
   TypedValue* iclonePropVec = (TypedValue *)((uintptr_t)iclone +
                                sizeof(ObjectData) + builtinPropSize());
   for (Slot i = 0; i < nProps; i++) {
     tvRefcountedDecRef(&iclonePropVec[i]);
-    TypedValue* fr = &propVec[i];
+    TypedValue* fr = &propVec()[i];
     TypedValue* to = &iclonePropVec[i];
     TV_DUP_FLATTEN_VARS(fr, to, NULL);
   }

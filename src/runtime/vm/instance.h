@@ -119,6 +119,8 @@ private:
 protected:
   void initialize(Slot nProps);
   void callCustomInstanceInit();
+  TypedValue* propVec();
+  const TypedValue* propVec() const;
 
 public:
   void operator delete(void* p) {
@@ -194,7 +196,9 @@ public:
   }
 
   static size_t sizeForNProps(Slot nProps) {
-    return sizeof(Instance) + (sizeof(TypedValue) * nProps);
+    size_t sz = sizeof(Instance) + (sizeof(TypedValue) * nProps);
+    ASSERT((sz & (sizeof(TypedValue) - 1)) == 0);
+    return sz;
   }
 
   static Object FromArray(ArrayData *properties);

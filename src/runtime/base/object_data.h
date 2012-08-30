@@ -98,6 +98,7 @@ class ObjectData : public CountableNF {
         , o_callbacks(cb)
 #endif
         {
+    ASSERT(uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!noId) {
       o_id = ++(*os_max_id);
     }
@@ -415,7 +416,11 @@ public:
     }
     delete this;
   }
-};
+}
+#ifdef HHVM
+  __attribute__((aligned(16)))
+#endif
+;
 
 template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
@@ -512,7 +517,7 @@ ObjectData *coo_ObjectData(ObjectData *);
 ///////////////////////////////////////////////////////////////////////////////
 // Calculate item sizes for object allocators
 
-#define WORD_SIZE sizeof(void *)
+#define WORD_SIZE sizeof(TypedValue)
 #define ALIGN_WORD(n) ((n) + (WORD_SIZE - (n) % WORD_SIZE) % WORD_SIZE)
 
 // Mapping from index to size class for objects.  Mapping in the other

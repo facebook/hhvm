@@ -2523,48 +2523,6 @@ const ClassInfo::ConstantInfo* VMExecutionContext::findConstantInfo(
   return ci;
 }
 
-struct ResolveIncludeContext {
-  String path; // translated path of the file
-  struct stat* s; // stat for the file
-};
-
-static bool findFileWrapper(CStrRef file, void* ctx) {
-  ResolveIncludeContext* context = (ResolveIncludeContext*)ctx;
-  ASSERT(context->path.isNull());
-  // TranslatePath() will canonicalize the path and also check
-  // whether the file is in an allowed directory.
-  String translatedPath = File::TranslatePath(file, false, true);
-  if (file[0] != '/') {
-    if (HPHP::Eval::FileRepository::findFile(translatedPath.get(),
-                                             context->s)) {
-      context->path = translatedPath;
-      return true;
-    }
-    return false;
-  }
-  if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
-    if (HPHP::Eval::FileRepository::findFile(translatedPath.get(),
-                                             context->s)) {
-      context->path = translatedPath;
-      return true;
-    }
-  }
-  string server_root(SourceRootInfo::GetCurrentSourceRoot());
-  if (server_root.empty()) {
-    server_root = string(g_vmContext->getCwd()->data());
-    if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
-      server_root += "/";
-    }
-  }
-  String rel_path(Util::relativePath(server_root, translatedPath.data()));
-  if (HPHP::Eval::FileRepository::findFile(rel_path.get(),
-                                           context->s)) {
-    context->path = rel_path;
-    return true;
-  }
-  return false;
-}
-
 HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
                                                        const char* currentDir,
                                                        bool* initial_opt) {
@@ -2573,19 +2531,9 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
   initial = true;
 
   struct stat s;
-  String spath;
-  // Resolve the include path
-  {
-    ResolveIncludeContext ctx;
-    ctx.s = &s;
-    resolve_include(path, currentDir, findFileWrapper,
-                    (void*)&ctx);
-    // If resolve_include() could not find the file, return NULL
-    if (ctx.path.isNull()) {
-      return NULL;
-    }
-    spath = ctx.path;
-  }
+  String spath = Eval::resolveVmInclude(path, currentDir, &s);
+  if (spath.isNull()) return NULL;
+
   // Check if this file has already been included.
   EvaledFilesMap::const_iterator it = m_evaledFiles.find(spath.get());
   HPHP::Eval::PhpFile* efile = NULL;

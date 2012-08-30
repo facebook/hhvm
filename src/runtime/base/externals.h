@@ -130,6 +130,7 @@ class LVariableTable;
 extern Variant invoke_file(CStrRef file, bool once = false,
                            LVariableTable* variables = NULL,
                            const char *currentDir = NULL);
+extern bool hphp_could_invoke_file(CStrRef file, void*);
 
 /**
  * Initializes constant strings and scalar arrays.

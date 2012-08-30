@@ -3144,6 +3144,10 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
   if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
   cg_indentEnd();
   cg_printf(text4);
+
+  cg_printf("bool hphp_could_invoke_file(CStrRef s, void*) {\n"
+            "  return findFile(s.c_str(), s->hash());\n"
+            "}\n");
 }
 
 void AnalysisResult::outputCPPDynamicClassTables(

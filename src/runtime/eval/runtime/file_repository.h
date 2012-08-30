@@ -170,6 +170,9 @@ private:
   static std::set<std::string> s_names;
 };
 
+String resolveVmInclude(StringData* path, const char* currentDir,
+                        struct stat *s);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

@@ -35,6 +35,7 @@
 #include <runtime/vm/backup_gc.h>
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
+#include <runtime/eval/runtime/file_repository.h>
 
 #include <util/parser/parser.h>
 
@@ -969,8 +970,7 @@ int fb_compact_unserialize_from_buffer(
   return 0;
 }
 
-Variant f_fb_compact_unserialize(
-  CVarRef thing, VRefParam success, VRefParam errcode /* = null_variant */) {
+Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success, VRefParam errcode /* = null_variant */) {
 
   if (!thing.isString()) {
     success = false;
@@ -1374,6 +1374,14 @@ Variant f_fb_utf8_substr(CStrRef str, int start, int length /* = INT_MAX */) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool f_fb_could_include(CStrRef file) {
+  if (hhvm) {
+    struct stat s;
+    return !Eval::resolveVmInclude(file.get(), "", &s).isNull();
+  }
+  return !resolve_include(file, "", hphp_could_invoke_file, NULL).isNull();
+}
 
 bool f_fb_intercept(CStrRef name, CVarRef handler,
                     CVarRef data /* = null_variant */) {

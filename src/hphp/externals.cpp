@@ -59,6 +59,7 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
                     const char *currDir /* = NULL */) {
   return false;
 }
+bool hphp_could_invoke_file(CStrRef s, void*) { return false; }
 
 Variant get_constant(CStrRef name, bool error) { return name;}
 Variant get_builtin_constant(CStrRef name, bool error) { return name;}

@@ -356,6 +356,7 @@ TypedValue* fg_fb_serialize(VM::ActRec *ar);
 TypedValue* fg_fb_unserialize(VM::ActRec *ar);
 TypedValue* fg_fb_compact_serialize(VM::ActRec *ar);
 TypedValue* fg_fb_compact_unserialize(VM::ActRec *ar);
+TypedValue* fg_fb_could_include(VM::ActRec *ar);
 TypedValue* fg_fb_intercept(VM::ActRec *ar);
 TypedValue* fg_fb_stubout_intercept_handler(VM::ActRec *ar);
 TypedValue* fg_fb_rpc_intercept_handler(VM::ActRec *ar);
@@ -2880,7 +2881,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2174;
+const long long hhbc_ext_funcs_count = 2175;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -3216,6 +3217,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "fb_unserialize", fg_fb_unserialize },
   { "fb_compact_serialize", fg_fb_compact_serialize },
   { "fb_compact_unserialize", fg_fb_compact_unserialize },
+  { "fb_could_include", fg_fb_could_include },
   { "fb_intercept", fg_fb_intercept },
   { "fb_stubout_intercept_handler", fg_fb_stubout_intercept_handler },
   { "fb_rpc_intercept_handler", fg_fb_rpc_intercept_handler },

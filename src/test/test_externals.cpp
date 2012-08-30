@@ -356,6 +356,9 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
   }
   return false;
 }
+bool hphp_could_invoke_file(CStrRef s, void*) {
+  return s == "string" || s == "pageletserver";
+}
 
 Variant get_static_property(CStrRef s, const char *prop) {
   return null;

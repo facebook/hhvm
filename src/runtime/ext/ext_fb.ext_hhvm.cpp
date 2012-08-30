@@ -244,6 +244,58 @@ TypedValue* fg_fb_compact_unserialize(HPHP::VM::ActRec *ar) {
 
 
 /*
+bool HPHP::f_fb_could_include(HPHP::String const&)
+_ZN4HPHP18f_fb_could_includeERKNS_6StringE
+
+(return value) => rax
+file => rdi
+*/
+
+bool fh_fb_could_include(Value* file) asm("_ZN4HPHP18f_fb_could_includeERKNS_6StringE");
+
+TypedValue * fg1_fb_could_include(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_fb_could_include(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfBoolean;
+  tvCastToStringInPlace(args-0);
+  rv->m_data.num = (fh_fb_could_include((Value*)(args-0))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_fb_could_include(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_fb_could_include((Value*)(args-0))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_fb_could_include(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("fb_could_include", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 bool HPHP::f_fb_intercept(HPHP::String const&, HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP14f_fb_interceptERKNS_6StringERKNS_7VariantES5_
 

@@ -1742,7 +1742,7 @@ String resolve_include(CStrRef file, const char* currentDir,
     }
   }
 
-  return String((StringData*)NULL);
+  return String();
 }
 
 static Variant include_impl(CStrRef file, bool once,

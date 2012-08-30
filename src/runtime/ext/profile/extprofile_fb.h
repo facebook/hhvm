@@ -61,6 +61,12 @@ inline Variant x_fb_compact_unserialize(CVarRef thing, VRefParam success, VRefPa
   return f_fb_compact_unserialize(thing, success, errcode);
 }
 
+inline bool x_fb_could_include(CStrRef file) {
+  FUNCTION_INJECTION_BUILTIN(fb_could_include);
+  TAINT_OBSERVER(, );
+  return f_fb_could_include(file);
+}
+
 inline bool x_fb_intercept(CStrRef name, CVarRef handler, CVarRef data = null_variant) {
   FUNCTION_INJECTION_BUILTIN(fb_intercept);
   TAINT_OBSERVER(, );

@@ -968,12 +968,60 @@ private:
 //=============================================================================
 // EmitterVisitor.
 
-void EmitterVisitor::addMetaInfo(int pos, Unit::MetaInfo::Kind kind,
-                                 bool mVector, int arg, Id data) {
+void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
+                          bool mVector, int arg, Id data) {
   ASSERT(arg >= 0);
   if (arg > 127) return;
   if (mVector) arg |= Unit::MetaInfo::VectorArg;
   m_metaMap[pos].push_back(Unit::MetaInfo(kind, arg, data));
+}
+
+void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
+  int entries = m_metaMap.size();
+  if (!entries) return;
+
+  vector<Offset> index1;
+  vector<Offset> index2;
+  vector<uint8> data;
+  index1.push_back(entries);
+
+  size_t sz1 = (2 + entries) * sizeof(Offset);
+  size_t sz2 = (1 + entries) * sizeof(Offset);
+  for (Map::const_iterator it = m_metaMap.begin(), end = m_metaMap.end();
+      it != end; ++it) {
+    index1.push_back(it->first);
+    index2.push_back(sz1 + sz2 + data.size());
+
+    const Vec& v = it->second;
+    ASSERT(v.size());
+    for (unsigned i = 0; i < v.size(); i++) {
+      const Unit::MetaInfo& mi = v[i];
+      data.push_back(mi.m_kind);
+      data.push_back(mi.m_arg);
+      if (mi.m_data < 0x80) {
+        data.push_back(mi.m_data << 1);
+      } else {
+        union {
+          uint32 val;
+          uint8  bytes[4];
+        } u;
+        u.val = (mi.m_data << 1) | 1;
+        for (int j = 0; j < 4; j++) {
+          data.push_back(u.bytes[j]);
+        }
+      }
+    }
+  }
+  index1.push_back(INT_MAX);
+  index2.push_back(sz1 + sz2 + data.size());
+
+  size_t size = sz1 + sz2 + data.size();
+  uint8* meta = (uint8*)malloc(size);
+  memcpy(meta, &index1[0], sz1);
+  memcpy(meta + sz1, &index2[0], sz2);
+  memcpy(meta + sz1 + sz2, &data[0], data.size());
+  target.setBcMeta(meta, size);
+  free(meta);
 }
 
 static StringData* continuationClassName(const StringData* fname) {
@@ -1036,7 +1084,7 @@ void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
   if (arg >= 0 && pos >= 0 && expected == StackSym::C) {
     DataType dt = m_evalStack.getKnownType();
     if (dt != KindOfUnknown) {
-      addMetaInfo(pos, Unit::MetaInfo::DataType, false, arg, dt);
+      m_metaInfo.add(pos, Unit::MetaInfo::DataType, false, arg, dt);
     }
   }
 
@@ -1079,7 +1127,7 @@ void EmitterVisitor::popSymbolicLocal(Opcode op, int arg, int pos) {
     if (arg >= 0 && pos >= 0) {
       DataType dt = m_evalStack.getKnownType();
       if (dt != KindOfUnknown) {
-        addMetaInfo(pos, Unit::MetaInfo::DataType, false, arg, dt);
+        m_metaInfo.add(pos, Unit::MetaInfo::DataType, false, arg, dt);
       }
     }
     popEvalStack(StackSym::L);
@@ -1574,7 +1622,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
   emitPostponedSinits();
   emitPostponedCinits();
   emitPostponedClosureCtors();
-  emitMetaData();
+  m_metaInfo.setForUnit(m_ue);
 }
 
 static StringData* getClassName(ExpressionPtr e) {
@@ -1621,7 +1669,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn) {
     } else {
       e.UnboxR();
     }
-    addMetaInfo(cur, Unit::MetaInfo::NopOut, false, 0, 0);
+    m_metaInfo.add(cur, Unit::MetaInfo::NopOut, false, 0, 0);
   }
 }
 
@@ -1928,7 +1976,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.Null();
         }
         if (r->isGuarded()) {
-          addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                       false, 0, 0);
         }
         if (retV) {
@@ -3004,7 +3052,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
         if (clsName) {
           Id id = m_ue.mergeLitstr(clsName);
-          addMetaInfo(fpiStart, Unit::MetaInfo::Class, false,
+          m_metaInfo.add(fpiStart, Unit::MetaInfo::Class, false,
                       om->getName().empty() ? 1 : 0, id);
         }
         {
@@ -3122,7 +3170,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (sv->isThis()) {
           if (sv->hasContext(Expression::ObjectContext)) {
             if (sv->isGuarded()) {
-              addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+              m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                           false, 0, 0);
             }
             e.This();
@@ -3421,11 +3469,11 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
       const StringData* cls = m_evalStack.getName(iFirst);
       ASSERT(cls);
       Id id = m_ue.mergeLitstr(cls);
-      addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::Class, true, 0, id);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Class, true, 0, id);
     }
     DataType dt = m_evalStack.getKnownType(iFirst);
     if (dt != KindOfUnknown) {
-      addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::DataType, true, 0, dt);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::DataType, true, 0, dt);
     }
     switch (marker) {
       case StackSym::N: {
@@ -3489,7 +3537,7 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
       // m-vector later on in this function. Don't duplicate it in the
       // metadata table.
       if (symFlavor != StackSym::T) {
-        addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::String,
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::String,
                     true, metaI, strid);
       }
     }
@@ -4707,7 +4755,7 @@ void EmitterVisitor::emitPostponedMeths() {
           bool byRef = (*p.m_closureUseVars)[i].second;
           emitVirtualLocal(fe->lookupVarId(name));
           if (i) {
-            addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                         false, 0, 0);
           }
           e.This();
@@ -4758,7 +4806,7 @@ void EmitterVisitor::emitPostponedMeths() {
       e.Null();
       if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded()) ||
           (fe->isClosureBody() && p.m_closureUseVars->size())) {
-        addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                     false, 0, 0);
       }
       e.RetC();
@@ -4995,7 +5043,7 @@ void EmitterVisitor::emitPostponedClosureCtors() {
         pi.setRef(useVars[i].second);
         fe->appendParam(StringData::GetStaticString(num.str()), pi);
         if (i) {
-          addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                       false, 0, 0);
         }
         e.This();
@@ -5015,60 +5063,13 @@ void EmitterVisitor::emitPostponedClosureCtors() {
     }
     e.Null();
     if (n > 0) {
-      addMetaInfo(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                   false, 0, 0);
     }
     e.RetC();
 
     m_postponedClosureCtors.pop_front();
   }
-}
-
-void EmitterVisitor::emitMetaData() {
-  int entries = m_metaMap.size();
-  if (!entries) return;
-  vector<Offset> index1;
-  vector<Offset> index2;
-  vector<uint8> data;
-  index1.push_back(entries);
-
-  size_t sz1 = (2 + entries) * sizeof(Offset);
-  size_t sz2 = (1 + entries) * sizeof(Offset);
-  for (std::map<Offset, MetaVec>::iterator it = m_metaMap.begin(),
-         end = m_metaMap.end(); it != end; ++it) {
-    index1.push_back(it->first);
-    index2.push_back(sz1 + sz2 + data.size());
-
-    const MetaVec& v = it->second;
-    ASSERT(v.size());
-    for (unsigned i = 0; i < v.size(); i++) {
-      const Unit::MetaInfo& mi = v[i];
-      data.push_back(mi.m_kind);
-      data.push_back(mi.m_arg);
-      if (mi.m_data < 0x80) {
-        data.push_back(mi.m_data << 1);
-      } else {
-        union {
-          uint32 val;
-          uint8  bytes[4];
-        } u;
-        u.val = (mi.m_data << 1) | 1;
-        for (int j = 0; j < 4; j++) {
-          data.push_back(u.bytes[j]);
-        }
-      }
-    }
-  }
-  index1.push_back(INT_MAX);
-  index2.push_back(sz1 + sz2 + data.size());
-
-  size_t size = sz1 + sz2 + data.size();
-  uint8* meta = (uint8*)malloc(size);
-  memcpy(meta, &index1[0], sz1);
-  memcpy(meta + sz1, &index2[0], sz2);
-  memcpy(meta + sz1 + sz2, &data[0], data.size());
-  m_ue.setBcMeta(meta, size);
-  free(meta);
 }
 
 void EmitterVisitor::emitVirtualLocal(int localId) {
@@ -6060,7 +6061,8 @@ typedef hphp_hash_map<const StringData*, ContinuationMethod,
                       string_data_hash, string_data_same> ContMethMap;
 
 static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
-                                   ContinuationMethod m) {
+                                   ContinuationMethod m,
+                                   MetaInfoBuilder& metaInfo) {
   static const StringData* valStr = StringData::GetStaticString("value");
   static const StringData* exnStr = StringData::GetStaticString("exception");
 
@@ -6075,7 +6077,8 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       // subclasses so we can burn Class*s and Func*s into the
       // translations
       fe->setAttrs(Attr(fe->attrs() | AttrClone));
-      Offset fpiStart = ue.bcPos();
+      const Offset fpiStart = ue.bcPos();
+      const Offset ehStart = ue.bcPos();
       ue.emitOp(OpFPushContFunc);
       ue.emitIVA(1);
       {
@@ -6093,14 +6096,12 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
         fpi.m_fcallOff = ue.bcPos();
         fpi.m_fpOff = 0;
       }
-      Offset ehStart = ue.bcPos();
       ue.emitOp(OpFCall);
       ue.emitIVA(1);
+      // Generated continuation bodies always return KindOfNull.
+      metaInfo.add(ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+      ue.emitOp(OpUnboxR);
       ue.emitOp(OpContStopped);
-      // If we were emitting under the watchful eye of Emitter, it
-      // would yell at us for not having an UnboxR between the FCall
-      // and the RetC, but generated continuation bodies always return
-      // a KindOfNull Cell so we can skip it safely.
       ue.emitOp(OpRetC);
 
       EHEnt& eh = fe->addEHEnt();
@@ -6143,6 +6144,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   mfe->setMaxStackCells(1);
   mfe->finish(past, false);
   ue->recordFunction(mfe);
+
+  MetaInfoBuilder metaInfo;
 
   ContMethMap contMethods;
   contMethods[StringData::GetStaticString("next")] = METH_NEXT;
@@ -6230,7 +6233,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       pce->addMethod(fe);
       if (e.name->isame(continuationCls) &&
           mapGet(contMethods, methName, &cmeth)) {
-        emitContinuationMethod(*ue, fe, cmeth);
+        emitContinuationMethod(*ue, fe, cmeth, metaInfo);
       } else {
         // Build the function
         BuiltinFunction bcf =
@@ -6262,6 +6265,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       }
     }
   }
+
+  metaInfo.setForUnit(*ue);
 
   Unit* unit = ue->create();
   delete ue;

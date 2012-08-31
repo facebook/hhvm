@@ -56,6 +56,17 @@ using namespace VM;
 class Label;
 class EmitterVisitor;
 
+struct MetaInfoBuilder {
+  void add(int pos, Unit::MetaInfo::Kind kind,
+           bool mVector, int arg, Id data);
+  void setForUnit(UnitEmitter&) const;
+
+private:
+  typedef std::vector<Unit::MetaInfo> Vec;
+  typedef std::map<Offset,Vec> Map;
+  Map m_metaMap;
+};
+
 class Emitter {
 public:
   Emitter(ConstructPtr node, UnitEmitter& ue, EmitterVisitor& ev)
@@ -336,8 +347,6 @@ public:
     EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
   };
 
-  void addMetaInfo(int pos, Unit::MetaInfo::Kind kind,
-                   bool mVector, int arg, Id data);
   void pushIterId(Id id) { m_pendingIters.push_back(id); }
   void popIterId() { m_pendingIters.pop_back(); }
 private:
@@ -470,8 +479,7 @@ private:
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::map<StringData*, Label, string_data_lt> m_gotoLabels;
-  typedef std::vector<Unit::MetaInfo> MetaVec;
-  std::map<Offset, MetaVec> m_metaMap;
+  MetaInfoBuilder m_metaInfo;
 public:
   Label& topBreakHandler() { return m_contTargets.front().m_brkHand; }
   Label& topContHandler() { return m_contTargets.front().m_cntHand; }
@@ -542,7 +550,6 @@ public:
   void emitPostponedSinits();
   void emitPostponedCinits();
   void emitPostponedClosureCtors();
-  void emitMetaData();
   void emitFuncCall(Emitter& e, FunctionCallPtr node);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
   PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,

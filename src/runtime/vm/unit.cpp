@@ -1617,11 +1617,12 @@ Unit* UnitEmitter::create() {
 
   static const bool kAlwaysVerify = getenv("HHVM_ALWAYS_VERIFY");
   static const bool kVerifyNonSystem = getenv("HHVM_VERIFY");
+  static const bool kVerifyVerbose = getenv("HHVM_VERIFY_VERBOSE");
   const bool doVerify = kAlwaysVerify ||
      (kVerifyNonSystem && !u->filepath()->empty() &&
       !boost::ends_with(u->filepath()->data(), "systemlib.php"));
   if (doVerify) {
-    Verifier::checkUnit(u);
+    Verifier::checkUnit(u, kVerifyVerbose);
   }
   return u;
 }

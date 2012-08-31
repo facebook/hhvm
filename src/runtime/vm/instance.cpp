@@ -550,8 +550,7 @@ void Instance::unsetProp(Class* ctx, const StringData* key) {
     Slot propInd = declPropInd(propVal);
     if (propInd != kInvalidSlot) {
       // Declared property.
-      tvRefcountedDecRef(propVal);
-      TV_WRITE_UNINIT(propVal);
+      tvSetIgnoreRef((TypedValue*)&null_variant, propVal);
     } else {
       // Dynamic property.
       ASSERT(o_properties.get() != NULL);

@@ -195,19 +195,29 @@ inline void tvWriteUninit(TypedValue* tv) {
   TV_WRITE_UNINIT(tv);
 }
 
-// Assumes 'to' and 'fr' are live
-// Assumes that 'fr->m_type != KindOfRef'
-// If 'to->m_type == KindOfRef', this will perform the set
-// operation on the inner cell (to->m_data.pref)
-inline void tvSet(const TypedValue* fr, TypedValue* to) {
+template <bool respectRef>
+inline void tvSetImpl(const TypedValue* fr, TypedValue* to) {
   ASSERT(fr->m_type != KindOfRef);
-  if (to->m_type == KindOfRef) {
+  if (respectRef && to->m_type == KindOfRef) {
     to = to->m_data.pref->tv();
   }
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
   TV_DUP_CELL_NC(fr, to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+// Assumes 'to' and 'fr' are live
+// Assumes that 'fr->m_type != KindOfRef'
+// If 'to->m_type == KindOfRef', this will perform the set
+// operation on the inner cell (to->m_data.pref)
+inline void tvSet(const TypedValue* fr, TypedValue* to) {
+  tvSetImpl<true>(fr, to);
+}
+
+// Same as tvSet, but does not dereference to if it's KindOfRef.
+inline void tvSetIgnoreRef(const TypedValue* fr, TypedValue* to) {
+  tvSetImpl<false>(fr, to);
 }
 
 // Assumes 'to' and 'fr' are live

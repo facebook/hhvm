@@ -1656,9 +1656,10 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   }
 
   Elm* e = &elms[pos];
-  // Free the value if necessary and mark it as a tombstone.
+  // Mark the value as a tombstone.
   TypedValue* tv = &e->data;
-  tvRefcountedDecRef(tv);
+  DataType oldType = tv->m_type;
+  uint64_t oldDatum = tv->m_data.num;
   tv->m_type = KindOfTombstone;
   // Free the key if necessary, and clear the h and key fields in order to
   // increase the chances that subsequent searches will quickly/safely fail
@@ -1691,6 +1692,10 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   ASSERT(m_lastE == ElmIndEmpty ||
          uint32(m_lastE)+1 <= computeMaxElms(m_tableMask));
   ASSERT(m_hLoad <= computeMaxElms(m_tableMask));
+
+  // Finally, decref the old value
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+
   if (m_size < (uint32_t)((m_lastE+1) >> 1)) {
     // Compact in order to keep elms from being overly sparse.
     compact();

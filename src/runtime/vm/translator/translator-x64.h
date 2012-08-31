@@ -89,8 +89,8 @@ class TranslatorX64 : public Translator, public SpillFill,
   TCA                    m_retHelper;
   TCA                    m_stackOverflowHelper;
   TCA                    m_dtorGenericStub;
+  TCA                    m_dtorGenericStubRegs;
   TCA                    m_dtorStubs[MaxNumDataTypes];
-  TCA                    m_typedDtorStub;
   TCA                    m_interceptHelper;
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
@@ -140,6 +140,8 @@ class TranslatorX64 : public Translator, public SpillFill,
                   DataType type);
   void emitDecRefGeneric(const NormalizedInstruction& i, PhysReg srcReg,
                          int disp = 0);
+  void emitDecRefGenericReg(const NormalizedInstruction& i,
+                            PhysReg rData, PhysReg rType);
   void emitDecRefInput(Asm& a, const NormalizedInstruction& i, int input);
   void emitCopy(PhysReg srcCell, int disp, PhysReg destCell);
   void emitCopyToStack(Asm& a,
@@ -152,9 +154,10 @@ class TranslatorX64 : public Translator, public SpillFill,
                               int off,
                               PhysReg tmpReg);
   void emitTvSetRegSafe(const NormalizedInstruction&, PhysReg from,
-    DataType fromType, PhysReg toPtr, PhysReg tmp1, PhysReg tmp2);
+    DataType fromType, PhysReg toPtr, PhysReg tmp1, PhysReg tmp2,
+    bool incRefFrom);
   void emitTvSet(const NormalizedInstruction&, PhysReg from,
-    DataType fromType, PhysReg toPtr);
+    DataType fromType, PhysReg toPtr, bool incRefFrom = true);
 
   void emitPushAR(const NormalizedInstruction& i, const Func* func,
                   const int bytesPopped = 0, bool isCtor = false,
@@ -220,6 +223,7 @@ class TranslatorX64 : public Translator, public SpillFill,
   TCA emitUnaryStub(Asm& a, void* fptr);
   TCA emitBinaryStub(Asm& a, void* fptr);
   TCA genericRefCountStub(Asm& a);
+  TCA genericRefCountStubRegs(Asm& a);
   TCA emitPrologueRedispatch(Asm &a);
   TCA emitFuncGuard(Asm& a, const Func *f);
   template <bool reentrant>

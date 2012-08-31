@@ -665,8 +665,7 @@ struct IfCountNotStatic {
   NonStaticCondBlock *m_cb; // might be null
   IfCountNotStatic(X64Assembler& a,
                    PhysReg reg,
-                   DataType t = KindOfInvalid,
-                   RegAlloc* rm = NULL) {
+                   DataType t = KindOfInvalid) {
     // Objects and variants cannot be static
     if (typeCanBeStatic(t)) {
       m_cb = new NonStaticCondBlock(a, reg);
@@ -716,7 +715,7 @@ void TranslatorX64::SEGVHandler(int signum, siginfo_t *info, void *ctx) {
 
 // emitDispDeref --
 // emitDeref --
-// emitTypedValueStore --
+// emitStoreTypedValue --
 // emitStoreUninitNull --
 // emitStoreNull --
 //
@@ -746,12 +745,17 @@ emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
   }
 }
 
-// NB: leaves count field unmodified.
+// NB: leaves count field unmodified. Does not store to m_data if type
+// is a null type.
 static void
-emitTypedValueStore(X64Assembler& a, DataType type, PhysReg val,
-                    int disp, PhysReg dest) {
-  a.    store_imm32_disp_reg(type, disp + TVOFF(m_type), dest);
-  a.    store_reg64_disp_reg64(val, disp + TVOFF(m_data), dest);
+emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
+                    int disp, PhysReg dest, bool writeType = true) {
+  if (writeType) {
+    a.    store_imm32_disp_reg(type, disp + TVOFF(m_type), dest);
+  }
+  if (!IS_NULL_TYPE(type)) {
+    a.  store_reg64_disp_reg64(val, disp + TVOFF(m_data), dest);
+  }
 }
 
 // Assumes caller has already zeroed out zeroedReg
@@ -791,7 +795,8 @@ void TranslatorX64::emitTvSetRegSafe(const NormalizedInstruction& i,
                                      DataType fromType,
                                      PhysReg toPtr,
                                      PhysReg oldType,
-                                     PhysReg oldData) {
+                                     PhysReg oldData,
+                                     bool incRefFrom) {
   ASSERT(!i.isNative());
   ASSERT(!i.isSimple());
   ASSERT(fromType != KindOfRef);
@@ -799,29 +804,21 @@ void TranslatorX64::emitTvSetRegSafe(const NormalizedInstruction& i,
   emitDerefIfVariant(a, toPtr);
   a.  load_reg64_disp_reg32(toPtr, TVOFF(m_type), oldType);
   a.  load_reg64_disp_reg64(toPtr, TVOFF(m_data), oldData);
-  emitTypedValueStore(a, fromType, from, 0, toPtr);
-  emitIncRef(from, fromType);
-  a.  cmp_imm32_reg32(KindOfRefCountThreshold, oldType);
-  {
-    JccBlock<CC_LE> ifRefCounted(a);
-    {
-      IfCountNotStatic ins(a, oldData, KindOfInvalid);
-      a.  sub_imm32_disp_reg32(1, TVOFF(_count), oldData);
-      {
-        JccBlock<CC_NZ> ifZero(a);
-        callBinaryStub(a, i, m_typedDtorStub, oldData, oldType);
-      }
-    }
+  emitStoreTypedValue(a, fromType, from, 0, toPtr);
+  if (incRefFrom) {
+    emitIncRef(from, fromType);
   }
+  emitDecRefGenericReg(i, oldData, oldType);
 }
 
 void TranslatorX64::emitTvSet(const NormalizedInstruction& i,
                               PhysReg from,
                               DataType fromType,
-                              PhysReg toPtr) {
+                              PhysReg toPtr,
+                              bool incRefFrom) {
   ScratchReg oldType(m_regMap);
   ScratchReg oldData(m_regMap);
-  emitTvSetRegSafe(i, from, fromType, toPtr, *oldType, *oldData);
+  emitTvSetRegSafe(i, from, fromType, toPtr, *oldType, *oldData, incRefFrom);
 }
 
 // Logical register move: ensures the value in src will be in dest
@@ -1655,6 +1652,19 @@ void TranslatorX64::emitDecRefGeneric(const NormalizedInstruction& i,
   }
 }
 
+// Same as emitDecRefGeneric, except for when we have the type in a
+// register as well.  Same inlining/outlining choices as
+// emitDecRefGeneric above.
+void TranslatorX64::emitDecRefGenericReg(const NormalizedInstruction& i,
+                                         PhysReg rData, PhysReg rType) {
+  SpaceRecorder sr("_DecRefGeneric", a);
+  a.   cmp_imm32_reg32(KindOfRefCountThreshold, rType);
+  {
+    JccBlock<CC_BE> ifRefCounted(a);
+    callBinaryStub(a, i, m_dtorGenericStubRegs, rData, rType);
+  }
+}
+
 /**
  * genericRefCountStub --
  *
@@ -1681,6 +1691,35 @@ TCA TranslatorX64::genericRefCountStub(X64Assembler& a) {
         a.call(TCA(tv_release_generic));
       } // endif
     } // endif
+  }
+  a.    popr(rbp); // }
+  a.    ret();
+  return retval;
+}
+
+TCA TranslatorX64::genericRefCountStubRegs(X64Assembler& a) {
+  const PhysReg rData = argNumToRegName[0];
+  const PhysReg rType = argNumToRegName[1];
+
+  moveToAlign(a);
+  TCA retval = a.code.frontier;
+  FreezeRegs brr(m_regMap);
+  a.    pushr(rbp); // {
+  a.    mov_reg64_reg64(rsp, rbp);
+  {
+    IfCountNotStatic ins(a, rData, KindOfInvalid);
+    a.  sub_imm32_disp_reg32(1, TVOFF(_count), rData);
+    {
+      JccBlock<CC_NZ> ifZero(a);
+      // The arguments are already in the right registers.
+      RegSet s = kCallerSaved - (RegSet(rData) | RegSet(rType));
+      PhysRegSaverParity<1> saver(a, s);
+      if (false) { // typecheck
+        RefData* vp; DataType dt;
+        (void)tv_release_typed(vp, dt);
+      }
+      a.call(TCA(tv_release_typed));
+    }
   }
   a.    popr(rbp); // }
   a.    ret();
@@ -3562,12 +3601,7 @@ TranslatorX64::spillTo(DataType type, PhysReg reg, bool writeType,
   SpaceRecorder sr("_Spill", a);
 
   Stats::emitInc(a, Stats::Tx64_Spill);
-  if (writeType) {
-    a.    store_imm32_disp_reg(type, disp + TVOFF(m_type), base);
-  }
-  if (!IS_NULL_TYPE(type)) {
-    a.    store_reg64_disp_reg64(reg, disp + TVOFF(m_data), base);
-  }
+  emitStoreTypedValue(a, type, reg, disp, base, writeType);
 }
 
 void
@@ -4731,7 +4765,7 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
 
     oldLocalReg.alloc();
     emitDeref(a, localReg, *oldLocalReg);
-    emitTypedValueStore(a, rhsType, rhsReg, 0, localReg);
+    emitStoreTypedValue(a, rhsType, rhsReg, 0, localReg);
     decRefType = ni.inputs[locIdx]->rtt.innerType();
   } else {
     /*
@@ -8049,18 +8083,8 @@ TranslatorX64::emitPropSet(const NormalizedInstruction& i,
                            PhysReg fieldAddr) {
   DataType rhsType = rhs.rtt.valueType();
 
-  if (i.outStack || rhs.isLocal()) {
-    emitIncRef(rhsReg, rhsType);
-  }
-
-  // If the field is a Var, we need to dereference the Var so that
-  // fieldAddr holds the address of the inner cell.
-  emitDerefIfVariant(a, fieldAddr);
-  // decRef the lhs.
-  emitDecRefGeneric(i, fieldAddr);
-  // Drop rhs on the lhs.
-  a.  store_reg64_disp_reg64(rhsReg, TVOFF(m_data), fieldAddr);
-  a.  store_imm32_disp_reg(rhsType, TVOFF(m_type), fieldAddr);
+  // Store rhs in the field
+  emitTvSet(i, rhsReg, rhsType, fieldAddr, i.outStack || rhs.isLocal());
 
   if (!base.isLocal()) {
     const int kBaseIdx = 1;
@@ -8122,7 +8146,6 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
     emitPropSet(i, base, val, rhsReg, *rField);
     decRefRhs = false;
   } else {
-
     Stats::emitInc(a, Stats::Tx64_PropSetSlow);
     bool useCtx = !isContextFixed();
     const StringData* name = prop.rtt.valueString();
@@ -10526,7 +10549,7 @@ TranslatorX64::TranslatorX64()
   m_dtorStubs[KindOfObject]        = emitUnaryStub(a, vp(tv_release_obj));
   m_dtorStubs[KindOfRef]           = emitUnaryStub(a, vp(tv_release_ref));
   m_dtorGenericStub                = genericRefCountStub(a);
-  m_typedDtorStub                  = emitBinaryStub(a, vp(tv_release_typed));
+  m_dtorGenericStubRegs            = genericRefCountStubRegs(a);
 
   if (trustSigSegv) {
     // Install SIGSEGV handler for timeout exceptions

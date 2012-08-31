@@ -1273,14 +1273,17 @@ public:
     if (self->m_type == KindOfRef) self = self->m_data.pref->var();
     if (other->m_type == KindOfRef) other = other->m_data.pref->var();
     if (self != other) {
-      DataType mt = other->m_type;
-      Data data = other->m_data;
-      if (IS_REFCOUNTED_TYPE(mt)) {
-        data.pstr->incRefCount();
+      DataType otype = other->m_type;
+      Data odata = other->m_data;
+      Variant scopy(noInit);
+      scopy.m_data = self->m_data;
+      scopy.m_countAndTypeUnion = self->m_countAndTypeUnion;
+
+      if (IS_REFCOUNTED_TYPE(otype)) {
+        odata.pstr->incRefCount();
       }
-      if (IS_REFCOUNTED_TYPE(self->m_type)) self->destruct();
-      self->m_data = data;
-      self->m_type = mt == KindOfUninit ? KindOfNull : mt;
+      self->m_data = odata;
+      self->m_type = otype == KindOfUninit ? KindOfNull : otype;
     }
   }
 

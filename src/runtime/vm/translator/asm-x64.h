@@ -794,7 +794,8 @@ public:
   void emitJ8(X64Instr op, ssize_t imm)
     ALWAYS_INLINE {
     ASSERT((op.flags & IF_JCC) == 0);
-    int8_t delta = imm - ((ssize_t)code.frontier + 2);
+    ssize_t delta = imm - ((ssize_t)code.frontier + 2);
+    ASSERT(imm == 0 || deltaFits(delta, sz::byte));
     // Emit opcode and 8-bit immediate
     byte(0xEB);
     byte(delta);
@@ -804,7 +805,8 @@ public:
     ALWAYS_INLINE {
     // this is for jcc only
     ASSERT(op.flags & IF_JCC);
-    int8_t delta = imm - ((ssize_t)code.frontier + 2);
+    ssize_t delta = imm - ((ssize_t)code.frontier + 2);
+    ASSERT(imm == 0 || deltaFits(delta, sz::byte));
     // Emit opcode
     byte(jcond | 0x70);
     // Emit 8-bit offset
@@ -815,6 +817,7 @@ public:
     // call and jmp are supported, jcc is not supported
     ASSERT((op.flags & IF_JCC) == 0);
     ssize_t delta = imm - ((ssize_t)code.frontier + 5);
+    ASSERT(imm == 0 || deltaFits(delta, sz::dword));
     uint8_t *bdelta = (uint8_t*)&delta;
     uint8_t instr[] = { op.table[2],
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -826,6 +829,7 @@ public:
     // jcc is supported, call and jmp are not supported
     ASSERT(op.flags & IF_JCC);
     ssize_t delta = imm - ((ssize_t)code.frontier + 6);
+    ASSERT(imm == 0 || deltaFits(delta, sz::dword));
     uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };

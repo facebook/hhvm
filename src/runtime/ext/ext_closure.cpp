@@ -59,24 +59,6 @@ bool c_Closure::php_sleep(Variant &ret) {
   return true;
 }
 
-c_GeneratorClosure::c_GeneratorClosure(const ObjectStaticCallbacks *cb) :
-    c_Closure(cb) {
-  throw_fatal(
-      "Cannot explicitly instantiate and/or subclass GeneratorClosure");
-}
-c_GeneratorClosure::~c_GeneratorClosure() {}
-
-void c_GeneratorClosure::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(GeneratorClosure, GeneratorClosure::__construct);
-  throw_fatal(
-      "Cannot explicitly instantiate and/or subclass GeneratorClosure");
-}
-
-Variant c_GeneratorClosure::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(GeneratorClosure, GeneratorClosure::__destruct);
-  return null;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DummyClosure::c_DummyClosure(const ObjectStaticCallbacks *cb) :

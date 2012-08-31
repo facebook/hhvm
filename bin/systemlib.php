@@ -5487,9 +5487,6 @@ class Closure {
   }
 }
 
-// Unused, but needed for consistency with class_map.cpp
-class GeneratorClosure extends Closure {
-}
 
 // Used as a sentinel type in 86pinit().
 class __pinitSentinel {

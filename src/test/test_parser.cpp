@@ -33,7 +33,6 @@ bool TestParser::SameCode(std::string code1, std::string code2) {
   Util::replaceAll(code1, "\n", "");
   Util::replaceAll(code2, "\n", "");
 
-  // hphpi has more concise way of handling empty block statements
   Util::replaceAll(code1, "{{}}", "{}");
   Util::replaceAll(code2, "{{}}", "{}");
   Util::replaceAll(code1, "else {}", "");

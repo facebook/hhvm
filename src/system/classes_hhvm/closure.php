@@ -10,6 +10,3 @@ class Closure {
   }
 }
 
-// Unused, but needed for consistency with class_map.cpp
-class GeneratorClosure extends Closure {
-}

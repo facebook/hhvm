@@ -56,9 +56,8 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
 
   Func *fnew = Unit::lookupFunc(newNe, n3w);
   if (fnew && fnew != func) {
-    // To match hphpc/hphpi, we silently ignore functions defined in
-    // user code that have the same name as a function defined in a
-    // separable extension
+    // To match hphpc, we silently ignore functions defined in user code that
+    // have the same name as a function defined in a separable extension
     if (!fnew->isIgnoreRedefinition()) {
       raise_error("Function already defined: %s", n3w->data());
     } else {

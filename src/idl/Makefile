@@ -9,7 +9,7 @@ ifndef REPO_DEL
 REPO_DEL = git rm
 endif
 
-PHP := $(wildcard /usr/local/hphpi/bin/hphpi)
+PHP := $(wildcard /usr/local/hphpi/bin/hhvm)
 PHP := $(if $(PHP),$(PHP) -v Preg.ErrorLog=false,php)
 
 all:

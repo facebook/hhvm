@@ -178,10 +178,9 @@ function parseIDLForMethods(&$ext_class_info, $mangleMap, $idlDir) {
     global $classes;
     foreach ($classes as $cls) {
       $cname = $cls['name'];
-      if (strtolower($cname) === 'closure' ||
-          strtolower($cname) === 'generatorclosure') {
-        // Ignore the C++ version of Closure and GeneratorClosure;
-        // the VM uses the pure Closure class declared in systemlib.php
+      if (strtolower($cname) === 'closure') {
+        // Ignore the C++ version of Closure; the VM uses the
+        // pure-PHP Closure class declared in systemlib.php
         continue;
       }
       $method_info = array();

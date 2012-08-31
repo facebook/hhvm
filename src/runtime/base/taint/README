@@ -62,7 +62,7 @@ Then from $HPHP_HOME, run
   make clean
   make -C src -j
 
-This will build hphp and hphpi with taint enabled. Running an hphpi server
+This will build hphp and hhvm with taint enabled. Running an hhvm server
 or compiling code and running in server mode is done the usual way.
 
 

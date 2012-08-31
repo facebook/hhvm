@@ -735,7 +735,7 @@ static String makeStaticString(const char *s) {
     return null_string;
   }
   if (has_eval_support) {
-    // hphpi and hhvm use GetStaticString
+    // hhvm uses GetStaticString
     return StringData::GetStaticString(s);
   }
   // binaries compiled with hphpc don't use GetStaticString(), and

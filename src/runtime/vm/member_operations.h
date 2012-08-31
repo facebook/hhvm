@@ -539,8 +539,8 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
     } else {
       raise_warning("Illegal offset type");
       // Assignment failed, so the result is null rather than the RHS.
-      // XXX This does not match bytecode.specification, but it does roughly
-      // match Zend and hphpi behavior.
+      // XXX This does not match bytecode.specification, but it does
+      // roughly match Zend behavior.
       if (IS_REFCOUNTED_TYPE(value->m_type)) {
         tvDecRef(value);
       }

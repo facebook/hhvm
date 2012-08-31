@@ -718,7 +718,7 @@ Array f_hphp_get_class_info(CVarRef name) {
       const VM::Class::Const* consts = cls->constants();
 
       for (size_t i = 0; i < numConsts; i++) {
-        // Note: hphpi/hphpc don't include inherited constants in
+        // Note: hphpc doesn't include inherited constants in
         // get_class_constants(), so mimic that behavior
         if (consts[i].m_class == cls) {
           TypedValue* value = cls->clsCnsGet(consts[i].m_name);

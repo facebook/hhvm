@@ -1700,7 +1700,6 @@ String resolve_include(CStrRef file, const char* currentDir,
     }
 
     if (currentDir[0] == '/') {
-      // We are in hphpi, which passes an absolute path
       String path(currentDir);
       path += "/";
       path += file;
@@ -1711,7 +1710,6 @@ String resolve_include(CStrRef file, const char* currentDir,
         return can_path;
       }
     } else {
-      // Regular hphp
       String path(g_context->getCwd() + "/" + currentDir + file);
       String can_path(Util::canonicalize(path.c_str(), path.size()),
                       AttachString);

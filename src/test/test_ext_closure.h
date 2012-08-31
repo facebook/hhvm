@@ -28,7 +28,6 @@ class TestExtClosure : public TestCppExt {
   virtual bool RunTests(const std::string &which);
 
   bool test_Closure();
-  bool test_GeneratorClosure();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -479,7 +479,7 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
   }
   bool ret = m_client->connect(ops.host, ops.port);
   if (!ret) {
-    raise_warning("failed to connect to hphpi %s:%d", ops.host.c_str(),
+    raise_warning("failed to connect to hhvm %s:%d", ops.host.c_str(),
                   ops.port);
     return false;
   }

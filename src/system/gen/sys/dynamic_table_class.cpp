@@ -7540,13 +7540,9 @@ const int cw_DummyClosure$$instanceof_index[] = {
   1,
   -1,0,
 };
-extern const CallInfo ci_DummyClosure$$__destruct = { (void*)&c_DummyClosure::i___destruct, (void*)&c_DummyClosure::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DummyClosure$$__construct = { (void*)&c_DummyClosure::i___construct, (void*)&c_DummyClosure::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_DummyClosure::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_DummyClosure::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DummyClosure::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7556,27 +7552,17 @@ Variant NEVER_INLINE c_DummyClosure::ifa___construct(MethodCallPackage &mcp, int
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
 }
-Variant NEVER_INLINE c_DummyClosure::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DummyClosure);
-  }
-  c_DummyClosure *self ATTRIBUTE_UNUSED (static_cast<c_DummyClosure*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DummyClosure$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_DummyClosure$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_DummyClosure$$__destruct },
+  { 0x229C615F, 1, 11, "__construct", &ci_DummyClosure$$__construct },
 };
 extern const int cw_DummyClosure$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
+  1,
+  -1,0,
 };
 c_DummyClosure *c_DummyClosure::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DummyClosure$$call_info_table[];
@@ -11614,7 +11600,6 @@ const int cw_Closure$$instanceof_index[] = {
 };
 extern const CallInfo ci_Closure$$__invoke = { (void*)&c_Closure::i___invoke, (void*)&c_Closure::ifa___invoke, 0, 5, 0x0000000000000000LL};
 extern const CallInfo ci_Closure$$__clone = { (void*)&c_Closure::i___clone, (void*)&c_Closure::ifa___clone, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Closure$$__destruct = { (void*)&c_Closure::i___destruct, (void*)&c_Closure::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Closure$$__construct = { (void*)&c_Closure::i___construct, (void*)&c_Closure::ifa___construct, 0, 4, 0x0000000000000000LL};
 Variant c_Closure::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
@@ -11630,9 +11615,6 @@ Variant c_Closure::i___invoke(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Closure::i___clone(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___clone);
-}
-Variant c_Closure::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_Closure::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -11664,30 +11646,20 @@ Variant NEVER_INLINE c_Closure::ifa___clone(MethodCallPackage &mcp, int count, I
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__clone", 0, 1);
   return (self->t___clone());
 }
-Variant NEVER_INLINE c_Closure::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_Closure);
-  }
-  c_Closure *self ATTRIBUTE_UNUSED (static_cast<c_Closure*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_Closure$$call_info_table[] = {
-  { 0x0004BE9B, 0, 7, "__clone", &ci_Closure$$__clone },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_Closure$$__destruct },
+  { 0x0004BE9B, 1, 7, "__clone", &ci_Closure$$__clone },
   { 0x1BD81D65, 1, 8, "__invoke", &ci_Closure$$__invoke },
   { 0x229C615F, 1, 11, "__construct", &ci_Closure$$__construct },
 };
 extern const int cw_Closure$$call_info_index[] = {
   7,
-  -1,-1,-1,0,-1,2,-1,3,
+  -1,-1,-1,0,-1,1,-1,2,
 
 };
 c_Closure *c_Closure::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_Closure$$call_info_table[];
@@ -11701,69 +11673,6 @@ const ObjectStaticCallbacks cw_Closure = {
   &c_Closure::s_class_name,
   0,&ci_Closure$$__construct,0,0,0x0,
   &c_Closure::s_cls
-};
-ObjectData *coo_GeneratorClosure() {
-  return NEWOBJ(c_GeneratorClosure)();
-}
-IMPLEMENT_CLASS(GeneratorClosure)
-extern const InstanceOfInfo cw_GeneratorClosure$$instanceof_table[] = {
-  {0x12E92A6C,1,"Closure",&cw_Closure},
-  {0x51FB4A51,1,"GeneratorClosure",&cw_GeneratorClosure},
-};
-const int cw_GeneratorClosure$$instanceof_index[] = {
-  3,
-  0,1,-1,-1,
-};
-extern const CallInfo ci_GeneratorClosure$$__destruct = { (void*)&c_GeneratorClosure::i___destruct, (void*)&c_GeneratorClosure::ifa___destruct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_GeneratorClosure$$__construct = { (void*)&c_GeneratorClosure::i___construct, (void*)&c_GeneratorClosure::ifa___construct, 0, 4, 0x0000000000000000LL};
-Variant c_GeneratorClosure::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___construct);
-}
-Variant c_GeneratorClosure::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
-}
-Variant NEVER_INLINE c_GeneratorClosure::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_GeneratorClosure);
-  }
-  c_GeneratorClosure *self ATTRIBUTE_UNUSED (static_cast<c_GeneratorClosure*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__construct", 0, 1);
-  return (self->t___construct(), null);
-}
-Variant NEVER_INLINE c_GeneratorClosure::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_GeneratorClosure);
-  }
-  c_GeneratorClosure *self ATTRIBUTE_UNUSED (static_cast<c_GeneratorClosure*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-extern const MethodCallInfoTable cw_GeneratorClosure$$call_info_table[] = {
-  { 0x229C615F, 0, 11, "__construct", &ci_GeneratorClosure$$__construct },
-  { 0x2ACC1EF3, 1, 10, "__destruct", &ci_GeneratorClosure$$__destruct },
-};
-extern const int cw_GeneratorClosure$$call_info_index[] = {
-  3,
-  -1,-1,-1,0,
-};
-c_GeneratorClosure *c_GeneratorClosure::create() {
-  CountableHelper h(this);
-  init();
-  t___construct();
-  clearNoDestruct();
-  return this;
-}
-extern const MethodCallInfoTable cw_GeneratorClosure$$call_info_table[];
-extern const int cw_GeneratorClosure$$call_info_index[];
-extern const InstanceOfInfo cw_GeneratorClosure$$instanceof_table[];
-extern const int cw_GeneratorClosure$$instanceof_index[];
-const ObjectStaticCallbacks cw_GeneratorClosure = {
-  (ObjectData*(*)(ObjectData*))coo_GeneratorClosure,
-  cw_GeneratorClosure$$call_info_table,cw_GeneratorClosure$$call_info_index,
-  cw_GeneratorClosure$$instanceof_table,cw_GeneratorClosure$$instanceof_index,
-  &c_GeneratorClosure::s_class_name,
-  0,&ci_GeneratorClosure$$__construct,0,&cw_Closure,0x0,
-  &c_GeneratorClosure::s_cls
 };
 ObjectData *coo_DOMNodeList() {
   return NEWOBJ(c_DOMNodeList)();
@@ -11933,7 +11842,6 @@ static const hashNodeCTD ctdBuckets[] = {
   {0x186A3D4E,1,0,"SoapHeader",(int64)&cw_SoapHeader },
   {0x7BA7A64F,1,0,"SplObjectStorage",(int64)&cw_SplObjectStorage },
   {0x29F87A50,1,0,"Normalizer",(int64)&cw_Normalizer },
-  {0x51FB4A51,1,0,"GeneratorClosure",(int64)&cw_GeneratorClosure },
   {0x564B1453,0,0,"DOMCharacterData",(int64)&cw_DOMCharacterData },
   {0x776A9D53,1,0,"RangeException",(int64)&cw_RangeException },
   {0x17E8A15E,1,0,"DirectoryIterator",(int64)&cw_DirectoryIterator },
@@ -12012,28 +11920,28 @@ static const int ctdMapTable[] = {
   18,-1,-1,-1,-1,19,21,-1,
   -1,22,23,-1,24,-1,26,-1,
   -1,29,30,32,-1,33,34,35,
-  36,37,-1,38,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,40,-1,
-  -1,41,42,43,-1,44,-1,-1,
-  45,-1,47,48,50,-1,-1,-1,
-  -1,-1,-1,51,-1,53,-1,-1,
-  -1,-1,54,-1,-1,55,-1,-1,
-  57,-1,58,59,60,-1,-1,61,
-  -1,-1,-1,-1,-1,-1,-1,62,
-  64,-1,-1,65,66,-1,-1,-1,
-  -1,-1,-1,-1,-1,69,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,70,
-  71,72,73,-1,-1,74,-1,76,
-  77,78,-1,-1,-1,-1,-1,-1,
-  -1,-1,79,-1,-1,80,-1,-1,
-  -1,-1,-1,82,-1,-1,-1,-1,
-  83,-1,-1,84,-1,-1,-1,-1,
-  85,86,88,-1,90,-1,-1,-1,
-  91,92,93,-1,94,-1,-1,-1,
-  -1,-1,95,-1,96,-1,-1,-1,
-  -1,-1,-1,-1,97,-1,-1,-1,
-  -1,-1,-1,-1,98,-1,-1,99,
-  -1,-1,-1,-1,100,101,-1,103,
+  36,-1,-1,37,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,39,-1,
+  -1,40,41,42,-1,43,-1,-1,
+  44,-1,46,47,49,-1,-1,-1,
+  -1,-1,-1,50,-1,52,-1,-1,
+  -1,-1,53,-1,-1,54,-1,-1,
+  56,-1,57,58,59,-1,-1,60,
+  -1,-1,-1,-1,-1,-1,-1,61,
+  63,-1,-1,64,65,-1,-1,-1,
+  -1,-1,-1,-1,-1,68,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,69,
+  70,71,72,-1,-1,73,-1,75,
+  76,77,-1,-1,-1,-1,-1,-1,
+  -1,-1,78,-1,-1,79,-1,-1,
+  -1,-1,-1,81,-1,-1,-1,-1,
+  82,-1,-1,83,-1,-1,-1,-1,
+  84,85,87,-1,89,-1,-1,-1,
+  90,91,92,-1,93,-1,-1,-1,
+  -1,-1,94,-1,95,-1,-1,-1,
+  -1,-1,-1,-1,96,-1,-1,-1,
+  -1,-1,-1,-1,97,-1,-1,98,
+  -1,-1,-1,-1,99,100,-1,102,
 
 };
 

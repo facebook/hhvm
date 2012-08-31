@@ -163,7 +163,7 @@ Array vm_get_class_constants(CStrRef className) {
   HphpArray* retVal = NEW(HphpArray)(numConstants);
   const VM::Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
-    // Note: hphpi/hphpc don't include inherited constants in
+    // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
     if (consts[i].m_class == cls) {
       StringData* name  = const_cast<StringData*>(consts[i].m_name);

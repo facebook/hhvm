@@ -5,7 +5,7 @@ include $(PROJECT_ROOT)/src/dirs.mk
 
 PHP_FILES = $(wildcard classes/*.php) $(wildcard globals/*.php)
 
-PHP := $(wildcard /usr/local/hphpi/bin/hphpi)
+PHP := $(wildcard /usr/local/hphpi/bin/hhvm)
 PHP := $(if $(PHP),$(PHP) -v Preg.ErrorLog=false,php)
 all:
 	$(HPHP) --opts=none -t cpp -f sys --input-dir . -i $(PHP_FILES) -o gen 1>/dev/null

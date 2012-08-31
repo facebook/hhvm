@@ -10704,7 +10704,7 @@ bool TestCodeRun::TestCompilation() {
   MVCR("<?php class A { public static $foo = 123;} $a = foo(); "
        "function foo() { return 'foo';} var_dump(A::$$a);");
 
-  // testing re-declared classes with missing parents, HPHPi raises error
+  // testing re-declared classes with missing parents, VM raises error
   // but the compiled code does not.
   //MVCR("<?php $a = bar(); if ($a) { class fOO extends Unknown {} } else "
   //     "{ class Foo extends unknOwn {} } function bar() { return 123;}");
@@ -31293,8 +31293,6 @@ bool TestCodeRun::TestTraits() {
         "",
         "2\n");
 
-  // fails under hphpi
-#if 0
   MVCRO("<?php\n"
         "trait T {\n"
         "  public static function foo() {\n"
@@ -31314,7 +31312,6 @@ bool TestCodeRun::TestTraits() {
         "bar1\n"
         "bar2\n"
        );
-#endif
 
   MVCRO("<?php\n"
         "trait T {\n"

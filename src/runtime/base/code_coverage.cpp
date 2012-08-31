@@ -24,8 +24,8 @@ namespace HPHP {
 
 /*
  * The function below will be called by the interpreter on each
- * evaluated expression when running hphpi with:
- *   $ hphpi -v Eval.RecordCodeCoverage=1 <phpfile>
+ * evaluated expression when running hhvm with:
+ *   $ hhvm -v Eval.RecordCodeCoverage=1 <phpfile>
  *
  * The (line0, line1) pair is supposed to represent the start and end
  * of an evaluated expression. One should normally increment the line
@@ -50,9 +50,9 @@ namespace HPHP {
  *
  * and with this command:
  *
- *  $ hphpi -v Eval.RecordCodeCoverage=1 \
- *          -v Eval.CodeCoverageOutputFile=/tmp/cov.log \
- *           -f cover.php
+ *  $ hhvm -v Eval.RecordCodeCoverage=1 \
+ *         -v Eval.CodeCoverageOutputFile=/tmp/cov.log \
+ *         -f cover.php
  *
  * one get this output (with appropriate printf in this file):
  *

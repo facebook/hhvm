@@ -2116,9 +2116,8 @@ void DebuggerClient::usageLog(const std::string& cmd, const std::string& line) {
   if (m_usageLogHeader.empty()) {
     std::string login = m_options.user;
     std::string host = Process::GetHostName();
-    std::string hphpMode = hhvm ? "vm" : "hphpi";
     std::string clientMode = isApiMode() ? "api" : "terminal";
-    m_usageLogHeader = login + " " + host + " " + hphpMode + " " + clientMode;
+    m_usageLogHeader = login + " " + host + " hhvm " + clientMode;
   }
 
   struct timespec tp;

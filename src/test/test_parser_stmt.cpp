@@ -724,9 +724,6 @@ bool TestParserStmt::TestYieldStatement() {
 }
 
 bool TestParserStmt::TestUseTraitStatement() {
-  // GO: TODO: enable this once traits are implemented in hphpi
-  return true;
-
   V("<?php trait T1 { public function F() {} } "
     "trait T2 { public function F() {} } "
     "class C { use T1, T2 { T1::F insteadof T2; T2::F as private G; } } ",

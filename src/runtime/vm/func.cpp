@@ -453,9 +453,9 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
     cloneMembers(mi->parameters);
     cloneMembers(mi->staticVariables);
   } else {
-    // hphpc and hphpi set the ClassInfo::VariableArguments attribute if the
-    // method contains a call to func_get_arg, func_get_args, or func_num_args.
-    // We don't do this in the VM currently and hopefully we never will need to.
+    // hphpc sets the ClassInfo::VariableArguments attribute if the method
+    // contains a call to func_get_arg, func_get_args, or func_num_args. We
+    // don't do this in the VM currently and hopefully we never will need to.
     int attr = 0;
     if (m_attrs & AttrReference) attr |= ClassInfo::IsReference;
     if (m_attrs & AttrAbstract) attr |= ClassInfo::IsAbstract;

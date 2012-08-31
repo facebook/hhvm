@@ -3142,7 +3142,9 @@ TranslatorX64::enterTC(SrcKey sk) {
       g_vmContext->m_pc = curUnit()->at(sk.offset());
       INC_TPC(interp_bb);
       g_vmContext->dispatchBB();
-      sk = SrcKey(curFunc(), g_vmContext->getPC());
+      PC newPc = g_vmContext->getPC();
+      if (!newPc) { g_vmContext->m_fp = 0; return; }
+      sk = SrcKey(curFunc(), newPc);
       start = getTranslation(&sk, true);
     }
     ASSERT(isValidCodeAddress(start));
@@ -3188,7 +3190,7 @@ TranslatorX64::enterTC(SrcKey sk) {
       vmfp() = nullptr;
       return;
     }
-    handleServiceRequest(info, start, sk);
+    if (!handleServiceRequest(info, start, sk)) return;
   }
 }
 
@@ -3196,6 +3198,7 @@ TranslatorX64::enterTC(SrcKey sk) {
  * The contract is that each case will set sk to the place where
  * execution should resume, and optionally set start to the hardware
  * translation of the resumption point (or otherwise set it to null).
+ * Returns false if we need to halt this nesting of the VM.
  *
  * start and sk might be subtly different; i.e., there are cases where
  * start != NULL && start != getTranslation(sk). For instance,
@@ -3205,7 +3208,7 @@ TranslatorX64::enterTC(SrcKey sk) {
  * Call instruction. If we punt to the interpreter, the interpreter
  * will redo some of the work that the translator has already done.
  */
-void TranslatorX64::handleServiceRequest(TReqInfo& info,
+bool TranslatorX64::handleServiceRequest(TReqInfo& info,
                                          TCA& start,
                                          SrcKey& sk) {
   const uintptr_t& requestNum = info.requestNum;
@@ -3338,7 +3341,9 @@ void TranslatorX64::handleServiceRequest(TReqInfo& info,
       INC_TPC(interp_bb);
       g_vmContext->dispatchBB();
     }
-    SrcKey newSk(curFunc(), g_vmContext->getPC());
+    PC newPc = g_vmContext->getPC();
+    if (!newPc) { g_vmContext->m_fp = 0; return false; }
+    SrcKey newSk(curFunc(), newPc);
     SKTRACE(5, newSk, "interp: exit\n");
     sk = newSk;
     start = getTranslation(&newSk, true);
@@ -3387,6 +3392,8 @@ void TranslatorX64::handleServiceRequest(TReqInfo& info,
   if (smashed && info.stubAddr) {
     Treadmill::WorkItem::enqueue(new FreeRequestStubTrigger(info.stubAddr));
   }
+
+  return true;
 }
 
 TCA FreeStubList::maybePop() {

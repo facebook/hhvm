@@ -90,10 +90,6 @@ static const Trace::Module TRACEMOD = Trace::bcinterp;
 
 namespace {
 
-struct HaltVM : std::exception {
-  const char* what() const throw() { return "HaltVM"; }
-};
-
 struct VMPrepareThrow : std::exception {
   const char* what() const throw() { return "VMPrepareThrow"; }
 };
@@ -1951,7 +1947,6 @@ short_jump:
     UnwindStatus unwindType = m_stack.unwindFrame(m_fp, faultPC, m_pc, fault);
     jumpCode = handleUnwind(unwindType);
     goto short_jump;
-  } catch (const HaltVM&) {
   } catch (...) {
     ASSERT(tl_regState == REGSTATE_CLEAN);
     jumpCode = exception_handler();
@@ -4578,9 +4573,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {
                            "%p)\n", os.str().c_str(), m_fp));
     }
 #endif
-    m_fp = NULL;
-    m_pc = NULL;
-    throw HaltVM();
+    pc = 0;
   }
 }
 
@@ -6891,9 +6884,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNativeImpl(PC& pc) {
                            "%p)\n", os.str().c_str(), m_fp));
     }
 #endif
-    m_fp = NULL;
-    m_pc = NULL;
-    throw HaltVM();
+    pc = 0;
   }
 }
 
@@ -7424,25 +7415,25 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
 #endif /* HPHP_TRACE */
   bool isCtlFlow = false;
 
-#define DISPATCH() do {                                                       \
-    if ((breakOnCtlFlow && isCtlFlow) ||                                      \
-        (limInstrs && UNLIKELY(numInstrs-- == 0))) {                          \
-      ONTRACE(1,                                                              \
+#define DISPATCH() do {                                                 \
+    if ((breakOnCtlFlow && isCtlFlow) ||                                \
+        (limInstrs && UNLIKELY(numInstrs-- == 0))) {                    \
+      ONTRACE(1,                                                        \
               Trace::trace("dispatch: Halt ExecutionContext::dispatch(%p)\n", \
-                           m_fp));                                            \
-      delete g_vmContext->m_lastLocFilter;                                    \
-      g_vmContext->m_lastLocFilter = NULL;                                    \
-      return;                                                                 \
-    }                                                                         \
-    Op op = (Op)*pc;                                                          \
-    COND_STACKTRACE("dispatch:                    ");                         \
-    ONTRACE(1,                                                                \
-            Trace::trace("dispatch: %d: %s\n", pcOff(), nametab[op]));        \
-    ASSERT(op < Op_count);                                                    \
-    if (profile && (op == OpRetC || op == OpRetV)) { \
-      profileReturnValue(m_stack.top()->m_type); \
-    } \
-    goto *optab[op];                                                          \
+                           m_fp));                                      \
+      delete g_vmContext->m_lastLocFilter;                              \
+      g_vmContext->m_lastLocFilter = NULL;                              \
+      return;                                                           \
+    }                                                                   \
+    Op op = (Op)*pc;                                                    \
+    COND_STACKTRACE("dispatch:                    ");                   \
+    ONTRACE(1,                                                          \
+            Trace::trace("dispatch: %d: %s\n", pcOff(), nametab[op]));  \
+    ASSERT(op < Op_count);                                              \
+    if (profile && (op == OpRetC || op == OpRetV)) {                    \
+      profileReturnValue(m_stack.top()->m_type);                        \
+    }                                                                   \
+    goto *optab[op];                                                    \
 } while (0)
 
   ONTRACE(1, Trace::trace("dispatch: Enter ExecutionContext::dispatch(%p)\n",
@@ -7450,23 +7441,27 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
   PC pc = m_pc;
   DISPATCH();
 
-#define O(name, imm, pusph, pop, flags)                                       \
-  LabelDbg##name:                                                             \
-    phpDebuggerHook(pc);                                                      \
-  LabelInst##name:                                                            \
-    INST_HOOK_PC(injTable, pc);                                               \
-  LabelCover##name:                                                           \
-    if (collectCoverage) {                                                    \
-      recordCodeCoverage(pc);                                                 \
-    }                                                                         \
-  Label##name: {                                                              \
-    iop##name(pc);                                                            \
-    SYNC();                                                                   \
-    if (breakOnCtlFlow) {                                                     \
-      isCtlFlow = instrIsControlFlow(Op##name);                               \
-      Stats::incOp(Op##name);                                                 \
-    }                                                                         \
-    DISPATCH();                                                               \
+#define O(name, imm, pusph, pop, flags)                       \
+  LabelDbg##name:                                             \
+    phpDebuggerHook(pc);                                      \
+  LabelInst##name:                                            \
+    INST_HOOK_PC(injTable, pc);                               \
+  LabelCover##name:                                           \
+    if (collectCoverage) {                                    \
+      recordCodeCoverage(pc);                                 \
+    }                                                         \
+  Label##name: {                                              \
+    iop##name(pc);                                            \
+    SYNC();                                                   \
+    if (breakOnCtlFlow) {                                     \
+      isCtlFlow = instrIsControlFlow(Op##name);               \
+      Stats::incOp(Op##name);                                 \
+    }                                                         \
+    const Op op = Op##name;                                   \
+    if (op == OpRetC || op == OpRetV || op == OpNativeImpl) { \
+      if (UNLIKELY(!pc)) { m_fp = 0; return; }                \
+    }                                                         \
+    DISPATCH();                                               \
   }
   OPCODES
 #undef O

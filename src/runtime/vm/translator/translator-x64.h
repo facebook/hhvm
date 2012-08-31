@@ -915,7 +915,7 @@ private:
   void emitCondJmp(const SrcKey &skTrue, const SrcKey &skFalse,
                    ConditionCode cc);
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
-  void handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
+  bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
   void recordGdbTranslation(const SrcKey& sk, const Unit* u,
                             const Asm& a,

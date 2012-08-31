@@ -84,6 +84,7 @@ class FuncChecker {
   bool checkFpi(State* cur, PC pc, Block* b);
   bool checkIter(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
+  bool checkString(PC pc, Id id);
   void reportStkUnderflow(Block*, const State& cur, PC);
   void reportStkOverflow(Block*, const State& cur, PC);
   void reportStkMismatch(Block* b, Block* target, const State& cur);
@@ -313,26 +314,41 @@ class ImmVecRange {
       loc(v.locationCode()),
       loc_local(numLocationCodeImms(loc) ? decodeVariableSizeImm(&vecp) : -1) {
   }
+
   bool empty() const {
     return vecp >= v.vec() + v.size();
   }
+
   MemberCode frontMember() const {
     ASSERT(!empty());
     return MemberCode(*vecp);
   }
+
   int frontLocal() const {
     PC p = vecp + 1;
-    return memberCodeHasImm(frontMember()) ? decodeVariableSizeImm(&p) : -1;
+    const MemberCode mc = frontMember();
+    return (mc == MEL || mc == MPL) ? decodeMemberCodeImm(&p, mc) : -1;
   }
+
+  Id frontString() const {
+    PC p = vecp + 1;
+    const MemberCode mc = frontMember();
+    return (mc == MET || mc == MPT) ? Id(decodeMemberCodeImm(&p, mc)) : -1;
+  }
+
   void popFront() {
     ASSERT(!empty());
     vecp++;
-    if (memberCodeHasImm(MemberCode(vecp[-1])))
-      decodeVariableSizeImm(&vecp);
-  } 
+    const MemberCode mc = MemberCode(vecp[-1]);
+    if (memberCodeHasImm(mc)) {
+      decodeMemberCodeImm(&vecp, mc);
+    }
+  }
+
   int size() const {
     return v.size();
   }
+
  private:
   ImmVector v;
   PC vecp;
@@ -345,6 +361,14 @@ bool FuncChecker::checkLocal(PC pc, int k) {
   if (k < 0 || k >= numLocals()) {
     printf("Verify: invalid local variable id %d at Offset %d\n",
            k, offset(pc));
+    return false;
+  }
+  return true;
+}
+
+bool FuncChecker::checkString(PC pc, Id id) {
+  if (id < 0 || unsigned(id) >= unit()->numLitstrs()) {
+    printf("Verify: invalid string id %d at %d\n", id, offset(pc));
     return false;
   }
   return true;
@@ -389,6 +413,8 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
           }
           if (vr.frontLocal() != -1) {
             ok &= checkLocal(pc, vr.frontLocal());
+          } else if (vr.frontString() != -1) {
+            ok &= checkString(pc, vr.frontString());
           }
         }
       }
@@ -443,10 +469,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
     case SA: { // litstr id
       PC sa_pc = pc;
       Id id = decodeId(&sa_pc);
-      if (id < 0 || id >= (Id)unit()->numLitstrs()) {
-        printf("Verify: invalid string id %d\n", id);
-        ok = false;
-      }
+      ok &= checkString(pc, id);
       break;
     }
     case AA: { // static array id

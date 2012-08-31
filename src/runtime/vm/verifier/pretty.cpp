@@ -143,4 +143,13 @@ void printGml(const Unit* unit) {
   fclose(file);
 }
 
+void verify_error(const char* fmt, ...) {
+  char buf[1024];
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(buf, sizeof buf, fmt, args);
+  va_end(args);
+  printf("Verification: %s", buf);
+}
+
 }}} // namespace HPHP::VM

@@ -246,28 +246,28 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         int32_t len = getImmVector(pc).size();
         int64 limit = base + len - 2;
         if (limit < switchBase) {
-          printf("Verify: Overflow in Switch bounds [%d:%d]\n",
-                 base, past);
+          verify_error("Overflow in Switch bounds [%d:%d]\n",
+                       base, past);
         }
       }
       branches.push_back(pc);
     }
     if (i.empty()) {
       if (offset(pc + instrLen(pc)) != past) {
-        printf("Verify: Last instruction in %s at %d overflows [%d:%d]\n",
+        verify_error("Last instruction in %s at %d overflows [%d:%d]\n",
                name, offset(pc), base, past);
         ok = false;
       }
       if (!isTF(pc)) {
-        printf("Verify: Last instruction in %s is not teriminal %d:%s\n",
+        verify_error("Last instruction in %s is not teriminal %d:%s\n",
                name, offset(pc), instrToString(pc, unit()).c_str());
         ok = false;
       } else {
         if (isRet(pc) && !is_main) {
-          printf("Verify: Ret* may not appear in %s\n", name);
+          verify_error("Ret* may not appear in %s\n", name);
           ok = false;
         } else if (Op(*pc) == OpUnwind && is_main) {
-          printf("Verify: Unwind may not appear in %s\n", name);
+          verify_error("Unwind may not appear in %s\n", name);
           ok = false;
         }
       }
@@ -359,7 +359,7 @@ class ImmVecRange {
 
 bool FuncChecker::checkLocal(PC pc, int k) {
   if (k < 0 || k >= numLocals()) {
-    printf("Verify: invalid local variable id %d at Offset %d\n",
+    verify_error("invalid local variable id %d at Offset %d\n",
            k, offset(pc));
     return false;
   }
@@ -368,7 +368,7 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 
 bool FuncChecker::checkString(PC pc, Id id) {
   if (id < 0 || unsigned(id) >= unit()->numLitstrs()) {
-    printf("Verify: invalid string id %d at %d\n", id, offset(pc));
+    verify_error("invalid string id %d at %d\n", id, offset(pc));
     return false;
   }
   return true;
@@ -380,7 +380,7 @@ bool FuncChecker::checkString(PC pc, Id id) {
  */
 bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
   if (!isValidOpcode(*instr)) {
-    printf("Verify: Invalid opcode %d in section %s at offset %d\n",
+    verify_error("Invalid opcode %d in section %s at offset %d\n",
            *instr, name, offset(instr));
     return false;
   }
@@ -394,12 +394,12 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       ImmVecRange vr(instr);
       if (vr.size() < 2) {
         // vector must at least have a LocationCode and 1+ MemberCodes
-        printf("Verify: invalid vector size %d at %d\n",
+        verify_error("invalid vector size %d at %d\n",
                vr.size(), offset(instr));
         return false;
       } else {
         if (vr.loc < 0 || vr.loc >= NumLocationCodes) {
-          printf("Verify: invalid location code %d in vector at %d\n",
+          verify_error("invalid location code %d in vector at %d\n",
                  (int)vr.loc, offset(instr));
           ok = false;
         }
@@ -407,7 +407,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
         for (; !vr.empty(); vr.popFront()) {
           MemberCode member = vr.frontMember();
           if (member < 0 || member >= NumMemberCodes) {
-            printf("Verifier: invalid member code %d in vector at %d\n",
+            verify_error("invalid member code %d in vector at %d\n",
                    (int) member, offset((PC)instr));
             ok = false;
           }
@@ -430,7 +430,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       PC ia_pc = pc;
       int32 k = decodeVariableSizeImm(&ia_pc);
       if (k >= numIters()) {
-        printf("Verify: invalid iterator variable id %d at %d\n",
+        verify_error("invalid iterator variable id %d at %d\n",
                k, offset((PC)instr));
         ok = false;
       }
@@ -446,7 +446,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
         break;
       case OpVerifyParamType:
         if (k >= numParams()) {
-          printf("Verify: invalid parameter id %d at %d\n",
+          verify_error("invalid parameter id %d at %d\n",
                  k, offset((PC)instr));
           ok = false;
         }
@@ -456,7 +456,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
     case BLA: { // vec of int32 for Switch
       int len = *(int*)pc;
       if (len < 1) {
-        printf("Verify: invalid length of jump table %d at Offset %d\n",
+        verify_error("invalid length of jump table %d at Offset %d\n",
                len, offset(pc));
         return false;
       }
@@ -476,7 +476,7 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       PC aa_pc = pc;
       Id id = decodeId(&aa_pc);
       if (id < 0 || id >= (Id)unit()->numArrays()) {
-        printf("Verify: invalid array id %d\n", id);
+        verify_error("invalid array id %d\n", id);
         ok = false;
       }
       break;
@@ -494,14 +494,14 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:
         if (op >= IncDec_invalid) {
-          printf("Verify: invalid operation for IncDec*: %d\n", op);
+          verify_error("invalid operation for IncDec*: %d\n", op);
           ok = false;
         }
         break;
       case OpSetOpL: case OpSetOpN: case OpSetOpG: case OpSetOpS:
       case OpSetOpM:
         if (op >= SetOp_invalid) {
-          printf("Verify: invalid operation for SetOp*: %d\n", op);
+          verify_error("invalid operation for SetOp*: %d\n", op);
           ok = false;
         }
         break;
@@ -521,7 +521,7 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
                            const FlavorDesc* sig) {
   for (int i = 0; i < len; ++i) {
     if (args[i] != (FlavorDesc)sig[i]) {
-      printf("Verify: flavor mismatch at %d, got %s expected %s\n",
+      verify_error("flavor mismatch at %d, got %s expected %s\n",
              offset(pc), stkToString(len, args).c_str(),
              sigToString(len, sig).c_str());
       return false;
@@ -621,7 +621,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 bool FuncChecker::checkTerminal(State* cur, PC pc) {
   if (isRet(pc) || Op(*pc) == OpUnwind) {
     if (cur->stklen != 0) {
-      printf("Verify: stack depth must equal 0 after Ret* and Unwind; got %d\n",
+      verify_error("stack depth must equal 0 after Ret* and Unwind; got %d\n",
              cur->stklen);
       return false;
     }
@@ -631,7 +631,7 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
 
 bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   if (cur->fpilen <= 0) {
-    printf("Verify: cannot access empty FPI stack\n");
+    verify_error("cannot access empty FPI stack\n");
     return false;
   }
   bool ok = true;
@@ -641,17 +641,17 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
     int call_params = getImmIva(pc);
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
-      printf("Verify: FCall param_count (%d) doesn't match FPush* (%d)\n",
+      verify_error("FCall param_count (%d) doesn't match FPush* (%d)\n",
              call_params, push_params);
       ok = false;
     }
     if (fpi.next != push_params) {
-      printf("Verify: wrong # of params were passed; got %d expected %d\n",
+      verify_error("wrong # of params were passed; got %d expected %d\n",
              fpi.next, push_params);
       ok = false;
     }
     if (cur->stklen != fpi.stkmin) {
-      printf("Verify: FCall didn't consume the proper param count\n");
+      verify_error("FCall didn't consume the proper param count\n");
       ok = false;
     }
   } else {
@@ -659,12 +659,12 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
     int param_id = getImmIva(pc);
     int push_params = getImmIva(at(fpi.fpush));
     if (param_id >= push_params) {
-      printf("Verify: param_id %d out of range [0:%d)\n", param_id,
+      verify_error("param_id %d out of range [0:%d)\n", param_id,
              push_params);
       return false;
     }
     if (param_id != fpi.next) {
-      printf("Verify: FPass* out of order; got id %d expected %d\n",
+      verify_error("FPass* out of order; got id %d expected %d\n",
              param_id, fpi.next);
       ok = false;
     }
@@ -672,7 +672,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
     // so this check doesn't count the F result of this FPush, but does
     // count the previous FPush*s.
     if (cur->stklen != fpi.stkmin + param_id) {
-      printf("Verify: Stack depth incorrect after FPush; got %d expected %d\n",
+      verify_error("Stack depth incorrect after FPush; got %d expected %d\n",
              cur->stklen, fpi.stkmin + param_id);
       ok = false;
     }
@@ -687,12 +687,12 @@ bool FuncChecker::checkIter(State* cur, PC pc) {
   bool ok = true;
   if (Op(*pc) == OpIterInit || Op(*pc) == OpIterInitM) {
     if (cur->iters[id]) {
-      printf("Verify: IterInit*<%d> trying to double-initialize\n", id);
+      verify_error("IterInit*<%d> trying to double-initialize\n", id);
       ok = false;
     }
   } else {
     if (!cur->iters[id]) {
-      printf("Verify: Cannot access un-initialized iter %d\n", id);
+      verify_error("Cannot access un-initialized iter %d\n", id);
       ok = false;
     }
     if (Op(*pc) == OpIterFree) cur->iters[id] = false;
@@ -747,7 +747,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
       outs[i] = outputSigs[*pc][i];
     if (isFPush(Op(*pc))) {
       if (cur->fpilen >= maxFpi()) {
-        printf("Verify: more FPush* instructions than FPI regions\n");
+        verify_error("more FPush* instructions than FPI regions\n");
         return false;
       }
       FpiState& fpi = cur->fpi[cur->fpilen];
@@ -918,12 +918,12 @@ bool FuncChecker::checkEmptyStack(const EHEnt& handler, Block* b) {
   const State& state = m_info[b->id].state_in;
   if (!state.stk) return true; // ignore unreachable block
   if (state.stklen != 0) {
-    printf("Verifier: EH region starts with non-empty stack at B%d\n",
+    verify_error("EH region starts with non-empty stack at B%d\n",
            b->id);
     return false;
   }
   if (state.fpilen != 0) {
-    printf("Verifier: EH region starts with non-empty FPI stack at B%d\n",
+    verify_error("EH region starts with non-empty FPI stack at B%d\n",
            b->id);
     return false;
   }
@@ -949,7 +949,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   }
   for (int i = 0, n = cur.stklen; i < n; i++) {
     if (state.stk[i] != cur.stk[i]) {
-      printf("Verify: mismatch on edge B%d->B%d, current %s target %s\n",
+      verify_error("mismatch on edge B%d->B%d, current %s target %s\n",
              b->id, t->id, stkToString(n, cur.stk).c_str(),
              stkToString(n, state.stk).c_str());
       return false;
@@ -957,13 +957,13 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   }
   // Check FPI stack.
   if (state.fpilen != cur.fpilen) {
-    printf("Verify: FPI stack depth mismatch on edge B%d->B%d, "
+    verify_error("FPI stack depth mismatch on edge B%d->B%d, "
            "current %d target %d\n", b->id, t->id, cur.fpilen, state.fpilen);
     return false;
   }
   for (int i = 0, n = cur.fpilen; i < n; i++) {
     if (state.fpi[i] != cur.fpi[i]) {
-      printf("Verify: FPI mismatch on edge B%d->B%d, current %s target %s\n",
+      verify_error("FPI mismatch on edge B%d->B%d, current %s target %s\n",
              b->id, t->id, fpiToString(cur.fpi[i]).c_str(),
              fpiToString(state.fpi[i]).c_str());
       return false;
@@ -972,7 +972,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   // Check iterator variable state.
   for (int i = 0, n = numIters(); i < n; i++) {
     if (state.iters[i] != cur.iters[i]) {
-      printf("Verify: mismatched iterator state on edge B%d->B%d, "
+      verify_error("mismatched iterator state on edge B%d->B%d, "
              "current %s target %s\n", b->id, t->id,
              iterToString(cur).c_str(), iterToString(state).c_str());
       return false;
@@ -983,22 +983,22 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
 
 void FuncChecker::reportStkUnderflow(Block*, const State& cur, PC pc) {
   int min = cur.fpilen > 0 ? cur.fpi[cur.fpilen - 1].stkmin : 0;
-  printf("Verify: Rule2: Stack underflow at PC %d, min depth %d\n",
+  verify_error("Rule2: Stack underflow at PC %d, min depth %d\n",
          offset(pc), min);
 }
 
 void FuncChecker::reportStkOverflow(Block*, const State& cur, PC pc) {
-  printf("Verify: Rule2: Stack overflow at PC %d\n", offset(pc));
+  verify_error("Rule2: Stack overflow at PC %d\n", offset(pc));
 }
 
 void FuncChecker::reportStkMismatch(Block* b, Block* t, const State& cur) {
   const State& st = m_info[t->id].state_in;
-  printf("Verify: Rule1: Stack mismatch on edge B%d->B%d; depth %d->%d\n",
+  verify_error("Rule1: Stack mismatch on edge B%d->B%d; depth %d->%d\n",
           b->id, t->id, cur.stklen, st.stklen);
 }
 
 void FuncChecker::reportEscapeEdge(Block* b, Block* s) {
-  printf("Verify: Edge from B%d to offset %d escapes function\n",
+  verify_error("Edge from B%d to offset %d escapes function\n",
          b->id, offset(s->start));
 }
 
@@ -1011,15 +1011,15 @@ bool FuncChecker::checkOffset(const char* name, Offset off,
                               Offset past, bool check_instrs) {
   ASSERT(past >= base);
   if (off < base || off >= past) {
-    printf("Verify: Offset %s %d is outside region %s %d:%d\n",
+    verify_error("Offset %s %d is outside region %s %d:%d\n",
            name, off, regionName, base, past);
     return false;
   }
   if (check_instrs && !m_instrs.get(off - m_func->base())) {
-    printf("Verify: label %s %d is not on a valid instruction boundary\n",
+    verify_error("label %s %d is not on a valid instruction boundary\n",
            name, off);
     return false;
-  } 
+  }
   return true;
 }
 
@@ -1032,18 +1032,18 @@ bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
                                Offset past, bool check_instrs) {
   ASSERT(past >= base);
   if (p < b) {
-    printf("Verify: region %s %d:%d has negative length\n",
+    verify_error("region %s %d:%d has negative length\n",
            name, b, p);
     return false;
   }
   if (b < base || p > past) {
-    printf("Verify: region %s %d:%d is not inside region %s %d:%d\n",
+    verify_error("region %s %d:%d is not inside region %s %d:%d\n",
            name, b, p, regionName, base, past);
     return false;
   } else if (check_instrs &&
              (!m_instrs.get(b - m_func->base()) ||
               !m_instrs.get(p - m_func->base()))) {
-    printf("Verify: region %s %d:%d boundaries are inbetween instructions\n",
+    verify_error("region %s %d:%d boundaries are inbetween instructions\n",
            name, b, p);
     return false;
   }

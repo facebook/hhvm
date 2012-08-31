@@ -59,6 +59,14 @@ std::string blockToString(const Block* b, const Graph* g, const Unit* u);
  */
 void printGml(const Unit*);
 
+/*
+ * Called to indicate a verification error.
+ *
+ * Currently just prints to stdout, but we might eventually want to
+ * support other ways of reporting the error.
+ */
+void verify_error(const char* fmt, ...) __attribute__((format(printf,1,2)));
+
 }}} // HPHP::VM::Verifier
 
 #endif // incl_VM_VERIFIER_PRETTY_H

@@ -45,7 +45,7 @@ class UnitChecker {
 };
 
 bool checkUnit(const Unit* unit, bool verbose) {
-  printf("Verify: verifying unit from %s\n", unit->filepath()->data());
+  verify_error("verifying unit from %s\n", unit->filepath()->data());
   return UnitChecker(unit, verbose).verify();
 }
 
@@ -80,13 +80,13 @@ bool UnitChecker::checkStrings() {
   for (size_t i = 0, n = m_unit->numLitstrs(); i < n; ++i) {
     const StringData* s = m_unit->lookupLitstrId(i);
     if (!s) {
-      printf("Verify: null string id %ld in unit %s\n", i,
+      verify_error("null string id %ld in unit %s\n", i,
              m_unit->md5().toString().c_str());
       ok = false;
       continue;
     }
     if (!s->isStatic()) {
-      printf("Verify: non-static string id %ld in unit %s\n", i,
+      verify_error("non-static string id %ld in unit %s\n", i,
              m_unit->md5().toString().c_str());
       ok = false;
       continue;
@@ -120,21 +120,21 @@ bool UnitChecker::checkBytecode() {
     const Func* f = i.popFront();
     if (f->past() <= f->base()) {
       if (!f->isAbstract() || f->past() < f->base()) {
-        printf("Verify: func size <= 0 [%d:%d] in unit %s\n",
+        verify_error("func size <= 0 [%d:%d] in unit %s\n",
              f->base(), f->past(), m_unit->md5().toString().c_str());
         ok = false;
         continue;
       }
     }
     if (f->base() < 0 || f->past() > m_unit->bclen()) {
-      printf("Verify: function region [%d:%d] out of unit %s bounds [%d:%d]\n",
+      verify_error("function region [%d:%d] out of unit %s bounds [%d:%d]\n",
              f->base(), f->past(), m_unit->md5().toString().c_str(),
              0, m_unit->bclen());
       ok = false;
       continue;
     }
     if (funcs.find(f->base()) != funcs.end()) {
-      printf("Verify: duplicate function-base at %d in unit %s\n",
+      verify_error("duplicate function-base at %d in unit %s\n",
              f->base(), m_unit->md5().toString().c_str());
       ok = false;
       continue;
@@ -143,7 +143,7 @@ bool UnitChecker::checkBytecode() {
   }
   // iterate funcs in offset order, checking for holes and overlap
   if (funcs.empty()) {
-    printf("Verify: unit %s must have at least one func\n",
+    verify_error("unit %s must have at least one func\n",
            m_unit->md5().toString().c_str());
     return false;
   }
@@ -151,17 +151,17 @@ bool UnitChecker::checkBytecode() {
   for (FuncMap::iterator i = funcs.begin(), e = funcs.end(); i != e; ) {
     const Func* f = (*i).second; ++i;
     if (f->base() < last_past) {
-      printf("Verify: function overlap [%d:%d] in unit %s\n",
+      verify_error("function overlap [%d:%d] in unit %s\n",
              f->base(), last_past, m_unit->md5().toString().c_str());
       ok = false;
     } else if (f->base() > last_past) {
-      printf("Verify: dead bytecode space [%d:%d] in unit %s\n",
+      verify_error("dead bytecode space [%d:%d] in unit %s\n",
              last_past, f->base(), m_unit->md5().toString().c_str());
       ok = false;
     }
     last_past = f->past();
     if (i == e && last_past != m_unit->bclen()) {
-      printf("Verify: dead bytecode [%d:%d] at end of unit %s\n",
+      verify_error("dead bytecode [%d:%d] at end of unit %s\n",
              last_past, m_unit->bclen(), m_unit->md5().toString().c_str());
       ok = false;
     }

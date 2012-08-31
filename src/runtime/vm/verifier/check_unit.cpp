@@ -31,6 +31,7 @@ class UnitChecker {
   ~UnitChecker() {}
   bool verify();
  private:
+  template<class T> bool checkLiteral(size_t, const T*, const char*);
   bool checkStrings();
   bool checkArrays();
   bool checkSourceLocs();
@@ -66,46 +67,60 @@ UnitChecker::UnitChecker(const Unit* unit, bool verbose)
 
 bool UnitChecker::verify() {
   return checkStrings() &&
-         //checkArrays() &&
+         checkArrays() &&
          //checkSourceLocs() &&
          //checkPreConsts() &&
          //checkPreClasses() &&
          checkBytecode() &&
-         //checkMetadta() &&
+         //checkMetadata() &&
          checkFuncs();
+}
+
+template<class LitType>
+bool UnitChecker::checkLiteral(size_t id,
+                               const LitType* lt,
+                               const char* what) {
+  bool ok = true;
+  if (!lt) {
+    verify_error("null %s id %zu in unit %s\n", what, id,
+                 m_unit->md5().toString().c_str());
+    ok = false;
+  }
+  if (!lt->isStatic()) {
+    verify_error("non-static %s id %zu in unit %s\n", what, id,
+                 m_unit->md5().toString().c_str());
+    ok = false;
+  }
+  return ok;
 }
 
 bool UnitChecker::checkStrings() {
   bool ok = true;
   for (size_t i = 0, n = m_unit->numLitstrs(); i < n; ++i) {
-    const StringData* s = m_unit->lookupLitstrId(i);
-    if (!s) {
-      verify_error("null string id %ld in unit %s\n", i,
-             m_unit->md5().toString().c_str());
-      ok = false;
-      continue;
-    }
-    if (!s->isStatic()) {
-      verify_error("non-static string id %ld in unit %s\n", i,
-             m_unit->md5().toString().c_str());
-      ok = false;
-      continue;
-    }
+    ok &= checkLiteral(i, m_unit->lookupLitstrId(i), "string");
   }
   return ok;
   // Notes
   // * Any string in repo can be null.  repo litstrId is checked on load
-  // then discarded.  Each Litstr entry bcecomes a static string.
+  // then discarded.  Each Litstr entry becomes a static string.
   // Strings are hash-commoned so presumably only one can be null per unit.
   // string_data_hash and string_data_same both crash/assert on null.
-  // * If DB has dups then UnitEmitter commons them - spec should outlow
+  // * If DB has dups then UnitEmitter commons them - spec should outlaw
   // dups because UE will assert if db has dups with different ids.
-  // StringData staticly keeps a map of loaded static strings
+  // StringData statically keeps a map of loaded static strings
   // * UE keeps a (String->id) mapping and assigns dups the same id, plus
   // a table of litstrs indexed by id.  Unit stores them as
   // m_namedInfo, a vector<StringData,NamedEntity=null> of pairs.
   // * are null characters allowed inside the string?
   // * are strings utf8-encoded?
+}
+
+bool UnitChecker::checkArrays() {
+  bool ok = true;
+  for (size_t i = 0, n = m_unit->numArrays(); i < n; ++i) {
+    ok &= checkLiteral(i, m_unit->lookupArrayId(i), "array");
+  }
+  return ok;
 }
 
 /**
@@ -174,10 +189,27 @@ bool UnitChecker::checkBytecode() {
 }
 
 bool UnitChecker::checkFuncs() {
+  const Func* pseudo = 0;
+  bool multi = false;
+
   bool ok = true;
   for (AllFuncs i(m_unit); !i.empty();) {
+    if (i.front()->isPseudoMain()) {
+      if (pseudo) {
+        multi = true;
+        verify_error("unit should have exactly one pseudo-main\n");
+        ok = false;
+      }
+      pseudo = i.front();
+    }
     ok &= checkFunc(i.popFront(), m_verbose);
   }
+
+  if (!multi && m_unit->getMain() != pseudo) {
+    verify_error("funcs and unit disagree on what is the pseudo-main\n");
+    ok = false;
+  }
+
   return ok;
 }
 

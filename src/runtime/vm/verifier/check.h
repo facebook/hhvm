@@ -36,15 +36,16 @@ namespace Verifier {
  * Checked:
  * -- string table may not contain null pointers, but strings can contain
  *    NUL (0) chars.
+ * -- array table may not contain null pointers
  * -- every byte of code must be in exactly one Func's range.
+ * -- must have exactly 1 pseudo-main
+ * -- checkFunc for each function in the unit
  *
  * Not Checked:
- * -- array table contents
  * -- SourceLocs
  * -- PreConsts
  * -- PreClasses
  * -- Metadata
- * -- Must have exactly 1 pseudo-main
  */
 bool checkUnit(const Unit*, bool verbose = false);
 

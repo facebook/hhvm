@@ -98,7 +98,7 @@ class ObjectData : public CountableNF {
         , o_callbacks(cb)
 #endif
         {
-    ASSERT(uintptr_t(this) % sizeof(TypedValue) == 0);
+    ASSERT(!hhvm || uintptr_t(this) % sizeof(TypedValue) == 0);
     if (!noId) {
       o_id = ++(*os_max_id);
     }

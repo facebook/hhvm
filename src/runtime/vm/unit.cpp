@@ -19,6 +19,7 @@
 #include <iostream>
 #include <iomanip>
 #include <tbb/concurrent_unordered_map.h>
+#include <boost/algorithm/string.hpp>
 
 #include <util/lock.h>
 #include <runtime/ext/ext_variable.h>
@@ -1614,8 +1615,12 @@ Unit* UnitEmitter::create() {
     std::cout << u->toString();
   }
 
-  static const bool kAlwaysVerify = getenv("HPHP_ALWAYS_VERIFY");
-  if (kAlwaysVerify) {
+  static const bool kAlwaysVerify = getenv("HHVM_ALWAYS_VERIFY");
+  static const bool kVerifyNonSystem = getenv("HHVM_VERIFY");
+  const bool doVerify = kAlwaysVerify ||
+     (kVerifyNonSystem && !u->filepath()->empty() &&
+      !boost::ends_with(u->filepath()->data(), "systemlib.php"));
+  if (doVerify) {
     Verifier::checkUnit(u);
   }
   return u;

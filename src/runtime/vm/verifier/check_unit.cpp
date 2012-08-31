@@ -45,6 +45,7 @@ class UnitChecker {
 };
 
 bool checkUnit(const Unit* unit, bool verbose) {
+  printf("Verify: verifying unit from %s\n", unit->filepath()->data());
   return UnitChecker(unit, verbose).verify();
 }
 

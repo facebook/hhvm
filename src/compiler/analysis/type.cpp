@@ -53,11 +53,6 @@ Type::TypePtrMap Type::s_TypeHintTypes;
 void Type::InitTypeHintMap() {
   ASSERT(s_TypeHintTypes.empty());
   s_TypeHintTypes["array"] = Type::Array;
-  if (Option::EnableHipHopExperimentalSyntax) {
-    s_TypeHintTypes["vector"]  = Type::Array;
-    s_TypeHintTypes["map"]     = Type::Array;
-    s_TypeHintTypes["set"]     = Type::Array;
-  }
   if (Option::EnableHipHopSyntax) {
     s_TypeHintTypes["bool"]    = Type::Boolean;
     s_TypeHintTypes["boolean"] = Type::Boolean;

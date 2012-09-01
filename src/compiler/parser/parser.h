@@ -145,11 +145,8 @@ public:
   void onScalar(Token &out, int type, Token &scalar);
   void onExprListElem(Token &out, Token *exprs, Token &expr);
 
-  void pushObject(Token &base);
-  void popObject(Token &out);
-  void appendMethodParams(Token &params);
-  void appendProperty(Token &prop);
-  void appendRefDim(Token &offset);
+  void onObjectProperty(Token &out, Token &base, Token &prop);
+  void onObjectMethodCall(Token &out, Token &base, Token &prop, Token &params);
 
   void onListAssignment(Token &out, Token &vars, Token *expr);
   void onAListVar(Token &out, Token *list, Token *var);
@@ -171,7 +168,7 @@ public:
                   Token &params, Token &stmt, Token *attr);
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue);
-  void onClassStart(int type, Token &name, Token *parent);
+  void onClassStart(int type, Token &name);
   void onClass(Token &out, int type, Token &name, Token &base,
                Token &baseInterface, Token &stmt, Token *attr);
   void onInterface(Token &out, Token &name, Token &base, Token &stmt,
@@ -232,9 +229,6 @@ public:
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
 
-  void onTypeDecl(Token &out, Token &type, Token &decl);
-  void onTypedVariable(Token &out, Token *exprs, Token &var, Token *value);
-
   virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
   virtual void invalidateLabel(TStatementPtr stmt);
 
@@ -244,7 +238,6 @@ public:
 private:
   AnalysisResultPtr m_ar;
   FileScopePtr m_file;
-  ExpressionPtrVec m_objects; // for parsing object property/method calls
   std::vector<std::string> m_comments; // for docComment stack
   std::vector<BlockScopePtrVec> m_scopes;
   std::vector<int> m_generators;

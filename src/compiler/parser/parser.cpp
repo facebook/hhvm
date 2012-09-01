@@ -423,48 +423,25 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
 ///////////////////////////////////////////////////////////////////////////////
 // object property and method calls
 
-void Parser::pushObject(Token &base) {
-  m_objects.push_back(base->exp);
-}
-
-void Parser::popObject(Token &out) {
-  out->exp = m_objects.back();
-  m_objects.pop_back();
-}
-
-void Parser::appendMethodParams(Token &params) {
-  ExpressionListPtr paramsExp;
-  if (params->exp) {
-    paramsExp = dynamic_pointer_cast<ExpressionList>(params->exp);
-  } else if (params->num() == 1) {
-    paramsExp = NEW_EXP0(ExpressionList);
-  }
-  if (paramsExp) {
-    ObjectPropertyExpressionPtr prop =
-      dynamic_pointer_cast<ObjectPropertyExpression>(m_objects.back());
-    if (prop) {
-      ObjectMethodExpressionPtr method =
-        NEW_EXP(ObjectMethodExpression,
-                prop->getObject(), prop->getProperty(), paramsExp);
-      m_objects.back() = method;
-    } else {
-      m_objects.back() = NEW_EXP(DynamicFunctionCall, m_objects.back(),
-                                 paramsExp, ExpressionPtr());
-    }
-  }
-}
-
-void Parser::appendProperty(Token &prop) {
+void Parser::onObjectProperty(Token &out, Token &base, Token &prop) {
   if (!prop->exp) {
     prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
   }
-  m_objects.back() = NEW_EXP(ObjectPropertyExpression, m_objects.back(),
-                             prop->exp);
+  out->exp = NEW_EXP(ObjectPropertyExpression, base->exp, prop->exp);
 }
 
-void Parser::appendRefDim(Token &offset) {
-  m_objects.back() = NEW_EXP(ArrayElementExpression, m_objects.back(),
-                             offset->exp);
+void Parser::onObjectMethodCall(Token &out, Token &base, Token &prop,
+                                Token &params) {
+  if (!prop->exp) {
+    prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
+  }
+  ExpressionListPtr paramsExp;
+  if (params->exp) {
+    paramsExp = dynamic_pointer_cast<ExpressionList>(params->exp);
+  } else {
+    paramsExp = NEW_EXP0(ExpressionList);
+  }
+  out->exp = NEW_EXP(ObjectMethodExpression, base->exp, prop->exp, paramsExp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -860,7 +837,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     }
 
     ExpressionListPtr attrList;
-    if (attr) {
+    if (attr && attr->exp) {
       attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
     }
 
@@ -902,7 +879,7 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
   out->exp = expList;
 }
 
-void Parser::onClassStart(int type, Token &name, Token *parent) {
+void Parser::onClassStart(int type, Token &name) {
   if (name.text() == "self" || name.text() == "parent" ||
       Type::GetTypeHintTypes().find(name.text()) !=
       Type::GetTypeHintTypes().end()) {
@@ -923,7 +900,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
   ExpressionListPtr attrList;
-  if (attr) {
+  if (attr && attr->exp) {
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
 
@@ -950,7 +927,7 @@ void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt,
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
   ExpressionListPtr attrList;
-  if (attr) {
+  if (attr && attr->exp) {
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
 
@@ -1136,7 +1113,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 
   } else {
     ExpressionListPtr attrList;
-    if (attr) {
+    if (attr && attr->exp) {
       attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
     }
     mth = NEW_STMT(MethodStatement, exp, ref->num(), name->text(),
@@ -1541,17 +1518,6 @@ void Parser::onLabel(Token &out, Token &label) {
 
 void Parser::onGoto(Token &out, Token &label, bool limited) {
   out->stmt = NEW_STMT(GotoStatement, label.text());
-}
-
-void Parser::onTypeDecl(Token &out, Token &type, Token &decl) {
-  if (!Option::EnableHipHopExperimentalSyntax && !m_scanner.isStrictMode()) {
-    PARSE_ERROR("Type hint is not enabled");
-    return;
-  }
-}
-
-void Parser::onTypedVariable(Token &out, Token *exprs, Token &var,
-                             Token *value) {
 }
 
 void Parser::invalidateGoto(TStatementPtr stmt, GotoError error) {

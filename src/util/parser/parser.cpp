@@ -130,6 +130,19 @@ LocationPtr ParserBase::popFuncLocation() {
   return loc;
 }
 
+void ParserBase::pushClass(bool isXhpClass) {
+  m_classes.push_back(isXhpClass);
+}
+
+bool ParserBase::peekClass() {
+  ASSERT(!m_classes.empty());
+  return m_classes.back();
+}
+
+void ParserBase::popClass() {
+  m_classes.pop_back();
+}
+
 std::string ParserBase::getAnonFuncName(AnonFuncKind kind) {
   int64 h = hash_string_cs(m_fileName, strlen(m_fileName));
   int closureId;

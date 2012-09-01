@@ -159,9 +159,8 @@ static void prepare_continuation_call(Parser* _p, Token& rhs, const char* cname)
     Token var;    _p->onSynthesizedVariable(var, name);
     Token pn;     pn.setText(cname);
     Token pname;  _p->onName(pname, pn, Parser::VarName);
-                  _p->pushObject(var); _p->appendProperty(pname);
-    Token empty;  empty = 1; _p->appendMethodParams(empty);
-                  _p->popObject(rhs);
+    Token empty;  empty = 1;
+                  _p->onObjectMethodCall(rhs, var, pname, empty);
   }
 }
 
@@ -214,9 +213,9 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
         Token var;     _p->onSynthesizedVariable(var, name);
         Token pn;      pn.setText("getLabel");
         Token pname;   _p->onName(pname, pn, Parser::VarName);
-        Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
-        Token empty;   empty = 1; _p->appendMethodParams(empty);
-                       _p->popObject(mcall);
+        Token mcall;
+        Token empty;   empty = 1;
+                       _p->onObjectMethodCall(mcall, var, pname, empty);
         switchExp = mcall;
       }
     }
@@ -428,8 +427,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
     Token pn;       pn.setText("valid");
     Token pname;    _p->onName(pname, pn, Parser::VarName);
     Token empty;    empty = 1;
-    Token valid;    _p->pushObject(var); _p->appendProperty(pname);
-                    _p->appendMethodParams(empty); _p->popObject(valid);
+    Token valid;    _p->onObjectMethodCall(valid, var, pname, empty);
     _p->onExprListElem(cond, NULL, valid);
   }
 
@@ -440,8 +438,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
     Token pn;       pn.setText("next");
     Token pname;    _p->onName(pname, pn, Parser::VarName);
     Token empty;    empty = 1;
-    Token next;     _p->pushObject(var); _p->appendProperty(pname);
-                    _p->appendMethodParams(empty); _p->popObject(next);
+    Token next;     _p->onObjectMethodCall(next, var, pname, empty);
     _p->onExprListElem(step, NULL, next);
   }
 
@@ -456,8 +453,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
         Token pn;     pn->setText("key");
         Token pname;  _p->onName(pname, pn, Parser::VarName);
         Token empty;  empty = 1;
-        Token call;   _p->pushObject(var); _p->appendProperty(pname);
-                      _p->appendMethodParams(empty); _p->popObject(call);
+        Token call;   _p->onObjectMethodCall(call, var, pname, empty);
         Token kset;   _p->onAssign(kset, name, call, false);
         _p->onExpStatement(skset, kset);
       }
@@ -470,8 +466,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
         Token pn;     pn.setText(byRef ? "currentRef" : "current");
         Token pname;  _p->onName(pname, pn, Parser::VarName);
         Token empty;  empty = 1;
-        Token call;   _p->pushObject(var); _p->appendProperty(pname);
-                      _p->appendMethodParams(empty); _p->popObject(call);
+        Token call;   _p->onObjectMethodCall(call, var, pname, empty);
         Token vset;   _p->onAssign(vset, value, call, byRef);
         _p->onExpStatement(svset, vset);
       }
@@ -488,8 +483,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
         Token pn;     pn.setText(byRef ? "currentRef" : "current");
         Token pname;  _p->onName(pname, pn, Parser::VarName);
         Token empty;  empty = 1;
-        Token call;   _p->pushObject(var); _p->appendProperty(pname);
-                      _p->appendMethodParams(empty); _p->popObject(call);
+        Token call;   _p->onObjectMethodCall(call, var, pname, empty);
         Token vset;   _p->onAssign(vset, name, call, byRef);
         _p->onExpStatement(svset, vset);
       }
@@ -854,14 +848,6 @@ static void only_in_strict_mode(Parser *_p) {
   }
 }
 
-static void sm_array_wrapper(Parser *_p, Token &out, Token &pairs,
-                             const char *wrapper) {
-  Token arr;     _p->onArray(arr, pairs, T_ARRAY);
-  Token params;  _p->onCallParam(params,NULL,arr,0);
-  Token name;    name.set(T_STRING, wrapper);
-  _p->onCall(out, 0, name, params, NULL);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
@@ -869,7 +855,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 }
 %}
 
-%expect 14
+%expect 2
 %define api.pure
 %parse-param {HPHP::HPHP_PARSER_NS::Parser *_p}
 
@@ -1073,29 +1059,19 @@ inner_statement:
     statement                          { $$ = $1;}
   | function_declaration_statement     { $$ = $1;}
   | class_declaration_statement        { $$ = $1;}
+  | trait_declaration_statement        { $$ = $1;}
 ;
 statement:
-   expr ';'                            { _p->onExpStatement($$, $1);}
- | statement_without_expr              { $$ = $1;}
- | T_STRING ':'                        { _p->onLabel($$, $1);
-                                         _p->addLabel($1.text(),
-                                                      _p->getLocation(),
-                                                      &$$); }
-;
-statement_without_expr:
     '{' inner_statement_list '}'       { _p->onBlock($$, $2);}
-
   | T_IF '(' expr ')'
     statement
     elseif_list
     else_single                        { _p->onIf($$,$3,$5,$6,$7);}
-
   | T_IF '(' expr ')' ':'
     inner_statement_list
     new_elseif_list
     new_else_single
     T_ENDIF ';'                        { _p->onIf($$,$3,$6,$7,$8);}
-
   | T_WHILE '(' expr ')'               { _p->pushLabelScope();}
     while_statement                    { _p->popLabelScope();
                                          _p->onWhile($$,$3,$6);}
@@ -1103,62 +1079,38 @@ statement_without_expr:
   | T_DO                               { _p->pushLabelScope();}
     statement T_WHILE '(' expr ')' ';' { _p->popLabelScope();
                                          _p->onDo($$,$3,$6);}
-
   | T_FOR '(' for_expr ';'
     for_expr ';' for_expr ')'          { _p->pushLabelScope();}
     for_statement                      { _p->popLabelScope();
                                          _p->onFor($$,$3,$5,$7,$10);}
-
   | T_SWITCH '(' expr ')'              { _p->pushLabelScope();}
     switch_case_list                   { _p->popLabelScope();
                                          _p->onSwitch($$,$3,$6);}
-
   | T_BREAK ';'                        { _p->onBreak($$, NULL);}
   | T_BREAK expr ';'                   { _p->onBreak($$, &$2);}
-
   | T_CONTINUE ';'                     { _p->onContinue($$, NULL);}
   | T_CONTINUE expr ';'                { _p->onContinue($$, &$2);}
-
   | T_RETURN ';'                       { _p->onReturn($$, NULL);}
-  | T_RETURN expr_without_variable ';' { _p->onReturn($$, &$2);}
-  | T_RETURN variable ';'              { _p->onReturn($$, &$2);}
-
+  | T_RETURN expr ';'                  { _p->onReturn($$, &$2);}
   | T_YIELD T_BREAK ';'                { _p->onYield($$, NULL, false);}
-  | T_YIELD expr_without_variable ';'  { _p->onYield($$, &$2, false);}
-  | T_YIELD variable ';'               { _p->onYield($$, &$2, false);}
-  | variable '='
-    T_YIELD expr_without_variable ';'  { on_yield_assign(_p, $$, $1, &$4);}
-  | variable '=' T_YIELD variable ';'  { on_yield_assign(_p, $$, $1, &$4);}
-  | T_LIST '(' assignment_list ')' '='
-    T_YIELD expr_without_variable ';'  { on_yield_list_assign(_p, $$, $3, &$7);}
-  | T_LIST '(' assignment_list ')' '='
-    T_YIELD variable ';'               { on_yield_list_assign(_p, $$, $3, &$7);}
-
+  | T_YIELD expr ';'                   { _p->onYield($$, &$2, false);}
+  | variable '=' T_YIELD expr ';'      { on_yield_assign(_p, $$, $1, &$4);}
+  | T_LIST '(' assignment_list ')'
+    '=' T_YIELD expr ';'               { on_yield_list_assign(_p, $$, $3, &$7);}
   | T_GLOBAL global_var_list ';'       { _p->onGlobal($$, $2);}
   | T_STATIC static_var_list ';'       { _p->onStatic($$, $2);}
-  | non_empty_type_decl var_list ';'   { _p->onTypeDecl($$, $1, $2);}
-  | T_ECHO echo_expr_list ';'          { _p->onEcho($$, $2, 0);}
-  | T_UNSET '(' unset_variables ')'
-    ';'                                { _p->onUnset($$, $3);}
+  | T_ECHO expr_list ';'               { _p->onEcho($$, $2, 0);}
+  | T_UNSET '(' variable_list ')' ';'  { _p->onUnset($$, $3);}
   | ';'                                { $$.reset();}
-
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}
-
-  | T_FOREACH '(' variable
+  | T_FOREACH '(' expr
     T_AS foreach_variable
-    foreach_optional_arg ')'           { _p->pushLabelScope();}
-    foreach_statement                  { _p->popLabelScope();
-                                         _p->onForEach($$,$3,$5,$6,$9);}
-
-  | T_FOREACH '(' expr_without_variable
-    T_AS variable
     foreach_optional_arg ')'           { _p->pushLabelScope();}
     foreach_statement                  { _p->popLabelScope();
                                          _p->onForEach($$,$3,$5,$6,$9);}
 
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
-
   | T_TRY '{'
     inner_statement_list '}'
     T_CATCH '('
@@ -1167,18 +1119,20 @@ statement_without_expr:
     inner_statement_list '}'
     additional_catches
     optional_finally                   { _p->onTry($$,$3,$7,$8,$11,$13,$14);}
-
-  
   | T_TRY '{'
     inner_statement_list '}'
     finally                            { _p->onTry($$, $3, $5);}
-
-
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
   | T_GOTO T_STRING ';'                { _p->onGoto($$, $2, true);
                                          _p->addGoto($2.text(),
                                                      _p->getLocation(),
                                                      &$$); }
+  | expr ';'                           { _p->onExpStatement($$, $1);}
+  | T_STRING ':'                       { _p->onLabel($$, $1);
+                                         _p->addLabel($1.text(),
+                                                      _p->getLocation(),
+                                                      &$$); }
+;
 
 additional_catches:
     additional_catches
@@ -1201,14 +1155,6 @@ optional_finally:
   |                                    { $$.reset();}
 ;
 
-unset_variables:
-    unset_variable                     { _p->onExprListElem($$, NULL, $1);}
-  | unset_variables ',' unset_variable { _p->onExprListElem($$, &$1, $3);}
-;
-unset_variable:
-    variable                           { $$ = $1;}
-;
-
 is_reference:
     '&'                                { $$ = 1;}
   |                                    { $$.reset();}
@@ -1217,87 +1163,118 @@ is_reference:
 function_loc:
     T_FUNCTION                         { _p->pushFuncLocation();}
 ;
+
 function_declaration_statement:
-    type_decl function_loc
-    is_reference sm_name_with_typevar { $4.setText(_p->nsDecl($4.text()));
+    function_loc
+    is_reference sm_name_with_typevar  { $3.setText(_p->nsDecl($3.text()));
+                                         _p->onFunctionStart($3);
+                                         _p->pushLabelInfo();}
+    '(' parameter_list ')'
+    sm_opt_return_type
+    '{' inner_statement_list '}'       { Token t; t.reset();
+                                         _p->onFunction($$,t,$2,$3,$6,$10,0);
+                                         _p->popLabelInfo();
+                                         _p->popTypeScope();}
+  | non_empty_user_attributes function_loc
+    is_reference sm_name_with_typevar  { $4.setText(_p->nsDecl($4.text()));
                                          _p->onFunctionStart($4);
                                          _p->pushLabelInfo();}
-    '(' parameter_list sm_endpar_and_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,$1,$3,$4,$7,$10,0);
-                                         _p->popLabelInfo(); _p->popTypeScope(); }
- |  T_SL user_attribute_list T_SR
-    type_decl function_loc
-    is_reference sm_name_with_typevar { $7.setText(_p->nsDecl($7.text()));
-                                         _p->onFunctionStart($7);
-                                         _p->pushLabelInfo();}
-    '(' parameter_list sm_endpar_and_type
-    '{' inner_statement_list '}'       { _p->onFunction($$,$4,$6,$7,$10,$13,&$2);
-                                         _p->popLabelInfo(); _p->popTypeScope(); }
+    '(' parameter_list ')'
+    sm_opt_return_type
+    '{' inner_statement_list '}'       { Token t; t.reset();
+                                         _p->onFunction($$,t,$3,$4,$7,$11,&$1);
+                                         _p->popLabelInfo();
+                                         _p->popTypeScope();}
 ;
 
 class_declaration_statement:
-    class_entry_type sm_name_with_typevar
-    extends_from                       { $2.setText(_p->nsDecl($2.text()));
-                                         _p->onClassStart($1.num(), $2, &$3);}
-    implements_list '{'
-    class_statement_list '}'           { _p->onClass($$,$1.num(),$2,$3,$5,$7,0);
-                                         _p->popTypeScope(); }
-
-  | class_entry_type T_XHP_LABEL
-    extends_from                       { $2.xhpLabel();
-                                         $2.setText(_p->nsDecl($2.text()));
-                                         _p->onClassStart($1.num(), $2, &$3);}
-    implements_list '{'                { _p->scanner().xhpStatement();}
-    xhp_class_statement_list '}'       { xhp_collect_attributes(_p, $9, $8);
-                                         _p->onClass($$,$1.num(),$2,$3,$5,$9,0);
-                                         _p->xhpResetAttributes();
-                                         _p->scanner().xhpReset();}
-  | T_SL user_attribute_list T_SR
-    class_entry_type sm_name_with_typevar
-    extends_from                       { $5.setText(_p->nsDecl($5.text()));
-                                         _p->onClassStart($4.num(), $5, &$6);}
-    implements_list '{'
-    class_statement_list '}'           { _p->onClass($$,$4.num(),$5,$6,$8,$10,&$2);
-                                         _p->popTypeScope(); }
-  | T_SL user_attribute_list T_SR
-    class_entry_type T_XHP_LABEL
-    extends_from                       { $5.xhpLabel();
-                                         $5.setText(_p->nsDecl($5.text()));
-                                         _p->onClassStart($4.num(), $5, &$6);}
-    implements_list '{'                { _p->scanner().xhpStatement();}
-    xhp_class_statement_list '}'       { xhp_collect_attributes(_p, $12, $11);
-                                         _p->onClass($$,$4.num(),$5,$6,$8,$12,&$2);
-                                         _p->xhpResetAttributes();
-                                         _p->scanner().xhpReset();}
-  | T_INTERFACE sm_name_with_typevar   { $2.setText(_p->nsDecl($2.text()));
-                                         _p->onClassStart(T_INTERFACE, $2, 0);}
+    class_entry_type
+    class_decl_name                    { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onClassStart($1.num(),$2);}
+    extends_from implements_list '{'   { if (_p->peekClass())
+                                           _p->scanner().xhpStatement();}
+    class_statement_list '}'           { Token stmts;
+                                         if (_p->peekClass()) {
+                                           xhp_collect_attributes(_p,stmts,$8);
+                                         } else {
+                                           stmts = $8;
+                                         }
+                                         _p->onClass($$,$1.num(),$2,$4,$5,
+                                                     stmts,0);
+                                         if (_p->peekClass()) {
+                                           _p->xhpResetAttributes();
+                                           _p->scanner().xhpReset();
+                                         }
+                                         _p->popClass();
+                                         _p->popTypeScope();}
+  | non_empty_user_attributes
+    class_entry_type
+    class_decl_name                    { $3.setText(_p->nsDecl($3.text()));
+                                         _p->onClassStart($2.num(),$3);}
+    extends_from implements_list '{'   { if (_p->peekClass())
+                                           _p->scanner().xhpStatement();}
+    class_statement_list '}'           { Token stmts;
+                                         if (_p->peekClass()) {
+                                           xhp_collect_attributes(_p,stmts,$9);
+                                         } else {
+                                           stmts = $9;
+                                         }
+                                         _p->onClass($$,$2.num(),$3,$5,$6,
+                                                     stmts,&$1);
+                                         if (_p->peekClass()) {
+                                           _p->xhpResetAttributes();
+                                           _p->scanner().xhpReset();
+                                         }
+                                         _p->popClass();
+                                         _p->popTypeScope();}
+  | T_INTERFACE
+    interface_decl_name                { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onClassStart(T_INTERFACE,$2);}
     interface_extends_list '{'
     class_statement_list '}'           { _p->onInterface($$,$2,$4,$6,0);
-                                         _p->popTypeScope(); }
-  | T_SL user_attribute_list T_SR
-    T_INTERFACE sm_name_with_typevar   { $5.setText(_p->nsDecl($5.text()));
-                                         _p->onClassStart(T_INTERFACE, $5, 0);}
+                                         _p->popClass();
+                                         _p->popTypeScope();}
+  | non_empty_user_attributes
+    T_INTERFACE
+    interface_decl_name                { $3.setText(_p->nsDecl($3.text()));
+                                         _p->onClassStart(T_INTERFACE,$3);}
     interface_extends_list '{'
-    class_statement_list '}'           { _p->onInterface($$,$5,$7,$9,&$2);
-                                         _p->popTypeScope(); }
+    class_statement_list '}'           { _p->onInterface($$,$3,$5,$7,&$1);
+                                         _p->popClass();
+                                         _p->popTypeScope();}
 ;
 
 trait_declaration_statement:
-    T_TRAIT sm_name_with_typevar       { $2.setText(_p->nsDecl($2.text()));
-                                         _p->onClassStart(T_TRAIT, $2, 0);}
+    T_TRAIT
+    trait_decl_name                    { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onClassStart(T_TRAIT, $2);}
     '{' class_statement_list '}'       { Token t_ext, t_imp;
                                          t_ext.reset(); t_imp.reset();
                                          _p->onClass($$,T_TRAIT,$2,t_ext,t_imp,
                                                      $5, 0);
-                                         _p->popTypeScope(); }
-  | T_SL user_attribute_list T_SR
-    T_TRAIT sm_name_with_typevar       { $5.setText(_p->nsDecl($5.text()));
-                                         _p->onClassStart(T_TRAIT, $5, 0);}
+                                         _p->popClass();
+                                         _p->popTypeScope();}
+  | non_empty_user_attributes
+    T_TRAIT
+    trait_decl_name                    { $3.setText(_p->nsDecl($3.text()));
+                                         _p->onClassStart(T_TRAIT, $3);}
     '{' class_statement_list '}'       { Token t_ext, t_imp;
                                          t_ext.reset(); t_imp.reset();
-                                         _p->onClass($$,T_TRAIT,$5,t_ext,t_imp,
-                                                     $8, &$2);
-                                         _p->popTypeScope(); }
+                                         _p->onClass($$,T_TRAIT,$3,t_ext,t_imp,
+                                                     $6, &$1);
+                                         _p->popClass();
+                                         _p->popTypeScope();}
+;
+class_decl_name:
+    sm_name_with_typevar               { _p->pushClass(false); $$ = $1;}
+  | T_XHP_LABEL                        { $1.xhpLabel(); _p->pushTypeScope();
+                                         _p->pushClass(true); $$ = $1;}
+;
+interface_decl_name:
+    sm_name_with_typevar               { _p->pushClass(false); $$ = $1;}
+;
+trait_decl_name:
+    sm_name_with_typevar               { _p->pushClass(false); $$ = $1;}
 ;
 class_entry_type:
     T_CLASS                            { $$ = T_CLASS;}
@@ -1429,30 +1406,18 @@ non_empty_parameter_list:
     sm_type_opt T_VARIABLE
     '=' static_scalar                  { _p->onParam($$,&$1,$3,$4,0,&$6);}
 ;
-non_empty_type_decl:
-    T_STRING                           { $$ = $1;}
-  | T_ARRAY                            { $$.setText("array");}
-  | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1;}
-;
-type_decl:
-    non_empty_type_decl                { $$ = $1;}
-  |                                    { $$.reset();}
-;
 
 function_call_parameter_list:
     non_empty_fcall_parameter_list     { $$ = $1;}
   |                                    { $$.reset();}
 ;
 non_empty_fcall_parameter_list:
-    expr_without_variable              { _p->onCallParam($$,NULL,$1,0);}
-  | variable                           { _p->onCallParam($$,NULL,$1,0);}
-  | '&' w_variable                     { _p->onCallParam($$,NULL,$2,1);}
+    expr                               { _p->onCallParam($$,NULL,$1,0);}
+  | '&' variable                       { _p->onCallParam($$,NULL,$2,1);}
   | non_empty_fcall_parameter_list ','
-    expr_without_variable              { _p->onCallParam($$,&$1,$3,0);}
+    expr                               { _p->onCallParam($$,&$1,$3,0);}
   | non_empty_fcall_parameter_list ','
-    variable                           { _p->onCallParam($$,&$1,$3,0);}
-  | non_empty_fcall_parameter_list ','
-    '&' w_variable                     { _p->onCallParam($$,&$1,$4,1);}
+    '&' variable                       { _p->onCallParam($$,&$1,$4,1);}
 ;
 
 global_var_list:
@@ -1461,7 +1426,7 @@ global_var_list:
 ;
 global_var:
     T_VARIABLE                         { $$ = $1;}
-  | '$' r_variable                     { $$ = $2; $$ = 1;}
+  | '$' variable                       { $$ = $2; $$ = 1;}
   | '$' '{' expr '}'                   { $$ = $3; $$ = 1;}
 ;
 
@@ -1473,22 +1438,11 @@ static_var_list:
   | T_VARIABLE '=' static_scalar       { _p->onStaticVariable($$,0,$1,&$3);}
 ;
 
-var_list:
-    var_list ',' T_VARIABLE            { _p->onTypedVariable($$,&$1,$3,0);}
-  | var_list ',' T_VARIABLE '=' expr   { _p->onTypedVariable($$,&$1,$3,&$5);}
-  | T_VARIABLE                         { _p->onTypedVariable($$,0,$1,0);}
-  | T_VARIABLE '=' expr                { _p->onTypedVariable($$,0,$1,&$3);}
-;
-
 class_statement_list:
     class_statement_list
-    class_statement                    { _p->onClassStatement($$, $1, $2);}
-  |                                    { $$.reset();}
-;
-xhp_class_statement_list:
-    xhp_class_statement_list
     class_statement                    { _p->onClassStatement($$, $1, $2);
-                                         _p->scanner().xhpStatement();}
+                                         if (_p->peekClass())
+                                           _p->scanner().xhpStatement();}
   |                                    { $$.reset();}
 ;
 class_statement:
@@ -1501,25 +1455,29 @@ class_statement:
                                          ($$,&$1,$4,&$2);}
   | class_constant_declaration ';'     { _p->onClassVariableStart
                                          ($$,NULL,$1,NULL);}
-  | method_modifiers
-    type_decl function_loc
+  | method_modifiers function_loc
     is_reference sm_name_with_typevar '('
-                                       { _p->onMethodStart($5, $1);
+                                       { _p->onMethodStart($4, $1);
                                          _p->pushLabelInfo();}
-    parameter_list sm_endpar_and_type method_body
-                                       { _p->onMethod($$,$1,$2,$4,$5,$8,$10,0);
+    parameter_list ')'
+    sm_opt_return_type
+    method_body
+                                       { Token t; t.reset();
+                                         _p->onMethod($$,$1,t,$3,$4,$7,$10,0);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope(); }
-  | T_SL user_attribute_list T_SR
-    method_modifiers
-    type_decl function_loc
+                                         _p->popTypeScope();}
+  | non_empty_user_attributes
+    method_modifiers function_loc
     is_reference sm_name_with_typevar '('
-                                        { _p->onMethodStart($8, $4);
+                                       { _p->onMethodStart($5, $2);
                                          _p->pushLabelInfo();}
-    parameter_list sm_endpar_and_type method_body
-                                       { _p->onMethod($$,$4,$5,$7,$8,$11,$13,&$2);
+    parameter_list ')'
+    sm_opt_return_type
+    method_body
+                                       { Token t; t.reset();
+                                         _p->onMethod($$,$2,t,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope(); }
+                                         _p->popTypeScope();}
   | T_XHP_ATTRIBUTE                    { _p->scanner().xhpAttributeDecl();}
     xhp_attribute_stmt ';'             { _p->xhpSetAttributes($3);}
   | T_XHP_CATEGORY
@@ -1689,22 +1647,19 @@ class_constant_declaration:
   | T_CONST sm_name_with_type '=' static_scalar { _p->onClassConstant($$,0,$2,$4);}
 ;
 
-echo_expr_list:
-    echo_expr_list ',' expr            { _p->onExprListElem($$, &$1, $3);}
+expr_list:
+    expr_list ',' expr                 { _p->onExprListElem($$, &$1, $3);}
   | expr                               { _p->onExprListElem($$, NULL, $1);}
 ;
 
 for_expr:
-    non_empty_for_expr                 { $$ = $1;}
+    expr_list                          { $$ = $1;}
   |                                    { $$.reset();}
 ;
-non_empty_for_expr:
-    non_empty_for_expr ',' expr        { _p->onExprListElem($$, &$1, $3);}
-  | expr                               { _p->onExprListElem($$, NULL, $1);}
-;
 
-expr_without_variable:
-    T_LIST '(' assignment_list ')'
+expr:
+    variable                           { $$ = $1;}
+  | T_LIST '(' assignment_list ')'
     '=' expr                           { _p->onListAssignment($$, $3, &$6);}
   | variable '=' expr                  { _p->onAssign($$, $1, $3, 0);}
   | variable '=' '&' variable          { _p->onAssign($$, $1, $4, 1);}
@@ -1725,10 +1680,10 @@ expr_without_variable:
   | variable T_XOR_EQUAL expr          { BEXP($$,$1,$3,T_XOR_EQUAL);}
   | variable T_SL_EQUAL expr           { BEXP($$,$1,$3,T_SL_EQUAL);}
   | variable T_SR_EQUAL expr           { BEXP($$,$1,$3,T_SR_EQUAL);}
-  | rw_variable T_INC                  { UEXP($$,$1,T_INC,0);}
-  | T_INC rw_variable                  { UEXP($$,$2,T_INC,1);}
-  | rw_variable T_DEC                  { UEXP($$,$1,T_DEC,0);}
-  | T_DEC rw_variable                  { UEXP($$,$2,T_DEC,1);}
+  | variable T_INC                     { UEXP($$,$1,T_INC,0);}
+  | T_INC variable                     { UEXP($$,$2,T_INC,1);}
+  | variable T_DEC                     { UEXP($$,$1,T_DEC,0);}
+  | T_DEC variable                     { UEXP($$,$2,T_DEC,1);}
   | expr T_BOOLEAN_OR expr             { BEXP($$,$1,$3,T_BOOLEAN_OR);}
   | expr T_BOOLEAN_AND expr            { BEXP($$,$1,$3,T_BOOLEAN_AND);}
   | expr T_LOGICAL_OR expr             { BEXP($$,$1,$3,T_LOGICAL_OR);}
@@ -1775,21 +1730,35 @@ expr_without_variable:
   | T_EXIT exit_expr                   { UEXP($$,$2,T_EXIT,1);}
   | '@' expr                           { UEXP($$,$2,'@',1);}
   | scalar                             { $$ = $1;}
-  | T_ARRAY  '(' array_pair_list ')'   { _p->onArray($$,$3,T_ARRAY);}
-  | T_STRICT_INT_MAP '(' array_pair_list ')' { sm_array_wrapper(_p, $$, $3, "__sm_intmap"); }
-  | T_STRICT_STR_MAP '(' array_pair_list ')' { sm_array_wrapper(_p, $$, $3, "__sm_strmap"); }
-  | '[' array_pair_list ']'            { only_in_strict_mode(_p);
-                                         sm_array_wrapper(_p, $$, $2, "__sm_vector"); }
+  | array_literal                      { $$ = $1;}
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
-  | type_decl function_loc
-    is_reference '('                   { Token t; _p->onFunctionStart(t);
+  | function_loc is_reference '('      { Token t; _p->onFunctionStart(t);
                                          _p->pushLabelInfo();}
-    parameter_list sm_endpar_and_type lexical_vars
-    '{' inner_statement_list '}'       { _p->onClosure($$,$1,$3,$6,$8,$10);
+    parameter_list ')'
+    sm_opt_return_type lexical_vars
+    '{' inner_statement_list '}'       { Token u; u.reset();
+                                         _p->onClosure($$,u,$2,$5,$8,$10);
                                          _p->popLabelInfo();}
-  | expr '[' dim_offset ']'            { _p->onRefDim($$, $1, $3);}
   | xhp_tag                            { $$ = $1;}
+  | dim_expr                           { $$ = $1;}
+;
+
+array_literal:
+    T_ARRAY '(' array_pair_list ')'    { _p->onArray($$,$3,T_ARRAY);}
+;
+
+dim_expr:
+    dim_expr
+    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
+  | dim_expr_base
+    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
+;
+
+dim_expr_base:
+    array_literal                      { $$ = $1;}
+  | class_constant                     { $$ = $1;}
+  | '(' expr ')'                       { $$ = $2;}
 ;
 
 lexical_vars:
@@ -1808,29 +1777,23 @@ xhp_tag:
     '<' xhp_label xhp_tag_body '>'     { no_gap(_p); xhp_tag(_p,$$,$2,$3);}
 ;
 xhp_tag_body:
-    '/'                                { Token t1; _p->onArray(t1,$1);
-                                         Token t2; _p->onArray(t2,$1);
-                                         _p->onCallParam($1,NULL,t1,0);
-                                         _p->onCallParam($$, &$1,t2,0);
-                                         $$.setText("");
-                                         _p->scanner().xhpCloseTag();}
-  | xhp_attributes '/'                 { _p->scanner().xhpCloseTag();}
-    xhp_end_tag                        { Token t1; _p->onArray(t1,$1);
+    xhp_attributes '/'                 { _p->scanner().xhpCloseTag();
+                                         Token t1; _p->onArray(t1,$1);
                                          Token t2; _p->onArray(t2,$2);
                                          _p->onCallParam($1,NULL,t1,0);
                                          _p->onCallParam($$, &$1,t2,0);
-                                         $$.setText($4);}
+                                         $$.setText("");}
   | xhp_attributes '>'                 { _p->scanner().xhpChild();}
     xhp_children '<' '/'               { _p->scanner().xhpCloseTag();}
-    xhp_end_tag                        { _p->onArray($5,$1);
+    xhp_opt_end_label                  { _p->onArray($5,$1);
                                          _p->onArray($6,$4);
                                          _p->onCallParam($2,NULL,$5,0);
                                          _p->onCallParam($$, &$2,$6,0);
-                                         $$.setText($8);}
+                                         $$.setText($8.text());}
 ;
-xhp_end_tag:
-    T_XHP_LABEL                        { $$ = $1;}
-  |                                    { $$.reset();}
+xhp_opt_end_label:
+                                       { $$.reset(); $$.setText("");}
+  | T_XHP_LABEL                        { $$.reset(); $$.setText($1);}
 ;
 xhp_attributes:
     xhp_attributes
@@ -1951,25 +1914,16 @@ xhp_bareword:
   | T_NS_C                             { $$ = $1;}
   | T_TRAIT                            { $$ = $1;}
   | T_TRAIT_C                          { $$ = $1;}
-  | T_VARARG                           { $$ = $1;}
 ;
 
-function_call:
+simple_function_call:
     namespace_string '('
     function_call_parameter_list ')'   { _p->onCall($$,0,$1,$3,NULL);}
-  | variable_without_objects '('
-    function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
-  | static_class_name
-    T_PAAMAYIM_NEKUDOTAYIM
-    T_STRING '('
-    function_call_parameter_list ')'   { _p->onCall($$,0,$3,$5,&$1);}
-  | static_class_name
-    T_PAAMAYIM_NEKUDOTAYIM
-    variable_without_objects '('
-    function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
 ;
+
 static_class_name:
-    fully_qualified_class_name_no_typeargs { _p->onName($$,$1,Parser::StringName);}
+    fully_qualified_class_name_no_typeargs
+                                       { _p->onName($$,$1,Parser::StringName);}
   | T_STATIC                           { _p->onName($$,$1,Parser::StaticName);}
   | reference_variable                 { _p->onName($$,$1,
                                          Parser::StaticClassExprName);}
@@ -1983,25 +1937,16 @@ fully_qualified_class_name_no_typeargs:
   | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1;}
 ;
 class_name_reference:
-    class_namespace_string             { _p->onName($$,$1,Parser::StringName);}
+    variable_no_calls                  { _p->onName($$,$1,Parser::ExprName);}
+  | T_STATIC                           { _p->onName($$,$1,Parser::StaticName);}
   | T_XHP_LABEL                        { $1.xhpLabel();
                                          _p->onName($$,$1,Parser::StringName);}
-  | dynamic_class_name_reference       { _p->onName($$,$1,Parser::ExprName);}
-  | T_STATIC                           { _p->onName($$,$1,Parser::StaticName);}
-;
-dynamic_class_name_reference:
-    base_variable                      { _p->pushObject($1);}
-    T_OBJECT_OPERATOR object_property
-    object_properties                  { _p->popObject($$);}
-  | base_variable                      { $$ = $1;}
-;
-object_properties:
-    object_properties
-    dynamic_class_name_variable_prop   { }
-  |                                    { }
-;
-dynamic_class_name_variable_prop:
-    T_OBJECT_OPERATOR object_property  { }
+  | namespace_name                     { $1.setText(_p->resolve($1.text(),1));
+                                         _p->onName($$,$1,Parser::StringName);}
+  | T_NS_SEPARATOR namespace_name      { _p->onName($$,$2,Parser::StringName);}
+  | T_NAMESPACE T_NS_SEPARATOR
+    namespace_name                     { $3.setText(_p->nsDecl($3.text()));
+                                         _p->onName($$,$3,Parser::StringName);}
 ;
 
 exit_expr:
@@ -2156,41 +2101,73 @@ user_attribute_list:
     non_empty_user_attribute_list
     possible_comma                     { $$ = $2;}
 ;
-
-expr:
-    r_variable                         { $$ = $1;}
-  | expr_without_variable              { $$ = $1;}
-;
-r_variable:
-    variable                           { $$ = $1;}
-;
-w_variable:
-    variable                           { $$ = $1;}
-;
-rw_variable:
-    variable                           { $$ = $1;}
+non_empty_user_attributes:
+    T_SL user_attribute_list T_SR      { $$ = $2;}
 ;
 variable:
-    base_variable_with_function_calls  { _p->pushObject($1);}
-    T_OBJECT_OPERATOR object_property
-    method_or_not                      { _p->appendMethodParams($5);}
-    variable_properties                { _p->popObject($$);}
-  | base_variable_with_function_calls  { _p->pushObject($1);
-                                         _p->popObject($$);}
+    variable_without_objects           { $$ = $1;}
+  | simple_function_call               { $$ = $1;}
+  | object_method_call                 { $$ = $1;}
+  | class_method_call                  { $$ = $1;}
+  | dimmable_variable
+    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
+  | dimmable_variable '{' expr '}'     { _p->onRefDim($$, $1, $3);}
+  | variable T_OBJECT_OPERATOR
+    T_STRING                           { _p->onObjectProperty($$,$1,$3);}
+  | variable T_OBJECT_OPERATOR
+    variable_without_objects           { _p->onObjectProperty($$,$1,$3);}
+  | variable T_OBJECT_OPERATOR
+    '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
+  | static_class_name
+    T_PAAMAYIM_NEKUDOTAYIM
+    variable_without_objects           { _p->onStaticMember($$,$1,$3);}
+  | callable_variable '('
+    function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
 ;
-variable_properties:
-    variable_properties
-    variable_property                  { }
-  |                                    { }
+
+dimmable_variable:
+    simple_function_call               { $$ = $1;}
+  | object_method_call                 { $$ = $1;}
+  | class_method_call                  { $$ = $1;}
+  | dimmable_variable
+    '[' dim_offset ']'                 { _p->onRefDim($$,$1,$3);}
+  | dimmable_variable '{' expr '}'     { _p->onRefDim($$,$1,$3);}
+  | variable T_OBJECT_OPERATOR
+    T_STRING                           { _p->onObjectProperty($$,$1,$3);}
+  | variable T_OBJECT_OPERATOR
+    '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
+  | callable_variable '('
+    function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
 ;
-variable_property:
-    T_OBJECT_OPERATOR object_property
-    method_or_not                      { _p->appendMethodParams($3);}
+
+callable_variable:
+    variable_without_objects           { $$ = $1;}
+  | dimmable_variable
+    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
+  | dimmable_variable '{' expr '}'     { _p->onRefDim($$, $1, $3);}
 ;
-method_or_not:
-    '('
-    function_call_parameter_list ')'   { $$ = $2; $$ = 1;}
-  |                                    { $$.reset();}
+
+object_method_call:
+    variable T_OBJECT_OPERATOR
+    T_STRING '('
+    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$3,$5);}
+  | variable T_OBJECT_OPERATOR
+    variable_without_objects '('
+    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$3,$5);}
+  | variable T_OBJECT_OPERATOR
+    '{' expr '}' '('
+    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$4,$7);}
+;
+
+class_method_call:
+    static_class_name
+    T_PAAMAYIM_NEKUDOTAYIM
+    T_STRING '('
+    function_call_parameter_list ')'   { _p->onCall($$,0,$3,$5,&$1);}
+  | static_class_name
+    T_PAAMAYIM_NEKUDOTAYIM
+    variable_without_objects '('
+    function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
 ;
 
 variable_without_objects:
@@ -2198,22 +2175,7 @@ variable_without_objects:
   | simple_indirect_reference
     reference_variable                 { _p->onIndirectRef($$,$1,$2);}
 ;
-static_member:
-    static_class_name
-    T_PAAMAYIM_NEKUDOTAYIM
-    variable_without_objects           { _p->onStaticMember($$,$1,$3);}
-;
 
-base_variable_with_function_calls:
-    base_variable                      { $$ = $1;}
-  | function_call                      { $$ = $1;}
-;
-base_variable:
-    reference_variable                 { $$ = $1;}
-  | simple_indirect_reference
-    reference_variable                 { _p->onIndirectRef($$,$1,$2);}
-  | static_member                      { $$ = $1; $$ = 2;}
-;
 reference_variable:
     reference_variable
     '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
@@ -2229,23 +2191,37 @@ dim_offset:
   |                                    { $$.reset();}
 ;
 
-object_property:
-    object_dim_list                    { }
-  | variable_without_objects           { _p->appendProperty($1);}
-;
-object_dim_list:
-    object_dim_list '[' dim_offset ']' { _p->appendRefDim($3);}
-  | object_dim_list '{' expr '}'       { _p->appendRefDim($3);}
-  | variable_name                      { _p->appendProperty($1);}
-;
-variable_name:
-    T_STRING                           {_p->onName($$,$1,Parser::VarName);}
-  | '{' expr '}'                       {_p->onName($$,$2,Parser::ExprName);}
-;
-
 simple_indirect_reference:
     '$'                                { $$ = 1;}
   | simple_indirect_reference '$'      { $$++;}
+;
+
+variable_no_calls:
+    variable_without_objects           { $$ = $1;}
+  | dimmable_variable_no_calls
+    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
+  | dimmable_variable_no_calls
+    '{' expr '}'                       { _p->onRefDim($$, $1, $3);}
+  | variable_no_calls T_OBJECT_OPERATOR
+    T_STRING                           { _p->onObjectProperty($$,$1,$3);}
+  | variable_no_calls T_OBJECT_OPERATOR
+    variable_without_objects           { _p->onObjectProperty($$,$1,$3);}
+  | variable_no_calls T_OBJECT_OPERATOR
+    '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
+  | static_class_name
+    T_PAAMAYIM_NEKUDOTAYIM
+    variable_without_objects           { _p->onStaticMember($$,$1,$3);}
+;
+
+dimmable_variable_no_calls:
+    dimmable_variable_no_calls
+    '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
+  | dimmable_variable_no_calls
+    '{' expr '}'                       { _p->onRefDim($$, $1, $3);}
+  | variable_no_calls T_OBJECT_OPERATOR
+    T_STRING                           { _p->onObjectProperty($$,$1,$3);}
+  | variable_no_calls T_OBJECT_OPERATOR
+    '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
 ;
 
 assignment_list:
@@ -2271,11 +2247,11 @@ non_empty_array_pair_list:
   | expr                               { _p->onArrayPair($$,  0,  0,$1,0);}
   | non_empty_array_pair_list
     ',' expr T_DOUBLE_ARROW
-    '&' w_variable                     { _p->onArrayPair($$,&$1,&$3,$6,1);}
+    '&' variable                       { _p->onArrayPair($$,&$1,&$3,$6,1);}
   | non_empty_array_pair_list ','
-    '&' w_variable                     { _p->onArrayPair($$,&$1,  0,$4,1);}
-  | expr T_DOUBLE_ARROW '&' w_variable { _p->onArrayPair($$,  0,&$1,$4,1);}
-  | '&' w_variable                     { _p->onArrayPair($$,  0,  0,$2,1);}
+    '&' variable                       { _p->onArrayPair($$,&$1,  0,$4,1);}
+  | expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,  0,&$1,$4,1);}
+  | '&' variable                       { _p->onArrayPair($$,  0,  0,$2,1);}
 ;
 
 encaps_list:
@@ -2307,7 +2283,7 @@ encaps_var_offset:
 ;
 
 internal_functions:
-    T_ISSET '(' isset_variables ')'    { UEXP($$,$3,T_ISSET,1);}
+    T_ISSET '(' variable_list ')'      { UEXP($$,$3,T_ISSET,1);}
   | T_EMPTY '(' variable ')'           { UEXP($$,$3,T_EMPTY,1);}
   | T_INCLUDE expr                     { UEXP($$,$2,T_INCLUDE,1);}
   | T_INCLUDE_ONCE expr                { UEXP($$,$2,T_INCLUDE_ONCE,1);}
@@ -2316,9 +2292,9 @@ internal_functions:
   | T_REQUIRE_ONCE expr                { UEXP($$,$2,T_REQUIRE_ONCE,1);}
 ;
 
-isset_variables:
+variable_list:
     variable                           { _p->onExprListElem($$, NULL, $1);}
-  | isset_variables ',' variable       { _p->onExprListElem($$, &$1, $3);}
+  | variable_list ',' variable         { _p->onExprListElem($$, &$1, $3);}
 ;
 
 class_constant:
@@ -2348,9 +2324,7 @@ sm_typeargs_opt: /* -> <bar<baz>> */
   |                                    { $$.reset(); }
 ;
 
-
 /* this is just  sm_type_list '>'  with a little hack to avoid adding more lexer state */
-
 sm_type_list_gt:
     T_STRING '<' sm_type_list T_SR
   | sm_type '>'
@@ -2362,10 +2336,9 @@ sm_type_list:
   | sm_type ',' sm_type_list
 ;
 
-
-sm_endpar_and_type: /* ) -> ):int */
-    ')'                                { $$ = $1; }
-  | ')' ':' sm_type                    { only_in_strict_mode(_p);  $$ = $1; }
+sm_opt_return_type:
+                                       { $$.reset(); }
+  | ':' sm_type                        { only_in_strict_mode(_p); $$ = $2; }
 ;
 
 sm_typevar_list:

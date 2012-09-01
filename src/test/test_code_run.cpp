@@ -32109,6 +32109,16 @@ bool TestCodeRun::TestTraits() {
         "bool(false)\n"
         "bool(false)\n");
 
+  MVCRO("<?php\n"
+        "if (true) {\n"
+        "  trait T { public static function foo() { echo \"Foo\\n\"; } }\n"
+        "  class C { use T; }\n"
+        "}\n"
+        "C::foo();\n"
+        ,
+        "Foo\n"
+        );
+
   return true;
 }
 
@@ -32156,15 +32166,6 @@ bool TestCodeRun::TestStrictMode() {
         "echo vidx($a, 0), Foo::BLEH, car($blork), $d();\n",
 
         "abcd");
-
-  MVCRO(
-    "<?hh\n"
-    "function __sm_intmap($s) { return array('intmap', $s); }\n"
-    "function __sm_strmap($s) { return array('strmap', $s); }\n"
-    "function __sm_vector($s) { return array('vector', $s); }\n"
-    "echo json_encode(intmap(10 => strmap('foo'=> [1,2,3])));",
-
-    "[\"intmap\",{\"10\":[\"strmap\",{\"foo\":[\"vector\",[1,2,3]]}]}]");
 
   return true;
 }

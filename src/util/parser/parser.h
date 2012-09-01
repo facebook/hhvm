@@ -147,6 +147,9 @@ public:
 
   void pushFuncLocation();
   LocationPtr popFuncLocation();
+  void pushClass(bool isXhpClass);
+  bool peekClass();
+  void popClass();
   std::string getAnonFuncName(AnonFuncKind kind);
 
   // for typevar checking
@@ -189,6 +192,8 @@ protected:
 
   Location m_loc;
   LocationPtrVec m_funcLocs;
+  std::vector<bool> m_classes; // used to determine if we are currently
+                               // inside a regular class or an XHP class
 
   struct LabelStmtInfo {
     int scopeId;

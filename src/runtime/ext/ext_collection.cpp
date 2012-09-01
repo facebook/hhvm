@@ -76,10 +76,6 @@ void c_Vector::resize(int64 sz, TypedValue* val) {
   m_size = sz;
 }
 
-bool c_Vector::contains(int64 key) {
-  return ((unsigned long long)key < (unsigned long long)m_size);
-}
-
 ObjectData* c_Vector::clone() {
   ObjectData* obj = ObjectData::clone();
   c_Vector* vec = static_cast<c_Vector*>(obj);
@@ -180,10 +176,11 @@ Variant c_Vector::t_get(CVarRef key) {
 }
 
 bool c_Vector::t_contains(CVarRef key) {
-  if (!key.isInteger()) {
-    throwBadKeyType();
+  if (key.isInteger()) {
+    return contains(key.toInt64());
   }
-  return contains(key.toInt64());
+  throwBadKeyType();
+  return false;
 }
 
 Array c_Vector::t_toarray() {
@@ -516,6 +513,17 @@ bool c_Vector::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   return result ? empty(tvAsCVarRef(result)) : true;
 }
 
+bool c_Vector::OffsetContains(ObjectData* obj, TypedValue* key) {
+  ASSERT(key->m_type != KindOfRef);
+  c_Vector* vec = static_cast<c_Vector*>(obj);
+  if (key->m_type == KindOfInt64) {
+    return vec->contains(key->m_data.num);
+  } else {
+    throwBadKeyType();
+    return false;
+  }
+}
+
 void c_Vector::OffsetAppend(ObjectData* obj, TypedValue* val) {
   ASSERT(val->m_type != KindOfRef);
   c_Vector* vec = static_cast<c_Vector*>(obj);
@@ -524,7 +532,7 @@ void c_Vector::OffsetAppend(ObjectData* obj, TypedValue* val) {
 
 void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   Object e(SystemLib::AllocRuntimeExceptionObject(
-    "Vector does not support unset"));
+    "Cannot unset element of a Vector"));
   throw e;
 }
 
@@ -700,14 +708,12 @@ Object c_Map::t_put(CVarRef key, CVarRef value) {
 bool c_Map::t_contains(CVarRef key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
-    Bucket* p = find(key.toInt64());
-    return (p != NULL);
+    return contains(key.toInt64());
   }
   if (IS_STRING_TYPE(t)) {
-    StringData* sd = key.getStringData();
-    Bucket* p = find(sd->data(), sd->size(), sd->hash());
-    return (p != NULL);
+    return contains(key.getStringData());
   }
+  throwBadKeyType();
   return false;
 }
 
@@ -717,18 +723,14 @@ Object c_Map::t_remove(CVarRef key) {
     remove(key.toInt64());
   } else if (IS_STRING_TYPE(t)) {
     remove(key.getStringData());
+  } else {
+    throwBadKeyType();
   }
   return this;
 }
 
 Object c_Map::t_discard(CVarRef key) {
-  DataType t = key.getType();
-  if (t == KindOfInt64) {
-    remove(key.toInt64());
-  } else if (IS_STRING_TYPE(t)) {
-    remove(key.getStringData());
-  }
-  return this;
+  return t_remove(key);
 }
 
 Array c_Map::t_toarray() {
@@ -1322,6 +1324,19 @@ bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   return result ? empty(tvAsCVarRef(result)) : true;
 }
 
+bool c_Map::OffsetContains(ObjectData* obj, TypedValue* key) {
+  ASSERT(key->m_type != KindOfRef);
+  c_Map* mp = static_cast<c_Map*>(obj);
+  if (key->m_type == KindOfInt64) {
+    return mp->contains(key->m_data.num);
+  } else if (IS_STRING_TYPE(key->m_type)) {
+    return mp->contains(key->m_data.pstr);
+  } else {
+    throwBadKeyType();
+    return false;
+  }
+}
+
 void c_Map::OffsetAppend(ObjectData* obj, TypedValue* val) {
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "[] operator not supported for Maps"));
@@ -1552,14 +1567,12 @@ Object c_StableMap::t_put(CVarRef key, CVarRef value) {
 bool c_StableMap::t_contains(CVarRef key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
-    Bucket* p = find(key.toInt64());
-    return (p != NULL);
+    return contains(key.toInt64());
   }
   if (IS_STRING_TYPE(t)) {
-    StringData* sd = key.getStringData();
-    Bucket* p = find(sd->data(), sd->size(), sd->hash());
-    return (p != NULL);
+    return contains(key.getStringData());
   }
+  throwBadKeyType();
   return false;
 }
 
@@ -1569,18 +1582,14 @@ Object c_StableMap::t_remove(CVarRef key) {
     remove(key.toInt64());
   } else if (IS_STRING_TYPE(t)) {
     remove(key.getStringData());
+  } else {
+    throwBadKeyType();
   }
   return this;
 }
 
 Object c_StableMap::t_discard(CVarRef key) {
-  DataType t = key.getType();
-  if (t == KindOfInt64) {
-    remove(key.toInt64());
-  } else if (IS_STRING_TYPE(t)) {
-    remove(key.getStringData());
-  }
-  return this;
+  return t_remove(key);
 }
 
 Array c_StableMap::t_toarray() {
@@ -2044,6 +2053,19 @@ bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
     result = NULL;
   }
   return result ? empty(tvAsCVarRef(result)) : true;
+}
+
+bool c_StableMap::OffsetContains(ObjectData* obj, TypedValue* key) {
+  ASSERT(key->m_type != KindOfRef);
+  c_Map* smp = static_cast<c_Map*>(obj);
+  if (key->m_type == KindOfInt64) {
+    return smp->contains(key->m_data.num);
+  } else if (IS_STRING_TYPE(key->m_type)) {
+    return smp->contains(key->m_data.pstr);
+  } else {
+    throwBadKeyType();
+    return false;
+  }
 }
 
 void c_StableMap::OffsetAppend(ObjectData* obj, TypedValue* val) {

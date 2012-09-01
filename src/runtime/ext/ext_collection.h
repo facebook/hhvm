@@ -151,14 +151,19 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit>,
   public: ObjectData* clone();
 
   public: void resize(int64 sz, TypedValue* val);
-  public: bool contains(int64 key);
-  public: int getVersionNumber() { return m_versionNumber; }
-
+  public: bool contains(int64 key) {
+    return ((unsigned long long)key < (unsigned long long)m_size);
+  }
+  public: int getVersionNumber() {
+    return m_versionNumber;
+  }
+  
   public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   public: static void OffsetSet(ObjectData* obj, TypedValue* key,
                                 TypedValue* val);
   public: static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
 
@@ -319,13 +324,22 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit>,
     ++m_versionNumber;
     erase(find(key->data(), key->size(), key->hash()));
   }
-  public: int getVersionNumber() { return m_versionNumber; }
+  public: bool contains(int64 key) {
+    return find(key);
+  }
+  public: bool contains(StringData* key) {
+    return find(key->data(), key->size(), key->hash());
+  }
+  public: int getVersionNumber() {
+    return m_versionNumber;
+  }
 
   public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   public: static void OffsetSet(ObjectData* obj, TypedValue* key,
                                 TypedValue* val);
   public: static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
 
@@ -616,13 +630,22 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit>,
     ++m_versionNumber;
     erase(findForErase(key->data(), key->size(), key->hash()));
   }
-  public: int getVersionNumber() { return m_versionNumber; }
+  public: bool contains(int64 key) {
+    return find(key);
+  }
+  public: bool contains(StringData* key) {
+    return find(key->data(), key->size(), key->hash());
+  }
+  public: int getVersionNumber() {
+    return m_versionNumber;
+  }
 
   public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   public: static void OffsetSet(ObjectData* obj, TypedValue* key,
                                 TypedValue* val);
   public: static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
 
@@ -1011,6 +1034,24 @@ inline void collectionOffsetSet(ObjectData* obj, double offset, CVarRef val) {
 
 inline void collectionOffsetSet(ObjectData* obj, litstr offset, CVarRef val) {
   collectionOffsetSet(obj, Variant(offset), val);
+}
+
+inline bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
+  TypedValue* key = (TypedValue*)(&offset);
+  if (key->m_type == KindOfRef) {
+    key = key->m_data.pref->tv();
+  }
+  int ct = obj->getCollectionType();
+  if (ct == Collection::VectorType) {
+    return c_Vector::OffsetContains(obj, key);
+  } else if (ct == Collection::MapType) {
+    return c_Map::OffsetContains(obj, key);
+  } else if (ct == Collection::StableMapType) {
+    return c_StableMap::OffsetContains(obj, key);
+  } else {
+    ASSERT(false);
+    return false;
+  }
 }
 
 inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {

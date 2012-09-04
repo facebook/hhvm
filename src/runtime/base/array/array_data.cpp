@@ -106,7 +106,7 @@ HOT_FUNC
 ArrayData::~ArrayData() {
   // If there are any strong iterators pointing to this array, they need
   // to be invalidated.
-  if (!m_strongIterators.empty()) {
+  if (m_strongIterators) {
     freeStrongIterators();
   }
 }
@@ -282,32 +282,21 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 
 void ArrayData::newFullPos(FullPos &fp) {
   ASSERT(fp.container == NULL);
-  m_strongIterators.push(&fp);
-  fp.container = (ArrayData*)this;
+  fp.container = this;
+  fp.next = m_strongIterators;
+  m_strongIterators = &fp;
   getFullPos(fp);
 }
 
 void ArrayData::freeFullPos(FullPos &fp) {
   ASSERT(fp.container == (ArrayData*)this);
-  int sz = m_strongIterators.size();
-  if (sz > 0) {
-    // Common case: fp is at the end of the list
-    if (m_strongIterators.get(sz - 1) == &fp) {
-      m_strongIterators.pop();
+  // search for fp in our list, then remove it.  Usually its the first one.
+  for (FullPos **prev = &m_strongIterators, *p = *prev; p != 0;
+       prev = &p->next, p = p->next) {
+    if (p == &fp) {
+      *prev = p->next;
       fp.container = NULL;
       return;
-    }
-    // Unusual case: somehow the strong iterator for an foreach loop
-    // was freed before a strong iterator from a nested foreach loop,
-    // so do a linear search for fp
-    for (int k = sz - 2; k >= 0; --k) {
-      if (m_strongIterators.get(k) == &fp) {
-        // Swap fp with the last element in the list and then pop
-        m_strongIterators.set(k, m_strongIterators.get(sz - 1));
-        m_strongIterators.pop();
-        fp.container = NULL;
-        return;
-      }
     }
   }
   // If the strong iterator list was empty or if fp could not be
@@ -326,11 +315,10 @@ bool ArrayData::setFullPos(const FullPos &fp) {
 }
 
 void ArrayData::freeStrongIterators() {
-  int sz = m_strongIterators.size();
-  for (int i = 0; i < sz; ++i) {
-    m_strongIterators.get(i)->container = NULL;
+  for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+    r.front()->container = NULL;
   }
-  m_strongIterators.clear();
+  m_strongIterators = 0;
 }
 
 CVarRef ArrayData::currentRef() {

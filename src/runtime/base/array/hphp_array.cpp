@@ -823,11 +823,11 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   // do a pass and update these iterators to point to the newly added element.
   if (m_siPastEnd) {
     m_siPastEnd = false;
-    int sz = m_strongIterators.size();
     bool shouldWarn = false;
-    for (int i = 0; i < sz; ++i) {
-      if (m_strongIterators.get(i)->pos == ssize_t(ElmIndEmpty)) {
-        m_strongIterators.get(i)->pos = ssize_t(*ei);
+    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+      FullPos* fp = r.front();
+      if (fp->pos == ssize_t(ElmIndEmpty)) {
+        fp->pos = ssize_t(*ei);
         shouldWarn = true;
       }
     }
@@ -1000,13 +1000,6 @@ void HphpArray::grow() {
 }
 
 void HphpArray::compact(bool renumber /* = false */) {
-  struct ElmKey {
-    int32       hash;
-    union {
-      int64 ikey;
-      StringData* key;
-    };
-  };
   ElmKey mPos;
   if (m_pos != ArrayData::invalid_index) {
     // Cache key for element associated with m_pos in order to update m_pos
@@ -1020,18 +1013,12 @@ void HphpArray::compact(bool renumber /* = false */) {
     mPos.hash = 0;
     mPos.key = NULL;
   }
-  int nsi = m_strongIterators.size();
-  ElmKey* siKeys = NULL;
-  if (nsi > 0) {
-    Elm* elms = m_data;
-    siKeys = (ElmKey*)malloc(nsi * sizeof(ElmKey));
-    for (int i = 0; i < nsi; ++i) {
-      ElmInd ei = (ElmInd)m_strongIterators.get(i)->pos;
-      if (ei != ElmIndEmpty) {
-        Elm* e = &elms[(ElmInd)m_strongIterators.get(i)->pos];
-        siKeys[i].hash = e->hash;
-        siKeys[i].key = e->key;
-      }
+  TinyVector<ElmKey, 3> siKeys;
+  for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+    ElmInd ei = r.front()->pos;
+    if (ei != ElmIndEmpty) {
+      Elm* e = &m_data[ei];
+      siKeys.push_back(ElmKey(e->hash, e->key));
     }
   }
   if (renumber) {
@@ -1079,21 +1066,19 @@ void HphpArray::compact(bool renumber /* = false */) {
       m_pos = ssize_t(find(mPos.ikey));
     }
   }
-  if (nsi > 0) {
-    // Update strong iterators, now that compaction is complete.
-    for (int i = 0; i < nsi; ++i) {
-      ssize_t* siPos = &m_strongIterators.get(i)->pos;
-      if (*siPos != ArrayData::invalid_index) {
-        if (siKeys[i].hash) {
-          *siPos = ssize_t(find(siKeys[i].key->data(),
-                                siKeys[i].key->size(),
-                                siKeys[i].hash));
-        } else {
-          *siPos = ssize_t(find(siKeys[i].ikey));
-        }
+  // Update strong iterators, now that compaction is complete.
+  int key = 0;
+  for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+    FullPos* fp = r.front();
+    if (fp->pos != ArrayData::invalid_index) {
+      ElmKey &k = siKeys[key];
+      key++;
+      if (k.hash) { // string key
+        fp->pos = ssize_t(find(k.key->data(), k.key->size(), k.hash));
+      } else { // int key
+        fp->pos = ssize_t(find(k.ikey));
       }
     }
-    free(siKeys);
   }
 }
 
@@ -1628,10 +1613,10 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   Elm* elms = m_data;
 
   bool nextElementUnsetInsideForeachByReference = false;
-  int nsi = m_strongIterators.size();
   ElmInd eINext = ElmIndTombstone;
-  for (int i = 0; i < nsi; ++i) {
-    if (m_strongIterators.get(i)->pos == ssize_t(pos)) {
+  for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+    FullPos* fp = r.front();
+    if (fp->pos == ssize_t(pos)) {
       nextElementUnsetInsideForeachByReference = true;
       if (eINext == ElmIndTombstone) {
         // eINext will actually be used, so properly initialize it with the
@@ -1643,7 +1628,7 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
           m_siPastEnd = true;
         }
       }
-      m_strongIterators.get(i)->pos = ssize_t(eINext);
+      fp->pos = ssize_t(eINext);
     }
   }
 
@@ -1759,19 +1744,18 @@ ArrayData* HphpArray::copy() const {
 ArrayData* HphpArray::copyWithStrongIterators() const {
   HphpArray* copied = copyImpl();
   // Transfer strong iterators
-  if (!m_strongIterators.empty()) {
+  if (m_strongIterators) {
     // Copy over all of the strong iterators, and update the iterators
     // to point to the new array
-    for (int k = 0; k < m_strongIterators.size(); ++k) {
-      FullPos* fp = m_strongIterators.get(k);
-      fp->container = copied;
-      copied->m_strongIterators.push(fp);
+    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+      r.front()->container = copied;
     }
+    copied->m_strongIterators = m_strongIterators;
     // Copy flags to new array
     copied->m_siPastEnd = m_siPastEnd;
     // Clear the strong iterator list and flags from the original array
     HphpArray* src = const_cast<HphpArray*>(this);
-    src->m_strongIterators.clear();
+    src->m_strongIterators = 0;
     src->m_siPastEnd = 0;
   }
   return copied;
@@ -2144,7 +2128,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
-  if (!a->m_strongIterators.empty()) {
+  if (m_strongIterators) {
     a->freeStrongIterators();
   }
   Elm* elms = a->m_data;
@@ -2173,7 +2157,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
-  if (!a->m_strongIterators.empty()) {
+  if (m_strongIterators) {
     a->freeStrongIterators();
   }
 
@@ -2264,7 +2248,6 @@ CVarRef HphpArray::endRef() {
 
 void HphpArray::sweep() {
   if (m_allocMode == kMalloc) free(m_data);
-  m_strongIterators.clear();
   // Its okay to skip calling adjustUsageStats() in the sweep phase.
 }
 

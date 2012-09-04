@@ -213,7 +213,7 @@ VectorArray::VectorArray(const VectorArray *src, uint start /* = 0 */,
     ArrayData(src), m_nonsmart(false) {
   ASSERT(src);
   ASSERT(size == 0 || (size == src->m_size - 1L && size > 0));
-  ASSERT(src->m_strongIterators.empty());
+  ASSERT(!src->m_strongIterators);
   ASSERT(m_pos == src->m_pos);
   m_size = size ? size : src->m_size;
   alloc(m_size);
@@ -254,7 +254,7 @@ VectorArray::~VectorArray() {
 VectorArray::VectorArray(const VectorArray *src, bool sma /* ignored */) :
     ArrayData(src), m_nonsmart(true) {
   ASSERT(src);
-  ASSERT(src->m_strongIterators.empty());
+  ASSERT(!src->m_strongIterators);
   m_size = src->m_size;
   if (m_size <= FixedSize) {
     m_capacity = FixedSize;
@@ -406,7 +406,7 @@ ssize_t VectorArray::getIndex(CVarRef k) const {
 
 void VectorArray::sweep() {
   if (m_allocMode == kMalloc) free(m_elems);
-  ASSERT(m_strongIterators.empty());
+  ASSERT(!m_strongIterators);
 }
 
 ZendArray *VectorArray::escalateToNonEmptyZendArray() const {

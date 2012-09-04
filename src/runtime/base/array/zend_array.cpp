@@ -105,11 +105,11 @@ do {                                                                    \
   /* newly added element. */                                            \
   if (m_flag & StrongIteratorPastEnd) {                                 \
     m_flag &= ~StrongIteratorPastEnd;                                   \
-    int sz = m_strongIterators.size();                                  \
     bool shouldWarn = false;                                            \
-    for (int i = 0; i < sz; ++i) {                                      \
-      if (m_strongIterators.get(i)->pos == 0) {                         \
-        m_strongIterators.get(i)->pos = (ssize_t)(element);             \
+    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) { \
+      FullPos* fp = r.front();                                          \
+      if (fp->pos == 0) {                                               \
+        fp->pos = (ssize_t)(element);                                   \
         shouldWarn = true;                                              \
       }                                                                 \
     }                                                                   \
@@ -1199,12 +1199,12 @@ void ZendArray::erase(Bucket ** prev, bool updateNext /* = false */) {
     if (m_pos == (ssize_t)p) {
       m_pos = (ssize_t)p->pListNext;
     }
-    int sz = m_strongIterators.size();
-    for (int i = 0; i < sz; ++i) {
-      if (m_strongIterators.get(i)->pos == (ssize_t)p) {
+    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+      FullPos* fp = r.front();
+      if (fp->pos == ssize_t(p)) {
         nextElementUnsetInsideForeachByReference = true;
-        m_strongIterators.get(i)->pos = (ssize_t)p->pListNext;
-        if (!(m_strongIterators.get(i)->pos)) {
+        fp->pos = (ssize_t)p->pListNext;
+        if (!fp->pos) {
           // Record that there is a strong iterator out there
           // that is past the end
           m_flag |= StrongIteratorPastEnd;
@@ -1280,9 +1280,9 @@ ArrayData *ZendArray::copy() const {
 ArrayData *ZendArray::copyWithStrongIterators() const {
   ZendArray* copied = copyImpl();
   // Transfer strong iterators
-  if (!m_strongIterators.empty()) {
-    for (int k = 0; k < m_strongIterators.size(); ++k) {
-      FullPos* fp = m_strongIterators.get(k);
+  if (m_strongIterators != 0) {
+    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+      FullPos* fp = r.front();
       // Update fp.pos to point to the corresponding element in 'copied'
       Bucket* p = reinterpret_cast<Bucket*>(fp->pos);
       if (p) {
@@ -1296,13 +1296,13 @@ ArrayData *ZendArray::copyWithStrongIterators() const {
         fp->pos = (ssize_t)copiedP;
       }
       fp->container = copied;
-      copied->m_strongIterators.push(fp);
     }
+    copied->m_strongIterators = m_strongIterators;
     // Copy the flags
     copied->m_flag |= (m_flag & StrongIteratorPastEnd);
     // Clear the strong iterator list and flags from the original array
     ZendArray* src = const_cast<ZendArray*>(this);
-    src->m_strongIterators.clear();
+    src->m_strongIterators = 0;
     src->m_flag &= ~StrongIteratorPastEnd;
   }
   return copied;
@@ -1462,7 +1462,7 @@ ArrayData *ZendArray::dequeue(Variant &value) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators
   // when an element is removed from the beginning of the array
-  if (!m_strongIterators.empty()) {
+  if (m_strongIterators) {
     freeStrongIterators();
   }
   if (m_pListHead) {
@@ -1486,7 +1486,7 @@ ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators
   // when an element is added to the beginning of the array
-  if (!m_strongIterators.empty()) {
+  if (m_strongIterators) {
     freeStrongIterators();
   }
   nextInsert(v);
@@ -1603,7 +1603,6 @@ void ZendArray::sweep() {
   if (m_allocMode == kMalloc) {
     free(m_arBuckets);
   }
-  m_strongIterators.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

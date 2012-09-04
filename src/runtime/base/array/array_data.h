@@ -20,7 +20,6 @@
 #include <runtime/base/util/countable.h>
 #include <runtime/base/types.h>
 #include <runtime/base/macros.h>
-#include <util/pointer_list.h>
 #include <climits>
 
 namespace HPHP {
@@ -40,8 +39,8 @@ class ArrayData : public Countable {
 
   static const ssize_t invalid_index = -1;
 
-  ArrayData() : m_size(-1), m_pos(0) {}
-  ArrayData(const ArrayData *src) : m_pos(src->m_pos) {}
+  ArrayData() : m_size(-1), m_pos(0), m_strongIterators(0) {}
+  ArrayData(const ArrayData *src) : m_pos(src->m_pos), m_strongIterators(0) {}
   virtual ~ArrayData();
 
   /**
@@ -341,16 +340,13 @@ class ArrayData : public Countable {
   virtual ArrayData *escalate(bool mutableIteration = false) const {
     return const_cast<ArrayData *>(this);
   }
-  PointerList<FullPos> &getStrongIterators() {
-    return m_strongIterators;
-  }
 
   static ArrayData *GetScalarArray(ArrayData *arr,
                                    const StringData *key = NULL);
  protected:
   uint m_size;
   ssize_t m_pos;
-  PointerList<FullPos> m_strongIterators;
+  FullPos* m_strongIterators; // head of linked list
 
   void freeStrongIterators();
 

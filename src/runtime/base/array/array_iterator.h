@@ -191,10 +191,36 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * FullPos represents a position in an array that could reallocate; so we store
+ * information to access an element, instead of a pointer directly to
+ * the element.
+ *
+ * Each Array with an active MutableArrayIter keeps a linked list of active
+ * FullPos's; list is maintained through the FullPos.next fields and the
+ * head is ArrayData.m_strongIterators.
+ */
 struct FullPos {
-  ssize_t pos;
-  ArrayData * container;
-  FullPos() : pos(0), container(NULL) {}
+  ssize_t pos;  // pos within container
+  ArrayData* container; // the array itself
+  FullPos* next; // next FullPos of another iterator for the same array
+  FullPos() : pos(0), container(NULL), next(NULL) {}
+};
+
+/**
+ * Range which visits each entry in a list of FullPos.  Removing the
+ * front element will crash but removing an already-visited element
+ * or future element will work.
+ */
+class FullPosRange {
+public:
+  FullPosRange(FullPos* list) : m_fp(list) {}
+  FullPosRange(const FullPosRange& other) : m_fp(other.m_fp) {}
+  bool empty() const { return m_fp == 0; }
+  FullPos* front() const { ASSERT(!empty()); return m_fp; }
+  void popFront() { ASSERT(!empty()); m_fp = m_fp->next; }
+private:
+  FullPos* m_fp;
 };
 
 /**

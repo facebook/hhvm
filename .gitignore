@@ -27,7 +27,6 @@ hphp.log
 /src/runtime/ext_hhvm/xconstants.php
 /src/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
 /src/runtime/ext_hhvm/ext_noinline.cpp
-*.ext_hhvm.cpp
 
 /src/hphp/hphp
 

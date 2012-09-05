@@ -2261,6 +2261,142 @@ TypedValue* fg_version_compare(HPHP::VM::ActRec *ar) {
 
 
 /*
+bool HPHP::f_gc_enabled()
+_ZN4HPHP12f_gc_enabledEv
+
+(return value) => rax
+*/
+
+bool fh_gc_enabled() asm("_ZN4HPHP12f_gc_enabledEv");
+
+TypedValue* fg_gc_enabled(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfBoolean;
+      rv.m_data.num = (fh_gc_enabled()) ? 1LL : 0LL;
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("gc_enabled", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+void HPHP::f_gc_enable()
+_ZN4HPHP11f_gc_enableEv
+
+*/
+
+void fh_gc_enable() asm("_ZN4HPHP11f_gc_enableEv");
+
+TypedValue* fg_gc_enable(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv.m_data.num = 0LL;
+      rv._count = 0;
+      rv.m_type = KindOfNull;
+      fh_gc_enable();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("gc_enable", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+void HPHP::f_gc_disable()
+_ZN4HPHP12f_gc_disableEv
+
+*/
+
+void fh_gc_disable() asm("_ZN4HPHP12f_gc_disableEv");
+
+TypedValue* fg_gc_disable(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv.m_data.num = 0LL;
+      rv._count = 0;
+      rv.m_type = KindOfNull;
+      fh_gc_disable();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("gc_disable", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+long long HPHP::f_gc_collect_cycles()
+_ZN4HPHP19f_gc_collect_cyclesEv
+
+(return value) => rax
+*/
+
+long long fh_gc_collect_cycles() asm("_ZN4HPHP19f_gc_collect_cyclesEv");
+
+TypedValue* fg_gc_collect_cycles(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfInt64;
+      rv.m_data.num = (long long)fh_gc_collect_cycles();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("gc_collect_cycles", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::String HPHP::f_zend_logo_guid()
 _ZN4HPHP16f_zend_logo_guidEv
 

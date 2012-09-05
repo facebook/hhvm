@@ -354,6 +354,8 @@ TypedValue* fg_fb_thrift_serialize(VM::ActRec *ar);
 TypedValue* fg_fb_thrift_unserialize(VM::ActRec *ar);
 TypedValue* fg_fb_serialize(VM::ActRec *ar);
 TypedValue* fg_fb_unserialize(VM::ActRec *ar);
+TypedValue* fg_fb_compact_serialize(VM::ActRec *ar);
+TypedValue* fg_fb_compact_unserialize(VM::ActRec *ar);
 TypedValue* fg_fb_intercept(VM::ActRec *ar);
 TypedValue* fg_fb_stubout_intercept_handler(VM::ActRec *ar);
 TypedValue* fg_fb_rpc_intercept_handler(VM::ActRec *ar);
@@ -395,6 +397,8 @@ TypedValue* fg_fb_lazy_stat(VM::ActRec *ar);
 TypedValue* fg_fb_lazy_lstat(VM::ActRec *ar);
 TypedValue* fg_fb_lazy_realpath(VM::ActRec *ar);
 TypedValue* fg_fb_setprofile(VM::ActRec *ar);
+TypedValue* fg_fb_gc_collect_cycles(VM::ActRec *ar);
+TypedValue* fg_fb_gc_detect_cycles(VM::ActRec *ar);
 TypedValue* fg_fopen(VM::ActRec *ar);
 TypedValue* fg_popen(VM::ActRec *ar);
 TypedValue* fg_fclose(VM::ActRec *ar);
@@ -1640,6 +1644,10 @@ TypedValue* fg_set_magic_quotes_runtime(VM::ActRec *ar);
 TypedValue* fg_set_time_limit(VM::ActRec *ar);
 TypedValue* fg_sys_get_temp_dir(VM::ActRec *ar);
 TypedValue* fg_version_compare(VM::ActRec *ar);
+TypedValue* fg_gc_enabled(VM::ActRec *ar);
+TypedValue* fg_gc_enable(VM::ActRec *ar);
+TypedValue* fg_gc_disable(VM::ActRec *ar);
+TypedValue* fg_gc_collect_cycles(VM::ActRec *ar);
 TypedValue* fg_zend_logo_guid(VM::ActRec *ar);
 TypedValue* fg_zend_thread_id(VM::ActRec *ar);
 TypedValue* fg_zend_version(VM::ActRec *ar);
@@ -2190,7 +2198,97 @@ TypedValue* fg_nzcompress(VM::ActRec *ar);
 TypedValue* fg_nzuncompress(VM::ActRec *ar);
 VM::Instance* new_DummyClosure_Instance(VM::Class*);
 TypedValue* tg_12DummyClosure___construct(VM::ActRec *ar);
-TypedValue* tg_12DummyClosure___destruct(VM::ActRec *ar);
+VM::Instance* new_Vector_Instance(VM::Class*);
+TypedValue* tg_6Vector___construct(VM::ActRec *ar);
+TypedValue* tg_6Vector_isEmpty(VM::ActRec *ar);
+TypedValue* tg_6Vector_count(VM::ActRec *ar);
+TypedValue* tg_6Vector_at(VM::ActRec *ar);
+TypedValue* tg_6Vector_get(VM::ActRec *ar);
+TypedValue* tg_6Vector_put(VM::ActRec *ar);
+TypedValue* tg_6Vector_clear(VM::ActRec *ar);
+TypedValue* tg_6Vector_contains(VM::ActRec *ar);
+TypedValue* tg_6Vector_append(VM::ActRec *ar);
+TypedValue* tg_6Vector_add(VM::ActRec *ar);
+TypedValue* tg_6Vector_pop(VM::ActRec *ar);
+TypedValue* tg_6Vector_resize(VM::ActRec *ar);
+TypedValue* tg_6Vector_toArray(VM::ActRec *ar);
+TypedValue* tg_6Vector_getIterator(VM::ActRec *ar);
+TypedValue* tg_6Vector_sort(VM::ActRec *ar);
+TypedValue* tg_6Vector_reverse(VM::ActRec *ar);
+TypedValue* tg_6Vector_splice(VM::ActRec *ar);
+TypedValue* tg_6Vector_linearSearch(VM::ActRec *ar);
+TypedValue* tg_6Vector_shuffle(VM::ActRec *ar);
+TypedValue* tg_6Vector___toString(VM::ActRec *ar);
+TypedValue* tg_6Vector_fromArray(VM::ActRec *ar);
+TypedValue* tg_6Vector_fromVector(VM::ActRec *ar);
+TypedValue* tg_6Vector_slice(VM::ActRec *ar);
+VM::Instance* new_VectorIterator_Instance(VM::Class*);
+TypedValue* tg_14VectorIterator___construct(VM::ActRec *ar);
+TypedValue* tg_14VectorIterator_current(VM::ActRec *ar);
+TypedValue* tg_14VectorIterator_key(VM::ActRec *ar);
+TypedValue* tg_14VectorIterator_valid(VM::ActRec *ar);
+TypedValue* tg_14VectorIterator_next(VM::ActRec *ar);
+TypedValue* tg_14VectorIterator_rewind(VM::ActRec *ar);
+VM::Instance* new_Map_Instance(VM::Class*);
+TypedValue* tg_3Map___construct(VM::ActRec *ar);
+TypedValue* tg_3Map_isEmpty(VM::ActRec *ar);
+TypedValue* tg_3Map_count(VM::ActRec *ar);
+TypedValue* tg_3Map_at(VM::ActRec *ar);
+TypedValue* tg_3Map_get(VM::ActRec *ar);
+TypedValue* tg_3Map_put(VM::ActRec *ar);
+TypedValue* tg_3Map_clear(VM::ActRec *ar);
+TypedValue* tg_3Map_contains(VM::ActRec *ar);
+TypedValue* tg_3Map_remove(VM::ActRec *ar);
+TypedValue* tg_3Map_discard(VM::ActRec *ar);
+TypedValue* tg_3Map_toArray(VM::ActRec *ar);
+TypedValue* tg_3Map_copyAsArray(VM::ActRec *ar);
+TypedValue* tg_3Map_toKeysArray(VM::ActRec *ar);
+TypedValue* tg_3Map_values(VM::ActRec *ar);
+TypedValue* tg_3Map_toValuesArray(VM::ActRec *ar);
+TypedValue* tg_3Map_updateFromArray(VM::ActRec *ar);
+TypedValue* tg_3Map_updateFromIterable(VM::ActRec *ar);
+TypedValue* tg_3Map_differenceByKey(VM::ActRec *ar);
+TypedValue* tg_3Map_getIterator(VM::ActRec *ar);
+TypedValue* tg_3Map___toString(VM::ActRec *ar);
+TypedValue* tg_3Map_fromArray(VM::ActRec *ar);
+TypedValue* tg_3Map_fromIterable(VM::ActRec *ar);
+VM::Instance* new_MapIterator_Instance(VM::Class*);
+TypedValue* tg_11MapIterator___construct(VM::ActRec *ar);
+TypedValue* tg_11MapIterator_current(VM::ActRec *ar);
+TypedValue* tg_11MapIterator_key(VM::ActRec *ar);
+TypedValue* tg_11MapIterator_valid(VM::ActRec *ar);
+TypedValue* tg_11MapIterator_next(VM::ActRec *ar);
+TypedValue* tg_11MapIterator_rewind(VM::ActRec *ar);
+VM::Instance* new_StableMap_Instance(VM::Class*);
+TypedValue* tg_9StableMap___construct(VM::ActRec *ar);
+TypedValue* tg_9StableMap_isEmpty(VM::ActRec *ar);
+TypedValue* tg_9StableMap_count(VM::ActRec *ar);
+TypedValue* tg_9StableMap_at(VM::ActRec *ar);
+TypedValue* tg_9StableMap_get(VM::ActRec *ar);
+TypedValue* tg_9StableMap_put(VM::ActRec *ar);
+TypedValue* tg_9StableMap_clear(VM::ActRec *ar);
+TypedValue* tg_9StableMap_contains(VM::ActRec *ar);
+TypedValue* tg_9StableMap_remove(VM::ActRec *ar);
+TypedValue* tg_9StableMap_discard(VM::ActRec *ar);
+TypedValue* tg_9StableMap_toArray(VM::ActRec *ar);
+TypedValue* tg_9StableMap_copyAsArray(VM::ActRec *ar);
+TypedValue* tg_9StableMap_toKeysArray(VM::ActRec *ar);
+TypedValue* tg_9StableMap_values(VM::ActRec *ar);
+TypedValue* tg_9StableMap_toValuesArray(VM::ActRec *ar);
+TypedValue* tg_9StableMap_updateFromArray(VM::ActRec *ar);
+TypedValue* tg_9StableMap_updateFromIterable(VM::ActRec *ar);
+TypedValue* tg_9StableMap_differenceByKey(VM::ActRec *ar);
+TypedValue* tg_9StableMap_getIterator(VM::ActRec *ar);
+TypedValue* tg_9StableMap___toString(VM::ActRec *ar);
+TypedValue* tg_9StableMap_fromArray(VM::ActRec *ar);
+TypedValue* tg_9StableMap_fromIterable(VM::ActRec *ar);
+VM::Instance* new_StableMapIterator_Instance(VM::Class*);
+TypedValue* tg_17StableMapIterator___construct(VM::ActRec *ar);
+TypedValue* tg_17StableMapIterator_current(VM::ActRec *ar);
+TypedValue* tg_17StableMapIterator_key(VM::ActRec *ar);
+TypedValue* tg_17StableMapIterator_valid(VM::ActRec *ar);
+TypedValue* tg_17StableMapIterator_next(VM::ActRec *ar);
+TypedValue* tg_17StableMapIterator_rewind(VM::ActRec *ar);
 VM::Instance* new_Continuation_Instance(VM::Class*);
 TypedValue* tg_12Continuation___construct(VM::ActRec *ar);
 TypedValue* tg_12Continuation_update(VM::ActRec *ar);
@@ -2210,12 +2308,10 @@ TypedValue* tg_12Continuation_raised(VM::ActRec *ar);
 TypedValue* tg_12Continuation_receive(VM::ActRec *ar);
 TypedValue* tg_12Continuation_getOrigFuncName(VM::ActRec *ar);
 TypedValue* tg_12Continuation___clone(VM::ActRec *ar);
-TypedValue* tg_12Continuation___destruct(VM::ActRec *ar);
 VM::Instance* new_GenericContinuation_Instance(VM::Class*);
 TypedValue* tg_19GenericContinuation___construct(VM::ActRec *ar);
 TypedValue* tg_19GenericContinuation_update(VM::ActRec *ar);
 TypedValue* tg_19GenericContinuation_getVars(VM::ActRec *ar);
-TypedValue* tg_19GenericContinuation___destruct(VM::ActRec *ar);
 VM::Instance* new_DummyContinuation_Instance(VM::Class*);
 TypedValue* tg_17DummyContinuation___construct(VM::ActRec *ar);
 TypedValue* tg_17DummyContinuation_current(VM::ActRec *ar);
@@ -2223,7 +2319,6 @@ TypedValue* tg_17DummyContinuation_key(VM::ActRec *ar);
 TypedValue* tg_17DummyContinuation_next(VM::ActRec *ar);
 TypedValue* tg_17DummyContinuation_rewind(VM::ActRec *ar);
 TypedValue* tg_17DummyContinuation_valid(VM::ActRec *ar);
-TypedValue* tg_17DummyContinuation___destruct(VM::ActRec *ar);
 VM::Instance* new_DateTime_Instance(VM::Class*);
 TypedValue* tg_8DateTime___construct(VM::ActRec *ar);
 TypedValue* tg_8DateTime_format(VM::ActRec *ar);
@@ -2284,7 +2379,6 @@ TypedValue* tg_14DebuggerClient___construct(VM::ActRec *ar);
 TypedValue* tg_14DebuggerClient_getState(VM::ActRec *ar);
 TypedValue* tg_14DebuggerClient_init(VM::ActRec *ar);
 TypedValue* tg_14DebuggerClient_processCmd(VM::ActRec *ar);
-TypedValue* tg_14DebuggerClient___destruct(VM::ActRec *ar);
 VM::Instance* new_DOMNode_Instance(VM::Class*);
 TypedValue* tg_7DOMNode___construct(VM::ActRec *ar);
 TypedValue* tg_7DOMNode_appendChild(VM::ActRec *ar);
@@ -2538,7 +2632,6 @@ TypedValue* tg_20MutableArrayIterator_current(VM::ActRec *ar);
 TypedValue* tg_20MutableArrayIterator_key(VM::ActRec *ar);
 TypedValue* tg_20MutableArrayIterator_next(VM::ActRec *ar);
 TypedValue* tg_20MutableArrayIterator_valid(VM::ActRec *ar);
-TypedValue* tg_20MutableArrayIterator___destruct(VM::ActRec *ar);
 VM::Instance* new_Memcache_Instance(VM::Class*);
 TypedValue* tg_8Memcache___construct(VM::ActRec *ar);
 TypedValue* tg_8Memcache_connect(VM::ActRec *ar);
@@ -2785,7 +2878,6 @@ TypedValue* tg_9XMLReader_setSchema(VM::ActRec *ar);
 TypedValue* tg_9XMLReader_setParserProperty(VM::ActRec *ar);
 TypedValue* tg_9XMLReader_setRelaxNGSchema(VM::ActRec *ar);
 TypedValue* tg_9XMLReader_setRelaxNGSchemaSource(VM::ActRec *ar);
-TypedValue* tg_9XMLReader___destruct(VM::ActRec *ar);
 VM::Instance* new_XMLWriter_Instance(VM::Class*);
 TypedValue* tg_9XMLWriter___construct(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_openMemory(VM::ActRec *ar);
@@ -2832,7 +2924,7 @@ TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter___destruct(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2166;
+const long long hhbc_ext_funcs_count = 2174;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -3166,6 +3258,8 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "fb_thrift_unserialize", fg_fb_thrift_unserialize },
   { "fb_serialize", fg_fb_serialize },
   { "fb_unserialize", fg_fb_unserialize },
+  { "fb_compact_serialize", fg_fb_compact_serialize },
+  { "fb_compact_unserialize", fg_fb_compact_unserialize },
   { "fb_intercept", fg_fb_intercept },
   { "fb_stubout_intercept_handler", fg_fb_stubout_intercept_handler },
   { "fb_rpc_intercept_handler", fg_fb_rpc_intercept_handler },
@@ -3207,6 +3301,8 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "fb_lazy_lstat", fg_fb_lazy_lstat },
   { "fb_lazy_realpath", fg_fb_lazy_realpath },
   { "fb_setprofile", fg_fb_setprofile },
+  { "fb_gc_collect_cycles", fg_fb_gc_collect_cycles },
+  { "fb_gc_detect_cycles", fg_fb_gc_detect_cycles },
   { "fopen", fg_fopen },
   { "popen", fg_popen },
   { "fclose", fg_fclose },
@@ -4452,6 +4548,10 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "set_time_limit", fg_set_time_limit },
   { "sys_get_temp_dir", fg_sys_get_temp_dir },
   { "version_compare", fg_version_compare },
+  { "gc_enabled", fg_gc_enabled },
+  { "gc_enable", fg_gc_enable },
+  { "gc_disable", fg_gc_disable },
+  { "gc_collect_cycles", fg_gc_collect_cycles },
   { "zend_logo_guid", fg_zend_logo_guid },
   { "zend_thread_id", fg_zend_thread_id },
   { "zend_version", fg_zend_version },
@@ -5002,13 +5102,121 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "nzuncompress", fg_nzuncompress }
 };
 
-static const long long hhbc_ext_method_count_DummyClosure = 2;
+static const long long hhbc_ext_method_count_DummyClosure = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
-  { "__construct", tg_12DummyClosure___construct },
-  { "__destruct", tg_12DummyClosure___destruct }
+  { "__construct", tg_12DummyClosure___construct }
 };
 
-static const long long hhbc_ext_method_count_Continuation = 19;
+static const long long hhbc_ext_method_count_Vector = 23;
+static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
+  { "__construct", tg_6Vector___construct },
+  { "isEmpty", tg_6Vector_isEmpty },
+  { "count", tg_6Vector_count },
+  { "at", tg_6Vector_at },
+  { "get", tg_6Vector_get },
+  { "put", tg_6Vector_put },
+  { "clear", tg_6Vector_clear },
+  { "contains", tg_6Vector_contains },
+  { "append", tg_6Vector_append },
+  { "add", tg_6Vector_add },
+  { "pop", tg_6Vector_pop },
+  { "resize", tg_6Vector_resize },
+  { "toArray", tg_6Vector_toArray },
+  { "getIterator", tg_6Vector_getIterator },
+  { "sort", tg_6Vector_sort },
+  { "reverse", tg_6Vector_reverse },
+  { "splice", tg_6Vector_splice },
+  { "linearSearch", tg_6Vector_linearSearch },
+  { "shuffle", tg_6Vector_shuffle },
+  { "__toString", tg_6Vector___toString },
+  { "fromArray", tg_6Vector_fromArray },
+  { "fromVector", tg_6Vector_fromVector },
+  { "slice", tg_6Vector_slice }
+};
+
+static const long long hhbc_ext_method_count_VectorIterator = 6;
+static const HhbcExtMethodInfo hhbc_ext_methods_VectorIterator[] = {
+  { "__construct", tg_14VectorIterator___construct },
+  { "current", tg_14VectorIterator_current },
+  { "key", tg_14VectorIterator_key },
+  { "valid", tg_14VectorIterator_valid },
+  { "next", tg_14VectorIterator_next },
+  { "rewind", tg_14VectorIterator_rewind }
+};
+
+static const long long hhbc_ext_method_count_Map = 22;
+static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
+  { "__construct", tg_3Map___construct },
+  { "isEmpty", tg_3Map_isEmpty },
+  { "count", tg_3Map_count },
+  { "at", tg_3Map_at },
+  { "get", tg_3Map_get },
+  { "put", tg_3Map_put },
+  { "clear", tg_3Map_clear },
+  { "contains", tg_3Map_contains },
+  { "remove", tg_3Map_remove },
+  { "discard", tg_3Map_discard },
+  { "toArray", tg_3Map_toArray },
+  { "copyAsArray", tg_3Map_copyAsArray },
+  { "toKeysArray", tg_3Map_toKeysArray },
+  { "values", tg_3Map_values },
+  { "toValuesArray", tg_3Map_toValuesArray },
+  { "updateFromArray", tg_3Map_updateFromArray },
+  { "updateFromIterable", tg_3Map_updateFromIterable },
+  { "differenceByKey", tg_3Map_differenceByKey },
+  { "getIterator", tg_3Map_getIterator },
+  { "__toString", tg_3Map___toString },
+  { "fromArray", tg_3Map_fromArray },
+  { "fromIterable", tg_3Map_fromIterable }
+};
+
+static const long long hhbc_ext_method_count_MapIterator = 6;
+static const HhbcExtMethodInfo hhbc_ext_methods_MapIterator[] = {
+  { "__construct", tg_11MapIterator___construct },
+  { "current", tg_11MapIterator_current },
+  { "key", tg_11MapIterator_key },
+  { "valid", tg_11MapIterator_valid },
+  { "next", tg_11MapIterator_next },
+  { "rewind", tg_11MapIterator_rewind }
+};
+
+static const long long hhbc_ext_method_count_StableMap = 22;
+static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
+  { "__construct", tg_9StableMap___construct },
+  { "isEmpty", tg_9StableMap_isEmpty },
+  { "count", tg_9StableMap_count },
+  { "at", tg_9StableMap_at },
+  { "get", tg_9StableMap_get },
+  { "put", tg_9StableMap_put },
+  { "clear", tg_9StableMap_clear },
+  { "contains", tg_9StableMap_contains },
+  { "remove", tg_9StableMap_remove },
+  { "discard", tg_9StableMap_discard },
+  { "toArray", tg_9StableMap_toArray },
+  { "copyAsArray", tg_9StableMap_copyAsArray },
+  { "toKeysArray", tg_9StableMap_toKeysArray },
+  { "values", tg_9StableMap_values },
+  { "toValuesArray", tg_9StableMap_toValuesArray },
+  { "updateFromArray", tg_9StableMap_updateFromArray },
+  { "updateFromIterable", tg_9StableMap_updateFromIterable },
+  { "differenceByKey", tg_9StableMap_differenceByKey },
+  { "getIterator", tg_9StableMap_getIterator },
+  { "__toString", tg_9StableMap___toString },
+  { "fromArray", tg_9StableMap_fromArray },
+  { "fromIterable", tg_9StableMap_fromIterable }
+};
+
+static const long long hhbc_ext_method_count_StableMapIterator = 6;
+static const HhbcExtMethodInfo hhbc_ext_methods_StableMapIterator[] = {
+  { "__construct", tg_17StableMapIterator___construct },
+  { "current", tg_17StableMapIterator_current },
+  { "key", tg_17StableMapIterator_key },
+  { "valid", tg_17StableMapIterator_valid },
+  { "next", tg_17StableMapIterator_next },
+  { "rewind", tg_17StableMapIterator_rewind }
+};
+
+static const long long hhbc_ext_method_count_Continuation = 18;
 static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "__construct", tg_12Continuation___construct },
   { "update", tg_12Continuation_update },
@@ -5027,27 +5235,24 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "raised", tg_12Continuation_raised },
   { "receive", tg_12Continuation_receive },
   { "getOrigFuncName", tg_12Continuation_getOrigFuncName },
-  { "__clone", tg_12Continuation___clone },
-  { "__destruct", tg_12Continuation___destruct }
+  { "__clone", tg_12Continuation___clone }
 };
 
-static const long long hhbc_ext_method_count_GenericContinuation = 4;
+static const long long hhbc_ext_method_count_GenericContinuation = 3;
 static const HhbcExtMethodInfo hhbc_ext_methods_GenericContinuation[] = {
   { "__construct", tg_19GenericContinuation___construct },
   { "update", tg_19GenericContinuation_update },
-  { "getVars", tg_19GenericContinuation_getVars },
-  { "__destruct", tg_19GenericContinuation___destruct }
+  { "getVars", tg_19GenericContinuation_getVars }
 };
 
-static const long long hhbc_ext_method_count_DummyContinuation = 7;
+static const long long hhbc_ext_method_count_DummyContinuation = 6;
 static const HhbcExtMethodInfo hhbc_ext_methods_DummyContinuation[] = {
   { "__construct", tg_17DummyContinuation___construct },
   { "current", tg_17DummyContinuation_current },
   { "key", tg_17DummyContinuation_key },
   { "next", tg_17DummyContinuation_next },
   { "rewind", tg_17DummyContinuation_rewind },
-  { "valid", tg_17DummyContinuation_valid },
-  { "__destruct", tg_17DummyContinuation___destruct }
+  { "valid", tg_17DummyContinuation_valid }
 };
 
 static const long long hhbc_ext_method_count_DateTime = 10;
@@ -5117,13 +5322,12 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DebuggerClientCmdUser[] = {
   { "__destruct", tg_21DebuggerClientCmdUser___destruct }
 };
 
-static const long long hhbc_ext_method_count_DebuggerClient = 5;
+static const long long hhbc_ext_method_count_DebuggerClient = 4;
 static const HhbcExtMethodInfo hhbc_ext_methods_DebuggerClient[] = {
   { "__construct", tg_14DebuggerClient___construct },
   { "getState", tg_14DebuggerClient_getState },
   { "init", tg_14DebuggerClient_init },
-  { "processCmd", tg_14DebuggerClient_processCmd },
-  { "__destruct", tg_14DebuggerClient___destruct }
+  { "processCmd", tg_14DebuggerClient_processCmd }
 };
 
 static const long long hhbc_ext_method_count_DOMNode = 22;
@@ -5450,15 +5654,14 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Normalizer[] = {
   { "__destruct", tg_10Normalizer___destruct }
 };
 
-static const long long hhbc_ext_method_count_MutableArrayIterator = 7;
+static const long long hhbc_ext_method_count_MutableArrayIterator = 6;
 static const HhbcExtMethodInfo hhbc_ext_methods_MutableArrayIterator[] = {
   { "__construct", tg_20MutableArrayIterator___construct },
   { "currentRef", tg_20MutableArrayIterator_currentRef },
   { "current", tg_20MutableArrayIterator_current },
   { "key", tg_20MutableArrayIterator_key },
   { "next", tg_20MutableArrayIterator_next },
-  { "valid", tg_20MutableArrayIterator_valid },
-  { "__destruct", tg_20MutableArrayIterator___destruct }
+  { "valid", tg_20MutableArrayIterator_valid }
 };
 
 static const long long hhbc_ext_method_count_Memcache = 21;
@@ -5724,7 +5927,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_SQLite3Result[] = {
   { "__destruct", tg_13SQLite3Result___destruct }
 };
 
-static const long long hhbc_ext_method_count_XMLReader = 28;
+static const long long hhbc_ext_method_count_XMLReader = 27;
 static const HhbcExtMethodInfo hhbc_ext_methods_XMLReader[] = {
   { "__construct", tg_9XMLReader___construct },
   { "open", tg_9XMLReader_open },
@@ -5752,8 +5955,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLReader[] = {
   { "setSchema", tg_9XMLReader_setSchema },
   { "setParserProperty", tg_9XMLReader_setParserProperty },
   { "setRelaxNGSchema", tg_9XMLReader_setRelaxNGSchema },
-  { "setRelaxNGSchemaSource", tg_9XMLReader_setRelaxNGSchemaSource },
-  { "__destruct", tg_9XMLReader___destruct }
+  { "setRelaxNGSchemaSource", tg_9XMLReader_setRelaxNGSchemaSource }
 };
 
 static const long long hhbc_ext_method_count_XMLWriter = 44;
@@ -5804,9 +6006,15 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
   { "__destruct", tg_9XMLWriter___destruct }
 };
 
-const long long hhbc_ext_class_count = 53;
+const long long hhbc_ext_class_count = 59;
 const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "DummyClosure", new_DummyClosure_Instance, sizeof(c_DummyClosure), hhbc_ext_method_count_DummyClosure, hhbc_ext_methods_DummyClosure },
+  { "Vector", new_Vector_Instance, sizeof(c_Vector), hhbc_ext_method_count_Vector, hhbc_ext_methods_Vector },
+  { "VectorIterator", new_VectorIterator_Instance, sizeof(c_VectorIterator), hhbc_ext_method_count_VectorIterator, hhbc_ext_methods_VectorIterator },
+  { "Map", new_Map_Instance, sizeof(c_Map), hhbc_ext_method_count_Map, hhbc_ext_methods_Map },
+  { "MapIterator", new_MapIterator_Instance, sizeof(c_MapIterator), hhbc_ext_method_count_MapIterator, hhbc_ext_methods_MapIterator },
+  { "StableMap", new_StableMap_Instance, sizeof(c_StableMap), hhbc_ext_method_count_StableMap, hhbc_ext_methods_StableMap },
+  { "StableMapIterator", new_StableMapIterator_Instance, sizeof(c_StableMapIterator), hhbc_ext_method_count_StableMapIterator, hhbc_ext_methods_StableMapIterator },
   { "Continuation", new_Continuation_Instance, sizeof(c_Continuation), hhbc_ext_method_count_Continuation, hhbc_ext_methods_Continuation },
   { "GenericContinuation", new_GenericContinuation_Instance, sizeof(c_GenericContinuation), hhbc_ext_method_count_GenericContinuation, hhbc_ext_methods_GenericContinuation },
   { "DummyContinuation", new_DummyContinuation_Instance, sizeof(c_DummyContinuation), hhbc_ext_method_count_DummyContinuation, hhbc_ext_methods_DummyContinuation },

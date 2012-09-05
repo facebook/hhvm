@@ -7152,7 +7152,7 @@ void TranslatorX64::emitStaticPropInlineLookup(const NormalizedInstruction& i,
 
     // Precondition for this lookup - we don't need to pass the preClass,
     // as we only translate in class lookups.
-    ASSERT(cls == arGetContextClass(curFrame()));
+    ASSERT(cls == curFunc()->cls());
     if (false) { // typecheck
       StringData *data = NULL;
       SPropCache::lookup(ch, cls, data);
@@ -7169,14 +7169,19 @@ void TranslatorX64::emitStaticPropInlineLookup(const NormalizedInstruction& i,
   }
 }
 
+static bool isContextFixed() {
+  // Translations for pseudomains don't have a fixed context class
+  return !curFunc()->isPseudoMain();
+}
+
 void TranslatorX64::analyzeCGetS(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 2);
   ASSERT(i.inputs[0]->valueType() == KindOfClass);
   ASSERT(i.outStack);
   const Class* cls = i.inputs[0]->rtt.valueClass();
   const StringData* propName = i.inputs[1]->rtt.valueString();
-  i.m_txFlags = supportedPlan(cls && propName &&
-                              (arGetContextClass(curFrame()) == cls));
+  i.m_txFlags = supportedPlan(cls && propName && isContextFixed() &&
+                              curFunc()->cls() == cls);
 }
 
 void TranslatorX64::translateCGetS(const Tracelet& t,
@@ -7196,8 +7201,8 @@ void TranslatorX64::analyzeSetS(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.outStack);
   const Class* cls = i.inputs[1]->rtt.valueClass();
   const StringData* propName = i.inputs[2]->rtt.valueString();
-  i.m_txFlags = supportedPlan(cls && propName &&
-                              (arGetContextClass(curFrame()) == cls));
+  i.m_txFlags = supportedPlan(cls && propName && isContextFixed() &&
+                              curFunc()->cls() == cls);
 }
 
 void TranslatorX64::translateSetS(const Tracelet& t,
@@ -7264,11 +7269,6 @@ isNormalPropertyAccess(const NormalizedInstruction& i,
     i.inputs[objInput]->valueType() == KindOfObject;
 }
 
-static bool isContextFixed() {
-  // Translations for pseudomains don't have a fixed context class
-  return !curFunc()->isPseudoMain();
-}
-
 static Slot
 getPropertyOffset(const NormalizedInstruction& i,
                   int propInput, int objInput) {
@@ -7284,7 +7284,7 @@ getPropertyOffset(const NormalizedInstruction& i,
     return kInvalidSlot;
   }
   bool accessible;
-  Class* ctx = arGetContextClass(curFrame());
+  Class* ctx = curFunc()->cls();
   // If we are not in repo-authoriative mode, we need to check that
   // baseClass cannot change in between requests
   if (!RuntimeOption::RepoAuthoritative ||

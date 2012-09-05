@@ -43,6 +43,10 @@ const char* const CANNOT_USE_SCALAR_AS_ARRAY =
   "Cannot use a scalar value as an array";
 const char* const CREATING_DEFAULT_OBJECT =
   "Creating default object from empty value";
+const char* const FUNCTION_NAME_MUST_BE_STRING =
+  "Function name must be a string";
+const char* const METHOD_NAME_MUST_BE_STRING =
+  "Method name must be a string";
 
 } // namespace Strings
 } // namespace HPHP

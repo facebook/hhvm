@@ -5397,10 +5397,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
     const Class* cls = origObj->getVMClass();
     func = cls->lookupMethod(invokeName);
     if (func == NULL) {
-      raise_error("Function name must be a string");
+      raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
     }
   } else {
-    raise_error("Function name must be a string");
+    raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   if (func == NULL) {
     raise_error("Undefined function: %s", c1->m_data.pstr->data());
@@ -5483,7 +5483,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushObjMethod(PC& pc) {
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.topC(); // Method name.
   if (!IS_STRING_TYPE(c1->m_type)) {
-    raise_error("FPushObjMethod method argument must be a string");
+    raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
   Cell* c2 = m_stack.indC(1); // Object.
   if (c2->m_type != KindOfObject) {
@@ -5560,7 +5560,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethod(PC& pc) {
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.indC(1); // Method name.
   if (!IS_STRING_TYPE(c1->m_type)) {
-    raise_error("FPushClsMethod method argument must be a string");
+    raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   TypedValue* tv = m_stack.top();
   ASSERT(tv->m_type == KindOfClass);
@@ -5593,7 +5593,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodF(PC& pc) {
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.indC(1); // Method name.
   if (!IS_STRING_TYPE(c1->m_type)) {
-    raise_error("FPushClsMethodF method argument must be a string");
+    raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   TypedValue* tv = m_stack.top();
   ASSERT(tv->m_type == KindOfClass);

@@ -92,4 +92,4 @@ In Z::fZ()
   In Z::fPrivate()
   In Z::fProtected()
   In Z::fPublic()
-Test end
+HipHop Fatal error: Function name must be a string in src/test/vm/FPushObjMethod.php on line 201

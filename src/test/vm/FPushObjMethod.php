@@ -197,4 +197,5 @@ $z->fX();
 $z->fY();
 $z->fZ();
 
-print "Test end\n";
+$not_a_string = 123;
+$foo = C::$not_a_string();

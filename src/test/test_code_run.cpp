@@ -8661,6 +8661,21 @@ bool TestCodeRun::TestCollectionClasses() {
         "\n"
         "Done\n"
         );
+  
+  MVCRO("<?php\n"
+        "$v = new Vector;\n"
+        "$v[] = 123;\n"
+        "var_dump($v->toArray());\n"
+        "$v->pop();\n"
+        "var_dump($v->toArray());\n"
+        ,
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(123)\n"
+        "}\n"
+        "array(0) {\n"
+        "}\n"
+        );
 
   return true;
 }

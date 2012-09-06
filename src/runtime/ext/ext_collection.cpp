@@ -119,7 +119,7 @@ void c_Vector::t_pop() {
   ++m_versionNumber;
   if (m_size) {
     --m_size;
-    tvDecRef(&m_data[m_size]);
+    tvRefcountedDecRef(&m_data[m_size]);
   } else {
     Object e(SystemLib::AllocRuntimeExceptionObject(
       "Cannot pop empty Vector"));

@@ -164,7 +164,8 @@ static std::string getSandboxHostFormat() {
     return "";
   }
   String host = fields.rvalAt(0).toString();
-  String domain = fields.rvalAt(2).toString();
+  String domain = fields.rvalAt(1).toString() + "." +
+    fields.rvalAt(2).toString();
   String suffix = fields.rvalAt(3).toString();
   string sandboxHost = "hphpd.debugger_tests." + host->toCPPString() +
                        "." + domain->toCPPString() +

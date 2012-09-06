@@ -2080,7 +2080,7 @@ public:
     case 2: case 32: case 64: case 128: case 256: case 512: case 65535:
       value = p;
       break;
-    default: assert(false);
+    default: not_reached();
     }
   }
   int64 hash;
@@ -4264,7 +4264,7 @@ Variant get_builtin_constant(CStrRef name, bool error) {
     case 256: return *(StaticArray*)(p->value);
     case 512: { CVarRef (*f)()=(CVarRef(*)())(p->value); return (*f)(); }
     case 65535: return *(Variant*)(p->value);
-    default: assert(false);
+    default: not_reached();
     }
   }
   return getDynamicConstant(g->stgv_Variant[p->off-1], name);

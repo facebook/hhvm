@@ -17,7 +17,8 @@
 #ifndef __MUTEX_H__
 #define __MUTEX_H__
 
-#include <assert.h>
+#include <util/assert.h>
+#include <util/util.h>
 #include <pthread.h>
 #include <time.h>
 #include <tbb/concurrent_hash_map.h>
@@ -157,12 +158,9 @@ public:
     assert(m_magic == kMagic);
     checkRank(m_rank);
 #endif
-    int ret = pthread_mutex_lock(&m_mutex);
-    if (ret != 0) {
-#ifdef DEBUG
-      assert(false);
-#endif
-    }
+    UNUSED int ret = pthread_mutex_lock(&m_mutex);
+    ASSERT(ret == 0);
+
     recordAcquisition();
     assertOwnedBySelf();
   }
@@ -172,12 +170,8 @@ public:
     assert(m_magic == kMagic);
 #endif
     recordRelease();
-    int ret = pthread_mutex_unlock(&m_mutex);
-    if (ret != 0) {
-#ifdef DEBUG
-      assert(false);
-#endif
-    }
+    UNUSED int ret = pthread_mutex_unlock(&m_mutex);
+    ASSERT(ret == 0);
   }
 
 private:

@@ -83,7 +83,7 @@ public:
   virtual const char *getRemoteHost() {
     return m_remoteHost.c_str();
   }
-  virtual const uint16 getRemotePort() {
+  virtual uint16 getRemotePort() {
     return 0;
   }
   virtual const void *getPostData(int &size) {

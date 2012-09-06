@@ -1123,8 +1123,7 @@ void MethodStatement::outputParamArrayCreate(CodeGenerator &cg, bool checkRef) {
     string name = pre + (Option::VariablePrefix +
                          CodeGenerator::FormatLabel(paramName));
     if (checkRef && param->isRef()) {
-      assert(false);
-      cg_printf("ref(%s)", name.c_str());
+      not_reached();
     } else {
       cg_printf("%s", name.c_str());
     }

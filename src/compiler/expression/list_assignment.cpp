@@ -412,5 +412,5 @@ bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 void ListAssignment::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  assert(false);
+  not_reached();
 }

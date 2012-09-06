@@ -2141,8 +2141,7 @@ Variant i_callUserFunc(void *extra, CArrRef params) {
 // This is solely here to support generator methods. The C++ implementation of
 // the Continuation class is the only thing that uses this function.
 Variant i_callUserFunc1ArgMCP(MethodCallPackage& mcp, int num, CVarRef arg0) {
-  assert(false);
-  return Variant();
+  not_reached();
 }
 
 CallInfoWithConstructor ci_callUserFunc(

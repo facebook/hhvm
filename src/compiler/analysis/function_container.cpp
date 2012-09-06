@@ -375,7 +375,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
       ASSERT(iterFuncs != functions->end());
       // We have assumptions that function names do not contain ".."
       // (e.g., call_user_func0 ~ call_user_func6)
-      if (strstr(name, "..")) assert(false);
+      assert(!strstr(name, ".."));
       FunctionScopePtr func = iterFuncs->second;
       cg_printf(" {" STRHASH_FMT ",%d,%d,\"%s\",",
                 hash_string_i(name),

@@ -1374,7 +1374,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                 // be the first instruction
                 punt();
               }
-              assert(false);
+              not_reached();
             }
           }
           dl->rtt = RuntimeType((DataType)info.m_data);

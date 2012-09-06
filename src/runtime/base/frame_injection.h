@@ -30,32 +30,30 @@ class VariableEnvironment;
 // The FrameInjectionVM class is used instead of real FrameInjection
 // classes (see macros.h) for the few remaining cases where a
 // FrameInjection object is needed for calling methods. All of the
-// methods just assert(false) but they are needed for successful
+// methods just not_reached() but they are needed for successful
 // compilation without even more #ifdefs.
 class FrameInjectionVM {
  public:
   FrameInjectionVM () {}
 
   ObjectData *getThis() const {
-    assert(false);
+    not_reached();
   }
 
   ObjectData *getThisForArrow() {
-    assert(false);
+    not_reached();
   }
 
   void setLine(int n) {
-    assert(false);
-    // Anything relying on this information in the VM is already
-    // broken.
+    not_reached();
   }
 
   void setStaticClassName(CStrRef cls) {
-    assert(false);
+    not_reached();
   }
 
-  ThreadInfo* getThreadInfo() const { 
-    assert(false);
+  ThreadInfo* getThreadInfo() const {
+    not_reached();
   }
 };
 

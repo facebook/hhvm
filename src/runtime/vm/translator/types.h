@@ -17,9 +17,6 @@
 #ifndef incl_TRANSL_TYPES_H_
 #define incl_TRANSL_TYPES_H_
 
-#include <hash_map>
-#include <hash_set>
-
 namespace HPHP {
 namespace VM {
 namespace Transl {

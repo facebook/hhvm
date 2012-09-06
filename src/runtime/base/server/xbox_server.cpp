@@ -53,7 +53,7 @@ public:
   virtual const char *getRemoteHost() {
     return "127.0.0.1";
   }
-  virtual const uint16 getRemotePort() {
+  virtual uint16 getRemotePort() {
     return 0;
   }
   virtual const void *getPostData(int &size) {

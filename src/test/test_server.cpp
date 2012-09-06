@@ -348,7 +348,7 @@ public:
   virtual const char *getUrl() { return "/string";}
   virtual const char *getRemoteHost() { return "remote";}
   virtual const void *getPostData(int &size) { size = 0; return NULL;}
-  virtual const uint16 getRemotePort() { return 0; }
+  virtual uint16 getRemotePort() { return 0; }
   virtual Method getMethod() { return Transport::GET;}
   virtual std::string getHeader(const char *name) { return "";}
   virtual void getHeaders(HeaderMap &headers) {}

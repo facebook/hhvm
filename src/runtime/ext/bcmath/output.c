@@ -190,7 +190,8 @@ bc_out_num (bc_num num, int o_base, void (*out_char)(), int leading_zero TSRMLS_
 	      if (o_base <= 16)
 		(*out_char) (ref_str[fdigit]);
 	      else {
-		bc_out_long (fdigit, max_o_digit->n_len, pre_space, out_char);
+		bc_out_long ((long)fdigit, max_o_digit->n_len,
+                             pre_space, out_char);
 		pre_space = 1;
 	      }
 	      bc_multiply (t_num, base, &t_num, 0 TSRMLS_CC);

@@ -87,7 +87,7 @@ IMPLEMENT_SMART_ALLOCATION_HOT(VectorArray, SmartAllocatorImpl::NeedSweep);
 #define NEWALLOC(a) new (a)
 #define DEALLOC(a, e, T) (e->~T(),a->dealloc(e))
 #endif
-ssize_t VectorArray::vsize() const { assert(false); }
+ssize_t VectorArray::vsize() const { not_reached(); }
 
 HOT_FUNC_HPHP
 ssize_t VectorArray::iter_begin() const {

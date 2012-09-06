@@ -90,21 +90,21 @@ static inline void threadStats(uint64*& allocated, uint64*& deallocated,
   if (mallctlbymib(threadAllocatedpMib,
                    sizeof(threadAllocatedpMib) / sizeof(size_t),
                    &allocated, &len, NULL, 0)) {
-    assert(false);
+    not_reached();
   }
 
   len = sizeof(deallocated);
   if (mallctlbymib(threadDeallocatedpMib,
                    sizeof(threadDeallocatedpMib) / sizeof(size_t),
                    &deallocated, &len, NULL, 0)) {
-    assert(false);
+    not_reached();
   }
 
   len = sizeof(cactive);
   if (mallctlbymib(statsCactiveMib,
                    sizeof(statsCactiveMib) / sizeof(size_t),
                    &cactive, &len, NULL, 0)) {
-    assert(false);
+    not_reached();
   }
 
   size_t headRoom = RuntimeOption::ServerMemoryHeadRoom;

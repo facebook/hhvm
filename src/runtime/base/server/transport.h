@@ -97,7 +97,7 @@ public:
    */
   virtual const char *getUrl() = 0;
   virtual const char *getRemoteHost() = 0;
-  virtual const uint16 getRemotePort() = 0;
+  virtual uint16 getRemotePort() = 0;
 
   /**
    * POST request's data.

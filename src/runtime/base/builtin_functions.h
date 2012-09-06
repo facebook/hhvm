@@ -697,7 +697,7 @@ public:
   void lateStaticBind(ThreadInfo *ti);
   const CallInfo *bindClass(FrameInjection &fi);
   const CallInfo *bindClass(FrameInjectionVM &fi) {
-    assert(false);
+    not_reached();
   }
   String getClassName();
 

@@ -351,7 +351,7 @@ static int cloneStmtsForInline(InlineCloneInfo &info, StatementPtr s,
       return -1;
     }
   default:
-    assert(false);
+    not_reached();
   }
   return 1;
 }

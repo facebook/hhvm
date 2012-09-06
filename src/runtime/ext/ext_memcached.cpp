@@ -911,7 +911,7 @@ void c_Memcached::toPayload(CVarRef value, vector<char> &payload,
     else if (value.isInteger()) flags = MEMC_VAL_IS_LONG;
     else if (value.isDouble())  flags = MEMC_VAL_IS_DOUBLE;
     else if (value.isBoolean()) flags = MEMC_VAL_IS_BOOL;
-    else assert(false);
+    else not_reached();
   } else {
     switch (m_impl->serializer) {
     case q_Memcached$$SERIALIZER_JSON:

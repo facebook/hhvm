@@ -594,7 +594,7 @@ static void updateDepthAndFlags(ExpressionPtr e, int &depth, int &flags) {
   } else if (s == "io") {
     flags |= Expression::IOEffect;
   } else {
-    assert(false);
+    not_reached();
   }
 }
 
@@ -863,7 +863,7 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e,
           spc(AssignmentExpression,e)->getVariable(), rv, forLval);
 
     default:
-      assert(false);
+      not_reached();
   }
 
   return DisjointAccess;
@@ -2052,7 +2052,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
     }
 
   default:
-    assert(false);
+    not_reached();
   }
 
   for (int i = start; i < nkid; i++) {

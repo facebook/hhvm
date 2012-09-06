@@ -22,6 +22,7 @@
 #ifndef __HPHP_STRING_H__
 #define __HPHP_STRING_H__
 
+#include <util/assert.h>
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/string_data.h>
 #include <runtime/base/string_offset.h>
@@ -399,7 +400,7 @@ public:
   String rvalAt(double  key) const { return rvalAtImpl((int64)key);}
   String rvalAt(litstr  key) const { return rvalAtImpl(String(key).toInt32());}
   String rvalAt(const StringData *key) const {
-    assert(false);
+    not_reached();
     return rvalAtImpl(key ? key->toInt32() : 0);
   }
   String rvalAt(CStrRef key) const { return rvalAtImpl(key.toInt32());}
@@ -415,7 +416,7 @@ public:
   StringOffset lvalAt(double  key) { return lvalAtImpl((int64)key);}
   StringOffset lvalAt(litstr  key) { return lvalAtImpl(String(key).toInt32());}
   StringOffset lvalAt(const StringData *key) {
-    assert(false);
+    not_reached();
     return lvalAtImpl(key ? key->toInt32() : 0);
   }
   StringOffset lvalAt(CStrRef key) { return lvalAtImpl(key.toInt32());}

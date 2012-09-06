@@ -2368,13 +2368,13 @@ CVarRef Variant::rvalAtRefHelper(T offset, ACCESSPARAMS_IMPL) const {
 }
 
 template
-CVarRef Variant::rvalAtRefHelper<int64>(int64 offset, ACCESSPARAMS_DECL) const;
+CVarRef Variant::rvalAtRefHelper<int64>(int64 offset, ACCESSPARAMS_IMPL) const;
 template
 CVarRef Variant::rvalAtRefHelper<CStrRef>(CStrRef offset,
-                                          ACCESSPARAMS_DECL) const;
+                                          ACCESSPARAMS_IMPL) const;
 template
 CVarRef Variant::rvalAtRefHelper<CVarRef>(CVarRef offset,
-                                          ACCESSPARAMS_DECL) const;
+                                          ACCESSPARAMS_IMPL) const;
 CVarRef Variant::rvalAtRef(double offset, ACCESSPARAMS_IMPL) const {
   return rvalAtRefHelper(HPHP::toInt64(offset), flags);
 }

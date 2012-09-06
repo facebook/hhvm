@@ -277,7 +277,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                   Option::ClassStaticsCallbackPrefix, m_className.c_str(),
                   Option::ObjectStaticPrefix, m_ciTemp);
       } else {
-        assert(false);
+        not_reached();
       }
     }
     cg_printf("const CallInfo *cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);

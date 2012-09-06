@@ -1724,7 +1724,7 @@ ObjectData *ObjectData::clone() {
               ((Variant*)a2)->setWithRef(*(Variant*)a1);
               break;
             default:
-              assert(false);
+              not_reached();
           }
         } while ((off = p->next) != 0);
       }

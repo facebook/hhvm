@@ -1018,7 +1018,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
         case Type::KindOfInt64: p = "Integer"; break;
         case Type::KindOfDouble: p = "Double"; break;
         case Type::KindOfString: p = "String"; break;
-        default: assert(false);
+        default: not_reached();
       }
       cg_indentBegin("!%s%s.is%s()) {\n",
                      Option::VariablePrefix, param->getName().c_str(), p);

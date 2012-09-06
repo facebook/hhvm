@@ -31,7 +31,7 @@ inline bool f_is_bool(int     v) { return false;}
 inline bool f_is_bool(int64   v) { return false;}
 inline bool f_is_bool(double  v) { return false;}
 inline bool f_is_bool(litstr  v) { return false;}
-inline bool f_is_bool(const StringData *v) { assert(false); return false;}
+inline bool f_is_bool(const StringData *v) { not_reached(); }
 inline bool f_is_bool(CStrRef v) { return false;}
 inline bool f_is_bool(CArrRef v) { return false;}
 inline bool f_is_bool(CObjRef v) { return false;}
@@ -44,7 +44,7 @@ inline bool f_is_int(int     v) { return true;}
 inline bool f_is_int(int64   v) { return true;}
 inline bool f_is_int(double  v) { return false;}
 inline bool f_is_int(litstr  v) { return false;}
-inline bool f_is_int(const StringData *v) { assert(false); return false;}
+inline bool f_is_int(const StringData *v) { not_reached(); }
 inline bool f_is_int(CStrRef v) { return false;}
 inline bool f_is_int(CArrRef v) { return false;}
 inline bool f_is_int(CObjRef v) { return false;}
@@ -57,7 +57,7 @@ inline bool f_is_integer(int     v) { return true;}
 inline bool f_is_integer(int64   v) { return true;}
 inline bool f_is_integer(double  v) { return false;}
 inline bool f_is_integer(litstr  v) { return false;}
-inline bool f_is_integer(const StringData *v) { assert(false); return false;}
+inline bool f_is_integer(const StringData *v) { not_reached(); }
 inline bool f_is_integer(CStrRef v) { return false;}
 inline bool f_is_integer(CArrRef v) { return false;}
 inline bool f_is_integer(CObjRef v) { return false;}
@@ -70,7 +70,7 @@ inline bool f_is_long(int     v) { return true;}
 inline bool f_is_long(int64   v) { return true;}
 inline bool f_is_long(double  v) { return false;}
 inline bool f_is_long(litstr  v) { return false;}
-inline bool f_is_long(const StringData *v) { assert(false); return false;}
+inline bool f_is_long(const StringData *v) { not_reached(); }
 inline bool f_is_long(CStrRef v) { return false;}
 inline bool f_is_long(CArrRef v) { return false;}
 inline bool f_is_long(CObjRef v) { return false;}
@@ -83,7 +83,7 @@ inline bool f_is_double(int     v) { return false;}
 inline bool f_is_double(int64   v) { return false;}
 inline bool f_is_double(double  v) { return true;}
 inline bool f_is_double(litstr  v) { return false;}
-inline bool f_is_double(const StringData *v) { assert(false); return false;}
+inline bool f_is_double(const StringData *v) { not_reached(); }
 inline bool f_is_double(CStrRef v) { return false;}
 inline bool f_is_double(CArrRef v) { return false;}
 inline bool f_is_double(CObjRef v) { return false;}
@@ -96,7 +96,7 @@ inline bool f_is_float(int     v) { return false;}
 inline bool f_is_float(int64   v) { return false;}
 inline bool f_is_float(double  v) { return true;}
 inline bool f_is_float(litstr  v) { return false;}
-inline bool f_is_float(const StringData *v) { assert(false); return false;}
+inline bool f_is_float(const StringData *v) { not_reached(); }
 inline bool f_is_float(CStrRef v) { return false;}
 inline bool f_is_float(CArrRef v) { return false;}
 inline bool f_is_float(CObjRef v) { return false;}
@@ -109,10 +109,7 @@ inline bool f_is_numeric(int     v) { return true;}
 inline bool f_is_numeric(int64   v) { return true;}
 inline bool f_is_numeric(double  v) { return true;}
 inline bool f_is_numeric(litstr  v) { return String(v).isNumeric();}
-inline bool f_is_numeric(const StringData *v) {
-  assert(false);
-  return v ? v->isNumeric() : false;
-}
+inline bool f_is_numeric(const StringData *v) { not_reached(); }
 inline bool f_is_numeric(CStrRef v) { return v.isNumeric();}
 inline bool f_is_numeric(CArrRef v) { return false;}
 inline bool f_is_numeric(CObjRef v) { return false;}
@@ -125,7 +122,7 @@ inline bool f_is_real(int     v) { return false;}
 inline bool f_is_real(int64   v) { return false;}
 inline bool f_is_real(double  v) { return true;}
 inline bool f_is_real(litstr  v) { return false;}
-inline bool f_is_real(const StringData *v) { assert(false); return false;}
+inline bool f_is_real(const StringData *v) { not_reached(); }
 inline bool f_is_real(CStrRef v) { return false;}
 inline bool f_is_real(CArrRef v) { return false;}
 inline bool f_is_real(CObjRef v) { return false;}
@@ -138,7 +135,7 @@ inline bool f_is_string(int     v) { return false;}
 inline bool f_is_string(int64   v) { return false;}
 inline bool f_is_string(double  v) { return false;}
 inline bool f_is_string(litstr  v) { return true;}
-inline bool f_is_string(const StringData *v) { assert(false); return true;}
+inline bool f_is_string(const StringData *v) { not_reached(); }
 inline bool f_is_string(CStrRef v) { return true;}
 inline bool f_is_string(CArrRef v) { return false;}
 inline bool f_is_string(CObjRef v) { return false;}
@@ -151,7 +148,7 @@ inline bool f_is_scalar(int     v) { return true;}
 inline bool f_is_scalar(int64   v) { return true;}
 inline bool f_is_scalar(double  v) { return true;}
 inline bool f_is_scalar(litstr  v) { return true;}
-inline bool f_is_scalar(const StringData *v) { assert(false); return true;}
+inline bool f_is_scalar(const StringData *v) { not_reached(); }
 inline bool f_is_scalar(CStrRef v) { return true;}
 inline bool f_is_scalar(CArrRef v) { return false;}
 inline bool f_is_scalar(CObjRef v) { return false;}
@@ -164,7 +161,7 @@ inline bool f_is_array(int     v) { return false;}
 inline bool f_is_array(int64   v) { return false;}
 inline bool f_is_array(double  v) { return false;}
 inline bool f_is_array(litstr  v) { return false;}
-inline bool f_is_array(const StringData *v) { assert(false); return false;}
+inline bool f_is_array(const StringData *v) { not_reached(); }
 inline bool f_is_array(CStrRef v) { return false;}
 inline bool f_is_array(CArrRef v) { return true;}
 inline bool f_is_array(CObjRef v) { return false;}
@@ -177,7 +174,7 @@ inline bool f_is_object(int     v) { return false;}
 inline bool f_is_object(int64   v) { return false;}
 inline bool f_is_object(double  v) { return false;}
 inline bool f_is_object(litstr  v) { return false;}
-inline bool f_is_object(const StringData *v) { assert(false); return false;}
+inline bool f_is_object(const StringData *v) { not_reached(); }
 inline bool f_is_object(CStrRef v) { return false;}
 inline bool f_is_object(CArrRef v) { return false;}
 inline bool f_is_object(CObjRef v) { return !v.isResource();}
@@ -190,7 +187,7 @@ inline bool f_is_resource(int     v) { return false;}
 inline bool f_is_resource(int64   v) { return false;}
 inline bool f_is_resource(double  v) { return false;}
 inline bool f_is_resource(litstr  v) { return false;}
-inline bool f_is_resource(const StringData *v) { assert(false); return false;}
+inline bool f_is_resource(const StringData *v) { not_reached(); }
 inline bool f_is_resource(CStrRef v) { return false;}
 inline bool f_is_resource(CArrRef v) { return false;}
 inline bool f_is_resource(CObjRef v) { return v.isResource();}
@@ -203,7 +200,7 @@ inline bool f_is_null(int     v) { return false;}
 inline bool f_is_null(int64   v) { return false;}
 inline bool f_is_null(double  v) { return false;}
 inline bool f_is_null(litstr  v) { return false;}
-inline bool f_is_null(const StringData *v) { assert(false); return v == NULL;}
+inline bool f_is_null(const StringData *v) { not_reached(); }
 inline bool f_is_null(CStrRef v) { return v.isNull();}
 inline bool f_is_null(CArrRef v) { return v.isNull();}
 inline bool f_is_null(CObjRef v) { return v.isNull();}
@@ -216,7 +213,7 @@ inline String f_gettype(int     v) { return "integer";}
 inline String f_gettype(int64   v) { return "integer";}
 inline String f_gettype(double  v) { return "double";}
 inline String f_gettype(litstr  v) { return "string";}
-inline String f_gettype(const StringData *v) { assert(false); return "string";}
+inline String f_gettype(const StringData *v) { not_reached(); }
 inline String f_gettype(CStrRef v) { return "string";}
 inline String f_gettype(CArrRef v) { return "array";}
 inline String f_gettype(CObjRef v) { return "object";}

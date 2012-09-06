@@ -500,7 +500,7 @@ void CodeGenerator::pushBreakScope(int labelId,
                                    bool loopCounter /* = true */) {
   m_breakScopes.push_back(labelId);
   if (loopCounter) {
-    printf("LOOP_COUNTER(%d);\n", labelId & ~BreakScopeBitMask);
+    printf("LOOP_COUNTER(%d);\n", int(labelId & ~BreakScopeBitMask));
   }
 }
 
@@ -555,10 +555,8 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
 int CodeGenerator::checkLiteralString(const std::string &str, int &index,
                                       AnalysisResultPtr ar, BlockScopePtr bs,
                                       bool scalarVariant /* = false */) {
-  if (getContext() == CodeGenerator::CppConstantsDecl ||
-      getContext() == CodeGenerator::CppClassConstantsImpl) {
-    assert(false);
-  }
+  assert(getContext() != CodeGenerator::CppConstantsDecl &&
+         getContext() != CodeGenerator::CppClassConstantsImpl);
   int stringId = ar->getLiteralStringId(str, index);
   if (m_literalScope) {
     bs = m_literalScope;

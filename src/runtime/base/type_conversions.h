@@ -176,7 +176,7 @@ Object toObject(ObjectData *v);
 inline Object toObject(CObjRef v) { return toObject(v.get());}
 inline Object toObject(CVarRef v) { return v.toObject();}
 
-inline const String *const toSPOD(CStrRef v) { return &v;}
+inline const String *toSPOD(CStrRef v) { return &v;}
 inline const Variant *toVPOD(CVarRef v) { return &v;}
 inline const Object *toOPOD(CObjRef v) { return &v;}
 

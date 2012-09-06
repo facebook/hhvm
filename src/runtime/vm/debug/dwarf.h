@@ -83,8 +83,8 @@ class TCRange {
     return bool(m_start);
   }
   bool isAstubs() const { return m_isAstubs; }
-  const TCA begin() const { V(); return m_start; }
-  const TCA end() const   { V(); return m_end; };
+  TCA begin() const { V(); return m_start; }
+  TCA end() const   { V(); return m_end; };
   uint32_t size() const   { V(); return m_end - m_start; }
 
   void extend(const TCA newEnd) {

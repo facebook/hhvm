@@ -819,7 +819,6 @@ int SymbolicStack::getActualPos(int vpos) const {
       return j;
     }
   }
-  ASSERT(false);
   NOT_REACHED();
 }
 
@@ -1956,8 +1955,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfIfBranchStatement:
-        assert(false); // handled by KindOfIfStatement
-        return false;
+        not_reached(); // handled by KindOfIfStatement
 
       case Statement::KindOfReturnStatement: {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
@@ -2235,8 +2233,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfClassConstant:
       case Statement::KindOfMethodStatement:
         // handled by emitClass
-        assert(false);
-        return false;
+        not_reached();
 
       case Statement::KindOfFunctionStatement: {
         ASSERT(!node->getClassScope()); // Handled directly by emitClass().
@@ -3424,8 +3421,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
     }
   }
 
-  assert(false);
-  return false;
+  not_reached();
 }
 
 int EmitterVisitor::scanStackForLocation(int iLast) {
@@ -5930,7 +5926,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
         }
         break;
       }
-      assert(false);
+      not_reached();
     }
   }
 }

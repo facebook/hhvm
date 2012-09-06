@@ -1715,7 +1715,7 @@ TCA TranslatorX64::genericRefCountStubRegs(X64Assembler& a) {
       RegSet s = kCallerSaved - (RegSet(rData) | RegSet(rType));
       PhysRegSaverParity<1> saver(a, s);
       if (false) { // typecheck
-        RefData* vp; DataType dt;
+        RefData* vp = NULL; DataType dt = KindOfUninit;
         (void)tv_release_typed(vp, dt);
       }
       a.call(TCA(tv_release_typed));
@@ -5269,7 +5269,7 @@ TranslatorX64::translateDefCns(const Tracelet& t,
   StringData* name = curUnit()->lookupLitstrId(i.imm[0].u_SA);
 
   if (false) {
-    TargetCache::CacheHandle ch;
+    TargetCache::CacheHandle ch = 0;
     size_t bit = 0;
     Variant *inout = 0;
     StringData *name = 0;
@@ -5386,8 +5386,8 @@ TranslatorX64::translateConcat(const Tracelet& t,
   } else {
     // Otherwise, use the generic concat helper
     if (false) { // type check
-      uint64_t v1, v2;
-      DataType t1, t2;
+      uint64_t v1 = 0, v2 = 0;
+      DataType t1 = KindOfUninit, t2 = KindOfUninit;
       StringData *retval = concat(t1, v1, t2, v2);
       printf("%p", retval); // use retval
     }
@@ -6039,7 +6039,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
         tv.m_data.parr = curUnit()->lookupArrayId(prev->imm[0].u_AA);
         break;
       default:
-        assert(false);
+        not_reached();
     }
   }
   /*
@@ -7541,7 +7541,7 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
             (doIntCheck ? (void*)array_getm_s0 : (void*)array_getm_s0_fast));
   }
   if (false) { // type-check
-    void *a;
+    void *a = NULL;
     TypedValue tv;
     array_getm_i(a, 1, &tv);
     StringData *sd = NULL;
@@ -7582,7 +7582,7 @@ TranslatorX64::translateCGetM_LEE(const Tracelet& t,
 
   TRACE(1, "nvGet2 outLoc: (%s, %lld)\n", outLoc.spaceName(), outLoc.offset);
   if (false) { // typeCheck
-    ArrayData *a;
+    ArrayData *a = NULL;
     TypedValue tv;
     StringData *sd = NULL;
     array_getm_is(a, 666, sd, &tv);

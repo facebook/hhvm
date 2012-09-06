@@ -93,7 +93,7 @@ const char *ReplayTransport::getUrl() {
 const char *ReplayTransport::getRemoteHost() {
   return m_hdf["remote_host"].get("");
 }
-const uint16 ReplayTransport::getRemotePort() {
+uint16 ReplayTransport::getRemotePort() {
   return m_hdf["remote_port"].getUInt16(0);
 }
 

@@ -1806,7 +1806,7 @@ void AnalysisResult::outputCPPNamedScalarVarIntegers(const std::string &file) {
   }
   cg_printf("\n");
   cg.namespaceBegin();
-  if ((sizeof(VarNR) % sizeof(int64) != 0)) assert(false);
+  assert((sizeof(VarNR) % sizeof(int64) == 0));
   int multiple = (sizeof(VarNR) / sizeof(int64));
   cg_indentBegin("static const uint64 ivalues[] = {\n");
   for (map<int, vector<string> >::const_iterator it =
@@ -1873,8 +1873,8 @@ void AnalysisResult::outputCPPNamedScalarVarDoubles(const std::string &file) {
   }
   cg_printf("\n");
   cg.namespaceBegin();
-  if ((sizeof(int64) != sizeof(double))) assert(false);
-  if ((sizeof(VarNR) % sizeof(double) != 0)) assert(false);
+  assert((sizeof(int64) == sizeof(double)));
+  assert((sizeof(VarNR) % sizeof(double) == 0));
   int multiple = (sizeof(VarNR) / sizeof(double));
   cg_indentBegin("static const uint64 dvalues[] = {\n");
   for (map<int, vector<string> >::const_iterator it =
@@ -3238,7 +3238,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     "    case %d: case %d: case %d: case %d: case %d: case %d: case %d:\n"
     "      value = p;\n"
     "      break;\n"
-    "    default: assert(false);\n"
+    "    default: not_reached();\n"
     "    }\n"
     "  }\n"
     "  int64 hash;\n"
@@ -3344,7 +3344,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
         cg_printf("(const char *)&%s,\n", varName.c_str());
         break;
       case Type::KindOfObject:
-        if (!system) assert(false);
+        assert(system);
         if (strcmp(name, "STDERR") == 0) {
           cg_printf("(const char *)&BuiltinFiles::GetSTDERR,\n");
         } else if (strcmp(name, "STDIN") == 0) {
@@ -3352,7 +3352,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
         } else if (strcmp(name, "STDOUT") == 0) {
           cg_printf("(const char *)&BuiltinFiles::GetSTDOUT,\n");
         } else {
-          assert(false);
+          not_reached();
         }
         break;
       default:
@@ -3415,7 +3415,7 @@ void AnalysisResult::outputCPPDynamicConstantTable(
     "  case %d: return *(StaticArray*)(p->value);\n"
     "  case %d: { CVarRef (*f)()=(CVarRef(*)())(p->value); return (*f)(); }\n"
     "  case %d: return *(Variant*)(p->value);\n"
-    "  default: assert(false);\n"
+    "  default: not_reached();\n"
     "  }\n"
     "}\n"
   };
@@ -5363,6 +5363,6 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
   cg.namespaceEnd();
   fTable.close();
   outputCPPNamedLiteralStrings(true, litstrFile);
-  if (m_scalarArrays.size()) assert(false);
+  assert(m_scalarArrays.size() == 0);
 }
 

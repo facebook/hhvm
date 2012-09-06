@@ -1870,7 +1870,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
     cg_printf("%s(", m_name.c_str());
     Variant t;
     if (!(*m_params)[0]->getScalarValue(t) || !t.isString()) {
-      assert(false);
+      not_reached();
     }
     cg_printString(t.toString().data(), ar, shared_from_this());
     cg_printf(")");

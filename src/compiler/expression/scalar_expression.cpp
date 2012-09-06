@@ -461,8 +461,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
         (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
       OutputCPPString(output, cg, ar, getScope(), constant);
     } else {
-      assert(false);
-      cg_printf("%s", m_value.c_str());
+      not_reached();
     }
     break;
   }

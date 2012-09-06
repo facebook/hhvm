@@ -43,7 +43,7 @@ public:
    */
   virtual const char *getUrl();
   virtual const char *getRemoteHost();
-  virtual const uint16 getRemotePort();
+  virtual uint16 getRemotePort();
   virtual const void *getPostData(int &size);
   virtual Method getMethod();
   virtual std::string getHeader(const char *name);

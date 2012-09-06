@@ -195,7 +195,7 @@ ZendArray::~ZendArray() {
   }
 }
 
-ssize_t ZendArray::vsize() const { assert(false); }
+ssize_t ZendArray::vsize() const { not_reached(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 // iterations

@@ -54,15 +54,21 @@
   }                                                                           \
 } while (0)
 
+#ifdef __INTEL_COMPILER
+#define not_reached()                                                \
+  do {                                                               \
+    assert(false);                                                   \
+  } while (true)
+#else
 #define not_reached() /* gcc-4.5 supports __builtin_unreachable() */ \
   assert(false)
+#endif
 
 #define NOT_REACHED not_reached
 
 #define not_implemented() do {                   \
   fprintf(stderr, "not implemented: %s:%d %s\n", \
           __FILE__, __LINE__, __FUNCTION__);     \
-  assert(false);                                 \
   not_reached();                                 \
 } while(0)
 

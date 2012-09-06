@@ -839,14 +839,12 @@ void VariableTable::checkSystemGVOrder(SymbolSet &variants,
     "gvm_argv",
     "gvm_http_response_header",
   };
-  if (variants.size() < max ||
-      sizeof(sgvNames)/sizeof(sgvNames[0]) != max) {
-    assert(false);
-  }
+  assert(variants.size() >= max &&
+         sizeof(sgvNames) / sizeof(sgvNames[0]) == max);
   unsigned int i = 0;
   for (SymbolSet::const_iterator iterName = variants.begin();
        iterName != variants.end(); ++iterName) {
-    if (strcmp(sgvNames[i], iterName->c_str())) assert(false);
+    assert(!strcmp(sgvNames[i], iterName->c_str()));
     i++;
   }
 }
@@ -1000,8 +998,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
       bool gvmPrefix = (strncmp(iterName->c_str(), "gvm_", 4) == 0);
       if (!gvmPrefix) {
         gvmDone = true;
-      } else if (gvmDone) {
-        assert(false);
+      } else {
+        assert(!gvmDone);
       }
       string cast;
       if (type == object) {
@@ -1384,7 +1382,7 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     if (sym->isSystem()) {
-      if (sysDone) assert(false);
+      assert(!sysDone);
       variants.insert(string("gvm_") +
                              CodeGenerator::FormatLabel(sym->getName()));
       maxSysIdx++;

@@ -63,12 +63,14 @@ template<class T, size_t InternalSize = 1, size_t MinHeapCapacity = 0>
 struct TinyVector : private boost::noncopyable {
   struct const_iterator;
 
+#ifndef __INTEL_COMPILER
   static_assert(boost::has_trivial_destructor<T>::value,
                 "TinyVector only supports elements with trivial destructors");
   static_assert(boost::has_trivial_copy<T>::value &&
                 boost::has_trivial_assign<T>::value,
                 "TinyVector only supports elements with trivial copy "
                 "constructors and trivial assignment operators");
+#endif
   static_assert(InternalSize >= 1,
                 "TinyVector assumes that the internal size is at least 1");
 

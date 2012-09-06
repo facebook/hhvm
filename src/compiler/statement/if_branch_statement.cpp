@@ -102,7 +102,7 @@ void IfBranchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void IfBranchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  assert(false);
+  not_reached();
 }
 
 int IfBranchStatement::outputCPPIfBranch(CodeGenerator &cg,

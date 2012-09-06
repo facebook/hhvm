@@ -66,7 +66,12 @@
 #include "util/hash.h"
 #include "util/assert.h"
 
-#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4))
+#ifdef __INTEL_COMPILER
+#define va_copy __builtin_va_copy
+#endif
+
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4)) || \
+  __INTEL_COMPILER
 
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
@@ -107,14 +112,6 @@ struct hphp_hash_set : std::tr1::unordered_set<_T,_V,_W> {
 #define hphp_hash     __gnu_cxx::hash
 
 #endif
-
-namespace HPHP {
-  using std::string;
-  using std::vector;
-  using boost::lexical_cast;
-  using boost::dynamic_pointer_cast;
-  using boost::static_pointer_cast;
-}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -547,6 +544,14 @@ template <typename T, typename U>
 HPHP::hphp_raw_ptr<T> static_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
   return HPHP::hphp_raw_ptr<T>(static_cast<T*>(p.get()));
 }
+}
+
+namespace HPHP {
+  using std::string;
+  using std::vector;
+  using boost::lexical_cast;
+  using boost::dynamic_pointer_cast;
+  using boost::static_pointer_cast;
 }
 
 #endif // __BASE_H__

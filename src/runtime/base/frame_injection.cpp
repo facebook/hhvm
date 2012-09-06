@@ -201,7 +201,7 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   t = st;
   while (t && bt.size() < half) {
     Array frame = t->getStackFrame(withSelf, withThis);
-    if (frame.isNull()) assert(false);
+    if (frame.isNull()) not_reached();
     bt.append(frame);
     t = t->m_prev;
   }
@@ -225,7 +225,7 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   }
   for (int i = omitted; i < remaining; i++) {
     Array frame = remainingFrames[i]->getStackFrame(withSelf, withThis);
-    if (frame.isNull()) assert(false);
+    if (frame.isNull()) not_reached();
     bt.append(frame);
   }
   return bt;

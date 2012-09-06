@@ -174,7 +174,7 @@ void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("variables->get(dgv_%d).assignRef(g->get(dgv_%d));\n", id, id);
       exp->outputCPPEnd(cg, ar);
     } else {
-      assert(false);
+      not_reached();
     }
   }
   if (m_exp->getCount() > 1) cg_indentEnd("}\n");

@@ -505,8 +505,7 @@ private:
 
   const ClassInfo* getCurrentOrNull() const;
   const ClassInfo* current() const {
-    assert(false);
-    return this;
+    not_reached();
   }
 };
 

@@ -10288,9 +10288,9 @@ TranslatorX64::emitGetGlobal(const NormalizedInstruction& i, int nameIdx,
   }
   SKTRACE(1, i.source, "ch %d\n", ch);
   EMIT_CALL(a, allowCreate ? GlobalCache::lookupCreate
-                            : GlobalCache::lookup,
-             IMM(ch),
-             IMM((uint64_t)maybeName));
+                           : GlobalCache::lookup,
+            IMM(ch),
+            IMM((uint64_t)maybeName));
   recordCall(i);
 }
 

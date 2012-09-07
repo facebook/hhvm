@@ -1023,9 +1023,17 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
   free(meta);
 }
 
-static StringData* continuationClassName(const StringData* fname) {
+StringData* EmitterVisitor::continuationClassName(
+  const StringData* fname) {
   std::ostringstream str;
-  str << "continuation$" << fname->data();
+  str << "continuation$"
+      << '$'
+      << std::hex
+      << m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0]
+      << std::dec
+      << '$'
+      << fname->data();
+
   return StringData::GetStaticString(str.str());
 }
 
@@ -3400,7 +3408,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(className,
                                                        PreClass::NotHoistable);
-        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), AttrNone,
+        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), AttrUnique,
                   parentName, NULL);
         e.DefCls(pce->id());
 
@@ -4741,6 +4749,9 @@ void EmitterVisitor::emitPostponedMeths() {
           attrs = (Attr)(attrs | AttrNoOverride);
         }
       }
+    } else if (!SystemLib::s_inited) {
+      // we're building systemlib. everything is unique
+      attrs = (Attr)(attrs | AttrUnique);
     }
 
     // For closures, the MethodStatement didn't have real attributes; enforce
@@ -4869,7 +4880,7 @@ void EmitterVisitor::newContinuationClass(const StringData* name) {
     StringData::GetStaticString("GenericContinuation");
   PreClassEmitter* pce = m_ue.newPreClassEmitter(className,
                                                  PreClass::AlwaysHoistable);
-  pce->init(0, 0, m_ue.bcPos(), AttrNone, parentName, NULL);
+  pce->init(0, 0, m_ue.bcPos(), AttrUnique, parentName, NULL);
 }
 
 void EmitterVisitor::emitPostponedCtors() {
@@ -5335,19 +5346,26 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     if (cNode->getUsedTraitNames().size()) {
       attr = (Attr)(attr | AttrNoExpandTrait);
     }
+  } else if (!SystemLib::s_inited) {
+    // we're building systemlib. everything is unique
+    attr = (Attr)(attr | AttrUnique);
   }
+
   const Location* sLoc = is->getLocation().get();
   const std::vector<std::string>& bases(cNode->getBases());
   int firstInterface = cNode->getOriginalParent().empty() ? 0 : 1;
   int nInterfaces = bases.size();
   PreClass::Hoistable hoistable = PreClass::NotHoistable;
   if (toplevel) {
-    if (nInterfaces > firstInterface || cNode->getUsedTraitNames().size()) {
-      hoistable = PreClass::Mergeable;
-    } else if (firstInterface &&
-               !m_hoistables.count(cNode->getOriginalParent())) {
-      hoistable = PreClass::MaybeHoistable;
-    } else {
+    if (SystemLib::s_inited) {
+      if (nInterfaces > firstInterface || cNode->getUsedTraitNames().size()) {
+        hoistable = PreClass::Mergeable;
+      } else if (firstInterface &&
+                 !m_hoistables.count(cNode->getOriginalParent())) {
+        hoistable = PreClass::MaybeHoistable;
+      }
+    }
+    if (hoistable == PreClass::NotHoistable) {
       hoistable = PreClass::AlwaysHoistable;
       m_hoistables.insert(cNode->getOriginalName());
     }
@@ -5867,16 +5885,20 @@ StringData* EmitterVisitor::newClosureName() {
   if (m_curFunc->pce() != NULL) {
     str << m_curFunc->pce()->name()->data();
   }
-  str << "$";
+  str << '$';
   if (m_curFunc->isPseudoMain()) {
-    // Pseudo-main. Uniquify via md5.
-    str << "__pseudoMain" << std::hex
-        << m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0]
-        << std::dec;
+    str << "__pseudoMain";
   } else {
     str << m_curFunc->name()->data();
   }
-  str << "$" << m_closureCounter++;
+  /*
+   * Uniquify the name
+   */
+  str << '$'
+      << std::hex
+      << m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0]
+      << std::dec
+      << '$' << m_closureCounter++;
 
   return StringData::GetStaticString(str.str());
 }
@@ -6067,6 +6089,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     ue->emitOp(OpNativeImpl);
     Offset past = ue->bcPos();
     fe->setMaxStackCells(kNumActRecCells + 1);
+    fe->setAttrs(Attr(fe->attrs()|AttrUnique));
     fe->finish(past, false);
     ue->recordFunction(fe);
   }
@@ -6171,6 +6194,13 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   mfe->finish(past, false);
   ue->recordFunction(mfe);
 
+  TypedValue mainReturn;
+  mainReturn.m_data.num = 1;
+  mainReturn.m_type = KindOfBoolean;
+  // _count is the "Unit::isMergeOnly()" flag
+  mainReturn._count = 1;
+  ue->setMainReturn(&mainReturn);
+
   MetaInfoBuilder metaInfo;
 
   ContMethMap contMethods;
@@ -6238,7 +6268,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       StringData::GetStaticString(e.ci->getParentClass().get());
     PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
                                                   PreClass::AlwaysHoistable);
-    pce->init(0, 0, ue->bcPos(), AttrNone, parentName, NULL);
+    pce->init(0, 0, ue->bcPos(), AttrUnique, parentName, NULL);
     pce->setBuiltinClassInfo(e.ci, e.info->m_InstanceCtor, e.info->m_sizeof);
     {
       ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();

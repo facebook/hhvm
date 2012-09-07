@@ -293,6 +293,14 @@ char* getNativeFunctionName(void* codeAddr);
                  ((a) & 0x00000000ffffffff)))) << 32))
 #endif
 
+/**
+ * Read typed data from an offset relative to a base address
+ */
+template <class T>
+static T& getDataRef(void* base, unsigned offset) {
+  return *(T*)((char*)base + offset);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

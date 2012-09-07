@@ -22,6 +22,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <util/lock.h>
+#include <util/util.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/repo.h>
@@ -40,6 +41,8 @@
 namespace HPHP {
 namespace VM {
 ///////////////////////////////////////////////////////////////////////////////
+
+using Util::getDataRef;
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
 
@@ -258,9 +261,12 @@ Unit::Unit()
       m_mergeables(NULL),
       m_firstHoistableFunc(0),
       m_firstHoistablePreClass(0),
-      m_firstMergablePreClass(0),
+      m_firstMergeablePreClass(0),
       m_mergeablesSize(0),
-      m_repoId(-1), m_initialMergeState(UnitMergeStateUninit) {
+      m_cacheOffset(0),
+      m_repoId(-1),
+      m_mergeState(UnitMergeStateUnmerged),
+      m_cacheMask(0) {
   TV_WRITE_UNINIT(&m_mainReturn);
   m_mainReturn._count = 0; // flag for whether or not the unit is mergeable
 }
@@ -295,7 +301,8 @@ Unit::~Unit() {
     }
   }
 
-  if (!RuntimeOption::RepoAuthoritative && m_initialMergeState) {
+  if (!RuntimeOption::RepoAuthoritative &&
+      (m_mergeState & UnitMergeStateMerged)) {
     Transl::unmergePreConsts(m_preConsts, this);
   }
 
@@ -510,14 +517,21 @@ static SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
 
 void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
-  if (LIKELY(m_initialMergeState == UnitMergeStateUninit)) {
-    m_initialMergeState = UnitMergeStateMerging;
+  if (LIKELY(m_mergeState == UnitMergeStateUnmerged)) {
+    int state = 0;
+    m_mergeState = UnitMergeStateMerging;
+    bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
     for (MutableFuncRange fr(nonMainFuncs()); !fr.empty();) {
-      loadFunc(fr.popFront());
+      Func* f = fr.popFront();
+      if (allFuncsUnique) {
+        allFuncsUnique = (f->attrs() & AttrUnique);
+      }
+      loadFunc(f);
     }
+    if (allFuncsUnique) state |= UnitMergeStateUniqueFuncs;
     if (!RuntimeOption::RepoAuthoritative) {
       Transl::mergePreConsts(m_preConsts);
-    } else if (isMergeOnly()) {
+    } else {
       /*
        * The mergeables array begins with the hoistable Func*s,
        * followed by the (potenitally) hoistable Class*s.
@@ -536,122 +550,181 @@ void Unit::initialMerge() {
        * the pointer will be followed by a TypedValue representing
        * the value being defined/assigned.
        */
-      for (int ix = m_firstMergablePreClass, end = m_mergeablesSize;
-           ix < end; ++ix) {
-        void *obj = mergeableObj(ix);
-        InclOpFlags flags = InclOpDefault;
-        UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
-        switch (k) {
-          case UnitMergeKindDone: ASSERT(false);
-          case UnitMergeKindClass: break;
-          case UnitMergeKindReqMod:
-            flags = InclOpDocRoot | InclOpLocal;
-            goto inc;
-          case UnitMergeKindReqSrc:
-            flags = InclOpRelative | InclOpLocal;
-            goto inc;
-          case UnitMergeKindReqDoc:
-            flags = InclOpDocRoot;
-            goto inc;
-          inc: {
-              StringData* s = (StringData*)((char*)obj - (int)k);
-              HPHP::Eval::PhpFile* efile =
-                g_vmContext->lookupIncludeRoot(s, flags, NULL, this);
-              ASSERT(efile);
-              Unit* unit = efile->unit();
-              unit->initialMerge();
-              mergeableObj(ix) = (void*)((char*)unit + (int)k);
-            }
-            break;
-          case UnitMergeKindDefine: {
-            StringData* s = (StringData*)((char*)obj - (int)k);
-            TypedValue* v = (TypedValue*)mergeableData(ix + 1);
-            ix += sizeof(TypedValue) / sizeof(void*);
-            v->_count = TargetCache::allocConstant(s);
-            break;
-          }
-          case UnitMergeKindGlobal: {
-            StringData* s = (StringData*)((char*)obj - (int)k);
-            TypedValue* v = (TypedValue*)mergeableData(ix + 1);
-            ix += sizeof(TypedValue) / sizeof(void*);
-            v->_count = TargetCache::GlobalCache::alloc(s);
-            break;
-          }
+      bool allClassesUnique = true;
+      int ix = m_firstHoistablePreClass;
+      int end = m_firstMergeablePreClass;
+      while (ix < end) {
+        PreClass* pre = (PreClass*)mergeableObj(ix++);
+        if (allClassesUnique) {
+          allClassesUnique = pre->attrs() & AttrUnique;
         }
       }
+      if (isMergeOnly()) {
+        ix = m_firstMergeablePreClass;
+        end = m_mergeablesSize;
+        while (ix < end) {
+          void *obj = mergeableObj(ix);
+          InclOpFlags flags = InclOpDefault;
+          UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
+          switch (k) {
+            case UnitMergeKindUniqueDefinedClass:
+            case UnitMergeKindDone:
+              not_reached();
+            case UnitMergeKindClass:
+              if (allClassesUnique) {
+                allClassesUnique = ((PreClass*)obj)->attrs() & AttrUnique;
+              }
+              break;
+            case UnitMergeKindReqMod:
+              flags = InclOpDocRoot | InclOpLocal;
+              goto inc;
+            case UnitMergeKindReqSrc:
+              flags = InclOpRelative | InclOpLocal;
+              goto inc;
+            case UnitMergeKindReqDoc:
+              flags = InclOpDocRoot;
+              goto inc;
+            inc: {
+                StringData* s = (StringData*)((char*)obj - (int)k);
+                HPHP::Eval::PhpFile* efile =
+                  g_vmContext->lookupIncludeRoot(s, flags, NULL, this);
+                ASSERT(efile);
+                Unit* unit = efile->unit();
+                unit->initialMerge();
+                mergeableObj(ix) = (void*)((char*)unit + (int)k);
+              }
+              break;
+            case UnitMergeKindDefine: {
+              StringData* s = (StringData*)((char*)obj - (int)k);
+              TypedValue* v = (TypedValue*)mergeableData(ix + 1);
+              ix += sizeof(TypedValue) / sizeof(void*);
+              v->_count = TargetCache::allocConstant(s);
+              break;
+            }
+            case UnitMergeKindGlobal: {
+              StringData* s = (StringData*)((char*)obj - (int)k);
+              TypedValue* v = (TypedValue*)mergeableData(ix + 1);
+              ix += sizeof(TypedValue) / sizeof(void*);
+              v->_count = TargetCache::GlobalCache::alloc(s);
+              break;
+            }
+          }
+          ix++;
+        }
+      }
+      if (allClassesUnique) state |= UnitMergeStateUniqueClasses;
     }
-    m_initialMergeState = UnitMergeStateMerged;
+    m_mergeState = UnitMergeStateMerged | state;
   }
 }
 
-static void mergeCns(TargetCache::CacheHandle ch, TypedValue *value,
+static void mergeCns(TypedValue& tv, TypedValue *value,
                      StringData *name) {
-  using namespace TargetCache;
-  TypedValue *tv = (TypedValue*)handleToPtr(ch);
-  if (LIKELY(tv->m_type == KindOfUninit &&
+  if (LIKELY(tv.m_type == KindOfUninit &&
              g_vmContext->m_constants.nvInsert(name, value))) {
-    tvDup(value, tv);
+    tvDup(value, &tv);
     return;
   }
 
   raise_warning(Strings::CONSTANT_ALREADY_DEFINED, name->data());
 }
 
-static void setGlobal(TargetCache::CacheHandle ch, TypedValue *value,
+static void setGlobal(void* cacheAddr, TypedValue *value,
                       StringData *name) {
-  using namespace TargetCache;
-  TypedValue* g = GlobalCache::lookupCreate(ch, name);
-  tvSet(value, g);
+  tvSet(value, TargetCache::GlobalCache::lookupCreateAddr(cacheAddr, name));
 }
 
 void Unit::merge() {
-  if (UNLIKELY(m_initialMergeState != UnitMergeStateMerged)) {
+  if (UNLIKELY(!(m_mergeState & UnitMergeStateMerged))) {
     SimpleLock lock(unitInitLock);
-    ASSERT(m_initialMergeState != UnitMergeStateMerging);
     initialMerge();
-    ASSERT(m_initialMergeState == UnitMergeStateMerged);
   }
+
+  if (UNLIKELY(isDebuggerAttached())) {
+    mergeImpl<true>(TargetCache::handleToPtr(0));
+  } else {
+    mergeImpl<false>(TargetCache::handleToPtr(0));
+  }
+}
+
+template <bool debugger>
+void Unit::mergeImpl(void* tcbase) {
+  ASSERT(m_mergeState & UnitMergeStateMerged);
 
   Func** it = funcHoistableBegin();
   Func** fend = funcEnd();
   if (it != fend) {
-    bool debugger = isDebuggerAttached();
-    do {
-      Func* func = *it;
-      ASSERT(func->top());
-      setCachedFunc(func, debugger);
-    } while (++it != fend);
+    if (LIKELY((m_mergeState & UnitMergeStateUniqueFuncs) != 0)) {
+      do {
+        Func* func = *it;
+        ASSERT(func->top());
+        getDataRef<Func*>(tcbase, func->getCachedOffset()) = func;
+        if (debugger) phpDefFuncHook(func);
+      } while (++it != fend);
+    } else {
+      do {
+        Func* func = *it;
+        ASSERT(func->top());
+        setCachedFunc(func, debugger);
+      } while (++it != fend);
+    }
   }
 
   bool redoHoistable = false;
   int ix = m_firstHoistablePreClass;
-  int end = m_firstMergablePreClass;
+  int end = m_firstMergeablePreClass;
   // iterate over all the potentially hoistable classes
   // with no fatals on failure
-  while (ix < end) {
-    PreClass* pre = (PreClass*)mergeableObj(ix++);
-    if (!defClass(pre, false)) redoHoistable = true;
-  }
-  if (UNLIKELY(redoHoistable)) {
-    // if this unit isnt mergeOnly, we're done
-    if (!isMergeOnly()) return;
-    // as a special case, if all the classes are potentially
-    // hoistable, we dont list them twice, but instead
-    // iterate over them again
-    // At first glance, it may seem like we could leave
-    // the maybe-hoistable classes out of the second list
-    // and then always reset ix to 0; but that gets this
-    // case wrong if there's an autoloader for C, and C
-    // extends B:
-    //
-    // class A {}
-    // class B implements I {}
-    // class D extends C {}
-    //
-    // because now A and D go on the maybe-hoistable list
-    // B goes on the never hoistable list, and we
-    // fatal trying to instantiate D before B
-    if (end == (int)m_mergeablesSize) ix = m_firstHoistablePreClass;
+  if (ix < end) {
+    if (LIKELY((m_mergeState & UnitMergeStateUniqueDefinedClasses) != 0)) {
+      do {
+        PreClass* pre = (PreClass*)mergeableObj(ix++);
+        Class* cls = *pre->namedEntity()->clsList();
+        ASSERT(cls && !cls->m_nextClass);
+        ASSERT(cls->preClass() == pre);
+        if (Class* parent = cls->parent()) {
+          if (UNLIKELY(!getDataRef<Class*>(tcbase, parent->m_cachedOffset))) {
+            redoHoistable = true;
+            continue;
+          }
+        }
+        getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
+        if (debugger) phpDefClassHook(cls);
+      } while (ix < end);
+    } else {
+      do {
+        PreClass* pre = (PreClass*)mergeableObj(ix++);
+        if (UNLIKELY(!defClass(pre, false))) redoHoistable = true;
+      } while (ix < end);
+    }
+    if (UNLIKELY(redoHoistable)) {
+      // if this unit isnt mergeOnly, we're done
+      if (!isMergeOnly()) return;
+      // as a special case, if all the classes are potentially
+      // hoistable, we dont list them twice, but instead
+      // iterate over them again
+      // At first glance, it may seem like we could leave
+      // the maybe-hoistable classes out of the second list
+      // and then always reset ix to 0; but that gets this
+      // case wrong if there's an autoloader for C, and C
+      // extends B:
+      //
+      // class A {}
+      // class B implements I {}
+      // class D extends C {}
+      //
+      // because now A and D go on the maybe-hoistable list
+      // B goes on the never hoistable list, and we
+      // fatal trying to instantiate D before B
+      if (end == (int)m_mergeablesSize) {
+        ix = m_firstHoistablePreClass;
+        do {
+          PreClass* pre = (PreClass*)mergeableObj(ix++);
+          defClass(pre, true);
+        } while (ix < end);
+        return;
+      }
+    }
   }
 
   // iterate over all but the guaranteed hoistable classes
@@ -668,11 +741,27 @@ void Unit::merge() {
         } while (!k);
         continue;
 
+      case UnitMergeKindUniqueDefinedClass:
+        do {
+          Class* other = NULL;
+          Class* cls = (Class*)((char*)obj - (int)k);
+          Class::Avail avail = cls->avail(other, true);
+          if (UNLIKELY(avail == Class::AvailFail)) {
+            raise_error("unknown class %s", other->name()->data());
+          }
+          ASSERT(avail == Class::AvailTrue);
+          getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
+          if (debugger) phpDefClassHook(cls);
+          obj = mergeableObj(++ix);
+          k = UnitMergeKind(uintptr_t(obj) & 7);
+        } while (k == UnitMergeKindUniqueDefinedClass);
+        continue;
+
       case UnitMergeKindDefine:
         do {
           StringData* name = (StringData*)((char*)obj - (int)k);
           TypedValue *v = (TypedValue*)mergeableData(ix + 1);
-          mergeCns(v->_count, v, name);
+          mergeCns(getDataRef<TypedValue>(tcbase, v->_count), v, name);
           ix += 1 + sizeof(TypedValue) / sizeof(void*);
           obj = mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
@@ -683,7 +772,7 @@ void Unit::merge() {
         do {
           StringData* name = (StringData*)((char*)obj - (int)k);
           TypedValue *v = (TypedValue*)mergeableData(ix + 1);
-          setGlobal(v->_count, v, name);
+          setGlobal(&getDataRef<char>(tcbase, v->_count), v, name);
           ix += 1 + sizeof(TypedValue) / sizeof(void*);
           obj = mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
@@ -695,13 +784,16 @@ void Unit::merge() {
       case UnitMergeKindReqDoc:
         do {
           Unit *unit = (Unit*)((char*)obj - (int)k);
-          if (!TargetCache::testAndSetBit(unit->m_cacheId)) {
-            unit->merge();
+          uchar& unitLoadedFlags =
+            getDataRef<uchar>(tcbase, unit->m_cacheOffset);
+          if (!(unitLoadedFlags & unit->m_cacheMask)) {
+            unitLoadedFlags |= unit->m_cacheMask;
+            unit->mergeImpl<debugger>(tcbase);
             if (UNLIKELY(!unit->isMergeOnly())) {
               Stats::inc(Stats::PseudoMain_Reentered);
               TypedValue ret;
               g_vmContext->invokeFunc(&ret, unit->getMain(), Array(),
-                                      NULL, NULL, NULL, NULL, unit);
+                                      NULL, NULL, NULL, NULL, NULL);
               tvRefcountedDecRef(&ret);
             } else {
               Stats::inc(Stats::PseudoMain_SkipDeep);
@@ -715,6 +807,46 @@ void Unit::merge() {
         continue;
       case UnitMergeKindDone:
         ASSERT((unsigned)ix == m_mergeablesSize);
+        if (UNLIKELY((m_mergeState & (UnitMergeStateUniqueClasses|
+                                      UnitMergeStateUniqueDefinedClasses)) ==
+                     UnitMergeStateUniqueClasses)) {
+          /*
+           * All the classes are known to be unique, and we just got
+           * here, so all were successfully defined. We can now go
+           * back and convert all UnitMergeKindClass entries to
+           * UnitMergeKindUniqueDefinedClass.
+           *
+           * This is a pure optimization: whether readers see the
+           * old value or the new does not affect correctness.
+           * Also, its idempotent - even if multiple threads do
+           * this update simultaneously, they all make exactly the
+           * same change.
+           */
+          m_mergeState |= UnitMergeStateUniqueDefinedClasses;
+          end = ix;
+          ix = m_firstMergeablePreClass;
+          do {
+            obj = mergeableObj(ix);
+            k = UnitMergeKind(uintptr_t(obj) & 7);
+            switch (k) {
+              case UnitMergeKindClass: {
+                PreClass* pre = (PreClass*)obj;
+                Class* cls = *pre->namedEntity()->clsList();
+                ASSERT(cls && !cls->m_nextClass);
+                ASSERT(cls->preClass() == pre);
+                mergeableObj(ix) =
+                  (char*)cls + (int)UnitMergeKindUniqueDefinedClass;
+                break;
+              }
+              case UnitMergeKindDefine:
+              case UnitMergeKindGlobal:
+                ix += sizeof(TypedValue) / sizeof(void*);
+                break;
+              default:
+                break;
+            }
+          } while (++ix < end);
+        }
         return;
     }
     // Normal cases should continue, KindDone returns
@@ -1788,7 +1920,9 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
     }
     for (int i = 0, n = m_mergeableStmts.size(); i < n; i++) {
       switch (m_mergeableStmts[i].first) {
-        case UnitMergeKindDone: ASSERT(false);
+        case UnitMergeKindDone:
+        case UnitMergeKindUniqueDefinedClass:
+          not_reached();
         case UnitMergeKindClass: break;
         case UnitMergeKindReqMod:
         case UnitMergeKindReqSrc:
@@ -1910,7 +2044,7 @@ Unit* UnitEmitter::create() {
        it != m_hoistablePceIdVec.end(); ++it) {
     u->mergeableObj(ix++) = u->m_preClasses[*it].get();
   }
-  u->m_firstMergablePreClass = ix;
+  u->m_firstMergeablePreClass = ix;
   if (u->m_mainReturn._count && !m_allClassesHoistable) {
     for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
          it != m_mergeableStmts.end(); ++it) {
@@ -1937,7 +2071,9 @@ Unit* UnitEmitter::create() {
           ASSERT(sizeof(TypedValue) % sizeof(void*) == 0);
           break;
         }
-        case UnitMergeKindDone: ASSERT(false);
+        case UnitMergeKindDone:
+        case UnitMergeKindUniqueDefinedClass:
+          not_reached();
       }
     }
   }

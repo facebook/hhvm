@@ -55,8 +55,6 @@
 #include <runtime/base/util/simple_counter.h>
 #include <runtime/base/util/extended_logger.h>
 
-#include <runtime/vm/translator/translator-x64.h>
-
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -1131,26 +1129,7 @@ void hphp_process_init() {
   init_literal_varstrings();
 
   if (hhvm) {
-    if (!RuntimeOption::RepoAuthoritative &&
-        RuntimeOption::EvalJitEnableRenameFunction &&
-        RuntimeOption::EvalJit) {
-      VM::Func::enableIntercept();
-      VM::Transl::TranslatorX64* tx64 = VM::Transl::TranslatorX64::Get();
-      tx64->enableIntercepts();
-    }
-    bool db = RuntimeOption::EvalDumpBytecode;
-    bool p = RuntimeOption::RepoAuthoritative;
-    bool rp = RuntimeOption::AlwaysUseRelativePath;
-    bool sf = RuntimeOption::SafeFileAccess;
-    RuntimeOption::EvalDumpBytecode = false;
-    RuntimeOption::RepoAuthoritative = false;
-    RuntimeOption::AlwaysUseRelativePath = false;
-    RuntimeOption::SafeFileAccess = false;
     HPHP::VM::ProcessInit();
-    RuntimeOption::EvalDumpBytecode = db;
-    RuntimeOption::RepoAuthoritative = p;
-    RuntimeOption::AlwaysUseRelativePath = rp;
-    RuntimeOption::SafeFileAccess = sf;
   }
 
   PageletServer::Restart();

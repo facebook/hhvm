@@ -2022,6 +2022,15 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
 
   checkStack(m_stack, f);
 
+  if (toMerge != NULL) {
+    ASSERT(toMerge->getMain() == f);
+    toMerge->merge();
+    if (toMerge->isMergeOnly()) {
+      *retval = *toMerge->getMainReturn();
+      return;
+    }
+  }
+
   ActRec* ar = m_stack.allocA();
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
@@ -2107,10 +2116,6 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
         }
       }
     }
-  }
-
-  if (toMerge != NULL) {
-    toMerge->merge();
   }
 
   if (m_fp) {

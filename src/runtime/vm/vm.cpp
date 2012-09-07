@@ -26,6 +26,7 @@
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/vm/translator/fixup.h>
+#include <runtime/vm/translator/translator-x64.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <system/lib/systemlib.h>
 #include <util/logger.h>
@@ -118,6 +119,25 @@ void ProcessInit() {
   // ensure that nextTx64 and tx64 are set
   (void)VM::Transl::Translator::Get();
 
+  if (!RuntimeOption::RepoAuthoritative &&
+      RuntimeOption::EvalJitEnableRenameFunction &&
+      RuntimeOption::EvalJit) {
+    VM::Func::enableIntercept();
+    VM::Transl::TranslatorX64* tx64 = VM::Transl::TranslatorX64::Get();
+    tx64->enableIntercepts();
+  }
+  // Save the current options, and set things up so that
+  // systemlib.php can be read from and stored in the
+  // normal repo.
+  bool db = RuntimeOption::EvalDumpBytecode;
+  bool p = RuntimeOption::RepoAuthoritative;
+  bool rp = RuntimeOption::AlwaysUseRelativePath;
+  bool sf = RuntimeOption::SafeFileAccess;
+  RuntimeOption::EvalDumpBytecode = false;
+  RuntimeOption::RepoAuthoritative = false;
+  RuntimeOption::AlwaysUseRelativePath = false;
+  RuntimeOption::SafeFileAccess = false;
+
   Transl::TargetCache::requestInit();
 
   Unit* nativeFuncUnit = build_native_func_unit(hhbc_ext_funcs,
@@ -191,6 +211,14 @@ void ProcessInit() {
   SystemLib::s_phpFile = file;
   file->incRef();
   SystemLib::s_unit = file->unit();
+
+  // Restore settings before merging anything,
+  // because of optimizations that depend on the
+  // setting of RepoAuthoritative
+  RuntimeOption::EvalDumpBytecode = db;
+  RuntimeOption::RepoAuthoritative = p;
+  RuntimeOption::AlwaysUseRelativePath = rp;
+  RuntimeOption::SafeFileAccess = sf;
 
   // Load the systemlib unit to build the Class objects
   SystemLib::s_unit->merge();

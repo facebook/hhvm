@@ -401,6 +401,7 @@ public:
 
   static TypedValue* lookup(CacheHandle handle, StringData* nm);
   static TypedValue* lookupCreate(CacheHandle handle, StringData* nm);
+  static TypedValue* lookupCreateAddr(void* cacheAddr, StringData* nm);
 };
 
 class BoxedGlobalCache : public GlobalCache {

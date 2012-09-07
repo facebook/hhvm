@@ -40,22 +40,27 @@ enum UnitOrigin {
 
 enum UnitMergeKind {
   UnitMergeKindClass = 0,
-  UnitMergeKindDefine = 1,
-  UnitMergeKindGlobal = 2,
-  UnitMergeKindDone = 3,
+  UnitMergeKindUniqueDefinedClass = 1,
+  UnitMergeKindDefine = 2,
+  UnitMergeKindGlobal = 3,
   UnitMergeKindReqMod = 4, // used by isMergeKindReq
   UnitMergeKindReqSrc = 5, // "
   UnitMergeKindReqDoc = 6, // "
+  UnitMergeKindDone = 7,
 };
 
 enum UnitMergeState {
-  UnitMergeStateUninit = 0,
+  UnitMergeStateUnmerged = 0,
   UnitMergeStateMerging = 1,
-  UnitMergeStateMerged = 2
+  UnitMergeStateMerged = 2,
+  UnitMergeStateUniqueFuncs = 4,
+  UnitMergeStateUniqueClasses = 8,
+  UnitMergeStateUniqueDefinedClasses = 16
 };
 
 inline bool ALWAYS_INLINE isMergeKindReq(UnitMergeKind k) {
-  return k & 4;
+  return unsigned(k - UnitMergeKindReqMod) <=
+    unsigned(UnitMergeKindReqDoc - UnitMergeKindReqMod);
 }
 
 typedef const uchar* PC;
@@ -451,6 +456,8 @@ private:
   }
   void*& mergeableObj(int ix) { return ((void**)m_mergeables)[ix]; }
   void* mergeableData(int ix) { return (char*)m_mergeables + ix*sizeof(void*); }
+  template <bool debugger>
+  void mergeImpl(void* tcbase);
 public:
   Func* getMain() const {
     return *funcBegin();
@@ -512,8 +519,10 @@ public:
 
   const Func* getFunc(Offset pc) const;
   void enableIntercepts();
-
-  void setCacheId(unsigned id) { m_cacheId = id; }
+  void setCacheId(unsigned id) {
+    m_cacheOffset = id >> 3;
+    m_cacheMask = 1 << (id & 7);
+  }
   bool isMergeOnly() const { return m_mainReturn._count; }
   void clearMergeOnly() { m_mainReturn._count = 0; }
 public:
@@ -555,11 +564,12 @@ private:
   void* m_mergeables;
   unsigned m_firstHoistableFunc;
   unsigned m_firstHoistablePreClass;
-  unsigned m_firstMergablePreClass;
+  unsigned m_firstMergeablePreClass;
   unsigned m_mergeablesSize;
-  unsigned m_cacheId;
+  unsigned m_cacheOffset;
   int8 m_repoId;
-  int8 m_initialMergeState;
+  uint8 m_mergeState;
+  uint8 m_cacheMask;
   LineTable m_lineTable;
   FuncTable m_funcTable;
   PreConstVec m_preConsts;

@@ -488,6 +488,14 @@ GlobalCache::lookupCreate(Handle handle, StringData* name) {
 }
 
 TypedValue*
+GlobalCache::lookupCreateAddr(void* cacheAddr, StringData* name) {
+  GlobalCache* thiz = (GlobalCache*)cacheAddr;
+  TypedValue* retval = thiz->lookupImpl<false>(name, true /* allowCreate */);
+  ASSERT(retval->m_type != KindOfRef);
+  return retval;
+}
+
+TypedValue*
 BoxedGlobalCache::lookup(Handle handle, StringData* name) {
   BoxedGlobalCache* thiz = (BoxedGlobalCache*)
     BoxedGlobalCache::cacheAtHandle(handle);

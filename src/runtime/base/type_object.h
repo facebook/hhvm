@@ -171,6 +171,9 @@ class Object : protected ObjectBase {
   Array  toArray  () const;
   Variant toKey   () const;
 
+  int64 toInt64ForCompare() const;
+  double toDoubleForCompare() const;
+
   /**
    * Comparisons
    */

@@ -939,16 +939,38 @@ void throw_instance_method_fatal(const char *name) {
   }
 }
 
-void NEVER_INLINE throw_collection_modified() {
+void throw_iterator_not_valid() {
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(
+    "Iterator is not valid"));
+  throw e;
+}
+
+void throw_collection_modified() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
     "Collection was modified during iteration"));
   throw e;
 }
 
-void NEVER_INLINE throw_iterator_not_valid() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "Iterator is not valid"));
-  throw e;
+void throw_collection_compare_exception() {
+  const char* msg =
+    "Cannot use comparison operators (==, !=, <>, <, <=, >, >=) to compare "
+    "a collection with an integer, double, string, array, or object";
+  if (RuntimeOption::StrictCollections) {
+    Object e(SystemLib::AllocRuntimeExceptionObject(msg));
+    throw e;
+  } else {
+    raise_warning(msg);
+  }
+}
+
+void check_collection_compare(ObjectData* obj) {
+  if (obj && obj->isCollection()) throw_collection_compare_exception();
+}
+
+void check_collection_compare(ObjectData* obj1, ObjectData* obj2) {
+  if (obj1 && obj2 && (obj1->isCollection() || obj2->isCollection())) {
+    throw_collection_compare_exception();
+  }
 }
 
 Object create_object(CStrRef s, CArrRef params, bool init /* = true */,

@@ -304,6 +304,7 @@ int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::UseHphpArray = hhvm;
 bool RuntimeOption::UseSmallArray = false;
 bool RuntimeOption::UseVectorArray = true;
+bool RuntimeOption::StrictCollections = false;
 bool RuntimeOption::UseDirectCopy = false;
 bool RuntimeOption::EnableApc = true;
 bool RuntimeOption::EnableConstLoad = false;
@@ -806,6 +807,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     UseSmallArray = server["UseSmallArray"].getBool(false);
 
     UseVectorArray = server["UseVectorArray"].getBool(true);
+    StrictCollections = server["StrictCollections"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
 

@@ -61,6 +61,16 @@ Variant Object::toKey() const {
     : String();
 }
 
+int64 Object::toInt64ForCompare() const {
+  check_collection_compare(m_px);
+  return toInt64();
+}
+
+double Object::toDoubleForCompare() const {
+  check_collection_compare(m_px);
+  return toDouble();
+}
+
 Object Object::CreateDummy(ObjectData*(*cooFunc)()) {
   Object r(cooFunc());
   r.get()->setDummy();
@@ -75,11 +85,13 @@ Object Object::CreateDummy(ObjectData*(*cooFunc)(ObjectData *)) {
 
 bool Object::equal(CObjRef v2) const {
   if (m_px == v2.get()) {
+    check_collection_compare(m_px);
     return true;
   }
   if (!m_px || !v2.get()) {
     return false;
   }
+  check_collection_compare(m_px, v2.get());
   if (isResource() || v2.isResource()) {
     return false;
   }
@@ -88,10 +100,12 @@ bool Object::equal(CObjRef v2) const {
 }
 
 bool Object::less(CObjRef v2) const {
+  check_collection_compare(m_px, v2.get());
   return m_px != v2.m_px && toArray().less(v2.toArray());
 }
 
 bool Object::more(CObjRef v2) const {
+  check_collection_compare(m_px, v2.get());
   return m_px != v2.m_px && toArray().more(v2.toArray());
 }
 

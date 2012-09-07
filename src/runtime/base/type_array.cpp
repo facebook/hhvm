@@ -337,6 +337,7 @@ bool Array::equal(CObjRef v2) const {
   if (m_px == NULL || v2.get() == NULL) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
+  check_collection_compare(v2.get());
   return false;
 }
 
@@ -354,6 +355,7 @@ bool Array::less(CObjRef v2) const {
   if (m_px == NULL || v2.get() == NULL) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
+  check_collection_compare(v2.get());
   return false;
 }
 
@@ -381,6 +383,7 @@ bool Array::more(CObjRef v2) const {
   if (m_px == NULL || v2.get() == NULL) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
+  check_collection_compare(v2.get());
   return true;
 }
 

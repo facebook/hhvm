@@ -300,6 +300,7 @@ public:
   static bool UseHphpArray;
   static bool UseSmallArray;
   static bool UseVectorArray;
+  static bool StrictCollections;
   static bool UseDirectCopy;
   static bool EnableApc;
   static bool EnableConstLoad;

@@ -441,8 +441,9 @@ inline Variant throw_missing_file(const char *cls) {
 }
 void throw_instance_method_fatal(const char *name);
 
-void throw_iterator_not_valid() ATTRIBUTE_COLD;
-void throw_collection_modified() ATTRIBUTE_COLD;
+void throw_iterator_not_valid() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_collection_modified() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_collection_property_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 void throw_collection_compare_exception() ATTRIBUTE_COLD;
 void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);

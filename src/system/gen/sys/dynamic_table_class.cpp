@@ -3706,28 +3706,32 @@ const int cw_Map$$instanceof_index[] = {
   -1,-1,-1,-1,-1,-1,-1,-1,
 
 };
+extern const CallInfo ci_Map$$discard = { (void*)&c_Map::i_discard, (void*)&c_Map::ifa_discard, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$tokeysarray = { (void*)&c_Map::i_tokeysarray, (void*)&c_Map::ifa_tokeysarray, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$__tostring = { (void*)&c_Map::i___tostring, (void*)&c_Map::ifa___tostring, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Map$$clear = { (void*)&c_Map::i_clear, (void*)&c_Map::ifa_clear, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$updatefromiterable = { (void*)&c_Map::i_updatefromiterable, (void*)&c_Map::ifa_updatefromiterable, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$values = { (void*)&c_Map::i_values, (void*)&c_Map::ifa_values, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$contains = { (void*)&c_Map::i_contains, (void*)&c_Map::ifa_contains, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$fromiterable = { (void*)&c_Map::i_fromiterable, (void*)&c_Map::ifa_fromiterable, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$differencebykey = { (void*)&c_Map::i_differencebykey, (void*)&c_Map::ifa_differencebykey, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Map$$__construct = { (void*)&c_Map::i___construct, (void*)&c_Map::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Map$$put = { (void*)&c_Map::i_put, (void*)&c_Map::ifa_put, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$differencebykey = { (void*)&c_Map::i_differencebykey, (void*)&c_Map::ifa_differencebykey, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$fromiterable = { (void*)&c_Map::i_fromiterable, (void*)&c_Map::ifa_fromiterable, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$__tostring = { (void*)&c_Map::i___tostring, (void*)&c_Map::ifa___tostring, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Map$$tovaluesarray = { (void*)&c_Map::i_tovaluesarray, (void*)&c_Map::ifa_tovaluesarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$toarray = { (void*)&c_Map::i_toarray, (void*)&c_Map::ifa_toarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$getiterator = { (void*)&c_Map::i_getiterator, (void*)&c_Map::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$tokeysarray = { (void*)&c_Map::i_tokeysarray, (void*)&c_Map::ifa_tokeysarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$count = { (void*)&c_Map::i_count, (void*)&c_Map::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$discard = { (void*)&c_Map::i_discard, (void*)&c_Map::ifa_discard, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$copyasarray = { (void*)&c_Map::i_copyasarray, (void*)&c_Map::ifa_copyasarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$fromarray = { (void*)&c_Map::i_fromarray, (void*)&c_Map::ifa_fromarray, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$__unset = { (void*)&c_Map::i___unset, (void*)&c_Map::ifa___unset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Map$$get = { (void*)&c_Map::i_get, (void*)&c_Map::ifa_get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$remove = { (void*)&c_Map::i_remove, (void*)&c_Map::ifa_remove, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$at = { (void*)&c_Map::i_at, (void*)&c_Map::ifa_at, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Map$$isempty = { (void*)&c_Map::i_isempty, (void*)&c_Map::ifa_isempty, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Map$$updatefromarray = { (void*)&c_Map::i_updatefromarray, (void*)&c_Map::ifa_updatefromarray, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$remove = { (void*)&c_Map::i_remove, (void*)&c_Map::ifa_remove, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$contains = { (void*)&c_Map::i_contains, (void*)&c_Map::ifa_contains, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$copyasarray = { (void*)&c_Map::i_copyasarray, (void*)&c_Map::ifa_copyasarray, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$__set = { (void*)&c_Map::i___set, (void*)&c_Map::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$__get = { (void*)&c_Map::i___get, (void*)&c_Map::ifa___get, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$__isset = { (void*)&c_Map::i___isset, (void*)&c_Map::ifa___isset, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$updatefromiterable = { (void*)&c_Map::i_updatefromiterable, (void*)&c_Map::ifa_updatefromiterable, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$at = { (void*)&c_Map::i_at, (void*)&c_Map::ifa_at, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$count = { (void*)&c_Map::i_count, (void*)&c_Map::ifa_count, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$fromarray = { (void*)&c_Map::i_fromarray, (void*)&c_Map::ifa_fromarray, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$isempty = { (void*)&c_Map::i_isempty, (void*)&c_Map::ifa_isempty, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$getiterator = { (void*)&c_Map::i_getiterator, (void*)&c_Map::ifa_getiterator, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$toarray = { (void*)&c_Map::i_toarray, (void*)&c_Map::ifa_toarray, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Map$$values = { (void*)&c_Map::i_values, (void*)&c_Map::ifa_values, 0, 4, 0x0000000000000000LL};
 Variant c_Map::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -3787,6 +3791,18 @@ Variant c_Map::i_getiterator(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Map::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___tostring);
+}
+Variant c_Map::i___get(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___get);
+}
+Variant c_Map::i___set(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___set);
+}
+Variant c_Map::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___isset);
+}
+Variant c_Map::i___unset(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___unset);
 }
 Variant c_Map::i_fromarray(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_fromarray);
@@ -3964,6 +3980,43 @@ Variant NEVER_INLINE c_Map::ifa___tostring(MethodCallPackage &mcp, int count, IN
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__tostring", 0, 1);
   return (self->t___tostring());
 }
+Variant NEVER_INLINE c_Map::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___get, coo_Map);
+  }
+  c_Map *self ATTRIBUTE_UNUSED (static_cast<c_Map*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__get", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___get(arg0));
+}
+Variant NEVER_INLINE c_Map::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___set, coo_Map);
+  }
+  c_Map *self ATTRIBUTE_UNUSED (static_cast<c_Map*>(mcp.obj));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("__set", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (self->t___set(arg0, arg1));
+}
+Variant NEVER_INLINE c_Map::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___isset, coo_Map);
+  }
+  c_Map *self ATTRIBUTE_UNUSED (static_cast<c_Map*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___isset(arg0));
+}
+Variant NEVER_INLINE c_Map::ifa___unset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___unset, coo_Map);
+  }
+  c_Map *self ATTRIBUTE_UNUSED (static_cast<c_Map*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__unset", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___unset(arg0));
+}
 Variant NEVER_INLINE c_Map::ifa_fromarray(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("fromarray", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -3981,12 +4034,15 @@ extern const MethodCallInfoTable cw_Map$$call_info_table[] = {
   { 0x295C3D07, 1, 9, "fromArray", &ci_Map$$fromarray },
   { 0x55C7DBC9, 1, 7, "discard", &ci_Map$$discard },
   { 0x7D14564E, 1, 6, "remove", &ci_Map$$remove },
+  { 0x74FA338F, 1, 5, "__get", &ci_Map$$__get },
   { 0x65104D10, 0, 5, "count", &ci_Map$$count },
   { 0x7A22D290, 1, 8, "contains", &ci_Map$$contains },
   { 0x53768711, 1, 15, "updateFromArray", &ci_Map$$updatefromarray },
   { 0x14B34A13, 1, 10, "__toString", &ci_Map$$__tostring },
+  { 0x03340395, 1, 5, "__set", &ci_Map$$__set },
   { 0x655C3FD9, 1, 12, "fromIterable", &ci_Map$$fromiterable },
   { 0x49D8CC9A, 1, 3, "put", &ci_Map$$put },
+  { 0x49A2079B, 1, 7, "__unset", &ci_Map$$__unset },
   { 0x4EC51D5C, 1, 6, "values", &ci_Map$$values },
   { 0x229C615F, 1, 11, "__construct", &ci_Map$$__construct },
   { 0x5A226667, 1, 5, "clear", &ci_Map$$clear },
@@ -3994,6 +4050,7 @@ extern const MethodCallInfoTable cw_Map$$call_info_table[] = {
   { 0x569AD828, 1, 3, "get", &ci_Map$$get },
   { 0x2D97C76D, 0, 18, "updateFromIterable", &ci_Map$$updatefromiterable },
   { 0x630CD52D, 1, 15, "differenceByKey", &ci_Map$$differencebykey },
+  { 0x2E2178EE, 1, 7, "__isset", &ci_Map$$__isset },
   { 0x3109B0F2, 1, 7, "toArray", &ci_Map$$toarray },
   { 0x2439E4B7, 1, 2, "at", &ci_Map$$at },
   { 0x6BECD6BD, 1, 13, "toValuesArray", &ci_Map$$tovaluesarray },
@@ -4001,13 +4058,13 @@ extern const MethodCallInfoTable cw_Map$$call_info_table[] = {
 extern const int cw_Map$$call_info_index[] = {
   63,
   0,-1,-1,1,2,-1,-1,3,
-  -1,4,-1,-1,-1,-1,5,-1,
-  6,8,-1,9,-1,-1,-1,-1,
-  -1,10,11,-1,12,-1,-1,13,
-  -1,-1,-1,-1,-1,-1,-1,14,
-  15,-1,-1,-1,-1,17,-1,-1,
-  -1,-1,19,-1,-1,-1,-1,20,
-  -1,-1,-1,-1,-1,21,-1,-1,
+  -1,4,-1,-1,-1,-1,5,6,
+  7,9,-1,10,-1,11,-1,-1,
+  -1,12,13,14,15,-1,-1,16,
+  -1,-1,-1,-1,-1,-1,-1,17,
+  18,-1,-1,-1,-1,20,22,-1,
+  -1,-1,23,-1,-1,-1,-1,24,
+  -1,-1,-1,-1,-1,25,-1,-1,
 
 };
 c_Map *c_Map::create() {
@@ -8340,28 +8397,32 @@ const int cw_StableMap$$instanceof_index[] = {
   -1,-1,-1,-1,4,-1,-1,-1,
 
 };
+extern const CallInfo ci_StableMap$$discard = { (void*)&c_StableMap::i_discard, (void*)&c_StableMap::ifa_discard, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$tokeysarray = { (void*)&c_StableMap::i_tokeysarray, (void*)&c_StableMap::ifa_tokeysarray, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$__tostring = { (void*)&c_StableMap::i___tostring, (void*)&c_StableMap::ifa___tostring, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_StableMap$$clear = { (void*)&c_StableMap::i_clear, (void*)&c_StableMap::ifa_clear, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$updatefromiterable = { (void*)&c_StableMap::i_updatefromiterable, (void*)&c_StableMap::ifa_updatefromiterable, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$values = { (void*)&c_StableMap::i_values, (void*)&c_StableMap::ifa_values, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$contains = { (void*)&c_StableMap::i_contains, (void*)&c_StableMap::ifa_contains, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$fromiterable = { (void*)&c_StableMap::i_fromiterable, (void*)&c_StableMap::ifa_fromiterable, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$differencebykey = { (void*)&c_StableMap::i_differencebykey, (void*)&c_StableMap::ifa_differencebykey, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_StableMap$$__construct = { (void*)&c_StableMap::i___construct, (void*)&c_StableMap::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_StableMap$$put = { (void*)&c_StableMap::i_put, (void*)&c_StableMap::ifa_put, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$differencebykey = { (void*)&c_StableMap::i_differencebykey, (void*)&c_StableMap::ifa_differencebykey, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$fromiterable = { (void*)&c_StableMap::i_fromiterable, (void*)&c_StableMap::ifa_fromiterable, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$__tostring = { (void*)&c_StableMap::i___tostring, (void*)&c_StableMap::ifa___tostring, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_StableMap$$tovaluesarray = { (void*)&c_StableMap::i_tovaluesarray, (void*)&c_StableMap::ifa_tovaluesarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$toarray = { (void*)&c_StableMap::i_toarray, (void*)&c_StableMap::ifa_toarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$getiterator = { (void*)&c_StableMap::i_getiterator, (void*)&c_StableMap::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$tokeysarray = { (void*)&c_StableMap::i_tokeysarray, (void*)&c_StableMap::ifa_tokeysarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$count = { (void*)&c_StableMap::i_count, (void*)&c_StableMap::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$discard = { (void*)&c_StableMap::i_discard, (void*)&c_StableMap::ifa_discard, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$copyasarray = { (void*)&c_StableMap::i_copyasarray, (void*)&c_StableMap::ifa_copyasarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$fromarray = { (void*)&c_StableMap::i_fromarray, (void*)&c_StableMap::ifa_fromarray, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$__unset = { (void*)&c_StableMap::i___unset, (void*)&c_StableMap::ifa___unset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_StableMap$$get = { (void*)&c_StableMap::i_get, (void*)&c_StableMap::ifa_get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$remove = { (void*)&c_StableMap::i_remove, (void*)&c_StableMap::ifa_remove, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$at = { (void*)&c_StableMap::i_at, (void*)&c_StableMap::ifa_at, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_StableMap$$isempty = { (void*)&c_StableMap::i_isempty, (void*)&c_StableMap::ifa_isempty, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_StableMap$$updatefromarray = { (void*)&c_StableMap::i_updatefromarray, (void*)&c_StableMap::ifa_updatefromarray, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$remove = { (void*)&c_StableMap::i_remove, (void*)&c_StableMap::ifa_remove, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$contains = { (void*)&c_StableMap::i_contains, (void*)&c_StableMap::ifa_contains, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$copyasarray = { (void*)&c_StableMap::i_copyasarray, (void*)&c_StableMap::ifa_copyasarray, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$__set = { (void*)&c_StableMap::i___set, (void*)&c_StableMap::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$__get = { (void*)&c_StableMap::i___get, (void*)&c_StableMap::ifa___get, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$__isset = { (void*)&c_StableMap::i___isset, (void*)&c_StableMap::ifa___isset, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$updatefromiterable = { (void*)&c_StableMap::i_updatefromiterable, (void*)&c_StableMap::ifa_updatefromiterable, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$at = { (void*)&c_StableMap::i_at, (void*)&c_StableMap::ifa_at, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$count = { (void*)&c_StableMap::i_count, (void*)&c_StableMap::ifa_count, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$fromarray = { (void*)&c_StableMap::i_fromarray, (void*)&c_StableMap::ifa_fromarray, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$isempty = { (void*)&c_StableMap::i_isempty, (void*)&c_StableMap::ifa_isempty, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$getiterator = { (void*)&c_StableMap::i_getiterator, (void*)&c_StableMap::ifa_getiterator, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$toarray = { (void*)&c_StableMap::i_toarray, (void*)&c_StableMap::ifa_toarray, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_StableMap$$values = { (void*)&c_StableMap::i_values, (void*)&c_StableMap::ifa_values, 0, 4, 0x0000000000000000LL};
 Variant c_StableMap::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -8418,6 +8479,18 @@ Variant c_StableMap::i_differencebykey(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_StableMap::i_getiterator(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getiterator);
+}
+Variant c_StableMap::i___get(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___get);
+}
+Variant c_StableMap::i___set(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___set);
+}
+Variant c_StableMap::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___isset);
+}
+Variant c_StableMap::i___unset(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___unset);
 }
 Variant c_StableMap::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___tostring);
@@ -8590,6 +8663,43 @@ Variant NEVER_INLINE c_StableMap::ifa_getiterator(MethodCallPackage &mcp, int co
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
 }
+Variant NEVER_INLINE c_StableMap::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___get, coo_StableMap);
+  }
+  c_StableMap *self ATTRIBUTE_UNUSED (static_cast<c_StableMap*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__get", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___get(arg0));
+}
+Variant NEVER_INLINE c_StableMap::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___set, coo_StableMap);
+  }
+  c_StableMap *self ATTRIBUTE_UNUSED (static_cast<c_StableMap*>(mcp.obj));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("__set", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (self->t___set(arg0, arg1));
+}
+Variant NEVER_INLINE c_StableMap::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___isset, coo_StableMap);
+  }
+  c_StableMap *self ATTRIBUTE_UNUSED (static_cast<c_StableMap*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___isset(arg0));
+}
+Variant NEVER_INLINE c_StableMap::ifa___unset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___unset, coo_StableMap);
+  }
+  c_StableMap *self ATTRIBUTE_UNUSED (static_cast<c_StableMap*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__unset", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___unset(arg0));
+}
 Variant NEVER_INLINE c_StableMap::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___tostring, coo_StableMap);
@@ -8615,12 +8725,15 @@ extern const MethodCallInfoTable cw_StableMap$$call_info_table[] = {
   { 0x295C3D07, 1, 9, "fromArray", &ci_StableMap$$fromarray },
   { 0x55C7DBC9, 1, 7, "discard", &ci_StableMap$$discard },
   { 0x7D14564E, 1, 6, "remove", &ci_StableMap$$remove },
+  { 0x74FA338F, 1, 5, "__get", &ci_StableMap$$__get },
   { 0x65104D10, 0, 5, "count", &ci_StableMap$$count },
   { 0x7A22D290, 1, 8, "contains", &ci_StableMap$$contains },
   { 0x53768711, 1, 15, "updateFromArray", &ci_StableMap$$updatefromarray },
   { 0x14B34A13, 1, 10, "__toString", &ci_StableMap$$__tostring },
+  { 0x03340395, 1, 5, "__set", &ci_StableMap$$__set },
   { 0x655C3FD9, 1, 12, "fromIterable", &ci_StableMap$$fromiterable },
   { 0x49D8CC9A, 1, 3, "put", &ci_StableMap$$put },
+  { 0x49A2079B, 1, 7, "__unset", &ci_StableMap$$__unset },
   { 0x4EC51D5C, 1, 6, "values", &ci_StableMap$$values },
   { 0x229C615F, 1, 11, "__construct", &ci_StableMap$$__construct },
   { 0x5A226667, 1, 5, "clear", &ci_StableMap$$clear },
@@ -8628,6 +8741,7 @@ extern const MethodCallInfoTable cw_StableMap$$call_info_table[] = {
   { 0x569AD828, 1, 3, "get", &ci_StableMap$$get },
   { 0x2D97C76D, 0, 18, "updateFromIterable", &ci_StableMap$$updatefromiterable },
   { 0x630CD52D, 1, 15, "differenceByKey", &ci_StableMap$$differencebykey },
+  { 0x2E2178EE, 1, 7, "__isset", &ci_StableMap$$__isset },
   { 0x3109B0F2, 1, 7, "toArray", &ci_StableMap$$toarray },
   { 0x2439E4B7, 1, 2, "at", &ci_StableMap$$at },
   { 0x6BECD6BD, 1, 13, "toValuesArray", &ci_StableMap$$tovaluesarray },
@@ -8635,13 +8749,13 @@ extern const MethodCallInfoTable cw_StableMap$$call_info_table[] = {
 extern const int cw_StableMap$$call_info_index[] = {
   63,
   0,-1,-1,1,2,-1,-1,3,
-  -1,4,-1,-1,-1,-1,5,-1,
-  6,8,-1,9,-1,-1,-1,-1,
-  -1,10,11,-1,12,-1,-1,13,
-  -1,-1,-1,-1,-1,-1,-1,14,
-  15,-1,-1,-1,-1,17,-1,-1,
-  -1,-1,19,-1,-1,-1,-1,20,
-  -1,-1,-1,-1,-1,21,-1,-1,
+  -1,4,-1,-1,-1,-1,5,6,
+  7,9,-1,10,-1,11,-1,-1,
+  -1,12,13,14,15,-1,-1,16,
+  -1,-1,-1,-1,-1,-1,-1,17,
+  18,-1,-1,-1,-1,20,22,-1,
+  -1,-1,23,-1,-1,-1,-1,24,
+  -1,-1,-1,-1,-1,25,-1,-1,
 
 };
 c_StableMap *c_StableMap::create() {
@@ -9229,29 +9343,33 @@ const int cw_Vector$$instanceof_index[] = {
   -1,-1,-1,-1,-1,-1,-1,-1,
 
 };
+extern const CallInfo ci_Vector$$pop = { (void*)&c_Vector::i_pop, (void*)&c_Vector::ifa_pop, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$__tostring = { (void*)&c_Vector::i___tostring, (void*)&c_Vector::ifa___tostring, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$shuffle = { (void*)&c_Vector::i_shuffle, (void*)&c_Vector::ifa_shuffle, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Vector$$clear = { (void*)&c_Vector::i_clear, (void*)&c_Vector::ifa_clear, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$splice = { (void*)&c_Vector::i_splice, (void*)&c_Vector::ifa_splice, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$contains = { (void*)&c_Vector::i_contains, (void*)&c_Vector::ifa_contains, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$linearsearch = { (void*)&c_Vector::i_linearsearch, (void*)&c_Vector::ifa_linearsearch, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$fromvector = { (void*)&c_Vector::i_fromvector, (void*)&c_Vector::ifa_fromvector, 1, 12, 0x0000000000000000LL};
 extern const CallInfo ci_Vector$$__construct = { (void*)&c_Vector::i___construct, (void*)&c_Vector::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Vector$$put = { (void*)&c_Vector::i_put, (void*)&c_Vector::ifa_put, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$linearsearch = { (void*)&c_Vector::i_linearsearch, (void*)&c_Vector::ifa_linearsearch, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$__tostring = { (void*)&c_Vector::i___tostring, (void*)&c_Vector::ifa___tostring, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$toarray = { (void*)&c_Vector::i_toarray, (void*)&c_Vector::ifa_toarray, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$add = { (void*)&c_Vector::i_add, (void*)&c_Vector::ifa_add, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$sort = { (void*)&c_Vector::i_sort, (void*)&c_Vector::ifa_sort, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$getiterator = { (void*)&c_Vector::i_getiterator, (void*)&c_Vector::ifa_getiterator, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$count = { (void*)&c_Vector::i_count, (void*)&c_Vector::ifa_count, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$reverse = { (void*)&c_Vector::i_reverse, (void*)&c_Vector::ifa_reverse, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$fromvector = { (void*)&c_Vector::i_fromvector, (void*)&c_Vector::ifa_fromvector, 1, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$fromarray = { (void*)&c_Vector::i_fromarray, (void*)&c_Vector::ifa_fromarray, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$__unset = { (void*)&c_Vector::i___unset, (void*)&c_Vector::ifa___unset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Vector$$append = { (void*)&c_Vector::i_append, (void*)&c_Vector::ifa_append, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Vector$$get = { (void*)&c_Vector::i_get, (void*)&c_Vector::ifa_get, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$resize = { (void*)&c_Vector::i_resize, (void*)&c_Vector::ifa_resize, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$contains = { (void*)&c_Vector::i_contains, (void*)&c_Vector::ifa_contains, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$__set = { (void*)&c_Vector::i___set, (void*)&c_Vector::ifa___set, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$splice = { (void*)&c_Vector::i_splice, (void*)&c_Vector::ifa_splice, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Vector$$slice = { (void*)&c_Vector::i_slice, (void*)&c_Vector::ifa_slice, 3, 12, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$pop = { (void*)&c_Vector::i_pop, (void*)&c_Vector::ifa_pop, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Vector$$shuffle = { (void*)&c_Vector::i_shuffle, (void*)&c_Vector::ifa_shuffle, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$add = { (void*)&c_Vector::i_add, (void*)&c_Vector::ifa_add, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$__get = { (void*)&c_Vector::i___get, (void*)&c_Vector::ifa___get, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$__isset = { (void*)&c_Vector::i___isset, (void*)&c_Vector::ifa___isset, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Vector$$at = { (void*)&c_Vector::i_at, (void*)&c_Vector::ifa_at, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$count = { (void*)&c_Vector::i_count, (void*)&c_Vector::ifa_count, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$fromarray = { (void*)&c_Vector::i_fromarray, (void*)&c_Vector::ifa_fromarray, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$sort = { (void*)&c_Vector::i_sort, (void*)&c_Vector::ifa_sort, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Vector$$isempty = { (void*)&c_Vector::i_isempty, (void*)&c_Vector::ifa_isempty, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$resize = { (void*)&c_Vector::i_resize, (void*)&c_Vector::ifa_resize, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$reverse = { (void*)&c_Vector::i_reverse, (void*)&c_Vector::ifa_reverse, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$getiterator = { (void*)&c_Vector::i_getiterator, (void*)&c_Vector::ifa_getiterator, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_Vector$$toarray = { (void*)&c_Vector::i_toarray, (void*)&c_Vector::ifa_toarray, 0, 4, 0x0000000000000000LL};
 Variant c_Vector::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -9311,6 +9429,18 @@ Variant c_Vector::i_shuffle(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Vector::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___tostring);
+}
+Variant c_Vector::i___get(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___get);
+}
+Variant c_Vector::i___set(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___set);
+}
+Variant c_Vector::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___isset);
+}
+Variant c_Vector::i___unset(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___unset);
 }
 Variant c_Vector::i_fromarray(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_fromarray);
@@ -9498,6 +9628,43 @@ Variant NEVER_INLINE c_Vector::ifa___tostring(MethodCallPackage &mcp, int count,
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__tostring", 0, 1);
   return (self->t___tostring());
 }
+Variant NEVER_INLINE c_Vector::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___get, coo_Vector);
+  }
+  c_Vector *self ATTRIBUTE_UNUSED (static_cast<c_Vector*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__get", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___get(arg0));
+}
+Variant NEVER_INLINE c_Vector::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___set, coo_Vector);
+  }
+  c_Vector *self ATTRIBUTE_UNUSED (static_cast<c_Vector*>(mcp.obj));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("__set", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (self->t___set(arg0, arg1));
+}
+Variant NEVER_INLINE c_Vector::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___isset, coo_Vector);
+  }
+  c_Vector *self ATTRIBUTE_UNUSED (static_cast<c_Vector*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___isset(arg0));
+}
+Variant NEVER_INLINE c_Vector::ifa___unset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___unset, coo_Vector);
+  }
+  c_Vector *self ATTRIBUTE_UNUSED (static_cast<c_Vector*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__unset", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___unset(arg0));
+}
 Variant NEVER_INLINE c_Vector::ifa_fromarray(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("fromarray", count, 1, 1, 1);
   CVarRef arg0(a0);
@@ -9522,14 +9689,17 @@ extern const MethodCallInfoTable cw_Vector$$call_info_table[] = {
   { 0x295C3D07, 1, 9, "fromArray", &ci_Vector$$fromarray },
   { 0x0B55E088, 1, 12, "linearSearch", &ci_Vector$$linearsearch },
   { 0x7C79458B, 1, 3, "add", &ci_Vector$$add },
+  { 0x74FA338F, 1, 5, "__get", &ci_Vector$$__get },
   { 0x65104D10, 0, 5, "count", &ci_Vector$$count },
   { 0x7A22D290, 1, 8, "contains", &ci_Vector$$contains },
   { 0x1763E711, 1, 6, "splice", &ci_Vector$$splice },
   { 0x3CD2AC13, 0, 3, "pop", &ci_Vector$$pop },
   { 0x14B34A13, 1, 10, "__toString", &ci_Vector$$__tostring },
+  { 0x03340395, 1, 5, "__set", &ci_Vector$$__set },
   { 0x3FA87C16, 1, 7, "reverse", &ci_Vector$$reverse },
   { 0x268F3557, 1, 5, "slice", &ci_Vector$$slice },
   { 0x49D8CC9A, 1, 3, "put", &ci_Vector$$put },
+  { 0x49A2079B, 1, 7, "__unset", &ci_Vector$$__unset },
   { 0x229C615F, 1, 11, "__construct", &ci_Vector$$__construct },
   { 0x28B0F1E0, 0, 6, "resize", &ci_Vector$$resize },
   { 0x55C61DA0, 1, 7, "shuffle", &ci_Vector$$shuffle },
@@ -9537,6 +9707,7 @@ extern const MethodCallInfoTable cw_Vector$$call_info_table[] = {
   { 0x5FC265E8, 0, 7, "isEmpty", &ci_Vector$$isempty },
   { 0x569AD828, 1, 3, "get", &ci_Vector$$get },
   { 0x0E1DBB2A, 1, 4, "sort", &ci_Vector$$sort },
+  { 0x2E2178EE, 1, 7, "__isset", &ci_Vector$$__isset },
   { 0x3109B0F2, 1, 7, "toArray", &ci_Vector$$toarray },
   { 0x2439E4B7, 1, 2, "at", &ci_Vector$$at },
   { 0x01C712FE, 1, 10, "fromVector", &ci_Vector$$fromvector },
@@ -9544,13 +9715,13 @@ extern const MethodCallInfoTable cw_Vector$$call_info_table[] = {
 extern const int cw_Vector$$call_info_index[] = {
   63,
   -1,-1,0,1,-1,-1,-1,2,
-  3,-1,-1,4,-1,-1,-1,-1,
-  5,7,-1,8,-1,-1,10,11,
-  -1,-1,12,-1,-1,-1,-1,13,
-  14,-1,-1,-1,-1,-1,-1,16,
-  17,-1,19,-1,-1,-1,-1,-1,
-  -1,-1,20,-1,-1,-1,-1,21,
-  -1,-1,-1,-1,-1,-1,22,-1,
+  3,-1,-1,4,-1,-1,-1,5,
+  6,8,-1,9,-1,11,12,13,
+  -1,-1,14,15,-1,-1,-1,16,
+  17,-1,-1,-1,-1,-1,-1,19,
+  20,-1,22,-1,-1,-1,23,-1,
+  -1,-1,24,-1,-1,-1,-1,25,
+  -1,-1,-1,-1,-1,-1,26,-1,
 
 };
 c_Vector *c_Vector::create() {

@@ -24,8 +24,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Vector::c_Vector(const ObjectStaticCallbacks *cb) :
-    ExtObjectDataFlags<ObjectData::VectorAttrInit>(cb), m_data(NULL),
-    m_size(0), m_capacity(0), m_versionNumber(0) {
+    ExtObjectDataFlags<ObjectData::VectorAttrInit|
+                       ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::UseIsset|
+                       ObjectData::UseUnset>(cb),
+    m_data(NULL), m_size(0), m_capacity(0), m_versionNumber(0) {
 }
 
 c_Vector::~c_Vector() {
@@ -339,10 +343,6 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
   return this;
 }
 
-String c_Vector::t___tostring() {
-  return "Vector";
-}
-
 Variant c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -552,11 +552,9 @@ Variant c_VectorIterator::t_current() {
   c_Vector* vec = m_obj.get();
   if (UNLIKELY(m_versionNumber != vec->getVersionNumber())) {
     throw_collection_modified();
-    return null;
   }
   if (!vec->contains(m_pos)) {
     throw_iterator_not_valid();
-    return null;
   }
   return tvAsCVarRef(&vec->m_data[m_pos]);
 }
@@ -565,7 +563,6 @@ Variant c_VectorIterator::t_key() {
   c_Vector* vec = m_obj.get();
   if (!vec->contains(m_pos)) {
     throw_iterator_not_valid();
-    return null;
   }
   return m_pos;
 }
@@ -589,8 +586,12 @@ void c_VectorIterator::t_rewind() {
 static const char emptyMapSlot[sizeof(c_Map::Bucket)] = { 0 };
 
 c_Map::c_Map(const ObjectStaticCallbacks *cb) :
-    ExtObjectDataFlags<ObjectData::MapAttrInit>(cb), m_size(0), m_load(0),
-    m_nLastSlot(0), m_versionNumber(0) {
+    ExtObjectDataFlags<ObjectData::MapAttrInit|
+                       ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::UseIsset|
+                       ObjectData::UseUnset>(cb),
+    m_size(0), m_load(0), m_nLastSlot(0), m_versionNumber(0) {
   m_data = (Bucket*)emptyMapSlot;
 }
 
@@ -908,10 +909,6 @@ Object c_Map::t_getiterator() {
   it->m_pos = iter_begin();
   it->m_versionNumber = getVersionNumber();
   return it;
-}
-
-String c_Map::t___tostring() {
-  return "Map";
 }
 
 Variant c_Map::ti_fromarray(const char* cls, CVarRef arr) {
@@ -1373,11 +1370,9 @@ Variant c_MapIterator::t_current() {
   c_Map* mp = m_obj.get();
   if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
     throw_collection_modified();
-    return null;
   }
   if (!m_pos) {
     throw_iterator_not_valid();
-    return null;
   }
   return mp->iter_value(m_pos);
 }
@@ -1386,11 +1381,9 @@ Variant c_MapIterator::t_key() {
   c_Map* mp = m_obj.get();
   if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
     throw_collection_modified();
-    return null;
   }
   if (!m_pos) {
     throw_iterator_not_valid();
-    return null;
   }
   return mp->iter_key(m_pos);
 }
@@ -1403,7 +1396,6 @@ void c_MapIterator::t_next() {
   c_Map* mp = m_obj.get();
   if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
     throw_collection_modified();
-    return;
   }
   m_pos = mp->iter_next(m_pos);
 }
@@ -1412,7 +1404,6 @@ void c_MapIterator::t_rewind() {
   c_Map* mp = m_obj.get();
   if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
     throw_collection_modified();
-    return;
   }
   m_pos = mp->iter_begin();
 }
@@ -1437,8 +1428,12 @@ do {                                                                    \
 static const char emptyStableMapSlot[sizeof(c_StableMap::Bucket*)] = { 0 };
 
 c_StableMap::c_StableMap(const ObjectStaticCallbacks *cb) :
-    ExtObjectDataFlags<ObjectData::StableMapAttrInit>(cb), m_versionNumber(0),
-    m_pListHead(NULL), m_pListTail(NULL) {
+    ExtObjectDataFlags<ObjectData::StableMapAttrInit|
+                       ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::UseIsset|
+                       ObjectData::UseUnset>(cb),
+    m_versionNumber(0), m_pListHead(NULL), m_pListTail(NULL) {
   m_size = 0;
   m_nTableSize = 0;
   m_nTableMask = 0;
@@ -1746,10 +1741,6 @@ Object c_StableMap::t_getiterator() {
   it->m_pos = iter_begin();
   it->m_versionNumber = getVersionNumber();
   return it;
-}
-
-String c_StableMap::t___tostring() {
-  return "StableMap";
 }
 
 Variant c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
@@ -2104,11 +2095,9 @@ Variant c_StableMapIterator::t_current() {
   c_StableMap* smp = m_obj.get();
   if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
     throw_collection_modified();
-    return null;
   }
   if (!m_pos) {
     throw_iterator_not_valid();
-    return null;
   }
   return smp->iter_value(m_pos);
 }
@@ -2117,11 +2106,9 @@ Variant c_StableMapIterator::t_key() {
   c_StableMap* smp = m_obj.get();
   if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
     throw_collection_modified();
-    return null;
   }
   if (!m_pos) {
     throw_iterator_not_valid();
-    return null;
   }
   return smp->iter_key(m_pos);
 }
@@ -2134,7 +2121,6 @@ void c_StableMapIterator::t_next() {
   c_StableMap* smp = m_obj.get();
   if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
     throw_collection_modified();
-    return;
   }
   m_pos = smp->iter_next(m_pos);
 }
@@ -2143,10 +2129,32 @@ void c_StableMapIterator::t_rewind() {
   c_StableMap* smp = m_obj.get();
   if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
     throw_collection_modified();
-    return;
   }
   m_pos = smp->iter_begin();
 }
+
+#define COLLECTION_MAGIC_METHODS(cls) \
+  String c_##cls::t___tostring() { \
+    return #cls; \
+  } \
+  Variant c_##cls::t___get(Variant name) { \
+    throw_collection_property_exception(); \
+  } \
+  Variant c_##cls::t___set(Variant name, Variant value) { \
+    throw_collection_property_exception(); \
+  } \
+  bool c_##cls::t___isset(Variant name) { \
+    throw_collection_property_exception(); \
+  } \
+  Variant c_##cls::t___unset(Variant name) { \
+    throw_collection_property_exception(); \
+  }
+
+COLLECTION_MAGIC_METHODS(Vector)
+COLLECTION_MAGIC_METHODS(Map)
+COLLECTION_MAGIC_METHODS(StableMap)
+
+#undef COLLECTION_MAGIC_METHODS
 
 ///////////////////////////////////////////////////////////////////////////////
 }

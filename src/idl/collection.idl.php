@@ -91,7 +91,7 @@ BeginClass(
     'ifaces' => array('Iterable', 'Countable'),
     'bases'  => array('Sweepable'),
     'desc'   => "A stack-style container.",
-    'flags'  =>  HasDocComment | NoDefaultSweep,
+    'flags'  =>  IsFinal | HasDocComment | NoDefaultSweep,
     'footer' => <<<EOT
 
  private:
@@ -387,6 +387,70 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__get",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__set",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__unset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fromArray",
     'flags'  =>  IsStatic | HasDocComment,
     'desc'   => "Returns a Vector containing the values from the " .
@@ -452,7 +516,7 @@ BeginClass(
     'name'   => "VectorIterator",
     'ifaces' => array('Iterator'),
     'desc'   => "An iterator implementation for iterating over a Vector.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  IsFinal | HasDocComment,
   ));
 
 DefineFunction(
@@ -525,7 +589,7 @@ BeginClass(
     'ifaces' => array('Iterable', 'Countable'),
     'bases'  => array('Sweepable'),
     'desc'   => "An unordered dictionary-style container.",
-    'flags'  =>  HasDocComment | NoDefaultSweep,
+    'flags'  =>  IsFinal | HasDocComment | NoDefaultSweep,
   ));
 
 DefineFunction(
@@ -797,6 +861,70 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__get",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__set",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__unset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fromArray",
     'flags'  =>  IsStatic | HasDocComment,
     'desc'   => "Returns a Map containing the key/value pairs from the " .
@@ -837,7 +965,7 @@ BeginClass(
     'name'   => "MapIterator",
     'ifaces' => array('Iterator'),
     'desc'   => "An iterator implementation for iterating over a Map.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  IsFinal | HasDocComment,
   ));
 
 DefineFunction(
@@ -910,7 +1038,7 @@ BeginClass(
     'ifaces' => array('Iterable', 'Countable'),
     'bases'  => array('Sweepable'),
     'desc'   => "An ordered dictionary-style container.",
-    'flags'  =>  HasDocComment | NoDefaultSweep,
+    'flags'  =>  IsFinal | HasDocComment | NoDefaultSweep,
   ));
 
 DefineFunction(
@@ -1175,6 +1303,70 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__get",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__set",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__unset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__toString",
     'return' => array(
       'type'   => String,
@@ -1223,7 +1415,7 @@ BeginClass(
     'name'   => "StableMapIterator",
     'ifaces' => array('Iterator'),
     'desc'   => "An iterator implementation for iterating over a StableMap.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  IsFinal | HasDocComment,
   ));
 
 DefineFunction(

@@ -2220,6 +2220,10 @@ TypedValue* tg_6Vector_splice(VM::ActRec *ar);
 TypedValue* tg_6Vector_linearSearch(VM::ActRec *ar);
 TypedValue* tg_6Vector_shuffle(VM::ActRec *ar);
 TypedValue* tg_6Vector___toString(VM::ActRec *ar);
+TypedValue* tg_6Vector___get(VM::ActRec *ar);
+TypedValue* tg_6Vector___set(VM::ActRec *ar);
+TypedValue* tg_6Vector___isset(VM::ActRec *ar);
+TypedValue* tg_6Vector___unset(VM::ActRec *ar);
 TypedValue* tg_6Vector_fromArray(VM::ActRec *ar);
 TypedValue* tg_6Vector_fromVector(VM::ActRec *ar);
 TypedValue* tg_6Vector_slice(VM::ActRec *ar);
@@ -2251,6 +2255,10 @@ TypedValue* tg_3Map_updateFromIterable(VM::ActRec *ar);
 TypedValue* tg_3Map_differenceByKey(VM::ActRec *ar);
 TypedValue* tg_3Map_getIterator(VM::ActRec *ar);
 TypedValue* tg_3Map___toString(VM::ActRec *ar);
+TypedValue* tg_3Map___get(VM::ActRec *ar);
+TypedValue* tg_3Map___set(VM::ActRec *ar);
+TypedValue* tg_3Map___isset(VM::ActRec *ar);
+TypedValue* tg_3Map___unset(VM::ActRec *ar);
 TypedValue* tg_3Map_fromArray(VM::ActRec *ar);
 TypedValue* tg_3Map_fromIterable(VM::ActRec *ar);
 VM::Instance* new_MapIterator_Instance(VM::Class*);
@@ -2280,6 +2288,10 @@ TypedValue* tg_9StableMap_updateFromArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_updateFromIterable(VM::ActRec *ar);
 TypedValue* tg_9StableMap_differenceByKey(VM::ActRec *ar);
 TypedValue* tg_9StableMap_getIterator(VM::ActRec *ar);
+TypedValue* tg_9StableMap___get(VM::ActRec *ar);
+TypedValue* tg_9StableMap___set(VM::ActRec *ar);
+TypedValue* tg_9StableMap___isset(VM::ActRec *ar);
+TypedValue* tg_9StableMap___unset(VM::ActRec *ar);
 TypedValue* tg_9StableMap___toString(VM::ActRec *ar);
 TypedValue* tg_9StableMap_fromArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_fromIterable(VM::ActRec *ar);
@@ -5065,7 +5077,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
   { "__construct", tg_12DummyClosure___construct }
 };
 
-static const long long hhbc_ext_method_count_Vector = 23;
+static const long long hhbc_ext_method_count_Vector = 27;
 static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "__construct", tg_6Vector___construct },
   { "isEmpty", tg_6Vector_isEmpty },
@@ -5087,6 +5099,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "linearSearch", tg_6Vector_linearSearch },
   { "shuffle", tg_6Vector_shuffle },
   { "__toString", tg_6Vector___toString },
+  { "__get", tg_6Vector___get },
+  { "__set", tg_6Vector___set },
+  { "__isset", tg_6Vector___isset },
+  { "__unset", tg_6Vector___unset },
   { "fromArray", tg_6Vector_fromArray },
   { "fromVector", tg_6Vector_fromVector },
   { "slice", tg_6Vector_slice }
@@ -5102,7 +5118,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_VectorIterator[] = {
   { "rewind", tg_14VectorIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Map = 22;
+static const long long hhbc_ext_method_count_Map = 26;
 static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "__construct", tg_3Map___construct },
   { "isEmpty", tg_3Map_isEmpty },
@@ -5124,6 +5140,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "differenceByKey", tg_3Map_differenceByKey },
   { "getIterator", tg_3Map_getIterator },
   { "__toString", tg_3Map___toString },
+  { "__get", tg_3Map___get },
+  { "__set", tg_3Map___set },
+  { "__isset", tg_3Map___isset },
+  { "__unset", tg_3Map___unset },
   { "fromArray", tg_3Map_fromArray },
   { "fromIterable", tg_3Map_fromIterable }
 };
@@ -5138,7 +5158,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_MapIterator[] = {
   { "rewind", tg_11MapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_StableMap = 22;
+static const long long hhbc_ext_method_count_StableMap = 26;
 static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "__construct", tg_9StableMap___construct },
   { "isEmpty", tg_9StableMap_isEmpty },
@@ -5159,6 +5179,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "updateFromIterable", tg_9StableMap_updateFromIterable },
   { "differenceByKey", tg_9StableMap_differenceByKey },
   { "getIterator", tg_9StableMap_getIterator },
+  { "__get", tg_9StableMap___get },
+  { "__set", tg_9StableMap___set },
+  { "__isset", tg_9StableMap___isset },
+  { "__unset", tg_9StableMap___unset },
   { "__toString", tg_9StableMap___toString },
   { "fromArray", tg_9StableMap_fromArray },
   { "fromIterable", tg_9StableMap_fromIterable }

@@ -825,6 +825,163 @@ TypedValue* tg_6Vector___toString(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Variant HPHP::c_Vector::t___get(HPHP::Variant)
+_ZN4HPHP8c_Vector7t___getENS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+*/
+
+TypedValue* th_6Vector___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP8c_Vector7t___getENS_7VariantE");
+
+TypedValue* tg_6Vector___get(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        th_6Vector___get((&(rv)), (this_), (args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::__get", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::__get");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_Vector::t___set(HPHP::Variant, HPHP::Variant)
+_ZN4HPHP8c_Vector7t___setENS_7VariantES1_
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+value => rcx
+*/
+
+TypedValue* th_6Vector___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP8c_Vector7t___setENS_7VariantES1_");
+
+TypedValue* tg_6Vector___set(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 2LL) {
+        th_6Vector___set((&(rv)), (this_), (args-0), (args-1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::__set", count, 2, 2, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::__set");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+bool HPHP::c_Vector::t___isset(HPHP::Variant)
+_ZN4HPHP8c_Vector9t___issetENS_7VariantE
+
+(return value) => rax
+this_ => rdi
+name => rsi
+*/
+
+bool th_6Vector___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP8c_Vector9t___issetENS_7VariantE");
+
+TypedValue* tg_6Vector___isset(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_6Vector___isset((this_), (args-0))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::__isset", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::__isset");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_Vector::t___unset(HPHP::Variant)
+_ZN4HPHP8c_Vector9t___unsetENS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+*/
+
+TypedValue* th_6Vector___unset(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP8c_Vector9t___unsetENS_7VariantE");
+
+TypedValue* tg_6Vector___unset(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        th_6Vector___unset((&(rv)), (this_), (args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::__unset", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::__unset");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Vector::ti_fromarray(char const*, HPHP::Variant const&)
 _ZN4HPHP8c_Vector12ti_fromarrayEPKcRKNS_7VariantE
 
@@ -1980,6 +2137,163 @@ TypedValue* tg_3Map___toString(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Variant HPHP::c_Map::t___get(HPHP::Variant)
+_ZN4HPHP5c_Map7t___getENS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+*/
+
+TypedValue* th_3Map___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP5c_Map7t___getENS_7VariantE");
+
+TypedValue* tg_3Map___get(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        th_3Map___get((&(rv)), (this_), (args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::__get", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::__get");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_Map::t___set(HPHP::Variant, HPHP::Variant)
+_ZN4HPHP5c_Map7t___setENS_7VariantES1_
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+value => rcx
+*/
+
+TypedValue* th_3Map___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP5c_Map7t___setENS_7VariantES1_");
+
+TypedValue* tg_3Map___set(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 2LL) {
+        th_3Map___set((&(rv)), (this_), (args-0), (args-1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::__set", count, 2, 2, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::__set");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+bool HPHP::c_Map::t___isset(HPHP::Variant)
+_ZN4HPHP5c_Map9t___issetENS_7VariantE
+
+(return value) => rax
+this_ => rdi
+name => rsi
+*/
+
+bool th_3Map___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP5c_Map9t___issetENS_7VariantE");
+
+TypedValue* tg_3Map___isset(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_3Map___isset((this_), (args-0))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::__isset", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::__isset");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_Map::t___unset(HPHP::Variant)
+_ZN4HPHP5c_Map9t___unsetENS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+*/
+
+TypedValue* th_3Map___unset(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP5c_Map9t___unsetENS_7VariantE");
+
+TypedValue* tg_3Map___unset(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        th_3Map___unset((&(rv)), (this_), (args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::__unset", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::__unset");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Map::ti_fromarray(char const*, HPHP::Variant const&)
 _ZN4HPHP5c_Map12ti_fromarrayEPKcRKNS_7VariantE
 
@@ -3050,6 +3364,163 @@ TypedValue* tg_9StableMap_getIterator(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_StableMap::t___get(HPHP::Variant)
+_ZN4HPHP11c_StableMap7t___getENS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+*/
+
+TypedValue* th_9StableMap___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP11c_StableMap7t___getENS_7VariantE");
+
+TypedValue* tg_9StableMap___get(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        th_9StableMap___get((&(rv)), (this_), (args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::__get", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::__get");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_StableMap::t___set(HPHP::Variant, HPHP::Variant)
+_ZN4HPHP11c_StableMap7t___setENS_7VariantES1_
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+value => rcx
+*/
+
+TypedValue* th_9StableMap___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP11c_StableMap7t___setENS_7VariantES1_");
+
+TypedValue* tg_9StableMap___set(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 2LL) {
+        th_9StableMap___set((&(rv)), (this_), (args-0), (args-1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::__set", count, 2, 2, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::__set");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+bool HPHP::c_StableMap::t___isset(HPHP::Variant)
+_ZN4HPHP11c_StableMap9t___issetENS_7VariantE
+
+(return value) => rax
+this_ => rdi
+name => rsi
+*/
+
+bool th_9StableMap___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP11c_StableMap9t___issetENS_7VariantE");
+
+TypedValue* tg_9StableMap___isset(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv._count = 0;
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_9StableMap___isset((this_), (args-0))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::__isset", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::__isset");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_StableMap::t___unset(HPHP::Variant)
+_ZN4HPHP11c_StableMap9t___unsetENS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+name => rdx
+*/
+
+TypedValue* th_9StableMap___unset(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP11c_StableMap9t___unsetENS_7VariantE");
+
+TypedValue* tg_9StableMap___unset(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        th_9StableMap___unset((&(rv)), (this_), (args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::__unset", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::__unset");
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

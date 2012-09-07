@@ -8722,6 +8722,33 @@ bool TestCodeRun::TestCollectionClasses() {
         "CD\n"
         );
 
+  MVCRO("<?php\n"
+        "$classes = array('Vector','Map','StableMap');\n"
+        "$i = 0;\n"
+        "try {\n"
+        "  foreach ($classes as $cls) {\n"
+        "    $obj = new $cls;\n"
+        "    try {\n"
+        "      $x = $obj->foo;\n"
+        "    } catch (RuntimeException $e) {\n"
+        "      echo $i;\n"
+        "    }\n"
+        "    ++$i;\n"
+        "    try {\n"
+        "      $obj->foo = 123;\n"
+        "    } catch (RuntimeException $e) {\n"
+        "      echo $i;\n"
+        "    }\n"
+        "    ++$i;\n"
+        "  }\n"
+        "} catch (Exception $e) {\n"
+        "  echo \"Fail!\\n\";\n"
+        "}\n"
+        "echo \"Done\\n\";\n"
+        ,
+        "012345Done\n"
+        );
+
   return true;
 }
 

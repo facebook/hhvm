@@ -951,6 +951,12 @@ void throw_collection_modified() {
   throw e;
 }
 
+void throw_collection_property_exception() {
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(
+    "Cannot access property on a collection"));
+  throw e;
+}
+
 void throw_collection_compare_exception() {
   const char* msg =
     "Cannot use comparison operators (==, !=, <>, <, <=, >, >=) to compare "

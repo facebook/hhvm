@@ -30,7 +30,11 @@ namespace HPHP {
 // class Vector
 
 FORWARD_DECLARE_CLASS_BUILTIN(Vector);
-class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit>,
+class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
+                                           ObjectData::UseGet|
+                                           ObjectData::UseSet|
+                                           ObjectData::UseIsset|
+                                           ObjectData::UseUnset>,
                  public Sweepable {
  public:
   DECLARE_CLASS(Vector, Vector, ObjectData)
@@ -84,6 +88,14 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit>,
   DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: String t___tostring();
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  public: Variant t___get(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__get);
+  public: Variant t___set(Variant name, Variant value);
+  DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
+  public: Variant t___unset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__unset);
   public: static Variant ti_fromarray(const char* cls, CVarRef arr);
   public: static Variant t_fromarray(CVarRef arr) {
     return ti_fromarray("vector", arr);
@@ -218,7 +230,11 @@ class c_VectorIterator : public ExtObjectData {
 // class Map
 
 FORWARD_DECLARE_CLASS_BUILTIN(Map);
-class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit>,
+class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
+                                        ObjectData::UseGet|
+                                        ObjectData::UseSet|
+                                        ObjectData::UseIsset|
+                                        ObjectData::UseUnset>,
               public Sweepable {
  public:
   DECLARE_CLASS(Map, Map, ObjectData)
@@ -273,6 +289,14 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit>,
   DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: String t___tostring();
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  public: Variant t___get(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__get);
+  public: Variant t___set(Variant name, Variant value);
+  DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
+  public: Variant t___unset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__unset);
   public: static Variant ti_fromarray(const char* cls, CVarRef arr);
   public: static Variant t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);
@@ -526,7 +550,11 @@ class c_MapIterator : public ExtObjectData {
 // class StableMap
 
 FORWARD_DECLARE_CLASS_BUILTIN(StableMap);
-class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit>,
+class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
+                                              ObjectData::UseGet|
+                                              ObjectData::UseSet|
+                                              ObjectData::UseIsset|
+                                              ObjectData::UseUnset>,
                     public Sweepable {
  public:
   DECLARE_CLASS(StableMap, StableMap, ObjectData)
@@ -579,6 +607,14 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit>,
   DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: String t___tostring();
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  public: Variant t___get(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__get);
+  public: Variant t___set(Variant name, Variant value);
+  DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
+  public: Variant t___unset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__unset);
   public: static Variant ti_fromarray(const char* cls, CVarRef arr);
   public: static Variant t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);

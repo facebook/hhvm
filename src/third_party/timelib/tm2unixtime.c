@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: tm2unixtime.c 293036 2010-01-03 09:23:27Z sebastian $ */
+/* $Id: tm2unixtime.c,v 1.28 2009-05-03 16:31:04 derick Exp $ */
 
 #include "timelib.h"
 
@@ -39,6 +39,66 @@ static int do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, t
 		*a -= adj * (*a / adj);
 	}
 	return 0;
+}
+
+static void inc_month(timelib_sll *y, timelib_sll *m)
+{
+	(*m)++;
+	if (*m > 12) {
+		*m -= 12;
+		(*y)++;
+	}
+}
+
+static void dec_month(timelib_sll *y, timelib_sll *m)
+{
+	(*m)--;
+	if (*m < 1) {
+		*m += 12;
+		(*y)--;
+	}
+}
+
+static void do_range_limit_days_relative(timelib_sll *base_y, timelib_sll *base_m, timelib_sll *y, timelib_sll *m, timelib_sll *d, timelib_sll invert)
+{
+	timelib_sll leapyear;
+	timelib_sll month, year;
+	timelib_sll days;
+
+	do_range_limit(1, 13, 12, base_m, base_y);
+
+	year = *base_y;
+	month = *base_m;
+
+/*
+	printf( "S: Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days);
+*/
+	if (!invert) {
+		while (*d < 0) {
+			dec_month(&year, &month);
+			leapyear = timelib_is_leap(year);
+			days = leapyear ? days_in_month_leap[month] : days_in_month[month];
+
+			/* printf( "I  Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days); */
+
+			*d += days;
+			(*m)--;
+		}
+	} else {
+		while (*d < 0) {
+			leapyear = timelib_is_leap(year);
+			days = leapyear ? days_in_month_leap[month] : days_in_month[month];
+
+			/* printf( "I  Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days); */
+
+			*d += days;
+			(*m)--;
+			inc_month(&year, &month);
+		}
+	}
+	/*
+	printf( "E: Y%d M%d   %d %d %d   %d\n", year, month, *y, *m, *d, days);
+	*/
 }
 
 static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
@@ -87,6 +147,15 @@ static void do_adjust_for_weekday(timelib_time* time)
 	timelib_sll current_dow, difference;
 
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
+	if (time->relative.weekday_behavior == 2)
+	{
+		if (time->relative.weekday == 0) {
+			time->relative.weekday = 7;
+		}
+		time->d -= current_dow;
+		time->d += time->relative.weekday;
+		return;
+	}
 	difference = time->relative.weekday - current_dow;
 	if ((time->relative.d < 0 && difference < 0) || (time->relative.d >= 0 && difference <= -time->relative.weekday_behavior)) {
 		difference += 7;
@@ -96,7 +165,18 @@ static void do_adjust_for_weekday(timelib_time* time)
 	} else {
 		time->d -= (7 - (abs(time->relative.weekday) - current_dow));
 	}
-	time->have_weekday_relative = 0;
+	time->relative.have_weekday_relative = 0;
+}
+
+void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
+{
+	do {} while (do_range_limit(0, 60, 60, &rt->s, &rt->i));
+	do {} while (do_range_limit(0, 60, 60, &rt->i, &rt->h));
+	do {} while (do_range_limit(0, 24, 24, &rt->h, &rt->d));
+	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
+
+	do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d, rt->invert);
+	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
 }
 
 static void do_normalize(timelib_time* time)
@@ -112,7 +192,7 @@ static void do_normalize(timelib_time* time)
 
 static void do_adjust_relative(timelib_time* time)
 {
-	if (time->have_weekday_relative) {
+	if (time->relative.have_weekday_relative) {
 		do_adjust_for_weekday(time);
 	}
 	do_normalize(time);
@@ -126,17 +206,23 @@ static void do_adjust_relative(timelib_time* time)
 		time->m += time->relative.m;
 		time->y += time->relative.y;
 	}
+	switch (time->relative.first_last_day_of) {
+		case 1: /* first */
+			time->d = 1;
+			break;
+		case 2: /* last */
+			time->d = 0;
+			time->m++;
+			break;
+	}
 	do_normalize(time);
-
-	memset(&(time->relative), 0, sizeof(time->relative));
-	time->have_relative = 0;
 }
 
 static void do_adjust_special_weekday(timelib_time* time)
 {
 	timelib_sll current_dow, count;
 
-	count = time->special.amount;
+	count = time->relative.special.amount;
 
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
 	if (count == 0) {
@@ -187,16 +273,34 @@ static void do_adjust_special_weekday(timelib_time* time)
 
 static void do_adjust_special(timelib_time* time)
 {
-	if (time->have_special_relative) {
-		switch (time->special.type) {
+	if (time->relative.have_special_relative) {
+		switch (time->relative.special.type) {
 			case TIMELIB_SPECIAL_WEEKDAY:
 				do_adjust_special_weekday(time);
 				break;
 		}
 	}
 	do_normalize(time);
-	memset(&(time->special), 0, sizeof(time->special));
-	time->have_relative = 0;
+	memset(&(time->relative.special), 0, sizeof(time->relative.special));
+}
+
+static void do_adjust_special_early(timelib_time* time)
+{
+	if (time->relative.have_special_relative) {
+		switch (time->relative.special.type) {
+			case TIMELIB_SPECIAL_DAY_OF_WEEK_IN_MONTH:
+				time->d = 1;
+				time->m += time->relative.m;
+				time->relative.m = 0;
+				break;
+			case TIMELIB_SPECIAL_LAST_DAY_OF_WEEK_IN_MONTH:
+				time->d = 1;
+				time->m += time->relative.m + 1;
+				time->relative.m = 0;
+				break;
+		}
+	}
+	do_normalize(time);
 }
 
 static timelib_sll do_years(timelib_sll year)
@@ -303,7 +407,20 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 				}
 				timelib_time_offset_dtor(before);
 				timelib_time_offset_dtor(after);
-				
+
+				{
+					timelib_time_offset *gmt_offset;
+
+					gmt_offset = timelib_get_time_zone_info(tz->sse + tmp, tzi);
+					tz->z = gmt_offset->offset;
+
+					tz->dst = gmt_offset->is_dst;
+					if (tz->tz_abbr) {
+						free(tz->tz_abbr);
+					}
+					tz->tz_abbr = strdup(gmt_offset->abbr);
+					timelib_time_offset_dtor(gmt_offset);
+				}
 				return tmp;
 			}
 	}
@@ -314,6 +431,7 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 {
 	timelib_sll res = 0;
 
+	do_adjust_special_early(time);
 	do_adjust_relative(time);
 	do_adjust_special(time);
 	res += do_years(time->y);
@@ -326,6 +444,7 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 	time->sse = res;
 
 	time->sse_uptodate = 1;
+	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = 0;
 }
 
 #if 0

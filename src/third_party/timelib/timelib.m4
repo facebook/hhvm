@@ -1,5 +1,5 @@
 dnl
-dnl $Id: timelib.m4 189829 2005-07-03 23:30:52Z sniper $
+dnl $Id: timelib.m4,v 1.2 2005-07-09 20:50:26 derick Exp $
 dnl
 dnl
 dnl TL_DEF_HAVE(what [, why])

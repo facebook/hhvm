@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: parse_tz.c 293036 2010-01-03 09:23:27Z sebastian $ */
+/* $Id: parse_tz.c,v 1.28 2009-05-03 16:19:18 derick Exp $ */
 
 #include "timelib.h"
 
@@ -49,7 +49,25 @@
 #define timelib_conv_int(l) ((l & 0x000000ff) << 24) + ((l & 0x0000ff00) << 8) + ((l & 0x00ff0000) >> 8) + ((l & 0xff000000) >> 24)
 #endif
 
-static void read_header(char **tzf, timelib_tzinfo *tz)
+static void read_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
+{
+	/* skip ID */
+	*tzf += 4;
+	
+	/* read BC flag */
+	tz->bc = (**tzf == '\1');
+	*tzf += 1;
+
+	/* read country code */
+	memcpy(tz->location.country_code, *tzf, 2);
+	tz->location.country_code[2] = '\0';
+	*tzf += 2;
+
+	/* skip read of preamble */
+	*tzf += 13;
+}
+
+static void read_header(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	uint32_t buffer[6];
 
@@ -63,7 +81,7 @@ static void read_header(char **tzf, timelib_tzinfo *tz)
 	*tzf += sizeof(buffer);
 }
 
-static void read_transistions(char **tzf, timelib_tzinfo *tz)
+static void read_transistions(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	int32_t *buffer = NULL;
 	uint32_t i;
@@ -82,6 +100,7 @@ static void read_transistions(char **tzf, timelib_tzinfo *tz)
 
 		cbuffer = (unsigned char*) malloc(tz->timecnt * sizeof(unsigned char));
 		if (!cbuffer) {
+			free(buffer);
 			return;
 		}
 		memcpy(cbuffer, *tzf, sizeof(unsigned char) * tz->timecnt);
@@ -92,7 +111,7 @@ static void read_transistions(char **tzf, timelib_tzinfo *tz)
 	tz->trans_idx = cbuffer;
 }
 
-static void read_types(char **tzf, timelib_tzinfo *tz)
+static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	unsigned char *buffer;
 	int32_t *leap_buffer;
@@ -107,6 +126,7 @@ static void read_types(char **tzf, timelib_tzinfo *tz)
 
 	tz->type = (ttinfo*) malloc(tz->typecnt * sizeof(struct ttinfo));
 	if (!tz->type) {
+		free(buffer);
 		return;
 	}
 
@@ -135,6 +155,7 @@ static void read_types(char **tzf, timelib_tzinfo *tz)
 
 		tz->leap_times = (tlinfo*) malloc(tz->leapcnt * sizeof(tlinfo));
 		if (!tz->leap_times) {
+			free(leap_buffer);
 			return;
 		}
 		for (i = 0; i < tz->leapcnt; i++) {
@@ -173,10 +194,33 @@ static void read_types(char **tzf, timelib_tzinfo *tz)
 	}
 }
 
+static void read_location(const unsigned char **tzf, timelib_tzinfo *tz)
+{
+	uint32_t buffer[3];
+	uint32_t comments_len;
+
+	memcpy(&buffer, *tzf, sizeof(buffer));
+	tz->location.latitude = timelib_conv_int(buffer[0]);
+	tz->location.latitude = (tz->location.latitude / 100000) - 90;
+	tz->location.longitude = timelib_conv_int(buffer[1]);
+	tz->location.longitude = (tz->location.longitude / 100000) - 180;
+	comments_len = timelib_conv_int(buffer[2]);
+	*tzf += sizeof(buffer);
+
+	tz->location.comments = malloc(comments_len + 1);
+	memcpy(tz->location.comments, *tzf, comments_len);
+	tz->location.comments[comments_len] = '\0';
+	*tzf += comments_len;
+}
+
 void timelib_dump_tzinfo(timelib_tzinfo *tz)
 {
 	uint32_t i;
 
+	printf("Country Code:      %s\n", tz->location.country_code);
+	printf("Geo Location:      %f,%f\n", tz->location.latitude, tz->location.longitude);
+	printf("Comments:\n%s\n",          tz->location.comments);
+	printf("BC:                %s\n",  tz->bc ? "" : "yes");
 	printf("UTC/Local count:   %lu\n", (unsigned long) tz->ttisgmtcnt);
 	printf("Std/Wall count:    %lu\n", (unsigned long) tz->ttisstdcnt);
 	printf("Leap.sec. count:   %lu\n", (unsigned long) tz->leapcnt);
@@ -234,7 +278,7 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 		} else if (cmp > 0) {
 			left = mid + 1;
 		} else { /* (cmp == 0) */
-			(*tzf) = &(tzdb->data[tzdb->index[mid].pos + 20]);
+			(*tzf) = &(tzdb->data[tzdb->index[mid].pos]);
 #ifdef HAVE_SETLOCALE
 			setlocale(LC_CTYPE, cur_locale);
 			if (cur_locale) free(cur_locale);
@@ -276,9 +320,11 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
 	if (seek_to_tz_position(&tzf, timezone, tzdb)) {
 		tmp = timelib_tzinfo_ctor(timezone);
 
-		read_header((char**) &tzf, tmp);
-		read_transistions((char**) &tzf, tmp);
-		read_types((char**) &tzf, tmp);
+		read_preamble(&tzf, tmp);
+		read_header(&tzf, tmp);
+		read_transistions(&tzf, tmp);
+		read_types(&tzf, tmp);
+		read_location(&tzf, tmp);
 	} else {
 		tmp = NULL;
 	}

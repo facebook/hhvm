@@ -139,11 +139,6 @@ void ReplayTransport::sendImpl(const void *data, int size, int code,
   m_response += (m_code == 200 ? "OK" : "Internal Server Error");
   m_response += "\r\n";
 
-  if (code >= 300 && code <= 399) {
-    data = (void *)"";
-    size = 0;
-  }
-
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
     for (unsigned int i = 0; i < iter->second.size(); i++) {

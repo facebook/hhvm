@@ -253,11 +253,6 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
   ASSERT(!m_sendEnded);
   ASSERT(!m_sendStarted || chunked);
 
-  if (code >= 300 && code <= 399) {
-    data = (void *)"";
-    size = 0;
-  }
-
   if (chunked) {
     ASSERT(m_method != HEAD);
     evbuffer *chunk = evbuffer_new();

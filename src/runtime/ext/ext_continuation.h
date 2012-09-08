@@ -26,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
+FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
 void f_hphp_pack_continuation(CObjRef continuation, int64 label, CVarRef value);
 void f_hphp_unpack_continuation(CObjRef continuation);
@@ -184,6 +185,8 @@ public:
 #ifndef HHVM
   };
 #endif
+
+  p_ContinuationWaitHandle m_waitHandle;
 
 #ifdef HHVM
   SmartPtr<HphpArray> m_VMStatics;

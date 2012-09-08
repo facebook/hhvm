@@ -144,6 +144,10 @@ TypedValue* fg_i18n_loc_set_default(VM::ActRec *ar);
 TypedValue* fg_i18n_loc_set_attribute(VM::ActRec *ar);
 TypedValue* fg_i18n_loc_set_strength(VM::ActRec *ar);
 TypedValue* fg_i18n_loc_get_error_code(VM::ActRec *ar);
+TypedValue* fg_asio_enter_context(VM::ActRec *ar);
+TypedValue* fg_asio_exit_context(VM::ActRec *ar);
+TypedValue* fg_asio_get_current(VM::ActRec *ar);
+TypedValue* fg_asio_set_on_failed_callback(VM::ActRec *ar);
 TypedValue* fg_bcscale(VM::ActRec *ar);
 TypedValue* fg_bcadd(VM::ActRec *ar);
 TypedValue* fg_bcsub(VM::ActRec *ar);
@@ -2216,6 +2220,40 @@ TypedValue* fg_nzuncompress(VM::ActRec *ar);
 TypedValue* fg_lz4compress(VM::ActRec *ar);
 TypedValue* fg_lz4hccompress(VM::ActRec *ar);
 TypedValue* fg_lz4uncompress(VM::ActRec *ar);
+VM::Instance* new_WaitHandle_Instance(VM::Class*);
+TypedValue* tg_10WaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_import(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_join(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_getID(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_getName(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_getExceptionIfFailed(VM::ActRec *ar);
+VM::Instance* new_StaticWaitHandle_Instance(VM::Class*);
+TypedValue* tg_16StaticWaitHandle___construct(VM::ActRec *ar);
+VM::Instance* new_StaticResultWaitHandle_Instance(VM::Class*);
+TypedValue* tg_22StaticResultWaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_22StaticResultWaitHandle_create(VM::ActRec *ar);
+VM::Instance* new_StaticExceptionWaitHandle_Instance(VM::Class*);
+TypedValue* tg_25StaticExceptionWaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_25StaticExceptionWaitHandle_create(VM::ActRec *ar);
+VM::Instance* new_WaitableWaitHandle_Instance(VM::Class*);
+TypedValue* tg_18WaitableWaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_18WaitableWaitHandle_getParents(VM::ActRec *ar);
+TypedValue* tg_18WaitableWaitHandle_getStackTrace(VM::ActRec *ar);
+VM::Instance* new_BlockableWaitHandle_Instance(VM::Class*);
+TypedValue* tg_19BlockableWaitHandle___construct(VM::ActRec *ar);
+VM::Instance* new_ContinuationWaitHandle_Instance(VM::Class*);
+TypedValue* tg_22ContinuationWaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_22ContinuationWaitHandle_start(VM::ActRec *ar);
+TypedValue* tg_22ContinuationWaitHandle_markCurrentAsSucceeded(VM::ActRec *ar);
+TypedValue* tg_22ContinuationWaitHandle_markCurrentAsTailCall(VM::ActRec *ar);
+TypedValue* tg_22ContinuationWaitHandle_getPrivData(VM::ActRec *ar);
+TypedValue* tg_22ContinuationWaitHandle_setPrivData(VM::ActRec *ar);
+VM::Instance* new_GenArrayWaitHandle_Instance(VM::Class*);
+TypedValue* tg_18GenArrayWaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_18GenArrayWaitHandle_create(VM::ActRec *ar);
+VM::Instance* new_SetResultToRefWaitHandle_Instance(VM::Class*);
+TypedValue* tg_24SetResultToRefWaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_24SetResultToRefWaitHandle_create(VM::ActRec *ar);
 VM::Instance* new_DummyClosure_Instance(VM::Class*);
 TypedValue* tg_12DummyClosure___construct(VM::ActRec *ar);
 VM::Instance* new_Vector_Instance(VM::Class*);
@@ -2943,7 +2981,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2193;
+const long long hhbc_ext_funcs_count = 2197;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3066,6 +3104,10 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "i18n_loc_set_attribute", fg_i18n_loc_set_attribute, (void *)&fh_i18n_loc_set_attribute },
   { "i18n_loc_set_strength", fg_i18n_loc_set_strength, (void *)&fh_i18n_loc_set_strength },
   { "i18n_loc_get_error_code", fg_i18n_loc_get_error_code, (void *)&fh_i18n_loc_get_error_code },
+  { "asio_enter_context", fg_asio_enter_context, (void *)&fh_asio_enter_context },
+  { "asio_exit_context", fg_asio_exit_context, (void *)&fh_asio_exit_context },
+  { "asio_get_current", fg_asio_get_current, (void *)&fh_asio_get_current },
+  { "asio_set_on_failed_callback", fg_asio_set_on_failed_callback, (void *)&fh_asio_set_on_failed_callback },
   { "bcscale", fg_bcscale, (void *)&fh_bcscale },
   { "bcadd", fg_bcadd, (void *)&fh_bcadd },
   { "bcsub", fg_bcsub, (void *)&fh_bcsub },
@@ -5140,6 +5182,67 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "lz4uncompress", fg_lz4uncompress, (void *)&fh_lz4uncompress }
 };
 
+static const long long hhbc_ext_method_count_WaitHandle = 6;
+static const HhbcExtMethodInfo hhbc_ext_methods_WaitHandle[] = {
+  { "__construct", tg_10WaitHandle___construct },
+  { "import", tg_10WaitHandle_import },
+  { "join", tg_10WaitHandle_join },
+  { "getID", tg_10WaitHandle_getID },
+  { "getName", tg_10WaitHandle_getName },
+  { "getExceptionIfFailed", tg_10WaitHandle_getExceptionIfFailed }
+};
+
+static const long long hhbc_ext_method_count_StaticWaitHandle = 1;
+static const HhbcExtMethodInfo hhbc_ext_methods_StaticWaitHandle[] = {
+  { "__construct", tg_16StaticWaitHandle___construct }
+};
+
+static const long long hhbc_ext_method_count_StaticResultWaitHandle = 2;
+static const HhbcExtMethodInfo hhbc_ext_methods_StaticResultWaitHandle[] = {
+  { "__construct", tg_22StaticResultWaitHandle___construct },
+  { "create", tg_22StaticResultWaitHandle_create }
+};
+
+static const long long hhbc_ext_method_count_StaticExceptionWaitHandle = 2;
+static const HhbcExtMethodInfo hhbc_ext_methods_StaticExceptionWaitHandle[] = {
+  { "__construct", tg_25StaticExceptionWaitHandle___construct },
+  { "create", tg_25StaticExceptionWaitHandle_create }
+};
+
+static const long long hhbc_ext_method_count_WaitableWaitHandle = 3;
+static const HhbcExtMethodInfo hhbc_ext_methods_WaitableWaitHandle[] = {
+  { "__construct", tg_18WaitableWaitHandle___construct },
+  { "getParents", tg_18WaitableWaitHandle_getParents },
+  { "getStackTrace", tg_18WaitableWaitHandle_getStackTrace }
+};
+
+static const long long hhbc_ext_method_count_BlockableWaitHandle = 1;
+static const HhbcExtMethodInfo hhbc_ext_methods_BlockableWaitHandle[] = {
+  { "__construct", tg_19BlockableWaitHandle___construct }
+};
+
+static const long long hhbc_ext_method_count_ContinuationWaitHandle = 6;
+static const HhbcExtMethodInfo hhbc_ext_methods_ContinuationWaitHandle[] = {
+  { "__construct", tg_22ContinuationWaitHandle___construct },
+  { "start", tg_22ContinuationWaitHandle_start },
+  { "markCurrentAsSucceeded", tg_22ContinuationWaitHandle_markCurrentAsSucceeded },
+  { "markCurrentAsTailCall", tg_22ContinuationWaitHandle_markCurrentAsTailCall },
+  { "getPrivData", tg_22ContinuationWaitHandle_getPrivData },
+  { "setPrivData", tg_22ContinuationWaitHandle_setPrivData }
+};
+
+static const long long hhbc_ext_method_count_GenArrayWaitHandle = 2;
+static const HhbcExtMethodInfo hhbc_ext_methods_GenArrayWaitHandle[] = {
+  { "__construct", tg_18GenArrayWaitHandle___construct },
+  { "create", tg_18GenArrayWaitHandle_create }
+};
+
+static const long long hhbc_ext_method_count_SetResultToRefWaitHandle = 2;
+static const HhbcExtMethodInfo hhbc_ext_methods_SetResultToRefWaitHandle[] = {
+  { "__construct", tg_24SetResultToRefWaitHandle___construct },
+  { "create", tg_24SetResultToRefWaitHandle_create }
+};
+
 static const long long hhbc_ext_method_count_DummyClosure = 1;
 static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
   { "__construct", tg_12DummyClosure___construct }
@@ -6046,8 +6149,17 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
   { "outputMemory", tg_9XMLWriter_outputMemory }
 };
 
-const long long hhbc_ext_class_count = 60;
+const long long hhbc_ext_class_count = 69;
 const HhbcExtClassInfo hhbc_ext_classes[] = {
+  { "WaitHandle", new_WaitHandle_Instance, sizeof(c_WaitHandle), hhbc_ext_method_count_WaitHandle, hhbc_ext_methods_WaitHandle },
+  { "StaticWaitHandle", new_StaticWaitHandle_Instance, sizeof(c_StaticWaitHandle), hhbc_ext_method_count_StaticWaitHandle, hhbc_ext_methods_StaticWaitHandle },
+  { "StaticResultWaitHandle", new_StaticResultWaitHandle_Instance, sizeof(c_StaticResultWaitHandle), hhbc_ext_method_count_StaticResultWaitHandle, hhbc_ext_methods_StaticResultWaitHandle },
+  { "StaticExceptionWaitHandle", new_StaticExceptionWaitHandle_Instance, sizeof(c_StaticExceptionWaitHandle), hhbc_ext_method_count_StaticExceptionWaitHandle, hhbc_ext_methods_StaticExceptionWaitHandle },
+  { "WaitableWaitHandle", new_WaitableWaitHandle_Instance, sizeof(c_WaitableWaitHandle), hhbc_ext_method_count_WaitableWaitHandle, hhbc_ext_methods_WaitableWaitHandle },
+  { "BlockableWaitHandle", new_BlockableWaitHandle_Instance, sizeof(c_BlockableWaitHandle), hhbc_ext_method_count_BlockableWaitHandle, hhbc_ext_methods_BlockableWaitHandle },
+  { "ContinuationWaitHandle", new_ContinuationWaitHandle_Instance, sizeof(c_ContinuationWaitHandle), hhbc_ext_method_count_ContinuationWaitHandle, hhbc_ext_methods_ContinuationWaitHandle },
+  { "GenArrayWaitHandle", new_GenArrayWaitHandle_Instance, sizeof(c_GenArrayWaitHandle), hhbc_ext_method_count_GenArrayWaitHandle, hhbc_ext_methods_GenArrayWaitHandle },
+  { "SetResultToRefWaitHandle", new_SetResultToRefWaitHandle_Instance, sizeof(c_SetResultToRefWaitHandle), hhbc_ext_method_count_SetResultToRefWaitHandle, hhbc_ext_methods_SetResultToRefWaitHandle },
   { "DummyClosure", new_DummyClosure_Instance, sizeof(c_DummyClosure), hhbc_ext_method_count_DummyClosure, hhbc_ext_methods_DummyClosure },
   { "Vector", new_Vector_Instance, sizeof(c_Vector), hhbc_ext_method_count_Vector, hhbc_ext_methods_Vector },
   { "VectorIterator", new_VectorIterator_Instance, sizeof(c_VectorIterator), hhbc_ext_method_count_VectorIterator, hhbc_ext_methods_VectorIterator },

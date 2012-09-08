@@ -235,6 +235,13 @@ inline void tvWriteUninit(TypedValue* tv) {
   tv->m_type = KindOfUninit;
 }
 
+// Assumes 'tv' is dead
+inline void tvWriteObject(ObjectData* pobj, TypedValue* tv) {
+  tv->m_type = KindOfObject;
+  tv->m_data.pobj = pobj;
+  tvIncRef(tv);
+}
+
 // conditionally unbox tv
 inline TypedValue* tvToCell(TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
@@ -263,9 +270,51 @@ inline void tvSet(const TypedValue* fr, TypedValue* to) {
   tvSetImpl<true>(fr, to);
 }
 
-// Same as tvSet, but does not dereference to if it's KindOfRef.
+// Same as tvSet, but does not dereference 'to' if it's KindOfRef.
 inline void tvSetIgnoreRef(const TypedValue* fr, TypedValue* to) {
   tvSetImpl<false>(fr, to);
+}
+
+template <bool respectRef>
+inline void tvSetNullImpl(TypedValue* to) {
+  if (respectRef) to = tvToCell(to);
+  DataType oldType = to->m_type;
+  uint64_t oldDatum = to->m_data.num;
+  tvWriteNull(to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+// Assumes 'to' is live
+// If 'to->m_type == KindOfRef', this will perform the set
+// operation on the inner cell (to->m_data.pref)
+inline void tvSetNull(TypedValue* to) {
+  tvSetNullImpl<true>(to);
+}
+
+// Same as tvSetNull, but does not dereference 'to' if it's KindOfRef.
+inline void tvSetNullIgnoreRef(TypedValue* to) {
+  tvSetNullImpl<false>(to);
+}
+
+template <bool respectRef>
+inline void tvSetObjectImpl(ObjectData* pobj, TypedValue* to) {
+  if (respectRef) to = tvToCell(to);
+  DataType oldType = to->m_type;
+  uint64_t oldDatum = to->m_data.num;
+  tvWriteObject(pobj, to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+// Assumes 'to' is live
+// If 'to->m_type == KindOfRef', this will perform the set
+// operation on the inner cell (to->m_data.pref)
+inline void tvSetObject(ObjectData* pobj, TypedValue* to) {
+  tvSetObjectImpl<true>(pobj, to);
+}
+
+// Same as tvSetObject, but does not dereference 'to' if it's KindOfRef.
+inline void tvSetObjectIgnoreRef(ObjectData* pobj, TypedValue* to) {
+  tvSetObjectImpl<false>(pobj, to);
 }
 
 // Assumes 'to' and 'fr' are live

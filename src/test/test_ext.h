@@ -20,6 +20,7 @@
 #include <test/test_ext_apc.h>
 #include <test/test_ext_apd.h>
 #include <test/test_ext_array.h>
+#include <test/test_ext_asio.h>
 #include <test/test_ext_bcmath.h>
 #include <test/test_ext_bzip2.h>
 #include <test/test_ext_class.h>

@@ -5,6 +5,7 @@ RUN_TESTSUITE(TestExtApache);
 RUN_TESTSUITE(TestExtApc);
 RUN_TESTSUITE(TestExtApd);
 RUN_TESTSUITE(TestExtArray);
+RUN_TESTSUITE(TestExtAsio);
 RUN_TESTSUITE(TestExtBcmath);
 RUN_TESTSUITE(TestExtBzip2);
 RUN_TESTSUITE(TestExtClass);

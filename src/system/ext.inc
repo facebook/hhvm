@@ -5,6 +5,7 @@
 #include "apc.inc"
 #include "apd.inc"
 #include "array.inc"
+#include "asio.inc"
 #include "bcmath.inc"
 #include "bzip2.inc"
 #include "class.inc"

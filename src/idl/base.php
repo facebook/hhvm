@@ -568,6 +568,20 @@ function generateFuncArgsCall($func, $f) {
   }
 }
 
+function generateFuncCPPForwardDeclarations($func, $f) {
+  if (is_string($func['return'])) {
+    fprintf($f, "FORWARD_DECLARE_CLASS_BUILTIN(%s);\n",
+            typename($func['return'], false));
+  }
+
+  foreach ($func['args'] as $arg) {
+    if (is_string($arg['type'])) {
+      fprintf($f, "FORWARD_DECLARE_CLASS_BUILTIN(%s);\n",
+              typename($arg['type'], false));
+    }
+  }
+}
+
 function generateFuncCPPHeader($func, $f, $method = false, $forceRef = false,
                                $static = false, $class = false) {
   if ($method) {
@@ -575,6 +589,7 @@ function generateFuncCPPHeader($func, $f, $method = false, $forceRef = false,
             typename($func['return']), $static ? "ti" : "t",
             strtolower($func['name']));
   } else {
+    generateFuncCPPForwardDeclarations($func, $f);
     fprintf($f, '%s f_%s', typename($func['return']), $func['name']);
   }
   generateFuncArgsCPPHeader($func, $f, $forceRef, $static);
@@ -669,6 +684,9 @@ EOT
   fprintf($f, "FORWARD_DECLARE_CLASS_BUILTIN(%s);\n", $clsname);
   foreach ($class['properties'] as $p) {
     generatePropertyCPPForwardDeclarations($p, $f);
+  }
+  foreach ($class['methods'] as $m) {
+    generateFuncCPPForwardDeclarations($m, $f);
   }
 
   fprintf($f, "class c_%s", $clsname);

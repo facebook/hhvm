@@ -107,11 +107,13 @@ Object c_Vector::t_append(CVarRef val) {
   return this;
 }
 
-void c_Vector::t_pop() {
+Variant c_Vector::t_pop() {
   ++m_versionNumber;
   if (m_size) {
     --m_size;
+    Variant ret = tvAsCVarRef(&m_data[m_size]);
     tvRefcountedDecRef(&m_data[m_size]);
+    return ret;
   } else {
     Object e(SystemLib::AllocRuntimeExceptionObject(
       "Cannot pop empty Vector"));

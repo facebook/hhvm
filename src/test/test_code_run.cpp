@@ -8666,13 +8666,14 @@ bool TestCodeRun::TestCollectionClasses() {
         "$v = new Vector;\n"
         "$v[] = 123;\n"
         "var_dump($v->toArray());\n"
-        "$v->pop();\n"
+        "var_dump($v->pop());\n"
         "var_dump($v->toArray());\n"
         ,
         "array(1) {\n"
         "  [0]=>\n"
         "  int(123)\n"
         "}\n"
+        "int(123)\n"
         "array(0) {\n"
         "}\n"
         );

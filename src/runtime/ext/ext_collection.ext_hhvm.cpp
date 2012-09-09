@@ -429,13 +429,15 @@ TypedValue* tg_6Vector_add(HPHP::VM::ActRec *ar) {
 }
 
 /*
-void HPHP::c_Vector::t_pop()
+HPHP::Variant HPHP::c_Vector::t_pop()
 _ZN4HPHP8c_Vector5t_popEv
 
-this_ => rdi
+(return value) => rax
+_rv => rdi
+this_ => rsi
 */
 
-void th_6Vector_pop(ObjectData* this_) asm("_ZN4HPHP8c_Vector5t_popEv");
+TypedValue* th_6Vector_pop(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vector5t_popEv");
 
 TypedValue* tg_6Vector_pop(HPHP::VM::ActRec *ar) {
     TypedValue rv;
@@ -444,10 +446,8 @@ TypedValue* tg_6Vector_pop(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv.m_data.num = 0LL;
-        rv._count = 0;
-        rv.m_type = KindOfNull;
-        th_6Vector_pop((this_));
+        th_6Vector_pop((&(rv)), (this_));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;

@@ -49,7 +49,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit>,
   DECLARE_METHOD_INVOKE_HELPERS(add);
   public: Object t_append(CVarRef val);
   DECLARE_METHOD_INVOKE_HELPERS(append);
-  public: void t_pop();
+  public: Variant t_pop();
   DECLARE_METHOD_INVOKE_HELPERS(pop);
   public: void t_resize(CVarRef sz, CVarRef value);
   DECLARE_METHOD_INVOKE_HELPERS(resize);

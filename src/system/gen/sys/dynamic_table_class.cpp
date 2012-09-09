@@ -9414,7 +9414,7 @@ Variant NEVER_INLINE c_Vector::ifa_pop(MethodCallPackage &mcp, int count, INVOKE
   }
   c_Vector *self ATTRIBUTE_UNUSED (static_cast<c_Vector*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("pop", 0, 1);
-  return (self->t_pop(), null);
+  return (self->t_pop());
 }
 Variant NEVER_INLINE c_Vector::ifa_resize(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {

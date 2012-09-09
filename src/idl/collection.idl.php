@@ -250,7 +250,7 @@ DefineFunction(
     'name'   => "pop",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => null,
+      'type'   => Variant,
     ),
   ));
 
@@ -524,7 +524,7 @@ BeginClass(
     'name'   => "Map",
     'ifaces' => array('Iterable', 'Countable'),
     'bases'  => array('Sweepable'),
-    'desc'   => "An ordered dictionary-style container.",
+    'desc'   => "An unordered dictionary-style container.",
     'flags'  =>  HasDocComment | NoDefaultSweep,
   ));
 

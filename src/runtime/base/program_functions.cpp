@@ -1152,7 +1152,10 @@ void hphp_process_init() {
   PageletServer::Restart();
   XboxServer::Restart();
   Extension::InitModules();
+  int64 save = RuntimeOption::SerializationSizeLimit;
+  RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
   apc_load(RuntimeOption::ApcLoadThread);
+  RuntimeOption::SerializationSizeLimit = save;
   StaticString::FinishInit();
 
   if (hhvm) {

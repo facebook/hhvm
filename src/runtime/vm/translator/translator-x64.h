@@ -426,6 +426,7 @@ MINSTRS
   CASE(FPushClsMethodD) \
   CASE(FPushClsMethodF) \
   CASE(FPushObjMethodD) \
+  CASE(FPushCtor) \
   CASE(FPushCtorD) \
   CASE(FPushContFunc) \
   CASE(FPassR) \

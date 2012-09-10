@@ -11639,11 +11639,6 @@ TranslatorX64::translateFPushObjMethodD(const Tracelet &t,
   }
 }
 
-void TranslatorX64::analyzeFPushCtorD(Tracelet& t,
-                                      NormalizedInstruction &i) {
-  i.m_txFlags = supportedPlan(true);
-}
-
 static inline ALWAYS_INLINE Class* getKnownClass(Class** classCache,
                                                  const StringData* clsName) {
   Class* cls = *classCache;
@@ -11667,10 +11662,7 @@ newInstanceHelperNoCtor(Class** classCache, const StringData* clsName) {
 
 static Instance*
 HOT_FUNC_VM
-newInstanceHelper(Class** classCache,
-                  const StringData* clsName, int numArgs,
-                  ActRec* ar, ActRec* prevAr) {
-  Class* cls = getKnownClass(classCache, clsName);
+newInstanceHelper(Class* cls, int numArgs, ActRec* ar, ActRec* prevAr) {
   const Func* f = cls->getCtor();
   Instance* ret = NULL;
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
@@ -11696,6 +11688,30 @@ newInstanceHelper(Class** classCache,
   return ret;
 }
 
+void TranslatorX64::translateFPushCtor(const Tracelet& t,
+                                       const NormalizedInstruction& i) {
+  int numArgs = i.imm[0].u_IVA;
+  int arOff = vstackOffset(i, -int(sizeof(ActRec)));
+  m_regMap.scrubStackRange(i.stackOff, i.stackOff + kNumActRecCells);
+  EMIT_CALL(a, newInstanceHelper,
+            V(i.inputs[0]->location),
+            IMM(numArgs),
+            RPLUS(rVmSp, arOff),
+            R(rVmFp));
+  recordReentrantCall(i);
+
+  m_regMap.bind(rax, i.outStack->location, KindOfObject, RegInfo::DIRTY);
+}
+
+static Instance*
+HOT_FUNC_VM
+newInstanceHelperCached(Class** classCache,
+                        const StringData* clsName, int numArgs,
+                        ActRec* ar, ActRec* prevAr) {
+  Class* cls = getKnownClass(classCache, clsName);
+  return newInstanceHelper(cls, numArgs, ar, prevAr);
+}
+
 void TranslatorX64::translateFPushCtorD(const Tracelet& t,
                                         const NormalizedInstruction& i) {
   using namespace TargetCache;
@@ -11715,7 +11731,7 @@ void TranslatorX64::translateFPushCtorD(const Tracelet& t,
               R(*scr),
               IMM(uintptr_t(clsName)));
   } else {
-    EMIT_CALL(a, newInstanceHelper,
+    EMIT_CALL(a, newInstanceHelperCached,
               R(*scr),
               IMM(uintptr_t(clsName)),
               IMM(numArgs),
@@ -13639,6 +13655,8 @@ bool TranslatorX64::dumpTCData() {
   SUPPORTED_OP(ContSend) \
   SUPPORTED_OP(ContRaise) \
   SUPPORTED_OP(ContCurrent) \
+  SUPPORTED_OP(FPushCtor) \
+  SUPPORTED_OP(FPushCtorD) \
   /*
    * Always-interp instructions,
    */ \

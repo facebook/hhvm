@@ -103,97 +103,22 @@ public:
    * The global static to feed into pthread_create(), and this will delegate
    * the work to AsyncFuncImpl::threadFuncImpl().
    */
-  static void *ThreadFunc(void *obj) {
-    pthread_attr_t *attr;
-    size_t stacksize, guardsize;
-    void *stackaddr;
-
-    attr = ((AsyncFuncImpl*)obj)->getThreadAttr();
-    pthread_attr_getstack(attr, &stackaddr, &stacksize);
-
-    // Get the guard page's size, because the stack address returned
-    // above starts at the guard page, so the thread's stack limit is
-    // stackaddr + guardsize.
-    if (pthread_attr_getguardsize(attr, &guardsize) != 0)
-      guardsize = 0;
-
-    ASSERT(stackaddr != NULL);
-    ASSERT(stacksize >= PTHREAD_STACK_MIN);
-    Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
-    Util::s_stackSize = stacksize;
-
-    ((AsyncFuncImpl*)obj)->threadFuncImpl();
-    return NULL;
-  }
+  static void *ThreadFunc(void *obj);
 
   /**
    * Called by AsyncFunc<T> so we can call func(obj) back on thread running.
    */
-  AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
-      : m_stopped(false),
-        m_obj(obj), m_func(func), m_threadId(0), m_exceptioned(false),
-        m_threadStack(NULL), m_stackSize(0) {
-  }
+  AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func);
 
   /**
    * Starts this thread.
    */
-  void start() {
-    struct rlimit rlim;
-
-    // Allocate the thread-stack
-    pthread_attr_init(&m_attr);
-
-    if (getrlimit(RLIMIT_STACK, &rlim) != 0 || rlim.rlim_cur == RLIM_INFINITY ||
-        rlim.rlim_cur < m_stackSizeMinimum) {
-      rlim.rlim_cur = m_stackSizeMinimum;
-    }
-
-    // On Success use the allocated memory for the thread's stack
-    if (posix_memalign(&m_threadStack, PAGE_SIZE, rlim.rlim_cur) == 0) {
-      pthread_attr_setstack(&m_attr, m_threadStack, rlim.rlim_cur);
-    }
-
-    pthread_create(&m_threadId, &m_attr, ThreadFunc, (void*)this);
-    ASSERT(m_threadId);
-  }
+  void start();
 
   /**
    * Waits until this thread finishes running.
    */
-  bool waitForEnd(int seconds = 0) {
-    if (m_threadId == 0) return true;
-
-    {
-      Lock lock(m_stopMonitor.getMutex());
-      while (!m_stopped) {
-        if (seconds > 0) {
-          if (!m_stopMonitor.wait(seconds)) {
-            // wait timed out
-            return false;
-          }
-        } else {
-          m_stopMonitor.wait();
-        }
-      }
-    }
-
-    void *ret = NULL;
-    pthread_join(m_threadId, &ret);
-    m_threadId = 0;
-
-    if (m_threadStack != NULL) {
-      free(m_threadStack);
-      m_threadStack = NULL;
-    }
-
-    if (m_exceptioned) {
-      m_exceptioned = false;
-      throw m_exception;
-    }
-
-    return true;
-  }
+  bool waitForEnd(int seconds = 0);
 
   /**
    * Starts and waits until this thread finishes running.
@@ -225,9 +150,10 @@ public:
     return s_finiFunc;
   }
 
+  void setNoInit() { m_noInit = true; }
+
 private:
   Synchronizable m_stopMonitor;
-  bool m_stopped;
 
   void *m_obj;
   PFN_THREAD_FUNC *m_func;
@@ -235,43 +161,21 @@ private:
   static PFN_THREAD_FUNC *s_finiFunc;
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
-  pthread_t m_threadId;
-  bool m_exceptioned;
   void *m_threadStack;
   size_t m_stackSize;
   Exception m_exception; // exception was thrown and thread was terminated
   pthread_attr_t m_attr;
+  pthread_t m_threadId;
+  bool m_exceptioned;
+  bool m_stopped;
+  bool m_noInit;
 
   static const size_t m_stackSizeMinimum = 8388608; // 8MB
 
   /**
    * Called by ThreadFunc() to delegate the work.
    */
-  void threadFuncImpl() {
-    if (s_initFunc) {
-      s_initFunc(s_initFuncArg);
-    }
-    try {
-      m_func(m_obj);
-    } catch (Exception &e) {
-      m_exceptioned = true;
-      m_exception = e;
-    } catch (std::exception &e) {
-      m_exceptioned = true;
-      m_exception.setMessage(e.what());
-    } catch (...) {
-      m_exceptioned = true;
-      m_exception.setMessage("(unknown exception)");
-    }
-    {
-      Lock lock(m_stopMonitor.getMutex());
-      m_stopped = true;
-      m_stopMonitor.notify();
-    }
-    if (s_finiFunc) {
-      s_finiFunc(s_finiFuncArg);
-    }
-  }
+  void threadFuncImpl();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

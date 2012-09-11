@@ -30,12 +30,21 @@ namespace HPHP {
 template<class TJob, class TWorker>
 class JobDispatcher;
 
+template<class TJob>
+class WorkerInfo {
+ public:
+  enum { DoInit = true };
+};
+
 template<class TJob, class TWorker>
 class WorkerWrapper {
 public:
   WorkerWrapper(JobDispatcher<TJob, TWorker> &dispatcher)
     : m_dispatcher(dispatcher),
     m_func(this, &WorkerWrapper<TJob, TWorker>::doJob) {
+    if (!WorkerInfo<TJob>::DoInit) {
+      m_func.setNoInit();
+    }
   }
 
   TWorker *getWorker() { return &m_worker;}

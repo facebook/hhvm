@@ -4212,19 +4212,20 @@ void TranslatorX64::emitBaseLCR(const Tracelet& t,
   int disp;
   locToRegDisp(base.location, &pr, &disp);
   rBase = m_regMap.allocScratchReg();
-  a.    lea_reg64_disp_reg64(pr, disp, rBase);
   if (base.isVariant()) {
     // Get inner value.
-    a.  load_reg64_disp_reg64(rBase, TVOFF(m_data), rBase);
+    a.  load_reg64_disp_reg64(pr, disp + TVOFF(m_data), rBase);
+  } else {
+    a.  lea_reg64_disp_reg64(pr, disp, rBase);
   }
 }
 
 template <bool warn, bool define>
 static inline TypedValue* baseNImpl(TypedValue* key,
-                                    TranslatorX64::MInstrState* mis) {
+                                    TranslatorX64::MInstrState* mis,
+                                    ActRec* fp) {
   TypedValue* base;
   StringData* name = prepareKey(key).detach();
-  ActRec* fp = curFrame();
   const Func* func = fp->m_func;
   Id id = func->lookupVarId(name);
   if (id != kInvalidId) {
@@ -4264,22 +4265,26 @@ static inline TypedValue* baseNImpl(TypedValue* key,
 
 HOT_FUNC
 static TypedValue* baseN(TypedValue* key, TranslatorX64::MInstrState* mis) {
-  return baseNImpl<false, false>(key, mis);
+  register ActRec* rbp asm("rbp");
+  return baseNImpl<false, false>(key, mis, (ActRec*)rbp->m_savedRbp);
 }
 
 HOT_FUNC
 static TypedValue* baseNW(TypedValue* key, TranslatorX64::MInstrState* mis) {
-  return baseNImpl<true, false>(key, mis);
+  register ActRec* rbp asm("rbp");
+  return baseNImpl<true, false>(key, mis, (ActRec*)rbp->m_savedRbp);
 }
 
 HOT_FUNC
 static TypedValue* baseND(TypedValue* key, TranslatorX64::MInstrState* mis) {
-  return baseNImpl<false, true>(key, mis);
+  register ActRec* rbp asm("rbp");
+  return baseNImpl<false, true>(key, mis, (ActRec*)rbp->m_savedRbp);
 }
 
 HOT_FUNC
 static TypedValue* baseNWD(TypedValue* key, TranslatorX64::MInstrState* mis) {
-  return baseNImpl<true, true>(key, mis);
+  register ActRec* rbp asm("rbp");
+  return baseNImpl<true, true>(key, mis, (ActRec*)rbp->m_savedRbp);
 }
 
 void TranslatorX64::emitBaseN(const Tracelet& t,
@@ -4389,9 +4394,9 @@ static TypedValue* baseS(Class* ctx, TypedValue* key, const Class* cls,
 }
 
 HOT_FUNC
-static inline TypedValue* baseSClsRef(Class* ctx, TypedValue* key,
-                                      TypedValue* clsRef,
-                                      TranslatorX64::MInstrState* mis) {
+static TypedValue* baseSClsRef(Class* ctx, TypedValue* key,
+                               TypedValue* clsRef,
+                               TranslatorX64::MInstrState* mis) {
   ASSERT(clsRef->m_type == KindOfClass);
   const Class* cls = clsRef->m_data.pcls;
   return baseS(ctx, key, cls, mis);
@@ -6172,7 +6177,7 @@ static void getMInstrCtx(TranslatorX64::MInstrState* mis) {
 
 bool TranslatorX64::needMInstrCtx(const Tracelet& t,
                                   const NormalizedInstruction& ni) const {
-  if (!isContextFixed()) {
+  if (false && !isContextFixed()) {
     SKTRACE(2, ni.source, "%s (context not fixed) --> true\n", __func__);
     return true;
   }
@@ -6231,10 +6236,15 @@ void TranslatorX64::emitMPre(const Tracelet& t,
   }
   a.    store_imm32_disp_reg(false, offsetof(MInstrState, baseStrOff), rsp);
 
-  ctxFixed = !needMInstrCtx(t, ni);
+  ctxFixed = isContextFixed();
   SKTRACE(2, ni.source, "%s ctxFixed=%s\n",
           __func__, ctxFixed ? "true" : "false");
-  if (!ctxFixed) {
+
+  /* XXX Im pretty sure we shouldnt need to clean/smash the regs */
+  m_regMap.cleanRegs(kAllRegs);
+  m_regMap.smashRegs(kCallerSaved);
+
+  if (!ctxFixed && needMInstrCtx(t, ni)) {
     EMIT_CALL(a, getMInstrCtx, R(rsp));
     recordCall(ni);
   } else if (debug) {

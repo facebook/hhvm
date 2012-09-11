@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <boost/noncopyable.hpp>
+
 #include <runtime/eval/debugger/dummy_sandbox.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/debugger/cmd/cmd_signal.h>
@@ -63,15 +65,30 @@ void DummySandbox::stop() {
   }
 }
 
+namespace {
+
+struct CLISession : boost::noncopyable {
+  CLISession() {
+    char *argv[] = {"", NULL};
+    execute_command_line_begin(1, argv, 0);
+  }
+  ~CLISession() {
+    Debugger::UnregisterSandbox(g_context->getSandboxId());
+    ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.debugger = false;
+    execute_command_line_end(0, false, NULL);
+  }
+};
+
+}
+
 void DummySandbox::run() {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   Debugger::RegisterThread();
   ti->m_reqInjectionData.dummySandbox = true;
   while (!m_stopped) {
     try {
-      char *argv[] = {"", NULL};
-      execute_command_line_begin(1, argv, 0);
-
+      CLISession hphpSession;
       FUNCTION_INJECTION_FS("_", FrameInjection::PseudoMain);
 
       DSandboxInfo sandbox = m_proxy->getSandbox();
@@ -132,10 +149,7 @@ void DummySandbox::run() {
       break;
     } catch (const DebuggerException &e) {
     }
-    ti->m_reqInjectionData.debugger = false;
-    execute_command_line_end(0, false, NULL);
   }
-  Debugger::UnregisterSandbox(g_context->getSandboxId());
 }
 
 void DummySandbox::notifySignal(int signum) {

@@ -294,7 +294,7 @@ public:
   void* alloc(size_t size);
   void dealloc(void *obj) {
     ASSERT(assertValidHelper(obj));
-    ASSERT(memset(obj, 0x5a, m_itemSize));
+    ASSERT(memset(obj, 0x6a, m_itemSize));
     m_freelist.push(obj);
     if (hhvm) {
       int tomb = RefCountTombstoneValue;

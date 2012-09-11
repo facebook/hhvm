@@ -55,10 +55,6 @@ public:
   FILE *getStream() { return m_stream;}
   virtual const char *getStreamType() const { return "STDIO";}
 
-  static CVarRef getStdIn();
-  static CVarRef getStdOut();
-  static CVarRef getStdErr();
-
 protected:
   FILE *m_stream;
   bool m_eof;

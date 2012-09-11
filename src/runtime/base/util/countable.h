@@ -18,6 +18,7 @@
 #define __HPHP_COUNTABLE_H__
 
 #include <util/base.h>
+#include <util/util.h>
 #include <util/trace.h>
 #include <util/atomic.h>
 
@@ -25,28 +26,64 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
+ * This is a special value for _count used to indicate objects that
+ * are already deallocated. (See smart_allocator.h.)
+ */
+const int32_t RefCountTombstoneValue = 0xde1ee7ed;
+static_assert(RefCountTombstoneValue < 0,
+              "RefCountTombstoneValue should be negative to aid assertions");
+
+/*
+ * This bit flags a reference count as "static".  If a reference count
+ * is static, it means we should never increment or decrement it: the
+ * object lives across requests and may be accessed by multiple
+ * threads.
+ */
+const int32_t RefCountStaticValue = (1 << 30);
+
+// Used for assertions.
+inline DEBUG_ONLY bool is_refcount_realistic(int32_t count) {
+  return count != RefCountTombstoneValue &&
+         count != 0x5a5a5a5a; /* debug freed mem in malloc */
+}
+
+/**
  * StringData and Variant do not formally derive from Countable, but they
  * have a _count field and define all of the methods from Countable. These
  * macros are provided to avoid code duplication.
  */
-#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                            \
-  int32_t getCount() const { return _count; }                            \
-  bool isRefCounted() const { return _count != Countable::STATIC_FLAG; } \
-  void incRefCount() const { if (isRefCounted()) { ++_count; } }         \
-  int32_t decRefCount() const {                                          \
-    ASSERT(_count > 0);                                                  \
-    return isRefCounted() ? --_count : _count;                           \
+#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC   \
+  int32_t getCount() const {                    \
+    ASSERT(is_refcount_realistic(_count));      \
+    return _count;                              \
+  }                                             \
+                                                \
+  bool isRefCounted() const {                   \
+    ASSERT(is_refcount_realistic(_count));      \
+    return _count != RefCountStaticValue;       \
+  }                                             \
+                                                \
+  void incRefCount() const {                    \
+    ASSERT(is_refcount_realistic(_count));      \
+    if (isRefCounted()) { ++_count; }           \
+  }                                             \
+                                                \
+  int32_t decRefCount() const {                 \
+    ASSERT(_count > 0);                         \
+    ASSERT(is_refcount_realistic(_count));      \
+    return isRefCounted() ? --_count : _count;  \
   }
 
-#define IMPLEMENT_COUNTABLE_METHODS                                      \
-  /* setStatic() is used by StaticString and StaticArray to make  */     \
-  /* sure ref count is "never" going to reach 0, even if multiple */     \
-  /* threads modify it in a non-thread-safe fashion.              */     \
-  void setStatic() const { _count = Countable::STATIC_FLAG; }            \
-  bool isStatic() const { return _count == STATIC_FLAG; }                \
+#define IMPLEMENT_COUNTABLE_METHODS                                   \
+  void setStatic() const {                                            \
+    ASSERT(is_refcount_realistic(_count));                            \
+    _count = RefCountStaticValue;                                     \
+  }                                                                   \
+  bool isStatic() const {                                             \
+    ASSERT(is_refcount_realistic(_count));                            \
+    return _count == STATIC_FLAG;                                     \
+  }                                                                   \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
-
-const int32_t RefCountStaticValue = (1 << 30);
 
 /**
  * Implements reference counting. We chose to roll our own SmartPtr type
@@ -62,17 +99,24 @@ class Countable {
   mutable int32_t _count;
 };
 
-/**
- * This is a special value for _count used to indicate objects that
- * are already deallocated. (See smart_allocator.h.)
- */
-const int32_t RefCountTombstoneValue = 0xde1ee7ed;
-
-#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC                               \
-  int32_t getCount() const { return _count; }                                 \
-  bool isRefCounted() const { return true; }                                  \
-  void incRefCount() const { ++_count; }                                      \
-  int32_t decRefCount() const { ASSERT(_count > 0); return --_count; }
+#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC \
+  int32_t getCount() const {                    \
+    ASSERT(is_refcount_realistic(_count));      \
+    return _count;                              \
+  }                                             \
+                                                \
+  bool isRefCounted() const { return true; }    \
+                                                \
+  void incRefCount() const {                    \
+    ASSERT(is_refcount_realistic(_count));      \
+    ++_count;                                   \
+  }                                             \
+                                                \
+  int32_t decRefCount() const {                 \
+    ASSERT(_count > 0);                         \
+    ASSERT(is_refcount_realistic(_count));      \
+    return --_count;                            \
+  }
 
 /**
  * CountableNF : countable no flags
@@ -106,7 +150,7 @@ private:
 class AtomicCountable {
  public:
   AtomicCountable() : _count(0) {}
-  int32_t getCount() const { return _count; }                        
+  int32_t getCount() const { return _count; }
   void incAtomicCount() const { atomic_inc(_count); }
   int decAtomicCount() const { return atomic_dec(_count); }
  protected:

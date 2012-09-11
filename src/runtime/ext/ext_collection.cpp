@@ -47,7 +47,6 @@ void c_Vector::t___construct() {
 }
 
 Variant c_Vector::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::__destruct);
   return null;
 }
 
@@ -95,7 +94,6 @@ ObjectData* c_Vector::clone() {
 }
 
 Object c_Vector::t_add(CVarRef val) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::add);
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
     tv = tv->m_data.pref->tv();
@@ -105,7 +103,6 @@ Object c_Vector::t_add(CVarRef val) {
 }
 
 Object c_Vector::t_append(CVarRef val) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::append);
   TypedValue* tv = (TypedValue*)(&val);
   if (UNLIKELY(tv->m_type == KindOfRef)) {
     tv = tv->m_data.pref->tv();
@@ -115,7 +112,6 @@ Object c_Vector::t_append(CVarRef val) {
 }
 
 void c_Vector::t_pop() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::pop);
   ++m_versionNumber;
   if (m_size) {
     --m_size;
@@ -128,7 +124,6 @@ void c_Vector::t_pop() {
 }
 
 void c_Vector::t_resize(CVarRef sz, CVarRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::resize);
   if (!sz.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter sz must be a non-negative integer"));
@@ -148,7 +143,6 @@ void c_Vector::t_resize(CVarRef sz, CVarRef value) {
 }
 
 Object c_Vector::t_clear() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::clear);
   ++m_versionNumber;
   int sz = m_size;
   for (int i = 0; i < sz; ++i) {
@@ -162,17 +156,14 @@ Object c_Vector::t_clear() {
 }
 
 bool c_Vector::t_isempty() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::isempty);
   return (m_size == 0);
 }
 
 int64 c_Vector::t_count() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::count);
   return m_size;
 }
 
 Variant c_Vector::t_at(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::at);
   if (key.isInteger()) {
     return at(key.toInt64());
   }
@@ -181,7 +172,6 @@ Variant c_Vector::t_at(CVarRef key) {
 }
 
 Variant c_Vector::t_get(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::get);
   if (key.isInteger()) {
     return get(key.toInt64());
   }
@@ -190,7 +180,6 @@ Variant c_Vector::t_get(CVarRef key) {
 }
 
 bool c_Vector::t_contains(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::contains);
   if (!key.isInteger()) {
     throwBadKeyType();
   }
@@ -198,7 +187,6 @@ bool c_Vector::t_contains(CVarRef key) {
 }
 
 Array c_Vector::t_toarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::toarray);
   ArrayInit ai(m_size, ArrayInit::vectorInit);
   int sz = m_size;
   for (int i = 0; i < sz; ++i) {
@@ -208,7 +196,6 @@ Array c_Vector::t_toarray() {
 }
 
 void c_Vector::t_sort(CVarRef col /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::sort);
   // Terribly inefficient, but produces correct results for now
   Variant arr = t_toarray();
   if (col.isNull()) {
@@ -244,7 +231,6 @@ void c_Vector::t_sort(CVarRef col /* = null */) {
 }
 
 void c_Vector::t_reverse() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::reverse);
   TypedValue* start = m_data;
   TypedValue* end = m_data + m_size - 1;
   for (; start < end; ++start, --end) {
@@ -255,7 +241,6 @@ void c_Vector::t_reverse() {
 
 void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
                         CVarRef replacement /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::splice);
   if (!offset.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter offset must be an integer"));
@@ -318,7 +303,6 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
 }
 
 int64 c_Vector::t_linearsearch(CVarRef search_value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::linearsearch);
   int sz = m_size;
   for (int i = 0; i < sz; ++i) {
     if (search_value.same(tvAsCVarRef(&m_data[i]))) {
@@ -329,7 +313,6 @@ int64 c_Vector::t_linearsearch(CVarRef search_value) {
 }
 
 void c_Vector::t_shuffle() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::shuffle);
   for (int64 i = 1; i < m_size; ++i) {
     int64 j = f_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
@@ -337,7 +320,6 @@ void c_Vector::t_shuffle() {
 }
 
 Object c_Vector::t_getiterator() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::getiterator);
   c_VectorIterator* it = NEWOBJ(c_VectorIterator)();
   it->m_obj = this;
   it->m_pos = 0;
@@ -346,7 +328,6 @@ Object c_Vector::t_getiterator() {
 }
 
 Object c_Vector::t_put(CVarRef key, CVarRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::put);
   if (key.isInteger()) {
     TypedValue* tv = (TypedValue*)(&value);
     if (UNLIKELY(tv->m_type == KindOfRef)) {
@@ -360,12 +341,10 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
 }
 
 String c_Vector::t___tostring() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Vector, Vector::__tostring);
   return "Vector";
 }
 
 Variant c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
-  STATIC_METHOD_INJECTION_BUILTIN(Vector, Vector::fromarray);
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -393,7 +372,6 @@ Variant c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
 }
 
 Variant c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
-  STATIC_METHOD_INJECTION_BUILTIN(Vector, Vector::fromvector);
   if (!vec.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "vec must be an instance of Vector"));
@@ -420,7 +398,6 @@ Variant c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
 
 Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
                            CVarRef len /* = null */) {
-  STATIC_METHOD_INJECTION_BUILTIN(Vector, Vector::slice);
   if (!vec.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "vec must be an instance of Vector"));
@@ -562,7 +539,6 @@ void c_VectorIterator::t___construct() {
 }
 
 Variant c_VectorIterator::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(VectorIterator, VectorIterator::current);
   c_Vector* vec = m_obj.get();
   if (UNLIKELY(m_versionNumber != vec->getVersionNumber())) {
     throw_collection_modified();
@@ -576,7 +552,6 @@ Variant c_VectorIterator::t_current() {
 }
 
 Variant c_VectorIterator::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(VectorIterator, VectorIterator::key);
   c_Vector* vec = m_obj.get();
   if (!vec->contains(m_pos)) {
     throw_iterator_not_valid();
@@ -586,19 +561,16 @@ Variant c_VectorIterator::t_key() {
 }
 
 bool c_VectorIterator::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(VectorIterator, VectorIterator::valid);
   ASSERT(m_pos >= 0);
   c_Vector* vec = m_obj.get();
   return vec && (m_pos < vec->m_size);
 }
 
 void c_VectorIterator::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(VectorIterator, VectorIterator::next);
   m_pos++;
 }
 
 void c_VectorIterator::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(VectorIterator, VectorIterator::rewind);
   m_pos = 0;
 }
 
@@ -641,7 +613,6 @@ void c_Map::t___construct() {
 }
 
 Variant c_Map::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::__destruct);
   return null;
 }
 
@@ -674,7 +645,6 @@ ObjectData* c_Map::clone() {
 }
 
 Object c_Map::t_clear() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::clear);
   deleteBuckets();
   sweep();
   m_size = 0;
@@ -685,17 +655,14 @@ Object c_Map::t_clear() {
 }
 
 bool c_Map::t_isempty() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::isempty);
   return (m_size == 0);
 }
 
 int64 c_Map::t_count() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::count);
   return m_size;
 }
 
 Variant c_Map::t_at(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::at);
   if (key.isInteger()) {
     return at(key.toInt64());
   } else if (key.isString()) {
@@ -706,7 +673,6 @@ Variant c_Map::t_at(CVarRef key) {
 }
 
 Variant c_Map::t_get(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::get);
   if (key.isInteger()) {
     return get(key.toInt64());
   } else if (key.isString()) {
@@ -717,7 +683,6 @@ Variant c_Map::t_get(CVarRef key) {
 }
 
 Object c_Map::t_put(CVarRef key, CVarRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::put);
   TypedValue* val = (TypedValue*)(&value);
   if (UNLIKELY(val->m_type == KindOfRef)) {
     val = val->m_data.pref->tv();
@@ -733,7 +698,6 @@ Object c_Map::t_put(CVarRef key, CVarRef value) {
 }
 
 bool c_Map::t_contains(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::contains);
   DataType t = key.getType();
   if (t == KindOfInt64) {
     Bucket* p = find(key.toInt64());
@@ -748,7 +712,6 @@ bool c_Map::t_contains(CVarRef key) {
 }
 
 Object c_Map::t_remove(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::remove);
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -759,7 +722,6 @@ Object c_Map::t_remove(CVarRef key) {
 }
 
 Object c_Map::t_discard(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::discard);
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -770,7 +732,6 @@ Object c_Map::t_discard(CVarRef key) {
 }
 
 Array c_Map::t_toarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::toarray);
   ArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
@@ -786,12 +747,10 @@ Array c_Map::t_toarray() {
 }
 
 Array c_Map::t_copyasarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::copyasarray);
   return t_toarray();
 }
 
 Array c_Map::t_tokeysarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::tokeysarray);
   ArrayInit ai(m_size, ArrayInit::vectorInit);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
@@ -807,7 +766,6 @@ Array c_Map::t_tokeysarray() {
 }
 
 Object c_Map::t_values() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::values);
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
   int64 sz = m_size;
@@ -833,7 +791,6 @@ Object c_Map::t_values() {
 }
 
 Array c_Map::t_tovaluesarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::tovaluesarray);
   ArrayInit ai(m_size, ArrayInit::vectorInit);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
@@ -845,7 +802,6 @@ Array c_Map::t_tovaluesarray() {
 }
 
 Object c_Map::t_updatefromarray(CVarRef arr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::updatefromarray);
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected arr to be an array"));
@@ -870,7 +826,6 @@ Object c_Map::t_updatefromarray(CVarRef arr) {
 }
 
 Object c_Map::t_updatefromiterable(CVarRef it) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::updatefromiterable);
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -909,7 +864,6 @@ Object c_Map::t_updatefromiterable(CVarRef it) {
 }
 
 Object c_Map::t_differencebykey(CVarRef it) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::differencebykey);
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -945,7 +899,6 @@ Object c_Map::t_differencebykey(CVarRef it) {
 }
 
 Object c_Map::t_getiterator() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::getiterator);
   c_MapIterator* it = NEWOBJ(c_MapIterator)();
   it->m_obj = this;
   it->m_pos = iter_begin();
@@ -954,12 +907,10 @@ Object c_Map::t_getiterator() {
 }
 
 String c_Map::t___tostring() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Map, Map::__tostring);
   return "Map";
 }
 
 Variant c_Map::ti_fromarray(const char* cls, CVarRef arr) {
-  STATIC_METHOD_INJECTION_BUILTIN(Map, Map::fromarray);
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -986,7 +937,6 @@ Variant c_Map::ti_fromarray(const char* cls, CVarRef arr) {
 }
 
 Variant c_Map::ti_fromiterable(const char* cls, CVarRef it) {
-  STATIC_METHOD_INJECTION_BUILTIN(Map, Map::fromiterable);
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -1403,7 +1353,6 @@ void c_MapIterator::t___construct() {
 }
 
 Variant c_MapIterator::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MapIterator, MapIterator::current);
   c_Map* mp = m_obj.get();
   if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
     throw_collection_modified();
@@ -1417,7 +1366,6 @@ Variant c_MapIterator::t_current() {
 }
 
 Variant c_MapIterator::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MapIterator, MapIterator::key);
   c_Map* mp = m_obj.get();
   if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
     throw_collection_modified();
@@ -1431,12 +1379,10 @@ Variant c_MapIterator::t_key() {
 }
 
 bool c_MapIterator::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MapIterator, MapIterator::valid);
   return m_pos != 0;
 }
 
 void c_MapIterator::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MapIterator, MapIterator::next);
   c_Map* mp = m_obj.get();
   if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
     throw_collection_modified();
@@ -1446,7 +1392,6 @@ void c_MapIterator::t_next() {
 }
 
 void c_MapIterator::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(MapIterator, MapIterator::rewind);
   c_Map* mp = m_obj.get();
   if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
     throw_collection_modified();
@@ -1508,7 +1453,6 @@ void c_StableMap::t___construct() {
 }
 
 Variant c_StableMap::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::__destruct);
   return null;
 }
 
@@ -1555,7 +1499,6 @@ ObjectData* c_StableMap::clone() {
 }
 
 Object c_StableMap::t_clear() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::clear);
   deleteBuckets();
   sweep();
   m_pListHead = NULL;
@@ -1568,17 +1511,14 @@ Object c_StableMap::t_clear() {
 }
 
 bool c_StableMap::t_isempty() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::isempty);
   return (m_size == 0);
 }
 
 int64 c_StableMap::t_count() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::count);
   return m_size;
 }
 
 Variant c_StableMap::t_at(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::at);
   if (key.isInteger()) {
     return at(key.toInt64());
   } else if (key.isString()) {
@@ -1589,7 +1529,6 @@ Variant c_StableMap::t_at(CVarRef key) {
 }
 
 Variant c_StableMap::t_get(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::get);
   if (key.isInteger()) {
     return get(key.toInt64());
   } else if (key.isString()) {
@@ -1600,7 +1539,6 @@ Variant c_StableMap::t_get(CVarRef key) {
 }
 
 Object c_StableMap::t_put(CVarRef key, CVarRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::put);
   if (key.isInteger()) {
     update(key.toInt64(), value);
   } else if (key.isString()) {
@@ -1612,7 +1550,6 @@ Object c_StableMap::t_put(CVarRef key, CVarRef value) {
 }
 
 bool c_StableMap::t_contains(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::contains);
   DataType t = key.getType();
   if (t == KindOfInt64) {
     Bucket* p = find(key.toInt64());
@@ -1627,7 +1564,6 @@ bool c_StableMap::t_contains(CVarRef key) {
 }
 
 Object c_StableMap::t_remove(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::remove);
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -1638,7 +1574,6 @@ Object c_StableMap::t_remove(CVarRef key) {
 }
 
 Object c_StableMap::t_discard(CVarRef key) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::discard);
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -1649,7 +1584,6 @@ Object c_StableMap::t_discard(CVarRef key) {
 }
 
 Array c_StableMap::t_toarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::toarray);
   ArrayInit ai(m_size);
   Bucket* p = m_pListHead;
   while (p) {
@@ -1664,12 +1598,10 @@ Array c_StableMap::t_toarray() {
 }
 
 Array c_StableMap::t_copyasarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::copyasarray);
   return t_toarray();
 }
 
 Array c_StableMap::t_tokeysarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::tokeysarray);
   ArrayInit ai(m_size, ArrayInit::vectorInit);
   Bucket* p = m_pListHead;
   while (p) {
@@ -1684,7 +1616,6 @@ Array c_StableMap::t_tokeysarray() {
 }
 
 Object c_StableMap::t_values() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::values);
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
   int64 sz = m_size;
@@ -1704,7 +1635,6 @@ Object c_StableMap::t_values() {
 }
 
 Array c_StableMap::t_tovaluesarray() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::tovaluesarray);
   ArrayInit ai(m_size, ArrayInit::vectorInit);
   Bucket* p = m_pListHead;
   while (p) {
@@ -1715,7 +1645,6 @@ Array c_StableMap::t_tovaluesarray() {
 }
 
 Object c_StableMap::t_updatefromarray(CVarRef arr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::updatefromarray);
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -1736,7 +1665,6 @@ Object c_StableMap::t_updatefromarray(CVarRef arr) {
 }
 
 Object c_StableMap::t_updatefromiterable(CVarRef it) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::updatefromiterable);
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -1769,7 +1697,6 @@ Object c_StableMap::t_updatefromiterable(CVarRef it) {
 }
 
 Object c_StableMap::t_differencebykey(CVarRef it) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::differencebykey);
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -1803,7 +1730,6 @@ Object c_StableMap::t_differencebykey(CVarRef it) {
 }
 
 Object c_StableMap::t_getiterator() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::getiterator);
   c_StableMapIterator* it = NEWOBJ(c_StableMapIterator)();
   it->m_obj = this;
   it->m_pos = iter_begin();
@@ -1812,12 +1738,10 @@ Object c_StableMap::t_getiterator() {
 }
 
 String c_StableMap::t___tostring() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMap, StableMap::__tostring);
   return "StableMap";
 }
 
 Variant c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
-  STATIC_METHOD_INJECTION_BUILTIN(StableMap, StableMap::fromarray);
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -1841,7 +1765,6 @@ Variant c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
 }
 
 Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
-  STATIC_METHOD_INJECTION_BUILTIN(StableMap, StableMap::fromiterable);
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -2154,7 +2077,6 @@ void c_StableMapIterator::t___construct() {
 }
 
 Variant c_StableMapIterator::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMapIterator, StableMapIterator::current);
   c_StableMap* smp = m_obj.get();
   if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
     throw_collection_modified();
@@ -2168,7 +2090,6 @@ Variant c_StableMapIterator::t_current() {
 }
 
 Variant c_StableMapIterator::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMapIterator, StableMapIterator::key);
   c_StableMap* smp = m_obj.get();
   if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
     throw_collection_modified();
@@ -2182,12 +2103,10 @@ Variant c_StableMapIterator::t_key() {
 }
 
 bool c_StableMapIterator::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMapIterator, StableMapIterator::valid);
   return m_pos != 0;
 }
 
 void c_StableMapIterator::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMapIterator, StableMapIterator::next);
   c_StableMap* smp = m_obj.get();
   if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
     throw_collection_modified();
@@ -2197,7 +2116,6 @@ void c_StableMapIterator::t_next() {
 }
 
 void c_StableMapIterator::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(StableMapIterator, StableMapIterator::rewind);
   c_StableMap* smp = m_obj.get();
   if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
     throw_collection_modified();

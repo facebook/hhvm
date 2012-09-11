@@ -50,7 +50,7 @@ void init_thread_locals(void *arg /* = NULL */) {
   get_server_note();
   g_persistentObjects.getCheck();
   Sweepable::GetSweepData();
-  MemoryManager::TheMemoryManager().getCheck();
+  MemoryManager::TlsWrapper::getCheck();
   InitAllocatorThreadLocal();
   RefData::AllocatorType::getCheck();
   get_global_variables_check();

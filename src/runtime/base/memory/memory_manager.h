@@ -38,8 +38,15 @@ class SmartAllocatorImpl;
  *     completely out of MemoryManager's control.
  */
 class MemoryManager : boost::noncopyable {
+  static void* TlsInitSetup;
 public:
-  static ThreadLocalNoCheck<MemoryManager> &TheMemoryManager();
+  typedef ThreadLocalSingleton<MemoryManager> TlsWrapper;
+  static void Create(void* storage);
+  static void Delete(MemoryManager*);
+  static void OnThreadExit(MemoryManager*);
+  static MemoryManager* TheMemoryManager() {
+    return TlsWrapper::getNoCheck();
+  }
 
   MemoryManager();
 
@@ -206,8 +213,6 @@ private:
 #ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
 #endif
-
-  static DECLARE_THREAD_LOCAL_NO_CHECK(MemoryManager, s_singleton);
 
   bool m_enabled;
 

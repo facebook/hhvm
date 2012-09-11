@@ -1250,7 +1250,7 @@ ServerStatsHelper::~ServerStatsHelper() {
     logTime("page.cpu.", m_cpuStart, cpuEnd);
 
     if (m_track & TRACK_MEMORY) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
+      MemoryManager *mm = MemoryManager::TheMemoryManager();
       int64 mem = mm->getStats(true).peakUsage;
       ServerStats::Log(string("mem.") + m_section, mem);
     }

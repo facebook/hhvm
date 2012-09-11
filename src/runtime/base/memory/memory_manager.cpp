@@ -118,10 +118,30 @@ static inline void threadStats(uint64*& allocated, uint64*& deallocated,
 }
 #endif
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(MemoryManager, MemoryManager::s_singleton);
+static void* MemoryManagerInit() {
+  // We store the free list pointers right at the start of each object,
+  // overlapping SmartHeader.data, and we also clobber _count as a
+  // free-object flag when the object is deallocated (if hhvm).
+  // This assert just makes sure they don't overflow.
+  static_assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
+                SmartAllocatorImpl::MinItemSize,
+                "MinItemSize is too small");
+  MemoryManager::TlsWrapper tls;
+  return (void*)tls.getNoCheck;
+}
 
-ThreadLocalNoCheck<MemoryManager> &MemoryManager::TheMemoryManager() {
-  return s_singleton;
+void* MemoryManager::TlsInitSetup = MemoryManagerInit();
+
+void MemoryManager::Create(void* storage) {
+  new (storage) MemoryManager();
+}
+
+void MemoryManager::Delete(MemoryManager* mm) {
+  mm->~MemoryManager();
+}
+
+void MemoryManager::OnThreadExit(MemoryManager* mm) {
+  mm->~MemoryManager();
 }
 
 MemoryManager::AllocIterator::AllocIterator(const MemoryManager* mman)

@@ -84,8 +84,7 @@ static int findIndex(const vector<char *> &blocks,
 
 SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
                                        int itemSize, int flag)
-  : m_stats(NULL)
-  , m_itemSize(itemSizeRoundup(itemSize))
+  : m_itemSize(itemSizeRoundup(itemSize))
   , m_row(0)
   , m_nameEnum(Name(nameEnum))
   , m_itemCount(itemCount)
@@ -126,9 +125,6 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
   ASSERT(itemCount);
   ASSERT(itemSize);
 
-  MemoryManager* mm = MemoryManager::TheMemoryManager().getNoCheck();
-  m_stats = &mm->getStats();
-
   m_colMax = m_itemSize * m_itemCount;
   char *p = (char *)malloc(m_colMax);
   m_next = p;
@@ -136,12 +132,12 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
   m_blocks.push_back(p);
   m_blockIndex[((int64)p) / m_colMax] = 0;
   // Cancel out jemalloc's accounting for this slab.
-  JEMALLOC_STATS_ADJUST(m_stats, m_colMax);
-  m_stats->alloc += m_colMax;
-  if (m_stats->alloc > m_stats->peakAlloc) {
-    m_stats->peakAlloc = m_stats->alloc;
+  MemoryUsageStats* stats = &MemoryManager::TheMemoryManager()->getStats();
+  JEMALLOC_STATS_ADJUST(stats, m_colMax);
+  stats->alloc += m_colMax;
+  if (stats->alloc > stats->peakAlloc) {
+    stats->peakAlloc = stats->alloc;
   }
-
   if (nameEnum < 0) {
     m_name = "(unknown)";
   } else {
@@ -153,8 +149,7 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
     ASSERT(nameEnum < (int)(sizeof(TypeNames)/sizeof(TypeNames[0])));
     m_name = TypeNames[nameEnum];
   }
-
-  mm->add(this);
+  MemoryManager::TheMemoryManager()->add(this);
 }
 
 SmartAllocatorImpl::~SmartAllocatorImpl() {
@@ -169,9 +164,9 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 
 HOT_FUNC
 void *SmartAllocatorImpl::alloc(size_t nbytes) {
-  ASSERT(m_stats && nbytes == size_t(m_itemSize));
+  ASSERT(nbytes == size_t(m_itemSize));
   ASSERT(m_next && m_next <= m_limit);
-  MemoryUsageStats* stats = m_stats;
+  MemoryUsageStats* stats = &MemoryManager::TheMemoryManager()->getStats();
   // Just update the usage, while the peakUsage is maintained by
   // FrameInjection.
   int64 usage = stats->usage + nbytes;
@@ -205,12 +200,12 @@ void *SmartAllocatorImpl::allocHelper() {
     m_blocks.push_back(p);
     m_blockIndex[((int64)p) / m_colMax] = m_blocks.size() - 1;
     // Cancel out jemalloc's accounting for this slab.
-    JEMALLOC_STATS_ADJUST(m_stats, size);
+    MemoryUsageStats* stats = &MemoryManager::TheMemoryManager()->getStats();
+    JEMALLOC_STATS_ADJUST(stats, size);
     m_allocatedBlocks = m_multiplier - 1;
-
-    m_stats->alloc += size;
-    if (m_stats->alloc > m_stats->peakAlloc) {
-      m_stats->peakAlloc = m_stats->alloc;
+    stats->alloc += size;
+    if (stats->alloc > stats->peakAlloc) {
+      stats->peakAlloc = stats->alloc;
     }
   } else {
     // still have some blocks left from the last batch
@@ -231,7 +226,7 @@ void *SmartAllocatorImpl::allocHelper() {
 // cold-path helper function, only called when request memory overflow
 // is likely.
 void SmartAllocatorImpl::statsHelper() {
-  ASSERT(m_stats->maxBytes > 0);
+  ASSERT(MemoryManager::TheMemoryManager()->getStats().maxBytes > 0);
   MemoryManager::TheMemoryManager()->refreshStats();
 }
 

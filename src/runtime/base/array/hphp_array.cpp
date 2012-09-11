@@ -172,15 +172,13 @@ static inline size_t computeDataSize(uint32 tableMask) {
 }
 
 static inline void adjustUsageStats(size_t delta, bool refresh = false) {
-  ThreadLocalNoCheck<MemoryManager>& mm = MemoryManager::TheMemoryManager();
-  if (LIKELY(!mm.isNull())) {
-    MemoryUsageStats& stats = mm->getStats();
-    stats.alloc += delta;
-    stats.usage += delta;
-    JEMALLOC_STATS_ADJUST(&stats, delta);
-    if (refresh) {
-      mm->refreshStats();
-    }
+  MemoryManager* mm = MemoryManager::TheMemoryManager();
+  MemoryUsageStats& stats = mm->getStats();
+  stats.alloc += delta;
+  stats.usage += delta;
+  JEMALLOC_STATS_ADJUST(&stats, delta);
+  if (refresh) {
+    mm->refreshStats();
   }
 }
 

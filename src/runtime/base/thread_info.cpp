@@ -48,7 +48,7 @@ ThreadInfo::ThreadInfo()
       ASSERT(it->second() != NULL);
     }
   }
-  m_mm = MemoryManager::TheMemoryManager().getNoCheck();
+  m_mm = MemoryManager::TheMemoryManager();
 
   m_profiler = NULL;
   m_pendingException = false;

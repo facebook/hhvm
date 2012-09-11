@@ -163,13 +163,6 @@ typedef boost::dynamic_bitset<unsigned long long> FreeMap;
 class GarbageList {
 public:
   GarbageList() : ptr(NULL) {
-    // We store the free list pointers right at the start of each
-    // object.  The VM also stores a flag into the _count field to
-    // know the object is deallocated---this assert just makes sure
-    // they don't overlap.
-    static_assert((FAST_REFCOUNT_OFFSET >= sizeof(void*)),
-                  "FAST_REFCOUNT_OFFSET has to be larger than "
-                  "sizeof(void*) to work correctly with GarbageList");
   }
 
   // Pops an item, or returns NULL
@@ -297,11 +290,9 @@ public:
     ASSERT(memset(obj, 0x6a, m_itemSize));
     m_freelist.push(obj);
     if (hhvm) {
-      int tomb = RefCountTombstoneValue;
-      memcpy((char*)obj + FAST_REFCOUNT_OFFSET, &tomb, sizeof tomb);
+      *((int*)(uintptr_t(obj) + FAST_REFCOUNT_OFFSET)) = RefCountTombstoneValue;
     }
-    ASSERT(m_stats);
-    m_stats->usage -= m_itemSize;
+    MemoryManager::TheMemoryManager()->getStats().usage -= m_itemSize;
   }
 
   /*
@@ -328,8 +319,6 @@ private:
   bool assertValidHelper(void *obj) const;
 
   // keep these frequently used fields together.
-protected:
-  MemoryUsageStats *m_stats;
 private:
   GarbageList m_freelist;
   char* m_next;

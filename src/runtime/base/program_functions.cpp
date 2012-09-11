@@ -1202,7 +1202,7 @@ static bool hphp_warmup(ExecutionContext *context,
   error = false;
   std::string errorMsg;
 
-  MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
   if (mm->isEnabled()) {
     ServerStatsHelper ssh("reqinit");
     try {
@@ -1248,7 +1248,7 @@ void hphp_thread_init() {
 }
 
 bool hphp_is_warmup_enabled() {
-  MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
   return mm->isEnabled();
 }
 
@@ -1343,7 +1343,7 @@ void hphp_session_exit() {
 
   ThreadInfo::s_threadInfo->clearPendingException();
 
-  MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
+  MemoryManager *mm = MemoryManager::TheMemoryManager();
   if (RuntimeOption::CheckMemory) {
     mm->checkMemory(false);
   }

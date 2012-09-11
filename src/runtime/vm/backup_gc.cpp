@@ -93,7 +93,7 @@ int32_t* count_addr(void* obj) {
 bool is_smart_allocated(ObjectData* obj) {
   // XXX ObjectData is allocated from several smart allocators by
   // size, so currently we have to check them all.
-  MemoryManager::AllocIterator aIter(&*MemoryManager::TheMemoryManager());
+  MemoryManager::AllocIterator aIter(MemoryManager::TheMemoryManager());
   while (SmartAllocatorImpl* sa = aIter.current()) {
     if (sa->getAllocatorType() == SmartAllocatorImpl::ObjectData) {
       if (sa->isFromThisAllocator(obj)) return true;
@@ -130,7 +130,7 @@ void walk_allocator(const Visitor& visit, SmartAllocatorImpl* sa) {
  */
 template<class Visitor>
 void walk_smart_heap(const Visitor& visit) {
-  MemoryManager::AllocIterator aIter(&*MemoryManager::TheMemoryManager());
+  MemoryManager::AllocIterator aIter(MemoryManager::TheMemoryManager());
   while (SmartAllocatorImpl* sa = aIter.current()) {
     switch (sa->getAllocatorType()) {
     case SmartAllocatorImpl::HphpArray:

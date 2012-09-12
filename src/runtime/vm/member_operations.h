@@ -29,9 +29,15 @@
 namespace HPHP {
 namespace VM {
 
-// When MoreWarnings is set to true, the VM will match Zend on
-// warnings for SetOpM and CGetG
-static const bool MoreWarnings = false;
+// When MoreWarnings is set to true, the VM will raise more warnings
+// on SetOpM, IncDecM and CGetG, intended to match Zend.
+const bool MoreWarnings =
+#ifdef HHVM_MORE_WARNINGS
+  true
+#else
+  false
+#endif
+  ;
 
 void objArrayAccess(TypedValue* base);
 TypedValue* objOffsetGet(TypedValue& tvRef, TypedValue* base,

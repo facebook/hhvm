@@ -167,7 +167,16 @@ enum MInstrAttr {
   MIA_final_get    = 0x20,
   MIA_base         = MIA_warn | MIA_define,
   MIA_intermediate = MIA_warn | MIA_define | MIA_reffy | MIA_unset,
-  MIA_final        = MIA_new | MIA_final_get
+  MIA_final        = MIA_new | MIA_final_get,
+
+  // Some warnings may conditionally be built for Zend compatibility,
+  // but are off by default.
+  MIA_more_warn =
+#ifdef HHVM_MORE_WARNINGS
+    MIA_warn
+#else
+    MIA_none
+#endif
 };
 
 // MII(instr,  * in *M
@@ -183,9 +192,9 @@ enum MInstrAttr {
   MII(Isset,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
   MII(Empty,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
   MII(Set,    MIA_define|MIA_new,                D,  D, 1, SetNewElem) \
-  MII(SetOp,  MIA_warn|MIA_define|MIA_new|MIA_final_get, \
+  MII(SetOp,  MIA_more_warn|MIA_define|MIA_new|MIA_final_get, \
                                                 WD, WD, 1, SetOpNewElem) \
-  MII(IncDec, MIA_warn|MIA_define|MIA_new|MIA_final_get, \
+  MII(IncDec, MIA_more_warn|MIA_define|MIA_new|MIA_final_get, \
                                                 WD, WD, 0, IncDecNewElem) \
   MII(Bind,   MIA_define|MIA_reffy|MIA_new|MIA_final_get, \
                                                  D,  D, 1, BindNewElem) \

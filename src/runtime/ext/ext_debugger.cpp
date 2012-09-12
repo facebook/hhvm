@@ -602,6 +602,10 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
 
 void c_DebuggerClient::sweep() {
   if (m_client) {
+    // Note: it's important that resetSmartAllocatedMembers happens
+    // before clearCachedLocal(), because the smart allocated pointers
+    // are already invalid.
+    m_client->resetSmartAllocatedMembers();
     m_client->clearCachedLocal();
     m_client->apiFree();
   }

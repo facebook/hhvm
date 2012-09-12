@@ -508,6 +508,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 }
 
+namespace Eval { void shutdown_hphpd(); }
+
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
@@ -524,6 +526,8 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
     ti->m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
   }
+
+  Eval::shutdown_hphpd();
 }
 
 static void pagein_self(void) {

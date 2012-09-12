@@ -29,6 +29,7 @@
 #include <util/logger.h>
 #include <util/process.h>
 #include <boost/format.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #define USE_VARARGS
 #define PREFER_STDARG
@@ -42,13 +43,32 @@ using namespace HPHP::Util::TextArt;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+static boost::scoped_ptr<DebuggerClient> debugger_client;
+
 static DebuggerClient& getStaticDebuggerClient() {
-  // DebuggerClient acquires global mutexes in its constructor, so we allocate
-  // s_debugger_client lazily to ensure that all of the global mutexes have
-  // been initialized before we enter the constructor.
-  static DebuggerClient s_debugger_client;
-  return s_debugger_client;
+  /*
+   * DebuggerClient acquires global mutexes in its constructor, so we
+   * allocate s_debugger_client lazily to ensure that all of the
+   * global mutexes have been initialized before we enter the
+   * constructor.
+   *
+   * This initialization is thread-safe because program_functions.cpp
+   * must call Debugger::StartClient (which ends up here) before any
+   * additional threads are created.
+   */
+  if (!debugger_client) {
+    debugger_client.reset(new DebuggerClient);
+  }
+  return *debugger_client;
 }
+
+void shutdown_hphpd() {
+  if (debugger_client) {
+    debugger_client->resetSmartAllocatedMembers();
+    debugger_client.reset();
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // readline setups
 
@@ -2081,6 +2101,14 @@ bool DebuggerClient::apiGrab() {
 void DebuggerClient::apiFree() {
   Lock l(m_inApiUseLck);
   m_inApiUse = false;
+}
+
+void DebuggerClient::resetSmartAllocatedMembers() {
+  // Essentially sets these to null: so it's safe to run their
+  // destructors at sweep time or after the SmartAllocators are torn
+  // down.
+  new (&m_stacktrace) Array();
+  new (&m_otValues) Array();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

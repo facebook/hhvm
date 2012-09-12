@@ -305,6 +305,7 @@ public:
   }
   bool apiGrab();
   void apiFree();
+  void resetSmartAllocatedMembers();
   const std::string& getNameApi() const { return m_nameForApi; }
 
   /**
@@ -338,6 +339,13 @@ private:
     Running,
     Stopped
   };
+
+  /*
+   * NOTE: be careful about the use of smart-allocated data members
+   * here.  They need to be kept in sync with
+   * resetSmartAllocatedMembers() or you'll break the php-api to the
+   * debugger and shutdown in the CLI client.
+   */
 
   std::string m_configFileName;
   Hdf m_config;

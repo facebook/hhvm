@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/variable_serializer.h>
 #include <runtime/ext/ext_collection.h>
 #include <runtime/ext/ext_array.h>
 #include <runtime/ext/ext_math.h>
@@ -78,6 +79,15 @@ void c_Vector::resize(int64 sz, TypedValue* val) {
     tvDup(val, &m_data[i]);
   }
   m_size = sz;
+}
+
+void c_Vector::reserve(int64 sz) {
+  ++m_versionNumber;
+  if (sz <= 0) return;
+  if (m_capacity < sz) {
+    m_capacity = sz;
+    m_data = (TypedValue*)realloc(m_data, m_capacity * sizeof(TypedValue));
+  }
 }
 
 ObjectData* c_Vector::clone() {
@@ -1162,15 +1172,23 @@ void c_Map::erase(Bucket* p) {
 }
 
 void c_Map::resize() {
+  reserve(m_size);
+}
+
+void c_Map::reserve(int64 sz) {
+  ++m_versionNumber;
+  if (sz < 2) {
+    if (sz <= 0) return;
+    sz = 2;
+  }
   if (m_nLastSlot == 0) {
     ASSERT(m_data == (Bucket*)emptyMapSlot);
-    m_nLastSlot = 3;
+    m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
     m_data = (Bucket*)calloc(numSlots(), sizeof(Bucket));
     return;
   }
   uint oldNumSlots = numSlots();
-  ASSERT(m_size > 0);
-  m_nLastSlot = Util::roundUpToPowerOfTwo(m_size << 1) - 1;
+  m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
   m_load = m_size;
   Bucket* oldBuckets = m_data;
   m_data = (Bucket*)calloc(numSlots(), sizeof(Bucket));
@@ -1913,12 +1931,24 @@ void c_StableMap::erase(Bucket** prev) {
 }
 
 void c_StableMap::resize() {
+  reserve(m_size);
+}
+
+void c_StableMap::reserve(int64 sz) {
+  ++m_versionNumber;
+  if (sz < 4) {
+    if (sz <= 0) return;
+    sz = 4;
+  } else {
+    sz = Util::roundUpToPowerOfTwo(sz);
+  }
   if (m_nTableSize == 0) {
-    m_nTableSize = 4;
+    m_nTableSize = sz;
     m_nTableMask = m_nTableSize - 1;
     m_arBuckets = (Bucket**)calloc(m_nTableSize, sizeof(Bucket*));
+    return;
   }
-  m_nTableSize <<= 1;
+  m_nTableSize = sz;
   m_nTableMask = m_nTableSize - 1;
   free(m_arBuckets);
   m_arBuckets = (Bucket**)calloc(m_nTableSize, sizeof(Bucket*));
@@ -2155,6 +2185,64 @@ COLLECTION_MAGIC_METHODS(Map)
 COLLECTION_MAGIC_METHODS(StableMap)
 
 #undef COLLECTION_MAGIC_METHODS
+
+void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
+  ASSERT(obj->isCollection());
+  int64 sz = collectionSize(obj);
+  if (obj->getCollectionType() == Collection::VectorType) {
+    serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
+    serializer->writeArrayHeader(sz, true);
+    if (serializer->getType() == VariableSerializer::Serialize ||
+        serializer->getType() == VariableSerializer::APCSerialize ||
+        serializer->getType() == VariableSerializer::DebuggerSerialize) {
+      // For the 'V' serialization format, we don't print out keys
+      // for Serialize, APCSerialize, DebuggerSerialize
+      for (ArrayIter iter(obj); iter; ++iter) {
+        serializer->writeArrayValue(iter.second());
+      }
+    } else {
+      for (ArrayIter iter(obj); iter; ++iter) {
+        serializer->writeArrayKey(iter.first());
+        serializer->writeArrayValue(iter.second());
+      }
+    }
+    serializer->writeArrayFooter();
+  } else {
+    ASSERT(obj->getCollectionType() == Collection::MapType ||
+           obj->getCollectionType() == Collection::StableMapType);
+    serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'K');
+    serializer->writeArrayHeader(sz, false);
+    for (ArrayIter iter(obj); iter; ++iter) {
+      serializer->writeArrayKey(iter.first());
+      serializer->writeArrayValue(iter.second());
+    }
+    serializer->writeArrayFooter();
+  }
+}
+
+void collectionUnserialize(ObjectData* obj,
+                           VariableUnserializer* uns,
+                           int64 sz,
+                           char type) { 
+  ASSERT(obj->isCollection());
+  collectionReserve(obj, sz);
+  if (type == 'V') {
+    for (int64 i = 0; i < sz; ++i) {
+      Variant v;
+      v.unserialize(uns);
+      collectionOffsetAppend(obj, v);
+    }
+  } else {
+    ASSERT(type == 'K');
+    for (int64 i = 0; i < sz; ++i) {
+      Variant k;
+      k.unserialize(uns);
+      Variant v;
+      v.unserialize(uns);
+      collectionOffsetSet(obj, k, v);
+    }
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

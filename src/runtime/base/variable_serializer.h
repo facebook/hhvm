@@ -86,10 +86,10 @@ public:
   void writeOverflow(void* ptr, bool isObject = false);
   void writeRefCount(); // for DebugDump only
 
-  void writeArrayHeader(const ArrayData *arr, int size);
-  void writeArrayKey(const ArrayData *arr, Variant key);
-  void writeArrayValue(const ArrayData *arr, CVarRef value);
-  void writeArrayFooter(const ArrayData *arr);
+  void writeArrayHeader(int size, bool isVectorData);
+  void writeArrayKey(Variant key);
+  void writeArrayValue(CVarRef value);
+  void writeArrayFooter();
   void writeSerializableObject(CStrRef clsname, CStrRef serialized);
 
   /**
@@ -101,7 +101,7 @@ public:
   void incMaxCount() { m_maxCount++; }
   bool incNestedLevel(void *ptr, bool isObject = false);
   void decNestedLevel(void *ptr);
-  void setObjectInfo(CStrRef objClass, int objId);
+  void setObjectInfo(CStrRef objClass, int objId, char objCode);
   void setResourceInfo(CStrRef rsrcName, int rsrcId);
   void getResourceInfo(String &rsrcName, int &rsrcId);
   Type getType() const { return m_type; }
@@ -116,8 +116,9 @@ private:
   bool m_referenced;             // mark current array element as reference
   int m_refCount;                // current variable's reference count
   String m_objClass;             // for object serialization
-  String m_rsrcName;             // for resource serialization
   int m_objId;                   // for object serialization
+  char m_objCode;                // for object serialization
+  String m_rsrcName;             // for resource serialization
   int m_rsrcId;                  // for resource serialization
   int m_maxCount;                // for max recursive levels
   int m_levelDebugger;           // keep track of levels for DebuggerSerialize

@@ -1569,6 +1569,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   if (LIKELY(serializer->getType() == VariableSerializer::Serialize ||
              serializer->getType() == VariableSerializer::APCSerialize)) {
     if (o_instanceof("Serializable")) {
+      ASSERT(!isCollection());
       Variant ret =
         const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
       if (ret.isString()) {
@@ -1585,6 +1586,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::DebuggerSerialize)) {
     if (o_instanceof("Serializable")) {
+      ASSERT(!isCollection());
       try {
         Variant ret =
           const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
@@ -1614,6 +1616,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
     }
   }
   if (UNLIKELY(handleSleep)) {
+    ASSERT(!isCollection());
     if (ret.isArray()) {
       const ClassInfo *cls = ClassInfo::FindClass(o_getClassName());
       Array wanted = Array::Create();
@@ -1634,7 +1637,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
           wanted.set(name, null);
         }
       }
-      serializer->setObjectInfo(o_getClassName(), o_getId());
+      serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
       wanted.serialize(serializer, true);
     } else {
       if (o_instanceof("Closure")) {
@@ -1665,8 +1668,12 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
       }
     }
   } else {
-    serializer->setObjectInfo(o_getClassName(), o_getId());
-    o_toArray().serialize(serializer, true);
+    if (isCollection()) {
+      collectionSerialize(const_cast<ObjectData*>(this), serializer);
+    } else {
+      serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
+      o_toArray().serialize(serializer, true);
+    }
   }
 }
 

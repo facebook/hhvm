@@ -166,6 +166,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: bool contains(int64 key) {
     return ((unsigned long long)key < (unsigned long long)m_size);
   }
+  public: void reserve(int64 sz);
   public: int getVersionNumber() {
     return m_versionNumber;
   }
@@ -354,6 +355,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
+  public: void reserve(int64 sz);
   public: int getVersionNumber() {
     return m_versionNumber;
   }
@@ -672,6 +674,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
+  public: void reserve(int64 sz);
   public: int getVersionNumber() {
     return m_versionNumber;
   }
@@ -1144,6 +1147,39 @@ inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
   }
   collectionAppend(obj, tv);
 }
+
+inline int64 collectionSize(ObjectData* obj) {
+  int ct = obj->getCollectionType();
+  if (ct == Collection::VectorType) {
+    return static_cast<c_Vector*>(obj)->t_count();
+  } else if (ct == Collection::MapType) {
+    return static_cast<c_Map*>(obj)->t_count();
+  } else if (ct == Collection::StableMapType) {
+    return static_cast<c_StableMap*>(obj)->t_count();
+  } else {
+    ASSERT(false);
+    return 0;
+  }
+}
+
+inline void collectionReserve(ObjectData* obj, int64 sz) {
+  int ct = obj->getCollectionType();
+  if (ct == Collection::VectorType) {
+    static_cast<c_Vector*>(obj)->reserve(sz);
+  } else if (ct == Collection::MapType) {
+    static_cast<c_Map*>(obj)->reserve(sz);
+  } else if (ct == Collection::StableMapType) {
+    static_cast<c_StableMap*>(obj)->reserve(sz);
+  } else {
+    ASSERT(false);
+  }
+}
+
+void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
+void collectionUnserialize(ObjectData* obj,
+                           VariableUnserializer* uns,
+                           int64 sz,
+                           char type);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

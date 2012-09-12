@@ -120,10 +120,10 @@ class ObjectData : public CountableNF {
   HPHP::VM::Class* instanceof(const HPHP::VM::PreClass* pc) const;
   bool instanceof(const HPHP::VM::Class* c) const;
 
-  bool isCollection() {
+  bool isCollection() const {
     return getCollectionType() != Collection::InvalidType;
   }
-  int getCollectionType() {
+  int getCollectionType() const {
     // Return the upper 3 bits of o_attribute
     return (int)(o_attribute >> 13) & 7;
   }

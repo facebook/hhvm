@@ -27,6 +27,7 @@
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/ext/ext_json.h>
+#include <runtime/ext/ext_collection.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,9 +51,12 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   }
 }
 
-void VariableSerializer::setObjectInfo(CStrRef objClass, int objId) {
+void VariableSerializer::setObjectInfo(CStrRef objClass, int objId,
+                                       char objCode) {
+  ASSERT(objCode == 'O' || objCode == 'V' || objCode == 'K');
   m_objClass = objClass;
   m_objId = objId;
+  m_objCode = objCode;
 }
 
 void VariableSerializer::getResourceInfo(String &rsrcName, int &rsrcId) {
@@ -342,6 +346,7 @@ void VariableSerializer::write(CObjRef v) {
   if (!v.isNull() && m_type == JSON) {
 
     if (v.instanceof(s_JsonSerializable)) {
+      ASSERT(!v->isCollection());
       Variant ret = v->o_invoke(s_jsonSerialize, null_array, -1);
       // for non objects or when $this is returned
       if (!ret.isObject() || (ret.isObject() && !ret.same(v))) {
@@ -349,15 +354,18 @@ void VariableSerializer::write(CObjRef v) {
         return;
       }
     }
-
     if (incNestedLevel(v.get(), true)) {
       writeOverflow(v.get(), true);
     } else {
-      Array props(ArrayData::Create());
-      ClassInfo::GetArray(v.get(), v->o_getClassPropTable(), props,
-                          ClassInfo::GetArrayPublic);
-      setObjectInfo(v->o_getClassName(), v->o_getId());
-      props.serialize(this);
+      if (v->isCollection()) {
+        collectionSerialize(v.get(), this);
+      } else {
+        Array props(ArrayData::Create());
+        ClassInfo::GetArray(v.get(), v->o_getClassPropTable(), props,
+                            ClassInfo::GetArrayPublic);
+        setObjectInfo(v->o_getClassName(), v->o_getId(), 'O');
+        props.serialize(this);
+      }
     }
     decNestedLevel(v.get());
   } else {
@@ -472,7 +480,7 @@ void VariableSerializer::writeRefCount() {
   }
 }
 
-void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
+void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
   m_arrayInfos.push_back(ArrayInfo());
   ArrayInfo &info = m_arrayInfos.back();
   info.first_element = true;
@@ -547,7 +555,8 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   case APCSerialize:
   case DebuggerSerialize:
     if (!m_objClass.empty()) {
-      m_buf->append("O:");
+      m_buf->append(m_objCode); 
+      m_buf->append(":");
       m_buf->append((int)m_objClass.size());
       m_buf->append(":\"");
       m_buf->append(m_objClass);
@@ -562,7 +571,9 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
     break;
   case JSON:
   case DebuggerDump:
-    info.is_vector = m_objClass.empty() && arr->isVectorData();
+    info.is_vector =
+      (m_objClass.empty() || m_objCode == 'V' || m_objCode == 'K') &&
+      isVectorData;
     if (info.is_vector && m_type == JSON) {
       info.is_vector = (m_option & k_JSON_FORCE_OBJECT)
                        ? false : info.is_vector;
@@ -620,7 +631,7 @@ void VariableSerializer::writePropertyKey(CStrRef prop) {
 }
 
 /* key MUST be a non-reference string or int */
-void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
+void VariableSerializer::writeArrayKey(Variant key) {
   Variant::TypedValueAccessor tva = key.getTypedAccessor();
   bool skey = Variant::IsString(tva);
   if (skey && m_type == APCSerialize) {
@@ -705,7 +716,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
   }
 }
 
-void VariableSerializer::writeArrayValue(const ArrayData *arr, CVarRef value) {
+void VariableSerializer::writeArrayValue(CVarRef value) {
   // Do not count referenced values after the first
   if ((m_type == Serialize || m_type == APCSerialize ||
        m_type == DebuggerSerialize) &&
@@ -730,7 +741,7 @@ void VariableSerializer::writeArrayValue(const ArrayData *arr, CVarRef value) {
   info.first_element = false;
 }
 
-void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
+void VariableSerializer::writeArrayFooter() {
   ArrayInfo &info = m_arrayInfos.back();
 
   m_indent -= info.indent_delta;

@@ -3729,6 +3729,7 @@ static void unserializeProp(VariableUnserializer *uns,
   void *addr = obj->o_realPropTyped(key, flags, context, &type);
   if (addr) {
     if (UNLIKELY(type != KindOfUnknown)) {
+      ASSERT(uns->peek() != 'V' && uns->peek() != 'K');
       // This is a property which got type inferred.
       if (UNLIKELY(uns->peek() == 'O')) {
         // an object can be referred to by an 'r', so we
@@ -3861,6 +3862,8 @@ void Variant::unserialize(VariableUnserializer *uns) {
     }
     break;
   case 'O':
+  case 'V':
+  case 'K':
     {
       String clsName;
       clsName.unserialize(uns);
@@ -3889,41 +3892,60 @@ void Variant::unserialize(VariableUnserializer *uns) {
         throw Exception("Expected '{' but got '%c'", sep);
       }
       if (size > 0) {
-        /*
-          Count backwards so that i is the number of properties
-          remaining (to be used as an estimate for the total number
-          of dynamic properties when we see the first dynamic prop).
-          see getVariantPtr
-        */
-        for (int64 i = size; i--; ) {
-          String key = uns->unserializeKey().toString();
-          int ksize = key.size();
-          const char *kdata = key.data();
-          int subLen = 0;
-          if (kdata[0] == '\0') {
-            if (UNLIKELY(!ksize)) {
-              throw EmptyObjectPropertyException();
+        if (type == 'O') {
+          // Collection are not allowed 
+          if (obj->isCollection()) {
+            if (size > 0) {
+              throw Exception("%s does not support the 'O' serialization "
+                              "format", clsName.data());
             }
-            // private or protected
-            subLen = strlen(kdata + 1) + 2;
-            if (UNLIKELY(subLen >= ksize)) {
-              if (subLen == ksize) {
-                throw EmptyObjectPropertyException();
-              } else {
-                throw Exception("Mangled private object property");
-              }
-            }
-            String k(kdata + subLen, ksize - subLen, AttachLiteral);
-            if (kdata[1] == '*') {
-              unserializeProp(uns, obj.get(), k, clsName, key, i + 1);
-            } else {
-              unserializeProp(uns, obj.get(), k,
-                              String(kdata + 1, subLen - 2, AttachLiteral),
-                              key, i + 1);
-            }
-          } else {
-            unserializeProp(uns, obj.get(), key, empty_string, key, i + 1);
+            // Be lax and tolerate the 'O' serialization format for collection
+            // classes if there are 0 properties.
+            raise_warning("%s does not support the 'O' serialization "
+                          "format", clsName.data());
           }
+          /*
+            Count backwards so that i is the number of properties
+            remaining (to be used as an estimate for the total number
+            of dynamic properties when we see the first dynamic prop).
+            see getVariantPtr
+          */
+          for (int64 i = size; i--; ) {
+            String key = uns->unserializeKey().toString();
+            int ksize = key.size();
+            const char *kdata = key.data();
+            int subLen = 0;
+            if (kdata[0] == '\0') {
+              if (UNLIKELY(!ksize)) {
+                throw EmptyObjectPropertyException();
+              }
+              // private or protected
+              subLen = strlen(kdata + 1) + 2;
+              if (UNLIKELY(subLen >= ksize)) {
+                if (subLen == ksize) {
+                  throw EmptyObjectPropertyException();
+                } else {
+                  throw Exception("Mangled private object property");
+                }
+              }
+              String k(kdata + subLen, ksize - subLen, AttachLiteral);
+              if (kdata[1] == '*') {
+                unserializeProp(uns, obj.get(), k, clsName, key, i + 1);
+              } else {
+                unserializeProp(uns, obj.get(), k,
+                                String(kdata + 1, subLen - 2, AttachLiteral),
+                                key, i + 1);
+              }
+            } else {
+              unserializeProp(uns, obj.get(), key, empty_string, key, i + 1);
+            }
+          }
+        } else {
+          ASSERT(type == 'V' || type == 'K');
+          if (!obj->isCollection()) {
+            throw Exception("%s is not a collection class", clsName.data());
+          }
+          collectionUnserialize(obj.get(), uns, size, type);
         }
       }
       sep = uns->readChar();

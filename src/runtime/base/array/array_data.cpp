@@ -413,19 +413,19 @@ ssize_t ArrayData::iter_rewind(ssize_t prev) const {
 // helpers
 
 void ArrayData::serializeImpl(VariableSerializer *serializer) const {
-  serializer->writeArrayHeader(this, size());
+  serializer->writeArrayHeader(size(), isVectorData());
   for (ArrayIter iter(this); iter; ++iter) {
-    serializer->writeArrayKey(this, iter.first());
-    serializer->writeArrayValue(this, iter.secondRef());
+    serializer->writeArrayKey(iter.first());
+    serializer->writeArrayValue(iter.secondRef());
   }
-  serializer->writeArrayFooter(this);
+  serializer->writeArrayFooter();
 }
 
 void ArrayData::serialize(VariableSerializer *serializer,
                           bool skipNestCheck /* = false */) const {
   if (size() == 0) {
-    serializer->writeArrayHeader(this, 0);
-    serializer->writeArrayFooter(this);
+    serializer->writeArrayHeader(0, isVectorData());
+    serializer->writeArrayFooter();
     return;
   }
   if (!skipNestCheck) {

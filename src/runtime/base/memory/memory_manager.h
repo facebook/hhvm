@@ -26,6 +26,107 @@ namespace HPHP {
 
 class SmartAllocatorImpl;
 
+struct SmartNode;
+struct SweepNode;
+
+// jemalloc uses 0x5a but we use 0x6a so we can tell the difference
+// when debugging.
+const char kSmartFreeFill = 0x6a;
+
+/**
+ * A garbage list is a freelist of items that uses the space in the items
+ * to store a singly linked list.
+ */
+class GarbageList {
+public:
+  GarbageList() : ptr(NULL) {
+  }
+
+  // Pops an item, or returns NULL
+  void* maybePop() {
+    void** ret = ptr;
+    if (LIKELY(ret != NULL)) {
+      ptr = (void**)*ret;
+    }
+    return ret;
+  }
+
+  // Pushes an item on to the list. The item must be larger than
+  // sizeof(void*)
+  void push(void* val) {
+    void** convval = (void**)val;
+    *convval = ptr;
+    ptr = convval;
+  }
+
+  // Number of items on the list.  We calculate this iteratively
+  // on the assumption we don't query this often, so iterating is
+  // faster than keeping a size field up-to-date.
+  int size() const {
+    int sz = 0;
+    for (Iterator it = begin(), e = end(); it != e; ++it, ++sz) {}
+    return sz;
+  }
+
+  bool empty() const {
+    return ptr == NULL;
+  }
+
+  // Remove all items from this list
+  void clear() {
+    ptr = NULL;
+  }
+
+  class Iterator {
+  public:
+    Iterator(const GarbageList& l) : curptr(l.ptr) {}
+
+    Iterator(const Iterator &other) : curptr(other.curptr) {}
+    Iterator() : curptr(NULL) {}
+
+    bool operator==(const Iterator &it) {
+      return curptr == it.curptr;
+    }
+
+    bool operator!=(const Iterator &it) {
+      return !operator==(it);
+    }
+
+    Iterator &operator++() {
+      if (curptr) {
+        curptr = (void**)*curptr;
+      }
+      return *this;
+    }
+
+    Iterator operator++(int) {
+      Iterator ret(*this);
+      operator++();
+      return ret;
+    }
+
+    void* operator*() const {
+      return curptr;
+    }
+
+  private:
+    void** curptr;
+  };
+
+  Iterator begin() const {
+    return Iterator(*this);
+  }
+
+  Iterator end() const {
+    return Iterator();
+  }
+
+  typedef Iterator iterator;
+
+private:
+  void** ptr;
+};
+
 /**
  * MemoryManager categorizes memory usage into 3 categories and maintain some
  * of them with different strategy:
@@ -118,6 +219,11 @@ public:
    */
   void resetStats();
 
+  /**
+   * Out-of-line version of refresh stats
+   */
+  void refreshStatsHelper();
+
   void refreshStats() {
     refreshStats<true>(m_stats);
   }
@@ -208,17 +314,38 @@ public:
     }
   };
 
+  void* smartMalloc(size_t nbytes);
+  void* smartRealloc(void* ptr, size_t nbytes);
+  void* smartCallocBig(size_t totalbytes);
+  void  smartFree(void* ptr);
+  static const size_t kMaxSmartSize = 2048;
+
 private:
+  char* newSlab();
+  void* smartEnlist(SweepNode*);
+  void* smartMallocSlab(size_t padbytes);
+  void* smartMallocBig(size_t nbytes);
+  void  smartFreeBig(SweepNode*);
   void refreshStatsHelperExceeded();
 #ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
 #endif
 
+private:
+  static const unsigned kLgSizeQuantum = 6; // 64 bytes
+  static const unsigned kNumSizes = kMaxSmartSize >> kLgSizeQuantum;
+  static const size_t kMask = (1 << kLgSizeQuantum) - 1;
+
+private:
+  char *m_front, *m_limit;
+  GarbageList m_smartfree[kNumSizes];
+  SweepNode* m_smartsweep;
+  MemoryUsageStats m_stats;
   bool m_enabled;
 
   std::vector<SmartAllocatorImpl*> m_smartAllocators;
+  std::vector<char*> m_slabs;
 
-  MemoryUsageStats m_stats;
 #ifdef USE_JEMALLOC
   uint64* m_allocated;
   uint64* m_deallocated;
@@ -232,6 +359,30 @@ public:
   static size_t s_cactiveLimitCeiling;
 #endif
 };
+
+//
+// smart_malloc api for request-scoped memory
+//
+// These functions behave like malloc, but get memory from the current
+// thread's MemoryManager instance.  At request-end, any un-freed memory
+// is explicitly freed and garbage filled.  If any pointers to this memory
+// survive beyond a request, they'll be dangling pointers.
+//
+// Block sizes <= MemoryManager::kMaxSmartSize are region-allocated
+// and are only guaranteed to be 8-byte aligned.  Larger blocks are
+// directly malloc'd (with a header) and are 16-byte aligned.
+//
+// Clients must not mix/match calls between smart_malloc and malloc:
+//  - these blocks have a header that malloc wouldn't grok
+//  - memory is auto-freed at request-end, unlike malloc
+//  - all bookeeping is thread local; freeing a smart_malloc block
+//    from a different thread than it was malloc'd from, even while
+//    the original request is still running, will just crash and burn.
+//
+void* smart_malloc(size_t nbytes);
+void* smart_calloc(size_t count, size_t bytes);
+void* smart_realloc(void* ptr, size_t nbytes);
+void  smart_free(void* ptr);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

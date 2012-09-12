@@ -72,9 +72,27 @@ namespace Util {
 /**
  * Safe memory allocation.
  */
-void* safe_malloc(size_t size);
-void* safe_realloc(void* ptr, size_t size);
-void  safe_free(void* ptr);
+inline void* safe_malloc(size_t size) {
+  void* p = malloc(size);
+  if (!p) throw OutOfMemoryException(size);
+  return p;
+}
+
+inline void* safe_calloc(size_t count, size_t size) {
+  void* p = calloc(count, size);
+  if (!p) throw OutOfMemoryException(size);
+  return p;
+}
+
+inline void* safe_realloc(void* ptr, size_t size) {
+  ptr = realloc(ptr, size);
+  if (!ptr && size > 0) throw OutOfMemoryException(size);
+  return ptr;
+}
+
+inline void safe_free(void* ptr) {
+  return free(ptr);
+}
 
 /**
  * Instruct low level memory allocator to free memory back to system. Called
@@ -94,7 +112,7 @@ void flush_thread_stack();
  */
 class ScopedMem {
   ScopedMem(const ScopedMem&); // disable copying
-  ScopedMem& operator=(const ScopedMem&); 
+  ScopedMem& operator=(const ScopedMem&);
  public:
   ScopedMem(void* ptr) : m_ptr(ptr) {}
   ~ScopedMem() { free(m_ptr); }

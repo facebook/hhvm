@@ -157,98 +157,6 @@ typedef hphp_hash_map<int64, int, int64_hash> BlockIndexMap;
 typedef boost::dynamic_bitset<unsigned long long> FreeMap;
 
 /**
- * A garbage list is a freelist of items that uses the space in the items
- * to store a singly linked list.
- */
-class GarbageList {
-public:
-  GarbageList() : ptr(NULL) {
-  }
-
-  // Pops an item, or returns NULL
-  void* maybePop() {
-    void** ret = ptr;
-    if (LIKELY(ret != NULL)) {
-      ptr = (void**)*ret;
-    }
-    return ret;
-  }
-
-  // Pushes an item on to the list. The item must be larger than
-  // sizeof(void*)
-  void push(void* val) {
-    void** convval = (void**)val;
-    *convval = ptr;
-    ptr = convval;
-  }
-
-  // Number of items on the list.
-  int size() const {
-    int sz = 0;
-    for (Iterator it = begin(), e = end(); it != e; ++it, ++sz) {}
-    return sz;
-  }
-
-  bool empty() const {
-    return ptr == NULL;
-  }
-
-  // Remove all items from this list
-  void clear() {
-    ptr = NULL;
-  }
-
-  class Iterator {
-  public:
-    Iterator(const GarbageList& l) : curptr(l.ptr) {}
-
-    Iterator(const Iterator &other) : curptr(other.curptr) {}
-    Iterator() : curptr(NULL) {}
-
-    bool operator==(const Iterator &it) {
-      return curptr == it.curptr;
-    }
-
-    bool operator!=(const Iterator &it) {
-      return !operator==(it);
-    }
-
-    Iterator &operator++() {
-      if (curptr) {
-        curptr = (void**)*curptr;
-      }
-      return *this;
-    }
-
-    Iterator operator++(int) {
-      Iterator ret(*this);
-      operator++();
-      return ret;
-    }
-
-    void* operator*() const {
-      return curptr;
-    }
-
-  private:
-    void** curptr;
-  };
-
-  Iterator begin() const {
-    return Iterator(*this);
-  }
-
-  Iterator end() const {
-    return Iterator();
-  }
-
-  typedef Iterator iterator;
-
-private:
-  void** ptr;
-};
-
-/**
  * Just a simple free-list based memory allocator.
  */
 class SmartAllocatorImpl : boost::noncopyable {
@@ -287,7 +195,7 @@ public:
   void* alloc(size_t size);
   void dealloc(void *obj) {
     ASSERT(assertValidHelper(obj));
-    ASSERT(memset(obj, 0x6a, m_itemSize));
+    ASSERT(memset(obj, kSmartFreeFill, m_itemSize));
     m_freelist.push(obj);
     if (hhvm) {
       *((int*)(uintptr_t(obj) + FAST_REFCOUNT_OFFSET)) = RefCountTombstoneValue;
@@ -315,7 +223,6 @@ public:
 
 private:
   void* allocHelper() NEVER_INLINE;
-  void statsHelper() NEVER_INLINE;
   bool assertValidHelper(void *obj) const;
 
   // keep these frequently used fields together.

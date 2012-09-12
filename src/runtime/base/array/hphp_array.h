@@ -264,7 +264,6 @@ public:
   struct InlineSlots {
     Elm slots[SmallSize];
     ElmInd hash[SmallHashSize];
-    static void rel(Elm*) { /* nop */ };
   };
 
 private:
@@ -399,8 +398,7 @@ private:
   void resizeIfNeeded();
 
   // Memory allocator methods.
-  DECLARE_SMART_ALLOCATION(HphpArray, SmartAllocatorImpl::NeedSweep);
-  void sweep();
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(HphpArray);
 
 private:
   enum EmptyMode { StaticEmptyArray };

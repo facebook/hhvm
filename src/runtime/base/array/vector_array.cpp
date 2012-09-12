@@ -25,55 +25,7 @@ namespace HPHP {
 
 StaticEmptyVectorArray StaticEmptyVectorArray::s_theEmptyVectorArray;
 
-template <class Elm, int Size, class Self>
-struct BufImpl {
-  Elm slots[Size];
-  void dump() {}
-  static Elm* alloc() {
-    return (NEW(Self)())->slots;
-  }
-  static void rel(Elm* data) {
-    Self* p = (Self*)(uintptr_t(data) - offsetof(Self, slots));
-    DELETE(Self)(p);
-  }
-};
-
-struct Buf8: BufImpl<TypedValue, 8, Buf8> {
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Buf8);
-};
-struct Buf16: BufImpl<TypedValue, 16, Buf16> {
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Buf16);
-};
-struct Buf32: BufImpl<TypedValue, 32, Buf32> {
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Buf32);
-};
-struct Buf64: BufImpl<TypedValue, 64, Buf64> {
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Buf64);
-};
-static const uint MaxSmartCap = 64;
-
-TypedValue* VectorArray::smartAlloc(uint cap) {
-  ASSERT(cap <= MaxSmartCap);
-  return cap <= 8 ? Buf8::alloc() :
-         cap <= 16 ? Buf16::alloc() :
-         cap <= 32 ? Buf32::alloc() :
-                     Buf64::alloc();
-}
-void VectorArray::smartFree(TypedValue* data, uint cap) {
-  ASSERT(cap == Util::nextPower2(cap) && cap <= MaxSmartCap);
-  switch (cap) {
-    case 8:  Buf8::rel(data); break;
-    case 16: Buf16::rel(data); break;
-    case 32: Buf32::rel(data); break;
-    default: Buf64::rel(data); break;
-  }
-}
-
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(Buf8);
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(Buf16);
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(Buf32);
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(Buf64);
-IMPLEMENT_SMART_ALLOCATION_HOT(VectorArray, SmartAllocatorImpl::NeedSweep);
+IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(VectorArray);
 
 #ifdef DEBUGGING_SMART_ALLOCATOR
 #define DECLARE_ALLOCATOR(a, T, I)
@@ -190,13 +142,13 @@ void VectorArray::alloc(uint size) {
   }
   uint cap = Util::nextPower2(size);
   m_capacity = cap;
-  if (cap <= MaxSmartCap && !m_nonsmart) {
-    m_elems = smartAlloc(cap);
+  if (!m_nonsmart) {
+    m_elems = (TypedValue*) smart_malloc(cap * sizeof(TypedValue));
     m_allocMode = kSmart;
-    return;
+  } else {
+    m_elems = (TypedValue*) malloc(cap * sizeof(TypedValue));
+    m_allocMode = kMalloc;
   }
-  m_elems = (TypedValue*) malloc(cap * sizeof(TypedValue));
-  m_allocMode = kMalloc;
 }
 
 HOT_FUNC_HPHP
@@ -244,7 +196,7 @@ VectorArray::~VectorArray() {
     tvAsVariant(&m_elems[i]).~Variant();
   }
   if (m_allocMode == kSmart) {
-    smartFree(m_elems, m_capacity);
+    smart_free(m_elems);
   } else if (m_allocMode == kMalloc) {
     free(m_elems);
   }
@@ -277,26 +229,23 @@ VectorArray::VectorArray(const VectorArray *src, bool sma /* ignored */) :
 
 void VectorArray::grow(uint newSize) {
   ASSERT(newSize > FixedSize);
-  uint old_capacity = m_capacity;
   m_capacity = Util::nextPower2(newSize);
-  if (m_capacity <= MaxSmartCap && !m_nonsmart) {
-    TypedValue* elems = smartAlloc(m_capacity);
-    memcpy(elems, m_elems, m_size * sizeof(TypedValue));
-    if (m_allocMode == kSmart) {
-      smartFree(m_elems, old_capacity);
-    } else {
+  if (!m_nonsmart) {
+    ASSERT(m_allocMode == kInline || m_allocMode == kSmart);
+    if (m_allocMode == kInline) {
+      m_elems = (TypedValue*)smart_malloc(m_capacity * sizeof(TypedValue));
+      memcpy(m_elems, m_fixed, m_size * sizeof(TypedValue));
       m_allocMode = kSmart;
+    } else {
+      m_elems = (TypedValue*)smart_realloc(m_elems,
+                                           m_capacity * sizeof(TypedValue));
     }
-    m_elems = elems;
-  } else if (m_allocMode != kMalloc) {
-    TypedValue* elems = (TypedValue*)malloc(m_capacity * sizeof(TypedValue));
-    memcpy(elems, m_elems, m_size * sizeof(TypedValue));
-    if (m_allocMode == kSmart) {
-      smartFree(m_elems, old_capacity);
-    }
-    m_elems = elems;
+  } else if (m_allocMode == kInline) {
+    m_elems = (TypedValue*)malloc(m_capacity * sizeof(TypedValue));
+    memcpy(m_elems, m_fixed, m_size * sizeof(TypedValue));
     m_allocMode = kMalloc;
   } else {
+    ASSERT(m_allocMode == kMalloc);
     m_elems = (TypedValue*)realloc(m_elems, m_capacity * sizeof(TypedValue));
   }
 }
@@ -403,10 +352,6 @@ ssize_t VectorArray::getIndex(CVarRef k) const {
     return VectorArray::getIndex(getIntKey(tva));
   }
   return ArrayData::invalid_index;
-}
-
-void VectorArray::sweep() {
-  if (m_allocMode == kMalloc) free(m_elems);
 }
 
 ZendArray *VectorArray::escalateToNonEmptyZendArray() const {

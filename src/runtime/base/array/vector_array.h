@@ -126,9 +126,8 @@ public:
   virtual CVarRef endRef();
   virtual ArrayData *escalate(bool mutableIteration = false) const;
 
-  DECLARE_SMART_ALLOCATION(VectorArray, SmartAllocatorImpl::NeedSweep);
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(VectorArray);
 
-  void sweep();
 private:
   enum AllocMode { kInline, kSmart, kMalloc };
   TypedValue     m_fixed[FixedSize];
@@ -144,8 +143,6 @@ private:
   void grow(uint newSize) NEVER_INLINE;
   void checkSize(uint n = 1);
   void checkInsertIterator(ssize_t pos);
-  static TypedValue* smartAlloc(uint cap);
-  static void smartFree(TypedValue* data, uint cap);
 };
 
 class StaticEmptyVectorArray : public VectorArray {

@@ -275,14 +275,11 @@ private:
   void init(uint nSize);
   void resize();
   void rehash();
-  static Bucket** smartAlloc(uint cap);
-  static void smartFree(Bucket**, uint cap);
 
   /**
    * Memory allocator methods.
    */
-  DECLARE_SMART_ALLOCATION(ZendArray, SmartAllocatorImpl::NeedSweep);
-  void sweep();
+  DECLARE_SMART_ALLOCATION_NOCALLBACKS(ZendArray);
 };
 
 class StaticEmptyZendArray : public ZendArray {

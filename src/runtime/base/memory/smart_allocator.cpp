@@ -166,16 +166,15 @@ HOT_FUNC
 void *SmartAllocatorImpl::alloc(size_t nbytes) {
   ASSERT(nbytes == size_t(m_itemSize));
   ASSERT(m_next && m_next <= m_limit);
-  MemoryUsageStats* stats = &MemoryManager::TheMemoryManager()->getStats();
   // Just update the usage, while the peakUsage is maintained by
   // FrameInjection.
-  int64 usage = stats->usage + nbytes;
-  stats->usage = usage;
+  MemoryUsageStats* stats = &MemoryManager::TheMemoryManager()->getStats();
+  int64 usage = (stats->usage += nbytes);
   if (hhvm && UNLIKELY(usage > stats->maxBytes)) {
     // It's possible that this simplified check will trip later than
     // it should in a perfect world but it's cheaper than a full call
     // to refreshStats on every alloc().
-    statsHelper();
+    MemoryManager::TheMemoryManager()->refreshStatsHelper();
   }
 #ifndef SMART_ALLOCATOR_DEBUG_FREE
   void* freelist_value = m_freelist.maybePop();
@@ -221,13 +220,6 @@ void *SmartAllocatorImpl::allocHelper() {
   m_next = p + m_itemSize;
   m_limit = p + m_colMax;
   return p;
-}
-
-// cold-path helper function, only called when request memory overflow
-// is likely.
-void SmartAllocatorImpl::statsHelper() {
-  ASSERT(MemoryManager::TheMemoryManager()->getStats().maxBytes > 0);
-  MemoryManager::TheMemoryManager()->refreshStats();
 }
 
 bool SmartAllocatorImpl::assertValidHelper(void *obj) const {

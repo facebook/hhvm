@@ -495,7 +495,7 @@ struct JccBlock {
     : m_a(&a),
       m_jcc8(a.code.frontier),
       m_dg(new DiamondGuard(a)) {
-    a.    jcc8(Jcc, 0);
+    a.    jcc8(Jcc, m_a->code.frontier);
   }
 
   ~JccBlock() {
@@ -618,7 +618,7 @@ class IfElseBlock : boost::noncopyable {
   explicit IfElseBlock(X64Assembler& a) :
     m_a(a), m_jcc8(a.code.frontier), m_jmp8(NULL) {
     tx64->m_regMap.freeze();
-    m_a.jcc8(Jcc, m_jmp8);  // 1f
+    m_a.jcc8(Jcc, m_a.code.frontier);  // 1f
   }
   void Else() {
     ASSERT(m_jmp8 == NULL);
@@ -12360,7 +12360,7 @@ TranslatorX64::translateIterInit(const Tracelet& t,
   // returns 1
   a.    test_reg64_reg64(rax, rax);
   TCA toPatch = a.code.frontier;
-  a.    jz(0); // 1f
+  a.    jz(a.code.frontier); // 1f
   emitBindJmp(notTaken);
   // 1:
   a.patchJcc(toPatch, a.code.frontier);

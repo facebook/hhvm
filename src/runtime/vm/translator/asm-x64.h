@@ -795,10 +795,9 @@ public:
     ALWAYS_INLINE {
     ASSERT((op.flags & IF_JCC) == 0);
     ssize_t delta = imm - ((ssize_t)code.frontier + 2);
-    ASSERT(imm == 0 || deltaFits(delta, sz::byte));
     // Emit opcode and 8-bit immediate
     byte(0xEB);
-    byte(delta);
+    byte(safe_cast<int8_t>(delta));
   }
 
   void emitCJ8(X64Instr op, int jcond, ssize_t imm)
@@ -806,18 +805,16 @@ public:
     // this is for jcc only
     ASSERT(op.flags & IF_JCC);
     ssize_t delta = imm - ((ssize_t)code.frontier + 2);
-    ASSERT(imm == 0 || deltaFits(delta, sz::byte));
     // Emit opcode
     byte(jcond | 0x70);
     // Emit 8-bit offset
-    byte(delta);
+    byte(safe_cast<int8_t>(delta));
   }
 
   void emitJ32(X64Instr op, ssize_t imm) ALWAYS_INLINE {
     // call and jmp are supported, jcc is not supported
     ASSERT((op.flags & IF_JCC) == 0);
-    ssize_t delta = imm - ((ssize_t)code.frontier + 5);
-    ASSERT(imm == 0 || deltaFits(delta, sz::dword));
+    int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code.frontier + 5));
     uint8_t *bdelta = (uint8_t*)&delta;
     uint8_t instr[] = { op.table[2],
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -828,8 +825,7 @@ public:
       ALWAYS_INLINE {
     // jcc is supported, call and jmp are not supported
     ASSERT(op.flags & IF_JCC);
-    ssize_t delta = imm - ((ssize_t)code.frontier + 6);
-    ASSERT(imm == 0 || deltaFits(delta, sz::dword));
+    int32_t delta = safe_cast<int32_t>(imm - ((ssize_t)code.frontier + 6));
     uint8_t* bdelta = (uint8_t*)&delta;
     uint8_t instr[6] = { 0x0f, uint8_t(0x80 | jcond),
       bdelta[0], bdelta[1], bdelta[2], bdelta[3] };
@@ -1311,29 +1307,25 @@ public:
   inline void patchJcc(CodeAddress jmp, CodeAddress dest) {
     ASSERT(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
     ssize_t diff = dest - (jmp + 6);
-    ASSERT(deltaFits(diff, sz::dword));
-    *(int32_t*)(jmp + 2) = (int32_t)diff;
+    *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
   }
 
   inline void patchJcc8(CodeAddress jmp, CodeAddress dest) {
     ASSERT((jmp[0] & 0xF0) == 0x70);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
-    ASSERT(deltaFits(diff, sz::byte));
-    *(int8_t*)(jmp + 1) = (int8_t)diff;
+    *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
   inline void patchJmp(CodeAddress jmp, CodeAddress dest) {
     ASSERT(jmp[0] == 0xE9);
     ssize_t diff = dest - (jmp + 5);
-    ASSERT(deltaFits(diff, sz::dword));
-    *(int32_t*)(jmp + 1) = (int32_t)diff;
+    *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
   }
 
   inline void patchJmp8(CodeAddress jmp, CodeAddress dest) {
     ASSERT(jmp[0] == 0xEB);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
-    ASSERT(deltaFits(diff, sz::byte));
-    *(int8_t*)(jmp + 1) = (int8_t)diff;
+    *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
   /*
@@ -1420,20 +1412,17 @@ public:
   }                                                                     \
   /* op imm32, rdest */                                                 \
   inline void name ## _imm32_reg64(int64_t imm, register_name_t rdest) { \
-    ASSERT(deltaFits(imm, sz::dword));                                  \
-    emitIR(instr_ ## name, rdest, imm);                                 \
+    emitIR(instr_ ## name, rdest, safe_cast<int32_t>(imm));             \
   }                                                                     \
   /* op imm32, edest */                                                 \
   inline void name ## _imm32_reg32(int64_t imm, register_name_t rdest) { \
-    ASSERT(deltaFits(imm, sz::dword));                                  \
-    emitIR32(instr_ ## name, rdest, imm);                               \
+    emitIR32(instr_ ## name, rdest, safe_cast<int32_t>(imm));           \
   }                                                                     \
   /* opl imm, disp(rdest) */                                            \
   inline void name ## _imm32_disp_reg32(int64_t imm, int disp,          \
                                         register_name_t rdest) {        \
-    ASSERT(deltaFits(imm, sz::dword));                                  \
     emitIM32(instr_ ## name, rdest, reg::noreg,                         \
-             sz::byte, disp, imm);                                      \
+             sz::byte, disp, safe_cast<int32_t>(imm));                  \
   }                                                                     \
   /* opq imm, disp(rdest) */                                            \
   inline void name ## _imm64_disp_reg64(int64_t imm, int disp,          \

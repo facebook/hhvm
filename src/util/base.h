@@ -62,6 +62,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/type_traits.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 #include "util/hash.h"
 #include "util/assert.h"
@@ -531,6 +532,26 @@ struct file_closer {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * DEBUG-only wrapper around boost::numeric_cast that converts any
+ * thrown exceptions to a failed assertion.
+ */
+template <typename To, typename From>
+To safe_cast(From val) {
+  if (debug) {
+    try {
+      return boost::numeric_cast<To>(val);
+    } catch (std::bad_cast& bce) {
+      std::cerr << "conversion of " << val << " failed in "
+                << __PRETTY_FUNCTION__ << " : "
+                << bce.what() << std::endl;
+      not_reached();
+    }
+  } else {
+    return static_cast<To>(val);
+  }
+}
 }
 
 namespace boost {

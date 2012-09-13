@@ -343,16 +343,13 @@ Variant f_file_get_contents(CStrRef filename,
 Variant f_file_put_contents(CStrRef filename, CVarRef data,
                             int flags /* = 0 */,
                             CVarRef context /* = null */) {
-  FILE *f = fopen(File::TranslatePath(filename).data(),
-                  (flags & PHP_FILE_APPEND) ? "ab" : "wb");
-  Object closer(NEWOBJ(PlainFile)(f));
-  if (!f) {
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
-                    Util::safe_strerror(errno).c_str());
+  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb");
+  if (!fvar) {
     return false;
   }
+  File *f = fvar.asObjRef().getTyped<File>();
 
-  if ((flags & LOCK_EX) && flock(fileno(f), LOCK_EX)) {
+  if ((flags & LOCK_EX) && flock(f->fd(), LOCK_EX)) {
     return false;
   }
 
@@ -370,7 +367,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
         int len = fsrc->readImpl(buffer, sizeof(buffer));
         if (len == 0) break;
         numbytes += len;
-        int written = fwrite(buffer, 1, len, f);
+        int written = f->writeImpl(buffer, len);
         if (written != len) {
           numbytes = -1;
           break;
@@ -385,7 +382,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
         String value = iter.second();
         if (!value.empty()) {
           numbytes += value.size();
-          int written = fwrite(value.data(), 1, value.size(), f);
+          int written = f->writeImpl(value.data(), value.size());
           if (written != value.size()) {
             numbytes = -1;
             break;
@@ -398,7 +395,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
     {
       String value = data.toString();
       numbytes += value.size();
-      int written = fwrite(value.data(), 1, value.size(), f);
+      int written = f->writeImpl(value, value.size());
       if (written != value.size()) {
         numbytes = -1;
       }

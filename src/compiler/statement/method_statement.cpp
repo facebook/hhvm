@@ -1142,10 +1142,14 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
                                              ClassScopePtr cls,
                                              FunctionScopePtr funcScope) {
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
+    if (funcScope->isDynamicInvoke()) {
+      cg_printf("INTERCEPT_INJECTION_ALWAYS(\"%s\", \"%s\", ", name, name);
+    } else {
+      cg_printf("INTERCEPT_INJECTION(\"%s\", ", name);
+    }
     if (m_params) {
       int n = m_params->getCount();
       ASSERT(n >= 0);
-      cg_printf("INTERCEPT_INJECTION(\"%s\", ", name);
       if (Option::GenArrayCreate && !hasRefParam()) {
         if (ar->m_arrayIntegerKeyMaxSize < n) ar->m_arrayIntegerKeyMaxSize = n;
         outputParamArrayCreate(cg, true);
@@ -1162,7 +1166,7 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
         cg_printf(".create()))");
       }
     } else {
-      cg_printf("INTERCEPT_INJECTION(\"%s\", null_array", name);
+      cg_printf("null_array");
     }
     TypePtr t = funcScope->getReturnType();
     bool refRet = funcScope->isRefReturn() && t && Type::IsMappedToVariant(t);

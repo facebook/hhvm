@@ -1149,11 +1149,13 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
   // Get next piece if no limit or limit not yet reached and something matched
   Variant return_value = Array::Create();
   int g_notempty = 0;   /* If the match should not be empty */
+  int utf8_check = 0;
   pcre *re_bump = NULL; /* Regex instance for empty matches */
   pcre_extra *extra_bump = NULL; /* Almost dummy */
   while ((limit == -1 || limit > 1)) {
     int count = pcre_exec(pce->re, extra, ssubject.data(), ssubject.size(),
-                          start_offset, g_notempty, offsets, size_offsets);
+                          start_offset, g_notempty | utf8_check,
+                          offsets, size_offsets);
 
     /* Check for too many substrings condition. */
     if (count == 0) {
@@ -1163,6 +1165,12 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
 
     /* If something matched */
     if (count > 0) {
+      /* Subsequent calls to pcre_exec don't need to bother with the
+       * utf8 validity check: if the subject isn't valid, the first
+       * call to pcre_exec will have failed, and as long as we only
+       * set start_offset to known character boundaries we won't
+       * supply an invalid offset. */
+      utf8_check = PCRE_NO_UTF8_CHECK;
 
       if (!no_empty || ssubject.data() + offsets[0] != last_match) {
         if (offset_capture) {
@@ -1261,6 +1269,8 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
 
     /* Advance to the position right after the last full match */
     start_offset = offsets[1];
+    /* Make sure we're not setting start_offset to the middle of a character */
+    ASSERT((ssubject.data()[start_offset] & 0xc0) != 0x80);
   }
 
   start_offset = last_match - ssubject.data(); /* the offset might have been incremented, but without further successful matches */

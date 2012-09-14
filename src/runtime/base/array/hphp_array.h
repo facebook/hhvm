@@ -467,10 +467,6 @@ uint64 array_issetm_s0_fast(const void* hphpArray, StringData* sd)
   FLATTEN;
 uint64 array_issetm_i(const void* hphpArray, int64_t key)
   FLATTEN;
-ArrayData* array_unsetm_s(ArrayData* hphpArray, StringData* sd)
-                         FLATTEN;
-ArrayData* array_unsetm_s0(ArrayData* hphpArray, StringData* sd)
-                          FLATTEN;
 ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 
 }

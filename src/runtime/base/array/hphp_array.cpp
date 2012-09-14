@@ -2738,32 +2738,6 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
   return a1;
 }
 
-/**
- * array_unsetm_s --
- * array_unsetm_s0 --
- *
- *   String-key removal. Might trigger copy-on-write. _s0 doesn't decref
- *   the key.
- */
-static inline ArrayData* array_unsetm_s_common(ArrayData *ad, StringData* sd,
-                                               bool decRef) {
-  ArrayData* retval = 0;
-  int64 lval;
-  bool copy = ad->getCount() > 1;
-  bool isInt = sd->isStrictlyInteger(lval);
-  retval = isInt ? ad->remove(lval, copy) : ad->remove(*(String*)&sd, copy);
-  if (decRef && sd->decRefCount() == 0) sd->release();
-  return array_mutate_post(NULL, ad, retval);
-}
-
-ArrayData* array_unsetm_s0(ArrayData *ad, StringData* sd) {
-  return array_unsetm_s_common(ad, sd, false);
-}
-
-ArrayData* array_unsetm_s(ArrayData *ad, StringData* sd) {
-  return array_unsetm_s_common(ad, sd, true);
-}
-
 }
 
 //=============================================================================

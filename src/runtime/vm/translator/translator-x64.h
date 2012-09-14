@@ -362,9 +362,7 @@ class TranslatorX64 : public Translator, public SpillFill,
                              const NormalizedInstruction& ni, \
                              const MInstrInfo& mii, bool ctxFixed, \
                              unsigned mInd, unsigned iInd, \
-                             const PhysReg& rBase); \
-  void translate##instr##MGeneric(const Tracelet& t, \
-                                  const NormalizedInstruction& ni);
+                             const PhysReg& rBase);
 MINSTRS
 #undef MII
 

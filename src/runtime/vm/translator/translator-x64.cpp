@@ -1552,6 +1552,18 @@ void TranslatorX64::prepareCallSaveRegs() {
      RPLUS(rsp, offsetof(MInstrState, tvResult)), \
      A(result.location))
 
+#define TRANSLATE_MINSTR_GENERIC(instr, t, ni) do {                        \
+  ASSERT(RuntimeOption::EvalJitMGeneric);                             \
+  SKTRACE(2, ni.source, "%s\n", __func__);                            \
+  const MInstrInfo& mii = getMInstrInfo(Op##instr##M);                \
+  bool ctxFixed;                                                      \
+  unsigned mInd, iInd;                                                \
+  PhysReg rBase;                                                      \
+  emitMPre((t), (ni), mii, ctxFixed, mInd, iInd, rBase);              \
+  emitFinal##instr##MOp((t), (ni), mii, ctxFixed, mInd, iInd, rBase); \
+  emitMPost((t), (ni), mii);                                          \
+} while (0)
+
 void
 TranslatorX64::emitIncRef(PhysReg base, DataType dtype) {
   if (!IS_REFCOUNTED_TYPE(dtype) && dtype != KindOfInvalid) {
@@ -6372,23 +6384,6 @@ void TranslatorX64::emitMPost(const Tracelet& t,
   a.    add_imm32_reg64(sizeof(MInstrState), rsp);
 }
 
-#define MII(instr, attrs, bS, iS, vC, fN) \
-void TranslatorX64::translate##instr##MGeneric(const Tracelet& t, \
-                                               const NormalizedInstruction& \
-                                               ni) { \
-  ASSERT(RuntimeOption::EvalJitMGeneric); \
-  SKTRACE(2, ni.source, "%s\n", __func__); \
-  const MInstrInfo& mii = getMInstrInfo(Op##instr##M); \
-  bool ctxFixed; \
-  unsigned mInd, iInd; \
-  PhysReg rBase; \
-  emitMPre(t, ni, mii, ctxFixed, mInd, iInd, rBase); \
-  emitFinal##instr##MOp(t, ni, mii, ctxFixed, mInd, iInd, rBase); \
-  emitMPost(t, ni, mii); \
-}
-MINSTRS
-#undef MII
-
 static inline TXFlags
 plan(bool cond, TXFlags successFlags, TXFlags fallbackFlags=Interp) {
   return cond ? successFlags : fallbackFlags;
@@ -10090,7 +10085,7 @@ TranslatorX64::translateCGetM(const Tracelet& t,
     emitArrayElem(i, &base, baseReg, &key, i.outStack->location);
     return;
   }
-  translateCGetMGeneric(t, i);
+  TRANSLATE_MINSTR_GENERIC(CGet, t, i);
 }
 
 static bool
@@ -10156,7 +10151,7 @@ void TranslatorX64::analyzeVGetM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateVGetM(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
-  translateVGetMGeneric(t, ni);
+  TRANSLATE_MINSTR_GENERIC(VGet, t, ni);
 }
 
 static TypedValue* lookupGlobal(StringData* name) {
@@ -10389,7 +10384,7 @@ void TranslatorX64::translateIssetM(const Tracelet& t,
     translateIssetMSimple(t, ni);
   } else {
     ASSERT(ni.isSupported());
-    translateIssetMGeneric(t, ni);
+    TRANSLATE_MINSTR_GENERIC(Isset, t, ni);
   }
 }
 
@@ -10404,7 +10399,7 @@ void TranslatorX64::analyzeEmptyM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateEmptyM(const Tracelet& t,
                                     const NormalizedInstruction& ni) {
-  translateEmptyMGeneric(t, ni);
+  TRANSLATE_MINSTR_GENERIC(Empty, t, ni);
 }
 
 void TranslatorX64::analyzeCheckTypeOp(Tracelet& t,
@@ -10835,7 +10830,7 @@ TranslatorX64::translateSetM(const Tracelet& t,
     translateSetMArray(t, i);
     return;
   }
-  translateSetMGeneric(t, i);
+  TRANSLATE_MINSTR_GENERIC(Set, t, i);
 }
 
 void
@@ -10881,7 +10876,7 @@ void TranslatorX64::analyzeSetOpM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateSetOpM(const Tracelet& t,
                                     const NormalizedInstruction& ni) {
-  translateSetOpMGeneric(t, ni);
+  TRANSLATE_MINSTR_GENERIC(SetOp, t, ni);
 }
 
 void
@@ -10933,7 +10928,7 @@ void TranslatorX64::analyzeIncDecM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateIncDecM(const Tracelet& t,
                                      const NormalizedInstruction& ni) {
-  translateIncDecMGeneric(t, ni);
+  TRANSLATE_MINSTR_GENERIC(IncDec, t, ni);
 }
 
 void
@@ -10956,64 +10951,20 @@ TranslatorX64::translateUnsetL(const Tracelet& t,
   }
 }
 
-static bool
-isSupportedUnsetMLegacy(const NormalizedInstruction& i) {
-  return (i.inputs.size() == 2 &&
-          i.immVec.locationCode() == LL &&
-          i.immVecM.size() == 1 &&
-          mcodeMaybeArrayStringKey(i.immVecM[0]) &&
-          i.inputs[0]->outerType() == KindOfArray &&
-          i.inputs[1]->isString());
-}
-
 void
-TranslatorX64::analyzeUnsetM(Tracelet& t, NormalizedInstruction& i) {
+TranslatorX64::analyzeUnsetM(Tracelet& t, NormalizedInstruction& ni) {
   if (!RuntimeOption::EvalJitMGeneric) {
-    i.m_txFlags = supportedPlan(isSupportedUnsetMLegacy(i));
+    ni.m_txFlags = Interp;
     return;
   }
-  i.m_txFlags = Supported;
-  if (!isSupportedUnsetMLegacy(i)) {
-    i.manuallyAllocInputs = true;
-  }
+  ni.m_txFlags = Supported;
+  ni.manuallyAllocInputs = true;
 }
 
 void
 TranslatorX64::translateUnsetM(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  if (isSupportedUnsetMLegacy(i)) {
-    const DynLocation& base = *i.inputs[0];
-    const DynLocation& key  = *i.inputs[1];
-
-    ASSERT(!i.outStack && !i.outLocal);
-    const bool decRefKey = key.isStack();
-    if (decRefKey) {
-      if (false) { // type check
-        ArrayData *arr = NULL;
-        StringData *sd = NULL;
-        arr = array_unsetm_s(arr, sd);
-      }
-      // array_unsetm_s will decRef the key for us, if the key is present in the
-      // array is will also decRef the unset value for us if appropriate. If
-      // copy-on-write is triggered, it will also incRef the new array and
-      // decRef the old array for us.
-      EMIT_RCALL(a, i, array_unsetm_s, V(base.location), V(key.location));
-    } else {
-      if (false) { // type check
-        ArrayData *arr = NULL;
-        StringData *sd = NULL;
-        arr = array_unsetm_s0(arr, sd);
-      }
-      // If the key is present in the array, array_unsetm_s0 will decRef the
-      // unset value for us if appropriate. If copy-on-write is triggered, it
-      // will also incRef the new array and decRef the old array for us.
-      EMIT_RCALL(a, i, array_unsetm_s0, V(base.location), V(key.location));
-    }
-    m_regMap.invalidate(base.location);
-    m_regMap.bind(rax, base.location, KindOfArray, RegInfo::DIRTY);
-    return;
-  }
-  translateUnsetMGeneric(t, i);
+                               const NormalizedInstruction& ni) {
+  TRANSLATE_MINSTR_GENERIC(Unset, t, ni);
 }
 
 void TranslatorX64::analyzeBindM(Tracelet& t, NormalizedInstruction& ni) {
@@ -11027,7 +10978,7 @@ void TranslatorX64::analyzeBindM(Tracelet& t, NormalizedInstruction& ni) {
 
 void TranslatorX64::translateBindM(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
-  translateBindMGeneric(t, ni);
+  TRANSLATE_MINSTR_GENERIC(Bind, t, ni);
 }
 
 void

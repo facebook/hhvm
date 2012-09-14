@@ -3406,7 +3406,6 @@ public:
         id = m_gidMap["v:" + sv->getName()];
         if (id) {
           if (sv == e) {
-            sv->setCanonID(id);
             sv->clearAnticipated();
             if (m_block->getBit(DataFlow::Killed, id)) {
               sv->setKilled();

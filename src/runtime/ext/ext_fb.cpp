@@ -503,19 +503,23 @@ Variant f_fb_unserialize(CVarRef thing, VRefParam success,
  *  9 (STRING_N): followed by n as a serialized int64, followed by n characters
  *      All of these represent a string value.
  *
- *  10 (LIST): followed by serialized values until STOP is seen.
- *      Represents an array with numeric keys 0, 1, ..., n-1.
+ *  10 (LIST_MAP): followed by serialized values until STOP is seen.
+ *      Represents a map with numeric keys 0, 1, ..., n-1 (but see SKIP below).
  *
  *  11 (MAP): followed by serialized key/value pairs until STOP
- *      is seen.  Represents an array with arbitrary keys.
+ *      is seen.  Represents a map with arbitrary int64 or string keys.
  *
  *  12 (STOP): no data
  *      Marks the end of a LIST or a MAP.
  *
  *  13 (SKIP): no data
- *      If seen as an entry in a LIST, the next index in the sequence will be
- *      skipped. E.g. array(0 => 'a', 1 => 'b', 3 => 'c) will be encoded as
- *      (LIST, 'a', 'b', SKIP, 'c') instead of (MAP, 0, 'a', 1, 'b', 3, 'c').
+ *      If seen as an entry in a LIST_MAP, the next index in the sequence will
+ *       be skipped.  E.g. array(0 => 'a', 1 => 'b', 3 => 'c) will be encoded as
+ *      (LIST_MAP, 'a', 'b', SKIP, 'c') instead of
+ *      (MAP, 0, 'a', 1, 'b', 3, 'c').
+ *
+ *  14 (VECTOR): followed by n serialized values until STOP is seen.
+ *      Represents a vector of n values.
  *
  *  In addition, if <c> & 0xf0 != 0xf0, most significant bits of <c> mean:
  *
@@ -540,10 +544,11 @@ enum FbCompactSerializeCode {
   FB_CS_STRING_0   = 7,
   FB_CS_STRING_1   = 8,
   FB_CS_STRING_N   = 9,
-  FB_CS_LIST       = 10,
+  FB_CS_LIST_MAP   = 10,
   FB_CS_MAP        = 11,
   FB_CS_STOP       = 12,
   FB_CS_SKIP       = 13,
+  FB_CS_VECTOR     = 14,
   FB_CS_MAX_CODE   = 15,
 };
 
@@ -661,10 +666,10 @@ static bool fb_compact_serialize_is_list(CArrRef arr, int64_t& index_limit) {
 
 static int fb_compact_serialize_variant(StringData* sd, CVarRef var, int depth);
 
-static void fb_compact_serialize_list(
+static void fb_compact_serialize_array_as_list_map(
   StringData* sd, CArrRef arr, int64_t index_limit, int depth) {
 
-  fb_compact_serialize_code(sd, FB_CS_LIST);
+  fb_compact_serialize_code(sd, FB_CS_LIST_MAP);
   for (int64 i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
       fb_compact_serialize_variant(sd, arr[i], depth + 1);
@@ -675,7 +680,7 @@ static void fb_compact_serialize_list(
   fb_compact_serialize_code(sd, FB_CS_STOP);
 }
 
-static void fb_compact_serialize_map(
+static void fb_compact_serialize_array_as_map(
   StringData* sd, CArrRef arr, int depth) {
 
   fb_compact_serialize_code(sd, FB_CS_MAP);
@@ -735,9 +740,9 @@ static int fb_compact_serialize_variant(
       Array arr = var.toArray();
       int64_t index_limit;
       if (fb_compact_serialize_is_list(arr, index_limit)) {
-        fb_compact_serialize_list(sd, arr, index_limit, depth);
+        fb_compact_serialize_array_as_list_map(sd, arr, index_limit, depth);
       } else {
-        fb_compact_serialize_map(sd, arr, depth);
+        fb_compact_serialize_array_as_map(sd, arr, depth);
       }
       break;
     }
@@ -905,8 +910,11 @@ int fb_compact_unserialize_from_buffer(
       break;
     }
 
-    case FB_CS_LIST:
+    case FB_CS_LIST_MAP:
+    case FB_CS_VECTOR:
     {
+      // There's no concept of vector in PHP (yet),
+      // so return an array in both cases
       Array arr = Array::Create();
       int64 i = 0;
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {

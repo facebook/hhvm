@@ -103,6 +103,13 @@ bool TestExtFb::test_fb_compact_serialize() {
     fb_cs_test(-n-1); fb_cs_test(CREATE_VECTOR1(-n-1));
     fb_cs_test(-n+1); fb_cs_test(CREATE_VECTOR1(-n+1));
   }
+
+  // Test vector code (PHP can't create those, but they might come form
+  // C++ code in serialized strings)
+  String s("\xfe\x01\x02\x03\xfc");  // VECTOR, 1, 2, 3, STOP
+  Variant ret;
+  VS(f_fb_compact_unserialize(s, ref(ret)), CREATE_VECTOR3(1, 2, 3));
+
   return Count(true);
 }
 

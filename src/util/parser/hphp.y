@@ -1677,8 +1677,11 @@ for_expr:
 ;
 
 expr:
-    variable                           { $$ = $1;}
-  | T_LIST '(' assignment_list ')'
+    expr_no_variable                   { $$ = $1;}
+  | variable                           { $$ = $1;}
+
+expr_no_variable:
+    T_LIST '(' assignment_list ')'
     '=' expr                           { _p->onListAssignment($$, $3, &$6);}
   | variable '=' expr                  { _p->onAssign($$, $1, $3, 0);}
   | variable '=' '&' variable          { _p->onAssign($$, $1, $4, 1);}
@@ -1735,7 +1738,7 @@ expr:
                                               T_IS_GREATER_OR_EQUAL);}
   | expr T_INSTANCEOF
     class_name_reference               { BEXP($$,$1,$3,T_INSTANCEOF);}
-  | '(' expr ')'                       { $$ = $2;}
+  | '(' expr_no_variable ')'           { $$ = $2;}
   | expr '?' expr ':' expr             { _p->onQOp($$, $1, &$3, $5);}
   | expr '?' ':' expr                  { _p->onQOp($$, $1,   0, $4);}
   | internal_functions                 { $$ = $1;}
@@ -1777,7 +1780,7 @@ dim_expr:
 dim_expr_base:
     array_literal                      { $$ = $1;}
   | class_constant                     { $$ = $1;}
-  | '(' expr ')'                       { $$ = $2;}
+  | '(' expr_no_variable ')'           { $$ = $2;}
 ;
 
 lexical_vars:
@@ -2146,6 +2149,7 @@ variable:
     variable_without_objects           { _p->onStaticMember($$,$1,$3);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
+  | '(' variable ')'                   { $$ = $2;}
 ;
 
 dimmable_variable:
@@ -2161,6 +2165,7 @@ dimmable_variable:
     '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
+  | '(' variable ')'                   { $$ = $2;}
 ;
 
 callable_variable:
@@ -2168,6 +2173,7 @@ callable_variable:
   | dimmable_variable
     '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
   | dimmable_variable '{' expr '}'     { _p->onRefDim($$, $1, $3);}
+  | '(' variable ')'                   { $$ = $2;}
 ;
 
 object_method_call:
@@ -2234,6 +2240,7 @@ variable_no_calls:
   | static_class_name
     T_PAAMAYIM_NEKUDOTAYIM
     variable_without_objects           { _p->onStaticMember($$,$1,$3);}
+  | '(' variable ')'                   { $$ = $2;}
 ;
 
 dimmable_variable_no_calls:
@@ -2245,6 +2252,7 @@ dimmable_variable_no_calls:
     T_STRING                           { _p->onObjectProperty($$,$1,$3);}
   | variable_no_calls T_OBJECT_OPERATOR
     '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
+  | '(' variable ')'                   { $$ = $2;}
 ;
 
 assignment_list:

@@ -27913,15 +27913,57 @@ bool TestCodeRun::TestTaintExt() {
 #endif
 
 bool TestCodeRun::TestParser() {
-  MVCRO("<?php function foo() { return array(1, 2, 3);} var_dump(foo()[2]);",
-        "int(3)\n");
+
+  MVCRO("<?php function foo() { return array(1, 2, 3);} var_dump(foo()[2]);"
+        ,
+        "int(3)\n"
+        );
+
   MVCRO("<?php "
         ":test::go();"
         "class :test {"
         "  static function go() {"
         "    echo \"Everything's cool\\n\";"
         "  }"
-        "}", "Everything's cool\n");
+        "}"
+        ,
+        "Everything's cool\n"
+        );
+
+  MVCRO("<?php\n"
+        "class Foo {\n"
+        "  public $a;\n"
+        "  static public $b;\n"
+        "  static public $c;\n"
+        "}\n"
+        "$foo = new Foo;\n"
+        "$foo->a = function ($x) { echo '!' . $x; };\n"
+        "($foo->a)(\"foo\\n\");\n"
+        "Foo::$b = function ($x) { echo '?' . $x; };\n"
+        "(Foo::$b)(\"bar\\n\");\n"
+        "Foo::$c[0] = function ($x) { echo '.' . $x; };\n"
+        "(Foo::$c[0])(\"baz\\n\");\n"
+        ,
+        "!foo\n"
+        "?bar\n"
+        ".baz\n"
+        );
+
+  MVCRO("<?php\n"
+        "($a) = 1;\n"
+        "var_dump($a);\n"
+        "$b = array();\n"
+        "($b)[0] = 2;\n"
+        "var_dump($b[0]);\n"
+        "$c = new stdClass;\n"
+        "($c)->prop = 3;\n"
+        "var_dump($c->prop);\n"
+        ,
+        "int(1)\n"
+        "int(2)\n"
+        "int(3)\n"
+        );
+
   return true;
 }
 

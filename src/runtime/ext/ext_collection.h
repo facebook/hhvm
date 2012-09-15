@@ -396,17 +396,12 @@ public:
       int64      ikey;
       StringData *skey;
     };
-    // set the top bit for string hashes to make sure the hash
-    // value is never zero. hash value 0 corresponds to integer key.
-    static inline int32 encodeHash(int32 h) {
-      return (h | 0x80000000);
-    }
     inline bool hasStrKey() const { return data._count != 0; }
     inline bool hasIntKey() const { return data._count == 0; }
-    inline void setStrKey(StringData* k, int64 h) {
+    inline void setStrKey(StringData* k, strhash_t h) {
       skey = k;
       skey->incRefCount();
-      data._count = encodeHash(h);
+      data._count = int32_t(h) | 0x80000000;
     }
     inline void setIntKey(int64 k) {
       ikey = k;
@@ -415,16 +410,16 @@ public:
     inline int64 hashKey() const {
       return data._count == 0 ? ikey : data._count;
     }
-    inline int32 hash() const {
+    inline int32_t hash() const {
       return data._count;
     }
-    bool validValue() {
+    bool validValue() const {
       return (intptr_t(data.m_type) > 0);
     }
-    bool empty() {
+    bool empty() const {
       return data.m_type == KindOfUninit;
     }
-    bool tombstone() {
+    bool tombstone() const {
       return data.m_type == KindOfTombstone;
     }
     void dump();
@@ -494,9 +489,10 @@ private:
   }
 
   Bucket* find(int64 h) const;
-  Bucket* find(const char* k, int len, int64 prehash) const;
+  Bucket* find(const char* k, int len, strhash_t prehash) const;
   Bucket* findForInsert(int64 h) const;
-  Bucket* findForInsert(const char* k, int len, int64 prehash) const;
+  Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
+  Bucket* findForNewInsert(size_t h0) const;
 
   bool update(int64 h, TypedValue* data);
   bool update(StringData* key, TypedValue* data);
@@ -708,22 +704,12 @@ public:
       data(d), ikey(0), pListNext(NULL), pListLast(NULL), pNext(NULL) {
       data._count = 0;
     }
+    ~Bucket();
     // set the top bit for string hashes to make sure the hash
     // value is never zero. hash value 0 corresponds to integer key.
-    static inline int32 encodeHash(int32 h) {
-      return (h | 0x80000000);
+    static inline int32_t encodeHash(strhash_t h) {
+      return int32_t(h) | 0x80000000;
     }
-    // These special constructors do not setup all the member fields.
-    // They cannot be used along but must be with the following special
-    // MapImpl constructor
-    Bucket(StringData *k, CVarRef d) : data(d), skey(k) {
-      ASSERT(k->isStatic());
-      data._count = encodeHash(k->getPrecomputedHash());
-    }
-    Bucket(int64 k, CVarRef d) : data(d), ikey(k) {
-      data._count = 0;
-    }
-    ~Bucket();
 
     /* The key is either a string pointer or an int value, and the _count
      * field in data is used to discriminate the key type. _count = 0 means
@@ -741,7 +727,7 @@ public:
 
     inline bool hasStrKey() const { return data._count != 0; }
     inline bool hasIntKey() const { return data._count == 0; }
-    inline void setStrKey(StringData* k, int64 h) {
+    inline void setStrKey(StringData* k, strhash_t h) {
       skey = k;
       skey->incRefCount();
       data._count = encodeHash(h);
@@ -753,7 +739,7 @@ public:
     inline int64 hashKey() const {
       return data._count == 0 ? ikey : data._count;
     }
-    inline int32 hash() const {
+    inline int32_t hash() const {
       return data._count;
     }
 
@@ -774,9 +760,9 @@ private:
   Bucket**         m_arBuckets;
 
   Bucket* find(int64 h) const;
-  Bucket* find(const char* k, int len, int64 prehash) const;
+  Bucket* find(const char* k, int len, strhash_t prehash) const;
   Bucket** findForErase(int64 h) const;
-  Bucket** findForErase(const char* k, int len, int64 prehash) const;
+  Bucket** findForErase(const char* k, int len, strhash_t prehash) const;
 
   bool update(int64 h, CVarRef data);
   bool update(StringData* key, CVarRef data);

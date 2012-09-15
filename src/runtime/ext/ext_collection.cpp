@@ -984,10 +984,13 @@ void c_Map::throwOOB() {
   throw e;
 }
 
-bool hit_string_key(const c_Map::Bucket* p, const char* k,
-                    int len, int32 hash) ALWAYS_INLINE;
-bool hit_string_key(const c_Map::Bucket* p, const char* k,
-                    int len, int32 hash) {
+#define STRING_HASH(x)   (int32_t(x) | 0x80000000)
+
+bool hitStringKey(const c_Map::Bucket* p, const char* k,
+                  int len, int32_t hash) ALWAYS_INLINE;
+bool hitStringKey(const c_Map::Bucket* p, const char* k,
+                  int len, int32_t hash) {
+  ASSERT(p->validValue());
   if (p->hasIntKey()) return false;
   const char* data = p->skey->data();
   return data == k || (p->hash() == hash &&
@@ -995,110 +998,102 @@ bool hit_string_key(const c_Map::Bucket* p, const char* k,
                        memcmp(data, k, len) == 0);
 }
 
-c_Map::Bucket* c_Map::find(int64 h) const {
-  Bucket* p = fetchBucket(h & m_nLastSlot);
-  if (LIKELY(p->validValue() && p->hasIntKey() && p->ikey == h)) {
-    return p;
-  }
-  if (LIKELY(p->empty())) {
-    return NULL;
-  }
-  size_t probeIndex = h;
-  for (size_t i = 1;; ++i) {
-    ASSERT(i <= m_nLastSlot);
-    probeIndex = (probeIndex + i) & m_nLastSlot;
-    ASSERT(((size_t(h)+((i + i*i) >> 1)) & m_nLastSlot) == probeIndex);
-    p = fetchBucket(probeIndex);
-    if (p->validValue() && p->hasIntKey() && p->ikey == h) {
-      return p;
-    }
-    if (p->empty()) {
-      return NULL;
-    }
-  }
+bool hitIntKey(const c_Map::Bucket* p, int64 ki) ALWAYS_INLINE;
+bool hitIntKey(const c_Map::Bucket* p, int64 ki) {
+  ASSERT(p->validValue());
+  return p->ikey == ki && p->hasIntKey();
 }
 
-c_Map::Bucket* c_Map::find(const char* k, int len, int64 prehash) const {
-  int32 hash = c_Map::Bucket::encodeHash(prehash);
-  Bucket* p = fetchBucket(prehash & m_nLastSlot);
-  if (LIKELY(p->validValue() && hit_string_key(p, k, len, hash))) {
-    return p;
+#define FIND_BODY(h0, hit) \
+  size_t tableMask = m_nLastSlot; \
+  size_t probeIndex = size_t(h0) & tableMask; \
+  Bucket* p = fetchBucket(probeIndex); \
+  if (LIKELY(p->validValue() && (hit))) { \
+    return p; \
+  } \
+  if (LIKELY(p->empty())) { \
+    return NULL; \
+  } \
+  for (size_t i = 1;; ++i) { \
+    ASSERT(i <= tableMask); \
+    probeIndex = (probeIndex + i) & tableMask; \
+    ASSERT(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
+    p = fetchBucket(probeIndex); \
+    if (p->validValue() && (hit)) { \
+      return p; \
+    } \
+    if (p->empty()) { \
+      return NULL; \
+    } \
   }
-  if (p->empty()) {
-    return NULL;
+
+#define FIND_FOR_INSERT_BODY(h0, hit) \
+  size_t tableMask = m_nLastSlot; \
+  size_t probeIndex = size_t(h0) & tableMask; \
+  Bucket* p = fetchBucket(h0 & tableMask); \
+  if (LIKELY((p->validValue() && (hit)) || \
+             p->empty())) { \
+    return p; \
+  } \
+  Bucket* ts = NULL; \
+  for (size_t i = 1;; ++i) { \
+    if (UNLIKELY(p->tombstone() && !ts)) { \
+      ts = p; \
+    } \
+    ASSERT(i <= tableMask); \
+    probeIndex = (probeIndex + i) & tableMask; \
+    ASSERT(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
+    p = fetchBucket(probeIndex); \
+    if (LIKELY(p->validValue() && (hit))) { \
+      return p; \
+    } \
+    if (LIKELY(p->empty())) { \
+      if (LIKELY(!ts)) { \
+        return p; \
+      } \
+      return ts; \
+    } \
   }
-  size_t probeIndex = prehash;
-  for (size_t i = 1;; ++i) {
-    ASSERT(i <= m_nLastSlot);
-    probeIndex = (probeIndex + i) & m_nLastSlot;
-    ASSERT(((size_t(prehash)+((i + i*i) >> 1)) & m_nLastSlot) == probeIndex);
-    p = fetchBucket(probeIndex);
-    if (LIKELY(p->validValue() && hit_string_key(p, k, len, hash))) {
-      return p;
-    }
-    if (p->empty()) {
-      return NULL;
-    }
-  }
+
+c_Map::Bucket* c_Map::find(int64 h) const {
+  FIND_BODY(h, hitIntKey(p, h));
+}
+
+c_Map::Bucket* c_Map::find(const char* k, int len, strhash_t prehash) const {
+  FIND_BODY(prehash, hitStringKey(p, k, len, STRING_HASH(prehash)));
 }
 
 c_Map::Bucket* c_Map::findForInsert(int64 h) const {
-  Bucket* p = fetchBucket(h & m_nLastSlot);
-  if (LIKELY((p->validValue() && p->hasIntKey() && p->ikey == h) ||
-             p->empty())) {
+  FIND_FOR_INSERT_BODY(h, hitIntKey(p, h));
+}
+
+c_Map::Bucket* c_Map::findForInsert(const char* k, int len,
+                                    strhash_t prehash) const {
+  FIND_FOR_INSERT_BODY(prehash, hitStringKey(p, k, len, STRING_HASH(prehash)));
+}
+
+inline ALWAYS_INLINE
+c_Map::Bucket* c_Map::findForNewInsert(size_t h0) const {
+  size_t tableMask = m_nLastSlot;
+  size_t probeIndex = h0 & tableMask;
+  Bucket* p = fetchBucket(probeIndex);
+  if (LIKELY(p->empty())) {
     return p;
   }
-  Bucket* ts = NULL;
-  size_t probeIndex = h;
   for (size_t i = 1;; ++i) {
-    if (UNLIKELY(p->tombstone() && !ts)) {
-      ts = p;
-    }
-    ASSERT(i <= m_nLastSlot);
-    probeIndex = (probeIndex + i) & m_nLastSlot;
-    ASSERT(((size_t(h)+((i + i*i) >> 1)) & m_nLastSlot) == probeIndex);
+    ASSERT(i <= tableMask);
+    probeIndex = (probeIndex + i) & tableMask;
+    ASSERT(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);
     p = fetchBucket(probeIndex);
-    if (LIKELY(p->validValue() && p->hasIntKey() && p->ikey == h)) {
-      return p;
-    }
     if (LIKELY(p->empty())) {
-      if (LIKELY(!ts)) {
-        return p;
-      }
-      return ts;
+      return p;
     }
   }
 }
 
-c_Map::Bucket* c_Map::findForInsert(const char* k, int len,
-                                    int64 prehash) const {
-  int32 hash = c_Map::Bucket::encodeHash(prehash);
-  Bucket* p = fetchBucket(prehash & m_nLastSlot);
-  if (LIKELY((p->validValue() && hit_string_key(p, k, len, hash)) ||
-             p->empty())) {
-    return p;
-  }
-  Bucket* ts = NULL;
-  size_t probeIndex = prehash;
-  for (size_t i = 1;; ++i) {
-    if (UNLIKELY(p->tombstone() && !ts)) {
-      ts = p;
-    }
-    ASSERT(i <= m_nLastSlot);
-    probeIndex = (probeIndex + i) & m_nLastSlot;
-    ASSERT(((size_t(prehash)+((i + i*i) >> 1)) & m_nLastSlot) == probeIndex);
-    p = fetchBucket(probeIndex);
-    if (LIKELY(p->validValue() && hit_string_key(p, k, len, hash))) {
-      return p;
-    }
-    if (LIKELY(p->empty())) {
-      if (LIKELY(!ts)) {
-        return p;
-      }
-      return ts;
-    }
-  }
-}
+#undef STRING_HASH
+#undef FIND_BODY
+#undef FIND_FOR_INSERT_BODY
 
 bool c_Map::update(int64 h, TypedValue* data) {
   ASSERT(data->m_type != KindOfRef);
@@ -1114,7 +1109,7 @@ bool c_Map::update(int64 h, TypedValue* data) {
   ++m_versionNumber;
   ++m_size;
   if (!p->tombstone()) {
-    if (++m_load >= computeMaxLoad()) {
+    if (UNLIKELY(++m_load >= computeMaxLoad())) {
       resize();
       p = findForInsert(h);
       ASSERT(p);
@@ -1128,7 +1123,7 @@ bool c_Map::update(int64 h, TypedValue* data) {
 }
 
 bool c_Map::update(StringData *key, TypedValue* data) {
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   Bucket* p = findForInsert(key->data(), key->size(), h);
   ASSERT(p);
   if (p->validValue()) {
@@ -1141,7 +1136,7 @@ bool c_Map::update(StringData *key, TypedValue* data) {
   ++m_versionNumber;
   ++m_size;
   if (!p->tombstone()) {
-    if (++m_load >= computeMaxLoad()) {
+    if (UNLIKELY(++m_load >= computeMaxLoad())) {
       resize();
       p = findForInsert(key->data(), key->size(), h);
       ASSERT(p);
@@ -1195,12 +1190,7 @@ void c_Map::reserve(int64 sz) {
   for (uint i = 0; i < oldNumSlots; ++i) {
     Bucket* p = &oldBuckets[i];
     if (p->validValue()) {
-      Bucket* np;
-      if (p->hasIntKey()) {
-        np = findForInsert((int64)p->ikey);
-      } else {
-        np = findForInsert(p->skey->data(), p->skey->size(), p->skey->hash());
-      }
+      Bucket* np = findForNewInsert(p->hasIntKey() ? p->ikey : p->hash());
       memcpy(np, p, sizeof(Bucket));
     }
   }
@@ -1810,10 +1800,10 @@ Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
   return ret;
 }
 
-bool lm_hit_string_key(const c_StableMap::Bucket* p,
+bool sm_hit_string_key(const c_StableMap::Bucket* p,
                        const char* k, int len, int32 hash)
                        ALWAYS_INLINE;
-bool lm_hit_string_key(const c_StableMap::Bucket* p,
+bool sm_hit_string_key(const c_StableMap::Bucket* p,
                        const char* k, int len, int32 hash) {
   if (p->hasIntKey()) return false;
   const char* data = p->skey->data();
@@ -1832,10 +1822,10 @@ c_StableMap::Bucket* c_StableMap::find(int64 h) const {
 }
 
 c_StableMap::Bucket* c_StableMap::find(const char* k, int len,
-                                       int64 prehash) const {
-  int32 hash = c_StableMap::Bucket::encodeHash(prehash);
+                                       strhash_t prehash) const {
+  int32_t hash = c_StableMap::Bucket::encodeHash(prehash);
   for (Bucket* p = m_arBuckets[prehash & m_nTableMask]; p; p = p->pNext) {
-    if (lm_hit_string_key(p, k, len, hash)) return p;
+    if (sm_hit_string_key(p, k, len, hash)) return p;
   }
   return NULL;
 }
@@ -1854,12 +1844,12 @@ c_StableMap::Bucket** c_StableMap::findForErase(int64 h) const {
 }
 
 c_StableMap::Bucket** c_StableMap::findForErase(const char* k, int len,
-                                                int64 prehash) const {
+                                                strhash_t prehash) const {
   Bucket** ret = &(m_arBuckets[prehash & m_nTableMask]);
   Bucket* p = *ret;
-  int32 hash = c_StableMap::Bucket::encodeHash(prehash);
+  int32_t hash = c_StableMap::Bucket::encodeHash(prehash);
   while (p) {
-    if (lm_hit_string_key(p, k, len, hash)) return ret;
+    if (sm_hit_string_key(p, k, len, hash)) return ret;
     ret = &(p->pNext);
     p = *ret;
   }
@@ -1886,7 +1876,7 @@ bool c_StableMap::update(int64 h, CVarRef data) {
 }
 
 bool c_StableMap::update(StringData *key, CVarRef data) {
-  int64 h = key->hash();
+  strhash_t h = key->hash();
   Bucket* p = find(key->data(), key->size(), h);
   if (p) {
     p->data.assignValHelper(data);

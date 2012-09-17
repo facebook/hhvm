@@ -1269,8 +1269,6 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
 
     /* Advance to the position right after the last full match */
     start_offset = offsets[1];
-    /* Make sure we're not setting start_offset to the middle of a character */
-    ASSERT((ssubject.data()[start_offset] & 0xc0) != 0x80);
   }
 
   start_offset = last_match - ssubject.data(); /* the offset might have been incremented, but without further successful matches */

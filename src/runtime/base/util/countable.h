@@ -25,14 +25,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * This is a special value for _count used to indicate objects that
- * are already deallocated. (See smart_allocator.h.)
- */
-const int32_t RefCountTombstoneValue = 0xde1ee7ed;
-static_assert(RefCountTombstoneValue < 0,
-              "RefCountTombstoneValue should be negative to aid assertions");
-
 /*
  * This bit flags a reference count as "static".  If a reference count
  * is static, it means we should never increment or decrement it: the
@@ -41,10 +33,23 @@ static_assert(RefCountTombstoneValue < 0,
  */
 const int32_t RefCountStaticValue = (1 << 30);
 
-// Used for assertions.
+/**
+ * This is a special value for _count used to indicate objects that
+ * are already deallocated. (See smart_allocator.h.)
+ */
+const int32_t RefCountTombstoneValue = -0x21e11813; // 0xde1ee7ed
+static_assert(RefCountTombstoneValue < 0,
+              "RefCountTombstoneValue is expected to be less than "
+              "zero for assertion purposes");
+
+/*
+ * Used for assertions.  Real count values should always be less than
+ * or equal to RefCountStaticValue, and asserting this will also catch
+ * common malloc freed-memory patterns (e.g. 0x5a5a5a5a and smart
+ * allocator's 0x6a6a6a6a).
+ */
 inline DEBUG_ONLY bool is_refcount_realistic(int32_t count) {
-  return count != RefCountTombstoneValue &&
-         count != 0x5a5a5a5a; /* debug freed mem in malloc */
+  return count <= RefCountStaticValue && count >= 0;
 }
 
 /**

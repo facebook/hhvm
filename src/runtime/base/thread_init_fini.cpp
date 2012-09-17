@@ -70,8 +70,8 @@ void flush_thread_locals() {
 }
 
 void finish_thread_locals(void *arg /* = NULL */) {
-  if (g_context.getNoCheck()) g_context.destroy();
-  if (g_persistentObjects.getNoCheck()) g_persistentObjects.destroy();
+  if (!g_context.isNull()) g_context.destroy();
+  if (!g_persistentObjects.isNull()) g_persistentObjects.destroy();
 }
 
 static class SetThreadInitFini {

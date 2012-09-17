@@ -215,18 +215,14 @@ Array vm_get_class_vars(CStrRef className) {
   // For visibility checks
   CallerFrame cf;
   HPHP::VM::Class* ctx = arGetContextClass(cf());
-  const ClassInfo* ctxCI =
-    (ctx == NULL ? NULL : g_vmContext->findClassInfo(CStrRef(ctx->nameRef())));
-  ClassInfo::PropertyMap propMap;
-  g_vmContext->findClassInfo(className)->getAllProperties(propMap);
 
   HphpArray* ret = NEW(HphpArray)(numDeclProps + numSProps);
 
   for (size_t i = 0; i < numDeclProps; ++i) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);
     // Empty names are used for invisible/private parent properties; skip them
-    if (name->size() == 0) continue;
-    if (propMap[String(name)]->isVisible(ctxCI)) {
+    ASSERT(name->size() != 0);
+    if (VM::Class::IsPropAccessible(propInfo[i], ctx)) {
       const TypedValue* value = &((*propVals)[i]);
       ret->nvSet(name, value, false);
     }
@@ -235,7 +231,7 @@ Array vm_get_class_vars(CStrRef className) {
   for (size_t i = 0; i < numSProps; ++i) {
     bool vis, access;
     TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
-    if (vis) {
+    if (access) {
       ret->nvSet(const_cast<StringData*>(sPropInfo[i].m_name), value, false);
     }
   }

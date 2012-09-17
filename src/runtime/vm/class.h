@@ -640,6 +640,8 @@ public:
   TypedValue* getSProp(Class* ctx, const StringData* sPropName,
                        bool& visible, bool& accessible) const;
 
+  static bool IsPropAccessible(const Prop& prop, Class* ctx);
+
   // Returns kInvalidSlot if we can't find this static property.
   Slot lookupSProp(const StringData* sPropName) const {
     return m_staticProperties.findIndex(sPropName);

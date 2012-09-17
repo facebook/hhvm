@@ -952,6 +952,14 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
   return sProp;
 }
 
+bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
+  if (prop.m_attrs & AttrPublic) return true;
+  if (prop.m_attrs & AttrPrivate) return prop.m_class == ctx;
+  if (!ctx) return false;
+
+  return prop.m_class->classof(ctx) || ctx->classof(prop.m_class);
+}
+
 TypedValue Class::getStaticPropInitVal(const SProp& prop) {
   Class* declCls = prop.m_class;
   Slot s = declCls->m_staticProperties.findIndex(prop.m_name);
@@ -1668,13 +1676,10 @@ void Class::setProperties() {
       prop.m_originalMangledName = parentProp.m_originalMangledName;
       prop.m_attrs = parentProp.m_attrs;
       prop.m_docComment = parentProp.m_docComment;
+      prop.m_name = parentProp.m_name;
       if (!(parentProp.m_attrs & AttrPrivate)) {
-        prop.m_name = parentProp.m_name;
         curPropMap.add(prop.m_name, prop);
       } else {
-        // Use a blank name for inaccessible properties.
-        static StringData* sd = StringData::GetStaticString("");
-        prop.m_name = sd;
         ++numInaccessible;
         curPropMap.addUnnamed(prop);
       }

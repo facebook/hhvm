@@ -259,10 +259,11 @@ VectorArray::VectorArray(const VectorArray *src, bool sma /* ignored */) :
   if (m_size <= FixedSize) {
     m_capacity = FixedSize;
     m_elems = m_fixed;
+    m_allocMode = kInline;
   } else {
-    // malloc
     m_capacity = Util::nextPower2(m_size);
     m_elems = (TypedValue*) malloc(m_capacity * sizeof(TypedValue));
+    m_allocMode = kMalloc;
   }
   for (uint i = 0, n = m_size; i < n; i++) {
     ASSERT(src->m_elems[i].m_type != KindOfRef &&

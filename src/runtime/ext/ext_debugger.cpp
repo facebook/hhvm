@@ -153,6 +153,9 @@ Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
     // sweep. It will remove the client from the map. Here we'd rather take
     // the risk of leaking the client than the risk of chasing dangling
     // pointers.
+    //
+    // FIXME: it's unclear why it should be possible that we would not
+    // get a chance to destruct or call sweep.
     return s_dbgCltMap.erase(nameStr);
   }
 

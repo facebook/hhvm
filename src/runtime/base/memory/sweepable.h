@@ -36,6 +36,12 @@ public:
 
   virtual void sweep() { delete this;}
 
+  /*
+   * Note: "Persistent" here means that the object will stay alive
+   * across requests, but *as a thread local*.  It can be reused once
+   * the same server thread gets around to handling a new request.  If
+   * you need this you probably should be using it via PersistentObjectStore.
+   */
   void incPersistent() { ++m_persistentCount;}
   void decPersistent() { --m_persistentCount;}
   bool isPersistent() { return m_persistentCount > 0; }

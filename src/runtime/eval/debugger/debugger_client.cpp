@@ -474,8 +474,8 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   SmartPtr<Socket> socket1(new Socket(fds[0], AF_UNIX));
   SmartPtr<Socket> socket2(new Socket(fds[1], AF_UNIX));
 
-  socket1->incPersistent();
-  socket2->incPersistent();
+  socket1->unregister();
+  socket2->unregister();
   DMachineInfoPtr machine(new DMachineInfo());
   machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
@@ -493,11 +493,10 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
   info("Connecting to %s:%d...", host.c_str(), port);
   Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                             String(host), port);
-  // To ensure the sock is not swept, we need to mark it persistent
-  // This should have no effect on normal client mode as it never does sweeping
-  // It is needed in API mode otherwise the Socket will be swept and the client
-  // will hold an invalid pointer.
-  sock->incPersistent();
+  // Ensure the socket is not swept---it is cached across requests in
+  // API mode, and in client mode we expect to destruct it ourselves
+  // when ~DebuggerClient runs.
+  sock->unregister();
   Object obj(sock);
   if (f_socket_connect(sock, String(host), port)) {
     DMachineInfoPtr machine(new DMachineInfo());
@@ -520,7 +519,7 @@ bool DebuggerClient::reconnect() {
     info("Re-connecting to %s:%d...", host.c_str(), port);
     Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                               String(host), port);
-    sock->incPersistent();
+    sock->unregister();
     Object obj(sock);
     if (f_socket_connect(sock, String(host), port)) {
       for (unsigned int i = 0; i < m_machines.size(); i++) {

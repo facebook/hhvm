@@ -496,6 +496,12 @@ void ClassInfo::getAllParentsVec(ClassVec &parents) const {
 }
 
 void ClassInfo::getAllInterfacesVec(InterfaceVec &interfaces) const {
+  CStrRef parent = getParentClass();
+  if (!parent.empty()) {
+    const ClassInfo *info = FindClass(parent);
+    if (info) info->getAllInterfacesVec(interfaces);
+  }
+
   const InterfaceVec &ifs = getInterfacesVec();
   for (unsigned int i = 0; i < ifs.size(); i++) {
     CStrRef intf = ifs[i];

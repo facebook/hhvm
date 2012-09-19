@@ -123,6 +123,7 @@ class Variant : VariantBase {
   Variant(NoInit) {}
 
   void destruct();
+  static void destructData(RefData* num, DataType t);
 
   // D462768 showed no gain from inlining, even just with INLINE_VARIANT_HELPER.
   ~Variant();
@@ -193,6 +194,7 @@ public:
 
  private:
   inline ALWAYS_INLINE void destructImpl();
+  inline ALWAYS_INLINE static void destructDataImpl(RefData* d, DataType t);
   friend class VarNR;
   // This helper is only used to construct VarNR
   static const int NR_FLAG = 1 << 29;
@@ -206,8 +208,10 @@ public:
    * Break bindings and set to null.
    */
   void unset() {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    RefData* d = m_data.pref;
+    DataType t = m_type;
     m_type = KindOfUninit;
+    if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);
   }
 
   /**
@@ -1308,9 +1312,12 @@ public:
     PromoteToRef(v);
     RefData* r = v.m_data.pref;
     r->incRefCount(); // in case destruct() triggers deletion of v
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+
+    RefData* d = m_data.pref;
+    DataType t = m_type;
     m_type = KindOfRef;
     m_data.pref = r;
+    if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);
   }
 
   inline ALWAYS_INLINE void constructRefHelper(CVarRef v) {
@@ -1345,10 +1352,12 @@ public:
       rhs.m_data.pstr->incRefCount();
     }
 
-    if (destroy) destruct();
+    RefData* d = m_data.pref;
+    DataType t = m_type;
     m_type = rhs.m_type;
     if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
     m_data.num = rhs.m_data.num;
+    if (destroy) destructData(d, t);
   }
 
   inline ALWAYS_INLINE

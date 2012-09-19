@@ -200,15 +200,19 @@ static void destructRef(RefData *p)     { p->release(); }
 static void (*destructors[4])(RefData *) =
   {destructString, destructArray, destructObject, destructRef};
 
-inline ALWAYS_INLINE void Variant::destructImpl() {
-  ASSERT(!isPrimitive());
+inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
+  ASSERT(IS_REFCOUNTED_TYPE(t));
   CT_ASSERT(KindOfString + 1 == KindOfArray &&
             KindOfArray + 1 == KindOfObject &&
             KindOfObject + 1 == KindOfRef);
-  if (m_data.pref->decRefCount() == 0) {
-    ASSERT(m_type >= KindOfString && m_type <= KindOfRef);
-    destructors[m_type - KindOfString](m_data.pref);
+  if (data->decRefCount() == 0) {
+    ASSERT(t >= KindOfString && t <= KindOfRef);
+    destructors[t - KindOfString](data);
   }
+}
+
+inline ALWAYS_INLINE void Variant::destructImpl() {
+  destructDataImpl(m_data.pref, m_type);
 }
 
 namespace VM {
@@ -248,6 +252,11 @@ void Variant::destruct() {
 }
 
 HOT_FUNC
+void Variant::destructData(RefData* data, DataType t) {
+  destructDataImpl(data, t);
+}
+
+HOT_FUNC
 Variant::~Variant() {
   if (IS_REFCOUNTED_TYPE(m_type)) destructImpl();
 }
@@ -270,147 +279,67 @@ Variant &Variant::setWithRef(CVarRef v, const ArrayData *arr /* = NULL */) {
   return *this;
 }
 
-void Variant::setNull() {
-  if (isPrimitive()) {
-    m_type = KindOfNull;
-  } else if (m_type == KindOfRef) {
-    m_data.pref->var()->setNull();
-  } else {
-    destruct();
-    m_type = KindOfNull;
+#define IMPLEMENT_SET_IMPL(name, argType, argName, setOp, returnStmt)   \
+  Variant::name(argType argName) {                                      \
+    if (isPrimitive()) {                                                \
+      setOp;                                                            \
+    } else if (m_type == KindOfRef) {                                   \
+      m_data.pref->var()->name(argName);                                \
+      returnStmt;                                                       \
+    } else {                                                            \
+      RefData* d = m_data.pref;                                         \
+      DataType t = m_type;                                              \
+      setOp;                                                            \
+      destructData(d, t);                                               \
+    }                                                                   \
+    returnStmt;                                                         \
   }
-}
+#define IMPLEMENT_VOID_SET(name, setOp) \
+  void IMPLEMENT_SET_IMPL(name, , , setOp, return)
+#define IMPLEMENT_SET(argType, setOp) \
+  CVarRef IMPLEMENT_SET_IMPL(set, argType, v, setOp, return *this)
 
-HOT_FUNC
-CVarRef Variant::set(bool v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfRef) {
-    m_data.pref->var()->set(v);
-    return *this;
-  } else {
-    destruct();
-  }
-  m_type = KindOfBoolean;
-  m_data.num = (v ? 1 : 0);
-  return *this;
-}
+IMPLEMENT_VOID_SET(setNull, m_type = KindOfNull)
+HOT_FUNC IMPLEMENT_SET(bool, m_type = KindOfBoolean; m_data.num = v)
+IMPLEMENT_SET(int, m_type = KindOfInt64; m_data.num = v)
+HOT_FUNC IMPLEMENT_SET(int64, m_type = KindOfInt64; m_data.num = v)
+IMPLEMENT_SET(double, m_type = KindOfDouble; m_data.dbl = v)
+IMPLEMENT_SET(litstr,
+              m_type = KindOfString;
+              m_data.pstr = NEW(StringData)(v);
+              m_data.pstr->incRefCount())
+IMPLEMENT_SET(const StaticString&,
+              StringData* s = v.get();
+              ASSERT(s);
+              m_type = KindOfStaticString;
+              m_data.pstr = s)
 
-CVarRef Variant::set(int v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfRef) {
-    m_data.pref->var()->set(v);
-    return *this;
-  } else {
-    destruct();
-  }
-  m_type = KindOfInt64;
-  m_data.num = v;
-  return *this;
-}
+#undef IMPLEMENT_SET_IMPL
+#undef IMPLEMENT_VOID_SET
+#undef IMPLEMENT_SET
 
-HOT_FUNC
-CVarRef Variant::set(int64 v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfRef) {
-    m_data.pref->var()->set(v);
-    return *this;
-  } else {
-    destruct();
+#define IMPLEMENT_PTR_SET(ptr, member, dtype)                           \
+  CVarRef Variant::set(ptr *v) {                                        \
+    Variant *self = m_type == KindOfRef ? m_data.pref->var() : this;    \
+    if (UNLIKELY(!v)) {                                                 \
+      self->setNull();                                                  \
+    } else {                                                            \
+      v->incRefCount();                                                 \
+      RefData* d = self->m_data.pref;                                   \
+      DataType t = self->m_type;                                        \
+      self->m_type = dtype;                                             \
+      self->m_data.member = v;                                          \
+      if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);                    \
+    }                                                                   \
+    return *this;                                                       \
   }
-  m_type = KindOfInt64;
-  m_data.num = v;
-  return *this;
-}
 
-CVarRef Variant::set(double v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfRef) {
-    m_data.pref->var()->set(v);
-    return *this;
-  } else {
-    destruct();
-  }
-  m_type = KindOfDouble;
-  m_data.dbl = v;
-  return *this;
-}
+HOT_FUNC IMPLEMENT_PTR_SET(StringData, pstr,
+                           v->isStatic() ? KindOfStaticString : KindOfString);
+HOT_FUNC IMPLEMENT_PTR_SET(ArrayData, parr, KindOfArray)
+HOT_FUNC IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
 
-CVarRef Variant::set(litstr v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfRef) {
-    m_data.pref->var()->set(v);
-    return *this;
-  } else {
-    destruct();
-  }
-  m_type = KindOfString;
-  m_data.pstr = NEW(StringData)(v);
-  m_data.pstr->incRefCount();
-  return *this;
-}
-
-HOT_FUNC
-CVarRef Variant::set(StringData *v) {
-  Variant *self = m_type == KindOfRef ? m_data.pref->var() : this;
-  if (UNLIKELY(!v)) {
-    self->setNull();
-  } else {
-    v->incRefCount();
-    if (IS_REFCOUNTED_TYPE(self->m_type)) self->destruct();
-    self->m_type = v->isStatic() ? KindOfStaticString : KindOfString;
-    self->m_data.pstr = v;
-  }
-  return *this;
-}
-
-CVarRef Variant::set(const StaticString & v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfRef) {
-    m_data.pref->var()->set(v);
-    return *this;
-  } else {
-    destruct();
-  }
-  StringData *s = v.get();
-  ASSERT(s);
-  m_type = KindOfStaticString;
-  m_data.pstr = s;
-  return *this;
-}
-
-HOT_FUNC
-CVarRef Variant::set(ArrayData *v) {
-  Variant *self = m_type == KindOfRef ? m_data.pref->var() : this;
-  if (UNLIKELY(!v)) {
-    self->setNull();
-  } else {
-    v->incRefCount();
-    if (IS_REFCOUNTED_TYPE(self->m_type)) self->destruct();
-    self->m_type = KindOfArray;
-    self->m_data.parr = v;
-  }
-  return *this;
-}
-
-HOT_FUNC
-CVarRef Variant::set(ObjectData *v) {
-  Variant *self = m_type == KindOfRef ? m_data.pref->var() : this;
-  if (UNLIKELY(!v)) {
-    self->setNull();
-  } else {
-    v->incRefCount();
-    if (IS_REFCOUNTED_TYPE(self->m_type)) self->destruct();
-    self->m_type = KindOfObject;
-    self->m_data.pobj = v;
-  }
-  return *this;
-}
+#undef IMPLEMENT_PTR_SET
 
 void Variant::init(ObjectData *v) {
   if (v) {

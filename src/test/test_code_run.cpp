@@ -24021,6 +24021,53 @@ bool TestCodeRun::TestYield() {
         "  int(3)\n"
         "}\n");
 
+  // Testing destructor/assignment corner cases
+  MVCRO("<?php\n"
+        "\n"
+        "class Evil {\n"
+        "  public function __destruct() {\n"
+        "    echo \"in __destruct()\\n\";\n"
+        "    dumpCurrent();\n"
+        "  }\n"
+        "}\n"
+        "function dumpCurrent() {\n"
+        "  var_dump($GLOBALS['cont']->current());\n"
+        "  if (isset($GLOBALS['gonext'])) {\n"
+        "    $GLOBALS['cont']->next();\n"
+        "  }\n"
+        "}\n"
+        "function gen() {\n"
+        "  yield new Evil;\n"
+        "  yield null;\n"
+        "  yield null;\n"
+        "  yield null;\n"
+        "  yield null;\n"
+        "  yield null;\n"
+        "  yield null;\n"
+        "}\n"
+        "function main() {\n"
+        "  $GLOBALS['cont'] = $c = gen();\n"
+        "  $c->next();\n"
+        "\n"
+        "  $c->send(new Evil);\n"
+        "  $GLOBALS['gonext'] = true;\n"
+        "  $c->next();\n"
+        "  $c->send(new Evil);\n"
+        "  $c->send(null);\n"
+        "  echo \"Finished!\\n\";\n"
+        "}\n"
+        "main();\n"
+        "echo \n\"Returned from main safely\\n\";\n",
+
+        "in __destruct()\n"
+        "NULL\n"
+        "in __destruct()\n"
+        "NULL\n"
+        "in __destruct()\n"
+        "NULL\n"
+        "Finished!\n"
+        "Returned from main safely\n");
+
   return true;
 }
 

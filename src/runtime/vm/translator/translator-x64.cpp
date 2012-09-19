@@ -708,7 +708,7 @@ static void
 emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
   if (RuntimeOption::EvalJitCmovVarDeref) {
     a.cmp_imm32_disp_reg32(KindOfRef, TVOFF(m_type), reg);
-    a.cload_reg64_disp_reg64(CC_Z, reg, 0, reg);
+    a.cload_reg64_disp_reg64(CC_Z, reg, TVOFF(m_data), reg);
   } else {
     IfVariant ifVar(a, reg);
     emitDeref(a, reg, reg);
@@ -721,9 +721,10 @@ static void
 emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
                     int disp, PhysReg dest, bool writeType = true) {
   if (writeType) {
-    a.    store_imm32_disp_reg(type, disp + TVOFF(m_type), dest);
+    a.  store_imm32_disp_reg(type, disp + TVOFF(m_type), dest);
   }
   if (!IS_NULL_TYPE(type)) {
+    ASSERT(val != reg::noreg);
     a.  store_reg64_disp_reg64(val, disp + TVOFF(m_data), dest);
   }
 }
@@ -764,13 +765,19 @@ emitStoreNull(X64Assembler& a, const Location& where) {
  * Emit code that does the same thing as tvSet().
  *
  * The `oldType' and `oldData' registers are used for temporary
- * storage and unconditionally destroyed; `toPtr' may be destroyed;
+ * storage and unconditionally destroyed.
+ * `toPtr' will be destroyed iff the cell we're storing to is
+ * KindOfRef.
+ * The variant check will not be performed if toOffset is nonzero, so
+ * only pass a nonzero offset if you know the destination is not
+ * KindOfRef.
  * `from' will not be modified.
  */
 void TranslatorX64::emitTvSetRegSafe(const NormalizedInstruction& i,
                                      PhysReg from,
                                      DataType fromType,
                                      PhysReg toPtr,
+                                     int toOffset,
                                      PhysReg oldType,
                                      PhysReg oldData,
                                      bool incRefFrom) {
@@ -778,10 +785,12 @@ void TranslatorX64::emitTvSetRegSafe(const NormalizedInstruction& i,
   ASSERT(!i.isSimple());
   ASSERT(fromType != KindOfRef);
 
-  emitDerefIfVariant(a, toPtr);
-  a.  load_reg64_disp_reg32(toPtr, TVOFF(m_type), oldType);
-  a.  load_reg64_disp_reg64(toPtr, TVOFF(m_data), oldData);
-  emitStoreTypedValue(a, fromType, from, 0, toPtr);
+  if (toOffset == 0) {
+    emitDerefIfVariant(a, toPtr);
+  }
+  a.  load_reg64_disp_reg32(toPtr, toOffset + TVOFF(m_type), oldType);
+  a.  load_reg64_disp_reg64(toPtr, toOffset + TVOFF(m_data), oldData);
+  emitStoreTypedValue(a, fromType, from, toOffset, toPtr);
   if (incRefFrom) {
     emitIncRef(from, fromType);
   }
@@ -792,10 +801,12 @@ void TranslatorX64::emitTvSet(const NormalizedInstruction& i,
                               PhysReg from,
                               DataType fromType,
                               PhysReg toPtr,
+                              int toOffset,
                               bool incRefFrom) {
   ScratchReg oldType(m_regMap);
   ScratchReg oldData(m_regMap);
-  emitTvSetRegSafe(i, from, fromType, toPtr, *oldType, *oldData, incRefFrom);
+  emitTvSetRegSafe(i, from, fromType, toPtr, toOffset,
+                   *oldType, *oldData, incRefFrom);
 }
 
 // Logical register move: ensures the value in src will be in dest
@@ -9237,12 +9248,12 @@ void TranslatorX64::translatePackCont(const Tracelet& t,
     a.  store_reg32_disp_reg64(*rZero, srcOff + TVOFF(m_type), rVmFp);
   }
 
-  int valueOff = offsetof(c_GenericContinuation, m_value);
-  emitDecRefGeneric(i, rCont, valueOff);
   // We're moving our reference to the value from the stack to the
   // continuation object, so we don't have to incRef or decRef
   Location valLoc = i.inputs[valIdx]->location;
-  spillTo(i.inputs[valIdx]->outerType(), getReg(valLoc), true, rCont, valueOff);
+  emitTvSet(i, getReg(valLoc), i.inputs[valIdx]->outerType(), rCont,
+            offsetof(c_GenericContinuation, m_value), false);
+
   emitImmReg(a, i.imm[0].u_IVA, *rScratch);
   a.    store_reg64_disp_reg64(*rScratch,
                                offsetof(c_GenericContinuation, m_label),
@@ -9339,9 +9350,7 @@ void TranslatorX64::translateContNext(const Tracelet& t,
 
   // m_received.setNull()
   const Offset receivedOff = offsetof(c_GenericContinuation, m_received);
-  emitDecRefGeneric(i, *rCont, receivedOff);
-  emitStoreImm(a, KindOfUninit, *rCont, receivedOff + TVOFF(m_type),
-               sz::dword, &m_regMap);
+  emitTvSet(i, reg::noreg, KindOfNull, *rCont, receivedOff, false);
 
   emitContPreNext(i, rCont);
 }
@@ -9375,11 +9384,9 @@ void TranslatorX64::translateContSendImpl(const NormalizedInstruction& i) {
 
   // m_received = value
   const Offset receivedOff = offsetof(c_GenericContinuation, m_received);
-  emitDecRefGeneric(i, *rCont, receivedOff);
   PhysReg valReg = getReg(i.inputs[valIdx]->location);
   DataType valType = i.inputs[valIdx]->outerType();
-  emitIncRef(valReg, valType);
-  spillTo(valType, valReg, true, *rCont, receivedOff);
+  emitTvSet(i, valReg, valType, *rCont, receivedOff, true);
 
   // m_should_throw = true (maybe)
   if (raise) {
@@ -10618,7 +10625,7 @@ TranslatorX64::emitPropSet(const NormalizedInstruction& i,
   DataType rhsType = rhs.rtt.valueType();
 
   // Store rhs in the field
-  emitTvSet(i, rhsReg, rhsType, fieldAddr, i.outStack || rhs.isLocal());
+  emitTvSet(i, rhsReg, rhsType, fieldAddr, 0, i.outStack || rhs.isLocal());
 
   if (!base.isLocal()) {
     const int kBaseIdx = 1;

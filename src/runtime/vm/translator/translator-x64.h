@@ -180,10 +180,10 @@ class TranslatorX64 : public Translator, public SpillFill,
                               int off,
                               PhysReg tmpReg);
   void emitTvSetRegSafe(const NormalizedInstruction&, PhysReg from,
-    DataType fromType, PhysReg toPtr, PhysReg tmp1, PhysReg tmp2,
+    DataType fromType, PhysReg toPtr, int toOffset, PhysReg tmp1, PhysReg tmp2,
     bool incRefFrom);
   void emitTvSet(const NormalizedInstruction&, PhysReg from,
-    DataType fromType, PhysReg toPtr, bool incRefFrom = true);
+    DataType fromType, PhysReg toPtr, int toOffset = 0, bool incRefFrom = true);
 
   void emitPushAR(const NormalizedInstruction& i, const Func* func,
                   const int bytesPopped = 0, bool isCtor = false,

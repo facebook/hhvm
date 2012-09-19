@@ -311,7 +311,6 @@ private:
   uint32  m_tableMask;   // Bitmask used when indexing into the hash table.
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
   ElmInd  m_lastE;       // Index of last used element.
-  bool    m_siPastEnd;   // (true) ? strong iterators possibly past end.
   uint8_t m_allocMode;   // enum AllocMode
   const bool m_nonsmart; // never use smartalloc to allocate Elms
   union {

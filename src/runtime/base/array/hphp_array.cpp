@@ -230,7 +230,7 @@ inline void HphpArray::init(uint size) {
 
 HphpArray::HphpArray(uint size)
   : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_siPastEnd(false), m_nonsmart(false) {
+    m_nonsmart(false) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
@@ -241,7 +241,7 @@ HphpArray::HphpArray(uint size)
 
 HphpArray::HphpArray(EmptyMode)
   : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_siPastEnd(false), m_nonsmart(false) {
+    m_nonsmart(false) {
   init(0);
   setStatic();
 }
@@ -819,10 +819,10 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   }
   // If there could be any strong iterators that are past the end, we need to
   // do a pass and update these iterators to point to the newly added element.
-  if (m_siPastEnd) {
-    m_siPastEnd = false;
+  if (siPastEnd()) {
+    setSiPastEnd(false);
     bool shouldWarn = false;
-    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+    for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
       FullPos* fp = r.front();
       if (fp->pos == ssize_t(ElmIndEmpty)) {
         fp->pos = ssize_t(*ei);
@@ -1012,7 +1012,7 @@ void HphpArray::compact(bool renumber /* = false */) {
     mPos.key = NULL;
   }
   TinyVector<ElmKey, 3> siKeys;
-  for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     ElmInd ei = r.front()->pos;
     if (ei != ElmIndEmpty) {
       Elm* e = &m_data[ei];
@@ -1066,7 +1066,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   }
   // Update strong iterators, now that compaction is complete.
   int key = 0;
-  for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     FullPos* fp = r.front();
     if (fp->pos != ArrayData::invalid_index) {
       ElmKey &k = siKeys[key];
@@ -1612,7 +1612,7 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
 
   bool nextElementUnsetInsideForeachByReference = false;
   ElmInd eINext = ElmIndTombstone;
-  for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     FullPos* fp = r.front();
     if (fp->pos == ssize_t(pos)) {
       nextElementUnsetInsideForeachByReference = true;
@@ -1621,9 +1621,8 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
         // next element past pos, or ElmIndEmpty if pos is the last element.
         eINext = nextElm(elms, pos);
         if (eINext == ElmIndEmpty) {
-          // Record that there is a strong iterator out there that is past the
-          // end.
-          m_siPastEnd = true;
+          // Remember there is a strong iterator past the end.
+          setSiPastEnd(true);
         }
       }
       fp->pos = ssize_t(eINext);
@@ -1741,21 +1740,7 @@ ArrayData* HphpArray::copy() const {
 
 ArrayData* HphpArray::copyWithStrongIterators() const {
   HphpArray* copied = copyImpl();
-  // Transfer strong iterators
-  if (m_strongIterators) {
-    // Copy over all of the strong iterators, and update the iterators
-    // to point to the new array
-    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
-      r.front()->container = copied;
-    }
-    copied->m_strongIterators = m_strongIterators;
-    // Copy flags to new array
-    copied->m_siPastEnd = m_siPastEnd;
-    // Clear the strong iterator list and flags from the original array
-    HphpArray* src = const_cast<HphpArray*>(this);
-    src->m_strongIterators = 0;
-    src->m_siPastEnd = 0;
-  }
+  moveStrongIterators(copied, const_cast<HphpArray*>(this));
   return copied;
 }
 
@@ -1970,6 +1955,7 @@ HphpArray* HphpArray::copyImpl() const {
 }
 
 HphpArray* HphpArray::copyImpl(HphpArray* target) const {
+  ASSERT(!target->siPastEnd());
   target->m_pos = m_pos;
   target->m_data = NULL;
   target->m_nextKI = m_nextKI;
@@ -1977,7 +1963,6 @@ HphpArray* HphpArray::copyImpl(HphpArray* target) const {
   target->m_size = m_size;
   target->m_hLoad = m_hLoad;
   target->m_lastE = m_lastE;
-  target->m_siPastEnd = false;
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
   target->allocData(maxElms, tableSize);
@@ -2126,9 +2111,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
-  if (a->m_strongIterators) {
-    a->freeStrongIterators();
-  }
+  a->freeStrongIterators();
   Elm* elms = a->m_data;
   ElmInd pos = a->nextElm(elms, ElmIndEmpty);
   if (validElmInd(pos)) {
@@ -2155,9 +2138,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
-  if (a->m_strongIterators) {
-    a->freeStrongIterators();
-  }
+  a->freeStrongIterators();
 
   Elm* elms = a->m_data;
   if (a->m_lastE == 0 || elms[0].data.m_type != KindOfTombstone) {
@@ -2213,8 +2194,8 @@ void HphpArray::getFullPos(FullPos& fp) {
   ASSERT(fp.container == (ArrayData*)this);
   fp.pos = m_pos;
   if (fp.pos == ssize_t(ElmIndEmpty)) {
-    // Record that there is a strong iterator out there that is past the end.
-    m_siPastEnd = true;
+    // Remember there is a strong iterator past the end.
+    setSiPastEnd(true);
   }
 }
 

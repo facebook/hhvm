@@ -103,10 +103,10 @@ do {                                                                    \
   /* If there could be any strong iterators that are past the end, */   \
   /* we need to a pass and update these iterators to point to the */    \
   /* newly added element. */                                            \
-  if (m_flag & StrongIteratorPastEnd) {                                 \
-    m_flag &= ~StrongIteratorPastEnd;                                   \
+  if (siPastEnd()) {                                                    \
+    setSiPastEnd(false);                                                \
     bool shouldWarn = false;                                            \
-    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) { \
+    for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) { \
       FullPos* fp = r.front();                                          \
       if (fp->pos == 0) {                                               \
         fp->pos = (ssize_t)(element);                                   \
@@ -158,7 +158,7 @@ void ZendArray::init(uint nSize) {
 
 HOT_FUNC_HPHP
 ZendArray::ZendArray(uint nSize, bool nonsmart) :
-  m_flag(0), m_nonsmart(nonsmart), m_pListHead(NULL), m_pListTail(NULL),
+  m_nonsmart(nonsmart), m_pListHead(NULL), m_pListTail(NULL),
   m_nNextFreeElement(0) {
   m_size = 0;
   init(nSize);
@@ -166,7 +166,7 @@ ZendArray::ZendArray(uint nSize, bool nonsmart) :
 
 HOT_FUNC_HPHP
 ZendArray::ZendArray(uint nSize, int64 n, Bucket *bkts[]) :
-  m_flag(0), m_nonsmart(false), m_pListHead(bkts[0]), m_pListTail(0),
+  m_nonsmart(false), m_pListHead(bkts[0]), m_pListTail(0),
   m_nNextFreeElement(n) {
   m_pos = (ssize_t)(m_pListHead);
   m_size = nSize;
@@ -1199,15 +1199,14 @@ void ZendArray::erase(Bucket ** prev, bool updateNext /* = false */) {
     if (m_pos == (ssize_t)p) {
       m_pos = (ssize_t)p->pListNext;
     }
-    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+    for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
       FullPos* fp = r.front();
       if (fp->pos == ssize_t(p)) {
         nextElementUnsetInsideForeachByReference = true;
         fp->pos = (ssize_t)p->pListNext;
         if (!fp->pos) {
-          // Record that there is a strong iterator out there
-          // that is past the end
-          m_flag |= StrongIteratorPastEnd;
+          // Remember there is a strong iterator past the end
+          setSiPastEnd(true);
         }
       }
     }
@@ -1280,30 +1279,21 @@ ArrayData *ZendArray::copy() const {
 ArrayData *ZendArray::copyWithStrongIterators() const {
   ZendArray* copied = copyImpl();
   // Transfer strong iterators
-  if (m_strongIterators != 0) {
-    for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+  if (strongIterators()) {
+    moveStrongIterators(copied, const_cast<ZendArray*>(this));
+    for (FullPosRange r(copied->strongIterators()); !r.empty(); r.popFront()) {
       FullPos* fp = r.front();
       // Update fp.pos to point to the corresponding element in 'copied'
       Bucket* p = reinterpret_cast<Bucket*>(fp->pos);
       if (p) {
-        Bucket* copiedP;
         if (p->hasStrKey()) {
-          copiedP = copied->find(p->skey->data(), p->skey->size(),
-                                 (strhash_t)p->hash());
+          fp->pos = (ssize_t) copied->find(p->skey->data(), p->skey->size(),
+                                          (strhash_t)p->hash());
         } else {
-          copiedP = copied->find((int64)p->ikey);
+          fp->pos = (ssize_t) copied->find((int64)p->ikey);
         }
-        fp->pos = (ssize_t)copiedP;
       }
-      fp->container = copied;
     }
-    copied->m_strongIterators = m_strongIterators;
-    // Copy the flags
-    copied->m_flag |= (m_flag & StrongIteratorPastEnd);
-    // Clear the strong iterator list and flags from the original array
-    ZendArray* src = const_cast<ZendArray*>(this);
-    src->m_strongIterators = 0;
-    src->m_flag &= ~StrongIteratorPastEnd;
   }
   return copied;
 }
@@ -1462,9 +1452,8 @@ ArrayData *ZendArray::dequeue(Variant &value) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators
   // when an element is removed from the beginning of the array
-  if (m_strongIterators) {
-    freeStrongIterators();
-  }
+  freeStrongIterators();
+
   if (m_pListHead) {
     value = m_pListHead->data;
     erase(findForErase(m_pListHead));
@@ -1486,9 +1475,8 @@ ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators
   // when an element is added to the beginning of the array
-  if (m_strongIterators) {
-    freeStrongIterators();
-  }
+  freeStrongIterators();
+
   nextInsert(v);
   if (m_size == 1) {
     return NULL; // only element in array, no need to move it.
@@ -1569,9 +1557,8 @@ void ZendArray::getFullPos(FullPos &fp) {
   ASSERT(fp.container == (ArrayData*)this);
   fp.pos = m_pos;
   if (!fp.pos) {
-    // Record that there is a strong iterator out there
-    // that is past the end
-    m_flag |= StrongIteratorPastEnd;
+    // Remember there is a strong iterator past the end
+    setSiPastEnd(true);
   }
 }
 

@@ -106,7 +106,7 @@ HOT_FUNC
 ArrayData::~ArrayData() {
   // If there are any strong iterators pointing to this array, they need
   // to be invalidated.
-  if (m_strongIterators) {
+  if (strongIterators()) {
     freeStrongIterators();
   }
 }
@@ -283,18 +283,23 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 void ArrayData::newFullPos(FullPos &fp) {
   ASSERT(fp.container == NULL);
   fp.container = this;
-  fp.next = m_strongIterators;
-  m_strongIterators = &fp;
+  fp.next = strongIterators();
+  setStrongIterators(&fp);
   getFullPos(fp);
 }
 
 void ArrayData::freeFullPos(FullPos &fp) {
-  ASSERT(fp.container == (ArrayData*)this);
+  ASSERT(strongIterators() != 0 && fp.container == (ArrayData*)this);
   // search for fp in our list, then remove it.  Usually its the first one.
-  for (FullPos **prev = &m_strongIterators, *p = *prev; p != 0;
-       prev = &p->next, p = p->next) {
-    if (p == &fp) {
-      *prev = p->next;
+  FullPos* p = strongIterators();
+  if (p == &fp) {
+    setStrongIterators(p->next);
+    fp.container = NULL;
+    return;
+  }
+  for (; p->next; p = p->next) {
+    if (p->next == &fp) {
+      p->next = p->next->next;
       fp.container = NULL;
       return;
     }
@@ -315,10 +320,19 @@ bool ArrayData::setFullPos(const FullPos &fp) {
 }
 
 void ArrayData::freeStrongIterators() {
-  for (FullPosRange r(m_strongIterators); !r.empty(); r.popFront()) {
+  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     r.front()->container = NULL;
   }
-  m_strongIterators = 0;
+  setStrongIterators(0);
+}
+
+void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
+  for (FullPosRange r(src->strongIterators()); !r.empty(); r.popFront()) {
+    r.front()->container = dest;
+  }
+  // move pointer to list and flag in one copy
+  dest->m_strongIterators = src->m_strongIterators;
+  src->m_strongIterators = 0;
 }
 
 CVarRef ArrayData::currentRef() {

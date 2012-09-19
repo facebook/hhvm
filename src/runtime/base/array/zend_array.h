@@ -35,8 +35,8 @@ public:
   friend class VectorArray;
 
   ZendArray() : m_arBuckets(m_inlineBuckets), m_nTableMask(MinSize - 1),
-    m_flag(0), m_allocMode(kInline), m_nonsmart(false), m_pListHead(0),
-    m_pListTail(0), m_nNextFreeElement(0) {
+    m_allocMode(kInline), m_nonsmart(false), m_pListHead(0), m_pListTail(0),
+    m_nNextFreeElement(0) {
     m_size = 0;
     memset(m_inlineBuckets, 0, MinSize * sizeof(Bucket*));
   }
@@ -226,7 +226,6 @@ public:
   // from generated code.
   ZendArray(uint nSize, int64 n, Bucket *bkts[]);
 
-  void setFlag(int flag) { m_flag = (Flag)flag; }
 private:
   enum Flag {
     StrongIteratorPastEnd = 1,
@@ -237,7 +236,6 @@ private:
 
   Bucket         **m_arBuckets;
   uint             m_nTableMask;
-  mutable uint16   m_flag;
   uint8_t          m_allocMode;
   const bool       m_nonsmart;
   Bucket         * m_pListHead;

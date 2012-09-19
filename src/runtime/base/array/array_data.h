@@ -343,20 +343,36 @@ class ArrayData : public Countable {
 
   static ArrayData *GetScalarArray(ArrayData *arr,
                                    const StringData *key = NULL);
- protected:
-  uint m_size;
-  ssize_t m_pos;
-  FullPos* m_strongIterators; // head of linked list
-
-  void freeStrongIterators();
-
  private:
   void serializeImpl(VariableSerializer *serializer) const;
-
- private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(ArrayData, _count) == FAST_REFCOUNT_OFFSET);
   }
+  enum { kSiPastEnd = 1 };
+ protected:
+  void freeStrongIterators();
+  static void moveStrongIterators(ArrayData* dest, ArrayData* src);
+  FullPos* strongIterators() const {
+    return (FullPos*)(m_flags & ~kSiPastEnd);
+  }
+  bool siPastEnd() const {
+    return (m_flags & kSiPastEnd) != 0;
+  }
+  void setSiPastEnd(bool b) {
+    m_flags = (m_flags & ~kSiPastEnd) | (b ? kSiPastEnd : 0);
+  }
+  void setStrongIterators(FullPos* p) {
+    m_flags = uintptr_t(p) | m_flags & kSiPastEnd;
+  }
+
+ protected:
+  uint m_size;
+  ssize_t m_pos;
+ private:
+  union {
+    FullPos* m_strongIterators; // head of linked list
+    uintptr_t m_flags;
+  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2126,7 +2126,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
-  if (m_strongIterators) {
+  if (a->m_strongIterators) {
     a->freeStrongIterators();
   }
   Elm* elms = a->m_data;
@@ -2155,7 +2155,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   }
   // To match PHP-like semantics, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
-  if (m_strongIterators) {
+  if (a->m_strongIterators) {
     a->freeStrongIterators();
   }
 

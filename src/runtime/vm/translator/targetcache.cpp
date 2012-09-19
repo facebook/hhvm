@@ -1003,6 +1003,51 @@ StaticMethodFCache::alloc(const StringData* clsName,
 }
 
 const Func*
+StaticMethodCache::lookupIR(Handle handle, const NamedEntity *ne,
+                            const StringData* clsName,
+                            const StringData* methName) {
+  StaticMethodCache* thiz = static_cast<StaticMethodCache*>
+    (handleToPtr(handle));
+  Stats::inc(Stats::TgtCache_StaticMethodMiss);
+  Stats::inc(Stats::TgtCache_StaticMethodHit, -1);
+  TRACE(1, "miss %s :: %s caller %p\n",
+        clsName->data(), methName->data(), __builtin_return_address(0));
+  VMRegAnchor _; // needed for lookupClsMethod.
+
+  ActRec* ar = reinterpret_cast<ActRec*>(vmsp() - kNumActRecCells);
+  const Func* f;
+  VMExecutionContext* ec = g_vmContext;
+  const Class* cls = Unit::loadClass(ne, clsName);
+  if (UNLIKELY(!cls)) {
+    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
+  }
+  LookupResult res = ec->lookupClsMethod(f, cls, methName,
+                                         NULL, // there may be an active this,
+                                               // but we can just fall through
+                                               // in that case.
+                                         false /*raise*/);
+  if (LIKELY(res == MethodFoundNoThis &&
+             !f->isAbstract() &&
+             f->isStatic())) {
+    f->validate();
+    TRACE(1, "fill %s :: %s -> %p\n", clsName->data(),
+          methName->data(), f);
+    // Do the | here instead of on every call.
+    thiz->m_cls = (Class*)(uintptr_t(cls) | 1);
+    thiz->m_func = f;
+    ar->setClass(const_cast<Class*>(cls));
+    return f;
+  }
+  ASSERT(res != MethodFoundWithThis); // Not possible: no this supplied.
+  // We've already sync'ed regs; this is some hard case, we might as well
+  // just let the interpreter handle this entirely.
+  ASSERT(*vmpc() == OpFPushClsMethodD);
+
+  // Indicate to the IR that it should take even slower path
+  return NULL;
+}
+
+const Func*
 StaticMethodCache::lookup(Handle handle, const NamedEntity *ne,
                           const StringData* clsName,
                           const StringData* methName) {

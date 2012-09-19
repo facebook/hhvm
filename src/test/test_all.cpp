@@ -55,10 +55,14 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
       RUN_TESTSUITE(TestCodeRun);
       return;
     }
-    if (suite == "TestCodeRunJit" || suite == "TestCodeRunRepoJit") {
+    if (suite == "TestCodeRunJit" || suite == "TestCodeRunRepoJit" ||
+        suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
       suite = "TestCodeRun";
       Option::EnableEval = Option::FullEval;
       RuntimeOption::EvalJit = true;
+      if (suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
+        RuntimeOption::EvalJitUseIR = true;
+      }
       TestCodeRun::Filter = vmFilter;
       RUN_TESTSUITE(TestCodeRun);
       return;

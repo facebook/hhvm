@@ -215,6 +215,9 @@ struct StaticMethodCache {
   const Class* m_cls;
   static CacheHandle alloc(const StringData* cls, const StringData* meth,
                            const char* ctxName);
+  static const Func* lookupIR(CacheHandle chand,
+                              const NamedEntity* ne, const StringData* cls,
+                              const StringData* meth);
   static const Func* lookup(CacheHandle chand,
                             const NamedEntity* ne, const StringData* cls,
                             const StringData* meth);

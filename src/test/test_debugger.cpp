@@ -332,6 +332,9 @@ void TestDebugger::runServer() {
                            boost::lexical_cast<string>(m_debugPort);
   string jitConfig = "Eval.Jit=" +
                      boost::lexical_cast<string>(RuntimeOption::EvalJit);
+  string jitUseIRConfig = "Eval.JitUseIR=" +
+                          boost::lexical_cast<string>(
+                              RuntimeOption::EvalJitUseIR);
 
   // To emulate sandbox setup, let home to be "src/test", and user name to be
   // "debugger_tests", so that it can find the sandbox_conf there
@@ -347,6 +350,7 @@ void TestDebugger::runServer() {
                         "-v", adminPortConfig.c_str(),
                         "-v", debugPortConfig.c_str(),
                         "-v", jitConfig.c_str(),
+                        "-v", jitUseIRConfig.c_str(),
                         NULL};
   Process::Exec(HHVM_PATH, argv, NULL, out, &err);
 }

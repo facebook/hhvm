@@ -276,11 +276,14 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       filearg += "main.php";
       string jitarg = string("-vEval.Jit=") +
         (RuntimeOption::EvalJit ? "true" : "false");
+      string jit_use_ir = string("-vEval.JitUseIR=") +
+        (RuntimeOption::EvalJitUseIR ? "true" : "false");
       string jit_rename = string("-vEval.JitEnableRenameFunction=") +
         (RuntimeOption::EvalJit ? "true" : "false");
       const char *argv[] = {"", filearg.c_str(),
                             "--config=test/config.hdf",
                             jitarg.c_str(),
+                            jit_use_ir.c_str(),
                             jit_rename.c_str(),
                             NULL};
       Process::Exec(HHVM_PATH, argv, NULL, actual, &err);

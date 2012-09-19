@@ -872,19 +872,23 @@ char* Util::getNativeFunctionName(void* codeAddr) {
     // Sometimes, though, backtrace_symbols can't find the function name
     // and ends up giving us a blank managled name, like this:
     // ../src/hhvm/hhvm() [0x17e4d01]
+    // or this: [0x7fffca800130]
     //
-    char* start = strchr(*symbols, '(')+1;
-    char* end = strchr(start, '+');
-    if (end != NULL) {
-      size_t len = end-start;
-      functionName = new char[len+1];
-      strncpy(functionName, start, len);
-      functionName[len] = '\0';
-      int status;
-      char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
-      if (status == 0) {
-        free(functionName);
-        functionName = demangledName;
+    char* start = strchr(*symbols, '(');
+    if (start) {
+      start++;
+      char* end = strchr(start, '+');
+      if (end != NULL) {
+        size_t len = end-start;
+        functionName = new char[len+1];
+        strncpy(functionName, start, len);
+        functionName[len] = '\0';
+        int status;
+        char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
+        if (status == 0) {
+          free(functionName);
+          functionName = demangledName;
+        }
       }
     }
   }

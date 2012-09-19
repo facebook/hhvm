@@ -14,32 +14,32 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _BLOCK_TRANS_DATA_H_
-#define _BLOCK_TRANS_DATA_H_
+#ifndef _TRANS_DATA_H_
+#define _TRANS_DATA_H_
 
-#include "translator.h"
+#include <util/base.h>
+#include <runtime/vm/translator/types.h>
+
+#include <vector>
 
 namespace HPHP {
 namespace VM {
 namespace Transl {
 
-typedef hphp_hash_set<TransID> TransIDSet;
-
 // Interface for classes maintaining meta-data about translations
 // created by the tracelet translator
 
+struct TransRec;
+
 class TransData {
 public:
+  // Interface to be implemented by subclasses
   virtual ~TransData() {}
   virtual uint32 getNumTrans() const = 0;
 
   virtual const TransRec* getTransRec(TransID id) const = 0;
 
   virtual uint64 getTransCounter(TransID id) const = 0;
-
-  virtual void addTrans(TransRec& transRec, uint64 profCount) = 0;
-
-  virtual void addControlArc(TransID srcId, TransID destId) = 0;
 
   virtual const TransIDSet& getTransPreds(TransID transId) const = 0;
 

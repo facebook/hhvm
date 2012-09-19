@@ -359,8 +359,15 @@ typedef std::pair<std::string, std::string> StringPair;
 typedef std::set<std::pair<std::string, std::string> > StringPairSet;
 typedef std::vector<StringPairSet> StringPairSetVec;
 
-// Convenience functions to avoid boilerplate checks for map<>::end() after
-// map<>::find().
+// Convenience functions to avoid boilerplate checks for set/map<>::end() after
+// set/map<>::find().
+
+template<typename Set>
+bool
+setContains(const Set& m,
+            const typename Set::key_type& k) {
+  return m.find(k) != m.end();
+}
 
 template<typename Map>
 bool

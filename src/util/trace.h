@@ -78,6 +78,7 @@ namespace Trace {
       TM(intercept)   \
       TM(txdeps)      \
       TM(typeProfile) \
+      TM(hhir)        \
       TM(gc)          \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
@@ -174,11 +175,11 @@ static const bool enabled = true;
 
 #define ONTRACE(n, x) ONTRACE_MOD(TRACEMOD, n, x)
 
-#define TRACE(n, ...) ONTRACE(n, Trace::trace(__VA_ARGS__))
+#define TRACE(n, ...) ONTRACE(n, HPHP::Trace::trace(__VA_ARGS__))
 #define TRACE_MOD(mod, level, ...) \
-  ONTRACE_MOD(mod, level, Trace::trace(__VA_ARGS__))
+  ONTRACE_MOD(mod, level, HPHP::Trace::trace(__VA_ARGS__))
 #define TRACE_SET_MOD(name)  \
-  static const Trace::Module TRACEMOD = Trace::name;
+  static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
 extern void trace(const char *, ...)
   __attribute__((format(printf,1,2)));

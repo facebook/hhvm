@@ -1,0 +1,8 @@
+Starting
+foo
+method1
+doCall(hello) -- doCall got true
+hello1
+49
+1
+Done

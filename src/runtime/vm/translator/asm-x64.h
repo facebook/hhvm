@@ -1169,10 +1169,13 @@ public:
 
   inline void store_imm64_disp_reg64(int64_t imm, int off,
                                      register_name_t rdest) {
-    mov_imm64_reg(imm, reg::rScratch);
-    emitRM(instr_mov, rdest, reg::noreg, sz::byte, off, reg::rScratch);
+    if (deltaFits(imm, sz::dword)) {
+      emitIM(instr_mov, rdest, reg::noreg, sz::byte, off, imm);
+    } else {
+      mov_imm64_reg(imm, reg::rScratch);
+      emitRM(instr_mov, rdest, reg::noreg, sz::byte, off, reg::rScratch);
+    }
   }
-
   // mov %rsrc, disp(%rdest)
   inline void store_reg64_disp_reg64(register_name_t rsrc, int off,
                                      register_name_t rdest) {
@@ -1380,6 +1383,10 @@ public:
     emitR(instr_not, rn);
   }
 
+  inline void neg_reg64(register_name_t rn) {
+    emitR(instr_neg, rn);
+  }
+
   /*
    * Escaped opcodes for setcc family of instructions; always preceded with
    * lock prefix/opcode escape byte 0x0f for these meanings. Generally if
@@ -1487,6 +1494,12 @@ public:
   // imul rsrc, rdest
   inline void imul_reg64_reg64(register_name_t rsrc, register_name_t rdest) {
     emitRR(instr_imul, rsrc, rdest);
+  }
+
+  // imul imm, rdest
+  inline void imul_imm64_reg64(int64_t imm, register_name_t rdest) {
+    mov_imm64_reg(imm, reg::rScratch);
+    imul_reg64_reg64(reg::rScratch, rdest);
   }
 
   // divisor: register name of divisor.
@@ -1608,6 +1621,31 @@ public:
       return;
     }
     mov_imm64_reg(imm, dest);
+  }
+
+  inline void mov_reg64_mmx(register_name_t rnsrc, register_name_t rndest) {
+    int rsrc = (int)rnsrc;
+    int rdst = (int)rndest;
+    // REX
+    unsigned char rex = 0x48;
+    if (rsrc & 8) rex |= 1;
+    byte(rex);
+    // two-byte opcode
+    byte(0x0F);
+    byte(0x6E);
+    emitModrm(3, rdst, rsrc);
+  }
+  inline void mov_mmx_reg64(register_name_t rnsrc, register_name_t rndest) {
+    int rsrc = (int)rnsrc;
+    int rdst = (int)rndest;
+    // REX
+    unsigned char rex = 0x48;
+    if (rdst & 8) rex |= 1;
+    byte(rex);
+    // two-byte opcode
+    byte(0x0F);
+    byte(0x7E);
+    emitModrm(3, rsrc, rdst);
   }
 };
 

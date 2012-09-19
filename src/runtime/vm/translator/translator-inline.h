@@ -21,6 +21,9 @@
 #include <boost/noncopyable.hpp>
 #include <runtime/base/execution_context.h>
 
+#define TVOFF(nm) offsetof(TypedValue, nm)
+#define AROFF(nm) offsetof(ActRec, nm)
+
 /*
  * Because of a circular dependence with ExecutionContext, these
  * translation-related helpers cannot live in translator.h.
@@ -57,6 +60,17 @@ static inline uintptr_t tlsBase() {
   uintptr_t retval;
   asm ("movq %%fs:0, %0" : "=r" (retval));
   return retval;
+}
+
+static inline size_t
+cellsToBytes(int nCells) {
+  return nCells * sizeof(Cell);
+}
+
+static inline size_t
+bytesToCells(int nBytes) {
+  ASSERT(nBytes % sizeof(Cell) == 0);
+  return nBytes / sizeof(Cell);
 }
 
 struct VMRegAnchor : private boost::noncopyable {

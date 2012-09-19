@@ -26,7 +26,7 @@
 #include "runtime/vm/stats.h"
 #include "runtime/vm/translator/translator.h"
 #include "runtime/vm/type-profile.h"
- 
+
 namespace HPHP {
 namespace VM {
 
@@ -48,11 +48,11 @@ struct ValueProfile {
   uint8_t  m_samples[MaxNumDataTypes];
 };
 
-/* 
+/*
  * Magic tunables.
  */
 
-/* 
+/*
  * kNumEntries
  *
  * Tradeoff: size vs. accuracy.
@@ -162,6 +162,8 @@ static inline bool warmedUp() {
 }
 
 static inline bool profileThisRequest() {
+  // Disable type profiling with IR for now
+  if (RuntimeOption::EvalJitUseIR) return false;
   if (warmedUp()) return false;
   if (serverMode()) return true;
   return RuntimeOption::EvalJitProfileRecord;

@@ -28,6 +28,7 @@
 #include <tbb/concurrent_hash_map.h>
 #include <util/ringbuffer.h>
 #include <runtime/vm/debug/debug.h>
+#include <runtime/vm/translator/hopt/hhbctranslator.h>
 
 namespace HPHP {
 
@@ -36,6 +37,7 @@ class ExecutionContext;
 namespace VM {
 namespace Transl {
 
+class IRTranslator;
 using HPHP::x64::register_name_t;
 
 struct TraceletCounters {
@@ -50,6 +52,11 @@ struct TraceletCountersVec {
   TraceletCountersVec() : m_size(0), m_elms(NULL), m_lock() { }
 };
 
+class TranslatorX64;
+extern __thread TranslatorX64* tx64;
+
+extern void* interpOneEntryPoints[];
+
 class TranslatorX64 : public Translator, public SpillFill,
   public boost::noncopyable {
   friend class SrcRec; // so it can smash code.
@@ -60,6 +67,9 @@ class TranslatorX64 : public Translator, public SpillFill,
   friend class DiamondReturn;
   friend class RedirectSpillFill;
   friend class Tx64Reaper;
+  friend class IRTranslator;
+  friend class HPHP::VM::JIT::CodeGenerator;
+  friend class HPHP::VM::JIT::HhbcTranslator; // packBitVec()
   template<int, int, int> friend class CondBlock;
   template<int> friend class JccBlock;
   template<int> friend class IfElseBlock;
@@ -95,6 +105,22 @@ class TranslatorX64 : public Translator, public SpillFill,
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
   DataBlock              m_globalData;
+  size_t                 m_irAUsage;
+  size_t                 m_irAstubsUsage;
+
+  // Data structures for HHIR-based translation
+  uint64_t               m_numHHIRTrans;
+  JIT::IRFactory*        m_irFactory;
+  JIT::CSEHash*          m_constTable;
+  JIT::TraceBuilder*     m_traceBuilder;
+  JIT::HhbcTranslator*   m_hhbcTrans;
+  IRTranslator*          m_irTrans;
+
+  void hhirTraceStart(Offset bcStartOffset);
+  void hhirTraceCodeGen();
+  void hhirTraceEnd(Offset bcSuccOffset);
+  void hhirTraceFree();
+
 
   struct SavedRegState {
     explicit SavedRegState(void* saver, const RegAlloc& state)
@@ -614,6 +640,7 @@ public:
   REQ(INTERPRET)         \
   REQ(POST_INTERP_RET)   \
   REQ(STACK_OVERFLOW)    \
+  REQ(RETRANSLATE_NO_IR) \
   REQ(RESUME)
 
   enum ServiceRequest {
@@ -637,6 +664,7 @@ public:
                     const NormalizedInstruction& i,
                     PhysReg reg, int disp, DataType type,
                     TCA &sideExit);
+  void irEmitResolvedDeps(const ChangeMap& resolvedDeps);
 
   void emitVariantGuards(const Tracelet& t, const NormalizedInstruction& i);
   void emitPredictionGuards(const NormalizedInstruction& i);
@@ -646,14 +674,25 @@ public:
 private:
   TCA getInterceptHelper();
   void translateInstr(const Tracelet& t, const NormalizedInstruction& i);
+  void translateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
+  void irTranslateInstr(const Tracelet& t, const NormalizedInstruction& i);
+  void irTranslateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
+  void irTranslateInstrDefault(const Tracelet& t,
+                               const NormalizedInstruction& i);
   bool checkTranslationLimit(const SrcKey&, const SrcRec&) const;
   void translateTracelet(const Tracelet& t);
+  bool irTranslateTracelet(const Tracelet& t,
+                           const TCA       start,
+                           const TCA       stubStart);
   void emitStringCheck(Asm& _a, PhysReg base, int offset, PhysReg tmp);
   void emitTypeCheck(Asm& _a, DataType dt,
                      PhysReg base, int offset,
                      PhysReg tmp = InvalidReg);
+  void irAssertType(const Location& l, const RuntimeType& rtt);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,
     SrcRec& fail);
+  void irCheckType(Asm&, const Location& l, const RuntimeType& rtt,
+                   SrcRec& fail);
   void checkRefs(Asm&, const SrcKey&, const RefDeps&, SrcRec&);
 
   void emitSmartAddImm(register_name_t rsrcdest, int64_t imm);
@@ -677,7 +716,11 @@ private:
   static void smash(Asm &a, TCA src, TCA dest);
 
   TCA getTranslation(const SrcKey *sk, bool align);
-  TCA retranslate(SrcKey sk, bool align);
+  TCA retranslate(SrcKey sk, bool align, bool useHHIR);
+  TCA retranslateOpt(TransID transId, bool align);
+  TCA retranslateAndPatchNoIR(SrcKey sk,
+                              bool   align,
+                              TCA    toSmash);
   TCA bindJmp(TCA toSmash, SrcKey dest, bool isAddr = false);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
@@ -686,12 +729,15 @@ private:
   TCA bindJmpccSecond(TCA toSmash, const Offset off,
                       HPHP::x64::ConditionCode cc);
   void emitFallbackJmp(SrcRec& dest);
+  void emitFallbackJmp(Asm& as, SrcRec& dest);
+  void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
 
   TCA emitServiceReq(bool align, ServiceRequest, int numArgs, ...);
   TCA emitServiceReq(ServiceRequest, int numArgs, ...);
   TCA emitServiceReqVA(bool align, ServiceRequest, int numArgs, va_list args);
   void emitRetC(const NormalizedInstruction& i);
   TCA emitRetFromInterpretedFrame();
+  TCA emitGearTrigger(Asm& a, const SrcKey& sk, TransID transId);
   void emitBox(DataType t, PhysReg rToBox);
   void emitUnboxTopOfStack(const NormalizedInstruction& ni);
   void emitBindCall(const Tracelet& t, const NormalizedInstruction &ni,
@@ -729,6 +775,11 @@ private:
   void emitBindJmp(Asm& a, const SrcKey& dest,
                    ServiceRequest req = REQ_BIND_JMP);
   void emitBindJmp(const SrcKey& dest);
+  void emitBindCallHelper(register_name_t stashedAR,
+                          SrcKey srcKey,
+                          const Func* funcd,
+                          int numArgs,
+                          bool isImmutable);
   void emitIncCounter(TCA start, int cntOfs);
 
   void analyzeReqLit(Tracelet& t, NormalizedInstruction& i,
@@ -746,9 +797,13 @@ private:
   TCA getNativeTrampoline(TCA helperAddress);
   TCA emitNativeTrampoline(TCA helperAddress);
 
+  // Utility function shared with IR code
+  static uint64_t packBitVec(const vector<bool>& bits, unsigned i);
+
 public:
   void resume(SrcKey sk);
-  TCA translate(const SrcKey *sk, bool align);
+
+  TCA translate(const SrcKey *sk, bool align, bool useHHIR);
 
   TranslatorX64();
   virtual ~TranslatorX64();
@@ -799,6 +854,34 @@ private:
   virtual bool addDbgGuards(const Unit* unit);
   virtual bool addDbgGuard(const Func* func, Offset offset);
   void addDbgGuardImpl(const SrcKey& sk, SrcRec& sr);
+
+private: // Only for HackIR
+  void emitReqRetransNoIR(Asm& as, SrcKey& sk);
+
+public: // Only for HackIR
+#define DECLARE_FUNC(nm) \
+  void irTranslate ## nm(const Tracelet& t,               \
+                         const NormalizedInstruction& i);
+#define CASE DECLARE_FUNC
+
+INSTRS
+PSEUDOINSTRS
+
+#undef CASE
+#undef DECLARE_FUNC
+
+  // Helper functions not covered by macros above
+  void irTranslateSetMProp(const Tracelet& t, const NormalizedInstruction& i);
+  void irTranslateCGetMProp(const Tracelet &t, const NormalizedInstruction& i);
+  void irTranslateCGetM_LEE(const Tracelet &t, const NormalizedInstruction& i);
+  void irTranslateCGetM_GE(const Tracelet &t, const NormalizedInstruction& i);
+  void irTranslateReqLit(const Tracelet& t,
+                         const NormalizedInstruction& i,
+                         InclOpFlags flags);
+  template<bool raise>
+  void irTranslateContSendImpl(const NormalizedInstruction& i);
+
+
 };
 
 
@@ -837,6 +920,62 @@ const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
   kMinPerTrampolineSize;
 
 void fcallHelperThunk() asm ("__fcallHelperThunk");
+
+// These could be static but are used in hopt/codegen.cpp
+void raiseUndefVariable(StringData* nm);
+void defFuncHelper(Func *f);
+Instance* newInstanceHelper(Class* cls, int numArgs, ActRec* ar,
+                            ActRec* prevAr);
+Instance* newInstanceHelperCached(Class** classCache,
+                                  const StringData* clsName, int numArgs,
+                                  ActRec* ar, ActRec* prevAr);
+
+// These could be static but are used in hopt/irtranslator.cpp
+SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i);
+bool isNormalPropertyAccess(const NormalizedInstruction& i,
+                       int propInput,
+                       int objInput);
+bool isContextFixed();
+Slot getPropertyOffset(const NormalizedInstruction& i,
+                  int propInput, int objInput);
+bool isSupportedCGetMProp(const NormalizedInstruction& i);
+bool isSupportedCGetM_LE(const NormalizedInstruction& i);
+bool isSupportedCGetM_LEE(const NormalizedInstruction& i);
+bool isSupportedCGetM_RE(const NormalizedInstruction& i);
+bool isSupportedCGetM_GE(const NormalizedInstruction& i);
+bool isSupportedCGetM(const NormalizedInstruction& i);
+bool isSupportedSetMProp(const NormalizedInstruction& i);
+TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
+TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
+void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
+
+// SpaceRecorder is used in translator-x64.cpp and in hopt/irtranslator.cpp
+// RAII logger for TC space consumption.
+struct SpaceRecorder {
+  const char *m_name;
+  const HPHP::x64::X64Assembler m_a;
+  // const X64Assembler& m_a;
+  const uint8_t *m_start;
+  SpaceRecorder(const char* name, const HPHP::x64::X64Assembler& a) :
+      m_name(name), m_a(a), m_start(a.code.frontier)
+    { }
+  ~SpaceRecorder() {
+    if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
+      ptrdiff_t diff = m_a.code.frontier - m_start;
+      if (diff) Trace::traceRelease("TCSpace %10s %3d\n", m_name, diff);
+    }
+    if (Trace::moduleEnabledRelease(Trace::tcdump, 1)) {
+      Trace::traceRelease("TCDump %s", m_name);
+      for (const uint8_t* p = m_start; p < m_a.code.frontier; p++) {
+        Trace::traceRelease(" %x", *p);
+      }
+      Trace::traceRelease("\n");
+    }
+  }
+};
+
+
+typedef const size_t COff; // Const offsets
 
 } } }
 

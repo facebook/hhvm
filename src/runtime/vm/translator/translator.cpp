@@ -1350,7 +1350,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         ASSERT((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii);
+        DynLocation* dl = tas.recordRead(ii, m_useHHIR, (DataType)info.m_data);
         if (dl->rtt.outerType() != info.m_data &&
             (!dl->isString() || info.m_data != KindOfString)) {
           if (dl->rtt.outerType() != KindOfInvalid) {
@@ -1405,7 +1405,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         ASSERT((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii);
+        DynLocation* dl = tas.recordRead(ii, m_useHHIR, KindOfString);
         ASSERT(!dl->rtt.isString() || !dl->rtt.valueString() ||
                dl->rtt.valueString() == sd);
         SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
@@ -1416,7 +1416,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       case Unit::MetaInfo::Class: {
         ASSERT((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii);
+        DynLocation* dl = tas.recordRead(ii, m_useHHIR);
         if (dl->rtt.valueType() != KindOfObject) {
           continue;
         }
@@ -2055,7 +2055,9 @@ bool DynLocation::canBeAliased() const {
      isVariant());
 }
 
-DynLocation* TraceletContext::recordRead(const InputInfo& ii) {
+DynLocation* TraceletContext::recordRead(const InputInfo& ii,
+                                         bool useHHIR,
+                                         DataType staticType) {
   DynLocation* dl;
   const Location& l = ii.loc;
   if (!mapGet(m_currentMap, l, &dl)) {
@@ -2065,7 +2067,12 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii) {
     // be in m_changeSet either
     ASSERT(!mapContains(m_changeSet, l));
     if (ii.dontGuard && !l.isLiteral()) {
-        dl = m_t->newDynLocation(l, RuntimeType(KindOfInvalid));
+      ASSERT(!useHHIR || staticType != KindOfRef);
+      dl = m_t->newDynLocation(l, RuntimeType(useHHIR ? staticType
+                                                      : KindOfInvalid));
+      if (useHHIR && staticType != KindOfInvalid) {
+        m_resolvedDeps[l] = dl;
+      }
     } else {
       RuntimeType rtt = Translator::liveType(l, *curUnit());
       ASSERT(rtt.isIter() || !rtt.isVagueValue());
@@ -2295,7 +2302,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       for (unsigned int i = 0; i < inputInfos.size(); i++) {
         SKTRACE(2, sk, "typing input %d\n", i);
         const InputInfo& ii = inputInfos[i];
-        DynLocation* dl = tas.recordRead(ii);
+        DynLocation* dl = tas.recordRead(ii, m_useHHIR);
         const RuntimeType& rtt = dl->rtt;
         // Some instructions are able to handle an input with an unknown type
         if (!ii.dontBreak && !ii.dontGuard) {
@@ -2505,7 +2512,11 @@ breakBB:
       --t.m_numOpcodes;
     }
   }
-  analyzeSecondPass(t);
+  // Peephole optimizations may leave the bytecode stream in a state that is
+  // inconsistent and troubles HHIR emission, so don't do it if HHIR is in use
+  if (!RuntimeOption::EvalJitUseIR) {
+    analyzeSecondPass(t);
+  }
 
   // Mark the last instruction appropriately
   ASSERT(t.m_instrStream.last);
@@ -2513,6 +2524,7 @@ breakBB:
   t.m_nextSk = sk;
   // Populate t.m_changes, t.intermediates, t.m_dependencies
   t.m_dependencies = tas.m_dependencies;
+  t.m_resolvedDeps = tas.m_resolvedDeps;
   t.m_changes.clear();
   LocationSet::iterator it = tas.m_changeSet.begin();
   for (; it != tas.m_changeSet.end(); ++it) {
@@ -2523,7 +2535,8 @@ breakBB:
 }
 
 Translator::Translator() :
-    m_resumeHelper(NULL) {
+    m_resumeHelper(NULL),
+    m_useHHIR(false) {
   initInstrInfo();
 }
 
@@ -2567,6 +2580,47 @@ Translator::addDbgBLPC(PC pc) {
   }
   m_dbgBLPC.addPC(pc);
   return true;
+}
+
+uint64* Translator::getTransCounterAddr() {
+  if (!isTransDBEnabled()) return NULL;
+
+  TransID id = m_translations.size();
+
+  // allocate a new chunk of counters if necessary
+  if (id >= m_transCounters.size() * transCountersPerChunk) {
+    uint32   size = sizeof(uint64) * transCountersPerChunk;
+    uint64 *chunk = (uint64*)malloc(size);
+    bzero(chunk, size);
+    m_transCounters.push_back(chunk);
+  }
+  ASSERT(id / transCountersPerChunk < m_transCounters.size());
+  return &(m_transCounters[id / transCountersPerChunk]
+           [id % transCountersPerChunk]);
+}
+
+
+uint64 Translator::getTransCounter(TransID transId) const {
+  if (!isTransDBEnabled()) return -1ul;
+  ASSERT(transId < m_translations.size());
+
+  uint64 counter;
+
+  if (transId / transCountersPerChunk >= m_transCounters.size()) {
+    counter = 0;
+  } else {
+    counter =  m_transCounters[transId / transCountersPerChunk]
+                              [transId % transCountersPerChunk];
+  }
+  return counter;
+}
+
+void Translator::setTransCounter(TransID transId, uint64 value) {
+  ASSERT(transId < m_translations.size());
+  ASSERT(transId / transCountersPerChunk < m_transCounters.size());
+
+  m_transCounters[transId / transCountersPerChunk]
+                 [transId % transCountersPerChunk] = value;
 }
 
 static const char *transKindStr[] = {

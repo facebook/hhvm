@@ -20,6 +20,10 @@ hphp.log
 /src/test/*.tmp
 /src/test/vm/*.out
 /src/test/vm/*.diff
+/src/test/vm/*.log
+/src/test/vm/*.reduce_out
+/src/test/vm/*.reduce_diff
+/src/test/vm/*.reduce_exp
 /src/test/vm/*.perf
 /src/test/vm/perf/*.out
 /src/test/vm/perf/*.diff

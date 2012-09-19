@@ -34,6 +34,7 @@
 #include <runtime/vm/translator/runtime-type.h>
 #include <runtime/vm/translator/fixup.h>
 #include <runtime/vm/translator/writelease.h>
+#include <runtime/vm/translator/trans-data.h>
 #include <runtime/vm/debugger_hook.h>
 #include <runtime/base/md5.h>
 
@@ -491,6 +492,7 @@ struct ActRecState {
 struct Tracelet : private boost::noncopyable {
   ChangeMap      m_changes;
   DepMap         m_dependencies;
+  DepMap         m_resolvedDeps; // dependencies resolved by static analysis
   InstrStream    m_instrStream;
   int            m_stackChange;
 
@@ -545,6 +547,7 @@ struct TraceletContext {
   Tracelet*   m_t;
   ChangeMap   m_currentMap;
   DepMap      m_dependencies;
+  DepMap      m_resolvedDeps; // dependencies resolved by static analysis
   LocationSet m_changeSet;
   LocationSet m_deletedSet;
   bool        m_aliasTaint;
@@ -554,7 +557,8 @@ struct TraceletContext {
     : m_t(NULL), m_aliasTaint(false), m_varEnvTaint(false) {}
   TraceletContext(Tracelet* t)
     : m_t(t), m_aliasTaint(false), m_varEnvTaint(false) {}
-  DynLocation* recordRead(const InputInfo& l);
+  DynLocation* recordRead(const InputInfo& l, bool useHHIR,
+                          DataType staticType = KindOfInvalid);
   void recordWrite(DynLocation* dl, NormalizedInstruction* source);
   void recordDelete(const Location& l);
   void aliasTaint();
@@ -563,8 +567,6 @@ struct TraceletContext {
  private:
   static bool canBeAliased(const DynLocation* dl);
 };
-
-typedef uint32 TransID;
 
 enum TransKind {
   TransNormal = 0,
@@ -597,7 +599,11 @@ struct TransRec {
   uint32                  aLen;
   TCA                     astubsStart;
   uint32                  astubsLen;
+  TCA                     counterStart;
+  uint8                   counterLen;
   vector<TransBCMapping>  bcMapping;
+
+  static const TransID InvalidID = -1LL;
 
   TransRec() {}
 
@@ -610,7 +616,8 @@ struct TransRec {
            uint32    _astubsLen = 0) :
       id(0), kind(_kind), src(s), md5(_md5), bcStopOffset(0),
       aStart(_aStart), aLen(_aLen),
-      astubsStart(_astubsStart), astubsLen(_astubsLen) { }
+      astubsStart(_astubsStart), astubsLen(_astubsLen),
+      counterStart(0), counterLen(0) { }
 
   TransRec(SrcKey                   s,
            MD5                      _md5,
@@ -619,10 +626,14 @@ struct TransRec {
            uint32                   _aLen = 0,
            TCA                      _astubsStart = 0,
            uint32                   _astubsLen = 0,
+           TCA                      _counterStart = 0,
+           uint8                    _counterLen = 0,
            vector<TransBCMapping>   _bcMapping = vector<TransBCMapping>()) :
       id(0), kind(TransNormal), src(s), md5(_md5),
       bcStopOffset(t.m_nextSk.offset()), aStart(_aStart), aLen(_aLen),
-      astubsStart(_astubsStart), astubsLen(_astubsLen), bcMapping(_bcMapping) {
+      astubsStart(_astubsStart), astubsLen(_astubsLen),
+      counterStart(_counterStart), counterLen(_counterLen),
+      bcMapping(_bcMapping) {
     for (DepMap::const_iterator dep = t.m_dependencies.begin();
          dep != t.m_dependencies.end();
          ++dep) {
@@ -680,10 +691,13 @@ protected:
 
   TCA m_resumeHelper;
 
-  typedef std::map<TCA, uint32> TransDB;
-  TransDB          m_transDB;
-  vector<TransRec> m_translations;
-  vector<uint64*>  m_transCounters;
+  typedef std::map<TCA, TransID> TransDB;
+  TransDB            m_transDB;
+  vector<TransRec>   m_translations;
+  vector<uint64*>    m_transCounters;
+
+  // For HHIR-based translation
+  bool               m_useHHIR;
 
   static Lease s_writeLease;
   static volatile bool s_replaceInFlight;
@@ -736,47 +750,36 @@ public:
     if (it == m_transDB.end()) {
       return NULL;
     }
-    return getTransRec(it->second);
-  }
-
-  const TransRec* getTransRec(uint32 transId) const {
-    if (!isTransDBEnabled()) return NULL;
-
-    if (transId >= m_translations.size()) {
+    if (it->second >= m_translations.size()) {
       return NULL;
     }
+    return &m_translations[it->second];
+  }
+
+  const TransRec* getTransRec(TransID transId) const {
+    if (!isTransDBEnabled()) return NULL;
+
+    assert(transId < m_translations.size());
     return &m_translations[transId];
   }
 
-  uint64* getTransCounterAddr() {
-    if (!isTransDBEnabled()) return NULL;
-    TransID id = m_translations.size();
-
-    // allocate a new chunk of counters if necessary
-    if (id >= m_transCounters.size() * transCountersPerChunk) {
-      uint32   size = sizeof(uint64) * transCountersPerChunk;
-      uint64 *chunk = (uint64*)malloc(size);
-      bzero(chunk, size);
-      m_transCounters.push_back(chunk);
-    }
-    ASSERT(id / transCountersPerChunk < m_transCounters.size());
-    return &(m_transCounters[id / transCountersPerChunk]
-                            [id % transCountersPerChunk]);
+  TransID getNumTrans() const {
+    return m_translations.size();
   }
 
-  uint64 getTransCounter(uint32 transId) const {
-    if (!isTransDBEnabled()) return -1ul;
-    ASSERT(transId < m_translations.size());
-
-    if (transId / transCountersPerChunk >= m_transCounters.size()) return 0;
-
-    return m_transCounters[transId / transCountersPerChunk]
-                          [transId % transCountersPerChunk];
+  TransID getCurrentTransID() const {
+    return m_translations.size();
   }
+
+  uint64* getTransCounterAddr();
+
+  uint64 getTransCounter(TransID transId) const;
+
+  void setTransCounter(TransID transId, uint64 value);
 
   uint32 addTranslation(const TransRec& transRec) {
     if (!isTransDBEnabled()) return -1u;
-    uint32 id = m_translations.size();
+    uint32 id = getCurrentTransID();
     m_translations.push_back(transRec);
     m_translations[id].setID(id);
 

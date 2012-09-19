@@ -38,6 +38,10 @@ struct ctca_identity_hash {
   }
 };
 
+
+typedef uint32                 TransID;
+typedef hphp_hash_set<TransID> TransIDSet;
+
 }}}
 
 #endif

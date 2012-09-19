@@ -394,10 +394,12 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
   default:
     {
       String value = data.toString();
-      numbytes += value.size();
-      int written = f->writeImpl(value, value.size());
-      if (written != value.size()) {
-        numbytes = -1;
+      if (!value.empty()) {
+        numbytes += value.size();
+        int written = f->writeImpl(value, value.size());
+        if (written != value.size()) {
+          numbytes = -1;
+        }
       }
     }
     break;

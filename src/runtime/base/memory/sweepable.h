@@ -14,17 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SWEEPABLE_H__
-#define __HPHP_SWEEPABLE_H__
+#ifndef incl_HPHP_SWEEPABLE_H_
+#define incl_HPHP_SWEEPABLE_H_
 
 #include <util/base.h>
-#include <util/thread_local.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * Raw pointers that need to be deleted during garbage collection time.
+/*
+ * Objects that need to do special clean up at the end of the request
+ * may register themselves for this by deriving from Sweepable.  After
+ * every request, Sweepable::SweepAll is called so the objects may
+ * clear out request-local allocations that are not smart-allocated.
  */
 class Sweepable {
 public:
@@ -34,7 +36,11 @@ public:
   Sweepable();
   virtual ~Sweepable();
 
-  virtual void sweep() { delete this;}
+  /*
+   * Default sweep behavior is to delete ourselves.  Note that this is
+   * not appropriate for a smart-allocated class.
+   */
+  virtual void sweep() { delete this; }
 
   /*
    * Note: "Persistent" here means that the object will stay alive
@@ -42,32 +48,23 @@ public:
    * the same server thread gets around to handling a new request.  If
    * you need this you probably should be using it via PersistentObjectStore.
    */
-  void incPersistent() { ++m_persistentCount;}
-  void decPersistent() { --m_persistentCount;}
+  void incPersistent() { ++m_persistentCount; }
+  void decPersistent() { --m_persistentCount; }
   bool isPersistent() { return m_persistentCount > 0; }
 
-  static void GetSweepData() ATTRIBUTE_COLD;
-  /**
-   * Excluding this from being swept(). This is useful for child Sweepable
-   * inside a parent Sweepable, when parent's destructor will delete this
-   * object. For example, ZipFile containing PlainFile.
+  /*
+   * Remove this object from the sweepable list, so it won't have
+   * sweep() called at the next SweepAll.
    */
   void unregister();
 
 private:
-  typedef hphp_hash_set<Sweepable*, pointer_hash<Sweepable> > SweepableSet;
-  class SweepData {
-  public:
-    SweepData() : sweeping(false) {}
-    bool sweeping;
-    SweepableSet sweepables;
-  };
-  static DECLARE_THREAD_LOCAL_NO_CHECK(SweepData, s_sweep_data);
-
+  Sweepable* m_nextSweepable;
+  Sweepable** m_prevSweepable; // Pointer to previous next pointer.
   int m_persistentCount;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __HPHP_SWEEPABLE_H__ */
+#endif

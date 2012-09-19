@@ -21,44 +21,58 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(Sweepable::SweepData, Sweepable::s_sweep_data);
-
-void Sweepable::GetSweepData() {
-  s_sweep_data.getCheck();
-}
+static __thread Sweepable* t_sweepList = 0;
 
 void Sweepable::SweepAll() {
-  s_sweep_data->sweeping = true;
-  SweepableSet &sweepables = s_sweep_data->sweepables;
-  SweepableSet persistentObjects;
-  for (SweepableSet::iterator iter = sweepables.begin();
-       iter != sweepables.end(); ++iter) {
-    Sweepable *obj = *iter;
-    if (obj->m_persistentCount == 0) {
-      obj->sweep();
+  Sweepable* persistList = 0;
+  while (t_sweepList) {
+    Sweepable* s = t_sweepList;
+    s->unregister();
+
+    if (s->m_persistentCount == 0) {
+      s->sweep();
     } else {
-      persistentObjects.insert(obj);
+      if (persistList) {
+        ASSERT(persistList->m_prevSweepable = &persistList);
+        persistList->m_prevSweepable = &s->m_nextSweepable;
+      }
+      s->m_nextSweepable = persistList;
+      persistList = s;
+      s->m_prevSweepable = &persistList;
     }
   }
-  sweepables.clear();
-  if (!persistentObjects.empty()) {
-    sweepables = persistentObjects;
+  t_sweepList = persistList;
+  if (persistList) {
+    ASSERT(persistList->m_prevSweepable == &persistList);
+    persistList->m_prevSweepable = &t_sweepList;
   }
-  s_sweep_data->sweeping = false;
 }
 
-Sweepable::Sweepable() : m_persistentCount(0) {
-  s_sweep_data->sweepables.insert(this);
+Sweepable::Sweepable()
+  : m_nextSweepable(t_sweepList)
+  , m_prevSweepable(&t_sweepList)
+  , m_persistentCount(0)
+{
+  if (t_sweepList) {
+    ASSERT(t_sweepList->m_prevSweepable == &t_sweepList);
+    t_sweepList->m_prevSweepable = &m_nextSweepable;
+  }
+  t_sweepList = this;
 }
 
 Sweepable::~Sweepable() {
-  if (!s_sweep_data->sweeping) {
-    s_sweep_data->sweepables.erase(this);
-  }
+  unregister();
 }
 
 void Sweepable::unregister() {
-  s_sweep_data->sweepables.erase(this);
+  if (m_prevSweepable) {
+    if (m_nextSweepable) {
+      m_nextSweepable->m_prevSweepable = m_prevSweepable;
+    }
+    *m_prevSweepable = m_nextSweepable;
+    m_nextSweepable = 0;
+    m_prevSweepable = 0;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

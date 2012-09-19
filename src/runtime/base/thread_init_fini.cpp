@@ -48,7 +48,6 @@ void init_thread_locals(void *arg /* = NULL */) {
   zend_get_rand_data();
   get_server_note();
   g_persistentObjects.getCheck();
-  Sweepable::GetSweepData();
   MemoryManager::TlsWrapper::getCheck();
   InitAllocatorThreadLocal();
   RefData::AllocatorType::getCheck();

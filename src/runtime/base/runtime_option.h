@@ -424,7 +424,7 @@ public:
   static uint32 EvalDumpIR;
   static bool EvalDumpTC;
   static bool EvalDumpAst;
-  static bool EvalPeephole;
+  static bool EvalMapTCHuge;
   static bool RecordCodeCoverage;
   static std::string CodeCoverageOutputFile;
 

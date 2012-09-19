@@ -419,7 +419,7 @@ bool RuntimeOption::EvalDumpBytecode = false;
 uint32 RuntimeOption::EvalDumpIR = 0;
 bool RuntimeOption::EvalDumpTC = false;
 bool RuntimeOption::EvalDumpAst = false;
-bool RuntimeOption::EvalPeephole = true;
+bool RuntimeOption::EvalMapTCHuge = true;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 
@@ -1200,7 +1200,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EvalDumpIR = eval["DumpIR"].getUInt32(0);
     EvalDumpTC = eval["DumpTC"].getBool(false);
     EvalDumpAst = eval["DumpAst"].getBool(false);
-    EvalPeephole = eval["Peephole"].getBool(true);
+    EvalMapTCHuge = eval["MapTCHuge"].getBool(true);
     RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();
     if (EvalJit && RecordCodeCoverage) {
       throw InvalidArgumentException(

@@ -6132,10 +6132,7 @@ static Unit* emitHHBCUnit(AnalysisResultPtr ar, FileScopePtr fsp,
     fev.emitMakeUnitFatal(emitter, ex.getMessage());
   }
 
-  if (RuntimeOption::EvalPeephole) {
-    // Run the peephole optimizer.
-    Peephole peephole(*ue);
-  }
+  Peephole peephole(*ue);
 
   if (commit) {
     HPHP::VM::Repo::get().commitUnit(ue, unitOrigin);

@@ -30,9 +30,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_parent("parent");
-static StaticString s_self("self");
-
 using HPHP::VM::ActRec;
 using HPHP::VM::Transl::CallerFrame;
 

@@ -95,7 +95,7 @@ static void recordActRecPush(const SrcKey& sk,
   ASSERT(sk.offset() == fpi->m_fpushOff);
   SrcKey fcall = sk;
   fcall.m_offset = fpi->m_fcallOff;
-  ASSERT(*unit->at(fcall.offset()) == OpFCall);
+  ASSERT(isFCallStar(*unit->at(fcall.offset())));
   if (clsName) {
     const Class* cls = Unit::lookupClass(clsName);
     bool magic = false;
@@ -156,7 +156,8 @@ void annotate(NormalizedInstruction* i) {
                        i->op() == OpFPushClsMethodD ||
                        i->op() == OpFPushClsMethodF);
     } break;
-    case OpFCall: {
+    case OpFCall:
+    case OpFCallArray: {
       CallRecord callRec;
       if (mapGet(s_callDB, i->source, &callRec)) {
         if (callRec.m_type == Function) {

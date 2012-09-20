@@ -1033,7 +1033,6 @@ StringData* EmitterVisitor::continuationClassName(
   const StringData* fname) {
   std::ostringstream str;
   str << "continuation$"
-      << '$'
       << std::hex
       << m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0]
       << std::dec
@@ -2785,6 +2784,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             }
             not_reached();
           }
+        } else if (emitCallUserFunc(e, call)) {
+          return true;
         } else if (call->isCallToFunction("define")) {
           if (params && params->getCount() == 2) {
             ExpressionPtr p0 = (*params)[0];
@@ -4815,7 +4816,6 @@ void EmitterVisitor::emitPostponedMeths() {
           }
           emitPop(e);
         }
-        delete p.m_closureUseVars;
       }
     }
     Label ctFatal, ctFatalWithPop;
@@ -4873,6 +4873,7 @@ void EmitterVisitor::emitPostponedMeths() {
     if (!dvInitializers.empty()) {
       e.Jmp(topOfBody);
     }
+    delete p.m_closureUseVars;
     m_postponedMeths.pop_front();
   }
 
@@ -5181,6 +5182,82 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     m_evalStack.setString(
       StringData::GetStaticString(node->getClassName()));
   }
+}
+
+bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
+  static struct {
+    const char* name;
+    int minParams, maxParams;
+    CallUserFuncFlags flags;
+  } cufTab[] = {
+    { "call_user_func", 1, INT_MAX, CallUserFuncPlain },
+    { "call_user_func_array", 2, 2, CallUserFuncArray },
+    { "forward_static_call", 1, INT_MAX, CallUserFuncForward },
+    { "forward_static_call_array", 2, 2, CallUserFuncForwardArray },
+    { "fb_call_user_func_safe", 1, INT_MAX, CallUserFuncSafe },
+    { "fb_call_user_func_array_safe", 2, 2, CallUserFuncSafeArray },
+    { "fb_call_user_func_safe_return", 2, INT_MAX, CallUserFuncSafeReturn },
+  };
+
+  ExpressionListPtr params = func->getParams();
+  if (!params) return false;
+  int nParams = params->getCount();
+  if (!nParams) return false;
+  CallUserFuncFlags flags = CallUserFuncNone;
+  for (unsigned i = 0; i < sizeof(cufTab) / sizeof(cufTab[0]); i++) {
+    if (func->isCallToFunction(cufTab[i].name) &&
+        nParams >= cufTab[i].minParams &&
+        nParams <= cufTab[i].maxParams) {
+      flags = cufTab[i].flags;
+      break;
+    }
+  }
+  if (flags == CallUserFuncNone) return false;
+
+  int param = 1;
+  ExpressionPtr callable = (*params)[0];
+  visit(callable);
+  emitConvertToCell(e);
+  Offset fpiStart = m_ue.bcPos();
+  if (flags & CallUserFuncForward) {
+    e.FPushCufF(nParams - param);
+  } else if (flags & CallUserFuncSafe) {
+    if (flags & CallUserFuncReturn) {
+      ASSERT(nParams >= 2);
+      visit((*params)[param++]);
+      emitConvertToCell(e);
+    } else {
+      e.Null();
+    }
+    fpiStart = m_ue.bcPos();
+    e.FPushCufSafe(nParams - param);
+  } else {
+    e.FPushCuf(nParams - param);
+  }
+
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    for (int i = param; i < nParams; i++) {
+      visit((*params)[i]);
+      emitConvertToCell(e);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+      e.FPassC(i - param);
+    }
+  }
+
+  if (flags & CallUserFuncArray) {
+    e.FCallArray();
+  } else {
+    e.FCall(nParams - param);
+  }
+  if (flags & CallUserFuncSafe) {
+    if (flags & CallUserFuncReturn) {
+      e.CufSafeReturn();
+    } else {
+      e.CufSafeArray();
+    }
+  }
+  return true;
 }
 
 void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
@@ -6082,10 +6159,22 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   ue->emitOp(OpInt);
   ue->emitInt64(1);
   ue->emitOp(OpRetC);
-  Offset past = ue->bcPos();
   mfe->setMaxStackCells(1);
-  mfe->finish(past, false);
+  mfe->finish(ue->bcPos(), false);
   ue->recordFunction(mfe);
+
+  /*
+    Special function used by FPushCuf* when its argument
+    is not callable.
+  */
+  StringData* name = StringData::GetStaticString("86null");
+  FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
+  fe->init(0, 0, ue->bcPos(), AttrUnique, true, empty_string.get());
+  ue->emitOp(OpNull);
+  ue->emitOp(OpRetC);
+  fe->setMaxStackCells(1);
+  fe->finish(ue->bcPos(), false);
+  ue->recordFunction(fe);
 
   for (ssize_t i = 0LL; i < numBuiltinFuncs; ++i) {
     const HhbcExtFuncInfo* info = &builtinFuncs[i];
@@ -6096,10 +6185,9 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, base);
     ue->emitOp(OpNativeImpl);
-    Offset past = ue->bcPos();
     fe->setMaxStackCells(kNumActRecCells + 1);
     fe->setAttrs(Attr(fe->attrs()|AttrUnique));
-    fe->finish(past, false);
+    fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);
   }
 

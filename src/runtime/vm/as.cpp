@@ -767,7 +767,7 @@ OpcodeParserMap opcode_parsers;
                                                                   \
     if (isFPush(Op##name)) {                                      \
       as.beginFpi();                                              \
-    } else if (Op##name == OpFCall) {                             \
+    } else if (isFCallStar(Op##name)) {                           \
       as.endFpi();                                                \
     }                                                             \
     as.ue->emitOp(Op##name);                                      \

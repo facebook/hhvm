@@ -872,6 +872,7 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpContHandle:
       return ControlFlowBreaksBB;
     case OpFCall:
+    case OpFCallArray:
     case OpIncl:
     case OpInclOnce:
     case OpReq:

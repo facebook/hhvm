@@ -583,20 +583,21 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef NOV
   };
   switch (Op(*pc)) {
-  case OpCGetM:    // ONE(LA),      LMANY(), ONE(CV)
-  case OpVGetM:    // ONE(LA),      LMANY(), ONE(VV)
-  case OpIssetM:   // ONE(LA),      LMANY(), ONE(CV)
-  case OpEmptyM:   // ONE(LA),      LMANY(), ONE(CV)
-  case OpUnsetM:   // ONE(LA),      LMANY(), NOV
-  case OpFPassM:   // TWO(IVA,LA),  LMANY(), ONE(FV)
-  case OpIncDecM:  // TWO(OA,LA),   LMANY(), ONE(CV)
+  case OpCGetM:     // ONE(LA),      LMANY(), ONE(CV)
+  case OpVGetM:     // ONE(LA),      LMANY(), ONE(VV)
+  case OpIssetM:    // ONE(LA),      LMANY(), ONE(CV)
+  case OpEmptyM:    // ONE(LA),      LMANY(), ONE(CV)
+  case OpUnsetM:    // ONE(LA),      LMANY(), NOV
+  case OpFPassM:    // TWO(IVA,LA),  LMANY(), ONE(FV)
+  case OpIncDecM:   // TWO(OA,LA),   LMANY(), ONE(CV)
     return vectorSig(pc, NOV);
-  case OpBindM:    // ONE(LA),    V_LMANY(), ONE(VV)
+  case OpBindM:     // ONE(LA),    V_LMANY(), ONE(VV)
     return vectorSig(pc, VV);
-  case OpSetM:     // ONE(LA),    C_LMANY(), ONE(CV)
-  case OpSetOpM:   // TWO(OA,LA), C_LMANY(), ONE(CV)
+  case OpSetM:      // ONE(LA),    C_LMANY(), ONE(CV)
+  case OpSetOpM:    // TWO(OA,LA), C_LMANY(), ONE(CV)
     return vectorSig(pc, CV);
-  case OpFCall:    // ONE(IVA),     FMANY,   ONE(RV)
+  case OpFCall:     // ONE(IVA),     FMANY,   ONE(RV)
+  case OpFCallArray:// NA,           ONE(FV), ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }
@@ -636,12 +637,12 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   }
   bool ok = true;
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  if (Op(*pc) == OpFCall) {
+  if (isFCallStar(Op(*pc))) {
     --cur->fpilen;
-    int call_params = getImmIva(pc);
+    int call_params = Op(*pc) == OpFCall ? getImmIva(pc) : 1;
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
-      verify_error("FCall param_count (%d) doesn't match FPush* (%d)\n",
+      verify_error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
              call_params, push_params);
       ok = false;
     }

@@ -46,11 +46,19 @@ RuntimeType::RuntimeType(DataType outer, DataType inner /* = KindOfInvalid */,
   consistencyCheck();
 }
 
-RuntimeType::RuntimeType(const StringData* sd /* = NULL */)
+RuntimeType::RuntimeType(const StringData* sd)
   : m_kind(VALUE) {
   m_value.outerType = KindOfString;
   m_value.innerType = KindOfInvalid;
   m_value.string = sd;
+  consistencyCheck();
+}
+
+RuntimeType::RuntimeType(const ArrayData* ad)
+  : m_kind(VALUE) {
+  m_value.outerType = KindOfArray;
+  m_value.innerType = KindOfInvalid;
+  m_value.array = ad;
   consistencyCheck();
 }
 
@@ -144,6 +152,14 @@ RuntimeType::valueString() const {
   ASSERT(m_kind != ITER);
   ASSERT(isString());
   return m_value.string;
+}
+
+const ArrayData*
+RuntimeType::valueArray() const {
+  consistencyCheck();
+  ASSERT(m_kind != ITER);
+  ASSERT(isArray());
+  return m_value.array;
 }
 
 // -1 for unknown, 0 for false, 1 for true

@@ -206,18 +206,16 @@ class TranslatorX64 : public Translator, public SpillFill,
   void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
   template <bool reentrant>
   void recordCallImpl(Asm& a, const NormalizedInstruction& i,
-                      const SrcKey* inputSk = 0);
-  void recordReentrantCall(Asm& a, const NormalizedInstruction& i,
-                           const SrcKey* inputSk = 0) {
-    recordCallImpl<true>(a, i, inputSk);
+                      bool advance = false);
+  void recordReentrantCall(Asm& a, const NormalizedInstruction& i) {
+    recordCallImpl<true>(a, i);
   }
-  void recordReentrantCall(const NormalizedInstruction& i,
-                           const SrcKey* inputSk = 0) {
-    recordCallImpl<true>(a, i, inputSk);
+  void recordReentrantCall(const NormalizedInstruction& i) {
+    recordCallImpl<true>(a, i);
   }
   void recordReentrantStubCall(const NormalizedInstruction& i,
-                               const SrcKey* inputSk = 0) {
-    recordCallImpl<true>(astubs, i, inputSk);
+                               bool advance = false) {
+    recordCallImpl<true>(astubs, i, advance);
   }
   void recordCall(Asm& a, const NormalizedInstruction& i) {
     recordCallImpl<false>(a, i);
@@ -503,6 +501,7 @@ MINSTRS
   CASE(UnaryBooleanOp) \
   CASE(BranchOp) \
   CASE(AssignToLocalOp) \
+  CASE(FPushCufOp) \
   CASE(FPassCOp) \
   CASE(CheckTypeOp)
 
@@ -549,7 +548,12 @@ PSEUDOINSTRS
                      const Location& outLoc);
   void translateIssetMSimple(const Tracelet& t,
                              const NormalizedInstruction& ni);
+  void setupActRecClsForStaticCall(const NormalizedInstruction& i,
+                                   const Func* func, const Class* cls,
+                                   size_t clsOff, bool forward);
 
+  const Func* findCuf(const NormalizedInstruction& ni,
+                      Class* &cls, StringData*& invName, bool& forward);
   static void toStringHelper(ObjectData *obj);
   void invalidateSrcKey(const SrcKey& sk);
   bool dontGuardAnyInputs(Opcode op);

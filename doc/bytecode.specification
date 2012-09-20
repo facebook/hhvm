@@ -313,8 +313,8 @@ FPI stack is called the "current FPI".
 The FPush* instructions push a new entry onto the FPI stack, initializing the
 entry with a reference to the FPI structure for a given function and the
 bytecode address of the appropriate entry point. The FPass* instructions
-prepare the parameters that will be passed into the callee. The FCall
-instruction looks at the current FPI to get the bytecode address of the
+prepare the parameters that will be passed into the callee. The FCall*
+instructions look at the current FPI to get the bytecode address of the
 function (the callee), transfers the parameters from the evaluation stack to
 the callee, pops the current FPI off of the FPI stack, and then invokes the
 dispatcher to call the function.
@@ -324,15 +324,15 @@ Calling convention
 ------------------
 
 The caller may pass any number of parameters to the callee by executing the
-FPass* instructions zero or more times prior to executing the FCall
+FPass* instructions zero or more times prior to executing an FCall*
 instruction. The caller must pass the parameters in forward order, i.e. the
 first use of FPass* passes the first parameter, the second use of FPass* passes
 the second parameter, and so forth.
 
-The FPush*/FPass*/FCall instructions can be used to call a standard function, a
+The FPush*/FPass*/FCall* instructions can be used to call a standard function, a
 method on an object, or a method from a class. The caller is responsible for
-evaluating all of the parameters in forward order. When the caller executes the
-FCall instruction, the dispatcher creates a new frame and binds the parameters
+evaluating all of the parameters in forward order. When the caller executes an
+FCall* instruction, the dispatcher creates a new frame and binds the parameters
 prepared by the caller into the callee's variable environment. The dispatcher
 then transfers control to the appropriate entry point (either the main entry
 point or a DV entry point) based on the number of parameters passed.
@@ -508,7 +508,7 @@ FPI regions
 
 An FPI region is a continguous range of bytecode that constitutes a call site.
 Each FPI region begins immediately after an FPush* instruction that pushes an
-FPI structure onto the FPI stack and must end with the corresponding FCall
+FPI structure onto the FPI stack and must end with the corresponding FCall*
 instruction that pops that FPI structure off of the FPI stack. If two FPI
 regions overlap, one of the FPI regions must be completely enclosed by the other
 FPI region. An FPI region may not contain backward jumps, nor may it contain
@@ -517,7 +517,7 @@ forward jumps that jump past the end of the FPI region.
 Each function has an "FPI region table". Each row in the FPI region table
 consists of the starting offset of the FPI region (the bytecode offset
 immediately following the FPush* instruction), the ending offset of the FPI
-region (the bytecode offset of the FCall instruction), and the number of
+region (the bytecode offset of the FCall* instruction), and the number of
 parameters being passed.
 
 
@@ -610,9 +610,9 @@ NativeImpl, or ContHandle. The primary function body may not contain the Unwind
 instruction. Also, fault funclets may not contain the Ret* instructions.
 
 8) Each FPI region enumerated in the FPI region table must start with an FPush*
-instruction and it must end with an FCall instruction. Each use of the FPush*
+instruction and it must end with an FCall* instruction. Each use of the FPush*
 instruction must be the first instruction in exactly one FPI region. Likewise,
-each use of the FCall instruction must be the last instruction in exactly one
+each use of the FCall* instruction must be the last instruction in exactly one
 FPI region. Finally, the FPass* instructions may not be used outside an FPI
 region.
 
@@ -628,11 +628,11 @@ passes n parameters, all possible control flow paths from the beginning of the
 region to the end must pass through exactly n FPass* instructions associated
 with the region which pass the parameters in forward order.
 
-11) Given an evaluation stack of depth n before an FPush* instruction, the
-evaluation stack before the corresponding FCall instruction must also have a
+11) Given an evaluation stack of depth n after an FPush* instruction, the
+evaluation stack before the corresponding FCall* instruction must also have a
 depth of n. Likewise, the evaluation stack after corresponding FPass*
 instructions must have a depth of n as well. Finally, no instruction between an
-FPush* and its corresponding FCall may consume any of the values from the
+FPush* and its corresponding FCall* may consume any of the values from the
 evaluation stack that were pushed onto the stack before the FPush* instruction.
 
 12) The initialized state of each iterator variable must be known at every
@@ -1638,7 +1638,7 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   AGetC instruction to convert the name given by %2 into a classref.
 
   This instruction pushes an uninitialized object onto the stack (to be
-  initialized during FCall) prior to entering the FPI region, then pushes a new
+  initialized during FCall*) prior to entering the FPI region, then pushes a new
   entry on the FPI stack, initializing it with the number of parameters being
   passed (given by %1) and a reference to the FPI structure for the constructor
   for class x.
@@ -1654,7 +1654,30 @@ FPushContFunc <num params>    []  ->  []
   the late bound class of the new FPI stack entry be will set from the value
   saved in the continuation.
 
-FPassC <param id>    [C]  ->  [F]
+FPushCuf <num params>     [C]   ->  []
+FPushCufF <num params>    [C]   ->  []
+  FPI push call user function. These instructions lookup $1 as a
+  callable, and push a new entry onto the FPI stack. If $1 is not callable,
+  they issue a warning, and push an entry representing a function which
+  does nothing, takes no argument, and returns null.
+
+FPushCufSafe <num params> [C C] ->  [C C]
+  FPI push call user function. This instruction pops $1 and $2, then pushes
+  $1 back onto the stack. It then looks up $2 as a callable, and pushes a
+  new entry onto the FPI stack. If $2 is not callable, it pushes an entry
+  representing a function which does nothing, takes no argument, and returns
+  null, and in addition pushes boolean false onto the evaluation stack;
+  otherwise it pushes true onto the evaluation stack.
+
+CufSafeArray   [C C R] -> [C]
+  Pops 3 elements from the stack, and pushes array($2, $1), preserving
+  references.
+
+CufSafeReturn  [C C R] -> [R]
+  Pops 3 elements from the stack, and pushes $2 ? $1 : $3, preserving
+  references.
+
+FPassC <param id>     [C]  ->  [F]
 FPassCW <param id>    [C]  ->  [F]
 FPassCE <param id>    [C]  ->  [F]
 
@@ -1708,6 +1731,16 @@ FCall <num params>    [F..F]  ->  [R]
   FPI stack, and then invokes the dispatcher to call the callee. When the
   callee returns, it will transfer the return value onto the caller's
   evaluation stack using the flavor determined by the callee.
+
+FCallArray    [F]  ->  [R]
+
+  FPI call with array. This instruction gets the bytecode address of the
+  function associated with the current FPI (the callee), transfers the
+  elements of $1 (which must be an array) to the callee as parameters, pops
+  the current FPI off of the FPI stack, and then invokes the dispatcher to
+  call the callee. When the callee returns, it will transfer the return value
+  onto the caller's evaluation stack using the flavor determined by the
+  callee.
 
 
 9. Member operations

@@ -165,6 +165,7 @@ class RuntimeType {
       union {
         // We may have even more precise data about this set of values.
         const StringData* string; // KindOfString: The exact value.
+        const ArrayData* array;   // KindOfArray: The exact value.
         const Class* klass;       // KindOfObject: A known super-class.
                                   // KindOfClass: An instance of the current
                                   //   instantiation of the preClass.  The
@@ -194,6 +195,8 @@ class RuntimeType {
              m_value.innerType == KindOfClass ||
              m_value.outerType == KindOfObject ||
              m_value.innerType == KindOfObject ||
+             m_value.outerType == KindOfArray ||
+             m_value.innerType == KindOfArray ||
              m_value.outerType == KindOfBoolean ||
              m_value.outerType == KindOfInt64 ||
              m_value.klass == NULL);
@@ -206,6 +209,7 @@ class RuntimeType {
   RuntimeType(DataType outer, DataType inner = KindOfInvalid,
               const Class* = NULL);
   RuntimeType(const StringData*);
+  RuntimeType(const ArrayData*);
   RuntimeType(const Class*);
   explicit RuntimeType(bool value);
   explicit RuntimeType(int64 value);
@@ -226,6 +230,7 @@ class RuntimeType {
   DataType valueType() const;
   const Class* valueClass() const;
   const StringData* valueString() const;
+  const ArrayData* valueArray() const;
   int valueBoolean() const;
   int64 valueInt() const;
   int64 valueGeneric() const;

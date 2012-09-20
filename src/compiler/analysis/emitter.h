@@ -36,6 +36,7 @@ DECLARE_BOOST_TYPES(ListAssignment);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionCall);
+DECLARE_BOOST_TYPES(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(SwitchStatement);
 class StaticClassName;
 
@@ -550,6 +551,19 @@ public:
   void emitPostponedSinits();
   void emitPostponedCinits();
   void emitPostponedClosureCtors();
+  enum CallUserFuncFlags {
+    CallUserFuncNone = -1,
+    CallUserFuncPlain = 0,
+    CallUserFuncArray = 1,
+    CallUserFuncSafe = 2,
+    CallUserFuncReturn = 4,
+    CallUserFuncForward = 8,
+    CallUserFuncSafeArray = CallUserFuncSafe | CallUserFuncArray,
+    CallUserFuncSafeReturn = CallUserFuncSafe | CallUserFuncReturn,
+    CallUserFuncForwardArray = CallUserFuncForward | CallUserFuncArray
+  };
+
+  bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
   void emitFuncCall(Emitter& e, FunctionCallPtr node);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
   PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,

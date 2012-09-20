@@ -62,6 +62,10 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+extern StaticString s_self;
+extern StaticString s_parent;
+extern StaticString s_static;
+
 // empty
 
 inline bool empty(bool    v) { return !v;}

@@ -49,7 +49,6 @@ static StaticString s_line1("line1");
 static StaticString s_line2("line2");
 static StaticString s_doc("doc");
 static StaticString s_modifiers("modifiers");
-static StaticString s_static("static");
 static StaticString s_class("class");
 static StaticString s_ref("ref");
 static StaticString s_index("index");
@@ -65,7 +64,6 @@ static StaticString s_internal("internal");
 static StaticString s_hphp("hphp");
 static StaticString s_static_variables("static_variables");
 static StaticString s_extension("extension");
-static StaticString s_parent("parent");
 static StaticString s_interfaces("interfaces");
 static StaticString s_traits("traits");
 static StaticString s_interface("interface");
@@ -735,7 +733,7 @@ Array f_hphp_get_class_info(CVarRef name) {
                       pcls->line1(), pcls->line2());
       set_doc_comment(ret, pcls->docComment());
     }
-    
+
     // user attributes
     {
       Array arr = Array::Create();

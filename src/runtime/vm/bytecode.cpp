@@ -5639,6 +5639,66 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtorD(PC& pc) {
   ar->setVarEnv(NULL);
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
+                                                         bool forward,
+                                                         bool safe) {
+  NEXT();
+  DECODE_IVA(numArgs);
+
+  TypedValue func = m_stack.topTV()[safe];
+
+  ObjectData* obj = NULL;
+  HPHP::VM::Class* cls = NULL;
+  StringData* invName = NULL;
+
+  const HPHP::VM::Func* f = vm_decode_function(tvAsVariant(&func), m_fp,
+                                               forward,
+                                               obj, cls, invName,
+                                               !safe);
+
+  if (safe) m_stack.topTV()[1] = m_stack.topTV()[0];
+  m_stack.ndiscard(1);
+  if (f == NULL) {
+    f = SystemLib::GetNullFunction();
+    if (safe) {
+      m_stack.pushFalse();
+    }
+  } else if (safe) {
+    m_stack.pushTrue();
+  }
+
+  ActRec* ar = m_stack.allocA();
+  arSetSfp(ar, m_fp);
+  ar->m_func = f;
+  if (obj) {
+    ar->setThis(obj);
+    obj->incRefCount();
+  } else if (cls) {
+    ar->setClass(cls);
+  } else {
+    ar->setThis(NULL);
+  }
+  ar->initNumArgs(numArgs, false /* isFPushCtor */);
+  if (invName) {
+    ar->setInvName(invName);
+  } else {
+    ar->setVarEnv(NULL);
+  }
+  tvRefcountedDecRef(&func);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFPushCuf(PC& pc) {
+  doFPushCuf(pc, false, false);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFPushCufF(PC& pc) {
+  doFPushCuf(pc, true, false);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFPushCufSafe(PC& pc) {
+  doFPushCuf(pc, false, true);
+}
+
 static inline ActRec* arFromInstr(TypedValue* sp, const Opcode* pc) {
   return arFromSpOffset((ActRec*)sp, instrSpToArDelta(pc));
 }
@@ -5822,6 +5882,166 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
   ASSERT(numArgs == ar->numArgs());
   checkStack(m_stack, ar->m_func);
   doFCall<false>(ar, pc);
+}
+
+bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
+                                          ArrayData* args,
+                                          TypedValue*& extraArgs) {
+  extraArgs = NULL;
+  if (UNLIKELY(ar->hasInvName())) {
+    m_stack.pushStringNoRc(ar->getInvName());
+    m_stack.pushArray(args);
+    ar->setVarEnv(0);
+    ar->initNumArgs(2);
+  } else {
+    int nargs = args->size();
+    const Func* f = ar->m_func;
+    int nparams = f->numParams();
+    int extra = nargs - nparams;
+    if (extra < 0) {
+      extra = 0;
+      nparams = nargs;
+    }
+    ssize_t pos = args->iter_begin();
+    for (int i = 0; i < nparams; ++i) {
+      TypedValue* from = const_cast<TypedValue*>(
+        args->getValueRef(pos).asTypedValue());
+      if (UNLIKELY(f->byRef(i))) {
+        if (UNLIKELY(!tvAsVariant(from).isReferenced())) {
+          int param = i + 1;
+          while (i--) m_stack.popTV();
+          m_stack.popAR();
+          m_stack.pushNull();
+          raise_warning("Parameter %d to %s() expected to be a reference, "
+                        "value given", param, f->name()->data());
+          return false;
+        }
+        tvDup(from, m_stack.allocTV());
+      } else {
+        TypedValue* to = m_stack.allocTV();
+        tvDup(from, to);
+        if (UNLIKELY(to->m_type == KindOfRef)) {
+          tvUnbox(to);
+        }
+      }
+      pos = args->iter_advance(pos);
+    }
+    if (extra && (ar->m_func->attrs() & AttrMayUseVV)) {
+      extraArgs = (TypedValue*)malloc(sizeof(TypedValue) * extra);
+      while (extra--) {
+        TypedValue* to = extraArgs + extra;
+        tvDup(args->getValueRef(pos).asTypedValue(), to);
+        if (to->m_type == KindOfRef && to->m_data.pref->_count == 2) {
+          tvUnbox(to);
+        }
+        pos = args->iter_advance(pos);
+      }
+      ar->initNumArgs(nargs);
+    } else {
+      ar->initNumArgs(nparams);
+    }
+  }
+  return true;
+}
+
+void VMExecutionContext::cleanupParamsAndActRec(ActRec* ar,
+                                                TypedValue* extraArgs) {
+  for (int i = ar->numArgs(); i--; ) {
+    m_stack.popTV();
+  }
+  ASSERT(m_stack.top() == (void*)ar);
+  m_stack.popAR();
+  if (extraArgs) {
+    for (int i = ar->numArgs() - ar->m_func->numParams(); i--; ) {
+      tvRefcountedDecRef(extraArgs + i);
+    }
+    free(extraArgs);
+  }
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
+  ActRec* ar = (ActRec*)(m_stack.top() + 1);
+  NEXT();
+  ASSERT(ar->numArgs() == 1);
+
+  Cell* c1 = m_stack.topC();
+  if (false && UNLIKELY(c1->m_type != KindOfArray)) {
+    // task #1756122
+    // this is what we /should/ do, but our code base depends
+    // on the broken behavior of casting the second arg to an
+    // array.
+    cleanupParamsAndActRec(ar, NULL);
+    m_stack.pushNull();
+    raise_warning("call_user_func_array() expects parameter 2 to be array");
+    return;
+  }
+
+  const Func* func = ar->m_func;
+  TypedValue* extraArgs = NULL;
+  {
+    Array args(LIKELY(c1->m_type == KindOfArray) ? c1->m_data.parr :
+               tvAsVariant(c1).toArray().get());
+    m_stack.popTV();
+    checkStack(m_stack, func);
+
+    ASSERT(ar->m_savedRbp == (uint64_t)m_fp);
+    ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+    TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
+          m_fp->m_func->unit()->entry(),
+          int(m_fp->m_func->base()));
+    ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
+      - (uintptr_t)m_fp->m_func->base();
+    ASSERT(pcOff() > m_fp->m_func->base());
+
+    StringData* invName = ar->hasInvName() ? ar->getInvName() : NULL;
+    if (UNLIKELY(!prepareArrayArgs(ar, args.get(), extraArgs))) return;
+    if (UNLIKELY(func->maybeIntercepted())) {
+      Variant *h = get_intercept_handler(func->fullNameRef(),
+                                         &func->maybeIntercepted());
+      if (h) {
+        try {
+          TypedValue retval;
+          if (!run_intercept_handler_for_invokefunc(
+                &retval, func, args,
+                ar->hasThis() ? ar->getThis() : NULL,
+                invName, h)) {
+            cleanupParamsAndActRec(ar, extraArgs);
+            *m_stack.allocTV() = retval;
+            return;
+          }
+        } catch (...) {
+          cleanupParamsAndActRec(ar, extraArgs);
+          m_stack.pushNull();
+          SYNC();
+          throw;
+        }
+      }
+    }
+  }
+
+  prepareFuncEntry<true, false>(ar, pc, extraArgs);
+  SYNC();
+  EventHook::FunctionEnter(ar, EventHook::NormalFunc);
+  INST_HOOK_FENTRY(func->fullName());
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopCufSafeArray(PC& pc) {
+  NEXT();
+  Array ret;
+  ret.append(tvAsVariant(m_stack.top() + 1));
+  ret.appendWithRef(tvAsVariant(m_stack.top() + 0));
+  m_stack.popTV();
+  m_stack.popTV();
+  tvAsVariant(m_stack.top()) = ret;
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopCufSafeReturn(PC& pc) {
+  NEXT();
+  bool ok = tvAsVariant(m_stack.top() + 1).toBoolean();
+  tvRefcountedDecRef(m_stack.top() + 1);
+  tvRefcountedDecRef(m_stack.top() + (ok ? 2 : 0));
+  if (ok) m_stack.top()[2] = m_stack.top()[0];
+  m_stack.ndiscard(2);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIterInit(PC& pc) {

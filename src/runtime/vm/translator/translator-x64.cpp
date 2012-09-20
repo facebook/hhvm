@@ -1399,15 +1399,19 @@ template <bool reentrant>
 void
 TranslatorX64::recordCallImpl(X64Assembler& a,
                               const NormalizedInstruction& i,
-                              const SrcKey* inputSk /* = 0 */) {
-  SrcKey sk = inputSk ? *inputSk : i.source;
+                              bool advance /* = false */) {
+  SrcKey sk = i.source;
+  Offset stackOff = i.stackOff + (vmfp() - vmsp());
+  if (advance) {
+    sk.advance(curUnit());
+    stackOff += getStackDelta(i);
+  }
   ASSERT(i.checkedInputs ||
          (reentrant && !i.isSimple()) ||
          (!reentrant && !i.isNative()));
   Offset pcOff = sk.offset() - curFunc()->base();
   SKTRACE(2, sk, "record%sCall pcOff %d\n",
              reentrant ? "Reentrant" : "", int(pcOff));
-  Offset stackOff = i.stackOff + (vmfp() - vmsp());
   recordSyncPoint(a, pcOff, stackOff);
   SKTRACE(2, sk, "record%sCall stackOff %d\n",
              reentrant ? "Reentrant" : "", int(stackOff));
@@ -3696,7 +3700,7 @@ TranslatorX64::enterTC(SrcKey sk) {
         const FPIEnt* fe = curFunc()->findPrecedingFPI(
           curUnit()->offsetOf(vmpc()));
         vmpc() = curUnit()->at(fe->m_fcallOff);
-        ASSERT(*vmpc() == OpFCall);
+        ASSERT(isFCallStar(*vmpc()));
         raise_error("Stack overflow");
         return;
       }
@@ -11374,26 +11378,8 @@ TranslatorX64::translateFPushClsMethodD(const Tracelet& t,
     emitPushAR(i, func, 0 /*bytesPopped*/,
                false /* isCtor */, false /* clearThis */,
                magicCall ? uintptr_t(meth) | 1 : 0 /* varEnvInvName */);
-    if (!(func->attrs() & AttrStatic) &&
-        !(curFunc()->attrs() & AttrStatic) &&
-        curFunc()->cls() &&
-        curFunc()->cls()->classof(baseClass)) {
-      /* might be a non-static call */
-      ScratchReg rClsScratch(m_regMap);
-      PhysReg rCls = *rClsScratch;
-      a.    load_reg64_disp_reg64(rVmFp, AROFF(m_cls), rCls);
-      a.    test_imm32_reg64(1, rCls);
-      {
-        IfElseBlock<CC_NZ> ifThis(a);
-        // rCls is holding $this. We should pass it to the callee
-        emitIncRef(rCls, KindOfObject);
-        emitVStackStore(a, i, rCls, clsOff);
-        ifThis.Else();
-        emitVStackStoreImm(a, i, uintptr_t(baseClass)|1, clsOff);
-      }
-    } else {
-      emitVStackStoreImm(a, i, uintptr_t(baseClass)|1, clsOff);
-    }
+
+    setupActRecClsForStaticCall(i, func, baseClass, clsOff, false);
   } else {
     Stats::emitInc(a, Stats::TgtCache_StaticMethodHit);
     CacheHandle ch = StaticMethodCache::alloc(cls, meth, getContextName());
@@ -11487,29 +11473,8 @@ TranslatorX64::translateFPushClsMethodF(const Tracelet& t,
     emitPushAR(i, func, bytesPopped,
                false /* isCtor */, false /* clearThis */,
                magicCall ? uintptr_t(name) | 1 : 0 /* varEnvInvName */);
-    ScratchReg rClsScratch(m_regMap);
-    PhysReg rCls = *rClsScratch;
-    a.    load_reg64_disp_reg64(rVmFp, AROFF(m_cls), rCls);
-    if (!(curFunc()->attrs() & AttrStatic)) {
-      ASSERT(curFunc()->cls() &&
-             curFunc()->cls()->classof(cls));
-      /* the context is non-static, so we have to deal
-         with passing in $this or getClass($this) */
-      a.    test_imm32_reg64(1, rCls);
-      {
-        JccBlock<CC_NZ> ifThis(a);
-        // rCls is holding a real $this.
-        if (func->attrs() & AttrStatic) {
-          // but we're a static method, so pass getClass($this)|1
-          a.load_reg64_disp_reg64(rCls, ObjectData::getVMClassOffset(), rCls);
-          a.or_imm32_reg64(1, rCls);
-        } else {
-          // We should pass $this to the callee
-          emitIncRef(rCls, KindOfObject);
-        }
-      }
-    }
-    emitVStackStore(a, i, rCls, clsOff);
+
+    setupActRecClsForStaticCall(i, func, cls, clsOff, true);
     m_regMap.scrubStackRange(i.stackOff - 2,
                              i.stackOff - 2 + kNumActRecCells);
   } else {
@@ -11977,6 +11942,258 @@ TranslatorX64::translateFPushContFunc(const Tracelet& t,
       // m_vmCalledClass already has its low bit set
       emitVStackStore(a, i, *rScratch, thisOff, sz::qword);
     }
+  }
+}
+
+const Func*
+TranslatorX64::findCuf(const NormalizedInstruction& ni,
+                       Class*& cls, StringData*& invName, bool& forward) {
+  forward = (ni.op() == OpFPushCufF);
+  cls = NULL;
+  invName = NULL;
+
+  DynLocation* callable = ni.inputs[ni.op() == OpFPushCufSafe ? 1 : 0];
+
+  const StringData* str =
+    callable->isString() ? callable->rtt.valueString() : NULL;
+  const ArrayData* arr =
+    callable->isArray() ? callable->rtt.valueArray() : NULL;
+
+  StringData* sclass = NULL;
+  StringData* sname = NULL;
+  if (str) {
+    Func* f = HPHP::VM::Unit::lookupFunc(str);
+    if (f) return f;
+    String name(const_cast<StringData*>(str));
+    int pos = name.find("::");
+    if (pos <= 0 || pos + 2 >= name.size() ||
+        name.find("::", pos + 2) != String::npos) {
+      return NULL;
+    }
+    sclass = StringData::GetStaticString(name.substr(0, pos).get());
+    sname = StringData::GetStaticString(name.substr(pos + 2).get());
+  } else if (arr) {
+    if (arr->size() != 2) return NULL;
+    CVarRef e0 = arr->get(0LL, false);
+    CVarRef e1 = arr->get(1LL, false);
+    if (!e0.isString() || !e1.isString()) return NULL;
+    sclass = e0.getStringData();
+    sname = e1.getStringData();
+    String name(sname);
+    if (name.find("::") != String::npos) return NULL;
+  } else {
+    return NULL;
+  }
+
+  if (!isContextFixed()) return NULL;
+
+  Class* ctx = curFunc()->cls();
+
+  if (sclass->isame(s_self.get())) {
+    if (!ctx) return NULL;
+    cls = ctx;
+    forward = true;
+  } else if (sclass->isame(s_parent.get())) {
+    if (!ctx || !ctx->parent()) return NULL;
+    cls = ctx->parent();
+    forward = true;
+  } else if (sclass->isame(s_static.get())) {
+    return NULL;
+  } else {
+    cls = VM::Unit::lookupClass(sclass);
+    if (!cls) return NULL;
+  }
+
+  bool magicCall = false;
+  const Func* f = lookupImmutableMethod(cls, sname, magicCall, true);
+  if (!f || (forward && !ctx->classof(f->cls()))) {
+    /*
+     * To preserve the invariant that the lsb class
+     * is an instance of the context class, we require
+     * that f's class is an instance of the context class.
+     * This is conservative, but without it, we would need
+     * a runtime check to decide whether or not to forward
+     * the lsb class
+     */
+    return NULL;
+  }
+  if (magicCall) invName = sname;
+  return f;
+}
+
+void
+TranslatorX64::analyzeFPushCufOp(Tracelet& t,
+                                 NormalizedInstruction& ni) {
+  Class* cls = NULL;
+  StringData* invName = NULL;
+  bool forward = false;
+  const Func* func = findCuf(ni, cls, invName, forward);
+  ni.m_txFlags = supportedPlan(func != NULL);
+  ni.manuallyAllocInputs = true;
+}
+
+void
+TranslatorX64::setupActRecClsForStaticCall(const NormalizedInstruction &i,
+                                           const Func* func, const Class* cls,
+                                           size_t clsOff, bool forward) {
+  if (forward) {
+    ScratchReg rClsScratch(m_regMap);
+    PhysReg rCls = *rClsScratch;
+    a.    load_reg64_disp_reg64(rVmFp, AROFF(m_cls), rCls);
+    if (!(curFunc()->attrs() & AttrStatic)) {
+      ASSERT(curFunc()->cls() &&
+             curFunc()->cls()->classof(cls));
+      /* the context is non-static, so we have to deal
+         with passing in $this or getClass($this) */
+      a.    test_imm32_reg64(1, rCls);
+      {
+        JccBlock<CC_NZ> ifThis(a);
+        // rCls is holding a real $this.
+        if (func->attrs() & AttrStatic) {
+          // but we're a static method, so pass getClass($this)|1
+          a.load_reg64_disp_reg64(rCls, ObjectData::getVMClassOffset(), rCls);
+          a.or_imm32_reg64(1, rCls);
+        } else {
+          // We should pass $this to the callee
+          emitIncRef(rCls, KindOfObject);
+        }
+      }
+    }
+    emitVStackStore(a, i, rCls, clsOff);
+  } else {
+    if (!(func->attrs() & AttrStatic) &&
+        !(curFunc()->attrs() & AttrStatic) &&
+        curFunc()->cls() &&
+        curFunc()->cls()->classof(cls)) {
+      /* might be a non-static call */
+      ScratchReg rClsScratch(m_regMap);
+      PhysReg rCls = *rClsScratch;
+      a.    load_reg64_disp_reg64(rVmFp, AROFF(m_cls), rCls);
+      a.    test_imm32_reg64(1, rCls);
+      {
+        IfElseBlock<CC_NZ> ifThis(a);
+        // rCls is holding $this. We should pass it to the callee
+        emitIncRef(rCls, KindOfObject);
+        emitVStackStore(a, i, rCls, clsOff);
+        ifThis.Else();
+        emitVStackStoreImm(a, i, uintptr_t(cls)|1, clsOff);
+      }
+    } else {
+      emitVStackStoreImm(a, i, uintptr_t(cls)|1, clsOff);
+    }
+  }
+}
+
+template <bool warn>
+int64 checkClass(TargetCache::CacheHandle ch, StringData* clsName,
+                 ActRec *ar) {
+  VMRegAnchor _;
+  AutoloadHandler::s_instance->invokeHandler(clsName->data());
+  if (*(Class**)TargetCache::handleToPtr(ch)) return true;
+  ar->m_func = SystemLib::GetNullFunction();
+  if (ar->hasThis()) {
+    // cannot hit zero, we just inc'ed it
+    ar->getThis()->decRefCount();
+  }
+  ar->setThis(0);
+  return false;
+}
+
+static void warnMissingFunc(StringData* name) {
+  raise_warning("function: method '%s' not found", name->data());
+}
+
+void
+TranslatorX64::translateFPushCufOp(const Tracelet& t,
+                                   const NormalizedInstruction& ni) {
+  Class* cls = NULL;
+  StringData* invName = NULL;
+  bool forward = false;
+  const Func* func = findCuf(ni, cls, invName, forward);
+  ASSERT(func);
+
+  int numPopped = ni.op() == OpFPushCufSafe ? 0 : 1;
+  m_regMap.scrubStackRange(ni.stackOff - numPopped,
+                           ni.stackOff - numPopped + kNumActRecCells);
+
+  int startOfActRec = int(numPopped * sizeof(Cell)) - int(sizeof(ActRec));
+
+  emitPushAR(ni, func, numPopped * sizeof(Cell),
+             false /* isCtor */, !cls /* clearThis */,
+             invName ? uintptr_t(invName) | 1 : 0 /* varEnvInvName */);
+
+  bool safe = (ni.op() == OpFPushCufSafe);
+  size_t clsOff  = AROFF(m_cls) + startOfActRec;
+  size_t funcOff  = AROFF(m_func) + startOfActRec;
+  LazyScratchReg flag(m_regMap);
+  if (safe) {
+    flag.alloc();
+    emitImmReg(a, true, *flag);
+  }
+  if (cls) {
+    setupActRecClsForStaticCall(ni, func, cls, clsOff, forward);
+    TargetCache::CacheHandle ch = cls->m_cachedOffset;
+    a.          cmp_imm32_disp_reg32(0, ch, rVmTl);
+    {
+      UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+      if (false) {
+        checkClass<false>(0, NULL, NULL);
+        checkClass<true>(0, NULL, NULL);
+      }
+      EMIT_CALL(astubs, TCA(safe ? checkClass<false> : checkClass<true>),
+                IMM(ch), IMM(uintptr_t(cls->name())),
+                RPLUS(rVmSp, vstackOffset(ni, startOfActRec)));
+      recordReentrantStubCall(ni, true);
+      if (safe) {
+        astubs.  mov_reg64_reg64(rax, *flag);
+      }
+    }
+  } else {
+    TargetCache::CacheHandle ch = func->getCachedOffset();
+    a.          cmp_imm32_disp_reg32(0, ch, rVmTl);
+    {
+      UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+      emitVStackStoreImm(astubs, ni,
+                         uintptr_t(SystemLib::GetNullFunction()), funcOff);
+      if (safe) {
+        emitImmReg(astubs, false, *flag);
+      } else {
+        EMIT_CALL(astubs, TCA(warnMissingFunc), IMM(uintptr_t(func->name())));
+        recordReentrantStubCall(ni);
+      }
+    }
+  }
+
+  if (safe) {
+    DynLocation* outFlag = ni.outStack2;
+    DynLocation* outDef = ni.outStack;
+
+    DynLocation* inDef = ni.inputs[0];
+    if (!m_regMap.hasReg(inDef->location)) {
+      m_regMap.scrubStackRange(ni.stackOff - 2, ni.stackOff - 2);
+      PhysReg base1, base2;
+      int disp1, disp2;
+      locToRegDisp(inDef->location, &base1, &disp1);
+      locToRegDisp(outDef->location, &base2, &disp2);
+      ScratchReg tmp(m_regMap);
+      a.   load_reg64_disp_reg64(base1, TVOFF(m_data) + disp1, *tmp);
+      a.   store_reg64_disp_reg64(*tmp, TVOFF(m_data) + disp2, base2);
+      if (!inDef->rtt.isVagueValue()) {
+        a. store_imm32_disp_reg(inDef->outerType(),
+                                TVOFF(m_type) + disp2, base2);
+      } else {
+        a. load_reg64_disp_reg32(base1, TVOFF(m_type) + disp1, *tmp);
+        a. store_reg32_disp_reg64(*tmp, TVOFF(m_type) + disp2, base2);
+      }
+    } else {
+      PhysReg reg = m_regMap.getReg(inDef->location);
+      m_regMap.scrubStackRange(ni.stackOff - 1, ni.stackOff - 1);
+      m_regMap.bind(reg, outDef->location, inDef->rtt.outerType(),
+                    RegInfo::DIRTY);
+    }
+    emitImmReg(a, true, *flag);
+    m_regMap.bindScratch(flag, outFlag->location, KindOfBoolean,
+                         RegInfo::DIRTY);
   }
 }
 
@@ -12539,6 +12756,10 @@ TranslatorX64::translateIterNext(const Tracelet& t,
   case OpFPassCW:                               \
   case OpFPassCE:                               \
     func(FPassCOp, t, i)                        \
+  case OpFPushCuf:                              \
+  case OpFPushCufF:                             \
+  case OpFPushCufSafe:                          \
+    func(FPushCufOp, t, i)                      \
   case OpIssetL:                                \
   case OpIsNullL:                               \
   case OpIsStringL:                             \

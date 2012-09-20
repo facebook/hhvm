@@ -250,6 +250,7 @@ enum OutTypeConstraints {
   OutBooleanImm,
   OutInt64,
   OutArray,
+  OutArrayImm,
   OutObject,
   OutThisObject,        // Object from current environment
   OutFDesc,             // Blows away the current function desc
@@ -287,10 +288,10 @@ enum Operands {
   Stack3          = 1 << 0,
   Stack2          = 1 << 1,
   Stack1          = 1 << 2,
-  FuncdRef        = 1 << 3,  // Input to FPass*
-  FStack          = 1 << 4,  // output of FPushFuncD and friends
-  StackIns1       = 1 << 5,  // Insert an element under top of stack
-  StackIns2       = 1 << 6,  // Insert an element under top 2 of stack
+  StackIns1       = 1 << 3,  // Insert an element under top of stack
+  StackIns2       = 1 << 4,  // Insert an element under top 2 of stack
+  FuncdRef        = 1 << 5,  // Input to FPass*
+  FStack          = 1 << 6,  // output of FPushFuncD and friends
   Local           = 1 << 7,  // Writes to a local
   MVector         = 1 << 8,  // Member-vector input
   Iter            = 1 << 9,  // Iterator in imm[0]
@@ -300,9 +301,10 @@ enum Operands {
   DontBreakLocal  = 1 << 13, // Dont break a tracelet on behalf of the local
   DontBreakStack1 = 1 << 14, // Dont break a tracelet on behalf of stack1 input
   IgnoreInnerType = 1 << 15, // Instruction doesnt care about the inner types
-
+  DontGuardAny    = 1 << 16, // Dont force a guard for any input
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
+  StackCufSafe = StackIns1 | FStack
 };
 
 Operands
@@ -557,6 +559,13 @@ getDynLocType(const vector<DynLocation*>& inputs,
       return RuntimeType(sd);
     }
 
+    case OutArrayImm: {
+      ASSERT(ni->op() == OpArray);
+      ArrayData *ad = curUnit()->lookupArrayId(ni->imm[0].u_AA);
+      ASSERT(ad);
+      return RuntimeType(ad);
+    }
+
     case OutBooleanImm: {
       ASSERT(ni->op() == OpTrue || ni->op() == OpFalse);
       return RuntimeType(ni->op() == OpTrue);
@@ -760,7 +769,7 @@ static const struct {
   { OpInt,         {None,             Stack1,       OutInt64,          1 }},
   { OpDouble,      {None,             Stack1,       OutDouble,         1 }},
   { OpString,      {None,             Stack1,       OutStringImm,      1 }},
-  { OpArray,       {None,             Stack1,       OutArray,          1 }},
+  { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutArray,         -2 }},
@@ -933,14 +942,21 @@ static const struct {
                                                      kNumActRecCells - 2 }},
   { OpFPushClsMethodD,
                    {None,             FStack,       OutFDesc,
-                                                     kNumActRecCells }},
+                                                         kNumActRecCells }},
   { OpFPushCtor,   {Stack1,           Stack1|FStack,OutObject,
-                                                     kNumActRecCells }},
+                                                         kNumActRecCells }},
   { OpFPushCtorD,  {None,             Stack1|FStack,OutObject,
                                                      kNumActRecCells + 1 }},
   { OpFPushContFunc,
                    {None,             FStack,       OutFDesc,
-                                                     kNumActRecCells }},
+                                                         kNumActRecCells }},
+  { OpFPushCuf,    {Stack1,           FStack,       OutFDesc,
+                                                     kNumActRecCells - 1 }},
+  { OpFPushCufF,   {Stack1,           FStack,       OutFDesc,
+                                                     kNumActRecCells - 1 }},
+  { OpFPushCufSafe,{StackTop2|DontGuardAny,
+                                      StackCufSafe, OutFDesc,
+                                                         kNumActRecCells }},
   { OpFPassC,      {FuncdRef,         None,         OutNull,           0 }},
   { OpFPassCW,     {FuncdRef,         None,         OutNull,           0 }},
   { OpFPassCE,     {FuncdRef,         None,         OutNull,           0 }},
@@ -957,6 +973,12 @@ static const struct {
    * runtime stack are outside the boundaries of the tracelet abstraction.
    */
   { OpFCall,       {FStack,           Stack1,       OutPred,           0 }},
+  { OpFCallArray,  {FStack,           Stack1,       OutPred,
+                                                   -(int)kNumActRecCells }},
+  { OpCufSafeArray,{StackTop3|DontGuardAny,
+                                      Stack1,       OutArray,         -2 }},
+  { OpCufSafeReturn,{StackTop3|DontGuardAny,
+                                      Stack1,       OutUnknown,       -2 }},
 
   /*** 11. Iterator instructions ***/
 
@@ -1650,7 +1672,8 @@ void Translator::getInputs(Tracelet& t,
   }
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", currentStackOffset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());
-  if (inputs.size() && dontGuardAnyInputs(ni->op())) {
+  if (inputs.size() &&
+      ((input & DontGuardAny) || dontGuardAnyInputs(ni->op()))) {
     for (int i = inputs.size(); i--; ) {
       inputs[i].dontGuard = true;
     }
@@ -2279,6 +2302,9 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     if (hasImmVector(*ni->pc())) {
       ni->immVec = getImmVector(ni->pc());
     }
+    if (ni->op() == OpFCallArray) {
+      ni->imm[0].u_IVA = 1;
+    }
 
     // Use the basic block analyzer to follow the flow of immediate values.
     findImmable(immStack, ni);
@@ -2367,7 +2393,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       goto breakBB;
     }
 
-    if (ni->op() == OpFCall) {
+    if (isFCallStar(ni->op())) {
       if (!doVarEnvTaint) {
         const FPIEnt *fpi = curFunc()->findFPI(ni->source.m_offset);
         ASSERT(fpi);

@@ -1,4 +1,4 @@
-array(6) {
+array(5) {
   [0]=>
   array(6) {
     ["file"]=>
@@ -48,7 +48,11 @@ array(6) {
     }
   }
   [2]=>
-  array(2) {
+  array(4) {
+    ["file"]=>
+    string() "src/test/vm/debug_backtrace.php"
+    ["line"]=>
+    int(20)
     ["function"]=>
     string(3) "bar"
     ["args"]=>
@@ -60,20 +64,6 @@ array(6) {
     ["file"]=>
     string() "src/test/vm/debug_backtrace.php"
     ["line"]=>
-    int(20)
-    ["function"]=>
-    string(14) "call_user_func"
-    ["args"]=>
-    array(1) {
-      [0]=>
-      string(3) "bar"
-    }
-  }
-  [4]=>
-  array(4) {
-    ["file"]=>
-    string() "src/test/vm/debug_backtrace.php"
-    ["line"]=>
     int(29)
     ["function"]=>
     string(3) "foo"
@@ -81,7 +71,7 @@ array(6) {
     array(0) {
     }
   }
-  [5]=>
+  [4]=>
   array(4) {
     ["file"]=>
     string() "src/test/vm/debug_backtrace.php"
@@ -94,7 +84,7 @@ array(6) {
     }
   }
 }
-array(6) {
+array(5) {
   [0]=>
   array(6) {
     ["file"]=>
@@ -131,7 +121,11 @@ array(6) {
     }
   }
   [2]=>
-  array(2) {
+  array(4) {
+    ["file"]=>
+    string() "src/test/vm/debug_backtrace.php"
+    ["line"]=>
+    int(20)
     ["function"]=>
     string(3) "bar"
     ["args"]=>
@@ -143,20 +137,6 @@ array(6) {
     ["file"]=>
     string() "src/test/vm/debug_backtrace.php"
     ["line"]=>
-    int(20)
-    ["function"]=>
-    string(14) "call_user_func"
-    ["args"]=>
-    array(1) {
-      [0]=>
-      string(3) "bar"
-    }
-  }
-  [4]=>
-  array(4) {
-    ["file"]=>
-    string() "src/test/vm/debug_backtrace.php"
-    ["line"]=>
     int(29)
     ["function"]=>
     string(3) "foo"
@@ -164,7 +144,7 @@ array(6) {
     array(0) {
     }
   }
-  [5]=>
+  [4]=>
   array(4) {
     ["file"]=>
     string() "src/test/vm/debug_backtrace.php"

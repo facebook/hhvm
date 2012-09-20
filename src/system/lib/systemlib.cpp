@@ -159,6 +159,13 @@ SystemLib::AllocSoapFaultObject(CVarRef code,
 
 #undef CREATE_AND_CONSTRUCT
 
+VM::Func*
+SystemLib::GetNullFunction() {
+  VM::Func* f = *s_nativeFuncUnit->funcHoistableBegin();
+  ASSERT(!strcmp(f->name()->data(), "86null"));
+  return f;
+}
+
 ALLOC_OBJECT_STUB(Directory);
 ALLOC_OBJECT_STUB(RecursiveDirectoryIterator);
 ALLOC_OBJECT_STUB(SplFileInfo);

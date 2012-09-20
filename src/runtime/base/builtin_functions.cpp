@@ -53,11 +53,12 @@ static StaticString s_offsetExists("offsetExists");
 static StaticString s___autoload("__autoload");
 static StaticString s___call("__call");
 static StaticString s___callStatic("__callStatic");
-static StaticString s_self("self");
-static StaticString s_parent("parent");
-static StaticString s_static("static");
 static StaticString s_exception("exception");
 static StaticString s_previous("previous");
+
+StaticString s_self("self");
+StaticString s_parent("parent");
+StaticString s_static("static");
 
 ///////////////////////////////////////////////////////////////////////////////
 

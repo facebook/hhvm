@@ -27,11 +27,10 @@ bar 3
 caught 3
 HipHop Fatal error: Uncaught exception 'Ex3' with message '' in src/test/vm/exceptions.php:21
 Stack trace:
-#0 (): bar()
-#1 src/test/vm/exceptions.php(28): call_user_func()
-#2 src/test/vm/exceptions.php(35): foo2()
-#3 src/test/vm/exceptions.php(39): foo1()
-#4 (): foo()
-#5 src/test/vm/exceptions.php(105): array_map()
-#6 src/test/vm/exceptions.php(111): main3()
-#7 {main}
+#0 src/test/vm/exceptions.php(28): bar()
+#1 src/test/vm/exceptions.php(35): foo2()
+#2 src/test/vm/exceptions.php(39): foo1()
+#3 (): foo()
+#4 src/test/vm/exceptions.php(105): array_map()
+#5 src/test/vm/exceptions.php(111): main3()
+#6 {main}

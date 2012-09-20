@@ -664,9 +664,13 @@ private:
   void enterVM(TypedValue* retval,
                HPHP::VM::ActRec* ar,
                TypedValue* extraArgs);
+  void doFPushCuf(VM::PC& pc, bool forward, bool safe);
   void unwindBuiltinFrame();
   template <bool reenter, bool handle_throw>
   bool prepareFuncEntry(VM::ActRec* ar, VM::PC& pc, TypedValue* extraArgs);
+  bool prepareArrayArgs(VM::ActRec* ar, ArrayData* args,
+                        TypedValue*& extraArgs);
+  void cleanupParamsAndActRec(VM::ActRec* ar, TypedValue* extraArgs);
   void recordCodeCoverage(VM::PC pc);
   int m_coverPrevLine;
   HPHP::VM::Unit* m_coverPrevUnit;

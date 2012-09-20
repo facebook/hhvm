@@ -26,6 +26,7 @@ class ObjectData;
 namespace VM {
   class Unit;
   class Class;
+  class Func;
 }
 namespace Eval {
   class PhpFile;
@@ -54,6 +55,8 @@ class SystemLib {
   static HPHP::VM::Class* s_DOMExceptionClass;
   static HPHP::VM::Class* s_PDOExceptionClass;
   static HPHP::VM::Class* s_SoapFaultClass;
+
+  static HPHP::VM::Func* GetNullFunction();
 
 
   static ObjectData* AllocStdClassObject();

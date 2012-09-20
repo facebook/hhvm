@@ -469,6 +469,9 @@ enum SetOpOp {
   O(FPushCtor,       ONE(IVA),         ONE(AV),         ONE(CV),    NF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
   O(FPushContFunc,   ONE(IVA),         NOV,             NOV,        NF) \
+  O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        NF) \
+  O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
+  O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), NF) \
   O(FPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCW,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCE,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
@@ -480,6 +483,9 @@ enum SetOpOp {
   O(FPassS,          ONE(IVA),         TWO(AV,CV),      ONE(FV),    FF) \
   O(FPassM,          TWO(IVA,MA),      LMANY(),         ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
+  O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
+  O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
+  O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        TWO(IA,BA),       ONE(CV),         NOV,        CF) \
   O(IterInitM,       TWO(IA,BA),       ONE(VV),         NOV,        CF) \
   O(IterValueC,      ONE(IA),          NOV,             ONE(CV),    NF) \
@@ -729,7 +735,11 @@ bool instrIsControlFlow(Opcode opcode);
 bool instrReadsCurrentFpi(Opcode opcode);
 
 inline bool isFPush(Opcode opcode) {
-  return opcode >= OpFPushFunc && opcode <= OpFPushContFunc;
+  return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;
+}
+
+inline bool isFCallStar(Opcode opcode) {
+  return opcode == OpFCall || opcode == OpFCallArray;
 }
 
 int instrNumPops(const Opcode* opcode);

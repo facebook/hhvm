@@ -867,10 +867,10 @@ int instrSpToArDelta(const Opcode* opcode) {
   // parameters pushed onto the stack so far that are not being consumed by
   // this instruction (numExtra). For the FPass* instructions, numExtra will
   // be equal to the first immediate argument (param id). For the FCall
-  // instruction, numExtra will be 0 because all of the parameters on the
+  // instructions, numExtra will be 0 because all of the parameters on the
   // stack are already accounted for by numPops.
   int numPops = instrNumPops(opcode);
-  int numExtra = (*opcode != OpFCall) ? getImm(opcode, 0).u_IVA : 0;
+  int numExtra = isFCallStar(*opcode) ? 0 : getImm(opcode, 0).u_IVA;
   int delta = numPops + numExtra;
   return delta;
 }

@@ -250,10 +250,10 @@ inline LinearBlocks linearBlocks(const Graph* g) {
 
 typedef std::pair<Id, Offset> CatchEnt;
 
-// A callsite starts with FPush*, has 0 or more FPass*, and ends with FCall.
+// A callsite starts with FPush*, has 0 or more FPass*, and ends with FCall*.
 // The FPI Region protects the range of instructions that execute with the
 // partial activation on the stack, which is the instruction after FPush*
-// up to and including FCall.  FPush* is not in the protected region.
+// up to and including FCall*.  FPush* is not in the protected region.
 
 inline Offset fpiBase(const FPIEnt& fpi, PC bc) {
   PC fpush = bc + fpi.m_fpushOff;

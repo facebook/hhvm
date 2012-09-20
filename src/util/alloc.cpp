@@ -27,28 +27,18 @@ namespace HPHP { namespace Util {
 
 void* safe_malloc(size_t size) {
   void *ptr = std::malloc(size);
-
-  if (ptr == NULL) {
-    throw OutOfMemoryException(size);
-  }
+  if (ptr == NULL) throw OutOfMemoryException(size);
   return ptr;
 }
 
-void* safe_realloc(void *var, size_t size) {
-  void *ptr = NULL;
-
-  ptr = std::realloc(var, size);
-  if (ptr == NULL && size != 0) {
-    throw OutOfMemoryException(size);
-  }
-
+void* safe_realloc(void *ptr, size_t size) {
+  ptr = std::realloc(ptr, size);
+  if (!ptr && size != 0) throw OutOfMemoryException(size);
   return ptr;
 }
 
 void safe_free(void *ptr) {
-  if (!ptr) {
-    free(ptr);
-  }
+  free(ptr); // standard free() allows ptr == 0
 }
 
 void flush_thread_caches() {

@@ -52,9 +52,9 @@ const StringData *convert_integer_helper(int64 n, StringData *sd) {
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
   if (sd) {
-    new (sd) StringData(p, len, CopyString);
+    new (sd) StringData(p, len, CopyMalloc);
   } else {
-    sd = new StringData(p, len, CopyString);
+    sd = new StringData(p, len, CopyMalloc);
   }
   sd->setStatic();
   if (!String(sd).checkStatic()) {

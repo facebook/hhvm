@@ -72,7 +72,7 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
           setSerializedArray();
           m_shouldCache = true;
           String s = apc_serialize(source);
-          m_data.str = new StringData(s.data(), s.size(), CopyString);
+          m_data.str = new StringData(s.data(), s.size(), CopyMalloc);
           break;
         }
       }
@@ -117,7 +117,7 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
         setIsObj();
       } else {
         String s = apc_serialize(source);
-        m_data.str = new StringData(s.data(), s.size(), CopyString);
+        m_data.str = new StringData(s.data(), s.size(), CopyMalloc);
       }
       break;
     }

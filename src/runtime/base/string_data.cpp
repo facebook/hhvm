@@ -48,7 +48,7 @@ StringData *StringData::GetStaticString(const StringData *str) {
   }
   // Lookup failed, so do the hard work of creating a StringData with its own
   // copy of the key string, so that the atomic insert() has a permanent key.
-  StringData *sd = new StringData(str->data(), str->size(), CopyString);
+  StringData *sd = new StringData(str->data(), str->size(), CopyMalloc);
   sd->setStatic();
   if (!s_stringDataMap->insert(acc, sd)) {
     delete sd;
@@ -154,6 +154,31 @@ void StringData::initCopy(const char* data, int len) {
     m_small[len] = 0;
     m_small[MaxSmallSize] = 0;
   } else {
+    char *buf = (char*)smart_malloc(len + 1);
+    memcpy(buf, data, len);
+    buf[len] = 0;
+    m_len = len;
+    m_cdata = buf;
+    m_big.cap = len | IsSmart;
+  }
+  ASSERT(checkSane());
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
+}
+
+HOT_FUNC
+void StringData::initMalloc(const char* data, int len) {
+  if (uint32_t(len) > MaxSize) {
+    throw InvalidArgumentException("len>=2^30", len);
+  }
+  m_hash = 0;
+  _count = 0;
+  if (uint32_t(len) <= MaxSmallSize) {
+    memcpy(m_small, data, len);
+    m_len = len;
+    m_data = m_small;
+    m_small[len] = 0;
+    m_small[MaxSmallSize] = 0;
+  } else {
     char *buf = (char*)malloc(len + 1);
     memcpy(buf, data, len);
     buf[len] = 0;
@@ -180,20 +205,36 @@ StringData::StringData(SharedVariant *shared)
 
 HOT_FUNC
 void StringData::releaseData() {
-  Format f = format();
-  if (f == IsSmall) return;
-  if (f == IsMalloc) {
+  switch (format()) {
+  case IsMalloc:
     ASSERT(checkSane());
     free(m_data);
-    m_data = NULL;
-    return;
-  }
-  if (f == IsShared) {
+    break;
+  case IsShared:
     ASSERT(checkSane());
     m_big.shared->decRef();
-    return;
+    break;
+  case IsSmart:
+    ASSERT(checkSane());
+    smart_free(m_data);
+    break;
+  default:
+    break;
   }
-  // Nothing to do for literals, which are rarely destructed anyway.
+}
+
+HOT_FUNC
+void StringData::sweep() {
+  switch (format()) {
+  case IsMalloc:
+    free(m_data);
+    break;
+  case IsShared:
+    m_big.shared->decRef();
+    break;
+  default:
+    break;
+  }
 }
 
 void StringData::attach(char *data, int len) {
@@ -204,6 +245,15 @@ void StringData::attach(char *data, int len) {
   m_len = len;
   m_data = data;
   m_big.cap = len | IsMalloc;
+}
+
+char* smart_concat(const char* s1, int len1, const char* s2, int len2) {
+  int len = len1 + len2;
+  char* s = (char*)smart_malloc(len + 1);
+  memcpy(s, s1, len1);
+  memcpy(s + len1, s2, len2);
+  s[len] = 0;
+  return s;
 }
 
 void StringData::initConcat(StringSlice r1, StringSlice r2) {
@@ -220,10 +270,10 @@ void StringData::initConcat(StringSlice r1, StringSlice r2) {
   } else if (UNLIKELY(uint32_t(len) > MaxSize)) {
     throw FatalErrorException(0, "String length exceeded 2^30 - 1: %d", len);
   } else {
-    char* buf = string_concat(r1.ptr, r1.len, r2.ptr, r2.len, len);
+    char* buf = smart_concat(r1.ptr, r1.len, r2.ptr, r2.len);
     m_len = len;
     m_data = buf;
-    m_big.cap = len | IsMalloc;
+    m_big.cap = len | IsSmart;
   }
 }
 
@@ -241,8 +291,8 @@ StringData::StringData(int cap) {
       throw InvalidArgumentException("len>=2^30", cap);
     }
     m_len = 0;
-    m_data = (char*) malloc(cap + 1);
-    m_big.cap = cap | IsMalloc;
+    m_data = (char*) smart_malloc(cap + 1);
+    m_big.cap = cap | IsSmart;
   }
 }
 
@@ -256,7 +306,7 @@ void StringData::append(const char *s, int len) {
     throw FatalErrorException(0, "String length exceeded 2^30 - 1: %u",
                               len + m_len);
   }
-  int newlen;
+  int newlen = m_len + len;
   // TODO: t1122987: in any of the cases below where we need a bigger buffer,
   // we can probably assume we're in a concat-loop and pick a good buffer
   // size to avoid O(N^2) copying cost.
@@ -264,21 +314,21 @@ void StringData::append(const char *s, int len) {
     // buffer is immutable, don't modify it.
     // We are mutating, so we don't need to repropagate our own taint
     StringSlice r = slice();
-    char* newdata = string_concat(r.ptr, r.len, s, len, newlen);
+    char* newdata = smart_concat(r.ptr, r.len, s, len);
     if (isShared()) m_big.shared->decRef();
     m_len = newlen;
     m_data = newdata;
-    m_big.cap = newlen | IsMalloc;
+    m_big.cap = newlen | IsSmart;
     m_hash = 0;
   } else if (rawdata() == s) {
     // appending ourself to ourself, be conservative.
     // We are mutating, so we don't need to repropagate our own taint
     StringSlice r = slice();
-    char *newdata = string_concat(r.ptr, r.len, s, len, newlen);
+    char *newdata = smart_concat(r.ptr, r.len, s, len);
     releaseData();
     m_len = newlen;
     m_data = newdata;
-    m_big.cap = newlen | IsMalloc;
+    m_big.cap = newlen | IsSmart;
     m_hash = 0;
   } else if (isSmall()) {
     // we're currently small but might not be after append.
@@ -295,12 +345,26 @@ void StringData::append(const char *s, int len) {
       m_hash = 0;
     } else {
       // small->big string transition.
-      char *newdata = string_concat(m_small, oldlen, s, len, newlen);
+      char *newdata = smart_concat(m_small, oldlen, s, len);
       m_len = newlen;
       m_data = newdata;
-      m_big.cap = newlen | IsMalloc;
+      m_big.cap = newlen | IsSmart;
       m_hash = 0;
     }
+  } else if (format() == IsSmart) {
+    // generic "big string concat" path.  smart_realloc buffer.
+    int oldlen = m_len;
+    char* oldp = m_data;
+    ASSERT((oldp > s && oldp - s > len) ||
+           (oldp < s && s - oldp > oldlen)); // no overlapping
+    newlen = oldlen + len;
+    char* newdata = (char*) smart_realloc(oldp, newlen + 1);
+    memcpy(newdata + oldlen, s, len);
+    newdata[newlen] = 0;
+    m_len = newlen;
+    m_data = newdata;
+    m_big.cap = newlen | IsSmart;
+    m_hash = 0;
   } else {
     // generic "big string concat" path.  realloc buffer.
     int oldlen = m_len;
@@ -321,6 +385,28 @@ void StringData::append(const char *s, int len) {
   ASSERT(checkSane());
 }
 
+MutableSlice StringData::reserve(int cap) {
+  ASSERT(!isImmutable() && _count <= 1 && cap >= 0);
+  if (cap <= capacity()) return mutableSlice();
+  switch (format()) {
+    default: ASSERT(false);
+    case IsSmall:
+      m_data = (char*) smart_malloc(cap + 1);
+      memcpy(m_data, m_small, m_len + 1); // includes \0
+      m_big.cap = cap | IsSmart;
+      break;
+    case IsSmart:
+      m_data = (char*) smart_realloc(m_data, cap + 1);
+      m_big.cap = cap | IsSmart;
+      break;
+    case IsMalloc:
+      m_data = (char*) realloc(m_data, cap + 1);
+      m_big.cap = cap | IsMalloc;
+      break;
+  }
+  return MutableSlice(m_data, cap);
+}
+
 StringData *StringData::copy(bool sharedMemory /* = false */) const {
   if (isStatic()) {
     // Static strings cannot change, and are always available.
@@ -330,7 +416,7 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
     // Even if it's literal, it might come from hphpi's class info
     // which will be freed at the end of the request, and so must be
     // copied.
-    return new StringData(data(), size(), CopyString);
+    return new StringData(data(), size(), CopyMalloc);
   } else {
     if (isLiteral()) {
       return NEW(StringData)(data(), size(), AttachLiteral);
@@ -391,7 +477,7 @@ static StringData** precompute_chars() {
   StringData** raw = new StringData*[256];
   for (int i = 0; i < 256; i++) {
     char s[2] = { (char)i, 0 };
-    StringData str(s, 1, CopyString);
+    StringData str(s, 1, AttachLiteral);
     raw[i] = StringData::GetStaticString(&str);
   }
   return raw;

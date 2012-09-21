@@ -154,7 +154,7 @@ const StringData* InjectionCache::getStringData(const StringData* sd) {
   }
   accFind.release(); // Release read lock
   // Gap of lock
-  StringData* sdata = new StringData(sd->data(), sd->size(), CopyString);
+  StringData* sdata = new StringData(sd->data(), sd->size(), CopyMalloc);
   StringDataMap::accessor accInsert;
   if (!m_sdCache.insert(accInsert, sdata)) {
     // Same string inserted in gap of the lock

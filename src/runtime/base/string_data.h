@@ -71,8 +71,15 @@ enum AttachDeprecatedMode { AttachDeprecated };
 enum AttachStringMode { AttachString };
 
 // const char* points to client-owned memory, StringData will copy it
-// at construct-time.
+// at construct-time using smart_malloc.  This is only ok when the StringData
+// itself was smart-allocated.
 enum CopyStringMode { CopyString };
+
+// const char* points to client-owned memory, StringData will copy it
+// at construct-time using malloc.  This works for any String but is
+// meant for StringData instances which are not smart-allocated (e.g.
+// live across multiple requests).
+enum CopyMallocMode { CopyMalloc };
 
 /**
  * Inner data class for String type. As a coding guideline, String and
@@ -95,10 +102,11 @@ class StringData {
 
   enum Format {
     IsSmall   = 0, // short str overlaps m_big
-    IsLiteral = 0x4000000000000000, // literal string
-    IsShared  = 0x8000000000000000, // shared memory string
-    IsMalloc  = 0xC000000000000000, // m_big.data points to malloc'd memory
-    IsMask    = 0xC000000000000000
+    IsLiteral = 0x1000000000000000, // literal string
+    IsShared  = 0x2000000000000000, // shared memory string
+    IsMalloc  = 0x3000000000000000, // m_big.data is malloc'd
+    IsSmart   = 0x4000000000000000, // m_big.data is smart_malloc'd
+    IsMask    = 0xF000000000000000
   };
 
  public:
@@ -133,9 +141,9 @@ class StringData {
    */
   void destruct() const { if (!isStatic()) delete this; }
 
-  StringData() : m_data(0), _count(0), m_len(0), m_hash(0) {
+  StringData() : m_data(m_small), _count(0), m_len(0), m_hash(0) {
     m_big.shared = 0;
-    m_big.cap = 0;
+    m_big.cap = IsSmall;
   }
 
   /**
@@ -169,6 +177,9 @@ class StringData {
   }
   StringData(const char* data, int len, CopyStringMode) {
     initCopy(data, len);
+  }
+  StringData(const char* data, int len, CopyMallocMode) {
+    initMalloc(data, len);
   }
   StringData(const StringData* s, CopyStringMode) {
     StringSlice r = s->slice();
@@ -207,6 +218,7 @@ public:
   void append(StringSlice r) { append(r.ptr, r.len); }
   void append(const char *s, int len);
   StringData *copy(bool sharedMemory = false) const;
+  MutableSlice reserve(int capacity);
   MutableSlice mutableSlice() {
     ASSERT(!isImmutable());
     return isSmall() ? MutableSlice(m_small, MaxSmallSize) :
@@ -333,7 +345,7 @@ public:
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedSweep);
-  void sweep() { releaseData();}
+  void sweep();
   void dump() const;
   std::string toCPPString() const;
 
@@ -385,6 +397,7 @@ public:
   void initAttachDeprecated(const char* data, int len);
   void initAttach(const char* data, int len);
   void initCopy(const char* data, int len);
+  void initMalloc(const char* data, int len);
   void initConcat(StringSlice r1, StringSlice r2);
   void releaseData();
   int numericCompare(const StringData *v2) const;

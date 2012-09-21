@@ -48,7 +48,7 @@ public:
    */
   explicit StringBuffer(int initialSize = 63);
   explicit StringBuffer(const char *filename);
-  StringBuffer(char *data, int len); // attaching
+  StringBuffer(char *data, int len); // attaching a malloc'd buffer
   ~StringBuffer();
 
   static const int kDefaultOutputLimit = INT_MAX;

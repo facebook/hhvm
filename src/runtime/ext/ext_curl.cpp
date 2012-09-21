@@ -1022,6 +1022,50 @@ Variant f_curl_multi_exec(CObjRef mh, VRefParam still_running) {
   return result;
 }
 
+/* Fallback implementation of curl_multi_select() for
+ * libcurl < 7.28.0 without FB's curl_multi_select() patch
+ *
+ * This allows the OSS build to work with older package
+ * versions of libcurl, but will fail with file descriptors
+ * over 1024.
+ */
+UNUSED
+static void hphp_curl_multi_select(CURLM *mh, int timeout_ms, int *ret) {
+  fd_set read_fds, write_fds, except_fds;
+  int maxfds, nfds = -1;
+  struct timeval tv;
+
+  FD_ZERO(&read_fds);
+  FD_ZERO(&write_fds);
+  FD_ZERO(&except_fds);
+
+  tv.tv_sec  =  timeout_ms / 1000;
+  tv.tv_usec = (timeout_ms * 1000) % 1000000;
+
+  curl_multi_fdset(mh, &read_fds, &write_fds, &except_fds, &maxfds);
+  if (maxfds < 1024) {
+    nfds = select(maxfds + 1, &read_fds, &write_fds, &except_fds, &tv);
+  } else {
+    /* fd_set can only hold sockets from 0 to 1023,
+     * anything higher is ignored by FD_SET()
+     * avoid "unexplained" behavior by failing outright
+     */
+    raise_warning("libcurl versions < 7.28.0 do not support selecting on "
+                  "file descriptors of 1024 or higher.");
+  }
+  if (ret) {
+    *ret = nfds;
+  }
+}
+
+#ifndef HAVE_CURL_MULTI_SELECT
+# ifdef HAVE_CURL_MULTI_WAIT
+#  define curl_multi_select(mh, tm, ret) curl_multi_wait((mh), NULL, 0, (tm), (ret))
+# else
+#  define curl_multi_select hphp_curl_multi_select
+# endif
+#endif
+
 Variant f_curl_multi_select(CObjRef mh, double timeout /* = 1.0 */) {
   CHECK_MULTI_RESOURCE(curlm);
   int ret;

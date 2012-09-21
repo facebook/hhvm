@@ -6405,10 +6405,10 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     }
   }
 
-  // We also want two subclasses of GenericContinuation, for different
+  // We also want two subclasses of Continuation, for different
   // types of continuations.
-  static const StringData* genericContinuation =
-    StringData::GetStaticString("GenericContinuation");
+  static const StringData* continuationClassName =
+    StringData::GetStaticString("Continuation");
   static const StringData* names[] = {
     StringData::GetStaticString("MethodContinuation"),
     StringData::GetStaticString("FunctionContinuation")
@@ -6417,7 +6417,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     for (unsigned i = 0; i < array_size(names); ++i) {
       PreClassEmitter* pce =
         ue->newPreClassEmitter(names[i], PreClass::AlwaysHoistable);
-      pce->init(0, 0, ue->bcPos(), AttrUnique, genericContinuation, NULL);
+      pce->init(0, 0, ue->bcPos(), AttrUnique, continuationClassName, NULL);
     }
   }
 

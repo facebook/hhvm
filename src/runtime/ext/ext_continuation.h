@@ -35,7 +35,16 @@ void f_hphp_unpack_continuation(CObjRef continuation);
 
 class c_Continuation : public ExtObjectData {
  public:
+#ifndef HHVM
   DECLARE_CLASS(Continuation, Continuation, ObjectData)
+#else
+  DECLARE_CLASS_NO_ALLOCATION(Continuation, Continuation, ObjectData)
+  virtual void sweep();
+  void operator delete(void* p) {
+    c_Continuation* this_ = (c_Continuation*)p;
+    DELETEOBJSZ(sizeForNLocals(this_->m_nLocals))(this_);
+  }
+#endif
 
   // need to implement
   public: c_Continuation(const ObjectStaticCallbacks *cb = &cw_Continuation);
@@ -76,16 +85,23 @@ class c_Continuation : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getorigfuncname);
   public: Variant t___clone();
   DECLARE_METHOD_INVOKE_HELPERS(__clone);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_Continuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Variant obj = null, Array args = null_array);
   public: static const ClassPropTable os_prop_table;
 
+  static c_Continuation* alloc(VM::Class* cls, int nLocals) {
+    const_assert(hhvm);
+    c_Continuation* cont =
+      (c_Continuation*)ALLOCOBJSZ(sizeForNLocals(nLocals));
+    new ((void *)cont) c_Continuation(
+      ObjectStaticCallbacks::encodeVMClass(cls));
+    return cont;
+  }
+
   public: void setCalledClass(CStrRef cls) {
     const_assert(!hhvm);
-    m_called_class = cls;
+    getCalledClass() = cls;
   }
 protected: virtual bool php_sleep(Variant &ret);
 private:
@@ -123,86 +139,66 @@ public:
   Variant m_value;
   Variant m_received;
   String m_origFuncName;
+#ifndef HHVM
   String m_called_class;
+#endif
   bool m_done;
   bool m_running;
   bool m_should_throw;
   bool m_isMethod;
-  const CallInfo *m_callInfo;
+
   union {
-    void *m_extra;
-    VM::Func *m_vmFunc;
-  };
+    const CallInfo *m_callInfo; // only used by HPHPc
+    VM::Func *m_vmFunc; // only used by HHVM
 #ifdef HHVM
+  };
   LABEL_DECL
 #endif
-#undef LABEL_DECL
-};
+  // These fields are not used by HPHPc and are rolled up in the
+  // union for the HPHPc build so that they don't waste space
+  bool m_hasExtraVars;
+  int m_nLocals;
+  intptr_t m_vmCalledClass; // Stored with 1 in its low bit
+#ifndef HHVM
+  };
+#endif
 
-///////////////////////////////////////////////////////////////////////////////
-// class GenericContinuation
+#ifdef HHVM
+  Array m_vars;
+  SmartPtr<HphpArray> m_VMStatics;
 
-FORWARD_DECLARE_CLASS_BUILTIN(GenericContinuation);
-class c_GenericContinuation : public c_Continuation {
- public:
-  DECLARE_CLASS_NO_ALLOCATION(GenericContinuation, GenericContinuation, Continuation)
+  Array& getVars() { return m_vars; }
+  String& getCalledClass() { const_assert(false); return *(String*)(NULL); }
+#else
+  Array& getVars() { const_assert(false); return *(Array*)NULL; }
+  String& getCalledClass() { return m_called_class; }
+#endif
 
-  static c_GenericContinuation* alloc(VM::Class* cls, int nLocals) {
-    c_GenericContinuation* cont =
-      (c_GenericContinuation*)ALLOCOBJSZ(sizeForNLocals(nLocals));
-    new ((void *)cont) c_GenericContinuation(
-      ObjectStaticCallbacks::encodeVMClass(cls));
-    return cont;
+  VM::Class* getVMCalledClass() const {
+    return (VM::Class*)(m_vmCalledClass & ~0x1ll);
   }
-  void operator delete(void* p) {
-    c_GenericContinuation* this_ = (c_GenericContinuation*)p;
-    DELETEOBJSZ(sizeForNLocals(this_->m_nLocals))(this_);
+  intptr_t getVMCalledClassRaw() const {
+    return m_vmCalledClass;
   }
-
-  // need to implement
-  public: c_GenericContinuation(const ObjectStaticCallbacks *cb = &cw_GenericContinuation);
-  public: ~c_GenericContinuation();
-  public: void t___construct(int64 func, int64 extra, bool isMethod, CStrRef origFuncName, CArrRef vars, CVarRef obj = null, CArrRef args = null_array);
-  DECLARE_METHOD_INVOKE_HELPERS(__construct);
-  public: void t_update(int64 label, CVarRef value, CArrRef vars);
-  DECLARE_METHOD_INVOKE_HELPERS(update);
-  public: Array t_getvars();
-  DECLARE_METHOD_INVOKE_HELPERS(getvars);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
-
-  // implemented by HPHP
-  public: c_GenericContinuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Array vars, Variant obj = null, Array args = null_array);
-  public: static const ClassPropTable os_prop_table;
-
-public:
+  void setVMCalledClassRaw(intptr_t c) {
+    m_vmCalledClass = c;
+  }
   HphpArray* getStaticLocals();
   static size_t sizeForNLocals(int n) {
-    return sizeof(c_GenericContinuation) + sizeof(TypedValue) * n;
+    return sizeof(c_Continuation) + sizeof(TypedValue) * n;
   }
   static size_t localsOffset() {
-    return sizeof(c_GenericContinuation);
+    return sizeof(c_Continuation);
   }
   TypedValue* locals() {
     return (TypedValue*)((uintptr_t)this + localsOffset());
   }
   TypedValue* props() {
+    const_assert(hhvm);
     ASSERT(m_nLocals == 0);
     return locals();
   }
-
-public:
-  bool m_hasExtraVars;
-  int m_nLocals;
-  Array m_vars;
-  intptr_t m_vmCalledClass; // Stored with 1 in its low bit
-  VM::Class* getVMCalledClass() {
-    return (VM::Class*)(m_vmCalledClass & ~0x1ll);
-  }
-
-  LVariableTable m_statics;
-private:
-  SmartPtr<HphpArray> m_VMStatics;
+#undef LABEL_DECL
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,12 +224,9 @@ class c_DummyContinuation : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
   public: bool t_valid();
   DECLARE_METHOD_INVOKE_HELPERS(valid);
-  public: Variant t___destruct();
-  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DummyContinuation *create();
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

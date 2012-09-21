@@ -29,8 +29,6 @@ Array f_spl_classes();
 String f_spl_object_hash(CObjRef obj);
 inline int64 f_hphp_object_pointer(CObjRef obj) { return (int64)obj.get();}
 Variant f_hphp_get_this();
-int64 f_hphp_get_call_info(CStrRef cls, CStrRef func);
-int64 f_hphp_get_call_info_extra(CStrRef cls, CStrRef func);
 Variant f_class_implements(CVarRef obj, bool autoload = true);
 Variant f_class_parents(CVarRef obj, bool autoload = true);
 Variant f_class_uses(CVarRef obj, bool autoload = true);

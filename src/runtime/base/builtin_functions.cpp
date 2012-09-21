@@ -738,13 +738,17 @@ Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
 
 Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
                bool tryInterp /* = true */, bool fatal /* = true */) {
-  const CallInfo *ci;
-  void *extra;
   if (hhvm) {
-    if (g_vmContext->getCallInfo(ci, extra, function)) {
-      return (ci->getFunc())(extra, params);
+    StringData funcName(function);
+    VM::Func* func = VM::Unit::lookupFunc(&funcName);
+    if (func) {
+      Variant ret;
+      g_vmContext->invokeFunc((TypedValue*)&ret, func, params);
+      return ret;
     }
   } else {
+    const CallInfo *ci;
+    void *extra;
     if (LIKELY(get_call_info(ci, extra, function, hash))) {
       return (ci->getFunc())(extra, params);
     }
@@ -2046,11 +2050,7 @@ void MethodCallPackage::functionNamedCall(CVarRef func) {
 void MethodCallPackage::functionNamedCall(CStrRef func) {
   const_assert(!hhvm);
   m_isFunc = true;
-  if (!get_call_info(ci, extra, func.data())) {
-    if (hhvm) {
-      g_vmContext->getCallInfo(ci, extra, func.data());
-    }
-  }
+  get_call_info(ci, extra, func.data());
 }
 
 void MethodCallPackage::functionNamedCall(ObjectData *func) {

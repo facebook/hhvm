@@ -39,7 +39,7 @@
 #define PHP_OUTPUT_HANDLER_END    (1<<2)
 
 namespace HPHP {
-class c_GenericContinuation;
+class c_Continuation;
 namespace Eval {
 class PhpFile;
 }
@@ -432,14 +432,14 @@ public:
 
   static void getElem(TypedValue* base, TypedValue* key, TypedValue* dest);
   template<bool isMethod>
-  static c_GenericContinuation* createContinuation(VM::ActRec* fp, bool getArgs,
-                                                   const VM::Func* origFunc,
-                                                   const VM::Func* genFunc);
-  static c_GenericContinuation* fillContinuationVars(
+  static c_Continuation* createContinuation(VM::ActRec* fp, bool getArgs,
+                                            const VM::Func* origFunc,
+                                            const VM::Func* genFunc);
+  static c_Continuation* fillContinuationVars(
     VM::ActRec* fp, const VM::Func* origFunc, const VM::Func* genFunc,
-    c_GenericContinuation* cont);
-  static int unpackContinuation(c_GenericContinuation* cont, TypedValue* dest);
-  static void packContinuation(c_GenericContinuation* cont, VM::ActRec* fp,
+    c_Continuation* cont);
+  static int unpackContinuation(c_Continuation* cont, TypedValue* dest);
+  static void packContinuation(c_Continuation* cont, VM::ActRec* fp,
                                TypedValue* value, int label);
   void pushLocalsAndIterators(const HPHP::VM::Func* f, int nparams = 0);
 
@@ -619,9 +619,6 @@ public:
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
   void destructObjects();
-  bool getCallInfo(const CallInfo *&ci, void *&extra, const char *s);
-  bool getCallInfoStatic(const CallInfo *&ci, void *&extra,
-                         const StringData *cls, const StringData *func);
   int m_lambdaCounter;
   struct ReentryRecord {
     VMState m_savedState;

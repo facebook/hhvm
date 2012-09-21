@@ -2248,7 +2248,6 @@ extern const CallInfo ci_DummyContinuation$$rewind = { (void*)&c_DummyContinuati
 extern const CallInfo ci_DummyContinuation$$key = { (void*)&c_DummyContinuation::i_key, (void*)&c_DummyContinuation::ifa_key, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DummyContinuation$$current = { (void*)&c_DummyContinuation::i_current, (void*)&c_DummyContinuation::ifa_current, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DummyContinuation$$next = { (void*)&c_DummyContinuation::i_next, (void*)&c_DummyContinuation::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DummyContinuation$$__destruct = { (void*)&c_DummyContinuation::i___destruct, (void*)&c_DummyContinuation::ifa___destruct, 0, 4, 0x0000000000000000LL};
 Variant c_DummyContinuation::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -2266,9 +2265,6 @@ Variant c_DummyContinuation::i_rewind(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DummyContinuation::i_valid(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_valid);
-}
-Variant c_DummyContinuation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_DummyContinuation::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -2318,18 +2314,9 @@ Variant NEVER_INLINE c_DummyContinuation::ifa_valid(MethodCallPackage &mcp, int 
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
 }
-Variant NEVER_INLINE c_DummyContinuation::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_DummyContinuation);
-  }
-  c_DummyContinuation *self ATTRIBUTE_UNUSED (static_cast<c_DummyContinuation*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_DummyContinuation$$call_info_table[] = {
   { 0x4991C291, 0, 7, "current", &ci_DummyContinuation$$current },
   { 0x4D5C8831, 1, 6, "rewind", &ci_DummyContinuation$$rewind },
-  { 0x50DD3DA2, 1, 10, "__destruct", &ci_DummyContinuation$$__destruct },
   { 0x35A80033, 1, 5, "valid", &ci_DummyContinuation$$valid },
   { 0x21B23D34, 1, 3, "key", &ci_DummyContinuation$$key },
   { 0x51A5071C, 1, 4, "next", &ci_DummyContinuation$$next },
@@ -2337,15 +2324,14 @@ extern const MethodCallInfoTable cw_DummyContinuation$$call_info_table[] = {
 };
 extern const int cw_DummyContinuation$$call_info_index[] = {
   15,
-  -1,0,2,3,4,-1,-1,-1,
-  -1,-1,-1,-1,5,6,-1,-1,
+  -1,0,-1,2,3,-1,-1,-1,
+  -1,-1,-1,-1,4,5,-1,-1,
 
 };
 c_DummyContinuation *c_DummyContinuation::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_DummyContinuation$$call_info_table[];
@@ -2359,128 +2345,6 @@ const ObjectStaticCallbacks cw_DummyContinuation = {
   &c_DummyContinuation::s_class_name,
   0,&ci_DummyContinuation$$__construct,0,0,0x0,
   &c_DummyContinuation::s_cls
-};
-ObjectData *coo_GenericContinuation() {
-  return NEWOBJ(c_GenericContinuation)();
-}
-IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(GenericContinuation)
-extern const InstanceOfInfo cw_GenericContinuation$$instanceof_table[] = {
-  {0x7EA02238,0,"Continuation",&cw_Continuation},
-  {0x5CB957E8,1,"Iterator",(const ObjectStaticCallbacks*)2},
-  {0x27F2782C,1,"Traversable",(const ObjectStaticCallbacks*)2},
-  {0x7CD06715,1,"GenericContinuation",&cw_GenericContinuation},
-};
-const int cw_GenericContinuation$$instanceof_index[] = {
-  7,
-  0,-1,-1,-1,2,3,-1,-1,
-
-};
-extern const CallInfo ci_GenericContinuation$$getvars = { (void*)&c_GenericContinuation::i_getvars, (void*)&c_GenericContinuation::ifa_getvars, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_GenericContinuation$$__destruct = { (void*)&c_GenericContinuation::i___destruct, (void*)&c_GenericContinuation::ifa___destruct, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_GenericContinuation$$__construct = { (void*)&c_GenericContinuation::i___construct, (void*)&c_GenericContinuation::ifa___construct, 7, 4, 0x0000000000000000LL};
-extern const CallInfo ci_GenericContinuation$$update = { (void*)&c_GenericContinuation::i_update, (void*)&c_GenericContinuation::ifa_update, 3, 4, 0x0000000000000000LL};
-Variant c_GenericContinuation::i___construct(MethodCallPackage &mcp, CArrRef params) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::i_dummy(mcp, params, i___construct, coo_GenericContinuation);
-  }
-  c_GenericContinuation *self ATTRIBUTE_UNUSED (static_cast<c_GenericContinuation*>(mcp.obj));
-  int count ATTRIBUTE_UNUSED = params.size();
-  if (UNLIKELY(count < 5 || count > 7)) return throw_wrong_arguments("__construct", count, 5, 7, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 5) return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
-    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count <= 6) return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
-    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5, arg6), null);
-  }
-}
-Variant c_GenericContinuation::i_update(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_update);
-}
-Variant c_GenericContinuation::i_getvars(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_getvars);
-}
-Variant c_GenericContinuation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
-}
-Variant NEVER_INLINE c_GenericContinuation::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_GenericContinuation);
-  }
-  c_GenericContinuation *self ATTRIBUTE_UNUSED (static_cast<c_GenericContinuation*>(mcp.obj));
-  if (UNLIKELY(count < 5)) return throw_wrong_arguments("__construct", count, 5, 7, 1);
-  CVarRef arg0(a0);
-  CVarRef arg1(a1);
-  CVarRef arg2(a2);
-  CVarRef arg3(a3);
-  CVarRef arg4(a4);
-  if (count <= 5) return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
-  CVarRef arg5(a5);
-  return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
-}
-Variant NEVER_INLINE c_GenericContinuation::ifa_update(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_update, coo_GenericContinuation);
-  }
-  c_GenericContinuation *self ATTRIBUTE_UNUSED (static_cast<c_GenericContinuation*>(mcp.obj));
-  if (UNLIKELY(count != 3)) return throw_wrong_arguments("update", count, 3, 3, 1);
-  CVarRef arg0(a0);
-  CVarRef arg1(a1);
-  CVarRef arg2(a2);
-  return (self->t_update(arg0, arg1, arg2), null);
-}
-Variant NEVER_INLINE c_GenericContinuation::ifa_getvars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getvars, coo_GenericContinuation);
-  }
-  c_GenericContinuation *self ATTRIBUTE_UNUSED (static_cast<c_GenericContinuation*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getvars", 0, 1);
-  return (self->t_getvars());
-}
-Variant NEVER_INLINE c_GenericContinuation::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_GenericContinuation);
-  }
-  c_GenericContinuation *self ATTRIBUTE_UNUSED (static_cast<c_GenericContinuation*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
-extern const MethodCallInfoTable cw_GenericContinuation$$call_info_table[] = {
-  { 0x50DD3DA2, 1, 10, "__destruct", &ci_GenericContinuation$$__destruct },
-  { 0x44892084, 1, 6, "update", &ci_GenericContinuation$$update },
-  { 0x3A40C6ED, 1, 11, "__construct", &ci_GenericContinuation$$__construct },
-  { 0x6041EAA7, 1, 7, "getVars", &ci_GenericContinuation$$getvars },
-};
-extern const int cw_GenericContinuation$$call_info_index[] = {
-  7,
-  -1,-1,0,-1,1,2,-1,3,
-
-};
-c_GenericContinuation *c_GenericContinuation::create(int64 a0, int64 a1, bool a2, String a3, Array a4, Variant a5, Array a6) {
-  CountableHelper h(this);
-  init();
-  t___construct(a0, a1, a2, a3, a4, a5, a6);
-  clearNoDestruct();
-  return this;
-}
-extern const MethodCallInfoTable cw_GenericContinuation$$call_info_table[];
-extern const int cw_GenericContinuation$$call_info_index[];
-extern const InstanceOfInfo cw_GenericContinuation$$instanceof_table[];
-extern const int cw_GenericContinuation$$instanceof_index[];
-const ObjectStaticCallbacks cw_GenericContinuation = {
-  (ObjectData*(*)(ObjectData*))coo_GenericContinuation,
-  cw_GenericContinuation$$call_info_table,cw_GenericContinuation$$call_info_index,
-  cw_GenericContinuation$$instanceof_table,cw_GenericContinuation$$instanceof_index,
-  &c_GenericContinuation::s_class_name,
-  0,&ci_GenericContinuation$$__construct,0,&cw_Continuation,0x0,
-  &c_GenericContinuation::s_cls
 };
 ObjectData *coo_DOMNode() {
   return NEWOBJ(c_DOMNode)();
@@ -7114,7 +6978,6 @@ extern const CallInfo ci_Continuation$$next = { (void*)&c_Continuation::i_next, 
 extern const CallInfo ci_Continuation$$receive = { (void*)&c_Continuation::i_receive, (void*)&c_Continuation::ifa_receive, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Continuation$$key = { (void*)&c_Continuation::i_key, (void*)&c_Continuation::ifa_key, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Continuation$$get_args = { (void*)&c_Continuation::i_get_args, (void*)&c_Continuation::ifa_get_args, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_Continuation$$__destruct = { (void*)&c_Continuation::i___destruct, (void*)&c_Continuation::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Continuation$$send = { (void*)&c_Continuation::i_send, (void*)&c_Continuation::ifa_send, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Continuation$$num_args = { (void*)&c_Continuation::i_num_args, (void*)&c_Continuation::ifa_num_args, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_Continuation$$update = { (void*)&c_Continuation::i_update, (void*)&c_Continuation::ifa_update, 2, 4, 0x0000000000000000LL};
@@ -7171,9 +7034,6 @@ Variant c_Continuation::i_getorigfuncname(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_Continuation::i___clone(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___clone);
-}
-Variant c_Continuation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_Continuation::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7332,14 +7192,6 @@ Variant NEVER_INLINE c_Continuation::ifa___clone(MethodCallPackage &mcp, int cou
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("__clone", 0, 1);
   return (self->t___clone());
 }
-Variant NEVER_INLINE c_Continuation::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_Continuation);
-  }
-  c_Continuation *self ATTRIBUTE_UNUSED (static_cast<c_Continuation*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_Continuation$$call_info_table[] = {
   { 0x44892084, 1, 6, "update", &ci_Continuation$$update },
   { 0x3BD7080D, 1, 5, "raise", &ci_Continuation$$raise },
@@ -7350,7 +7202,6 @@ extern const MethodCallInfoTable cw_Continuation$$call_info_table[] = {
   { 0x3DA6B359, 1, 4, "done", &ci_Continuation$$done },
   { 0x3B5A571A, 1, 7, "get_arg", &ci_Continuation$$get_arg },
   { 0x51A5071C, 1, 4, "next", &ci_Continuation$$next },
-  { 0x50DD3DA2, 1, 10, "__destruct", &ci_Continuation$$__destruct },
   { 0x0E3F3AA6, 1, 8, "num_args", &ci_Continuation$$num_args },
   { 0x3A40C6ED, 0, 11, "__construct", &ci_Continuation$$__construct },
   { 0x5DCE826D, 0, 15, "getOrigFuncName", &ci_Continuation$$getorigfuncname },
@@ -7367,17 +7218,16 @@ extern const int cw_Continuation$$call_info_index[] = {
   -1,-1,-1,-1,-1,1,-1,-1,
   -1,2,3,-1,-1,-1,5,-1,
   -1,6,7,-1,8,-1,-1,-1,
-  -1,-1,9,-1,-1,-1,10,-1,
-  -1,-1,-1,-1,-1,11,-1,-1,
-  -1,14,-1,15,16,-1,-1,-1,
-  -1,-1,-1,17,18,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,9,-1,
+  -1,-1,-1,-1,-1,10,-1,-1,
+  -1,13,-1,14,15,-1,-1,-1,
+  -1,-1,-1,16,17,-1,-1,-1,
 
 };
 c_Continuation *c_Continuation::create(int64 a0, int64 a1, bool a2, String a3, Variant a4, Array a5) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_Continuation$$call_info_table[];
@@ -12195,7 +12045,6 @@ static const hashNodeCTD ctdBuckets[] = {
   {0x60D3440F,0,0,"Normalizer",(int64)&cw_Normalizer },
   {0x1283EF0F,1,0,"RuntimeException",(int64)&cw_RuntimeException },
   {0x5AEC2B14,1,0,"OutOfRangeException",(int64)&cw_OutOfRangeException },
-  {0x7CD06715,0,0,"GenericContinuation",(int64)&cw_GenericContinuation },
   {0x0F774815,1,0,"AppendIterator",(int64)&cw_AppendIterator },
   {0x71484417,1,0,"Memcached",(int64)&cw_Memcached },
   {0x5857D01B,0,0,"ReflectionParameter",(int64)&cw_ReflectionParameter },
@@ -12294,36 +12143,36 @@ static const hashNodeCTD ctdBuckets[] = {
 static const int ctdMapTable[] = {
   -1,-1,0,-1,-1,1,-1,-1,
   -1,2,3,4,-1,-1,-1,6,
-  -1,-1,-1,-1,8,9,-1,11,
-  -1,-1,-1,12,-1,14,-1,-1,
-  -1,-1,-1,-1,-1,15,-1,16,
-  -1,-1,17,18,-1,19,-1,-1,
-  -1,20,-1,-1,21,22,-1,-1,
-  23,-1,24,26,27,-1,28,29,
-  -1,30,-1,31,33,34,-1,36,
-  -1,-1,37,-1,-1,-1,-1,-1,
-  -1,-1,-1,39,-1,40,-1,41,
-  -1,42,-1,43,-1,44,46,48,
-  -1,-1,49,-1,-1,50,-1,-1,
-  51,53,54,55,-1,56,-1,-1,
-  -1,-1,57,-1,-1,58,-1,-1,
-  60,-1,61,-1,62,63,-1,-1,
-  -1,-1,-1,-1,65,66,-1,-1,
-  -1,-1,-1,-1,-1,67,-1,-1,
-  68,70,-1,71,72,-1,-1,73,
-  -1,-1,-1,74,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,75,-1,
-  76,-1,77,78,-1,-1,79,-1,
-  -1,-1,-1,-1,-1,-1,-1,81,
-  -1,-1,-1,-1,-1,82,-1,-1,
-  83,-1,-1,84,-1,-1,-1,-1,
-  85,86,87,88,-1,-1,89,-1,
-  -1,-1,-1,-1,90,-1,91,-1,
-  -1,92,-1,93,-1,-1,-1,-1,
-  -1,-1,94,-1,-1,-1,-1,-1,
-  -1,-1,-1,95,96,-1,-1,97,
-  -1,-1,99,-1,-1,-1,100,101,
-  -1,-1,-1,-1,-1,103,-1,-1,
+  -1,-1,-1,-1,8,9,-1,10,
+  -1,-1,-1,11,-1,13,-1,-1,
+  -1,-1,-1,-1,-1,14,-1,15,
+  -1,-1,16,17,-1,18,-1,-1,
+  -1,19,-1,-1,20,21,-1,-1,
+  22,-1,23,25,26,-1,27,28,
+  -1,29,-1,30,32,33,-1,35,
+  -1,-1,36,-1,-1,-1,-1,-1,
+  -1,-1,-1,38,-1,39,-1,40,
+  -1,41,-1,42,-1,43,45,47,
+  -1,-1,48,-1,-1,49,-1,-1,
+  50,52,53,54,-1,55,-1,-1,
+  -1,-1,56,-1,-1,57,-1,-1,
+  59,-1,60,-1,61,62,-1,-1,
+  -1,-1,-1,-1,64,65,-1,-1,
+  -1,-1,-1,-1,-1,66,-1,-1,
+  67,69,-1,70,71,-1,-1,72,
+  -1,-1,-1,73,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,74,-1,
+  75,-1,76,77,-1,-1,78,-1,
+  -1,-1,-1,-1,-1,-1,-1,80,
+  -1,-1,-1,-1,-1,81,-1,-1,
+  82,-1,-1,83,-1,-1,-1,-1,
+  84,85,86,87,-1,-1,88,-1,
+  -1,-1,-1,-1,89,-1,90,-1,
+  -1,91,-1,92,-1,-1,-1,-1,
+  -1,-1,93,-1,-1,-1,-1,-1,
+  -1,-1,-1,94,95,-1,-1,96,
+  -1,-1,98,-1,-1,-1,99,100,
+  -1,-1,-1,-1,-1,102,-1,-1,
 
 };
 

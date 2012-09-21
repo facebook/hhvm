@@ -127,6 +127,7 @@ static __thread int64 s_perfCounters[tpc_num_counters];
 
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)
+#define CONTOFF(nm) offsetof(c_Continuation, nm)
 
 // nextTx64: Global shared state. The tx64 that should be used for
 // new requests going forward.
@@ -1527,7 +1528,7 @@ TranslatorX64::getInterceptHelper() {
   }
   if (!m_interceptHelper) {
     m_interceptHelper = TCA(astubs.code.frontier);
-    astubs.    load_reg64_disp_reg64(rStashedAR, offsetof(ActRec, m_func),
+    astubs.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func),
                                      rax);
     astubs.    lea_reg64_disp_reg64(rax, Func::fullNameOff(),
                                     argNumToRegName[0]);
@@ -2549,7 +2550,7 @@ TranslatorX64::checkRefs(X64Assembler& a,
       continue;
     }
 
-    int32_t funcOff = cellsToBytes(entryArDelta) + offsetof(ActRec, m_func);
+    int32_t funcOff = cellsToBytes(entryArDelta) + AROFF(m_func);
     a.    load_reg64_disp_reg64(rVmSp, funcOff, *rFunc); // rFunc <- Func*
     a.    load_reg64_disp_reg32(*rFunc, Func::numParamsOff(),
                                 *rNumParams);
@@ -5979,7 +5980,7 @@ void TranslatorX64::translateSelf(const Tracelet& t,
   } else {
     // tmp = rfp->m_func
     // tmp = tmp->m_cls
-    a.load_reg64_disp_reg64(rVmFp,offsetof(ActRec,m_func),tmp);
+    a.load_reg64_disp_reg64(rVmFp, AROFF(m_func), tmp);
     a.load_reg64_disp_reg64(tmp, Func::clsOff(), tmp);
     // Note: After Mark's checkin, we can simplify further to
     if (false) {
@@ -6069,7 +6070,7 @@ void TranslatorX64::emitCallFillCont(X64Assembler& a,
                                      const Func* gen) {
   if (false) {
     ActRec* fp = NULL;
-    c_GenericContinuation *cont = NULL;
+    c_Continuation *cont = NULL;
     cont =
       VMExecutionContext::fillContinuationVars(fp, orig, gen, cont);
   }
@@ -6090,7 +6091,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
 
   if (false) {
     ActRec* fp = NULL;
-    UNUSED c_GenericContinuation* cont =
+    UNUSED c_Continuation* cont =
       VMExecutionContext::createContinuation<true>(fp, getArgs, origFunc,
                                                    genFunc);
     VMExecutionContext::createContinuation<false>(fp, getArgs, origFunc,
@@ -6137,7 +6138,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
     ScratchReg rDest(m_regMap);
     if (origLocals > 0 || fillThis) {
       a.lea_reg64_disp_reg64(rax,
-                             c_GenericContinuation::localsOffset(),
+                             c_Continuation::localsOffset(),
                              *rDest);
     }
     for (int i = 0; i < origLocals; ++i) {
@@ -6150,9 +6151,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
     // Deal with a potential $this local in the generator body
     if (fillThis) {
       ASSERT(thisId != kInvalidId);
-      a.load_reg64_disp_reg64(rax,
-                              offsetof(c_GenericContinuation, m_obj),
-                              *rScratch);
+      a.load_reg64_disp_reg64(rax, CONTOFF(m_obj), *rScratch);
       a.test_reg64_reg64(*rScratch, *rScratch);
       {
         JccBlock<CC_Z> ifObj(a);
@@ -6178,7 +6177,7 @@ void TranslatorX64::emitCallUnpack(X64Assembler& a,
   const int contIdx = 0;
 
   if (false) {
-    c_GenericContinuation* cont = NULL;
+    c_Continuation* cont = NULL;
     TypedValue* dest = NULL;
     VMExecutionContext::unpackContinuation(cont, dest);
   }
@@ -6214,9 +6213,7 @@ void TranslatorX64::translateUnpackCont(const Tracelet& t,
   PhysReg rCont = getReg(i.inputs[contIdx]->location);
   ScratchReg rLabel(m_regMap);
   {
-    a.    test_imm32_disp_reg32(0x1,
-                                offsetof(c_GenericContinuation, m_hasExtraVars),
-                                rCont);
+    a.    test_imm32_disp_reg32(0x1, CONTOFF(m_hasExtraVars), rCont);
     DiamondReturn astubsRet;
     {
       UnlikelyIfBlock<CC_NZ> hasVars(a, astubs, &astubsRet);
@@ -6226,15 +6223,13 @@ void TranslatorX64::translateUnpackCont(const Tracelet& t,
     }
     Stats::emitInc(a, Stats::Tx64_ContUnpackFast);
 
-    a.    load_reg64_disp_reg64(rCont,
-                                offsetof(c_GenericContinuation, m_label),
-                                *rLabel);
+    a.    load_reg64_disp_reg64(rCont, CONTOFF(m_label), *rLabel);
     ScratchReg rScratch(m_regMap);
     ScratchReg rSrc(m_regMap);
     ScratchReg rZero(m_regMap);
     if (nCopy > 0) {
       a.  lea_reg64_disp_reg64(rCont,
-                               c_GenericContinuation::localsOffset(),
+                               c_Continuation::localsOffset(),
                                *rSrc);
       emitImmReg(a, 0, *rZero);
     }
@@ -6261,7 +6256,7 @@ void TranslatorX64::emitCallPack(X64Assembler& a,
   // that.
   m_regMap.cleanAll();
   if (false) {
-    c_GenericContinuation* cont = NULL;
+    c_Continuation* cont = NULL;
     TypedValue* tv = NULL;
     ActRec* fp = NULL;
     int label = 0;
@@ -6309,7 +6304,7 @@ void TranslatorX64::translatePackCont(const Tracelet& t,
   ScratchReg rZero(m_regMap);
   if (nCopy > 0) {
     a.  lea_reg64_disp_reg64(rCont,
-                             c_GenericContinuation::localsOffset(),
+                             c_Continuation::localsOffset(),
                              *rDest);
     emitImmReg(a, 0, *rZero);
   }
@@ -6331,15 +6326,13 @@ void TranslatorX64::translatePackCont(const Tracelet& t,
   // continuation object, so we don't have to incRef or decRef
   Location valLoc = i.inputs[valIdx]->location;
   emitTvSet(i, getReg(valLoc), i.inputs[valIdx]->outerType(), rCont,
-            offsetof(c_GenericContinuation, m_value), false);
+            CONTOFF(m_value), false);
 
   emitImmReg(a, i.imm[0].u_IVA, *rScratch);
-  a.    store_reg64_disp_reg64(*rScratch,
-                               offsetof(c_GenericContinuation, m_label),
-                               rCont);
+  a.    store_reg64_disp_reg64(*rScratch, CONTOFF(m_label), rCont);
 }
 
-static void continuationRaiseHelper(c_GenericContinuation* cont) {
+static void continuationRaiseHelper(c_Continuation* cont) {
   cont->t_raised();
   not_reached();
 }
@@ -6349,13 +6342,11 @@ void TranslatorX64::emitContRaiseCheck(X64Assembler& a,
   const int contIdx = 0;
   ASSERT(i.inputs[contIdx]->location == Location(Location::Local, 0));
   PhysReg rCont = getReg(i.inputs[contIdx]->location);
-  a.    test_imm32_disp_reg32(0x1,
-                              offsetof(c_GenericContinuation, m_should_throw),
-                              rCont);
+  a.    test_imm32_disp_reg32(0x1, CONTOFF(m_should_throw), rCont);
   {
     UnlikelyIfBlock<CC_NZ> ifThrow(a, astubs);
     if (false) {
-      c_GenericContinuation* c = NULL;
+      c_Continuation* c = NULL;
       continuationRaiseHelper(c);
     }
     EMIT_CALL(astubs,
@@ -6372,7 +6363,7 @@ void TranslatorX64::translateContReceive(const Tracelet& t,
   emitContRaiseCheck(a, i);
   ScratchReg rScratch(m_regMap);
   a.   lea_reg64_disp_reg64(getReg(i.inputs[contIdx]->location),
-                            offsetof(c_GenericContinuation, m_received),
+                            CONTOFF(m_received),
                             *rScratch);
   emitIncRefGeneric(*rScratch, 0);
   emitCopyToStack(a, i, *rScratch, -1 * (int)sizeof(Cell));
@@ -6387,19 +6378,19 @@ void TranslatorX64::translateContDone(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   const int contIdx = 0;
   a.    store_imm8_disp_reg(0x1,
-                            offsetof(c_GenericContinuation, m_done),
+                            CONTOFF(m_done),
                             getReg(i.inputs[contIdx]->location));
 }
 
-static void contPreNextThrowHelper(c_GenericContinuation* c) {
+static void contPreNextThrowHelper(c_Continuation* c) {
   c->preNext();
   not_reached();
 }
 
 void TranslatorX64::emitContPreNext(const NormalizedInstruction& i,
                                     ScratchReg& rCont) {
-  const Offset doneOffset = offsetof(c_GenericContinuation, m_done);
-  CT_ASSERT((doneOffset + 1) == offsetof(c_GenericContinuation, m_running));
+  const Offset doneOffset = CONTOFF(m_done);
+  CT_ASSERT((doneOffset + 1) == CONTOFF(m_running));
   // Check m_done and m_running at the same time
   a.    test_imm32_disp_reg32(0x0101, doneOffset, *rCont);
   {
@@ -6410,11 +6401,9 @@ void TranslatorX64::emitContPreNext(const NormalizedInstruction& i,
   }
 
   // ++m_index
-  a.    add_imm64_disp_reg64(0x1, offsetof(c_GenericContinuation, m_index),
-                             *rCont);
+  a.    add_imm64_disp_reg64(0x1, CONTOFF(m_index), *rCont);
   // m_running = true
-  a.    store_imm8_disp_reg(0x1, offsetof(c_GenericContinuation, m_running),
-                            *rCont);
+  a.    store_imm8_disp_reg(0x1, CONTOFF(m_running), *rCont);
 
   // push Continuation on the stack
   m_regMap.bindScratch(rCont, i.outStack->location, KindOfObject,
@@ -6428,13 +6417,13 @@ void TranslatorX64::translateContNext(const Tracelet& t,
   a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
 
   // m_received.setNull()
-  const Offset receivedOff = offsetof(c_GenericContinuation, m_received);
+  const Offset receivedOff = CONTOFF(m_received);
   emitTvSet(i, reg::noreg, KindOfNull, *rCont, receivedOff, false);
 
   emitContPreNext(i, rCont);
 }
 
-static void contNextCheckThrowHelper(c_GenericContinuation* cont) {
+static void contNextCheckThrowHelper(c_Continuation* cont) {
   cont->nextCheck();
   not_reached();
 }
@@ -6442,8 +6431,7 @@ static void contNextCheckThrowHelper(c_GenericContinuation* cont) {
 void TranslatorX64::emitContNextCheck(const NormalizedInstruction& i,
                                       ScratchReg& rCont) {
   // if (m_index < 0)
-  a.    cmp_imm64_disp_reg64(0, offsetof(c_GenericContinuation, m_index),
-                             *rCont);
+  a.    cmp_imm64_disp_reg64(0, CONTOFF(m_index), *rCont);
   {
     UnlikelyIfBlock<CC_L> whoops(a, astubs);
     EMIT_CALL(astubs, contNextCheckThrowHelper, *rCont);
@@ -6462,16 +6450,14 @@ void TranslatorX64::translateContSendImpl(const NormalizedInstruction& i) {
   emitContNextCheck(i, rCont);
 
   // m_received = value
-  const Offset receivedOff = offsetof(c_GenericContinuation, m_received);
+  const Offset receivedOff = CONTOFF(m_received);
   PhysReg valReg = getReg(i.inputs[valIdx]->location);
   DataType valType = i.inputs[valIdx]->outerType();
   emitTvSet(i, valReg, valType, *rCont, receivedOff, true);
 
   // m_should_throw = true (maybe)
   if (raise) {
-    a.  store_imm8_disp_reg(0x1,
-                            offsetof(c_GenericContinuation, m_should_throw),
-                            *rCont);
+    a.  store_imm8_disp_reg(0x1, CONTOFF(m_should_throw), *rCont);
   }
 
   emitContPreNext(i, rCont);
@@ -6495,9 +6481,7 @@ void TranslatorX64::translateContValid(const Tracelet& t,
   m_regMap.allocOutputRegs(i);
   PhysReg validReg = getReg(i.outStack->location);
   // !m_done
-  a.    loadzxb_reg64_disp_reg64(*rCont,
-                                 offsetof(c_GenericContinuation, m_done),
-                                 validReg);
+  a.    loadzxb_reg64_disp_reg64(*rCont, CONTOFF(m_done), validReg);
   a.    xor_imm32_reg64(0x1, validReg);
 }
 
@@ -6507,8 +6491,7 @@ void TranslatorX64::translateContCurrent(const Tracelet& t,
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
   emitContNextCheck(i, rCont);
 
-  a.   lea_reg64_disp_reg64(*rCont, offsetof(c_GenericContinuation, m_value),
-                            *rCont);
+  a.   lea_reg64_disp_reg64(*rCont, CONTOFF(m_value), *rCont);
   emitIncRefGeneric(*rCont, 0);
   emitCopyToStack(a, i, *rCont, -1 * (int)sizeof(Cell));
 }
@@ -6517,9 +6500,7 @@ void TranslatorX64::translateContStopped(const Tracelet& t,
                                          const NormalizedInstruction& i) {
   ScratchReg rCont(m_regMap);
   a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
-  a.    store_imm8_disp_reg(0x0,
-                            offsetof(c_GenericContinuation, m_running),
-                            *rCont);
+  a.    store_imm8_disp_reg(0x0, CONTOFF(m_running), *rCont);
 }
 
 void TranslatorX64::translateContHandle(const Tracelet& t,
@@ -7970,16 +7951,12 @@ TranslatorX64::translateFPushContFunc(const Tracelet& t,
   a.  load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
 
   // Store the func
-  a.load_reg64_disp_reg64(*rCont,
-                          offsetof(c_GenericContinuation, m_vmFunc),
-                          *rScratch);
+  a.load_reg64_disp_reg64(*rCont, CONTOFF(m_vmFunc), *rScratch);
   emitVStackStore(a, i, *rScratch, funcOff, sz::qword);
 
   if (isMethod) {
     // Store m_this
-    a.  load_reg64_disp_reg64(*rCont,
-                              offsetof(c_GenericContinuation, m_obj),
-                              *rScratch);
+    a.  load_reg64_disp_reg64(*rCont, CONTOFF(m_obj), *rScratch);
     a.  test_reg64_reg64(*rScratch, *rScratch);
     {
       IfElseBlock<CC_Z> ifThis(a);
@@ -7987,9 +7964,7 @@ TranslatorX64::translateFPushContFunc(const Tracelet& t,
       emitIncRef(*rScratch, KindOfObject);
 
       ifThis.Else();
-      a.load_reg64_disp_reg64(*rCont,
-                              offsetof(c_GenericContinuation, m_vmCalledClass),
-                              *rScratch);
+      a.load_reg64_disp_reg64(*rCont, CONTOFF(m_vmCalledClass), *rScratch);
       // m_vmCalledClass already has its low bit set
       emitVStackStore(a, i, *rScratch, thisOff, sz::qword);
     }

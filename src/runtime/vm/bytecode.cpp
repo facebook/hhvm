@@ -2112,53 +2112,6 @@ void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
              m_globalVarEnv, NULL, unit);
 }
 
-
-Variant i_callUserFunc(void *extra, CArrRef params) {
-  Variant v;
-  g_vmContext->invokeFunc((TypedValue*)&v, (Func*)extra, params);
-  return v;
-}
-
-// XXX hackity hack hack
-// This is solely here to support generator methods. The C++ implementation of
-// the Continuation class is the only thing that uses this function.
-Variant i_callUserFunc1ArgMCP(MethodCallPackage& mcp, int num, CVarRef arg0) {
-  not_reached();
-}
-
-CallInfoWithConstructor ci_callUserFunc(
-  (void *)&i_callUserFunc, (void *)&i_callUserFunc1ArgMCP,
-  0, 0, 0);
-
-bool VMExecutionContext::getCallInfo(const CallInfo *&outCi,
-                                     void *&outExtra, const char *s) {
-  StringData funcName(s);
-  Func* func = Unit::lookupFunc(&funcName);
-  if (!func) {
-    return false;
-  }
-  outExtra = (void*)func;
-  outCi = &ci_callUserFunc;
-  return true;
-}
-
-bool VMExecutionContext::getCallInfoStatic(const CallInfo*& outCi,
-                                           void*& outExtra,
-                                           const StringData* clsName,
-                                           const StringData* funcName) {
-  Class* cls = Unit::lookupClass(clsName);
-  if (cls == NULL) {
-    return false;
-  }
-  const Func* method = cls->lookupMethod(funcName);
-  if (method == NULL) {
-    return false;
-  }
-  outExtra = (void *)method;
-  outCi = &ci_callUserFunc;
-  return true;
-}
-
 void VMExecutionContext::unwindBuiltinFrame() {
   // Unwind the frame for a builtin. Currently only used for
   // hphpd_break and fb_enable_code_coverage
@@ -6569,7 +6522,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopParent(PC& pc) {
 }
 
 template<bool isMethod>
-c_GenericContinuation*
+c_Continuation*
 VMExecutionContext::createContinuation(ActRec* fp,
                                        bool getArgs,
                                        const Func* origFunc,
@@ -6588,17 +6541,17 @@ VMExecutionContext::createContinuation(ActRec* fp,
   int nLocals = genFunc->numNamedLocals() - 1; //Don't need space for __cont__
   Class* genClass = isMethod ? SystemLib::s_MethodContinuationClass
                              : SystemLib::s_FunctionContinuationClass;
-  c_GenericContinuation* cont =
-    c_GenericContinuation::alloc(genClass, nLocals);
+  c_Continuation* cont =
+    c_Continuation::alloc(genClass, nLocals);
   memset(cont->locals(), 0, sizeof(TypedValue) * nLocals);
-  cont->create((int64)&ci_callUserFunc, (int64)genFunc, isMethod,
-               StrNR(const_cast<StringData*>(origName)), Array(), obj, args);
+  cont->create((int64)0, (int64)genFunc, isMethod,
+               StrNR(const_cast<StringData*>(origName)), obj, args);
   cont->incRefCount();
   cont->setNoDestruct();
   if (isMethod) {
     Class* cls = frameStaticClass(fp);
     ASSERT(cls);
-    cont->m_vmCalledClass = (intptr_t)cls | 0x1ll;
+    cont->setVMCalledClassRaw((intptr_t)cls | 0x1ll);
   }
 
   cont->m_nLocals = nLocals;
@@ -6609,22 +6562,22 @@ static inline void setContVar(const Func* genFunc,
                               const StringData* name,
                               CVarRef value,
                               int nLocals,
-                              c_GenericContinuation* cont) {
+                              c_Continuation* cont) {
   Variant* dest;
   Id id = genFunc->lookupVarId(name);
   if (id != kInvalidId) {
     dest = &tvAsVariant(&cont->locals()[nLocals - id]);
   } else {
-    dest = &cont->m_vars.lval(*(String*)&name);
+    dest = &cont->getVars().lval(*(String*)&name);
   }
   dest->setWithRef(value);
 }
 
-c_GenericContinuation*
+c_Continuation*
 VMExecutionContext::fillContinuationVars(ActRec* fp,
                                          const Func* origFunc,
                                          const Func* genFunc,
-                                         c_GenericContinuation* cont) {
+                                         c_Continuation* cont) {
   // For functions that contain only named locals, the variable
   // environment is saved and restored by teleporting the values (and
   // their references) between the evaluation stack and the local
@@ -6648,7 +6601,7 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
                  tvAsCVarRef(frame_local(fp, i)), nLocals, cont);
     }
   }
-  cont->m_hasExtraVars = !cont->m_vars.empty();
+  cont->m_hasExtraVars = !cont->getVars().empty();
 
   // If $this is used as a local inside the body and is not provided
   // by our containing environment, just prefill it here instead of
@@ -6672,7 +6625,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   ASSERT(genFunc != NULL);
 
   bool isMethod = origFunc->isNonClosureMethod();
-  c_GenericContinuation* cont = isMethod ?
+  c_Continuation* cont = isMethod ?
     createContinuation<true>(m_fp, getArgs, origFunc, genFunc) :
     createContinuation<false>(m_fp, getArgs, origFunc, genFunc);
 
@@ -6684,14 +6637,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   ret->m_data.pobj = cont;
 }
 
-static inline c_GenericContinuation* frame_continuation(ActRec* fp) {
-  c_GenericContinuation* cont =
-    dynamic_cast<c_GenericContinuation*>(frame_local(fp, 0)->m_data.pobj);
-  ASSERT(cont != NULL);
-  return cont;
+static inline c_Continuation* frame_continuation(ActRec* fp) {
+  ObjectData* obj = frame_local(fp, 0)->m_data.pobj;
+  ASSERT(dynamic_cast<c_Continuation*>(obj));
+  return static_cast<c_Continuation*>(obj);
 }
 
-int VMExecutionContext::unpackContinuation(c_GenericContinuation* cont,
+int VMExecutionContext::unpackContinuation(c_Continuation* cont,
                                            TypedValue* dest) {
   // Teleport the references that live in the continuation object to
   // the runtime stack so we don't have to do any refcounting in the
@@ -6701,16 +6653,16 @@ int VMExecutionContext::unpackContinuation(c_GenericContinuation* cont,
   memcpy(dest, src, nCopy * sizeof(TypedValue));
   memset(src, 0x0, nCopy * sizeof(TypedValue));
 
-  ASSERT(cont->m_hasExtraVars == !cont->m_vars.empty());
+  ASSERT(cont->m_hasExtraVars == !cont->getVars().empty());
   if (UNLIKELY(cont->m_hasExtraVars)) {
     Stats::inc(Stats::Cont_UnpackVerySlow);
     VarEnv* env = g_vmContext->getVarEnv(false);
-    for (ArrayIter iter(cont->m_vars); !iter.end(); iter.next()) {
+    for (ArrayIter iter(cont->getVars()); !iter.end(); iter.next()) {
       StringData* key = iter.first().getStringData();
       TypedValue* value = iter.secondRef().getTypedAccessor();
       env->setWithRef(key, value);
     }
-    cont->m_vars.clear();
+    cont->getVars().clear();
   }
 
   return cont->m_label;
@@ -6719,7 +6671,7 @@ int VMExecutionContext::unpackContinuation(c_GenericContinuation* cont,
 inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   NEXT();
   ASSERT(!m_fp->hasVarEnv());
-  c_GenericContinuation* cont = frame_continuation(m_fp);
+  c_Continuation* cont = frame_continuation(m_fp);
 
   int nCopy = m_fp->m_func->numNamedLocals() - 1;
   int label = unpackContinuation(cont, frame_local(m_fp, nCopy));
@@ -6731,7 +6683,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   ret->m_data.num = label;
 }
 
-void VMExecutionContext::packContinuation(c_GenericContinuation* cont,
+void VMExecutionContext::packContinuation(c_Continuation* cont,
                                           ActRec* fp,
                                           TypedValue* value,
                                           int label) {
@@ -6741,25 +6693,25 @@ void VMExecutionContext::packContinuation(c_GenericContinuation* cont,
   memcpy(dest, src, nCopy * sizeof(TypedValue));
   memset(src, 0x0, nCopy * sizeof(TypedValue));
 
-  // If we have a varEnv, stick any non-named locals into cont->m_vars
+  // If we have a varEnv, stick any non-named locals into cont->getVars()
   if (UNLIKELY(fp->hasVarEnv())) {
     Stats::inc(Stats::Cont_PackVerySlow);
     const Func* f = fp->m_func;
     ASSERT(f != NULL);
-    ASSERT(cont->m_vars.empty());
+    ASSERT(cont->getVars().empty());
     Array vars = fp->getVarEnv()->getDefinedVariables();
     for (ArrayIter iter(vars); !iter.end(); iter.next()) {
       Variant key = iter.first();
       CVarRef value = iter.secondRef();
       if (f->lookupVarId(key.getStringData()) == kInvalidId) {
         if (value.m_type == KindOfRef) {
-          cont->m_vars.setRef(key, value);
+          cont->getVars().setRef(key, value);
         } else {
-          cont->m_vars.add(key, value);
+          cont->getVars().add(key, value);
         }
       }
     }
-    cont->m_hasExtraVars = !cont->m_vars.empty();
+    cont->m_hasExtraVars = !cont->getVars().empty();
   }
 
   cont->c_Continuation::t_update(label, tvAsCVarRef(value));
@@ -6768,7 +6720,7 @@ void VMExecutionContext::packContinuation(c_GenericContinuation* cont,
 inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
   NEXT();
   DECODE_IVA(label);
-  c_GenericContinuation* cont = frame_continuation(m_fp);
+  c_Continuation* cont = frame_continuation(m_fp);
 
   packContinuation(cont, m_fp, m_stack.topTV(), label);
   m_stack.popTV();
@@ -6776,7 +6728,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
   NEXT();
-  c_GenericContinuation* cont = frame_continuation(m_fp);
+  c_Continuation* cont = frame_continuation(m_fp);
   Variant val = cont->t_receive();
 
   TypedValue* tv = m_stack.allocTV();
@@ -6786,21 +6738,20 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContRaised(PC& pc) {
   NEXT();
-  c_GenericContinuation* cont = frame_continuation(m_fp);
+  c_Continuation* cont = frame_continuation(m_fp);
   cont->t_raised();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContDone(PC& pc) {
   NEXT();
-  c_GenericContinuation* cont = frame_continuation(m_fp);
+  c_Continuation* cont = frame_continuation(m_fp);
   cont->t_done();
 }
 
-static inline c_GenericContinuation* this_continuation(ActRec* fp) {
-  c_GenericContinuation* c =
-    dynamic_cast<c_GenericContinuation*>(fp->getThis());
-  ASSERT(c != NULL);
-  return c;
+static inline c_Continuation* this_continuation(ActRec* fp) {
+  ObjectData* obj = fp->getThis();
+  ASSERT(dynamic_cast<c_Continuation*>(obj));
+  return static_cast<c_Continuation*>(obj);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushContFunc(PC& pc) {
@@ -6808,7 +6759,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushContFunc(PC& pc) {
   DECODE_IVA(nArgs);
   ASSERT(nArgs == 1);
 
-  c_GenericContinuation* cont = this_continuation(m_fp);
+  c_Continuation* cont = this_continuation(m_fp);
   Func* func = cont->m_vmFunc;
   func->validate();
   ActRec* ar = m_stack.allocA();
@@ -6821,7 +6772,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushContFunc(PC& pc) {
     } else {
       // m_vmCalledClass already has its low bit set so we want to
       // bypass setClass().
-      ar->m_cls = (Class*)cont->m_vmCalledClass;
+      ar->m_cls = (Class*)cont->getVMCalledClassRaw();
     }
   } else {
     ar->setThis(NULL);
@@ -6832,7 +6783,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushContFunc(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {
   NEXT();
-  c_GenericContinuation* cont = this_continuation(m_fp);
+  c_Continuation* cont = this_continuation(m_fp);
   cont->m_received.setNull();
   cont->preNext();
 
@@ -6843,7 +6794,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {
 
 template<bool raise>
 inline void VMExecutionContext::contSendImpl() {
-  c_GenericContinuation* cont = this_continuation(m_fp);
+  c_Continuation* cont = this_continuation(m_fp);
   cont->nextCheck();
   cont->m_received.assignVal(tvAsVariant(frame_local(m_fp, 0)));
   if (raise) {
@@ -6875,7 +6826,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContValid(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContCurrent(PC& pc) {
   NEXT();
-  c_GenericContinuation* cont = this_continuation(m_fp);
+  c_Continuation* cont = this_continuation(m_fp);
   cont->nextCheck();
 
   TypedValue* tv = m_stack.allocTV();
@@ -6890,7 +6841,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContStopped(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
   NEXT();
-  c_GenericContinuation* cont = this_continuation(m_fp);
+  c_Continuation* cont = this_continuation(m_fp);
   cont->m_running = false;
   cont->m_done = true;
 

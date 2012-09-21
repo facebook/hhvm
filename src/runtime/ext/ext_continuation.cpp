@@ -61,22 +61,41 @@ c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
     m_index(-1LL),
     m_value(Variant::nullInit), m_received(Variant::nullInit),
     m_done(false), m_running(false), m_should_throw(false),
-    m_isMethod(false), m_callInfo(NULL), m_extra(NULL)
+    m_isMethod(false), m_callInfo(NULL)
 #ifdef HHVM
-    ,LABEL_INIT
+    , LABEL_INIT, m_hasExtraVars(false), m_nLocals(0), m_vmCalledClass(0ll)
 #endif
 {
 }
 #undef LABEL_INIT
 
-c_Continuation::~c_Continuation() {}
+c_Continuation::~c_Continuation() {
+  if (hhvm) {
+    TypedValue* locs = locals();
+    for (int i = 0; i < m_nLocals; ++i) {
+      tvRefcountedDecRef(&locs[i]);
+    }
+    int nProps = m_cls->numDeclProperties();
+    ASSERT(nProps == 0 || m_nLocals == 0);
+    for (int i = 0; i < nProps; i++) {
+      tvRefcountedDecRef(props() + i);
+    }
+    // Avoid having to recompute nProps in operator delete.
+    m_nLocals += nProps;
+  }
+}
 
 void c_Continuation::t___construct(
     int64 func, int64 extra, bool isMethod,
     CStrRef origFuncName, CVarRef obj, CArrRef args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
-  m_callInfo     = (const CallInfo*) func;
-  m_extra        = (void*) extra;
+  if (hhvm) {
+    m_vmFunc       = (VM::Func*) extra;
+    ASSERT(m_vmFunc);
+  } else {
+    m_callInfo     = (const CallInfo*) func;
+    ASSERT(m_callInfo);
+  }
   m_isMethod     = isMethod;
   m_origFuncName = origFuncName;
 
@@ -87,7 +106,6 @@ void c_Continuation::t___construct(
     ASSERT(m_obj.isNull());
   }
   m_args = args;
-  ASSERT(m_callInfo);
 }
 
 void c_Continuation::t_update(int64 label, CVarRef value) {
@@ -150,27 +168,16 @@ inline void c_Continuation::nextImpl(FI& fi) {
   try {
     if (m_isMethod) {
       MethodCallPackage mcp;
-      mcp.isObj = hhvm || m_obj.get();
+      mcp.isObj = m_obj.get();
       if (mcp.isObj) {
         mcp.obj = mcp.rootObj = m_obj.get();
       } else {
-        mcp.rootCls = m_called_class.get();
+        mcp.rootCls = getCalledClass().get();
       }
-      mcp.extra = m_extra;
-      if (!hhvm) {
-        fi.setStaticClassName(m_called_class);
-      }
+      fi.setStaticClassName(getCalledClass());
       (m_callInfo->getMeth1Args())(mcp, 1, this);
     } else {
-      if (hhvm) {
-        MethodCallPackage mcp;
-        mcp.isObj = false;
-        mcp.obj = mcp.rootObj = NULL;
-        mcp.extra = m_extra;
-        (m_callInfo->getMeth1Args())(mcp, 1, this);
-      } else {
-        (m_callInfo->getFunc1Args())(m_extra, 1, this);
-      }
+      (m_callInfo->getFunc1Args())(NULL, 1, this);
     }
   } catch (Object e) {
     if (e.instanceof("exception")) {
@@ -239,14 +246,16 @@ Variant c_Continuation::t_receive() {
 
 String c_Continuation::t_getorigfuncname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getorigfuncname);
+  String called_class;
   if (hhvm) {
-    c_GenericContinuation* self = static_cast<c_GenericContinuation*>(this);
-    VM::Class* vmClass = self->getVMCalledClass();
-    if (vmClass != NULL && m_called_class.size() == 0) {
-      m_called_class = vmClass->name()->data();
+    VM::Class* vmClass = getVMCalledClass();
+    if (vmClass != NULL) {
+      called_class = vmClass->name()->data();
     }
+  } else {
+    called_class = getCalledClass();
   }
-  if (m_called_class.size() == 0) {
+  if (called_class.size() == 0) {
     return m_origFuncName;
   }
 
@@ -256,7 +265,7 @@ String c_Continuation::t_getorigfuncname() {
    */
   size_t method_pos = m_origFuncName.find("::");
   if (method_pos != std::string::npos) {
-    return concat3(m_called_class, "::", m_origFuncName.substr(method_pos+2));
+    return concat3(called_class, "::", m_origFuncName.substr(method_pos+2));
   } else {
     return m_origFuncName;
   }
@@ -269,70 +278,18 @@ Variant c_Continuation::t___clone() {
   return null;
 }
 
-Variant c_Continuation::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__destruct);
-  return null;
-}
-
-c_GenericContinuation::c_GenericContinuation(const ObjectStaticCallbacks *cb) :
-    c_Continuation(cb), m_hasExtraVars(false), m_nLocals(0),
-    m_vmCalledClass(0ll) {}
-c_GenericContinuation::~c_GenericContinuation() {
-  if (hhvm) {
-    TypedValue* locs = locals();
-    for (int i = 0; i < m_nLocals; ++i) {
-      tvRefcountedDecRef(&locs[i]);
-    }
-    int nProps = m_cls->numDeclProperties();
-    ASSERT(nProps == 0 || m_nLocals == 0);
-    for (int i = 0; i < nProps; i++) {
-      tvRefcountedDecRef(props() + i);
-    }
-    // Avoid having to recompute nProps in operator delete.
-    m_nLocals += nProps;
-  }
-}
-
-void
-c_GenericContinuation::t___construct(int64 func, int64 extra, bool isMethod,
-                                     CStrRef origFuncName, CArrRef vars,
-                                     CVarRef obj, CArrRef args) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::__construct);
-  c_Continuation::t___construct(func, extra, isMethod,
-                                origFuncName, obj, args);
-  if (!hhvm) {
-    m_vars = vars;
-  }
-}
-
-void c_GenericContinuation::t_update(int64 label, CVarRef value, CArrRef vars) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::update);
-  c_Continuation::t_update(label, value);
-  if (!hhvm) {
-    m_vars = vars;
-    m_vars.weakRemove(s___cont__, true);
-  }
-
-}
-
-Array c_GenericContinuation::t_getvars() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::getvars);
-  return m_vars;
-}
-
-Variant c_GenericContinuation::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(GenericContinuation, GenericContinuation::__destruct);
-  return null;
-}
-
-HphpArray* c_GenericContinuation::getStaticLocals() {
+HphpArray* c_Continuation::getStaticLocals() {
   const_assert(hhvm);
+#ifdef HHVM
   if (m_VMStatics.get() == NULL) {
     m_VMStatics = NEW(HphpArray)(1);
   }
-
   return m_VMStatics.get();
+#else
+  return NULL;
+#endif
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DummyContinuation::c_DummyContinuation(const ObjectStaticCallbacks *cb) :
@@ -370,11 +327,6 @@ bool c_DummyContinuation::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::valid);
   throw_fatal("Tring to use a DummyContinuation");
   return false;
-}
-
-Variant c_DummyContinuation::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DummyContinuation, DummyContinuation::__destruct);
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

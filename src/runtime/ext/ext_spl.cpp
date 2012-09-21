@@ -129,51 +129,6 @@ Variant f_hphp_get_this() {
   }
 }
 
-static int64 hphp_get_call_info_and_extra(
-    CStrRef cls, CStrRef func, int64 &extra) {
-  if (func.empty()) {
-    throw_spl_exception("Invalid function name given");
-  }
-
-  if (cls.empty()) {
-    const CallInfo *cit;
-    void *extrap;
-    bool succ = hhvm
-                ? g_vmContext->getCallInfo(cit, extrap, func)
-                : get_call_info(cit, extrap, func->data(), func->hash());
-    if (!succ) {
-      throw InvalidFunctionCallException(func.data());
-    }
-    extra = (int64) extrap;
-    return (int64) cit;
-  } else {
-    MethodCallPackage mcp;
-    mcp.rootCls = cls.get();
-    mcp.name = &func;
-    bool succ = hhvm
-                ? g_vmContext->getCallInfoStatic(mcp.ci, mcp.extra,
-                                               cls.get(), func.get())
-                : get_call_info_static_method(mcp);
-    if (!succ) {
-      throw_spl_exception("Could not find method %s for class %s",
-                          func.c_str(), cls.c_str());
-    }
-    extra = (int64) mcp.extra;
-    return (int64) mcp.ci;
-  }
-}
-
-int64 f_hphp_get_call_info(CStrRef cls, CStrRef func) {
-  int64 extra;
-  return hphp_get_call_info_and_extra(cls, func, extra);
-}
-
-int64 f_hphp_get_call_info_extra(CStrRef cls, CStrRef func) {
-  int64 extra;
-  hphp_get_call_info_and_extra(cls, func, extra);
-  return extra;
-}
-
 Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
   String clsname;
   if (obj.isString()) {

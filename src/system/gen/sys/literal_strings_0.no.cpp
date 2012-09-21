@@ -2523,10 +2523,6 @@ StaticStringProxy s_sys_ssp4ac3e894;
 #ifndef s_sys_ss4ac3e894
 #define s_sys_ss4ac3e894 (*(StaticString *)(&s_sys_ssp4ac3e894))
 #endif
-StaticStringProxy s_sys_ssp4aea8cb9;
-#ifndef s_sys_ss4aea8cb9
-#define s_sys_ss4aea8cb9 (*(StaticString *)(&s_sys_ssp4aea8cb9))
-#endif
 StaticStringProxy s_sys_ssp4af8a7b6;
 #ifndef s_sys_ss4af8a7b6
 #define s_sys_ss4af8a7b6 (*(StaticString *)(&s_sys_ssp4af8a7b6))
@@ -4751,7 +4747,6 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp4a69d66a, (const char *)"VersionMismatch",
   (const char *)&s_sys_ssp4ab3dcf3, (const char *)"default",
   (const char *)&s_sys_ssp4ac3e894, (const char *)"getLine",
-  (const char *)&s_sys_ssp4aea8cb9, (const char *)"getVars",
   (const char *)&s_sys_ssp4af8a7b6, (const char *)"public",
   (const char *)&s_sys_ssp4b39677a, (const char *)"getSeverity",
   (const char *)&s_sys_ssp4b95db2f, (const char *)"c14nfile",
@@ -5167,7 +5162,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp6fd67d3d, (const char *)"\000*\000file", (const char *)7LL,
   (const char *)&s_sys_ssp7c4bb61c, (const char *)"\000SplObjectStorage\000storage", (const char *)25LL,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 984, 21);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 983, 21);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs00000000, (const char *)&s_sys_ss00000000,
   (const char *)&s_sys_svs0514b8b1, (const char *)&s_sys_ss0514b8b1,

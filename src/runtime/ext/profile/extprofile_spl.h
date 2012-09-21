@@ -43,14 +43,6 @@ inline Variant x_hphp_get_this() {
   return f_hphp_get_this();
 }
 
-inline int64 x_hphp_get_call_info(CStrRef cls, CStrRef func) {
-  return f_hphp_get_call_info(cls, func);
-}
-
-inline int64 x_hphp_get_call_info_extra(CStrRef cls, CStrRef func) {
-  return f_hphp_get_call_info_extra(cls, func);
-}
-
 inline Variant x_class_implements(CVarRef obj, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(class_implements);
   return f_class_implements(obj, autoload);

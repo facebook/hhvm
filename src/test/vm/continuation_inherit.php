@@ -1,6 +1,6 @@
 <?
 
-class Sub extends GenericContinuation {
+class Sub extends Continuation {
   public $a;
   public $b;
   public $c;

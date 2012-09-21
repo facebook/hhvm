@@ -1864,8 +1864,6 @@ TypedValue* fg_spl_classes(VM::ActRec *ar);
 TypedValue* fg_spl_object_hash(VM::ActRec *ar);
 TypedValue* fg_hphp_object_pointer(VM::ActRec *ar);
 TypedValue* fg_hphp_get_this(VM::ActRec *ar);
-TypedValue* fg_hphp_get_call_info(VM::ActRec *ar);
-TypedValue* fg_hphp_get_call_info_extra(VM::ActRec *ar);
 TypedValue* fg_class_implements(VM::ActRec *ar);
 TypedValue* fg_class_parents(VM::ActRec *ar);
 TypedValue* fg_class_uses(VM::ActRec *ar);
@@ -2332,10 +2330,6 @@ TypedValue* tg_12Continuation_raised(VM::ActRec *ar);
 TypedValue* tg_12Continuation_receive(VM::ActRec *ar);
 TypedValue* tg_12Continuation_getOrigFuncName(VM::ActRec *ar);
 TypedValue* tg_12Continuation___clone(VM::ActRec *ar);
-VM::Instance* new_GenericContinuation_Instance(VM::Class*);
-TypedValue* tg_19GenericContinuation___construct(VM::ActRec *ar);
-TypedValue* tg_19GenericContinuation_update(VM::ActRec *ar);
-TypedValue* tg_19GenericContinuation_getVars(VM::ActRec *ar);
 VM::Instance* new_DummyContinuation_Instance(VM::Class*);
 TypedValue* tg_17DummyContinuation___construct(VM::ActRec *ar);
 TypedValue* tg_17DummyContinuation_current(VM::ActRec *ar);
@@ -2918,7 +2912,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2186;
+const long long hhbc_ext_funcs_count = 2184;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -4762,8 +4756,6 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "spl_object_hash", fg_spl_object_hash },
   { "hphp_object_pointer", fg_hphp_object_pointer },
   { "hphp_get_this", fg_hphp_get_this },
-  { "hphp_get_call_info", fg_hphp_get_call_info },
-  { "hphp_get_call_info_extra", fg_hphp_get_call_info_extra },
   { "class_implements", fg_class_implements },
   { "class_parents", fg_class_parents },
   { "class_uses", fg_class_uses },
@@ -5254,13 +5246,6 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "receive", tg_12Continuation_receive },
   { "getOrigFuncName", tg_12Continuation_getOrigFuncName },
   { "__clone", tg_12Continuation___clone }
-};
-
-static const long long hhbc_ext_method_count_GenericContinuation = 3;
-static const HhbcExtMethodInfo hhbc_ext_methods_GenericContinuation[] = {
-  { "__construct", tg_19GenericContinuation___construct },
-  { "update", tg_19GenericContinuation_update },
-  { "getVars", tg_19GenericContinuation_getVars }
 };
 
 static const long long hhbc_ext_method_count_DummyContinuation = 6;
@@ -5997,7 +5982,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
   { "outputMemory", tg_9XMLWriter_outputMemory }
 };
 
-const long long hhbc_ext_class_count = 60;
+const long long hhbc_ext_class_count = 59;
 const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "DummyClosure", new_DummyClosure_Instance, sizeof(c_DummyClosure), hhbc_ext_method_count_DummyClosure, hhbc_ext_methods_DummyClosure },
   { "Vector", new_Vector_Instance, sizeof(c_Vector), hhbc_ext_method_count_Vector, hhbc_ext_methods_Vector },
@@ -6007,7 +5992,6 @@ const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "StableMap", new_StableMap_Instance, sizeof(c_StableMap), hhbc_ext_method_count_StableMap, hhbc_ext_methods_StableMap },
   { "StableMapIterator", new_StableMapIterator_Instance, sizeof(c_StableMapIterator), hhbc_ext_method_count_StableMapIterator, hhbc_ext_methods_StableMapIterator },
   { "Continuation", new_Continuation_Instance, sizeof(c_Continuation), hhbc_ext_method_count_Continuation, hhbc_ext_methods_Continuation },
-  { "GenericContinuation", new_GenericContinuation_Instance, sizeof(c_GenericContinuation), hhbc_ext_method_count_GenericContinuation, hhbc_ext_methods_GenericContinuation },
   { "DummyContinuation", new_DummyContinuation_Instance, sizeof(c_DummyContinuation), hhbc_ext_method_count_DummyContinuation, hhbc_ext_methods_DummyContinuation },
   { "DateTime", new_DateTime_Instance, sizeof(c_DateTime), hhbc_ext_method_count_DateTime, hhbc_ext_methods_DateTime },
   { "DateTimeZone", new_DateTimeZone_Instance, sizeof(c_DateTimeZone), hhbc_ext_method_count_DateTimeZone, hhbc_ext_methods_DateTimeZone },

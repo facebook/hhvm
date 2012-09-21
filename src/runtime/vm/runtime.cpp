@@ -626,8 +626,7 @@ HphpArray* get_static_locals(const ActRec* ar) {
     return static_cast<HphpArray*>(prop->m_data.parr);
   } else if (ar->m_func->isGeneratorFromClosure()) {
     TypedValue* contLoc = frame_local(ar, 0);
-    c_GenericContinuation* cont = static_cast<c_GenericContinuation*>(
-      contLoc->m_data.pobj);
+    c_Continuation* cont = static_cast<c_Continuation*>(contLoc->m_data.pobj);
     ASSERT(cont != NULL);
     return cont->getStaticLocals();
   } else {

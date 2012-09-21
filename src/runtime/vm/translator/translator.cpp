@@ -1307,8 +1307,14 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
 bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                                     NormalizedInstruction* ni,
                                     TraceletContext& tas,
-                                    vector<InputInfo> &inputInfos) {
+                                    InputInfos &inputInfos) {
   if (!metaHand.findMeta(ni->unit(), ni->offset())) return false;
+
+  Unit::MetaInfo info;
+  if (!metaHand.nextArg(info)) return false;
+  if (info.m_kind == Unit::MetaInfo::NopOut) {
+    return true;
+  }
 
   /*
    * We need to adjust the indexes in MetaInfo::m_arg if this
@@ -1335,8 +1341,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                    !(iInfo.in & Stack2) ? 1 :
                    !(iInfo.in & Stack3) ? 2 : 3;
 
-  Unit::MetaInfo info;
-  while (metaHand.nextArg(info)) {
+  do {
     SKTRACE(3, ni->source, "considering MetaInfo of kind %d\n", info.m_kind);
 
     int arg = info.m_arg & Unit::MetaInfo::VectorArg ?
@@ -1437,11 +1442,13 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
       case Unit::MetaInfo::NopOut:
-        return true;
+        // NopOut should always be the first and only annotation
+        // and was handled above.
+        not_reached();
       case Unit::MetaInfo::None:
         break;
     }
-  }
+  } while (metaHand.nextArg(info));
 
   return false;
 }
@@ -1566,7 +1573,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 void Translator::getInputs(Tracelet& t,
                            NormalizedInstruction* ni,
                            int& currentStackOffset,
-                           vector<InputInfo>& inputs) { // out
+                           InputInfos& inputs) { // out
 #ifdef USE_TRACE
   const SrcKey& sk = ni->source;
 #endif
@@ -1579,19 +1586,7 @@ void Translator::getInputs(Tracelet& t,
   const InstrInfo& info = instrInfo[ni->op()];
   Operands input = info.in;
   if (input & FuncdRef) {
-    // Drive the arState machine; if it is going to throw an input exception,
-    // do so here.
-    int argNum = ni->imm[0].u_IVA;
-    // instrSpToArDelta() returns the delta relative to the sp at the
-    // beginning of the instruction, but getReffiness() wants the delta
-    // relative to the sp at the beginning of the tracelet, so we adjust
-    // by subtracting ni->stackOff
-    int entryArDelta = instrSpToArDelta(ni->pc()) - ni->stackOff;
-    ni->preppedByRef = t.m_arState.getReffiness(argNum,
-                                                entryArDelta,
-                                                &t.m_refDeps);
-    SKTRACE(1, sk, "passing arg%d by %s\n", argNum,
-            ni->preppedByRef ? "reference" : "value");
+    inputs.needsRefCheck = true;
   }
   if (input & Iter) {
     inputs.push_back(Location(Location::Iter, ni->imm[0].u_IVA));
@@ -2293,12 +2288,28 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     // Translation could fail entirely (because of an unknown opcode), or
     // encounter an input that cannot be computed.
     try {
-      vector<InputInfo> inputInfos;
+      InputInfos inputInfos;
       getInputs(t, ni, stackFrameOffset, inputInfos);
       if (applyInputMetaData(metaHand, ni, tas, inputInfos)) {
         stackFrameOffset = oldStackFrameOffset;
         continue;
       }
+      if (inputInfos.needsRefCheck) {
+        // Drive the arState machine; if it is going to throw an input
+        // exception, do so here.
+        int argNum = ni->imm[0].u_IVA;
+        // instrSpToArDelta() returns the delta relative to the sp at the
+        // beginning of the instruction, but getReffiness() wants the delta
+        // relative to the sp at the beginning of the tracelet, so we adjust
+        // by subtracting ni->stackOff
+        int entryArDelta = instrSpToArDelta(ni->pc()) - ni->stackOff;
+        ni->preppedByRef = t.m_arState.getReffiness(argNum,
+                                                    entryArDelta,
+                                                    &t.m_refDeps);
+        SKTRACE(1, sk, "passing arg%d by %s\n", argNum,
+                ni->preppedByRef ? "reference" : "value");
+      }
+
       for (unsigned int i = 0; i < inputInfos.size(); i++) {
         SKTRACE(2, sk, "typing input %d\n", i);
         const InputInfo& ii = inputInfos[i];

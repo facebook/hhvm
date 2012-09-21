@@ -972,7 +972,13 @@ void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
   ASSERT(arg >= 0);
   if (arg > 127) return;
   if (mVector) arg |= Unit::MetaInfo::VectorArg;
-  m_metaMap[pos].push_back(Unit::MetaInfo(kind, arg, data));
+  Vec& info = m_metaMap[pos];
+  if (kind == Unit::MetaInfo::NopOut) {
+    info.clear();
+  } else if (info.size() == 1 && info[0].m_kind == Unit::MetaInfo::NopOut) {
+    return;
+  }
+  info.push_back(Unit::MetaInfo(kind, arg, data));
 }
 
 void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
@@ -2412,6 +2418,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           {
             FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
             e.Int(0);
+            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
             e.FPassC(0);
           }
           e.FCall(1);
@@ -2715,6 +2722,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         if (el->getType() == '`') {
           emitConvertToCell(e);
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
           e.FPassC(0);
           delete fpi;
           e.FCall(1);
@@ -3830,13 +3838,12 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                                   Expression::RefParameter)) {
     if (exp->hasContext(Expression::RefValue)) {
       emitVGet(e);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+      e.FPassV(paramId);
     } else {
       emitCGet(e);
-    }
-    int i = m_evalStack.size() - 1;
-    if (m_evalStack.get(i) == StackSym::C ||
-        m_evalStack.get(i) == StackSym::V) {
-      m_evalStack.set(i, StackSym::F);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+      e.FPassC(paramId);
     }
     return;
   }
@@ -5761,6 +5768,7 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     emitVirtualLocal(oldLevelLoc);
     emitCGet(e);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
     e.FPassC(0);
   }
   e.FCall(1);
@@ -5777,6 +5785,7 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     emitVirtualLocal(oldLevelLoc);
     emitCGet(e);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
     e.FPassC(0);
   }
   e.FCall(1);
@@ -6137,6 +6146,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
           OpContRaise,
         };
         ue.emitOp(mOps[m]);
+        metaInfo.add(ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
         ue.emitOp(OpFPassC);
         ue.emitIVA(0);
 

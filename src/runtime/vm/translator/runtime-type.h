@@ -132,6 +132,23 @@ struct InputInfo {
   bool     dontGuard;
 };
 
+class InputInfos : public std::vector<InputInfo> {
+ public:
+  InputInfos() : needsRefCheck(false) {}
+
+  std::string pretty() const {
+    std::string retval;
+    for (size_t i = 0; i < size(); i++) {
+      retval += (*this)[i].pretty();
+      if (i != size() - 1) {
+        retval += string(" ");
+      }
+    }
+    return retval;
+  }
+  bool  needsRefCheck;
+};
+
 // RuntimeType --
 //
 //   Symbolic description of a root location in the runtime: e.g., a stack,

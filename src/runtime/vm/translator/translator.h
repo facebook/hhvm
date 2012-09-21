@@ -663,11 +663,11 @@ private:
   bool applyInputMetaData(Unit::MetaHandle&,
                           NormalizedInstruction* ni,
                           TraceletContext& tas,
-                          vector<InputInfo>& ii);
+                          InputInfos& ii);
   void getInputs(Tracelet& t,
                  NormalizedInstruction* ni,
                  int& currentStackOffset,
-                 vector<InputInfo>& inputs);
+                 InputInfos& inputs);
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,

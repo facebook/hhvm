@@ -374,12 +374,12 @@ void VariableSerializer::write(CObjRef v) {
 }
 
 void VariableSerializer::write(CVarRef v, bool isArrayKey /* = false */) {
+  setReferenced(v.isReferenced());
+  setRefCount(v.getRefCount());
   if (!isArrayKey && v.isObject()) {
     write(v.toObject());
     return;
   }
-  setReferenced(v.isReferenced());
-  setRefCount(v.getRefCount());
   v.serialize(this, isArrayKey);
 }
 
@@ -555,7 +555,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
   case APCSerialize:
   case DebuggerSerialize:
     if (!m_objClass.empty()) {
-      m_buf->append(m_objCode); 
+      m_buf->append(m_objCode);
       m_buf->append(":");
       m_buf->append((int)m_objClass.size());
       m_buf->append(":\"");

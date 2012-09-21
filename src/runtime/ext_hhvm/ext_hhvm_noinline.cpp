@@ -136,6 +136,16 @@ bool fni_checkdate(int month, int day, int year) {
   return f_checkdate(month, day, year);
 }
 
+Object fni_date_add(CObjRef datetime, CObjRef interval) {
+  return f_date_add(datetime, interval);
+}
+
+Object fni_date_create_from_format(CStrRef format,
+                                   CStrRef time,
+                                   CObjRef timezone = null_object) {
+  return f_date_create_from_format(format, time, timezone);
+}
+
 Object fni_date_create(String const& time, Object const& timezone) {
   return f_date_create(time, timezone);
 }
@@ -152,8 +162,25 @@ bool fni_date_default_timezone_set(String const& name) {
   return f_date_default_timezone_set(name);
 }
 
+Object fni_date_diff(CObjRef datetime, CObjRef datetime2,
+                     bool absolute = false) {
+  return f_date_diff(datetime, datetime2, absolute);
+}
+
 String fni_date_format(Object const& object, String const& format) {
   return f_date_format(object, format);
+}
+
+Array fni_date_get_last_errors() {
+  return f_date_get_last_errors();
+}
+
+Object fni_date_interval_create_from_date_string(CStrRef time) {
+  return f_date_interval_create_from_date_string(time);
+}
+
+String fni_date_interval_format(CObjRef interval, CStrRef format_spec) {
+  return f_date_interval_format(interval, format_spec);
 }
 
 void fni_date_isodate_set(Object const& object, int year, int week, int day) {
@@ -172,6 +199,10 @@ Variant fni_date_parse(String const& date) {
   return f_date_parse(date);
 }
 
+Object fni_date_sub(CObjRef datetime, CObjRef interval) {
+  return f_date_sub(datetime, interval);
+}
+
 Array fni_date_sun_info(long long ts, double latitude, double longitude) {
   return f_date_sun_info(ts, latitude, longitude);
 }
@@ -186,6 +217,14 @@ Variant fni_date_sunset(long long timestamp, int format, double latitude, double
 
 void fni_date_time_set(Object const& object, int hour, int minute, int second) {
   return f_date_time_set(object, hour, minute, second);
+}
+
+int64 fni_date_timestamp_get(CObjRef datetime) {
+  return f_date_timestamp_get(datetime);
+}
+
+Object fni_date_timestamp_set(CObjRef datetime, int64 timestamp) {
+  return f_date_timestamp_set(datetime, timestamp);
 }
 
 Variant fni_date_timezone_get(Object const& object) {
@@ -260,6 +299,10 @@ Array fni_timezone_identifiers_list() {
   return f_timezone_identifiers_list();
 }
 
+Array fni_timezone_location_get(CObjRef timezone) {
+  return f_timezone_location_get(timezone);
+}
+
 Variant fni_timezone_name_from_abbr(String const& abbr, int gmtoffset, bool isdst) {
   return f_timezone_name_from_abbr(abbr, gmtoffset, isdst);
 }
@@ -278,6 +321,10 @@ Object fni_timezone_open(String const& timezone) {
 
 Array fni_timezone_transitions_get(Object const& object) {
   return f_timezone_transitions_get(object);
+}
+
+String fni_timezone_version_get() {
+  return f_timezone_version_get();
 }
 
 #if FACEBOOK

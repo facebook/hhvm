@@ -19,6 +19,8 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/time/timezone.h>
+#include <runtime/base/time/dateinterval.h>
+#include <runtime/base/util/request_local.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -259,6 +261,9 @@ public:
   void setTime(int hour, int minute, int second = 0);
   void setTimezone(SmartObject<TimeZone> tz);
   void modify(CStrRef diff); // PHP's date_modify() function, very powerful
+  void add(const SmartObject<DateInterval> &interval);
+  void sub(const SmartObject<DateInterval> &interval);
+  void internalModify(timelib_rel_time *rel, bool have_relative, char bias);
 
   // conversions
   void toTm(struct tm &ta) const;
@@ -268,7 +273,10 @@ public:
   String toString(DateFormat format) const;
   Array toArray(ArrayFormat format) const;
   void fromTimeStamp(int64 timestamp, bool utc = false);
-  bool fromString(CStrRef input, SmartObject<TimeZone> tz);
+  bool fromString(CStrRef input, SmartObject<TimeZone> tz, const char* format=NULL);
+
+  // comparison
+  SmartObject<DateInterval> diff(SmartObject<DateTime> datetime2, bool absolute = false);
 
   // cloning
   SmartObject<DateTime> cloneDateTime() const;
@@ -278,6 +286,53 @@ public:
   Variant getSunInfo(SunInfoFormat retformat,
                      double latitude, double longitude,
                      double zenith, double utc_offset, bool calc_sunset) const;
+
+  // Error access
+private:
+  class LastErrors : public RequestEventHandler {
+    public:
+      virtual void requestInit() {
+        m_errors = NULL;
+      }
+      virtual void requestShutdown() {
+        if (m_errors) {
+          timelib_error_container_dtor(m_errors);
+        }
+      }
+      void set(timelib_error_container *ec) {
+        requestShutdown();
+        m_errors = ec;
+      }
+      Array getLastWarnings() {
+        Array ret = Array::Create();
+        if (!m_errors) return ret;
+        for(int i = 0; i < m_errors->warning_count; i++) {
+          timelib_error_message *em = m_errors->warning_messages + i;
+          ret.set(em->position, String(em->message, CopyString));
+        }
+        return ret;
+      }
+      Array getLastErrors() {
+        Array ret = Array::Create();
+        if (!m_errors) return ret;
+        for(int i = 0; i < m_errors->error_count; i++) {
+          timelib_error_message *em = m_errors->error_messages + i;
+          ret.set(em->position, String(em->message, CopyString));
+        }
+        return ret;
+      }
+    private:
+      timelib_error_container *m_errors;
+  };
+  DECLARE_STATIC_REQUEST_LOCAL(LastErrors, s_lastErrors);
+
+public:
+  static void setLastErrors(timelib_error_container *ec)
+    { s_lastErrors.get()->set(ec); }
+  static Array getLastWarnings()
+    { return s_lastErrors.get()->getLastWarnings(); }
+  static Array getLastErrors()
+    { return s_lastErrors.get()->getLastErrors(); }
 
 private:
   struct time_deleter {

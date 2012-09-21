@@ -28,6 +28,7 @@ IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(DateTime);
 // statics
 
 StaticString DateTime::s_class_name("DateTime");
+IMPLEMENT_REQUEST_LOCAL(DateTime::LastErrors, DateTime::s_lastErrors);
 
 const char *DateTime::DateFormatRFC822     = "D, d M y H:i:s O";
 const char *DateTime::DateFormatRFC850     = "l, d-M-y H:i:s T";
@@ -129,25 +130,17 @@ Array DateTime::Parse(CStrRef datetime) {
     ret.set("fraction", parsed_time->f);
   }
 
+  setLastErrors(error);
   {
-    ret.set("warning_count", error->warning_count);
-    Array element;
-    for (int i = 0; i < error->warning_count; i++) {
-      element.set(error->warning_messages[i].position,
-                  String(error->warning_messages[i].message, CopyString));
-    }
-    ret.set("warnings", element);
+    Array warnings = DateTime::getLastWarnings();
+    ret.set("warning_count", warnings.size());
+    ret.set("warnings", warnings);
   }
   {
-    ret.set("error_count", error->error_count);
-    Array element;
-    for (int i = 0; i < error->error_count; i++) {
-      element.set(error->error_messages[i].position,
-                  String(error->error_messages[i].message, CopyString));
-    }
-    ret.set("errors", element);
+    Array errors = DateTime::getLastErrors();
+    ret.set("error_count", errors.size());
+    ret.set("errors", errors);
   }
-  timelib_error_container_dtor(error);
 
   ret.set("is_localtime", (bool)parsed_time->is_localtime);
   if (parsed_time->is_localtime) {
@@ -391,24 +384,34 @@ void DateTime::setTimezone(SmartObject<TimeZone> timezone) {
 void DateTime::modify(CStrRef diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
                                              NULL, TimeZone::GetDatabase());
-  m_time->relative.y = tmp_time->relative.y;
-  m_time->relative.m = tmp_time->relative.m;
-  m_time->relative.d = tmp_time->relative.d;
-  m_time->relative.h = tmp_time->relative.h;
-  m_time->relative.i = tmp_time->relative.i;
-  m_time->relative.s = tmp_time->relative.s;
-  m_time->relative.weekday = tmp_time->relative.weekday;
-  m_time->have_relative = tmp_time->have_relative;
-#if defined(TIMELIB_VERSION)
-  m_time->relative.have_weekday_relative =
-    tmp_time->relative.have_weekday_relative;
-#else
-  m_time->have_weekday_relative = tmp_time->have_weekday_relative;
-#endif
-  m_time->sse_uptodate = 0;
+  internalModify(&(tmp_time->relative), tmp_time->have_relative, 1);
   timelib_time_dtor(tmp_time);
+}
+
+void DateTime::internalModify(timelib_rel_time *rel,
+                              bool have_relative, char bias) {
+  m_time->relative.y = rel->y * bias;
+  m_time->relative.m = rel->m * bias;
+  m_time->relative.d = rel->d * bias;
+  m_time->relative.h = rel->h * bias;
+  m_time->relative.i = rel->i * bias;
+  m_time->relative.s = rel->s * bias;
+  m_time->relative.weekday = rel->weekday;
+  m_time->have_relative = have_relative;
+  m_time->relative.have_weekday_relative = rel->have_weekday_relative;
+  m_time->sse_uptodate = 0;
   update();
   timelib_update_from_sse(m_time.get());
+}
+
+void DateTime::add(const SmartObject<DateInterval> &interval) {
+  timelib_rel_time *rel = interval->get();
+  internalModify(rel, true, rel->invert ? -1 :  1);
+}
+
+void DateTime::sub(const SmartObject<DateInterval> &interval) {
+  timelib_rel_time *rel = interval->get();
+  internalModify(rel, true, rel->invert ?  1 : -1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -688,12 +691,19 @@ Array DateTime::toArray(ArrayFormat format) const {
   return ret;
 }
 
-bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz) {
+bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz,
+                          const char* format /*=NUL*/) {
   struct timelib_error_container *error;
-  timelib_time *t = timelib_strtotime((char*)input.data(), input.size(),
-                                      &error, TimeZone::GetDatabase());
+  timelib_time *t;
+  if (format) {
+    t = timelib_parse_from_format((char*)format, (char*)input.data(),
+                                  input.size(), &error, TimeZone::GetDatabase());
+  } else {
+    t = timelib_strtotime((char*)input.data(), input.size(),
+                                 &error, TimeZone::GetDatabase());
+  }
   int error1 = error->error_count;
-  timelib_error_container_dtor(error);
+  setLastErrors(error);
 
   if (m_timestamp == -1) {
     fromTimeStamp(0);
@@ -726,6 +736,18 @@ SmartObject<DateTime> DateTime::cloneDateTime() const {
   SmartObject<DateTime> ret(NEWOBJ(DateTime)(toTimeStamp(err), true));
   ret->setTimezone(m_tz);
   return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// comparison
+
+SmartObject<DateInterval> DateTime::diff(SmartObject<DateTime> datetime2, bool absolute) {
+  timelib_rel_time *rel = timelib_diff(m_time.get(), datetime2.get()->m_time.get());
+  if (absolute) {
+    rel->invert = 0;
+  }
+  SmartObject<DateInterval> di(NEWOBJ(DateInterval)(rel));
+  return di;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

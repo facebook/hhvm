@@ -94,6 +94,19 @@ public:
   Array transitions() const;
 
   /**
+   * Get information about a timezone
+   */
+  Array getLocation() const;
+
+  /**
+   * Timezone Database version
+   */
+  static String getVersion() {
+    const timelib_tzdb* db = GetDatabase();
+    return String(db->version, CopyString);
+  }
+
+  /**
    * Make a copy of this timezone object, so it can be changed independently.
    */
   SmartObject<TimeZone> cloneTimeZone() const;
@@ -101,6 +114,7 @@ public:
 protected:
   friend class DateTime;
   friend class TimeStamp;
+  friend class DateInterval;
 
   /**
    * Returns raw pointer. For internal use only.

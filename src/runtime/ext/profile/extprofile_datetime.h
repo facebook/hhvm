@@ -30,6 +30,16 @@ inline bool x_checkdate(int month, int day, int year) {
   return f_checkdate(month, day, year);
 }
 
+inline Object x_date_add(CObjRef datetime, CObjRef interval) {
+  FUNCTION_INJECTION_BUILTIN(date_add);
+  return f_date_add(datetime, interval);
+}
+
+inline Object x_date_create_from_format(CStrRef format, CStrRef time, CObjRef timezone = null_object) {
+  FUNCTION_INJECTION_BUILTIN(date_create_from_format);
+  return f_date_create_from_format(format, time, timezone);
+}
+
 inline Object x_date_create(CStrRef time = null_string, CObjRef timezone = null_object) {
   FUNCTION_INJECTION_BUILTIN(date_create);
   return f_date_create(time, timezone);
@@ -50,9 +60,29 @@ inline bool x_date_default_timezone_set(CStrRef name) {
   return f_date_default_timezone_set(name);
 }
 
+inline Object x_date_diff(CObjRef datetime, CObjRef datetime2, bool absolute = false) {
+  FUNCTION_INJECTION_BUILTIN(date_diff);
+  return f_date_diff(datetime, datetime2, absolute);
+}
+
 inline String x_date_format(CObjRef object, CStrRef format) {
   FUNCTION_INJECTION_BUILTIN(date_format);
   return f_date_format(object, format);
+}
+
+inline Array x_date_get_last_errors() {
+  FUNCTION_INJECTION_BUILTIN(date_get_last_errors);
+  return f_date_get_last_errors();
+}
+
+inline Object x_date_interval_create_from_date_string(CStrRef time) {
+  FUNCTION_INJECTION_BUILTIN(date_interval_create_from_date_string);
+  return f_date_interval_create_from_date_string(time);
+}
+
+inline String x_date_interval_format(CObjRef interval, CStrRef format_spec) {
+  FUNCTION_INJECTION_BUILTIN(date_interval_format);
+  return f_date_interval_format(interval, format_spec);
 }
 
 inline void x_date_isodate_set(CObjRef object, int year, int week, int day = 1) {
@@ -75,6 +105,11 @@ inline Variant x_date_parse(CStrRef date) {
   return f_date_parse(date);
 }
 
+inline Object x_date_sub(CObjRef datetime, CObjRef interval) {
+  FUNCTION_INJECTION_BUILTIN(date_sub);
+  return f_date_sub(datetime, interval);
+}
+
 inline Array x_date_sun_info(int64 ts, double latitude, double longitude) {
   FUNCTION_INJECTION_BUILTIN(date_sun_info);
   return f_date_sun_info(ts, latitude, longitude);
@@ -93,6 +128,16 @@ inline Variant x_date_sunset(int64 timestamp, int format = 0, double latitude = 
 inline void x_date_time_set(CObjRef object, int hour, int minute, int second = 0) {
   FUNCTION_INJECTION_BUILTIN(date_time_set);
   f_date_time_set(object, hour, minute, second);
+}
+
+inline int64 x_date_timestamp_get(CObjRef datetime) {
+  FUNCTION_INJECTION_BUILTIN(date_timestamp_get);
+  return f_date_timestamp_get(datetime);
+}
+
+inline Object x_date_timestamp_set(CObjRef datetime, int64 timestamp) {
+  FUNCTION_INJECTION_BUILTIN(date_timestamp_set);
+  return f_date_timestamp_set(datetime, timestamp);
 }
 
 inline Variant x_date_timezone_get(CObjRef object) {
@@ -190,6 +235,11 @@ inline Array x_timezone_identifiers_list() {
   return f_timezone_identifiers_list();
 }
 
+inline Array x_timezone_location_get(CObjRef timezone) {
+  FUNCTION_INJECTION_BUILTIN(timezone_location_get);
+  return f_timezone_location_get(timezone);
+}
+
 inline Variant x_timezone_name_from_abbr(CStrRef abbr, int gmtoffset = -1, bool isdst = true) {
   FUNCTION_INJECTION_BUILTIN(timezone_name_from_abbr);
   return f_timezone_name_from_abbr(abbr, gmtoffset, isdst);
@@ -213,6 +263,11 @@ inline Object x_timezone_open(CStrRef timezone) {
 inline Array x_timezone_transitions_get(CObjRef object) {
   FUNCTION_INJECTION_BUILTIN(timezone_transitions_get);
   return f_timezone_transitions_get(object);
+}
+
+inline String x_timezone_version_get() {
+  FUNCTION_INJECTION_BUILTIN(timezone_version_get);
+  return f_timezone_version_get();
 }
 
 

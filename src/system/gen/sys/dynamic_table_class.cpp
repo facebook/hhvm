@@ -547,6 +547,7 @@ const int cw_DateTimeZone$$instanceof_index[] = {
   -1,0,
 };
 extern const CallInfo ci_DateTimeZone$$__construct = { (void*)&c_DateTimeZone::i___construct, (void*)&c_DateTimeZone::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTimeZone$$getlocation = { (void*)&c_DateTimeZone::i_getlocation, (void*)&c_DateTimeZone::ifa_getlocation, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTimeZone$$listabbreviations = { (void*)&c_DateTimeZone::i_listabbreviations, (void*)&c_DateTimeZone::ifa_listabbreviations, 0, 12, 0x0000000000000000LL};
 extern const CallInfo ci_DateTimeZone$$getname = { (void*)&c_DateTimeZone::i_getname, (void*)&c_DateTimeZone::ifa_getname, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTimeZone$$getoffset = { (void*)&c_DateTimeZone::i_getoffset, (void*)&c_DateTimeZone::ifa_getoffset, 1, 4, 0x0000000000000000LL};
@@ -554,6 +555,9 @@ extern const CallInfo ci_DateTimeZone$$gettransitions = { (void*)&c_DateTimeZone
 extern const CallInfo ci_DateTimeZone$$listidentifiers = { (void*)&c_DateTimeZone::i_listidentifiers, (void*)&c_DateTimeZone::ifa_listidentifiers, 0, 12, 0x0000000000000000LL};
 Variant c_DateTimeZone::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
+}
+Variant c_DateTimeZone::i_getlocation(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getlocation);
 }
 Variant c_DateTimeZone::i_getname(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getname);
@@ -578,6 +582,14 @@ Variant NEVER_INLINE c_DateTimeZone::ifa___construct(MethodCallPackage &mcp, int
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   CVarRef arg0(a0);
   return (self->t___construct(arg0), null);
+}
+Variant NEVER_INLINE c_DateTimeZone::ifa_getlocation(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getlocation, coo_DateTimeZone);
+  }
+  c_DateTimeZone *self ATTRIBUTE_UNUSED (static_cast<c_DateTimeZone*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getlocation", 0, 1);
+  return (self->t_getlocation());
 }
 Variant NEVER_INLINE c_DateTimeZone::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -619,11 +631,12 @@ extern const MethodCallInfoTable cw_DateTimeZone$$call_info_table[] = {
   { 0x06C1353B, 1, 7, "getName", &ci_DateTimeZone$$getname },
   { 0x3A40C6ED, 0, 11, "__construct", &ci_DateTimeZone$$__construct },
   { 0x192CB03D, 1, 9, "getOffset", &ci_DateTimeZone$$getoffset },
+  { 0x763F3B2E, 1, 11, "getLocation", &ci_DateTimeZone$$getlocation },
 };
 extern const int cw_DateTimeZone$$call_info_index[] = {
   15,
   -1,-1,-1,-1,-1,0,1,-1,
-  -1,-1,-1,3,-1,4,-1,-1,
+  -1,-1,-1,3,-1,4,6,-1,
 
 };
 c_DateTimeZone *c_DateTimeZone::create(String a0) {
@@ -5234,6 +5247,110 @@ const ObjectStaticCallbacks cw_DebuggerProxyCmdUser = {
   &c_DebuggerProxyCmdUser::s_class_name,
   0,&ci_DebuggerProxyCmdUser$$__construct,0,0,0x0,
   &c_DebuggerProxyCmdUser::s_cls
+};
+ObjectData *coo_DateInterval() {
+  return NEWOBJ(c_DateInterval)();
+}
+IMPLEMENT_CLASS(DateInterval)
+extern const InstanceOfInfo cw_DateInterval$$instanceof_table[] = {
+  {0x264EFB5F,1,"DateInterval",&cw_DateInterval},
+};
+const int cw_DateInterval$$instanceof_index[] = {
+  1,
+  -1,0,
+};
+extern const CallInfo ci_DateInterval$$__get = { (void*)&c_DateInterval::i___get, (void*)&c_DateInterval::ifa___get, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateInterval$$createfromdatestring = { (void*)&c_DateInterval::i_createfromdatestring, (void*)&c_DateInterval::ifa_createfromdatestring, 1, 12, 0x0000000000000000LL};
+extern const CallInfo ci_DateInterval$$format = { (void*)&c_DateInterval::i_format, (void*)&c_DateInterval::ifa_format, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateInterval$$__construct = { (void*)&c_DateInterval::i___construct, (void*)&c_DateInterval::ifa___construct, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateInterval$$__set = { (void*)&c_DateInterval::i___set, (void*)&c_DateInterval::ifa___set, 2, 4, 0x0000000000000000LL};
+Variant c_DateInterval::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___construct);
+}
+Variant c_DateInterval::i___get(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___get);
+}
+Variant c_DateInterval::i___set(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa___set);
+}
+Variant c_DateInterval::i_createfromdatestring(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_createfromdatestring);
+}
+Variant c_DateInterval::i_format(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_format);
+}
+Variant NEVER_INLINE c_DateInterval::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___construct, coo_DateInterval);
+  }
+  c_DateInterval *self ATTRIBUTE_UNUSED (static_cast<c_DateInterval*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___construct(arg0), null);
+}
+Variant NEVER_INLINE c_DateInterval::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___get, coo_DateInterval);
+  }
+  c_DateInterval *self ATTRIBUTE_UNUSED (static_cast<c_DateInterval*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("__get", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t___get(arg0));
+}
+Variant NEVER_INLINE c_DateInterval::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___set, coo_DateInterval);
+  }
+  c_DateInterval *self ATTRIBUTE_UNUSED (static_cast<c_DateInterval*>(mcp.obj));
+  if (UNLIKELY(count != 2)) return throw_wrong_arguments("__set", count, 2, 2, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  return (self->t___set(arg0, arg1));
+}
+Variant NEVER_INLINE c_DateInterval::ifa_createfromdatestring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("createfromdatestring", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (c_DateInterval::t_createfromdatestring(arg0));
+}
+Variant NEVER_INLINE c_DateInterval::ifa_format(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_format, coo_DateInterval);
+  }
+  c_DateInterval *self ATTRIBUTE_UNUSED (static_cast<c_DateInterval*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("format", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_format(arg0));
+}
+extern const MethodCallInfoTable cw_DateInterval$$call_info_table[] = {
+  { 0x5FE9BCE5, 0, 5, "__get", &ci_DateInterval$$__get },
+  { 0x43A29845, 1, 5, "__set", &ci_DateInterval$$__set },
+  { 0x71DB3B9A, 1, 6, "format", &ci_DateInterval$$format },
+  { 0x3A40C6ED, 0, 11, "__construct", &ci_DateInterval$$__construct },
+  { 0x688B9EDD, 1, 20, "createFromDateString", &ci_DateInterval$$createfromdatestring },
+};
+extern const int cw_DateInterval$$call_info_index[] = {
+  15,
+  -1,-1,-1,-1,-1,0,-1,-1,
+  -1,-1,2,-1,-1,3,-1,-1,
+
+};
+c_DateInterval *c_DateInterval::create(String a0) {
+  CountableHelper h(this);
+  init();
+  t___construct(a0);
+  return this;
+}
+extern const MethodCallInfoTable cw_DateInterval$$call_info_table[];
+extern const int cw_DateInterval$$call_info_index[];
+extern const InstanceOfInfo cw_DateInterval$$instanceof_table[];
+extern const int cw_DateInterval$$instanceof_index[];
+const ObjectStaticCallbacks cw_DateInterval = {
+  (ObjectData*(*)(ObjectData*))coo_DateInterval,
+  cw_DateInterval$$call_info_table,cw_DateInterval$$call_info_index,
+  cw_DateInterval$$instanceof_table,cw_DateInterval$$instanceof_index,
+  &c_DateInterval::s_class_name,
+  0,&ci_DateInterval$$__construct,0,0,0x0,
+  &c_DateInterval::s_cls
 };
 ObjectData *coo_SQLite3() {
   return NEWOBJ(c_SQLite3)();
@@ -10618,23 +10735,45 @@ const int cw_DateTime$$instanceof_index[] = {
   1,
   0,-1,
 };
-extern const CallInfo ci_DateTime$$setdate = { (void*)&c_DateTime::i_setdate, (void*)&c_DateTime::ifa_setdate, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$format = { (void*)&c_DateTime::i_format, (void*)&c_DateTime::ifa_format, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$__construct = { (void*)&c_DateTime::i___construct, (void*)&c_DateTime::ifa___construct, 2, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$gettimezone = { (void*)&c_DateTime::i_gettimezone, (void*)&c_DateTime::ifa_gettimezone, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$settime = { (void*)&c_DateTime::i_settime, (void*)&c_DateTime::ifa_settime, 3, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DateTime$$settimezone = { (void*)&c_DateTime::i_settimezone, (void*)&c_DateTime::ifa_settimezone, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$setisodate = { (void*)&c_DateTime::i_setisodate, (void*)&c_DateTime::ifa_setisodate, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$getoffset = { (void*)&c_DateTime::i_getoffset, (void*)&c_DateTime::ifa_getoffset, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$settimezone = { (void*)&c_DateTime::i_settimezone, (void*)&c_DateTime::ifa_settimezone, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$createfromformat = { (void*)&c_DateTime::i_createfromformat, (void*)&c_DateTime::ifa_createfromformat, 3, 12, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$gettimestamp = { (void*)&c_DateTime::i_gettimestamp, (void*)&c_DateTime::ifa_gettimestamp, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$add = { (void*)&c_DateTime::i_add, (void*)&c_DateTime::ifa_add, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$sub = { (void*)&c_DateTime::i_sub, (void*)&c_DateTime::ifa_sub, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$diff = { (void*)&c_DateTime::i_diff, (void*)&c_DateTime::ifa_diff, 2, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$gettimezone = { (void*)&c_DateTime::i_gettimezone, (void*)&c_DateTime::ifa_gettimezone, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$format = { (void*)&c_DateTime::i_format, (void*)&c_DateTime::ifa_format, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$getlasterrors = { (void*)&c_DateTime::i_getlasterrors, (void*)&c_DateTime::ifa_getlasterrors, 0, 12, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$settimestamp = { (void*)&c_DateTime::i_settimestamp, (void*)&c_DateTime::ifa_settimestamp, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$settime = { (void*)&c_DateTime::i_settime, (void*)&c_DateTime::ifa_settime, 3, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DateTime$$setdate = { (void*)&c_DateTime::i_setdate, (void*)&c_DateTime::ifa_setdate, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DateTime$$modify = { (void*)&c_DateTime::i_modify, (void*)&c_DateTime::ifa_modify, 1, 4, 0x0000000000000000LL};
+Variant c_DateTime::i_add(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_add);
+}
 Variant c_DateTime::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
+}
+Variant c_DateTime::i_createfromformat(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_createfromformat);
+}
+Variant c_DateTime::i_diff(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_diff);
 }
 Variant c_DateTime::i_format(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_format);
 }
+Variant c_DateTime::i_getlasterrors(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getlasterrors);
+}
 Variant c_DateTime::i_getoffset(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getoffset);
+}
+Variant c_DateTime::i_gettimestamp(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_gettimestamp);
 }
 Variant c_DateTime::i_gettimezone(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_gettimezone);
@@ -10651,8 +10790,23 @@ Variant c_DateTime::i_setisodate(MethodCallPackage &mcp, CArrRef params) {
 Variant c_DateTime::i_settime(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_settime);
 }
+Variant c_DateTime::i_settimestamp(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_settimestamp);
+}
 Variant c_DateTime::i_settimezone(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_settimezone);
+}
+Variant c_DateTime::i_sub(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_sub);
+}
+Variant NEVER_INLINE c_DateTime::ifa_add(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_add, coo_DateTime);
+  }
+  c_DateTime *self ATTRIBUTE_UNUSED (static_cast<c_DateTime*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("add", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_add(arg0));
 }
 Variant NEVER_INLINE c_DateTime::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -10666,6 +10820,25 @@ Variant NEVER_INLINE c_DateTime::ifa___construct(MethodCallPackage &mcp, int cou
   CVarRef arg1(a1);
   return (self->t___construct(arg0, arg1), null);
 }
+Variant NEVER_INLINE c_DateTime::ifa_createfromformat(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count < 2 || count > 3)) return throw_wrong_arguments("createfromformat", count, 2, 3, 1);
+  CVarRef arg0(a0);
+  CVarRef arg1(a1);
+  if (count <= 2) return (c_DateTime::t_createfromformat(arg0, arg1));
+  CVarRef arg2(a2);
+  return (c_DateTime::t_createfromformat(arg0, arg1, arg2));
+}
+Variant NEVER_INLINE c_DateTime::ifa_diff(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_diff, coo_DateTime);
+  }
+  c_DateTime *self ATTRIBUTE_UNUSED (static_cast<c_DateTime*>(mcp.obj));
+  if (UNLIKELY(count < 1 || count > 2)) return throw_wrong_arguments("diff", count, 1, 2, 1);
+  CVarRef arg0(a0);
+  if (count <= 1) return (self->t_diff(arg0));
+  CVarRef arg1(a1);
+  return (self->t_diff(arg0, arg1));
+}
 Variant NEVER_INLINE c_DateTime::ifa_format(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_format, coo_DateTime);
@@ -10675,6 +10848,10 @@ Variant NEVER_INLINE c_DateTime::ifa_format(MethodCallPackage &mcp, int count, I
   CVarRef arg0(a0);
   return (self->t_format(arg0));
 }
+Variant NEVER_INLINE c_DateTime::ifa_getlasterrors(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("getlasterrors", 0, 1);
+  return (c_DateTime::t_getlasterrors());
+}
 Variant NEVER_INLINE c_DateTime::ifa_getoffset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getoffset, coo_DateTime);
@@ -10682,6 +10859,14 @@ Variant NEVER_INLINE c_DateTime::ifa_getoffset(MethodCallPackage &mcp, int count
   c_DateTime *self ATTRIBUTE_UNUSED (static_cast<c_DateTime*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("getoffset", 0, 1);
   return (self->t_getoffset());
+}
+Variant NEVER_INLINE c_DateTime::ifa_gettimestamp(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_gettimestamp, coo_DateTime);
+  }
+  c_DateTime *self ATTRIBUTE_UNUSED (static_cast<c_DateTime*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("gettimestamp", 0, 1);
+  return (self->t_gettimestamp());
 }
 Variant NEVER_INLINE c_DateTime::ifa_gettimezone(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -10735,6 +10920,15 @@ Variant NEVER_INLINE c_DateTime::ifa_settime(MethodCallPackage &mcp, int count, 
   CVarRef arg2(a2);
   return (self->t_settime(arg0, arg1, arg2));
 }
+Variant NEVER_INLINE c_DateTime::ifa_settimestamp(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_settimestamp, coo_DateTime);
+  }
+  c_DateTime *self ATTRIBUTE_UNUSED (static_cast<c_DateTime*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("settimestamp", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_settimestamp(arg0));
+}
 Variant NEVER_INLINE c_DateTime::ifa_settimezone(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
     return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_settimezone, coo_DateTime);
@@ -10744,23 +10938,39 @@ Variant NEVER_INLINE c_DateTime::ifa_settimezone(MethodCallPackage &mcp, int cou
   CVarRef arg0(a0);
   return (self->t_settimezone(arg0));
 }
+Variant NEVER_INLINE c_DateTime::ifa_sub(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_sub, coo_DateTime);
+  }
+  c_DateTime *self ATTRIBUTE_UNUSED (static_cast<c_DateTime*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("sub", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_sub(arg0));
+}
 extern const MethodCallInfoTable cw_DateTime$$call_info_table[] = {
   { 0x38A73020, 1, 10, "setISODate", &ci_DateTime$$setisodate },
+  { 0x18C1B961, 1, 13, "getLastErrors", &ci_DateTime$$getlasterrors },
+  { 0x0CDB2562, 1, 12, "setTimestamp", &ci_DateTime$$settimestamp },
+  { 0x758B5928, 1, 12, "getTimestamp", &ci_DateTime$$gettimestamp },
+  { 0x7ECA670A, 1, 3, "sub", &ci_DateTime$$sub },
   { 0x3A40C6ED, 0, 11, "__construct", &ci_DateTime$$__construct },
   { 0x715D284D, 1, 7, "setDate", &ci_DateTime$$setdate },
+  { 0x0A669031, 1, 16, "createFromFormat", &ci_DateTime$$createfromformat },
   { 0x595D6832, 0, 11, "getTimezone", &ci_DateTime$$gettimezone },
   { 0x7DB3D4B2, 1, 11, "setTimezone", &ci_DateTime$$settimezone },
   { 0x7C763534, 1, 7, "setTime", &ci_DateTime$$settime },
+  { 0x7EB308F5, 0, 3, "add", &ci_DateTime$$add },
   { 0x4C1970D5, 1, 6, "modify", &ci_DateTime$$modify },
   { 0x71DB3B9A, 1, 6, "format", &ci_DateTime$$format },
   { 0x192CB03D, 1, 9, "getOffset", &ci_DateTime$$getoffset },
+  { 0x0EA298BE, 1, 4, "diff", &ci_DateTime$$diff },
 };
 extern const int cw_DateTime$$call_info_index[] = {
   31,
-  0,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,1,-1,-1,
-  -1,-1,3,-1,5,6,-1,-1,
-  -1,-1,7,-1,-1,8,-1,-1,
+  0,1,2,-1,-1,-1,-1,-1,
+  3,-1,4,-1,-1,5,-1,-1,
+  -1,7,8,-1,10,11,-1,-1,
+  -1,-1,13,-1,-1,14,15,-1,
 
 };
 c_DateTime *c_DateTime::create(String a0, Object a1) {
@@ -12024,6 +12234,7 @@ static const hashNodeCTD ctdBuckets[] = {
   {0x44B6FD5D,1,0,"ReflectionFunctionAbstract",(int64)&cw_ReflectionFunctionAbstract },
   {0x4023605E,0,0,"Vector",(int64)&cw_Vector },
   {0x48BAD95E,1,0,"ReflectionObject",(int64)&cw_ReflectionObject },
+  {0x264EFB5F,1,0,"DateInterval",(int64)&cw_DateInterval },
   {0x449C2762,1,0,"DateTime",(int64)&cw_DateTime },
   {0x1B578365,1,0,"DOMDocument",(int64)&cw_DOMDocument },
   {0x35F61B68,0,0,"DOMComment",(int64)&cw_DOMComment },
@@ -12092,27 +12303,27 @@ static const int ctdMapTable[] = {
   -1,30,-1,31,33,34,-1,36,
   -1,-1,37,-1,-1,-1,-1,-1,
   -1,-1,-1,39,-1,40,-1,41,
-  -1,42,-1,43,-1,44,46,-1,
-  -1,-1,48,-1,-1,49,-1,-1,
-  50,52,53,54,-1,55,-1,-1,
-  -1,-1,56,-1,-1,57,-1,-1,
-  59,-1,60,-1,61,62,-1,-1,
-  -1,-1,-1,-1,64,65,-1,-1,
-  -1,-1,-1,-1,-1,66,-1,-1,
-  67,69,-1,70,71,-1,-1,72,
-  -1,-1,-1,73,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,74,-1,
-  75,-1,76,77,-1,-1,78,-1,
-  -1,-1,-1,-1,-1,-1,-1,80,
-  -1,-1,-1,-1,-1,81,-1,-1,
-  82,-1,-1,83,-1,-1,-1,-1,
-  84,85,86,87,-1,-1,88,-1,
-  -1,-1,-1,-1,89,-1,90,-1,
-  -1,91,-1,92,-1,-1,-1,-1,
-  -1,-1,93,-1,-1,-1,-1,-1,
-  -1,-1,-1,94,95,-1,-1,96,
-  -1,-1,98,-1,-1,-1,99,100,
-  -1,-1,-1,-1,-1,102,-1,-1,
+  -1,42,-1,43,-1,44,46,48,
+  -1,-1,49,-1,-1,50,-1,-1,
+  51,53,54,55,-1,56,-1,-1,
+  -1,-1,57,-1,-1,58,-1,-1,
+  60,-1,61,-1,62,63,-1,-1,
+  -1,-1,-1,-1,65,66,-1,-1,
+  -1,-1,-1,-1,-1,67,-1,-1,
+  68,70,-1,71,72,-1,-1,73,
+  -1,-1,-1,74,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,75,-1,
+  76,-1,77,78,-1,-1,79,-1,
+  -1,-1,-1,-1,-1,-1,-1,81,
+  -1,-1,-1,-1,-1,82,-1,-1,
+  83,-1,-1,84,-1,-1,-1,-1,
+  85,86,87,88,-1,-1,89,-1,
+  -1,-1,-1,-1,90,-1,91,-1,
+  -1,92,-1,93,-1,-1,-1,-1,
+  -1,-1,94,-1,-1,-1,-1,-1,
+  -1,-1,-1,95,96,-1,-1,97,
+  -1,-1,99,-1,-1,-1,100,101,
+  -1,-1,-1,-1,-1,103,-1,-1,
 
 };
 

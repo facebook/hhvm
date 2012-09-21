@@ -1417,6 +1417,137 @@ TypedValue* fg_checkdate(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Object HPHP::fni_date_add(HPHP::Object const&, HPHP::Object const&)
+_ZN4HPHP12fni_date_addERKNS_6ObjectES2_
+
+(return value) => rax
+_rv => rdi
+datetime => rsi
+interval => rdx
+*/
+
+Value* fh_date_add(Value* _rv, Value* datetime, Value* interval) asm("_ZN4HPHP12fni_date_addERKNS_6ObjectES2_");
+
+TypedValue * fg1_date_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_date_add(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfObject;
+  if ((args-1)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  fh_date_add((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_date_add(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
+        rv._count = 0;
+        rv.m_type = KindOfObject;
+        fh_date_add((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_date_add(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("date_add", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Object HPHP::fni_date_create_from_format(HPHP::String const&, HPHP::String const&, HPHP::Object const&)
+_ZN4HPHP27fni_date_create_from_formatERKNS_6StringES2_RKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+format => rsi
+time => rdx
+timezone => rcx
+*/
+
+Value* fh_date_create_from_format(Value* _rv, Value* format, Value* time, Value* timezone) asm("_ZN4HPHP27fni_date_create_from_formatERKNS_6StringES2_RKNS_6ObjectE");
+
+TypedValue * fg1_date_create_from_format(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_date_create_from_format(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfObject;
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfObject) {
+      tvCastToObjectInPlace(args-2);
+    }
+  case 2:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  fh_date_create_from_format((Value*)(rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_date_create_from_format(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfObject) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
+        rv._count = 0;
+        rv.m_type = KindOfObject;
+        fh_date_create_from_format((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_date_create_from_format(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("date_create_from_format", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Object HPHP::fni_date_create(HPHP::String const&, HPHP::Object const&)
 _ZN4HPHP15fni_date_createERKNS_6StringERKNS_6ObjectE
 
@@ -1639,6 +1770,76 @@ TypedValue* fg_date_default_timezone_set(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Object HPHP::fni_date_diff(HPHP::Object const&, HPHP::Object const&, bool)
+_ZN4HPHP13fni_date_diffERKNS_6ObjectES2_b
+
+(return value) => rax
+_rv => rdi
+datetime => rsi
+datetime2 => rdx
+absolute => rcx
+*/
+
+Value* fh_date_diff(Value* _rv, Value* datetime, Value* datetime2, bool absolute) asm("_ZN4HPHP13fni_date_diffERKNS_6ObjectES2_b");
+
+TypedValue * fg1_date_diff(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_date_diff(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfObject;
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfBoolean) {
+      tvCastToBooleanInPlace(args-2);
+    }
+  case 2:
+    break;
+  }
+  if ((args-1)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  fh_date_diff((Value*)(rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
+  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_date_diff(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
+        rv._count = 0;
+        rv.m_type = KindOfObject;
+        fh_date_diff((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_date_diff(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("date_diff", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::String HPHP::fni_date_format(HPHP::Object const&, HPHP::String const&)
 _ZN4HPHP15fni_date_formatERKNS_6ObjectERKNS_6StringE
 
@@ -1687,6 +1888,158 @@ TypedValue* fg_date_format(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_wrong_arguments_nr("date_format", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Array HPHP::fni_date_get_last_errors()
+_ZN4HPHP24fni_date_get_last_errorsEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_date_get_last_errors(Value* _rv) asm("_ZN4HPHP24fni_date_get_last_errorsEv");
+
+TypedValue* fg_date_get_last_errors(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfArray;
+      fh_date_get_last_errors((Value*)(&(rv)));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("date_get_last_errors", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Object HPHP::fni_date_interval_create_from_date_string(HPHP::String const&)
+_ZN4HPHP41fni_date_interval_create_from_date_stringERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+time => rsi
+*/
+
+Value* fh_date_interval_create_from_date_string(Value* _rv, Value* time) asm("_ZN4HPHP41fni_date_interval_create_from_date_stringERKNS_6StringE");
+
+TypedValue * fg1_date_interval_create_from_date_string(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_date_interval_create_from_date_string(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfObject;
+  tvCastToStringInPlace(args-0);
+  fh_date_interval_create_from_date_string((Value*)(rv), (Value*)(args-0));
+  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_date_interval_create_from_date_string(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv._count = 0;
+        rv.m_type = KindOfObject;
+        fh_date_interval_create_from_date_string((Value*)(&(rv)), (Value*)(args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_date_interval_create_from_date_string(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("date_interval_create_from_date_string", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::String HPHP::fni_date_interval_format(HPHP::Object const&, HPHP::String const&)
+_ZN4HPHP24fni_date_interval_formatERKNS_6ObjectERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+interval => rsi
+format_spec => rdx
+*/
+
+Value* fh_date_interval_format(Value* _rv, Value* interval, Value* format_spec) asm("_ZN4HPHP24fni_date_interval_formatERKNS_6ObjectERKNS_6StringE");
+
+TypedValue * fg1_date_interval_format(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_date_interval_format(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfString;
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  fh_date_interval_format((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_date_interval_format(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
+        rv._count = 0;
+        rv.m_type = KindOfString;
+        fh_date_interval_format((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_date_interval_format(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("date_interval_format", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
@@ -1926,6 +2279,67 @@ TypedValue* fg_date_parse(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Object HPHP::fni_date_sub(HPHP::Object const&, HPHP::Object const&)
+_ZN4HPHP12fni_date_subERKNS_6ObjectES2_
+
+(return value) => rax
+_rv => rdi
+datetime => rsi
+interval => rdx
+*/
+
+Value* fh_date_sub(Value* _rv, Value* datetime, Value* interval) asm("_ZN4HPHP12fni_date_subERKNS_6ObjectES2_");
+
+TypedValue * fg1_date_sub(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_date_sub(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfObject;
+  if ((args-1)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  fh_date_sub((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_date_sub(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
+        rv._count = 0;
+        rv.m_type = KindOfObject;
+        fh_date_sub((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_date_sub(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("date_sub", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -2227,6 +2641,119 @@ TypedValue* fg_date_time_set(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+long long HPHP::fni_date_timestamp_get(HPHP::Object const&)
+_ZN4HPHP22fni_date_timestamp_getERKNS_6ObjectE
+
+(return value) => rax
+datetime => rdi
+*/
+
+long long fh_date_timestamp_get(Value* datetime) asm("_ZN4HPHP22fni_date_timestamp_getERKNS_6ObjectE");
+
+TypedValue * fg1_date_timestamp_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_date_timestamp_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfInt64;
+  tvCastToObjectInPlace(args-0);
+  rv->m_data.num = (long long)fh_date_timestamp_get((Value*)(args-0));
+  return rv;
+}
+
+TypedValue* fg_date_timestamp_get(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfObject) {
+        rv._count = 0;
+        rv.m_type = KindOfInt64;
+        rv.m_data.num = (long long)fh_date_timestamp_get((Value*)(args-0));
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_date_timestamp_get(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("date_timestamp_get", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Object HPHP::fni_date_timestamp_set(HPHP::Object const&, long long)
+_ZN4HPHP22fni_date_timestamp_setERKNS_6ObjectEx
+
+(return value) => rax
+_rv => rdi
+datetime => rsi
+timestamp => rdx
+*/
+
+Value* fh_date_timestamp_set(Value* _rv, Value* datetime, long long timestamp) asm("_ZN4HPHP22fni_date_timestamp_setERKNS_6ObjectEx");
+
+TypedValue * fg1_date_timestamp_set(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_date_timestamp_set(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfObject;
+  if ((args-1)->m_type != KindOfInt64) {
+    tvCastToInt64InPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  fh_date_timestamp_set((Value*)(rv), (Value*)(args-0), (long long)(args[-1].m_data.num));
+  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_date_timestamp_set(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
+        rv._count = 0;
+        rv.m_type = KindOfObject;
+        fh_date_timestamp_set((Value*)(&(rv)), (Value*)(args-0), (long long)(args[-1].m_data.num));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_date_timestamp_set(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("date_timestamp_set", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -3274,6 +3801,61 @@ TypedValue* fg_timezone_identifiers_list(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Array HPHP::fni_timezone_location_get(HPHP::Object const&)
+_ZN4HPHP25fni_timezone_location_getERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+timezone => rsi
+*/
+
+Value* fh_timezone_location_get(Value* _rv, Value* timezone) asm("_ZN4HPHP25fni_timezone_location_getERKNS_6ObjectE");
+
+TypedValue * fg1_timezone_location_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_timezone_location_get(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfArray;
+  tvCastToObjectInPlace(args-0);
+  fh_timezone_location_get((Value*)(rv), (Value*)(args-0));
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_timezone_location_get(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfObject) {
+        rv._count = 0;
+        rv.m_type = KindOfArray;
+        fh_timezone_location_get((Value*)(&(rv)), (Value*)(args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_timezone_location_get(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("timezone_location_get", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::fni_timezone_name_from_abbr(HPHP::String const&, int, bool)
 _ZN4HPHP27fni_timezone_name_from_abbrERKNS_6StringEib
 
@@ -3556,6 +4138,42 @@ TypedValue* fg_timezone_transitions_get(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::String HPHP::fni_timezone_version_get()
+_ZN4HPHP24fni_timezone_version_getEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_timezone_version_get(Value* _rv) asm("_ZN4HPHP24fni_timezone_version_getEv");
+
+TypedValue* fg_timezone_version_get(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfString;
+      fh_timezone_version_get((Value*)(&(rv)));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("timezone_version_get", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

@@ -12,7 +12,10 @@
 // Preamble: C++ code inserted at beginning of ext_{name}.h
 
 DefinePreamble(<<<CPP
-
+#include <runtime/base/time/timestamp.h>
+#include <runtime/base/time/datetime.h>
+#include <runtime/base/time/timezone.h>
+#include <runtime/base/time/dateinterval.h>
 CPP
 );
 
@@ -76,6 +79,49 @@ DefineFunction(
       ),
     ),
     'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_add",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "datetime",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "interval",
+        'type'   => Object,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_create_from_format",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "format",
+        'type'   => String,
+      ),
+      array(
+        'name'   => "time",
+        'type'   => String,
+      ),
+      array(
+        'name'   => "timezone",
+        'type'   => Object,
+        'value'  => "null_object",
+      ),
+    ),
   ));
 
 DefineFunction(
@@ -161,6 +207,30 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "date_diff",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "datetime",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "datetime2",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "absolute",
+        'type'   => Boolean,
+        'value'  => "false",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "date_format",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -177,6 +247,49 @@ DefineFunction(
       ),
     ),
     'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_get_last_errors",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => VariantVec,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_interval_create_from_date_string",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "time",
+        'type'   => String,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_interval_format",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => String,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "interval",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "format_spec",
+        'type'   => String,
+      ),
+    ),
   ));
 
 DefineFunction(
@@ -260,6 +373,25 @@ DefineFunction(
       ),
     ),
     'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_sub",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "datetime",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "interval",
+        'type'   => Object,
+      ),
+    ),
   ));
 
 DefineFunction(
@@ -415,6 +547,40 @@ DefineFunction(
       ),
     ),
     'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_timestamp_get",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Int64,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "datetime",
+        'type'   => Object,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_timestamp_set",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "datetime",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "timestamp",
+        'type'   => Int64,
+      ),
+    ),
   ));
 
 DefineFunction(
@@ -746,7 +912,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strftime",
-    'desc'   => "Format the time and/or date according to locale settings. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().\n\nNot all conversion specifiers may be supported by your C library, in which case they will not be supported by PHP's strftime(). Additionally, not all platforms support negative timestamps, so your date range may be limited to no earlier than the Unix epoch. This means that %e, %T, %R and, %D (and possibly others) - as well as dates prior to Jan 1, 1970 - will not work on Windows, some Linux distributions, and a few other operating systems. For Windows systems, a complete overview of supported conversion specifiers can be found at » MSDN.",
+    'desc'   => "Format the time and/or date according to locale settings. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().\n\nNot all conversion specifiers may be supported by your C library, in which case they will not be supported by PHP's strftime(). Additionally, not all platforms support negative timestamps, so your date range may be limited to no earlier than the Unix epoch. This means that %e, %T, %R and, %D (and possibly others) - as well as dates prior to Jan 1, 1970 - will not work on Windows, some Linux distributions, and a few other operating systems. For Windows systems, a complete overview of supported conversion specifiers can be found at MSDN.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -853,6 +1019,21 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "timezone_location_get",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => VariantVec,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "timezone",
+        'type'   => Object,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "timezone_name_from_abbr",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -947,6 +1128,15 @@ DefineFunction(
       ),
     ),
     'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "timezone_version_get",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => String,
+    ),
   ));
 
 
@@ -1069,6 +1259,24 @@ DefineConstant(
 
 DefineFunction(
   array(
+    'name'   => "add",
+    'desc'   => "Add an interval to a datetime object",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns the DateTime object for method chaining",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "interval",
+        'type'   => Object,
+        'desc'   => "DateInterval object containing the time to add.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__construct",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1084,6 +1292,59 @@ DefineFunction(
         'name'   => "timezone",
         'type'   => Object,
         'value'  => "null_object",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "createFromFormat",
+    'desc'   => "Parse a date according to a format and create a DateTime object",
+    'flags'  => HasDocComment|IsStatic,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns a new DateTime object",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "format",
+        'type'   => String,
+        'desc'   => "DateTime format specifier",
+      ),
+      array(
+        'name'   => "time",
+        'type'   => String,
+        'desc'   => "Date and time to parse",
+      ),
+      array(
+        'name'   => "timezone",
+        'type'   => Object,
+        'desc'   => "DateTimeZone for the given time",
+        'value'  => "null_object",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "diff",
+    'desc'   => "Find the interval between two DateTime objects",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns a DateIntervalobject representing the distance between two times",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "datetime2",
+        'type'   => Object,
+        'desc'   => "DateTime object to compare agains",
+      ),
+      array(
+        'name'   => "absolute",
+        'type'   => Boolean,
+        'desc'   => "Whether to return absolute difference",
+        'value'  => "false",
       ),
     ),
   ));
@@ -1108,6 +1369,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "getLastErrors",
+    'desc'   => "Returns the last errors encountered by the datetime extension",
+    'flags'  => HasDocComment|IsStatic,
+    'return' => array(
+      'type'   => VariantVec,
+      'desc'   => "Vector of error messages",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "getOffset",
     'desc'   => "Procedural style int date_offset_get ( DateTime \$object ) Returns the timezone offset.",
     'flags'  =>  HasDocComment,
@@ -1116,6 +1388,18 @@ DefineFunction(
       'desc'   => "Returns the timezone offset in seconds from UTC on success or FALSE on failure.",
     ),
   ));
+
+DefineFunction(
+  array(
+    'name'   => "getTimestamp",
+    'desc'   => "Returns the unix timestamp representing the date.",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "Epoch representing the datetime object",
+    ),
+  ));
+
 
 DefineFunction(
   array(
@@ -1234,6 +1518,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "setTimestamp",
+    'desc'   => "Set the DateTime object according to the timestamp provided",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns the DateTime object for method chaining",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "unixtimestamp",
+        'type'   => Int64,
+        'desc'   => "Unix timestamp to update the DateTime object to.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "setTimezone",
     'desc'   => "Procedural style DateTime date_timezone_set ( DateTime \$object , DateTimeZone \$timezone )",
     'flags'  =>  HasDocComment,
@@ -1250,6 +1552,24 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "sub",
+    'desc'   => "Subtract an interval from a datetime object",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns the DateTime object for method chaining",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "interval",
+        'type'   => Object,
+        'desc'   => "DateInterval object containing the time to subtract.",
+      ),
+    ),
+  ));
+
 EndClass(
 );
 
@@ -1261,6 +1581,22 @@ BeginClass(
     'desc'   => "Representation of time zone.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
+
+  // Helper for TimeZone -> c_DateTimeZone conversion
+  public: static Object wrap(SmartObject<TimeZone> tz) {
+    c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
+    Object ret(ctz);
+    ctz->m_tz = tz;
+    return ret;
+  }
+
+  // Helper for c_DateTimeZone -> TimeZone conversion
+  public: static SmartObject<TimeZone> unwrap(CObjRef timezone) {
+    SmartObject<c_DateTimeZone> ctz = timezone.getTyped<c_DateTimeZone>(true);
+    if (ctz.get() == NULL)
+      return SmartObject<TimeZone>();
+    return ctz->m_tz;
+  }
 
  private:
   SmartObject<TimeZone> m_tz;
@@ -1371,6 +1707,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "getLocation",
+    'desc'   => "Returns location information for a timezone",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => VariantVec,
+      'desc'   => "Array containing location information about timezone.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "getName",
     'desc'   => "Procedural style string timezone_name_get ( void ) Returns the name of the timezone.",
     'flags'  =>  HasDocComment,
@@ -1434,3 +1781,139 @@ DefineFunction(
 EndClass(
 );
 
+BeginClass(
+  array(
+    'name'   => "DateInterval",
+    'desc'   => "Represents a date interval.",
+    'flags'  =>  HasDocComment,
+    'footer' => <<<EOT
+
+  public: static Object wrap(SmartObject<DateInterval> di) {
+    c_DateInterval *cdi = NEWOBJ(c_DateInterval)();
+    Object ret(cdi);
+    cdi->m_di = di;
+    return ret;
+  }
+
+  public: static SmartObject<DateInterval> unwrap(CObjRef dateinterval) {
+    SmartObject<c_DateInterval> cdi = dateinterval.getTyped<c_DateInterval>(true);
+    if (cdi.get() == NULL)
+      return SmartObject<DateInterval>();
+    return cdi->m_di;
+  }
+
+ private:
+  SmartObject<DateInterval> m_di;
+ public:
+  virtual ObjectData *clone();
+EOT
+,
+  ));
+
+# Object Psuedo-Properties - Implemented with __get()/__set()
+# since underlying rel time must adjust automatically when set
+#
+# y - Number of years
+# m - Number of months
+# d - Number of days
+# h - Number of hourse
+# i - Number of minutes
+# s - Number of seconds
+# invert - Whether the interval is inverted
+# days - Total number of days (not partial days in month) of interval
+
+DefineFunction(
+  array(
+    'name'   => "__construct",
+    'desc'   => "Creates a new DateInterval object",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "interval_spec",
+        'type'   => String,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__get",
+    'desc'   => "Retreives interval partials (y, m, d, etc...)",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Number of years, months, days, hours, minutes, seconds, or total days for DateInterval, or true/false for date inversion.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "member",
+        'type'   => Variant,
+        'desc'   => "One of 'y', 'm', 'd', 'h', 'i', 's', 'invert', or 'days'.  All other vales will return null and throw undefined property notice.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__set",
+    'desc'   => "Sets interval partials (y, m, d, etc...)",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Always returns NULL.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "member",
+        'type'   => Variant,
+        'desc'   => "One of 'y', 'm', 'd', 'h', 'i', 's', 'invert', or 'days'.  All other vales will throw undefined property notice and ignore value.",
+      ),
+      array(
+        'name'   => "value",
+        'type'   => Variant,
+        'desc'   => "Either a boolean for 'invert', or a number.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "createFromDateString",
+    'desc'   => "Sets up a DateInterval from the relative parts of the string",
+    'flags'  => HasDocComment|IsStatic,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns a new DateInterval instance.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "time",
+        'type'   => String,
+        'desc'   => "A date with relative parts. Specifically, the relative formats supported by the parser used for strtotime() and DateTime will be used to construct the DateInterval.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "format",
+    'desc'   => "Formats the interval",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Returns the formatted interval.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "format",
+        'type'   => String,
+        'desc'   => "DateInterval format specifier.",
+      ),
+    ),
+  ));
+
+EndClass(
+);

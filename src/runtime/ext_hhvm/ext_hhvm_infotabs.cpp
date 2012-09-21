@@ -222,19 +222,28 @@ TypedValue* fg_evhttp_async_get(VM::ActRec *ar);
 TypedValue* fg_evhttp_async_post(VM::ActRec *ar);
 TypedValue* fg_evhttp_recv(VM::ActRec *ar);
 TypedValue* fg_checkdate(VM::ActRec *ar);
+TypedValue* fg_date_add(VM::ActRec *ar);
+TypedValue* fg_date_create_from_format(VM::ActRec *ar);
 TypedValue* fg_date_create(VM::ActRec *ar);
 TypedValue* fg_date_date_set(VM::ActRec *ar);
 TypedValue* fg_date_default_timezone_get(VM::ActRec *ar);
 TypedValue* fg_date_default_timezone_set(VM::ActRec *ar);
+TypedValue* fg_date_diff(VM::ActRec *ar);
 TypedValue* fg_date_format(VM::ActRec *ar);
+TypedValue* fg_date_get_last_errors(VM::ActRec *ar);
+TypedValue* fg_date_interval_create_from_date_string(VM::ActRec *ar);
+TypedValue* fg_date_interval_format(VM::ActRec *ar);
 TypedValue* fg_date_isodate_set(VM::ActRec *ar);
 TypedValue* fg_date_modify(VM::ActRec *ar);
 TypedValue* fg_date_offset_get(VM::ActRec *ar);
 TypedValue* fg_date_parse(VM::ActRec *ar);
+TypedValue* fg_date_sub(VM::ActRec *ar);
 TypedValue* fg_date_sun_info(VM::ActRec *ar);
 TypedValue* fg_date_sunrise(VM::ActRec *ar);
 TypedValue* fg_date_sunset(VM::ActRec *ar);
 TypedValue* fg_date_time_set(VM::ActRec *ar);
+TypedValue* fg_date_timestamp_get(VM::ActRec *ar);
+TypedValue* fg_date_timestamp_set(VM::ActRec *ar);
 TypedValue* fg_date_timezone_get(VM::ActRec *ar);
 TypedValue* fg_date_timezone_set(VM::ActRec *ar);
 TypedValue* fg_date(VM::ActRec *ar);
@@ -253,11 +262,13 @@ TypedValue* fg_strtotime(VM::ActRec *ar);
 TypedValue* fg_time(VM::ActRec *ar);
 TypedValue* fg_timezone_abbreviations_list(VM::ActRec *ar);
 TypedValue* fg_timezone_identifiers_list(VM::ActRec *ar);
+TypedValue* fg_timezone_location_get(VM::ActRec *ar);
 TypedValue* fg_timezone_name_from_abbr(VM::ActRec *ar);
 TypedValue* fg_timezone_name_get(VM::ActRec *ar);
 TypedValue* fg_timezone_offset_get(VM::ActRec *ar);
 TypedValue* fg_timezone_open(VM::ActRec *ar);
 TypedValue* fg_timezone_transitions_get(VM::ActRec *ar);
+TypedValue* fg_timezone_version_get(VM::ActRec *ar);
 TypedValue* fg_hphpd_install_user_command(VM::ActRec *ar);
 TypedValue* fg_hphpd_get_user_commands(VM::ActRec *ar);
 TypedValue* fg_hphpd_break(VM::ActRec *ar);
@@ -2333,22 +2344,36 @@ TypedValue* tg_17DummyContinuation_next(VM::ActRec *ar);
 TypedValue* tg_17DummyContinuation_rewind(VM::ActRec *ar);
 TypedValue* tg_17DummyContinuation_valid(VM::ActRec *ar);
 VM::Instance* new_DateTime_Instance(VM::Class*);
+TypedValue* tg_8DateTime_add(VM::ActRec *ar);
 TypedValue* tg_8DateTime___construct(VM::ActRec *ar);
+TypedValue* tg_8DateTime_createFromFormat(VM::ActRec *ar);
+TypedValue* tg_8DateTime_diff(VM::ActRec *ar);
 TypedValue* tg_8DateTime_format(VM::ActRec *ar);
+TypedValue* tg_8DateTime_getLastErrors(VM::ActRec *ar);
 TypedValue* tg_8DateTime_getOffset(VM::ActRec *ar);
+TypedValue* tg_8DateTime_getTimestamp(VM::ActRec *ar);
 TypedValue* tg_8DateTime_getTimezone(VM::ActRec *ar);
 TypedValue* tg_8DateTime_modify(VM::ActRec *ar);
 TypedValue* tg_8DateTime_setDate(VM::ActRec *ar);
 TypedValue* tg_8DateTime_setISODate(VM::ActRec *ar);
 TypedValue* tg_8DateTime_setTime(VM::ActRec *ar);
+TypedValue* tg_8DateTime_setTimestamp(VM::ActRec *ar);
 TypedValue* tg_8DateTime_setTimezone(VM::ActRec *ar);
+TypedValue* tg_8DateTime_sub(VM::ActRec *ar);
 VM::Instance* new_DateTimeZone_Instance(VM::Class*);
 TypedValue* tg_12DateTimeZone___construct(VM::ActRec *ar);
+TypedValue* tg_12DateTimeZone_getLocation(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_getName(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_getOffset(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_getTransitions(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_listAbbreviations(VM::ActRec *ar);
 TypedValue* tg_12DateTimeZone_listIdentifiers(VM::ActRec *ar);
+VM::Instance* new_DateInterval_Instance(VM::Class*);
+TypedValue* tg_12DateInterval___construct(VM::ActRec *ar);
+TypedValue* tg_12DateInterval___get(VM::ActRec *ar);
+TypedValue* tg_12DateInterval___set(VM::ActRec *ar);
+TypedValue* tg_12DateInterval_createFromDateString(VM::ActRec *ar);
+TypedValue* tg_12DateInterval_format(VM::ActRec *ar);
 VM::Instance* new_DebuggerProxyCmdUser_Instance(VM::Class*);
 TypedValue* tg_20DebuggerProxyCmdUser___construct(VM::ActRec *ar);
 TypedValue* tg_20DebuggerProxyCmdUser_isLocal(VM::ActRec *ar);
@@ -2893,7 +2918,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2175;
+const long long hhbc_ext_funcs_count = 2186;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -3095,19 +3120,28 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "evhttp_async_post", fg_evhttp_async_post },
   { "evhttp_recv", fg_evhttp_recv },
   { "checkdate", fg_checkdate },
+  { "date_add", fg_date_add },
+  { "date_create_from_format", fg_date_create_from_format },
   { "date_create", fg_date_create },
   { "date_date_set", fg_date_date_set },
   { "date_default_timezone_get", fg_date_default_timezone_get },
   { "date_default_timezone_set", fg_date_default_timezone_set },
+  { "date_diff", fg_date_diff },
   { "date_format", fg_date_format },
+  { "date_get_last_errors", fg_date_get_last_errors },
+  { "date_interval_create_from_date_string", fg_date_interval_create_from_date_string },
+  { "date_interval_format", fg_date_interval_format },
   { "date_isodate_set", fg_date_isodate_set },
   { "date_modify", fg_date_modify },
   { "date_offset_get", fg_date_offset_get },
   { "date_parse", fg_date_parse },
+  { "date_sub", fg_date_sub },
   { "date_sun_info", fg_date_sun_info },
   { "date_sunrise", fg_date_sunrise },
   { "date_sunset", fg_date_sunset },
   { "date_time_set", fg_date_time_set },
+  { "date_timestamp_get", fg_date_timestamp_get },
+  { "date_timestamp_set", fg_date_timestamp_set },
   { "date_timezone_get", fg_date_timezone_get },
   { "date_timezone_set", fg_date_timezone_set },
   { "date", fg_date },
@@ -3126,11 +3160,13 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "time", fg_time },
   { "timezone_abbreviations_list", fg_timezone_abbreviations_list },
   { "timezone_identifiers_list", fg_timezone_identifiers_list },
+  { "timezone_location_get", fg_timezone_location_get },
   { "timezone_name_from_abbr", fg_timezone_name_from_abbr },
   { "timezone_name_get", fg_timezone_name_get },
   { "timezone_offset_get", fg_timezone_offset_get },
   { "timezone_open", fg_timezone_open },
   { "timezone_transitions_get", fg_timezone_transitions_get },
+  { "timezone_version_get", fg_timezone_version_get },
   { "hphpd_install_user_command", fg_hphpd_install_user_command },
   { "hphpd_get_user_commands", fg_hphpd_get_user_commands },
   { "hphpd_break", fg_hphpd_break },
@@ -5237,27 +5273,44 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DummyContinuation[] = {
   { "valid", tg_17DummyContinuation_valid }
 };
 
-static const long long hhbc_ext_method_count_DateTime = 9;
+static const long long hhbc_ext_method_count_DateTime = 16;
 static const HhbcExtMethodInfo hhbc_ext_methods_DateTime[] = {
+  { "add", tg_8DateTime_add },
   { "__construct", tg_8DateTime___construct },
+  { "createFromFormat", tg_8DateTime_createFromFormat },
+  { "diff", tg_8DateTime_diff },
   { "format", tg_8DateTime_format },
+  { "getLastErrors", tg_8DateTime_getLastErrors },
   { "getOffset", tg_8DateTime_getOffset },
+  { "getTimestamp", tg_8DateTime_getTimestamp },
   { "getTimezone", tg_8DateTime_getTimezone },
   { "modify", tg_8DateTime_modify },
   { "setDate", tg_8DateTime_setDate },
   { "setISODate", tg_8DateTime_setISODate },
   { "setTime", tg_8DateTime_setTime },
-  { "setTimezone", tg_8DateTime_setTimezone }
+  { "setTimestamp", tg_8DateTime_setTimestamp },
+  { "setTimezone", tg_8DateTime_setTimezone },
+  { "sub", tg_8DateTime_sub }
 };
 
-static const long long hhbc_ext_method_count_DateTimeZone = 6;
+static const long long hhbc_ext_method_count_DateTimeZone = 7;
 static const HhbcExtMethodInfo hhbc_ext_methods_DateTimeZone[] = {
   { "__construct", tg_12DateTimeZone___construct },
+  { "getLocation", tg_12DateTimeZone_getLocation },
   { "getName", tg_12DateTimeZone_getName },
   { "getOffset", tg_12DateTimeZone_getOffset },
   { "getTransitions", tg_12DateTimeZone_getTransitions },
   { "listAbbreviations", tg_12DateTimeZone_listAbbreviations },
   { "listIdentifiers", tg_12DateTimeZone_listIdentifiers }
+};
+
+static const long long hhbc_ext_method_count_DateInterval = 5;
+static const HhbcExtMethodInfo hhbc_ext_methods_DateInterval[] = {
+  { "__construct", tg_12DateInterval___construct },
+  { "__get", tg_12DateInterval___get },
+  { "__set", tg_12DateInterval___set },
+  { "createFromDateString", tg_12DateInterval_createFromDateString },
+  { "format", tg_12DateInterval_format }
 };
 
 static const long long hhbc_ext_method_count_DebuggerProxyCmdUser = 3;
@@ -5944,7 +5997,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_XMLWriter[] = {
   { "outputMemory", tg_9XMLWriter_outputMemory }
 };
 
-const long long hhbc_ext_class_count = 59;
+const long long hhbc_ext_class_count = 60;
 const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "DummyClosure", new_DummyClosure_Instance, sizeof(c_DummyClosure), hhbc_ext_method_count_DummyClosure, hhbc_ext_methods_DummyClosure },
   { "Vector", new_Vector_Instance, sizeof(c_Vector), hhbc_ext_method_count_Vector, hhbc_ext_methods_Vector },
@@ -5958,6 +6011,7 @@ const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "DummyContinuation", new_DummyContinuation_Instance, sizeof(c_DummyContinuation), hhbc_ext_method_count_DummyContinuation, hhbc_ext_methods_DummyContinuation },
   { "DateTime", new_DateTime_Instance, sizeof(c_DateTime), hhbc_ext_method_count_DateTime, hhbc_ext_methods_DateTime },
   { "DateTimeZone", new_DateTimeZone_Instance, sizeof(c_DateTimeZone), hhbc_ext_method_count_DateTimeZone, hhbc_ext_methods_DateTimeZone },
+  { "DateInterval", new_DateInterval_Instance, sizeof(c_DateInterval), hhbc_ext_method_count_DateInterval, hhbc_ext_methods_DateInterval },
   { "DebuggerProxyCmdUser", new_DebuggerProxyCmdUser_Instance, sizeof(c_DebuggerProxyCmdUser), hhbc_ext_method_count_DebuggerProxyCmdUser, hhbc_ext_methods_DebuggerProxyCmdUser },
   { "DebuggerClientCmdUser", new_DebuggerClientCmdUser_Instance, sizeof(c_DebuggerClientCmdUser), hhbc_ext_method_count_DebuggerClientCmdUser, hhbc_ext_methods_DebuggerClientCmdUser },
   { "DebuggerClient", new_DebuggerClient_Instance, sizeof(c_DebuggerClient), hhbc_ext_method_count_DebuggerClient, hhbc_ext_methods_DebuggerClient },

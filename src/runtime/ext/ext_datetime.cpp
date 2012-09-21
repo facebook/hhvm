@@ -60,6 +60,12 @@ c_DateTime::c_DateTime(const ObjectStaticCallbacks *cb) : ExtObjectData(cb) {
 c_DateTime::~c_DateTime() {
 }
 
+Object c_DateTime::t_add(CObjRef interval) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::add);
+  m_dt->add(c_DateInterval::unwrap(interval));
+  return this;
+}
+
 void c_DateTime::t___construct(CStrRef time /*= "now"*/,
                                CObjRef timezone /*= null_object*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::__construct);
@@ -69,14 +75,48 @@ void c_DateTime::t___construct(CStrRef time /*= "now"*/,
   }
 }
 
+Object c_DateTime::ti_createfromformat(const char* cls , CStrRef format, CStrRef time,
+                                       CObjRef timezone /*= null_object */) {
+  STATIC_METHOD_INJECTION_BUILTIN(DateTime, DateTime::createfromformat);
+  c_DateTime *datetime = NEWOBJ(c_DateTime);
+  datetime->m_dt = NEWOBJ(DateTime);
+  datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone), format.data());
+  return datetime;
+}
+
+Object c_DateTime::t_diff(CObjRef datetime2, bool absolute) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::diff);
+  return c_DateInterval::wrap(m_dt->diff(c_DateTime::unwrap(datetime2), absolute));
+}
+
 String c_DateTime::t_format(CStrRef format) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::format);
   return m_dt->toString(format, false);
 }
 
+Array c_DateTime::ti_getlasterrors(const char* cls ) {
+  STATIC_METHOD_INJECTION_BUILTIN(DateTime, DateTime::getlasterrors);
+  Array errors = DateTime::getLastErrors();
+  Array warnings = DateTime::getLastWarnings();
+  Array ret = Array::Create();
+
+  ret.add("warning_count", warnings.size());
+  ret.add("warnings", warnings);
+  ret.add("error_count", errors.size());
+  ret.add("errors", errors);
+
+  return ret;
+}
+
 int64 c_DateTime::t_getoffset() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::getoffset);
   return m_dt->offset();
+}
+
+int64 c_DateTime::t_gettimestamp() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::gettimestamp);
+  bool err = false;
+  return m_dt->toTimeStamp(err);
 }
 
 Variant c_DateTime::t_gettimezone() {
@@ -112,9 +152,21 @@ Object c_DateTime::t_settime(int64 hour, int64 minute, int64 second /*= 0*/) {
   return this;
 }
 
+Object c_DateTime::t_settimestamp(int64 unixtimestamp) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::settimestamp);
+  m_dt->fromTimeStamp(unixtimestamp, false);
+  return this;
+}
+
 Object c_DateTime::t_settimezone(CObjRef timezone) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::settimezone);
   m_dt->setTimezone(c_DateTimeZone::unwrap(timezone));
+  return this;
+}
+
+Object c_DateTime::t_sub(CObjRef interval) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::sub);
+  m_dt->sub(c_DateInterval::unwrap(interval));
   return this;
 }
 
@@ -141,6 +193,11 @@ void c_DateTimeZone::t___construct(CStrRef timezone) {
     msg += ")";
     throw Object(SystemLib::AllocExceptionObject(msg));
   }
+}
+
+Array c_DateTimeZone::t_getlocation() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateTimeZone, DateTimeZone::getlocation);
+  return m_tz->getLocation();
 }
 
 String c_DateTimeZone::t_getname() {
@@ -174,6 +231,91 @@ ObjectData *c_DateTimeZone::clone() {
   ObjectData *obj = ObjectData::clone();
   c_DateTimeZone *dtz = static_cast<c_DateTimeZone*>(obj);
   dtz->m_tz = m_tz->cloneTimeZone();
+  return obj;
+}
+
+c_DateInterval::c_DateInterval(const ObjectStaticCallbacks *cb) :
+    ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>(cb) {
+}
+
+c_DateInterval::~c_DateInterval() {
+}
+
+void c_DateInterval::t___construct(CStrRef interval_spec) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateInterval, DateInterval::__construct);
+  m_di = NEWOBJ(DateInterval)(interval_spec);
+  if (!m_di->isValid()) {
+    std::string msg = "DateInterval::__construct: Invalid interval (";
+    msg += interval_spec.data();
+    msg += ")";
+    throw Object(SystemLib::AllocExceptionObject(msg));
+  }
+}
+
+Variant c_DateInterval::t___get(Variant member) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateInterval, DateInterval::__get);
+  if (member.isString()) {
+    if (member.same("y"))      return m_di->getYears();
+    if (member.same("m"))      return m_di->getMonths();
+    if (member.same("d"))      return m_di->getDays();
+    if (member.same("h"))      return m_di->getHours();
+    if (member.same("i"))      return m_di->getMinutes();
+    if (member.same("s"))      return m_di->getSeconds();
+    if (member.same("invert")) return m_di->isInverted();
+    if (member.same("days")) {
+      if (m_di->haveTotalDays()) {
+        return m_di->getTotalDays();
+      } else {
+        return false;
+      }
+    }
+  }
+  std::string msg = "Undefined property '";
+  msg += member.toString().data();
+  msg += ") on DateInterval object";
+  throw Object(SystemLib::AllocExceptionObject(msg));
+}
+
+Variant c_DateInterval::t___set(Variant member, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateInterval, DateInterval::__set);
+  if (member.isString()) {
+    if (member.same("y")) { m_di->setYears(value.toInt64());   return null; }
+    if (member.same("m")) { m_di->setMonths(value.toInt64());  return null; }
+    if (member.same("d")) { m_di->setDays(value.toInt64());    return null; }
+    if (member.same("h")) { m_di->setHours(value.toInt64());   return null; }
+    if (member.same("i")) { m_di->setMinutes(value.toInt64()); return null; }
+    if (member.same("s")) { m_di->setSeconds(value.toInt64()); return null; }
+    if (member.same("invert")) {
+      m_di->setInverted(value.toBoolean());
+      return null;
+    }
+    if (member.same("days")) {
+      m_di->setTotalDays(value.toInt64());
+      return null;
+    }
+  }
+
+  std::string msg = "Undefined property '";
+  msg += member.toString().data();
+  msg += ") on DateInterval object";
+  throw Object(SystemLib::AllocExceptionObject(msg));
+}
+
+Object c_DateInterval::ti_createfromdatestring(const char* cls , CStrRef time) {
+  STATIC_METHOD_INJECTION_BUILTIN(DateInterval, DateInterval::createfromdatestring);
+  SmartObject<DateInterval> di(NEWOBJ(DateInterval)(time, true));
+  return c_DateInterval::wrap(di);
+}
+
+String c_DateInterval::t_format(CStrRef format) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DateInterval, DateInterval::format);
+  return m_di->format(format);
+}
+
+ObjectData *c_DateInterval::clone() {
+  ObjectData *obj = ObjectData::clone();
+  c_DateInterval *di = static_cast<c_DateInterval*>(obj);
+  di->m_di = m_di->cloneDateInterval();
   return obj;
 }
 

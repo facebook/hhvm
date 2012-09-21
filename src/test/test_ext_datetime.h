@@ -28,19 +28,28 @@ class TestExtDatetime : public TestCppExt {
   virtual bool RunTests(const std::string &which);
 
   bool test_checkdate();
+  bool test_date_add();
+  bool test_date_create_from_format();
   bool test_date_create();
   bool test_date_date_set();
   bool test_date_default_timezone_get();
   bool test_date_default_timezone_set();
+  bool test_date_diff();
   bool test_date_format();
+  bool test_date_get_last_errors();
+  bool test_date_interval_create_from_date_string();
+  bool test_date_interval_format();
   bool test_date_isodate_set();
   bool test_date_modify();
   bool test_date_offset_get();
   bool test_date_parse();
+  bool test_date_sub();
   bool test_date_sun_info();
   bool test_date_sunrise();
   bool test_date_sunset();
   bool test_date_time_set();
+  bool test_date_timestamp_get();
+  bool test_date_timestamp_set();
   bool test_date_timezone_get();
   bool test_date_timezone_set();
   bool test_date();
@@ -59,11 +68,13 @@ class TestExtDatetime : public TestCppExt {
   bool test_time();
   bool test_timezone_abbreviations_list();
   bool test_timezone_identifiers_list();
+  bool test_timezone_location_get();
   bool test_timezone_name_from_abbr();
   bool test_timezone_name_get();
   bool test_timezone_offset_get();
   bool test_timezone_open();
   bool test_timezone_transitions_get();
+  bool test_timezone_version_get();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

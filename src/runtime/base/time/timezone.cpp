@@ -254,5 +254,17 @@ Array TimeZone::transitions() const {
   return ret;
 }
 
+Array TimeZone::getLocation() const {
+  Array ret;
+  if (!m_tzi) return ret;
+
+  ret.set("country_code", String(m_tzi->location.country_code, CopyString));
+  ret.set("latitude",     m_tzi->location.latitude);
+  ret.set("longitude",    m_tzi->location.longitude);
+  ret.set("comments",     String(m_tzi->location.comments, CopyString));
+
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

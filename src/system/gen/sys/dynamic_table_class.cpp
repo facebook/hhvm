@@ -3692,7 +3692,7 @@ const ObjectStaticCallbacks cw_DummyContinuation = {
 ObjectData *coo_Map() {
   return NEWOBJ(c_Map)();
 }
-IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Map)
+IMPLEMENT_CLASS(Map)
 extern const InstanceOfInfo cw_Map$$instanceof_table[] = {
   {0x20DCFAD1,0,"Map",&cw_Map},
   {0x45E6F0A1,0,"Traversable",(const ObjectStaticCallbacks*)2},
@@ -8383,7 +8383,7 @@ const ObjectStaticCallbacks cw_MapIterator = {
 ObjectData *coo_StableMap() {
   return NEWOBJ(c_StableMap)();
 }
-IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(StableMap)
+IMPLEMENT_CLASS(StableMap)
 extern const InstanceOfInfo cw_StableMap$$instanceof_table[] = {
   {0x45E6F0A1,0,"Traversable",(const ObjectStaticCallbacks*)2},
   {0x5EE263D1,1,"Countable",(const ObjectStaticCallbacks*)2},
@@ -9329,7 +9329,7 @@ const ObjectStaticCallbacks cw_DOMDocument = {
 ObjectData *coo_Vector() {
   return NEWOBJ(c_Vector)();
 }
-IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(Vector)
+IMPLEMENT_CLASS(Vector)
 extern const InstanceOfInfo cw_Vector$$instanceof_table[] = {
   {0x45E6F0A1,0,"Traversable",(const ObjectStaticCallbacks*)2},
   {0x5EE263D1,1,"Countable",(const ObjectStaticCallbacks*)2},

@@ -34,8 +34,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
                                            ObjectData::UseGet|
                                            ObjectData::UseSet|
                                            ObjectData::UseIsset|
-                                           ObjectData::UseUnset>,
-                 public Sweepable {
+                                           ObjectData::UseUnset> {
  public:
   DECLARE_CLASS(Vector, Vector, ObjectData)
   friend class c_VectorIterator;
@@ -45,6 +44,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
 
   public: c_Vector(const ObjectStaticCallbacks *cb = &cw_Vector);
   public: ~c_Vector();
+  public: void freeData();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
@@ -170,7 +170,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: int getVersionNumber() {
     return m_versionNumber;
   }
-  
+
   public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   public: static void OffsetSet(ObjectData* obj, TypedValue* key,
                                 TypedValue* val);
@@ -235,8 +235,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
                                         ObjectData::UseGet|
                                         ObjectData::UseSet|
                                         ObjectData::UseIsset|
-                                        ObjectData::UseUnset>,
-              public Sweepable {
+                                        ObjectData::UseUnset> {
  public:
   DECLARE_CLASS(Map, Map, ObjectData)
   friend class c_MapIterator;
@@ -248,6 +247,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
 
   public: c_Map(const ObjectStaticCallbacks *cb = &cw_Map);
   public: ~c_Map();
+  public: void freeData();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
@@ -552,8 +552,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                                               ObjectData::UseGet|
                                               ObjectData::UseSet|
                                               ObjectData::UseIsset|
-                                              ObjectData::UseUnset>,
-                    public Sweepable {
+                                              ObjectData::UseUnset> {
  public:
   DECLARE_CLASS(StableMap, StableMap, ObjectData)
   friend class c_StableMapIterator;
@@ -563,6 +562,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
 
   public: c_StableMap(const ObjectStaticCallbacks *cb = &cw_StableMap);
   public: ~c_StableMap();
+  public: void freeData();
   public: void t___construct();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();

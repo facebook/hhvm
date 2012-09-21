@@ -38,12 +38,12 @@ c_Vector::~c_Vector() {
   for (int i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
   }
-  c_Vector::sweep();
+  c_Vector::freeData();
 }
 
-void c_Vector::sweep() {
+void c_Vector::freeData() {
   if (m_data) {
-    free(m_data);
+    smart_free(m_data);
     m_data = NULL;
   }
 }
@@ -61,7 +61,7 @@ void c_Vector::grow() {
   } else {
     m_capacity = 8;
   }
-  m_data = (TypedValue*)realloc(m_data, m_capacity * sizeof(TypedValue));
+  m_data = (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
 }
 
 void c_Vector::resize(int64 sz, TypedValue* val) {
@@ -70,7 +70,8 @@ void c_Vector::resize(int64 sz, TypedValue* val) {
   ASSERT(sz >= 0);
   if (m_capacity < sz) {
     m_capacity = sz;
-    m_data = (TypedValue*)realloc(m_data, m_capacity * sizeof(TypedValue));
+    m_data =
+      (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
   }
   for (int64 i = m_size-1; i >= sz; --i) {
     tvRefcountedDecRef(&m_data[i]);
@@ -86,7 +87,8 @@ void c_Vector::reserve(int64 sz) {
   if (sz <= 0) return;
   if (m_capacity < sz) {
     m_capacity = sz;
-    m_data = (TypedValue*)realloc(m_data, m_capacity * sizeof(TypedValue));
+    m_data =
+      (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
   }
 }
 
@@ -96,7 +98,7 @@ ObjectData* c_Vector::clone() {
   int sz = m_size;
   TypedValue* data;
   vec->m_capacity = vec->m_size = sz;
-  vec->m_data = data = (TypedValue*)malloc(sz * sizeof(TypedValue));
+  vec->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   for (int i = 0; i < sz; ++i) {
     tvDup(&m_data[i], &data[i]);
   }
@@ -160,7 +162,7 @@ Object c_Vector::t_clear() {
   for (int i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
   }
-  free(m_data);
+  smart_free(m_data);
   m_data = NULL;
   m_size = 0;
   m_capacity = 0;
@@ -365,7 +367,7 @@ Variant c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   int sz = ad->size();
   vec->m_capacity = vec->m_size = sz;
   TypedValue* data;
-  vec->m_data = data = (TypedValue*)malloc(sz * sizeof(TypedValue));
+  vec->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   ssize_t pos = ad->iter_begin();
   for (int i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     ASSERT(pos != ArrayData::invalid_index);
@@ -398,7 +400,7 @@ Variant c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
   int sz = v->m_size;
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
-  target->m_data = data = (TypedValue*)malloc(sz * sizeof(TypedValue));
+  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   for (int i = 0; i < sz; ++i) {
     tvDup(&v->m_data[i], &data[i]);
   }
@@ -465,7 +467,7 @@ Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
   int64 sz = endPos - startPos;
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
-  target->m_data = data = (TypedValue*)malloc(sz * sizeof(TypedValue));
+  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   for (int64 i = 0; i < sz; ++i, ++startPos) {
     tvDup(&v->m_data[startPos], &data[i]);
   }
@@ -607,12 +609,12 @@ c_Map::c_Map(const ObjectStaticCallbacks *cb) :
 
 c_Map::~c_Map() {
   deleteBuckets();
-  sweep();
+  freeData();
 }
 
-void c_Map::sweep() {
+void c_Map::freeData() {
   if (m_data != (Bucket*)emptyMapSlot) {
-    free(m_data);
+    smart_free(m_data);
   }
   m_data = (Bucket*)emptyMapSlot;
 }
@@ -647,7 +649,7 @@ ObjectData* c_Map::clone() {
   target->m_size = m_size;
   target->m_load = m_load;
   target->m_nLastSlot = m_nLastSlot;
-  target->m_data = (Bucket*)malloc(numSlots() * sizeof(Bucket));
+  target->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
   memcpy(target->m_data, m_data, numSlots() * sizeof(Bucket));
 
   for (uint i = 0; i <= m_nLastSlot; ++i) {
@@ -667,7 +669,7 @@ ObjectData* c_Map::clone() {
 
 Object c_Map::t_clear() {
   deleteBuckets();
-  sweep();
+  freeData();
   m_size = 0;
   m_load = 0;
   m_nLastSlot = 0;
@@ -789,7 +791,7 @@ Object c_Map::t_values() {
   }
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
-  target->m_data = data = (TypedValue*)malloc(sz * sizeof(TypedValue));
+  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
 
   int64 j = 0;
   for (uint i = 0; i <= m_nLastSlot; ++i) {
@@ -1179,14 +1181,14 @@ void c_Map::reserve(int64 sz) {
   if (m_nLastSlot == 0) {
     ASSERT(m_data == (Bucket*)emptyMapSlot);
     m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
-    m_data = (Bucket*)calloc(numSlots(), sizeof(Bucket));
+    m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
     return;
   }
   uint oldNumSlots = numSlots();
   m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
   m_load = m_size;
   Bucket* oldBuckets = m_data;
-  m_data = (Bucket*)calloc(numSlots(), sizeof(Bucket));
+  m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
   for (uint i = 0; i < oldNumSlots; ++i) {
     Bucket* p = &oldBuckets[i];
     if (p->validValue()) {
@@ -1194,7 +1196,7 @@ void c_Map::reserve(int64 sz) {
       memcpy(np, p, sizeof(Bucket));
     }
   }
-  free(oldBuckets);
+  smart_free(oldBuckets);
 }
 
 ssize_t c_Map::iter_begin() const {
@@ -1450,12 +1452,12 @@ c_StableMap::c_StableMap(const ObjectStaticCallbacks *cb) :
 
 c_StableMap::~c_StableMap() {
   deleteBuckets();
-  sweep();
+  freeData();
 }
 
-void c_StableMap::sweep() {
+void c_StableMap::freeData() {
   if (m_arBuckets != (Bucket**)emptyStableMapSlot) {
-    free(m_arBuckets);
+    smart_free(m_arBuckets);
   }
   m_arBuckets = (Bucket**)emptyStableMapSlot;
 }
@@ -1485,7 +1487,7 @@ ObjectData* c_StableMap::clone() {
   target->m_size = m_size;
   target->m_nTableSize = m_nTableSize;
   target->m_nTableMask = m_nTableMask;
-  target->m_arBuckets = (Bucket**)calloc(m_nTableSize, sizeof(Bucket*));
+  target->m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
 
   Bucket *last = NULL;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
@@ -1520,7 +1522,7 @@ ObjectData* c_StableMap::clone() {
 
 Object c_StableMap::t_clear() {
   deleteBuckets();
-  sweep();
+  freeData();
   m_pListHead = NULL;
   m_pListTail = NULL;
   m_size = 0;
@@ -1638,7 +1640,7 @@ Object c_StableMap::t_values() {
   }
   TypedValue* data;
   target->m_capacity = target->m_size = sz;
-  target->m_data = data = (TypedValue*)malloc(sz * sizeof(TypedValue));
+  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   Bucket* p = m_pListHead;
   for (int64 i = 0; i < sz; ++i) {
     ASSERT(p);
@@ -1935,13 +1937,13 @@ void c_StableMap::reserve(int64 sz) {
   if (m_nTableSize == 0) {
     m_nTableSize = sz;
     m_nTableMask = m_nTableSize - 1;
-    m_arBuckets = (Bucket**)calloc(m_nTableSize, sizeof(Bucket*));
+    m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
     return;
   }
   m_nTableSize = sz;
   m_nTableMask = m_nTableSize - 1;
-  free(m_arBuckets);
-  m_arBuckets = (Bucket**)calloc(m_nTableSize, sizeof(Bucket*));
+  smart_free(m_arBuckets);
+  m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
   for (Bucket* p = m_pListHead; p; p = p->pListNext) {
     uint nIndex = (p->hashKey() & m_nTableMask);
     p->pNext = m_arBuckets[nIndex];
@@ -2213,7 +2215,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
 void collectionUnserialize(ObjectData* obj,
                            VariableUnserializer* uns,
                            int64 sz,
-                           char type) { 
+                           char type) {
   ASSERT(obj->isCollection());
   collectionReserve(obj, sz);
   if (type == 'V') {

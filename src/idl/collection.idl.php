@@ -89,9 +89,8 @@ BeginClass(
   array(
     'name'   => "Vector",
     'ifaces' => array('Iterable', 'Countable'),
-    'bases'  => array('Sweepable'),
     'desc'   => "A stack-style container.",
-    'flags'  =>  IsFinal | HasDocComment | NoDefaultSweep,
+    'flags'  =>  IsFinal | HasDocComment,
     'footer' => <<<EOT
 
  private:
@@ -587,9 +586,8 @@ BeginClass(
   array(
     'name'   => "Map",
     'ifaces' => array('Iterable', 'Countable'),
-    'bases'  => array('Sweepable'),
     'desc'   => "An unordered dictionary-style container.",
-    'flags'  =>  IsFinal | HasDocComment | NoDefaultSweep,
+    'flags'  =>  IsFinal | HasDocComment,
   ));
 
 DefineFunction(
@@ -1036,9 +1034,8 @@ BeginClass(
   array(
     'name'   => "StableMap",
     'ifaces' => array('Iterable', 'Countable'),
-    'bases'  => array('Sweepable'),
     'desc'   => "An ordered dictionary-style container.",
-    'flags'  =>  IsFinal | HasDocComment | NoDefaultSweep,
+    'flags'  =>  IsFinal | HasDocComment,
   ));
 
 DefineFunction(

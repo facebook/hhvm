@@ -397,21 +397,21 @@ inline void check_recursion(ThreadInfo *&info) {
 }
 
 // implemented in runtime/base/builtin_functions.cpp
-extern void pause_and_exit() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+extern void pause_forever() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 extern void check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 
 extern bool SegFaulting;
 
 inline void check_request_timeout(ThreadInfo *info) {
   const_assert(!hhvm);
-  if (SegFaulting) pause_and_exit();
+  if (SegFaulting) pause_forever();
   info->m_mm->refreshStats();
   if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
 }
 
 inline void check_request_timeout_nomemcheck(ThreadInfo *info) {
   const_assert(!hhvm);
-  if (SegFaulting) pause_and_exit();
+  if (SegFaulting) pause_forever();
   if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
 }
 

@@ -1000,14 +1000,13 @@ Object create_object(CStrRef s, CArrRef params, bool init /* = true */,
   }
 }
 
-void pause_and_exit() {
-  // NOTE: This is marked as __attribute__((noreturn)) in base/types.h
-  // Signal sent, nothing can be trusted, don't do anything, as we might
-  // write bad data, including calling exit handlers or destructors until the
-  // signal handler (StackTrace) has had a chance to exit.
-  sleep(300);
-  // Should abort first, but it not try to exit
-  pthread_exit(0);
+/*
+ * This function is used when another thread is segfaulting---we just
+ * want to wait forever to give it a chance to write a stacktrace file
+ * (and maybe a core file).
+ */
+void pause_forever() {
+  for (;;) sleep(300);
 }
 
 void check_request_surprise(ThreadInfo *info) {

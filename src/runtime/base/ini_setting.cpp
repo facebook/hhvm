@@ -244,6 +244,11 @@ bool IniSetting::Get(CStrRef name, String &value) {
     value = String(uploadMaxFilesize);
     return true;
   }
+  if (name == "post_max_size") {
+    int postMaxSize = VirtualHost::GetMaxPostSize();
+    value = String(postMaxSize);
+    return true;
+  }
   if (name == "log_errors") {
     value = g_context->getLogErrors() ? "1" : "0";
     return true;

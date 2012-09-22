@@ -152,10 +152,8 @@ flood error logs.
 
     # maximum POST Content-Length
     MaxPostSize = 10MB
-    # maximum upload file size
-    UploadMaxFileSize = 10MB
     # maximum memory size for image processing
-    ImageMemoryMaxBytes = UploadMaxFileSize * 2
+    ImageMemoryMaxBytes = Upload.UploadMaxFileSize * 2
 
     # Recommended to turn this on to avoid memory leaks and to enable the
     # RequestInitDocument and RequestInitFunction features.
@@ -234,7 +232,6 @@ How long to wait for dangling server to respond.
     EnableEarlyFlush = true
     ForceChunkedEncoding = false
     MaxPostSize = 8  # in MB
-    EnableFileUploads = true
     LibEventSyncSend = true
     ResponseQueueCount = 0
 
@@ -368,6 +365,17 @@ These are experimental LFU settings.
     # RTTI profiling settings. Experimental.
     RTTIDirectory = /tmp/
     EnableCliRTTI = false
+
+    # Uploads
+    Upload {
+      UploadMaxFileSize = 100 # Size in MB
+      UploadTmpDir = /tmp/
+      EnableFileUploads = true
+      EnableUploadProgress = false
+      Rfc1867Freq = 262144 # 256K
+      Rfc1867Prefix = vupload_
+      Rfc1867Name = video_ptoken
+    }
   }
 
 = Virtual Hosts

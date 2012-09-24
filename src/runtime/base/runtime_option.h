@@ -301,6 +301,7 @@ public:
   static bool UseSmallArray;
   static bool UseVectorArray;
   static bool StrictCollections;
+  static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;
   static bool EnableApc;
   static bool EnableConstLoad;

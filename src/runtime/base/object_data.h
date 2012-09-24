@@ -306,6 +306,7 @@ class ObjectData : public CountableNF {
   Variant o_throw_fatal(const char *msg);
   void serialize(VariableSerializer *serializer) const;
   virtual void serializeImpl(VariableSerializer *serializer) const;
+  bool hasInternalReference(PointerSet &vars, bool ds = false) const;
   virtual void dump() const;
   virtual ObjectData *clone();
   virtual void setRoot(ObjectData *root) {}

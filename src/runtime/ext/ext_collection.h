@@ -160,8 +160,6 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     tv->_count = 0;
     ++m_size;
   }
-  public: ObjectData* clone();
-
   public: void resize(int64 sz, TypedValue* val);
   public: bool contains(int64 key) {
     return ((unsigned long long)key < (unsigned long long)m_size);
@@ -170,6 +168,11 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: int getVersionNumber() {
     return m_versionNumber;
   }
+  
+  public: Array toArrayImpl() const;
+
+  public: Array o_toArray() const;
+  public: ObjectData* clone();
 
   public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   public: static void OffsetSet(ObjectData* obj, TypedValue* key,
@@ -359,6 +362,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: int getVersionNumber() {
     return m_versionNumber;
   }
+  public: Array toArrayImpl() const;
+
+  public: Array o_toArray() const;
+  public: ObjectData* clone();
 
   public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   public: static void OffsetSet(ObjectData* obj, TypedValue* key,
@@ -368,8 +375,6 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
-
-  public: ObjectData* clone();
 
   // implemented by HPHP
   public: c_Map *create();
@@ -674,6 +679,10 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: int getVersionNumber() {
     return m_versionNumber;
   }
+  public: Array toArrayImpl() const;
+
+  public: Array o_toArray() const;
+  public: ObjectData* clone();
 
   public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   public: static void OffsetSet(ObjectData* obj, TypedValue* key,
@@ -683,8 +692,6 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
-
-  public: ObjectData* clone();
 
   // implemented by HPHP
   public: c_StableMap *create();

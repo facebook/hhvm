@@ -92,6 +92,20 @@ void c_Vector::reserve(int64 sz) {
   }
 }
 
+Array c_Vector::toArrayImpl() const {
+  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  int sz = m_size;
+  for (int i = 0; i < sz; ++i) {
+    ai.set(tvAsCVarRef(&m_data[i]));
+  }
+  return ai.create();
+}
+
+Array c_Vector::o_toArray() const {
+  check_collection_cast_to_array();
+  return toArrayImpl();
+}
+
 ObjectData* c_Vector::clone() {
   ObjectData* obj = ObjectData::clone();
   c_Vector* vec = static_cast<c_Vector*>(obj);
@@ -207,12 +221,7 @@ bool c_Vector::t_contains(CVarRef key) {
 }
 
 Array c_Vector::t_toarray() {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
-  int sz = m_size;
-  for (int i = 0; i < sz; ++i) {
-    ai.set(tvAsCVarRef(&m_data[i]));
-  }
-  return ai.create();
+  return toArrayImpl();
 }
 
 void c_Vector::t_sort(CVarRef col /* = null */) {
@@ -644,6 +653,26 @@ Variant c_Map::t___destruct() {
   return null;
 }
 
+Array c_Map::toArrayImpl() const {
+  ArrayInit ai(m_size);
+  for (uint i = 0; i <= m_nLastSlot; ++i) {
+    Bucket& p = m_data[i];
+    if (p.validValue()) {
+      if (p.hasIntKey()) {
+        ai.set((int64)p.ikey, tvAsCVarRef(&p.data));
+      } else {
+        ai.set(*(const String*)(&p.skey), tvAsCVarRef(&p.data));
+      }
+    }
+  }
+  return ai.create();
+}
+
+Array c_Map::o_toArray() const {
+  check_collection_cast_to_array();
+  return toArrayImpl();
+}
+
 ObjectData* c_Map::clone() {
   ObjectData* obj = ObjectData::clone();
   c_Map* target = static_cast<c_Map*>(obj);
@@ -764,22 +793,11 @@ Object c_Map::t_discard(CVarRef key) {
 }
 
 Array c_Map::t_toarray() {
-  ArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      if (p.hasIntKey()) {
-        ai.set((int64)p.ikey, tvAsCVarRef(&p.data));
-      } else {
-        ai.set(*(const String*)(&p.skey), tvAsCVarRef(&p.data));
-      }
-    }
-  }
-  return ai.create();
+  return toArrayImpl();
 }
 
 Array c_Map::t_copyasarray() {
-  return t_toarray();
+  return toArrayImpl();
 }
 
 Array c_Map::t_tokeysarray() {
@@ -1493,6 +1511,25 @@ Variant c_StableMap::t___destruct() {
   return null;
 }
 
+Array c_StableMap::toArrayImpl() const {
+  ArrayInit ai(m_size);
+  Bucket* p = m_pListHead;
+  while (p) {
+    if (p->hasIntKey()) {
+      ai.set((int64)p->ikey, p->data);
+    } else {
+      ai.set(*(const String*)(&p->skey), p->data);
+    }
+    p = p->pListNext;
+  }
+  return ai.create();
+}
+
+Array c_StableMap::o_toArray() const {
+  check_collection_cast_to_array();
+  return toArrayImpl();
+}
+
 ObjectData* c_StableMap::clone() {
   ObjectData* obj = ObjectData::clone();
   c_StableMap* target = static_cast<c_StableMap*>(obj);
@@ -1625,21 +1662,11 @@ Object c_StableMap::t_discard(CVarRef key) {
 }
 
 Array c_StableMap::t_toarray() {
-  ArrayInit ai(m_size);
-  Bucket* p = m_pListHead;
-  while (p) {
-    if (p->hasIntKey()) {
-      ai.set((int64)p->ikey, p->data);
-    } else {
-      ai.set(*(const String*)(&p->skey), p->data);
-    }
-    p = p->pListNext;
-  }
-  return ai.create();
+  return toArrayImpl();
 }
 
 Array c_StableMap::t_copyasarray() {
-  return t_toarray();
+  return toArrayImpl();
 }
 
 Array c_StableMap::t_tokeysarray() {

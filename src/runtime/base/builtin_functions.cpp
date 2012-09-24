@@ -980,6 +980,15 @@ void check_collection_compare(ObjectData* obj1, ObjectData* obj2) {
   }
 }
 
+void check_collection_cast_to_array() {
+  if (RuntimeOption::WarnOnCollectionToArray) {
+    raise_warning("Casting a collection to an array is an expensive operation "
+                  "and should be avoided where possible. To convert a "
+                  "collection to an array without raising a warning, use the "
+                  "toArray() method.");
+  }
+}
+
 Object create_object(CStrRef s, CArrRef params, bool init /* = true */,
                      ObjectData *root /* = NULL */) {
   if (hhvm) {

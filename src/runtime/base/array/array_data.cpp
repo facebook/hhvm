@@ -483,7 +483,7 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
           return false;
         }
       }
-      if (pobj->o_toArray().get()->hasInternalReference(vars, ds)) {
+      if (pobj->hasInternalReference(vars, ds)) {
         return true;
       }
     } else if (var.isArray() &&

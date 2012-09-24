@@ -1677,6 +1677,14 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   }
 }
 
+bool ObjectData::hasInternalReference(PointerSet &vars,
+                                      bool ds /* = false */) const {
+  if (isCollection()) {
+    return true;
+  }
+  return o_toArray().get()->hasInternalReference(vars, ds);
+}
+
 void ObjectData::dump() const {
   o_toArray().dump();
 }

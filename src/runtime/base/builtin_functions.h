@@ -451,6 +451,7 @@ void throw_collection_property_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 void throw_collection_compare_exception() ATTRIBUTE_COLD;
 void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
+void check_collection_cast_to_array();
 
 /**
  * Argument count handling.

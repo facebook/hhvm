@@ -376,8 +376,7 @@ SharedVariant* SharedVariant::convertObj(CVarRef var) {
     // should also check the object itself
     return NULL;
   }
-  CArrRef arr = obj->o_toArray();
-  if (arr->hasInternalReference(seen, true)) {
+  if (obj->hasInternalReference(seen, true)) {
     return NULL;
   }
   SharedVariant *tmp = new SharedVariant(var, false, true, true);

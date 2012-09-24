@@ -672,7 +672,7 @@ bool TestParserStmt::TestYieldStatement() {
     "}\n"
     "function foo() {\n"
     "return hphp_create_continuation"
-    "('', '31772962690_1', __FUNCTION__);\n"
+    "('', '3990978909_1', __FUNCTION__);\n"
     "}\n");
 
   V("<?php function foo() { yield 123;}",
@@ -690,14 +690,14 @@ bool TestParserStmt::TestYieldStatement() {
     "}\n"
     "function foo() {\n"
     "return hphp_create_continuation"
-    "('', '31772962690_1', __FUNCTION__);\n"
+    "('', '3990978909_1', __FUNCTION__);\n"
     "}\n");
 
   V("<?php class bar { function foo() { yield 123; yield 456;} }",
     "class bar {\n"
     "public function foo() {\n"
     "return hphp_create_continuation"
-    "('bar', '31772962690_1', __METHOD__);\n"
+    "('bar', '3990978909_1', __METHOD__);\n"
     "}\n"
     "public function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
     "hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ");\n"

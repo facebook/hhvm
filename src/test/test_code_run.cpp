@@ -9093,6 +9093,31 @@ bool TestCodeRun::TestCollectionClasses() {
         "string(3) \"bar\"\n"
         );
 
+  MVCRO("<?php\n"
+        "$v = Vector::fromArray(array('foo'));\n"
+        "var_dump($v->at(0));\n"
+        "var_dump($v->get(0));\n"
+        "var_dump($v[0]);\n"
+        "$m = Map::fromArray(array('foo'));\n"
+        "var_dump($m->at(0));\n"
+        "var_dump($m->get(0));\n"
+        "var_dump($m[0]);\n"
+        "$sm = StableMap::fromArray(array('foo'));\n"
+        "var_dump($sm->at(0));\n"
+        "var_dump($sm->get(0));\n"
+        "var_dump($sm[0]);\n"
+        ,
+        "string(3) \"foo\"\n"
+        "string(3) \"foo\"\n"
+        "string(3) \"foo\"\n"
+        "string(3) \"foo\"\n"
+        "string(3) \"foo\"\n"
+        "string(3) \"foo\"\n"
+        "string(3) \"foo\"\n"
+        "string(3) \"foo\"\n"
+        "string(3) \"foo\"\n"
+        );
+
   return true;
 }
 

@@ -179,7 +179,7 @@ int64 c_Vector::t_count() {
 
 Variant c_Vector::t_at(CVarRef key) {
   if (key.isInteger()) {
-    return at(key.toInt64());
+    return tvAsCVarRef(at(key.toInt64()));
   }
   throwBadKeyType();
   return null;
@@ -187,7 +187,7 @@ Variant c_Vector::t_at(CVarRef key) {
 
 Variant c_Vector::t_get(CVarRef key) {
   if (key.isInteger()) {
-    return get(key.toInt64());
+    return tvAsCVarRef(get(key.toInt64()));
   }
   throwBadKeyType();
   return null;
@@ -687,9 +687,9 @@ int64 c_Map::t_count() {
 
 Variant c_Map::t_at(CVarRef key) {
   if (key.isInteger()) {
-    return at(key.toInt64());
+    return tvAsCVarRef(at(key.toInt64()));
   } else if (key.isString()) {
-    return at(key.getStringData());
+    return tvAsCVarRef(at(key.getStringData()));
   }
   throwBadKeyType();
   return null;
@@ -697,9 +697,9 @@ Variant c_Map::t_at(CVarRef key) {
 
 Variant c_Map::t_get(CVarRef key) {
   if (key.isInteger()) {
-    return get(key.toInt64());
+    return tvAsCVarRef(get(key.toInt64()));
   } else if (key.isString()) {
-    return get(key.getStringData());
+    return tvAsCVarRef(get(key.getStringData()));
   }
   throwBadKeyType();
   return null;
@@ -1542,9 +1542,9 @@ int64 c_StableMap::t_count() {
 
 Variant c_StableMap::t_at(CVarRef key) {
   if (key.isInteger()) {
-    return at(key.toInt64());
+    return tvAsCVarRef(at(key.toInt64()));
   } else if (key.isString()) {
-    return at(key.getStringData());
+    return tvAsCVarRef(at(key.getStringData()));
   }
   throwBadKeyType();
   return null;
@@ -1552,9 +1552,9 @@ Variant c_StableMap::t_at(CVarRef key) {
 
 Variant c_StableMap::t_get(CVarRef key) {
   if (key.isInteger()) {
-    return get(key.toInt64());
+    return tvAsCVarRef(get(key.toInt64()));
   } else if (key.isString()) {
-    return get(key.getStringData());
+    return tvAsCVarRef(get(key.getStringData()));
   }
   throwBadKeyType();
   return null;

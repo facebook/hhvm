@@ -2380,7 +2380,7 @@ head:
   }
   if (self->m_type == KindOfObject) {
     if (self->m_data.pobj->isCollection()) {
-      raise_error("Cannot use [] for reading");
+      return collectionOffsetGet(self->m_data.pobj, Variant(key));
     }
     Variant *ret = &(self->getArrayAccess()->___offsetget_lval(key));
     if (!blackHole) {

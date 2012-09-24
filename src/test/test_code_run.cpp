@@ -9083,6 +9083,16 @@ bool TestCodeRun::TestCollectionClasses() {
         "bool(false)\n"
         );
 
+  MVCRO("<?php\n"
+        "$m = new Map();\n"
+        "$m['foo'] = new Map();\n"
+        "$m['foo'][123] = new Vector();\n"
+        "$m['foo'][123][] = 'bar';\n"
+        "var_dump($m['foo'][123][0]);\n"
+        ,
+        "string(3) \"bar\"\n"
+        );
+
   return true;
 }
 

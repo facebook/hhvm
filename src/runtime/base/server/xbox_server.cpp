@@ -219,7 +219,6 @@ void XboxServer::Restart() {
       (RuntimeOption::XboxServerThreadCount,
        RuntimeOption::ServerThreadRoundRobin,
        RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-       RuntimeOption::ServerThreadDropCacheExpensiveTimeoutSeconds,
        RuntimeOption::ServerThreadDropStack,
        NULL);
     if (RuntimeOption::XboxServerLogInfo) {
@@ -396,7 +395,7 @@ Object XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */) {
   bool xboxEnabled = (RuntimeOption::XboxServerThreadCount > 0);
   if (!xboxEnabled || !Available()) {
     const char* errMsg = (xboxEnabled ?
-      "Cannot create new Xbox task because the Xbox queue has "
+      "Cannot create new Xbox task because the Xbox queue has " 
       "reached maximum capacity" :
       "Cannot create new Xbox task because the Xbox is not enabled");
     Object e = SystemLib::AllocExceptionObject(errMsg);

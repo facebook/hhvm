@@ -6400,7 +6400,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   StringData::GetStaticString("");
 
   JobQueueDispatcher<EmitterWorker::JobType, EmitterWorker>
-    dispatcher(threadCount, true, 0, 0, false, ar.get());
+    dispatcher(threadCount, true, 0, false, ar.get());
 
   dispatcher.start();
   ar->visitFiles(addEmitterWorker, &dispatcher);

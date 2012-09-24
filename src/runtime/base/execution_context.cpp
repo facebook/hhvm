@@ -862,10 +862,6 @@ void PersistentObjectStore::removeObject(ResourceData *data) {
 }
 
 PersistentObjectStore::~PersistentObjectStore() {
-  this->clear();
-}
-
-void PersistentObjectStore::clear() {
   for (ResourceMapMap::const_iterator iter = m_objects.begin();
        iter != m_objects.end(); ++iter) {
     const ResourceMap &resources = iter->second;
@@ -874,7 +870,6 @@ void PersistentObjectStore::clear() {
       removeObject(iterInner->second);
     }
   }
-  m_objects.clear();
 }
 
 int PersistentObjectStore::size() const {

@@ -32222,6 +32222,19 @@ bool TestCodeRun::TestTraits() {
         "Foo\n"
         );
 
+  MVCRO("<?php\n"
+        "final class Foo {\n"
+        "  use Bar;\n"
+        "  private static $a = 3;\n"
+        "}\n"
+        "trait Bar {\n"
+        "  private static $a = 3;\n"
+        "}\n"
+        "echo \"Done\\n\";\n"
+        ,
+        "Done\n"
+        );
+
   return true;
 }
 

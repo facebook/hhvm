@@ -1927,7 +1927,17 @@ void Class::importTraitStaticProp(ClassPtr trait,
   } else {
     // Redeclared prop, make sure it matches previous declaration
     SProp&     prevProp    = curSPropMap[prevIt->second];
-    TypedValue prevPropVal = getStaticPropInitVal(prevProp);
+    TypedValue prevPropVal;
+    if (prevProp.m_class == this) {
+      // If this static property was declared by this class, we can
+      // get the initial value directly from m_val
+      prevPropVal = prevProp.m_val;
+    } else {
+      // If this static property was declared in a parent class, m_val
+      // will be KindOfUninit, and we'll need to consult the appropriate
+      // parent class to get the initial value.
+      prevPropVal = getStaticPropInitVal(prevProp);
+    }
     if (prevProp.m_attrs != traitProp.m_attrs ||
         !compatibleTraitPropInit(traitProp.m_val, prevPropVal)) {
       raise_error("trait declaration of property '%s' is incompatible with "

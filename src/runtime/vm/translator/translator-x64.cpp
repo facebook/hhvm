@@ -1839,6 +1839,13 @@ TCA TranslatorX64::retranslateAndPatchNoIR(SrcKey sk,
   LeaseHolder writer(s_writeLease);
   if (!writer) return NULL;
   SKTRACE(1, sk, "retranslateAndPatchNoIR\n");
+  SrcRec* srcRec = getSrcRec(sk);
+  if (srcRec->translations().size() == SrcRec::kMaxTranslations + 1) {
+    // we've gone over the translation limit and already have an anchor
+    // translation that will interpret, so just return NULL and force
+    // interpretation of this BB.
+    return NULL;
+  }
   TCA start = translate(&sk, align, false);
   if (start != NULL) {
     smash(getAsmFor(toSmash), toSmash, start);

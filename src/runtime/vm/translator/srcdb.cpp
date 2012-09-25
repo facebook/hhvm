@@ -78,7 +78,7 @@ void SrcRec::emitFallbackJump(Asm &a, IncomingBranch incoming) {
 void SrcRec::newTranslation(Asm& a, Asm &astubs, TCA newStart) {
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
-  ASSERT(m_translations.size() <= kMaxTranslations + 1);
+  ASSERT(m_translations.size() <= kMaxTranslations);
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, newStart);
 

@@ -1268,7 +1268,7 @@ Address CodeGenerator::cgLdObjClass(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* obj   = inst->getSrc(0);
 
-  // TODO:MP 
+  // TODO:MP assert copied from translatorx64. Update and make it work
   // ASSERT(obj->getType() == Type::Obj);
   register_name_t dstReg = dst->getAssignedLoc();
   register_name_t objReg = obj->getAssignedLoc();
@@ -1345,23 +1345,27 @@ Address CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   return start;
 }
 
-void checkFrame(ActRec* fp, Cell* sp) {
+void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   const Func* func = fp->m_func;
   if (fp->hasVarEnv()) {
     ASSERT(fp->getVarEnv()->getCfp() == fp);
   }
   // TODO: validate this pointer from actrec
-//  int numLocals = func->numLocals();
-//  Cell* firstSp = ((Cell*)fp) - numLocals;
+  int numLocals = func->numLocals();
   DEBUG_ONLY Cell* firstSp = ((Cell*)fp) - func->numSlotsInFrame();
   ASSERT(sp <= firstSp);
-  int numParams = func->numParams();
-  for (int i=0; i < numParams; i++) {
-    TypedValue* tv = frame_local(fp, i);
-    ASSERT(tvIsPlausible(tv));
-    DataType t = tv->m_type;
-    if (IS_REFCOUNTED_TYPE(t)) {
-      // ASSERT(tv->m_data.ptv->_count > 0);  // HHIR:TODO:MERGE access protected field _count
+  if (checkLocals) {
+    int numParams = func->numParams();
+    for (int i=0; i < numLocals; i++) {
+      if (i >= numParams && func->isGenerator() && i < func->numNamedLocals()) {
+        continue;
+      }
+      TypedValue* tv = frame_local(fp, i);
+      ASSERT(tvIsPlausible(tv));
+      DataType t = tv->m_type;
+      if (IS_REFCOUNTED_TYPE(t)) {
+        ASSERT(tv->m_data.pstr->getCount() > 0);
+      }
     }
   }
   // We unfortunately can't do the same kind of check for the stack
@@ -1395,7 +1399,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
             << " " << rip
             << std::endl;
 #endif
-  checkFrame(fp, sp);
+  checkFrame(fp, sp, false);
 }
 
 void CodeGenerator::emitTraceRet(CodeGenerator::Asm& as,
@@ -2283,8 +2287,10 @@ Address CodeGenerator::cgAllocActRec6(SSATmp* dst,
   }
   // actRec->m_invName
   ASSERT(magicName->isConst());
+  // ActRec::m_invName is encoded as a pointer with bottom bit set to 1
+  // to distinguish it from m_varEnv and m_extrArgs
   uintptr_t invName = (magicName->getType() == Type::Null ?
-                       0 : uintptr_t(magicName->getConstValAsStr()));
+                       0 : (uintptr_t(magicName->getConstValAsStr()) | 1));
   m_as.store_imm64_disp_reg64(invName,
                               actRecAdjustment + AROFF(m_invName),
                               spReg);
@@ -2598,21 +2604,43 @@ Address CodeGenerator::cgLdThis(IRInstruction* inst) {
   // mov dst, [fp + 0x20]
   register_name_t dstReg = dst->getAssignedLoc();
 
-  m_as.load_reg64_disp_reg64(src->getAssignedLoc(),
-                           AROFF(m_this),
-                           dstReg);
+  // the destination of LdThis could be dead but
+  // the instruction itself still useful because
+  // of the checks that it does (if it has a label).
+  // So we need to make sure there is a dstReg for this
+  // instruction.
+  if (dstReg != reg::noreg) {
+    // instruction's result is not dead
+    m_as.load_reg64_disp_reg64(src->getAssignedLoc(),
+                               AROFF(m_this),
+                               dstReg);
+  }
 
   if (label != NULL) {
+    // we need to perform its checks
     if (curFunc()->cls() == NULL) {
       // test dst, dst
       // jz label
+
+      if (dstReg == reg::noreg) {
+        dstReg = reg::rScratch;
+        m_as.load_reg64_disp_reg64(src->getAssignedLoc(),
+                                   AROFF(m_this),
+                                   dstReg);
+      }
       m_as.test_reg64_reg64(dstReg, dstReg);
       emitFwdJcc(CC_Z, label);
     }
     // test dst, 0x01
     // jnz label
-    m_as.test_imm32_reg64(1, dstReg);
-    emitFwdJcc(CC_NZ, label);
+    if (dstReg == reg::noreg) {
+      // TODO: Could also use a 32-bit test here
+      m_as.test_imm64_disp_reg64(1, AROFF(m_this), src->getAssignedLoc());
+      emitFwdJcc(CC_NZ, label);
+    } else {
+      m_as.test_imm32_reg64(1, dstReg);
+      emitFwdJcc(CC_NZ, label);
+    }
 #if 0
     // TODO: Move this to be the code generated for a new instruction for
     // raising fatal
@@ -3698,8 +3726,7 @@ void traceCallback(ActRec* fp, Cell* sp, int64 pcOff, void* rip) {
             << " " << rip
             << std::endl;
 #endif
-//fullN  std::cout << "traceCallback: pcOff = " << pcOff << std::endl;
-  checkFrame(fp, sp);
+  checkFrame(fp, sp, true);
 }
 
 void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64 pcOff) {

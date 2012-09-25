@@ -1535,15 +1535,13 @@ TranslatorX64::irTranslateTracelet(const Tracelet& t,
   }
 
   if (!hhirSucceeded) {
-    hhirTraceFree();
-
     // The whole translation failed; give up on this BB. Since it is not
     // linked into srcDB yet, it is guaranteed not to be reachable.
-    m_regMap.reset();
-    // Permanent reset; nothing is reachable yet.
+    // Free IR resources for this trace, rollback the Translation cache
+    // frontiers, and discard any pending fixups.
+    hhirTraceFree();
     a.code.frontier = start;
     astubs.code.frontier = stubStart;
-    // Discard any pending fixups.
     m_pendingFixups.clear();
   }
 

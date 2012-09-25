@@ -198,7 +198,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     if (RuntimeOption::EnableStaticContentFromDisk) {
       String translated = File::TranslatePath(String(absPath));
       if (!translated.empty()) {
-        StringBuffer sb(translated.data());
+        CstrBuffer sb(translated.data());
         if (sb.valid()) {
           struct stat st;
           st.st_mtime = 0;

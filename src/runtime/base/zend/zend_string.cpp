@@ -472,7 +472,7 @@ int string_rfind(const char *input, int len, char ch, int pos,
   }
   const void *ptr;
   if (case_sensitive) {
-    if (pos >= 0) {  
+    if (pos >= 0) {
       ptr = memrchr(input + pos, ch, len - pos);
     } else {
       ptr = memrchr(input, ch, len + pos + 1);
@@ -2052,9 +2052,9 @@ char *string_escape_shell_cmd(const char *str) {
   return cmd;
 }
 
-char *string_cplus_escape(const char *s, int len)
+std::string string_cplus_escape(const char *s, int len)
 {
-  StringBuffer sb;
+  std::string sb;
   static const char digits[] = "01234567";
 
   for (int i = 0; i < len; i++) {
@@ -2070,18 +2070,18 @@ char *string_cplus_escape(const char *s, int len)
       case '?':  sb.append("\\?", 2);  break;
       default:
         if (uc >= ' ' && (uc & 127) == uc) {
-          sb.append((char)uc);
+          sb += (char) uc;
         } else {
-          sb.append('\\');
-          sb.append(digits[(uc >> 6) & 7]);
-          sb.append(digits[(uc >> 3) & 7]);
-          sb.append(digits[(uc >> 0) & 7]);
+          sb += '\\';
+          sb += digits[(uc >> 6) & 7];
+          sb += digits[(uc >> 3) & 7];
+          sb += digits[(uc >> 0) & 7];
         }
         break;
     }
   }
 
-  return sb.detach(len);
+  return sb;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

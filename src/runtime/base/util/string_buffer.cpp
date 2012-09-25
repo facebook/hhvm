@@ -31,96 +31,44 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StringBuffer::StringBuffer(int initialSize /* = 63 */)
-  : m_initialSize(initialSize), m_maxBytes(kDefaultOutputLimit),
-    m_size(initialSize), m_pos(0) {
+  : m_initialCap(initialSize), m_maxBytes(kDefaultOutputLimit),
+    m_cap(initialSize), m_len(0) {
   ASSERT(initialSize > 0);
-  m_buffer = (char *)Util::safe_malloc(initialSize + 1);
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
-}
-
-StringBuffer::StringBuffer(const char *filename)
-  : m_buffer(NULL), m_initialSize(1024), m_maxBytes(kDefaultOutputLimit),
-    m_size(0), m_pos(0) {
-  struct stat sb;
-  if (stat(filename, &sb) == 0) {
-    if (sb.st_size > m_maxBytes - 1) {
-      std::ostringstream out;
-      out << "file " << filename << " is too large";
-      throw StringBufferLimitException(m_maxBytes,
-                                       String(out.str().c_str()));
-    }
-    m_size = sb.st_size;
-    m_buffer = (char *)Util::safe_malloc(m_size + 1);
-
-    int fd = ::open(filename, O_RDONLY);
-    if (fd != -1) {
-      while (m_pos < m_size) {
-        int buffer_size = m_size - m_pos;
-        int len = ::read(fd, m_buffer + m_pos, buffer_size);
-        if (len == -1 && errno == EINTR) continue;
-        if (len <= 0) break;
-        m_pos += len;
-      }
-      ::close(fd);
-    }
-  }
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
-}
-
-StringBuffer::StringBuffer(char *data, int len)
-  : m_buffer(data), m_initialSize(1024), m_maxBytes(kDefaultOutputLimit),
-    m_size(len), m_pos(len) {
+  m_str = NEW(StringData)(initialSize);
+  m_buffer = (char *)m_str->data();
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
 StringBuffer::~StringBuffer() {
-  if (m_buffer) {
-    free(m_buffer);
+  if (m_str) {
+    ASSERT((m_str->setSize(0), true)); // appease StringData::checkSane()
+    DELETE(StringData)(m_str);
   }
 }
 
 const char *StringBuffer::data() const {
   TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
-  if (m_buffer && m_pos) {
-    m_buffer[m_pos] = '\0'; // fixup
+  if (m_buffer && m_len) {
+    m_buffer[m_len] = '\0'; // fixup
     return m_buffer;
   }
   return NULL;
 }
 
 const char *StringBuffer::dataIgnoreTaint() const {
-  if (m_buffer && m_pos) {
-    m_buffer[m_pos] = '\0'; // fixup
+  if (m_buffer && m_len) {
+    m_buffer[m_len] = '\0'; // fixup
     return m_buffer;
   }
   return NULL;
 }
 
 char StringBuffer::charAt(int pos) const {
-  ASSERT(pos >= 0 && pos < m_pos);
-  if (m_buffer && pos >= 0 && pos < m_pos) {
+  ASSERT(pos >= 0 && pos < m_len);
+  if (m_buffer && pos >= 0 && pos < m_len) {
     return m_buffer[pos];
   }
   return '\0';
-}
-
-char *StringBuffer::detach(int &size) {
-  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
-#ifdef TAINTED
-  m_taint_data.unsetTaint(TAINT_BIT_ALL);
-#endif
-  if (m_buffer) {
-    if (m_pos) {
-      m_buffer[m_pos] = '\0'; // fixup
-      size = m_pos;
-      char *ret = m_buffer;
-      m_buffer = NULL;
-      m_pos = 0;
-      return ret;
-    }
-    size = 0;
-  }
-  return NULL;
 }
 
 String StringBuffer::detachImpl() {
@@ -129,26 +77,28 @@ String StringBuffer::detachImpl() {
   m_taint_data.unsetTaint(TAINT_BIT_ALL);
 #endif
 
-  if (m_buffer && m_pos) {
-    m_buffer[m_pos] = '\0'; // fixup
-    String ret(m_buffer, m_pos, AttachString);
-    m_buffer = NULL;
-    m_pos = 0;
-    return ret;
+  if (m_buffer && m_len) {
+    ASSERT(m_str && m_str->getCount() == 0);
+    m_buffer[m_len] = '\0'; // fixup
+    StringData* str = m_str;
+    str->setSize(m_len);
+    m_str = 0;
+    m_buffer = 0;
+    m_len = 0;
+    m_cap = 0;
+    return String(str); // causes incref
   }
   return String("");
 }
 
 String StringBuffer::copy() {
   // REGISTER_ACCESSED() is called by data()
-  String r = String(data(), size(), CopyString);
-  return r;
+  return String(data(), size(), CopyString);
 }
 
 String StringBuffer::copyWithTaint() {
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  String r = String(data(), size(), CopyString);
-  return r;
+  return String(data(), size(), CopyString);
 }
 
 void StringBuffer::absorb(StringBuffer &buf) {
@@ -156,15 +106,23 @@ void StringBuffer::absorb(StringBuffer &buf) {
     TAINT_OBSERVER_REGISTER_ACCESSED(buf.getTaintDataRefConst());
     TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 
-    char *buffer = m_buffer;
-    int size = m_size;
+    StringData* str = m_str;
 
+    m_str = buf.m_str;
     m_buffer = buf.m_buffer;
-    m_size = buf.m_size;
-    m_pos = buf.m_pos;
+    m_len = buf.m_len;
+    m_cap = buf.m_cap;
 
-    buf.m_buffer = buffer;
-    buf.m_size = size;
+    buf.m_str = str;
+    if (str) {
+      buf.m_buffer = (char*)str->data();
+      buf.m_len = str->size();
+      buf.m_cap = str->capacity();
+    } else {
+      buf.m_buffer = 0;
+      buf.m_len = 0;
+      buf.m_cap = 0;
+    }
     buf.reset();
   } else {
     // REGISTER_ACCESSED()/REGISTER_MUTATED() are called by append()/detach()
@@ -173,35 +131,42 @@ void StringBuffer::absorb(StringBuffer &buf) {
 }
 
 void StringBuffer::reset() {
-  m_pos = 0;
+  m_len = 0;
 #ifdef TAINTED
   m_taint_data.unsetTaint(TAINT_BIT_ALL);
 #endif
 }
 
 void StringBuffer::release() {
-  if (m_buffer) {
-    free(m_buffer);
-    m_buffer = NULL;
+  if (m_str) {
+    m_buffer[m_len] = 0; // appease StringData::checkSane()
+    DELETE(StringData)(m_str);
   }
+  m_str = 0;
+  m_buffer = 0;
+  m_len = m_cap = 0;
 }
 
 void StringBuffer::resize(int size) {
-  ASSERT(size >= 0 && size < m_size);
-  if (size >= 0 && size < m_size) {
-    m_pos = size;
+  ASSERT(size >= 0 && size < m_cap);
+  if (size >= 0 && size < m_cap) {
+    m_len = size;
   }
 }
 
 char *StringBuffer::reserve(int size) {
-  if (m_size - m_pos <  size) {
-    m_size = m_pos + size;
-    m_buffer = (char *)Util::safe_realloc(m_buffer, m_size + 1);
-  } else if (m_buffer == NULL) {
-    m_size = m_initialSize;
-    m_buffer = (char *)Util::safe_malloc(m_size + 1);
+  if (!m_buffer) {
+    m_str = NEW(StringData)(std::max(m_initialCap, m_len + size));
+    m_buffer = (char*)m_str->data();
+    m_cap = m_str->capacity();
+  } else if (m_cap - m_len < size) {
+    m_buffer[m_len] = 0;
+    m_str->setSize(m_len);
+    MutableSlice s = m_str->reserve(m_len + size);
+    m_buffer = s.ptr;
+    m_cap = s.len;
   }
-  return m_buffer + m_pos;
+  return m_buffer + m_len;
 }
 
 void StringBuffer::append(int n) {
@@ -246,15 +211,11 @@ void StringBuffer::append(CVarRef v) {
 }
 
 void StringBuffer::appendHelper(char ch) {
-  if (m_buffer == NULL) {
-    m_size = m_initialSize;
-    m_buffer = (char *)Util::safe_malloc(m_size + 1);
-  }
-
-  if (m_pos == m_size) {
+  if (!m_buffer) reserve(1);
+  if (m_len == m_cap) {
     growBy(1);
   }
-  m_buffer[m_pos++] = ch;
+  m_buffer[m_len++] = ch;
 }
 
 
@@ -264,23 +225,17 @@ void StringBuffer::append(CStrRef s) {
 }
 
 void StringBuffer::appendHelper(const char *s, int len) {
-  if (m_buffer == NULL) {
-    m_size = m_initialSize;
-    if (len > m_size) {
-      m_size = len;
-    }
-    m_buffer = (char *)Util::safe_malloc(m_size + 1);
-  }
+  if (!m_buffer) reserve(len);
 
   ASSERT(s);
   ASSERT(len >= 0);
   if (len <= 0) return;
 
-  if (len > m_size - m_pos) {
+  if (len > m_cap - m_len) {
     growBy(len);
   }
-  memcpy(m_buffer + m_pos, s, len);
-  m_pos += len;
+  memcpy(m_buffer + m_len, s, len);
+  m_len += len;
 }
 
 #define REVERSE16(us)                                     \
@@ -400,12 +355,12 @@ void StringBuffer::printf(const char *format, ...) {
     va_list v;
     va_copy(v, ap);
 
-    char *buf = (char*)Util::safe_malloc(len);
+    char *buf = (char*)smart_malloc(len);
     if (vsnprintf(buf, len, format, v) < len) {
       append(buf);
       printed = true;
     }
-    free(buf);
+    smart_free(buf);
 
     va_end(v);
   }
@@ -417,20 +372,16 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
   ASSERT(in);
   ASSERT(page_size > 0);
 
-  if (m_buffer == NULL) {
-    m_size = m_initialSize;
-    m_buffer = (char *)Util::safe_malloc(m_size + 1);
-  }
-
+  if (!m_buffer) reserve(page_size);
   while (true) {
-    int buffer_size = m_size - m_pos;
+    int buffer_size = m_cap - m_len;
     if (buffer_size < page_size) {
       growBy(page_size);
-      buffer_size = m_size - m_pos;
+      buffer_size = m_cap - m_len;
     }
-    int len = fread(m_buffer + m_pos, 1, buffer_size, in);
+    int len = fread(m_buffer + m_len, 1, buffer_size, in);
     if (len == 0) break;
-    m_pos += len;
+    m_len += len;
   }
 }
 
@@ -438,20 +389,16 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
   ASSERT(in);
   ASSERT(page_size > 0);
 
-  if (m_buffer == NULL) {
-    m_size = m_initialSize;
-    m_buffer = (char *)Util::safe_malloc(m_size + 1);
-  }
-
+  if (!m_buffer) reserve(page_size);
   while (true) {
-    int buffer_size = m_size - m_pos;
+    int buffer_size = m_cap - m_len;
     if (buffer_size < page_size) {
       growBy(page_size);
-      buffer_size = m_size - m_pos;
+      buffer_size = m_cap - m_len;
     }
-    int len = in->readImpl(m_buffer + m_pos, buffer_size);
+    int len = in->readImpl(m_buffer + m_len, buffer_size);
     if (len == 0) break;
-    m_pos += len;
+    m_len += len;
   }
 }
 
@@ -464,8 +411,8 @@ void StringBuffer::growBy(int spaceRequired) {
    * is power-of-two minus 1, or that it stays that way
    * (new_size < minSize below).
    */
-  long new_size = m_size * 2L + 1;
-  long minSize = m_size + (long)spaceRequired;
+  long new_size = m_cap * 2L + 1;
+  long minSize = m_cap + (long)spaceRequired;
   if (new_size < minSize) {
     new_size = minSize;
   }
@@ -478,12 +425,81 @@ void StringBuffer::growBy(int spaceRequired) {
     }
   }
 
-  char *new_buffer;
-  new_buffer = (char *)Util::safe_realloc(m_buffer, new_size + 1);
-
-  m_size = new_size;
-  m_buffer = new_buffer;
+  m_buffer[m_len] = 0;
+  m_str->setSize(m_len);
+  MutableSlice s = m_str->reserve(new_size);
+  m_buffer = s.ptr;
+  m_cap = s.len;
 }
+
+CstrBuffer::CstrBuffer(int cap)
+  : m_buffer((char*)Util::safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
+  ASSERT(unsigned(cap) <= kMaxCap);
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
+}
+
+CstrBuffer::CstrBuffer(const char *filename)
+  : m_buffer(NULL), m_len(0) {
+  struct stat sb;
+  if (stat(filename, &sb) == 0) {
+    if (sb.st_size > kMaxCap - 1) {
+      std::ostringstream out;
+      out << "file " << filename << " is too large";
+      throw StringBufferLimitException(kMaxCap,
+                                       String(out.str().c_str()));
+    }
+    m_cap = sb.st_size;
+    m_buffer = (char *)Util::safe_malloc(m_cap + 1);
+
+    int fd = ::open(filename, O_RDONLY);
+    if (fd != -1) {
+      while (m_len < m_cap) {
+        int buffer_size = m_cap - m_len;
+        int len = ::read(fd, m_buffer + m_len, buffer_size);
+        if (len == -1 && errno == EINTR) continue;
+        if (len <= 0) break;
+        m_len += len;
+      }
+      ::close(fd);
+    }
+  }
+  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
+}
+
+CstrBuffer::CstrBuffer(char* data, int len)
+  : m_buffer(data), m_len(len), m_cap(len) {
+  ASSERT(unsigned(len) < kMaxCap);
+}
+
+CstrBuffer::~CstrBuffer() {
+  free(m_buffer);
+}
+
+void CstrBuffer::append(const char* data, int len) {
+  ASSERT(m_buffer && len >= 0);
+  unsigned newlen = m_len + len;
+  if (newlen + 1 > m_cap) {
+    if (newlen + 1 > kMaxCap) {
+      throw StringBufferLimitException(kMaxCap, detach());
+    }
+    unsigned newcap = Util::nextPower2(newlen + 1);
+    m_buffer = (char*)Util::safe_realloc(m_buffer, newcap);
+    m_cap = newcap - 1;
+    ASSERT(newlen + 1 <= m_cap);
+  }
+  memcpy(m_buffer + m_len, data, len);
+  m_buffer[newlen] = 0;
+  m_len = newlen;
+}
+
+String CstrBuffer::detach() {
+  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
+  String s(m_buffer, m_len, AttachString);
+  m_buffer = 0;
+  m_len = m_cap = 0;
+  return s;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

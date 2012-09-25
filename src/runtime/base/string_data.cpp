@@ -278,6 +278,7 @@ void StringData::initConcat(StringSlice r1, StringSlice r2) {
 }
 
 // make an empty string with cap reserve bytes, plus one more for \0
+HOT_FUNC
 StringData::StringData(int cap) {
   m_hash = 0;
   _count = 0;

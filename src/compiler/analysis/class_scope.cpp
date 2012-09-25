@@ -1153,9 +1153,8 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (!m_docComment.empty() && Option::GenerateDocComments) {
-    char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
-    cg_printf("\"%s\",\n", dc);
-    free(dc);
+    std::string dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
+    cg_printf("\"%s\",\n", dc.c_str());
   }
 
   // parent interfaces

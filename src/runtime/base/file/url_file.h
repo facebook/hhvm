@@ -50,6 +50,7 @@ private:
   int m_maxRedirect;
   int m_timeout;
   std::string m_error;
+  StringBuffer m_response;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

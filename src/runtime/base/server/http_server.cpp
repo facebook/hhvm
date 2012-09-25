@@ -357,7 +357,7 @@ void HttpServer::removePid() {
 
 void HttpServer::killPid() {
   if (!RuntimeOption::PidFile.empty()) {
-    StringBuffer sb(RuntimeOption::PidFile.c_str());
+    CstrBuffer sb(RuntimeOption::PidFile.c_str());
     if (sb.size()) {
       int64 pid = sb.detach().toInt64();
       if (pid) {

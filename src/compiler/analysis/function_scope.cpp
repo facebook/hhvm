@@ -1928,9 +1928,8 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (!m_docComment.empty() && Option::GenerateDocComments) {
-    char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
-    cg_printf("\"%s\",\n", dc);
-    free(dc);
+    std::string dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
+    cg_printf("\"%s\",\n", dc.c_str());
   }
 
   Variant defArg;
@@ -1953,9 +1952,9 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
                             param->getOriginalTypeHint().c_str() : "");
       ExpressionPtr def = param->defaultValue();
       if (def) {
-        string sdef = def->getText();
-        char *esdef = string_cplus_escape(sdef.data(), sdef.size());
-        ASSERT(esdef);
+        std::string sdef = def->getText();
+        std::string esdef = string_cplus_escape(sdef.data(), sdef.size());
+        ASSERT(!esdef.empty());
         if (!def->isScalar() || !def->getScalarValue(defArg)) {
           /**
            * Special value runtime/ext/ext_reflection.cpp can check and throw.
@@ -1963,26 +1962,22 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
            * work better for reflections, we will have to implement
            * getScalarValue() to greater extent under compiler/expressions.
            */
-          cg_printf("\"\x01\", \"%s\",\n", esdef);
+          cg_printf("\"\x01\", \"%s\",\n", esdef.c_str());
         } else {
           String str = f_serialize(defArg);
-          char *s = string_cplus_escape(str.data(), str.size());
-          cg_printf("\"%s\", \"%s\",\n", s, esdef);
-          free(s);
+          std::string s = string_cplus_escape(str.data(), str.size());
+          cg_printf("\"%s\", \"%s\",\n", s.c_str(), esdef.c_str());
         }
-        free(esdef);
       } else {
         cg_printf("\"\", \"\",\n");
       }
     } else {
       cg_printf("\"\", ");
-      char *def = string_cplus_escape(m_paramDefaults[i].data(),
-                                      m_paramDefaults[i].size());
-      char *defText = string_cplus_escape(m_paramDefaultTexts[i].data(),
-                                          m_paramDefaultTexts[i].size());
-      cg_printf("\"%s\", \"%s\",\n", def ? def : "", defText ? defText : "");
-      free(def);
-      free(defText);
+      std::string def = string_cplus_escape(m_paramDefaults[i].data(),
+                                            m_paramDefaults[i].size());
+      std::string defText = string_cplus_escape(m_paramDefaultTexts[i].data(),
+                                                m_paramDefaultTexts[i].size());
+      cg_printf("\"%s\", \"%s\",\n", def.c_str(), defText.c_str());
     }
   }
   cg_printf("NULL,\n");

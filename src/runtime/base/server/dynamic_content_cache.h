@@ -47,8 +47,8 @@ private:
   DECLARE_BOOST_TYPES(ResourceFile);
   class ResourceFile {
   public:
-    StringBufferPtr file;
-    StringBufferPtr compressed;
+    CstrBufferPtr file;
+    CstrBufferPtr compressed;
   };
 
   StringToResourceFilePtrMap m_files;

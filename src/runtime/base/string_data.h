@@ -150,6 +150,7 @@ class StringData {
   StringData() : m_data(m_small), _count(0), m_len(0), m_hash(0) {
     m_big.shared = 0;
     m_big.cap = IsSmall;
+    m_small[0] = 0;
   }
 
   /**
@@ -248,6 +249,7 @@ public:
   // This method should only be used internally by the String class.
   const char *dataIgnoreTaint() const { return rawdata(); }
   int size() const { return m_len; }
+  int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }
   StringSlice slice() const {
     TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
     return StringSlice(m_data, m_len);
@@ -421,7 +423,6 @@ public:
     ASSERT(!isSmall());
     return m_big.cap & ~IsMask;
   }
-  int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

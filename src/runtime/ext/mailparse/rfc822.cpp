@@ -436,7 +436,7 @@ static void parse_address_tokens(php_rfc822_tokenized_t *toks,
   int start_tok = 0, iaddr = 0, i, in_group = 0, group_lbl_start = 0,
     group_lbl_end = 0;
   int a_start, a_count; /* position and count for address part of a name */
-  HPHP::StringBuffer group_addrs;
+  std::string group_addrs;
   char *address_value = NULL;
 
 address:  /* mailbox / group */
@@ -590,8 +590,7 @@ address:  /* mailbox / group */
 
     if (addrs) {
       group_addrs += ';';
-      int len = 0;
-      addrs->addrs[iaddr].address = group_addrs.detach(len);
+      addrs->addrs[iaddr].address = strdup(group_addrs.c_str());
 
       free(addrs->addrs[iaddr].name);
       addrs->addrs[iaddr].name =

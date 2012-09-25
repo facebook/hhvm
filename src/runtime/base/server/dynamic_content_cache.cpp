@@ -53,15 +53,14 @@ void DynamicContentCache::store(const std::string &name, const char *data,
   ASSERT(size > 0);
 
   ResourceFilePtr f(new ResourceFile());
-  StringBufferPtr sb(new StringBuffer(size));
-  sb->append(data, size);
+  CstrBufferPtr sb(new CstrBuffer(size));
+  sb->append(data, size); // makes a copy
   f->file = sb;
-
   int len = sb->size();
   char *compressed = gzencode(sb->data(), len, 9, CODING_GZIP);
   if (compressed) {
-    if (len < sb->size()) {
-      f->compressed = StringBufferPtr(new StringBuffer(compressed, len));
+    if (unsigned(len) < sb->size()) {
+      f->compressed = CstrBufferPtr(new CstrBuffer(compressed, len));
     } else {
       free(compressed);
     }

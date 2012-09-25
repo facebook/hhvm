@@ -218,7 +218,7 @@ char *string_base64_encode(const char *input, int &len);
 char *string_base64_decode(const char *input, int &len, bool strict);
 char *string_escape_shell_arg(const char *str);
 char *string_escape_shell_cmd(const char *str);
-char *string_cplus_escape(const char *s, int len);
+std::string string_cplus_escape(const char *s, int len);
 
 /**
  * Convert between strings and numbers.

@@ -49,7 +49,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
     return false;
   }
   HttpClient http(m_timeout, m_maxRedirect);
-  StringBuffer response;
+  m_response.reset();
 
   HeaderMap *pHeaders = NULL;
   HeaderMap requestHeaders;
@@ -64,10 +64,10 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   int code;
   vector<String> responseHeaders;
   if (m_get) {
-    code = http.get(url.c_str(), response, pHeaders, &responseHeaders);
+    code = http.get(url.c_str(), m_response, pHeaders, &responseHeaders);
   } else {
     code = http.post(url.c_str(), m_postData.data(), m_postData.size(),
-                     response, pHeaders, &responseHeaders);
+                     m_response, pHeaders, &responseHeaders);
   }
 
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
@@ -78,11 +78,9 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   }
 
   if (code == 200) {
-    int len = m_len;
     m_name = url;
-    m_data = response.detach(len);
-    m_len = len;
-    m_malloced = true;
+    m_data = const_cast<char*>(m_response.data());
+    m_len = m_response.size();
     return true;
   } else {
     m_error = http.getLastError().c_str();

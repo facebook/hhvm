@@ -46,20 +46,18 @@ public:
    * Constructing a string buffer with some initial size, subsequent allocation
    * will double existing size every round.
    */
-  explicit StringBuffer(int initialSize = 63);
-  explicit StringBuffer(const char *filename);
-  StringBuffer(char *data, int len); // attaching a malloc'd buffer
+  explicit StringBuffer(int initialSize = StringData::MaxSmallSize);
   ~StringBuffer();
 
-  static const int kDefaultOutputLimit = INT_MAX;
+  static const int kDefaultOutputLimit = StringData::MaxSize;
   void setOutputLimit(int maxBytes) {
     m_maxBytes = maxBytes > 0 ? maxBytes : kDefaultOutputLimit;
   }
 
   bool valid() const { return m_buffer != NULL;}
-  bool empty() const { return m_pos == 0;}
-  int size() const { return m_pos;}
-  int length() const { return m_pos;}
+  bool empty() const { return m_len == 0;}
+  int size() const { return m_len;}
+  int length() const { return m_len;}
   const char *data() const;
 private:
   // This method is only used internally for particular operations which do
@@ -74,7 +72,6 @@ public:
    * Detach buffer and yield a String. After this, do not use this StringBuffer
    * object any more.
    */
-  char *detach(int &size);
   String detach() { return detachImpl(); }
   String detachWithTaint() {
     TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
@@ -100,8 +97,8 @@ public:
   void append(int n);
   void append(int64 n);
   void append(char c) {
-    if (m_buffer && m_pos < m_size) {
-      m_buffer[m_pos++] = c;
+    if (m_buffer && m_len < m_cap) {
+      m_buffer[m_len++] = c;
       return;
     }
     appendHelper(c);
@@ -119,9 +116,9 @@ public:
   void append(const char *s, int len) {
     TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
     ASSERT(len >= 0);
-    if (m_buffer && len <= m_size - m_pos) {
-      memcpy(m_buffer + m_pos, s, len);
-      m_pos += len;
+    if (m_buffer && len <= m_cap - m_len) {
+      memcpy(m_buffer + m_len, s, len);
+      m_len += len;
       return;
     }
     appendHelper(s, len);
@@ -179,17 +176,52 @@ private:
   StringBuffer(const StringBuffer &sb) { ASSERT(false);}
   StringBuffer &operator=(const StringBuffer &sb) {ASSERT(false);return *this;}
 
+  StringData* m_str;
   char *m_buffer;
-  int m_initialSize;
+  int m_initialCap;
   int m_maxBytes;
-  int m_size;
-  int m_pos;
+  int m_cap;
+  int m_len;
 #ifdef TAINTED
   TaintData m_taint_data;
 #endif
 
   void growBy(int spaceRequired);
 };
+
+/**
+ * StringBuffer-like wrapper for a malloc'd null-terminated C-String
+ */
+DECLARE_BOOST_TYPES(CstrBuffer);
+class CstrBuffer {
+ public:
+  static const unsigned kMaxCap = INT_MAX;
+  CstrBuffer(int len); // reserve space
+  CstrBuffer(char* data, int len); // attach a malloc'd buffer
+  explicit CstrBuffer(const char *filename); // read in a file
+  ~CstrBuffer();
+  const char* data() const;
+  unsigned size() const { return m_len; }
+  bool valid() const { return m_buffer != NULL; }
+  void append(const char* s, int len);
+  String detach();
+
+ private:
+  char* dataIgnoreTaint() const { return m_buffer; }
+
+ private:
+  char* m_buffer;
+  unsigned m_len;
+  unsigned m_cap;
+#ifdef TAINTED
+  TaintData m_taint_data;
+#endif
+};
+
+inline const char* CstrBuffer::data() const {
+  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
+  return m_buffer;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

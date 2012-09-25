@@ -321,9 +321,9 @@ private:
   ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
 
   ssize_t /*ElmInd*/ find(int64 ki) const;
-  ssize_t /*ElmInd*/ find(const char* k, int len, strhash_t prehash) const;
+  ssize_t /*ElmInd*/ find(const StringData* s, strhash_t prehash) const;
   ElmInd* findForInsert(int64 ki) const;
-  ElmInd* findForInsert(const char* k, int len, strhash_t prehash) const;
+  ElmInd* findForInsert(const StringData* k, strhash_t prehash) const;
 
   ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
 

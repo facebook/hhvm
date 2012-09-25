@@ -121,17 +121,17 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
     case Mov:         return simplifyMov(src1);
     case LdObjClass:  return simplifyLdObjClass(src1);
     case LdCachedClass: return simplifyLdCachedClass(src1);
-    case LdCls:       // return simplifyLdCls(src1);
-    case LdObjMethod:// return simplifyLdObjMethod(src1, src2);
+    case LdCls:
+    case LdObjMethod:
 
-    case RetVal:      // return simplifyRetVal(type, src1, src2);
+    case RetVal:
     case FreeActRec:
 
   // stores
-    case StMem:      // return simplifyStMem(src1, src2, true);
-    case StMemNT:    // return simplifyStMem(src1, src2, false);
-    case StLoc:      // return simplifyStLoc(src1, src2);
-    case IncRef:     // return simplifyIncRef(type,  src1);
+    case StMem:
+    case StMemNT:
+    case StLoc:
+    case IncRef:
     case DefFP:
     case DefSP:
     case LdFunc:

@@ -313,16 +313,26 @@ void IRInstruction::print(std::ostream& ostream) {
     ostream << m_id << ": ";
   }
   printDst(ostream);
-  if (m_op == StMem || m_op == StLoc || m_op == LdMemNR) {
-    if (m_op == LdMemNR) {
+  bool isStMem = m_op == StMem || m_op == StMemNT || m_op == StRaw;
+  bool isLdMem = m_op == LdMemNR || m_op == LdRaw;
+  if (isStMem || m_op == StLoc || isLdMem) {
+    if (isLdMem) {
       ostream << OpcodeStrings[m_op] << " ";
     }
     ostream << "[";
     printSrc(ostream, 0);
-    ostream << "]:" << Type::Strings[m_type];
-    if (getNumSrcs() > 1) {
-      ostream << " = " <<  OpcodeStrings[m_op] << " ";
+    SSATmp* offset = getSrc(1);
+    if ((isStMem || isLdMem) &&
+        (!offset->isConst() || offset->getConstValAsInt() != 0)) {
+      ostream << " + ";
       printSrc(ostream, 1);
+    }
+    Type::Tag type = isStMem ? getSrc(2)->getType() : m_type;
+    ostream << "]:" << Type::Strings[type];
+    if (!isLdMem) {
+      ASSERT(getNumSrcs() > 1);
+      ostream << " = " <<  OpcodeStrings[m_op] << " ";
+      printSrc(ostream, isStMem ? 2 : 1);
     }
   } else {
     printOpcode(ostream);
@@ -386,7 +396,7 @@ void ConstInstruction::printConst(std::ostream& ostream) {
       ostream << m_dblVal;
       break;
     case Type::Bool:
-      ostream << m_boolVal;
+      ostream << (m_boolVal ? "true" : "false");
       break;
     case Type::Str:
     case Type::StaticStr:

@@ -121,7 +121,7 @@ public:
     ++m_index;
   }
 
-  inline void nextCheck() {
+  inline void startedCheck() {
     if (m_index < 0LL) {
       throw_exception(
         Object(SystemLib::AllocExceptionObject("Need to call next() first")));

@@ -1841,8 +1841,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Statement::KindOfCaseStatement: {
         // Should never be called. Handled in visitSwitch.
-        ASSERT(false);
-        return false;
+        not_reached();
       }
 
       case Statement::KindOfCatchStatement: {
@@ -2100,14 +2099,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         Id tempLocal = -1;
         Offset start = InvalidAbsoluteOffset;
 
+        bool enabled = RuntimeOption::EnableEmitSwitch;
         SimpleFunctionCallPtr
           call(dynamic_pointer_cast<SimpleFunctionCall>(subject));
-        if (call &&
+        if (enabled && call &&
             call->isCompilerCallToFunction("hphp_unpack_continuation")) {
           emitContinuationSwitch(e, sw);
           return false;
         }
-        bool didIntSwitch = emitIntegerSwitch(e, sw, caseLabels, done);
+        bool didIntSwitch =
+          enabled && emitIntegerSwitch(e, sw, caseLabels, done);
         if (!didIntSwitch) {
           if (!simpleSubject) {
             // Evaluate the subject once and stash it in a local
@@ -6208,17 +6209,20 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       // subclasses so we can burn Class*s and Func*s into the
       // translations
       fe->setAttrs(Attr(fe->attrs() | AttrClone));
+
+      static Op mOps[] = {
+        OpContNext,
+        OpContSend,
+        OpContRaise,
+      };
+      ue.emitOp(mOps[m]);
       const Offset fpiStart = ue.bcPos();
       const Offset ehStart = ue.bcPos();
       ue.emitOp(OpFPushContFunc);
       ue.emitIVA(1);
       {
-        static Op mOps[] = {
-          OpContNext,
-          OpContSend,
-          OpContRaise,
-        };
-        ue.emitOp(mOps[m]);
+        metaInfo.add(ue.bcPos(), Unit::MetaInfo::GuardedThis, false, 0, 0);
+        ue.emitOp(OpThis);
         metaInfo.add(ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
         ue.emitOp(OpFPassC);
         ue.emitIVA(0);

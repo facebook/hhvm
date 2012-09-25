@@ -193,6 +193,7 @@ public:
                            const StringData* baseClassName);
   void emitFPushCtorD(int32 numParams, int32 classNameStrId);
   void emitFPushCtor(int32 numParams);
+  void emitFPushContFunc();
   void emitFCall(uint32 numParams, uint32 returnBcOffset );
   void emitFCallD(uint32 numParams, const Func* callee,
                   uint32 returnBcOffset);
@@ -262,13 +263,15 @@ public:
   void emitVerifyParamType(uint32 paramId);
 
   // continuations
-  void emitCreateCont(bool getArgs, uint32 funNameStrId, uint32 classNameStrId);
+  SSATmp* getContLocals(SSATmp* cont);
+  void emitCreateCont(bool getArgs, Id funNameStrId);
   void emitUnpackCont();
-  void emitPackCont(uint32 labelId);
+  void emitPackCont(int32 labelId);
   void emitContReceive();
   void emitContRaised();
   void emitContDone();
   void emitContNext();
+  void emitContSendImpl(bool raise);
   void emitContSend();
   void emitContRaise();
   void emitContValid();
@@ -358,6 +361,7 @@ private:
   SSATmp* popF() { return pop(Type::Gen, NULL);       }
   SSATmp* topC(uint32 i = 0) { return top(Type::Cell, i, NULL); }
   SSATmp* spillStack(bool allocActRec = false);
+  SSATmp* loadStackAddr(int32 offset);
   SSATmp* top(Type::Tag protoflavor,
               uint32 index = 0,
               Trace* exitTrace = NULL);

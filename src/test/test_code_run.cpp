@@ -24120,7 +24120,11 @@ bool TestCodeRun::TestYield() {
         "class Evil {\n"
         "  public function __destruct() {\n"
         "    echo \"in __destruct()\\n\";\n"
-        "    dumpCurrent();\n"
+        "    try {\n"
+        "      dumpCurrent();\n"
+        "    } catch (Exception $e) {\n"
+        "      printf(\"Caught: %s\\n\", $e->getMessage());\n"
+        "    }\n"
         "  }\n"
         "}\n"
         "function dumpCurrent() {\n"
@@ -24131,9 +24135,6 @@ bool TestCodeRun::TestYield() {
         "}\n"
         "function gen() {\n"
         "  yield new Evil;\n"
-        "  yield null;\n"
-        "  yield null;\n"
-        "  yield null;\n"
         "  yield null;\n"
         "  yield null;\n"
         "  yield null;\n"
@@ -24150,14 +24151,16 @@ bool TestCodeRun::TestYield() {
         "  echo \"Finished!\\n\";\n"
         "}\n"
         "main();\n"
-        "echo \n\"Returned from main safely\\n\";\n",
-
+        "echo \"Returned from main safely\\n\";\n"
+        ,
         "in __destruct()\n"
         "NULL\n"
         "in __destruct()\n"
         "NULL\n"
+        "Caught: Continuation is already running\n"
         "in __destruct()\n"
         "NULL\n"
+        "Caught: Continuation is already running\n"
         "Finished!\n"
         "Returned from main safely\n");
 

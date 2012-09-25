@@ -617,7 +617,7 @@ void TranslatorX64::irTranslateDup(const Tracelet& t,
 
 void TranslatorX64::irTranslateCreateCont(const Tracelet& t,
                                         const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateCont, (i.imm[0].u_IVA), (i.imm[1].u_SA), (i.imm[2].u_SA));
+  HHIR_EMIT(CreateCont, i.imm[0].u_IVA, i.imm[1].u_SA);
 }
 
 void TranslatorX64::irTranslateUnpackCont(const Tracelet& t,
@@ -627,7 +627,7 @@ void TranslatorX64::irTranslateUnpackCont(const Tracelet& t,
 
 void TranslatorX64::irTranslatePackCont(const Tracelet& t,
                                       const NormalizedInstruction& i) {
-  HHIR_EMIT(PackCont, (i.imm[0].u_IVA));
+  HHIR_EMIT(PackCont, i.imm[0].u_IVA);
 }
 
 void TranslatorX64::irTranslateContReceive(const Tracelet& t,
@@ -648,12 +648,6 @@ void TranslatorX64::irTranslateContDone(const Tracelet& t,
 void TranslatorX64::irTranslateContNext(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   HHIR_EMIT(ContNext);
-}
-
-template<bool raise>
-void TranslatorX64::irTranslateContSendImpl(const NormalizedInstruction& i) {
-
-  HHIR_UNIMPLEMENTED(ContSendImpl);
 }
 
 void TranslatorX64::irTranslateContSend(const Tracelet& t,
@@ -1128,8 +1122,9 @@ TranslatorX64::irTranslateFPushFuncD(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateFPushContFunc(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(FPushContFunc);
+                                        const NormalizedInstruction& i) {
+  ASSERT(i.imm[0].u_IVA == 1);
+  HHIR_EMIT(FPushContFunc);
 }
 
 void

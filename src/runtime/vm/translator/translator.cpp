@@ -107,6 +107,20 @@ DynLocation* Tracelet::newDynLocation() {
   return dl;
 }
 
+void Tracelet::print() {
+  NormalizedInstruction* i = m_instrStream.first;
+  if (i == NULL) {
+    std::cerr << "<empty>\n";
+    return;
+  }
+
+  std::cerr << i->unit()->filepath()->data() << ':'
+            << i->unit()->getLineNumber(i->offset()) << std::endl;
+  for (; i; i = i->next) {
+    std::cerr << "  " << i->offset() << ": " << i->toString() << std::endl;
+  }
+}
+
 void
 SrcKey::trace(const char *fmt, ...) const {
   if (!Trace::enabled) {
@@ -1068,9 +1082,9 @@ static const struct {
   { OpContRaised,  {Local,            None,         OutNone,           0 }},
   { OpContReceive, {Local,            Stack1,       OutUnknown,        1 }},
   { OpContDone,    {Local,            None,         OutNone,           0 }},
-  { OpContNext,    {None,             Stack1,       OutObject,         1 }},
-  { OpContSend,    {Local,            Stack1,       OutObject,         1 }},
-  { OpContRaise,   {Local,            Stack1,       OutObject,         1 }},
+  { OpContNext,    {None,             None,         OutNone,           0 }},
+  { OpContSend,    {Local,            None,         OutNone,           0 }},
+  { OpContRaise,   {Local,            None,         OutNone,           0 }},
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
   { OpContStopped, {None,             None,         OutNone,           0 }},
@@ -2231,6 +2245,10 @@ Offset NormalizedInstruction::offset() const {
   return source.offset();
 }
 
+std::string NormalizedInstruction::toString() const {
+  return instrToString(pc(), unit());
+}
+
 void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                              int& currentStackOffset, Tracelet& t,
                              TraceletContext& tas) {
@@ -2328,7 +2346,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     NormalizedInstruction* ni = t.newNormalizedInstruction();
     ni->source = sk;
     ni->stackOff = stackFrameOffset;
-    ni->funcd = (t.m_arState.getCurrentState() == ActRecState::Record::KNOWN) ?
+    ni->funcd = (t.m_arState.getCurrentState() == ActRecState::KNOWN) ?
       t.m_arState.getCurrentFunc() : NULL;
     ni->m_unit = unit;
     ni->preppedByRef = false;
@@ -2757,7 +2775,7 @@ void
 ActRecState::pushFuncD(const Func* func) {
   TRACE(2, "ActRecState: pushStatic func %p(%s)\n", func, func->name()->data());
   Record r;
-  r.m_state = Record::KNOWN;
+  r.m_state = KNOWN;
   r.m_topFunc = func;
   r.m_entryArDelta = InvalidEntryArDelta;
   m_arStack.push_back(r);
@@ -2767,7 +2785,7 @@ void
 ActRecState::pushDynFunc() {
   TRACE(2, "ActRecState: pushDynFunc\n");
   Record r;
-  r.m_state = Record::UNKNOWABLE;
+  r.m_state = UNKNOWABLE;
   r.m_topFunc = NULL;
   r.m_entryArDelta = InvalidEntryArDelta;
   m_arStack.push_back(r);
@@ -2799,20 +2817,20 @@ ActRecState::getReffiness(int argNum, int entryArDelta, RefDeps* outRefDeps) {
     // guards.
     const ActRec* ar = arFromSpOffset((ActRec*)vmsp(), entryArDelta);
     Record r;
-    r.m_state = Record::GUESSABLE;
+    r.m_state = GUESSABLE;
     r.m_entryArDelta = entryArDelta;
     r.m_topFunc = ar->m_func;
     m_arStack.push_back(r);
   }
   Record& r = m_arStack.back();
-  if (r.m_state == Record::UNKNOWABLE) {
+  if (r.m_state == UNKNOWABLE) {
     TRACE(2, "ActRecState: unknowable, throwing in the towel\n");
     throwUnknownInput();
     not_reached();
   }
   ASSERT(r.m_topFunc);
   bool retval = r.m_topFunc->byRef(argNum);
-  if (r.m_state == Record::GUESSABLE) {
+  if (r.m_state == GUESSABLE) {
     ASSERT(r.m_entryArDelta != InvalidEntryArDelta);
     TRACE(2, "ActRecState: guessing arg%d -> %d\n", argNum, retval);
     outRefDeps->addDep(r.m_entryArDelta, argNum, retval);
@@ -2826,9 +2844,9 @@ ActRecState::getCurrentFunc() {
   return m_arStack.back().m_topFunc;
 }
 
-int
+ActRecState::State
 ActRecState::getCurrentState() {
-  if (m_arStack.empty()) return Record::GUESSABLE;
+  if (m_arStack.empty()) return GUESSABLE;
   return m_arStack.back().m_state;
 }
 

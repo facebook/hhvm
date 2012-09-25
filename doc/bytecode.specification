@@ -3519,25 +3519,24 @@ ContDone    []  ->  []
   Finish continuation. Marks the continuation in local 0 as finished. Further
   attempts to iterate it will fail.
 
-ContNext    []  ->  [C]
+ContNext    []  ->  []
 
   Prepare continuation for iteration. $this must be a Continuation
   object. If the continuation is finished or already running, an exception
-  will be thrown. Otherwise, the continuation object is pushed on the stack.
+  will be thrown.
 
-ContSend    []  ->  [C]
+ContSend    []  ->  []
 
   Prepare continuation to receive a value. $this must be a Continuation
   object. If the continuation is finished or already running, an exception will
-  be thrown. Otherwise, the value in local 0 is stored in the continuation and
-  the continuation object is pushed on the stack.
+  be thrown. Otherwise, the value in local 0 is stored in the continuation.
 
-ContRaise    []  ->  [C]
+ContRaise    []  ->  []
 
   Prepare continuation to receive a thrown exception. $this must be a
   Continuation object. If the continuation is finished or already running, an
   exception will be thrown. Otherwise, the exception in local 0 is stored in
-  the continuation and the continuation object is pushed on the stack.
+  the continuation.
 
 ContValid    []  ->  [C:Bool]
 

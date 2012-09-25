@@ -143,16 +143,13 @@ Variant c_Continuation::t_get_arg(int64 id) {
 Variant c_Continuation::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::current);
   const_assert(!hhvm);
-  nextCheck();
+  startedCheck();
   return m_value;
 }
 
 int64 c_Continuation::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::key);
-  if (m_index < 0LL) {
-    throw_exception(
-      Object(SystemLib::AllocExceptionObject("Need to call next() first")));
-  }
+  startedCheck();
   return m_index;
 }
 
@@ -164,7 +161,7 @@ bool c_Continuation::php_sleep(Variant &ret) {
 template<typename FI>
 inline void c_Continuation::nextImpl(FI& fi) {
   const_assert(!hhvm);
-  preNext();
+  ASSERT(m_running);
   try {
     if (m_isMethod) {
       MethodCallPackage mcp;
@@ -194,6 +191,7 @@ inline void c_Continuation::nextImpl(FI& fi) {
 void c_Continuation::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::next);
   const_assert(!hhvm);
+  preNext();
   m_received.setNull();
   nextImpl(fi);
 }
@@ -213,7 +211,8 @@ bool c_Continuation::t_valid() {
 void c_Continuation::t_send(CVarRef v) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::send);
   const_assert(!hhvm);
-  nextCheck();
+  startedCheck();
+  preNext();
   m_received.assignVal(v);
   nextImpl(fi);
 }
@@ -221,7 +220,8 @@ void c_Continuation::t_send(CVarRef v) {
 void c_Continuation::t_raise(CVarRef v) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::raise);
   const_assert(!hhvm);
-  nextCheck();
+  startedCheck();
+  preNext();
   m_received.assignVal(v);
   m_should_throw = true;
   nextImpl(fi);

@@ -228,6 +228,14 @@ enum ServiceRequest {
 const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
                          | kSpecialCrossTraceRegs;
 
+/*
+ * Some data structures are accessed often enough from translated code
+ * that we have shortcuts for getting offsets into them.
+ */
+#define TVOFF(nm) offsetof(TypedValue, nm)
+#define AROFF(nm) offsetof(ActRec, nm)
+#define CONTOFF(nm) offsetof(c_Continuation, nm)
+
 }}}
 
 #endif

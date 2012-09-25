@@ -169,6 +169,8 @@ class FailedIRGen : public std::exception {
   /* loads */                               \
   OPC(LdStack,           1,  0,  0,  0,  0,  0,  1,  0,  0,  0) \
   OPC(LdLoc,             1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(LdStackAddr,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(LdLocAddr,         1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdMemNR,           1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdPropNR,          1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdRefNR,           1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
@@ -185,7 +187,7 @@ class FailedIRGen : public std::exception {
   OPC(LdClsCns,          1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdClsMethod,       1,  1,  0,  0,  0,  0,  0,  0,  1,  1) \
   /* XXX TODO Create version of LdClsPropAddr that doesn't check */ \
-  OPC(LdPropAddr,        1,  1,  0,  0,  0,  0,  0,  0,  0,  1) \
+  OPC(LdPropAddr,        1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdClsPropAddr,     1,  1,  1,  0,  0,  0,  0,  0,  1,  1) \
   /* helper call to MethodCache::Lookup */                  \
   OPC(LdObjMethod,       1,  1,  1,  0,  1,  0,  0,  1,  0,  1) \
@@ -199,7 +201,7 @@ class FailedIRGen : public std::exception {
   OPC(LdARFuncPtr,       1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdFuncCls,         1,  1,  0,  0,  0,  0,  0,  0,  0,  1) \
   OPC(NewObj,            1,  0,  1,  1,  1,  0,  1,  0,  0,  0) \
-  OPC(LdRawInt,          1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(LdRaw,             1,  0,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(AllocActRec,       1,  0,  0,  1,  0,  1,  0,  0,  0,  0) \
   OPC(FreeActRec,        1,  0,  0,  1,  0,  0,  0,  0,  0,  0) \
   OPC(Call,              1,  0,  1,  1,  0,  1,  0,  1,  0,  0) \
@@ -217,6 +219,7 @@ class FailedIRGen : public std::exception {
   OPC(StLocNT,           0,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
   OPC(StRef,             1,  0,  1,  1,  0,  1,  0,  1,  0,  0) \
   OPC(StRefNT,           1,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
+  OPC(StRaw,             0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
   OPC(SpillStack,        1,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
   OPC(SpillStackAllocAR, 1,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
   OPC(ExitTrace,         0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
@@ -258,6 +261,17 @@ class FailedIRGen : public std::exception {
   OPC(Reload,            1,  0,  0,  1,  0,  0,  0,  0,  0,  0) \
   OPC(AllocSpill,        0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
   OPC(FreeSpill,         0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
+  /* continuation support */                                    \
+  OPC(LdContThisOrCls,   1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(CreateCont,        1,  0,  1,  1,  1,  0,  1,  0,  0,  0) \
+  OPC(FillContLocals,    0,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
+  OPC(FillContThis,      0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
+  OPC(UnpackCont,        1,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
+  OPC(ExitOnContVars,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(PackCont,          0,  0,  1,  1,  1,  0,  0,  0,  0,  0) \
+  OPC(ContRaiseCheck,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(ContPreNext,       0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
+  OPC(ContStartedCheck,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
 
 enum Opcode {
 #define OPC(name, hasDst, canCSE, essential, hasMemEffects, isNative, \

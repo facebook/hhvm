@@ -1,17 +1,17 @@
 Use: 246 2000
 Args: 777 500
-#0  funk() called at [src/test/vm/closure.php:17]
-#1  {closure}() called at [src/test/vm/closure.php:27]
-#2  main() called at [src/test/vm/closure.php:33]
+#0  funk() called at src/test/vm/closure.php:17]
+#1  {closure}() called at src/test/vm/closure.php:27]
+#2  main() called at src/test/vm/closure.php:33]
 Use: 246 4000
 Args: 888 500
-#0  funk() called at [src/test/vm/closure.php:17]
-#1  {closure}() called at [src/test/vm/closure.php:28]
-#2  main() called at [src/test/vm/closure.php:33]
-object(closure$$main$567a8b0f650eadf4e0a1f87abc666eeb$0)#1 (3) {
-  ["use_by_val":"closure$$main$567a8b0f650eadf4e0a1f87abc666eeb$0":private]=>
+#0  funk() called at src/test/vm/closure.php:17]
+#1  {closure}() called at src/test/vm/closure.php:28]
+#2  main() called at src/test/vm/closure.php:33]
+object(closure$)#1 (3) {
+  ["use_by_val":"closure$":private]=>
   int(123)
-  ["use_by_ref":"closure$$main$567a8b0f650eadf4e0a1f87abc666eeb$0":private]=>
+  ["use_by_ref":"closure$":private]=>
   &int(4000)
   ["__static_locals":protected]=>
   NULL

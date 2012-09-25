@@ -15,6 +15,7 @@
 */
 
 #include "hhbctranslator.h"
+#include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include <util/trace.h>
 #include "runtime/vm/unit.h"
@@ -496,68 +497,173 @@ void HhbcTranslator::emitIterValueC(uint32 iterVarId) {
 }
 
 // continuations
+SSATmp* HhbcTranslator::getContLocals(SSATmp* cont) {
+  /* Using this before iterating over each of the locals allows us to save code
+   * space: even with only one local the net effect is 3 bytes saved, with up
+   * to 6 more bytes save for each additional local. */
+  return m_tb.genLdPropAddr(cont, m_tb.genDefConst<int64>(
+                              c_Continuation::localsOffset()));
+}
+
 void HhbcTranslator::emitCreateCont(bool getArgs,
-                                    uint32 funNameStrId,
-                                    uint32 classNameStrId) {
-  spillStack();
-  emitInterpOneOrPunt(Type::Cell);
+                                    Id funNameStrId) {
+  /* Runtime-determined slow path punts to TranslatorX64 for now */
+  m_tb.genExitOnVarEnv(getExitSlowTrace());
+
+  const StringData* genName = lookupStringId(funNameStrId);
+  const Func* origFunc = curFunc();
+  const Func* genFunc = origFunc->getGeneratorBody(genName);
+  int origLocals = origFunc->numNamedLocals();
+  int genLocals = genFunc->numNamedLocals() - 1;
+
+  SSATmp* cont = m_tb.genCreateCont(getArgs, origFunc, genFunc);
+
+  TranslatorX64::ContParamMap params;
+  if (origLocals <= TranslatorX64::kMaxInlineContLocals &&
+      TranslatorX64::mapContParams(params, origFunc, genFunc)) {
+    static const StringData* thisStr = StringData::GetStaticString("this");
+    Id thisId = kInvalidId;
+    bool fillThis = origFunc->isNonClosureMethod() && !origFunc->isStatic() &&
+      ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
+      (origFunc->lookupVarId(thisStr) == kInvalidId);
+    SSATmp* locals = getContLocals(cont);
+    for (int i = 0; i < origLocals; ++i) {
+      SSATmp* loc = m_tb.genIncRef(m_tb.genLdLoc(i, Type::Gen, NULL));
+      m_tb.genStMem(locals, cellsToBytes(genLocals - params[i]), loc, true);
+    }
+    if (fillThis) {
+      ASSERT(thisId != kInvalidId);
+      m_tb.genFillContThis(cont, locals, cellsToBytes(genLocals - thisId));
+    }
+  } else {
+    m_tb.genFillContLocals(origFunc, genFunc, cont);
+  }
+
+  push(cont);
 }
 
 void HhbcTranslator::emitUnpackCont() {
-  spillStack();
-  emitInterpOneOrPunt(Type::Int);
+  int nCopy = curFunc()->numNamedLocals() - 1;
+  if (nCopy > TranslatorX64::kMaxInlineContLocals) {
+    SSATmp* locals = m_tb.genLdLocAddr(nCopy);
+    spillStack();
+    push(m_tb.genUnpackCont(m_tb.genLdLoc(0), locals));
+    for (int i = 0; debug && i < nCopy; ++i) {
+      ASSERT(m_tb.getLocalValue(nCopy - i) == NULL);
+    }
+    return;
+  }
+
+  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
+  m_tb.genExitOnContVars(cont, getExitSlowTrace());
+
+  SSATmp* locals = getContLocals(cont);
+  SSATmp* uninit = m_tb.genDefUninit();
+  for (int i = 0; i < nCopy; ++i) {
+    int contOffset = cellsToBytes(i);
+    SSATmp* val = m_tb.genLdMem(locals, contOffset, Type::Gen, NULL);
+    m_tb.genStMem(locals, contOffset, uninit, true);
+    m_tb.genInitLoc(nCopy - i, val);
+  }
+
+  SSATmp* offset = m_tb.genDefConst<int64>(CONTOFF(m_label));
+  push(m_tb.genLdRaw(cont, offset, Type::Int));
 }
 
-void HhbcTranslator::emitPackCont(uint32 labelId) {
-  spillStack();
-  popC();
-  emitInterpOneOrPunt(Type::None);
-//  spillStack();
+void HhbcTranslator::emitPackCont(int32 labelId) {
+  int nCopy = curFunc()->numNamedLocals() - 1;
+  if (nCopy > TranslatorX64::kMaxInlineContLocals) {
+    spillStack();
+    m_tb.genPackCont(m_tb.genLdLoc(0, Type::Obj, NULL),
+                     loadStackAddr(0),
+                     labelId,
+                     curFunc());
+    popC();
+    return;
+  }
+
+  m_tb.genExitOnVarEnv(getExitSlowTrace());
+
+  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
+  SSATmp* uninit = m_tb.genDefUninit();
+  SSATmp* locals = getContLocals(cont);
+  for (int i = 0; i < nCopy; ++i) {
+    int locId = nCopy - i;
+    SSATmp* local = m_tb.genLdLoc(locId, Type::Gen, NULL);
+    m_tb.genInitLoc(locId, uninit);
+    m_tb.genStMem(locals, cellsToBytes(i), local, true);
+  }
+
+  m_tb.genSetPropCell(cont, CONTOFF(m_value), popC());
+  m_tb.genStRaw(cont, CONTOFF(m_label), m_tb.genDefConst<int64>(labelId));
 }
 
 void HhbcTranslator::emitContReceive() {
-  spillStack();
-  emitInterpOneOrPunt(Type::Cell);
+  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
+  m_tb.genContRaiseCheck(cont, getExitSlowTrace());
+
+  SSATmp* valOffset = m_tb.genDefConst<int64>(CONTOFF(m_received));
+  SSATmp* value = m_tb.genLdProp(cont, valOffset, Type::Cell, NULL);
+  value = m_tb.genIncRef(value);
+  push(value);
 }
 
 void HhbcTranslator::emitContRaised() {
-  spillStack();
-  emitInterpOneOrPunt(Type::None);
+  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
+  m_tb.genContRaiseCheck(cont, getExitSlowTrace());
 }
 
 void HhbcTranslator::emitContDone() {
-  spillStack();
-  emitInterpOneOrPunt(Type::None);
+  SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
+  m_tb.genStRaw(cont, CONTOFF(m_done), m_tb.genDefConst<bool>(true));
 }
 
 void HhbcTranslator::emitContNext() {
-  spillStack();
-  emitInterpOneOrPunt(Type::Cell);
+  SSATmp* cont = m_tb.genLdThis(NULL);
+  m_tb.genContPreNext(cont, getExitSlowTrace());
+  m_tb.genSetPropCell(cont, CONTOFF(m_received), m_tb.genDefUninit());
+}
+
+void HhbcTranslator::emitContSendImpl(bool raise) {
+  SSATmp* cont = m_tb.genLdThis(NULL);
+  m_tb.genContStartedCheck(cont, getExitSlowTrace());
+  m_tb.genContPreNext(cont, getExitSlowTrace());
+
+  SSATmp* value = m_tb.genLdLoc(0, Type::Cell, NULL);
+  value = m_tb.genIncRef(value);
+  m_tb.genSetPropCell(cont, CONTOFF(m_received), value);
+  if (raise) {
+    m_tb.genStRaw(cont, CONTOFF(m_should_throw), m_tb.genDefConst<bool>(true));
+  }
 }
 
 void HhbcTranslator::emitContSend() {
-  spillStack();
-  emitInterpOneOrPunt(Type::Cell);
+  emitContSendImpl(false);
 }
 
 void HhbcTranslator::emitContRaise() {
-  spillStack();
-  emitInterpOneOrPunt(Type::Cell);
+  emitContSendImpl(true);
 }
 
 void HhbcTranslator::emitContValid() {
-  spillStack();
-  emitInterpOneOrPunt(Type::Bool);
+  SSATmp* cont = m_tb.genLdThis(NULL);
+  SSATmp* done =
+    m_tb.genLdRaw(cont, m_tb.genDefConst<int64>(CONTOFF(m_done)), Type::Bool);
+  push(m_tb.genNot(done));
 }
 
 void HhbcTranslator::emitContCurrent() {
-  spillStack();
-  emitInterpOneOrPunt(Type::Cell);
+  SSATmp* cont = m_tb.genLdThis(NULL);
+  m_tb.genContStartedCheck(cont, getExitSlowTrace());
+  SSATmp* offset = m_tb.genDefConst<int64>(CONTOFF(m_value));
+  SSATmp* value = m_tb.genLdProp(cont, offset, Type::Cell, NULL);
+  value = m_tb.genIncRef(value);
+  push(value);
 }
 
 void HhbcTranslator::emitContStopped() {
-  spillStack();
-  emitInterpOneOrPunt(Type::None);
+  SSATmp* cont = m_tb.genLdThis(NULL);
+  m_tb.genStRaw(cont, CONTOFF(m_running), m_tb.genDefConst<bool>(false));
 }
 
 void HhbcTranslator::emitContHandle() {
@@ -930,6 +1036,19 @@ void HhbcTranslator::emitFPushFunc(int32 numParams) {
   m_fpiStack.push(m_tb.genLdFunc(funcName, actRec));
 }
 
+void HhbcTranslator::emitFPushContFunc() {
+  Class* genClass = curFrame()->getThis()->getVMClass();
+  ASSERT(genClass == SystemLib::s_MethodContinuationClass ||
+         genClass == SystemLib::s_FunctionContinuationClass);
+  bool isMethod = genClass == SystemLib::s_MethodContinuationClass;
+
+  SSATmp* cont = m_tb.genLdThis(NULL);
+  SSATmp* funcOffset = m_tb.genDefConst<int64>(CONTOFF(m_vmFunc));
+  SSATmp* thiz = isMethod ? m_tb.genLdContThisOrCls(cont) : m_tb.genDefNull();
+  SSATmp* func = m_tb.genLdRaw(cont, funcOffset, Type::FuncRef);
+  m_fpiStack.push(m_tb.genAllocActRec(func, thiz, 1, NULL));
+}
+
 void HhbcTranslator::emitFPushObjMethodD(int32 numParams,
                                          int32 methodNameStrId,
                                          const StringData* baseClassName) {
@@ -1242,10 +1361,12 @@ Trace* HhbcTranslator::guardRefs(int64               entryArDelta,
   int32_t actRecOff = cellsToBytes(entryArDelta);
   SSATmp* funcPtr = m_tb.genLdARFuncPtr(m_tb.getSp(),
                                         m_tb.genDefConst<int64>(actRecOff));
-  SSATmp* nParams = m_tb.genLdRawInt(funcPtr,
-                                 m_tb.genDefConst<int64>(Func::numParamsOff()));
-  SSATmp* bitsPtr = m_tb.genLdRawInt(funcPtr,
-                                 m_tb.genDefConst<int64>(Func::refBitVecOff()));
+  SSATmp* nParams =
+    m_tb.genLdRaw(funcPtr, m_tb.genDefConst<int64>(Func::numParamsOff()),
+                  Type::Int);
+  SSATmp* bitsPtr =
+    m_tb.genLdRaw(funcPtr, m_tb.genDefConst<int64>(Func::refBitVecOff()),
+                  Type::Int);
 
   for (unsigned i = 0; i < mask.size(); i += 64) {
     ASSERT(i < vals.size());
@@ -1270,6 +1391,12 @@ Trace* HhbcTranslator::guardRefs(int64               entryArDelta,
 
 void HhbcTranslator::emitVerifyParamType(int32 paramId,
                                          const StringData* constraintClsName) {
+  /* It's currently better to interpOne all of these, since the slow path punts
+   * for the entire tracelet */
+  spillStack();
+  emitInterpOneOrPunt(Type::None);
+  return;
+
   ASSERT(!constraintClsName || constraintClsName->isStatic());
   const Func* func = getCurFunc();
   const Class* constraint = (constraintClsName ?
@@ -1648,6 +1775,12 @@ SSATmp* HhbcTranslator::spillStack(bool allocActRec) {
   return sp;
 }
 
+SSATmp* HhbcTranslator::loadStackAddr(int32 offset) {
+  // You're almost certainly doing it wrong if you want to get the address of a
+  // stack cell that's in m_evalStack.
+  ASSERT(offset >= (int32)m_evalStack.numElems());
+  return m_tb.genLdStackAddr(offset + m_stackDeficit - m_evalStack.numElems());
+}
 
 //
 // This is a wrapper to TraceBuilder::genLdLoc() that also emits the

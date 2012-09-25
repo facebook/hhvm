@@ -365,6 +365,8 @@ class NormalizedInstruction {
     OutputDoesntCare
   };
   OutputUse outputIsUsed(DynLocation* output) const;
+
+  std::string toString() const;
 };
 
 class TranslationFailedExc : public std::exception {
@@ -475,10 +477,12 @@ struct ActRecState {
   // instructions that need to do so.
   static const int InvalidEntryArDelta = INT_MAX;
 
+  enum State {
+    GUESSABLE, KNOWN, UNKNOWABLE
+  };
+
   struct Record {
-    enum {
-      GUESSABLE, KNOWN, UNKNOWABLE
-    }              m_state;
+    State          m_state;
     const Func*    m_topFunc;
     int            m_entryArDelta; // delta at BB entry to guessed ActRec.
   };
@@ -491,7 +495,7 @@ struct ActRecState {
   void pop();
   bool getReffiness(int argNum, int stackOffset, RefDeps* outRefDeps);
   const Func* getCurrentFunc();
-  int getCurrentState();
+  State getCurrentState();
 };
 
 struct Tracelet : private boost::noncopyable {
@@ -546,6 +550,8 @@ struct Tracelet : private boost::noncopyable {
   DynLocation* newDynLocation(Location l, DataType t);
   DynLocation* newDynLocation(Location l, RuntimeType t);
   DynLocation* newDynLocation();
+
+  void print();
 };
 
 struct TraceletContext {

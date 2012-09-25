@@ -286,7 +286,10 @@ string FileRepository::unitMd5(const string& fileMd5) {
   // Incorporate relevant options into the unit md5 (there will be more)
   char* md5str;
   int md5len;
-  string t = fileMd5 + '\0' + (RuntimeOption::EnableHipHopSyntax ? '1' : '0');
+  std::ostringstream opts;
+  string t = fileMd5 + '\0'
+    + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
+    + (RuntimeOption::EnableEmitSwitch ? '1' : '0');
   md5str = string_md5(t.c_str(), t.size(), false, md5len);
   string s = string(md5str, md5len);
   free(md5str);

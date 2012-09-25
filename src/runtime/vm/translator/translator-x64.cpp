@@ -125,10 +125,6 @@ static __thread int64 s_perfCounters[tpc_num_counters];
 #define STRINGCASE() \
   case BitwiseKindOfString: case KindOfStaticString
 
-#define TVOFF(nm) offsetof(TypedValue, nm)
-#define AROFF(nm) offsetof(ActRec, nm)
-#define CONTOFF(nm) offsetof(c_Continuation, nm)
-
 // nextTx64: Global shared state. The tx64 that should be used for
 // new requests going forward.
 TranslatorX64* volatile nextTx64;
@@ -146,7 +142,6 @@ static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 // crossover point in terms of code size is 6; 9 was determined by experiment to
 // be the optimal point in certain benchmarks. #microoptimization
 static const int kLocalsToInitializeInline = 9;
-static const int kMaxInlineContLocals = 10;
 
 // An intentionally funny-looking-in-core-dumps constant for uninitialized
 // instruction pointers.
@@ -6045,14 +6040,14 @@ void TranslatorX64::translateDup(const Tracelet& t,
 
 typedef std::map<int, int> ParamMap;
 /*
- * mapGenParams determines if every named local in origFunc has a
+ * mapContParams determines if every named local in origFunc has a
  * corresponding named local in genFunc. If this step succeeds and
  * there's no VarEnv at runtime, the continuation's variables can be
  * filled completely inline in the TC (assuming there aren't too
  * many).
  */
-static bool mapGenParams(ParamMap& map,
-                         const Func* origFunc, const Func* genFunc) {
+bool TranslatorX64::mapContParams(ParamMap& map,
+                                  const Func* origFunc, const Func* genFunc) {
   const StringData* const* varNames = origFunc->localNames();
   for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
     Id id = genFunc->lookupVarId(varNames[i]);
@@ -6114,9 +6109,9 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
 
   int origLocals = origFunc->numNamedLocals();
   int genLocals = genFunc->numNamedLocals() - 1;
-  ParamMap params;
+  ContParamMap params;
   if (origLocals <= kMaxInlineContLocals &&
-      mapGenParams(params, origFunc, genFunc)) {
+      mapContParams(params, origFunc, genFunc)) {
     ScratchReg rScratch(m_regMap);
     a.  load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rScratch);
     a.  test_reg64_reg64(*rScratch, *rScratch);
@@ -6251,9 +6246,7 @@ void TranslatorX64::emitCallPack(X64Assembler& a,
   const int contIdx = 1;
 
   // packContinuation is going to read values directly from the stack
-  // so we have to clean everything. We're about to do an EMIT_CALL so
-  // everything will get cleaned anyway but we don't want to rely on
-  // that.
+  // so we have to clean everything.
   m_regMap.cleanAll();
   if (false) {
     c_Continuation* cont = NULL;
@@ -6363,8 +6356,7 @@ void TranslatorX64::translateContReceive(const Tracelet& t,
   emitContRaiseCheck(a, i);
   ScratchReg rScratch(m_regMap);
   a.   lea_reg64_disp_reg64(getReg(i.inputs[contIdx]->location),
-                            CONTOFF(m_received),
-                            *rScratch);
+                            CONTOFF(m_received), *rScratch);
   emitIncRefGeneric(*rScratch, 0);
   emitCopyToStack(a, i, *rScratch, -1 * (int)sizeof(Cell));
 }
@@ -6377,8 +6369,7 @@ void TranslatorX64::translateContRaised(const Tracelet& t,
 void TranslatorX64::translateContDone(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   const int contIdx = 0;
-  a.    store_imm8_disp_reg(0x1,
-                            CONTOFF(m_done),
+  a.    store_imm8_disp_reg(0x1, CONTOFF(m_done),
                             getReg(i.inputs[contIdx]->location));
 }
 
@@ -6404,32 +6395,25 @@ void TranslatorX64::emitContPreNext(const NormalizedInstruction& i,
   a.    add_imm64_disp_reg64(0x1, CONTOFF(m_index), *rCont);
   // m_running = true
   a.    store_imm8_disp_reg(0x1, CONTOFF(m_running), *rCont);
-
-  // push Continuation on the stack
-  m_regMap.bindScratch(rCont, i.outStack->location, KindOfObject,
-                       RegInfo::DIRTY);
-  emitIncRef(*rCont, KindOfObject);
 }
 
 void TranslatorX64::translateContNext(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   ScratchReg rCont(m_regMap);
   a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
+  emitContPreNext(i, rCont);
 
   // m_received.setNull()
-  const Offset receivedOff = CONTOFF(m_received);
-  emitTvSet(i, reg::noreg, KindOfNull, *rCont, receivedOff, false);
-
-  emitContPreNext(i, rCont);
+  emitTvSet(i, reg::noreg, KindOfNull, *rCont, CONTOFF(m_received), false);
 }
 
 static void contNextCheckThrowHelper(c_Continuation* cont) {
-  cont->nextCheck();
+  cont->startedCheck();
   not_reached();
 }
 
-void TranslatorX64::emitContNextCheck(const NormalizedInstruction& i,
-                                      ScratchReg& rCont) {
+void TranslatorX64::emitContStartedCheck(const NormalizedInstruction& i,
+                                         ScratchReg& rCont) {
   // if (m_index < 0)
   a.    cmp_imm64_disp_reg64(0, CONTOFF(m_index), *rCont);
   {
@@ -6447,20 +6431,18 @@ void TranslatorX64::translateContSendImpl(const NormalizedInstruction& i) {
 
   ScratchReg rCont(m_regMap);
   a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
-  emitContNextCheck(i, rCont);
+  emitContStartedCheck(i, rCont);
+  emitContPreNext(i, rCont);
 
   // m_received = value
-  const Offset receivedOff = CONTOFF(m_received);
   PhysReg valReg = getReg(i.inputs[valIdx]->location);
   DataType valType = i.inputs[valIdx]->outerType();
-  emitTvSet(i, valReg, valType, *rCont, receivedOff, true);
+  emitTvSet(i, valReg, valType, *rCont, CONTOFF(m_received), true);
 
   // m_should_throw = true (maybe)
   if (raise) {
     a.  store_imm8_disp_reg(0x1, CONTOFF(m_should_throw), *rCont);
   }
-
-  emitContPreNext(i, rCont);
 }
 
 void TranslatorX64::translateContSend(const Tracelet& t,
@@ -6489,7 +6471,7 @@ void TranslatorX64::translateContCurrent(const Tracelet& t,
                                          const NormalizedInstruction& i) {
   ScratchReg rCont(m_regMap);
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
-  emitContNextCheck(i, rCont);
+  emitContStartedCheck(i, rCont);
 
   a.   lea_reg64_disp_reg64(*rCont, CONTOFF(m_value), *rCont);
   emitIncRefGeneric(*rCont, 0);

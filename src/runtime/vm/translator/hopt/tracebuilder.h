@@ -60,19 +60,24 @@ public:
   SSATmp* genLdThis(Trace* trace);
   SSATmp* genLdVarEnv();
   SSATmp* genLdRetAddr();
-  SSATmp* genLdRawInt(SSATmp* baseAddr, SSATmp* offset);
+  SSATmp* genLdRaw(SSATmp* baseAddr, SSATmp* offset, Type::Tag type);
+  void    genStRaw(SSATmp* base, int64 offset, SSATmp* value);
 
   SSATmp* genLdLoc(uint32 id);
   SSATmp* genLdLoc(uint32 id, Type::Tag type, Trace* exitTrace);
+  SSATmp* genLdLocAddr(uint32 id);
   void    genStLoc(uint32 id,
                    SSATmp* src,
                    bool genDecRef,
                    bool genStoreType,
                    Trace* exit);
   SSATmp* genLdMem(SSATmp* addr, Type::Tag type, Trace* target);
+  SSATmp* genLdMem(SSATmp* addr, int64 offset, Type::Tag type, Trace* target);
   void    genStMem(SSATmp* addr, SSATmp* src, bool genStoreType);
+  void    genStMem(SSATmp* addr, int64 offset, SSATmp* src, bool stType);
   SSATmp* genLdProp(SSATmp* obj, SSATmp* prop, Type::Tag type, Trace* exit);
   void    genStProp(SSATmp* obj, SSATmp* prop, SSATmp* src, bool genStoreType);
+  void    genSetPropCell(SSATmp* base, int64 offset, SSATmp* value);
 
   SSATmp* genBoxLoc(uint32 id);
   void    genBindLoc(uint32 id, SSATmp* ref);
@@ -180,12 +185,27 @@ public:
   SSATmp* genLdStack(int32 stackOff, Type::Tag type, Trace* target);
   SSATmp* genDefFP();
   SSATmp* genDefSP(SSATmp* fpOpnd, uint32 offsetFromFp);
+  SSATmp* genLdStackAddr(int64 offset);
   SSATmp* genQueryOp(Opcode queryOpc, SSATmp* addr);
   Trace*  genVerifyParamType(SSATmp* objClass, SSATmp* className,
                              const Class* constraint, Trace* exitTrace);
   SSATmp* genInstanceOfD(SSATmp* src, SSATmp* className);
 
   void    genNativeImpl();
+
+  SSATmp* genLdContThisOrCls(SSATmp* cont);
+  SSATmp* genCreateCont(bool getArgs, const Func* origFunc,
+                        const Func* genFunc);
+  void    genFillContLocals(const Func* origFunc, const Func* genFunc,
+                            SSATmp* cont);
+  void    genFillContThis(SSATmp* cont, SSATmp* locals, int64 offset);
+  SSATmp* genUnpackCont(SSATmp* cont, SSATmp* locals);
+  Trace*  genExitOnContVars(SSATmp* cont, Trace* target);
+  void    genPackCont(SSATmp* cont, SSATmp* value, int32 label,
+                      const Func* func);
+  Trace*  genContRaiseCheck(SSATmp* cont, Trace* target);
+  Trace*  genContPreNext(SSATmp* cont, Trace* target);
+  Trace*  genContStartedCheck(SSATmp* cont, Trace* target);
 
   SSATmp* genInterpOne(uint32 pcOff, uint32 stackAdjustment,
                        Type::Tag resultType, Trace* target);
@@ -259,6 +279,13 @@ private:
                          SSATmp* src2,
                          SSATmp* src3,
                          SSATmp* src4);
+  SSATmp* genInstruction(Opcode,
+                         Type::Tag,
+                         SSATmp* src1,
+                         SSATmp* src2,
+                         SSATmp* src3,
+                         SSATmp* src4,
+                         SSATmp* src5);
   SSATmp* genInstruction(Opcode, Type::Tag, Trace* exit = NULL);
   SSATmp* genInstruction(Opcode,
                          Type::Tag,

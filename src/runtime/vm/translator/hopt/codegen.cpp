@@ -18,6 +18,7 @@
 #include "ir.h"
 #include "linearscan.h"
 #include "codegen.h"
+#include "runtime/ext/ext_continuation.h"
 #include "runtime/base/complex_types.h"
 #include "runtime/base/types.h"
 #include "runtime/vm/bytecode.h"
@@ -1550,9 +1551,10 @@ Address CodeGenerator::cgStPropNT(IRInstruction* inst) {
 
 Address CodeGenerator::cgStMemWork(IRInstruction* inst, bool genStoreType) {
   SSATmp* addr = inst->getSrc(0);
-  SSATmp* src  = inst->getSrc(1);
-
-  return cgStore(addr->getAssignedLoc(), 0, src, genStoreType);
+  SSATmp* offset  = inst->getSrc(1);
+  SSATmp* src  = inst->getSrc(2);
+  return cgStore(addr->getAssignedLoc(), offset->getConstValAsInt(),
+                 src, genStoreType);
 }
 Address CodeGenerator::cgStMem(IRInstruction* inst) {
   return cgStMemWork(inst, true);
@@ -2708,7 +2710,19 @@ Address CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   return start;
 }
 
-Address CodeGenerator::cgLdRawInt(IRInstruction* inst) {
+static int getNativeTypeSize(Type::Tag type) {
+  switch (type) {
+    case Type::Int:
+    case Type::FuncRef:
+      return sz::qword;
+    case Type::Bool:
+      return sz::byte;
+    default:
+      not_implemented();
+  }
+}
+
+Address CodeGenerator::cgLdRaw(IRInstruction* inst) {
   Address start  = m_as.code.frontier;
   SSATmp* dest   = inst->getDst();
   SSATmp* addr   = inst->getSrc(0);
@@ -2720,14 +2734,58 @@ Address CodeGenerator::cgLdRawInt(IRInstruction* inst) {
   register_name_t addrReg = addr->getAssignedLoc();
   register_name_t destReg = dest->getAssignedLoc();
 
+  int ldSize = getNativeTypeSize(dest->getType());
   if (offset->isConst()) {
-
     ASSERT(offset->getType() == Type::Int);
-    m_as.load_reg64_disp_reg64(addrReg, offset->getConstValAsInt(), destReg);
-
+    if (ldSize == sz::qword) {
+      m_as.load_reg64_disp_reg64(addrReg, offset->getConstValAsInt(), destReg);
+    } else {
+      ASSERT(ldSize == sz::byte);
+      m_as.loadzxb_reg64_disp_reg64(addrReg, offset->getConstValAsInt(),
+                                    destReg);
+    }
   } else {
     register_name_t offsetReg = offset->getAssignedLoc();
-    m_as.load_reg64_disp_index_reg64(addrReg, 0, offsetReg, destReg);
+    if (ldSize == sz::qword) {
+      m_as.load_reg64_disp_index_reg64(addrReg, 0, offsetReg, destReg);
+    } else {
+      // Not yet supported by our assembler
+      ASSERT(ldSize == sz::byte);
+      not_implemented();
+    }
+  }
+
+  return start;
+}
+
+Address CodeGenerator::cgStRaw(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  register_name_t baseReg = inst->getSrc(0)->getAssignedLoc();
+  int64 offset = inst->getSrc(1)->getConstValAsInt();
+  SSATmp* value = inst->getSrc(2);
+
+  int stSize = getNativeTypeSize(value->getType());
+  if (value->isConst()) {
+    if (stSize == sz::qword) {
+      m_as.store_imm64_disp_reg64(value->getConstValAsInt(),
+                                  offset,
+                                  baseReg);
+    } else {
+      ASSERT(stSize == sz::byte);
+      m_as.store_imm8_disp_reg(value->getConstValAsBool(),
+                               offset,
+                               baseReg);
+    }
+  } else {
+    if (stSize == sz::qword) {
+      m_as.store_reg64_disp_reg64(value->getAssignedLoc(),
+                                  offset,
+                                  baseReg);
+    } else {
+      // not supported by our assembler yet
+      ASSERT(stSize == sz::byte);
+      not_implemented();
+    }
   }
 
   return start;
@@ -2928,6 +2986,7 @@ Address CodeGenerator::cgLdMemNR(IRInstruction * inst) {
   Type::Tag type  = inst->getType();
   SSATmp*   dst   = inst->getDst();
   SSATmp*   addr  = inst->getSrc(0);
+  int64 offset    = inst->getSrc(1)->getConstValAsInt();
   LabelInstruction* label = inst->getLabel();
 
   if (type == Type::Cell && addr->getType() == Type::PtrToCell) {
@@ -2938,7 +2997,7 @@ Address CodeGenerator::cgLdMemNR(IRInstruction * inst) {
     // need unboxing.
     label = NULL;
   }
-  cgLoad(type, dst, addr->getAssignedLoc(), 0, label);
+  cgLoad(type, dst, addr->getAssignedLoc(), offset, label);
 
   return start;
 }
@@ -2978,21 +3037,43 @@ Address CodeGenerator::cgRaiseUninitWarning(IRInstruction* inst) {
   return start;
 }
 
+static void getLocalRegOffset(SSATmp* src, register_name_t& reg, int64& off) {
+  ConstInstruction* homeInstr =
+    dynamic_cast<ConstInstruction*>(src->getInstruction());
+  ASSERT(homeInstr && homeInstr->getOpcode() == LdHome);
+  reg = homeInstr->getSrc(0)->getAssignedLoc();
+  int64 index = homeInstr->getLocal()->getId();
+  off = -cellsToBytes(index + 1);
+}
+
 Address CodeGenerator::cgLdLoc(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   Type::Tag         type = inst->getType();
   SSATmp*           dst  = inst->getDst();
-  SSATmp*           addr = inst->getSrc(0);
   LabelInstruction* label     = inst->getLabel();
 
-  IRInstruction* addrInst = addr->getInstruction();
-  ASSERT(addrInst->getOpcode() == LdHome);
-  ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
-  register_name_t fpReg = homeInstr->getSrc(0)->getAssignedLoc();
-  int64_t index = homeInstr->getLocal()->getId();
-  // XXX remove this assert and pass label to cgLoad
-//  ASSERT(type != Type::Cell);
-  cgLoad(type, dst, fpReg, -((index + 1)* sizeof(Cell)), label);
+  register_name_t fpReg;
+  int64 offset;
+  getLocalRegOffset(inst->getSrc(0), fpReg, offset);
+  cgLoad(type, dst, fpReg, offset, label);
+  return start;
+}
+
+Address CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  register_name_t fpReg;
+  int64 offset;
+  getLocalRegOffset(inst->getSrc(0), fpReg, offset);
+  m_as.lea_reg64_disp_reg64(fpReg, offset,
+                            inst->getDst()->getAssignedLoc());
+  return start;
+}
+
+Address CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  m_as.lea_reg64_disp_reg64(inst->getSrc(0)->getAssignedLoc(),
+                            cellsToBytes(inst->getSrc(1)->getConstValAsInt()),
+                            inst->getDst()->getAssignedLoc());
   return start;
 }
 
@@ -3716,6 +3797,148 @@ Address CodeGenerator::cgDefFunc(IRInstruction* inst) {
   SSATmp* func  = inst->getSrc(0);
   cgCallHelper(m_as, (TCA)defFuncHelper, dst, true,
                ArgGroup().ssa(func));
+  return start;
+}
+
+Address CodeGenerator::cgLdContThisOrCls(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  register_name_t contReg = inst->getSrc(0)->getAssignedLoc();
+  register_name_t outReg = inst->getDst()->getAssignedLoc();
+
+  // We can use outReg as scratch if it's != our input reg
+  register_name_t scratch = contReg != outReg ? outReg : LinearScan::rScratch;
+  m_as.load_reg64_disp_reg64(contReg, CONTOFF(m_obj), scratch);
+  m_as.test_reg64_reg64(scratch, scratch);
+  Address thisJmp = m_as.code.frontier;
+  m_as.jnz8(thisJmp); // jnz have_this
+  // no_this:
+  m_as.load_reg64_disp_reg64(contReg, CONTOFF(m_vmCalledClass), scratch);
+  Address skipJmp = m_as.code.frontier;
+  m_as.jmp8(skipJmp); // jmp end
+
+  // have_this:
+  m_as.patchJcc8(thisJmp, m_as.code.frontier);
+  // We know it's an object and can't be static so a raw incref is ok
+  emitIncRef(m_as, scratch, 0);
+
+  // end:
+  m_as.patchJmp8(skipJmp, m_as.code.frontier);
+
+  if (scratch != outReg) {
+    m_as.mov_reg64_reg64(scratch, outReg);
+  }
+  return start;
+}
+
+Address CodeGenerator::cgCreateCont(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  auto helper = curFunc()->isNonClosureMethod() ?
+    VMExecutionContext::createContinuation<true> :
+    VMExecutionContext::createContinuation<false>;
+  cgCallHelper(m_as, (TCA)helper,
+               inst->getDst(), false,
+               ArgGroup().ssa(inst->getSrc(0))
+                         .ssa(inst->getSrc(1))
+                         .ssa(inst->getSrc(2))
+                         .ssa(inst->getSrc(3)));
+  return start;
+}
+
+Address CodeGenerator::cgFillContLocals(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  cgCallHelper(m_as, (TCA)VMExecutionContext::fillContinuationVars,
+               reg::noreg, false,
+               ArgGroup().ssa(inst->getSrc(0))
+                         .ssa(inst->getSrc(1))
+                         .ssa(inst->getSrc(2))
+                         .ssa(inst->getSrc(3)));
+  return start;
+}
+
+Address CodeGenerator::cgFillContThis(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  SSATmp* cont = inst->getSrc(0);
+  register_name_t baseReg = inst->getSrc(1)->getAssignedLoc();
+  int64 offset = inst->getSrc(2)->getConstValAsInt();
+  register_name_t scratch = LinearScan::rScratch;
+
+  m_as.load_reg64_disp_reg64(cont->getAssignedLoc(), CONTOFF(m_obj), scratch);
+  m_as.test_reg64_reg64(scratch, scratch);
+  Address jmp = m_as.code.frontier;
+  m_as.jz8(jmp); // jz no_this
+  {
+    m_as.add_imm32_disp_reg32(1, TVOFF(_count), scratch);
+    m_as.store_reg64_disp_reg64(scratch, offset + TVOFF(m_data), baseReg);
+    m_as.store_imm32_disp_reg(KindOfObject, offset + TVOFF(m_type), baseReg);
+  }
+  // no_this:
+  m_as.patchJcc8(jmp, m_as.code.frontier);
+
+  return start;
+}
+
+Address CodeGenerator::cgUnpackCont(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  cgCallHelper(m_as, (TCA)VMExecutionContext::unpackContinuation,
+               inst->getDst(), false,
+               ArgGroup().ssa(inst->getSrc(0))
+                         .ssa(inst->getSrc(1)));
+  return start;
+}
+
+Address CodeGenerator::cgExitOnContVars(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  SSATmp* cont = inst->getSrc(0);
+  LabelInstruction* label = inst->getLabel();
+
+  m_as.test_imm32_disp_reg32(0x1, CONTOFF(m_hasExtraVars),
+                             cont->getAssignedLoc());
+  emitFwdJcc(CC_NZ, label);
+  return start;
+}
+
+Address CodeGenerator::cgPackCont(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  cgCallHelper(m_as, (TCA)VMExecutionContext::packContinuation,
+               reg::noreg, false,
+               ArgGroup().ssa(inst->getSrc(0))
+                         .ssa(inst->getSrc(1))
+                         .ssa(inst->getSrc(2))
+                         .ssa(inst->getSrc(3)));
+  return start;
+}
+
+Address CodeGenerator::cgContRaiseCheck(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  SSATmp* cont = inst->getSrc(0);
+  m_as.test_imm32_disp_reg32(0x1, CONTOFF(m_should_throw),
+                             cont->getAssignedLoc());
+  emitFwdJcc(CC_NZ, inst->getLabel());
+  return start;
+}
+
+Address CodeGenerator::cgContPreNext(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  register_name_t contReg = inst->getSrc(0)->getAssignedLoc();
+
+  const Offset doneOffset = CONTOFF(m_done);
+  CT_ASSERT((doneOffset + 1) == CONTOFF(m_running));
+  // Check m_done and m_running at the same time
+  m_as.test_imm32_disp_reg32(0x0101, doneOffset, contReg);
+  emitFwdJcc(CC_NZ, inst->getLabel());
+
+  // ++m_index
+  m_as.add_imm64_disp_reg64(0x1, CONTOFF(m_index), contReg);
+  // m_running = true
+  m_as.store_imm8_disp_reg(0x1, CONTOFF(m_running), contReg);
+  return start;
+}
+
+Address CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  m_as.cmp_imm64_disp_reg64(0, CONTOFF(m_index),
+                            inst->getSrc(0)->getAssignedLoc());
+  emitFwdJcc(CC_L, inst->getLabel());
   return start;
 }
 

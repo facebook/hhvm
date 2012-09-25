@@ -6691,7 +6691,7 @@ void VMExecutionContext::packContinuation(c_Continuation* cont,
   TypedValue* src = frame_local(fp, nCopy);
   TypedValue* dest = cont->locals();
   memcpy(dest, src, nCopy * sizeof(TypedValue));
-  memset(src, 0x0, nCopy * sizeof(TypedValue));
+  bzero(src, nCopy * sizeof(TypedValue));
 
   // If we have a varEnv, stick any non-named locals into cont->getVars()
   if (UNLIKELY(fp->hasVarEnv())) {
@@ -6784,27 +6784,19 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushContFunc(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  cont->m_received.setNull();
   cont->preNext();
-
-  TypedValue* tv = m_stack.allocTV();
-  TV_WRITE_UNINIT(tv);
-  tvAsVariant(tv) = cont;
+  cont->m_received.setNull();
 }
 
 template<bool raise>
 inline void VMExecutionContext::contSendImpl() {
   c_Continuation* cont = this_continuation(m_fp);
-  cont->nextCheck();
+  cont->startedCheck();
+  cont->preNext();
   cont->m_received.assignVal(tvAsVariant(frame_local(m_fp, 0)));
   if (raise) {
     cont->m_should_throw = true;
   }
-  cont->preNext();
-
-  TypedValue* tv = m_stack.allocTV();
-  TV_WRITE_UNINIT(tv);
-  tvAsVariant(tv) = cont;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContSend(PC& pc) {
@@ -6827,7 +6819,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContValid(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopContCurrent(PC& pc) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
-  cont->nextCheck();
+  cont->startedCheck();
 
   TypedValue* tv = m_stack.allocTV();
   TV_WRITE_UNINIT(tv);

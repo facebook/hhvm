@@ -81,6 +81,8 @@ class TranslatorX64 : public Translator
   typedef void (*sigaction_t)(int, siginfo_t*, void*);
 
   typedef X64Assembler Asm;
+  typedef std::map<int, int> ContParamMap;
+  static const int kMaxInlineContLocals = 10;
   Asm                    a;
   Asm                    astubs;
   Asm                    atrampolines;
@@ -200,14 +202,19 @@ class TranslatorX64 : public Translator
                                ScratchReg& output,
                                ptrdiff_t ch);
   void emitCall(Asm& a, TCA dest, bool killRegs=false);
+
+  /* Continuation-related helpers */
+  static bool mapContParams(ContParamMap& map, const Func* origFunc,
+                            const Func* genFunc);
   void emitCallFillCont(Asm& a, const Func* orig, const Func* gen);
   void emitCallUnpack(Asm& a, const NormalizedInstruction& i, int nCopy);
   void emitCallPack(Asm& a, const NormalizedInstruction& i, int nCopy);
   void emitContRaiseCheck(Asm& a, const NormalizedInstruction& i);
   void emitContPreNext(const NormalizedInstruction& i, ScratchReg&  rCont);
-  void emitContNextCheck(const NormalizedInstruction& i, ScratchReg& rCont);
+  void emitContStartedCheck(const NormalizedInstruction& i, ScratchReg& rCont);
   template<bool raise>
   void translateContSendImpl(const NormalizedInstruction& i);
+
   void translateClassExistsImpl(const Tracelet& t,
                                 const NormalizedInstruction& i,
                                 Attr typeAttr);
@@ -867,10 +874,6 @@ PSEUDOINSTRS
   void irTranslateReqLit(const Tracelet& t,
                          const NormalizedInstruction& i,
                          InclOpFlags flags);
-  template<bool raise>
-  void irTranslateContSendImpl(const NormalizedInstruction& i);
-
-
 };
 
 

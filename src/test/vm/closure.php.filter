@@ -1,2 +1,3 @@
 #!/bin/bash
-sed -e 's/\[.*\/src/\[src/g'
+
+./test/vm/filepath.filter | ./test/vm/closure.filter

@@ -523,9 +523,9 @@ enum SetOpOp {
   O(ContRaised,      NA,               NOV,             NOV,        NF) \
   O(ContReceive,     NA,               NOV,             ONE(CV),    NF) \
   O(ContDone,        NA,               NOV,             NOV,        NF) \
-  O(ContNext,        NA,               NOV,             ONE(CV),    NF) \
-  O(ContSend,        NA,               NOV,             ONE(CV),    NF) \
-  O(ContRaise,       NA,               NOV,             ONE(CV),    NF) \
+  O(ContNext,        NA,               NOV,             NOV,        NF) \
+  O(ContSend,        NA,               NOV,             NOV,        NF) \
+  O(ContRaise,       NA,               NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContStopped,     NA,               NOV,             NOV,        NF) \

@@ -993,7 +993,14 @@ bool f_copy(CStrRef source, CStrRef dest,
   if (!context.isNull() || !File::IsPlainFilePath(source) ||
       !File::IsPlainFilePath(dest)) {
     Variant sfile = f_fopen(source, "r", false, context);
+    if (same(sfile, false)) {
+      return false;
+    }
     Variant dfile = f_fopen(dest, "w", false, context);
+    if (same(dfile, false)) {
+      return false;
+    }
+    
     return f_stream_copy_to_stream(sfile, dfile).toBoolean();
   } else {
     int ret =

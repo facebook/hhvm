@@ -393,6 +393,7 @@ public:
   static bool EvalAllowHhas;
   static bool EvalJitNoGdb;
   static bool EvalProfileBC;
+  static bool EvalProfileHWEnable;
   static std::string EvalProfileHWEvents;
   static bool EvalJitTrampolines;
   static string EvalJitProfilePath;

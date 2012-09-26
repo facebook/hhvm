@@ -41,6 +41,14 @@ namespace HPHP { namespace Util {
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(HardwareCounter,
     HardwareCounter::s_counter);
 
+static inline bool useCounters() {
+#ifdef VALGRIND
+  return false;
+#else
+  return RuntimeOption::EvalProfileHWEnable;
+#endif
+}
+
 class HardwareCounterImpl {
 public:
   HardwareCounterImpl(int type, unsigned long config, StringData* desc = NULL)
@@ -56,7 +64,7 @@ public:
     pe.read_format =
       PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING;
 
-#ifndef VALGRIND
+    if (!useCounters()) return;
     /*
      * perf_event_open(struct perf_event_attr *hw_event_uptr, pid_t pid,
      *                 int cpu, int group_fd, unsigned long flags)
@@ -64,29 +72,29 @@ public:
     m_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (m_fd < 0) {
       Logger::Verbose("perf_event_open failed with: %s",
-          Util::safe_strerror(errno).c_str());
+                      Util::safe_strerror(errno).c_str());
       m_err = -1;
       return;
     }
     if (ioctl(m_fd, PERF_EVENT_IOC_ENABLE, 0) < 0) {
       Logger::Warning("perf_event failed to enable: %s",
-          Util::safe_strerror(errno).c_str());
+                      Util::safe_strerror(errno).c_str());
       close();
       m_err = -1;
       return;
     }
     reset();
-#endif
-  }
+    }
 
   ~HardwareCounterImpl() {
     close();
   }
 
   int64 read() {
+    if (!useCounters()) return 0;
+
     int64 count = 0;
 
-#ifndef VALGRIND
     if (m_fd > 0) {
       int64 values[3];
       int ret;
@@ -110,7 +118,6 @@ public:
         }
       }
     }
-#endif
     return count;
   }
 

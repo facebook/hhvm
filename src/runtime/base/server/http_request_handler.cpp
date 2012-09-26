@@ -173,7 +173,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       bool original = compressed;
       // check against static content cache
       if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
-        String str;
+        bool free_data = false;
         // (qigao) not calling stat at this point because the timestamp of
         // local cache file is not valuable, maybe misleading. This way
         // the Last-Modified header will not show in response.
@@ -184,12 +184,13 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
             throw FatalErrorException("cannot unzip compressed data");
           }
           compressed = false;
-          str = NEW(StringData)(data, len, AttachDeprecated);
+          free_data = true;
         }
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
         StaticContentCache::TheFileCache->adviseOutMemory();
         ServerStats::LogPage(path, 200);
         GetAccessLog().log(transport, vhost);
+        if (free_data) free(const_cast<char*>(data));
         return;
       }
     }

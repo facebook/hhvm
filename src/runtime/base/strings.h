@@ -37,6 +37,8 @@ const char* const CANT_ACCESS_PARENT_WHEN_NO_CLASS =
   "Cannot access parent:: when no class scope is active";
 const char* const CANT_ACCESS_PARENT_WHEN_NO_PARENT =
   "Cannot access parent:: when current class scope has no parent";
+const char* const CANT_ACCESS_STATIC =
+  "Cannot access static:: when no class scope is active";
 const char* const UNDEFINED_INDEX =
   "Undefined index: %s";
 const char* const CANNOT_USE_SCALAR_AS_ARRAY =

@@ -51,6 +51,8 @@ function main() {
   echo "**************\n";
   $d->yar();
   D::yar();
+  echo "**************\n";
+  static::foo();
 }
 
 main();

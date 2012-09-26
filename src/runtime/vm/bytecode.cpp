@@ -195,7 +195,7 @@ static inline Class* frameStaticClass(ActRec* fp) {
   } else if (fp->hasClass()) {
     return fp->getClass();
   } else {
-    not_reached();
+    return NULL;
   }
 }
 
@@ -6281,7 +6281,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCatch(PC& pc) {
 
 inline void OPTBLD_INLINE VMExecutionContext::iopLateBoundCls(PC& pc) {
   NEXT();
-  m_stack.pushClass(frameStaticClass(m_fp));
+  Class* cls = frameStaticClass(m_fp);
+  if (!cls) {
+    raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
+  }
+  m_stack.pushClass(cls);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopVerifyParamType(PC& pc) {
@@ -6388,7 +6392,9 @@ VMExecutionContext::createContinuation(ActRec* fp,
   cont->incRefCount();
   cont->setNoDestruct();
   if (isMethod) {
-    cont->m_vmCalledClass = (intptr_t)frameStaticClass(fp) | 0x1ll;
+    Class* cls = frameStaticClass(fp);
+    ASSERT(cls);
+    cont->m_vmCalledClass = (intptr_t)cls | 0x1ll;
   }
 
   cont->m_nLocals = nLocals;

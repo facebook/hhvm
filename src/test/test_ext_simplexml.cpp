@@ -78,12 +78,11 @@ bool TestExtSimplexml::test_libxml_set_streams_context() {
 }
 
 bool TestExtSimplexml::test_libxml_disable_entity_loader() {
-  try {
-    f_libxml_disable_entity_loader(true);
-  } catch (NotImplementedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  
+  VS(f_libxml_disable_entity_loader(true), false);
+  VS(f_libxml_disable_entity_loader(true), true);
+  VS(f_libxml_disable_entity_loader(false), true);
+  return Count(true);
 }
 
 bool TestExtSimplexml::test_SimpleXMLElement() {

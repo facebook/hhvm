@@ -1140,6 +1140,7 @@ public:
   virtual void requestInit() {
     m_use_error = false;
     m_errors.reset();
+    xmlParserInputBufferCreateFilenameDefault(NULL);
   }
   virtual void requestShutdown() {
     m_use_error = false;
@@ -1243,8 +1244,20 @@ void f_libxml_set_streams_context(CObjRef streams_context) {
   throw NotImplementedException(__func__);
 }
 
+static xmlParserInputBufferPtr
+hphp_libxml_input_buffer_noload(const char *URI, xmlCharEncoding enc) {
+  return NULL;
+}
+
 bool f_libxml_disable_entity_loader(bool disable /* = true */) {
-  throw NotImplementedException(__func__);
+  xmlParserInputBufferCreateFilenameFunc old;
+
+  if (disable) {
+    old = xmlParserInputBufferCreateFilenameDefault(hphp_libxml_input_buffer_noload);
+  } else {
+    old = xmlParserInputBufferCreateFilenameDefault(NULL);
+  }
+  return (old == hphp_libxml_input_buffer_noload);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -162,8 +162,6 @@ static inline bool warmedUp() {
 }
 
 static inline bool profileThisRequest() {
-  // Disable type profiling with IR for now
-  if (RuntimeOption::EvalJitUseIR) return false;
   if (warmedUp()) return false;
   if (serverMode()) return true;
   return RuntimeOption::EvalJitProfileRecord;

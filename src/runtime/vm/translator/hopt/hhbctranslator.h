@@ -298,6 +298,8 @@ public:
 
   void checkTypeStack(uint32 stackIndex, Type::Tag type);
 
+  void setThisAvailable();
+
 private:
 
   /*

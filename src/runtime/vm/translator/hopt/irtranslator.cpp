@@ -326,7 +326,7 @@ TranslatorX64::irTranslatePopC(const Tracelet& t,
 
 void
 TranslatorX64::irTranslatePopV(const Tracelet& t,
-                             const NormalizedInstruction& i) {
+                               const NormalizedInstruction& i) {
   ASSERT(i.inputs[0]->rtt.isVagueValue() ||
          i.inputs[0]->isVariant());
 
@@ -335,19 +335,25 @@ TranslatorX64::irTranslatePopV(const Tracelet& t,
 
 void
 TranslatorX64::irTranslatePopR(const Tracelet& t,
-                             const NormalizedInstruction& i) {
+                               const NormalizedInstruction& i) {
   irTranslatePopC(t, i);
 }
 
 void
 TranslatorX64::irTranslateUnboxR(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  HHIR_EMIT(UnboxR);
+                                 const NormalizedInstruction& i) {
+  if (i.noOp) {
+    // statically proved to be unboxed -- just pass that info to the IR
+    TRACE(1, "HHIR: irTranslateUnboxR: output inferred to be Cell\n");
+    m_hhbcTrans->assertTypeStack(0, JIT::Type::Cell);
+  } else {
+    HHIR_EMIT(UnboxR);
+  }
 }
 
 void
 TranslatorX64::irTranslateNull(const Tracelet& t,
-                             const NormalizedInstruction& i) {
+                               const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 0);
   ASSERT(!i.outLocal);
 
@@ -1399,6 +1405,10 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
     }
   }
 
+  if (i.guardedThis) {
+    m_hhbcTrans->setThisAvailable();
+  }
+
   // Actually translate the instruction's body.
   Stats::emitIncTranslOp(a, op);
 
@@ -1542,6 +1552,8 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
                                          *m_constTable,
                                          curFunc());
   m_hhbcTrans    = new JIT::HhbcTranslator(*m_traceBuilder, curFunc());
+  TRACE(1, "hhirTraceStart: bcStartOffset %d   vmfp() - vmsp() = %ld\n",
+        bcStartOffset, vmfp() - vmsp());
   m_hhbcTrans->start(bcStartOffset, (vmfp() - vmsp()));
 }
 

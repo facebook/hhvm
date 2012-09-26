@@ -1335,6 +1335,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
   Unit::MetaInfo info;
   if (!metaHand.nextArg(info)) return false;
   if (info.m_kind == Unit::MetaInfo::NopOut) {
+    ni->noOp = true;
     return true;
   }
 
@@ -2324,7 +2325,8 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     try {
       InputInfos inputInfos;
       getInputs(t, ni, stackFrameOffset, inputInfos);
-      if (applyInputMetaData(metaHand, ni, tas, inputInfos)) {
+      bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
+      if (noOp && !RuntimeOption::EvalJitUseIR) {
         stackFrameOffset = oldStackFrameOffset;
         continue;
       }

@@ -37,8 +37,11 @@ public:
   Trace* makeExitTrace(uint32 bcOff) {
     return m_trace->addExitTrace(makeTrace(bcOff, false));
   }
-  bool isThisAvailable() {
+  bool isThisAvailable() const {
     return m_thisIsAvailable;
+  }
+  void setThisAvailable() {
+    m_thisIsAvailable = true;
   }
 
   void start(uint32 initialBcOffset, uint32 initialSpOffsetFromFp);

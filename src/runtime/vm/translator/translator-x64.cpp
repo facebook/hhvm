@@ -9017,12 +9017,19 @@ TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
   NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
 
   if (m_useHHIR) {
-    if (NormalizedInstruction::OutputUsed) {
-      ASSERT(i.outStack->outerType() != KindOfRef);
-      uint32 stackOffset = locPhysicalOffset(i.outStack->location);
+    if (u == NormalizedInstruction::OutputUsed ||
+        u == NormalizedInstruction::OutputInferred) {
       JIT::Type::Tag jitType = JIT::Type::fromDataType(i.outStack->outerType(),
-                                                       KindOfInvalid);
-      m_hhbcTrans->checkTypeStack(stackOffset, jitType);
+                                                       i.outStack->valueType());
+      if (u == NormalizedInstruction::OutputInferred) {
+        TRACE(1, "HHIR: emitPredictionGuards: output inferred to be %s\n",
+              JIT::Type::Strings[jitType]);
+        m_hhbcTrans->assertTypeStack(0, jitType);
+      } else {
+        TRACE(1, "HHIR: emitPredictionGuards: output predicted to be %s\n",
+              JIT::Type::Strings[jitType]);
+        m_hhbcTrans->checkTypeStack(0, jitType);
+      }
     }
     return;
   }

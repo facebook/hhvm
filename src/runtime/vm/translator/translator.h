@@ -298,6 +298,10 @@ class NormalizedInstruction {
     going to be skipped (so dont setup an actrec)
   */
   unsigned noCtor:1;
+  /*
+   * instruction is statically known to have no effect, e.g. unboxing a Cell
+   */
+  unsigned noOp:1;
 
   ArgUnion constImm;
   TXFlags m_txFlags;
@@ -325,6 +329,7 @@ class NormalizedInstruction {
     grouped(false),
     guardedThis(false),
     noCtor(false),
+    noOp(false),
     m_txFlags(Interp)
   { }
 

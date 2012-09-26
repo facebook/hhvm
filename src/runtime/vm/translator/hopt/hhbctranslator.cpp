@@ -1170,6 +1170,10 @@ void HhbcTranslator::emitRetV() {
   emitRet(popV(), exit);
 }
 
+void HhbcTranslator::setThisAvailable() {
+  m_tb.setThisAvailable();
+}
+
 Trace* HhbcTranslator::guardTypeLocal(uint32 localIndex,
                                       Type::Tag type,
                                       Trace* nextTrace) {

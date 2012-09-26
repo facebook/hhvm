@@ -11838,6 +11838,36 @@ bool TestCodeRun::TestReflection() {
           "}"
           "test();",
           "string(3) \"bar\"\n");
+
+    MVCRO("<?php\n"
+          "\n"
+          "/**\n"
+          " * Doc comment on a function generator\n"
+          " */\n"
+          "function foo() {\n"
+          "  yield null;\n"
+          "}\n"
+          "$rf = new ReflectionFunction('foo');\n"
+          "var_dump($rf->getDocComment());\n"
+          "\n"
+          "class C {\n"
+          "  /**\n"
+          "   * Doc comment on a method generator\n"
+          "   */\n"
+          "  public function bar() {\n"
+          "    yield null;\n"
+          "  }\n"
+          "}\n"
+          "$rm = new ReflectionMethod('C','bar');\n"
+          "var_dump($rm->getDocComment());\n"
+          ,
+          "string(46) \"/**\n"
+          " * Doc comment on a function generator\n"
+          " */\"\n"
+          "string(48) \"/**\n"
+          "   * Doc comment on a method generator\n"
+          "   */\"\n"
+          );
   }
 
   MVCR("<?php"

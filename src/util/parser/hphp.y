@@ -277,9 +277,9 @@ void create_generator(Parser *_p, Token &out, Token &params,
                       Token &origGenFunc, bool isHhvm, Token *attr) {
   _p->pushFuncLocation();
   if (clsname) {
-    _p->onMethodStart(name, *modifiers);
+    _p->onMethodStart(name, *modifiers, false);
   } else {
-    _p->onFunctionStart(name);
+    _p->onFunctionStart(name, false);
   }
 
   Token scont;

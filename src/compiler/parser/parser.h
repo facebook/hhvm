@@ -163,7 +163,7 @@ public:
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void fixStaticVars();
-  void onFunctionStart(Token &name);
+  void onFunctionStart(Token &name, bool doPushComment = true);
   void onFunction(Token &out, Token &ret, Token &ref, Token &name,
                   Token &params, Token &stmt, Token *attr);
   void onParam(Token &out, Token *params, Token &type, Token &var,
@@ -182,7 +182,7 @@ public:
   void onTraitAliasRuleStart(Token &out, Token &className, Token &methodName);
   void onTraitAliasRuleModify(Token &out, Token &rule, Token &accessModifiers,
                          Token &newMethodName);
-  void onMethodStart(Token &name, Token &mods);
+  void onMethodStart(Token &name, Token &mods, bool doPushComment = true);
   void onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
                 Token &name, Token &params, Token &stmt, Token *attr,
                 bool reloc = true);
@@ -257,6 +257,7 @@ private:
   bool m_closureGenerator;
 
   void pushComment();
+  void pushComment(const std::string& s);
   std::string popComment();
 
   void newScope();

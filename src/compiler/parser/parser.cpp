@@ -228,6 +228,10 @@ void Parser::pushComment() {
   m_comments.push_back(m_scanner.detachDocComment());
 }
 
+void Parser::pushComment(const std::string& s) {
+  m_comments.push_back(s);
+}
+
 std::string Parser::popComment() {
   std::string ret = m_comments.back();
   m_comments.pop_back();
@@ -713,9 +717,11 @@ void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
 ///////////////////////////////////////////////////////////////////////////////
 // function/method declaration
 
-void Parser::onFunctionStart(Token &name) {
+void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
   m_file->pushAttribute();
-  pushComment();
+  if (doPushComment) {
+    pushComment();
+  }
   newScope();
   m_generators.push_back(0);
   m_foreaches.push_back(0);
@@ -725,8 +731,9 @@ void Parser::onFunctionStart(Token &name) {
   m_staticVars.push_back(StringToExpressionPtrVecMap());
 }
 
-void Parser::onMethodStart(Token &name, Token &mods) {
-  onFunctionStart(name);
+void Parser::onMethodStart(Token &name, Token &mods,
+                           bool doPushComment /* = true */) {
+  onFunctionStart(name, doPushComment);
 }
 
 void Parser::fixStaticVars() {
@@ -812,6 +819,10 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       prepending.push_back(func);
 
       if (name->text().empty()) m_closureGenerator = true;
+      // create_generator() expects us to push the docComment back
+      // onto the comment stack so that it can make sure that the
+      // the MethodStatement it's building will get the docComment
+      pushComment(comment);
       Token origGenFunc;
       create_generator(this, out, params, name, closureName, NULL, NULL,
                        hasCallToGetArgs, origGenFunc,
@@ -1099,6 +1110,10 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     {
       completeScope(mth->onInitialParse(m_ar, m_file));
     }
+    // create_generator() expects us to push the docComment back
+    // onto the comment stack so that it can make sure that the
+    // the MethodStatement it's building will get the docComment
+    pushComment(comment);
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, m_clsName.c_str(),
                      &modifiers, hasCallToGetArgs, origGenFunc,

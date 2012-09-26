@@ -5043,6 +5043,7 @@ void EmitterVisitor::emitPostponedCinits() {
     //   }
     size_t nConsts = p.m_vec->size();
     ASSERT(nConsts > 0);
+    Label retC;
     for (size_t i = 0; i < nConsts - 1; ++i) {
       Label mismatch;
 
@@ -5054,10 +5055,11 @@ void EmitterVisitor::emitPostponedCinits() {
 
       visit((*p.m_vec)[i].second);
 
-      e.RetC();
+      e.Jmp(retC);
       mismatch.set(e);
     }
     visit((*p.m_vec)[nConsts-1].second);
+    retC.set(e);
     e.RetC();
 
     p.release(); // Manually trigger memory cleanup.

@@ -114,8 +114,14 @@ class ScopedMem {
   ScopedMem(const ScopedMem&); // disable copying
   ScopedMem& operator=(const ScopedMem&);
  public:
-  ScopedMem(void* ptr) : m_ptr(ptr) {}
+  ScopedMem() : m_ptr(0) {}
+  explicit ScopedMem(void* ptr) : m_ptr(ptr) {}
   ~ScopedMem() { free(m_ptr); }
+  ScopedMem& operator=(void* ptr) {
+    ASSERT(!m_ptr);
+    m_ptr = ptr;
+    return *this;
+  }
  private:
   void* m_ptr;
 };

@@ -31,6 +31,7 @@
 #include <runtime/base/server/http_protocol.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/eval/debugger/debugger.h>
+#include <util/alloc.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -173,7 +174,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       bool original = compressed;
       // check against static content cache
       if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
-        bool free_data = false;
+        Util::ScopedMem decompressed_data;
         // (qigao) not calling stat at this point because the timestamp of
         // local cache file is not valuable, maybe misleading. This way
         // the Last-Modified header will not show in response.
@@ -183,14 +184,13 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
           if (data == NULL) {
             throw FatalErrorException("cannot unzip compressed data");
           }
+          decompressed_data = const_cast<char*>(data);
           compressed = false;
-          free_data = true;
         }
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
         StaticContentCache::TheFileCache->adviseOutMemory();
         ServerStats::LogPage(path, 200);
         GetAccessLog().log(transport, vhost);
-        if (free_data) free(const_cast<char*>(data));
         return;
       }
     }

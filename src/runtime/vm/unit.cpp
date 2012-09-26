@@ -482,13 +482,15 @@ Class* Unit::loadClass(const NamedEntity* ne,
     if (LIKELY(cls != NULL)) return cls;
   }
   VMRegAnchor _;
-  AutoloadHandler::s_instance->invokeHandler(name->data());
+  AutoloadHandler::s_instance->invokeHandler(
+    StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
 }
 
 Class* Unit::loadMissingClass(const NamedEntity* ne,
                               const StringData *name) {
-  AutoloadHandler::s_instance->invokeHandler(name->data());
+  AutoloadHandler::s_instance->invokeHandler(
+    StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
 }
 

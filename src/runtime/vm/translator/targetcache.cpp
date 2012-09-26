@@ -543,7 +543,8 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
   Class* cls = *cache;
   ASSERT(!cls); // the caller should already have checked
   VMRegAnchor _;
-  AutoloadHandler::s_instance->invokeHandler(clsName->data());
+  AutoloadHandler::s_instance->invokeHandler(
+    StrNR(const_cast<StringData*>(clsName)));
   cls = *cache;
 
   if (checkOnly) {

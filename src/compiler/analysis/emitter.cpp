@@ -973,12 +973,18 @@ void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
   if (arg > 127) return;
   if (mVector) arg |= Unit::MetaInfo::VectorArg;
   Vec& info = m_metaMap[pos];
+  int i = info.size();
   if (kind == Unit::MetaInfo::NopOut) {
     info.clear();
-  } else if (info.size() == 1 && info[0].m_kind == Unit::MetaInfo::NopOut) {
+  } else if (i == 1 && info[0].m_kind == Unit::MetaInfo::NopOut) {
     return;
+  } else if (kind == Unit::MetaInfo::DataType) {
+    // Put DataType first, because if applyInputMetaData saw Class
+    // first, it would call recordRead which mark the input as
+    // needing a guard before we saw the DataType
+    i = 0;
   }
-  info.push_back(Unit::MetaInfo(kind, arg, data));
+  info.insert(info.begin() + i, Unit::MetaInfo(kind, arg, data));
 }
 
 void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
@@ -1670,6 +1676,15 @@ static StringData* getClassName(ExpressionPtr e) {
   ClassScopeRawPtr cls;
   if (e->isThis()) {
     cls = e->getOriginalClass();
+    if (TypePtr t = e->getAssertedType()) {
+      if (t->isSpecificObject()) {
+        AnalysisResultConstPtr ar = e->getScope()->getContainingProgram();
+        ClassScopeRawPtr c2 = t->getClass(ar, e->getScope());
+        if (c2 && c2->derivesFrom(ar, cls->getName(), true, false)) {
+          cls = c2;
+        }
+      }
+    }
   } else if (TypePtr t = e->getActualType()) {
     if (t->isSpecificObject()) {
       cls = t->getClass(e->getScope()->getContainingProgram(), e->getScope());
@@ -3097,7 +3112,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (clsName) {
           Id id = m_ue.mergeLitstr(clsName);
           m_metaInfo.add(fpiStart, Unit::MetaInfo::Class, false,
-                      om->getName().empty() ? 1 : 0, id);
+                         om->getName().empty() ? 1 : 0, id);
         }
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
@@ -3215,7 +3230,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (sv->hasContext(Expression::ObjectContext)) {
             if (sv->isGuarded()) {
               m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                          false, 0, 0);
+                             false, 0, 0);
             }
             e.This();
           } else {
@@ -3508,15 +3523,15 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
     char sym = m_evalStack.get(iFirst);
     char symFlavor = StackSym::GetSymFlavor(sym);
     char marker = StackSym::GetMarker(sym);
+    DataType dt = m_evalStack.getKnownType(iFirst);
+    if (dt != KindOfUnknown) {
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::DataType, true, 0, dt);
+    }
     if (m_evalStack.isCls(iFirst)) {
       const StringData* cls = m_evalStack.getName(iFirst);
       ASSERT(cls);
       Id id = m_ue.mergeLitstr(cls);
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Class, true, 0, id);
-    }
-    DataType dt = m_evalStack.getKnownType(iFirst);
-    if (dt != KindOfUnknown) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::DataType, true, 0, dt);
     }
     switch (marker) {
       case StackSym::N: {
@@ -4851,7 +4866,7 @@ void EmitterVisitor::emitPostponedMeths() {
       if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded()) ||
           (fe->isClosureBody() && p.m_closureUseVars->size())) {
         m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                    false, 0, 0);
+                       false, 0, 0);
       }
       e.RetC();
     } // -- Method emission ends --

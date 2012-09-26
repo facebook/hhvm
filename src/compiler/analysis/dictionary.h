@@ -61,6 +61,7 @@ public:
   AttributeTagger(ControlFlowGraph *g, Dict &d) :
       DataFlowWalker(g), m_dict(d) {}
 
+  void walk() { DataFlowWalker::walk(*this); }
   void processAccess(ExpressionPtr e) {
     m_dict.updateAccess(e);
   }

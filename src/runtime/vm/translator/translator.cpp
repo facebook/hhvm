@@ -1448,13 +1448,14 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
           continue;
         }
         const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
-        ASSERT(!dl->rtt.valueClass() ||
-               dl->rtt.valueClass()->name() == sd);
-        SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
-                "class; old type = %s\n",
-                arg, dl->pretty().c_str());
         Class* cls = Unit::lookupClass(sd);
         if (cls) {
+          ASSERT(!dl->rtt.valueClass() ||
+                 cls->classof(dl->rtt.valueClass()) ||
+                 dl->rtt.valueClass()->classof(cls));
+          SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
+                  "class; old type = %s\n",
+                  arg, dl->pretty().c_str());
           if (dl->rtt.isVariant()) {
             dl->rtt = RuntimeType(KindOfRef, KindOfObject, cls);
           } else {

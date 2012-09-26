@@ -93,7 +93,8 @@ class DataFlowWalker : public ControlFlowGraphWalker {
 public:
   DataFlowWalker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
 
-  void walk() { ControlFlowGraphWalker::walk(*this); }
+  template<class T>
+  void walk(T &t) { ControlFlowGraphWalker::walk(t); }
 
   int after(ConstructRawPtr cp);
   int afterEach(ConstructRawPtr cur, int i, ConstructRawPtr kid);

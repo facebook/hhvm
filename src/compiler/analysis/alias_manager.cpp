@@ -3305,7 +3305,7 @@ public:
       DataFlowWalker(g), m_gidMap(gidMap) {}
 
   void walk(MethodStatementPtr m) {
-    DataFlowWalker::walk();
+    DataFlowWalker::walk(*this);
     ControlBlock *b = m_graph.getDfBlock(1);
     std::map<std::string,int>::iterator it = m_gidMap.find("v:this");
     if (m->getOrigGeneratorFunc()) {
@@ -3344,6 +3344,9 @@ public:
   void processAccess(ExpressionPtr e) {
     int id = e->getCanonID();
     if (id) {
+      if (e->isThis() && e->getAssertedType()) {
+        markAvailable(e);
+      }
       if (m_block->getBit(DataFlow::Available, id)) {
         markAvailable(e);
         e->clearAnticipated();
@@ -3414,9 +3417,11 @@ public:
             }
             if (m_block->getBit(DataFlow::Referenced, id)) {
               sv->setRefCounted();
+              sv->setKilled();
             }
             if (m_block->getBit(DataFlow::Inited, id)) {
               sv->setInited();
+              sv->setKilled();
             }
             if (sv->hasAllContext(Expression::UnsetContext|
                                   Expression::LValue)) {
@@ -3446,8 +3451,21 @@ public:
             if (mod || ref) {
               m_block->setBit(DataFlow::Referenced, id, true);
               m_block->setBit(DataFlow::Inited, id, true);
-              m_block->setBit(DataFlow::Killed, id, true);
-              return;
+              bool kill = true;
+
+              if (!mod) {
+                if (TypePtr act = sv->getActualType()) {
+                  if (sv->hasContext(Expression::ObjectContext)) {
+                    if (act->is(Type::KindOfObject)) kill = false;
+                  } else if (sv->hasContext(Expression::AccessContext)) {
+                    if (act->is(Type::KindOfArray)) kill = false;
+                  }
+                }
+              }
+              if (kill) {
+                m_block->setBit(DataFlow::Killed, id, true);
+                return;
+              }
             }
 
             if (!sv->couldBeAliased()) {
@@ -3478,7 +3496,7 @@ public:
     }
   }
 
-  int after(ConstructPtr cp) {
+  int after(ConstructRawPtr cp) {
     if (ReturnStatementPtr rs = dynamic_pointer_cast<ReturnStatement>(cp)) {
       int id = m_gidMap["v:this"];
       if (id && m_block->getBit(DataFlow::Available, id)) {
@@ -3498,11 +3516,16 @@ public:
       m_top(g->getMethod()->getStmts()) {}
 
   void walk() {
-    DataFlowWalker::walk();
+    DataFlowWalker::walk(*this);
   }
 
   void processAccess(ExpressionPtr e) {
-    if (int id = e->getCanonID()) {
+    int id = e->getCanonID();
+    if (!id && e->is(Expression::KindOfSimpleVariable) &&
+        (e->isAnticipated() || !e->isKilled())) {
+      id = m_gidMap["v:" + static_pointer_cast<SimpleVariable>(e)->getName()];
+    }
+    if (id) {
       if (!m_block->getDfn()) return;
       if (e->isAnticipated() && m_block->getBit(DataFlow::AvailIn, id)) {
         markAvailable(e);
@@ -3528,8 +3551,7 @@ public:
           Statement::KindOfReturnStatement)) {
       if (m_block->getDfn()) {
         int id = m_gidMap["v:this"];
-        if (id && m_block->getBit(cp == m_top ?
-                                  DataFlow::AvailOut : DataFlow::AvailIn, id)) {
+        if (id && m_block->getBit(DataFlow::AvailOut, id)) {
           cp->setGuarded();
         }
       }

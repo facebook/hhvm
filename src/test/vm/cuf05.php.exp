@@ -27,7 +27,7 @@ array(1) {
   &int(1)
 }
 HipHop Warning:  Parameter 1 to bar() expected to be a reference, value given in src/test/vm/cuf05.php on line 13
-NULL
+int(1)
 array(1) {
   [0]=>
   int(1)

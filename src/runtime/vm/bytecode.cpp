@@ -5879,18 +5879,27 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
       nparams = nargs;
     }
     ssize_t pos = args->iter_begin();
+    int param = 0;
     for (int i = 0; i < nparams; ++i) {
       TypedValue* from = const_cast<TypedValue*>(
         args->getValueRef(pos).asTypedValue());
       if (UNLIKELY(f->byRef(i))) {
         if (UNLIKELY(!tvAsVariant(from).isReferenced())) {
+          // TODO: #1746957
+          // we should raise a warning and bail out here. But there are
+          // lots of tests dependent on actually making the call.
+          // Hopefully the warnings will get the code base cleaned up
+          // and we'll be able to fix this painlessly
+          const bool skipCallOnInvalidParams = false;
           int param = i + 1;
-          while (i--) m_stack.popTV();
-          m_stack.popAR();
-          m_stack.pushNull();
           raise_warning("Parameter %d to %s() expected to be a reference, "
                         "value given", param, f->name()->data());
-          return false;
+          if (skipCallOnInvalidParams) {
+            while (i--) m_stack.popTV();
+            m_stack.popAR();
+            m_stack.pushNull();
+            return false;
+          }
         }
         tvDup(from, m_stack.allocTV());
       } else {

@@ -12308,26 +12308,19 @@ TranslatorX64::translateFCall(const Tracelet& t,
   }
 }
 
-void
-TranslatorX64::analyzeStaticLocInit(Tracelet& t, NormalizedInstruction& i) {
-  // Class methods, closures, and generators all violate the
-  // one-source == one-static assumption for our current translation
-  // strategy.
-  i.m_txFlags = supportedPlan(!curFunc()->isClosureBody() &&
-                              !curFunc()->isGeneratorFromClosure() &&
-                              !curFunc()->cls());
-}
-
+template <bool UseTC>
 static TypedValue*
-staticLocHelper(StringData* name, TargetCache::CacheHandle ch) {
-  VMRegAnchor _;
-  Stats::inc(Stats::TgtCache_StaticMiss);
-  Stats::inc(Stats::TgtCache_StaticHit, -1);
-  HphpArray* map = get_static_locals(curFrame());
+staticLocHelper(StringData* name, ActRec* fp, TypedValue* sp,
+                TargetCache::CacheHandle ch) {
+  if (UseTC) {
+    Stats::inc(Stats::TgtCache_StaticMiss);
+    Stats::inc(Stats::TgtCache_StaticHit, -1);
+  }
+  HphpArray* map = get_static_locals(fp);
   TypedValue* retval = map->nvGet(name); // Local to num
   if (!retval) {
     // Read the initial value off the stack.
-    TypedValue tv = *vmsp();
+    TypedValue tv = *sp;
     map->nvSet(name, &tv, false);
     retval = map->nvGet(name);
   }
@@ -12336,41 +12329,71 @@ staticLocHelper(StringData* name, TargetCache::CacheHandle ch) {
     tvBox(retval);
   }
   ASSERT(retval->m_type == KindOfRef);
-  TypedValue** chTv = (TypedValue**)TargetCache::handleToPtr(ch);
-  ASSERT(*chTv == NULL);
-  return (*chTv = retval);
+  if (UseTC) {
+    TypedValue** chTv = (TypedValue**)TargetCache::handleToPtr(ch);
+    ASSERT(*chTv == NULL);
+    return (*chTv = retval);
+  } else {
+    return retval;
+  }
+}
+
+void
+TranslatorX64::emitCallStaticLocHelper(x64::X64Assembler& as,
+                                       const NormalizedInstruction& i,
+                                       ScratchReg& output,
+                                       CacheHandle ch) {
+  // The helper is going to read the value from memory, so record it.  We
+  // could also pass type/value as parameters, but this is hopefully a
+  // rare path.
+  m_regMap.cleanLoc(i.inputs[0]->location);
+  if (false) { // typecheck
+    StringData* sd = NULL;
+    ActRec* fp = NULL;
+    TypedValue* sp = NULL;
+    sp = staticLocHelper<true>(sd, fp, sp, ch);
+    sp = staticLocHelper<false>(sd, fp, sp, ch);
+  }
+  const StringData* name = curFunc()->unit()->lookupLitstrId(i.imm[1].u_SA);
+  ASSERT(name->isStatic());
+  if (ch) {
+    EMIT_CALL(as, (TCA)staticLocHelper<true>, IMM(uintptr_t(name)), R(rVmFp),
+              RPLUS(rVmSp, -cellsToBytes(i.stackOff)), IMM(ch));
+  } else {
+    EMIT_CALL(as, (TCA)staticLocHelper<false>, IMM(uintptr_t(name)), R(rVmFp),
+              RPLUS(rVmSp, -cellsToBytes(i.stackOff)));
+  }
+  recordCall(as, i);
+  emitMovRegReg(as, rax, *output);
 }
 
 void
 TranslatorX64::translateStaticLocInit(const Tracelet& t,
                                       const NormalizedInstruction& i) {
-  // Miss path explicitly decrements.
-  Stats::emitInc(a, Stats::TgtCache_StaticHit);
-
   using namespace TargetCache;
-  CacheHandle ch = allocStatic();
   ScratchReg output(m_regMap);
   const Location& outLoc = i.outLocal->location;
-  a.    load_reg64_disp_reg64(rVmTl, ch, *output);
-  a.    test_reg64_reg64(*output, *output);
-  {
-    UnlikelyIfBlock<CC_Z> fooey(a, astubs);
-    // No point spilling outLoc in this branch; it doesn't have its final
-    // value yet.
-    //
-    // The helper is going to read the value from memory, so record it.  We
-    // could also pass type/value as parameters, but this is hopefully a
-    // rare path.
-    m_regMap.cleanLoc(i.inputs[0]->location);
-    if (false) { // typecheck
-      StringData* sd = NULL;
-      UNUSED TypedValue* tv = staticLocHelper(sd, ch);
+
+  // Closures and generators from closures don't satisfy the "one
+  // static per source location" rule that the inline fastpath
+  // requires
+  if (!curFunc()->isClosureBody() &&
+      !curFunc()->isGeneratorFromClosure()) {
+    // Miss path explicitly decrements.
+    Stats::emitInc(a, Stats::TgtCache_StaticHit);
+    Stats::emitInc(a, Stats::Tx64_StaticLocFast);
+
+    CacheHandle ch = allocStatic();
+    ASSERT(ch);
+    a.  load_reg64_disp_reg64(rVmTl, ch, *output);
+    a.  test_reg64_reg64(*output, *output);
+    {
+      UnlikelyIfBlock<CC_Z> fooey(a, astubs);
+      emitCallStaticLocHelper(astubs, i, output, ch);
     }
-    const StringData* name = curFunc()->unit()->lookupLitstrId(i.imm[1].u_SA);
-    ASSERT(name->isStatic());
-    EMIT_CALL(astubs, TCA(staticLocHelper), IMM(uintptr_t(name)), IMM(ch));
-    recordReentrantStubCall(i);
-    emitMovRegReg(astubs, rax, *output);
+  } else {
+    Stats::emitInc(a, Stats::Tx64_StaticLocSlow);
+    emitCallStaticLocHelper(a, i, output, 0);
   }
   // Now we've got the outer variant in *output. Get the address of the
   // inner cell, since that's the enregistered representation of a variant.
@@ -13993,6 +14016,7 @@ bool TranslatorX64::dumpTCData() {
   SUPPORTED_OP(ContCurrent) \
   SUPPORTED_OP(FPushCtor) \
   SUPPORTED_OP(FPushCtorD) \
+  SUPPORTED_OP(StaticLocInit) \
   /*
    * Always-interp instructions,
    */ \

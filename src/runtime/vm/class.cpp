@@ -1552,17 +1552,15 @@ void Class::setMethods() {
        it != parentMethodsWithStaticLocals.end(); ++it) {
     Func*& f = builder[*it];
     if (f->cls() != this) {
-      // If f doesn't have AttrClone set, we're only cloning it so
-      // that we get a distinct set of static locals. Keep the same
-      // FuncId so that we don't generate separate translations.
-      Func::FuncId id = f->getFuncId();
+      // Don't update f's m_cls if it doesn't have AttrClone set:
+      // we're cloning it so that we get a distinct set of static
+      // locals and a separate translation, not a different context
+      // class.
       f = f->clone();
       if (f->attrs() & AttrClone) {
         f->setCls(this);
-        f->setNewFuncId();
-      } else {
-        f->setFuncId(id);
       }
+      f->setNewFuncId();
     }
   }
 

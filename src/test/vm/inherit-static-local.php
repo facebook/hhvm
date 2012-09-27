@@ -15,6 +15,7 @@ class D extends C {
 
 C::foo();
 C::foo();
+C::foo();
 D::foo();
 D::foo();
 

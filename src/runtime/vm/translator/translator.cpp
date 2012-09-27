@@ -1447,19 +1447,24 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         if (dl->rtt.valueType() != KindOfObject) {
           continue;
         }
-        const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
-        Class* cls = Unit::lookupClass(sd);
-        if (cls) {
-          ASSERT(!dl->rtt.valueClass() ||
-                 cls->classof(dl->rtt.valueClass()) ||
-                 dl->rtt.valueClass()->classof(cls));
+
+        const StringData* metaName = ni->unit()->lookupLitstrId(info.m_data);
+        const StringData* rttName =
+          dl->rtt.valueClass() ? dl->rtt.valueClass()->name() : NULL;
+        // The two classes might not be exactly the same, which is ok
+        // as long as metaCls is more derived than rttCls.
+        Class* metaCls = Unit::lookupClass(metaName);
+        Class* rttCls = rttName ? Unit::lookupClass(rttName) : NULL;
+        ASSERT(IMPLIES(metaCls && rttCls && metaCls != rttCls,
+                       metaCls->classof(rttCls)));
+        if (metaCls && metaCls != rttCls) {
           SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
-                  "class; old type = %s\n",
-                  arg, dl->pretty().c_str());
+                  "class of %s; old type = %s\n",
+                  arg, metaName->data(), dl->pretty().c_str());
           if (dl->rtt.isVariant()) {
-            dl->rtt = RuntimeType(KindOfRef, KindOfObject, cls);
+            dl->rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
           } else {
-            dl->rtt = RuntimeType(KindOfObject, KindOfInvalid, cls);
+            dl->rtt = RuntimeType(KindOfObject, KindOfInvalid, metaCls);
           }
         }
         break;

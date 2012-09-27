@@ -191,6 +191,10 @@ class TranslatorX64 : public Translator, public SpillFill,
 
   void emitCallSaveRegs();
   void prepareCallSaveRegs();
+  void emitCallStaticLocHelper(x64::X64Assembler& as,
+                               const NormalizedInstruction& i,
+                               ScratchReg& output,
+                               ptrdiff_t ch);
   void emitCall(Asm& a, TCA dest, bool killRegs=false);
   void emitCallFillCont(Asm& a, const Func* orig, const Func* gen);
   void emitCallUnpack(Asm& a, const NormalizedInstruction& i, int nCopy);

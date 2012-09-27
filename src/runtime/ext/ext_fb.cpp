@@ -419,13 +419,11 @@ Variant f_fb_thrift_serialize(CVarRef thing) {
   if (fb_serialized_size(thing, 0, &len)) {
     return null;
   }
-  char *buff = (char *)malloc(len + 1);
+  String s(len, ReserveString);
   int pos = 0;
-  fb_serialize_into_buffer(thing, buff, &pos);
-
+  fb_serialize_into_buffer(thing, s.mutableSlice().ptr, &pos);
   ASSERT(pos == len);
-  buff[len] = '\0';
-  return String(buff, len, AttachString);
+  return s.setSize(len);
 }
 
 int fb_compact_unserialize_from_buffer(
@@ -767,9 +765,9 @@ Variant f_fb_compact_serialize(CVarRef thing) {
   if (thing.getType() == KindOfInt64) {
     int64_t val = thing.toInt64();
     if (val >= 0 && (uint64_t)val <= kInt7Mask) {
-      char* buf = (char*)malloc(2);
-      *(uint16_t*)(buf) = (uint16_t)htons(kInt13Prefix | val);
-      return String(buf, 2, AttachString);
+      String s(2, ReserveString);
+      *(uint16_t*)(s.mutableSlice().ptr) = (uint16_t)htons(kInt13Prefix | val);
+      return s.setSize(2);
     }
   }
 
@@ -781,7 +779,7 @@ Variant f_fb_compact_serialize(CVarRef thing) {
     return null;
   }
 
-  return String(sd);
+  return Variant(sd);
 }
 
 int fb_compact_unserialize_int64_from_buffer(
@@ -1176,7 +1174,7 @@ bool f_fb_utf8ize(VRefParam input) {
     return false; // Too long.
   }
 
-  // Preflight to avoid malloc() if the entire input is valid.
+  // Preflight to avoid allocation if the entire input is valid.
   int32_t srcPosBytes;
   for (srcPosBytes = 0; srcPosBytes < srcLenBytes; /* U8_NEXT increments */) {
     // This is lame, but gcc doesn't optimize U8_NEXT very well
@@ -1212,10 +1210,8 @@ bool f_fb_utf8ize(VRefParam input) {
   if (dstMaxLenBytes > INT_MAX) {
     return false; // Too long.
   }
-  char *dstBuf = (char*)malloc(dstMaxLenBytes + 1);
-  if (!dstBuf) {
-    return false;
-  }
+  String dstStr(dstMaxLenBytes, ReserveString);
+  char *dstBuf = dstStr.mutableSlice().ptr;
 
   // Copy valid bytes found so far as one solid block.
   memcpy(dstBuf, srcBuf, srcPosBytes);
@@ -1241,8 +1237,7 @@ bool f_fb_utf8ize(VRefParam input) {
     // We know that resultBuffer > total possible length.
     U8_APPEND_UNSAFE(dstBuf, dstPosBytes, curCodePoint);
   }
-  dstBuf[dstPosBytes] = '\0';
-  input = String(dstBuf, dstPosBytes, AttachString);
+  input = dstStr.setSize(dstPosBytes);
   return true;
 }
 
@@ -1287,9 +1282,7 @@ int64 f_fb_utf8_strlen_deprecated(CStrRef input) {
 static Variant f_fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
                                        int32_t numDesiredCodePoints) {
   const char* const srcBuf = str.data();
-  char *dstBuf;
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
-  int32_t dstPosBytes = 0;
 
   ASSERT(firstCodePoint >= 0);  // Wrapper fixes up negative starting positions.
   ASSERT(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
@@ -1319,10 +1312,9 @@ static Variant f_fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
   if (dstMaxLenBytes > INT_MAX) {
     return false; // Too long.
   }
-  dstBuf = (char*)malloc(dstMaxLenBytes + 1);
-  if (!dstBuf) {
-    return false;
-  }
+  String dstStr(dstMaxLenBytes, ReserveString);
+  char* dstBuf = dstStr.mutableSlice().ptr;
+  int32_t dstPosBytes = 0;
 
   // Iterate through src's codepoints; srcPosBytes is incremented by U8_NEXT.
   for (int32_t srcPosBytes = 0, srcPosCodePoints = 0;
@@ -1346,12 +1338,8 @@ static Variant f_fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
   }
 
   if (dstPosBytes > 0) {
-    ASSERT(dstPosBytes <= (int32_t)dstMaxLenBytes);
-    dstBuf[dstPosBytes] = '\0';
-    return String(dstBuf, dstPosBytes, AttachString);
+    return dstStr.setSize(dstPosBytes);
   }
-
-  free(dstBuf);
   return false;
 }
 

@@ -350,6 +350,9 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
   SweepNode* n2 = (SweepNode*) realloc(n, nbytes + sizeof(SweepNode));
   if (n2 != n) {
     // block moved; must re-link to sweeplist
+    if (hhvm && UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+      refreshStatsHelper();
+    }
     if (next != n) {
       next->prev = prev->next = n2;
     } else {

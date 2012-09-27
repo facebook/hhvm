@@ -220,10 +220,12 @@ public:
     return isSmall() ? MutableSlice(m_small, MaxSmallSize) :
                        MutableSlice(m_data, bigCap());
   }
-  void setSize(int len) {
+  StringData* shrink(int len); // setSize and maybe realloc
+  StringData* setSize(int len) {
     ASSERT(len >= 0 && len <= capacity() && !isImmutable());
     m_data[len] = 0;
     m_len = len;
+    return this;
   }
 
   ~StringData() { releaseData(); }

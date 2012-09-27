@@ -207,6 +207,11 @@ public:
     m_px->setSize(len);
     return *this;
   }
+  CStrRef shrink(int len) {
+    ASSERT(m_px);
+    m_px->shrink(len);
+    return *this;
+  }
   const char *c_str() const {
     return m_px ? m_px->data() : "";
   }

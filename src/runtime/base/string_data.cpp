@@ -388,6 +388,24 @@ MutableSlice StringData::reserve(int cap) {
   return MutableSlice(m_data, cap);
 }
 
+StringData* StringData::shrink(int len) {
+  setSize(len);
+  switch (format()) {
+    case IsSmart:
+      m_data = (char*) smart_realloc(m_data, len + 1);
+      m_big.cap = len | IsSmart;
+      break;
+    case IsMalloc:
+      m_data = (char*) realloc(m_data, len + 1);
+      m_big.cap = len | IsMalloc;
+      break;
+    default:
+      // don't shrink
+      break;
+  }
+  return this;
+}
+
 StringData *StringData::copy(bool sharedMemory /* = false */) const {
   if (isStatic()) {
     // Static strings cannot change, and are always available.

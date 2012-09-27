@@ -508,7 +508,7 @@ static void staticArrayStreamer(ArrayData* ad, std::stringstream& out) {
   out << ")";
 }
 
-void staticStreamer(TypedValue* tv, std::stringstream& out) {
+void staticStreamer(const TypedValue* tv, std::stringstream& out) {
   switch (tv->m_type) {
   case KindOfUninit:
   case KindOfNull: {

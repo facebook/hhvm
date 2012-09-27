@@ -86,10 +86,7 @@ PreClass::Prop::Prop(PreClass* preClass, const StringData* n, Attr attrs,
   memcpy(&m_val, &val, sizeof(TypedValue));
 }
 
-PreClass::Prop::~Prop() {
-}
-
-void PreClass::Prop::prettyPrint(std::ostream& out) {
+void PreClass::Prop::prettyPrint(std::ostream& out) const {
   out << "Property ";
   if (m_attrs & AttrStatic) { out << "static "; }
   if (m_attrs & AttrPublic) { out << "public "; }
@@ -115,10 +112,7 @@ PreClass::Const::Const(PreClass* preClass, const StringData* n,
   memcpy(&m_val, &val, sizeof(TypedValue));
 }
 
-PreClass::Const::~Const() {
-}
-
-void PreClass::Const::prettyPrint(std::ostream& out) {
+void PreClass::Const::prettyPrint(std::ostream& out) const {
   out << "Constant " << m_preClass->name()->data() << "::" << m_name->data()
       << " = ";
   if (m_val.m_type == KindOfUninit) {
@@ -147,10 +141,6 @@ PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
 PreClass::~PreClass() {
   std::for_each(methods(), methods() + numMethods(),
                 boost::checked_deleter<Func>());
-  std::for_each(properties(), properties() + numProperties(),
-                boost::checked_deleter<Prop>());
-  std::for_each(constants(), constants() + numConstants(),
-                boost::checked_deleter<Const>());
 }
 
 void PreClass::atomicRelease() {
@@ -177,17 +167,17 @@ void PreClass::prettyPrint(std::ostream &out) const {
     out << " ";
     (*it)->prettyPrint(out);
   }
-  for (Prop* const* it = properties();
+  for (const Prop* it = properties();
       it != properties() + numProperties();
       ++it) {
     out << " ";
-    (*it)->prettyPrint(out);
+    it->prettyPrint(out);
   }
-  for (Const* const* it = constants();
+  for (const Const* it = constants();
       it != constants() + numConstants();
       ++it) {
     out << " ";
-    (*it)->prettyPrint(out);
+    it->prettyPrint(out);
   }
 }
 
@@ -349,26 +339,24 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   }
   pc->m_methods.create(methodBuild);
 
-  // Properties in the actual PreClass are heap allocated (currently).
-  // (TODO: #1130994)
   PreClass::PropMap::Builder propBuild;
   for (unsigned i = 0; i < m_propMap.size(); ++i) {
     const Prop& prop = m_propMap[i];
-    propBuild.add(prop.name(), new PreClass::Prop(pc,
-                                                  prop.name(),
-                                                  prop.attrs(),
-                                                  prop.docComment(),
-                                                  prop.val()));
+    propBuild.add(prop.name(), PreClass::Prop(pc,
+                                              prop.name(),
+                                              prop.attrs(),
+                                              prop.docComment(),
+                                              prop.val()));
   }
   pc->m_properties.create(propBuild);
 
   PreClass::ConstMap::Builder constBuild;
   for (unsigned i = 0; i < m_constMap.size(); ++i) {
     const Const& const_ = m_constMap[i];
-    constBuild.add(const_.name(), new PreClass::Const(pc,
-                                                      const_.name(),
-                                                      const_.val(),
-                                                      const_.phpCode()));
+    constBuild.add(const_.name(), PreClass::Const(pc,
+                                                  const_.name(),
+                                                  const_.val(),
+                                                  const_.phpCode()));
   }
   pc->m_constants.create(constBuild);
   return pc;
@@ -1636,7 +1624,7 @@ void Class::setConstants() {
   }
 
   for (Slot i = 0, sz = m_preClass->numConstants(); i < sz; ++i) {
-    PreClass::Const* preConst = m_preClass->constants()[i];
+    const PreClass::Const* preConst = &m_preClass->constants()[i];
     ConstMap::Builder::iterator it2 = builder.find(preConst->name());
     if (it2 != builder.end()) {
       // Overlay ancestor's constant.
@@ -1700,7 +1688,7 @@ void Class::setProperties() {
 
   ASSERT(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
   for (Slot slot = 0; slot < m_preClass->numProperties(); ++slot) {
-    const PreClass::Prop* preProp = m_preClass->properties()[slot];
+    const PreClass::Prop* preProp = &m_preClass->properties()[slot];
 
     if (!(preProp->attrs() & AttrStatic)) {
       // Overlay/append this class's protected and public properties onto/to

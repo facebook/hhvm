@@ -185,7 +185,7 @@ static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
 }
 
 
-static void set_property_info(Array &ret, VM::PreClass::Prop* prop) {
+static void set_property_info(Array &ret, const VM::PreClass::Prop* prop) {
   ret.set(s_name, VarNR(prop->name()));
   set_attrs(ret, get_modifiers(prop->attrs(), false) & ~0x66);
   ret.set(s_class, VarNR(prop->preClass()->name()));
@@ -695,15 +695,14 @@ Array f_hphp_get_class_info(CVarRef name) {
     // properties
     {
       Array arr = Array::Create();
-      VM::PreClass::Prop* const* properties =
-        cls->preClass()->properties();
+      const VM::PreClass::Prop* properties = cls->preClass()->properties();
       const size_t nProps = cls->preClass()->numProperties();
 
       for (VM::Slot i = 0; i < nProps; ++i) {
-        VM::PreClass::Prop* prop = properties[i];
+        const VM::PreClass::Prop& prop = properties[i];
         Array info = Array::Create();
-        set_property_info(info, prop);
-        arr.set(prop->nameRef(), VarNR(info));
+        set_property_info(info, &prop);
+        arr.set(prop.nameRef(), VarNR(info));
       }
       ret.set(s_properties, VarNR(arr));
     }

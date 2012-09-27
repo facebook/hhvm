@@ -705,7 +705,7 @@ void encodeToVector(std::vector<uchar>& vec, T val) {
   memcpy(&vec[currentLen], &val, sizeof(T));
 }
 
-void staticStreamer(TypedValue* tv, std::stringstream& out);
+void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
 std::string instrToString(const Opcode* it, const Unit* u = NULL);
 std::string opcodeToName(Opcode op);

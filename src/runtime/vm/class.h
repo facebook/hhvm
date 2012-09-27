@@ -64,13 +64,12 @@ class PreClass : public AtomicCountable {
     AlwaysHoistable
   };
 
-  class Prop {
-   public:
+  struct Prop {
+    Prop() {}
     Prop(PreClass* preClass, const StringData* n, Attr attrs,
          const StringData* docComment, const TypedValue& val);
-    ~Prop();
 
-    void prettyPrint(std::ostream& out);
+    void prettyPrint(std::ostream& out) const;
 
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
@@ -80,7 +79,8 @@ class PreClass : public AtomicCountable {
     Attr attrs() const { return m_attrs; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
-   private:
+
+  private:
     PreClass* m_preClass;
     const StringData* m_name;
     const StringData* m_mangledName;
@@ -88,20 +88,21 @@ class PreClass : public AtomicCountable {
     const StringData* m_docComment;
     TypedValue m_val;
   };
-  class Const {
-   public:
+
+  struct Const {
+    Const() {}
     Const(PreClass* preClass, const StringData* n, const TypedValue& val,
           const StringData* phpCode);
-    ~Const();
 
-    void prettyPrint(std::ostream& out);
+    void prettyPrint(std::ostream& out) const;
 
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
     CStrRef nameRef() const { return *(String*)&m_name; }
     const TypedValue& val() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
-   private:
+
+  private:
     PreClass* m_preClass;
     const StringData* m_name;
     TypedValue m_val;
@@ -213,17 +214,20 @@ class PreClass : public AtomicCountable {
    *    consts(); numConsts(); ConstRange allConsts();
    *    properties; numProperties(); PropRange allProperties();
    */
-#define DEF_ACCESSORS(Type, fields, Fields)                                 \
-  Type* const* fields() const { return m_##fields.accessList(); }           \
-  Type**       mutable##Fields() { return m_##fields.mutableAccessList(); } \
-  size_t num##Fields()  const { return m_##fields.size(); }                 \
-  typedef IterRange<Type* const*> Type##Range;                              \
-  Type##Range all##Fields() const {                                         \
-    return Type##Range(fields(), fields() + m_##fields.size() - 1);         \
+
+#define DEF_ACCESSORS(Type, TypeName, fields, Fields)                   \
+  Type const* fields() const { return m_##fields.accessList(); }        \
+  Type*       mutable##Fields() { return m_##fields.mutableAccessList(); } \
+  size_t num##Fields()  const { return m_##fields.size(); }             \
+  typedef IterRange<Type const*> TypeName##Range;                       \
+  TypeName##Range all##Fields() const {                                 \
+    return TypeName##Range(fields(), fields() + m_##fields.size() - 1); \
   }
-  DEF_ACCESSORS(Func, methods, Methods)
-  DEF_ACCESSORS(Const, constants, Constants)
-  DEF_ACCESSORS(Prop, properties, Properties)
+
+  DEF_ACCESSORS(Func*, Func, methods, Methods)
+  DEF_ACCESSORS(Const, Const, constants, Constants)
+  DEF_ACCESSORS(Prop, Prop, properties, Properties)
+
 #undef DEF_ACCESSORS
 
   bool hasMethod(const StringData* methName) const {
@@ -240,10 +244,10 @@ class PreClass : public AtomicCountable {
     return f;
   }
 
-  Prop* lookupProp(const StringData* propName) const {
-    Prop* p = m_properties.lookupDefault(propName, 0);
-    ASSERT(p != NULL);
-    return p;
+  const Prop* lookupProp(const StringData* propName) const {
+    Slot s = m_properties.findIndex(propName);
+    ASSERT(s != kInvalidSlot);
+    return &m_properties[s];
   }
 
   BuiltinCtorFunction instanceCtor() { return m_InstanceCtor; }
@@ -255,8 +259,8 @@ class PreClass : public AtomicCountable {
 
 private:
   typedef IndexedStringMap<Func*,false,Slot> MethodMap;
-  typedef IndexedStringMap<Prop*,true,Slot> PropMap;
-  typedef IndexedStringMap<Const*,true,Slot> ConstMap;
+  typedef IndexedStringMap<Prop,true,Slot> PropMap;
+  typedef IndexedStringMap<Const,true,Slot> ConstMap;
 
 private:
   Unit* m_unit;

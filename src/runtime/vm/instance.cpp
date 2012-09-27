@@ -605,11 +605,11 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
   // hierarchy, in declaration order.
   const Class* klass = m_cls;
   while (klass != NULL) {
-    PreClass::Prop* const* props = klass->m_preClass->properties();
+    const PreClass::Prop* props = klass->m_preClass->properties();
     const size_t numProps = klass->m_preClass->numProperties();
 
     for (size_t i = 0; i < numProps; ++i) {
-      StringData* key = const_cast<StringData*>(props[i]->name());
+      StringData* key = const_cast<StringData*>(props[i].name());
       bool visible, accessible, unset;
       TypedValue* val = getProp(ctx, key, visible, accessible, unset);
       if (accessible && val->m_type != KindOfUninit && !unset) {
@@ -721,10 +721,10 @@ void Instance::getProps(const Class* klass, bool pubOnly,
                         const PreClass* pc,
                         Array& props,
                         std::vector<bool>& inserted) const {
-  PreClass::Prop* const* propVec = pc->properties();
+  PreClass::Prop const* propVec = pc->properties();
   size_t count = pc->numProperties();
   for (size_t i = 0; i < count; ++i) {
-    getProp(klass, pubOnly, propVec[i], props, inserted);
+    getProp(klass, pubOnly, &propVec[i], props, inserted);
   }
 }
 

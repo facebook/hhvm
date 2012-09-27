@@ -2225,14 +2225,10 @@ TranslatorX64::trimExtraArgs(ActRec* ar) {
         numArgs, f->name()->data(), numParams, ar);
 
   if (f->attrs() & AttrMayUseVV) {
-    if (!ar->hasExtraArgs()) {
-      ar->setExtraArgs(new ExtraArgs());
-    }
-    // Stash the excess args in the VarEnv attached to the ActRec. They'll be
-    // decref'ed, if needed, when the VarEnv gets destructed.
-    ar->getExtraArgs()->copyExtraArgs(
+    ASSERT(!ar->hasExtraArgs());
+    ar->setExtraArgs(ExtraArgs::allocateCopy(
       (TypedValue*)(uintptr_t(ar) - numArgs * sizeof(TypedValue)),
-      numArgs - numParams);
+      numArgs - numParams));
   } else {
     // Function is not marked as "MayUseVV", so discard the extra arguments
     TypedValue* tv = (TypedValue*)(uintptr_t(ar) - numArgs*sizeof(TypedValue));

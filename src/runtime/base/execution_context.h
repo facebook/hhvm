@@ -662,15 +662,20 @@ public:
 private:
   void enterVMWork(VM::ActRec* enterFnAr);
   void enterVM(TypedValue* retval,
-               HPHP::VM::ActRec* ar,
-               TypedValue* extraArgs);
+               VM::ActRec* ar,
+               VM::ExtraArgs* extraArgs);
+  void reenterVM(TypedValue* retval,
+                 VM::ActRec* ar,
+                 VM::ExtraArgs* extraArgs,
+                 TypedValue* savedSP);
   void doFPushCuf(VM::PC& pc, bool forward, bool safe);
   void unwindBuiltinFrame();
   template <bool reenter, bool handle_throw>
-  bool prepareFuncEntry(VM::ActRec* ar, VM::PC& pc, TypedValue* extraArgs);
+  bool prepareFuncEntry(VM::ActRec* ar,
+                        VM::PC& pc,
+                        VM::ExtraArgs* extraArgs);
   bool prepareArrayArgs(VM::ActRec* ar, ArrayData* args,
-                        TypedValue*& extraArgs);
-  void cleanupParamsAndActRec(VM::ActRec* ar, TypedValue* extraArgs);
+                        VM::ExtraArgs*& extraArgs);
   void recordCodeCoverage(VM::PC pc);
   int m_coverPrevLine;
   HPHP::VM::Unit* m_coverPrevUnit;
@@ -679,10 +684,6 @@ public:
   void resetCoverageCounters();
   void shuffleMagicArgs(HPHP::VM::ActRec* ar);
   void syncGdbState();
-  void reenterVM(TypedValue* retval,
-                 HPHP::VM::ActRec* ar,
-                 TypedValue* extraArgs,
-                 TypedValue* savedSP);
   void invokeFunc(TypedValue* retval,
                   const HPHP::VM::Func* f,
                   CArrRef params,

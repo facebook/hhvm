@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 #include <boost/format.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
@@ -243,13 +244,11 @@ VarEnv::VarEnv()
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
-  : m_extraArgs(eArgs) // move
+  : m_extraArgs(eArgs)
   , m_depth(1)
   , m_malloced(false)
   , m_cfp(fp)
 {
-  delete eArgs;
-
   const Func* func = fp->m_func;
   const Id numNames = func->numNamedLocals();
 
@@ -492,73 +491,53 @@ Array VarEnv::getDefinedVariables() const {
   return ret;
 }
 
-unsigned VarEnv::numExtraArgs() const {
-  return m_extraArgs.numExtraArgs();
-}
-
 TypedValue* VarEnv::getExtraArg(unsigned argInd) const {
-  ASSERT(numExtraArgs());
-  return m_extraArgs.getExtraArg(argInd);
+  return m_extraArgs->getExtraArg(argInd);
 }
 
 //=============================================================================
-// ExtraArgs.
 
-ExtraArgs::ExtraArgs()
-  : m_extraArgs(NULL)
-  , m_numExtraArgs(0)
-{}
+ExtraArgs::ExtraArgs() {}
+ExtraArgs::~ExtraArgs() {}
 
-ExtraArgs::ExtraArgs(ExtraArgs* o)
-  : m_extraArgs(o ? o->m_extraArgs : 0)
-  , m_numExtraArgs(o ? o->m_numExtraArgs : 0)
-{
-  if (o) {
-    o->m_extraArgs = 0;
-    o->m_numExtraArgs = 0;
+void* ExtraArgs::allocMem(unsigned nargs) {
+  return smart_malloc(sizeof(TypedValue) * nargs + sizeof(ExtraArgs));
+}
+
+ExtraArgs* ExtraArgs::allocateCopy(TypedValue* args, unsigned nargs) {
+  void* mem = allocMem(nargs);
+  ExtraArgs* ea = new (mem) ExtraArgs();
+
+  /*
+   * The stack grows downward, so the args in memory are "backward"; i.e. the
+   * leftmost (in PHP) extra arg is highest in memory.
+   */
+  std::reverse_copy(args, args + nargs, &ea->m_extraArgs[0]);
+  return ea;
+}
+
+ExtraArgs* ExtraArgs::allocateUninit(unsigned nargs) {
+  void* mem = ExtraArgs::allocMem(nargs);
+  return new (mem) ExtraArgs();
+}
+
+void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
+  ASSERT(nargs > 0);
+
+  for (unsigned i = 0; i < nargs; ++i) {
+    tvRefcountedDecRef(ea->m_extraArgs + i);
   }
+  ea->~ExtraArgs();
+  smart_free(ea);
 }
 
-ExtraArgs::~ExtraArgs() {
-  if (m_extraArgs != NULL) {
-    for (unsigned i = 0; i < m_numExtraArgs; i++) {
-      tvRefcountedDecRef(&m_extraArgs[i]);
-    }
-    free(m_extraArgs);
-    if (debug) {
-      m_extraArgs = 0;
-      m_numExtraArgs = 0;
-    }
-  }
-}
-
-void ExtraArgs::setExtraArgs(TypedValue* args, unsigned nargs) {
-  ASSERT(!m_extraArgs);
-  m_extraArgs = args;
-  m_numExtraArgs = nargs;
-}
-
-void ExtraArgs::copyExtraArgs(TypedValue* args, unsigned nargs) {
-  // The ExtraArgs takes over ownership of the args; the original copies are
-  // discarded from the stack without adjusting reference counts, thus allowing
-  // ExtraArgs to avoid reference count manipulation here.
-  ASSERT(!m_extraArgs);
-  m_extraArgs = (TypedValue*)malloc(nargs * sizeof(TypedValue));
-  m_numExtraArgs = nargs;
-
-  // The stack grows downward, so the args in memory are "backward"; i.e. the
-  // leftmost (in PHP) extra arg is highest in memory.  We just copy them in a
-  // blob here, and compensate in getExtraArg().
-  memcpy(m_extraArgs, args, nargs * sizeof(TypedValue));
-}
-
-unsigned ExtraArgs::numExtraArgs() const {
-  return m_numExtraArgs;
+void ExtraArgs::deallocate(ActRec* ar) {
+  const int numExtra = ar->numArgs() - ar->m_func->numParams();
+  deallocate(ar->getExtraArgs(), numExtra);
 }
 
 TypedValue* ExtraArgs::getExtraArg(unsigned argInd) const {
-  ASSERT(argInd < m_numExtraArgs);
-  return &m_extraArgs[m_numExtraArgs - argInd - 1];
+  return const_cast<TypedValue*>(&m_extraArgs[argInd]);
 }
 
 //=============================================================================
@@ -1655,7 +1634,7 @@ static inline void checkStack(Stack& stk, const Func* f) {
 template <bool reenter, bool handle_throw>
 bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
                                           PC& pc,
-                                          TypedValue* extraArgs) {
+                                          ExtraArgs* extraArgs) {
   const Func* func = ar->m_func;
   if (!reenter) {
     // For the reenter case, intercept and magic shuffling are handled
@@ -1712,11 +1691,10 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
           // inheriting a VarEnv
           ASSERT(!m_fp->m_varEnv);
           // Extra parameters must be moved off the stack.
-          m_fp->setExtraArgs(new ExtraArgs());
-          int numExtras = nargs - nparams;
-          m_fp->getExtraArgs()->copyExtraArgs(
+          const int numExtras = nargs - nparams;
+          m_fp->setExtraArgs(ExtraArgs::allocateCopy(
             (TypedValue*)(uintptr_t(m_fp) - nargs * sizeof(TypedValue)),
-            numExtras);
+            numExtras));
           for (int i = 0; i < numExtras; i++) {
             m_stack.discard();
           }
@@ -1747,12 +1725,9 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
       // the VarEnv inherited from our caller to the current frame
       ar->m_varEnv->attach(ar);
     } else if (extraArgs) {
-      // Create a new ExtraArgs structure and stash the extra args in
+      // Create an ExtraArgs structure and stash the extra args in
       // there.
-      int numExtras = ar->numArgs() - ar->m_func->numParams();
-      ASSERT(numExtras > 0);
-      ar->setExtraArgs(new ExtraArgs());
-      ar->getExtraArgs()->setExtraArgs(extraArgs, numExtras);
+      ar->setExtraArgs(extraArgs);
     }
   }
 
@@ -1854,7 +1829,7 @@ static int exception_handler() {
 
 void VMExecutionContext::enterVM(TypedValue* retval,
                                  ActRec* ar,
-                                 TypedValue* extraArgs) {
+                                 ExtraArgs* extraArgs) {
   m_firstAR = ar;
   ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
 
@@ -1945,7 +1920,7 @@ propagate:
 
 void VMExecutionContext::reenterVM(TypedValue* retval,
                                    ActRec* ar,
-                                   TypedValue* extraArgs,
+                                   ExtraArgs* extraArgs,
                                    TypedValue* savedSP) {
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
@@ -2061,7 +2036,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
 #endif
 
   HphpArray *arr = dynamic_cast<HphpArray*>(params.get());
-  TypedValue* extraArgs = NULL;
+  ExtraArgs* extraArgs = nullptr;
   if (isMagicCall) {
     // Put the method name into the location of the first parameter. We
     // are transferring ownership, so no need to incRef/decRef here.
@@ -2079,10 +2054,10 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
       ASSERT(arr && IsHphpArray(arr));
     }
     if (arr) {
-      int numParams = f->numParams();
-      int numExtraArgs = arr->size() - numParams;
+      const int numParams = f->numParams();
+      const int numExtraArgs = arr->size() - numParams;
       if (numExtraArgs > 0 && (f->attrs() & AttrMayUseVV)) {
-        extraArgs = (TypedValue*)malloc(sizeof(TypedValue) * numExtraArgs);
+        extraArgs = ExtraArgs::allocateUninit(numExtraArgs);
       }
       int paramId = 0;
       for (ssize_t i = arr->iter_begin();
@@ -2094,6 +2069,8 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
           to = m_stack.allocTV();
         } else {
           if (!(f->attrs() & AttrMayUseVV)) {
+            // Discard extra arguments, since the function cannot
+            // possibly use them.
             ASSERT(extraArgs == NULL);
             ar->setNumArgs(numParams);
             break;
@@ -2101,7 +2078,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
           ASSERT(extraArgs != NULL && numExtraArgs > 0);
           // VarEnv expects the extra args to be in "reverse" order
           // (i.e. the last extra arg has the lowest address)
-          to = extraArgs + (numExtraArgs - 1) - (paramId - numParams);
+          to = extraArgs->getExtraArg(paramId - numParams);
         }
         if (LIKELY(!f->byRef(paramId))) {
           tvDup(from, to);
@@ -2387,7 +2364,6 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
           args.append(tvAsVariant(arg));
         }
         for (; i < nargs; i++) {
-          ASSERT(fp->numExtraArgs());
           TypedValue *arg = fp->getExtraArg(i - nparams);
           args.append(tvAsVariant(arg));
         }
@@ -5886,7 +5862,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
 
 bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
                                           ArrayData* args,
-                                          TypedValue*& extraArgs) {
+                                          ExtraArgs*& extraArgs) {
   extraArgs = NULL;
   if (UNLIKELY(ar->hasInvName())) {
     m_stack.pushStringNoRc(ar->getInvName());
@@ -5927,9 +5903,9 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
       pos = args->iter_advance(pos);
     }
     if (extra && (ar->m_func->attrs() & AttrMayUseVV)) {
-      extraArgs = (TypedValue*)malloc(sizeof(TypedValue) * extra);
-      while (extra--) {
-        TypedValue* to = extraArgs + extra;
+      extraArgs = ExtraArgs::allocateUninit(extra);
+      for (int i = 0; i < extra; ++i) {
+        TypedValue* to = extraArgs->getExtraArg(i);
         tvDup(args->getValueRef(pos).asTypedValue(), to);
         if (to->m_type == KindOfRef && to->m_data.pref->_count == 2) {
           tvUnbox(to);
@@ -5944,18 +5920,17 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
   return true;
 }
 
-void VMExecutionContext::cleanupParamsAndActRec(ActRec* ar,
-                                                TypedValue* extraArgs) {
+static void cleanupParamsAndActRec(VM::Stack& stack,
+                                   ActRec* ar,
+                                   ExtraArgs* extraArgs) {
   for (int i = ar->numArgs(); i--; ) {
-    m_stack.popTV();
+    stack.popTV();
   }
-  ASSERT(m_stack.top() == (void*)ar);
-  m_stack.popAR();
+  ASSERT(stack.top() == (void*)ar);
+  stack.popAR();
   if (extraArgs) {
-    for (int i = ar->numArgs() - ar->m_func->numParams(); i--; ) {
-      tvRefcountedDecRef(extraArgs + i);
-    }
-    free(extraArgs);
+    const int numExtra = ar->numArgs() - ar->m_func->numParams();
+    ExtraArgs::deallocate(extraArgs, numExtra);
   }
 }
 
@@ -5970,14 +5945,14 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
     // this is what we /should/ do, but our code base depends
     // on the broken behavior of casting the second arg to an
     // array.
-    cleanupParamsAndActRec(ar, NULL);
+    cleanupParamsAndActRec(m_stack, ar, NULL);
     m_stack.pushNull();
     raise_warning("call_user_func_array() expects parameter 2 to be array");
     return;
   }
 
   const Func* func = ar->m_func;
-  TypedValue* extraArgs = NULL;
+  ExtraArgs* extraArgs = NULL;
   {
     Array args(LIKELY(c1->m_type == KindOfArray) ? c1->m_data.parr :
                tvAsVariant(c1).toArray().get());
@@ -6005,12 +5980,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
                 &retval, func, args,
                 ar->hasThis() ? ar->getThis() : NULL,
                 invName, h)) {
-            cleanupParamsAndActRec(ar, extraArgs);
+            cleanupParamsAndActRec(m_stack, ar, extraArgs);
             *m_stack.allocTV() = retval;
             return;
           }
         } catch (...) {
-          cleanupParamsAndActRec(ar, extraArgs);
+          cleanupParamsAndActRec(m_stack, ar, extraArgs);
           m_stack.pushNull();
           SYNC();
           throw;

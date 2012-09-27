@@ -311,7 +311,7 @@ Variant f_func_get_arg(int arg_num) {
       return false;
     }
 
-    int numParams = ar->m_func->numParams();
+    const int numParams = ar->m_func->numParams();
 
     if (arg_num < numParams) {
       // Formal parameter. Value is on the stack.
@@ -320,10 +320,13 @@ Variant f_func_get_arg(int arg_num) {
       return tvAsVariant(loc);
     }
 
+    const int numArgs = ar->numArgs();
+    const int extraArgs = numArgs - numParams;
+
     // Not a formal parameter.  Value is potentially in the
     // ExtraArgs/VarEnv.
-    int extraArgNum = arg_num - numParams;
-    if (extraArgNum < ar->numExtraArgs()) {
+    const int extraArgNum = arg_num - numParams;
+    if (extraArgNum < extraArgs) {
       return tvAsVariant(ar->getExtraArg(extraArgNum));
     }
 
@@ -369,7 +372,6 @@ Array hhvm_get_frame_args(const ActRec* ar) {
       --local;
     } else {
       // This is not a formal parameter, so it's in the ExtraArgs.
-      ASSERT(i - numParams < (int)ar->numExtraArgs());
       retval->nvAppend(ar->getExtraArg(i - numParams), false);
     }
   }

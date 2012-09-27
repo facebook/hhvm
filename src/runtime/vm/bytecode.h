@@ -77,19 +77,41 @@ namespace VM {
 class Func;
 
 struct ExtraArgs : private boost::noncopyable {
-private:
-  TypedValue* m_extraArgs;
-  unsigned m_numExtraArgs;
+  /*
+   * Allocate an ExtraArgs structure, with arguments copied from the
+   * evaluation stack.  This takes ownership of the args without
+   * adjusting reference counts, so they must be discarded from the
+   * stack.
+   */
+  static ExtraArgs* allocateCopy(TypedValue* args, unsigned nargs);
 
-public:
+  /*
+   * Allocate an ExtraArgs, without initializing any of the arguments.
+   * All arguments must be initialized via getExtraArg before
+   * deallocate() is called for the returned pointer.
+   */
+  static ExtraArgs* allocateUninit(unsigned nargs);
+
+  /*
+   * Deallocate an extraArgs structure.  Either use the one that
+   * exists in a ActRec, or do it explicitly.
+   */
+  static void deallocate(ActRec*);
+  static void deallocate(ExtraArgs*, unsigned numArgs);
+
+  /*
+   * Get the slot for extra arg i, where i = argNum - func->numParams.
+   */
+  TypedValue* getExtraArg(unsigned argInd) const;
+
+private:
   ExtraArgs();
-  ExtraArgs(ExtraArgs*); // move (may take a null)
   ~ExtraArgs();
 
-  void setExtraArgs(TypedValue* args, unsigned nargs);
-  void copyExtraArgs(TypedValue* args, unsigned nargs);
-  unsigned numExtraArgs() const;
-  TypedValue* getExtraArg(unsigned argInd) const;
+  static void* allocMem(unsigned nargs);
+
+private:
+  TypedValue m_extraArgs[];
 };
 
 /*
@@ -113,7 +135,7 @@ public:
  */
 class VarEnv {
  private:
-  ExtraArgs m_extraArgs;
+  ExtraArgs* m_extraArgs;
   uint16_t m_depth;
   bool m_malloced;
   ActRec* m_cfp;
@@ -184,7 +206,6 @@ class VarEnv {
   bool isGlobalScope() const { return !m_previous; }
 
   // Access to wrapped ExtraArgs, if we have one.
-  unsigned numExtraArgs() const;
   TypedValue* getExtraArg(unsigned argInd) const;
 };
 
@@ -353,11 +374,6 @@ struct ActRec {
 #undef UNION_FIELD_ACCESSORS
 
   // Accessors for extra arg queries.
-  int numExtraArgs() const {
-    return hasExtraArgs() ? getExtraArgs()->numExtraArgs() :
-           hasVarEnv()    ? getVarEnv()->numExtraArgs() :
-           0;
-  }
   TypedValue* getExtraArg(unsigned ind) const {
     ASSERT(hasExtraArgs() || hasVarEnv());
     return hasExtraArgs() ? getExtraArgs()->getExtraArg(ind) :

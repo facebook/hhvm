@@ -559,6 +559,11 @@ To safe_cast(From val) {
     return static_cast<To>(val);
   }
 }
+
+template<class T, size_t Sz>
+size_t array_size(T (&t)[Sz]) {
+  return Sz;
+}
 }
 
 namespace boost {

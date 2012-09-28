@@ -6568,13 +6568,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopParent(PC& pc) {
   m_stack.pushClass(parent);
 }
 
+template<bool isMethod>
 c_GenericContinuation*
 VMExecutionContext::createContinuation(ActRec* fp,
                                        bool getArgs,
                                        const Func* origFunc,
-                                       Class* genClass,
                                        const Func* genFunc) {
-  bool isMethod = origFunc->isNonClosureMethod();
   Object obj;
   Array args;
   if (fp->hasThis()) {
@@ -6587,6 +6586,8 @@ VMExecutionContext::createContinuation(ActRec* fp,
   const StringData* origName =
     origFunc->isClosureBody() ? closure : origFunc->fullName();
   int nLocals = genFunc->numNamedLocals() - 1; //Don't need space for __cont__
+  Class* genClass = isMethod ? SystemLib::s_MethodContinuationClass
+                             : SystemLib::s_FunctionContinuationClass;
   c_GenericContinuation* cont =
     c_GenericContinuation::alloc(genClass, nLocals);
   memset(cont->locals(), 0, sizeof(TypedValue) * nLocals);
@@ -6665,16 +6666,16 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   NEXT();
   DECODE_IVA(getArgs);
   DECODE_LITSTR(genName);
-  DECODE_LITSTR(className);
 
   const Func* origFunc = m_fp->m_func;
   const Func* genFunc = origFunc->getGeneratorBody(genName);
   ASSERT(genFunc != NULL);
 
-  Class* cls = Unit::lookupClass(className);
-  ASSERT(cls);
-  c_GenericContinuation* cont =
-    createContinuation(m_fp, getArgs, origFunc, cls, genFunc);
+  bool isMethod = origFunc->isNonClosureMethod();
+  c_GenericContinuation* cont = isMethod ?
+    createContinuation<true>(m_fp, getArgs, origFunc, genFunc) :
+    createContinuation<false>(m_fp, getArgs, origFunc, genFunc);
+
   fillContinuationVars(m_fp, origFunc, genFunc, cont);
 
   TypedValue* ret = m_stack.allocTV();

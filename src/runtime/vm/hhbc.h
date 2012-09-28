@@ -517,7 +517,7 @@ enum SetOpOp {
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCont,      THREE(IVA,SA,SA), NOV,             ONE(CV),    NF) \
+  O(CreateCont,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
   O(UnpackCont,      NA,               NOV,             ONE(CV),    NF) \
   O(PackCont,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(ContRaised,      NA,               NOV,             NOV,        NF) \

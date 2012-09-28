@@ -66,6 +66,8 @@ static StaticString s_resource(LITSTR_INIT("__resource"));
 static StaticString s_DOMException(LITSTR_INIT("DOMException"));
 static StaticString s_PDOException(LITSTR_INIT("PDOException"));
 static StaticString s_SoapFault(LITSTR_INIT("SoapFault"));
+static StaticString s_MethodContinuation(LITSTR_INIT("MethodContinuation"));
+static StaticString s_FunctionContinuation(LITSTR_INIT("FunctionContinuation"));
 
 class VMClassInfoHook : public ClassInfoHook {
 public:
@@ -226,10 +228,21 @@ void ProcessInit() {
   // load builtins
   SystemLib::s_nativeFuncUnit->merge();
 
+  // We call a special bytecode emitter function to build the native
+  // unit which will contain all of our cppext functions and classes.
+  // Each function and method will have a bytecode body that will thunk
+  // to the native implementation.
+  Unit* nativeClassUnit = build_native_class_unit(hhbc_ext_classes,
+                                                  hhbc_ext_class_count);
+  SystemLib::s_nativeClassUnit = nativeClassUnit;
+
+  // Load the nativelib unit to build the Class objects
+  SystemLib::s_nativeClassUnit->merge();
+
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
     Class *cls = *Unit::GetNamedEntity(s_##cls.get())->clsList();       \
-    ASSERT(cls);                                                        \
+    ASSERT(!hhbc_ext_class_count || cls);                               \
     SystemLib::s_##cls##Class = cls;                                    \
   }
 
@@ -251,19 +264,10 @@ void ProcessInit() {
   INIT_SYSTEMLIB_CLASS_FIELD(DOMException);
   INIT_SYSTEMLIB_CLASS_FIELD(PDOException);
   INIT_SYSTEMLIB_CLASS_FIELD(SoapFault);
+  INIT_SYSTEMLIB_CLASS_FIELD(MethodContinuation);
+  INIT_SYSTEMLIB_CLASS_FIELD(FunctionContinuation);
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
-
-  // We call a special bytecode emitter function to build the native
-  // unit which will contain all of our cppext functions and classes.
-  // Each function and method will have a bytecode body that will thunk
-  // to the native implementation.
-  Unit* nativeClassUnit = build_native_class_unit(hhbc_ext_classes,
-                                                  hhbc_ext_class_count);
-  SystemLib::s_nativeClassUnit = nativeClassUnit;
-
-  // Load the nativelib unit to build the Class objects
-  SystemLib::s_nativeClassUnit->merge();
 
   // Retrieve all of the class pointers
   for (long long i = 0LL; i < hhbc_ext_class_count; ++i) {

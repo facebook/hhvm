@@ -431,9 +431,9 @@ public:
   void requestExit();
 
   static void getElem(TypedValue* base, TypedValue* key, TypedValue* dest);
+  template<bool isMethod>
   static c_GenericContinuation* createContinuation(VM::ActRec* fp, bool getArgs,
                                                    const VM::Func* origFunc,
-                                                   VM::Class* genClass,
                                                    const VM::Func* genFunc);
   static c_GenericContinuation* fillContinuationVars(
     VM::ActRec* fp, const VM::Func* origFunc, const VM::Func* genFunc,

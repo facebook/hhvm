@@ -57,6 +57,8 @@ HPHP::VM::Class* SystemLib::s_pinitSentinelClass = NULL;
 HPHP::VM::Class* SystemLib::s_resourceClass = NULL;
 HPHP::VM::Class* SystemLib::s_DOMExceptionClass = NULL;
 HPHP::VM::Class* SystemLib::s_SoapFaultClass = NULL;
+HPHP::VM::Class* SystemLib::s_MethodContinuationClass = NULL;
+HPHP::VM::Class* SystemLib::s_FunctionContinuationClass = NULL;
 
 ObjectData* SystemLib::AllocStdClassObject() {
   if (hhvm) {

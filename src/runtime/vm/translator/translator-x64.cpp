@@ -6080,28 +6080,29 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
                                         const NormalizedInstruction& i) {
   bool getArgs = i.imm[0].u_IVA;
   const StringData* genName = curUnit()->lookupLitstrId(i.imm[1].u_SA);
-  const StringData* className = curUnit()->lookupLitstrId(i.imm[2].u_SA);
   const Func* origFunc = curFunc();
-  Class* genClass = Unit::lookupClass(className);
-  ASSERT(genClass);
   const Func* genFunc = origFunc->getGeneratorBody(genName);
 
   if (false) {
     ActRec* fp = NULL;
     UNUSED c_GenericContinuation* cont =
-      VMExecutionContext::createContinuation(fp, getArgs, origFunc, genClass,
-                                             genFunc);
+      VMExecutionContext::createContinuation<true>(fp, getArgs, origFunc,
+                                                   genFunc);
+    VMExecutionContext::createContinuation<false>(fp, getArgs, origFunc,
+                                                 genFunc);
   }
 
   // Even callee-saved regs need to be clean, because
   // createContinuation will read all locals.
   m_regMap.cleanAll();
+  auto helper = origFunc->isNonClosureMethod() ?
+    VMExecutionContext::createContinuation<true> :
+    VMExecutionContext::createContinuation<false>;
   EMIT_CALL(a,
-             VMExecutionContext::createContinuation,
+             (TCA)helper,
              R(rVmFp),
              IMM(getArgs),
              IMM((intptr_t)origFunc),
-             IMM((intptr_t)genClass),
              IMM((intptr_t)genFunc));
   ScratchReg holdRax(m_regMap, rax);
 
@@ -7949,38 +7950,28 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
 void
 TranslatorX64::translateFPushContFunc(const Tracelet& t,
                                       const NormalizedInstruction& i) {
-  // All functions that use this instruction are cloned into
-  // subclasses so we can burn in the Continuation's body Func*
   ASSERT(curFrame()->hasThis());
-  c_GenericContinuation* cont =
-    dynamic_cast<c_GenericContinuation*>(curFrame()->getThis());
-  ASSERT(cont);
-  const Func* genFunc = cont->m_vmFunc;
-  genFunc->validate();
-  ASSERT(IMPLIES(genFunc->isTraitMethod(), cont->m_isMethod));
-
-  // TODO: Make the FuncIds for Continuation subclasses depend on the
-  // containing class's parents as well, so we can burn in the Func*
-  // for method generators. See t1061448.
-  if (cont->m_isMethod) {
-    genFunc = NULL;
-  }
-
+  Class* genClass = curFrame()->getThis()->getVMClass();
+  ASSERT(genClass == SystemLib::s_MethodContinuationClass ||
+         genClass == SystemLib::s_FunctionContinuationClass);
+  bool isMethod = genClass == SystemLib::s_MethodContinuationClass;
   size_t thisOff = AROFF(m_this) - sizeof(ActRec);
   size_t funcOff = AROFF(m_func) - sizeof(ActRec);
   m_regMap.scrubStackRange(i.stackOff,
                            i.stackOff + kNumActRecCells);
-  emitPushAR(i, genFunc, 0, false, !cont->m_isMethod);
-  if (cont->m_isMethod) {
-    ScratchReg rCont(m_regMap);
-    ScratchReg rScratch(m_regMap);
-    a.  load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
-    if (genFunc == NULL) {
-      a.load_reg64_disp_reg64(*rCont,
-                              offsetof(c_GenericContinuation, m_vmFunc),
-                              *rScratch);
-      emitVStackStore(a, i, *rScratch, funcOff, sz::qword);
-    }
+  emitPushAR(i, NULL, 0, false, false);
+  ScratchReg rCont(m_regMap);
+  ScratchReg rScratch(m_regMap);
+  a.  load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
+
+  // Store the func
+  a.load_reg64_disp_reg64(*rCont,
+                          offsetof(c_GenericContinuation, m_vmFunc),
+                          *rScratch);
+  emitVStackStore(a, i, *rScratch, funcOff, sz::qword);
+
+  if (isMethod) {
+    // Store m_this
     a.  load_reg64_disp_reg64(*rCont,
                               offsetof(c_GenericContinuation, m_obj),
                               *rScratch);
@@ -7997,6 +7988,8 @@ TranslatorX64::translateFPushContFunc(const Tracelet& t,
       // m_vmCalledClass already has its low bit set
       emitVStackStore(a, i, *rScratch, thisOff, sz::qword);
     }
+  } else {
+    emitVStackStoreImm(a, i, 0, thisOff, sz::qword);
   }
 }
 

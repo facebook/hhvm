@@ -55,6 +55,8 @@ class SystemLib {
   static HPHP::VM::Class* s_DOMExceptionClass;
   static HPHP::VM::Class* s_PDOExceptionClass;
   static HPHP::VM::Class* s_SoapFaultClass;
+  static HPHP::VM::Class* s_MethodContinuationClass;
+  static HPHP::VM::Class* s_FunctionContinuationClass;
 
   static HPHP::VM::Func* GetNullFunction();
 

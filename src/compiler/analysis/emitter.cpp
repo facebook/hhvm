@@ -1035,19 +1035,6 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
   free(meta);
 }
 
-StringData* EmitterVisitor::continuationClassName(
-  const StringData* fname) {
-  std::ostringstream str;
-  str << "continuation$"
-      << std::hex
-      << m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0]
-      << std::dec
-      << '$'
-      << fname->data();
-
-  return StringData::GetStaticString(str.str());
-}
-
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
   : m_ue(ue), m_curFunc(ue.getMain()), m_evalStackIsUnknown(false),
     m_actualStackHighWater(0), m_fdescHighWater(0), m_closureCounter(0) {
@@ -1499,9 +1486,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
       m_methLabels[methName] = new Label();
       // Emit afterwards
       postponeMeth(meth, NULL, true);
-      if (meth->getFunctionScope()->isGenerator()) {
-        newContinuationClass(methName);
-      }
     }
   }
   {
@@ -2318,7 +2302,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
 
           postponeMeth(m, NULL, true);
-          newContinuationClass(nName);
         } else {
           FuncEmitter* fe = m_ue.newFuncEmitter(nName, false);
           e.DefFunc(fe->id());
@@ -2847,7 +2830,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           const StringData* nameStr =
             StringData::GetStaticString(nameVar.getStringData());
           bool callGetArgs = params->getCount() == 4;
-          e.CreateCont(callGetArgs, nameStr, continuationClassName(nameStr));
+          e.CreateCont(callGetArgs, nameStr);
           return true;
         } else if (call->isCompilerCallToFunction("hphp_continuation_raised")) {
           e.ContRaised();
@@ -4897,15 +4880,6 @@ void EmitterVisitor::emitPostponedMeths() {
   }
 }
 
-void EmitterVisitor::newContinuationClass(const StringData* name) {
-  StringData* className = continuationClassName(name);
-  static const StringData* parentName =
-    StringData::GetStaticString("GenericContinuation");
-  PreClassEmitter* pce = m_ue.newPreClassEmitter(className,
-                                                 PreClass::AlwaysHoistable);
-  pce->init(0, 0, m_ue.bcPos(), AttrUnique, parentName, NULL);
-}
-
 void EmitterVisitor::emitPostponedCtors() {
   while (!m_postponedCtors.empty()) {
     PostponedCtor& p = m_postponedCtors.front();
@@ -5515,9 +5489,6 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
         bool added UNUSED = pce->addMethod(fe);
         ASSERT(added);
         postponeMeth(meth, fe, false);
-        if (isGenerator) {
-          newContinuationClass(methName);
-        }
       } else if (ClassVariablePtr cv =
                  dynamic_pointer_cast<ClassVariable>((*stmts)[i])) {
         ModifierExpressionPtr mod(cv->getModifiers());
@@ -6431,6 +6402,22 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         pce->addConstant(
           cnsInfo->name.get(), (TypedValue*)(&val), empty_string.get());
       }
+    }
+  }
+
+  // We also want two subclasses of GenericContinuation, for different
+  // types of continuations.
+  static const StringData* genericContinuation =
+    StringData::GetStaticString("GenericContinuation");
+  static const StringData* names[] = {
+    StringData::GetStaticString("MethodContinuation"),
+    StringData::GetStaticString("FunctionContinuation")
+  };
+  if (classEntries.size()) {
+    for (unsigned i = 0; i < array_size(names); ++i) {
+      PreClassEmitter* pce =
+        ue->newPreClassEmitter(names[i], PreClass::AlwaysHoistable);
+      pce->init(0, 0, ue->bcPos(), AttrUnique, genericContinuation, NULL);
     }
   }
 

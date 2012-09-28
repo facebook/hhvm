@@ -584,8 +584,6 @@ public:
   void saveMaxStackCells(FuncEmitter* fe);
   void finishFunc(Emitter& e, FuncEmitter* fe);
   StringData* newClosureName();
-  StringData* continuationClassName(const StringData* fname);
-  void newContinuationClass(const StringData* name);
 
   void initScalar(TypedValue& tvVal, ExpressionPtr val);
 

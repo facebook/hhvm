@@ -5879,7 +5879,6 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
       nparams = nargs;
     }
     ssize_t pos = args->iter_begin();
-    int param = 0;
     for (int i = 0; i < nparams; ++i) {
       TypedValue* from = const_cast<TypedValue*>(
         args->getValueRef(pos).asTypedValue());

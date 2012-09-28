@@ -8155,7 +8155,7 @@ int64 checkClass(TargetCache::CacheHandle ch, StringData* clsName,
 }
 
 static void warnMissingFunc(StringData* name) {
-  raise_warning("function: method '%s' not found", name->data());
+  throw_invalid_argument("function: method '%s' not found", name->data());
 }
 
 void
@@ -8173,8 +8173,8 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
 
   int startOfActRec = int(numPopped * sizeof(Cell)) - int(sizeof(ActRec));
 
-  emitPushAR(ni, func, numPopped * sizeof(Cell),
-             false /* isCtor */, !cls /* clearThis */,
+  emitPushAR(ni, cls ? func : NULL, numPopped * sizeof(Cell),
+             false /* isCtor */, false /* clearThis */,
              invName ? uintptr_t(invName) | 1 : 0 /* varEnvInvName */);
 
   bool safe = (ni.op() == OpFPushCufSafe);
@@ -8204,8 +8204,12 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
       }
     }
   } else {
+    ScratchReg funcReg(m_regMap);
     TargetCache::CacheHandle ch = func->getCachedOffset();
-    a.          cmp_imm32_disp_reg32(0, ch, rVmTl);
+    a.          load_reg64_disp_reg64(rVmTl, ch, *funcReg);
+    emitVStackStore(a, ni, *funcReg, funcOff);
+    emitVStackStoreImm(a, ni, 0, clsOff, sz::qword, &m_regMap);
+    a.          test_reg64_reg64(*funcReg, *funcReg);
     {
       UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
       emitVStackStoreImm(astubs, ni,
@@ -8214,7 +8218,7 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
         emitImmReg(astubs, false, *flag);
       } else {
         EMIT_CALL(astubs, TCA(warnMissingFunc), IMM(uintptr_t(func->name())));
-        recordReentrantStubCall(ni);
+        recordReentrantStubCall(ni, true);
       }
     }
   }
@@ -8246,7 +8250,6 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
       m_regMap.bind(reg, outDef->location, inDef->rtt.outerType(),
                     RegInfo::DIRTY);
     }
-    emitImmReg(a, true, *flag);
     m_regMap.bindScratch(flag, outFlag->location, KindOfBoolean,
                          RegInfo::DIRTY);
   }

@@ -221,12 +221,8 @@ class TranslatorX64 : public Translator, public SpillFill,
                                bool advance = false) {
     recordCallImpl<true>(astubs, i, advance);
   }
-  void recordCall(Asm& a, const NormalizedInstruction& i) {
-    recordCallImpl<false>(a, i);
-  }
-  void recordCall(const NormalizedInstruction& i) {
-    recordCall(a, i);
-  }
+  void recordCall(Asm& a, const NormalizedInstruction& i);
+  void recordCall(const NormalizedInstruction& i);
   void recordStubCall(const NormalizedInstruction& i) {
     recordCall(astubs, i);
   }

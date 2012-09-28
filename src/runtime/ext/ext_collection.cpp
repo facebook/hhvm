@@ -187,7 +187,12 @@ Variant c_Vector::t_at(CVarRef key) {
 
 Variant c_Vector::t_get(CVarRef key) {
   if (key.isInteger()) {
-    return tvAsCVarRef(get(key.toInt64()));
+    TypedValue* tv = get(key.toInt64());
+    if (tv) {
+      return tvAsCVarRef(tv);
+    } else {
+      return null;
+    }
   }
   throwBadKeyType();
   return null;
@@ -697,9 +702,19 @@ Variant c_Map::t_at(CVarRef key) {
 
 Variant c_Map::t_get(CVarRef key) {
   if (key.isInteger()) {
-    return tvAsCVarRef(get(key.toInt64()));
+    TypedValue* tv = get(key.toInt64());
+    if (tv) {
+      return tvAsCVarRef(tv);
+    } else {
+      return null;
+    }
   } else if (key.isString()) {
-    return tvAsCVarRef(get(key.getStringData()));
+    TypedValue* tv = get(key.getStringData());
+    if (tv) {
+      return tvAsCVarRef(tv);
+    } else {
+      return null;
+    }
   }
   throwBadKeyType();
   return null;
@@ -1552,9 +1567,19 @@ Variant c_StableMap::t_at(CVarRef key) {
 
 Variant c_StableMap::t_get(CVarRef key) {
   if (key.isInteger()) {
-    return tvAsCVarRef(get(key.toInt64()));
+    TypedValue* tv = get(key.toInt64());
+    if (tv) {
+      return tvAsCVarRef(tv);
+    } else {
+      return null;
+    }
   } else if (key.isString()) {
-    return tvAsCVarRef(get(key.getStringData()));
+    TypedValue* tv = get(key.getStringData());
+    if (tv) {
+      return tvAsCVarRef(tv);
+    } else {
+      return null;
+    }
   }
   throwBadKeyType();
   return null;

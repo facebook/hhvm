@@ -12618,13 +12618,7 @@ TranslatorX64::translateIterInit(const Tracelet& t,
   // new_iter returns 0 if an iterator was not created, otherwise it
   // returns 1
   a.    test_reg64_reg64(rax, rax);
-  TCA toPatch = a.code.frontier;
-  a.    jz(a.code.frontier); // 1f
-  emitBindJmp(notTaken);
-  // 1:
-  a.patchJcc(toPatch, a.code.frontier);
-  emitBindJmp(taken);
-  translator_not_reached(a);
+  emitCondJmp(taken, notTaken, CC_Z);
 }
 
 void

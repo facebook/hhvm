@@ -174,7 +174,7 @@ int64 f_get_magic_quotes_gpc() {
 }
 
 int64 f_get_magic_quotes_runtime() {
-  throw NotSupportedException(__func__, "not using magic quotes");
+  return 0;
 }
 
 Array f_get_required_files() {

@@ -180,12 +180,8 @@ bool TestExtOptions::test_get_magic_quotes_gpc() {
 }
 
 bool TestExtOptions::test_get_magic_quotes_runtime() {
-  try {
-    f_get_magic_quotes_runtime();
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  VS(f_get_magic_quotes_runtime(), 0);
+  return Count(true);
 }
 
 bool TestExtOptions::test_get_required_files() {

@@ -2371,12 +2371,7 @@ void TranslatorX64::emitCGetElem(const Tracelet& t,
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& memb = *ni.inputs[iInd];
-  bool isVariant = memb.isVariant();
-  // Slight optimization: we can use cGetElemC (which doesn't check for
-  // key unboxing) if we know our input isn't variant.
-  auto cGetElemOp = (isVariant && ni.immVecM[mInd]) == MEL ? cGetElemL
-    : cGetElemC;
-  ASSERT(IMPLIES(isVariant, ni.immVecM[mInd] == MEL));
+  auto cGetElemOp = ni.immVecM[mInd] == MEL ? cGetElemL : cGetElemC;
   
   m_regMap.smashLoc(memb.location);
   const DynLocation& result = *ni.outStack;

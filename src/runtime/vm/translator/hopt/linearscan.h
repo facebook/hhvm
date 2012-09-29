@@ -25,17 +25,16 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
-using namespace HPHP::x64;
-
 class LinearScan {
 public:
+  // TODO: remove these in favor of using the abi-x64.h constants.
   const static register_name_t noReg = reg::noreg;
-  const static register_name_t rVmSP = reg::rbx;
+  const static register_name_t rVmSP = Transl::rVmSp;
   const static register_name_t rSP = reg::rsp;
-  const static register_name_t rVmFP = reg::rbp;
-  const static register_name_t rScratch = reg::r10;
-  const static register_name_t rTlPtr = reg::r12;
-  const static register_name_t rStashedAR = reg::r15;
+  const static register_name_t rVmFP = Transl::rVmFp;
+  const static register_name_t rScratch = reg::rScratch;
+  const static register_name_t rTlPtr = Transl::rVmTl;
+  const static register_name_t rStashedAR = Transl::rStashedAR;
 
   static const int NumRegs = 16;
   static const int NumMmxRegs = 8;

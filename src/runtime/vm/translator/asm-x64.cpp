@@ -29,7 +29,8 @@
 #include "runtime/base/runtime_option.h"
 
 namespace HPHP {
-namespace x64 {
+namespace VM {
+namespace Transl {
 
 static void panic(const char *fmt, ...) {
   va_list ap;
@@ -109,4 +110,4 @@ void X64Assembler::init(CodeAddress start, size_t sz) {
   code.initCodeBlock(start, sz);
 }
 
-} }
+}}}

@@ -61,9 +61,10 @@
 #define logical_const /* nothing */
 
 namespace HPHP {
-namespace x64 {
+namespace VM {
+namespace Transl {
 
-TRACE_SET_MOD(asmx64);
+#define TRACEMOD ::HPHP::Trace::asmx64
 
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103
 enum class register_name_t : int {};
@@ -1610,12 +1611,12 @@ public:
     byte(imm & 0xFF); // 8-bit immediate
   }
 
-  inline void emitImmReg(int64_t imm, x64::register_name_t dest) {
+  inline void emitImmReg(int64_t imm, register_name_t dest) {
     if (imm == 0) {
       xor_reg32_reg32(dest, dest);
       return;
     }
-    if (LIKELY(imm > 0 && x64::deltaFits(imm, x64::sz::dword))) {
+    if (LIKELY(imm > 0 && deltaFits(imm, sz::dword))) {
       // This will zero out the high-order bits.
       mov_imm32_reg32(imm, dest);
       return;
@@ -1650,10 +1651,12 @@ public:
 };
 
 inline void emitImmReg(X64Assembler& a, int64_t imm,
-                       x64::register_name_t dest) {
+                       register_name_t dest) {
   a.emitImmReg(imm, dest);
 }
 
-} } // HPHP::x64
+#undef TRACEMOD
+
+}}}
 
 #endif

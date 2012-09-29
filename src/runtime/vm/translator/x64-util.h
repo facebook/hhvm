@@ -24,14 +24,14 @@ namespace VM {
 namespace Transl {
 
 static inline void
-translator_not_reached(x64::X64Assembler &a) {
+translator_not_reached(X64Assembler &a) {
   if (debug) {
     a.  ud2();
   }
 }
 
 static inline void
-translator_debug_break(x64::X64Assembler &a) {
+translator_debug_break(X64Assembler &a) {
   if (debug) {
     a.  int3();
   }
@@ -58,8 +58,7 @@ translator_debug_break(x64::X64Assembler &a) {
  * the programmer to ensure that it really is a TLS address.
  */
 static inline void
-emitTLSLoad(x64::X64Assembler& a, const void* datum,
-            x64::register_name_t reg) {
+emitTLSLoad(X64Assembler& a, const void* datum, register_name_t reg) {
   uintptr_t virtualAddress = uintptr_t(datum) - tlsBase();
   a.    fs();
   a.    load_disp32_reg64(virtualAddress, reg);
@@ -67,8 +66,8 @@ emitTLSLoad(x64::X64Assembler& a, const void* datum,
 
 template<typename T>
 static inline void
-emitTLSLoad(x64::X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
-            x64::register_name_t reg) {
+emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
+            register_name_t reg) {
   emitTLSLoad(a, &datum.m_node.m_p, reg);
 }
 

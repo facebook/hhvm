@@ -4,14 +4,15 @@
 #include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
+#include <runtime/vm/translator/abi-x64.h>
+
 /* 
  * Please don't include this unless your file implements methods of
  * TranslatorX64; you won't like it. It pollutes the namespace, makes
- * "KindOfString" #error, and tortures a kitten.
+ * "KindOfString" #error, makes your TRACEMOD tx64, and tortures a kitten.
  */
 
-using namespace HPHP::x64;
-using namespace HPHP::x64::reg;
+using namespace HPHP::VM::Transl::reg;
 using namespace HPHP::Util;
 using namespace HPHP::Trace;
 using std::max;
@@ -20,41 +21,11 @@ namespace HPHP {
 namespace VM {
 namespace Transl {
 
+static const Trace::Module TRACEMOD = Trace::tx64;
 static const DataType BitwiseKindOfString = KindOfString;
 
 #define KindOfString \
 #error You probably do not mean to use KindOfString in this file.
-
-// The x64 C ABI.
-static const PhysReg argNumToRegName[] = {
-  rdi, rsi, rdx, rcx, r8, r9
-};
-static const int kNumRegisterArgs = sizeof(argNumToRegName) /
-  sizeof(PhysReg);
-
-// While running in the TC, rVmFp points to the ActRec of the function
-// we are currently in, rVmSp point to the top of the eval stack at the
-// beginning of the current tracelet, and rVmTl points to the target cache
-// for the current request.
-//
-// Note: unwind-x64.cpp relies on the values used for these registers.
-static const PhysReg rVmSp = rbx;
-static const PhysReg rVmFp = rbp;
-static const PhysReg rVmTl = r12;
-
-// Registers available for program locations.
-//
-// rsp is reserved by the runtime.
-// r10 is reserved by the assembler.
-// rbp, r12, and rbx are statically allocated.
-static const RegSet kCallerSaved =
-  RegSet(rax) | RegSet(rcx) | RegSet(rdx) | RegSet(rsi) |
-  RegSet(rdi) | RegSet(r8)  | RegSet(r9)  | RegSet(r11);
-
-// Keep this list in sync with behavior in unwind-x64.cpp.
-static const RegSet kCalleeSaved = RegSet(r13) | RegSet(r14) | RegSet(r15);
-
-static const RegSet kAllRegs = kCalleeSaved | kCallerSaved;
 
 // RAII aids to machine code.
 
@@ -575,7 +546,7 @@ emitCopyTo(X64Assembler& a,
 
 // ArgManager -- support for passing VM-level data to helper functions.
 class ArgManager {
-  typedef HPHP::x64::X64Assembler& A;
+  typedef HPHP::VM::Transl::X64Assembler& A;
 public:
   ArgManager(TranslatorX64 &tx64, A& a) : m_tx64(tx64), m_a(a) { }
 

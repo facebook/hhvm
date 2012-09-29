@@ -80,17 +80,14 @@ typedef __sighandler_t *sighandler_t;
 #include <runtime/vm/translator/hopt/linearscan.h>
 #include <runtime/vm/translator/hopt/codegen.h>
 
-using namespace HPHP::x64;
-using namespace HPHP::x64::reg;
-using namespace HPHP::Util;
-using namespace HPHP::Trace;
-using std::max;
-
 namespace HPHP {
 namespace VM {
 namespace Transl {
 
-
+using namespace reg;
+using namespace Util;
+using namespace Trace;
+using std::max;
 
 static const Trace::Module TRACEMOD = Trace::tx64;
 #ifdef DEBUG
@@ -101,19 +98,6 @@ static const bool debug = false;
 
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)
-
-
-// While running in the TC, rVmFp points to the ActRec of the function
-// we are currently in, rVmSp point to the top of the eval stack at the
-// beginning of the current tracelet, and rVmTl points to the target cache
-// for the current request.
-//
-// Note: unwind-x64.cpp relies on the values used for these registers.
-static const PhysReg rVmSp = rbx;
-static const PhysReg rVmFp = rbp;
-static const PhysReg rVmTl = r12;
-static const PhysReg rStashedAR = r15;
-
 
 /*
  * tx64LocPhysicalOffset --
@@ -1424,7 +1408,7 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
 }
 
 void TranslatorX64::irAssertType(const Location& l,
-                               const RuntimeType& rtt) {
+                                 const RuntimeType& rtt) {
   ASSERT(m_useHHIR);
   if (rtt.isVagueValue()) return;
 

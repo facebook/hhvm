@@ -23,6 +23,7 @@
 
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/translator/runtime-type.h"
+#include "runtime/vm/translator/abi-x64.h"
 #include "runtime/vm/stats.h"
 #include "runtime/vm/runtime.h"
 
@@ -100,6 +101,8 @@ void sync_callee_saved(_Unwind_Context* context) {
        * frame below a C++ frame.  In this case, rbx is properly
        * restored for us by the unwinder, so we can use it here.
        */
+      static_assert(rVmSp == reg::rbx,
+                    "unwind-x64.cpp expected rVmSp == rbx");
       TypedValue* frameSp = reinterpret_cast<TypedValue*>(
         _Unwind_GetGR(context, Debug::RBX));
       cell = frameSp - (cri.locOffset + 1);
@@ -177,7 +180,7 @@ bool UnwindRegInfo::empty() const {
   return !m_regs[0].dirty;
 }
 
-void UnwindRegInfo::add(x64::register_name_t reg,
+void UnwindRegInfo::add(register_name_t reg,
                         DataType type,
                         Location loc) {
   ASSERT(type >= -16 && type <= 15 &&

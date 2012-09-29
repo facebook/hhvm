@@ -19,7 +19,9 @@
 #include "asm-x64.h"
 
 namespace HPHP {
-namespace x64 {
+namespace VM {
+namespace Transl {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // List of x64 instructions
@@ -203,7 +205,7 @@ void testEmitMethods() {
   X64Assembler e;
   e.init(10 << 20);
 
-  using namespace HPHP::x64::reg;
+  using namespace HPHP::VM::Transl::reg;
 
   int n = sizeof(instr_list) / sizeof(instr_list[0]);
   for (int i = 0; i < n; ++i) {
@@ -568,6 +570,7 @@ void testEmitMethods() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+}
 }
 }
 

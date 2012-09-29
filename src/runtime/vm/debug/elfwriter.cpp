@@ -395,7 +395,7 @@ int ElfWriter::writeStringSection() {
 
 int ElfWriter::writeTextSection() {
   int section = -1;
-  HPHP::x64::X64Assembler &a(TranslatorX64::Get()->getAsm());
+  X64Assembler &a(TranslatorX64::Get()->getAsm());
   if ((section = newSection(
       ".text.tracelets", a.code.size, SHT_NOBITS, SHF_ALLOC | SHF_EXECINSTR,
       reinterpret_cast<uint64_t>(a.code.base))) < 0) {

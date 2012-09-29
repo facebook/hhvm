@@ -76,6 +76,7 @@ typedef __sighandler_t *sighandler_t;
 #include <runtime/vm/repo.h>
 #include <runtime/vm/type-profile.h>
 #include <runtime/vm/member_operations.h>
+#include <runtime/vm/translator/abi-x64.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/vm/translator/hopt/ir.h>
 #include <runtime/vm/translator/hopt/linearscan.h>
@@ -87,6 +88,11 @@ typedef __sighandler_t *sighandler_t;
 namespace HPHP {
 namespace VM {
 namespace Transl {
+
+using namespace reg;
+using namespace Util;
+using namespace Trace;
+using std::max;
 
 #define TRANS_PERF_COUNTERS \
   TPC(translate) \
@@ -119,12 +125,8 @@ static __thread int64 s_perfCounters[tpc_num_counters];
 #define STRINGCASE() \
   case BitwiseKindOfString: case KindOfStaticString
 
-static const Trace::Module TRACEMOD = Trace::tx64;
-
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)
-
-typedef const size_t COff; // Const offsets
 
 // nextTx64: Global shared state. The tx64 that should be used for
 // new requests going forward.
@@ -134,8 +136,6 @@ __thread TranslatorX64* tx64;
 
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = REGSTATE_CLEAN;
-
-static const PhysReg rStashedAR = r15;
 
 static StaticString s___call(LITSTR_INIT("__call"));
 static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
@@ -359,7 +359,7 @@ void TranslatorX64::emitTvSetRegSafe(const NormalizedInstruction& i,
   if (incRefFrom) {
     emitIncRef(from, fromType);
   }
-  emitDecRefGenericReg(i, oldData, oldType);
+  emitDecRefGenericReg(oldData, oldType);
 }
 
 void TranslatorX64::emitTvSet(const NormalizedInstruction& i,
@@ -438,12 +438,6 @@ TranslatorX64::emitPushAR(const NormalizedInstruction& i, const Func* func,
   emitVStackStore(a, i,      rVmFp,           savedRbpOff, sz::qword);
 }
 
-static inline bool
-regIsInCallingSequence(PhysReg r) {
-  return r == rax || r == rdi || r == rsi || r == rcx || r == rdx ||
-         r == r8  || r == r9;
-}
-
 template<int StackParity>
 class PhysRegSaverParity {
 protected:
@@ -491,6 +485,41 @@ TranslatorX64::emitCallSaveRegs() {
   m_regMap.cleanRegs(kCallerSaved);
 }
 
+static void UNUSED tc_debug_print(const char* message,
+                           uintptr_t r1,
+                           uintptr_t r2,
+                           uintptr_t r3,
+                           ActRec* fp) {
+  TRACE(1, "*********************** %s: %p %p %p  (for : %s)\n",
+           message, (void*)r1, (void*)r2, (void*)r3,
+           fp->m_func ? fp->m_func->fullName()->data() : "[?]");
+}
+
+// Utility for debugging translations that will print a message,
+// followed by the value of up to three registers.
+void TranslatorX64::emitDebugPrint(Asm& a,
+                                   const char* message,
+                                   PhysReg r1,
+                                   PhysReg r2,
+                                   PhysReg r3) {
+  boost::optional<PhysRegSaver> aSaver;
+  boost::optional<PhysRegSaverStub> astubsSaver;
+
+  if (&a == &this->a) {
+    aSaver = boost::in_place<PhysRegSaver>(boost::ref(a), kAllX64Regs);
+  } else {
+    astubsSaver = boost::in_place<PhysRegSaverStub>(boost::ref(a),
+      kAllX64Regs);
+  }
+
+  a.  mov_imm64_reg  (uintptr_t(message), argNumToRegName[0]);
+  a.  mov_reg64_reg64(r1, argNumToRegName[1]);
+  a.  mov_reg64_reg64(r2, argNumToRegName[2]);
+  a.  mov_reg64_reg64(r3, argNumToRegName[3]);
+  a.  mov_reg64_reg64(rVmFp, argNumToRegName[4]);
+  a.  call((TCA)tc_debug_print);
+}
+
 void ArgManager::cleanLocs() {
   for (size_t i = 0; i < m_args.size(); ++i) {
     // We only need to clean locations we are passing the address of.
@@ -498,9 +527,7 @@ void ArgManager::cleanLocs() {
     // location, not the address of the location itself, so it doesn't
     // need cleaning here.)
     if (m_args[i].m_kind != ArgContent::ArgLocAddr) continue;
-    if (m_tx64.m_regMap.hasReg(*m_args[i].m_loc)) {
-      m_tx64.m_regMap.cleanLoc(*m_args[i].m_loc);
-    }
+    m_tx64.m_regMap.cleanLoc(*m_args[i].m_loc);
   }
 }
 
@@ -531,7 +558,7 @@ TranslatorX64::emitRB(X64Assembler& a,
   if (!Trace::moduleEnabledRelease(Trace::tx64, 5)) {
     return;
   }
-  PhysRegSaver rs(a, toSave);
+  PhysRegSaver rs(a, toSave | kSpecialCrossTraceRegs);
   int arg = 0;
   emitImmReg(a, t, argNumToRegName[arg++]);
   emitImmReg(a, sk.m_funcId, argNumToRegName[arg++]);
@@ -547,7 +574,7 @@ TranslatorX64::emitRB(X64Assembler& a,
   if (!Trace::moduleEnabledRelease(Trace::tx64, 5)) {
     return;
   }
-  PhysRegSaver save(a, toSave);
+  PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);
   int arg = 0;
   emitImmReg(a, (uintptr_t)msg, argNumToRegName[arg++]);
   emitImmReg(a, strlen(msg), argNumToRegName[arg++]);
@@ -861,6 +888,7 @@ emitEagerVMRegSave(X64Assembler& a,
 
   PhysReg pcReg = rdi;
   PhysReg rEC = rScratch;
+  ASSERT(!kSpecialCrossTraceRegs.contains(rdi));
 
   emitGetGContext(a, rEC);
 
@@ -980,13 +1008,12 @@ void TranslatorX64::emitDecRefGeneric(const NormalizedInstruction& i,
 // Same as emitDecRefGeneric, except for when we have the type in a
 // register as well.  Same inlining/outlining choices as
 // emitDecRefGeneric above.
-void TranslatorX64::emitDecRefGenericReg(const NormalizedInstruction& i,
-                                         PhysReg rData, PhysReg rType) {
+void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
   SpaceRecorder sr("_DecRefGeneric", a);
   a.   cmp_imm32_reg32(KindOfRefCountThreshold, rType);
   {
     JccBlock<CC_BE> ifRefCounted(a);
-    callBinaryStub(a, i, m_dtorGenericStubRegs, rData, rType);
+    callBinaryStub(a, *m_curNI, m_dtorGenericStubRegs, rData, rType);
   }
 }
 
@@ -1000,6 +1027,10 @@ TCA TranslatorX64::genericRefCountStub(X64Assembler& a) {
   moveToAlign(a);
   FreezeRegs brr(m_regMap);
   TCA retval = a.code.frontier;
+
+  // Note we make a real frame here: this is necessary so that the
+  // fixup map can chase back to the caller of this stub if it needs
+  // to sync regs.
   a.    pushr(rbp); // {
   a.    mov_reg64_reg64(rsp, rbp);
   {
@@ -1029,6 +1060,9 @@ TCA TranslatorX64::genericRefCountStubRegs(X64Assembler& a) {
   moveToAlign(a);
   TCA retval = a.code.frontier;
   FreezeRegs brr(m_regMap);
+
+  // The frame here is needed for the same reason as in
+  // genericRefCountStub.
   a.    pushr(rbp); // {
   a.    mov_reg64_reg64(rsp, rbp);
   {
@@ -1511,7 +1545,10 @@ TranslatorX64::getInterceptHelper() {
     // Copy the old rbp into the savedRbp pointer.
     astubs.    store_reg64_disp_reg64(rbp, 0, rStashedAR);
 
-    PhysReg rSavedRip = r13;
+    PhysReg rSavedRip = r13; // XXX ideally don't hardcode r13 ... but
+                             // we need callee-saved and don't have
+                             // any scratch ones.
+
     // Fish out the saved rip. We may need to jump there, and the helper will
     // have wiped out the ActRec.
     astubs.    load_reg64_disp_reg64(rStashedAR, AROFF(m_savedRip),
@@ -1550,6 +1587,10 @@ TranslatorX64::emitPrologueRedispatch(X64Assembler& a) {
   retval = a.code.frontier;
   // We're in the wrong func prologue. By convention with emitFuncGuard,
   // rax contains the function we need to enter.
+
+  ASSERT(kScratchCrossTraceRegs.contains(rax));
+  ASSERT(kScratchCrossTraceRegs.contains(rdx));
+  ASSERT(kScratchCrossTraceRegs.contains(rcx));
 
   // We don't know how many params we were invoked with. Infer it from
   // the stack and rStashedAR rather than reading it from the actrec.
@@ -1629,7 +1670,7 @@ funcGuardToFuncImm(TCA funcGuard) {
 static inline bool
 funcGuardIsForFunc(TCA funcGuard, const Func* func) {
   intptr_t iptr = uintptr_t(func);
-  if (x64::deltaFits(iptr, sz::dword)) {
+  if (deltaFits(iptr, sz::dword)) {
     return *funcGuardToFuncImm<int32_t>(funcGuard) == iptr;
   }
   return *funcGuardToFuncImm<int64_t>(funcGuard) == iptr;
@@ -1638,7 +1679,7 @@ funcGuardIsForFunc(TCA funcGuard, const Func* func) {
 static void
 disableFuncGuard(TCA funcGuard, Func* func) {
   ASSERT(funcGuardIsForFunc(funcGuard, func));
-  if (x64::deltaFits((intptr_t)func, sz::dword)) {
+  if (deltaFits((intptr_t)func, sz::dword)) {
     *funcGuardToFuncImm<int32_t>(funcGuard) = 0;
   } else {
     *funcGuardToFuncImm<int64_t>(funcGuard) = 0;
@@ -1648,6 +1689,9 @@ disableFuncGuard(TCA funcGuard, Func* func) {
 
 TCA
 TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
+  ASSERT(kScratchCrossTraceRegs.contains(rax));
+  ASSERT(kScratchCrossTraceRegs.contains(rdx));
+
   // Ensure the immediate is safely smashable; the immediate needs
   // to be at a qword boundary, so we need to start the movImm at
   // (kAlign - kFuncMovImm) % 8.
@@ -1764,9 +1808,9 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   // Guard: we have stack enough stack space to complete this function.
   emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
 
-  // NB: We have the whole register file to play with, since we know we're
-  // between BB's. So, we hardcode some registers here rather than using
-  // the scratch allocator.
+  // NB: We have most of the register file to play with, since we know
+  // we're between BB's. So, we hardcode some registers here rather
+  // than using the scratch allocator.
   TRACE(2, "funcPrologue: user function: %s\n", func->name()->data());
 
   // Add a counter for the translation if requested
@@ -2029,10 +2073,6 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   return funcBody;
 }
 
-static const PhysReg serviceReqArgRegs[] = {
-  /* rdi: contains req */ rsi, rdx, rcx, r8, r9
-};
-
 void
 TranslatorX64::emitBindCall(const Tracelet& t,
                             const NormalizedInstruction &ni,
@@ -2267,7 +2307,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
   // yet.
   if (taken) cc = ccNegate(cc);
   TCA stub =
-    emitServiceReq(false, TranslatorX64::REQ_BIND_JMPCC_SECOND, 3,
+    emitServiceReq(false, REQ_BIND_JMPCC_SECOND, 3,
                    toSmash, uint64_t(offWillDefer), uint64_t(cc));
 
   Asm &as = getAsmFor(toSmash);
@@ -2477,13 +2517,17 @@ TranslatorX64::checkRefs(X64Assembler& a,
     return;
   }
 
-  // We're still between BB's, so ignore the register allocator.
-  PhysReg rNumParams = rdi;
-  PhysReg rMask = rdx;
-  PhysReg rBits = rax;
-  PhysReg rExpectedBits = rcx;
-  PhysReg rBitsValue = rsi;
-  PhysReg rFunc = r8;
+  /*
+   * We're still between BB's, so we're not using the real register
+   * allocator.
+   */
+  RegSet unusedRegs = kScratchCrossTraceRegs;
+  DumbScratchReg rNumParams(unusedRegs);
+  DumbScratchReg rMask(unusedRegs);
+  DumbScratchReg rBits(unusedRegs);
+  DumbScratchReg rExpectedBits(unusedRegs);
+  DumbScratchReg rBitsValue(unusedRegs);
+  DumbScratchReg rFunc(unusedRegs);
 
   // Set up guards for each pushed ActRec that we've made reffiness
   // assumptions about
@@ -2503,11 +2547,11 @@ TranslatorX64::checkRefs(X64Assembler& a,
     }
 
     int32_t funcOff = cellsToBytes(entryArDelta) + offsetof(ActRec, m_func);
-    a.    load_reg64_disp_reg64(rVmSp, funcOff, rFunc); // rFunc <- Func*
-    a.    load_reg64_disp_reg32(rFunc, Func::numParamsOff(),
-                                rNumParams);
-    a.    load_reg64_disp_reg64(rFunc, Func::refBitVecOff(),
-                                rBits);  // rBits <- m_refBitVec
+    a.    load_reg64_disp_reg64(rVmSp, funcOff, *rFunc); // rFunc <- Func*
+    a.    load_reg64_disp_reg32(*rFunc, Func::numParamsOff(),
+                                *rNumParams);
+    a.    load_reg64_disp_reg64(*rFunc, Func::refBitVecOff(),
+                                *rBits);  // rBits <- m_refBitVec
 
     for (unsigned i = 0; i < it->second.m_mask.size(); i += 64) {
       ASSERT(i < it->second.m_vals.size());
@@ -2517,8 +2561,8 @@ TranslatorX64::checkRefs(X64Assembler& a,
       }
       uint64_t value = packBitVec(it->second.m_vals, i);
 
-      emitImmReg(a, mask,  rMask);
-      emitImmReg(a, value, rExpectedBits);
+      emitImmReg(a, mask,  *rMask);
+      emitImmReg(a, value, *rExpectedBits);
 
       /*
        * Before trying to load this block off the bit vector, make
@@ -2530,30 +2574,30 @@ TranslatorX64::checkRefs(X64Assembler& a,
       if (Trace::moduleEnabled(Trace::stats, 2)) {
         Stats::emitInc(a, Stats::TraceletGuard_branch);
       }
-      a.  cmp_imm32_reg32(i + 1, rNumParams);
+      a.  cmp_imm32_reg32(i + 1, *rNumParams);
       {
         IfElseBlock<CC_L> ifFewEnoughArgs(a);
 
         // Load the appropriate qword off of the top actRec's func*.
         SKTRACE(2, sk, "reffiness mask %lx value %lx, ar @%d\n",
                 mask, value, entryArDelta);
-        a.  load_reg64_disp_reg64(rBits, sizeof(uint64) * (i / 64),
-                                  rBitsValue);  // rBitsValue <- rBits[i / 64]
-        a.  and_reg64_reg64(rMask, rBitsValue); // rBitsValue &= rMask
-        a.  cmp_reg64_reg64(rBitsValue, rExpectedBits);
+        a.  load_reg64_disp_reg64(*rBits, sizeof(uint64) * (i / 64),
+                                  *rBitsValue);  // rBitsValue <- rBits[i / 64]
+        a.  and_reg64_reg64(*rMask, *rBitsValue); // rBitsValue &= rMask
+        a.  cmp_reg64_reg64(*rBitsValue, *rExpectedBits);
         emitFallbackJmp(fail);
 
         ifFewEnoughArgs.Else();
 
         a.  test_imm32_disp_reg32(AttrVariadicByRef,
                                   Func::attrsOff(),
-                                  rFunc);
+                                  *rFunc);
         {
           IfElseBlock<CC_NZ> ifNotWeirdBuiltin(a);
 
           // Other than these builtins, we need to have all by value
           // args in this case.
-          a.  test_reg64_reg64(rExpectedBits, rExpectedBits);
+          a.  test_reg64_reg64(*rExpectedBits, *rExpectedBits);
           emitFallbackJmp(fail);
 
           ifNotWeirdBuiltin.Else();
@@ -2561,7 +2605,7 @@ TranslatorX64::checkRefs(X64Assembler& a,
           // If it is one of the weird builtins that has reffiness for
           // additional args, we have to make sure our expectation is
           // that these additional args are by ref.
-          a.  cmp_imm32_reg64((signed int)(-1ull & mask), rExpectedBits);
+          a.  cmp_imm32_reg64((signed int)(-1ull & mask), *rExpectedBits);
           emitFallbackJmp(fail);
         }
       }
@@ -2592,11 +2636,13 @@ TranslatorX64::emitRetFromInterpretedFrame() {
  * fcallHelperThunk
  * Note: Assumes rStashedAR is r15
  */
+static_assert(rStashedAR == r15,
+  "__fcallHelperThunk needs to be modified for ABI changes");
 asm (
   ".byte 0\n"
   ".align 16\n"
   ".globl __fcallHelperThunk\n"
-  "__fcallHelperThunk:\n"
+"__fcallHelperThunk:\n"
 #ifdef HHVM
   "mov %r15, %rdi\n"
   "call fcallHelper\n"
@@ -2621,6 +2667,11 @@ asm (
  * %rbp.  This means when we call it from C++, we have to tell gcc to
  * clobber all the other callee-saved registers.
  */
+static_assert(rVmSp == rbx &&
+              rVmFp == rbp &&
+              rVmTl == r12 &&
+              rStashedAR == r15,
+  "__enterTCHelper needs to be modified to use the correct ABI");
 asm (
   ".byte 0\n"
   ".align 16\n"
@@ -2642,7 +2693,7 @@ asm (
   "mov %rdi, %rbx\n"          // rVmSp
   "mov %r9, %r12\n"           // rVmTl
   "mov %rsi, %rbp\n"          // rVmFp
-  "mov 0x30(%rcx), %r15\n"    // restore previous r15 value
+  "mov 0x30(%rcx), %r15\n"    // rStashedAR saved across service requests
 
   // The translated code we are about to enter does not follow the
   // standard prologue of pushing rbp at entry, so we are purposely 8
@@ -2657,18 +2708,20 @@ asm (
   "call *%rdx\n"
   "add $0x80, %rsp\n"
 
-  // Restore infoPtr into r14
-  "pop %r14\n"
+  // Restore infoPtr into %rbx
+  "pop %rbx\n"
   ".cfi_adjust_cfa_offset -8\n"
 
   // Copy the values passed from jitted code into *infoPtr
-  "mov %rdi, 0x0(%r14)\n"
-  "mov %rsi, 0x8(%r14)\n"
-  "mov %rdx, 0x10(%r14)\n"
-  "mov %rcx, 0x18(%r14)\n"
-  "mov %r8,  0x20(%r14)\n"
-  "mov %r9,  0x28(%r14)\n"
-  "mov %r15, 0x30(%r14)\n"
+  "mov %rdi, 0x0(%rbx)\n"
+  "mov %rsi, 0x8(%rbx)\n"
+  "mov %rdx, 0x10(%rbx)\n"
+  "mov %rcx, 0x18(%rbx)\n"
+  "mov %r8,  0x20(%rbx)\n"
+  "mov %r9,  0x28(%rbx)\n"
+
+  // Service request "callee-saved".  (Returnee-saved?)
+  "mov %r15, 0x30(%rbx)\n"
 
   // Epilogue
   "pop %rbp\n"
@@ -2681,12 +2734,14 @@ asm (
 struct TReqInfo {
   uintptr_t requestNum;
   uintptr_t args[5];
-  uintptr_t savedR15; // this TC register is preserved across service requests
+
+  // Some TC registers need to be preserved across service requests.
+  uintptr_t saved_rStashedAr;
 };
 
 void enterTCHelper(Cell* vm_sp,
                    Cell* vm_fp,
-                   unsigned char* start,
+                   TCA start,
                    TReqInfo* infoPtr,
                    ActRec* firstAR,
                    uint8_t* targetCacheBase) asm ("__enterTCHelper");
@@ -2700,9 +2755,6 @@ __thread int DepthGuard::m_depth;
 void
 TranslatorX64::enterTC(SrcKey sk) {
   using namespace TargetCache;
-  CT_ASSERT(rVmSp == rbx);
-  CT_ASSERT(rVmFp == rbp);
-  CT_ASSERT(rVmTl == r12);
   TCA start = getTranslation(&sk, true);
 
   DepthGuard d;
@@ -2715,13 +2767,13 @@ TranslatorX64::enterTC(SrcKey sk) {
     ASSERT(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
     ASSERT(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
-    TRACE(4, "enterTC: %p fp%p(%s) sp%p enter {\n", start,
+    TRACE(1, "enterTC: %p fp%p(%s) sp%p enter {\n", start,
           vmfp(), ((ActRec*)vmfp())->m_func->name()->data(), vmsp());
     s_writeLease.gremlinUnlock();
     // Keep dispatching until we end up somewhere the translator
     // recognizes, or we luck out and the leaseholder exits.
     while (!start) {
-      TRACE(4, "enterTC forwarding BB to interpreter\n");
+      TRACE(2, "enterTC forwarding BB to interpreter\n");
       g_vmContext->m_pc = curUnit()->at(sk.offset());
       INC_TPC(interp_bb);
       g_vmContext->dispatchBB();
@@ -2822,7 +2874,7 @@ TranslatorX64::enterTC(SrcKey sk) {
         Offset off = args[1];
         sk = SrcKey(curFunc(), off);
         if (requestNum == REQ_BIND_SIDE_EXIT) {
-          SKTRACE(4, sk, "side exit taken!\n");
+          SKTRACE(3, sk, "side exit taken!\n");
         }
         start = bindJmp(toSmash, sk, requestNum == REQ_BIND_ADDR);
       } break;
@@ -2936,7 +2988,7 @@ TranslatorX64::enterTC(SrcKey sk) {
         vmpc() = curUnit()->at(fe->m_fcallOff);
         ASSERT(isFCallStar(*vmpc()));
         raise_error("Stack overflow");
-        return;
+        NOT_REACHED();
       }
     }
   }
@@ -2973,7 +3025,7 @@ TranslatorX64::emitServiceReqVA(bool align, ServiceRequest req, int numArgs,
   TRACE(3, "Emit Service Req %s(", reqName(req));
   for (int i = 0; i < numArgs; i++) {
     uint64_t argVal = va_arg(args, uint64_t);
-    TRACE(3, "%ld,", argVal);
+    TRACE(3, "%p,", (void*)argVal);
     emitImmReg(astubs, argVal, serviceReqArgRegs[i]);
   }
   TRACE(3, ")\n");
@@ -3308,7 +3360,7 @@ interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
    * fixup map for interpOne calls anyway.
    */ \
   tl_regState = REGSTATE_DIRTY;                                         \
-  return ec;;                                                           \
+  return ec;                                                            \
 }
 
 OPCODES
@@ -3364,7 +3416,7 @@ TranslatorX64::syncWork() {
 
 void
 TranslatorX64::emitInterpOne(const Tracelet& t,
-                             const NormalizedInstruction &ni) {
+                             const NormalizedInstruction& ni) {
   // Write any dirty values to memory
   m_regMap.cleanAll();
   // Call into the appropriate interpOne method. Note that this call will
@@ -3954,7 +4006,7 @@ TranslatorX64::translateBranchOp(const Tracelet& t,
              inputType != KindOfBoolean &&
              !rtt.isInt()) {
     // input might be in-flight
-    m_regMap.cleanRegs(RegSet(m_regMap.getReg(inLoc)));
+    m_regMap.cleanLoc(inLoc);
     // Cast to a bool.
     if (false) {
       TypedValue *tv = NULL;
@@ -4267,6 +4319,8 @@ TranslatorX64::translatePopR(const Tracelet& t,
 void
 TranslatorX64::translateUnboxR(const Tracelet& t,
                                const NormalizedInstruction& i) {
+  ASSERT(!i.inputs[0]->rtt.isVagueValue());
+
   // If the value on the top of a stack is a var, unbox it and
   // leave it on the top of the stack.
   if (i.inputs[0]->isVariant()) {
@@ -4419,7 +4473,7 @@ TranslatorX64::translateAddElemC(const Tracelet& t,
   // If either the key or the rhs is not Int64, we will need to pass the
   // rhs by address, so we need to sync it back to memory
   if (!key.rtt.isInt() || !val.rtt.isInt()) {
-    m_regMap.cleanRegs(RegSet(m_regMap.getReg(valLoc)));
+    m_regMap.cleanLoc(valLoc);
   }
 
   // The array_setm helpers will decRef any old value that is
@@ -4495,7 +4549,7 @@ TranslatorX64::translateAddNewElemC(const Tracelet& t,
   Location valLoc = i.inputs[0]->location;
 
   // We pass the rhs by address, so we need to sync it back to memory
-  m_regMap.cleanRegs(RegSet(m_regMap.getReg(valLoc)));
+  m_regMap.cleanLoc(valLoc);
 
   // The array_setm helpers will decRef any old value that is
   // overwritten if appropriate. If copy-on-write occurs, it will also
@@ -4539,7 +4593,11 @@ static void undefCns(const StringData* nm) {
 void TranslatorX64::emitSideExit(Asm& a, const NormalizedInstruction& i,
                                  bool next) {
   const NormalizedInstruction& dest = next ? *i.next : i;
+
   SKTRACE(3, i.source, "sideexit check %p\n", a.code.frontier);
+  // NB: if next == true, we are assuming here that stack elements
+  // spit out by this instruction are already clean and sync'd back to
+  // the top slot of the stack.
   m_regMap.scrubStackEntries(dest.stackOff);
   m_regMap.cleanAll();
   emitRB(a, RBTypeSideExit, i.source);
@@ -4981,6 +5039,9 @@ static const StringData* stringDataFromDouble(int64 n) {
 
 void TranslatorX64::toStringHelper(ObjectData *obj) {
   // caller must set r15 to the new ActRec
+  static_assert(rStashedAR == r15 &&
+                rVmFp == rbp,
+                "toStringHelper needs to be updated for ABI changes");
   register ActRec *ar asm("r15");
   register ActRec *rbp asm("rbp");
 
@@ -5002,7 +5063,8 @@ void TranslatorX64::toStringHelper(ObjectData *obj) {
   ar->initNumArgs(0);
   ar->setThis(obj);
   ar->setVarEnv(0);
-  // point our return address at the prolog to execute
+  // Point the return address of this C++ function at the prolog to
+  // execute.
   rbp->m_savedRip = (uint64_t)toString->getPrologue(0);
 }
 
@@ -5056,12 +5118,13 @@ TranslatorX64::translateCastString(const Tracelet& t,
       a. mov_reg64_reg64(obj,  argNumToRegName[0]);
     }
     m_regMap.smashRegs(kAllRegs);
-    a.   mov_reg64_reg64(rVmSp, r15);
+    a.   mov_reg64_reg64(rVmSp, rStashedAR);
     EMIT_CALL(a, TCA(toStringHelper));
     recordReentrantCall(i);
     if (i.stackOff != 0) {
       a. add_imm64_reg64(cellsToBytes(i.stackOff), rVmSp);
     }
+
     PhysReg base;
     int disp;
     locToRegDisp(i.outStack->location, &base, &disp);
@@ -5120,7 +5183,7 @@ TranslatorX64::translatePrint(const Tracelet& t,
 void
 TranslatorX64::translateJmp(const Tracelet& t,
                             const NormalizedInstruction& i) {
-  m_regMap.allocOutputRegs(i);
+  ASSERT(!i.outStack && !i.outLocal);
   syncOutputs(t);
 
   // Check the surprise page on all backwards jumps
@@ -5355,6 +5418,49 @@ TranslatorX64::analyzeRetV(Tracelet& t,
   analyzeRetC(t, i);
 }
 
+static TypedValue getGroupedRetTV(const NormalizedInstruction& i) {
+  TypedValue tv;
+  TV_WRITE_UNINIT(&tv);
+  tv.m_data.num = 0; // to keep the compiler happy
+  if (!i.grouped) return tv;
+
+  /*
+   * We suppressed the write of the (literal) return value
+   * to the stack. Figure out what it was.
+   */
+  NormalizedInstruction* prev = i.prev;
+  ASSERT(!prev->outStack);
+  switch (prev->op()) {
+    case OpNull:
+      tv.m_type = KindOfNull;
+      break;
+    case OpTrue:
+    case OpFalse:
+      tv.m_type = KindOfBoolean;
+      tv.m_data.num = prev->op() == OpTrue;
+      break;
+    case OpInt:
+      tv.m_type = KindOfInt64;
+      tv.m_data.num = prev->imm[0].u_I64A;
+      break;
+    case OpDouble:
+      tv.m_type = KindOfDouble;
+      tv.m_data.dbl = prev->imm[0].u_DA;
+      break;
+    case OpString:
+      tv.m_type = BitwiseKindOfString;
+      tv.m_data.pstr = curUnit()->lookupLitstrId(prev->imm[0].u_SA);
+      break;
+    case OpArray:
+      tv.m_type = KindOfArray;
+      tv.m_data.parr = curUnit()->lookupArrayId(prev->imm[0].u_AA);
+      break;
+    default:
+      not_reached();
+  }
+  return tv;
+}
+
 // translateRetC --
 //
 //   Return to caller with the current activation record replaced with the
@@ -5363,7 +5469,10 @@ TranslatorX64::analyzeRetV(Tracelet& t,
 void
 TranslatorX64::translateRetC(const Tracelet& t,
                              const NormalizedInstruction& i) {
-  /**
+  if (i.skipSync) ASSERT(i.grouped);
+  if (i.grouped)  ASSERT(freeLocalsInline());
+
+  /*
    * This method chooses one of two ways to generate machine code for RetC
    * depending on whether we are generating a specialized return (where we
    * free the locals inline when possible) or a generic return (where we call
@@ -5390,8 +5499,10 @@ TranslatorX64::translateRetC(const Tracelet& t,
    *   unconditionally transfer control back to the caller
    */
 
-  int adjust = t.m_stackChange;
+  int stackAdjustment = t.m_stackChange;
   if (i.skipSync) {
+    SKTRACE(2, i.source, "i.skipSync\n");
+
     /*
      * getting here means there was nothing to do between
      * a previous reqXXX and this ret. Any spill code we generate
@@ -5401,7 +5512,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
     TCA s DEBUG_ONLY = a.code.frontier;
     syncOutputs(0);
     ASSERT(s == a.code.frontier);
-    adjust = 0;
+    stackAdjustment = 0;
   } else {
     /*
      * no need to syncOutputs here... we're going to update
@@ -5409,86 +5520,65 @@ TranslatorX64::translateRetC(const Tracelet& t,
      * to use enregistered locals on the fast path below
      */
     m_regMap.scrubStackEntries(t.m_stackChange);
-    m_regMap.cleanAll();
+    m_regMap.cleanAll(); // TODO(#1339331): don't.
   }
 
   bool noThis = !curFunc()->isPseudoMain() &&
                 (!curFunc()->isMethod() || curFunc()->isStatic());
   bool mayUseVV = (curFunc()->attrs() & AttrMayUseVV);
 
-  TypedValue tv;
-  TV_WRITE_UNINIT(&tv);
-  tv.m_data.num = 0; // to keep the compiler happy
-  if (i.grouped) {
-    /*
-     * We suppressed the write of the (literal) return value
-     * to the stack. Figure out what it was.
-     */
-    NormalizedInstruction* prev = i.prev;
-    ASSERT(!prev->outStack);
-    switch (prev->op()) {
-      case OpNull:
-        tv.m_type = KindOfNull;
-        break;
-      case OpTrue:
-      case OpFalse:
-        tv.m_type = KindOfBoolean;
-        tv.m_data.num = prev->op() == OpTrue;
-        break;
-      case OpInt:
-        tv.m_type = KindOfInt64;
-        tv.m_data.num = prev->imm[0].u_I64A;
-        break;
-      case OpDouble:
-        tv.m_type = KindOfDouble;
-        tv.m_data.dbl = prev->imm[0].u_DA;
-        break;
-      case OpString:
-        tv.m_type = BitwiseKindOfString;
-        tv.m_data.pstr = curUnit()->lookupLitstrId(prev->imm[0].u_SA);
-        break;
-      case OpArray:
-        tv.m_type = KindOfArray;
-        tv.m_data.parr = curUnit()->lookupArrayId(prev->imm[0].u_AA);
-        break;
-      default:
-        not_reached();
-    }
-  }
+  const TypedValue groupedRetTV = getGroupedRetTV(i);
+
   /*
    * figure out where to put the return value, and where to get it from
    */
+  ASSERT(i.stackOff == t.m_stackChange);
+  const Location retValSrcLoc(Location::Stack, stackAdjustment - 1);
+
   const Func *callee = curFunc();
   ASSERT(callee);
   int nLocalCells =
     callee == NULL ? 0 : // This happens for returns from pseudo-main.
     callee->numSlotsInFrame();
-  int retvalSrcBase  = cellsToBytes(-adjust); // 0(rVmSp) is retval
+  int retvalSrcBase = cellsToBytes(-stackAdjustment);
+
+  ASSERT(cellsToBytes(locPhysicalOffset(retValSrcLoc)) == retvalSrcBase);
 
   /*
    * The (1 + nLocalCells) skips 1 slot for the return value.
    */
-  TRACE(2, "nLocalCells: %d\n", nLocalCells);
-  int retvalDestDisp =
-    cellsToBytes(1 + nLocalCells - adjust) + AROFF(m_r);
+  int retvalDestDisp = cellsToBytes(1 + nLocalCells - stackAdjustment) +
+    AROFF(m_r);
 
   if (freeLocalsInline()) {
+    SKTRACE(2, i.source, "emitting specialized inline return\n");
+
     // Emit specialized code inline to clean up the locals
     ASSERT(curFunc()->numLocals() == (int)i.inputs.size());
 
-    boost::scoped_ptr<DiamondReturn> dr;
+    ScratchReg rTmp(m_regMap);
+
+    /*
+     * If this function can possibly use variadic arguments or shared
+     * variable environment, we need to check for it and go to a
+     * generic return if so.
+     */
+    boost::scoped_ptr<DiamondReturn> mayUseVVRet;
     if (mayUseVV) {
-      dr.reset(new DiamondReturn);
-      ScratchReg scratch(m_regMap);
-      a. load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *scratch);
-      a. test_reg64_reg64(*scratch, *scratch);
+      SKTRACE(2, i.source, "emitting mayUseVV in UnlikelyIf\n");
+
+      mayUseVVRet.reset(new DiamondReturn);
+      a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rTmp);
+      a.    test_reg64_reg64(*rTmp, *rTmp);
       {
-        UnlikelyIfBlock<CC_NZ> varEnvCheck(a, astubs, dr.get());
+        UnlikelyIfBlock<CC_NZ> varEnvCheck(a, astubs, mayUseVVRet.get());
+
+        m_regMap.cleanAll();
         if (i.grouped) {
-          emitStoreImm(astubs, tv.m_type,
+          emitStoreImm(astubs, groupedRetTV.m_type,
                        rVmSp, retvalSrcBase + TVOFF(m_type), sz::dword);
-          if (tv.m_type != KindOfNull) {
-            emitStoreImm(astubs, tv.m_data.num,
+          if (groupedRetTV.m_type != KindOfNull) {
+            emitStoreImm(astubs, groupedRetTV.m_data.num,
                          rVmSp, retvalSrcBase, sz::qword);
           }
         }
@@ -5518,36 +5608,40 @@ TranslatorX64::translateRetC(const Tracelet& t,
       ASSERT(curFrame()->hasThis() || curFrame()->hasClass());
       // m_this and m_cls share a slot in the ActRec, so we check the
       // lowest bit (0 -> m_this, 1 -> m_cls)
-      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), rdi);
+      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
       if (i.guardedThis) {
-        emitDecRef(i, rdi, KindOfObject);
+        emitDecRef(i, *rTmp, KindOfObject);
       } else {
-        a.      test_imm32_reg64(1, rdi);
+        a.      test_imm32_reg64(1, *rTmp);
         {
           JccBlock<CC_NZ> ifZero(a);
-          emitDecRef(i, rdi, KindOfObject); // this. decref it.
+          emitDecRef(i, *rTmp, KindOfObject); // this. decref it.
         }
       }
     } else if (curFunc()->isPseudoMain()) {
-      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), rdi);
-      a.      shr_imm32_reg64(1, rdi); // sets c (from bit 0) and z
+      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
+      a.      shr_imm32_reg64(1, *rTmp); // sets c (from bit 0) and z
+      FreezeRegs ice(m_regMap);
       {
         // tests for Not Zero and Not Carry
         UnlikelyIfBlock<CC_NBE> ifRealThis(a, astubs);
-        astubs.    shl_imm32_reg64(1, rdi);
-        emitDecRef(astubs, i, rdi, KindOfObject);
+        astubs.    shl_imm32_reg64(1, *rTmp);
+        emitDecRef(astubs, i, *rTmp, KindOfObject);
       }
     }
 
+    // Register map is officially out of commission now.
+    m_regMap.scrubLoc(retValSrcLoc);
     m_regMap.smashRegs(kAllRegs);
+
     emitTestSurpriseFlags();
     {
       UnlikelyIfBlock<CC_NZ> ifTracer(a, astubs);
       if (i.grouped) {
-        emitStoreImm(astubs, tv.m_type,
+        emitStoreImm(astubs, groupedRetTV.m_type,
                      rVmSp, retvalSrcBase + TVOFF(m_type), sz::dword);
-        if (tv.m_type != KindOfNull) {
-          emitStoreImm(astubs, tv.m_data.num,
+        if (groupedRetTV.m_type != KindOfNull) {
+          emitStoreImm(astubs, groupedRetTV.m_data.num,
                        rVmSp, retvalSrcBase, sz::qword);
         }
       }
@@ -5555,15 +5649,24 @@ TranslatorX64::translateRetC(const Tracelet& t,
       emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
       recordReentrantStubCall(i);
     }
+
+    // The register map on the main line better be empty (everything
+    // smashed) or some of the above DiamondReturns might generate
+    // reconciliation code.
+    ASSERT(m_regMap.empty());
   } else {
+    SKTRACE(2, i.source, "emitting generic return\n");
+
     if (i.grouped) {
       /*
-       * what a pain: EventHook::onFunctionExit needs access
+       * What a pain: EventHook::onFunctionExit needs access
        * to the return value - so we'd better not have suppressed
        * writing it to the stack...
        */
+      ASSERT(false);
       not_reached();
     }
+    m_regMap.cleanAll();
     m_regMap.smashRegs(kAllRegs);
     // If we are doing the generic return flow, we emit a call to
     // frame_free_locals here
@@ -5571,8 +5674,15 @@ TranslatorX64::translateRetC(const Tracelet& t,
     emitFrameRelease(a, i, noThis);
   }
 
-  const PhysReg rRetAddr = rax;
-  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRip), rRetAddr);
+  /*
+   * We're officially between tracelets now, and the normal register
+   * allocator is not being used.
+   */
+  ASSERT(m_regMap.empty());
+  RegSet scratchRegs = kScratchCrossTraceRegs;
+  DumbScratchReg rRetAddr(scratchRegs);
+
+  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRip), *rRetAddr);
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
 
   /*
@@ -5582,10 +5692,10 @@ TranslatorX64::translateRetC(const Tracelet& t,
    * refcount-neutral.
    */
   if (i.grouped) {
-    emitStoreImm(a, tv.m_type,
+    emitStoreImm(a, groupedRetTV.m_type,
                  rVmSp, retvalDestDisp + TVOFF(m_type), sz::dword);
-    if (tv.m_type != KindOfNull) {
-      emitStoreImm(a, tv.m_data.num,
+    if (groupedRetTV.m_type != KindOfNull) {
+      emitStoreImm(a, groupedRetTV.m_data.num,
                    rVmSp, retvalDestDisp, sz::qword);
     }
   } else {
@@ -5595,16 +5705,17 @@ TranslatorX64::translateRetC(const Tracelet& t,
     a.   load_reg64_disp_reg64 (rVmSp,    retvalSrcBase + 8,  rScratch);
     a.   store_reg64_disp_reg64(rScratch, retvalDestDisp + 8, rVmSp);
   }
+
   /*
-   * Now update the principle hardware registers.
+   * Now update the principal hardware registers.
    *
    * Stack pointer has to skip over all the locals as well as the
    * activation record.
    */
   a.   add_imm64_reg64(sizeof(ActRec) +
-                       cellsToBytes(nLocalCells - adjust), rVmSp);
-  emitRB(a, RBTypeFuncExit, curFunc()->fullName()->data(), RegSet(rRetAddr));
-  a.   jmp_reg        (rRetAddr);
+                       cellsToBytes(nLocalCells - stackAdjustment), rVmSp);
+  emitRB(a, RBTypeFuncExit, curFunc()->fullName()->data(), RegSet(*rRetAddr));
+  a.   jmp_reg        (*rRetAddr);
   translator_not_reached(a);
 }
 
@@ -5614,6 +5725,12 @@ TranslatorX64::translateRetV(const Tracelet& t,
   translateRetC(t, i);
 }
 
+/*
+ * NativeImpl is a special operation in the sense that it must be the
+ * only opcode in a function body, and also functions as the return.
+ *
+ * This function runs between tracelets and does not use m_regMap.
+ */
 void TranslatorX64::emitNativeImpl(const Func* func,
                                    bool emitSavedRIPReturn) {
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
@@ -5624,9 +5741,11 @@ void TranslatorX64::emitNativeImpl(const Func* func,
 
   TRACE(2, "calling builtin preClass %p func %p\n", func->preClass(),
     builtinFuncPtr);
-  // Call the native implementation. This will free the locals for us in the
-  // normal case. In the case where an exception is thrown, the VM unwinder
-  // will handle it for us.
+  /*
+   * Call the native implementation. This will free the locals for us in the
+   * normal case. In the case where an exception is thrown, the VM unwinder
+   * will handle it for us.
+   */
   a.   mov_reg64_reg64(rVmFp, argNumToRegName[0]);
   emitCall(a, (TCA)builtinFuncPtr, false /* smash regs */);
 
@@ -5648,22 +5767,34 @@ void TranslatorX64::emitNativeImpl(const Func* func,
                                        // non-arg locals
   recordSyncPoint(a, pcOffset, stackOff);
 
-  const PhysReg rRetAddr = rax;
+  RegSet unusedRegs = kScratchCrossTraceRegs;
+  DumbScratchReg rRetAddr(unusedRegs);
+
   RegSet saveDuringEmitRB;
   if (emitSavedRIPReturn) {
     // Get the return address from the ActRec
-    a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRip), rRetAddr);
-    saveDuringEmitRB |= RegSet(rRetAddr);
+    a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRip), *rRetAddr);
+    saveDuringEmitRB |= RegSet(*rRetAddr);
   }
-  // The native implementation put the return value in the right place for
-  // us already; all we have left to do is update the frame pointer and the
-  // stack pointer
-  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
+
+  /*
+   * The native implementation already put the return value on the
+   * stack for us, and handled cleaning up the arguments.  We have to
+   * update the frame pointer and the stack pointer, and load the
+   * return value into the return register so the trace we are
+   * returning to has it where it expects.
+   *
+   * TODO(#1273094): we should probably modify the actual builtins to
+   * return values via registers (rax:edx) using the C ABI and do a
+   * reg-to-reg move.
+   */
   int nLocalCells = func->numSlotsInFrame();
   a.   add_imm64_reg64(sizeof(ActRec) + cellsToBytes(nLocalCells-1), rVmSp);
+  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
+
   emitRB(a, RBTypeFuncExit, func->fullName()->data(), saveDuringEmitRB);
   if (emitSavedRIPReturn) {
-    a.   jmp_reg        (rRetAddr);
+    a.   jmp_reg        (*rRetAddr);
     translator_not_reached(a);
   }
 }
@@ -5671,8 +5802,12 @@ void TranslatorX64::emitNativeImpl(const Func* func,
 void
 TranslatorX64::translateNativeImpl(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
-  syncOutputs(t);
-  ASSERT(ni.stackOff == 0); // Assumed in emitNativeImpl
+  /*
+   * We assume that NativeImpl is the only instruction in the trace,
+   * and the only instruction for the implementation of the function.
+   */
+  ASSERT(ni.stackOff == 0);
+  ASSERT(m_regMap.empty());
   emitNativeImpl(curFunc(), true);
 }
 
@@ -7062,7 +7197,8 @@ TranslatorX64::translateReqLit(const Tracelet& t,
   Func *func = unit->getMain();
 
   const Offset after = nextSrcKey(t, i).offset();
-  TRACE(1, "requireHelper: efile %p offset %d\n", efile, after);
+  TRACE(1, "requireHelper: efile %p offset %d%s\n", efile, after,
+           i.skipSync ? " [skipsync]" : "");
 
   if (i.skipSync) {
     /*
@@ -7203,7 +7339,7 @@ void TranslatorX64::translateDefCls(const Tracelet& t,
      compute the corrected stack ptr as a pseudo-param to m_defClsHelper
      which it will store in g_vmContext, in case of fatals, or __autoload
   */
-  m_regMap.cleanRegs(RegSet(rax));
+  m_regMap.cleanReg(rax);
   m_regMap.smashReg(rax);
   ScratchReg offset(m_regMap, rax);
   a.   lea_reg64_disp_reg64(rVmSp, -cellsToBytes(i.stackOff), rax);
@@ -8167,6 +8303,8 @@ TranslatorX64::translateFPassR(const Tracelet& t,
    * unbox; otherwise we might accidentally make callee changes to its
    * parameter globally visible.
    */
+  ASSERT(!i.inputs[0]->rtt.isVagueValue());
+
   ASSERT(i.inputs.size() == 1);
   const RuntimeType& inRtt = i.inputs[0]->rtt;
   if (inRtt.isVariant() && !i.preppedByRef) {
@@ -8186,15 +8324,22 @@ TranslatorX64::translateFCall(const Tracelet& t,
   // top of stack at the beginning of the current instruction
   syncOutputs(i);
 
+  // We are "between" tracelets and don't use the register map
+  // anymore.  (Note that the currently executing trace may actually
+  // continue past the FCall, but it will have to resume with a fresh
+  // register map.)
+  RegSet scratchRegs = kScratchCrossTraceRegs;
+  DumbScratchReg retIPReg(scratchRegs);
+
   // Caller-specific fields: return addresses and the frame pointer
   // offset.
   ASSERT(sizeof(Cell) == 1 << 4);
   // Record the hardware return address. This will be patched up below; 2
   // is a magic number dependent on assembler implementation.
   uint64 *retIP = (uint64*)(a.code.frontier + 2);
-  emitImmReg(a, kUninitializedRIP, rax);
+  emitImmReg(a, kUninitializedRIP, *retIPReg);
   ASSERT(*retIP == kUninitializedRIP);
-  a.    store_reg64_disp_reg64 (rax,
+  a.    store_reg64_disp_reg64 (*retIPReg,
                                 cellsToBytes(numArgs) + AROFF(m_savedRip),
                                 rVmSp);
 
@@ -8262,10 +8407,10 @@ staticLocHelper(StringData* name, ActRec* fp, TypedValue* sp,
 }
 
 void
-TranslatorX64::emitCallStaticLocHelper(x64::X64Assembler& as,
+TranslatorX64::emitCallStaticLocHelper(X64Assembler& as,
                                        const NormalizedInstruction& i,
                                        ScratchReg& output,
-                                       CacheHandle ch) {
+                                       TargetCache::CacheHandle ch) {
   // The helper is going to read the value from memory, so record it.  We
   // could also pass type/value as parameters, but this is hopefully a
   // rare path.
@@ -9098,9 +9243,8 @@ TranslatorX64::emitGuardChecks(X64Assembler& a,
     if (!pseudoMain || !dep->second->isLocal() || !dep->second->isValue()) {
       checkType(a, dep->first, dep->second->rtt, fail);
     } else {
-      TRACE(3, "Skipping tracelet guard for %d:%d %d\n",
-            (int)dep->second->location.space,
-            (int)dep->second->location.offset,
+      TRACE(3, "Skipping tracelet guard for %s %d\n",
+            dep->second->location.pretty().c_str(),
             (int)dep->second->rtt.outerType());
     }
   }
@@ -9164,12 +9308,24 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   }
 }
 
+namespace {
+template<class T> struct Nuller : private boost::noncopyable {
+  explicit Nuller(const T** p) : p(p) {}
+  ~Nuller() { *p = 0; }
+  T const** const p;
+};
+}
+
 void
 TranslatorX64::translateTracelet(const Tracelet& t) {
   const SrcKey &sk = t.m_sk;
 
+  m_curTrace = &t;
+  Nuller<Tracelet> ctNuller(&m_curTrace);
+
   SKTRACE(1, sk, "translateTracelet\n");
   ASSERT(m_srcDB.find(sk));
+  ASSERT(m_regMap.pristine());
   TCA                     start = a.code.frontier;
   TCA                     stubStart = astubs.code.frontier;
   TCA                     counterStart = 0;
@@ -9209,6 +9365,8 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
                                                astubs.code.frontier});
         }
 
+        m_curNI = ni;
+        Nuller<NormalizedInstruction> niNuller(&m_curNI);
         translateInstr(t, *ni);
         ASSERT(ni->source.offset() >= curFunc()->base());
         // We sometimes leave the tail of a truncated tracelet in place to aid
@@ -9291,7 +9449,9 @@ TranslatorX64::TranslatorX64()
   m_hhbcTrans(NULL),
   m_regMap(kCallerSaved, kCalleeSaved, this),
   m_interceptsEnabled(false),
-  m_unwindRegMap(128)
+  m_unwindRegMap(128),
+  m_curTrace(0),
+  m_curNI(0)
 {
   TRACE(1, "TranslatorX64@%p startup\n", this);
   tx64 = this;

@@ -1893,7 +1893,7 @@ short_jump:
     goto short_jump;
   }
 
-  memcpy(retval, m_stack.topTV(), sizeof(TypedValue));
+  *retval = *m_stack.topTV();
   m_stack.discard();
   return;
 

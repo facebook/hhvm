@@ -61,7 +61,7 @@ undefinedError(const char* msg, const char* name) {
 }
 
 // Targetcache memory. See the comment in targetcache.h
-__thread HPHP::x64::DataBlock tl_targetCaches = {0, 0, kNumTargetCacheBytes};
+__thread DataBlock tl_targetCaches = {0, 0, kNumTargetCacheBytes};
 CT_ASSERT(kConditionFlagsOff + sizeof(ssize_t) <= 64);
 size_t s_frontier = kConditionFlagsOff + 64;
 static size_t s_next_bit;

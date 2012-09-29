@@ -773,7 +773,7 @@ OPCODES
   return out.str();
 }
 
-std::string opcodeToName(Opcode op) {
+const char* opcodeToName(Opcode op) {
   const char* namesArr[] = {
 #define O(name, imm, inputs, outputs, flags) \
     #name ,

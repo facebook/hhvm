@@ -62,13 +62,11 @@ static inline uintptr_t tlsBase() {
   return retval;
 }
 
-static inline size_t
-cellsToBytes(int nCells) {
+static inline int cellsToBytes(int nCells) {
   return nCells * sizeof(Cell);
 }
 
-static inline size_t
-bytesToCells(int nBytes) {
+static inline size_t bytesToCells(int nBytes) {
   ASSERT(nBytes % sizeof(Cell) == 0);
   return nBytes / sizeof(Cell);
 }

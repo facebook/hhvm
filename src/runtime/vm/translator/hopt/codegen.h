@@ -22,13 +22,12 @@
 #include "runtime/vm/translator/targetcache.h"
 #include <runtime/vm/translator/translator-x64.h>
 
-using namespace HPHP::x64;
-using namespace HPHP::VM::Transl;
-using namespace HPHP::VM::Transl::TargetCache;
-
 namespace HPHP {
 namespace VM {
 namespace JIT {
+
+using namespace HPHP::VM::Transl;
+using namespace HPHP::VM::Transl::TargetCache;
 
 class FailedCodeGen : public std::exception {
  public:
@@ -54,7 +53,7 @@ public:
   static const register_name_t argNumToRegName[];
 
   // typedef copied from TranslatorX64 class
-  typedef HPHP::x64::X64Assembler Asm;
+  typedef Transl::X64Assembler Asm;
   CodeGenerator(Asm& as, Asm& astubs, Transl::TranslatorX64* tx64) :
       m_as(as), m_astubs(astubs), m_tx64(tx64),
       m_curInst(NULL), m_lastMarker(NULL), m_curTrace(NULL) {

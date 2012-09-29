@@ -38,7 +38,7 @@ using HPHP::TypedValue;
 using HPHP::VM::Transl::TCA;
 
 // from translator-x64.h
-typedef register_name_t PhysReg;
+typedef register_name_t PhysReg; // XXX; should use asm-x64.h version
 static const PhysReg InvalidReg = reg::noreg;
 
 // emitDispDeref --
@@ -99,6 +99,9 @@ namespace VM {
 namespace JIT {
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::tx64;
+
+using Transl::rVmSp;
+using Transl::rVmFp;
 
 // from traslator-x64.h
 // The x64 C ABI.
@@ -1408,8 +1411,8 @@ void CodeGenerator::emitTraceRet(CodeGenerator::Asm& as,
   as.pushr(retAddrReg);
   // call to a trace function
   as.mov_reg64_reg64(retAddrReg, reg::rdx);
-  as.mov_reg64_reg64(reg::rbp, reg::rdi);
-  as.mov_reg64_reg64(reg::rbx, reg::rsi);
+  as.mov_reg64_reg64(rVmFp, reg::rdi);
+  as.mov_reg64_reg64(rVmSp, reg::rsi);
   // do the call; may use a trampoline
   m_tx64->emitCall(as, (TCA)traceRet);
   as.popr(retAddrReg);
@@ -2811,7 +2814,7 @@ Address CodeGenerator::cgStore(register_name_t base,
       ConstInstruction* homeInstr = (ConstInstruction*)addrInst;
       register_name_t baseReg = homeInstr->getSrc(0)->getAssignedLoc();
       int64_t index = homeInstr->getLocal()->getId();
-      register_name_t tmpReg = HPHP::x64::reg::rScratch;
+      register_name_t tmpReg = reg::rScratch;
       m_as.lea_reg64_disp_reg64(baseReg, -((index + 1)*sizeof(Cell)), tmpReg);
       m_as.store_reg64_disp_reg64(tmpReg, off + TVOFF(m_data), base);
     } else {
@@ -3733,8 +3736,8 @@ void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64 pcOff) {
 #ifdef DEBUG
   // call to a trace function
   as.mov_imm64_reg((int64_t)as.code.frontier, reg::rcx);
-  as.mov_reg64_reg64(reg::rbp, reg::rdi);
-  as.mov_reg64_reg64(reg::rbx, reg::rsi);
+  as.mov_reg64_reg64(rVmFp, reg::rdi);
+  as.mov_reg64_reg64(rVmSp, reg::rsi);
   as.mov_imm64_reg(pcOff, reg::rdx);
   // do the call; may use a trampoline
   m_tx64->emitCall(as, (TCA)traceCallback);

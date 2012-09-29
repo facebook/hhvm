@@ -34,23 +34,22 @@ __thread uint64_t tl_helper_counters[kMaxNumTrampolines];
 const char* volatile helperNames[kMaxNumTrampolines];
 
 void
-emitInc(x64::X64Assembler& a,uint64_t* tl_table,uint index,int n) {
+emitInc(Transl::X64Assembler& a,uint64_t* tl_table,uint index,int n) {
   using namespace HPHP::VM::Transl;
-  using namespace HPHP::x64::reg;
   uintptr_t virtualAddress = uintptr_t(&tl_table[index]) - tlsBase();
-  emitImmReg(a, virtualAddress, rScratch);
+  emitImmReg(a, virtualAddress, reg::rScratch);
   a.   fs();
-  a.   add_imm64_disp_reg64(n, 0, rScratch);
+  a.   add_imm64_disp_reg64(n, 0, reg::rScratch);
 }
 
 
 
-void emitInc(x64::X64Assembler& a, StatCounter stat, int n /* = 1*/) {
+void emitInc(Transl::X64Assembler& a, StatCounter stat, int n /* = 1*/) {
   if (!enabled()) return;
   emitInc(a,&tl_counters[0],stat,n);
 }
 
-void emitIncTranslOp(x64::X64Assembler&a, Opcode opc) {
+void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc) {
   if (!enableInstrCount()) return;
   emitInc(a, &tl_counters[0], opcodeToTranslStatCounter(opc), 1);
 }

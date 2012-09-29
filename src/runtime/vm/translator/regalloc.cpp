@@ -16,14 +16,15 @@
 
 #include <set>
 
+#include <boost/format.hpp>
 #include "runtime/base/types.h"
 #include "util/trace.h"
 #include "regalloc.h"
 
-using std::set;
-using namespace HPHP::x64::reg;
-
 namespace HPHP { namespace VM { namespace Transl {
+
+using std::set;
+using namespace reg;
 
 static const Trace::Module TRACEMOD = Trace::regalloc;
 
@@ -344,6 +345,9 @@ void RegAlloc::reconcile(RegAlloc& branch) {
        * important to do this before freeing r->m_pReg so spill()
        * can't allocate it for an immediate register).
        *
+       * XXX: the above comment is out of date (spill can't allocate
+       * anymore).
+       *
        * If the other register was dirty, we know we'll need to clean
        * it, because the location is obviously in a different
        * register.  (The only case we don't have to spill a dirty
@@ -394,9 +398,10 @@ void RegAlloc::reconcile(RegAlloc& branch) {
 void
 RegAlloc::cleanReg(PhysReg reg) {
   RegInfo* r = physRegToInfo(reg);
-  ASSERT(r->m_state == RegInfo::DIRTY);
-  spill(r);
-  stateTransition(r, RegInfo::CLEAN);
+  if (r->m_state == RegInfo::DIRTY) {
+    spill(r);
+    stateTransition(r, RegInfo::CLEAN);
+  }
 }
 
 void
@@ -443,6 +448,17 @@ void RegAlloc::cleanLocals() {
     }
   }
   verify();
+}
+
+bool RegAlloc::pristine() const {
+  return empty() && m_epoch == 0;
+}
+
+bool RegAlloc::empty() const {
+  FOR_EACH_REG (r) {
+    if (r->m_state != RegInfo::FREE) return false;
+  }
+  return true;
 }
 
 void RegAlloc::cleanAll() {
@@ -736,6 +752,33 @@ RegAlloc::scrubStackRange(int firstToDiscard, int lastToDiscard) {
   verify();
 }
 
+void RegAlloc::scrubReg(PhysReg pr) {
+  RegInfo* ri = physRegToInfo(pr);
+  ASSERT(ri->m_state == RegInfo::CLEAN ||
+         ri->m_state == RegInfo::DIRTY ||
+         ri->m_state == RegInfo::FREE);
+  TRACE(1, "scrubbing register %d: %s\n", pr,
+    ri->m_cont.isLoc()
+      ? ri->m_cont.m_loc.pretty().c_str() :
+    ri->m_cont.isInt()
+      ? str(boost::format("(Int %d)") % ri->m_cont.m_int).c_str()
+    : "FREE");
+  if (ri->m_state != RegInfo::FREE) {
+    stateTransition(ri, RegInfo::CLEAN);
+  }
+  verify();
+}
+
+void RegAlloc::scrubRegs(RegSet rs) {
+  FOR_EACH_REG_IN_SET (r, rs) {
+    scrubReg(r->m_pReg);
+  }
+}
+
+void RegAlloc::scrubLoc(const Location& l) {
+  if (hasReg(l)) scrubReg(getReg(l));
+}
+
 void
 RegAlloc::swapRegisters(PhysReg pr1, PhysReg pr2) {
   int r1 = int(pr1);
@@ -844,10 +887,7 @@ LazyScratchReg::LazyScratchReg(RegAlloc& regMap) :
 }
 
 LazyScratchReg::~LazyScratchReg() {
-  if (m_reg != noreg) {
-    TRACE(1, "LazyScratchReg: free %d\n", m_reg);
-    m_regMap.freeScratchReg(m_reg);
-  }
+  dealloc();
 }
 
 void
@@ -855,6 +895,13 @@ LazyScratchReg::alloc(PhysReg pr /* = InvalidReg */) {
   ASSERT(m_reg == noreg);
   m_reg = m_regMap.allocScratchReg(pr);
   TRACE(1, "LazyScratchReg: alloc %d\n", m_reg);
+}
+
+void LazyScratchReg::dealloc() {
+  if (m_reg != noreg) {
+    TRACE(1, "LazyScratchReg: free %d\n", m_reg);
+    m_regMap.freeScratchReg(m_reg);
+  }
 }
 
 PhysReg LazyScratchReg::operator*() const {
@@ -873,6 +920,40 @@ ScratchReg::ScratchReg(RegAlloc& regMap, PhysReg reg) :
   ASSERT(m_regMap.getRegsLike(RegInfo::FREE).contains(reg));
   m_regMap.bind(reg, Location(), KindOfInvalid, RegInfo::SCRATCH);
   TRACE(1, "ScratchReg: wired alloc %d\n", m_reg);
+}
+
+static PhysReg getRegForDumb(RegSet& regs) {
+  PhysReg ret;
+  if (!regs.findFirst(ret)) {
+    ASSERT(false &&
+      "DumbScratchReg can only be used when you know you have "
+      "enough registers.  We ran out.");
+    throw std::runtime_error("DumbScratchReg ran out of registers");
+  }
+  regs.remove(ret);
+  return ret;
+}
+
+DumbScratchReg::DumbScratchReg(RegSet& regs)
+  /*
+   * We could heuristically try to select registers to prefer using
+   * regs that don't have REX prefixes or something.  But we don't
+   * really know how long-lived these guys or how many uses they will
+   * have.  (We could have the calleer provide a hint, but for now we
+   * just do this all braindead.)
+   */
+  : m_regPool(regs)
+  , m_reg(getRegForDumb(regs))
+{}
+
+DumbScratchReg::~DumbScratchReg() {
+  ASSERT(!m_regPool.contains(m_reg) &&
+         "The register we thought we owned was already back in the pool");
+  m_regPool.add(m_reg);
+}
+
+PhysReg DumbScratchReg::operator*() const {
+  return m_reg;
 }
 
 } } } // HPHP::VM::Transl

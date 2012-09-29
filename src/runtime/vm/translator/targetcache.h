@@ -37,7 +37,7 @@ void threadExit(void);
  * layout. So the memory is in tl_targetCaches, but we allocate it via the
  * global s_frontier. This is protected by the translator's write-lease.
  */
-extern __thread HPHP::x64::DataBlock tl_targetCaches;
+extern __thread DataBlock tl_targetCaches;
 extern size_t s_frontier;
 
 static const int kConditionFlagsOff = 0;

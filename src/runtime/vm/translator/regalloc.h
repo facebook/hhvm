@@ -16,14 +16,14 @@
 #ifndef incl_REG_ALLOC_H_
 #define incl_REG_ALLOC_H_
 
+#include <boost/noncopyable.hpp>
+
 #include "util/trace.h"
 #include "util/bitops.h"
 #include "translator.h"
 #include "asm-x64.h"
 
 namespace HPHP { namespace VM { namespace Transl {
-
-using HPHP::x64::register_name_t;
 
 // Assumption: the set interfaces are limited to the first 64 registers.
 static const int kMaxRegs = 64;
@@ -42,34 +42,34 @@ static const int kMaxRegs = 64;
  * actually be able to allocate registers.
  */
 typedef register_name_t PhysReg;
-static const PhysReg InvalidReg = x64::reg::noreg;
+static const PhysReg InvalidReg = reg::noreg;
 
 class RegSet {
   uint64_t m_bits;
-  RegSet operator=(int rhs) {
-    ASSERT(false);
-    return *this;
-  }
 
  public:
   RegSet() : m_bits(0) { }
   explicit RegSet(PhysReg pr) : m_bits(1 << int(pr)) { }
 
   // union
-  RegSet operator| (const RegSet& rhs) const {
+  RegSet operator|(const RegSet& rhs) const {
     RegSet retval;
     retval.m_bits = m_bits | rhs.m_bits;
     return retval;
   }
 
-  RegSet operator|= (const RegSet& rhs) {
+  RegSet& operator|=(const RegSet& rhs) {
     m_bits |= rhs.m_bits;
     return *this;
   }
 
   // Equality
-  bool operator== (const RegSet& rhs) {
+  bool operator==(const RegSet& rhs) const {
     return m_bits == rhs.m_bits;
+  }
+
+  bool operator!=(const RegSet& rhs) const {
+    return !(*this == rhs);
   }
 
   // Difference
@@ -77,6 +77,11 @@ class RegSet {
     RegSet retval;
     retval.m_bits = m_bits & ~rhs.m_bits;
     return retval;
+  }
+
+  RegSet& operator-=(const RegSet& rhs) {
+    *this = *this - rhs;
+    return *this;
   }
 
   void clear() {
@@ -87,7 +92,12 @@ class RegSet {
     return __builtin_popcount(m_bits);
   }
 
-  RegSet remove(PhysReg pr) {
+  RegSet& add(PhysReg pr) {
+    *this |= RegSet(pr);
+    return *this;
+  }
+
+  RegSet& remove(PhysReg pr) {
     m_bits = m_bits & ~(1 << int(pr));
     return *this;
   }
@@ -253,10 +263,6 @@ class SpillFill {
 class LazyScratchReg;
 
 class RegAlloc {
-  // We copy this structure a lot: every time we encounter a physical branch in
-  // translation, for instance. So we've chosen a position-independent, flat
-  // encoding, that can be copied bitwise.
-
   // RegInfo: indexed by PhysReg.
   RegInfo         m_info[kMaxRegs];
 
@@ -293,12 +299,16 @@ class RegAlloc {
   void trace();
   void verify();
   void smashRegImpl(RegInfo *r);
+  template<bool Smash> void cleanLocImpl(const Location&);
   void reconcileOne(RegInfo* r, RegAlloc* branchRA, PhysReg branchPR);
 
  public:
+  RegAlloc(RegSet callerSaved, RegSet calleeSaved, SpillFill* spf);
+
   RegAlloc(const RegAlloc& rhs) {
     *this = rhs; // operator= invocation
   }
+
   // allocReg: allocate a single operand
   PhysReg allocReg(const Location& loc, DataType t, RegInfo::State state) {
     RegInfo* ri = alloc(loc, t, state, state == RegInfo::CLEAN);
@@ -317,6 +327,16 @@ class RegAlloc {
   bool regIsFree(PhysReg pr) const {
     return getInfo(pr)->m_state == RegInfo::FREE;
   }
+  DataType regType(PhysReg pr) const {
+    return getInfo(pr)->m_type;
+  }
+  void setRegType(PhysReg pr, DataType type) const {
+    physRegToInfo(pr)->m_type = type;
+  }
+  Location regLoc(PhysReg pr) const {
+    const RegInfo* info = getInfo(pr);
+    return info->m_cont.isLoc() ? info->m_cont.m_loc : Location();
+  }
 
   // allocInputRegs: given an instruction, find/fill its inputs.
   void allocInputReg(const NormalizedInstruction& ni, int index,
@@ -329,10 +349,16 @@ class RegAlloc {
 
   PhysReg allocScratchReg(PhysReg pr = InvalidReg);
   void freeScratchReg(PhysReg r);
-  void bind(PhysReg reg, const Location& loc, DataType t, RegInfo::State state);
+  void bind(PhysReg reg, const Location& loc, DataType t,
+            RegInfo::State state);
   void bindScratch(LazyScratchReg& reg, const Location& loc, DataType t,
                    RegInfo::State state);
   void markAsClean(const Location& loc);
+
+  /*
+   * Invalidating a location means to drop any register mapped to that
+   * location down to FREE state, regardless of the current state.
+   */
   void invalidate(const Location& loc);
   void invalidateLocals(int first, int last);
 
@@ -353,23 +379,66 @@ class RegAlloc {
    */
   PhysReg getImmReg(int64 immVal, bool allowAllocate = true);
 
+  /*
+   * Reset the register mapping to an empty state, epoch zero.
+   *
+   * Post: pristine() == true
+   */
+  void reset();
+
+  /*
+   * Indicates whether the register map is in its initial, empty
+   * state.  That is, empty() == true and bumpEpoch has not been
+   * called since the last time reset() was called.
+   */
+  bool pristine() const;
+
+  /*
+   * Returns true if this RegMap has no non-FREE registers in it.
+   */
+  bool empty() const;
+
+  /*
+   * Clean any dirty registers from various sets.
+   *
+   * For these functions, only registers in the DIRTY state are
+   * cleaned and transitioned to the CLEAN state.  Scratch registers
+   * remain in scratch state.
+   */
   void cleanAll();
-  void cleanReg(PhysReg reg);
   void cleanRegs(RegSet regsToPurge);
- private:
-  template <bool smash>
-  void cleanLocImpl(const Location& loc);
- public:
   void cleanLoc(const Location& loc);
   void cleanLocals();
+  void cleanReg(PhysReg reg);
+
+  /*
+   * Forget the mapping for all registers in the set.  The regs must
+   * not be DIRTY (if you want to forget a dirty register without
+   * spilling, scrub it first).
+   */
   void smashRegs(RegSet smashedRegs);
-  void killImms(RegSet imms);
   void smashReg(PhysReg pr);
   void smashLoc(const Location& loc);
-  void reset();
-  RegAlloc(RegSet callerSaved, RegSet calleeSaved, SpillFill* spf);
+
+  /*
+   * Scrubbing a register means to change it to the CLEAN state,
+   * regardless of whether we've actually spilled its contents to
+   * memory.  These functions may not be called for a scratch
+   * register---it must be a program location---but it is legal to
+   * scrub an already-free register.
+   *
+   * This is often going to be followed by smashing the register.
+   * Special functions help for the case of dealing with discarding
+   * dead execution stack locations, since that's usually what this is
+   * about.
+   */
   void scrubStackEntries(int firstUnreachable);
   void scrubStackRange(int firstToDiscard, int lastToDiscard);
+  void scrubReg(PhysReg pr);
+  void scrubRegs(RegSet regs);
+  void scrubLoc(const Location&);
+
+  void killImms(RegSet imms);
   void swapRegisters(PhysReg r1, PhysReg r2);
 
   /*
@@ -401,7 +470,7 @@ class RegAlloc {
 //
 //   ScratchReg r(m_regMap);
 //   .. neg_reg64(*r);
-class LazyScratchReg {
+class LazyScratchReg : boost::noncopyable {
  protected:
   RegAlloc& m_regMap;
   PhysReg m_reg;
@@ -409,9 +478,10 @@ class LazyScratchReg {
   LazyScratchReg(RegAlloc& regMap);
   ~LazyScratchReg();
 
-  bool isAllocated() const { return m_reg != x64::reg::noreg; }
+  bool isAllocated() const { return m_reg != reg::noreg; }
 
   void alloc(PhysReg pr = InvalidReg);
+  void dealloc();
   PhysReg operator*() const;
 };
 
@@ -421,6 +491,27 @@ class ScratchReg : public LazyScratchReg {
   // Use this constructor to reserve an already-selected register, which
   // must be free.
   ScratchReg(RegAlloc& regMap, PhysReg pr);
+};
+
+/*
+ * DumbScratch allocates a register out of a RegSet, putting it back
+ * when it's done.  This is used for very simple register selection
+ * when we don't want to use the whole register allocator
+ * (e.g. between tracelets).
+ *
+ * Since this thing is dumb, there's no recourse if the set has no
+ * registers available.  This thing will assert, then throw, in that
+ * case.
+ */
+struct DumbScratchReg : private boost::noncopyable {
+  explicit DumbScratchReg(RegSet& allocSet);
+  ~DumbScratchReg();
+
+  PhysReg operator*() const;
+
+private:
+  RegSet& m_regPool;
+  const PhysReg m_reg;
 };
 
 } } } // HPHP::VM::Transl

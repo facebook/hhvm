@@ -20,9 +20,8 @@
 #include <util/trace.h>
 
 namespace HPHP {
-namespace x64 { class X64Assembler; }
-
 namespace VM {
+namespace Transl { class X64Assembler; }
 namespace Stats {
 
 extern __thread uint64_t tl_interpInstrs;
@@ -177,12 +176,12 @@ static inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
 }
 
 // Both emitIncs use r10.
-extern void emitInc(x64::X64Assembler &a, StatCounter stat, int n = 1);
-extern void emitInc(x64::X64Assembler& a,
+extern void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1);
+extern void emitInc(Transl::X64Assembler& a,
                     uint64_t* tl_table,
                     uint index,
                     int n = 1);
-extern void emitIncTranslOp(x64::X64Assembler& a, Opcode opc);
+extern void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc);
 extern void dump();
 extern void clear();
 

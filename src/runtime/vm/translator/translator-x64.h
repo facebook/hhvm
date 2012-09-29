@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _TRANSLATOR_X64_H_
-#define _TRANSLATOR_X64_H_
+#ifndef incl_RUNTIME_VM_TRANSLATOR_X64_H_
+#define incl_RUNTIME_VM_TRANSLATOR_X64_H_
 
 #include <signal.h>
 #include <boost/noncopyable.hpp>
@@ -29,6 +29,7 @@
 #include <util/ringbuffer.h>
 #include <runtime/vm/debug/debug.h>
 #include <runtime/vm/translator/hopt/hhbctranslator.h>
+#include "runtime/vm/translator/abi-x64.h"
 
 namespace HPHP {
 
@@ -38,7 +39,6 @@ namespace VM {
 namespace Transl {
 
 class IRTranslator;
-using HPHP::x64::register_name_t;
 
 struct TraceletCounters {
   uint64_t m_numEntered, m_numExecuted;
@@ -57,8 +57,9 @@ extern __thread TranslatorX64* tx64;
 
 extern void* interpOneEntryPoints[];
 
-class TranslatorX64 : public Translator, public SpillFill,
-  public boost::noncopyable {
+class TranslatorX64 : public Translator
+                    , SpillFill
+                    , boost::noncopyable {
   friend class SrcRec; // so it can smash code.
   friend class SrcDB;  // For write lock and code invalidation.
   friend class ArgManager;
@@ -79,8 +80,7 @@ class TranslatorX64 : public Translator, public SpillFill,
   typedef tbb::concurrent_hash_map<TCA, TCA> SignalStubMap;
   typedef void (*sigaction_t)(int, siginfo_t*, void*);
 
-  typedef HPHP::x64::X64Assembler Asm;
-  typedef HPHP::x64::DataBlock DataBlock;
+  typedef X64Assembler Asm;
   Asm                    a;
   Asm                    astubs;
   Asm                    atrampolines;
@@ -139,6 +139,11 @@ class TranslatorX64 : public Translator, public SpillFill,
   UnwindRegMap               m_unwindRegMap;
   UnwindInfoHandle           m_unwindRegistrar;
 
+  // Currently translating trace or instruction---only valid during
+  // translate phase.
+  const Tracelet*              m_curTrace;
+  const NormalizedInstruction* m_curNI;
+
   struct PendingFixup {
     TCA m_tca;
     Fixup m_fixup;
@@ -166,8 +171,7 @@ class TranslatorX64 : public Translator, public SpillFill,
                   DataType type);
   void emitDecRefGeneric(const NormalizedInstruction& i, PhysReg srcReg,
                          int disp = 0);
-  void emitDecRefGenericReg(const NormalizedInstruction& i,
-                            PhysReg rData, PhysReg rType);
+  void emitDecRefGenericReg(PhysReg rData, PhysReg rType);
   void emitDecRefInput(Asm& a, const NormalizedInstruction& i, int input);
   void emitCopy(PhysReg srcCell, int disp, PhysReg destCell);
   void emitCopyToStack(Asm& a,
@@ -191,7 +195,7 @@ class TranslatorX64 : public Translator, public SpillFill,
 
   void emitCallSaveRegs();
   void prepareCallSaveRegs();
-  void emitCallStaticLocHelper(x64::X64Assembler& as,
+  void emitCallStaticLocHelper(X64Assembler& as,
                                const NormalizedInstruction& i,
                                ScratchReg& output,
                                ptrdiff_t ch);
@@ -518,10 +522,10 @@ PSEUDOINSTRS
 
 
   void branchWithFlagsSet(const Tracelet& t, const NormalizedInstruction& i,
-                          HPHP::x64::ConditionCode cc);
+                          ConditionCode cc);
   void fuseBranchSync(const Tracelet& t, const NormalizedInstruction& i);
   void fuseBranchAfterBool(const Tracelet& t, const NormalizedInstruction& i,
-                           HPHP::x64::ConditionCode cc);
+                           ConditionCode cc);
   void fuseBranchAfterStaticBool(const Tracelet& t,
                                  const NormalizedInstruction& i,
                                  bool resultIsTrue);
@@ -576,16 +580,6 @@ PSEUDOINSTRS
 
   static void SEGVHandler(int signum, siginfo_t *info, void *ctx);
 
-  // SpillFill interface
-  void spillTo(DataType t, PhysReg reg, bool writeType,
-               PhysReg base, int disp);
-  void spill(const Location& loc, DataType t, PhysReg reg,
-             bool writeType);
-  void fill(const Location& loc, PhysReg reg);
-  void fillByMov(PhysReg src, PhysReg dst);
-  void loadImm(int64 immVal, PhysReg reg);
-  void poison(PhysReg dest);
-
   // public for syncing gdb state
   Debug::DebugInfo m_debugInfo;
 
@@ -629,30 +623,18 @@ PSEUDOINSTRS
 private:
   virtual void syncWork();
 
+  void spillTo(DataType t, PhysReg reg, bool writeType,
+               PhysReg base, int disp);
+
+  // SpillFill interface
+  void spill(const Location& loc, DataType t, PhysReg reg,
+             bool writeType);
+  void fill(const Location& loc, PhysReg reg);
+  void fillByMov(PhysReg src, PhysReg dst);
+  void loadImm(int64 immVal, PhysReg reg);
+  void poison(PhysReg dest);
+
 public:
-
-#define SERVICE_REQUESTS \
-  REQ(EXIT)              \
-  REQ(BIND_CALL)         \
-  REQ(BIND_JMP)          \
-  REQ(BIND_ADDR)         \
-  REQ(BIND_SIDE_EXIT)    \
-  REQ(BIND_JMPCC_FIRST)  \
-  REQ(BIND_JMPCC_SECOND) \
-  REQ(BIND_REQUIRE)      \
-  REQ(RETRANSLATE)       \
-  REQ(INTERPRET)         \
-  REQ(POST_INTERP_RET)   \
-  REQ(STACK_OVERFLOW)    \
-  REQ(RETRANSLATE_NO_IR) \
-  REQ(RESUME)
-
-  enum ServiceRequest {
-#define REQ(nm) REQ_##nm,
-    SERVICE_REQUESTS
-#undef REQ
-  };
-
   void analyzeInstr(Tracelet& t, NormalizedInstruction& i);
   bool acquireWriteLease(bool blocking) {
     return s_writeLease.acquire(blocking);
@@ -699,7 +681,6 @@ private:
                    SrcRec& fail);
   void checkRefs(Asm&, const SrcKey&, const RefDeps&, SrcRec&);
 
-  void emitSmartAddImm(register_name_t rsrcdest, int64_t imm);
   void emitFrameRelease(Asm& a, const NormalizedInstruction& i,
                         bool noThis = false);
   void dumpStack(const char* msg, int offset) const;
@@ -729,17 +710,20 @@ private:
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
                      bool toTake,
-                     HPHP::x64::ConditionCode cc);
+                     ConditionCode cc);
   TCA bindJmpccSecond(TCA toSmash, const Offset off,
-                      HPHP::x64::ConditionCode cc);
+                      ConditionCode cc);
   void emitFallbackJmp(SrcRec& dest);
   void emitFallbackJmp(Asm& as, SrcRec& dest);
   void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
+  void emitDebugPrint(Asm&, const char*,
+                      PhysReg = reg::r13,
+                      PhysReg = reg::r14,
+                      PhysReg = reg::rax);
 
   TCA emitServiceReq(bool align, ServiceRequest, int numArgs, ...);
   TCA emitServiceReq(ServiceRequest, int numArgs, ...);
   TCA emitServiceReqVA(bool align, ServiceRequest, int numArgs, va_list args);
-  void emitRetC(const NormalizedInstruction& i);
   TCA emitRetFromInterpretedFrame();
   TCA emitGearTrigger(Asm& a, const SrcKey& sk, TransID transId);
   void emitBox(DataType t, PhysReg rToBox);
@@ -747,7 +731,7 @@ private:
   void emitBindCall(const Tracelet& t, const NormalizedInstruction &ni,
                     Offset atCall, Offset after);
   void emitCondJmp(const SrcKey &skTrue, const SrcKey &skFalse,
-                   HPHP::x64::ConditionCode cc);
+                   ConditionCode cc);
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
   void emitMovRegReg(Asm& a, PhysReg src, PhysReg dest);
   void emitMovRegReg(PhysReg src, PhysReg dest);
@@ -893,7 +877,7 @@ PSEUDOINSTRS
  * RAII bookmark for temporarily rewinding a.code.frontier.
  */
 class CodeCursor {
-  typedef HPHP::x64::X64Assembler Asm;
+  typedef X64Assembler Asm;
   Asm& m_a;
   TCA m_oldFrontier;
   public:
@@ -957,10 +941,10 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
 // RAII logger for TC space consumption.
 struct SpaceRecorder {
   const char *m_name;
-  const HPHP::x64::X64Assembler m_a;
+  const X64Assembler m_a;
   // const X64Assembler& m_a;
   const uint8_t *m_start;
-  SpaceRecorder(const char* name, const HPHP::x64::X64Assembler& a) :
+  SpaceRecorder(const char* name, const X64Assembler& a) :
       m_name(name), m_a(a), m_start(a.code.frontier)
     { }
   ~SpaceRecorder() {
@@ -978,8 +962,7 @@ struct SpaceRecorder {
   }
 };
 
-
-typedef const size_t COff; // Const offsets
+typedef const int COff; // Const offsets
 
 } } }
 

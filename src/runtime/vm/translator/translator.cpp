@@ -1375,6 +1375,8 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       case Unit::MetaInfo::DataType: {
         ASSERT((unsigned)arg < inputInfos.size());
+        SKTRACE(1, ni->source, "MetaInfo DataType for input %d; "
+                   "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
         DynLocation* dl = tas.recordRead(ii, m_useHHIR, (DataType)info.m_data);
@@ -1387,7 +1389,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
             // and there's an earlier bytecode in the tracelet
             // thats going to fatal
             NormalizedInstruction *src = NULL;
-            if(mapContains(tas.m_changeSet, dl->location)) {
+            if (mapContains(tas.m_changeSet, dl->location)) {
               src = findInputSrc(tas.m_t->m_instrStream.last, dl);
               if (src && src->outputPredicted) {
                 src->outputPredicted = false;
@@ -1608,7 +1610,7 @@ void Translator::getInputs(Tracelet& t,
   ASSERT(inputs.empty());
   if (debug && !mapContains(instrInfo, ni->op())) {
     fprintf(stderr, "Translator does not understand "
-      "instruction %s\n", opcodeToName(ni->op()).c_str());
+      "instruction %s\n", opcodeToName(ni->op()));
     ASSERT(false);
   }
   const InstrInfo& info = instrInfo[ni->op()];

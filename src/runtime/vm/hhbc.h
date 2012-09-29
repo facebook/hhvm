@@ -708,7 +708,7 @@ void encodeToVector(std::vector<uchar>& vec, T val) {
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
 std::string instrToString(const Opcode* it, const Unit* u = NULL);
-std::string opcodeToName(Opcode op);
+const char* opcodeToName(Opcode op);
 
 // returns a pointer to the location within the bytecode containing the jump
 //   Offset, or NULL if the instruction cannot jump. Note that this offset is

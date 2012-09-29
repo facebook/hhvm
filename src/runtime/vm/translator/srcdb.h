@@ -34,15 +34,15 @@ struct IncomingBranch {
     JCC,
     ADDR,
   };
-  IncomingBranch(HPHP::x64::ConditionCode cc, TCA src)
+  IncomingBranch(ConditionCode cc, TCA src)
   : m_type(JCC), m_cc(cc), m_src(src) { }
   IncomingBranch(TCA src)
-  : m_type(JMP), m_cc(HPHP::x64::CC_NP) /*unused*/, m_src(src) { }
+  : m_type(JMP), m_cc(CC_NP) /*unused*/, m_src(src) { }
   IncomingBranch(TCA* addr)
-  : m_type(ADDR), m_cc(HPHP::x64::CC_NP) /*unused*/, m_addr(addr) { }
+  : m_type(ADDR), m_cc(CC_NP) /*unused*/, m_addr(addr) { }
 
   BranchType m_type;
-  HPHP::x64::ConditionCode m_cc;
+  ConditionCode m_cc;
   union {
     TCA m_src;
     TCA* m_addr;
@@ -53,7 +53,7 @@ struct IncomingBranch {
  * SrcRec: record of translator output for a given source location.
  */
 struct SrcRec {
-  typedef HPHP::x64::X64Assembler Asm;
+  typedef X64Assembler Asm;
   static const unsigned int kMaxTranslations = 12;
 
   SrcRec()

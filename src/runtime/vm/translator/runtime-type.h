@@ -35,8 +35,13 @@ struct Location {
     Litstr,   // Literal string pseudo-location
     Litint,   // Literal int pseudo-location
   };
-  Space space;
-  int64 offset;
+
+  Location(Space spc, int64 off)
+    : space(spc)
+    , offset(off)
+  {}
+
+  Location() : space(Invalid), offset(-1) {}
 
   int cmp(const Location &r) const {
 #define CMP(field) do { \
@@ -60,14 +65,10 @@ struct Location {
     return cmp(r) < 0;
   }
 
-  Location(Space spc, int64 off) : space(spc), offset(off) { }
-
   // Hash function.
   size_t operator()(const Location& l) const {
     return HPHP::hash_int64_pair(l.space, l.offset);
   }
-
-  Location() : space(Invalid), offset(-1) { }
 
   const char *spaceName() const {
     switch(space) {
@@ -106,6 +107,10 @@ struct Location {
   bool isLiteral() const {
     return space == Litstr || space == Litint;
   }
+
+public:
+  Space space;
+  int64 offset;
 };
 
 struct InputInfo {

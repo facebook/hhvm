@@ -34,14 +34,14 @@
 #include "runtime/vm/class.h"
 #include "util/arena.h"
 
-using HPHP::VM::Transl::TCA;
-using HPHP::x64::register_name_t;
-
 namespace HPHP {
 // forward declaration
 class StringData;
 namespace VM {
 namespace JIT {
+
+using HPHP::VM::Transl::TCA;
+using HPHP::VM::Transl::register_name_t;
 
 class FailedIRGen : public std::exception {
  public:
@@ -969,7 +969,7 @@ private:
                                             m_id(opndId),
                                             m_lastUseId(0),
                                             m_useCount(0) {
-    m_assignedLoc[0] = m_assignedLoc[1] = HPHP::x64::reg::noreg;
+    m_assignedLoc[0] = m_assignedLoc[1] = Transl::reg::noreg;
     m_analysis = -1;
   }
   IRInstruction*  m_inst;

@@ -56,7 +56,7 @@ struct UnwindRegInfo {
 
   explicit UnwindRegInfo();
 
-  void add(x64::register_name_t reg, DataType type, Location loc);
+  void add(register_name_t reg, DataType type, Location loc);
   void clear();
   bool empty() const;
 

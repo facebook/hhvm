@@ -103,7 +103,6 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
       break;
     case RefData:
     case Variant:
-    case Array:
     case SharedMap:
       m_itemCount = 128; // rarely used items belong to this group
       m_maxMultiplier = SLAB_SIZE / (m_itemSize * m_itemCount);
@@ -405,7 +404,6 @@ static bool UNUSED is_iterable_type(SmartAllocatorImpl::Name type) {
          type == SmartAllocatorImpl::ObjectData ||
          type == SmartAllocatorImpl::StringData ||
          type == SmartAllocatorImpl::HphpArray ||
-         type == SmartAllocatorImpl::Array ||
          type == SmartAllocatorImpl::VectorArray ||
          type == SmartAllocatorImpl::ZendArray;
 }

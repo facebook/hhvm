@@ -146,7 +146,6 @@ void walk_smart_heap(const Visitor& visit) {
       // Unneccesary for the first level walk, because strings can't
       // have references to other objects.
       break;
-    case SmartAllocatorImpl::Array:
     case SmartAllocatorImpl::ZendArray:
     case SmartAllocatorImpl::VectorArray:
       /*

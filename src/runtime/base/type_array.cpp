@@ -36,8 +36,6 @@ namespace HPHP {
 
 const Array null_array = Array();
 
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Array);
-
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
   if (!m_px) {

@@ -111,7 +111,13 @@ class StringData {
 
  public:
   const static uint32_t MaxSmallSize = 43;
-  const static uint32_t MaxSize = 0x3fffffff; // 2^30-1
+
+  /* max length of a string, not counting the terminal 0.  This is
+   * MAX_INT-1 to avoid this kind of hazard in client code:
+   *   int size = string_data->size();
+   *   ... = size + 1; // oops, wraparound.
+   */
+  const static uint32_t MaxSize = 0x7ffffffe; // 2^31-2
 
   /**
    * StringData does not formally derive from Countable, however it has a
@@ -413,7 +419,7 @@ public:
   }
   int bigCap() const {
     ASSERT(!isSmall());
-    return m_big.cap & MaxSize;
+    return m_big.cap & ~IsMask;
   }
   int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }
 };

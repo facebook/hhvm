@@ -73,7 +73,7 @@ void StringData::initLiteral(const char* data) {
 
 void StringData::initLiteral(const char* data, int len) {
   if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len>=2^30", len);
+    throw InvalidArgumentException("len > 2^31-2", len);
   }
   // Do not copy literals, this StringData can have a shorter lifetime than
   // the literal, and the client can count on this->data() giving back
@@ -93,7 +93,7 @@ void StringData::initAttachDeprecated(const char* data) {
 
 void StringData::initAttachDeprecated(const char* data, int len) {
   if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len>=2^30", len);
+    throw InvalidArgumentException("len > 2^31-2", len);
   }
   // Don't copy small strings here either because the caller sometimes
   // assumes he can mess with data while this string is still alive,
@@ -115,7 +115,7 @@ void StringData::initAttach(const char* data) {
 HOT_FUNC
 void StringData::initAttach(const char* data, int len) {
   if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len>=2^30", len);
+    throw InvalidArgumentException("len > 2^31-2", len);
   }
   m_hash = 0;
   _count = 0;
@@ -143,7 +143,7 @@ void StringData::initCopy(const char* data) {
 HOT_FUNC
 void StringData::initCopy(const char* data, int len) {
   if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len>=2^30", len);
+    throw InvalidArgumentException("len > 2^31-2", len);
   }
   m_hash = 0;
   _count = 0;
@@ -168,7 +168,7 @@ void StringData::initCopy(const char* data, int len) {
 HOT_FUNC
 void StringData::initMalloc(const char* data, int len) {
   if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len>=2^30", len);
+    throw InvalidArgumentException("len > 2^31-2", len);
   }
   m_hash = 0;
   _count = 0;
@@ -193,7 +193,7 @@ void StringData::initMalloc(const char* data, int len) {
 HOT_FUNC
 StringData::StringData(SharedVariant *shared)
   : _count(0) {
-  ASSERT(shared);
+  ASSERT(shared && size_t(shared->stringLength()) <= size_t(MaxSize));
   shared->incRef();
   m_hash = 0;
   m_len = shared->stringLength();
@@ -239,7 +239,7 @@ void StringData::sweep() {
 
 void StringData::attach(char *data, int len) {
   if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len>=2^30", len);
+    throw InvalidArgumentException("len > 2^31-2", len);
   }
   releaseData();
   m_len = len;
@@ -247,8 +247,8 @@ void StringData::attach(char *data, int len) {
   m_big.cap = len | IsMalloc;
 }
 
-char* smart_concat(const char* s1, int len1, const char* s2, int len2) {
-  int len = len1 + len2;
+char* smart_concat(const char* s1, uint32_t len1, const char* s2, uint32_t len2) {
+  uint32_t len = len1 + len2;
   char* s = (char*)smart_malloc(len + 1);
   memcpy(s, s1, len1);
   memcpy(s + len1, s2, len2);
@@ -259,16 +259,16 @@ char* smart_concat(const char* s1, int len1, const char* s2, int len2) {
 void StringData::initConcat(StringSlice r1, StringSlice r2) {
   m_hash = 0;
   _count = 0;
-  int len = r1.len + r2.len;
-  if (uint32_t(len) <= MaxSmallSize) {
+  uint32_t len = r1.len + r2.len;
+  if (len <= MaxSmallSize) {
     memcpy(m_small,          r1.ptr, r1.len);
     memcpy(m_small + r1.len, r2.ptr, r2.len);
     m_len = len;
     m_data = m_small;
     m_small[len] = 0;
     m_small[MaxSmallSize] = 0;
-  } else if (UNLIKELY(uint32_t(len) > MaxSize)) {
-    throw FatalErrorException(0, "String length exceeded 2^30 - 1: %d", len);
+  } else if (UNLIKELY(len > MaxSize)) {
+    throw FatalErrorException(0, "String length exceeded 2^31-2: %u", len);
   } else {
     char* buf = smart_concat(r1.ptr, r1.len, r2.ptr, r2.len);
     m_len = len;
@@ -287,8 +287,8 @@ StringData::StringData(int cap) {
     m_small[0] = 0;
     m_small[MaxSmallSize] = 0;
   } else {
-    if (UNLIKELY(uint32_t(cap) >= MaxSize)) {
-      throw InvalidArgumentException("len>=2^30", cap);
+    if (UNLIKELY(uint32_t(cap) > MaxSize)) {
+      throw InvalidArgumentException("len > 2^31-2", cap);
     }
     m_len = 0;
     m_data = (char*) smart_malloc(cap + 1);
@@ -300,13 +300,13 @@ void StringData::append(const char *s, int len) {
   ASSERT(!isStatic()); // never mess around with static strings!
   if (len == 0) return;
   if (UNLIKELY(uint32_t(len) > MaxSize)) {
-    throw InvalidArgumentException("len>=2^30", len);
+    throw InvalidArgumentException("len > 2^31-2", len);
   }
-  if (UNLIKELY(len + m_len > MaxSize)) {
-    throw FatalErrorException(0, "String length exceeded 2^30 - 1: %u",
-                              len + m_len);
+  if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
+    throw FatalErrorException(0, "String length exceeded 2^31-2: %ul",
+                              size_t(len) + size_t(m_len));
   }
-  int newlen = m_len + len;
+  uint32_t newlen = m_len + len;
   // TODO: t1122987: in any of the cases below where we need a bigger buffer,
   // we can probably assume we're in a concat-loop and pick a good buffer
   // size to avoid O(N^2) copying cost.
@@ -333,9 +333,9 @@ void StringData::append(const char *s, int len) {
   } else if (isSmall()) {
     // we're currently small but might not be after append.
     // We are mutating, so we don't need to repropagate our own taint
-    int oldlen = m_len;
+    uint32_t oldlen = m_len;
     newlen = oldlen + len;
-    if (unsigned(newlen) <= MaxSmallSize) {
+    if (newlen <= MaxSmallSize) {
       // win.
       memcpy(&m_small[oldlen], s, len);
       m_small[newlen] = 0;
@@ -353,7 +353,7 @@ void StringData::append(const char *s, int len) {
     }
   } else if (format() == IsSmart) {
     // generic "big string concat" path.  smart_realloc buffer.
-    int oldlen = m_len;
+    uint32_t oldlen = m_len;
     char* oldp = m_data;
     ASSERT((oldp > s && oldp - s > len) ||
            (oldp < s && s - oldp > oldlen)); // no overlapping
@@ -367,7 +367,7 @@ void StringData::append(const char *s, int len) {
     m_hash = 0;
   } else {
     // generic "big string concat" path.  realloc buffer.
-    int oldlen = m_len;
+    uint32_t oldlen = m_len;
     char* oldp = m_data;
     ASSERT((oldp > s && oldp - s > len) ||
            (oldp < s && s - oldp > oldlen)); // no overlapping
@@ -380,7 +380,7 @@ void StringData::append(const char *s, int len) {
     m_big.cap = newlen | IsMalloc;
     m_hash = 0;
   }
-  ASSERT(uint32_t(newlen) <= MaxSize);
+  ASSERT(newlen <= MaxSize);
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
   ASSERT(checkSane());
 }
@@ -542,7 +542,7 @@ void StringData::inc() {
   }
   StringSlice s = slice();
   // if increment_string overflows, it returns a new ptr and updates s.len
-  ASSERT(int(s.len) >= 0 && s.len <= MaxSize); // safe int/uint casting
+  ASSERT(s.len <= MaxSize); // safe int/uint casting
   int len = s.len;
   char *overflowed = increment_string((char *)s.ptr, len);
   if (overflowed) attach(overflowed, len);
@@ -785,6 +785,7 @@ std::string StringData::toCPPString() const {
 }
 
 bool StringData::checkSane() const {
+  static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
   static_assert(sizeof(Format) == 8, "enum Format is wrong size");
   static_assert(offsetof(StringData, _count) == FAST_REFCOUNT_OFFSET,
                 "_count at wrong offset");

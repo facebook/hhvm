@@ -260,7 +260,6 @@ struct Unit {
   friend class UnitEmitter;
   friend class UnitRepoProxy;
   friend class FuncDict;
-  friend class MetaHandle;
 
   typedef IterRange<Func* const*> FuncRange;
   typedef IterRange<Func**> MutableFuncRange;
@@ -295,7 +294,6 @@ struct Unit {
   };
 
   class MetaHandle {
-    friend class Unit;
     /*
       The meta-data in Unit::m_bc_meta is stored as:
 

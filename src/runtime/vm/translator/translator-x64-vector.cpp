@@ -2076,9 +2076,8 @@ void TranslatorX64::emitFinal##instr##MOp(const Tracelet& t, \
 MINSTRS
 #undef MII
 
-static void getMInstrCtx(TranslatorX64::MInstrState* mis) {
-  VMRegAnchor _;
-  mis->ctx = arGetContextClass(curFrame());
+static void getMInstrCtx(TranslatorX64::MInstrState* mis, ActRec* ar) {
+  mis->ctx = arGetContextClass(ar);
 }
 
 bool TranslatorX64::needMInstrCtx(const Tracelet& t,
@@ -2151,7 +2150,7 @@ void TranslatorX64::emitMPre(const Tracelet& t,
   m_regMap.smashRegs(kCallerSaved);
 
   if (!ctxFixed && needMInstrCtx(t, ni)) {
-    EMIT_CALL(a, getMInstrCtx, R(rsp));
+    EMIT_CALL(a, getMInstrCtx, R(rsp), R(rVmFp));
     recordCall(ni);
   } else if (debug) {
     a.  store_imm64_disp_reg64(0xfacefacefacefaceULL,

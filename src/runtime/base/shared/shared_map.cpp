@@ -49,20 +49,6 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
   return *r;
 }
 
-Variant SharedMap::getValueUncached(ssize_t pos) const {
-  SharedVariant *sv = m_arr->getValue(pos);
-  DataType t = sv->getType();
-  if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
-  if (LIKELY(m_localCache != NULL)) {
-    Variant *pv;
-    ArrayData *escalated DEBUG_ONLY =
-      m_localCache->ZendArray::lvalPtr((int64)pos, pv, false, false);
-    ASSERT(!escalated);
-    if (pv) return *pv;
-  }
-  return sv->toLocal();
-}
-
 bool SharedMap::exists(CVarRef k) const {
   return m_arr->getIndex(k) != -1;
 }

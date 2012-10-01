@@ -117,8 +117,6 @@ public:
 private:
   SharedVariant *m_arr;
   mutable ZendArray *m_localCache;
-
-  Variant getValueUncached(ssize_t pos) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

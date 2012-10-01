@@ -457,14 +457,26 @@ void TranslatorX64::emitBaseOp(const Tracelet& t,
   }
 }
 
+template<bool canBeRef>
+static inline TypedValue* unbox(TypedValue* k) {
+  if (canBeRef && k->m_type == KindOfRef) k = k->m_data.pref->tv();
+  ASSERT(k->m_type != KindOfRef);
+  return k;
+}
+
+template<typename FuncType>
+static inline FuncType helperFromKey(const DynLocation& keyDl,
+                                     FuncType localHelper,
+                                     FuncType cellHelper) {
+  if (!keyDl.isVariant()) return cellHelper;
+  return localHelper; 
+}
+
+
 template <bool unboxKey, bool warn, bool define, bool reffy, bool unset>
 static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
                                    TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   if (unset) {
     return ElemU(mis->tvScratch, mis->tvRef, base, key);
   } else if (define) {
@@ -585,8 +597,8 @@ void TranslatorX64::emitElem(const Tracelet& t,
        elemCU, elemX,  elemX,  elemX,   elemX, elemX, elemX,   elemX};
   ASSERT((mia & MIA_intermediate) < sizeof(localElemOps)/sizeof(ElemOp));
   ASSERT((mia & MIA_intermediate) < sizeof(cellElemOps)/sizeof(ElemOp));
-  ElemOp elemOp = ((mCode == MEL) ? localElemOps : cellElemOps)
-                  [mia & MIA_intermediate];
+  auto base = helperFromKey(memb, localElemOps, cellElemOps);
+  ElemOp elemOp = base[mia & MIA_intermediate];
   ASSERT(elemOp != elemX);
   EMIT_RCALL(a, ni, elemOp, R(rBase), ML(memb.location, a, m_regMap, rsp),
              R(rsp));
@@ -597,11 +609,7 @@ template <bool unboxKey, bool warn, bool define, bool unset>
 static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
                                    TypedValue* key,
                                    TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   return Prop<warn, define, unset>(mis->tvScratch, mis->tvRef, ctx, base, key);
 }
 
@@ -849,11 +857,7 @@ template <bool unboxKey>
 static inline void cGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                 TypedValue* result,
                                 TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   base = Prop<true, false, false>(*result, mis->tvRef, ctx, base, key);
   if (base != result) {
     // Save a copy of the result.
@@ -905,11 +909,7 @@ template <bool unboxKey>
 static inline void vGetElemImpl(TypedValue* base, TypedValue* key,
                                 TypedValue* result,
                                 TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   base = ElemD<false, true>(mis->tvScratch, mis->tvRef, base, key);
   if (base == &mis->tvScratch && base->m_type == KindOfUninit) {
     // Error (no result was set).
@@ -942,8 +942,7 @@ void TranslatorX64::emitVGetElem(const Tracelet& t,
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& memb = *ni.inputs[iInd];
-  void (*vGetElemOp)(TypedValue*, TypedValue*, TypedValue*, MInstrState*) =
-    ni.immVecM[mInd] == MEL ? vGetElemL : vGetElemC;
+  auto vGetElemOp = helperFromKey(memb, vGetElemL, vGetElemC);
   m_regMap.smashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   bool useTvR = useTvResult(t, ni, mii);
@@ -959,11 +958,7 @@ template <bool unboxKey>
 static inline void vGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                 TypedValue* result,
                                 TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   base = Prop<false, true, false>(mis->tvScratch, mis->tvRef, ctx, base, key);
   if (base == &mis->tvScratch && base->m_type == KindOfUninit) {
     // Error (no result was set).
@@ -1019,11 +1014,7 @@ void TranslatorX64::emitVGetProp(const Tracelet& t,
 template <bool unboxKey, bool useEmpty>
 static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue* key,
                                       TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   return IssetEmptyElem<useEmpty>(mis->tvScratch, mis->tvRef, base,
                                   mis->baseStrOff, key);
 }
@@ -1058,9 +1049,9 @@ void TranslatorX64::emitIssetEmptyElem(const Tracelet& t,
                                        const MInstrInfo& mii, unsigned mInd,
                                        unsigned iInd, const PhysReg& rBase) {
   const DynLocation& memb = *ni.inputs[iInd];
-  bool (*issetEmptyElemOp)(TypedValue*, TypedValue*, MInstrState*) =
-    useEmpty ? (ni.immVecM[mInd] == MEL ? emptyElemL : emptyElemC)
-             : (ni.immVecM[mInd] == MEL ? issetElemL : issetElemC);
+  auto issetEmptyElemOp = useEmpty ?
+      helperFromKey(memb, emptyElemL, emptyElemC) :
+      helperFromKey(memb, issetElemL, issetElemC);
   m_regMap.smashLoc(memb.location);
   EMIT_RCALL(a, ni, issetEmptyElemOp, R(rBase),
              ML(memb.location, a, m_regMap, rsp), R(rsp));
@@ -1088,11 +1079,7 @@ template <bool unboxKey, bool useEmpty>
 static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
                                       TypedValue* key,
                                       TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   return IssetEmptyProp<useEmpty>(ctx, base, key);
 }
 
@@ -1179,11 +1166,7 @@ void TranslatorX64::emitEmptyProp(const Tracelet& t,
 
 template <bool unboxKey, bool setResult>
 static inline void setElemImpl(TypedValue* base, TypedValue* key, Cell* val) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   SetElem<setResult>(base, key, val);
 }
 
@@ -1238,11 +1221,7 @@ void TranslatorX64::emitSetElem(const Tracelet& t,
 template <bool unboxKey, bool setResult>
 static inline void setPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                Cell* val) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   SetProp<setResult>(ctx, base, key, val);
 }
 
@@ -1301,11 +1280,7 @@ template <bool unboxKey, unsigned char op, bool setResult>
 static inline void setOpElemImpl(TypedValue* base, TypedValue* key, Cell* val,
                                  TranslatorX64::MInstrState* mis,
                                  TypedValue* tvRes=NULL) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   TypedValue* result = SetOpElem(mis->tvScratch, mis->tvRef, op, base, key,
                                  val);
   if (setResult) {
@@ -1409,11 +1384,7 @@ template <bool unboxKey, unsigned char op, bool setResult>
 static inline void setOpPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                  Cell* val, TranslatorX64::MInstrState* mis,
                                  TypedValue* tvRes=NULL) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   TypedValue* result = SetOpProp(mis->tvScratch, mis->tvRef, ctx, op, base, key,
                                  val);
   if (setResult) {
@@ -1517,11 +1488,7 @@ template <bool unboxKey, unsigned char op, bool setResult>
 static inline void incDecElemImpl(TypedValue* base, TypedValue* key,
                                   TranslatorX64::MInstrState* mis,
                                   TypedValue* tvRes) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   IncDecElem<setResult>(mis->tvScratch, mis->tvRef, op, base, key, *tvRes);
 }
 
@@ -1607,11 +1574,7 @@ template <bool unboxKey, unsigned char op, bool setResult>
 static inline void incDecPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                   TranslatorX64::MInstrState* mis,
                                   TypedValue* tvRes) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   IncDecProp<setResult>(mis->tvScratch, mis->tvRef, ctx, op, base, key, *tvRes);
 }
 
@@ -1703,11 +1666,7 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
 template <bool unboxKey>
 static inline void bindElemImpl(TypedValue* base, TypedValue* key, RefData* val,
                                 TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   base = ElemD<false, true>(mis->tvScratch, mis->tvRef, base, key);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBind(val->tv(), base);
@@ -1735,8 +1694,7 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
   const DynLocation& key = *ni.inputs[iInd];
   const DynLocation& val = *ni.inputs[0];
   ASSERT(generateMVal(t, ni, mii));
-  void (*bindElemOp)(TypedValue*, TypedValue*, RefData*, MInstrState*) =
-    (ni.immVecM[mInd] == MEL) ? bindElemL : bindElemC;
+  auto bindElemOp = helperFromKey(key, bindElemL, bindElemC);
   m_regMap.smashLoc(key.location);
   m_regMap.smashLoc(val.location);
   ASSERT(!forceMValIncDec(t, ni, mii));
@@ -1748,11 +1706,7 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
 template <bool unboxKey>
 static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                 RefData* val, TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   base = Prop<false, true, false>(mis->tvScratch, mis->tvRef, ctx, base, key);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBind(val->tv(), base);
@@ -1799,11 +1753,7 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
 
 template <bool unboxKey>
 static inline void unsetElemImpl(TypedValue* base, TypedValue* key) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   UnsetElem(base, key);
 }
 
@@ -1825,8 +1775,7 @@ void TranslatorX64::emitUnsetElem(const Tracelet& t,
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& key = *ni.inputs[iInd];
   const DynLocation& val = *ni.inputs[0];
-  void (*unsetElemOp)(TypedValue*, TypedValue*) =
-    ni.immVecM[mInd] == MEL ? unsetElemL : unsetElemC;
+  auto unsetElemOp = helperFromKey(key, unsetElemL, unsetElemC);
   m_regMap.smashLoc(key.location);
   m_regMap.smashLoc(val.location);
   EMIT_RCALL(a, ni, unsetElemOp, R(rBase), ML(key.location, a, m_regMap, rsp));
@@ -1835,11 +1784,7 @@ void TranslatorX64::emitUnsetElem(const Tracelet& t,
 template <bool unboxKey>
 static inline void unsetPropImpl(Class* ctx, TypedValue* base,
                                  TypedValue* key) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   UnsetProp(ctx, base, key);
 }
 
@@ -2337,11 +2282,7 @@ template <bool unboxKey>
 static inline void cGetElemImpl(TypedValue* base, TypedValue* key,
                                 TypedValue* result,
                                 TranslatorX64::MInstrState* mis) {
-  if (unboxKey) {
-    if (key->m_type == KindOfRef) {
-      key = key->m_data.pref->tv();
-    }
-  }
+  key = unbox<unboxKey>(key);
   base = Elem<true>(*result, mis->tvRef, base, mis->baseStrOff, key);
   if (base != result) {
     // Save a copy of the result.
@@ -2371,7 +2312,7 @@ void TranslatorX64::emitCGetElem(const Tracelet& t,
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& memb = *ni.inputs[iInd];
-  auto cGetElemOp = ni.immVecM[mInd] == MEL ? cGetElemL : cGetElemC;
+  auto cGetElemOp = helperFromKey(memb, cGetElemL, cGetElemC);
   
   m_regMap.smashLoc(memb.location);
   const DynLocation& result = *ni.outStack;

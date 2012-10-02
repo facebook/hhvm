@@ -332,7 +332,7 @@ private:
 #endif
 
 private:
-  static const unsigned kLgSizeQuantum = 6; // 64 bytes
+  static const unsigned kLgSizeQuantum = 4; // 16 bytes
   static const unsigned kNumSizes = kMaxSmartSize >> kLgSizeQuantum;
   static const size_t kMask = (1 << kLgSizeQuantum) - 1;
 

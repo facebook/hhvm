@@ -297,21 +297,18 @@ void MemoryManager::checkMemory(bool detailed) {
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
   ASSERT(nbytes > 0);
-  if (LIKELY(nbytes <= kMaxSmartSize)) {
-    // we round up before adding header-padding, so at least some
-    // allocations will be 16-byte aligned or greater.  If we included
-    // padding before rounding, every allocation would be 8-aligned.
-    // We can change this as the common-cases evolve over time.
-    size_t padbytes = (nbytes + kMask) & ~kMask; // not counting header
-    size_t allbytes = padbytes + sizeof(SmallNode);
-    m_stats.usage += allbytes;
+  size_t padbytes = (nbytes + sizeof(SmallNode) + kMask) & ~kMask;
+  if (LIKELY(padbytes <= kMaxSmartSize)) {
+    // add room for header before rounding up, so the header always is
+    // 8-byte aligned and the usable memory is always 16-aligned.
+    m_stats.usage += padbytes;
     unsigned i = (padbytes - 1) >> kLgSizeQuantum;
     ASSERT(i < kNumSizes);
     void* p = m_smartfree[i].maybePop();
     if (LIKELY(p != 0)) return p;
     char* mem = m_front;
-    if (LIKELY(mem + allbytes <= m_limit)) {
-      m_front = mem + allbytes;
+    if (LIKELY(mem + padbytes <= m_limit)) {
+      m_front = mem + padbytes;
       SmallNode* n = (SmallNode*) mem;
       n->padbytes = padbytes;
       return n + 1;
@@ -326,7 +323,7 @@ inline void MemoryManager::smartFree(void* ptr) {
   SweepNode* n = ((SweepNode*)ptr) - 1;
   size_t padbytes = n->padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
-    ASSERT(memset(ptr, kSmartFreeFill, padbytes));
+    ASSERT(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
     unsigned i = (padbytes - 1) >> kLgSizeQuantum;
     ASSERT(i < kNumSizes);
     m_smartfree[i].push(ptr);
@@ -380,10 +377,12 @@ NEVER_INLINE char* MemoryManager::newSlab() {
 NEVER_INLINE
 void* MemoryManager::smartMallocSlab(size_t padbytes) {
   char* slab = newSlab();
-  size_t allbytes = padbytes + sizeof(SmallNode);
-  m_front = slab + allbytes;
+  // padding 8 bytes here aligns the usable area of smart_malloc blocks
+  // on 16-byte boundaries.
+  size_t align = sizeof(SmallNode) & 15;
+  m_front = slab + align + padbytes;
   m_limit = slab + SLAB_SIZE;
-  SmallNode* n = (SmallNode*) slab;
+  SmallNode* n = (SmallNode*) (slab + align);
   n->padbytes = padbytes;
   return n + 1;
 }

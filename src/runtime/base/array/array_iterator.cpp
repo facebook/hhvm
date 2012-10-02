@@ -375,7 +375,7 @@ void MutableArrayIter::escalateCheck() {
       }
       m_data = esc;
     }
-  } 
+  }
 }
 
 ArrayData* MutableArrayIter::cowCheck() {
@@ -410,7 +410,8 @@ ArrayData* MutableArrayIter::getData() {
 }
 
 MIterCtx::~MIterCtx() {
-  delete m_mArray;
+  m_mArray->~MutableArrayIter();
+  smart_free(m_mArray);
   tvRefcountedDecRef(&m_key);
   tvRefcountedDecRef(&m_val);
   if (m_ref && m_ref->decRefCount() == 0) {

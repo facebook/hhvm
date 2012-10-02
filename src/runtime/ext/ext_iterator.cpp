@@ -473,7 +473,7 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
   if (rtv->m_type == KindOfArray) {
     MIterCtx& mi = marr();
     (void) new (&mi) MIterCtx(tv->m_data.pref);
-    m_valid = mi.m_mArray->advance();
+    m_valid = mi.mArray().advance();
     if (!m_valid) mi.~MIterCtx();
   } else if (rtv->m_type == KindOfObject) {
     CStrRef ctxStr = hhvm
@@ -491,7 +491,7 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
     ArrayData* ad = iterArray.detach();
     MIterCtx& mi = marr();
     (void) new (&mi) MIterCtx(ad);
-    m_valid = mi.m_mArray->advance();
+    m_valid = mi.mArray().advance();
     if (!m_valid) mi.~MIterCtx();
   } else {
     raise_warning("Invalid argument supplied for foreach()");
@@ -507,28 +507,28 @@ Variant c_MutableArrayIterator::t_currentref() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::currentref);
   if (!m_valid) return null;
   MIterCtx& mi = marr();
-  return strongBind(*(Variant*)(&mi.m_val));
+  return strongBind(*(Variant*)(&mi.val()));
 }
 
 Variant c_MutableArrayIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::current);
   if (!m_valid) return null;
   MIterCtx& mi = marr();
-  return *(const Variant*)(&mi.m_val);
+  return *(const Variant*)(&mi.val());
 }
 
 Variant c_MutableArrayIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::key);
   if (!m_valid) return false;
   MIterCtx& mi = marr();
-  return *(Variant*)(&mi.m_key);
+  return *(Variant*)(&mi.key());
 }
 
 void c_MutableArrayIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::next);
   if (!m_valid) return;
   MIterCtx &mi = marr();
-  if (!mi.m_mArray->advance()) {
+  if (!mi.mArray().advance()) {
     mi.~MIterCtx();
     m_valid = false;
   }

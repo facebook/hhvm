@@ -6042,7 +6042,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
       MIterCtx& mi = it->marr();
       (void) new (&mi) MIterCtx(v1->m_data.pref);
       it->m_itype = Iter::TypeMutableArray;
-      mi.m_mArray->advance();
+      mi.mArray().advance();
     } else {
       ITER_SKIP(offset);
     }
@@ -6065,7 +6065,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
       Iter* it = frame_iter(m_fp, itId);
       MIterCtx& mi = it->marr();
       (void) new (&mi) MIterCtx(ad);
-      mi.m_mArray->advance();
+      mi.mArray().advance();
       it->m_itype = Iter::TypeMutableArray;
     }
   } else {
@@ -6099,7 +6099,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterValueC(PC& pc) {
   case Iter::TypeMutableArray: {
     // Dup value.
     TypedValue* tv1 = m_stack.allocTV();
-    tvDup(&it->marr().m_val, tv1);
+    tvDup(&it->marr().val(), tv1);
     ASSERT(tv1->m_type == KindOfRef);
     tvUnbox(tv1);
     break;
@@ -6132,7 +6132,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterValueV(PC& pc) {
   case Iter::TypeMutableArray: {
     // Dup value.
     TypedValue* tv1 = m_stack.allocTV();
-    tvDup(&it->marr().m_val, tv1);
+    tvDup(&it->marr().val(), tv1);
     ASSERT(tv1->m_type == KindOfRef);
     break;
   }
@@ -6164,7 +6164,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterKey(PC& pc) {
   case Iter::TypeMutableArray: {
     // Dup key.
     TypedValue* tv1 = m_stack.allocTV();
-    tvDup(&it->marr().m_key, tv1);
+    tvDup(&it->marr().key(), tv1);
     if (tv1->m_type == KindOfRef) {
       tvUnbox(tv1);
     }
@@ -6205,7 +6205,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterNext(PC& pc) {
   }
   case Iter::TypeMutableArray: {
     MIterCtx &mi = it->marr();
-    if (!mi.m_mArray->advance()) {
+    if (!mi.mArray().advance()) {
       // If after advancing the iterator we have reached the end, free
       // the iterator and fall through to the next instruction.
       mi.~MIterCtx();

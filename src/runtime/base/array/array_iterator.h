@@ -239,7 +239,7 @@ public:
   MutableArrayIter(const Variant* var, Variant* key, Variant& val);
   MutableArrayIter(ArrayData* data, Variant* key, Variant& val);
   ~MutableArrayIter();
-  void release() { delete this;}
+  void release() { delete this; }
   bool advance();
 
 private:
@@ -255,31 +255,52 @@ private:
 };
 
 struct MIterCtx {
+  const RefData* prepRef(const RefData* ref) {
+    ref->incRefCount();
+    return ref;
+  }
+  MutableArrayIter* initMArray(ArrayData* data, Variant* key, Variant& val) {
+    MutableArrayIter* mArray =
+      (MutableArrayIter*)smart_malloc(sizeof(MutableArrayIter));
+    (void) new (mArray) MutableArrayIter(data, key, val);
+    return mArray;
+  }
+  MutableArrayIter* initMArray(const Variant* var, Variant* key, Variant& val) {
+    MutableArrayIter* mArray =
+      (MutableArrayIter*)smart_malloc(sizeof(MutableArrayIter));
+    (void) new (mArray) MutableArrayIter(var, key, val);
+    return mArray;
+  }
+  MIterCtx(ArrayData *ad)
+    : m_key(*(const TypedValue*)&null_variant),
+      m_val(*(const TypedValue*)&null_variant), m_ref(NULL),
+      m_mArray(initMArray(ad, &tvAsVariant(&m_key), tvAsVariant(&m_val))) {
+    ASSERT(!ad->isStatic());
+  }
+  MIterCtx(const RefData* ref)
+    : m_key(*(TypedValue*)&null_variant), m_val(*(TypedValue*)&null_variant),
+      m_ref(prepRef(ref)),
+      m_mArray(initMArray((Variant*)(ref->tv()), &tvAsVariant(&m_key),
+                          tvAsVariant(&m_val))) {
+    // Reference must be an inner cell
+    ASSERT(ref->_count > 0);
+  }
+  ~MIterCtx();
+
+  TypedValue& key() { return m_key; }
+  TypedValue& val() { return m_val; }
+  MutableArrayIter& mArray() const { return *m_mArray; }
+
+private:
   TypedValue m_key;
   TypedValue m_val;
   const RefData* m_ref;
-  MutableArrayIter *m_mArray; // big! Defer allocation.
-  MIterCtx(ArrayData *ad) {
-    ASSERT(!ad->isStatic());
-    tvWriteUninit(&m_key);
-    tvWriteUninit(&m_val);
-    m_ref = NULL;
-    m_mArray = new MutableArrayIter(ad, &tvAsVariant(&m_key),
-                                    tvAsVariant(&m_val));
-  }
-  MIterCtx(const RefData* ref) {
-    tvWriteUninit(&m_key);
-    tvWriteUninit(&m_val);
-    // Reference must be an inner cell
-    ASSERT(ref->_count > 0);
-    m_ref = ref;
-    m_ref->incRefCount();
-    // Bind ref to m_var
-    m_mArray = new MutableArrayIter((Variant*)(ref->tv()),
-                                    &tvAsVariant(&m_key),
-                                    tvAsVariant(&m_val));
-  }
-  ~MIterCtx();
+  // MutableArrayIter is big; allocate it separately (rather than directly
+  // embedding it) in order to keep iterators on the VM stack to a more
+  // reasonable size.  If all iterators were mutable, and they were guaranteed
+  // to be used by every function invocation, then this optimization would not
+  // make sense.
+  MutableArrayIter* m_mArray;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

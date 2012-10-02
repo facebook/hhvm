@@ -250,6 +250,12 @@ bool ConcurrentTableSharedStore::handlePromoteObj(CStrRef key,
   return false;
 }
 
+static string std_apc_miss = "apc.miss";
+static string std_apc_hit = "apc.hit";
+static string std_apc_cas = "apc.cas";
+static string std_apc_update = "apc.update";
+static string std_apc_new = "apc.new";
+
 bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
   const StoreValue *sval;
   SharedVariant *svar = NULL;
@@ -261,7 +267,7 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
   {
     Map::const_accessor acc;
     if (!m_vars.find(acc, key.data())) {
-      log_apc("apc.miss");
+      log_apc(std_apc_miss);
       return false;
     } else {
       sval = &acc->second;
@@ -290,11 +296,11 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
     }
   }
   if (expired) {
-    log_apc("apc.miss");
+    log_apc(std_apc_miss);
     eraseImpl(key, true);
     return false;
   }
-  log_apc("apc.hit");
+  log_apc(std_apc_hit);
 
   if (update) {
     bool updated = handleUpdate(key, svar);
@@ -341,7 +347,7 @@ int64 ConcurrentTableSharedStore::inc(CStrRef key, int64 step, bool &found) {
         sval->var->decRef();
         sval->var = svar;
         found = true;
-        log_apc("apc.hit");
+        log_apc(std_apc_hit);
       }
     }
   }
@@ -362,7 +368,7 @@ bool ConcurrentTableSharedStore::cas(CStrRef key, int64 old, int64 val) {
         sval->var->decRef();
         sval->var = var;
         success = true;
-        log_apc("apc.cas");
+        log_apc(std_apc_cas);
       }
     }
   }
@@ -377,7 +383,7 @@ bool ConcurrentTableSharedStore::exists(CStrRef key) {
   {
     Map::const_accessor acc;
     if (!m_vars.find(acc, key.data())) {
-      log_apc("apc.miss");
+      log_apc(std_apc_miss);
       return false;
     } else {
       sval = &acc->second;
@@ -394,11 +400,11 @@ bool ConcurrentTableSharedStore::exists(CStrRef key) {
     }
   }
   if (expired) {
-    log_apc("apc.miss");
+    log_apc(std_apc_miss);
     eraseImpl(key, true);
     return false;
   }
-  log_apc("apc.hit");
+  log_apc(std_apc_hit);
   return true;
 }
 
@@ -463,12 +469,11 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64 ttl,
     purgeExpired();
   }
   if (present) {
-    log_apc("apc.update");
+    log_apc(std_apc_update);
   } else {
-    log_apc("apc.new");
+    log_apc(std_apc_new);
     if (RuntimeOption::EnableStats && RuntimeOption::EnableAPCKeyStats) {
-      string prefix = "apc.new.";
-      prefix += GetSkeleton(key);
+      string prefix = "apc.new." + GetSkeleton(key);
       ServerStats::Log(prefix, 1);
     }
   }

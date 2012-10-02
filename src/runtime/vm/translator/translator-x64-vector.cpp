@@ -426,7 +426,8 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
   const Class* cls = clsRef.rtt.valueClass();
   PREP_CTX(ctxFixed, rdi);
   // Emit the appropriate helper call.
-  if (cls != NULL) {
+  if (RuntimeOption::RepoAuthoritative && cls != NULL &&
+      (cls->preClass()->attrs() & AttrUnique)) {
     EMIT_RCALL(a, ni, baseS,
                       CTX(ctxFixed),
                       A(key.location),

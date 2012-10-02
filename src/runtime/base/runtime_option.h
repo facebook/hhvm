@@ -311,7 +311,6 @@ public:
   static std::set<std::string> ApcCompletionKeys;
   enum ApcTableTypes {
     ApcHashTable,
-    ApcLfuTable,
     ApcConcurrentTable
   };
   static ApcTableTypes ApcTableType;

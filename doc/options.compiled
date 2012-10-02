@@ -319,16 +319,13 @@ through PrimeLibrary option. The loading can be done in parallel with
 LoadThread count of threads. Once loading is done, it can write to APC with
 some specified keys in CompletionKeys to tell web application about priming.
 
-      TableType = hash (default) | lfu | concurrent
+      TableType = hash (default) | concurrent
       LockType = readwritelock | mutex
-      UseLockedRefs = false
 
-- TableType, LockType, UseLockedRefs
+- TableType, LockType
 
-Recommend to use "concurrent", the fastest with least locking. "lfu" is
-experimental for now and it may have bugs. When "concurrent", LockType doesn't
-matter. UseLockedRefs uses mutexes than atomic numbers for APC item's reference
-counting, so it's recommended to turn off.
+Recommend to use "concurrent", the fastest with least locking.
+When "concurrent", LockType doesn't matter.
 
       ExpireOnSets = false
       PurgeFrequency = 4096

@@ -94,21 +94,6 @@ void SharedStores::create() {
             m_stores[i] = new RwLockHashTableSharedStore(i);
         }
         break;
-      case RuntimeOption::ApcLfuTable:
-        {
-          time_t maturity = RuntimeOption::ApcKeyMaturityThreshold;
-          size_t maxCap = RuntimeOption::ApcMaximumCapacity;
-          int updatePeriod = RuntimeOption::ApcKeyFrequencyUpdatePeriod;
-
-          if (i == SHARED_STORE_DNS_CACHE) {
-            maturity = RuntimeOption::DnsCacheKeyMaturityThreshold;
-            maxCap = RuntimeOption::DnsCacheMaximumCapacity;
-            updatePeriod = RuntimeOption::DnsCacheKeyFrequencyUpdatePeriod;
-          }
-          m_stores[i] = new LfuTableSharedStore(i, maturity, maxCap,
-              updatePeriod);
-        }
-        break;
       case RuntimeOption::ApcConcurrentTable:
         m_stores[i] = new ConcurrentTableSharedStore(i);
         break;

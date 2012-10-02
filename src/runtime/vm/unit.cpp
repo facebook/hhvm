@@ -967,14 +967,19 @@ void Unit::prettyPrint(std::ostream &out, size_t startOffset,
             out << " i" << argKind << arg << ":t=" << (int)info.m_data;
             break;
           case Unit::MetaInfo::String: {
-            const StringData* sd = this->lookupLitstrId(info.m_data);
+            const StringData* sd = lookupLitstrId(info.m_data);
             out << " i" << argKind << arg << ":s=" <<
               std::string(sd->data(), sd->size());
             break;
           }
           case Unit::MetaInfo::Class: {
-            const StringData* sd = this->lookupLitstrId(info.m_data);
+            const StringData* sd = lookupLitstrId(info.m_data);
             out << " i" << argKind << arg << ":c=" << sd->data();
+            break;
+          }
+          case Unit::MetaInfo::MVecPropClass: {
+            const StringData* sd = lookupLitstrId(info.m_data);
+            out << " i" << argKind << arg << ":pc=" << sd->data();
             break;
           }
           case Unit::MetaInfo::NopOut:

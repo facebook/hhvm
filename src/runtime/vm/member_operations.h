@@ -1077,6 +1077,7 @@ static inline DataType propPreStdclass(TypedValue& tvScratch,
   if (!define) {
     return propPreNull<warn>(tvScratch, result);
   }
+  // TODO(#1124706): We don't want to do this anymore.
   Instance* obj = createDefaultObject();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;

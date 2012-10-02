@@ -1441,6 +1441,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       case Unit::MetaInfo::GuardedThis:
         ni->guardedThis = true;
         break;
+
       case Unit::MetaInfo::DataType: {
         ASSERT((unsigned)arg < inputInfos.size());
         SKTRACE(1, ni->source, "MetaInfo DataType for input %d; "
@@ -1497,6 +1498,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         }
         break;
       }
+
       case Unit::MetaInfo::String: {
         const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
         ASSERT((unsigned)arg < inputInfos.size());
@@ -1510,6 +1512,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         dl->rtt = RuntimeType(sd);
         break;
       }
+
       case Unit::MetaInfo::Class: {
         ASSERT((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
@@ -1539,6 +1542,16 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         }
         break;
       }
+
+      case Unit::MetaInfo::MVecPropClass: {
+        const StringData* metaName = ni->unit()->lookupLitstrId(info.m_data);
+        Class* metaCls = Unit::lookupClass(metaName);
+        if (metaCls) {
+          ni->immVecClasses[arg] = metaCls;
+        }
+        break;
+      }
+
       case Unit::MetaInfo::NopOut:
         // NopOut should always be the first and only annotation
         // and was handled above.
@@ -1563,14 +1576,14 @@ static void addMVectorInputs(NormalizedInstruction& ni,
   currentStackOffset -= ni.immVec.numStackValues();
   int localStackOffset = currentStackOffset;
 
-#define PUSH_STACK() do {                                           \
-  ++stackCount;                                                     \
-  inputs.push_back(Location(Location::Stack, localStackOffset++));  \
-} while(0)
-#define PUSH_LOCAL() do {                                     \
-  ++localCount;                                               \
-  inputs.push_back(Location(Location::Local, imm));           \
-} while (0)
+  auto push_stack = [&] {
+    ++stackCount;
+    inputs.push_back(Location(Location::Stack, localStackOffset++));
+  };
+  auto push_local = [&] (int imm) {
+    ++localCount;
+    inputs.push_back(Location(Location::Local, imm));
+  };
 
   /*
    * Note that we have to push as we go so that the arguments come in
@@ -1595,25 +1608,23 @@ static void addMVectorInputs(NormalizedInstruction& ni,
   case 0: {
     int numImms = numLocationCodeImms(lcode);
     for (int i = 0; i < numImms; ++i) {
-      int imm = decodeVariableSizeImm(&vec);
-      PUSH_LOCAL();
+      push_local(decodeVariableSizeImm(&vec));
     }
   } break;
   case 1:
     if (lcode == LSL) {
       // We'll get the trailing stack value after pushing all the
       // member vector elements.
-      int imm = decodeVariableSizeImm(&vec);
-      PUSH_LOCAL();
+      push_local(decodeVariableSizeImm(&vec));
     } else {
-      PUSH_STACK();
+      push_stack();
     }
     break;
   case 2:
-    PUSH_STACK();
+    push_stack();
     if (!trailingClassRef) {
       // This one is actually at the back.
-      PUSH_STACK();
+      push_stack();
     }
     break;
   default: ASSERT(false);
@@ -1629,7 +1640,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     } else if (memberCodeHasImm(mcode)) {
       int64 imm = decodeMemberCodeImm(&vec, mcode);
       if (memberCodeImmIsLoc(mcode)) {
-        PUSH_LOCAL();
+        push_local(imm);
       } else if (memberCodeImmIsString(mcode)) {
         inputs.push_back(Location(Location::Litstr, imm));
       } else {
@@ -1637,21 +1648,21 @@ static void addMVectorInputs(NormalizedInstruction& ni,
         inputs.push_back(Location(Location::Litint, imm));
       }
     } else {
-      PUSH_STACK();
+      push_stack();
     }
   }
 
   if (trailingClassRef) {
-    PUSH_STACK();
+    push_stack();
   }
+
+  ni.immVecClasses.resize(ni.immVecM.size());
 
   ASSERT(vec - ni.immVec.vec() == ni.immVec.size());
   ASSERT(stackCount == ni.immVec.numStackValues());
 
   SKTRACE(2, ni.source, "M-vector using %d hidden stack "
                         "inputs, %d locals\n", stackCount, localCount);
-#undef PUSH_STACK
-#undef PUSH_LOCAL
 }
 
 /*

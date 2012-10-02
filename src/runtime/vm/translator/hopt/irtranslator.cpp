@@ -732,9 +732,10 @@ TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
 
   const DynLocation& prop = *i.inputs[1];
   const Location& propLoc = prop.location;
-  const Slot propOffset   = getPropertyOffset(i, 1, 0);
+  const int propOffset    = getNormalPropertyOffset(i,
+                              getMInstrInfo(OpCGetM), 1, 0);
 
-  if (propOffset != kInvalidSlot && i.immVec.locationCode() == LC) {
+  if (propOffset != -1 && i.immVec.locationCode() == LC) {
     HHIR_EMIT(CGetProp, propOffset, propLoc.isStack());
   } else {
     HHIR_UNIMPLEMENTED(CGetMSlow);
@@ -890,15 +891,24 @@ TranslatorX64::irTranslateSetMProp(const Tracelet& t,
   const int kPropIdx      = 2;
   const DynLocation& base = *i.inputs[kBaseIdx];
   const DynLocation& prop = *i.inputs[kPropIdx];
-  const Slot propOffset   = getPropertyOffset(i, kPropIdx, 1);
+  const int propOffset    = getNormalPropertyOffset(i, getMInstrInfo(OpSetM),
+                                                    kPropIdx, 1);
 
   const Location& propLoc = prop.location;
 
-  bool fastSet = propOffset != kInvalidSlot && i.immVec.locationCode() == LC;
+  bool fastSet = propOffset != -1 && i.immVec.locationCode() == LC;
 
   HHIR_UNIMPLEMENTED_WHEN(!fastSet || base.valueType() != KindOfObject,
                           SetMPropSlow);
   HHIR_EMIT(SetProp, propOffset, propLoc.isStack());
+}
+
+static bool isSupportedSetMProp(const NormalizedInstruction& i) {
+  if (i.inputs.size() != 3) return false;
+  SKTRACE(2, i.source, "setM prop candidate: prop supported: %d, rtt %s\n",
+          mcodeMaybePropName(i.immVecM[0]),
+          i.inputs[2]->rtt.pretty().c_str());
+  return isNormalPropertyAccess(i, 2, 1) && isContextFixed();
 }
 
 void
@@ -922,8 +932,8 @@ void
 TranslatorX64::irTranslateIncDecM(const Tracelet& t,
                                 const NormalizedInstruction& i) {
   if (isNormalPropertyAccess(i, 1, 0) && !curFunc()->isPseudoMain()) {
-    int offset = getPropertyOffset(i, 1, 0);
-    if (offset >= 0 && i.immVec.locationCode() == LC) {
+    int offset = getNormalPropertyOffset(i, getMInstrInfo(OpIncDecM), 1, 0);
+    if (offset != -1 && i.immVec.locationCode() == LC) {
       const IncDecOp oplet = (IncDecOp) *(i.pc() + 1);
       ASSERT(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
              oplet == PostDec);

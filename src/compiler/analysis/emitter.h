@@ -135,8 +135,6 @@ struct SymbolicStack {
   enum MetaType {
     META_NONE,
     META_LITSTR,
-    META_CLASS,
-    META_CLASS_NON_NULL,
     META_DATA_TYPE
   };
 
@@ -161,6 +159,8 @@ private:
       : sym(s)
       , metaType(META_NONE)
       , notRef(false)
+      , notNull(false)
+      , className(nullptr)
       , intval(-1)
       , unnamedLocalStart(InvalidAbsoluteOffset)
       , clsBaseType(CLS_INVALID)
@@ -168,10 +168,12 @@ private:
     char sym;
     MetaType metaType;
     bool notRef;
+    bool notNull;
     union {
-      const StringData* name;
-      DataType dt;
+      const StringData* name;   // META_LITSTR
+      DataType dt;              // META_DATA_TYPE
     }   metaData;
+    const StringData* className;
     int64 intval; // used for L and I symbolic flavors
 
     // If intval is an unnamed local temporary, this offset is the start
@@ -223,6 +225,7 @@ public:
   char top() const;
   char get(int index) const;
   const StringData* getName(int index) const;
+  const StringData* getClsName(int index) const;
   bool isCls(int index) const;
   void set(int index, char sym);
   unsigned size() const;

@@ -653,18 +653,20 @@ char SymbolicStack::get(int index) const {
 
 const StringData* SymbolicStack::getName(int index) const {
   ASSERT(index >= 0 && index < (int)m_symStack.size());
-  if (m_symStack[index].metaType == META_CLASS ||
-      m_symStack[index].metaType == META_CLASS_NON_NULL ||
-      m_symStack[index].metaType == META_LITSTR) {
+  if (m_symStack[index].metaType == META_LITSTR) {
     return m_symStack[index].metaData.name;
   }
   return NULL;
 }
 
+const StringData* SymbolicStack::getClsName(int index) const {
+  ASSERT(index >= 0 && index < (int)m_symStack.size());
+  return m_symStack[index].className;
+}
+
 bool SymbolicStack::isCls(int index) const {
   ASSERT(index >= 0 && index < (int)m_symStack.size());
-  return m_symStack[index].metaType == META_CLASS ||
-    m_symStack[index].metaType == META_CLASS_NON_NULL;
+  return m_symStack[index].className != nullptr;
 }
 
 void SymbolicStack::setString(const StringData* s) {
@@ -682,19 +684,13 @@ void SymbolicStack::setString(const StringData* s) {
 void SymbolicStack::setKnownCls(const StringData* s, bool nonNull) {
   ASSERT(m_symStack.size());
   SymEntry& se = m_symStack.back();
-  if (se.metaType == META_CLASS_NON_NULL) {
-    ASSERT(se.metaData.name == s);
-    nonNull = true;
-  } else if (se.metaType == META_DATA_TYPE) {
+  ASSERT(!se.className || se.className == s);
+  if (se.metaType == META_DATA_TYPE) {
     ASSERT(se.metaData.dt == KindOfObject);
     nonNull = true;
-  } else if (se.metaType == META_CLASS) {
-    ASSERT(se.metaData.name == s);
-  } else {
-    ASSERT(se.metaType == META_NONE);
   }
-  se.metaData.name = s;
-  se.metaType = nonNull ? META_CLASS_NON_NULL : META_CLASS;
+  se.className = s;
+  se.notNull = se.notNull || nonNull;
 }
 
 void SymbolicStack::setNotRef() {
@@ -717,10 +713,9 @@ void SymbolicStack::setInt(int64 v) {
 void SymbolicStack::setKnownType(DataType dt) {
   ASSERT(m_symStack.size());
   SymEntry& se = m_symStack.back();
-  if (se.metaType == META_CLASS_NON_NULL ||
-      se.metaType == META_CLASS) {
+  if (se.className) {
     ASSERT(dt == KindOfObject);
-    se.metaType = META_CLASS_NON_NULL;
+    se.notNull = true;
   } else {
     ASSERT(se.metaType == META_NONE);
     se.metaType = META_DATA_TYPE;
@@ -733,7 +728,7 @@ DataType SymbolicStack::getKnownType(int index, bool noRef) const {
   ASSERT((unsigned)index < m_symStack.size());
   const SymEntry& se = m_symStack[index];
   if (!noRef || se.notRef) {
-    if (se.metaType == META_CLASS_NON_NULL) {
+    if (se.className && se.notNull) {
       return KindOfObject;
     } else if (se.metaType == META_DATA_TYPE) {
       return se.metaData.dt;
@@ -3127,7 +3122,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           static_pointer_cast<ObjectPropertyExpression>(node));
         visit(op->getObject());
         StringData* clsName = getClassName(op->getObject());
-        if (clsName && !StackSym::GetMarker(m_evalStack.top())) {
+        if (clsName) {
           m_evalStack.setKnownCls(clsName, false);
         }
         emitNameString(e, op->getProperty(), true);
@@ -3520,9 +3515,7 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
     if (dt != KindOfUnknown) {
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::DataType, true, 0, dt);
     }
-    if (m_evalStack.isCls(iFirst)) {
-      const StringData* cls = m_evalStack.getName(iFirst);
-      ASSERT(cls);
+    if (const StringData* cls = m_evalStack.getClsName(iFirst)) {
       Id id = m_ue.mergeLitstr(cls);
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Class, true, 0, id);
     }
@@ -3582,6 +3575,7 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
     char symFlavor = StackSym::GetSymFlavor(sym);
     char marker = StackSym::GetMarker(sym);
     Id strid = -1;
+
     if (const StringData* name = m_evalStack.getName(i)) {
       strid = m_ue.mergeLitstr(name);
       // If this string is an m-vector litstr it will be stored in the
@@ -3589,9 +3583,15 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
       // metadata table.
       if (symFlavor != StackSym::T) {
         m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::String,
-                    true, metaI, strid);
+                       true, metaI, strid);
       }
     }
+    if (const StringData* cls = m_evalStack.getClsName(i)) {
+      const int mcodeNum = i - (iFirst + 1);
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::MVecPropClass,
+                     false, mcodeNum, m_ue.mergeLitstr(cls));
+    }
+
     switch (marker) {
       case StackSym::M: {
         ASSERT(symFlavor == StackSym::A);

@@ -257,7 +257,19 @@ class NormalizedInstruction {
   ArgUnion imm[3];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
+
+  // The member codes for the M-vector.
   std::vector<MemberCode> immVecM;
+
+  /*
+   * For property dims, if we know the Class* for the base when we'll
+   * be executing a given dim, it is stored here (at the index for the
+   * relevant member code minus 1, because the known class for the
+   * first member code is given by the base in inputs[]).
+   *
+   * Other entries here store null.  See MetaInfo::MVecPropClass.
+   */
+  std::vector<Class*> immVecClasses;
 
   unsigned checkedInputs;
   // StackOff: logical delta at *start* of this instruction to

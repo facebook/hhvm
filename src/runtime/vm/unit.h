@@ -273,9 +273,30 @@ struct Unit {
       NopOut,
       DataType,
       GuardedThis,
-      GuardedCls
+      GuardedCls,
+
+      /*
+       * Information about the known class of a property base in the
+       * middle of a vector instruction.
+       *
+       * In this case, m_arg is the index of the member code for the
+       * relevant property dim.  (Unlike other cases, m_arg is not an
+       * index into the instruction inputs in NormalizedInstruction.)
+       *
+       * Whatever the base is when processing that member code will be
+       * an object of the supplied class type (or a null).
+       */
+      MVecPropClass
     };
+
+    /*
+     * This flag is used to mark that m_arg is an index into an
+     * MVector input list.  (We need to know this so we can bump the
+     * indexes different amounts depending on the instruction type;
+     * see applyInputMetaData.)
+     */
     static const int VectorArg = 1 << 7;
+
     MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {
       ASSERT((int)m_arg == a);
     }

@@ -21,7 +21,7 @@
 
 #include <runtime/vm/translator/abi-x64.h>
 
-/* 
+/*
  * Please don't include this unless your file implements methods of
  * TranslatorX64; you won't like it. It pollutes the namespace, makes
  * "KindOfString" #error, makes your TRACEMOD tx64, and tortures a kitten.

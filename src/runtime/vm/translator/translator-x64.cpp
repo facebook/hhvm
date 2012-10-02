@@ -8393,32 +8393,6 @@ TranslatorX64::translateFPassCOp(const Tracelet& t,
 }
 
 void
-TranslatorX64::analyzeFPassM(Tracelet& t, NormalizedInstruction& ni) {
-  if (!RuntimeOption::EvalJitMGeneric) {
-    if (!ni.preppedByRef) {
-      analyzeCGetM(t, ni);
-    } else {
-      analyzeVGetM(t, ni);
-    }
-    return;
-  }
-  ni.m_txFlags = Supported;
-  ni.manuallyAllocInputs = true;
-}
-
-void
-TranslatorX64::translateFPassM(const Tracelet& t,
-                               const NormalizedInstruction& ni) {
-  ASSERT(ni.inputs.size() >= 1);
-  ASSERT(ni.outStack && !ni.outLocal);
-  if (!ni.preppedByRef) {
-    translateCGetM(t, ni);
-  } else {
-    translateVGetM(t, ni);
-  }
-}
-
-void
 TranslatorX64::translateFPassR(const Tracelet& t,
                                const NormalizedInstruction& i) {
   /*

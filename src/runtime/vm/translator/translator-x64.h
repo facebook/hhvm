@@ -348,9 +348,14 @@ class TranslatorX64 : public Translator
   void emitElem(const Tracelet& t, const NormalizedInstruction& ni,
                 const MInstrInfo& mii, unsigned mInd, unsigned iInd,
                 PhysReg& rBase);
-  void emitProp(const Tracelet& t, const NormalizedInstruction& ni,
-                const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+  void emitProp(const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
                 unsigned iInd, PhysReg& rBase);
+  void emitPropGeneric(const Tracelet& t, const NormalizedInstruction& ni,
+                       const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+                       unsigned iInd, PhysReg& rBase);
+  void emitPropSpecialized(MInstrAttr, const Class*,
+                           int propOffset, unsigned mInd, unsigned iInd,
+                           PhysReg rBase);
   void emitNewElem(const Tracelet& t, const NormalizedInstruction& ni,
                    unsigned mInd, PhysReg& rBase);
   void emitIntermediateOp(const Tracelet& t, const NormalizedInstruction& ni,
@@ -550,12 +555,6 @@ PSEUDOINSTRS
   void fuseBranchAfterStaticBool(const Tracelet& t,
                                  const NormalizedInstruction& i,
                                  bool resultIsTrue);
-  void emitPropSet(const NormalizedInstruction& i,
-                   const DynLocation& base,
-                   const DynLocation& rhs,
-                   PhysReg rhsReg,
-                   PhysReg fieldAddr);
-  void translateSetMProp(const Tracelet &t, const NormalizedInstruction& i);
   void translateSetMArray(const Tracelet &t, const NormalizedInstruction& i);
   void emitPropGet(const NormalizedInstruction& i,
                    const DynLocation& base,
@@ -935,21 +934,20 @@ Instance* newInstanceHelperCached(Class** classCache,
                                   const StringData* clsName, int numArgs,
                                   ActRec* ar, ActRec* prevAr);
 
-// These could be static but are used in hopt/irtranslator.cpp
 SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i);
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
                        int propInput,
                        int objInput);
 bool isContextFixed();
-Slot getPropertyOffset(const NormalizedInstruction& i,
-                  int propInput, int objInput);
+int getNormalPropertyOffset(const NormalizedInstruction& i,
+                            const MInstrInfo&,
+                            int propInput, int objInput);
 bool isSupportedCGetMProp(const NormalizedInstruction& i);
 bool isSupportedCGetM_LE(const NormalizedInstruction& i);
 bool isSupportedCGetM_LEE(const NormalizedInstruction& i);
 bool isSupportedCGetM_RE(const NormalizedInstruction& i);
 bool isSupportedCGetM_GE(const NormalizedInstruction& i);
 bool isSupportedCGetM(const NormalizedInstruction& i);
-bool isSupportedSetMProp(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards);

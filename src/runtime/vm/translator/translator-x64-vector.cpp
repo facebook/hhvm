@@ -26,6 +26,8 @@
 
 #include <runtime/vm/translator/translator-x64-internal.h>
 
+#include <memory>
+
 namespace HPHP {
 namespace VM {
 namespace Transl {
@@ -94,16 +96,14 @@ bool TranslatorX64::generateMVal(const Tracelet& t,
                                  const MInstrInfo& mii) const {
   if (mii.valCount() == 1) {
     const DynLocation& input = *ni.inputs[0];
-    const DynLocation& output = *ni.outStack;
     // Some instruction sequences, e.g. CGetL..SetM..PopC are optimized during
     // analysis to avoid the push/pop, in which case the input is a local
     // instead of a stack, and no val results from executing the VM instruction.
-    if (input.isStack() && &output != NULL) {
+    if (input.isStack() && ni.outStack != NULL) {
       return true;
     }
   } else if (mii.instr() == MI_IncDecM) {
-    const DynLocation& output = *ni.outStack;
-    if (&output != NULL) {
+    if (ni.outStack != NULL) {
       return true;
     }
   }
@@ -285,7 +285,8 @@ void TranslatorX64::emitBaseN(const Tracelet& t,
           __func__, long(a.code.frontier),
           (mia & MIA_warn) ? "W" : "", (mia & MIA_define) ? "D" : "");
   typedef TypedValue* (*BaseNOp)(TypedValue*, TranslatorX64::MInstrState*);
-  ASSERT(MIA_warn == 0x1 && MIA_define == 0x2);
+  static_assert(MIA_warn == 0x1 && MIA_define == 0x2,
+                "MIA_* bitmask values were not as expected");
   static const BaseNOp baseNOps[] = {baseN, baseNW, baseND, baseNWD};
   ASSERT((mia & MIA_base) < sizeof(baseNOps)/sizeof(BaseNOp));
   BaseNOp baseNOp = baseNOps[mia & MIA_base];
@@ -353,7 +354,8 @@ void TranslatorX64::emitBaseG(const Tracelet& t,
   SKTRACE(2, ni.source, "%s %#lx %s%s\n", __func__, long(a.code.frontier),
           (mia & MIA_warn) ? "W" : "", (mia & MIA_define) ? "D" : "");
   typedef TypedValue* (*BaseGOp)(TypedValue*, TranslatorX64::MInstrState*);
-  ASSERT(MIA_warn == 0x1 && MIA_define == 0x2);
+  static_assert(MIA_warn == 0x1 && MIA_define == 0x2,
+                "MIA_* bitmask values were not as expected");
   static const BaseGOp baseGOps[] = {baseG, baseGW, baseGD, baseGWD};
   ASSERT((mia & MIA_base) < sizeof(baseGOps)/sizeof(BaseGOp));
   BaseGOp baseGOp = baseGOps[mia & MIA_base];
@@ -445,7 +447,7 @@ static inline FuncType helperFromKey(const DynLocation& keyDl,
                                      FuncType localHelper,
                                      FuncType cellHelper) {
   if (!keyDl.isVariant()) return cellHelper;
-  return localHelper; 
+  return localHelper;
 }
 
 
@@ -601,8 +603,9 @@ void TranslatorX64::emitElem(const Tracelet& t,
   m_regMap.cleanSmashLoc(memb.location);
   typedef TypedValue* (*ElemOp)(TypedValue*, TypedValue*,
                                 TranslatorX64::MInstrState*);
-  ASSERT(MIA_warn == 0x1 && MIA_define == 0x2 && MIA_reffy == 0x4 &&
-         MIA_unset == 0x8);
+  static_assert(MIA_warn == 0x1 && MIA_define == 0x2 && MIA_reffy == 0x4 &&
+                MIA_unset == 0x8,
+                "MIA_* bitmask values were not as expected");
   const ElemOp elemX = nullptr;
   static const ElemOp localElemOps[]
     = {elemL,  elemLW, elemLD, elemLWD, elemX, elemX, elemLDR, elemLWDR,
@@ -667,11 +670,11 @@ PROP_TABLE
 #undef PROP
 #undef PROP_TABLE
 
-void TranslatorX64::emitProp(const Tracelet& t,
-                             const NormalizedInstruction& ni,
-                             const MInstrInfo& mii, bool ctxFixed,
-                             unsigned mInd, unsigned iInd,
-                             PhysReg& rBase) {
+void TranslatorX64::emitPropGeneric(const Tracelet& t,
+                                    const NormalizedInstruction& ni,
+                                    const MInstrInfo& mii, bool ctxFixed,
+                                    unsigned mInd, unsigned iInd,
+                                    PhysReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
   MemberCode mCode = ni.immVecM[mInd];
@@ -680,7 +683,8 @@ void TranslatorX64::emitProp(const Tracelet& t,
   m_regMap.cleanSmashLoc(memb.location);
   typedef TypedValue* (*PropOp)(Class*, TypedValue*, TypedValue*,
                                 TranslatorX64::MInstrState*);
-  ASSERT(MIA_warn == 0x1 && MIA_define == 0x2 && MIA_unset == 0x8);
+  static_assert(MIA_warn == 0x1 && MIA_define == 0x2 && MIA_unset == 0x8,
+                "MIA_* bitmask values were not as expected");
   const PropOp propX = nullptr;
   static const PropOp localPropOps[]
     = {propL,  propLW, propLD, propLWD, propX, propX, propLD, propLWD,
@@ -688,8 +692,8 @@ void TranslatorX64::emitProp(const Tracelet& t,
   static const PropOp cellPropOps[]
     = {propC,  propCW, propCD, propCWD, propX, propX, propCD, propCWD,
        propCU, propX,  propX,  propX,   propX, propX, propX,  propX};
-  ASSERT((mia & MIA_intermediate) < sizeof(localPropOps)/sizeof(PropOp));
-  ASSERT((mia & MIA_intermediate) < sizeof(cellPropOps)/sizeof(PropOp));
+  ASSERT((mia & MIA_intermediate) < array_size(localPropOps));
+  ASSERT((mia & MIA_intermediate) < array_size(cellPropOps));
   PropOp propOp = ((mCode == MPL) ? localPropOps : cellPropOps)
                   [mia & MIA_intermediate];
   ASSERT(propOp != propX);
@@ -701,6 +705,176 @@ void TranslatorX64::emitProp(const Tracelet& t,
                     ML(memb.location, a, m_regMap, rsp),
                     R(rsp));
   rBase = m_regMap.allocScratchReg(rax);
+}
+
+static int getPropertyOffset(const NormalizedInstruction& ni,
+                             const Class*& baseClass,
+                             const MInstrInfo& mii,
+                             unsigned mInd, unsigned iInd) {
+  if (mInd == 0) {
+    auto const baseIndex = mii.valCount();
+    baseClass = ni.inputs[baseIndex]->rtt.isObject()
+      ? ni.inputs[baseIndex]->rtt.valueClass()
+      : nullptr;
+  } else {
+    baseClass = ni.immVecClasses[mInd - 1];
+  }
+  if (!baseClass) return -1;
+
+  if (!ni.inputs[iInd]->rtt.isString() || !isContextFixed()) {
+    return -1;
+  }
+  auto* const name = ni.inputs[iInd]->rtt.valueString();
+  if (!name) return -1;
+
+  bool accessible;
+  Class* ctx = curFunc()->cls();
+  // If we are not in repo-authoriative mode, we need to check that
+  // baseClass cannot change in between requests
+  if (!RuntimeOption::RepoAuthoritative ||
+      !(baseClass->preClass()->attrs() & AttrUnique)) {
+    if (!ctx) return -1;
+    if (!ctx->classof(baseClass)) {
+      if (baseClass->classof(ctx)) {
+        // baseClass can change on us in between requests, but since
+        // ctx is an ancestor of baseClass we can make the weaker
+        // assumption that the object is an instance of ctx
+        baseClass = ctx;
+      } else {
+        // baseClass can change on us in between requests and it is
+        // not related to ctx, so bail out
+        return -1;
+      }
+    }
+  }
+  // Lookup the index of the property based on ctx and baseClass
+  Slot idx = baseClass->getDeclPropIndex(ctx, name, accessible);
+  // If we couldn't find a property that is accessible in the current
+  // context, bail out
+  if (idx == kInvalidSlot || !accessible) {
+    return -1;
+  }
+  // If it's a declared property we're good to go: even if a subclass
+  // redefines an accessible property with the same name it's guaranteed
+  // to be at the same offset
+  return baseClass->declPropOffset(idx);
+}
+
+static void raiseUndefProp(ObjectData* base, const StringData* name) {
+  static_cast<Instance*>(base)->raiseUndefProp(name);
+}
+
+static void raisePropertyOnNonObject() {
+  raise_warning("Cannot access property on non-object");
+}
+
+void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
+                                        const Class* baseClass,
+                                        int propOffset,
+                                        unsigned mInd,
+                                        unsigned iInd,
+                                        PhysReg rBase) {
+  SKTRACE(2, m_curNI->source, "%s class=%s offset=%d\n",
+    __func__, baseClass->nameRef()->data(), propOffset);
+
+  ASSERT(!(mia & MIA_warn) || !(mia & MIA_unset));
+  const bool doWarn   = mia & MIA_warn;
+  const bool doDefine = mia & MIA_define || mia & MIA_unset;
+
+  /*
+   * Type-inference from hphpc only tells us that this either an
+   * object of a given class type or null.  If it's not an object, it
+   * has to be a null type based on type inference.  (It could be
+   * KindOfRef with an object inside, except that this isn't inferred
+   * for object properties so we're fine not checking KindOfRef in
+   * that case.)
+   *
+   * On the other hand, if mInd == 0, we're operating on the base
+   * which was already guarded by tracelet guards (and may have been
+   * KindOfRef, but the Base* op already handled this).  So we only
+   * need to do a type check against null here in the intermediate
+   * cases.
+   */
+  std::unique_ptr<DiamondReturn> nonObjectRet;
+  if (mInd != 0) {
+    emitTypeCheck(a, KindOfObject, rBase, 0);
+    {
+      nonObjectRet.reset(new DiamondReturn());
+      UnlikelyIfBlock<CC_NZ> ifNotObject(a, astubs, nonObjectRet.get());
+      if (doWarn) {
+        EMIT_RCALL(astubs, *m_curNI, raisePropertyOnNonObject);
+      }
+      if (doDefine) {
+        /*
+         * NOTE:
+         *
+         * This case logically is supposed to do a stdClass promotion.
+         * It should ideally not be possible (since we have a known
+         * class type), except that the static compiler doesn't
+         * correctly infer object class types in some edge cases
+         * involving stdClass promotion.
+         *
+         * This is impossible to handle "correctly" if we're in the
+         * middle of a multi-dim property expression, because things
+         * further along may also have type inference telling them
+         * that object properties are at a given slot, but the object
+         * could actually be a stdClass instead of the knownCls type
+         * if we were to promote here.
+         *
+         * So, we throw a fatal error, which is what hphpc's generated
+         * C++ would do in this case too.
+         *
+         * Relevant TODOs:
+         *   #1789661 (this can cause bugs if bytecode.cpp promotes)
+         *   #1124706 (we want to get rid of stdClass promotion in general)
+         */
+        EMIT_RCALL(astubs, *m_curNI, throw_null_object_prop);
+      } else {
+        emitImmReg(astubs, uintptr_t(&init_null_variant), rBase);
+      }
+    }
+  }
+
+  emitDeref(a, rBase, rBase);
+  a.    lea_reg64_disp_reg64(rBase, propOffset, rBase);
+  if (doWarn || doDefine) {
+    a.  cmp_imm32_disp_reg32(KindOfUninit, TVOFF(m_type), rBase);
+    {
+      UnlikelyIfBlock<CC_Z> ifUninit(a, astubs);
+      if (doWarn) {
+        EMIT_RCALL(
+          astubs, *m_curNI, raiseUndefProp,
+          R(rBase),
+          IMM(uintptr_t(m_curNI->inputs[iInd]->rtt.valueString()))
+        );
+      }
+      if (doDefine) {
+        astubs.store_imm32_disp_reg(KindOfNull, TVOFF(m_type), rBase);
+      } else {
+        emitImmReg(astubs, uintptr_t(&init_null_variant), rBase);
+      }
+    }
+  }
+
+  // nonObjectRet returns here.
+}
+
+void TranslatorX64::emitProp(const MInstrInfo& mii, bool ctxFixed,
+                             unsigned mInd, unsigned iInd,
+                             PhysReg& rBase) {
+  SKTRACE(2, m_curNI->source, "%s %#lx mInd=%u, iInd=%u\n",
+          __func__, long(a.code.frontier), mInd, iInd);
+
+  const Class* knownCls = nullptr;
+  const int propOffset  = getPropertyOffset(*m_curNI, knownCls, mii,
+                                            mInd, iInd);
+
+  if (propOffset == -1) {
+    emitPropGeneric(*m_curTrace, *m_curNI, mii, ctxFixed, mInd, iInd, rBase);
+  } else {
+    auto attrs = mii.getAttr(m_curNI->immVecM[mInd]);
+    emitPropSpecialized(attrs, knownCls, propOffset, mInd, iInd, rBase);
+  }
 }
 
 HOT_FUNC_VM
@@ -734,7 +908,7 @@ void TranslatorX64::emitIntermediateOp(const Tracelet& t,
     break;
   }
   case MPC: case MPL: case MPT:
-    emitProp(t, ni, mii, ctxFixed, mInd, iInd, rBase);
+    emitProp(mii, ctxFixed, mInd, iInd, rBase);
     ++iInd;
     break;
   case MW:
@@ -883,10 +1057,38 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
                                  const PhysReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
+
+  /*
+   * If we know the class for the current base, emit a direct property
+   * access.
+   */
+  const Class* knownCls = nullptr;
+  const int propOffset  = getPropertyOffset(*m_curNI, knownCls,
+                                            mii, mInd, iInd);
+  if (propOffset != -1) {
+    emitPropSpecialized(MIA_warn, knownCls, propOffset, mInd, iInd, rBase);
+    emitDerefIfVariant(a, rBase);
+    emitIncRefGeneric(rBase, 0);
+
+    PhysReg stackOutReg;
+    int stackOutDisp;
+    if (useTvResult(t, ni, mii)) {
+      stackOutReg = rsp;
+      stackOutDisp = offsetof(MInstrState, tvResult);
+    } else {
+      locToRegDisp(ni.outStack->location, &stackOutReg, &stackOutDisp);
+    }
+
+    ScratchReg scratch(m_regMap);
+    emitCopyTo(a, rBase, 0, stackOutReg, stackOutDisp, *scratch);
+
+    return;
+  }
+
+  // TODO: property cache in other cases.
+
   const DynLocation& memb = *ni.inputs[iInd];
-  void (*cGetPropOp)(Class*, TypedValue*, TypedValue*, TypedValue*,
-                     MInstrState*) =
-    ni.immVecM[mInd] == MPL ? cGetPropL : cGetPropC;
+  auto* cGetPropOp = ni.immVecM[mInd] == MPL ? cGetPropL : cGetPropC;
   m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   PREP_CTX(ctxFixed, argNumToRegName[0]);
@@ -990,9 +1192,7 @@ void TranslatorX64::emitVGetProp(const Tracelet& t,
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& memb = *ni.inputs[iInd];
-  void (*vGetPropOp)(Class*, TypedValue*, TypedValue*, TypedValue*,
-                     MInstrState*) =
-    ni.immVecM[mInd] == MPL ? vGetPropL : vGetPropC;
+  auto vGetPropOp = ni.immVecM[mInd] == MPL ? vGetPropL : vGetPropC;
   m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   bool useTvR = useTvResult(t, ni, mii);
@@ -1110,7 +1310,7 @@ void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
                                        unsigned mInd, unsigned iInd,
                                        const PhysReg& rBase) {
   const DynLocation& memb = *ni.inputs[iInd];
-  bool (*issetEmptyPropOp)(Class*, TypedValue*, TypedValue*, MInstrState*) =
+  auto issetEmptyPropOp =
     useEmpty ? (ni.immVecM[mInd] == MPL ? emptyPropL : emptyPropC)
              : (ni.immVecM[mInd] == MPL ? issetPropL : issetPropC);
   m_regMap.cleanSmashLoc(memb.location);
@@ -1250,13 +1450,35 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
                                 const PhysReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
-  const DynLocation& key = *ni.inputs[iInd];
-  const DynLocation& val = *ni.inputs[0];
-  bool setResult = generateMVal(t, ni, mii);
+  const int kRhsIdx      = 0;
+  const DynLocation& val = *ni.inputs[kRhsIdx];
+
+  /*
+   * If we know the class for the current base, emit a direct property
+   * set.
+   */
+  const Class* knownCls = nullptr;
+  const int propOffset  = getPropertyOffset(*m_curNI, knownCls,
+                                            mii, mInd, iInd);
+  if (propOffset != -1) {
+    emitPropSpecialized(MIA_define, knownCls, propOffset, mInd, iInd, rBase);
+
+    m_regMap.allocInputReg(*m_curNI, kRhsIdx);
+    PhysReg rhsReg = getReg(val.location);
+    if (val.isVariant()) {
+      emitDeref(a, rhsReg, rhsReg);
+    }
+
+    const bool incRef = true;
+    emitTvSet(*m_curNI, rhsReg, val.rtt.valueType(), rBase, 0, incRef);
+    return;
+  }
+
+  const bool setResult   = generateMVal(t, ni, mii);
   SKTRACE(2, ni.source, "%s setResult=%s\n",
-          __func__, setResult ? "true" : "false");
-  void (*setPropOp)(Class*, TypedValue*, TypedValue*, Cell*) =
-    (ni.immVecM[mInd] == MPL)
+        __func__, setResult ? "true" : "false");
+  const DynLocation& key = *ni.inputs[iInd];
+  auto const setPropOp = (ni.immVecM[mInd] == MPL)
     ? (setResult ? setPropLR : setPropL)
     : (setResult ? setPropCR : setPropC);
   m_regMap.cleanSmashLoc(key.location);
@@ -1728,17 +1950,17 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
                                  const PhysReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
-  const DynLocation& key = *ni.inputs[iInd];
+
   const DynLocation& val = *ni.inputs[0];
-  ASSERT(generateMVal(t, ni, mii));
-  void (*bindPropOp)(Class*, TypedValue*, TypedValue*, RefData*, MInstrState*) =
-    (ni.immVecM[mInd] == MPL) ? bindPropL : bindPropC;
-  m_regMap.cleanSmashLoc(key.location);
   m_regMap.cleanSmashLoc(val.location);
+  ASSERT(val.isVariant());
+  ASSERT(generateMVal(t, ni, mii));
+  const DynLocation& key = *ni.inputs[iInd];
+  auto bindPropOp = (ni.immVecM[mInd] == MPL) ? bindPropL : bindPropC;
+  m_regMap.cleanSmashLoc(key.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
   ASSERT(!forceMValIncDec(t, ni, mii));
-  ASSERT(val.isVariant());
   EMIT_RCALL(a, ni, bindPropOp,
                     CTX(ctxFixed),
                     R(rBase),
@@ -1803,8 +2025,7 @@ void TranslatorX64::emitUnsetProp(const Tracelet& t,
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& key = *ni.inputs[iInd];
   const DynLocation& val = *ni.inputs[0];
-  void (*unsetPropOp)(Class*, TypedValue*, TypedValue*) =
-    ni.immVecM[mInd] == MPL ? unsetPropL : unsetPropC;
+  auto unsetPropOp = ni.immVecM[mInd] == MPL ? unsetPropL : unsetPropC;
   m_regMap.cleanSmashLoc(key.location);
   m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
@@ -2210,6 +2431,8 @@ void TranslatorX64::emitMPost(const Tracelet& t,
                 __func__, long(a.code.frontier), i, tname(dt).c_str());
         PhysReg pr = m_regMap.allocReg(input.location, dt, RegInfo::CLEAN);
         emitDecRef(ni, pr, dt);
+        // XXX: can't this go away since we're about to invalidate
+        // popped stack locations after this call?
         m_regMap.cleanSmashLoc(input.location);
       }
       break;
@@ -2308,7 +2531,7 @@ void TranslatorX64::emitCGetElem(const Tracelet& t,
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& memb = *ni.inputs[iInd];
   auto cGetElemOp = helperFromKey(memb, cGetElemL, cGetElemC);
-  
+
   m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   bool useTvR = useTvResult(t, ni, mii);
@@ -2333,51 +2556,12 @@ isNormalPropertyAccess(const NormalizedInstruction& i,
     i.inputs[objInput]->valueType() == KindOfObject;
 }
 
-Slot
-getPropertyOffset(const NormalizedInstruction& i,
-                  int propInput, int objInput) {
+int getNormalPropertyOffset(const NormalizedInstruction& i,
+                            const MInstrInfo& mii,
+                            int propInput, int objInput) {
   ASSERT(isNormalPropertyAccess(i, propInput, objInput));
-  // The context class must be fixed
-  if (!isContextFixed()) {
-    return kInvalidSlot;
-  }
-  // Property name and base class must be known at compile time
-  const StringData* name = i.inputs[propInput]->rtt.valueString();
-  const Class* baseClass = i.inputs[objInput]->rtt.valueClass();
-  if (name == NULL || baseClass == NULL) {
-    return kInvalidSlot;
-  }
-  bool accessible;
-  Class* ctx = curFunc()->cls();
-  // If we are not in repo-authoriative mode, we need to check that
-  // baseClass cannot change in between requests
-  if (!RuntimeOption::RepoAuthoritative ||
-      !(baseClass->preClass()->attrs() & AttrUnique)) {
-    if (!ctx) return kInvalidSlot;
-    if (!ctx->classof(baseClass)) {
-      if (baseClass->classof(ctx)) {
-        // baseClass can change on us in between requests, but since
-        // ctx is an ancestor of baseClass we can make the weaker
-        // assumption that the object is an instance of ctx
-        baseClass = ctx;
-      } else {
-        // baseClass can change on us in between requests and it is
-        // not related to ctx, so bail out
-        return kInvalidSlot;
-      }
-    }
-  }
-  // Lookup the index of the property based on ctx and baseClass
-  Slot idx = baseClass->getDeclPropIndex(ctx, name, accessible);
-  // If we couldn't find a property that is accessible in the current
-  // context, bail out
-  if (idx == kInvalidSlot || !accessible) {
-    return kInvalidSlot;
-  }
-  // If it's a declared property we're good to go: even if a subclass
-  // redefines an accessible property with the same name it's guaranteed
-  // to be at the same offset
-  return baseClass->declPropOffset(idx);
+  const Class* baseClass = nullptr;
+  return getPropertyOffset(i, baseClass, mii, objInput, propInput);
 }
 
 bool
@@ -2388,7 +2572,8 @@ isSupportedCGetMProp(const NormalizedInstruction& i) {
           mcodeMaybePropName(i.immVecM[0]),
           i.inputs[0]->rtt.pretty().c_str(),
           i.inputs[1]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 1, 0) && isContextFixed();
+  return isNormalPropertyAccess(i, 1, 0) && isContextFixed() &&
+         i.immVec.locationCode() != LL;
 }
 
 bool
@@ -2490,11 +2675,6 @@ TranslatorX64::emitPropGet(const NormalizedInstruction& i,
   }
 }
 
-static void
-raiseUndefProp(ObjectData* base, const StringData* name) {
-  static_cast<Instance*>(base)->raiseUndefProp(name);
-}
-
 void
 TranslatorX64::translateCGetMProp(const Tracelet& t,
                                   const NormalizedInstruction& i) {
@@ -2507,14 +2687,15 @@ TranslatorX64::translateCGetMProp(const Tracelet& t,
   const Location& baseLoc = base.location;
   const Location& propLoc = prop.location;
   const Location& outLoc  = i.outStack->location;
-  const Slot propOffset   = getPropertyOffset(i, 1, 0);
+  const int propOffset    = getNormalPropertyOffset(i,
+                              getMInstrInfo(OpCGetM), 1, 0);
 
-  if (propOffset != kInvalidSlot && i.immVec.locationCode() == LC) {
+  if (propOffset != -1 && i.immVec.locationCode() == LC) {
     m_regMap.allocInputReg(i, 0);
     ASSERT(!base.isLocal() && !base.isVariant());
     Stats::emitInc(a, Stats::Tx64_PropGetFast);
     ScratchReg fieldAddr(m_regMap);
-    a.lea_reg64_disp_reg64(getReg(baseLoc), int(propOffset), *fieldAddr);
+    a.lea_reg64_disp_reg64(getReg(baseLoc), propOffset, *fieldAddr);
     // Still have to check for uninit
     a.cmp_imm32_disp_reg32(KindOfUninit, TVOFF(m_type), *fieldAddr);
     {
@@ -2923,23 +3104,12 @@ isSupportedSetMArray(const NormalizedInstruction& i) {
     (i.inputs[2]->isInt() || i.inputs[2]->isString()); // key
 }
 
-bool
-isSupportedSetMProp(const NormalizedInstruction& i) {
-  if (i.inputs.size() != 3) return false;
-  SKTRACE(2, i.source, "setM prop candidate: prop supported: %d, rtt %s\n",
-          mcodeMaybePropName(i.immVecM[0]),
-          i.inputs[2]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 2, 1) && isContextFixed();
-}
-
 void
 TranslatorX64::analyzeSetM(Tracelet& t, NormalizedInstruction& i) {
   // TODO: We could be more aggressive in the translation plans when the
   // lefthand side isn't refcounted.
-  ASSERT(!(isSupportedSetMProp(i) && isSupportedSetMArray(i)));
   if (!RuntimeOption::EvalJitMGeneric) {
-    i.m_txFlags = supportedPlan(isSupportedSetMProp(i) ||
-                                isSupportedSetMArray(i));
+    i.m_txFlags = supportedPlan(isSupportedSetMArray(i));
     if (i.m_txFlags) {
       i.manuallyAllocInputs = true;
     }
@@ -2947,115 +3117,6 @@ TranslatorX64::analyzeSetM(Tracelet& t, NormalizedInstruction& i) {
   }
   i.m_txFlags = Supported;
   i.manuallyAllocInputs = true;
-}
-
-void
-TranslatorX64::emitPropSet(const NormalizedInstruction& i,
-                           const DynLocation& base,
-                           const DynLocation& rhs,
-                           PhysReg rhsReg,
-                           PhysReg fieldAddr) {
-  DataType rhsType = rhs.rtt.valueType();
-
-  // Store rhs in the field
-  emitTvSet(i, rhsReg, rhsType, fieldAddr, 0, i.outStack || rhs.isLocal());
-
-  if (!base.isLocal()) {
-    const int kBaseIdx = 1;
-    ASSERT(i.inputs[kBaseIdx] == &base);
-    m_regMap.allocInputReg(i, kBaseIdx);
-    PhysReg baseReg = getReg(base.location);
-    emitDecRef(i, baseReg, base.outerType());
-  }
-}
-
-void
-TranslatorX64::translateSetMProp(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  using namespace TargetCache;
-  ASSERT(i.inputs.size() == 3);
-
-  const int kRhsIdx       = 0;
-  const int kBaseIdx      = 1;
-  const int kPropIdx      = 2;
-  const DynLocation& val  = *i.inputs[kRhsIdx];
-  const DynLocation& base = *i.inputs[kBaseIdx];
-  const DynLocation& prop = *i.inputs[kPropIdx];
-  const Slot propOffset   = getPropertyOffset(i, kPropIdx, 1);
-
-  const Location& valLoc  = val.location;
-  const Location& baseLoc = base.location;
-  const Location& propLoc = prop.location;
-
-  bool fastSet = propOffset != kInvalidSlot && i.immVec.locationCode() == LC;
-
-  // We only combine a CGetL with a SetM if the SetM's value
-  // is unused. Otherwise we'd need to do the same incRef
-  // on the result of CGetL that CGetL already does for us.
-  ASSERT(!i.outStack || !val.isLocal());
-  // We can't get a variant unless we combined a CGetL
-  ASSERT(val.isLocal() || !val.isVariant());
-
-  bool decRefRhs = !i.outStack && !val.isLocal();
-
-  int args[3];
-  args[kRhsIdx] = fastSet ? ArgAnyReg : 3;
-  args[kBaseIdx] = fastSet || base.isVariant() ? ArgAnyReg : 1;
-  args[kPropIdx] = fastSet ? ArgDontAllocate : 2;
-  allocInputsForCall(i, args);
-
-  LazyScratchReg rhsTmp(m_regMap);
-  PhysReg rhsReg = getReg(valLoc);
-  if (val.isVariant()) {
-    rhsTmp.alloc();
-    emitDeref(a, rhsReg, *rhsTmp);
-    rhsReg = *rhsTmp;
-  }
-
-  if (fastSet) {
-    ASSERT(!base.isLocal() && !base.isVariant());
-    Stats::emitInc(a, Stats::Tx64_PropSetFast);
-    ScratchReg rField(m_regMap);
-    a.lea_reg64_disp_reg64(getReg(baseLoc), int(propOffset), *rField);
-    emitPropSet(i, base, val, rhsReg, *rField);
-    decRefRhs = false;
-  } else {
-    Stats::emitInc(a, Stats::Tx64_PropSetSlow);
-    assert(isContextFixed());
-    const StringData* name = prop.rtt.valueString();
-    ASSERT(name == NULL || name->isStatic());
-
-    CacheHandle ch;
-    TargetCache::pcb_set_func_t setFn = propSetPrep(
-      ch, propCacheName(name).get(),
-      base.isLocal() || base.isVariant() ? BASE_LOCAL : BASE_CELL,
-      name ? STATIC_NAME : DYN_NAME);
-    EMIT_RCALL(a, i, setFn,
-               IMM(ch),
-               base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
-               V(propLoc),
-               R(rhsReg),
-               IMM(val.rtt.valueType()),
-               R(rVmFp));
-    if (!base.isLocal() && base.isVariant()) {
-      m_regMap.allocInputReg(i, kBaseIdx);
-      emitDecRef(i, getReg(baseLoc), KindOfRef);
-    }
-    if (i.outStack || decRefRhs) {
-      m_regMap.allocInputReg(i, kRhsIdx);
-      rhsReg = getReg(valLoc);
-    }
-  }
-
-  if (i.outStack) {
-    ASSERT(!val.isVariant());
-    m_regMap.cleanRegs(RegSet(rhsReg));
-    m_regMap.invalidate(valLoc);
-    m_regMap.bind(rhsReg, i.outStack->location,
-                  val.valueType(), RegInfo::DIRTY);
-  } else if (decRefRhs) {
-    emitDecRef(i, rhsReg, val.outerType());
-  }
 }
 
 // Check if val incref/decref is forced as a side effect of analysis
@@ -3234,10 +3295,6 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
 void
 TranslatorX64::translateSetM(const Tracelet& t,
                              const NormalizedInstruction& i) {
-  if (isSupportedSetMProp(i)) {
-    translateSetMProp(t, i);
-    return;
-  }
   if (isSupportedSetMArray(i)) {
     translateSetMArray(t, i);
     return;
@@ -3302,4 +3359,31 @@ void TranslatorX64::translateBindM(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
   TRANSLATE_MINSTR_GENERIC(Bind, t, ni);
 }
+
+void
+TranslatorX64::analyzeFPassM(Tracelet& t, NormalizedInstruction& ni) {
+  if (!RuntimeOption::EvalJitMGeneric) {
+    if (!ni.preppedByRef) {
+      analyzeCGetM(t, ni);
+    } else {
+      analyzeVGetM(t, ni);
+    }
+    return;
+  }
+  ni.m_txFlags = Supported;
+  ni.manuallyAllocInputs = true;
+}
+
+void
+TranslatorX64::translateFPassM(const Tracelet& t,
+                               const NormalizedInstruction& ni) {
+  ASSERT(ni.inputs.size() >= 1);
+  ASSERT(ni.outStack && !ni.outLocal);
+  if (!ni.preppedByRef) {
+    translateCGetM(t, ni);
+  } else {
+    translateVGetM(t, ni);
+  }
+}
+
 }}}

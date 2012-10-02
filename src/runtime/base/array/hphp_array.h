@@ -46,11 +46,11 @@ public:
 
 public:
   HphpArray(uint nSize);
-private:
-  HphpArray(CopyMode);
   static inline const void** getVTablePtr() {
     return (*(void const***)(&s_theEmptyArray));
   }
+private:
+  HphpArray(CopyMode);
 
 public:
   virtual ~HphpArray();
@@ -192,6 +192,35 @@ public:
 
   static bool isHphpArray(const ArrayData* ad) {
     return *(void const***)ad == getVTablePtr();
+  }
+
+  // Assembly linkage
+  static uint32_t getMaskOff() {
+    return (uintptr_t)&((HphpArray*)0)->m_tableMask;
+  }
+
+  static uint32_t getDataOff() {
+    return (uintptr_t)&((HphpArray*)0)->m_data;
+  }
+
+  static uint32_t getHashOff() {
+    return (uintptr_t)&((HphpArray*)0)->m_hash;
+  }
+  
+  static uint32_t getElmSize() {
+    return sizeof(Elm);
+  }
+
+  static uint32_t getElmKeyOff() {
+    return offsetof(Elm, key);
+  }
+
+  static uint32_t getElmHashOff() {
+    return offsetof(Elm, hash);
+  }
+
+  static uint32_t getElmDataOff() {
+    return offsetof(Elm, data);
   }
 
   void dumpDebugInfo() const;

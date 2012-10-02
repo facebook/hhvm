@@ -305,6 +305,7 @@ TranslatorX64::emitCopyToStackRegSafe(X64Assembler& a,
                                       PhysReg src,
                                       int off,
                                       PhysReg tmpReg) {
+  ASSERT(off % sizeof(Cell) == 0);
   emitCopyTo(a, src, 0, rVmSp, vstackOffset(ni, off), tmpReg);
 }
 

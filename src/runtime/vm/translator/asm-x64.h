@@ -1142,10 +1142,24 @@ public:
   }
 
   inline void load_reg64_disp_index_reg32(register_name_t rsrc,
-                                          int off,
+                                          int disp,
                                           register_name_t rindex,
                                           register_name_t rdest) {
-    emitMR32(instr_mov, rsrc, rindex, sz::dword, off, rdest);
+    emitMR32(instr_mov, rsrc, rindex, sz::byte, disp, rdest);
+  }
+
+  inline void load_reg64_index_scale_disp_reg64(register_name_t rbase,
+                                                register_name_t rindex,
+                                                int scale, int disp,
+                                                register_name_t rdest) {
+    emitMR(instr_mov, rbase, rindex, scale, disp, rdest);
+  }
+
+  inline void load_reg64_index_scale_disp_reg32(register_name_t rbase,
+                                                register_name_t rindex,
+                                                int scale, int disp,
+                                                register_name_t rdest) {
+    emitMR32(instr_mov, rbase, rindex, scale, disp, rdest);
   }
 
   inline void store_imm8_disp_reg(int imm, int off, register_name_t rdest) {
@@ -1459,6 +1473,16 @@ public:
   inline void name ## _reg32_disp_reg64(register_name_t rsrc, int disp, \
                                         register_name_t rdest) {        \
     emitRM32(instr_ ## name, rdest, reg::noreg, sz::byte, disp, rsrc);  \
+  }                                                                     \
+  /* opq disp(rsrc), rdest */                                           \
+  inline void name ## _disp_reg64_reg64(int disp, register_name_t rsrc, \
+                                        register_name_t rdest) {        \
+    emitMR(instr_ ## name, rsrc, reg::noreg, sz::byte, disp, rdest);    \
+  }                                                                     \
+  /* opl disp(esrc), edest */                                           \
+  inline void name ## _disp_reg64_reg32(int disp, register_name_t rsrc, \
+                                        register_name_t rdest) {        \
+    emitMR32(instr_ ## name, rsrc, reg::noreg, sz::byte, disp, rdest);  \
   }
 
   // These two do not support standard: base + index * scale + disp
@@ -1469,6 +1493,8 @@ public:
 
 #define SCALED_OP(name)                                                 \
   SIMPLE_OP(name)                                                       \
+  JUST_SCALED_OP(name)
+#define JUST_SCALED_OP(name) \
   /* opl rsrc, disp(rbase, rindex, scale), rdest */                     \
   inline void name ## _reg64_reg64_index_scale_disp(register_name_t rsrc, \
                       register_name_t rbase, register_name_t rindex,    \
@@ -1489,6 +1515,7 @@ public:
   SCALED_OP(or)
   SCALED_OP(test)
   SCALED_OP(cmp)
+  JUST_SCALED_OP(lea)
 #undef SCALED_OP
 #undef SIMPLE_OP
 

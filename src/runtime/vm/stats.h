@@ -130,7 +130,10 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(VMEnter) \
   STAT(TraceletGuard_enter) \
   STAT(TraceletGuard_branch) \
-  STAT(TraceletGuard_execute)
+  STAT(TraceletGuard_execute) \
+  STAT(ElemAsm_GetIHit) \
+  STAT(ElemAsm_GetIMiss) \
+  STAT(PropAsm) \
 
 
 enum StatCounter {

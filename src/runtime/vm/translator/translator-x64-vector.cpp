@@ -21,6 +21,8 @@
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/member_operations.h>
 #include <runtime/vm/stats.h>
+#include <runtime/base/array/zend_array.h>
+#include <runtime/base/shared/shared_map.h>
 
 #include <runtime/vm/translator/translator-x64-internal.h>
 
@@ -492,15 +494,109 @@ ELEM_TABLE
 #undef ELEM
 #undef ELEM_TABLE
 
+void TranslatorX64::emitHphpArrayGetIntKey(const NormalizedInstruction& i,
+                                           PhysReg rBase,
+                                           const DynLocation& keyLoc,
+                                           Location outLoc,
+                                           void* fallbackFunc) {
+  // We're just going to use a heck-ton of scratch regs here. There is
+  // a lot of state to carry around the loop.
+  ScratchReg mask(m_regMap);
+  ScratchReg hash(m_regMap);
+  ScratchReg count(m_regMap);
+  ScratchReg probe(m_regMap);
+  LazyScratchReg rDereffedKey(m_regMap);
+  PhysReg rKey = getReg(keyLoc.location);
+  if (keyLoc.isVariant()) {
+    rDereffedKey.alloc();
+    emitDeref(a, rKey, *rDereffedKey);
+    rKey = *rDereffedKey;
+  }
+  TCA bail = astubs.code.frontier;
+  {
+    // Failure path.
+    DiamondGuard dg(astubs);
+    Stats::emitInc(astubs, Stats::ElemAsm_GetIMiss);
+    EMIT_CALL(astubs, fallbackFunc,
+              R(rBase), V(keyLoc.location), A(outLoc));
+    recordReentrantStubCall(i);
+  }
+  TCA returnFromBail = astubs.code.frontier;
+  astubs.jmp(astubs.code.frontier);
+  {
+    // Hold the register state steady; we might branch into bail.
+    FreezeRegs brr(m_regMap);
+    // Check that rBase is an HphpArray
+    a.    cmp_imm64_disp_reg64(uintptr_t(HphpArray::getVTablePtr()),
+                               0, rBase);
+    a.    jnz(bail);
+    a.    load_reg64_disp_reg32(rBase, HphpArray::getMaskOff(), *mask);
+    a.    load_reg64_disp_reg64(rBase, HphpArray::getHashOff(), *hash);
+    // The probe will be a uint32, so just start w/ low-order bits.
+    a.    mov_reg32_reg32(rKey, *probe);
+    emitImmReg(a, 0, *count);
+
+    TCA loopHead = a.code.frontier; // loop:
+    // probe = probe + count
+    a.    lea_reg64_index_scale_disp_reg64(*count, *probe, 1, 0, *probe);
+    a.    and_reg32_reg32(*mask, *probe);
+    a.    load_reg64_index_scale_disp_reg32(*hash, *probe, 4, 0, *probe);
+    // "probe" is now the index
+    PhysReg index = *probe;
+    a.    test_reg32_reg32(index, index);
+    a.    js(bail);
+
+    ASSERT(HphpArray::getElmSize() == 24);
+    // index = index * 3; index = index * 8;
+    a.    lea_reg64_index_scale_disp_reg64(index, index, 2, 0, index);
+    a.    shl_imm32_reg32(3, index);
+
+    a.    add_disp_reg64_reg64(HphpArray::getDataOff(), rBase, index);
+    // index is now the elm pointer. Does the key look right?
+    PhysReg elmPtr = index;
+    a.    cmp_reg64_disp_reg64(rKey, HphpArray::getElmKeyOff(), elmPtr);
+    TCA continue0 = a.code.frontier;
+    a.    jcc8(CC_NZ, continue0); // Try again
+
+    // Is it an int or a string?
+    a.    cmp_imm32_disp_reg32(0, HphpArray::getElmHashOff(), elmPtr);
+    a.    jnz(bail);
+
+    TCA successJmp = a.code.frontier;
+    a.    jmp8(successJmp);
+
+    // Try the loop again.
+    a.patchJcc8(continue0, a.code.frontier);
+    a.    add_imm32_reg32(1, *count);
+    a.    jmp8(loopHead);
+
+    a.patchJmp8(successJmp, a.code.frontier);
+    Stats::emitInc(a, Stats::ElemAsm_GetIHit);
+    if (HphpArray::getElmDataOff() != 0) {
+      a.  add_imm32_reg64(HphpArray::getElmDataOff(), elmPtr);
+    }
+    // Drat. Might be a Ref or a Indirect; for both, we should deref.
+    a.    cmp_imm32_disp_reg32(KindOfRef, TVOFF(m_type), elmPtr);
+    TCA skipDeref = a.code.frontier;
+    a.    jl(skipDeref);
+    emitDeref(a, elmPtr, elmPtr);
+    a.patchJcc(skipDeref, a.code.frontier);
+    // Copy to stack. We're done with mask, so reuse it as a scratch reg.
+    emitCopyToStackRegSafe(a, i, elmPtr, mResultStackOffset(i), *mask);
+    emitIncRefGenericRegSafe(elmPtr, 0, *mask);
+  }
+  astubs.patchJmp(returnFromBail, a.code.frontier);
+}
+
 template<DataType keyType>
 void TranslatorX64::emitElem(const Tracelet& t,
                              const NormalizedInstruction& ni,
                              const MInstrInfo& mii, unsigned mInd,
                              unsigned iInd, PhysReg& rBase) {
-  SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
-          __func__, long(a.code.frontier), mInd, iInd);
   MemberCode mCode = ni.immVecM[mInd];
-  const MInstrAttr& mia = mii.getAttr(mCode);
+  const unsigned mia = mii.getAttr(mCode) & MIA_intermediate;
+  SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u flags %x\n",
+          __func__, long(a.code.frontier), mInd, iInd, mia);
   const DynLocation& memb = *ni.inputs[iInd];
   m_regMap.cleanSmashLoc(memb.location);
   typedef TypedValue* (*ElemOp)(TypedValue*, TypedValue*,
@@ -514,10 +610,10 @@ void TranslatorX64::emitElem(const Tracelet& t,
   static const ElemOp cellElemOps[]
     = {elemC,  elemCW, elemCD, elemCWD, elemX, elemX, elemCDR, elemCWDR,
        elemCU, elemX,  elemX,  elemX,   elemX, elemX, elemX,   elemX};
-  ASSERT((mia & MIA_intermediate) < sizeof(localElemOps)/sizeof(ElemOp));
-  ASSERT((mia & MIA_intermediate) < sizeof(cellElemOps)/sizeof(ElemOp));
+  ASSERT(mia < sizeof(localElemOps)/sizeof(ElemOp));
+  ASSERT(mia < sizeof(cellElemOps)/sizeof(ElemOp));
   auto base = helperFromKey(memb, localElemOps, cellElemOps);
-  ElemOp elemOp = base[mia & MIA_intermediate];
+  ElemOp elemOp = base[mia];
   ASSERT(elemOp != elemX);
   EMIT_RCALL(a, ni, elemOp, R(rBase), ML(memb.location, a, m_regMap, rsp),
              R(rsp));
@@ -599,8 +695,8 @@ void TranslatorX64::emitProp(const Tracelet& t,
   ASSERT(propOp != propX);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
-  EMIT_RCALL(a, ni, propOp,
-                    CTX(ctxFixed),
+  Stats::emitInc(a, Stats::PropAsm);
+  EMIT_RCALL(a, ni, propOp, CTX(ctxFixed),
                     R(rBase),
                     ML(memb.location, a, m_regMap, rsp),
                     R(rsp));
@@ -2498,8 +2594,12 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
     array_getm_s(a, sd, &tv);
     array_getm_s0(a, sd, &tv);
   }
-  EMIT_CALL(a, fptr, R(baseReg), V(keyIn->location), A(outLoc));
-  recordReentrantCall(i);
+  if (keyIn->isInt() && !baseInput->isVariant()) {
+    emitHphpArrayGetIntKey(i, baseReg, *keyIn, outLoc, fptr);
+  } else {
+    EMIT_CALL(a, fptr,R(baseReg), V(keyIn->location), A(outLoc));
+    recordReentrantCall(i);
+  }
   m_regMap.invalidate(outLoc);
 
   if (decRefBase) {

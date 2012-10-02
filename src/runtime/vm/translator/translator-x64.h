@@ -163,6 +163,10 @@ class TranslatorX64 : public Translator
     return m_regMap.getReg(loc);
   }
 
+  PhysReg getReg(const DynLocation& dl) {
+    return m_regMap.getReg(dl.location);
+  }
+
   Asm &getAsmFor(TCA addr) { return Asm::Choose(a, astubs, addr); }
   void emitIncRef(PhysReg base, DataType);
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
@@ -335,6 +339,11 @@ class TranslatorX64 : public Translator
   void emitBaseOp(const Tracelet& t, const NormalizedInstruction& ni,
                   const MInstrInfo& mii, unsigned iInd, bool ctxFixed,
                   PhysReg& rBase);
+  void emitHphpArrayGetIntKey(const NormalizedInstruction& i,
+                              PhysReg rBase,
+                              const DynLocation& keyLoc,
+                              Location outLoc,
+                              void* fallbackFunc);
   template<DataType keyType>
   void emitElem(const Tracelet& t, const NormalizedInstruction& ni,
                 const MInstrInfo& mii, unsigned mInd, unsigned iInd,

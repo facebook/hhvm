@@ -23,6 +23,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/variable_serializer.h>
+#include <runtime/base/shared/shared_map.h>
 #include <util/hash.h>
 #include <util/lock.h>
 #include <util/alloc.h>
@@ -2295,6 +2296,7 @@ static void elem(ArrayData* ad, StringData* sd, TypedValue* dest) {
  * callers, which may have "lost" the array in volatile registers before
  * calling.
  */
+
 ArrayData*
 array_getm_i(void* dptr, int64 key, TypedValue* out) {
   ASSERT(dptr);
@@ -2331,8 +2333,7 @@ array_getm_i(void* dptr, int64 key, TypedValue* out) {
     }                                                     \
   }                                                       \
   if (drKey && sd->decRefCount() == 0) sd->release();     \
-} while(0)                                                \
-
+} while(0)
 
 #define ARRAY_GETM_BODY(dptr, sd, out, body, drKey) do {  \
   ArrayData* ad = (ArrayData*)dptr;                       \

@@ -167,6 +167,13 @@ const PhysReg serviceReqArgRegs[] = {
   REQ(BIND_REQUIRE)      \
   \
   /*
+   * BIND_JMP_NO_IR is similar to BIND_JMP except that, if a new translation
+   * needs to be generated, it'll force that HHIR is not used.
+   * This is only used when HHIR is turned on.
+   */ \
+  REQ(BIND_JMP_NO_IR)  \
+  \
+  /*
    * When all translations don't support the incoming types, a
    * retranslate request is made.
    */ \
@@ -195,7 +202,11 @@ const PhysReg serviceReqArgRegs[] = {
   REQ(STACK_OVERFLOW) \
   \
   /*
-   * TODO: explain this
+   * When HHIR is in use, this requests a retranslation that does not use HHIR.
+   * This is only used when HHIR is turned on.
+   *
+   * Note that, when EvalJitUseIR is enabled, RETRANSLATE requests will attempt
+   * to use HHIR.
    */ \
   REQ(RETRANSLATE_NO_IR) \
   /*

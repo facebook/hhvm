@@ -1181,7 +1181,8 @@ reqName(int req) {
  * a translation.
  */
 TCA
-TranslatorX64::getTranslation(const SrcKey *sk, bool align) {
+TranslatorX64::getTranslation(const SrcKey *sk, bool align,
+                              bool forceNoHHIR /* = false */) {
   curFunc()->validate();
   SKTRACE(2, *sk, "getTranslation: curUnit %s funcId %llx offset %d\n",
           curUnit()->filepath()->data(),
@@ -1222,7 +1223,8 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align) {
       // Since we are holding the write lease, we know that sk is properly
       // initialized, except that it has no translations (due to
       // replaceOldTranslations)
-      return retranslate(*sk, align, RuntimeOption::EvalJitUseIR);
+      return retranslate(*sk, align,
+                         RuntimeOption::EvalJitUseIR && !forceNoHHIR);
     }
   }
 
@@ -1241,7 +1243,7 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align) {
 
   ASSERT(getTransRec(start)->kind == TransAnchor);
 
-  return retranslate(*sk, align, RuntimeOption::EvalJitUseIR);
+  return retranslate(*sk, align, RuntimeOption::EvalJitUseIR && !forceNoHHIR);
 }
 
 TCA
@@ -2251,8 +2253,9 @@ void TranslatorX64::drawCFG(std::ofstream& out) const {
  *   u:dest from toSmash.
  */
 TCA
-TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk, bool isAddr) {
-  TCA tDest = getTranslation(&destSk, false);
+TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk, bool isAddr,
+                       bool forceNoHHIR /* = false */) {
+  TCA tDest = getTranslation(&destSk, false, forceNoHHIR);
   if (!tDest) return NULL;
   LeaseHolder writer(s_writeLease);
   if (!writer) return tDest;
@@ -2869,6 +2872,7 @@ TranslatorX64::enterTC(SrcKey sk) {
 
       case REQ_BIND_SIDE_EXIT:
       case REQ_BIND_JMP:
+      case REQ_BIND_JMP_NO_IR:
       case REQ_BIND_ADDR: {
         TCA toSmash = (TCA)args[0];
         Offset off = args[1];
@@ -2876,7 +2880,8 @@ TranslatorX64::enterTC(SrcKey sk) {
         if (requestNum == REQ_BIND_SIDE_EXIT) {
           SKTRACE(3, sk, "side exit taken!\n");
         }
-        start = bindJmp(toSmash, sk, requestNum == REQ_BIND_ADDR);
+        start = bindJmp(toSmash, sk, requestNum == REQ_BIND_ADDR,
+                        requestNum == REQ_BIND_JMP_NO_IR);
       } break;
 
       case REQ_BIND_JMPCC_FIRST: {

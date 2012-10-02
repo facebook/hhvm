@@ -701,13 +701,13 @@ private:
   static bool isSmashable(Asm &a, int nBytes);
   static void smash(Asm &a, TCA src, TCA dest);
 
-  TCA getTranslation(const SrcKey *sk, bool align);
+  TCA getTranslation(const SrcKey *sk, bool align, bool forceNoHHIR = false);
   TCA retranslate(SrcKey sk, bool align, bool useHHIR);
   TCA retranslateOpt(TransID transId, bool align);
   TCA retranslateAndPatchNoIR(SrcKey sk,
                               bool   align,
                               TCA    toSmash);
-  TCA bindJmp(TCA toSmash, SrcKey dest, bool isAddr = false);
+  TCA bindJmp(TCA toSmash, SrcKey dest, bool isAddr, bool forceNoHHIR = false);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
                      bool toTake,

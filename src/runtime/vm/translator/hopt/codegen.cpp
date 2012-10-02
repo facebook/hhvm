@@ -1640,8 +1640,10 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
 
   switch(exitType) {
     case TraceExitType::Normal:
-    case TraceExitType::Slow:
       m_tx64->emitBindJmp(outputAsm, destSK);
+      break;
+    case TraceExitType::Slow:
+      m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP_NO_IR);
       break;
     case TraceExitType::SlowNoProgress:
       m_tx64->emitReqRetransNoIR(outputAsm, destSK);

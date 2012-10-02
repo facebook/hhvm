@@ -42,6 +42,8 @@ namespace VM {
   class Class;
 }
 
+extern StaticString ssIterator;
+
 /**
  * Base class of all user-defined classes. All data members and methods in
  * this class should start with "o_" or "os_" to avoid name conflicts.
@@ -128,6 +130,10 @@ class ObjectData : public CountableNF {
     return (int)(o_attribute >> 13) & 7;
   }
 
+  bool implementsIterator() {
+    return (o_instanceof(ssIterator));
+  }
+
   void setAttributes(int attrs) { o_attribute |= attrs; }
   void setAttributes(const ObjectData *o) { o_attribute |= o->o_attribute; }
   bool getAttribute(Attribute attr) const { return o_attribute & attr; }
@@ -137,7 +143,7 @@ class ObjectData : public CountableNF {
   void setNoDestruct() { setAttribute(NoDestructor); }
   ObjectData *clearNoDestruct() { clearAttribute(NoDestructor); return this; }
 
-  Object iterableObject(bool& isInstanceofIterator);
+  Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
   ArrayIter begin(CStrRef context = null_string);
   MutableArrayIter begin(Variant *key, Variant &val,
                          CStrRef context = null_string);

@@ -681,6 +681,24 @@ private:
 #define R(r)         _am.addReg(r)
 #define RPLUS(r,off) _am.addRegPlus(r, off)
 #define A(loc)       _am.addLocAddr(loc)
+#define IE(cond, argIf, argElse) \
+  ((cond) ? (argIf) : (argElse))
+
+#define PREP_CTX(ctxFixed, pr)                                         \
+  Class* ctx = NULL;                                                   \
+  LazyScratchReg rCtx(m_regMap);                                       \
+  if (ctxFixed) {                                                      \
+    ASSERT(isContextFixed());                                          \
+    ctx = arGetContextClass(curFrame());                               \
+  } else {                                                             \
+    rCtx.alloc(pr);                                                    \
+    a.  load_reg64_disp_reg64(rsp, offsetof(MInstrState, ctx), *rCtx); \
+  }
+#define CTX(ctxFixed)     \
+  IE((ctxFixed),          \
+     IMM(uintptr_t(ctx)), \
+     R(*rCtx))
+
 #define EMIT_CALL_PROLOGUE(a) do { \
   SpaceRecorder sr("_HCallInclusive", a);  \
   ArgManager _am(*this, a);       \

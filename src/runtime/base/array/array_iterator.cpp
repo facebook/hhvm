@@ -74,11 +74,13 @@ ArrayIter::ArrayIter(CArrRef array) : m_pos(0) {
   }
 }
 
-ArrayIter::ArrayIter(ObjectData *obj, bool rewind /* = true */) :
-    m_pos(ArrayData::invalid_index) {
+template <bool incRef>
+void ArrayIter::objInit(ObjectData *obj, bool rewind /* = true */) {
   ASSERT(obj);
   setObject(obj);
-  obj->incRefCount();
+  if (incRef) {
+    obj->incRefCount();
+  }
   if (!obj->isCollection()) {
     ASSERT(obj->o_instanceof(s_Iterator));
     if (obj->o_instanceof(s_Continuation)) {
@@ -104,6 +106,18 @@ ArrayIter::ArrayIter(ObjectData *obj, bool rewind /* = true */) :
       ASSERT(false);
     }
   }
+}
+
+ArrayIter::ArrayIter(ObjectData *obj, bool rewind /* = true */)
+  : m_pos(ArrayData::invalid_index) {
+  objInit<true>(obj, rewind);
+}
+
+// Special constructor used by the VM. This constructor does not increment the
+// refcount of the specified object.
+ArrayIter::ArrayIter(ObjectData *obj, int)
+  : m_pos(ArrayData::invalid_index) {
+  objInit<false>(obj, true);
 }
 
 HOT_FUNC

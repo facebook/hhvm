@@ -50,7 +50,12 @@ public:
   ArrayIter(const ArrayData* data);
   ArrayIter(const ArrayData* data, int);
   ArrayIter(CArrRef array);
+private:
+  template <bool incRef>
+  void objInit(ObjectData* obj, bool rewind = true);
+public:
   ArrayIter(ObjectData* obj, bool rewind = true);
+  ArrayIter(ObjectData* obj, int);
   ~ArrayIter();
 
   operator bool() { return !end(); }

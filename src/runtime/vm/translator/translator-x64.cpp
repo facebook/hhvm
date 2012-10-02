@@ -8666,51 +8666,61 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
 }
 
 void
-TranslatorX64::analyzeIterInit(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = simplePlan(i.inputs[0]->valueType() == KindOfArray);
+TranslatorX64::analyzeIterInit(Tracelet& t, NormalizedInstruction& ni) {
+  ni.m_txFlags = supportedPlan(ni.inputs[0]->valueType() == KindOfArray ||
+                               ni.inputs[0]->valueType() == KindOfObject);
 }
 
 void
 TranslatorX64::translateIterInit(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  ASSERT(!i.outStack && !i.outLocal);
-  DynLocation* arrIn = i.inputs[0];
-  ASSERT(arrIn->outerType() != KindOfRef);
-
-  PhysReg src = getReg(arrIn->location);
-  SKTRACE(1, i.source, "IterInit: committed to translation\n");
-  syncOutputs(t); // Ends BB
+                                 const NormalizedInstruction& ni) {
+  ASSERT(ni.inputs.size() == 1);
+  ASSERT(!ni.outStack && !ni.outLocal);
+  DynLocation* in = ni.inputs[0];
+  ASSERT(in->outerType() != KindOfRef);
+  SKTRACE(1, ni.source, "IterInit: committed to translation\n");
+  PhysReg src = getReg(in->location);
   SrcKey taken, notTaken;
-  branchDests(t, i, &taken, &notTaken, 1 /* immIdx */);
-  Location iterLoc(Location::Iter, i.imm[0].u_IVA);
-  PhysReg base;
-  int offset;
-  locToRegDisp(iterLoc, &base, &offset);
-  TRACE(2, "IterInit: iter %lld -> base r%d, offset %d\n", iterLoc.offset,
-      base, offset);
-  if (false) { // typecheck
-    Iter *dest = NULL;
-    HphpArray *arr = NULL;
-    new_iter(dest, arr);
+  branchDests(t, ni, &taken, &notTaken, 1 /* immIdx */);
+  Location iterLoc(Location::Iter, ni.imm[0].u_IVA);
+  switch (in->valueType()) {
+  case KindOfArray: {
+    if (false) { // typecheck
+      Iter *dest = NULL;
+      HphpArray *arr = NULL;
+      new_iter_array(dest, arr);
+    }
+    EMIT_RCALL(a, ni, new_iter_array, A(iterLoc), R(src));
+    break;
   }
-  // We've already synced the outputs, so we need to manually
-  // set up the parameters and do the call
-  emitMovRegReg(src, argNumToRegName[1]);
-  a.    lea_reg64_disp_reg64(base, offset, argNumToRegName[0]);
-  // If a new iterator is created, new_iter will not adjust the refcount of
-  // the array. If a new iterator is not created, new_iter will decRef the
-  // array for us.
-  emitCall(a, (TCA)new_iter);
-  // new_iter returns 0 if an iterator was not created, otherwise it
-  // returns 1
+  case KindOfObject: {
+    if (false) { // typecheck
+      Iter *dest = NULL;
+      ObjectData *obj = NULL;
+      Class *ctx = NULL;
+      new_iter_object(dest, obj, ctx);
+    }
+    bool ctxFixed = isContextFixed();
+    PREP_CTX(ctxFixed, argNumToRegName[2]);
+    EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src), CTX(ctxFixed));
+    break;
+  }
+  default: not_reached();
+  }
+  syncOutputs(t); // Ends BB
+  // If a new iterator is created, new_iter_* will not adjust the refcount of
+  // the input. If a new iterator is not created, new_iter_* will decRef the
+  // input for us.  new_iter_* returns 0 if an iterator was not created,
+  // otherwise it returns 1.
   a.    test_reg64_reg64(rax, rax);
   emitCondJmp(taken, notTaken, CC_Z);
 }
 
 void
 TranslatorX64::analyzeIterValueC(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = supportedPlan(i.inputs[0]->rtt.iterType() == Iter::TypeArray);
+  i.m_txFlags = supportedPlan(
+    i.inputs[0]->rtt.iterType() == Iter::TypeArray ||
+    i.inputs[0]->rtt.iterType() == Iter::TypeIterator);
 }
 
 void
@@ -8720,26 +8730,27 @@ TranslatorX64::translateIterValueC(const Tracelet& t,
   ASSERT(i.inputs[0]->rtt.isIter());
 
   Location outLoc;
-
-  if (false) { // type check
-    Iter* it = NULL;
-    TypedValue* out = NULL;
-    iter_value_cell(it, out);
-  }
+  Iter::Type iterType = i.inputs[0]->rtt.iterType();
+  typedef void (*IterValueC)(Iter*, TypedValue*);
+  IterValueC ivc;
   if (i.outStack) {
     outLoc = i.outStack->location;
-    EMIT_CALL(a, iter_value_cell, A(i.inputs[0]->location), A(outLoc));
+    ivc = (iterType == Iter::TypeArray)
+      ? iter_value_cell_array : iter_value_cell_iterator;
   } else {
     outLoc = i.outLocal->location;
-    EMIT_CALL(a, iter_value_cell_local, A(i.inputs[0]->location), A(outLoc));
+    ivc = (iterType == Iter::TypeArray)
+      ? iter_value_cell_local_array : iter_value_cell_local_iterator;
   }
-  recordReentrantCall(a, i);
+  EMIT_RCALL(a, i, ivc, A(i.inputs[0]->location), A(outLoc));
   m_regMap.invalidate(outLoc);
 }
 
 void
 TranslatorX64::analyzeIterKey(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = supportedPlan(i.inputs[0]->rtt.iterType() == Iter::TypeArray);
+  i.m_txFlags = supportedPlan(
+    i.inputs[0]->rtt.iterType() == Iter::TypeArray ||
+    i.inputs[0]->rtt.iterType() == Iter::TypeIterator);
 }
 
 void
@@ -8749,26 +8760,28 @@ TranslatorX64::translateIterKey(const Tracelet& t,
   ASSERT(i.inputs[0]->rtt.isIter());
 
   Location outLoc;
-  if (false) { // type check
-    Iter* it = NULL;
-    TypedValue* out = NULL;
-    iter_key_cell(it, out);
-  }
+  Iter::Type iterType = i.inputs[0]->rtt.iterType();
+  typedef void (*IterKey)(Iter*, TypedValue*);
+  IterKey ik;
   if (i.outStack) {
     outLoc = i.outStack->location;
-    EMIT_CALL(a, iter_key_cell, A(i.inputs[0]->location), A(outLoc));
+    ik = (iterType == Iter::TypeArray)
+      ? iter_key_cell_array : iter_key_cell_iterator;
   } else {
     outLoc = i.outLocal->location;
-    EMIT_CALL(a, iter_key_cell_local, A(i.inputs[0]->location), A(outLoc));
+    ik = (iterType == Iter::TypeArray)
+      ? iter_key_cell_local_array : iter_key_cell_local_iterator;
   }
-  recordReentrantCall(a, i);
+  EMIT_RCALL(a, i, ik, A(i.inputs[0]->location), A(outLoc));
   m_regMap.invalidate(outLoc);
 }
 
 void
 TranslatorX64::analyzeIterNext(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 1);
-  i.m_txFlags = supportedPlan(i.inputs[0]->rtt.iterType() == Iter::TypeArray);
+  i.m_txFlags = supportedPlan(
+    i.inputs[0]->rtt.iterType() == Iter::TypeArray ||
+    i.inputs[0]->rtt.iterType() == Iter::TypeIterator);
 }
 
 void

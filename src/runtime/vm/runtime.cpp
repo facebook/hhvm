@@ -61,13 +61,14 @@ void print_boolean(int64 val) {
 }
 
 /**
- * new_iter creates an iterator for the specified array iff the array is not
- * empty. If new_iter creates an iterator, it does not increment the refcount
- * of the specified array. If new_iter does not create an iterator, it decRefs
- * the array.
+ * new_iter_array creates an iterator for the specified array iff the array is
+ * not empty. If new_iter_array creates an iterator, it does not increment the
+ * refcount of the specified array. If new_iter_array does not create an
+ * iterator, it decRefs the array.
  */
-int64 new_iter(Iter* dest, HphpArray* arr) {
-  TRACE(2, "new_iter: I %p, arr %p\n", dest, arr);
+HOT_FUNC
+int64 new_iter_array(Iter* dest, HphpArray* arr) {
+  TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
   if (!arr->empty()) {
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
@@ -82,10 +83,56 @@ int64 new_iter(Iter* dest, HphpArray* arr) {
 }
 
 /**
+ * new_iter_object creates an iterator for the specified object if the object
+ * is iterable and it is non-empty (has properties). If new_iter_object creates
+ * an iterator, it does not increment the refcount of the specified object. If
+ * new_iter_object does not create an iterator, it decRefs the object.
+ */
+HOT_FUNC
+int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx) {
+  Iter::Type itType;
+  if (obj->isCollection() || obj->implementsIterator()) {
+    TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
+             __func__, dest, obj, ctx);
+    (void) new (&dest->arr()) ArrayIter(obj, 0);
+    itType = Iter::TypeIterator;
+  } else {
+    bool isIteratorAggregate;
+    Object itObj = obj->iterableObject(isIteratorAggregate, false);
+    if (isIteratorAggregate) {
+      TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
+               __func__, dest, obj, ctx);
+      (void) new (&dest->arr()) ArrayIter(itObj.get());
+      itType = Iter::TypeIterator;
+    } else {
+      TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
+               __func__, dest, obj, ctx);
+      CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+      Array iterArray(itObj->o_toIterArray(ctxStr));
+      ArrayData* ad = iterArray.getArrayData();
+      (void) new (&dest->arr()) ArrayIter(ad);
+      itType = Iter::TypeArray;
+    }
+    // We did not transfer ownership of the object to an iterator, so we need
+    // to decRef the object.
+    if (obj->decRefCount() == 0) obj->release();
+  }
+  if (!dest->arr().end()) {
+    dest->m_itype = itType;
+    return 1LL;
+  }
+  // Iterator was empty; call the destructor on the iterator we just
+  // constructed.
+  dest->arr().~ArrayIter();
+  return 0LL;
+}
+
+/**
  * iter_next_array will advance the iterator to point to the next element.
  * If the iterator reaches the end, iter_next_array will free the iterator
  * and will decRef the array.
  */
+HOT_FUNC
 int64 iter_next_array(Iter* iter) {
   TRACE(2, "iter_next_array: I %p\n", iter);
   ASSERT(iter->m_itype == Iter::TypeArray ||
@@ -102,15 +149,18 @@ int64 iter_next_array(Iter* iter) {
 }
 
 /**
- * iter_value_cell will store a copy of the current value at the address
- * given by 'out'. iter_value_cell will increment the refcount of the current
+ * iter_value_cell* will store a copy of the current value at the address
+ * given by 'out'. iter_value_cell* will increment the refcount of the current
  * value if appropriate.
  */
-void iter_value_cell(Iter* iter, TypedValue* out) {
-  TRACE(2, "iter_value_cell: I %p, out %p\n", iter, out);
-  ASSERT(iter->m_itype == Iter::TypeArray);
+template <bool typeArray>
+static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
+  TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
+           __func__, typeArray ? "true" : "false", iter, out);
+  ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
+         (!typeArray && iter->m_itype == Iter::TypeIterator));
   ArrayIter& arr = iter->arr();
-  if (LIKELY(arr.isHphpArray())) {
+  if (typeArray && LIKELY(arr.isHphpArray())) {
     TypedValue* cur = arr.nvSecond();
     if (UNLIKELY(cur->m_type == KindOfRef)) cur = cur->m_data.pref->tv();
     TV_DUP_CELL_NC(cur, out);
@@ -121,22 +171,45 @@ void iter_value_cell(Iter* iter, TypedValue* out) {
   TV_DUP_CELL_NC((TypedValue*)&val, out);
 }
 
-void iter_value_cell_local(Iter* iter, TypedValue* out) {
+HOT_FUNC
+void iter_value_cell_array(Iter* iter, TypedValue* out) {
+  iter_value_cell_impl<true>(iter, out);
+}
+
+HOT_FUNC
+void iter_value_cell_iterator(Iter* iter, TypedValue* out) {
+  iter_value_cell_impl<false>(iter, out);
+}
+
+template <bool typeArray>
+static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
   if (UNLIKELY(oldType == KindOfRef)) {
     out = out->m_data.pref->tv();
     oldType = out->m_type;
   }
   uint64_t oldDatum = out->m_data.num;
-  iter_value_cell(iter, out);
+  iter_value_cell_impl<typeArray>(iter, out);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
-void iter_key_cell(Iter* iter, TypedValue* out) {
-  TRACE(2, "iter_key_cell: I %p, out %p\n", iter, out);
-  ASSERT(iter->m_itype == Iter::TypeArray);
+HOT_FUNC
+void iter_value_cell_local_array(Iter* iter, TypedValue* out) {
+  iter_value_cell_local_impl<true>(iter, out);
+}
+
+HOT_FUNC
+void iter_value_cell_local_iterator(Iter* iter, TypedValue* out) {
+  iter_value_cell_local_impl<false>(iter, out);
+}
+
+template <bool typeArray>
+static inline void iter_key_cell_impl(Iter* iter, TypedValue* out) {
+  TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
+  ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
+         (!typeArray && iter->m_itype == Iter::TypeIterator));
   ArrayIter& arr = iter->arr();
-  if (LIKELY(arr.isHphpArray())) {
+  if (typeArray && LIKELY(arr.isHphpArray())) {
     arr.nvFirst(out);
     return;
   }
@@ -145,15 +218,36 @@ void iter_key_cell(Iter* iter, TypedValue* out) {
   TV_DUP_CELL_NC((TypedValue*)&key, out);
 }
 
-void iter_key_cell_local(Iter* iter, TypedValue* out) {
+HOT_FUNC
+void iter_key_cell_array(Iter* iter, TypedValue* out) {
+  iter_key_cell_impl<true>(iter, out);
+}
+
+HOT_FUNC
+void iter_key_cell_iterator(Iter* iter, TypedValue* out) {
+  iter_key_cell_impl<false>(iter, out);
+}
+
+template <bool typeArray>
+static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
   if (UNLIKELY(oldType == KindOfRef)) {
     out = out->m_data.pref->tv();
     oldType = out->m_type;
   }
   uint64_t oldDatum = out->m_data.num;
-  iter_key_cell(iter, out);
+  iter_key_cell_impl<typeArray>(iter, out);
   tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+HOT_FUNC
+void iter_key_cell_local_array(Iter* iter, TypedValue* out) {
+  iter_key_cell_local_impl<true>(iter, out);
+}
+
+HOT_FUNC
+void iter_key_cell_local_iterator(Iter* iter, TypedValue* out) {
+  iter_key_cell_local_impl<false>(iter, out);
 }
 
 static inline void

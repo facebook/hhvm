@@ -6042,9 +6042,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInit(PC& pc) {
       ITER_SKIP(offset);
     }
   } else if (c1->m_type == KindOfObject) {
-    Class* ctx = arGetContextClass(m_fp);
     Iter* it = frame_iter(m_fp, itId);
-    CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
     bool isIterator;
     if (c1->m_data.pobj->isCollection()) {
       isIterator = true;
@@ -6054,6 +6052,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInit(PC& pc) {
       if (isIterator) {
         (void) new (&it->arr()) ArrayIter(obj.get());
       } else {
+        Class* ctx = arGetContextClass(m_fp);
+        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(obj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.getArrayData();
         (void) new (&it->arr()) ArrayIter(ad);
@@ -6094,8 +6094,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
       ITER_SKIP(offset);
     }
   } else if (rtv->m_type == KindOfObject)  {
-    Class* ctx = arGetContextClass(m_fp);
-    CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
     if (rtv->m_data.pobj->getCollectionType() != 0) {
       raise_error("Collection elements cannot be taken by reference");
     }
@@ -6104,6 +6102,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIterInitM(PC& pc) {
     if (isIterator) {
       raise_error("An iterator cannot be used with foreach by reference");
     }
+    Class* ctx = arGetContextClass(m_fp);
+    CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
     Array iterArray = obj->o_toIterArray(ctxStr, true);
     if (iterArray->empty()) {
       ITER_SKIP(offset);

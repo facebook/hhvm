@@ -26,12 +26,17 @@
 namespace HPHP {
 namespace VM {
 
-int64 new_iter(HPHP::VM::Iter* dest, HphpArray* arr);
+int64 new_iter_array(HPHP::VM::Iter* dest, HphpArray* arr);
+int64 new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx);
 int64 iter_next_array(HPHP::VM::Iter* dest);
-void iter_value_cell(HPHP::VM::Iter* iter, TypedValue* out);
-void iter_value_cell_local(HPHP::VM::Iter* iter, TypedValue* out);
-void iter_key_cell(HPHP::VM::Iter* iter, TypedValue* out);
-void iter_key_cell_local(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_value_cell_array(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_value_cell_iterator(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_value_cell_local_array(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_value_cell_local_iterator(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_key_cell_array(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_key_cell_iterator(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_key_cell_local_array(HPHP::VM::Iter* iter, TypedValue* out);
+void iter_key_cell_local_iterator(HPHP::VM::Iter* iter, TypedValue* out);
 
 StringData* concat_is(int64 v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64 v2);

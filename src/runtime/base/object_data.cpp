@@ -680,36 +680,38 @@ Variant ObjectData::os_invoke(CStrRef c, CStrRef s,
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-static StaticString s_Iterator("Iterator");
+StaticString ssIterator("Iterator");
 static StaticString s_IteratorAggregate("IteratorAggregate");
 static StaticString s_getIterator("getIterator");
 
-Object ObjectData::iterableObject(bool& isInstanceofIterator) {
-  if (o_instanceof(s_Iterator)) {
-    isInstanceofIterator = true;
+Object ObjectData::iterableObject(bool& isIterable,
+                                  bool mayImplementIterator /* = true */) {
+  ASSERT(mayImplementIterator || !implementsIterator());
+  if (mayImplementIterator && implementsIterator()) {
+    isIterable = true;
     return Object(this);
   }
   Object obj(this);
   while (obj->o_instanceof(s_IteratorAggregate)) {
     Variant iterator = obj->o_invoke(s_getIterator, Array());
     if (!iterator.isObject()) break;
-    if (iterator.instanceof(s_Iterator)) {
-      isInstanceofIterator = true;
+    if (iterator.instanceof(ssIterator)) {
+      isIterable = true;
       return iterator.getObjectData();
     }
     obj = iterator.getObjectData();
   }
-  isInstanceofIterator = false;
+  isIterable = false;
   return obj;
 }
 
 ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
-  bool isInstanceofIterator;
+  bool isIterable;
   if (isCollection()) {
     return ArrayIter(this);
   }
-  Object iterable = iterableObject(isInstanceofIterator);
-  if (isInstanceofIterator) {
+  Object iterable = iterableObject(isIterable);
+  if (isIterable) {
     return ArrayIter(iterable.get());
   } else {
     return ArrayIter(iterable->o_toIterArray(context));
@@ -718,12 +720,12 @@ ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
 
 MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
                                    CStrRef context /* = null_string */) {
-  bool isInstanceofIterator;
+  bool isIterable;
   if (isCollection()) {
     raise_error("Collection elements cannot be taken by reference");
   }
-  Object iterable = iterableObject(isInstanceofIterator);
-  if (isInstanceofIterator) {
+  Object iterable = iterableObject(isIterable);
+  if (isIterable) {
     throw FatalErrorException("An iterator cannot be used with "
                               "foreach by reference");
   }

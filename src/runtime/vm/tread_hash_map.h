@@ -226,7 +226,7 @@ private:
 
   static Table* allocTable(size_t capacity) {
     Table* ret = static_cast<Table*>(
-      calloc(capacity, sizeof(value_type) + sizeof(Table)));
+      calloc(1, capacity * sizeof(value_type) + sizeof(Table)));
     ret->capac = capacity;
     ret->size = 0;
     return ret;

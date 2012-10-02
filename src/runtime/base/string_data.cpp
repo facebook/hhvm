@@ -31,7 +31,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION_HOT(StringData, SmartAllocatorImpl::NeedSweep);
+IMPLEMENT_SMART_ALLOCATION_HOT(StringData);
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
@@ -87,6 +87,42 @@ void StringData::initLiteral(const char* data, int len) {
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
+void StringData::enlist() {
+  StringNode& head = MemoryManager::TheMemoryManager()->m_strings;
+  // insert after head
+  StringNode* next = head.next;
+  ASSERT(uintptr_t(next) != kMallocFreeWord);
+  m_big.node.next = next;
+  m_big.node.prev = &head;
+  next->prev = head.next = &m_big.node;
+}
+
+void StringData::delist() {
+  StringNode* next = m_big.node.next;
+  StringNode* prev = m_big.node.prev;
+  ASSERT(uintptr_t(next) != kMallocFreeWord);
+  ASSERT(uintptr_t(prev) != kMallocFreeWord);
+  next->prev = prev;
+  prev->next = next;
+}
+
+void StringData::sweepAll() {
+  StringNode& head = MemoryManager::TheMemoryManager()->m_strings;
+  for (StringNode *next, *n = head.next; n != &head; n = next) {
+    next = n->next;
+    ASSERT(next && uintptr_t(next) != kSmartFreeWord);
+    ASSERT(next && uintptr_t(next) != kMallocFreeWord);
+    StringData* s = (StringData*)(uintptr_t(n) -
+                                  offsetof(StringData, m_big.node));
+    switch (s->format()) {
+      case IsMalloc: free(s->m_data); break;
+      case IsShared: s->m_big.shared->decRef(); break;
+      default: break;
+    }
+  }
+  head.next = head.prev = &head;
+}
+
 HOT_FUNC
 void StringData::initAttach(const char* data) {
   return initAttach(data, strlen(data));
@@ -110,6 +146,7 @@ void StringData::initAttach(const char* data, int len) {
     m_len = len;
     m_cdata = data;
     m_big.cap = len | IsMalloc;
+    enlist();
   }
   ASSERT(checkSane());
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
@@ -165,6 +202,9 @@ void StringData::initMalloc(const char* data, int len) {
     m_len = len;
     m_cdata = buf;
     m_big.cap = len | IsMalloc;
+    // this isn't a smart-alloc'd string, but ~StringData calls delist(),
+    // so initialize the node as an empty list.
+    m_big.node.next = m_big.node.prev = &m_big.node;
   }
   ASSERT(checkSane());
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
@@ -180,6 +220,7 @@ StringData::StringData(SharedVariant *shared)
   m_cdata = shared->stringData();
   m_big.shared = shared;
   m_big.cap = m_len | IsShared;
+  enlist();
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
@@ -189,28 +230,16 @@ void StringData::releaseData() {
   case IsMalloc:
     ASSERT(checkSane());
     free(m_data);
+    delist();
     break;
   case IsShared:
     ASSERT(checkSane());
     m_big.shared->decRef();
+    delist();
     break;
   case IsSmart:
     ASSERT(checkSane());
     smart_free(m_data);
-    break;
-  default:
-    break;
-  }
-}
-
-HOT_FUNC
-void StringData::sweep() {
-  switch (format()) {
-  case IsMalloc:
-    free(m_data);
-    break;
-  case IsShared:
-    m_big.shared->decRef();
     break;
   default:
     break;
@@ -225,6 +254,7 @@ void StringData::attach(char *data, int len) {
   m_len = len;
   m_data = data;
   m_big.cap = len | IsMalloc;
+  enlist();
 }
 
 char* smart_concat(const char* s1, uint32_t len1, const char* s2, uint32_t len2) {
@@ -296,7 +326,10 @@ void StringData::append(const char *s, int len) {
     // We are mutating, so we don't need to repropagate our own taint
     StringSlice r = slice();
     char* newdata = smart_concat(r.ptr, r.len, s, len);
-    if (isShared()) m_big.shared->decRef();
+    if (isShared()) {
+      m_big.shared->decRef();
+      delist();
+    }
     m_len = newlen;
     m_data = newdata;
     m_big.cap = newlen | IsSmart;
@@ -359,6 +392,7 @@ void StringData::append(const char *s, int len) {
     m_len = newlen;
     m_data = newdata;
     m_big.cap = newlen | IsMalloc;
+    // already enlisted, don't do it again
     m_hash = 0;
   }
   ASSERT(newlen <= MaxSize);
@@ -383,6 +417,7 @@ MutableSlice StringData::reserve(int cap) {
     case IsMalloc:
       m_data = (char*) realloc(m_data, cap + 1);
       m_big.cap = cap | IsMalloc;
+      // already enlisted, don't do it again
       break;
   }
   return MutableSlice(m_data, cap);
@@ -433,6 +468,7 @@ void StringData::escalate() {
   m_len = s.len;
   m_data = buf;
   m_big.cap = s.len | IsMalloc;
+  enlist();
   // clear precomputed hashcode
   m_hash = 0;
   ASSERT(checkSane());

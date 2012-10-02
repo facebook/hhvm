@@ -25,7 +25,7 @@ namespace HPHP {
 
 StaticEmptyVectorArray StaticEmptyVectorArray::s_theEmptyVectorArray;
 
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(VectorArray);
+IMPLEMENT_SMART_ALLOCATION_HOT(VectorArray);
 
 #ifdef DEBUGGING_SMART_ALLOCATOR
 #define DECLARE_ALLOCATOR(a, T, I)
@@ -33,8 +33,7 @@ IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(VectorArray);
 #define DEALLOC(a, e, T) delete e;
 #else
 #define DECLARE_ALLOCATOR(a, T, I)                  \
-  SmartAllocator<T, SmartAllocatorImpl::I,  \
-                 SmartAllocatorImpl::NoCallbacks> *a =  \
+  SmartAllocator<T, SmartAllocatorImpl::I> *a =     \
     T::AllocatorType::getNoCheck();
 #define NEWALLOC(a) new (a)
 #define DEALLOC(a, e, T) (e->~T(),a->dealloc(e))

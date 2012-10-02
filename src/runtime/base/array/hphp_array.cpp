@@ -66,7 +66,7 @@ static const Trace::Module TRACEMOD = Trace::runtime;
  * separately.  Even larger tables allocate the hashtable and slots
  * contiguously.
  */
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(HphpArray);
+IMPLEMENT_SMART_ALLOCATION(HphpArray);
 
 //=============================================================================
 // Static members.

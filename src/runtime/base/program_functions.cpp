@@ -1328,7 +1328,7 @@ void hphp_session_exit() {
 
   MemoryManager *mm = MemoryManager::TheMemoryManager();
   if (RuntimeOption::CheckMemory) {
-    mm->checkMemory(false);
+    mm->checkMemory();
   }
   if (RuntimeOption::EnableStats && RuntimeOption::EnableMemoryStats) {
     mm->logStats();

@@ -48,7 +48,7 @@ public:
   }
 
   // SmartAllocator methods
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(TaintTraceData);
+  DECLARE_SMART_ALLOCATION(TaintTraceData);
   void dump() const { }
 
 private:

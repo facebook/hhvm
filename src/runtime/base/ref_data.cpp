@@ -18,7 +18,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(RefData);
+IMPLEMENT_SMART_ALLOCATION(RefData);
 
 RefData::~RefData() {
   tvAsVariant(&m_tv).~Variant();

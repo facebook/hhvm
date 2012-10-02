@@ -759,7 +759,7 @@ public:
   /**
    * Memory allocator methods.
    */
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(Variant);
+  DECLARE_SMART_ALLOCATION(Variant);
 
   void dump() const;
 

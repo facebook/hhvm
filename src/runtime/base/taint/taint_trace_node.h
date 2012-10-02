@@ -88,7 +88,7 @@ public:
   const TaintTraceDataPtr& getLeaf() const { return m_leaf; }
 
   // SmartAllocator methods
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(TaintTraceNode);
+  DECLARE_SMART_ALLOCATION(TaintTraceNode);
   void dump() const { }
 
 private:

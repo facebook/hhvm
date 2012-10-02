@@ -85,8 +85,10 @@ enum CopyMallocMode { CopyMalloc };
  * A StringData can be in two formats, small or big.  Small format
  * stores the string inline by overlapping with some fields, as follows:
  *
- * small: m_data:8, _count:4, m_len:4, m_hash:4, m_small:44
- * big:   m_data:8, _count:4, m_len:4, m_hash:4, junk[28], shared:8, cap:8
+ * small: m_data:8, _count:4, m_len:4, m_hash:4,
+ *        m_small[44]
+ * big:   m_data:8, _count:4, m_len:4, m_hash:4,
+ *        junk[12], node:16, shared:8, cap:8
  *
  * If the format is IsLiteral or IsShared, we always use the "big" layout.
  * resemblences to fbstring are not accidental.
@@ -343,10 +345,10 @@ public:
   /**
    * Memory allocator methods.
    */
-  DECLARE_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedSweep);
-  void sweep();
+  DECLARE_SMART_ALLOCATION(StringData);
   void dump() const;
   std::string toCPPString() const;
+  static void sweepAll();
 
   static StringData *GetStaticString(const StringData *str);
   static StringData *GetStaticString(const std::string &str);
@@ -373,12 +375,17 @@ public:
   uint32_t m_len;
   mutable strhash_t m_hash;   // precompute hash codes for static strings
   union __attribute__((__packed__)) {
+    char m_small[MaxSmallSize + 1];
     struct __attribute__((__packed__)) {
-      char junk[28];
+      // Calculate padding so that node, shared, and cap are pointer aligned,
+      // and ensure cap overlaps the last byte of m_small.
+      static const size_t kPadding = sizeof(m_small) -
+        sizeof(StringNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
+      char junk[kPadding];
+      StringNode node;
       SharedVariant *shared;
       uint64_t cap;
     } m_big;
-    char m_small[sizeof(m_big)];
   };
 #ifdef TAINTED
   TaintData m_taint_data;
@@ -400,6 +407,8 @@ public:
   int numericCompare(const StringData *v2) const;
   void escalate(); // change to malloc-ed string
   void attach(char *data, int len);
+  void enlist();
+  void delist();
 
   strhash_t hashHelper() const NEVER_INLINE;
 

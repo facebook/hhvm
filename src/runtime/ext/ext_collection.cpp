@@ -1453,7 +1453,7 @@ void c_MapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_CLS(c_StableMap, Bucket);
+IMPLEMENT_SMART_ALLOCATION_CLS(c_StableMap, Bucket);
 
 #define CONNECT_TO_GLOBAL_DLLIST(element)                               \
 do {                                                                    \

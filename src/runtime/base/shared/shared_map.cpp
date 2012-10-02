@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_SMART_ALLOCATION_HOT(SharedMap, SmartAllocatorImpl::NeedSweep);
+IMPLEMENT_SMART_ALLOCATION_HOT(SharedMap);
 ///////////////////////////////////////////////////////////////////////////////
 HOT_FUNC
 CVarRef SharedMap::getValueRef(ssize_t pos) const {

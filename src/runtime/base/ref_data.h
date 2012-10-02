@@ -40,7 +40,7 @@ public:
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
   // Memory allocator methods
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(RefData);
+  DECLARE_SMART_ALLOCATION(RefData);
   void dump() const;
 
   const TypedValue* tv() const { return &m_tv; }

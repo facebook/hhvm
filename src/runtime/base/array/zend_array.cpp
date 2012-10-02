@@ -31,8 +31,8 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_CLS(ZendArray, Bucket);
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(ZendArray);
+IMPLEMENT_SMART_ALLOCATION_CLS(ZendArray, Bucket);
+IMPLEMENT_SMART_ALLOCATION_HOT(ZendArray);
 
 // append/insert/update
 

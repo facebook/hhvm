@@ -126,7 +126,7 @@ public:
   virtual CVarRef endRef();
   virtual ArrayData *escalate(bool mutableIteration = false) const;
 
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(VectorArray);
+  DECLARE_SMART_ALLOCATION(VectorArray);
 
 private:
   enum AllocMode { kInline, kSmart, kMalloc };

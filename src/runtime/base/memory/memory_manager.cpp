@@ -158,14 +158,14 @@ void MemoryManager::AllocIterator::next() {
   ++m_it;
 }
 
-MemoryManager::MemoryManager() : m_enabled(RuntimeOption::EnableMemoryManager) {
+MemoryManager::MemoryManager() : m_front(0), m_limit(0), m_smartsweep(0),
+  m_enabled(RuntimeOption::EnableMemoryManager) {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
   resetStats();
   m_stats.maxBytes = INT64_MAX;
-  m_front = m_limit = 0;
-  m_smartsweep = 0;
+  m_strings.next = m_strings.prev = &m_strings; // empty circular list
 }
 
 void MemoryManager::resetStats() {
@@ -235,10 +235,12 @@ struct SweepNode {
   };
 };
 
+typedef std::vector<char*>::const_iterator SlabIter;
+
 void MemoryManager::rollback() {
-  typedef std::vector<char*>::const_iterator SlabIter;
-  for (unsigned int i = 0; i < m_smartAllocators.size(); i++) {
-    m_smartAllocators[i]->rollbackObjects();
+  StringData::sweepAll();
+  for (unsigned int i = 0, n = m_smartAllocators.size(); i < n; i++) {
+    m_smartAllocators[i]->clear();
   }
   // free smart-malloc slabs
   for (SlabIter i = m_slabs.begin(), end = m_slabs.end(); i != end; ++i) {
@@ -264,7 +266,7 @@ void MemoryManager::logStats() {
   LeakDetectable::LogMallocStats();
 }
 
-void MemoryManager::checkMemory(bool detailed) {
+void MemoryManager::checkMemory() {
   printf("----- MemoryManager for Thread %ld -----\n", (long)pthread_self());
 
   refreshStats();
@@ -274,10 +276,6 @@ void MemoryManager::checkMemory(bool detailed) {
   printf("Peak Alloc: %lld bytes\n", m_stats.peakAlloc);
 
   printf("Slabs: %lu KiB\n", m_slabs.size() * SLAB_SIZE / 1024);
-
-  for (unsigned int i = 0; i < m_smartAllocators.size(); i++) {
-    m_smartAllocators[i]->checkMemory(detailed);
-  }
 }
 
 //
@@ -327,7 +325,7 @@ inline void MemoryManager::smartFree(void* ptr) {
     unsigned i = (padbytes - 1) >> kLgSizeQuantum;
     ASSERT(i < kNumSizes);
     m_smartfree[i].push(ptr);
-    m_stats.usage -= padbytes + sizeof(SmallNode);
+    m_stats.usage -= padbytes;
     return;
   }
   smartFreeBig(n);
@@ -363,7 +361,11 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
   return n2 + 1;
 }
 
-NEVER_INLINE char* MemoryManager::newSlab() {
+/**
+ * Get a new slab, then allocate nbytes from it and install it in our
+ * slab list.  Return the newly allocated nbytes-sized block.
+ */
+NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
   if (hhvm && UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
@@ -374,18 +376,14 @@ NEVER_INLINE char* MemoryManager::newSlab() {
     m_stats.peakAlloc = m_stats.alloc;
   }
   m_slabs.push_back(slab);
+  m_front = slab + nbytes;
+  m_limit = slab + SLAB_SIZE;
   return slab;
 }
 
 NEVER_INLINE
 void* MemoryManager::smartMallocSlab(size_t padbytes) {
-  char* slab = newSlab();
-  // padding 8 bytes here aligns the usable area of smart_malloc blocks
-  // on 16-byte boundaries.
-  size_t align = sizeof(SmallNode) & 15;
-  m_front = slab + align + padbytes;
-  m_limit = slab + SLAB_SIZE;
-  SmallNode* n = (SmallNode*) (slab + align);
+  SmallNode* n = (SmallNode*) newSlab(padbytes + sizeof(SmallNode));
   n->padbytes = padbytes;
   return n + 1;
 }
@@ -435,6 +433,18 @@ void MemoryManager::smartFreeBig(SweepNode* n) {
   free(n);
 }
 
+// allocate nbytes from the current slab, aligned to 16-bytes
+inline void* MemoryManager::slabAlloc(size_t nbytes) {
+  const size_t kAlignMask = 15;
+  ASSERT((nbytes & 7) == 0);
+  char* ptr = (char*)(uintptr_t(m_front + kAlignMask) & ~kAlignMask);
+  if (ptr + nbytes <= m_limit) {
+    m_front = ptr + nbytes;
+    return ptr;
+  }
+  return newSlab(nbytes);
+}
+
 static inline MemoryManager& MM() {
   return *MemoryManager::TheMemoryManager();
 }
@@ -465,6 +475,17 @@ void* smart_realloc(void* ptr, size_t nbytes) {
 HOT_FUNC
 void smart_free(void* ptr) {
   if (ptr) MM().smartFree(ptr);
+}
+
+// SmartAllocator facade
+
+HOT_FUNC
+void* SmartAllocatorImpl::alloc(size_t nbytes) {
+  ASSERT(nbytes == size_t(m_itemSize));
+  MM().getStats().usage += nbytes;
+  void* ptr = m_free.maybePop();
+  if (LIKELY(ptr != NULL)) return ptr;
+  return MM().slabAlloc(nbytes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

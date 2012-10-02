@@ -26,8 +26,8 @@
 namespace HPHP {
 
 IMPLEMENT_REQUEST_LOCAL(TaintTracerRequestData, TaintTracer::s_requestdata);
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TaintTraceData);
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TaintTraceNode);
+IMPLEMENT_SMART_ALLOCATION(TaintTraceData);
+IMPLEMENT_SMART_ALLOCATION(TaintTraceNode);
 
 /*
  * TaintTraceDataPtr methods

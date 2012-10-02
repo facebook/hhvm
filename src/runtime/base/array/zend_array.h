@@ -218,7 +218,7 @@ public:
     /**
      * Memory allocator methods.
      */
-    DECLARE_SMART_ALLOCATION_NOCALLBACKS(Bucket);
+    DECLARE_SMART_ALLOCATION(Bucket);
     void dump();
   };
 
@@ -279,7 +279,7 @@ private:
   /**
    * Memory allocator methods.
    */
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(ZendArray);
+  DECLARE_SMART_ALLOCATION(ZendArray);
 };
 
 class StaticEmptyZendArray : public ZendArray {

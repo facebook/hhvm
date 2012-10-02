@@ -30,7 +30,7 @@ namespace HPHP {
 /**
  * Wrapper for a shared memory map.
  */
-class SharedMap : public ArrayData {
+class SharedMap : public ArrayData, Sweepable {
 public:
   SharedMap(SharedVariant* source) : m_arr(source), m_localCache(NULL) {
     source->incRef();
@@ -109,8 +109,10 @@ public:
   /**
    * Memory allocator methods.
    */
-  DECLARE_SMART_ALLOCATION(SharedMap, SmartAllocatorImpl::NeedSweep);
-  void sweep() { m_arr->decRef();}
+  DECLARE_SMART_ALLOCATION(SharedMap);
+
+  // implements Sweepable.sweep()
+  void sweep() { m_arr->decRef(); }
 
   virtual ArrayData *escalate(bool mutableIteration = false) const;
 

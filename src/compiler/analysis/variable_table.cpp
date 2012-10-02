@@ -875,7 +875,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     cg_printf("void initialize();\n");
   } else {
     cg_printf("class GlobalVariables : public SystemGlobals {\n");
-    cg_printf("DECLARE_SMART_ALLOCATION_NOCALLBACKS(GlobalVariables);\n");
+    cg_printf("DECLARE_SMART_ALLOCATION(GlobalVariables);\n");
     cg_indentBegin("public:\n");
     cg_printf("GlobalVariables();\n");
     cg_printf("~GlobalVariables();\n");
@@ -1106,7 +1106,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   if (!system) {
-    cg_printf("IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(GlobalVariables)\n");
+    cg_printf("IMPLEMENT_SMART_ALLOCATION(GlobalVariables)\n");
   }
 
   const char *clsname = system ? "SystemGlobals" : "GlobalVariables";

@@ -427,7 +427,7 @@ private:
   void resizeIfNeeded();
 
   // Memory allocator methods.
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(HphpArray);
+  DECLARE_SMART_ALLOCATION(HphpArray);
 
 private:
   enum EmptyMode { StaticEmptyArray };

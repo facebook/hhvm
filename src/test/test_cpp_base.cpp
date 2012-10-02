@@ -87,8 +87,7 @@ public:
 };
 
 typedef SmartAllocator<SomeClass,
-                       SmartAllocatorImpl::TestAllocator,
-                       SmartAllocatorImpl::NoCallbacks>
+                       SmartAllocatorImpl::TestAllocator>
         SomeClassAlloc;
 
 bool TestCppBase::TestSmartAllocator() {
@@ -848,10 +847,10 @@ public:
   Variant m_curlMultiConn;
   String key;
   String value;
-  DECLARE_SMART_ALLOCATION_NOCALLBACKS(TestGlobals);
+  DECLARE_SMART_ALLOCATION(TestGlobals);
   void dump() {}
 };
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TestGlobals);
+IMPLEMENT_SMART_ALLOCATION(TestGlobals);
 
 /* Pull 32bit Big Endian words from an in6_addr */
 static inline long in6addrWord(struct in6_addr addr, char wordNo) {

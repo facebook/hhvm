@@ -488,8 +488,7 @@ void CstrBuffer::append(const char* data, int len) {
     ASSERT(newlen + 1 <= m_cap);
   }
   memcpy(m_buffer + m_len, data, len);
-  m_buffer[newlen] = 0;
-  m_len = newlen;
+  m_buffer[m_len = newlen] = 0;
 }
 
 String CstrBuffer::detach() {

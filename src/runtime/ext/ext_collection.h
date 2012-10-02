@@ -168,7 +168,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: int getVersionNumber() {
     return m_versionNumber;
   }
-  
+
   public: Array toArrayImpl() const;
 
   public: Array o_toArray() const;
@@ -753,7 +753,7 @@ public:
     /**
      * Memory allocator methods.
      */
-    DECLARE_SMART_ALLOCATION_NOCALLBACKS(Bucket);
+    DECLARE_SMART_ALLOCATION(Bucket);
     void dump();
   };
 

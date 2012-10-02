@@ -29,9 +29,15 @@ class SmartAllocatorImpl;
 struct SmartNode;
 struct SweepNode;
 
+struct StringNode {
+  StringNode *next, *prev;
+};
+
 // jemalloc uses 0x5a but we use 0x6a so we can tell the difference
 // when debugging.
 const char kSmartFreeFill = 0x6a;
+const uintptr_t kSmartFreeWord = 0x6a6a6a6a6a6a6a6aLL;
+const uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
 /**
  * A garbage list is a freelist of items that uses the space in the items
@@ -196,7 +202,7 @@ public:
   /**
    * Display any leaked or double-freed memory.
    */
-  void checkMemory(bool detailed);
+  void checkMemory();
 
   /**
    * Find out how much memory we have used so far.
@@ -323,8 +329,11 @@ public:
   void  smartFree(void* ptr);
   static const size_t kMaxSmartSize = 2048;
 
+  // allocate nbytes from the current slab, aligned to 16-bytes
+  void* slabAlloc(size_t nbytes);
+
 private:
-  char* newSlab();
+  char* newSlab(size_t nbytes);
   void* smartEnlist(SweepNode*);
   void* smartMallocSlab(size_t padbytes);
   void* smartMallocBig(size_t nbytes);
@@ -343,6 +352,7 @@ private:
   char *m_front, *m_limit;
   GarbageList m_smartfree[kNumSizes];
   SweepNode* m_smartsweep;
+  StringNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
   bool m_enabled;
 
@@ -361,6 +371,8 @@ public:
   static bool s_statsEnabled;
   static size_t s_cactiveLimitCeiling;
 #endif
+
+  friend class StringData; // for enlist/delist access to m_strings
 };
 
 //

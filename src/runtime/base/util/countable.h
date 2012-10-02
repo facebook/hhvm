@@ -33,15 +33,6 @@ namespace HPHP {
  */
 const int32_t RefCountStaticValue = (1 << 30);
 
-/**
- * This is a special value for _count used to indicate objects that
- * are already deallocated. (See smart_allocator.h.)
- */
-const int32_t RefCountTombstoneValue = -0x21e11813; // 0xde1ee7ed
-static_assert(RefCountTombstoneValue < 0,
-              "RefCountTombstoneValue is expected to be less than "
-              "zero for assertion purposes");
-
 /*
  * Used for assertions.  Real count values should always be less than
  * or equal to RefCountStaticValue, and asserting this will also catch

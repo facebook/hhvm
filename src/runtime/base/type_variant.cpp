@@ -48,7 +48,7 @@ static void unserializeProp(VariableUnserializer *uns,
                             CStrRef context, CStrRef realKey,
                             int nProp) NEVER_INLINE;
 
-IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_HOT(Variant);
+IMPLEMENT_SMART_ALLOCATION_HOT(Variant);
 
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
@@ -3822,7 +3822,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
       }
       if (size > 0) {
         if (type == 'O') {
-          // Collection are not allowed 
+          // Collection are not allowed
           if (obj->isCollection()) {
             if (size > 0) {
               throw Exception("%s does not support the 'O' serialization "

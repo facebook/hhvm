@@ -403,6 +403,7 @@ std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::EvalJitCmovVarDeref = true;
 bool RuntimeOption::EvalJitTransCounters = false;
 bool RuntimeOption::EvalJitUseIR = false;
+bool RuntimeOption::EvalIRPuntDontInterp = false;
 bool RuntimeOption::EvalHHIRMemOpt = false;
 uint32 RuntimeOption::EvalHHIRNumFreeRegs = (uint32)-1;
 bool RuntimeOption::EvalHHIREnableRematerialization = true;
@@ -1188,6 +1189,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EvalJitWarmupRequests = eval["JitWarmupRequests"].getInt32(kDefaultWarmupRequests);
     EvalJitMGeneric = eval["JitMGeneric"].getBool(true);
     EvalJitUseIR = eval["JitUseIR"].getBool(false);
+    EvalIRPuntDontInterp = eval["IRPuntDontInterp"].getBool(false);
     EvalHHIRMemOpt = eval["HHIRMemOpt"].getBool(true);
     EvalHHIRNumFreeRegs = eval["HHIRNumFreeRegs"].getUInt32(-1);
     EvalHHIREnableRematerialization = eval["HHIREnableRematerialization"].getBool(true);

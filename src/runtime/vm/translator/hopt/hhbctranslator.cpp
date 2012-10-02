@@ -224,9 +224,8 @@ void HhbcTranslator::emitAddNewElemC() {
 }
 
 void HhbcTranslator::emitCns(uint32 id) {
-//  PUNT(Cns);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitDefCns(uint32 id) {
@@ -246,13 +245,13 @@ void HhbcTranslator::emitConcat() {
 void HhbcTranslator::emitDefCls(int cid, Offset after) {
 //  m_tb.genDefCls(lookupPreClassId(cid), getCurUnit()->at(after));
   spillStack();
-  emitInterpOne(Type::None);
+  emitInterpOneOrPunt(Type::None);
 }
 
 void HhbcTranslator::emitDefFunc(int fid) {
 //  m_tb.genDefFunc(lookupFuncId(fid));
   spillStack();
-  emitInterpOne(Type::None);
+  emitInterpOneOrPunt(Type::None);
 }
 
 void HhbcTranslator::emitSelf() {
@@ -340,23 +339,22 @@ void HhbcTranslator::emitVGetL(int32 id) {
 }
 
 void HhbcTranslator::emitVGetG() {
- // TODO (a helper call)
-//  PUNT(VGetG);
+  // helper function BoxedGlobalCache::lookupCreate
   spillStack();
   popC();
-  emitInterpOne(Type::Gen);
+  emitInterpOneOrPunt(Type::Gen);
 }
 
 
 void HhbcTranslator::emitUnsetN() {
-//  PUNT(UnsetN);
+  // No reason to punt, translator-x64 does emitInterpOne as well
   spillStack();
   popC();
   emitInterpOne(Type::None);
 }
 
 void HhbcTranslator::emitUnsetG() {
-//  PUNT(UnsetG);
+  // No reason to punt, translator-x64 does emitInterpOne as well
   spillStack();
   popC();
   emitInterpOne(Type::None);
@@ -425,36 +423,30 @@ void HhbcTranslator::emitIncDecMem(bool pre,
 }
 
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
-//  PUNT(SetOpL);
   spillStack();
   popC();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitClassExists() {
-//  PUNT(ClassExists);
   spillStack();
   popC();
   popC();
-  emitInterpOne(Type::Bool);
+  emitInterpOneOrPunt(Type::Bool);
 }
 
 void HhbcTranslator::emitInterfaceExists() {
-//  PUNT(InterfaceExists);
   emitClassExists();
 }
 
 void HhbcTranslator::emitTraitExists() {
-//  PUNT(TraitExists);
   emitClassExists();
 }
 
 void HhbcTranslator::emitStaticLocInit(uint32 varId, uint32 listStrId) {
-//  PUNT(StaticLocInit);
   spillStack();
   popC();
-  emitInterpOne(Type::None);
-
+  emitInterpOneOrPunt(Type::None);
 }
 
 void HhbcTranslator::emitReqDoc() {
@@ -487,9 +479,8 @@ void HhbcTranslator::emitIterInit(uint32 iterVarId, int offset) {
 }
 
 void HhbcTranslator::emitIterKey(uint32 iterVarId) {
-//  PUNT(IterKey);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitIterNext(uint32 iterVarId, int offset) {
@@ -500,90 +491,77 @@ void HhbcTranslator::emitIterNext(uint32 iterVarId, int offset) {
 }
 
 void HhbcTranslator::emitIterValueC(uint32 iterVarId) {
-//  PUNT(IterValueC);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 // continuations
 void HhbcTranslator::emitCreateCont(bool getArgs,
                                     uint32 funNameStrId,
                                     uint32 classNameStrId) {
-//  PUNT(CreateCont);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitUnpackCont() {
-//  PUNT(UnpackCont);
   spillStack();
-  emitInterpOne(Type::Int);
+  emitInterpOneOrPunt(Type::Int);
 }
 
 void HhbcTranslator::emitPackCont(uint32 labelId) {
-//  PUNT(PackCont);
   spillStack();
   popC();
-  emitInterpOne(Type::None);
+  emitInterpOneOrPunt(Type::None);
 //  spillStack();
 }
 
 void HhbcTranslator::emitContReceive() {
-//  PUNT(CreateCont);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitContRaised() {
-//  PUNT(ContRaised);
   spillStack();
-  emitInterpOne(Type::None);
+  emitInterpOneOrPunt(Type::None);
 }
 
 void HhbcTranslator::emitContDone() {
-//  PUNT(ContDone);
   spillStack();
-  emitInterpOne(Type::None);
+  emitInterpOneOrPunt(Type::None);
 }
 
 void HhbcTranslator::emitContNext() {
-//  PUNT(ContNext);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitContSend() {
-//  PUNT(ContSend);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitContRaise() {
-//  PUNT(ContRaise);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitContValid() {
-//  PUNT(ContValid);
   spillStack();
-  emitInterpOne(Type::Bool);
+  emitInterpOneOrPunt(Type::Bool);
 }
 
 void HhbcTranslator::emitContCurrent() {
-//  PUNT(ContCurrent);
   spillStack();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitContStopped() {
-//  PUNT(ContStopped);
   spillStack();
-  emitInterpOne(Type::None);
+  emitInterpOneOrPunt(Type::None);
 }
 
 void HhbcTranslator::emitContHandle() {
-//  PUNT(ContHandle);
+  // No reason to punt, translator-x64 does emitInterpOne as well
   spillStack();
   popC();
   emitInterpOne(Type::None);
@@ -1439,18 +1417,16 @@ void HhbcTranslator::emitVGetS() {
 }
 
 void HhbcTranslator::emitCGetG() {
-//  PUNT(CGetG);
   spillStack();
   popC();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitSetG() {
-//  PUNT(SetG);
   spillStack();
   popC();
   popC();
-  emitInterpOne(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell);
 }
 
 void HhbcTranslator::emitSetS() {
@@ -1504,18 +1480,6 @@ void HhbcTranslator::emitBinaryArith(Opcode opc, bool isBitOp /* = false */) {
       type = Type::Cell;
     }
     emitInterpOne(type);
-  }
-}
-
-void HhbcTranslator::emitUnaryArith(Opcode opc) {
-  Type::Tag type = topC(0)->getType();
-  if (type == Type::Int || type == Type::Bool) {
-    SSATmp* src = popC();
-    push(m_tb.genIntegerOp(opc, src));
-  } else {
-    spillStack();
-    popC();
-    emitInterpOne(Type::Int);
   }
 }
 
@@ -1595,6 +1559,15 @@ void HhbcTranslator::emitInterpOne(Type::Tag type, Trace* target /* = NULL */) {
   } else {
     m_tb.genInterpOne(m_bcOff, m_stackDeficit, type, target);
     m_stackDeficit = 0;
+  }
+}
+
+void HhbcTranslator::emitInterpOneOrPunt(Type::Tag type,
+                                         Trace* target /* = NULL */) {
+  if (RuntimeOption::EvalIRPuntDontInterp) {
+    PUNT(PuntDontInterp);
+  } else {
+    emitInterpOne(type, target);
   }
 }
 

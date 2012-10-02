@@ -322,8 +322,8 @@ private:
   Trace* getGuardExit();
   SSATmp* emitLdLocWarn(uint32 id, Type::Tag type, Trace* target);
   void emitInterpOne(Type::Tag type, Trace* target = NULL);
+  void emitInterpOneOrPunt(Type::Tag type, Trace* target = NULL);
   void emitBinaryArith(Opcode, bool isBitOp = false);
-  void emitUnaryArith(Opcode);
 
   /*
    * Accessors for the current function being compiled and its

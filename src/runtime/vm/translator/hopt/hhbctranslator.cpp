@@ -1088,12 +1088,10 @@ void HhbcTranslator::emitFCall(uint32 numParams, uint32 returnBcOffset) {
 }
 
 void HhbcTranslator::emitFCallD(uint32 numParams,
-                                const StringData* calleeName,
+                                const Func* callee,
                                 uint32 returnBcOffset) {
-  ASSERT(calleeName->isStatic());
-  const Func* callee = Unit::lookupFunc(calleeName);
-  TRACE(3, "%u: FCallD %s %u %u\n", m_bcOff, callee->fullName()->data(),
-        numParams, returnBcOffset);
+  TRACE(3, "%u: FCallD %s %u %u\n", m_bcOff,
+        callee->fullName()->data(), numParams, returnBcOffset);
   emitFCallAux(numParams, returnBcOffset, callee);
 }
 

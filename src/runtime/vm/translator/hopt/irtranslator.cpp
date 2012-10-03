@@ -1183,9 +1183,8 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
   int32 callOffsetInUnit =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
   if (i.funcd) {
-    const Func* targetFunc = i.funcd;
     // add ni.source?
-    HHIR_EMIT(FCallD, numArgs, targetFunc->name(), callOffsetInUnit);
+    HHIR_EMIT(FCallD, numArgs, i.funcd, callOffsetInUnit);
   } else {
     HHIR_EMIT(FCall, numArgs, callOffsetInUnit);
   }

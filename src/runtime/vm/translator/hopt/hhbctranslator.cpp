@@ -1213,9 +1213,10 @@ Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
 }
 
 void HhbcTranslator::checkTypeStack(uint32 stackIndex,
-                                    Type::Tag type) {
+                                    Type::Tag type,
+                                    Offset nextByteCode) {
   ASSERT(stackIndex != (uint32)-1);
-  Trace* exitTrace = getExitSlowTrace();
+  Trace* exitTrace = getExitSlowTrace(nextByteCode);
   SSATmp* tmp = top(type, stackIndex, exitTrace);
   tmp = m_tb.genGuardType(tmp, type, exitTrace);
   replace(stackIndex, tmp);
@@ -1583,13 +1584,13 @@ Trace* HhbcTranslator::getGuardExit() {
   return m_tb.getExitGuardFailureTrace();
 }
 
-Trace* HhbcTranslator::getExitSlowTrace() {
+Trace* HhbcTranslator::getExitSlowTrace(Offset nextByteCode /* = -1 */) {
   uint32 numStackElems = m_evalStack.numElems();
   SSATmp* stackValues[numStackElems];
   for (uint32 i = 0; i < numStackElems; i++) {
     stackValues[i] = m_evalStack.top(i);
   }
-  return m_tb.getExitSlowTrace(m_bcOff,
+  return m_tb.getExitSlowTrace(nextByteCode == -1 ? m_bcOff : nextByteCode,
                                m_stackDeficit,
                                numStackElems,
                                numStackElems ? stackValues : 0);

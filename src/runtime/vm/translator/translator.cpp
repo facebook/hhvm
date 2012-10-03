@@ -396,6 +396,15 @@ static RuntimeType bitOpType(DynLocation* a, DynLocation* b) {
   return inferType(BitOpRules, ins);
 }
 
+static uint32 m_w = 1;    /* must not be zero */
+static uint32 m_z = 1;    /* must not be zero */
+
+static uint32 get_random()
+{
+    m_z = 36969 * (m_z & 65535) + (m_z >> 16);
+    m_w = 18000 * (m_w & 65535) + (m_w >> 16);
+    return (m_z << 16) + m_w;  /* 32-bit result */
+}
 
 /*
  * predictOutputs --
@@ -418,6 +427,32 @@ predictOutputs(NormalizedInstruction* ni) {
       }
     }
   }
+
+  if (RuntimeOption::EvalJitStressTypePredPercent &&
+      RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
+    ni->outputPredicted = true;
+    int dt;
+    while (true) {
+      dt = get_random() % (KindOfRef + 1);
+      switch (dt) {
+        case KindOfUninit:
+        case KindOfNull:
+        case KindOfBoolean:
+        case KindOfInt64:
+        case KindOfDouble:
+        case KindOfString:
+        case KindOfArray:
+        case KindOfObject:
+        case KindOfRef:
+          break;
+        default:
+          continue;
+      }
+      break;
+    }
+    return DataType(dt);
+  }
+
   std::pair<DataType, double> pred = std::make_pair(KindOfInvalid, 0.0);
   if (hasImmVector(ni->op()) && typeProfileCGetM) {
     const ImmVector& immVec = ni->immVec;

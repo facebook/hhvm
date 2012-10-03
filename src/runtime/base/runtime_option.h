@@ -397,6 +397,7 @@ public:
   static std::string EvalProfileHWEvents;
   static bool EvalJitTrampolines;
   static string EvalJitProfilePath;
+  static int EvalJitStressTypePredPercent;
   static uint32 EvalJitWarmupRequests;
   static bool EvalJitProfileRecord;
   static uint32 EvalGdbSyncChunks;

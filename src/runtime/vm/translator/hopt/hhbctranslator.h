@@ -296,7 +296,7 @@ public:
 
   void checkTypeLocal(uint32 localIndex, Type::Tag type);
 
-  void checkTypeStack(uint32 stackIndex, Type::Tag type);
+  void checkTypeStack(uint32 stackIndex, Type::Tag type, Offset nextByteCode);
 
   void setThisAvailable();
 
@@ -320,7 +320,7 @@ private:
   SSATmp* getClsPropAddr(Trace* exit);
   void   decRefPropAddr(SSATmp* propAddr);
   Trace* getExitTrace(uint32 targetBcOff);
-  Trace* getExitSlowTrace();
+  Trace* getExitSlowTrace(Offset nextByteCode = -1);
   Trace* getGuardExit();
   SSATmp* emitLdLocWarn(uint32 id, Type::Tag type, Trace* target);
   void emitInterpOne(Type::Tag type, Trace* target = NULL);

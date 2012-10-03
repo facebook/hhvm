@@ -9039,7 +9039,7 @@ TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
       } else {
         TRACE(1, "HHIR: emitPredictionGuards: output predicted to be %s\n",
               JIT::Type::Strings[jitType]);
-        m_hhbcTrans->checkTypeStack(0, jitType);
+        m_hhbcTrans->checkTypeStack(0, jitType, i.next->offset());
       }
     }
     return;

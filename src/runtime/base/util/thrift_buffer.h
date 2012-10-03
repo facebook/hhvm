@@ -190,11 +190,10 @@ public:
     int32 size;
     read(size);
     if (size > 0 && size + 1 > 0) {
-      char *buf = (char*)malloc(size + 1);
-      if (!buf) throwOutOfMemory();
+      data = String(size, ReserveString);
+      char *buf = data.mutableSlice().ptr;
       read(buf, size);
-      buf[size] = '\0';
-      data = String(buf, size, AttachString);
+      data.setSize(size);
     } else if (size) {
       throwInvalidStringSize(size);
     }

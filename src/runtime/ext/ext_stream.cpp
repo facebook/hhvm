@@ -99,14 +99,13 @@ Variant f_stream_get_contents(CObjRef handle, int maxlen /* = 0 */,
 
   String ret;
   if (maxlen) {
-    char *buf = (char *)malloc(maxlen + 1);
+    ret = String(maxlen, ReserveString);
+    char *buf = ret.mutableSlice().ptr;
     maxlen = file->readImpl(buf, maxlen);
     if (maxlen < 0) {
-      free(buf);
       return false;
     }
-    buf[maxlen] = '\0';
-    ret = String(buf, maxlen, AttachString);
+    ret.setSize(maxlen);
   } else {
     StringBuffer sb;
     sb.read(file);

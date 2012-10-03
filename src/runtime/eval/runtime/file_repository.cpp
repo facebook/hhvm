@@ -347,12 +347,13 @@ bool FileRepository::readActualFile(const StringData *name,
   if (!fileSize) return false;
   int fd = open(name->data(), O_RDONLY);
   if (!fd) return false; // ignore file open exception
-  char *input = (char *)malloc(fileSize + 1);
+  String str = String(fileSize, ReserveString);
+  char *input = str.mutableSlice().ptr;
   if (!input) return false;
   int nbytes = read(fd, input, fileSize);
   close(fd);
-  input[fileSize] = 0;
-  fileInfo.m_inputString = String(input, fileSize, AttachString);
+  str.setSize(fileSize);
+  fileInfo.m_inputString = str;
   if (nbytes != fileSize) return false;
 
   if (md5Enabled()) {

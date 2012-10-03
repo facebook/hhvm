@@ -1297,9 +1297,10 @@ public:
 
     int output_length;
     char *output = 0;
+    String s;
 
     if (sscanf(input, xhprof_trace_header, &output_length) != 1) {
-      return String("", 0, AttachLiteral);
+      return empty_string;
     }
     const char *zipped_begin;
     if (!(zipped_begin = strchr(input, '\n'))
@@ -1321,7 +1322,8 @@ public:
       goto error2_out;
     }
 
-    output = (char *)malloc(output_length);
+    s = String(output_length, ReserveString);
+    output = s.mutableSlice().ptr;
 
     strm.avail_in = input_length - (zipped_begin - input);
     strm.next_in = (Bytef*)zipped_begin;
@@ -1338,12 +1340,12 @@ public:
     }
     inflateEnd(&strm);
 
-    return String(output, output_length, AttachString);
+    return s.setSize(output_length);
   error_out:
     free(output);
     inflateEnd(&strm);
   error2_out:
-    return String("", 0, AttachLiteral);
+    return empty_string;
   }
 
 

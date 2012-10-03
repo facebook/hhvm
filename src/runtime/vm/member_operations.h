@@ -496,17 +496,14 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         // reference.
         base->m_data.pstr->setChar(x, y[0]);
       } else {
-        char* s = (char*)malloc(slen + 1);
-        if (s == NULL) {
-          raise_error("Out of memory");
-        }
+        StringData* sd = NEW(StringData)(slen);
+        char* s = sd->mutableSlice().ptr;
         memcpy(s, base->m_data.pstr->data(), baseLen);
         if (x > baseLen) {
           memset(&s[baseLen], ' ', slen - baseLen - 1);
         }
         s[x] = y[0];
-        s[slen] = '\0';
-        StringData* sd = NEW(StringData)(s, slen, AttachString);
+        sd->setSize(slen);
         sd->incRefCount();
         if (base->m_data.pstr->decRefCount() == 0) base->m_data.pstr->release();
         base->m_data.pstr = sd;

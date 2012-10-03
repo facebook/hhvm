@@ -237,7 +237,8 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
     return false;
   }
 
-  char *decompressed = (char*)malloc(size + 1);
+  String s = String(size, ReserveString);
+  char *decompressed = s.mutableSlice().ptr;
   size_t dsize;
 
   switch (level) {
@@ -264,8 +265,7 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
   }
 
   ASSERT(dsize == size);
-  decompressed[dsize] = '\0';
-  return String(decompressed, dsize, AttachString);
+  return s.setSize(dsize);
 #endif
 }
 
@@ -288,18 +288,17 @@ Variant f_snuncompress(CStrRef data) {
 #ifndef HAVE_SNAPPY
   throw NotSupportedException(__func__, "Snappy library cannot be found");
 #else
-  char *uncompressed;
   size_t dsize;
 
   snappy::GetUncompressedLength(data.data(), data.size(), &dsize);
-  uncompressed = (char *)malloc(dsize + 1);
+  String s = String(dsize, ReserveString);
+  char *uncompressed = s.mutableSlice().ptr;
 
   if (!snappy::RawUncompress(data.data(), data.size(), uncompressed)) {
     free(uncompressed);
     return false;
   }
-  uncompressed[dsize] = '\0';
-  return String(uncompressed, dsize, AttachString);
+  return s.setSize(dsize);
 #endif
 }
 

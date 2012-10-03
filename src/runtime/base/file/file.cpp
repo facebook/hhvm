@@ -304,7 +304,8 @@ String File::read(int64 length) {
     return "";
   }
 
-  char *ret = (char *)malloc(length + 1);
+  String s = String(length, ReserveString);
+  char *ret = s.mutableSlice().ptr;
   int64 copied = 0;
   int64 avail = m_writepos - m_readpos;
 
@@ -338,8 +339,7 @@ String File::read(int64 length) {
   }
 
   m_position += copied;
-  ret[copied] = '\0';
-  return String(ret, copied, AttachString);
+  return s.setSize(copied);
 }
 
 int64 File::write(CStrRef data, int64 length /* = 0 */) {
@@ -585,7 +585,8 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
   }
 
   if (toread >= 0) {
-    char *buf = (char *)malloc(toread + 1);
+    String s = String(toread, ReserveString);
+    char *buf = s.mutableSlice().ptr;
     if (toread) {
       memcpy(buf, m_buffer + m_readpos, toread);
     }
@@ -595,8 +596,7 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
       m_readpos += delimiter.size();
       m_position += delimiter.size();
     }
-    buf[toread] = '\0';
-    return String(buf, toread, AttachString);
+    return s.setSize(toread);
   }
 
   return empty_string;

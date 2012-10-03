@@ -286,12 +286,12 @@ private:
     decode(sz);
     if (sz == uint32_t(-1)) return String();
 
-    char* pch = static_cast<char*>(malloc(sz + 1));
+    String s = String(sz, ReserveString);
+    char* pch = s.mutableSlice().ptr;
     ASSERT(m_last - m_p >= sz);
     std::copy(m_p, m_p + sz, pch);
-    pch[sz] = '\0';
     m_p += sz;
-    return String(pch, sz, AttachString);
+    return s.setSize(sz);
   }
 
 private:

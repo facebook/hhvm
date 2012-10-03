@@ -221,7 +221,8 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
   len -= lenDelim; // always one delimiter less than count of items
   ASSERT((int)sitems.size() == size);
 
-  char *buffer = (char *)malloc(len + 1);
+  String s = String(len, ReserveString);
+  char *buffer = s.mutableSlice().ptr;
   const char *sdelim = delim.data();
   char *p = buffer;
   for (int i = 0; i < size; i++) {
@@ -236,9 +237,8 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
       p += lenItem;
     }
   }
-  *p = '\0';
   ASSERT(p - buffer == len);
-  return String(buffer, len, AttachString);
+  return s.setSize(len);
 }
 
 Variant StringUtil::Split(CStrRef str, int split_length /* = 1 */) {

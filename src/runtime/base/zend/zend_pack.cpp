@@ -270,7 +270,8 @@ Variant ZendPack::pack(CStrRef fmt, CArrRef argv) {
     }
   }
 
-  char *output = (char*)malloc(outputsize + 1);
+  String s = String(outputsize, ReserveString);
+  char *output = s.mutableSlice().ptr;
   outputpos = 0;
   currentarg = 0;
 
@@ -435,8 +436,7 @@ Variant ZendPack::pack(CStrRef fmt, CArrRef argv) {
     }
   }
 
-  output[outputpos] = '\0';
-  return String(output, outputpos, AttachString);
+  return s.setSize(outputpos);
 }
 
 int32 ZendPack::unpack(const char *data, int size, int issigned, int *map) {
@@ -627,7 +627,8 @@ Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
             len -= argb % 2;
           }
 
-          buf = (char*)malloc(len + 1);
+          String s = String(len, ReserveString);
+          buf = s.mutableSlice().ptr;
 
           for (ipos = opos = 0; opos < len; opos++) {
             char c = (input[inputpos + ipos] >> nibbleshift) & 0xf;
@@ -647,8 +648,8 @@ Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
             }
           }
 
-          buf[len] = '\0';
-          ret.set(String(n, CopyString), String(buf, len, AttachString));
+          s.setSize(len);
+          ret.set(String(n, CopyString), s);
           break;
         }
 

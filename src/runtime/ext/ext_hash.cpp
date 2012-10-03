@@ -175,12 +175,12 @@ static Variant php_hash_do_hash(CStrRef algo, CStrRef data, bool isfilename,
     ops->hash_update(context, (unsigned char *)data.data(), data.size());
   }
 
-  char *digest = (char*)malloc(ops->digest_size + 1);
+  String raw = String(ops->digest_size, ReserveString);
+  char *digest = raw.mutableSlice().ptr;
   ops->hash_final((unsigned char *)digest, context);
   free(context);
 
-  digest[ops->digest_size] = '\0';
-  String raw(digest, ops->digest_size, AttachString);
+  raw.setSize(ops->digest_size);
   if (raw_output) {
     return raw;
   }
@@ -266,13 +266,13 @@ static Variant php_hash_do_hash_hmac(CStrRef algo, CStrRef data,
     ops->hash_update(context, (unsigned char *)data.data(), data.size());
   }
 
-  char *digest = (char*)malloc(ops->digest_size + 1);
+  String raw = String(ops->digest_size, ReserveString);
+  char *digest = raw.mutableSlice().ptr;
   ops->hash_final((unsigned char *)digest, context);
   finalize_hmac_key(K, ops, context, digest);
   free(context);
 
-  digest[ops->digest_size] = '\0';
-  String raw(digest, ops->digest_size, AttachString);
+  raw.setSize(ops->digest_size);
   if (raw_output) {
     return raw;
   }
@@ -357,7 +357,8 @@ int64 f_hash_update_stream(CObjRef context, CObjRef handle,
 String f_hash_final(CObjRef context, bool raw_output /* = false */) {
   HashContext *hash = context.getTyped<HashContext>();
 
-  char *digest = (char*)malloc(hash->ops->digest_size + 1);
+  String raw = String(hash->ops->digest_size, ReserveString);
+  char *digest = raw.mutableSlice().ptr;
   hash->ops->hash_final((unsigned char *)digest, hash->context);
   if (hash->options & k_HASH_HMAC) {
     finalize_hmac_key(hash->key, hash->ops, hash->context, digest);
@@ -366,8 +367,7 @@ String f_hash_final(CObjRef context, bool raw_output /* = false */) {
   free(hash->context);
   hash->context = NULL;
 
-  digest[hash->ops->digest_size] = '\0';
-  String raw(digest, hash->ops->digest_size, AttachString);
+  raw.setSize(hash->ops->digest_size);
   if (raw_output) {
     return raw;
   }

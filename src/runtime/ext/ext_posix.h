@@ -29,9 +29,10 @@ namespace HPHP {
 bool f_posix_access(CStrRef file, int mode = 0);
 
 inline String f_posix_ctermid() {
-  char *buffer = (char *)malloc(L_ctermid);
+  String s = String(L_ctermid, ReserveString);
+  char *buffer = s.mutableSlice().ptr;
   ctermid(buffer);
-  return String(buffer, AttachString);
+  return s.setSize(strlen(buffer));
 }
 
 inline int64 f_posix_get_last_error() {
@@ -39,12 +40,12 @@ inline int64 f_posix_get_last_error() {
 }
 
 inline String f_posix_getcwd() {
-  char *buffer = (char *)malloc(PATH_MAX);
+  String s = String(PATH_MAX, ReserveString);
+  char *buffer = s.mutableSlice().ptr;
   if (getcwd(buffer, PATH_MAX) == NULL) {
-    free(buffer);
     return "/";
   }
-  return String(buffer, AttachString);
+  return s.setSize(strlen(buffer));
 }
 
 inline int64 f_posix_getegid() {

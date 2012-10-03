@@ -1423,17 +1423,14 @@ String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {
   int len4 = s4.size();
   int len5 = s5.size();
   int len = len1 + len2 + len3 + len4 + len5;
-  char *buf = (char *)malloc(len + 1);
-  if (buf == NULL) {
-    throw FatalErrorException(0, "malloc failed: %d", len);
-  }
+  String s = String(len, ReserveString);
+  char *buf = s.mutableSlice().ptr;
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
   memcpy(buf + len1 + len2, s3.data(), len3);
   memcpy(buf + len1 + len2 + len3, s4.data(), len4);
   memcpy(buf + len1 + len2 + len3 + len4, s5.data(), len5);
-  buf[len] = 0;
-  return String(buf, len, AttachString);
+  return s.setSize(len);
 }
 
 String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
@@ -1447,18 +1444,15 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
   int len5 = s5.size();
   int len6 = s6.size();
   int len = len1 + len2 + len3 + len4 + len5 + len6;
-  char *buf = (char *)malloc(len + 1);
-  if (buf == NULL) {
-    throw FatalErrorException(0, "malloc failed: %d", len);
-  }
+  String s = String(len, ReserveString);
+  char *buf = s.mutableSlice().ptr;
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
   memcpy(buf + len1 + len2, s3.data(), len3);
   memcpy(buf + len1 + len2 + len3, s4.data(), len4);
   memcpy(buf + len1 + len2 + len3 + len4, s5.data(), len5);
   memcpy(buf + len1 + len2 + len3 + len4 + len5, s6.data(), len6);
-  buf[len] = 0;
-  return String(buf, len, AttachString);
+  return s.setSize(len);
 }
 
 bool empty(CVarRef v, bool    offset) {

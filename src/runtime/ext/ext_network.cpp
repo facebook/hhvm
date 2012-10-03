@@ -444,17 +444,18 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     int ll = 0;
 
     subarray.set("type", "TXT");
-    tp = (unsigned char *)malloc(dlen + 1);
+    String s = String(dlen, ReserveString);
+    tp = (unsigned char *)s.mutableSlice().ptr;
 
     while (ll < dlen) {
       n = cp[ll];
       memcpy(tp + ll , cp + ll + 1, n);
       ll = ll + n + 1;
     }
-    tp[dlen] = '\0';
+    s.setSize(dlen);
     cp += dlen;
 
-    subarray.set("txt", String((const char *)tp, dlen - 1, AttachString));
+    subarray.set("txt", s);
     break;
   }
   case DNS_T_SOA:

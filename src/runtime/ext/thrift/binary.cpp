@@ -141,10 +141,10 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
     case T_STRING: {
       uint32_t size = transport.readU32();
       if (size && (size + 1)) {
-        char* strbuf = (char*) malloc(size + 1);
+        String s = String(size, ReserveString);
+        char* strbuf = s.mutableSlice().ptr;
         transport.readBytes(strbuf, size);
-        strbuf[size] = '\0';
-        return String(strbuf, size, AttachString);
+        return s.setSize(size);
       } else {
         return "";
       }

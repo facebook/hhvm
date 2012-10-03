@@ -847,14 +847,11 @@ class CompactReader {
       uint32_t size = readVarint();
 
       if (size && (size + 1)) {
-        char* buf = (char*) malloc(size + 1);
-        if (!buf) {
-          thrift_error("unable to allocate string", ERR_UNKNOWN);
-        }
+        String s = String(size, ReserveString);
+        char* buf = s.mutableSlice().ptr;
 
         transport.readBytes(buf, size);
-        buf[size] = '\0';
-        return String(buf, size, AttachString);
+        return s.setSize(size);
       } else {
         transport.skip(size);
         return "";

@@ -544,16 +544,11 @@ emitCopyTo(X64Assembler& a,
            int srcOff,
            PhysReg dest,
            int destOff,
-           PhysReg scratch,
-           PhysReg zero = noreg) {
+           PhysReg scratch) {
   ASSERT(src != scratch);
   // This is roughly how gcc compiles this.
   a.    load_reg64_disp_reg64(src, srcOff + TVOFF(m_data), scratch);
-  if (zero == noreg) {
-    a.    store_imm32_disp_reg(0, destOff + TVOFF(_count), dest);
-  } else if (zero != rFlag) {
-    a.    store_reg32_disp_reg64(zero, destOff + TVOFF(_count), dest);
-  }
+  // Blow off _count.
   a.    store_reg64_disp_reg64(scratch, destOff + TVOFF(m_data), dest);
   a.    load_reg64_disp_reg32(src, srcOff + TVOFF(m_type), scratch);
   a.    store_reg32_disp_reg64(scratch, destOff + TVOFF(m_type), dest);

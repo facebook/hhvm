@@ -6143,7 +6143,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
     for (int i = 0; i < origLocals; ++i) {
       ASSERT(mapContains(params, i));
       int destOff = cellsToBytes(genLocals - params[i]);
-      emitCopyTo(a, rVmFp, localOffset(i), *rDest, destOff, *rScratch, rFlag);
+      emitCopyTo(a, rVmFp, localOffset(i), *rDest, destOff, *rScratch);
       emitIncRefGenericRegSafe(*rDest, destOff, *rScratch);
     }
 
@@ -6236,12 +6236,12 @@ void TranslatorX64::translateUnpackCont(const Tracelet& t,
       a.  lea_reg64_disp_reg64(rCont,
                                c_GenericContinuation::localsOffset(),
                                *rSrc);
-      a.  xor_reg32_reg32(*rZero, *rZero);
+      emitImmReg(a, 0, *rZero);
     }
     for (int srcOff = 0, destOff = localOffset(nCopy);
          srcOff < (int)cellsToBytes(nCopy);
          srcOff += sizeof(Cell), destOff += sizeof(Cell)) {
-      emitCopyTo(a, *rSrc, srcOff, rVmFp, destOff, *rScratch, *rZero);
+      emitCopyTo(a, *rSrc, srcOff, rVmFp, destOff, *rScratch);
       a.  store_reg32_disp_reg64(*rZero, srcOff + TVOFF(m_type), *rSrc);
     }
   }
@@ -6311,7 +6311,7 @@ void TranslatorX64::translatePackCont(const Tracelet& t,
     a.  lea_reg64_disp_reg64(rCont,
                              c_GenericContinuation::localsOffset(),
                              *rDest);
-    a.  xor_reg32_reg32(*rZero, *rZero);
+    emitImmReg(a, 0, *rZero);
   }
   for (int idx = nCopy, destOff = 0, srcOff = localOffset(nCopy);
        idx > 0;
@@ -6321,7 +6321,7 @@ void TranslatorX64::translatePackCont(const Tracelet& t,
       PhysReg reg = getReg(loc);
       spillTo(m_regMap.getInfo(reg)->m_type, reg, true, *rDest, destOff);
     } else {
-      emitCopyTo(a, rVmFp, srcOff, *rDest, destOff, *rScratch, *rZero);
+      emitCopyTo(a, rVmFp, srcOff, *rDest, destOff, *rScratch);
     }
     m_regMap.invalidate(loc);
     a.  store_reg32_disp_reg64(*rZero, srcOff + TVOFF(m_type), rVmFp);

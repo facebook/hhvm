@@ -87,26 +87,6 @@ void StringData::initLiteral(const char* data, int len) {
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
-void StringData::initAttachDeprecated(const char* data) {
-  return initAttachDeprecated(data, strlen(data));
-}
-
-void StringData::initAttachDeprecated(const char* data, int len) {
-  if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len > 2^31-2", len);
-  }
-  // Don't copy small strings here either because the caller sometimes
-  // assumes he can mess with data while this string is still alive,
-  // and we want to free it eagerly. Sketchy!
-  m_hash = 0;
-  _count = 0;
-  m_len = len;
-  m_cdata = data;
-  m_big.cap = len | IsMalloc;
-  ASSERT(checkSane());
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
-}
-
 HOT_FUNC
 void StringData::initAttach(const char* data) {
   return initAttach(data, strlen(data));

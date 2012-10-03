@@ -257,7 +257,7 @@ static Variant _xml_xmlchar_zval(const XML_Char *s, int len,
   }
   int ret_len;
   char * ret = xml_utf8_decode(s, len, &ret_len, encoding);
-  return String(ret, ret_len, AttachDeprecated);
+  return String(ret, ret_len, AttachString);
 }
 
 static char *_xml_decode_tag(XmlParser *parser, const char *tag) {
@@ -455,11 +455,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           if (parser->ctag.toArray().exists("value"))
           {
             myval = parser->ctag.rvalAt("value").toString();
-            myval += String(decoded_value, decoded_len, AttachDeprecated);
+            myval += String(decoded_value, decoded_len, AttachString);
             parser->ctag.set("value", myval);
           } else {
             parser->ctag.set("value",
-                             String(decoded_value,decoded_len,AttachDeprecated));
+                             String(decoded_value,decoded_len,AttachString));
           }
         } else {
           Array tag;
@@ -472,7 +472,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             if (!strcmp(mytype.data(), "cdata")) {
               if (curtag.toArray().exists("value")) {
                 myval = curtag.rvalAt("value").toString();
-                myval += String(decoded_value, decoded_len, AttachDeprecated);
+                myval += String(decoded_value, decoded_len, AttachString);
                 curtag.set("value", myval);
                 return;
               }
@@ -483,7 +483,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
                            parser->toffset);
           tag.set("tag", String(parser->ltags[parser->level-1] +
                                 parser->toffset, CopyString));
-          tag.set("value", String(decoded_value, AttachDeprecated));
+          tag.set("value", String(decoded_value, AttachString));
           tag.set("type", "cdata");
           tag.set("level", parser->level);
           parser->data.append(tag);
@@ -526,8 +526,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         char* val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     &val_len, parser->target_encoding);
-        args.lvalAt(2).set(String(att, AttachDeprecated),
-                           String(val, val_len, AttachDeprecated));
+        args.lvalAt(2).set(String(att, AttachString),
+                           String(val, val_len, AttachString));
         attributes += 2;
       }
 
@@ -557,7 +557,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         char* val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     &val_len, parser->target_encoding);
-        atr.set(String(att, AttachDeprecated), String(val, val_len, AttachDeprecated));
+        atr.set(String(att, AttachString), String(val, val_len, AttachString));
         atcnt++;
         attributes += 2;
       }
@@ -882,7 +882,8 @@ String f_xml_error_string(int code) {
 ///////////////////////////////////////////////////////////////////////////////
 
 String f_utf8_decode(CStrRef data) {
-  char *newbuf = (char*)malloc(data.size() + 1);
+  String str = String(data.size(), ReserveString);
+  char *newbuf = str.mutableSlice().ptr;
   int newlen = 0;
   const char *s = data.data();
   for (int pos = data.size(); pos > 0; ) {
@@ -918,12 +919,12 @@ String f_utf8_decode(CStrRef data) {
     newbuf[newlen] = (char)(c > 0xff ? '?' : c);
     ++newlen;
   }
-  newbuf[newlen] = '\0';
-  return String(newbuf, newlen, AttachDeprecated);
+  return str.setSize(newlen);
 }
 
 String f_utf8_encode(CStrRef data) {
-  char *newbuf = (char*)malloc(data.size() * 4 + 1);
+  String str = String(data.size() * 4, ReserveString);
+  char *newbuf = str.mutableSlice().ptr;
   int newlen = 0;
   const char *s = data.data();
   for (int pos = data.size(); pos > 0; pos--, s++) {
@@ -944,8 +945,7 @@ String f_utf8_encode(CStrRef data) {
       newbuf[newlen++] = (0x80 | (c & 0x3f));
     }
   }
-  newbuf[newlen] = '\0';
-  return String(newbuf, newlen, AttachDeprecated);
+  return str.setSize(newlen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

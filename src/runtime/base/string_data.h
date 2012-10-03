@@ -57,14 +57,6 @@ typedef Slice<char> MutableSlice;
 // deprecated to enable copying of small strings.
 enum AttachLiteralMode { AttachLiteral };
 
-// DEPRECATED.  const char* points to malloc'd memory that will be freed
-// sometime after the the StringData is constructed (in case of mutation),
-// but no later than when ~StringData is called.  Really, the new StringData
-// owns data from the point of construction -- see AttachStringMode.
-// This is deprecated because callers should assume the buffer can be
-// freed immediately when a String[Data] is constructed.
-enum AttachDeprecatedMode { AttachDeprecated };
-
 // Aggressively copy small strings and free the passed-in buffer immediately;
 // otherwise keep the buffer for long strings, and free it when the string
 // is mutated or released.
@@ -74,6 +66,9 @@ enum AttachStringMode { AttachString };
 // at construct-time using smart_malloc.  This is only ok when the StringData
 // itself was smart-allocated.
 enum CopyStringMode { CopyString };
+
+// reserve space for buffer that will be filled in by client.
+enum ReserveStringMode { ReserveString };
 
 // const char* points to client-owned memory, StringData will copy it
 // at construct-time using malloc.  This works for any String but is
@@ -163,9 +158,6 @@ class StringData {
   StringData(const char *data, AttachLiteralMode) {
     initLiteral(data);
   }
-  StringData(const char *data, AttachDeprecatedMode) {
-    initAttachDeprecated(data);
-  }
   StringData(const char *data, AttachStringMode) {
     initAttach(data);
   }
@@ -175,9 +167,6 @@ class StringData {
 
   StringData(const char *data, int len, AttachLiteralMode) {
     initLiteral(data, len);
-  }
-  StringData(const char* data, int len, AttachDeprecatedMode) {
-    initAttachDeprecated(data, len);
   }
   StringData(const char* data, int len, AttachStringMode) {
     initAttach(data, len);
@@ -398,11 +387,9 @@ public:
    * Helpers.
    */
   void initLiteral(const char* data);
-  void initAttachDeprecated(const char* data);
   void initAttach(const char* data);
   void initCopy(const char* data);
   void initLiteral(const char* data, int len);
-  void initAttachDeprecated(const char* data, int len);
   void initAttach(const char* data, int len);
   void initCopy(const char* data, int len);
   void initMalloc(const char* data, int len);

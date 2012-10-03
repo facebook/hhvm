@@ -439,7 +439,7 @@ static void add_assoc_name_entry(Array &ret, const char *key,
         if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
           to_add_len = ASN1_STRING_to_UTF8(&to_add, str);
           if (to_add_len != -1) {
-            subentries.append(String((char*)to_add, to_add_len, AttachDeprecated));
+            subentries.append(String((char*)to_add, to_add_len, AttachString));
           }
         } else {
           to_add = ASN1_STRING_data(str);
@@ -1116,7 +1116,8 @@ bool f_openssl_open(CStrRef sealed_data, VRefParam open_data, CStrRef env_key,
   }
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
 
-  unsigned char *buf = (unsigned char *)malloc(sealed_data.size() + 1);
+  String s = String(sealed_data.size(), ReserveString);
+  unsigned char *buf = (unsigned char *)s.mutableSlice().ptr;
 
   EVP_CIPHER_CTX ctx;
   int len1, len2;
@@ -1126,11 +1127,9 @@ bool f_openssl_open(CStrRef sealed_data, VRefParam open_data, CStrRef env_key,
                       sealed_data.size()) ||
       !EVP_OpenFinal(&ctx, buf + len1, &len2) ||
       len1 + len2 == 0) {
-    free(buf);
     return false;
   }
-  buf[len1 + len2] = '\0';
-  open_data = String((char*)buf, AttachDeprecated);
+  open_data = s.setSize(len1 + len2);
   return true;
 }
 
@@ -1697,7 +1696,8 @@ bool f_openssl_private_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
   }
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
-  unsigned char *cryptedbuf = (unsigned char *)malloc(cryptedlen + 1);
+  String s = String(cryptedlen, ReserveString);
+  unsigned char *cryptedbuf = (unsigned char *)s.mutableSlice().ptr;
 
   int successful = 0;
   switch (pkey->type) {
@@ -1718,12 +1718,10 @@ bool f_openssl_private_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
   }
 
   if (successful) {
-    cryptedbuf[cryptedlen] = '\0';
-    decrypted = String((char*)cryptedbuf, cryptedlen, AttachDeprecated);
+    decrypted = s.setSize(cryptedlen);
     return true;
   }
 
-  free(cryptedbuf);
   return false;
 }
 
@@ -1736,7 +1734,8 @@ bool f_openssl_private_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
   }
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
-  unsigned char *cryptedbuf = (unsigned char *)malloc(cryptedlen + 1);
+  String s = String(cryptedlen, ReserveString);
+  unsigned char *cryptedbuf = (unsigned char *)s.mutableSlice().ptr;
 
   int successful = 0;
   switch (pkey->type) {
@@ -1753,12 +1752,10 @@ bool f_openssl_private_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
   }
 
   if (successful) {
-    cryptedbuf[cryptedlen] = '\0';
-    crypted = String((char*)cryptedbuf, cryptedlen, AttachDeprecated);
+    crypted = s.setSize(cryptedlen);
     return true;
   }
 
-  free(cryptedbuf);
   return false;
 }
 
@@ -1771,7 +1768,8 @@ bool f_openssl_public_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
   }
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
-  unsigned char *cryptedbuf = (unsigned char *)malloc(cryptedlen + 1);
+  String s = String(cryptedlen, ReserveString);
+  unsigned char *cryptedbuf = (unsigned char *)s.mutableSlice().ptr;
 
   int successful = 0;
   switch (pkey->type) {
@@ -1792,12 +1790,10 @@ bool f_openssl_public_decrypt(CStrRef data, VRefParam decrypted, CVarRef key,
   }
 
   if (successful) {
-    cryptedbuf[cryptedlen] = '\0';
-    decrypted = String((char*)cryptedbuf, cryptedlen, AttachDeprecated);
+    decrypted = s.setSize(cryptedlen);
     return true;
   }
 
-  free(cryptedbuf);
   return false;
 }
 
@@ -1810,7 +1806,8 @@ bool f_openssl_public_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
   }
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
-  unsigned char *cryptedbuf = (unsigned char *)malloc(cryptedlen + 1);
+  String s = String(cryptedlen, ReserveString);
+  unsigned char *cryptedbuf = (unsigned char *)s.mutableSlice().ptr;
 
   int successful = 0;
   switch (pkey->type) {
@@ -1827,12 +1824,10 @@ bool f_openssl_public_encrypt(CStrRef data, VRefParam crypted, CVarRef key,
   }
 
   if (successful) {
-    cryptedbuf[cryptedlen] = '\0';
-    crypted = String((char*)cryptedbuf, cryptedlen, AttachDeprecated);
+    crypted = s.setSize(cryptedlen);
     return true;
   }
 
-  free(cryptedbuf);
   return false;
 }
 
@@ -1854,6 +1849,8 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
   /* get the public keys we are using to seal this data */
   bool ret = true;
   int i = 0;
+  String s;
+  unsigned char *buf = NULL;
   for (ArrayIter iter(pub_key_ids); iter; ++iter, ++i) {
     Object okey = Key::Get(iter.second(), true);
     if (okey.isNull()) {
@@ -1874,31 +1871,26 @@ Variant f_openssl_seal(CStrRef data, VRefParam sealed_data, VRefParam env_keys,
 
   int len1, len2;
 
-  unsigned char *buf;
-  buf = (unsigned char *)malloc(data.size() + EVP_CIPHER_CTX_block_size(&ctx));
+  s = String(data.size() + EVP_CIPHER_CTX_block_size(&ctx), ReserveString);
+  buf = (unsigned char *)s.mutableSlice().ptr;
   if (!EVP_SealInit(&ctx, EVP_rc4(), eks, eksl, NULL, pkeys, nkeys) ||
       !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data.data(),
                       data.size())) {
     ret = false;
-    free(buf);
     goto clean_exit;
   }
 
   EVP_SealFinal(&ctx, buf + len1, &len2);
   if (len1 + len2 > 0) {
-    buf[len1 + len2] = '\0';
-    sealed_data = String((char*)buf, len1 + len2, AttachDeprecated);
+    sealed_data = s.setSize(len1 + len2);
 
     Array ekeys;
     for (int i = 0; i < nkeys; i++) {
       eks[i][eksl[i]] = '\0';
-      ekeys.append(String((char*)eks[i], eksl[i], AttachDeprecated));
+      ekeys.append(String((char*)eks[i], eksl[i], AttachString));
       eks[i] = NULL;
     }
     env_keys = ekeys;
-
-  } else {
-    free(buf);
   }
 
  clean_exit:
@@ -1942,14 +1934,14 @@ bool f_openssl_sign(CStrRef data, VRefParam signature, CVarRef priv_key_id,
 
   EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
   int siglen = EVP_PKEY_size(pkey);
-  unsigned char *sigbuf = (unsigned char *)malloc(siglen + 1);
+  String s = String(siglen, ReserveString);
+  unsigned char *sigbuf = (unsigned char *)s.mutableSlice().ptr;
 
   EVP_MD_CTX md_ctx;
   EVP_SignInit(&md_ctx, mdtype);
   EVP_SignUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
   if (EVP_SignFinal(&md_ctx, sigbuf, (unsigned int *)&siglen, pkey)) {
-    sigbuf[siglen] = '\0';
-    signature = String((char*)sigbuf, siglen, AttachDeprecated);
+    signature = s.setSize(siglen);
 #if OPENSSL_VERSION_NUMBER >= 0x0090700fL
     EVP_MD_CTX_cleanup(&md_ctx);
 #endif
@@ -1958,7 +1950,6 @@ bool f_openssl_sign(CStrRef data, VRefParam signature, CVarRef priv_key_id,
 #if OPENSSL_VERSION_NUMBER >= 0x0090700fL
   EVP_MD_CTX_cleanup(&md_ctx);
 #endif
-  free(sigbuf);
   return false;
 }
 
@@ -2182,7 +2173,7 @@ Variant f_openssl_x509_parse(CVarRef x509cert, bool shortnames /* = true */) {
   ret.set("version", X509_get_version(cert));
 
   ret.set("serialNumber", String
-          (i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)), AttachDeprecated));
+          (i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)), AttachString));
 
   ASN1_STRING *str = X509_get_notBefore(cert);
   ret.set("validFrom", String((char*)str->data, str->length, CopyString));
@@ -2268,9 +2259,8 @@ Variant f_openssl_random_pseudo_bytes(int length,
 
   unsigned char *buffer = NULL;
 
-  if ((buffer = (unsigned char *)malloc(length + 1)) == NULL) {
-    return false;
-  }
+  String s = String(length, ReserveString);
+  buffer = (unsigned char *)s.mutableSlice().ptr;
 
   crypto_strong = false;
 
@@ -2278,12 +2268,10 @@ Variant f_openssl_random_pseudo_bytes(int length,
 
   if ((crypto_strength = RAND_pseudo_bytes(buffer, length)) < 0) {
     crypto_strong = false;
-    free(buffer);
     return false;
   } else {
     crypto_strong = (bool)crypto_strength;
-    buffer[length] = '\0';
-    return String((char *)buffer, length, AttachDeprecated);
+    return s.setSize(length);
   }
 }
 
@@ -2310,11 +2298,13 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
     return piv;
   }
 
-  iv_new = (char*)calloc(1, iv_required_len + 1);
+  String s = String(iv_required_len, ReserveString);
+  iv_new = s.mutableSlice().ptr;
+  memset(iv_new, 0, iv_required_len);
 
   if (piv.size() <= 0) {
     /* BC behavior */
-    return String(iv_new, iv_required_len, AttachDeprecated);
+    return s.setSize(iv_required_len);
   }
 
   if (piv.size() < iv_required_len) {
@@ -2322,14 +2312,14 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
                   "expects an IV of precisely %d bytes, padding with \\0",
                   piv.size(), iv_required_len);
     memcpy(iv_new, piv.data(), piv.size());
-    return String(iv_new, iv_required_len, AttachDeprecated);
+    return s.setSize(iv_required_len);
   }
 
   raise_warning("IV passed is %d bytes long which is longer than the %d "
                 "expected by selected cipher, truncating", piv.size(),
                 iv_required_len);
   memcpy(iv_new, piv.data(), iv_required_len);
-  return String(iv_new, iv_required_len, AttachDeprecated);
+  return s.setSize(iv_required_len);
 }
 
 Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
@@ -2349,9 +2339,11 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
    * less than keylen
    */
   if (keylen > password.size()) {
-    char *keybuf = (char *)calloc(keylen + 1, sizeof(*keybuf));
+    String s = String(keylen, ReserveString);
+    char *keybuf = s.mutableSlice().ptr;
+    memset(keybuf, 0, keylen);
     memcpy(keybuf, password.data(), password.size());
-    key = String(keybuf, keylen, AttachDeprecated);
+    key = s.setSize(keylen);
   }
 
   int max_iv_len = EVP_CIPHER_iv_length(cipher_type);
@@ -2365,7 +2357,8 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
   String new_iv  = php_openssl_validate_iv(iv, max_iv_len);
 
   int outlen = data.size() + EVP_CIPHER_block_size(cipher_type);
-  unsigned char *outbuf = (unsigned char*)malloc(outlen + 1);
+  String rv = String(outlen, ReserveString);
+  unsigned char *outbuf = (unsigned char*)rv.mutableSlice().ptr;
 
   EVP_CIPHER_CTX cipher_ctx;
 
@@ -2390,8 +2383,7 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
   if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + result_len,
                        &result_len)) {
     outlen += result_len;
-    outbuf[outlen] = '\0';
-    String rv = String((char*)outbuf, outlen, AttachDeprecated);
+    rv.setSize(outlen);
     EVP_CIPHER_CTX_cleanup(&cipher_ctx);
     if (options & k_OPENSSL_RAW_DATA) {
       return rv;
@@ -2401,7 +2393,6 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
   }
 
   EVP_CIPHER_CTX_cleanup(&cipher_ctx);
-  free(outbuf);
   return false;
 }
 
@@ -2428,9 +2419,11 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
    * less than keylen
    */
    if (keylen > password.size()) {
-    char *keybuf = (char *)calloc(keylen + 1, sizeof(*keybuf));
+    String s = String(keylen, ReserveString);
+    char *keybuf = s.mutableSlice().ptr;
+    memset(keybuf, 0, keylen);
     memcpy(keybuf, password.data(), password.size());
-    key = String(keybuf, keylen, AttachDeprecated);
+    key = s.setSize(keylen);
   }
 
   int result_len = 0;
@@ -2439,7 +2432,8 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
                                            EVP_CIPHER_iv_length(cipher_type));
 
   int outlen = decoded_data.size() + EVP_CIPHER_block_size(cipher_type);
-  unsigned char *outbuf = (unsigned char*)malloc(outlen + 1);
+  String rv = String(outlen, ReserveString);
+  unsigned char *outbuf = (unsigned char*)rv.mutableSlice().ptr;
 
   EVP_CIPHER_CTX cipher_ctx;
   EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
@@ -2458,12 +2452,10 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
   if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf + result_len,
                        &result_len)) {
     outlen += result_len;
-    outbuf[outlen] = '\0';
     EVP_CIPHER_CTX_cleanup(&cipher_ctx);
-    return String((char*)outbuf, outlen, AttachDeprecated);
+    return rv.setSize(outlen);
   } else {
     EVP_CIPHER_CTX_cleanup(&cipher_ctx);
-    free(outbuf);
     return false;
   }
 }
@@ -2477,22 +2469,20 @@ Variant f_openssl_digest(CStrRef data, CStrRef method,
     return false;
   }
   int siglen = EVP_MD_size(mdtype);
-  unsigned char *sigbuf = (unsigned char *)malloc(siglen + 1);
+  String rv = String(siglen, ReserveString);
+  unsigned char *sigbuf = (unsigned char *)rv.mutableSlice().ptr;
   EVP_MD_CTX md_ctx;
 
   EVP_DigestInit(&md_ctx, mdtype);
   EVP_DigestUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
   if (EVP_DigestFinal(&md_ctx, (unsigned char *)sigbuf, (unsigned int *)&siglen)) {
     if (raw_output) {
-      sigbuf[siglen] = '\0';
-      return String((char*)sigbuf, siglen, AttachDeprecated);
+      return rv.setSize(siglen);
     } else {
-      String digest_str = string_bin2hex((char*)sigbuf, siglen);
-      free(sigbuf);
-      return String(digest_str, AttachDeprecated);
+      char* digest_str = string_bin2hex((char*)sigbuf, siglen);
+      return String(digest_str, AttachString);
     }
   } else {
-    free(sigbuf);
     return false;
   }
 }

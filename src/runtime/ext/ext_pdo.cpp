@@ -2502,9 +2502,9 @@ safe:
 
 rewrite:
     /* allocate output buffer */
-    newbuffer = (char*)malloc(newbuffer_len + 1);
-    newbuffer[newbuffer_len] = '\0';
-    out = String(newbuffer, newbuffer_len, AttachDeprecated);
+    out = String(newbuffer_len, ReserveString);
+    newbuffer = out.mutableSlice().ptr;
+    out.setSize(newbuffer_len);
 
     /* and build the query */
     plc = placeholders;

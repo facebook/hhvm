@@ -142,13 +142,6 @@ public:
       m_px->setRefCount(1);
     }
   }
-  // attach to null terminated malloc'ed string
-  String(const char *s, AttachDeprecatedMode mode) {
-    if (s) {
-      m_px = NEW(StringData)(s, mode);
-      m_px->setRefCount(1);
-    }
-  }
   // attach to null terminated malloc'ed string, maybe free it now.
   String(const char *s, AttachStringMode mode) {
     if (s) {
@@ -171,13 +164,6 @@ public:
     }
   }
   // attach to binary malloc'ed string
-  String(const char *s, int length, AttachDeprecatedMode mode) {
-    if (s) {
-      m_px = NEW(StringData)(s, length, mode);
-      m_px->setRefCount(1);
-    }
-  }
-  // attach to binary malloc'ed string
   String(const char *s, int length, AttachStringMode mode) {
     if (s) {
       m_px = NEW(StringData)(s, length, mode);
@@ -190,6 +176,11 @@ public:
       m_px = NEW(StringData)(s, length, mode);
       m_px->setRefCount(1);
     }
+  }
+  // make an empty string with cap reserve bytes, plus 1 for '\0'
+  String(int cap, ReserveStringMode mode) {
+    m_px = NEW(StringData)(cap);
+    m_px->setRefCount(1);
   }
 
   void clear() { reset();}
@@ -211,6 +202,11 @@ private:
     return m_px ? m_px->dataIgnoreTaint() : "";
   }
 public:
+  CStrRef setSize(int len) {
+    ASSERT(m_px);
+    m_px->setSize(len);
+    return *this;
+  }
   const char *c_str() const {
     return m_px ? m_px->data() : "";
   }
@@ -225,6 +221,9 @@ public:
   }
   StringSlice slice() const {
     return m_px ? m_px->slice() : StringSlice("", 0);
+  }
+  MutableSlice mutableSlice() {
+    return m_px ? m_px->mutableSlice() : MutableSlice("", 0);
   }
   bool isNull() const {
     return m_px == NULL;

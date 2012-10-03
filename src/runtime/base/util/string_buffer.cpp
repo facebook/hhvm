@@ -493,7 +493,9 @@ void CstrBuffer::append(const char* data, int len) {
 }
 
 String CstrBuffer::detach() {
+  ASSERT(m_len <= m_cap);
   TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
+  m_buffer[m_len] = 0;
   String s(m_buffer, m_len, AttachString);
   m_buffer = 0;
   m_len = m_cap = 0;

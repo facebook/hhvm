@@ -219,7 +219,9 @@ class CstrBuffer {
 };
 
 inline const char* CstrBuffer::data() const {
+  ASSERT(m_len <= m_cap);
   TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
+  m_buffer[m_len] = 0;
   return m_buffer;
 }
 

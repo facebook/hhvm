@@ -39,6 +39,7 @@ hphp.log
 /src/runtime/tmp/run.sh
 /src/runtime/tmp/libtest.so
 /src/runtime/vm/repo_schema.h
+/src/runtime/base/compiler_id.h
 
 /src/hphpi/gen
 /src/hphpi/hphpi

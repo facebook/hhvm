@@ -462,12 +462,7 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
   }
 }
 
-static TypedValue* elemX(TypedValue* base, TypedValue* key,
-                         TranslatorX64::MInstrState* mis) {
-  not_reached();
-}
-
-#define ELEM_TABLE() \
+#define ELEM_TABLE \
  /*   name  unboxKey warn   define reffy  unset */ \
  ELEM(CU,   false,   false, false, false, true)  \
  ELEM(CWDR, false,   true,  true,  true,  false) \
@@ -493,8 +488,9 @@ static TypedValue* elem ## nm(TypedValue* base, TypedValue* key,            \
                                                                  mis);      \
 }
 
-ELEM_TABLE()
+ELEM_TABLE
 #undef ELEM
+#undef ELEM_TABLE
 
 template<DataType keyType>
 void TranslatorX64::emitElem(const Tracelet& t,
@@ -511,6 +507,7 @@ void TranslatorX64::emitElem(const Tracelet& t,
                                 TranslatorX64::MInstrState*);
   ASSERT(MIA_warn == 0x1 && MIA_define == 0x2 && MIA_reffy == 0x4 &&
          MIA_unset == 0x8);
+  const ElemOp elemX = nullptr;
   static const ElemOp localElemOps[]
     = {elemL,  elemLW, elemLD, elemLWD, elemX, elemX, elemLDR, elemLWDR,
        elemLU, elemX,  elemX,  elemX,   elemX, elemX, elemX,   elemX};
@@ -551,70 +548,28 @@ static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
   return Prop<warn, define, unset>(mis->tvScratch, mis->tvRef, ctx, base, key);
 }
 
-static TypedValue* propX(Class* ctx, TypedValue* base, TypedValue* key,
-                         TranslatorX64::MInstrState* mis) {
-  not_reached();
-}
+#define PROP_TABLE                              \
+  /*   name  unboxKey  warn  define  unset */   \
+  PROP(CU,     false, false, false,  true)      \
+  PROP(CWD,    false,  true,  true, false)      \
+  PROP(CW,     false,  true, false, false)      \
+  PROP(CD,     false, false,  true, false)      \
+  PROP(C,      false, false, false, false)      \
+  PROP(LU,      true, false, false,  true)      \
+  PROP(LWD,     true,  true,  true, false)      \
+  PROP(LW,      true,  true, false, false)      \
+  PROP(LD,      true, false,  true, false)      \
+  PROP(L,       true, false, false, false)
 
-HOT_FUNC_VM
-static TypedValue* propCU(Class* ctx, TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return propImpl<false, false, false, true>(ctx, base, key, mis);
+#define PROP(nm, unboxKey, warn, define, unset)                         \
+HOT_FUNC_VM                                                             \
+static TypedValue* prop ## nm(Class* ctx, TypedValue* base, TypedValue* key, \
+                              TranslatorX64::MInstrState* mis) {        \
+  return propImpl<unboxKey,warn,define,unset>(ctx, base, key, mis);     \
 }
-
-HOT_FUNC_VM
-static TypedValue* propCWD(Class* ctx, TypedValue* base, TypedValue* key,
-                           TranslatorX64::MInstrState* mis) {
-  return propImpl<false, true, true, false>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* propCW(Class* ctx, TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return propImpl<false, true, false, false>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* propCD(Class* ctx, TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return propImpl<false, false, true, false>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* propC(Class* ctx, TypedValue* base, TypedValue* key,
-                         TranslatorX64::MInstrState* mis) {
-  return propImpl<false, false, false, false>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* propLU(Class* ctx, TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return propImpl<true, false, false, true>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* propLWD(Class* ctx, TypedValue* base, TypedValue* key,
-                           TranslatorX64::MInstrState* mis) {
-  return propImpl<true, true, true, false>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* propLW(Class* ctx, TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return propImpl<true, true, false, false>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* propLD(Class* ctx, TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return propImpl<true, false, true, false>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* propL(Class* ctx, TypedValue* base, TypedValue* key,
-                         TranslatorX64::MInstrState* mis) {
-  return propImpl<true, false, false, false>(ctx, base, key, mis);
-}
+PROP_TABLE
+#undef PROP
+#undef PROP_TABLE
 
 void TranslatorX64::emitProp(const Tracelet& t,
                              const NormalizedInstruction& ni,
@@ -630,6 +585,7 @@ void TranslatorX64::emitProp(const Tracelet& t,
   typedef TypedValue* (*PropOp)(Class*, TypedValue*, TypedValue*,
                                 TranslatorX64::MInstrState*);
   ASSERT(MIA_warn == 0x1 && MIA_define == 0x2 && MIA_unset == 0x8);
+  const PropOp propX = nullptr;
   static const PropOp localPropOps[]
     = {propL,  propLW, propLD, propLWD, propX, propX, propLD, propLWD,
        propLU, propX,  propX,  propX,   propX, propX, propX,  propX};

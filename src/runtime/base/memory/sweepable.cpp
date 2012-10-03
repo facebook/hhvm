@@ -21,58 +21,58 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static __thread Sweepable* t_sweepList = 0;
+static __thread Sweepable::Node t_sweep;
+
+inline void Sweepable::Node::init() {
+  next = prev = this;
+}
+
+inline void Sweepable::Node::enlist(Node& head) {
+  Node* n = next = head.next;
+  prev = &head;
+  head.next = n->prev = this;
+}
+
+void Sweepable::Node::delist() {
+  Node *n = next, *p = prev;
+  n->prev = p;
+  p->next = n;
+}
+
+void Sweepable::InitSweepableList() {
+  t_sweep.init();
+}
 
 void Sweepable::SweepAll() {
-  Sweepable* persistList = 0;
-  while (t_sweepList) {
-    Sweepable* s = t_sweepList;
-    s->unregister();
-
+  Node persist;
+  persist.init();
+  while (t_sweep.next != &t_sweep) {
+    Node* n = t_sweep.next;
+    n->delist();
+    Sweepable* s = (Sweepable*)(uintptr_t(n) - offsetof(Sweepable,m_sweepNode));
     if (s->m_persistentCount == 0) {
       s->sweep();
     } else {
-      if (persistList) {
-        ASSERT(persistList->m_prevSweepable = &persistList);
-        persistList->m_prevSweepable = &s->m_nextSweepable;
-      }
-      s->m_nextSweepable = persistList;
-      persistList = s;
-      s->m_prevSweepable = &persistList;
+      n->enlist(persist);
     }
   }
-  t_sweepList = persistList;
-  if (persistList) {
-    ASSERT(persistList->m_prevSweepable == &persistList);
-    persistList->m_prevSweepable = &t_sweepList;
-  }
+  // copy persist list to t_sweep
+  ASSERT(t_sweep.next == &t_sweep && t_sweep.prev == &t_sweep);
+  t_sweep.enlist(persist); // stick t_sweep in persist list
+  persist.delist(); // remove persist; now t_sweep is "head"
 }
 
-Sweepable::Sweepable()
-  : m_nextSweepable(t_sweepList)
-  , m_prevSweepable(&t_sweepList)
-  , m_persistentCount(0)
-{
-  if (t_sweepList) {
-    ASSERT(t_sweepList->m_prevSweepable == &t_sweepList);
-    t_sweepList->m_prevSweepable = &m_nextSweepable;
-  }
-  t_sweepList = this;
+Sweepable::Sweepable() : m_persistentCount(0) {
+  m_sweepNode.enlist(t_sweep);
 }
 
 Sweepable::~Sweepable() {
-  unregister();
+  m_sweepNode.delist();
 }
 
 void Sweepable::unregister() {
-  if (m_prevSweepable) {
-    if (m_nextSweepable) {
-      m_nextSweepable->m_prevSweepable = m_prevSweepable;
-    }
-    *m_prevSweepable = m_nextSweepable;
-    m_nextSweepable = 0;
-    m_prevSweepable = 0;
-  }
+  m_sweepNode.delist();
+  m_sweepNode.init(); // in case destructor runs later.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

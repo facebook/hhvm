@@ -30,7 +30,14 @@ namespace HPHP {
  */
 class Sweepable {
 public:
+  struct Node {
+    Node *next, *prev;
+    void enlist(Node& head);
+    void delist();
+    void init();
+  };
   static void SweepAll();
+  static void InitSweepableList();
 
 public:
   Sweepable();
@@ -59,8 +66,7 @@ public:
   void unregister();
 
 private:
-  Sweepable* m_nextSweepable;
-  Sweepable** m_prevSweepable; // Pointer to previous next pointer.
+  Node m_sweepNode;
   int m_persistentCount;
 };
 

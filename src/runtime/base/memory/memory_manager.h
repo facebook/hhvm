@@ -26,11 +26,12 @@ namespace HPHP {
 
 class SmartAllocatorImpl;
 
-struct SmartNode;
-struct SweepNode;
-
-struct StringNode {
-  StringNode *next, *prev;
+struct SweepNode {
+  SweepNode* next;
+  union {
+    SweepNode* prev;
+    size_t padbytes;
+  };
 };
 
 // jemalloc uses 0x5a but we use 0x6a so we can tell the difference
@@ -348,8 +349,8 @@ private:
 private:
   char *m_front, *m_limit;
   GarbageList m_smartfree[kNumSizes];
-  SweepNode* m_smartsweep;
-  StringNode m_strings; // in-place node is head of circular list
+  SweepNode m_sweep;   // oversize smart_malloc'd blocks
+  SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
   bool m_enabled;
 

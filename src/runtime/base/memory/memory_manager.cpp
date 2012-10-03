@@ -158,14 +158,16 @@ void MemoryManager::AllocIterator::next() {
   ++m_it;
 }
 
-MemoryManager::MemoryManager() : m_front(0), m_limit(0), m_smartsweep(0),
+MemoryManager::MemoryManager() : m_front(0), m_limit(0),
   m_enabled(RuntimeOption::EnableMemoryManager) {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
   resetStats();
   m_stats.maxBytes = INT64_MAX;
-  m_strings.next = m_strings.prev = &m_strings; // empty circular list
+  // make the circular-lists empty.
+  m_sweep.next = m_sweep.prev = &m_sweep;
+  m_strings.next = m_strings.prev = &m_strings;
 }
 
 void MemoryManager::resetStats() {
@@ -227,14 +229,6 @@ struct SmallNode {
   size_t padbytes; // <= kMaxSmartSize means small block
 };
 
-struct SweepNode {
-  SweepNode* next;
-  union {
-    SweepNode* prev;
-    size_t padbytes;
-  };
-};
-
 typedef std::vector<char*>::const_iterator SlabIter;
 
 void MemoryManager::rollback() {
@@ -248,13 +242,11 @@ void MemoryManager::rollback() {
   }
   m_slabs.clear();
   // free large allocation blocks
-  if (SweepNode* n = m_smartsweep) {
-    for (SweepNode *next = 0; next != m_smartsweep; n = next) {
-      next = n->next;
-      free(n);
-    }
-    m_smartsweep = 0;
+  for (SweepNode *n = m_sweep.next, *next; n != &m_sweep; n = next) {
+    next = n->next;
+    free(n);
   }
+  m_sweep.next = m_sweep.prev = &m_sweep;
   // zero out freelists
   for (unsigned i = 0; i < kNumSizes; i++) {
     m_smartfree[i].clear();
@@ -347,15 +339,10 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
   SweepNode* n2 = (SweepNode*) realloc(n, nbytes + sizeof(SweepNode));
   if (n2 != n) {
     // block moved; must re-link to sweeplist
+    next->prev = prev->next = n2;
     if (hhvm && UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
       refreshStatsHelper();
     }
-    if (next != n) {
-      next->prev = prev->next = n2;
-    } else {
-      n2->next = n2->prev = n2;
-    }
-    if (m_smartsweep == n) m_smartsweep = n2;
   }
   return n2 + 1;
 }
@@ -391,16 +378,11 @@ inline void* MemoryManager::smartEnlist(SweepNode* n) {
   if (hhvm && UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
-  SweepNode* next = m_smartsweep;
-  if (next) {
-    SweepNode* prev = next->prev;
-    n->next = next;
-    n->prev = prev;
-    next->prev = prev->next = n;
-  } else {
-    n->next = n->prev = n;
-  }
-  m_smartsweep = n;
+  // link after m_sweep
+  SweepNode* next = m_sweep.next;
+  n->next = next;
+  n->prev = &m_sweep;
+  next->prev = m_sweep.next = n;
   ASSERT(n->padbytes > kMaxSmartSize);
   return n + 1;
 }
@@ -426,9 +408,6 @@ void MemoryManager::smartFreeBig(SweepNode* n) {
   SweepNode* prev = n->prev;
   next->prev = prev;
   prev->next = next;
-  if (UNLIKELY(n == m_smartsweep)) {
-    m_smartsweep = (next != n) ? next : 0;
-  }
   free(n);
 }
 

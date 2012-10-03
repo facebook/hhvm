@@ -398,9 +398,9 @@ public:
       // Calculate padding so that node, shared, and cap are pointer aligned,
       // and ensure cap overlaps the last byte of m_small.
       static const size_t kPadding = sizeof(m_small) -
-        sizeof(StringNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
+        sizeof(SweepNode) - sizeof(SharedVariant*) - sizeof(uint64_t);
       char junk[kPadding];
-      StringNode node;
+      SweepNode node;
       SharedVariant *shared;
       uint64_t cap;
     } m_big;

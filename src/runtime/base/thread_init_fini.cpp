@@ -41,6 +41,7 @@ InitFiniNode::InitFiniNode(void(*f)(), bool init) {
 }
 
 void init_thread_locals(void *arg /* = NULL */) {
+  Sweepable::InitSweepableList();
   ObjectData::GetMaxId();
   ResourceData::GetMaxResourceId();
   ServerStats::GetLogger();

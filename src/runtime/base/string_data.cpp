@@ -95,9 +95,9 @@ void StringData::initLiteral(const char* data, int len) {
 }
 
 void StringData::enlist() {
-  StringNode& head = MemoryManager::TheMemoryManager()->m_strings;
+  SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
   // insert after head
-  StringNode* next = head.next;
+  SweepNode* next = head.next;
   ASSERT(uintptr_t(next) != kMallocFreeWord);
   m_big.node.next = next;
   m_big.node.prev = &head;
@@ -105,8 +105,8 @@ void StringData::enlist() {
 }
 
 void StringData::delist() {
-  StringNode* next = m_big.node.next;
-  StringNode* prev = m_big.node.prev;
+  SweepNode* next = m_big.node.next;
+  SweepNode* prev = m_big.node.prev;
   ASSERT(uintptr_t(next) != kMallocFreeWord);
   ASSERT(uintptr_t(prev) != kMallocFreeWord);
   next->prev = prev;
@@ -114,8 +114,8 @@ void StringData::delist() {
 }
 
 void StringData::sweepAll() {
-  StringNode& head = MemoryManager::TheMemoryManager()->m_strings;
-  for (StringNode *next, *n = head.next; n != &head; n = next) {
+  SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
+  for (SweepNode *next, *n = head.next; n != &head; n = next) {
     next = n->next;
     ASSERT(next && uintptr_t(next) != kSmartFreeWord);
     ASSERT(next && uintptr_t(next) != kMallocFreeWord);

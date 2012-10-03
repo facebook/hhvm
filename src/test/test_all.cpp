@@ -68,6 +68,10 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
       return;
     }
   }
+  if (hhvm) {
+    fprintf(stderr, "%s is not supported with USE_HHVM=1\n", suite.c_str());
+    exit(-1);
+  }
   if (suite == "TestServer") {
     RUN_TESTSUITE(TestServer);
     return;

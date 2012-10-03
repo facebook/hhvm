@@ -138,6 +138,7 @@ public:
   CurlResource(CurlResource *src) {
     ASSERT(src && src != this);
     m_cp = curl_easy_duphandle(src->get());
+    m_url = src->m_url;
 
     memset(m_error_str, 0, sizeof(m_error_str));
     m_error_no = CURLE_OK;

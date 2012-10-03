@@ -70,12 +70,16 @@ static inline void opPre(TypedValue*& base, DataType& type) {
   }
 }
 
-template <bool warn>
+template <bool warn, DataType CompileTimeKeyType = KindOfUnknown>
 static inline TypedValue* ElemArray(TypedValue* base,
                                     TypedValue* key) {
   TypedValue* result;
   bool isHphpArray = IsHphpArray(base->m_data.parr);
-  if (key->m_type == KindOfInt64) {
+  DataType keyType = CompileTimeKeyType == KindOfUnknown ?
+    key->m_type : CompileTimeKeyType;
+  ASSERT(CompileTimeKeyType == KindOfUnknown ||
+         key->m_type == CompileTimeKeyType);
+  if (keyType == KindOfInt64) {
     if (LIKELY(isHphpArray)) {
       result = (static_cast<HphpArray*>(base->m_data.parr))
                ->nvGet(key->m_data.num);
@@ -86,7 +90,7 @@ static inline TypedValue* ElemArray(TypedValue* base,
       result = (TypedValue*)&tvCellAsVariant(base).asArrRef()
         .rvalAtRef(key->m_data.num);
     }
-  } else if (IS_STRING_TYPE(key->m_type)) {
+  } else if (IS_STRING_TYPE(keyType)) {
     if (LIKELY(isHphpArray)) {
       int64 n;
       if (!key->m_data.pstr->isStrictlyInteger(n)) {
@@ -119,7 +123,7 @@ static inline TypedValue* ElemArray(TypedValue* base,
 }
 
 // $result = $base[$key];
-template <bool warn>
+template <bool warn, DataType keyType = KindOfUnknown>
 static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
                                TypedValue* base, bool& baseStrOff,
                                TypedValue* key) {
@@ -128,18 +132,9 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
   opPre(base, type);
   switch (type) {
   case KindOfUninit:
-  case KindOfNull: {
-    result = (TypedValue*)&init_null_variant;
-    break;
-  }
-  case KindOfBoolean: {
-    result = (TypedValue*)&init_null_variant;
-    break;
-  }
-  case KindOfInt64: {
-    result = (TypedValue*)&init_null_variant;
-    break;
-  }
+  case KindOfNull:
+  case KindOfBoolean:
+  case KindOfInt64:
   case KindOfDouble: {
     result = (TypedValue*)&init_null_variant;
     break;
@@ -168,7 +163,7 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfArray: {
-    result = ElemArray<warn>(base, key);
+    result = ElemArray<warn, keyType>(base, key);
     break;
   }
   case KindOfObject: {

@@ -325,6 +325,7 @@ class TranslatorX64 : public Translator
   void emitBaseOp(const Tracelet& t, const NormalizedInstruction& ni,
                   const MInstrInfo& mii, unsigned iInd, bool ctxFixed,
                   PhysReg& rBase);
+  template<DataType keyType>
   void emitElem(const Tracelet& t, const NormalizedInstruction& ni,
                 const MInstrInfo& mii, unsigned mInd, unsigned iInd,
                 PhysReg& rBase);

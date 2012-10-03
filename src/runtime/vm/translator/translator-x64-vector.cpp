@@ -447,7 +447,8 @@ static inline FuncType helperFromKey(const DynLocation& keyDl,
 }
 
 
-template <bool unboxKey, bool warn, bool define, bool reffy, bool unset>
+template <bool unboxKey, bool warn, bool define, bool reffy, bool unset,
+          DataType keyType = KindOfUnknown>
 static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
                                    TranslatorX64::MInstrState* mis) {
   key = unbox<unboxKey>(key);
@@ -456,7 +457,8 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
   } else if (define) {
     return ElemD<warn, reffy>(mis->tvScratch, mis->tvRef, base, key);
   } else {
-    return Elem<warn>(mis->tvScratch, mis->tvRef, base, mis->baseStrOff, key);
+    return Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base, mis->baseStrOff,
+                               key);
   }
 }
 
@@ -465,90 +467,36 @@ static TypedValue* elemX(TypedValue* base, TypedValue* key,
   not_reached();
 }
 
-HOT_FUNC_VM
-static TypedValue* elemCU(TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return elemImpl<false, false, false, false, true>(base, key, mis);
+#define ELEM_TABLE() \
+ /*   name  unboxKey warn   define reffy  unset */ \
+ ELEM(CU,   false,   false, false, false, true)  \
+ ELEM(CWDR, false,   true,  true,  true,  false) \
+ ELEM(CDR,  false,   false, true,  true,  false) \
+ ELEM(CWD,  false,   true,  true,  false, false) \
+ ELEM(CD,   false,   false, true,  false, false) \
+ ELEM(CW,   false,   true,  false, false, false) \
+ ELEM(C,    false,   false, false, false, false) \
+ ELEM(LU,   true,    false, false, false, true)  \
+ ELEM(LWDR, true,    true,  true,  true,  false) \
+ ELEM(LDR,  true,    false, true,  true,  false) \
+ ELEM(LWD,  true,    true,  true,  false, false) \
+ ELEM(LD,   true,    false, true,  false, false) \
+ ELEM(LW,   true,    true,  false, false, false) \
+ ELEM(L,    true,    false, false, false, false)
+
+#define ELEM(nm, unboxKey, warn, define, reffy, unset)                      \
+template<DataType keyType = KindOfUnknown>                                  \
+HOT_FUNC_VM                                                                 \
+static TypedValue* elem ## nm(TypedValue* base, TypedValue* key,            \
+                          TranslatorX64::MInstrState* mis) {                \
+  return elemImpl<unboxKey, warn, define, reffy, unset, keyType>(base, key, \
+                                                                 mis);      \
 }
 
-HOT_FUNC_VM
-static TypedValue* elemCWDR(TypedValue* base, TypedValue* key,
-                            TranslatorX64::MInstrState* mis) {
-  return elemImpl<false, true, true, true, false>(base, key, mis);
-}
+ELEM_TABLE()
+#undef ELEM
 
-HOT_FUNC_VM
-static TypedValue* elemCDR(TypedValue* base, TypedValue* key,
-                           TranslatorX64::MInstrState* mis) {
-  return elemImpl<false, false, true, true, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemCWD(TypedValue* base, TypedValue* key,
-                           TranslatorX64::MInstrState* mis) {
-  return elemImpl<false, true, true, false, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemCD(TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return elemImpl<false, false, true, false, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemCW(TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return elemImpl<false, true, false, false, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemC(TypedValue* base, TypedValue* key,
-                         TranslatorX64::MInstrState* mis) {
-  return elemImpl<false, false, false, false, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemLU(TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return elemImpl<true, false, false, false, true>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemLWDR(TypedValue* base, TypedValue* key,
-                            TranslatorX64::MInstrState* mis) {
-  return elemImpl<true, true, true, true, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemLDR(TypedValue* base, TypedValue* key,
-                           TranslatorX64::MInstrState* mis) {
-  return elemImpl<true, false, true, true, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemLWD(TypedValue* base, TypedValue* key,
-                           TranslatorX64::MInstrState* mis) {
-  return elemImpl<true, true, true, false, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemLD(TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return elemImpl<true, false, true, false, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemLW(TypedValue* base, TypedValue* key,
-                          TranslatorX64::MInstrState* mis) {
-  return elemImpl<true, true, false, false, false>(base, key, mis);
-}
-
-HOT_FUNC_VM
-static TypedValue* elemL(TypedValue* base, TypedValue* key,
-                         TranslatorX64::MInstrState* mis) {
-  return elemImpl<true, false, false, false, false>(base, key, mis);
-}
-
+template<DataType keyType>
 void TranslatorX64::emitElem(const Tracelet& t,
                              const NormalizedInstruction& ni,
                              const MInstrInfo& mii, unsigned mInd,
@@ -578,6 +526,22 @@ void TranslatorX64::emitElem(const Tracelet& t,
              R(rsp));
   rBase = m_regMap.allocScratchReg(rax);
 }
+
+template
+void TranslatorX64::emitElem<BitwiseKindOfString>(const Tracelet& t,
+                                          const NormalizedInstruction& ni,
+                                          const MInstrInfo& mii, unsigned mInd,
+                                          unsigned iInd, PhysReg& rBase);
+template
+void TranslatorX64::emitElem<KindOfInt64>(const Tracelet& t,
+                                          const NormalizedInstruction& ni,
+                                          const MInstrInfo& mii, unsigned mInd,
+                                          unsigned iInd, PhysReg& rBase);
+template
+void TranslatorX64::emitElem<KindOfUnknown>(const Tracelet& t,
+                                            const NormalizedInstruction& ni,
+                                            const MInstrInfo& mii, unsigned mInd,
+                                            unsigned iInd, PhysReg& rBase);
 
 template <bool unboxKey, bool warn, bool define, bool unset>
 static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
@@ -707,10 +671,16 @@ void TranslatorX64::emitIntermediateOp(const Tracelet& t,
                                        unsigned mInd, unsigned& iInd,
                                        PhysReg& rBase) {
   switch (ni.immVecM[mInd]) {
-  case MEC: case MEL: case MET: case MEI:
-    emitElem(t, ni, mii, mInd, iInd, rBase);
+  case MEC: case MEL: case MET: case MEI: {
+    DataType keyType = ni.inputs[iInd]->rtt.valueType();
+    auto emitter = IS_STRING_TYPE(keyType) ?
+      &TranslatorX64::emitElem<BitwiseKindOfString> :
+      (keyType == KindOfInt64 ? &TranslatorX64::emitElem<KindOfInt64> :
+       &TranslatorX64::emitElem<KindOfUnknown>);
+    (this->*emitter)(t, ni, mii, mInd, iInd, rBase);
     ++iInd;
     break;
+  }
   case MPC: case MPL: case MPT:
     emitProp(t, ni, mii, ctxFixed, mInd, iInd, rBase);
     ++iInd;

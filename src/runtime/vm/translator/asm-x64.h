@@ -1655,6 +1655,15 @@ inline void emitImmReg(X64Assembler& a, int64_t imm,
   a.emitImmReg(imm, dest);
 }
 
+class MovImmPatcher {
+ public:
+  MovImmPatcher(X64Assembler& as, uint64_t initial, register_name_t reg);
+  void patch(uint64_t actual);
+ private:
+  void* m_addr;
+  bool is32;
+};
+
 #undef TRACEMOD
 
 }}}

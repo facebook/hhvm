@@ -110,4 +110,23 @@ void X64Assembler::init(CodeAddress start, size_t sz) {
   code.initCodeBlock(start, sz);
 }
 
+MovImmPatcher::MovImmPatcher(X64Assembler& as, uint64_t initial,
+                             register_name_t reg) {
+  is32 = deltaFits(initial, sz::dword);
+  as.mov_imm64_reg(initial, reg);
+  m_addr = as.code.frontier - (is32 ? 4 : 8);
+}
+
+void MovImmPatcher::patch(uint64_t actual) {
+  if (is32) {
+    if (deltaFits(actual, sz::dword)) {
+      *(uint32_t*)m_addr = actual;
+    } else {
+      not_reached();
+    }
+  } else {
+    *(uint64_t*)m_addr = actual;
+  }
+}
+
 }}}

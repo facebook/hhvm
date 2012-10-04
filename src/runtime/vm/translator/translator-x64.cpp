@@ -8294,9 +8294,7 @@ TranslatorX64::translateFCall(const Tracelet& t,
   ASSERT(sizeof(Cell) == 1 << 4);
   // Record the hardware return address. This will be patched up below; 2
   // is a magic number dependent on assembler implementation.
-  uint64 *retIP = (uint64*)(a.code.frontier + 2);
-  emitImmReg(a, kUninitializedRIP, *retIPReg);
-  ASSERT(*retIP == kUninitializedRIP);
+  MovImmPatcher retIP(a, (uint64_t)a.code.frontier, *retIPReg);
   a.    store_reg64_disp_reg64 (*retIPReg,
                                 cellsToBytes(numArgs) + AROFF(m_savedRip),
                                 rVmSp);
@@ -8311,7 +8309,7 @@ TranslatorX64::translateFCall(const Tracelet& t,
   emitBindCall(t, i,
                curUnit()->offsetOf(atCall),
                curUnit()->offsetOf(after)); // ...
-  *retIP = uint64(a.code.frontier);
+  retIP.patch(uint64(a.code.frontier));
 
   if (i.breaksBB) {
     SrcKey fallThru(curFunc(), after);
@@ -9409,6 +9407,7 @@ static const size_t kAStubsSize = 512 << 20;
 static const size_t kGDataSize = kASize / 4;
 static const size_t kTotalSize = kASize + kAStubsSize +
                                          kTrampolinesBlockSize + kGDataSize;
+static const size_t kRoundUp = 1 << 12;
 
 TranslatorX64::TranslatorX64()
 : Translator(),
@@ -9448,7 +9447,12 @@ TranslatorX64::TranslatorX64()
   // "atrampolines", and "m_globalData" are nearby so that we can
   // short jump/point between them. Thus we allocate one slab and
   // divide it between "a", "astubs", and "atrampolines".
-  uint8_t *base = allocSlab(kTotalSize);
+
+  // Using sbrk to ensure its in the bottom 2G, so we avoid
+  // the need for trampolines, and get to use shorter
+  // instructions for tc addresses.
+  uint8_t *base = (uint8_t*)sbrk(kTotalSize + kRoundUp - 1);
+  base += -(uint64_t)base & (kRoundUp - 1);
   atrampolines.init(base, kTrampolinesBlockSize);
   base += kTrampolinesBlockSize;
   a.init(base, kASize);

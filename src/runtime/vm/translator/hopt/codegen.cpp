@@ -2489,7 +2489,6 @@ Address CodeGenerator::cgNewObj(IRInstruction* inst) {
   return start;
 }
 
-
 Address CodeGenerator::cgCall(IRInstruction* inst) {
 
   Address start   = m_as.code.frontier;
@@ -2510,8 +2509,7 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
     cgStore(spReg, -(i+1) * sizeof(Cell), args[i]);
   }
   // store the return IP into the outgoing actrec; this is patched below
-  m_as.mov_imm64_reg((uint64)m_as.code.frontier, reg::rScratch);
-  TCA retIpPatch = m_as.code.frontier - 8;
+  MovImmPatcher retIp(m_as, (uint64_t)m_as.code.frontier, reg::rScratch);
   m_as.store_reg64_disp_reg64(reg::rScratch, AROFF(m_savedRip), spReg);
   // store the return bytecode offset into the outgoing actrec
   uint64 returnBc = returnBcOffset->getConstValAsInt();
@@ -2540,7 +2538,7 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
                              funcd, numArgs, isImmutable);
 
   // Patch the immediate in the code which defines the return address
-  *((uint64*)retIpPatch) = (uint64)m_as.code.frontier;
+  retIp.patch((uint64)m_as.code.frontier);
 
   return start;
 }

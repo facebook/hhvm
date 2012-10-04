@@ -794,11 +794,6 @@ void HhbcTranslator::emitIssetL(int32 id) {
   }
 }
 
-void HhbcTranslator::emitIssetC() {
-  TRACE(3, "%u: IssetC\n", m_bcOff);
-  push(m_tb.genQueryOp(IsSet, popC()));
-}
-
 void HhbcTranslator::emitIssetS() {
   TRACE(3, "%u: IssetS\n", m_bcOff);
   Trace* exitTrace = getExitSlowTrace();

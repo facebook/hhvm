@@ -6972,7 +6972,7 @@ void TranslatorX64::analyzeCheckTypeOp(Tracelet& t,
 
 static bool checkTypeHelper(Opcode op, DataType dt) {
   switch (op) {
-  case OpIssetL:    case OpIssetC:    return !IS_NULL_TYPE(dt);
+  case OpIssetL:    return !IS_NULL_TYPE(dt);
   case OpIsNullL:   case OpIsNullC:   return IS_NULL_TYPE(dt);
   case OpIsStringL: case OpIsStringC: return IS_STRING_TYPE(dt);
   case OpIsArrayL:  case OpIsArrayC:  return IS_ARRAY_TYPE(dt);
@@ -7023,6 +7023,165 @@ TranslatorX64::translateCheckTypeOp(const Tracelet& t,
   }
   Stats::emitInc(a, Stats::Tx64_UnfusedTypeCheck);
   emitImmReg(a, isType, getReg(ni.outStack->location));
+}
+
+static void badArray() {
+  throw_bad_type_exception("array_key_exists expects an array or an object; "
+                           "false returned.");
+}
+
+static void badKey() {
+  raise_warning("Array key should be either a string or an integer");
+}
+
+static inline int64 ak_exist_string_helper(StringData* key, ArrayData* arr) {
+  int64 n;
+  if (key->isStrictlyInteger(n)) {
+    return arr->exists(n);
+  }
+  return arr->exists(StrNR(key));
+}
+
+static int64 ak_exist_string(StringData* key, ArrayData* arr) {
+  int64 res = ak_exist_string_helper(key, arr);
+  if (arr->decRefCount() == 0) {
+    arr->release();
+  }
+  if (key->decRefCount() == 0) {
+    key->release();
+  }
+  return res;
+}
+
+static int64 ak_exist_int(int64 key, ArrayData* arr) {
+  bool res = arr->exists(key);
+  if (arr->decRefCount() == 0) {
+    arr->release();
+  }
+  return res;
+}
+
+static int64 ak_exist_string_obj(StringData* key, ObjectData* obj) {
+  CArrRef arr = obj->o_toArray();
+  int64 res = ak_exist_string_helper(key, arr.get());
+  if (obj->decRefCount() == 0) {
+    obj->release();
+  }
+  if (key->decRefCount() == 0) {
+    key->release();
+  }
+  return res;
+}
+
+static int64 ak_exist_int_obj(int64 key, ObjectData* obj) {
+  CArrRef arr = obj->o_toArray();
+  bool res = arr.get()->exists(key);
+  if (obj->decRefCount() == 0) {
+    obj->release();
+  }
+  return res;
+}
+
+void
+TranslatorX64::analyzeAKExists(Tracelet& t, NormalizedInstruction& i) {
+  const int keyIx = 1;
+  const int arrIx = 0;
+
+  const DataType dta = i.inputs[arrIx]->valueType();
+  const DataType dtk = i.inputs[keyIx]->valueType();
+
+  bool reentrant = (dta != KindOfArray && dta != KindOfObject) ||
+    (!IS_STRING_TYPE(dtk) && dtk != KindOfInt64 && dtk != KindOfNull);
+
+  i.m_txFlags = reentrant ? Supported : Simple;
+  i.manuallyAllocInputs = true;
+}
+
+void
+TranslatorX64::translateAKExists(const Tracelet& t,
+                                 const NormalizedInstruction& ni) {
+  ASSERT(ni.inputs.size() == 2);
+  ASSERT(ni.outStack);
+
+  const int keyIx = 1;
+  const int arrIx = 0;
+
+  const DataType dta = ni.inputs[arrIx]->valueType();
+  const DataType dtk = ni.inputs[keyIx]->valueType();
+  TCA string_func = (TCA)ak_exist_string;
+  TCA int_func = (TCA)ak_exist_int;
+
+  int result = -1;
+  int args[2];
+  args[keyIx] = 0;
+  args[arrIx] = 1;
+  switch (dta) {
+    case KindOfObject:
+      string_func = (TCA)ak_exist_string_obj;
+      int_func = (TCA)ak_exist_int_obj;
+    case KindOfArray:
+      switch (dtk) {
+        case BitwiseKindOfString:
+        case KindOfStaticString:
+        case KindOfInt64: {
+          allocInputsForCall(ni, args);
+          PhysReg rk = getReg(ni.inputs[keyIx]->location);
+          PhysReg ra = getReg(ni.inputs[arrIx]->location);
+          m_regMap.scrubStackEntries(ni.outStack->location.offset);
+          EMIT_CALL(a, dtk == KindOfInt64 ? int_func : string_func,
+                    R(rk), R(ra));
+          recordCall(ni);
+          break;
+        }
+        case KindOfNull:
+          if (dta == KindOfArray) {
+            args[keyIx] = ArgDontAllocate;
+            allocInputsForCall(ni, args);
+            PhysReg ra = getReg(ni.inputs[arrIx]->location);
+            m_regMap.scrubStackEntries(ni.outStack->location.offset);
+            EMIT_CALL(a, string_func,
+                      IMM((uint64_t)empty_string.get()), R(ra));
+            recordCall(ni);
+          } else {
+            result = ni.invertCond;
+          }
+          break;
+        default:
+          EMIT_CALL(a, badKey);
+          recordReentrantCall(ni);
+          result = ni.invertCond;
+          break;
+      }
+      break;
+    default:
+      EMIT_CALL(a, badArray);
+      recordReentrantCall(ni);
+      result = ni.invertCond;
+      break;
+  }
+
+  if (result >= 0) {
+    if (ni.changesPC) {
+      fuseBranchAfterStaticBool(t, ni, result);
+      return;
+    } else {
+      m_regMap.allocOutputRegs(ni);
+      emitImmReg(a, result, getReg(ni.outStack->location));
+    }
+  } else {
+    ScratchReg res(m_regMap, rax);
+    if (ni.changesPC) {
+      fuseBranchSync(t, ni);
+      a.    test_reg64_reg64(*res, *res);
+      fuseBranchAfterBool(t, ni, ni.invertCond ? CC_Z : CC_NZ);
+    } else {
+      if (ni.invertCond) {
+        a.  xor_imm32_reg64(1, *res);
+      }
+      m_regMap.bindScratch(res, ni.outStack->location, KindOfBoolean,
+                           RegInfo::DIRTY);
+    }
+  }
 }
 
 void
@@ -8830,7 +8989,6 @@ TranslatorX64::translateIterNext(const Tracelet& t,
   case OpIsObjectL:                             \
   case OpIsBoolL:                               \
   case OpIsDoubleL:                             \
-  case OpIssetC:                                \
   case OpIsNullC:                               \
   case OpIsStringC:                             \
   case OpIsArrayC:                              \

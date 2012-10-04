@@ -457,6 +457,7 @@ MINSTRS
   CASE(VGetM) \
   CASE(IssetM) \
   CASE(EmptyM) \
+  CASE(AKExists) \
   CASE(SetS) \
   CASE(SetG) \
   CASE(SetM) \

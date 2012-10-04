@@ -853,7 +853,6 @@ TranslatorX64::irTranslateCheckTypeOp(const Tracelet& t,
   const int    off = ni.inputs[0]->location.offset;
   switch (op) {
     case OpIssetL:    HHIR_EMIT(IssetL, off);
-    case OpIssetC:    HHIR_EMIT(IssetC);
     case OpIsNullL:   HHIR_EMIT(IsNullL, off);
     case OpIsNullC:   HHIR_EMIT(IsNullC);
     case OpIsStringL: HHIR_EMIT(IsStringL, off);
@@ -872,6 +871,12 @@ TranslatorX64::irTranslateCheckTypeOp(const Tracelet& t,
     // call to ObjectData::isResource or something.
   }
   NOT_REACHED();
+}
+
+void
+TranslatorX64::irTranslateAKExists(const Tracelet& t,
+                                   const NormalizedInstruction& ni) {
+  HHIR_UNIMPLEMENTED(AKExists);
 }
 
 void
@@ -1298,7 +1303,6 @@ TranslatorX64::irTranslateIterNext(const Tracelet& t,
   case OpIsObjectL:                             \
   case OpIsBoolL:                               \
   case OpIsDoubleL:                             \
-  case OpIssetC:                                \
   case OpIsNullC:                               \
   case OpIsStringC:                             \
   case OpIsArrayC:                              \

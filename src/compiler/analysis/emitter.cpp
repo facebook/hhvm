@@ -2785,6 +2785,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
         } else if (emitCallUserFunc(e, call)) {
           return true;
+        } else if (call->isCallToFunction("array_key_exists")) {
+          if (params && params->getCount() == 2) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            visit((*params)[1]);
+            emitConvertToCell(e);
+            e.AKExists();
+            return true;
+          }
         } else if (call->isCallToFunction("define")) {
           if (params && params->getCount() == 2) {
             ExpressionPtr p0 = (*params)[0];
@@ -3911,7 +3920,7 @@ void EmitterVisitor::emitIsset(Emitter& e) {
       // code is valid. Once the parser handles this correctly,
       // the R and C cases can go.
       case StackSym::R:  e.UnboxR(); // fall through
-      case StackSym::C:  e.IssetC(); break;
+      case StackSym::C:  e.IsNullC(); e.Not(); break;
       default: {
         unexpectedStackSym(sym, "emitIsset");
         break;

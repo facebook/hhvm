@@ -917,7 +917,7 @@ static const struct {
 
   /*** 6. Isset, Empty, and type querying instructions ***/
 
-  { OpIssetC,      {Stack1,           Stack1,       OutBoolean,        0 }},
+  { OpAKExists,    {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpIssetL,      {Local,            Stack1,       OutBoolean,        1 }},
   { OpIssetN,      {Stack1,           Stack1,       OutBoolean,        0 }},
   { OpIssetG,      {Stack1,           Stack1,       OutBoolean,        0 }},
@@ -1188,7 +1188,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       if (prevOp == OpGt || prevOp == OpLt ||
           prevOp == OpGte || prevOp == OpLte ||
           prevOp == OpEq || prevOp == OpNeq ||
-          prevOp == OpIssetL || prevOp == OpIssetC ||
+          prevOp == OpIssetL || prevOp == OpAKExists ||
           isTypePred(prevOp) ||
           prev->fuseBranch) {
         prev->breaksBB = true;
@@ -1286,7 +1286,8 @@ void Translator::analyzeSecondPass(Tracelet& t) {
      */
     if (op == OpNot) {
       switch (prevOp) {
-        case OpIssetL:    case OpIssetC:
+        case OpAKExists:
+        case OpIssetL:
         case OpIsNullL:   case OpIsNullC:
         case OpIsBoolL:   case OpIsBoolC:
         case OpIsIntL:    case OpIsIntC:

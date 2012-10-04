@@ -145,7 +145,6 @@ public:
   void emitUnsetG();
   void emitUnsetProp(int offset); // TODO
   void emitIssetL(int32 id);
-  void emitIssetC();
   void emitIssetS();
   void emitIssetM(const char* vectorDesc /*<H E> */ ); // TODO
   void emitIssetProp(int offset); // TODO

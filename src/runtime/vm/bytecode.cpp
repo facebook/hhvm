@@ -57,6 +57,7 @@
 #include <runtime/ext/ext_continuation.h>
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_variable.h>
+#include <runtime/ext/ext_array.h>
 #include <runtime/vm/stats.h>
 #include <runtime/vm/type-profile.h>
 #include <runtime/base/server/source_root_info.h>
@@ -4736,7 +4737,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
   tvRet->m_type = KindOfBoolean;
 }
 
-#define IOP_TYPE_CHECK_INSTR(checkInit, what, predicate)            \
+#define IOP_TYPE_CHECK_INSTR_L(checkInit, what, predicate)          \
 inline void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## L(PC& pc) { \
   NEXT();                                                           \
   DECODE_HA(local);                                                 \
@@ -4749,7 +4750,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## L(PC& pc) { \
   topTv->m_data.num = ret;                                          \
   topTv->m_type = KindOfBoolean;                                    \
 }                                                                   \
-                                                                    \
+
+#define IOP_TYPE_CHECK_INSTR_C(checkInit, what, predicate)          \
 inline void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## C(PC& pc) { \
   NEXT();                                                           \
   TypedValue* topTv = m_stack.topTV();                              \
@@ -4760,7 +4762,11 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## C(PC& pc) { \
   topTv->m_type = KindOfBoolean;                                    \
 }
 
-IOP_TYPE_CHECK_INSTR(false,   set, isset)
+#define IOP_TYPE_CHECK_INSTR(checkInit, what, predicate)          \
+  IOP_TYPE_CHECK_INSTR_L(checkInit, what, predicate)              \
+  IOP_TYPE_CHECK_INSTR_C(checkInit, what, predicate)              \
+
+IOP_TYPE_CHECK_INSTR_L(false,   set, isset)
 IOP_TYPE_CHECK_INSTR(true,   Null, f_is_null)
 IOP_TYPE_CHECK_INSTR(true,  Array, f_is_array)
 IOP_TYPE_CHECK_INSTR(true, String, f_is_string)
@@ -4863,6 +4869,17 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyM(PC& pc) {
   tvRet->m_data.num = emptyResult;
   tvRet->_count = 0;
   tvRet->m_type = KindOfBoolean;
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopAKExists(PC& pc) {
+  NEXT();
+  TypedValue* arr = m_stack.topTV();
+  TypedValue* key = arr + 1;
+  bool result = f_array_key_exists(tvAsCVarRef(key), tvAsCVarRef(arr));
+  m_stack.popTV();
+  tvRefcountedDecRef(key);
+  key->m_data.num = result;
+  key->m_type = KindOfBoolean;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopSetL(PC& pc) {

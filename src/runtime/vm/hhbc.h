@@ -408,7 +408,7 @@ enum SetOpOp {
   O(VGetM,           ONE(MA),          LMANY(),         ONE(VV),    NF) \
   O(AGetC,           NA,               ONE(CV),         ONE(AV),    NF) \
   O(AGetL,           ONE(HA),          NOV,             ONE(AV),    NF) \
-  O(IssetC,          NA,               ONE(CV),         ONE(CV),    NF) \
+  O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(HA),          NOV,             ONE(CV),    NF) \
   O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \

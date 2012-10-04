@@ -775,7 +775,7 @@ static bool php_mysql_read_rows(MYSQL *mysql, CVarRef result) {
 }
 
 static Variant php_mysql_localize_result(MYSQL *mysql) {
-#if MYSQL_VERSION_ID < 50500
+#if MYSQL_VERSION_ID <= 50138
   mysql = mysql->last_used_con;
 #endif
 

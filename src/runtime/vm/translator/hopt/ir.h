@@ -53,6 +53,14 @@ class FailedIRGen : public std::exception {
       file(_file), line(_line), func(_func) { }
 };
 
+// Flags to identify if a branch should go to a patchable jmp in astubs
+// happens when instructions have been moved off the main trace to the exit path.
+static const TCA kIRDirectJmpInactive = NULL;
+// Fixup Jcc;Jmp branches out of trace using REQ_BIND_JMPCC_FIRST/SECOND
+static const TCA kIRDirectJccJmpActive = (TCA)0x01;
+// Optimize Jcc exit from trace when fall through path stays in trace
+static const TCA kIRDirectJccActive = (TCA)0x02;
+
 #define PUNT(instr) do {                             \
   throw FailedIRGen(__FILE__, __LINE__, __func__);   \
   } while(0)
@@ -142,23 +150,24 @@ class FailedIRGen : public std::exception {
   /* there is a conditional branch for each of the above query */        \
   /* operators to enable generating efficieng comparison-and-branch */   \
   /* instruction sequences */                               \
-  OPC(JmpGt,             0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpGte,            0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpLt,             0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpLte,            0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpEq,             0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpNeq,            0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpSame,           0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpNSame,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpInstanceOfD,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpNInstanceOfD,   0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpIsSet,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpIsType,         0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpIsNSet,         0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpIsNType,        0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpZero,           0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(JmpNZero,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
-  OPC(Jmp_,              0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpGt,             1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpGte,            1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpLt,             1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpLte,            1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpEq,             1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpNeq,            1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpZero,           1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpNZero,          1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpSame,           1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpNSame,          1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+    /* keep preceeding conditional branches contiguous */       \
+  OPC(JmpInstanceOfD,    1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpNInstanceOfD,   1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpIsSet,          1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpIsType,         1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpIsNSet,         1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(JmpIsNType,        1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(Jmp_,              1,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(ExitWhenSurprised, 0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(ExitOnVarEnv,      0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(CheckUninit,       0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
@@ -223,7 +232,9 @@ class FailedIRGen : public std::exception {
   OPC(StRaw,             0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
   OPC(SpillStack,        1,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
   OPC(SpillStackAllocAR, 1,  0,  1,  1,  0,  1,  0,  0,  0,  0) \
+  /* Update ExitTrace entries in sync with ExitType below */    \
   OPC(ExitTrace,         0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(ExitTraceCc,       0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(ExitSlow,          0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(ExitSlowNoProgress,0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(ExitGuardFailure,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
@@ -315,8 +326,10 @@ static inline Opcode negateQueryOp(Opcode opc) {
 }
 
 namespace TraceExitType {
+// Must update in sync with ExitTrace entries in OPC table above
 enum ExitType {
   Normal,
+  NormalCc,
   Slow,
   SlowNoProgress,
   GuardFailure
@@ -521,6 +534,8 @@ public:
   void       setSrc(uint32 i, SSATmp* newSrc);
   SSATmp*    getDst()      const       { return m_dst; }
   void       setDst(SSATmp* newDst)    { m_dst = newDst; }
+  TCA        getTCA()      const       { return m_tca; }
+  void       setTCA(TCA    newTCA)     { m_tca = newTCA; }
   uint32     getId()       const       { return m_id; }
   void       setId(uint32 newId)       { m_id = newId; }
   void       setAsmAddr(void* addr)    { m_asmAddr = addr; }
@@ -607,7 +622,7 @@ protected:
   IRInstruction(Opcode o, Type::Tag t, LabelInstruction *l = NULL)
       : m_op(o), m_type(t), m_id(0), m_numSrcs(0),
         m_liveOutRegs(0), m_dst(NULL), m_asmAddr(NULL), m_label(l),
-        m_parent(NULL)
+        m_parent(NULL), m_tca(NULL)
   {
     m_srcs[0] = m_srcs[1] = NULL;
   }
@@ -615,7 +630,7 @@ protected:
   IRInstruction(Opcode o, Type::Tag t, SSATmp* src, LabelInstruction *l = NULL)
       : m_op(o), m_type(t), m_id(0),  m_numSrcs(1),
         m_liveOutRegs(0), m_dst(NULL), m_asmAddr(NULL), m_label(l),
-        m_parent(NULL)
+        m_parent(NULL), m_tca(NULL)
   {
     m_srcs[0] = src; m_srcs[1] = NULL;
   }
@@ -627,7 +642,7 @@ protected:
                 LabelInstruction *l = NULL)
       : m_op(o), m_type(t), m_id(0), m_numSrcs(2),
         m_liveOutRegs(0), m_dst(NULL), m_asmAddr(NULL), m_label(l),
-        m_parent(NULL)
+        m_parent(NULL), m_tca(NULL)
   {
     m_srcs[0] = src0; m_srcs[1] = src1;
   }
@@ -641,7 +656,7 @@ protected:
         m_dst(NULL),
         m_asmAddr(NULL),
         m_label(inst->m_label),
-        m_parent(NULL)
+        m_parent(NULL), m_tca(NULL)
   {
     m_srcs[0] = inst->m_srcs[0];
     m_srcs[1] = inst->m_srcs[1];
@@ -661,6 +676,7 @@ protected:
   void*             m_asmAddr;
   LabelInstruction* m_label;
   Trace*            m_parent;
+  TCA               m_tca;
 };
 
 class ExtendedInstruction : public IRInstruction {
@@ -671,6 +687,7 @@ public:
 
   virtual SSATmp* getExtendedSrc(uint32 i) const;
   virtual void    setExtendedSrc(uint32 i, SSATmp* newSrc);
+  void appendExtendedSrc(IRFactory& irFactory, SSATmp* src);
 
   virtual SSATmp** getExtendedSrcs() { return m_extendedSrcs; }
 protected:
@@ -886,6 +903,10 @@ private:
     const VarEnv*     m_varEnv;
     const TCA         m_tca;
   };
+  friend class CodeGenerator;
+  void setValAsRawInt(int64 intVal) {
+    m_intVal = intVal;
+  }
 };
 
 class LabelInstruction : public IRInstruction {
@@ -902,6 +923,10 @@ public:
   virtual uint32 hash();
   virtual SSATmp* simplify(Simplifier*);
   virtual IRInstruction* clone(IRFactory* factory);
+
+  void    prependPatchAddr(TCA addr);
+  void*   getPatchAddr();
+
 protected:
   friend class IRFactory;
   friend class TraceBuilder;
@@ -909,11 +934,13 @@ protected:
   LabelInstruction(uint32 id) : IRInstruction(DefLabel, Type::None),
                                 m_labelId(id),
                                 m_stackOff(0),
+                                m_patchAddr(0),
                                 m_trace(NULL) {
   }
   LabelInstruction(Opcode opc, uint32 id) : IRInstruction(opc,Type::None),
                                             m_labelId(id),
                                             m_stackOff(0),
+                                            m_patchAddr(0),
                                             m_trace(NULL) {
   }
 
@@ -921,6 +948,7 @@ protected:
       : IRInstruction(opc,Type::None),
         m_labelId(bcOff),
         m_stackOff(spOff),
+        m_patchAddr(0),
         m_func(f)
   {
   }
@@ -929,11 +957,13 @@ protected:
       : IRInstruction(inst),
         m_labelId(inst->m_labelId),
         m_stackOff(inst->m_stackOff),
+        m_patchAddr(0),
         m_trace(inst->m_trace) // copies func also
   {
   }
   uint32 m_labelId;  // for Marker instructions: the bytecode offset in unit
   int32  m_stackOff; // for Marker instructions: stack off from start of trace
+  void*  m_patchAddr; // Support patching forward jumps
   union {
     Trace* m_trace;     // for DefLabel instructions
     const Func* m_func; // for Marker instructions
@@ -981,6 +1011,10 @@ public:
   void              print();
   static const uint32 MaxNumAssignedLoc = 2;
 
+  // Used for Jcc to Jmp elimination 
+  void              setTCA(TCA tca);
+  TCA               getTCA();
+
 private:
   friend class IRFactory;
   friend class TraceBuilder;
@@ -995,6 +1029,7 @@ private:
     m_assignedLoc[0] = m_assignedLoc[1] = Transl::reg::noreg;
     m_analysis = -1;
   }
+
   IRInstruction*  m_inst;
   const uint32    m_id;
   uint32          m_lastUseId;
@@ -1010,7 +1045,7 @@ private:
   // loc < LinearScan::NumRegs: general purpose registers
   // LinearScan::NumRegs <= loc < LinearScan::FirstSpill: MMX registers
   // LinearScan::FistSpill <= loc: spill location
-  register_name_t m_assignedLoc[MaxNumAssignedLoc]; // for register allocation
+  register_name_t   m_assignedLoc[MaxNumAssignedLoc]; // register allocation
 };
 
 class IRFactory {
@@ -1049,6 +1084,12 @@ public:
                            SSATmp* pc,
                            SSATmp* sp,
                            SSATmp* fp);
+  IRInstruction* exitTrace(TraceExitType::ExitType,
+                           SSATmp* func,
+                           SSATmp* pc,
+                           SSATmp* sp,
+                           SSATmp* fp,
+                           SSATmp* notTakenPC);
   IRInstruction* allocActRec(SSATmp* stkPtr,
                              SSATmp* framePtr,
                              SSATmp* func,
@@ -1170,6 +1211,7 @@ public:
 
   List& getExitTraces() { return m_exitTraces; }
   void print(std::ostream& ostream, bool printAsm, bool isExit = false);
+  void print();  // default to std::cout and printAsm == true
 
 private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't

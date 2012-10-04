@@ -387,6 +387,20 @@ void ExtendedInstruction::setExtendedSrc(uint32 i, SSATmp* newSrc) {
   m_extendedSrcs[i] = newSrc;
 }
 
+void ExtendedInstruction::appendExtendedSrc(IRFactory& irFactory,
+                                            SSATmp* src) {
+  // create larger array and add input
+  int i = 0;
+  SSATmp** extendedSrcs = m_extendedSrcs;
+  m_extendedSrcs =
+    new (irFactory.arena()) SSATmp*[m_numSrcs + 1 - NUM_FIXED_SRCS];
+  for (i = 0; i < (int)m_numSrcs - (int)NUM_FIXED_SRCS; i++) {
+    m_extendedSrcs[i] = extendedSrcs[i];
+  }
+  m_extendedSrcs[i] = src;
+  m_numSrcs++;
+}
+
 void ConstInstruction::printConst(std::ostream& ostream) {
   switch (m_type) {
     case Type::Int:
@@ -428,6 +442,9 @@ void ConstInstruction::printConst(std::ostream& ostream) {
       break;
     case Type::FuncClassRef:
       ASSERT(false /* ConstInstruction does not hold both func* and class* */);
+      break;
+    case Type::None:
+      ostream << "None:" << m_intVal;
       break;
     default:
       ASSERT(0);
@@ -486,6 +503,18 @@ bool LabelInstruction::equals(IRInstruction* inst) const {
 uint32 LabelInstruction::hash() {
   ASSERT(0);
   return 0;
+}
+
+// Thread chain of patch locations using the 4 byte space in each jmp/jcc
+void LabelInstruction::prependPatchAddr(TCA patchAddr) {
+  ssize_t diff = getPatchAddr() ? ((TCA)patchAddr - (TCA)getPatchAddr()) : 0;
+  ASSERT(deltaFits(diff, sz::dword));
+  *(int*)(patchAddr) = (int)diff;
+  m_patchAddr = patchAddr;
+}
+
+void* LabelInstruction::getPatchAddr() {
+  return m_patchAddr;
 }
 
 void LabelInstruction::print(std::ostream& ostream) {
@@ -594,6 +623,13 @@ uintptr_t SSATmp::getConstValAsBits() {
   return ((ConstInstruction*)m_inst)->getValAsBits();
 }
 
+void SSATmp::setTCA(TCA tca) {
+  getInstruction()->setTCA(tca);
+}
+TCA SSATmp::getTCA() {
+  return getInstruction()->getTCA();
+}
+
 void SSATmp::print(std::ostream& ostream, bool printLastUse) {
   if (m_inst->isDefConst()) {
     ((ConstInstruction*)m_inst)->printConst(ostream);
@@ -648,11 +684,12 @@ IRInstruction* IRFactory::guardRefs(SSATmp*           funcPtr,
                                     SSATmp*           vals64,
                                     LabelInstruction* exitLabel) {
 
-  SSATmp* extraArgs[] = {firstBitNum, mask64, vals64};
+  SSATmp* args[3] = {firstBitNum, mask64, vals64};
 
   return new (m_arena) ExtendedInstruction(*this, GuardRefs, Type::None,
-                                           funcPtr, nParams, bitsPtr, 3,
-                                           extraArgs, exitLabel);
+                                           funcPtr, nParams, bitsPtr,
+                                           (sizeof(args) / sizeof(SSATmp*)),
+                                           args, exitLabel);
 }
 
 IRInstruction* IRFactory::ldLoc(SSATmp* home) {
@@ -720,7 +757,8 @@ IRInstruction* IRFactory::allocActRec(SSATmp* stackPtr,
   SSATmp* args[4] = { func, objOrCls, numArgs, magicName };
   return new (m_arena) ExtendedInstruction(*this, AllocActRec,
                                            Type::SP, stackPtr, framePtr,
-                                           4, args);
+                                           (sizeof(args) / sizeof(SSATmp*)),
+                                           args);
 
 }
 
@@ -764,7 +802,23 @@ IRInstruction* IRFactory::exitTrace(TraceExitType::ExitType exitType,
                                            Type::None,
                                            func,
                                            pc,
-                                           2,
+                                           (sizeof(args) / sizeof(SSATmp*)),
+                                           args);
+}
+
+IRInstruction* IRFactory::exitTrace(TraceExitType::ExitType exitType,
+                                    SSATmp* func,
+                                    SSATmp* pc,
+                                    SSATmp* sp,
+                                    SSATmp* fp,
+                                    SSATmp* notTakenPC) {
+  SSATmp* args[3] = { sp, fp, notTakenPC };
+  return new (m_arena) ExtendedInstruction(*this,
+                                           getExitOpcode(exitType),
+                                           Type::None,
+                                           func,
+                                           pc,
+                                           (sizeof(args) / sizeof(SSATmp*)),
                                            args);
 }
 
@@ -928,6 +982,10 @@ void Trace::print(std::ostream& ostream, bool printAsm,
     std::cout << "\n-------  Exit Trace  -------\n";
     exitTrace->print(std::cout, printAsm, true);
   }
+}
+
+void Trace::print() {
+  print(std::cout, true /* printAsm */);
 }
 
 void resetIdsAux(Trace* trace) {

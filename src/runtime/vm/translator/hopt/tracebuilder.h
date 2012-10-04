@@ -210,13 +210,14 @@ public:
                           uint32 numOpnds,
                           SSATmp** opnds);
 
-  // generates an exit that can be a target of a control flow
-  // instruction from the main trace
+  // generates a trace exit that can be the target of a conditional
+  // or unconditional control flow instruction from the main trace
   Trace* genExitTrace(uint32 bcOff,
-                      int32 stackDeficit,
+                      int32  stackDeficit,
                       uint32 numOpnds,
                       SSATmp** opnds,
-                      TraceExitType::ExitType = TraceExitType::Normal);
+                      TraceExitType::ExitType,
+                      uint32 notTakenBcOff = 0);
 
   void genExitGuardFailure(uint32 off);
   // generates the ExitTrace instruction at the end of a trace
@@ -283,8 +284,7 @@ private:
                          SSATmp* src4,
                          SSATmp* src5);
   SSATmp* genInstruction(Opcode, Type::Tag, Trace* exit = NULL);
-  SSATmp* genInstruction(Opcode,
-                         Type::Tag,
+  SSATmp* genInstruction(Opcode, Type::Tag,
                          SSATmp* src,
                          Trace* exit = NULL);
   SSATmp* genInstruction(Opcode, Type::Tag,

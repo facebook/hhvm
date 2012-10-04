@@ -1542,6 +1542,7 @@ TranslatorX64::irTranslateTracelet(const Tracelet& t,
     emitRB(a, RBTypeTraceletBody, t.m_sk);
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
     recordBCInstr(OpTraceletGuard, a, start);
+    m_hhbcTrans->setBcOffNextTrace(t.m_nextSk.offset());
 
     // Translate each instruction in the tracelet
     for (NormalizedInstruction* ni = t.m_instrStream.first; ni;

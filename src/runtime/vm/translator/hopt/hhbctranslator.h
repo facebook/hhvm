@@ -99,6 +99,8 @@ public:
   }
 
   void setBcOff(uint32 newOff, bool lastBcOff);
+  void setBcOffNextTrace(uint32 bcOff) { m_bcOffNextTrace = bcOff; }
+  uint32 getBcOffNextTrace() { return m_bcOffNextTrace; }
   void emitUninitLoc(uint32 id);
   void emitPrint();
   void emitThis();
@@ -330,6 +332,7 @@ private:
   SSATmp* getClsPropAddr(const Class* cls, const StringData* propName = NULL);
   void   decRefPropAddr(SSATmp* propAddr);
   Trace* getExitTrace(uint32 targetBcOff);
+  Trace* getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff);
   Trace* getExitSlowTrace(Offset nextByteCode = -1);
   Trace* getGuardExit();
   SSATmp* emitLdLocWarn(uint32 id, Type::Tag type, Trace* target);
@@ -382,6 +385,7 @@ private:
   TraceBuilder& m_tb;
   const Func*   m_curFunc;
   uint32        m_bcOff;
+  uint32        m_bcOffNextTrace;
   bool          m_firstBcOff;
   bool          m_lastBcOff;
   bool          m_hasRet;

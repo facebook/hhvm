@@ -228,7 +228,7 @@ void HhbcTranslator::emitArrayAdd() {
   SSATmp* tr = popC();
   SSATmp* tl = popC();
   // the ArrrayAdd helper decrefs its args, so don't decref pop'ed values
-  // TODO verify that ArrayAdd increfs its result
+  // TODO task 1805916: verify that ArrayAdd increfs its result
   push(m_tb.genArrayAdd(tl, tr));
 }
 
@@ -238,7 +238,7 @@ void HhbcTranslator::emitAddElemC() {
   SSATmp* key = popC();
   SSATmp* arr = popC();
   // the AddElem helper decrefs its args, so don't decref pop'ed values
-  // TODO verify that AddElem increfs its result
+  // TODO task 1805916: verify that AddElem increfs its result
   push(m_tb.genAddElem(arr, key, val));
 }
 
@@ -247,7 +247,7 @@ void HhbcTranslator::emitAddNewElemC() {
   SSATmp* val = popC();
   SSATmp* arr = popC();
   // the AddNewElem helper decrefs its args, so don't decref pop'ed values
-  // TODO verify that NewElem increfs its result
+  // TODO task 1805916: verify that NewElem increfs its result
   push(m_tb.genAddNewElem(arr, val));
 }
 
@@ -267,7 +267,7 @@ void HhbcTranslator::emitConcat() {
   SSATmp* tr = popC();
   SSATmp* tl = popC();
   // the concat helpers decref their args, so don't decref pop'ed values
-  // TODO verify that Concat increfs its result
+  // TODO task 1805916: verify that Concat increfs its result
   push(m_tb.genConcat(tl, tr));
 }
 
@@ -942,6 +942,7 @@ void HhbcTranslator::emitDup() {
 
 Trace* HhbcTranslator::emitJmp(int32 offset) {
   TRACE(3, "%u: Jmp %d\n", m_bcOff, offset);
+  spillStack(); //  spill early since every path will need it
   // If surprise flags are set, exit trace and handle surprise
   bool backward = (offset - (int32)m_bcOff) < 0;
   if (backward) {
@@ -955,7 +956,15 @@ Trace* HhbcTranslator::emitJmp(int32 offset) {
 
 Trace* HhbcTranslator::emitJmpCondHelper(int32 offset, bool negate) {
   SSATmp* src = popC();
-  Trace* target = getExitTrace(offset);
+  Trace* target = NULL;
+  if (m_lastBcOff) {
+    // Spill everything on main trace if all paths will exit
+    spillStack();
+    uint32 nextTrace = getBcOffNextTrace();
+    target = getExitTrace(offset, nextTrace);
+  } else {
+    target = getExitTrace(offset);
+  }
   SSATmp* boolSrc = m_tb.genConvToBool(src);
   m_tb.genDecRef(src);
   return m_tb.genJmpCond(boolSrc, target, negate);
@@ -1813,7 +1822,26 @@ Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff) {
   return m_tb.genExitTrace(targetBcOff,
                            m_stackDeficit,
                            numStackElems,
-                           numStackElems ? stackValues : 0);
+                           numStackElems ? stackValues :
+                                           (SSATmp**) NULL,
+                           TraceExitType::Normal);
+}
+
+// generates a trace exit that can be the target of a conditional
+// control flow instruction at the current bytecode offset
+Trace* HhbcTranslator::getExitTrace(uint32 targetBcOff, uint32 notTakenBcOff) {
+  uint32 numStackElems = m_evalStack.numElems();
+  SSATmp* stackValues[numStackElems];
+  for (uint32 i = 0; i < numStackElems; i++) {
+    stackValues[i] = m_evalStack.top(i);
+  }
+  return m_tb.genExitTrace(targetBcOff,
+                           m_stackDeficit,
+                           numStackElems,
+                           numStackElems ? stackValues :
+                                           (SSATmp**) NULL,
+                           TraceExitType::NormalCc,
+                           notTakenBcOff);
 }
 
 SSATmp* HhbcTranslator::spillStack(bool allocActRec) {

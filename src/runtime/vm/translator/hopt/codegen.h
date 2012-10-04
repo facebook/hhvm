@@ -134,6 +134,7 @@ public:
   Address cgLabel(Opcode opc, LabelInstruction* label);
   Address cgOpEqHelper(IRInstruction* inst, bool eq);
   Address cgOpSameHelper(IRInstruction* inst, bool eq);
+  Address cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
 
 
 private:
@@ -169,6 +170,11 @@ private:
   Address emitFwdJcc(ConditionCode cc, LabelInstruction* label);
   Address emitFwdJmp(Asm& as, LabelInstruction* label);
   Address emitFwdJmp(LabelInstruction* label);
+  Address emitSmashableFwdJmp(LabelInstruction* label, SSATmp* toSmash);
+  Address emitSmashableFwdJccAtEnd(ConditionCode cc, LabelInstruction* label,
+                              SSATmp* toSmash);
+  Address emitSmashableFwdJcc(ConditionCode cc, LabelInstruction* label,
+                              SSATmp* toSmash);
   int getLiveOutRegsToSave(register_name_t dstReg);
   const Func* getCurrFunc();
   void recordSyncPoint(Asm& as);

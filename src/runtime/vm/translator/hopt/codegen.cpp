@@ -447,10 +447,7 @@ Address CodeGenerator::emitFwdJcc(ConditionCode cc, LabelInstruction* label) {
   Address start = m_as.code.frontier;
   m_as.jcc(cc, m_as.code.frontier);
   TCA immPtr = m_as.code.frontier - 4;
-  ssize_t diff = label->getAsmAddr() ? (immPtr - (TCA)label->getAsmAddr()) : 0;
-  ASSERT(deltaFits(diff, sz::dword));
-  *(int*)(immPtr) = (int)diff;
-  label->setAsmAddr(immPtr);
+  label->prependPatchAddr(immPtr);
   return start;
 }
 
@@ -458,10 +455,52 @@ Address CodeGenerator::emitFwdJmp(Asm& as, LabelInstruction* label) {
   Address start = as.code.frontier;
   as.jmp(as.code.frontier);
   TCA immPtr = as.code.frontier - 4;
-  ssize_t diff = label->getAsmAddr() ? (immPtr - (TCA)label->getAsmAddr()) : 0;
-  ASSERT(deltaFits(diff, sz::dword));
-  *(int*)(immPtr) = (int)diff;
-  label->setAsmAddr(immPtr);
+  label->prependPatchAddr(immPtr);
+  return start;
+}
+
+// Patch with service request EMIT_BIND_JMP
+Address CodeGenerator::emitSmashableFwdJmp(LabelInstruction* label,
+                                           SSATmp* toSmash) {
+  Address start = m_as.code.frontier;
+  if (toSmash) {
+    m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen);
+    Address tca = emitFwdJmp(label);
+    toSmash->setTCA(tca);
+    ASSERT(false);  // TODO looks like this path is unused
+  } else {
+    emitFwdJmp(label);
+  }
+  return start;
+}
+
+// Patch with servie request REQ_BIND_JMPCC_FIRST/SECOND
+Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc,
+                                              LabelInstruction* label,
+                                              SSATmp* toSmash) {
+  Address start = m_as.code.frontier;
+  if (toSmash) {
+    m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen +
+                                  TranslatorX64::kJmpccLen);
+    Address tcaJcc = emitFwdJcc(cc, label);
+    emitFwdJmp(label);
+    toSmash->setTCA(tcaJcc);
+  } else {
+    emitFwdJcc(cc, label);
+  }
+  return start;
+}
+
+// Patch with service request REQ_BIND_JCC
+Address CodeGenerator::emitSmashableFwdJcc(ConditionCode cc,
+                                           LabelInstruction* label,
+                                           SSATmp* toSmash) {
+  Address start = m_as.code.frontier;
+  ASSERT(toSmash);
+
+  m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
+  Address tcaJcc = emitFwdJcc(cc, label);
+  toSmash->setTCA(tcaJcc);
   return start;
 }
 
@@ -469,10 +508,7 @@ Address CodeGenerator::emitFwdJmp(LabelInstruction* label) {
   Address start = m_as.code.frontier;
   m_as.jmp(m_as.code.frontier);
   TCA immPtr = m_as.code.frontier - 4;
-  ssize_t diff = label->getAsmAddr() ? (immPtr - (TCA)label->getAsmAddr()) : 0;
-  ASSERT(deltaFits(diff, sz::dword));
-  *(int*)(immPtr) = (int)diff;
-  label->setAsmAddr(immPtr);
+  label->prependPatchAddr(immPtr);
   return start;
 }
 
@@ -515,7 +551,9 @@ Address CodeGenerator::cgJcc(IRInstruction* inst) {
     // This cmp will compute srcReg1 - srcReg2
     m_as.cmp_reg64_reg64(srcReg2, srcReg1);
   }
-  emitFwdJcc(cc, label);
+  SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive ?
+                                      inst->getDst() : NULL;
+  emitSmashableFwdJccAtEnd(cc, label, toSmash);
   return start;
 }
 
@@ -1323,6 +1361,8 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
       args.type(src);
       args.ssa(src);
       cgCallHelper(m_as, (TCA)cellToBoolHelper, dst, false, args);
+    } else {
+      CG_PUNT(Conv);
     }
     return start;
   }
@@ -1831,10 +1871,28 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
   SSATmp* pc   = inst->getSrc(1);
   SSATmp* sp   = inst->getSrc(2);
   SSATmp* fp   = inst->getSrc(3);
+  SSATmp* notTakenPC = NULL;
+  SSATmp* toSmash = NULL;
+  ASSERT(pc->isConst() && inst->getNumSrcs() <= 6);
+
   TraceExitType::ExitType exitType = getExitType(inst->getOpcode());
+  if (exitType == TraceExitType::Normal && inst->getNumSrcs() == 5) {
+    // Unconditional trace exit
+    toSmash    = inst->getSrc(4);
+    ASSERT(toSmash);
+  } else if (exitType == TraceExitType::NormalCc) {
+    // Exit at trace end  which is the target of a conditional branch
+    notTakenPC = inst->getSrc(4);
+    ASSERT(notTakenPC->isConst());
+    if (inst->getNumSrcs() == 6) {
+      toSmash    = inst->getSrc(5);
+      ASSERT(toSmash);
+    }
+  }
   using namespace HPHP::VM::Transl;
 
-  Asm& outputAsm = m_as; // Note: m_as is the same as m_atubs for Exit Traces
+  Asm& outputAsm = m_as; // Note: m_as is the same as m_atubs for Exit Traces,
+  // unless exit trace was moved to end of main trace
 
   Address start = outputAsm.code.frontier;
   if (sp->getAssignedLoc() != LinearScan::rVmSP) {
@@ -1854,8 +1912,45 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
   SrcKey  destSK(func->getConstValAsFunc(), pc->getConstValAsInt());
 
   switch(exitType) {
+    case TraceExitType::NormalCc:
+      if (toSmash) {
+        TCA smashAddr = toSmash->getTCA();
+        ASSERT(smashAddr != kIRDirectJmpInactive);
+        // Patch the original jcc;jmp, don't emit another
+        IRInstruction* jcc = toSmash->getInstruction();
+        Opcode         opc = jcc->getOpcode();
+        ConditionCode  cc  = cmpOpToCC[opc - JmpGt];
+        uint64_t     taken = pc->getConstValAsInt();
+        uint64_t  notTaken = notTakenPC->getConstValAsInt();
+
+        m_astubs.setcc(cc, serviceReqArgRegs[4]);
+        m_tx64-> emitServiceReq(false /* align */, REQ_BIND_JMPCC_FIRST,
+                                4ull,
+                                smashAddr,
+                                taken,
+                                notTaken,
+                                uint64_t(cc));
+      } else {
+        // NormalCc exit but not optimized to jcc directly to destination
+        m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP);
+      }
+      break;
     case TraceExitType::Normal:
-      m_tx64->emitBindJmp(outputAsm, destSK);
+      {
+        TCA smashAddr = toSmash ? toSmash->getTCA() : NULL;
+        if (smashAddr) {
+          ASSERT(smashAddr != kIRDirectJmpInactive);
+          if (smashAddr != kIRDirectJccJmpActive) {
+            // kIRDirectJccJmpActive only needs NormalCc exit in astubs
+
+            m_tx64->emitServiceReq(false, REQ_BIND_JMP, 2,
+                                   smashAddr, uint64_t(destSK.offset()));
+
+          }
+        } else {
+          m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP);
+        }
+      }
       break;
     case TraceExitType::Slow:
       m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP_NO_IR);
@@ -1869,6 +1964,10 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
       break;
   }
   return start;
+}
+
+Address CodeGenerator::cgExitTraceCc(IRInstruction* inst) {
+  return cgExitTrace(inst);
 }
 
 Address CodeGenerator::cgExitSlow(IRInstruction* inst) {
@@ -2408,12 +2507,13 @@ Address CodeGenerator::cgDecRefMem(Type::Tag type,
 
 
 Address patchLabel(LabelInstruction* label, Address labelAddr) {
-  void* list = label->getAsmAddr();
+  void* list = label->getPatchAddr();
   while (list != NULL) {
-    int diffToNext = *(int*)list;
+    int* toPatch   = (int*)list;
+    int diffToNext = *toPatch;
     ssize_t diff = labelAddr - ((Address)list + 4);
     ASSERT(deltaFits(diff, sz::dword));
-    *(int*)(list) = (int)diff; // patch the jump address
+    *toPatch = (int)diff; // patch the jump address
     if (diffToNext == 0) {
       break;
     }
@@ -3645,15 +3745,20 @@ Address CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   return start;
 }
 
-Address CodeGenerator::cgJmpZero(IRInstruction* inst) {
+Address CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
+                                       ConditionCode cc) {
   Address start = m_as.code.frontier;
   SSATmp* src   = inst->getSrc(0);
   LabelInstruction* label = inst->getLabel();
+  SSATmp* toSmash = inst->getTCA() == kIRDirectJccJmpActive ?
+                                      inst->getDst() : NULL;
 
   register_name_t srcReg = src->getAssignedLoc();
   if (src->isConst()) {
-    if (src->getConstValAsRawInt() == 0) {
-      emitFwdJmp(label);
+    bool valIsZero = src->getConstValAsRawInt() == 0;
+    if ((cc == CC_Z  && valIsZero) ||
+        (cc == CC_NZ && !valIsZero)) {
+      emitSmashableFwdJmp(label, toSmash);
     }
     return start;
   }
@@ -3662,37 +3767,25 @@ Address CodeGenerator::cgJmpZero(IRInstruction* inst) {
   } else {
     m_as.test_reg64_reg64(srcReg, srcReg);
   }
-  emitFwdJcc(CC_Z, label);
+  emitSmashableFwdJccAtEnd(cc, label, toSmash);
   return start;
 }
 
-Address CodeGenerator::cgJmpNZero(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  SSATmp* src   = inst->getSrc(0);
-  LabelInstruction* label = inst->getLabel();
+Address CodeGenerator::cgJmpZero(IRInstruction* inst) {
+  return cgJmpZeroHelper(inst, CC_Z);
+}
 
-  register_name_t srcReg = src->getAssignedLoc();
-  if (src->isConst()) {
-    if (src->getConstValAsRawInt() != 0) {
-      emitFwdJmp(label);
-    }
-    return start;
-  }
-  if (src->getType() == Type::Bool) {
-    m_as.test_reg32_reg32(srcReg, srcReg);
-  } else {
-    m_as.test_reg64_reg64(srcReg, srcReg);
-  }
-  emitFwdJcc(CC_NZ, label);
-  return start;
+Address CodeGenerator::cgJmpNZero(IRInstruction* inst) {
+  return cgJmpZeroHelper(inst, CC_NZ);
 }
 
 Address CodeGenerator::cgJmp_(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   LabelInstruction* label = inst->getLabel();
 
+  // removed when moving trace exit to main trace in eliminateDeadCode
+  ASSERT(false);
   emitFwdJmp(label);
-
   return start;
 }
 
@@ -3722,6 +3815,7 @@ Address CodeGenerator::cgExitWhenSurprised(IRInstruction* inst) {
   CT_ASSERT(sizeof(RequestInjectionData::conditionFlags) == 8);
 
 #if 0
+  // ALIA:TODO
   m_as.test_imm64_disp_reg64(-1,
                              TargetCache::kConditionFlagsOff,
                              LinearScan::rTlPtr);
@@ -3888,6 +3982,7 @@ Address CodeGenerator::cgDefCns(IRInstruction* inst) {
   using namespace TargetCache;
   UNUSED CacheHandle ch = allocConstant((StringData*)cnsName->getConstValAsStr());
 #if 0
+  // ALIA:TODO
   // XXX second param is an inout pointer to a Ref, so we need to pass
   // the pointer to a stack slot
   if (RuntimeOption::RepoAuthoritative) {
@@ -3959,6 +4054,7 @@ Address CodeGenerator::cgDefCls(IRInstruction* inst) {
   // XXX we need to compute the stack ptr to pass to the m_defClsHelper function
   // in register rax
 #if 0
+  // ALIA:TODO
   /*
      compute the corrected stack ptr as a pseudo-param to m_defClsHelper
      which it will store in g_vmContext, in case of fatals, or __autoload

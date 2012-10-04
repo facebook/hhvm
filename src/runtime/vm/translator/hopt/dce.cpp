@@ -107,7 +107,7 @@ void initInstructions(Trace* trace, IRInstruction::List& wl) {
       inst->setId(LIVE);
       wl.push_back(inst);
     } else {
-      {
+      if (moduleEnabled(HPHP::Trace::hhir, 5)) {
         std::ostringstream ss1;
         inst->printSrcs(ss1);
         TRACE(5, "DCE: %s\n", ss1.str().c_str());
@@ -236,10 +236,17 @@ void sinkIncRefs(Trace* trace,
   }
 }
 
+// These are the conditional branches supported for direct branch
+// to their target trace at TraceExit, TraceExitType::NormalCc
+bool jccCanBeDirectExit(Opcode opc) {
+  // JmpGt .. JmpNSame are contiguous and all use cgJcc
+  return (JmpGt <= opc && opc <= JmpNSame);
+}
+
 void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   IRInstruction::List wl; // worklist of live instructions
   Trace::List& exitTraces = trace->getExitTraces();
-  // first mark all exit traces as unreachable my setting the id on
+  // first mark all exit traces as unreachable by setting the id on
   // their labels to 0
   for (Trace::Iterator it = exitTraces.begin();
        it != exitTraces.end();
@@ -313,7 +320,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
     removeDeadInstructions(*it);
   }
 
-  // for main trace ends with an unconditional jump copy the target of
+  // If main trace ends with an unconditional jump, copy the target of
   // the jump to the end of the trace
   IRInstruction::List& instList = trace->getInstructionList();
   IRInstruction::Iterator lastInst = instList.end();
@@ -333,6 +340,73 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
     instList.splice(lastInst, targetInstList, instIter, targetInstList.end());
     // delete the jump instruction
     instList.erase(lastInst);
+  }
+
+  // If main trace ends with a conditional jump with no side-effects on exit,
+  // hook it to the exitTrace and make it a TraceExitType::NormalCc
+  if (RuntimeOption::EvalHHIRDirectExit) {
+    IRInstruction::List& instList = trace->getInstructionList();
+    IRInstruction::Iterator tail  = instList.end();
+    IRInstruction* jccInst        = NULL;
+    IRInstruction* exitInst       = NULL;
+    IRInstruction* exitCcInst     = NULL;
+    Opcode opc = OpAdd;
+    // Normally Jcc comes before a Marker
+    for (int idx = 3; idx >= 0; idx--) {
+      tail--; // go back to the previous instruction
+      IRInstruction* inst = *tail;
+      opc = inst->getOpcode();
+      if (opc == ExitTrace) {
+        exitInst = *tail;
+        continue;
+      }
+      if (opc == Marker) {
+        continue;
+      }
+      if (jccCanBeDirectExit(opc)) {
+        jccInst = inst;
+        break;
+      }
+      break;
+    }
+    if (jccCanBeDirectExit(opc)) {
+      SSATmp* dst = jccInst->getDst();
+      Trace* targetTrace = jccInst->getLabel()->getTrace();
+      IRInstruction::List& targetInstList = targetTrace->getInstructionList();
+      IRInstruction::Iterator targetInstIter = targetInstList.begin();
+      targetInstIter++; // skip over label
+
+      // Check for a NormalCc exit with no side effects
+      for (IRInstruction::Iterator it = targetInstIter;
+           it != targetInstList.end();
+           ++it) {
+        IRInstruction* instr = (*it);
+        // Extend to support ExitSlow, ExitSlowNoProgress, ...
+        Opcode opc = instr->getOpcode();
+        if (opc == ExitTraceCc) {
+          exitCcInst = instr;
+          break;
+        } else if (opc == Marker) {
+          continue;
+        } else {
+          // Do not optimize if there are other instructions
+          break;
+        }
+      }
+
+      if (exitInst && exitCcInst &&
+          exitCcInst->getNumSrcs() > NUM_FIXED_SRCS &&
+          exitInst->getNumSrcs() > NUM_FIXED_SRCS) {
+        // Found both exits, link them to Jcc for codegen
+        ASSERT(dst);
+        ExtendedInstruction* exCcInst = (ExtendedInstruction*)exitCcInst;
+        exCcInst->appendExtendedSrc(*irFactory, dst);
+        ExtendedInstruction* exInst = (ExtendedInstruction*)exitInst;
+        exInst->appendExtendedSrc(*irFactory, dst);
+        // Set flag so Jcc and exits know this is active
+        dst->setTCA(kIRDirectJccJmpActive);
+      }
+    }
   }
 }
 

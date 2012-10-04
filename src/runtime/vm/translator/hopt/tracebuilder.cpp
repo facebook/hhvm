@@ -279,11 +279,12 @@ void TraceBuilder::genTraceEnd(uint32 nextPc,
                                           m_fpValue));
 }
 
-Trace* TraceBuilder::genExitTrace(uint32 bcOff,
-                                  int32 stackDeficit,
-                                  uint32 numOpnds,
+Trace* TraceBuilder::genExitTrace(uint32   bcOff,
+                                  int32    stackDeficit,
+                                  uint32   numOpnds,
                                   SSATmp** opnds,
-                                  TraceExitType::ExitType exitType) {
+                                  TraceExitType::ExitType exitType,
+                                  uint32   notTakenBcOff) {
   Trace* exitTrace = makeExitTrace(bcOff);
   exitTrace->appendInstruction(
     m_irFactory.marker(bcOff,
@@ -298,11 +299,25 @@ Trace* TraceBuilder::genExitTrace(uint32 bcOff,
     exitTrace->appendInstruction(spillInst);
   }
   SSATmp* pc = genDefConst<int64>(bcOff);
-  exitTrace->appendInstruction(m_irFactory.exitTrace(exitType,
-                                                   m_curFunc,
-                                                   pc,
-                                                   sp,
-                                                   m_fpValue));
+  IRInstruction* instr = NULL;
+  if (exitType == TraceExitType::NormalCc) {
+    ASSERT(notTakenBcOff != 0);
+    SSATmp* notTakenPC = genDefConst<int64>(notTakenBcOff);
+    instr = m_irFactory.exitTrace(exitType,
+                                  m_curFunc,
+                                  pc,
+                                  sp,
+                                  m_fpValue,
+                                  notTakenPC);
+  } else {
+    ASSERT(notTakenBcOff == 0);
+    instr = m_irFactory.exitTrace(exitType,
+                                  m_curFunc,
+                                  pc,
+                                  sp,
+                                  m_fpValue);
+  }
+  exitTrace->appendInstruction(instr);
   return exitTrace;
 }
 
@@ -1387,6 +1402,7 @@ SSATmp* TraceBuilder::genSpillStack(uint32 stackAdjustment,
   if (stackAdjustment == 0 && numOpnds == 0 && !allocActRec) {
     return m_spValue;
   }
+
   SSATmp* stackAdjustmentOpnd = genDefConst<int64>(stackAdjustment);
   SSATmp* newSpValue = getSSATmp(m_irFactory.spillStack(m_spValue,
                                                         stackAdjustmentOpnd,

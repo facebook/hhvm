@@ -1971,13 +1971,32 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         cg_printf("\"\", \"\",\n");
       }
+      // user attributes
+      ExpressionListPtr paramUserAttrs =
+        dynamic_pointer_cast<ExpressionList>(param->userAttributeList());
+      if (paramUserAttrs) {
+        for (int j = 0; j < paramUserAttrs->getCount(); ++j) {
+          UserAttributePtr a = dynamic_pointer_cast<UserAttribute>(
+            (*paramUserAttrs)[j]);
+          ExpressionPtr expr = a->getExp();
+          Variant v;
+          bool isScalar UNUSED = expr->getScalarValue(v);
+          ASSERT(isScalar);
+          int valueLen = 0;
+          string valueText = SymbolTable::getEscapedText(v, valueLen);
+          cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
+                    CodeGenerator::EscapeLabel(a->getName()).c_str(),
+                    valueLen, valueText.c_str());
+        }
+      }
+      cg_printf("NULL,\n");
     } else {
       cg_printf("\"\", ");
       std::string def = string_cplus_escape(m_paramDefaults[i].data(),
                                             m_paramDefaults[i].size());
       std::string defText = string_cplus_escape(m_paramDefaultTexts[i].data(),
                                                 m_paramDefaultTexts[i].size());
-      cg_printf("\"%s\", \"%s\",\n", def.c_str(), defText.c_str());
+      cg_printf("\"%s\", \"%s\", NULL,\n", def.c_str(), defText.c_str());
     }
   }
   cg_printf("NULL,\n");

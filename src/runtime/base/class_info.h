@@ -123,11 +123,13 @@ public:
   };
 
   struct ParameterInfo {
+    ~ParameterInfo();
     Attribute attribute;
     const char *name;
     const char *type;      // hinted type
     const char *value;     // serialized default value
     const char *valueText; // original PHP code
+    std::vector<const UserAttributeInfo *> userAttrs;
   };
 
   struct MethodInfo {
@@ -281,6 +283,12 @@ public:
   static void GetClassProperties(PropertyVec &props, CStrRef classname);
 
   /**
+   * Read user attributes in from the class map.
+   */
+  static void ReadUserAttributes(const char **&p,
+                                 std::vector<const UserAttributeInfo*> &attrs);
+
+  /**
    * Return lists of names for auto-complete purposes.
    */
   static void GetClassSymbolNames(CArrRef names, bool interface, bool trait,
@@ -411,6 +419,7 @@ public:
    * Read one class's information from specified map pointer and move it.
    */
   ClassInfoUnique(const char **&p);
+  virtual ~ClassInfoUnique();
 
   // implementing ClassInfo
   CStrRef getParentClass() const { return m_parent;}

@@ -266,7 +266,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
     Token type;    type.setText("Continuation");
     Token var;     var.setText(CONTINUATION_OBJECT_NAME);
     params.reset();
-    _p->onParam(params, NULL, type, var, false, NULL);
+    _p->onParam(params, NULL, type, var, false, NULL, NULL);
   }
 }
 
@@ -1389,22 +1389,30 @@ parameter_list:
 ;
 
 non_empty_parameter_list:
-    sm_type_opt T_VARIABLE      { _p->onParam($$,NULL,$1,$2,0,NULL);}
-  | sm_type_opt '&' T_VARIABLE  { _p->onParam($$,NULL,$1,$3,1,NULL);}
-  | sm_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$1,$3,1,&$5);}
-  | sm_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$1,$2,0,&$4);}
-  | non_empty_parameter_list ','
-    sm_type_opt T_VARIABLE      { _p->onParam($$,&$1,$3,$4,0,NULL);}
-  | non_empty_parameter_list ','
-    sm_type_opt '&' T_VARIABLE  { _p->onParam($$,&$1,$3,$5,1,NULL);}
-  | non_empty_parameter_list ','
+    optional_user_attributes
+    sm_type_opt T_VARIABLE             { _p->onParam($$,NULL,$2,$3,0,NULL,&$1);}
+  | optional_user_attributes
+    sm_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$2,$4,1,NULL,&$1);}
+  | optional_user_attributes
     sm_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$3,$5,1,&$7);}
-  | non_empty_parameter_list ','
+    '=' static_scalar                  { _p->onParam($$,NULL,$2,$4,1,&$6,&$1);}
+  | optional_user_attributes
     sm_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$3,$4,0,&$6);}
+    '=' static_scalar                  { _p->onParam($$,NULL,$2,$3,0,&$5,&$1);}
+  | non_empty_parameter_list ','
+    optional_user_attributes
+    sm_type_opt T_VARIABLE             { _p->onParam($$,&$1,$4,$5,0,NULL,&$3);}
+  | non_empty_parameter_list ','
+    optional_user_attributes
+    sm_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$4,$6,1,NULL,&$3);}
+  | non_empty_parameter_list ','
+    optional_user_attributes
+    sm_type_opt '&' T_VARIABLE
+    '=' static_scalar                  { _p->onParam($$,&$1,$4,$6,1,&$8,&$3);}
+  | non_empty_parameter_list ','
+    optional_user_attributes
+    sm_type_opt T_VARIABLE
+    '=' static_scalar                  { _p->onParam($$,&$1,$4,$5,0,&$7,&$3);}
 ;
 
 function_call_parameter_list:
@@ -2103,6 +2111,10 @@ user_attribute_list:
 ;
 non_empty_user_attributes:
     T_SL user_attribute_list T_SR      { $$ = $2;}
+;
+optional_user_attributes:
+    non_empty_user_attributes          { $$ = $1;}
+  |                                    { $$.reset();}
 ;
 variable:
     variable_without_objects           { $$ = $1;}

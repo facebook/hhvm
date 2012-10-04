@@ -31,7 +31,8 @@ class ParameterExpression : public Expression {
 public:
   ParameterExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                       const std::string &type, const std::string &name,
-                      bool ref, ExpressionPtr defaultValue);
+                      bool ref, ExpressionPtr defaultValue,
+                      ExpressionPtr attributeList);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
@@ -43,6 +44,7 @@ public:
   int getLocalEffects() const { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
+  ExpressionPtr userAttributeList() { return m_attributeList; }
   TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
   bool hasTypeHint() const { return !m_type.empty(); }
   const std::string &getTypeHint() const {
@@ -65,6 +67,7 @@ private:
   bool m_ref;
   bool m_hasRTTI;
   ExpressionPtr m_defaultValue;
+  ExpressionPtr m_attributeList;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -522,6 +522,15 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
       }
       pi->type = fpi.typeConstraint().exists() ?
         fpi.typeConstraint().typeName()->data() : "";
+      for (UserAttributeMap::const_iterator it = fpi.userAttributes().begin();
+           it != fpi.userAttributes().end(); ++it) {
+        // convert the typedvalue to a cvarref and push into pi.
+        auto userAttr = new ClassInfo::UserAttributeInfo;
+        ASSERT(it->first->isStatic());
+        userAttr->name = const_cast<StringData*>(it->first);
+        userAttr->setStaticValue(tvAsCVarRef(&it->second));
+        pi->userAttrs.push_back(userAttr);
+      }
       mi->parameters.push_back(pi);
     }
     // XXX ConstantInfo is abused to store static variable metadata, and
@@ -779,6 +788,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     pi.setDefaultValue(m_params[i].defaultValue());
     pi.setPhpCode(m_params[i].phpCode());
     pi.setTypeConstraint(m_params[i].typeConstraint());
+    pi.setUserAttributes(m_params[i].userAttributes());
     f->appendParam(m_params[i].ref(), pi);
   }
   f->shared()->m_localNames.create(m_localNames);

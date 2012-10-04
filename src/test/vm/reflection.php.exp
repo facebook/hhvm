@@ -27,61 +27,78 @@ array(4) {
   [0]=>
   object(ReflectionParameter) (1) {
     ["info"]=>
-    array(4) {
+    array(6) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(1) "a"
       ["type"]=>
       string(0) ""
+      ["function"]=>
+      string(1) "f"
       ["nullable"]=>
       bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
     }
   }
   [1]=>
   object(ReflectionParameter) (1) {
     ["info"]=>
-    array(5) {
+    array(7) {
       ["index"]=>
       int(1)
       ["name"]=>
       string(1) "b"
       ["type"]=>
       string(0) ""
+      ["function"]=>
+      string(1) "f"
       ["nullable"]=>
       bool(true)
       ["ref"]=>
       bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
     }
   }
   [2]=>
   object(ReflectionParameter) (1) {
     ["info"]=>
-    array(6) {
+    array(8) {
       ["index"]=>
       int(2)
       ["name"]=>
       string(1) "c"
       ["type"]=>
       string(0) ""
+      ["function"]=>
+      string(1) "f"
       ["nullable"]=>
       bool(true)
       ["default"]=>
       NULL
       ["defaultText"]=>
       string(4) "null"
+      ["attributes"]=>
+      array(0) {
+      }
     }
   }
   [3]=>
   object(ReflectionParameter) (1) {
     ["info"]=>
-    array(6) {
+    array(8) {
       ["index"]=>
       int(3)
       ["name"]=>
       string(1) "d"
       ["type"]=>
       string(0) ""
+      ["function"]=>
+      string(1) "f"
       ["nullable"]=>
       bool(true)
       ["default"]=>
@@ -95,6 +112,9 @@ array(4) {
       }
       ["defaultText"]=>
       string(26) "array(1, 2, SOME_CONSTANT)"
+      ["attributes"]=>
+      array(0) {
+      }
     }
   }
 }

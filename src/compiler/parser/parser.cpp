@@ -877,16 +877,20 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
-                     bool ref, Token *defValue) {
+                     bool ref, Token *defValue, Token *attr) {
   ExpressionPtr expList;
   if (params) {
     expList = params->exp;
   } else {
     expList = NEW_EXP0(ExpressionList);
   }
+  ExpressionListPtr attrList;
+  if (attr && attr->exp) {
+    attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
+  }
   expList->addElement(NEW_EXP(ParameterExpression, type->text(), var->text(),
-                              ref,
-                              defValue ? defValue->exp : ExpressionPtr()));
+                              ref, defValue ? defValue->exp : ExpressionPtr(),
+                              attrList));
   out->exp = expList;
 }
 
@@ -1475,7 +1479,7 @@ void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
                        dynamic_pointer_cast<StatementList>(stmtList),
                        finallyStmt->stmt);
 }
- 
+
 void Parser::onTry(Token &out, Token &tryStmt, Token &finallyStmt) {
   out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
                        dynamic_pointer_cast<StatementList>(NEW_STMT0(StatementList)),
@@ -1523,7 +1527,7 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
     expList = NEW_EXP0(ExpressionList);
   }
   expList->addElement(NEW_EXP(ParameterExpression, "", param->text(), ref,
-                              ExpressionPtr()));
+                              ExpressionPtr(), ExpressionPtr()));
   out->exp = expList;
 }
 

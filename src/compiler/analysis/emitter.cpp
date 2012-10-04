@@ -4744,6 +4744,22 @@ void EmitterVisitor::emitPostponedMeths() {
           pi.setDefaultValue(dv);
         }
       }
+      ExpressionListPtr paramUserAttrs =
+        dynamic_pointer_cast<ExpressionList>(par->userAttributeList());
+      if (paramUserAttrs) {
+        for (int j = 0; j < paramUserAttrs->getCount(); ++j) {
+          UserAttributePtr a = dynamic_pointer_cast<UserAttribute>(
+            (*paramUserAttrs)[j]);
+          StringData* uaName = StringData::GetStaticString(a->getName());
+          ExpressionPtr uaValue = a->getExp();
+          ASSERT(uaValue);
+          ASSERT(uaValue->isScalar());
+          TypedValue tv;
+          initScalar(tv, uaValue);
+          pi.addUserAttribute(uaName, tv);
+        }
+      }
+
       pi.setRef(par->isRef());
       fe->appendParam(parName, pi);
     }

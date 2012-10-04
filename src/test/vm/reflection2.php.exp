@@ -212,14 +212,19 @@ array(6) {
 }
 object(ReflectionParameter) (1) {
   ["info"]=>
-  array(4) {
+  array(6) {
     ["index"]=>
     int(0)
     ["name"]=>
     string "c"
     ["type"]=>
     string "MyClass"
+    ["function"]=>
+    string "f"
     ["class"]=>
     string "I"
+    ["attributes"]=>
+    array(0) {
+    }
   }
 }

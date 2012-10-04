@@ -759,6 +759,24 @@ static String makeStaticString(const char *s) {
   return sd;
 }
 
+void ClassInfo::ReadUserAttributes(const char **&p,
+                                   std::vector<const UserAttributeInfo*> &userAttrVec) {
+  while (*p) {
+    UserAttributeInfo *userAttr = new UserAttributeInfo();
+    userAttr->name = makeStaticString(*p++);
+
+    const char *len = *p++;
+    const char *valueText = *p++;
+    int64 valueLen = (int64)len;
+    VariableUnserializer vu(valueText,
+                            valueLen,
+                            VariableUnserializer::Serialize);
+    userAttr->setStaticValue(vu.unserialize());
+
+    userAttrVec.push_back(userAttr);
+  }
+}
+
 ClassInfo::MethodInfo *ClassInfo::MethodInfo::getDeclared() {
   if (attribute & ClassInfo::IsRedeclared) {
     RedeclaredCallInfo *ci = *(RedeclaredCallInfo**)((char*)get_globals() +
@@ -801,6 +819,9 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       parameter->value = *p++;
       parameter->valueText = *p++;
 
+      ClassInfo::ReadUserAttributes(p, parameter->userAttrs);
+      p++;
+
       parameters.push_back(parameter);
     }
     p++;
@@ -822,21 +843,7 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
     }
     p++;
 
-    // user attributes
-    while (*p) {
-      UserAttributeInfo *userAttr = new UserAttributeInfo();
-      userAttr->name = makeStaticString(*p++);
-
-      const char *len = *p++;
-      const char *valueText = *p++;
-      int64 valueLen = (int64)len;
-      VariableUnserializer vu(valueText,
-                              valueLen,
-                              VariableUnserializer::Serialize);
-      userAttr->setStaticValue(vu.unserialize());
-
-      userAttrs.push_back(userAttr);
-    }
+    ClassInfo::ReadUserAttributes(p, userAttrs);
   }
 
   p++;
@@ -964,6 +971,12 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   p++;
 }
 
+ClassInfoUnique::~ClassInfoUnique() {
+  for (auto it = m_userAttrVec.begin(); it != m_userAttrVec.end(); ++it) {
+    delete *it;
+  }
+}
+
 const ClassInfo *ClassInfoUnique::getParentClassInfo() const {
   if (m_parentInfo) return m_parentInfo;
   if (m_parent.empty()) return NULL;
@@ -1045,6 +1058,12 @@ void ClassInfo::Load() {
 
 void ClassInfo::postInit() {}
 
+ClassInfo::ParameterInfo::~ParameterInfo() {
+  for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
+    delete *it;
+  }
+}
+
 ClassInfo::MethodInfo::~MethodInfo() {
   if (attribute & ClassInfo::IsRedeclared) {
     for (vector<const ParameterInfo *>::iterator it = parameters.begin();
@@ -1060,6 +1079,9 @@ ClassInfo::MethodInfo::~MethodInfo() {
          it != staticVariables.end(); ++it) {
       delete *it;
     }
+  }
+  for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
+    delete *it;
   }
 }
 

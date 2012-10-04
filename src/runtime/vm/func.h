@@ -34,6 +34,9 @@ typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
 struct Func {
   friend class FuncEmitter;
 
+  typedef hphp_hash_map<const StringData*, TypedValue, string_data_hash,
+                        string_data_isame> UserAttributeMap;
+
   struct ParamInfo { // Parameter default value info.
     // construct a dummy ParamInfo
     ParamInfo() : m_funcletOff(InvalidAbsoluteOffset), m_phpCode(NULL) {
@@ -50,6 +53,7 @@ struct Func {
         (m_phpCode)
         (tcName)
         (tcNullable)
+        (m_userAttributes)
         ;
 
       if (SerDe::deserializing) {
@@ -79,12 +83,24 @@ struct Func {
     void setTypeConstraint(const TypeConstraint& tc) { m_typeConstraint = tc; }
     const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
 
+    void addUserAttribute(const StringData* name, TypedValue tv) {
+      m_userAttributes[name] = tv;
+    }
+    void setUserAttributes(const Func::UserAttributeMap& uaMap) {
+      m_userAttributes = uaMap;
+    }
+    const Func::UserAttributeMap& userAttributes() const {
+      return m_userAttributes;
+    }
+
   private:
     Offset m_funcletOff; // If no default: InvalidAbsoluteOffset.
     TypedValue m_defVal; // Set to uninit null if there is no default value
                          // or if there is a non-scalar default value.
     const StringData* m_phpCode; // eval'able PHP code.
     TypeConstraint m_typeConstraint;
+
+    Func::UserAttributeMap m_userAttributes;
   };
   struct SVInfo { // Static variable info.
     const StringData* name;
@@ -100,9 +116,6 @@ struct Func {
 
   typedef uint32_t FuncId;
   static const FuncId InvalidId = -1LL;
-
-  typedef hphp_hash_map<const StringData*, TypedValue, string_data_hash,
-  string_data_isame> UserAttributeMap;
 
   Func(Unit& unit, Id id, int line1, int line2, Offset base,
       Offset past, const StringData* name, Attr attrs, bool top,

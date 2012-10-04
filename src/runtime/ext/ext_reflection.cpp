@@ -72,6 +72,7 @@ static StaticString s_trait("trait");
 static StaticString s_methods("methods");
 static StaticString s_properties("properties");
 static StaticString s_attributes("attributes");
+static StaticString s_function("function");
 
 static StaticString s_trait_aliases("trait_aliases");
 static StaticString s_varg("varg");
@@ -221,6 +222,7 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
       param.set(s_index, VarNR((int)i));
       param.set(s_name, p->name);
       param.set(s_type, p->type);
+      param.set(s_function, info->name);
       if (classname) {
         param.set(s_class, VarNR(*classname));
       }
@@ -249,6 +251,14 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
       }
       if (p->attribute & ClassInfo::IsReference) {
         param.set(s_ref, true_varNR);
+      }
+      {
+        Array userAttrs = Array::Create();
+        for (unsigned int i = 0; i < p->userAttrs.size(); ++i) {
+          const ClassInfo::UserAttributeInfo *ai = p->userAttrs[i];
+          userAttrs.set(ai->name, ai->getValue());
+        }
+        param.set(s_attributes, VarNR(userAttrs));
       }
       arr.append(param);
     }
@@ -306,6 +316,7 @@ static void set_function_info(Array &ret, const VM::Func* func) {
       const StringData* type = fpi.typeConstraint().exists() ?
         fpi.typeConstraint().typeName() : empty_string.get();
       param.set(s_type, VarNR(type));
+      param.set(s_function, VarNR(func->name()));
       if (func->preClass()) {
         param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
                                  func->preClass()->name()));
@@ -332,6 +343,15 @@ static void set_function_info(Array &ret, const VM::Func* func) {
       }
       if (func->byRef(i)) {
         param.set(s_ref, true_varNR);
+      }
+      {
+        Array userAttrs = Array::Create();
+        for (auto it = fpi.userAttributes().begin();
+             it != fpi.userAttributes().end(); ++it) {
+          userAttrs.set(String(const_cast<StringData*>(it->first)),
+                        tvAsCVarRef(&it->second));
+        }
+        param.set(s_attributes, VarNR(userAttrs));
       }
       arr.append(VarNR(param));
     }

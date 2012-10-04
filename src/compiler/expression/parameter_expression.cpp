@@ -32,10 +32,10 @@ using namespace HPHP;
 ParameterExpression::ParameterExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  const std::string &type, const std::string &name, bool ref,
- ExpressionPtr defaultValue)
+ ExpressionPtr defaultValue, ExpressionPtr attributeList)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression)),
     m_originalType(type), m_name(name), m_ref(ref), m_hasRTTI(false),
-    m_defaultValue(defaultValue) {
+    m_defaultValue(defaultValue), m_attributeList(attributeList) {
   m_type = Util::toLower(type);
   if (m_defaultValue) {
     m_defaultValue->setContext(InParameterExpression);
@@ -46,6 +46,7 @@ ExpressionPtr ParameterExpression::clone() {
   ParameterExpressionPtr exp(new ParameterExpression(*this));
   Expression::deepCopy(exp);
   exp->m_defaultValue = Clone(m_defaultValue);
+  exp->m_attributeList = Clone(m_attributeList);
   return exp;
 }
 

@@ -29,58 +29,9 @@ namespace HPHP {
 bool TestExtApc::RunTests(const std::string &which) {
   bool ret = true;
 
-  RuntimeOption::ApcTableType = RuntimeOption::ApcHashTable;
-  s_apc_store.reset();
-  printf("\nNon shared-memory version:\n");
-  RUN_TEST(test_apc_add);
-  RUN_TEST(test_apc_store);
-  RUN_TEST(test_apc_fetch);
-  RUN_TEST(test_apc_delete);
-  RUN_TEST(test_apc_compile_file);
-  RUN_TEST(test_apc_cache_info);
-  RUN_TEST(test_apc_clear_cache);
-  RUN_TEST(test_apc_define_constants);
-  RUN_TEST(test_apc_load_constants);
-  RUN_TEST(test_apc_sma_info);
-  RUN_TEST(test_apc_filehits);
-  RUN_TEST(test_apc_delete_file);
-  RUN_TEST(test_apc_inc);
-  RUN_TEST(test_apc_dec);
-  RUN_TEST(test_apc_cas);
-  RUN_TEST(test_apc_bin_dump);
-  RUN_TEST(test_apc_bin_load);
-  RUN_TEST(test_apc_bin_dumpfile);
-  RUN_TEST(test_apc_bin_loadfile);
-  RUN_TEST(test_apc_exists);
-
   RuntimeOption::ApcTableType = RuntimeOption::ApcConcurrentTable;
   s_apc_store.reset();
   printf("\nNon shared-memory concurrent version:\n");
-  RUN_TEST(test_apc_add);
-  RUN_TEST(test_apc_store);
-  RUN_TEST(test_apc_fetch);
-  RUN_TEST(test_apc_delete);
-  RUN_TEST(test_apc_compile_file);
-  RUN_TEST(test_apc_cache_info);
-  RUN_TEST(test_apc_clear_cache);
-  RUN_TEST(test_apc_define_constants);
-  RUN_TEST(test_apc_load_constants);
-  RUN_TEST(test_apc_sma_info);
-  RUN_TEST(test_apc_filehits);
-  RUN_TEST(test_apc_delete_file);
-  RUN_TEST(test_apc_inc);
-  RUN_TEST(test_apc_dec);
-  RUN_TEST(test_apc_cas);
-  RUN_TEST(test_apc_bin_dump);
-  RUN_TEST(test_apc_bin_load);
-  RUN_TEST(test_apc_bin_dumpfile);
-  RUN_TEST(test_apc_bin_loadfile);
-  RUN_TEST(test_apc_exists);
-
-  s_apc_store.clear();
-  RuntimeOption::ApcTableType = RuntimeOption::ApcHashTable;
-  s_apc_store.create();
-  printf("\nNon shared-memory version:\n");
   RUN_TEST(test_apc_add);
   RUN_TEST(test_apc_store);
   RUN_TEST(test_apc_fetch);

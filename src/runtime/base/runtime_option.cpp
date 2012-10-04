@@ -314,8 +314,6 @@ std::string RuntimeOption::ApcPrimeLibrary;
 int RuntimeOption::ApcLoadThread = 1;
 std::set<std::string> RuntimeOption::ApcCompletionKeys;
 RuntimeOption::ApcTableTypes RuntimeOption::ApcTableType = ApcConcurrentTable;
-RuntimeOption::ApcTableLockTypes RuntimeOption::ApcTableLockType =
-  ApcReadWriteLock;
 bool RuntimeOption::EnableApcSerialize = true;
 time_t RuntimeOption::ApcKeyMaturityThreshold = 20;
 size_t RuntimeOption::ApcMaximumCapacity = 0;
@@ -852,22 +850,11 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     apc["CompletionKeys"].get(ApcCompletionKeys);
 
     string apcTableType = apc["TableType"].getString("concurrent");
-    if (strcasecmp(apcTableType.c_str(), "hash") == 0) {
-      ApcTableType = ApcHashTable;
-    } else if (strcasecmp(apcTableType.c_str(), "concurrent") == 0) {
+    if (strcasecmp(apcTableType.c_str(), "concurrent") == 0) {
       ApcTableType = ApcConcurrentTable;
     } else {
       throw InvalidArgumentException("apc table type",
                                      "Invalid table type");
-    }
-    string apcLockType = apc["LockType"].getString("readwritelock");
-    if (strcasecmp(apcLockType.c_str(), "readwritelock") == 0) {
-      ApcTableLockType = ApcReadWriteLock;
-    } else if (strcasecmp(apcLockType.c_str(), "mutex") == 0) {
-      ApcTableLockType = ApcMutex;
-    } else {
-      throw InvalidArgumentException("apc lock type",
-                                     "Invalid lock type");
     }
     EnableApcSerialize = apc["EnableApcSerialize"].getBool(true);
     ApcExpireOnSets = apc["ExpireOnSets"].getBool();

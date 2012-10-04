@@ -319,13 +319,13 @@ through PrimeLibrary option. The loading can be done in parallel with
 LoadThread count of threads. Once loading is done, it can write to APC with
 some specified keys in CompletionKeys to tell web application about priming.
 
-      TableType = hash (default) | concurrent
-      LockType = readwritelock | mutex
+      TableType = concurrent (default)
 
-- TableType, LockType
+- TableType
 
-Recommend to use "concurrent", the fastest with least locking.
-When "concurrent", LockType doesn't matter.
+Recommend to use "concurrent", the fastest with least locking, and since its
+the only implemented table type.  (The option remains for future use if we 
+add other apc implementations).
 
       ExpireOnSets = false
       PurgeFrequency = 4096

@@ -21,9 +21,9 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/server/server_stats.h>
-#include <runtime/base/shared/shared_store.h>
 #include <runtime/base/shared/concurrent_shared_store.h>
 #include <util/timer.h>
+#include <util/logger.h>
 #include <sys/mman.h>
 
 namespace HPHP {
@@ -85,15 +85,6 @@ SharedStores::SharedStores() {
 void SharedStores::create() {
   for (int i = 0; i < MAX_SHARED_STORE; i++) {
     switch (RuntimeOption::ApcTableType) {
-      case RuntimeOption::ApcHashTable:
-        switch (RuntimeOption::ApcTableLockType) {
-          case RuntimeOption::ApcMutex:
-            m_stores[i] = new MutexHashTableSharedStore(i);
-            break;
-          default:
-            m_stores[i] = new RwLockHashTableSharedStore(i);
-        }
-        break;
       case RuntimeOption::ApcConcurrentTable:
         m_stores[i] = new ConcurrentTableSharedStore(i);
         break;

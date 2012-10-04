@@ -318,16 +318,10 @@ public:
   static int ApcLoadThread;
   static std::set<std::string> ApcCompletionKeys;
   enum ApcTableTypes {
-    ApcHashTable,
     ApcConcurrentTable
   };
   static ApcTableTypes ApcTableType;
-  enum ApcTableLockTypes {
-    ApcMutex,
-    ApcReadWriteLock
-  };
   static bool EnableApcSerialize;
-  static ApcTableLockTypes ApcTableLockType;
   static time_t ApcKeyMaturityThreshold;
   static size_t ApcMaximumCapacity;
   static int ApcKeyFrequencyUpdatePeriod;

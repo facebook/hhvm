@@ -1188,8 +1188,12 @@ void Unit::prettyPrint(std::ostream &out, size_t startOffset,
         int arg = info.m_arg & ~MetaInfo::VectorArg;
         const char *argKind = info.m_arg & MetaInfo::VectorArg ? "M" : "";
         switch (info.m_kind) {
-          case Unit::MetaInfo::DataType:
+          case Unit::MetaInfo::DataTypeInferred:
+          case Unit::MetaInfo::DataTypePredicted:
             out << " i" << argKind << arg << ":t=" << (int)info.m_data;
+            if (info.m_kind == Unit::MetaInfo::DataTypePredicted) {
+              out << "*";
+            }
             break;
           case Unit::MetaInfo::String: {
             const StringData* sd = lookupLitstrId(info.m_data);

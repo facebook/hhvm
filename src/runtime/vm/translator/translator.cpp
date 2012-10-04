@@ -96,7 +96,7 @@ void Tracelet::constructLiveRanges() {
   };
   // We assign each instruction a sequence number. We do this here, rather
   // than when creating the instruction, to allow splicing and removing
-  // instructions 
+  // instructions
   int sequenceNum = 0;
   for (auto ni = m_instrStream.first; ni; ni = ni->next) {
     ni->sequenceNum = sequenceNum++;
@@ -1534,9 +1534,36 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         ni->imm[0].u_IVA = info.m_data;
         break;
 
-      case Unit::MetaInfo::DataType: {
+      case Unit::MetaInfo::DataTypePredicted: {
+        // If the original type was invalid or predicted, then use the
+        // prediction in the meta-data.
+        ASSERT((unsigned) arg < inputInfos.size());
+
+        SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
+                "newType = %d\n", arg, DataType(info.m_data));
+        InputInfo& ii = inputInfos[arg];
+        DynLocation* dl = tas.recordRead(ii, m_useHHIR, (DataType)info.m_data);
+        NormalizedInstruction* src = findInputSrc(tas.m_t->m_instrStream.last,
+                                                  dl);
+        if (src) {
+          // Update the rtt and mark src's output as predicted if either:
+          //  a) we don't have type information yet (ie, it's KindOfInvalid), or
+          //  b) src's output was predicted. This is assuming that the
+          //     front-end's prediction is more accurate.
+          if (dl->rtt.outerType() == KindOfInvalid || src->outputPredicted) {
+            SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
+                    "replacing oldType = %d with newType = %d\n", arg,
+                    dl->rtt.outerType(), DataType(info.m_data));
+            dl->rtt = RuntimeType((DataType)info.m_data);
+            src->outputPredicted = true;
+            src->outputPredictionStatic = true;
+          }
+        }
+        break;
+      }
+      case Unit::MetaInfo::DataTypeInferred: {
         ASSERT((unsigned)arg < inputInfos.size());
-        SKTRACE(1, ni->source, "MetaInfo DataType for input %d; "
+        SKTRACE(1, ni->source, "MetaInfo DataTypeInferred for input %d; "
                    "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
@@ -2522,6 +2549,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     ni->manuallyAllocInputs = false;
     ni->fuseBranch = false;
     ni->outputPredicted = false;
+    ni->outputPredictionStatic = false;
 
     ASSERT(!t.m_analysisFailed);
     oldStackFrameOffset = stackFrameOffset;
@@ -2546,7 +2574,11 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       InputInfos inputInfos;
       getInputs(t, ni, stackFrameOffset, inputInfos);
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
-      if (noOp && !RuntimeOption::EvalJitUseIR) {
+      if (noOp) {
+        if (RuntimeOption::EvalJitUseIR) {
+          t.m_instrStream.append(ni);
+          ++t.m_numOpcodes;
+        }
         stackFrameOffset = oldStackFrameOffset;
         continue;
       }
@@ -2730,7 +2762,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     }
 
     // Check if we need to break the tracelet.
-    // 
+    //
     // If we've gotten this far, it mostly boils down to control-flow
     // instructions. However, we'll trace through a few unconditional jmps.
     if (ni->op() == OpJmp &&

@@ -289,6 +289,7 @@ class NormalizedInstruction {
   unsigned manuallyAllocInputs:1;
   unsigned invertCond:1;
   unsigned outputPredicted:1;
+  unsigned outputPredictionStatic:1;
   unsigned ignoreInnerType:1;
   /*
    * skipSync indicates that a previous instruction that should have

@@ -35,13 +35,14 @@
 #define __VM_PEEPHOLE_H__
 
 #include <runtime/vm/bytecode.h>
+#include <compiler/analysis/emitter.h>
 
 namespace HPHP {
 namespace VM {
 
 class Peephole {
 public:
-  Peephole(UnitEmitter& ue);
+  Peephole(UnitEmitter& ue, Compiler::MetaInfoBuilder& metaInfo);
 
 private:
   void buildFuncTargets(FuncEmitter* fe);

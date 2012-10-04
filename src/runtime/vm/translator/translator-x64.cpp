@@ -4671,11 +4671,18 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
 
 static void
 planPop(NormalizedInstruction& i) {
+  DataType type = i.inputs[0]->outerType();
+  // Avoid type-prediction guard simply for popping the value out of the stack.
   if (i.prev && i.prev->outputPredicted) {
     i.prev->outputPredicted = false;
-    i.inputs[0]->rtt = RuntimeType(KindOfInvalid);
+    // If the prediction is based on static analysis, the type is either 'type'
+    // or null. So if 'type' is not ref-counted, keeping it avoids the dynamic
+    // check for decref.
+    if (!(i.prev->outputPredictionStatic) || IS_REFCOUNTED_TYPE(type)) {
+      i.inputs[0]->rtt = RuntimeType(KindOfInvalid);
+      type = KindOfInvalid;
+    }
   }
-  DataType type = i.inputs[0]->outerType();
   i.m_txFlags =
     (type == KindOfInvalid || IS_REFCOUNTED_TYPE(type)) ? Supported : Native;
   i.manuallyAllocInputs = true;

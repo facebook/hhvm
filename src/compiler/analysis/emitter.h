@@ -60,6 +60,12 @@ class EmitterVisitor;
 struct MetaInfoBuilder {
   void add(int pos, Unit::MetaInfo::Kind kind,
            bool mVector, int arg, Id data);
+  void addKnownDataType(DataType dt,
+                        bool     dtPredicted,
+                        int      pos,
+                        bool     mVector,
+                        int      arg);
+  void deleteInfo(Offset bcOffset);
   void setForUnit(UnitEmitter&) const;
 
 private:
@@ -160,6 +166,7 @@ private:
       , metaType(META_NONE)
       , notRef(false)
       , notNull(false)
+      , dtPredicted(false)
       , className(nullptr)
       , intval(-1)
       , unnamedLocalStart(InvalidAbsoluteOffset)
@@ -167,8 +174,9 @@ private:
     {}
     char sym;
     MetaType metaType;
-    bool notRef;
-    bool notNull;
+    bool notRef:1;
+    bool notNull:1;
+    bool dtPredicted:1;
     union {
       const StringData* name;   // META_LITSTR
       DataType dt;              // META_DATA_TYPE
@@ -216,7 +224,7 @@ public:
   void setKnownCls(const StringData* s, bool nonNull);
   void setNotRef();
   bool getNotRef() const;
-  void setKnownType(DataType dt);
+  void setKnownType(DataType dt, bool predicted = false);
   void cleanTopMeta();
   DataType getKnownType(int index = -1, bool noRef = true) const;
   void setClsBaseType(ClassBaseType);
@@ -227,6 +235,7 @@ public:
   const StringData* getName(int index) const;
   const StringData* getClsName(int index) const;
   bool isCls(int index) const;
+  bool isTypePredicted(int index = -1 /* stack top */) const;
   void set(int index, char sym);
   unsigned size() const;
   bool empty() const;

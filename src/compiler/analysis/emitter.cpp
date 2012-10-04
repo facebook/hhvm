@@ -717,7 +717,7 @@ void SymbolicStack::setInt(int64 v) {
   m_symStack.back().intval = v;
 }
 
-void SymbolicStack::setKnownType(DataType dt) {
+void SymbolicStack::setKnownType(DataType dt, bool predicted /* = false */) {
   ASSERT(m_symStack.size());
   SymEntry& se = m_symStack.back();
   if (se.className) {
@@ -728,6 +728,7 @@ void SymbolicStack::setKnownType(DataType dt) {
     se.metaType = META_DATA_TYPE;
     se.metaData.dt = dt;
   }
+  se.dtPredicted = predicted;
 }
 
 DataType SymbolicStack::getKnownType(int index, bool noRef) const {
@@ -742,6 +743,12 @@ DataType SymbolicStack::getKnownType(int index, bool noRef) const {
     }
   }
   return KindOfUnknown;
+}
+
+bool SymbolicStack::isTypePredicted(int index /* = -1, stack top */) const {
+  if (index < 0) index += m_symStack.size();
+  ASSERT((unsigned)index < m_symStack.size());
+  return m_symStack[index].dtPredicted;
 }
 
 void SymbolicStack::cleanTopMeta() {
@@ -980,13 +987,31 @@ void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
     info.clear();
   } else if (i == 1 && info[0].m_kind == Unit::MetaInfo::NopOut) {
     return;
-  } else if (kind == Unit::MetaInfo::DataType) {
+  } else if (kind == Unit::MetaInfo::DataTypeInferred ||
+             kind == Unit::MetaInfo::DataTypePredicted) {
     // Put DataType first, because if applyInputMetaData saw Class
     // first, it would call recordRead which mark the input as
     // needing a guard before we saw the DataType
     i = 0;
   }
   info.insert(info.begin() + i, Unit::MetaInfo(kind, arg, data));
+}
+
+void MetaInfoBuilder::addKnownDataType(DataType dt,
+                                       bool     dtPredicted,
+                                       int      pos,
+                                       bool     mVector,
+                                       int      arg) {
+  if (dt != KindOfUnknown) {
+    Unit::MetaInfo::Kind dtKind = (dtPredicted ?
+                                   Unit::MetaInfo::DataTypePredicted :
+                                   Unit::MetaInfo::DataTypeInferred);
+    add(pos, dtKind, mVector, arg, dt);
+  }
+}
+
+void MetaInfoBuilder::deleteInfo(Offset bcOffset) {
+  m_metaMap.erase(bcOffset);
 }
 
 void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
@@ -1088,11 +1113,11 @@ void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
     return;
   }
 
-  if (arg >= 0 && pos >= 0 && expected == StackSym::C) {
-    DataType dt = m_evalStack.getKnownType();
-    if (dt != KindOfUnknown) {
-      m_metaInfo.add(pos, Unit::MetaInfo::DataType, false, arg, dt);
-    }
+  if (arg >= 0 && pos >= 0 &&
+      (expected == StackSym::C || expected == StackSym::R)) {
+    m_metaInfo.addKnownDataType(m_evalStack.getKnownType(),
+                                m_evalStack.isTypePredicted(),
+                                pos, false, arg);
   }
 
   char sym = m_evalStack.top();
@@ -1132,10 +1157,9 @@ void EmitterVisitor::popSymbolicLocal(Opcode op, int arg, int pos) {
     m_evalStack.consumeBelowTop(belowTop - 1);
   } else {
     if (arg >= 0 && pos >= 0) {
-      DataType dt = m_evalStack.getKnownType();
-      if (dt != KindOfUnknown) {
-        m_metaInfo.add(pos, Unit::MetaInfo::DataType, false, arg, dt);
-      }
+      m_metaInfo.addKnownDataType(m_evalStack.getKnownType(),
+                                  m_evalStack.isTypePredicted(),
+                                  pos, false, arg);
     }
     popEvalStack(StackSym::L);
   }
@@ -1655,6 +1679,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
   emitPostponedSinits();
   emitPostponedCinits();
   emitPostponedClosureCtors();
+  Peephole peephole(m_ue, m_metaInfo);
   m_metaInfo.setForUnit(m_ue);
 }
 
@@ -1682,24 +1707,42 @@ static StringData* getClassName(ExpressionPtr e) {
   return NULL;
 }
 
+static DataType getPredictedDataType(ExpressionPtr expr) {
+  if (!expr->maybeInited()) {
+    return KindOfUninit;
+  }
+  // Note that expr->isNonNull() may be false,
+  // but that's ok since this is just a prediction.
+  TypePtr act = expr->getActualType();
+  if (!act) {
+    return KindOfUnknown;
+  }
+  return act->getDataType();
+}
+
 void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn) {
   int ref = -1;
   if (fn->hasAnyContext(Expression::RefValue |
                         Expression::DeepReference |
                         Expression::LValue |
                         Expression::OprLValue |
-                        Expression::UnsetContext) ||
-      fn->isUnused()) {
+                        Expression::UnsetContext)) {
     return;
   }
+  bool voidReturn = false;
   if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
+    if (!(fn->getFuncScope()->getReturnType())) {
+      voidReturn = true;
+    }
   } else if (!fn->getName().empty()) {
     FunctionScope::FunctionInfoPtr fi =
       FunctionScope::GetFunctionInfo(fn->getName());
     if (!fi || !fi->getMaybeRefReturn()) ref = false;
   }
-  if (ref >= 0 &&
+
+  if (!fn->isUnused() &&
+      ref >= 0 &&
       (!ref || !fn->hasAnyContext(Expression::AccessContext |
                                   Expression::ObjectContext))) {
     /* we dont support V in M-vectors, so leave it as an R in that
@@ -1712,6 +1755,17 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn) {
       e.UnboxR();
     }
     m_metaInfo.add(cur, Unit::MetaInfo::NopOut, false, 0, 0);
+  }
+
+  if (voidReturn) {
+    m_evalStack.setKnownType(KindOfNull, false /* inferred */);
+    m_evalStack.setNotRef();
+  } else if (!ref) {
+    DataType dt = getPredictedDataType(fn);
+    if (dt != KindOfUnknown) {
+      m_evalStack.setKnownType(dt, true /* predicted */);
+    }
+    m_evalStack.setNotRef();
   }
 }
 
@@ -3584,10 +3638,9 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
     char sym = m_evalStack.get(iFirst);
     char symFlavor = StackSym::GetSymFlavor(sym);
     char marker = StackSym::GetMarker(sym);
-    DataType dt = m_evalStack.getKnownType(iFirst);
-    if (dt != KindOfUnknown) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::DataType, true, 0, dt);
-    }
+    m_metaInfo.addKnownDataType(m_evalStack.getKnownType(iFirst),
+                                m_evalStack.isTypePredicted(iFirst),
+                                m_ue.bcPos(), true, 0);
     if (const StringData* cls = m_evalStack.getClsName(iFirst)) {
       Id id = m_ue.mergeLitstr(cls);
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Class, true, 0, id);
@@ -3665,6 +3718,9 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::MVecPropClass,
                      false, mcodeNum, m_ue.mergeLitstr(cls));
     }
+    m_metaInfo.addKnownDataType(m_evalStack.getKnownType(i),
+                                m_evalStack.isTypePredicted(i),
+                                m_ue.bcPos(), true, i - iFirst);
 
     switch (marker) {
       case StackSym::M: {
@@ -6240,8 +6296,6 @@ static Unit* emitHHBCUnit(AnalysisResultPtr ar, FileScopePtr fsp,
     fev.emitMakeUnitFatal(emitter, ex.getMessage());
   }
 
-  Peephole peephole(*ue);
-
   if (commit) {
     HPHP::VM::Repo::get().commitUnit(ue, unitOrigin);
   }
@@ -6518,6 +6572,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     }
   }
 
+  Peephole peephole(*ue, metaInfo);
   metaInfo.setForUnit(*ue);
 
   Unit* unit = ue->create();

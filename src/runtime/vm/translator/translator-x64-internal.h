@@ -714,7 +714,7 @@ private:
 
 #define EMIT_RCALL(a, ni, dest, ...) \
   EMIT_CALL(a, dest, __VA_ARGS__);   \
-  recordReentrantCall(ni);
+  recordReentrantCall(a, ni);
 
 // typeReentersOnRelease --
 //   Returns whether the release helper for a given type can

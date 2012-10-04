@@ -381,7 +381,7 @@ public:
   }
 
   static inline bool isUnboxed(Tag t) {
-    return t <= Type::Cell;
+    return (t <= Type::Cell && t != Type::None);
   }
 
   static inline bool isRefCounted(Tag t) {
@@ -389,7 +389,11 @@ public:
   }
 
   static inline bool isStaticallyKnown(Tag t) {
-    return t != Type::Cell && t != Type::Gen;
+    return t != Type::Cell && t != Type::Gen && t != Type::None;
+  }
+
+  static inline bool isStaticallyKnownUnboxed(Tag t) {
+    return isUnboxed(t) && t != Type::Cell;
   }
 
   static inline bool needsStaticBitCheck(Tag t) {

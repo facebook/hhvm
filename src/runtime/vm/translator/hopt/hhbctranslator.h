@@ -126,15 +126,16 @@ public:
   void emitFalse();
   void emitCGetL(int32 id);
   void emitCGetL2(int32 id);
-  void emitCGetS();
-  void emitCGetProp(int propOffset, bool isPropOnStack);
+  void emitCGetS(const Class* cls, Type::Tag resultType, bool isInferedType);
+  void emitCGetProp(int propOffset, bool isPropOnStack, Type::Tag resultType,
+                    bool isInferedType);
   void emitVGetL(int32 id);
-  void emitCGetG();
+  void emitCGetG(Type::Tag resultType, bool isInferedType);
   void emitVGetG();
   void emitVGetS(); // TODO (tx64 doesn't have a trans for this)
   void emitVGetM(); // (tx64 doesn't have a trans for this);
   void emitSetL(int32 id);
-  void emitSetS();
+  void emitSetS(const Class* cls);
   void emitSetG();
   void emitSetProp(int propOffset, bool isPropOnStack); // object + offset
   void emitBindL(int32 id);
@@ -189,7 +190,7 @@ public:
                            bool mightNotBeStatic);
   void emitFPushObjMethodD(int32 numParams,
                            int32 methodNameStrId,
-                           const StringData* baseClassName);
+                           const Class* baseClass);
   void emitFPushCtorD(int32 numParams, int32 classNameStrId);
   void emitFPushCtor(int32 numParams);
   void emitFPushContFunc();
@@ -319,7 +320,7 @@ private:
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   void emitIncDecMem(bool pre, bool inc, SSATmp* propAddr, Trace* exitTrace);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
-  SSATmp* getClsPropAddr(Trace* exit);
+  SSATmp* getClsPropAddr(const Class*);
   void   decRefPropAddr(SSATmp* propAddr);
   Trace* getExitTrace(uint32 targetBcOff);
   Trace* getExitSlowTrace(Offset nextByteCode = -1);
@@ -328,6 +329,7 @@ private:
   void emitInterpOne(Type::Tag type, Trace* target = NULL);
   void emitInterpOneOrPunt(Type::Tag type, Trace* target = NULL);
   void emitBinaryArith(Opcode, bool isBitOp = false);
+  void checkTypeStackAux(uint32 stackIndex, Type::Tag type, Trace* nextTrace);
 
   /*
    * Accessors for the current function being compiled and its
@@ -350,23 +352,23 @@ private:
    */
   SSATmp* push(SSATmp* tmp);
   SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb.genIncRef(tmp)); }
-  SSATmp* pop(Type::Tag protoflavor, Trace* exitTrace);
-  void    popDecRef(Type::Tag protoflavor, Trace* exitTrace);
+  SSATmp* pop(Type::Tag type, Trace* exitTrace);
+  void    popDecRef(Type::Tag type, Trace* exitTrace);
   SSATmp* pop()  { return pop(Type::Gen, NULL);       }
   SSATmp* popC() { return pop(Type::Cell, NULL);      }
   SSATmp* popV() { return pop(Type::BoxedCell, NULL); }
   SSATmp* popR() { return pop(Type::Gen, NULL);       }
   SSATmp* popA() { return pop(Type::ClassRef, NULL);  }
   SSATmp* popF() { return pop(Type::Gen, NULL);       }
-  SSATmp* topC(uint32 i = 0) { return top(Type::Cell, i, NULL); }
+  SSATmp* topC(uint32 i = 0) { return top(Type::Cell, i); }
   SSATmp* spillStack(bool allocActRec = false);
   SSATmp* loadStackAddr(int32 offset);
-  SSATmp* top(Type::Tag protoflavor,
-              uint32 index = 0,
-              Trace* exitTrace = NULL);
-  void    extendStack(uint32 index, Trace* exitTrace = NULL);
+  SSATmp* top(Type::Tag type, uint32 index = 0);
+  void    extendStack(uint32 index,
+                      Type::Tag type = Type::Gen,
+                      Trace* exitTrace = NULL);
   void    replace(uint32 index, SSATmp* tmp);
-  SSATmp* checkFlavorDesc(SSATmp* tmp, Type::Tag protoflavor);
+  void    refineType(SSATmp* tmp, Type::Tag type);
   /*
    * Fields
    */

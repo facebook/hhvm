@@ -123,6 +123,8 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
     case LdCachedClass: return simplifyLdCachedClass(src1);
     case LdCls:
     case LdObjMethod:
+    case LdClsPropAddr:
+      return simplifyLdClsPropAddr(src1, src2);
 
     case RetVal:
     case FreeActRec:
@@ -212,8 +214,6 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
     case LdPropAddr:
     case LdClsCns:
       return NULL;
-    case LdClsPropAddr:
-      return simplifyLdClsPropAddr(src1, src2, label);
     case Unbox:
          return simplifyUnbox(type, src1, label);
     case JmpGt:
@@ -870,14 +870,13 @@ SSATmp* Simplifier::simplifyIsSet(SSATmp* src, bool negate) {
   return NULL;
 }
 
-SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls, SSATmp* prop,
-                                          LabelInstruction* label) {
+SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls, SSATmp* prop) {
   if (cls->getType() == Type::ClassRef) {
     IRInstruction* clsInst = cls->getInstruction();
     if (clsInst->getOpcode() == LdCls) {
       SSATmp* clsName = clsInst->getSrc(0);
       ASSERT(clsName->isConst() && clsName->getType() == Type::StaticStr);
-      return genLdClsPropAddr(clsName, prop, label);
+      return genLdClsPropAddr(clsName, prop);
     }
   }
   return NULL;
@@ -946,9 +945,8 @@ SSATmp* Simplifier::genDefBool(bool val) {
 }
 
 SSATmp* Simplifier::genLdClsPropAddr(SSATmp* src1,
-                                     SSATmp* src2,
-                                     LabelInstruction* label) {
-  return m_tb->genLdClsPropAddr(src1, src2, label ? label->getTrace() : NULL);
+                                     SSATmp* src2) {
+  return m_tb->genLdClsPropAddr(src1, src2);
 }
 
 }}} // namespace HPHP::VM::JIT

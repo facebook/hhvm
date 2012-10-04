@@ -72,14 +72,13 @@ public:
                       LabelInstruction* label);
   SSATmp* simplifyJmpZ(SSATmp* src, LabelInstruction* label);
   SSATmp* simplifyJmpNz(SSATmp* src, LabelInstruction* label);
-  SSATmp* simplifyLdClsPropAddr(SSATmp* src1, SSATmp* src2,
-                                LabelInstruction* label);
+  SSATmp* simplifyLdClsPropAddr(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyAllocActRec(SSATmp* src1, SSATmp* src2, SSATmp* src3,
                               SSATmp* src4, SSATmp* src5);
 private:
   SSATmp* genDefInt(int64 val);
   SSATmp* genDefBool(bool val);
-  SSATmp* genLdClsPropAddr(SSATmp* src1, SSATmp* src2, LabelInstruction* label);
+  SSATmp* genLdClsPropAddr(SSATmp* src1, SSATmp* src2);
   TraceBuilder* m_tb;
 
 };

@@ -59,34 +59,49 @@ SSATmp* HhbcTranslator::push(SSATmp* tmp) {
   return tmp;
 }
 
-SSATmp* HhbcTranslator::checkFlavorDesc(SSATmp* tmp, Type::Tag flavor) {
-  // If flavor is more refined that tmp's type, reset tmp's type to this flavor
-  if (Type::isMoreRefined(flavor, tmp->getType())) {
-    tmp->getInstruction()->setType(flavor);
+void HhbcTranslator::refineType(SSATmp* tmp, Type::Tag type) {
+  // If type is more refined that tmp's type, reset tmp's type to type
+  IRInstruction* inst = tmp->getInstruction();
+  if (Type::isMoreRefined(type, inst->getType())) {
+    inst->setType(type);
+    // If tmp is incref or move, then chase down its src
+    Opcode opc = inst->getOpcode();
+    if (opc == Mov || opc == IncRef) {
+      refineType(inst->getSrc(0), type);
+    } else {
+      // at this point, we have no business refining the type of any
+      // instructions other than the following
+      ASSERT (opc == LdLoc   || opc == LdStack  ||
+              opc == LdMemNR || opc == LdPropNR ||
+              opc == LdRefNR || opc == LdClsCns);
+    }
   }
-  return tmp;
 }
 
-SSATmp* HhbcTranslator::pop(Type::Tag flavor, Trace* exitTrace) {
+SSATmp* HhbcTranslator::pop(Type::Tag type, Trace* exitTrace) {
   SSATmp* opnd = m_evalStack.pop();
   if (opnd == NULL) {
     uint32 stackOff = m_stackDeficit;
     m_stackDeficit++;
     // we use an exit trace in case a later genGuardType adds a
     // guardType to this instruction
-    opnd = m_tb.genLdStack(stackOff, flavor, exitTrace);
-  } else {
-    checkFlavorDesc(opnd, flavor);
+    return m_tb.genLdStack(stackOff, type, exitTrace);
+  }
+  if (exitTrace == NULL) {
+    // if we have an exit trace label, then we are guarding that the
+    // top has a particular type and we should not use refineType
+    // to refine tmp's type.
+    refineType(opnd, type);
   }
   return opnd;
 }
 
 // type is the type expected on the stack.
-void HhbcTranslator::popDecRef(Type::Tag flavor, Trace* exitTrace) {
+void HhbcTranslator::popDecRef(Type::Tag type, Trace* exitTrace) {
   SSATmp* src = m_evalStack.pop();
   if (src == NULL) {
     uint32 stackOff = m_stackDeficit;
-    m_tb.genDecRefStack(flavor, stackOff, exitTrace);
+    m_tb.genDecRefStack(type, stackOff, exitTrace);
     m_stackDeficit++;
     return;
   } else {
@@ -94,29 +109,33 @@ void HhbcTranslator::popDecRef(Type::Tag flavor, Trace* exitTrace) {
   }
 }
 
-void HhbcTranslator::extendStack(uint32 index, Trace* exitTrace) {
+void HhbcTranslator::extendStack(uint32 index,
+                                 Type::Tag type,
+                                 Trace* exitTrace) {
   ASSERT(index != (uint32)-1);
-  // We don't know what flavor description to expect, so we use a generic
-  // type here. If this ends up pushing a ldStack, checkFlavorDesc
-  // will later fix up the type to the expected flavor.
-  SSATmp* tmp = pop(Type::Gen, exitTrace);
+  // We don't know what type description to expect, so we use a generic
+  // type here. If this ends up pushing a ldStack, refineType
+  // will later fix up the type to the expected type.
+  SSATmp* tmp;
   if (index != 0) {
-    extendStack(index-1, exitTrace);
+    tmp = pop(Type::Gen, exitTrace);
+    extendStack(index-1, type, exitTrace);
+  } else {
+    tmp = pop(type, exitTrace);
   }
   push(tmp);
 }
 
-SSATmp* HhbcTranslator::top(Type::Tag flavor,
-                            uint32 index,
-                            Trace* exitTrace) {
+SSATmp* HhbcTranslator::top(Type::Tag type, uint32 index) {
   ASSERT(index != (uint32)-1);
   SSATmp* tmp = m_evalStack.top(index);
   if (!tmp) {
-    extendStack(index, exitTrace);
+    extendStack(index);
     tmp = m_evalStack.top(index);
   }
   ASSERT(tmp);
-  return checkFlavorDesc(tmp, flavor);
+  refineType(tmp, type);
+  return tmp;
 }
 
 void HhbcTranslator::replace(uint32 index, SSATmp* tmp) {
@@ -673,11 +692,18 @@ void HhbcTranslator::emitContHandle() {
   emitInterpOne(Type::None);
 }
 
-SSATmp* HhbcTranslator::getClsPropAddr(Trace* exit) {
-  SSATmp* cls = popA();
+SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls) {
+  SSATmp* clsTmp = popA();
   SSATmp* prop = popC();
-  // TODO: fallback to interpone if prop is not the right type
-  return m_tb.genLdClsPropAddr(cls, prop, exit);
+  if (!prop->isConst() || prop->getType() != Type::StaticStr) {
+    // TODO: fallback to interpone if prop is not the right type
+    PUNT(ClsPropAddr);
+  }
+  if (cls) {
+    const StringData* clsName = cls->preClass()->name();
+    clsTmp = m_tb.genDefConst<const StringData*>(clsName);
+  }
+  return m_tb.genLdClsPropAddr(clsTmp, prop);
 }
 
 #if 0
@@ -699,7 +725,7 @@ void HhbcTranslator::decRefPropAddr(SSATmp* propAddr) {
 
 void HhbcTranslator::emitIncDecS(bool pre, bool inc) {
   Trace* exitTrace = getExitSlowTrace();
-  SSATmp* propAddr = getClsPropAddr(exitTrace);
+  SSATmp* propAddr = getClsPropAddr(NULL);
   emitIncDecMem(pre, inc, propAddr, exitTrace);
   decRefPropAddr(propAddr);
 }
@@ -751,26 +777,46 @@ void HhbcTranslator::emitSetProp(int offset, bool isPropOnStack) {
   m_tb.genDecRef(obj);
 }
 
-void HhbcTranslator::emitCGetProp(int offset, bool isPropOnStack) {
+void HhbcTranslator::emitCGetProp(int offset,
+                                  bool isPropOnStack,
+                                  Type::Tag resultType,
+                                  bool isInferedType) {
   TRACE(3, "%u: CGetM %d\n", m_bcOff, offset);
-  Trace* exitTrace = getExitSlowTrace();
 
+  Trace* exitTrace1 = getExitSlowTrace();
+  Trace* exitTrace2 = getExitSlowTrace();
   if (isPropOnStack) {
     UNUSED SSATmp* prop = popC();
   }
   SSATmp* obj  = popC();
   if (obj->getType() != Type::Obj) {
-    PUNT(SetProp_nonobj);
+    PUNT(CGetProp_nonobj);
   }
   SSATmp* propOffset = m_tb.genDefConst<int64>(offset);
   SSATmp* val;
-  if (m_unboxPtrs) {
-    SSATmp* propPtr = m_tb.genUnboxPtr(m_tb.genLdPropAddr(obj, propOffset));
-    val = m_tb.genLdMem(propPtr, Type::Cell, exitTrace);
+
+  if (isInferedType) {
+    ASSERT(Type::isStaticallyKnownUnboxed(resultType));
+    val = m_tb.genLdProp(obj, propOffset, resultType, NULL);
   } else {
-    val = m_tb.genLdProp(obj, propOffset, Type::Cell, exitTrace);
+    if (resultType == Type::None) {
+      // result type not predicted
+      resultType = Type::Cell;
+    } else {
+      ASSERT(Type::isStaticallyKnownUnboxed(resultType));
+    }
+    // This code is currently correct, but once we enable type
+    // prediction for CGetM, we should exit normally to a trace
+    // executes the CGet as cell type (including the incref of the
+    // result and decref of the obj) and exits to the next bytecode
+    if (m_unboxPtrs) {
+      SSATmp* propPtr = m_tb.genUnboxPtr(m_tb.genLdPropAddr(obj, propOffset));
+      val = m_tb.genLdMem(propPtr, resultType, exitTrace1);
+    } else {
+      val = m_tb.genLdProp(obj, propOffset, resultType, exitTrace1);
+    }
+    m_tb.genCheckUninit(val, exitTrace2);
   }
-  m_tb.genCheckUninit(val, exitTrace);
   pushIncRef(val);
   m_tb.genDecRef(obj);
 }
@@ -796,8 +842,7 @@ void HhbcTranslator::emitIssetL(int32 id) {
 
 void HhbcTranslator::emitIssetS() {
   TRACE(3, "%u: IssetS\n", m_bcOff);
-  Trace* exitTrace = getExitSlowTrace();
-  SSATmp* propAddr = getClsPropAddr(exitTrace);
+  SSATmp* propAddr = getClsPropAddr(NULL);
   push(m_tb.genQueryOp(IsSet, propAddr));
   decRefPropAddr(propAddr);
 }
@@ -822,7 +867,7 @@ void HhbcTranslator::emitEmptyL(int32 id) {
 void HhbcTranslator::emitEmptyS() {
   TRACE(3, "%u: EmptyS\n", m_bcOff);
   Trace* exitTrace = getExitSlowTrace();
-  SSATmp* propAddr = getClsPropAddr(exitTrace);
+  SSATmp* propAddr = getClsPropAddr(NULL);
   SSATmp* ld = m_tb.genLdMem(propAddr, Type::Cell, exitTrace);
   push(m_tb.genNot(m_tb.genConvToBool(ld)));
   decRefPropAddr(propAddr);
@@ -1046,10 +1091,7 @@ void HhbcTranslator::emitFPushContFunc() {
 
 void HhbcTranslator::emitFPushObjMethodD(int32 numParams,
                                          int32 methodNameStrId,
-                                         const StringData* baseClassName) {
-  ASSERT(!baseClassName || baseClassName->isStatic());
-  const Class* baseClass = (baseClassName ?
-                            Unit::lookupClass(baseClassName) : NULL);
+                                         const Class* baseClass) {
   const StringData* methodName = lookupStringId(methodNameStrId);
   TRACE(3, "%u: FPushObjMethodD %s %d\n",
         m_bcOff,
@@ -1296,49 +1338,51 @@ Trace* HhbcTranslator::guardTypeLocal(uint32 localIndex,
   return nextTrace;
 }
 
-// Similar to guardTypeLocal, but this takes a slow/side exit instead of
+// Similar to guardTypeLocal, but this takes a exit instead of
 // a guard exit.
-void HhbcTranslator::checkTypeLocal(uint32 localIndex,
-                                    Type::Tag type) {
-  Trace* exitTrace = getExitSlowTrace();
+void HhbcTranslator::checkTypeLocal(uint32 localIndex, Type::Tag type) {
+  Trace* exitTrace = getExitTrace(m_bcOff);
   m_tb.killLocalValue(localIndex);
   m_tb.genLdLoc(localIndex, type, exitTrace);
 }
 
-void HhbcTranslator::assertTypeLocal(uint32 localIndex,
-                                     Type::Tag type) {
+void HhbcTranslator::assertTypeLocal(uint32 localIndex, Type::Tag type) {
   m_tb.genLdLoc(localIndex, type, NULL);
 }
+
+void HhbcTranslator::checkTypeStackAux(uint32 stackIndex,
+                                       Type::Tag type,
+                                       Trace* nextTrace) {
+  ASSERT(stackIndex != (uint32)-1);
+  SSATmp* tmp = m_evalStack.top(stackIndex);
+  if (!tmp) {
+    extendStack(stackIndex, type, nextTrace);
+    tmp = m_evalStack.top(stackIndex);
+  }
+  ASSERT(tmp);
+  tmp = m_tb.genGuardType(tmp, type, nextTrace);
+  replace(stackIndex, tmp);
+}
+
 
 Trace* HhbcTranslator::guardTypeStack(uint32 stackIndex,
                                       Type::Tag type,
                                       Trace* nextTrace) {
-  ASSERT(stackIndex != (uint32)-1);
   if (nextTrace == NULL) {
     nextTrace = getGuardExit();
   }
-  // note that outerType passed as flavor description is stronger than
-  // the usual prototypes passed to top
-  // XXX revisit this
-  SSATmp* tmp = top(type, stackIndex, nextTrace);
-  tmp = m_tb.genGuardType(tmp, type, nextTrace);
-  replace(stackIndex, tmp);
+  checkTypeStackAux(stackIndex, type, nextTrace);
   return nextTrace;
 }
 
 void HhbcTranslator::checkTypeStack(uint32 stackIndex,
                                     Type::Tag type,
                                     Offset nextByteCode) {
-  ASSERT(stackIndex != (uint32)-1);
-  Trace* exitTrace = getExitSlowTrace(nextByteCode);
-  SSATmp* tmp = top(type, stackIndex, exitTrace);
-  tmp = m_tb.genGuardType(tmp, type, exitTrace);
-  replace(stackIndex, tmp);
+  Trace* exitTrace = getExitTrace(nextByteCode);
+  checkTypeStackAux(stackIndex, type, exitTrace);
 }
 
-// XXX make sure this doesn't generate a guard
-void HhbcTranslator::assertTypeStack(uint32 stackIndex,
-                                     Type::Tag type) {
+void HhbcTranslator::assertTypeStack(uint32 stackIndex, Type::Tag type) {
   ASSERT(stackIndex != (uint32)-1);
   // top() generates the LdStack if necessary, and sets 'type' accordingly
   SSATmp* tmp = top(type, stackIndex);
@@ -1520,31 +1564,59 @@ void HhbcTranslator::emitAGetL(int id) {
   }
 }
 
-void HhbcTranslator::emitCGetS() {
+void HhbcTranslator::emitCGetS(const Class* cls,
+                               Type::Tag resultType,
+                               bool isInferedType) {
+
   TRACE(3, "%u: CGetS\n", m_bcOff);
   Trace* exitTrace = getExitSlowTrace();
-  SSATmp* propPtr = getClsPropAddr(exitTrace);
-  pushIncRef(m_tb.genLdMem(m_unboxPtrs ? m_tb.genUnboxPtr(propPtr) : propPtr,
-                           Type::Cell,
-                           exitTrace));
+  SSATmp* propPtr = getClsPropAddr(cls);
+  SSATmp* val;
+  if (isInferedType) {
+    ASSERT(Type::isStaticallyKnownUnboxed(resultType));
+    val = m_tb.genLdMem(propPtr, resultType, NULL);
+  } else {
+    if (resultType == Type::None) {
+      // result type not predicted
+      resultType = Type::Cell;
+    } else {
+      ASSERT(Type::isStaticallyKnownUnboxed(resultType));
+    }
+    // This code is currently correct, but once we enable type
+    // prediction for CGetS, we should exit normally to a trace that
+    // executes the CGetS as cell type (including the incref of the
+    // result) and exits to the next bytecode.
+    val = m_tb.genLdMem(m_unboxPtrs ? m_tb.genUnboxPtr(propPtr) : propPtr,
+                        resultType,
+                        exitTrace);
+  }
+  pushIncRef(val);
   decRefPropAddr(propPtr);
 }
 
 // XXX TODO
 void HhbcTranslator::emitVGetS() {
   TRACE(3, "%u: VGetS\n", m_bcOff);
-  UNUSED Trace* exitTrace = getExitSlowTrace();
-  UNUSED SSATmp* propAddr = getClsPropAddr(exitTrace);
+  SSATmp* propAddr = getClsPropAddr(NULL);
 // XXX TODO
 //  push(m_tb.genLdMem());
   PUNT(VGetS);
   decRefPropAddr(propAddr);
 }
 
-void HhbcTranslator::emitCGetG() {
+void HhbcTranslator::emitCGetG(Type::Tag resultType, bool isInferedType) {
   spillStack();
   popC();
-  emitInterpOneOrPunt(Type::Cell);
+  if (isInferedType) {
+    ASSERT(Type::isUnboxed(resultType) &&
+           resultType != Type::Cell &&
+           resultType != Type::None);
+  } else {
+    ASSERT(resultType == Type::None); // Type prediction shouldn't happen
+    resultType = Type::Cell;
+  }
+  // TODO: Consider type inference once we support CGetG translation
+  emitInterpOneOrPunt(resultType);
 }
 
 void HhbcTranslator::emitSetG() {
@@ -1554,10 +1626,10 @@ void HhbcTranslator::emitSetG() {
   emitInterpOneOrPunt(Type::Cell);
 }
 
-void HhbcTranslator::emitSetS() {
+void HhbcTranslator::emitSetS(const Class* cls) {
   Trace* exitTrace = getExitSlowTrace();
   SSATmp* src = popC();
-  SSATmp* propAddrToDecRef = getClsPropAddr(exitTrace);
+  SSATmp* propAddrToDecRef = getClsPropAddr(cls);
   SSATmp* propPtr = m_unboxPtrs ? m_tb.genUnboxPtr(propAddrToDecRef)
                                 : propAddrToDecRef;
   SSATmp* prevValue = m_tb.genLdMem(propPtr, Type::Cell, exitTrace);

@@ -647,17 +647,20 @@ SSATmp* TraceBuilder::genGuardType(SSATmp* src,
     // XXX TODO: generate a jump here and return NULL
     return genInstruction(GuardType, type, src, target);
   }
-  // at this point, type is more refined that src's type, so we need a
-  // guard
+  // type is more refined that src's type, so we need a guard
   IRInstruction* srcInst = src->getInstruction();
   Opcode opc = srcInst->getOpcode();
+  // if srcInst is an incref or move, then Chase down its src
+  while (opc == Mov || opc == IncRef) {
+    srcInst->setType(type);
+    srcInst = srcInst->getSrc(0)->getInstruction();
+    opc = srcInst->getOpcode();
+    srcType = srcInst->getType();
+  }
   if (srcInst->getLabel() &&
-      // TODO: Revisit this list of opcodes to make sure its complete
-      // At this point only LdStack could happen, but as we stitch traces
-      // and do type prediction, more opcodes will occur.
       (opc == LdLoc   || opc == LdStack  ||
-       opc == LdMemNR || opc == LdPropNR || opc == LdRefNR ||
-       opc == LdClsCns)) {
+       opc == LdMemNR || opc == LdPropNR ||
+       opc == LdRefNR || opc == LdClsCns)) {
     if (srcType == Type::Gen ||
         (srcType == Type::Cell && !Type::isBoxed(type))) {
       srcInst->setType(type);
@@ -729,13 +732,8 @@ SSATmp* TraceBuilder::genLdPropAddr(SSATmp* obj, SSATmp* prop) {
   return genInstruction(LdPropAddr, Type::PtrToGen, obj, prop);
 }
 
-SSATmp* TraceBuilder::genLdClsPropAddr(SSATmp* cls,
-                                       SSATmp* prop,
-                                       Trace* exitTrace) {
-  if (!prop->isConst() || prop->getType() != Type::StaticStr) {
-    PUNT(LdClsPropAddr);
-  }
-  return genInstruction(LdClsPropAddr, Type::PtrToGen, cls, prop, exitTrace);
+SSATmp* TraceBuilder::genLdClsPropAddr(SSATmp* cls, SSATmp* prop) {
+  return genInstruction(LdClsPropAddr, Type::PtrToGen, cls, prop);
 }
 
 SSATmp* TraceBuilder::genLdFunc(SSATmp* funcName, SSATmp* actRec) {

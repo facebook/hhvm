@@ -63,6 +63,16 @@ void removeDeadInstructions(Trace* trace) {
   trace->getInstructionList().remove_if(instructionIsMarkedDead);
 }
 
+bool isUnguardedLoad(IRInstruction* inst) {
+  Opcode opc = inst->getOpcode();
+  Type::Tag type = inst->getType();
+  return (opc == LdStack && (type == Type::Gen || type == Type::Cell))
+          || (opc == LdLoc && type == Type::Gen)
+          || (opc == LdRefNR && type == Type::Cell)
+          || (opc == LdMemNR && type == Type::Cell &&
+              inst->getSrc(0)->getType() == Type::PtrToCell);
+}
+
 void initInstructions(Trace* trace, IRInstruction::List& wl) {
   IRInstruction::List instructions = trace->getInstructionList();
   IRInstruction::Iterator it;
@@ -72,17 +82,17 @@ void initInstructions(Trace* trace, IRInstruction::List& wl) {
     IRInstruction* inst = *it;
     ASSERT(inst->getParent() == trace);
     Simplifier::copyProp(inst);
-    Opcode opc = inst->getOpcode();
-    Type::Tag type = inst->getType();
-    if ((opc == LdStack && (type == Type::Gen || type == Type::Cell))
-        || (opc == LdLoc && type == Type::Gen)
-        || (opc == LdRefNR && type == Type::Cell)) {
+    // if this is a load that does not generate a guard, then get rid
+    // of its label so that its not an essential control-flow
+    // instruction
+    if (isUnguardedLoad(inst)) {
       // LdStack and LdLoc instructions that produce generic types
       // and LdStack instruction that produce Cell types will not
       // generate guards, so remove the label from this instruction so
       // that its no longer an essential control-flow instruction
       inst->setLabel(NULL);
     }
+    Opcode opc = inst->getOpcode();
     // decref of anything that isn't ref counted is a nop
     if ((opc == DecRef || opc == DecRefNZ) && !isRefCounted(inst->getSrc(0))) {
       inst->setId(DEAD);

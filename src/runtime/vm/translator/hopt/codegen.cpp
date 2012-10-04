@@ -3125,7 +3125,6 @@ Address CodeGenerator::cgLdPropNR(IRInstruction* inst) {
   register_name_t objReg = obj->getAssignedLoc();
   if (prop->isConst()) {
     int64 offset = prop->getConstValAsInt();
-    // XXX why don't we check whether loaded property is uninit
     cgLoad(type, dst, objReg, offset, label);
   } else {
     CG_PUNT(LdPropNR);
@@ -3555,11 +3554,14 @@ Address CodeGenerator::cgLdClsCns(IRInstruction* inst) {
 
   TargetCache::CacheHandle ch = TargetCache::allocClassConstant(fullName);
   // note that we bail from the trace if the target cache entry is empty
-  // for this class constant or the type assertion fails.
+  // for this class constant or if the type assertion fails.
   // TODO: handle the slow case helper call.
   cgLoad(type, dst, LinearScan::rTlPtr, ch,
          // no need to worry about boxed types if loading a cell
          type == Type::Cell ? NULL : label);
+  // Note that this cgCheckUninit checks that the target cache entry has a
+  // valid entry.
+  // TODO: Is this cgCheckUninit necesary if type is set?
   cgCheckUninit(dst, label); // slow path helper call
   return start;
 }

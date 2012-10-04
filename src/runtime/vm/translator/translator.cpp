@@ -427,21 +427,6 @@ static uint32 get_random()
  */
 static DataType
 predictOutputs(NormalizedInstruction* ni) {
-  if (ni->op() == OpClsCnsD) {
-    const NamedEntityPair& cne =
-      curFrame()->m_func->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
-    StringData* cnsName = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
-    Class* cls = *cne.second->clsList();
-    if (cls && (cls = cls->getCached())) {
-      DataType dt = cls->clsCnsType(cnsName);
-      if (dt != KindOfUninit) {
-        TRACE(1, "clscnsd: %s:%s prediction type %d\n",
-              cne.first->data(), cnsName->data(), dt);
-        return dt;
-      }
-    }
-  }
-
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     ni->outputPredicted = true;
@@ -465,6 +450,21 @@ predictOutputs(NormalizedInstruction* ni) {
       break;
     }
     return DataType(dt);
+  }
+
+  if (ni->op() == OpClsCnsD) {
+    const NamedEntityPair& cne =
+      curFrame()->m_func->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
+    StringData* cnsName = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
+    Class* cls = *cne.second->clsList();
+    if (cls && (cls = cls->getCached())) {
+      DataType dt = cls->clsCnsType(cnsName);
+      if (dt != KindOfUninit) {
+        TRACE(1, "clscnsd: %s:%s prediction type %d\n",
+              cne.first->data(), cnsName->data(), dt);
+        return dt;
+      }
+    }
   }
 
   std::pair<DataType, double> pred = std::make_pair(KindOfInvalid, 0.0);

@@ -656,8 +656,8 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "argRest",
-    'desc'   => "Gets remaining arguments all together as a single string.",
+    'name'   => "lineRest",
+    'desc'   => "Gets rest of line all together as a single string.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,

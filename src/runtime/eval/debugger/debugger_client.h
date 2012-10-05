@@ -179,7 +179,8 @@ public:
   bool arg(int index, const char *s);
   int argCount() { return m_args.size();}
   std::string argValue(int index);
-  std::string argRest(int index);
+  // The entire line after that argument, un-escaped.
+  std::string lineRest(int index);
   StringVec *args() { return &m_args;}
 
   /**
@@ -385,6 +386,8 @@ private:
   std::string m_commandCanonical;
   std::string m_prevCmd;
   StringVec m_args;
+  // m_args[i]'s last character is m_line[m_argIdx[i]]
+  std::vector<int> m_argIdx;
   std::string m_code;
 
   MacroPtrVec m_macros;
@@ -422,7 +425,7 @@ private:
   // helpers
   void runImpl();
   std::string getPrompt();
-  void addToken(std::string &token);
+  void addToken(std::string &token, int idx);
   void parseCommand(const char *line);
   void shiftCommand();
   bool parse(const char *line);

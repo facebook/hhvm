@@ -45,7 +45,7 @@ bool CmdComplete::help(DebuggerClient *client) {
 
 bool CmdComplete::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
-  std::string text = client->argRest(1);
+  std::string text = client->lineRest(1);
   std::vector<std::string> res = client->getAllCompletions(text);
   for (size_t i = 0; i < res.size(); ++i) {
     client->print(res[i].c_str());

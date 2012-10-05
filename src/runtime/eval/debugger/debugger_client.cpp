@@ -1457,6 +1457,7 @@ const char **DebuggerClient::GetCommands() {
 void DebuggerClient::shiftCommand() {
   if (m_command.size() > 1) {
     m_args.insert(m_args.begin(), m_command.substr(1));
+    m_argIdx.insert(m_argIdx.begin(), 1);
     m_command = m_command.substr(0, 1);
   }
 }
@@ -1525,8 +1526,11 @@ bool DebuggerClient::process() {
   if (isApiMode()) {
     // construct m_line based on m_command and m_args
     m_line = m_command;
+    m_argIdx.clear();
+    m_argIdx.push_back(m_line.size());
     for (unsigned int i = 0; i < m_args.size(); i++) {
       m_line += " " + m_args[i];
+      m_argIdx.push_back(m_line.size());
     }
   }
   switch (tolower(m_command[0])) {
@@ -1566,7 +1570,8 @@ bool DebuggerClient::process() {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-void DebuggerClient::addToken(std::string &token) {
+void DebuggerClient::addToken(std::string &token, int idx) {
+  m_argIdx.push_back(idx);
   if (m_command.empty()) {
     m_command = token;
   } else {
@@ -1581,13 +1586,16 @@ void DebuggerClient::parseCommand(const char *line) {
 
   char quote = 0;
   string token;
-  for (const char *p = line; *p; p++) {
-    char ch = *p;
+  m_argIdx.clear();
+  int i = 0;
+  for (i = 0; line[i]; i++) {
+    char ch = line[i];
+    char next = line[i+1];
     switch (ch) {
       case ' ':
         if (!quote) {
           if (!token.empty()) {
-            addToken(token);
+            addToken(token, i);
           }
         } else {
           token += ch;
@@ -1600,21 +1608,21 @@ void DebuggerClient::parseCommand(const char *line) {
           token += ch;
           break;
         }
-        if (quote == ch && (p[1] == ' ' || p[1] == 0)) {
+        if (quote == ch && (next == ' ' || next == 0)) {
           token += ch;
-          addToken(token);
+          addToken(token, i);
           quote = 0;
           break;
         }
         token += ch;
         break;
       case '\\':
-        if ((p[1] == ' ' || p[1] == '"' || p[1] == '\'' || p[1] == '\\')) {
+        if ((next == ' ' || next == '"' || next == '\'' || next == '\\')) {
           if (quote == '\'') {
             token += ch;
           }
-          p++;
-          token += *p;
+          i++;
+          token += next;
           break;
         }
         // fall through
@@ -1624,7 +1632,7 @@ void DebuggerClient::parseCommand(const char *line) {
     }
   }
   if (!token.empty()) {
-    addToken(token);
+    addToken(token, i);
   }
 }
 
@@ -1685,17 +1693,9 @@ std::string DebuggerClient::argValue(int index) {
   return "";
 }
 
-std::string DebuggerClient::argRest(int index) {
+std::string DebuggerClient::lineRest(int index) {
   ASSERT(index > 0);
-  --index;
-  if (index >= 0 && index < (int)m_args.size()) {
-    string ret = m_args[index];
-    while (++index < (int)m_args.size()) {
-      ret += " " + m_args[index];
-    }
-    return ret;
-  }
-  return "";
+  return m_line.substr(m_argIdx[index - 1] + 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

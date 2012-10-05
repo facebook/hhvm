@@ -410,23 +410,23 @@ static Array get_method_info(const ClassInfo *cls, CVarRef name) {
   return ret;
 }
 
-Array f_hphp_get_method_info(CVarRef cname, CVarRef name) {
+Array f_hphp_get_method_info(CVarRef cls, CVarRef name) {
   if (hhvm) {
-    const VM::Class* cls = get_cls(cname);
-    if (!cls) return Array();
-    if (cls->clsInfo()) {
+    const VM::Class* c = get_cls(cls);
+    if (!c) return Array();
+    if (c->clsInfo()) {
       /*
        * Default arguments for builtins arent setup correctly,
        * so use the ClassInfo instead.
        */
-      return get_method_info(cls->clsInfo(), name);
+      return get_method_info(c->clsInfo(), name);
     }
     CStrRef method_name = name.toString();
-    const VM::Func* func = cls->lookupMethod(method_name.get());
+    const VM::Func* func = c->lookupMethod(method_name.get());
     if (!func) {
-      if (cls->attrs() & VM::AttrAbstract) {
-        VM::ClassSet::const_iterator it = cls->allInterfaces().begin(),
-          end = cls->allInterfaces().end();
+      if (c->attrs() & VM::AttrAbstract) {
+        VM::ClassSet::const_iterator it = c->allInterfaces().begin(),
+          end = c->allInterfaces().end();
         while (it != end) {
           func = (*it)->lookupMethod(method_name.get());
           if (func) break;
@@ -440,10 +440,10 @@ Array f_hphp_get_method_info(CVarRef cname, CVarRef name) {
     return ret;
   } else {
     String className;
-    if (cname.isObject()) {
-      className = cname.toObject()->o_getClassName();
+    if (cls.isObject()) {
+      className = cls.toObject()->o_getClassName();
     } else {
-      className = cname.toString();
+      className = cls.toString();
     }
 
     const ClassInfo *cls = ClassInfo::FindClassInterfaceOrTrait(className);

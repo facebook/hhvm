@@ -322,9 +322,9 @@ String c_DebuggerClientCmdUser::t_argvalue(int index) {
   return m_client->argValue(index + 1);
 }
 
-String c_DebuggerClientCmdUser::t_argrest(int index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::argrest);
-  return m_client->argRest(index + 1);
+String c_DebuggerClientCmdUser::t_linerest(int index) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClientCmdUser, DebuggerClientCmdUser::linerest);
+  return m_client->lineRest(index + 1);
 }
 
 Array c_DebuggerClientCmdUser::t_args() {

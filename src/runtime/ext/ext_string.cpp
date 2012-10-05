@@ -329,7 +329,7 @@ Variant f_strrchr(CStrRef haystack, CVarRef needle) {
 }
 
 Variant f_strstr(CStrRef haystack, CVarRef needle,
-                 bool before_needle /* =false */) {
+                 bool before_needle /* = false */) {
   Variant ret = f_strpos(haystack, needle);
   if (same(ret, false)) {
     return false;

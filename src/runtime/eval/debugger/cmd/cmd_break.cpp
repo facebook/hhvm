@@ -313,9 +313,9 @@ bool CmdBreak::validate(DebuggerClient *client, BreakPointInfoPtr bpi,
                         int index) {
   ++index;
   if (client->arg(index, "if")) {
-    bpi->setClause(client->argRest(++index), true);
+    bpi->setClause(client->lineRest(++index), true);
   } else if (client->arg(index, "&&")) {
-    bpi->setClause(client->argRest(++index), false);
+    bpi->setClause(client->lineRest(++index), false);
   }
 
   if (bpi->valid()) {

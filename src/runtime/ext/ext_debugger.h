@@ -118,8 +118,8 @@ class c_DebuggerClientCmdUser : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(argcount);
   public: String t_argvalue(int index);
   DECLARE_METHOD_INVOKE_HELPERS(argvalue);
-  public: String t_argrest(int index);
-  DECLARE_METHOD_INVOKE_HELPERS(argrest);
+  public: String t_linerest(int index);
+  DECLARE_METHOD_INVOKE_HELPERS(linerest);
   public: Array t_args();
   DECLARE_METHOD_INVOKE_HELPERS(args);
   public: Variant t_send(CObjRef cmd);

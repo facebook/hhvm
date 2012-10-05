@@ -2393,7 +2393,7 @@ TypedValue* tg_21DebuggerClientCmdUser_getCommand(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_arg(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_argCount(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_argValue(VM::ActRec *ar);
-TypedValue* tg_21DebuggerClientCmdUser_argRest(VM::ActRec *ar);
+TypedValue* tg_21DebuggerClientCmdUser_lineRest(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_args(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_send(VM::ActRec *ar);
 TypedValue* tg_21DebuggerClientCmdUser_xend(VM::ActRec *ar);
@@ -5327,7 +5327,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DebuggerClientCmdUser[] = {
   { "arg", tg_21DebuggerClientCmdUser_arg },
   { "argCount", tg_21DebuggerClientCmdUser_argCount },
   { "argValue", tg_21DebuggerClientCmdUser_argValue },
-  { "argRest", tg_21DebuggerClientCmdUser_argRest },
+  { "lineRest", tg_21DebuggerClientCmdUser_lineRest },
   { "args", tg_21DebuggerClientCmdUser_args },
   { "send", tg_21DebuggerClientCmdUser_send },
   { "xend", tg_21DebuggerClientCmdUser_xend },

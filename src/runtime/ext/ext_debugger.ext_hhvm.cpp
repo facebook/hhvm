@@ -1710,8 +1710,8 @@ TypedValue* tg_21DebuggerClientCmdUser_argValue(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::String HPHP::c_DebuggerClientCmdUser::t_argrest(int)
-_ZN4HPHP23c_DebuggerClientCmdUser9t_argrestEi
+HPHP::String HPHP::c_DebuggerClientCmdUser::t_linerest(int)
+_ZN4HPHP23c_DebuggerClientCmdUser10t_linerestEi
 
 (return value) => rax
 _rv => rdi
@@ -1719,20 +1719,20 @@ this_ => rsi
 index => rdx
 */
 
-Value* th_21DebuggerClientCmdUser_argRest(Value* _rv, ObjectData* this_, int index) asm("_ZN4HPHP23c_DebuggerClientCmdUser9t_argrestEi");
+Value* th_21DebuggerClientCmdUser_lineRest(Value* _rv, ObjectData* this_, int index) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_linerestEi");
 
-TypedValue* tg1_21DebuggerClientCmdUser_argRest(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_argRest(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, HPHP::VM::ActRec* ar, long long count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  th_21DebuggerClientCmdUser_argRest((Value*)(rv), (this_), (int)(args[-0].m_data.num));
+  th_21DebuggerClientCmdUser_lineRest((Value*)(rv), (this_), (int)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_argRest(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_lineRest(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1742,22 +1742,22 @@ TypedValue* tg_21DebuggerClientCmdUser_argRest(HPHP::VM::ActRec *ar) {
         if ((args-0)->m_type == KindOfInt64) {
           rv._count = 0;
           rv.m_type = KindOfString;
-          th_21DebuggerClientCmdUser_argRest((Value*)(&(rv)), (this_), (int)(args[-0].m_data.num));
+          th_21DebuggerClientCmdUser_lineRest((Value*)(&(rv)), (this_), (int)(args[-0].m_data.num));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
         } else {
-          tg1_21DebuggerClientCmdUser_argRest(&rv, ar, count , this_);
+          tg1_21DebuggerClientCmdUser_lineRest(&rv, ar, count , this_);
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
         }
       } else {
-        throw_wrong_arguments_nr("DebuggerClientCmdUser::argRest", count, 1, 1, 1);
+        throw_wrong_arguments_nr("DebuggerClientCmdUser::lineRest", count, 1, 1, 1);
       }
     } else {
-      throw_instance_method_fatal("DebuggerClientCmdUser::argRest");
+      throw_instance_method_fatal("DebuggerClientCmdUser::lineRest");
     }
     rv.m_data.num = 0LL;
     rv._count = 0;

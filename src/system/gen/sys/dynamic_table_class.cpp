@@ -3236,10 +3236,10 @@ extern const CallInfo ci_DebuggerClientCmdUser$$print = { (void*)&c_DebuggerClie
 extern const CallInfo ci_DebuggerClientCmdUser$$args = { (void*)&c_DebuggerClientCmdUser::i_args, (void*)&c_DebuggerClientCmdUser::ifa_args, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$getstacktrace = { (void*)&c_DebuggerClientCmdUser::i_getstacktrace, (void*)&c_DebuggerClientCmdUser::ifa_getstacktrace, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$xend = { (void*)&c_DebuggerClientCmdUser::i_xend, (void*)&c_DebuggerClientCmdUser::ifa_xend, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_DebuggerClientCmdUser$$argrest = { (void*)&c_DebuggerClientCmdUser::i_argrest, (void*)&c_DebuggerClientCmdUser::ifa_argrest, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$helptitle = { (void*)&c_DebuggerClientCmdUser::i_helptitle, (void*)&c_DebuggerClientCmdUser::ifa_helptitle, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$printframe = { (void*)&c_DebuggerClientCmdUser::i_printframe, (void*)&c_DebuggerClientCmdUser::ifa_printframe, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$getcommand = { (void*)&c_DebuggerClientCmdUser::i_getcommand, (void*)&c_DebuggerClientCmdUser::ifa_getcommand, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_DebuggerClientCmdUser$$linerest = { (void*)&c_DebuggerClientCmdUser::i_linerest, (void*)&c_DebuggerClientCmdUser::ifa_linerest, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$code = { (void*)&c_DebuggerClientCmdUser::i_code, (void*)&c_DebuggerClientCmdUser::ifa_code, 4, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$__construct = { (void*)&c_DebuggerClientCmdUser::i___construct, (void*)&c_DebuggerClientCmdUser::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_DebuggerClientCmdUser$$getcurrentlocation = { (void*)&c_DebuggerClientCmdUser::i_getcurrentlocation, (void*)&c_DebuggerClientCmdUser::ifa_getcurrentlocation, 0, 4, 0x0000000000000000LL};
@@ -3394,8 +3394,8 @@ Variant c_DebuggerClientCmdUser::i_argcount(MethodCallPackage &mcp, CArrRef para
 Variant c_DebuggerClientCmdUser::i_argvalue(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_argvalue);
 }
-Variant c_DebuggerClientCmdUser::i_argrest(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa_argrest);
+Variant c_DebuggerClientCmdUser::i_linerest(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_linerest);
 }
 Variant c_DebuggerClientCmdUser::i_args(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_args);
@@ -3645,14 +3645,14 @@ Variant NEVER_INLINE c_DebuggerClientCmdUser::ifa_argvalue(MethodCallPackage &mc
   CVarRef arg0(a0);
   return (self->t_argvalue(arg0));
 }
-Variant NEVER_INLINE c_DebuggerClientCmdUser::ifa_argrest(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant NEVER_INLINE c_DebuggerClientCmdUser::ifa_linerest(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_argrest, coo_DebuggerClientCmdUser);
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_linerest, coo_DebuggerClientCmdUser);
   }
   c_DebuggerClientCmdUser *self ATTRIBUTE_UNUSED (static_cast<c_DebuggerClientCmdUser*>(mcp.obj));
-  if (UNLIKELY(count != 1)) return throw_wrong_arguments("argrest", count, 1, 1, 1);
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("linerest", count, 1, 1, 1);
   CVarRef arg0(a0);
-  return (self->t_argrest(arg0));
+  return (self->t_linerest(arg0));
 }
 Variant NEVER_INLINE c_DebuggerClientCmdUser::ifa_args(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -3726,7 +3726,6 @@ extern const MethodCallInfoTable cw_DebuggerClientCmdUser$$call_info_table[] = {
   { 0x14A35941, 1, 4, "args", &ci_DebuggerClientCmdUser$$args },
   { 0x4476E8C2, 1, 3, "ask", &ci_DebuggerClientCmdUser$$ask },
   { 0x05743383, 1, 4, "xend", &ci_DebuggerClientCmdUser$$xend },
-  { 0x3A2E8C06, 0, 7, "argRest", &ci_DebuggerClientCmdUser$$argrest },
   { 0x61E1A7C6, 0, 10, "printFrame", &ci_DebuggerClientCmdUser$$printframe },
   { 0x6AEFD706, 1, 13, "addCompletion", &ci_DebuggerClientCmdUser$$addcompletion },
   { 0x47203EC7, 1, 8, "tutorial", &ci_DebuggerClientCmdUser$$tutorial },
@@ -3745,6 +3744,7 @@ extern const MethodCallInfoTable cw_DebuggerClientCmdUser$$call_info_table[] = {
   { 0x091F89D7, 1, 11, "helpSection", &ci_DebuggerClientCmdUser$$helpsection },
   { 0x5D9C73DA, 1, 8, "argValue", &ci_DebuggerClientCmdUser$$argvalue },
   { 0x5C03659C, 1, 18, "getCurrentLocation", &ci_DebuggerClientCmdUser$$getcurrentlocation },
+  { 0x604063A0, 1, 8, "lineRest", &ci_DebuggerClientCmdUser$$linerest },
   { 0x2CF083E5, 1, 4, "quit", &ci_DebuggerClientCmdUser$$quit },
   { 0x13CAC3E8, 0, 10, "getCommand", &ci_DebuggerClientCmdUser$$getcommand },
   { 0x2BE299A8, 1, 3, "arg", &ci_DebuggerClientCmdUser$$arg },
@@ -3755,11 +3755,11 @@ extern const MethodCallInfoTable cw_DebuggerClientCmdUser$$call_info_table[] = {
 };
 extern const int cw_DebuggerClientCmdUser$$call_info_index[] = {
   63,
-  -1,0,1,2,-1,-1,3,6,
-  -1,-1,7,9,-1,10,-1,11,
-  -1,-1,-1,14,15,-1,17,19,
-  -1,-1,20,-1,21,-1,-1,-1,
-  -1,-1,-1,-1,-1,22,-1,-1,
+  -1,0,1,2,-1,-1,3,5,
+  -1,-1,6,8,-1,9,-1,10,
+  -1,-1,-1,13,14,-1,16,18,
+  -1,-1,19,-1,20,-1,-1,-1,
+  21,-1,-1,-1,-1,22,-1,-1,
   23,-1,-1,-1,-1,25,-1,26,
   -1,27,-1,-1,-1,28,-1,-1,
   -1,-1,-1,-1,-1,-1,-1,-1,

@@ -315,7 +315,7 @@ bool CmdPrint::onClient(DebuggerClient *client) {
       break;
     }
   }
-  m_body = client->argRest(index);
+  m_body = client->lineRest(index);
   if (m_isForWatch) {
     client->addWatch(format, m_body);
     return true;

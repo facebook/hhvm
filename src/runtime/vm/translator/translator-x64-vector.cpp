@@ -2396,7 +2396,6 @@ TranslatorX64::emitPropGet(const NormalizedInstruction& i,
 
 static void
 raiseUndefProp(ObjectData* base, const StringData* name) {
-  VMRegAnchor _;
   static_cast<Instance*>(base)->raiseUndefProp(name);
 }
 
@@ -2446,23 +2445,12 @@ TranslatorX64::translateCGetMProp(const Tracelet& t,
       base.isLocal() ? BASE_LOCAL : BASE_CELL,
       useCtx ? DYN_CONTEXT : STATIC_CONTEXT,
       name ? STATIC_NAME : DYN_NAME);
-    if (useCtx) {
-      EMIT_CALL(a,
-                 lookupFn,
-                 IMM(ch),
-                 base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
-                 V(propLoc),
-                 A(outLoc),
-                 R(rVmFp));
-    } else {
-      EMIT_CALL(a,
-                 lookupFn,
-                 IMM(ch),
-                 base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
-                 V(propLoc),
-                 A(outLoc));
-    }
-    recordReentrantCall(i);
+    EMIT_RCALL(a, i, lookupFn,
+               IMM(ch),
+               base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
+               V(propLoc),
+               A(outLoc),
+               R(rVmFp));
   }
   m_regMap.invalidate(i.outStack->location);
 }
@@ -2944,23 +2932,13 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
       base.isLocal() || base.isVariant() ? BASE_LOCAL : BASE_CELL,
       useCtx ? DYN_CONTEXT : STATIC_CONTEXT,
       name ? STATIC_NAME : DYN_NAME);
-    if (useCtx) {
-      EMIT_CALL(a, setFn,
-                 IMM(ch),
-                 base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
-                 V(propLoc),
-                 R(rhsReg),
-                 IMM(val.rtt.valueType()),
-                 R(rVmFp));
-    } else {
-      EMIT_CALL(a, setFn,
-                 IMM(ch),
-                 base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
-                 V(propLoc),
-                 R(rhsReg),
-                 IMM(val.rtt.valueType()));
-    }
-    recordReentrantCall(i);
+    EMIT_RCALL(a, i, setFn,
+               IMM(ch),
+               base.isVariant() ? DEREF(baseLoc) : V(baseLoc),
+               V(propLoc),
+               R(rhsReg),
+               IMM(val.rtt.valueType()),
+               R(rVmFp));
     if (!base.isLocal() && base.isVariant()) {
       m_regMap.allocInputReg(i, kBaseIdx);
       emitDecRef(i, getReg(baseLoc), KindOfRef);

@@ -1222,7 +1222,7 @@ LookupResult VMExecutionContext::lookupObjMethod(const Func*& f,
                                                  const Class* cls,
                                                  const StringData* methodName,
                                                  bool raise /* = false */) {
-  Class* ctx = arGetContextClass(m_fp);
+  Class* ctx = arGetContextClass(getFP());
   f = lookupMethodCtx(cls, methodName, ctx, ObjMethod, false);
   if (!f) {
     f = cls->lookupMethod(s___call.get());
@@ -1247,7 +1247,7 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
                                     const StringData* methodName,
                                     ObjectData* obj,
                                     bool raise /* = false */) {
-  Class* ctx = arGetContextClass(m_fp);
+  Class* ctx = arGetContextClass(getFP());
   f = lookupMethodCtx(cls, methodName, ctx, ClsMethod, false);
   if (!f) {
     if (obj && obj->instanceof(cls)) {
@@ -1285,7 +1285,7 @@ LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
                                                   bool raise /* = false */) {
   f = cls->getCtor();
   if (!(f->attrs() & AttrPublic)) {
-    Class* ctx = arGetContextClass(m_fp);
+    Class* ctx = arGetContextClass(getFP());
     f = lookupMethodCtx(cls, NULL, ctx, CtorMethod, raise);
     if (!f) {
       // If raise was true than lookupMethodCtx should have thrown,
@@ -1324,12 +1324,12 @@ ObjectData* VMExecutionContext::createObjectOnly(StringData* clsName) {
 
 ActRec* VMExecutionContext::getStackFrame() {
   VMRegAnchor _;
-  return m_fp;
+  return getFP();
 }
 
 ObjectData* VMExecutionContext::getThis(bool skipFrame /* = false */) {
   VMRegAnchor _;
-  ActRec* fp = m_fp;
+  ActRec* fp = getFP();
   if (skipFrame) {
     fp = getPrevVMState(fp);
     if (!fp) return NULL;
@@ -1342,7 +1342,7 @@ ObjectData* VMExecutionContext::getThis(bool skipFrame /* = false */) {
 
 CStrRef VMExecutionContext::getContextClassName(bool skipFrame /* = false */) {
   VMRegAnchor _;
-  ActRec* ar = m_fp;
+  ActRec* ar = getFP();
   ASSERT(ar != NULL);
   if (skipFrame) {
     ar = getPrevVMState(ar);
@@ -1359,7 +1359,7 @@ CStrRef VMExecutionContext::getContextClassName(bool skipFrame /* = false */) {
 
 CStrRef VMExecutionContext::getParentContextClassName(bool skip /* = false */) {
   VMRegAnchor _;
-  ActRec* ar = m_fp;
+  ActRec* ar = getFP();
   ASSERT(ar != NULL);
   if (skip) {
     ar = getPrevVMState(ar);
@@ -1385,7 +1385,7 @@ CStrRef VMExecutionContext::getParentContextClassName(bool skip /* = false */) {
 CStrRef VMExecutionContext::getContainingFileName(
   bool skipFrame /* = false */) {
   VMRegAnchor _;
-  ActRec* ar = m_fp;
+  ActRec* ar = getFP();
   if (ar == NULL) return empty_string;
   if (skipFrame) {
     ar = getPrevVMState(ar);
@@ -1397,7 +1397,7 @@ CStrRef VMExecutionContext::getContainingFileName(
 
 int VMExecutionContext::getLine(bool skipFrame /* = false */) {
   VMRegAnchor _;
-  ActRec* ar = m_fp;
+  ActRec* ar = getFP();
   Unit* unit = ar ? ar->m_func->unit() : NULL;
   Offset pc = unit ? pcOff() : 0;
   if (ar == NULL) return -1;
@@ -1411,7 +1411,7 @@ int VMExecutionContext::getLine(bool skipFrame /* = false */) {
 Array VMExecutionContext::getCallerInfo(bool skipFrame /* = false */) {
   VMRegAnchor _;
   Array result = Array::Create();
-  ActRec* ar = m_fp;
+  ActRec* ar = getFP();
   if (skipFrame) {
     ar = getPrevVMState(ar);
   }
@@ -1526,7 +1526,7 @@ VarEnv* VMExecutionContext::getVarEnv(bool skipBuiltin) {
   Transl::VMRegAnchor _;
 
   HPHP::VM::VarEnv* builtinVarEnv = NULL;
-  HPHP::VM::ActRec* fp = m_fp;
+  HPHP::VM::ActRec* fp = getFP();
   if (skipBuiltin) {
     if (fp->hasVarEnv()) {
       builtinVarEnv = fp->getVarEnv();
@@ -1557,7 +1557,7 @@ void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
   Transl::VMRegAnchor _;
   // setVar() should only be called after getVarEnv() has been called
   // to create a varEnv
-  ActRec *fp = getPrevVMState(m_fp);
+  ActRec *fp = getPrevVMState(getFP());
   if (!fp) return;
   ASSERT(!fp->hasInvName());
   ASSERT(!fp->hasExtraArgs());
@@ -1571,7 +1571,7 @@ void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
 
 Array VMExecutionContext::getLocalDefinedVariables(int frame) {
   Transl::VMRegAnchor _;
-  ActRec *fp = m_fp;
+  ActRec *fp = getFP();
   for (; frame > 0; --frame) {
     if (!fp) break;
     fp = getPrevVMState(fp);
@@ -1924,7 +1924,7 @@ void VMExecutionContext::reenterVM(TypedValue* retval,
                                    TypedValue* savedSP) {
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
-  VMState savedVM = { m_pc, m_fp, m_firstAR, savedSP };
+  VMState savedVM = { getPC(), getFP(), m_firstAR, savedSP };
   TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
   pushVMState(savedVM, ar);
   ASSERT(m_nestedVMs.size() >= 1);
@@ -2119,7 +2119,7 @@ void VMExecutionContext::unwindBuiltinFrame() {
   ASSERT(m_fp->m_func->name()->isame(s_hphpd_break.get()) ||
          m_fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
   // Free any values that may be on the eval stack
-  TypedValue *evalTop = (TypedValue*)m_fp;
+  TypedValue *evalTop = (TypedValue*)getFP();
   while (m_stack.topTV() < evalTop) {
     m_stack.popTV();
   }
@@ -2207,23 +2207,23 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     frame.set(String(s_line), parserFrame->lineNumber, true);
     bt.append(frame);
   }
-  if (!m_fp) {
+  Transl::VMRegAnchor _;
+  if (!getFP()) {
     // If there are no VM frames, we're done
     return bt;
   }
-  Transl::VMRegAnchor _;
   // Get the fp and pc of the top frame (possibly skipping one frame)
   ActRec* fp;
   Offset pc;
   if (skip) {
-    fp = getPrevVMState(m_fp, &pc);
+    fp = getPrevVMState(getFP(), &pc);
     if (!fp) {
       // We skipped over the only VM frame, we're done
       return bt;
     }
   } else {
-    fp = m_fp;
-    Unit *unit = m_fp->m_func->unit();
+    fp = getFP();
+    Unit *unit = getFP()->m_func->unit();
     ASSERT(unit);
     pc = unit->offsetOf(m_pc);
   }
@@ -2557,7 +2557,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
   String absPath;
   if ((flags & InclOpRelative)) {
     namespace fs = boost::filesystem;
-    if (!unit) unit = m_fp->m_func->unit();
+    if (!unit) unit = getFP()->m_func->unit();
     fs::path currentUnit(unit->filepath()->data());
     fs::path currentDir(currentUnit.branch_path());
     absPath = currentDir.string() + '/';
@@ -2608,7 +2608,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   ASSERT(!func->isBuiltin());
   ar->m_func = func;
   ar->initNumArgs(0);
-  ASSERT(m_fp);
+  ASSERT(getFP());
   ASSERT(!m_fp->hasInvName());
   if (m_fp->hasThis()) {
     ObjectData *this_ = m_fp->getThis();
@@ -2753,7 +2753,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   }
 
   VarEnv *varEnv = NULL;
-  ActRec *fp = m_fp;
+  ActRec *fp = getFP();
   ActRec *cfpSave = NULL;
   if (fp) {
     VM::VarEnv* vit = 0;
@@ -2859,7 +2859,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
     VarEnv::createGlobal();
   }
   VarEnv* varEnv = m_topVarEnv;
-  if (!m_fp) {
+  if (!getFP()) {
     ASSERT(m_stack.count() == 0);
     ActRec* ar = m_stack.allocA();
     ar->m_func = s_debuggerDummy->getMain();
@@ -2878,7 +2878,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
 void VMExecutionContext::exitDebuggerDummyEnv() {
   ASSERT(m_topVarEnv);
   ASSERT(m_globalVarEnv == m_topVarEnv);
-  m_globalVarEnv->detach(m_fp);
+  m_globalVarEnv->detach(getFP());
 }
 
 static inline StringData* lookup_name(TypedValue* key) {
@@ -3090,7 +3090,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
 
   TypedValue* loc = NULL;
   TypedValue dummy;
-  Class* const ctx = arGetContextClass(m_fp);
+  Class* const ctx = arGetContextClass(getFP());
 
   StringData* name;
   TypedValue* fr = NULL;
@@ -3382,7 +3382,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
 
   TypedValue* loc = NULL;
   TypedValue dummy;
-  Class* const ctx = arGetContextClass(m_fp);
+  Class* const ctx = arGetContextClass(getFP());
 
   StringData* name;
   TypedValue* fr = NULL;
@@ -5580,7 +5580,7 @@ inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
   HPHP::VM::Class* cls = NULL;
   StringData* invName = NULL;
 
-  const HPHP::VM::Func* f = vm_decode_function(tvAsVariant(&func), m_fp,
+  const HPHP::VM::Func* f = vm_decode_function(tvAsVariant(&func), getFP(),
                                                forward,
                                                obj, cls, invName,
                                                !safe);
@@ -6872,7 +6872,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopTraitExists(PC& pc) {
 
 string
 VMExecutionContext::prettyStack(const string& prefix) const {
-  if (!m_fp) {
+  if (!getFP()) {
     string s("__Halted");
     return s;
   }
@@ -6896,7 +6896,7 @@ void VMExecutionContext::DumpStack() {
 }
 
 void VMExecutionContext::DumpCurUnit(int skip) {
-  ActRec* fp = g_vmContext->m_fp;
+  ActRec* fp = g_vmContext->getFP();
   Offset pc = fp->m_func->unit() ? g_vmContext->pcOff() : 0;
   while (skip--) {
     fp = g_vmContext->getPrevVMState(fp, &pc);
@@ -7104,7 +7104,7 @@ void VMExecutionContext::dispatchBB() {
 }
 
 void VMExecutionContext::recordCodeCoverage(PC pc) {
-  Unit* unit = m_fp->m_func->unit();
+  Unit* unit = getFP()->m_func->unit();
   ASSERT(unit != NULL);
   if (unit == SystemLib::s_nativeFuncUnit ||
       unit == SystemLib::s_nativeClassUnit) {

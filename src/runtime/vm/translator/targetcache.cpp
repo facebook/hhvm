@@ -56,7 +56,6 @@ typedef CacheHandle Handle;
 // format with one %s parameter, which name will be substituted into.
 void
 undefinedError(const char* msg, const char* name) {
-  VMRegAnchor _;
   raise_error(msg, name);
 }
 
@@ -366,8 +365,6 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
         LIKELY(!pair->m_value.isMagicCall())) {
       Stats::inc(Stats::TgtCache_MethodHit, func != NULL);
     } else {
-      // lookupObjMethod uses the current frame pointer to resolve context,
-      // so we'd better sync regs.
       Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
       Stats::inc(Stats::TgtCache_MethodMiss);
       TRACE(2, "MethodCache: miss class %p name %s!\n", c, name->data());
@@ -376,10 +373,7 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
         isMagicCall = true;
         func = c->lookupMethod(s___call.get());
         if (UNLIKELY(!func)) {
-          // Do it again, but raise the error this time. Keeps the VMRegAnchor
-          // off the hot path; this should be wildly unusual, since we're
-          // probably about to fatal.
-          VMRegAnchor _;
+          // Do it again, but raise the error this time.
           (void) g_vmContext->lookupMethodCtx(c, name, ctx, ObjMethod, true);
           NOT_REACHED();
         }
@@ -542,7 +536,6 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
 
   Class* cls = *cache;
   ASSERT(!cls); // the caller should already have checked
-  VMRegAnchor _;
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(clsName)));
   cls = *cache;
@@ -770,7 +763,6 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
   if (pair->m_key == key) {
     result = (TypedValue*)((uintptr_t)base + pair->m_value);
     if (UNLIKELY(result->m_type == KindOfUninit)) {
-      VMRegAnchor _;
       static_cast<Instance*>(base)->raiseUndefProp(name);
       result = (TypedValue*)&init_null_variant;
     } else if (UNLIKELY(result->m_type == KindOfRef)) {
@@ -786,10 +778,9 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
       Stats::inc(Stats::TgtCache_PropGetMiss);
     }
 
-    VMRegAnchor _;
     // Pseudomains don't always have the same context class
-    ASSERT(!curFunc()->isPseudoMain());
-    Class* ctx = arGetContextClass(g_vmContext->getFP());
+    ASSERT(!fp->m_func->isPseudoMain());
+    Class* ctx = fp->m_func->cls();
     Instance* instance = static_cast<Instance*>(base);
 
     // propW may need temporary storage (for getters, eg)
@@ -864,10 +855,9 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
       Stats::inc(Stats::TgtCache_PropSetMiss);
     }
 
-    VMRegAnchor _;
     // Pseudomains don't always have the same context class
-    ASSERT(!curFunc()->isPseudoMain());
-    Class* ctx = arGetContextClass(g_vmContext->getFP());
+    ASSERT(!fp->m_func->isPseudoMain());
+    Class* ctx = fp->m_func->cls();
     Instance* instance = static_cast<Instance*>(base);
     TypedValue* result = instance->setProp(ctx, name, &propVal);
     // setProp will return a real pointer iff it's a declared property
@@ -939,7 +929,6 @@ lookupClassConstant(TypedValue* cache,
 TypedValue*
 SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
   // The fast path is in-TC. If we get here, we have already missed.
-  VMRegAnchor _;
   SPropCache* thiz = cacheAtHandle(handle);
   Stats::inc(Stats::TgtCache_SPropMiss);
   Stats::inc(Stats::TgtCache_SPropHit, -1);
@@ -949,7 +938,10 @@ SPropCache::lookup(Handle handle, const Class *cls, const StringData *name) {
         name->data());
   // This is valid only if the lookup comes from an in-class method
   Class *ctx = const_cast<Class*>(cls);
-  ASSERT(ctx == arGetContextClass((ActRec*)vmfp()));
+  if (debug) {
+    VMRegAnchor _;
+    ASSERT(ctx == arGetContextClass((ActRec*)vmfp()));
+  }
   bool visible, accessible;
   TypedValue* val;
   val = cls->getSProp(ctx, name, visible, accessible);

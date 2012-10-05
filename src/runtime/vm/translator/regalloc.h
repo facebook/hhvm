@@ -299,7 +299,6 @@ class RegAlloc {
   void trace();
   void verify();
   void smashRegImpl(RegInfo *r);
-  template<bool Smash> void cleanLocImpl(const Location&);
   void reconcileOne(RegInfo* r, RegAlloc* branchRA, PhysReg branchPR);
 
  public:
@@ -358,6 +357,9 @@ class RegAlloc {
   /*
    * Invalidating a location means to drop any register mapped to that
    * location down to FREE state, regardless of the current state.
+   *
+   * (This differs from smashing a location in that it doesn't require
+   * that the register is not DIRTY.)
    */
   void invalidate(const Location& loc);
   void invalidateLocals(int first, int last);
@@ -419,6 +421,15 @@ class RegAlloc {
   void smashRegs(RegSet smashedRegs);
   void smashReg(PhysReg pr);
   void smashLoc(const Location& loc);
+
+  /*
+   * Forget a mapping for a register, after cleaning it if it is DIRTY.
+   *
+   * This is equivalent to calling clean followed by smash.
+   */
+  void cleanSmashRegs(RegSet set);
+  void cleanSmashReg(PhysReg pr);
+  void cleanSmashLoc(const Location& loc);
 
   /*
    * Scrubbing a register means to change it to the CLEAN state,

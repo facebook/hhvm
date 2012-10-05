@@ -415,8 +415,7 @@ RegAlloc::cleanRegs(RegSet regs) {
   verify();
 }
 
-template <bool smash>
-void RegAlloc::cleanLocImpl(const Location& loc) {
+void RegAlloc::cleanLoc(const Location& loc) {
   RegContent cont(loc);
   PhysReg pr = mapGet(m_contToRegMap, cont, InvalidReg);
   if (pr == InvalidReg) {
@@ -429,13 +428,6 @@ void RegAlloc::cleanLocImpl(const Location& loc) {
     spill(info);
     stateTransition(info, RegInfo::CLEAN);
   }
-  if (smash) {
-    smashReg(pr);
-  }
-}
-
-void RegAlloc::cleanLoc(const Location& loc) {
-  cleanLocImpl<false>(loc);
 }
 
 void RegAlloc::cleanLocals() {
@@ -512,7 +504,23 @@ void RegAlloc::smashRegs(RegSet toSmash) {
 }
 
 void RegAlloc::smashLoc(const Location& loc) {
-  cleanLocImpl<true>(loc);
+  PhysReg reg = mapGet(m_contToRegMap, RegContent(loc), InvalidReg);
+  if (reg != InvalidReg) smashReg(reg);
+}
+
+void RegAlloc::cleanSmashRegs(RegSet rs) {
+  cleanRegs(rs);
+  smashRegs(rs);
+}
+
+void RegAlloc::cleanSmashReg(PhysReg r) {
+  cleanReg(r);
+  smashReg(r);
+}
+
+void RegAlloc::cleanSmashLoc(const Location& loc) {
+  cleanLoc(loc);
+  smashLoc(loc);
 }
 
 void RegAlloc::killImms(RegSet toKill) {

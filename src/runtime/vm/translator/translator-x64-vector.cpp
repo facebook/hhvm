@@ -39,7 +39,7 @@ namespace Transl {
 
 #define PREP_RESULT(useTvR)                                                   \
   if (!useTvR) {                                                              \
-    m_regMap.smashLoc(result.location);                                       \
+    m_regMap.cleanSmashLoc(result.location);                                  \
     ScratchReg rScratch(m_regMap);                                            \
     a.  lea_reg64_disp_reg64(rVmSp, vstackOffset(ni, mResultStackOffset(ni)), \
                              *rScratch);                                      \
@@ -193,7 +193,7 @@ void TranslatorX64::emitBaseLCR(const Tracelet& t,
       emitStoreNull(a, base.location);
     }
   }
-  m_regMap.smashLoc(base.location);
+  m_regMap.cleanSmashLoc(base.location);
   PhysReg pr;
   int disp;
   locToRegDisp(base.location, &pr, &disp);
@@ -288,7 +288,7 @@ void TranslatorX64::emitBaseN(const Tracelet& t,
   ASSERT((mia & MIA_base) < sizeof(baseNOps)/sizeof(BaseNOp));
   BaseNOp baseNOp = baseNOps[mia & MIA_base];
   const DynLocation& base = *ni.inputs[iInd];
-  m_regMap.smashLoc(base.location);
+  m_regMap.cleanSmashLoc(base.location);
   EMIT_RCALL(a, ni, baseNOp, A(base.location), R(rsp));
   rBase = m_regMap.allocScratchReg(rax);
 }
@@ -356,7 +356,7 @@ void TranslatorX64::emitBaseG(const Tracelet& t,
   ASSERT((mia & MIA_base) < sizeof(baseGOps)/sizeof(BaseGOp));
   BaseGOp baseGOp = baseGOps[mia & MIA_base];
   const DynLocation& base = *ni.inputs[iInd];
-  m_regMap.smashLoc(base.location);
+  m_regMap.cleanSmashLoc(base.location);
   EMIT_RCALL(a, ni, baseGOp, A(base.location), R(rsp));
   rBase = m_regMap.allocScratchReg(rax);
 }
@@ -393,7 +393,7 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
                               bool ctxFixed, PhysReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx\n", __func__, long(a.code.frontier));
   const DynLocation& key = *ni.inputs[iInd];
-  m_regMap.smashLoc(key.location);
+  m_regMap.cleanSmashLoc(key.location);
   const DynLocation& clsRef = *ni.inputs[ni.inputs.size()-1];
   ASSERT(clsRef.valueType() == KindOfClass);
   const Class* cls = clsRef.rtt.valueClass();
@@ -407,7 +407,7 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
                       IMM(uintptr_t(cls)),
                       R(rsp));
   } else {
-    m_regMap.smashLoc(clsRef.location);
+    m_regMap.cleanSmashLoc(clsRef.location);
     EMIT_RCALL(a, ni, baseSClsRef,
                       CTX(ctxFixed),
                       A(key.location),
@@ -502,7 +502,7 @@ void TranslatorX64::emitElem(const Tracelet& t,
   MemberCode mCode = ni.immVecM[mInd];
   const MInstrAttr& mia = mii.getAttr(mCode);
   const DynLocation& memb = *ni.inputs[iInd];
-  m_regMap.smashLoc(memb.location);
+  m_regMap.cleanSmashLoc(memb.location);
   typedef TypedValue* (*ElemOp)(TypedValue*, TypedValue*,
                                 TranslatorX64::MInstrState*);
   ASSERT(MIA_warn == 0x1 && MIA_define == 0x2 && MIA_reffy == 0x4 &&
@@ -581,7 +581,7 @@ void TranslatorX64::emitProp(const Tracelet& t,
   MemberCode mCode = ni.immVecM[mInd];
   const MInstrAttr& mia = mii.getAttr(mCode);
   const DynLocation& memb = *ni.inputs[iInd];
-  m_regMap.smashLoc(memb.location);
+  m_regMap.cleanSmashLoc(memb.location);
   typedef TypedValue* (*PropOp)(Class*, TypedValue*, TypedValue*,
                                 TranslatorX64::MInstrState*);
   ASSERT(MIA_warn == 0x1 && MIA_define == 0x2 && MIA_unset == 0x8);
@@ -791,7 +791,7 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
   void (*cGetPropOp)(Class*, TypedValue*, TypedValue*, TypedValue*,
                      MInstrState*) =
     ni.immVecM[mInd] == MPL ? cGetPropL : cGetPropC;
-  m_regMap.smashLoc(memb.location);
+  m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   bool useTvR = useTvResult(t, ni, mii);
@@ -843,7 +843,7 @@ void TranslatorX64::emitVGetElem(const Tracelet& t,
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& memb = *ni.inputs[iInd];
   auto vGetElemOp = helperFromKey(memb, vGetElemL, vGetElemC);
-  m_regMap.smashLoc(memb.location);
+  m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   bool useTvR = useTvResult(t, ni, mii);
   PREP_RESULT(useTvR);
@@ -897,7 +897,7 @@ void TranslatorX64::emitVGetProp(const Tracelet& t,
   void (*vGetPropOp)(Class*, TypedValue*, TypedValue*, TypedValue*,
                      MInstrState*) =
     ni.immVecM[mInd] == MPL ? vGetPropL : vGetPropC;
-  m_regMap.smashLoc(memb.location);
+  m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   bool useTvR = useTvResult(t, ni, mii);
   PREP_RESULT(useTvR);
@@ -952,7 +952,7 @@ void TranslatorX64::emitIssetEmptyElem(const Tracelet& t,
   auto issetEmptyElemOp = useEmpty ?
       helperFromKey(memb, emptyElemL, emptyElemC) :
       helperFromKey(memb, issetElemL, issetElemC);
-  m_regMap.smashLoc(memb.location);
+  m_regMap.cleanSmashLoc(memb.location);
   EMIT_RCALL(a, ni, issetEmptyElemOp, R(rBase),
              ML(memb.location, a, m_regMap, rsp), R(rsp));
   a.   and_imm32_reg64(1, rax); // Mask garbage bits.
@@ -1017,7 +1017,7 @@ void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
   bool (*issetEmptyPropOp)(Class*, TypedValue*, TypedValue*, MInstrState*) =
     useEmpty ? (ni.immVecM[mInd] == MPL ? emptyPropL : emptyPropC)
              : (ni.immVecM[mInd] == MPL ? issetPropL : issetPropC);
-  m_regMap.smashLoc(memb.location);
+  m_regMap.cleanSmashLoc(memb.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
   EMIT_RCALL(a, ni, issetEmptyPropOp,
@@ -1105,8 +1105,8 @@ void TranslatorX64::emitSetElem(const Tracelet& t,
     (ni.immVecM[mInd] == MEL)
     ? (setResult ? setElemLR : setElemL)
     : (setResult ? setElemCR : setElemC);
-  m_regMap.smashLoc(key.location);
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(key.location);
+  m_regMap.cleanSmashLoc(val.location);
   bool useRVal = (!forceMValIncDec(t, ni, mii) && val.isVariant());
   PREP_VAL(useRVal, argNumToRegName[2]);
   // Emit the appropriate helper call.
@@ -1163,8 +1163,8 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
     (ni.immVecM[mInd] == MPL)
     ? (setResult ? setPropLR : setPropL)
     : (setResult ? setPropCR : setPropC);
-  m_regMap.smashLoc(key.location);
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(key.location);
+  m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   bool useRVal = val.isVariant();
   PREP_VAL(useRVal, argNumToRegName[3]);
@@ -1229,8 +1229,8 @@ void TranslatorX64::emitSetOpElem(const Tracelet& t,
   bool setResult = generateMVal(t, ni, mii);
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
-  m_regMap.smashLoc(key.location);
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(key.location);
+  m_regMap.cleanSmashLoc(val.location);
   bool useRVal = (!forceMValIncDec(t, ni, mii) && val.isVariant());
   PREP_VAL(useRVal, argNumToRegName[2]);
   // Emit the appropriate helper call.
@@ -1334,8 +1334,8 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
   bool setResult = generateMVal(t, ni, mii);
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
-  m_regMap.smashLoc(key.location);
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(key.location);
+  m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   bool useRVal = val.isVariant();
   PREP_VAL(useRVal, argNumToRegName[3]);
@@ -1431,7 +1431,7 @@ void TranslatorX64::emitIncDecElem(const Tracelet& t,
   bool setResult = generateMVal(t, ni, mii);
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
-  m_regMap.smashLoc(key.location);
+  m_regMap.cleanSmashLoc(key.location);
   // Emit the appropriate helper call.
   if (setResult) {
     void (*incDecElemOp)(TypedValue*, TypedValue*, MInstrState*, TypedValue*);
@@ -1518,7 +1518,7 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
   bool setResult = generateMVal(t, ni, mii);
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
-  m_regMap.smashLoc(key.location);
+  m_regMap.cleanSmashLoc(key.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
   if (setResult) {
@@ -1595,8 +1595,8 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
   const DynLocation& val = *ni.inputs[0];
   ASSERT(generateMVal(t, ni, mii));
   auto bindElemOp = helperFromKey(key, bindElemL, bindElemC);
-  m_regMap.smashLoc(key.location);
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(key.location);
+  m_regMap.cleanSmashLoc(val.location);
   ASSERT(!forceMValIncDec(t, ni, mii));
   ASSERT(val.isVariant());
   EMIT_RCALL(a, ni, bindElemOp, R(rBase), ML(key.location, a, m_regMap, rsp),
@@ -1637,8 +1637,8 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
   ASSERT(generateMVal(t, ni, mii));
   void (*bindPropOp)(Class*, TypedValue*, TypedValue*, RefData*, MInstrState*) =
     (ni.immVecM[mInd] == MPL) ? bindPropL : bindPropC;
-  m_regMap.smashLoc(key.location);
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(key.location);
+  m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
   ASSERT(!forceMValIncDec(t, ni, mii));
@@ -1676,8 +1676,8 @@ void TranslatorX64::emitUnsetElem(const Tracelet& t,
   const DynLocation& key = *ni.inputs[iInd];
   const DynLocation& val = *ni.inputs[0];
   auto unsetElemOp = helperFromKey(key, unsetElemL, unsetElemC);
-  m_regMap.smashLoc(key.location);
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(key.location);
+  m_regMap.cleanSmashLoc(val.location);
   EMIT_RCALL(a, ni, unsetElemOp, R(rBase), ML(key.location, a, m_regMap, rsp));
 }
 
@@ -1709,8 +1709,8 @@ void TranslatorX64::emitUnsetProp(const Tracelet& t,
   const DynLocation& val = *ni.inputs[0];
   void (*unsetPropOp)(Class*, TypedValue*, TypedValue*) =
     ni.immVecM[mInd] == MPL ? unsetPropL : unsetPropC;
-  m_regMap.smashLoc(key.location);
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(key.location);
+  m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
   EMIT_RCALL(a, ni, unsetPropOp,
@@ -1770,7 +1770,7 @@ void TranslatorX64::emitSetNewElem(const Tracelet& t,
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
   const DynLocation& val = *ni.inputs[0];
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(val.location);
   // Emit the appropriate helper call.
   void (*setNewElemOp)(TypedValue*, Cell*) =
     setResult ? setNewElemR : setNewElem;
@@ -1820,7 +1820,7 @@ void TranslatorX64::emitSetOpNewElem(const Tracelet& t,
   bool setResult = generateMVal(t, ni, mii);
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(val.location);
   bool useRVal = val.isVariant();
   PREP_VAL(useRVal, argNumToRegName[3]);
   // Emit the appropriate helper call.
@@ -1936,7 +1936,7 @@ void TranslatorX64::emitBindNewElem(const Tracelet& t,
           __func__, long(a.code.frontier), mInd, iInd);
   ASSERT(generateMVal(t, ni, mii));
   const DynLocation& val = *ni.inputs[0];
-  m_regMap.smashLoc(val.location);
+  m_regMap.cleanSmashLoc(val.location);
   // Emit the appropriate helper call.
   void (*bindNewElemOp)(TypedValue*, RefData*, MInstrState*) = bindNewElem;
   ASSERT(val.isVariant());
@@ -2114,7 +2114,7 @@ void TranslatorX64::emitMPost(const Tracelet& t,
                 __func__, long(a.code.frontier), i, tname(dt).c_str());
         PhysReg pr = m_regMap.allocReg(input.location, dt, RegInfo::CLEAN);
         emitDecRef(ni, pr, dt);
-        m_regMap.smashLoc(input.location);
+        m_regMap.cleanSmashLoc(input.location);
       }
       break;
     }
@@ -2167,7 +2167,7 @@ void TranslatorX64::emitMPost(const Tracelet& t,
             __func__, long(a.code.frontier));
     ScratchReg rScratch(m_regMap);
     const DynLocation& val = *ni.inputs[0];
-    m_regMap.smashLoc(val.location);
+    m_regMap.cleanSmashLoc(val.location);
     PhysReg prVal;
     int dispVal;
     locToRegDisp(val.location, &prVal, &dispVal);
@@ -2213,7 +2213,7 @@ void TranslatorX64::emitCGetElem(const Tracelet& t,
   const DynLocation& memb = *ni.inputs[iInd];
   auto cGetElemOp = helperFromKey(memb, cGetElemL, cGetElemC);
   
-  m_regMap.smashLoc(memb.location);
+  m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   bool useTvR = useTvResult(t, ni, mii);
   PREP_RESULT(useTvR);

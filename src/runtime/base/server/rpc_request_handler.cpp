@@ -35,7 +35,7 @@ RPCRequestHandler::RPCRequestHandler(bool info /* = true */)
   : m_count(0), m_reset(false),
   m_returnEncodeType(Json) {
   hphp_session_init();
-  bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
+  bool isServer = RuntimeOption::serverExecutionMode();
   if (isServer) {
     m_context = hphp_context_init();
   } else {

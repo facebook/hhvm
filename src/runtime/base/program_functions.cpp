@@ -1255,7 +1255,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool &error, string &errorMsg,
                  bool once /* = true */, bool warmupOnly /* = false */,
                  bool richErrorMsg /* = false */) {
-  bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
+  bool isServer = RuntimeOption::serverExecutionMode();
   error = false;
 
   String oldCwd;

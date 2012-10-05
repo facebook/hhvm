@@ -144,7 +144,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
 }
 
 int64 f_pcntl_fork() {
-  if (strcmp(RuntimeOption::ExecutionMode, "srv") == 0) {
+  if (RuntimeOption::serverExecutionMode()) {
     raise_error("forking is disallowed in server mode");
     return -1;
   }

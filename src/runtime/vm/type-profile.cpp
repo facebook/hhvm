@@ -151,19 +151,14 @@ profileInit() {
 bool __thread profileOn = false;
 static int64 numRequests;
 
-static inline bool serverMode() {
-  static bool cli = !strcmp(RuntimeOption::ExecutionMode, "cli");
-  return !cli;
-}
-
 static inline bool warmedUp() {
   return (numRequests >= RuntimeOption::EvalJitWarmupRequests) ||
-    (!serverMode() && !RuntimeOption::EvalJitProfileRecord);
+    (RuntimeOption::clientExecutionMode() && !RuntimeOption::EvalJitProfileRecord);
 }
 
 static inline bool profileThisRequest() {
   if (warmedUp()) return false;
-  if (serverMode()) return true;
+  if (RuntimeOption::serverExecutionMode()) return true;
   return RuntimeOption::EvalJitProfileRecord;
 }
 

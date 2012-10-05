@@ -36,6 +36,14 @@ public:
 
   static bool Loaded;
 
+  static bool serverExecutionMode() {
+    return strcmp(ExecutionMode, "srv") == 0;
+  }
+
+  static bool clientExecutionMode() {
+    return strcmp(ExecutionMode, "cli") == 0;
+  }
+
   static const char *ExecutionMode;
   static std::string BuildId;
   static std::string PidFile;

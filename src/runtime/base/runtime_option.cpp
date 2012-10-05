@@ -515,9 +515,21 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
 }
 
 static inline bool evalJitDefault() {
+  // Only use JIT for HHVM
+  if (!hhvm) {
+    return false;
+  }
+
+  // --mode server or --mode daemon
+  // run long enough to justify JIT
+  if (RuntimeOption::serverExecutionMode()) {
+    return true;
+  }
+
+  // JIT explicitly turned on via .hhvm-jit file
   static const char* path = "/.hhvm-jit";
   struct stat dummy;
-  return hhvm && stat(path, &dummy) == 0;
+  return stat(path, &dummy) == 0;
 }
 
 void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,

@@ -108,7 +108,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   default: break;
   }
 
-  bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
+  bool isServer = RuntimeOption::serverExecutionMode();
   if (isServer) {
     g->GV(_ENV).set("HPHP_SERVER", 1);
 #ifdef HOTPROFILER

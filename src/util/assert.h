@@ -24,14 +24,14 @@
 // might hide problems
 #undef ASSERT
 
-#ifdef RELEASE
-#ifndef ALWAYS_ASSERT
-#define ASSERT(x)
+#ifndef DEBUG
+#  ifndef ALWAYS_ASSERT
+#    define ASSERT(x)
+#  else
+#    define ASSERT(x) assert(x)
+#  endif
 #else
-#define ASSERT(x) assert(x)
-#endif
-#else
-#define ASSERT(x) assert(x)
+#  define ASSERT(x) assert(x)
 #endif
 
 #define IMPLIES(a, b) (!(a) || (b))

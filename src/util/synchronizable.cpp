@@ -30,12 +30,8 @@ Synchronizable::~Synchronizable() {
 }
 
 void Synchronizable::wait() {
-#ifdef RELEASE
-  pthread_cond_wait(&m_cond, &m_mutex.getRaw());
-#else
-  int ret = pthread_cond_wait(&m_cond, &m_mutex.getRaw());
+  UNUSED int ret = pthread_cond_wait(&m_cond, &m_mutex.getRaw());
   ASSERT(ret != EPERM); // did you lock the mutex?
-#endif
 }
 
 bool Synchronizable::wait(long seconds) {

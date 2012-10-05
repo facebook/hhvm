@@ -34,15 +34,14 @@ struct IncomingBranch {
     JCC,
     ADDR,
   };
-  IncomingBranch(ConditionCode cc, TCA src)
-  : m_type(JCC), m_cc(cc), m_src(src) { }
+  IncomingBranch(BranchType t, TCA src)
+  : m_type(t), m_src(src) { }
   IncomingBranch(TCA src)
-  : m_type(JMP), m_cc(CC_NP) /*unused*/, m_src(src) { }
+  : m_type(JMP), m_src(src) { }
   IncomingBranch(TCA* addr)
-  : m_type(ADDR), m_cc(CC_NP) /*unused*/, m_addr(addr) { }
+  : m_type(ADDR), m_addr(addr) { }
 
   BranchType m_type;
-  ConditionCode m_cc;
   union {
     TCA m_src;
     TCA* m_addr;
@@ -81,7 +80,7 @@ struct SrcRec {
    */
   void setFuncInfo(const Func* f);
   void chainFrom(Asm& a, IncomingBranch br);
-  void emitFallbackJump(Asm &a, IncomingBranch incoming);
+  void emitFallbackJump(Asm &a, TCA from, int cc = -1);
   void newTranslation(Asm& a, Asm &astubs, TCA newStart);
   void replaceOldTranslations(Asm& a, Asm& astubs);
   void addDebuggerGuard(Asm& a, Asm &astubs, TCA dbgGuard,

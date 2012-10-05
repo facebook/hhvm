@@ -160,11 +160,12 @@ const PhysReg serviceReqArgRegs[] = {
    */ \
   REQ(BIND_CALL)         \
   REQ(BIND_JMP)          \
+  REQ(BIND_JCC)          \
   REQ(BIND_ADDR)         \
   REQ(BIND_SIDE_EXIT)    \
   REQ(BIND_JMPCC_FIRST)  \
   REQ(BIND_JMPCC_SECOND) \
-  REQ(BIND_REQUIRE)      \
+  REQ(BIND_REQUIRE) \
   \
   /*
    * BIND_JMP_NO_IR is similar to BIND_JMP except that, if a new translation

@@ -312,9 +312,14 @@ class NormalizedInstruction {
    */
   unsigned guardedCls:1;
   /*
+   * dont check the surprise flag
+   */
+  unsigned noSurprise:1;
+  /*
     noCtor is set on FPushCtorD to say that the ctor is
     going to be skipped (so dont setup an actrec)
   */
+
   unsigned noCtor:1;
   /*
    * instruction is statically known to have no effect, e.g. unboxing a Cell
@@ -347,6 +352,7 @@ class NormalizedInstruction {
     grouped(false),
     guardedThis(false),
     guardedCls(false),
+    noSurprise(false),
     noCtor(false),
     noOp(false),
     m_txFlags(Interp)

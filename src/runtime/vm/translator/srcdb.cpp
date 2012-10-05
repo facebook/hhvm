@@ -57,15 +57,16 @@ void SrcRec::chainFrom(Asm& a, IncomingBranch br) {
   patch(&a, br, destAddr);
 }
 
-void SrcRec::emitFallbackJump(Asm &a, IncomingBranch incoming) {
+void SrcRec::emitFallbackJump(Asm &a, TCA from, int cc /* = -1 */) {
   TCA destAddr = getFallbackTranslation();
-
+  IncomingBranch incoming(cc < 0 ? IncomingBranch::JMP : IncomingBranch::JCC,
+                          from);
   // emit dummy jump to be smashed via patch()
-  if (incoming.m_type == IncomingBranch::JMP) {
+  if (cc < 0) {
     a.jmp(a.code.frontier);
   } else {
     ASSERT(incoming.m_type == IncomingBranch::JCC);
-    a.jcc(incoming.m_cc, a.code.frontier);
+    a.jcc((ConditionCode)cc, a.code.frontier);
   }
 
   patch(&a, incoming, destAddr);
@@ -166,20 +167,23 @@ void SrcRec::patch(Asm* a, IncomingBranch branch, TCA dest) {
     return;
   }
 
-  CodeCursor cg(*a, branch.m_src);
-
   // modifying reachable code
   switch(branch.m_type) {
-  case IncomingBranch::JMP:
-    TranslatorX64::smash(*a, branch.m_src, dest);
-    break;
-  case IncomingBranch::JCC:
-    ASSERT(TranslatorX64::isSmashable(*a,
-                                      TranslatorX64::kJmpccLen));
-    a->jcc(branch.m_cc, dest);
-    break;
-  default:
-    not_implemented();
+    case IncomingBranch::JMP: {
+      CodeCursor cg(*a, branch.m_src);
+      TranslatorX64::smash(*a, branch.m_src, dest);
+      break;
+    }
+    case IncomingBranch::JCC: {
+      // patch destination, but preserve the condition code
+      int32_t delta = safe_cast<int32_t>((dest - branch.m_src) -
+                                         TranslatorX64::kJmpccLen);
+      int32_t* addr = (int32_t*)(branch.m_src + TranslatorX64::kJmpccLen - 4);
+      atomic_release_store(addr, delta);
+      break;
+    }
+    default:
+      not_implemented();
   }
 }
 

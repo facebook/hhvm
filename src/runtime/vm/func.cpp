@@ -118,6 +118,8 @@ void Func::initPrologues(int numParams) {
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
+
+  m_funcBody = (TCA)HPHP::VM::Transl::funcBodyHelperThunk;
   TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
     m_prologueTable[i] = fcallHelper;
@@ -618,7 +620,7 @@ FuncEmitter::~FuncEmitter() {
 
 void FuncEmitter::init(int line1, int line2, Offset base, Attr attrs, bool top,
                        const StringData* docComment) {
-  m_line1 = line1; 
+  m_line1 = line1;
   m_line2 = line2;
   m_base = base;
   m_attrs = attrs;

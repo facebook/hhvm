@@ -57,6 +57,8 @@ extern __thread TranslatorX64* tx64;
 
 extern void* interpOneEntryPoints[];
 
+extern "C" TCA funcBodyHelper(ActRec* fp);
+
 class TranslatorX64 : public Translator
                     , SpillFill
                     , boost::noncopyable {
@@ -71,6 +73,7 @@ class TranslatorX64 : public Translator
   friend class IRTranslator;
   friend class HPHP::VM::JIT::CodeGenerator;
   friend class HPHP::VM::JIT::HhbcTranslator; // packBitVec()
+  friend TCA funcBodyHelper(ActRec* fp);
   template<int, int, int> friend class CondBlock;
   template<int> friend class JccBlock;
   template<int> friend class IfElseBlock;
@@ -264,6 +267,7 @@ class TranslatorX64 : public Translator
   TCA emitBinaryStub(Asm& a, void* fptr);
   TCA genericRefCountStub(Asm& a);
   TCA genericRefCountStubRegs(Asm& a);
+  TCA getCallArrayProlog(Func* func);
   TCA emitPrologueRedispatch(Asm &a);
   TCA emitFuncGuard(Asm& a, const Func *f);
   template <bool reentrant>
@@ -489,6 +493,7 @@ MINSTRS
   CASE(This) \
   CASE(InitThisLoc) \
   CASE(FCall) \
+  CASE(FCallArray) \
   CASE(VerifyParamType) \
   CASE(InstanceOfD) \
   CASE(StaticLocInit) \
@@ -726,7 +731,7 @@ private:
   TCA retranslateAndPatchNoIR(SrcKey sk,
                               bool   align,
                               TCA    toSmash);
-  TCA bindJmp(TCA toSmash, SrcKey dest, bool isAddr, bool forceNoHHIR = false);
+  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
                      bool toTake,
@@ -780,8 +785,12 @@ private:
   SrcKey emitPrologue(Func* func, int nArgs);
   void emitNativeImpl(const Func*, bool emitSavedRIPReturn);
   TCA emitInterceptPrologue(Func* func, TCA next=NULL);
+  void emitBindJ(Asm& a, int cc, const SrcKey& dest,
+                 ServiceRequest req);
   void emitBindJmp(Asm& a, const SrcKey& dest,
                    ServiceRequest req = REQ_BIND_JMP);
+  void emitBindJcc(Asm& a, ConditionCode cc, const SrcKey& dest,
+                   ServiceRequest req = REQ_BIND_JCC);
   void emitBindJmp(const SrcKey& dest);
   void emitBindCallHelper(register_name_t stashedAR,
                           SrcKey srcKey,
@@ -801,6 +810,11 @@ private:
     bool m_local;
   };
   static void reqLitHelper(const ReqLitStaticArgs* args);
+  struct FCallArrayArgs {
+    Offset m_pcOff;
+    Offset m_pcNext;
+  };
+  static void fCallArrayHelper(const FCallArrayArgs* args);
 
   TCA getNativeTrampoline(TCA helperAddress);
   TCA emitNativeTrampoline(TCA helperAddress);
@@ -924,6 +938,7 @@ const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
   kMinPerTrampolineSize;
 
 void fcallHelperThunk() asm ("__fcallHelperThunk");
+void funcBodyHelperThunk() asm ("__funcBodyHelperThunk");
 
 // These could be static but are used in hopt/codegen.cpp
 void raiseUndefVariable(StringData* nm);

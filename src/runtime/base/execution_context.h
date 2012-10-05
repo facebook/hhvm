@@ -659,6 +659,7 @@ public:
   int switchMode(bool unwindBuiltin);
   template <bool handle_throw>
   void doFCall(HPHP::VM::ActRec* ar, HPHP::VM::PC& pc);
+  bool doFCallArray(HPHP::VM::PC& pc);
   CVarRef getEvaledArg(const StringData* val);
 private:
   void enterVMWork(VM::ActRec* enterFnAr);

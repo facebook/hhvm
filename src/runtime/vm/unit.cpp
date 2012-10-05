@@ -991,6 +991,9 @@ void Unit::prettyPrint(std::ostream &out, size_t startOffset,
           case Unit::MetaInfo::GuardedCls:
             out << " GuardedCls";
             break;
+          case Unit::MetaInfo::NoSurprise:
+            out << " NoSurprise";
+            break;
           case Unit::MetaInfo::None:
             ASSERT(false);
             break;

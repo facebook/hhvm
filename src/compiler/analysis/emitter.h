@@ -521,7 +521,7 @@ public:
   void emitConvertToCellOrLoc(Emitter& e);
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
-  void emitVirtualLocal(int localId);
+  void emitVirtualLocal(int localId, DataType dt = KindOfUnknown);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
   void emitResolveClsBase(Emitter& e, int pos);
   void emitClsIfSPropBase(Emitter& e);

@@ -64,6 +64,9 @@ struct Func {
     bool hasDefaultValue() const {
       return m_funcletOff != InvalidAbsoluteOffset;
     }
+    bool hasNonNullDefaultValue() const {
+      return hasDefaultValue() && m_defVal.m_type != KindOfNull;
+    }
     bool hasScalarDefaultValue() const {
       return hasDefaultValue() && m_defVal.m_type != KindOfUninit;
     }
@@ -298,6 +301,12 @@ struct Func {
   void setPrologue(int index, unsigned char* tca) {
     m_prologueTable[index] = tca;
   }
+  void setFuncBody(unsigned char* fb) {
+    m_funcBody = fb;
+  }
+  unsigned char* getFuncBody() const {
+    return m_funcBody;
+  }
   unsigned char* getPrologue(int index) const {
     return m_prologueTable[index];
   }
@@ -428,6 +437,7 @@ private:
                                  // method
   // TODO(#1114385) intercept should work via invalidation.
   mutable char m_maybeIntercepted; // -1, 0, or 1.  Accessed atomically.
+  unsigned char* volatile m_funcBody;
   // This must be the last field declared in this structure
   // and the Func class should not be inherited from.
   unsigned char* volatile m_prologueTable[kNumFixedPrologues];

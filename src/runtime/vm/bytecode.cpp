@@ -5895,9 +5895,8 @@ static void cleanupParamsAndActRec(VM::Stack& stack,
   }
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
+bool VMExecutionContext::doFCallArray(PC& pc) {
   ActRec* ar = (ActRec*)(m_stack.top() + 1);
-  NEXT();
   ASSERT(ar->numArgs() == 1);
 
   Cell* c1 = m_stack.topC();
@@ -5909,7 +5908,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
     cleanupParamsAndActRec(m_stack, ar, NULL);
     m_stack.pushNull();
     raise_warning("call_user_func_array() expects parameter 2 to be array");
-    return;
+    return false;
   }
 
   const Func* func = ar->m_func;
@@ -5930,7 +5929,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
     ASSERT(pcOff() > m_fp->m_func->base());
 
     StringData* invName = ar->hasInvName() ? ar->getInvName() : NULL;
-    if (UNLIKELY(!prepareArrayArgs(ar, args.get(), extraArgs))) return;
+    if (UNLIKELY(!prepareArrayArgs(ar, args.get(), extraArgs))) return false;
     if (UNLIKELY(func->maybeIntercepted())) {
       Variant *h = get_intercept_handler(func->fullNameRef(),
                                          &func->maybeIntercepted());
@@ -5943,7 +5942,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
                 invName, h)) {
             cleanupParamsAndActRec(m_stack, ar, extraArgs);
             *m_stack.allocTV() = retval;
-            return;
+            return false;
           }
         } catch (...) {
           cleanupParamsAndActRec(m_stack, ar, extraArgs);
@@ -5959,6 +5958,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
   SYNC();
   EventHook::FunctionEnter(ar, EventHook::NormalFunc);
   INST_HOOK_FENTRY(func->fullName());
+  return true;
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFCallArray(PC& pc) {
+  NEXT();
+  (void)doFCallArray(pc);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCufSafeArray(PC& pc) {

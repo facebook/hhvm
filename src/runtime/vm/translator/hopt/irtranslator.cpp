@@ -1201,6 +1201,12 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateFCallArray(const Tracelet& t,
+                                     const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(FCallArray);
+}
+
+void
 TranslatorX64::irTranslateStaticLocInit(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   HHIR_EMIT(StaticLocInit, i.imm[0].u_IVA, i.imm[1].u_SA);

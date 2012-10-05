@@ -73,4 +73,55 @@ void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
   rbp->m_savedRbp = (uint64_t)ec->m_fp;
 }
 
+asm (
+  ".byte 0\n"
+  ".align 16\n"
+  ".globl __funcBodyHelperThunk\n"
+"__funcBodyHelperThunk:\n"
+#ifdef HHVM
+  "mov %rbp, %rdi\n"
+  "call funcBodyHelper\n"
+  "jmp *%rax\n"
+#endif
+  "ud2\n"
+);
+TCA funcBodyHelper(ActRec* fp) {
+  g_vmContext->m_fp = fp;
+  g_vmContext->m_stack.top() = sp;
+  g_vmContext->m_pc = fp->m_func->unit()->at(fp->m_func->base());
+  tl_regState = REGSTATE_CLEAN;
+  Func* func = const_cast<Func*>(fp->m_func);
+  SrcKey sk(func, func->base());
+  TCA tca = tx64->getCallArrayProlog(func);
+  if (tca) {
+    func->setFuncBody(tca);
+  } else {
+    tca = Translator::Get()->getResumeHelper();
+  }
+  tl_regState = REGSTATE_DIRTY;
+  return tca;
+}
+
+void TranslatorX64::fCallArrayHelper(const FCallArrayArgs* args) {
+  register ActRec* rbp asm("rbp");
+  ActRec* fp = (ActRec*)rbp->m_savedRbp;
+
+  VMExecutionContext *ec = g_vmContext;
+  ec->m_fp = fp;
+  ec->m_stack.top() = sp;
+  ec->m_pc = curUnit()->at(args->m_pcOff);
+  PC pc = curUnit()->at(args->m_pcNext);
+
+  tl_regState = REGSTATE_CLEAN;
+  bool runFunc = ec->doFCallArray(pc);
+  tl_regState = REGSTATE_DIRTY;
+  if (!runFunc) return;
+
+  ec->m_fp->m_savedRip = rbp->m_savedRip;
+  // smash our return and rbp chain
+  rbp->m_savedRip = (uint64_t)ec->m_fp->m_func->getFuncBody();
+  sp = ec->m_stack.top();
+  rbp->m_savedRbp = (uint64_t)ec->m_fp;
+}
+
 } } } // HPHP::VM::Transl

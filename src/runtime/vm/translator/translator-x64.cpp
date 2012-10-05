@@ -1579,6 +1579,46 @@ TranslatorX64::getInterceptHelper() {
 }
 
 TCA
+TranslatorX64::getCallArrayProlog(Func* func) {
+  TCA tca = func->getFuncBody();
+  if (tca != (TCA)funcBodyHelperThunk) return tca;
+
+  int numParams = func->numParams();
+  std::vector<std::pair<int,Offset> > dvs;
+  for (int i = 0; i < numParams; ++i) {
+    const Func::ParamInfo& pi = func->params()[i];
+    if (pi.hasDefaultValue()) {
+      dvs.push_back(std::make_pair(i, pi.funcletOff()));
+    }
+  }
+  if (dvs.size()) {
+    LeaseHolder writer(s_writeLease);
+    if (!writer) return NULL;
+    tca = func->getFuncBody();
+    if (tca != (TCA)funcBodyHelperThunk) return tca;
+    tca = a.code.frontier;
+    if (dvs.size() == 1) {
+      a.   cmp_imm32_disp_reg32(dvs[0].first,
+                                AROFF(m_numArgsAndCtorFlag), rVmFp);
+      emitBindJcc(a, CC_LE, SrcKey(func, dvs[0].second));
+      emitBindJmp(a, SrcKey(func, func->base()));
+    } else {
+      a.   load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndCtorFlag), rax);
+      for (unsigned i = 0; i < dvs.size(); i++) {
+        a.   cmp_imm32_reg32(dvs[i].first, rax);
+        emitBindJcc(a, CC_LE, SrcKey(func, dvs[i].second));
+      }
+      emitBindJmp(a, SrcKey(func, func->base()));
+    }
+  } else {
+    SrcKey sk(func, func->base());
+    tca = tx64->getTranslation(&sk, false);
+  }
+
+  return tca;
+}
+
+TCA
 TranslatorX64::emitPrologueRedispatch(X64Assembler& a) {
   TCA retval;
   moveToAlign(a);
@@ -2249,15 +2289,17 @@ void TranslatorX64::drawCFG(std::ofstream& out) const {
  *   u:dest from toSmash.
  */
 TCA
-TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk, bool isAddr,
-                       bool forceNoHHIR /* = false */) {
-  TCA tDest = getTranslation(&destSk, false, forceNoHHIR);
+TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req) {
+  TCA tDest = getTranslation(&destSk, false, req == REQ_BIND_JMP_NO_IR);
   if (!tDest) return NULL;
   LeaseHolder writer(s_writeLease);
   if (!writer) return tDest;
   SrcRec* sr = getSrcRec(destSk);
-  if (isAddr) {
+  if (req == REQ_BIND_ADDR) {
     sr->chainFrom(a, IncomingBranch((TCA*)toSmash));
+  } else if (req == REQ_BIND_JCC) {
+    sr->chainFrom(getAsmFor(toSmash),
+                  IncomingBranch(IncomingBranch::JCC, toSmash));
   } else {
     sr->chainFrom(getAsmFor(toSmash), IncomingBranch(toSmash));
   }
@@ -2354,35 +2396,59 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
   LeaseHolder writer(s_writeLease, NO_ACQUIRE);
   if (branch && writer.acquire()) {
     SrcRec* destRec = getSrcRec(dest);
-    destRec->chainFrom(getAsmFor(toSmash), IncomingBranch(cc, toSmash));
+    destRec->chainFrom(getAsmFor(toSmash),
+                       IncomingBranch(IncomingBranch::JCC, toSmash));
   }
   return branch;
 }
 
+static void emitJmpOrJcc(X64Assembler& a, int cc, TCA addr) {
+  if (cc < 0) {
+    a.   jmp(addr);
+  } else {
+    a.   jcc((ConditionCode)cc, addr);
+  }
+}
+
 /*
- * emitBindJmp --
+ * emitBindJ --
  *
- *   Emit code to lazily branch to the srckey in next. Assumes current
- *   basic block is closed (outputs synced, etc.).
+ *   Emit code to lazily branch (optionally on condition cc) to the
+ *   srckey in next.
+ *   Assumes current basic block is closed (outputs synced, etc.).
  */
 void
-TranslatorX64::emitBindJmp(X64Assembler& _a, const SrcKey& dest,
-                           ServiceRequest req /* = REQ_BIND_JMP */) {
-  prepareForSmash(_a, kJmpLen);
+TranslatorX64::emitBindJ(X64Assembler& _a, int cc,
+                         const SrcKey& dest, ServiceRequest req) {
+  prepareForSmash(_a, cc < 0 ? (int)kJmpLen : kJmpccLen);
   TCA toSmash = _a.code.frontier;
   if (&_a == &astubs) {
-    _a.   jmp(toSmash);
+    emitJmpOrJcc(_a, cc, toSmash);
   }
 
   TCA sr = emitServiceReq(false, req, 2,
                           toSmash, uint64_t(dest.offset()));
 
   if (&_a == &astubs) {
-    CodeCursor cc(_a, toSmash);
-    _a.   jmp(sr);
+    CodeCursor cursor(_a, toSmash);
+    emitJmpOrJcc(_a, cc, sr);
   } else {
-    _a.   jmp(sr);
+    emitJmpOrJcc(_a, cc, sr);
   }
+}
+
+void
+TranslatorX64::emitBindJcc(X64Assembler& _a, ConditionCode cc,
+                           const SrcKey& dest,
+                           ServiceRequest req /* = REQ_BIND_JCC */) {
+  emitBindJ(_a, cc, dest, req);
+}
+
+void
+TranslatorX64::emitBindJmp(X64Assembler& _a,
+                           const SrcKey& dest,
+                           ServiceRequest req /* = REQ_BIND_JMP */) {
+  emitBindJ(_a, -1, dest, req);
 }
 
 void
@@ -2461,19 +2527,19 @@ TranslatorX64::checkType(X64Assembler& a,
 void
 TranslatorX64::emitFallbackJmp(SrcRec& dest) {
   prepareForSmash(kJmpccLen);
-  dest.emitFallbackJump(a, IncomingBranch(CC_NZ, a.code.frontier));
+  dest.emitFallbackJump(a, a.code.frontier, CC_NZ);
 }
 
 void
 TranslatorX64::emitFallbackJmp(Asm& as, SrcRec& dest) {
   prepareForSmash(as, kJmpccLen);
-  dest.emitFallbackJump(as, IncomingBranch(CC_NZ, as.code.frontier));
+  dest.emitFallbackJump(as, as.code.frontier, CC_NZ);
 }
 
 void
 TranslatorX64::emitFallbackUncondJmp(Asm& as, SrcRec& dest) {
   prepareForSmash(as, kJmpLen);
-  dest.emitFallbackJump(as, IncomingBranch(as.code.frontier));
+  dest.emitFallbackJump(as, as.code.frontier);
 }
 
 void TranslatorX64::emitReqRetransNoIR(Asm& as, SrcKey& sk) {
@@ -2868,6 +2934,7 @@ TranslatorX64::enterTC(SrcKey sk) {
 
       case REQ_BIND_SIDE_EXIT:
       case REQ_BIND_JMP:
+      case REQ_BIND_JCC:
       case REQ_BIND_JMP_NO_IR:
       case REQ_BIND_ADDR: {
         TCA toSmash = (TCA)args[0];
@@ -2876,8 +2943,7 @@ TranslatorX64::enterTC(SrcKey sk) {
         if (requestNum == REQ_BIND_SIDE_EXIT) {
           SKTRACE(3, sk, "side exit taken!\n");
         }
-        start = bindJmp(toSmash, sk, requestNum == REQ_BIND_ADDR,
-                        requestNum == REQ_BIND_JMP_NO_IR);
+        start = bindJmp(toSmash, sk, (ServiceRequest)requestNum);
       } break;
 
       case REQ_BIND_JMPCC_FIRST: {
@@ -5187,7 +5253,7 @@ TranslatorX64::translateJmp(const Tracelet& t,
   syncOutputs(t);
 
   // Check the surprise page on all backwards jumps
-  if (i.imm[0].u_BA < 0) {
+  if (i.imm[0].u_BA < 0 && !i.noSurprise) {
     if (trustSigSegv) {
       const uint64_t stackMask =
         ~(cellsToBytes(RuntimeOption::EvalVMStackElms) - 1);
@@ -8465,6 +8531,44 @@ TranslatorX64::translateFCall(const Tracelet& t,
      * TODO: in the case of an inlined NativeImpl, we're essentially
      * emitting two adds to rVmSp in a row, which we can combine ...
      */
+    int delta = i.stackOff + getStackDelta(i);
+    if (delta != 0) {
+      // i.stackOff is in negative Cells, not bytes.
+      a.    add_imm64_reg64(cellsToBytes(delta), rVmSp);
+    }
+  }
+}
+
+void TranslatorX64::analyzeFCallArray(Tracelet& t,
+                                      NormalizedInstruction& i) {
+  i.m_txFlags = Supported;
+}
+
+void TranslatorX64::translateFCallArray(const Tracelet& t,
+                                        const NormalizedInstruction& i) {
+  const Offset after = nextSrcKey(t, i).offset();
+
+  syncOutputs(i);
+
+  FCallArrayArgs* args = m_globalData.alloc<FCallArrayArgs>();
+  emitImmReg(a, (uint64_t)args, argNumToRegName[0]);
+  emitCall(a, (TCA)fCallArrayHelper, true);
+
+  args->m_pcOff = i.offset();
+  args->m_pcNext = after;
+
+  if (i.breaksBB) {
+    SrcKey fallThru(curFunc(), after);
+    emitBindJmp(fallThru);
+  } else {
+    /*
+     * When we get here, rVmSp points to the actual top of stack,
+     * but the rest of this tracelet assumes that rVmSp is set to
+     * the top of the stack at the beginning of the tracelet, so we
+     * have to fix it up here.
+     *
+     */
+    ASSERT(i.outStack);
     int delta = i.stackOff + getStackDelta(i);
     if (delta != 0) {
       // i.stackOff is in negative Cells, not bytes.

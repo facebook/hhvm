@@ -4871,14 +4871,15 @@ void EmitterVisitor::emitPostponedMeths() {
       Label entryPoint(e);
       Id paramId = dvInitializers[i].first;
       ConstructPtr node = dvInitializers[i].second;
-      emitVirtualLocal(paramId);
-      e.getEmitterVisitor().visit(node);
-      e.getEmitterVisitor().emitCGet(e);
-      e.getEmitterVisitor().emitSet(e);
+      emitVirtualLocal(paramId, KindOfUninit);
+      visit(node);
+      emitCGet(e);
+      emitSet(e);
       e.PopC();
       p.m_fe->setParamFuncletOff(paramId, entryPoint.getAbsoluteOffset());
     }
     if (!dvInitializers.empty()) {
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NoSurprise, false, 0, 0);
       e.Jmp(topOfBody);
     }
     delete p.m_closureUseVars;
@@ -5118,11 +5119,16 @@ void EmitterVisitor::emitPostponedClosureCtors() {
   }
 }
 
-void EmitterVisitor::emitVirtualLocal(int localId) {
+void EmitterVisitor::emitVirtualLocal(int localId,
+                                      DataType dt /* = KindOfUnknown */) {
   prepareEvalStack();
 
   m_evalStack.push(StackSym::L);
   m_evalStack.setInt(localId);
+  if (dt != KindOfUnknown) {
+    m_evalStack.setKnownType(dt);
+    m_evalStack.setNotRef();
+  }
 }
 
 template<class Expr>

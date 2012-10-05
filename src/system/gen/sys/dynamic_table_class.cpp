@@ -7903,7 +7903,6 @@ extern const CallInfo ci_MutableArrayIterator$$key = { (void*)&c_MutableArrayIte
 extern const CallInfo ci_MutableArrayIterator$$currentref = { (void*)&c_MutableArrayIterator::i_currentref, (void*)&c_MutableArrayIterator::ifa_currentref, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_MutableArrayIterator$$current = { (void*)&c_MutableArrayIterator::i_current, (void*)&c_MutableArrayIterator::ifa_current, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_MutableArrayIterator$$next = { (void*)&c_MutableArrayIterator::i_next, (void*)&c_MutableArrayIterator::ifa_next, 0, 4, 0x0000000000000000LL};
-extern const CallInfo ci_MutableArrayIterator$$__destruct = { (void*)&c_MutableArrayIterator::i___destruct, (void*)&c_MutableArrayIterator::ifa___destruct, 0, 4, 0x0000000000000000LL};
 Variant c_MutableArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
 }
@@ -7921,9 +7920,6 @@ Variant c_MutableArrayIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_MutableArrayIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_valid);
-}
-Variant c_MutableArrayIterator::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_MutableArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -7974,17 +7970,8 @@ Variant NEVER_INLINE c_MutableArrayIterator::ifa_valid(MethodCallPackage &mcp, i
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
 }
-Variant NEVER_INLINE c_MutableArrayIterator::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_MutableArrayIterator);
-  }
-  c_MutableArrayIterator *self ATTRIBUTE_UNUSED (static_cast<c_MutableArrayIterator*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_MutableArrayIterator$$call_info_table[] = {
   { 0x4991C291, 1, 7, "current", &ci_MutableArrayIterator$$current },
-  { 0x50DD3DA2, 1, 10, "__destruct", &ci_MutableArrayIterator$$__destruct },
   { 0x35A80033, 1, 5, "valid", &ci_MutableArrayIterator$$valid },
   { 0x21B23D34, 1, 3, "key", &ci_MutableArrayIterator$$key },
   { 0x6E745559, 1, 10, "currentRef", &ci_MutableArrayIterator$$currentref },
@@ -7993,15 +7980,14 @@ extern const MethodCallInfoTable cw_MutableArrayIterator$$call_info_table[] = {
 };
 extern const int cw_MutableArrayIterator$$call_info_index[] = {
   15,
-  -1,0,1,2,3,-1,-1,-1,
-  -1,4,-1,-1,5,6,-1,-1,
+  -1,0,-1,1,2,-1,-1,-1,
+  -1,3,-1,-1,4,5,-1,-1,
 
 };
 c_MutableArrayIterator *c_MutableArrayIterator::create(VRefParam a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_MutableArrayIterator$$call_info_table[];
@@ -10116,7 +10102,6 @@ extern const CallInfo ci_XMLReader$$getparserproperty = { (void*)&c_XMLReader::i
 extern const CallInfo ci_XMLReader$$movetoattributeno = { (void*)&c_XMLReader::i_movetoattributeno, (void*)&c_XMLReader::ifa_movetoattributeno, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLReader$$movetonextattribute = { (void*)&c_XMLReader::i_movetonextattribute, (void*)&c_XMLReader::ifa_movetonextattribute, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLReader$$lookupnamespace = { (void*)&c_XMLReader::i_lookupnamespace, (void*)&c_XMLReader::ifa_lookupnamespace, 1, 4, 0x0000000000000000LL};
-extern const CallInfo ci_XMLReader$$__destruct = { (void*)&c_XMLReader::i___destruct, (void*)&c_XMLReader::ifa___destruct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLReader$$open = { (void*)&c_XMLReader::i_open, (void*)&c_XMLReader::ifa_open, 3, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLReader$$__construct = { (void*)&c_XMLReader::i___construct, (void*)&c_XMLReader::ifa___construct, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_XMLReader$$setrelaxngschema = { (void*)&c_XMLReader::i_setrelaxngschema, (void*)&c_XMLReader::ifa_setrelaxngschema, 1, 4, 0x0000000000000000LL};
@@ -10204,9 +10189,6 @@ Variant c_XMLReader::i_setrelaxngschema(MethodCallPackage &mcp, CArrRef params) 
 }
 Variant c_XMLReader::i_setrelaxngschemasource(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_setrelaxngschemasource);
-}
-Variant c_XMLReader::i___destruct(MethodCallPackage &mcp, CArrRef params) {
-  return invoke_meth_few_handler(mcp, params, &ifa___destruct);
 }
 Variant NEVER_INLINE c_XMLReader::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -10452,14 +10434,6 @@ Variant NEVER_INLINE c_XMLReader::ifa_setrelaxngschemasource(MethodCallPackage &
   CVarRef arg0(a0);
   return (self->t_setrelaxngschemasource(arg0));
 }
-Variant NEVER_INLINE c_XMLReader::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(mcp.obj == 0)) {
-    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa___destruct, coo_XMLReader);
-  }
-  c_XMLReader *self ATTRIBUTE_UNUSED (static_cast<c_XMLReader*>(mcp.obj));
-  if (UNLIKELY(count > 0)) return throw_toomany_arguments("__destruct", 0, 1);
-  return (self->t___destruct());
-}
 extern const MethodCallInfoTable cw_XMLReader$$call_info_table[] = {
   { 0x5F24A741, 1, 17, "moveToAttributeNo", &ci_XMLReader$$movetoattributeno },
   { 0x4DB36B02, 1, 14, "getAttributeNo", &ci_XMLReader$$getattributeno },
@@ -10476,7 +10450,6 @@ extern const MethodCallInfoTable cw_XMLReader$$call_info_table[] = {
   { 0x1B4A461E, 0, 14, "getAttributeNs", &ci_XMLReader$$getattributens },
   { 0x63B8771E, 1, 16, "setRelaxNGSchema", &ci_XMLReader$$setrelaxngschema },
   { 0x7CD2549F, 1, 5, "close", &ci_XMLReader$$close },
-  { 0x50DD3DA2, 1, 10, "__destruct", &ci_XMLReader$$__destruct },
   { 0x779A4CA3, 1, 13, "moveToElement", &ci_XMLReader$$movetoelement },
   { 0x5FE9BCE5, 1, 5, "__get", &ci_XMLReader$$__get },
   { 0x39B1B666, 1, 22, "setRelaxNGSchemaSource", &ci_XMLReader$$setrelaxngschemasource },
@@ -10496,17 +10469,16 @@ extern const int cw_XMLReader$$call_info_index[] = {
   5,-1,-1,-1,-1,-1,-1,-1,
   6,-1,8,-1,-1,-1,-1,-1,
   -1,9,-1,10,11,-1,12,14,
-  -1,-1,15,16,-1,17,18,-1,
-  -1,-1,-1,19,-1,21,-1,-1,
-  -1,-1,-1,23,26,-1,-1,-1,
-  -1,-1,27,-1,-1,-1,-1,-1,
+  -1,-1,-1,15,-1,16,17,-1,
+  -1,-1,-1,18,-1,20,-1,-1,
+  -1,-1,-1,22,25,-1,-1,-1,
+  -1,-1,26,-1,-1,-1,-1,-1,
 
 };
 c_XMLReader *c_XMLReader::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  clearNoDestruct();
   return this;
 }
 extern const MethodCallInfoTable cw_XMLReader$$call_info_table[];

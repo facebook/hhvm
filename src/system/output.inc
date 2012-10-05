@@ -29,8 +29,8 @@
 "hphp_output_global_state", T(Variant), S(0), "serialize", T(Boolean), "b:1;", "true", S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Dumps all variables in global state, including global variables, static\n * variables, class statics and others.\n *\n * @serialize  bool    Specifies what format to use, whether to serialize\n *                     into a string.\n *\n * @return     mixed   An array of global state.\n */", 
 "hphp_instruction_counter", T(Int64), S(0), NULL, S(4276224), "/**\n * ( HipHop specific )\n *\n *\n * @return     int     Returns the current instruction counter value.\n */", 
 "hphp_get_hardware_counters", T(Variant), S(0), NULL, S(4276224), "/**\n * ( HipHop specific )\n *\n *\n * @return     mixed   An array of hardware counters\n */", 
-"hphp_set_hardware_events", T(Boolean), S(0), "events", T(String), "N;", "null", S(0), NULL, S(4276224), "/**\n * ( HipHop specific )\n *\n *\n * @events     string  comma separated list of hardware events\n *\n * @return     bool    returns TRUE on success and FALSE on failure\n */",
-"hphp_clear_hardware_events", T(Void), S(0), NULL, S(4276224), "/**\n * ( HipHop specific )\n *\n *\n */",
+"hphp_set_hardware_events", T(Boolean), S(0), "events", T(String), "N;", "null", S(0), NULL, S(4276224), "/**\n * ( HipHop specific )\n *\n *\n * @events     string  comma separated list of hardware events\n *\n * @return     bool    returns TRUE on success and FALSE on failure\n */", 
+"hphp_clear_hardware_events", T(Void), S(0), NULL, S(4276224), "/**\n * ( HipHop specific )\n *\n *\n */", 
 
 #elif EXT_TYPE == 1
 

@@ -2292,7 +2292,7 @@ isSupportedCGetMProp(const NormalizedInstruction& i) {
           mcodeMaybePropName(i.immVecM[0]),
           i.inputs[0]->rtt.pretty().c_str(),
           i.inputs[1]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 1, 0) && !curFunc()->isPseudoMain();
+  return isNormalPropertyAccess(i, 1, 0) && isContextFixed();
 }
 
 bool
@@ -2435,15 +2435,14 @@ TranslatorX64::translateCGetMProp(const Tracelet& t,
     args[1] = 2;
     allocInputsForCall(i, args);
     Stats::emitInc(a, Stats::Tx64_PropGetSlow);
-    bool useCtx = !isContextFixed();
+    assert(isContextFixed());
     const StringData* name = prop.rtt.valueString();
     ASSERT(name == NULL || name->isStatic());
 
     CacheHandle ch;
     TargetCache::pcb_lookup_func_t lookupFn = propLookupPrep(
-      ch, useCtx ? name : propCacheName(name).get(),
+      ch, propCacheName(name).get(),
       base.isLocal() ? BASE_LOCAL : BASE_CELL,
-      useCtx ? DYN_CONTEXT : STATIC_CONTEXT,
       name ? STATIC_NAME : DYN_NAME);
     EMIT_RCALL(a, i, lookupFn,
                IMM(ch),
@@ -2830,7 +2829,7 @@ isSupportedSetMProp(const NormalizedInstruction& i) {
   SKTRACE(2, i.source, "setM prop candidate: prop supported: %d, rtt %s\n",
           mcodeMaybePropName(i.immVecM[0]),
           i.inputs[2]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 2, 1) && !curFunc()->isPseudoMain();
+  return isNormalPropertyAccess(i, 2, 1) && isContextFixed();
 }
 
 void
@@ -2922,15 +2921,14 @@ TranslatorX64::translateSetMProp(const Tracelet& t,
     decRefRhs = false;
   } else {
     Stats::emitInc(a, Stats::Tx64_PropSetSlow);
-    bool useCtx = !isContextFixed();
+    assert(isContextFixed());
     const StringData* name = prop.rtt.valueString();
     ASSERT(name == NULL || name->isStatic());
 
     CacheHandle ch;
     TargetCache::pcb_set_func_t setFn = propSetPrep(
-      ch, useCtx ? name : propCacheName(name).get(),
+      ch, propCacheName(name).get(),
       base.isLocal() || base.isVariant() ? BASE_LOCAL : BASE_CELL,
-      useCtx ? DYN_CONTEXT : STATIC_CONTEXT,
       name ? STATIC_NAME : DYN_NAME);
     EMIT_RCALL(a, i, setFn,
                IMM(ch),

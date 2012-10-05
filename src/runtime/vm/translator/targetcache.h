@@ -74,7 +74,6 @@ enum PHPNameSpace {
   NSGlobal,
   NSSProp,
   NSProperty,
-  NSCtxProperty,
   NSCnsBits,
 
   NumNameSpaces,
@@ -291,10 +290,6 @@ enum HomeState {
   BASE_CELL,
   BASE_LOCAL,
 };
-enum CtxState {
-  STATIC_CONTEXT,
-  DYN_CONTEXT,
-};
 enum NameState {
   STATIC_NAME,
   DYN_NAME,
@@ -303,16 +298,16 @@ enum NameState {
 // These functions allocate a CacheHandle of the appropriate type and
 // return a pointer to the C++ helper to call.
 pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
-                                 HomeState hs, CtxState cs, NameState ns);
+                                 HomeState hs, NameState ns);
 pcb_set_func_t propSetPrep(CacheHandle& ch, const StringData* name,
-                           HomeState hs, CtxState cs, NameState ns);
+                           HomeState hs, NameState ns);
 
 struct PropKey {
   Class* cls;
   bool operator==(const PropKey& other) {
     return cls == other.cls;
   }
-  PropKey(Class* cls, ActRec* fp, StringData* name)
+  PropKey(Class* cls, StringData* name)
       : cls(cls) {}
   void destroy() {}
 };
@@ -320,7 +315,7 @@ struct PropKey {
 struct PropNameKey {
   Class* cls;
   StringData* name;
-  PropNameKey(Class* cls, ActRec* fp, StringData* name)
+  PropNameKey(Class* cls, StringData* name)
       : cls(cls), name(name) {}
   bool operator==(const PropNameKey& other) {
     return cls == other.cls && name->same(other.name);
@@ -333,38 +328,8 @@ struct PropNameKey {
   }
 };
 
-struct PropCtxKey {
-  Class* cls;
-  Class* ctx;
-  bool operator==(const PropCtxKey& other) {
-    return cls == other.cls && ctx == other.ctx;
-  }
-  PropCtxKey(Class* cls, ActRec* fp, StringData* name)
-      : cls(cls), ctx(fp->m_func->cls()) {}
-  void destroy() {}
-};
-
-struct PropCtxNameKey {
-  Class* cls;
-  Class* ctx;
-  StringData* name;
-  bool operator==(const PropCtxNameKey& other) {
-    return cls == other.cls && ctx == other.ctx && name->same(other.name);
-  }
-  PropCtxNameKey(Class* cls, ActRec* fp, StringData* name)
-      : cls(cls), ctx(fp->m_func->cls()), name(name) {}
-
-  void destroy() {
-    if (name && name->decRefCount() == 0) {
-      name->release();
-    }
-  }
-};
-
 typedef PropCacheBase<PropKey, NSProperty> PropCache;
 typedef PropCacheBase<PropNameKey> PropNameCache;
-typedef PropCacheBase<PropCtxKey, NSCtxProperty> PropCtxCache;
-typedef PropCacheBase<PropCtxNameKey> PropCtxNameCache;
 
 /*
  * GlobalCache --

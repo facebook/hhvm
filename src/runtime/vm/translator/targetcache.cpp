@@ -225,6 +225,13 @@ namedAlloc(PHPNameSpace where, const StringData* name,
   return retval;
 }
 
+template
+Handle namedAlloc<true>(PHPNameSpace where, const StringData* name,
+                        int numBytes, int align);
+template
+Handle namedAlloc<false>(PHPNameSpace where, const StringData* name,
+                         int numBytes, int align);
+
 void
 invalidateForRename(const StringData* name) {
   ASSERT(name);
@@ -596,7 +603,7 @@ ClassCache::lookup(Handle handle, StringData *name,
 // PropCache
 
 pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
-                                 HomeState hs, CtxState cs, NameState ns) {
+                                 HomeState hs, NameState ns) {
   if (false) {
     CacheHandle ch = 0;
     ObjectData* base = NULL;
@@ -608,42 +615,20 @@ pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
     PropCache::lookup<true>(ch, base, name, stack, fp);
     PropNameCache::lookup<false>(ch, base, name, stack, fp);
     PropNameCache::lookup<true>(ch, base, name, stack, fp);
-    PropCtxCache::lookup<false>(ch, base, name, stack, fp);
-    PropCtxCache::lookup<true>(ch, base, name, stack, fp);
-    PropCtxNameCache::lookup<false>(ch, base, name, stack, fp);
-    PropCtxNameCache::lookup<true>(ch, base, name, stack, fp);
   }
-  if (cs == STATIC_CONTEXT) {
-    if (ns == STATIC_NAME) {
-      ch = PropCache::alloc(name);
-      if (hs == BASE_CELL) {
-        return PropCache::lookup<false>;
-      } else if (hs == BASE_LOCAL) {
-        return PropCache::lookup<true>;
-      }
-    } else if (ns == DYN_NAME) {
-      ch = PropNameCache::alloc();
-      if (hs == BASE_CELL) {
-        return PropNameCache::lookup<false>;
-      } else if (hs == BASE_LOCAL) {
-        return PropNameCache::lookup<true>;
-      }
+  if (ns == STATIC_NAME) {
+    ch = PropCache::alloc(name);
+    if (hs == BASE_CELL) {
+      return PropCache::lookup<false>;
+    } else if (hs == BASE_LOCAL) {
+      return PropCache::lookup<true>;
     }
-  } else if (cs == DYN_CONTEXT) {
-    if (ns == STATIC_NAME) {
-      ch = PropCtxCache::alloc(name);
-      if (hs == BASE_CELL) {
-        return PropCtxCache::lookup<false>;
-      } else if (hs == BASE_LOCAL) {
-        return PropCtxCache::lookup<true>;
-      }
-    } else if (ns == DYN_NAME) {
-      ch = PropCtxNameCache::alloc();
-      if (hs == BASE_CELL) {
-        return PropCtxNameCache::lookup<false>;
-      } else if (hs == BASE_LOCAL) {
-        return PropCtxNameCache::lookup<true>;
-      }
+  } else if (ns == DYN_NAME) {
+    ch = PropNameCache::alloc();
+    if (hs == BASE_CELL) {
+      return PropNameCache::lookup<false>;
+    } else if (hs == BASE_LOCAL) {
+      return PropNameCache::lookup<true>;
     }
   }
 
@@ -651,7 +636,7 @@ pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
 }
 
 pcb_set_func_t propSetPrep(CacheHandle& ch, const StringData* name,
-                           HomeState hs, CtxState cs, NameState ns) {
+                           HomeState hs, NameState ns) {
   if (false) {
     CacheHandle ch = 0;
     ObjectData* base = NULL;
@@ -664,42 +649,20 @@ pcb_set_func_t propSetPrep(CacheHandle& ch, const StringData* name,
     PropCache::set<true>(ch, base, name, val, t, fp);
     PropNameCache::set<false>(ch, base, name, val, t, fp);
     PropNameCache::set<true>(ch, base, name, val, t, fp);
-    PropCtxCache::set<false>(ch, base, name, val, t, fp);
-    PropCtxCache::set<true>(ch, base, name, val, t, fp);
-    PropCtxNameCache::set<false>(ch, base, name, val, t, fp);
-    PropCtxNameCache::set<true>(ch, base, name, val, t, fp);
   }
-  if (cs == STATIC_CONTEXT) {
-    if (ns == STATIC_NAME) {
-      ch = PropCache::alloc(name);
-      if (hs == BASE_CELL) {
-        return PropCache::set<false>;
-      } else if (hs == BASE_LOCAL) {
-        return PropCache::set<true>;
-      }
-    } else if (ns == DYN_NAME) {
-      ch = PropNameCache::alloc();
-      if (hs == BASE_CELL) {
-        return PropNameCache::set<false>;
-      } else if (hs == BASE_LOCAL) {
-        return PropNameCache::set<true>;
-      }
+  if (ns == STATIC_NAME) {
+    ch = PropCache::alloc(name);
+    if (hs == BASE_CELL) {
+      return PropCache::set<false>;
+    } else if (hs == BASE_LOCAL) {
+      return PropCache::set<true>;
     }
-  } else if (cs == DYN_CONTEXT) {
-    if (ns == STATIC_NAME) {
-      ch = PropCtxCache::alloc(name);
-      if (hs == BASE_CELL) {
-        return PropCtxCache::set<false>;
-      } else if (hs == BASE_LOCAL) {
-        return PropCtxCache::set<true>;
-      }
-    } else if (ns == DYN_NAME) {
-      ch = PropCtxNameCache::alloc();
-      if (hs == BASE_CELL) {
-        return PropCtxNameCache::set<false>;
-      } else if (hs == BASE_LOCAL) {
-        return PropCtxNameCache::set<true>;
-      }
+  } else if (ns == DYN_NAME) {
+    ch = PropNameCache::alloc();
+    if (hs == BASE_CELL) {
+      return PropNameCache::set<false>;
+    } else if (hs == BASE_LOCAL) {
+      return PropNameCache::set<true>;
     }
   }
 
@@ -719,31 +682,11 @@ PropNameCache::Parent::hashKey(PropNameKey key) {
   return hash_int64_pair((intptr_t)key.cls, key.name->hash());
 }
 
-template<>
-inline int
-PropCtxCache::Parent::hashKey(PropCtxKey key) {
-  return hash_int64_pair((intptr_t)key.cls, (intptr_t)key.ctx);
-}
-
-template<>
-inline int
-PropCtxNameCache::Parent::hashKey(PropCtxNameKey key) {
-  return hash_int64_pair(
-    hash_int64_pair((intptr_t)key.cls, (intptr_t)key.ctx),
-    key.name->hash());
-}
-
 template<> inline void
 PropCache::incStat() { Stats::inc(Stats::Tx64_PropCache); }
 
 template<> inline void
 PropNameCache::incStat() { Stats::inc(Stats::Tx64_PropNameCache); }
-
-template<> inline void
-PropCtxCache::incStat() { Stats::inc(Stats::Tx64_PropCtxCache); }
-
-template<> inline void
-PropCtxNameCache::incStat() { Stats::inc(Stats::Tx64_PropCtxNameCache); }
 
 template<typename Key, PHPNameSpace ns>
 template<bool baseIsLocal>
@@ -754,7 +697,7 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
   incStat();
   Class* c = base->getVMClass();
   ASSERT(c != NULL);
-  Key key(c, fp, name);
+  Key key(c, name);
   typename Parent::Self* thiz = Parent::cacheAtHandle(handle);
   typename Parent::Pair* pair = thiz->keyToPair(key);
   TypedValue* result;
@@ -837,7 +780,7 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
   incStat();
   Class* c = base->getVMClass();
   ASSERT(c != NULL);
-  Key key(c, fp, name);
+  Key key(c, name);
   typename Parent::Self* thiz = Parent::cacheAtHandle(ch);
   typename Parent::Pair* pair = thiz->keyToPair(key);
   TypedValue propVal;

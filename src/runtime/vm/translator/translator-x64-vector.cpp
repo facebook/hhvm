@@ -2362,10 +2362,6 @@ void TranslatorX64::emitMPre(const Tracelet& t,
   SKTRACE(2, ni.source, "%s ctxFixed=%s\n",
           __func__, ctxFixed ? "true" : "false");
 
-  /* XXX Im pretty sure we shouldnt need to clean/smash the regs */
-  m_regMap.cleanRegs(kAllRegs);
-  m_regMap.smashRegs(kCallerSaved);
-
   if (!ctxFixed && needMInstrCtx(t, ni)) {
     EMIT_CALL(a, getMInstrCtx, R(rsp), R(rVmFp));
     recordCall(ni);

@@ -272,7 +272,8 @@ struct Unit {
       Class,
       NopOut,
       DataType,
-      GuardedThis
+      GuardedThis,
+      GuardedCls
     };
     static const int VectorArg = 1 << 7;
     MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {

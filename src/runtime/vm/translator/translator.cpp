@@ -1200,6 +1200,20 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       }
     }
 
+    if (op == OpFPushClsMethodF && ni->funcd &&
+        prevOp == OpAGetC &&
+        prev->prev && prev->prev->op() == OpString &&
+        prev->prev->prev && prev->prev->prev->op() == OpString) {
+      /*
+       * We have a fully determined OpFPushClsMethodF. We dont
+       * need to put the class and method name strings, or the
+       * Class* into registers.
+       */
+      prev->outStack = NULL;
+      prev->prev->outStack = NULL;
+      prev->prev->prev->outStack = NULL;
+    }
+
     if (RuntimeOption::RepoAuthoritative &&
         prevOp == OpFPushCtorD &&
         !prev->noCtor &&
@@ -1420,6 +1434,9 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
 
     switch (info.m_kind) {
+      case Unit::MetaInfo::GuardedCls:
+        ni->guardedCls = true;
+        break;
       case Unit::MetaInfo::GuardedThis:
         ni->guardedThis = true;
         break;

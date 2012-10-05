@@ -241,6 +241,8 @@ class NormalizedInstruction {
   const Func* funcd; // The Func in the topmost AR on the stack. Guaranteed to
                      // be accurate. Don't guess about this. Note that this is
                      // *not* the function whose body the NI belongs to.
+                     // Note that for an FPush* may be set to the (statically
+                     // known Func* that /this/ instruction is pushing)
   const StringData* funcName;
     // For FCall's, an opaque identifier that is either null, or uniquely
     // identifies the (functionName, -arity) pair of this call site.
@@ -294,6 +296,10 @@ class NormalizedInstruction {
    */
   unsigned guardedThis:1;
   /*
+   * guardedCls indicates that we know the class exists
+   */
+  unsigned guardedCls:1;
+  /*
     noCtor is set on FPushCtorD to say that the ctor is
     going to be skipped (so dont setup an actrec)
   */
@@ -328,6 +334,7 @@ class NormalizedInstruction {
     skipSync(false),
     grouped(false),
     guardedThis(false),
+    guardedCls(false),
     noCtor(false),
     noOp(false),
     m_txFlags(Interp)

@@ -239,6 +239,9 @@ class TranslatorX64 : public Translator
   }
   void emitSideExit(Asm& a, const NormalizedInstruction& dest, bool next);
   void emitStringToClass(const NormalizedInstruction& i);
+  void emitKnownClassCheck(const NormalizedInstruction& i,
+                           const StringData* clssName,
+                           register_name_t reg);
   void emitStringToKnownClass(const NormalizedInstruction& i,
                               const StringData* clssName);
   void emitObjToClass(const NormalizedInstruction& i);

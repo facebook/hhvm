@@ -5268,6 +5268,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
       StringData* nLiteral = StringData::GetStaticString(nameStr);
       fpiStart = m_ue.bcPos();
       e.FPushClsMethodD(numParams, nLiteral, cLiteral);
+      if (node->forcedPresent()) {
+        m_metaInfo.add(fpiStart, Unit::MetaInfo::GuardedCls, false, 0, 0);
+      }
     } else {
       emitVirtualClassBase(e, node.get());
       if (!nameStr.empty()) {

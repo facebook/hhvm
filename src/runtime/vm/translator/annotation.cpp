@@ -82,11 +82,12 @@ void recordFunc(const SrcKey& sk, const Func* func) {
   s_callDB.insert(std::make_pair(sk, cr));
 }
 
-static void recordActRecPush(const SrcKey& sk,
+static void recordActRecPush(NormalizedInstruction& i,
                              const Unit* unit,
                              const StringData* name,
                              const StringData* clsName,
                              bool staticCall) {
+  const SrcKey& sk = i.source;
   SrcKey next(sk);
   next.advance(unit);
   const FPIEnt *fpi = curFunc()->findFPI(next.offset());
@@ -102,6 +103,7 @@ static void recordActRecPush(const SrcKey& sk,
     const Func* func = lookupImmutableMethod(cls, name, magic, staticCall);
     if (func) {
       recordFunc(fcall, func);
+      i.funcd = func;
     }
     return;
   }
@@ -152,7 +154,7 @@ void annotate(NormalizedInstruction* i) {
         className = curUnit()->lookupLitstrId(i->imm[2].u_SA);
       }
       ASSERT(funcName->isStatic());
-      recordActRecPush(i->source, curUnit(), funcName, className,
+      recordActRecPush(*i, curUnit(), funcName, className,
                        i->op() == OpFPushClsMethodD ||
                        i->op() == OpFPushClsMethodF);
     } break;

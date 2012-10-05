@@ -5841,35 +5841,70 @@ TranslatorX64::emitFrameRelease(X64Assembler& a,
 
 const int kEmitClsLocalIdx = 0;
 
+/*
+ * Determine if the class is defined, and fatal if not.
+ * If reg is not noreg, return the Class* in it
+ * If we can statically prove that the class is defined,
+ * all checks are omitted (eg its a parent of the current,
+ * fixed, context).
+ */
+void
+TranslatorX64::emitKnownClassCheck(const NormalizedInstruction& i,
+                                   const StringData* clsName,
+                                   register_name_t reg) {
+  using namespace TargetCache;
+  ASSERT(clsName);
+  Class* klass = Unit::lookupClass(clsName);
+  bool guarded = false;
+  if (klass) {
+    guarded = i.guardedCls;
+    if (!guarded && isContextFixed()) {
+      Class *ctx = curFunc()->cls();
+      if (ctx && ctx->classof(klass)) {
+        guarded = true;
+      }
+    }
+  }
+  if (guarded) {
+    if (reg != reg::noreg) {
+      emitImmReg(a, (uint64_t)klass, reg);
+    }
+  } else {
+    Stats::emitInc(a, Stats::TgtCache_KnownClsHit);
+    CacheHandle ch = allocKnownClass(clsName);
+    if (reg == reg::noreg) {
+      a.          cmp_imm32_disp_reg32(0, ch, rVmTl);
+    } else {
+      a.          load_reg64_disp_reg64(rVmTl, ch, reg);
+      a.          test_reg64_reg64(reg, reg);
+    }
+    {
+      UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+      ScratchReg clsPtr(m_regMap);
+      astubs.   lea_reg64_disp_reg64(rVmTl, ch, *clsPtr);
+      if (false) { // typecheck
+        Class** cache = NULL;
+        UNUSED Class* ret =
+          TargetCache::lookupKnownClass<false>(cache, clsName, true);
+      }
+      // We're only passing two arguments to lookupKnownClass because
+      // the third is ignored in the checkOnly == false case
+      EMIT_CALL(astubs, ((TargetCache::lookupKnownClass_func_t)
+                         TargetCache::lookupKnownClass<false>),
+                R(*clsPtr), IMM((uintptr_t)clsName));
+      recordReentrantStubCall(i);
+      if (reg != reg::noreg) {
+        emitMovRegReg(astubs, rax, reg);
+      }
+    }
+  }
+}
+
 void
 TranslatorX64::emitStringToKnownClass(const NormalizedInstruction& i,
                                       const StringData* clsName) {
-  using namespace TargetCache;
-  ASSERT(clsName);
-  Stats::emitInc(a, Stats::TgtCache_KnownClsHit);
-  CacheHandle ch = allocKnownClass(clsName);
   ScratchReg cls(m_regMap);
-  a.          load_reg64_disp_reg64(rVmTl, ch, *cls);
-  a.          test_reg64_reg64(*cls, *cls);
-  {
-    UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
-    ScratchReg clsPtr(m_regMap);
-    astubs.   lea_reg64_disp_reg64(rVmTl, ch, *clsPtr);
-    if (false) { // typecheck
-      Class** cache = NULL;
-      UNUSED Class* ret =
-        TargetCache::lookupKnownClass<false>(cache, clsName, true);
-    }
-    // We're only passing two arguments to lookupKnownClass because
-    // the third is ignored in the checkOnly == false case
-    EMIT_CALL(astubs, ((TargetCache::lookupKnownClass_func_t)
-                         TargetCache::lookupKnownClass<false>),
-               R(*clsPtr), IMM((uintptr_t)clsName));
-    recordReentrantStubCall(i);
-    // UnlikelyIfBlock will restore cls's SCRATCH state but not its
-    // contents. lookupKnownClass returns the value we want.
-    emitMovRegReg(astubs, rax, *cls);
-  }
+  emitKnownClassCheck(i, clsName, *cls);
   m_regMap.bindScratch(cls, i.outStack->location, KindOfClass, RegInfo::DIRTY);
 }
 
@@ -5939,11 +5974,14 @@ TranslatorX64::analyzeAGetC(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(!rtt.isVariant());
   i.m_txFlags = supportedPlan(rtt.isString() ||
                               rtt.valueType() == KindOfObject);
+  if (rtt.isString() && rtt.valueString()) i.manuallyAllocInputs = true;
 }
 
 void TranslatorX64::translateAGetC(const Tracelet& t,
                                    const NormalizedInstruction& ni) {
-  emitClsAndPals(ni);
+  if (ni.outStack) {
+    emitClsAndPals(ni);
+  }
 }
 
 void TranslatorX64::analyzeAGetL(Tracelet& t,
@@ -5962,46 +6000,18 @@ void TranslatorX64::translateAGetL(const Tracelet& t,
 
 void TranslatorX64::translateSelf(const Tracelet& t,
                                   const NormalizedInstruction& i) {
-
   m_regMap.allocOutputRegs(i);
   PhysReg tmp = getReg(i.outStack->location);
-  Class* clss = curFunc()->cls();
-  // if in repo authorative mode & the class is unique, then we can
-  // just burn the class ref into an immediate
-  if (RuntimeOption::RepoAuthoritative &&
-     (clss->preClass()->attrs() & AttrUnique)) {
-    // tmp = clss
-    a.mov_imm64_reg((int64_t)clss,tmp);
-  } else {
-    // tmp = rfp->m_func
-    // tmp = tmp->m_cls
-    a.load_reg64_disp_reg64(rVmFp, AROFF(m_func), tmp);
-    a.load_reg64_disp_reg64(tmp, Func::clsOff(), tmp);
-    // Note: After Mark's checkin, we can simplify further to
-    if (false) {
-      a.load_reg64_disp_reg64(rVmTl,
-                              TargetCache::allocKnownClass(clss->name()),
-                              tmp);
-    }
-  }
+  ASSERT(isContextFixed() && curFunc()->cls());
+  emitImmReg(a, (int64_t)curFunc()->cls(), tmp);
 }
 
 void TranslatorX64::translateParent(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  Class* clss = curFunc()->cls()->parent();
-  // if in repo authorative mode & the class is unique, then we can
-  // just burn the class ref into an immediate
-  if (RuntimeOption::RepoAuthoritative &&
-     (clss->preClass()->attrs() & AttrUnique)) {
-    // tmp = clss
-    m_regMap.allocOutputRegs(i);
-    PhysReg tmp = getReg(i.outStack->location);
-    a.mov_imm64_reg((int64_t)clss,tmp);
-  } else {
-    // Note: After Mark's checkin, we can simplify further like
-    // translateSelf above
-    emitStringToKnownClass(i, clss->name());
-  }
+  m_regMap.allocOutputRegs(i);
+  PhysReg tmp = getReg(i.outStack->location);
+  ASSERT(isContextFixed() && curFunc()->cls() && curFunc()->cls()->parent());
+  emitImmReg(a, (int64_t)curFunc()->cls()->parent(), tmp);
 }
 
 void TranslatorX64::analyzeSelf(Tracelet& t,NormalizedInstruction& i) {
@@ -7398,6 +7408,7 @@ TranslatorX64::translateFPushClsMethodD(const Tracelet& t,
 
   size_t clsOff  = AROFF(m_cls) + startOfActRec;
   if (func) {
+    emitKnownClassCheck(i, cls, reg::noreg);
     Stats::emitInc(a, Stats::TgtCache_StaticMethodBypass);
     emitPushAR(i, func, 0 /*bytesPopped*/,
                false /* isCtor */, false /* clearThis */,

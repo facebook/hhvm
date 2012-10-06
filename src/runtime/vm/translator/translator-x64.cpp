@@ -291,8 +291,7 @@ void TranslatorX64::SEGVHandler(int signum, siginfo_t *info, void *ctx) {
 }
 
 /*
- * Copy a heap cell from memory to the stack. Takes care to honor
- * the system invariant that _count == 0.
+ * Copy a heap cell from memory to the stack.
  *
  * Use emitCopyToStack when you can safely change the state of the
  * register map.  When using emitCopyToStackRegSafe, you'll need to
@@ -1398,7 +1397,6 @@ TranslatorX64::setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
   TypedValue* tv =
     (TypedValue*)(uintptr_t(ar) - (argNum+1) * sizeof(TypedValue));
   tv->m_data.num = datum;
-  tv->_count = 0;
   tv->m_type = t;
 }
 

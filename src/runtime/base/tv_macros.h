@@ -57,7 +57,6 @@
   } else { \
     TypedValue* fr2 = (fr)->m_data.pref->tv(); \
     (to)->m_data.num = fr2->m_data.num; \
-    (to)->_count = 0; \
     (to)->m_type = fr2->m_type; \
     if (IS_REFCOUNTED_TYPE((to)->m_type)) { \
       TV_INCREF(to); \
@@ -77,7 +76,6 @@
 }
 
 // Assumes 'fr' is live and 'to' is dead
-// NOTE: this helper will not change the value of to->_count
 #define TV_DUP_VAR_NC(fr,to) { \
   ASSERT((fr)->m_type == KindOfRef); \
   (to)->m_data.num = (fr)->m_data.num; \
@@ -86,7 +84,6 @@
 }
 
 // Assumes 'fr' is live and 'to' is dead
-// NOTE: this helper will not change the value of to->_count
 #define TV_DUP_NC(fr,to) { \
   (to)->m_data.num = (fr)->m_data.num; \
   (to)->m_type = (fr)->m_type; \
@@ -97,30 +94,23 @@
 
 // Assumes 'fr' is live and 'to' is dead
 // Assumes 'fr->m_type != KindOfRef'
-// NOTE: this helper will initialize to->_count to 0
 #define TV_DUP_CELL(fr, to) { \
   TV_DUP_CELL_NC((fr), (to)) \
-  (to)->_count = 0; \
 }
 
 // Assumes 'fr' is live and 'to' is dead
 // Assumes 'fr->m_type == KindOfRef'
-// NOTE: this helper will initialize to->_count to 0
 #define TV_DUP_VAR(fr, to) { \
   ASSERT((fr)->m_type == KindOfRef); \
   TV_DUP_VAR_NC((fr), (to)) \
-  (to)->_count = 0; \
 }
 
 // Assumes 'fr' is live and 'to' is dead
-// NOTE: this helper will initialize to->_count to 0
 #define TV_DUP(fr,to) { \
   TV_DUP_NC((fr), (to)) \
-  (to)->_count = 0; \
 }
 
 // Assumes 'fr' is live and 'to' is dead
-// NOTE: this helper will initialize to->_count to 0
 #define TV_DUP_FLATTEN_VARS(fr, to, container) { \
   if (LIKELY(fr->m_type != KindOfRef)) { \
     TV_DUP_CELL_NC(fr, to); \
@@ -132,19 +122,14 @@
   } else { \
     TV_DUP_VAR_NC(fr, to); \
   } \
-  to->_count = 0; \
 }
 
 // Assumes 'tv' is dead
-// NOTE: this helper will initialize tv->_count to 0
 #define TV_WRITE_NULL(tv) \
-  (tv)->_count = 0; \
   (tv)->m_type = KindOfNull
 
 // Assumes 'tv' is dead
-// NOTE: this helper will initialize tv->_count to 0
 #define TV_WRITE_UNINIT(tv) \
-  (tv)->_count = 0; \
   (tv)->m_type = KindOfUninit
 
 #endif

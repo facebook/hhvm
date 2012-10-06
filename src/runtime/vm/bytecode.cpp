@@ -215,7 +215,6 @@ VarEnv::VarEnv()
   // The global scope always contains certain special names.
   {
     TypedValue globalArray;
-    globalArray._count = 0;
     globalArray.m_type = KindOfArray;
     globalArray.m_data.parr =
       new (request_arena()) NameValueTableWrapper(&*m_nvTable);
@@ -2987,7 +2986,6 @@ static inline void lookupClsRef(TypedValue* input,
     tvRefcountedDecRef(input);
   }
   output->m_data.pcls = const_cast<Class*>(class_);
-  output->_count = 0;
   output->m_type = KindOfClass;
 }
 
@@ -3946,7 +3944,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNot(PC& pc) {
     int64 result = VOP(tvCellAsVariant(c2), tvCellAsCVarRef(c1));             \
     tvRefcountedDecRefCell(c2);                                               \
     c2->m_data.num = result;                                                  \
-    c2->_count = 0;                                                           \
     c2->m_type = KindOfBoolean;                                               \
     m_stack.popC();                                                           \
   }                                                                           \
@@ -4106,7 +4103,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopInstanceOf(PC& pc) {
   m_stack.popC();
   tvRefcountedDecRefCell(c2);
   c2->m_data.num = r;
-  c2->_count = 0;
   c2->m_type = KindOfBoolean;
 }
 
@@ -4118,7 +4114,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopInstanceOfD(PC& pc) {
   bool r = cellInstanceOf(c1, ne);
   tvRefcountedDecRefCell(c1);
   c1->m_data.num = r;
-  c1->_count = 0;
   c1->m_type = KindOfBoolean;
 }
 
@@ -4127,7 +4122,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopPrint(PC& pc) {
   Cell* c1 = m_stack.topC();
   print(tvCellAsVariant(c1).toString());
   tvRefcountedDecRefCell(c1);
-  c1->_count = 0;
   c1->m_type = KindOfInt64;
   c1->m_data.num = 1;
 }
@@ -4144,7 +4138,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopClone(PC& pc) {
   m_stack.popTV();
   m_stack.pushNull();
   tv->m_type = KindOfObject;
-  tv->_count = 0;
   tv->m_data.pobj = newobj;
 }
 
@@ -4667,7 +4660,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetN(PC& pc) {
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
-  tv1->_count = 0;
   tv1->m_type = KindOfBoolean;
   LITSTR_DECREF(name);
 }
@@ -4686,7 +4678,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetG(PC& pc) {
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
-  tv1->_count = 0;
   tv1->m_type = KindOfBoolean;
   LITSTR_DECREF(name);
 }
@@ -4701,7 +4692,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
   }
   m_stack.popC();
   output->m_data.num = e;
-  output->_count = 0;
   output->m_type = KindOfBoolean;
   SPROP_OP_POSTLUDE
 }
@@ -4733,7 +4723,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
   }
   getHelperPost<false>(GETHELPERPOST_ARGS);
   tvRet->m_data.num = issetResult;
-  tvRet->_count = 0;
   tvRet->m_type = KindOfBoolean;
 }
 
@@ -4783,7 +4772,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyL(PC& pc) {
   bool e = empty(tvAsCVarRef(loc));
   TypedValue* tv1 = m_stack.allocTV();
   tv1->m_data.num = e;
-  tv1->_count = 0;
   tv1->m_type = KindOfBoolean;
 }
 
@@ -4801,7 +4789,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyN(PC& pc) {
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
-  tv1->_count = 0;
   tv1->m_type = KindOfBoolean;
   LITSTR_DECREF(name);
 }
@@ -4820,7 +4807,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyG(PC& pc) {
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
-  tv1->_count = 0;
   tv1->m_type = KindOfBoolean;
   LITSTR_DECREF(name);
 }
@@ -4835,7 +4821,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
   }
   m_stack.popC();
   output->m_data.num = e;
-  output->_count = 0;
   output->m_type = KindOfBoolean;
   SPROP_OP_POSTLUDE
 }
@@ -4867,7 +4852,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyM(PC& pc) {
   }
   getHelperPost<false>(GETHELPERPOST_ARGS);
   tvRet->m_data.num = emptyResult;
-  tvRet->_count = 0;
   tvRet->m_type = KindOfBoolean;
 }
 
@@ -5543,7 +5527,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushCtor(PC& pc) {
   this_->incRefCount();
   this_->incRefCount();
   tv->m_type = KindOfObject;
-  tv->_count = 0;
   tv->m_data.pobj = this_;
   // Push new activation record.
   ActRec* ar = m_stack.allocA();
@@ -6371,7 +6354,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopInitThisLoc(PC& pc) {
   tvRefcountedDecRef(thisLoc);
   if (m_fp->hasThis()) {
     thisLoc->m_data.pobj = m_fp->getThis();
-    thisLoc->_count = 0;
     thisLoc->m_type = KindOfObject;
     tvIncRef(thisLoc);
   } else {
@@ -6650,7 +6632,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
 
   TypedValue* ret = m_stack.allocTV();
   ret->m_type = KindOfObject;
-  ret->_count = 0;
   ret->m_data.pobj = cont;
 }
 
@@ -6696,7 +6677,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   // Return the label in a stack cell
   TypedValue* ret = m_stack.allocTV();
   ret->m_type = KindOfInt64;
-  ret->_count = 0;
   ret->m_data.num = label;
 }
 

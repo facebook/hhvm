@@ -1098,7 +1098,7 @@ void HphpArray::addLvalImpl(StringData* key, int64 h, Variant** pDest) {
   // Initialize element to null and store the address of the element into
   // *pDest.
   TV_WRITE_NULL(&e->data);
-  // Set key. Do this after writing to e->data so _count is not overwritten
+  // Set key.
   e->setStrKey(key, h);
   e->key->incRefCount();
   *pDest = &(tvAsVariant(&e->data));
@@ -2388,7 +2388,6 @@ template<DataType keyType, bool decRefBase>
 inline void non_array_getm(TypedValue* base, int64 key, TypedValue* out) {
   ASSERT(base->m_type != KindOfRef);
   TypedValue keyTV;
-  keyTV._count = 0;
   keyTV.m_type = keyType;
   keyTV.m_data.num = key;
   VMExecutionContext::getElem(base, &keyTV, out);

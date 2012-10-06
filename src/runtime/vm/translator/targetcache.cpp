@@ -784,7 +784,6 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
   typename Parent::Self* thiz = Parent::cacheAtHandle(ch);
   typename Parent::Pair* pair = thiz->keyToPair(key);
   TypedValue propVal;
-  if (debug) propVal._count = 0;
   propVal.m_type = type;
   propVal.m_data.num = val;
   if (pair->m_key == key) {

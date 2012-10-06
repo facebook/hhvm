@@ -242,7 +242,7 @@ void LinearScan::allocRegToInstruction(Trace* trace,
     return;
   }
 
-  if (type == Type::Null || type == Type::Uninit || Type::None) {
+  if (type == Type::Null || type == Type::Uninit || type == Type::None) {
     // these types don't get a register because their values are static
     return;
   }

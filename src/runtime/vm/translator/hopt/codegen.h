@@ -132,6 +132,8 @@ public:
   Address cgNegate(IRInstruction* inst); // helper
   Address cgJcc(IRInstruction* inst); // helper
   Address cgLabel(Opcode opc, LabelInstruction* label);
+  Address cgOpEqHelper(IRInstruction* inst, bool eq);
+  Address cgOpSameHelper(IRInstruction* inst, bool eq);
 
 
 private:

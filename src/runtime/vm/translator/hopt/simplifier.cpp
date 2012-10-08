@@ -604,7 +604,12 @@ SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
         return genDefBool(NAME == OpNSame);                                   \
       }                                                                       \
     }                                                                         \
-    /* if the types are known to be equal, then simplify Same into Eq */      \
+    /* strings and objects have special === rules */                          \
+    /* other types may now simplify === to ==, since the types are equal */   \
+    if (Type::isString(src1->getType()) ||                                    \
+        src1->getType() == Type::Obj) {                                       \
+      break;                                                                  \
+    }                                                                         \
     if (NAME == OpSame) {                                                     \
       return m_tb->genCmp(OpEq, src1, src2);                                  \
     }                                                                         \

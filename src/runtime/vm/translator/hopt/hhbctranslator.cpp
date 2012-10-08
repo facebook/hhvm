@@ -929,8 +929,8 @@ void HhbcTranslator::emitCmp(Opcode opc) {
   SSATmp* src2 = popC();
   // src2 opc src1
   push(m_tb.genCmp(opc, src2, src1));
-  m_tb.genDecRef(src1);
   m_tb.genDecRef(src2);
+  m_tb.genDecRef(src1);
 }
 
 void HhbcTranslator::emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId) {

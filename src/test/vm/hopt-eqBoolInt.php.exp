@@ -1,0 +1,504 @@
+----------
+x = bool(true)
+y = bool(true)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(true)
+y = bool(true)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(true)
+y = bool(false)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(false)
+y = bool(true)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(true)
+y = int(0)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(0)
+y = bool(true)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(true)
+y = int(1)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(1)
+y = bool(true)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(true)
+y = int(2)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(2)
+y = bool(true)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(true)
+y = int(3)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(3)
+y = bool(true)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(true)
+(x == true) = bool(true)
+(true == x) = bool(false)
+----------
+x = bool(true)
+(x == false) = bool(false)
+(false == x) = bool(false)
+----------
+x = bool(true)
+(x == 0) = bool(false)
+(0 == x) = bool(false)
+----------
+x = bool(true)
+(x == 1) = bool(true)
+(1 == x) = bool(true)
+----------
+x = bool(true)
+(x == 2) = bool(true)
+(2 == x) = bool(true)
+----------
+x = bool(true)
+(x == 3) = bool(true)
+(3 == x) = bool(true)
+----------
+x = bool(false)
+y = bool(true)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(true)
+y = bool(false)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(false)
+y = bool(false)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(false)
+y = bool(false)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(false)
+y = int(0)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(0)
+y = bool(false)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(false)
+y = int(1)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1)
+y = bool(false)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(false)
+y = int(2)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(2)
+y = bool(false)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(false)
+y = int(3)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(3)
+y = bool(false)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(false)
+(x == true) = bool(false)
+(true == x) = bool(true)
+----------
+x = bool(false)
+(x == false) = bool(true)
+(false == x) = bool(true)
+----------
+x = bool(false)
+(x == 0) = bool(true)
+(0 == x) = bool(true)
+----------
+x = bool(false)
+(x == 1) = bool(false)
+(1 == x) = bool(false)
+----------
+x = bool(false)
+(x == 2) = bool(false)
+(2 == x) = bool(false)
+----------
+x = bool(false)
+(x == 3) = bool(false)
+(3 == x) = bool(false)
+----------
+x = int(0)
+y = bool(true)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(true)
+y = int(0)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(0)
+y = bool(false)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(false)
+y = int(0)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(0)
+y = int(0)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(0)
+y = int(0)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(0)
+y = int(1)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1)
+y = int(0)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(0)
+y = int(2)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(2)
+y = int(0)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(0)
+y = int(3)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(3)
+y = int(0)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(0)
+(x == true) = bool(false)
+(true == x) = bool(true)
+----------
+x = int(0)
+(x == false) = bool(true)
+(false == x) = bool(true)
+----------
+x = int(0)
+(x == 0) = bool(true)
+(0 == x) = bool(true)
+----------
+x = int(0)
+(x == 1) = bool(false)
+(1 == x) = bool(false)
+----------
+x = int(0)
+(x == 2) = bool(false)
+(2 == x) = bool(false)
+----------
+x = int(0)
+(x == 3) = bool(false)
+(3 == x) = bool(false)
+----------
+x = int(1)
+y = bool(true)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(true)
+y = int(1)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(1)
+y = bool(false)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(false)
+y = int(1)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1)
+y = int(0)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(0)
+y = int(1)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1)
+y = int(1)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(1)
+y = int(1)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(1)
+y = int(2)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(2)
+y = int(1)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1)
+y = int(3)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(3)
+y = int(1)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1)
+(x == true) = bool(true)
+(true == x) = bool(false)
+----------
+x = int(1)
+(x == false) = bool(false)
+(false == x) = bool(false)
+----------
+x = int(1)
+(x == 0) = bool(false)
+(0 == x) = bool(false)
+----------
+x = int(1)
+(x == 1) = bool(true)
+(1 == x) = bool(true)
+----------
+x = int(1)
+(x == 2) = bool(false)
+(2 == x) = bool(false)
+----------
+x = int(1)
+(x == 3) = bool(false)
+(3 == x) = bool(false)
+----------
+x = int(2)
+y = bool(true)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(true)
+y = int(2)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(2)
+y = bool(false)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(false)
+y = int(2)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(2)
+y = int(0)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(0)
+y = int(2)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(2)
+y = int(1)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1)
+y = int(2)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(2)
+y = int(2)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(2)
+y = int(2)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(2)
+y = int(3)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(3)
+y = int(2)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(2)
+(x == true) = bool(true)
+(true == x) = bool(false)
+----------
+x = int(2)
+(x == false) = bool(false)
+(false == x) = bool(false)
+----------
+x = int(2)
+(x == 0) = bool(false)
+(0 == x) = bool(false)
+----------
+x = int(2)
+(x == 1) = bool(false)
+(1 == x) = bool(false)
+----------
+x = int(2)
+(x == 2) = bool(true)
+(2 == x) = bool(true)
+----------
+x = int(2)
+(x == 3) = bool(false)
+(3 == x) = bool(false)
+----------
+x = int(1234567)
+y = bool(true)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = bool(true)
+y = int(1234567)
+(x == y) = bool(true)
+(x != y) = bool(false)
+----------
+x = int(1234567)
+y = bool(false)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = bool(false)
+y = int(1234567)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1234567)
+y = int(0)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(0)
+y = int(1234567)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1234567)
+y = int(1)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1)
+y = int(1234567)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1234567)
+y = int(2)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(2)
+y = int(1234567)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1234567)
+y = int(3)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(3)
+y = int(1234567)
+(x == y) = bool(false)
+(x != y) = bool(true)
+----------
+x = int(1234567)
+(x == true) = bool(true)
+(true == x) = bool(false)
+----------
+x = int(1234567)
+(x == false) = bool(false)
+(false == x) = bool(false)
+----------
+x = int(1234567)
+(x == 0) = bool(false)
+(0 == x) = bool(false)
+----------
+x = int(1234567)
+(x == 1) = bool(false)
+(1 == x) = bool(false)
+----------
+x = int(1234567)
+(x == 2) = bool(false)
+(2 == x) = bool(false)
+----------
+x = int(1234567)
+(x == 3) = bool(false)
+(3 == x) = bool(false)

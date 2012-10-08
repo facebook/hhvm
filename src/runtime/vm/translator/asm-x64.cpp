@@ -25,7 +25,7 @@
 
 #include "assert.h"
 #include "asm-x64.h"
-#include "util/kernel_version.h"
+#include "util/maphuge.h"
 #include "runtime/base/runtime_option.h"
 
 namespace HPHP {
@@ -47,16 +47,7 @@ Address allocSlab(size_t size) {
     panic("%s:%d: (%s) map of %zu bytes failed (%s)\n",
           __FILE__, __LINE__, __func__, size, strerror(errno));
   }
-#ifdef MADV_HUGEPAGE
-  if (RuntimeOption::EvalMapTCHuge) {
-    static KernelVersion kv;
-    // This kernel fixed a panic when using MADV_HUGEPAGE.
-    static KernelVersion minKv("3.2.28-72_fbk12");
-    if (KernelVersion::cmp(kv, minKv) >= 0) {
-      madvise(result, size, MADV_HUGEPAGE);
-    }
-  }
-#endif
+  hintHuge(result, size);
   return result;
 }
 

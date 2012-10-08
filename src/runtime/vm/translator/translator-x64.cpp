@@ -46,6 +46,7 @@ typedef __sighandler_t *sighandler_t;
 #include <util/ringbuffer.h>
 #include <util/rank.h>
 #include <util/timer.h>
+#include <util/maphuge.h>
 
 #include <runtime/base/tv_macros.h>
 #include <runtime/vm/bytecode.h>
@@ -9549,8 +9550,6 @@ static const size_t kAStubsSize = 512 << 20;
 static const size_t kGDataSize = kASize / 4;
 static const size_t kTotalSize = kASize + kAStubsSize +
                                          kTrampolinesBlockSize + kGDataSize;
-static const size_t kRoundUp = 1 << 12;
-
 TranslatorX64::TranslatorX64()
 : Translator(),
   m_numNativeTrampolines(0),
@@ -9593,8 +9592,12 @@ TranslatorX64::TranslatorX64()
   // Using sbrk to ensure its in the bottom 2G, so we avoid
   // the need for trampolines, and get to use shorter
   // instructions for tc addresses.
+  static const size_t kRoundUp = 2 << 20;
   uint8_t *base = (uint8_t*)sbrk(kTotalSize + kRoundUp - 1);
   base += -(uint64_t)base & (kRoundUp - 1);
+  if (RuntimeOption::EvalMapTCHuge) {
+    hintHuge(base, kTotalSize);
+  }
   atrampolines.init(base, kTrampolinesBlockSize);
   base += kTrampolinesBlockSize;
   a.init(base, kASize);

@@ -484,8 +484,9 @@ OPCODES
   void contSendImpl();
   void classExistsImpl(HPHP::VM::PC& pc, HPHP::VM::Attr typeAttr);
 
-public:
+private:
   HphpArray m_constants;
+public:
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
                         string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
@@ -598,6 +599,9 @@ public:
   bool defined(CStrRef name);
   TypedValue* getCns(StringData* cns, bool system=true, bool dynamic=true);
   bool setCns(StringData* cns, CVarRef val, bool dynamic = false);
+  inline bool insertCns(StringData* name, TypedValue* value) {
+    return m_constants.nvInsert(name, value);
+  }
   bool renameFunction(const StringData* oldName, const StringData* newName);
   bool isFunctionRenameable(const StringData* name);
   void addRenameableFunctions(ArrayData* arr);

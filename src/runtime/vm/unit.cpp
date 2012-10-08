@@ -626,7 +626,7 @@ void Unit::initialMerge() {
 static void mergeCns(TypedValue& tv, TypedValue *value,
                      StringData *name) {
   if (LIKELY(tv.m_type == KindOfUninit &&
-             g_vmContext->m_constants.nvInsert(name, value))) {
+             g_vmContext->insertCns(name, value))) {
     tvDup(value, &tv);
     return;
   }

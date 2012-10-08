@@ -4713,7 +4713,7 @@ static void defCnsHelper(TargetCache::CacheHandle ch, Variant *inout,
   if (LIKELY(tv->m_type == KindOfUninit &&
              inout->isAllowedAsConstantValue())) {
     inout->setEvalScalar();
-    if (LIKELY(g_vmContext->m_constants.nvInsert(name, (TypedValue*)inout))) {
+    if (LIKELY(g_vmContext->insertCns(name, (TypedValue*)inout))) {
       tvDup((TypedValue*)inout, tv);
       *inout = true;
       if (setBit) {

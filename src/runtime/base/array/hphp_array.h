@@ -55,6 +55,15 @@ private:
 public:
   virtual ~HphpArray();
 
+  // dropContentsOnFloor twiddles the HphpArray's internal state such
+  // that the destructor will do (almost) no work. Only call it if
+  // you're 100% confident that the contents of this array are static
+  // or will be swept.
+  void dropContentsOnFloor() {
+    m_lastE = ElmIndEmpty;
+    m_data = NULL;
+  }
+
   // override/implement ArrayData api's
 
   // implements ArrayData

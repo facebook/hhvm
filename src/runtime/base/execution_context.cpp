@@ -99,6 +99,7 @@ VMExecutionContext::VMExecutionContext() :
   CT_ASSERT(offsetof(ExecutionContext, m_eventHook) <= 0xff);
   CT_ASSERT(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff);
 #endif
+  const_assert(hhvm);
 
   {
     Lock lock(s_threadIdxLock);
@@ -108,9 +109,7 @@ VMExecutionContext::VMExecutionContext() :
       s_threadIdxMap[tid] = m_currentThreadIdx;
     }
   }
-  if (hhvm) {
-    m_eventHook = new HPHP::VM::EventHook();
-  }
+  m_eventHook = new HPHP::VM::EventHook();
 }
 #undef NEAR_FIELD_INIT
 
@@ -159,6 +158,11 @@ VMExecutionContext::~VMExecutionContext() {
       LITSTR_DECREF(const_cast<StringData*>(i->name));
     }
   }
+
+  // Any non-static contents of this array will be swept so the
+  // destructor doesn't need to walk the contents and clean everything
+  // up.
+  m_constants.dropContentsOnFloor();
 }
 
 void BaseExecutionContext::backupSession() {

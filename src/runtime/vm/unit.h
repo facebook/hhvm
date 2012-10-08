@@ -39,6 +39,7 @@ enum UnitOrigin {
 };
 
 enum UnitMergeKind {
+  // UnitMergeKindClass is required to be 0 for correctness.
   UnitMergeKindClass = 0,
   UnitMergeKindUniqueDefinedClass = 1,
   UnitMergeKindDefine = 2,
@@ -47,6 +48,7 @@ enum UnitMergeKind {
   UnitMergeKindReqSrc = 5, // "
   UnitMergeKindReqDoc = 6, // "
   UnitMergeKindDone = 7,
+  // We cannot add more kinds here; this has to fit in 3 bits.
 };
 
 enum UnitMergeState {
@@ -420,7 +422,7 @@ struct Unit {
 
   static Func *lookupFunc(const StringData *funcName);
 
-  static Class* defClass(HPHP::VM::PreClass* preClass,
+  static Class* defClass(const HPHP::VM::PreClass* preClass,
                          bool failIsFatal = true);
 
   static Class *lookupClass(const NamedEntity *ne) {

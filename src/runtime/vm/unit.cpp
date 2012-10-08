@@ -341,7 +341,7 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
   return true;
 }
 
-Class* Unit::defClass(PreClass* preClass,
+Class* Unit::defClass(const PreClass* preClass,
                       bool failIsFatal /* = true */) {
   Class* const* clsList = preClass->namedEntity()->clsList();
   Class* top = *clsList;
@@ -423,7 +423,9 @@ Class* Unit::defClass(PreClass* preClass,
       ec->m_pc = preClass->unit()->at(preClass->getOffset());
       ec->pushLocalsAndIterators(tmp.m_func);
     }
-    ClassPtr newClass(Class::newClass(preClass, parent));
+    // The only reason the newClass param is not const is to increment its
+    // SmartPtr refcount, which is only modifying a mutable member anyway
+    ClassPtr newClass(Class::newClass(const_cast<PreClass*>(preClass), parent));
     if (needsFrame) {
       ec->m_stack.top() = (Cell*)(ec->m_fp+1);
       ec->m_fp = fp;
@@ -681,12 +683,13 @@ void Unit::mergeImpl(void* tcbase) {
   // iterate over all the potentially hoistable classes
   // with no fatals on failure
   if (ix < end) {
-    if (LIKELY((m_mergeState & UnitMergeStateUniqueDefinedClasses) != 0)) {
-      do {
-        PreClass* pre = (PreClass*)mergeableObj(ix++);
-        Class* cls = *pre->namedEntity()->clsList();
-        ASSERT(cls && !cls->m_nextClass);
-        ASSERT(cls->preClass() == pre);
+    do {
+      // The first time this unit is merged, if the classes turn out to be all
+      // unique and defined, we replace the PreClass*'s with the corresponding
+      // Class*'s, with the low-order bit marked.
+      PreClass* pre = (PreClass*)mergeableObj(ix);
+      if (LIKELY(uintptr_t(pre) & 1)) {
+        Class* cls = (Class*)(uintptr_t(pre) & ~1);
         if (Class* parent = cls->parent()) {
           if (UNLIKELY(!getDataRef<Class*>(tcbase, parent->m_cachedOffset))) {
             redoHoistable = true;
@@ -695,13 +698,12 @@ void Unit::mergeImpl(void* tcbase) {
         }
         getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
         if (debugger) phpDefClassHook(cls);
-      } while (ix < end);
-    } else {
-      do {
-        PreClass* pre = (PreClass*)mergeableObj(ix++);
-        if (UNLIKELY(!defClass(pre, false))) redoHoistable = true;
-      } while (ix < end);
-    }
+      } else {
+        if (UNLIKELY(!defClass(pre, false))) {
+          redoHoistable = true;
+        }
+      }
+    } while (++ix < end);
     if (UNLIKELY(redoHoistable)) {
       // if this unit isnt mergeOnly, we're done
       if (!isMergeOnly()) return;
@@ -724,9 +726,14 @@ void Unit::mergeImpl(void* tcbase) {
       if (end == (int)m_mergeablesSize) {
         ix = m_firstHoistablePreClass;
         do {
-          PreClass* pre = (PreClass*)mergeableObj(ix++);
-          defClass(pre, true);
-        } while (ix < end);
+          void* obj = mergeableObj(ix);
+          if (UNLIKELY(uintptr_t(obj) & 1)) {
+            Class* cls = (Class*)(uintptr_t(obj) & ~1);
+            defClass(cls->preClass(), true);
+          } else {
+            defClass((PreClass*)obj, true);
+          }
+        } while (++ix < end);
         return;
       }
     }
@@ -819,22 +826,45 @@ void Unit::mergeImpl(void* tcbase) {
            * All the classes are known to be unique, and we just got
            * here, so all were successfully defined. We can now go
            * back and convert all UnitMergeKindClass entries to
-           * UnitMergeKindUniqueDefinedClass.
+           * UnitMergeKindUniqueDefinedClass, and all hoistable
+           * classes to their Class*'s instead of PreClass*'s.
            *
            * This is a pure optimization: whether readers see the
            * old value or the new does not affect correctness.
            * Also, its idempotent - even if multiple threads do
-           * this update simultaneously, they all make exactly the
-           * same change.
+           * this update simultaneously (which they can -- there is
+           * a race here, since the check-and-write of m_mergeState
+           * is not atomic), they all make exactly the same change,
+           * and can deal with reading pointers that have already
+           * been marked.
            */
           m_mergeState |= UnitMergeStateUniqueDefinedClasses;
-          end = ix;
+
+          ix = m_firstHoistablePreClass;
+          end = m_firstMergeablePreClass;
+          for (; ix < end; ++ix) {
+            obj = mergeableObj(ix);
+            // The mark check is necessary, since the pointer may have already
+            // been marked, even though this code is "only executed once". See
+            // the note about races above.
+            if ((uintptr_t(obj) & 1) == 0) {
+              PreClass* pre = (PreClass*)obj;
+              Class* cls = *pre->namedEntity()->clsList();
+              ASSERT(cls && !cls->m_nextClass);
+              ASSERT(cls->preClass() == pre);
+              mergeableObj(ix) = (void*)(uintptr_t(cls) | 1);
+            }
+          }
+
           ix = m_firstMergeablePreClass;
+          end = m_mergeablesSize;
           do {
             obj = mergeableObj(ix);
             k = UnitMergeKind(uintptr_t(obj) & 7);
             switch (k) {
               case UnitMergeKindClass: {
+                // obj's low-order bits are UnitMergeKindClass, but fortunately,
+                // UnitMergeKindClass == 0.
                 PreClass* pre = (PreClass*)obj;
                 Class* cls = *pre->namedEntity()->clsList();
                 ASSERT(cls && !cls->m_nextClass);

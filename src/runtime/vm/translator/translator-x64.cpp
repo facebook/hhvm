@@ -3215,7 +3215,7 @@ TranslatorX64::emitUnboxTopOfStack(const NormalizedInstruction& i) {
   // same and we want to have separate registers for the input
   // and output.
   m_regMap.invalidate(inputs[0]->location);
-  m_regMap.bind(rSrc, Location(), KindOfInvalid, RegInfo::SCRATCH);
+  ScratchReg rSrcScratch(m_regMap, rSrc);
   // This call to allocOutputRegs will allocate a new register
   // for the output location
   m_regMap.allocOutputRegs(i);
@@ -3224,7 +3224,6 @@ TranslatorX64::emitUnboxTopOfStack(const NormalizedInstruction& i) {
   emitIncRef(rDest, outType);
   // decRef the var on the evaluation stack
   emitDecRef(i, rSrc, KindOfRef);
-  m_regMap.freeScratchReg(rSrc);
 }
 
 // setOpOpToOpcodeOp --
@@ -8668,9 +8667,7 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
     }
     EMIT_CALL(a, VerifyParamTypeSlow, R(*inCls), R(*cls));
     // Pin the return value, check if a match or take slow path
-    m_regMap.bind(rax, Location(), KindOfInvalid, RegInfo::SCRATCH);
     a.  test_reg64_reg64(rax, rax);
-    m_regMap.freeScratchReg(rax);
 
     // Put the failure path into astubs
     {
@@ -8903,8 +8900,7 @@ TranslatorX64::translateIterNext(const Tracelet& t,
   // freeing the iterator and it will decRef the array
   EMIT_CALL(a, iter_next_array, A(i.inputs[0]->location));
   recordReentrantCall(a, i);
-  // RAX is now a scratch register with no progam meaning...
-  m_regMap.bind(rax, Location(), KindOfInvalid, RegInfo::SCRATCH);
+  ScratchReg raxScratch(m_regMap, rax);
 
   // syncOutputs before we handle the branch.
   syncOutputs(t);
@@ -9302,6 +9298,8 @@ TranslatorX64::translateInstr(const Tracelet& t,
     syncOutputs(t);
     emitBindJmp(t.m_nextSk);
   }
+
+  m_regMap.assertNoScratch();
 }
 
 bool

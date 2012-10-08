@@ -599,6 +599,18 @@ RegAlloc::freeScratchReg(PhysReg r) {
   }
 }
 
+bool
+RegAlloc::checkNoScratch() {
+  for (int i = 0; i < m_numRegs; ++i) {
+    PhysReg pr = m_lru[i];
+    RegInfo* r = physRegToInfo(pr);
+    if (r->m_state == RegInfo::SCRATCH) {
+      return false;
+    }
+  }
+  return true;
+}
+
 RegInfo *
 RegAlloc::findFreeReg(const Location& loc) {
   RegSet favoriteRegs = loc.isLocal() ? m_calleeSaved : m_callerSaved;
@@ -909,7 +921,13 @@ void LazyScratchReg::dealloc() {
   if (m_reg != noreg) {
     TRACE(1, "LazyScratchReg: free %d\n", m_reg);
     m_regMap.freeScratchReg(m_reg);
+    m_reg = noreg;
   }
+}
+
+void LazyScratchReg::realloc(PhysReg pr /* = InvalidReg */) {
+  dealloc();
+  alloc(pr);
 }
 
 PhysReg LazyScratchReg::operator*() const {

@@ -263,6 +263,7 @@ class SpillFill {
 class LazyScratchReg;
 
 class RegAlloc {
+  friend class LazyScratchReg;
   // RegInfo: indexed by PhysReg.
   RegInfo         m_info[kMaxRegs];
 
@@ -300,6 +301,9 @@ class RegAlloc {
   void verify();
   void smashRegImpl(RegInfo *r);
   void reconcileOne(RegInfo* r, RegAlloc* branchRA, PhysReg branchPR);
+  bool checkNoScratch();
+  PhysReg allocScratchReg(PhysReg pr = InvalidReg);
+  void freeScratchReg(PhysReg r);
 
  public:
   RegAlloc(RegSet callerSaved, RegSet calleeSaved, SpillFill* spf);
@@ -313,6 +317,8 @@ class RegAlloc {
     RegInfo* ri = alloc(loc, t, state, state == RegInfo::CLEAN);
     return ri->m_pReg;
   }
+
+  void assertNoScratch() { ASSERT(checkNoScratch()); }
 
   const RegInfo* getInfo(PhysReg pr) const {
     return physRegToInfo(pr);
@@ -346,8 +352,6 @@ class RegAlloc {
   // values into these outputs.
   void allocOutputRegs(const NormalizedInstruction& ni);
 
-  PhysReg allocScratchReg(PhysReg pr = InvalidReg);
-  void freeScratchReg(PhysReg r);
   void bind(PhysReg reg, const Location& loc, DataType t,
             RegInfo::State state);
   void bindScratch(LazyScratchReg& reg, const Location& loc, DataType t,
@@ -493,6 +497,7 @@ class LazyScratchReg : boost::noncopyable {
 
   void alloc(PhysReg pr = InvalidReg);
   void dealloc();
+  void realloc(PhysReg pr = InvalidReg);
   PhysReg operator*() const;
 };
 

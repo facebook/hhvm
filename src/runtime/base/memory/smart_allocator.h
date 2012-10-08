@@ -135,7 +135,7 @@ void InitAllocatorThreadLocal() ATTRIBUTE_COLD;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define SLAB_SIZE (1024 * 1024)
+#define SLAB_SIZE (2 << 20)
 
 /**
  * Just a simple free-list based memory allocator.

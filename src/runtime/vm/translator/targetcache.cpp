@@ -132,10 +132,12 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
     return handle;
   }
   if (!s_bits_to_go) {
+    static const int kNumBytes = 512;
+    static const int kNumBytesMask = kNumBytes - 1;
     s_next_bit = s_frontier * CHAR_BIT;
-    // allocate at least 64 bytes, and make sure we end
+    // allocate at least kNumBytes bytes, and make sure we end
     // on a 64 byte aligned boundary.
-    int bytes = ((~s_frontier + 1) & 63) + 64;
+    int bytes = ((~s_frontier + 1) & kNumBytesMask) + kNumBytes;
     s_bits_to_go = bytes * CHAR_BIT;
     s_frontier += bytes;
   }

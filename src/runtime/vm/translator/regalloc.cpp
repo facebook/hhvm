@@ -939,6 +939,7 @@ void LazyScratchReg::dealloc() {
 }
 
 void LazyScratchReg::realloc(PhysReg pr /* = InvalidReg */) {
+  ASSERT(m_reg != noreg);
   dealloc();
   alloc(pr);
 }

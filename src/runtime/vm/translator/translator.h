@@ -749,6 +749,7 @@ public:
   static bool ReplaceInFlight() {
     return s_replaceInFlight;
   }
+  static RuntimeType outThisObjectType();
 
   /*
    * Interface between the arch-dependent translator and outside world.
@@ -761,7 +762,7 @@ public:
   virtual TCA getRetFromInterpretedFrame() = 0;
   virtual void defineCns(StringData* name) = 0;
   virtual std::string getUsage() = 0;
-  virtual bool dumpTC() = 0;
+  virtual bool dumpTC(bool ignoreLease = false) = 0;
   virtual bool dumpTCCode(const char *filename) = 0;
   virtual bool dumpTCData() = 0;
   virtual void protectCode() = 0;

@@ -286,10 +286,6 @@ public:
   static inline void incStat();
 };
 
-enum HomeState {
-  BASE_CELL,
-  BASE_LOCAL,
-};
 enum NameState {
   STATIC_NAME,
   DYN_NAME,
@@ -298,9 +294,9 @@ enum NameState {
 // These functions allocate a CacheHandle of the appropriate type and
 // return a pointer to the C++ helper to call.
 pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
-                                 HomeState hs, NameState ns);
+                                 bool decRefBase, NameState ns);
 pcb_set_func_t propSetPrep(CacheHandle& ch, const StringData* name,
-                           HomeState hs, NameState ns);
+                           bool decRefBase, NameState ns);
 
 struct PropKey {
   Class* cls;

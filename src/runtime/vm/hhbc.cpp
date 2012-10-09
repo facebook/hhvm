@@ -540,7 +540,7 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
   }
 }
 
-const char* const locationNames[] = { "L", "C",
+const char* const locationNames[] = { "L", "C", "H",
                                       "GL", "GC",
                                       "NL", "NC",
                                       "SL", "SC",
@@ -561,6 +561,7 @@ LocationCode parseLocationCode(const char* s) {
   switch (*s) {
   case 'L':   return LL;
   case 'C':   return LC;
+  case 'H':   return LH;
   case 'R':   return LR;
   default:
     int incr = (s[1] == 'C');

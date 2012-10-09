@@ -82,9 +82,10 @@ enum InstrFlags {
 };
 
 enum LocationCode {
-  // Base is the object stored in a cell or a local.
+  // Base is the object stored in a local, a cell, or $this
   LL,
   LC,
+  LH,
 
   // Base is the global name referred to by a cell or a local.
   LGL,
@@ -112,16 +113,27 @@ enum LocationCode {
 };
 
 inline int numLocationCodeImms(LocationCode lc) {
-  return
-    (lc == LL || lc == LGL || lc == LNL || lc == LSL) ? 1 :
-    0;
+  switch (lc) {
+  case LL: case LGL: case LNL: case LSL:
+    return 1;
+  case LC: case LH: case LGC: case LNC: case LSC: case LR:
+    return 0;
+  default:
+    not_reached();
+  }
 }
 
 inline int numLocationCodeStackVals(LocationCode lc) {
-  return
-    (lc == LR || lc == LC || lc == LGC || lc == LNC || lc == LSL) ? 1 :
-    (lc == LSC) ? 2 :
-    0;
+  switch (lc) {
+  case LL: case LH: case LGL: case LNL:
+    return 0;
+  case LC: case LGC: case LNC: case LSL: case LR:
+    return 1;
+  case LSC:
+    return 2;
+  default:
+    not_reached();
+  }
 }
 
 // Returns string representation of `lc'.  (Pointer to internal static
@@ -505,6 +517,7 @@ enum SetOpOp {
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(This,            NA,               NOV,             ONE(CV),    NF) \
+  O(CheckThis,       NA,               NOV,             NOV,        NF) \
   O(InitThisLoc,     ONE(IVA),         NOV,             NOV,        NF) \
   O(StaticLoc,       TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
   O(StaticLocInit,   TWO(IVA,SA),      ONE(CV),         NOV,        NF) \

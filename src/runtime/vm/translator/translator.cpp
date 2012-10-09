@@ -198,9 +198,12 @@ RuntimeType Translator::liveType(Location l, const Unit& u) {
     case Location::Litint: {
       return RuntimeType(l.offset);
     } break;
-    default: {
-      NOT_REACHED();
+    case Location::This: {
+      return outThisObjectType();
     } break;
+    default: {
+      not_reached();
+    }
   }
   ASSERT(outer->m_type >= MinDataType && outer->m_type < MaxNumDataTypes);
   return liveType(outer, l);
@@ -235,6 +238,24 @@ Translator::liveType(const Cell* outer, const Location& l) {
   TRACE(2, "liveType %d\n", outerType);
   RuntimeType retval = RuntimeType(outerType, innerType, klass);
   return retval;
+}
+
+RuntimeType Translator::outThisObjectType() {
+  // Use the current method's context class (ctx) as a constraint.
+  // For instance methods, if $this is non-null, we are guaranteed
+  // that $this is an instance of ctx or a class derived from
+  // ctx. Zend allows this assumption to be violated but we have
+  // deliberately chosen to diverge from them here.
+  const Class *ctx = curFunc()->isMethod() ?
+    arGetContextClass(curFrame()) : NULL;
+  if (ctx) {
+    ASSERT(!curFrame()->hasThis() ||
+           curFrame()->getThis()->getVMClass()->classof(ctx));
+    TRACE(2, "OutThisObject: derived from Class \"%s\"\n",
+          ctx->name()->data());
+    return RuntimeType(KindOfObject, KindOfInvalid, ctx);
+  }
+  return RuntimeType(KindOfObject, KindOfInvalid);
 }
 
 bool Translator::liveFrameIsPseudoMain() {
@@ -621,19 +642,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
     }
 
     case OutThisObject: {
-      // Use the current method's context class (ctx) as a constraint.
-      // For instance methods, if $this is non-null, we are guaranteed
-      // that $this is an instance of ctx or a class derived from ctx.
-      const Class *ctx = curFunc()->isMethod() ?
-        arGetContextClass(curFrame()) : NULL;
-      if (ctx) {
-        ASSERT(!curFrame()->hasThis() ||
-               curFrame()->getThis()->getVMClass()->classof(ctx));
-        TRACE(2, "OutThisObject: derived from Class \"%s\"\n",
-              ctx->name()->data());
-        return RuntimeType(KindOfObject, KindOfInvalid, ctx);
-      }
-      return RuntimeType(KindOfObject, KindOfInvalid);
+      return Translator::outThisObjectType();
     }
 
     case OutVUnknown: {
@@ -1056,6 +1065,7 @@ static const struct {
   /*** 13. Miscellaneous instructions ***/
 
   { OpThis,        {None,             Stack1,       OutThisObject,     1 }},
+  { OpCheckThis,   {None,             None,         OutNone,           0 }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown,        0 }},
   { OpStaticLoc,
@@ -1609,9 +1619,14 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
   switch (numLocationCodeStackVals(lcode)) {
   case 0: {
-    int numImms = numLocationCodeImms(lcode);
-    for (int i = 0; i < numImms; ++i) {
-      push_local(decodeVariableSizeImm(&vec));
+    if (lcode == LH) {
+      inputs.push_back(Location(Location::This));
+    } else {
+      ASSERT(lcode == LL || lcode == LGL || lcode == LNL);
+      int numImms = numLocationCodeImms(lcode);
+      for (int i = 0; i < numImms; ++i) {
+        push_local(decodeVariableSizeImm(&vec));
+      }
     }
   } break;
   case 1:
@@ -1630,7 +1645,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
       push_stack();
     }
     break;
-  default: ASSERT(false);
+  default: not_reached();
   }
 
   // Now push all the members in the correct order.

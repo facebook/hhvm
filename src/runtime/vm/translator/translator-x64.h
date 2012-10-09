@@ -198,6 +198,7 @@ class TranslatorX64 : public Translator
   void emitTvSet(const NormalizedInstruction&, PhysReg from,
     DataType fromType, PhysReg toPtr, int toOffset = 0, bool incRefFrom = true);
 
+  void emitThisCheck(const NormalizedInstruction& i, PhysReg reg);
   void emitPushAR(const NormalizedInstruction& i, const Func* func,
                   const int bytesPopped = 0, bool isCtor = false,
                   bool clearThis = true, uintptr_t varEnvInvName = 0);
@@ -334,6 +335,7 @@ class TranslatorX64 : public Translator
                        const MInstrInfo& mii) const;
   void emitBaseLCR(const Tracelet& t, const NormalizedInstruction& ni,
                    const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
+  void emitBaseH(LazyScratchReg& rBase);
   void emitBaseN(const Tracelet& t, const NormalizedInstruction& ni,
                  const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
   void emitBaseG(const Tracelet& t, const NormalizedInstruction& ni,
@@ -491,6 +493,7 @@ MINSTRS
   CASE(FPassS) \
   CASE(FPassG) \
   CASE(This) \
+  CASE(CheckThis) \
   CASE(InitThisLoc) \
   CASE(FCall) \
   CASE(FCallArray) \
@@ -852,7 +855,7 @@ public:
   }
 
   // Returns true on success
-  bool dumpTC();
+  bool dumpTC(bool ignoreLease = false);
 
   // Returns true on success
   bool dumpTCCode(const char* filename);

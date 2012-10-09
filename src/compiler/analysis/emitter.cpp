@@ -115,6 +115,7 @@ namespace StackSym {
   static const char L = 0x06; // Local symbolic flavor
   static const char T = 0x07; // String literal symbolic flavor
   static const char I = 0x08; // int literal symbolic flavor
+  static const char H = 0x09; // $this symbolic flavor
 
   static const char N = 0x10; // Name marker
   static const char G = 0x20; // Global name marker
@@ -151,6 +152,7 @@ namespace StackSym {
       case StackSym::L: res = "L"; break;
       case StackSym::T: res = "T"; break;
       case StackSym::I: res = "I"; break;
+      case StackSym::H: res = "H"; break;
       default: break;
     }
     char marker = StackSym::GetMarker(sym);
@@ -620,7 +622,7 @@ std::string SymbolicStack::pretty() const {
 
 void SymbolicStack::push(char sym) {
   if (sym != StackSym::W && sym != StackSym::K && sym != StackSym::L &&
-      sym != StackSym::T && sym != StackSym::I) {
+      sym != StackSym::T && sym != StackSym::I && sym != StackSym::H) {
     m_actualStack.push_back(m_symStack.size());
     *m_actualStackHighWaterPtr = MAX(*m_actualStackHighWaterPtr,
                                      (int)m_actualStack.size());
@@ -634,7 +636,8 @@ void SymbolicStack::pop() {
   char sym = m_symStack.back().sym;
   char flavor = StackSym::GetSymFlavor(sym);
   if (StackSym::GetMarker(sym) != StackSym::W &&
-      flavor != StackSym::L && flavor != StackSym::T && flavor != StackSym::I) {
+      flavor != StackSym::L && flavor != StackSym::T && flavor != StackSym::I &&
+      flavor != StackSym::H) {
     ASSERT(!m_actualStack.empty());
     m_actualStack.pop_back();
   }
@@ -1181,12 +1184,12 @@ void EmitterVisitor::popEvalStackLMany() {
   char symFlavor = StackSym::GetSymFlavor(sym);
   m_evalStack.pop();
   if (symFlavor != StackSym::C && symFlavor != StackSym::L &&
-      symFlavor != StackSym::R) {
+      symFlavor != StackSym::R && symFlavor != StackSym::H) {
     InvariantViolation(
       "Emitter emitted an instruction that tries to consume a "
       "value from the stack when the top of the stack does not "
       "match the symbolic flavor that the instruction expects "
-      "(expected symbolic flavor \"C\", \"L\", or \"R\", actual "
+      "(expected symbolic flavor \"C\", \"L\", \"R\", or \"H\", actual "
       "symbolic flavor \"%s\" at offset %d)",
       StackSym::ToString(symFlavor).c_str(),
       m_ue.bcPos());
@@ -3120,7 +3123,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Expression::KindOfObjectPropertyExpression: {
         ObjectPropertyExpressionPtr op(
           static_pointer_cast<ObjectPropertyExpression>(node));
-        visit(op->getObject());
+        ExpressionPtr obj = op->getObject();
+        SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(obj);
+        if (sv && sv->isThis() && sv->hasContext(Expression::ObjectContext)) {
+          if (sv->isGuarded()) {
+            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                           false, 0, 0);
+          }
+          e.CheckThis();
+          m_evalStack.push(StackSym::H);
+        } else {
+          visit(obj);
+        }
         StringData* clsName = getClassName(op->getObject());
         if (clsName) {
           m_evalStack.setKnownCls(clsName, false);
@@ -3555,13 +3569,14 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
           vectorImm.push_back(LC);
         } else if (symFlavor == StackSym::R) {
           vectorImm.push_back(LR);
+        } else if (symFlavor == StackSym::H) {
+          vectorImm.push_back(LH);
         } else {
-          ASSERT(false);
+          not_reached();
         }
       } break;
       default: {
-        ASSERT(false);
-        break;
+        not_reached();
       }
     }
     if (symFlavor == StackSym::L) {

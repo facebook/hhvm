@@ -605,7 +605,7 @@ ClassCache::lookup(Handle handle, StringData *name,
 // PropCache
 
 pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
-                                 HomeState hs, NameState ns) {
+                                 bool decRefBase, NameState ns) {
   if (false) {
     CacheHandle ch = 0;
     ObjectData* base = NULL;
@@ -620,17 +620,17 @@ pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
   }
   if (ns == STATIC_NAME) {
     ch = PropCache::alloc(name);
-    if (hs == BASE_CELL) {
-      return PropCache::lookup<false>;
-    } else if (hs == BASE_LOCAL) {
+    if (decRefBase) {
       return PropCache::lookup<true>;
+    } else {
+      return PropCache::lookup<false>;
     }
   } else if (ns == DYN_NAME) {
     ch = PropNameCache::alloc();
-    if (hs == BASE_CELL) {
-      return PropNameCache::lookup<false>;
-    } else if (hs == BASE_LOCAL) {
+    if (decRefBase) {
       return PropNameCache::lookup<true>;
+    } else {
+      return PropNameCache::lookup<false>;
     }
   }
 
@@ -638,7 +638,7 @@ pcb_lookup_func_t propLookupPrep(CacheHandle& ch, const StringData* name,
 }
 
 pcb_set_func_t propSetPrep(CacheHandle& ch, const StringData* name,
-                           HomeState hs, NameState ns) {
+                           bool decRefBase, NameState ns) {
   if (false) {
     CacheHandle ch = 0;
     ObjectData* base = NULL;
@@ -654,17 +654,17 @@ pcb_set_func_t propSetPrep(CacheHandle& ch, const StringData* name,
   }
   if (ns == STATIC_NAME) {
     ch = PropCache::alloc(name);
-    if (hs == BASE_CELL) {
-      return PropCache::set<false>;
-    } else if (hs == BASE_LOCAL) {
+    if (decRefBase) {
       return PropCache::set<true>;
+    } else {
+      return PropCache::set<false>;
     }
   } else if (ns == DYN_NAME) {
     ch = PropNameCache::alloc();
-    if (hs == BASE_CELL) {
-      return PropNameCache::set<false>;
-    } else if (hs == BASE_LOCAL) {
+    if (decRefBase) {
       return PropNameCache::set<true>;
+    } else {
+      return PropNameCache::set<false>;
     }
   }
 
@@ -691,7 +691,7 @@ template<> inline void
 PropNameCache::incStat() { Stats::inc(Stats::Tx64_PropNameCache); }
 
 template<typename Key, PHPNameSpace ns>
-template<bool baseIsLocal>
+template<bool decRefBase>
 void
 PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
                                StringData* name, TypedValue* stackPtr,
@@ -703,7 +703,7 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
   typename Parent::Self* thiz = Parent::cacheAtHandle(handle);
   typename Parent::Pair* pair = thiz->keyToPair(key);
   TypedValue* result;
-  RefData* refToFree = baseIsLocal || stackPtr->m_type != KindOfRef ?
+  RefData* refToFree = !decRefBase || stackPtr->m_type != KindOfRef ?
     NULL : stackPtr->m_data.pref;
   if (pair->m_key == key) {
     result = (TypedValue*)((uintptr_t)base + pair->m_value);
@@ -765,7 +765,7 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
   tvSet(result, stackPtr);
 
   exit:
-  if (!baseIsLocal) {
+  if (decRefBase) {
     if (refToFree) {
       tvDecRefRefInternal(refToFree);
     } else if (base->decRefCount() == 0) {
@@ -775,7 +775,7 @@ PropCacheBase<Key, ns>::lookup(CacheHandle handle, ObjectData* base,
 }
 
 template<typename Key, PHPNameSpace ns>
-template<bool baseIsLocal>
+template<bool decRefBase>
 void
 PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
                             int64 val, DataType type, ActRec* fp) {
@@ -816,7 +816,7 @@ PropCacheBase<Key, ns>::set(CacheHandle ch, ObjectData* base, StringData* name,
     }
   }
 
-  if (!baseIsLocal && base->decRefCount() == 0) {
+  if (decRefBase && base->decRefCount() == 0) {
     base->release();
   }
 }

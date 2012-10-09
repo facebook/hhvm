@@ -1145,6 +1145,12 @@ TranslatorX64::irTranslateThis(const Tracelet &t,
 }
 
 void
+TranslatorX64::irTranslateCheckThis(const Tracelet& t,
+                                    const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(CheckThis);
+}
+
+void
 TranslatorX64::irTranslateInitThisLoc(const Tracelet& t,
                                     const NormalizedInstruction& i) {
   ASSERT(i.outLocal && !i.outStack);
@@ -1490,6 +1496,10 @@ void TranslatorX64::irAssertType(const Location& l,
 
     case Location::Litint:            // Literal int pseudo-location
       HHIR_UNIMPLEMENTED(Litint);
+      break;
+
+    case Location::This:
+      HHIR_UNIMPLEMENTED(This);
       break;
   }
 }

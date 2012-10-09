@@ -3402,6 +3402,11 @@ This    []  ->  [C:Obj]
   instruction throws a fatal error. Next, this instruction pushes the current
   instance onto the stack.
 
+CheckThis    []  ->  []
+
+  Check existence of this. This instruction checks the current instance, and if
+  it is null, throws a fatal error.
+
 InitThisLoc <local variable id>    []  ->  []
 
   Initialize this local variable. This instruction checks the current instance,

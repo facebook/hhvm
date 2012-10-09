@@ -3095,6 +3095,7 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
   TypedValue* fr = NULL;
   TypedValue* cref;
   TypedValue* pname;
+  tvWriteUninit(&tvScratch);
 
   switch (lcode) {
   case LNL:
@@ -3178,11 +3179,17 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
   case LR:
     loc = m_stack.indTV(depth--);
     break;
-  default: ASSERT(false);
+  case LH:
+    ASSERT(m_fp->hasThis());
+    tvScratch.m_type = KindOfObject;
+    tvScratch.m_data.pobj = m_fp->getThis();
+    loc = &tvScratch;
+    break;
+
+  default: not_reached();
   }
 
   base = loc;
-  tvWriteUninit(&tvScratch);
   tvWriteUninit(&tvLiteral);
   tvWriteUninit(&tvRef);
   tvWriteUninit(&tvRef2);
@@ -3387,6 +3394,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
   TypedValue* fr = NULL;
   TypedValue* cref;
   TypedValue* pname;
+  tvWriteUninit(&tvScratch);
 
   switch (lcode) {
   case LNL:
@@ -3478,11 +3486,17 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
   case LR:
     loc = m_stack.indTV(depth--);
     break;
-  default: ASSERT(false);
+  case LH:
+    ASSERT(m_fp->hasThis());
+    tvScratch.m_type = KindOfObject;
+    tvScratch.m_data.pobj = m_fp->getThis();
+    loc = &tvScratch;
+    break;
+
+  default: not_reached();
   }
 
   base = loc;
-  tvWriteUninit(&tvScratch);
   tvWriteUninit(&tvLiteral);
   tvWriteUninit(&tvRef);
   tvWriteUninit(&tvRef2);
@@ -6343,13 +6357,22 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDefCls(PC& pc) {
   Unit::defClass(c);
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopThis(PC& pc) {
-  NEXT();
-  if (!m_fp->hasThis()) {
+static inline void checkThis(ActRec* fp) {
+  if (!fp->hasThis()) {
     raise_error(Strings::FATAL_NULL_THIS);
   }
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopThis(PC& pc) {
+  NEXT();
+  checkThis(m_fp);
   ObjectData* this_ = m_fp->getThis();
   m_stack.pushObject(this_);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopCheckThis(PC& pc) {
+  NEXT();
+  checkThis(m_fp);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopInitThisLoc(PC& pc) {

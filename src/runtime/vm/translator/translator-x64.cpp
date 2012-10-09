@@ -2452,7 +2452,7 @@ TranslatorX64::checkType(X64Assembler& a,
                          SrcRec& fail) {
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
-  if (rtt.isVagueValue()) return;
+  if (rtt.isVagueValue() || l.isThis()) return;
 
   if (m_useHHIR) {
     irCheckType(a, l, rtt, fail);
@@ -3123,6 +3123,10 @@ TranslatorX64::spill(const Location& loc, DataType type,
 void
 TranslatorX64::fill(const Location& loc, PhysReg reg) {
   SpaceRecorder sr("_Fill", *m_spillFillCode);
+  if (loc.isThis()) {
+    m_spillFillCode->load_reg64_disp_reg64(rVmFp, AROFF(m_this), reg);
+    return;
+  }
   PhysReg base;
   int disp;
   locToRegDisp(loc, &base, &disp);
@@ -7984,6 +7988,24 @@ void TranslatorX64::translateFPushCtorD(const Tracelet& t,
 static void fatalNullThis() { raise_error(Strings::FATAL_NULL_THIS); }
 
 void
+TranslatorX64::emitThisCheck(const NormalizedInstruction& i,
+                             PhysReg reg) {
+  if (curFunc()->cls() == NULL) {  // Non-class
+    a.test_reg64_reg64(reg, reg);
+    a.jz(astubs.code.frontier); // jz if_null
+  }
+
+  a.  test_imm32_reg64(1, reg);
+  {
+    UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs);
+    // if_null:
+    EMIT_CALL(astubs, fatalNullThis);
+    recordReentrantStubCall(i);
+  }
+}
+
+
+void
 TranslatorX64::translateThis(const Tracelet &t,
                              const NormalizedInstruction &i) {
   ASSERT(i.outStack && !i.outLocal);
@@ -7993,20 +8015,18 @@ TranslatorX64::translateThis(const Tracelet &t,
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), out);
 
   if (!i.guardedThis) {
-    if (curFunc()->cls() == NULL) {  // Non-class
-      a.   test_reg64_reg64(out, out);
-      a.   jz(astubs.code.frontier); // jz if_null
-    }
-
-    a.   test_imm32_reg64(1, out);
-    {
-      UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs);
-      // if_null:
-      EMIT_CALL(astubs, fatalNullThis);
-      recordReentrantStubCall(i);
-    }
+    emitThisCheck(i, out);
   }
   emitIncRef(out, KindOfObject);
+}
+
+void
+TranslatorX64::translateCheckThis(const Tracelet& t,
+                                  const NormalizedInstruction& i) {
+  if (i.guardedThis) return;
+  ScratchReg rThis(m_regMap);
+  a.load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rThis);
+  emitThisCheck(i, *rThis);
 }
 
 void
@@ -10190,13 +10210,13 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
 }
 
 // Returns true on success
-bool TranslatorX64::dumpTC() {
-  if (!s_writeLease.acquire(true)) return false;
+bool TranslatorX64::dumpTC(bool ignoreLease) {
+  if (!ignoreLease && !s_writeLease.acquire(true)) return false;
   bool success = dumpTCData();
   if (success) {
     success = dumpTCCode("/tmp/tc_dump");
   }
-  s_writeLease.drop();
+  if (!ignoreLease) s_writeLease.drop();
   return success;
 }
 
@@ -10276,6 +10296,7 @@ bool TranslatorX64::dumpTCData() {
   SUPPORTED_OP(Cns) \
   SUPPORTED_OP(ClsCnsD) \
   SUPPORTED_OP(This) \
+  SUPPORTED_OP(CheckThis) \
   SUPPORTED_OP(PackCont) \
   SUPPORTED_OP(ContReceive) \
   SUPPORTED_OP(ContRaised) \

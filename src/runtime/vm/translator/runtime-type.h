@@ -34,7 +34,13 @@ struct Location {
     Iter,     // Stack frame's iterators
     Litstr,   // Literal string pseudo-location
     Litint,   // Literal int pseudo-location
+    This,     // $this in the current frame
   };
+
+  Location(Space spc)
+  : space(spc)
+  , offset(0)
+  { ASSERT(spc == This); }
 
   Location(Space spc, int64 off)
     : space(spc)
@@ -77,8 +83,9 @@ struct Location {
     case Iter:   return "Iter";
     case Litstr: return "Litstr";
     case Litint: return "Litint";
-    case Invalid:
-    default:     return "*invalid*";
+    case This:   return "This";
+    case Invalid:return "*invalid*";
+    default:     not_reached();
     }
   }
 
@@ -106,6 +113,10 @@ struct Location {
 
   bool isLiteral() const {
     return space == Litstr || space == Litint;
+  }
+
+  bool isThis() const {
+    return space == This;
   }
 
 public:

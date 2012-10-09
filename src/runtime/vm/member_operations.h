@@ -156,6 +156,7 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
       tvScratch._count = 0;
       tvScratch.m_type = KindOfString;
     } else {
+      TV_WRITE_UNINIT(&tvScratch);
       tvAsVariant(&tvScratch) = base->m_data.pstr->getChar(x);
     }
     result = &tvScratch;

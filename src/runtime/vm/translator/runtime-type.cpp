@@ -154,6 +154,12 @@ RuntimeType::valueString() const {
   return m_value.string;
 }
 
+const StringData*
+RuntimeType::valueStringOrNull() const {
+  if (!isString()) return NULL;
+  return valueString();
+}
+
 const ArrayData*
 RuntimeType::valueArray() const {
   consistencyCheck();

@@ -235,6 +235,7 @@ class RuntimeType {
   DataType valueType() const;
   const Class* valueClass() const;
   const StringData* valueString() const;
+  const StringData* valueStringOrNull() const;
   const ArrayData* valueArray() const;
   int valueBoolean() const;
   int64 valueInt() const;

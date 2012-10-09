@@ -604,18 +604,21 @@ const int kEmitClsLocalIdx = 0;
 
 void TranslatorX64::irTranslateAGetC(const Tracelet& t,
                                      const NormalizedInstruction& ni) {
-  HHIR_EMIT(AGetC);
+  const StringData* clsName =
+    ni.inputs[kEmitClsLocalIdx]->rtt.valueStringOrNull();
+  HHIR_EMIT(AGetC, clsName);
 }
 
 void TranslatorX64::irTranslateAGetL(const Tracelet& t,
-                                     const NormalizedInstruction& ni) {
-  const DynLocation& in = *ni.inputs[kEmitClsLocalIdx];
-  HHIR_EMIT(AGetL, in.location.offset);
+                                     const NormalizedInstruction& i) {
+  ASSERT(i.inputs[kEmitClsLocalIdx]->isLocal());
+  const DynLocation* dynLoc = i.inputs[kEmitClsLocalIdx];
+  const StringData* clsName = dynLoc->rtt.valueStringOrNull();
+  HHIR_EMIT(AGetL, dynLoc->location.offset, clsName);
 }
 
 void TranslatorX64::irTranslateSelf(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-
   HHIR_EMIT(Self);
 }
 
@@ -696,25 +699,33 @@ void TranslatorX64::irTranslateContHandle(const Tracelet& t,
 
 void TranslatorX64::irTranslateClassExists(const Tracelet& t,
                                            const NormalizedInstruction& i) {
-  HHIR_EMIT(ClassExists);
+  const StringData* clsName = i.inputs[1]->rtt.valueStringOrNull();
+  HHIR_EMIT(ClassExists, clsName);
 }
 
 void TranslatorX64::irTranslateInterfaceExists(const Tracelet& t,
                                                const NormalizedInstruction& i) {
-  HHIR_EMIT(InterfaceExists);
+  const StringData* ifaceName = i.inputs[1]->rtt.valueStringOrNull();
+
+  HHIR_EMIT(InterfaceExists, ifaceName);
 }
 
 void TranslatorX64::irTranslateTraitExists(const Tracelet& t,
                                            const NormalizedInstruction& i) {
-  HHIR_EMIT(TraitExists);
+  const StringData* traitName = i.inputs[1]->rtt.valueStringOrNull();
+
+  HHIR_EMIT(TraitExists, traitName);
 }
 
 void TranslatorX64::irTranslateCGetS(const Tracelet& t,
                                      const NormalizedInstruction& i) {
   const int kClassIdx = 0;
+  const int kPropNameIdx = 1;
   const Class* cls = i.inputs[kClassIdx]->rtt.valueClass();
+  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
   if (cls && arGetContextClass(curFrame()) == cls) {
-    HHIR_EMIT(CGetS, cls, getInferredOrPredictedType(i), isInferredType(i));
+    HHIR_EMIT(CGetS, cls, propName,
+              getInferredOrPredictedType(i), isInferredType(i));
   } else {
     HHIR_UNIMPLEMENTED(CGetS);
   }
@@ -723,10 +734,11 @@ void TranslatorX64::irTranslateCGetS(const Tracelet& t,
 void TranslatorX64::irTranslateSetS(const Tracelet& t,
                                     const NormalizedInstruction& i) {
   const int kClassIdx = 1;
-
+  const int kPropIdx = 2;
   const Class* cls = i.inputs[kClassIdx]->rtt.valueClass();
+  const StringData* propName = i.inputs[kPropIdx]->rtt.valueStringOrNull();
   if (cls && arGetContextClass(curFrame()) == cls) {
-    HHIR_EMIT(SetS, cls);
+    HHIR_EMIT(SetS, cls, propName);
   } else {
     HHIR_UNIMPLEMENTED(SetS);
   }
@@ -801,7 +813,8 @@ TranslatorX64::irTranslateCGetM(const Tracelet& t,
 void
 TranslatorX64::irTranslateVGetG(const Tracelet& t,
                                 const NormalizedInstruction& i) {
-  HHIR_EMIT(VGetG);
+  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(VGetG, name);
 }
 
 void
@@ -815,7 +828,8 @@ TranslatorX64::irTranslateVGetM(const Tracelet& t,
 void
 TranslatorX64::irTranslateCGetG(const Tracelet& t,
                                 const NormalizedInstruction& i) {
-  HHIR_EMIT(CGetG, getInferredOrPredictedType(i), isInferredType(i));
+  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(CGetG, name, getInferredOrPredictedType(i), isInferredType(i));
 }
 
 void TranslatorX64::irTranslateFPassL(const Tracelet& t,
@@ -1007,57 +1021,53 @@ void TranslatorX64::irTranslateBindM(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateReqLit(const Tracelet& t,
-                               const NormalizedInstruction& i,
-                               InclOpFlags flags) {
+                                 const NormalizedInstruction& i,
+                                 InclOpFlags flags) {
   HHIR_UNIMPLEMENTED(ReqLit);
 }
 
 void
 TranslatorX64::irTranslateReqDoc(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-
-//  irTranslateReqLit(t, i, InclOpDocRoot);
-  HHIR_EMIT(ReqDoc);
+                                 const NormalizedInstruction& i) {
+  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(ReqDoc, name);
 }
 
 void
 TranslatorX64::irTranslateReqMod(const Tracelet& t,
                                const NormalizedInstruction& i) {
-
-//  irTranslateReqLit(t, i, InclOpDocRoot | InclOpLocal);
-  HHIR_EMIT(ReqMod);
+  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(ReqMod, name);
 }
 
 void
 TranslatorX64::irTranslateReqSrc(const Tracelet& t,
                                const NormalizedInstruction& i) {
-
-//  irTranslateReqLit(t, i, InclOpRelative | InclOpLocal);
-  HHIR_EMIT(ReqSrc);
+  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
+  HHIR_EMIT(ReqSrc, name);
 }
 
 void TranslatorX64::irTranslateDefCls(const Tracelet& t,
                                     const NormalizedInstruction& i) {
   int cid = i.imm[0].u_IVA;
-
   HHIR_EMIT(DefCls, cid, i.source.offset());
 }
 
 void TranslatorX64::irTranslateDefFunc(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
+                                       const NormalizedInstruction& i) {
   int fid = i.imm[0].u_IVA;
   HHIR_EMIT(DefFunc, fid);
 }
 
 void
 TranslatorX64::irTranslateFPushFunc(const Tracelet& t,
-                                  const NormalizedInstruction& i) {
+                                    const NormalizedInstruction& i) {
   HHIR_EMIT(FPushFunc, (i.imm[0].u_IVA));
 }
 
 void
 TranslatorX64::irTranslateFPushClsMethodD(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+                                          const NormalizedInstruction& i) {
   using namespace TargetCache;
   const StringData* meth = curUnit()->lookupLitstrId(i.imm[1].u_SA);
   const NamedEntityPair& np = curUnit()->lookupNamedEntityPairId(i.imm[2].u_SA);

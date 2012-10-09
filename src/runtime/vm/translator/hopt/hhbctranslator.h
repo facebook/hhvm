@@ -126,16 +126,18 @@ public:
   void emitFalse();
   void emitCGetL(int32 id);
   void emitCGetL2(int32 id);
-  void emitCGetS(const Class* cls, Type::Tag resultType, bool isInferedType);
+  void emitCGetS(const Class* cls, const StringData* propName,
+                 Type::Tag resultType, bool isInferedType);
   void emitCGetProp(int propOffset, bool isPropOnStack, Type::Tag resultType,
                     bool isInferedType);
   void emitVGetL(int32 id);
-  void emitCGetG(Type::Tag resultType, bool isInferedType);
-  void emitVGetG();
+  void emitCGetG(const StringData* name, Type::Tag resultType,
+                 bool isInferedType);
+  void emitVGetG(const StringData* name);
   void emitVGetS(); // TODO (tx64 doesn't have a trans for this)
   void emitVGetM(); // (tx64 doesn't have a trans for this);
   void emitSetL(int32 id);
-  void emitSetS(const Class* cls);
+  void emitSetS(const Class* cls, const StringData* propName);
   void emitSetG();
   void emitSetProp(int propOffset, bool isPropOnStack); // object + offset
   void emitBindL(int32 id);
@@ -199,8 +201,8 @@ public:
                   uint32 returnBcOffset);
   void emitClsCnsD(int32 cnsNameStrId, int32 clsNameStrId);
   void emitClsCns(int32 cnsNameStrId); // TODO
-  void emitAGetC();
-  void emitAGetL(int localId);
+  void emitAGetC(const StringData* clsName);
+  void emitAGetL(int localId, const StringData* clsName);
   void emitIsNullL(int id);
   void emitIsNullC();
   void emitIsArrayL(int id);
@@ -245,14 +247,14 @@ public:
   void emitNot();
   void emitNativeImpl();
 
-  void emitClassExists();
-  void emitInterfaceExists();
-  void emitTraitExists();
+  void emitClassExists(const StringData* clsName);
+  void emitInterfaceExists(const StringData* ifaceName);
+  void emitTraitExists(const StringData* traitName);
 
   void emitStaticLocInit(uint32 varId, uint32 listStrId);
-  void emitReqDoc();
-  void emitReqMod();
-  void emitReqSrc();
+  void emitReqDoc(const StringData* name);
+  void emitReqMod(const StringData* name);
+  void emitReqSrc(const StringData* name);
 
   // iterators
   void emitIterInit(uint32 iterVarId, int targetOffset);
@@ -320,7 +322,7 @@ private:
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   void emitIncDecMem(bool pre, bool inc, SSATmp* propAddr, Trace* exitTrace);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);
-  SSATmp* getClsPropAddr(const Class*);
+  SSATmp* getClsPropAddr(const Class* cls, const StringData* propName = NULL);
   void   decRefPropAddr(SSATmp* propAddr);
   Trace* getExitTrace(uint32 targetBcOff);
   Trace* getExitSlowTrace(Offset nextByteCode = -1);

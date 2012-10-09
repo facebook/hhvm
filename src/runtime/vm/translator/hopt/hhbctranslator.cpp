@@ -358,7 +358,7 @@ void HhbcTranslator::emitVGetL(int32 id) {
   pushIncRef(m_tb.genBoxLoc(id));
 }
 
-void HhbcTranslator::emitVGetG() {
+void HhbcTranslator::emitVGetG(const StringData* name) {
   // helper function BoxedGlobalCache::lookupCreate
   spillStack();
   popC();
@@ -448,19 +448,19 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32 id) {
   emitInterpOneOrPunt(Type::Cell);
 }
 
-void HhbcTranslator::emitClassExists() {
+void HhbcTranslator::emitClassExists(const StringData* clsName) {
   spillStack();
   popC();
   popC();
   emitInterpOneOrPunt(Type::Bool);
 }
 
-void HhbcTranslator::emitInterfaceExists() {
-  emitClassExists();
+void HhbcTranslator::emitInterfaceExists(const StringData* ifaceName) {
+  emitClassExists(ifaceName);
 }
 
-void HhbcTranslator::emitTraitExists() {
-  emitClassExists();
+void HhbcTranslator::emitTraitExists(const StringData* traitName) {
+  emitClassExists(traitName);
 }
 
 void HhbcTranslator::emitStaticLocInit(uint32 varId, uint32 listStrId) {
@@ -469,7 +469,7 @@ void HhbcTranslator::emitStaticLocInit(uint32 varId, uint32 listStrId) {
   emitInterpOneOrPunt(Type::None);
 }
 
-void HhbcTranslator::emitReqDoc() {
+void HhbcTranslator::emitReqDoc(const StringData* name) {
   PUNT(ReqDoc);
 // Can't interp one req instructions because their interp one
 // function changes the pc, sp, and fp.
@@ -478,14 +478,14 @@ void HhbcTranslator::emitReqDoc() {
 //  emitInterpOne(Type::Cell);
 }
 
-void HhbcTranslator::emitReqMod() {
+void HhbcTranslator::emitReqMod(const StringData* name) {
 //  PUNT(ReqMod);
-  emitReqDoc();
+  emitReqDoc(name);
 }
 
-void HhbcTranslator::emitReqSrc() {
+void HhbcTranslator::emitReqSrc(const StringData* name) {
 //  PUNT(ReqSrc);
-  emitReqDoc();
+  emitReqDoc(name);
 }
 
 void HhbcTranslator::emitIterInit(uint32 iterVarId, int offset) {
@@ -692,9 +692,13 @@ void HhbcTranslator::emitContHandle() {
   emitInterpOne(Type::None);
 }
 
-SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls) {
+SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
+                                       const StringData* propName) {
   SSATmp* clsTmp = popA();
   SSATmp* prop = popC();
+  if (propName) {
+    prop = m_tb.genDefConst<const StringData*>(propName);
+  }
   if (!prop->isConst() || prop->getType() != Type::StaticStr) {
     // TODO: fallback to interpone if prop is not the right type
     PUNT(ClsPropAddr);
@@ -1522,9 +1526,10 @@ void HhbcTranslator::emitCastObject() {
 }
 
 static
-bool isSupportedAGet(SSATmp* classSrc) {
+bool isSupportedAGet(SSATmp* classSrc, const StringData* className) {
   Type::Tag srcType = classSrc->getType();
   return (srcType == Type::Obj ||
+          className != NULL ||
           // TODO: Remove this isConst() check once the code gen
           // supports helper call for non-constant strings
           (Type::isString(srcType) && classSrc->isConst()));
@@ -1541,9 +1546,12 @@ void HhbcTranslator::emitAGet(SSATmp* classSrc) {
   }
 }
 
-void HhbcTranslator::emitAGetC() {
-  if (isSupportedAGet(topC())) {
+void HhbcTranslator::emitAGetC(const StringData* clsName) {
+  if (isSupportedAGet(topC(), clsName)) {
     SSATmp* src = popC();
+    if (clsName != NULL) {
+      src = m_tb.genDefConst<const StringData*>(clsName);
+    }
     emitAGet(src);
     m_tb.genDecRef(src);
   } else {
@@ -1553,10 +1561,13 @@ void HhbcTranslator::emitAGetC() {
   }
 }
 
-void HhbcTranslator::emitAGetL(int id) {
+void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
   Trace* exitTrace = getExitSlowTrace();
   SSATmp* src = m_tb.genLdLoc(id, Type::Cell, exitTrace);
-  if (isSupportedAGet(src)) {
+  if (isSupportedAGet(src, clsName)) {
+    if (clsName != NULL) {
+      src = m_tb.genDefConst<const StringData*>(clsName);
+    }
     emitAGet(src);
   } else {
     spillStack();
@@ -1565,12 +1576,13 @@ void HhbcTranslator::emitAGetL(int id) {
 }
 
 void HhbcTranslator::emitCGetS(const Class* cls,
+                               const StringData* propName,
                                Type::Tag resultType,
                                bool isInferedType) {
 
   TRACE(3, "%u: CGetS\n", m_bcOff);
   Trace* exitTrace = getExitSlowTrace();
-  SSATmp* propPtr = getClsPropAddr(cls);
+  SSATmp* propPtr = getClsPropAddr(cls, propName);
   SSATmp* val;
   if (isInferedType) {
     ASSERT(Type::isStaticallyKnownUnboxed(resultType));
@@ -1604,7 +1616,8 @@ void HhbcTranslator::emitVGetS() {
   decRefPropAddr(propAddr);
 }
 
-void HhbcTranslator::emitCGetG(Type::Tag resultType, bool isInferedType) {
+void HhbcTranslator::emitCGetG(const StringData* name,
+                               Type::Tag resultType, bool isInferedType) {
   spillStack();
   popC();
   if (isInferedType) {
@@ -1626,10 +1639,10 @@ void HhbcTranslator::emitSetG() {
   emitInterpOneOrPunt(Type::Cell);
 }
 
-void HhbcTranslator::emitSetS(const Class* cls) {
+void HhbcTranslator::emitSetS(const Class* cls, const StringData* propName) {
   Trace* exitTrace = getExitSlowTrace();
   SSATmp* src = popC();
-  SSATmp* propAddrToDecRef = getClsPropAddr(cls);
+  SSATmp* propAddrToDecRef = getClsPropAddr(cls, propName);
   SSATmp* propPtr = m_unboxPtrs ? m_tb.genUnboxPtr(propAddrToDecRef)
                                 : propAddrToDecRef;
   SSATmp* prevValue = m_tb.genLdMem(propPtr, Type::Cell, exitTrace);

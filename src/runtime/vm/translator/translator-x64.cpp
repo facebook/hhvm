@@ -4668,7 +4668,7 @@ TranslatorX64::translateCns(const Tracelet& t,
            (IS_STRING_TYPE(tv->m_type) && IS_STRING_TYPE(outType)));
     PhysReg r = getReg(i.outStack->location);
     a.   mov_imm64_reg(tv->m_data.num, r);
-    emitIncRef(r, tv->m_type);
+    // tv is static; no need to incref
     return;
   }
 
@@ -7267,9 +7267,7 @@ TranslatorX64::translateUnsetL(const Tracelet& t,
 
   DataType type = localDl.outerType();
   // decRef the value that currently lives in the local if appropriate.
-  if (IS_REFCOUNTED_TYPE(type)) {
-    emitDecRef(i, getReg(localDl.location), type);
-  }
+  emitDecRef(i, getReg(localDl.location), type);
 }
 
 
@@ -8718,7 +8716,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
 
   if (type != KindOfObject) {
     // All non-object inputs are not instances
-    if (!input0IsLoc && IS_REFCOUNTED_TYPE(type)) {
+    if (!input0IsLoc) {
       ASSERT(!input0->isVariant());
       emitDecRef(i, srcReg, type);
     }
@@ -8734,7 +8732,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     } else {
       a.  load_reg64_disp_reg64(srcReg, ObjectData::getVMClassOffset(), *inCls);
     }
-    if (!input0IsLoc && IS_REFCOUNTED_TYPE(type)) {
+    if (!input0IsLoc) {
       emitDecRef(i, srcReg, type);
     }
 

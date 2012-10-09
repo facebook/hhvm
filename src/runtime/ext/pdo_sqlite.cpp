@@ -230,9 +230,10 @@ int64 PDOSqliteConnection::doer(CStrRef sql) {
 bool PDOSqliteConnection::quoter(CStrRef input, String &quoted,
                                  PDOParamType paramtype) {
   int len = 2 * input.size() + 3;
-  char *buf = (char*)malloc(len);
+  String s(len, ReserveString);
+  char *buf = s.mutableSlice().ptr;
   sqlite3_snprintf(len, buf, "'%q'", input.data());
-  quoted = String(buf, AttachString);
+  quoted = s.setSize(strlen(buf));
   return true;
 }
 

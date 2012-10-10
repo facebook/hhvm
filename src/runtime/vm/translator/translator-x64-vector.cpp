@@ -509,6 +509,12 @@ void TranslatorX64::emitHphpArrayGetIntKey(const NormalizedInstruction& i,
   ScratchReg probe(m_regMap);
   LazyScratchReg rDereffedKey(m_regMap);
   PhysReg rKey = getReg(keyLoc.location);
+  if (keyLoc.isVariant()) {
+    rDereffedKey.alloc();
+    emitDeref(a, rKey, *rDereffedKey);
+    rKey = *rDereffedKey;
+    assert(rKey != rBase);
+  }
   // Track some weirdness: #1798599
   assert(*mask != rBase);
   assert(*hash != rBase);
@@ -518,16 +524,14 @@ void TranslatorX64::emitHphpArrayGetIntKey(const NormalizedInstruction& i,
   assert(*hash != rKey);
   assert(*count != rKey);
   assert(*probe != rKey);
-  if (keyLoc.isVariant()) {
-    rDereffedKey.alloc();
-    emitDeref(a, rKey, *rDereffedKey);
-    rKey = *rDereffedKey;
-    assert(rKey != rBase);
-    assert(rKey != rKey);
-  }
   TCA bail = astubs.code.frontier;
   {
-    // Failure path.
+    // Failure path. A nasty subtelty is that we can't just use diamond
+    // guard here; the helper is going to mutate the stack location that
+    // backs rBase. The contract with the caller is that we're going to
+    // preserve rBase bitwise. So, push and pop rBase around the diamond
+    // guard.
+    PhysRegSaver prs(astubs, RegSet(rBase));
     DiamondGuard dg(astubs);
     Stats::emitInc(astubs, Stats::ElemAsm_GetIMiss);
     EMIT_CALL(astubs, fallbackFunc,

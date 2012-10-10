@@ -1477,7 +1477,7 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
     m_regMap.allocInputReg(*m_curNI, kRhsIdx);
     PhysReg rhsReg = getReg(val.location);
     LazyScratchReg tmp(m_regMap);
-    if (val.isVariant()) {
+    if (val.isVariant() && !IS_NULL_TYPE(val.rtt.valueType())) {
       tmp.alloc();
       emitDeref(a, rhsReg, *tmp);
       rhsReg = *tmp;
@@ -3038,8 +3038,9 @@ void TranslatorX64::translateIssetMSimple(const Tracelet& t,
 
   PhysReg arrReg = getReg(base.location);
 
-  ScratchReg scratch(m_regMap);
+  LazyScratchReg scratch(m_regMap);
   if (base.isVariant()) {
+    scratch.alloc();
     emitDeref(a, arrReg, *scratch);
     arrReg = *scratch;
     SKTRACE(1, ni.source, "loaded variant\n");

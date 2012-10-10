@@ -1755,6 +1755,7 @@ void Translator::getInputs(Tracelet& t,
     if (input & DontBreakLocal) inputs.back().dontBreak = true;
   }
   if ((input & AllLocals) && freeLocalsInline()) {
+    ni->ignoreInnerType = true;
     int n = curFunc()->numLocals();
     for (int i = 0; i < n; ++i) {
       inputs.push_back(Location(Location::Local, i));

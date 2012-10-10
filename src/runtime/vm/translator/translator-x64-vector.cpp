@@ -1476,8 +1476,11 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
 
     m_regMap.allocInputReg(*m_curNI, kRhsIdx);
     PhysReg rhsReg = getReg(val.location);
+    LazyScratchReg tmp(m_regMap);
     if (val.isVariant()) {
-      emitDeref(a, rhsReg, rhsReg);
+      tmp.alloc();
+      emitDeref(a, rhsReg, *tmp);
+      rhsReg = *tmp;
     }
 
     const bool incRef = true;

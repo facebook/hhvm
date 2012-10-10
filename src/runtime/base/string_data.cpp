@@ -303,6 +303,7 @@ StringData::StringData(int cap) {
     }
     m_len = 0;
     m_data = (char*) smart_malloc(cap + 1);
+    m_data[0] = 0;
     m_big.cap = cap | IsSmart;
   }
 }
@@ -829,7 +830,6 @@ bool StringData::checkSane() const {
   ASSERT(uint32_t(size()) <= MaxSize);
   ASSERT(uint32_t(capacity()) <= MaxSize);
   ASSERT(size() <= capacity());
-  ASSERT(rawdata()[size()] == 0); // all strings must be null-terminated
   if (isSmall()) {
     ASSERT(m_data == m_small && m_len <= MaxSmallSize);
   } else {

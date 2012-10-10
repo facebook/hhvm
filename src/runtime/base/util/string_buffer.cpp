@@ -32,10 +32,12 @@ namespace HPHP {
 
 StringBuffer::StringBuffer(int initialSize /* = 63 */)
   : m_initialCap(initialSize), m_maxBytes(kDefaultOutputLimit),
-    m_cap(initialSize), m_len(0) {
+    m_len(0) {
   ASSERT(initialSize > 0);
   m_str = NEW(StringData)(initialSize);
-  m_buffer = (char *)m_str->data();
+  MutableSlice s = m_str->mutableSlice();
+  m_buffer = s.ptr;
+  m_cap = s.len;
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 

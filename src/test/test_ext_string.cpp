@@ -23,6 +23,7 @@
 bool TestExtString::RunTests(const std::string &which) {
   bool ret = true;
 
+  RUN_TEST(test_stringdata);
   RUN_TEST(test_addcslashes);
   RUN_TEST(test_stripcslashes);
   RUN_TEST(test_addslashes);
@@ -118,6 +119,16 @@ bool TestExtString::RunTests(const std::string &which) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool TestExtString::test_stringdata() {
+  // None of these should assert.
+  StringData s1;
+  String s2(StringData::MaxSmallSize / 2, ReserveString);
+  String s3(StringData::MaxSmallSize * 2, ReserveString);
+  String s4(StringData::MaxSmallSize * 2, ReserveString);
+  s4.mutableSlice().ptr[0] = 'a';
+  return Count(true);
+}
 
 bool TestExtString::test_addcslashes() {
   VS(f_addcslashes("ABCDEFGH\n", "A..D\n"), "\\A\\B\\C\\DEFGH\\n");

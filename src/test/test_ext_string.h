@@ -27,6 +27,7 @@ class TestExtString : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 
+  bool test_stringdata();
   bool test_addcslashes();
   bool test_stripcslashes();
   bool test_addslashes();

@@ -373,12 +373,18 @@ void StringData::append(const char *s, int len) {
     ASSERT((oldp > s && oldp - s > len) ||
            (oldp < s && s - oldp > oldlen)); // no overlapping
     newlen = oldlen + len;
-    char* newdata = (char*) smart_realloc(oldp, newlen + 1);
+    char* newdata;
+    if ((int)newlen <= capacity()) {
+      newdata = oldp;
+    } else {
+      uint32_t nlen = newlen + (newlen >> 2);
+      newdata = (char*) smart_realloc(oldp, nlen + 1);
+      m_big.cap = nlen | IsSmart;
+    }
     memcpy(newdata + oldlen, s, len);
     newdata[newlen] = 0;
     m_len = newlen;
     m_data = newdata;
-    m_big.cap = newlen | IsSmart;
     m_hash = 0;
   } else {
     // generic "big string concat" path.  realloc buffer.

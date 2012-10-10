@@ -359,7 +359,7 @@ class TranslatorX64 : public Translator
                        unsigned iInd, LazyScratchReg& rBase);
   void emitPropSpecialized(MInstrAttr, const Class*,
                            int propOffset, unsigned mInd, unsigned iInd,
-                           PhysReg rBase);
+                           LazyScratchReg& rBase);
   void emitNewElem(const Tracelet& t, const NormalizedInstruction& ni,
                    unsigned mInd, LazyScratchReg& rBase);
   void emitIntermediateOp(const Tracelet& t, const NormalizedInstruction& ni,
@@ -414,12 +414,12 @@ class TranslatorX64 : public Translator
                          PhysReg rBase); \
   void emit##instr##Prop(const Tracelet& t, const NormalizedInstruction& ni, \
                          const MInstrInfo& mii, bool ctxFixed, unsigned mInd, \
-                         unsigned iInd, PhysReg rBase); \
+                         unsigned iInd, LazyScratchReg& rBase); \
   void emitFinal##instr##MOp(const Tracelet& t, \
                              const NormalizedInstruction& ni, \
                              const MInstrInfo& mii, bool ctxFixed, \
                              unsigned mInd, unsigned iInd, \
-                             PhysReg rBase);
+                             LazyScratchReg& rBase);
 MINSTRS
 #undef MII
 

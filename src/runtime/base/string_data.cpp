@@ -95,6 +95,7 @@ void StringData::initLiteral(const char* data, int len) {
 }
 
 void StringData::enlist() {
+  ASSERT(isShared());
   SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
   // insert after head
   SweepNode* next = head.next;
@@ -105,6 +106,7 @@ void StringData::enlist() {
 }
 
 void StringData::delist() {
+  ASSERT(isShared());
   SweepNode* next = m_big.node.next;
   SweepNode* prev = m_big.node.prev;
   ASSERT(uintptr_t(next) != kMallocFreeWord);
@@ -121,11 +123,8 @@ void StringData::sweepAll() {
     ASSERT(next && uintptr_t(next) != kMallocFreeWord);
     StringData* s = (StringData*)(uintptr_t(n) -
                                   offsetof(StringData, m_big.node));
-    switch (s->format()) {
-      case IsMalloc: free(s->m_data); break;
-      case IsShared: s->m_big.shared->decRef(); break;
-      default: break;
-    }
+    ASSERT(s->isShared());
+    s->m_big.shared->decRef();
   }
   head.next = head.prev = &head;
 }
@@ -150,10 +149,13 @@ void StringData::initAttach(const char* data, int len) {
     m_small[MaxSmallSize] = 0;
     free((void*)data);
   } else {
+    char* buf = (char*)smart_malloc(len + 1);
+    memcpy(buf, data, len);
+    buf[len] = 0;
     m_len = len;
-    m_cdata = data;
-    m_big.cap = len | IsMalloc;
-    enlist();
+    m_cdata = buf;
+    m_big.cap = len | IsSmart;
+    free((void*)data);
   }
   ASSERT(checkSane());
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
@@ -209,9 +211,6 @@ void StringData::initMalloc(const char* data, int len) {
     m_len = len;
     m_cdata = buf;
     m_big.cap = len | IsMalloc;
-    // this isn't a smart-alloc'd string, but ~StringData calls delist(),
-    // so initialize the node as an empty list.
-    m_big.node.next = m_big.node.prev = &m_big.node;
   }
   ASSERT(checkSane());
   TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
@@ -237,7 +236,6 @@ void StringData::releaseData() {
   case IsMalloc:
     ASSERT(checkSane());
     free(m_data);
-    delist();
     break;
   case IsShared:
     ASSERT(checkSane());
@@ -251,17 +249,6 @@ void StringData::releaseData() {
   default:
     break;
   }
-}
-
-void StringData::attach(char *data, int len) {
-  if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len > 2^31-2", len);
-  }
-  releaseData();
-  m_len = len;
-  m_data = data;
-  m_big.cap = len | IsMalloc;
-  enlist();
 }
 
 char* smart_concat(const char* s1, uint32_t len1, const char* s2, uint32_t len2) {
@@ -406,7 +393,6 @@ void StringData::append(const char *s, int len) {
     m_len = newlen;
     m_data = newdata;
     m_big.cap = newlen | IsMalloc;
-    // already enlisted, don't do it again
     m_hash = 0;
   }
   ASSERT(newlen <= MaxSize);
@@ -431,7 +417,6 @@ MutableSlice StringData::reserve(int cap) {
     case IsMalloc:
       m_data = (char*) realloc(m_data, cap + 1);
       m_big.cap = cap | IsMalloc;
-      // already enlisted, don't do it again
       break;
   }
   return MutableSlice(m_data, cap);
@@ -473,19 +458,18 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
   }
 }
 
-void StringData::escalate() {
-  ASSERT(isImmutable() && !isStatic() && size() > 0);
+MutableSlice StringData::escalate(uint32_t cap) {
+  ASSERT(isImmutable() && !isStatic() && cap >= m_len);
+  char *buf = (char*)smart_malloc(cap + 1);
   StringSlice s = slice();
-  char *buf = (char*)malloc(s.len + 1);
   memcpy(buf, s.ptr, s.len);
   buf[s.len] = 0;
-  m_len = s.len;
   m_data = buf;
-  m_big.cap = s.len | IsMalloc;
-  enlist();
+  m_big.cap = s.len | IsSmart;
   // clear precomputed hashcode
   m_hash = 0;
   ASSERT(checkSane());
+  return MutableSlice(buf, cap);
 }
 
 StringData *StringData::Escalate(StringData *in) {
@@ -557,18 +541,16 @@ void StringData::setChar(int offset, CStrRef substring) {
       // PHP will treat data as an array and we don't want to follow that.
       throw OffsetOutOfRangeException();
     }
+    char c = substring.empty() ? 0 : substring.data()[0];
     if (uint32_t(offset) < s.len) {
-      char* buf = (char*)s.ptr;
-      buf[offset] = substring.empty() ? 0 : substring.data()[0];
+      ((char*)s.ptr)[offset] = c;
     } else if (offset <= RuntimeOption::StringOffsetLimit) {
       // We are mutating, so we don't need to repropagate our own taint
-      int newlen = offset + 1;
-      char *buf = (char *)Util::safe_malloc(newlen + 1);
-      memcpy(buf, s.ptr, s.len);
-      memset(buf + s.len, ' ', newlen - s.len);
-      buf[newlen] = 0;
-      buf[offset] = substring.empty() ? 0 : substring.data()[0];
-      attach(buf, newlen);
+      uint32_t newlen = offset + 1;
+      MutableSlice buf = isImmutable() ? escalate(newlen) : reserve(newlen);
+      memset(buf.ptr + s.len, ' ', newlen - s.len);
+      buf.ptr[offset] = c;
+      setSize(newlen);
     } else {
       throw OffsetOutOfRangeException();
     }
@@ -578,23 +560,108 @@ void StringData::setChar(int offset, CStrRef substring) {
 
 void StringData::setChar(int offset, char ch) {
   ASSERT(offset >= 0 && offset < size() && !isStatic());
-  if (isImmutable()) escalate();
+  if (isImmutable()) escalate(size());
   ((char*)rawdata())[offset] = ch;
   m_hash = 0;
+}
+
+/**
+ * Zend's way of incrementing a string. Definitely something we want to get rid
+ * of in the future.  If the incremented string is longer, use smart_malloc
+ * to allocate the new string, update len, and return the new string.
+ * Otherwise return null.
+ */
+char *increment_string(char *s, uint32_t &len) {
+  ASSERT(s && *s);
+  enum CharKind {
+    UNKNOWN_KIND,
+    LOWER_CASE,
+    UPPER_CASE,
+    NUMERIC
+  };
+
+  int carry = 0;
+  int pos = len - 1;
+  int last = UNKNOWN_KIND; // Shut up the compiler warning
+  int ch;
+
+  while (pos >= 0) {
+    ch = s[pos];
+    if (ch >= 'a' && ch <= 'z') {
+      if (ch == 'z') {
+        s[pos] = 'a';
+        carry=1;
+      } else {
+        s[pos]++;
+        carry=0;
+      }
+      last=LOWER_CASE;
+    } else if (ch >= 'A' && ch <= 'Z') {
+      if (ch == 'Z') {
+        s[pos] = 'A';
+        carry=1;
+      } else {
+        s[pos]++;
+        carry=0;
+      }
+      last=UPPER_CASE;
+    } else if (ch >= '0' && ch <= '9') {
+      if (ch == '9') {
+        s[pos] = '0';
+        carry=1;
+      } else {
+        s[pos]++;
+        carry=0;
+      }
+      last = NUMERIC;
+    } else {
+      carry=0;
+      break;
+    }
+    if (carry == 0) {
+      break;
+    }
+    pos--;
+  }
+
+  if (carry) {
+    char *t = (char *) smart_malloc(len+1+1);
+    memcpy(t+1, s, len);
+    t[++len] = '\0';
+    switch (last) {
+    case NUMERIC:
+      t[0] = '1';
+      break;
+    case UPPER_CASE:
+      t[0] = 'A';
+      break;
+    case LOWER_CASE:
+      t[0] = 'a';
+      break;
+    }
+    return t;
+  }
+  return NULL;
 }
 
 void StringData::inc() {
   ASSERT(!isStatic());
   ASSERT(!empty());
-  if (isImmutable()) {
-    escalate();
-  }
   StringSlice s = slice();
-  // if increment_string overflows, it returns a new ptr and updates s.len
+  if (isImmutable()) escalate(s.len);
+  // if increment_string overflows, it returns a new ptr and updates len
   ASSERT(s.len <= MaxSize); // safe int/uint casting
-  int len = s.len;
+  auto len = s.len;
   char *overflowed = increment_string((char *)s.ptr, len);
-  if (overflowed) attach(overflowed, len);
+  if (overflowed) {
+    if (len > MaxSize) {
+      throw InvalidArgumentException("len > 2^31-2", len);
+    }
+    releaseData();
+    m_len = len;
+    m_data = overflowed;
+    m_big.cap = len | IsSmart;
+  }
   m_hash = 0;
 }
 

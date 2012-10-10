@@ -423,8 +423,7 @@ public:
   void initConcat(StringSlice r1, StringSlice r2);
   void releaseData();
   int numericCompare(const StringData *v2) const;
-  void escalate(); // change to malloc-ed string
-  void attach(char *data, int len);
+  MutableSlice escalate(uint32_t cap); // change to smart-malloced string
   void enlist();
   void delist();
 

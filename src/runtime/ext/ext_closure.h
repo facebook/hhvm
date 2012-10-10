@@ -55,25 +55,22 @@ public:
    */
   virtual const CallInfo *t___invokeCallInfoHelper(void *&extra);
 
-  /**
-   * Used by HPHPI to make closures work
-   */
-  void *extraData() const { return m_extraData; }
+  String name() const { return String(m_name, CopyString); }
 
   /**
    * This is the constructor which is called internally-
    * PHP code will never be able to call this constructor
    */
-  c_Closure(const CallInfo *callInfo, void *extraData,
+  c_Closure(const CallInfo *callInfo, const char *name,
             const ObjectStaticCallbacks *cb = &cw_Closure) :
-      ExtObjectData(cb), m_callInfo(callInfo), m_extraData(extraData) {
+      ExtObjectData(cb), m_callInfo(callInfo), m_name(name) {
     ASSERT(callInfo);
   }
 protected:
   virtual bool php_sleep(Variant &ret);
 private:
   const CallInfo *m_callInfo;
-  void *m_extraData;
+  const char *m_name;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

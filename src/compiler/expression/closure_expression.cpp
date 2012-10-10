@@ -283,15 +283,17 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
   const string &origName = m_func->getOriginalName();
 
   if (needsAnonCls) {
-    cg_printf("%sClosure$%s(NEWOBJ(%sClosure$%s)(&%s%s, NULL",
+    cg_printf("%sClosure$%s(NEWOBJ(%sClosure$%s)(&%s%s, \"%s\"",
               Option::SmartPtrPrefix, origName.c_str(),
               Option::ClassPrefix, origName.c_str(),
-              Option::CallInfoPrefix, origName.c_str());
+              Option::CallInfoPrefix, origName.c_str(),
+              origName.c_str());
   } else {
     // no use vars, so can use the generic closure
-    cg_printf("%sClosure(NEWOBJ(%sClosure)(&%s%s, NULL",
+    cg_printf("%sClosure(NEWOBJ(%sClosure)(&%s%s, \"%s\"",
               Option::SmartPtrPrefix, Option::ClassPrefix,
-              Option::CallInfoPrefix, origName.c_str());
+              Option::CallInfoPrefix, origName.c_str(),
+              origName.c_str());
   }
 
   bool hasEmit = false;

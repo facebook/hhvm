@@ -85,11 +85,11 @@ _ZN4HPHP22f_hphp_get_method_infoERKNS_7VariantES2_
 
 (return value) => rax
 _rv => rdi
-cls => rsi
+cname => rsi
 name => rdx
 */
 
-Value* fh_hphp_get_method_info(Value* _rv, TypedValue* cls, TypedValue* name) asm("_ZN4HPHP22f_hphp_get_method_infoERKNS_7VariantES2_");
+Value* fh_hphp_get_method_info(Value* _rv, TypedValue* cname, TypedValue* name) asm("_ZN4HPHP22f_hphp_get_method_infoERKNS_7VariantES2_");
 
 TypedValue* fg_hphp_get_method_info(HPHP::VM::ActRec *ar) {
     TypedValue rv;
@@ -110,6 +110,43 @@ TypedValue* fg_hphp_get_method_info(HPHP::VM::ActRec *ar) {
     rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Array HPHP::f_hphp_get_closure_info(HPHP::Variant const&)
+_ZN4HPHP23f_hphp_get_closure_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+closure => rsi
+*/
+
+Value* fh_hphp_get_closure_info(Value* _rv, TypedValue* closure) asm("_ZN4HPHP23f_hphp_get_closure_infoERKNS_7VariantE");
+
+TypedValue* fg_hphp_get_closure_info(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv._count = 0;
+      rv.m_type = KindOfArray;
+      fh_hphp_get_closure_info((Value*)(&(rv)), (args-0));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("hphp_get_closure_info", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

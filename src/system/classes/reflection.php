@@ -492,9 +492,13 @@ implements Reflector {
   const IS_DEPRECATED = 262144;
 
   public function __construct($name) {
-    $this->info = hphp_get_function_info($name);
-    if (empty($this->info)) {
-      throw new ReflectionException("Function $name does not exist");
+    if ($name instanceof Closure) {
+      $this->info = hphp_get_closure_info($name);
+    } else {
+      $this->info = hphp_get_function_info($name);
+      if (empty($this->info)) {
+        throw new ReflectionException("Function $name does not exist");
+      }
     }
   }
 
@@ -537,6 +541,11 @@ implements Reflector {
  */
   public function invoke() {
     $args = func_get_args();
+    if (isset($this->info['closureobj'])) {
+      $closure = $this->info['closureobj'];
+      return hphp_invoke_method($closure, get_class($closure),
+                                '__invoke', $args);
+    }
     return hphp_invoke($this->info['name'], $args);
   }
 
@@ -551,6 +560,11 @@ implements Reflector {
  * @args       mixed   The args to invoke.
  */
   public function invokeArgs($args) {
+    if (isset($this->info['closureobj'])) {
+      $closure = $this->info['closureobj'];
+      return hphp_invoke_method($closure, get_class($closure),
+                                '__invoke', array_values($args));
+    }
     return hphp_invoke($this->info['name'], array_values($args));
   }
 
@@ -1370,7 +1384,7 @@ class ReflectionClass implements Reflector {
   public function getExtensionName() {
     return $this->fetch('extension')->getName();
   }
-  
+
   public function getAttribute($name) {
     $attrs = $this->fetch('attributes');
     return isset($attrs[$name]) ? $attrs[$name] : null;
@@ -1379,12 +1393,12 @@ class ReflectionClass implements Reflector {
   public function getAttributes() {
     return $this->fetch('attributes');
   }
-  
+
   public function getAttributeRecursive($name) {
     $attrs = $this->fetch('attributes_rec');
     return isset($attrs[$name]) ? $attrs[$name] : null;
   }
-  
+
   public function getAttributesRecursive() {
     return $this->fetch('attributes_rec');
   }
@@ -1948,7 +1962,7 @@ implements Reflector {
   public function getAttributes() {
     return $this->info['attributes'];
   }
-  
+
   public function getAttributeRecursive($name) {
     $attrs = $this->info['attributes'];
     if (isset($attrs[$name])) {
@@ -1964,7 +1978,7 @@ implements Reflector {
     }
     return $rm->getAttributeRecursive($name);
   }
-  
+
   public function getAttributesRecursive() {
     $attrs = $this->info['attributes'];
     $p = get_parent_class($this->class);

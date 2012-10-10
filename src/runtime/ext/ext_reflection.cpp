@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/ext_reflection.h>
+#include <runtime/ext/ext_closure.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/source_info.h>
@@ -75,6 +76,9 @@ static StaticString s_attributes("attributes");
 static StaticString s_trait_aliases("trait_aliases");
 static StaticString s_varg("varg");
 static StaticString s_closure("closure");
+static StaticString s___invoke("__invoke");
+static StaticString s_closure_in_braces("{closure}");
+static StaticString s_closureobj("closureobj");
 
 static const VM::Class* get_cls(CVarRef class_or_object) {
   VM::Class* cls = NULL;
@@ -450,6 +454,33 @@ Array f_hphp_get_method_info(CVarRef cls, CVarRef name) {
     if (!cls) return Array();
     return get_method_info(cls, name);
   }
+}
+
+Array f_hphp_get_closure_info(CVarRef closure) {
+  if (hhvm) {
+    Array mi = f_hphp_get_method_info(closure.toObject()->o_getClassName(),
+                                      s___invoke);
+    mi.set(s_name, s_closure_in_braces);
+    mi.set(s_closureobj, closure);
+    mi.set(s_closure, empty_string);
+    mi.remove(s_access);
+    mi.remove(s_modifiers);
+    mi.remove(s_class);
+
+    Array &params = mi.lvalAt(s_params).asArrRef();
+    for (int i = 0; i < params.size(); i++) {
+      params.lvalAt(i).asArrRef().remove(s_class);
+    }
+
+    return mi;
+  }
+
+  const c_Closure *c = closure.asCObjRef().getTyped<const c_Closure>();
+  Array fi = f_hphp_get_function_info(c->name());
+  fi.set(s_name, s_closure_in_braces);
+  fi.set(s_closureobj, closure);
+  fi.remove(s_varg);
+  return fi;
 }
 
 Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name) {

@@ -1772,6 +1772,7 @@ TypedValue* fg_escapeshellarg(VM::ActRec *ar);
 TypedValue* fg_escapeshellcmd(VM::ActRec *ar);
 TypedValue* fg_hphp_get_extension_info(VM::ActRec *ar);
 TypedValue* fg_hphp_get_method_info(VM::ActRec *ar);
+TypedValue* fg_hphp_get_closure_info(VM::ActRec *ar);
 TypedValue* fg_hphp_get_class_constant(VM::ActRec *ar);
 TypedValue* fg_hphp_get_class_info(VM::ActRec *ar);
 TypedValue* fg_hphp_get_function_info(VM::ActRec *ar);
@@ -2912,7 +2913,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2184;
+const long long hhbc_ext_funcs_count = 2185;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -4664,6 +4665,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "escapeshellcmd", fg_escapeshellcmd },
   { "hphp_get_extension_info", fg_hphp_get_extension_info },
   { "hphp_get_method_info", fg_hphp_get_method_info },
+  { "hphp_get_closure_info", fg_hphp_get_closure_info },
   { "hphp_get_class_constant", fg_hphp_get_class_constant },
   { "hphp_get_class_info", fg_hphp_get_class_info },
   { "hphp_get_function_info", fg_hphp_get_function_info },

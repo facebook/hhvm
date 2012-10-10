@@ -76,11 +76,28 @@ DefineFunction(
     ),
     'args'   => array(
       array(
-        'name'   => "cls",
+        'name'   => "cname",
         'type'   => Variant,
       ),
       array(
         'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_get_closure_info",
+    'desc'   => "Internally used by ReflectionFunction for getting a closure's information.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => VariantMap,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "closure",
         'type'   => Variant,
       ),
     ),

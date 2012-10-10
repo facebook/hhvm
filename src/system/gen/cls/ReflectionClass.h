@@ -31,7 +31,7 @@ extern const VarNR &s_sys_svi5830e7c6;
 FORWARD_DECLARE_CLASS(ReflectionMethod);
 FORWARD_DECLARE_CLASS(ReflectionProperty);
 
-/* SRC: classes/reflection.php line 586 */
+/* SRC: classes/reflection.php line 600 */
 FORWARD_DECLARE_CLASS(ReflectionClass);
 extern const ObjectStaticCallbacks cw_ReflectionClass;
 class c_ReflectionClass : public ExtObjectData {

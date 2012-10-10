@@ -2203,7 +2203,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("\n");
     }
 
-    cg_printf("%sClosure$%s(const CallInfo *func, void *extra",
+    cg_printf("%sClosure$%s(const CallInfo *func, const char *name",
               Option::ClassPrefix, funcName.c_str());
 
     if (!useVars.empty()) cg_printf(", ");
@@ -2217,7 +2217,7 @@ void FunctionScope::outputCPPPreface(CodeGenerator &cg, AnalysisResultPtr ar) {
     // TODO: non ref variants can be directly assigned to the member
     // variable in the initialization list, giving an ever-so-slight
     // gain in performance
-    cg_printf(") : %sClosure(func, extra)", Option::ClassPrefix);
+    cg_printf(") : %sClosure(func, name)", Option::ClassPrefix);
     if (variables->hasStaticLocals()) {
       cg_printf(", ");
       variables->outputCPPStaticLocals(cg, ar, true);

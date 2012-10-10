@@ -509,10 +509,21 @@ void TranslatorX64::emitHphpArrayGetIntKey(const NormalizedInstruction& i,
   ScratchReg probe(m_regMap);
   LazyScratchReg rDereffedKey(m_regMap);
   PhysReg rKey = getReg(keyLoc.location);
+  // Track some weirdness: #1798599
+  assert(*mask != rBase);
+  assert(*hash != rBase);
+  assert(*count != rBase);
+  assert(*probe != rBase);
+  assert(*mask != rKey);
+  assert(*hash != rKey);
+  assert(*count != rKey);
+  assert(*probe != rKey);
   if (keyLoc.isVariant()) {
     rDereffedKey.alloc();
     emitDeref(a, rKey, *rDereffedKey);
     rKey = *rDereffedKey;
+    assert(rKey != rBase);
+    assert(rKey != rKey);
   }
   TCA bail = astubs.code.frontier;
   {
@@ -2744,20 +2755,24 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
                              PhysReg baseReg,
                              const DynLocation* keyIn,
                              const Location& outLoc) {
+  bool isInline = keyIn->isInt() && !baseInput->isVariant();
   // Let the array helpers handle refcounting logic: key down,
   // return value up.
   SKTRACE(1, i.source, "emitCGetM: committed to unary load\n");
   bool decRefBase = baseInput->isStack();
   PhysReg decRefReg = noreg;
+  bool stackSavedDecRef = false;
   if (decRefBase) {
     // We'll need to decref the base after the call. Make sure we hold
     // on to the value if it's a variant or from a global.
     if (isSupportedCGetM_GE(i)) {
       decRefReg = baseReg;
     } else if (baseInput->isVariant()) {
+      ASSERT(!isInline);
       decRefReg = getReg(baseInput->location);
     }
-    if (decRefReg != noreg && kCallerSaved.contains(decRefReg)) {
+    if (!isInline && decRefReg != noreg && kCallerSaved.contains(decRefReg)) {
+      stackSavedDecRef = true;
       a.    pushr(decRefReg);
       a.    sub_imm32_reg64(8, rsp);
     }
@@ -2782,7 +2797,7 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
     array_getm_s(a, sd, &tv);
     array_getm_s0(a, sd, &tv);
   }
-  if (keyIn->isInt() && !baseInput->isVariant()) {
+  if (isInline) {
     emitHphpArrayGetIntKey(i, baseReg, *keyIn, outLoc, fptr);
   } else {
     EMIT_CALL(a, fptr,R(baseReg), V(keyIn->location), A(outLoc));
@@ -2791,12 +2806,14 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
   m_regMap.invalidate(outLoc);
 
   if (decRefBase) {
-    // For convenience of decRefs, the callees return the ArrayData*...
-    PhysReg base = rax;
+    // For convenience of decRefs, the helpers return the ArrayData*. The
+    // inline translation left baseReg intact.
+    PhysReg base = isInline ? baseReg : rax;
     // but if it was boxed or from a global, we need to get the
     // original address back...
     if (decRefReg != noreg) {
-      if (kCallerSaved.contains(decRefReg)) {
+      if (stackSavedDecRef) {
+        ASSERT(!isInline);
         a.    add_imm32_reg64(8, rsp);
         a.    popr(rax);
       } else {

@@ -323,6 +323,7 @@ private:
   template<Type::Tag T> void emitIsTypeC();
   template<Type::Tag T> void emitIsTypeL(int id);
   void emitCmp(Opcode opc);
+  Trace* emitJmpCondHelper(int32 offset, bool negate);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   void emitIncDecMem(bool pre, bool inc, SSATmp* propAddr, Trace* exitTrace);
   SSATmp* getMemberAddr(const char* vectorDesc, Trace* exitTrace);

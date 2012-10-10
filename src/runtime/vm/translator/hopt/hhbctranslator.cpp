@@ -228,6 +228,7 @@ void HhbcTranslator::emitArrayAdd() {
   SSATmp* tr = popC();
   SSATmp* tl = popC();
   // the ArrrayAdd helper decrefs its args, so don't decref pop'ed values
+  // TODO verify that ArrayAdd increfs its result
   push(m_tb.genArrayAdd(tl, tr));
 }
 
@@ -237,6 +238,7 @@ void HhbcTranslator::emitAddElemC() {
   SSATmp* key = popC();
   SSATmp* arr = popC();
   // the AddElem helper decrefs its args, so don't decref pop'ed values
+  // TODO verify that AddElem increfs its result
   push(m_tb.genAddElem(arr, key, val));
 }
 
@@ -245,6 +247,7 @@ void HhbcTranslator::emitAddNewElemC() {
   SSATmp* val = popC();
   SSATmp* arr = popC();
   // the AddNewElem helper decrefs its args, so don't decref pop'ed values
+  // TODO verify that NewElem increfs its result
   push(m_tb.genAddNewElem(arr, val));
 }
 
@@ -264,6 +267,7 @@ void HhbcTranslator::emitConcat() {
   SSATmp* tr = popC();
   SSATmp* tl = popC();
   // the concat helpers decref their args, so don't decref pop'ed values
+  // TODO verify that Concat increfs its result
   push(m_tb.genConcat(tl, tr));
 }
 
@@ -429,8 +433,10 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32 id) {
 
 // only handles integer inc/dec
 SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
+  ASSERT(src->getType() == Type::Int);
   SSATmp* one = m_tb.genDefConst<int64>(1);
   SSATmp* res = inc ? m_tb.genAdd(src, one) : m_tb.genSub(src, one);
+  // no incref necessary on push since result is an int
   push(pre ? res : src);
   return res;
 }
@@ -715,17 +721,6 @@ SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
   return m_tb.genLdClsPropAddr(clsTmp, prop);
 }
 
-#if 0
-bool HhbcTranslator::isSupportedClsPropAddr(uint32 stkIndex) {
-  SSATmp* cls = top(stkIndex);
-  SSATmp* prop = topC(stkIndex+1);
-  if (!prop->isConst() || prop->getType() != Type::StaticStr) {
-    return false;
-  }
-  return true;
-}
-#endif
-
 void HhbcTranslator::decRefPropAddr(SSATmp* propAddr) {
   SSATmp* prop = propAddr->getInstruction()->getSrc(1);
   m_tb.genDecRef(prop);
@@ -958,36 +953,22 @@ Trace* HhbcTranslator::emitJmp(int32 offset) {
   return m_tb.genJmp(target);
 }
 
+Trace* HhbcTranslator::emitJmpCondHelper(int32 offset, bool negate) {
+  SSATmp* src = popC();
+  Trace* target = getExitTrace(offset);
+  SSATmp* boolSrc = m_tb.genConvToBool(src);
+  m_tb.genDecRef(src);
+  return m_tb.genJmpCond(boolSrc, target, negate);
+}
+
 Trace* HhbcTranslator::emitJmpZ(int32 offset) {
   TRACE(3, "%u: JmpZ %d\n", m_bcOff, offset);
-  SSATmp* opnd = popC();
-  Trace* target = getExitTrace(offset);
-  Trace* trace = m_tb.genJmpZ(opnd, target);
-  if (isRefCounted(opnd)) {
-    m_tb.genDecRef(opnd);
-    if (trace) {
-      // generate a decref at the target trace also
-      IRInstruction decRefInst(DecRef, opnd->getType(), opnd);
-      trace->prependInstruction(decRefInst.clone(m_tb.getIrFactory()));
-    }
-  }
-  return trace;
+  return emitJmpCondHelper(offset, true);
 }
 
 Trace* HhbcTranslator::emitJmpNZ(int32 offset) {
   TRACE(3, "%u: JmpNZ %d\n", m_bcOff, offset);
-  SSATmp* opnd = popC();
-  Trace* target = getExitTrace(offset);
-  Trace* trace = m_tb.genJmpNZ(opnd, target);
-  if (isRefCounted(opnd)) {
-    m_tb.genDecRef(opnd);
-    if (trace) {
-      // generate a decref at the target trace also
-      IRInstruction decRefInst(DecRef, opnd->getType(), opnd);
-      trace->prependInstruction(decRefInst.clone(m_tb.getIrFactory()));
-    }
-  }
-  return trace;
+  return emitJmpCondHelper(offset, false);
 }
 
 void HhbcTranslator::emitCmp(Opcode opc) {
@@ -1523,7 +1504,7 @@ void HhbcTranslator::emitCastDouble() {
   m_tb.genDecRef(src);
 }
 
-// XXX for emitCastString, castAray, and castObject, double check that the
+// TODO for emitCastString, castAray, and castObject, double check that the
 // helpers already don't incref their return values
 void HhbcTranslator::emitCastString() {
   SSATmp* src = popC();
@@ -1624,11 +1605,11 @@ void HhbcTranslator::emitCGetS(const Class* cls,
   decRefPropAddr(propPtr);
 }
 
-// XXX TODO
+// TODO
 void HhbcTranslator::emitVGetS() {
   TRACE(3, "%u: VGetS\n", m_bcOff);
   SSATmp* propAddr = getClsPropAddr(NULL);
-// XXX TODO
+// TODO
 //  push(m_tb.genLdMem());
   PUNT(VGetS);
   decRefPropAddr(propAddr);
@@ -1781,7 +1762,7 @@ void HhbcTranslator::emitXor() {
 void HhbcTranslator::emitInterpOne(Type::Tag type, Trace* target /* = NULL */) {
   if (0) {
     m_tb.genTraceEnd(m_bcOff, TraceExitType::SlowNoProgress);
-    // XXX need to push something on the stack...
+    // TODO need to push something on the stack...
     // Better approach here is to modify the code gen to generate an exit
     // when it sees interp one
   } else {

@@ -133,11 +133,7 @@ public:
 
   SSATmp* genDefUninit();
   SSATmp* genDefNull();
-  Trace*  genJmpCond(Opcode opc, SSATmp* src1, SSATmp* src2, Trace* target);
-  Trace*  genJmpCond(Opcode opc, SSATmp* src, Trace* target);
-  Trace*  genJmpCond(Opcode opc, Type::Tag, SSATmp* src, Trace* target);
-  Trace*  genJmpZ(SSATmp* src, Trace* target);
-  Trace*  genJmpNZ(SSATmp* src, Trace* target);
+  Trace*  genJmpCond(SSATmp* src, Trace* target, bool negate);
   Trace*  genJmp(Trace* target);
   Trace*  genExitWhenSurprised(Trace* target);
   Trace*  genExitOnVarEnv(Trace* target);
@@ -301,11 +297,14 @@ private:
                          uint32 nOpnds,
                          SSATmp** opnds,
                          Trace* exit = NULL);
+  Trace*  genJmpCond(Opcode opc, SSATmp* src1, SSATmp* src2, Trace* target);
+  Trace*  genJmpCond(Opcode opc, SSATmp* src, Trace* target);
+  Trace*  genJmpCond(Opcode opc, Type::Tag, SSATmp* src, Trace* target);
+
   SSATmp* genLogicalOp(Opcode opc, SSATmp* src1, SSATmp* src2);
   Trace* makeTrace(uint32 bcOff, bool isMain) {
     return new Trace(m_irFactory.defLabel(), bcOff, isMain);
   }
-  Trace*  genJmpZAux(SSATmp* src, Trace* target, bool negate);
   void genStLocAux(uint32 id, SSATmp* t0, bool genStoreType);
   /*
    * Fields

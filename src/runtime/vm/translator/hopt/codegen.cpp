@@ -1017,6 +1017,41 @@ Address CodeGenerator::cgOpLte(IRInstruction* inst) {
   return start;
 }
 
+// Runtime helpers
+int64 strToBoolHelper(const StringData *s) {
+  return s->toBoolean();
+}
+
+int64 arrToBoolHelper(const ArrayData *a) {
+  return !a->empty();
+}
+
+int64 objToBoolHelper(const ObjectData *o) {
+  return o->o_toBoolean();
+}
+
+int64 cellToBoolHelper(DataType kind, Value value) {
+  if (IS_NULL_TYPE(kind)) {
+    return 0;
+  }
+
+  if (kind <= KindOfInt64) {
+    return value.m_data.num;
+  }
+
+  switch (kind) {
+  case KindOfDouble:  return value.m_data.dbl != 0;
+  case KindOfStaticString:
+  case KindOfString:  return value.m_data.pstr->toBoolean();
+  case KindOfArray:   return !value.m_data.parr->empty();
+  case KindOfObject:  return value.m_data.pobj->o_toBoolean();
+  default:
+    ASSERT(false);
+    break;
+  }
+  return 0;
+}
+
 // eq - is it = or !=
 // same - is it == or ===
 template <bool eq, bool same>
@@ -1157,6 +1192,12 @@ Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
     args.ssa(src1).ssa(src2);
     if (eq) cgCallHelper(m_as, (TCA)cgStringEqHelper,  dst, true, args);
     else    cgCallHelper(m_as, (TCA)cgStringNeqHelper, dst, true, args);
+  } else if (type1 == Type::Obj && type2 == Type::Obj) {
+    if (eq) CG_PUNT(Eq_obj);
+    else    CG_PUNT(Neq_obj);
+  } else if (type1 == Type::Arr && type2 == Type::Arr) {
+    if (eq) CG_PUNT(Eq_arr);
+    else    CG_PUNT(Neq_arr);
   } else {
     if (eq) CG_PUNT(Eq);
     else    CG_PUNT(Neq);
@@ -1267,6 +1308,24 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
     return start;
   }
 
+  if (toType == Type::Bool) {
+    ArgGroup args;
+    if (Type::isString(fromType)) {
+      args.ssa(src);
+      cgCallHelper(m_as, (TCA)strToBoolHelper, dst, false, args);
+    } else if (fromType == Type::Arr) {
+      args.ssa(src);
+      cgCallHelper(m_as, (TCA)arrToBoolHelper, dst, false, args);
+    } else if (fromType == Type::Obj) {
+      args.ssa(src);
+      cgCallHelper(m_as, (TCA)objToBoolHelper, dst, false, args);
+    } else if (fromType == Type::Cell) {
+      args.type(src);
+      args.ssa(src);
+      cgCallHelper(m_as, (TCA)cellToBoolHelper, dst, false, args);
+    }
+    return start;
+  }
   // TODO: Add handling of conversions
   CG_PUNT(Conv);
 
@@ -3246,12 +3305,31 @@ Address CodeGenerator::cgLdStack(IRInstruction* inst) {
 
 Address CodeGenerator::cgGuardType(IRInstruction* inst) {
   Address   start = m_as.code.frontier;
-  UNUSED Type::Tag t     = inst->getType();
-  UNUSED SSATmp*   dst   = inst->getDst();
-  UNUSED SSATmp*   src   = inst->getSrc(0);
-  UNUSED LabelInstruction* exit = inst->getLabel();
+  UNUSED Type::Tag type = inst->getType();
+  SSATmp*   dst   = inst->getDst();
+  SSATmp*   src   = inst->getSrc(0);
+  LabelInstruction* label = inst->getLabel();
+  register_name_t dstReg = dst->getAssignedLoc(0);
+  register_name_t srcValueReg = src->getAssignedLoc(0);
+  register_name_t srcTypeReg = src->getAssignedLoc(1);
+  ASSERT(srcTypeReg != reg::noreg);
 
-  CG_PUNT(GuardType);
+  // compare srcTypeReg with type
+  DataType dataType = Type::toDataType(type);
+  if (IS_STRING_TYPE(dataType)) {
+    // Note: this assumes String and StaticString are types 6 and 7
+    // TODO: Delete this mov if srcTypeReg is not live out
+    m_as.mov_reg64_reg64(srcTypeReg, LinearScan::rScratch);
+    m_as.and_imm32_reg32((signed char)(0xfe), LinearScan::rScratch);
+    m_as.cmp_imm32_reg32(6, LinearScan::rScratch);
+  } else {
+    m_as.cmp_imm32_reg32(dataType, srcTypeReg);
+  }
+  emitFwdJcc(CC_NE, label);
+
+  if (srcValueReg != dstReg) {
+    m_as.mov_reg64_reg64(srcValueReg, dstReg);
+  }
 
   return start;
 }
@@ -4035,7 +4113,7 @@ Address CodeGenerator::cgFillContThis(IRInstruction* inst) {
 Address CodeGenerator::cgUnpackCont(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   cgCallHelper(m_as, (TCA)VMExecutionContext::unpackContinuation,
-               inst->getDst(), false,
+               inst->getDst(), true,
                ArgGroup().ssa(inst->getSrc(0))
                          .ssa(inst->getSrc(1)));
   return start;
@@ -4055,7 +4133,7 @@ Address CodeGenerator::cgExitOnContVars(IRInstruction* inst) {
 Address CodeGenerator::cgPackCont(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   cgCallHelper(m_as, (TCA)VMExecutionContext::packContinuation,
-               reg::noreg, false,
+               reg::noreg, true,
                ArgGroup().ssa(inst->getSrc(0))
                          .ssa(inst->getSrc(1))
                          .ssa(inst->getSrc(2))

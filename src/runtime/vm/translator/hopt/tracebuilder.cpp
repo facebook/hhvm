@@ -534,9 +534,9 @@ Trace* TraceBuilder::genJmp(Trace* targetTrace) {
   return targetTrace;
 }
 
-Trace* TraceBuilder::genJmpZAux(SSATmp* src, Trace* target, bool negate) {
+Trace* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
   ASSERT(target);
-  SSATmp* boolSrc = genConvToBool(src);
+  ASSERT(boolSrc->getType() == Type::Bool);
   if (boolSrc->isConst()) {
     bool val = boolSrc->getConstValAsBool();
     if (negate) {
@@ -597,14 +597,6 @@ Trace* TraceBuilder::genJmpZAux(SSATmp* src, Trace* target, bool negate) {
     genInstruction(opc, Type::None, boolSrc, target);
   }
   return target;
-}
-
-Trace* TraceBuilder::genJmpZ(SSATmp* src, Trace* target) {
-  return genJmpZAux(src, target, true);
-}
-
-Trace* TraceBuilder::genJmpNZ(SSATmp* src, Trace* target) {
-  return genJmpZAux(src, target, false);
 }
 
 Trace* TraceBuilder::genCheckUninit(SSATmp* src, Trace* target) {

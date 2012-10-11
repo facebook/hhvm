@@ -481,6 +481,7 @@ predictOutputs(NormalizedInstruction* ni) {
     if (cls && (cls = cls->getCached())) {
       DataType dt = cls->clsCnsType(cnsName);
       if (dt != KindOfUninit) {
+        ni->outputPredicted = true;
         TRACE(1, "clscnsd: %s:%s prediction type %d\n",
               cne.first->data(), cnsName->data(), dt);
         return dt;

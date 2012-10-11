@@ -704,7 +704,7 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
   ASSERT(propOp != propX);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
-  Stats::emitInc(a, Stats::PropAsm);
+  Stats::emitInc(a, Stats::PropAsm_Generic);
   EMIT_RCALL(a, ni, propOp, CTX(ctxFixed),
                     R(*rBase),
                     ML(memb.location, a, m_regMap, rsp),
@@ -785,6 +785,8 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
   ASSERT(!(mia & MIA_warn) || !(mia & MIA_unset));
   const bool doWarn   = mia & MIA_warn;
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
+
+  Stats::emitInc(a, Stats::PropAsm_Specialized);
 
   /*
    * Type-inference from hphpc only tells us that this either an
@@ -1099,7 +1101,7 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
     return;
   }
 
-  // TODO: property cache in other cases.
+  Stats::emitInc(a, Stats::PropAsm_GenFinal);
 
   const DynLocation& memb = *ni.inputs[iInd];
   auto* cGetPropOp = ni.immVecM[mInd] == MPL ? cGetPropL : cGetPropC;
@@ -1490,6 +1492,8 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
     emitTvSet(*m_curNI, rhsReg, val.rtt.valueType(), *rBase, 0, incRef);
     return;
   }
+
+  Stats::emitInc(a, Stats::PropAsm_GenFinal);
 
   const bool setResult   = generateMVal(t, ni, mii);
   SKTRACE(2, ni.source, "%s setResult=%s\n",

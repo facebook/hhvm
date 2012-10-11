@@ -133,7 +133,9 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TraceletGuard_execute) \
   STAT(ElemAsm_GetIHit) \
   STAT(ElemAsm_GetIMiss) \
-  STAT(PropAsm) \
+  STAT(PropAsm_Generic) \
+  STAT(PropAsm_Specialized) \
+  STAT(PropAsm_GenFinal)
 
 
 enum StatCounter {

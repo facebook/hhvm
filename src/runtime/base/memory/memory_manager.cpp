@@ -295,10 +295,9 @@ void MemoryManager::checkMemory() {
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
   ASSERT(nbytes > 0);
+  // add room for header before rounding up
   size_t padbytes = (nbytes + sizeof(SmallNode) + kMask) & ~kMask;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
-    // add room for header before rounding up, so the header always is
-    // 8-byte aligned and the usable memory is always 16-aligned.
     m_stats.usage += padbytes;
     unsigned i = (padbytes - 1) >> kLgSizeQuantum;
     ASSERT(i < kNumSizes);
@@ -383,7 +382,7 @@ NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
 
 NEVER_INLINE
 void* MemoryManager::smartMallocSlab(size_t padbytes) {
-  SmallNode* n = (SmallNode*) newSlab(padbytes + sizeof(SmallNode));
+  SmallNode* n = (SmallNode*) newSlab(padbytes);
   n->padbytes = padbytes;
   return n + 1;
 }

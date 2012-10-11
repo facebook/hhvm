@@ -3197,7 +3197,7 @@ TranslatorX64::syncOutputs(int stackOff) {
  *   the instruction is both a source and destination.
  */
 static void
-getBinaryStackInputs(const RegAlloc& regmap, const NormalizedInstruction& i,
+getBinaryStackInputs(RegAlloc& regmap, const NormalizedInstruction& i,
                      PhysReg& rsrc, PhysReg& rsrcdest) {
   ASSERT(i.inputs.size()   == 2);
   ASSERT(i.outStack && !i.outLocal);

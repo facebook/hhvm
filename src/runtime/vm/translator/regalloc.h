@@ -236,7 +236,8 @@ struct RegInfo {
 #undef REGSTATE
     };
     char buf[1024];
-    sprintf(buf, "Reg:%02d:%s:Type:%d", m_pReg, names[m_state], m_type);
+    sprintf(buf, "Reg:%02d:%s:%lld:Type:%d",
+            m_pReg, names[m_state], m_epoch, m_type);
     return Trace::prettyNode(buf, m_cont);
   }
   RegInfo() : m_cont(), m_state(FREE) { }
@@ -370,7 +371,7 @@ class RegAlloc {
 
   bool hasReg(const Location &loc) const;
   RegSet getRegsLike(RegInfo::State state) const;
-  PhysReg getReg(const Location &loc) const;
+  PhysReg getReg(const Location &loc);
 
   /*
    * Returns a PhysReg containing the given immediate value (immVal),
@@ -475,6 +476,8 @@ class RegAlloc {
   bool frozen() const  { return m_freezeCount > 0; }
 
   void bumpEpoch() { m_epoch++; }
+
+  std::string pretty() const;
 };
 
 // RAII ScratchReg holder:

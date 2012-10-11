@@ -225,8 +225,9 @@ RegAlloc::getRegsLike(RegInfo::State state) const {
 }
 
 PhysReg
-RegAlloc::getReg(const Location& loc) const {
+RegAlloc::getReg(const Location& loc) {
   PhysReg reg = mapGet(m_contToRegMap, RegContent(loc), InvalidReg);
+  lruFront(physRegToInfo(reg));
   ASSERT(reg != InvalidReg); // Usage error; didn't call allocInputRegs()?
   return reg;
 }
@@ -609,6 +610,18 @@ RegAlloc::checkNoScratch() {
     }
   }
   return true;
+}
+
+std::string
+RegAlloc::pretty() const {
+  std::ostringstream ss;
+  ss << "Most recently used\n";
+  ss << "Reg:NUM:STATE:EPOCH:Type:TYPE\n";
+  for (int i = 0; i < m_numRegs; ++i) {
+    ss << "  " << m_info[(int)m_lru[i]].pretty() << "\n";
+  }
+  ss << "Least recently used\n";
+  return ss.str();
 }
 
 RegInfo *

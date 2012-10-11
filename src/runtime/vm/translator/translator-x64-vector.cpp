@@ -513,17 +513,7 @@ void TranslatorX64::emitHphpArrayGetIntKey(const NormalizedInstruction& i,
     rDereffedKey.alloc();
     emitDeref(a, rKey, *rDereffedKey);
     rKey = *rDereffedKey;
-    assert(rKey != rBase);
   }
-  // Track some weirdness: #1798599
-  assert(*mask != rBase);
-  assert(*hash != rBase);
-  assert(*count != rBase);
-  assert(*probe != rBase);
-  assert(*mask != rKey);
-  assert(*hash != rKey);
-  assert(*count != rKey);
-  assert(*probe != rKey);
   TCA bail = astubs.code.frontier;
   {
     // Failure path. A nasty subtelty is that we can't just use diamond

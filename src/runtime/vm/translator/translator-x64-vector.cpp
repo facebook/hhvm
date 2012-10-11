@@ -567,17 +567,15 @@ void TranslatorX64::emitHphpArrayGetIntKey(const NormalizedInstruction& i,
 
     // Is it an int or a string?
     a.    cmp_imm32_disp_reg32(0, HphpArray::getElmHashOff(), elmPtr);
-    a.    jnz(bail);
-
     TCA successJmp = a.code.frontier;
-    a.    jmp8(successJmp);
+    a.    jcc8(CC_Z, successJmp);
 
     // Try the loop again.
     a.patchJcc8(continue0, a.code.frontier);
     a.    add_imm32_reg32(1, *count);
     a.    jmp8(loopHead);
 
-    a.patchJmp8(successJmp, a.code.frontier);
+    a.patchJcc8(successJmp, a.code.frontier);
     Stats::emitInc(a, Stats::ElemAsm_GetIHit);
     if (HphpArray::getElmDataOff() != 0) {
       a.  add_imm32_reg64(HphpArray::getElmDataOff(), elmPtr);

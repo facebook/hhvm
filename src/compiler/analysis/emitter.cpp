@@ -6519,6 +6519,8 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   /* there is a race condition in the first call to
      GetStaticString. Make sure we dont hit it */
   StringData::GetStaticString("");
+  /* same for TypeConstraint */
+  TypeConstraint tc;
 
   JobQueueDispatcher<EmitterWorker::JobType, EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());
@@ -6550,6 +6552,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     Option::WholeProgram = false;
     Type::InitTypeHintMap();
     BuiltinSymbols::LoadSuperGlobals();
+    TypeConstraint tc;
     return NULL;
   }
 

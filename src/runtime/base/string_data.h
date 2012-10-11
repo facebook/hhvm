@@ -236,13 +236,15 @@ public:
    * Informational.
    */
   const char *data() const {
-    ASSERT(rawdata()[size()] == 0); // all strings must be null-terminated
+    // TODO: t1800106: re-enable this assert
+    //ASSERT(rawdata()[size()] == 0); // all strings must be null-terminated
     TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
     return rawdata();
   }
   // This method should only be used internally by the String class.
   const char *dataIgnoreTaint() const {
-    ASSERT(rawdata()[size()] == 0); // all strings must be null-terminated
+    // TODO: t1800106: re-enable this assert
+    //ASSERT(rawdata()[size()] == 0); // all strings must be null-terminated
     return rawdata();
   }
   int size() const { return m_len; }

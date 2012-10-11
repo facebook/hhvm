@@ -40,8 +40,8 @@ void initialize_repo() {
     TRACE(1, "Failed to set default SQLite multi-threading mode\n");
   }
 
-  if (const char* schemaOverride = getenv("HHVM_REPO_SCHEMA")) {
-    TRACE(1, "Schema override: HHVM_REPO_SCHEMA=%s\n", schemaOverride);
+  if (const char* schemaOverride = getenv("HHVM_RUNTIME_REPO_SCHEMA")) {
+    TRACE(1, "Schema override: HHVM_RUNTIME_REPO_SCHEMA=%s\n", schemaOverride);
     Repo::kSchemaId = schemaOverride;
   }
 }

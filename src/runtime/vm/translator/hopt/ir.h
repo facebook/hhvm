@@ -29,6 +29,7 @@
 #include <assert.h>
 #include "runtime/vm/translator/asm-x64.h"
 #include "runtime/vm/translator/types.h"
+#include "runtime/vm/translator/runtime-type.h"
 #include "runtime/base/types.h"
 #include "runtime/vm/func.h"
 #include "runtime/vm/class.h"
@@ -467,6 +468,10 @@ public:
                                                             KindOfInvalid));
       default            : return (Tag)(outerType + 1);
     }
+  }
+
+  static inline Tag fromRuntimeType(const Transl::RuntimeType& rtt) {
+    return fromDataType(rtt.outerType(), rtt.innerType());
   }
 
   static inline bool canRunDtor(Type::Tag ty) {

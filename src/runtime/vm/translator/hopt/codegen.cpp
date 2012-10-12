@@ -1070,9 +1070,9 @@ Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
   Type::Tag type2 = src2->getType();
 
   register_name_t dstReg = dst->getAssignedLoc();
-  
+
   if (type1 == type2 &&
-      (type1 == Type::Int || 
+      (type1 == Type::Int ||
        type1 == Type::Bool)) {
     bool c1 = src1->isConst();
     bool c2 = src2->isConst();
@@ -3559,10 +3559,11 @@ Address CodeGenerator::cgLdClsCns(IRInstruction* inst) {
   cgLoad(type, dst, LinearScan::rTlPtr, ch,
          // no need to worry about boxed types if loading a cell
          type == Type::Cell ? NULL : label);
-  // Note that this cgCheckUninit checks that the target cache entry has a
-  // valid entry.
-  // TODO: Is this cgCheckUninit necesary if type is set?
-  cgCheckUninit(dst, label); // slow path helper call
+  // The following checks that the target cache entry is valid (not Uninit).
+  // If type is known, the cgLoad above already exits if the entry is invalid.
+  if (type == Type::Cell) {
+    cgCheckUninit(dst, label); // slow path helper call
+  }
   return start;
 }
 

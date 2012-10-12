@@ -9145,8 +9145,7 @@ TranslatorX64::emitVariantGuards(const Tracelet& t,
     if (modifiableLocal) {
       if (m_useHHIR) {
         RuntimeType& rtt = input->rtt;
-        JIT::Type::Tag type = JIT::Type::fromDataType(rtt.outerType(),
-                                                      rtt.innerType());
+        JIT::Type::Tag type = JIT::Type::fromRuntimeType(rtt);
         if (isFirstInstr) {
           m_hhbcTrans->guardTypeLocal(input->location.offset, type);
         } else {
@@ -9205,8 +9204,7 @@ TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
   if (m_useHHIR) {
     if (u == NormalizedInstruction::OutputUsed ||
         u == NormalizedInstruction::OutputInferred) {
-      JIT::Type::Tag jitType = JIT::Type::fromDataType(i.outStack->outerType(),
-                                                       i.outStack->valueType());
+      JIT::Type::Tag jitType = JIT::Type::fromRuntimeType(i.outStack->rtt);
       if (u == NormalizedInstruction::OutputInferred) {
         TRACE(1, "HHIR: emitPredictionGuards: output inferred to be %s\n",
               JIT::Type::Strings[jitType]);

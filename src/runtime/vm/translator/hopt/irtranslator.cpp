@@ -145,8 +145,7 @@ JIT::Type::Tag getInferredOrPredictedType(const NormalizedInstruction& i) {
   NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
   if (u == NormalizedInstruction::OutputInferred ||
       (u == NormalizedInstruction::OutputUsed && i.outputPredicted)) {
-    return JIT::Type::fromDataType(i.outStack->outerType(),
-                                   i.outStack->valueType());
+    return JIT::Type::fromRuntimeType(i.outStack->rtt);
   }
   return JIT::Type::None;
 }
@@ -166,9 +165,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
     // negative offsets for locals accessed via rVmFp
     // positive offsets for stack values, relative to rVmSp
     uint32 stackOffset = tx64LocPhysicalOffset(l);
-    m_hhbcTrans->guardTypeStack(stackOffset,
-                                JIT::Type::fromDataType(rtt.outerType(),
-                                                        rtt.innerType()));
+    m_hhbcTrans->guardTypeStack(stackOffset, JIT::Type::fromRuntimeType(rtt));
   } else {
     if (l.space == Location::Invalid) {
       HHIR_UNIMPLEMENTED(Invalid);
@@ -177,9 +174,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
       HHIR_UNIMPLEMENTED(IterGuard);
     }
     // Convert negative offset to a positive offset for convenience
-    m_hhbcTrans->guardTypeLocal(l.offset,
-                                JIT::Type::fromDataType(rtt.outerType(),
-                                                        rtt.innerType()));
+    m_hhbcTrans->guardTypeLocal(l.offset, JIT::Type::fromRuntimeType(rtt));
   }
   return;
 }
@@ -187,7 +182,7 @@ TranslatorX64::irCheckType(X64Assembler& a,
 
 void
 TranslatorX64::irTranslateBinaryArithOp(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+                                        const NormalizedInstruction& i) {
   const Opcode op = i.op();
   switch (op) {
 #define CASE(OpBc, x64op)                                          \
@@ -1472,14 +1467,11 @@ void TranslatorX64::irAssertType(const Location& l,
       // relative to rVmSp
       uint32 stackOffset = tx64LocPhysicalOffset(l);
       m_hhbcTrans->assertTypeStack(stackOffset,
-                                   JIT::Type::fromDataType(rtt.outerType(),
-                                                           rtt.innerType()));
+                                   JIT::Type::fromRuntimeType(rtt));
       break;
     }
     case Location::Local:  // Stack frame's registers; offset == local register
-      m_hhbcTrans->assertTypeLocal(l.offset,
-                                   JIT::Type::fromDataType(rtt.outerType(),
-                                                           rtt.innerType()));
+      m_hhbcTrans->assertTypeLocal(l.offset, JIT::Type::fromRuntimeType(rtt));
       break;
 
     case Location::Invalid:           // Unknown location

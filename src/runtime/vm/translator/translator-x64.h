@@ -256,7 +256,7 @@ class TranslatorX64 : public Translator
   void emitObjToClass(const NormalizedInstruction& i);
   void emitClsAndPals(const NormalizedInstruction& i);
   void emitStaticPropInlineLookup(const NormalizedInstruction& i,
-                                  const DynLocation& clsInput,
+                                  int classInputIdx,
                                   const DynLocation& propInput,
                                   PhysReg scr);
 

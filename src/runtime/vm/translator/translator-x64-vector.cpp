@@ -38,9 +38,9 @@ namespace Transl {
 
 struct MVecTransState {
   MVecTransState()
-      : baseType(KindOfUninit)
-      , needsMIS(true)
-    {}
+    : baseType(KindOfUninit)
+    , needsMIS(true)
+  {}
 
   bool isKnown() { return baseType != KindOfUninit; }
   bool isObj() { return baseType == KindOfObject; }
@@ -522,27 +522,49 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
   SKTRACE(2, ni.source, "%s %#lx\n", __func__, long(a.code.frontier));
   const DynLocation& key = *ni.inputs[iInd];
   m_regMap.cleanSmashLoc(key.location);
-  const DynLocation& clsRef = *ni.inputs[ni.inputs.size()-1];
+  const int kClassIdx = ni.inputs.size() - 1;
+  const DynLocation& clsRef = *ni.inputs[kClassIdx];
   ASSERT(clsRef.valueType() == KindOfClass);
   const Class* cls = clsRef.rtt.valueClass();
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+
+  const bool uniqueKnownClass =
+    cls != NULL &&
+    (cls->preClass()->attrs() & AttrUnique);
+  const bool canUseCache =
+    cls &&
+    key.isString() &&
+    key.rtt.valueString() &&
+    ctxFixed &&
+    curFunc()->cls() == cls;
+
   // Emit the appropriate helper call.
-  if (RuntimeOption::RepoAuthoritative && cls != NULL &&
-      (cls->preClass()->attrs() & AttrUnique)) {
+  if (canUseCache) {
+    SKTRACE(3, ni.source, "%s using SPropCache\n", __func__);
+
+    rBase.alloc();
+    emitStaticPropInlineLookup(*m_curNI, kClassIdx, key, *rBase);
+  } else if (uniqueKnownClass && RuntimeOption::RepoAuthoritative) {
+    SKTRACE(3, ni.source, "%s using uniqueKnownClass\n", __func__);
+
+    PREP_CTX(ctxFixed, argNumToRegName[0]);
     EMIT_RCALL(a, ni, baseS,
                       CTX(ctxFixed),
                       A(key.location),
                       IMM(uintptr_t(cls)),
                       R(mis_rsp));
+    rBase.alloc(rax);
   } else {
+    SKTRACE(3, ni.source, "%s using generic\n", __func__);
+
+    PREP_CTX(ctxFixed, argNumToRegName[0]);
     m_regMap.cleanSmashLoc(clsRef.location);
     EMIT_RCALL(a, ni, baseSClsRef,
                       CTX(ctxFixed),
                       A(key.location),
                       A(clsRef.location),
                       R(mis_rsp));
+    rBase.alloc(rax);
   }
-  rBase.alloc(rax);
 }
 
 void TranslatorX64::emitBaseOp(const Tracelet& t,

@@ -541,7 +541,7 @@ TranslatorX64::emitRB(X64Assembler& a,
 /*
  * allocate the input registers for i, trying to
  * match inputs to call arguments.
- * if args[j] == ArgDontAllocate, the arg is skipped
+ * if args[j] == ArgDontAllocate, the input i.inputs[j] is skipped
  * if args[j] == ArgAnyReg, it will be allocated as normal
  * otherwise, args[j] should be a positional call argument,
  * and allocInputsForCall will attempt to allocate it to
@@ -6710,9 +6710,10 @@ void TranslatorX64::translateTraitExists(const Tracelet& t,
 // later, so scr must not alias an input register.  This also handles
 // the decref for the case where prop is not a static string.
 void TranslatorX64::emitStaticPropInlineLookup(const NormalizedInstruction& i,
-                                               const DynLocation& clsInput,
+                                               int classInputIdx,
                                                const DynLocation& propInput,
                                                PhysReg scr) {
+  auto const& clsInput = *i.inputs[classInputIdx];
   const Class* cls = clsInput.rtt.valueClass();
   const StringData* propName = propInput.rtt.valueString();
   using namespace TargetCache;
@@ -6748,6 +6749,10 @@ void TranslatorX64::emitStaticPropInlineLookup(const NormalizedInstruction& i,
       SPropCache::lookup(ch, cls, data);
     }
 
+    std::vector<int> args(i.inputs.size(), ArgDontAllocate);
+    args[classInputIdx] = 1;
+    allocInputsForCall(i, &args[0]);
+
     EMIT_CALL(astubs, (TCA)SPropCache::lookup,
                IMM(ch), V(clsInput.location), IMM(uint64_t(propName)));
     recordReentrantStubCall(i);
@@ -6767,6 +6772,7 @@ void TranslatorX64::analyzeCGetS(Tracelet& t, NormalizedInstruction& i) {
   const StringData* propName = i.inputs[1]->rtt.valueString();
   i.m_txFlags = supportedPlan(cls && propName && isContextFixed() &&
                               curFunc()->cls() == cls);
+  i.manuallyAllocInputs = true;
 }
 
 void TranslatorX64::translateCGetS(const Tracelet& t,
@@ -6775,8 +6781,7 @@ void TranslatorX64::translateCGetS(const Tracelet& t,
   const int kPropIdx = 1;
 
   ScratchReg sprop(m_regMap);
-  emitStaticPropInlineLookup(i, *i.inputs[kClassIdx],
-                                *i.inputs[kPropIdx], *sprop);
+  emitStaticPropInlineLookup(i, kClassIdx, *i.inputs[kPropIdx], *sprop);
   emitDerefIfVariant(a, *sprop);
   emitIncRefGeneric(*sprop, 0);
   // Finally copy the thing to the stack
@@ -6797,6 +6802,7 @@ void TranslatorX64::analyzeSetS(Tracelet& t, NormalizedInstruction& i) {
   // the same unit as context, and the property is public
   i.m_txFlags = supportedPlan(cls && propName && isContextFixed() &&
                               curFunc()->cls() == cls);
+  i.manuallyAllocInputs = true;
 }
 
 void TranslatorX64::translateSetS(const Tracelet& t,
@@ -6805,11 +6811,12 @@ void TranslatorX64::translateSetS(const Tracelet& t,
 
   ScratchReg sprop(m_regMap);
   const RuntimeType& rhsType = i.inputs[0]->rtt;
-  emitStaticPropInlineLookup(i, *i.inputs[kClassIdx], *i.inputs[2], *sprop);
+  emitStaticPropInlineLookup(i, kClassIdx, *i.inputs[2], *sprop);
 
   ASSERT(m_regMap.getInfo(*sprop)->m_state == RegInfo::SCRATCH);
   ASSERT(!rhsType.isVariant());
 
+  m_regMap.allocInputReg(i, 0);
   m_regMap.allocOutputRegs(i);
   PhysReg rhsReg = getReg(i.inputs[0]->location);
   PhysReg outReg = getReg(i.outStack->location);

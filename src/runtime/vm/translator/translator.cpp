@@ -1211,7 +1211,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       }
     }
 
-    if (op == OpFPushClsMethodF && ni->funcd &&
+    if (op == OpFPushClsMethodF && ni->directCall &&
         prevOp == OpAGetC &&
         prev->prev && prev->prev->op() == OpString &&
         prev->prev->prev && prev->prev->prev->op() == OpString) {

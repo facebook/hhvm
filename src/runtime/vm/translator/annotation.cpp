@@ -75,11 +75,13 @@ void recordNameAndArgs(const SrcKey& sk, const StringData* name, int numArgs) {
   s_callDB.insert(std::make_pair(sk, cr));
 }
 
-void recordFunc(const SrcKey& sk, const Func* func) {
+static void recordFunc(NormalizedInstruction& i,
+                       const SrcKey& sk, const Func* func) {
   CallRecord cr;
   cr.m_type = Function;
   cr.m_func = func;
   s_callDB.insert(std::make_pair(sk, cr));
+  i.directCall = true;
 }
 
 static void recordActRecPush(NormalizedInstruction& i,
@@ -102,8 +104,7 @@ static void recordActRecPush(NormalizedInstruction& i,
     bool magic = false;
     const Func* func = lookupImmutableMethod(cls, name, magic, staticCall);
     if (func) {
-      recordFunc(fcall, func);
-      i.funcd = func;
+      recordFunc(i, fcall, func);
     }
     return;
   }
@@ -112,7 +113,7 @@ static void recordActRecPush(NormalizedInstruction& i,
     // this will never go into a call cache, so we dont need to
     // encode the args. it will be used in OpFCall below to
     // set the i->funcd.
-    recordFunc(fcall, func);
+    recordFunc(i, fcall, func);
   } else {
     // It's not enough to remember the function name; we also need to encode
     // the number of arguments and current flag disposition.

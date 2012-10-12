@@ -319,12 +319,15 @@ class NormalizedInstruction {
     noCtor is set on FPushCtorD to say that the ctor is
     going to be skipped (so dont setup an actrec)
   */
-
   unsigned noCtor:1;
   /*
    * instruction is statically known to have no effect, e.g. unboxing a Cell
    */
   unsigned noOp:1;
+  /*
+   * This is an FPush* that will be directly bound to a Func*
+   */
+  unsigned directCall:1;
 
   ArgUnion constImm;
   TXFlags m_txFlags;
@@ -355,6 +358,7 @@ class NormalizedInstruction {
     noSurprise(false),
     noCtor(false),
     noOp(false),
+    directCall(false),
     m_txFlags(Interp)
   { }
 

@@ -79,7 +79,7 @@ BaseExecutionContext::BaseExecutionContext() :
 }
 
 VMExecutionContext::VMExecutionContext() :
-    m_constants(0),
+    m_constants(RuntimeOption::EvalConstEstimate),
 #ifndef HHVM
     NEAR_FIELD_INIT
 #endif

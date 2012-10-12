@@ -431,6 +431,7 @@ public:
   static bool EvalDumpTC;
   static bool EvalDumpAst;
   static bool EvalMapTCHuge;
+  static uint32 EvalConstEstimate;
   static bool RecordCodeCoverage;
   static std::string CodeCoverageOutputFile;
 

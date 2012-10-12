@@ -395,6 +395,7 @@ public:
   static bool EvalJit;
   static bool EvalAllowHhas;
   static bool EvalJitNoGdb;
+  static uint32 EvalJitTargetCacheSize;
   static bool EvalProfileBC;
   static bool EvalProfileHWEnable;
   static std::string EvalProfileHWEvents;

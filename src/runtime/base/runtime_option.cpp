@@ -391,6 +391,7 @@ uint32 RuntimeOption::EvalJitWarmupRequests = kDefaultWarmupRequests;
 bool RuntimeOption::EvalJitProfileRecord = false;
 bool RuntimeOption::EvalJitNoGdb = true;
 bool RuntimeOption::EvalProfileBC = false;
+uint32 RuntimeOption::EvalJitTargetCacheSize = 64 << 20;
 bool RuntimeOption::EvalProfileHWEnable = true;
 std::string RuntimeOption::EvalProfileHWEvents = "";
 #define JIT_TRAMPOLINES_DEFAULT true
@@ -1171,6 +1172,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EvalJit = eval["Jit"].getBool(evalJitDefault());
     EvalAllowHhas = eval["AllowHhas"].getBool(false);
     EvalJitNoGdb = eval["JitNoGdb"].getBool(true);
+    EvalJitTargetCacheSize = eval["JitTargetCacheSize"].getUInt32(64 << 20);
     EvalProfileBC = eval["ProfileBC"].getBool(false);
     EvalProfileHWEnable = eval["ProfileHWEnable"].getBool(true);
     EvalProfileHWEvents = eval["ProfileHWEvents"].getString();

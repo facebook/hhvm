@@ -60,7 +60,7 @@ undefinedError(const char* msg, const char* name) {
 }
 
 // Targetcache memory. See the comment in targetcache.h
-__thread DataBlock tl_targetCaches = {0, 0, kNumTargetCacheBytes};
+__thread DataBlock tl_targetCaches = {0, 0, 0};
 CT_ASSERT(kConditionFlagsOff + sizeof(ssize_t) <= 64);
 size_t s_frontier = kConditionFlagsOff + 64;
 static size_t s_next_bit;
@@ -98,7 +98,7 @@ static Mutex s_handleMutex(false /*recursive*/, RankLeaf);
 inline Handle
 ptrToHandle(const void* ptr) {
   ptrdiff_t retval = uintptr_t(ptr) - uintptr_t(tl_targetCaches.base);
-  ASSERT(retval < kNumTargetCacheBytes);
+  ASSERT(retval < RuntimeOption::EvalJitTargetCacheSize);
   return retval;
 }
 
@@ -256,6 +256,7 @@ invalidateForRename(const StringData* name) {
 }
 
 void threadInit() {
+  tl_targetCaches.size = RuntimeOption::EvalJitTargetCacheSize;
   tl_targetCaches.init();
 }
 
@@ -263,14 +264,14 @@ void threadExit() {
   tl_targetCaches.free();
 }
 
-static const bool zeroViaMemset = false;
+static const bool zeroViaMemset = true;
 
 void
 requestInit() {
   ASSERT(tl_targetCaches.base);
-  TRACE(1, "TargetCaches: @%p\n", tl_targetCaches.base);
+  TRACE(1, "TargetCache: @%p\n", tl_targetCaches.base);
   if (zeroViaMemset) {
-    TRACE(1, "TargetCaches: bzeroing %zd bytes: %p\n", s_frontier,
+    TRACE(1, "TargetCache: bzeroing %zd bytes: %p\n", s_frontier,
           tl_targetCaches.base);
     memset(tl_targetCaches.base, 0, s_frontier);
   }
@@ -279,11 +280,16 @@ requestInit() {
 void
 requestExit() {
   if (!zeroViaMemset) {
-    TRACE(1, "TargetCaches: bzeroing %zd bytes: %p\n", s_frontier,
-          tl_targetCaches.base);
-    if (madvise(tl_targetCaches.base, s_frontier, MADV_DONTNEED) < 0) {
-      not_reached();
-    }
+    flush();
+  }
+}
+
+void
+flush() {
+  TRACE(1, "TargetCache: MADV_DONTNEED %zd bytes: %p\n", s_frontier,
+        tl_targetCaches.base);
+  if (madvise(tl_targetCaches.base, s_frontier, MADV_DONTNEED) < 0) {
+    not_reached();
   }
 }
 

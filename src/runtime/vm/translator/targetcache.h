@@ -27,10 +27,11 @@ namespace VM {
 namespace Transl {
 namespace TargetCache {
 
-void requestInit(void);
-void requestExit(void);
-void threadInit(void);
-void threadExit(void);
+void requestInit();
+void requestExit();
+void threadInit();
+void threadExit();
+void flush();
 
 /*
  * The targetCaches are physically thread-private, but they share their
@@ -52,7 +53,6 @@ static const int kDefaultNumLines = 4;
  * opaque handle into the request-private targetcache.
  */
 typedef ptrdiff_t CacheHandle;
-static const ptrdiff_t kNumTargetCacheBytes = (64 << 20);
 
 enum PHPNameSpace {
   NSFunction,
@@ -107,7 +107,7 @@ TCA fcallHelper(ActRec* ar);
 
 static inline void*
 handleToPtr(CacheHandle h) {
-  ASSERT(h < kNumTargetCacheBytes);
+  ASSERT(h < RuntimeOption::EvalJitTargetCacheSize);
   return tl_targetCaches.base + h;
 }
 

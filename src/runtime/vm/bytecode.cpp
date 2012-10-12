@@ -659,6 +659,7 @@ Stack::flush() {
   if (!t_se.isNull()) {
     t_se->flush();
   }
+  TargetCache::flush();
 }
 
 void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)

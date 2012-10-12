@@ -223,16 +223,30 @@ void TranslatorX64::emitBaseLCR(const Tracelet& t,
       emitStoreNull(a, base.location);
     }
   }
-  m_regMap.cleanSmashLoc(base.location);
-  PhysReg pr;
-  int disp;
-  locToRegDisp(base.location, &pr, &disp);
-  rBase.alloc();
-  if (base.isVariant()) {
-    // Get inner value.
-    a.  load_reg64_disp_reg64(pr, disp + TVOFF(m_data), *rBase);
+
+  const bool canEnregisterObj =
+    base.isObject() &&
+    mcodeMaybePropName(ni.immVecM[0]);
+
+  if (canEnregisterObj) {
+    m_regMap.allocInputReg(ni, iInd);
+    auto curReg = getReg(base);
+    m_regMap.cleanSmashReg(curReg);
+    rBase.alloc(curReg);
+    m_vecState->setObj();
   } else {
-    a.  lea_reg64_disp_reg64(pr, disp, *rBase);
+    PhysReg pr;
+    int disp;
+    locToRegDisp(base.location, &pr, &disp);
+    rBase.alloc();
+
+    m_regMap.cleanSmashLoc(base.location);
+    if (base.isVariant()) {
+      // Get inner value.
+      a.  load_reg64_disp_reg64(pr, disp + TVOFF(m_data), *rBase);
+    } else {
+      a.  lea_reg64_disp_reg64(pr, disp, *rBase);
+    }
   }
 }
 

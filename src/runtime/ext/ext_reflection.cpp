@@ -71,6 +71,7 @@ static StaticString s_interface("interface");
 static StaticString s_trait("trait");
 static StaticString s_methods("methods");
 static StaticString s_properties("properties");
+static StaticString s_private_properties("private_properties");
 static StaticString s_attributes("attributes");
 static StaticString s_function("function");
 
@@ -190,11 +191,18 @@ static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
 }
 
 
-static void set_property_info(Array &ret, const VM::PreClass::Prop* prop) {
-  ret.set(s_name, VarNR(prop->name()));
-  set_attrs(ret, get_modifiers(prop->attrs(), false) & ~0x66);
-  ret.set(s_class, VarNR(prop->preClass()->name()));
-  set_doc_comment(ret, prop->docComment());
+static void set_instance_prop_info(Array &ret, const VM::Class::Prop* prop) {
+  ret.set(s_name, VarNR(prop->m_name));
+  set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
+  ret.set(s_class, VarNR(prop->m_class->name()));
+  set_doc_comment(ret, prop->m_docComment);
+}
+
+static void set_static_prop_info(Array &ret, const VM::Class::SProp* prop) {
+  ret.set(s_name, VarNR(prop->m_name));
+  set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
+  ret.set(s_class, VarNR(prop->m_class->name()));
+  set_doc_comment(ret, prop->m_docComment);
 }
 
 static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
@@ -590,15 +598,22 @@ static Array get_class_info(const ClassInfo *cls) {
   // properties
   {
     Array arr = Array::Create();
+    Array arrPriv = Array::Create();
     const ClassInfo::PropertyVec &properties = cls->getPropertiesVec();
     for (ClassInfo::PropertyVec::const_iterator iter = properties.begin();
          iter != properties.end(); ++iter) {
       ClassInfo::PropertyInfo *prop = *iter;
       Array info = Array::Create();
       set_property_info(info, prop, cls);
-      arr.set(prop->name, info);
+      if (prop->attribute & ClassInfo::IsPrivate) {
+        ASSERT(prop->owner == cls);
+        arrPriv.set(prop->name, info);
+      } else {
+        arr.set(prop->name, info);
+      }
     }
     ret.set(s_properties, VarNR(arr));
+    ret.set(s_private_properties, VarNR(arrPriv));
   }
 
   // constants
@@ -746,16 +761,44 @@ Array f_hphp_get_class_info(CVarRef name) {
     // properties
     {
       Array arr = Array::Create();
-      const VM::PreClass::Prop* properties = cls->preClass()->properties();
-      const size_t nProps = cls->preClass()->numProperties();
+      Array arrPriv = Array::Create();
+
+      const VM::Class::Prop* properties = cls->declProperties();
+      const size_t nProps = cls->numDeclProperties();
 
       for (VM::Slot i = 0; i < nProps; ++i) {
-        const VM::PreClass::Prop& prop = properties[i];
+        const VM::Class::Prop& prop = properties[i];
         Array info = Array::Create();
-        set_property_info(info, &prop);
-        arr.set(prop.nameRef(), VarNR(info));
+        if ((prop.m_attrs & VM::AttrPrivate) == VM::AttrPrivate) {
+          if (prop.m_class == cls) {
+            set_instance_prop_info(info, &prop);
+            arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
+          }
+          continue;
+        }
+        set_instance_prop_info(info, &prop);
+        arr.set(*(String*)(&prop.m_name), VarNR(info));
       }
+
+      const VM::Class::SProp* staticProperties = cls->staticProperties();
+      const size_t nSProps = cls->numStaticProperties();
+
+      for (VM::Slot i = 0; i < nSProps; ++i) {
+        const VM::Class::SProp& prop = staticProperties[i];
+        Array info = Array::Create();
+        if ((prop.m_attrs & VM::AttrPrivate) == VM::AttrPrivate) {
+          if (prop.m_class == cls) {
+            set_static_prop_info(info, &prop);
+            arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
+          }
+          continue;
+        }
+        set_static_prop_info(info, &prop);
+        arr.set(*(String*)(&prop.m_name), VarNR(info));
+      }
+
       ret.set(s_properties, VarNR(arr));
+      ret.set(s_private_properties, VarNR(arrPriv));
     }
 
     // constants

@@ -674,6 +674,7 @@ class ReflectionClass implements Reflector {
   private function fetch($what) {
     if (!$this->info) {
       $this->info = self::fetch_recur($this->name);
+      $this->info['properties'] += $this->info['private_properties'];
     }
     return $this->info[$what];
   }

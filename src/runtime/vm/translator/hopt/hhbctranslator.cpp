@@ -192,6 +192,11 @@ void HhbcTranslator::emitThis() {
   pushIncRef(m_tb.genLdThis(getExitSlowTrace()));
 }
 
+void HhbcTranslator::emitCheckThis() {
+  TRACE(3, "%u: CheckThis\n", m_bcOff);
+  m_tb.genLdThis(getExitSlowTrace());
+}
+
 void HhbcTranslator::emitArray(int arrayId) {
   TRACE(3, "%u: Array %d\n", m_bcOff, arrayId);
   ArrayData* ad = lookupArrayId(arrayId);
@@ -781,7 +786,8 @@ void HhbcTranslator::emitSetProp(int offset, bool isPropOnStack) {
   m_tb.genDecRef(obj);
 }
 
-void HhbcTranslator::emitCGetProp(int offset,
+void HhbcTranslator::emitCGetProp(LocationCode locCode,
+                                  int offset,
                                   bool isPropOnStack,
                                   Type::Tag resultType,
                                   bool isInferedType) {
@@ -792,7 +798,17 @@ void HhbcTranslator::emitCGetProp(int offset,
   if (isPropOnStack) {
     UNUSED SSATmp* prop = popC();
   }
-  SSATmp* obj  = popC();
+  SSATmp* obj;
+  switch (locCode) {
+    case LH:
+      obj = m_tb.genLdThis(NULL);
+      break;
+    case LC:
+      obj = popC();
+      break;
+    default:
+      PUNT(CGetProp_unsupportedLocation);
+  }
   if (obj->getType() != Type::Obj) {
     PUNT(CGetProp_nonobj);
   }
@@ -822,7 +838,9 @@ void HhbcTranslator::emitCGetProp(int offset,
     m_tb.genCheckUninit(val, exitTrace2);
   }
   pushIncRef(val);
-  m_tb.genDecRef(obj);
+  if (locCode != LH) {
+    m_tb.genDecRef(obj);
+  }
 }
 
 /*

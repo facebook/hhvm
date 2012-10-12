@@ -1169,7 +1169,7 @@ public:
   typedef std::list<Trace*>::iterator Iterator;
 
   List& getExitTraces() { return m_exitTraces; }
-  void print(std::ostream& ostream, bool printAsm = false);
+  void print(std::ostream& ostream, bool printAsm, bool isExit = false);
 
 private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't

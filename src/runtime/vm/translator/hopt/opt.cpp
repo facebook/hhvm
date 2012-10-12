@@ -30,7 +30,7 @@ void optimizeTrace(Trace* trace, IRFactory* irFactory) {
   }
   if (RuntimeOption::EvalDumpIR > 5) {
     std::cout << "----- HHIR before DCE -----\n";
-    trace->print(std::cout);
+    trace->print(std::cout, false);
     std::cout << "---------------------------\n";
   }
   eliminateDeadCode(trace, irFactory);

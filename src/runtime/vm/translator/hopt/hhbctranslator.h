@@ -102,6 +102,7 @@ public:
   void emitUninitLoc(uint32 id);
   void emitPrint();
   void emitThis();
+  void emitCheckThis();
   void emitInitThisLoc(int32 id);
   void emitArray(int arrayId);
   void emitNewArray();
@@ -128,7 +129,10 @@ public:
   void emitCGetL2(int32 id);
   void emitCGetS(const Class* cls, const StringData* propName,
                  Type::Tag resultType, bool isInferedType);
-  void emitCGetProp(int propOffset, bool isPropOnStack, Type::Tag resultType,
+  void emitCGetProp(LocationCode locCode,
+                    int propOffset,
+                    bool isPropOnStack,
+                    Type::Tag resultType,
                     bool isInferedType);
   void emitVGetL(int32 id);
   void emitCGetG(const StringData* name, Type::Tag resultType,

@@ -755,8 +755,9 @@ TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
   const int propOffset    = getNormalPropertyOffset(i,
                               getMInstrInfo(OpCGetM), 1, 0);
 
-  if (propOffset != -1 && i.immVec.locationCode() == LC) {
-    HHIR_EMIT(CGetProp, propOffset, propLoc.isStack(),
+  LocationCode locCode = i.immVec.locationCode();
+  if (propOffset != -1 && (locCode == LC || locCode == LH)) {
+    HHIR_EMIT(CGetProp, locCode, propOffset, propLoc.isStack(),
               getInferredOrPredictedType(i), isInferredType(i));
   } else {
     HHIR_UNIMPLEMENTED(CGetMSlow);
@@ -1142,7 +1143,7 @@ TranslatorX64::irTranslateThis(const Tracelet &t,
 void
 TranslatorX64::irTranslateCheckThis(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(CheckThis);
+  HHIR_EMIT(CheckThis);
 }
 
 void

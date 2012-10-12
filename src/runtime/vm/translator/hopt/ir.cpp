@@ -848,7 +848,8 @@ void printInstructions(xed_uint8_t* codeStartAddr,
 }
 #endif
 
-void Trace::print(std::ostream& ostream, bool printAsm) {
+void Trace::print(std::ostream& ostream, bool printAsm,
+                  bool isExit /* = false */) {
 #ifdef DEBUG
   xed_state_init(&xed_state, XED_MACHINE_MODE_LONG_64,
                  XED_ADDRESS_WIDTH_64b, XED_ADDRESS_WIDTH_64b);
@@ -864,6 +865,7 @@ void Trace::print(std::ostream& ostream, bool printAsm) {
     if (inst->getOpcode() == Marker) {
       inst->print(std::cout);
       std::cout << std::endl;
+      if (isExit) continue; // don't print bytecode
       LabelInstruction* markerInst = (LabelInstruction*)inst;
       uint32 bcOffset = markerInst->getLabelId();
       const Func* func = markerInst->getFunc();
@@ -923,7 +925,8 @@ void Trace::print(std::ostream& ostream, bool printAsm) {
       }
 
     }
-    exitTrace->print(std::cout, printAsm);
+    std::cout << "\n-------  Exit Trace  -------\n";
+    exitTrace->print(std::cout, printAsm, true);
   }
 }
 

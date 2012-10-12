@@ -9504,14 +9504,6 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
   }
 }
 
-namespace {
-template<class T> struct Nuller : private boost::noncopyable {
-  explicit Nuller(const T** p) : p(p) {}
-  ~Nuller() { *p = 0; }
-  T const** const p;
-};
-}
-
 void
 TranslatorX64::translateTracelet(const Tracelet& t) {
   const SrcKey &sk = t.m_sk;
@@ -9646,7 +9638,8 @@ TranslatorX64::TranslatorX64()
   m_interceptsEnabled(false),
   m_unwindRegMap(128),
   m_curTrace(0),
-  m_curNI(0)
+  m_curNI(0),
+  m_vecState(NULL)
 {
   TRACE(1, "TranslatorX64@%p startup\n", this);
   tx64 = this;

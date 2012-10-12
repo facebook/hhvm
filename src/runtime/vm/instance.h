@@ -265,6 +265,11 @@ class Instance : public ObjectData {
   void raiseUndefProp(const StringData* name);
 };
 
+inline Instance* instanceFromTv(TypedValue* tv) {
+  ASSERT(dynamic_cast<Instance*>(tv->m_data.pobj));
+  return static_cast<Instance*>(tv->m_data.pobj);
+}
+
 } } // HPHP::VM
 
 namespace HPHP {
@@ -297,6 +302,7 @@ template <int flags> class ExtObjectDataFlags : public ExtObjectData {
     ObjectData::setAttributes(flags);
   }
 };
+
 } // HPHP
 
 #endif

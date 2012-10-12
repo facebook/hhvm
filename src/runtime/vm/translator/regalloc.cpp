@@ -164,9 +164,8 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
 }
 
 void
-RegAlloc::allocInputReg(const NormalizedInstruction& ni, int index,
-                        PhysReg target /* = InvalidReg */) {
-  RuntimeType& rtt = ni.inputs[index]->rtt;
+RegAlloc::allocInputReg(const DynLocation& dl, PhysReg target) {
+  const RuntimeType& rtt = dl.rtt;
   if (rtt.isIter()) {
     // Note: if this changes to enregister iterators unwinding will
     // have to be updated.
@@ -176,7 +175,7 @@ RegAlloc::allocInputReg(const NormalizedInstruction& ni, int index,
   DataType t = rtt.outerType();
   if (t == KindOfInvalid) return;
 
-  Location& loc = ni.inputs[index]->location;
+  const Location& loc = dl.location;
 
   int64 litVal = 0;
   if (loc.isLiteral()) {
@@ -184,6 +183,12 @@ RegAlloc::allocInputReg(const NormalizedInstruction& ni, int index,
   }
 
   (void) alloc(loc, t, RegInfo::CLEAN, true, litVal, target);
+}
+
+void
+RegAlloc::allocInputReg(const NormalizedInstruction& ni, int index,
+                        PhysReg target /* = InvalidReg */) {
+  allocInputReg(*ni.inputs[index], target);
 }
 
 void

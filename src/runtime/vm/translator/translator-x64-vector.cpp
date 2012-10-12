@@ -36,6 +36,23 @@ namespace Transl {
  * Translator for vector instructions.
  */
 
+struct MVecTransState {
+  MVecTransState()
+      : baseType(KindOfUninit)
+    {}
+
+  bool isKnown() { return baseType != KindOfUninit; }
+  bool isObj() { return baseType == KindOfObject; }
+  void setObj() { baseType = KindOfObject; }
+  void resetBase() { baseType = KindOfUninit; }
+
+ private:
+  /* This stores the type of the current value in rBase. If it's !=
+   * KindOfUninit then the register will hold the value itself instead of a
+   * TypedValue* */
+  DataType baseType;
+};
+
 #define ML(loc, a, regMap, rMis)           \
   IE(loc.isLiteral(),                      \
      _am.addLiteral(loc, a, regMap, rMis), \
@@ -70,6 +87,8 @@ namespace Transl {
 #define TRANSLATE_MINSTR_GENERIC(instr, t, ni) do {                   \
   ASSERT(RuntimeOption::EvalJitMGeneric);                             \
   SKTRACE(2, ni.source, "%s\n", __func__);                            \
+  m_vecState = new MVecTransState();                                  \
+  Deleter<MVecTransState> stateDeleter(&m_vecState);                  \
   const MInstrInfo& mii = getMInstrInfo(Op##instr##M);                \
   bool ctxFixed;                                                      \
   unsigned mInd, iInd;                                                \
@@ -79,6 +98,15 @@ namespace Transl {
   emitMPost((t), (ni), mii);                                          \
 } while (0)
 
+template<unsigned bit>
+unsigned buildBitmask() {
+  return 0;
+}
+template<unsigned bit = 0, typename... Args>
+unsigned buildBitmask(bool condition, Args... args) {
+  static_assert(bit < (sizeof(unsigned) * CHAR_BIT), "Too many bits");
+  return buildBitmask<bit + 1>(args...) | (condition ? (1u << bit) : 0);
+}
 
 int TranslatorX64::mResultStackOffset(const NormalizedInstruction& ni) const {
   int stackDest = 0 - int(sizeof(Cell));
@@ -210,11 +238,8 @@ void TranslatorX64::emitBaseLCR(const Tracelet& t,
 
 void TranslatorX64::emitBaseH(LazyScratchReg& rBase) {
   rBase.alloc();
-  ScratchReg scratch(m_regMap);
-  a.load_reg64_disp_reg64(rVmFp, AROFF(m_this), *scratch);
-  a.lea_reg64_disp_reg64(rsp, offsetof(MInstrState, tvScratch), *rBase);
-  a.store_reg64_disp_reg64(*scratch, TVOFF(m_data), *rBase);
-  a.store_imm32_disp_reg(KindOfObject, TVOFF(m_type), *rBase);
+  a.load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rBase);
+  m_vecState->setObj();
 }
 
 template <bool warn, bool define>
@@ -654,32 +679,43 @@ void TranslatorX64::emitElem<KindOfUnknown>(const Tracelet& t,
                                             unsigned iInd,
                                             LazyScratchReg& rBase);
 
-template <bool unboxKey, bool warn, bool define, bool unset>
+template <bool unboxKey, bool warn, bool define, bool unset, bool isObj>
 static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
                                    TypedValue* key,
                                    TranslatorX64::MInstrState* mis) {
   key = unbox<unboxKey>(key);
-  return Prop<warn, define, unset>(mis->tvScratch, mis->tvRef, ctx, base, key);
+  return Prop<warn, define, unset, isObj>(
+    mis->tvScratch, mis->tvRef, ctx, base, key);
 }
 
-#define PROP_TABLE                              \
-  /*   name  unboxKey  warn  define  unset */   \
-  PROP(CU,     false, false, false,  true)      \
-  PROP(CWD,    false,  true,  true, false)      \
-  PROP(CW,     false,  true, false, false)      \
-  PROP(CD,     false, false,  true, false)      \
-  PROP(C,      false, false, false, false)      \
-  PROP(LU,      true, false, false,  true)      \
-  PROP(LWD,     true,  true,  true, false)      \
-  PROP(LW,      true,  true, false, false)      \
-  PROP(LD,      true, false,  true, false)      \
-  PROP(L,       true, false, false, false)
+#define PROP_TABLE                                   \
+  /*   name  unboxKey  warn  define  unset isObj */  \
+  PROP(CU,     false, false, false,  true, false)    \
+  PROP(CWD,    false,  true,  true, false, false)    \
+  PROP(CW,     false,  true, false, false, false)    \
+  PROP(CD,     false, false,  true, false, false)    \
+  PROP(C,      false, false, false, false, false)    \
+  PROP(CUO,    false, false, false,  true,  true)    \
+  PROP(CWDO,   false,  true,  true, false,  true)    \
+  PROP(CWO,    false,  true, false, false,  true)    \
+  PROP(CDO,    false, false,  true, false,  true)    \
+  PROP(CO,     false, false, false, false,  true)    \
+  PROP(LU,      true, false, false,  true, false)    \
+  PROP(LWD,     true,  true,  true, false, false)    \
+  PROP(LW,      true,  true, false, false, false)    \
+  PROP(LD,      true, false,  true, false, false)    \
+  PROP(L,       true, false, false, false, false)    \
+  PROP(LUO,     true, false, false,  true,  true)    \
+  PROP(LWDO,    true,  true,  true, false,  true)    \
+  PROP(LWO,     true,  true, false, false,  true)    \
+  PROP(LDO,     true, false,  true, false,  true)    \
+  PROP(LO,      true, false, false, false,  true)
 
-#define PROP(nm, unboxKey, warn, define, unset)                         \
+#define PROP(nm, unboxKey, warn, define, unset, isObj)                  \
 HOT_FUNC_VM                                                             \
 static TypedValue* prop ## nm(Class* ctx, TypedValue* base, TypedValue* key, \
                               TranslatorX64::MInstrState* mis) {        \
-  return propImpl<unboxKey,warn,define,unset>(ctx, base, key, mis);     \
+  return propImpl<unboxKey,warn,define,unset,isObj>(ctx, base, key, mis); \
 }
 PROP_TABLE
 #undef PROP
@@ -703,14 +739,18 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
   const PropOp propX = nullptr;
   static const PropOp localPropOps[]
     = {propL,  propLW, propLD, propLWD, propX, propX, propLD, propLWD,
-       propLU, propX,  propX,  propX,   propX, propX, propX,  propX};
+       propLU, propX,  propX,  propX,   propX, propX, propX,  propX,
+       propLO, propLWO,propLDO,propLWDO,propX, propX, propLDO,propLWDO,
+       propLUO,propX,  propX,  propX,   propX, propX, propX,  propX};
   static const PropOp cellPropOps[]
     = {propC,  propCW, propCD, propCWD, propX, propX, propCD, propCWD,
-       propCU, propX,  propX,  propX,   propX, propX, propX,  propX};
+       propCU, propX,  propX,  propX,   propX, propX, propX,  propX,
+       propCO, propCWO,propCDO,propCWDO,propX, propX, propCDO,propCWD,
+       propCUO,propX,  propX,  propX,   propX, propX, propX,  propX};
   ASSERT((mia & MIA_intermediate) < array_size(localPropOps));
   ASSERT((mia & MIA_intermediate) < array_size(cellPropOps));
-  PropOp propOp = ((mCode == MPL) ? localPropOps : cellPropOps)
-                  [mia & MIA_intermediate];
+  unsigned idx = (mia & MIA_intermediate) | (m_vecState->isObj() ? 0x10 : 0x0);
+  PropOp propOp = ((mCode == MPL) ? localPropOps : cellPropOps)[idx];
   ASSERT(propOp != propX);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
@@ -720,6 +760,7 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
                     ML(memb.location, a, m_regMap, rsp),
                     R(rsp));
   rBase.realloc(rax);
+  m_vecState->resetBase();
 }
 
 static int getPropertyOffset(const NormalizedInstruction& ni,
@@ -813,7 +854,8 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
    * cases.
    */
   std::unique_ptr<DiamondReturn> nonObjectRet;
-  if (mInd != 0) {
+  bool isObj = m_vecState->isObj();
+  if (!isObj) {
     emitTypeCheck(a, KindOfObject, *rBase, 0);
     {
       nonObjectRet.reset(new DiamondReturn());
@@ -854,7 +896,9 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
 
   ScratchReg rScratch(m_regMap);
 
-  emitDeref(a, *rBase, *rBase);
+  if (!isObj) {
+    emitDeref(a, *rBase, *rBase);
+  }
   a.    lea_reg64_disp_reg64(*rBase, propOffset, *rScratch);
   if (doWarn || doDefine) {
     a.  cmp_imm32_disp_reg32(KindOfUninit, TVOFF(m_type), *rScratch);
@@ -880,6 +924,7 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
   auto usedScratch = *rScratch;
   rScratch.dealloc();
   rBase.realloc(usedScratch);
+  m_vecState->resetBase();
 
   // nonObjectRet returns here.
 }
@@ -923,6 +968,7 @@ void TranslatorX64::emitIntermediateOp(const Tracelet& t,
                                        LazyScratchReg& rBase) {
   switch (ni.immVecM[mInd]) {
   case MEC: case MEL: case MET: case MEI: {
+    ASSERT(!m_vecState->isKnown());
     DataType keyType = ni.inputs[iInd]->rtt.valueType();
     auto emitter = IS_STRING_TYPE(keyType) ?
       &TranslatorX64::emitElem<BitwiseKindOfString> :
@@ -937,6 +983,7 @@ void TranslatorX64::emitIntermediateOp(const Tracelet& t,
     ++iInd;
     break;
   case MW:
+    ASSERT(!m_vecState->isKnown());
     ASSERT(mii.newElem());
     emitNewElem(t, ni, mInd, rBase);
     break;
@@ -1049,12 +1096,12 @@ void TranslatorX64::emitRatchetRefs(const Tracelet& t,
     a.    lea_reg64_disp_reg64(rsp, offsetof(MInstrState, tvRef2), rBase);
   }
 }
-template <bool unboxKey>
+template <bool unboxKey, bool isObj>
 static inline void cGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                 TypedValue* result,
                                 TranslatorX64::MInstrState* mis) {
   key = unbox<unboxKey>(key);
-  base = Prop<true, false, false>(*result, mis->tvRef, ctx, base, key);
+  base = Prop<true, false, false, isObj>(*result, mis->tvRef, ctx, base, key);
   if (base != result) {
     // Save a copy of the result.
     tvDup(base, result);
@@ -1064,17 +1111,23 @@ static inline void cGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
   }
 }
 
-HOT_FUNC_VM
-static void cGetPropL(Class* ctx, TypedValue* base, TypedValue* key,
-                      TypedValue* result, TranslatorX64::MInstrState* mis) {
-  cGetPropImpl<true>(ctx, base, key, result, mis);
-}
+#define PROP_TABLE             \
+  /*   name unboxKey isObj */  \
+  PROP(L,      true, false)    \
+  PROP(LO,     true,  true)    \
+  PROP(C,     false, false)    \
+  PROP(CO,    false,  true)
 
-HOT_FUNC_VM
-static void cGetPropC(Class* ctx, TypedValue* base, TypedValue* key,
-                      TypedValue* result, TranslatorX64::MInstrState* mis) {
-  cGetPropImpl<false>(ctx, base, key, result, mis);
+#define PROP(nm, unboxKey, isObj)                                       \
+HOT_FUNC_VM                                                             \
+static void cGetProp##nm(Class* ctx, TypedValue* base, TypedValue* key, \
+                           TypedValue* result,                          \
+                           TranslatorX64::MInstrState* mis) {           \
+  cGetPropImpl<unboxKey, isObj>(ctx, base, key, result, mis);           \
 }
+PROP_TABLE
+#undef PROP
+#undef PROP_TABLE
 
 void TranslatorX64::emitCGetProp(const Tracelet& t,
                                  const NormalizedInstruction& ni,
@@ -1114,7 +1167,12 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
   Stats::emitInc(a, Stats::PropAsm_GenFinal);
 
   const DynLocation& memb = *ni.inputs[iInd];
-  auto* cGetPropOp = ni.immVecM[mInd] == MPL ? cGetPropL : cGetPropC;
+  typedef void (*PropOp)(Class*, TypedValue*, TypedValue*, TypedValue*,
+                         MInstrState*);
+  static const PropOp propOps[]
+    = {cGetPropC, cGetPropL, cGetPropCO, cGetPropLO};
+  unsigned idx = buildBitmask(ni.immVecM[mInd] == MPL, m_vecState->isObj());
+  PropOp cGetPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   PREP_CTX(ctxFixed, argNumToRegName[0]);
@@ -1178,12 +1236,13 @@ void TranslatorX64::emitVGetElem(const Tracelet& t,
                     R(rsp));
 }
 
-template <bool unboxKey>
+template <bool unboxKey, bool isObj>
 static inline void vGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                 TypedValue* result,
                                 TranslatorX64::MInstrState* mis) {
   key = unbox<unboxKey>(key);
-  base = Prop<false, true, false>(mis->tvScratch, mis->tvRef, ctx, base, key);
+  base = Prop<false, true, false, isObj>(mis->tvScratch, mis->tvRef, ctx,
+                                         base, key);
   if (base == &mis->tvScratch && base->m_type == KindOfUninit) {
     // Error (no result was set).
     tvWriteNull(result);
@@ -1196,19 +1255,23 @@ static inline void vGetPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
   }
 }
 
-HOT_FUNC_VM
-static inline void vGetPropL(Class* ctx, TypedValue* base, TypedValue* key,
-                            TypedValue* result,
-                            TranslatorX64::MInstrState* mis) {
-  vGetPropImpl<true>(ctx, base, key, result, mis);
-}
+#define PROP_TABLE             \
+  /*   name unboxKey isObj */  \
+  PROP(L,      true, false)    \
+  PROP(LO,     true,  true)    \
+  PROP(C,     false, false)    \
+  PROP(CO,    false,  true)
 
-HOT_FUNC_VM
-static inline void vGetPropC(Class* ctx, TypedValue* base, TypedValue* key,
-                            TypedValue* result,
-                            TranslatorX64::MInstrState* mis) {
-  vGetPropImpl<false>(ctx, base, key, result, mis);
+#define PROP(nm, unboxKey, isObj)               \
+HOT_FUNC_VM                                                             \
+static inline void vGetProp##nm(Class* ctx, TypedValue* base, TypedValue* key, \
+                                TypedValue* result,                     \
+                                TranslatorX64::MInstrState* mis) {      \
+  vGetPropImpl<unboxKey, isObj>(ctx, base, key, result, mis);           \
 }
+PROP_TABLE
+#undef PROP
+#undef PROP_TABLE
 
 void TranslatorX64::emitVGetProp(const Tracelet& t,
                                  const NormalizedInstruction& ni,
@@ -1218,7 +1281,12 @@ void TranslatorX64::emitVGetProp(const Tracelet& t,
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& memb = *ni.inputs[iInd];
-  auto vGetPropOp = ni.immVecM[mInd] == MPL ? vGetPropL : vGetPropC;
+  typedef void (*PropOp)(Class*, TypedValue*, TypedValue*, TypedValue*,
+                         MInstrState*);
+  static const PropOp propOps[]
+    = {vGetPropC, vGetPropL, vGetPropCO, vGetPropLO};
+  unsigned idx = buildBitmask(ni.immVecM[mInd] == MPL, m_vecState->isObj());
+  PropOp vGetPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
   bool useTvR = useTvResult(t, ni, mii);
@@ -1297,37 +1365,34 @@ void TranslatorX64::emitIssetElem(const Tracelet& t,
   emitIssetEmptyElem<false>(t, ni, mii, mInd, iInd, rBase);
 }
 
-template <bool unboxKey, bool useEmpty>
+template <bool unboxKey, bool useEmpty, bool isObj>
 static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
                                       TypedValue* key,
                                       TranslatorX64::MInstrState* mis) {
   key = unbox<unboxKey>(key);
-  return IssetEmptyProp<useEmpty>(ctx, base, key);
+  return IssetEmptyProp<useEmpty, isObj>(ctx, base, key);
 }
 
-HOT_FUNC_VM
-static bool issetPropL(Class* ctx, TypedValue* base, TypedValue* key,
-                       TranslatorX64::MInstrState* mis) {
-  return issetEmptyPropImpl<true, false>(ctx, base, key, mis);
-}
+#define ISSET_TABLE                                      \
+  /*    nm unboxKey useEmpty isObj */                      \
+  ISSET(C,   false, false,   false)                        \
+  ISSET(L,    true, false,   false)                        \
+  ISSET(CE,  false,  true,   false)                        \
+  ISSET(LE,   true,  true,   false)                        \
+  ISSET(CO,  false, false,    true)                        \
+  ISSET(LO,   true, false,    true)                        \
+  ISSET(CEO, false,  true,    true)                        \
+  ISSET(LEO,  true,  true,    true)
 
-HOT_FUNC_VM
-static bool issetPropC(Class* ctx, TypedValue* base, TypedValue* key,
-                       TranslatorX64::MInstrState* mis) {
-  return issetEmptyPropImpl<false, false>(ctx, base, key, mis);
+#define ISSET(nm, unboxKey, useEmpty, isObj)    \
+HOT_FUNC_VM                                                              \
+static bool issetProp##nm(Class* ctx, TypedValue* base, TypedValue* key, \
+                          TranslatorX64::MInstrState* mis) {             \
+  return issetEmptyPropImpl<unboxKey, useEmpty, isObj>(ctx, base, key, mis); \
 }
-
-HOT_FUNC_VM
-static bool emptyPropL(Class* ctx, TypedValue* base, TypedValue* key,
-                       TranslatorX64::MInstrState* mis) {
-  return issetEmptyPropImpl<true, true>(ctx, base, key, mis);
-}
-
-HOT_FUNC_VM
-static bool emptyPropC(Class* ctx, TypedValue* base, TypedValue* key,
-                       TranslatorX64::MInstrState* mis) {
-  return issetEmptyPropImpl<false, true>(ctx, base, key, mis);
-}
+ISSET_TABLE
+#undef ISSET
+#undef ISSET_TABLE
 
 template <bool useEmpty>
 void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
@@ -1336,9 +1401,13 @@ void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
                                        unsigned mInd, unsigned iInd,
                                        PhysReg rBase) {
   const DynLocation& memb = *ni.inputs[iInd];
-  auto issetEmptyPropOp =
-    useEmpty ? (ni.immVecM[mInd] == MPL ? emptyPropL : emptyPropC)
-             : (ni.immVecM[mInd] == MPL ? issetPropL : issetPropC);
+  typedef bool (*IssetOp)(Class* ctx, TypedValue*, TypedValue*, MInstrState*);
+  static const IssetOp issetOps[]
+    = {issetPropC,  issetPropL,  issetPropCE,  issetPropLE,
+       issetPropCO, issetPropLO, issetPropCEO, issetPropLEO};
+  unsigned idx = buildBitmask(ni.immVecM[mInd] == MPL, useEmpty,
+                            m_vecState->isObj());
+  IssetOp issetEmptyPropOp = issetOps[idx];
   m_regMap.cleanSmashLoc(memb.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
@@ -1440,34 +1509,32 @@ void TranslatorX64::emitSetElem(const Tracelet& t,
                        VAL(useRVal)));
 }
 
-template <bool unboxKey, bool setResult>
+template <bool unboxKey, bool setResult, bool isObj>
 static inline void setPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                Cell* val) {
   key = unbox<unboxKey>(key);
-  SetProp<setResult>(ctx, base, key, val);
+  SetProp<setResult, isObj>(ctx, base, key, val);
 }
 
-HOT_FUNC_VM
-static void setPropLR(Class* ctx, TypedValue* base, TypedValue* key,
-                      Cell* val) {
-  setPropImpl<true, true>(ctx, base, key, val);
-}
+#define PROP_TABLE                              \
+  PROP(L,       true, false, false)             \
+  PROP(LR,      true,  true, false)             \
+  PROP(LO,      true, false,  true)             \
+  PROP(LRO,     true,  true,  true)             \
+  PROP(C,      false, false, false)             \
+  PROP(CR,     false,  true, false)             \
+  PROP(CO,     false, false,  true)             \
+  PROP(CRO,    false,  true,  true)
 
-HOT_FUNC_VM
-static void setPropL(Class* ctx, TypedValue* base, TypedValue* key, Cell* val) {
-  setPropImpl<true, false>(ctx, base, key, val);
+#define PROP(nm, unboxKey, setResult, isObj)                            \
+HOT_FUNC_VM                                                             \
+static void setProp ## nm(Class* ctx, TypedValue* base, TypedValue* key, \
+                          Cell* val) {                                  \
+  setPropImpl<unboxKey, setResult, isObj>(ctx, base, key, val);         \
 }
-
-HOT_FUNC_VM
-static void setPropCR(Class* ctx, TypedValue* base, TypedValue* key,
-                      Cell* val) {
-  setPropImpl<false, true>(ctx, base, key, val);
-}
-
-HOT_FUNC_VM
-static void setPropC(Class* ctx, TypedValue* base, TypedValue* key, Cell* val) {
-  setPropImpl<false, false>(ctx, base, key, val);
-}
+PROP_TABLE
+#undef PROP
+#undef PROP_TABLE
 
 void TranslatorX64::emitSetProp(const Tracelet& t,
                                 const NormalizedInstruction& ni,
@@ -1509,9 +1576,14 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
   SKTRACE(2, ni.source, "%s setResult=%s\n",
         __func__, setResult ? "true" : "false");
   const DynLocation& key = *ni.inputs[iInd];
-  auto const setPropOp = (ni.immVecM[mInd] == MPL)
-    ? (setResult ? setPropLR : setPropL)
-    : (setResult ? setPropCR : setPropC);
+  typedef void (*PropOp)(Class*, TypedValue*, TypedValue*, Cell*);
+  static const PropOp propOps[]
+    = {setPropC,  setPropL,  setPropCR,  setPropLR,
+       setPropCO, setPropLO, setPropCRO, setPropLRO};
+  unsigned idx = buildBitmask(ni.immVecM[mInd] == MPL,
+                            setResult,
+                            m_vecState->isObj());
+  auto setPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(key.location);
   m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
@@ -1629,13 +1701,13 @@ void TranslatorX64::emitSetOpElem(const Tracelet& t,
   }
 }
 
-template <bool unboxKey, unsigned char op, bool setResult>
+template <bool unboxKey, unsigned char op, bool setResult, bool isObj>
 static inline void setOpPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                  Cell* val, TranslatorX64::MInstrState* mis,
                                  TypedValue* tvRes=NULL) {
   key = unbox<unboxKey>(key);
-  TypedValue* result = SetOpProp(mis->tvScratch, mis->tvRef, ctx, op, base, key,
-                                 val);
+  TypedValue* result = SetOpProp<isObj>(mis->tvScratch, mis->tvRef, ctx, op,
+                                        base, key, val);
   if (setResult) {
     if (result->m_type == KindOfRef) {
       tvUnbox(result);
@@ -1649,23 +1721,45 @@ HOT_FUNC_VM \
 static void setOp##op##PropLR(Class* ctx, TypedValue* base, TypedValue* key, \
                               Cell* val, TranslatorX64::MInstrState* mis, \
                               TypedValue* tvRes) { \
-  setOpPropImpl<true, SetOp##op, true>(ctx, base, key, val, mis, tvRes); \
+  setOpPropImpl<true,SetOp##op,true,false>(ctx, base, key, val, mis, tvRes); \
 } \
 HOT_FUNC_VM \
 static void setOp##op##PropCR(Class* ctx, TypedValue* base, TypedValue* key, \
                               Cell* val, TranslatorX64::MInstrState* mis, \
                               TypedValue* tvRes) { \
-  setOpPropImpl<false, SetOp##op, true>(ctx, base, key, val, mis, tvRes); \
+  setOpPropImpl<false,SetOp##op,true,false>(ctx, base, key, val, mis, tvRes); \
 } \
 HOT_FUNC_VM \
 static void setOp##op##PropL(Class* ctx, TypedValue* base, TypedValue* key, \
                               Cell* val, TranslatorX64::MInstrState* mis) { \
-  setOpPropImpl<true, SetOp##op, false>(ctx, base, key, val, mis); \
+  setOpPropImpl<true, SetOp##op, false, false>(ctx, base, key, val, mis); \
 } \
 HOT_FUNC_VM \
 static void setOp##op##PropC(Class* ctx, TypedValue* base, TypedValue* key, \
                               Cell* val, TranslatorX64::MInstrState* mis) { \
-  setOpPropImpl<false, SetOp##op, false>(ctx, base, key, val, mis); \
+  setOpPropImpl<false, SetOp##op, false, false>(ctx, base, key, val, mis); \
+} \
+HOT_FUNC_VM \
+static void setOp##op##PropLRO(Class* ctx, TypedValue* base, TypedValue* key, \
+                              Cell* val, TranslatorX64::MInstrState* mis, \
+                              TypedValue* tvRes) { \
+  setOpPropImpl<true, SetOp##op, true, true>(ctx, base, key, val, mis, tvRes); \
+} \
+HOT_FUNC_VM \
+static void setOp##op##PropCRO(Class* ctx, TypedValue* base, TypedValue* key, \
+                              Cell* val, TranslatorX64::MInstrState* mis, \
+                              TypedValue* tvRes) { \
+  setOpPropImpl<false,SetOp##op,true,true>(ctx, base, key, val, mis, tvRes); \
+} \
+HOT_FUNC_VM \
+static void setOp##op##PropLO(Class* ctx, TypedValue* base, TypedValue* key, \
+                              Cell* val, TranslatorX64::MInstrState* mis) { \
+  setOpPropImpl<true, SetOp##op, false, true>(ctx, base, key, val, mis); \
+} \
+HOT_FUNC_VM \
+static void setOp##op##PropCO(Class* ctx, TypedValue* base, TypedValue* key, \
+                              Cell* val, TranslatorX64::MInstrState* mis) { \
+  setOpPropImpl<false, SetOp##op, false, true>(ctx, base, key, val, mis); \
 }
 SETOP_OPS
 #undef SETOP_OP
@@ -1687,6 +1781,7 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
   m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   bool useRVal = val.isVariant();
+  bool isObj = m_vecState->isObj();
   PREP_VAL(useRVal, argNumToRegName[3]);
   // Emit the appropriate helper call.
   if (setResult) {
@@ -1696,7 +1791,8 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
 #define SETOP_OP(op, bcOp) \
       case SetOp##op: \
         setOpPropOp = (ni.immVecM[mInd] == MEL) \
-                      ? setOp##op##PropLR : setOp##op##PropCR; \
+                      ? (isObj ? setOp##op##PropLRO : setOp##op##PropLR)  \
+                      : (isObj ? setOp##op##PropCRO : setOp##op##PropCR); \
         break;
       SETOP_OPS
 #undef SETOP_OP
@@ -1718,7 +1814,8 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
 #define SETOP_OP(op, bcOp) \
       case SetOp##op: \
         setOpPropOp = (ni.immVecM[mInd] == MEL) \
-                      ? setOp##op##PropL : setOp##op##PropC; \
+                      ? (isObj ? setOp##op##PropLO : setOp##op##PropL)  \
+                      : (isObj ? setOp##op##PropCO : setOp##op##PropC); \
         break;
       SETOP_OPS
 #undef SETOP_OP
@@ -1819,12 +1916,13 @@ void TranslatorX64::emitIncDecElem(const Tracelet& t,
   }
 }
 
-template <bool unboxKey, unsigned char op, bool setResult>
+template <bool unboxKey, unsigned char op, bool setResult, bool isObj>
 static inline void incDecPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                   TranslatorX64::MInstrState* mis,
                                   TypedValue* tvRes) {
   key = unbox<unboxKey>(key);
-  IncDecProp<setResult>(mis->tvScratch, mis->tvRef, ctx, op, base, key, *tvRes);
+  IncDecProp<setResult, isObj>(mis->tvScratch, mis->tvRef, ctx, op, base, key,
+                               *tvRes);
 }
 
 #define INCDEC_OP(op) \
@@ -1832,25 +1930,49 @@ HOT_FUNC_VM \
 static void incDec##op##PropLR(Class* ctx, TypedValue* base, TypedValue* key, \
                                TranslatorX64::MInstrState* mis, \
                                TypedValue* tvRes) { \
-  incDecPropImpl<true, op, true>(ctx, base, key, mis, tvRes); \
+  incDecPropImpl<true, op, true, false>(ctx, base, key, mis, tvRes); \
 } \
 HOT_FUNC_VM \
 static void incDec##op##PropCR(Class* ctx, TypedValue* base, TypedValue* key, \
                                TranslatorX64::MInstrState* mis, \
                                TypedValue* tvRes) { \
-  incDecPropImpl<false, op, true>(ctx, base, key, mis, tvRes); \
+  incDecPropImpl<false, op, true, false>(ctx, base, key, mis, tvRes); \
 } \
 HOT_FUNC_VM \
 static void incDec##op##PropL(Class* ctx, TypedValue* base, TypedValue* key, \
                               TranslatorX64::MInstrState* mis) { \
   TypedValue tvRes; /* Not used; no need to initialize. */ \
-  incDecPropImpl<true, op, false>(ctx, base, key, mis, &tvRes); \
+  incDecPropImpl<true, op, false, false>(ctx, base, key, mis, &tvRes); \
 } \
 HOT_FUNC_VM \
 static void incDec##op##PropC(Class* ctx, TypedValue* base, TypedValue* key, \
                               TranslatorX64::MInstrState* mis) { \
   TypedValue tvRes; /* Not used; no need to initialize. */ \
-  incDecPropImpl<false, op, false>(ctx, base, key, mis, &tvRes); \
+  incDecPropImpl<false, op, false, false>(ctx, base, key, mis, &tvRes); \
+} \
+HOT_FUNC_VM \
+static void incDec##op##PropLRO(Class* ctx, TypedValue* base, TypedValue* key, \
+                               TranslatorX64::MInstrState* mis, \
+                               TypedValue* tvRes) { \
+  incDecPropImpl<true, op, true, true>(ctx, base, key, mis, tvRes); \
+} \
+HOT_FUNC_VM \
+static void incDec##op##PropCRO(Class* ctx, TypedValue* base, TypedValue* key, \
+                               TranslatorX64::MInstrState* mis, \
+                               TypedValue* tvRes) { \
+  incDecPropImpl<false, op, true, true>(ctx, base, key, mis, tvRes); \
+} \
+HOT_FUNC_VM \
+static void incDec##op##PropLO(Class* ctx, TypedValue* base, TypedValue* key, \
+                              TranslatorX64::MInstrState* mis) { \
+  TypedValue tvRes; /* Not used; no need to initialize. */ \
+  incDecPropImpl<true, op, false, true>(ctx, base, key, mis, &tvRes); \
+} \
+HOT_FUNC_VM \
+static void incDec##op##PropCO(Class* ctx, TypedValue* base, TypedValue* key, \
+                              TranslatorX64::MInstrState* mis) { \
+  TypedValue tvRes; /* Not used; no need to initialize. */ \
+  incDecPropImpl<false, op, false, true>(ctx, base, key, mis, &tvRes); \
 }
 INCDEC_OPS
 #undef INCDEC_OP
@@ -1869,6 +1991,7 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
           __func__, setResult ? "true" : "false");
   m_regMap.cleanSmashLoc(key.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
+  bool isObj = m_vecState->isObj();
   // Emit the appropriate helper call.
   if (setResult) {
     void (*incDecPropOp)(Class*, TypedValue*, TypedValue*, MInstrState*,
@@ -1877,7 +2000,8 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
 #define INCDEC_OP(op) \
       case op: \
         incDecPropOp = (ni.immVecM[mInd] == MEL) \
-                       ? incDec##op##PropLR : incDec##op##PropCR; \
+                       ? (isObj ? incDec##op##PropLRO : incDec##op##PropLR)  \
+                       : (isObj ? incDec##op##PropCRO : incDec##op##PropCR); \
         break;
       INCDEC_OPS
 #undef INCDEC_OP
@@ -1898,7 +2022,8 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
 #define INCDEC_OP(op) \
       case op: \
         incDecPropOp = (ni.immVecM[mInd] == MEL) \
-                       ? incDec##op##PropL : incDec##op##PropC; \
+                       ? (isObj ? incDec##op##PropLO : incDec##op##PropL)  \
+                       : (isObj ? incDec##op##PropCO : incDec##op##PropC); \
         break;
       INCDEC_OPS
 #undef INCDEC_OP
@@ -1952,27 +2077,34 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
              A(val.location), R(rsp));
 }
 
-template <bool unboxKey>
+template <bool unboxKey, bool isObj>
 static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
                                 RefData* val, TranslatorX64::MInstrState* mis) {
   key = unbox<unboxKey>(key);
-  base = Prop<false, true, false>(mis->tvScratch, mis->tvRef, ctx, base, key);
+  base = Prop<false, true, false, isObj>(mis->tvScratch, mis->tvRef, ctx, base,
+                                         key);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBind(val->tv(), base);
   }
 }
 
-HOT_FUNC_VM
-static inline void bindPropL(Class* ctx, TypedValue* base, TypedValue* key,
-                             RefData* val, TranslatorX64::MInstrState* mis) {
-  bindPropImpl<true>(ctx, base, key, val, mis);
-}
+#define PROP_TABLE             \
+  /*   name unboxKey isObj */  \
+  PROP(L,      true, false)    \
+  PROP(LO,     true,  true)    \
+  PROP(C,     false, false)    \
+  PROP(CO,    false,  true)
 
-HOT_FUNC_VM
-static inline void bindPropC(Class* ctx, TypedValue* base, TypedValue* key,
-                            RefData* val, TranslatorX64::MInstrState* mis) {
-  bindPropImpl<false>(ctx, base, key, val, mis);
+#define PROP(nm, unboxKey, isObj)                                       \
+HOT_FUNC_VM                                                             \
+static inline void bindProp##nm(Class* ctx, TypedValue* base, TypedValue* key, \
+                                RefData* val,                           \
+                                TranslatorX64::MInstrState* mis) {      \
+  bindPropImpl<unboxKey, isObj>(ctx, base, key, val, mis);              \
 }
+PROP_TABLE
+#undef PROP
+#undef PROP_TABLE
 
 void TranslatorX64::emitBindProp(const Tracelet& t,
                                  const NormalizedInstruction& ni,
@@ -1987,7 +2119,12 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
   ASSERT(val.isVariant());
   ASSERT(generateMVal(t, ni, mii));
   const DynLocation& key = *ni.inputs[iInd];
-  auto bindPropOp = (ni.immVecM[mInd] == MPL) ? bindPropL : bindPropC;
+  typedef void (*PropOp)(Class*, TypedValue*, TypedValue*, RefData*,
+                         MInstrState*);
+  static const PropOp propOps[]
+    = {bindPropC, bindPropL, bindPropCO, bindPropLO};
+  unsigned idx = buildBitmask(ni.immVecM[mInd] == MPL, m_vecState->isObj());
+  PropOp bindPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(key.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
   // Emit the appropriate helper call.
@@ -2030,22 +2167,28 @@ void TranslatorX64::emitUnsetElem(const Tracelet& t,
   EMIT_RCALL(a, ni, unsetElemOp, R(rBase), ML(key.location, a, m_regMap, rsp));
 }
 
-template <bool unboxKey>
+template <bool unboxKey, bool isObj>
 static inline void unsetPropImpl(Class* ctx, TypedValue* base,
                                  TypedValue* key) {
   key = unbox<unboxKey>(key);
-  UnsetProp(ctx, base, key);
+  UnsetProp<isObj>(ctx, base, key);
 }
 
-HOT_FUNC_VM
-static void unsetPropL(Class* ctx, TypedValue* base, TypedValue* key) {
-  unsetPropImpl<true>(ctx, base, key);
-}
+#define PROP_TABLE             \
+  /*   name unboxKey isObj */  \
+  PROP(L,      true, false)    \
+  PROP(LO,     true,  true)    \
+  PROP(C,     false, false)    \
+  PROP(CO,    false,  true)
 
-HOT_FUNC_VM
-static void unsetPropC(Class* ctx, TypedValue* base, TypedValue* key) {
-  unsetPropImpl<false>(ctx, base, key);
+#define PROP(nm, unboxKey, isObj)                                       \
+HOT_FUNC_VM                                                             \
+static void unsetProp##nm(Class* ctx, TypedValue* base, TypedValue* key) { \
+  unsetPropImpl<unboxKey, isObj>(ctx, base, key);                       \
 }
+PROP_TABLE
+#undef PROP
+#undef PROP_TABLE
 
 void TranslatorX64::emitUnsetProp(const Tracelet& t,
                                   const NormalizedInstruction& ni,
@@ -2056,7 +2199,11 @@ void TranslatorX64::emitUnsetProp(const Tracelet& t,
           __func__, long(a.code.frontier), mInd, iInd);
   const DynLocation& key = *ni.inputs[iInd];
   const DynLocation& val = *ni.inputs[0];
-  auto unsetPropOp = ni.immVecM[mInd] == MPL ? unsetPropL : unsetPropC;
+  typedef void (*PropOp)(Class*, TypedValue*, TypedValue*);
+  static const PropOp propOps[]
+    = {unsetPropC, unsetPropL, unsetPropCO, unsetPropLO};
+  unsigned idx = buildBitmask(ni.immVecM[mInd] == MPL, m_vecState->isObj());
+  PropOp unsetPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(key.location);
   m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(ctxFixed, argNumToRegName[0]);
@@ -2309,12 +2456,14 @@ void TranslatorX64::emitFinal##instr##MOp(const Tracelet& t, \
                                           LazyScratchReg& rBase) { \
   switch (ni.immVecM[mInd]) { \
   case MEC: case MEL: case MET: case MEI: \
+    ASSERT(!m_vecState->isKnown()); \
     emit##instr##Elem(t, ni, mii, mInd, iInd, *rBase); \
     break; \
   case MPC: case MPL: case MPT: \
     emit##instr##Prop(t, ni, mii, ctxFixed, mInd, iInd, rBase); \
     break; \
   case MW: \
+    ASSERT(!m_vecState->isKnown()); \
     ASSERT((attrs) & MIA_final); \
     emit##fN(t, ni, mii, mInd, iInd, *rBase); \
     break; \

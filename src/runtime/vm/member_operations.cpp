@@ -20,53 +20,48 @@
 namespace HPHP {
 namespace VM {
 
-void objArrayAccess(TypedValue* base) {
-  ASSERT(base->m_type == KindOfObject);
-  ASSERT(!base->m_data.pobj->isCollection());
-  if (!instanceOf(tvAsCVarRef(base), "ArrayAccess")) {
+void objArrayAccess(Instance* base) {
+  ASSERT(!base->isCollection());
+  if (!instanceOf(base, "ArrayAccess")) {
     raise_error("Object does not implement ArrayAccess");
   }
 }
 
-TypedValue* objOffsetGet(TypedValue& tvRef, TypedValue* base,
+TypedValue* objOffsetGet(TypedValue& tvRef, Instance* base,
                          CVarRef offset, bool validate /* = true */) {
   if (validate) {
     objArrayAccess(base);
   }
   TypedValue* result;
-  ObjectData* obj = base->m_data.pobj;
-  ASSERT(!obj->isCollection());
-  Instance* instance = static_cast<Instance*>(obj);
+  ASSERT(!base->isCollection());
   static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
-  const Func* method = instance->methodNamed(sd__offsetGet);
+  const Func* method = base->methodNamed(sd__offsetGet);
   ASSERT(method != NULL);
-  instance->invokeUserMethod(&tvRef, method, CREATE_VECTOR1(offset));
+  base->invokeUserMethod(&tvRef, method, CREATE_VECTOR1(offset));
   result = &tvRef;
   return result;
 }
 
-static bool objOffsetExists(TypedValue* base, CVarRef offset) {
+static bool objOffsetExists(Instance* base, CVarRef offset) {
   objArrayAccess(base);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
   static StringData* sd__offsetExists
     = StringData::GetStaticString("offsetExists");
-  ObjectData* obj = base->m_data.pobj;
-  ASSERT(!obj->isCollection());
-  Instance* instance = static_cast<Instance*>(obj);
-  const Func* method = instance->methodNamed(sd__offsetExists);
+  ASSERT(!base->isCollection());
+  const Func* method = base->methodNamed(sd__offsetExists);
   ASSERT(method != NULL);
-  instance->invokeUserMethod(&tvResult, method, CREATE_VECTOR1(offset));
+  base->invokeUserMethod(&tvResult, method, CREATE_VECTOR1(offset));
   tvCastToBooleanInPlace(&tvResult);
   return bool(tvResult.m_data.num);
 }
 
-bool objOffsetIsset(TypedValue& tvRef, TypedValue* base, CVarRef offset,
+bool objOffsetIsset(TypedValue& tvRef, Instance* base, CVarRef offset,
                     bool validate /* = true */) {
   return objOffsetExists(base, offset);
 }
 
-bool objOffsetEmpty(TypedValue& tvRef, TypedValue* base, CVarRef offset,
+bool objOffsetEmpty(TypedValue& tvRef, Instance* base, CVarRef offset,
                     bool validate /* = true */) {
   if (!objOffsetExists(base, offset)) {
     return true;
@@ -76,46 +71,41 @@ bool objOffsetEmpty(TypedValue& tvRef, TypedValue* base, CVarRef offset,
   return empty(tvAsCVarRef(result));
 }
 
-void objOffsetAppend(TypedValue* base, TypedValue* val,
+void objOffsetAppend(Instance* base, TypedValue* val,
                      bool validate /* = true */) {
-  ObjectData* obj UNUSED = base->m_data.pobj;
-  ASSERT(!obj->isCollection());
+  ASSERT(!base->isCollection());
   if (validate) {
     objArrayAccess(base);
   }
   objOffsetSet(base, init_null_variant, val, false);
 }
 
-void objOffsetSet(TypedValue* base, CVarRef offset, TypedValue* val,
+void objOffsetSet(Instance* base, CVarRef offset, TypedValue* val,
                   bool validate /* = true */) {
   if (validate) {
     objArrayAccess(base);
   }
   static StringData* sd__offsetSet = StringData::GetStaticString("offsetSet");
-  ObjectData* obj = base->m_data.pobj;
-  ASSERT(!obj->isCollection());
-  Instance* instance = static_cast<Instance*>(obj);
-  const Func* method = instance->methodNamed(sd__offsetSet);
+  ASSERT(!base->isCollection());
+  const Func* method = base->methodNamed(sd__offsetSet);
   ASSERT(method != NULL);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
-  instance->invokeUserMethod(&tvResult, method,
-                             CREATE_VECTOR2(offset, tvAsCVarRef(val)));
+  base->invokeUserMethod(&tvResult, method,
+                         CREATE_VECTOR2(offset, tvAsCVarRef(val)));
   tvRefcountedDecRef(&tvResult);
 }
 
-void objOffsetUnset(TypedValue* base, CVarRef offset) {
+void objOffsetUnset(Instance* base, CVarRef offset) {
   objArrayAccess(base);
   static StringData* sd__offsetUnset
     = StringData::GetStaticString("offsetUnset");
-  ObjectData* obj = base->m_data.pobj;
-  ASSERT(!obj->isCollection());
-  Instance* instance = static_cast<Instance*>(obj);
-  const Func* method = instance->methodNamed(sd__offsetUnset);
+  ASSERT(!base->isCollection());
+  const Func* method = base->methodNamed(sd__offsetUnset);
   ASSERT(method != NULL);
   TypedValue tv;
   tvWriteUninit(&tv);
-  instance->invokeUserMethod(&tv, method, CREATE_VECTOR1(offset));
+  base->invokeUserMethod(&tv, method, CREATE_VECTOR1(offset));
   tvRefcountedDecRef(&tv);
 }
 

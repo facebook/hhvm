@@ -39,6 +39,7 @@ namespace VM {
 namespace Transl {
 
 class IRTranslator;
+class MVecTransState;
 
 struct TraceletCounters {
   uint64_t m_numEntered, m_numExecuted;
@@ -320,6 +321,8 @@ class TranslatorX64 : public Translator
     Class* ctx;
   } __attribute__((aligned(16)));
  private:
+
+  MVecTransState* m_vecState;
   int mResultStackOffset(const NormalizedInstruction& ni) const;
   bool generateMVal(const Tracelet& t, const NormalizedInstruction& ni,
                     const MInstrInfo& mii) const;

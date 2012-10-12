@@ -345,6 +345,7 @@ class RegAlloc {
   }
 
   // allocInputRegs: given an instruction, find/fill its inputs.
+  void allocInputReg(const DynLocation& dl, PhysReg target = InvalidReg);
   void allocInputReg(const NormalizedInstruction& ni, int index,
                      PhysReg target = InvalidReg);
   void allocInputRegs(const NormalizedInstruction& ni);

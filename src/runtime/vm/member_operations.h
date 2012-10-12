@@ -39,17 +39,17 @@ const bool MoreWarnings =
 #endif
   ;
 
-void objArrayAccess(TypedValue* base);
-TypedValue* objOffsetGet(TypedValue& tvRef, TypedValue* base,
+void objArrayAccess(Instance* base);
+TypedValue* objOffsetGet(TypedValue& tvRef, Instance* base,
                          CVarRef offset, bool validate=true);
-bool objOffsetIsset(TypedValue& tvRef, TypedValue* base, CVarRef offset,
+bool objOffsetIsset(TypedValue& tvRef, Instance* base, CVarRef offset,
                     bool validate=true);
-bool objOffsetEmpty(TypedValue& tvRef, TypedValue* base, CVarRef offset,
+bool objOffsetEmpty(TypedValue& tvRef, Instance* base, CVarRef offset,
                     bool validate=true);
-void objOffsetSet(TypedValue* base, CVarRef offset, TypedValue* val,
+void objOffsetSet(Instance* base, CVarRef offset, TypedValue* val,
                   bool validate=true);
-void objOffsetAppend(TypedValue* base, TypedValue* val, bool validate=true);
-void objOffsetUnset(TypedValue* base, CVarRef offset);
+void objOffsetAppend(Instance* base, TypedValue* val, bool validate=true);
+void objOffsetUnset(Instance* base, CVarRef offset);
 
 static inline String prepareKey(TypedValue* tv) {
   String ret;
@@ -171,7 +171,7 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
     if (LIKELY(base->m_data.pobj->isCollection())) {
       result = collectionGet(base->m_data.pobj, key);
     } else {
-      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
     }
     break;
   }
@@ -280,7 +280,7 @@ static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
         result = collectionGet(base->m_data.pobj, key);
       }
     } else {
-      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
     }
     break;
   }
@@ -337,7 +337,7 @@ static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
     if (LIKELY(base->m_data.pobj->isCollection())) {
       result = collectionGet(base->m_data.pobj, key);
     } else {
-      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
     }
     break;
   }
@@ -397,7 +397,7 @@ static inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
       raise_error("Cannot use [] for reading");
       result = NULL;
     } else {
-      result = objOffsetGet(tvRef, base, init_null_variant);
+      result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
     }
     break;
   }
@@ -567,7 +567,7 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
     if (LIKELY(base->m_data.pobj->isCollection())) {
       collectionSet(base->m_data.pobj, key, (TypedValue*)value);
     } else {
-      objOffsetSet(base, tvAsCVarRef(key), (TypedValue*)value);
+      objOffsetSet(instanceFromTv(base), tvAsCVarRef(key), (TypedValue*)value);
     }
     break;
   }
@@ -637,7 +637,7 @@ static inline void SetNewElem(TypedValue* base, Cell* value) {
     if (LIKELY(base->m_data.pobj->isCollection())) {
       collectionAppend(base->m_data.pobj, (TypedValue*)value);
     } else {
-      objOffsetAppend(base, (TypedValue*)value);
+      objOffsetAppend(instanceFromTv(base), (TypedValue*)value);
     }
     break;
   }
@@ -705,9 +705,9 @@ static inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
       result = collectionGet(base->m_data.pobj, key);
       SETOP_BODY(result, op, rhs);
     } else {
-      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
       SETOP_BODY(result, op, rhs);
-      objOffsetSet(base, tvAsCVarRef(key), result, false);
+      objOffsetSet(instanceFromTv(base), tvAsCVarRef(key), result, false);
     }
     break;
   }
@@ -775,9 +775,9 @@ static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
       raise_error("Cannot use [] for reading");
       result = NULL;
     } else {
-      result = objOffsetGet(tvRef, base, init_null_variant);
+      result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
       SETOP_BODY(result, op, rhs);
-      objOffsetAppend(base, result, false);
+      objOffsetAppend(instanceFromTv(base), result, false);
     }
     break;
   }
@@ -933,7 +933,7 @@ static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     if (LIKELY(base->m_data.pobj->isCollection())) {
       result = collectionGet(base->m_data.pobj, key);
     } else {
-      result = objOffsetGet(tvRef, base, tvCellAsCVarRef(key));
+      result = objOffsetGet(tvRef, instanceFromTv(base), tvCellAsCVarRef(key));
     }
     IncDecBody<setResult>(op, result, &dest);
     break;
@@ -1001,7 +1001,7 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
       raise_error("Cannot use [] for reading");
       result = NULL;
     } else {
-      result = objOffsetGet(tvRef, base, init_null_variant);
+      result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
       IncDecBody<setResult>(op, result, &dest);
     }
     break;
@@ -1049,7 +1049,7 @@ static inline void UnsetElem(TypedValue* base, TypedValue* member) {
     if (LIKELY(base->m_data.pobj->isCollection())) {
       collectionUnset(base->m_data.pobj, member);
     } else {
-      objOffsetUnset(base, tvAsCVarRef(member));
+      objOffsetUnset(instanceFromTv(base), tvAsCVarRef(member));
     }
     break;
   }
@@ -1119,7 +1119,6 @@ static inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
     return issetEmpty ? KindOfArray : propPreNull<warn>(tvScratch, result);
   }
   case KindOfObject: {
-    keySD = prepareKey(key).detach();
     return KindOfObject;
   }
   default: {
@@ -1140,20 +1139,26 @@ static inline void propPost(StringData* keySD) {
 //   \____ ____/
 //        v
 //     $result
-template <bool warn, bool define, bool unset>
+template <bool warn, bool define, bool unset, bool baseIsObj = false>
 static inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
                                Class* ctx, TypedValue* base, TypedValue* key) {
   ASSERT(!warn || !unset);
   TypedValue* result = NULL;
-  StringData* keySD = 0;
-  DataType t = propPre<warn, define, false>(tvScratch, result, base, key,
-                                            keySD);
-  if (t == KindOfNull) {
-    return result;
+  StringData* keySD = NULL;
+  Instance* instance;
+  if (baseIsObj) {
+    instance = reinterpret_cast<Instance*>(base);
+  } else {
+    DataType t = propPre<warn, define, false>(tvScratch, result, base, key,
+                                              keySD);
+    if (t == KindOfNull) {
+      return result;
+    }
+    ASSERT(t == KindOfObject);
+    instance = static_cast<Instance*>(base->m_data.pobj);
   }
-  ASSERT(t == KindOfObject);
+  keySD = prepareKey(key).detach();
   // Get property.
-  Instance* instance = static_cast<Instance*>(base->m_data.pobj);
   result = &tvScratch;
 #define ARGS result, tvRef, ctx, keySD
   if (!warn && !(define || unset)) instance->prop  (ARGS);
@@ -1165,10 +1170,33 @@ static inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
   return result;
 }
 
-template <bool useEmpty>
+template<bool useEmpty>
+static inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
+                                     bool baseStrOff, TypedValue* key) {
+  if (useEmpty) {
+    if (LIKELY(instance->isCollection())) {
+      return collectionEmpty(instance, key);
+    } else {
+      return objOffsetEmpty(tvRef, instance, tvCellAsCVarRef(key));
+    }
+  } else {
+    if (LIKELY(instance->isCollection())) {
+      return collectionIsset(instance, key);
+    } else {
+      return objOffsetIsset(tvRef, instance, tvCellAsCVarRef(key));
+    }
+  }
+}
+
+template <bool useEmpty, bool isObj = false>
 static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
                                   TypedValue* base, bool baseStrOff,
                                   TypedValue* key) {
+  if (isObj) {
+    return IssetEmptyElemObj<useEmpty>(
+      tvRef, reinterpret_cast<Instance*>(base), baseStrOff, key);
+  }
+
   TypedValue* result;
   DataType type;
   opPre(base, type);
@@ -1197,19 +1225,8 @@ static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    if (useEmpty) {
-      if (LIKELY(base->m_data.pobj->isCollection())) {
-        return collectionEmpty(base->m_data.pobj, key);
-      } else {
-        return objOffsetEmpty(tvRef, base, tvCellAsCVarRef(key));
-      }
-    } else {
-      if (LIKELY(base->m_data.pobj->isCollection())) {
-        return collectionIsset(base->m_data.pobj, key);
-      } else {
-        return objOffsetIsset(tvRef, base, tvCellAsCVarRef(key));
-      }
-    }
+    return IssetEmptyElemObj<useEmpty>(
+      tvRef, static_cast<Instance*>(base->m_data.pobj), baseStrOff, key);
     break;
   }
   default: {
@@ -1225,8 +1242,26 @@ static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool useEmpty>
+static inline bool IssetEmptyPropObj(Class* ctx, Instance* instance,
+                                     TypedValue* key) {
+  StringData* keySD;
+  bool issetEmptyResult;
+  keySD = prepareKey(key).detach();
+  issetEmptyResult = useEmpty ?
+    instance->propEmpty(ctx, keySD) :
+    instance->propIsset(ctx, keySD);
+  propPost(keySD);
+  return issetEmptyResult;
+}
+
+template <bool useEmpty, bool isObj = false>
 static inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
                                   TypedValue* key) {
+  if (isObj) {
+    return IssetEmptyPropObj<useEmpty>(ctx, reinterpret_cast<Instance*>(base),
+                                       key);
+  }
+
   StringData* keySD;
   TypedValue tvScratch;
   TypedValue* result = NULL;
@@ -1236,13 +1271,7 @@ static inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
     return useEmpty;
   }
   if (t == KindOfObject) {
-    bool issetEmptyResult;
-    Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-    issetEmptyResult = useEmpty ?
-                  instance->propEmpty(ctx, keySD) :
-                  instance->propIsset(ctx, keySD);
-    propPost(keySD);
-    return issetEmptyResult;
+    return IssetEmptyPropObj<useEmpty>(ctx, instanceFromTv(base), key);
   } else {
     ASSERT(t == KindOfArray);
     return useEmpty;
@@ -1271,10 +1300,24 @@ static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
   /* dont set _count; base could be an inner variant */
   base->m_data.pobj = obj;
 }
+
+static inline void SetPropObj(Class* ctx, Instance* instance,
+                              TypedValue* key, Cell* val) {
+  StringData* keySD = prepareKey(key).detach();
+  // Set property.
+  instance->setProp(ctx, keySD, val);
+  LITSTR_DECREF(keySD);
+}
+
 // $base->$key = $val
-template <bool setResult>
+template <bool setResult, bool isObj = false>
 static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
                            Cell* val) {
+  if (isObj) {
+    SetPropObj(ctx, reinterpret_cast<Instance*>(base), key, val);
+    return;
+  }
+
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -1301,11 +1344,7 @@ static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
     break;
   }
   case KindOfObject: {
-    StringData* keySD = prepareKey(key).detach();
-    // Set property.
-    Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-    instance->setProp(ctx, keySD, val);
-    LITSTR_DECREF(keySD);
+    SetPropObj(ctx, static_cast<Instance*>(base->m_data.pobj), key, val);
     break;
   }
   default: {
@@ -1337,11 +1376,27 @@ static inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
   LITSTR_DECREF(keySD);
   return &tvRef;
 }
+
+static inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
+                                       unsigned char op, Instance* instance,
+                                       TypedValue* key, Cell* rhs) {
+  StringData* keySD = prepareKey(key).detach();
+  TypedValue* result = instance->setOpProp(tvRef, ctx, op, keySD, rhs);
+  LITSTR_DECREF(keySD);
+  return result;
+}
+
 // $base->$key <op>= $rhs
+template<bool isObj = false>
 static inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
                                     Class* ctx, unsigned char op,
                                     TypedValue* base, TypedValue* key,
                                     Cell* rhs) {
+  if (isObj) {
+    return SetOpPropObj(tvRef, ctx, op, reinterpret_cast<Instance*>(base),
+                        key, rhs);
+  }
+
   TypedValue* result;
   DataType type;
   opPre(base, type);
@@ -1369,10 +1424,8 @@ static inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    StringData* keySD = prepareKey(key).detach();
-    Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-    result = instance->setOpProp(tvRef, ctx, op, keySD, rhs);
-    LITSTR_DECREF(keySD);
+    result = SetOpPropObj(tvRef, ctx, op,
+                          static_cast<Instance*>(base->m_data.pobj), key, rhs);
     break;
   }
   default: {
@@ -1418,11 +1471,27 @@ static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
   ASSERT(!IS_REFCOUNTED_TYPE(tv.m_type));
   LITSTR_DECREF(keySD);
 }
+
 template <bool setResult>
+static inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
+                                 unsigned char op, Instance* base,
+                                 TypedValue* key, TypedValue& dest) {
+  StringData* keySD = prepareKey(key).detach();
+  base->incDecProp<setResult>(tvRef, ctx, op, keySD, dest);
+  LITSTR_DECREF(keySD);
+}
+
+template <bool setResult, bool isObj = false>
 static inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
                               Class* ctx, unsigned char op,
                               TypedValue* base, TypedValue* key,
                               TypedValue& dest) {
+  if (isObj) {
+    IncDecPropObj<setResult>(tvRef, ctx, op, reinterpret_cast<Instance*>(base),
+                             key, dest);
+    return;
+  }
+
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -1449,10 +1518,7 @@ static inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    StringData* keySD = prepareKey(key).detach();
-    Instance* instance = static_cast<Instance*>(base->m_data.pobj);
-    instance->incDecProp<setResult>(tvRef, ctx, op, keySD, dest);
-    LITSTR_DECREF(keySD);
+    IncDecPropObj<setResult>(tvRef, ctx, op, instanceFromTv(base), key, dest);
     break;
   }
   default: {
@@ -1462,21 +1528,26 @@ static inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
   }
 }
 
+template<bool isObj = false>
 static inline void UnsetProp(Class* ctx, TypedValue* base,
                              TypedValue* key) {
-  DataType type;
-  opPre(base, type);
-  // Validate base.
-  if (UNLIKELY(type != KindOfObject)) {
-    // Do nothing.
-    return;
+  Instance* instance;
+  if (!isObj) {
+    DataType type;
+    opPre(base, type);
+    // Validate base.
+    if (UNLIKELY(type != KindOfObject)) {
+      // Do nothing.
+      return;
+    }
+    instance = instanceFromTv(base);
+  } else {
+    instance = reinterpret_cast<Instance*>(base);
   }
   // Prepare key.
   StringData* keySD = prepareKey(key).detach();
   // Unset property.
-  Instance* instance = static_cast<Instance*>(base->m_data.pobj);
   instance->unsetProp(ctx, keySD);
-
   LITSTR_DECREF(keySD);
 }
 

@@ -155,6 +155,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: Variant                     m_last_request_headers;
   public: Variant                     m_last_response_headers;
 
+  private: Array                      m_stream_context_options;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

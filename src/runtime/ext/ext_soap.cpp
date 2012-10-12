@@ -28,6 +28,7 @@
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_class.h>
 #include <runtime/ext/ext_output.h>
+#include <runtime/ext/ext_stream.h>
 
 #include <system/lib/systemlib.h>
 
@@ -2328,6 +2329,18 @@ void c_SoapClient::t___construct(CVarRef wsdl,
       }
     }
 
+    if (options.exists("stream_context")) {
+      StreamContext *sc = NULL;
+      if (options["stream_context"].isObject()) {
+        sc = options["stream_context"].toObject()
+                                      .getTyped<StreamContext>();
+      }
+      if (!sc) {
+        throw SoapException("'stream_context' is not a StreamContext");
+      }
+      m_stream_context_options = sc->m_options;
+    }
+
     if (options.exists("soap_version")) {
       m_soap_version = options["soap_version"].toInt32();
     }
@@ -2385,6 +2398,7 @@ void c_SoapClient::t___construct(CVarRef wsdl,
       if (!m_login.empty()) {
         http.auth(m_login.data(), m_password.data(), !m_digest);
       }
+      http.setStreamContextOptions(m_stream_context_options);
       m_sdl = s_soap_data->get_sdl(swsdl.data(), cache_wsdl, &http);
     } else {
       m_sdl = s_soap_data->get_sdl(swsdl.data(), cache_wsdl);
@@ -2680,6 +2694,7 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
   if (!m_login.empty()) {
     http.auth(m_login.data(), m_password.data(), !m_digest);
   }
+  http.setStreamContextOptions(m_stream_context_options);
   StringBuffer response;
   int code = http.post(location.data(), buffer.data(), buffer.size(), response,
                        &headers);

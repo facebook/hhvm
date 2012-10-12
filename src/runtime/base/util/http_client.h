@@ -41,6 +41,13 @@ public:
              const std::string &password = "");
 
   /**
+   * StreamContext settings for this connection
+   */
+  void setStreamContextOptions(Array &opts) {
+    m_stream_context_options = opts;
+  }
+
+  /**
    * GET an URL and returns its response code.
    */
   int get(const char *url, StringBuffer &response,
@@ -74,6 +81,8 @@ private:
   int         m_proxyPort;
   std::string m_proxyUsername;
   std::string m_proxyPassword;
+
+  Array       m_stream_context_options;
 
   int impl(const char *url, const char *data, int size, StringBuffer &response,
            const HeaderMap *requestHeaders,

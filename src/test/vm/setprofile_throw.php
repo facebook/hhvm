@@ -1,29 +1,23 @@
 <?php
 
 
-function throwing_profiler($case) {
-  throw new Exception("yeah");
+function throwing_profiler($case, $func) {
+  if ($case == 'enter' && ($func == 'bar' || $func == 'baz')) {
+    throw new Exception("yeah");
+  }
 }
 
 function bar() { echo "bar()\n"; }
+function baz() { echo "baz()\n"; }
 
-function foo() {
-  fb_setprofile('throwing_profiler');
-  bar();
+function foo($f) {
+  $f();
 }
-
-// Test throwing on function entry
-try { foo(); } catch (Exception $x) { echo "UNREACHED\n"; }
-fb_setprofile(null);
-
-// Test throwing exceptions from surprise flags things (OOM, signals,
-// and req timeout all work this way).
 
 function signal_thrower() {
   echo "signal throwing\n";
   throw new Exception("Sig exception");
 }
-pcntl_signal(10, 'signal_thrower');
 
 function func_to_enter() {}
 
@@ -84,5 +78,20 @@ function func_backward() {
   for ($i = 0; $i < 2; ++$i) {}
 }
 
-try { func_entry(); } catch (Exception $x) { echo "caught\n"; }
-try { func_backward(); } catch (Exception $x) { echo "caught\n"; }
+function main() {
+// Test throwing on function entry
+  fb_setprofile('throwing_profiler');
+  try { foo('bar'); } catch (Exception $x) { echo "Caught\n"; }
+  try { foo('baz'); } catch (Exception $x) { echo "Caught\n"; }
+  fb_setprofile(null);
+
+// Test throwing exceptions from surprise flags things (OOM, signals,
+// and req timeout all work this way).
+
+  pcntl_signal(10, 'signal_thrower');
+
+  try { func_entry(); } catch (Exception $x) { echo "caught\n"; }
+  try { func_backward(); } catch (Exception $x) { echo "caught\n"; }
+}
+
+main();

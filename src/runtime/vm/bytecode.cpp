@@ -956,7 +956,10 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
     fp->getThis()->setNoDestruct();
   }
 
-  frame_free_locals_inl(fp, func->numLocals());
+  // onFunctionExit might throw
+  try {
+    frame_free_locals_inl(fp, func->numLocals());
+  } catch (...) {}
   ndiscard(func->numSlotsInFrame());
   return UnwindPropagate;
 }

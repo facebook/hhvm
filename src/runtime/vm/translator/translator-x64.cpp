@@ -1872,19 +1872,38 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
 }
 
 static TCA callAndResume(ActRec *ar) {
-  VMRegAnchor _(ar,true);
+  VMRegAnchor _(ar, true);
   g_vmContext->doFCall<true>(ar, g_vmContext->m_pc);
   return Translator::Get()->getResumeHelper();
 }
 
 extern "C"
 TCA fcallHelper(ActRec* ar) {
-  TCA tca =
-    Translator::Get()->funcPrologue((Func*)ar->m_func, ar->numArgs());
-  if (tca) {
-    return tca;
+  try {
+    TCA tca =
+      Translator::Get()->funcPrologue((Func*)ar->m_func, ar->numArgs());
+    if (tca) {
+      return tca;
+    }
+    return callAndResume(ar);
+  } catch (...) {
+    /*
+      The return address is set to __fcallHelperThunk,
+      which has no unwind information. Its "logically"
+      part of the tc, but the c++ unwinder wont know
+      that. So point our return address at the called
+      function's return address (which will be in the
+      tc).
+      Note that the registers really are clean - we
+      just came from callAndResume which cleaned
+      them for us - so we just have to tell the unwinder
+      that.
+    */
+    register ActRec* rbp asm("rbp");
+    tl_regState = REGSTATE_CLEAN;
+    rbp->m_savedRip = ar->m_savedRip;
+    throw;
   }
-  return callAndResume(ar);
 }
 
 TCA

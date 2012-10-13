@@ -8888,8 +8888,9 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
 
 void
 TranslatorX64::analyzeIterInit(Tracelet& t, NormalizedInstruction& ni) {
-  ni.m_txFlags = supportedPlan(ni.inputs[0]->valueType() == KindOfArray ||
-                               ni.inputs[0]->valueType() == KindOfObject);
+  DataType inType = ni.inputs[0]->valueType();
+  ni.m_txFlags = supportedPlan(
+    isContextFixed() && (inType == KindOfArray || inType == KindOfObject));
 }
 
 void
@@ -8921,9 +8922,9 @@ TranslatorX64::translateIterInit(const Tracelet& t,
       Class *ctx = NULL;
       new_iter_object(dest, obj, ctx);
     }
-    bool ctxFixed = isContextFixed();
-    PREP_CTX(ctxFixed, argNumToRegName[2]);
-    EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src), CTX(ctxFixed));
+    ASSERT(isContextFixed());
+    Class* ctx = arGetContextClass(curFrame());
+    EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src), IMM((uintptr_t)ctx));
     break;
   }
   default: not_reached();

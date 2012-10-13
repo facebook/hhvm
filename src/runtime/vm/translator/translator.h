@@ -332,7 +332,8 @@ class NormalizedInstruction {
   ArgUnion constImm;
   TXFlags m_txFlags;
 
-  Opcode op() const;
+  Op op() const;
+  Op mInstrOp() const;
   PC pc() const;
   const Unit* unit() const;
   Offset offset() const;

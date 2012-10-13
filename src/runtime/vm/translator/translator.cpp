@@ -1382,6 +1382,10 @@ void Translator::analyzeSecondPass(Tracelet& t) {
             ppp->outStack = NULL;
             ni->skipSync = true;
             break;
+
+          default:
+            // do nothing
+            break;
         }
       }
     }
@@ -2278,15 +2282,25 @@ void TraceletContext::varEnvTaint() {
 }
 
 /*
- * op --
- * pc --
- * unit --
- * offset --
- *
  *   Helpers for recovering context of this instruction.
  */
-Opcode NormalizedInstruction::op() const {
-  return *pc();
+Op NormalizedInstruction::op() const {
+  uchar op = *pc();
+  ASSERT(isValidOpcode(op));
+  return (Op)op;
+}
+
+Op NormalizedInstruction::mInstrOp() const {
+  Op opcode = op();
+#define MII(instr, a, b, i, v, d) case Op##instr##M: return opcode;
+  switch (opcode) {
+    MINSTRS
+  case OpFPassM:
+    return preppedByRef ? OpVGetM : OpCGetM;
+  default:
+    not_reached();
+  }
+#undef MII
 }
 
 PC NormalizedInstruction::pc() const {

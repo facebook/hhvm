@@ -80,15 +80,11 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_PropNameCache) \
   STAT(Tx64_PropCtxCache) \
   STAT(Tx64_PropCtxNameCache) \
-  STAT(Tx64_PropGetFast) \
-  STAT(Tx64_PropGetSlow) \
-  STAT(Tx64_PropSetFast) \
-  STAT(Tx64_PropSetSlow) \
-  STAT(Tx64_CGetMProp) \
   STAT(Tx64_CGetMLEE) \
   STAT(Tx64_CGetMGE) \
   STAT(Tx64_CGetMArray) \
   STAT(Tx64_CGetMGeneric) \
+  STAT(Tx64_MFillLiteral) \
   STAT(Tx64_CnsFast) \
   STAT(Tx64_CnsSlow) \
   STAT(Tx64_ContCreateFast) \

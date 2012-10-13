@@ -640,33 +640,17 @@ public:
 
   void addLiteral(const Location &loc, A &a, RegAlloc &regMap,
                   PhysReg rMis) {
-    ASSERT(loc.isLiteral());
+    size_t offset = m_tx64.emitPrepareLiteral(loc, a, rMis);
     if (loc.space == Location::Litstr) {
-      StringData* sd = curUnit()->lookupLitstrId(loc.offset);
+      UNUSED StringData* sd = curUnit()->lookupLitstrId(loc.offset);
       TRACE(6, "ArgManager: push arg %zd (%s, %lld) \"%s\" --> r%d+%zu\n",
             m_args.size(), loc.spaceName(), loc.offset, sd->data(), rMis,
-            offsetof(TranslatorX64::MInstrState, tvLiteral));
-      a.  store_imm64_disp_reg64((uintptr_t)sd,
-                                 offsetof(TranslatorX64::MInstrState, tvLiteral)
-                                 + TVOFF(m_data), rMis);
-      a.  store_imm32_disp_reg(BitwiseKindOfString,
-                               offsetof(TranslatorX64::MInstrState, tvLiteral)
-                               + TVOFF(m_type), rMis);
+            offset);
     } else {
-      ASSERT(loc.space == Location::Litint);
       TRACE(6, "ArgManager: push arg %zd (%s, %lld) --> r%d+%zu\n",
-            m_args.size(), loc.spaceName(), loc.offset, rMis,
-            offsetof(TranslatorX64::MInstrState, tvLiteral));
-      a.  store_imm64_disp_reg64(loc.offset,
-                                 offsetof(TranslatorX64::MInstrState, tvLiteral)
-                                 + TVOFF(m_data), rMis);
-      a.  store_imm32_disp_reg(KindOfInt64,
-                               offsetof(TranslatorX64::MInstrState, tvLiteral)
-                               + TVOFF(m_type), rMis);
+            m_args.size(), loc.spaceName(), loc.offset, rMis, offset);
     }
-    m_args.push_back(ArgContent(ArgContent::ArgRegPlus, rMis,
-                                offsetof(TranslatorX64::MInstrState,
-                                         tvLiteral)));
+    m_args.push_back(ArgContent(ArgContent::ArgRegPlus, rMis, offset));
   }
 
   void emitArguments() {
@@ -719,21 +703,8 @@ private:
 #define A(loc)       _am.addLocAddr(loc)
 #define IE(cond, argIf, argElse) \
   ((cond) ? (argIf) : (argElse))
-
-#define PREP_CTX(ctxFixed, pr)                                         \
-  Class* ctx = NULL;                                                   \
-  LazyScratchReg rCtx(m_regMap);                                       \
-  if (ctxFixed) {                                                      \
-    ASSERT(isContextFixed());                                          \
-    ctx = arGetContextClass(curFrame());                               \
-  } else {                                                             \
-    rCtx.alloc(pr);                                                    \
-    a.  load_reg64_disp_reg64(rsp, offsetof(MInstrState, ctx), *rCtx); \
-  }
-#define CTX(ctxFixed)     \
-  IE((ctxFixed),          \
-     IMM(uintptr_t(ctx)), \
-     R(*rCtx))
+static inline void voidFunc() {}
+#define ID(argDbg) IE(debug, (argDbg), voidFunc())
 
 #define EMIT_CALL_PROLOGUE(a) do { \
   SpaceRecorder sr("_HCallInclusive", a);  \
@@ -786,7 +757,7 @@ static inline TXFlags planHingesOnRefcounting(DataType type) {
          Supported;
 }
 
-static const char* getContextName() {
+static inline const char* getContextName() {
   ASSERT(isContextFixed());
   Class* ctx = arGetContextClass(curFrame());
   return ctx ? ctx->name()->data() : ":anonymous:";

@@ -781,6 +781,18 @@ void TranslatorX64::irTranslateCGetM_GE(const Tracelet& t,
   HHIR_UNIMPLEMENTED(CGetM_GE);
 }
 
+static bool
+isSupportedCGetMProp(const NormalizedInstruction& i) {
+  if (i.inputs.size() != 2) return false;
+  SKTRACE(2, i.source, "CGetM prop candidate: prop supported: %d, "
+                       "in[0] %s in[1] %s\n",
+          mcodeMaybePropName(i.immVecM[0]),
+          i.inputs[0]->rtt.pretty().c_str(),
+          i.inputs[1]->rtt.pretty().c_str());
+  return isNormalPropertyAccess(i, 1, 0) && isContextFixed() &&
+         i.immVec.locationCode() != LL;
+}
+
 void
 TranslatorX64::irTranslateCGetM(const Tracelet& t,
                               const NormalizedInstruction& i) {

@@ -326,6 +326,10 @@ class TranslatorX64 : public Translator
   int mResultStackOffset(const NormalizedInstruction& ni) const;
   bool generateMVal(const Tracelet& t, const NormalizedInstruction& ni,
                     const MInstrInfo& mii) const;
+  int firstDecrefInput(const Tracelet& t, const NormalizedInstruction& ni,
+                       const MInstrInfo& mii) const;
+  bool inputIsLiveForFinalOp(const NormalizedInstruction& ni, unsigned i,
+                           const MInstrInfo& mii) const;
   bool logicalTeleportMVal(const Tracelet& t, const NormalizedInstruction& ni,
                            const MInstrInfo& mii) const;
   bool teleportMVal(const Tracelet& t, const NormalizedInstruction& ni,
@@ -336,6 +340,7 @@ class TranslatorX64 : public Translator
                        const DynLocation& val) const;
   bool forceMValIncDec(const Tracelet& t, const NormalizedInstruction& ni,
                        const MInstrInfo& mii) const;
+  size_t emitPrepareLiteral(const Location& l, Asm& a, PhysReg r);
   void emitBaseLCR(const Tracelet& t, const NormalizedInstruction& ni,
                    const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
   void emitBaseH(unsigned iInd, LazyScratchReg& rBase);
@@ -571,7 +576,6 @@ PSEUDOINSTRS
                    const DynLocation& base,
                    PhysReg fieldAddr,
                    const Location& outLoc);
-  void translateCGetMProp(const Tracelet &t, const NormalizedInstruction& i);
   void translateCGetM_LEE(const Tracelet &t, const NormalizedInstruction& i);
   void translateCGetM_GE(const Tracelet &t, const NormalizedInstruction& i);
   void emitGetGlobal(const NormalizedInstruction& i, int nameIdx,
@@ -963,7 +967,7 @@ bool isContextFixed();
 int getNormalPropertyOffset(const NormalizedInstruction& i,
                             const MInstrInfo&,
                             int propInput, int objInput);
-bool isSupportedCGetMProp(const NormalizedInstruction& i);
+bool mInstrHasUnknownOffsets(const NormalizedInstruction& i);
 bool isSupportedCGetM_LE(const NormalizedInstruction& i);
 bool isSupportedCGetM_LEE(const NormalizedInstruction& i);
 bool isSupportedCGetM_RE(const NormalizedInstruction& i);

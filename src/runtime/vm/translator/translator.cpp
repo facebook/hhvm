@@ -974,7 +974,7 @@ static const struct {
                     IgnoreInnerType,  Stack1|Local, OutSameAsInput,    0 }},
   { OpBindN,       {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
   { OpBindG,       {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
-  { OpBindS,       {StackTop2,        Stack1,       OutSameAsInput,   -1 }},
+  { OpBindS,       {StackTop3,        Stack1,       OutSameAsInput,   -2 }},
   { OpBindM,       {MVector|Stack1,   Stack1,       OutSameAsInput,    0 }},
   { OpUnsetL,      {Local,            Local,        OutNone,           0 }},
   { OpUnsetN,      {Stack1,           Local,        OutNone,          -1 }},

@@ -2367,6 +2367,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             }
           } else {
             ASSERT(m_staticArrays.size() == 0);
+            ExpressionPtr ex = u->getExpression();
+            if (ex->getKindOf() == Expression::KindOfExpressionList) {
+              ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
+              int capacity = el->getCount();
+              if (capacity > 0) {
+                m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::ArrayCapacity,
+                               false, 0, capacity);
+              }
+            }
             e.NewArray();
             visit(u->getExpression());
           }

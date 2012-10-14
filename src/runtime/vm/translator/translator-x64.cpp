@@ -4467,18 +4467,38 @@ TranslatorX64::translateArray(const Tracelet& t,
   }
 }
 
+ArrayData*
+HOT_FUNC_VM
+newArrayHelper(int capacity) {
+  ArrayData *a = NEW(HphpArray)(capacity);
+  a->incRefCount();
+  TRACE(2, "newArrayHelper: capacity %d\n", capacity);
+  return a;
+}
+
 void
 TranslatorX64::translateNewArray(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 0);
   ASSERT(i.outStack && !i.outLocal);
   ASSERT(i.outStack->outerType() == KindOfArray);
-  m_regMap.allocOutputRegs(i);
-  PhysReg r = getReg(i.outStack->location);
-  emitImmReg(a, uint64(HphpArray::GetStaticEmptyArray()), r);
-  // We are guaranteed that the new array is static, so we do not need to
-  // increment the refcount
-  ASSERT(HphpArray::GetStaticEmptyArray()->isStatic());
+  int capacity = i.imm[0].u_IVA;
+  if (capacity == 0) {
+    m_regMap.allocOutputRegs(i);
+    PhysReg r = getReg(i.outStack->location);
+    emitImmReg(a, uint64(HphpArray::GetStaticEmptyArray()), r);
+    // We are guaranteed that the new array is static, so we do not need to
+    // increment the refcount
+    ASSERT(HphpArray::GetStaticEmptyArray()->isStatic());
+  } else {
+    // create an empty array with a nonzero capacity
+    if (false) {
+      ArrayData* a = newArrayHelper(42);
+      printf("%p", a); // use ret
+    }
+    EMIT_CALL(a, newArrayHelper, IMM(capacity));
+    m_regMap.bind(rax, i.outStack->location, KindOfArray, RegInfo::DIRTY);
+  }
 }
 
 void

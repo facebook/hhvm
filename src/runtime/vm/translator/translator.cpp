@@ -1455,6 +1455,9 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       case Unit::MetaInfo::GuardedThis:
         ni->guardedThis = true;
         break;
+      case Unit::MetaInfo::ArrayCapacity:
+        ni->imm[0].u_IVA = info.m_data;
+        break;
 
       case Unit::MetaInfo::DataType: {
         ASSERT((unsigned)arg < inputInfos.size());

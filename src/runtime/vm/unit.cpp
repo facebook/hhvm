@@ -1024,6 +1024,9 @@ void Unit::prettyPrint(std::ostream &out, size_t startOffset,
           case Unit::MetaInfo::NoSurprise:
             out << " NoSurprise";
             break;
+          case Unit::MetaInfo::ArrayCapacity:
+            out << " capacity=" << info.m_data;
+            break;
           case Unit::MetaInfo::None:
             ASSERT(false);
             break;

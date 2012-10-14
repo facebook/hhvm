@@ -359,8 +359,9 @@ class NormalizedInstruction {
     noCtor(false),
     noOp(false),
     directCall(false),
-    m_txFlags(Interp)
-  { }
+    m_txFlags(Interp) {
+    memset(imm, 0, sizeof(imm));
+  }
 
   bool isJmpNZ() const {
     ASSERT(op() == OpJmpNZ || op() == OpJmpZ);

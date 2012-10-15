@@ -2635,7 +2635,6 @@ void TranslatorX64::emitMPre(const Tracelet& t,
   }
   SKTRACE(2, ni.source, "%s %#lx\n", __func__, long(a.code.frontier));
   if (m_vecState->needsMIState()) {
-    a.  sub_imm32_reg64(sizeof(MInstrState), mis_rsp);
     if (debug) {
       emitStoreInvalid(a, MISOFF(tvScratch), mis_rsp);
       emitStoreInvalid(a, MISOFF(tvLiteral), mis_rsp);
@@ -2784,9 +2783,6 @@ void TranslatorX64::emitMPost(const Tracelet& t,
     locToRegDisp(val.location, &prVal, &dispVal);
     emitCopyTo(a, prVal, dispVal, rVmSp,
                vstackOffset(ni, mResultStackOffset(ni)), *rScratch);
-  }
-  if (m_vecState->needsMIState()) {
-    a.  add_imm32_reg64(sizeof(MInstrState), mis_rsp);
   }
 }
 

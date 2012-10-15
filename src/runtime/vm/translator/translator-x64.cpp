@@ -2715,6 +2715,9 @@ static_assert(rVmSp == rbx &&
               rVmTl == r12 &&
               rStashedAR == r15,
   "__enterTCHelper needs to be modified to use the correct ABI");
+static_assert(kReservedRSPScratchSpace == 0x80,
+              "enterTCHelper needs to be updated for changes to "
+              "kReservedRSPScratchSpace");
 asm (
   ".byte 0\n"
   ".align 16\n"
@@ -2738,15 +2741,15 @@ asm (
   "mov %rsi, %rbp\n"          // rVmFp
   "mov 0x30(%rcx), %r15\n"    // rStashedAR saved across service requests
 
-  // The translated code we are about to enter does not follow the
-  // standard prologue of pushing rbp at entry, so we are purposely 8
-  // bytes short of 16-byte alignment before this call instruction so
-  // that the return address being pushed will make the native stack
-  // 16-byte aligned.
-  // Pre-allocate LinearScan::NumPreAllocatedSpillLocs * 8 bytes for
-  // spill locations.
-  // This value must be consistent with LinearScan::NumPreAllocatedSpillLocs.
-  "sub $0x80, %rsp\n"
+  /*
+   * The translated code we are about to enter does not follow the
+   * standard prologue of pushing rbp at entry, so we are purposely 8
+   * bytes short of 16-byte alignment before this call instruction so
+   * that the return address being pushed will make the native stack
+   * 16-byte aligned.
+   */
+
+  "sub $0x80, %rsp\n" // kReservedRSPScratchSpace
   // May need cfi_adjust_cfa_offset annotations: Task #1747813
   "call *%rdx\n"
   "add $0x80, %rsp\n"

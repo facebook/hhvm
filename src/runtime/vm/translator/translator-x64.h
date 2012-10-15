@@ -311,6 +311,10 @@ class TranslatorX64 : public Translator
 
  public:
   struct MInstrState {
+    // Room for this structure is allocated on the stack before we
+    // make a call into the tc, so this first element is padding for
+    // the return address pushed by the call.
+    uintptr_t returnAddress;
     TypedValue tvScratch;
     TypedValue tvLiteral;
     TypedValue tvRef;
@@ -320,6 +324,12 @@ class TranslatorX64 : public Translator
     bool baseStrOff;
     Class* ctx;
   } __attribute__((aligned(16)));
+  static_assert(sizeof(TranslatorX64::MInstrState)
+                    - sizeof(uintptr_t) // return address
+                  < kReservedRSPScratchSpace,
+                "MInstrState is too large for the rsp scratch space "
+                "in enterTCHelper");
+
  private:
 
   MVecTransState* m_vecState;

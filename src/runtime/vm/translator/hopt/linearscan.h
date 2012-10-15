@@ -17,9 +17,10 @@
 #ifndef _LINEAR_SCAN_H_
 #define _LINEAR_SCAN_H_
 
-#include "ir.h"
-#include "tracebuilder.h"
-#include "codegen.h"
+#include "runtime/vm/translator/abi-x64.h"
+#include "runtime/vm/translator/hopt/ir.h"
+#include "runtime/vm/translator/hopt/tracebuilder.h"
+#include "runtime/vm/translator/hopt/codegen.h"
 
 namespace HPHP {
 namespace VM {
@@ -46,6 +47,9 @@ public:
   // for spill locations in __enterTCHelper in translator-x64.cpp.
   // Be very careful when changing this value.
   static const int NumPreAllocatedSpillLocs = 16;
+  static_assert(kReservedRSPScratchSpace == NumPreAllocatedSpillLocs * 8,
+                "kReservedRSPScratchSpace changes require updates in "
+                "LinearScan");
 
   // HHIR:TODO ideally wouldn't need to use ints, but very helpful for bit ops
   static int regNameAsInt(register_name_t r) { return (int)r; }

@@ -237,6 +237,18 @@ const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
 #define AROFF(nm) offsetof(ActRec, nm)
 #define CONTOFF(nm) offsetof(c_Continuation, nm)
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * This much space (in bytes) at 8(%rsp) is allocated on entry to the
+ * TC and made available for scratch purposes (right above the return
+ * address).  It is used as spill locations by HHIR (see LinearScan),
+ * and for MInstrState in translator-x64-vector.cpp.
+ */
+const size_t kReservedRSPScratchSpace = 0x80;
+
+//////////////////////////////////////////////////////////////////////
+
 }}}
 
 #endif

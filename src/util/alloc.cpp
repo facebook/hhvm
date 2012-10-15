@@ -69,29 +69,50 @@ void flush_thread_stack() {
 }
 
 #ifndef NO_JEMALLOC
+unsigned low_arena = 0;
 struct JEMallocInitializer {
   JEMallocInitializer() {
     // The following comes from malloc_extension.cc in google-perftools
 #ifdef __GLIBC__
-  // GNU libc++ versions 3.3 and 3.4 obey the environment variables
-  // GLIBCPP_FORCE_NEW and GLIBCXX_FORCE_NEW respectively.  Setting
-  // one of these variables forces the STL default allocator to call
-  // new() or delete() for each allocation or deletion.  Otherwise
-  // the STL allocator tries to avoid the high cost of doing
-  // allocations by pooling memory internally.  However, tcmalloc
-  // does allocations really fast, especially for the types of small
-  // items one sees in STL, so it's better off just using us.
-  // TODO: control whether we do this via an environment variable?
-  setenv("GLIBCPP_FORCE_NEW", "1", false /* no overwrite*/);
-  setenv("GLIBCXX_FORCE_NEW", "1", false /* no overwrite*/);
+    // GNU libc++ versions 3.3 and 3.4 obey the environment variables
+    // GLIBCPP_FORCE_NEW and GLIBCXX_FORCE_NEW respectively.  Setting
+    // one of these variables forces the STL default allocator to call
+    // new() or delete() for each allocation or deletion.  Otherwise
+    // the STL allocator tries to avoid the high cost of doing
+    // allocations by pooling memory internally.  However, tcmalloc
+    // does allocations really fast, especially for the types of small
+    // items one sees in STL, so it's better off just using us.
+    // TODO: control whether we do this via an environment variable?
+    setenv("GLIBCPP_FORCE_NEW", "1", false /* no overwrite*/);
+    setenv("GLIBCXX_FORCE_NEW", "1", false /* no overwrite*/);
 
-  // Now we need to make the setenv 'stick', which it may not do since
-  // the env is flakey before main() is called.  But luckily stl only
-  // looks at this env var the first time it tries to do an alloc, and
-  // caches what it finds.  So we just cause an stl alloc here.
-  std::string dummy("I need to be allocated");
-  dummy += "!";         // so the definition of dummy isn't optimized out
+    // Now we need to make the setenv 'stick', which it may not do since
+    // the env is flakey before main() is called.  But luckily stl only
+    // looks at this env var the first time it tries to do an alloc, and
+    // caches what it finds.  So we just cause an stl alloc here.
+    std::string dummy("I need to be allocated");
+    dummy += "!";         // so the definition of dummy isn't optimized out
 #endif  /* __GLIBC__ */
+    // Create a special arena to be used for allocating objects in low memory.
+    int err;
+    size_t sz = sizeof(low_arena);
+    if ((err = mallctl("arenas.extend", &low_arena, &sz, NULL, 0)) != 0) {
+      // Error; bail out.
+      return;
+    }
+    size_t mib[3];
+    size_t miblen = sizeof(mib) / sizeof(size_t);
+    const char *dss = "primary";
+    if ((err = mallctlnametomib("arena.0.dss", mib, &miblen)) != 0) {
+      // Error; bail out.
+      return;
+    }
+    mib[1] = low_arena;
+    if ((err = mallctlbymib(mib, miblen, NULL, NULL, (void *)&dss,
+        sizeof(const char *))) != 0) {
+      // Error; bail out.
+      return;
+    }
   }
 };
 

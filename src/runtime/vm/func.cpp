@@ -149,7 +149,7 @@ void* Func::allocFuncMem(const StringData* name, int numParams) {
     maxNumPrologues - kNumFixedPrologues :
     0;
   size_t funcSize = sizeof(Func) + numExtraPrologues * sizeof(unsigned char*);
-  return operator new (funcSize);
+  return Util::low_malloc(funcSize);
 }
 
 Func::Func(Unit& unit, Id id, int line1, int line2,
@@ -204,6 +204,11 @@ Func::~Func() {
   validate();
   m_magic = ~m_magic;
 #endif
+}
+
+void Func::destroy(Func* func) {
+  func->~Func();
+  Util::low_free(func);
 }
 
 Func* Func::clone() const {

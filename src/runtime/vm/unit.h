@@ -354,6 +354,8 @@ struct Unit {
 
   Unit();
   ~Unit();
+  void* operator new(size_t sz);
+  void operator delete(void* p, size_t sz);
 
   int repoId() const { return m_repoId; }
   int64 sn() const { return m_sn; }

@@ -48,10 +48,12 @@ StringData *StringData::GetStaticString(const StringData *str) {
   }
   // Lookup failed, so do the hard work of creating a StringData with its own
   // copy of the key string, so that the atomic insert() has a permanent key.
-  StringData *sd = new StringData(str->data(), str->size(), CopyMalloc);
+  StringData *sd = (StringData*)Util::low_malloc(sizeof(StringData));
+  new (sd) StringData(str->data(), str->size(), CopyMalloc);
   sd->setStatic();
   if (!s_stringDataMap->insert(acc, sd)) {
-    delete sd;
+    sd->~StringData();
+    Util::low_free(sd);
   }
   ASSERT(acc->first != NULL);
   return const_cast<StringData*>(acc->first);

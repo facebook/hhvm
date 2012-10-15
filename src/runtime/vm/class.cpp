@@ -470,11 +470,11 @@ void PreClassRepoProxy::GetPreClassesStmt
 
 ClassPtr Class::newClass(PreClass* preClass, Class* parent) {
   unsigned classVecLen = (parent != NULL) ? parent->m_classVecLen+1 : 1;
-  void* mem = malloc(sizeForNClasses(classVecLen));
+  void* mem = Util::low_malloc(sizeForNClasses(classVecLen));
   try {
     return ClassPtr(new (mem) Class(preClass, parent, classVecLen));
   } catch (...) {
-    free(mem);
+    Util::low_free(mem);
     throw;
   }
 }

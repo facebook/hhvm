@@ -125,6 +125,7 @@ struct Func {
       const StringData* name, Attr attrs, bool top,
       const StringData* docComment, int numParams);
   ~Func();
+  static void destroy(Func* func);
 
   Func* clone() const;
 

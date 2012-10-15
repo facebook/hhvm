@@ -34,6 +34,9 @@
 # endif
 #else
 # include <jemalloc/jemalloc.h>
+# ifndef ALLOCM_ARENA
+#  define ALLOCM_ARENA(a) 0
+# endif
 #endif
 
 extern "C" {
@@ -68,6 +71,28 @@ public:
 
 namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifndef NO_JEMALLOC
+extern unsigned low_arena;
+#endif
+
+inline void* low_malloc(size_t size) {
+#ifdef NO_JEMALLOC
+  return malloc(size);
+#else
+  void* ptr = NULL;
+  allocm(&ptr, NULL, size, ALLOCM_ARENA(low_arena));
+  return ptr;
+#endif
+}
+
+inline void low_free(void* ptr) {
+#ifdef NO_JEMALLOC
+  free(ptr);
+#else
+  dallocm(ptr, ALLOCM_ARENA(low_arena));
+#endif
+}
 
 /**
  * Safe memory allocation.

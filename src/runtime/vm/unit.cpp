@@ -283,7 +283,7 @@ Unit::~Unit() {
   free(m_bc_meta);
 
   // Delete all Func's.
-  range_foreach(mutableFuncs(), boost::checked_deleter<Func>());
+  range_foreach(mutableFuncs(), Func::destroy);
 
   // ExecutionContext and the TC may retain references to Class'es, so
   // it is possible for Class'es to outlive their Unit.
@@ -310,6 +310,14 @@ Unit::~Unit() {
   }
 
   free(m_mergeables);
+}
+
+void* Unit::operator new(size_t sz) {
+  return Util::low_malloc(sz);
+}
+
+void Unit::operator delete(void* p, size_t sz) {
+  Util::low_free(p);
 }
 
 bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {

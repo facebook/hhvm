@@ -425,6 +425,7 @@ public:
   static bool EvalHHIREnableMmx;
   static bool EvalHHIREnableRefCountOpt;
   static bool EvalHHIREnableSinking;
+  static bool EvalHHIRGenerateAsserts;
   static uint64 EvalHHIRDirectExit;
   static uint64 EvalMaxHHIRTrans;
   static bool EvalDumpBytecode;

@@ -140,6 +140,8 @@ public:
 private:
   void emitTraceCall(CodeGenerator::Asm& as, int64 pcOff);
   void emitTraceRet(CodeGenerator::Asm& as, register_name_t retAddrReg);
+  Address emitCheckStack(CodeGenerator::Asm& as, SSATmp* sp, uint32 numElems,
+                         bool allocActRec);
   uint32 cgTrace(Trace*, uint32 liveRegs);
   Address cgCheckStaticBit(Type::Tag type,
                            register_name_t reg,

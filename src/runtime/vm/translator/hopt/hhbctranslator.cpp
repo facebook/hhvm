@@ -713,18 +713,30 @@ SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
                                        const StringData* propName) {
   SSATmp* clsTmp = popA();
   SSATmp* prop = popC();
+  SSATmp* clsName;
   if (propName) {
     prop = m_tb.genDefConst<const StringData*>(propName);
   }
+  // TODO: fallback to interpone if we decide to punt
+  if (!cls || !isContextFixed() || curFunc()->cls() != cls) {
+    PUNT(ClsPropAddr_noCls);
+  }
   if (!prop->isConst() || prop->getType() != Type::StaticStr) {
-    // TODO: fallback to interpone if prop is not the right type
-    PUNT(ClsPropAddr);
+    PUNT(ClsPropAddr_noProp);
   }
   if (cls) {
-    const StringData* clsName = cls->preClass()->name();
-    clsTmp = m_tb.genDefConst<const StringData*>(clsName);
+    const StringData* clsNameStr = cls->preClass()->name();
+    clsName = m_tb.genDefConst<const StringData*>(clsNameStr);
+  } else {
+    IRInstruction* clsInst = clsTmp->getInstruction();
+    if (clsInst->getOpcode() == LdCls &&
+        clsInst->getSrc(0)->getType() == Type::StaticStr) {
+      clsName = clsInst->getSrc(0);
+    } else {
+      PUNT(clsPropAddr_noClassName);
+    }
   }
-  return m_tb.genLdClsPropAddr(clsTmp, prop);
+  return m_tb.genLdClsPropAddr(clsTmp, clsName, prop);
 }
 
 void HhbcTranslator::decRefPropAddr(SSATmp* propAddr) {
@@ -1523,7 +1535,17 @@ void HhbcTranslator::emitCastDouble() {
 // helpers already don't incref their return values
 void HhbcTranslator::emitCastString() {
   SSATmp* src = popC();
-  pushIncRef(m_tb.genConvToStr(src)); // change if helper increfs
+  Type::Tag fromType = src->getType();
+  if (fromType == Type::Cell) {
+    PUNT(CastString);
+  } else if (fromType == Type::Obj) {
+    // call the toString helper on object
+    PUNT(CastString);
+  } else {
+    // for int to string conversion, this calls a helper that returns
+    // a string with ref count of 0.
+    pushIncRef(m_tb.genConvToStr(src));
+  }
   m_tb.genDecRef(src);
 }
 
@@ -1860,24 +1882,39 @@ SSATmp* HhbcTranslator::spillStack(bool allocActRec) {
 
   // remove spilled values that are already on the stack
   // at the right offset
-  for (int32 i = numStackElems - 1; i >= 0; i--) {
-    IRInstruction* inst = stackValues[i]->getInstruction();
-    if (inst->getOpcode() != LdStack) {
-      break;
+  if (false) {
+    for (int32 i = numStackElems - 1; i >= 0; i--) {
+      IRInstruction* inst = stackValues[i]->getInstruction();
+      if (inst->getOpcode() != LdStack) {
+        break;
+      }
+      // first check that the ldstack uses the same sp as the current
+      // sp value
+      if (inst->getSrc(0) != curSp) {
+        break;
+      }
+      // now check the stack offset
+      int64 stackOffset = inst->getSrc(1)->getConstValAsInt();
+      if (allocActRec) {
+        // if there is an AR on the stack, then we need to adjust
+        // the stack offset by its size
+        stackOffset -= (sizeof(ActRec) / sizeof(Cell));
+      }
+      if (stackOffset != i) {
+        break;
+      }
+      // XXX it's better not to eliminate these LdStack here but rather
+      // not generate code for them and not allocate registers to their
+      // ldstacks src (by not incrementing their use counts). This is
+      // because getStackValue uses these SpillStack instructions to
+      // propagate type and value information.  When checking to see if
+      // the stack offsets are the same, we should also chase down
+      // increfs.
+
+      // remove the operand by decrementing the number of operands
+      numStackElems--;
+      m_stackDeficit--; // compensate
     }
-    // first check that the ldstack uses the same sp as the current
-    // sp value
-    if (inst->getSrc(0) != curSp) {
-      break;
-    }
-    // now check the stack offset
-    int64 stackOffset = inst->getSrc(1)->getConstValAsInt();
-    if (stackOffset != i) {
-      break;
-    }
-    // remove the operand by decrementing the number of operands
-    numStackElems--;
-    m_stackDeficit--; // compensate
   }
 
   SSATmp* sp = m_tb.genSpillStack(m_stackDeficit,
@@ -1916,6 +1953,17 @@ SSATmp* HhbcTranslator::emitLdLocWarn(uint32 id,
 void HhbcTranslator::end(int nextPc) {
   if (m_hasRet) return;
 
+  if (nextPc >= getCurFunc()->past()) {
+    // We have fallen off the end of the func's bytecodes. This happens
+    // when the function's bytecodes end with an unconditional
+    // backwards jump so that nextPc is out of bounds and causes an
+    // assertion failure in unit.cpp. The common case for this comes
+    // from the default value funclets, which are placed after the end
+    // of the function, with an unconditional branch back to the start
+    // of the function. So you should see this in any function with
+    // default params.
+    return;
+  }
   setBcOff(nextPc, true);
   spillStack();
   m_tb.genTraceEnd(nextPc);

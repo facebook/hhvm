@@ -67,6 +67,10 @@ const int CanCSE[] = {
 };
 
 bool IRInstruction::canCSE(Opcode opc) {
+  // make sure that instructions that are CSE'able can't produce a
+  // reference count or consume reference counts.
+  ASSERT(!CanCSE[opc] || !producesReference(opc));
+  ASSERT(!CanCSE[opc] || !consumesReferences(opc));
   return CanCSE[opc];
 }
 
@@ -182,6 +186,17 @@ Opcode queryNegateTable[] = {
   IsNType,      // IsType
   IsSet,        // IsNSet
   IsType        // IsNType
+};
+
+Opcode queryCommuteTable[] = {
+  OpLt,         // OpGt
+  OpLte,        // OpGte
+  OpGt,         // OpLt
+  OpGte,        // OpLte
+  OpEq,         // OpEq
+  OpNeq,        // OpNeq
+  OpSame,       // OpSame
+  OpNSame       // OpNSame
 };
 
 const char* Type::Strings[(int)Type::TAG_ENUM_COUNT] = {

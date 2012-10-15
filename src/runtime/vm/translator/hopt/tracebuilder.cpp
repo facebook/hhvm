@@ -455,7 +455,12 @@ SSATmp* TraceBuilder::genConvToDbl(SSATmp* src) {
   return genInstruction(Conv, Type::Dbl, src);
 }
 SSATmp* TraceBuilder::genConvToStr(SSATmp* src) {
-  return genInstruction(Conv, Type::Str, src);
+  if (src->getType() == Type::Bool) {
+    // Bool to string code sequence loads static strings
+    return genInstruction(Conv, Type::StaticStr, src);
+  } else {
+    return genInstruction(Conv, Type::Str, src);
+  }
 }
 SSATmp* TraceBuilder::genConvToArr(SSATmp* src) {
   return genInstruction(Conv, Type::Arr, src);
@@ -739,8 +744,10 @@ SSATmp* TraceBuilder::genLdPropAddr(SSATmp* obj, SSATmp* prop) {
   return genInstruction(LdPropAddr, Type::PtrToGen, obj, prop);
 }
 
-SSATmp* TraceBuilder::genLdClsPropAddr(SSATmp* cls, SSATmp* prop) {
-  return genInstruction(LdClsPropAddr, Type::PtrToGen, cls, prop);
+SSATmp* TraceBuilder::genLdClsPropAddr(SSATmp* cls,
+                                       SSATmp* clsName,
+                                       SSATmp* propName) {
+  return genInstruction(LdClsPropAddr, Type::PtrToGen, cls, clsName, propName);
 }
 
 SSATmp* TraceBuilder::genLdFunc(SSATmp* funcName, SSATmp* actRec) {
@@ -1269,36 +1276,6 @@ SSATmp* TraceBuilder::genInterpOne(uint32 pcOff,
   m_spOffset += ((resultType == Type::None ? 0 : 1) - stackAdjustment);
   return spVal;
 }
-
-#if 0
-SSATmp* TraceBuilder::genCall(SSATmp* actRec,
-                              uint32 returnBcOffset,
-                              uint32 numParams,
-                              SSATmp** params) {
-  // see if the actrec has a func that can be used by fcall
-  SSATmp* funcTmp;
-  Opcode arOpcode = actRec->getInstruction()->getOpcode();
-  if (actRec->getType() == Type::Null ||
-      arOpcode == SpillStack ||
-      arOpcode == SpillStackAllocAR ||
-      arOpcode == DefSP ||
-//      arOpcode == NewObj ||
-      actRec->getInstruction()->getNumSrcs() == 1) {
-    funcTmp = genDefNull();
-  } else {
-    ASSERT(actRec->getType() == Type::SP);
-    funcTmp = actRec->getInstruction()->getSrc(2);
-    if (!funcTmp->isConst()) {
-      funcTmp = genDefNull();
-    }
-  }
-  return genCall(actRec,
-                 returnBcOffset,
-                 funcTmp,
-                 numParams,
-                 params);
-}
-#endif
 
 SSATmp* TraceBuilder::genCall(SSATmp* actRec,
                               uint32 returnBcOffset,

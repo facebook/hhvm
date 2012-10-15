@@ -123,9 +123,7 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
     case LdCachedClass: return simplifyLdCachedClass(src1);
     case LdCls:
     case LdObjMethod:
-    case LdClsPropAddr:
-      return simplifyLdClsPropAddr(src1, src2);
-
+      return NULL;
     case RetVal:
     case FreeActRec:
 
@@ -154,6 +152,8 @@ SSATmp* Simplifier::simplifyInst(Opcode opc,
                                  uint32 numExtendedSrcs,
                                  SSATmp** extendedSrcs) {
   switch(opc) {
+    case LdClsPropAddr:
+      return simplifyLdClsPropAddr(src1, src2, extendedSrcs[0]);
     case AllocActRec:
       if (numExtendedSrcs == 3) {
         return simplifyAllocActRec(src1,
@@ -564,8 +564,15 @@ SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
   return NULL;
 }
 
+SSATmp* chaseIncRefs(SSATmp* tmp) {
+  while (tmp->getInstruction()->getOpcode() == IncRef) {
+    tmp = tmp->getInstruction()->getSrc(0);
+  }
+  return tmp;
+}
+
 #define SIMPLIFY_CMP(OP, NAME, EXP) do {                                      \
-  if (src1 == src2) {                                                         \
+  if (src1 == src2 || chaseIncRefs(src1) == chaseIncRefs(src2)) {             \
     /* want to use the same operator to compare two equal values */           \
     return genDefBool(0 OP 0);                                                \
   }                                                                           \
@@ -615,42 +622,42 @@ SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
     }                                                                         \
     return m_tb->genCmp(OpNeq, src1, src2);                                   \
   }                                                                           \
+  if (src1->getType() == src2->getType() ||                                   \
+      (Type::isString(src1->getType()) && Type::isString(src2->getType()))) { \
+    /* Types are the same, no more simplifications left */                    \
+    break;                                                                    \
+  }                                                                           \
   /* nulls get canonicalized to the right */                                  \
   if (Type::isNull(src1->getType())) {                                        \
-    if (NAME == OpEq || NAME == OpNeq) {                                      \
-      return m_tb->genCmp(NAME, src2, src1);                                  \
-    }                                                                         \
-    return m_tb->genCmp(negateQueryOp(NAME), src2, src1);                     \
+    return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
   }                                                                           \
-  /* objects are always greater than null */                                  \
-  if (src1->getType() == Type::Obj && Type::isNull(src2->getType())) {        \
-    return genDefBool(1 OP 0);                                                \
+  if (Type::isNull(src2->getType())) {                                        \
+    if (Type::isString(src1->getType())) {                                    \
+      /* convert null to "", numerical or lexical comparison */               \
+      return m_tb->genCmp(NAME, src1,                                         \
+                          m_tb->genDefConst(StringData::GetStaticString("")));\
+    }                                                                         \
+    if (src1->getType() == Type::Int) {                                       \
+      if (NAME == OpEq || NAME == OpNeq) {                                    \
+        return m_tb->genCmp(NAME, src1, genDefInt(0));                        \
+      }                                                                       \
+      /* TODO: for all other comparison of int to null, we can optimize to use
+         an unsigned integer comparison */                                    \
+    }                                                                         \
+    return m_tb->genCmp(NAME, src1, genDefBool(false));                       \
+  }                                                                           \
+  /* bools get canonicalized to the right */                                  \
+  if (src1->getType() == Type::Bool) {                                        \
+    return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
+  }                                                                           \
+  if (src2->getType() == Type::Bool) {                                        \
+    /* TODO: optimze comparison of ints to const bools */                     \
+    return m_tb->genCmp(NAME, m_tb->genConvToBool(src1), src2);               \
   }                                                                           \
   if (src1->isConst() && src2->isConst()) {                                   \
-    if (Type::isNull(src2->getType())) {                                      \
-      /* Array cmp Null */                                                    \
-      if (src1->getType() == Type::Arr) {                                     \
-        const ArrayData* arr = src1->getConstValAsArr();                      \
-        ConstInstruction* cinst = (ConstInstruction *)src1->getInstruction(); \
-        /* empty arrays are equal to null, non-empty are greater */           \
-        if (cinst->isEmptyArray() || arr->empty()) {                          \
-          return genDefBool(0 OP 0);                                          \
-        }                                                                     \
-        return genDefBool(1 OP 0);                                            \
-      }                                                                       \
-      /* StaticStr cmp Null */                                                \
-      if (src1->getType() == Type::StaticStr) {                               \
-        const StringData* str = src1->getConstValAsStr();                     \
-        int i1 = (str->empty() ? 0 : 1);                                      \
-        return genDefBool(i1 OP 0);                                           \
-      }                                                                       \
-    }                                                                         \
     /* canonicalize static strings to left */                                 \
     if (src2->getType() == Type::StaticStr) {                                 \
-      if (NAME == OpEq || NAME == OpNeq) {                                    \
-        return m_tb->genCmp(NAME, src2, src1);                                \
-      }                                                                       \
-      return m_tb->genCmp(negateQueryOp(NAME), src2, src1);                   \
+      return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                  \
     }                                                                         \
     /* StaticStr cmp ConstBool */                                             \
     if (src1->getType() == Type::StaticStr && src2->getType() == Type::Bool) {\
@@ -683,6 +690,14 @@ SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
       return genDefBool(src1->getConstValAsBool() OP                          \
                         bool(src2->getConstValAsInt()));                      \
     }                                                                         \
+  }                                                                           \
+  if (src1->getType() == Type::Arr && src2->getType() != Type::Arr) {         \
+    /* array is always greater */                                             \
+    return genDefBool(1 OP 0)                             ;                   \
+  }                                                                           \
+  if (src2->getType() == Type::Arr && src1->getType() != Type::Arr) {         \
+    /* array is always greater */                                             \
+    return genDefBool(0 OP 1)                             ;                   \
   }                                                                           \
 } while (0)
 
@@ -788,10 +803,10 @@ SSATmp* Simplifier::simplifyConv(Type::Tag toType, SSATmp* src) {
         return m_tb->genDefConst(StringData::GetStaticString(""));
       }
       if (type == Type::Int) {
-        // TODO
+        // TODO constant int to string
       }
       if (type == Type::Dbl) {
-        // TODO
+        // TODO constant dbl to string
       }
     }
   }
@@ -870,13 +885,15 @@ SSATmp* Simplifier::simplifyIsSet(SSATmp* src, bool negate) {
   return NULL;
 }
 
-SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls, SSATmp* prop) {
-  if (cls->getType() == Type::ClassRef) {
+SSATmp* Simplifier::simplifyLdClsPropAddr(SSATmp* cls,
+                                          SSATmp* clsName,
+                                          SSATmp* propName) {
+  if (clsName->getType() == Type::Null) {
     IRInstruction* clsInst = cls->getInstruction();
     if (clsInst->getOpcode() == LdCls) {
       SSATmp* clsName = clsInst->getSrc(0);
       ASSERT(clsName->isConst() && clsName->getType() == Type::StaticStr);
-      return genLdClsPropAddr(clsName, prop);
+      return genLdClsPropAddr(cls, clsName, propName);
     }
   }
   return NULL;
@@ -944,9 +961,10 @@ SSATmp* Simplifier::genDefBool(bool val) {
   return m_tb->genDefConst<bool>(val);
 }
 
-SSATmp* Simplifier::genLdClsPropAddr(SSATmp* src1,
-                                     SSATmp* src2) {
-  return m_tb->genLdClsPropAddr(src1, src2);
+SSATmp* Simplifier::genLdClsPropAddr(SSATmp* cls,
+                                     SSATmp* clsName,
+                                     SSATmp* prop) {
+  return m_tb->genLdClsPropAddr(cls, clsName, prop);
 }
 
 }}} // namespace HPHP::VM::JIT

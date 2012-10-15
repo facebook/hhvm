@@ -718,12 +718,8 @@ void TranslatorX64::irTranslateCGetS(const Tracelet& t,
   const int kPropNameIdx = 1;
   const Class* cls = i.inputs[kClassIdx]->rtt.valueClass();
   const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
-  if (cls && arGetContextClass(curFrame()) == cls) {
-    HHIR_EMIT(CGetS, cls, propName,
-              getInferredOrPredictedType(i), isInferredType(i));
-  } else {
-    HHIR_UNIMPLEMENTED(CGetS);
-  }
+  HHIR_EMIT(CGetS, cls, propName,
+            getInferredOrPredictedType(i), isInferredType(i));
 }
 
 void TranslatorX64::irTranslateSetS(const Tracelet& t,
@@ -732,11 +728,7 @@ void TranslatorX64::irTranslateSetS(const Tracelet& t,
   const int kPropIdx = 2;
   const Class* cls = i.inputs[kClassIdx]->rtt.valueClass();
   const StringData* propName = i.inputs[kPropIdx]->rtt.valueStringOrNull();
-  if (cls && arGetContextClass(curFrame()) == cls) {
-    HHIR_EMIT(SetS, cls, propName);
-  } else {
-    HHIR_UNIMPLEMENTED(SetS);
-  }
+  HHIR_EMIT(SetS, cls, propName);
 }
 
 void TranslatorX64::irTranslateSetG(const Tracelet& t,

@@ -1061,7 +1061,7 @@ int64 strToBoolHelper(const StringData *s) {
 }
 
 int64 arrToBoolHelper(const ArrayData *a) {
-  return !a->empty();
+  return a->size() != 0;
 }
 
 int64 objToBoolHelper(const ObjectData *o) {
@@ -1074,21 +1074,29 @@ int64 cellToBoolHelper(DataType kind, Value value) {
   }
 
   if (kind <= KindOfInt64) {
-    return value.m_data.num;
+    return value.m_data.num ? 1 : 0;
   }
 
   switch (kind) {
-  case KindOfDouble:  return value.m_data.dbl != 0;
-  case KindOfStaticString:
-  case KindOfString:  return value.m_data.pstr->toBoolean();
-  case KindOfArray:   return !value.m_data.parr->empty();
-  case KindOfObject:  return value.m_data.pobj->o_toBoolean();
-  default:
-    ASSERT(false);
-    break;
+    case KindOfDouble:  return value.m_data.dbl != 0;
+    case KindOfStaticString:
+    case KindOfString:  return value.m_data.pstr->toBoolean();
+    case KindOfArray:   return value.m_data.parr->size() != 0;
+    case KindOfObject:  return value.m_data.pobj->o_toBoolean();
+    default:
+      ASSERT(false);
+      break;
   }
   return 0;
 }
+
+const StringData* intToStringHelper(int64 n) {
+  // This returns a string with ref count of 0, so be sure
+  // to incref it immediately, or dispose of it when done
+  StringData* s = buildStringData(n);
+  return s;
+}
+
 
 // eq - is it = or !=
 // same - is it == or ===
@@ -1313,56 +1321,104 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
   register_name_t dstReg = dst->getAssignedLoc();
   register_name_t srcReg = src->getAssignedLoc();
 
-  // Bool -> Int is just a move
-  if (toType == Type::Int && fromType == Type::Bool) {
-    if (src->isConst()) {
-      int64 constVal = src->getConstValAsRawInt();
-      if (constVal == 0) {
-        m_as.xor_reg64_reg64(dstReg, dstReg);
-      } else {
-        m_as.mov_imm64_reg(1, dstReg);
+  bool srcIsConst = src->isConst();
+
+  if (toType == Type::Int) {
+    if (fromType == Type::Bool) {
+      // Bool -> Int is just a move
+      if (srcIsConst) {
+        int64 constVal = src->getConstValAsRawInt();
+        if (constVal == 0) {
+          m_as.xor_reg64_reg64(dstReg, dstReg);
+        } else {
+          m_as.mov_imm64_reg(1, dstReg);
+        }
+      } else if (srcReg != dstReg) {
+        m_as.mov_reg64_reg64(srcReg, dstReg);
       }
+      return start;
     }
-    return start;
-  }
-  // Int -> Bool
-  if (toType == Type::Bool && fromType == Type::Int) {
-    if (src->isConst()) {
-      int64 constVal = src->getConstValAsInt();
-      if (constVal == 0) {
-        m_as.xor_reg64_reg64(dstReg, dstReg);
-      } else {
-        m_as.mov_imm64_reg(1, dstReg);
-      }
-    } else if (dstReg == srcReg) {
-      m_as.test_reg64_reg64(dstReg, dstReg);
-      m_as.setne(dstReg);
-      m_as.and_imm64_reg64(0xff, dstReg);
-    } else {
-      m_as.xor_reg64_reg64(dstReg, dstReg);
-      m_as.test_reg64_reg64(srcReg, srcReg);
-      m_as.setne(dstReg);
+    if (Type::isString(fromType)) {
+      // Str -> Int
+      // TODO
     }
-    return start;
   }
 
   if (toType == Type::Bool) {
-    ArgGroup args;
-    if (Type::isString(fromType)) {
-      args.ssa(src);
-      cgCallHelper(m_as, (TCA)strToBoolHelper, dst, false, args);
-    } else if (fromType == Type::Arr) {
-      args.ssa(src);
-      cgCallHelper(m_as, (TCA)arrToBoolHelper, dst, false, args);
-    } else if (fromType == Type::Obj) {
-      args.ssa(src);
-      cgCallHelper(m_as, (TCA)objToBoolHelper, dst, false, args);
-    } else if (fromType == Type::Cell) {
-      args.type(src);
-      args.ssa(src);
-      cgCallHelper(m_as, (TCA)cellToBoolHelper, dst, false, args);
+    if (fromType == Type::Null || fromType == Type::Uninit) {
+      // Uninit/Null -> Bool (false)
+      m_as.xor_reg64_reg64(dstReg, dstReg);
+    } else if (fromType == Type::Bool) {
+      // Bool -> Bool (nop!)
+      if (srcIsConst) {
+        int64 constVal = src->getConstValAsRawInt();
+        if (constVal == 0) {
+          m_as.xor_reg64_reg64(dstReg, dstReg);
+        } else {
+          m_as.mov_imm64_reg(1, dstReg);
+        }
+      } else if (srcReg != dstReg) {
+        m_as.mov_reg64_reg64(srcReg, dstReg);
+      }
+    } else if (fromType == Type::Int) {
+      // Int -> Bool
+      if (src->isConst()) {
+        int64 constVal = src->getConstValAsInt();
+        if (constVal == 0) {
+          m_as.xor_reg64_reg64(dstReg, dstReg);
+        } else {
+          m_as.mov_imm64_reg(1, dstReg);
+        }
+      } else if (dstReg == srcReg) {
+        m_as.test_reg64_reg64(dstReg, dstReg);
+        m_as.setne(dstReg);
+        m_as.and_imm64_reg64(0xff, dstReg);
+      } else {
+        m_as.xor_reg64_reg64(dstReg, dstReg);
+        m_as.test_reg64_reg64(srcReg, srcReg);
+        m_as.setne(dstReg);
+      }
     } else {
-      CG_PUNT(Conv);
+      TCA helper = NULL;
+      ArgGroup args;
+      if (fromType == Type::Cell) {
+        // Cell -> Bool
+        args.type(src);
+        helper = (TCA)cellToBoolHelper;
+      } else if (Type::isString(fromType)) {
+        // Str -> Bool
+        helper = (TCA)strToBoolHelper;
+      } else if (fromType == Type::Arr) {
+        // Arr -> Bool
+        helper = (TCA)arrToBoolHelper;
+      } else if (fromType == Type::Obj) {
+        // Obj -> Bool
+        helper = (TCA)objToBoolHelper;
+      } else {
+        // Dbl -> Bool
+        CG_PUNT(Conv);
+      }
+      args.ssa(src);
+      cgCallHelper(m_as, helper, dst, false, args);
+    }
+    return start;
+  }
+  if (Type::isString(toType)) {
+    if (fromType == Type::Int) {
+      // Int -> Str
+      ArgGroup args;
+      args.ssa(src);
+      cgCallHelper(m_as, (TCA)intToStringHelper, dst, false, args);
+    } else if (fromType == Type::Bool) {
+      // Bool -> Str
+      m_as.test_reg64_reg64(srcReg, srcReg);
+      m_as.mov_imm64_reg((uint64)StringData::GetStaticString(""),
+                         dstReg);
+      m_as.mov_imm64_reg((uint64)StringData::GetStaticString("1"),
+                         LinearScan::rScratch);
+      m_as.cmov_reg64_reg64(CC_NZ, LinearScan::rScratch, dstReg);
+    } else {
+      CG_PUNT(Conv_toString);
     }
     return start;
   }
@@ -1602,6 +1658,35 @@ Address CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   return start;
 }
 
+void checkStack(Cell* sp, int numElems) {
+  Cell* firstSp = sp + numElems;
+  for (Cell* c=sp; c < firstSp; c++) {
+    TypedValue* tv = (TypedValue*)c;
+    ASSERT(tvIsPlausible(tv));
+    DataType t = tv->m_type;
+    if (IS_REFCOUNTED_TYPE(t)) {
+      ASSERT(tv->m_data.pstr->getCount() > 0);
+    }
+  }
+}
+
+void checkStackAR(Cell* sp, int numElems) {
+  checkStack(sp+3, numElems); // skip over the actrec
+}
+
+Address CodeGenerator::emitCheckStack(CodeGenerator::Asm& as,
+                                      SSATmp* sp,
+                                      uint32 numElems,
+                                      bool allocActRec) {
+  if (allocActRec) {
+    return cgCallHelper(as, (TCA)checkStackAR, reg::noreg, false,
+                        ArgGroup().ssa(sp).imm(numElems));
+  } else {
+    return cgCallHelper(as, (TCA)checkStack, reg::noreg, false,
+                        ArgGroup().ssa(sp).imm(numElems));
+  }
+}
+
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   const Func* func = fp->m_func;
   if (fp->hasVarEnv()) {
@@ -1633,8 +1718,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
     ASSERT(tvIsPlausible(tv));
     DataType t = tv->m_type;
     if (IS_REFCOUNTED_TYPE(t)) {
-      uint64_t datum = tv->m_data.num;
-      ASSERT(((Variant*)datum)->_count > 0);
+      ASSERT(tv->m_data.pstr->getCount() > 0);
     }
   }
 #endif
@@ -1642,26 +1726,14 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == TranslatorX64::Get()->getCallToExit()) {
-#if 0
-    std::cout << "ret: callToExit helper"
-              << " " << rip
-              << std::endl;
-#endif
     return;
   }
-#if 0
-  const Func* func = fp->m_func;
-  std::cout << "ret: "
-            << func->fullName()->data()
-            << " " << rip
-            << std::endl;
-#endif
   checkFrame(fp, sp, false);
+  checkStack(sp, 1); // check return value
 }
 
 void CodeGenerator::emitTraceRet(CodeGenerator::Asm& as,
                                  register_name_t retAddrReg) {
-#ifdef DEBUG
   as.pushr(retAddrReg);
   // call to a trace function
   as.mov_reg64_reg64(retAddrReg, reg::rdx);
@@ -1670,7 +1742,6 @@ void CodeGenerator::emitTraceRet(CodeGenerator::Asm& as,
   // do the call; may use a trampoline
   m_tx64->emitCall(as, (TCA)traceRet);
   as.popr(retAddrReg);
-#endif
 }
 
 Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
@@ -1982,7 +2053,7 @@ Address CodeGenerator::cgExitGuardFailure(IRInstruction* inst) {
   return cgExitTrace(inst);
 }
 
-DEBUG_ONLY static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
+static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
   TCA patch = as.code.frontier;
   as.jcc8(CC_GE, patch);
   as.int3();
@@ -1990,13 +2061,29 @@ DEBUG_ONLY static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
 }
 
 static
+void emitAssertRefCount(CodeGenerator::Asm& as,
+                        register_name_t base,
+                        int off) {
+  as.cmp_imm32_disp_reg32(HPHP::RefCountStaticValue,
+                          off + TVOFF(_count),
+                          base);
+  TCA patch = as.code.frontier;
+  as.jcc8(CC_BE, patch);
+  as.int3();
+  as.patchJcc8(patch, as.code.frontier);
+}
+
+static
 void emitIncRef(CodeGenerator::Asm& as, register_name_t base, int off) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitAssertRefCount(as, base, off);
+  }
   // emit incref
   as.add_imm32_disp_reg32(1, off + TVOFF(_count), base);
-#ifdef DEBUG
-  // Assert that the ref count is greater than zero
-  emitAssertFlagsNonNegative(as);
-#endif
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // Assert that the ref count is greater than zero
+    emitAssertFlagsNonNegative(as);
+  }
 }
 
 Address CodeGenerator::cgIncRefWork(Type::Tag type, SSATmp* dst, SSATmp* src) {
@@ -2241,6 +2328,9 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type::Tag type,
     //     )
     //     [dataReg + offset(_count)] = scratchReg
 
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitAssertRefCount(m_as, dataReg, 0);
+    }
     // Load _count in scratchReg
     m_as.load_reg64_disp_reg32(dataReg, TVOFF(_count), scratchReg);
 
@@ -2254,10 +2344,10 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type::Tag type,
     if (exit) {
       emitFwdJcc(CC_E, exit);
     }
-#ifdef DEBUG
-    // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(m_as);
-#endif
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      // Assert that the ref count is greater than zero
+      emitAssertFlagsNonNegative(m_as);
+    }
     m_as.store_reg32_disp_reg64(scratchReg, TVOFF(_count), dataReg);
 
   } else {
@@ -2285,14 +2375,17 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type::Tag type,
       m_as.cmp_imm32_disp_reg32(1, TVOFF(_count), dataReg);
       emitFwdJcc(CC_E, exit);
     }
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitAssertRefCount(m_as, dataReg, 0);
+    }
 
     // Decrement _count
     m_as.sub_imm32_disp_reg32(1, TVOFF(_count), dataReg);
 
-#ifdef DEBUG
-    // Assert that the ref count is not less than zero
-    emitAssertFlagsNonNegative(m_as);
-#endif
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      // Assert that the ref count is not less than zero
+      emitAssertFlagsNonNegative(m_as);
+    }
   }
 
   return patchStaticCheck;
@@ -2852,7 +2945,9 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
 
   // Patch the immediate in the code which defines the return address
   retIp.patch((uint64)m_as.code.frontier);
-
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitCheckStack(m_as, inst->getDst(), 1, false);
+  }
   return start;
 }
 
@@ -2885,6 +2980,9 @@ Address CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
     if (m_curTrace->isMain()) {
       TRACE(3, "[counter] 1 reg move in cgSpillStackWork\n");
     }
+  }
+  if (false) {
+    emitCheckStack(m_as, dst, numSpill, allocActRec);
   }
   return start;
 }
@@ -3649,30 +3747,34 @@ Address CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   SSATmp* dst   = inst->getDst();
   SSATmp* cls   = inst->getSrc(0);
-  SSATmp* prop  = inst->getSrc(1);
+  SSATmp* clsName = inst->getSrc(1);
+  SSATmp* prop  = inst->getSrc(2);
 
-  if (cls->isConst() && cls->getType() == Type::StaticStr &&
-      prop->isConst() && prop->getType() == Type::StaticStr) {
+  if (clsName->isConst() && clsName->getType() == Type::StaticStr  &&
+      prop->isConst() && prop->getType() == Type::StaticStr &&
+      cls->getType() == Type::ClassRef) {
 
     const StringData* propName = prop->getConstValAsStr();
     register_name_t dstReg = dst->getAssignedLoc();
-    const StringData* clsName = cls->getConstValAsStr();
-    string sds(Util::toLower(clsName->data()) + ":" +
+    register_name_t srcReg = cls->getAssignedLoc();
+    const StringData* clsNameString = clsName->getConstValAsStr();
+    string sds(Util::toLower(clsNameString->data()) + ":" +
                string(propName->data(), propName->size()));
     StringData sd(sds.c_str(), sds.size(), AttachLiteral);
     CacheHandle ch = SPropCache::alloc(&sd);
 
-    m_as.load_reg64_disp_reg64(LinearScan::rTlPtr, ch, dstReg);
-    m_as.test_reg64_reg64(dstReg, dstReg);
+    register_name_t tmpReg = dstReg == srcReg ? LinearScan::rScratch
+                                              : dstReg;
+    m_as.load_reg64_disp_reg64(LinearScan::rTlPtr, ch, tmpReg);
+    m_as.test_reg64_reg64(tmpReg, tmpReg);
     // jz off to the helper call in astubs
     m_as.jcc(CC_E, m_astubs.code.frontier);
+    if (tmpReg != dstReg) {
+      m_as.mov_reg64_reg64(tmpReg, dstReg);
+    }
     // this helper can raise an invalid property access error
     cgCallHelper(m_astubs, (TCA)SPropCache::lookup, dstReg, true,
-                 ArgGroup().imm(ch)
-                 // XXX don't use arGetContextClass here; context should be
-                 // fixed
-                 .immPtr(arGetContextClass(curFrame()))
-                 .ssa(prop));
+                 ArgGroup().imm(ch).ssa(cls).ssa(prop));
     // TODO make the lookup helper return null on an error, and bail out
     // of the trace if it returns null
     m_astubs.jmp(m_as.code.frontier);
@@ -3684,6 +3786,8 @@ Address CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
 }
 
 Address CodeGenerator::cgLdCls(IRInstruction* inst) {
+  // TODO: See TranslatorX64::emitKnownClassCheck for recent changes
+
   Address start = m_as.code.frontier;
   SSATmp* dst   = inst->getDst();
   SSATmp* className = inst->getSrc(0);
@@ -4287,7 +4391,6 @@ void traceCallback(ActRec* fp, Cell* sp, int64 pcOff, void* rip) {
 }
 
 void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64 pcOff) {
-#ifdef DEBUG
   // call to a trace function
   as.mov_imm64_reg((int64_t)as.code.frontier, reg::rcx);
   as.mov_reg64_reg64(rVmFp, reg::rdi);
@@ -4295,7 +4398,6 @@ void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64 pcOff) {
   as.mov_imm64_reg(pcOff, reg::rdx);
   // do the call; may use a trampoline
   m_tx64->emitCall(as, (TCA)traceCallback);
-#endif
 }
 
 void CodeGenerator::cgTrace(Trace* trace) {

@@ -146,7 +146,7 @@ public:
   SSATmp* genConvToArr(SSATmp* src);
   SSATmp* genConvToObj(SSATmp* src);
   SSATmp* genLdPropAddr(SSATmp* obj, SSATmp* prop);
-  SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* prop);
+  SSATmp* genLdClsPropAddr(SSATmp* cls, SSATmp* clsName, SSATmp* propName);
   SSATmp* genLdClsMethod(SSATmp* methodName, SSATmp* classOpnd);
   SSATmp* genLdClsMethod(SSATmp* className,
                          SSATmp* methodName,

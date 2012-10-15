@@ -572,6 +572,33 @@ void LinearScan::computePreColoringHint() {
       m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
       m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
       break;
+    case Conv:
+    {
+      SSATmp* src = nextNative->getSrc(0);
+      Type::Tag toType = nextNative->getType();
+      Type::Tag fromType = src->getType();
+      if (toType == Type::Bool) {
+        switch (fromType) {
+          case Type::Cell:
+            m_preColoringHint.add(src, 0, 0);
+            m_preColoringHint.add(src, 1, 1);
+            break;
+          case Type::Str:
+          case Type::StaticStr:
+          case Type::Arr:
+          case Type::Obj:
+            m_preColoringHint.add(src, 0, 0);
+            break;
+          default:
+            break;
+        }
+      } else if (Type::isString(toType)) {
+        if (fromType == Type::Int) {
+          m_preColoringHint.add(src, 0, 0);
+        }
+      }
+      break;
+    }
     default:
       break;
   }

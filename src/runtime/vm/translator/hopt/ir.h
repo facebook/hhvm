@@ -120,7 +120,7 @@ static const TCA kIRDirectJccActive = (TCA)0x02;
   OPC(OpMul,             1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
                                            \
   /* convert from src operand's type to destination type */ \
-  OPC(Conv,              1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(Conv,              1,  1,  0,  0,  1,  0,  0,  0,  0,  0) \
                                            \
   /* query operators returning bool */     \
   /* comparisons (binary) */               \
@@ -204,7 +204,7 @@ static const TCA kIRDirectJccActive = (TCA)0x02;
   OPC(LdObjClass,        1,  1,  0,  0,  0,  0,  0,  0,  0,  0) \
   OPC(LdCachedClass,     1,  1,  0,  0,  0,  0,  0,  0,  1,  0) \
   /* helper call to FuncCache::lookup */                    \
-  OPC(LdFunc,            1,  1,  1,  0,  1,  1,  0,  0,  0,  1) \
+  OPC(LdFunc,            1,  0,  1,  0,  1,  1,  0,  0,  0,  1) \
   /* helper call for FPushFuncD(FixedFuncCache::lookup) */  \
   OPC(LdFixedFunc,       1,  1,  1,  0,  0,  0,  0,  0,  0,  1) \
   OPC(LdCurFuncPtr,      1,  1,  0,  0,  0,  0,  0,  0,  1,  0) \
@@ -261,7 +261,7 @@ static const TCA kIRDirectJccActive = (TCA)0x02;
   OPC(Print,             0,  0,  1,  1,  1,  1,  0,  0,  0,  0) \
   OPC(AddElem,           1,  0,  0,  1,  1,  1,  1,  1,  0,  0) \
   OPC(AddNewElem,        1,  0,  0,  1,  1,  1,  1,  0,  0,  0) \
-  OPC(DefCns,            1,  1,  1,  1,  1,  1,  0,  0,  0,  0)/* TODO: consume ref count? */ \
+  OPC(DefCns,            1,  1,  1,  1,  1,  0,  0,  0,  0,  0) \
   OPC(Concat,            1,  0,  0,  1,  1,  1,  1,  1,  0,  0) \
   OPC(ArrayAdd,          1,  0,  0,  1,  1,  1,  1,  0,  0,  0) \
   OPC(DefCls,            0,  1,  1,  0,  1,  0,  0,  0,  0,  0) \
@@ -323,6 +323,13 @@ extern Opcode queryNegateTable[];
 static inline Opcode negateQueryOp(Opcode opc) {
   ASSERT(isQueryOp(opc));
   return queryNegateTable[opc - OpGt];
+}
+
+extern Opcode queryCommuteTable[];
+
+static inline Opcode commuteQueryOp(Opcode opc) {
+  ASSERT(opc >= OpGt && opc <= OpNSame);
+  return queryCommuteTable[opc - OpGt];
 }
 
 namespace TraceExitType {

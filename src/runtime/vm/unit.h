@@ -562,11 +562,6 @@ public: // Translator field access
   static size_t bcOff() { return offsetof(Unit, m_bc); }
 
 private:
-  typedef hphp_hash_map<const StringData*, Id,
-                        string_data_hash, string_data_same> ArrayIdMap;
-  typedef std::vector<void*> MergeablesVec;
-
-private:
   /*
    * pseudoMain's return value, or KindOfUninit if
    * its not known. Also use _count as a flag to
@@ -582,7 +577,6 @@ private:
   const StringData* m_dirpath;
   MD5 m_md5;
   std::vector<NamedEntityPair> m_namedInfo;
-  ArrayIdMap m_array2id;
   std::vector<const ArrayData*> m_arrays;
   PreClassPtrVec m_preClasses;
   void* m_mergeables;
@@ -718,7 +712,9 @@ class UnitEmitter {
                         string_data_hash, string_data_same> LitstrMap;
   LitstrMap m_litstr2id;
   std::vector<const StringData*> m_litstrs;
-  Unit::ArrayIdMap m_array2id;
+  typedef hphp_hash_map<const StringData*, Id,
+                        string_data_hash, string_data_same> ArrayIdMap;
+  ArrayIdMap m_array2id;
   typedef struct {
     const StringData* serialized;
     const ArrayData* array;

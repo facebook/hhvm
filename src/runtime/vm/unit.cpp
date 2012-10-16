@@ -1758,7 +1758,7 @@ Id UnitEmitter::mergeArray(ArrayData* a, const StringData* key /* = NULL */) {
     key = StringData::GetStaticString(s.get());
   }
 
-  Unit::ArrayIdMap::const_iterator it = m_array2id.find(key);
+  ArrayIdMap::const_iterator it = m_array2id.find(key);
   if (it == m_array2id.end()) {
     a = ArrayData::GetScalarArray(a, key);
 
@@ -2037,7 +2037,6 @@ Unit* UnitEmitter::create() {
     np.second = NULL;
     u->m_namedInfo.push_back(np);
   }
-  u->m_array2id = m_array2id;
   for (unsigned i = 0; i < m_arrays.size(); ++i) {
     u->m_arrays.push_back(m_arrays[i].array);
   }

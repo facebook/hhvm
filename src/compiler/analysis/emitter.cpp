@@ -4851,7 +4851,8 @@ void EmitterVisitor::emitPostponedMeths() {
             m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                         false, 0, 0);
           }
-          e.This();
+          e.CheckThis();
+          m_evalStack.push(StackSym::H);
           m_evalStack.push(StackSym::T);
           m_evalStack.setString(name);
           markProp(e);
@@ -5133,7 +5134,8 @@ void EmitterVisitor::emitPostponedClosureCtors() {
           m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                       false, 0, 0);
         }
-        e.This();
+        e.CheckThis();
+        m_evalStack.push(StackSym::H);
         m_evalStack.push(StackSym::T);
         m_evalStack.setString(useVars[i].first);
         markProp(e);

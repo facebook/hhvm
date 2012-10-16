@@ -337,6 +337,7 @@ enum Operands {
   DontBreakStack1 = 1 << 14, // Dont break a tracelet on behalf of stack1 input
   IgnoreInnerType = 1 << 15, // Instruction doesnt care about the inner types
   DontGuardAny    = 1 << 16, // Dont force a guard for any input
+  This            = 1 << 17, // Input to CheckThis
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
   StackCufSafe = StackIns1 | FStack
@@ -1066,7 +1067,7 @@ static const struct {
   /*** 13. Miscellaneous instructions ***/
 
   { OpThis,        {None,             Stack1,       OutThisObject,     1 }},
-  { OpCheckThis,   {None,             None,         OutNone,           0 }},
+  { OpCheckThis,   {This,             None,         OutNone,           0 }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown,        0 }},
   { OpStaticLoc,
@@ -1787,6 +1788,9 @@ void Translator::getInputs(Tracelet& t,
     for (int i = inputs.size(); i--; ) {
       inputs[i].dontGuard = true;
     }
+  }
+  if (input & This) {
+    inputs.push_back(Location(Location::This));
   }
 }
 

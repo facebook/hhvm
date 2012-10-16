@@ -338,7 +338,7 @@ class TranslatorX64 : public Translator
                        const MInstrInfo& mii) const;
   void emitBaseLCR(const Tracelet& t, const NormalizedInstruction& ni,
                    const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
-  void emitBaseH(LazyScratchReg& rBase);
+  void emitBaseH(unsigned iInd, LazyScratchReg& rBase);
   void emitBaseN(const Tracelet& t, const NormalizedInstruction& ni,
                  const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
   void emitBaseG(const Tracelet& t, const NormalizedInstruction& ni,

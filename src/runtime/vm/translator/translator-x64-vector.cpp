@@ -250,9 +250,9 @@ void TranslatorX64::emitBaseLCR(const Tracelet& t,
   }
 }
 
-void TranslatorX64::emitBaseH(LazyScratchReg& rBase) {
-  rBase.alloc();
-  a.load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rBase);
+void TranslatorX64::emitBaseH(unsigned iInd, LazyScratchReg& rBase) {
+  m_regMap.allocInputReg(*m_curNI, iInd);
+  rBase.alloc(getReg(m_curNI->inputs[iInd]->location));
   m_vecState->setObj();
 }
 
@@ -476,7 +476,7 @@ void TranslatorX64::emitBaseOp(const Tracelet& t,
   LocationCode lCode = ni.immVec.locationCode();
   switch (lCode) {
   case LL: case LC: case LR: emitBaseLCR(t, ni, mii, iInd, rBase);    break;
-  case LH:                   emitBaseH(rBase);                        break;
+  case LH:                   emitBaseH(iInd, rBase);                  break;
   case LGL: case LGC:        emitBaseG(t, ni, mii, iInd, rBase);      break;
   case LNL: case LNC:        emitBaseN(t, ni, mii, iInd, rBase);      break;
   case LSL: case LSC:        emitBaseS(t, ni, iInd, ctxFixed, rBase); break;

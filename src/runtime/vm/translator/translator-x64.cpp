@@ -8062,10 +8062,10 @@ TranslatorX64::translateThis(const Tracelet &t,
 void
 TranslatorX64::translateCheckThis(const Tracelet& t,
                                   const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 1 &&
+         i.inputs[0]->location == Location(Location::This));
   if (i.guardedThis) return;
-  ScratchReg rThis(m_regMap);
-  a.load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rThis);
-  emitThisCheck(i, *rThis);
+  emitThisCheck(i, getReg(i.inputs[0]->location));
 }
 
 void

@@ -55,6 +55,11 @@ inline int64 x_hphp_get_thread_id() {
   return f_hphp_get_thread_id();
 }
 
+inline int x_hphp_gettid() {
+  FUNCTION_INJECTION_BUILTIN(hphp_gettid);
+  return f_hphp_gettid();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

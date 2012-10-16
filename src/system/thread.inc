@@ -7,6 +7,7 @@
 "hphp_thread_is_warmup_enabled", T(Boolean), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Whether current thread is warmed up with some PHP document.\n *\n * @return     bool    TRUE if warmed up already, FALSE otherwise.\n */", 
 "hphp_thread_set_warmup_enabled", T(Void), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Enables warmup document.\n *\n */", 
 "hphp_get_thread_id", T(Int64), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Gets current thread's ID.\n *\n * @return     int     The pthread_self() return.\n */", 
+"hphp_gettid", T(Int32), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Gets the kernel thread id of the current running thread.\n *\n * @return     int     The tid of the current running thread. In Linux,\n *                     this is gettid()\n */", 
 
 #elif EXT_TYPE == 1
 

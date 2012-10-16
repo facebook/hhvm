@@ -126,6 +126,17 @@ DefineFunction(
     'taint_observer' => false,
   ));
 
+DefineFunction(
+  array(
+    'name'   => "hphp_gettid",
+    'desc'   => "Gets the kernel thread id of the current running thread.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "The tid of the current running thread. In Linux, this is gettid()",
+    ),
+    'taint_observer' => false,
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

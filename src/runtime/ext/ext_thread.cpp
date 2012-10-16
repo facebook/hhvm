@@ -60,5 +60,9 @@ int64 f_hphp_get_thread_id() {
   return  (unsigned long)Process::GetThreadId();
 }
 
+int32 f_hphp_gettid() {
+    return (unsigned int)Process::GetThreadPid();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

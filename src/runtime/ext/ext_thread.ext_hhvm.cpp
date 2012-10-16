@@ -246,6 +246,40 @@ TypedValue* fg_hphp_get_thread_id(HPHP::VM::ActRec *ar) {
 
 
 
+/*
+int HPHP::f_hphp_gettid()
+_ZN4HPHP13f_hphp_gettidEv
+
+(return value) => rax
+*/
+
+int fh_hphp_gettid() asm("_ZN4HPHP13f_hphp_gettidEv");
+
+TypedValue* fg_hphp_gettid(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfInt64;
+      rv.m_data.num = (long long)fh_hphp_gettid();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("hphp_gettid", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
 
 } // !HPHP
 

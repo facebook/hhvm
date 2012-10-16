@@ -259,10 +259,10 @@ VarEnv::~VarEnv() {
            this,
            isGlobalScope() ? "global scope" : "local scope");
   ASSERT(m_restoreLocations.empty());
-  ASSERT(g_vmContext->m_topVarEnv == this);
-  g_vmContext->m_topVarEnv = m_previous;
+  if (g_vmContext->m_topVarEnv == this) {
+    g_vmContext->m_topVarEnv = m_previous;
+  }
 
-  ASSERT(m_cfp == NULL);
   if (!isGlobalScope()) {
     if (LIKELY(!m_malloced)) {
       varenv_arena().endFrame();
@@ -653,9 +653,6 @@ Stack::flush() {
 
 void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
   const {
-  if (tv->_count != 0) {
-    os << " ??? _count " << tv->_count << " ";
-  }
   if (tv->m_type < MinDataType || tv->m_type > MaxNumDataTypes) {
     os << " ??? type " << tv->m_type << "\n";
     return;
@@ -784,9 +781,11 @@ void Stack::toStringFrag(std::ostream& os, const ActRec* fp,
   //
   // Use depth-first recursion to get the output order correct.
 
-  tv = (TypedValue*)((uintptr_t)fp
-                - (uintptr_t)(fp->m_func->numLocals() * sizeof(TypedValue))
-                - (uintptr_t)(fp->m_func->numIterators() * sizeof(Iter)));
+  if (LIKELY(!fp->m_func->isGenerator())) {
+    tv = frameStackBase(fp);
+  } else {
+    tv = generatorStackBase(fp);
+  }
 
   for (tv--; (uintptr_t)tv >= (uintptr_t)top; tv--) {
     os << " ";
@@ -796,7 +795,16 @@ void Stack::toStringFrag(std::ostream& os, const ActRec* fp,
 
 void Stack::toStringAR(std::ostream& os, const ActRec* fp,
                        const FPIEnt *fe, const TypedValue* top) const {
-  ActRec *ar = arAtOffset(fp, -fe->m_fpOff);
+  ActRec *ar;
+  if (LIKELY(!fp->m_func->isGenerator())) {
+    ar = arAtOffset(fp, -fe->m_fpOff);
+  } else {
+    // Deal with generators' split stacks. See unwindAR for reasoning.
+    TypedValue* genStackBase = generatorStackBase(fp);
+    ActRec* fakePrevFP =
+      (ActRec*)(genStackBase + fp->m_func->numSlotsInFrame());
+    ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
+  }
 
   if (fe->m_parentIndex != -1) {
     toStringAR(os, fp, &fp->m_func->fpitab()[fe->m_parentIndex],
@@ -910,9 +918,19 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
                                PC& pc, Fault& f) {
   const Func* func = fp->m_func;
   TRACE(1, "unwindFrag: func %s\n", func->fullName()->data());
-  TypedValue* evalTop = (TypedValue*)((uintptr_t)fp
-                  - (uintptr_t)(func->numLocals()) * sizeof(TypedValue)
-                  - (uintptr_t)(func->numIterators() * sizeof(Iter)));
+
+  bool unwindingGeneratorFrame = func->isGenerator();
+  TypedValue* evalTop;
+  if (UNLIKELY(unwindingGeneratorFrame)) {
+    ASSERT(!isValidAddress((uintptr_t)fp));
+    evalTop = generatorStackBase(fp);
+  } else {
+    ASSERT(isValidAddress((uintptr_t)fp));
+    evalTop = frameStackBase(fp);
+  }
+  ASSERT(isValidAddress((uintptr_t)evalTop));
+  ASSERT(evalTop >= m_top);
+
   while (m_top < evalTop) {
     popTV();
   }
@@ -945,11 +963,14 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
     fp->getThis()->setNoDestruct();
   }
 
-  // onFunctionExit might throw
-  try {
-    frame_free_locals_inl(fp, func->numLocals());
-  } catch (...) {}
-  ndiscard(func->numSlotsInFrame());
+  if (LIKELY(!unwindingGeneratorFrame)) {
+    // A generator's locals don't live on this stack.
+    // onFunctionExit might throw
+    try {
+      frame_free_locals_inl(fp, func->numLocals());
+    } catch (...) {}
+    ndiscard(func->numSlotsInFrame());
+  }
   return UnwindPropagate;
 }
 
@@ -959,11 +980,22 @@ void Stack::unwindARFrag(ActRec* ar) {
   }
 }
 
-void Stack::unwindAR(ActRec* fp, int offset, const FPIEnt* fe) {
+void Stack::unwindAR(ActRec* fp, const FPIEnt* fe) {
   while (true) {
-    TRACE(1, "unwindAR: function %s, offset %d, pIdx %d\n",
-          fp->m_func->name()->data(), offset, fe->m_parentIndex);
-    ActRec* ar = arAtOffset(fp, -fe->m_fpOff);
+    TRACE(1, "unwindAR: function %s, pIdx %d\n",
+          fp->m_func->name()->data(), fe->m_parentIndex);
+    ActRec* ar;
+    if (LIKELY(!fp->m_func->isGenerator())) {
+      ar = arAtOffset(fp, -fe->m_fpOff);
+    } else {
+      // fp is pointing into the continuation object. Since fpOff is given as an
+      // offset from the frame pointer as if it were in the normal place on the
+      // main stack, we have to reconstruct that "normal place".
+      TypedValue* genStackBase = generatorStackBase(fp);
+      ActRec* fakePrevFP =
+        (ActRec*)(genStackBase + fp->m_func->numSlotsInFrame());
+      ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
+    }
     ASSERT((TypedValue*)ar >= m_top);
     unwindARFrag(ar);
 
@@ -991,7 +1023,7 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
             offset, fp);
     const FPIEnt *fe = fp->m_func->findFPI(offset);
     if (fe != NULL) {
-      unwindAR(fp, offset, fe);
+      unwindAR(fp, fe);
     }
     if (unwindFrag(fp, offset, pc, f) == UnwindResumeVM) {
       return UnwindResumeVM;
@@ -1000,9 +1032,13 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
     SKTRACE(1, sk, "unwindFrame: fp %p prevFp %p\n",
             fp, prevFp);
     Offset prevOff = fp->m_soff + prevFp->m_func->base();
-    // We don't need to refcount the AR's refcounted members; that was
-    // taken care of in frame_free_locals, called from unwindFrag()
-    discardAR();
+    if (LIKELY(!fp->m_func->isGenerator())) {
+      // We don't need to refcount the AR's refcounted members; that was
+      // taken care of in frame_free_locals, called from unwindFrag().
+      // If it's a generator, the AR doesn't live on this stack.
+      discardAR();
+    }
+
     if (prevFp == fp) {
       TRACE(1, "unwindFrame: reached the end of this nesting's ActRec "
                "chain\n");
@@ -1010,6 +1046,7 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault& f) {
     }
     // Keep the pc up to date while unwinding.
     const Func *prevF = prevFp->m_func;
+    ASSERT(isValidAddress((uintptr_t)prevFp) || prevF->isGenerator());
     pc = prevF->unit()->at(prevF->base() + fp->m_soff);
     fp = prevFp;
     offset = prevOff;
@@ -1031,6 +1068,24 @@ bool Stack::wouldOverflow(int numCells) const {
   return diff < 0;
 }
 
+TypedValue* Stack::frameStackBase(const ActRec* fp) {
+  const Func* func = fp->m_func;
+  ASSERT(!func->isGenerator());
+  return (TypedValue*)((uintptr_t)fp
+                       - (uintptr_t)(func->numLocals()) * sizeof(TypedValue)
+                       - (uintptr_t)(func->numIterators() * sizeof(Iter)));
+}
+
+TypedValue* Stack::generatorStackBase(const ActRec* fp) {
+  // We know generators are always called from a function with an empty stack.
+  // So we find the caller's FP, compensate for its locals, and then we've found
+  // the base of the generator's stack.
+  ASSERT(fp->m_func->isGenerator());
+  ActRec* callerFP = (ActRec*)fp->m_savedRbp;
+  return (TypedValue*)callerFP - callerFP->m_func->numSlotsInFrame();
+}
+
+
 __thread RequestArenaStorage s_requestArenaStorage;
 __thread VarEnvArenaStorage s_varEnvArenaStorage;
 
@@ -1045,9 +1100,20 @@ using namespace HPHP::MethodLookup;
 
 ActRec* VMExecutionContext::arGetSfp(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
-  if (prevFrame >= m_stack.getStackLowAddress() &&
-      prevFrame < m_stack.getStackHighAddress()) {
-    ASSERT((char*)prevFrame >= ((char*)ar + sizeof(ActRec)));
+  if (LIKELY(prevFrame >= m_stack.getStackLowAddress() &&
+             prevFrame < m_stack.getStackHighAddress())) {
+    return prevFrame;
+  }
+
+  // Generators have their frames outside the main stack, so prevFrame might
+  // point there. We need to be careful to distinguish this from a prevFrame
+  // that points into the C++ stack.
+  if (!prevFrame) {
+    return const_cast<ActRec*>(ar);
+  }
+  int64* magicPtr = (int64*)(prevFrame + 1);
+  if (*magicPtr == c_Continuation::kMagic) {
+    ASSERT(prevFrame->m_func->isGenerator());
     return prevFrame;
   }
   return const_cast<ActRec*>(ar);
@@ -2154,7 +2220,13 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
   }
   ActRec* prevFp = arGetSfp(fp);
   if (prevFp != fp) {
-    if (prevSp) *prevSp = (TypedValue*)&fp[1];
+    if (prevSp) {
+      if (UNLIKELY(fp->m_func->isGenerator())) {
+        *prevSp = (TypedValue*)prevFp - prevFp->m_func->numSlotsInFrame();
+      } else {
+        *prevSp = (TypedValue*)&fp[1];
+      }
+    }
     if (prevPc) *prevPc = prevFp->m_func->base() + fp->m_soff;
     return prevFp;
   }
@@ -2613,6 +2685,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   }
   Func* func = unit->getMain(cls);
   ASSERT(!func->isBuiltin());
+  ASSERT(!func->isGenerator());
   ar->m_func = func;
   ar->initNumArgs(0);
   ASSERT(getFP());
@@ -4379,6 +4452,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {
   NEXT();
   uint soff = m_fp->m_soff;
+  ASSERT(!m_fp->m_func->isGenerator());
+
   // Call the runtime helpers to free the local variables and iterators
   frame_free_locals_inl(m_fp, m_fp->m_func->numLocals());
   ActRec* sfp = arGetSfp(m_fp);
@@ -5942,6 +6017,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     checkStack(m_stack, func);
 
     ASSERT(ar->m_savedRbp == (uint64_t)m_fp);
+    ASSERT(!ar->m_func->isGenerator());
     ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
           m_fp->m_func->unit()->entry(),
@@ -6585,39 +6661,62 @@ VMExecutionContext::createContinuation(ActRec* fp,
   static const StringData* closure = StringData::GetStaticString("{closure}");
   const StringData* origName =
     origFunc->isClosureBody() ? closure : origFunc->fullName();
-  int nLocals = genFunc->numNamedLocals() - 1; //Don't need space for __cont__
-  Class* genClass = isMethod ? SystemLib::s_MethodContinuationClass
-                             : SystemLib::s_FunctionContinuationClass;
-  c_Continuation* cont =
-    c_Continuation::alloc(genClass, nLocals);
-  memset(cont->locals(), 0, sizeof(TypedValue) * nLocals);
+  int nLocals = genFunc->numLocals();
+  int nIters = genFunc->numIterators();
+  Class* genClass = SystemLib::s_ContinuationClass;
+  c_Continuation* cont = c_Continuation::alloc(genClass, nLocals, nIters);
   cont->create((int64)0, (int64)genFunc, isMethod,
                StrNR(const_cast<StringData*>(origName)), obj, args);
   cont->incRefCount();
   cont->setNoDestruct();
-  if (isMethod) {
-    Class* cls = frameStaticClass(fp);
-    ASSERT(cls);
-    cont->setVMCalledClassRaw((intptr_t)cls | 0x1ll);
-  }
 
-  cont->m_nLocals = nLocals;
+  // The ActRec corresponding to the generator body lives as long as the object
+  // does. We set it up once, here, and then just change FP to point to it when
+  // we enter the generator body.
+  ActRec* ar = cont->actRec();
+  ar->m_func = genFunc;
+  if (isMethod) {
+    if (obj.get()) {
+      ObjectData* objData = obj.get();
+      ar->setThis(objData);
+      objData->incRefCount();
+    } else {
+      ar->setClass(frameStaticClass(fp));
+    }
+  } else {
+    ar->setThis(NULL);
+  }
+  ar->initNumArgs(1);
+  ar->setVarEnv(NULL);
+
+  TypedValue* contLocal = frame_local(ar, 0);
+  contLocal->m_type = KindOfObject;
+  contLocal->m_data.pobj = cont;
+  // Do not incref the continuation here! Doing so will create a reference
+  // cycle, since this reference is a local in the continuation frame and thus
+  // will be decreffed when the continuation is destroyed. The corresponding
+  // non-decref is in ~c_Continuation.
+
   return cont;
 }
 
 static inline void setContVar(const Func* genFunc,
                               const StringData* name,
-                              CVarRef value,
-                              int nLocals,
+                              TypedValue* src,
                               c_Continuation* cont) {
-  Variant* dest;
-  Id id = genFunc->lookupVarId(name);
-  if (id != kInvalidId) {
-    dest = &tvAsVariant(&cont->locals()[nLocals - id]);
+  Id destId = genFunc->lookupVarId(name);
+  if (destId != kInvalidId) {
+    tvDup(src, frame_local(cont->actRec(), destId));
   } else {
-    dest = &cont->getVars().lval(*(String*)&name);
+    ActRec *contFP = cont->actRec();
+    if (!contFP->hasVarEnv()) {
+      // We pass skipInsert to this VarEnv because it's going to exist
+      // independent of the chain; i.e. we can't stack-allocate it. We link it
+      // into the chain in UnpackCont, and take it out in PackCont.
+      contFP->setVarEnv(VarEnv::createLazyAttach(contFP, true));
+    }
+    contFP->getVarEnv()->setWithRef(name, src);
   }
-  dest->setWithRef(value);
 }
 
 c_Continuation*
@@ -6631,24 +6730,24 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   // space at the end of the object using memcpy. Any variables in a
   // VarEnv are saved and restored from m_vars as usual.
   static const StringData* thisStr = StringData::GetStaticString("this");
-  int nLocals = cont->m_nLocals;
+  int nLocals = genFunc->numLocals();
   bool skipThis;
   if (fp->hasVarEnv()) {
     Stats::inc(Stats::Cont_CreateVerySlow);
     Array definedVariables = fp->getVarEnv()->getDefinedVariables();
     skipThis = definedVariables.exists("this", true);
+
     for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
       setContVar(genFunc, iter.first().getStringData(),
-                 iter.secondRef(), nLocals, cont);
+                 const_cast<TypedValue*>(iter.secondRef().asTypedValue()), cont);
     }
   } else {
     skipThis = origFunc->lookupVarId(thisStr) != kInvalidId;
     for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
       setContVar(genFunc, origFunc->localVarName(i),
-                 tvAsCVarRef(frame_local(fp, i)), nLocals, cont);
+                 frame_local(fp, i), cont);
     }
   }
-  cont->m_hasExtraVars = !cont->getVars().empty();
 
   // If $this is used as a local inside the body and is not provided
   // by our containing environment, just prefill it here instead of
@@ -6656,7 +6755,7 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   if (!skipThis && cont->m_obj.get()) {
     Id id = genFunc->lookupVarId(thisStr);
     if (id != kInvalidId) {
-      tvAsVariant(&cont->locals()[nLocals - id]) = cont->m_obj;
+      tvAsVariant(&cont->locals()[nLocals - id - 1]) = cont->m_obj;
     }
   }
   return cont;
@@ -6689,77 +6788,65 @@ static inline c_Continuation* frame_continuation(ActRec* fp) {
   return static_cast<c_Continuation*>(obj);
 }
 
-int VMExecutionContext::unpackContinuation(c_Continuation* cont,
-                                           TypedValue* dest) {
-  // Teleport the references that live in the continuation object to
-  // the runtime stack so we don't have to do any refcounting in the
-  // fast case
-  int nCopy = cont->m_nLocals;
-  TypedValue* src = cont->locals();
-  memcpy(dest, src, nCopy * sizeof(TypedValue));
-  memset(src, 0x0, nCopy * sizeof(TypedValue));
+static inline c_Continuation* this_continuation(ActRec* fp) {
+  ObjectData* obj = fp->getThis();
+  ASSERT(dynamic_cast<c_Continuation*>(obj));
+  return static_cast<c_Continuation*>(obj);
+}
 
-  ASSERT(cont->m_hasExtraVars == !cont->getVars().empty());
-  if (UNLIKELY(cont->m_hasExtraVars)) {
-    Stats::inc(Stats::Cont_UnpackVerySlow);
-    VarEnv* env = g_vmContext->getVarEnv(false);
-    for (ArrayIter iter(cont->getVars()); !iter.end(); iter.next()) {
-      StringData* key = iter.first().getStringData();
-      TypedValue* value = iter.secondRef().getTypedAccessor();
-      env->setWithRef(key, value);
-    }
-    cont->getVars().clear();
+void VMExecutionContext::iopContEnter(PC& pc) {
+  NEXT();
+
+  // The stack must be empty! Or else generatorStackBase() won't work!
+  ASSERT(m_stack.top() == (TypedValue*)m_fp - m_fp->m_func->numSlotsInFrame());
+
+  // Do linkage of the continuation's AR.
+  ASSERT(m_fp->hasThis());
+  c_Continuation* cont = this_continuation(m_fp);
+  ActRec* contAR = cont->actRec();
+  arSetSfp(contAR, m_fp);
+
+  contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc)
+    - (uintptr_t)m_fp->m_func->base();
+  contAR->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame();
+
+  m_fp = contAR;
+  pc = contAR->m_func->getEntry();
+}
+
+void VMExecutionContext::iopContExit(PC& pc) {
+  NEXT();
+
+  ActRec* prevFp = arGetSfp(m_fp);
+  pc = prevFp->m_func->getEntry() + m_fp->m_soff;
+  m_fp = prevFp;
+}
+
+void VMExecutionContext::unpackContVarEnvLinkage(ActRec* fp) {
+  // This is called from the TC, and is assumed not to reenter.
+  if (fp->hasVarEnv()) {
+    VarEnv*& topVE = g_vmContext->m_topVarEnv;
+    fp->getVarEnv()->setPrevious(topVE);
+    topVE = fp->getVarEnv();
   }
-
-  return cont->m_label;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopUnpackCont(PC& pc) {
   NEXT();
-  ASSERT(!m_fp->hasVarEnv());
   c_Continuation* cont = frame_continuation(m_fp);
 
-  int nCopy = m_fp->m_func->numNamedLocals() - 1;
-  int label = unpackContinuation(cont, frame_local(m_fp, nCopy));
+  unpackContVarEnvLinkage(m_fp);
 
   // Return the label in a stack cell
   TypedValue* ret = m_stack.allocTV();
   ret->m_type = KindOfInt64;
-  ret->m_data.num = label;
+  ret->m_data.num = cont->m_label;
 }
 
-void VMExecutionContext::packContinuation(c_Continuation* cont,
-                                          ActRec* fp,
-                                          TypedValue* value,
-                                          int label) {
-  int nCopy = cont->m_nLocals;
-  TypedValue* src = frame_local(fp, nCopy);
-  TypedValue* dest = cont->locals();
-  memcpy(dest, src, nCopy * sizeof(TypedValue));
-  bzero(src, nCopy * sizeof(TypedValue));
-
-  // If we have a varEnv, stick any non-named locals into cont->getVars()
-  if (UNLIKELY(fp->hasVarEnv())) {
-    Stats::inc(Stats::Cont_PackVerySlow);
-    const Func* f = fp->m_func;
-    ASSERT(f != NULL);
-    ASSERT(cont->getVars().empty());
-    Array vars = fp->getVarEnv()->getDefinedVariables();
-    for (ArrayIter iter(vars); !iter.end(); iter.next()) {
-      Variant key = iter.first();
-      CVarRef value = iter.secondRef();
-      if (f->lookupVarId(key.getStringData()) == kInvalidId) {
-        if (value.m_type == KindOfRef) {
-          cont->getVars().setRef(key, value);
-        } else {
-          cont->getVars().add(key, value);
-        }
-      }
-    }
-    cont->m_hasExtraVars = !cont->getVars().empty();
+void VMExecutionContext::packContVarEnvLinkage(ActRec* fp) {
+  if (fp->hasVarEnv()) {
+    g_vmContext->m_topVarEnv = fp->getVarEnv()->previous();
   }
-
-  cont->c_Continuation::t_update(label, tvAsCVarRef(value));
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
@@ -6767,7 +6854,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
   DECODE_IVA(label);
   c_Continuation* cont = frame_continuation(m_fp);
 
-  packContinuation(cont, m_fp, m_stack.topTV(), label);
+  packContVarEnvLinkage(m_fp);
+  cont->c_Continuation::t_update(label, tvAsCVarRef(m_stack.topTV()));
   m_stack.popTV();
 }
 
@@ -6791,39 +6879,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContDone(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
   cont->t_done();
-}
-
-static inline c_Continuation* this_continuation(ActRec* fp) {
-  ObjectData* obj = fp->getThis();
-  ASSERT(dynamic_cast<c_Continuation*>(obj));
-  return static_cast<c_Continuation*>(obj);
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopFPushContFunc(PC& pc) {
-  NEXT();
-  DECODE_IVA(nArgs);
-  ASSERT(nArgs == 1);
-
-  c_Continuation* cont = this_continuation(m_fp);
-  Func* func = cont->m_vmFunc;
-  func->validate();
-  ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
-  ar->m_func = func;
-  if (cont->m_isMethod) {
-    if (cont->m_obj.get()) {
-      ar->setThis(cont->m_obj.get());
-      cont->m_obj.get()->incRefCount();
-    } else {
-      // m_vmCalledClass already has its low bit set so we want to
-      // bypass setClass().
-      ar->m_cls = (Class*)cont->getVMCalledClassRaw();
-    }
-  } else {
-    ar->setThis(NULL);
-  }
-  ar->initNumArgs(1);
-  ar->setVarEnv(NULL);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {

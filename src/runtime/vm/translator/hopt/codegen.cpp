@@ -1268,7 +1268,7 @@ Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
 
       if (eq) cgCallHelper(m_as, (TCA)cgIntEqStringHelper,  dst, true, args);
       else    cgCallHelper(m_as, (TCA)cgIntNeqStringHelper, dst, true, args);
-    } 
+    }
   } else if (type1 == Type::Obj && type2 == Type::Obj) {
     if (eq) CG_PUNT(Eq_obj);
     else    CG_PUNT(Neq_obj);
@@ -1750,7 +1750,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   // TODO: validate this pointer from actrec
   int numLocals = func->numLocals();
   DEBUG_ONLY Cell* firstSp = ((Cell*)fp) - func->numSlotsInFrame();
-  ASSERT(sp <= firstSp);
+  ASSERT(sp <= firstSp || func->isGenerator());
   if (checkLocals) {
     int numParams = func->numParams();
     for (int i=0; i < numLocals; i++) {
@@ -4274,33 +4274,7 @@ Address CodeGenerator::cgDefFunc(IRInstruction* inst) {
 }
 
 Address CodeGenerator::cgLdContThisOrCls(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  register_name_t contReg = inst->getSrc(0)->getAssignedLoc();
-  register_name_t outReg = inst->getDst()->getAssignedLoc();
-
-  // We can use outReg as scratch if it's != our input reg
-  register_name_t scratch = contReg != outReg ? outReg : LinearScan::rScratch;
-  m_as.load_reg64_disp_reg64(contReg, CONTOFF(m_obj), scratch);
-  m_as.test_reg64_reg64(scratch, scratch);
-  Address thisJmp = m_as.code.frontier;
-  m_as.jnz8(thisJmp); // jnz have_this
-  // no_this:
-  m_as.load_reg64_disp_reg64(contReg, CONTOFF(m_vmCalledClass), scratch);
-  Address skipJmp = m_as.code.frontier;
-  m_as.jmp8(skipJmp); // jmp end
-
-  // have_this:
-  m_as.patchJcc8(thisJmp, m_as.code.frontier);
-  // We know it's an object and can't be static so a raw incref is ok
-  emitIncRef(m_as, scratch);
-
-  // end:
-  m_as.patchJmp8(skipJmp, m_as.code.frontier);
-
-  if (scratch != outReg) {
-    m_as.mov_reg64_reg64(scratch, outReg);
-  }
-  return start;
+  not_reached();
 }
 
 Address CodeGenerator::cgCreateCont(IRInstruction* inst) {
@@ -4351,34 +4325,15 @@ Address CodeGenerator::cgFillContThis(IRInstruction* inst) {
 }
 
 Address CodeGenerator::cgUnpackCont(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  cgCallHelper(m_as, (TCA)VMExecutionContext::unpackContinuation,
-               inst->getDst(), true,
-               ArgGroup().ssa(inst->getSrc(0))
-                         .ssa(inst->getSrc(1)));
-  return start;
+  not_reached();
 }
 
 Address CodeGenerator::cgExitOnContVars(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  SSATmp* cont = inst->getSrc(0);
-  LabelInstruction* label = inst->getLabel();
-
-  m_as.test_imm32_disp_reg32(0x1, CONTOFF(m_hasExtraVars),
-                             cont->getAssignedLoc());
-  emitFwdJcc(CC_NZ, label);
-  return start;
+  not_reached();
 }
 
 Address CodeGenerator::cgPackCont(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  cgCallHelper(m_as, (TCA)VMExecutionContext::packContinuation,
-               reg::noreg, true,
-               ArgGroup().ssa(inst->getSrc(0))
-                         .ssa(inst->getSrc(1))
-                         .ssa(inst->getSrc(2))
-                         .ssa(inst->getSrc(3)));
-  return start;
+  not_reached();
 }
 
 Address CodeGenerator::cgContRaiseCheck(IRInstruction* inst) {

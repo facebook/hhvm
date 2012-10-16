@@ -79,8 +79,14 @@ private:
           (void*)tca, fixup.m_pcOffset, fixup.m_spOffset);
     ASSERT(fixup.m_spOffset >= 0);
     outRegs->m_pc = pc(ar, f, fixup);
-    outRegs->m_sp = (TypedValue*)ar - fixup.m_spOffset;
     outRegs->m_fp = ar;
+
+    if (UNLIKELY(f->isGenerator())) {
+      TypedValue* genStackBase = Stack::generatorStackBase(ar);
+      outRegs->m_sp = genStackBase - fixup.m_spOffset;
+    } else {
+      outRegs->m_sp = (TypedValue*)ar - fixup.m_spOffset;
+    }
   }
 
   TreadHashMap<CTCA,Fixup,ctca_identity_hash> m_fixups;

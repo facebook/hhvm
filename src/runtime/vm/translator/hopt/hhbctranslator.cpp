@@ -534,8 +534,7 @@ SSATmp* HhbcTranslator::getContLocals(SSATmp* cont) {
   /* Using this before iterating over each of the locals allows us to save code
    * space: even with only one local the net effect is 3 bytes saved, with up
    * to 6 more bytes save for each additional local. */
-  return m_tb.genLdPropAddr(cont, m_tb.genDefConst<int64>(
-                              c_Continuation::localsOffset()));
+  not_reached();
 }
 
 void HhbcTranslator::emitCreateCont(bool getArgs,
@@ -546,8 +545,8 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   const StringData* genName = lookupStringId(funNameStrId);
   const Func* origFunc = curFunc();
   const Func* genFunc = origFunc->getGeneratorBody(genName);
-  int origLocals = origFunc->numNamedLocals();
-  int genLocals = genFunc->numNamedLocals() - 1;
+  int origLocals = origFunc->numLocals();
+  int genLocals = genFunc->numLocals();
 
   SSATmp* cont = m_tb.genCreateCont(getArgs, origFunc, genFunc);
 
@@ -562,11 +561,11 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
     SSATmp* locals = getContLocals(cont);
     for (int i = 0; i < origLocals; ++i) {
       SSATmp* loc = m_tb.genIncRef(m_tb.genLdLoc(i, Type::Gen, NULL));
-      m_tb.genStMem(locals, cellsToBytes(genLocals - params[i]), loc, true);
+      m_tb.genStMem(locals, cellsToBytes(genLocals - params[i] - 1), loc, true);
     }
     if (fillThis) {
       ASSERT(thisId != kInvalidId);
-      m_tb.genFillContThis(cont, locals, cellsToBytes(genLocals - thisId));
+      m_tb.genFillContThis(cont, locals, cellsToBytes(genLocals - thisId - 1));
     }
   } else {
     m_tb.genFillContLocals(origFunc, genFunc, cont);
@@ -1101,19 +1100,6 @@ void HhbcTranslator::emitFPushFunc(int32 numParams) {
                                        numParams,
                                        NULL);
   m_fpiStack.push(m_tb.genLdFunc(funcName, actRec));
-}
-
-void HhbcTranslator::emitFPushContFunc() {
-  Class* genClass = curFrame()->getThis()->getVMClass();
-  ASSERT(genClass == SystemLib::s_MethodContinuationClass ||
-         genClass == SystemLib::s_FunctionContinuationClass);
-  bool isMethod = genClass == SystemLib::s_MethodContinuationClass;
-
-  SSATmp* cont = m_tb.genLdThis(NULL);
-  SSATmp* funcOffset = m_tb.genDefConst<int64>(CONTOFF(m_vmFunc));
-  SSATmp* thiz = isMethod ? m_tb.genLdContThisOrCls(cont) : m_tb.genDefNull();
-  SSATmp* func = m_tb.genLdRaw(cont, funcOffset, Type::FuncRef);
-  m_fpiStack.push(m_tb.genAllocActRec(func, thiz, 1, NULL));
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32 numParams,

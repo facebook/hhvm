@@ -452,7 +452,9 @@ private:
                                  // method
   // TODO(#1114385) intercept should work via invalidation.
   mutable char m_maybeIntercepted; // -1, 0, or 1.  Accessed atomically.
-  unsigned char* volatile m_funcBody;
+public:
+  unsigned char* volatile m_funcBody;  // Accessed from assembly.
+private:
   // This must be the last field declared in this structure
   // and the Func class should not be inherited from.
   unsigned char* volatile m_prologueTable[kNumFixedPrologues];

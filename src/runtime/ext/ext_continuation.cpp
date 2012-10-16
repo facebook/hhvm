@@ -25,6 +25,7 @@
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/func.h>
+#include <runtime/vm/runtime.h>
 #include <runtime/vm/stats.h>
 
 namespace HPHP {
@@ -63,7 +64,7 @@ c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
     m_done(false), m_running(false), m_should_throw(false),
     m_isMethod(false), m_callInfo(NULL)
 #ifdef HHVM
-    , LABEL_INIT, m_hasExtraVars(false), m_nLocals(0), m_vmCalledClass(0ll)
+    , LABEL_INIT
 #endif
 {
 }
@@ -71,17 +72,20 @@ c_Continuation::c_Continuation(const ObjectStaticCallbacks *cb) :
 
 c_Continuation::~c_Continuation() {
   if (hhvm) {
-    TypedValue* locs = locals();
-    for (int i = 0; i < m_nLocals; ++i) {
-      tvRefcountedDecRef(&locs[i]);
+    VM::ActRec* ar = actRec();
+
+    // The first local is the object itself, and it wasn't increffed at creation
+    // time (see createContinuation()). Overwrite its type to exempt it from
+    // refcounting here.
+    TypedValue* contLocal = frame_local(ar, 0);
+    ASSERT(contLocal->m_data.pobj == this);
+    contLocal->m_type = KindOfNull;
+
+    if (ar->hasVarEnv()) {
+      VM::VarEnv::destroy(ar->getVarEnv());
+    } else {
+      frame_free_locals_inl(ar, m_vmFunc->numLocals());
     }
-    int nProps = m_cls->numDeclProperties();
-    ASSERT(nProps == 0 || m_nLocals == 0);
-    for (int i = 0; i < nProps; i++) {
-      tvRefcountedDecRef(props() + i);
-    }
-    // Avoid having to recompute nProps in operator delete.
-    m_nLocals += nProps;
   }
 }
 
@@ -248,9 +252,8 @@ String c_Continuation::t_getorigfuncname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getorigfuncname);
   String called_class;
   if (hhvm) {
-    VM::Class* vmClass = getVMCalledClass();
-    if (vmClass != NULL) {
-      called_class = vmClass->name()->data();
+    if (actRec()->hasClass()) {
+      called_class = actRec()->getClass()->name()->data();
     }
   } else {
     called_class = getCalledClass();

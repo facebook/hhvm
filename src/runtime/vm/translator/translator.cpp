@@ -27,6 +27,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/types.h>
 #include <runtime/base/tv_macros.h>
+#include <runtime/ext/ext_continuation.h>
 #include <util/trace.h>
 #include <util/biased_coin.h>
 #include <runtime/vm/hhbc.h>
@@ -1064,9 +1065,6 @@ static const struct {
                                                          kNumActRecCells }},
   { OpFPushCtorD,  {None,             Stack1|FStack,OutObject,
                                                      kNumActRecCells + 1 }},
-  { OpFPushContFunc,
-                   {None,             FStack,       OutFDesc,
-                                                         kNumActRecCells }},
   { OpFPushCuf,    {Stack1,           FStack,       OutFDesc,
                                                      kNumActRecCells - 1 }},
   { OpFPushCufF,   {Stack1,           FStack,       OutFDesc,
@@ -1147,6 +1145,8 @@ static const struct {
   /*** 14. Continuation instructions ***/
 
   { OpCreateCont,  {None,             Stack1,       OutObject,         1 }},
+  { OpContEnter,   {None,             None,         OutNone,           0 }},
+  { OpContExit,    {None,             None,         OutNone,           0 }},
   { OpUnpackCont,  {Local,            Stack1|Local, OutInt64,          1 }},
   { OpPackCont,    {Local|Stack1,     Local,        OutNone,          -1 }},
   { OpContRaised,  {Local,            None,         OutNone,           0 }},

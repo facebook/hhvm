@@ -1,2 +1,2 @@
-HipHop Warning:  Missing argument 1 for Continuation::__construct() in src/test/vm/continuation_inherit.php on line 20
-hootenanny.
+bool(true)
+HipHop Fatal error: Class HerpDerp may not inherit from final class (Continuation) in src/test/vm/continuation_inherit.php on line 4

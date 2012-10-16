@@ -42,7 +42,8 @@ class c_Continuation : public ExtObjectData {
   virtual void sweep();
   void operator delete(void* p) {
     c_Continuation* this_ = (c_Continuation*)p;
-    DELETEOBJSZ(sizeForNLocals(this_->m_nLocals))(this_);
+    DELETEOBJSZ(sizeForLocalsAndIters(this_->m_vmFunc->numLocals(),
+                                      this_->m_vmFunc->numIterators()))(this_);
   }
 #endif
 
@@ -90,12 +91,22 @@ class c_Continuation : public ExtObjectData {
   public: c_Continuation *create(int64 func, int64 extra, bool isMethod, String origFuncName, Variant obj = null, Array args = null_array);
   public: static const ClassPropTable os_prop_table;
 
-  static c_Continuation* alloc(VM::Class* cls, int nLocals) {
+  static c_Continuation* alloc(VM::Class* cls, int nLocals, int nIters) {
     const_assert(hhvm);
     c_Continuation* cont =
-      (c_Continuation*)ALLOCOBJSZ(sizeForNLocals(nLocals));
+      (c_Continuation*)ALLOCOBJSZ(sizeForLocalsAndIters(nLocals, nIters));
     new ((void *)cont) c_Continuation(
       ObjectStaticCallbacks::encodeVMClass(cls));
+    cont->m_localsOffset = sizeof(c_Continuation) + sizeof(VM::Iter) * nIters;
+    cont->m_arPtr = (VM::ActRec*)(cont->locals() + nLocals);
+
+    // The magic number is placed after the AR to enable stack-unwinding code to
+    // identify a pointer to this ActRec as such.
+    int64* magicPtr = (int64*)(cont->actRec() + 1);
+    *magicPtr = kMagic;
+
+    memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
+           sizeof(TypedValue) * nLocals + sizeof(VM::Iter) * nIters);
     return cont;
   }
 
@@ -147,6 +158,9 @@ public:
   bool m_should_throw;
   bool m_isMethod;
 
+  // This isn't used by HPHPc but there's 4 bytes of padding here anyway
+  int m_localsOffset;
+
   union {
     const CallInfo *m_callInfo; // only used by HPHPc
     VM::Func *m_vmFunc; // only used by HHVM
@@ -156,47 +170,31 @@ public:
 #endif
   // These fields are not used by HPHPc and are rolled up in the
   // union for the HPHPc build so that they don't waste space
-  bool m_hasExtraVars;
-  int m_nLocals;
-  intptr_t m_vmCalledClass; // Stored with 1 in its low bit
+  VM::ActRec* m_arPtr;
 #ifndef HHVM
   };
 #endif
 
 #ifdef HHVM
-  Array m_vars;
   SmartPtr<HphpArray> m_VMStatics;
 
-  Array& getVars() { return m_vars; }
-  String& getCalledClass() { const_assert(false); return *(String*)(NULL); }
+  String& getCalledClass() { not_reached(); }
 #else
-  Array& getVars() { const_assert(false); return *(Array*)NULL; }
   String& getCalledClass() { return m_called_class; }
 #endif
 
-  VM::Class* getVMCalledClass() const {
-    return (VM::Class*)(m_vmCalledClass & ~0x1ll);
-  }
-  intptr_t getVMCalledClassRaw() const {
-    return m_vmCalledClass;
-  }
-  void setVMCalledClassRaw(intptr_t c) {
-    m_vmCalledClass = c;
-  }
   HphpArray* getStaticLocals();
-  static size_t sizeForNLocals(int n) {
-    return sizeof(c_Continuation) + sizeof(TypedValue) * n;
+  static const int64 kMagic = 0xd00beed00beed000;
+  static size_t sizeForLocalsAndIters(int nLocals, int nIters) {
+    return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +
+            sizeof(VM::Iter) * nIters + sizeof(VM::ActRec) +
+            sizeof(kMagic));
   }
-  static size_t localsOffset() {
-    return sizeof(c_Continuation);
+  VM::ActRec* actRec() {
+    return m_arPtr;
   }
   TypedValue* locals() {
-    return (TypedValue*)((uintptr_t)this + localsOffset());
-  }
-  TypedValue* props() {
-    const_assert(hhvm);
-    ASSERT(m_nLocals == 0);
-    return locals();
+    return (TypedValue*)(uintptr_t(this) + m_localsOffset);
   }
 #undef LABEL_DECL
 };

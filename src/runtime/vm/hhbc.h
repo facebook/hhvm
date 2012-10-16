@@ -482,7 +482,6 @@ enum SetOpOp {
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        NF) \
   O(FPushCtor,       ONE(IVA),         ONE(AV),         ONE(CV),    NF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
-  O(FPushContFunc,   ONE(IVA),         NOV,             NOV,        NF) \
   O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), NF) \
@@ -534,6 +533,8 @@ enum SetOpOp {
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCont,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
+  O(ContEnter,       NA,               NOV,             NOV,        CF) \
+  O(ContExit,        NA,               NOV,             NOV,        CF) \
   O(UnpackCont,      NA,               NOV,             ONE(CV),    NF) \
   O(PackCont,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(ContRaised,      NA,               NOV,             NOV,        NF) \

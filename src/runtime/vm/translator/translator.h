@@ -939,6 +939,7 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpJmpZ:
     case OpJmpNZ:
     case OpSwitch:
+    case OpContExit:
     case OpRetC:
     case OpRetV:
     case OpRaise:
@@ -955,6 +956,7 @@ opcodeControlFlowInfo(const Opcode instr) {
       return ControlFlowBreaksBB;
     case OpFCall:
     case OpFCallArray:
+    case OpContEnter:
     case OpIncl:
     case OpInclOnce:
     case OpReq:

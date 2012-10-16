@@ -492,8 +492,16 @@ private:
                      const std::string& prefix) const;
 
   UnwindStatus unwindFrag(ActRec* fp, int offset, PC& pc, Fault& f);
+
+  // Pops everything between the current stack pointer and the passed ActRec*.
+  // It assumes everything there is values, not ActRecs.
   void unwindARFrag(ActRec* ar);
-  void unwindAR(ActRec* fp, int offset, const FPIEnt* fe);
+
+  // Pops everything up to and including the outermost unactivated ActRec. Since
+  // it's impossible to have more than one chain of nested unactivated ActRecs
+  // on the stack, this means that after this function returns, everything
+  // between the stack pointer and frame pointer is a value, Iter or local.
+  void unwindAR(ActRec* fp, const FPIEnt* fe);
 public:
   static const int sSurprisePageSize;
   static const uint sMinStackElms;
@@ -522,6 +530,9 @@ public:
     Stack *that = 0;
     return (size_t)&that->m_top;
   }
+
+  static TypedValue* frameStackBase(const ActRec* fp);
+  static TypedValue* generatorStackBase(const ActRec* fp);
 
   inline size_t ALWAYS_INLINE count() const {
     return ((uintptr_t)m_base - (uintptr_t)m_top) / sizeof(TypedValue);

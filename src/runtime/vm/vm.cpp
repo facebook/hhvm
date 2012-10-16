@@ -66,8 +66,7 @@ static StaticString s_resource(LITSTR_INIT("__resource"));
 static StaticString s_DOMException(LITSTR_INIT("DOMException"));
 static StaticString s_PDOException(LITSTR_INIT("PDOException"));
 static StaticString s_SoapFault(LITSTR_INIT("SoapFault"));
-static StaticString s_MethodContinuation(LITSTR_INIT("MethodContinuation"));
-static StaticString s_FunctionContinuation(LITSTR_INIT("FunctionContinuation"));
+static StaticString s_Continuation(LITSTR_INIT("Continuation"));
 
 class VMClassInfoHook : public ClassInfoHook {
 public:
@@ -263,8 +262,7 @@ void ProcessInit() {
   INIT_SYSTEMLIB_CLASS_FIELD(DOMException);
   INIT_SYSTEMLIB_CLASS_FIELD(PDOException);
   INIT_SYSTEMLIB_CLASS_FIELD(SoapFault);
-  INIT_SYSTEMLIB_CLASS_FIELD(MethodContinuation);
-  INIT_SYSTEMLIB_CLASS_FIELD(FunctionContinuation);
+  INIT_SYSTEMLIB_CLASS_FIELD(Continuation);
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
 

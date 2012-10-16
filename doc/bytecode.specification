@@ -833,7 +833,7 @@ NewTuple <num elems>    [C..C]  ->  [C]
 
   New array. Creates a new array from the top %1 cells on the stack,
   pops those cells, then pushes the new array onto the stack.  Elements
-  are implicitly numbered from 0 to num elems - 1; $1 is at index 0, 
+  are implicitly numbered from 0 to num elems - 1; $1 is at index 0,
   $2 is at 1, and so on.
 
 AddElemC    [C C C]  ->  [C:Arr]
@@ -1649,17 +1649,6 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   entry on the FPI stack, initializing it with the number of parameters being
   passed (given by %1) and a reference to the FPI structure for the constructor
   for class x.
-
-FPushContFunc <num params>    []  ->  []
-
-  FPI push continuation function. This instruction must only be executed inside
-  a method of the Continuation class or one of its subclasses. If that
-  continuation's body is a method call, this instruction behaves like
-  FPushObjMethod, otherwise it behaves like FPushFunc. In the method call case,
-  the $this member of the new FPI stack entry will point to the continuation's
-  saved object if one exists. If the continuation does not have a saved object,
-  the late bound class of the new FPI stack entry be will set from the value
-  saved in the continuation.
 
 FPushCuf <num params>     [C]   ->  []
 FPushCufF <num params>    [C]   ->  []
@@ -3505,6 +3494,18 @@ CreateCont <getargs> <function name>    []  ->  [C]
   function, and if the <getargs> immediate is nonzero it will also store the
   result of func_get_args(). The Continuation will store a reference to the
   function named by the string immediate to be used as its body.
+
+ContEnter []  ->  []
+
+  This instruction may only appear in non-static methods of the Continuation
+  class. It transfers control flow to the beginning of the continuation body
+  associated with the $this object of the Continuation object.
+
+ContExit    []  ->  []
+
+  This instruction may only appear in continuation bodies. It transfers control
+  flow to the caller of the continuation body, which must be a non-static method
+  of the Continuation class.
 
 UnpackCont    []  ->  [C:Int]
 

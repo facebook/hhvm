@@ -629,17 +629,27 @@ void TranslatorX64::irTranslateDup(const Tracelet& t,
 
 void TranslatorX64::irTranslateCreateCont(const Tracelet& t,
                                           const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateCont, i.imm[0].u_IVA, i.imm[1].u_SA);
+  HHIR_UNIMPLEMENTED(CreateCont);
+}
+
+void TranslatorX64::irTranslateContEnter(const Tracelet& t,
+                                         const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(ContEnter);
+}
+
+void TranslatorX64::irTranslateContExit(const Tracelet& t,
+                                        const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(ContExit);
 }
 
 void TranslatorX64::irTranslateUnpackCont(const Tracelet& t,
                                           const NormalizedInstruction& i) {
-  HHIR_EMIT(UnpackCont);
+  HHIR_UNIMPLEMENTED(UnpackCont);
 }
 
 void TranslatorX64::irTranslatePackCont(const Tracelet& t,
                                         const NormalizedInstruction& i) {
-  HHIR_EMIT(PackCont, i.imm[0].u_IVA);
+  HHIR_UNIMPLEMENTED(PackCont);
 }
 
 void TranslatorX64::irTranslateContReceive(const Tracelet& t,
@@ -1172,13 +1182,6 @@ TranslatorX64::irTranslateFPushFuncD(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateFPushContFunc(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
-  ASSERT(i.imm[0].u_IVA == 1);
-  HHIR_EMIT(FPushContFunc);
-}
-
-void
 TranslatorX64::irTranslateFPassCOp(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   const Opcode op = i.op();
@@ -1615,9 +1618,13 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
                                          *m_constTable,
                                          curFunc());
   m_hhbcTrans    = new JIT::HhbcTranslator(*m_traceBuilder, curFunc());
+  Cell* fp = vmfp();
+  if (curFunc()->isGenerator()) {
+    fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
+  }
   TRACE(1, "hhirTraceStart: bcStartOffset %d   vmfp() - vmsp() = %ld\n",
-        bcStartOffset, vmfp() - vmsp());
-  m_hhbcTrans->start(bcStartOffset, (vmfp() - vmsp()));
+        bcStartOffset, fp - vmsp());
+  m_hhbcTrans->start(bcStartOffset, (fp - vmsp()));
 }
 
 void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {

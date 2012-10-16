@@ -202,7 +202,6 @@ public:
                            const Class* baseClass);
   void emitFPushCtorD(int32 numParams, int32 classNameStrId);
   void emitFPushCtor(int32 numParams);
-  void emitFPushContFunc();
   void emitFCall(uint32 numParams, uint32 returnBcOffset );
   void emitFCallD(uint32 numParams, const Func* callee,
                   uint32 returnBcOffset);

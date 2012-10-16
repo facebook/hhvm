@@ -115,6 +115,7 @@ class TranslatorX64 : public Translator
   sigaction_t            m_segvChain;
   TCA                    m_callToExit;
   TCA                    m_retHelper;
+  TCA                    m_genRetHelper;
   TCA                    m_stackOverflowHelper;
   TCA                    m_dtorGenericStub;
   TCA                    m_dtorGenericStubRegs;
@@ -233,8 +234,7 @@ private:
   static bool mapContParams(ContParamMap& map, const Func* origFunc,
                             const Func* genFunc);
   void emitCallFillCont(Asm& a, const Func* orig, const Func* gen);
-  void emitCallUnpack(Asm& a, const NormalizedInstruction& i, int nCopy);
-  void emitCallPack(Asm& a, const NormalizedInstruction& i, int nCopy);
+  void emitCallPack(Asm& a, const NormalizedInstruction& i);
   void emitContRaiseCheck(Asm& a, const NormalizedInstruction& i);
   void emitContPreNext(const NormalizedInstruction& i, ScratchReg&  rCont);
   void emitContStartedCheck(const NormalizedInstruction& i, ScratchReg& rCont);
@@ -532,7 +532,6 @@ MINSTRS
   CASE(FPushObjMethodD) \
   CASE(FPushCtor) \
   CASE(FPushCtorD) \
-  CASE(FPushContFunc) \
   CASE(FPassR) \
   CASE(FPassL) \
   CASE(FPassM) \
@@ -563,6 +562,8 @@ MINSTRS
   CASE(TraitExists) \
   CASE(Dup) \
   CASE(CreateCont) \
+  CASE(ContEnter) \
+  CASE(ContExit) \
   CASE(UnpackCont) \
   CASE(PackCont) \
   CASE(ContReceive) \
@@ -695,6 +696,10 @@ PSEUDOINSTRS
 
   TCA getRetFromInterpretedFrame() {
     return m_retHelper;
+  }
+
+  TCA getRetFromInterpretedGeneratorFrame() {
+    return m_genRetHelper;
   }
 
   // If we were to shove every little helper function into this class
@@ -835,6 +840,7 @@ private:
                        va_list args);
 
   TCA emitRetFromInterpretedFrame();
+  TCA emitRetFromInterpretedGeneratorFrame();
   TCA emitGearTrigger(Asm& a, const SrcKey& sk, TransID transId);
   void emitBox(DataType t, PhysReg rToBox);
   void emitUnboxTopOfStack(const NormalizedInstruction& ni);

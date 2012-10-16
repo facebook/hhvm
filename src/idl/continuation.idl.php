@@ -152,6 +152,7 @@ DefineFunction(
 BeginClass(
   array(
     'name' => 'Continuation',
+    'flags' => IsFinal,
     'ifaces' => array('Iterator'),
     'footer' => <<<EOT
   public: void setCalledClass(CStrRef cls) {

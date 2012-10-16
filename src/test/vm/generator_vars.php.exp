@@ -62,7 +62,7 @@ array(13) {
   ["e"]=>
   int(5)
   ["__cont__"]=>
-  object(FunctionContinuation)#4 (0) {
+  object(Continuation)#4 (0) {
   }
   ["c"]=>
   int(3)
@@ -91,7 +91,7 @@ array(13) {
   ["e"]=>
   int(5)
   ["__cont__"]=>
-  object(FunctionContinuation)#4 (0) {
+  object(Continuation)#4 (0) {
   }
   ["c"]=>
   int(3)
@@ -121,10 +121,10 @@ array(13) {
   ["e"]=>
   int(3126047761)
   ["__cont__"]=>
-  object(FunctionContinuation)#4 (0) {
+  object(Continuation)#4 (0) {
   }
   ["c"]=>
-  object(FunctionContinuation)#4 (0) {
+  object(Continuation)#4 (0) {
   }
   ["j"]=>
   int(10)
@@ -152,10 +152,10 @@ array(13) {
   ["e"]=>
   int(3126047761)
   ["__cont__"]=>
-  object(FunctionContinuation)#4 (0) {
+  object(Continuation)#4 (0) {
   }
   ["c"]=>
-  object(FunctionContinuation)#4 (0) {
+  object(Continuation)#4 (0) {
   }
   ["j"]=>
   int(10)

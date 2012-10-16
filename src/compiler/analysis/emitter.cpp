@@ -2024,6 +2024,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfReturnStatement: {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
         bool retV = false;
+        if (m_curFunc->isGenerator()) {
+          e.ContExit();
+          return false;
+        }
         if (visit(r->getRetExp())) {
           if (r->getRetExp()->getContext() & Expression::RefValue) {
             emitConvertToVar(e);
@@ -4946,13 +4950,17 @@ void EmitterVisitor::emitPostponedMeths() {
     // If the current position in the bytecode is reachable, emit code to
     // return null
     if (currentPositionIsReachable()) {
-      e.Null();
-      if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded()) ||
-          (fe->isClosureBody() && p.m_closureUseVars->size())) {
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                       false, 0, 0);
+      if (p.m_meth->getFunctionScope()->isGenerator()) {
+        e.ContExit();
+      } else {
+        e.Null();
+        if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded()) ||
+            (fe->isClosureBody() && p.m_closureUseVars->size())) {
+          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                         false, 0, 0);
+        }
+        e.RetC();
       }
-      e.RetC();
     } // -- Method emission ends --
 
     FuncFinisher ff(this, e, p.m_fe);
@@ -6335,28 +6343,10 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
         OpContRaise,
       };
       ue.emitOp(mOps[m]);
-      const Offset fpiStart = ue.bcPos();
       const Offset ehStart = ue.bcPos();
-      ue.emitOp(OpFPushContFunc);
-      ue.emitIVA(1);
-      {
-        metaInfo.add(ue.bcPos(), Unit::MetaInfo::GuardedThis, false, 0, 0);
-        ue.emitOp(OpThis);
-        metaInfo.add(ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
-        ue.emitOp(OpFPassC);
-        ue.emitIVA(0);
-
-        FPIEnt& fpi = fe->addFPIEnt();
-        fpi.m_fpushOff = fpiStart;
-        fpi.m_fcallOff = ue.bcPos();
-        fpi.m_fpOff = 0;
-      }
-      ue.emitOp(OpFCall);
-      ue.emitIVA(1);
-      // Generated continuation bodies always return KindOfNull.
-      metaInfo.add(ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
-      ue.emitOp(OpUnboxR);
+      ue.emitOp(OpContEnter);
       ue.emitOp(OpContStopped);
+      ue.emitOp(OpNull);
       ue.emitOp(OpRetC);
 
       EHEnt& eh = fe->addEHEnt();
@@ -6525,23 +6515,6 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         pce->addConstant(
           cnsInfo->name.get(), (TypedValue*)(&val), empty_string.get());
       }
-    }
-  }
-
-  // We also want two subclasses of Continuation, for different
-  // types of continuations.
-  static const StringData* continuationClassName =
-    StringData::GetStaticString("Continuation");
-  static const StringData* names[] = {
-    StringData::GetStaticString("MethodContinuation"),
-    StringData::GetStaticString("FunctionContinuation")
-  };
-  if (classEntries.size()) {
-    for (unsigned i = 0; i < array_size(names); ++i) {
-      PreClassEmitter* pce =
-        ue->newPreClassEmitter(names[i], PreClass::AlwaysHoistable);
-      pce->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent,
-                continuationClassName, NULL);
     }
   }
 

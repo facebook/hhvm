@@ -325,27 +325,32 @@ public:
     return h ? h : hashHelper();
   }
 
+  /**
+   * Comparisons.
+   */
+  bool equal(const StringData *s) const {
+    ASSERT(s);
+    if (s == this) return true;
+    int ret = numericCompare(s);
+    if (ret < -1) {
+      if (m_len != s->m_len) return false;
+      ret = memcmp(rawdata(), s->rawdata(), m_len);
+    }
+    return ret == 0;
+  }
+
   bool same(const StringData *s) const {
     ASSERT(s);
     if (m_len != s->m_len) return false;
-    const char* s1 = rawdata();
-    const char* s2 = s->rawdata();
-    if (s1 == s2) return true;
-    return !memcmp(s1, s2, m_len);
+    return !memcmp(rawdata(), s->rawdata(), m_len);
   }
 
   bool isame(const StringData *s) const {
     ASSERT(s);
     if (m_len != s->m_len) return false;
-    const char* s1 = rawdata();
-    const char* s2 = s->rawdata();
-    if (s1 == s2) return true;
-    return !bstrcasecmp(s1, m_len, s2, m_len);
+    return !bstrcasecmp(rawdata(), m_len, s->rawdata(), m_len);
   }
 
-  /**
-   * Comparisons.
-   */
   int compare(const StringData *v2) const;
 
   /**

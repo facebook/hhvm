@@ -364,15 +364,25 @@ concat(DataType t1, uint64 v1, DataType t2, uint64 v2) {
 }
 
 int64 eq_null_str(StringData* v1) {
-  int64 retval = v1->empty() ? 1 : 0;
+  int64 retval = v1->empty();
   // decRef the string
   if (v1->decRefCount() == 0) v1->release();
   return retval;
 }
 
 int64 eq_bool_str(int64 v1, StringData* v2) {
-  ASSERT(v1 == 0 || v1 == 1);
-  int64 retval = v2->toBoolean() ? v1 : (v1^1);
+  // The truth table for v2->toBoolean() ? v1 : !v1
+  //   looks like:
+  //      \ v2:0 | v2:1
+  // v1:0 |   1  |   0
+  // v1:1 |   0  |   1
+  //
+  // which is nothing but nxor.
+  int64 v2i = int64(v2->toBoolean());
+  ASSERT(v2i == 0ll || v2i == 1ll);
+  ASSERT(v1  == 0ll || v1  == 1ll);
+  int64 retval = (v2i ^ v1) ^ 1;
+  ASSERT(retval == 0ll || retval == 1ll);
   // decRef the string
   if (v2->decRefCount() == 0) v2->release();
   return retval;
@@ -384,37 +394,23 @@ int64 eq_int_str(int64 v1, StringData* v2) {
   // decRef the string
   if (v2->decRefCount() == 0) v2->release();
   if (ret == KindOfInt64) {
-    return v1 == lval ? 1 : 0;
+    return v1 == lval;
   } else if (ret == KindOfDouble) {
-    return (double)v1 == dval ? 1 : 0;
+    return (double)v1 == dval;
   } else {
-    return v1 == 0 ? 1 : 0;
+    return v1 == 0;
   }
 }
 
 int64 eq_str_str(StringData* v1, StringData* v2) {
-  int64 retval = (v1->compare(v2) == 0) ? 1 : 0;
+  int64 retval = v1->equal(v2);
   if (v2->decRefCount() == 0) v2->release();
   if (v1->decRefCount() == 0) v1->release();
   return retval;
 }
 
 int64 same_str_str(StringData* v1, StringData* v2) {
-  int64 retval;
-  ASSERT(v1);
-  ASSERT(v2);
-  int len = v1->size();
-  if (v1 == v2) {
-    retval = true;
-  } else {
-    if (v2->size() != len) {
-      retval = false;
-    } else {
-      // Don't bother comparing data pointers;
-      // v1 != v2 makes it likely v1->data != v2->data.
-      retval = !memcmp(v1->data(), v2->data(), len);
-    }
-  }
+  int64 retval = v1 == v2 || v1->same(v2);
   if (v2->decRefCount() == 0) v2->release();
   if (v1->decRefCount() == 0) v1->release();
   return retval;

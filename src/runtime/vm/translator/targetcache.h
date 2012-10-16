@@ -61,7 +61,6 @@ enum PHPNameSpace {
   NSDynFunction,
   NSStaticMethod,
   NSStaticMethodF,
-  NSFuncToTCA,
   NSClass,
   NSKnownClass,
   NSClsInitProp,

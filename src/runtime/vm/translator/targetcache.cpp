@@ -65,7 +65,9 @@ CT_ASSERT(kConditionFlagsOff + sizeof(ssize_t) <= 64);
 size_t s_frontier = kConditionFlagsOff + 64;
 static size_t s_next_bit;
 static size_t s_bits_to_go;
+static const size_t kPreAllocatedBytes = kConditionFlagsOff + 64;
 
+static Mutex s_mutex(false /*recursive*/, RankLeaf);
 // Mapping from names to targetcache locations. Protected by the translator
 // write lease.
 typedef hphp_hash_map<const StringData*, Handle, string_data_hash,
@@ -89,9 +91,6 @@ typedef std::vector<Handle> HandleVector;
 // Set of FuncCache handles for dynamic function callsites, used for
 // invalidation when a function is renamed.
 HandleVector funcCacheEntries;
-// Set of CallCache handles for dynamic function callsites, used for
-// invalidation when a function is renamed or intercepted.
-HandleVector callCacheEntries;
 
 static Mutex s_handleMutex(false /*recursive*/, RankLeaf);
 
@@ -221,8 +220,6 @@ namedAlloc(PHPNameSpace where, const StringData* name,
     TRACE(1, "TargetCache: inserted \"%s\", %d\n", name->data(), int(retval));
   } else if (where == NSDynFunction) {
     funcCacheEntries.push_back(retval);
-  } else if (where == NSFuncToTCA) {
-    callCacheEntries.push_back(retval);
   }
   return retval;
 }

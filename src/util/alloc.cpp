@@ -134,3 +134,7 @@ static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
+
+extern "C" {
+  const char* malloc_conf = "narenas:1,lg_tcache_max:16";
+}

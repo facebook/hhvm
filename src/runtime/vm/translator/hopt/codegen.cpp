@@ -1986,7 +1986,11 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
     case TraceExitType::NormalCc:
       if (toSmash) {
         TCA smashAddr = toSmash->getTCA();
-        ASSERT(smashAddr != kIRDirectJmpInactive);
+        if (smashAddr == kIRDirectJmpInactive) {
+          // The jump in the main trace has been optimized away
+          // this exit trace is no longer needed
+          break;
+        }
         // Patch the original jcc;jmp, don't emit another
         IRInstruction* jcc = toSmash->getInstruction();
         Opcode         opc = jcc->getOpcode();
@@ -2019,6 +2023,7 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
 
           }
         } else {
+          ASSERT(smashAddr == kIRDirectJmpInactive);
           m_tx64->emitBindJmp(outputAsm, destSK, REQ_BIND_JMP);
         }
       }
@@ -3863,6 +3868,9 @@ Address CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
     if ((cc == CC_Z  && valIsZero) ||
         (cc == CC_NZ && !valIsZero)) {
       emitSmashableFwdJmp(label, toSmash);
+    } else {
+      // Fall through to next bytecode, disable DirectJmp
+      inst->setTCA(kIRDirectJmpInactive);
     }
     return start;
   }

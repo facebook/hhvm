@@ -324,4 +324,8 @@ Properties:
   "p" => 112
   "q" => q
   "r" => r
+object(dumper) (1) {
+  ["prop"]=>
+  int(10)
+}
 Test end

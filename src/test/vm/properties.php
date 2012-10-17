@@ -261,4 +261,18 @@ foreach ($o as $k => &$v) {
 }
 obj_dump($o);
 
+class dumper {
+  public function __destruct() {
+    var_dump($this);
+  }
+}
+function foo() {
+  return new dumper;
+}
+function useReturn() {
+  $five = 5;
+  foo()->prop += $five + 5;
+}
+useReturn();
+
 print "Test end\n";

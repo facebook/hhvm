@@ -237,21 +237,32 @@ bool TranslatorX64::useTvResult(const Tracelet& t,
             __func__, mii.instr() == MI_SetM ? "SetM" : "BindM");
     return false;
   }
+
+  int bottomI = 0;
+  const DynLocation* bottomStack = NULL;
   for (unsigned i = firstDecrefInput(t, ni, mii); i < ni.inputs.size(); ++i) {
     const DynLocation& input = *ni.inputs[i];
-    if (input.location.isStack()) {
-      // Only the bottommost stack input can possibly overlay the output.
-      ASSERT(input.location == output.location);
-      SKTRACE(2, ni.source, "%s input %u/[0..%u) --> %s\n",
-              __func__, i, ni.inputs.size(),
-              (IS_REFCOUNTED_TYPE(input.outerType())
-              || i == ni.inputs.size() - 1) ? "true" : "false");
-      // Use tvResult if the overlaid input is refcounted, or if it might be
-      // used during the final operation (in which case it may still be in use
-      // at the time the result is written).
-      return IS_REFCOUNTED_TYPE(input.outerType())
-             || inputIsLiveForFinalOp(ni, i, mii);
+    // Only the bottommost stack input can possibly overlay the
+    // output, but that might not be the first stack input in
+    // ni.inputs. Walk through all stack inputs to find the bottommost
+    // one.
+    if (input.location.isStack() &&
+        (!bottomStack ||
+         input.location.offset < bottomStack->location.offset)) {
+      bottomStack = &input;
+      bottomI = i;
     }
+  }
+  if (bottomStack) {
+    ASSERT(bottomStack->location == output.location);
+    // Use tvResult if the overlaid input is refcounted, or if it
+    // might be used during the final operation (in which case it may
+    // still be in use at the time the result is written).
+    bool result = IS_REFCOUNTED_TYPE(bottomStack->outerType())
+      || inputIsLiveForFinalOp(ni, bottomI, mii);
+    SKTRACE(2, ni.source, "%s input %u/[0..%u) --> %s\n",
+            __func__, bottomI, ni.inputs.size(), result ? "true" : "false");
+    return result;
   }
   // No stack inputs. If we were to write the result directly to the VM stack,
   // it would potentially be clobbered by reentry during cleanup, e.g. for
@@ -857,7 +868,7 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
   static const PropOp cellPropOps[]
     = {propC,  propCW, propCD, propCWD, propX, propX, propCD, propCWD,
        propCU, propX,  propX,  propX,   propX, propX, propX,  propX,
-       propCO, propCWO,propCDO,propCWDO,propX, propX, propCDO,propCWD,
+       propCO, propCWO,propCDO,propCWDO,propX, propX, propCDO,propCWDO,
        propCUO,propX,  propX,  propX,   propX, propX, propX,  propX};
   ASSERT((mia & MIA_intermediate) < array_size(localPropOps));
   ASSERT((mia & MIA_intermediate) < array_size(cellPropOps));

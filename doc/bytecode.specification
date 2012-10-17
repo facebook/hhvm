@@ -3409,6 +3409,11 @@ This    []  ->  [C:Obj]
   instruction throws a fatal error. Next, this instruction pushes the current
   instance onto the stack.
 
+BareThis <notice>   []  ->  [C:Obj]
+
+  This. This instruction pushes the current instance onto the stack. If %1 is
+  not zero, and the current instance is null, emits a notice.
+
 CheckThis    []  ->  []
 
   Check existence of this. This instruction checks the current instance, and if

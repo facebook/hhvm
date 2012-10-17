@@ -214,10 +214,9 @@ void ProcessInit() {
   file->incRef();
   SystemLib::s_unit = file->unit();
 
-  // Restore settings before merging anything,
+  // Restore most settings before merging anything,
   // because of optimizations that depend on the
   // setting of RepoAuthoritative
-  RuntimeOption::EvalDumpBytecode = db;
   RuntimeOption::RepoAuthoritative = p;
   RuntimeOption::AlwaysUseRelativePath = rp;
   RuntimeOption::SafeFileAccess = sf;
@@ -289,6 +288,9 @@ void ProcessInit() {
   if (debug) {
     VM::Transl::FixupMapUnitTest _;
   }
+
+  // Restore this after loading systemlib
+  RuntimeOption::EvalDumpBytecode = db;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

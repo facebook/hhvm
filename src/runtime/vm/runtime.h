@@ -139,7 +139,6 @@ frame_free_locals_inl(ActRec* fp, int numLocals) {
 inline void ALWAYS_INLINE
 frame_free_locals_no_this_inl(ActRec* fp, int numLocals) {
   frame_free_locals_helper_inl(fp, numLocals);
-  ASSERT(!fp->hasThis());
   EventHook::FunctionExit(fp);
 }
 

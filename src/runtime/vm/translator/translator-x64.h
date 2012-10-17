@@ -518,6 +518,7 @@ MINSTRS
   CASE(FPassS) \
   CASE(FPassG) \
   CASE(This) \
+  CASE(BareThis) \
   CASE(CheckThis) \
   CASE(InitThisLoc) \
   CASE(FCall) \
@@ -588,6 +589,10 @@ PSEUDOINSTRS
   void fuseBranchAfterStaticBool(const Tracelet& t,
                                  const NormalizedInstruction& i,
                                  bool resultIsTrue);
+  void emitReturnVal(Asm& a, const NormalizedInstruction& i,
+                     PhysReg dstBase, int dstOffset,
+                     PhysReg thisBase, int thisOffset,
+                     PhysReg scratch);
   void translateSetMArray(const Tracelet &t, const NormalizedInstruction& i);
   void emitPropGet(const NormalizedInstruction& i,
                    const DynLocation& base,

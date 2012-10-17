@@ -1492,7 +1492,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
   }
   {
     FunctionScopePtr fsp = m->getFunctionScope();
-    if (fsp->containsBareThis() && !fsp->isGenerator()) {
+    if (fsp->needsLocalThis()) {
       static const StringData* thisStr = StringData::GetStaticString("this");
       Id thisId = m_curFunc->lookupVarId(thisStr);
       e.InitThisLoc(thisId);
@@ -3282,11 +3282,19 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                              false, 0, 0);
             }
             e.This();
-          } else {
+          } else if (sv->getFunctionScope()->needsLocalThis()) {
             static const StringData* thisStr =
               StringData::GetStaticString("this");
             Id thisId = m_curFunc->lookupVarId(thisStr);
             emitVirtualLocal(thisId);
+          } else {
+            if (sv->isGuarded()) {
+              m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
+                             false, 0, 0);
+              e.This();
+            } else {
+              e.BareThis(!sv->hasContext(Expression::ExistContext));
+            }
           }
         } else {
           StringData* nLiteral = StringData::GetStaticString(sv->getName());
@@ -4860,8 +4868,9 @@ void EmitterVisitor::emitPostponedMeths() {
     fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, p.m_top, methDoc);
     // --Method emission begins--
     {
-      if (funcScope->containsBareThis() && !funcScope->isGenerator() &&
-          !funcScope->isStatic()) {
+      if (funcScope->needsLocalThis() &&
+          !funcScope->isStatic() &&
+          !funcScope->isGenerator()) {
         ASSERT(!p.m_top);
         static const StringData* thisStr = StringData::GetStaticString("this");
         Id thisId = fe->lookupVarId(thisStr);

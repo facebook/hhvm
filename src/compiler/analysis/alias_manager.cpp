@@ -2268,14 +2268,16 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       {
         SimpleVariablePtr sv(spc(SimpleVariable, e));
         if (Symbol *sym = sv->getSymbol()) {
-          if ((context & (Expression::RefValue|Expression::RefAssignmentLHS)) ||
-              sym->isRefClosureVar()) {
+          bool ref = (context & (Expression::RefValue|
+                                 Expression::RefAssignmentLHS)) ||
+            sym->isRefClosureVar();
+          if (ref) {
             sym->setReferenced();
           }
           if (sv->isThis()) {
             sv->getFunctionScope()->setContainsThis();
             if (!e->hasContext(Expression::ObjectContext)) {
-              sv->getFunctionScope()->setContainsBareThis();
+              sv->getFunctionScope()->setContainsBareThis(true, ref);
             } else if (m_graph) {
               int &id = m_gidMap["v:this"];
               if (!id) id = m_gidMap.size();

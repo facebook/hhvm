@@ -145,6 +145,8 @@ public:
   bool hasTry() const { return m_hasTry; }
   unsigned getNewID() { return m_nextID++; }
 
+  bool needsLocalThis() const;
+
   /**
    * Either __construct or a class-name constructor.
    */
@@ -222,7 +224,14 @@ public:
   bool containsThis() const { return m_containsThis;}
   void setContainsThis(bool f=true) { m_containsThis = f;}
   bool containsBareThis() const { return m_containsBareThis; }
-  void setContainsBareThis(bool f=true) { m_containsBareThis = f; }
+  bool containsRefThis() const { return m_containsBareThis & 2; }
+  void setContainsBareThis(bool f, bool ref = false) {
+    if (f) {
+      m_containsBareThis |= ref ? 2 : 1;
+    } else {
+      m_containsBareThis = 0;
+    }
+  }
   /**
    * How many parameters a caller should provide.
    */
@@ -534,7 +543,8 @@ private:
   unsigned m_inlineable : 1;
   unsigned m_sep : 1;
   unsigned m_containsThis : 1; // contains a usage of $this?
-  unsigned m_containsBareThis : 1; // $this outside object-context
+  unsigned m_containsBareThis : 2; // $this outside object-context,
+                                   // 2 if in reference context
   unsigned m_nrvoFix : 1;
   unsigned m_inlineAsExpr : 1;
   unsigned m_inlineSameContext : 1;

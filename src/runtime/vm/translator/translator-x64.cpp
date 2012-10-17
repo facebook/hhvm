@@ -5528,11 +5528,15 @@ TranslatorX64::analyzeRetV(Tracelet& t,
   analyzeRetC(t, i);
 }
 
-static TypedValue getGroupedRetTV(const NormalizedInstruction& i) {
+void TranslatorX64::emitReturnVal(
+  Asm& a, const NormalizedInstruction& i,
+  PhysReg dstBase, int dstOffset, PhysReg thisBase, int thisOffset,
+  PhysReg scratch) {
+
+  if (!i.grouped) return;
   TypedValue tv;
   TV_WRITE_UNINIT(&tv);
   tv.m_data.num = 0; // to keep the compiler happy
-  if (!i.grouped) return tv;
 
   /*
    * We suppressed the write of the (literal) return value
@@ -5565,10 +5569,41 @@ static TypedValue getGroupedRetTV(const NormalizedInstruction& i) {
       tv.m_type = KindOfArray;
       tv.m_data.parr = curUnit()->lookupArrayId(prev->imm[0].u_AA);
       break;
+    case OpThis: {
+      if (thisBase != dstBase || thisOffset != dstOffset) {
+        a.  load_reg64_disp_reg64(thisBase, thisOffset, scratch);
+        a.  store_reg64_disp_reg64(scratch, dstOffset, dstBase);
+      }
+      emitStoreImm(a, KindOfObject,
+                   dstBase, dstOffset + TVOFF(m_type), sz::dword);
+      return;
+    }
+    case OpBareThis: {
+      ASSERT(curFunc()->cls());
+      a.    mov_imm32_reg32(KindOfNull, scratch);
+      a.    test_imm64_disp_reg64(1, thisOffset, thisBase);
+      {
+        JccBlock<CC_NZ> noThis(a);
+        a.  mov_imm32_reg32(KindOfObject, scratch);
+      }
+      a.   store_reg32_disp_reg64(scratch, dstOffset + TVOFF(m_type), dstBase);
+      if (thisBase != dstBase || thisOffset != dstOffset) {
+        a.  load_reg64_disp_reg64(thisBase, thisOffset, scratch);
+        a.  store_reg64_disp_reg64(scratch, dstOffset, dstBase);
+      }
+      return;
+    }
     default:
       not_reached();
   }
-  return tv;
+
+  emitStoreImm(a, tv.m_type,
+               dstBase, dstOffset + TVOFF(m_type), sz::dword);
+  if (tv.m_type != KindOfNull) {
+    emitStoreImm(a, tv.m_data.num,
+                 dstBase, dstOffset, sz::qword);
+  }
+
 }
 
 // translateRetC --
@@ -5580,7 +5615,6 @@ void
 TranslatorX64::translateRetC(const Tracelet& t,
                              const NormalizedInstruction& i) {
   if (i.skipSync) ASSERT(i.grouped);
-  if (i.grouped)  ASSERT(freeLocalsInline());
 
   /*
    * This method chooses one of two ways to generate machine code for RetC
@@ -5634,11 +5668,10 @@ TranslatorX64::translateRetC(const Tracelet& t,
   }
 
   bool noThis = !curFunc()->isPseudoMain() &&
-                (!curFunc()->isMethod() || curFunc()->isStatic());
+    (!curFunc()->isMethod() || curFunc()->isStatic());
   bool mayUseVV = (curFunc()->attrs() & AttrMayUseVV);
-
-  const TypedValue groupedRetTV = getGroupedRetTV(i);
-
+  bool mergedThis = i.grouped && (i.prev->op() == OpThis ||
+                                  i.prev->op() == OpBareThis);
   /*
    * figure out where to put the return value, and where to get it from
    */
@@ -5685,14 +5718,11 @@ TranslatorX64::translateRetC(const Tracelet& t,
 
         m_regMap.cleanAll();
         if (i.grouped) {
-          emitStoreImm(astubs, groupedRetTV.m_type,
-                       rVmSp, retvalSrcBase + TVOFF(m_type), sz::dword);
-          if (groupedRetTV.m_type != KindOfNull) {
-            emitStoreImm(astubs, groupedRetTV.m_data.num,
-                         rVmSp, retvalSrcBase, sz::qword);
-          }
+          ScratchReg s(m_regMap);
+          emitReturnVal(astubs, i,
+                        rVmSp, retvalSrcBase, rVmFp, AROFF(m_this), *s);
         }
-        emitFrameRelease(astubs, i, noThis);
+        emitFrameRelease(astubs, i, noThis || mergedThis);
       }
     }
 
@@ -5707,36 +5737,42 @@ TranslatorX64::translateRetC(const Tracelet& t,
       }
     }
 
-    // If this is a instance method called on an object or if it is a
-    // pseudomain, we need to decRef $this (if there is one)
-    if (curFunc()->isMethod() && !curFunc()->isStatic()) {
-      // This assert is weaker than it looks; it only checks the invocation
-      // we happen to be translating for. The runtime "assert" is the
-      // unconditional dereference of m_this we emit; if the frame has
-      // neither this nor a class, then m_this will be null and we'll
-      // SEGV.
-      ASSERT(curFrame()->hasThis() || curFrame()->hasClass());
-      // m_this and m_cls share a slot in the ActRec, so we check the
-      // lowest bit (0 -> m_this, 1 -> m_cls)
-      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
-      if (i.guardedThis) {
-        emitDecRef(i, *rTmp, KindOfObject);
-      } else {
-        a.      test_imm32_reg64(1, *rTmp);
-        {
-          JccBlock<CC_NZ> ifZero(a);
-          emitDecRef(i, *rTmp, KindOfObject); // this. decref it.
+    if (mergedThis) {
+      // There is nothing to do, we're returning this,
+      // but we didnt incRef it, so we dont have to
+      // decRef here.
+    } else {
+      // If this is a instance method called on an object or if it is a
+      // pseudomain, we need to decRef $this (if there is one)
+      if (curFunc()->isMethod() && !curFunc()->isStatic()) {
+        // This assert is weaker than it looks; it only checks the invocation
+        // we happen to be translating for. The runtime "assert" is the
+        // unconditional dereference of m_this we emit; if the frame has
+        // neither this nor a class, then m_this will be null and we'll
+        // SEGV.
+        ASSERT(curFrame()->hasThis() || curFrame()->hasClass());
+        // m_this and m_cls share a slot in the ActRec, so we check the
+        // lowest bit (0 -> m_this, 1 -> m_cls)
+        a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
+        if (i.guardedThis) {
+          emitDecRef(i, *rTmp, KindOfObject);
+        } else {
+          a.      test_imm32_reg64(1, *rTmp);
+          {
+            JccBlock<CC_NZ> ifZero(a);
+            emitDecRef(i, *rTmp, KindOfObject); // this. decref it.
+          }
         }
-      }
-    } else if (curFunc()->isPseudoMain()) {
-      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
-      a.      shr_imm32_reg64(1, *rTmp); // sets c (from bit 0) and z
-      FreezeRegs ice(m_regMap);
-      {
-        // tests for Not Zero and Not Carry
-        UnlikelyIfBlock<CC_NBE> ifRealThis(a, astubs);
-        astubs.    shl_imm32_reg64(1, *rTmp);
-        emitDecRef(astubs, i, *rTmp, KindOfObject);
+      } else if (curFunc()->isPseudoMain()) {
+        a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
+        a.      shr_imm32_reg64(1, *rTmp); // sets c (from bit 0) and z
+        FreezeRegs ice(m_regMap);
+        {
+          // tests for Not Zero and Not Carry
+          UnlikelyIfBlock<CC_NBE> ifRealThis(a, astubs);
+          astubs.    shl_imm32_reg64(1, *rTmp);
+          emitDecRef(astubs, i, *rTmp, KindOfObject);
+        }
       }
     }
 
@@ -5748,12 +5784,9 @@ TranslatorX64::translateRetC(const Tracelet& t,
     {
       UnlikelyIfBlock<CC_NZ> ifTracer(a, astubs);
       if (i.grouped) {
-        emitStoreImm(astubs, groupedRetTV.m_type,
-                     rVmSp, retvalSrcBase + TVOFF(m_type), sz::dword);
-        if (groupedRetTV.m_type != KindOfNull) {
-          emitStoreImm(astubs, groupedRetTV.m_data.num,
-                       rVmSp, retvalSrcBase, sz::qword);
-        }
+        ScratchReg s(m_regMap);
+        emitReturnVal(astubs, i,
+                      rVmSp, retvalSrcBase, rVmFp, AROFF(m_this), *s);
       }
       astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
       emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
@@ -5767,21 +5800,23 @@ TranslatorX64::translateRetC(const Tracelet& t,
   } else {
     SKTRACE(2, i.source, "emitting generic return\n");
 
+    m_regMap.cleanAll();
+    m_regMap.smashRegs(kAllRegs);
     if (i.grouped) {
       /*
        * What a pain: EventHook::onFunctionExit needs access
-       * to the return value - so we'd better not have suppressed
-       * writing it to the stack...
+       * to the return value - so we have to write it to the
+       * stack anyway. We still win for OpThis, and
+       * OpBareThis, since we dont have to do any refCounting
        */
-      ASSERT(false);
-      not_reached();
+      ScratchReg s(m_regMap);
+      emitReturnVal(astubs, i,
+                    rVmSp, retvalSrcBase, rVmFp, AROFF(m_this), *s);
     }
-    m_regMap.cleanAll();
-    m_regMap.smashRegs(kAllRegs);
     // If we are doing the generic return flow, we emit a call to
     // frame_free_locals here
     ASSERT(i.inputs.size() == 0);
-    emitFrameRelease(a, i, noThis);
+    emitFrameRelease(a, i, noThis || mergedThis);
   }
 
   /*
@@ -5802,12 +5837,10 @@ TranslatorX64::translateRetC(const Tracelet& t,
    * refcount-neutral.
    */
   if (i.grouped) {
-    emitStoreImm(a, groupedRetTV.m_type,
-                 rVmSp, retvalDestDisp + TVOFF(m_type), sz::dword);
-    if (groupedRetTV.m_type != KindOfNull) {
-      emitStoreImm(a, groupedRetTV.m_data.num,
-                   rVmSp, retvalDestDisp, sz::qword);
-    }
+    DumbScratchReg s(scratchRegs);
+    emitReturnVal(a, i, rVmSp, retvalDestDisp,
+                  rVmSp, retvalDestDisp - AROFF(m_r) + AROFF(m_this),
+                  *s);
   } else {
     ASSERT(sizeof(Cell) == 16);
     a.   load_reg64_disp_reg64 (rVmSp,    retvalSrcBase,      rScratch);
@@ -7105,29 +7138,64 @@ static bool checkTypeHelper(Opcode op, DataType dt) {
   NOT_REACHED();
 }
 
+static void warnNullThis() { raise_notice(Strings::WARN_NULL_THIS); }
+
 void
 TranslatorX64::translateCheckTypeOp(const Tracelet& t,
                                     const NormalizedInstruction& ni) {
   ASSERT(ni.inputs.size() == 1);
   ASSERT(ni.outStack);
 
-  const DataType dt    =  ni.inputs[0]->valueType();
-  const bool isLocalOp = ni.inputs[0]->isLocal();
-  const bool isType    =
-    checkTypeHelper(ni.op(), ni.inputs[0]->valueType()) != ni.invertCond;
-  const bool doUninit  = isLocalOp &&
-                         ni.op() != OpIssetL &&
-                         ni.inputs[0]->rtt.isUninit();
+  bool isType;
 
-  if (!isLocalOp) {
-    emitDecRef(ni, getReg(ni.inputs[0]->location), dt);
+  if (ni.grouped && (ni.prev->op() == OpThis || ni.prev->op() == OpBareThis)) {
+    ASSERT(ni.op() == OpIsNullC);
+    if (ni.prev->op() == OpThis) {
+      isType = false;
+    } else {
+      if (ni.changesPC) {
+        fuseBranchSync(t, ni);
+        a.   test_imm64_disp_reg64(1, AROFF(m_this), rVmFp);
+        if (ni.prev->imm[0].u_OA) {
+          UnlikelyIfBlock<CC_NZ> nullThis(a, astubs);
+          EMIT_CALL(astubs, warnNullThis);
+          recordReentrantStubCall(ni);
+          nullThis.reconcileEarly();
+          astubs.test_imm64_disp_reg64(1, AROFF(m_this), rVmFp);
+        }
+        fuseBranchAfterBool(t, ni, ni.invertCond ? CC_Z : CC_NZ);
+      } else {
+        m_regMap.allocOutputRegs(ni);
+        PhysReg res = getReg(ni.outStack->location);
+        a.   test_imm64_disp_reg64(1, AROFF(m_this), rVmFp);
+        a.   setcc(ni.invertCond ? CC_Z : CC_NZ, res);
+        if (ni.prev->imm[0].u_OA) {
+          UnlikelyIfBlock<CC_NZ> nullThis(a, astubs);
+          EMIT_CALL(astubs, warnNullThis);
+          recordReentrantStubCall(ni);
+        }
+        a.   mov_reg8_reg64_unsigned(res, res);
+      }
+      return;
+    }
+  } else {
+    const DataType dt    = ni.inputs[0]->valueType();
+    const bool isLocalOp = ni.inputs[0]->isLocal();
+
+    isType = checkTypeHelper(ni.op(), dt) != ni.invertCond;
+    if (!isLocalOp) {
+      emitDecRef(ni, getReg(ni.inputs[0]->location), dt);
+    }
+    if (isLocalOp &&
+        ni.op() != OpIssetL &&
+        ni.inputs[0]->rtt.isUninit()) {
+      const StringData* name = local_name(ni.inputs[0]->location);
+      ASSERT(name->isStatic());
+      EMIT_CALL(a, raiseUndefVariable, IMM((uintptr_t)name));
+      recordReentrantCall(ni);
+    }
   }
-  if (doUninit) {
-    const StringData* name = local_name(ni.inputs[0]->location);
-    ASSERT(name->isStatic());
-    EMIT_CALL(a, raiseUndefVariable, IMM((uintptr_t)name));
-    recordReentrantCall(ni);
-  }
+
   m_regMap.allocOutputRegs(ni);
   if (ni.changesPC) {
     // Don't bother driving an output reg. Just take the branch
@@ -8092,11 +8160,15 @@ TranslatorX64::emitThisCheck(const NormalizedInstruction& i,
   }
 }
 
-
 void
 TranslatorX64::translateThis(const Tracelet &t,
                              const NormalizedInstruction &i) {
-  ASSERT(i.outStack && !i.outLocal);
+  if (!i.outStack) {
+    ASSERT(i.next && i.next->grouped);
+    return;
+  }
+
+  ASSERT(!i.outLocal);
   ASSERT(curFunc()->isPseudoMain() || curFunc()->cls());
   m_regMap.allocOutputRegs(i);
   PhysReg out = getReg(i.outStack->location);
@@ -8106,6 +8178,56 @@ TranslatorX64::translateThis(const Tracelet &t,
     emitThisCheck(i, out);
   }
   emitIncRef(out, KindOfObject);
+}
+
+void
+TranslatorX64::translateBareThis(const Tracelet &t,
+                                const NormalizedInstruction &i) {
+  if (!i.outStack) {
+    ASSERT(i.next && i.next->grouped);
+    return;
+  }
+  ASSERT(!i.outLocal);
+  ASSERT(curFunc()->cls());
+  ScratchReg outScratch(m_regMap);
+  PhysReg out = *outScratch;
+  PhysReg base;
+  int offset;
+  locToRegDisp(i.outStack->location, &base, &offset);
+  if (i.outStack->rtt.isVagueValue()) {
+    m_regMap.scrubLoc(i.outStack->location);
+  }
+  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), out);
+  a.   test_imm32_reg64(1, out);
+  DiamondReturn astubsRet;
+  {
+    UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs, &astubsRet);
+    astubs. store_imm32_disp_reg(KindOfNull, TVOFF(m_type) + offset, base);
+    if (i.imm[0].u_OA) {
+      EMIT_CALL(astubs, warnNullThis);
+      recordReentrantStubCall(i);
+    }
+    if (i.next && !i.outStack->rtt.isVagueValue()) {
+      // To handle the case where we predict that
+      // the bare this will have type Object.
+      // Using the normal type prediction mechanism
+      // would require writing the object to the stack
+      // anyway.
+      // This is currently dead, however - I couldnt
+      // find a win.
+      emitSideExit(astubs, i, true);
+      astubsRet.kill();
+    }
+  }
+  emitIncRef(out, KindOfObject);
+  if (i.outStack->rtt.isVagueValue()) {
+    a. store_imm32_disp_reg(KindOfObject, TVOFF(m_type) + offset, base);
+    a. store_reg64_disp_reg64(out, TVOFF(m_data) + offset, base);
+  } else {
+    ASSERT(i.outStack->isObject());
+    m_regMap.bindScratch(outScratch, i.outStack->location, KindOfObject,
+                         RegInfo::DIRTY);
+  }
 }
 
 void
@@ -8879,8 +9001,40 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
   DynLocation* input0 = i.inputs[0];
   bool input0IsLoc = input0->isLocal();
   DataType type = input0->valueType();
-  PhysReg srcReg = getReg(input0->location);
+  PhysReg srcReg;
   ScratchReg result(m_regMap);
+  LazyScratchReg srcScratch(m_regMap);
+  TCA patchAddr = NULL;
+  boost::scoped_ptr<DiamondReturn> retFromNullThis;
+
+  if (i.grouped && (i.prev->op() == OpThis || i.prev->op() == OpBareThis)) {
+    srcScratch.alloc();
+    srcReg = *srcScratch;
+    a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), srcReg);
+    if (i.prev->op() == OpThis) {
+      ASSERT(i.guardedThis);
+    } else {
+      if (i.prev->imm[0].u_OA) {
+        retFromNullThis.reset(new DiamondReturn);
+        a.  test_imm32_reg64(1, srcReg);
+        {
+          UnlikelyIfBlock<CC_NZ> ifNull(a, astubs, retFromNullThis.get());
+          EMIT_CALL(astubs, warnNullThis);
+          recordReentrantStubCall(i);
+          emitImmReg(astubs, false, *result);
+        }
+      } else {
+        emitImmReg(a, false, *result);
+        a.  test_imm32_reg64(1, srcReg);
+        patchAddr = a.code.frontier;
+        a.  jcc(CC_NZ, patchAddr);
+      }
+    }
+    input0IsLoc = true; // we dont want a decRef
+    type = KindOfObject;
+  } else {
+    srcReg = getReg(input0->location);
+  }
 
   if (type != KindOfObject) {
     // All non-object inputs are not instances
@@ -8930,6 +9084,11 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
       astubs.  mov_reg32_reg32(rax, *result);
     }
   }
+  if (patchAddr) {
+    a. patchJcc(patchAddr, a.code.frontier);
+  }
+  retFromNullThis.reset();
+
   // Bind result and destination
   m_regMap.bindScratch(result, i.outStack->location, i.outStack->outerType(),
                        RegInfo::DIRTY);
@@ -10381,6 +10540,7 @@ bool TranslatorX64::dumpTCData() {
   SUPPORTED_OP(Cns) \
   SUPPORTED_OP(ClsCnsD) \
   SUPPORTED_OP(This) \
+  SUPPORTED_OP(BareThis) \
   SUPPORTED_OP(CheckThis) \
   SUPPORTED_OP(PackCont) \
   SUPPORTED_OP(ContReceive) \

@@ -1069,6 +1069,7 @@ static const struct {
   /*** 13. Miscellaneous instructions ***/
 
   { OpThis,        {None,             Stack1,       OutThisObject,     1 }},
+  { OpBareThis,    {None,             Stack1,       OutUnknown,        1 }},
   { OpCheckThis,   {This,             None,         OutNone,           0 }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown,        0 }},
@@ -1338,6 +1339,14 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       ni->grouped = true;
     }
 
+    if ((op == OpInstanceOfD || op == OpIsNullC) &&
+        (ni->m_txFlags & Supported) &&
+        (prevOp == OpThis || prevOp == OpBareThis)) {
+      prev->outStack = 0;
+      ni->grouped = true;
+      ni->manuallyAllocInputs = true;
+    }
+
     /*
      * TODO: #1181258 this should mostly be subsumed by the IR.
      * Remove this once the IR is seen to be handling it.
@@ -1362,8 +1371,9 @@ void Translator::analyzeSecondPass(Tracelet& t) {
          prevOp == OpTrue ||
          prevOp == OpFalse ||
          prevOp == OpDouble ||
-         prevOp == OpArray) &&
-        freeLocalsInline()) {
+         prevOp == OpArray ||
+         prevOp == OpThis ||
+         prevOp == OpBareThis)) {
       ASSERT(!ni->outStack);
       ni->grouped = true;
       prev->outStack = NULL;
@@ -2337,6 +2347,18 @@ std::string NormalizedInstruction::toString() const {
 void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                              int& currentStackOffset, Tracelet& t,
                              TraceletContext& tas) {
+  if (ni->op() == OpBareThis &&
+      ni->outStack->rtt.isVagueValue()) {
+    SrcKey src = sk;
+    const Unit* unit = ni->m_unit;
+    src.advance(unit);
+    Opcode next = *unit->at(src.offset());
+    if (next == OpInstanceOfD || next == OpIsNullC) {
+      ni->outStack->rtt = RuntimeType(KindOfObject);
+    }
+    return;
+  }
+
   if ((ni->op() != OpIterValueC && ni->op() != OpIterKey)
       || ni->m_txFlags == Interp) {
     return;

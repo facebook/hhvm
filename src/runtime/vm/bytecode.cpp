@@ -6383,6 +6383,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopThis(PC& pc) {
   m_stack.pushObject(this_);
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopBareThis(PC& pc) {
+  NEXT();
+  DECODE(unsigned char, notice);
+  if (m_fp->hasThis()) {
+    ObjectData* this_ = m_fp->getThis();
+    m_stack.pushObject(this_);
+  } else {
+    m_stack.pushNull();
+    if (notice) raise_notice(Strings::WARN_NULL_THIS);
+  }
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopCheckThis(PC& pc) {
   NEXT();
   checkThis(m_fp);

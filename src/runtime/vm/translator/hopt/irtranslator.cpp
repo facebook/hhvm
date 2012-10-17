@@ -1145,6 +1145,15 @@ TranslatorX64::irTranslateThis(const Tracelet &t,
 }
 
 void
+TranslatorX64::irTranslateBareThis(const Tracelet &t,
+                                  const NormalizedInstruction &i) {
+  ASSERT(i.outStack && !i.outLocal);
+  ASSERT(curFunc()->isPseudoMain() || curFunc()->cls());
+
+  HHIR_UNIMPLEMENTED(BareThis);
+}
+
+void
 TranslatorX64::irTranslateCheckThis(const Tracelet& t,
                                     const NormalizedInstruction& i) {
   HHIR_EMIT(CheckThis);

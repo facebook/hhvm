@@ -178,7 +178,6 @@ private:
     swapRegMaps();
   }
 
-private:
   bool finishedBranch() const { return m_branchJmp != 0; }
 
   void swapRegMaps() {
@@ -211,9 +210,21 @@ public:
     , m_branchJmp(0)
   {}
 
+  void kill() {
+    m_mainA = NULL;
+  }
+
   ~DiamondReturn() {
     ASSERT(m_branchA &&
       "DiamondReturn was created without being passed to UnlikelyIfBlock");
+
+    if (!m_mainA) {
+      /*
+       * We were killed. eg the UnlikelyIfBlock took a side exit, so
+       * no reconciliation/branch back to a is required.
+       */
+      return;
+    }
 
     if (!finishedBranch()) {
       /*

@@ -80,7 +80,7 @@ void VariableTable::getLocalVariableNames(vector<string> &syms) const {
     syms.push_back(name);
   }
 
-  if (fs->containsBareThis()) {
+  if (fs->needsLocalThis()) {
     ASSERT(dollarThisIsSpecial);
     // We only need a local variable named "this" if the current function
     // contains an occurrence of "$this" that is not part of a property

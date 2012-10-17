@@ -21,6 +21,7 @@ namespace HPHP {
 namespace Strings {
 
 const char* const FATAL_NULL_THIS = "$this is null";
+const char* const WARN_NULL_THIS = "Undefined variable: this";
 const char* const FUNCTION_ALREADY_DEFINED = "Function already defined: %s";
 const char* const CONSTANT_ALREADY_DEFINED = "Constant %s already defined";
 const char* const CONSTANTS_MUST_BE_SCALAR =

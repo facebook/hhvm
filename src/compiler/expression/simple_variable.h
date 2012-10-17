@@ -42,6 +42,8 @@ public:
                                 bool coerce);
 
   virtual bool canonCompare(ExpressionPtr e) const;
+  virtual void setContext(Context context);
+
   const std::string &getName() const { return m_name;}
   const std::string &getDocComment() const {
     return m_docComment;

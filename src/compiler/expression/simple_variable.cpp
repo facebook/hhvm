@@ -53,6 +53,15 @@ ExpressionPtr SimpleVariable::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+void SimpleVariable::setContext(Context context) {
+  m_context |= context;
+  if (m_this && context & (RefValue | RefAssignmentLHS)) {
+    if (FunctionScopePtr func = getFunctionScope()) {
+      func->setContainsBareThis(true, true);
+    }
+  }
+}
+
 int SimpleVariable::getLocalEffects() const {
   if (m_context == Declaration &&
       m_sym && m_sym->isShrinkWrapped()) {
@@ -138,7 +147,10 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
         func->setContainsThis();
         m_this = true;
         if (!hasContext(ObjectContext)) {
-          func->setContainsBareThis();
+          func->setContainsBareThis(
+            true,
+            hasAnyContext(RefValue | RefAssignmentLHS) ||
+            m_sym->isRefClosureVar());
           if (variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
             ClassScopePtr cls = getClassScope();
             TypePtr t = !cls || cls->isRedeclaring() ?

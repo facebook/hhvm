@@ -146,6 +146,34 @@ HphpArray::HphpArray(uint size)
   init(size);
 }
 
+HphpArray::HphpArray(uint size, const TypedValue* values)
+  : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
+    m_nonsmart(false) {
+#ifdef PEDANTIC
+  if (size > 0x7fffffffU) {
+    raise_error("Cannot create an array with more than 2^31 - 1 elements");
+  }
+#endif
+  init(size);
+  ASSERT(size <= m_tableMask + 1);
+  // append values by moving -- Caller assumes we update refcount.  Values
+  // are in reverse order since they come from the stack, which grows down.
+  // This code is hand-specialized from nextInsert().
+  ASSERT(m_size == 0 && m_hLoad == 0 && m_nextKI == 0);
+  ElmInd* hash = m_hash;
+  Elm* data = m_data;
+  for (uint i = 0; i < size; i++) {
+    ASSERT(hash[i] == HphpArray::ElmIndEmpty);
+    data[i].data = values[size - i - 1];
+    data[i].setIntKey(i);
+    hash[i] = i;
+  }
+  m_size = size;
+  m_hLoad = size;
+  m_lastE = size - 1;
+  m_nextKI = size;
+}
+
 HphpArray::HphpArray(EmptyMode)
   : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
     m_nonsmart(false) {

@@ -44,15 +44,22 @@ public:
     return &s_theEmptyArray;
   }
 
-public:
-  HphpArray(uint nSize);
   static inline const void** getVTablePtr() {
     return (*(void const***)(&s_theEmptyArray));
   }
+
 private:
+  // for copy-on-write escalation
   HphpArray(CopyMode);
 
 public:
+  // Create an empty array with enough capacity for nSize elements.
+  HphpArray(uint nSize);
+
+  // Create and initialize an array with size elements, populated by
+  // moving (without refcounting) and reversing vals.
+  HphpArray(uint size, const TypedValue* vals); // make tuple
+
   virtual ~HphpArray();
 
   // dropContentsOnFloor twiddles the HphpArray's internal state such
@@ -215,7 +222,7 @@ public:
   static uint32_t getHashOff() {
     return (uintptr_t)&((HphpArray*)0)->m_hash;
   }
-  
+
   static uint32_t getElmSize() {
     return sizeof(Elm);
   }

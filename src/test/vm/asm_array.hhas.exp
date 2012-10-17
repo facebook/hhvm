@@ -18,3 +18,9 @@ array(2) {
   [1]=>
   string(3) "one"
 }
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(1) "b"
+}

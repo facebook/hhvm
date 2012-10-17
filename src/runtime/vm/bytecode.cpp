@@ -3732,6 +3732,15 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNewArray(PC& pc) {
   m_stack.pushArray(arr);
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopNewTuple(PC& pc) {
+  NEXT();
+  DECODE_IVA(n);
+  // This constructor moves values, no inc/decref is necessary.
+  HphpArray* arr = NEW(HphpArray)(n, m_stack.topC());
+  m_stack.ndiscard(n);
+  m_stack.pushArray(arr);
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopAddElemC(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();

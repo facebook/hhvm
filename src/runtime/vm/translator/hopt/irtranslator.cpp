@@ -1245,6 +1245,14 @@ TranslatorX64::irTranslateFCallArray(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateNewTuple(const Tracelet& t,
+                                   const NormalizedInstruction& i) {
+  // todo: test
+  int numArgs = i.imm[0].u_IVA;
+  HHIR_EMIT(NewTuple, numArgs);
+}
+
+void
 TranslatorX64::irTranslateStaticLocInit(const Tracelet& t,
                                       const NormalizedInstruction& i) {
   HHIR_EMIT(StaticLocInit, i.imm[0].u_IVA, i.imm[1].u_SA);

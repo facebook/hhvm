@@ -331,6 +331,7 @@ int instrNumPops(const Opcode* opcode) {
 #define C_LMANY(...) -2
 #define V_LMANY(...) -2
 #define FMANY -3
+#define CMANY -3
 #define O(name, imm, pop, push, flags) pop,
     OPCODES
 #undef NOV
@@ -341,13 +342,15 @@ int instrNumPops(const Opcode* opcode) {
 #undef C_LMANY
 #undef V_LMANY
 #undef FMANY
+#undef CMANY
 #undef O
   };
   int n = numberOfPops[*opcode];
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
-  // FCall specifies how many values are popped in its first immediate
+  // FCall and NewTuple specify how many values are popped in their
+  // first immediate
   if (n == -3) return getImm(opcode, 0).u_IVA;
   // For instructions with vector immediates, we have to scan the
   // contents of the vector immediate to determine how many values

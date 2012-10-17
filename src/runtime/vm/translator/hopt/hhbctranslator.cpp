@@ -209,6 +209,12 @@ void HhbcTranslator::emitNewArray() {
   push(m_tb.genDefConst<const ArrayData*>(ad));
 }
 
+void HhbcTranslator::emitNewTuple(int numArgs) {
+  spillStack();
+  for (int i = 0; i < numArgs; i++) popC();
+  emitInterpOneOrPunt(Type::Arr);
+}
+
 void HhbcTranslator::emitArrayAdd() {
   TRACE(3, "%u: ArrayAdd\n", m_bcOff);
   Type::Tag type1 = topC(0)->getType();

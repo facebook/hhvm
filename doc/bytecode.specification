@@ -829,6 +829,13 @@ NewArray    []  ->  [C:Arr]
 
   New array. Creates a new empty array and pushes it onto the stack.
 
+NewTuple <num elems>    [C..C]  ->  [C]
+
+  New array. Creates a new array from the top %1 cells on the stack,
+  pops those cells, then pushes the new array onto the stack.  Elements
+  are implicitly numbered from 0 to num elems - 1; $1 is at index 0, 
+  $2 is at 1, and so on.
+
 AddElemC    [C C C]  ->  [C:Arr]
 
   Add element. If $3 is an array, this instruction executes $3[$2] = $1 and

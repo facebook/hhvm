@@ -301,6 +301,7 @@ class TranslatorX64 : public Translator
               RegSet toSave = RegSet());
   void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
               RegSet toSave = RegSet());
+  void newTuple(const NormalizedInstruction& i, unsigned n);
 
   enum {
     ArgDontAllocate = -1,
@@ -455,6 +456,7 @@ MINSTRS
   CASE(String) \
   CASE(Array) \
   CASE(NewArray) \
+  CASE(NewTuple) \
   CASE(Nop) \
   CASE(AddElemC) \
   CASE(AddNewElemC) \

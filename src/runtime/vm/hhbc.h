@@ -353,6 +353,7 @@ enum SetOpOp {
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \
   O(Array,           ONE(AA),          NOV,             ONE(CV),    NF) \
   O(NewArray,        NA,               NOV,             ONE(CV),    NF) \
+  O(NewTuple,        ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \

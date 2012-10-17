@@ -108,6 +108,7 @@ public:
   void emitInitThisLoc(int32 id);
   void emitArray(int arrayId);
   void emitNewArray();
+  void emitNewTuple(int n);
 
   void emitArrayAdd();
   void emitAddElemC();

@@ -695,14 +695,10 @@ OpcodeParserMap opcode_parsers;
 #define IMM_TWO(t1, t2) IMM_##t1; IMM_##t2
 #define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
 
-// We need the first argument to FCall to do POP_FMANY.
+// FCall and NewTuple need to know the the first imm do POP_*MANY.
 #define IMM_IVA                                   \
-  if (thisOpcode == OpFCall) {                    \
-    fcallIVA = read_opcode_arg<int64_t>(as);      \
-    as.ue->emitIVA(fcallIVA);                     \
-  } else {                                        \
-    as.ue->emitIVA(read_opcode_arg<int64_t>(as)); \
-  }
+  immIVA = read_opcode_arg<int64_t>(as);          \
+  as.ue->emitIVA(immIVA);                         \
 
 #define IMM_SA   as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
 #define IMM_I64A as.ue->emitInt64(read_opcode_arg<int64_t>(as))
@@ -757,11 +753,12 @@ OpcodeParserMap opcode_parsers;
 #define NUM_POP_LMANY() vecImmStackValues
 #define NUM_POP_V_LMANY() (1 + vecImmStackValues)
 #define NUM_POP_C_LMANY() (1 + vecImmStackValues)
-#define NUM_POP_FMANY fcallIVA /* number of arguments */
+#define NUM_POP_FMANY immIVA /* number of arguments */
+#define NUM_POP_CMANY immIVA /* number of arguments */
 
 #define O(name, imm, pop, push, flags)                            \
   void parse_opcode_##name(AsmState& as) {                        \
-    UNUSED int64_t fcallIVA = -1;                                 \
+    UNUSED int64_t immIVA = -1;                                   \
     UNUSED const Opcode thisOpcode = Op##name;                    \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();            \
                                                                   \
@@ -820,6 +817,7 @@ OPCODES
 #undef NUM_POP_V_LMANY
 #undef NUM_POP_C_LMANY
 #undef NUM_POP_FMANY
+#undef NUM_POP_CMANY
 
 void initialize_opcode_map() {
 #define O(name, imm, pop, push, flags) \

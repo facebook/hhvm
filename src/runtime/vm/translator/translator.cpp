@@ -338,6 +338,7 @@ enum Operands {
   IgnoreInnerType = 1 << 15, // Instruction doesnt care about the inner types
   DontGuardAny    = 1 << 16, // Dont force a guard for any input
   This            = 1 << 17, // Input to CheckThis
+  StackN          = 1 << 18, // pop N cells from stack; n = imm[0].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
   StackCufSafe = StackIns1 | FStack
@@ -831,6 +832,7 @@ static const struct {
   { OpString,      {None,             Stack1,       OutStringImm,      1 }},
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
+  { OpNewTuple,    {StackN,           Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutArray,         -1 }},
@@ -1128,6 +1130,9 @@ int getStackDelta(const NormalizedInstruction& ni) {
   if (op == OpFCall) {
     int numArgs = ni.imm[0].u_IVA;
     return 1 - numArgs - kNumActRecCells;
+  }
+  if (op == OpNewTuple) {
+    return 1 - ni.imm[0].u_IVA;
   }
   const InstrInfo& info = instrInfo[op];
   if (info.in & MVector) {
@@ -1744,6 +1749,16 @@ void Translator::getInputs(Tracelet& t,
         SKTRACE(1, sk, "getInputs: stack3 %d\n", currentStackOffset - 1);
         inputs.push_back(Location(Location::Stack, --currentStackOffset));
       }
+    }
+  }
+  if (input & StackN) {
+    int numArgs = ni->imm[0].u_IVA;
+    SKTRACE(1, sk, "getInputs: stackN %d %d\n", currentStackOffset - 1,
+            numArgs);
+    for (int i = 0; i < numArgs; i++) {
+      inputs.push_back(Location(Location::Stack, --currentStackOffset));
+      inputs.back().dontGuard = true;
+      inputs.back().dontBreak = true;
     }
   }
   if (input & MVector) {

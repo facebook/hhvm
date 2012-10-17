@@ -564,6 +564,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][3] = {
   #define NOV { },
   #define FMANY { },
+  #define CMANY { },
   #define ONE(a) { a },
   #define TWO(a,b) { b, a },
   #define THREE(a,b,c) { c, b, a },
@@ -577,6 +578,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef V_LMANY
   #undef LMANY
   #undef FMANY
+  #undef CMANY
   #undef THREE
   #undef TWO
   #undef ONE
@@ -600,6 +602,11 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case OpFCallArray:// NA,           ONE(FV), ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
+    }
+    return m_tmp_sig;
+  case OpNewTuple:  // ONE(IVA),     CMANY,   ONE(CV)
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
   default:
@@ -705,6 +712,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][3] = {
   #define NOV { },
   #define FMANY { },
+  #define CMANY { },
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
@@ -720,6 +728,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef V_LMANY
   #undef LMANY
   #undef FMANY
+  #undef CMANY
   #undef INS_1
   #undef INS_2
   #undef THREE

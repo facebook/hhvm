@@ -321,7 +321,7 @@ public:
   void popEvalStack(char symFlavor, int arg = -1, int pos = -1);
   void popSymbolicLocal(Opcode opcode, int arg = -1, int pos = -1);
   void popEvalStackLMany();
-  void popEvalStackFMany(int len);
+  void popEvalStackMany(int len, char symFlavor);
   void pushEvalStack(char symFlavor);
   void peekEvalStack(char symFlavor, int depthActual);
   void pokeEvalStack(char symFlavor, int depthActual);

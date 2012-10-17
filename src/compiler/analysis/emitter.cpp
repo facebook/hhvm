@@ -278,6 +278,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_C_LMANY() 0
 #define COUNT_V_LMANY() 0
 #define COUNT_FMANY 0
+#define COUNT_CMANY 0
 
 #define ONE(t) \
   DEC_##t a1
@@ -317,7 +318,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().popEvalStack(StackSym::V); \
   getEmitterVisitor().popEvalStackLMany()
 #define POP_FMANY \
-  getEmitterVisitor().popEvalStackFMany(a1) \
+  getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
+#define POP_CMANY \
+  getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
 
 #define POP_CV(i) getEmitterVisitor().popEvalStack(StackSym::C, i, curPos)
 #define POP_VV(i) getEmitterVisitor().popEvalStack(StackSym::V, i, curPos)
@@ -498,6 +501,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_FV
 #undef POP_LREST
 #undef POP_FMANY
+#undef POP_CMANY
 #undef POP_HA_ONE
 #undef POP_HA_TWO
 #undef POP_HA_THREE
@@ -1196,9 +1200,9 @@ void EmitterVisitor::popEvalStackLMany() {
   }
 }
 
-void EmitterVisitor::popEvalStackFMany(int len) {
+void EmitterVisitor::popEvalStackMany(int len, char symFlavor) {
   for (int i = 0; i < len; ++i) {
-    popEvalStack(StackSym::F);
+    popEvalStack(symFlavor);
   }
 }
 
@@ -1716,6 +1720,28 @@ void EmitterVisitor::visitKids(ConstructPtr c) {
     ConstructPtr kid(c->getNthKid(i));
     visit(kid);
   }
+}
+
+/*
+ * isTupleInit() returns true if this expression list looks like a vanilla
+ * tuple-shaped array with no keys, no ref values; e.g. array(x,y,z),
+ * where we can NewTuple to create the array.  In that case the elements are
+ * pushed on the stack, so we arbitrarily limit this to a small multiple of
+ * HphpArray::SmallSize (12).
+ */
+bool isTupleInit(ExpressionPtr init_expr, int* cap) {
+  if (init_expr->getKindOf() != Expression::KindOfExpressionList) return false;
+  ExpressionListPtr el = static_pointer_cast<ExpressionList>(init_expr);
+  int n = el->getCount();
+  if (n < 1 || n > int(4 * HphpArray::SmallSize)) return false;
+  for (int i = 0, n = el->getCount(); i < n; ++i) {
+    ExpressionPtr ex = (*el)[i];
+    if (ex->getKindOf() != Expression::KindOfArrayPairExpression) return false;
+    ArrayPairExpressionPtr ap = static_pointer_cast<ArrayPairExpression>(ex);
+    if (ap->getName() != NULL || ap->isRef()) return false;
+  }
+  *cap = n;
+  return true;
 }
 
 bool EmitterVisitor::visit(ConstructPtr node) {
@@ -2358,6 +2384,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           return true;
         }
         if (op == T_ARRAY) {
+          int tuple_cap;
           if (u->isScalar()) {
             TypedValue tv;
             TV_WRITE_UNINIT(&tv);
@@ -2365,6 +2392,17 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (m_staticArrays.size() == 0) {
               e.Array(tv.m_data.parr);
             }
+          } else if (isTupleInit(u->getExpression(), &tuple_cap)) {
+            // evaluate array values onto stack
+            ExpressionListPtr el =
+              static_pointer_cast<ExpressionList>(u->getExpression());
+            for (int i = 0; i < tuple_cap; i++) {
+              ArrayPairExpressionPtr ap =
+                static_pointer_cast<ArrayPairExpression>((*el)[i]);
+              visit(ap->getValue());
+              emitConvertToCell(e);
+            }
+            e.NewTuple(tuple_cap);
           } else {
             ASSERT(m_staticArrays.size() == 0);
             ExpressionPtr ex = u->getExpression();
@@ -2377,7 +2415,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               }
             }
             e.NewArray();
-            visit(u->getExpression());
+            visit(ex);
           }
           return true;
         } else if (op == T_ISSET) {

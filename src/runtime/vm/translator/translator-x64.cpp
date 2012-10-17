@@ -4504,6 +4504,38 @@ TranslatorX64::translateNewArray(const Tracelet& t,
   }
 }
 
+ArrayData* newTupleHelper(int n, TypedValue* values) {
+  HphpArray* a = NEW(HphpArray)(n, values);
+  a->incRefCount();
+  TRACE(2, "newTupleHelper: size %d\n", n);
+  return a;
+}
+
+void TranslatorX64::translateNewTuple(const Tracelet& t,
+                                      const NormalizedInstruction& i) {
+  int arity = i.imm[0].u_IVA;
+  ASSERT(arity > 0 && i.inputs.size() == unsigned(arity));
+  ASSERT(i.outStack && !i.outLocal);
+  for (int j = 0; j < arity; j++) {
+    ASSERT(i.inputs[j]->outerType() != KindOfRef);
+    ASSERT(i.inputs[j]->isStack());
+  }
+
+  // We pass the values by address, so we need to sync them back to memory
+  for (int j = 0; j < arity; j++) {
+    m_regMap.cleanLoc(i.inputs[j]->location);
+  }
+  if (false) {
+    TypedValue* rhs = 0;
+    ArrayData* ret = newTupleHelper(arity, rhs);
+    printf("%p", ret); // use ret
+  }
+  EMIT_CALL(a, newTupleHelper, IMM(arity), A(i.inputs[0]->location));
+  // newTupleHelper returns the up-to-date array pointer in rax.
+  // Therefore, we can bind rax to the result location and mark it as dirty.
+  m_regMap.bind(rax, i.inputs[arity-1]->location, KindOfArray, RegInfo::DIRTY);
+}
+
 void
 TranslatorX64::analyzeNop(Tracelet& t, NormalizedInstruction& i) {
   i.m_txFlags = Native;
@@ -10325,6 +10357,7 @@ bool TranslatorX64::dumpTCData() {
   SIMPLE_OP(FCall) \
   SIMPLE_OP(CreateCont) \
   SIMPLE_OP(UnpackCont) \
+  SIMPLE_OP(NewTuple) \
   /*
    * Translations with a reentrant helper.
    *

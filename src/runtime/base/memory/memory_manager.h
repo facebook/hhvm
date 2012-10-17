@@ -52,10 +52,7 @@ public:
   void* maybePop() {
     void** ret = ptr;
     if (LIKELY(ret != NULL)) {
-      void** next_free = (void**)*ret;
-      ptr = next_free;
-      // prefetch the next-free-object's next pointer
-      __builtin_prefetch(next_free,0,1); // rw=0, locality=T2
+      ptr = (void**)*ret;
     }
     return ret;
   }

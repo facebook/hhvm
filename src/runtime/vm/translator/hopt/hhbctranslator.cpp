@@ -188,7 +188,6 @@ void HhbcTranslator::emitUnboxR() {
 
 void HhbcTranslator::emitThis() {
   TRACE(3, "%u: This\n", m_bcOff);
-  // TODO: genLdThis should check and generate fatal if NULL
   pushIncRef(m_tb.genLdThis(getExitSlowTrace()));
 }
 
@@ -425,8 +424,7 @@ void HhbcTranslator::emitSetL(int32 id) {
   // move the incref to after the store because the stored location
   // might contain a ref, which could then be modified by the decref
   // inserted after the stloc
-  pushIncRef(src);
-  m_tb.genStLoc(id, src, true, true, exitTrace);
+  push(m_tb.genStLoc(id, src, true, true, exitTrace));
 }
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32 id) {
@@ -784,7 +782,6 @@ void HhbcTranslator::emitSetProp(int offset, bool isPropOnStack) {
   if (obj->getType() != Type::Obj) {
     PUNT(SetProp_nonobj);
   }
-  pushIncRef(src);
   SSATmp* propOffset = m_tb.genDefConst<int64>(offset);
   SSATmp* prevValue;
   if (m_unboxPtrs) {
@@ -795,6 +792,7 @@ void HhbcTranslator::emitSetProp(int offset, bool isPropOnStack) {
      prevValue = m_tb.genLdProp(obj, propOffset, Type::Cell, exitTrace);
      m_tb.genStProp(obj, propOffset, src, true);
   }
+  pushIncRef(src);
   m_tb.genDecRef(prevValue);
   m_tb.genDecRef(obj);
 }
@@ -1475,9 +1473,10 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
 
   // VerifyParamType does not remove the parameter from the stack
   TRACE(3, "%u: VerifyParamType %s\n", m_bcOff, tcTypeName->data());
-  Trace* exitTrace = getExitSlowTrace();
+  Trace* exitTrace1 = getExitSlowTrace();
+  Trace* exitTrace2 = getExitSlowTrace();
   // XXX Should verify param type unbox?
-  SSATmp* param = m_tb.genLdLoc(paramId, Type::Gen, exitTrace);
+  SSATmp* param = m_tb.genLdLoc(paramId, Type::Gen, exitTrace1);
   if (param->getType() != Type::Obj) {
     PUNT(VerifyParamType_nonobj);
   }
@@ -1501,7 +1500,7 @@ void HhbcTranslator::emitVerifyParamType(int32 paramId,
   m_tb.genVerifyParamType(objClass,
                           m_tb.genDefConst<const StringData*>(tcTypeName),
                           constraint,
-                          exitTrace);
+                          exitTrace2);
 }
 
 void HhbcTranslator::emitInstanceOfD(int classNameStrId) {

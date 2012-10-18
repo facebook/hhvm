@@ -1013,11 +1013,11 @@ void TraceBuilder::genBindLoc(uint32 id, SSATmp* newValue) {
 /*
  * Store a cell value to a local that might be boxed.
  */
-void TraceBuilder::genStLoc(uint32 id,
-                            SSATmp* newValue,
-                            bool doGenDecRef,
-                            bool genStoreType,
-                            Trace* exit) {
+SSATmp* TraceBuilder::genStLoc(uint32 id,
+                               SSATmp* newValue,
+                               bool doRefCount,
+                               bool genStoreType,
+                               Trace* exit) {
   ASSERT(!Type::isBoxed(newValue->getType()));
   /*
    * If prior value of local is a cell, then  re-use genBindLoc.
@@ -1034,8 +1034,9 @@ void TraceBuilder::genStLoc(uint32 id,
   // this point thanks to the tracelet guards
   ASSERT (trackedType != Type::None);
   if (Type::isUnboxed(trackedType)) {
+    SSATmp* retVal = doRefCount ? genIncRef(newValue) : newValue;
     genBindLoc(id, newValue);
-    return;
+    return retVal;
   }
   ASSERT(Type::isBoxed(trackedType));
   SSATmp* prevRef = getLocalValue(id);
@@ -1047,7 +1048,7 @@ void TraceBuilder::genStLoc(uint32 id,
     prevRef = genInstruction(LdLoc, trackedType, genLdHome(id));
   }
   SSATmp* prevValue = NULL;
-  if (doGenDecRef) {
+  if (doRefCount) {
     ASSERT(exit);
     Type::Tag innerType = Type::getInnerType(trackedType);
     prevValue = genInstruction(LdRefNR, innerType, prevRef, exit);
@@ -1063,9 +1064,12 @@ void TraceBuilder::genStLoc(uint32 id,
   // update other tracked locals that also contain prevRef
   updateLocalRefValues(prevRef, newRef);
 
-  if (doGenDecRef) {
+  SSATmp* retVal = newValue;
+  if (doRefCount) {
+    retVal = genIncRef(newValue);
     genDecRef(prevValue);
   }
+  return retVal;
 }
 
 SSATmp* TraceBuilder::genNewObj(int32 numParams, SSATmp* cls) {

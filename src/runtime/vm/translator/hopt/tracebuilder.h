@@ -66,9 +66,9 @@ public:
   SSATmp* genLdLoc(uint32 id);
   SSATmp* genLdLoc(uint32 id, Type::Tag type, Trace* exitTrace);
   SSATmp* genLdLocAddr(uint32 id);
-  void    genStLoc(uint32 id,
+  SSATmp* genStLoc(uint32 id,
                    SSATmp* src,
-                   bool genDecRef,
+                   bool doRefCount,
                    bool genStoreType,
                    Trace* exit);
   SSATmp* genLdMem(SSATmp* addr, Type::Tag type, Trace* target);

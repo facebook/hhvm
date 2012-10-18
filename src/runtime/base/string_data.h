@@ -331,11 +331,16 @@ public:
   bool equal(const StringData *s) const {
     ASSERT(s);
     if (s == this) return true;
-    int ret = numericCompare(s);
-    if (ret < -1) {
-      if (m_len != s->m_len) return false;
-      ret = memcmp(rawdata(), s->rawdata(), m_len);
+    int ret;
+
+    if (!(m_hash < 0 || s->m_hash < 0)) {
+      ret = numericCompare(s);
+      if (ret >= -1) {
+        return ret == 0;
+      }
     }
+    if (m_len != s->m_len) return false;
+    ret = memcmp(rawdata(), s->rawdata(), m_len);
     return ret == 0;
   }
 

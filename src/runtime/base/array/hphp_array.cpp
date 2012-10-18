@@ -543,13 +543,16 @@ static bool hitIntKey(const HphpArray::Elm* e, int64 ki) {
     } \
   }
 
+NEVER_INLINE
 ssize_t /*ElmInd*/ HphpArray::find(int64 ki) const {
   FIND_BODY(ki, hitIntKey(&elms[pos], ki));
 }
 
+NEVER_INLINE
 ssize_t /*ElmInd*/ HphpArray::find(const StringData* s,
                                    strhash_t prehash) const {
-  FIND_BODY(prehash, hitStringKey(&elms[pos], s, STRING_HASH(prehash)));
+  int32_t h = STRING_HASH(prehash);
+  FIND_BODY(prehash, hitStringKey(&elms[pos], s, h));
 }
 #undef FIND_BODY
 
@@ -587,14 +590,16 @@ ssize_t /*ElmInd*/ HphpArray::find(const StringData* s,
     } \
   }
 
+NEVER_INLINE
 HphpArray::ElmInd* HphpArray::findForInsert(int64 ki) const {
   FIND_FOR_INSERT_BODY(ki, hitIntKey(&elms[pos], ki));
 }
 
+NEVER_INLINE
 HphpArray::ElmInd* HphpArray::findForInsert(const StringData* s,
                                             strhash_t prehash) const {
-  FIND_FOR_INSERT_BODY(prehash, hitStringKey(&elms[pos], s,
-                                             STRING_HASH(prehash)));
+  int32_t h = STRING_HASH(prehash);
+  FIND_FOR_INSERT_BODY(prehash, hitStringKey(&elms[pos], s, h));
 }
 #undef FIND_FOR_INSERT_BODY
 
@@ -607,13 +612,19 @@ HphpArray::ElmInd* HphpArray::findForNewInsert(size_t h0) const {
   if (LIKELY(!validElmInd(pos))) {
     return ei;
   }
+  return findForNewInsertLoop(tableMask, h0);
+}
+
+NEVER_INLINE HphpArray::ElmInd*
+HphpArray::findForNewInsertLoop(size_t tableMask, size_t h0) const {
   /* Quadratic probe. */
+  size_t probeIndex = h0 & tableMask;
   for (size_t i = 1;; ++i) {
     ASSERT(i <= tableMask);
     probeIndex = (probeIndex + i) & tableMask;
     ASSERT(((h0 + ((i + i * i) >> 1)) & tableMask) == probeIndex);
-    ei = &m_hash[probeIndex];
-    pos = ssize_t(*ei);
+    ElmInd* ei = &m_hash[probeIndex];
+    ssize_t pos = ssize_t(*ei);
     if (!validElmInd(pos)) {
       return ei;
     }
@@ -733,8 +744,15 @@ ssize_t HphpArray::getIndex(CVarRef k) const {
 //=============================================================================
 // Append/insert/update.
 
+inline ALWAYS_INLINE bool HphpArray::isFull() const {
+  uint32 maxElms = computeMaxElms(m_tableMask);
+  ASSERT(m_lastE == ElmIndEmpty || uint32(m_lastE) + 1 <= maxElms);
+  ASSERT(m_hLoad <= maxElms);
+  return uint32(m_lastE) + 1 == maxElms || m_hLoad == maxElms;
+}
+
 inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
-  ASSERT(!validElmInd(*ei));
+  ASSERT(!validElmInd(*ei) && !isFull());
   ASSERT(m_size != 0 || m_lastE == ElmIndEmpty);
 #ifdef PEDANTIC
   if (m_size >= 0x7fffffffU) {
@@ -742,22 +760,28 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
     return NULL;
   }
 #endif
-  // If we need to grow first before allocating another element,
-  // return NULL to indicate that allocation failed.
-  uint32 maxElms = computeMaxElms(m_tableMask);
-  ASSERT(m_lastE == ElmIndEmpty || uint32(m_lastE)+1 <= maxElms);
-  ASSERT(m_hLoad <= maxElms);
-  if (uint32(m_lastE)+1 == maxElms || m_hLoad == maxElms) {
-    return NULL;
-  }
   ++m_size;
   m_hLoad += (*ei == ElmIndEmpty);
-  ++m_lastE;
-  (*ei) = m_lastE;
-  Elm* e = &m_data[m_lastE];
-  if (m_pos == ArrayData::invalid_index) {
-    m_pos = ssize_t(m_lastE);
-  }
+  ElmInd i = ++m_lastE;
+  (*ei) = i;
+  if (m_pos == ArrayData::invalid_index) m_pos = ssize_t(i);
+  Elm* e = &m_data[i];
+  return LIKELY(!siPastEnd()) ? e : allocElmExtra(e, ei);
+}
+
+inline ALWAYS_INLINE
+HphpArray::Elm* HphpArray::newElm(ElmInd* ei, size_t h0) {
+  if (isFull()) return newElmGrow(h0);
+  return allocElm(ei);
+}
+
+NEVER_INLINE
+HphpArray::Elm* HphpArray::newElmGrow(size_t h0) {
+  resize();
+  return allocElm(findForNewInsert(h0));
+}
+
+NEVER_INLINE HphpArray::Elm* HphpArray::allocElmExtra(Elm* e, ElmInd* ei) {
   // If there could be any strong iterators that are past the end, we need to
   // do a pass and update these iterators to point to the newly added element.
   if (siPastEnd()) {
@@ -780,32 +804,37 @@ inline ALWAYS_INLINE HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
 }
 
 inline ALWAYS_INLINE
-void HphpArray::initElm(Elm* e, size_t hki, StringData* key, CVarRef rhs,
-                        bool isRef) {
+void HphpArray::initElmInt(Elm* e, int64_t ki, CVarRef rhs, bool isRef) {
   if (isRef) {
     tvAsUninitializedVariant(&e->data).constructRefHelper(rhs);
   } else {
     tvAsUninitializedVariant(&e->data).constructValHelper(rhs);
   }
-  if (key) {
-    e->setStrKey(key, hki);
-    key->incRefCount();
-  } else {
-    e->setIntKey(hki);
-  }
+  e->setIntKey(ki);
 }
 
 inline ALWAYS_INLINE
-void HphpArray::allocNewElm(ElmInd* ei, size_t hki, StringData* key,
-                            CVarRef data, bool byRef) {
-  Elm* e = allocElm(ei);
-  if (UNLIKELY(e == NULL)) {
-    resize();
-    ei = findForNewInsert(hki);
-    e = allocElm(ei);
-    ASSERT(e != NULL);
+void HphpArray::initElmStr(Elm* e, strhash_t h, StringData* key, CVarRef rhs,
+                           bool isRef) {
+  if (isRef) {
+    tvAsUninitializedVariant(&e->data).constructRefHelper(rhs);
+  } else {
+    tvAsUninitializedVariant(&e->data).constructValHelper(rhs);
   }
-  initElm(e, hki, key, data, byRef);
+  e->setStrKey(key, h);
+  key->incRefCount();
+}
+
+inline ALWAYS_INLINE
+void HphpArray::newElmInt(ElmInd* ei, int64_t ki, CVarRef data,
+                               bool byRef) {
+  initElmInt(newElm(ei, ki), ki, data, byRef);
+}
+
+inline ALWAYS_INLINE
+void HphpArray::newElmStr(ElmInd* ei, strhash_t h, StringData* key,
+                               CVarRef data, bool byRef) {
+  initElmStr(newElm(ei, h), h, key, data, byRef);
 }
 
 void HphpArray::allocData(size_t maxElms, size_t tableSize) {
@@ -862,15 +891,10 @@ void HphpArray::reallocData(size_t maxElms, size_t tableSize, uint oldMask) {
 }
 
 inline ALWAYS_INLINE void HphpArray::resizeIfNeeded() {
-  uint32 maxElms = computeMaxElms(m_tableMask);
-  ASSERT(m_lastE == ElmIndEmpty || uint32(m_lastE)+1 <= maxElms);
-  ASSERT(m_hLoad <= maxElms);
-  if (uint32(m_lastE)+1 == maxElms || m_hLoad == maxElms) {
-    resize();
-  }
+  if (isFull()) resize();
 }
 
-void HphpArray::resize() {
+NEVER_INLINE void HphpArray::resize() {
   uint32 maxElms = computeMaxElms(m_tableMask);
   ASSERT(m_lastE == ElmIndEmpty || uint32(m_lastE)+1 <= maxElms);
   ASSERT(m_hLoad <= maxElms);
@@ -1032,10 +1056,8 @@ bool HphpArray::nextInsert(CVarRef data) {
   // to use findForNewInsert()
   ElmInd* ei = findForNewInsert(ki);
   ASSERT(!validElmInd(*ei));
-  // Allocate a new element.
-  Elm* e = allocElm(ei);
-  ASSERT(e != NULL);
-  initElm(e, ki, NULL, data);
+  // Allocate and initialize a new element.
+  initElmInt(allocElm(ei), ki, data);
   // Update next free element.
   ++m_nextKI;
   return true;
@@ -1053,11 +1075,7 @@ void HphpArray::nextInsertRef(CVarRef data) {
   // know that m_nextKI is not present in the array, so it is safe
   // to use findForNewInsert()
   ElmInd* ei = findForNewInsert(ki);
-  ASSERT(!validElmInd(*ei));
-  // Allocate a new element.
-  Elm* e = allocElm(ei);
-  ASSERT(e != NULL);
-  initElm(e, ki, NULL, data, true /*byRef*/);
+  initElmInt(allocElm(ei), ki, data, true /*byRef*/);
   // Update next free element.
   ++m_nextKI;
 }
@@ -1082,30 +1100,19 @@ void HphpArray::addLvalImpl(int64 ki, Variant** pDest) {
   ASSERT(pDest != NULL);
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
-    Elm* e = &m_data[*ei];
-    TypedValue* tv = &e->data;
-    *pDest = &tvAsVariant(tv);
+    *pDest = &tvAsVariant(&m_data[*ei].data);
     return;
   }
-
-  Elm* e = allocElm(ei);
-  if (UNLIKELY(e == NULL)) {
-    resize();
-    ei = findForNewInsert(ki);
-    e = allocElm(ei);
-    ASSERT(e != NULL);
-  }
-
+  Elm* e = newElm(ei, ki);
   TV_WRITE_NULL(&e->data);
   e->setIntKey(ki);
   *pDest = &(tvAsVariant(&e->data));
-
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
 }
 
-void HphpArray::addLvalImpl(StringData* key, int64 h, Variant** pDest) {
+void HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
   ASSERT(key != NULL && pDest != NULL);
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
@@ -1115,14 +1122,7 @@ void HphpArray::addLvalImpl(StringData* key, int64 h, Variant** pDest) {
     *pDest = &tvAsVariant(tv);
     return;
   }
-
-  Elm* e = allocElm(ei);
-  if (UNLIKELY(e == NULL)) {
-    resize();
-    ei = findForNewInsert(h);
-    e = allocElm(ei);
-    ASSERT(e != NULL);
-  }
+  Elm* e = newElm(ei, h);
   // Initialize element to null and store the address of the element into
   // *pDest.
   TV_WRITE_NULL(&e->data);
@@ -1134,18 +1134,11 @@ void HphpArray::addLvalImpl(StringData* key, int64 h, Variant** pDest) {
 
 inline void HphpArray::addVal(int64 ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
-  Elm* e = allocElm(ei);
-  if (UNLIKELY(e == NULL)) {
-    resize();
-    ei = findForNewInsert(ki);
-    e = allocElm(ei);
-    ASSERT(e != NULL);
-  }
+  Elm* e = newElm(ei, ki);
   TypedValue* fr = (TypedValue*)(&data);
   TypedValue* to = (TypedValue*)(&e->data);
   ELEMENT_CONSTRUCT(fr, to);
   e->setIntKey(ki);
-
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
@@ -1154,14 +1147,7 @@ inline void HphpArray::addVal(int64 ki, CVarRef data) {
 inline void HphpArray::addVal(StringData* key, CVarRef data) {
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
-  Elm *e = allocElm(ei);
-  if (UNLIKELY(e == NULL)) {
-    resize();
-    ei = findForNewInsert(h);
-    e = allocElm(ei);
-    ASSERT(e != NULL);
-  }
-
+  Elm *e = newElm(ei, h);
   // Set the element
   TypedValue* to = (TypedValue*)(&e->data);
   TypedValue* fr = (TypedValue*)(&data);
@@ -1177,14 +1163,10 @@ inline void HphpArray::addValWithRef(int64 ki, CVarRef data) {
   if (validElmInd(*ei)) {
     return;
   }
-
   Elm* e = allocElm(ei);
-
   TV_WRITE_NULL(&e->data);
   tvAsVariant(&e->data).setWithRef(data);
-
   e->setIntKey(ki);
-
   if (ki >= m_nextKI) {
     m_nextKI = ki + 1;
   }
@@ -1197,12 +1179,9 @@ inline void HphpArray::addValWithRef(StringData* key, CVarRef data) {
   if (validElmInd(*ei)) {
     return;
   }
-
   Elm* e = allocElm(ei);
-
   TV_WRITE_NULL(&e->data);
   tvAsVariant(&e->data).setWithRef(data);
-
   e->setStrKey(key, h);
   e->key->incRefCount();
 }
@@ -1214,7 +1193,7 @@ void HphpArray::update(int64 ki, CVarRef data) {
     tvAsVariant(&e->data).assignValHelper(data);
     return;
   }
-  allocNewElm(ei, ki, NULL, data);
+  newElmInt(ei, ki, data);
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
@@ -1226,12 +1205,10 @@ void HphpArray::update(StringData* key, CVarRef data) {
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
-    Variant* to;
-    to = &tvAsVariant(&e->data);
-    to->assignValHelper(data);
+    tvAsVariant(&e->data).assignValHelper(data);
     return;
   }
-  allocNewElm(ei, h, key, data);
+  newElmStr(ei, h, key, data);
 }
 
 void HphpArray::updateRef(int64 ki, CVarRef data) {
@@ -1241,7 +1218,7 @@ void HphpArray::updateRef(int64 ki, CVarRef data) {
     tvAsVariant(&e->data).assignRefHelper(data);
     return;
   }
-  allocNewElm(ei, ki, NULL, data, true /*byRef*/);
+  newElmInt(ei, ki, data, true /*byRef*/);
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
@@ -1255,7 +1232,7 @@ void HphpArray::updateRef(StringData* key, CVarRef data) {
     tvAsVariant(&e->data).assignRefHelper(data);
     return;
   }
-  allocNewElm(ei, h, key, data, true /*byRef*/);
+  newElmStr(ei, h, key, data, true /*byRef*/);
 }
 
 ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
@@ -1699,14 +1676,6 @@ ArrayData* HphpArray::nvSet(StringData* k, const TypedValue* v, bool copy) {
   return retval;
 }
 
-void HphpArray::nvBind(int64 ki, const TypedValue* v) {
-  updateRef(ki, tvAsCVarRef(v));
-}
-
-void HphpArray::nvBind(StringData* k, const TypedValue* v) {
-  updateRef(k, tvAsCVarRef(v));
-}
-
 ArrayData* HphpArray::nvAppend(const TypedValue* v, bool copy) {
   HphpArray* a = this;
   ArrayData* retval = NULL;
@@ -1772,22 +1741,14 @@ bool HphpArray::nvUpdate(int64 ki, int64 vi) {
     to->m_type = KindOfInt64;
     return true;
   }
-  Elm* e = allocElm(ei);
-  if (UNLIKELY(e == NULL)) {
-    resize();
-    ei = findForNewInsert(ki);
-    e = allocElm(ei);
-    ASSERT(e != NULL);
-  }
+  Elm* e = newElm(ei, ki);
   TypedValue* to = (TypedValue*)(&e->data);
   to->m_data.num = vi;
   to->m_type = KindOfInt64;
   e->setIntKey(ki);
-
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
-
   return true;
 }
 
@@ -1802,19 +1763,11 @@ bool HphpArray::nvInsert(StringData *k, TypedValue *data) {
   if (validElmInd(*ei)) {
     return false;
   }
-  allocNewElm(ei, h, k, tvAsVariant(data));
+  newElmStr(ei, h, k, tvAsVariant(data));
   return true;
 }
 
-ArrayData* HphpArray::nonSmartCopy() const {
-  return copyImpl(new HphpArray(kNonSmartCopy));
-}
-
-HphpArray* HphpArray::copyImpl() const {
-  return copyImpl(NEW(HphpArray)(kSmartCopy));
-}
-
-HphpArray* HphpArray::copyImpl(HphpArray* target) const {
+inline ALWAYS_INLINE HphpArray* HphpArray::copyImpl(HphpArray* target) const {
   ASSERT(!target->siPastEnd());
   target->m_pos = m_pos;
   target->m_data = NULL;
@@ -1871,6 +1824,14 @@ HphpArray* HphpArray::copyImpl(HphpArray* target) const {
     }
   }
   return target;
+}
+
+NEVER_INLINE ArrayData* HphpArray::nonSmartCopy() const {
+  return copyImpl(new HphpArray(kNonSmartCopy));
+}
+
+NEVER_INLINE HphpArray* HphpArray::copyImpl() const {
+  return copyImpl(NEW(HphpArray)(kSmartCopy));
 }
 
 ArrayData* HphpArray::append(CVarRef v, bool copy) {

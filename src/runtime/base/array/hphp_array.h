@@ -197,8 +197,12 @@ public:
   ArrayData* nvSet(int64 ki, int64 vi, bool copy);
   ArrayData* nvSet(int64 ki, const TypedValue* v, bool copy);
   ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
-  void nvBind(int64 ki, const TypedValue* v);
-  void nvBind(StringData* k, const TypedValue* v);
+  void nvBind(int64 ki, const TypedValue* v) {
+    updateRef(ki, tvAsCVarRef(v));
+  }
+  void nvBind(StringData* k, const TypedValue* v) {
+    updateRef(k, tvAsCVarRef(v));
+  }
   ArrayData* nvAppend(const TypedValue* v, bool copy);
   void nvAppendWithRef(const TypedValue* v);
   ArrayData* nvNew(TypedValue*& v, bool copy);
@@ -378,12 +382,13 @@ private:
    * put the array into a bad state; use with caution.
    */
   ElmInd* findForNewInsert(size_t h0) const;
+  ElmInd* findForNewInsertLoop(size_t tableMask, size_t h0) const;
 
   bool nextInsert(CVarRef data);
   void nextInsertRef(CVarRef data);
   void nextInsertWithRef(CVarRef data);
   void addLvalImpl(int64 ki, Variant** pDest);
-  void addLvalImpl(StringData* key, int64 h, Variant** pDest);
+  void addLvalImpl(StringData* key, strhash_t h, Variant** pDest);
   void addVal(int64 ki, CVarRef data);
   void addVal(StringData* key, CVarRef data);
   void addValWithRef(int64 ki, CVarRef data);
@@ -402,11 +407,18 @@ private:
   HphpArray* copyImpl(HphpArray* target) const;
   HphpArray* copyImpl() const;
 
+  bool isFull() const;
+  Elm* newElm(ElmInd* e, size_t h0);
+  Elm* newElmGrow(size_t h0);
   Elm* allocElm(ElmInd* ei);
-  void initElm(Elm* e, size_t ki, StringData* key, CVarRef data,
-               bool byRef=false);
-  void allocNewElm(ElmInd* ei, size_t ki, StringData* key, CVarRef data,
-                   bool byRef=false);
+  Elm* allocElmExtra(Elm* e, ElmInd* ei);
+  void initElmInt(Elm* e, int64_t ki, CVarRef data, bool byRef=false);
+  void initElmStr(Elm* e, strhash_t h, StringData* key, CVarRef data,
+                  bool byRef=false);
+  void newElmInt(ElmInd* ei, int64_t ki, CVarRef data,
+                      bool byRef=false);
+  void newElmStr(ElmInd* ei, strhash_t h, StringData* key, CVarRef data,
+                      bool byRef=false);
   void allocData(size_t maxElms, size_t tableSize);
   void reallocData(size_t maxElms, size_t tableSize, uint oldMask);
 

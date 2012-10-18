@@ -108,8 +108,11 @@ void DummySandbox::run() {
         Debugger::RegisterSandbox(sandbox);
         g_context->setSandboxId(sandbox.id());
 
-        Logger::Info("Start loading startup doc");
+        char cwd[PATH_MAX];
+        getcwd(cwd, sizeof(cwd));
         std::string doc = getStartupDoc(sandbox);
+        Logger::Info("Start loading startup doc '%s', pwd = '%s'",
+                     doc.c_str(), cwd);
         bool error; string errorMsg;
         bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
                                null, "", "", error, errorMsg, true, false,

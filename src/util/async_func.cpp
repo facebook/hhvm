@@ -33,6 +33,10 @@ AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
       m_exceptioned(false), m_stopped(false), m_noInit(false) {
 }
 
+AsyncFuncImpl::~AsyncFuncImpl() {
+  ASSERT(m_stopped || m_threadId == 0);
+}
+
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
   pthread_attr_t *attr;
   size_t stacksize, guardsize;

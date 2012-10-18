@@ -385,6 +385,8 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
 }
 
 DebuggerClient::~DebuggerClient() {
+  m_stopped = true;
+  m_mainThread.waitForEnd();
   if (m_outputBuf) {
     delete m_outputBuf;
     m_outputBuf = NULL;

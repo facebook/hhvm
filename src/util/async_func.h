@@ -109,6 +109,7 @@ public:
    * Called by AsyncFunc<T> so we can call func(obj) back on thread running.
    */
   AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func);
+  ~AsyncFuncImpl();
 
   /**
    * Starts this thread.

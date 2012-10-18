@@ -54,6 +54,11 @@ DebuggerServer::DebuggerServer()
     : m_serverThread(this, &DebuggerServer::accept), m_stopped(false) {
 }
 
+DebuggerServer::~DebuggerServer() {
+  m_stopped = true;
+  m_serverThread.waitForEnd();
+}
+
 bool DebuggerServer::start() {
   int port = RuntimeOption::DebuggerServerPort;
   int backlog = 128;

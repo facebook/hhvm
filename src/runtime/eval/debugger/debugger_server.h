@@ -36,6 +36,7 @@ public:
 
 public:
   DebuggerServer();
+  ~DebuggerServer();
 
   bool start();
   void stop();

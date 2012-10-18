@@ -357,7 +357,8 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
   return false;
 }
 bool hphp_could_invoke_file(CStrRef s, void*) {
-  return s == "string" || s == "pageletserver";
+  return s == "string" || s == "pageletserver" ||
+        (s.substr(-23) == "/test/test_ext_file.txt");
 }
 
 Variant get_static_property(CStrRef s, const char *prop) {

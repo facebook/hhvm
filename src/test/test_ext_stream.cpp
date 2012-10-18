@@ -18,6 +18,7 @@
 #include <runtime/ext/ext_stream.h>
 #include <runtime/ext/ext_socket.h>
 #include <runtime/ext/ext_file.h>
+#include <runtime/ext/ext_options.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -332,12 +333,14 @@ bool TestExtStream::test_stream_wrapper_unregister() {
 }
 
 bool TestExtStream::test_stream_resolve_include_path() {
-  try {
-    f_stream_resolve_include_path("");
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  String old_include_path = f_get_include_path();
+  f_set_include_path(".:test/");
+  String filename = f_getcwd();
+  filename += "/test/test_ext_file.txt";
+  VS(filename, f_stream_resolve_include_path("test_ext_file.txt"));
+  VS(null, f_stream_resolve_include_path("some-nonexistant-file.ext"));
+  f_set_include_path(old_include_path);
+  return Count(true);
 }
 
 bool TestExtStream::test_stream_select() {

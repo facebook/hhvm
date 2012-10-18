@@ -19,6 +19,7 @@
 #define __EXT_STREAM_H__
 
 #include <runtime/base/base_includes.h>
+#include <runtime/eval/runtime/file_repository.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -151,7 +152,12 @@ inline bool f_stream_wrapper_unregister(CStrRef protocol) {
 
 inline String f_stream_resolve_include_path(CStrRef filename,
                                             CObjRef context = null_object) {
-  throw NotSupportedException(__func__, "include path is not supported");
+  if (hhvm) {
+    struct stat s;
+    return Eval::resolveVmInclude(filename.get(), "", &s);
+  } else {
+    return resolve_include(filename, "", hphp_could_invoke_file, NULL);
+  }
 }
 
 Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,

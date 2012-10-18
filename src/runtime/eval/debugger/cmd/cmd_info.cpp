@@ -390,6 +390,17 @@ bool CmdInfo::TryProperty(StringBuffer &sb, CArrRef info,
               prop["name"].toString().data());
     return true;
   }
+  key = FindSubSymbol(info["private_properties"],
+                      subsymbol[0] == '$' ?
+                      subsymbol.substr(1) : subsymbol);
+  if (!key.isNull()) {
+    Array prop = info["private_properties"][key];
+    PrintDocComments(sb, prop);
+    sb.printf("  private %s$%s;\n",
+              GetModifier(prop, "static").data(),
+              prop["name"].toString().data());
+    return true;
+  }
   return false;
 }
 
@@ -477,13 +488,21 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
     }
   }
 
-  if (!info["properties"].toArray().empty()) {
+  if (!info["properties"].toArray().empty() ||
+      !info["private_properties"].toArray().empty()) {
     sb.printf("  // properties\n");
     for (ArrayIter iter(info["properties"]); iter; ++iter) {
       Array prop = iter.second().toArray();
       sb.printf("  %s%s %s$%s;\n",
                 prop["doc"].toBoolean() ? "[doc] " : "",
                 prop["access"].toString().data(),
+                GetModifier(prop, "static").data(),
+                prop["name"].toString().data());
+    }
+    for (ArrayIter iter(info["private_properties"]); iter; ++iter) {
+      Array prop = iter.second().toArray();
+      sb.printf("  %sprivate %s$%s;\n",
+                prop["doc"].toBoolean() ? "[doc] " : "",
                 GetModifier(prop, "static").data(),
                 prop["name"].toString().data());
     }

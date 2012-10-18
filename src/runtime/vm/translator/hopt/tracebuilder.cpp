@@ -1000,7 +1000,7 @@ void TraceBuilder::genBindLoc(uint32 id, SSATmp* newValue) {
   }
   bool genStoreType = true;
   if ((Type::isBoxed(trackedType) && Type::isBoxed(newValue->getType())) ||
-      trackedType == newValue->getType()) {
+      (trackedType == newValue->getType() && !Type::isString(trackedType))) {
     // no need to store type with local value
     genStoreType = false;
   }

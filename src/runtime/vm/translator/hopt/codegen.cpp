@@ -1687,6 +1687,22 @@ Address CodeGenerator::emitCheckStack(CodeGenerator::Asm& as,
   }
 }
 
+void checkCell(Cell* base, uint32 index) {
+  TypedValue* tv = (TypedValue*)(base + index);
+  assert(tvIsPlausible(tv));
+  DataType t = tv->m_type;
+  if (IS_REFCOUNTED_TYPE(t)) {
+    assert(tv->m_data.pstr->getCount() > 0);
+  }
+}
+
+Address CodeGenerator::emitCheckCell(CodeGenerator::Asm& as,
+                                     SSATmp* sp,
+                                     uint32 index) {
+  return cgCallHelper(as, (TCA)checkCell, reg::noreg, false,
+                      ArgGroup().ssa(sp).imm(index));
+}
+
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   const Func* func = fp->m_func;
   if (fp->hasVarEnv()) {
@@ -2989,8 +3005,16 @@ Address CodeGenerator::cgSpillStackWork(IRInstruction* inst, bool allocActRec) {
   if (false) {
     emitCheckStack(m_as, dst, numSpill, allocActRec);
   }
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    for (uint32 i = 0; i < numSpill; i++) {
+      if (spillSrcs[i]->getType() != Type::Gen) {
+        emitCheckCell(m_as, dst, i + (allocActRec ? 3 : 0));
+      }
+    }
+  }
   return start;
 }
+
 Address CodeGenerator::cgSpillStack(IRInstruction* inst) {
   return cgSpillStackWork(inst, false);
 }

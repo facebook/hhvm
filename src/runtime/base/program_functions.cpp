@@ -723,6 +723,22 @@ static void close_server_log_file(int kind) {
   }
 }
 
+/* Sets RuntimeOption::ExecutionMode according
+ * to commandline options prior to config load
+ */
+static void set_execution_mode(string mode) {
+  if (mode == "daemon" || mode == "server" || mode == "replay") {
+    RuntimeOption::ExecutionMode = "srv";
+  } else if (mode == "run" || mode == "debug") {
+    RuntimeOption::ExecutionMode = "cli";
+  } else if (mode == "translate") {
+    RuntimeOption::ExecutionMode = "";
+  } else {
+    // Undefined mode
+    assert(false);
+  }
+}
+
 static int execute_program_impl(int argc, char **argv) {
   string usage = "Usage:\n\n\t";
   usage += argv[0];
@@ -801,6 +817,8 @@ static int execute_program_impl(int argc, char **argv) {
     if (po.mode == "d") po.mode = "debug";
     if (po.mode == "s") po.mode = "server";
     if (po.mode == "t") po.mode = "translate";
+    if (po.mode == "")  po.mode = "run";
+    set_execution_mode(po.mode);
   } catch (error &e) {
     Logger::Error("Error in command line: %s\n\n", e.what());
     cout << desc << "\n";
@@ -929,10 +947,6 @@ static int execute_program_impl(int argc, char **argv) {
       }
     }
   }
-
-  if (po.mode == "d") po.mode = "debug";
-  if (po.mode == "s") po.mode = "server";
-  if (po.mode == "t") po.mode = "translate";
 
   ShmCounters::initialize(true, Logger::Error);
 

@@ -1060,6 +1060,10 @@ int64 strToBoolHelper(const StringData *s) {
   return s->toBoolean();
 }
 
+int64 strToIntHelper(const StringData* s) {
+  return s->toInt64();
+}
+
 int64 arrToBoolHelper(const ArrayData *a) {
   return a->size() != 0;
 }
@@ -1339,8 +1343,15 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
       return start;
     }
     if (Type::isString(fromType)) {
-      // Str -> Int
-      // TODO
+      if (src->isConst()) {
+        auto val = src->getConstValAsStr()->toInt64();
+        m_as.mov_imm64_reg(val, dstReg);
+      } else {
+        ArgGroup args;
+        args.ssa(src);
+        cgCallHelper(m_as, (TCA)strToIntHelper, dst, false, args);
+      }
+      return start;
     }
   }
 
@@ -1403,6 +1414,7 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
     }
     return start;
   }
+
   if (Type::isString(toType)) {
     if (fromType == Type::Int) {
       // Int -> Str

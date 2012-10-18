@@ -596,6 +596,8 @@ void LinearScan::computePreColoringHint() {
         if (fromType == Type::Int) {
           m_preColoringHint.add(src, 0, 0);
         }
+      } else if (Type::isString(fromType) && toType == Type::Int) {
+        m_preColoringHint.add(src, 0, 0);
       }
       break;
     }

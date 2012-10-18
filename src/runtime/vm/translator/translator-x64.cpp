@@ -4504,6 +4504,11 @@ TranslatorX64::translateNewArray(const Tracelet& t,
   }
 }
 
+void TranslatorX64::analyzeNewTuple(Tracelet& t, NormalizedInstruction& i) {
+  i.m_txFlags = Simple; // the array constructors are not re-entrant.
+  i.manuallyAllocInputs = true; // all values passed via stack.
+}
+
 ArrayData* newTupleHelper(int n, TypedValue* values) {
   HphpArray* a = NEW(HphpArray)(n, values);
   a->incRefCount();
@@ -10357,7 +10362,6 @@ bool TranslatorX64::dumpTCData() {
   SIMPLE_OP(FCall) \
   SIMPLE_OP(CreateCont) \
   SIMPLE_OP(UnpackCont) \
-  SIMPLE_OP(NewTuple) \
   /*
    * Translations with a reentrant helper.
    *

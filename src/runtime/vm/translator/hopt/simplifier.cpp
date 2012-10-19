@@ -17,6 +17,7 @@
 #include "simplifier.h"
 #include "tracebuilder.h"
 #include <runtime/vm/runtime.h>
+#include <sstream>
 
 namespace HPHP {
 namespace VM {
@@ -803,7 +804,9 @@ SSATmp* Simplifier::simplifyConv(Type::Tag toType, SSATmp* src) {
         return m_tb->genDefConst(StringData::GetStaticString(""));
       }
       if (type == Type::Int) {
-        // TODO constant int to string
+        std::stringstream ss;
+        ss << src->getConstValAsInt();
+        return m_tb->genDefConst(StringData::GetStaticString(ss.str()));
       }
       if (type == Type::Dbl) {
         // TODO constant dbl to string

@@ -23,6 +23,7 @@
 
 #include <util/lock.h>
 #include <util/util.h>
+#include <util/atomic.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/repo.h>
@@ -276,7 +277,8 @@ Unit::Unit()
       m_cacheOffset(0),
       m_repoId(-1),
       m_mergeState(UnitMergeStateUnmerged),
-      m_cacheMask(0) {
+      m_cacheMask(0),
+      m_pseudoMainCache(NULL) {
   TV_WRITE_UNINIT(&m_mainReturn);
   m_mainReturn._count = 0; // flag for whether or not the unit is mergeable
 }
@@ -319,6 +321,14 @@ Unit::~Unit() {
   }
 
   free(m_mergeInfo);
+
+  if (m_pseudoMainCache) {
+    for (auto it = m_pseudoMainCache->begin();
+         it != m_pseudoMainCache->end(); ++it) {
+      delete it->second;
+    }
+    delete m_pseudoMainCache;
+  }
 }
 
 void* Unit::operator new(size_t sz) {
@@ -1054,6 +1064,24 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
     // Normal cases should continue, KindDone returns
     NOT_REACHED();
   } while (true);
+}
+
+Func* Unit::getMain(Class* cls /*= NULL*/) const {
+  if (!cls) return *m_mergeInfo->funcBegin();
+  Lock lock(s_classesMutex);
+  if (!m_pseudoMainCache) {
+    m_pseudoMainCache = new PseudoMainCacheMap;
+  }
+  auto it = m_pseudoMainCache->find(cls);
+  if (it != m_pseudoMainCache->end()) {
+    return it->second;
+  }
+  Func* f = (*m_mergeInfo->funcBegin())->clone();
+  f->setNewFuncId();
+  f->setCls(cls);
+  f->setBaseCls(cls);
+  (*m_pseudoMainCache)[cls] = f;
+  return f;
 }
 
 int Unit::getLineNumber(Offset pc) const {

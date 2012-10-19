@@ -881,7 +881,6 @@ static inline TXFlags planHingesOnRefcounting(DataType type) {
 }
 
 static inline const char* getContextName() {
-  ASSERT(isContextFixed());
   Class* ctx = arGetContextClass(curFrame());
   return ctx ? ctx->name()->data() : ":anonymous:";
 }

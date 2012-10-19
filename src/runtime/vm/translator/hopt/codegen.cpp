@@ -3711,17 +3711,8 @@ Address CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
   return start;
 }
 
-#ifdef DEBUG
-// Copied from translator-x64.cpp
-static bool isContextFixed() {
-  // Translations for pseudomains don't have a fixed context class
-  return !curFunc()->isPseudoMain();
-}
-#endif
-
 // Copied from translator-x64.cpp
 static const char* getContextName() {
-  ASSERT(isContextFixed());
   Class* ctx = arGetContextClass(curFrame());
   return ctx ? ctx->name()->data() : ":anonymous:";
 }

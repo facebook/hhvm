@@ -110,17 +110,6 @@ Class* arGetContextClassImpl<false>(const ActRec* ar) {
   if (ar == NULL) {
     return NULL;
   }
-  if (ar->m_func->isPseudoMain()) {
-    // Pseudomains inherit the context of their caller
-    VMExecutionContext* context = g_vmContext;
-    ar = context->getPrevVMState(ar);
-    while (ar != NULL && ar->m_func->isPseudoMain()) {
-      ar = context->getPrevVMState(ar);
-    }
-    if (ar == NULL) {
-      return NULL;
-    }
-  }
   return ar->m_func->cls();
 }
 
@@ -2002,7 +1991,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   checkStack(m_stack, f);
 
   if (toMerge != NULL) {
-    ASSERT(toMerge->getMain() == f);
+    ASSERT(f->unit() == toMerge && f->isPseudoMain());
     toMerge->merge();
     if (toMerge->isMergeOnly()) {
       *retval = *toMerge->getMainReturn();
@@ -2606,15 +2595,14 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   }
   Stats::inc(Stats::PseudoMain_Executed);
 
-  Func* func = unit->getMain();
+
   ActRec* ar = m_stack.allocA();
   ASSERT((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
-  ASSERT(!func->isBuiltin());
-  ar->m_func = func;
-  ar->initNumArgs(0);
-  ASSERT(getFP());
-  ASSERT(!m_fp->hasInvName());
-  if (m_fp->hasThis()) {
+  VM::Class* cls = curClass();
+  if (local) {
+    cls = NULL;
+    ar->setThis(NULL);
+  } else if (m_fp->hasThis()) {
     ObjectData *this_ = m_fp->getThis();
     this_->incRefCount();
     ar->setThis(this_);
@@ -2623,6 +2611,12 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   } else {
     ar->setThis(NULL);
   }
+  Func* func = unit->getMain(cls);
+  ASSERT(!func->isBuiltin());
+  ar->m_func = func;
+  ar->initNumArgs(0);
+  ASSERT(getFP());
+  ASSERT(!m_fp->hasInvName());
   arSetSfp(ar, m_fp);
   ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
                          m_fp->m_func->base());
@@ -2655,6 +2649,7 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val) {
   VM::Unit* unit = compileEvalString(code.get());
   ASSERT(unit != NULL);
   Variant v;
+  // Default arg values are not currently allowed to depend on class context.
   g_vmContext->invokeFunc((TypedValue*)&v, unit->getMain(),
                           Array::Create());
   Variant &lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
@@ -2809,8 +2804,8 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   const static StaticString s_exit("Hit exit");
   const static StaticString s_fatal("Hit fatal");
   try {
-    invokeFunc(retval, unit->getMain(), Array::Create(), this_, cls,
-               varEnv, NULL, unit);
+    invokeFunc(retval, unit->getMain(fp->m_func->cls()), Array::Create(),
+               this_, cls, varEnv, NULL, unit);
   } catch (FatalErrorException &e) {
     g_vmContext->write(s_fatal);
     g_vmContext->write(" : ");

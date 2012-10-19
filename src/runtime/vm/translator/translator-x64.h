@@ -365,9 +365,9 @@ private:
   void emitBaseG(const Tracelet& t, const NormalizedInstruction& ni,
                  const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
   void emitBaseS(const Tracelet& t, const NormalizedInstruction& ni,
-                 unsigned iInd, bool ctxFixed, LazyScratchReg& rBase);
+                 unsigned iInd, LazyScratchReg& rBase);
   void emitBaseOp(const Tracelet& t, const NormalizedInstruction& ni,
-                  const MInstrInfo& mii, unsigned iInd, bool ctxFixed,
+                  const MInstrInfo& mii, unsigned iInd,
                   LazyScratchReg& rBase);
   void emitHphpArrayGetIntKey(const NormalizedInstruction& i,
                               PhysReg rBase,
@@ -378,10 +378,10 @@ private:
   void emitElem(const Tracelet& t, const NormalizedInstruction& ni,
                 const MInstrInfo& mii, unsigned mInd, unsigned iInd,
                 LazyScratchReg& rBase);
-  void emitProp(const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+  void emitProp(const MInstrInfo& mii, unsigned mInd,
                 unsigned iInd, LazyScratchReg& rBase);
   void emitPropGeneric(const Tracelet& t, const NormalizedInstruction& ni,
-                       const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+                       const MInstrInfo& mii, unsigned mInd,
                        unsigned iInd, LazyScratchReg& rBase);
   void emitPropSpecialized(MInstrAttr, const Class*,
                            int propOffset, unsigned mInd, unsigned iInd,
@@ -389,7 +389,7 @@ private:
   void emitNewElem(const Tracelet& t, const NormalizedInstruction& ni,
                    unsigned mInd, LazyScratchReg& rBase);
   void emitIntermediateOp(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+                          const MInstrInfo& mii, unsigned mInd,
                           unsigned& iInd, LazyScratchReg& rBase);
   bool needFirstRatchet(const Tracelet& t, const NormalizedInstruction& ni,
                         const MInstrInfo& mii) const;
@@ -408,7 +408,7 @@ private:
                           PhysReg rBase);
   template <bool useEmpty>
   void emitIssetEmptyProp(const Tracelet& t, const NormalizedInstruction& ni,
-                          const MInstrInfo& mii, bool ctxFixed, unsigned mInd,
+                          const MInstrInfo& mii, unsigned mInd,
                           unsigned iInd, PhysReg rBase);
   void emitVGetNewElem(const Tracelet& t, const NormalizedInstruction& ni,
                        const MInstrInfo& mii, unsigned mInd, unsigned iInd,
@@ -430,7 +430,7 @@ private:
                           PhysReg rBase);
   bool needMInstrCtx(const Tracelet& t, const NormalizedInstruction& ni) const;
   void emitMPre(const Tracelet& t, const NormalizedInstruction& ni,
-                const MInstrInfo& mii, bool& ctxFixed, unsigned& mInd,
+                const MInstrInfo& mii, unsigned& mInd,
                 unsigned& iInd, LazyScratchReg& rBase);
   void emitMPost(const Tracelet& t, const NormalizedInstruction& ni,
                  const MInstrInfo& mii);
@@ -439,11 +439,11 @@ private:
                          const MInstrInfo& mii, unsigned mInd, unsigned iInd, \
                          PhysReg rBase); \
   void emit##instr##Prop(const Tracelet& t, const NormalizedInstruction& ni, \
-                         const MInstrInfo& mii, bool ctxFixed, unsigned mInd, \
+                         const MInstrInfo& mii, unsigned mInd, \
                          unsigned iInd, LazyScratchReg& rBase); \
   void emitFinal##instr##MOp(const Tracelet& t, \
                              const NormalizedInstruction& ni, \
-                             const MInstrInfo& mii, bool ctxFixed, \
+                             const MInstrInfo& mii, \
                              unsigned mInd, unsigned iInd, \
                              LazyScratchReg& rBase);
 MINSTRS
@@ -987,7 +987,6 @@ SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i);
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
                        int propInput,
                        int objInput);
-bool isContextFixed();
 int getNormalPropertyOffset(const NormalizedInstruction& i,
                             const MInstrInfo&,
                             int propInput, int objInput);

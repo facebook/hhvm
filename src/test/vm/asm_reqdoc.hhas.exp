@@ -1,0 +1,9 @@
+value of var before ReqDoc: hello
+in mod.php
+this->var was set; changing it.
+value of var after ReqDoc: hello more
+testvar set after ReqDoc? 1
+testing from anonymous context
+testvar set before Req? 
+in mod.php
+testvar set after Req? 1

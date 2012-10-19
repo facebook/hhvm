@@ -78,18 +78,12 @@ static const PhysReg unsafe_rsp = rsp;
      _am.addLiteral(loc, a, regMap, mis_rsp),     \
      A(loc))
 
-#define PREP_CTX(ctxFixed, pr)                                         \
+#define PREP_CTX(pr)                                                   \
   Class* ctx = NULL;                                                   \
   LazyScratchReg rCtx(m_regMap);                                       \
-  if (ctxFixed) {                                                      \
-    ASSERT(isContextFixed());                                          \
-    ctx = arGetContextClass(curFrame());                               \
-  } else {                                                             \
-    rCtx.alloc(pr);                                                    \
-    a.  load_reg64_disp_reg64(mis_rsp, MISOFF(ctx), *rCtx);            \
-  }
-#define CTX(ctxFixed)     \
-  IE((ctxFixed),          \
+  ctx = arGetContextClass(curFrame());
+#define CTX()             \
+  IE(true,                \
      IMM(uintptr_t(ctx)), \
      R(*rCtx))
 
@@ -125,11 +119,10 @@ static const PhysReg unsafe_rsp = rsp;
   m_vecState = new MVecTransState();                                  \
   Deleter<MVecTransState> stateDeleter(&m_vecState);                  \
   const MInstrInfo& mii = getMInstrInfo(Op##instr##M);                \
-  bool ctxFixed;                                                      \
   unsigned mInd, iInd;                                                \
   LazyScratchReg rBase(m_regMap);                                     \
-  emitMPre((t), (ni), mii, ctxFixed, mInd, iInd, rBase);              \
-  emitFinal##instr##MOp((t), (ni), mii, ctxFixed, mInd, iInd, rBase); \
+  emitMPre((t), (ni), mii, mInd, iInd, rBase);              \
+  emitFinal##instr##MOp((t), (ni), mii, mInd, iInd, rBase); \
   emitMPost((t), (ni), mii);                                          \
 } while (0)
 
@@ -529,7 +522,7 @@ static TypedValue* baseSClsRef(Class* ctx, TypedValue* key,
 
 void TranslatorX64::emitBaseS(const Tracelet& t,
                               const NormalizedInstruction& ni, unsigned iInd,
-                              bool ctxFixed, LazyScratchReg& rBase) {
+                              LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx\n", __func__, long(a.code.frontier));
   const DynLocation& key = *ni.inputs[iInd];
   m_regMap.cleanSmashLoc(key.location);
@@ -545,7 +538,6 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
     cls &&
     key.isString() &&
     key.rtt.valueString() &&
-    ctxFixed &&
     curFunc()->cls() == cls;
 
   // Emit the appropriate helper call.
@@ -557,9 +549,9 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
   } else if (uniqueKnownClass && RuntimeOption::RepoAuthoritative) {
     SKTRACE(3, ni.source, "%s using uniqueKnownClass\n", __func__);
 
-    PREP_CTX(ctxFixed, argNumToRegName[0]);
+    PREP_CTX(argNumToRegName[0]);
     EMIT_RCALL(a, ni, baseS,
-                      CTX(ctxFixed),
+                      CTX(),
                       A(key.location),
                       IMM(uintptr_t(cls)),
                       R(mis_rsp));
@@ -567,10 +559,10 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
   } else {
     SKTRACE(3, ni.source, "%s using generic\n", __func__);
 
-    PREP_CTX(ctxFixed, argNumToRegName[0]);
+    PREP_CTX(argNumToRegName[0]);
     m_regMap.cleanSmashLoc(clsRef.location);
     EMIT_RCALL(a, ni, baseSClsRef,
-                      CTX(ctxFixed),
+                      CTX(),
                       A(key.location),
                       A(clsRef.location),
                       R(mis_rsp));
@@ -581,14 +573,14 @@ void TranslatorX64::emitBaseS(const Tracelet& t,
 void TranslatorX64::emitBaseOp(const Tracelet& t,
                                const NormalizedInstruction& ni,
                                const MInstrInfo& mii, unsigned iInd,
-                               bool ctxFixed, LazyScratchReg& rBase) {
+                               LazyScratchReg& rBase) {
   LocationCode lCode = ni.immVec.locationCode();
   switch (lCode) {
   case LL: case LC: case LR: emitBaseLCR(t, ni, mii, iInd, rBase);    break;
   case LH:                   emitBaseH(iInd, rBase);                  break;
   case LGL: case LGC:        emitBaseG(t, ni, mii, iInd, rBase);      break;
   case LNL: case LNC:        emitBaseN(t, ni, mii, iInd, rBase);      break;
-  case LSL: case LSC:        emitBaseS(t, ni, iInd, ctxFixed, rBase); break;
+  case LSL: case LSC:        emitBaseS(t, ni, iInd, rBase); break;
   default:                   not_reached();
   }
 }
@@ -846,7 +838,7 @@ PROP_TABLE
 
 void TranslatorX64::emitPropGeneric(const Tracelet& t,
                                     const NormalizedInstruction& ni,
-                                    const MInstrInfo& mii, bool ctxFixed,
+                                    const MInstrInfo& mii,
                                     unsigned mInd, unsigned iInd,
                                     LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -875,10 +867,10 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
   unsigned idx = (mia & MIA_intermediate) | (m_vecState->isObj() ? 0x10 : 0x0);
   PropOp propOp = ((mCode == MPL) ? localPropOps : cellPropOps)[idx];
   ASSERT(propOp != propX);
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   Stats::emitInc(a, Stats::PropAsm_Generic);
-  EMIT_RCALL(a, ni, propOp, CTX(ctxFixed),
+  EMIT_RCALL(a, ni, propOp, CTX(),
                     R(*rBase),
                     ML(memb.location, a, m_regMap),
                     R(mis_rsp));
@@ -900,7 +892,7 @@ static int getPropertyOffset(const NormalizedInstruction& ni,
   }
   if (!baseClass) return -1;
 
-  if (!ni.inputs[iInd]->rtt.isString() || !isContextFixed()) {
+  if (!ni.inputs[iInd]->rtt.isString()) {
     return -1;
   }
   auto* const name = ni.inputs[iInd]->rtt.valueString();
@@ -1052,7 +1044,7 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
   // nonObjectRet returns here.
 }
 
-void TranslatorX64::emitProp(const MInstrInfo& mii, bool ctxFixed,
+void TranslatorX64::emitProp(const MInstrInfo& mii,
                              unsigned mInd, unsigned iInd,
                              LazyScratchReg& rBase) {
   SKTRACE(2, m_curNI->source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -1063,7 +1055,7 @@ void TranslatorX64::emitProp(const MInstrInfo& mii, bool ctxFixed,
                                             mInd, iInd);
 
   if (propOffset == -1) {
-    emitPropGeneric(*m_curTrace, *m_curNI, mii, ctxFixed, mInd, iInd, rBase);
+    emitPropGeneric(*m_curTrace, *m_curNI, mii, mInd, iInd, rBase);
   } else {
     auto attrs = mii.getAttr(m_curNI->immVecM[mInd]);
     emitPropSpecialized(attrs, knownCls, propOffset, mInd, iInd, rBase);
@@ -1086,7 +1078,7 @@ void TranslatorX64::emitNewElem(const Tracelet& t,
 
 void TranslatorX64::emitIntermediateOp(const Tracelet& t,
                                        const NormalizedInstruction& ni,
-                                       const MInstrInfo& mii, bool ctxFixed,
+                                       const MInstrInfo& mii,
                                        unsigned mInd, unsigned& iInd,
                                        LazyScratchReg& rBase) {
   switch (ni.immVecM[mInd]) {
@@ -1102,7 +1094,7 @@ void TranslatorX64::emitIntermediateOp(const Tracelet& t,
     break;
   }
   case MPC: case MPL: case MPT:
-    emitProp(mii, ctxFixed, mInd, iInd, rBase);
+    emitProp(mii, mInd, iInd, rBase);
     ++iInd;
     break;
   case MW:
@@ -1258,7 +1250,7 @@ PROP_TABLE
 
 void TranslatorX64::emitCGetProp(const Tracelet& t,
                                  const NormalizedInstruction& ni,
-                                 const MInstrInfo& mii, bool ctxFixed,
+                                 const MInstrInfo& mii,
                                  unsigned mInd, unsigned iInd,
                                  LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -1302,12 +1294,12 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
   PropOp cGetPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(memb.location);
   const DynLocation& result = *ni.outStack;
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   bool useTvR = useTvResult(t, ni, mii);
   PREP_RESULT(useTvR);
   // Emit the appropriate helper call.
   EMIT_RCALL(a, ni, cGetPropOp,
-                    CTX(ctxFixed),
+                    CTX(),
                     R(*rBase),
                     ML(memb.location, a, m_regMap),
                     RESULT(useTvR),
@@ -1402,7 +1394,7 @@ PROP_TABLE
 
 void TranslatorX64::emitVGetProp(const Tracelet& t,
                                  const NormalizedInstruction& ni,
-                                 const MInstrInfo& mii, bool ctxFixed,
+                                 const MInstrInfo& mii,
                                  unsigned mInd, unsigned iInd,
                                  LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -1418,10 +1410,10 @@ void TranslatorX64::emitVGetProp(const Tracelet& t,
   const DynLocation& result = *ni.outStack;
   bool useTvR = useTvResult(t, ni, mii);
   PREP_RESULT(useTvR);
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   EMIT_RCALL(a, ni, vGetPropOp,
-                    CTX(ctxFixed),
+                    CTX(),
                     R(*rBase),
                     ML(memb.location, a, m_regMap),
                     RESULT(useTvR),
@@ -1524,7 +1516,7 @@ ISSET_TABLE
 template <bool useEmpty>
 void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
                                        const NormalizedInstruction& ni,
-                                       const MInstrInfo& mii, bool ctxFixed,
+                                       const MInstrInfo& mii,
                                        unsigned mInd, unsigned iInd,
                                        PhysReg rBase) {
   const DynLocation& memb = *ni.inputs[iInd];
@@ -1536,10 +1528,10 @@ void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
                             m_vecState->isObj());
   IssetOp issetEmptyPropOp = issetOps[idx];
   m_regMap.cleanSmashLoc(memb.location);
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   EMIT_RCALL(a, ni, issetEmptyPropOp,
-                    CTX(ctxFixed),
+                    CTX(),
                     R(rBase),
                     ML(memb.location, a, m_regMap));
   a.   and_imm32_reg64(1, rax); // Mask garbage bits.
@@ -1555,12 +1547,12 @@ void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
 
 void TranslatorX64::emitIssetProp(const Tracelet& t,
                                   const NormalizedInstruction& ni,
-                                  const MInstrInfo& mii, bool ctxFixed,
+                                  const MInstrInfo& mii,
                                   unsigned mInd, unsigned iInd,
                                   LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
-  emitIssetEmptyProp<false>(t, ni, mii, ctxFixed, mInd, iInd, *rBase);
+  emitIssetEmptyProp<false>(t, ni, mii, mInd, iInd, *rBase);
 }
 
 void TranslatorX64::emitEmptyElem(const Tracelet& t,
@@ -1574,12 +1566,12 @@ void TranslatorX64::emitEmptyElem(const Tracelet& t,
 
 void TranslatorX64::emitEmptyProp(const Tracelet& t,
                                   const NormalizedInstruction& ni,
-                                  const MInstrInfo& mii, bool ctxFixed,
+                                  const MInstrInfo& mii,
                                   unsigned mInd, unsigned iInd,
                                   LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
           __func__, long(a.code.frontier), mInd, iInd);
-  emitIssetEmptyProp<true>(t, ni, mii, ctxFixed, mInd, iInd, *rBase);
+  emitIssetEmptyProp<true>(t, ni, mii, mInd, iInd, *rBase);
 }
 
 template <bool unboxKey, bool setResult>
@@ -1665,7 +1657,7 @@ PROP_TABLE
 
 void TranslatorX64::emitSetProp(const Tracelet& t,
                                 const NormalizedInstruction& ni,
-                                const MInstrInfo& mii, bool ctxFixed,
+                                const MInstrInfo& mii,
                                 unsigned mInd, unsigned iInd,
                                 LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -1713,12 +1705,12 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
   auto setPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(key.location);
   m_regMap.cleanSmashLoc(val.location);
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   bool useRVal = val.isVariant();
   PREP_VAL(useRVal, argNumToRegName[3]);
   // Emit the appropriate helper call.
   EMIT_RCALL(a, ni, setPropOp,
-                    CTX(ctxFixed),
+                    CTX(),
                     R(*rBase),
                     ML(key.location, a, m_regMap),
                     VAL(useRVal));
@@ -1893,7 +1885,7 @@ SETOP_OPS
 
 void TranslatorX64::emitSetOpProp(const Tracelet& t,
                                   const NormalizedInstruction& ni,
-                                  const MInstrInfo& mii, bool ctxFixed,
+                                  const MInstrInfo& mii,
                                   unsigned mInd, unsigned iInd,
                                   LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -1906,7 +1898,7 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
           __func__, setResult ? "true" : "false");
   m_regMap.cleanSmashLoc(key.location);
   m_regMap.cleanSmashLoc(val.location);
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   bool useRVal = val.isVariant();
   bool isObj = m_vecState->isObj();
   PREP_VAL(useRVal, argNumToRegName[3]);
@@ -1929,7 +1921,7 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
     bool useTvR = useTvResult(t, ni, mii);
     PREP_RESULT(useTvR);
     EMIT_RCALL(a, ni, setOpPropOp,
-                      CTX(ctxFixed),
+                      CTX(),
                       R(*rBase),
                       ML(key.location, a, m_regMap),
                       VAL(useRVal),
@@ -1949,7 +1941,7 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
       default: not_reached();
     }
     EMIT_RCALL(a, ni, setOpPropOp,
-                      CTX(ctxFixed),
+                      CTX(),
                       R(*rBase),
                       ML(key.location, a, m_regMap),
                       VAL(useRVal),
@@ -2106,7 +2098,7 @@ INCDEC_OPS
 
 void TranslatorX64::emitIncDecProp(const Tracelet& t,
                                    const NormalizedInstruction& ni,
-                                   const MInstrInfo& mii, bool ctxFixed,
+                                   const MInstrInfo& mii,
                                    unsigned mInd, unsigned iInd,
                                    LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -2117,7 +2109,7 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
   m_regMap.cleanSmashLoc(key.location);
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   bool isObj = m_vecState->isObj();
   // Emit the appropriate helper call.
   if (setResult) {
@@ -2138,7 +2130,7 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
     bool useTvR = useTvResult(t, ni, mii);
     PREP_RESULT(useTvR);
     EMIT_RCALL(a, ni, incDecPropOp,
-                      CTX(ctxFixed),
+                      CTX(),
                       R(*rBase),
                       ML(key.location, a, m_regMap),
                       R(mis_rsp),
@@ -2157,7 +2149,7 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
       default: not_reached();
     }
     EMIT_RCALL(a, ni, incDecPropOp,
-                      CTX(ctxFixed),
+                      CTX(),
                       R(*rBase),
                       ML(key.location, a, m_regMap),
                       R(mis_rsp));
@@ -2235,7 +2227,7 @@ PROP_TABLE
 
 void TranslatorX64::emitBindProp(const Tracelet& t,
                                  const NormalizedInstruction& ni,
-                                 const MInstrInfo& mii, bool ctxFixed,
+                                 const MInstrInfo& mii,
                                  unsigned mInd, unsigned iInd,
                                  LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -2253,11 +2245,11 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
   unsigned idx = buildBitmask(ni.immVecM[mInd] == MPL, m_vecState->isObj());
   PropOp bindPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(key.location);
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   ASSERT(!forceMValIncDec(t, ni, mii));
   EMIT_RCALL(a, ni, bindPropOp,
-                    CTX(ctxFixed),
+                    CTX(),
                     R(*rBase),
                     ML(key.location, a, m_regMap),
                     A(val.location),
@@ -2319,7 +2311,7 @@ PROP_TABLE
 
 void TranslatorX64::emitUnsetProp(const Tracelet& t,
                                   const NormalizedInstruction& ni,
-                                  const MInstrInfo& mii, bool ctxFixed,
+                                  const MInstrInfo& mii,
                                   unsigned mInd, unsigned iInd,
                                   LazyScratchReg& rBase) {
   SKTRACE(2, ni.source, "%s %#lx mInd=%u, iInd=%u\n",
@@ -2333,10 +2325,10 @@ void TranslatorX64::emitUnsetProp(const Tracelet& t,
   PropOp unsetPropOp = propOps[idx];
   m_regMap.cleanSmashLoc(key.location);
   m_regMap.cleanSmashLoc(val.location);
-  PREP_CTX(ctxFixed, argNumToRegName[0]);
+  PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   EMIT_RCALL(a, ni, unsetPropOp,
-                    CTX(ctxFixed),
+                    CTX(),
                     R(*rBase),
                     ML(key.location, a, m_regMap));
 }
@@ -2578,7 +2570,7 @@ void TranslatorX64::emitNotSuppNewElem(const Tracelet& t,
 void TranslatorX64::emitFinal##instr##MOp(const Tracelet& t, \
                                           const NormalizedInstruction& ni, \
                                           const MInstrInfo& mii, \
-                                          bool ctxFixed, unsigned mInd, \
+                                          unsigned mInd, \
                                           unsigned iInd, \
                                           LazyScratchReg& rBase) { \
   switch (ni.immVecM[mInd]) { \
@@ -2587,7 +2579,7 @@ void TranslatorX64::emitFinal##instr##MOp(const Tracelet& t, \
     emit##instr##Elem(t, ni, mii, mInd, iInd, *rBase); \
     break; \
   case MPC: case MPL: case MPT: \
-    emit##instr##Prop(t, ni, mii, ctxFixed, mInd, iInd, rBase); \
+    emit##instr##Prop(t, ni, mii, mInd, iInd, rBase); \
     break; \
   case MW: \
     ASSERT(!m_vecState->isKnown()); \
@@ -2599,10 +2591,6 @@ void TranslatorX64::emitFinal##instr##MOp(const Tracelet& t, \
 }
 MINSTRS
 #undef MII
-
-static void getMInstrCtx(TranslatorX64::MInstrState* mis, ActRec* ar) {
-  mis->ctx = arGetContextClass(ar);
-}
 
 bool TranslatorX64::needMInstrCtx(const Tracelet& t,
                                   const NormalizedInstruction& ni) const {
@@ -2637,7 +2625,7 @@ bool TranslatorX64::needMInstrCtx(const Tracelet& t,
 
 void TranslatorX64::emitMPre(const Tracelet& t,
                              const NormalizedInstruction& ni,
-                             const MInstrInfo& mii, bool& ctxFixed,
+                             const MInstrInfo& mii,
                              unsigned& mInd, unsigned& iInd,
                              LazyScratchReg& rBase) {
   if (!mInstrHasUnknownOffsets(ni) && !useTvResult(t, ni, mii) &&
@@ -2667,14 +2655,9 @@ void TranslatorX64::emitMPre(const Tracelet& t,
     a.  store_imm32_disp_reg(false, MISOFF(baseStrOff), mis_rsp);
   }
 
-  ctxFixed = isContextFixed();
-  SKTRACE(2, ni.source, "%s ctxFixed=%s\n",
-          __func__, ctxFixed ? "true" : "false");
+  SKTRACE(2, ni.source, "%s\n", __func__);
 
-  if (!ctxFixed && needMInstrCtx(t, ni)) {
-    EMIT_CALL(a, getMInstrCtx, R(mis_rsp), R(rVmFp));
-    recordCall(ni);
-  } else if (debug && m_vecState->needsMIState()) {
+  if (debug && m_vecState->needsMIState()) {
     a.  store_imm64_disp_reg64(0xfacefacefacefaceULL, MISOFF(ctx), mis_rsp);
   }
 
@@ -2706,12 +2689,12 @@ void TranslatorX64::emitMPre(const Tracelet& t,
   // (mInd) commonly differ.  Additionally, W members have no corresponding
   // inputs, so it is necessary to track the two indices separately.
   iInd = mii.valCount();
-  emitBaseOp(t, ni, mii, iInd, ctxFixed, rBase);
+  emitBaseOp(t, ni, mii, iInd, rBase);
   ++iInd;
   // Iterate over all but the last member, which is consumed by a final
   // operation.
   for (mInd = 0; mInd < ni.immVecM.size() - 1; ++mInd) {
-    emitIntermediateOp(t, ni, mii, ctxFixed, mInd, iInd, rBase);
+    emitIntermediateOp(t, ni, mii, mInd, iInd, rBase);
     emitRatchetRefs(t, ni, mii, mInd, *rBase);
   }
 }

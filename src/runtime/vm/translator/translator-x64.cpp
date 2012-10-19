@@ -3522,11 +3522,6 @@ TranslatorX64::emitInterpOne(const Tracelet& t,
   }
 }
 
-bool isContextFixed() {
-  // Translations for pseudomains don't have a fixed context class
-  return !curFunc()->isPseudoMain();
-}
-
 // could be static but used in hopt/codegen.cpp
 void raiseUndefVariable(StringData* nm) {
   raise_notice(Strings::UNDEFINED_VARIABLE, nm->data());
@@ -6010,7 +6005,7 @@ TranslatorX64::emitKnownClassCheck(const NormalizedInstruction& i,
   bool guarded = false;
   if (klass) {
     guarded = i.guardedCls;
-    if (!guarded && isContextFixed()) {
+    if (!guarded) {
       Class *ctx = curFunc()->cls();
       if (ctx && ctx->classof(klass)) {
         guarded = true;
@@ -6154,7 +6149,7 @@ void TranslatorX64::translateSelf(const Tracelet& t,
                                   const NormalizedInstruction& i) {
   m_regMap.allocOutputRegs(i);
   PhysReg tmp = getReg(i.outStack->location);
-  ASSERT(isContextFixed() && curFunc()->cls());
+  ASSERT(curFunc()->cls());
   emitImmReg(a, (int64_t)curFunc()->cls(), tmp);
 }
 
@@ -6162,7 +6157,7 @@ void TranslatorX64::translateParent(const Tracelet& t,
                                     const NormalizedInstruction& i) {
   m_regMap.allocOutputRegs(i);
   PhysReg tmp = getReg(i.outStack->location);
-  ASSERT(isContextFixed() && curFunc()->cls() && curFunc()->cls()->parent());
+  ASSERT(curFunc()->cls() && curFunc()->cls()->parent());
   emitImmReg(a, (int64_t)curFunc()->cls()->parent(), tmp);
 }
 
@@ -6855,8 +6850,7 @@ void TranslatorX64::analyzeCGetS(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.outStack);
   const Class* cls = i.inputs[0]->rtt.valueClass();
   const StringData* propName = i.inputs[1]->rtt.valueString();
-  i.m_txFlags = supportedPlan(cls && propName && isContextFixed() &&
-                              curFunc()->cls() == cls);
+  i.m_txFlags = supportedPlan(cls && propName && curFunc()->cls() == cls);
   i.manuallyAllocInputs = true;
 }
 
@@ -6880,13 +6874,11 @@ void TranslatorX64::analyzeSetS(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.outStack);
   const Class* cls = i.inputs[1]->rtt.valueClass();
   const StringData* propName = i.inputs[2]->rtt.valueString();
-  // XXX Need to check isContextFixed
   // Might be able to broaden this: if cls is an ancestor of the current context,
   // the context is Fixed, and the property is not private
   // Also if the m_hoistable in cls is set to AlwaysHoistable, defined in
   // the same unit as context, and the property is public
-  i.m_txFlags = supportedPlan(cls && propName && isContextFixed() &&
-                              curFunc()->cls() == cls);
+  i.m_txFlags = supportedPlan(cls && propName && curFunc()->cls() == cls);
   i.manuallyAllocInputs = true;
 }
 
@@ -7524,7 +7516,7 @@ TranslatorX64::translateReqLit(const Tracelet& t,
    */
   m_srcDB.recordDependency(efile, t.m_sk);
   Unit *unit = efile->unit();
-  Func *func = unit->getMain();
+  Func *func = unit->getMain(local ? NULL : curClass());
 
   const Offset after = nextSrcKey(t, i).offset();
   TRACE(1, "requireHelper: efile %p offset %d%s\n", efile, after,
@@ -7731,7 +7723,7 @@ TranslatorX64::translateFPushFunc(const Tracelet& t,
 
 void
 TranslatorX64::analyzeFPushClsMethodD(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = supportedPlan(isContextFixed());
+  i.m_txFlags = supportedPlan(true);
 }
 
 void
@@ -7820,8 +7812,7 @@ TranslatorX64::analyzeFPushClsMethodF(Tracelet& t,
   i.m_txFlags = supportedPlan(
     i.inputs[1]->rtt.valueString() != NULL && // We know the method name
     i.inputs[0]->valueType() == KindOfClass &&
-    i.inputs[0]->rtt.valueClass() != NULL && // We know the class name
-    isContextFixed()
+    i.inputs[0]->rtt.valueClass() != NULL // We know the class name
   );
 }
 
@@ -7829,7 +7820,6 @@ void
 TranslatorX64::translateFPushClsMethodF(const Tracelet& t,
                                         const NormalizedInstruction& i) {
   using namespace TargetCache;
-  ASSERT(isContextFixed());
   ASSERT(!curFunc()->isPseudoMain());
   ASSERT(curFunc()->cls() != NULL); // self:: and parent:: should only
                                     // appear in methods
@@ -7936,8 +7926,7 @@ void
 TranslatorX64::analyzeFPushObjMethodD(Tracelet& t,
                                       NormalizedInstruction &i) {
   DynLocation* objLoc = i.inputs[0];
-  i.m_txFlags = supportedPlan(objLoc->valueType() == KindOfObject &&
-                              isContextFixed());
+  i.m_txFlags = supportedPlan(objLoc->valueType() == KindOfObject);
 }
 
 void
@@ -8425,8 +8414,6 @@ TranslatorX64::findCuf(const NormalizedInstruction& ni,
   } else {
     return NULL;
   }
-
-  if (!isContextFixed()) return NULL;
 
   Class* ctx = curFunc()->cls();
 
@@ -9113,8 +9100,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
 void
 TranslatorX64::analyzeIterInit(Tracelet& t, NormalizedInstruction& ni) {
   DataType inType = ni.inputs[0]->valueType();
-  ni.m_txFlags = supportedPlan(
-    isContextFixed() && (inType == KindOfArray || inType == KindOfObject));
+  ni.m_txFlags = supportedPlan(inType == KindOfArray || inType == KindOfObject);
 }
 
 void
@@ -9146,7 +9132,6 @@ TranslatorX64::translateIterInit(const Tracelet& t,
       Class *ctx = NULL;
       new_iter_object(dest, obj, ctx);
     }
-    ASSERT(isContextFixed());
     Class* ctx = arGetContextClass(curFrame());
     EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src), IMM((uintptr_t)ctx));
     break;

@@ -715,7 +715,7 @@ SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
     prop = m_tb.genDefConst<const StringData*>(propName);
   }
   // TODO: fallback to interpone if we decide to punt
-  if (!cls || !isContextFixed() || curFunc()->cls() != cls) {
+  if (!cls || curFunc()->cls() != cls) {
     PUNT(ClsPropAddr_noCls);
   }
   if (!prop->isConst() || prop->getType() != Type::StaticStr) {

@@ -1,0 +1,9 @@
+value of var before ReqOnce: hello
+in mod.php
+this->var was set; changing it.
+value of var after ReqOnce: hello more
+testvar set after ReqOnce? 1
+testing from anonymous context
+testvar set before Req? 
+in mod.php
+testvar set after Req? 1

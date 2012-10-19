@@ -306,6 +306,9 @@ struct Unit {
   typedef UnitMergeInfo::FuncRange FuncRange;
   typedef UnitMergeInfo::MutableFuncRange MutableFuncRange;
 
+  typedef hphp_hash_map<const Class*, Func*,
+                        pointer_hash<Class> > PseudoMainCacheMap;
+
   class MetaInfo {
    public:
     enum Kind {
@@ -527,12 +530,11 @@ private:
   template <bool debugger>
   void mergeImpl(void* tcbase, UnitMergeInfo* mi);
 public:
-  Func* getMain() const {
-    return *m_mergeInfo->funcBegin();
-  }
   Func* firstHoistable() const {
     return *m_mergeInfo->funcHoistableBegin();
   }
+  Func* getMain(Class* cls = NULL) const;
+  // Ranges for iterating over functions.
   MutableFuncRange nonMainFuncs() const {
     return m_mergeInfo->nonMainFuncs();
   }
@@ -631,6 +633,7 @@ private:
   LineTable m_lineTable;
   FuncTable m_funcTable;
   PreConstVec m_preConsts;
+  mutable PseudoMainCacheMap *m_pseudoMainCache;
 };
 
 class UnitEmitter {

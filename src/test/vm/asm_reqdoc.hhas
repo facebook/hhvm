@@ -1,0 +1,99 @@
+# This should be essentially the same as reqonce.php,
+# except using the ReqDoc opcode instead.
+
+.main {
+  FPushCtorD 0 "TestClass"
+  FCall 0
+  PopR
+  Dup
+
+  FPushObjMethodD 0 "testwithctx"
+  FCall 0
+  PopR
+
+  FPushFuncD 0 "testnoctx"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}
+
+.function testnoctx {
+  String "testing from anonymous context\n"
+  Print
+  PopC
+
+  String "testvar set before Req? "
+  Print
+  PopC
+  IssetL $testvar
+  Print
+  PopC
+  String "\n"
+  Print
+  PopC
+
+  String "reqtests/mod.php"
+  Req
+  PopC
+
+  String "testvar set after Req? "
+  Print
+  PopC
+  IssetL $testvar
+  Print
+  PopC
+  String "\n"
+  Print
+  PopC
+
+  Null
+  RetC
+}
+
+.class TestClass {
+  .property [private] var = """s:5:"hello";""";
+  
+  .method [public] 86ctor {
+    Null
+    RetC
+  }
+
+  .method [public] testwithctx {
+    String "value of var before ReqDoc: "
+    This
+    CGetM <C PT:"var">
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+
+    String "test/vm/reqtests/mod.php"
+    ReqDoc
+    PopC
+
+    String "value of var after ReqDoc: "
+    This
+    CGetM <C PT:"var">
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+
+    String "testvar set after ReqDoc? "
+    Print
+    PopC
+    IssetL $testvar
+    Print
+    PopC
+    String "\n"
+    Print
+    PopC
+
+    Null
+    RetC
+  }
+}

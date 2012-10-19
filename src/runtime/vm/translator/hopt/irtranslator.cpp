@@ -781,8 +781,7 @@ isSupportedCGetMProp(const NormalizedInstruction& i) {
           mcodeMaybePropName(i.immVecM[0]),
           i.inputs[0]->rtt.pretty().c_str(),
           i.inputs[1]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 1, 0) && isContextFixed() &&
-         i.immVec.locationCode() != LL;
+  return isNormalPropertyAccess(i, 1, 0) && i.immVec.locationCode() != LL;
 }
 
 void
@@ -936,7 +935,7 @@ static bool isSupportedSetMProp(const NormalizedInstruction& i) {
   SKTRACE(2, i.source, "setM prop candidate: prop supported: %d, rtt %s\n",
           mcodeMaybePropName(i.immVecM[0]),
           i.inputs[2]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 2, 1) && isContextFixed();
+  return isNormalPropertyAccess(i, 2, 1);
 }
 
 void
@@ -1090,7 +1089,6 @@ TranslatorX64::irTranslateFPushClsMethodD(const Tracelet& t,
     mightNotBeStatic = true;
   }
 
-  HHIR_UNIMPLEMENTED_WHEN(!isContextFixed(), FPushClsMethodD);
   HHIR_EMIT(FPushClsMethodD,
              (i.imm[0].u_IVA),
              (i.imm[1].u_SA),
@@ -1108,8 +1106,7 @@ void
 TranslatorX64::irTranslateFPushObjMethodD(const Tracelet &t,
                                         const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 1);
-  HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfObject ||
-                           !isContextFixed()),
+  HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfObject),
                           FPushObjMethod_nonObj);
   ASSERT(i.inputs[0]->valueType() == KindOfObject);
   int id = i.imm[1].u_IVA;

@@ -1,0 +1,8 @@
+value of var before ReqMod: hello
+in mod.php
+value of var after ReqMod: hello
+testvar set after ReqMod? 
+testing from anonymous context
+testvar set before Req? 
+in mod.php
+testvar set after Req? 1

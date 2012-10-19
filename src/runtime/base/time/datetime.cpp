@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/time/datetime.h>
+#include <runtime/base/time/dateinterval.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/runtime_error.h>
@@ -398,7 +399,9 @@ void DateTime::internalModify(timelib_rel_time *rel,
   m_time->relative.s = rel->s * bias;
   m_time->relative.weekday = rel->weekday;
   m_time->have_relative = have_relative;
+#ifdef TIMELIB_HAVE_INTERVAL
   m_time->relative.have_weekday_relative = rel->have_weekday_relative;
+#endif
   m_time->sse_uptodate = 0;
   update();
   timelib_update_from_sse(m_time.get());
@@ -406,12 +409,12 @@ void DateTime::internalModify(timelib_rel_time *rel,
 
 void DateTime::add(const SmartObject<DateInterval> &interval) {
   timelib_rel_time *rel = interval->get();
-  internalModify(rel, true, rel->invert ? -1 :  1);
+  internalModify(rel, true, TIMELIB_REL_INVERT(rel) ? -1 :  1);
 }
 
 void DateTime::sub(const SmartObject<DateInterval> &interval) {
   timelib_rel_time *rel = interval->get();
-  internalModify(rel, true, rel->invert ?  1 : -1);
+  internalModify(rel, true, TIMELIB_REL_INVERT(rel) ?  1 : -1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -696,8 +699,12 @@ bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz,
   struct timelib_error_container *error;
   timelib_time *t;
   if (format) {
+#ifdef TIMELIB_HAVE_INTERVAL
     t = timelib_parse_from_format((char*)format, (char*)input.data(),
                                   input.size(), &error, TimeZone::GetDatabase());
+#else
+    throw NotImplementedException("timelib version too old");
+#endif
   } else {
     t = timelib_strtotime((char*)input.data(), input.size(),
                                  &error, TimeZone::GetDatabase());
@@ -742,12 +749,16 @@ SmartObject<DateTime> DateTime::cloneDateTime() const {
 // comparison
 
 SmartObject<DateInterval> DateTime::diff(SmartObject<DateTime> datetime2, bool absolute) {
+#ifdef TIMELIB_HAVE_INTERVAL
   timelib_rel_time *rel = timelib_diff(m_time.get(), datetime2.get()->m_time.get());
   if (absolute) {
-    rel->invert = 0;
+    TIMELIB_REL_INVERT_SET(rel, 0);
   }
   SmartObject<DateInterval> di(NEWOBJ(DateInterval)(rel));
   return di;
+#else
+  throw NotImplementedException("timelib version too old");
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

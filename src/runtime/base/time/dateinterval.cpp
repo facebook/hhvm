@@ -71,13 +71,18 @@ bool DateInterval::setDateString(CStrRef date_string) {
 }
 
 bool DateInterval::setInterval(CStrRef date_interval) {
-  timelib_time *start = NULL, *end = NULL;
   timelib_rel_time *di = NULL;
   timelib_error_container *errors = NULL;
+
+#ifdef TIMELIB_HAVE_INTERVAL
+  timelib_time *start = NULL, *end = NULL;
   int r = 0;
 
   timelib_strtointerval((char*)date_interval.data(), date_interval.size(),
                         &start, &end, &di, &r, &errors);
+#else
+  throw NotImplementedException("timelib too old");
+#endif
 
   int error_count  = errors->error_count;
   DateTime::setLastErrors(errors);

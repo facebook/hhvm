@@ -77,6 +77,12 @@ bool TestExtDatetime::RunTests(const std::string &which) {
 
 #define VDT(dt, s) VS(f_date_format(dt, "Y-m-d H:i:s"), s)
 
+/* Ignore unimplemented datetime features when timelib is old */
+#define TIMELIB_TEST_UNIMPL(minver, exp) try { exp } \
+  catch (NotImplementedException e) { \
+    return Count(f_timezone_version_get().toDouble() < minver); \
+  }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtDatetime::test_checkdate() {
@@ -86,17 +92,21 @@ bool TestExtDatetime::test_checkdate() {
 }
 
 bool TestExtDatetime::test_date_add() {
-  Object datetime = f_date_create("2010-08-16");
-  Object interval = f_date_interval_create_from_date_string("2 weeks");
-  Object dt2 = f_date_add(datetime, interval);
-  VDT(dt2, "2010-08-30 00:00:00");
-  return Count(true);
+  TIMELIB_TEST_UNIMPL(2011.1,
+    Object datetime = f_date_create("2010-08-16");
+    Object interval = f_date_interval_create_from_date_string("2 weeks");
+    Object dt2 = f_date_add(datetime, interval);
+    VDT(dt2, "2010-08-30 00:00:00");
+    return Count(true);
+  );
 }
 
 bool TestExtDatetime::test_date_create_from_format() {
-  Object dt = f_date_create_from_format("d/m/Y H:i:s", "16/08/2012 00:00:00");
-  VDT(dt, "2012-08-16 00:00:00");
-  return Count(true);
+  TIMELIB_TEST_UNIMPL(2011.1,
+    Object dt = f_date_create_from_format("d/m/Y H:i:s", "16/08/2012 00:00:00");
+    VDT(dt, "2012-08-16 00:00:00");
+    return Count(true);
+  );
 }
 
 bool TestExtDatetime::test_date_create() {
@@ -126,11 +136,13 @@ bool TestExtDatetime::test_date_default_timezone_set() {
 }
 
 bool TestExtDatetime::test_date_diff() {
-  Object dt1 = f_date_create("2010-08-02");
-  Object dt2 = f_date_create("2010-08-30");
-  Object interval = f_date_diff(dt1, dt2, true);
-  VS(f_date_interval_format(interval, "%d"), "28");
-  return Count(true);
+  TIMELIB_TEST_UNIMPL(2011.1,
+    Object dt1 = f_date_create("2010-08-02");
+    Object dt2 = f_date_create("2010-08-30");
+    Object interval = f_date_diff(dt1, dt2, true);
+    VS(f_date_interval_format(interval, "%d"), "28");
+    return Count(true);
+  );
 }
 
 bool TestExtDatetime::test_date_format() {
@@ -161,9 +173,11 @@ bool TestExtDatetime::test_date_get_last_errors() {
 }
 
 bool TestExtDatetime::test_date_interval_create_from_date_string() {
-  Object interval = f_date_interval_create_from_date_string("2 weeks");
-  VS(f_date_interval_format(interval, "%d"), "14");
-  return Count(true);
+  TIMELIB_TEST_UNIMPL(2011.1,
+    Object interval = f_date_interval_create_from_date_string("2 weeks");
+    VS(f_date_interval_format(interval, "%d"), "14");
+    return Count(true);
+  );
 }
 
 bool TestExtDatetime::test_date_interval_format() {
@@ -218,11 +232,13 @@ bool TestExtDatetime::test_date_parse() {
 }
 
 bool TestExtDatetime::test_date_sub() {
-  Object datetime = f_date_create("2010-08-16");
-  Object interval = f_date_interval_create_from_date_string("2 weeks");
-  Object dt2 = f_date_sub(datetime, interval);
-  VS(f_date_format(dt2, "Y-m-d"), "2010-08-02");
-  return Count(true);
+  TIMELIB_TEST_UNIMPL(2011.1,
+    Object datetime = f_date_create("2010-08-16");
+    Object interval = f_date_interval_create_from_date_string("2 weeks");
+    Object dt2 = f_date_sub(datetime, interval);
+    VS(f_date_format(dt2, "Y-m-d"), "2010-08-02");
+    return Count(true);
+  );
 }
 
 bool TestExtDatetime::test_date_sun_info() {
@@ -492,6 +508,8 @@ bool TestExtDatetime::test_mktime() {
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 13, 1, 1997)),  "Jan-01-1998");
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 1998)),   "Jan-01-1998");
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 98)),     "Jan-01-1998");
+  VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 1900)),   "Jan-01-1900");
+  VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 2100)),   "Jan-01-2100");
 
   VS(f_mktime(), time(NULL));
 
@@ -620,14 +638,16 @@ bool TestExtDatetime::test_timezone_identifiers_list() {
 }
 
 bool TestExtDatetime::test_timezone_location_get() {
-  Object tz = f_timezone_open("Europe/Prague");
-  Array loc = f_timezone_location_get(tz);
-  VS(loc.size(), 4);
-  VS(loc["country_code"].toString(), "CZ");
-  VS((int)(loc["latitude"].toDoubleVal() * 100), 5008);
-  VS((int)(loc["longitude"].toDoubleVal() * 100), 1443);
-  VS(loc["comments"].toString(), "");
-  return Count(true);
+  TIMELIB_TEST_UNIMPL(2011.1,
+    Object tz = f_timezone_open("Europe/Prague");
+    Array loc = f_timezone_location_get(tz);
+    VS(loc.size(), 4);
+    VS(loc["country_code"].toString(), "CZ");
+    VS((int)(loc["latitude"].toDoubleVal() * 100), 5008);
+    VS((int)(loc["longitude"].toDoubleVal() * 100), 1443);
+    VS(loc["comments"].toString(), "");
+    return Count(true);
+  );
 }
 
 bool TestExtDatetime::test_timezone_name_from_abbr() {
@@ -676,6 +696,6 @@ bool TestExtDatetime::test_timezone_transitions_get() {
 }
 
 bool TestExtDatetime::test_timezone_version_get() {
-  VS(f_timezone_version_get(), "2011.14");
+  VS(f_timezone_version_get().toBoolean(), true);
   return Count(true);
 }

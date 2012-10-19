@@ -1207,7 +1207,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
           prevOp == OpGte || prevOp == OpLte ||
           prevOp == OpEq || prevOp == OpNeq ||
           prevOp == OpIssetL || prevOp == OpAKExists ||
-          isTypePred(prevOp) ||
+          isTypePred(prevOp) || prevOp == OpInstanceOfD ||
           prev->fuseBranch) {
         prev->breaksTracelet = true;
         prev->changesPC = true; // Dont generate generic glue.

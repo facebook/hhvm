@@ -445,6 +445,17 @@ inline bool deltaFits(int64_t delta, int s) {
   return delta < (1ll << (bits-1)) && delta >= -(1ll << (bits-1));
 }
 
+// The unsigned equivalent of deltaFits
+inline bool magFits(uint64_t val, int s) {
+  // sz::qword is always true
+  ASSERT(s == sz::byte ||
+         s == sz::word ||
+         s == sz::dword);
+  int bits = s * 8;
+
+  return (val & ((1ull << bits) - 1)) == val;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // License for Andrew J. Paroski's x86 machine code emitter
 
@@ -1506,6 +1517,12 @@ public:
                       register_name_t rindex, int scale, int disp,      \
                       register_name_t rdest) {                          \
     emitMR(instr_ ## name, rbase, rindex, scale, disp, rdest);          \
+  }                                                                     \
+  /* opq imm, disp(rdest, rindex, scale) */                             \
+  inline void name ## _imm64_index_scale_disp_reg64(                    \
+    int64 imm, register_name_t rindex, int scale, int disp,             \
+    register_name_t rdest) {                                            \
+    emitIM(instr_ ## name, rdest, rindex, scale, disp, imm);             \
   }
 
   SCALED_OP(add)

@@ -606,13 +606,15 @@ PSEUDOINSTRS
   void fuseBranchSync(const Tracelet& t, const NormalizedInstruction& i);
   void fuseBranchAfterBool(const Tracelet& t, const NormalizedInstruction& i,
                            ConditionCode cc);
-  void fuseBranchAfterStaticBool(const Tracelet& t,
+  void fuseBranchAfterStaticBool(Asm& a, const Tracelet& t,
                                  const NormalizedInstruction& i,
-                                 bool resultIsTrue);
+                                 bool resultIsTrue, bool doSync = true);
   void emitReturnVal(Asm& a, const NormalizedInstruction& i,
                      PhysReg dstBase, int dstOffset,
                      PhysReg thisBase, int thisOffset,
                      PhysReg scratch);
+  void fuseBranchAfterHelper(const Tracelet& t,
+                             const NormalizedInstruction& i);
   void translateSetMArray(const Tracelet &t, const NormalizedInstruction& i);
   void emitPropGet(const NormalizedInstruction& i,
                    const DynLocation& base,
@@ -632,6 +634,12 @@ PSEUDOINSTRS
   void setupActRecClsForStaticCall(const NormalizedInstruction& i,
                                    const Func* func, const Class* cls,
                                    size_t clsOff, bool forward);
+  void emitInstanceOfDFast(const Tracelet& t, const NormalizedInstruction& i,
+                           Class* maybeCls,
+                           const ScratchReg& inCls,
+                           const ScratchReg& cls,
+                           const LazyScratchReg& result);
+
 
   const Func* findCuf(const NormalizedInstruction& ni,
                       Class* &cls, StringData*& invName, bool& forward);
@@ -825,6 +833,7 @@ private:
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
   void emitMovRegReg(Asm& a, PhysReg src, PhysReg dest);
   void emitMovRegReg(PhysReg src, PhysReg dest);
+  void emitMovRegReg32(Asm& a, PhysReg src, PhysReg dest);
   void enterTC(SrcKey sk);
 
   void recordGdbTranslation(const SrcKey& sk, const Unit* u,

@@ -207,23 +207,28 @@ class IfElseBlock : boost::noncopyable {
   X64Assembler& m_a;
   TCA m_jcc8;
   TCA m_jmp8;
+  bool useElseJmp;
  public:
-  explicit IfElseBlock(X64Assembler& a) :
-    m_a(a), m_jcc8(a.code.frontier), m_jmp8(NULL) {
+  explicit IfElseBlock(X64Assembler& a, bool elseJmp = true) :
+    m_a(a), m_jcc8(a.code.frontier), m_jmp8(NULL), useElseJmp(elseJmp) {
     tx64->m_regMap.freeze();
     m_a.jcc8(Jcc, m_a.code.frontier);  // 1f
   }
   void Else() {
-    ASSERT(m_jmp8 == NULL);
-    m_jmp8 = m_a.code.frontier;
-    m_a.jmp8(m_jmp8); // 2f
+    if (useElseJmp) {
+      ASSERT(m_jmp8 == NULL);
+      m_jmp8 = m_a.code.frontier;
+      m_a.jmp8(m_jmp8); // 2f
+    }
     // 1:
     m_a.patchJcc8(m_jcc8, m_a.code.frontier);
   }
   ~IfElseBlock() {
-    ASSERT(m_jmp8 != NULL);
-    // 2:
-    m_a.patchJmp8(m_jmp8, m_a.code.frontier);
+    if (useElseJmp) {
+      ASSERT(m_jmp8 != NULL);
+      // 2:
+      m_a.patchJmp8(m_jmp8, m_a.code.frontier);
+    }
     tx64->m_regMap.defrost();
   }
 };
@@ -386,6 +391,13 @@ TranslatorX64::emitMovRegReg(X64Assembler& a, PhysReg src, PhysReg dest) {
 void
 TranslatorX64::emitMovRegReg(PhysReg src, PhysReg dest) {
   emitMovRegReg(a, src, dest);
+}
+
+void
+TranslatorX64::emitMovRegReg32(X64Assembler& a, PhysReg src, PhysReg dest) {
+  if (src != dest) {
+    a.  mov_reg32_reg32(src, dest);
+  }
 }
 
 /*
@@ -3341,8 +3353,8 @@ TranslatorX64::syncOutputs(const NormalizedInstruction& i) {
 
 void
 TranslatorX64::syncOutputs(int stackOff) {
-  SpaceRecorder sr("_SyncOuts", a);
-  TCA start = a.code.frontier;
+  SpaceRecorder sr("_SyncOuts", *m_spillFillCode);
+  TCA start = m_spillFillCode->code.frontier;
   // Mark all stack locations above the top of stack as dead
   m_regMap.scrubStackEntries(stackOff);
   // Spill all dirty registers
@@ -3350,11 +3362,11 @@ TranslatorX64::syncOutputs(int stackOff) {
   if (stackOff != 0) {
     TRACE(1, "syncOutputs: rVmSp + %d\n", stackOff);
     // t.stackChange is in negative Cells, not bytes.
-    a.    add_imm32_reg64(-cellsToBytes(stackOff), rVmSp);
+    m_spillFillCode->add_imm32_reg64(-cellsToBytes(stackOff), rVmSp);
   }
   // All registers have been smashed for realz, yo
   m_regMap.smashRegs(kAllRegs);
-  recordBCInstr(OpSyncOutputs, a, start);
+  recordBCInstr(OpSyncOutputs, *m_spillFillCode, start);
 }
 
 /*
@@ -3842,7 +3854,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     bool result = !instrNeg;
     SKTRACE(2, i.source, "straightening null/null comparison\n");
     if (i.changesPC) {
-      fuseBranchAfterStaticBool(t, i, result);
+      fuseBranchAfterStaticBool(a, t, i, result);
     } else {
       m_regMap.allocOutputRegs(i);
       emitImmReg(a, result, getReg(i.outStack->location));
@@ -3970,7 +3982,7 @@ TranslatorX64::translateLtGtOp(const Tracelet& t,
     PhysReg rOut = getReg(i.outStack->location);
     bool resultIsTrue = (op == OpLte || op == OpGte);
     if (i.changesPC) {
-      fuseBranchAfterStaticBool(t, i, resultIsTrue);
+      fuseBranchAfterStaticBool(a, t, i, resultIsTrue);
     } else {
       emitImmReg(a, resultIsTrue, rOut);
     }
@@ -4128,33 +4140,49 @@ void TranslatorX64::branchWithFlagsSet(const Tracelet& t,
   emitCondJmp(taken, notTaken, cc);
 }
 
-void TranslatorX64::fuseBranchAfterStaticBool(const Tracelet& t,
+void TranslatorX64::fuseBranchAfterStaticBool(Asm& a,
+                                              const Tracelet& t,
                                               const NormalizedInstruction& i,
-                                              bool resultIsTrue) {
+                                              bool resultIsTrue,
+                                              bool doSync) {
   ASSERT(i.breaksTracelet);
   ASSERT(i.next);
   NormalizedInstruction &nexti = *i.next;
-  fuseBranchSync(t, i);
+  if (doSync) {
+    fuseBranchSync(t, i);
+  } else {
+    ASSERT(m_regMap.branchSynced());
+  }
   bool isTaken = (resultIsTrue == nexti.isJmpNZ());
   SrcKey taken, notTaken;
   branchDests(t, nexti, &taken, &notTaken);
   if (isTaken) {
-    emitBindJmp(taken);
+    emitBindJmp(a, taken);
   } else {
-    emitBindJmp(notTaken);
+    emitBindJmp(a, notTaken);
   }
+}
+
+void TranslatorX64::fuseBranchAfterHelper(const Tracelet& t,
+                                          const NormalizedInstruction& i) {
+  fuseBranchSync(t, i);
+  a.test_reg64_reg64(rax, rax);
+  fuseBranchAfterBool(t, i, CC_NZ);
 }
 
 void TranslatorX64::fuseBranchSync(const Tracelet& t,
                                    const NormalizedInstruction& i) {
+  ASSERT(!m_regMap.branchSynced());
   // Don't bother sync'ing the output of this instruction.
   m_regMap.scrubStackEntries(i.outStack->location.offset);
   syncOutputs(t);
+  m_regMap.setBranchSynced();
 }
 
 void TranslatorX64::fuseBranchAfterBool(const Tracelet& t,
                                         const NormalizedInstruction& i,
                                         ConditionCode cc) {
+  ASSERT(m_regMap.branchSynced());
   ASSERT(i.breaksTracelet);
   ASSERT(i.next);
   NormalizedInstruction &nexti = *i.next;
@@ -7333,7 +7361,7 @@ TranslatorX64::translateCheckTypeOp(const Tracelet& t,
     // Don't bother driving an output reg. Just take the branch
     // where it leads.
     Stats::emitInc(a, Stats::Tx64_FusedTypeCheck);
-    fuseBranchAfterStaticBool(t, ni, isType);
+    fuseBranchAfterStaticBool(a, t, ni, isType);
     return;
   }
   Stats::emitInc(a, Stats::Tx64_UnfusedTypeCheck);
@@ -7477,7 +7505,7 @@ TranslatorX64::translateAKExists(const Tracelet& t,
 
   if (result >= 0) {
     if (ni.changesPC) {
-      fuseBranchAfterStaticBool(t, ni, result);
+      fuseBranchAfterStaticBool(a, t, ni, result);
       return;
     } else {
       m_regMap.allocOutputRegs(ni);
@@ -9119,20 +9147,23 @@ TranslatorX64::analyzeInstanceOfD(Tracelet& t, NormalizedInstruction& i) {
   i.m_txFlags = planHingesOnRefcounting(i.inputs[0]->outerType());
 }
 
-// check class hierarchy and fail if no match
+// Helpers for InstanceOfD. They return uint64_t so the translated
+// code calling them doesn't have to zero-extend the lower byte.
 static uint64_t
 InstanceOfDSlow(const Class* cls, const Class* constraint) {
   Stats::inc(Stats::Tx64_InstanceOfDSlow);
-  Stats::inc(Stats::Tx64_InstanceOfDFast, -1);
+  return constraint && cls->classof(constraint);
+}
 
-  // ensure C++ returns a 0 or 1 with upper bits zeroed
-  return static_cast<uint64_t>(constraint && cls->classof(constraint));
+static uint64_t
+InstanceOfDSlowInterface(const Class* cls, const Class* parent) {
+  Stats::inc(Stats::Tx64_InstanceOfDInterface);
+  return parent && cls->classof(parent->preClass());
 }
 
 void
 TranslatorX64::translateInstanceOfD(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  Stats::emitInc(a, Stats::Tx64_InstanceOfDFast);
   ASSERT(i.inputs.size() == 1);
   ASSERT(i.outStack && !i.outLocal);
 
@@ -9140,12 +9171,19 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
   bool input0IsLoc = input0->isLocal();
   DataType type = input0->valueType();
   PhysReg srcReg;
-  ScratchReg result(m_regMap);
+  LazyScratchReg result(m_regMap);
   LazyScratchReg srcScratch(m_regMap);
   TCA patchAddr = NULL;
   boost::scoped_ptr<DiamondReturn> retFromNullThis;
 
+  if (!i.changesPC) {
+    result.alloc();
+  } else {
+    Stats::emitInc(a, Stats::Tx64_InstanceOfDFused);
+  }
+
   if (i.grouped && (i.prev->op() == OpThis || i.prev->op() == OpBareThis)) {
+    ASSERT(curFunc()->cls());
     srcScratch.alloc();
     srcReg = *srcScratch;
     a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), srcReg);
@@ -9153,19 +9191,32 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
       ASSERT(i.prev->guardedThis);
     } else {
       if (i.prev->imm[0].u_OA) {
-        retFromNullThis.reset(new DiamondReturn);
+        // Warn on null $this
+        if (!i.changesPC) {
+          retFromNullThis.reset(new DiamondReturn);
+        }
         a.  test_imm32_reg64(1, srcReg);
         {
           UnlikelyIfBlock<CC_NZ> ifNull(a, astubs, retFromNullThis.get());
-          EMIT_CALL(astubs, warnNullThis);
-          recordReentrantStubCall(i);
-          emitImmReg(astubs, false, *result);
+          EMIT_RCALL(astubs, i, warnNullThis);
+          if (i.changesPC) {
+            fuseBranchAfterStaticBool(astubs, t, i, false);
+          } else {
+            emitImmReg(astubs, false, *result);
+          }
         }
       } else {
-        emitImmReg(a, false, *result);
+        if (!i.changesPC) {
+          emitImmReg(a, false, *result);
+        }
         a.  test_imm32_reg64(1, srcReg);
-        patchAddr = a.code.frontier;
-        a.  jcc(CC_NZ, patchAddr);
+        if (i.changesPC) {
+          JccBlock<CC_Z> ifNull(a);
+          fuseBranchAfterStaticBool(a, t, i, false);
+        } else {
+          patchAddr = a.code.frontier;
+          a.  jcc(CC_NZ, patchAddr);
+        }
       }
     }
     input0IsLoc = true; // we dont want a decRef
@@ -9175,61 +9226,160 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
   }
 
   if (type != KindOfObject) {
+    Stats::emitInc(a, Stats::Tx64_InstanceOfDBypass);
     // All non-object inputs are not instances
     if (!input0IsLoc) {
       ASSERT(!input0->isVariant());
       emitDecRef(i, srcReg, type);
     }
-    emitImmReg(a, false, *result);
-
+    if (i.changesPC) {
+      fuseBranchAfterStaticBool(a, t, i, false);
+      ASSERT(!patchAddr);
+      return;
+    } else {
+      emitImmReg(a, false, *result);
+    }
   } else {
     // Get the input's class from ObjectData->m_cls
     ScratchReg inCls(m_regMap);
+    PhysReg baseReg = srcReg;
     if (input0->rtt.isVariant()) {
       ASSERT(input0IsLoc);
       emitDeref(a, srcReg, *inCls);
-      a.  load_reg64_disp_reg64(*inCls, ObjectData::getVMClassOffset(), *inCls);
-    } else {
-      a.  load_reg64_disp_reg64(srcReg, ObjectData::getVMClassOffset(), *inCls);
+      baseReg = *inCls;
     }
+    a.  load_reg64_disp_reg64(baseReg, ObjectData::getVMClassOffset(), *inCls);
     if (!input0IsLoc) {
       emitDecRef(i, srcReg, type);
     }
 
-    // Set result to true for now. If take slow path, use its return val
-    emitImmReg(a, true, *result);
-    ScratchReg cls(m_regMap);
-    // Constraint may not be in the class-hierarchy of the method being traced,
-    // look up the class handle and emit code to put the Class* into a reg.
-    using namespace TargetCache;
-    int param = i.imm[0].u_SA;
-    const StringData* clsName = curUnit()->lookupLitstrId(param);
-    CacheHandle ch = allocKnownClass(clsName);
-    a.    load_reg64_disp_reg64(rVmTl, ch, *cls);
-    // Compare this class to the incoming object's class. If the typehint's
-    // class is not present, can not be an instance: fail
-    a.    cmp_reg64_reg64(*inCls, *cls);
+    const StringData* clsName = curUnit()->lookupLitstrId(i.imm[0].u_SA);
+    Class* maybeCls = Unit::lookupClass(clsName);
 
-    {
-      UnlikelyIfBlock<CC_NZ> subclassCheck(a, astubs);
-      // Call helper since ObjectData::instanceof is a member function
-      if (false) {
-        Class* cls = NULL;
-        Class* constraint = NULL;
-        InstanceOfDSlow(cls, constraint);
-      }
-      EMIT_CALL(astubs, InstanceOfDSlow, R(*inCls), R(*cls));
-      astubs.  mov_reg32_reg32(rax, *result);
+    // maybeInterface is just used as a hint: If it's a trait/interface now but
+    // a class at runtime, InstanceOfDSlowInterface will still do the right
+    // thing but more slowly. fastPath is guaranteed to be correct.
+    bool maybeInterface = maybeCls &&
+      (maybeCls->attrs() & (AttrTrait | AttrInterface));
+    bool fastPath = !maybeInterface &&
+      RuntimeOption::RepoAuthoritative &&
+      maybeCls &&
+      (maybeCls->attrs() & AttrUnique) &&
+      !(maybeCls->attrs() & (AttrInterface | AttrTrait));
+
+    ScratchReg cls(m_regMap);
+    TargetCache::CacheHandle ch = TargetCache::allocKnownClass(clsName);
+    a.    load_reg64_disp_reg64(rVmTl, ch, *cls);
+
+    auto afterHelper = [&] {
+      if (i.changesPC) fuseBranchAfterHelper(t, i);
+      else emitMovRegReg(a, rax, *result);
+    };
+    if (maybeInterface) {
+      EMIT_CALL(a, InstanceOfDSlowInterface, R(*inCls), R(*cls));
+      afterHelper();
+    } else if (fastPath) {
+      emitInstanceOfDFast(t, i, maybeCls, inCls, cls, result);
+    } else {
+      EMIT_CALL(a, InstanceOfDSlow, R(*inCls), R(*cls));
+      afterHelper();
+    }
+    if (i.changesPC) {
+      ASSERT(!patchAddr && !retFromNullThis);
+      return;
     }
   }
+
+  ASSERT(!patchAddr || !retFromNullThis);
+  ASSERT(IMPLIES(retFromNullThis, !i.changesPC));
   if (patchAddr) {
     a. patchJcc(patchAddr, a.code.frontier);
+  } else {
+    retFromNullThis.reset();
   }
-  retFromNullThis.reset();
 
   // Bind result and destination
+  ASSERT(!i.changesPC);
   m_regMap.bindScratch(result, i.outStack->location, i.outStack->outerType(),
                        RegInfo::DIRTY);
+}
+
+void
+TranslatorX64::emitInstanceOfDFast(const Tracelet& t,
+                                   const NormalizedInstruction& i,
+                                   Class* maybeCls,
+                                   const ScratchReg& inCls,
+                                   const ScratchReg& cls,
+                                   const LazyScratchReg& result) {
+  LazyScratchReg one(m_regMap);
+
+  if (i.changesPC) {
+    fuseBranchSync(t, i);
+  } else {
+    one.alloc();
+    emitImmReg(a, 1, *one);
+  }
+  FreezeRegs ice(m_regMap);
+
+  // Are the Class*s the exact same class?
+  a.      cmp_reg64_reg64(*inCls, *cls);
+  {
+    IfElseBlock<CC_NE> ifEqual(a, !i.changesPC);
+    Stats::emitInc(a, Stats::Tx64_InstanceOfDFastest);
+    if (i.changesPC) {
+      fuseBranchAfterStaticBool(a, t, i, true, false);
+    } else {
+      a.  mov_reg64_reg64(*one, *result);
+    }
+
+    ifEqual.Else();
+    Stats::emitInc(a, Stats::Tx64_InstanceOfDFast);
+
+    // Default to false and override if all the checks succeed
+    if (!i.changesPC) {
+      emitImmReg(a, 0, *result);
+    }
+
+    auto checkVec = [&]{
+      // Is our inheritence hierarchy no shorter than the candidate?
+      unsigned parentVecLen = maybeCls->classVecLen();
+      a.  cmp_imm32_disp_reg32(parentVecLen, Class::classVecLenOff(),
+                               *inCls);
+      {
+        JccBlock<CC_B> veclen(a);
+
+        // Is the spot in our inheritance hierarchy corresponding to the
+        // candidate equal to the candidate?
+        int offset = Class::classVecOff() + sizeof(Class*) * (parentVecLen-1);
+        if (Class::alwaysLowMem()) {
+          a.cmp_imm32_disp_reg32((uint64)maybeCls, offset, *inCls);
+        } else {
+          a.cmp_imm64_disp_reg64((uint64)maybeCls, offset, *inCls);
+        }
+        if (i.changesPC) {
+          fuseBranchAfterBool(t, i, CC_E);
+        } else {
+          a.cmov_reg64_reg64(CC_E, *one, *result);
+        }
+      }
+    };
+
+    if (maybeCls->attrs() & AttrPersistent) {
+      checkVec();
+    } else {
+      Stats::emitInc(a, Stats::Tx64_InstanceOfDNonPersistent);
+      a.  test_reg64_reg64(*inCls, *inCls);
+      {
+        JccBlock<CC_Z> ifcls(a);
+        checkVec();
+      }
+    }
+
+    // If execution makes it here the check has failed
+    if (i.changesPC) {
+      fuseBranchAfterStaticBool(a, t, i, false, false);
+    }
+  }
 }
 
 void

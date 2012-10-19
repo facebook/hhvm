@@ -279,6 +279,7 @@ class RegAlloc {
   SpillFill*      m_spf;
   mutable int     m_freezeCount;      // support immutability
   uint64          m_epoch;
+  bool            m_branchSynced;
 
   RegInfo* alloc(const Location& loc, DataType t, RegInfo::State state,
                  bool needsFill, int64 immVal = 0, PhysReg target = InvalidReg);
@@ -317,6 +318,14 @@ class RegAlloc {
   PhysReg allocReg(const Location& loc, DataType t, RegInfo::State state) {
     RegInfo* ri = alloc(loc, t, state, state == RegInfo::CLEAN);
     return ri->m_pReg;
+  }
+
+  void setBranchSynced() {
+    ASSERT(!m_branchSynced);
+    m_branchSynced = true;
+  }
+  bool branchSynced() {
+    return m_branchSynced;
   }
 
   void assertNoScratch() { ASSERT(checkNoScratch()); }

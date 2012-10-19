@@ -476,6 +476,8 @@ void PreClassRepoProxy::GetPreClassesStmt
 ClassPtr Class::newClass(PreClass* preClass, Class* parent) {
   unsigned classVecLen = (parent != NULL) ? parent->m_classVecLen+1 : 1;
   void* mem = Util::low_malloc(sizeForNClasses(classVecLen));
+  assert(IMPLIES(alwaysLowMem(), ptr_is_low_mem(mem)) &&
+         "All Classes must be allocated at 32-bit addresses");
   try {
     return ClassPtr(new (mem) Class(preClass, parent, classVecLen));
   } catch (...) {

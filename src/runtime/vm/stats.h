@@ -74,8 +74,13 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_VerifyParamTypeFast) \
   STAT(Tx64_FusedTypeCheck) \
   STAT(Tx64_UnfusedTypeCheck) \
-  STAT(Tx64_InstanceOfDSlow) \
+  STAT(Tx64_InstanceOfDFused) \
+  STAT(Tx64_InstanceOfDBypass) \
+  STAT(Tx64_InstanceOfDFastest) \
   STAT(Tx64_InstanceOfDFast) \
+  STAT(Tx64_InstanceOfDInterface) \
+  STAT(Tx64_InstanceOfDSlow) \
+  STAT(Tx64_InstanceOfDNonPersistent) \
   STAT(Tx64_PropCache) \
   STAT(Tx64_PropNameCache) \
   STAT(Tx64_PropCtxCache) \

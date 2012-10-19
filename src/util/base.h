@@ -579,6 +579,11 @@ HPHP::hphp_raw_ptr<T> static_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
 }
 }
 
+inline bool ptr_is_low_mem(void* ptr) {
+  static_assert(sizeof(void*) == 8, "Unexpected pointer size");
+  return !((uint64_t)ptr & 0xffffffff00000000ull);
+}
+
 namespace HPHP {
   using std::string;
   using std::vector;

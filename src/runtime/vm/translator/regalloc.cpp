@@ -47,7 +47,8 @@ RegAlloc::RegAlloc(RegSet callerSaved,
     m_numRegs(callerSaved.size() + calleeSaved.size()),
     m_allRegs(callerSaved | calleeSaved),
     m_spf(spf),
-    m_freezeCount(0)
+    m_freezeCount(0),
+    m_branchSynced(false)
 {
   ASSERT(m_calleeSaved - m_callerSaved == m_calleeSaved);
   reset();
@@ -282,6 +283,7 @@ RegAlloc::reset() {
     // Put the most favorable register last, so it is picked first.
     m_lru[(m_numRegs - 1) - i] = pr;
   }
+  m_branchSynced = false;
   verify();
 }
 

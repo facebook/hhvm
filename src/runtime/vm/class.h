@@ -20,6 +20,7 @@
 #include <runtime/vm/core_types.h>
 #include <runtime/vm/repo_helpers.h>
 #include <runtime/base/array/hphp_array.h>
+#include <runtime/base/runtime_option.h>
 #include <runtime/ext_hhvm/ext_hhvm.h>
 #include <util/parser/location.h>
 #include <util/fixed_vector.h>
@@ -532,6 +533,9 @@ public:
   Class(PreClass* preClass, Class* parent, unsigned classVecLen);
   void atomicRelease();
 
+  static bool alwaysLowMem() {
+    return use_jemalloc && RuntimeOption::RepoAuthoritative;
+  }
   static size_t sizeForNClasses(unsigned nClasses) {
     return offsetof(Class, m_classVec) + (sizeof(Class*) * nClasses);
   }
@@ -673,7 +677,12 @@ public:
     return sizeof(ObjectData) + m_builtinPropSize
       + index * sizeof(TypedValue);
   }
+  unsigned classVecLen() {
+    return m_classVecLen;
+  }
   static size_t preClassOff() { return offsetof(Class, m_preClass); }
+  static size_t classVecOff() { return offsetof(Class, m_classVec); }
+  static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
   static Offset getMethodsOffset() { return offsetof(Class, m_methods); }
   typedef IndexedStringMap<Func*,false,Slot> MethodMap;
 

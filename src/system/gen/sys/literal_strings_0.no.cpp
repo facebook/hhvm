@@ -871,6 +871,10 @@ StaticStringProxy s_sys_ssp1c2451f3;
 #ifndef s_sys_ss1c2451f3
 #define s_sys_ss1c2451f3 (*(StaticString *)(&s_sys_ssp1c2451f3))
 #endif
+StaticStringProxy s_sys_ssp1c2b0a57;
+#ifndef s_sys_ss1c2b0a57
+#define s_sys_ss1c2b0a57 (*(StaticString *)(&s_sys_ssp1c2b0a57))
+#endif
 StaticStringProxy s_sys_ssp1c30fc04;
 #ifndef s_sys_ss1c30fc04
 #define s_sys_ss1c30fc04 (*(StaticString *)(&s_sys_ssp1c30fc04))
@@ -982,6 +986,10 @@ StaticStringProxy s_sys_ssp1f085e14;
 StaticStringProxy s_sys_ssp1f4faed8;
 #ifndef s_sys_ss1f4faed8
 #define s_sys_ss1f4faed8 (*(StaticString *)(&s_sys_ssp1f4faed8))
+#endif
+StaticStringProxy s_sys_ssp1f989017;
+#ifndef s_sys_ss1f989017
+#define s_sys_ss1f989017 (*(StaticString *)(&s_sys_ssp1f989017))
 #endif
 StaticStringProxy s_sys_ssp1fd1a680;
 #ifndef s_sys_ss1fd1a680
@@ -1414,6 +1422,10 @@ StaticStringProxy s_sys_ssp2bb84f31;
 StaticStringProxy s_sys_ssp2bbad2e9;
 #ifndef s_sys_ss2bbad2e9
 #define s_sys_ss2bbad2e9 (*(StaticString *)(&s_sys_ssp2bbad2e9))
+#endif
+StaticStringProxy s_sys_ssp2bc38d53;
+#ifndef s_sys_ss2bc38d53
+#define s_sys_ss2bc38d53 (*(StaticString *)(&s_sys_ssp2bc38d53))
 #endif
 StaticStringProxy s_sys_ssp2bc9a7c8;
 #ifndef s_sys_ss2bc9a7c8
@@ -4364,6 +4376,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp1bc852d6, (const char *)"delete",
   (const char *)&s_sys_ssp1be4481e, (const char *)"RES_FAILURE",
   (const char *)&s_sys_ssp1c2451f3, (const char *)"getPathInfo",
+  (const char *)&s_sys_ssp1c2b0a57, (const char *)"getDeclaringFunction",
   (const char *)&s_sys_ssp1c6a6d66, (const char *)"helpCmds",
   (const char *)&s_sys_ssp1c6c4a31, (const char *)"SKIP_EMPTY",
   (const char *)&s_sys_ssp1c7be2db, (const char *)"SINGLE_SCRIPT",
@@ -4391,6 +4404,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp1ed8edbe, (const char *)"loadImages",
   (const char *)&s_sys_ssp1f085e14, (const char *)"toKeysArray",
   (const char *)&s_sys_ssp1f4faed8, (const char *)"READ_AHEAD",
+  (const char *)&s_sys_ssp1f989017, (const char *)"collectAttributes",
   (const char *)&s_sys_ssp1fd1a680, (const char *)"loadXML",
   (const char *)&s_sys_ssp1fed2f97, (const char *)"getFunctions",
   (const char *)&s_sys_ssp1fedb117, (const char *)"printFrame",
@@ -4493,6 +4507,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp2baa5fa8, (const char *)"getTraceAsString",
   (const char *)&s_sys_ssp2bb84f31, (const char *)"listIdentifiers",
   (const char *)&s_sys_ssp2bbad2e9, (const char *)"ATTR_CLIENT_VERSION",
+  (const char *)&s_sys_ssp2bc38d53, (const char *)"private_properties",
   (const char *)&s_sys_ssp2bc9a7c8, (const char *)"SIGNIFICANT_WHITESPACE",
   (const char *)&s_sys_ssp2bf8b6e3, (const char *)"createAttributens",
   (const char *)&s_sys_ssp2c1f9126, (const char *)"PARAM_EVT_ALLOC",
@@ -5172,7 +5187,7 @@ static const char *ss_data0[] = {
   (const char *)&s_sys_ssp6fd67d3d, (const char *)"\000*\000file", (const char *)7LL,
   (const char *)&s_sys_ssp7c4bb61c, (const char *)"\000SplObjectStorage\000storage", (const char *)25LL,
 };
-static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 985, 21);
+static int ATTRIBUTE_UNUSED initLiteralStrings0 = StringUtil::InitLiteralStrings(ss_data0, 988, 21);
 static const char *svs_data0[] = {
   (const char *)&s_sys_svs00000000, (const char *)&s_sys_ss00000000,
   (const char *)&s_sys_svs0514b8b1, (const char *)&s_sys_ss0514b8b1,

@@ -26,6 +26,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+FORWARD_DECLARE_CLASS(ReflectionFunctionAbstract);
+
 /* SRC: classes/reflection.php line 37 */
 FORWARD_DECLARE_CLASS(ReflectionParameter);
 extern const ObjectStaticCallbacks cw_ReflectionParameter;
@@ -50,6 +52,7 @@ class c_ReflectionParameter : public ExtObjectData {
   public: Variant t_getname();
   public: bool t_ispassedbyreference();
   public: Variant t_getdeclaringclass();
+  public: p_ReflectionFunctionAbstract t_getdeclaringfunction();
   public: Variant t_getclass();
   public: Variant t_gettypehinttext();
   public: bool t_isarray();
@@ -59,12 +62,18 @@ class c_ReflectionParameter : public ExtObjectData {
   public: Variant t_getdefaultvalue();
   public: Variant t_getdefaultvaluetext();
   public: Variant t_getposition();
+  public: Variant t_getattribute(CVarRef v_name);
+  public: Variant t_getattributes();
+  public: Variant t_getattributerecursive(CVarRef v_name);
+  public: Variant t_getattributesrecursive();
+  public: static void t_collectattributes(VRefParam rv_attrs, CVarRef v_class, CVarRef v_function_name, CVarRef v_index);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(export);
   DECLARE_METHOD_INVOKE_HELPERS(getname);
   DECLARE_METHOD_INVOKE_HELPERS(ispassedbyreference);
   DECLARE_METHOD_INVOKE_HELPERS(getdeclaringclass);
+  DECLARE_METHOD_INVOKE_HELPERS(getdeclaringfunction);
   DECLARE_METHOD_INVOKE_HELPERS(getclass);
   DECLARE_METHOD_INVOKE_HELPERS(gettypehinttext);
   DECLARE_METHOD_INVOKE_HELPERS(isarray);
@@ -74,6 +83,11 @@ class c_ReflectionParameter : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getdefaultvalue);
   DECLARE_METHOD_INVOKE_HELPERS(getdefaultvaluetext);
   DECLARE_METHOD_INVOKE_HELPERS(getposition);
+  DECLARE_METHOD_INVOKE_HELPERS(getattribute);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributes);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributerecursive);
+  DECLARE_METHOD_INVOKE_HELPERS(getattributesrecursive);
+  DECLARE_METHOD_INVOKE_HELPERS(collectattributes);
 };
 ObjectData *coo_ReflectionParameter() NEVER_INLINE;
 

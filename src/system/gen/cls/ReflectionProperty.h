@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1455 */
+/* SRC: classes/reflection.php line 1510 */
 FORWARD_DECLARE_CLASS(ReflectionProperty);
 extern const ObjectStaticCallbacks cw_ReflectionProperty;
 class c_ReflectionProperty : public ExtObjectData {

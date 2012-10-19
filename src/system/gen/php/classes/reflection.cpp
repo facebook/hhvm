@@ -33,7 +33,7 @@ namespace HPHP {
 
 /* preface starts */
 /* preface finishes */
-/* SRC: classes/reflection.php line 490 */
+/* SRC: classes/reflection.php line 544 */
 const int64 q_ReflectionFunction$$IS_DEPRECATED = 262144LL;
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunction)
 extern const InstanceOfInfo cw_ReflectionFunction$$instanceof_table[] = {
@@ -206,7 +206,7 @@ const ObjectStaticCallbacks cw_ReflectionFunction = {
   &c_ReflectionFunction::os_prop_table,&ci_ReflectionFunction$$__construct,0,&cw_ReflectionFunctionAbstract,0x0,
   &c_ReflectionFunction::s_cls
 };
-/* SRC: classes/reflection.php line 494 */
+/* SRC: classes/reflection.php line 548 */
 void c_ReflectionFunction::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::__construct);
   ObjectData *obj_tmp UNUSED;
@@ -236,13 +236,13 @@ void c_ReflectionFunction::t___construct(Variant v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 505 */
+/* SRC: classes/reflection.php line 559 */
 String c_ReflectionFunction::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 526 */
+/* SRC: classes/reflection.php line 580 */
 Variant c_ReflectionFunction::t_export(CVarRef v_name, CVarRef v_ret //  = false_varNR
 ) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::export);
@@ -264,7 +264,7 @@ Variant c_ReflectionFunction::t_export(CVarRef v_name, CVarRef v_ret //  = false
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 542 */
+/* SRC: classes/reflection.php line 596 */
 Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::invoke);
   Array v_args;
@@ -300,7 +300,7 @@ Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */)
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 562 */
+/* SRC: classes/reflection.php line 616 */
 Variant c_ReflectionFunction::t_invokeargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::invokeArgs);
   Variant v_closure;
@@ -333,7 +333,7 @@ Variant c_ReflectionFunction::t_invokeargs(CVarRef v_args) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 571 */
+/* SRC: classes/reflection.php line 625 */
 Variant c_ReflectionFunction::t_getattribute(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::getAttribute);
   Variant v_attrs;
@@ -348,14 +348,14 @@ Variant c_ReflectionFunction::t_getattribute(CVarRef v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 576 */
+/* SRC: classes/reflection.php line 630 */
 Variant c_ReflectionFunction::t_getattributes() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::getAttributes);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss25a233ea, "attributes"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 580 */
+/* SRC: classes/reflection.php line 634 */
 Variant c_ReflectionFunction::t_getattributerecursive(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::getAttributeRecursive);
   Variant v_attrs;
@@ -370,14 +370,14 @@ Variant c_ReflectionFunction::t_getattributerecursive(CVarRef v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 585 */
+/* SRC: classes/reflection.php line 639 */
 Variant c_ReflectionFunction::t_getattributesrecursive() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::getAttributesRecursive);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss25a233ea, "attributes"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 277 */
+/* SRC: classes/reflection.php line 331 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionFunctionAbstract)
 extern const InstanceOfInfo cw_ReflectionFunctionAbstract$$instanceof_table[] = {
   {0x44B6FD5D,1,"ReflectionFunctionAbstract",&cw_ReflectionFunctionAbstract},
@@ -577,14 +577,14 @@ const ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   &c_ReflectionFunctionAbstract::os_prop_table,0,0,0,0x0,
   &c_ReflectionFunctionAbstract::s_cls
 };
-/* SRC: classes/reflection.php line 290 */
+/* SRC: classes/reflection.php line 344 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getName);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss7c08daeb, "name"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 305 */
+/* SRC: classes/reflection.php line 359 */
 bool c_ReflectionFunctionAbstract::t_isinternal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::isInternal);
   ObjectData *obj_tmp UNUSED;
@@ -593,14 +593,14 @@ bool c_ReflectionFunctionAbstract::t_isinternal() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 309 */
+/* SRC: classes/reflection.php line 363 */
 Variant c_ReflectionFunctionAbstract::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getClosure);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss732d532e, "closure"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 324 */
+/* SRC: classes/reflection.php line 378 */
 bool c_ReflectionFunctionAbstract::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::isUserDefined);
   ObjectData *obj_tmp UNUSED;
@@ -609,42 +609,42 @@ bool c_ReflectionFunctionAbstract::t_isuserdefined() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 338 */
+/* SRC: classes/reflection.php line 392 */
 Variant c_ReflectionFunctionAbstract::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getFileName);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss153f63d0, "file"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 352 */
+/* SRC: classes/reflection.php line 406 */
 Variant c_ReflectionFunctionAbstract::t_getstartline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getStartLine);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss1172f426, "line1"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 367 */
+/* SRC: classes/reflection.php line 421 */
 Variant c_ReflectionFunctionAbstract::t_getendline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getEndLine);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss06bbdb9c, "line2"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 381 */
+/* SRC: classes/reflection.php line 435 */
 Variant c_ReflectionFunctionAbstract::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getDocComment);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss33dbef8a, "doc"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 396 */
+/* SRC: classes/reflection.php line 450 */
 Variant c_ReflectionFunctionAbstract::t_getstaticvariables() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getStaticVariables);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss4dbce0f8, "static_variables"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 411 */
+/* SRC: classes/reflection.php line 465 */
 bool c_ReflectionFunctionAbstract::t_returnsreference() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::returnsReference);
   ObjectData *obj_tmp UNUSED;
@@ -653,7 +653,7 @@ bool c_ReflectionFunctionAbstract::t_returnsreference() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 426 */
+/* SRC: classes/reflection.php line 480 */
 Array c_ReflectionFunctionAbstract::t_getparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getParameters);
   Array v_ret;
@@ -685,7 +685,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 448 */
+/* SRC: classes/reflection.php line 502 */
 int64 c_ReflectionFunctionAbstract::t_getnumberofparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfParameters);
   ObjectData *obj_tmp UNUSED;
@@ -695,7 +695,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofparameters() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 464 */
+/* SRC: classes/reflection.php line 518 */
 int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfRequiredParameters);
   int64 v_count = 0;
@@ -755,12 +755,18 @@ extern const CallInfo ci_ReflectionParameter$$isarray = { (void*)&c_ReflectionPa
 extern const CallInfo ci_ReflectionParameter$$getname = { (void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_ReflectionParameter$$getdefaultvalue = { (void*)&c_ReflectionParameter::i_getdefaultvalue, (void*)&c_ReflectionParameter::ifa_getdefaultvalue, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_ReflectionParameter$$getdefaultvaluetext = { (void*)&c_ReflectionParameter::i_getdefaultvaluetext, (void*)&c_ReflectionParameter::ifa_getdefaultvaluetext, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getdeclaringfunction = { (void*)&c_ReflectionParameter::i_getdeclaringfunction, (void*)&c_ReflectionParameter::ifa_getdeclaringfunction, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_ReflectionParameter$$allowsnull = { (void*)&c_ReflectionParameter::i_allowsnull, (void*)&c_ReflectionParameter::ifa_allowsnull, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getattributerecursive = { (void*)&c_ReflectionParameter::i_getattributerecursive, (void*)&c_ReflectionParameter::ifa_getattributerecursive, 1, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getattributes = { (void*)&c_ReflectionParameter::i_getattributes, (void*)&c_ReflectionParameter::ifa_getattributes, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_ReflectionParameter$$__tostring = { (void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_ReflectionParameter$$getclass = { (void*)&c_ReflectionParameter::i_getclass, (void*)&c_ReflectionParameter::ifa_getclass, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_ReflectionParameter$$export = { (void*)&c_ReflectionParameter::i_export, (void*)&c_ReflectionParameter::ifa_export, 3, 12, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$collectattributes = { (void*)&c_ReflectionParameter::i_collectattributes, (void*)&c_ReflectionParameter::ifa_collectattributes, 4, 140, 0x0000000000000001LL};
 extern const CallInfo ci_ReflectionParameter$$ispassedbyreference = { (void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getattribute = { (void*)&c_ReflectionParameter::i_getattribute, (void*)&c_ReflectionParameter::ifa_getattribute, 1, 4, 0x0000000000000000LL};
 extern const CallInfo ci_ReflectionParameter$$getdeclaringclass = { (void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL};
+extern const CallInfo ci_ReflectionParameter$$getattributesrecursive = { (void*)&c_ReflectionParameter::i_getattributesrecursive, (void*)&c_ReflectionParameter::ifa_getattributesrecursive, 0, 4, 0x0000000000000000LL};
 extern const CallInfo ci_ReflectionParameter$$isdefaultvalueavailable = { (void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 4, 0x0000000000000000LL};
 Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa___construct);
@@ -779,6 +785,9 @@ Variant c_ReflectionParameter::i_ispassedbyreference(MethodCallPackage &mcp, CAr
 }
 Variant c_ReflectionParameter::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getdeclaringclass);
+}
+Variant c_ReflectionParameter::i_getdeclaringfunction(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getdeclaringfunction);
 }
 Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getclass);
@@ -806,6 +815,21 @@ Variant c_ReflectionParameter::i_getdefaultvaluetext(MethodCallPackage &mcp, CAr
 }
 Variant c_ReflectionParameter::i_getposition(MethodCallPackage &mcp, CArrRef params) {
   return invoke_meth_few_handler(mcp, params, &ifa_getposition);
+}
+Variant c_ReflectionParameter::i_getattribute(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getattribute);
+}
+Variant c_ReflectionParameter::i_getattributes(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getattributes);
+}
+Variant c_ReflectionParameter::i_getattributerecursive(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getattributerecursive);
+}
+Variant c_ReflectionParameter::i_getattributesrecursive(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_getattributesrecursive);
+}
+Variant c_ReflectionParameter::i_collectattributes(MethodCallPackage &mcp, CArrRef params) {
+  return invoke_meth_few_handler(mcp, params, &ifa_collectattributes);
 }
 Variant NEVER_INLINE c_ReflectionParameter::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -856,6 +880,14 @@ Variant NEVER_INLINE c_ReflectionParameter::ifa_getdeclaringclass(MethodCallPack
   c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
+}
+Variant NEVER_INLINE c_ReflectionParameter::ifa_getdeclaringfunction(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getdeclaringfunction, coo_ReflectionParameter);
+  }
+  c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getDeclaringFunction", 0, 1);
+  return (self->t_getdeclaringfunction());
 }
 Variant NEVER_INLINE c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(mcp.obj == 0)) {
@@ -929,29 +961,81 @@ Variant NEVER_INLINE c_ReflectionParameter::ifa_getposition(MethodCallPackage &m
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
   return (self->t_getposition());
 }
+Variant NEVER_INLINE c_ReflectionParameter::ifa_getattribute(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getattribute, coo_ReflectionParameter);
+  }
+  c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionParameter::getAttribute", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_getattribute(arg0));
+}
+Variant NEVER_INLINE c_ReflectionParameter::ifa_getattributes(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getattributes, coo_ReflectionParameter);
+  }
+  c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getAttributes", 0, 1);
+  return (self->t_getattributes());
+}
+Variant NEVER_INLINE c_ReflectionParameter::ifa_getattributerecursive(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getattributerecursive, coo_ReflectionParameter);
+  }
+  c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
+  if (UNLIKELY(count != 1)) return throw_wrong_arguments("ReflectionParameter::getAttributeRecursive", count, 1, 1, 1);
+  CVarRef arg0(a0);
+  return (self->t_getattributerecursive(arg0));
+}
+Variant NEVER_INLINE c_ReflectionParameter::ifa_getattributesrecursive(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(mcp.obj == 0)) {
+    return ObjectData::ifa_dummy(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS, ifa_getattributesrecursive, coo_ReflectionParameter);
+  }
+  c_ReflectionParameter *self ATTRIBUTE_UNUSED (static_cast<c_ReflectionParameter*>(mcp.obj));
+  if (UNLIKELY(count > 0)) return throw_toomany_arguments("ReflectionParameter::getAttributesRecursive", 0, 1);
+  return (self->t_getattributesrecursive());
+}
+Variant NEVER_INLINE c_ReflectionParameter::ifa_collectattributes(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (UNLIKELY(count != 4)) return throw_wrong_arguments("ReflectionParameter::collectAttributes", count, 4, 4, 1);
+  VRefParam arg0(vref(a0));
+  CVarRef arg1(a1);
+  CVarRef arg2(a2);
+  CVarRef arg3(a3);
+  return (c_ReflectionParameter::t_collectattributes(arg0, arg1, arg2, arg3), null);
+}
 extern const MethodCallInfoTable cw_ReflectionParameter$$call_info_table[] = {
-  { 0x692A44A0, 1, 15, "getTypehintText", &ci_ReflectionParameter$$gettypehinttext },
-  { 0x382A3D23, 1, 23, "isDefaultValueAvailable", &ci_ReflectionParameter$$isdefaultvalueavailable },
-  { 0x620887E8, 1, 10, "allowsNull", &ci_ReflectionParameter$$allowsnull },
-  { 0x4F686AEA, 0, 17, "getDeclaringClass", &ci_ReflectionParameter$$getdeclaringclass },
-  { 0x7EE2EAAA, 1, 7, "isArray", &ci_ReflectionParameter$$isarray },
-  { 0x065EFD4C, 1, 8, "getClass", &ci_ReflectionParameter$$getclass },
-  { 0x3A40C6ED, 0, 11, "__construct", &ci_ReflectionParameter$$__construct },
+  { 0x065EFD4C, 0, 8, "getClass", &ci_ReflectionParameter$$getclass },
+  { 0x7C88178C, 1, 17, "collectAttributes", &ci_ReflectionParameter$$collectattributes },
   { 0x7BDF404D, 0, 10, "__toString", &ci_ReflectionParameter$$__tostring },
   { 0x687FA80D, 1, 11, "getPosition", &ci_ReflectionParameter$$getposition },
   { 0x5F2AD014, 1, 6, "export", &ci_ReflectionParameter$$export },
-  { 0x57554A7A, 1, 10, "isOptional", &ci_ReflectionParameter$$isoptional },
-  { 0x06C1353B, 1, 7, "getName", &ci_ReflectionParameter$$getname },
   { 0x4CEF339C, 1, 19, "isPassedByReference", &ci_ReflectionParameter$$ispassedbyreference },
   { 0x6150849F, 0, 15, "getDefaultValue", &ci_ReflectionParameter$$getdefaultvalue },
   { 0x61B50A9F, 1, 19, "getDefaultValueText", &ci_ReflectionParameter$$getdefaultvaluetext },
+  { 0x692A44A0, 1, 15, "getTypehintText", &ci_ReflectionParameter$$gettypehinttext },
+  { 0x382A3D23, 0, 23, "isDefaultValueAvailable", &ci_ReflectionParameter$$isdefaultvalueavailable },
+  { 0x037A2C63, 1, 21, "getAttributeRecursive", &ci_ReflectionParameter$$getattributerecursive },
+  { 0x11E52765, 1, 22, "getAttributesRecursive", &ci_ReflectionParameter$$getattributesrecursive },
+  { 0x620887E8, 1, 10, "allowsNull", &ci_ReflectionParameter$$allowsnull },
+  { 0x4F686AEA, 0, 17, "getDeclaringClass", &ci_ReflectionParameter$$getdeclaringclass },
+  { 0x7EE2EAAA, 1, 7, "isArray", &ci_ReflectionParameter$$isarray },
+  { 0x53F1AE6B, 1, 12, "getAttribute", &ci_ReflectionParameter$$getattribute },
+  { 0x3A40C6ED, 1, 11, "__construct", &ci_ReflectionParameter$$__construct },
+  { 0x372E98F8, 1, 13, "getAttributes", &ci_ReflectionParameter$$getattributes },
+  { 0x026AD5BA, 0, 20, "getDeclaringFunction", &ci_ReflectionParameter$$getdeclaringfunction },
+  { 0x57554A7A, 1, 10, "isOptional", &ci_ReflectionParameter$$isoptional },
+  { 0x06C1353B, 1, 7, "getName", &ci_ReflectionParameter$$getname },
 };
 extern const int cw_ReflectionParameter$$call_info_index[] = {
-  31,
-  0,-1,-1,1,-1,-1,-1,-1,
-  2,-1,3,-1,5,6,-1,-1,
-  -1,-1,-1,-1,9,-1,-1,-1,
-  -1,-1,10,11,12,-1,-1,13,
+  63,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,0,2,-1,-1,
+  -1,-1,-1,-1,4,-1,-1,-1,
+  -1,-1,-1,-1,5,-1,-1,6,
+  8,-1,-1,9,-1,11,-1,-1,
+  12,-1,13,15,-1,16,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,
+  17,-1,18,20,-1,-1,-1,-1,
 
 };
 c_ReflectionParameter *c_ReflectionParameter::create(CVarRef v_func, CVarRef v_param) {
@@ -1058,7 +1142,28 @@ Variant c_ReflectionParameter::t_getdeclaringclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 131 */
+/* SRC: classes/reflection.php line 121 */
+p_ReflectionFunctionAbstract c_ReflectionParameter::t_getdeclaringfunction() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getDeclaringFunction);
+  ObjectData *obj_tmp UNUSED;
+  if (empty(m_info, NAMSTR(s_sys_ss59589f70, "class"), true)) {
+    {
+      {
+        p_ReflectionFunction tmp0 = coo_ReflectionFunction();
+        const Variant &tmp1((m_info.rvalAt(NAMSTR(s_sys_ss73f7dba7, "function"), AccessFlags::Error_Key)));
+        return p_ReflectionFunctionAbstract(((c_ReflectionFunction*)tmp0.get()->create(tmp1), tmp0));
+      }
+    }
+  }
+  {
+    p_ReflectionMethod tmp0 = coo_ReflectionMethod();
+    const Variant &tmp1((m_info.rvalAt(NAMSTR(s_sys_ss59589f70, "class"), AccessFlags::Error_Key)));
+    const Variant &tmp2((m_info.rvalAt(NAMSTR(s_sys_ss73f7dba7, "function"), AccessFlags::Error_Key)));
+    return p_ReflectionFunctionAbstract(((c_ReflectionMethod*)tmp0.get()->create(tmp1, tmp2), tmp0));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/reflection.php line 138 */
 Variant c_ReflectionParameter::t_getclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getClass);
   String v_ltype;
@@ -1097,7 +1202,7 @@ Variant c_ReflectionParameter::t_getclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 157 */
+/* SRC: classes/reflection.php line 164 */
 Variant c_ReflectionParameter::t_gettypehinttext() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getTypehintText);
   ObjectData *obj_tmp UNUSED;
@@ -1115,7 +1220,7 @@ Variant c_ReflectionParameter::t_gettypehinttext() {
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 173 */
+/* SRC: classes/reflection.php line 180 */
 bool c_ReflectionParameter::t_isarray() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isArray);
   ObjectData *obj_tmp UNUSED;
@@ -1125,7 +1230,7 @@ bool c_ReflectionParameter::t_isarray() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 187 */
+/* SRC: classes/reflection.php line 194 */
 bool c_ReflectionParameter::t_allowsnull() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::allowsNull);
   ObjectData *obj_tmp UNUSED;
@@ -1134,21 +1239,21 @@ bool c_ReflectionParameter::t_allowsnull() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 200 */
+/* SRC: classes/reflection.php line 207 */
 bool c_ReflectionParameter::t_isoptional() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isOptional);
   ObjectData *obj_tmp UNUSED;
   return x_array_key_exists(NAMVAR(s_sys_svs4ab3dcf3, "default"), m_info);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 215 */
+/* SRC: classes/reflection.php line 222 */
 bool c_ReflectionParameter::t_isdefaultvalueavailable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isDefaultValueAvailable);
   ObjectData *obj_tmp UNUSED;
   return x_array_key_exists(NAMVAR(s_sys_svs4ab3dcf3, "default"), m_info);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 230 */
+/* SRC: classes/reflection.php line 237 */
 Variant c_ReflectionParameter::t_getdefaultvalue() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getDefaultValue);
   Variant v_defaultValue;
@@ -1189,7 +1294,7 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
   return v_defaultValue;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 245 */
+/* SRC: classes/reflection.php line 252 */
 Variant c_ReflectionParameter::t_getdefaultvaluetext() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getDefaultValueText);
   ObjectData *obj_tmp UNUSED;
@@ -1207,14 +1312,159 @@ Variant c_ReflectionParameter::t_getdefaultvaluetext() {
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 262 */
+/* SRC: classes/reflection.php line 269 */
 Variant c_ReflectionParameter::t_getposition() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getPosition);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss58c13540, "index"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 600 */
+/* SRC: classes/reflection.php line 273 */
+Variant c_ReflectionParameter::t_getattribute(CVarRef v_name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getAttribute);
+  Variant v_attrs;
+
+  ObjectData *obj_tmp UNUSED;
+  {
+    const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss25a233ea, "attributes"), AccessFlags::Error_Key)));
+    v_attrs.assignVal(tmp0);
+  }
+  {
+    return (isset(v_attrs, v_name) ? ((Variant)(v_attrs.rvalAt(v_name, AccessFlags::Error))) : ((Variant)(null)));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/reflection.php line 278 */
+Variant c_ReflectionParameter::t_getattributes() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getAttributes);
+  ObjectData *obj_tmp UNUSED;
+  return m_info.rvalAt(NAMSTR(s_sys_ss25a233ea, "attributes"), AccessFlags::Error_Key);
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/reflection.php line 282 */
+Variant c_ReflectionParameter::t_getattributerecursive(CVarRef v_name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getAttributeRecursive);
+  Variant v_attrs;
+
+  {
+    const Variant &tmp0((t_getattributesrecursive()));
+    v_attrs.assignVal(tmp0);
+  }
+  {
+    return (isset(v_attrs, v_name) ? ((Variant)(v_attrs.rvalAt(v_name, AccessFlags::Error))) : ((Variant)(null)));
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/reflection.php line 287 */
+Variant c_ReflectionParameter::t_getattributesrecursive() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getAttributesRecursive);
+  Variant v_attrs;
+  Variant v_class;
+  Variant v_function_name;
+  Variant v_index;
+
+  ObjectData *obj_tmp UNUSED;
+  {
+    bool tmp0;
+    {
+      tmp0 = (!(isset(m_info, NAMSTR(s_sys_ss59589f70, "class"), true)));
+    }
+    if (tmp0) {
+      {
+        return t_getattributes();
+      }
+    }
+  }
+  v_attrs = s_sys_sa00000000;
+  {
+    const Variant &tmp0((t_getdeclaringclass()));
+    v_class.assignVal(tmp0);
+  }
+  {
+    const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss73f7dba7, "function"), AccessFlags::Error_Key)));
+    v_function_name.assignVal(tmp0);
+  }
+  {
+    const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss58c13540, "index"), AccessFlags::Error_Key)));
+    v_index.assignVal(tmp0);
+  }
+  c_ReflectionParameter::t_collectattributes(strongBind(v_attrs), v_class, v_function_name, v_index);
+  return v_attrs;
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/reflection.php line 300 */
+void c_ReflectionParameter::t_collectattributes(VRefParam rv_attrs, CVarRef v_class, CVarRef v_function_name, CVarRef v_index) {
+  STATIC_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::collectAttributes);
+  Variant &v_attrs ATTRIBUTE_UNUSED = rv_attrs;
+  Variant v_method;
+  Variant v_params;
+  Variant v_parent;
+
+  {
+    bool tmp0;
+    {
+      MethodCallPackage mcp1;
+      CVarRef obj1 = v_class;
+      mcp1.methodCall((obj1), NAMSTR(s_sys_ss47a1c2ec, "hasMethod"), 0x1DB08814);
+      const CallInfo *cit1 ATTRIBUTE_UNUSED = mcp1.ci;
+      tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth1Args())(mcp1, 1, v_function_name)));
+    }
+    if (tmp0) {
+      {
+        {
+          MethodCallPackage mcp0;
+          CVarRef obj0 = v_class;
+          mcp0.methodCall((obj0), NAMSTR(s_sys_ss4276886e, "getMethod"), 0x3775939C);
+          const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+          Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_function_name)));
+          v_method.assignVal(tmp1);
+        }
+        {
+          MethodCallPackage mcp0;
+          CVarRef obj0 = v_method;
+          mcp0.methodCall((obj0), NAMSTR(s_sys_ss57e8626f, "getParameters"), 0x253E8AAC);
+          const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+          Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
+          v_params.assignVal(tmp1);
+        }
+        {
+          bool tmp0;
+          {
+            int64 tmp1((x_count(v_params)));
+            tmp0 = (not_less(tmp1, v_index));
+          }
+          if (tmp0) {
+            {
+              {
+                MethodCallPackage mcp0;
+                CVarRef obj0 = v_params.rvalAt(v_index, AccessFlags::Error);
+                mcp0.methodCall((obj0), NAMSTR(s_sys_ss1db8677f, "getAttributes"), 0x372E98F8);
+                const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+                Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
+                v_attrs += tmp1;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  {
+    MethodCallPackage mcp0;
+    CVarRef obj0 = v_class;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ss50bb6bb0, "getParentClass"), 0x07CD1498);
+    const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
+    Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
+    v_parent.assignVal(tmp1);
+  }
+  if (toBoolean(v_parent)) {
+    {
+      c_ReflectionParameter::t_collectattributes(strongBind(v_attrs), v_parent, v_function_name, v_index);
+    }
+  }
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/reflection.php line 654 */
 const int64 q_ReflectionClass$$IS_IMPLICIT_ABSTRACT = 16LL;
 const int64 q_ReflectionClass$$IS_EXPLICIT_ABSTRACT = 32LL;
 const int64 q_ReflectionClass$$IS_FINAL = 64LL;
@@ -1977,7 +2227,7 @@ const ObjectStaticCallbacks cw_ReflectionClass = {
   &c_ReflectionClass::os_prop_table,&ci_ReflectionClass$$__construct,0,0,0x0,
   &c_ReflectionClass::s_cls
 };
-/* SRC: classes/reflection.php line 609 */
+/* SRC: classes/reflection.php line 663 */
 void c_ReflectionClass::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::__construct);
   ObjectData *obj_tmp UNUSED;
@@ -2003,7 +2253,7 @@ void c_ReflectionClass::t___construct(Variant v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 620 */
+/* SRC: classes/reflection.php line 674 */
 Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::fetch);
   ObjectData *obj_tmp UNUSED;
@@ -2013,12 +2263,16 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
         const Variant &tmp0((c_ReflectionClass::t_fetch_recur(m_name)));
         m_info.assignVal(tmp0);
       }
+      {
+        const Variant &tmp0((m_info.rvalAt(NAMSTR(s_sys_ss2bc38d53, "private_properties"), AccessFlags::Error_Key)));
+        m_info.setOpEqual(277, NAMSTR(s_sys_ss6786d7be, "properties"), (tmp0), true);
+      }
     }
   }
   return m_info.rvalAt(v_what, AccessFlags::Error);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 627 */
+/* SRC: classes/reflection.php line 682 */
 Variant c_ReflectionClass::t_fetch_recur(CVarRef v_name) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::fetch_recur);
   Array v_info;
@@ -2130,7 +2384,7 @@ Variant c_ReflectionClass::t_fetch_recur(CVarRef v_name) {
   return v_info;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 662 */
+/* SRC: classes/reflection.php line 717 */
 bool c_ReflectionClass::t_check(CVarRef v_what) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::check);
   ObjectData *obj_tmp UNUSED;
@@ -2147,7 +2401,7 @@ bool c_ReflectionClass::t_check(CVarRef v_what) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 669 */
+/* SRC: classes/reflection.php line 724 */
 bool c_ReflectionClass::t_test(CVarRef v_what, CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::test);
   Variant v_v;
@@ -2165,13 +2419,13 @@ bool c_ReflectionClass::t_test(CVarRef v_what, CVarRef v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 674 */
+/* SRC: classes/reflection.php line 729 */
 String c_ReflectionClass::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 694 */
+/* SRC: classes/reflection.php line 749 */
 Variant c_ReflectionClass::t_export(CVarRef v_name, CVarRef v_ret //  = false_varNR
 ) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::export);
@@ -2193,38 +2447,38 @@ Variant c_ReflectionClass::t_export(CVarRef v_name, CVarRef v_ret //  = false_va
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 712 */
+/* SRC: classes/reflection.php line 767 */
 Variant c_ReflectionClass::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getName);
   ObjectData *obj_tmp UNUSED;
   return m_name;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 726 */
+/* SRC: classes/reflection.php line 781 */
 bool c_ReflectionClass::t_isinternal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInternal);
   return t_check(NAMVAR(s_sys_svs490a2a5c, "internal"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 739 */
+/* SRC: classes/reflection.php line 794 */
 bool c_ReflectionClass::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isUserDefined);
   return !(t_check(NAMVAR(s_sys_svs490a2a5c, "internal")));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 753 */
+/* SRC: classes/reflection.php line 808 */
 bool c_ReflectionClass::t_isinstantiable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInstantiable);
   return !(t_check(NAMVAR(s_sys_svs24ca9df6, "abstract")));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 768 */
+/* SRC: classes/reflection.php line 823 */
 bool c_ReflectionClass::t_hasconstant(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasConstant);
   return t_test(NAMVAR(s_sys_svs1289e20d, "constants"), v_name);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 782 */
+/* SRC: classes/reflection.php line 837 */
 bool c_ReflectionClass::t_hasmethod(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasMethod);
   {
@@ -2233,37 +2487,37 @@ bool c_ReflectionClass::t_hasmethod(CVarRef v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 797 */
+/* SRC: classes/reflection.php line 852 */
 bool c_ReflectionClass::t_hasproperty(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasProperty);
   return t_test(NAMVAR(s_sys_svs6786d7be, "properties"), v_name);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 812 */
+/* SRC: classes/reflection.php line 867 */
 Variant c_ReflectionClass::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getFileName);
   return t_fetch(NAMVAR(s_sys_svs153f63d0, "file"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 826 */
+/* SRC: classes/reflection.php line 881 */
 Variant c_ReflectionClass::t_getstartline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStartLine);
   return t_fetch(NAMVAR(s_sys_svs1172f426, "line1"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 839 */
+/* SRC: classes/reflection.php line 894 */
 Variant c_ReflectionClass::t_getendline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getEndLine);
   return t_fetch(NAMVAR(s_sys_svs06bbdb9c, "line2"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 853 */
+/* SRC: classes/reflection.php line 908 */
 Variant c_ReflectionClass::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getDocComment);
   return t_fetch(NAMVAR(s_sys_svs33dbef8a, "doc"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 867 */
+/* SRC: classes/reflection.php line 922 */
 Variant c_ReflectionClass::t_getconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstructor);
   Variant v_name;
@@ -2293,7 +2547,7 @@ Variant c_ReflectionClass::t_getconstructor() {
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 888 */
+/* SRC: classes/reflection.php line 943 */
 p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getMethod);
   Variant v_method;
@@ -2362,7 +2616,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 924 */
+/* SRC: classes/reflection.php line 979 */
 Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi5830e7c6, 65535LL)
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getMethods);
@@ -2399,7 +2653,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = NAMVAR(s_sys_svi583
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 953 */
+/* SRC: classes/reflection.php line 1008 */
 p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getProperty);
   Variant v_properties;
@@ -2447,7 +2701,7 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 976 */
+/* SRC: classes/reflection.php line 1031 */
 Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi5830e7c6, 65535LL)
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getProperties);
@@ -2480,13 +2734,13 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = NAMVAR(s_sys_svi
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1000 */
+/* SRC: classes/reflection.php line 1055 */
 Variant c_ReflectionClass::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstants);
   return t_fetch(NAMVAR(s_sys_svs1289e20d, "constants"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1014 */
+/* SRC: classes/reflection.php line 1069 */
 Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstant);
   Variant v_constants;
@@ -2518,7 +2772,7 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
   return v_constants.rvalAt(v_name, AccessFlags::Error);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1034 */
+/* SRC: classes/reflection.php line 1089 */
 Array c_ReflectionClass::t_getinterfaces() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getInterfaces);
   Array v_ret;
@@ -2554,7 +2808,7 @@ Array c_ReflectionClass::t_getinterfaces() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1045 */
+/* SRC: classes/reflection.php line 1100 */
 Array c_ReflectionClass::t_gettraits() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getTraits);
   Array v_ret;
@@ -2590,7 +2844,7 @@ Array c_ReflectionClass::t_gettraits() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1066 */
+/* SRC: classes/reflection.php line 1121 */
 Array c_ReflectionClass::t_getinterfacenames() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getInterfaceNames);
   Array v_ret;
@@ -2626,7 +2880,7 @@ Array c_ReflectionClass::t_getinterfacenames() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1077 */
+/* SRC: classes/reflection.php line 1132 */
 Array c_ReflectionClass::t_gettraitnames() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getTraitNames);
   Array v_ret;
@@ -2662,7 +2916,7 @@ Array c_ReflectionClass::t_gettraitnames() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1088 */
+/* SRC: classes/reflection.php line 1143 */
 Array c_ReflectionClass::t_gettraitaliases() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getTraitAliases);
   Array v_ret;
@@ -2685,44 +2939,44 @@ Array c_ReflectionClass::t_gettraitaliases() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1106 */
+/* SRC: classes/reflection.php line 1161 */
 bool c_ReflectionClass::t_isinterface() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInterface);
   return t_check(NAMVAR(s_sys_svs72a97b31, "interface"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1118 */
+/* SRC: classes/reflection.php line 1173 */
 bool c_ReflectionClass::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isAbstract);
   return t_check(NAMVAR(s_sys_svs24ca9df6, "abstract"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1130 */
+/* SRC: classes/reflection.php line 1185 */
 bool c_ReflectionClass::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isFinal);
   return t_check(NAMVAR(s_sys_svs5a1af271, "final"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1134 */
+/* SRC: classes/reflection.php line 1189 */
 bool c_ReflectionClass::t_istrait() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isTrait);
   return t_check(NAMVAR(s_sys_svs46e3b919, "trait"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1147 */
+/* SRC: classes/reflection.php line 1202 */
 Variant c_ReflectionClass::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getModifiers);
   return t_fetch(NAMVAR(s_sys_svs3e533a0b, "modifiers"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1161 */
+/* SRC: classes/reflection.php line 1216 */
 bool c_ReflectionClass::t_isinstance(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInstance);
   ObjectData *obj_tmp UNUSED;
   return x_hphp_instanceof(toObject(v_obj), toString(m_name));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1174 */
+/* SRC: classes/reflection.php line 1229 */
 Object c_ReflectionClass::t_newinstance(int num_args, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::newInstance);
   Array v_args;
@@ -2735,7 +2989,7 @@ Object c_ReflectionClass::t_newinstance(int num_args, Array args /* = Array() */
   return x_hphp_create_object(toString(m_name), v_args);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1193 */
+/* SRC: classes/reflection.php line 1248 */
 Object c_ReflectionClass::t_newinstanceargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::newInstanceArgs);
   ObjectData *obj_tmp UNUSED;
@@ -2746,7 +3000,7 @@ Object c_ReflectionClass::t_newinstanceargs(CVarRef v_args) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1207 */
+/* SRC: classes/reflection.php line 1262 */
 Variant c_ReflectionClass::t_getparentclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getParentClass);
   Variant v_parent;
@@ -2766,7 +3020,7 @@ Variant c_ReflectionClass::t_getparentclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1226 */
+/* SRC: classes/reflection.php line 1281 */
 Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isSubclassOf);
   Primitive v_name = 0;
@@ -2834,7 +3088,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1255 */
+/* SRC: classes/reflection.php line 1310 */
 Array c_ReflectionClass::t_getstaticproperties() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStaticProperties);
   Array v_ret;
@@ -2872,7 +3126,7 @@ Array c_ReflectionClass::t_getstaticproperties() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1276 */
+/* SRC: classes/reflection.php line 1331 */
 Variant c_ReflectionClass::t_getstaticpropertyvalue(CVarRef v_name, CVarRef v_default //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStaticPropertyValue);
@@ -2896,14 +3150,14 @@ Variant c_ReflectionClass::t_getstaticpropertyvalue(CVarRef v_name, CVarRef v_de
   return v_default;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1297 */
+/* SRC: classes/reflection.php line 1352 */
 void c_ReflectionClass::t_setstaticpropertyvalue(CVarRef v_name, CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::setStaticPropertyValue);
   ObjectData *obj_tmp UNUSED;
   x_hphp_set_static_property(toString(m_name), toString(v_name), v_value);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1311 */
+/* SRC: classes/reflection.php line 1366 */
 Array c_ReflectionClass::t_getdefaultproperties() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getDefaultProperties);
   Array v_ret;
@@ -2941,13 +3195,13 @@ Array c_ReflectionClass::t_getdefaultproperties() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1330 */
+/* SRC: classes/reflection.php line 1385 */
 Variant c_ReflectionClass::t_isiterateable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isIterateable);
   return t_issubclassof(NAMSTR(s_sys_ss22c5645b, "ArrayAccess"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1345 */
+/* SRC: classes/reflection.php line 1400 */
 bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::implementsInterface);
   Primitive v_name = 0;
@@ -2995,13 +3249,13 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   return false;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1370 */
+/* SRC: classes/reflection.php line 1425 */
 Variant c_ReflectionClass::t_getextension() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtension);
   return t_fetch(NAMVAR(s_sys_svs77afc1f7, "extension"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1384 */
+/* SRC: classes/reflection.php line 1439 */
 Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
@@ -3013,7 +3267,7 @@ Variant c_ReflectionClass::t_getextensionname() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1388 */
+/* SRC: classes/reflection.php line 1443 */
 Variant c_ReflectionClass::t_getattribute(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getAttribute);
   Variant v_attrs;
@@ -3027,13 +3281,13 @@ Variant c_ReflectionClass::t_getattribute(CVarRef v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1393 */
+/* SRC: classes/reflection.php line 1448 */
 Variant c_ReflectionClass::t_getattributes() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getAttributes);
   return t_fetch(NAMVAR(s_sys_svs25a233ea, "attributes"));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1397 */
+/* SRC: classes/reflection.php line 1452 */
 Variant c_ReflectionClass::t_getattributerecursive(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getAttributeRecursive);
   Variant v_attrs;
@@ -3047,7 +3301,7 @@ Variant c_ReflectionClass::t_getattributerecursive(CVarRef v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1402 */
+/* SRC: classes/reflection.php line 1457 */
 Variant c_ReflectionClass::t_getattributesrecursive() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getAttributesRecursive);
   return t_fetch(NAMVAR(s_sys_svs10b3f4fb, "attributes_rec"));
@@ -3074,7 +3328,7 @@ const ObjectStaticCallbacks cw_ReflectionException = {
   &c_Exception::os_prop_table,&ci_Exception$$__construct,0,&cw_Exception,0x0,
   &c_ReflectionException::s_cls
 };
-/* SRC: classes/reflection.php line 2005 */
+/* SRC: classes/reflection.php line 2060 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionExtension)
 extern const InstanceOfInfo cw_ReflectionExtension$$instanceof_table[] = {
   {0x0DC23C44,1,"Reflector",(const ObjectStaticCallbacks*)2},
@@ -3255,7 +3509,7 @@ const ObjectStaticCallbacks cw_ReflectionExtension = {
   &c_ReflectionExtension::os_prop_table,&ci_ReflectionExtension$$__construct,0,0,0x0,
   &c_ReflectionExtension::s_cls
 };
-/* SRC: classes/reflection.php line 2009 */
+/* SRC: classes/reflection.php line 2064 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::__construct);
   ObjectData *obj_tmp UNUSED;
@@ -3265,13 +3519,13 @@ void c_ReflectionExtension::t___construct(Variant v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2013 */
+/* SRC: classes/reflection.php line 2068 */
 String c_ReflectionExtension::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2033 */
+/* SRC: classes/reflection.php line 2088 */
 Variant c_ReflectionExtension::t_export(CVarRef v_name, CVarRef v_ret //  = false_varNR
 ) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::export);
@@ -3293,49 +3547,49 @@ Variant c_ReflectionExtension::t_export(CVarRef v_name, CVarRef v_ret //  = fals
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2051 */
+/* SRC: classes/reflection.php line 2106 */
 Variant c_ReflectionExtension::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getName);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss7c08daeb, "name"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2064 */
+/* SRC: classes/reflection.php line 2119 */
 Variant c_ReflectionExtension::t_getversion() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getVersion);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss386c932c, "version"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2080 */
+/* SRC: classes/reflection.php line 2135 */
 Variant c_ReflectionExtension::t_getfunctions() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getFunctions);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss51e4e711, "functions"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2093 */
+/* SRC: classes/reflection.php line 2148 */
 Variant c_ReflectionExtension::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getConstants);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss1289e20d, "constants"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2107 */
+/* SRC: classes/reflection.php line 2162 */
 Variant c_ReflectionExtension::t_getinientries() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getINIEntries);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss1e9b5acd, "ini"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2122 */
+/* SRC: classes/reflection.php line 2177 */
 Variant c_ReflectionExtension::t_getclasses() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getClasses);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss026be696, "classes"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2137 */
+/* SRC: classes/reflection.php line 2192 */
 Array c_ReflectionExtension::t_getclassnames() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getClassNames);
   Array v_ret;
@@ -3364,14 +3618,14 @@ Array c_ReflectionExtension::t_getclassnames() {
   return v_ret;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 2153 */
+/* SRC: classes/reflection.php line 2208 */
 Variant c_ReflectionExtension::t_info() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::info);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss63d821d3, "info"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1417 */
+/* SRC: classes/reflection.php line 1472 */
 IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(ReflectionObject)
 extern const InstanceOfInfo cw_ReflectionObject$$instanceof_table[] = {
   {0x0DC23C44,1,"Reflector",(const ObjectStaticCallbacks*)2},
@@ -3414,7 +3668,7 @@ const ObjectStaticCallbacks cw_ReflectionObject = {
   &c_ReflectionClass::os_prop_table,&ci_ReflectionClass$$__construct,0,&cw_ReflectionClass,0x0,
   &c_ReflectionObject::s_cls
 };
-/* SRC: classes/reflection.php line 1434 */
+/* SRC: classes/reflection.php line 1489 */
 Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret //  = false_varNR
 ) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionObject, ReflectionObject::export);
@@ -3435,7 +3689,7 @@ Variant c_ReflectionObject::t_export(Variant v_obj, CVarRef v_ret //  = false_va
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1708 */
+/* SRC: classes/reflection.php line 1763 */
 const int64 q_ReflectionMethod$$IS_STATIC = 1LL;
 const int64 q_ReflectionMethod$$IS_PUBLIC = 256LL;
 const int64 q_ReflectionMethod$$IS_PROTECTED = 512LL;
@@ -3772,7 +4026,7 @@ const ObjectStaticCallbacks cw_ReflectionMethod = {
   &c_ReflectionMethod::os_prop_table,&ci_ReflectionMethod$$__construct,0,&cw_ReflectionFunctionAbstract,0x0,
   &c_ReflectionMethod::s_cls
 };
-/* SRC: classes/reflection.php line 1720 */
+/* SRC: classes/reflection.php line 1775 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::__construct);
@@ -3834,13 +4088,13 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1740 */
+/* SRC: classes/reflection.php line 1795 */
 String c_ReflectionMethod::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1762 */
+/* SRC: classes/reflection.php line 1817 */
 Variant c_ReflectionMethod::t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret //  = false_varNR
 ) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::export);
@@ -3884,7 +4138,7 @@ Variant c_ReflectionMethod::t_export(Variant v_cls, CVarRef v_name, CVarRef v_re
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1787 */
+/* SRC: classes/reflection.php line 1842 */
 Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invoke);
   Variant v_args;
@@ -3903,7 +4157,7 @@ Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1808 */
+/* SRC: classes/reflection.php line 1863 */
 Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invokeArgs);
   ObjectData *obj_tmp UNUSED;
@@ -3916,7 +4170,7 @@ Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1821 */
+/* SRC: classes/reflection.php line 1876 */
 bool c_ReflectionMethod::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isFinal);
   ObjectData *obj_tmp UNUSED;
@@ -3925,7 +4179,7 @@ bool c_ReflectionMethod::t_isfinal() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1834 */
+/* SRC: classes/reflection.php line 1889 */
 bool c_ReflectionMethod::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isAbstract);
   ObjectData *obj_tmp UNUSED;
@@ -3934,7 +4188,7 @@ bool c_ReflectionMethod::t_isabstract() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1846 */
+/* SRC: classes/reflection.php line 1901 */
 bool c_ReflectionMethod::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPublic);
   ObjectData *obj_tmp UNUSED;
@@ -3944,7 +4198,7 @@ bool c_ReflectionMethod::t_ispublic() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1859 */
+/* SRC: classes/reflection.php line 1914 */
 bool c_ReflectionMethod::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPrivate);
   ObjectData *obj_tmp UNUSED;
@@ -3954,7 +4208,7 @@ bool c_ReflectionMethod::t_isprivate() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1872 */
+/* SRC: classes/reflection.php line 1927 */
 bool c_ReflectionMethod::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isProtected);
   ObjectData *obj_tmp UNUSED;
@@ -3964,7 +4218,7 @@ bool c_ReflectionMethod::t_isprotected() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1884 */
+/* SRC: classes/reflection.php line 1939 */
 bool c_ReflectionMethod::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isStatic);
   ObjectData *obj_tmp UNUSED;
@@ -3973,7 +4227,7 @@ bool c_ReflectionMethod::t_isstatic() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1897 */
+/* SRC: classes/reflection.php line 1952 */
 bool c_ReflectionMethod::t_isconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isConstructor);
   ObjectData *obj_tmp UNUSED;
@@ -3982,7 +4236,7 @@ bool c_ReflectionMethod::t_isconstructor() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1910 */
+/* SRC: classes/reflection.php line 1965 */
 bool c_ReflectionMethod::t_isdestructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isDestructor);
   {
@@ -3991,21 +4245,21 @@ bool c_ReflectionMethod::t_isdestructor() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1932 */
+/* SRC: classes/reflection.php line 1987 */
 Variant c_ReflectionMethod::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getModifiers);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss3e533a0b, "modifiers"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1936 */
+/* SRC: classes/reflection.php line 1991 */
 Variant c_ReflectionMethod::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getClosure);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss732d532e, "closure"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1950 */
+/* SRC: classes/reflection.php line 2005 */
 Variant c_ReflectionMethod::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getDeclaringClass);
   ObjectData *obj_tmp UNUSED;
@@ -4021,7 +4275,7 @@ Variant c_ReflectionMethod::t_getdeclaringclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1957 */
+/* SRC: classes/reflection.php line 2012 */
 Variant c_ReflectionMethod::t_getattribute(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getAttribute);
   Variant v_attrs;
@@ -4036,14 +4290,14 @@ Variant c_ReflectionMethod::t_getattribute(CVarRef v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1962 */
+/* SRC: classes/reflection.php line 2017 */
 Variant c_ReflectionMethod::t_getattributes() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getAttributes);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss25a233ea, "attributes"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1966 */
+/* SRC: classes/reflection.php line 2021 */
 Variant c_ReflectionMethod::t_getattributerecursive(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getAttributeRecursive);
   Variant v_attrs;
@@ -4088,7 +4342,7 @@ Variant c_ReflectionMethod::t_getattributerecursive(CVarRef v_name) {
   return v_rm->t_getattributerecursive(v_name);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1982 */
+/* SRC: classes/reflection.php line 2037 */
 Variant c_ReflectionMethod::t_getattributesrecursive() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getAttributesRecursive);
   Variant v_attrs;
@@ -4124,7 +4378,7 @@ Variant c_ReflectionMethod::t_getattributesrecursive() {
   return v_attrs;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1455 */
+/* SRC: classes/reflection.php line 1510 */
 const int64 q_ReflectionProperty$$IS_STATIC = 1LL;
 const int64 q_ReflectionProperty$$IS_PUBLIC = 256LL;
 const int64 q_ReflectionProperty$$IS_PROTECTED = 512LL;
@@ -4368,7 +4622,7 @@ const ObjectStaticCallbacks cw_ReflectionProperty = {
   &c_ReflectionProperty::os_prop_table,&ci_ReflectionProperty$$__construct,0,0,0x0,
   &c_ReflectionProperty::s_cls
 };
-/* SRC: classes/reflection.php line 1465 */
+/* SRC: classes/reflection.php line 1520 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::__construct);
   Variant v_prop;
@@ -4423,13 +4677,13 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1481 */
+/* SRC: classes/reflection.php line 1536 */
 String c_ReflectionProperty::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::__toString);
   return NAMSTR(s_sys_ss00000000, "");
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1498 */
+/* SRC: classes/reflection.php line 1553 */
 Variant c_ReflectionProperty::t_export(Variant v_cls, CVarRef v_name, CVarRef v_ret //  = false_varNR
 ) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::export);
@@ -4473,14 +4727,14 @@ Variant c_ReflectionProperty::t_export(Variant v_cls, CVarRef v_name, CVarRef v_
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1521 */
+/* SRC: classes/reflection.php line 1576 */
 Variant c_ReflectionProperty::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getName);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss7c08daeb, "name"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1534 */
+/* SRC: classes/reflection.php line 1589 */
 bool c_ReflectionProperty::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPublic);
   ObjectData *obj_tmp UNUSED;
@@ -4490,7 +4744,7 @@ bool c_ReflectionProperty::t_ispublic() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1547 */
+/* SRC: classes/reflection.php line 1602 */
 bool c_ReflectionProperty::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPrivate);
   ObjectData *obj_tmp UNUSED;
@@ -4500,7 +4754,7 @@ bool c_ReflectionProperty::t_isprivate() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1560 */
+/* SRC: classes/reflection.php line 1615 */
 bool c_ReflectionProperty::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isProtected);
   ObjectData *obj_tmp UNUSED;
@@ -4510,7 +4764,7 @@ bool c_ReflectionProperty::t_isprotected() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1573 */
+/* SRC: classes/reflection.php line 1628 */
 bool c_ReflectionProperty::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isStatic);
   ObjectData *obj_tmp UNUSED;
@@ -4519,27 +4773,27 @@ bool c_ReflectionProperty::t_isstatic() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1587 */
+/* SRC: classes/reflection.php line 1642 */
 Variant c_ReflectionProperty::t_isdefault() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isDefault);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss4ab3dcf3, "default"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1601 */
+/* SRC: classes/reflection.php line 1656 */
 void c_ReflectionProperty::t_setaccessible(CVarRef v_accessible) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::setAccessible);
   throw_exception(p_ReflectionException(((c_ReflectionException*)coo_ReflectionException())->create(NAMSTR(s_sys_ss398c07ba, "ReflectionProperty::setAccessible is not supported"))));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1615 */
+/* SRC: classes/reflection.php line 1670 */
 Variant c_ReflectionProperty::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getModifiers);
   ObjectData *obj_tmp UNUSED;
   return m_info.rvalAt(NAMSTR(s_sys_ss3e533a0b, "modifiers"), AccessFlags::Error_Key);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1631 */
+/* SRC: classes/reflection.php line 1686 */
 Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getValue);
@@ -4566,7 +4820,7 @@ Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
   return null;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1656 */
+/* SRC: classes/reflection.php line 1711 */
 void c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::setValue);
   ObjectData *obj_tmp UNUSED;
@@ -4591,7 +4845,7 @@ void c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1676 */
+/* SRC: classes/reflection.php line 1731 */
 Variant c_ReflectionProperty::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDeclaringClass);
   ObjectData *obj_tmp UNUSED;
@@ -4607,7 +4861,7 @@ Variant c_ReflectionProperty::t_getdeclaringclass() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/reflection.php line 1693 */
+/* SRC: classes/reflection.php line 1748 */
 Variant c_ReflectionProperty::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDocComment);
   ObjectData *obj_tmp UNUSED;

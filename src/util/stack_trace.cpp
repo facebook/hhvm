@@ -235,7 +235,8 @@ void StackTraceNoHeap::create() {
 ///////////////////////////////////////////////////////////////////////////////
 // reporting functions
 
-const std::string &StackTrace::toString() const {
+const std::string &StackTrace::toString(int skip, int limit) const {
+  if (skip != 0 || limit != -1) m_bt.clear();
   if (m_bt.empty()) {
     size_t frame = 0;
     for (vector<void*>::const_iterator btpi = m_bt_pointers.begin();
@@ -244,6 +245,7 @@ const std::string &StackTrace::toString() const {
       if (framename.find("StackTrace::") != string::npos) {
         continue; // ignore frames in the StackTrace class
       }
+      if (skip-- > 0) continue;
       m_bt += "# ";
       m_bt += lexical_cast<string>(frame);
       if (frame < 10) m_bt += " ";
@@ -252,6 +254,7 @@ const std::string &StackTrace::toString() const {
       m_bt += framename;
       m_bt += "\n";
       ++frame;
+      if ((int)frame == limit) break;
     }
   }
   return m_bt;

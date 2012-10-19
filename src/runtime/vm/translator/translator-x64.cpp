@@ -135,6 +135,7 @@ __thread TranslatorX64* tx64;
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = REGSTATE_CLEAN;
 
+__thread UnlikelyHitMap* tl_unlikelyHits = nullptr;
 static StaticString s___call(LITSTR_INIT("__call"));
 static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 
@@ -9726,6 +9727,9 @@ TranslatorX64::TranslatorX64()
   m_unwindRegMap(128),
   m_curTrace(0),
   m_curNI(0),
+  m_curFile(NULL),
+  m_curLine(0),
+  m_curFunc(NULL),
   m_vecState(NULL)
 {
   TRACE(1, "TranslatorX64@%p startup\n", this);
@@ -10046,6 +10050,7 @@ TranslatorX64::requestInit() {
   requestResetHighLevelTranslator();
   Treadmill::startRequest(g_vmContext->m_currentThreadIdx);
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
+  initUnlikelyProfile();
 }
 
 void
@@ -10061,6 +10066,7 @@ TranslatorX64::requestExit() {
   TRACE(1, "done requestExit(%ld)\n", g_vmContext->m_currentThreadIdx);
   Stats::dump();
   Stats::clear();
+  dumpUnlikelyProfile();
 
   if (Trace::moduleEnabledRelease(Trace::tx64stats, 1)) {
     Trace::traceRelease("TranslatorX64 perf counters for %s:\n",

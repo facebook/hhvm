@@ -149,6 +149,11 @@ class TranslatorX64 : public Translator
   // translate phase.
   const Tracelet*              m_curTrace;
   const NormalizedInstruction* m_curNI;
+public:
+  litstr m_curFile;
+  int m_curLine;
+  litstr m_curFunc;
+private:
 
   struct PendingFixup {
     TCA m_tca;

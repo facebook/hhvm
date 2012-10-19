@@ -269,6 +269,89 @@ public:
     }
   }
 };
+
+// Code to profile how often our UnlikelyIfBlock branches are taken in
+// practice. Enable with TRACE=unlikely:1
+struct UnlikelyHitRate {
+  litstr key;
+  uint64_t check;
+  uint64_t hit;
+  UnlikelyHitRate() : key(nullptr), check(0), hit(0) {}
+
+  float rate() const {
+    return 100.0 * hit / check;
+  }
+  bool operator<(const UnlikelyHitRate& b) const {
+    return rate() > b.rate();
+  }
+};
+typedef hphp_hash_map<litstr, UnlikelyHitRate, pointer_hash<const char>>
+  UnlikelyHitMap;
+extern __thread UnlikelyHitMap* tl_unlikelyHits;
+
+static void recordUnlikelyProfile(litstr key, int64 hit) {
+  UnlikelyHitRate& r = (*tl_unlikelyHits)[key];
+  r.key = key;
+  if (hit) {
+    r.hit++;
+  } else {
+    r.check++;
+  }
+}
+
+inline void emitUnlikelyProfile(bool hit, bool saveFlags,
+                                X64Assembler& a) {
+  if (!Trace::moduleEnabledRelease(Trace::unlikely)) return;
+  const ssize_t sz = 1024;
+  char key[sz];
+  if (snprintf(key, sz, "%47s:%-5d (%s)",
+               tx64->m_curFile, tx64->m_curLine, tx64->m_curFunc) >= sz) {
+    key[sz-1] = '\0';
+  }
+  litstr data = StringData::GetStaticString(key)->data();
+
+  if (saveFlags) a.pushf();
+  {
+    PhysRegSaver regs(a, kAllX64Regs);
+    int i = 0;
+    a.emitImmReg((intptr_t)data, argNumToRegName[i++]);
+    a.emitImmReg((intptr_t)hit, argNumToRegName[i++]);
+    a.call((TCA)recordUnlikelyProfile);
+  }
+  if (saveFlags) a.popf();
+}
+
+inline void initUnlikelyProfile() {
+  if (!Trace::moduleEnabledRelease(Trace::unlikely)) return;
+  tl_unlikelyHits = new UnlikelyHitMap();
+}
+
+inline void dumpUnlikelyProfile() {
+  if (!Trace::moduleEnabledRelease(Trace::unlikely)) return;
+  std::vector<UnlikelyHitRate> hits;
+  UnlikelyHitRate overall;
+  overall.key = "total";
+  for (auto item : *tl_unlikelyHits) {
+    overall.check += item.second.check;
+    overall.hit += item.second.hit;
+    hits.push_back(item.second);
+  }
+  std::sort(hits.begin(), hits.end());
+  Trace::traceRelease("UnlikelyIfBlock hit rates for %s:\n",
+                      g_context->getRequestUrl(50).c_str());
+  auto printRate = [&](const UnlikelyHitRate& hr) {
+    Trace::traceRelease("%5.2f%% (%8llu / %8llu, %5.1f%% of total): %s\n",
+                        hr.rate(), hr.hit, hr.check, hr.key,
+                        100.0 * hr.hit / overall.hit);
+  };
+  printRate(overall);
+  std::for_each(hits.begin(), hits.end(), printRate);
+  Trace::traceRelease("\n");
+
+  delete tl_unlikelyHits;
+  tl_unlikelyHits = nullptr;
+}
+
 // UnlikelyIfBlock:
 //
 //  Branch to distant code (that we presumably don't expect to
@@ -323,7 +406,9 @@ struct UnlikelyIfBlock {
     , m_returnDiamond(returnDiamond ? returnDiamond : new DiamondReturn())
     , m_externalDiamond(!!returnDiamond)
   {
+    emitUnlikelyProfile(false, true, m_likely);
     m_likely.jcc(Jcc, m_unlikely.code.frontier);
+    emitUnlikelyProfile(true, false, m_unlikely);
     m_likelyPostBranch = m_likely.code.frontier;
     m_returnDiamond->initBranch(&unlikely, &likely);
     tx64->m_spillFillCode = &unlikely;
@@ -357,6 +442,10 @@ struct UnlikelyIfBlock {
     m_ice = boost::in_place<FreezeRegs>(boost::ref(tx64->m_regMap));
   }
 };
+
+#define UnlikelyIfBlock                                                 \
+  m_curFile = __FILE__; m_curFunc = __FUNCTION__; m_curLine = __LINE__; \
+  UnlikelyIfBlock
 
 // A CondBlock is an RAII structure for emitting conditional code. It
 // compares the source register at fieldOffset with fieldValue, and

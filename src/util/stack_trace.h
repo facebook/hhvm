@@ -122,7 +122,7 @@ public:
   /**
    * Generate an output of the written stack trace.
    */
-  const std::string &toString() const;
+  const std::string &toString(int skip = 0, int limit = -1) const;
 
   /**
    * Get frames in raw pointers or translated frames.

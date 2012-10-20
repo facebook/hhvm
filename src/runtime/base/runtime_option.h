@@ -246,6 +246,7 @@ public:
   static bool MySQLKillOnTimeout;
   static int  MySQLMaxRetryOpenOnFail;
   static int  MySQLMaxRetryQueryOnFail;
+  static std::string MySQLSocket;
 
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;

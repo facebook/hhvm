@@ -246,6 +246,7 @@ int RuntimeOption::MySQLSlowQueryThreshold = 1000; // ms
 bool RuntimeOption::MySQLKillOnTimeout = false;
 int RuntimeOption::MySQLMaxRetryOpenOnFail = 1;
 int RuntimeOption::MySQLMaxRetryQueryOnFail = 1;
+std::string RuntimeOption::MySQLSocket = "";
 
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
@@ -1034,6 +1035,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     MySQLKillOnTimeout = mysql["KillOnTimeout"].getBool();
     MySQLMaxRetryOpenOnFail = mysql["MaxRetryOpenOnFail"].getInt32(1);
     MySQLMaxRetryQueryOnFail = mysql["MaxRetryQueryOnFail"].getInt32(1);
+    MySQLSocket = mysql["Socket"].getString();
   }
   {
     Hdf http = config["Http"];

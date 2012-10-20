@@ -174,6 +174,9 @@ int MySQL::GetDefaultPort() {
 }
 
 String MySQL::GetDefaultSocket() {
+  if (!RuntimeOption::MySQLSocket.empty()) {
+    return RuntimeOption::MySQLSocket;
+  }
   return MYSQL_UNIX_ADDR;
 }
 

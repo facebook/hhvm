@@ -755,6 +755,7 @@ users can use the same machine serving their own source files.
     WaitTimeout = -1           # in ms, -1 means "don't set"
     SlowQueryThreshold = 1000  # in ms, log slow queries as errors
     KillOnTimeout = false
+    Socket =                   # Default location to look for mysql.sock
   }
 
 - KillOnTimeout

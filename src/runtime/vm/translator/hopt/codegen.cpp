@@ -3389,7 +3389,8 @@ Address CodeGenerator::cgLoad(Type::Tag type,
                               SSATmp* dst,
                               register_name_t base,
                               int64_t off,
-                              LabelInstruction* label) {
+                              LabelInstruction* label,
+                              IRInstruction* inst) {
   Address start = m_as.code.frontier;
   if (type == Type::Cell || type == Type::Gen) {
     return cgLoadCell(type, dst, base, off, label);
@@ -3406,7 +3407,18 @@ Address CodeGenerator::cgLoad(Type::Tag type,
       m_as.cmp_imm32_disp_reg32(dataType, off + TVOFF(m_type), base);
       cc = CC_NE;
     }
-    emitFwdJcc(cc, label);
+    if (inst && inst->getTCA() == kIRDirectGuardActive) {
+      if (RuntimeOption::EvalDumpIR) {
+        m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
+        inst->setTCA(m_as.code.frontier);
+      }
+      // Get the SrcKey for the dest
+      SrcKey  destSK(getCurrFunc(), m_curTrace->getBcOff());
+      SrcRec* destSR = m_tx64->getSrcRec(destSK);
+      m_tx64->emitFallbackCondJmp(m_as, *destSR, cc);
+    } else {
+      emitFwdJcc(cc, label);
+    }
   }
   if (type == Type::Uninit || type == Type::Null) {
     return start; // these are constants
@@ -3504,7 +3516,7 @@ Address CodeGenerator::cgLdLoc(IRInstruction* inst) {
   register_name_t fpReg;
   int64 offset;
   getLocalRegOffset(inst->getSrc(0), fpReg, offset);
-  cgLoad(type, dst, fpReg, offset, label);
+  cgLoad(type, dst, fpReg, offset, label, inst);
   return start;
 }
 
@@ -3539,7 +3551,8 @@ Address CodeGenerator::cgLdStack(IRInstruction* inst) {
                 sp->getAssignedLoc(),
                 index->getConstValAsInt()*sizeof(Cell),
                 // no need to worry about boxed types if loading a cell
-                type == Type::Cell ? NULL : label);
+                type == Type::Cell ? NULL : label,
+                inst);
 }
 
 Address CodeGenerator::cgGuardType(IRInstruction* inst) {

@@ -865,6 +865,7 @@ private:
   void emitFallbackJmp(SrcRec& dest, ConditionCode cc = CC_NZ);
   void emitFallbackJmp(Asm& as, SrcRec& dest, ConditionCode cc = CC_NZ);
   void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
+  void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
   void emitDebugPrint(Asm&, const char*,
                       PhysReg = reg::r13,
                       PhysReg = reg::r14,

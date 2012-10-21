@@ -60,6 +60,8 @@ static const TCA kIRDirectJmpInactive = NULL;
 static const TCA kIRDirectJccJmpActive = (TCA)0x01;
 // Optimize Jcc exit from trace when fall through path stays in trace
 static const TCA kIRDirectJccActive = (TCA)0x02;
+// Optimize guard exit from beginning of trace
+static const TCA kIRDirectGuardActive = (TCA)0x03;
 
 #define PUNT(instr) do {                             \
   throw FailedIRGen(__FILE__, __LINE__, __func__);   \

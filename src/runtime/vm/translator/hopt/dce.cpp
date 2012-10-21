@@ -408,6 +408,49 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
       }
     }
   }
+
+  // If main trace starts with guards, have them generate a patchable jump to the anchor trace
+  if (RuntimeOption::EvalHHIRDirectExit) {
+    LabelInstruction* guardLabel = NULL;
+    IRInstruction::List& instList = trace->getInstructionList();
+    // Check the beginning of the trace for guards
+    for (IRInstruction::Iterator it = instList.begin(); it != instList.end(); ++it) {
+      IRInstruction* inst = *it;
+      Opcode opc = inst->getOpcode();
+      if ((opc == LdLoc || opc == LdStack) && inst->getLabel()) {
+        LabelInstruction* exitLabel = inst->getLabel();
+        // Find the GuardFailure's label and confirm this branches there
+        if (guardLabel == NULL) {
+          Trace* exitTrace = exitLabel->getTrace();
+          IRInstruction::List& xList = exitTrace->getInstructionList();
+          IRInstruction::Iterator instIter = xList.begin();
+          instIter++; // skip over label
+          // Confirm this is a GuardExit
+          for (IRInstruction::Iterator it = instIter; it != xList.end(); ++it) {
+            IRInstruction* i = *it;
+            Opcode op = i->getOpcode();
+            if (op == Marker) {
+              continue;
+            }
+            if (op == ExitGuardFailure) {
+              guardLabel = exitLabel;
+            }
+            // Do not optimize if other instructions are on exit trace
+            break;
+          }
+        }
+        if (exitLabel == guardLabel) {
+          inst->setTCA(kIRDirectGuardActive);
+          continue;
+        }
+        break;
+      }
+      if (opc == Marker || opc == DefLabel || opc == DefSP || opc == DefFP) {
+        continue;
+      }
+      break;
+    }
+  }
 }
 
 } } }

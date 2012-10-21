@@ -96,7 +96,8 @@ public:
                  SSATmp* dst,
                  register_name_t base,
                  int64_t off,
-                 LabelInstruction* label);
+                 LabelInstruction* label,
+                 IRInstruction* inst = NULL);
 
   Address cgStMemWork(IRInstruction* inst, bool genStoreType);
   Address cgStRefWork(IRInstruction* inst, bool genStoreType);

@@ -357,6 +357,23 @@ void IRInstruction::print(std::ostream& ostream) {
     ostream << ", ";
     m_label->print(ostream);
   }
+  if (m_tca) {
+    ostream << ", ";
+    if (m_tca == kIRDirectJccJmpActive) {
+      ostream << "JccJmp_Exit ";
+    }
+    else
+    if (m_tca == kIRDirectJccActive) {
+      ostream << "Jcc_Exit ";
+    }
+    else
+    if (m_tca == kIRDirectGuardActive) {
+      ostream << "Guard_Exit ";
+    }
+    else {
+      ostream << (void*)m_tca;
+    }
+  }
 }
 
 void IRInstruction::print() {

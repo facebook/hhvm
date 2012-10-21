@@ -2749,6 +2749,12 @@ TranslatorX64::emitFallbackUncondJmp(Asm& as, SrcRec& dest) {
   dest.emitFallbackJump(as, as.code.frontier);
 }
 
+void
+TranslatorX64::emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
+  prepareForSmash(as, kJmpccLen);
+  dest.emitFallbackJump(as, as.code.frontier, cc);
+}
+
 void TranslatorX64::emitReqRetransNoIR(Asm& as, SrcKey& sk) {
   prepareForSmash(as, kJmpLen);
   TCA toSmash = as.code.frontier;

@@ -10005,6 +10005,7 @@ static const size_t kAStubsSize = 512 << 20;
 static const size_t kGDataSize = kASize / 4;
 static const size_t kTotalSize = kASize + kAStubsSize +
                                          kTrampolinesBlockSize + kGDataSize;
+
 TranslatorX64::TranslatorX64()
 : Translator(),
   m_numNativeTrampolines(0),
@@ -10132,10 +10133,13 @@ TranslatorX64::TranslatorX64()
     tv_release_ref(ref);
   }
   typedef void* vp;
-  m_dtorStubs[BitwiseKindOfString] = emitUnaryStub(a, vp(tv_release_str));
-  m_dtorStubs[KindOfArray]         = emitUnaryStub(a, vp(tv_release_arr));
-  m_dtorStubs[KindOfObject]        = emitUnaryStub(a, vp(tv_release_obj));
-  m_dtorStubs[KindOfRef]           = emitUnaryStub(a, vp(tv_release_ref));
+  m_dtorStubs[BitwiseKindOfString] = emitUnaryStub(a,
+                                                   Call(getMethodHardwarePtr(&StringData::release)));
+  m_dtorStubs[KindOfArray]         = emitUnaryStub(a,
+                                                   Call(getVTableOffset(&HphpArray::release)));
+  m_dtorStubs[KindOfObject]        = emitUnaryStub(a,
+                                                   Call(getMethodHardwarePtr(&ObjectData::release)));
+  m_dtorStubs[KindOfRef]           = emitUnaryStub(a, Call(vp(getMethodHardwarePtr(&RefData::release))));
   m_dtorGenericStub                = genericRefCountStub(a);
   m_dtorGenericStubRegs            = genericRefCountStubRegs(a);
 
@@ -10193,8 +10197,20 @@ TranslatorX64::Get() {
   return tx64;
 }
 
+void
+TranslatorX64::Call::emit(Asm& a,
+                          PhysReg scratch) {
+  if (m_kind == Direct) {
+    a.    call(TCA(m_fptr));
+  } else {
+    a.    load_reg64_disp_reg64(rdi, 0, scratch);
+    a.    load_reg64_disp_reg64(scratch, m_offset, scratch);
+    a.    call_reg(scratch);
+  }
+}
+
 template<int Arity>
-TCA TranslatorX64::emitNAryStub(X64Assembler& a, void* fptr) {
+TCA TranslatorX64::emitNAryStub(X64Assembler& a, Call c) {
   BOOST_STATIC_ASSERT((Arity < kNumRegisterArgs));
 
   // The callNAryStub has already saved these regs on a.
@@ -10235,19 +10251,15 @@ TCA TranslatorX64::emitNAryStub(X64Assembler& a, void* fptr) {
   {
     RegSet s = kCallerSaved - alreadySaved;
     PhysRegSaverParity<Parity> rs(a, s);
-    emitCall(a, TCA(fptr));
+    c.emit(a, rax);
   }
   a.    popr(rbp);  // }
   a.    ret();
   return start;
 }
 
-TCA TranslatorX64::emitUnaryStub(X64Assembler& a, void* fptr) {
-  return emitNAryStub<1>(a, fptr);
-}
-
-TCA TranslatorX64::emitBinaryStub(X64Assembler& a, void* fptr) {
-  return emitNAryStub<2>(a, fptr);
+TCA TranslatorX64::emitUnaryStub(X64Assembler& a, Call c) {
+  return emitNAryStub<1>(a, c);
 }
 
 /*

@@ -277,6 +277,31 @@ static inline void compiler_membar( ) {
 char* getNativeFunctionName(void* codeAddr);
 
 /**
+ * Get the vtable offset corresponding to a method pointer. NB: only works
+ * for single inheritance. For no inheritance at all, use
+ * getMethodHardwarePtr. ABI-specific, don't play on or around.
+ */
+template <typename MethodPtr>
+int64_t getVTableOffset(MethodPtr meth) {
+  union {
+    MethodPtr meth;
+    int64_t offset;
+  } u;
+  u.meth = meth;
+  return u.offset - 1;
+}
+
+template <typename MethodPtr>
+void* getMethodHardwarePtr(MethodPtr meth) {
+  union {
+    MethodPtr meth;
+    void* ptr;
+  } u;
+  u.meth = meth;
+  return u.ptr;
+}
+
+/**
  * 64-bit equivalents of 32-bit htonl() and ntohq().
  */
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__

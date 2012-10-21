@@ -281,9 +281,18 @@ private:
     return a.code.isValidAddress(tca) || astubs.code.isValidAddress(tca) ||
       atrampolines.code.isValidAddress(tca);
   }
-  template<int Arity> TCA emitNAryStub(Asm& a, void* fptr);
-  TCA emitUnaryStub(Asm& a, void* fptr);
-  TCA emitBinaryStub(Asm& a, void* fptr);
+  struct Call {
+    enum { Direct, Virtual } m_kind;
+    union {
+      void* m_fptr;
+      int   m_offset;
+    };
+    explicit Call(void *p) : m_kind(Direct), m_fptr(p) {}
+    explicit Call(int off) : m_kind(Virtual), m_offset(off) {}
+    void emit(Asm& a, PhysReg scratch);
+  };
+  template<int Arity> TCA emitNAryStub(Asm& a, Call c);
+  TCA emitUnaryStub(Asm& a, Call c);
   TCA genericRefCountStub(Asm& a);
   TCA genericRefCountStubRegs(Asm& a);
   TCA getCallArrayProlog(Func* func);

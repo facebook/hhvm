@@ -1100,7 +1100,13 @@ TranslatorX64::moveToAlign(X64Assembler &aa,
   size_t leftInBlock = align - ((align - 1) & uintptr_t(aa.code.frontier));
   if (leftInBlock == align) return;
   if (unreachable) {
-    aa.emitInt3s(leftInBlock);
+    if (leftInBlock > 2) {
+      aa.ud2();
+      leftInBlock -= 2;
+    }
+    if (leftInBlock > 0) {
+      aa.emitInt3s(leftInBlock);
+    }
     return;
   }
   aa.emitNop(leftInBlock);

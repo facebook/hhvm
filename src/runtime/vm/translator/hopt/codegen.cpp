@@ -1115,6 +1115,22 @@ int64 cgStringNSameHelper(const StringData* s1, const StringData* s2) {
   return cgStringEqHelper2<false, true>(s1, s2);
 }
 
+int64 cgIntEqStringHelper(const StringData* s, int64 i) {
+  int64 si;
+  double sd;
+  auto st = s->isNumericWithVal(si, sd, true);
+
+  if (st == KindOfDouble) {
+    return i == sd;
+  }
+  if (st == KindOfNull) si = 0;
+  return i == si;
+}
+
+int64 cgIntNeqStringHelper(const StringData* s, int64 i) {
+  return !cgIntEqStringHelper(s, i);
+}
+
 Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
   Address start = m_as.code.frontier;
   UNUSED SSATmp* dst   = inst->getDst();
@@ -1212,6 +1228,47 @@ Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
     args.ssa(src1).ssa(src2);
     if (eq) cgCallHelper(m_as, (TCA)cgStringEqHelper,  dst, true, args);
     else    cgCallHelper(m_as, (TCA)cgStringNeqHelper, dst, true, args);
+  } else if ((type1 == Type::Int && Type::isString(type2)) ||
+             (type2 == Type::Int && Type::isString(type1))) {
+    if (type1 == Type::Int) {
+      std::swap(type1, type2);
+      std::swap(src1, src2);
+      assert(false); // due to canonicalization, this should never happen
+    }
+    // type1 is now String, type2 is Int
+
+    if (src1->isConst() && src2->isConst()) {
+      // this should be dealt with in the simplifier
+      if (eq) CG_PUNT(Eq_const_int_const_string);
+      else    CG_PUNT(Neq_const_int_const_string);
+    } else if (src1->isConst()) {
+      auto str = src1->getConstValAsStr();
+      int64 si;
+      double sd;
+      auto st = str->isNumericWithVal(si, sd, true);
+
+      if (st == KindOfDouble) {
+        ArgGroup args;
+        args.ssa(src1).ssa(src2);
+
+        if (eq) cgCallHelper(m_as, (TCA)cgIntEqStringHelper,  dst, true, args);
+        else    cgCallHelper(m_as, (TCA)cgIntNeqStringHelper, dst, true, args);
+      } else {
+        if (st == KindOfNull) {
+          si = 0;
+        }
+        m_as.cmp_imm64_reg64(si, src2->getAssignedLoc());
+        if (eq) m_as.setz (dstReg);
+        else    m_as.setnz(dstReg);
+        m_as.and_imm64_reg64(0xff, dstReg);
+      }
+    } else {
+      ArgGroup args;
+      args.ssa(src1).ssa(src2);
+
+      if (eq) cgCallHelper(m_as, (TCA)cgIntEqStringHelper,  dst, true, args);
+      else    cgCallHelper(m_as, (TCA)cgIntNeqStringHelper, dst, true, args);
+    } 
   } else if (type1 == Type::Obj && type2 == Type::Obj) {
     if (eq) CG_PUNT(Eq_obj);
     else    CG_PUNT(Neq_obj);

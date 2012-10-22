@@ -569,8 +569,17 @@ void LinearScan::computePreColoringHint() {
     case OpNeq:
     case OpSame:
     case OpNSame:
-      m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-      m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
+      {
+        auto src1 = nextNative->getSrc(0);
+        auto src2 = nextNative->getSrc(1);
+
+        if ((Type::isString(src1->getType())
+             && Type::isString(src2->getType()))
+            || (Type::isString(src1->getType()) && !src1->isConst())) {
+          m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
+          m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
+        }
+      }
       break;
     case Conv:
     {

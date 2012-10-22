@@ -655,11 +655,11 @@ SSATmp* chaseIncRefs(SSATmp* tmp) {
     /* TODO: optimze comparison of ints to const bools */                     \
     return m_tb->genCmp(NAME, m_tb->genConvToBool(src1), src2);               \
   }                                                                           \
+  /* strings get canonicalized to the left */                                 \
+  if (Type::isString(src2->getType())) {                                      \
+    return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
+  }                                                                           \
   if (src1->isConst() && src2->isConst()) {                                   \
-    /* canonicalize static strings to left */                                 \
-    if (src2->getType() == Type::StaticStr) {                                 \
-      return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                  \
-    }                                                                         \
     /* StaticStr cmp ConstBool */                                             \
     if (src1->getType() == Type::StaticStr && src2->getType() == Type::Bool) {\
       const StringData* str = src1->getConstValAsStr();                       \
@@ -685,11 +685,6 @@ SSATmp* chaseIncRefs(SSATmp* tmp) {
     if (src1->getType() == Type::Int && src2->getType() == Type::Bool) {      \
       return genDefBool(bool(src1->getConstValAsInt()) OP                     \
                         src2->getConstValAsBool());                           \
-    }                                                                         \
-    /* ConstBool cmp ConstInt */                                              \
-    if (src1->getType() == Type::Bool && src2->getType() == Type::Int) {      \
-      return genDefBool(src1->getConstValAsBool() OP                          \
-                        bool(src2->getConstValAsInt()));                      \
     }                                                                         \
   }                                                                           \
   if (src1->getType() == Type::Arr && src2->getType() != Type::Arr) {         \

@@ -1215,8 +1215,9 @@ TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
       useHHIR = false;
       m_useHHIR = false;
       RuntimeOption::EvalJitUseIR = false;
+    } else {
+      hhirTraceStart(sk->offset());
     }
-    hhirTraceStart(sk->offset());
   } else {
     ASSERT(m_useHHIR == false);
   }

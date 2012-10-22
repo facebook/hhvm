@@ -2881,7 +2881,7 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
 }
 
 static inline StringData* lookup_name(TypedValue* key) {
-  return prepareKey(key).detach();
+  return prepareKey(key);
 }
 
 static inline void lookup_var(ActRec* fp,

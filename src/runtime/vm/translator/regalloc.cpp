@@ -931,6 +931,9 @@ LazyScratchReg::~LazyScratchReg() {
 void
 LazyScratchReg::alloc(PhysReg pr /* = InvalidReg */) {
   ASSERT(m_reg == noreg);
+  if (pr != InvalidReg) {
+    m_regMap.assertRegIsFree(pr);
+  }
   m_reg = m_regMap.allocScratchReg(pr);
   TRACE(1, "LazyScratchReg: alloc %d\n", m_reg);
 }
@@ -961,9 +964,7 @@ ScratchReg::ScratchReg(RegAlloc& regMap) :
 
 ScratchReg::ScratchReg(RegAlloc& regMap, PhysReg reg) :
   LazyScratchReg(regMap) {
-  m_reg = reg;
-  ASSERT(m_regMap.getRegsLike(RegInfo::FREE).contains(reg));
-  m_regMap.bind(reg, Location(), KindOfInvalid, RegInfo::SCRATCH);
+  alloc(reg);
   TRACE(1, "ScratchReg: wired alloc %d\n", m_reg);
 }
 

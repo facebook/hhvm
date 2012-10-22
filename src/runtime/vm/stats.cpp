@@ -60,14 +60,14 @@ void dump() {
   TRACE(1, "STATS %lld %s\n", epoch, g_context->getRequestUrl(50).c_str());
 #include "runtime/vm/stats-opcodeDef.h"
 #define STAT(s) \
-  if (tl_counters[s]) TRACE(1, "STAT %-40s %15ld\n", \
+  if (tl_counters[s]) TRACE(1, "STAT %-50s %15ld\n", \
                             #s, tl_counters[s]);
   STATS
 #undef STAT
 #undef O
   for (int i=0; helperNames[i]; i++) {
     if (tl_helper_counters[i]) {
-      TRACE(1, "STAT %-40s %15ld\n",
+      TRACE(1, "STAT %-50s %15ld\n",
             helperNames[i],
             tl_helper_counters[i]);
     }

@@ -761,21 +761,6 @@ public:
     m_args.push_back(ArgContent(ArgContent::ArgLocAddr, loc));
   }
 
-  void addLiteral(const Location &loc, A &a, RegAlloc &regMap,
-                  PhysReg rMis) {
-    size_t offset = m_tx64.emitPrepareLiteral(loc, a, rMis);
-    if (loc.space == Location::Litstr) {
-      UNUSED StringData* sd = curUnit()->lookupLitstrId(loc.offset);
-      TRACE(6, "ArgManager: push arg %zd (%s, %lld) \"%s\" --> r%d+%zu\n",
-            m_args.size(), loc.spaceName(), loc.offset, sd->data(), rMis,
-            offset);
-    } else {
-      TRACE(6, "ArgManager: push arg %zd (%s, %lld) --> r%d+%zu\n",
-            m_args.size(), loc.spaceName(), loc.offset, rMis, offset);
-    }
-    m_args.push_back(ArgContent(ArgContent::ArgRegPlus, rMis, offset));
-  }
-
   void emitArguments() {
     size_t n = m_args.size();
     ASSERT((int)n <= kNumRegisterArgs);

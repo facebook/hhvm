@@ -20,6 +20,16 @@
 namespace HPHP {
 namespace VM {
 
+StringData* prepareAnyKey(TypedValue* tv) {
+  if (IS_STRING_TYPE(tv->m_type)) {
+    StringData* str = tv->m_data.pstr;
+    str->incRefCount();
+    return str;
+  } else {
+    return tvAsCVarRef(tv).toString().detach();
+  }
+}
+
 void objArrayAccess(Instance* base) {
   ASSERT(!base->isCollection());
   if (!instanceOf(base, "ArrayAccess")) {

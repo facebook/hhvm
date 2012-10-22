@@ -322,7 +322,6 @@ private:
     // the return address pushed by the call.
     uintptr_t returnAddress;
     TypedValue tvScratch;
-    TypedValue tvLiteral;
     TypedValue tvRef;
     TypedValue tvRef2;
     TypedValue tvResult;
@@ -339,6 +338,8 @@ private:
  private:
 
   MVecTransState* m_vecState;
+  void invalidateOutStack(const NormalizedInstruction& ni);
+  void invalidateOutLocal(const NormalizedInstruction& ni);
   int mResultStackOffset(const NormalizedInstruction& ni) const;
   bool generateMVal(const Tracelet& t, const NormalizedInstruction& ni,
                     const MInstrInfo& mii) const;
@@ -356,7 +357,6 @@ private:
                        const DynLocation& val) const;
   bool forceMValIncDec(const Tracelet& t, const NormalizedInstruction& ni,
                        const MInstrInfo& mii) const;
-  size_t emitPrepareLiteral(const Location& l, Asm& a, PhysReg r);
   void emitBaseLCR(const Tracelet& t, const NormalizedInstruction& ni,
                    const MInstrInfo& mii, unsigned iInd, LazyScratchReg& rBase);
   void emitBaseH(unsigned iInd, LazyScratchReg& rBase);
@@ -374,7 +374,6 @@ private:
                               const DynLocation& keyLoc,
                               Location outLoc,
                               void* fallbackFunc);
-  template<DataType keyType>
   void emitElem(const Tracelet& t, const NormalizedInstruction& ni,
                 const MInstrInfo& mii, unsigned mInd, unsigned iInd,
                 LazyScratchReg& rBase);

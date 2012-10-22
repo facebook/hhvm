@@ -209,10 +209,13 @@ struct DynLocation {
   }
 
   bool isStack() const {
-    return location.space == Location::Stack;
+    return location.isStack();
   }
   bool isLocal() const {
-    return location.space == Location::Local;
+    return location.isLocal();
+  }
+  bool isLiteral() const {
+    return location.isLiteral();
   }
 
   // Uses the runtime state. True if this dynLocation can be overwritten by

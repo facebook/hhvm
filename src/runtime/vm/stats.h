@@ -84,7 +84,9 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_CGetMGE) \
   STAT(Tx64_CGetMArray) \
   STAT(Tx64_CGetMGeneric) \
-  STAT(Tx64_MFillLiteral) \
+  STAT(Tx64_MLitKey) \
+  STAT(Tx64_MRegKey) \
+  STAT(Tx64_MTVKey) \
   STAT(Tx64_CnsFast) \
   STAT(Tx64_CnsSlow) \
   STAT(Tx64_ContCreateFast) \

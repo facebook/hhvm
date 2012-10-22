@@ -688,7 +688,7 @@ void ArgManager::emitValues(std::vector<PhysReg> &actual) {
 
 void
 TranslatorX64::emitCall(X64Assembler& a, TCA dest, bool killRegs) {
-  if (a.jmpDeltaFits(dest)) {
+  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
     a.    call(dest);
   } else {
     a.    call(getNativeTrampoline(dest));
@@ -7605,10 +7605,15 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   TCA trampAddr = atrampolines.code.frontier;
   if (Stats::enabled()) {
     Stats::emitInc(atrampolines, &Stats::tl_helper_counters[0], index);
-    Stats::helperNames[index] = Util::getNativeFunctionName(helperAddr);
+    char* name = Util::getNativeFunctionName(helperAddr);
+    const size_t limit = 50;
+    if (strlen(name) > limit) {
+      name[limit] = '\0';
+    }
+    Stats::helperNames[index] = name;
   }
-  atrampolines.mov_imm64_reg((int64_t)helperAddr, reg::rax);
-  atrampolines.jmp_reg(reg::rax);
+  atrampolines.mov_imm64_reg((int64_t)helperAddr, rScratch);
+  atrampolines.jmp_reg(rScratch);
   atrampolines.ud2();
   trampolineMap[helperAddr] = trampAddr;
   if (m_trampolineSize == 0) {
@@ -10621,6 +10626,18 @@ bool TranslatorX64::invalidateFile(Eval::PhpFile* f) {
   ASSERT(f != NULL);
   PendQ::defer(new DeferredFileInvalidate(f));
   return true;
+}
+
+void TranslatorX64::invalidateOutStack(const NormalizedInstruction& ni) {
+  if (ni.outStack) {
+    m_regMap.invalidate(ni.outStack->location);
+  }
+}
+
+void TranslatorX64::invalidateOutLocal(const NormalizedInstruction& ni) {
+  if (ni.outLocal) {
+    m_regMap.invalidate(ni.outLocal->location);
+  }
 }
 
 } // HPHP::VM::Transl

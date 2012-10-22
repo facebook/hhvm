@@ -333,6 +333,12 @@ class RegAlloc {
   bool regIsFree(PhysReg pr) const {
     return getInfo(pr)->m_state == RegInfo::FREE;
   }
+  void assertRegIsFree(PhysReg pr) const {
+    if (debug && !regIsFree(pr)) {
+      std::cerr << getInfo(pr)->pretty() << std::endl;
+      assert(false && "Expected register to be free");
+    }
+  }
   DataType regType(PhysReg pr) const {
     return getInfo(pr)->m_type;
   }

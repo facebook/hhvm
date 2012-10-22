@@ -381,7 +381,7 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
       growBy(page_size);
       buffer_size = m_cap - m_len;
     }
-    int len = fread(m_buffer + m_len, 1, buffer_size, in);
+    size_t len = fread(m_buffer + m_len, 1, buffer_size, in);
     if (len == 0) break;
     m_len += len;
   }
@@ -398,7 +398,8 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
       growBy(page_size);
       buffer_size = m_cap - m_len;
     }
-    int len = in->readImpl(m_buffer + m_len, buffer_size);
+    int64 len = in->readImpl(m_buffer + m_len, buffer_size);
+    ASSERT(len >= 0);
     if (len == 0) break;
     m_len += len;
   }

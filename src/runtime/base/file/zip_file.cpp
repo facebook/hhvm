@@ -79,7 +79,8 @@ bool ZipFile::closeImpl() {
 
 int64 ZipFile::readImpl(char *buffer, int64 length) {
   ASSERT(m_gzFile);
-  return gzread(m_gzFile, buffer, length);
+  int64 nread = gzread(m_gzFile, buffer, length);
+  return (nread < 0) ? 0 : nread;
 }
 
 int64 ZipFile::writeImpl(const char *buffer, int64 length) {

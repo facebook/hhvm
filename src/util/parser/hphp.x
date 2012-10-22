@@ -275,6 +275,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     case T_XHP_ATTRIBUTE:
     case -1:
     case ':': // so that we can correctly parse function foo(): :ui:box {}
+    case '?': // so that we can parse function foo(): ?:ui:box {}
     case T_PRIVATE:  // for types on class variables
     case T_PROTECTED:
     case T_PUBLIC:

@@ -2346,41 +2346,44 @@ array_getm_i(void* dptr, int64 key, TypedValue* out) {
   return ad;
 }
 
-#define ARRAY_GETM_IMPL(ad, sd, out, body, drKey) do {    \
-  if (UNLIKELY(!IsHphpArray(ad))) {                       \
-    elem(ad, sd, out);                                    \
-  } else {                                                \
-    HphpArray* ha = (HphpArray*)(ad);                     \
-    TypedValue* ret;                                      \
-    ARRAY_GETM_TRACE();                                   \
-    ret = (body);                                         \
-    if (UNLIKELY(!ret)) {                                 \
-      TV_WRITE_NULL(out);                                 \
-    } else {                                              \
-      tvDup((ret), (out));                                \
-    }                                                     \
-  }                                                       \
-  if (drKey && sd->decRefCount() == 0) sd->release();     \
-} while(0)
+enum GetFlags {
+  DecRefKey = 1,
+  CheckInts = 2,
+};
 
-#define ARRAY_GETM_BODY(dptr, sd, out, body, drKey) do {  \
-  ArrayData* ad = (ArrayData*)dptr;                       \
-  ARRAY_GETM_IMPL(ad, sd, out, body, drKey);              \
-  return ad;                                              \
-} while(0)
-
-#define ARRAY_GETM_TRACE() do {                           \
-  TRACE(2, "%s: (%p) <- %p[\"%s\"@sd%p]\n", __FUNCTION__, \
-        (out), (dptr), (sd)->data(), (sd));               \
-} while(0)
+static ArrayData*
+array_getm_impl(ArrayData* ad, StringData* sd, int flags, TypedValue* out)
+  NEVER_INLINE;
+ArrayData* array_getm_impl(ArrayData* ad, StringData* sd,
+                           int flags, TypedValue* out) {
+  bool drKey = flags & DecRefKey;
+  bool checkInts = flags & CheckInts;
+  if (UNLIKELY(!IsHphpArray(ad))) {
+    elem(ad, sd, out);
+  } else {
+    HphpArray* ha = (HphpArray*)(ad);
+    TypedValue* ret;
+    ret = (checkInts ? 
+           nv_get_cell_with_integer_check(ha, sd) :
+           ha->nvGetCell(sd, true /*error*/));
+    if (UNLIKELY(!ret)) {
+      TV_WRITE_NULL(out);
+    } else {
+      tvDup((ret), (out));
+    }
+  }
+  if (drKey && sd->decRefCount() == 0) sd->release();
+  TRACE(2, "%s: (%p) <- %p[\"%s\"@sd%p]\n", __FUNCTION__,
+        out, ad, sd->data(), sd);
+  return ad;
+}
 
 /**
  * array_getm_s: conservative unary string key.
  */
 ArrayData*
 array_getm_s(void* dptr, StringData* sd, TypedValue* out) {
-  ARRAY_GETM_BODY(dptr, sd, out, nv_get_cell_with_integer_check(ha, sd),
-                  true /* drKey */);
+  return array_getm_impl((ArrayData*)dptr, sd, DecRefKey | CheckInts, out);
 }
 
 /**
@@ -2389,8 +2392,7 @@ array_getm_s(void* dptr, StringData* sd, TypedValue* out) {
  */
 ArrayData*
 array_getm_s0(void* dptr, StringData* sd, TypedValue* out) {
-  ARRAY_GETM_BODY(dptr, sd, out, nv_get_cell_with_integer_check(ha, sd),
-                  false /* drKey */);
+  return array_getm_impl((ArrayData*)dptr, sd, CheckInts, out); 
 }
 
 /**
@@ -2401,16 +2403,13 @@ array_getm_s0(void* dptr, StringData* sd, TypedValue* out) {
  */
 ArrayData*
 array_getm_s_fast(void* dptr, StringData* sd, TypedValue* out) {
-  ARRAY_GETM_BODY(dptr, sd, out, ha->nvGetCell(sd, true /* error */),
-                  true /* drKey */);
+  return array_getm_impl((ArrayData*)dptr, sd, DecRefKey, out);
 }
 
 ArrayData*
 array_getm_s0_fast(void* dptr, StringData* sd, TypedValue* out) {
-  ARRAY_GETM_BODY(dptr, sd, out, ha->nvGetCell(sd, true /* error */),
-                  false /* drKey */);
+  return array_getm_impl((ArrayData*)dptr, sd, 0, out);
 }
-#undef ARRAY_GETM_TRACE
 
 template<DataType keyType, bool decRefBase>
 inline void non_array_getm(TypedValue* base, int64 key, TypedValue* out) {
@@ -2437,15 +2436,12 @@ non_array_getm_s(TypedValue* base, StringData* key, TypedValue* out) {
   non_array_getm<KindOfString, true>(base, (intptr_t)key, out);
 }
 
-#define ARRAY_GETM_TRACE() do {                           \
-  TRACE(2, "%s: (%p) <- %p[%lld][\"%s\"@sd%p]\n",         \
-        __FUNCTION__, (out), (ad), (ik), (sd)->data(),    \
-        (sd));                                            \
-} while(0)
-
-template <bool decRefKey>
-inline void
-array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
+void
+array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
+                   bool decRefKey) NEVER_INLINE;
+void
+array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
+                   bool decRefKey) {
   TypedValue* base2;
 
   if (UNLIKELY(!IsHphpArray(ad))) {
@@ -2461,8 +2457,7 @@ array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
     non_array_getm<KindOfString, false>(base2, (int64)sd, out);
   } else {
     ad = base2->m_data.parr;
-    ARRAY_GETM_IMPL(ad, sd, out, nv_get_cell_with_integer_check(ha, sd),
-                    decRefKey);
+    array_getm_impl(ad, sd, CheckInts | (decRefKey ? DecRefKey : 0), out);
   }
 }
 
@@ -2472,7 +2467,7 @@ array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
  */
 void
 array_getm_is(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
-  array_getm_is_impl<true>(ad, ik, sd, out);
+  array_getm_is_impl(ad, ik, sd, out, /*decRefKey=*/ true);
 }
 
 /**
@@ -2481,14 +2476,11 @@ array_getm_is(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
  */
 void
 array_getm_is0(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out) {
-  array_getm_is_impl<false>(ad, ik, sd, out);
+  array_getm_is_impl(ad, ik, sd, out, /*decRefKey=*/false);
 }
 
-#undef ARRAY_GETM_TRACE
-#undef ARRAY_GETM_BODY
-
 // issetm's DNA.
-static inline bool
+static bool
 issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {
   const ArrayData* ad = (const ArrayData*)dptr;
   bool retval;

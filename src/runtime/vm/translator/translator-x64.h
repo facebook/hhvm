@@ -738,6 +738,7 @@ private:
   void dumpStack(const char* msg, int offset) const;
 
   static const size_t kJmpTargetAlign = 16;
+  static const size_t kNonFallthroughAlign = 64;
   static const int kJmpLen = 5;
   static const int kJmpccLen = 6;
   static const int kJcc8Len = 3;

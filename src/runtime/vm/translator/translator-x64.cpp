@@ -1225,7 +1225,7 @@ TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
   analyze(sk, tlet);
 
   if (align) {
-    moveToAlign(a);
+    moveToAlign(a, kNonFallthroughAlign);
   }
 
   TCA start = a.code.frontier;

@@ -1674,9 +1674,9 @@ Array c_StableMap::t_tokeysarray() {
   Bucket* p = m_pListHead;
   while (p) {
     if (p->hasIntKey()) {
-      ai.set(*(const String*)(&p->skey));
-    } else {
       ai.set((int64)p->ikey);
+    } else {
+      ai.set(*(const String*)(&p->skey));
     }
     p = p->pListNext;
   }

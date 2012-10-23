@@ -53,6 +53,18 @@ struct TraceletCountersVec {
   TraceletCountersVec() : m_size(0), m_elms(NULL), m_lock() { }
 };
 
+struct FreeStubList {
+  struct StubNode {
+    StubNode* m_next;
+    uint64_t  m_freed;
+  };
+  static const uint64_t kStubFree = 0;
+  StubNode* m_list;
+  FreeStubList() : m_list(NULL) {}
+  TCA maybePop();
+  void push(TCA stub);
+};
+
 class TranslatorX64;
 extern __thread TranslatorX64* tx64;
 
@@ -713,6 +725,9 @@ public:
 
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
 
+  FreeStubList m_freeStubs;
+  bool freeRequestStub(TCA stub);
+  TCA getFreeStub(bool inLine);
 private:
   TCA getInterceptHelper();
   void translateInstr(const Tracelet& t, const NormalizedInstruction& i);
@@ -764,13 +779,15 @@ private:
   TCA retranslateAndPatchNoIR(SrcKey sk,
                               bool   align,
                               TCA    toSmash);
-  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req);
+  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req, bool& smashed);
   TCA bindJmpccFirst(TCA toSmash,
                      Offset offTrue, Offset offFalse,
                      bool toTake,
-                     ConditionCode cc);
+                     ConditionCode cc,
+                     bool& smashed);
   TCA bindJmpccSecond(TCA toSmash, const Offset off,
-                      ConditionCode cc);
+                      ConditionCode cc,
+                      bool& smashed);
   void emitFallbackJmp(SrcRec& dest);
   void emitFallbackJmp(Asm& as, SrcRec& dest);
   void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
@@ -778,10 +795,16 @@ private:
                       PhysReg = reg::r13,
                       PhysReg = reg::r14,
                       PhysReg = reg::rax);
-
-  TCA emitServiceReq(bool align, ServiceRequest, int numArgs, ...);
+  enum SRFlags {
+    SRNone = 0,
+    SRAlign = 1,
+    SRInline = 2,
+  };
   TCA emitServiceReq(ServiceRequest, int numArgs, ...);
-  TCA emitServiceReqVA(bool align, ServiceRequest, int numArgs, va_list args);
+  TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);
+  TCA emitServiceReqVA(SRFlags flags, ServiceRequest, int numArgs,
+                       va_list args);
+
   TCA emitRetFromInterpretedFrame();
   TCA emitGearTrigger(Asm& a, const SrcKey& sk, TransID transId);
   void emitBox(DataType t, PhysReg rToBox);

@@ -27,6 +27,7 @@
 #include "runtime/base/macros.h"
 #include "runtime/vm/class.h"
 #include "treadmill.h"
+#include "runtime/vm/translator/translator-x64.h"
 
 namespace HPHP { namespace VM { namespace Treadmill {
 

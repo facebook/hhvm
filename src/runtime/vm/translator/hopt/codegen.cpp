@@ -2049,7 +2049,8 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
         uint64_t  notTaken = notTakenPC->getConstValAsInt();
 
         m_astubs.setcc(cc, serviceReqArgRegs[4]);
-        m_tx64-> emitServiceReq(false /* align */, REQ_BIND_JMPCC_FIRST,
+        m_tx64-> emitServiceReq(TranslatorX64::SRFlags::SRInline,
+                                REQ_BIND_JMPCC_FIRST,
                                 4ull,
                                 smashAddr,
                                 taken,
@@ -2068,8 +2069,10 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
           if (smashAddr != kIRDirectJccJmpActive) {
             // kIRDirectJccJmpActive only needs NormalCc exit in astubs
 
-            m_tx64->emitServiceReq(false, REQ_BIND_JMP, 2,
-                                   smashAddr, uint64_t(destSK.offset()));
+            m_tx64->emitServiceReq(TranslatorX64::SRFlags::SRInline,
+                                   REQ_BIND_JMP, 2,
+                                   smashAddr,
+                                   uint64_t(destSK.offset()));
 
           }
         } else {

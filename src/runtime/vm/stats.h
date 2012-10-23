@@ -152,7 +152,10 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(ElemAsm_GetIMiss) \
   STAT(PropAsm_Generic) \
   STAT(PropAsm_Specialized) \
-  STAT(PropAsm_GenFinal)
+  STAT(PropAsm_GenFinal) \
+  /* astubs stats */ \
+  STAT(Astubs_New) \
+  STAT(Astubs_Reused)
 
 
 enum StatCounter {

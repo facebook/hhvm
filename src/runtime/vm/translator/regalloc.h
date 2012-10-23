@@ -164,6 +164,10 @@ struct RegContent {
     return !isValid();
   }
 
+  bool isUnreachableStack(int firstUnreachable) const {
+    return isLoc() && m_loc.isStack() && m_loc.offset >= firstUnreachable;
+  }
+
   int cmp(const RegContent &other) const {
     if (m_kind != other.m_kind) {
       return m_kind - other.m_kind;
@@ -391,6 +395,7 @@ class RegAlloc {
 
   bool hasReg(const Location &loc) const;
   RegSet getRegsLike(RegInfo::State state) const;
+  bool hasDirtyRegs(int firstUnreachableStk) const;
   PhysReg getReg(const Location &loc);
 
   /*

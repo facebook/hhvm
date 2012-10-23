@@ -111,6 +111,10 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_ClassExistsSlow) \
   STAT(Tx64_StaticLocFast) \
   STAT(Tx64_StaticLocSlow) \
+  STAT(Tx64_OneGuardShort) \
+  STAT(Tx64_OneGuardLong) \
+  STAT(Tx64_SideExit) \
+  STAT(Tx64_SideExitClean) \
   /* Type prediction stats */ \
   STAT(TypePred_Insert) \
   STAT(TypePred_Evict) \

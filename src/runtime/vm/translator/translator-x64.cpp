@@ -1253,6 +1253,13 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align,
 }
 
 TCA
+TranslatorX64::lookupTranslation(const SrcKey& sk) const {
+  if (SrcRec* sr = m_srcDB.find(sk)) {
+    return sr->getTopTranslation();
+  }
+  return NULL;
+}
+TCA
 TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
   INC_TPC(translate);
   ASSERT(vmfp() >= vmsp());
@@ -4988,6 +4995,10 @@ void TranslatorX64::emitSideExit(Asm& a, const NormalizedInstruction& i,
   const NormalizedInstruction& dest = next ? *i.next : i;
 
   SKTRACE(3, i.source, "sideexit check %p\n", a.code.frontier);
+  Stats::emitInc(a, Stats::Tx64_SideExit);
+  if (!m_regMap.hasDirtyRegs(i.stackOff)) {
+    Stats::emitInc(a, Stats::Tx64_SideExitClean);
+  }
   // NB: if next == true, we are assuming here that stack elements
   // spit out by this instruction are already clean and sync'd back to
   // the top slot of the stack.
@@ -9789,6 +9800,7 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
                                  PhysReg reg, int disp, DataType type,
                                  TCA &sideExit) {
   bool isFirstInstr = (&i == t.m_instrStream.first);
+  bool regsClean = !m_regMap.hasDirtyRegs(i.stackOff);
   emitTypeCheck(a, type, reg, disp);
   if (isFirstInstr) {
     SrcRec& srcRec = *getSrcRec(t.m_sk);
@@ -9799,10 +9811,26 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
     //
     // We need to record this as a fallback branch.
     emitFallbackJmp(srcRec);
-  } else if (!sideExit) {
-    UnlikelyIfBlock<CC_NZ> branchToSideExit(a, astubs);
-    sideExit = astubs.code.frontier;
-    emitSideExit(astubs, i, false /*next*/);
+  } else if (!sideExit || regsClean) {
+    if (regsClean) {
+      // If we have no dirty regs and no stack offset at our destination, we
+      // can do this with a single jnz. If the destination has a translation
+      // already we'd emit an unlikely backwards jne, so use semiLikelyIfBlock
+      // in that case.
+      if (i.stackOff == 0 && !lookupTranslation(i.source)) {
+        Stats::emitInc(a, Stats::Tx64_OneGuardShort);
+        emitBindJcc(a, CC_NE, i.source, REQ_BIND_SIDE_EXIT);
+      } else {
+        Stats::emitInc(a, Stats::Tx64_OneGuardLong);
+        semiLikelyIfBlock<CC_NZ>(a, [&]{
+            emitSideExit(a, i, false /*next*/);
+          });
+      }
+    } else {
+      UnlikelyIfBlock<CC_NZ> ifFail(a, astubs);
+      sideExit = astubs.code.frontier;
+      emitSideExit(astubs, i, false /*next*/);
+    }
   } else {
     a.    jnz(sideExit);
   }

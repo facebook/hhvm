@@ -2376,8 +2376,18 @@ sm_type:
   | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1; }
   | '(' T_FUNCTION '(' sm_type_list ')' ':' sm_type ')'
                                        { only_in_strict_mode(_p); $$.reset(); }
+  | '(' T_FUNCTION sm_cast_fix ':' sm_type ')'
+                                       { only_in_strict_mode(_p); $$.reset(); }
   | '(' sm_type ',' sm_type_list ')'   { only_in_strict_mode(_p); $$.setText("array"); }
 ;
+
+/* required, because (int) gets lexed as T_INT_CAST */
+sm_cast_fix:
+  T_BOOL_CAST                          { $$ = 1;}
+| T_INT_CAST                           { $$ = 1;}
+| T_DOUBLE_CAST                        { $$ = 1;}
+| T_ARRAY_CAST                         { $$ = 1;}
+| T_STRING_CAST                        { $$ = 1;}
 
 sm_type_opt:
     sm_type                            { $$ = $1; }

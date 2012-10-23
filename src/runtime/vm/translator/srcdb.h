@@ -102,6 +102,14 @@ struct SrcRec {
     m_anchorTranslation = anc;
   }
 
+  const vector<IncomingBranch>& inProgressTailJumps() const {
+    return m_inProgressTailJumps;
+  }
+
+  void clearInProgressTailJumps() {
+    m_inProgressTailJumps.clear();
+  }
+
 private:
   TCA getFallbackTranslation() const;
   void patch(Asm* a, IncomingBranch branch, TCA dest);

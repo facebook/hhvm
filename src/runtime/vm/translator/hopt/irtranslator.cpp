@@ -1537,6 +1537,7 @@ TranslatorX64::irTranslateTracelet(const Tracelet& t,
   const SrcKey &sk = t.m_sk;
   SrcRec&                 srcRec = *getSrcRec(sk);
   vector<TransBCMapping>  bcMapping;
+  ASSERT(srcRec.inProgressTailJumps().size() == 0);
   try {
     // Don't translate if we have already reached the maximum # of
     // translations for this tracelet
@@ -1600,6 +1601,8 @@ TranslatorX64::irTranslateTracelet(const Tracelet& t,
     a.code.frontier = start;
     astubs.code.frontier = stubStart;
     m_pendingFixups.clear();
+    // Reset additions to list of addresses which need to be patched
+    srcRec.clearInProgressTailJumps();
   }
 
   return hhirSucceeded;

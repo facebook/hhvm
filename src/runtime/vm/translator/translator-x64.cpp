@@ -9782,6 +9782,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   }
   if (!hhirSucceeded) {
     ASSERT(m_pendingFixups.size() == 0);
+    ASSERT(srcRec.inProgressTailJumps().size() == 0);
     try {
       if (t.m_analysisFailed || checkTranslationLimit(t.m_sk, srcRec)) {
         punt();
@@ -9825,6 +9826,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
       bcMapping.clear();
       // Discard any pending fixups.
       m_pendingFixups.clear();
+      srcRec.clearInProgressTailJumps();
       TRACE(1, "emitting %d-instr interp request for failed translation @%s:%d\n",
             int(t.m_numOpcodes), tfe.m_file, tfe.m_line);
       // Add a counter for the translation if requested

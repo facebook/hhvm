@@ -42,7 +42,7 @@ void cgPunt(const char* _file, int _line, const char* _func);
 
 #define CG_PUNT(instr) do {                                            \
   if (tx64) {                                                          \
-    cgPunt( __FILE__, __LINE__, __func__);              \
+    cgPunt( __FILE__, __LINE__, __func__);                             \
   }                                                                    \
 } while(0)
 

@@ -28,6 +28,7 @@ class IRInstruction;
 
 
 void optimizeTrace(Trace* trace, IRFactory* factory);
+void insertRefCountAsserts(Trace* trace, IRFactory* factory);
 
 } } }
 

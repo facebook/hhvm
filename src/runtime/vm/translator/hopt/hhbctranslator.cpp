@@ -272,7 +272,6 @@ void HhbcTranslator::emitConcat() {
   SSATmp* tr = popC();
   SSATmp* tl = popC();
   // the concat helpers decref their args, so don't decref pop'ed values
-  // TODO task 1805916: verify that Concat increfs its result
   push(m_tb.genConcat(tl, tr));
 }
 
@@ -1182,7 +1181,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32 numParams,
       objOrCls = m_tb.genDefConst<const Class*>(baseClass);
     } else if (m_tb.isThisAvailable()) {
       // 'this' pointer is available, so use it.
-      objOrCls = m_tb.genLdThis(NULL);
+      objOrCls = m_tb.genIncRef(m_tb.genLdThis(NULL));
     } else {
       // might be a non-static call
       // generate code that tests at runtime whether to use

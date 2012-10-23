@@ -23,6 +23,32 @@ namespace HPHP {
 namespace VM {
 namespace JIT {
 
+void insertRefCountAssertsAux(Trace* trace, IRFactory* factory) {
+  IRInstruction::List& instructions = trace->getInstructionList();
+  IRInstruction::Iterator it;
+  for (it = instructions.begin(); it != instructions.end(); ) {
+    IRInstruction* inst = *it;
+    it++;
+    SSATmp* dst = inst->getDst();
+    if (dst &&
+        inst->getOpcode() != LdContThisOrCls &&
+        Type::isStaticallyKnown(dst->getType()) &&
+        Type::isRefCounted(dst->getType())) {
+      IRInstruction assertInst(AssertRefCount, Type::None, dst);
+      instructions.insert(it, assertInst.clone(factory));
+    }
+  }
+}
+
+void insertRefCountAsserts(Trace* trace, IRFactory* factory) {
+  insertRefCountAssertsAux(trace, factory);
+  Trace::List& exitTraces = trace->getExitTraces();
+  for (Trace::Iterator it = exitTraces.begin();
+       it != exitTraces.end();
+       it++) {
+    insertRefCountAssertsAux(*it, factory);
+  }
+}
 
 void optimizeTrace(Trace* trace, IRFactory* irFactory) {
   if (RuntimeOption::EvalHHIRMemOpt) {
@@ -34,6 +60,9 @@ void optimizeTrace(Trace* trace, IRFactory* irFactory) {
     std::cout << "---------------------------\n";
   }
   eliminateDeadCode(trace, irFactory);
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    insertRefCountAsserts(trace, irFactory);
+  }
 }
 
 } } }

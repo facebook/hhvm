@@ -284,6 +284,7 @@ static const TCA kIRDirectJccActive = (TCA)0x02;
   OPC(ContRaiseCheck,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
   OPC(ContPreNext,       0,  0,  1,  1,  0,  0,  0,  0,  0,  0) \
   OPC(ContStartedCheck,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
+  OPC(AssertRefCount,    0,  0,  1,  0,  0,  0,  0,  0,  0,  0) \
 
 enum Opcode {
 #define OPC(name, hasDst, canCSE, essential, hasMemEffects, isNative, \
@@ -626,6 +627,7 @@ protected:
   friend class HhbcTranslator;
   friend class MemMap;
 
+ public:
   IRInstruction(Opcode o, Type::Tag t, LabelInstruction *l = NULL)
       : m_op(o), m_type(t), m_id(0), m_numSrcs(0),
         m_liveOutRegs(0), m_dst(NULL), m_asmAddr(NULL), m_label(l),
@@ -1018,7 +1020,7 @@ public:
   void              print();
   static const uint32 MaxNumAssignedLoc = 2;
 
-  // Used for Jcc to Jmp elimination 
+  // Used for Jcc to Jmp elimination
   void              setTCA(TCA tca);
   TCA               getTCA();
 

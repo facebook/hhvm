@@ -4419,6 +4419,14 @@ Address CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   return start;
 }
 
+Address CodeGenerator::cgAssertRefCount(IRInstruction* inst) {
+  Address start = m_as.code.frontier;
+  SSATmp* src = inst->getSrc(0);
+  register_name_t srcReg = src->getAssignedLoc();
+  emitAssertRefCount(m_as, srcReg, 0);
+  return start;
+}
+
 Address CodeGenerator::cgLabel(Opcode opc, LabelInstruction* label) {
   return patchLabel(label, m_as.code.frontier);
 }

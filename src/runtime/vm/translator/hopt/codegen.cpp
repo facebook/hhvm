@@ -2579,13 +2579,6 @@ Address CodeGenerator::cgDecRefDynamicTypeMem(register_name_t baseReg,
     ConditionCode cc = (&m_as == &m_astubs) ? CC_NE : CC_E;
     m_as.jcc(cc, m_astubs.code.frontier);
 
-    // Put the address of the cell into scratchReg. If rdi is
-    // available, use it as the scratchReg to avoid extra move
-    // before the call
-    if ((getLiveOutRegsToSave(reg::noreg) &
-         LinearScan::regNameAsInt(reg::rdi)) == 0) {
-      scratchReg = reg::rdi;
-    }
     m_astubs.lea_reg64_disp_reg64(baseReg, offset, scratchReg);
 
     // Emit call to release in m_astubs

@@ -537,7 +537,16 @@ public:
 
   Avail avail(Class *&parent, bool tryAutoload = false) const;
   Class* classof(const PreClass* preClass) const;
-  bool classof(const Class* cls) const;
+  bool classof(const Class* cls) const {
+    if (UNLIKELY((attrs() & (AttrInterface | AttrTrait)) ||
+                 (cls->attrs() & (AttrInterface | AttrTrait)))) {
+      return (classof(cls->m_preClass.get()) == cls);
+    }
+    if (m_classVecLen >= cls->m_classVecLen) {
+      return (m_classVec[cls->m_classVecLen-1] == cls);
+    }
+    return false;
+  }
   const StringData* name() const {
     return m_preClass->name();
   }

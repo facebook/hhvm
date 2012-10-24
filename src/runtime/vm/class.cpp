@@ -618,17 +618,6 @@ Class* Class::classof(const PreClass* preClass) const {
   return NULL;
 }
 
-bool Class::classof(const Class* cls) const {
-  if (UNLIKELY((attrs() & (AttrInterface | AttrTrait)) ||
-               (cls->attrs() & (AttrInterface | AttrTrait)))) {
-    return (classof(cls->m_preClass.get()) == cls);
-  }
-  if (m_classVecLen >= cls->m_classVecLen) {
-    return (m_classVec[cls->m_classVecLen-1] == cls);
-  }
-  return false;
-}
-
 void Class::initialize(TypedValue*& sProps) const {
   if (m_pinitVec.size() > 0) {
     if (getPropData() == NULL) {

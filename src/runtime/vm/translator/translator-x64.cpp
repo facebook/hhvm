@@ -10395,18 +10395,35 @@ TranslatorX64::TranslatorX64()
   // the need for trampolines, and get to use shorter
   // instructions for tc addresses.
   static const size_t kRoundUp = 2 << 20;
-  uint8_t *base = (uint8_t*)sbrk(kTotalSize + kRoundUp - 1);
+  const size_t allocationSize = kTotalSize + kRoundUp - 1;
+  uint8_t *base = (uint8_t*)sbrk(allocationSize);
+  if (base == (uint8_t*)-1) {
+    base = (uint8_t*)low_malloc(allocationSize);
+    if (!base) {
+      base = (uint8_t*)malloc(allocationSize);
+    }
+    if (!base) {
+      fprintf(stderr, "could not allocate %zd bytes for translation cache\n",
+              allocationSize);
+      exit(1);
+    }
+  }
+  ASSERT(base);
   base += -(uint64_t)base & (kRoundUp - 1);
   if (RuntimeOption::EvalMapTCHuge) {
     hintHuge(base, kTotalSize);
   }
+  TRACE(1, "init atrampolines @%p\n", base);
   atrampolines.init(base, kTrampolinesBlockSize);
   base += kTrampolinesBlockSize;
+  TRACE(1, "init a @%p\n", base);
   a.init(base, kASize);
   m_unwindRegistrar = register_unwind_region(base, kTotalSize);
   base += kASize;
+  TRACE(1, "init astubs @%p\n", base);
   astubs.init(base, kAStubsSize);
   base += kAStubsSize;
+  TRACE(1, "init gdata @%p\n", base);
   m_globalData.init(base, kGDataSize);
 
   // Emit some special helpers that are shared across translations.

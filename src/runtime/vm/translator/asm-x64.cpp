@@ -74,6 +74,7 @@ void DataBlock::init(Address start, size_t sz) {
 }
 
 void DataBlock::makeExecable() {
+  ASSERT(base);
   if (mprotect(base, size, PROT_READ | PROT_WRITE | PROT_EXEC)) {
     panic("%s:%d (%s): mprotect @%p %zu bytes failed (%s)\n",
           __FILE__, __LINE__, __func__,

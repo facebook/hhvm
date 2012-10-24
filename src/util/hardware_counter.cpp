@@ -274,6 +274,30 @@ static int findEvent(char *event, struct PerfTable *t,
   return -1;
 }
 
+#define CPUID_STEPPING(x)  ((x) & 0xf)
+#define CPUID_MODEL(x)     (((x) & 0xf0) >> 4)
+#define CPUID_FAMILY(x)    (((x) & 0xf00) >> 8)
+#define CPUID_TYPE(x)      (((x) & 0x3000) >> 12)
+
+// hack to get LLC counters on perflab frc machines
+static bool isIntelE5_2670() {
+  unsigned long x;
+  asm volatile ("cpuid" : "=a"(x): "a"(1) : "ebx", "ecx", "edx");
+  return CPUID_STEPPING(x) == 6 && CPUID_MODEL(x) == 0xd
+         && CPUID_FAMILY(x) == 6 && CPUID_TYPE(x) == 0;
+}
+
+static void checkLLCHack(char* event, uint32_t& type, uint64_t& config) {
+  if (!strncmp(event, "LLC-load", 8) && isIntelE5_2670()) {
+    type = PERF_TYPE_RAW;
+    if (!strncmp(&event[4], "loads", 5)) {
+      config = 0x534f2e;
+    } else if (!strncmp(&event[4], "load-misses", 11)) {
+      config = 0x53412e;
+    }
+  }
+}
+
 bool HardwareCounter::addPerfEvent(char *event) {
   uint32_t type = 0;
   uint64_t config = 0;
@@ -291,6 +315,8 @@ bool HardwareCounter::addPerfEvent(char *event) {
     config |= perfTable[i].config;
     ev = &ev[match_len];
   }
+
+  checkLLCHack(event, type, config);
 
   if (!found) {
     Logger::Warning("failed to find perf event: %s", event);

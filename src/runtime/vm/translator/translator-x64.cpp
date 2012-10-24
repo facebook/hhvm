@@ -9018,7 +9018,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     srcReg = *srcScratch;
     a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), srcReg);
     if (i.prev->op() == OpThis) {
-      ASSERT(i.guardedThis);
+      ASSERT(i.prev->guardedThis);
     } else {
       if (i.prev->imm[0].u_OA) {
         retFromNullThis.reset(new DiamondReturn);

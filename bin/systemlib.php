@@ -78,7 +78,7 @@ class Exception {
   }
 
   final function setPreviousChain(Exception $previous) {
-    Exception& $cur = $this;
+    $cur = $this;
     $next = $cur->getPrevious();
     while ($next instanceof Exception) {
       $cur = $next;

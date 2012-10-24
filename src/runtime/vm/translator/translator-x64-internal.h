@@ -17,6 +17,7 @@
 #define incl_TRANSLATOR_X64_INTERNAL_H_
 
 #include <boost/optional.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
 #include <runtime/vm/translator/abi-x64.h>
@@ -315,8 +316,23 @@ inline void emitUnlikelyProfile(bool hit, bool saveFlags,
   if (!Trace::moduleEnabledRelease(Trace::unlikely)) return;
   const ssize_t sz = 1024;
   char key[sz];
-  if (snprintf(key, sz, "%47s:%-5d (%s)",
-               tx64->m_curFile, tx64->m_curLine, tx64->m_curFunc) >= sz) {
+
+  // Clean up filename
+  std::string file =
+    boost::filesystem::path(tx64->m_curFile).filename().string();
+
+  // Get instruction if wanted
+  const NormalizedInstruction* ni = tx64->m_curNI;
+  std::string inst;
+  if (Trace::moduleEnabledRelease(Trace::unlikely, 2)) {
+    inst = std::string(", ") + (ni ? opcodeToName(ni->op()) : "<none>");
+  }
+  const char* fmt = Trace::moduleEnabledRelease(Trace::unlikely, 3) ?
+    "%-25s:%-5d, %-28s%s" :
+    "%-25s:%-5d (%-28s%s)";
+  if (snprintf(key, sz, fmt,
+               file.c_str(), tx64->m_curLine, tx64->m_curFunc,
+               inst.c_str()) >= sz) {
     key[sz-1] = '\0';
   }
   litstr data = StringData::GetStaticString(key)->data();
@@ -347,11 +363,18 @@ inline void dumpUnlikelyProfile() {
     overall.hit += item.second.hit;
     hits.push_back(item.second);
   }
-  std::sort(hits.begin(), hits.end());
+  if (hits.empty()) return;
+  auto cmp = [&](const UnlikelyHitRate& a, const UnlikelyHitRate& b) {
+    return a.hit > b.hit ? true : a.hit == b.hit ? a.check > b.check : false;
+  };
+  std::sort(hits.begin(), hits.end(), cmp);
   Trace::traceRelease("UnlikelyIfBlock hit rates for %s:\n",
                       g_context->getRequestUrl(50).c_str());
+  const char* fmt = Trace::moduleEnabledRelease(Trace::unlikely, 3) ?
+    "%6.2f, %8llu, %8llu, %5.1f, %s\n" :
+    "%6.2f%% (%8llu / %8llu, %5.1f%% of total): %s\n";
   auto printRate = [&](const UnlikelyHitRate& hr) {
-    Trace::traceRelease("%5.2f%% (%8llu / %8llu, %5.1f%% of total): %s\n",
+    Trace::traceRelease(fmt,
                         hr.rate(), hr.hit, hr.check, hr.key,
                         100.0 * hr.hit / overall.hit);
   };

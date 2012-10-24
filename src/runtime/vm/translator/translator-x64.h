@@ -145,11 +145,11 @@ class TranslatorX64 : public Translator
   UnwindRegMap               m_unwindRegMap;
   UnwindInfoHandle           m_unwindRegistrar;
 
+public:
   // Currently translating trace or instruction---only valid during
   // translate phase.
   const Tracelet*              m_curTrace;
   const NormalizedInstruction* m_curNI;
-public:
   litstr m_curFile;
   int m_curLine;
   litstr m_curFunc;

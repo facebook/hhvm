@@ -129,6 +129,7 @@ struct SrcKey {
   }
 
   void trace(const char *fmt, ...) const;
+  void print(int ninstr) const;
   int offset() const {
     return m_offset;
   }
@@ -586,7 +587,7 @@ struct Tracelet : private boost::noncopyable {
   DynLocation* newDynLocation(Location l, RuntimeType t);
   DynLocation* newDynLocation();
 
-  void print();
+  void print() const;
 };
 
 struct TraceletContext {

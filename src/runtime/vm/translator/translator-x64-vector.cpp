@@ -3106,58 +3106,6 @@ void TranslatorX64::translateCGetM_GE(const Tracelet& t,
                 rax, &key, outLoc);
 }
 
-static bool
-isSupportedInstrVGetG(const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  return (i.inputs[0]->rtt.isString());
-}
-
-void
-TranslatorX64::analyzeVGetG(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = simplePlan(isSupportedInstrVGetG(i));
-}
-
-static TypedValue* lookupAddBoxedGlobal(StringData* name) {
-  VarEnv* ve = g_vmContext->m_globalVarEnv;
-  TypedValue* r = ve->lookupAdd(name);
-  if (r->m_type != KindOfRef) {
-    tvBox(r);
-  }
-  LITSTR_DECREF(name);
-  return r;
-}
-
-void
-TranslatorX64::translateVGetG(const Tracelet& t,
-                              const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  ASSERT(i.outStack);
-  ASSERT(i.outStack->isVariant());
-  ASSERT(i.inputs[0]->location == i.outStack->location);
-
-  using namespace TargetCache;
-  const StringData* maybeName = i.inputs[0]->rtt.valueString();
-  if (!maybeName) {
-    EMIT_CALL(a, lookupAddBoxedGlobal, V(i.inputs[0]->location));
-    recordCall(i);
-  } else {
-    CacheHandle ch = BoxedGlobalCache::alloc(maybeName);
-
-    if (false) { // typecheck
-      StringData *key = NULL;
-      TypedValue UNUSED *glob = BoxedGlobalCache::lookupCreate(ch, key);
-    }
-    SKTRACE(1, i.source, "ch %d\n", ch);
-    EMIT_CALL(a, BoxedGlobalCache::lookupCreate,
-               IMM(ch),
-               V(i.inputs[0]->location));
-    recordCall(i);
-  }
-  m_regMap.bind(rax, i.outStack->location, KindOfRef, RegInfo::DIRTY);
-  emitIncRefGeneric(rax, 0);
-  emitDeref(a, rax, rax);
-}
-
 void
 TranslatorX64::translateCGetM(const Tracelet& t,
                               const NormalizedInstruction& i) {

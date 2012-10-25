@@ -107,8 +107,8 @@ DynLocation* Tracelet::newDynLocation() {
   return dl;
 }
 
-void Tracelet::print() {
-  NormalizedInstruction* i = m_instrStream.first;
+void Tracelet::print() const {
+  const NormalizedInstruction* i = m_instrStream.first;
   if (i == NULL) {
     std::cerr << "<empty>\n";
     return;
@@ -139,6 +139,20 @@ SrcKey::trace(const char *fmt, ...) const {
   va_start(a, fmt);
   Trace::vtrace(fmt, a);
   va_end(a);
+}
+
+void
+SrcKey::print(int ninstrs) const {
+  const Unit* u = curUnit();
+  Opcode* op = (Opcode*)u->at(m_offset);
+  std::cerr << u->filepath()->data() << ':' << u->getLineNumber(m_offset)
+            << std::endl;
+  for (int i = 0;
+       i < ninstrs && (uintptr_t)op < ((uintptr_t)u->entry() + u->bclen());
+       op += instrLen(op), ++i) {
+    std::cerr << "  " << u->offsetOf(op) << ": " << instrToString(op, u)
+              << std::endl;
+  }
 }
 
 // advance --
@@ -205,7 +219,7 @@ RuntimeType Translator::liveType(Location l, const Unit& u) {
       not_reached();
     }
   }
-  ASSERT(outer->m_type >= MinDataType && outer->m_type < MaxNumDataTypes);
+  ASSERT(IS_REAL_TYPE(outer->m_type));
   return liveType(outer, l);
 }
 
@@ -216,13 +230,14 @@ Translator::liveType(const Cell* outer, const Location& l) {
     return RuntimeType(KindOfRef, KindOfNull);
   }
   DataType outerType = (DataType)outer->m_type;
+  ASSERT(IS_REAL_TYPE(outerType));
   DataType valueType = outerType;
-  DataType innerType = KindOfInvalid;
   const Cell* valCell = outer;
   if (outerType == KindOfRef) {
     // Variant. Pick up the inner type, too.
     valCell = outer->m_data.pref->tv();
     DataType innerType = valCell->m_type;
+    ASSERT(IS_REAL_TYPE(innerType));
     valueType = innerType;
     ASSERT(innerType != KindOfRef);
     TRACE(2, "liveType Var -> %d\n", innerType);
@@ -236,7 +251,7 @@ Translator::liveType(const Cell* outer, const Location& l) {
     }
   }
   TRACE(2, "liveType %d\n", outerType);
-  RuntimeType retval = RuntimeType(outerType, innerType, klass);
+  RuntimeType retval = RuntimeType(outerType, KindOfInvalid, klass);
   return retval;
 }
 
@@ -967,7 +982,7 @@ static const struct {
   { OpSetOpN,      {StackTop2,        Stack1|Local, OutUnknown,       -1 }},
   { OpSetOpG,      {StackTop2,        Stack1|Local, OutUnknown,       -1 }},
   { OpSetOpS,      {StackTop3,        Stack1,       OutUnknown,       -2 }},
-  { OpSetOpM,      {MVector|Stack1,   Stack1,       OutUnknown,        0 }},
+  { OpSetOpM,      {MVector|Stack1,   Stack1|Local, OutUnknown,        0 }},
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec,         1 }},
   { OpIncDecN,     {Stack1,           Stack1|Local, OutUnknown,        0 }},
   { OpIncDecG,     {Stack1,           Stack1|Local, OutUnknown,        0 }},
@@ -1861,7 +1876,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
   varEnvTaint = false;
 
   const vector<DynLocation*>& inputs = ni->inputs;
-  Opcode op = ni->op();
+  Op op = ni->op();
 
   initInstrInfo();
   assert_not_implemented(instrInfo.find(op) != instrInfo.end());

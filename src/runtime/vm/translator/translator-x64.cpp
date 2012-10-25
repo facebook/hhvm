@@ -2487,6 +2487,7 @@ void
 TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
                              PhysReg base, int offset,
                              PhysReg tmp/*= InvalidReg*/) {
+  ASSERT(IS_REAL_TYPE(dt));
   offset += TVOFF(m_type);
   if (IS_STRING_TYPE(dt)) {
     LazyScratchReg scr(m_regMap);
@@ -3618,6 +3619,24 @@ void TranslatorX64::fixup(VMExecutionContext* ec) const {
   fixupWork(ec, rbp);
 }
 
+TCA TranslatorX64::getTranslatedCaller() const {
+  ActRec* rbp;
+  asm volatile("mov %%rbp, %0" : "=r"(rbp));
+  for (; rbp; rbp = (ActRec*)rbp->m_savedRbp) {
+    TCA rip = (TCA)rbp->m_savedRip;
+    if (isCodeAddress(rip)) {
+      return rip;
+    }
+  }
+  return nullptr;
+}
+
+bool TranslatorX64::isCodeAddress(TCA addr) const {
+  return a.code.isValidAddress(addr) ||
+    astubs.code.isValidAddress(addr) ||
+    atrampolines.code.isValidAddress(addr);
+}
+
 void
 TranslatorX64::syncWork() {
   ASSERT(tl_regState == REGSTATE_DIRTY);
@@ -4410,6 +4429,58 @@ TranslatorX64::translateVGetL(const Tracelet& t,
     emitMovRegReg(localReg, dest);
   }
   emitIncRef(dest, KindOfRef);
+}
+
+static bool
+isSupportedInstrVGetG(const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 1);
+  return (i.inputs[0]->rtt.isString());
+}
+
+void
+TranslatorX64::analyzeVGetG(Tracelet& t, NormalizedInstruction& i) {
+  i.m_txFlags = simplePlan(isSupportedInstrVGetG(i));
+}
+
+static TypedValue* lookupAddBoxedGlobal(StringData* name) {
+  VarEnv* ve = g_vmContext->m_globalVarEnv;
+  TypedValue* r = ve->lookupAdd(name);
+  if (r->m_type != KindOfRef) {
+    tvBox(r);
+  }
+  LITSTR_DECREF(name);
+  return r;
+}
+
+void
+TranslatorX64::translateVGetG(const Tracelet& t,
+                              const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 1);
+  ASSERT(i.outStack);
+  ASSERT(i.outStack->isVariant());
+  ASSERT(i.inputs[0]->location == i.outStack->location);
+
+  using namespace TargetCache;
+  const StringData* maybeName = i.inputs[0]->rtt.valueString();
+  if (!maybeName) {
+    EMIT_CALL(a, lookupAddBoxedGlobal, V(i.inputs[0]->location));
+    recordCall(i);
+  } else {
+    CacheHandle ch = BoxedGlobalCache::alloc(maybeName);
+
+    if (false) { // typecheck
+      StringData *key = NULL;
+      TypedValue UNUSED *glob = BoxedGlobalCache::lookupCreate(ch, key);
+    }
+    SKTRACE(1, i.source, "ch %d\n", ch);
+    EMIT_CALL(a, BoxedGlobalCache::lookupCreate,
+               IMM(ch),
+               V(i.inputs[0]->location));
+    recordCall(i);
+  }
+  m_regMap.bind(rax, i.outStack->location, KindOfRef, RegInfo::DIRTY);
+  emitIncRefGeneric(rax, 0);
+  emitDeref(a, rax, rax);
 }
 
 void

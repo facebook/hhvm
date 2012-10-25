@@ -557,6 +557,7 @@ public:
   std::string prettyStack(const std::string& prefix) const;
   static void DumpStack();
   static void DumpCurUnit(int skip = 0);
+  static void PrintTCCallerInfo();
 
   VM::VarEnv* m_globalVarEnv;
   VM::VarEnv* m_topVarEnv;

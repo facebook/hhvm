@@ -670,6 +670,8 @@ PSEUDOINSTRS
 
   void fixupWork(VMExecutionContext* ec, ActRec* startRbp) const;
   void fixup(VMExecutionContext* ec) const;
+  TCA getTranslatedCaller() const;
+  bool isCodeAddress(TCA) const;
 
   // helpers for srcDB.
   SrcRec* getSrcRec(const SrcKey& sk) {

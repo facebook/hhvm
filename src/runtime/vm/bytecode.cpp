@@ -6961,6 +6961,16 @@ void VMExecutionContext::DumpCurUnit(int skip) {
   std::cout << u->toString();
 }
 
+void VMExecutionContext::PrintTCCallerInfo() {
+  VMRegAnchor _;
+  ActRec* fp = g_vmContext->getFP();
+  Unit* u = fp->m_func->unit();
+  printf("Called from TC address %p\n",
+         TranslatorX64::Get()->getTranslatedCaller());
+  std::cout << u->filepath()->data() << ':'
+            << u->getLineNumber(u->offsetOf(g_vmContext->getPC())) << std::endl;
+}
+
 static inline void
 condStackTraceSep(const char* pfx) {
   TRACE(3, "%s"

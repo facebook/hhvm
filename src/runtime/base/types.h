@@ -182,6 +182,9 @@ inline int getDataTypeIndex(DataType t) {
 #define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
 
+#define IS_REAL_TYPE(t) \
+  ((t) >= KindOfUninit && (t) < MaxNumDataTypes || (t) == KindOfClass)
+
 namespace Collection {
 enum Type {
   InvalidType = 0,

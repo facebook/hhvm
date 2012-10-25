@@ -1257,15 +1257,14 @@ TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
 bool
 TranslatorX64::isSmashable(X64Assembler& a, int nBytes) {
   ASSERT(nBytes <= int(kX64CacheLineSize));
-  static const uint64 kCacheMask = ~(uint64(kX64CacheLineSize) - 1);
   uintptr_t iFrontier = uintptr_t(a.code.frontier);
   uintptr_t lastByte = iFrontier + nBytes - 1;
-  return (iFrontier & kCacheMask) == (lastByte & kCacheMask);
+  return (iFrontier & ~kX64CacheLineMask) == (lastByte & ~kX64CacheLineMask);
 }
 
 void
 TranslatorX64::prepareForSmash(X64Assembler& a, int nBytes) {
-  if (UNLIKELY(!isSmashable(a, nBytes))) {
+  if (!isSmashable(a, nBytes)) {
     moveToAlign(a, kX64CacheLineSize, false);
   }
   ASSERT(isSmashable(a, nBytes));
@@ -1797,6 +1796,11 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
   SpaceRecorder sr("_FuncPrologue", a);
+  // If we're close to a cache line boundary, just burn some space to
+  // try to keep the func and its body on fewer total lines.
+  if (((uintptr_t)a.code.frontier & kX64CacheLineMask) >= 32) {
+    moveToAlign(a, kX64CacheLineSize);
+  }
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
   // prologues, this is just a possible prologue.
   TCA aStart    = a.code.frontier;
@@ -3497,7 +3501,7 @@ TranslatorX64::emitInterpOne(const Tracelet& t,
   // by adding the appropriate offset to rax and dereferencing.
 
   // If this instruction ends the tracelet, we have some extra work to do.
-  if (ni.breaksBB) {
+  if (ni.breaksTracelet) {
     // Read the 'm_fp' and 'm_stack.m_top' fields into the rVmFp and
     // rVmSp registers.
     a.  load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_fp),
@@ -4002,7 +4006,7 @@ void TranslatorX64::branchWithFlagsSet(const Tracelet& t,
 void TranslatorX64::fuseBranchAfterStaticBool(const Tracelet& t,
                                               const NormalizedInstruction& i,
                                               bool resultIsTrue) {
-  ASSERT(i.breaksBB);
+  ASSERT(i.breaksTracelet);
   ASSERT(i.next);
   NormalizedInstruction &nexti = *i.next;
   fuseBranchSync(t, i);
@@ -4026,7 +4030,7 @@ void TranslatorX64::fuseBranchSync(const Tracelet& t,
 void TranslatorX64::fuseBranchAfterBool(const Tracelet& t,
                                         const NormalizedInstruction& i,
                                         ConditionCode cc) {
-  ASSERT(i.breaksBB);
+  ASSERT(i.breaksTracelet);
   ASSERT(i.next);
   NormalizedInstruction &nexti = *i.next;
   if (!i.next->isJmpNZ()) cc = ccNegate(cc);
@@ -7550,7 +7554,7 @@ TranslatorX64::translateReqLit(const Tracelet& t,
   args->m_pcOff = after;
   args->m_local = local;
 
-  if (i.breaksBB) {
+  if (i.breaksTracelet) {
     SrcKey fallThru(curFunc(), after);
     emitBindJmp(fallThru);
   } else {
@@ -8713,7 +8717,7 @@ TranslatorX64::translateFCall(const Tracelet& t,
                curUnit()->offsetOf(after)); // ...
   retIP.patch(uint64(a.code.frontier));
 
-  if (i.breaksBB) {
+  if (i.breaksTracelet) {
     SrcKey fallThru(curFunc(), after);
     emitBindJmp(fallThru);
   } else {
@@ -8752,7 +8756,7 @@ void TranslatorX64::translateFCallArray(const Tracelet& t,
   args->m_pcOff = i.offset();
   args->m_pcNext = after;
 
-  if (i.breaksBB) {
+  if (i.breaksTracelet) {
     SrcKey fallThru(curFunc(), after);
     emitBindJmp(fallThru);
   } else {
@@ -9452,7 +9456,7 @@ NormalizedInstruction::outputIsUsed(DynLocation* output) const {
 
 void
 TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
-  if (!i.outputPredicted || i.breaksBB) return;
+  if (!i.outputPredicted || i.breaksTracelet) return;
   NormalizedInstruction::OutputUse u = i.outputIsUsed(i.outStack);
 
   if (m_useHHIR) {
@@ -9626,7 +9630,7 @@ TranslatorX64::translateInstr(const Tracelet& t,
   recordBCInstr(op, a, start);
   recordBCInstr(op + Op_count, astubs, astart);
 
-  if (i.breaksBB && !i.changesPC) {
+  if (i.breaksTracelet && !i.changesPC) {
     // If this instruction's opcode always ends the tracelet then the
     // instruction case is responsible for performing end-of-tracelet
     // duties. Otherwise, we handle ending the tracelet here.
@@ -9813,8 +9817,8 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
         translateInstr(t, *ni);
         ASSERT(ni->source.offset() >= curFunc()->base());
         // We sometimes leave the tail of a truncated tracelet in place to aid
-        // analysis, but breaksBB is authoritative.
-        if (ni->breaksBB) break;
+        // analysis, but breaksTracelet is authoritative.
+        if (ni->breaksTracelet) break;
       }
     } catch (TranslationFailedExc& tfe) {
       // The whole translation failed; give up on this BB. Since it is not

@@ -1455,7 +1455,7 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
   SKTRACE(1, i.source, "translate %#lx\n", long(a.code.frontier));
   const Opcode op = i.op();
 
-  m_hhbcTrans->setBcOff(i.source.offset(), i.breaksBB);
+  m_hhbcTrans->setBcOff(i.source.offset(), i.breaksTracelet);
 
   if (!i.grouped) {
     emitVariantGuards(t, i);
@@ -1566,8 +1566,8 @@ TranslatorX64::irTranslateTracelet(const Tracelet& t,
       irTranslateInstr(t, *ni);
       ASSERT(ni->source.offset() >= curFunc()->base());
       // We sometimes leave the tail of a truncated tracelet in place to aid
-      // analysis, but breaksBB is authoritative.
-      if (ni->breaksBB) break;
+      // analysis, but breaksTracelet is authoritative.
+      if (ni->breaksTracelet) break;
     }
 
     hhirTraceEnd(t.m_nextSk.offset());

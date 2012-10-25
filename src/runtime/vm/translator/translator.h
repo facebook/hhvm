@@ -276,7 +276,8 @@ class NormalizedInstruction {
   // stack at tracelet entry.
   int stackOff;
   unsigned hasConstImm:1;
-  unsigned breaksBB:1;
+  unsigned startsBB:1;
+  unsigned breaksTracelet:1;
   unsigned changesPC:1;
   unsigned fuseBranch:1;
   unsigned preppedByRef:1;    // For FPass*; indicates parameter reffiness

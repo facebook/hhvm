@@ -1209,10 +1209,10 @@ void Translator::analyzeSecondPass(Tracelet& t) {
           prevOp == OpIssetL || prevOp == OpAKExists ||
           isTypePred(prevOp) ||
           prev->fuseBranch) {
-        prev->breaksBB = true;
+        prev->breaksTracelet = true;
         prev->changesPC = true; // Dont generate generic glue.
         // Leave prev->next linked. The translator will end up needing it. The
-        // breaksBB annotation here will prevent us from really translating the
+        // breaksTracelet annotation here will prevent us from really translating the
         // Jmp*.
         continue;
       }
@@ -2457,7 +2457,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       t.m_arState.getCurrentFunc() : NULL;
     ni->m_unit = unit;
     ni->preppedByRef = false;
-    ni->breaksBB = false;
+    ni->breaksTracelet = false;
     ni->changesPC = opcodeChangesPC(ni->op());
     ni->manuallyAllocInputs = false;
     ni->fuseBranch = false;
@@ -2727,7 +2727,7 @@ breakBB:
 
   // Mark the last instruction appropriately
   ASSERT(t.m_instrStream.last);
-  t.m_instrStream.last->breaksBB = true;
+  t.m_instrStream.last->breaksTracelet = true;
   t.m_nextSk = sk;
   // Populate t.m_changes, t.intermediates, t.m_dependencies
   t.m_dependencies = tas.m_dependencies;

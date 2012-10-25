@@ -65,12 +65,9 @@ bool RenamedFuncDict::rename(const StringData* old, const StringData* n3w) {
     }
   }
 
-  const StringData* sNew =
-    n3w->isStatic() ? n3w : StringData::GetStaticString(n3w);
-
   oldNe->setCachedFunc(NULL);
   if (UNLIKELY(newNe->m_cachedFuncOffset == 0)) {
-    newNe->m_cachedFuncOffset = Transl::TargetCache::allocFixedFunction(sNew);
+    Transl::TargetCache::allocFixedFunction(newNe, false);
   }
   newNe->setCachedFunc(func);
 

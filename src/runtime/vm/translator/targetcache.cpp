@@ -19,6 +19,7 @@
 
 #include <util/trace.h>
 #include <util/base.h>
+#include <util/maphuge.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/base/types.h>
@@ -60,14 +61,17 @@ undefinedError(const char* msg, const char* name) {
 }
 
 // Targetcache memory. See the comment in targetcache.h
-__thread DataBlock tl_targetCaches = {0, 0, 0};
+__thread void* tl_targetCaches = NULL;
+
 CT_ASSERT(kConditionFlagsOff + sizeof(ssize_t) <= 64);
 size_t s_frontier = kConditionFlagsOff + 64;
+static size_t s_persistent_frontier = 0;
+static size_t s_persistent_start = 0;
 static size_t s_next_bit;
 static size_t s_bits_to_go;
+static int s_tc_fd;
 static const size_t kPreAllocatedBytes = kConditionFlagsOff + 64;
 
-static Mutex s_mutex(false /*recursive*/, RankLeaf);
 // Mapping from names to targetcache locations. Protected by the translator
 // write lease.
 typedef hphp_hash_map<const StringData*, Handle, string_data_hash,
@@ -96,7 +100,7 @@ static Mutex s_handleMutex(false /*recursive*/, RankLeaf);
 
 inline Handle
 ptrToHandle(const void* ptr) {
-  ptrdiff_t retval = uintptr_t(ptr) - uintptr_t(tl_targetCaches.base);
+  ptrdiff_t retval = uintptr_t(ptr) - uintptr_t(tl_targetCaches);
   ASSERT(retval < RuntimeOption::EvalJitTargetCacheSize);
   return retval;
 }
@@ -190,6 +194,26 @@ bool testAndSetBit(Handle handle, uint32 mask) {
   return ret;
 }
 
+bool isPersistentHandle(Handle handle) {
+  return handle >= (unsigned)s_persistent_start;
+}
+
+static Handle allocLocked(bool persistent, int numBytes, int align) {
+  s_handleMutex.assertOwnedBySelf();
+  align = Util::roundUpToPowerOfTwo(align);
+  size_t &frontier = persistent ? s_persistent_frontier : s_frontier;
+
+  frontier += align - 1;
+  frontier &= ~(align - 1);
+  frontier += numBytes;
+
+  assert(frontier < (persistent ?
+                     RuntimeOption::EvalJitTargetCacheSize :
+                     s_persistent_start));
+
+  return frontier - numBytes;
+}
+
 // namedAlloc --
 //   Many targetcache entries (Func, Class, Constant, ...) have
 //   request-unique values. There is no reason to allocate more than
@@ -212,8 +236,7 @@ namedAlloc(PHPNameSpace where, const StringData* name,
     TRACE(2, "TargetCache: hit \"%s\", %d\n", name->data(), int(retval));
     return retval;
   }
-  void *mem = tl_targetCaches.allocAt(s_frontier, numBytes, align);
-  retval = ptrToHandle(mem);
+  retval = allocLocked(where == NSPersistent, numBytes, align);
   if (name) {
     if (!name->isStatic()) name = StringData::GetStaticString(name);
     mapInsertUnique(map, name, retval);
@@ -235,16 +258,6 @@ void
 invalidateForRename(const StringData* name) {
   ASSERT(name);
   Lock l(s_handleMutex);
-  {
-    Handle handle;
-    HandleMapIS& map = getHMap(NSFunction);
-    if (mapGet(map, name, &handle)) {
-      TRACE(1, "TargetCaches: invalidating mapping for NSFunction::%s\n",
-            name->data());
-      // OK, there's a targetcache for this name.
-      FixedFuncCache::invalidate(handle);
-    }
-  }
 
   for (HandleVector::iterator i = funcCacheEntries.begin();
        i != funcCacheEntries.end(); ++i) {
@@ -252,25 +265,56 @@ invalidateForRename(const StringData* name) {
   }
 }
 
+void initPersistentCache() {
+  Lock l(s_handleMutex);
+  if (s_tc_fd) return;
+  char tmpName[] = "/tmp/tcXXXXXX";
+  s_tc_fd = mkstemp(tmpName);
+  assert(s_tc_fd != -1);
+  unlink(tmpName);
+  s_persistent_start = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
+  s_persistent_start -= s_persistent_start & (4 * 1024 - 1);
+  ftruncate(s_tc_fd,
+            RuntimeOption::EvalJitTargetCacheSize - s_persistent_start);
+  s_persistent_frontier = s_persistent_start;
+}
+
 void threadInit() {
-  tl_targetCaches.size = RuntimeOption::EvalJitTargetCacheSize;
-  tl_targetCaches.init();
+  if (!s_tc_fd) {
+    initPersistentCache();
+  }
+
+  tl_targetCaches = mmap(NULL, RuntimeOption::EvalJitTargetCacheSize,
+                         PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+  assert(tl_targetCaches != MAP_FAILED);
+  hintHuge(tl_targetCaches, RuntimeOption::EvalJitTargetCacheSize);
+
+  void *shared_base = (char*)tl_targetCaches + s_persistent_start;
+  /*
+   * map the upper portion of the target cache to a shared area
+   * This is used for persistent classes and functions, so they
+   * are always defined, and always visible to all threads.
+   */
+  void *mem = mmap(shared_base,
+                   RuntimeOption::EvalJitTargetCacheSize - s_persistent_start,
+                   PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, s_tc_fd, 0);
+  assert(mem == shared_base);
 }
 
 void threadExit() {
-  tl_targetCaches.free();
+  munmap(tl_targetCaches, RuntimeOption::EvalJitTargetCacheSize);
 }
 
 static const bool zeroViaMemset = true;
 
 void
 requestInit() {
-  ASSERT(tl_targetCaches.base);
-  TRACE(1, "TargetCache: @%p\n", tl_targetCaches.base);
+  ASSERT(tl_targetCaches);
+  TRACE(1, "TargetCache: @%p\n", tl_targetCaches);
   if (zeroViaMemset) {
     TRACE(1, "TargetCache: bzeroing %zd bytes: %p\n", s_frontier,
-          tl_targetCaches.base);
-    memset(tl_targetCaches.base, 0, s_frontier);
+          tl_targetCaches);
+    memset(tl_targetCaches, 0, s_frontier);
   }
 }
 
@@ -284,8 +328,8 @@ requestExit() {
 void
 flush() {
   TRACE(1, "TargetCache: MADV_DONTNEED %zd bytes: %p\n", s_frontier,
-        tl_targetCaches.base);
-  if (madvise(tl_targetCaches.base, s_frontier, MADV_DONTNEED) < 0) {
+        tl_targetCaches);
+  if (madvise(tl_targetCaches, s_frontier, MADV_DONTNEED) < 0) {
     not_reached();
   }
 }
@@ -519,9 +563,33 @@ BoxedGlobalCache::lookupCreate(Handle handle, StringData* name) {
   return retval;
 }
 
+static CacheHandle allocFuncOrClass(const unsigned* handlep, bool persistent) {
+  if (UNLIKELY(!*handlep)) {
+    Lock l(s_handleMutex);
+    if (!*handlep) {
+      *const_cast<unsigned*>(handlep) =
+        allocLocked(persistent, sizeof(void*), sizeof(void*));
+    }
+  }
+  return *handlep;
+}
+
+CacheHandle allocKnownClass(const Class* cls) {
+  const NamedEntity* ne = cls->preClass()->namedEntity();
+  if (ne->m_cachedClassOffset) return ne->m_cachedClassOffset;
+
+  return allocKnownClass(ne,
+                         RuntimeOption::RepoAuthoritative &&
+                         cls->verifyPersistent());
+}
+
+CacheHandle allocKnownClass(const NamedEntity* ne,
+                            bool persistent) {
+  return allocFuncOrClass(&ne->m_cachedClassOffset, persistent);
+}
+
 CacheHandle allocKnownClass(const StringData* name) {
-  ASSERT(name != NULL);
-  return namedAlloc<NSKnownClass>(name, sizeof(Class*), sizeof(Class*));
+  return allocKnownClass(Unit::GetNamedEntity(name), false);
 }
 
 CacheHandle allocClassInitProp(const StringData* name) {
@@ -534,8 +602,12 @@ CacheHandle allocClassInitSProp(const StringData* name) {
                                     sizeof(TypedValue*));
 }
 
+CacheHandle allocFixedFunction(const NamedEntity* ne, bool persistent) {
+  return allocFuncOrClass(&ne->m_cachedFuncOffset, persistent);
+}
+
 CacheHandle allocFixedFunction(const StringData* name) {
-  return namedAlloc<NSFunction>(name, sizeof(Func*), sizeof(Func*));
+  return allocFixedFunction(Unit::GetNamedEntity(name), false);
 }
 
 template<bool checkOnly>

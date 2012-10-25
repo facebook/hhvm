@@ -21,7 +21,7 @@ namespace HPHP {
 namespace VM {
 
 inline ALWAYS_INLINE Func** getCachedFuncAddr(unsigned offset) {
-  ASSERT(offset != (unsigned)-1);
+  ASSERT(offset != 0u);
   return (Func**)Transl::TargetCache::handleToPtr(offset);
 }
 

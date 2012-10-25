@@ -31,6 +31,7 @@
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/blob_helper.h"
 #include "runtime/vm/func_inline.h"
+#include "system/lib/systemlib.h"
 
 namespace HPHP {
 namespace VM {
@@ -161,7 +162,7 @@ Func::Func(Unit& unit, Id id, int line1, int line2,
   , m_name(name)
   , m_namedEntity(NULL)
   , m_refBitVec(NULL)
-  , m_cachedOffset(-1)
+  , m_cachedOffset(0)
   , m_maxStackCells(0)
   , m_numParams(0)
   , m_attrs(attrs)
@@ -183,7 +184,7 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2, Offset base,
   , m_name(name)
   , m_namedEntity(NULL)
   , m_refBitVec(NULL)
-  , m_cachedOffset(-1)
+  , m_cachedOffset(0)
   , m_maxStackCells(0)
   , m_numParams(0)
   , m_attrs(attrs)
@@ -779,6 +780,13 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 }
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
+  Attr attrs = m_attrs;
+  if (attrs & AttrPersistent &&
+      (RuntimeOption::EvalJitEnableRenameFunction ||
+       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
+    attrs = Attr(attrs & ~AttrPersistent);
+  }
+
   Func* f = (m_pce == NULL)
     ? m_ue.newFunc(this, unit, m_id, m_line1, m_line2, m_base,
                    m_past, m_name, m_attrs, m_top, m_docComment,

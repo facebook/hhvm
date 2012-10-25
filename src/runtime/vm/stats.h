@@ -132,6 +132,20 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TraceletGuard_enter) \
   STAT(TraceletGuard_branch) \
   STAT(TraceletGuard_execute) \
+    STAT(UnitMerge_hoistable) \
+    STAT(UnitMerge_hoistable_persistent) \
+    STAT(UnitMerge_hoistable_persistent_cache) \
+    STAT(UnitMerge_hoistable_persistent_parent) \
+    STAT(UnitMerge_hoistable_persistent_parent_cache) \
+    STAT(UnitMerge_mergeable) \
+    STAT(UnitMerge_mergeable_unique) \
+    STAT(UnitMerge_mergeable_unique_persistent) \
+    STAT(UnitMerge_mergeable_unique_persistent_cache) \
+    STAT(UnitMerge_mergeable_define) \
+    STAT(UnitMerge_mergeable_global) \
+    STAT(UnitMerge_mergeable_class) \
+    STAT(UnitMerge_mergeable_require) \
+    STAT(UnitMerge_redo_hoistable) \
   STAT(ElemAsm_GetIHit) \
   STAT(ElemAsm_GetIMiss) \
   STAT(PropAsm_Generic) \

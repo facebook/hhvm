@@ -185,6 +185,7 @@ struct Func {
   bool isDestructor() const {
     return !strcmp(m_name->data(), "__destruct");
   }
+  bool isPersistent() const { return m_attrs & AttrPersistent; }
   static bool isMagicCallMethodName(const StringData* name) {
     return name->isame(s___call) || name->isame(s___callStatic);
   }

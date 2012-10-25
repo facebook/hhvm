@@ -248,6 +248,7 @@ bool Option::GenerateFFIStaticBinding = true;
 int Option::GCCOptimization[] = {0, 0, 0};
 
 void (*Option::m_hookHandler)(Hdf &config);
+bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from a PHP file

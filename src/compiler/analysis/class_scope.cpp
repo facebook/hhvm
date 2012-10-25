@@ -57,7 +57,8 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
   : BlockScope(name, docComment, stmt, BlockScope::ClassScope),
     m_parent(parent), m_bases(bases), m_attribute(0), m_redeclaring(-1),
     m_kindOf(kindOf), m_derivesFromRedeclaring(FromNormal),
-    m_traitStatus(NOT_FLATTENED), m_volatile(false), m_derivedByDynamic(false),
+    m_traitStatus(NOT_FLATTENED), m_volatile(false),
+    m_persistent(false), m_derivedByDynamic(false),
     m_sep(false), m_needsCppCtor(false), m_needsInit(true), m_knownBases(0),
     m_needsEnableDestructor(0) {
 
@@ -87,7 +88,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_parent(parent), m_bases(bases),
     m_attribute(0), m_redeclaring(-1),
     m_kindOf(KindOfObjectClass), m_derivesFromRedeclaring(FromNormal),
-    m_traitStatus(NOT_FLATTENED), m_dynamic(false), m_volatile(false),
+    m_traitStatus(NOT_FLATTENED), m_dynamic(false),
+    m_volatile(false), m_persistent(false),
     m_derivedByDynamic(false), m_sep(false), m_needsCppCtor(false),
     m_needsInit(true), m_knownBases(0), m_needsEnableDestructor(0) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {

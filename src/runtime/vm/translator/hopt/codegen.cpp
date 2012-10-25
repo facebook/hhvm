@@ -1501,7 +1501,7 @@ Address CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
   ASSERT(actRecReg != reg::noreg);
   using namespace TargetCache;
   const StringData* name = methodName->getConstValAsStr();
-  CacheHandle ch = FixedFuncCache::alloc(name);
+  CacheHandle ch = allocFixedFunction(name);
   size_t funcCacheOff = ch + offsetof(FixedFuncCache, m_func);
   m_as.load_reg64_disp_reg64(LinearScan::rTlPtr, funcCacheOff, dstReg);
   m_as.test_reg64_reg64(dstReg, dstReg);

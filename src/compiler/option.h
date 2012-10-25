@@ -19,9 +19,12 @@
 
 #include <util/hdf.h>
 #include <util/string_bag.h>
+#include <util/base.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+DECLARE_BOOST_TYPES(BlockScope);
+DECLARE_BOOST_TYPES(FileScope);
 
 class Option {
 public:
@@ -391,6 +394,7 @@ public:
     m_hookHandler = hookHandler;
   }
 
+  static bool (*PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr fs);
 private:
   /**
    * Directory that has system HPHP files for loading builtin classes, etc.

@@ -74,6 +74,10 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
     m_ignored = true;
     return;
   }
+
+  if (Option::PersistenceHook) {
+    fs->setPersistent(Option::PersistenceHook(fs, scope));
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -206,6 +206,7 @@ class PreClass : public AtomicCountable {
   const TraitPrecRuleVec& traitPrecRules() const { return m_traitPrecRules; }
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes() const { return m_userAttributes; }
+  bool isPersistent() const { return m_attrs & AttrPersistent; }
 
   /*
    *  Funcs, Consts, and Props all behave similarly. Define raw accessors
@@ -582,6 +583,7 @@ public:
     ASSERT(Attr(m_attrCopy) == m_preClass->attrs());
     return Attr(m_attrCopy);
   }
+  bool verifyPersistent() const;
   const Func* getCtor() const { return m_ctor; }
   const Func* getDtor() const { return m_dtor; }
   const Func* getToString() const { return m_toString; }
@@ -616,6 +618,8 @@ public:
   Func* lookupMethod(const StringData* methName) const {
     return m_methods.lookupDefault(methName, 0);
   }
+
+  bool isPersistent() const { return m_attrCopy & AttrPersistent; }
 
   /*
    * We have a call site for an object method, which previously

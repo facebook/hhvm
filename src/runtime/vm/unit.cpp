@@ -37,6 +37,7 @@
 #include <runtime/vm/func_inline.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/vm/stats.h>
+#include <runtime/vm/treadmill.h>
 
 namespace HPHP {
 namespace VM {
@@ -76,6 +77,16 @@ Func* NamedEntity::getCachedFunc() const {
     return *(Func**)Transl::TargetCache::handleToPtr(m_cachedFuncOffset);
   }
   return NULL;
+}
+
+UnitMergeInfo* UnitMergeInfo::alloc(size_t size) {
+  UnitMergeInfo* mi = (UnitMergeInfo*)malloc(
+    sizeof(UnitMergeInfo) + size * sizeof(void*));
+  mi->m_firstHoistableFunc = 0;
+  mi->m_firstHoistablePreClass = 0;
+  mi->m_firstMergeablePreClass = 0;
+  mi->m_mergeablesSize = size;
+  return mi;
 }
 
 Array Unit::getUserFunctions() {
@@ -261,11 +272,7 @@ Unit::Unit()
     : m_sn(-1), m_bc(NULL), m_bclen(0),
       m_bc_meta(NULL), m_bc_meta_len(0), m_filepath(NULL),
       m_dirpath(NULL), m_md5(),
-      m_mergeables(NULL),
-      m_firstHoistableFunc(0),
-      m_firstHoistablePreClass(0),
-      m_firstMergeablePreClass(0),
-      m_mergeablesSize(0),
+      m_mergeInfo(NULL),
       m_cacheOffset(0),
       m_repoId(-1),
       m_mergeState(UnitMergeStateUnmerged),
@@ -282,8 +289,10 @@ Unit::~Unit() {
   free(m_bc);
   free(m_bc_meta);
 
-  // Delete all Func's.
-  range_foreach(mutableFuncs(), Func::destroy);
+  if (m_mergeInfo) {
+    // Delete all Func's.
+    range_foreach(mutableFuncs(), Func::destroy);
+  }
 
   // ExecutionContext and the TC may retain references to Class'es, so
   // it is possible for Class'es to outlive their Unit.
@@ -309,7 +318,7 @@ Unit::~Unit() {
     Transl::unmergePreConsts(m_preConsts, this);
   }
 
-  free(m_mergeables);
+  free(m_mergeInfo);
 }
 
 void* Unit::operator new(size_t sz) {
@@ -452,7 +461,7 @@ Class* Unit::defClass(const PreClass* preClass,
       newClass->m_cachedOffset = top->m_cachedOffset;
     } else {
       newClass->m_cachedOffset =
-        Transl::TargetCache::allocKnownClass(preClass->name());
+        Transl::TargetCache::allocKnownClass(newClass.get());
     }
     newClass->m_nextClass = top;
     Util::compiler_membar();
@@ -522,8 +531,9 @@ void Unit::loadFunc(const Func *func) {
   ASSERT(!func->isMethod());
   const NamedEntity *ne = func->getNamedEntity();
   if (UNLIKELY(!ne->m_cachedFuncOffset)) {
-    const_cast<NamedEntity*>(ne)->m_cachedFuncOffset =
-      Transl::TargetCache::allocFixedFunction(func->name());
+    Transl::TargetCache::allocFixedFunction(ne,
+                                            func->attrs() & AttrPersistent &&
+                                            RuntimeOption::RepoAuthoritative);
   }
   const_cast<Func*>(func)->m_cachedOffset = ne->m_cachedFuncOffset;
 }
@@ -566,19 +576,19 @@ void Unit::initialMerge() {
        * the value being defined/assigned.
        */
       bool allClassesUnique = true;
-      int ix = m_firstHoistablePreClass;
-      int end = m_firstMergeablePreClass;
+      int ix = m_mergeInfo->m_firstHoistablePreClass;
+      int end = m_mergeInfo->m_firstMergeablePreClass;
       while (ix < end) {
-        PreClass* pre = (PreClass*)mergeableObj(ix++);
+        PreClass* pre = (PreClass*)m_mergeInfo->mergeableObj(ix++);
         if (allClassesUnique) {
           allClassesUnique = pre->attrs() & AttrUnique;
         }
       }
       if (isMergeOnly()) {
-        ix = m_firstMergeablePreClass;
-        end = m_mergeablesSize;
+        ix = m_mergeInfo->m_firstMergeablePreClass;
+        end = m_mergeInfo->m_mergeablesSize;
         while (ix < end) {
-          void *obj = mergeableObj(ix);
+          void *obj = m_mergeInfo->mergeableObj(ix);
           InclOpFlags flags = InclOpDefault;
           UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
           switch (k) {
@@ -606,19 +616,19 @@ void Unit::initialMerge() {
                 ASSERT(efile);
                 Unit* unit = efile->unit();
                 unit->initialMerge();
-                mergeableObj(ix) = (void*)((char*)unit + (int)k);
+                m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
               }
               break;
             case UnitMergeKindDefine: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              TypedValue* v = (TypedValue*)mergeableData(ix + 1);
+              TypedValue* v = (TypedValue*)m_mergeInfo->mergeableData(ix + 1);
               ix += sizeof(TypedValue) / sizeof(void*);
               v->_count = TargetCache::allocConstant(s);
               break;
             }
             case UnitMergeKindGlobal: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              TypedValue* v = (TypedValue*)mergeableData(ix + 1);
+              TypedValue* v = (TypedValue*)m_mergeInfo->mergeableData(ix + 1);
               ix += sizeof(TypedValue) / sizeof(void*);
               v->_count = TargetCache::GlobalCache::alloc(s);
               break;
@@ -656,18 +666,156 @@ void Unit::merge() {
   }
 
   if (UNLIKELY(isDebuggerAttached())) {
-    mergeImpl<true>(TargetCache::handleToPtr(0));
+    mergeImpl<true>(TargetCache::handleToPtr(0), m_mergeInfo);
   } else {
-    mergeImpl<false>(TargetCache::handleToPtr(0));
+    mergeImpl<false>(TargetCache::handleToPtr(0), m_mergeInfo);
   }
 }
 
+void* Unit::replaceUnit() const {
+  if (m_mergeState & UnitMergeStateEmpty) return NULL;
+  if (isMergeOnly() &&
+      m_mergeInfo->m_mergeablesSize == m_mergeInfo->m_firstHoistableFunc + 1) {
+    void* obj =
+      m_mergeInfo->mergeableObj(m_mergeInfo->m_firstHoistableFunc);
+    if (m_mergeInfo->m_firstMergeablePreClass ==
+        m_mergeInfo->m_firstHoistableFunc) {
+      int k = uintptr_t(obj) & 7;
+      if (k != UnitMergeKindClass) return obj;
+    } else if (m_mergeInfo->m_firstHoistablePreClass ==
+               m_mergeInfo->m_firstHoistableFunc) {
+      if (uintptr_t(obj) & 1) {
+        return (char*)obj - 1 + (int)UnitMergeKindUniqueDefinedClass;
+      }
+    }
+  }
+  return const_cast<Unit*>(this);
+}
+
+size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
+  Func** it = in->funcHoistableBegin();
+  Func** fend = in->funcEnd();
+  Func** iout = 0;
+  unsigned ix, end, oix = 0;
+
+  if (out) {
+    if (in != out) memcpy(out, in, uintptr_t(it) - uintptr_t(in));
+    iout = out->funcHoistableBegin();
+  }
+
+  size_t delta = 0;
+  while (it != fend) {
+    Func* func = *it++;
+    if (TargetCache::isPersistentHandle(func->getCachedOffset())) {
+      delta++;
+    } else if (iout) {
+      *iout++ = func;
+    }
+  }
+
+  if (out) {
+    oix = out->m_firstHoistablePreClass -= delta;
+  }
+
+  ix = in->m_firstHoistablePreClass;
+  end = in->m_firstMergeablePreClass;
+  for (; ix < end; ++ix) {
+    void* obj = in->mergeableObj(ix);
+    ASSERT((uintptr_t(obj) & 1) == 0);
+    PreClass* pre = (PreClass*)obj;
+    Class* cls = *pre->namedEntity()->clsList();
+    ASSERT(cls && !cls->m_nextClass);
+    ASSERT(cls->preClass() == pre);
+    if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+      delta++;
+    } else if (out) {
+      out->mergeableObj(oix++) = (void*)(uintptr_t(cls) | 1);
+    }
+  }
+
+  if (out) {
+    out->m_firstMergeablePreClass = oix;
+  }
+
+  end = in->m_mergeablesSize;
+  while (ix < end) {
+    void* obj = in->mergeableObj(ix++);
+    UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
+    switch (k) {
+      case UnitMergeKindClass: {
+        PreClass* pre = (PreClass*)obj;
+        Class* cls = *pre->namedEntity()->clsList();
+        ASSERT(cls && !cls->m_nextClass);
+        ASSERT(cls->preClass() == pre);
+        if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+          delta++;
+        } else if (out) {
+          out->mergeableObj(oix++) =
+            (void*)(uintptr_t(cls) | UnitMergeKindUniqueDefinedClass);
+        }
+        break;
+      }
+      case UnitMergeKindUniqueDefinedClass:
+        not_reached();
+
+      case UnitMergeKindDefine:
+      case UnitMergeKindGlobal:
+        if (out) {
+          out->mergeableObj(oix++) = obj;
+          *(TypedValue*)out->mergeableData(oix) =
+            *(TypedValue*)in->mergeableData(ix);
+          oix += sizeof(TypedValue) / sizeof(void*);
+        }
+        ix += sizeof(TypedValue) / sizeof(void*);
+        break;
+
+      case UnitMergeKindReqMod:
+      case UnitMergeKindReqSrc:
+      case UnitMergeKindReqDoc: {
+        Unit *unit = (Unit*)((char*)obj - (int)k);
+        void *rep = unit->replaceUnit();
+        if (!rep) {
+          delta++;
+        } else if (out) {
+          if (rep == unit) {
+            out->mergeableObj(oix++) = obj;
+          } else {
+            UnitMergeKind k1 = UnitMergeKind(uintptr_t(rep) & 7);
+            switch (k1) {
+              case UnitMergeKindReqMod:
+              case UnitMergeKindReqSrc:
+                break;
+              case UnitMergeKindReqDoc:
+                if (k != UnitMergeKindReqDoc) {
+                  rep = obj;
+                }
+                break;
+              default:
+                break;
+            }
+            out->mergeableObj(oix++) = rep;
+          }
+        }
+        break;
+      }
+      case UnitMergeKindDone:
+        not_reached();
+    }
+  }
+  if (out) {
+    // copy the UnitMergeKindDone marker
+    out->mergeableObj(oix) = in->mergeableObj(ix);
+    out->m_mergeablesSize = oix;
+  }
+  return delta;
+}
+
 template <bool debugger>
-void Unit::mergeImpl(void* tcbase) {
+void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
   ASSERT(m_mergeState & UnitMergeStateMerged);
 
-  Func** it = funcHoistableBegin();
-  Func** fend = funcEnd();
+  Func** it = mi->funcHoistableBegin();
+  Func** fend = mi->funcEnd();
   if (it != fend) {
     if (LIKELY((m_mergeState & UnitMergeStateUniqueFuncs) != 0)) {
       do {
@@ -686,8 +834,8 @@ void Unit::mergeImpl(void* tcbase) {
   }
 
   bool redoHoistable = false;
-  int ix = m_firstHoistablePreClass;
-  int end = m_firstMergeablePreClass;
+  int ix = mi->m_firstHoistablePreClass;
+  int end = mi->m_firstMergeablePreClass;
   // iterate over all the potentially hoistable classes
   // with no fatals on failure
   if (ix < end) {
@@ -695,10 +843,25 @@ void Unit::mergeImpl(void* tcbase) {
       // The first time this unit is merged, if the classes turn out to be all
       // unique and defined, we replace the PreClass*'s with the corresponding
       // Class*'s, with the low-order bit marked.
-      PreClass* pre = (PreClass*)mergeableObj(ix);
+      PreClass* pre = (PreClass*)mi->mergeableObj(ix);
       if (LIKELY(uintptr_t(pre) & 1)) {
+        Stats::inc(Stats::UnitMerge_hoistable);
         Class* cls = (Class*)(uintptr_t(pre) & ~1);
+        if (cls->isPersistent()) {
+          Stats::inc(Stats::UnitMerge_hoistable_persistent);
+        }
+        if (Stats::enabled() &&
+            TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+          Stats::inc(Stats::UnitMerge_hoistable_persistent_cache);
+        }
         if (Class* parent = cls->parent()) {
+          if (parent->isPersistent()) {
+            Stats::inc(Stats::UnitMerge_hoistable_persistent_parent);
+          }
+          if (Stats::enabled() &&
+              TargetCache::isPersistentHandle(parent->m_cachedOffset)) {
+            Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
+          }
           if (UNLIKELY(!getDataRef<Class*>(tcbase, parent->m_cachedOffset))) {
             redoHoistable = true;
             continue;
@@ -731,10 +894,11 @@ void Unit::mergeImpl(void* tcbase) {
       // because now A and D go on the maybe-hoistable list
       // B goes on the never hoistable list, and we
       // fatal trying to instantiate D before B
-      if (end == (int)m_mergeablesSize) {
-        ix = m_firstHoistablePreClass;
+      Stats::inc(Stats::UnitMerge_redo_hoistable);
+      if (end == (int)mi->m_mergeablesSize) {
+        ix = mi->m_firstHoistablePreClass;
         do {
-          void* obj = mergeableObj(ix);
+          void* obj = mi->mergeableObj(ix);
           if (UNLIKELY(uintptr_t(obj) & 1)) {
             Class* cls = (Class*)(uintptr_t(obj) & ~1);
             defClass(cls->preClass(), true);
@@ -749,22 +913,33 @@ void Unit::mergeImpl(void* tcbase) {
 
   // iterate over all but the guaranteed hoistable classes
   // fataling if we fail.
-  void* obj = mergeableObj(ix);
+  void* obj = mi->mergeableObj(ix);
   UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
   do {
     switch(k) {
       case UnitMergeKindClass:
         do {
+          Stats::inc(Stats::UnitMerge_mergeable);
+          Stats::inc(Stats::UnitMerge_mergeable_class);
           defClass((PreClass*)obj, true);
-          obj = mergeableObj(++ix);
+          obj = mi->mergeableObj(++ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (!k);
         continue;
 
       case UnitMergeKindUniqueDefinedClass:
         do {
+          Stats::inc(Stats::UnitMerge_mergeable);
+          Stats::inc(Stats::UnitMerge_mergeable_unique);
           Class* other = NULL;
           Class* cls = (Class*)((char*)obj - (int)k);
+          if (cls->isPersistent()) {
+            Stats::inc(Stats::UnitMerge_mergeable_unique_persistent);
+          }
+          if (Stats::enabled() &&
+              TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+            Stats::inc(Stats::UnitMerge_mergeable_unique_persistent_cache);
+          }
           Class::Avail avail = cls->avail(other, true);
           if (UNLIKELY(avail == Class::AvailFail)) {
             raise_error("unknown class %s", other->name()->data());
@@ -772,29 +947,33 @@ void Unit::mergeImpl(void* tcbase) {
           ASSERT(avail == Class::AvailTrue);
           getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
           if (debugger) phpDefClassHook(cls);
-          obj = mergeableObj(++ix);
+          obj = mi->mergeableObj(++ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (k == UnitMergeKindUniqueDefinedClass);
         continue;
 
       case UnitMergeKindDefine:
         do {
+          Stats::inc(Stats::UnitMerge_mergeable);
+          Stats::inc(Stats::UnitMerge_mergeable_define);
           StringData* name = (StringData*)((char*)obj - (int)k);
-          TypedValue *v = (TypedValue*)mergeableData(ix + 1);
+          TypedValue *v = (TypedValue*)mi->mergeableData(ix + 1);
           mergeCns(getDataRef<TypedValue>(tcbase, v->_count), v, name);
           ix += 1 + sizeof(TypedValue) / sizeof(void*);
-          obj = mergeableObj(ix);
+          obj = mi->mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (k == UnitMergeKindDefine);
         continue;
 
       case UnitMergeKindGlobal:
         do {
+          Stats::inc(Stats::UnitMerge_mergeable);
+          Stats::inc(Stats::UnitMerge_mergeable_global);
           StringData* name = (StringData*)((char*)obj - (int)k);
-          TypedValue *v = (TypedValue*)mergeableData(ix + 1);
+          TypedValue *v = (TypedValue*)mi->mergeableData(ix + 1);
           setGlobal(&getDataRef<char>(tcbase, v->_count), v, name);
           ix += 1 + sizeof(TypedValue) / sizeof(void*);
-          obj = mergeableObj(ix);
+          obj = mi->mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (k == UnitMergeKindGlobal);
         continue;
@@ -803,12 +982,14 @@ void Unit::mergeImpl(void* tcbase) {
       case UnitMergeKindReqSrc:
       case UnitMergeKindReqDoc:
         do {
+          Stats::inc(Stats::UnitMerge_mergeable);
+          Stats::inc(Stats::UnitMerge_mergeable_require);
           Unit *unit = (Unit*)((char*)obj - (int)k);
           uchar& unitLoadedFlags =
             getDataRef<uchar>(tcbase, unit->m_cacheOffset);
           if (!(unitLoadedFlags & unit->m_cacheMask)) {
             unitLoadedFlags |= unit->m_cacheMask;
-            unit->mergeImpl<debugger>(tcbase);
+            unit->mergeImpl<debugger>(tcbase, unit->m_mergeInfo);
             if (UNLIKELY(!unit->isMergeOnly())) {
               Stats::inc(Stats::PseudoMain_Reentered);
               TypedValue ret;
@@ -821,15 +1002,18 @@ void Unit::mergeImpl(void* tcbase) {
           } else {
             Stats::inc(Stats::PseudoMain_Guarded);
           }
-          obj = mergeableObj(++ix);
+          obj = mi->mergeableObj(++ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (isMergeKindReq(k));
         continue;
       case UnitMergeKindDone:
-        ASSERT((unsigned)ix == m_mergeablesSize);
+        Stats::inc(Stats::UnitMerge_mergeable, -1);
+        ASSERT((unsigned)ix == mi->m_mergeablesSize);
         if (UNLIKELY((m_mergeState & (UnitMergeStateUniqueClasses|
                                       UnitMergeStateUniqueDefinedClasses)) ==
                      UnitMergeStateUniqueClasses)) {
+          SimpleLock lock(unitInitLock);
+          if (m_mergeState & UnitMergeStateUniqueDefinedClasses) return;
           /*
            * All the classes are known to be unique, and we just got
            * here, so all were successfully defined. We can now go
@@ -837,58 +1021,33 @@ void Unit::mergeImpl(void* tcbase) {
            * UnitMergeKindUniqueDefinedClass, and all hoistable
            * classes to their Class*'s instead of PreClass*'s.
            *
-           * This is a pure optimization: whether readers see the
-           * old value or the new does not affect correctness.
-           * Also, its idempotent - even if multiple threads do
-           * this update simultaneously (which they can -- there is
-           * a race here, since the check-and-write of m_mergeState
-           * is not atomic), they all make exactly the same change,
-           * and can deal with reading pointers that have already
-           * been marked.
+           * We can also remove any Persistent Class/Func*'s,
+           * and any requires of modules that are (now) empty
            */
-          m_mergeState |= UnitMergeStateUniqueDefinedClasses;
-
-          ix = m_firstHoistablePreClass;
-          end = m_firstMergeablePreClass;
-          for (; ix < end; ++ix) {
-            obj = mergeableObj(ix);
-            // The mark check is necessary, since the pointer may have already
-            // been marked, even though this code is "only executed once". See
-            // the note about races above.
-            if ((uintptr_t(obj) & 1) == 0) {
-              PreClass* pre = (PreClass*)obj;
-              Class* cls = *pre->namedEntity()->clsList();
-              ASSERT(cls && !cls->m_nextClass);
-              ASSERT(cls->preClass() == pre);
-              mergeableObj(ix) = (void*)(uintptr_t(cls) | 1);
+          size_t delta = compactUnitMergeInfo(mi, NULL);
+          UnitMergeInfo* newMi = mi;
+          if (delta) {
+            newMi = UnitMergeInfo::alloc(mi->m_mergeablesSize - delta);
+          }
+          /*
+           * In the case where mi == newMi, there's an apparent
+           * race here. Although we have a lock, so we're the only
+           * ones modifying this, there could be any number of
+           * readers. But thats ok, because it doesnt matter
+           * whether they see the old contents or the new.
+           */
+          compactUnitMergeInfo(mi, newMi);
+          if (newMi != mi) {
+            this->m_mergeInfo = newMi;
+            Treadmill::deferredFree(mi);
+            if (isMergeOnly() &&
+                newMi->m_firstHoistableFunc == newMi->m_mergeablesSize) {
+              m_mergeState |= UnitMergeStateEmpty;
             }
           }
-
-          ix = m_firstMergeablePreClass;
-          end = m_mergeablesSize;
-          do {
-            obj = mergeableObj(ix);
-            k = UnitMergeKind(uintptr_t(obj) & 7);
-            switch (k) {
-              case UnitMergeKindClass: {
-                // obj's low-order bits are UnitMergeKindClass, but fortunately,
-                // UnitMergeKindClass == 0.
-                PreClass* pre = (PreClass*)obj;
-                Class* cls = *pre->namedEntity()->clsList();
-                ASSERT(cls && !cls->m_nextClass);
-                ASSERT(cls->preClass() == pre);
-                mergeableObj(ix) =
-                  (char*)cls + (int)UnitMergeKindUniqueDefinedClass;
-                break;
-              }
-              case UnitMergeKindDefine:
-              case UnitMergeKindGlobal:
-                ix += sizeof(TypedValue) / sizeof(void*);
-                break;
-              default:
-                break;
-            }
-          } while (++ix < end);
+          m_mergeState |= UnitMergeStateUniqueDefinedClasses;
+          ASSERT(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
+                 isMergeOnly());
         }
         return;
     }
@@ -2075,53 +2234,52 @@ Unit* UnitEmitter::create() {
     }
     ix += extra;
   }
-  u->m_mergeables = malloc((ix+1) * sizeof(void*));
-  u->m_mergeablesSize = ix;
-  u->m_firstHoistableFunc = 0;
+  UnitMergeInfo *mi = UnitMergeInfo::alloc(ix);
+  u->m_mergeInfo = mi;
   ix = 0;
   for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
     Func* func = (*it)->create(*u);
     if (func->top()) {
-      if (!u->m_firstHoistableFunc) {
-        u->m_firstHoistableFunc = ix;
+      if (!mi->m_firstHoistableFunc) {
+        mi->m_firstHoistableFunc = ix;
       }
     } else {
-      ASSERT(!u->m_firstHoistableFunc);
+      ASSERT(!mi->m_firstHoistableFunc);
     }
-    u->mergeableObj(ix++) = func;
+    mi->mergeableObj(ix++) = func;
   }
   ASSERT(u->getMain()->isPseudoMain());
-  if (!u->m_firstHoistableFunc) {
-    u->m_firstHoistableFunc =  ix;
+  if (!mi->m_firstHoistableFunc) {
+    mi->m_firstHoistableFunc =  ix;
   }
-  u->m_firstHoistablePreClass = ix;
+  mi->m_firstHoistablePreClass = ix;
   ASSERT(m_fes.size());
   for (IdVec::const_iterator it = m_hoistablePceIdVec.begin();
        it != m_hoistablePceIdVec.end(); ++it) {
-    u->mergeableObj(ix++) = u->m_preClasses[*it].get();
+    mi->mergeableObj(ix++) = u->m_preClasses[*it].get();
   }
-  u->m_firstMergeablePreClass = ix;
+  mi->m_firstMergeablePreClass = ix;
   if (u->m_mainReturn._count && !m_allClassesHoistable) {
     for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
          it != m_mergeableStmts.end(); ++it) {
       switch (it->first) {
         case UnitMergeKindClass:
-          u->mergeableObj(ix++) = u->m_preClasses[it->second].get();
+          mi->mergeableObj(ix++) = u->m_preClasses[it->second].get();
           break;
         case UnitMergeKindReqMod:
         case UnitMergeKindReqSrc:
         case UnitMergeKindReqDoc: {
           ASSERT(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(it->second);
-          u->mergeableObj(ix++) = (char*)name + (int)it->first;
+          mi->mergeableObj(ix++) = (char*)name + (int)it->first;
           break;
         }
         case UnitMergeKindDefine:
         case UnitMergeKindGlobal: {
           ASSERT(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(m_mergeableValues[it->second].first);
-          u->mergeableObj(ix++) = (char*)name + (int)it->first;
-          *(TypedValue*)u->mergeableData(ix) =
+          mi->mergeableObj(ix++) = (char*)name + (int)it->first;
+          *(TypedValue*)mi->mergeableData(ix) =
             m_mergeableValues[it->second].second;
           ix += sizeof(TypedValue) / sizeof(void*);
           ASSERT(sizeof(TypedValue) % sizeof(void*) == 0);
@@ -2133,8 +2291,8 @@ Unit* UnitEmitter::create() {
       }
     }
   }
-  ASSERT(ix == u->m_mergeablesSize);
-  u->mergeableObj(ix) = (void*)UnitMergeKindDone;
+  ASSERT(ix == mi->m_mergeablesSize);
+  mi->mergeableObj(ix) = (void*)UnitMergeKindDone;
   u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
   for (size_t i = 0; i < m_feTab.size(); ++i) {
     ASSERT(m_feTab[i].second->past() == m_feTab[i].first);

@@ -309,19 +309,24 @@ void PreClassEmitter::setBuiltinClassInfo(const ClassInfo* info,
                                           BuiltinCtorFunction ctorFunc,
                                           int sz) {
   if (info->getAttribute() & ClassInfo::IsFinal) {
-    m_attrs = (Attr)(m_attrs | AttrFinal);
+    m_attrs = m_attrs | AttrFinal;
   }
   if (info->getAttribute() & ClassInfo::IsAbstract) {
-    m_attrs = (Attr)(m_attrs | AttrAbstract);
+    m_attrs = m_attrs | AttrAbstract;
   }
-  m_attrs = (Attr)(m_attrs | AttrUnique);
+  m_attrs = m_attrs | AttrUnique;
   m_InstanceCtor = ctorFunc;
   m_builtinPropSize = sz - sizeof(ObjectData);
 }
 
 PreClass* PreClassEmitter::create(Unit& unit) const {
+  Attr attrs = m_attrs;
+  if (attrs & AttrPersistent &&
+      !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
+    attrs = Attr(attrs & ~AttrPersistent);
+  }
   PreClass* pc = new PreClass(&unit, m_line1, m_line2, m_offset, m_name,
-                              m_attrs, m_parent, m_docComment, m_id,
+                              attrs, m_parent, m_docComment, m_id,
                               m_hoistable);
   pc->m_InstanceCtor = m_InstanceCtor;
   pc->m_builtinPropSize = m_builtinPropSize;
@@ -482,7 +487,7 @@ ClassPtr Class::newClass(PreClass* preClass, Class* parent) {
 Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   : m_preClass(PreClassPtr(preClass)), m_parent(ClassPtr(parent)),
     m_traitsBeginIdx(0), m_traitsEndIdx(0), m_clsInfo(NULL),
-    m_builtinPropSize(0), m_classVecLen(classVecLen), m_cachedOffset(-1),
+    m_builtinPropSize(0), m_classVecLen(classVecLen), m_cachedOffset(0),
     m_propDataCache(-1), m_propSDataCache(-1), m_InstanceCtor(NULL),
     m_nextClass(NULL) {
   setParent();
@@ -498,16 +503,16 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
 }
 
 void Class::atomicRelease() {
-  if (m_cachedOffset != (unsigned)-1) {
+  if (m_cachedOffset != 0u) {
     /*
-      m_cachedOffset is initialied to -1, and is only set
+      m_cachedOffset is initialied to 0, and is only set
       when the Class is put on the list, so we only have to
-      remove this node if its NOT -1.
-      Since we're about to remove it, reset to -1 so we know
+      remove this node if its NOT 0.
+      Since we're about to remove it, reset to 0 so we know
       its safe to kill the node during the delayed Treadmill
       callback.
     */
-    m_cachedOffset = (unsigned)-1;
+    m_cachedOffset = 0u;
     PreClass* pcls = m_preClass.get();
     {
       Lock l(Unit::s_classesMutex);
@@ -532,6 +537,30 @@ Class *Class::getCached() const {
 
 void Class::setCached() {
   *(Class**)Transl::TargetCache::handleToPtr(m_cachedOffset) = this;
+}
+
+bool Class::verifyPersistent() const {
+  if (!(attrs() & AttrPersistent)) return false;
+  if (m_parent.get() &&
+      !Transl::TargetCache::isPersistentHandle(m_parent->m_cachedOffset)) {
+    return false;
+  }
+  for (size_t i = 0, nInterfaces = m_declInterfaces.size();
+       i < nInterfaces; ++i) {
+    Class* declInterface = m_declInterfaces[i].get();
+    if (!Transl::TargetCache::isPersistentHandle(
+          declInterface->m_cachedOffset)) {
+      return false;
+    }
+  }
+  for (size_t i = 0; i < m_usedTraits.size(); i++) {
+    Class* usedTrait = m_usedTraits[i].get();
+    if (!Transl::TargetCache::isPersistentHandle(
+          usedTrait->m_cachedOffset)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /*
@@ -1112,7 +1141,6 @@ void Class::setSpecial() {
   ASSERT(m_ctor->attrs() == AttrPublic);
 }
 
-// returns true on error
 void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule) {
   const StringData* methName          = rule.getMethodName();
   const StringData* selectedTraitName = rule.getSelectedTraitName();
@@ -1192,7 +1220,6 @@ void Class::addTraitAlias(const StringData* traitName,
                            (newMethName, origName));
 }
 
-// returns true on error
 void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule) {
   const StringData* traitName    = rule.getTraitName();
   const StringData* origMethName = rule.getOrigMethodName();
@@ -1231,7 +1258,6 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule) {
   }
 }
 
-// returns true on error
 void Class::applyTraitRules() {
   for (size_t i = 0; i < m_preClass->traitPrecRules().size(); i++) {
     applyTraitPrecRule(m_preClass->traitPrecRules()[i]);
@@ -1929,7 +1955,6 @@ void Class::importTraitStaticProp(ClassPtr trait,
   }
 }
 
-// returns true in case of error, false on success
 void Class::importTraitProps(PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap) {
   if (attrs() & AttrNoExpandTrait) return;

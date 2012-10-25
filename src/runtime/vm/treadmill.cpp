@@ -70,19 +70,6 @@ static GenCount* idToCount(int threadID) {
   return s_inflightRequests + threadID;
 }
 
-static bool isUnreachable(GenCount gc) {
-  if (gc > s_gen) return false;
-  for (int i = 0; i < s_maxThreadID; ++i) {
-    if (s_inflightRequests[i] != kIdleGenCount &&
-        s_inflightRequests[i] <= gc) {
-      TRACE(1, "request %d still in flight, of gen %d\n", i,
-            int(s_inflightRequests[i]));
-      return false;
-    }
-  }
-  return true;
-}
-
 typedef std::list<WorkItem*> PendingTriggers;
 static PendingTriggers s_tq;
 
@@ -115,16 +102,27 @@ void finishRequest(int threadId) {
 
     // After finishing a request, check to see if we've allowed any triggers
     // to fire.
-    for (PendingTriggers::iterator it = s_tq.begin();
-         it != s_tq.end(); ) {
-      TRACE(2, "considering delendum %d\n", int((*it)->m_gen));
-      if (isUnreachable((*it)->m_gen)) {
+    PendingTriggers::iterator it = s_tq.begin();
+    PendingTriggers::iterator end = s_tq.end();
+    if (it != end) {
+      GenCount gen = (*it)->m_gen;
+      GenCount limit = s_gen + 1;
+      for (int i = 0; i < s_maxThreadID; ++i) {
+        if (s_inflightRequests[i] != kIdleGenCount &&
+            s_inflightRequests[i] < limit) {
+          limit = s_inflightRequests[i];
+          if (limit <= gen) break;
+        }
+      }
+      do {
+        TRACE(2, "considering delendum %d\n", int((*it)->m_gen));
+        if ((*it)->m_gen >= limit) {
+          TRACE(2, "not unreachable! %d\n", int((*it)->m_gen));
+          break;
+        }
         toFire.push_back(*it);
         it = s_tq.erase(it);
-      } else {
-        TRACE(2, "not unreachable! %d\n", int((*it)->m_gen));
-        it++;
-      }
+      } while (it != end);
     }
   }
   for (unsigned i = 0; i < toFire.size(); ++i) {

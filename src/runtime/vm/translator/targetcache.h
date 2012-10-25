@@ -38,7 +38,7 @@ void flush();
  * layout. So the memory is in tl_targetCaches, but we allocate it via the
  * global s_frontier. This is protected by the translator's write-lease.
  */
-extern __thread DataBlock tl_targetCaches;
+extern __thread void* tl_targetCaches;
 extern size_t s_frontier;
 
 static const int kConditionFlagsOff = 0;
@@ -55,14 +55,12 @@ static const int kDefaultNumLines = 4;
 typedef ptrdiff_t CacheHandle;
 
 enum PHPNameSpace {
-  NSFunction,
   NSCtor,
   NSFixedCall,
   NSDynFunction,
   NSStaticMethod,
   NSStaticMethodF,
   NSClass,
-  NSKnownClass,
   NSClsInitProp,
   NSClsInitSProp,
 
@@ -79,7 +77,8 @@ enum PHPNameSpace {
   NumCaseSensitive = NumNameSpaces - NumInsensitive,
   FirstCaseSensitive = NumInsensitive,
 
-  NSInvalid = -1
+  NSInvalid = -1,
+  NSPersistent = -2
 };
 
 template <bool sensitive>
@@ -99,6 +98,7 @@ bool testBit(CacheHandle handle, uint32 mask);
 bool testBit(size_t bit);
 bool testAndSetBit(CacheHandle handle, uint32 mask);
 bool testAndSetBit(size_t bit);
+bool isPersistentHandle(CacheHandle handle);
 
 CacheHandle ptrToHandle(const void*);
 
@@ -107,7 +107,7 @@ TCA fcallHelper(ActRec* ar);
 static inline void*
 handleToPtr(CacheHandle h) {
   ASSERT(h < RuntimeOption::EvalJitTargetCacheSize);
-  return tl_targetCaches.base + h;
+  return (char*)tl_targetCaches + h;
 }
 
 template<class T>
@@ -193,11 +193,6 @@ struct FixedFuncCache {
 
   static inline FixedFuncCache* cacheAtHandle(CacheHandle handle) {
     return (FixedFuncCache*)handleToPtr(handle);
-  }
-
-  static CacheHandle alloc(const StringData* name) {
-    return namedAlloc<NSFunction>(name, sizeof(FixedFuncCache),
-                                  sizeof(FixedFuncCache));
   }
 
   static void invalidate(CacheHandle handle) {
@@ -343,7 +338,7 @@ class GlobalCache {
 
 protected:
   static inline GlobalCache* cacheAtHandle(CacheHandle handle) {
-    return (GlobalCache*)(uintptr_t(tl_targetCaches.base) + handle);
+    return (GlobalCache*)(uintptr_t(tl_targetCaches) + handle);
   }
 
   template<bool isBoxed>
@@ -383,6 +378,8 @@ public:
  * The request-private Class* for a given class name. This is used when
  * the class name is known at translation time.
  */
+CacheHandle allocKnownClass(const Class* name);
+CacheHandle allocKnownClass(const NamedEntity* name, bool persistent);
 CacheHandle allocKnownClass(const StringData* name);
 typedef Class* (*lookupKnownClass_func_t)(Class** cache,
                                           const StringData* clsName,
@@ -393,6 +390,7 @@ Class* lookupKnownClass(Class** cache, const StringData* clsName,
 CacheHandle allocClassInitProp(const StringData* name);
 CacheHandle allocClassInitSProp(const StringData* name);
 
+CacheHandle allocFixedFunction(const NamedEntity* ne, bool persistent);
 CacheHandle allocFixedFunction(const StringData* name);
 
 /*
@@ -427,7 +425,7 @@ CacheHandle allocStatic();
 class SPropCache {
 private:
   static inline SPropCache* cacheAtHandle(CacheHandle handle) {
-    return (SPropCache*)(uintptr_t(tl_targetCaches.base) + handle);
+    return (SPropCache*)(uintptr_t(tl_targetCaches) + handle);
   }
   CacheHandle allocConstantLocked(StringData* name);
 public:

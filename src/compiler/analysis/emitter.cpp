@@ -3489,8 +3489,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(className,
                                                        PreClass::NotHoistable);
-        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), AttrUnique,
-                  parentName, NULL);
+        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
+                  AttrUnique | AttrPersistent, parentName, NULL);
         e.DefCls(pce->id());
 
         // We're still at the closure definition site. Emit code to instantiate
@@ -4827,12 +4827,15 @@ void EmitterVisitor::emitPostponedMeths() {
     Attr attrs = buildAttrs(mod, p.m_meth->isRef());
 
     if (p.m_meth->getFunctionScope()->mayUseVV()) {
-      attrs = (Attr)(attrs | AttrMayUseVV);
+      attrs = attrs | AttrMayUseVV;
     }
 
     if (Option::WholeProgram) {
       if (!funcScope->isRedeclaring()) {
-        attrs = (Attr)(attrs | AttrUnique);
+        attrs = attrs | AttrUnique;
+        if (funcScope->isPersistent()) {
+          attrs = attrs | AttrPersistent;
+        }
       }
       if (ClassScopePtr cls = p.m_meth->getClassScope()) {
         if (p.m_meth->getName() == cls->getName() &&
@@ -4845,22 +4848,22 @@ void EmitterVisitor::emitPostponedMeths() {
             treating it as a constructor even though it looks like
             one.
           */
-          attrs = (Attr)(attrs | AttrTrait);
+          attrs = attrs | AttrTrait;
         }
         if (!p.m_meth->getFunctionScope()->hasOverride()) {
-          attrs = (Attr)(attrs | AttrNoOverride);
+          attrs = attrs | AttrNoOverride;
         }
       }
     } else if (!SystemLib::s_inited) {
       // we're building systemlib. everything is unique
-      attrs = (Attr)(attrs | AttrUnique);
+      attrs = attrs | AttrUnique | AttrPersistent;
     }
 
     // For closures, the MethodStatement didn't have real attributes; enforce
     // that the __invoke method is public here
     if (fe->isClosureBody()) {
       ASSERT(!(attrs & (AttrProtected | AttrPrivate)));
-      attrs = (Attr)(attrs | AttrPublic);
+      attrs = attrs | AttrPublic;
     }
 
     Label topOfBody(e);
@@ -5521,17 +5524,20 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
   if (Option::WholeProgram) {
     if (!cNode->isRedeclaring() &&
         !cNode->derivesFromRedeclaring()) {
-      attr = (Attr)(attr | AttrUnique);
+      attr = attr | AttrUnique;
+      if (cNode->isPersistent()) {
+        attr = attr | AttrPersistent;
+      }
     }
     if (!cNode->getAttribute(ClassScope::NotFinal)) {
-      attr = (Attr)(attr | AttrNoOverride);
+      attr = attr | AttrNoOverride;
     }
     if (cNode->getUsedTraitNames().size()) {
-      attr = (Attr)(attr | AttrNoExpandTrait);
+      attr = attr | AttrNoExpandTrait;
     }
   } else if (!SystemLib::s_inited) {
     // we're building systemlib. everything is unique
-    attr = (Attr)(attr | AttrUnique);
+    attr = attr | AttrUnique | AttrPersistent;
   }
 
   const Location* sLoc = is->getLocation().get();
@@ -6262,7 +6268,13 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   */
   StringData* name = StringData::GetStaticString("86null");
   FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
-  fe->init(0, 0, ue->bcPos(), AttrUnique, true, empty_string.get());
+  /*
+    Dont mark it AttrPersistent, because it would be
+    deleted, and we need to be able to find it in the
+    unit's m_mergeInfo
+  */
+  fe->init(0, 0, ue->bcPos(), AttrUnique,
+           true, empty_string.get());
   ue->emitOp(OpNull);
   ue->emitOp(OpRetC);
   fe->setMaxStackCells(1);
@@ -6279,7 +6291,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     fe->setBuiltinFunc(mi, bif, base);
     ue->emitOp(OpNativeImpl);
     fe->setMaxStackCells(kNumActRecCells + 1);
-    fe->setAttrs(Attr(fe->attrs()|AttrUnique));
+    fe->setAttrs(fe->attrs() | AttrUnique | AttrPersistent);
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);
   }
@@ -6462,7 +6474,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       StringData::GetStaticString(e.ci->getParentClass().get());
     PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
                                                   PreClass::AlwaysHoistable);
-    pce->init(0, 0, ue->bcPos(), AttrUnique, parentName, NULL);
+    pce->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent, parentName, NULL);
     pce->setBuiltinClassInfo(e.ci, e.info->m_InstanceCtor, e.info->m_sizeof);
     {
       ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();
@@ -6528,7 +6540,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     for (unsigned i = 0; i < array_size(names); ++i) {
       PreClassEmitter* pce =
         ue->newPreClassEmitter(names[i], PreClass::AlwaysHoistable);
-      pce->init(0, 0, ue->bcPos(), AttrUnique, continuationClassName, NULL);
+      pce->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent,
+                continuationClassName, NULL);
     }
   }
 

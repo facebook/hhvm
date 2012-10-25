@@ -33,6 +33,14 @@
 namespace HPHP {
 namespace VM {
 
+// Forward declarations.
+class Func;
+class FuncEmitter;
+class Repo;
+class FuncDict;
+class Unit;
+struct ActRec;
+
 enum UnitOrigin {
   UnitOriginFile = 0,
   UnitOriginEval = 1
@@ -57,7 +65,8 @@ enum UnitMergeState {
   UnitMergeStateMerged = 2,
   UnitMergeStateUniqueFuncs = 4,
   UnitMergeStateUniqueClasses = 8,
-  UnitMergeStateUniqueDefinedClasses = 16
+  UnitMergeStateUniqueDefinedClasses = 16,
+  UnitMergeStateEmpty = 32
 };
 
 inline bool ALWAYS_INLINE isMergeKindReq(UnitMergeKind k) {
@@ -65,18 +74,49 @@ inline bool ALWAYS_INLINE isMergeKindReq(UnitMergeKind k) {
     unsigned(UnitMergeKindReqDoc - UnitMergeKindReqMod);
 }
 
-typedef const uchar* PC;
+struct UnitMergeInfo {
+  typedef IterRange<Func* const*> FuncRange;
+  typedef IterRange<Func**> MutableFuncRange;
 
-// Forward declarations.
-class Func;
-class FuncEmitter;
-class Repo;
-class FuncDict;
-class Unit;
-struct ActRec;
+  unsigned m_firstHoistableFunc;
+  unsigned m_firstHoistablePreClass;
+  unsigned m_firstMergeablePreClass;
+  unsigned m_mergeablesSize;
+  void*    m_mergeables[1];
+
+  static UnitMergeInfo* alloc(size_t num);
+
+  Func** funcBegin() const {
+    return (Func**)m_mergeables;
+  }
+  Func** funcEnd() const {
+    return funcBegin() + m_firstHoistablePreClass;
+  }
+  Func** funcHoistableBegin() const {
+    return funcBegin() + m_firstHoistableFunc;
+  }
+  MutableFuncRange nonMainFuncs() const {
+    return MutableFuncRange(funcBegin() + 1, funcEnd());
+  }
+  MutableFuncRange hoistableFuncs() const {
+    return MutableFuncRange(funcHoistableBegin(), funcEnd());
+  }
+  FuncRange funcs() const {
+    return FuncRange(funcBegin(), funcEnd());
+  }
+  MutableFuncRange mutableFuncs() {
+    return MutableFuncRange(funcBegin(), funcEnd());
+  }
+  void*& mergeableObj(int ix) { return ((void**)m_mergeables)[ix]; }
+  void* mergeableData(int ix) { return (char*)m_mergeables + ix*sizeof(void*); }
+
+};
+
+typedef const uchar* PC;
 
 struct NamedEntity {
   Class* m_class;
+  unsigned m_cachedClassOffset;
   unsigned m_cachedFuncOffset;
 
   Class* const* clsList() const { return &m_class; }
@@ -263,8 +303,8 @@ struct Unit {
   friend class UnitRepoProxy;
   friend class FuncDict;
 
-  typedef IterRange<Func* const*> FuncRange;
-  typedef IterRange<Func**> MutableFuncRange;
+  typedef UnitMergeInfo::FuncRange FuncRange;
+  typedef UnitMergeInfo::MutableFuncRange MutableFuncRange;
 
   class MetaInfo {
    public:
@@ -434,6 +474,17 @@ struct Unit {
     return cls;
   }
 
+  static Class *lookupUniqueClass(const NamedEntity *ne) {
+    Class *cls = *ne->clsList();
+    if (LIKELY(cls != NULL)) {
+      if (cls->attrs() & AttrUnique && RuntimeOption::RepoAuthoritative) {
+        return cls;
+      }
+      cls = cls->getCached();
+    }
+    return cls;
+  }
+
   static Class *lookupClass(const StringData *clsName) {
     Class *cls = *GetNamedEntity(clsName)->clsList();
     if (LIKELY(cls != NULL)) cls = cls->getCached();
@@ -473,48 +524,38 @@ struct Unit {
     return &m_mainReturn;
   }
 private:
-  // Raw iterators; use with care as they override const.
-  Func** funcBegin() const {
-    return (Func**)m_mergeables;
-  }
-  Func** funcEnd() const {
-    return funcBegin() + m_firstHoistablePreClass;
-  }
-  void*& mergeableObj(int ix) { return ((void**)m_mergeables)[ix]; }
-  void* mergeableData(int ix) { return (char*)m_mergeables + ix*sizeof(void*); }
   template <bool debugger>
-  void mergeImpl(void* tcbase);
+  void mergeImpl(void* tcbase, UnitMergeInfo* mi);
 public:
   Func* getMain() const {
-    return *funcBegin();
+    return *m_mergeInfo->funcBegin();
   }
-  // Ranges for iterating over functions.
-  Func** funcHoistableBegin() const {
-    return funcBegin() + m_firstHoistableFunc;
+  Func* firstHoistable() const {
+    return *m_mergeInfo->funcHoistableBegin();
   }
   MutableFuncRange nonMainFuncs() const {
-    return MutableFuncRange(funcBegin() + 1, funcEnd());
+    return m_mergeInfo->nonMainFuncs();
   }
   MutableFuncRange hoistableFuncs() const {
-    return MutableFuncRange(funcHoistableBegin(), funcEnd());
+    return m_mergeInfo->hoistableFuncs();
   }
   Func* getLambda() const {
-    ASSERT(m_firstHoistableFunc == 1);
-    ASSERT(m_firstHoistablePreClass == 2);
-    return funcBegin()[1];
+    ASSERT(m_mergeInfo->m_firstHoistableFunc == 1);
+    ASSERT(m_mergeInfo->m_firstHoistablePreClass == 2);
+    return m_mergeInfo->funcBegin()[1];
   }
   void renameFunc(const StringData* oldName, const StringData* newName);
   void mergeFuncs() const;
   static void loadFunc(const Func *func);
   FuncRange funcs() const {
-    return FuncRange(funcBegin(), funcEnd());
+    return m_mergeInfo->funcs();
   }
   MutableFuncRange mutableFuncs() {
-    return MutableFuncRange(funcBegin(), funcEnd());
+    return m_mergeInfo->mutableFuncs();
   }
   Func* lookupFuncId(Id id) const {
-    ASSERT(id < Id(m_firstHoistablePreClass));
-    return funcBegin()[id];
+    ASSERT(id < Id(m_mergeInfo->m_firstHoistablePreClass));
+    return m_mergeInfo->funcBegin()[id];
   }
   size_t numPreClasses() const {
     return (size_t)m_preClasses.size();
@@ -551,6 +592,7 @@ public:
   }
   bool isMergeOnly() const { return m_mainReturn._count; }
   void clearMergeOnly() { m_mainReturn._count = 0; }
+  void* replaceUnit() const;
 public:
   static Mutex s_classesMutex;
 
@@ -581,11 +623,7 @@ private:
   std::vector<NamedEntityPair> m_namedInfo;
   std::vector<const ArrayData*> m_arrays;
   PreClassPtrVec m_preClasses;
-  void* m_mergeables;
-  unsigned m_firstHoistableFunc;
-  unsigned m_firstHoistablePreClass;
-  unsigned m_firstMergeablePreClass;
-  unsigned m_mergeablesSize;
+  UnitMergeInfo* m_mergeInfo;
   unsigned m_cacheOffset;
   int8 m_repoId;
   uint8 m_mergeState;

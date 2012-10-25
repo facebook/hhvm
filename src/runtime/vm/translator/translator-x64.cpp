@@ -2802,7 +2802,7 @@ void enterTCHelper(Cell* vm_sp,
                    TCA start,
                    TReqInfo* infoPtr,
                    ActRec* firstAR,
-                   uint8_t* targetCacheBase) asm ("__enterTCHelper");
+                   void* targetCacheBase) asm ("__enterTCHelper");
 
 struct DepthGuard {
   static __thread int m_depth;
@@ -2850,7 +2850,7 @@ TranslatorX64::enterTC(SrcKey sk) {
     // enterTCHelper does not preserve these registers.
     asm volatile("" : : : "rbx","r12","r13","r14","r15");
     enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
-                  tl_targetCaches.base);
+                  tl_targetCaches);
     asm volatile("" : : : "rbx","r12","r13","r14","r15");
 
     tl_regState = REGSTATE_CLEAN; // Careful: pc isn't sync'ed yet.
@@ -8320,7 +8320,7 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
   if (funcCanChange) {
     // Look it up in a FuncCache.
     using namespace TargetCache;
-    CacheHandle ch = FixedFuncCache::alloc(name);
+    CacheHandle ch = allocFixedFunction(nep.second, false);
     size_t funcOff = AROFF(m_func) - sizeof(ActRec);
     size_t funcCacheOff = ch + offsetof(FixedFuncCache, m_func);
 
@@ -8575,37 +8575,44 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
   if (cls) {
     setupActRecClsForStaticCall(ni, func, cls, clsOff, forward);
     TargetCache::CacheHandle ch = cls->m_cachedOffset;
-    a.          cmp_imm32_disp_reg32(0, ch, rVmTl);
-    {
-      UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
-      if (false) {
-        checkClass<false>(0, NULL, NULL);
-        checkClass<true>(0, NULL, NULL);
-      }
-      EMIT_CALL(astubs, TCA(safe ? checkClass<false> : checkClass<true>),
-                IMM(ch), IMM(uintptr_t(cls->name())),
-                RPLUS(rVmSp, vstackOffset(ni, startOfActRec)));
-      recordReentrantStubCall(ni, true);
-      if (safe) {
-        astubs.  mov_reg64_reg64(rax, *flag);
+    if (!TargetCache::isPersistentHandle(ch)) {
+      a.          cmp_imm32_disp_reg32(0, ch, rVmTl);
+      {
+        UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+        if (false) {
+          checkClass<false>(0, NULL, NULL);
+          checkClass<true>(0, NULL, NULL);
+        }
+        EMIT_CALL(astubs, TCA(safe ? checkClass<false> : checkClass<true>),
+                  IMM(ch), IMM(uintptr_t(cls->name())),
+                  RPLUS(rVmSp, vstackOffset(ni, startOfActRec)));
+        recordReentrantStubCall(ni, true);
+        if (safe) {
+          astubs.  mov_reg64_reg64(rax, *flag);
+        }
       }
     }
   } else {
-    ScratchReg funcReg(m_regMap);
     TargetCache::CacheHandle ch = func->getCachedOffset();
-    a.          load_reg64_disp_reg64(rVmTl, ch, *funcReg);
-    emitVStackStore(a, ni, *funcReg, funcOff);
-    emitVStackStoreImm(a, ni, 0, clsOff, sz::qword, &m_regMap);
-    a.          test_reg64_reg64(*funcReg, *funcReg);
-    {
-      UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
-      emitVStackStoreImm(astubs, ni,
-                         uintptr_t(SystemLib::GetNullFunction()), funcOff);
-      if (safe) {
-        emitImmReg(astubs, false, *flag);
-      } else {
-        EMIT_CALL(astubs, TCA(warnMissingFunc), IMM(uintptr_t(func->name())));
-        recordReentrantStubCall(ni, true);
+    if (TargetCache::isPersistentHandle(ch)) {
+      emitVStackStoreImm(a, ni, uintptr_t(func), funcOff, sz::qword);
+      emitVStackStoreImm(a, ni, 0, clsOff, sz::qword, &m_regMap);
+    } else {
+      ScratchReg funcReg(m_regMap);
+      a.          load_reg64_disp_reg64(rVmTl, ch, *funcReg);
+      emitVStackStore(a, ni, *funcReg, funcOff);
+      emitVStackStoreImm(a, ni, 0, clsOff, sz::qword, &m_regMap);
+      a.          test_reg64_reg64(*funcReg, *funcReg);
+      {
+        UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+        emitVStackStoreImm(astubs, ni,
+                           uintptr_t(SystemLib::GetNullFunction()), funcOff);
+        if (safe) {
+          emitImmReg(astubs, false, *flag);
+        } else {
+          EMIT_CALL(astubs, TCA(warnMissingFunc), IMM(uintptr_t(func->name())));
+          recordReentrantStubCall(ni, true);
+        }
       }
     }
   }
@@ -10334,7 +10341,7 @@ std::string TranslatorX64::getUsage() {
                       m_irAUsage,     100 * m_irAUsage / a.code.size,
                       m_irAstubsUsage, 100 * m_irAstubsUsage / astubs.code.size,
                       tcUsage,
-                      100 * tcUsage / TargetCache::tl_targetCaches.size);
+                      100 * tcUsage / RuntimeOption::EvalJitTargetCacheSize);
   return usage;
 }
 

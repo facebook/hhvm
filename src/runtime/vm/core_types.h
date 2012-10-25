@@ -98,8 +98,11 @@ enum Attr {
   AttrNoOverride= (1 << 13),     //    X                X    //
   AttrClone     = (1 << 14),     //                     X    //
   AttrVariadicByRef = (1 << 15), //                     X    //
-  AttrMayUseVV  = (1 << 16)      //                     X    //
+  AttrMayUseVV  = (1 << 16),     //                     X    //
+  AttrPersistent= (1 << 17)      //    X                X    //
 };
+
+static inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
 
 static inline const char * attrToVisibilityStr(Attr attr) {
   return (attr & AttrPrivate)   ? "private"   :

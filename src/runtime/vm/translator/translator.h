@@ -612,17 +612,27 @@ struct TraceletContext {
   DepMap      m_resolvedDeps; // dependencies resolved by static analysis
   LocationSet m_changeSet;
   LocationSet m_deletedSet;
+  int         m_numJmps;
   bool        m_aliasTaint;
   bool        m_varEnvTaint;
 
   TraceletContext()
-    : m_t(NULL), m_aliasTaint(false), m_varEnvTaint(false) {}
+    : m_t(NULL)
+    , m_numJmps(0)
+    , m_aliasTaint(false)
+    , m_varEnvTaint(false)
+  {}
   TraceletContext(Tracelet* t)
-    : m_t(t), m_aliasTaint(false), m_varEnvTaint(false) {}
+    : m_t(t)
+    , m_numJmps(0)
+    , m_aliasTaint(false)
+    , m_varEnvTaint(false)
+  {}
   DynLocation* recordRead(const InputInfo& l, bool useHHIR,
                           DataType staticType = KindOfInvalid);
   void recordWrite(DynLocation* dl, NormalizedInstruction* source);
   void recordDelete(const Location& l);
+  void recordJmp();
   void aliasTaint();
   void varEnvTaint();
 
@@ -711,6 +721,8 @@ struct TransRec {
  * Translator annotates a tracelet with input/output locations/types.
  */
 class Translator {
+  static const int MaxJmpsTracedThrough = 5;
+
 public:
   // kFewLocals is a magic value used to decide whether or not to
   // generate specialized code for RetC

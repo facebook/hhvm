@@ -166,26 +166,45 @@ SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i) {
   return i.next ? i.next->source : t.m_nextSk;
 }
 
+// Helper structs for jcc vs. jcc8.
+struct Jcc8 {
+  static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {
+    a.   jcc8(cc, dest);
+  }
+  static void patch(X64Assembler& a, TCA site, TCA newDest) {
+    a.patchJcc8(site, newDest);
+  }
+};
+
+struct Jcc32 {
+  static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {
+    a.   jcc(cc, dest);
+  }
+  static void patch(X64Assembler& a, TCA site, TCA newDest) {
+    a.patchJcc(site, newDest);
+  }
+};
+
 // JccBlock --
 //   A raw condition-code block; assumes whatever comparison or ALU op
 //   that sets the Jcc has already executed.
-template <int Jcc>
+template <ConditionCode Jcc, typename J=Jcc8>
 struct JccBlock {
   mutable X64Assembler* m_a;
-  TCA m_jcc8;
+  TCA m_jcc;
   mutable DiamondGuard* m_dg;
 
   explicit JccBlock(X64Assembler& a)
     : m_a(&a),
-      m_jcc8(a.code.frontier),
+      m_jcc(a.code.frontier),
       m_dg(new DiamondGuard(a)) {
-    a.    jcc8(Jcc, m_a->code.frontier);
+    J::branch(a, Jcc, m_a->code.frontier);
   }
 
   ~JccBlock() {
     if (m_a) {
       delete m_dg;
-      m_a->patchJcc8(m_jcc8, m_a->code.frontier);
+      J::patch(*m_a, m_jcc, m_a->code.frontier);
     }
   }
 
@@ -5558,7 +5577,9 @@ void
 TranslatorX64::translateJmp(const Tracelet& t,
                             const NormalizedInstruction& i) {
   ASSERT(!i.outStack && !i.outLocal);
-  syncOutputs(t);
+  if (i.breaksTracelet) {
+    syncOutputs(t);
+  }
 
   // Check the surprise page on all backwards jumps
   if (i.imm[0].u_BA < 0 && !i.noSurprise) {
@@ -5590,8 +5611,10 @@ TranslatorX64::translateJmp(const Tracelet& t,
       }
     }
   }
-  SrcKey sk(curFunc(), i.offset() + i.imm[0].u_BA);
-  emitBindJmp(sk);
+  if (i.breaksTracelet) {
+    SrcKey sk(curFunc(), i.offset() + i.imm[0].u_BA);
+    emitBindJmp(sk);
+  }
 }
 
 void
@@ -10191,12 +10214,9 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
        i != t.m_changes.end(); ++i) {
     TRACE(3, "    %-5s\n", i->second->pretty().c_str());
   }
-  for (SrcKey traceKey(t.m_sk);
-      traceKey != t.m_nextSk;
-      traceKey.advance(curUnit())) {
-    string s = instrToString(
-      curUnit()->at(traceKey.offset()), curUnit());
-    TRACE(3, "  %6d: %s\n", traceKey.offset(), s.c_str());
+  for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
+    string s = instrToString(ni->pc());
+    TRACE(3, "  %6d: %s\n", ni->source.offset(), s.c_str());
   }
   TRACE(3, "----------------------------------------------\n");
   if (Trace::moduleEnabled(Trace::tx64, 5)) {

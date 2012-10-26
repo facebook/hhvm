@@ -2361,6 +2361,10 @@ void TraceletContext::varEnvTaint() {
   }
 }
 
+void TraceletContext::recordJmp() {
+  m_numJmps++;
+}
+
 /*
  *   Helpers for recovering context of this instruction.
  */
@@ -2505,6 +2509,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
   SrcKey sk = *csk; // copy for local use
   const Unit *unit = curUnit();
   for (;; sk.advance(unit)) {
+  head:
     NormalizedInstruction* ni = t.newNormalizedInstruction();
     ni->source = sk;
     ni->stackOff = stackFrameOffset;
@@ -2725,12 +2730,20 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     }
 
     // Check if we need to break the tracelet.
-    //
-    // Note that if an instruction is interpreted and it can change PC, we
-    // have to break the tracelet even if opcodeBreaksBB() returns false
-    // because the translator is not equipped to continue after interpOne()
-    // changes PC.
-    if (opcodeBreaksBB(ni->op()) ||
+    // 
+    // If we've gotten this far, it mostly boils down to control-flow
+    // instructions. However, we'll trace through a few unconditional jmps.
+    if (ni->op() == OpJmp &&
+        ni->imm[0].u_IA > 0 &&
+        tas.m_numJmps < MaxJmpsTracedThrough) {
+      // Continue tracing through jumps. To prevent pathologies, only trace
+      // through a finite number of forward jumps.
+      SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
+              tas.m_numJmps, ni->imm[0].u_IA);
+      tas.recordJmp();
+      sk = SrcKey(curFunc(), sk.m_offset + ni->imm[0].u_IA);
+      goto head; // don't advance sk
+    } else if (opcodeBreaksBB(ni->op()) ||
         (ni->m_txFlags == Interp && opcodeChangesPC(ni->op()))) {
       SKTRACE(1, sk, "BB broken\n");
       sk.advance(unit);

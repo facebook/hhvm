@@ -88,7 +88,7 @@ class TranslatorX64 : public Translator
   friend class HPHP::VM::JIT::HhbcTranslator; // packBitVec()
   friend TCA funcBodyHelper(ActRec* fp);
   template<int, int, int> friend class CondBlock;
-  template<int> friend class JccBlock;
+  template<ConditionCode, typename smasher> friend class JccBlock;
   template<int> friend class IfElseBlock;
   template<int> friend class UnlikelyIfBlock;
   typedef HPHP::DataType DataType;

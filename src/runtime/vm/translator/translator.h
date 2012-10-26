@@ -279,6 +279,7 @@ class NormalizedInstruction {
   // StackOff: logical delta at *start* of this instruction to
   // stack at tracelet entry.
   int stackOff;
+  int sequenceNum;
   unsigned hasConstImm:1;
   unsigned startsBB:1;
   unsigned breaksTracelet:1;
@@ -563,6 +564,16 @@ struct Tracelet : private boost::noncopyable {
   ActRecState    m_arState;
   RefDeps        m_refDeps;
 
+  // Live range suport.
+  //
+  // Maintain a per-location last-read and last-written map. We don't need
+  // to remember the start of the live range, since we implicitly discover it
+  // at translation time. The entries in these maps are the sequence number
+  // of the instruction after which the location is no longer read/written.
+  typedef hphp_hash_map<Location, int, Location> RangeMap;
+  RangeMap m_liveEnd;
+  RangeMap m_liveDirtyEnd;
+
   /*
    * If we were unable to make sense of the instruction stream (e.g., it
    * used instructions that the translator does not understand), then this
@@ -581,6 +592,10 @@ struct Tracelet : private boost::noncopyable {
     m_stackChange(0),
     m_arState(),
     m_analysisFailed(false) { }
+
+  void constructLiveRanges();
+  bool isLiveAfterInstr(Location l, const NormalizedInstruction& i) const;
+  bool isWrittenAfterInstr(Location l, const NormalizedInstruction& i) const;
 
   NormalizedInstruction* newNormalizedInstruction();
   DynLocation* newDynLocation(Location l, DataType t);

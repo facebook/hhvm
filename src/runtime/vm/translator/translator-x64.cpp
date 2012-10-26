@@ -10044,6 +10044,37 @@ TranslatorX64::translateInstr(const Tracelet& t,
     m_regMap.invalidate(l);
   }
 
+  // Kill any live regs that won't be of further use in this trace.
+  RegSet live = m_regMap.getRegsLike(RegInfo::DIRTY) |
+    m_regMap.getRegsLike(RegInfo::CLEAN);
+  PhysReg pr;
+  while (live.findFirst(pr)) {
+    live.remove(pr);
+    const RegInfo* ri = m_regMap.getInfo(pr);
+    ASSERT(ri->m_state == RegInfo::CLEAN || ri->m_state == RegInfo::DIRTY);
+    bool dirty = ri->m_state == RegInfo::DIRTY;
+    if (ri->m_cont.m_kind != RegContent::Loc) continue;
+    const Location loc = ri->m_cont.m_loc;
+    // These heuristics do poorly on stack slots, which are more like
+    // ephemeral temps.
+    if (loc.space != Location::Local) continue;
+    if (false && dirty && !t.isWrittenAfterInstr(loc, i)) {
+      // This seems plausible enough: the intuition is that carrying aroud
+      // a register we'll read, but not write, in a dirty state, has a cost
+      // because any control-flow diamonds will have to spill it and then
+      // refill it. It appears to hurt performance today, though.
+      m_regMap.cleanLoc(loc);
+    }
+    if (t.isLiveAfterInstr(loc, i)) continue;
+    SKTRACE(1, i.source, "killing %s reg %d for (%s, %d)\n",
+            dirty ? "dirty" : "clean", (int)pr, loc.spaceName(), loc.offset);
+    if (dirty) {
+       m_regMap.cleanLoc(loc);
+    }
+    ASSERT(ri->m_state == RegInfo::CLEAN);
+    m_regMap.smashLoc(loc);
+  }
+
   emitPredictionGuards(i);
   recordBCInstr(op, a, start);
   recordBCInstr(op + Op_count, astubs, astart);
@@ -10223,7 +10254,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
       recordBCInstr(OpTraceletGuard, a, start);
 
       // Translate each instruction in the tracelet
-      for (NormalizedInstruction* ni = t.m_instrStream.first; ni; ni = ni->next) {
+      for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
         if (isTransDBEnabled()) {
           bcMapping.push_back((TransBCMapping){ni->offset(),
                                                a.code.frontier,
@@ -10255,8 +10286,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
       if (RuntimeOption::EvalJitTransCounters) {
         emitTransCounterInc(a);
       }
-      a.    jmp(
-                emitServiceReq(REQ_INTERPRET, 2ull, uint64_t(t.m_sk.offset()),
+      a.    jmp(emitServiceReq(REQ_INTERPRET, 2ull, uint64_t(t.m_sk.offset()),
                                uint64_t(t.m_numOpcodes)));
       // Fall through.
     }

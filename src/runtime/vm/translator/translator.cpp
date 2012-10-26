@@ -83,6 +83,46 @@ void InstrStream::remove(NormalizedInstruction* ni) {
   ni->next = NULL;
 }
 
+void Tracelet::constructLiveRanges() {
+  // Helper function.
+  auto considerLoc = [this](DynLocation* dloc,
+                            const NormalizedInstruction* ni,
+                            bool output) {
+    if (!dloc) return;
+    Location loc = dloc->location;
+    m_liveEnd[loc] = ni->sequenceNum;
+    if (output) m_liveDirtyEnd[loc] = ni->sequenceNum;
+  };
+  // We assign each instruction a sequence number. We do this here, rather
+  // than when creating the instruction, to allow splicing and removing
+  // instructions 
+  int sequenceNum = 0;
+  for (auto ni = m_instrStream.first; ni; ni = ni->next) {
+    ni->sequenceNum = sequenceNum++;
+    considerLoc(ni->outLocal, ni, true);
+    considerLoc(ni->outStack3, ni, true);
+    considerLoc(ni->outStack2, ni, true);
+    considerLoc(ni->outStack, ni, true);
+    for (auto inp : ni->inputs) {
+      considerLoc(inp, ni, false);
+    }
+  }
+}
+
+bool Tracelet::isLiveAfterInstr(Location l,
+                                const NormalizedInstruction& ni) const {
+  const auto end = m_liveEnd.find(l);
+  ASSERT(end != m_liveEnd.end());
+  return ni.sequenceNum < end->second;
+}
+
+bool Tracelet::isWrittenAfterInstr(Location l,
+                                   const NormalizedInstruction& ni) const {
+  const auto end = m_liveDirtyEnd.find(l);
+  if (end == m_liveDirtyEnd.end()) return false;
+  return ni.sequenceNum < end->second;
+}
+
 NormalizedInstruction* Tracelet::newNormalizedInstruction() {
   NormalizedInstruction* ni = new NormalizedInstruction();
   m_instrs.push_back(ni);
@@ -2752,6 +2792,8 @@ breakBB:
   for (; it != tas.m_changeSet.end(); ++it) {
     t.m_changes[*it] = tas.m_currentMap[*it];
   }
+
+  t.constructLiveRanges();
 
   TRACE(1, "Tracelet done: stack delta %d\n", t.m_stackChange);
 }

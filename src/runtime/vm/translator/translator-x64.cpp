@@ -7770,17 +7770,16 @@ TranslatorX64::translateFPushClsMethodD(const Tracelet& t,
     Stats::emitInc(a, Stats::TgtCache_StaticMethodHit);
     CacheHandle ch = StaticMethodCache::alloc(cls, meth, getContextName());
     ScratchReg rFunc(m_regMap);
-    a.    load_reg64_disp_reg64(rVmTl, ch, *rFunc);
-    a.    test_reg64_reg64(*rFunc, *rFunc);
-    // Unconditionally set rCls; if we miss, the miss path will
-    // clean it up for us. Careful! Flags are live. The fill path
-    // has already |'ed in the necessary 1.
+    // Unconditionally set rCls; if we miss, the miss path will clean it up for
+    // us. The fill path has already |'ed in the necessary 1.
     ScratchReg rCls(m_regMap);
     a.    load_reg64_disp_reg64(rVmTl,
                                 ch + offsetof(StaticMethodCache, m_cls),
                                 *rCls);
     emitVStackStore(a, i, *rCls, clsOff);
     TCA stubsSkipRet;
+    a.    load_reg64_disp_reg64(rVmTl, ch, *rFunc);
+    a.    test_reg64_reg64(*rFunc, *rFunc);
     {
       UnlikelyIfBlock<CC_Z> miss(a, astubs);
       if (false) { // typecheck

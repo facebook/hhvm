@@ -573,19 +573,69 @@ SSATmp* chaseIncRefs(SSATmp* tmp) {
 }
 
 #define SIMPLIFY_CMP(OP, NAME, EXP) do {                                      \
+  /* --------------------------------------------------------------------- */ \
+  /* Perform some execution optimizations immediately                      */ \
+  /* --------------------------------------------------------------------- */ \
+                                                                              \
+  /* Identity optimization */                                                 \
   if (src1 == src2 || chaseIncRefs(src1) == chaseIncRefs(src2)) {             \
-    /* want to use the same operator to compare two equal values */           \
     return genDefBool(0 OP 0);                                                \
   }                                                                           \
+                                                                              \
   /* need both types to be unboxed and known to simplify */                   \
   if (!Type::isUnboxed(src1->getType()) || src1->getType() == Type::Cell ||   \
       !Type::isUnboxed(src2->getType()) || src2->getType() == Type::Cell) {   \
     break;                                                                    \
   }                                                                           \
+                                                                              \
+  /* --------------------------------------------------------------------- */ \
+  /* OpSame and OpNSame have some special rules                            */ \
+  /* --------------------------------------------------------------------- */ \
+                                                                              \
+  if (NAME == OpSame || NAME == OpNSame) {                                    \
+    /* OpSame and OpNSame do not perform type juggling */                     \
+    if (src1->getType() != src2->getType()) {                                 \
+      if (!(Type::isString(src1->getType()) &&                                \
+            Type::isString(src2->getType()))) {                               \
+        return genDefBool(NAME == OpNSame);                                   \
+      }                                                                       \
+    }                                                                         \
+                                                                              \
+    /* src1 and arc2 are now known to have the same type */                   \
+                                                                              \
+    /* OpSame and OpNSame have special rules for string and object */         \
+    /* Other types may simplify to OpEq and OpNeq, respectively */            \
+    if (Type::isString(src1->getType()) && Type::isString(src2->getType())) { \
+      if (src1->isConst() && src2->isConst()) {                               \
+        auto str1 = src1->getConstValAsStr();                                 \
+        auto str2 = src2->getConstValAsStr();                                 \
+        bool same = str1->same(str2);                                         \
+        return genDefBool(same OP 1);                                         \
+      } else {                                                                \
+        break;                                                                \
+      }                                                                       \
+    }                                                                         \
+    if (src1->getType() == Type::Obj && src2->getType() == Type::Obj) {       \
+      break;                                                                  \
+    }                                                                         \
+    /* Type is neither a string nor an object - simplify to OpEq/OpNeq */     \
+    if (NAME == OpSame) {                                                     \
+      return m_tb->genCmp(OpEq, src1, src2);                                  \
+    }                                                                         \
+    return m_tb->genCmp(OpNeq, src1, src2);                                   \
+  }                                                                           \
+                                                                              \
+  /* --------------------------------------------------------------------- */ \
+  /* We may now perform constant-constant optimizations                    */ \
+  /* --------------------------------------------------------------------- */ \
+                                                                              \
   /* Null cmp Null */                                                         \
   if (Type::isNull(src1->getType()) && Type::isNull(src2->getType())) {       \
     return genDefBool(0 OP 0);                                                \
   }                                                                           \
+  /* const cmp const */                                                       \
+  /* TODO this list is incomplete - feel free to add more */                  \
+  /* TODO: can simplify const arrays when sizes are different or both 0 */    \
   if (src1->isConst() && src2->isConst()) {                                   \
     /* StaticStr cmp StaticStr */                                             \
     if (src1->getType() == Type::StaticStr &&                                 \
@@ -603,98 +653,161 @@ SSATmp* chaseIncRefs(SSATmp* tmp) {
                         src2->getConstValAsBool());                           \
     }                                                                         \
   }                                                                           \
-  /* stop if we're OpSame/OpNSame, all the following folds are aimed at
-   * operands of different types */                                           \
-  if (NAME == OpSame || NAME == OpNSame) {                                    \
-    if (src1->getType() != src2->getType()) {                                 \
-      if (!(Type::isString(src1->getType()) &&                                \
-            Type::isString(src2->getType()))) {                               \
-        return genDefBool(NAME == OpNSame);                                   \
+                                                                              \
+  /* --------------------------------------------------------------------- */ \
+  /* Constant bool comparisons can be strength-reduced                     */ \
+  /* NOTE: Comparisons with bools get juggled to bool.                     */ \
+  /* --------------------------------------------------------------------- */ \
+                                                                              \
+  /* Canonicalize constant bools to the right */                              \
+  if (src1->getType() == Type::Bool && src1->isConst()) {                     \
+    return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
+  }                                                                           \
+                                                                              \
+  /* Perform constant-bool optimizations */                                   \
+  if (src2->getType() == Type::Bool && src2->isConst()) {                     \
+    bool b = src2->getConstValAsBool();                                       \
+                                                                              \
+    /* The result of the comparison might be independent of the truth */      \
+    /* value of the LHS. If so, then simplify. */                             \
+    /* E.g. `some-int > true`. some-int may juggle to false or true */        \
+    /*  (0 or 1), but `0 > true` and `1 > true` are both false, so we can */  \
+    /*  simplify to false immediately. */                                     \
+    if ((false OP b) == (true OP b)) {                                        \
+      return genDefBool(false OP b);                                          \
+    }                                                                         \
+                                                                              \
+    /* There are only two distinct booleans - false and true (0 and 1). */    \
+    /* From above, we know that (0 OP b) != (1 OP b). */                      \
+    /* Hence exactly one of (0 OP b) and (1 OP b) is true. */                 \
+    /* Hence there is exactly one boolean value of src1 that results in the */\
+    /* overall expression being true (after type-juggling). */                \
+    /* Hence we may check for equality with that boolean. */                  \
+    /* E.g. `some-int > false` is equivalent to `some-int == true` */         \
+    if (NAME != OpEq) {                                                       \
+      if (false OP b) {                                                       \
+        return m_tb->genCmp(OpEq, src1, genDefBool(false));                   \
+      } else {                                                                \
+        return m_tb->genCmp(OpEq, src1, genDefBool(true));                    \
       }                                                                       \
     }                                                                         \
-    /* strings and objects have special === rules */                          \
-    /* other types may now simplify === to ==, since the types are equal */   \
-    if (Type::isString(src1->getType()) ||                                    \
-        src1->getType() == Type::Obj) {                                       \
-      break;                                                                  \
-    }                                                                         \
-    if (NAME == OpSame) {                                                     \
-      return m_tb->genCmp(OpEq, src1, src2);                                  \
-    }                                                                         \
-    return m_tb->genCmp(OpNeq, src1, src2);                                   \
   }                                                                           \
+                                                                              \
+  /* --------------------------------------------------------------------- */ \
+  /* For same-type cmps, canonicalize any constants to the right           */ \
+  /* Then stop - there are no more simplifications left                    */ \
+  /* --------------------------------------------------------------------- */ \
+                                                                              \
   if (src1->getType() == src2->getType() ||                                   \
       (Type::isString(src1->getType()) && Type::isString(src2->getType()))) { \
-    /* Types are the same, no more simplifications left */                    \
+    if (src1->isConst() && !src2->isConst()) {                                \
+      return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                  \
+    }                                                                         \
     break;                                                                    \
   }                                                                           \
+                                                                              \
+  /* --------------------------------------------------------------------- */ \
+  /* Perform type juggling and type canonicalization for different types   */ \
+  /* see http://www.php.net/manual/en/language.operators.comparison.php    */ \
+  /* --------------------------------------------------------------------- */ \
+                                                                              \
   /* nulls get canonicalized to the right */                                  \
   if (Type::isNull(src1->getType())) {                                        \
     return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
   }                                                                           \
+                                                                              \
+  /* case 1: null cmp string. Convert null to "" */                           \
+  if (Type::isString(src1->getType()) && Type::isNull(src2->getType())) {     \
+    return m_tb->genCmp(NAME, src1,                                           \
+                        m_tb->genDefConst(StringData::GetStaticString("")));  \
+  }                                                                           \
+                                                                              \
+  /* case 2a: null cmp anything. Convert null to false */                     \
   if (Type::isNull(src2->getType())) {                                        \
-    if (Type::isString(src1->getType())) {                                    \
-      /* convert null to "", numerical or lexical comparison */               \
-      return m_tb->genCmp(NAME, src1,                                         \
-                          m_tb->genDefConst(StringData::GetStaticString("")));\
-    }                                                                         \
-    if (src1->getType() == Type::Int) {                                       \
-      if (NAME == OpEq || NAME == OpNeq) {                                    \
-        return m_tb->genCmp(NAME, src1, genDefInt(0));                        \
-      }                                                                       \
-      /* TODO: for all other comparison of int to null, we can optimize to use
-         an unsigned integer comparison */                                    \
-    }                                                                         \
     return m_tb->genCmp(NAME, src1, genDefBool(false));                       \
   }                                                                           \
+                                                                              \
   /* bools get canonicalized to the right */                                  \
   if (src1->getType() == Type::Bool) {                                        \
     return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
   }                                                                           \
+                                                                              \
+  /* case 2b: bool cmp anything. Convert anything to bool */                  \
   if (src2->getType() == Type::Bool) {                                        \
-    /* TODO: optimze comparison of ints to const bools */                     \
+    if (src1->isConst()) {                                                    \
+      if (src1->getType() == Type::Int) {                                     \
+        return m_tb->genCmp(NAME, genDefBool(src1->getConstValAsInt()), src2);\
+      } else if (Type::isString(src1->getType())) {                           \
+        auto str = src1->getConstValAsStr();                                  \
+        return m_tb->genCmp(NAME, genDefBool(str->toBoolean()), src2);        \
+      }                                                                       \
+    }                                                                         \
+                                                                              \
+    /* Optimize comparison between int and const bool */                      \
+    if (src1->getType() == Type::Int && src2->isConst()) {                    \
+      /* Based on the const bool optimization (above) NAME should be OpEq */  \
+      assert(NAME == OpEq);                                                   \
+                                                                              \
+      if (src2->getConstValAsBool()) {                                        \
+        return m_tb->genCmp(OpNeq, src1, m_tb->genDefConst<int64>(0));        \
+      } else {                                                                \
+        return m_tb->genCmp(OpEq, src1, m_tb->genDefConst<int64>(0));         \
+      }                                                                       \
+    }                                                                         \
+                                                                              \
+    /* Nothing fancy to do - perform juggling as normal. */                   \
     return m_tb->genCmp(NAME, m_tb->genConvToBool(src1), src2);               \
   }                                                                           \
+                                                                              \
+  /* From here on, we must be careful of how Type::Obj gets dealt with, */    \
+  /* since Type::Obj can refer to an object or to a resource. */              \
+                                                                              \
+  /* case 3: object cmp object. No juggling to do */                          \
+  /* same-type simplification is performed above */                           \
+                                                                              \
   /* strings get canonicalized to the left */                                 \
   if (Type::isString(src2->getType())) {                                      \
     return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
   }                                                                           \
-  if (src1->isConst() && src2->isConst()) {                                   \
-    /* StaticStr cmp ConstBool */                                             \
-    if (src1->getType() == Type::StaticStr && src2->getType() == Type::Bool) {\
-      const StringData* str = src1->getConstValAsStr();                       \
-      if (str->isInteger()) {                                                 \
-        return genDefBool(bool(str->toInt64()) OP src2->getConstValAsBool()); \
-      } else if (str->isNumeric()) {                                          \
-        return genDefBool(bool(str->toDouble()) OP src2->getConstValAsBool());\
+                                                                              \
+  /* case 4: number/string/resource cmp. Convert to number (int OR double) */ \
+  /* NOTE: The following if-test only checks for the case when exactly     */ \
+  /*  one of the arguments is a string. Other cases (like string-string)   */ \
+  /*  are dealt with earlier, while other cases (like number-resource)     */ \
+  /*  are not caught at all (and end up exiting this macro at the bottom). */ \
+  if (Type::isString(src1->getType())) {                                      \
+    if (src1->isConst()) {                                                    \
+      auto str = src1->getConstValAsStr();                                    \
+      int64 si; double sd;                                                    \
+      auto st = str->isNumericWithVal(si, sd, true /* allow errors */);       \
+      if (st == KindOfDouble) {                                               \
+        return m_tb->genCmp(NAME, m_tb->genDefConst<double>(sd), src2);       \
       }                                                                       \
-      return genDefBool(!str->empty() OP src2->getConstValAsBool());          \
-    }                                                                         \
-    /* StaticStr cmp ConstInt */                                              \
-    if (src1->getType() == Type::StaticStr && src2->getType() == Type::Int) { \
-      const StringData* str = src1->getConstValAsStr();                       \
-      if (str->isInteger()) {                                                 \
-        return genDefBool(str->toInt64() OP src2->getConstValAsInt());        \
-      } else if (str->isNumeric()) {                                          \
-        return genDefBool(str->toDouble() OP                                  \
-                          double(src2->getConstValAsInt()));                  \
+      if (st == KindOfNull) {                                                 \
+        si = 0;                                                               \
       }                                                                       \
-      return genDefBool(0 OP src2->getConstValAsInt());                       \
+      return m_tb->genCmp(NAME, m_tb->genDefConst<int64>(si), src2);          \
     }                                                                         \
-    /* ConstInt cmp ConstBool */                                              \
-    if (src1->getType() == Type::Int && src2->getType() == Type::Bool) {      \
-      return genDefBool(bool(src1->getConstValAsInt()) OP                     \
-                        src2->getConstValAsBool());                           \
-    }                                                                         \
+    break;                                                                    \
   }                                                                           \
-  if (src1->getType() == Type::Arr && src2->getType() != Type::Arr) {         \
-    /* array is always greater */                                             \
-    return genDefBool(1 OP 0)                             ;                   \
+                                                                              \
+  /* case 5: array cmp array. No juggling to do */                            \
+  /* same-type simplification is performed above */                           \
+                                                                              \
+  /* case 6: array cmp anything. Array is greater */                          \
+  if (src1->getType() == Type::Arr) {                                         \
+    return genDefBool(1 OP 0);                                                \
   }                                                                           \
-  if (src2->getType() == Type::Arr && src1->getType() != Type::Arr) {         \
-    /* array is always greater */                                             \
-    return genDefBool(0 OP 1)                             ;                   \
+  if (src2->getType() == Type::Arr) {                                         \
+    return genDefBool(0 OP 1);                                                \
   }                                                                           \
+                                                                              \
+  /* case 7: object cmp anything. Object is greater */                        \
+  /* --------------------------------------------------------------------- */ \
+  /* Unfortunately, we are unsure of whether Type::Obj is an object or a   */ \
+  /* resource, so this code cannot be applied.                             */ \
+  /* --------------------------------------------------------------------- */ \
+                                                                              \
 } while (0)
 
 SSATmp* Simplifier::simplifyGt(SSATmp* src1, SSATmp* src2) {

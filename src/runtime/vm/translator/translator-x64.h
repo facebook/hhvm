@@ -779,15 +779,18 @@ private:
   static const int kJmpccLen = 6;
   static const int kJcc8Len = 3;
   static const int kLeaRipLen = 7;
+  static const int kTestRegRegLen = 3;
+  static const int kTestImmRegLen = 5;  // only for rax -- special encoding
   // Cache alignment is required for mutable instructions to make sure
   // mutations don't "tear" on remote cpus.
   static const size_t kX64CacheLineSize = 64;
   static const size_t kX64CacheLineMask = kX64CacheLineSize - 1;
   void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
                    const bool unreachable = true);
+  void prepareForTestAndSmash(int testBytes, int jccBytes);
   void prepareForSmash(Asm &a, int nBytes);
   void prepareForSmash(int nBytes);
-  static bool isSmashable(Asm &a, int nBytes);
+  static bool isSmashable(Address frontier, int nBytes);
   static void smash(Asm &a, TCA src, TCA dest);
 
   TCA getTranslation(const SrcKey *sk, bool align, bool forceNoHHIR = false);

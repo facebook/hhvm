@@ -1264,23 +1264,37 @@ TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
 }
 
 /*
- * Returns true if a's current frontier can have an nBytes-long
+ * Returns true if the given current frontier can have an nBytes-long
  * instruction written without any risk of cache-tearing.
  */
 bool
-TranslatorX64::isSmashable(X64Assembler& a, int nBytes) {
+TranslatorX64::isSmashable(Address frontier, int nBytes) {
   ASSERT(nBytes <= int(kX64CacheLineSize));
-  uintptr_t iFrontier = uintptr_t(a.code.frontier);
+  uintptr_t iFrontier = uintptr_t(frontier);
   uintptr_t lastByte = iFrontier + nBytes - 1;
   return (iFrontier & ~kX64CacheLineMask) == (lastByte & ~kX64CacheLineMask);
 }
 
+/*
+ * Call before emitting a test-jcc sequence. Inserts a nop gap such that after
+ * writing a testBytes-long instruction, the frontier will be smashable.
+ */
+void
+TranslatorX64::prepareForTestAndSmash(int testBytes, int jccBytes) {
+  uintptr_t afterTestFrontier = uintptr_t(a.code.frontier) + testBytes;
+  if (!isSmashable(a.code.frontier + testBytes, jccBytes)) {
+    int gapSize = kX64CacheLineSize - (afterTestFrontier & kX64CacheLineMask);
+    a.emitNop(gapSize);
+  }
+  ASSERT(isSmashable(a.code.frontier + testBytes, jccBytes));
+}
+
 void
 TranslatorX64::prepareForSmash(X64Assembler& a, int nBytes) {
-  if (!isSmashable(a, nBytes)) {
+  if (!isSmashable(a.code.frontier, nBytes)) {
     moveToAlign(a, kX64CacheLineSize, false);
   }
-  ASSERT(isSmashable(a, nBytes));
+  ASSERT(isSmashable(a.code.frontier, nBytes));
 }
 
 void
@@ -1309,7 +1323,7 @@ TranslatorX64::smash(X64Assembler &a, TCA src, TCA dest) {
    *       the assembler.
    */
   CodeCursor cg(a, src);
-  ASSERT(isSmashable(a, kJmpLen));
+  ASSERT(isSmashable(a.code.frontier, kJmpLen));
   if (dest > src && dest - src <= 7) {
     a.    emitNop(dest - src);
   } else {
@@ -2670,6 +2684,7 @@ TranslatorX64::checkRefs(X64Assembler& a,
 
           // Other than these builtins, we need to have all by value
           // args in this case.
+          prepareForTestAndSmash(kTestRegRegLen, kJmpccLen);
           a.  test_reg64_reg64(*rExpectedBits, *rExpectedBits);
           emitFallbackJmp(fail);
 
@@ -3894,6 +3909,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     }
     if (i.changesPC) {
       fuseBranchSync(t, i);
+      prepareForTestAndSmash(kTestImmRegLen, kJmpccLen + kJmpLen);
       a.   test_imm32_reg32(1, rax);
       fuseBranchAfterBool(t, i, ccNegate(ccBranch));
       return;
@@ -3914,6 +3930,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     fuseBranchSync(t, i);
   }
   if (IS_NULL_TYPE(leftType) || IS_NULL_TYPE(rightType)) {
+    prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
     if (IS_NULL_TYPE(leftType)) {
       a.   test_reg64_reg64(srcdest, srcdest);
     } else {
@@ -4254,6 +4271,7 @@ TranslatorX64::translateBranchOp(const Tracelet& t,
     emitBindJmp(isZ ? taken : notTaken);
     return;
   }
+  prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
   a.    test_reg64_reg64(src, src);
   branchWithFlagsSet(t, i, isZ ? CC_Z : CC_NZ);
 }
@@ -6900,6 +6918,7 @@ void TranslatorX64::translateClassExistsImpl(const Tracelet& t,
     if (i.changesPC) {
       fuseBranchSync(t, i);
     }
+    prepareForTestAndSmash(kTestImmRegLen, kJmpccLen + kJmpLen);
     a.    test_imm32_reg32(isClass ? attrNotClass : typeAttr, *scratch);
     ConditionCode cc = isClass ? CC_Z : CC_NZ;
     if (i.changesPC) {
@@ -7515,6 +7534,7 @@ TranslatorX64::translateAKExists(const Tracelet& t,
     ScratchReg res(m_regMap, rax);
     if (ni.changesPC) {
       fuseBranchSync(t, ni);
+      prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
       a.    test_reg64_reg64(*res, *res);
       fuseBranchAfterBool(t, ni, ni.invertCond ? CC_Z : CC_NZ);
     } else {
@@ -9428,6 +9448,7 @@ TranslatorX64::translateIterInit(const Tracelet& t,
   // the input. If a new iterator is not created, new_iter_* will decRef the
   // input for us.  new_iter_* returns 0 if an iterator was not created,
   // otherwise it returns 1.
+  prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
   a.    test_reg64_reg64(rax, rax);
   emitCondJmp(taken, notTaken, CC_Z);
 }
@@ -9524,6 +9545,7 @@ TranslatorX64::translateIterNext(const Tracelet& t,
   SrcKey taken, notTaken;
   branchDests(t, i, &taken, &notTaken, 1 /* destImmIdx */);
 
+  prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
   a.   test_reg64_reg64(rax, rax);
   emitCondJmp(taken, notTaken, CC_NZ);
 }

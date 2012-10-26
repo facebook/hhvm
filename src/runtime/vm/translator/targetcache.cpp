@@ -74,12 +74,12 @@ static const size_t kPreAllocatedBytes = kConditionFlagsOff + 64;
 
 // Mapping from names to targetcache locations. Protected by the translator
 // write lease.
-typedef hphp_hash_map<const StringData*, Handle, string_data_hash,
-        string_data_isame>
+typedef tbb::concurrent_hash_map<const StringData*, Handle,
+        StringDataHashICompare>
   HandleMapIS;
 
-typedef hphp_hash_map<const StringData*, Handle, string_data_hash,
-        string_data_same>
+typedef tbb::concurrent_hash_map<const StringData*, Handle,
+        StringDataHashCompare>
   HandleMapCS;
 
 // handleMaps[NSConstant]['FOO'] is the cache associated with the constant
@@ -127,12 +127,16 @@ public:
   HandleInfo<where >= FirstCaseSensitive>::getHandleMap(where)
 
 static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
-  Lock l(s_handleMutex);
   ASSERT_NOT_IMPLEMENTED(ns == NSInvalid || ns >= FirstCaseSensitive);
   HandleMapCS& map = HandleInfo<true>::getHandleMap(ns);
-  Handle handle;
-  if (name != NULL && ns != NSInvalid && mapGet(map, name, &handle)) {
-    return handle;
+  HandleMapCS::const_accessor a;
+  if (name != NULL && ns != NSInvalid && map.find(a, name)) {
+    return a->second;
+  }
+  Lock l(s_handleMutex);
+  if (name != NULL && ns != NSInvalid && map.find(a, name)) {
+    // Retry under the lock.
+    return a->second;
   }
   if (!s_bits_to_go) {
     static const int kNumBytes = 512;
@@ -147,7 +151,8 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
   s_bits_to_go--;
   if (name != NULL && ns != NSInvalid) {
     if (!name->isStatic()) name = StringData::GetStaticString(name);
-    mapInsertUnique(map, name, s_next_bit);
+    if (!map.insert(HandleMapCS::value_type(name, s_next_bit)))
+      NOT_REACHED();
   }
   return s_next_bit++;
 }
@@ -227,19 +232,23 @@ template<bool sensitive>
 Handle
 namedAlloc(PHPNameSpace where, const StringData* name,
            int numBytes, int align) {
-  Lock l(s_handleMutex);
   ASSERT(!name || (where >= 0 && where < NumNameSpaces));
-  Handle retval;
   typedef HandleInfo<sensitive> HI;
   typename HI::Map& map = HI::getHandleMap(where);
-  if (name && mapGet(map, name, &retval)) {
-    TRACE(2, "TargetCache: hit \"%s\", %d\n", name->data(), int(retval));
-    return retval;
+  typename HI::Map::const_accessor a;
+  if (name && map.find(a, name)) {
+    TRACE(2, "TargetCache: hit \"%s\", %d\n", name->data(), int(a->second));
+    return a->second;
   }
-  retval = allocLocked(where == NSPersistent, numBytes, align);
+  Lock l(s_handleMutex);
+  if (name && map.find(a, name)) { // Retry under the lock
+    TRACE(2, "TargetCache: hit \"%s\", %d\n", name->data(), int(a->second));
+    return a->second;
+  }
+  Handle retval = allocLocked(where == NSPersistent, numBytes, align);
   if (name) {
     if (!name->isStatic()) name = StringData::GetStaticString(name);
-    mapInsertUnique(map, name, retval);
+    if (!map.insert(typename HI::Map::value_type(name, retval))) NOT_REACHED();
     TRACE(1, "TargetCache: inserted \"%s\", %d\n", name->data(), int(retval));
   } else if (where == NSDynFunction) {
     funcCacheEntries.push_back(retval);

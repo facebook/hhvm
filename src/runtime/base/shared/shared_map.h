@@ -107,6 +107,16 @@ public:
   ArrayData *prepend(CVarRef v, bool copy);
 
   /**
+   * Non-Variant virtual methods that override ArrayData
+   */
+  TypedValue* nvGet(int64 k) const;
+  TypedValue* nvGet(const StringData* k) const;
+  void nvGetKey(TypedValue* out, ssize_t pos);
+  TypedValue* nvGetValueRef(ssize_t pos);
+  TypedValue* nvGetCell(int64 ki, bool error) const;
+  TypedValue* nvGetCell(const StringData* k, bool error) const;
+
+  /**
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION(SharedMap);

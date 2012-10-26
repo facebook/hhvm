@@ -453,25 +453,15 @@ bool ZendArray::exists(CVarRef k) const {
 HOT_FUNC_HPHP
 CVarRef ZendArray::get(int64 k, bool error /* = false */) const {
   Bucket *p = find(k);
-  if (p) {
-    return p->data;
-  }
-  if (error) {
-    raise_notice("Undefined index: %lld", k);
-  }
-  return null_variant;
+  if (p) return p->data;
+  return error ? getNotFound(k) : null_variant;
 }
 
 CVarRef ZendArray::get(litstr k, bool error /* = false */) const {
   int len = strlen(k);
   Bucket *p = find(k, len, hash_string(k, len));
-  if (p) {
-    return p->data;
-  }
-  if (error) {
-    raise_notice("Undefined index: %s", k);
-  }
-  return null_variant;
+  if (p) return p->data;
+  return error ? getNotFound(k) : null_variant;
 }
 
 HOT_FUNC_HPHP
@@ -479,13 +469,8 @@ CVarRef ZendArray::get(CStrRef k, bool error /* = false */) const {
   StringData *key = k.get();
   strhash_t prehash = key->hash();
   Bucket *p = find(key->data(), key->size(), prehash);
-  if (p) {
-    return p->data;
-  }
-  if (error) {
-    raise_notice("Undefined index: %s", k.data());
-  }
-  return null_variant;
+  if (p) return p->data;
+  return error ? getNotFound(k) : null_variant;
 }
 
 HOT_FUNC_HPHP
@@ -500,13 +485,8 @@ CVarRef ZendArray::get(CVarRef k, bool error /* = false */) const {
     strhash_t prehash = strkey->hash();
     p = find(strkey->data(), strkey->size(), prehash);
   }
-  if (p) {
-    return p->data;
-  }
-  if (error) {
-    raise_notice("Undefined index: %s", k.toString().data());
-  }
-  return null_variant;
+  if (p) return p->data;
+  return error ? getNotFound(k) : null_variant;
 }
 
 ssize_t ZendArray::getIndex(int64 k) const {

@@ -661,10 +661,7 @@ CVarRef HphpArray::get(int64 k, bool error /* = false */) const {
     Elm* e = &m_data[pos];
     return tvAsCVarRef(&e->data);
   }
-  if (error) {
-    raise_notice("Undefined index: %lld", k);
-  }
-  return null_variant;
+  return error ? getNotFound(k) : null_variant;
 }
 
 CVarRef HphpArray::get(litstr k, bool error /* = false */) const {
@@ -675,10 +672,7 @@ CVarRef HphpArray::get(litstr k, bool error /* = false */) const {
     Elm* e = &m_data[pos];
     return tvAsCVarRef(&e->data);
   }
-  if (error) {
-    raise_notice("Undefined index: %s", k);
-  }
-  return null_variant;
+  return error ? getNotFound(k) : null_variant;
 }
 
 CVarRef HphpArray::get(CStrRef k, bool error /* = false */) const {
@@ -689,10 +683,7 @@ CVarRef HphpArray::get(CStrRef k, bool error /* = false */) const {
     Elm* e = &m_data[pos];
     return tvAsCVarRef(&e->data);
   }
-  if (error) {
-    raise_notice("Undefined index: %s", k.data());
-  }
-  return null_variant;
+  return error ? getNotFound(k) : null_variant;
 }
 
 CVarRef HphpArray::get(CVarRef k, bool error /* = false */) const {
@@ -712,10 +703,7 @@ CVarRef HphpArray::get(CVarRef k, bool error /* = false */) const {
       return tvAsCVarRef(&e->data);
     }
   }
-  if (error) {
-    raise_notice("Undefined index: %s", k.toString().data());
-  }
-  return null_variant;
+  return error ? getNotFound(k) : null_variant;
 }
 
 ssize_t HphpArray::getIndex(int64 k) const {
@@ -1602,10 +1590,7 @@ TypedValue* HphpArray::nvGetCell(int64 ki, bool error /* = false */) const {
     return (tv->m_type != KindOfRef) ? tv :
            tv->m_data.pref->tv();
   }
-  if (error) {
-    raise_notice("Undefined index: %lld", ki);
-  }
-  return NULL;
+  return error ? nvGetNotFound(ki) : NULL;
 }
 
 inline TypedValue*
@@ -1621,10 +1606,7 @@ HphpArray::nvGetCell(const StringData* k, bool error /* = false */) const {
       return tv->m_data.pref->tv();
     }
   }
-  if (error) {
-    raise_notice("Undefined index: %s", k->data());
-  }
-  return NULL;
+  return error ? nvGetNotFound(k) : NULL;
 }
 
 TypedValue* HphpArray::nvGet(int64 ki) const {
@@ -1636,8 +1618,7 @@ TypedValue* HphpArray::nvGet(int64 ki) const {
   return NULL;
 }
 
-TypedValue*
-HphpArray::nvGet(const StringData* k) const {
+TypedValue* HphpArray::nvGet(const StringData* k) const {
   ElmInd pos = find(k, k->hash());
   if (LIKELY(pos != ElmIndEmpty)) {
     Elm* e = &m_data[pos];
@@ -1646,7 +1627,7 @@ HphpArray::nvGet(const StringData* k) const {
   return NULL;
 }
 
-inline ArrayData* HphpArray::nvSet(int64 ki, int64 vi, bool copy) {
+ArrayData* HphpArray::nvSet(int64 ki, int64 vi, bool copy) {
   HphpArray* a = this;
   ArrayData* retval = NULL;
   if (copy) {
@@ -2040,26 +2021,24 @@ namespace VM {
 
 // Helpers for array_setm.
 template<typename Value>
-inline ArrayData* nv_set_with_integer_check(HphpArray* arr, StringData* key,
+inline ArrayData* nv_set_with_integer_check(ArrayData* a, StringData* key,
                                             Value value, bool copy) {
   int64 lval;
   if (UNLIKELY(key->isStrictlyInteger(lval))) {
-    return arr->nvSet(lval, value, copy);
+    return a->nvSet(lval, value, copy);
   } else {
-    return arr->nvSet(key, value, copy);
+    return a->nvSet(key, value, copy);
   }
 }
 
 template<typename Value>
-ArrayData*
-nvCheckedSet(HphpArray* ha, StringData* sd, Value value, bool copy) {
-  return nv_set_with_integer_check<Value>(ha, sd, value, copy);
+ArrayData* nvCheckedSet(ArrayData* a, StringData* sd, Value value, bool copy) {
+  return nv_set_with_integer_check<Value>(a, sd, value, copy);
 }
 
 template<typename Value>
-ArrayData*
-nvCheckedSet(HphpArray* ha, int64 key, Value value, bool copy) {
-  return ha->nvSet(key, value, copy);
+ArrayData* nvCheckedSet(ArrayData* a, int64 key, Value value, bool copy) {
+  return a->nvSet(key, value, copy);
 }
 
 void setmDecRef(int64 i) { /* nop */ }
@@ -2074,27 +2053,6 @@ array_mutate_pre(ArrayData* ad) {
 
 VarNR toVar(int64 i)        { return VarNR(i); }
 Variant &toVar(TypedValue* tv) { return tvCellAsVariant(tv); }
-
-template<bool CheckInt>
-inline ArrayData* adSet(ArrayData* ad, int64 key, CVarRef val, bool copy) {
-  return ad->set(key, val, copy);
-}
-
-template<bool CheckInt>
-inline ArrayData* adSet(ArrayData* ad, const StringData* key,
-                        CVarRef val, bool copy) {
-  return ad->set(StrNR(key), val, copy);
-}
-
-template<>
-inline ArrayData* adSet<true>(ArrayData* ad, const StringData* key,
-                       CVarRef val, bool copy) {
-  int64 lval;
-  if (UNLIKELY(key->isStrictlyInteger(lval))) {
-    return ad->set(lval, val, copy);
-  }
-  return ad->set(StrNR(key), val, copy);
-}
 
 static inline ArrayData*
 array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
@@ -2116,16 +2074,10 @@ ArrayData*
 array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
   ArrayData* retval;
   bool copy = ad->getCount() > 1;
-  if (LIKELY(IsHphpArray(ad))) {
-    HphpArray* ha = array_mutate_pre(ad);
-    // nvSet will decRef any old value that may have been overwritten
-    // if appropriate
-    retval = CheckInt ?
-      nvCheckedSet(ha, key, value, copy)
-      : ha->nvSet(key, value, copy);
-  } else {
-    retval = adSet<CheckInt>(ad, key, toVar(value), copy);
-  }
+  // nvSet will decRef any old value that may have been overwritten
+  // if appropriate
+  retval = CheckInt ? nvCheckedSet(ad, key, value, copy) :
+           ad->nvSet(key, value, copy);
   if (DecRefKey) setmDecRef(key);
   if (DecRefValue) setmDecRef(value);
   return array_mutate_post(cell, ad, retval);
@@ -2246,7 +2198,7 @@ ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
 
 
 // Helpers for getm and friends.
-inline TypedValue* nv_get_cell_with_integer_check(HphpArray* arr,
+inline TypedValue* nv_get_cell_with_integer_check(ArrayData* arr,
                                                   StringData* key) {
   int64 lval;
   if (UNLIKELY(key->isStrictlyInteger(lval))) {
@@ -2254,26 +2206,6 @@ inline TypedValue* nv_get_cell_with_integer_check(HphpArray* arr,
   } else {
     return arr->nvGetCell(key, true /* error */);
   }
-}
-
-static void elem(ArrayData* ad, int64 k, TypedValue* dest) {
-  // dest is uninitialized, no need to destroy it
-  CVarRef value = ad->get(k, true /* error */);
-  TypedValue *tvPtr = value.getTypedAccessor();
-  tvDup(tvPtr, dest);
-}
-
-static void elem(ArrayData* ad, StringData* sd, TypedValue* dest) {
-  TypedValue* tvPtr;
-  int64 iKey;
-  if (UNLIKELY(sd->isStrictlyInteger(iKey))) {
-    tvPtr = ad->get(iKey, true /* error */).getTypedAccessor();
-  } else {
-    String k(sd);
-    tvPtr = ad->get(k, true /* error */).getTypedAccessor();
-  }
-
-  tvDup(tvPtr, dest);
 }
 
 /**
@@ -2290,19 +2222,14 @@ ArrayData*
 array_getm_i(void* dptr, int64 key, TypedValue* out) {
   ASSERT(dptr);
   ArrayData* ad = (ArrayData*)dptr;
-  if (UNLIKELY(!IsHphpArray(ad))) {
-    elem(ad, key, out);
+  TRACE(2, "array_getm_ik1: (%p) <- %p[%lld]\n", out, dptr, key);
+  // Ref-counting the value is the translator's responsibility. We know out
+  // pointed to uninitialized memory, so no need to dec it.
+  TypedValue* ret = ad->nvGetCell(key, true /* error */);
+  if (UNLIKELY(!ret)) {
+    TV_WRITE_NULL(out);
   } else {
-    HphpArray *ha = (HphpArray*)dptr;
-    TRACE(2, "array_getm_ik1: (%p) <- %p[%lld]\n", out, dptr, key);
-    // Ref-counting the value is the translator's responsibility. We know out
-    // pointed to uninitialized memory, so no need to dec it.
-    TypedValue* ret = ha->nvGetCell(key, true /* error */);
-    if (UNLIKELY(!ret)) {
-      TV_WRITE_NULL(out);
-    } else {
-      tvDup(ret, out);
-    }
+    tvDup(ret, out);
   }
   return ad;
 }
@@ -2319,19 +2246,12 @@ ArrayData* array_getm_impl(ArrayData* ad, StringData* sd,
                            int flags, TypedValue* out) {
   bool drKey = flags & DecRefKey;
   bool checkInts = flags & CheckInts;
-  if (UNLIKELY(!IsHphpArray(ad))) {
-    elem(ad, sd, out);
+  TypedValue* ret = checkInts ? nv_get_cell_with_integer_check(ad, sd) :
+                    ad->nvGetCell(sd, true /*error*/);
+  if (UNLIKELY(!ret)) {
+    TV_WRITE_NULL(out);
   } else {
-    HphpArray* ha = (HphpArray*)(ad);
-    TypedValue* ret;
-    ret = (checkInts ? 
-           nv_get_cell_with_integer_check(ha, sd) :
-           ha->nvGetCell(sd, true /*error*/));
-    if (UNLIKELY(!ret)) {
-      TV_WRITE_NULL(out);
-    } else {
-      tvDup((ret), (out));
-    }
+    tvDup((ret), (out));
   }
   if (drKey && sd->decRefCount() == 0) sd->release();
   TRACE(2, "%s: (%p) <- %p[\"%s\"@sd%p]\n", __FUNCTION__,
@@ -2353,7 +2273,7 @@ array_getm_s(void* dptr, StringData* sd, TypedValue* out) {
  */
 ArrayData*
 array_getm_s0(void* dptr, StringData* sd, TypedValue* out) {
-  return array_getm_impl((ArrayData*)dptr, sd, CheckInts, out); 
+  return array_getm_impl((ArrayData*)dptr, sd, CheckInts, out);
 }
 
 /**
@@ -2403,14 +2323,7 @@ array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
 void
 array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
                    bool decRefKey) {
-  TypedValue* base2;
-
-  if (UNLIKELY(!IsHphpArray(ad))) {
-    base2 = (TypedValue*)&ad->get(ik, true);
-  } else {
-    base2 = static_cast<HphpArray*>(ad)->nvGetCell(ik, true);
-  }
-
+  TypedValue* base2 = ad->nvGetCell(ik, true);
   if (UNLIKELY(base2 == NULL || base2->m_type != KindOfArray)) {
     if (base2 == NULL) {
       base2 = (TypedValue*)&init_null_variant;
@@ -2445,26 +2358,15 @@ static bool
 issetMUnary(const void* dptr, StringData* sd, bool decRefKey, bool checkInt) {
   const ArrayData* ad = (const ArrayData*)dptr;
   bool retval;
-  const Variant *cell;
-  if (UNLIKELY(!IsHphpArray(ad))) {
-    int64 keyAsInt;
-    if (checkInt && sd->isStrictlyInteger(keyAsInt)) {
-      cell = &ad->get(keyAsInt);
-    } else {
-      cell = &ad->get(StrNR(sd));
-    }
-  } else {
-    const HphpArray* ha = (const HphpArray*)dptr;
-    int64 keyAsInt;
+  int64 keyAsInt;
 
-    TypedValue* c;
-    if (checkInt && sd->isStrictlyInteger(keyAsInt)) {
-      c = ha->nvGet(keyAsInt);
-    } else {
-      c = ha->nvGet(sd);
-    }
-    cell = &tvAsVariant(c);
+  TypedValue* c;
+  if (checkInt && sd->isStrictlyInteger(keyAsInt)) {
+    c = ad->nvGet(keyAsInt);
+  } else {
+    c = ad->nvGet(sd);
   }
+  const Variant* cell = &tvAsVariant(c);
 
   retval = cell && !cell->isNull();
   TRACE(2, "issetMUnary: %p[\"%s\"@sd%p] -> %d\n",
@@ -2485,11 +2387,7 @@ uint64 array_issetm_s0_fast(const void* dptr, StringData* sd)
 
 uint64 array_issetm_i(const void* dptr, int64_t key) {
   ArrayData* ad = (ArrayData*)dptr;
-  if (UNLIKELY(!IsHphpArray(ad))) {
-    return ad->exists(key);
-  }
-  HphpArray* ha = (HphpArray*)dptr;
-  TypedValue* ret = ha->nvGetCell(key, false /* error */);
+  TypedValue* ret = ad->nvGetCell(key, false /* error */);
   return ret && !tvAsCVarRef(ret).isNull();
 }
 

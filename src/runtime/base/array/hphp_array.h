@@ -210,10 +210,6 @@ public:
   void nvGetKey(TypedValue* out, ssize_t pos);
   bool nvInsert(StringData* k, TypedValue *v);
 
-  static bool isHphpArray(const ArrayData* ad) {
-    return *(void const***)ad == getVTablePtr();
-  }
-
   // Assembly linkage
   static uint32_t getMaskOff() {
     return (uintptr_t)&((HphpArray*)0)->m_tableMask;
@@ -466,7 +462,7 @@ private:
 };
 
 inline bool IsHphpArray(const ArrayData* ad) {
-  return HphpArray::isHphpArray(ad);
+  return dynamic_cast<const HphpArray*>(ad) != 0;
 }
 
 //=============================================================================

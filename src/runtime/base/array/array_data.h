@@ -26,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class SharedVariant;
+struct TypedValue;
 
 /**
  * Base class/interface for all types of specialized array data.
@@ -161,6 +162,20 @@ class ArrayData : public Countable {
   virtual CVarRef get(litstr  k, bool error = false) const = 0;
   virtual CVarRef get(CStrRef k, bool error = false) const = 0;
   virtual CVarRef get(CVarRef k, bool error = false) const = 0;
+
+  /**
+   * Interface for VM helpers.  ArrayData implements generic versions
+   * using the other ArrayData api; subclasses may do better.
+   */
+  virtual TypedValue* nvGet(int64 k) const;
+  virtual TypedValue* nvGet(const StringData* k) const;
+  virtual void nvGetKey(TypedValue* out, ssize_t pos);
+  virtual TypedValue* nvGetValueRef(ssize_t pos);
+  virtual ArrayData* nvSet(int64 ki, int64 vi, bool copy);
+  virtual ArrayData* nvSet(int64 ki, const TypedValue* v, bool copy);
+  virtual ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
+  virtual TypedValue* nvGetCell(int64 ki, bool error) const;
+  virtual TypedValue* nvGetCell(const StringData* k, bool error) const;
 
   /**
    * Get the numeric index for a key. Only these need to be
@@ -364,6 +379,13 @@ class ArrayData : public Countable {
   void setStrongIterators(FullPos* p) {
     m_flags = uintptr_t(p) | m_flags & kSiPastEnd;
   }
+  // error-handling helpers
+  static CVarRef getNotFound(int64 k);
+  static CVarRef getNotFound(litstr k);
+  static CVarRef getNotFound(CStrRef k);
+  static CVarRef getNotFound(CVarRef k);
+  static TypedValue* nvGetNotFound(int64 k);
+  static TypedValue* nvGetNotFound(const StringData* k);
 
  protected:
   uint m_size;

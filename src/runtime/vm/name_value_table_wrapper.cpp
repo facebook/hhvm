@@ -101,6 +101,15 @@ CVarRef NameValueTableWrapper::get(CVarRef k, bool error) const {
   return get(k.toString(), error);
 }
 
+TypedValue* NameValueTableWrapper::nvGet(const StringData* k) const {
+  return m_tab->lookup(k);
+}
+
+TypedValue* NameValueTableWrapper::nvGet(int64 k) const {
+  Variant k2(k);
+  return m_tab->lookup(k2.toString().get());
+}
+
 ssize_t NameValueTableWrapper::getIndex(int64 k) const {
   return getIndex(Variant(k));
 }

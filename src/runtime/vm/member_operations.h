@@ -150,35 +150,16 @@ static inline void opPre(TypedValue*& base, DataType& type) {
 
 static inline TypedValue* ElemArrayRawKey(ArrayData* base,
                                           int64 key) {
-  TypedValue* result;
-  if (LIKELY(IsHphpArray(base))) {
-    result = static_cast<HphpArray*>(base)->nvGet(key);
-    if (result == NULL) {
-      result = (TypedValue*)&null_variant;
-    }
-  } else {
-    result = (TypedValue*)&base->get(key);
-  }
-  return result;
+  TypedValue* result = base->nvGet(key);
+  return result ? result : (TypedValue*)&null_variant;
 }
 
 static inline TypedValue* ElemArrayRawKey(ArrayData* base,
                                           StringData* key) {
-  TypedValue* result;
-  if (LIKELY(IsHphpArray(base))) {
-    int64 n;
-    if (!key->isStrictlyInteger(n)) {
-      result = static_cast<HphpArray*>(base)->nvGet(key);
-    } else {
-      result = static_cast<HphpArray*>(base)->nvGet(n);
-    }
-    if (result == NULL) {
-      result = (TypedValue*)&null_variant;
-    }
-  } else {
-    result = (TypedValue*)&ArrNR(base).asArray().rvalAtRef(StrNR(key));
-  }
-  return result;
+  int64 n;
+  TypedValue* result = !key->isStrictlyInteger(n) ? base->nvGet(key) :
+                       base->nvGet(n);
+  return result ? result : (TypedValue*)&null_variant;
 }
 
 template <bool warn, KeyType keyType>

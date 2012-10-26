@@ -76,6 +76,9 @@ public: // ArrayData implementation
   virtual CVarRef get(CStrRef k, bool error = false) const;
   virtual CVarRef get(CVarRef k, bool error = false) const;
 
+  virtual TypedValue* nvGet(int64 k) const;
+  virtual TypedValue* nvGet(const StringData* k) const;
+
   virtual ssize_t getIndex(int64 k) const;
   virtual ssize_t getIndex(litstr k) const;
   virtual ssize_t getIndex(CStrRef k) const;

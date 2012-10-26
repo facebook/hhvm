@@ -301,24 +301,15 @@ CVarRef VectorArray::get(int64 k, bool error /* = false */) const {
   if (LIKELY(inRange(k, m_size))) {
     return tvAsCVarRef(&m_elems[k]);
   }
-  if (error) {
-    raise_notice("Undefined index: %lld", k);
-  }
-  return null_variant;
+  return error ? getNotFound(k) : null_variant;
 }
 
 CVarRef VectorArray::get(litstr  k, bool error /* = false */) const {
-  if (error) {
-    raise_notice("Undefined index: %s", k);
-  }
-  return null_variant;
+  return error ? getNotFound(k) : null_variant;
 }
 
 CVarRef VectorArray::get(CStrRef k, bool error /* = false */) const {
-  if (error) {
-    raise_notice("Undefined index: %s", k->data());
-  }
-  return null_variant;
+  return error ? getNotFound(k) : null_variant;
 }
 
 CVarRef VectorArray::get(CVarRef k, bool error /* = false */) const {
@@ -326,10 +317,7 @@ CVarRef VectorArray::get(CVarRef k, bool error /* = false */) const {
   if (isIntKey(tva)) {
     return VectorArray::get(getIntKey(tva), error);
   }
-  if (error) {
-    raise_notice("Undefined index: %s", k.toString().data());
-  }
-  return null_variant;
+  return error ? getNotFound(k) : null_variant;
 }
 
 ssize_t VectorArray::getIndex(int64 k) const {

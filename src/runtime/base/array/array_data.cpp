@@ -494,6 +494,89 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
   return false;
 }
 
+// nvGet has to search twice when using the ArrayData api so as not to
+// conflate no-key with have-key && value == null_varaint.  Subclasses
+// can easily do this with one key search.
+
+TypedValue* ArrayData::nvGet(int64 k) const {
+  return exists(k) ? (TypedValue*)&get(k, false) :
+         NULL;
+}
+
+TypedValue* ArrayData::nvGet(const StringData* key) const {
+  StrNR k(key);
+  return exists(k) ? (TypedValue*)&get(k, false) :
+         NULL;
+}
+
+void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) {
+  Variant k = getKey(pos);
+  TypedValue* tv = k.asTypedValue();
+  // copy w/out clobbering out->_count.
+  out->m_type = tv->m_type;
+  out->m_data.num = tv->m_data.num;
+  if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
+}
+
+TypedValue* ArrayData::nvGetValueRef(ssize_t pos) {
+  return const_cast<TypedValue*>(getValueRef(pos).asTypedValue());
+}
+
+ArrayData* ArrayData::nvSet(int64 ki, int64 vi, bool copy) {
+  return set(ki, VarNR(vi), copy);
+}
+
+ArrayData* ArrayData::nvSet(int64 ki, const TypedValue* v, bool copy) {
+  return set(ki, tvAsCVarRef(v), copy);
+}
+
+ArrayData* ArrayData::nvSet(StringData* k, const TypedValue* v, bool copy) {
+  return set(StrNR(k), tvAsCVarRef(v), copy);
+}
+
+TypedValue* ArrayData::nvGetCell(int64 k, bool error) const {
+  return exists(k) ? get(k, false).getTypedAccessor() :
+         error ? nvGetNotFound(k) :
+         NULL;
+}
+
+TypedValue* ArrayData::nvGetCell(const StringData* key, bool error) const {
+  StrNR k(key);
+  return exists(k) ? get(k, false).getTypedAccessor() :
+         error ? nvGetNotFound(key) :
+         NULL;
+}
+
+CVarRef ArrayData::getNotFound(int64 k) {
+  raise_notice("Undefined index: %lld", k);
+  return null_variant;
+}
+
+CVarRef ArrayData::getNotFound(litstr k) {
+  raise_notice("Undefined index: %s", k);
+  return null_variant;
+}
+
+CVarRef ArrayData::getNotFound(CStrRef k) {
+  raise_notice("Undefined index: %s", k.data());
+  return null_variant;
+}
+
+CVarRef ArrayData::getNotFound(CVarRef k) {
+  raise_notice("Undefined index: %s", k.toString().data());
+  return null_variant;
+}
+
+TypedValue* ArrayData::nvGetNotFound(int64 k) {
+  raise_notice("Undefined index: %lld", k);
+  return NULL;
+}
+
+TypedValue* ArrayData::nvGetNotFound(const StringData* k) {
+  raise_notice("Undefined index: %s", k->data());
+  return NULL;
+}
+
 void ArrayData::dump() {
   string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
 }

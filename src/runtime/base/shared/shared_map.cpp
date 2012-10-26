@@ -78,10 +78,7 @@ ssize_t SharedMap::getIndex(CVarRef k) const {
 CVarRef SharedMap::get(CVarRef k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
-    if (error) {
-      raise_notice("Undefined index: %s", k.toString().data());
-    }
-    return null_variant;
+    return error ? getNotFound(k) : null_variant;
   }
   return getValueRef(index);
 }
@@ -89,10 +86,7 @@ CVarRef SharedMap::get(CVarRef k, bool error /* = false */) const {
 CVarRef SharedMap::get(CStrRef k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
-    if (error) {
-      raise_notice("Undefined index: %s", k.data());
-    }
-    return null_variant;
+    return error ? getNotFound(k) : null_variant;
   }
   return getValueRef(index);
 }
@@ -100,10 +94,7 @@ CVarRef SharedMap::get(CStrRef k, bool error /* = false */) const {
 CVarRef SharedMap::get(litstr k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
-    if (error) {
-      raise_notice("Undefined index: %s", k);
-    }
-    return null_variant;
+    return error ? getNotFound(k) : null_variant;
   }
   return getValueRef(index);
 }
@@ -111,10 +102,7 @@ CVarRef SharedMap::get(litstr k, bool error /* = false */) const {
 CVarRef SharedMap::get(int64 k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
-    if (error) {
-      raise_notice("Undefined index: %lld", k);
-    }
-    return null_variant;
+    return error ? getNotFound(k) : null_variant;
   }
   return getValueRef(index);
 }
@@ -311,6 +299,49 @@ ArrayData *SharedMap::escalate(bool mutableIteration /* = false */) const {
   m_arr->loadElems(ret, *this, mutableIteration);
   ASSERT(!ret->isStatic());
   return ret;
+}
+
+TypedValue* SharedMap::nvGet(int64 k) const {
+  int index = m_arr->getIndex(k);
+  if (index == -1) return NULL;
+  return (TypedValue*)&getValueRef(index);
+}
+
+TypedValue* SharedMap::nvGet(const StringData* key) const {
+  StrNR k(key);
+  int index = m_arr->getIndex(k);
+  if (index == -1) return NULL;
+  return (TypedValue*)&getValueRef(index);
+}
+
+void SharedMap::nvGetKey(TypedValue* out, ssize_t pos) {
+  Variant k = m_arr->getKey(pos);
+  TypedValue* tv = k.asTypedValue();
+  // copy w/out clobbering out->_count.
+  out->m_type = tv->m_type;
+  out->m_data.num = tv->m_data.num;
+  if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
+}
+
+TypedValue* SharedMap::nvGetValueRef(ssize_t pos) {
+  return const_cast<TypedValue*>(SharedMap::getValueRef(pos).asTypedValue());
+}
+
+TypedValue* SharedMap::nvGetCell(int64 k, bool error) const {
+  int index = m_arr->getIndex(k);
+  if (index != -1) {
+    return getValueRef(index).getTypedAccessor();
+  }
+  return error ? nvGetNotFound(k) : NULL;
+}
+
+TypedValue* SharedMap::nvGetCell(const StringData* key, bool error) const {
+  StrNR k(key);
+  int index = m_arr->getIndex(k);
+  if (index != -1) {
+    return getValueRef(index).getTypedAccessor();
+  }
+  return error ? nvGetNotFound(key) : NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

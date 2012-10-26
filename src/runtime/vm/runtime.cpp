@@ -160,7 +160,7 @@ static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
   ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
          (!typeArray && iter->m_itype == Iter::TypeIterator));
   ArrayIter& arr = iter->arr();
-  if (typeArray && LIKELY(arr.isHphpArray())) {
+  if (typeArray) {
     TypedValue* cur = arr.nvSecond();
     if (UNLIKELY(cur->m_type == KindOfRef)) cur = cur->m_data.pref->tv();
     TV_DUP_CELL_NC(cur, out);
@@ -209,7 +209,7 @@ static inline void iter_key_cell_impl(Iter* iter, TypedValue* out) {
   ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
          (!typeArray && iter->m_itype == Iter::TypeIterator));
   ArrayIter& arr = iter->arr();
-  if (typeArray && LIKELY(arr.isHphpArray())) {
+  if (typeArray) {
     arr.nvFirst(out);
     return;
   }
@@ -617,7 +617,7 @@ HphpArray* get_static_locals(const ActRec* ar) {
       prop->m_type = KindOfArray;
     }
     ASSERT(prop->m_type == KindOfArray);
-    ASSERT(HphpArray::isHphpArray(prop->m_data.parr));
+    ASSERT(IsHphpArray(prop->m_data.parr));
     ASSERT(ref.m_type == KindOfUninit);
     return static_cast<HphpArray*>(prop->m_data.parr);
   } else if (ar->m_func->isGeneratorFromClosure()) {

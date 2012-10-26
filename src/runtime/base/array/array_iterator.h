@@ -99,31 +99,16 @@ public:
   }
   CVarRef secondRef();
 
-  bool isHphpArray() {
-    ASSERT(hasArrayData());
-    const ArrayData* ad = getArrayData();
-    ASSERT(ad);
-    return IsHphpArray(ad);
-  }
-
   void nvFirst(TypedValue* out) {
-    ASSERT(hasArrayData());
     const ArrayData* ad = getArrayData();
-    ASSERT(ad);
-    ASSERT(m_pos != ArrayData::invalid_index);
-    ASSERT(isHphpArray());
-    HphpArray* ha = (HphpArray*)ad;
-    ha->nvGetKey(out, m_pos);
+    ASSERT(ad && m_pos != ArrayData::invalid_index);
+    const_cast<ArrayData*>(ad)->nvGetKey(out, m_pos);
   }
 
   TypedValue* nvSecond() {
-    ASSERT(hasArrayData());
     const ArrayData* ad = getArrayData();
-    ASSERT(ad);
-    ASSERT(m_pos != ArrayData::invalid_index);
-    ASSERT(isHphpArray());
-    HphpArray* ha = (HphpArray*)ad;
-    return ha->nvGetValueRef(m_pos);
+    ASSERT(ad && m_pos != ArrayData::invalid_index);
+    return const_cast<ArrayData*>(ad)->nvGetValueRef(m_pos);
   }
 
 private:

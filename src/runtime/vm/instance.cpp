@@ -104,31 +104,16 @@ Object Instance::FromArray(ArrayData *properties) {
   Instance* retval = Instance::newInstance(SystemLib::s_stdclassClass);
   retval->initDynProps();
   HphpArray* props = static_cast<HphpArray*>(retval->o_properties.get());
-  if (LIKELY(HphpArray::isHphpArray(properties))) {
-    HphpArray* oldProps = static_cast<HphpArray*>(properties);
-    for (ssize_t pos = oldProps->iter_begin(); pos != ArrayData::invalid_index;
-         pos = oldProps->iter_advance(pos)) {
-      TypedValue* value = oldProps->nvGetValueRef(pos);
-      TypedValue key;
-      oldProps->nvGetKey(&key, pos);
-      if (key.m_type == KindOfInt64) {
-        props->nvSet(key.m_data.num, value, false);
-      } else {
-        ASSERT(IS_STRING_TYPE(key.m_type));
-        props->nvSet(key.m_data.pstr, value, false);
-      }
-    }
-  } else {
-    for (ssize_t pos = properties->iter_begin();
-         pos != ArrayData::invalid_index; pos = properties->iter_advance(pos)) {
-      Variant key(properties->getKey(pos));
-      CVarRef value = properties->getValueRef(pos);
-      if (key.m_type == KindOfInt64) {
-        props->nvSet(key.toInt64(), (TypedValue*)&value, false);
-      } else {
-        ASSERT(IS_STRING_TYPE(key.m_type));
-        props->nvSet(key.asStrRef().get(), (TypedValue*)&value, false);
-      }
+  for (ssize_t pos = properties->iter_begin(); pos != ArrayData::invalid_index;
+       pos = properties->iter_advance(pos)) {
+    TypedValue* value = properties->nvGetValueRef(pos);
+    TypedValue key;
+    properties->nvGetKey(&key, pos);
+    if (key.m_type == KindOfInt64) {
+      props->nvSet(key.m_data.num, value, false);
+    } else {
+      ASSERT(IS_STRING_TYPE(key.m_type));
+      props->nvSet(key.m_data.pstr, value, false);
     }
   }
   return retval;

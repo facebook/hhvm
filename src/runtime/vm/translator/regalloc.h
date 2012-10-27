@@ -106,6 +106,10 @@ class RegSet {
     return bool(m_bits & (1 << int(pr)));
   }
 
+  bool empty() const {
+    return m_bits == 0;
+  }
+
   // For iterating over present registers, e.g.:
   //   while (regSet.findFirst(reg)) {
   //     regSet.remove(reg);

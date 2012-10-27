@@ -17,6 +17,7 @@
 #define _STATS_H_
 
 #include <runtime/vm/hhbc.h>
+#include <runtime/vm/translator/asm-x64.h>
 #include <util/trace.h>
 
 namespace HPHP {
@@ -70,17 +71,21 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TgtCache_StaticMethodFBypass) \
   STAT(TgtCache_ClassExistsHit) \
   STAT(TgtCache_ClassExistsMiss) \
-  STAT(Tx64_VerifyParamTypeSlow) \
-  STAT(Tx64_VerifyParamTypeFast) \
   STAT(Tx64_FusedTypeCheck) \
   STAT(Tx64_UnfusedTypeCheck) \
+  STAT(Tx64_VerifyParamTypeSlow) \
+  STAT(Tx64_VerifyParamTypeFast) \
+  STAT(Tx64_VerifyParamTypeSlowShortcut) \
+  STAT(Tx64_VerifyParamTypePass) \
+  STAT(Tx64_VerifyParamTypeEqual) \
   STAT(Tx64_InstanceOfDFused) \
   STAT(Tx64_InstanceOfDBypass) \
-  STAT(Tx64_InstanceOfDFastest) \
-  STAT(Tx64_InstanceOfDFast) \
   STAT(Tx64_InstanceOfDInterface) \
   STAT(Tx64_InstanceOfDSlow) \
-  STAT(Tx64_InstanceOfDNonPersistent) \
+  STAT(Tx64_InstanceOfDFast) \
+  STAT(Tx64_InstanceOfDEqual) \
+  STAT(Tx64_InstanceOfDFinalTrue) \
+  STAT(Tx64_InstanceOfDFinalFalse) \
   STAT(Tx64_PropCache) \
   STAT(Tx64_PropNameCache) \
   STAT(Tx64_PropCtxCache) \
@@ -206,11 +211,13 @@ static inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
 }
 
 // Both emitIncs use r10.
-extern void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1);
+extern void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
+                    Transl::ConditionCode cc = Transl::CC_None);
 extern void emitInc(Transl::X64Assembler& a,
                     uint64_t* tl_table,
                     uint index,
-                    int n = 1);
+                    int n = 1,
+                    Transl::ConditionCode cc = Transl::CC_None);
 extern void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc);
 extern void dump();
 extern void clear();

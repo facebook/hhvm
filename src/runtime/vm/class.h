@@ -677,7 +677,7 @@ public:
     return sizeof(ObjectData) + m_builtinPropSize
       + index * sizeof(TypedValue);
   }
-  unsigned classVecLen() {
+  unsigned classVecLen() const {
     return m_classVecLen;
   }
   static size_t preClassOff() { return offsetof(Class, m_preClass); }

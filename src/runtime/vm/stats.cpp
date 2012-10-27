@@ -22,6 +22,8 @@ namespace HPHP {
 namespace VM {
 namespace Stats {
 
+using namespace HPHP::VM::Transl;
+
 TRACE_SET_MOD(stats);
 
 __thread uint64_t tl_counters[kNumStatCounters];
@@ -34,22 +36,32 @@ __thread uint64_t tl_helper_counters[kMaxNumTrampolines];
 const char* volatile helperNames[kMaxNumTrampolines];
 
 void
-emitInc(Transl::X64Assembler& a,uint64_t* tl_table,uint index,int n) {
-  using namespace HPHP::VM::Transl;
+emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
+        ConditionCode cc) {
+  bool havecc = cc != CC_None;
   uintptr_t virtualAddress = uintptr_t(&tl_table[index]) - tlsBase();
+  TCA jcc = NULL;
+  if (havecc) {
+    jcc = a.code.frontier;
+    a.  jcc8(ccNegate(cc), jcc);
+    a.  pushf();
+  }
   emitImmReg(a, virtualAddress, reg::rScratch);
-  a.   fs();
-  a.   add_imm64_disp_reg64(n, 0, reg::rScratch);
+  a.    fs();
+  a.    add_imm64_disp_reg64(n, 0, reg::rScratch);
+  if (havecc) {
+    a.  popf();
+    a.  patchJcc8(jcc, a.code.frontier);
+  }
 }
 
-
-
-void emitInc(Transl::X64Assembler& a, StatCounter stat, int n /* = 1*/) {
+void emitInc(X64Assembler& a, StatCounter stat, int n /* = 1*/,
+             ConditionCode cc /* = -1*/) {
   if (!enabled()) return;
-  emitInc(a,&tl_counters[0],stat,n);
+  emitInc(a, &tl_counters[0], stat, n, cc);
 }
 
-void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc) {
+void emitIncTranslOp(X64Assembler& a, Opcode opc) {
   if (!enableInstrCount()) return;
   emitInc(a, &tl_counters[0], opcodeToTranslStatCounter(opc), 1);
 }

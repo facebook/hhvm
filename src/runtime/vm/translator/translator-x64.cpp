@@ -194,6 +194,17 @@ private:
   JccBlock& operator=(const JccBlock&);
 };
 
+// stubBlock --
+//   Used to emit a bunch of outlined code that is unconditionally jumped to.
+template <typename L>
+void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
+  std::unique_ptr<DiamondGuard> dg(new DiamondGuard(cold));
+  hot.  jmp(cold.code.frontier);
+  body();
+  dg.reset();
+  cold. jmp(hot.code.frontier);
+}
+
 // IfElseBlock: like CondBlock, but with an else clause.
 //    a.   test_reg_reg(rax, rax);
 //    {  IfElseBlock<CC_Z> ifRax(a);
@@ -2416,8 +2427,8 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
   return branch;
 }
 
-static void emitJmpOrJcc(X64Assembler& a, int cc, TCA addr) {
-  if (cc < 0) {
+static void emitJmpOrJcc(X64Assembler& a, ConditionCode cc, TCA addr) {
+  if (cc == CC_None) {
     a.   jmp(addr);
   } else {
     a.   jcc((ConditionCode)cc, addr);
@@ -2432,9 +2443,9 @@ static void emitJmpOrJcc(X64Assembler& a, int cc, TCA addr) {
  *   Assumes current basic block is closed (outputs synced, etc.).
  */
 void
-TranslatorX64::emitBindJ(X64Assembler& _a, int cc,
+TranslatorX64::emitBindJ(X64Assembler& _a, ConditionCode cc,
                          const SrcKey& dest, ServiceRequest req) {
-  prepareForSmash(_a, cc < 0 ? (int)kJmpLen : kJmpccLen);
+  prepareForSmash(_a, cc == CC_None ? (int)kJmpLen : kJmpccLen);
   TCA toSmash = _a.code.frontier;
   if (&_a == &astubs) {
     emitJmpOrJcc(_a, cc, toSmash);
@@ -2462,7 +2473,7 @@ void
 TranslatorX64::emitBindJmp(X64Assembler& _a,
                            const SrcKey& dest,
                            ServiceRequest req /* = REQ_BIND_JMP */) {
-  emitBindJ(_a, -1, dest, req);
+  emitBindJ(_a, CC_None, dest, req);
 }
 
 void
@@ -4210,12 +4221,21 @@ void TranslatorX64::fuseBranchSync(const Tracelet& t,
 void TranslatorX64::fuseBranchAfterBool(const Tracelet& t,
                                         const NormalizedInstruction& i,
                                         ConditionCode cc) {
-  ASSERT(m_regMap.branchSynced());
-  ASSERT(i.breaksTracelet);
-  ASSERT(i.next);
+  ASSERT(m_regMap.branchSynced() && i.breaksTracelet && i.next);
   NormalizedInstruction &nexti = *i.next;
   if (!i.next->isJmpNZ()) cc = ccNegate(cc);
   branchWithFlagsSet(t, nexti, cc);
+}
+
+void TranslatorX64::fuseHalfBranchAfterBool(const Tracelet& t,
+                                            const NormalizedInstruction& i,
+                                            ConditionCode cc,
+                                            bool taken) {
+  ASSERT(m_regMap.branchSynced() && i.breaksTracelet && i.next);
+  SrcKey destTaken, destNotTaken;
+  branchDests(t, *i.next, &destTaken, &destNotTaken);
+  if (!i.next->isJmpNZ()) taken = !taken;
+  emitBindJcc(a, cc, taken ? destTaken : destNotTaken);
 }
 
 void
@@ -9128,6 +9148,33 @@ TranslatorX64::analyzeVerifyParamType(Tracelet& t, NormalizedInstruction& i) {
   }
 }
 
+static bool
+classIsPersistent(const Class* cls) {
+  return RuntimeOption::RepoAuthoritative &&
+    cls &&
+    (cls->attrs() & AttrUnique) &&
+    (cls->attrs() & AttrPersistent);
+}
+
+static bool
+classIsUniqueNormalClass(const Class* cls) {
+  return RuntimeOption::RepoAuthoritative &&
+    cls &&
+    (cls->attrs() & AttrUnique) &&
+    !(cls->attrs() & (AttrInterface | AttrTrait));
+}
+
+static void
+emitClassToReg(X64Assembler& a, const StringData* name, PhysReg r) {
+  Class* cls = Unit::lookupClass(name);
+  if (classIsPersistent(cls)) {
+    emitImmReg(a, int64(cls), r);
+  } else {
+    TargetCache::CacheHandle ch = TargetCache::allocKnownClass(name);
+    a.  load_reg64_disp_reg64(rVmTl, ch, r);;
+  }
+}
+
 static void
 VerifyParamTypeFail(int paramNum) {
   VMRegAnchor _;
@@ -9144,20 +9191,19 @@ VerifyParamTypeFail(int paramNum) {
 }
 
 // check class hierarchy and fail if no match
-static uint64_t
-VerifyParamTypeSlow(const Class* cls, const Class* constraint) {
+static void
+VerifyParamTypeSlow(const Class* cls, const Class* constraint, int param) {
   Stats::inc(Stats::Tx64_VerifyParamTypeSlow);
-  Stats::inc(Stats::Tx64_VerifyParamTypeFast, -1);
+  Stats::inc(Stats::Tx64_VerifyParamTypeSlowShortcut, -1);
 
-  // ensure C++ returns a 0 or 1 with upper bits zeroed
-  return static_cast<uint64_t>(constraint && cls->classof(constraint));
+  if (UNLIKELY(!(constraint && cls->classof(constraint)))) {
+    VerifyParamTypeFail(param);
+  }
 }
 
 void
 TranslatorX64::translateVerifyParamType(const Tracelet& t,
                                         const NormalizedInstruction& i) {
-  Stats::emitInc(a, Stats::Tx64_VerifyParamTypeFast);
-
   int param = i.imm[0].u_IVA;
   const TypeConstraint& tc = curFunc()->params()[param].typeConstraint();
   // not quite a nop. The guards should have verified that the m_type field
@@ -9173,54 +9219,47 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
   ScratchReg inCls(m_regMap);
   if (i.inputs[0]->rtt.isVariant()) {
     emitDeref(a, src, *inCls);
-    a.  load_reg64_disp_reg64(*inCls, ObjectData::getVMClassOffset(), *inCls);
-  } else {
-    a.  load_reg64_disp_reg64(src, ObjectData::getVMClassOffset(), *inCls);
+    src = *inCls;
   }
+  a.  load_reg64_disp_reg64(src, ObjectData::getVMClassOffset(), *inCls);
 
   ScratchReg cls(m_regMap);
   // Constraint may not be in the class-hierarchy of the method being traced,
   // look up the class handle and emit code to put the Class* into a reg.
+  const Class* constraint = NULL;
   if (!tc.isSelf() && !tc.isParent()) {
     const StringData* clsName = tc.typeName();
-    using namespace TargetCache;
-    CacheHandle ch = allocKnownClass(clsName);
-    a.  load_reg64_disp_reg64(rVmTl, ch, *cls);
+    constraint = Unit::lookupClass(clsName);
+    emitClassToReg(a, tc.typeName(), *cls);
   } else {
-    const Class *constraint = NULL;
     if (tc.isSelf()) {
       tc.selfToClass(curFunc(), &constraint);
-    } else if (tc.isParent()) {
+    } else {
+      ASSERT(tc.isParent());
       tc.parentToClass(curFunc(), &constraint);
     }
     emitImmReg(a, uintptr_t(constraint), *cls);
   }
-  // Compare this class to the incoming object's class. If the typehint's class
-  // is not present, can not be an instance: fail
-  a.  cmp_reg64_reg64(*inCls, *cls);
 
-  {
-    JccBlock<CC_Z> subclassCheck(a);
-    // Call helper since ObjectData::instanceof is a member function
-    if (false) {
-      Class* cls = NULL;
-      Class* constraint = NULL;
-      VerifyParamTypeSlow(cls, constraint);
-    }
-    EMIT_CALL(a, VerifyParamTypeSlow, R(*inCls), R(*cls));
-    // Pin the return value, check if a match or take slow path
-    a.  test_reg64_reg64(rax, rax);
-
-    // Put the failure path into astubs
+  if (classIsUniqueNormalClass(constraint)) {
+    LazyScratchReg dummy(m_regMap);
+    Stats::emitInc(a, Stats::Tx64_VerifyParamTypeFast);
+    emitInstanceCheck(t, i, constraint, inCls, cls, dummy);
+  } else {
+    // Compare this class to the incoming object's class. If the typehint's
+    // class is not present, can not be an instance: fail
+    Stats::emitInc(a, Stats::Tx64_VerifyParamTypeSlowShortcut);
+    a.  cmp_reg64_reg64(*inCls, *cls);
     {
-      UnlikelyIfBlock<CC_Z> fail(a, astubs);
-      if (false) { // typecheck
-        VerifyParamTypeFail(param);
+      JccBlock<CC_E> subclassCheck(a);
+      // Call helper since ObjectData::instanceof is a member function
+      if (false) {
+        VerifyParamTypeSlow(constraint, constraint, param);
       }
-      EMIT_CALL(astubs, VerifyParamTypeFail, IMM(param));
-      recordReentrantStubCall(i);
+      EMIT_RCALL(a, i, VerifyParamTypeSlow, R(*inCls), R(*cls), IMM(param));
     }
   }
+
 }
 
 void
@@ -9344,25 +9383,20 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     // thing but more slowly. fastPath is guaranteed to be correct.
     bool maybeInterface = maybeCls &&
       (maybeCls->attrs() & (AttrTrait | AttrInterface));
-    bool fastPath = !maybeInterface &&
-      RuntimeOption::RepoAuthoritative &&
-      maybeCls &&
-      (maybeCls->attrs() & AttrUnique) &&
-      !(maybeCls->attrs() & (AttrInterface | AttrTrait));
-
-    ScratchReg cls(m_regMap);
-    TargetCache::CacheHandle ch = TargetCache::allocKnownClass(clsName);
-    a.    load_reg64_disp_reg64(rVmTl, ch, *cls);
-
+    bool fastPath = !maybeInterface && classIsUniqueNormalClass(maybeCls);
     auto afterHelper = [&] {
       if (i.changesPC) fuseBranchAfterHelper(t, i);
       else emitMovRegReg(a, rax, *result);
     };
+
+    ScratchReg cls(m_regMap);
+    emitClassToReg(a, clsName, *cls);
     if (maybeInterface) {
       EMIT_CALL(a, InstanceOfDSlowInterface, R(*inCls), R(*cls));
       afterHelper();
     } else if (fastPath) {
-      emitInstanceOfDFast(t, i, maybeCls, inCls, cls, result);
+      Stats::emitInc(a, Stats::Tx64_InstanceOfDFast);
+      emitInstanceCheck(t, i, maybeCls, inCls, cls, result);
     } else {
       EMIT_CALL(a, InstanceOfDSlow, R(*inCls), R(*cls));
       afterHelper();
@@ -9388,80 +9422,103 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
 }
 
 void
-TranslatorX64::emitInstanceOfDFast(const Tracelet& t,
-                                   const NormalizedInstruction& i,
-                                   Class* maybeCls,
-                                   const ScratchReg& inCls,
-                                   const ScratchReg& cls,
-                                   const LazyScratchReg& result) {
+TranslatorX64::emitInstanceCheck(const Tracelet& t,
+                                 const NormalizedInstruction& i,
+                                 const Class* klass,
+                                 const ScratchReg& inCls,
+                                 const ScratchReg& cls,
+                                 const LazyScratchReg& result) {
   LazyScratchReg one(m_regMap);
+  bool verifying = i.op() == OpVerifyParamType;
+  ASSERT(IMPLIES(verifying, !i.changesPC));
+
+  TCA equalJe = NULL;
+  TCA parentJmp = NULL;
+  TCA parentFailJe = NULL;
 
   if (i.changesPC) {
     fuseBranchSync(t, i);
-  } else {
+  } else if (!verifying) {
     one.alloc();
     emitImmReg(a, 1, *one);
   }
-  FreezeRegs ice(m_regMap);
+  std::unique_ptr<FreezeRegs> ice;
+  if (!verifying) ice.reset(new FreezeRegs(m_regMap));
 
   // Are the Class*s the exact same class?
   a.      cmp_reg64_reg64(*inCls, *cls);
   {
-    IfElseBlock<CC_NE> ifEqual(a, !i.changesPC);
-    Stats::emitInc(a, Stats::Tx64_InstanceOfDFastest);
-    if (i.changesPC) {
-      fuseBranchAfterStaticBool(a, t, i, true, false);
+    std::unique_ptr<IfElseBlock<CC_NE>> ifElse;
+    if (verifying) {
+      equalJe = a.code.frontier;
+      a.  je8(equalJe);
     } else {
-      a.  mov_reg64_reg64(*one, *result);
+      Stats::emitInc(a, Stats::Tx64_InstanceOfDEqual, 1, CC_E);
+      if (i.changesPC) {
+        fuseHalfBranchAfterBool(t, i, CC_E, true);
+      } else {
+        ifElse.reset(new IfElseBlock<CC_NE>(a));
+        a.  mov_reg64_reg64(*one, *result);
+        ifElse->Else();
+      }
     }
 
-    ifEqual.Else();
-    Stats::emitInc(a, Stats::Tx64_InstanceOfDFast);
-
     // Default to false and override if all the checks succeed
-    if (!i.changesPC) {
+    if (!i.changesPC && !verifying) {
       emitImmReg(a, 0, *result);
     }
 
-    auto checkVec = [&]{
-      // Is our inheritence hierarchy no shorter than the candidate?
-      unsigned parentVecLen = maybeCls->classVecLen();
-      a.  cmp_imm32_disp_reg32(parentVecLen, Class::classVecLenOff(),
-                               *inCls);
-      {
-        JccBlock<CC_B> veclen(a);
+    // Is our inheritence hierarchy no shorter than the candidate?
+    unsigned parentVecLen = klass->classVecLen();
+    a.  cmp_imm32_disp_reg32(parentVecLen, Class::classVecLenOff(),
+                             *inCls);
+    {
+      JccBlock<CC_B> veclen(a);
 
-        // Is the spot in our inheritance hierarchy corresponding to the
-        // candidate equal to the candidate?
-        int offset = Class::classVecOff() + sizeof(Class*) * (parentVecLen-1);
-        if (Class::alwaysLowMem()) {
-          a.cmp_imm32_disp_reg32((uint64)maybeCls, offset, *inCls);
-        } else {
-          a.cmp_imm64_disp_reg64((uint64)maybeCls, offset, *inCls);
-        }
+      // Is the spot in our inheritance hierarchy corresponding to the
+      // candidate equal to the candidate? *cls might still be NULL here
+      // (meaning the class isn't defined yet) but that's ok: if it is null the
+      // cmp will always fail.
+      int offset = Class::classVecOff() + sizeof(Class*) * (parentVecLen-1);
+      if (Class::alwaysLowMem()) {
+        a.cmp_reg32_disp_reg64(*cls, offset, *inCls);
+      } else {
+        a.cmp_reg64_disp_reg64(*cls, offset, *inCls);
+      }
+      if (verifying) {
+        parentFailJe = a.code.frontier;
+        a.jne8(parentFailJe);
+        parentJmp = a.code.frontier;
+        a.jmp8(parentJmp);
+      } else {
+        Stats::emitInc(a, Stats::Tx64_InstanceOfDFinalTrue, 1, CC_E);
+        Stats::emitInc(a, Stats::Tx64_InstanceOfDFinalFalse, 1, CC_NE);
         if (i.changesPC) {
-          fuseBranchAfterBool(t, i, CC_E);
+          // The decision is done here but if we fallthrough it's to the
+          // failure case, so it's ok to only bind half the branch.
+          fuseHalfBranchAfterBool(t, i, CC_E, true);
         } else {
           a.cmov_reg64_reg64(CC_E, *one, *result);
         }
-      }
-    };
-
-    if (maybeCls->attrs() & AttrPersistent) {
-      checkVec();
-    } else {
-      Stats::emitInc(a, Stats::Tx64_InstanceOfDNonPersistent);
-      a.  test_reg64_reg64(*inCls, *inCls);
-      {
-        JccBlock<CC_Z> ifcls(a);
-        checkVec();
       }
     }
 
     // If execution makes it here the check has failed
     if (i.changesPC) {
       fuseBranchAfterStaticBool(a, t, i, false, false);
+    } else if (verifying) {
+      a.patchJcc8(parentFailJe, a.code.frontier);
+      stubBlock(a, astubs, [&]{
+          EMIT_RCALL(astubs, i, VerifyParamTypeFail, IMM(i.imm[0].u_IVA));
+        });
     }
+  }
+
+  if (verifying) {
+    a.patchJcc8(equalJe, a.code.frontier);
+    Stats::emitInc(a, Stats::Tx64_VerifyParamTypeEqual);
+    a.patchJmp8(parentJmp, a.code.frontier);
+    Stats::emitInc(a, Stats::Tx64_VerifyParamTypePass);
   }
 }
 

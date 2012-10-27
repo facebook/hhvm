@@ -606,6 +606,9 @@ PSEUDOINSTRS
   void fuseBranchSync(const Tracelet& t, const NormalizedInstruction& i);
   void fuseBranchAfterBool(const Tracelet& t, const NormalizedInstruction& i,
                            ConditionCode cc);
+  void fuseHalfBranchAfterBool(const Tracelet& t,
+                               const NormalizedInstruction& i,
+                               ConditionCode cc, bool taken);
   void fuseBranchAfterStaticBool(Asm& a, const Tracelet& t,
                                  const NormalizedInstruction& i,
                                  bool resultIsTrue, bool doSync = true);
@@ -634,11 +637,11 @@ PSEUDOINSTRS
   void setupActRecClsForStaticCall(const NormalizedInstruction& i,
                                    const Func* func, const Class* cls,
                                    size_t clsOff, bool forward);
-  void emitInstanceOfDFast(const Tracelet& t, const NormalizedInstruction& i,
-                           Class* maybeCls,
-                           const ScratchReg& inCls,
-                           const ScratchReg& cls,
-                           const LazyScratchReg& result);
+  void emitInstanceCheck(const Tracelet& t, const NormalizedInstruction& i,
+                         const Class* maybeCls,
+                         const ScratchReg& inCls,
+                         const ScratchReg& cls,
+                         const LazyScratchReg& result);
 
 
   const Func* findCuf(const NormalizedInstruction& ni,
@@ -864,7 +867,7 @@ private:
   SrcKey emitPrologue(Func* func, int nArgs);
   void emitNativeImpl(const Func*, bool emitSavedRIPReturn);
   TCA emitInterceptPrologue(Func* func);
-  void emitBindJ(Asm& a, int cc, const SrcKey& dest,
+  void emitBindJ(Asm& a, ConditionCode cc, const SrcKey& dest,
                  ServiceRequest req);
   void emitBindJmp(Asm& a, const SrcKey& dest,
                    ServiceRequest req = REQ_BIND_JMP);

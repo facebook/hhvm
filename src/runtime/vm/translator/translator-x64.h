@@ -861,7 +861,7 @@ private:
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
   void emitNativeImpl(const Func*, bool emitSavedRIPReturn);
-  TCA emitInterceptPrologue(Func* func, TCA next=NULL);
+  TCA emitInterceptPrologue(Func* func);
   void emitBindJ(Asm& a, int cc, const SrcKey& dest,
                  ServiceRequest req);
   void emitBindJmp(Asm& a, const SrcKey& dest,

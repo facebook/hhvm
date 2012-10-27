@@ -1946,29 +1946,21 @@ TCA fcallHelper(ActRec* ar) {
 }
 
 TCA
-TranslatorX64::emitInterceptPrologue(Func* func, TCA next) {
+TranslatorX64::emitInterceptPrologue(Func* func) {
   TCA start = a.code.frontier;
-  a.mov_imm64_reg((uintptr_t)&func->maybeIntercepted(), rax);
+  emitImmReg(a, int64(&func->maybeIntercepted()), rax);
   a.cmp_imm8_disp_reg8(0, 0, rax);
-  TCA jcc8PatchAddr = NULL;
-  if (next == NULL) {
-    jcc8PatchAddr = a.code.frontier;
-    a.jcc8(CC_E, jcc8PatchAddr);
-  } else {
-    a.jcc(CC_E, next);
-  }
-  // Prologues are not really sites for function entry yet; we can get
-  // here via an optimistic bindCall. Check that the func is as expected.
+  semiLikelyIfBlock<CC_NE>(a, [&]{
+      // Prologues are not really sites for function entry yet; we can get
+      // here via an optimistic bindCall. Check that the func is as expected.
 
-  a.    mov_imm64_reg(uint64_t(func), rax);
-  a.    cmp_reg64_disp_reg64(rax, AROFF(m_func), rStashedAR);
-  {
-    JccBlock<CC_NZ> skip(a);
-    a.call(getInterceptHelper());
-  }
-  if (jcc8PatchAddr != NULL) {
-    a.patchJcc8(jcc8PatchAddr, a.code.frontier);
-  }
+      emitImmReg(a, int64(func), rax);
+      a.    cmp_reg64_disp_reg64(rax, AROFF(m_func), rStashedAR);
+      {
+        JccBlock<CC_NZ> skip(a);
+        a.call(getInterceptHelper());
+      }
+    });
   return start;
 }
 

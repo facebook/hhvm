@@ -481,6 +481,32 @@ struct UnlikelyIfBlock {
   m_curFile = __FILE__; m_curFunc = __FUNCTION__; m_curLine = __LINE__; \
   UnlikelyIfBlock
 
+/*
+ * semiLikelyIfBlock is a conditional block of code that is expected
+ * to be unlikely, but not so unlikely that we should shove it into
+ * astubs.
+ *
+ * Usage example:
+ *
+ * a. test_reg64_reg64(*rFoo, *rFoo);
+ * semiLikelyIfBlock<CC_Z>(a, [&]{
+ *   EMIT_CALL(a, some_helper);
+ *   emitMovRegReg(a, rax, *rFoo);
+ * });
+ */
+template<int Jcc, class Lambda>
+void semiLikelyIfBlock(X64Assembler& a, Lambda body) {
+  std::unique_ptr<DiamondGuard> dg(new DiamondGuard(a));
+  const TCA toPatch = a.code.frontier;
+  a.jcc8(Jcc, toPatch);
+  const TCA patchLikely = a.code.frontier;
+  a.jmp8(patchLikely);
+  a.patchJcc8(toPatch, a.code.frontier);
+  body();
+  dg.reset();
+  a.patchJmp8(patchLikely, a.code.frontier);
+}
+
 // A CondBlock is an RAII structure for emitting conditional code. It
 // compares the source register at fieldOffset with fieldValue, and
 // conditionally branches over the enclosing block of assembly on the

@@ -98,7 +98,7 @@ ZendArray::preSort(Bucket** buffer, const AccessorT& acc, bool checkTypes) {
     return GenericSort;
   }
 }
-  
+
 /**
  * postSort() runs after sorting has been performed. For ZendArray, postSort()
  * handles rewiring the linked list according to the results of the sort. Also,

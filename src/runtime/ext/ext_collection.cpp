@@ -16,6 +16,7 @@
 */
 
 #include <runtime/base/variable_serializer.h>
+#include <runtime/base/array/sort_helpers.h>
 #include <runtime/ext/ext_collection.h>
 #include <runtime/ext/ext_array.h>
 #include <runtime/ext/ext_math.h>
@@ -225,6 +226,8 @@ Array c_Vector::t_toarray() {
 }
 
 void c_Vector::t_sort(CVarRef col /* = null */) {
+  raise_warning("Vector::sort() is deprecated, please use the builtin sort() "
+                "function or usort() function instead");
   // Terribly inefficient, but produces correct results for now
   Variant arr = t_toarray();
   if (col.isNull()) {
@@ -486,6 +489,86 @@ Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
     tvDup(&v->m_data[startPos], &data[i]);
   }
   return ret;
+}
+
+struct VectorValAccessor {
+  typedef const TypedValue& ElmT;
+  bool isInt(ElmT elm) const { return elm.m_type == KindOfInt64; }
+  bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.m_type); }
+  int64 getInt(ElmT elm) const { return elm.m_data.num; }
+  StringData* getStr(ElmT elm) const { return elm.m_data.pstr; }
+  Variant getValue(ElmT elm) const { return tvAsCVarRef(&elm); }
+};
+
+/**
+ * preSort() does an initial pass over the array to do some preparatory work
+ * before the sort algorithm runs. For sorts that use builtin comparators, the
+ * types of values are also observed during this first pass. By observing the
+ * types during this initial pass, we can often use a specialized comparator
+ * and avoid performing type checks during the actual sort.
+ */
+template <typename AccessorT>
+c_Vector::SortFlavor c_Vector::preSort(const AccessorT& acc) {
+  ASSERT(m_size > 0);
+  int64 sz = m_size;
+  bool allInts = true;
+  bool allStrs = true;
+  for (int64 i = 0; i < sz; ++i) {
+    allInts = (allInts && acc.isInt(m_data[i]));
+    allStrs = (allStrs && acc.isStr(m_data[i]));
+  }
+  return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
+}
+
+#define SORT_CASE(flag, cmp_type, acc_type) \
+  case flag: { \
+    if (ascending) { \
+      cmp_type##Compare<acc_type, flag, true> comp; \
+      HPHP::Sort::sort(m_data, m_data + m_size, comp); \
+    } else { \
+      cmp_type##Compare<acc_type, flag, false> comp; \
+      HPHP::Sort::sort(m_data, m_data + m_size, comp); \
+    } \
+    break; \
+  }
+#define SORT_CASE_BLOCK(cmp_type, acc_type) \
+  switch (sort_flags) { \
+    default: /* fall through to SORT_REGULAR case */ \
+    SORT_CASE(SORT_REGULAR, cmp_type, acc_type) \
+    SORT_CASE(SORT_NUMERIC, cmp_type, acc_type) \
+    SORT_CASE(SORT_STRING, cmp_type, acc_type) \
+    SORT_CASE(SORT_LOCALE_STRING, cmp_type, acc_type) \
+    SORT_CASE(SORT_NATURAL, cmp_type, acc_type) \
+    SORT_CASE(SORT_NATURAL_CASE, cmp_type, acc_type) \
+  }
+#define CALL_SORT(acc_type) \
+  if (flav == StringSort) { \
+    SORT_CASE_BLOCK(StrElm, acc_type) \
+  } else if (flav == IntegerSort) { \
+    SORT_CASE_BLOCK(IntElm, acc_type) \
+  } else { \
+    SORT_CASE_BLOCK(Elm, acc_type) \
+  }
+
+void c_Vector::sort(int sort_flags, bool ascending) {
+  if (!m_size) {
+    return;
+  }
+  SortFlavor flav = preSort<VectorValAccessor>(VectorValAccessor());
+  CALL_SORT(VectorValAccessor);
+}
+
+#undef SORT_CASE
+#undef SORT_CASE_BLOCK
+#undef CALL_SORT
+
+void c_Vector::usort(CVarRef cmp_function) {
+  if (!m_size) {
+    return;
+  }
+  ElmUCompare<VectorValAccessor> comp;
+  comp.callback = &cmp_function;
+  HPHP::Sort::sort(m_data, m_data + m_size, comp);
 }
 
 void c_Vector::throwBadKeyType() {
@@ -866,10 +949,10 @@ Object c_Map::t_updatefromarray(CVarRef arr) {
       tv = tv->m_data.pref->tv();
     }
     if (k.isInteger()) {
-      update(k.toInt64(), (TypedValue*)(&ad->getValueRef(pos)));
+      update(k.toInt64(), tv);
     } else {
       ASSERT(k.isString());
-      update(k.getStringData(), (TypedValue*)(&ad->getValueRef(pos)));
+      update(k.getStringData(), tv);
     }
   }
   return this;
@@ -1516,9 +1599,9 @@ Array c_StableMap::toArrayImpl() const {
   Bucket* p = m_pListHead;
   while (p) {
     if (p->hasIntKey()) {
-      ai.set((int64)p->ikey, p->data);
+      ai.set((int64)p->ikey, tvAsCVarRef(&p->data));
     } else {
-      ai.set(*(const String*)(&p->skey), p->data);
+      ai.set(*(const String*)(&p->skey), tvAsCVarRef(&p->data));
     }
     p = p->pListNext;
   }
@@ -1543,8 +1626,8 @@ ObjectData* c_StableMap::clone() {
 
   Bucket *last = NULL;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
-    Bucket *np = NEW(Bucket)(Variant::noInit);
-    np->data.constructValHelper(p->data);
+    Bucket *np = NEW(Bucket)();
+    tvDup(&p->data, &np->data);
     uint nIndex;
     if (p->hasIntKey()) {
       np->setIntKey(p->ikey);
@@ -1623,10 +1706,14 @@ Variant c_StableMap::t_get(CVarRef key) {
 }
 
 Object c_StableMap::t_put(CVarRef key, CVarRef value) {
+  TypedValue* val = (TypedValue*)(&value);
+  if (UNLIKELY(val->m_type == KindOfRef)) {
+    val = val->m_data.pref->tv();
+  }
   if (key.isInteger()) {
-    update(key.toInt64(), value);
+    update(key.toInt64(), val);
   } else if (key.isString()) {
-    update(key.getStringData(), value);
+    update(key.getStringData(), val);
   } else {
     throwBadKeyType();
   }
@@ -1696,7 +1783,7 @@ Object c_StableMap::t_values() {
   Bucket* p = m_pListHead;
   for (int64 i = 0; i < sz; ++i) {
     ASSERT(p);
-    tvAsUninitializedVariant(&data[i]).constructValHelper(p->data);
+    tvDup(&p->data, &data[i]);
     p = p->pListNext;
   }
   return ret;
@@ -1706,7 +1793,7 @@ Array c_StableMap::t_tovaluesarray() {
   ArrayInit ai(m_size, ArrayInit::vectorInit);
   Bucket* p = m_pListHead;
   while (p) {
-    ai.set(p->data);
+    ai.set(tvAsCVarRef(&p->data));
     p = p->pListNext;
   }
   return ai.create();
@@ -1722,11 +1809,15 @@ Object c_StableMap::t_updatefromarray(CVarRef arr) {
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
+    TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
     if (k.isInteger()) {
-      update(k.toInt64(), ad->getValue(pos));
+      update(k.toInt64(), tv);
     } else {
       ASSERT(k.isString());
-      update(k.getStringData(), ad->getValue(pos));
+      update(k.getStringData(), tv);
     }
   }
   return this;
@@ -1744,9 +1835,9 @@ Object c_StableMap::t_updatefromiterable(CVarRef it) {
     c_StableMap::Bucket* p = smp->m_pListHead;
     while (p) {
       if (p->hasIntKey()) {
-        update((int64)p->ikey, p->data);
+        update((int64)p->ikey, &p->data);
       } else {
-        update(p->skey, p->data);
+        update(p->skey, &p->data);
       }
       p = p->pListNext;
     }
@@ -1754,11 +1845,16 @@ Object c_StableMap::t_updatefromiterable(CVarRef it) {
   }
   for (ArrayIter iter = obj->begin(); iter; ++iter) {
     Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
     if (k.isInteger()) {
-      update(k.toInt64(), iter.second());
+      update(k.toInt64(), tv);
     } else {
       ASSERT(k.isString());
-      update(k.getStringData(), iter.second());
+      update(k.getStringData(), tv);
     }
   }
   return this;
@@ -1818,11 +1914,15 @@ Variant c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
     Variant v = ad->getValue(pos);
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
     if (k.isInteger()) {
-      smp->update(k.toInt64(), v);
+      smp->update(k.toInt64(), tv);
     } else {
       ASSERT(k.isString());
-      smp->update(k.getStringData(), v);
+      smp->update(k.getStringData(), tv);
     }
   }
   return ret;
@@ -1844,11 +1944,16 @@ Variant c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
   ret = target = NEWOBJ(c_StableMap)();
   for (ArrayIter iter = obj->begin(); iter; ++iter) {
     Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
     if (k.isInteger()) {
-      target->update(k.toInt64(), iter.second());
+      target->update(k.toInt64(), tv);
     } else {
       ASSERT(k.isString());
-      target->update(k.getStringData(), iter.second());
+      target->update(k.getStringData(), tv);
     }
   }
   return ret;
@@ -1910,10 +2015,13 @@ c_StableMap::Bucket** c_StableMap::findForErase(const char* k, int len,
   return NULL;
 }
 
-bool c_StableMap::update(int64 h, CVarRef data) {
+bool c_StableMap::update(int64 h, TypedValue* data) {
   Bucket* p = find(h);
   if (p) {
-    p->data.assignValHelper(data);
+    tvRefcountedIncRef(data);
+    tvRefcountedDecRef(&p->data);
+    p->data.m_data.num = data->m_data.num;
+    p->data.m_type = data->m_type; 
     return true;
   }
   ++m_versionNumber;
@@ -1929,11 +2037,14 @@ bool c_StableMap::update(int64 h, CVarRef data) {
   return true;
 }
 
-bool c_StableMap::update(StringData *key, CVarRef data) {
+bool c_StableMap::update(StringData *key, TypedValue* data) {
   strhash_t h = key->hash();
   Bucket* p = find(key->data(), key->size(), h);
   if (p) {
-    p->data.assignValHelper(data);
+    tvRefcountedIncRef(data);
+    tvRefcountedDecRef(&p->data);
+    p->data.m_data.num = data->m_data.num;
+    p->data.m_type = data->m_type; 
     return true;
   }
   ++m_versionNumber;
@@ -2038,8 +2149,173 @@ Variant c_StableMap::iter_key(ssize_t pos) const {
 Variant c_StableMap::iter_value(ssize_t pos) const {
   ASSERT(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return p->data;
+  return tvAsCVarRef(&p->data);
 }
+
+struct StableMapKeyAccessor {
+  typedef const c_StableMap::Bucket* ElmT;
+  bool isInt(ElmT elm) const { return elm->hasIntKey(); }
+  bool isStr(ElmT elm) const { return elm->hasStrKey(); }
+  int64 getInt(ElmT elm) const { return elm->ikey; }
+  StringData* getStr(ElmT elm) const { return elm->skey; }
+  Variant getValue(ElmT elm) const {
+    if (isInt(elm)) {
+      return getInt(elm);
+    }
+    ASSERT(isStr(elm));
+    return getStr(elm);
+  }
+};
+
+struct StableMapValAccessor {
+  typedef const c_StableMap::Bucket* ElmT;
+  bool isInt(ElmT elm) const { return elm->data.m_type == KindOfInt64; }
+  bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm->data.m_type); }
+  int64 getInt(ElmT elm) const { return elm->data.m_data.num; }
+  StringData* getStr(ElmT elm) const { return elm->data.m_data.pstr; }
+  Variant getValue(ElmT elm) const { return tvAsCVarRef(&elm->data); }
+};
+
+/**
+ * preSort() does an initial pass over the array to do some preparatory work
+ * before the sort algorithm runs. For sorts that use builtin comparators, the
+ * types of values are also observed during this first pass. By observing the
+ * types during this initial pass, we can often use a specialized comparator
+ * and avoid performing type checks during the actual sort.
+ */
+template <typename AccessorT>
+c_StableMap::SortFlavor c_StableMap::preSort(Bucket** buffer,
+                                             const AccessorT& acc,
+                                             bool checkTypes) {
+  ASSERT(m_size > 0);
+  bool allInts UNUSED = true;
+  bool allStrs UNUSED = true;
+  uint i = 0;
+  // Build up an auxillary array of Bucket pointers. We will
+  // sort this auxillary array, and then we will rebuild the
+  // linked list based on the result.
+  if (checkTypes) {
+    for (Bucket *p = m_pListHead; p; ++i, p = p->pListNext) {
+      allInts = (allInts && acc.isInt(p));
+      allStrs = (allStrs && acc.isStr(p));
+      buffer[i] = p;
+    }
+    return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
+  } else {
+    for (Bucket *p = m_pListHead; p; ++i, p = p->pListNext) {
+      buffer[i] = p;
+    }
+    return GenericSort;
+  }
+}
+
+/**
+ * postSort() runs after sorting has been performed. For StableMap, postSort()
+ * handles rewiring the linked list according to the results of the sort.
+ */
+void c_StableMap::postSort(Bucket** buffer) {
+  uint last = m_size-1;
+  Bucket* b = m_pListHead = buffer[0];
+  b->pListLast = NULL;
+  for (uint i = 0; i < last; ++i) {
+    Bucket* bNext = buffer[i+1];
+    b->pListNext = bNext;
+    bNext->pListLast = b;
+    b = bNext;
+  } 
+  m_pListTail = b;
+  b->pListNext = NULL;
+}
+
+#define SORT_CASE(flag, cmp_type, acc_type) \
+  case flag: { \
+    if (ascending) { \
+      cmp_type##Compare<acc_type, flag, true> comp; \
+      HPHP::Sort::sort(buffer, buffer + m_size, comp); \
+    } else { \
+      cmp_type##Compare<acc_type, flag, false> comp; \
+      HPHP::Sort::sort(buffer, buffer + m_size, comp); \
+    } \
+    break; \
+  }
+#define SORT_CASE_BLOCK(cmp_type, acc_type) \
+  switch (sort_flags) { \
+    default: /* fall through to SORT_REGULAR case */ \
+    SORT_CASE(SORT_REGULAR, cmp_type, acc_type) \
+    SORT_CASE(SORT_NUMERIC, cmp_type, acc_type) \
+    SORT_CASE(SORT_STRING, cmp_type, acc_type) \
+    SORT_CASE(SORT_LOCALE_STRING, cmp_type, acc_type) \
+    SORT_CASE(SORT_NATURAL, cmp_type, acc_type) \
+    SORT_CASE(SORT_NATURAL_CASE, cmp_type, acc_type) \
+  }
+#define CALL_SORT(acc_type) \
+  if (flav == StringSort) { \
+    SORT_CASE_BLOCK(StrElm, acc_type) \
+  } else if (flav == IntegerSort) { \
+    SORT_CASE_BLOCK(IntElm, acc_type) \
+  } else { \
+    SORT_CASE_BLOCK(Elm, acc_type) \
+  }
+#define SORT_BODY(acc_type) \
+  do { \
+    if (!m_size) { \
+      return; \
+    } \
+    Bucket** buffer = (Bucket**)smart_malloc(m_size * sizeof(Bucket*)); \
+    SortFlavor flav = preSort<acc_type>(buffer, acc_type(), true); \
+    try { \
+      CALL_SORT(acc_type); \
+    } catch (...) { \
+      postSort(buffer); \
+      smart_free(buffer); \
+      throw; \
+    } \
+    postSort(buffer); \
+    smart_free(buffer); \
+  } while(0)
+
+void c_StableMap::asort(int sort_flags, bool ascending) {
+  SORT_BODY(StableMapValAccessor);
+}
+
+void c_StableMap::ksort(int sort_flags, bool ascending) {
+  SORT_BODY(StableMapKeyAccessor);
+}
+
+#undef SORT_CASE
+#undef SORT_CASE_BLOCK
+#undef CALL_SORT
+#undef SORT_BODY
+
+#define USER_SORT_BODY(acc_type) \
+  do { \
+    if (!m_size) { \
+      return; \
+    } \
+    Bucket** buffer = (Bucket**)smart_malloc(m_size * sizeof(Bucket*)); \
+    preSort<acc_type>(buffer, acc_type(), false); \
+    ElmUCompare<acc_type> comp; \
+    comp.callback = &cmp_function; \
+    try { \
+      HPHP::Sort::sort(buffer, buffer + m_size, comp); \
+    } catch (...) { \
+      postSort(buffer); \
+      smart_free(buffer); \
+      throw; \
+    } \
+    postSort(buffer); \
+    smart_free(buffer); \
+  } while (0)
+
+void c_StableMap::uasort(CVarRef cmp_function) {
+  USER_SORT_BODY(StableMapValAccessor);
+}
+
+void c_StableMap::uksort(CVarRef cmp_function) {
+  USER_SORT_BODY(StableMapKeyAccessor);
+}
+
+#undef USER_SORT_BODY
 
 void c_StableMap::throwBadKeyType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -2047,12 +2323,11 @@ void c_StableMap::throwBadKeyType() {
   throw e;
 }
 
-#undef CONNECT_TO_GLOBAL_DLLIST
-
 c_StableMap::Bucket::~Bucket() {
   if (hasStrKey() && skey->decRefCount() == 0) {
     DELETE(StringData)(skey);
   }
+  tvRefcountedDecRef(&data);
 }
 
 void c_StableMap::Bucket::dump() {
@@ -2061,7 +2336,7 @@ void c_StableMap::Bucket::dump() {
   if (hasStrKey()) {
     skey->dump();
   }
-  data.dump();
+  tvAsCVarRef(&data).dump();
 }
 
 TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
@@ -2154,6 +2429,8 @@ void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
   }
   throwBadKeyType();
 }
+
+#undef CONNECT_TO_GLOBAL_DLLIST
 
 c_StableMapIterator::c_StableMapIterator(const ObjectStaticCallbacks *cb) :
     ExtObjectData(cb) {

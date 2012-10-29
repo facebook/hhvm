@@ -19,6 +19,7 @@
 #include <runtime/ext/ext_iterator.h>
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_continuation.h>
+#include <runtime/ext/ext_collection.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_collator.h>
 #include <runtime/base/builtin_functions.h>
@@ -1241,67 +1242,111 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   }
 }
 
-#define SORT_BODY(sort_func, sort_flags, ascending) \
-  do { \
-    getCheckedArrayRetType(array, false, Array &); \
-    ArrayData* ad; \
-    arr_array = ad = arr_array->escalateForSort(); \
-    ad->sort_func(sort_flags, ascending); \
-    return true; \
-  } while (0)
+static bool
+php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
+  if (array.isArray()) {
+    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    if (use_collator && sort_flags != SORT_LOCALE_STRING) {
+      UCollator *coll = s_collator->getCollator();
+      if (coll) {
+        intl_error &errcode = s_collator->getErrorCodeRef();
+        return collator_sort(array, sort_flags, ascending,
+                             coll, &errcode);
+      }
+    }
+    ArrayData* ad;
+    arr_array = ad = arr_array->escalateForSort();
+    ad->sort(sort_flags, ascending);
+    return true;
+  }
+  if (array.isObject()) {
+    ObjectData* obj = array.getObjectData();
+    if (obj->getCollectionType() == Collection::VectorType) {
+      c_Vector* vec = static_cast<c_Vector*>(obj);
+      vec->sort(sort_flags, ascending);
+      return true;
+    }
+  }
+  throw_bad_array_exception();
+  return false;
+}
 
-#define SORT_BODY_WITH_COLLATOR_CHECK(sort_func, sort_flags, ascending) \
-  do { \
-    getCheckedArrayRetType(array, false, Array &); \
-    if (use_collator && sort_flags != SORT_LOCALE_STRING) { \
-      UCollator *coll = s_collator->getCollator(); \
-      if (coll) { \
-        intl_error &errcode = s_collator->getErrorCodeRef(); \
-        return collator_##sort_func(array, sort_flags, ascending, \
-                                    coll, &errcode); \
-      } \
-    } \
-    ArrayData* ad; \
-    arr_array = ad = arr_array->escalateForSort(); \
-    ad->sort_func(sort_flags, ascending); \
-    return true; \
-  } while (0)
+static bool
+php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
+  if (array.isArray()) {
+    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    if (use_collator && sort_flags != SORT_LOCALE_STRING) {
+      UCollator *coll = s_collator->getCollator();
+      if (coll) {
+        intl_error &errcode = s_collator->getErrorCodeRef();
+        return collator_asort(array, sort_flags, ascending,
+                              coll, &errcode);
+      }
+    }
+    ArrayData* ad;
+    arr_array = ad = arr_array->escalateForSort();
+    ad->asort(sort_flags, ascending);
+    return true;
+  }
+  if (array.isObject()) {
+    ObjectData* obj = array.getObjectData();
+    if (obj->getCollectionType() == Collection::StableMapType) {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->asort(sort_flags, ascending);
+      return true;
+    }
+  }
+  throw_bad_array_exception();
+  return false;
+}
 
-#define USER_SORT_BODY(sort_func) \
-  do { \
-    getCheckedArrayRetType(array, false, Array &); \
-    ArrayData* ad; \
-    arr_array = ad = arr_array->escalateForSort(); \
-    ad->sort_func(cmp_function); \
-    return true; \
-  } while (0)
+static bool
+php_ksort(VRefParam array, int sort_flags, bool ascending) {
+  if (array.isArray()) {
+    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    ArrayData* ad;
+    arr_array = ad = arr_array->escalateForSort();
+    ad->ksort(sort_flags, ascending);
+    return true;
+  }
+  if (array.isObject()) {
+    ObjectData* obj = array.getObjectData();
+    if (obj->getCollectionType() == Collection::StableMapType) {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->ksort(sort_flags, ascending);
+      return true;
+    }
+  }
+  throw_bad_array_exception();
+  return false;
+}
 
 bool f_sort(VRefParam array, int sort_flags /* = 0 */,
             bool use_collator /* = false */) {
-  SORT_BODY_WITH_COLLATOR_CHECK(sort, sort_flags, true);
+  return php_sort(array, sort_flags, true, use_collator);
 }
 
 bool f_rsort(VRefParam array, int sort_flags /* = 0 */,
              bool use_collator /* = false */) {
-  SORT_BODY_WITH_COLLATOR_CHECK(sort, sort_flags, false);
+  return php_sort(array, sort_flags, false, use_collator);
 }
 
 bool f_asort(VRefParam array, int sort_flags /* = 0 */,
              bool use_collator /* = false */) {
-  SORT_BODY_WITH_COLLATOR_CHECK(asort, sort_flags, true);
+  return php_asort(array, sort_flags, true, use_collator);
 }
 
 bool f_arsort(VRefParam array, int sort_flags /* = 0 */,
               bool use_collator /* = false */) {
-  SORT_BODY_WITH_COLLATOR_CHECK(asort, sort_flags, false);
+  return php_asort(array, sort_flags, false, use_collator);
 }
 
 bool f_ksort(VRefParam array, int sort_flags /* = 0 */) {
-  SORT_BODY(ksort, sort_flags, true);
+  return php_ksort(array, sort_flags, true);
 }
 
 bool f_krsort(VRefParam array, int sort_flags /* = 0 */) {
-  SORT_BODY(ksort, sort_flags, false);
+  return php_ksort(array, sort_flags, false);
 }
 
 // NOTE: PHP's implementation of natsort and natcasesort accepts ArrayAccess
@@ -1309,28 +1354,72 @@ bool f_krsort(VRefParam array, int sort_flags /* = 0 */) {
 // here.
 
 Variant f_natsort(VRefParam array) {
-  SORT_BODY(asort, SORT_NATURAL, true);
+  return php_asort(array, SORT_NATURAL, true, false);
 }
 
 Variant f_natcasesort(VRefParam array) {
-  SORT_BODY(asort, SORT_NATURAL_CASE, true);
+  return php_asort(array, SORT_NATURAL_CASE, true, false);
 }
 
 bool f_usort(VRefParam array, CVarRef cmp_function) {
-  USER_SORT_BODY(usort);
+  if (array.isArray()) {
+    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    ArrayData* ad;
+    arr_array = ad = arr_array->escalateForSort();
+    ad->usort(cmp_function);
+    return true;
+  }
+  if (array.isObject()) {
+    ObjectData* obj = array.getObjectData();
+    if (obj->getCollectionType() == Collection::VectorType) {
+      c_Vector* vec = static_cast<c_Vector*>(obj);
+      vec->usort(cmp_function);
+      return true;
+    }
+  }
+  throw_bad_array_exception();
+  return false;
 }
 
 bool f_uasort(VRefParam array, CVarRef cmp_function) {
-  USER_SORT_BODY(uasort);
+  if (array.isArray()) {
+    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    ArrayData* ad;
+    arr_array = ad = arr_array->escalateForSort();
+    ad->uasort(cmp_function);
+    return true;
+  }
+  if (array.isObject()) {
+    ObjectData* obj = array.getObjectData();
+    if (obj->getCollectionType() == Collection::StableMapType) {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->uasort(cmp_function);
+      return true;
+    }
+  }
+  throw_bad_array_exception();
+  return false;
 }
 
 bool f_uksort(VRefParam array, CVarRef cmp_function) {
-  USER_SORT_BODY(uksort);
+  if (array.isArray()) {
+    Array& arr_array = Variant::GetAsArray(array.getTypedAccessor());
+    ArrayData* ad;
+    arr_array = ad = arr_array->escalateForSort();
+    ad->uksort(cmp_function);
+    return true;
+  }
+  if (array.isObject()) {
+    ObjectData* obj = array.getObjectData();
+    if (obj->getCollectionType() == Collection::StableMapType) {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->uksort(cmp_function);
+      return true;
+    }
+  }
+  throw_bad_array_exception();
+  return false;
 }
-
-#undef SORT_BODY
-#undef SORT_BODY_WITH_COLLATOR_CHECK
-#undef USER_SORT_BODY
 
 bool f_array_multisort(int _argc, VRefParam ar1,
                        CArrRef _argv /* = null_array */) {

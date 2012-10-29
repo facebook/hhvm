@@ -114,13 +114,13 @@ void TranslatorX64::fCallArrayHelper(const FCallArrayArgs* args) {
 
   tl_regState = REGSTATE_CLEAN;
   bool runFunc = ec->doFCallArray(pc);
+  sp = ec->m_stack.top();
   tl_regState = REGSTATE_DIRTY;
   if (!runFunc) return;
 
   ec->m_fp->m_savedRip = rbp->m_savedRip;
   // smash our return and rbp chain
   rbp->m_savedRip = (uint64_t)ec->m_fp->m_func->getFuncBody();
-  sp = ec->m_stack.top();
   rbp->m_savedRbp = (uint64_t)ec->m_fp;
 }
 

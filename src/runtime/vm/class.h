@@ -629,9 +629,12 @@ public:
    * We have a call site for an object method, which previously
    * invoked func, but this call has a different Class (*this).  See
    * if we can figure out the correct Func to call.
+   *
+   * Since this exists to be inlined into a single callsite in targetcache,
+   * and the dependencies are a bit hairy, it's defined in targetcache.cpp.
    */
-  const Func* wouldCall(const Func* func) const;
-
+  const Func* wouldCall(const Func* prev) const;
+  
   // Finds the base class defining the given method (NULL if none).
   // Note: for methods imported via traits, the base class is the one that
   // uses/imports the trait.

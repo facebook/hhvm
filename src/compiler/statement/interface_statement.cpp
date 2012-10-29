@@ -164,8 +164,10 @@ void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {
       if (!cls->isInterface()) {
-        Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
-                        cls->getOriginalName());
+        Compiler::Error(
+          Compiler::InvalidDerivation,
+          shared_from_this(),
+          cls->getOriginalName() + " must be an interface");
       }
       if (cls->isUserClass()) {
         cls->addUse(classScope, BlockScope::UseKindParentRef);

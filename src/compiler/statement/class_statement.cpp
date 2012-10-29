@@ -192,8 +192,10 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
       if ((!cls->isInterface() && (m_parent.empty() || i > 0 )) ||
           (cls->isInterface() && (!m_parent.empty() && i == 0 )) ||
           (cls->isTrait())) {
-        Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
-                        cls->getOriginalName());
+        Compiler::Error(Compiler::InvalidDerivation,
+                        shared_from_this(),
+                        "You are extending " + cls->getOriginalName() + 
+                          " which is an interface or a trait");
       }
       if (cls->isUserClass()) {
         cls->addUse(getScope(), BlockScope::UseKindParentRef);

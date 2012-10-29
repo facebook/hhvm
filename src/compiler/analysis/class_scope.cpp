@@ -256,7 +256,10 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
     const string &base = m_bases[i];
 
     if (seen.find(base) != seen.end() || bases.find(base) != bases.end()) {
-      Compiler::Error(Compiler::InvalidDerivation, m_stmt, base);
+      Compiler::Error(
+        Compiler::InvalidDerivation,
+        m_stmt,
+        "The class hierarchy contains a circular reference involving " + base);
       if (i == 0 && !m_parent.empty()) {
         ASSERT(base == m_parent);
         m_parent.clear();

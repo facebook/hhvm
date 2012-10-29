@@ -229,11 +229,11 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
       }
       static StringData* sd = StringData::GetStaticString("");
       tvScratch.m_data.pstr = sd;
-      tvScratch._count = 0;
       tvScratch.m_type = KindOfString;
     } else {
-      TV_WRITE_UNINIT(&tvScratch);
-      tvAsVariant(&tvScratch) = base->m_data.pstr->getChar(x);
+      tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
+      ASSERT(tvScratch.m_data.pstr->isStatic());
+      tvScratch.m_type = KindOfStaticString;
     }
     result = &tvScratch;
     baseStrOff = true;
@@ -1361,7 +1361,9 @@ static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
     if (!useEmpty) {
       return true;
     }
-    tvAsVariant(&tvScratch) = base->m_data.pstr->getChar(x);
+    tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
+    ASSERT(tvScratch.m_data.pstr->isStatic());
+    tvScratch.m_type = KindOfStaticString;
     result = &tvScratch;
     break;
   }

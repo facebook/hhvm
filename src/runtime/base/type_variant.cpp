@@ -202,6 +202,7 @@ static void (*destructors[4])(RefData *) =
 
 inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
   ASSERT(IS_REFCOUNTED_TYPE(t));
+  ASSERT(IS_REAL_TYPE(t));
   CT_ASSERT(KindOfString + 1 == KindOfArray &&
             KindOfArray + 1 == KindOfObject &&
             KindOfObject + 1 == KindOfRef);

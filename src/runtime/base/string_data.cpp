@@ -540,7 +540,7 @@ StringData *StringData::getChar(int offset) const {
     return GetStaticString(m_data[offset]);
   }
   raise_notice("Uninitialized string offset: %d", offset);
-  return NEW(StringData)(0);
+  return GetStaticString("");
 }
 
 // mutations

@@ -135,7 +135,8 @@ __thread TranslatorX64* tx64;
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = REGSTATE_CLEAN;
 
-__thread UnlikelyHitMap* tl_unlikelyHits = nullptr;
+__thread JmpHitMap* tl_unlikelyHits = nullptr;
+__thread JmpHitMap* tl_jccHits = nullptr;
 static StaticString s___call(LITSTR_INIT("__call"));
 static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 
@@ -165,53 +166,6 @@ localOffset(int loc) {
 SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i) {
   return i.next ? i.next->source : t.m_nextSk;
 }
-
-// Helper structs for jcc vs. jcc8.
-struct Jcc8 {
-  static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {
-    a.   jcc8(cc, dest);
-  }
-  static void patch(X64Assembler& a, TCA site, TCA newDest) {
-    a.patchJcc8(site, newDest);
-  }
-};
-
-struct Jcc32 {
-  static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {
-    a.   jcc(cc, dest);
-  }
-  static void patch(X64Assembler& a, TCA site, TCA newDest) {
-    a.patchJcc(site, newDest);
-  }
-};
-
-// JccBlock --
-//   A raw condition-code block; assumes whatever comparison or ALU op
-//   that sets the Jcc has already executed.
-template <ConditionCode Jcc, typename J=Jcc8>
-struct JccBlock {
-  mutable X64Assembler* m_a;
-  TCA m_jcc;
-  mutable DiamondGuard* m_dg;
-
-  explicit JccBlock(X64Assembler& a)
-    : m_a(&a),
-      m_jcc(a.code.frontier),
-      m_dg(new DiamondGuard(a)) {
-    J::branch(a, Jcc, m_a->code.frontier);
-  }
-
-  ~JccBlock() {
-    if (m_a) {
-      delete m_dg;
-      J::patch(*m_a, m_jcc, m_a->code.frontier);
-    }
-  }
-
-private:
-  JccBlock(const JccBlock&);
-  JccBlock& operator=(const JccBlock&);
-};
 
 // stubBlock --
 //   Used to emit a bunch of outlined code that is unconditionally jumped to.
@@ -1020,10 +974,23 @@ void TranslatorX64::emitDecRefGeneric(const NormalizedInstruction& i,
 // emitDecRefGeneric above.
 void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
   SpaceRecorder sr("_DecRefGeneric", a);
-  a.   cmp_imm32_reg32(KindOfRefCountThreshold, rType);
-  {
-    JccBlock<CC_BE> ifRefCounted(a);
+
+  auto body = [&](X64Assembler& a){
     callBinaryStub(a, *m_curNI, m_dtorGenericStubRegs, rData, rType);
+  };
+
+  Op op = m_curNI->op();
+  a.   cmp_imm32_reg32(KindOfRefCountThreshold, rType);
+  if (op == OpSetM || op == OpContSend || op == OpSetG) {
+    // Semi-likely cases
+    semiLikelyIfBlock<CC_A>(a, std::bind(body, std::ref(a)));
+  } else if (op == OpContNext) {
+    // Unlikely cases
+    UnlikelyIfBlock<CC_A> counted(a, astubs);
+    body(astubs);
+  } else {
+    JccBlock<CC_BE> ifRefCounted(a);
+    body(a);
   }
 }
 
@@ -1050,12 +1017,11 @@ TCA TranslatorX64::genericRefCountStub(X64Assembler& a) {
     { // if !static
       IfCountNotStatic ins(a, rsi, KindOfInvalid);
       a.  sub_imm32_disp_reg32(1, TVOFF(_count), rsi);
-      { // if zero
-        JccBlock<CC_NZ> ifZero(a);
+      semiLikelyIfBlock<CC_Z>(a, [&]{
         RegSet s = kCallerSaved - (RegSet(rdi) | RegSet(rsi));
         PhysRegSaver prs(a, s);
         a.call(TCA(tv_release_generic));
-      } // endif
+      });
     } // endif
   }
   a.    popr(rbp); // }
@@ -1078,8 +1044,7 @@ TCA TranslatorX64::genericRefCountStubRegs(X64Assembler& a) {
   {
     IfCountNotStatic ins(a, rData, KindOfInvalid);
     a.  sub_imm32_disp_reg32(1, TVOFF(_count), rData);
-    {
-      JccBlock<CC_NZ> ifZero(a);
+    semiLikelyIfBlock<CC_Z>(a, [&]{
       // The arguments are already in the right registers.
       RegSet s = kCallerSaved - (RegSet(rData) | RegSet(rType));
       PhysRegSaverParity<1> saver(a, s);
@@ -1088,7 +1053,7 @@ TCA TranslatorX64::genericRefCountStubRegs(X64Assembler& a) {
         (void)tv_release_typed(vp, dt);
       }
       a.call(TCA(tv_release_typed));
-    }
+    });
   }
   a.    popr(rbp); // }
   a.    ret();
@@ -10805,7 +10770,7 @@ TranslatorX64::requestInit() {
   requestResetHighLevelTranslator();
   Treadmill::startRequest(g_vmContext->m_currentThreadIdx);
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
-  initUnlikelyProfile();
+  initJmpProfile();
 }
 
 void
@@ -10821,7 +10786,7 @@ TranslatorX64::requestExit() {
   TRACE(1, "done requestExit(%ld)\n", g_vmContext->m_currentThreadIdx);
   Stats::dump();
   Stats::clear();
-  dumpUnlikelyProfile();
+  dumpJmpProfile();
 
   if (Trace::moduleEnabledRelease(Trace::tx64stats, 1)) {
     Trace::traceRelease("TranslatorX64 perf counters for %s:\n",

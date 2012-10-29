@@ -90,7 +90,7 @@ class TranslatorX64 : public Translator
   template<int, int, int> friend class CondBlock;
   template<ConditionCode, typename smasher> friend class JccBlock;
   template<int> friend class IfElseBlock;
-  template<int> friend class UnlikelyIfBlock;
+  template<ConditionCode> friend class UnlikelyIfBlock;
   typedef HPHP::DataType DataType;
 
   typedef tbb::concurrent_hash_map<TCA, TCA> SignalStubMap;

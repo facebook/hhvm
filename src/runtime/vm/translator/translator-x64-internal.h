@@ -150,7 +150,7 @@ class DiamondReturn : boost::noncopyable {
   TCA m_finishBranchFrontier;
 
 private:
-  template<int> friend class UnlikelyIfBlock;
+  template<ConditionCode> friend class UnlikelyIfBlock;
 
   void initBranch(X64Assembler* branchA, X64Assembler* mainA) {
     /*
@@ -284,36 +284,35 @@ public:
 
 // Code to profile how often our UnlikelyIfBlock branches are taken in
 // practice. Enable with TRACE=unlikely:1
-struct UnlikelyHitRate {
+struct JmpHitRate {
   litstr key;
   uint64_t check;
-  uint64_t hit;
-  UnlikelyHitRate() : key(nullptr), check(0), hit(0) {}
+  uint64_t take;
+  JmpHitRate() : key(nullptr), check(0), take(0) {}
 
   float rate() const {
-    return 100.0 * hit / check;
+    return 100.0 * take / check;
   }
-  bool operator<(const UnlikelyHitRate& b) const {
+  bool operator<(const JmpHitRate& b) const {
     return rate() > b.rate();
   }
 };
-typedef hphp_hash_map<litstr, UnlikelyHitRate, pointer_hash<const char>>
-  UnlikelyHitMap;
-extern __thread UnlikelyHitMap* tl_unlikelyHits;
+typedef hphp_hash_map<litstr, JmpHitRate, pointer_hash<const char>> JmpHitMap;
+extern __thread JmpHitMap* tl_unlikelyHits;
+extern __thread JmpHitMap* tl_jccHits;
 
-static void recordUnlikelyProfile(litstr key, int64 hit) {
-  UnlikelyHitRate& r = (*tl_unlikelyHits)[key];
+template<Trace::Module mod>
+static void recordJmpProfile(litstr key, int64 take) {
+  JmpHitMap& map = mod == Trace::unlikely ? *tl_unlikelyHits : *tl_jccHits;
+  JmpHitRate& r = map[key];
   r.key = key;
-  if (hit) {
-    r.hit++;
-  } else {
-    r.check++;
-  }
+  r.check++;
+  if (take) r.take++;
 }
 
-inline void emitUnlikelyProfile(bool hit, bool saveFlags,
-                                X64Assembler& a) {
-  if (!Trace::moduleEnabledRelease(Trace::unlikely)) return;
+template<Trace::Module mod>
+void emitJmpProfile(X64Assembler& a, ConditionCode cc) {
+  if (!Trace::moduleEnabledRelease(mod)) return;
   const ssize_t sz = 1024;
   char key[sz];
 
@@ -324,10 +323,10 @@ inline void emitUnlikelyProfile(bool hit, bool saveFlags,
   // Get instruction if wanted
   const NormalizedInstruction* ni = tx64->m_curNI;
   std::string inst;
-  if (Trace::moduleEnabledRelease(Trace::unlikely, 2)) {
+  if (Trace::moduleEnabledRelease(mod, 2)) {
     inst = std::string(", ") + (ni ? opcodeToName(ni->op()) : "<none>");
   }
-  const char* fmt = Trace::moduleEnabledRelease(Trace::unlikely, 3) ?
+  const char* fmt = Trace::moduleEnabledRelease(mod, 3) ?
     "%-25s:%-5d, %-28s%s" :
     "%-25s:%-5d (%-28s%s)";
   if (snprintf(key, sz, fmt,
@@ -337,53 +336,79 @@ inline void emitUnlikelyProfile(bool hit, bool saveFlags,
   }
   litstr data = StringData::GetStaticString(key)->data();
 
-  if (saveFlags) a.pushf();
+  RegSet allRegs = kAllX64Regs;
+  allRegs.remove(rsi);
+
+  a.pushf();
+  a.pushr(rsi);
+  a.setcc(cc, rsi);
+  a.mov_reg8_reg64_unsigned(rsi, rsi);
   {
-    PhysRegSaver regs(a, kAllX64Regs);
-    int i = 0;
-    a.emitImmReg((intptr_t)data, argNumToRegName[i++]);
-    a.emitImmReg((intptr_t)hit, argNumToRegName[i++]);
-    a.call((TCA)recordUnlikelyProfile);
+    PhysRegSaver regs(a, allRegs);
+    a.emitImmReg((intptr_t)data, rdi);
+    if (false) {
+      recordJmpProfile<mod>("", 0);
+    }
+    a.call((TCA)recordJmpProfile<mod>);
   }
-  if (saveFlags) a.popf();
+  a.popr(rsi);
+  a.popf();
 }
 
-inline void initUnlikelyProfile() {
-  if (!Trace::moduleEnabledRelease(Trace::unlikely)) return;
-  tl_unlikelyHits = new UnlikelyHitMap();
+inline void initJmpProfile() {
+  if (Trace::moduleEnabledRelease(Trace::unlikely)) {
+    tl_unlikelyHits = new JmpHitMap();
+  }
+  if (Trace::moduleEnabledRelease(Trace::jcc)) {
+    tl_jccHits = new JmpHitMap();
+  }
 }
 
-inline void dumpUnlikelyProfile() {
-  if (!Trace::moduleEnabledRelease(Trace::unlikely)) return;
-  std::vector<UnlikelyHitRate> hits;
-  UnlikelyHitRate overall;
+inline void dumpProfileImpl(Trace::Module mod) {
+  JmpHitMap*& table = mod == Trace::jcc ? tl_jccHits : tl_unlikelyHits;
+  if (!table) return;
+
+  std::vector<JmpHitRate> hits;
+  JmpHitRate overall;
   overall.key = "total";
-  for (auto item : *tl_unlikelyHits) {
+  for (auto& item : *table) {
     overall.check += item.second.check;
-    overall.hit += item.second.hit;
+    overall.take += item.second.take;
     hits.push_back(item.second);
   }
   if (hits.empty()) return;
-  auto cmp = [&](const UnlikelyHitRate& a, const UnlikelyHitRate& b) {
-    return a.hit > b.hit ? true : a.hit == b.hit ? a.check > b.check : false;
+  auto cmp = [&](const JmpHitRate& a, const JmpHitRate& b) {
+    return a.take > b.take ? true
+    : a.take == b.take ? a.check > b.check
+    : false;
   };
   std::sort(hits.begin(), hits.end(), cmp);
-  Trace::traceRelease("UnlikelyIfBlock hit rates for %s:\n",
+  Trace::traceRelease("%s hit rates for %s:\n",
+                      mod == Trace::jcc ? "JccBlock" : "UnlikelyIfBlock",
                       g_context->getRequestUrl(50).c_str());
-  const char* fmt = Trace::moduleEnabledRelease(Trace::unlikely, 3) ?
+  const char* fmt = Trace::moduleEnabledRelease(mod, 3) ?
     "%6.2f, %8llu, %8llu, %5.1f, %s\n" :
     "%6.2f%% (%8llu / %8llu, %5.1f%% of total): %s\n";
-  auto printRate = [&](const UnlikelyHitRate& hr) {
+  auto printRate = [&](const JmpHitRate& hr) {
     Trace::traceRelease(fmt,
-                        hr.rate(), hr.hit, hr.check, hr.key,
-                        100.0 * hr.hit / overall.hit);
+                        hr.rate(), hr.take, hr.check, hr.key,
+                        100.0 * hr.take / overall.take);
   };
   printRate(overall);
   std::for_each(hits.begin(), hits.end(), printRate);
   Trace::traceRelease("\n");
 
-  delete tl_unlikelyHits;
-  tl_unlikelyHits = nullptr;
+  delete table;
+  table = nullptr;
+}
+
+inline void dumpJmpProfile() {
+  if (!Trace::moduleEnabledRelease(Trace::unlikely) &&
+      !Trace::moduleEnabledRelease(Trace::jcc)) {
+    return;
+  }
+  dumpProfileImpl(Trace::unlikely);
+  dumpProfileImpl(Trace::jcc);
 }
 
 // UnlikelyIfBlock:
@@ -422,7 +447,7 @@ inline void dumpUnlikelyProfile() {
 // corresponding DiamondReturns are correctly destroyed in reverse
 // order.  But also note that this can lead to more jumps on the
 // unlikely branch (see ~DiamondReturn).
-template <int Jcc>
+template <ConditionCode Jcc>
 struct UnlikelyIfBlock {
   X64Assembler& m_likely;
   X64Assembler& m_unlikely;
@@ -440,9 +465,8 @@ struct UnlikelyIfBlock {
     , m_returnDiamond(returnDiamond ? returnDiamond : new DiamondReturn())
     , m_externalDiamond(!!returnDiamond)
   {
-    emitUnlikelyProfile(false, true, m_likely);
+    emitJmpProfile<Trace::unlikely>(m_likely, Jcc);
     m_likely.jcc(Jcc, m_unlikely.code.frontier);
-    emitUnlikelyProfile(true, false, m_unlikely);
     m_likelyPostBranch = m_likely.code.frontier;
     m_returnDiamond->initBranch(&unlikely, &likely);
     tx64->m_spillFillCode = &unlikely;
@@ -480,6 +504,58 @@ struct UnlikelyIfBlock {
 #define UnlikelyIfBlock                                                 \
   m_curFile = __FILE__; m_curFunc = __FUNCTION__; m_curLine = __LINE__; \
   UnlikelyIfBlock
+
+// Helper structs for jcc vs. jcc8.
+struct Jcc8 {
+  static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {
+    a.   jcc8(cc, dest);
+  }
+  static void patch(X64Assembler& a, TCA site, TCA newDest) {
+    a.patchJcc8(site, newDest);
+  }
+};
+
+struct Jcc32 {
+  static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {
+    a.   jcc(cc, dest);
+  }
+  static void patch(X64Assembler& a, TCA site, TCA newDest) {
+    a.patchJcc(site, newDest);
+  }
+};
+
+// JccBlock --
+//   A raw condition-code block; assumes whatever comparison or ALU op
+//   that sets the Jcc has already executed.
+template <ConditionCode Jcc, typename J=Jcc8>
+struct JccBlock {
+  mutable X64Assembler* m_a;
+  TCA m_jcc;
+  mutable DiamondGuard* m_dg;
+
+  explicit JccBlock(X64Assembler& a)
+    : m_a(&a),
+      m_dg(new DiamondGuard(a)) {
+    emitJmpProfile<Trace::jcc>(a, Jcc);
+    m_jcc = a.code.frontier;
+    J::branch(a, Jcc, m_a->code.frontier);
+  }
+
+  ~JccBlock() {
+    if (m_a) {
+      delete m_dg;
+      J::patch(*m_a, m_jcc, m_a->code.frontier);
+    }
+  }
+
+private:
+  JccBlock(const JccBlock&);
+  JccBlock& operator=(const JccBlock&);
+};
+
+#define JccBlock                                                        \
+  m_curFile = __FILE__; m_curFunc = __FUNCTION__; m_curLine = __LINE__; \
+  JccBlock
 
 /*
  * semiLikelyIfBlock is a conditional block of code that is expected

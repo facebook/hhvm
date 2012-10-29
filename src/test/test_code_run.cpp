@@ -33024,6 +33024,9 @@ bool TestCodeRun::TestStrictMode() {
   // Generic with as
   MVCRO("<?hh\nclass C<T as I>{}", "");
 
+  // Silent type hint
+  MVCRO("<?hh\nfunction foo(@int $x){ echo 1; } foo('hi');", "1");
+
   // Kitchen sink
   MVCRO("<?hh\n"
         "function vidx<X>(blarg<X> $list, int $idx):X {\n"

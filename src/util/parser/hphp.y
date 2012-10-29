@@ -2367,6 +2367,7 @@ sm_type:
     /* double-optional types will be rejected by the typechecker; we
      * already allow plenty of nonsense types anyway */
     '?' sm_type                        { only_in_strict_mode(_p); $$.reset(); }
+  | '@' sm_type                        { only_in_strict_mode(_p); $$.reset(); }
   | T_STRING sm_typeargs_opt           { $$ = $1;
                                          /* if the type annotation is a bound
                                             typevar we have to strip it */

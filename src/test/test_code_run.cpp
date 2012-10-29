@@ -33742,6 +33742,10 @@ bool TestCodeRun::TestStrictMode() {
   // Combination of optional + generic
   MVCRO("<?hh\nfunction foo(): Map<int, ?Vector<int>> {}", "");
 
+  // Arrays with generic types
+  MVCRO("<?hh\nfunction foo(array<int> $x) {}", "");
+  MVCRO("<?hh\nfunction foo(array<string, int> $x) {}", "");
+
   // Kitchen sink
   MVCRO("<?hh\n"
         "function vidx<X>(blarg<X> $list, int $idx):X {\n"

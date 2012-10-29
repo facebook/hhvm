@@ -508,12 +508,14 @@ enum SetOpOp {
   O(FCallBuiltin,    TWO(IVA, SA),     FMANY,           ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
-  O(IterInit,        TWO(IA,BA),       ONE(CV),         NOV,        CF) \
-  O(IterInitM,       TWO(IA,BA),       ONE(VV),         NOV,        CF) \
-  O(IterValueC,      ONE(IA),          NOV,             ONE(CV),    NF) \
-  O(IterValueV,      ONE(IA),          NOV,             ONE(VV),    NF) \
-  O(IterKey,         ONE(IA),          NOV,             ONE(CV),    NF) \
-  O(IterNext,        TWO(IA,BA),       NOV,             NOV,        CF) \
+  O(IterInit,        THREE(IA,BA,HA),  ONE(CV),         NOV,        CF) \
+  O(IterInitK,       FOUR(IA,BA,HA,HA),ONE(CV),         NOV,        CF) \
+  O(IterInitM,       THREE(IA,BA,HA),  ONE(VV),         NOV,        CF) \
+  O(IterInitMK,      FOUR(IA,BA,HA,HA),ONE(VV),         NOV,        CF) \
+  O(IterNext,        THREE(IA,BA,HA),  NOV,             NOV,        CF) \
+  O(IterNextK,       FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
+  O(IterNextM,       THREE(IA,BA,HA),  NOV,             NOV,        CF) \
+  O(IterNextMK,      FOUR(IA,BA,HA,HA),NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    CF) \

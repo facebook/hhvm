@@ -340,6 +340,16 @@ public:
     ASSERT(unsigned(pos) <= unsigned(m_lastE));
     return &m_data[pos];
   }
+  static void getElmKey(Elm* e, TypedValue* out) {
+    if (e->hasIntKey()) {
+      out->m_data.num = e->ikey;
+      out->m_type = KindOfInt64;
+      return;
+    }
+    out->m_data.pstr = e->key;
+    out->m_type = KindOfString;
+    e->key->incRefCount();
+  }
 private:
   // Small: Array elements and the hash table are allocated inline.
   //

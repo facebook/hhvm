@@ -10390,6 +10390,7 @@ void TranslatorX64::translatorAssert(X64Assembler& a, ConditionCode cc,
   a.patchJcc8(jmp, a.code.frontier);
 }
 
+// note: this is ok for all the iterkey/itervalue stuff too
 void
 TranslatorX64::analyzeIterInit(Tracelet& t, NormalizedInstruction& ni) {
   DataType inType = ni.inputs[0]->valueType();
@@ -10397,11 +10398,15 @@ TranslatorX64::analyzeIterInit(Tracelet& t, NormalizedInstruction& ni) {
 }
 
 void
-TranslatorX64::translateIterInit(const Tracelet& t,
-                                 const NormalizedInstruction& ni) {
-  ASSERT(ni.inputs.size() == 1);
-  ASSERT(!ni.outStack && !ni.outLocal);
-  DynLocation* in = ni.inputs[0];
+TranslatorX64::analyzeIterInitK(Tracelet& t, NormalizedInstruction& ni) {
+  DataType inType = ni.inputs[0]->valueType();
+  ni.m_txFlags = supportedPlan(inType == KindOfArray || inType == KindOfObject);
+}
+
+void TranslatorX64::translateBasicIterInit(const Tracelet& t,
+                                           const NormalizedInstruction& ni) {
+  const int kValIdx = 0;
+  DynLocation* in = ni.inputs[kValIdx];
   ASSERT(in->outerType() != KindOfRef);
   SKTRACE(1, ni.source, "IterInit: committed to translation\n");
   PhysReg src = getReg(in->location);
@@ -10413,9 +10418,18 @@ TranslatorX64::translateIterInit(const Tracelet& t,
     if (false) { // typecheck
       Iter *dest = NULL;
       HphpArray *arr = NULL;
-      new_iter_array(dest, arr);
+      TypedValue *val = NULL;
+      TypedValue *key = NULL;
+      new_iter_array(dest, arr, val);
+      new_iter_array_key(dest, arr, val, key);
     }
-    EMIT_RCALL(a, ni, new_iter_array, A(iterLoc), R(src));
+    if (ni.outLocal2) {
+      EMIT_RCALL(a, ni, new_iter_array_key, A(iterLoc), R(src),
+                 A(ni.outLocal->location), A(ni.outLocal2->location));
+    } else {
+      EMIT_RCALL(a, ni, new_iter_array, A(iterLoc), R(src),
+                 A(ni.outLocal->location));
+    }
     break;
   }
   case KindOfObject: {
@@ -10423,10 +10437,19 @@ TranslatorX64::translateIterInit(const Tracelet& t,
       Iter *dest = NULL;
       ObjectData *obj = NULL;
       Class *ctx = NULL;
-      new_iter_object(dest, obj, ctx);
+      TypedValue *val = NULL;
+      TypedValue *key = NULL;
+      new_iter_object(dest, obj, ctx, val, key);
     }
     Class* ctx = arGetContextClass(curFrame());
-    EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src), IMM((uintptr_t)ctx));
+    if (ni.outLocal2) {
+      EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src),
+                 IMM((uintptr_t)ctx),
+                 A(ni.outLocal->location), A(ni.outLocal2->location));
+    } else {
+      EMIT_RCALL(a, ni, new_iter_object, A(iterLoc), R(src),
+                 IMM((uintptr_t)ctx), A(ni.outLocal->location), IMM(0));
+    }
     break;
   }
   default: not_reached();
@@ -10441,90 +10464,56 @@ TranslatorX64::translateIterInit(const Tracelet& t,
   emitCondJmp(taken, notTaken, CC_Z);
 }
 
-void
-TranslatorX64::analyzeIterValueC(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = supportedPlan(
-    i.inputs[0]->rtt.iterType() == Iter::TypeArray ||
-    i.inputs[0]->rtt.iterType() == Iter::TypeIterator);
+void TranslatorX64::translateIterInit(const Tracelet& t,
+                                      const NormalizedInstruction& ni) {
+  ASSERT(ni.inputs.size() == 1);
+  ASSERT(ni.outLocal);
+  ASSERT(!ni.outStack && !ni.outLocal2);
+  translateBasicIterInit(t, ni);
 }
 
-void
-TranslatorX64::translateIterValueC(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  ASSERT(i.inputs[0]->rtt.isIter());
-
-  Location outLoc;
-  Iter::Type iterType = i.inputs[0]->rtt.iterType();
-  typedef void (*IterValueC)(Iter*, TypedValue*);
-  IterValueC ivc;
-  if (i.outStack) {
-    outLoc = i.outStack->location;
-    ivc = (iterType == Iter::TypeArray)
-      ? iter_value_cell_array : iter_value_cell_iterator;
-  } else {
-    outLoc = i.outLocal->location;
-    ivc = (iterType == Iter::TypeArray)
-      ? iter_value_cell_local_array : iter_value_cell_local_iterator;
-  }
-  EMIT_RCALL(a, i, ivc, A(i.inputs[0]->location), A(outLoc));
-  m_regMap.invalidate(outLoc);
-}
-
-void
-TranslatorX64::analyzeIterKey(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = supportedPlan(
-    i.inputs[0]->rtt.iterType() == Iter::TypeArray ||
-    i.inputs[0]->rtt.iterType() == Iter::TypeIterator);
-}
-
-void
-TranslatorX64::translateIterKey(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  ASSERT(i.inputs[0]->rtt.isIter());
-
-  Location outLoc;
-  Iter::Type iterType = i.inputs[0]->rtt.iterType();
-  typedef void (*IterKey)(Iter*, TypedValue*);
-  IterKey ik;
-  if (i.outStack) {
-    outLoc = i.outStack->location;
-    ik = (iterType == Iter::TypeArray)
-      ? iter_key_cell_array : iter_key_cell_iterator;
-  } else {
-    outLoc = i.outLocal->location;
-    ik = (iterType == Iter::TypeArray)
-      ? iter_key_cell_local_array : iter_key_cell_local_iterator;
-  }
-  EMIT_RCALL(a, i, ik, A(i.inputs[0]->location), A(outLoc));
-  m_regMap.invalidate(outLoc);
+void TranslatorX64::translateIterInitK(const Tracelet& t,
+                                       const NormalizedInstruction& ni) {
+  ASSERT(ni.inputs.size() == 1);
+  ASSERT(ni.outLocal && ni.outLocal2);
+  ASSERT(!ni.outStack);
+  translateBasicIterInit(t, ni);
 }
 
 void
 TranslatorX64::analyzeIterNext(Tracelet& t, NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  i.m_txFlags = supportedPlan(
-    i.inputs[0]->rtt.iterType() == Iter::TypeArray ||
-    i.inputs[0]->rtt.iterType() == Iter::TypeIterator);
+  ASSERT(i.inputs.size() == 0);
+  i.m_txFlags = Supported;
 }
 
 void
-TranslatorX64::translateIterNext(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size() == 1);
-  ASSERT(!i.outStack && !i.outLocal);
-  ASSERT(i.inputs[0]->rtt.isIter());
+TranslatorX64::analyzeIterNextK(Tracelet& t, NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 0);
+  i.m_txFlags = Supported;
+}
 
+void
+TranslatorX64::translateBasicIterNext(const Tracelet& t,
+                                      const NormalizedInstruction& i) {
   if (false) { // type check
     Iter* it = NULL;
-    int64 ret = iter_next_array(it);
+    TypedValue* val = NULL;
+    TypedValue* key = NULL;
+    int64 ret = iter_next(it, val);
+    ret = iter_next_key(it, val, key);
     if (ret) printf("\n");
   }
   m_regMap.cleanAll(); // input might be in-flight
-  // If the iterator reaches the end, iter_next_array will handle
+  // If the iterator reaches the end, iter_next will handle
   // freeing the iterator and it will decRef the array
-  EMIT_CALL(a, iter_next_array, A(i.inputs[0]->location));
+  Location iterLoc(Location::Iter, i.imm[0].u_IVA);
+  if (i.outLocal2) {
+    EMIT_CALL(a, iter_next_key, A(iterLoc),
+              A(i.outLocal->location), A(i.outLocal2->location));
+  } else {
+    EMIT_CALL(a, iter_next, A(iterLoc),
+              A(i.outLocal->location));
+  }
   recordReentrantCall(a, i);
   ScratchReg raxScratch(m_regMap, rax);
 
@@ -10536,6 +10525,24 @@ TranslatorX64::translateIterNext(const Tracelet& t,
   prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
   a.   test_reg64_reg64(rax, rax);
   emitCondJmp(taken, notTaken, CC_NZ);
+}
+
+void
+TranslatorX64::translateIterNext(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 0);
+  ASSERT(!i.outStack && !i.outLocal2);
+  ASSERT(i.outLocal);
+  translateBasicIterNext(t, i);
+}
+
+void
+TranslatorX64::translateIterNextK(const Tracelet& t,
+                                  const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 0);
+  ASSERT(!i.outStack);
+  ASSERT(i.outLocal && i.outLocal2);
+  translateBasicIterNext(t, i);
 }
 
 // PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their
@@ -10626,7 +10633,6 @@ TranslatorX64::dontGuardAnyInputs(Opcode op) {
   return true;
 #undef NOOP
 #undef CASE
-
 }
 
 void TranslatorX64::emitOneGuard(const Tracelet& t,

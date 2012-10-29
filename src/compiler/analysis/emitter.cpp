@@ -274,6 +274,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_ONE(t) 1
 #define COUNT_TWO(t1,t2) 2
 #define COUNT_THREE(t1,t2,t3) 3
+#define COUNT_FOUR(t1,t2,t3,t4) 4
 #define COUNT_LMANY() 0
 #define COUNT_C_LMANY() 0
 #define COUNT_V_LMANY() 0
@@ -286,6 +287,8 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   DEC_##t1 a1, DEC_##t2 a2
 #define THREE(t1, t2, t3) \
   DEC_##t1 a1, DEC_##t2 a2, DEC_##t3 a3
+#define FOUR(t1, t2, t3, t4) \
+  DEC_##t1 a1, DEC_##t2 a2, DEC_##t3 a3, DEC_##t4 a4
 #define NA
 #define DEC_MA std::vector<uchar>
 #define DEC_BLA std::vector<Label*>&
@@ -310,6 +313,11 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   POP_##t1(0);                \
   POP_##t2(1);                \
   POP_##t3(2)
+#define POP_FOUR(t1, t2, t3, t4) \
+  POP_##t1(0);                   \
+  POP_##t2(1);                   \
+  POP_##t3(2);                   \
+  POP_##t4(3)
 #define POP_LMANY() \
   getEmitterVisitor().popEvalStackLMany()
 #define POP_C_LMANY() \
@@ -333,12 +341,17 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_HA_ONE(t) \
   POP_HA_##t(nIn)
 #define POP_HA_TWO(t1, t2) \
-  POP_HA_##t1(nIn)     \
+  POP_HA_##t1(nIn);    \
   POP_HA_##t2(nIn)
 #define POP_HA_THREE(t1, t2, t3) \
-  POP_HA_##t1(nIn)           \
-  POP_HA_##t2(nIn)           \
+  POP_HA_##t1(nIn);          \
+  POP_HA_##t2(nIn);          \
   POP_HA_##t3(nIn)
+#define POP_HA_FOUR(t1, t2, t3, t4) \
+  POP_HA_##t1(nIn);             \
+  POP_HA_##t2(nIn);             \
+  POP_HA_##t3(nIn);             \
+  POP_HA_##t4(nIn)
 
 #define POP_HA_NA
 #define POP_HA_MA(i)
@@ -363,6 +376,11 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   PUSH_##t2; \
   PUSH_##t1
 #define PUSH_THREE(t1, t2, t3) \
+  PUSH_##t3; \
+  PUSH_##t2; \
+  PUSH_##t1
+#define PUSH_FOUR(t1, t2, t3, t4) \
+  PUSH_##t4; \
   PUSH_##t3; \
   PUSH_##t2; \
   PUSH_##t1
@@ -393,6 +411,11 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   IMPL1_##t1; \
   IMPL2_##t2; \
   IMPL3_##t3
+#define IMPL_FOUR(t1, t2, t3, t4) \
+  IMPL1_##t1; \
+  IMPL2_##t2; \
+  IMPL3_##t3; \
+  IMPL4_##t4
 
 #define IMPL_MA(var) do {                             \
   getUnitEmitter().emitInt32(var.size());             \
@@ -404,6 +427,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL1_MA IMPL_MA(a1)
 #define IMPL2_MA IMPL_MA(a2)
 #define IMPL3_MA IMPL_MA(a3)
+#define IMPL4_MA IMPL_MA(a4)
 
 #define IMPL_BLA(var) do {                            \
   getUnitEmitter().emitInt32(var.size());             \
@@ -414,6 +438,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL1_BLA IMPL_BLA(a1)
 #define IMPL2_BLA IMPL_BLA(a2)
 #define IMPL3_BLA IMPL_BLA(a3)
+#define IMPL4_BLA IMPL_BLA(a4)
 
 #define IMPL_SLA(var) do {                      \
   auto& ue = getUnitEmitter();                  \
@@ -433,36 +458,43 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL1_IVA IMPL_IVA(a1)
 #define IMPL2_IVA IMPL_IVA(a2)
 #define IMPL3_IVA IMPL_IVA(a3)
+#define IMPL4_IVA IMPL_IVA(a4)
 
 #define IMPL1_HA IMPL_IVA(a1)
 #define IMPL2_HA IMPL_IVA(a2)
 #define IMPL3_HA IMPL_IVA(a3)
+#define IMPL4_HA IMPL_IVA(a4)
 
 #define IMPL1_IA IMPL_IVA(a1)
 #define IMPL2_IA IMPL_IVA(a2)
 #define IMPL3_IA IMPL_IVA(a3)
+#define IMPL4_IA IMPL_IVA(a4)
 
 #define IMPL_I64A(var) getUnitEmitter().emitInt64(var)
 #define IMPL1_I64A IMPL_I64A(a1)
 #define IMPL2_I64A IMPL_I64A(a2)
 #define IMPL3_I64A IMPL_I64A(a3)
+#define IMPL4_I64A IMPL_I64A(a4)
 
 #define IMPL_SA(var) \
   getUnitEmitter().emitInt32(getUnitEmitter().mergeLitstr(var))
 #define IMPL1_SA IMPL_SA(a1)
 #define IMPL2_SA IMPL_SA(a2)
 #define IMPL3_SA IMPL_SA(a3)
+#define IMPL4_SA IMPL_SA(a4)
 
 #define IMPL_AA(var) \
   getUnitEmitter().emitInt32(getUnitEmitter().mergeArray(var))
 #define IMPL1_AA IMPL_AA(a1)
 #define IMPL2_AA IMPL_AA(a2)
 #define IMPL3_AA IMPL_AA(a3)
+#define IMPL4_AA IMPL_AA(a4)
 
 #define IMPL_DA(var) getUnitEmitter().emitDouble(var)
 #define IMPL1_DA IMPL_DA(a1)
 #define IMPL2_DA IMPL_DA(a2)
 #define IMPL3_DA IMPL_DA(a3)
+#define IMPL4_DA IMPL_DA(a4)
 
 #define IMPL_BA(var) \
   if ((var).getAbsoluteOffset() == InvalidAbsoluteOffset) { \
@@ -479,16 +511,19 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL1_BA IMPL_BA(a1)
 #define IMPL2_BA IMPL_BA(a2)
 #define IMPL3_BA IMPL_BA(a3)
+#define IMPL4_BA IMPL_BA(a4)
 
 #define IMPL_OA(var) getUnitEmitter().emitByte(var)
 #define IMPL1_OA IMPL_OA(a1)
 #define IMPL2_OA IMPL_OA(a2)
 #define IMPL3_OA IMPL_OA(a3)
+#define IMPL4_OA IMPL_OA(a4)
  OPCODES
 #undef O
 #undef ONE
 #undef TWO
 #undef THREE
+#undef FOUR
 #undef NA
 #undef DEC_MA
 #undef DEC_IVA
@@ -504,6 +539,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_ONE
 #undef POP_TWO
 #undef POP_THREE
+#undef POP_FOUR
 #undef POP_LMANY
 #undef POP_C_LMANY
 #undef POP_V_LMANY
@@ -519,6 +555,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_HA_ONE
 #undef POP_HA_TWO
 #undef POP_HA_THREE
+#undef POP_HA_FOUR
 #undef POP_HA_NA
 #undef POP_HA_MA
 #undef POP_HA_IVA
@@ -534,6 +571,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef PUSH_ONE
 #undef PUSH_TWO
 #undef PUSH_THREE
+#undef PUSH_FOUR
 #undef PUSH_CV
 #undef PUSH_VV
 #undef PUSH_HV
@@ -543,53 +581,66 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef IMPL_ONE
 #undef IMPL_TWO
 #undef IMPL_THREE
+#undef IMPL_FOUR
 #undef IMPL_NA
 #undef IMPL_MA
 #undef IMPL1_MA
 #undef IMPL2_MA
 #undef IMPL3_MA
+#undef IMPL4_MA
 #undef IMPL_BLA
 #undef IMPL1_BLA
 #undef IMPL2_BLA
 #undef IMPL3_BLA
+#undef IMPL4_BLA
 #undef IMPL_SLA
 #undef IMPL1_SLA
 #undef IMPL2_SLA
 #undef IMPL3_SLA
+#undef IMPL4_SLA
 #undef IMPL_IVA
 #undef IMPL1_IVA
 #undef IMPL2_IVA
 #undef IMPL3_IVA
+#undef IMPL4_IVA
 #undef IMPL1_HA
 #undef IMPL2_HA
 #undef IMPL3_HA
+#undef IMPL4_HA
 #undef IMPL1_IA
 #undef IMPL2_IA
 #undef IMPL3_IA
+#undef IMPL4_IA
 #undef IMPL_I64A
 #undef IMPL1_I64A
 #undef IMPL2_I64A
 #undef IMPL3_I64A
+#undef IMPL4_I64A
 #undef IMPL_DA
 #undef IMPL1_DA
 #undef IMPL2_DA
 #undef IMPL3_DA
+#undef IMPL4_DA
 #undef IMPL_SA
 #undef IMPL1_SA
 #undef IMPL2_SA
 #undef IMPL3_SA
+#undef IMPL4_SA
 #undef IMPL_AA
 #undef IMPL1_AA
 #undef IMPL2_AA
 #undef IMPL3_AA
+#undef IMPL4_AA
 #undef IMPL_BA
 #undef IMPL1_BA
 #undef IMPL2_BA
 #undef IMPL3_BA
+#undef IMPL4_BA
 #undef IMPL_OA
 #undef IMPL1_OA
 #undef IMPL2_OA
 #undef IMPL3_OA
+#undef IMPL4_OA
 
 static void checkJmpTargetEvalStack(const SymbolicStack& source,
                                     const SymbolicStack& dest) {
@@ -2038,27 +2089,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Statement::KindOfForEachStatement: {
         ForEachStatementPtr fe(static_pointer_cast<ForEachStatement>(node));
-        ExpressionPtr ae(static_pointer_cast<Expression>(
-                           node->getNthKid(ForEachStatement::ArrayExpr)));
-        visit(ae);
-        Iter::Type itype = Iter::TypeUndefined;
-        if (fe->isStrong()) {
-          itype = Iter::TypeMutableArray;
-          emitConvertToVar(e);
-        } else {
-          if (ae->getActualType() &&
-              ae->getActualType()->is(Type::KindOfArray)) {
-            itype = Iter::TypeArray;
-          }
-          emitConvertToCell(e);
-        }
-        ExpressionPtr val(static_pointer_cast<Expression>(
-                            node->getNthKid(ForEachStatement::ValueExpr)));
-        ExpressionPtr name(static_pointer_cast<Expression>(
-                             node->getNthKid(ForEachStatement::NameExpr)));
-        StatementPtr body(static_pointer_cast<Statement>(
-                            node->getNthKid(ForEachStatement::BodyStmt)));
-        emitForeach(e, itype, val, name, body, fe->isStrong());
+        emitForeach(e, fe);
         return false;
       }
 
@@ -6094,134 +6125,122 @@ class ForeachIterGuard {
   }
 };
 
-void EmitterVisitor::emitForeach(Emitter& e,
-                                 Iter::Type itype,
-                                 ExpressionPtr val, ExpressionPtr key,
-                                 StatementPtr body, bool strong) {
+void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
+  ExpressionPtr ae(static_pointer_cast<Expression>(
+                      fe->getNthKid(ForEachStatement::ArrayExpr)));
+  ExpressionPtr val(static_pointer_cast<Expression>(
+                      fe->getNthKid(ForEachStatement::ValueExpr)));
+  ExpressionPtr key(static_pointer_cast<Expression>(
+                      fe->getNthKid(ForEachStatement::NameExpr)));
+  StatementPtr body(static_pointer_cast<Statement>(
+                      fe->getNthKid(ForEachStatement::BodyStmt)));
+  int keyTempLocal;
+  int valTempLocal;
+  bool strong = fe->isStrong();
   Label exit;
   Label next;
   Label brkHand;
   Label cntHand;
+  Label start;
+  Offset bIterStart;
   Id itId = m_curFunc->allocIterator();
   ForeachIterGuard fig(*this, itId);
-  if (strong) {
-    e.IterInitM(itId, exit);
-  } else {
-    e.IterInit(itId, exit);
-  }
-  Label start(e);
-  Offset bIterStart = m_ue.bcPos();
-
-  // The evaluation order for the beginning of each foreach iteration is
-  // IterValue*, IterKey, the key expression, and finally the value expression.
-  // In the general case we need to use unnamed locals to get evaluation order
-  // right. Fortunately, in the common case the key and value expressions are
-  // simple variables and so we can evaluate them out of order without causing
-  // observable changes in program behavior and avoid the need for unnamed
-  // locals.
   bool simpleCase = (!key || key->is(Expression::KindOfSimpleVariable)) &&
                              val->is(Expression::KindOfSimpleVariable);
 
   if (simpleCase) {
+    SimpleVariablePtr svVal(static_pointer_cast<SimpleVariable>(val));
+    StringData* name = StringData::GetStaticString(svVal->getName());
+    valTempLocal = m_curFunc->lookupVarId(name);
     if (key) {
+      SimpleVariablePtr svKey(static_pointer_cast<SimpleVariable>(key));
+      name = StringData::GetStaticString(svKey->getName());
+      keyTempLocal = m_curFunc->lookupVarId(name);
       visit(key);
+    } else {
+      // Make gcc happy
+      keyTempLocal = -1;
     }
     visit(val);
-    if (itype != Iter::TypeUndefined) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
-                     false, 0, itype);
-    }
+    visit(ae);
     if (strong) {
-      e.IterValueV(itId);
-      emitBind(e);
-    } else {
-      e.IterValueC(itId);
-      emitSet(e);
-    }
-    emitPop(e);
-    if (key) {
-      if (itype != Iter::TypeUndefined) {
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
-                       false, 0, itype);
+      emitConvertToVar(e);
+      if (key) {
+        e.IterInitMK(itId, exit, valTempLocal, keyTempLocal);
+      } else {
+        e.IterInitM(itId, exit, valTempLocal);
       }
-      e.IterKey(itId);
-      emitSet(e);
-      emitPop(e);
+    } else {
+      emitConvertToCell(e);
+      if (key) {
+        e.IterInitK(itId, exit, valTempLocal, keyTempLocal);
+      } else {
+        e.IterInit(itId, exit, valTempLocal);
+      }
     }
+
+    start.set(e);
+    bIterStart = m_ue.bcPos();
   } else {
-    // Allocate unnamed locals keyTempLocal (if there is a key
-    // expression) and valTempLocal
-    int keyTempLocal = key ? m_curFunc->allocUnnamedLocal() : -1;
-    int valTempLocal = m_curFunc->allocUnnamedLocal();
-    // Evaluate IterValue* and stash the result in valTempLocal
+    keyTempLocal = key ? m_curFunc->allocUnnamedLocal() : -1;
+    valTempLocal = m_curFunc->allocUnnamedLocal();
     if (key) {
       emitVirtualLocal(keyTempLocal);
     }
     emitVirtualLocal(valTempLocal);
-    if (itype != Iter::TypeUndefined) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
-                     false, 0, itype);
-    }
+
+    visit(ae);
     if (strong) {
-      e.IterValueV(itId);
-      emitBind(e);
+      emitConvertToVar(e);
     } else {
-      e.IterValueC(itId);
-      emitSet(e);
+      emitConvertToCell(e);
     }
-    emitPop(e);
-    if (key) {
-      // Evaluate IterKey and stash the result in keyTempLocal
-      if (itype != Iter::TypeUndefined) {
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
-                       false, 0, itype);
+
+    if (strong) {
+      if (key) {
+        e.IterInitMK(itId, exit, valTempLocal, keyTempLocal);
+      } else {
+        e.IterInitM(itId, exit, valTempLocal);
       }
-      e.IterKey(itId);
-      emitSet(e);
-      e.PopC();
-      // Evaluate the key expression
+    } else {
+      if (key) {
+        e.IterInitK(itId, exit, valTempLocal, keyTempLocal);
+      } else {
+        e.IterInit(itId, exit, valTempLocal);
+      }
+    }
+
+    // At this point, valTempLocal and keyTempLocal if applicable, contain the
+    // key and value for the iterator.
+    start.set(e);
+    bIterStart = m_ue.bcPos();
+    if (key) {
       visit(key);
     }
-    // Evaluate the value expression
     visit(val);
-    // Push valTempLocal onto the stack
     emitVirtualLocal(valTempLocal);
     if (strong) {
       emitVGet(e);
-    } else {
-      emitCGet(e);
-    }
-    // Unset valTempLocal
-    emitVirtualLocal(valTempLocal);
-    emitUnset(e);
-    // We're done with valTempLocal, set up a fault region
-    // for it and free it
-    newFaultRegion(bIterStart, m_ue.bcPos(),
-                   new UnsetUnnamedLocalThunklet(valTempLocal));
-    m_curFunc->freeUnnamedLocal(valTempLocal);
-    // Do the assignment for the value
-    if (strong) {
       emitBind(e);
     } else {
+      emitCGet(e);
       emitSet(e);
     }
     emitPop(e);
+    emitVirtualLocal(valTempLocal);
+    emitUnset(e);
+    newFaultRegion(bIterStart, m_ue.bcPos(),
+                   new UnsetUnnamedLocalThunklet(valTempLocal));
     if (key) {
       ASSERT(keyTempLocal != -1);
-      // Push keyTempLocal onto the stack
       emitVirtualLocal(keyTempLocal);
       emitCGet(e);
-      // Unset keyTempLocal
-      emitVirtualLocal(keyTempLocal);
-      emitUnset(e);
-      // We're done with keyTempLocal, set up a fault region
-      // for it and free it
-      newFaultRegion(bIterStart, m_ue.bcPos(),
-                     new UnsetUnnamedLocalThunklet(keyTempLocal));
-      m_curFunc->freeUnnamedLocal(keyTempLocal);
-      // Do the assignment for the key
       emitSet(e);
       emitPop(e);
+      emitVirtualLocal(keyTempLocal);
+      emitUnset(e);
+      newFaultRegion(bIterStart, m_ue.bcPos(),
+                     new UnsetUnnamedLocalThunklet(keyTempLocal));
     }
   }
 
@@ -6233,16 +6252,33 @@ void EmitterVisitor::emitForeach(Emitter& e,
   if (next.isUsed() || needBreakHandler) {
     next.set(e);
   }
-  if (itype != Iter::TypeUndefined) {
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
-                   false, 0, itype);
+  if (key) {
+    emitVirtualLocal(keyTempLocal);
   }
-  e.IterNext(itId, start);
-  // Set up a fault region to free the iterator variable.
+  emitVirtualLocal(valTempLocal);
+  if (strong) {
+    if (key) {
+      e.IterNextMK(itId, start, valTempLocal, keyTempLocal);
+    } else {
+      e.IterNextM(itId, start, valTempLocal);
+    }
+  } else {
+    if (key) {
+      e.IterNextK(itId, start, valTempLocal, keyTempLocal);
+    } else {
+      e.IterNext(itId, start, valTempLocal);
+    }
+  }
   newFaultRegion(bIterStart, m_ue.bcPos(), new IterFreeThunklet(itId), itId);
   if (needBreakHandler) {
     e.Jmp(exit);
     emitBreakHandler(e, exit, next, brkHand, cntHand, itId);
+  }
+  if (!simpleCase) {
+    m_curFunc->freeUnnamedLocal(valTempLocal);
+    if (key) {
+      m_curFunc->freeUnnamedLocal(keyTempLocal);
+    }
   }
   exit.set(e);
   m_curFunc->freeIterator(itId);

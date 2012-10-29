@@ -257,11 +257,12 @@ class NormalizedInstruction {
   vector<DynLocation*> inputs;
   DynLocation* outStack;
   DynLocation* outLocal;
+  DynLocation* outLocal2; // Used for IterInit* and IterNext*
   DynLocation* outStack2; // Used for CGetL2
   DynLocation* outStack3; // Used for CGetL3
   vector<Location> deadLocs; // locations that die at the end of this
                              // instruction
-  ArgUnion imm[3];
+  ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
 
@@ -374,6 +375,7 @@ class NormalizedInstruction {
     inputs(),
     outStack(NULL),
     outLocal(NULL),
+    outLocal2(NULL),
     outStack2(NULL),
     outStack3(NULL),
     deadLocs(),
@@ -1013,8 +1015,13 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpExit:
     case OpFatal:
     case OpIterNext:
+    case OpIterNextK:
+    case OpIterNextM:
+    case OpIterNextMK:
     case OpIterInit: // May branch to fail case.
-    case OpIterInitM: // May branch to fail case.
+    case OpIterInitK: // Ditto
+    case OpIterInitM: // Ditto
+    case OpIterInitMK: // Ditto
     case OpThrow:
     case OpUnwind:
     case OpEval:

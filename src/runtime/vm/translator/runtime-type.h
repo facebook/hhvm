@@ -119,6 +119,10 @@ struct Location {
     return space == This;
   }
 
+  bool isIter() const {
+    return space == Iter;
+  }
+
 public:
   Space space;
   int64 offset;

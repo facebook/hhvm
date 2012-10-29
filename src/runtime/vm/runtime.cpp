@@ -59,18 +59,71 @@ void print_boolean(int64 val) {
   }
 }
 
-int64 new_iter_array_cold(Iter* dest, ArrayData* ad) {
-  if (!ad->empty()) {
-    // We are transferring ownership of the array to the iterator, therefore
-    // we do not need to adjust the refcount.
-    (void) new (&dest->arr()) ArrayIter(ad, 0);
-    dest->m_itype = Iter::TypeArray;
-    return 1LL;
+/*
+ * iter_value_cell* will store a copy of the current value at the address
+ * given by 'out'. iter_value_cell* will increment the refcount of the current
+ * value if appropriate.
+ *
+ * This function has been split into hot and cold parts. The hot part has
+ * been carefully crafted so that it's a leaf function (after all functions
+ * it calls have been trivially inlined) that then tail calls a cold
+ * version of itself (new_value_cell_cold). The hot part should cover the
+ * common case, which occurs when the array parameter is an HphpArray.
+ * If you make any changes to this function, please keep the hot/cold
+ * splitting in mind, and disasemble the optimized version of the binary
+ * to make sure the hot part is a good-looking leaf function; otherwise,
+ * you're likely to get a performance regression.
+ */
+template <bool typeArray>
+static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
+  TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
+           __func__, typeArray ? "true" : "false", iter, out);
+  ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
+         (!typeArray && iter->m_itype == Iter::TypeIterator));
+  ArrayIter& arrIter = iter->arr();
+  if (typeArray) {
+    TypedValue* cur = tvToCell(arrIter.nvSecond());
+    // Old value is decref'd in iter_value_cell_local_impl.
+    tvDupCell(cur, out);
+    return;
   }
-  // We did not transfer ownership of the array to an iterator, so we need
-  // to decRef the array.
-  if (ad->decRefCount() == 0) ad->release();
-  return 0LL;
+  Variant val = arrIter.second();
+  ASSERT(val.getRawType() != KindOfRef);
+  // Old value is decref'd in iter_value_cell_local_impl.
+  tvDupCell((TypedValue*)&val, out);
+}
+
+template <bool typeArray>
+static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
+  DataType oldType = out->m_type;
+  ASSERT(oldType != KindOfRef);
+  uint64_t oldDatum = out->m_data.num;
+  iter_value_cell_impl<typeArray>(iter, out);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+template <bool typeArray>
+static inline void iter_key_cell_impl(Iter* iter, TypedValue* out) {
+  TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
+  ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
+         (!typeArray && iter->m_itype == Iter::TypeIterator));
+  ArrayIter& arr = iter->arr();
+  if (typeArray) {
+    // Old value is decref'd in iter_key_cell_local_impl
+    arr.nvFirst(out);
+    return;
+  }
+  Variant key = arr.first();
+  tvDupCell((TypedValue*)&key, out);
+}
+
+template <bool typeArray>
+static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
+  DataType oldType = out->m_type;
+  ASSERT(oldType != KindOfRef);
+  uint64_t oldDatum = out->m_data.num;
+  iter_key_cell_impl<typeArray>(iter, out);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
 /**
@@ -78,39 +131,118 @@ int64 new_iter_array_cold(Iter* dest, ArrayData* ad) {
  * not empty. If new_iter_array creates an iterator, it does not increment the
  * refcount of the specified array. If new_iter_array does not create an
  * iterator, it decRefs the array.
- *
- * This function has been split into hot and cold parts. The hot part has
- * been carefully crafted so that it's a leaf function (after all functions
- * it calls have been trivially inlined) that then tail calls a cold
- * version of itself (new_iter_array_cold, defined above). The hot part
- * should cover the common case, which occurs when the array parameter is
- * a non-empty HphpArray.
- * If you make any changes to this function, please keep the hot/cold
- * splitting in mind, and disasemble the optimized version of the binary
- * to make sure the hot part is a good-looking leaf function; otherwise,
- * you're likely to get a performance regression.
  */
-HOT_FUNC
-int64 new_iter_array(Iter* dest, ArrayData* ad) {
-  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
-  if (UNLIKELY(!IsHphpArray(ad))) {
-    return new_iter_array_cold(dest, ad);
-  }
-  HphpArray* arr = (HphpArray*)ad;
-  if (LIKELY(arr->getSize() != 0)) {
+static NEVER_INLINE
+int64 new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
+                          TypedValue* keyOut) {
+  TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
+  if (!arr->empty()) {
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
-    (void) new (&dest->arr()) ArrayIter(arr);
+    (void) new (&dest->arr()) ArrayIter(arr, 0);
     dest->m_itype = Iter::TypeArray;
+    iter_value_cell_local_impl<true>(dest, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<true>(dest, keyOut);
+    }
     return 1LL;
   }
   // We did not transfer ownership of the array to an iterator, so we need
   // to decRef the array.
-  if (UNLIKELY(arr->getCount() == 1)) {
-    return new_iter_array_cold(dest, arr);
-  }
-  arr->decRefCount();
+  if (arr->decRefCount() == 0) arr->release();
   return 0LL;
+}
+
+static inline void getHphpArrayElm(HphpArray::Elm* elm, TypedValue* valOut,
+                                   TypedValue* keyOut) {
+  TypedValue* cur = tvToCell(&elm->data);
+  tvDupCell(cur, valOut);
+  if (keyOut) {
+    HphpArray::getElmKey(elm, keyOut);
+  }
+}
+
+static inline bool willBeReleased(TypedValue* tv) {
+  if (!IS_REFCOUNTED_TYPE(tv->m_type)) return false;
+  if (tv->m_data.pind->_count > 1) return false;
+  return true;
+}
+
+HOT_FUNC
+int64 new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
+  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+  valOut = tvToCell(valOut);
+  if (UNLIKELY(!IsHphpArray(ad))) {
+    goto cold;
+  }
+  {
+    HphpArray* arr = (HphpArray*)ad;
+    if (LIKELY(arr->getSize() != 0)) {
+      if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+        if (UNLIKELY(valOut->m_data.pind->_count == 1)) {
+          goto cold;
+        }
+        valOut->m_data.pstr->decRefCount();
+      }
+      // We are transferring ownership of the array to the iterator, therefore
+      // we do not need to adjust the refcount.
+      (void) new (&dest->arr()) ArrayIter(arr);
+      dest->m_itype = Iter::TypeArray;
+      HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
+      getHphpArrayElm(elm, valOut, NULL);
+      return 1LL;
+    }
+    // We did not transfer ownership of the array to an iterator, so we need
+    // to decRef the array.
+    if (UNLIKELY(arr->getCount() == 1)) {
+      goto cold;
+    }
+    arr->decRefCount();
+    return 0LL;
+  }
+cold:
+  return new_iter_array_cold(dest, ad, valOut, NULL);
+}
+
+HOT_FUNC
+int64 new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
+                         TypedValue* keyOut) {
+  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+  valOut = tvToCell(valOut);
+  keyOut = tvToCell(keyOut);
+  if (UNLIKELY(!IsHphpArray(ad))) {
+    goto cold;
+  }
+  {
+    HphpArray* arr = (HphpArray*)ad;
+    if (LIKELY(arr->getSize() != 0)) {
+      if (UNLIKELY(willBeReleased(valOut)) || willBeReleased(keyOut)) {
+        goto cold;
+      }
+      if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+        valOut->m_data.pstr->decRefCount();
+      }
+      if (IS_REFCOUNTED_TYPE(keyOut->m_type)) {
+        keyOut->m_data.pstr->decRefCount();
+      }
+      // We are transferring ownership of the array to the iterator, therefore
+      // we do not need to adjust the refcount.
+      (void) new (&dest->arr()) ArrayIter(arr);
+      dest->m_itype = Iter::TypeArray;
+      HphpArray::Elm* elm = arr->getElm(dest->arr().m_pos);
+      getHphpArrayElm(elm, valOut, keyOut);
+      return 1LL;
+    }
+    // We did not transfer ownership of the array to an iterator, so we need
+    // to decRef the array.
+    if (UNLIKELY(arr->getCount() == 1)) {
+      goto cold;
+    }
+    arr->decRefCount();
+    return 0LL;
+  }
+cold:
+  return new_iter_array_cold(dest, ad, valOut, keyOut);
 }
 
 /**
@@ -120,7 +252,12 @@ int64 new_iter_array(Iter* dest, ArrayData* ad) {
  * new_iter_object does not create an iterator, it decRefs the object.
  */
 HOT_FUNC
-int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx) {
+int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
+                      TypedValue* valOut, TypedValue* keyOut) {
+  valOut = tvToCell(valOut);
+  if (keyOut) {
+    keyOut = tvToCell(keyOut);
+  }
   Iter::Type itType;
   if (obj->isCollection() || obj->implementsIterator()) {
     TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
@@ -150,6 +287,17 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx) {
   }
   if (!dest->arr().end()) {
     dest->m_itype = itType;
+    if (itType == Iter::TypeIterator) {
+      iter_value_cell_local_impl<false>(dest, valOut);
+      if (keyOut) {
+        iter_key_cell_local_impl<false>(dest, keyOut);
+      }
+    } else {
+      iter_value_cell_local_impl<true>(dest, valOut);
+      if (keyOut) {
+        iter_key_cell_local_impl<true>(dest, keyOut);
+      }
+    }
     return 1LL;
   }
   // Iterator was empty; call the destructor on the iterator we just
@@ -159,8 +307,8 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx) {
 }
 
 /**
- * iter_next_array will advance the iterator to point to the next element.
- * If the iterator reaches the end, iter_next_array will free the iterator
+ * iter_next will advance the iterator to point to the next element.
+ * If the iterator reaches the end, iter_next will free the iterator
  * and will decRef the array.
  * This function has been split into hot and cold parts. The hot part has
  * been carefully crafted so that it's a leaf function (after all functions
@@ -173,8 +321,8 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx) {
  * you're likely to get a performance regression.
  */
 static NEVER_INLINE
-int64 iter_next_array_cold(Iter* iter) {
-  TRACE(2, "iter_next_array: I %p\n", iter);
+int64 iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "iter_next_cold: I %p\n", iter);
   ASSERT(iter->m_itype == Iter::TypeArray ||
          iter->m_itype == Iter::TypeIterator);
   ArrayIter* ai = &iter->arr();
@@ -185,13 +333,27 @@ int64 iter_next_array_cold(Iter* iter) {
     iter->m_itype = Iter::TypeUndefined;
     return 0;
   }
+  if (iter->m_itype == Iter::TypeArray) {
+    iter_value_cell_local_impl<true>(iter, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<true>(iter, keyOut);
+    }
+  } else {
+    iter_value_cell_local_impl<false>(iter, valOut);
+    if (keyOut) {
+      iter_key_cell_local_impl<false>(iter, keyOut);
+    }
+  }
   return 1;
 }
 
 HOT_FUNC
-int64 iter_next_array(Iter* iter) {
+int64 iter_next(Iter* iter, TypedValue* valOut) {
+  TRACE(2, "iter_next: I %p\n", iter);
+  ASSERT(iter->m_itype == Iter::TypeArray ||
+         iter->m_itype == Iter::TypeIterator);
   ArrayIter* arrIter = &iter->arr();
-
+  valOut = tvToCell(valOut);
   if (UNLIKELY(!arrIter->hasArrayData())) {
     goto cold;
   }
@@ -211,145 +373,76 @@ int64 iter_next_array(Iter* iter) {
       return 0;
     }
     pos = pos + 1;
-    if (UNLIKELY(arr->getElm(pos)->data.m_type >= HphpArray::KindOfTombstone)) {
+    HphpArray::Elm* elm = arr->getElm(pos);
+    if (UNLIKELY(elm->data.m_type >= HphpArray::KindOfTombstone)) {
       goto cold;
     }
+    if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+      if (UNLIKELY(valOut->m_data.pind->_count == 1)) {
+        goto cold;
+      }
+      valOut->m_data.pstr->decRefCount();
+    }
     arrIter->setPos(pos);
+    getHphpArrayElm(elm, valOut, NULL);
     return 1;
   }
 cold:
-  return iter_next_array_cold(iter);
+  return iter_next_cold(iter, valOut, NULL);
 }
 
-/**
- * iter_value_cell* will store a copy of the current value at the address
- * given by 'out'. iter_value_cell* will increment the refcount of the current
- * value if appropriate.
- *
- * This function has been split into hot and cold parts. The hot part has
- * been carefully crafted so that it's a leaf function (after all functions
- * it calls have been trivially inlined) that then tail calls a cold
- * version of itself (new_value_cell_cold). The hot part should cover the
- * common case, which occurs when the array parameter is an HphpArray.
- * If you make any changes to this function, please keep the hot/cold
- * splitting in mind, and disasemble the optimized version of the binary
- * to make sure the hot part is a good-looking leaf function; otherwise,
- * you're likely to get a performance regression.
- */
-static NEVER_INLINE
-void iter_value_cell_cold(Iter* iter, TypedValue* out) {
-  ArrayIter& arr = iter->arr();
-  TypedValue* cur = tvToCell(arr.nvSecond());
-  tvDupCell(cur, out);
-  return;
-}
-
-
-template <bool typeArray>
-static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
-  TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
-           __func__, typeArray ? "true" : "false", iter, out);
-  ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
-         (!typeArray && iter->m_itype == Iter::TypeIterator));
-  ArrayIter& arrIter = iter->arr();
-  if (typeArray) {
-    if (UNLIKELY(!arrIter.hasArrayData())) {
-      iter_value_cell_cold(iter, out);
-      return;
-    }
-    const ArrayData* ad = arrIter.getArrayData();
+HOT_FUNC
+int64 iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "iter_next: I %p\n", iter);
+  ASSERT(iter->m_itype == Iter::TypeArray ||
+         iter->m_itype == Iter::TypeIterator);
+  ArrayIter* arrIter = &iter->arr();
+  valOut = tvToCell(valOut);
+  keyOut = tvToCell(keyOut);
+  if (UNLIKELY(!arrIter->hasArrayData())) {
+    goto cold;
+  }
+  {
+    const ArrayData* ad = arrIter->getArrayData();
     if (UNLIKELY(!IsHphpArray(ad))) {
-      iter_value_cell_cold(iter, out);
-      return;
+      goto cold;
     }
-    ssize_t pos = arrIter.getPos();
     const HphpArray* arr = (HphpArray*)ad;
-    TypedValue* cur = tvToCell(&arr->getElm(pos)->data);
-    tvDupCell(cur, out);
-    return;
+    ssize_t pos = arrIter->getPos();
+    if (size_t(pos) >= size_t(arr->getLastE())) {
+      if (UNLIKELY(arr->getCount() == 1)) {
+        goto cold;
+      }
+      arr->decRefCount();
+      iter->m_itype = Iter::TypeUndefined;
+      return 0;
+    }
+    pos = pos + 1;
+    HphpArray::Elm* elm = arr->getElm(pos);
+    if (UNLIKELY(elm->data.m_type >= HphpArray::KindOfTombstone)) {
+      goto cold;
+    }
+    if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+      if (UNLIKELY(valOut->m_data.pind->_count == 1)) {
+        goto cold;
+      }
+      valOut->m_data.pstr->decRefCount();
+    }
+    if (IS_REFCOUNTED_TYPE(keyOut->m_type)) {
+      if (UNLIKELY(keyOut->m_data.pind->_count == 1)) {
+        if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+          valOut->m_data.pstr->incRefCount();
+        }
+        goto cold;
+      }
+      keyOut->m_data.pstr->decRefCount();
+    }
+    arrIter->setPos(pos);
+    getHphpArrayElm(elm, valOut, keyOut);
+    return 1;
   }
-  Variant val = arrIter.second();
-  ASSERT(val.getRawType() != KindOfRef);
-  tvDupCell((TypedValue*)&val, out);
-}
-
-HOT_FUNC
-void iter_value_cell_array(Iter* iter, TypedValue* out) {
-  iter_value_cell_impl<true>(iter, out);
-}
-
-HOT_FUNC
-void iter_value_cell_iterator(Iter* iter, TypedValue* out) {
-  iter_value_cell_impl<false>(iter, out);
-}
-
-template <bool typeArray>
-static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
-  DataType oldType = out->m_type;
-  if (UNLIKELY(oldType == KindOfRef)) {
-    out = out->m_data.pref->tv();
-    oldType = out->m_type;
-  }
-  uint64_t oldDatum = out->m_data.num;
-  iter_value_cell_impl<typeArray>(iter, out);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
-}
-
-HOT_FUNC
-void iter_value_cell_local_array(Iter* iter, TypedValue* out) {
-  iter_value_cell_local_impl<true>(iter, out);
-}
-
-HOT_FUNC
-void iter_value_cell_local_iterator(Iter* iter, TypedValue* out) {
-  iter_value_cell_local_impl<false>(iter, out);
-}
-
-template <bool typeArray>
-static inline void iter_key_cell_impl(Iter* iter, TypedValue* out) {
-  TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
-  ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
-         (!typeArray && iter->m_itype == Iter::TypeIterator));
-  ArrayIter& arr = iter->arr();
-  if (typeArray) {
-    arr.nvFirst(out);
-    return;
-  }
-  Variant key = arr.first();
-  ASSERT(key.getRawType() == KindOfInt64 || IS_STRING_TYPE(key.getRawType()));
-  tvDupCell((TypedValue*)&key, out);
-}
-
-HOT_FUNC
-void iter_key_cell_array(Iter* iter, TypedValue* out) {
-  iter_key_cell_impl<true>(iter, out);
-}
-
-HOT_FUNC
-void iter_key_cell_iterator(Iter* iter, TypedValue* out) {
-  iter_key_cell_impl<false>(iter, out);
-}
-
-template <bool typeArray>
-static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
-  DataType oldType = out->m_type;
-  if (UNLIKELY(oldType == KindOfRef)) {
-    out = out->m_data.pref->tv();
-    oldType = out->m_type;
-  }
-  uint64_t oldDatum = out->m_data.num;
-  iter_key_cell_impl<typeArray>(iter, out);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
-}
-
-HOT_FUNC
-void iter_key_cell_local_array(Iter* iter, TypedValue* out) {
-  iter_key_cell_local_impl<true>(iter, out);
-}
-
-HOT_FUNC
-void iter_key_cell_local_iterator(Iter* iter, TypedValue* out) {
-  iter_key_cell_local_impl<false>(iter, out);
+cold:
+  return iter_next_cold(iter, valOut, keyOut);
 }
 
 static inline void

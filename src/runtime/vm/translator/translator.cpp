@@ -1128,13 +1128,15 @@ static const struct {
 
   /*** 11. Iterator instructions ***/
 
-  { OpIterInit,    {Stack1,           None,         OutNull,          -1 }},
-  { OpIterInitM,   {Stack1,           None,         OutNull,          -1 }},
+  { OpIterInit,    {Stack1,           Local,        OutUnknown,       -1 }},
+  { OpIterInitK,   {Stack1,           Local,        OutUnknown,       -1 }},
+  { OpIterInitM,   {Stack1,           Local,        OutUnknown,       -1 }},
+  { OpIterInitMK,  {Stack1,           Local,        OutUnknown,       -1 }},
+  { OpIterNext,    {None,             Local,        OutUnknown,        0 }},
+  { OpIterNextK,   {None,             Local,        OutUnknown,        0 }},
+  { OpIterNextM,   {None,             Local,        OutUnknown,        0 }},
+  { OpIterNextMK,  {None,             Local,        OutUnknown,        0 }},
   { OpIterFree,    {None,             None,         OutNone,           0 }},
-  { OpIterValueC,  {Iter,             Stack1,       OutUnknown,        1 }},
-  { OpIterValueV,  {Iter,             Stack1,       OutVUnknown,       1 }},
-  { OpIterKey,     {Iter,             Stack1,       OutUnknown,        1 }},
-  { OpIterNext,    {Iter,             None,         OutNull,           0 }},
 
   /*** 12. Include, eval, and define instructions ***/
 
@@ -1503,6 +1505,7 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
   while (ni != NULL) {
     if (ni->outStack == dl ||
         ni->outLocal == dl ||
+        ni->outLocal2 == dl ||
         ni->outStack2 == dl ||
         ni->outStack3 == dl) {
       break;
@@ -2165,7 +2168,11 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpVGetM ||
                                op == OpStaticLocInit || op == OpInitThisLoc ||
                                op == OpSetL || op == OpBindL ||
-                               op == OpUnsetL);
+                               op == OpUnsetL ||
+                               op == OpIterInit || op == OpIterInitK ||
+                               op == OpIterInitM || op == OpIterInitMK ||
+                               op == OpIterNext || op == OpIterNextK ||
+                               op == OpIterNextM || op == OpIterNextMK);
         if (op == OpIncDecL) {
           ASSERT(ni->inputs.size() == 1);
           const RuntimeType &inRtt = ni->inputs[0]->rtt;
@@ -2263,6 +2270,38 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                   dl->rtt.valueType());
           ASSERT(dl->location.isLocal());
           ni->outLocal = dl;
+          continue;
+        }
+        if (op >= OpIterInit && op <= OpIterNextMK) {
+          ASSERT(op == OpIterInit || op == OpIterInitK ||
+                 op == OpIterInitM || op == OpIterInitMK ||
+                 op == OpIterNext || op == OpIterNextK ||
+                 op == OpIterNextM || op == OpIterNextMK);
+          const int kValImmIdx = 2;
+          const int kKeyImmIdx = 3;
+          DynLocation* outVal = t.newDynLocation();
+          int off = ni->imm[kValImmIdx].u_IVA;
+          outVal->location = Location(Location::Local, off);
+          if (op == OpIterInitM || op == OpIterInitMK ||
+              op == OpIterNextM || op == OpIterNextMK) {
+            outVal->rtt = RuntimeType(KindOfRef, KindOfInvalid);
+          } else {
+            outVal->rtt = RuntimeType(KindOfInvalid);
+          }
+          ni->outLocal = outVal;
+          if (op == OpIterInitK || op == OpIterNextK) {
+            DynLocation* outKey = t.newDynLocation();
+            int keyOff = getImm(ni->pc(), kKeyImmIdx).u_IVA;
+            outKey->location = Location(Location::Local, keyOff);
+            outKey->rtt = RuntimeType(KindOfInvalid);
+            ni->outLocal2 = outKey;
+          } else if (op == OpIterInitMK || op == OpIterNextMK) {
+            DynLocation* outKey = t.newDynLocation();
+            int keyOff = getImm(ni->pc(), kKeyImmIdx).u_IVA;
+            outKey->location = Location(Location::Local, keyOff);
+            outKey->rtt = RuntimeType(KindOfRef, KindOfInvalid);
+            ni->outLocal2 = outKey;
+          }
           continue;
         }
         ASSERT(ni->inputs.size() == 2);
@@ -2575,38 +2614,6 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
       ni->outStack->rtt = RuntimeType(KindOfObject);
     }
     return;
-  }
-
-  if ((ni->op() != OpIterValueC && ni->op() != OpIterKey)
-      || ni->m_txFlags == Interp) {
-    return;
-  }
-  // examine the next two instructions to see if they are SetL and PopC
-  SrcKey src = sk;
-  const Unit* unit = ni->m_unit;
-  src.advance(unit);
-  PC setPC = unit->at(src.offset());
-  Opcode setOp = *setPC;
-  src.advance(unit);
-  Opcode popOp = *unit->at(src.offset());
-  if (setOp == OpSetL && popOp == OpPopC) {
-    // set outLocal
-    DynLocation *dl = ni->outStack;
-    ni->outStack = NULL;
-    int off = getImm(setPC, 0).u_IA;
-    dl->location = Location(Location::Local, off);
-    dl->rtt = RuntimeType(KindOfInvalid);
-    ni->outLocal = dl;
-
-    // skip SetL and PopC
-    sk.advance(ni->m_unit);
-    sk.advance(ni->m_unit);
-
-    // record write
-    tas.recordWrite(ni->outLocal, ni);
-    // restore stack delta
-    currentStackOffset--;
-    t.m_stackChange--;
   }
 }
 
@@ -3005,8 +3012,8 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
       tas.varEnvTaint();
     }
 
-    DynLocation* outputs[] = { ni->outStack, ni->outLocal, ni->outStack2,
-                               ni->outStack3 };
+    DynLocation* outputs[] = { ni->outStack, ni->outLocal, ni->outLocal2,
+                               ni->outStack2, ni->outStack3 };
     for (size_t i = 0; i < sizeof(outputs) / sizeof(*outputs); ++i) {
       if (outputs[i]) {
         DynLocation* o = outputs[i];

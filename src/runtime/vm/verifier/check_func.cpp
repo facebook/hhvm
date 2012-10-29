@@ -571,6 +571,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define ONE(a) { a },
   #define TWO(a,b) { b, a },
   #define THREE(a,b,c) { c, b, a },
+  #define FOUR(a,b,c,d) { d, c, b, a },
   #define LMANY() { },
   #define C_LMANY() { },
   #define V_LMANY() { },
@@ -582,6 +583,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef LMANY
   #undef FMANY
   #undef CMANY
+  #undef FOUR
   #undef THREE
   #undef TWO
   #undef ONE
@@ -720,6 +722,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
+  #define FOUR(a,b,c,d) { a, b, c, d },
   #define INS_1(a) { a },
   #define INS_2(a) { a },
   #define LMANY() { },
@@ -735,6 +738,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef CMANY
   #undef INS_1
   #undef INS_2
+  #undef FOUR
   #undef THREE
   #undef TWO
   #undef ONE

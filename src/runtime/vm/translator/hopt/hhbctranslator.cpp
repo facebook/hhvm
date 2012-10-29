@@ -512,9 +512,8 @@ void HhbcTranslator::emitIterInit(uint32 iterVarId, int offset) {
 
 }
 
-void HhbcTranslator::emitIterKey(uint32 iterVarId) {
-  spillStack();
-  emitInterpOneOrPunt(Type::Cell);
+void HhbcTranslator::emitIterInitK(uint32 iterVarId, int offset) {
+  PUNT(IterInitK);
 }
 
 void HhbcTranslator::emitIterNext(uint32 iterVarId, int offset) {
@@ -524,9 +523,8 @@ void HhbcTranslator::emitIterNext(uint32 iterVarId, int offset) {
 //  emitInterpOne(getExitTrace(offset));
 }
 
-void HhbcTranslator::emitIterValueC(uint32 iterVarId) {
-  spillStack();
-  emitInterpOneOrPunt(Type::Cell);
+void HhbcTranslator::emitIterNextK(uint32 iterVarId, int offset) {
+  PUNT(IterNextK);
 }
 
 // continuations

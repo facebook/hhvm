@@ -264,9 +264,9 @@ public:
 
   // iterators
   void emitIterInit(uint32 iterVarId, int targetOffset);
-  void emitIterKey(uint32 iterVarId);
+  void emitIterInitK(uint32 iterVarId, int targetOffset);
   void emitIterNext(uint32 iterVarId, int targetOffset);
-  void emitIterValueC(uint32 iterVarId);
+  void emitIterNextK(uint32 iterVarId, int targetOffset);
 
   void emitVerifyParamType(uint32 paramId);
 

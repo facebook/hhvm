@@ -1479,14 +1479,7 @@ void HphpArray::nvGetKey(TypedValue* out, ssize_t pos) {
   ASSERT(pos != ArrayData::invalid_index);
   ASSERT(m_data[pos].data.m_type != KindOfTombstone);
   Elm* e = &m_data[/*(ElmInd)*/pos];
-  if (e->hasIntKey()) {
-    out->m_data.num = e->ikey;
-    out->m_type = KindOfInt64;
-    return;
-  }
-  out->m_data.pstr = e->key;
-  out->m_type = KindOfString;
-  e->key->incRefCount();
+  getElmKey(e, out);
 }
 
 bool HphpArray::nvUpdate(int64 ki, int64 vi) {

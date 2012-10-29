@@ -3196,141 +3196,191 @@ UnsetM <loc-desc/M-vector>    [C..C]  ->  []
 11. Iterator instructions
 -------------------------
 
-IterInit <iterator variable id> <relative offset>    [C]  ->  []
+IterInit  <iterator var id> <rel offset> <local id>                [C]  ->  []
+IterInitK <iterator var id> <rel offset> <local id> <local id>     [C]  ->  []
 
-  Initialize iterator. If $1 is an array, this instruction creates an array
-  iterator, rewinds the array iterator to point to the beginning of the array,
-  and stores the array iterator in the iterator variable %1. Then this
-  instruction checks if the iterator is at the end, and if it is this
-  instruction frees the iterator and transfers control the location specified
+  Initialize iterator. If $1 is an array, these instructions create an array
+  iterator, rewind the array iterator to point to the beginning of the array,
+  and store the array iterator in the iterator variable %1. Then these
+  instructions check if the iterator is at the end, and if it is, these
+  instructions free the iterator and transfer control to the location specified
   by %2.
 
   If $1 is an object that is an instance of an extension class that implements
-  the Traversable interface, this instruction creates an extension class
-  iterator and stores it in the iterator variable %1. Then this instruction
-  checks if the iterator is at the end, and if it is this instruction frees the
-  iterator and transfers control the location specified by %2.
+  the Traversable interface, these instructions create an extension class
+  iterator and store it in the iterator variable %1. Then these instructions
+  check if the iterator is at the end, and if it is these instructions free the
+  iterator and transfer control the location specified by %2.
 
-  If $1 is an object that implements the Iterator interface, this instruction
-  creates an user class iterator, calls $1->rewind(), and stores the user class
-  iterator in the iterator variable %1. Then this instruction checks if
-  $1->valid() returns false, and if it does this instruction frees the iterator
-  and transfers control to the location specified by %2.
+  If $1 is an object that implements the Iterator interface, these instructions
+  create an user class iterator, call $1->rewind(), and store the user class
+  iterator in the iterator variable %1. Then these instructions check if
+  $1->valid() returns false, and if it does these instructions free the iterator
+  and transfer control to the location specified by %2.
 
-  If $1 is an object that implements the IteratorAggregate interface, this
-  instruction calls $1->getIterator() and inspects the object x that is
-  returned. If x is an instance of IteratorAggregate, this instruction will
+  If $1 is an object that implements the IteratorAggregate interface, these
+  instructions call $1->getIterator() and inspect the object x that is
+  returned. If x is an instance of IteratorAggregate, these instructions will
   repeatedly execute "x = x->getIterator()" until x is not an object that is an
   instance of IteratorAggregate. If x is an object that implements the
   Traversable interface, then this instruction will behave according to the
-  appropriate case described above. Otherwise, this instruction will throw an
+  appropriate case described above. Otherwise, these instructions will throw an
   exception of type Exception.
 
-  If $1 is an object that does not match any of the three cases above, this
-  instruction creates a default class iterator, rewinds the default class
-  iterator to point to the first accessible property, and stores the default
-  class iterator in the iterator variable %1. Then this instruction checks if
-  the iterator is at the end, and if it is this instruction frees the iterator
-  and transfers control the location specified by %2.
+  If $1 is an object that does not match any of the three cases above, these
+  instructions create a default class iterator, rewind the default class
+  iterator to point to the first accessible property, and store the default
+  class iterator in the iterator variable %1. Then these instructions check if
+  the iterator is at the end, and if it is these instructions free the iterator
+  and transfer control the location specified by %2.
 
-  If $1 is not an array or an object, this instruction raises a warning and
-  transfers control to the location specified by %2.
+  If $1 is not an array or an object, these instructions raise a warning and
+  transfer control to the location specified by %2.
 
-IterInitM <iterator variable id> <relative offset>    [V]  ->  []
+  If the iterator specified by %1 is a non-mutable array iterator or an
+  extension class iterator, these instructions store a copy of the current
+  value in %3 as a cell.
 
-  Initialize mutable iterator. If $1 is an array, this instruction creates a
-  mutable array iterator, rewinds the mutable array iterator to point to the
-  beginning of the array, and stores the mutable array iterator in the iterator
-  variable %1. Then this instruction checks if the iterator is at the end, and
-  if it is this instruction frees the iterator and transfers control the
+  If the iterator specified by %1 is a user class iterator for object $x, these
+  instructions store the return value of $x->current() in %3 as a cell.
+
+  If the iterator specified by %1 is a non-mutable default class iterator, these
+  instructions store a copy of the current property in %3 as a cell.
+
+  For the IterInitK version, the following also happens:
+
+  If the iterator specified by %1 is an array iterator or an extension class
+  iterator, this instruction stores a copy of the current key in %4 as a cell.
+
+  If the iterator specified by %1 is a user class iterator for object $x, this
+  instruction stores the return value of $x->key() in %4 as a cell.
+
+  If the iterator specified by %1 is a non-mutable default class iterator,
+  this instruction stores a copy of the name of the current property in %4 as a
+  cell.
+
+IterInitM  <iterator var id> <rel offset> <local id>               [V]  ->  []
+IterInitMK <iterator var id> <rel offset> <local id> <local id>    [V]  ->  []
+
+  Initialize mutable iterator. If $1 is an array, these instructions create a
+  mutable array iterator, rewind the mutable array iterator to point to the
+  beginning of the array, and store the mutable array iterator in the iterator
+  variable %1. Then these instructions check if the iterator is at the end, and
+  if it is these instructions free the iterator and transfers control the
   location specified by %2.
 
   If $1 is an object that is an instance of an extension class that implements
-  the Traversable interface, this instruction raises a fatal error.
+  the Traversable interface, these instructions raise a fatal error.
 
-  If $1 is an object that implements the Iterator interface, this instruction
-  throws a fatal error.
+  If $1 is an object that implements the Iterator interface, these instructions
+  throw a fatal error.
 
-  If $1 is an object that implements the IteratorAggregate interface, this
-  instruction throws a fatal error.
+  If $1 is an object that implements the IteratorAggregate interface, these
+  instructions throw a fatal error.
 
-  If $1 is an object that does not match any of the three cases above, this
-  instruction creates a mutable default class iterator, rewinds it to point to
-  the first accessible property, and stores the it in the iterator variable %1.
-  Then this instruction checks if the iterator is at the end, and if it is this
-  instruction frees the iterator and transfers control the location specified
-  by %2.
+  If $1 is an object that does not match any of the three cases above, these
+  instructions create a mutable default class iterator, rewind it to point to
+  the first accessible property, and store the it in the iterator variable %1.
+  Then these instructions check if the iterator is at the end, and if it is
+  these instructions free the iterator and transfer control to the location
+  specified by %2.
 
-  If $1 is not an array or an object, this instruction raises a warning and
-  transfers control to the location specified by %2.
+  If $1 is not an array or an object, these instructions raise a warning and
+  transfer control to the location specified by %2.
 
-IterValueC <iterator variable id>    []  ->  [C]
+  If the iterator specified by %1 is a mutable array iterator, these
+  instructions store the current value in %3 as a var.
 
-  Iterator value. If the iterator specified by %1 is a non-mutable array
-  iterator, a mutable array iterator, or an extension class iterator, this
-  instruction pushes a copy of the current value onto the stack as a cell.
+  If the iterator specified by %1 is a mutable default class iterator, these
+  instructions store the current property in %3 as a var.
 
-  If the iterator specified by %1 is a user class iterator for object $x, this
-  instruction pushes the return value of $x->current() onto the stack as a
+  For the IterInitMK version, the following also happens:
+
+  If the iterator specified by %1 is an array iterator, this instruction
+  stores a copy of the current key in %4 as a cell.
+
+  If the iterator specified by %1 is a mutable default class iterator,
+  this instruction stores a copy of the name of the current property in %4 as a
   cell.
 
-  If the iterator specified by %1 is a non-mutable default class iterator or a
-  mutable default class iterator, this instruction pushes a copy of the current
-  property onto the stack as a cell.
+IterNext  <iter var id> <rel offset> <local id>               []  ->  []
+IterNextK <iter var id> <rel offset> <local id> <local id>    []  ->  []
 
-  If the iterator specified by %1 has not been initialized, this instruction
-  throws a fatal error.
-
-IterValueV <iterator variable id>    []  ->  [V]
-
-  Iterator value. If the iterator specified by %1 is a non-mutable array
-  iterator or an extension class iterator, this instruction pushes the current
-  value onto the stack as a var.
-
-  If the iterator specified by %1 is a mutable array iterator, this instruction
-  pushes the current value onto the stack as a var.
-
-  If the iterator specified by %1 is a user class iterator for object $x, this
-  instruction pushes the return value of $x->current() onto the stack as a var.
-
-  If the iterator specified by %1 is a non-mutable default class iterator, this
-  instruction pushes the current property onto the stack as a var.
-
-  If the iterator specified by %1 is a mutable default class iterator, this
-  instruction pushes the current property onto the stack as a var.
-
-IterKey <iterator variable id>    []  ->  [C]
-
-  Iterator key. If the iterator specified by %1 is a non-mutable array
-  iterator, an array iterator, or an extension class iterator, this instruction
-  pushes a copy of the current key onto the stack as a cell.
-
-  If the iterator specified by %1 is a user class iterator for object $x, this
-  instruction pushes the return value of $x->key() onto the stack as a cell.
-
-  If the iterator specified by %1 is a non-mutable default class iterator or a
-  mutable default class iterator, this instruction pushes a copy of the name of
-  the current property onto the stack as a cell.
-
-IterNext <iterator variable id> <relative offset>    []  ->  []
-
-  Iterator next. If the specified iterator is a non-mutable array iterator, a
-  mutable array iterator, or an extension class iterator, advance the iterator
-  to point to the next element. If the iterator is not at the end, this
-  instruction transfers control to the location specified by %2.
+  Iterator next. If the specified iterator is a non-mutable array iterator
+  or an extension class iterator, advance the iterator to point to the next
+  element. If the iterator is not at the end, these instructions transfer
+  control to the location specified by %2.
 
   If the specified iterator is a user class iterator for object $x, this
-  instruction executes $x->next(). Then this instruction checks if $x->valid()
-  returns true, and if it does this instruction transfers control to the
+  instruction executes $x->next(). Then these instructions check if $x->valid()
+  returns true, and if it does these instructions transfer control to the
   location specified by %2.
 
-  If the specified iterator is a non-mutable default class iterator or a
-  mutable default class iterator, advance the iterator to point to the next
-  accessible property in the object. If the iterator is not at the end, this
-  instruction transfers control to the location specified by %2.
+  If the specified iterator is a non-mutable default class iterator, advance
+  the iterator to point to the next accessible property in the object.
+  If the iterator is not at the end, these instructions transfer control
+  to the location specified by %2.
 
   If the specified iterator is at the end, free the iterator variable with
   an implicit IterFree, then fall through to the next instruction.
+
+  If the specified iterator is not at the end, retrieve the key and value:
+
+  If the iterator specified by %1 is a non-mutable array iterator or an
+  extension class iterator, these instructions store a copy of the new current
+  value in %3 as a cell.
+
+  If the iterator specified by %1 is a user class iterator for object $x, these
+  instructions store the return value of $x->current() in %3 as a cell.
+
+  If the iterator specified by %1 is a non-mutable default class iterator, these
+  instructions store a copy of the new current property in %3 as a cell.
+
+  For the IterNextK version, the following also happens:
+
+  If the iterator specified by %1 is an array iterator or an extension class
+  iterator, this instruction stores a copy of the new current key in %4 as a
+  cell.
+
+  If the iterator specified by %1 is a user class iterator for object $x, this
+  instruction stores the return value of $x->key() in %4 as a cell.
+
+  If the iterator specified by %1 is a non-mutable default class iterator,
+  this instruction stores a copy of the name of the new current property in %4
+  as a cell.
+
+IterNextM  <iter var id> <rel offset> <local id>               []  ->  []
+IterNextMK <iter var id> <rel offset> <local id> <local id>    []  ->  []
+
+  Iterator next. If the specified iterator is a mutable array iterator,
+  advance the iterator to point to the next element. If the iterator
+  is not at the end, these instructions transfer control to the
+  location specified by %2.
+
+  If the specified iterator is a mutable default class iterator, advance
+  the iterator to point to the next accessible property in the object.
+  If the iterator is not at the end, these instructions transfer control
+  to the location specified by %2.
+
+  If the specified iterator is at the end, free the iterator variable with
+  an implicit IterFree, then fall through to the next instruction.
+
+  If the specified iterator is not at the end, retrieve the key and value:
+
+  If the iterator specified by %1 is a mutable array iterator, these
+  instructions store the new current value in %3 as a var.
+
+  If the iterator specified by %1 is a mutable default class iterator, these
+  instructions store the new current property in %3 as a var.
+
+  For the IterNextMK version, the following also happens:
+
+  If the iterator specified by %1 is an array iterator, this instruction
+  stores a copy of the new current key in %4 as a cell.
+
+  If the iterator specified by %1 is a mutable default class iterator,
+  this instruction stores a copy of the name of the new current property in %4
+  as a cell.
 
 IterFree <iterator variable id>    []  ->  []
 

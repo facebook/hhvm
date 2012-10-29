@@ -38,6 +38,7 @@ DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionCall);
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(SwitchStatement);
+DECLARE_BOOST_TYPES(ForEachStatement);
 class StaticClassName;
 
 namespace Compiler {
@@ -103,6 +104,8 @@ public:
   typ1 a1, typ2 a2
 #define THREE(typ1, typ2, typ3) \
   typ1 a1, typ2 a2, typ3 a3
+#define FOUR(typ1, typ2, typ3, typ4) \
+  typ1 a1, typ2 a2, typ3 a3, typ4 a4
 #define MA std::vector<uchar>
 #define BLA std::vector<Label*>&
 #define SLA std::vector<StrOff>&
@@ -121,6 +124,7 @@ public:
 #undef ONE
 #undef TWO
 #undef THREE
+#undef FOUR
 #undef MA
 #undef BLA
 #undef SLA
@@ -617,9 +621,7 @@ public:
                                 bool topLevel);
   void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,
       Label& brkHand, Label& cntHand, Id iter = -1);
-  void emitForeach(Emitter& e, Iter::Type itype,
-                   ExpressionPtr val, ExpressionPtr key,
-                   StatementPtr body, bool strong);
+  void emitForeach(Emitter& e, ForEachStatementPtr fe);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e, const std::string& message);
 

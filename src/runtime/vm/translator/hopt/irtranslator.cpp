@@ -1334,15 +1334,9 @@ TranslatorX64::irTranslateIterInit(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateIterValueC(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
-  HHIR_EMIT(IterValueC, i.imm[0].u_IVA);
-}
-
-void
-TranslatorX64::irTranslateIterKey(const Tracelet& t,
-                                     const NormalizedInstruction& i) {
-  HHIR_EMIT(IterKey, i.imm[0].u_IVA);
+TranslatorX64::irTranslateIterInitK(const Tracelet& t,
+                                         const NormalizedInstruction& i) {
+  HHIR_EMIT(IterInitK, i.imm[0].u_IVA, i.imm[1].u_BA);
 }
 
 void
@@ -1350,6 +1344,13 @@ TranslatorX64::irTranslateIterNext(const Tracelet& t,
                                  const NormalizedInstruction& i) {
 
   HHIR_EMIT(IterNext, i.imm[0].u_IVA, i.imm[1].u_BA);
+}
+
+void
+TranslatorX64::irTranslateIterNextK(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+
+  HHIR_EMIT(IterNextK, i.imm[1].u_IVA, i.imm[1].u_BA);
 }
 
 // PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their

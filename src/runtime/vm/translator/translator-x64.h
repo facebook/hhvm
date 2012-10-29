@@ -566,9 +566,9 @@ MINSTRS
   CASE(InstanceOfD) \
   CASE(StaticLocInit) \
   CASE(IterInit) \
-  CASE(IterValueC) \
-  CASE(IterKey) \
+  CASE(IterInitK) \
   CASE(IterNext) \
+  CASE(IterNextK) \
   CASE(ReqDoc) \
   CASE(ReqMod) \
   CASE(ReqSrc) \
@@ -964,6 +964,11 @@ private:
 
   // Utility function shared with IR code
   static uint64_t packBitVec(const vector<bool>& bits, unsigned i);
+
+  void translateBasicIterInit(const Tracelet& t,
+                              const NormalizedInstruction& ni);
+  void translateBasicIterNext(const Tracelet& t,
+                              const NormalizedInstruction& ni);
 
 public:
   /*

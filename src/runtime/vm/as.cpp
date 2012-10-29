@@ -903,6 +903,7 @@ OpcodeParserMap opcode_parsers;
 #define IMM_ONE(t) IMM_##t
 #define IMM_TWO(t1, t2) IMM_##t1; IMM_##t2
 #define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
+#define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
 
 // FCall and NewTuple need to know the the first imm do POP_*MANY.
 #define IMM_IVA                                   \

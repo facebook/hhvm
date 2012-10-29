@@ -4304,6 +4304,18 @@ void TranslatorX64::fuseBranchAfterBool(const Tracelet& t,
   branchWithFlagsSet(t, nexti, cc);
 }
 
+/*
+ * Fusing "half" of a branch is useful in situations where you would
+ * otherwise emit a jcc to or over a fuseStaticBranch. Pass in the
+ * condition code and whether that CC means the branch is taken or
+ * not. For example, if %rax == 0 means that your branch is not taken
+ * (but %rax != 0 means you have to do more checks), do something like
+ * this:
+ *
+ * a.test_reg64_reg64(rax, rax);
+ * fuseHalfBranchAfterBool(t, i, CC_Z, false);
+ * // ...more comparisons
+ */
 void TranslatorX64::fuseHalfBranchAfterBool(const Tracelet& t,
                                             const NormalizedInstruction& i,
                                             ConditionCode cc,

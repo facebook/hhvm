@@ -2368,7 +2368,9 @@ sm_type:
                                             typevar we have to strip it */
                                          if (_p->scanner().isStrictMode() &&
                                              (_p->isTypeVar($$.text()) ||
-                                              !$$.text().compare("mixed"))) {
+                                              !$$.text().compare("mixed") ||
+                                              !$$.text().compare("this")
+                                             )) {
                                            $$.reset();
                                          }
                                        }

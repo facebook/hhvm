@@ -667,6 +667,61 @@ DefineFunction(
   )
 );
 
+DefineFunction(
+  array(
+    'name' => 'lz4compress',
+    'desc' => 'This function compresses the given string using the lz4lib data format, which is primarily used for compressing and uncompressing memcache values',
+    'args' => array(
+      array(
+        'name' => 'uncompressed',
+        'type' => String,
+        'desc' => 'The uncompressed data'
+      ),
+    ),
+    'return' => array(
+      'type' => Variant,
+      'desc' => 'The compressed data, or FALSE on error.',
+    ),
+  )
+);
+
+DefineFunction(
+  array(
+    'name' => 'lz4hccompress',
+    'desc' => 'This function compresses the given string using the lz4lib data format, which is primarily used for compressing and uncompressing memcache values',
+    'args' => array(
+      array(
+        'name' => 'uncompressed',
+        'type' => String,
+        'desc' => 'The uncompressed data'
+      ),
+    ),
+    'return' => array(
+      'type' => Variant,
+      'desc' => 'The compressed data, or FALSE on error.',
+    ),
+  )
+);
+
+DefineFunction(
+  array(
+    'name' => 'lz4uncompress',
+    'desc' => 'This function uncompresses the given string given that it is in the lz4lib data format, which is primarily used for compressing and uncompressing memcache values',
+    'args' => array(
+      array(
+        'name' => 'compressed',
+        'type' => String,
+        'desc' => 'The data compressed by lz4compress().',
+      ),
+    ),
+    'return' => array(
+      'type' => Variant,
+      'desc' => 'The uncompressed data, or FALSE on error',
+    ),
+  )
+);
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

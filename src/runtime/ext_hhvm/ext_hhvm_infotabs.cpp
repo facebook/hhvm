@@ -2208,6 +2208,9 @@ TypedValue* fg_sncompress(VM::ActRec *ar);
 TypedValue* fg_snuncompress(VM::ActRec *ar);
 TypedValue* fg_nzcompress(VM::ActRec *ar);
 TypedValue* fg_nzuncompress(VM::ActRec *ar);
+TypedValue* fg_lz4compress(VM::ActRec *ar);
+TypedValue* fg_lz4hccompress(VM::ActRec *ar);
+TypedValue* fg_lz4uncompress(VM::ActRec *ar);
 VM::Instance* new_DummyClosure_Instance(VM::Class*);
 TypedValue* tg_12DummyClosure___construct(VM::ActRec *ar);
 VM::Instance* new_Vector_Instance(VM::Class*);
@@ -2914,7 +2917,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2186;
+const long long hhbc_ext_funcs_count = 2189;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -5101,7 +5104,10 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "sncompress", fg_sncompress },
   { "snuncompress", fg_snuncompress },
   { "nzcompress", fg_nzcompress },
-  { "nzuncompress", fg_nzuncompress }
+  { "nzuncompress", fg_nzuncompress },
+  { "lz4compress", fg_lz4compress },
+  { "lz4hccompress", fg_lz4hccompress },
+  { "lz4uncompress", fg_lz4uncompress }
 };
 
 static const long long hhbc_ext_method_count_DummyClosure = 1;

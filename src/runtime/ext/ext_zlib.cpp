@@ -394,8 +394,8 @@ error:
   return false;
 }
 
-Variant f_lz4compress(CStrRef data) {
-  int bufsize = LZ4_compressBound(data.size());
+Variant f_lz4compress(CStrRef uncompressed) {
+  int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
   }
@@ -403,9 +403,10 @@ Variant f_lz4compress(CStrRef data) {
   String s = String(bufsize, ReserveString);
   char *compressed = s.mutableSlice().ptr;
 
-  *((int*)compressed) = data.size();  // write the header
+  *((int*)compressed) = uncompressed.size();  // write the header
 
-  int csize = LZ4_compress(data.data(), compressed + sizeof(int), data.size());
+  int csize = LZ4_compress(uncompressed.data(), compressed + sizeof(int),
+      uncompressed.size());
   if (csize < 0) {
     return false;
   }
@@ -414,8 +415,8 @@ Variant f_lz4compress(CStrRef data) {
   return s.setSize(bufsize);
 }
 
-Variant f_lz4hccompress(CStrRef data) {
-  int bufsize = LZ4_compressBound(data.size());
+Variant f_lz4hccompress(CStrRef uncompressed) {
+  int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
   }
@@ -423,10 +424,10 @@ Variant f_lz4hccompress(CStrRef data) {
   String s = String(bufsize, ReserveString);
   char *compressed = s.mutableSlice().ptr;
 
-  *((int*)compressed) = data.size();  // write the header
+  *((int*)compressed) = uncompressed.size();  // write the header
 
-  int csize = LZ4_compressHC(data.data(),
-      compressed + sizeof(int), data.size());
+  int csize = LZ4_compressHC(uncompressed.data(),
+      compressed + sizeof(int), uncompressed.size());
   if (csize < 0) {
     return false;
   }
@@ -434,18 +435,18 @@ Variant f_lz4hccompress(CStrRef data) {
   return s.shrink(bufsize);
 }
 
-Variant f_lz4uncompress(CStrRef data) {
-  if (data.size() < (ssize_t)sizeof(int)) {
+Variant f_lz4uncompress(CStrRef compressed) {
+  if (compressed.size() < (ssize_t)sizeof(int)) {
     return false;
   }
-  int dsize = *((int*)data.data());
+  int dsize = *((int*)compressed.data());
   if (dsize < 0) {
     return false;
   }
 
   String s = String(dsize, ReserveString);
   char *uncompressed = s.mutableSlice().ptr;
-  int ret = LZ4_uncompress(data.data() + sizeof(int), uncompressed, dsize);
+  int ret = LZ4_uncompress(compressed.data() + sizeof(int), uncompressed, dsize);
 
   if (ret <= 0) {
     return false;

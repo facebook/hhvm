@@ -165,6 +165,21 @@ inline Variant x_nzuncompress(CStrRef compressed) {
   return f_nzuncompress(compressed);
 }
 
+inline Variant x_lz4compress(CStrRef uncompressed) {
+  FUNCTION_INJECTION_BUILTIN(lz4compress);
+  return f_lz4compress(uncompressed);
+}
+
+inline Variant x_lz4hccompress(CStrRef uncompressed) {
+  FUNCTION_INJECTION_BUILTIN(lz4hccompress);
+  return f_lz4hccompress(uncompressed);
+}
+
+inline Variant x_lz4uncompress(CStrRef compressed) {
+  FUNCTION_INJECTION_BUILTIN(lz4uncompress);
+  return f_lz4uncompress(compressed);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

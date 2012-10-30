@@ -137,6 +137,7 @@ add_subdirectory(third_party/libafdt)
 add_subdirectory(third_party/libmbfl)
 add_subdirectory(third_party/libsqlite3)
 add_subdirectory(third_party/timelib)
+add_subdirectory(third_party/lz4)
 
 foreach (CXX_FILE ${CXX_SOURCES})
 	if(${CXX_FILE} MATCHES ".no.cpp$")

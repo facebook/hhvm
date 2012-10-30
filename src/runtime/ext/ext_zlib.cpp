@@ -21,6 +21,8 @@
 #ifdef HAVE_SNAPPY
 #include <snappy.h>
 #endif
+#include <lz4.h>
+#include <lz4hc.h>
 
 #define PHP_ZLIB_MODIFIER 1000
 
@@ -295,7 +297,6 @@ Variant f_snuncompress(CStrRef data) {
   char *uncompressed = s.mutableSlice().ptr;
 
   if (!snappy::RawUncompress(data.data(), data.size(), uncompressed)) {
-    free(uncompressed);
     return false;
   }
   return s.setSize(dsize);
@@ -391,6 +392,65 @@ Variant f_nzuncompress(CStrRef compressed) {
 error:
   free(uncompressed);
   return false;
+}
+
+Variant f_lz4compress(CStrRef data) {
+  int bufsize = LZ4_compressBound(data.size());
+  if (bufsize < 0) {
+    return false;
+  }
+  bufsize += sizeof(int);  // for the header
+  String s = String(bufsize, ReserveString);
+  char *compressed = s.mutableSlice().ptr;
+
+  *((int*)compressed) = data.size();  // write the header
+
+  int csize = LZ4_compress(data.data(), compressed + sizeof(int), data.size());
+  if (csize < 0) {
+    return false;
+  }
+  bufsize = csize + sizeof(int);
+  s.shrink(bufsize);
+  return s.setSize(bufsize);
+}
+
+Variant f_lz4hccompress(CStrRef data) {
+  int bufsize = LZ4_compressBound(data.size());
+  if (bufsize < 0) {
+    return false;
+  }
+  bufsize += sizeof(int);  // for the header
+  String s = String(bufsize, ReserveString);
+  char *compressed = s.mutableSlice().ptr;
+
+  *((int*)compressed) = data.size();  // write the header
+
+  int csize = LZ4_compressHC(data.data(),
+      compressed + sizeof(int), data.size());
+  if (csize < 0) {
+    return false;
+  }
+  bufsize = csize + sizeof(int);
+  return s.shrink(bufsize);
+}
+
+Variant f_lz4uncompress(CStrRef data) {
+  if (data.size() < (ssize_t)sizeof(int)) {
+    return false;
+  }
+  int dsize = *((int*)data.data());
+  if (dsize < 0) {
+    return false;
+  }
+
+  String s = String(dsize, ReserveString);
+  char *uncompressed = s.mutableSlice().ptr;
+  int ret = LZ4_uncompress(data.data() + sizeof(int), uncompressed, dsize);
+
+  if (ret <= 0) {
+    return false;
+  }
+  return s.setSize(dsize);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

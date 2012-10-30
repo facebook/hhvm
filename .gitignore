@@ -101,6 +101,7 @@ cmake_install.cmake
 /bin/_fbcode_bin/
 
 # Generated makefiles
+/src/third_party/lz4/Makefile
 /src/runtime/ext_hhvm/Makefile
 /src/test/Makefile
 /src/hphp/Makefile

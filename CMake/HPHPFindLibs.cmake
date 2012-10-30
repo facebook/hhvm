@@ -124,6 +124,7 @@ include_directories("${HPHP_HOME}/src/third_party/libafdt/src")
 include_directories("${HPHP_HOME}/src/third_party/libmbfl")
 include_directories("${HPHP_HOME}/src/third_party/libmbfl/mbfl")
 include_directories("${HPHP_HOME}/src/third_party/libmbfl/filter")
+include_directories("${HPHP_HOME}/src/third_party/lz4")
 
 FIND_LIBRARY(XHP_LIB xhp)
 FIND_PATH(XHP_INCLUDE_DIR xhp_preprocess.hpp)
@@ -409,6 +410,7 @@ endif()
 
 	target_link_libraries(${target} timelib)
 	target_link_libraries(${target} sqlite3)
+	target_link_libraries(${target} lz4)
 
 	if (SKIP_BUNDLED_XHP)
 		target_link_libraries(${target} ${XHP_LIB})

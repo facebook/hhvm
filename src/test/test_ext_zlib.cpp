@@ -52,6 +52,9 @@ bool TestExtZlib::RunTests(const std::string &which) {
   RUN_TEST(test_snuncompress);
   RUN_TEST(test_nzcompress);
   RUN_TEST(test_nzuncompress);
+  RUN_TEST(test_lz4compress);
+  RUN_TEST(test_lz4hccompress);
+  RUN_TEST(test_lz4uncompress);
 
   return ret;
 }
@@ -283,6 +286,42 @@ bool TestExtZlib::test_nzuncompress() {
   String empty("", AttachLiteral);
   String c(f_nzcompress(empty).asStrRef());
   String d(f_nzuncompress(c).asStrRef());
+  if (d != empty) {
+    return Count(false);
+  }
+
+  return Count(true);
+}
+
+bool TestExtZlib::test_lz4compress() {
+  VS(f_lz4uncompress(f_lz4compress("testing lz4compress")),
+      "testing lz4compress");
+  return Count(true);
+}
+
+bool TestExtZlib::test_lz4hccompress() {
+  VS(f_lz4uncompress(f_lz4hccompress("testing lz4hccompress")),
+      "testing lz4hccompress");
+  return Count(true);
+}
+
+bool TestExtZlib::test_lz4uncompress() {
+  // first test uncompressing invalid string
+  String s("invalid compressed string", AttachLiteral);
+  Variant v = f_lz4uncompress(s);
+  if (v != Variant(false)) {
+    return Count(false);
+  }
+  // try uncompressing empty string
+  String empty("", AttachLiteral);
+  v = f_lz4uncompress(empty);
+  if (v != Variant(false)) {
+    return Count(false);
+  }
+
+  // compress and uncompress empty string
+  String c(f_lz4compress(empty).asStrRef());
+  String d(f_lz4uncompress(c).asStrRef());
   if (d != empty) {
     return Count(false);
   }

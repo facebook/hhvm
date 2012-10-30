@@ -33021,6 +33021,9 @@ bool TestCodeRun::TestStrictMode() {
   // Now a typevar, pass
   MVCRO("<?hh\nfunction t<X>(X $a) { echo 1; } t(42);", "1");
 
+  // Generic with as
+  MVCRO("<?hh\nclass C<T as I>{}", "");
+
   // Kitchen sink
   MVCRO("<?hh\n"
         "function vidx<X>(blarg<X> $list, int $idx):X {\n"

@@ -2356,6 +2356,10 @@ sm_opt_return_type:
 sm_typevar_list:
     T_STRING ',' sm_typevar_list       { _p->addTypeVar($1.text()); }
  |  T_STRING                           { _p->addTypeVar($1.text()); }
+ |  T_STRING T_AS T_STRING ','
+    sm_typevar_list                    { _p->addTypeVar($1.text()); }
+ |  T_STRING T_AS T_STRING             { _p->addTypeVar($1.text()); }
+
 ;
 
 /* extends non_empty_type_decl with some more types */

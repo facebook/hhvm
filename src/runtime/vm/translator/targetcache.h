@@ -136,10 +136,11 @@ void invalidateForRename(const StringData* name);
  */
 template<typename Key, typename Value, class LookupKey,
   PHPNameSpace NameSpace = NSInvalid,
-  int KNLines = kDefaultNumLines>
+  int KNLines = kDefaultNumLines,
+  typename ReturnValue = Value>
 class Cache {
 public:
-  typedef Cache<Key, Value, LookupKey, NameSpace, KNLines> Self;
+  typedef Cache<Key, Value, LookupKey, NameSpace, KNLines, ReturnValue> Self;
   static const int kNumLines = KNLines;
 
   struct Pair {
@@ -184,8 +185,8 @@ public:
     Self *thiz = cacheAtHandle(chand);
     memset(thiz, 0, sizeof(*thiz));
   }
-  static Value lookup(CacheHandle chand, LookupKey lookup,
-                      const void* extraKey = NULL);
+  static ReturnValue lookup(CacheHandle chand, LookupKey lookup,
+                            const void* extraKey = NULL);
 };
 
 struct FixedFuncCache {
@@ -228,22 +229,25 @@ struct StaticMethodFCache {
 
 struct MethodCacheEntry {
   intptr_t m_data;
-  void set(const Func* func, bool isMagicCall) {
+  void set(const Func* func, bool isMagicCall, bool isStatic) {
     ASSERT(func);
-    ASSERT((intptr_t(func) & 1) == 0);
-    m_data = intptr_t(func) | intptr_t(isMagicCall);
+    ASSERT((intptr_t(func) & 0x3) == 0);
+    m_data = intptr_t(func) | intptr_t(isMagicCall) | (intptr_t(isStatic) << 1);
   }
   bool isMagicCall() const {
     return (m_data & 1);
   }
+  bool isStatic() const {
+    return (m_data & 2);
+  }
   const Func* getFunc() const {
-    return (const Func*)(m_data & ~1);
+    return (const Func*)(m_data & ~3);
   }
 };
 
 typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>
   FuncCache;
-typedef Cache<const Class*, MethodCacheEntry, ActRec*, NSInvalid, 1>
+typedef Cache<const Class*, MethodCacheEntry, ActRec*, NSInvalid, 1, void>
   MethodCache;
 typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
 

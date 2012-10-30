@@ -442,7 +442,7 @@ MethodCache::hashKey(const Class* c) {
 
 template<>
 HOT_FUNC_VM
-MethodCacheEntry
+void
 MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
   StringData* name = (StringData*)extraKey;
   ASSERT(ar->hasThis());
@@ -453,10 +453,12 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
   Pair* pair = thiz->keyToPair(c);
   const Func* func = NULL;
   bool isMagicCall = false;
+  bool isStatic = false;
   if (LIKELY(pair->m_key == c)) {
     func = pair->m_value.getFunc();
     ASSERT(func);
     isMagicCall = pair->m_value.isMagicCall();
+    isStatic = pair->m_value.isStatic();
     Stats::inc(Stats::TgtCache_MethodHit);
   } else {
     ASSERT(IMPLIES(pair->m_key, pair->m_value.getFunc()));
@@ -479,14 +481,15 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
         }
       }
     }
-    pair->m_value.set(func, isMagicCall);
+    isStatic = func->attrs() & AttrStatic;
+    pair->m_value.set(func, isMagicCall, isStatic);
     pair->m_key = c;
   }
   ASSERT(func);
   func->validate();
 
   ar->m_func = func;
-  if (UNLIKELY(func->attrs() & AttrStatic)) {
+  if (UNLIKELY(isStatic)) {
     // Drop the ActRec's reference to the current instance
     if (obj->decRefCount() == 0) {
       obj->release();
@@ -500,7 +503,6 @@ MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
     ar->setInvName(name);
     name->incRefCount();
   }
-  return pair->m_value;
 }
 
 //=============================================================================

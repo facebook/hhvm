@@ -2897,6 +2897,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.AKExists();
             return true;
           }
+        } else if (call->isCallToFunction("strlen")) {
+          if (params && params->getCount() == 1) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            e.Strlen();
+            return true;
+          }
         } else if (call->isCallToFunction("define")) {
           if (params && params->getCount() == 2) {
             ExpressionPtr p0 = (*params)[0];

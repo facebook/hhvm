@@ -1159,6 +1159,7 @@ static const struct {
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
   { OpContStopped, {None,             None,         OutNone,           0 }},
   { OpContHandle,  {Stack1,           None,         OutNone,          -1 }},
+  { OpStrlen,      {Stack1,           Stack1,       OutInt64,          0 }},
 };
 
 static hphp_hash_map<Opcode, InstrInfo> instrInfo;

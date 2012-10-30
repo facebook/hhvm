@@ -6943,6 +6943,21 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
   throw exn.asObjRef();
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopStrlen(PC& pc) {
+  NEXT();
+  TypedValue* subj = m_stack.topTV();
+  int64 ans = 0;
+  if (LIKELY(IS_STRING_TYPE(subj->m_type))) {
+    ans = subj->m_data.pstr->size();
+  } else {
+    ans = f_strlen(tvAsVariant(subj));
+  }
+
+  tvRefcountedDecRef(subj);
+  subj->m_type = KindOfInt64;
+  subj->m_data.num = ans;
+}
+
 void VMExecutionContext::classExistsImpl(PC& pc, Attr typeAttr) {
   NEXT();
   TypedValue* aloadTV = m_stack.topTV();

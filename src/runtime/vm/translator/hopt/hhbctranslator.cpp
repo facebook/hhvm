@@ -705,6 +705,32 @@ void HhbcTranslator::emitContHandle() {
   emitInterpOne(Type::None);
 }
 
+void HhbcTranslator::emitStrlen() {
+  Type::Tag inType = topC()->getType();
+
+  if (Type::isString(inType)) {
+    SSATmp* input = popC();
+    SSATmp* offset = m_tb.genDefConst<int64>(StringData::sizeOffset());
+    SSATmp* ans = m_tb.genLdRaw(input, offset, Type::Int);
+    m_tb.genDecRef(input);
+    // XXX We need a LdRaw that loads 32 bits, but what's the right way?
+    push(m_tb.genAnd(ans, m_tb.genDefConst<int64>(0xffffffff)));
+  } else if (Type::isNull(inType)) {
+    push(m_tb.genDefConst<int64>(0));
+  } else if (inType == Type::Bool) {
+    // strlen(true) == 1, strlen(false) == 0.
+    push(m_tb.genConvToInt(popC()));
+  } else if (inType == Type::Arr) {
+    SSATmp* input = popC();
+    push(m_tb.genDefConst<int64>(strlen("Array")));
+    m_tb.genDecRef(input);
+  } else {
+    spillStack();
+    popC();
+    emitInterpOneOrPunt(Type::Int);
+  }
+}
+
 SSATmp* HhbcTranslator::getClsPropAddr(const Class* cls,
                                        const StringData* propName) {
   SSATmp* clsTmp = popA();

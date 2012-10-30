@@ -702,6 +702,11 @@ void TranslatorX64::irTranslateContHandle(const Tracelet& t,
   HHIR_EMIT(ContHandle);
 }
 
+void TranslatorX64::irTranslateStrlen(const Tracelet& t,
+                                      const NormalizedInstruction& i) {
+  HHIR_EMIT(Strlen);
+}
+
 void TranslatorX64::irTranslateClassExists(const Tracelet& t,
                                            const NormalizedInstruction& i) {
   const StringData* clsName = i.inputs[1]->rtt.valueStringOrNull();

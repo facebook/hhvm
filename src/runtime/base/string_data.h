@@ -248,6 +248,7 @@ public:
     return rawdata();
   }
   int size() const { return m_len; }
+  static uint sizeOffset() { return offsetof(StringData, m_len); }
   int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }
   StringSlice slice() const {
     TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);

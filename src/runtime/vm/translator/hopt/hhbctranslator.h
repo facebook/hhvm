@@ -287,6 +287,8 @@ public:
   void emitContStopped();
   void emitContHandle();
 
+  void emitStrlen();
+
   // tracelet guards
   Trace* guardTypeStack(uint32 stackIndex,
                         Type::Tag type,

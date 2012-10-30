@@ -575,7 +575,8 @@ MINSTRS
   CASE(ContValid) \
   CASE(ContCurrent) \
   CASE(ContStopped) \
-  CASE(ContHandle)
+  CASE(ContHandle) \
+  CASE(Strlen)
 
   // These are instruction-like functions which cover more than one
   // opcode.

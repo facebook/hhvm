@@ -6972,6 +6972,71 @@ void TranslatorX64::translateContHandle(const Tracelet& t,
   not_reached();
 }
 
+void TranslatorX64::analyzeStrlen(Tracelet& t,
+                                  NormalizedInstruction& i) {
+  switch (i.inputs[0]->rtt.valueType()) {
+    NULLCASE() :
+    case KindOfBoolean:
+      i.m_txFlags = Native;
+      break;
+    STRINGCASE() :
+      // May have to destroy a StringData, but can't reenter
+      i.m_txFlags = Simple;
+      break;
+    case KindOfArray:
+      i.m_txFlags = Supported;
+      break;
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfObject:
+      i.m_txFlags = Interp;
+      break;
+    default:
+      not_reached();
+  }
+}
+
+void TranslatorX64::translateStrlen(const Tracelet& t,
+                                    const NormalizedInstruction& i) {
+  PhysReg rInput = getReg(i.inputs[0]->location);
+  DataType inType = i.inputs[0]->rtt.valueType();
+
+  switch (inType) {
+    NULLCASE(): {
+      m_regMap.allocOutputRegs(i);
+      PhysReg rOutput = getReg(i.outStack->location);
+      a.  xor_reg64_reg64(rOutput, rOutput);
+      break;
+    }
+    case KindOfBoolean:
+      m_regMap.allocOutputRegs(i);
+      // Nothing. strlen(true) == 1, strlen(false) == 0
+      break;
+    STRINGCASE(): {
+      ScratchReg rScratch(m_regMap);
+      a.  load_reg64_disp_reg32(rInput, StringData::sizeOffset(), *rScratch);
+      emitDecRef(a, i, rInput, inType);
+      m_regMap.bindScratch(rScratch, i.outStack->location, KindOfInt64,
+                           RegInfo::DIRTY);
+      ASSERT(m_regMap.regIsFree(rInput));
+      break;
+    }
+    case KindOfArray: {
+      m_regMap.allocOutputRegs(i);
+      PhysReg rOutput = getReg(i.outStack->location);
+      emitDecRef(a, i, rInput, KindOfArray);
+      // You think I am kidding about this, but I am not. This is PHP.
+      a.  mov_imm32_reg32(strlen("Array"), rOutput);
+      break;
+    }
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfObject:
+    default:
+      not_reached();
+  }
+}
+
 static void analyzeClassExistsImpl(NormalizedInstruction& i) {
   const int nameIdx = 1;
   const int autoIdx = 0;

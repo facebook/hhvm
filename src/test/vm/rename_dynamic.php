@@ -8,12 +8,12 @@ function prefix() {
   return "__rename_func_";
 }
 
-$stub_name = prefix() . 'strlen';
+$stub_name = prefix() . 'strtoupper';
 
-var_dump(strlen(''));
-fb_rename_function('strlen', $stub_name);
-fb_rename_function('bungle', 'strlen');
-var_dump(strlen(''));
+var_dump(strtoupper('tweet'));
+fb_rename_function('strtoupper', $stub_name);
+fb_rename_function('bungle', 'strtoupper');
+var_dump(strtoupper('tweet'));
 
 // release stringdata
 unset($stub_name);
@@ -21,7 +21,7 @@ unset($stub_name);
 // try to allocate something in that memory
 $stub_name = prefix() . 'hagfish';
 
-$stub_name = prefix() . 'strlen';
-fb_rename_function('strlen', 'bungle');
-fb_rename_function($stub_name, 'strlen');
-var_dump(strlen(''));
+$stub_name = prefix() . 'strtoupper';
+fb_rename_function('strtoupper', 'bungle');
+fb_rename_function($stub_name, 'strtoupper');
+var_dump(strtoupper('tweet'));

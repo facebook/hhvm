@@ -11135,6 +11135,11 @@ void TranslatorX64::invalidateOutStack(const NormalizedInstruction& ni) {
   }
 }
 
+void TranslatorX64::cleanOutLocal(const NormalizedInstruction& ni) {
+  if (ni.outLocal) {
+    m_regMap.cleanLoc(ni.outLocal->location);
+  }
+}
 void TranslatorX64::invalidateOutLocal(const NormalizedInstruction& ni) {
   if (ni.outLocal) {
     m_regMap.invalidate(ni.outLocal->location);

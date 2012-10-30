@@ -360,6 +360,7 @@ private:
 
   MVecTransState* m_vecState;
   void invalidateOutStack(const NormalizedInstruction& ni);
+  void cleanOutLocal(const NormalizedInstruction& ni);
   void invalidateOutLocal(const NormalizedInstruction& ni);
   int mResultStackOffset(const NormalizedInstruction& ni) const;
   bool generateMVal(const Tracelet& t, const NormalizedInstruction& ni,

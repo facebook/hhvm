@@ -362,33 +362,6 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "hphp_log",
-    'desc'   => "Write a message to a file and keep it open afterwards, so we can continue to write to it efficiently as a log file.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure.",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "filename",
-        'type'   => String,
-        'desc'   => "Which file to write to.",
-      ),
-      array(
-        'name'   => "message",
-        'type'   => String,
-        'desc'   => "Message to write to the log.",
-      ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
-  ));
-
-DefineFunction(
-  array(
     'name'   => "hphp_crash_log",
     'desc'   => "Adds an entry to a log file that's written when server crashes. This is useful for diagnose why server crashed. For example, logged-on user's ID.",
     'flags'  =>  HasDocComment | HipHopSpecific,

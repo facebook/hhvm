@@ -67,18 +67,6 @@ flood error logs.
       File = filename
       Format = %h %t %s %U
     }
-
-    # enable or disable hphp_log() that can be called from PHP code
-    ApplicationLog = true
-
-    # Log aggregator logs one line per several errors, grouped by error's
-    # stacktraces. It can also save errors to a specified database.
-    Aggregator = false
-    Aggregator {
-      File = filename
-      Database = [username[:password]@]server[:port][/database]
-      SleepSeconds = 10   # polling cycle for aggregation
-    }
   }
 
 = Error Handling
@@ -324,7 +312,7 @@ some specified keys in CompletionKeys to tell web application about priming.
 - TableType
 
 Recommend to use "concurrent", the fastest with least locking, and since its
-the only implemented table type.  (The option remains for future use if we 
+the only implemented table type.  (The option remains for future use if we
 add other apc implementations).
 
       ExpireOnSets = false

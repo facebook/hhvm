@@ -57,7 +57,6 @@ private:
   ServerPtr m_adminServer;
   SatelliteServerPtrVec m_satellites;
   SatelliteServerPtrVec m_danglings;
-  AsyncFunc<HttpServer> m_loggerThread;
   AsyncFunc<HttpServer> m_watchDog;
   ServiceThreadPtrVec m_serviceThreads;
 

@@ -35,7 +35,6 @@
 #include <runtime/base/program_functions.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <util/db_conn.h>
-#include <util/log_aggregator.h>
 #include <runtime/ext/ext_apc.h>
 #include <sys/types.h>
 #include <signal.h>
@@ -52,7 +51,6 @@ time_t HttpServer::StartTime;
 
 HttpServer::HttpServer(void *sslCTX /* = NULL */)
   : m_stopped(false), m_sslCTX(sslCTX),
-    m_loggerThread(this, &HttpServer::flushLog),
     m_watchDog(this, &HttpServer::watchDog) {
 
   // enabling mutex profiling, but it's not turned on
@@ -212,7 +210,6 @@ HttpServer::~HttpServer() {
 void HttpServer::run() {
   StartTime = time(0);
 
-  m_loggerThread.start();
   m_watchDog.start();
 
   for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
@@ -300,7 +297,6 @@ void HttpServer::run() {
 
   hphp_process_exit();
   m_watchDog.waitForEnd();
-  m_loggerThread.waitForEnd();
   Logger::Info("all servers stopped");
 }
 
@@ -367,40 +363,6 @@ void HttpServer::killPid() {
     }
     Logger::Error("Unable to read pid file %s for any meaningful pid",
                   RuntimeOption::PidFile.c_str());
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// logger thread
-
-void HttpServer::flushLog() {
-  if (!Logger::UseLogAggregator) return;
-
-  ServerDataPtr database;
-  std::ostream *out = NULL;
-  if (!RuntimeOption::LogAggregatorDatabase.empty()) {
-    database = ServerData::Create(RuntimeOption::LogAggregatorDatabase);
-  } else if (!RuntimeOption::LogAggregatorFile.empty()) {
-    out = new std::ofstream(RuntimeOption::LogAggregatorFile.c_str());
-  } else {
-    out = &std::cout;
-  }
-
-  bool stopped = false;
-  while (!stopped) {
-    if (database) {
-      LogAggregator::TheLogAggregator.flush(database);
-    } else {
-      LogAggregator::TheLogAggregator.flush(*out);
-    }
-    sleep(RuntimeOption::LogAggregatorSleepSeconds);
-
-    Lock lock(this);
-    stopped = m_stopped;
-  }
-
-  if (out != &std::cout) {
-    delete out;
   }
 }
 

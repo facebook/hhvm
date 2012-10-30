@@ -86,8 +86,6 @@ inline bool f_output_reset_rewrite_vars() {
   throw NotSupportedException(__func__, "bad coding style");
 }
 
-bool f_hphp_log(CStrRef filename, CStrRef message);
-
 void f_hphp_crash_log(CStrRef name, CStrRef value);
 
 inline void f_hphp_stats(CStrRef name, int64 value) {

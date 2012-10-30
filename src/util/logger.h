@@ -47,7 +47,6 @@ public:
     LogVerbose
   };
 
-  static bool UseLogAggregator;
   static bool UseSyslog;
   static bool UseLogFile;
   static bool IsPipeOutput;
@@ -128,7 +127,7 @@ protected:
                   bool escape = true, bool escapeMore = false);
 
   static inline bool IsEnabled() {
-    return Logger::UseLogFile || Logger::UseSyslog || Logger::UseLogAggregator;
+    return Logger::UseLogFile || Logger::UseSyslog;
   }
 
   static FILE *GetStandardOut(LogLevelType level);

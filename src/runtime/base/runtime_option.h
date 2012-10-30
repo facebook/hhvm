@@ -50,9 +50,6 @@ public:
 
   static std::string LogFile;
   static std::string LogFileSymLink;
-  static std::string LogAggregatorFile;
-  static std::string LogAggregatorDatabase;
-  static int LogAggregatorSleepSeconds;
   static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;
   static bool InjectedStackTrace;

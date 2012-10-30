@@ -20,7 +20,6 @@
 #include "process.h"
 #include "exception.h"
 #include "util.h"
-#include "log_aggregator.h"
 #include "text_color.h"
 #include <util/atomic.h>
 #include <syslog.h>
@@ -52,7 +51,6 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Logger::UseLogAggregator = false;
 bool Logger::UseSyslog = false;
 bool Logger::UseLogFile = true;
 bool Logger::UseCronolog = true;
@@ -154,9 +152,6 @@ void Logger::log(LogLevelType level, const std::string &msg,
     stackTrace = deleter.get();
   }
 
-  if (UseLogAggregator) {
-    LogAggregator::TheLogAggregator.log(*stackTrace, msg);
-  }
   if (UseSyslog) {
     syslog(GetSyslogLevel(level), "%s", msg.c_str());
   }

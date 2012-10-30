@@ -127,12 +127,6 @@ inline bool x_output_reset_rewrite_vars() {
   return f_output_reset_rewrite_vars();
 }
 
-inline bool x_hphp_log(CStrRef filename, CStrRef message) {
-  FUNCTION_INJECTION_BUILTIN(hphp_log);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_hphp_log(filename, message);
-}
-
 inline void x_hphp_crash_log(CStrRef name, CStrRef value) {
   FUNCTION_INJECTION_BUILTIN(hphp_crash_log);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);

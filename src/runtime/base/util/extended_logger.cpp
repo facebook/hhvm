@@ -117,7 +117,6 @@ void ExtendedLogger::Log(LogLevelType level, CArrRef stackTrace,
 
   if (stackTrace.isNull()) return;
 
-  // TODO Should we also send the stacktrace to LogAggregator?
   if (UseLogFile) {
     FILE *f = Output ? Output : GetStandardOut(level);
     PrintStackTrace(f, stackTrace, escape, escapeMore);

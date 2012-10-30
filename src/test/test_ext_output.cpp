@@ -40,7 +40,6 @@ bool TestExtOutput::RunTests(const std::string &which) {
   RUN_TEST(test_ob_list_handlers);
   RUN_TEST(test_output_add_rewrite_var);
   RUN_TEST(test_output_reset_rewrite_vars);
-  RUN_TEST(test_hphp_log);
   RUN_TEST(test_hphp_crash_log);
   RUN_TEST(test_hphp_stats);
   RUN_TEST(test_hphp_get_stats);
@@ -201,10 +200,6 @@ bool TestExtOutput::test_output_reset_rewrite_vars() {
     return Count(true);
   }
   return Count(false);
-}
-
-bool TestExtOutput::test_hphp_log() {
-  return Count(true);
 }
 
 bool TestExtOutput::test_hphp_crash_log() {

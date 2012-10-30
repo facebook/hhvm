@@ -25,64 +25,6 @@
 namespace HPHP {
 
 /*
-bool HPHP::f_hphp_log(HPHP::String const&, HPHP::String const&)
-_ZN4HPHP10f_hphp_logERKNS_6StringES2_
-
-(return value) => rax
-filename => rdi
-message => rsi
-*/
-
-bool fh_hphp_log(Value* filename, Value* message) asm("_ZN4HPHP10f_hphp_logERKNS_6StringES2_");
-
-TypedValue * fg1_hphp_log(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_log(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
-  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
-  rv->m_type = KindOfBoolean;
-  if (!IS_STRING_TYPE((args-1)->m_type)) {
-    tvCastToStringInPlace(args-1);
-  }
-  if (!IS_STRING_TYPE((args-0)->m_type)) {
-    tvCastToStringInPlace(args-0);
-  }
-  rv->m_data.num = (fh_hphp_log((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
-  return rv;
-}
-
-TypedValue* fg_hphp_log(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    long long count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_hphp_log((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_hphp_log(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
-    } else {
-      throw_wrong_arguments_nr("hphp_log", count, 2, 2, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv._count = 0;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-
-
-/*
 void HPHP::f_hphp_crash_log(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP16f_hphp_crash_logERKNS_6StringES2_
 

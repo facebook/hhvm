@@ -51,9 +51,6 @@ std::string RuntimeOption::PidFile = "www.pid";
 
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
-std::string RuntimeOption::LogAggregatorFile;
-std::string RuntimeOption::LogAggregatorDatabase;
-int RuntimeOption::LogAggregatorSleepSeconds = 10;
 bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
@@ -615,12 +612,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     Logger::DropCacheChunkSize =
       logger["DropCacheChunkSize"].getInt32(1 << 20);
     AlwaysEscapeLog = logger["AlwaysEscapeLog"].getBool(false);
-
-    Hdf aggregator = logger["Aggregator"];
-    Logger::UseLogAggregator = aggregator.getBool();
-    LogAggregatorFile = aggregator["File"].getString();
-    LogAggregatorDatabase = aggregator["Database"].getString();
-    LogAggregatorSleepSeconds = aggregator["SleepSeconds"].getInt16(10);
 
     AlwaysLogUnhandledExceptions =
       logger["AlwaysLogUnhandledExceptions"].getBool(true);

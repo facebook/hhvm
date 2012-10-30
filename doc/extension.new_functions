@@ -5,7 +5,6 @@ Warning, these functions are not ported to PHP yet. Do NOT use them if the code
 is intended to run with PHP as well, unless guarded with function_exists()
 testing and some alternative PHP implementation.
 
-- hphp_log
 - hphp_crash_log
 - hphp_stats
 - hphp_get_stats

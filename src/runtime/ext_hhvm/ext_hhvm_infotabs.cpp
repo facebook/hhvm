@@ -1680,7 +1680,6 @@ TypedValue* fg_ob_implicit_flush(VM::ActRec *ar);
 TypedValue* fg_ob_list_handlers(VM::ActRec *ar);
 TypedValue* fg_output_add_rewrite_var(VM::ActRec *ar);
 TypedValue* fg_output_reset_rewrite_vars(VM::ActRec *ar);
-TypedValue* fg_hphp_log(VM::ActRec *ar);
 TypedValue* fg_hphp_crash_log(VM::ActRec *ar);
 TypedValue* fg_hphp_stats(VM::ActRec *ar);
 TypedValue* fg_hphp_get_stats(VM::ActRec *ar);
@@ -2914,7 +2913,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2186;
+const long long hhbc_ext_funcs_count = 2185;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -4574,7 +4573,6 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "ob_list_handlers", fg_ob_list_handlers },
   { "output_add_rewrite_var", fg_output_add_rewrite_var },
   { "output_reset_rewrite_vars", fg_output_reset_rewrite_vars },
-  { "hphp_log", fg_hphp_log },
   { "hphp_crash_log", fg_hphp_crash_log },
   { "hphp_stats", fg_hphp_stats },
   { "hphp_get_stats", fg_hphp_get_stats },

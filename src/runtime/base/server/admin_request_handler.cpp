@@ -67,7 +67,7 @@ AdminRequestHandler::AdminRequestHandler() {
 }
 
 // Helper machinery for jemalloc-stats-print command.
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
 struct malloc_write {
   char *s;
   size_t slen;
@@ -215,7 +215,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-tcreset:      throw away translations and start over\n"
 #endif
       ;
-#ifndef NO_TCMALLOC
+#ifdef USE_TCMALLOC
         if (MallocExtensionInstance) {
           usage.append(
               "/free-mem:        ask tcmalloc to release memory to system\n"
@@ -225,7 +225,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         }
 #endif
 
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
         if (mallctl) {
           usage.append(
               "/jemalloc-stats:  get internal jemalloc stats\n"
@@ -337,7 +337,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
 
-#ifndef NO_TCMALLOC
+#ifdef USE_TCMALLOC
     if (MallocExtensionInstance) {
       if (cmd == "free-mem") {
         MallocExtensionInstance()->ReleaseFreeMemory();
@@ -400,7 +400,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
 #endif
 
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
     if (mallctl) {
       if (cmd == "free-mem") {
         // Purge all dirty unused pages.

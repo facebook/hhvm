@@ -26,7 +26,7 @@ namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
 void flush_thread_caches() {
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
   if (mallctl) {
     unsigned arena;
     size_t usz = sizeof(unsigned);
@@ -37,7 +37,7 @@ void flush_thread_caches() {
     }
   }
 #endif
-#ifndef NO_TCMALLOC
+#ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
     MallocExtensionInstance()->MarkThreadIdle();
   }
@@ -68,7 +68,7 @@ void flush_thread_stack() {
   }
 }
 
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
 unsigned low_arena = 0;
 struct JEMallocInitializer {
   JEMallocInitializer() {

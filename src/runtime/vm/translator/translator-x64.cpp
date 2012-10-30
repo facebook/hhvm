@@ -1653,25 +1653,19 @@ TranslatorX64::emitPrologueRedispatch(X64Assembler& a) {
   TCA retval;
   moveToAlign(a);
   retval = a.code.frontier;
-  // We're in the wrong func prologue. By convention with emitFuncGuard,
-  // rax contains the function we need to enter.
+  // We're in the wrong func prologue.
 
   ASSERT(kScratchCrossTraceRegs.contains(rax));
   ASSERT(kScratchCrossTraceRegs.contains(rdx));
   ASSERT(kScratchCrossTraceRegs.contains(rcx));
 
-  // We don't know how many params we were invoked with. Infer it from
-  // the stack and rStashedAR rather than reading it from the actrec.
-  //
-  //    mov %r15, %rdx
-  //    ld  m_numParams(%rax), %ecx #ecx: targetFunc->numParams
-  //    sub %rbx, %rdx #edx: n_args
-  //    shr $4, rdx
-  a.    mov_reg64_reg64(rStashedAR, rdx);
+  //    Get the called func in rax
+  a.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func), rax);
+  //    Get the number of passed parameters in rdx
+  a.    load_reg64_disp_reg32(rStashedAR, AROFF(m_numArgsAndCtorFlag), rdx);
+  a.    and_imm32_reg32(0x7fffffff, rdx);
+  //    Get the number of declared parameters in rcx
   a.    load_reg64_disp_reg32(rax, Func::numParamsOff(), rcx);
-  a.    sub_reg64_reg64(rVmSp, rdx);
-  BOOST_STATIC_ASSERT(sizeof(TypedValue) == 16);
-  a.    shr_imm32_reg32(4, rdx); // rdx: numPassed
 
   // If we didn't pass too many args, directly dereference
   // func->m_prologues.
@@ -1721,38 +1715,52 @@ TranslatorX64::emitPrologueRedispatch(X64Assembler& a) {
 
 // The funcGuard gets skipped and patched by other code, so we have some
 // magic offsets.
-static const int kFuncMovImm = 6; // Offset to the immediate for expected func
+static const int kFuncMovImm = 6; // Offset to the immediate for 8 byte Func*
+static const int kFuncCmpImm = 4; // Offset to the immediate for 4 byte Func*
 static const int kFuncGuardLen = 23;
+static const int kFuncGuardShortLen = 14;
 
 template<typename T>
 static T*
-funcGuardToFuncImm(TCA funcGuard) {
-  T* retval = (T*)(funcGuard + kFuncMovImm + (2 - sizeof(T)/4));
-  // We padded these so the immediate would fit inside an aligned 8 byte region
-  // so the xor of the address of the first byte, with the address of the last
-  // byte should only be non zero in the bottom 3 bits.
-  ASSERT(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) & ~7) == 0);
+funcPrologToGuardImm(TCA prolog) {
+  ASSERT(sizeof(T) == 4 || sizeof(T) == 8);
+  T* retval = (T*)(prolog - (sizeof(T) == 8 ?
+                             kFuncGuardLen - kFuncMovImm :
+                             kFuncGuardShortLen - kFuncCmpImm));
+  // We padded these so the immediate would fit inside a cache line
+  ASSERT(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
+          ~(TranslatorX64::kX64CacheLineSize - 1)) == 0);
+
   return retval;
 }
 
 static inline bool
-funcGuardIsForFunc(TCA funcGuard, const Func* func) {
+funcPrologHasGuard(TCA prolog, const Func* func) {
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
-    return *funcGuardToFuncImm<int32_t>(funcGuard) == iptr;
+    return *funcPrologToGuardImm<int32_t>(prolog) == iptr;
   }
-  return *funcGuardToFuncImm<int64_t>(funcGuard) == iptr;
+  return *funcPrologToGuardImm<int64_t>(prolog) == iptr;
 }
 
 static void
-disableFuncGuard(TCA funcGuard, Func* func) {
-  ASSERT(funcGuardIsForFunc(funcGuard, func));
+disableFuncGuard(TCA prolog, Func* func) {
+  ASSERT(funcPrologHasGuard(prolog, func));
   if (deltaFits((intptr_t)func, sz::dword)) {
-    *funcGuardToFuncImm<int32_t>(funcGuard) = 0;
+    *funcPrologToGuardImm<int32_t>(prolog) = 0;
   } else {
-    *funcGuardToFuncImm<int64_t>(funcGuard) = 0;
+    *funcPrologToGuardImm<int64_t>(prolog) = 0;
   }
-  ASSERT(!funcGuardIsForFunc(funcGuard, func));
+  ASSERT(!funcPrologHasGuard(prolog, func));
+}
+
+static TCA
+funcPrologToGuard(TCA prolog, const Func* func) {
+  if (!prolog || prolog == (TCA)fcallHelperThunk) return prolog;
+  return prolog -
+    (deltaFits(uintptr_t(func), sz::dword) ?
+     kFuncGuardShortLen :
+     kFuncGuardLen);
 }
 
 TCA
@@ -1760,35 +1768,42 @@ TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
   ASSERT(kScratchCrossTraceRegs.contains(rax));
   ASSERT(kScratchCrossTraceRegs.contains(rdx));
 
-  // Ensure the immediate is safely smashable; the immediate needs
-  // to be at a qword boundary, so we need to start the movImm at
-  // (kAlign - kFuncMovImm) % 8.
-  static const int kAlign = 8;
-  static const int kAlignMask = kAlign - 1;
+  const int kAlign = kX64CacheLineSize;
+  const int kAlignMask = kAlign - 1;
   int loBits = uintptr_t(a.code.frontier) & kAlignMask;
-  a.emitNop(((kAlign - kFuncMovImm) - loBits) & kAlignMask);
-  ASSERT((uintptr_t(a.code.frontier) & kAlignMask) == kAlign - kFuncMovImm);
-  TCA aStart = a.code.frontier;
-  a.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func), rax);
-  ASSERT((a.code.frontier - aStart) ==
-         (kFuncMovImm - 2 /* rex + movimmOpcode */));
-  a.    mov_imm64_reg(uint64_t(func), rdx);
-  a.    cmp_reg64_reg64(rax, rdx);
+  int delta, size;
+
+  // Ensure the immediate is safely smashable
+  // the immediate must not cross a qword boundary,
+  if (!deltaFits((intptr_t)func, sz::dword)) {
+    size = 8;
+    delta = loBits + kFuncMovImm;
+  } else {
+    size = 4;
+    delta = loBits + kFuncCmpImm;
+  }
+
+  delta = (delta + size - 1) & kAlignMask;
+  if (delta < size - 1) {
+    a.emitNop(size - 1 - delta);
+  }
+
+  TCA aStart DEBUG_ONLY = a.code.frontier;
+  if (!deltaFits((intptr_t)func, sz::dword)) {
+    a.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func), rax);
+    a.    mov_imm64_reg(uint64_t(func), rdx);
+    a.    cmp_reg64_reg64(rax, rdx);
+  } else {
+    a.    cmp_imm32_disp_reg32(uint64_t(func), AROFF(m_func), rStashedAR);
+  }
 
   if (!m_funcPrologueRedispatch) {
     m_funcPrologueRedispatch = emitPrologueRedispatch(astubs);
   }
   a.    jnz(m_funcPrologueRedispatch);
-  ASSERT(a.code.frontier - aStart <= kFuncGuardLen);
-  a.emitNop(kFuncGuardLen - (a.code.frontier - aStart));
-  ASSERT(a.code.frontier - aStart == kFuncGuardLen);
-  return aStart;
-}
-
-TCA
-skipFuncCheck(TCA dest) {
-  if (!dest || dest == (TCA)fcallHelperThunk) return dest;
-  return dest + kFuncGuardLen;
+  ASSERT(funcPrologToGuard(a.code.frontier, func) == aStart);
+  ASSERT(funcPrologHasGuard(a.code.frontier, func));
+  return a.code.frontier;
 }
 
 /*
@@ -1929,7 +1944,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
     }
     start = magicStart;
   }
-  ASSERT(funcGuardIsForFunc(start, func));
+  ASSERT(funcPrologHasGuard(start, func));
   TRACE(2, "funcPrologue tx64 %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), nPassed, start);
   ASSERT(isValidCodeAddress(start));
@@ -2017,7 +2032,7 @@ TranslatorX64::interceptPrologues(Func* func) {
     TCA prologue = func->getPrologue(i);
     if (prologue == (unsigned char*)fcallHelperThunk)
       continue;
-    ASSERT(funcGuardIsForFunc(prologue, func));
+    ASSERT(funcPrologHasGuard(prologue, func));
     // There might already be calls hard-coded to this via FCall.
     // blow away immediate comparison, so that we always use the Func*'s
     // prologue table. We use 0 (== NULL on our architecture) as the bit
@@ -2025,14 +2040,13 @@ TranslatorX64::interceptPrologues(Func* func) {
     //
     // Note that we're modifying reachable code.
     disableFuncGuard(prologue, func);
-    ASSERT(funcGuardIsForFunc(prologue, NULL));
 
     // There's a prologue already generated; redirect it to first
     // call the intercept helper. First, reset it (leaking the old
     // prologue), so funcPrologue will re-emit it.
     func->setPrologue(i, (TCA)fcallHelperThunk);
     TCA addr = funcPrologue(func, i);
-    ASSERT(funcGuardIsForFunc(addr, func));
+    ASSERT(funcPrologHasGuard(addr, func));
     ASSERT(addr);
     func->setPrologue(i, addr);
     TRACE(1, "interceptPrologues %s prologue[%d]=%p\n",
@@ -2986,12 +3000,13 @@ TranslatorX64::enterTC(SrcKey sk) {
         bool isImmutable = req->m_isImmutable;
         TCA dest = tx64->funcPrologue(func, nArgs);
         TRACE(2, "enterTC: bindCall %s -> %p\n", func->name()->data(), dest);
-        if (isImmutable) {
-          // If we *know* we're calling the right function, don't bother
-          // with the dynamic check of ar->m_func.
-          dest = skipFuncCheck(dest);
+        if (!isImmutable) {
+          // We dont know we're calling the right function, so adjust
+          // dest to point to the dynamic check of ar->m_func.
+          dest = funcPrologToGuard(dest, func);
+        } else {
           TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
-                func->name()->data(), dest);
+                func->fullName()->data(), dest);
         }
         LeaseHolder writer(s_writeLease, NO_ACQUIRE);
         if (dest && writer.acquire()) {

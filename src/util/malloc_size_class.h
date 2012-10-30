@@ -42,7 +42,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef NO_JEMALLOC
+#ifndef USE_JEMALLOC
 
 template<size_t Size>
 struct is_malloc_size_class

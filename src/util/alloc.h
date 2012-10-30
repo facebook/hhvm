@@ -21,11 +21,11 @@
 
 #include "exception.h"
 
-#ifndef NO_TCMALLOC
+#ifdef USE_TCMALLOC
 #include <google/malloc_extension.h>
 #endif
 
-#ifdef NO_JEMALLOC
+#ifndef USE_JEMALLOC
 # ifdef __FreeBSD__
 #  include "stdlib.h"
 #  include "malloc_np.h"
@@ -40,12 +40,12 @@
 #endif
 
 extern "C" {
-#ifndef NO_TCMALLOC
+#ifdef USE_TCMALLOC
 #define MallocExtensionInstance _ZN15MallocExtension8instanceEv
   MallocExtension* MallocExtensionInstance() __attribute__((weak));
 #endif
 
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
   int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
               size_t newlen) __attribute__((weak));
   int mallctlnametomib(const char *name, size_t* mibp, size_t*miblenp)
@@ -72,12 +72,12 @@ public:
 namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
 extern unsigned low_arena;
 #endif
 
 inline void* low_malloc(size_t size) {
-#ifdef NO_JEMALLOC
+#ifndef USE_JEMALLOC
   return malloc(size);
 #else
   void* ptr = NULL;
@@ -87,7 +87,7 @@ inline void* low_malloc(size_t size) {
 }
 
 inline void low_free(void* ptr) {
-#ifdef NO_JEMALLOC
+#ifndef USE_JEMALLOC
   free(ptr);
 #else
   dallocm(ptr, ALLOCM_ARENA(low_arena));

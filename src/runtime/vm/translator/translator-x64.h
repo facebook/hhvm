@@ -787,10 +787,12 @@ private:
   static const int kLeaRipLen = 7;
   static const int kTestRegRegLen = 3;
   static const int kTestImmRegLen = 5;  // only for rax -- special encoding
+ public:
   // Cache alignment is required for mutable instructions to make sure
   // mutations don't "tear" on remote cpus.
   static const size_t kX64CacheLineSize = 64;
   static const size_t kX64CacheLineMask = kX64CacheLineSize - 1;
+ private:
   void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
                    const bool unreachable = true);
   void prepareForTestAndSmash(int testBytes, int jccBytes);

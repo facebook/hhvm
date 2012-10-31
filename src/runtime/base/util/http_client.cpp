@@ -192,7 +192,7 @@ int HttpClient::impl(const char *url, const char *data, int size,
                        ssl["capath"].toString().data());
     }
     if (ssl.exists("cafile")) {
-      curl_easy_setopt(cp, CURLOPT_CAPATH,
+      curl_easy_setopt(cp, CURLOPT_CAINFO,
                        ssl["cafile"].toString().data());
     }
     if (ssl.exists("local_cert")) {

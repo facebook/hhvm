@@ -103,10 +103,8 @@ public:
     if (getIsVector()) return m_data.vec->size;
     return m_data.map->size();
   }
-  int getIndex(CVarRef key);
-  int getIndex(CStrRef key);
-  int getIndex(litstr key);
   int getIndex(int64 key);
+  int getIndex(const StringData* key);
 
   void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
                  bool keepRef = false, bool mapInit = false);

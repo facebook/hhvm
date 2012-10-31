@@ -92,14 +92,6 @@ static inline size_t computeMaskFromNumElms(uint32 numElms) {
                 "lower limit for 0.75 load factor");
 }
 
-static inline bool isIntegerKey(CVarRef v) __attribute__((always_inline));
-static inline bool isIntegerKey(CVarRef v) {
-  if (v.getRawType() <= KindOfInt64) return true;
-  if (v.getRawType() != KindOfRef) return false;
-  if (v.getRefData()->getRawType() <= KindOfInt64) return true;
-  return false;
-}
-
 //=============================================================================
 // Construction/destruction.
 
@@ -601,23 +593,8 @@ bool HphpArray::exists(int64 k) const {
   return find(k) != (ssize_t)ElmIndEmpty;
 }
 
-bool HphpArray::exists(litstr k) const {
-  StringData s(k, strlen(k), AttachLiteral);
-  ssize_t /*ElmInd*/ pos = find(&s, hash_string(k));
-  return pos != ssize_t(ElmIndEmpty);
-}
-
-bool HphpArray::exists(CStrRef k) const {
-  ssize_t /*ElmInd*/ pos = find(k.get(), k->hash());
-  return pos != ssize_t(ElmIndEmpty);
-}
-
-bool HphpArray::exists(CVarRef k) const {
-  if (isIntegerKey(k)) {
-    return find(k.toInt64()) != (ssize_t)ElmIndEmpty;
-  }
-  StringData* key = k.getStringData();
-  ssize_t /*ElmInd*/ pos = find(key, key->hash());
+bool HphpArray::exists(const StringData* k) const {
+  ssize_t /*ElmInd*/ pos = find(k, k->hash());
   return pos != ssize_t(ElmIndEmpty);
 }
 
@@ -630,69 +607,21 @@ CVarRef HphpArray::get(int64 k, bool error /* = false */) const {
   return error ? getNotFound(k) : null_variant;
 }
 
-CVarRef HphpArray::get(litstr k, bool error /* = false */) const {
-  int len = strlen(k);
-  StringData s(k, len, AttachLiteral);
-  ElmInd pos = find(&s, hash_string(k, len));
+CVarRef HphpArray::get(const StringData* key, bool error /* = false */) const {
+  ElmInd pos = find(key, key->hash());
   if (pos != ElmIndEmpty) {
     Elm* e = &m_data[pos];
     return tvAsCVarRef(&e->data);
   }
-  return error ? getNotFound(k) : null_variant;
-}
-
-CVarRef HphpArray::get(CStrRef k, bool error /* = false */) const {
-  StringData* key = k.get();
-  strhash_t prehash = key->hash();
-  ElmInd pos = find(key, prehash);
-  if (pos != ElmIndEmpty) {
-    Elm* e = &m_data[pos];
-    return tvAsCVarRef(&e->data);
-  }
-  return error ? getNotFound(k) : null_variant;
-}
-
-CVarRef HphpArray::get(CVarRef k, bool error /* = false */) const {
-  ElmInd pos;
-  if (isIntegerKey(k)) {
-    pos = find(k.toInt64());
-    if (pos != ElmIndEmpty) {
-      Elm* e = &m_data[pos];
-      return tvAsCVarRef(&e->data);
-    }
-  } else {
-    StringData* strkey = k.getStringData();
-    strhash_t prehash = strkey->hash();
-    pos = find(strkey, prehash);
-    if (pos != ElmIndEmpty) {
-      Elm* e = &m_data[pos];
-      return tvAsCVarRef(&e->data);
-    }
-  }
-  return error ? getNotFound(k) : null_variant;
+  return error ? getNotFound(key) : null_variant;
 }
 
 ssize_t HphpArray::getIndex(int64 k) const {
   return ssize_t(find(k));
 }
 
-ssize_t HphpArray::getIndex(litstr k) const {
-  size_t len = strlen(k);
-  StringData s(k, len, AttachLiteral);
-  return ssize_t(find(&s, hash_string(k, len)));
-}
-
-ssize_t HphpArray::getIndex(CStrRef k) const {
-  return ssize_t(find(k.get(), k->hash()));
-}
-
-ssize_t HphpArray::getIndex(CVarRef k) const {
-  if (isIntegerKey(k)) {
-    return ssize_t(find(k.toInt64()));
-  } else {
-    StringData* key = k.getStringData();
-    return ssize_t(find(key, key->hash()));
-  }
+ssize_t HphpArray::getIndex(const StringData* k) const {
+  return ssize_t(find(k, k->hash()));
 }
 
 //=============================================================================
@@ -1212,15 +1141,8 @@ ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
   return a;
 }
 
-ArrayData* HphpArray::lval(litstr k, Variant*& ret, bool copy,
+ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy,
                            bool checkExist /* = false */) {
-  String s(k, AttachLiteral);
-  return HphpArray::lval(s, ret, copy, checkExist);
-}
-
-ArrayData* HphpArray::lval(CStrRef k, Variant*& ret, bool copy,
-                           bool checkExist /* = false */) {
-  StringData* key = k.get();
   strhash_t prehash = key->hash();
   if (!copy) {
     addLvalImpl(key, prehash, &ret);
@@ -1246,17 +1168,8 @@ ArrayData* HphpArray::lval(CStrRef k, Variant*& ret, bool copy,
   return a;
 }
 
-ArrayData* HphpArray::lval(CVarRef k, Variant*& ret, bool copy,
-                           bool checkExist /* = false */) {
-  if (isIntegerKey(k)) {
-    return HphpArray::lval(k.toInt64(), ret, copy, checkExist);
-  }
-  return HphpArray::lval(k.toString(), ret, copy, checkExist);
-}
-
-ArrayData *HphpArray::lvalPtr(CStrRef k, Variant*& ret, bool copy,
+ArrayData *HphpArray::lvalPtr(StringData* key, Variant*& ret, bool copy,
                               bool create) {
-  StringData* key = k.get();
   strhash_t prehash = key->hash();
   HphpArray* a = 0;
   HphpArray* t = this;
@@ -1317,21 +1230,10 @@ ArrayData* HphpArray::set(int64 k, CVarRef v, bool copy) {
   return t;
 }
 
-ArrayData* HphpArray::set(CStrRef k, CVarRef v, bool copy) {
+ArrayData* HphpArray::set(StringData* k, CVarRef v, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
-  a->update(k.get(), v);
-  return t;
-}
-
-ArrayData* HphpArray::set(CVarRef k, CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  if (isIntegerKey(k)) {
-    a->update(k.toInt64(), v);
-  } else {
-    a->update(k.getStringData(), v);
-  }
+  a->update(k, v);
   return t;
 }
 
@@ -1342,21 +1244,10 @@ ArrayData* HphpArray::setRef(int64 k, CVarRef v, bool copy) {
   return t;
 }
 
-ArrayData* HphpArray::setRef(CStrRef k, CVarRef v, bool copy) {
+ArrayData* HphpArray::setRef(StringData* k, CVarRef v, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
-  a->updateRef(k.get(), v);
-  return t;
-}
-
-ArrayData* HphpArray::setRef(CVarRef k, CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  if (isIntegerKey(k)) {
-    a->updateRef(k.toInt64(), v);
-  } else {
-    a->updateRef(k.getStringData(), v);
-  }
+  a->updateRef(k, v);
   return t;
 }
 
@@ -1368,20 +1259,12 @@ ArrayData* HphpArray::add(int64 k, CVarRef v, bool copy) {
   return t;
 }
 
-ArrayData* HphpArray::add(CStrRef k, CVarRef v, bool copy) {
+ArrayData* HphpArray::add(StringData* k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
-  a->addVal(k.get(), v);
+  a->addVal(k, v);
   return t;
-}
-
-ArrayData* HphpArray::add(CVarRef k, CVarRef v, bool copy) {
-  ASSERT(!exists(k));
-  if (isIntegerKey(k)) {
-    return HphpArray::add(k.toInt64(), v, copy);
-  }
-  return HphpArray::add(k.toString(), v, copy);
 }
 
 ArrayData* HphpArray::addLval(int64 k, Variant*& ret, bool copy) {
@@ -1392,25 +1275,11 @@ ArrayData* HphpArray::addLval(int64 k, Variant*& ret, bool copy) {
   return t;
 }
 
-ArrayData* HphpArray::addLval(CStrRef k, Variant*& ret, bool copy) {
+ArrayData* HphpArray::addLval(StringData* k, Variant*& ret, bool copy) {
   ASSERT(!exists(k));
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
-  StringData* key = k.get();
-  a->addLvalImpl(key, key->hash(), &ret);
-  return t;
-}
-
-ArrayData* HphpArray::addLval(CVarRef k, Variant*& ret, bool copy) {
-  ASSERT(!exists(k));
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  if (isIntegerKey(k)) {
-    a->addLvalImpl(k.toInt64(), &ret);
-  } else {
-    StringData* sd = k.getStringData();
-    a->addLvalImpl(sd, sd->hash(), &ret);
-  }
+  a->addLvalImpl(k, k->hash(), &ret);
   return t;
 }
 
@@ -1513,23 +1382,10 @@ ArrayData* HphpArray::remove(int64 k, bool copy) {
   return t;
 }
 
-ArrayData* HphpArray::remove(CStrRef k, bool copy) {
+ArrayData* HphpArray::remove(const StringData* key, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
-  StringData* key = k.get();
   a->erase(a->findForInsert(key, key->hash()));
-  return t;
-}
-
-ArrayData* HphpArray::remove(CVarRef k, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  if (isIntegerKey(k)) {
-    a->erase(a->findForInsert(k.toInt64()));
-  } else {
-    StringData* key = k.getStringData();
-    a->erase(a->findForInsert(key, key->hash()));
-  }
   return t;
 }
 

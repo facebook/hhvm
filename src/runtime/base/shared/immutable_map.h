@@ -39,7 +39,7 @@ public:
 
   void add(SharedVariant *key, SharedVariant *val);
 
-  int indexOf(StringData* key);
+  int indexOf(const StringData* key);
   int indexOf(int64 key);
 
   SharedVariant* getKeyIndex(int index) {

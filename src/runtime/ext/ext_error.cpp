@@ -64,6 +64,12 @@ void f_debug_print_backtrace() {
   echo(debug_string_backtrace(true));
 }
 
+static const StaticString s_class("class");
+static const StaticString s_type("type");
+static const StaticString s_function("function");
+static const StaticString s_file("file");
+static const StaticString s_line("line");
+
 String debug_string_backtrace(bool skip) {
   if (RuntimeOption::InjectedStackTrace) {
     Array bt;
@@ -78,17 +84,17 @@ String debug_string_backtrace(bool skip) {
       buf.append(i);
       if (i < 10) buf.append(' ');
       buf.append(' ');
-      if (frame.exists("class")) {
-        buf.append(frame->get("class").toString());
-        buf.append(frame->get("type").toString());
+      if (frame.exists(s_class)) {
+        buf.append(frame->get(s_class).toString());
+        buf.append(frame->get(s_type).toString());
       }
-      buf.append(frame->get("function").toString());
+      buf.append(frame->get(s_function).toString());
       buf.append("()");
-      if (frame.exists("file")) {
+      if (frame.exists(s_file)) {
         buf.append(" called at [");
-        buf.append(frame->get("file").toString());
+        buf.append(frame->get(s_file).toString());
         buf.append(':');
-        buf.append(frame->get("line").toString());
+        buf.append(frame->get(s_line).toString());
         buf.append(']');
       }
       buf.append('\n');

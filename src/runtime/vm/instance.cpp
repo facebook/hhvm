@@ -371,9 +371,11 @@ TypedValue* Instance::setProp(Class* ctx, const StringData* key,
     // the property name. Instead, call the appropriate
     // setters (set() or setRef()).
     if (UNLIKELY(bindingAssignment)) {
-      o_properties.get()->setRef(*(const String*)&key, tvAsCVarRef(val), false);
+      o_properties.get()->setRef(const_cast<StringData*>(key),
+                                 tvAsCVarRef(val), false);
     } else {
-      o_properties.get()->set(*(const String*)&key, tvAsCVarRef(val), false);
+      o_properties.get()->set(const_cast<StringData*>(key),
+                              tvAsCVarRef(val), false);
     }
     return NULL;
   }

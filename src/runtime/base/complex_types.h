@@ -26,6 +26,7 @@
 #include <runtime/base/ref_data.h>
 #include <runtime/base/type_variant.h>
 #include <runtime/base/tv_helpers.h>
+#include <runtime/base/array/array_inline.h>
 
 #undef __INSIDE_HPHP_COMPLEX_TYPES_H__
 

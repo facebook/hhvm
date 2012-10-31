@@ -44,34 +44,19 @@ bool GlobalArrayWrapper::noCopyOnWrite() const { return true; }
 bool GlobalArrayWrapper::exists(int64   k) const {
   return exists(Variant(k));
 }
-bool GlobalArrayWrapper::exists(litstr  k) const {
-  return m_globals->exists(k);
-}
-bool GlobalArrayWrapper::exists(CStrRef k) const {
-  return m_globals->exists(k);
-}
-bool GlobalArrayWrapper::exists(CVarRef k) const {
-  return m_globals->exists(k.toString());
+
+bool GlobalArrayWrapper::exists(const StringData* k) const {
+  return m_globals->exists(StrNR(k));
 }
 
 CVarRef GlobalArrayWrapper::get(int64   k, bool error /* = false */) const {
   return get(Variant(k));
 }
-CVarRef GlobalArrayWrapper::get(litstr  k, bool error /* = false */) const {
+
+CVarRef GlobalArrayWrapper::get(const StringData* k,
+                                bool error /* = false */) const {
   if (exists(k)) {
-    return m_globals->get(k);
-  }
-  return null_variant;
-}
-CVarRef GlobalArrayWrapper::get(CStrRef k, bool error /* = false */) const {
-  if (exists(k)) {
-    return m_globals->get(k);
-  }
-  return null_variant;
-}
-CVarRef GlobalArrayWrapper::get(CVarRef k, bool error /* = false */) const {
-  if (exists(k)) {
-    return m_globals->get(k);
+    return m_globals->get(StrNR(k));
   }
   return null_variant;
 }
@@ -80,40 +65,19 @@ ssize_t GlobalArrayWrapper::getIndex(int64 k) const {
   String s = toString(k);
   return m_globals->getIndex(s.data(), s->hash());
 }
-ssize_t GlobalArrayWrapper::getIndex(litstr k) const {
-  String s(k, AttachLiteral);
-  return m_globals->getIndex(k, s->hash());
-}
-ssize_t GlobalArrayWrapper::getIndex(CStrRef k) const {
-  return m_globals->getIndex(k.data(), k->hash());
-}
 
-ssize_t GlobalArrayWrapper::getIndex(CVarRef k) const {
-  if (k.isInteger()) {
-    return ((Array*)m_globals)->get()->getIndex(k.toInt64()) +
-      m_globals->size();
-  }
-  String s = k.toString();
-  return m_globals->getIndex(s.data(), s->hash());
+ssize_t GlobalArrayWrapper::getIndex(const StringData* k) const {
+  return m_globals->getIndex(k->data(), k->hash());
 }
 
 ArrayData *GlobalArrayWrapper::lval(int64   k, Variant *&ret, bool copy,
     bool checkExist /* = false */) {
   return lval(Variant(k), ret, copy);
 }
-ArrayData *GlobalArrayWrapper::lval(litstr  k, Variant *&ret, bool copy,
-    bool checkExist /* = false */) {
-  ret = &m_globals->get(k);
-  return NULL;
-}
-ArrayData *GlobalArrayWrapper::lval(CVarRef k, Variant *&ret, bool copy,
-    bool checkExist /* = false */) {
-  ret = &m_globals->get(k);
-  return NULL;
-}
-ArrayData *GlobalArrayWrapper::lval(CStrRef k, Variant *&ret, bool copy,
-    bool checkExist /* = false */) {
-  ret = &m_globals->get(k);
+
+ArrayData *GlobalArrayWrapper::lval(StringData* k, Variant *&ret,
+                                    bool copy, bool checkExist /* = false */) {
+  ret = &m_globals->get(StrNR(k));
   return NULL;
 }
 ArrayData* GlobalArrayWrapper::lvalNew(Variant *&ret, bool copy) {
@@ -122,40 +86,32 @@ ArrayData* GlobalArrayWrapper::lvalNew(Variant *&ret, bool copy) {
 }
 
 ArrayData *GlobalArrayWrapper::set(int64   k, CVarRef v, bool copy) {
-  set(VarNR(k), v, copy);
+  ArrayData::set(String(k), v, copy);
   return NULL;
 }
-ArrayData *GlobalArrayWrapper::set(CStrRef k, CVarRef v, bool copy) {
-  m_globals->get(k).assignVal(v);
-  return NULL;
-}
-ArrayData *GlobalArrayWrapper::set(CVarRef k, CVarRef v, bool copy) {
-  m_globals->get(k).assignVal(v);
+
+ArrayData *GlobalArrayWrapper::set(StringData* k, CVarRef v, bool copy) {
+  m_globals->get(StrNR(k)).assignVal(v);
   return NULL;
 }
 
 ArrayData *GlobalArrayWrapper::setRef(int64   k, CVarRef v, bool copy) {
-  setRef(VarNR(k), v, copy);
+  ArrayData::setRef(String(k), v, copy);
   return NULL;
 }
-ArrayData *GlobalArrayWrapper::setRef(CStrRef k, CVarRef v, bool copy) {
-  m_globals->get(k).assignRef(v);
-  return NULL;
-}
-ArrayData *GlobalArrayWrapper::setRef(CVarRef k, CVarRef v, bool copy) {
-  m_globals->get(k).assignRef(v);
+
+ArrayData *GlobalArrayWrapper::setRef(StringData* k, CVarRef v,
+                                      bool copy) {
+  m_globals->get(StrNR(k)).assignRef(v);
   return NULL;
 }
 
 ArrayData *GlobalArrayWrapper::remove(int64   k, bool copy) {
   return remove(Variant(k), copy);
 }
-ArrayData *GlobalArrayWrapper::remove(CStrRef k, bool copy) {
-  unset(m_globals->get(k));
-  return NULL;
-}
-ArrayData *GlobalArrayWrapper::remove(CVarRef k, bool copy) {
-  unset(m_globals->get(k));
+
+ArrayData *GlobalArrayWrapper::remove(const StringData* k, bool copy) {
+  unset(m_globals->get(StrNR(k)));
   return NULL;
 }
 

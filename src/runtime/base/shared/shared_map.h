@@ -48,6 +48,21 @@ public:
     return m_arr;
   }
 
+  // these using directives ensure the full set of overloaded functions
+  // are visible in this class, to avoid triggering implicit conversions
+  // from a CVarRef key to int64.
+  using ArrayData::exists;
+  using ArrayData::get;
+  using ArrayData::getIndex;
+  using ArrayData::lval;
+  using ArrayData::lvalNew;
+  using ArrayData::lvalPtr;
+  using ArrayData::set;
+  using ArrayData::setRef;
+  using ArrayData::add;
+  using ArrayData::addLval;
+  using ArrayData::remove;
+
   ssize_t vsize() const {
     return m_arr->arrSize();
   }
@@ -60,40 +75,27 @@ public:
   CVarRef getValueRef(ssize_t pos) const;
 
   bool exists(int64 k) const;
-  bool exists(litstr k) const;
-  bool exists(CStrRef k) const;
-  bool exists(CVarRef k) const;
+  bool exists(const StringData* k) const;
 
   CVarRef get(int64 k, bool error = false) const;
-  CVarRef get(litstr k, bool error = false) const;
-  CVarRef get(CStrRef k, bool error = false) const;
-  CVarRef get(CVarRef k, bool error = false) const;
+  CVarRef get(const StringData* k, bool error = false) const;
 
   ssize_t getIndex(int64 k) const;
-  ssize_t getIndex(litstr k) const;
-  ssize_t getIndex(CStrRef k) const;
-  ssize_t getIndex(CVarRef k) const;
+  ssize_t getIndex(const StringData* k) const;
 
-  virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
+  virtual ArrayData *lval(int64 k, Variant *&ret, bool copy,
                           bool checkExist = false);
-  virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          bool checkExist = false);
-  virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          bool checkExist = false);
-  virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
+  virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy,
                           bool checkExist = false);
   ArrayData *lvalNew(Variant *&ret, bool copy);
 
-  ArrayData *set(int64   k, CVarRef v, bool copy);
-  ArrayData *set(CStrRef k, CVarRef v, bool copy);
-  ArrayData *set(CVarRef k, CVarRef v, bool copy);
-  ArrayData *setRef(int64   k, CVarRef v, bool copy);
-  ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
-  ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
+  ArrayData *set(int64 k, CVarRef v, bool copy);
+  ArrayData *set(StringData* k, CVarRef v, bool copy);
+  ArrayData *setRef(int64 k, CVarRef v, bool copy);
+  ArrayData *setRef(StringData* k, CVarRef v, bool copy);
 
-  ArrayData *remove(int64   k, bool copy);
-  ArrayData *remove(CStrRef k, bool copy);
-  ArrayData *remove(CVarRef k, bool copy);
+  ArrayData *remove(int64 k, bool copy);
+  ArrayData *remove(const StringData* k, bool copy);
 
   ArrayData *copy() const;
   /**

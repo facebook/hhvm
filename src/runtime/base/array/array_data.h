@@ -150,18 +150,14 @@ class ArrayData : public Countable {
   /**
    * Testing whether a key exists.
    */
-  virtual bool exists(int64   k) const = 0;
-  virtual bool exists(litstr  k) const = 0;
-  virtual bool exists(CStrRef k) const = 0;
-  virtual bool exists(CVarRef k) const = 0;
+  virtual bool exists(int64 k) const = 0;
+  virtual bool exists(const StringData* k) const = 0;
 
   /**
    * Getting value at specified key.
    */
-  virtual CVarRef get(int64   k, bool error = false) const = 0;
-  virtual CVarRef get(litstr  k, bool error = false) const = 0;
-  virtual CVarRef get(CStrRef k, bool error = false) const = 0;
-  virtual CVarRef get(CVarRef k, bool error = false) const = 0;
+  virtual CVarRef get(int64 k, bool error = false) const = 0;
+  virtual CVarRef get(const StringData* k, bool error = false) const = 0;
 
   /**
    * Interface for VM helpers.  ArrayData implements generic versions
@@ -182,21 +178,15 @@ class ArrayData : public Countable {
    * in ArrayData.
    */
   virtual ssize_t getIndex(int64 k) const = 0;
-  virtual ssize_t getIndex(litstr k) const = 0;
-  virtual ssize_t getIndex(CStrRef k) const = 0;
-  virtual ssize_t getIndex(CVarRef k) const = 0;
+  virtual ssize_t getIndex(const StringData* k) const = 0;
 
   /**
    * Getting l-value (that Variant pointer) at specified key. Return NULL if
    * escalation is not needed, or an escalated array data.
    */
-  virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
+  virtual ArrayData *lval(int64 k, Variant *&ret, bool copy,
                           bool checkExist = false) = 0;
-  virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          bool checkExist = false) = 0;
-  virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          bool checkExist = false) = 0;
-  virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
+  virtual ArrayData *lval(StringData* k, Variant *&ret, bool copy,
                           bool checkExist = false) = 0;
 
   /**
@@ -213,9 +203,8 @@ class ArrayData : public Countable {
    * the dynamic property array in ObjectData or the local cache array
    * in ShardMap.
    */
-  virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
-                             bool create);
-  virtual ArrayData *lvalPtr(int64   k, Variant *&ret, bool copy,
+  virtual ArrayData *lvalPtr(int64 k, Variant *&ret, bool copy, bool create);
+  virtual ArrayData *lvalPtr(StringData* k, Variant *&ret, bool copy,
                              bool create);
 
   /**
@@ -223,46 +212,65 @@ class ArrayData : public Countable {
    * then set the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *set(int64   k, CVarRef v, bool copy) = 0;
-  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy) = 0;
-  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(int64 k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(StringData* k, CVarRef v, bool copy) = 0;
 
-  virtual ArrayData *setRef(int64   k, CVarRef v, bool copy) = 0;
-  virtual ArrayData *setRef(CStrRef k, CVarRef v, bool copy) = 0;
-  virtual ArrayData *setRef(CVarRef k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *setRef(int64 k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *setRef(StringData* k, CVarRef v, bool copy) = 0;
 
   /**
    * The same as set(), but with the precondition that the key does
    * not already exist in this array.  (This is to allow more
    * efficient implementation of this case in some derived classes.)
    */
-  virtual ArrayData *add(int64   k, CVarRef v, bool copy);
-  virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
-  virtual ArrayData *add(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *add(int64 k, CVarRef v, bool copy);
+  virtual ArrayData *add(StringData* k, CVarRef v, bool copy);
 
   /*
    * Same semantics as lval(), except with the precondition that the
    * key doesn't already exist in the array.
    */
-  virtual ArrayData *addLval(int64   k, Variant *&ret, bool copy);
-  virtual ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
-  virtual ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(int64 k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(StringData* k, Variant *&ret, bool copy);
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
    * then remove the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *remove(int64   k, bool copy) = 0;
-  virtual ArrayData *remove(CStrRef k, bool copy) = 0;
-  virtual ArrayData *remove(CVarRef k, bool copy) = 0;
+  virtual ArrayData *remove(int64 k, bool copy) = 0;
+  virtual ArrayData *remove(const StringData* k, bool copy) = 0;
 
   /**
-   * legacy overloads that are not used enough to justify optimizing
+   * Inline accessors that convert keys to StringData* before delegating to
+   * the virtual method.
    */
-  ArrayData *set(litstr  k, CVarRef v, bool copy);
-  ArrayData *setRef(litstr  k, CVarRef v, bool copy);
-  ArrayData *remove(litstr  k, bool copy);
+  bool exists(litstr k) const;
+  bool exists(CStrRef k) const;
+  bool exists(CVarRef k) const;
+  CVarRef get(litstr k, bool error = false) const;
+  CVarRef get(CStrRef k, bool error = false) const;
+  CVarRef get(CVarRef k, bool error = false) const;
+  ssize_t getIndex(litstr k) const;
+  ssize_t getIndex(CStrRef k) const;
+  ssize_t getIndex(CVarRef k) const;
+  ArrayData *lval(litstr k, Variant *&ret, bool copy, bool checkExist=false);
+  ArrayData *lval(CStrRef k, Variant *&ret, bool copy, bool checkExist=false);
+  ArrayData *lval(CVarRef k, Variant *&ret, bool copy, bool checkExist=false);
+  ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy, bool create);
+  ArrayData *set(litstr k, CVarRef v, bool copy);
+  ArrayData *set(CStrRef k, CVarRef v, bool copy);
+  ArrayData *set(CVarRef k, CVarRef v, bool copy);
+  ArrayData *setRef(litstr k, CVarRef v, bool copy);
+  ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
+  ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
+  ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  ArrayData *add(CVarRef k, CVarRef v, bool copy);
+  ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
+  ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
+  ArrayData *remove(litstr k, bool copy);
+  ArrayData *remove(CStrRef k, bool copy);
+  ArrayData *remove(CVarRef k, bool copy);
 
   virtual ssize_t iter_begin() const;
   virtual ssize_t iter_end() const;
@@ -390,10 +398,16 @@ class ArrayData : public Countable {
   // error-handling helpers
   static CVarRef getNotFound(int64 k);
   static CVarRef getNotFound(litstr k);
+  static CVarRef getNotFound(const StringData* k);
   static CVarRef getNotFound(CStrRef k);
   static CVarRef getNotFound(CVarRef k);
   static TypedValue* nvGetNotFound(int64 k);
   static TypedValue* nvGetNotFound(const StringData* k);
+
+  static bool IsValidKey(litstr k);
+  static bool IsValidKey(CStrRef k);
+  static bool IsValidKey(CVarRef k);
+  static bool IsValidKey(const StringData* k);
 
  protected:
   uint m_size;

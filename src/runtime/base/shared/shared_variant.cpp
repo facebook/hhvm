@@ -249,43 +249,10 @@ SharedVariant::~SharedVariant() {
 ///////////////////////////////////////////////////////////////////////////////
 
 HOT_FUNC
-int SharedVariant::getIndex(CVarRef key) {
-  ASSERT(is(KindOfArray));
-  switch (key.getType()) {
-  case KindOfInt64: {
-    int64 num = key.getNumData();
-    if (getIsVector()) {
-      if (num < 0 || (size_t) num >= m_data.vec->size) return -1;
-      return num;
-    }
-    return m_data.map->indexOf(num);
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    if (getIsVector()) return -1;
-    StringData *sd = key.getStringData();
-    return m_data.map->indexOf(sd);
-  }
-  default:
-    // No other types are legitimate keys
-    break;
-  }
-  return -1;
-}
-
-HOT_FUNC
-int SharedVariant::getIndex(CStrRef key) {
+int SharedVariant::getIndex(const StringData* key) {
   ASSERT(is(KindOfArray));
   if (getIsVector()) return -1;
-  StringData *sd = key.get();
-  return m_data.map->indexOf(sd);
-}
-
-int SharedVariant::getIndex(litstr key) {
-  ASSERT(is(KindOfArray));
-  if (getIsVector()) return -1;
-  StringData sd(key);
-  return m_data.map->indexOf(&sd);
+  return m_data.map->indexOf(key);
 }
 
 int SharedVariant::getIndex(int64 key) {

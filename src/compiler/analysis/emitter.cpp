@@ -3428,8 +3428,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                 tvKey.m_data.pstr = empty_string.get();
                 tvKey.m_type = KindOfString;
               } else if (c->isBoolean()) {
+                // PHP casts bool keys to 0 or 1
                 tvKey.m_data.num = c->getBooleanValue() ? 1 : 0;
-                tvKey.m_type = KindOfBoolean;
+                tvKey.m_type = KindOfInt64;
               } else {
                 // Handle INF and NAN
                 ASSERT(c->isDouble());

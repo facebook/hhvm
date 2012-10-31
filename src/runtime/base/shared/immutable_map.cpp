@@ -65,7 +65,7 @@ void ImmutableMap::add(SharedVariant *key, SharedVariant *val) {
 }
 
 HOT_FUNC
-int ImmutableMap::indexOf(StringData* key) {
+int ImmutableMap::indexOf(const StringData* key) {
   strhash_t hash = key->hash();
   size_t hash_pos = hash & m_capacity_mask;
   for (int bucket = m_hash[hash_pos]; bucket != -1;

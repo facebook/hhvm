@@ -53,6 +53,27 @@ ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
   return acc->second;
 }
 
+// In general, arrays can contain int-valued-strings, even though
+// plain array access converts them to integers.  non-int-string
+// assersions should go upstream of the ArrayData api.
+
+bool ArrayData::IsValidKey(litstr k) {
+  return k != NULL;
+}
+
+bool ArrayData::IsValidKey(const StringData* k) {
+  return k != NULL;
+}
+
+bool ArrayData::IsValidKey(CStrRef k) {
+  return IsValidKey(k.get());
+}
+
+bool ArrayData::IsValidKey(CVarRef k) {
+  return k.isInteger() ||
+         k.isString() && IsValidKey(k.getStringData());
+}
+
 // constructors/destructors
 
 HOT_FUNC
@@ -193,7 +214,7 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   return true;
 }
 
-ArrayData *ArrayData::lvalPtr(CStrRef k, Variant *&ret, bool copy,
+ArrayData *ArrayData::lvalPtr(StringData* k, Variant *&ret, bool copy,
                               bool create) {
   throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
 }
@@ -208,12 +229,7 @@ ArrayData *ArrayData::add(int64 k, CVarRef v, bool copy) {
   return set(k, v, copy);
 }
 
-ArrayData *ArrayData::add(CStrRef k, CVarRef v, bool copy) {
-  ASSERT(!exists(k));
-  return set(k, v, copy);
-}
-
-ArrayData *ArrayData::add(CVarRef k, CVarRef v, bool copy) {
+ArrayData *ArrayData::add(StringData* k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
   return set(k, v, copy);
 }
@@ -223,26 +239,9 @@ ArrayData *ArrayData::addLval(int64 k, Variant *&ret, bool copy) {
   return lval(k, ret, copy);
 }
 
-ArrayData *ArrayData::addLval(CStrRef k, Variant *&ret, bool copy) {
+ArrayData *ArrayData::addLval(StringData* k, Variant *&ret, bool copy) {
   ASSERT(!exists(k));
   return lval(k, ret, copy);
-}
-
-ArrayData *ArrayData::addLval(CVarRef k, Variant *&ret, bool copy) {
-  ASSERT(!exists(k));
-  return lval(k, ret, copy);
-}
-
-ArrayData *ArrayData::set(litstr  k, CVarRef v, bool copy) {
-  return set(String(k), v, copy);
-}
-
-ArrayData *ArrayData::setRef(litstr  k, CVarRef v, bool copy) {
-  return setRef(String(k), v, copy);
-}
-
-ArrayData *ArrayData::remove(litstr  k, bool copy) {
-  return remove(String(k), copy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -583,6 +582,11 @@ CVarRef ArrayData::getNotFound(litstr k) {
 
 CVarRef ArrayData::getNotFound(CStrRef k) {
   raise_notice("Undefined index: %s", k.data());
+  return null_variant;
+}
+
+CVarRef ArrayData::getNotFound(const StringData* k) {
+  raise_notice("Undefined index: %s", k->data());
   return null_variant;
 }
 

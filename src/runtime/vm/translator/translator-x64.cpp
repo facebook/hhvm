@@ -2818,7 +2818,7 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
  */
 static_assert(rStashedAR == r15,
   "__fcallHelperThunk needs to be modified for ABI changes");
-asm (
+asm(
   ".byte 0\n"
   ".align 16\n"
   ".globl __fcallHelperThunk\n"

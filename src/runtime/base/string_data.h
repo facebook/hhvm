@@ -370,6 +370,7 @@ public:
   static StringData *GetStaticString(const std::string &str);
   static StringData *GetStaticString(const char *str);
   static StringData *GetStaticString(char c);
+  static size_t GetStaticStringCount();
 
   /**
    * The order of the data members is significant. The _count field must

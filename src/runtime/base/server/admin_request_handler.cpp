@@ -183,6 +183,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    keysample     optional, only dump keys that belongs to the same\n"
         "                  group as <keysample>\n"
         "/const-ss:        get const_map_size\n"
+        "/static-strings:  get number of static strings\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
@@ -323,6 +324,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "const-ss", 8) == 0 &&
         handleConstSizeRequest(cmd, transport)) {
+      break;
+    }
+    if (strcmp(cmd.c_str(), "static-strings") == 0 &&
+        handleStaticStringsRequest(cmd, transport)) {
       break;
     }
     if (strncmp(cmd.c_str(), "vm-", 3) == 0 &&
@@ -910,6 +915,14 @@ bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
     return true;
   }
   return false;
+}
+
+bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
+                                                     Transport* transport) {
+  std::ostringstream result;
+  result << StringData::GetStaticStringCount();
+  transport->sendString(result.str());
+  return true;
 }
 
 namespace {

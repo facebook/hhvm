@@ -40,9 +40,14 @@ typedef tbb::concurrent_hash_map<const StringData *, void *,
                                  StringDataHashCompare> StringDataMap;
 static StringDataMap *s_stringDataMap;
 
+size_t StringData::GetStaticStringCount() {
+  if (!s_stringDataMap) return 0;
+  return s_stringDataMap->size();
+}
+
 StringData *StringData::GetStaticString(const StringData *str) {
   StringDataMap::const_accessor acc;
-  if (!s_stringDataMap) s_stringDataMap = new StringDataMap();
+  if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
   if (s_stringDataMap->find(acc, str)) {
     return const_cast<StringData*>(acc->first);
   }

@@ -1571,7 +1571,9 @@ TranslatorX64::getInterceptHelper() {
     astubs.    lea_reg64_disp_reg64(rax, Func::maybeInterceptedOff(),
                                     argNumToRegName[1]);
 
+    astubs.    sub_imm32_reg64(8, rsp); // Stack parity {
     astubs.    call(TCA(get_intercept_handler));
+    astubs.    add_imm32_reg64(8, rsp);  // }
     astubs.    test_reg64_reg64(rax, rax);
     {
       JccBlock<CC_NZ> ifNotIntercepted(astubs);

@@ -111,6 +111,7 @@ public:
   time_t startTime;
 };
 static StartTime s_startTime;
+static string tempFile;
 
 time_t start_time() {
   return s_startTime.startTime;
@@ -693,10 +694,11 @@ static void prepare_args(int &argc, char **&argv, const StringVec &args,
 
 static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
+  int ret_code = -1;
   try {
     if (hhvm) VM::initialize_repo();
     init_thread_locals();
-    return execute_program_impl(argc, argv);
+    ret_code = execute_program_impl(argc, argv);
   } catch (const Exception &e) {
     Logger::Error("Uncaught exception: %s", e.what());
   } catch (const std::exception &e) {
@@ -704,7 +706,10 @@ int execute_program(int argc, char **argv) {
   } catch (...) {
     Logger::Error("Uncaught exception: (unknown)");
   }
-  return -1;
+  if (tempFile.length() && boost::filesystem::exists(tempFile)) {
+    boost::filesystem::remove(tempFile);
+  }
+  return ret_code;
 }
 
 /* -1 - cannot open file
@@ -977,6 +982,10 @@ static int execute_program_impl(int argc, char **argv) {
   ShmCounters::initialize(true, Logger::Error);
 
   if (!po.lint.empty()) {
+    if (po.isTempFile) {
+      tempFile = po.lint;
+    }
+
     hphp_process_init();
     try {
       HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
@@ -1029,6 +1038,10 @@ static int execute_program_impl(int argc, char **argv) {
   }
 
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
+    if (po.isTempFile) {
+      tempFile = po.file;
+    }
+
     RuntimeOption::ExecutionMode = "cli";
 
     int new_argc;
@@ -1097,10 +1110,6 @@ static int execute_program_impl(int argc, char **argv) {
 
     free(new_argv);
     hphp_process_exit();
-
-    if (po.isTempFile && boost::filesystem::exists(po.file)) {
-      boost::filesystem::remove(po.file);
-    }
 
     return ret;
   }

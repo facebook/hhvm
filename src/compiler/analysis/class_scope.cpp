@@ -2632,6 +2632,11 @@ void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
       cg_printInclude(cls->getHeaderFilename());
     }
   }
+  BOOST_FOREACH(ClassScopeRawPtr cls, m_usedClassesFullHeader) {
+    if (cls && cls->isUserClass()) {
+      cg_printInclude(cls->getHeaderFilename());
+    }
+  }
 
   // 2. Declarations
   cg.namespaceBegin();
@@ -2647,12 +2652,6 @@ void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
 void ClassScope::outputCPPForwardHeader(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   cg.setContext(CodeGenerator::CppForwardDeclaration);
-
-  BOOST_FOREACH(ClassScopeRawPtr cls, m_usedClassesFullHeader) {
-    if (cls && cls->isUserClass()) {
-      cg_printInclude(cls->getHeaderFilename());
-    }
-  }
 
   bool done = false;
   BOOST_FOREACH(const string &str, m_usedLiteralStringsHeader) {

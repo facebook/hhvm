@@ -510,6 +510,9 @@ struct RedeclaredObjectStaticCallbacks {
   Variant os_get(CStrRef s) const;
   Variant &os_lval(CStrRef s) const;
   Variant os_constant(const char *s) const;
+  GlobalVariables *lazy_initializer(GlobalVariables *g) const {
+    return oscb.lazy_initializer(g);
+  }
   bool os_get_call_info(MethodCallPackage &info, strhash_t hash = -1) const;
   ObjectData *createOnlyNoInit(ObjectData* root = NULL) const;
   Object create(CArrRef params, bool init = true,

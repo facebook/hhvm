@@ -48,6 +48,8 @@ typedef GCRootTracker<StringData> StringBase;
 typedef SmartPtr<StringData> StringBase;
 #endif
 
+extern StringData* empty_string_data;
+
 /**
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
@@ -192,6 +194,9 @@ public:
   }
   const char *data() const {
     return m_px ? m_px->data() : "";
+  }
+  StringData* stringData() const {
+    return m_px ? m_px : empty_string_data;
   }
 private:
   // This method is only used internally for comparisons; that is, fully
@@ -453,6 +458,11 @@ public:
    * Check TheStaticStringSet, and upgrade itself to an existing StaticString.
    */
   bool checkStatic();
+
+  StringData* asStaticString() const {
+    if (m_px) return StringData::GetStaticString(m_px);
+    else return StringData::GetStaticString("");
+  }
 
   /**
    * Debugging

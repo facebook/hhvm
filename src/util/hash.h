@@ -44,9 +44,13 @@ inline long long hash_int64(long long key) {
   return key < 0 ? -key : key;
 }
 
-inline long long hash_int64_pair(long long k1, long long k2) {
+inline long long hash_hash_pair(long long h1, long long h2) {
   // Shift the first key, so (a,b) hashes somewhere other than (b,a)
-  return (hash_int64(k1) << 1) ^ hash_int64(k2);
+  return (h1 << 1) ^ h2;
+}
+
+inline long long hash_int64_pair(long long k1, long long k2) {
+  return hash_hash_pair(hash_int64(k1), hash_int64(k2));
 }
 
 namespace MurmurHash3 {

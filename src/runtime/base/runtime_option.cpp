@@ -51,6 +51,7 @@ std::string RuntimeOption::PidFile = "www.pid";
 
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
+int RuntimeOption::LogHeaderMangle;
 bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
@@ -612,6 +613,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     Logger::DropCacheChunkSize =
       logger["DropCacheChunkSize"].getInt32(1 << 20);
     AlwaysEscapeLog = logger["AlwaysEscapeLog"].getBool(false);
+    RuntimeOption::LogHeaderMangle = logger["HeaderMangle"].getInt32(0);
 
     AlwaysLogUnhandledExceptions =
       logger["AlwaysLogUnhandledExceptions"].getBool(true);

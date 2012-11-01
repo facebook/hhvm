@@ -12,6 +12,7 @@ node's purpose. Listed values are defaults, unless examples.
     AlwaysLogUnhandledExceptions = true
     RuntimeErrorReportingLevel = 8191
     Header = false
+    HeaderMangle = 0
     InjectedStackTrace = true
     NativeStackTrace = true
     MaxMessagesPerRequest = -1
@@ -38,6 +39,14 @@ compiled program. (2) PHP stacktrace from code injection. Generated C++ code
 injects stacktrace preparation code into every frame of functions and methods.
 InjectedStackTrace can turn on this PHP stacktrace, which sometimes is cleaner
 than the C++ stacktrace, which can be turned on and off by NativeStackTrace.
+
+- HeaderMangle
+
+This setting controls logging of potentially malicious headers.  If
+HeaderMangle is greater than 0, then HipHop will log one in every n
+requests where a header collision has occurred.  Such collisions
+almost certainly indicate a malicious attempt to set headers which are
+either set or filtered by a proxy.
 
 - MaxMessagesPerRequest
 

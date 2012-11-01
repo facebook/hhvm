@@ -50,6 +50,7 @@ public:
 
   static std::string LogFile;
   static std::string LogFileSymLink;
+  static int LogHeaderMangle;
   static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;
   static bool InjectedStackTrace;

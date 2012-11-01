@@ -135,7 +135,7 @@ void SrcRec::patchIncomingBranches(Asm& a, Asm &astubs, TCA newStart) {
     // We have a debugger guard, so all jumps to us funnel through
     // this.  Just smash m_dbgBranchGuardSrc.
     TRACE(1, "smashing m_dbgBranchGuardSrc @%p\n", m_dbgBranchGuardSrc);
-    TranslatorX64::smash(a, m_dbgBranchGuardSrc, newStart);
+    TranslatorX64::smashJmp(a, m_dbgBranchGuardSrc, newStart);
     return;
   }
 
@@ -171,7 +171,7 @@ void SrcRec::patch(Asm* a, IncomingBranch branch, TCA dest) {
   switch(branch.m_type) {
     case IncomingBranch::JMP: {
       CodeCursor cg(*a, branch.m_src);
-      TranslatorX64::smash(*a, branch.m_src, dest);
+      TranslatorX64::smashJmp(*a, branch.m_src, dest);
       break;
     }
     case IncomingBranch::JCC: {

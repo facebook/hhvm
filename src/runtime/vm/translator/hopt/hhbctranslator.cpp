@@ -1054,16 +1054,11 @@ void HhbcTranslator::emitFPassCOp() {
 
 void HhbcTranslator::emitNativeImpl() {
   TRACE(3, "%u: NativeImpl\n", m_bcOff);
-#if 1
   m_tb.genNativeImpl();
   SSATmp* retAddr = m_tb.genLdRetAddr();
   SSATmp* sp = m_tb.genRetVal();        // updates sp
   SSATmp* fp = m_tb.genFreeActRec();    // updates fp
   m_tb.genRetCtrl(sp, fp, retAddr);
-#else
-  spillStack();
-  emitInterpOne();
-#endif
 
   // Flag that this trace has a Ret instruction so no ExitTrace is needed
   this->m_hasRet = true;

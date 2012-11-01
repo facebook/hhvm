@@ -765,6 +765,7 @@ protected:
   void requestResetHighLevelTranslator();
 
   TCA m_resumeHelper;
+  TCA m_resumeHelperRet;
 
   typedef std::map<TCA, TransID> TransDB;
   TransDB            m_transDB;
@@ -922,6 +923,9 @@ public:
 
   TCA getResumeHelper() {
     return m_resumeHelper;
+  }
+  TCA getResumeHelperRet() {
+    return m_resumeHelperRet;
   }
 };
 

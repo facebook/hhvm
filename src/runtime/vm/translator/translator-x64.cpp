@@ -365,7 +365,7 @@ void TranslatorX64::emitTvSet(const NormalizedInstruction& i,
 // after execution, but might do so in strange ways. Do not count on
 // being able to smash dest to a different register in the future, e.g.
 void
-TranslatorX64::emitMovRegReg(X64Assembler& a, PhysReg src, PhysReg dest) {
+emitMovRegReg(X64Assembler& a, PhysReg src, PhysReg dest) {
   SpaceRecorder("_RegMove", a);
   if (src != dest) {
     a.  mov_reg64_reg64(src, dest);
@@ -373,15 +373,18 @@ TranslatorX64::emitMovRegReg(X64Assembler& a, PhysReg src, PhysReg dest) {
 }
 
 void
-TranslatorX64::emitMovRegReg(PhysReg src, PhysReg dest) {
-  emitMovRegReg(a, src, dest);
-}
-
-void
-TranslatorX64::emitMovRegReg32(X64Assembler& a, PhysReg src, PhysReg dest) {
+emitMovRegReg32(X64Assembler& a, PhysReg src, PhysReg dest) {
   if (src != dest) {
     a.  mov_reg32_reg32(src, dest);
   }
+}
+
+void
+emitLea(X64Assembler& a, PhysReg base, int disp, PhysReg dest) {
+  if (!disp) {
+    emitMovRegReg(a, base, dest);
+  }
+  a.   lea_reg64_disp_reg64(base, disp, dest);
 }
 
 /*
@@ -508,7 +511,7 @@ void
 TranslatorX64::emitRB(X64Assembler& a,
                       RingBufferType t,
                       SrcKey sk, RegSet toSave) {
-  if (!Trace::moduleEnabledRelease(Trace::tx64, 5)) {
+  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
     return;
   }
   PhysRegSaver rs(a, toSave | kSpecialCrossTraceRegs);
@@ -524,7 +527,7 @@ TranslatorX64::emitRB(X64Assembler& a,
                       RingBufferType t,
                       const char* msg,
                       RegSet toSave) {
-  if (!Trace::moduleEnabledRelease(Trace::tx64, 5)) {
+  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
     return;
   }
   PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);
@@ -600,7 +603,7 @@ void ArgManager::shuffleRegisters(std::map<PhysReg, size_t> &used,
             i, actual[i], argNumToRegName[i]);
       // Do copy and data structure update here, because this way
       // we can reuse the register in actual[i] later without problems.
-      m_tx64.emitMovRegReg(m_a, actual[i], argNumToRegName[i]);
+      emitMovRegReg(m_a, actual[i], argNumToRegName[i]);
       used.erase(actual[i]);
       actual[i] = argNumToRegName[i];
     } else {
@@ -646,7 +649,7 @@ void ArgManager::emitValues(std::vector<PhysReg> &actual) {
     case ArgContent::ArgReg:
       TRACE(6, "ArgManager: copying arg %zd from r%d to r%d\n",
             i, actual[i], argNumToRegName[i]);
-      m_tx64.emitMovRegReg(m_a, actual[i], argNumToRegName[i]);
+      emitMovRegReg(m_a, actual[i], argNumToRegName[i]);
       // Emit dereference if needed
       if (m_args[i].m_kind == ArgContent::ArgDeref) {
         emitDeref(m_a, argNumToRegName[i], argNumToRegName[i]);
@@ -671,7 +674,7 @@ void ArgManager::emitValues(std::vector<PhysReg> &actual) {
         PhysReg base;
         int disp;
         locToRegDisp(*m_args[i].m_loc, &base, &disp);
-        m_a.  lea_reg64_disp_reg64(base, disp, argNumToRegName[i]);
+        emitLea(m_a, base, disp, argNumToRegName[i]);
       }
       break;
 
@@ -1099,7 +1102,7 @@ TCA TranslatorX64::retranslateAndPatchNoIR(SrcKey sk,
   }
   TCA start = translate(&sk, align, false);
   if (start != NULL) {
-    smash(getAsmFor(toSmash), toSmash, start);
+    smashJmp(getAsmFor(toSmash), toSmash, start);
   }
   return start;
 }
@@ -1330,7 +1333,7 @@ TranslatorX64::prepareForSmash(int nBytes, int offset /* = 0 */) {
 }
 
 void
-TranslatorX64::smash(X64Assembler &a, TCA src, TCA dest) {
+TranslatorX64::smash(X64Assembler &a, TCA src, TCA dest, bool isCall) {
   ASSERT(canWrite());
   TRACE(2, "smash: %p -> %p\n", src, dest);
   /*
@@ -1352,9 +1355,12 @@ TranslatorX64::smash(X64Assembler &a, TCA src, TCA dest) {
   CodeCursor cg(a, src);
   ASSERT(isSmashable(a.code.frontier, kJmpLen));
   if (dest > src && dest - src <= 7) {
+    ASSERT(!isCall);
     a.    emitNop(dest - src);
-  } else {
+  } else if (!isCall) {
     a.    jmp(dest);
+  } else {
+    a.    call(dest);
   }
 }
 
@@ -1845,6 +1851,12 @@ TranslatorX64::checkCachedPrologue(const Func* func, int paramIdx,
   return false;
 }
 
+// pops the return address pushed by fcall and stores it into the actrec
+void
+TranslatorX64::emitPopRetIntoActRec(Asm& a) {
+  a.    pop_disp_reg64(AROFF(m_savedRip), rStashedAR);
+}
+
 TCA
 TranslatorX64::funcPrologue(Func* func, int nPassed) {
   func->validate();
@@ -1866,7 +1878,6 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
-
   SpaceRecorder sr("_FuncPrologue", a);
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
@@ -1886,8 +1897,6 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   }
 
   emitRB(a, RBTypeFuncPrologueTry, func->fullName()->data());
-  // Guard: we have stack enough stack space to complete this function.
-  emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
 
   // NB: We have most of the register file to play with, since we know
   // we're between BB's. So, we hardcode some registers here rather
@@ -1900,8 +1909,11 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   }
 
   if (!funcIsMagic) {
+    emitPopRetIntoActRec(a);
     // entry point for magic methods comes later
     emitRB(a, RBTypeFuncEntry, func->fullName()->data());
+    // Guard: we have stack enough stack space to complete this function.
+    emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
   }
 
   SrcKey skFuncBody = emitPrologue(func, nPassed);
@@ -1909,8 +1921,11 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   if (funcIsMagic) {
     // entry points for magic methods is here
     TCA magicStart = emitFuncGuard(a, func);
-    ASSERT(numParams == 2);
+    emitPopRetIntoActRec(a);
     emitRB(a, RBTypeFuncEntry, func->fullName()->data());
+    // Guard: we have stack enough stack space to complete this function.
+    emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
+    ASSERT(numParams == 2);
     // Special __call prologue
     a.  mov_reg64_reg64(rStashedAR, argNumToRegName[0]);
     emitCall(a, TCA(TranslatorX64::shuffleArgsForMagicCall));
@@ -1931,7 +1946,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
       // nPassed == 2
       // Fix up hardware stack pointer
       nPassed = 2;
-      a.  lea_reg64_disp_reg64(rStashedAR, -cellsToBytes(nPassed), rVmSp);
+      emitLea(a, rStashedAR, -cellsToBytes(nPassed), rVmSp);
       // Optimization TODO: Reuse the prologue for args == 2
       emitPrologue(func, nPassed);
     }
@@ -1953,41 +1968,6 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   recordBCInstr(OpFuncPrologue, a, start);
 
   return start;
-}
-
-static TCA callAndResume(ActRec *ar) {
-  VMRegAnchor _(ar, true);
-  g_vmContext->doFCall<true>(ar, g_vmContext->m_pc);
-  return Translator::Get()->getResumeHelper();
-}
-
-extern "C"
-TCA fcallHelper(ActRec* ar) {
-  try {
-    TCA tca =
-      Translator::Get()->funcPrologue((Func*)ar->m_func, ar->numArgs());
-    if (tca) {
-      return tca;
-    }
-    return callAndResume(ar);
-  } catch (...) {
-    /*
-      The return address is set to __fcallHelperThunk,
-      which has no unwind information. Its "logically"
-      part of the tc, but the c++ unwinder wont know
-      that. So point our return address at the called
-      function's return address (which will be in the
-      tc).
-      Note that the registers really are clean - we
-      just came from callAndResume which cleaned
-      them for us - so we just have to tell the unwinder
-      that.
-    */
-    register ActRec* rbp asm("rbp");
-    tl_regState = REGSTATE_CLEAN;
-    rbp->m_savedRip = ar->m_savedRip;
-    throw;
-  }
 }
 
 TCA
@@ -2146,7 +2126,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
 
   // Move rVmSp to the right place: just past all locals
   int frameCells = func->numSlotsInFrame();
-  a.   lea_reg64_disp_reg64(rVmFp, -cellsToBytes(frameCells), rVmSp);
+  emitLea(a, rVmFp, -cellsToBytes(frameCells), rVmSp);
   const Opcode* destPC = func->unit()->entry() + func->base();
   if (dvInitializer != InvalidAbsoluteOffset) {
     // dispatch to funclet.
@@ -2164,19 +2144,24 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   return funcBody;
 }
 
+static bool
+isNativeImplCall(const NormalizedInstruction& ni) {
+  ASSERT(ni.op() == OpFCall);
+  int numArgs = ni.imm[0].u_IVA;
+  return ni.funcd && ni.funcd->isBuiltin() && numArgs == ni.funcd->numParams();
+}
+
 int32_t // returns the amount by which rVmSp should be adjusted
 TranslatorX64::emitBindCall(const Tracelet& t,
                             const NormalizedInstruction &ni,
                             Offset atCall, Offset afterCall) {
   int numArgs = ni.imm[0].u_IVA;
-
   // If this is a call to a builtin and we don't need any argument
   // munging, we can skip the prologue system and do it inline.
-  if (ni.funcd && ni.funcd->isBuiltin() &&
-      numArgs == ni.funcd->numParams()) {
+  if (isNativeImplCall(ni)) {
     ASSERT(ni.funcd->numLocals() == ni.funcd->numParams());
     ASSERT(ni.funcd->numIterators() == 0);
-    a.  lea_reg64_disp_reg64(rVmSp, cellsToBytes(numArgs), rVmFp);
+    emitLea(a, rVmSp, cellsToBytes(numArgs), rVmFp);
     emitCheckSurpriseFlagsEnter(true, 0, numArgs);
     // rVmSp is already correctly adjusted, because there's no locals
     // other than the arguments passed.
@@ -2184,7 +2169,7 @@ TranslatorX64::emitBindCall(const Tracelet& t,
   }
 
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
-  a.    lea_reg64_disp_reg64(rVmSp, cellsToBytes(numArgs), rStashedAR);
+  emitLea(a, rVmSp, cellsToBytes(numArgs), rStashedAR);
   emitBindCallHelper(rStashedAR, ni.source, ni.funcd, numArgs, (bool)ni.funcd);
   return 0;
 }
@@ -2200,13 +2185,16 @@ TranslatorX64::emitBindCallHelper(register_name_t stashedAR,
   // Func we encounter as a decent prediction. Make space to burn in a
   // TCA.
   ReqBindCall* req = m_globalData.alloc<ReqBindCall>();
-  a.    mov_reg64_reg64(rStashedAR, serviceReqArgRegs[1]);
-  prepareForSmash(kJmpLen);
+  prepareForSmash(kCallLen);
   TCA toSmash = a.code.frontier;
-  a.    jmp(emitServiceReq(SRFlags::SRNone, REQ_BIND_CALL, 1ull, req));
+  a.    call(astubs.code.frontier);
 
-  TRACE(1, "will bind static call: tca %p, this %p, funcd %p\n",
-        toSmash, this, funcd);
+  astubs.    mov_reg64_reg64(rStashedAR, serviceReqArgRegs[1]);
+  emitPopRetIntoActRec(astubs);
+  emitServiceReq(SRFlags::SRInline, REQ_BIND_CALL, 1ull, req);
+
+  TRACE(1, "will bind static call: tca %p, this %p, funcd %p, astubs %p\n",
+        toSmash, this, funcd, astubs.code.frontier);
   req->m_toSmash = toSmash;
   req->m_nArgs = numArgs;
   req->m_sourceInstr = srcKey;
@@ -2793,25 +2781,6 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
 };
 
 /*
- * fcallHelperThunk
- * Note: Assumes rStashedAR is r15
- */
-static_assert(rStashedAR == r15,
-  "__fcallHelperThunk needs to be modified for ABI changes");
-asm(
-  ".byte 0\n"
-  ".align 16\n"
-  ".globl __fcallHelperThunk\n"
-"__fcallHelperThunk:\n"
-#ifdef HHVM
-  "mov %r15, %rdi\n"
-  "call fcallHelper\n"
-  "jmp *%rax\n"
-#endif
-  "ud2\n"
-);
-
-/*
  * enterTCHelper
  *
  * This helper routine is written in x64 assembly to take care of the details
@@ -2835,6 +2804,8 @@ static_assert(rVmSp == rbx &&
 static_assert(kReservedRSPScratchSpace == 0x80,
               "enterTCHelper needs to be updated for changes to "
               "kReservedRSPScratchSpace");
+static_assert(REQ_BIND_CALL == 0x1,
+  "Update assembly test for REQ_BIND_CALL in __enterTCHelper");
 asm (
   ".byte 0\n"
   ".align 16\n"
@@ -2867,10 +2838,24 @@ asm (
    */
 
   "sub $0x80, %rsp\n" // kReservedRSPScratchSpace
+  /* 
+   * If returning from a BIND_CALL then push the return IP saved in the
+   * actrec pointed to by r15.
+   * The 0x01 in the cmp instruction must be kept in sync with
+   * REQ_BIND_CALL in translator-x64.h
+   */
+  "cmp $0x1, 0x0(%rcx)\n"
+  "jne .LenterTCHelper$jumpToTC\n"
+  "lea .LenterTCHelper$serviceReqLabel(%rip), %rax\n"
+  "push %rax\n"
+  "push 0x8(%r15)\n"
+  "jmp *%rdx\n"
+  ".LenterTCHelper$jumpToTC:\n"
   // May need cfi_adjust_cfa_offset annotations: Task #1747813
   "call *%rdx\n"
-  "add $0x80, %rsp\n"
+  ".LenterTCHelper$serviceReqLabel:\n"
 
+  "add $0x80, %rsp\n"
   // Restore infoPtr into %rbx
   "pop %rbx\n"
   ".cfi_adjust_cfa_offset -8\n"
@@ -2926,6 +2911,8 @@ TranslatorX64::enterTC(SrcKey sk) {
 
   DepthGuard d;
   TReqInfo info;
+  info.requestNum = -1;
+  info.saved_rStashedAr = 0;
   const uintptr_t& requestNum = info.requestNum;
   bool smashed;
   uintptr_t* args = info.args;
@@ -3022,7 +3009,7 @@ TranslatorX64::enterTC(SrcKey sk) {
         LeaseHolder writer(s_writeLease, NO_ACQUIRE);
         if (dest && writer.acquire()) {
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
-          smash(tx64->getAsmFor(toSmash), toSmash, dest);
+          smashCall(tx64->getAsmFor(toSmash), toSmash, dest);
           smashed = true;
           // sk: stale, but doesn't matter since we have a valid dest TCA.
         } else {
@@ -3034,6 +3021,14 @@ TranslatorX64::enterTC(SrcKey sk) {
           sk = req->m_sourceInstr;
         }
         start = dest;
+        if (!start) {
+          // EnterTCHelper pushes the return ip onto the stack when the
+          // requestNum is REQ_BIND_CALL, but if start is NULL, it will
+          // interpret in doFCall, so we clear out the requestNum in this
+          // case to prevent enterTCHelper from pushing the return ip
+          // onto the stack.
+          info.requestNum = ~REQ_BIND_CALL;
+        }
       } break;
 
       case REQ_BIND_SIDE_EXIT:
@@ -3586,7 +3581,7 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
     binaryIntegerArith(i, op, srcReg, localReg);
     // We operated directly on the local's register, so we need to update
     // outReg
-    emitMovRegReg(localReg, outReg);
+    emitMovRegReg(a, localReg, outReg);
   } else {
     // The local is a var, so we have to read its value into outReg
     // on operate on that. We will need to write the result back
@@ -4163,7 +4158,7 @@ TranslatorX64::translateUnaryBooleanOp(const Tracelet& t,
       if (boxedForm) {
         emitDeref(a, reg, outReg);
       } else {
-        emitMovRegReg(reg, outReg);
+        emitMovRegReg(a, reg, outReg);
       }
       if (instrNeg) {
         a.  xor_imm32_reg32(1, outReg);
@@ -4425,7 +4420,7 @@ TranslatorX64::translateCGetL(const Tracelet& t,
     fill(inputs[0]->location, dest);
   } else {
     PhysReg localReg = getReg(inputs[0]->location);
-    emitMovRegReg(localReg, dest);
+    emitMovRegReg(a, localReg, dest);
   }
   if (inputs[0]->isVariant()) {
     emitDeref(a, dest, dest);
@@ -4481,7 +4476,7 @@ TranslatorX64::translateCGetL2(const Tracelet& t,
   if (ni.inputs[locIdx]->isVariant()) {
     emitDeref(a, localIn, cellOut);
   } else if (!undefinedLocal) {
-    emitMovRegReg(localIn, cellOut);
+    emitMovRegReg(a, localIn, cellOut);
   }
   emitIncRef(cellOut, ni.inputs[locIdx]->valueType());
 }
@@ -4511,11 +4506,11 @@ TranslatorX64::translateVGetL(const Tracelet& t,
                   RegInfo::DIRTY);
     m_regMap.allocOutputRegs(i);
     dest = getReg(i.outStack->location);
-    emitMovRegReg(rax, dest);
+    emitMovRegReg(a, rax, dest);
   } else {
     m_regMap.allocOutputRegs(i);
     dest = getReg(i.outStack->location);
-    emitMovRegReg(localReg, dest);
+    emitMovRegReg(a, localReg, dest);
   }
   emitIncRef(dest, KindOfRef);
 }
@@ -4645,7 +4640,7 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
 
   if (ni.outStack && !IS_NULL_TYPE(ni.outStack->outerType())) {
     PhysReg stackReg = getReg(ni.outStack->location);
-    emitMovRegReg(rhsReg, stackReg);
+    emitMovRegReg(a, rhsReg, stackReg);
   }
 }
 
@@ -5491,13 +5486,13 @@ static const StringData* stringDataFromDouble(int64 n) {
   return s;
 }
 
-void TranslatorX64::toStringHelper(ObjectData *obj) {
+// returns the prologue address to execute
+uint64_t TranslatorX64::toStringHelper(ObjectData *obj) {
   // caller must set r15 to the new ActRec
   static_assert(rStashedAR == r15 &&
                 rVmFp == rbp,
                 "toStringHelper needs to be updated for ABI changes");
   register ActRec *ar asm("r15");
-  register ActRec *rbp asm("rbp");
 
   const Class* cls = obj->getVMClass();
   const Func* toString = cls->getToString();
@@ -5510,16 +5505,12 @@ void TranslatorX64::toStringHelper(ObjectData *obj) {
     msg += "::__toString() was not defined";
     throw BadTypeConversionException(msg.c_str());
   }
-  // ar->m_savedRbp set by caller
-  ar->m_savedRip = rbp->m_savedRip;
   ar->m_func = toString;
   // ar->m_soff set by caller
   ar->initNumArgs(0);
   ar->setThis(obj);
   ar->setVarEnv(0);
-  // Point the return address of this C++ function at the prolog to
-  // execute.
-  rbp->m_savedRip = (uint64_t)toString->getPrologue(0);
+  return (uint64_t)toString->getPrologue(0);
 }
 
 void
@@ -5573,10 +5564,13 @@ TranslatorX64::translateCastString(const Tracelet& t,
     }
     m_regMap.smashRegs(kAllRegs);
     a.   mov_reg64_reg64(rVmSp, rStashedAR);
+
     EMIT_CALL(a, TCA(toStringHelper));
     recordReentrantCall(i);
+    // call to the address returned by toStringHelper
+    a.    call_reg(reg::rax);
     if (i.stackOff != 0) {
-      a. add_imm64_reg64(cellsToBytes(i.stackOff), rVmSp);
+      a.  add_imm64_reg64(cellsToBytes(i.stackOff), rVmSp);
     }
 
     PhysReg base;
@@ -6177,7 +6171,6 @@ TranslatorX64::translateRetC(const Tracelet& t,
 
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRip), *rRetAddr);
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
-
   /*
    * Having gotten everything we care about out of the current frame
    * pointer, smash the return address type and value over it. We don't
@@ -6206,7 +6199,9 @@ TranslatorX64::translateRetC(const Tracelet& t,
   a.   add_imm64_reg64(sizeof(ActRec) +
                        cellsToBytes(nLocalCells - stackAdjustment), rVmSp);
   emitRB(a, RBTypeFuncExit, curFunc()->fullName()->data(), RegSet(*rRetAddr));
-  a.   jmp_reg        (*rRetAddr);
+  // push the return address and do a ret
+  a.   pushr(*rRetAddr);
+  a.   ret();
   translator_not_reached(a);
 }
 
@@ -6262,14 +6257,9 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
                                        // non-arg locals
   recordSyncPoint(a, pcOffset, stackOff);
 
-  RegSet unusedRegs = kScratchCrossTraceRegs;
-  DumbScratchReg rRetAddr(unusedRegs);
-
-  RegSet saveDuringEmitRB;
   if (emitSavedRIPReturn) {
-    // Get the return address from the ActRec
-    a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRip), *rRetAddr);
-    saveDuringEmitRB |= RegSet(*rRetAddr);
+    // push the return address to get ready to ret.
+    a.   push_disp_reg64(AROFF(m_savedRip), rVmFp);
   }
 
   /*
@@ -6285,13 +6275,13 @@ int32_t TranslatorX64::emitNativeImpl(const Func* func,
    */
   int nLocalCells = func->numSlotsInFrame();
   if (emitSavedRIPReturn) {
-    a.   add_imm64_reg64(sizeof(ActRec) + cellsToBytes(nLocalCells-1), rVmSp);
+    a. add_imm64_reg64(sizeof(ActRec) + cellsToBytes(nLocalCells-1), rVmSp);
   }
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
 
-  emitRB(a, RBTypeFuncExit, func->fullName()->data(), saveDuringEmitRB);
+  emitRB(a, RBTypeFuncExit, func->fullName()->data());
   if (emitSavedRIPReturn) {
-    a.   jmp_reg        (*rRetAddr);
+    a. ret();
     translator_not_reached(a);
     return 0;
   }
@@ -6775,8 +6765,8 @@ void TranslatorX64::translateContReceive(const Tracelet& t,
   const int contIdx = 0;
   emitContRaiseCheck(a, i);
   ScratchReg rScratch(m_regMap);
-  a.   lea_reg64_disp_reg64(getReg(i.inputs[contIdx]->location),
-                            CONTOFF(m_received), *rScratch);
+  emitLea(a, getReg(i.inputs[contIdx]->location), CONTOFF(m_received),
+          *rScratch);
   emitIncRefGeneric(*rScratch, 0);
   emitCopyToStack(a, i, *rScratch, -1 * (int)sizeof(Cell));
 }
@@ -6934,7 +6924,7 @@ void TranslatorX64::translateContCurrent(const Tracelet& t,
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rCont);
   emitContStartedCheck(i, rCont);
 
-  a.   lea_reg64_disp_reg64(*rCont, CONTOFF(m_value), *rCont);
+  emitLea(a, *rCont, CONTOFF(m_value), *rCont);
   emitIncRefGeneric(*rCont, 0);
   emitCopyToStack(a, i, *rCont, -1 * (int)sizeof(Cell));
 }
@@ -7269,7 +7259,7 @@ void TranslatorX64::translateSetS(const Tracelet& t,
   PhysReg outReg = getReg(i.outStack->location);
   emitTvSet(i, rhsReg, rhsType.outerType(), *sprop);
   ASSERT(i.inputs[2]->location == i.outStack->location);
-  emitMovRegReg(rhsReg, outReg);
+  emitMovRegReg(a, rhsReg, outReg);
 }
 
 void TranslatorX64::analyzeSetG(Tracelet& t, NormalizedInstruction& i) {
@@ -7303,7 +7293,7 @@ void TranslatorX64::translateSetG(const Tracelet& t,
   PhysReg out = getReg(i.outStack->location);
 
   emitTvSet(i, src, type, rax);
-  emitMovRegReg(src, out);
+  emitMovRegReg(a, src, out);
 }
 
 static TypedValue* lookupGlobal(StringData* name) {
@@ -7796,7 +7786,7 @@ TranslatorX64::translateIncDecL(const Tracelet& t,
   PhysReg localVal = getReg(inputs[0]->location);
   if (i.outStack && post) { // $a++, $a--
     PhysReg output   = getReg(i.outStack->location);
-    emitMovRegReg(localVal, output);
+    emitMovRegReg(a, localVal, output);
   }
   if (inc) {
     a.  add_imm32_reg64(1, localVal);
@@ -7805,7 +7795,7 @@ TranslatorX64::translateIncDecL(const Tracelet& t,
   }
   if (i.outStack && pre) { // --$a, ++$a
     PhysReg output   = getReg(i.outStack->location);
-    emitMovRegReg(localVal, output);
+    emitMovRegReg(a, localVal, output);
   }
 }
 
@@ -8040,7 +8030,7 @@ void TranslatorX64::translateDefCls(const Tracelet& t,
   m_regMap.cleanReg(rax);
   m_regMap.smashReg(rax);
   ScratchReg offset(m_regMap, rax);
-  a.   lea_reg64_disp_reg64(rVmSp, -cellsToBytes(i.stackOff), rax);
+  emitLea(a, rVmSp, -cellsToBytes(i.stackOff), rax);
 
   EMIT_CALL(a, m_defClsHelper, IMM((uint64)c), IMM((uint64)after));
 }
@@ -9030,10 +9020,16 @@ TranslatorX64::translateFCall(const Tracelet& t,
   // offset.
   ASSERT(sizeof(Cell) == 1 << 4);
 
-  // Store the to-be-patched later return address
-  StoreImmPatcher retIP(a, (uint64_t)a.code.frontier, *retIPReg,
-                        cellsToBytes(numArgs) + AROFF(m_savedRip), rVmSp);
-
+  boost::optional<StoreImmPatcher> maybeStoreImm;
+  if (isNativeImplCall(i)) {
+    maybeStoreImm = StoreImmPatcher(a, (uint64_t)a.code.frontier, reg::rax,
+                                    cellsToBytes(numArgs) + AROFF(m_savedRip),
+                                    rVmSp);
+  } else if (debug) {
+    a. store_imm64_disp_reg64(0xba5eba11acc01ade,
+                              cellsToBytes(numArgs) + AROFF(m_savedRip),
+                              rVmSp);
+  }
   // The kooky offset here a) gets us to the current ActRec,
   // and b) accesses m_soff.
   int32 callOffsetInUnit = srcFunc->unit()->offsetOf(after - srcFunc->base());
@@ -9044,8 +9040,9 @@ TranslatorX64::translateFCall(const Tracelet& t,
   int32_t adjust = emitBindCall(t, i,
                                 curUnit()->offsetOf(atCall),
                                 curUnit()->offsetOf(after));
-  retIP.patch(uint64(a.code.frontier));
-
+  if (isNativeImplCall(i)) {
+    maybeStoreImm->patch(uint64(a.code.frontier));
+  }
   if (i.breaksTracelet) {
     if (adjust) {
       a.    add_imm64_reg64(adjust, rVmSp);
@@ -10602,6 +10599,8 @@ TranslatorX64::TranslatorX64()
   m_genRetHelper = emitRetFromInterpretedGeneratorFrame();
 
   moveToAlign(astubs);
+  m_resumeHelperRet = astubs.code.frontier;
+  emitPopRetIntoActRec(astubs);
   m_resumeHelper = astubs.code.frontier;
   emitGetGContext(astubs, rax);
   astubs.   load_reg64_disp_reg64(rax, offsetof(VMExecutionContext, m_fp),
@@ -10799,11 +10798,7 @@ TranslatorX64::callUnaryStubImpl(X64Assembler& a,
     // Account for pushing rdi.
     disp += 8;
   }
-  if (disp == 0) {
-    emitMovRegReg(a, arg, rdi);
-  } else {
-    a.    lea_reg64_disp_reg64(arg, disp, rdi);
-  }
+  emitLea(a, arg, disp, rdi);
   ASSERT(isValidCodeAddress(stub));
   emitCall(a, stub);
   recordCallImpl<reentrant>(a, i);

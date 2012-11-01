@@ -652,7 +652,7 @@ PSEUDOINSTRS
 
   const Func* findCuf(const NormalizedInstruction& ni,
                       Class* &cls, StringData*& invName, bool& forward);
-  static void toStringHelper(ObjectData *obj);
+  static uint64_t toStringHelper(ObjectData *obj);
   void invalidateSrcKey(const SrcKey& sk);
   bool dontGuardAnyInputs(Opcode op);
  public:
@@ -791,6 +791,7 @@ private:
   static const size_t kJmpTargetAlign = 16;
   static const size_t kNonFallthroughAlign = 64;
   static const int kJmpLen = 5;
+  static const int kCallLen = 5;
   static const int kJmpccLen = 6;
   static const int kJmpImmBytes = 4;
   static const int kJcc8Len = 3;
@@ -814,7 +815,13 @@ private:
   void prepareForSmash(Asm &a, int nBytes, int offset = 0);
   void prepareForSmash(int nBytes, int offset = 0);
   static bool isSmashable(Address frontier, int nBytes, int offset = 0);
-  static void smash(Asm &a, TCA src, TCA dest);
+  static void smash(Asm &a, TCA src, TCA dest, bool isCall);
+  static void smashJmp(Asm &a, TCA src, TCA dest) {
+    smash(a, src, dest, false);
+  }
+  static void smashCall(Asm &a, TCA src, TCA dest) {
+    smash(a, src, dest, true);
+  }
 
   TCA getTranslation(const SrcKey *sk, bool align, bool forceNoHHIR = false);
   TCA lookupTranslation(const SrcKey& sk) const;
@@ -852,6 +859,7 @@ private:
   TCA emitRetFromInterpretedFrame();
   TCA emitRetFromInterpretedGeneratorFrame();
   TCA emitGearTrigger(Asm& a, const SrcKey& sk, TransID transId);
+  void emitPopRetIntoActRec(Asm& a);
   void emitBox(DataType t, PhysReg rToBox);
   void emitUnboxTopOfStack(const NormalizedInstruction& ni);
   int32_t emitBindCall(const Tracelet& t, const NormalizedInstruction &ni,
@@ -859,9 +867,6 @@ private:
   void emitCondJmp(const SrcKey &skTrue, const SrcKey &skFalse,
                    ConditionCode cc);
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
-  void emitMovRegReg(Asm& a, PhysReg src, PhysReg dest);
-  void emitMovRegReg(PhysReg src, PhysReg dest);
-  void emitMovRegReg32(Asm& a, PhysReg src, PhysReg dest);
   void enterTC(SrcKey sk);
 
   void recordGdbTranslation(const SrcKey& sk, const Unit* u,

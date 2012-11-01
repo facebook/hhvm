@@ -1574,8 +1574,14 @@ public:
   inline void pushr(register_name_t reg) {
     emitR(instr_push, reg);
   }
+  inline void push_disp_reg64(uint32_t disp, register_name_t reg) {
+    emitM(instr_push, reg, reg::noreg/*ir*/, 1, disp, sz::qword);
+  }
   inline void popr(register_name_t reg) {
     emitR(instr_pop, reg);
+  }
+  inline void pop_disp_reg64(uint32_t disp, register_name_t reg) {
+    emitM(instr_pop, reg, reg::noreg/*ir*/, 1, disp, sz::qword);
   }
   inline void ret() {
     emit(instr_ret);
@@ -1720,8 +1726,8 @@ class StoreImmPatcher {
                   int32_t offset, register_name_t base);
   void patch(uint64_t actual);
  private:
-  void* m_addr;
-  bool is32;
+  CodeAddress m_addr;
+  bool m_is32;
 };
 
 #undef TRACEMOD

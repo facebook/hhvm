@@ -217,6 +217,9 @@ public:
     m_px->shrink(len);
     return *this;
   }
+  MutableSlice reserve(int size) {
+    return m_px ? m_px->reserve(size) : MutableSlice("", 0);
+  }
   const char *c_str() const {
     return m_px ? m_px->data() : "";
   }

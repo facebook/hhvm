@@ -32,10 +32,6 @@ bool is_compressible_file(const char *filename);
 
 char *gzencode(const char *data, int &len, int level, int encoding_mode);
 char *gzdecode(const char *data, int &len);
-char *gzcompress(const char *data, int &len, int level = -1);
-char *gzuncompress(const char *data, int &len, int limit = 0);
-char *gzdeflate(const char *data, int &len, int level = -1);
-char *gzinflate(const char *data, int &len, int limit = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 

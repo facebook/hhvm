@@ -1119,15 +1119,6 @@ public:
 
   void setToDefaultObject();
 
-  static size_t getTypeOffset() {
-    Variant *v = 0;
-    return (uintptr_t)&v->m_type;
-  }
-  static size_t getDataOffset() {
-    Variant *v = 0;
-    return (uintptr_t)&v->m_data;
-  }
-
   /*
    * Access this Variant as a TypedValue.  Differs slightly from
    * getTypedAccessor() by returning the outer TypedValue if it is
@@ -1161,11 +1152,6 @@ public:
     ASSERT(acc);
     ASSERT(acc->m_type == KindOfInt64);
     return acc->m_data.num;
-  }
-  static int64 *GetInt64Data(TypedValueAccessor acc) {
-    ASSERT(acc);
-    ASSERT(acc->m_type == KindOfInt64);
-    return &acc->m_data.num;
   }
   static double GetDouble(TypedValueAccessor acc) {
     ASSERT(acc && acc->m_type == KindOfDouble);

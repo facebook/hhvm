@@ -39,6 +39,8 @@
 # endif
 #endif
 
+#include <util/maphuge.h>
+
 extern "C" {
 #ifdef USE_TCMALLOC
 #define MallocExtensionInstance _ZN15MallocExtension8instanceEv
@@ -80,9 +82,8 @@ inline void* low_malloc(size_t size) {
 #ifndef USE_JEMALLOC
   return malloc(size);
 #else
-  void* ptr = NULL;
-  allocm(&ptr, NULL, size, ALLOCM_ARENA(low_arena));
-  return ptr;
+  extern void* low_malloc_impl(size_t size);
+  return low_malloc_impl(size);
 #endif
 }
 

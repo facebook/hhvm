@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <atomic>
+
 #include "alloc.h"
 #include <sys/mman.h>
 #include <sys/user.h>
@@ -70,6 +72,11 @@ void flush_thread_stack() {
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
+std::atomic<void*> highest_lowmall_addr;
+static const unsigned kLgHugeGranularity = 21;
+static const unsigned kHugePageSize = 1 << kLgHugeGranularity;
+static const unsigned kHugePageMask = (1 << kLgHugeGranularity) - 1;
+
 struct JEMallocInitializer {
   JEMallocInitializer() {
     // The following comes from malloc_extension.cc in google-perftools
@@ -113,6 +120,13 @@ struct JEMallocInitializer {
       // Error; bail out.
       return;
     }
+    // Maintain the invariant that the region surrounding the current brk
+    // is mapped huge. Burn whatever slack needed to align low memory.
+    unsigned leftInPage = kHugePageSize - (uintptr_t(sbrk(0)) & kHugePageMask);
+    (void) sbrk(leftInPage);
+    ASSERT((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
+    highest_lowmall_addr = sbrk(0);
+    hintHuge((void*)uintptr_t(highest_lowmall_addr.load()), kHugePageSize);
   }
 };
 
@@ -130,7 +144,31 @@ struct JEMallocInitializer {
 #endif
 
 static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
-#endif
+void* low_malloc_impl(size_t size) {
+  void* ptr = NULL;
+  allocm(&ptr, NULL, size, ALLOCM_ARENA(low_arena));
+  // In practice, the things we low_malloc are both long-lived and likely
+  // to be randomly accessed. This makes them good candidates for mapping
+  // with huge pages. Track a high water mark, and incrementally map each
+  // huge page we low_malloc with a huge mapping.
+  for (void* oldValue = highest_lowmall_addr.load(); ptr > oldValue; ) {
+    if (highest_lowmall_addr.compare_exchange_weak(oldValue, ptr)) {
+      uintptr_t prevRegion = uintptr_t(oldValue) >> kLgHugeGranularity; 
+      uintptr_t newRegion = uintptr_t(ptr) >> kLgHugeGranularity; 
+      if (prevRegion != newRegion) {
+        // Whoever updates highest_ever is responsible for hinting all the
+        // intervening regions. prevRegion is already huge, so bump the
+        // region we're hugening by 1.
+        hintHuge((void*)((prevRegion + 1) << kLgHugeGranularity),
+                 (newRegion - prevRegion) << kLgHugeGranularity);
+        break;
+      }
+    }
+    // Try again.
+  }
+  return ptr;
+}
+#endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

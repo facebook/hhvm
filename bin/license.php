@@ -22,6 +22,7 @@ $excluded = array(
   'runtime/ext/php_unicode.h',
   'runtime/base/zend/zend_ini.tab.cpp',
   'third_party/',
+  'util/safesort.h',
 );
 
 $files_external_party = array(

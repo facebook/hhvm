@@ -844,8 +844,8 @@ private:
   TCA emitGearTrigger(Asm& a, const SrcKey& sk, TransID transId);
   void emitBox(DataType t, PhysReg rToBox);
   void emitUnboxTopOfStack(const NormalizedInstruction& ni);
-  void emitBindCall(const Tracelet& t, const NormalizedInstruction &ni,
-                    Offset atCall, Offset after);
+  int32_t emitBindCall(const Tracelet& t, const NormalizedInstruction &ni,
+                       Offset atCall, Offset after);
   void emitCondJmp(const SrcKey &skTrue, const SrcKey &skFalse,
                    ConditionCode cc);
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
@@ -875,7 +875,7 @@ private:
   TCA funcPrologue(Func* func, int nArgs);
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
-  void emitNativeImpl(const Func*, bool emitSavedRIPReturn);
+  int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);
   TCA emitInterceptPrologue(Func* func);
   void emitBindJ(Asm& a, ConditionCode cc, const SrcKey& dest,
                  ServiceRequest req);

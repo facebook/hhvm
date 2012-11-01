@@ -589,6 +589,10 @@ emitStoreImm(X64Assembler& a, uint64_t imm, PhysReg r, int off,
   if (size == sz::qword) {
     PhysReg immReg = regAlloc ? regAlloc->getImmReg(imm) : InvalidReg;
     if (immReg == InvalidReg) {
+      if (deltaFits(imm, sz::dword)) {
+        a. store_imm64_disp_reg64(imm, off, r);
+        return;
+      }
       emitImmReg(a, imm, rScratch);
       immReg = rScratch;
     }

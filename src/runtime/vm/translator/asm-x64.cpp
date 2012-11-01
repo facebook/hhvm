@@ -102,14 +102,21 @@ void X64Assembler::init(CodeAddress start, size_t sz) {
   code.initCodeBlock(start, sz);
 }
 
-MovImmPatcher::MovImmPatcher(X64Assembler& as, uint64_t initial,
-                             register_name_t reg) {
+StoreImmPatcher::StoreImmPatcher(X64Assembler& as, uint64_t initial,
+                                 register_name_t reg,
+                                 int32_t offset, register_name_t base) {
   is32 = deltaFits(initial, sz::dword);
-  as.mov_imm64_reg(initial, reg);
+  if (is32) {
+    as.store_imm64_disp_reg64(initial, offset, base);
+  } else {
+    as.mov_imm64_reg(initial, reg);
+    as.store_reg64_disp_reg64(reg, offset, base);
+  }
   m_addr = as.code.frontier - (is32 ? 4 : 8);
+  ASSERT((is32 ? (uint64_t)*(int32_t*)m_addr : *(uint64_t*)m_addr) == initial);
 }
 
-void MovImmPatcher::patch(uint64_t actual) {
+void StoreImmPatcher::patch(uint64_t actual) {
   if (is32) {
     if (deltaFits(actual, sz::dword)) {
       *(uint32_t*)m_addr = actual;

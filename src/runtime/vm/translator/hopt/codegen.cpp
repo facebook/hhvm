@@ -2964,8 +2964,8 @@ Address CodeGenerator::cgCall(IRInstruction* inst) {
     cgStore(spReg, -(i+1) * sizeof(Cell), args[i]);
   }
   // store the return IP into the outgoing actrec; this is patched below
-  MovImmPatcher retIp(m_as, (uint64_t)m_as.code.frontier, reg::rScratch);
-  m_as.store_reg64_disp_reg64(reg::rScratch, AROFF(m_savedRip), spReg);
+  StoreImmPatcher retIp(m_as, (uint64_t)m_as.code.frontier, reg::rScratch,
+                        AROFF(m_savedRip), spReg);
   // store the return bytecode offset into the outgoing actrec
   uint64 returnBc = returnBcOffset->getConstValAsInt();
   m_as.store_imm32_disp_reg(returnBc, AROFF(m_soff), spReg);

@@ -1700,9 +1700,10 @@ inline void emitImmReg(X64Assembler& a, int64_t imm,
   a.emitImmReg(imm, dest);
 }
 
-class MovImmPatcher {
+class StoreImmPatcher {
  public:
-  MovImmPatcher(X64Assembler& as, uint64_t initial, register_name_t reg);
+  StoreImmPatcher(X64Assembler& as, uint64_t initial, register_name_t reg,
+                  int32_t offset, register_name_t base);
   void patch(uint64_t actual);
  private:
   void* m_addr;

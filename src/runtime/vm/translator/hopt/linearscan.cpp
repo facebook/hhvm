@@ -573,12 +573,15 @@ void LinearScan::computePreColoringHint() {
         auto src1 = nextNative->getSrc(0);
         auto src2 = nextNative->getSrc(1);
 
-        if ((src1->getType() == Type::Arr && src2->getType() == Type::Arr)
-            || (Type::isString(src1->getType())
-             && Type::isString(src2->getType()))
-            || (Type::isString(src1->getType()) && !src1->isConst())) {
-          m_preColoringHint.add(nextNative->getSrc(0), 0, 0);
-          m_preColoringHint.add(nextNative->getSrc(1), 0, 1);
+        auto type1 = src1->getType();
+        auto type2 = src2->getType();
+
+        if ((type1 == Type::Arr && type2 == Type::Arr)
+            || (Type::isString(type1) && Type::isString(type2))
+            || (Type::isString(type1) && !src1->isConst())
+            || (type1 == Type::Obj && type2 == Type::Obj)) {
+          m_preColoringHint.add(src1, 0, 0);
+          m_preColoringHint.add(src2, 0, 1);
         }
       }
       break;

@@ -1139,6 +1139,14 @@ int64 cgIntNeqStringHelper(const StringData* s, int64 i) {
   return !cgIntEqStringHelper(s, i);
 }
 
+int64 cgObjEqObjHelper(ObjectData* o1, ObjectData* o2) {
+  return equal(Object(o1), Object(o2));
+}
+
+int64 cgObjNeqObjHelper(ObjectData* o1, ObjectData* o2) {
+  return !cgObjEqObjHelper(o1, o2);
+}
+
 Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
   Address start = m_as.code.frontier;
   UNUSED SSATmp* dst   = inst->getDst();
@@ -1278,8 +1286,11 @@ Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
       else    cgCallHelper(m_as, (TCA)cgIntNeqStringHelper, dst, true, args);
     }
   } else if (type1 == Type::Obj && type2 == Type::Obj) {
-    if (eq) CG_PUNT(Eq_obj);
-    else    CG_PUNT(Neq_obj);
+    ArgGroup args;
+    args.ssa(src1).ssa(src2);
+
+    if (eq) cgCallHelper(m_as, (TCA)cgObjEqObjHelper,  dst, true, args);
+    else    cgCallHelper(m_as, (TCA)cgObjNeqObjHelper, dst, true, args);
   } else if (type1 == Type::Arr && type2 == Type::Arr) {
     ArgGroup args;
     args.ssa(src1).ssa(src2);

@@ -28,6 +28,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <util/hash.h>
+#include <util/timer.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/translator/immstack.h>
@@ -130,6 +131,7 @@ struct SrcKey {
 
   void trace(const char *fmt, ...) const;
   void print(int ninstr) const;
+  std::string pretty() const;
   int offset() const {
     return m_offset;
   }
@@ -796,6 +798,8 @@ protected:
   // For HHIR-based translation
   bool               m_useHHIR;
 
+  int64              m_createdTime;
+
   static Lease s_writeLease;
   static volatile bool s_replaceInFlight;
 
@@ -886,6 +890,14 @@ public:
   void setTransCounter(TransID transId, uint64 value);
 
   uint32 addTranslation(const TransRec& transRec) {
+    if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
+      // Log the translation's size, creation time, SrcKey, and size
+      Trace::traceRelease("New translation: %lld %s %u %u %d\n",
+                          Timer::GetCurrentTimeMicros() - m_createdTime,
+                          transRec.src.pretty().c_str(), transRec.aLen,
+                          transRec.astubsLen, transRec.kind);
+    }
+
     if (!isTransDBEnabled()) return -1u;
     uint32 id = getCurrentTransID();
     m_translations.push_back(transRec);

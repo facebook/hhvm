@@ -1301,18 +1301,20 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align,
   // We put retranslate requests at the end of our slab to more frequently
   //   allow conditional jump fall-throughs
 
-  TCA start = emitServiceReq(SRFlags::SRNone, REQ_RETRANSLATE,
+  TCA astart = a.code.frontier;
+  TCA stubstart = astubs.code.frontier;
+  TCA req = emitServiceReq(SRFlags::SRNone, REQ_RETRANSLATE,
                              1, uint64_t(sk->offset()));
   SKTRACE(1, *sk, "inserting anchor translation for (%p,%d) at %p\n",
-          curUnit(), sk->offset(), start);
+          curUnit(), sk->offset(), req);
   SrcRec* sr = m_srcDB.insert(*sk);
   sr->setFuncInfo(curFunc());
-  sr->setAnchorTranslation(start);
+  sr->setAnchorTranslation(req);
 
-  addTranslation(TransRec(*sk, curUnit()->md5(), TransAnchor, 0, 0, start,
-                          astubs.code.frontier - start));
-
-  ASSERT(getTransRec(start)->kind == TransAnchor);
+  addTranslation(TransRec(*sk, curUnit()->md5(), TransAnchor,
+                          astart, a.code.frontier - astart,
+                          stubstart, astubs.code.frontier - stubstart));
+  ASSERT(getTransRec(req)->kind == TransAnchor);
 
   return retranslate(*sk, align, RuntimeOption::EvalJitUseIR && !forceNoHHIR);
 }

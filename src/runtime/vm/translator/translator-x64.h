@@ -172,6 +172,7 @@ public:
   int m_curLine;
   litstr m_curFunc;
 private:
+  int64 m_createdTime;
 
   struct PendingFixup {
     TCA m_tca;

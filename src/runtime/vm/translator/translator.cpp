@@ -196,6 +196,15 @@ SrcKey::print(int ninstrs) const {
   }
 }
 
+std::string
+SrcKey::pretty() const {
+  std::ostringstream result;
+  const char* filepath = tl_regState == REGSTATE_CLEAN ?
+    curUnit()->filepath()->data() : "unknown";
+  result << filepath << ':' << m_funcId << ':' << m_offset;
+  return result.str();
+}
+
 // advance --
 //
 //  Move over the current instruction pointer.
@@ -3058,7 +3067,8 @@ breakBB:
 
 Translator::Translator() :
     m_resumeHelper(NULL),
-    m_useHHIR(false) {
+    m_useHHIR(false),
+    m_createdTime(Timer::GetCurrentTimeMicros()) {
   initInstrInfo();
 }
 

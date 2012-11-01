@@ -35,6 +35,11 @@ inline Variant x_thrift_protocol_read_binary(CObjRef transportobj, CStrRef obj_t
   return f_thrift_protocol_read_binary(transportobj, obj_typename, strict_read);
 }
 
+inline int x_thrift_protocol_set_compact_version(int version) {
+  FUNCTION_INJECTION_BUILTIN(thrift_protocol_set_compact_version);
+  return f_thrift_protocol_set_compact_version(version);
+}
+
 inline void x_thrift_protocol_write_compact(CObjRef transportobj, CStrRef method_name, int64 msgtype, CObjRef request_struct, int seqid) {
   FUNCTION_INJECTION_BUILTIN(thrift_protocol_write_compact);
   f_thrift_protocol_write_compact(transportobj, method_name, msgtype, request_struct, seqid);

@@ -2071,6 +2071,7 @@ TypedValue* fg_hphp_get_thread_id(VM::ActRec *ar);
 TypedValue* fg_hphp_gettid(VM::ActRec *ar);
 TypedValue* fg_thrift_protocol_write_binary(VM::ActRec *ar);
 TypedValue* fg_thrift_protocol_read_binary(VM::ActRec *ar);
+TypedValue* fg_thrift_protocol_set_compact_version(VM::ActRec *ar);
 TypedValue* fg_thrift_protocol_write_compact(VM::ActRec *ar);
 TypedValue* fg_thrift_protocol_read_compact(VM::ActRec *ar);
 TypedValue* fg_base64_decode(VM::ActRec *ar);
@@ -2913,7 +2914,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2185;
+const long long hhbc_ext_funcs_count = 2186;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -4964,6 +4965,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "hphp_gettid", fg_hphp_gettid },
   { "thrift_protocol_write_binary", fg_thrift_protocol_write_binary },
   { "thrift_protocol_read_binary", fg_thrift_protocol_read_binary },
+  { "thrift_protocol_set_compact_version", fg_thrift_protocol_set_compact_version },
   { "thrift_protocol_write_compact", fg_thrift_protocol_write_compact },
   { "thrift_protocol_read_compact", fg_thrift_protocol_read_compact },
   { "base64_decode", fg_base64_decode },

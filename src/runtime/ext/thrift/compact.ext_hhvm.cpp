@@ -25,6 +25,58 @@
 namespace HPHP {
 
 /*
+int HPHP::f_thrift_protocol_set_compact_version(int)
+_ZN4HPHP37f_thrift_protocol_set_compact_versionEi
+
+(return value) => rax
+version => rdi
+*/
+
+int fh_thrift_protocol_set_compact_version(int version) asm("_ZN4HPHP37f_thrift_protocol_set_compact_versionEi");
+
+TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
+TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->_count = 0;
+  rv->m_type = KindOfInt64;
+  tvCastToInt64InPlace(args-0);
+  rv->m_data.num = (long long)fh_thrift_protocol_set_compact_version((int)(args[-0].m_data.num));
+  return rv;
+}
+
+TypedValue* fg_thrift_protocol_set_compact_version(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv._count = 0;
+        rv.m_type = KindOfInt64;
+        rv.m_data.num = (long long)fh_thrift_protocol_set_compact_version((int)(args[-0].m_data.num));
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_thrift_protocol_set_compact_version(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("thrift_protocol_set_compact_version", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 void HPHP::f_thrift_protocol_write_compact(HPHP::Object const&, HPHP::String const&, long long, HPHP::Object const&, int)
 _ZN4HPHP31f_thrift_protocol_write_compactERKNS_6ObjectERKNS_6StringExS2_i
 

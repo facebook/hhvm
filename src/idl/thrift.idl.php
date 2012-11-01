@@ -111,6 +111,21 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "thrift_protocol_set_compact_version",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Int32,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "version",
+        'type'   => Int32,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "thrift_protocol_write_compact",
     'flags'  =>  HasDocComment,
     'return' => array(

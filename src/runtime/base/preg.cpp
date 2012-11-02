@@ -110,17 +110,18 @@ static __thread int t_last_error_code;
 
 namespace {
 
-struct FreeHelper {
-  explicit FreeHelper(void* p) : p(p) {}
-  ~FreeHelper() { free(p); }
+template<bool useSmartFree = false>
+struct FreeHelperImpl : private boost::noncopyable {
+  explicit FreeHelperImpl(void* p) : p(p) {}
+  ~FreeHelperImpl() {
+    useSmartFree ? smart_free(p) : free(p);
+  }
 
 private:
-  FreeHelper(const FreeHelper&);
-  FreeHelper& operator=(const FreeHelper&);
-
   void* p;
 };
 
+typedef FreeHelperImpl<true> SmartFreeHelper;
 }
 
 static const pcre_cache_entry* pcre_get_compiled_regex_cache(CStrRef regex) {
@@ -298,7 +299,7 @@ static int *create_offset_array(const pcre_cache_entry *pce,
   }
   num_subpats++;
   size_offsets = num_subpats * 3;
-  return (int *)malloc(size_offsets * sizeof(int));
+  return (int *)smart_malloc(size_offsets * sizeof(int));
 }
 
 static pcre* pcre_get_compiled_regex(CStrRef regex, pcre_extra **extra,
@@ -397,7 +398,7 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
   if (offsets == NULL) {
     return false;
   }
-  FreeHelper freer(offsets);
+  SmartFreeHelper freer(offsets);
 
   /* Initialize return array */
   Array ret = Array::Create();
@@ -489,7 +490,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
 
   int size_offsets = 0;
   int *offsets = create_offset_array(pce, size_offsets);
-  FreeHelper offsetsFreer(offsets);
+  SmartFreeHelper offsetsFreer(offsets);
   int num_subpats = size_offsets / 3;
   if (offsets == NULL) {
     return false;
@@ -500,8 +501,8 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
    * allocate the table, even though there may be no named subpatterns. This
    * avoids somewhat more complicated logic in the inner loops.
    */
-  char **subpat_names = (char **)malloc(num_subpats * sizeof(char *));
-  FreeHelper subpatFreer(subpat_names);
+  char **subpat_names = (char **)smart_malloc(num_subpats * sizeof(char *));
+  SmartFreeHelper subpatFreer(subpat_names);
   memset(subpat_names, 0, sizeof(char *) * num_subpats);
   {
     int name_cnt = 0, name_size, ni = 0;
@@ -782,7 +783,7 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
 
   int size_offsets;
   int *offsets = create_offset_array(pce, size_offsets);
-  FreeHelper offsetsFreer(offsets);
+  SmartFreeHelper offsetsFreer(offsets);
   if (offsets == NULL) {
     return false;
   }
@@ -1019,7 +1020,7 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
     }
     return String();
   } catch (...) {
-    if (result) free(result);
+    free(result);
     throw;
   }
 }
@@ -1132,7 +1133,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
 
   int size_offsets = 0;
   int *offsets = create_offset_array(pce, size_offsets);
-  FreeHelper offsetsFreer(offsets);
+  SmartFreeHelper offsetsFreer(offsets);
   if (offsets == NULL) {
     return false;
   }
@@ -1364,7 +1365,7 @@ static void php_reg_eprint(int err, regex_t *re) {
   /* get the length of the message */
   buf_len = regerror(REG_ITOA | err, re, NULL, 0);
   if (buf_len) {
-    buf = (char *)malloc(buf_len);
+    buf = (char *)smart_malloc(buf_len);
     if (!buf) return; /* fail silently */
     /* finally, get the error message */
     regerror(REG_ITOA | err, re, buf, buf_len);
@@ -1374,7 +1375,7 @@ static void php_reg_eprint(int err, regex_t *re) {
 #endif
   len = regerror(err, re, NULL, 0);
   if (len) {
-    message = (char *)malloc(buf_len + len + 2);
+    message = (char *)smart_malloc(buf_len + len + 2);
     if (!message) {
       return; /* fail silently */
     }
@@ -1386,8 +1387,8 @@ static void php_reg_eprint(int err, regex_t *re) {
     regerror(err, re, message + buf_len, len);
     raise_warning("%s", message);
   }
-  if (buf) free(buf);
-  if (message) free(message);
+  smart_free(buf);
+  smart_free(message);
 }
 
 Variant php_split(CStrRef spliton, CStrRef str, int count, bool icase) {

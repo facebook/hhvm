@@ -672,6 +672,9 @@ private:
                  TypedValue* savedSP);
   void doFPushCuf(VM::PC& pc, bool forward, bool safe);
   void unwindBuiltinFrame();
+  template <bool forwarding>
+  void pushClsMethodImpl(VM::Class* cls, StringData* name,
+                         ObjectData* obj, int numArgs);
   template <bool reenter, bool handle_throw>
   bool prepareFuncEntry(VM::ActRec* ar,
                         VM::PC& pc,

@@ -1238,6 +1238,7 @@ StaticMethodFCache::lookup(Handle handle, const Class* cls,
     thiz->m_static = f->isStatic();
     TRACE(1, "fill staticfcache %s :: %s -> %p\n",
           cls->name()->data(), methName->data(), f);
+    Stats::inc(Stats::TgtCache_StaticMethodFFill);
     return f;
   }
 

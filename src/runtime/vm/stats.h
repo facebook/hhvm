@@ -69,6 +69,7 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TgtCache_StaticMethodFHit) \
   STAT(TgtCache_StaticMethodFMiss) \
   STAT(TgtCache_StaticMethodFBypass) \
+  STAT(TgtCache_StaticMethodFFill) \
   STAT(TgtCache_ClassExistsHit) \
   STAT(TgtCache_ClassExistsMiss) \
   STAT(Tx64_FusedTypeCheck) \

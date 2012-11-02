@@ -5513,48 +5513,52 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushObjMethodD(PC& pc) {
   OBJMETHOD_BODY(cls, name, obj);
 }
 
-#define CLSMETHOD_BODY(cls, name, obj, forwarding) do { \
-  const Func* f; \
-  LookupResult res = lookupClsMethod(f, cls, name, obj, true); \
-  if (f->isAbstract()) { \
-    raise_error("Cannot call abstract method %s()", \
-                f->fullName()->data()); \
-  } \
-  if (res == MethodFoundNoThis || res == MagicCallStaticFound) { \
-    obj = NULL; \
-  } else { \
-    ASSERT(obj); \
-    ASSERT(res == MethodFoundWithThis || res == MagicCallFound); \
-    obj->incRefCount(); \
-  } \
-  ASSERT(f); \
-  ActRec* ar = m_stack.allocA(); \
-  arSetSfp(ar, m_fp); \
-  ar->m_func = f; \
-  if (obj) { \
-    ar->setThis(obj); \
-  } else { \
-    if (!forwarding) { \
-      ar->setClass(cls); \
-    } else { \
-      /* Propogate the current late bound class if there is one, */ \
-      /* otherwise use the class given by this instruction's input */ \
-      if (m_fp->hasThis()) { \
-        cls = m_fp->getThis()->getVMClass(); \
-      } else if (m_fp->hasClass()) { \
-        cls = m_fp->getClass(); \
-      } \
-      ar->setClass(cls); \
-    } \
-  } \
-  ar->initNumArgs(numArgs); \
-  if (res == MagicCallFound || res == MagicCallStaticFound) { \
-    ar->setInvName(name); \
-  } else { \
-    ar->setVarEnv(NULL); \
-    LITSTR_DECREF(const_cast<StringData*>(name)); \
-  } \
-} while (0)
+template<bool forwarding>
+void VMExecutionContext::pushClsMethodImpl(Class* cls,
+                                           StringData* name,
+                                           ObjectData* obj,
+                                           int numArgs) {
+  const Func* f;
+  LookupResult res = lookupClsMethod(f, cls, name, obj, true);
+  if (f->isAbstract()) {
+    raise_error("Cannot call abstract method %s()",
+                f->fullName()->data());
+  }
+  if (res == MethodFoundNoThis || res == MagicCallStaticFound) {
+    obj = NULL;
+  } else {
+    ASSERT(obj);
+    ASSERT(res == MethodFoundWithThis || res == MagicCallFound);
+    obj->incRefCount();
+  }
+  ASSERT(f);
+  ActRec* ar = m_stack.allocA();
+  arSetSfp(ar, m_fp);
+  ar->m_func = f;
+  if (obj) {
+    ar->setThis(obj);
+  } else {
+    if (!forwarding) {
+      ar->setClass(cls);
+    } else {
+      /* Propogate the current late bound class if there is one, */
+      /* otherwise use the class given by this instruction's input */
+      if (m_fp->hasThis()) {
+        cls = m_fp->getThis()->getVMClass();
+      } else if (m_fp->hasClass()) {
+        cls = m_fp->getClass();
+      }
+      ar->setClass(cls);
+    }
+  }
+  ar->initNumArgs(numArgs);
+  if (res == MagicCallFound || res == MagicCallStaticFound) {
+    ar->setInvName(name);
+  } else {
+    ar->setVarEnv(NULL);
+    LITSTR_DECREF(const_cast<StringData*>(name));
+  }
+}
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethod(PC& pc) {
   NEXT();
@@ -5571,7 +5575,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethod(PC& pc) {
   m_stack.ndiscard(2);
   ASSERT(cls && name);
   ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : NULL;
-  CLSMETHOD_BODY(cls, name, obj, false);
+  pushClsMethodImpl<false>(cls, name, obj, numArgs);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodD(PC& pc) {
@@ -5586,7 +5590,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodD(PC& pc) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
   ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : NULL;
-  CLSMETHOD_BODY(cls, name, obj, false);
+  pushClsMethodImpl<false>(cls, name, obj, numArgs);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodF(PC& pc) {
@@ -5604,7 +5608,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushClsMethodF(PC& pc) {
   // CLSMETHOD_BODY will take care of decReffing name
   m_stack.ndiscard(2);
   ObjectData* obj = m_fp->hasThis() ? m_fp->getThis() : NULL;
-  CLSMETHOD_BODY(cls, name, obj, true);
+  pushClsMethodImpl<true>(cls, name, obj, numArgs);
 }
 
 #undef CLSMETHOD_BODY

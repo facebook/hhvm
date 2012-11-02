@@ -2015,16 +2015,16 @@ TranslatorX64::emitInterceptPrologue(Func* func) {
   emitImmReg(a, int64(&func->maybeIntercepted()), rax);
   a.cmp_imm8_disp_reg8(0, 0, rax);
   semiLikelyIfBlock<CC_NE>(a, [&]{
-      // Prologues are not really sites for function entry yet; we can get
-      // here via an optimistic bindCall. Check that the func is as expected.
+    // Prologues are not really sites for function entry yet; we can get
+    // here via an optimistic bindCall. Check that the func is as expected.
 
-      emitImmReg(a, int64(func), rax);
-      a.    cmp_reg64_disp_reg64(rax, AROFF(m_func), rStashedAR);
-      {
-        JccBlock<CC_NZ> skip(a);
-        a.call(getInterceptHelper());
-      }
-    });
+    emitImmReg(a, int64(func), rax);
+    a.    cmp_reg64_disp_reg64(rax, AROFF(m_func), rStashedAR);
+    {
+      JccBlock<CC_NZ> skip(a);
+      a.call(getInterceptHelper());
+    }
+  });
   return start;
 }
 
@@ -9880,8 +9880,8 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
       } else {
         Stats::emitInc(a, Stats::Tx64_OneGuardLong);
         semiLikelyIfBlock<CC_NZ>(a, [&]{
-            emitSideExit(a, i, false /*next*/);
-          });
+          emitSideExit(a, i, false /*next*/);
+        });
       }
     } else {
       UnlikelyIfBlock<CC_NZ> ifFail(a, astubs);

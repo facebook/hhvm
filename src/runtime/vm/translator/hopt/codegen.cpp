@@ -1072,6 +1072,14 @@ const StringData* intToStringHelper(int64 n) {
 }
 
 
+int64 cgArrEqHelper(ArrayData* a1, ArrayData* a2) {
+  return equal(Array(a1), Array(a2));
+}
+
+int64 cgArrNeqHelper(ArrayData* a1, ArrayData* a2) {
+  return !cgArrEqHelper(a1, a2);
+}
+
 // eq - is it = or !=
 // same - is it == or ===
 template <bool eq, bool same>
@@ -1273,8 +1281,11 @@ Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
     if (eq) CG_PUNT(Eq_obj);
     else    CG_PUNT(Neq_obj);
   } else if (type1 == Type::Arr && type2 == Type::Arr) {
-    if (eq) CG_PUNT(Eq_arr);
-    else    CG_PUNT(Neq_arr);
+    ArgGroup args;
+    args.ssa(src1).ssa(src2);
+
+    if (eq) cgCallHelper(m_as, (TCA)cgArrEqHelper,  dst, true, args);
+    else    cgCallHelper(m_as, (TCA)cgArrNeqHelper, dst, true, args);
   } else {
     if (eq) CG_PUNT(Eq);
     else    CG_PUNT(Neq);

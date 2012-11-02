@@ -374,7 +374,7 @@ public: // Offset accessors for the translator.
 private:
   typedef IndexedStringMap<const StringData*,true,Id> NamedLocalsMap;
 
-  struct SharedData : public Countable {
+  struct SharedData : public AtomicCountable {
     PreClass* m_preClass;
     Id m_id;
     Offset m_base;
@@ -401,9 +401,9 @@ private:
         Offset past, int line1, int line2, bool top,
         const StringData* docComment);
     ~SharedData();
-    void release();
+    void atomicRelease();
   };
-  typedef SmartPtr<SharedData> SharedDataPtr;
+  typedef AtomicSmartPtr<SharedData> SharedDataPtr;
 
   static const int kBitsPerQword = 64;
   static const StringData* s___call;

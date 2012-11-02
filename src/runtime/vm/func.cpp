@@ -582,7 +582,7 @@ Func::SharedData::~SharedData() {
   }
 }
 
-void Func::SharedData::release() {
+void Func::SharedData::atomicRelease() {
   delete this;
 }
 

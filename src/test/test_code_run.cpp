@@ -11156,6 +11156,21 @@ bool TestCodeRun::TestVolatile() {
         "__autoload\n"
         "**************\n");
 
+  // Github Issue#619
+  MVCRO("<?php "
+        "spl_autoload_register(function($f) { var_dump(1); });\n"
+        "spl_autoload_register(function($f) { var_dump(2); });\n"
+        "class_exists('A');\n"
+        "// hphpc won't call the autoloader unless there exists a\n"
+        "// definition for the class somewhere\n"
+        "if (true) {\n"
+        "  class A {}\n"
+        "}\n",
+
+        "int(1)\n"
+        "int(2)\n"
+       );
+
   return true;
 }
 

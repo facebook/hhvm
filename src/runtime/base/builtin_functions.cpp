@@ -1912,6 +1912,11 @@ String AutoloadHandler::getSignature(CVarRef handler) {
       int64 data = (int64)first.getObjectData();
       lName += String((const char *)&data, sizeof(data), CopyString);
     }
+  } else if (handler.isObject()) {
+    // "lName" will just be "classname::__invoke",
+    // add object address to differentiate the signature
+    int64 data = (int64)handler.getObjectData();
+    lName += String((const char*)&data, sizeof(data), CopyString);
   }
   return lName;
 }

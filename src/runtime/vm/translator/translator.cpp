@@ -1916,16 +1916,31 @@ bool outputDependsOnInput(const Opcode instr) {
     case OutBooleanImm:
     case OutInt64:
     case OutArray:
+    case OutArrayImm:
     case OutObject:
+    case OutThisObject:
     case OutUnknown:
     case OutVUnknown:
     case OutClassRef:
+    case OutPred:
+    case OutCns:
+    case OutIncDec:
     case OutNone:
       return false;
-    default:
-      break;
+    case OutFDesc:
+    case OutSameAsInput:
+    case OutCInput:
+    case OutVInput:
+    case OutCInputL:
+    case OutVInputL:
+    case OutFInputL:
+    case OutFInputR:
+    case OutArith:
+    case OutBitOp:
+    case OutSetOp:
+      return true;
   }
-  return true;
+  not_reached();
 }
 
 /*

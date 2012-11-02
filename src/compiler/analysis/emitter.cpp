@@ -1458,6 +1458,16 @@ void EmitterVisitor::visitIfCondition(
     }
   }
 
+  Variant val;
+  if (cond->getScalarValue(val)) {
+    if (truFallthrough) {
+      if (!val.toBoolean()) e.Jmp(fals);
+    } else {
+      if (val.toBoolean()) e.Jmp(tru);
+    }
+    return;
+  }
+
   visit(cond);
   emitConvertToCell(e);
   if (truFallthrough) {
@@ -1906,14 +1916,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           visit(node->getNthKid(DoStatement::BodyStmt));
         }
         condition.set(e);
-        visit(node->getNthKid(DoStatement::CondExpr));
-        emitConvertToCell(e);
-        e.JmpNZ(top);
+        {
+          ExpressionPtr c(static_pointer_cast<Expression>(
+                            node->getNthKid(DoStatement::CondExpr)));
+          Emitter condEmitter(c, m_ue, *this);
+          visitIfCondition(c, condEmitter, top, exit, false);
+        }
+
         if (brkHand.isUsed() || cntHand.isUsed()) {
           e.Jmp(exit);
           emitBreakHandler(e, exit, condition, brkHand, cntHand);
         }
-        exit.set(e);
+        if (exit.isUsed()) exit.set(e);
         return false;
       }
 
@@ -1966,9 +1980,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         Label fail;
         Label brkHand;
         Label cntHand;
-        if (visit(node->getNthKid(ForStatement::CondExpr))) {
-          emitConvertToCell(e);
-          e.JmpZ(fail);
+        if (ConstructPtr n = node->getNthKid(ForStatement::CondExpr)) {
+          Label tru;
+          Emitter condEmitter(static_pointer_cast<Expression>(n),
+                              m_ue, *this);
+          visitIfCondition(static_pointer_cast<Expression>(n),
+                           condEmitter, tru, fail, true);
+          if (tru.isUsed()) tru.set(e);
         }
         {
           CONTROL_BODY(fail, preInc, brkHand, cntHand);
@@ -1980,7 +1998,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
         e.Jmp(preCond);
         emitBreakHandler(e, fail, preInc, brkHand, cntHand);
-        fail.set(e);
+        if (fail.isUsed()) fail.set(e);
         return false;
       }
 
@@ -2338,16 +2356,21 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         Label fail;
         Label brkHand;
         Label cntHand;
-        visit(node->getNthKid(WhileStatement::CondExpr));
-        emitConvertToCell(e);
-        e.JmpZ(fail);
+        {
+          Label tru;
+          ExpressionPtr c(static_pointer_cast<Expression>(
+                            node->getNthKid(WhileStatement::CondExpr)));
+          Emitter condEmitter(c, m_ue, *this);
+          visitIfCondition(c, condEmitter, tru, fail, true);
+          if (tru.isUsed()) tru.set(e);
+        }
         {
           CONTROL_BODY(fail, preCond, brkHand, cntHand);
           visit(node->getNthKid(WhileStatement::BodyStmt));
         }
         e.Jmp(preCond);
         emitBreakHandler(e, fail, preCond, brkHand, cntHand);
-        fail.set(e);
+        if (fail.isUsed()) fail.set(e);
         return false;
       }
 

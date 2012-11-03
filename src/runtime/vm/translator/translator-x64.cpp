@@ -2514,10 +2514,32 @@ TranslatorX64::emitStringCheck(X64Assembler& _a,
 }
 
 void
+TranslatorX64::emitCheckUnboxedUncounted(X64Assembler& a,
+                                         PhysReg       baseReg,
+                                         int           offset,
+                                         SrcRec&       fail) {
+  a.cmp_imm32_disp_reg32(KindOfStaticString, offset, baseReg);
+  emitFallbackJmp(a, fail, CC_G);
+}
+
+void
+TranslatorX64::emitCheckUnboxedCounted(X64Assembler& a,
+                                       PhysReg       baseReg,
+                                       int           offset,
+                                       SrcRec&       fail) {
+  ScratchReg rTmp(m_regMap);
+  a.load_reg64_disp_reg32(baseReg, offset, *rTmp);
+  a.cmp_imm32_reg32(KindOfStaticString, *rTmp);
+  emitFallbackJmp(a, fail, CC_LE);
+  a.cmp_imm32_reg32(KindOfRef, *rTmp);
+  emitFallbackJmp(a, fail, CC_GE);
+}
+
+void
 TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
                              PhysReg base, int offset,
+                             SrcRec* fail,
                              PhysReg tmp/*= InvalidReg*/) {
-  ASSERT(IS_REAL_TYPE(dt));
   offset += TVOFF(m_type);
   if (IS_STRING_TYPE(dt)) {
     LazyScratchReg scr(m_regMap);
@@ -2526,8 +2548,28 @@ TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
       tmp = *scr;
     }
     emitStringCheck(_a, base, offset, tmp);
-  } else {
-    _a. cmp_imm32_disp_reg32(dt, offset, base);
+    if (fail) {
+      emitFallbackJmp(*fail);
+    }
+    return;
+  }
+  switch (dt) {
+    case KindOfAny:
+      break;
+    case KindOfUnboxedUncounted:
+      ASSERT(fail);
+      emitCheckUnboxedUncounted(_a, base, offset, *fail);
+      break;
+    case KindOfUnboxedCounted:
+      ASSERT(fail);
+      emitCheckUnboxedCounted(_a, base, offset, *fail);
+      break;
+    default:
+      ASSERT(IS_REAL_TYPE(dt));
+      _a. cmp_imm32_disp_reg32(dt, offset, base);
+      if (fail) {
+        emitFallbackJmp(*fail);
+      }
   }
 }
 
@@ -2563,21 +2605,22 @@ TranslatorX64::checkType(X64Assembler& a,
     a.   cmp_imm32_disp_reg32(rtt.typeCheckValue(),
                               disp + rtt.typeCheckOffset(),
                               base);
+    emitFallbackJmp(fail);
   } else {
-    emitTypeCheck(a, rtt.typeCheckValue(), base, disp, rax);
+    emitTypeCheck(a, rtt.typeCheckValue(), base, disp, &fail, rax);
   }
-  emitFallbackJmp(fail);
 }
 
 void
-TranslatorX64::emitFallbackJmp(SrcRec& dest) {
-  emitFallbackJmp(a, dest);
+TranslatorX64::emitFallbackJmp(SrcRec& dest, ConditionCode cc /* = CC_NZ */) {
+  emitFallbackJmp(a, dest, cc);
 }
 
 void
-TranslatorX64::emitFallbackJmp(Asm& as, SrcRec& dest) {
-  prepareForSmash(as, kJmpccLen, kJmpccLen - kJmpImmBytes);
-  dest.emitFallbackJump(as, as.code.frontier, CC_NZ);
+TranslatorX64::emitFallbackJmp(Asm& as, SrcRec& dest,
+                               ConditionCode cc /* = CC_NZ */) {
+  prepareForSmash(as, kJmpccLen);
+  dest.emitFallbackJump(as, as.code.frontier, cc);
 }
 
 void
@@ -4574,6 +4617,7 @@ TranslatorX64::analyzeAssignToLocalOp(Tracelet& t,
   ni.m_txFlags = planHingesOnRefcounting(ni.inputs[locIdx]->outerType());
 }
 
+
 void
 TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
                                         const NormalizedInstruction& ni) {
@@ -4590,11 +4634,15 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
   ASSERT(ni.inputs[locIdx]->location == ni.outLocal->location);
   ASSERT(ni.inputs[rhsIdx]->isStack());
 
-  m_regMap.allocOutputRegs(ni);
-  const PhysReg rhsReg        = getReg(ni.inputs[rhsIdx]->location);
-  const PhysReg localReg      = getReg(ni.outLocal->location);
   const DataType oldLocalType = ni.inputs[locIdx]->outerType();
   const DataType rhsType      = ni.inputs[rhsIdx]->outerType();
+  bool rhsTypeRelaxed         = GuardType(rhsType).isRelaxed();
+  bool locTypeRelaxed         = GuardType(oldLocalType).isRelaxed();
+
+  m_regMap.allocOutputRegs(ni);
+
+  const PhysReg rhsReg        = getReg(ni.inputs[rhsIdx]->location);
+  const PhysReg localReg      = getReg(ni.outLocal->location);
   ASSERT(localReg != rhsReg);
 
   LazyScratchReg oldLocalReg(m_regMap);
@@ -4611,8 +4659,32 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
 
     oldLocalReg.alloc();
     emitDeref(a, localReg, *oldLocalReg);
-    emitStoreTypedValue(a, rhsType, rhsReg, 0, localReg);
+    if (rhsTypeRelaxed) {
+      PhysReg base;
+      int disp;
+      ScratchReg rTmp(m_regMap);
+      locToRegDisp(ni.inputs[rhsIdx]->location, &base, &disp);
+      a.store_reg64_disp_reg64(rhsReg, TVOFF(m_data), localReg);
+      a.load_reg64_disp_reg32(base, disp + TVOFF(m_type), *rTmp);
+      a.store_reg32_disp_reg64(*rTmp, TVOFF(m_type), localReg);
+    } else {
+      emitStoreTypedValue(a, rhsType, rhsReg, 0, localReg);
+    }
     decRefType = ni.inputs[locIdx]->rtt.innerType();
+  } else if (rhsTypeRelaxed) {
+    PhysReg rhsBase;
+    int rhsDisp;
+    locToRegDisp(ni.inputs[rhsIdx]->location, &rhsBase, &rhsDisp);
+    PhysReg locBase;
+    int locDisp;
+    locToRegDisp(ni.inputs[locIdx]->location, &locBase, &locDisp);
+    ScratchReg rTmp(m_regMap);
+    a.store_reg64_disp_reg64(rhsReg, locDisp + TVOFF(m_data), locBase);
+    a.load_reg64_disp_reg32(rhsBase, rhsDisp + TVOFF(m_type), *rTmp);
+    a.store_reg32_disp_reg64(*rTmp, locDisp + TVOFF(m_type), locBase);
+    m_regMap.swapRegisters(rhsReg, localReg);
+    decRefType = oldLocalType;
+    m_regMap.markAsClean(ni.inputs[locIdx]->location);
   } else {
     /*
      * Instead of emitting a mov, just swap the locations these two
@@ -4630,19 +4702,37 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
   // calling a possible destructor, since the destructor could have
   // access to the local if it is a var.
   if (ni.outStack) {
-    emitIncRef(rhsReg, rhsType);
+    if (rhsTypeRelaxed) {
+      if (GuardType(rhsType).isCounted()) {
+        PhysReg base;
+        int disp;
+        locToRegDisp(ni.inputs[rhsIdx]->location, &base, &disp);
+        emitIncRefGeneric(base, disp); // forces static check
+      }
+    } else {
+      emitIncRef(rhsReg, rhsType);
+    }
   } else {
     SKTRACE(3, ni.source, "hoisting Pop* into current instr\n");
   }
 
-  emitDecRef(ni, oldLocalReg.isAllocated() ? *oldLocalReg : localReg,
-    decRefType);
+  if (locTypeRelaxed) {
+    if (GuardType(decRefType).isCounted()) {
+      emitDecRef(ni, oldLocalReg.isAllocated() ? *oldLocalReg : localReg,
+                 decRefType);
+    }
+  } else {
+    emitDecRef(ni, oldLocalReg.isAllocated() ? *oldLocalReg : localReg,
+               decRefType);
+  }
 
   if (ni.outStack && !IS_NULL_TYPE(ni.outStack->outerType())) {
+    ASSERT(!rhsTypeRelaxed);
     PhysReg stackReg = getReg(ni.outStack->location);
     emitMovRegReg(a, rhsReg, stackReg);
   }
 }
+
 
 static void
 planPop(NormalizedInstruction& i) {

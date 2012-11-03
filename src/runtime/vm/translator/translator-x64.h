@@ -776,6 +776,7 @@ private:
   void emitStringCheck(Asm& _a, PhysReg base, int offset, PhysReg tmp);
   void emitTypeCheck(Asm& _a, DataType dt,
                      PhysReg base, int offset,
+                     SrcRec* fail = NULL,
                      PhysReg tmp = InvalidReg);
   void irAssertType(const Location& l, const RuntimeType& rtt);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,
@@ -839,13 +840,23 @@ private:
   TCA bindJmpccSecond(TCA toSmash, const Offset off,
                       ConditionCode cc,
                       bool& smashed);
-  void emitFallbackJmp(SrcRec& dest);
-  void emitFallbackJmp(Asm& as, SrcRec& dest);
+  void emitFallbackJmp(SrcRec& dest, ConditionCode cc = CC_NZ);
+  void emitFallbackJmp(Asm& as, SrcRec& dest, ConditionCode cc = CC_NZ);
   void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
   void emitDebugPrint(Asm&, const char*,
                       PhysReg = reg::r13,
                       PhysReg = reg::r14,
                       PhysReg = reg::rax);
+  void emitCheckUnboxedUncounted(X64Assembler& a,
+                                 PhysReg       baseReg,
+                                 int           offset,
+                                 SrcRec&       fail);
+  void emitCheckUnboxedCounted(X64Assembler& a,
+                               PhysReg       baseReg,
+                               int           offset,
+                               SrcRec&       fail);
+
+
   enum SRFlags {
     SRNone = 0,
     SRAlign = 1,

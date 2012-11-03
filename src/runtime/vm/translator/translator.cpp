@@ -2494,6 +2494,198 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
   }
 }
 
+GuardType::GuardType(DataType outer, DataType inner)
+  : outerType(outer), innerType(inner) {
+}
+
+GuardType::GuardType(const RuntimeType& rtt) {
+  ASSERT(rtt.isValue());
+  outerType = rtt.outerType();
+  innerType = rtt.innerType();
+}
+
+GuardType::GuardType(const GuardType& other) {
+  *this = other;
+}
+
+
+const DataType GuardType::getOuterType() const {
+  return outerType;
+}
+
+const DataType GuardType::getInnerType() const {
+  return innerType;
+}
+
+bool GuardType::isSpecific() const {
+  return outerType > KindOfInvalid;
+}
+
+bool GuardType::isRelaxed() const {
+  switch (outerType) {
+    case KindOfAny:
+    case KindOfUnboxedUncounted:
+    case KindOfUnboxedCounted:
+    case KindOfBoxedUncounted:
+    case KindOfBoxedCounted:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool GuardType::isCounted() const {
+  switch (outerType) {
+    case KindOfAny:
+    case KindOfUnboxedCounted:
+    case KindOfBoxedCounted:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfRef:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool GuardType::isMoreRefinedThan(const GuardType& other) const {
+  return getCategory() > other.getCategory();
+}
+
+DataTypeCategory GuardType::getCategory() const {
+  switch (outerType) {
+    case KindOfAny:              return DataTypeGeneric;
+    case KindOfUnboxedUncounted:
+    case KindOfUnboxedCounted:
+    case KindOfBoxedUncounted:
+    case KindOfBoxedCounted:     return DataTypeCountness;
+    default:                     return DataTypeSpecific;
+  }
+}
+
+GuardType GuardType::getCountness() const {
+  // Note that translations need to be able to handle KindOfString and
+  // KindOfStaticString interchangeably.  This implies that KindOfStaticString
+  // needs to be treated as KindOfString, i.e. as possibly counted.
+  switch (outerType) {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:  return GuardType(KindOfUnboxedUncounted);
+    default:            return *this;
+  }
+}
+
+DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
+                                              size_t opndIdx) {
+  switch (instr->op()) {
+    case OpSetL : {
+      ASSERT(opndIdx < 2);
+      if (opndIdx == 0) { // stack value
+        if (instr->outStack ||
+            (instr->outputIsUsed(instr->outLocal) ==
+             NormalizedInstruction::OutputUsed)) {
+          return DataTypeSpecific;
+        }
+        return DataTypeGeneric;
+      } else { // old local value
+        return DataTypeCountness;
+      }
+    }
+    default: return DataTypeSpecific;
+  }
+}
+
+
+GuardType getOperandConstraintType(NormalizedInstruction* instr,
+                                   size_t                 opndIdx,
+                                   const GuardType&       specType) {
+  DataTypeCategory dtCategory = getOperandConstraintCategory(instr, opndIdx);
+  switch (dtCategory) {
+    case DataTypeGeneric:   return GuardType(KindOfAny);
+    case DataTypeCountness: return specType.getCountness();
+    case DataTypeSpecific:
+    default:                return specType;
+  }
+}
+
+void constrainOperandType(GuardType&             relxType,
+                          NormalizedInstruction* instr,
+                          size_t                 opndIdx,
+                          const GuardType&       specType) {
+  if (relxType.isSpecific()) return; // Can't constrain any further
+
+  switch (instr->op()) {
+    case OpSetL: {
+      GuardType consType = getOperandConstraintType(instr, opndIdx, specType);
+      if (consType.isMoreRefinedThan(relxType)) {
+        relxType = consType;
+      }
+      return;
+    }
+    default: {
+      relxType = specType;
+      return;
+    }
+  }
+}
+
+
+/**
+ * This method looks at all the uses of the tracelet dependencies in the
+ * instruction stream and tries to relax the type associated with each location.
+ */
+void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
+  DynLocTypeMap locRelxTypeMap;
+  DynLocTypeMap locSpecTypeMap;
+
+  // Initialize type maps.  Relaxed types start off very relaxed, and then
+  // they may get more specific depending on how the instructions use them.
+  DepMap& deps = tctxt.m_dependencies;
+  for (auto depIt = deps.begin(); depIt != deps.end(); depIt++) {
+    DynLocation*       loc = depIt->second;
+    const RuntimeType& rtt = depIt->second->rtt;
+    if (rtt.isValue() && !rtt.isVagueValue() && !loc->location.isThis()) {
+      locSpecTypeMap[loc] = GuardType(rtt);
+      locRelxTypeMap[loc] = GuardType(KindOfAny);
+    }
+  }
+
+  // Process the instruction stream, constraining the relaxed types along the way
+  for (NormalizedInstruction* instr = tclet.m_instrStream.first; instr;
+       instr = instr->next) {
+    for (size_t i = 0; i < instr->inputs.size(); i++) {
+      DynLocation* loc = instr->inputs[i];
+      auto it = locRelxTypeMap.find(loc);
+      if (it != locRelxTypeMap.end()) {
+        GuardType& relxType = it->second;
+        constrainOperandType(relxType, instr, i, locSpecTypeMap[loc]);
+      }
+    }
+  }
+
+  // For each dependency, if we found a more relaxed type for it, use such type.
+  for (auto mapIt = locRelxTypeMap.begin(); mapIt != locRelxTypeMap.end();
+       mapIt++) {
+    DynLocation* loc = mapIt->first;
+    const GuardType& relxType = mapIt->second;
+    if (relxType.isRelaxed()) {
+      TRACE(1, "relaxDeps: Loc: %s   oldType: %s   =>   newType: %s\n",
+            loc->location.pretty().c_str(),
+            deps[loc->location]->rtt.pretty().c_str(),
+            RuntimeType(relxType.getOuterType(),
+                        relxType.getInnerType()).pretty().c_str());
+      ASSERT(deps[loc->location] == loc);
+      deps[loc->location]->rtt = RuntimeType(relxType.getOuterType(),
+                                             relxType.getInnerType());
+    }
+  }
+}
+
+
 /*
  * analyze --
  *
@@ -2839,6 +3031,11 @@ breakBB:
   // inconsistent and troubles HHIR emission, so don't do it if HHIR is in use
   if (!RuntimeOption::EvalJitUseIR) {
     analyzeSecondPass(t);
+  }
+
+  // TODO: Add support for relaxed dependencies to HHIR
+  if (!RuntimeOption::EvalJitUseIR) {
+    relaxDeps(t, tas);
   }
 
   // Mark the last instruction appropriately

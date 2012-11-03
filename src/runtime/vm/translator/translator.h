@@ -431,6 +431,25 @@ class UnknownInputExc : public std::exception {
   throw UnknownInputExc(__FILE__, __LINE__); \
 } while(0);
 
+class GuardType {
+ public:
+  GuardType(DataType outer = KindOfInvalid, DataType inner = KindOfInvalid);
+  GuardType(const RuntimeType& rtt);
+  GuardType(const GuardType& other);
+  const DataType   getOuterType() const;
+  const DataType   getInnerType() const;
+  bool             isSpecific() const;
+  bool             isRelaxed() const;
+  bool             isCounted() const;
+  bool             isMoreRefinedThan(const GuardType& other) const;
+  GuardType        getCountness() const;
+  DataTypeCategory getCategory() const;
+
+ private:
+  DataType outerType;
+  DataType innerType;
+};
+
 /*
  * A tracelet is a unit of input to the back-end. It is a partially typed,
  * non-maximal basic block, representing the next slice of the program to
@@ -442,6 +461,7 @@ class UnknownInputExc : public std::exception {
 typedef hphp_hash_map<Location, DynLocation*, Location> ChangeMap;
 typedef ChangeMap DepMap;
 typedef hphp_hash_set<Location, Location> LocationSet;
+typedef hphp_hash_map<DynLocation*, GuardType>  DynLocTypeMap;
 
 struct InstrStream {
   InstrStream() : first(NULL), last(NULL) {}
@@ -747,6 +767,7 @@ private:
                   NormalizedInstruction* ni,
                   int& currentStackOffset,
                   bool& varEnvTaint);
+  void relaxDeps(Tracelet& tclet, TraceletContext& tctxt);
 
   static RuntimeType liveType(Location l, const Unit &u);
   static RuntimeType liveType(const Cell* outer, const Location& l);

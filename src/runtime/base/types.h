@@ -127,12 +127,18 @@ class VariableUnserializer;
 enum DataType {
   // Self and Parent are defined here for use by class TypeConstraint.
   // KindOfSelf/Parent are not used by TypedValue
-  KindOfSelf      = -4,
-  KindOfParent    = -3,
+  KindOfSelf      = -9,
+  KindOfParent    = -8,
 
-  MinDataType     = -2,
+  MinDataType     = -7,
 
   // Values below zero are not PHP values, but runtime-internal.
+  KindOfAny              = -7,
+  KindOfUnboxedUncounted = -6,
+  KindOfUnboxedCounted   = -5,
+  KindOfBoxedUncounted   = -4,
+  KindOfBoxedCounted     = -3,
+
   KindOfClass     = -2,
   KindOfInvalid   = -1,
   KindOfUnknown   = KindOfInvalid,
@@ -163,6 +169,12 @@ BOOST_STATIC_ASSERT((sizeof(DataType) == 4));
 
 // All DataTypes greater than this value are refcounted.
 const DataType KindOfRefCountThreshold = KindOfStaticString;
+
+enum DataTypeCategory {
+  DataTypeGeneric,
+  DataTypeCountness,
+  DataTypeSpecific
+};
 
 std::string tname(DataType t);
 

@@ -227,27 +227,9 @@ struct StaticMethodFCache {
                             const StringData* meth);
 };
 
-struct MethodCacheEntry {
-  intptr_t m_data;
-  void set(const Func* func, bool isMagicCall, bool isStatic) {
-    ASSERT(func);
-    ASSERT((intptr_t(func) & 0x3) == 0);
-    m_data = intptr_t(func) | intptr_t(isMagicCall) | (intptr_t(isStatic) << 1);
-  }
-  bool isMagicCall() const {
-    return (m_data & 1);
-  }
-  bool isStatic() const {
-    return (m_data & 2);
-  }
-  const Func* getFunc() const {
-    return (const Func*)(m_data & ~3);
-  }
-};
-
 typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>
   FuncCache;
-typedef Cache<const Class*, MethodCacheEntry, ActRec*, NSInvalid, 1, void>
+typedef Cache<uintptr_t, const Func*, ActRec*, NSInvalid, 1, void>
   MethodCache;
 typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
 

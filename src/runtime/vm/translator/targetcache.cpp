@@ -435,73 +435,112 @@ void FixedFuncCache::lookupFailed(StringData* name) {
 
 template<>
 inline int
-MethodCache::hashKey(const Class* c) {
+MethodCache::hashKey(uintptr_t c) {
   pointer_hash<Class> h;
-  return h(c);
+  return h(reinterpret_cast<const Class*>(c));
+}
+
+/*
+ * This is flagged NEVER_INLINE because if gcc inlines it, it will
+ * hoist a bunch of initialization code (callee-saved regs pushes,
+ * making a frame, and rsp adjustment) above the fast path.  When not
+ * inlined, gcc is generating a jmp to this function instead of a
+ * call.
+ */
+HOT_FUNC_VM NEVER_INLINE
+static void methodCacheSlowPath(MethodCache::Pair* mce,
+                                ActRec* ar,
+                                StringData* name,
+                                Class* cls) {
+  ASSERT(ar->hasThis());
+  ASSERT(ar->getThis()->getVMClass() == cls);
+  ASSERT(IMPLIES(mce->m_key, mce->m_value));
+
+  bool isMagicCall = mce->m_key & 0x1u;
+  bool isStatic;
+  const Func* func;
+
+  auto* storedClass = reinterpret_cast<Class*>(mce->m_key & ~0x3u);
+  if (storedClass == cls) {
+    isStatic = mce->m_key & 0x2u;
+    func = mce->m_value;
+  } else {
+    if (LIKELY(storedClass != NULL &&
+               ((func = cls->wouldCall(mce->m_value)) != NULL) &&
+               !isMagicCall)) {
+      Stats::inc(Stats::TgtCache_MethodHit, func != NULL);
+      isMagicCall = false;
+    } else {
+      Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
+      Stats::inc(Stats::TgtCache_MethodMiss);
+      TRACE(2, "MethodCache: miss class %p name %s!\n", cls, name->data());
+      func = g_vmContext->lookupMethodCtx(cls, name, ctx,
+        MethodLookup::ObjMethod, false);
+      if (UNLIKELY(!func)) {
+        isMagicCall = true;
+        func = cls->lookupMethod(s___call.get());
+        if (UNLIKELY(!func)) {
+          // Do it again, but raise the error this time.
+          (void) g_vmContext->lookupMethodCtx(cls, name, ctx,
+                    MethodLookup::ObjMethod, true);
+          NOT_REACHED();
+        }
+      } else {
+        isMagicCall = false;
+      }
+    }
+
+    isStatic = func->attrs() & AttrStatic;
+
+    mce->m_key = uintptr_t(cls) | (uintptr_t(isStatic) << 1) |
+                 uintptr_t(isMagicCall);
+    mce->m_value = func;
+  }
+
+  ASSERT(func);
+  func->validate();
+  ar->m_func = func;
+
+  if (UNLIKELY(isStatic)) {
+    auto* obj = ar->getThis();
+    if (obj->decRefCount() == 0) {
+      obj->release();
+    }
+    if (debug) ar->setThis(NULL); // suppress ASSERT in setClass
+    ar->setClass(cls);
+  }
+
+  ASSERT(!ar->hasVarEnv() && !ar->hasInvName());
+  if (UNLIKELY(isMagicCall)) {
+    ar->setInvName(name);
+    ASSERT(name->isStatic()); // No incRef needed.
+  }
 }
 
 template<>
 HOT_FUNC_VM
 void
-MethodCache::lookup(Handle handle, ActRec *ar, const void* extraKey) {
-  StringData* name = (StringData*)extraKey;
+MethodCache::lookup(Handle handle, ActRec* ar, const void* extraKey) {
   ASSERT(ar->hasThis());
-  ObjectData* obj = ar->getThis();
-  Class* c = obj->getVMClass();
-  ASSERT(c);
-  MethodCache* thiz = MethodCache::cacheAtHandle(handle);
-  Pair* pair = thiz->keyToPair(c);
-  const Func* func = NULL;
-  bool isMagicCall = false;
-  bool isStatic = false;
-  if (LIKELY(pair->m_key == c)) {
-    func = pair->m_value.getFunc();
-    ASSERT(func);
-    isMagicCall = pair->m_value.isMagicCall();
-    isStatic = pair->m_value.isStatic();
-    Stats::inc(Stats::TgtCache_MethodHit);
-  } else {
-    ASSERT(IMPLIES(pair->m_key, pair->m_value.getFunc()));
-    if (LIKELY(pair->m_key != NULL) &&
-        LIKELY((func = c->wouldCall(pair->m_value.getFunc())) != NULL) &&
-        LIKELY(!pair->m_value.isMagicCall())) {
-      Stats::inc(Stats::TgtCache_MethodHit, func != NULL);
-    } else {
-      Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
-      Stats::inc(Stats::TgtCache_MethodMiss);
-      TRACE(2, "MethodCache: miss class %p name %s!\n", c, name->data());
-      func = g_vmContext->lookupMethodCtx(c, name, ctx, ObjMethod, false);
-      if (UNLIKELY(!func)) {
-        isMagicCall = true;
-        func = c->lookupMethod(s___call.get());
-        if (UNLIKELY(!func)) {
-          // Do it again, but raise the error this time.
-          (void) g_vmContext->lookupMethodCtx(c, name, ctx, ObjMethod, true);
-          NOT_REACHED();
-        }
-      }
-    }
-    isStatic = func->attrs() & AttrStatic;
-    pair->m_value.set(func, isMagicCall, isStatic);
-    pair->m_key = c;
-  }
-  ASSERT(func);
-  func->validate();
+  auto* cls = ar->getThis()->getVMClass();
+  auto* pair = MethodCache::cacheAtHandle(handle)->keyToPair(uintptr_t(cls));
 
-  ar->m_func = func;
-  if (UNLIKELY(isStatic)) {
-    // Drop the ActRec's reference to the current instance
-    if (obj->decRefCount() == 0) {
-      obj->release();
-    }
-    if (debug) ar->setThis(NULL); // suppress ASSERT in setClass
-    // Set the ActRec's class (needed for late static binding)
-    ar->setClass(c);
-  }
-  ASSERT(!ar->hasVarEnv() && !ar->hasInvName());
-  if (UNLIKELY(isMagicCall)) {
-    ar->setInvName(name);
-    name->incRefCount();
+  /*
+   * The MethodCache line consists of a Class* key (stored as a
+   * uintptr_t) and a Func*.  The low bit of the key is set if the
+   * function call is a magic call (in which case the cached Func* is
+   * the __call function).  The second lowest bit of the key is set if
+   * the cached Func has AttrStatic.
+   *
+   * For this fast path, we just check if the key is bitwise equal to
+   * the Class* on the object.  If either of the special bits are set
+   * in the key we'll bail to the slow path.
+   */
+  if (LIKELY(pair->m_key == reinterpret_cast<uintptr_t>(cls))) {
+    ar->m_func = pair->m_value;
+  } else {
+    auto* name = static_cast<const StringData*>(extraKey);
+    methodCacheSlowPath(pair, ar, const_cast<StringData*>(name), cls);
   }
 }
 

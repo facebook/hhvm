@@ -16,14 +16,30 @@
 
 #include "timer.h"
 #include "logger.h"
+#include <util/trace.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Timer::Timer(Type type, const char *name /* = NULL */) : m_type(type) {
+#define PRINT_MSG(...)                          \
+  switch (m_report) {                           \
+    case Log:                                   \
+      Logger::Info(__VA_ARGS__);                \
+      break;                                    \
+    case Stderr:                                \
+      fprintf(stderr, __VA_ARGS__);             \
+      break;                                    \
+    case Trace:                                 \
+      Trace::traceRelease(__VA_ARGS__);         \
+      break;                                    \
+    default: not_reached();                     \
+  }
+
+Timer::Timer(Type type, const char *name /* = NULL */, ReportType r)
+  : m_type(type), m_report(r) {
   if (name) {
     m_name = name;
-    Logger::Info("%s...", name);
+    PRINT_MSG("%s...\n", name);
   }
   m_start = measure();
 }
@@ -41,8 +57,8 @@ int64 Timer::getMicroSeconds() const {
 void Timer::report() const {
   int64 ms = getMicroSeconds();
   int seconds = ms / 1000000;
-  Logger::Info("%s took %d'%02d\" (%d ms) %s", m_name.c_str(),
-               seconds / 60, seconds % 60, ms/1000, getName());
+  PRINT_MSG("%s took %d'%02d\" (%lld us) %s\n", m_name.c_str(),
+            seconds / 60, seconds % 60, ms, getName());
 }
 
 static int64 to_usec(const timeval& tv) {

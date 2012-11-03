@@ -153,7 +153,8 @@ static int64 numRequests;
 
 static inline bool warmedUp() {
   return (numRequests >= RuntimeOption::EvalJitWarmupRequests) ||
-    (RuntimeOption::clientExecutionMode() && !RuntimeOption::EvalJitProfileRecord);
+    (RuntimeOption::clientExecutionMode() &&
+     !RuntimeOption::EvalJitProfileRecord);
 }
 
 static inline bool profileThisRequest() {

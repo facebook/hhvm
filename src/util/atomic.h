@@ -28,6 +28,7 @@
 #endif
 
 #include "util/assert.h"
+#include "util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,7 +52,7 @@ template<class T> inline T atomic_acquire_load(const T* address) {
   assert_address_is_atomically_accessible(address);
 
   T ret = *address; // acquire barrier on x64
-  asm volatile("" : : : "memory");
+  Util::compiler_membar();
   return ret;
 }
 
@@ -59,12 +60,13 @@ template<class T, class U>
 inline void atomic_release_store(T* address, U val) {
   assert_address_is_atomically_accessible(address);
 
-  asm volatile("" : : : "memory");
+  Util::compiler_membar();
   *address = val; // release barrier on x64 (as long as no one is
                   // doing any non-temporal moves or whatnot).
 }
 
-static inline int atomic_inc(int &count) {
+template<typename T>
+static inline T atomic_inc(T &count) {
   assert_address_is_atomically_accessible(&count);
   return __gnu_cxx::__exchange_and_add(&count, 1) + 1;
 }

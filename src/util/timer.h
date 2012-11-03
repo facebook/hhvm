@@ -33,9 +33,14 @@ public:
     UserCPU,
     TotalCPU,
   };
+  enum ReportType {
+    Log,
+    Stderr,
+    Trace,
+  };
 
 public:
-  Timer(Type type, const char *name = NULL);
+  Timer(Type type, const char *name = NULL, ReportType r = Log);
   ~Timer();
 
   static int64 GetCurrentTimeMicros();
@@ -45,6 +50,7 @@ public:
 
 private:
   Type m_type;
+  ReportType m_report;
   std::string m_name;
   int64 m_start;
 

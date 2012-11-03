@@ -9204,26 +9204,48 @@ TranslatorX64::analyzeVerifyParamType(Tracelet& t, NormalizedInstruction& i) {
   }
 }
 
-static bool
+inline static bool
 classIsPersistent(const Class* cls) {
   return RuntimeOption::RepoAuthoritative &&
     cls &&
-    (cls->attrs() & AttrUnique) &&
-    (cls->attrs() & AttrPersistent);
+    TargetCache::isPersistentHandle(cls->m_cachedOffset);
 }
 
-static bool
-classIsUniqueNormalClass(const Class* cls) {
+inline static bool
+classIsUnique(const Class* cls) {
   return RuntimeOption::RepoAuthoritative &&
     cls &&
-    (cls->attrs() & AttrUnique) &&
+    (cls->attrs() & AttrUnique);
+}
+
+inline static bool
+classIsUniqueOrCtxParent(const Class* cls) {
+  if (!cls) return false;
+  if (classIsUnique(cls)) return true;
+  Class* ctx = arGetContextClass(curFrame());
+  if (!ctx) return false;
+  return ctx->classof(cls);
+}
+
+inline static bool
+classIsUniqueNormalClass(const Class* cls) {
+  return classIsUnique(cls) &&
     !(cls->attrs() & (AttrInterface | AttrTrait));
 }
 
+/*
+ * This function will happily give you a Class* to a Class that hasn't been
+ * defined in your request yet. Make sure code using it is tolerant of that.
+ */
 static void
 emitClassToReg(X64Assembler& a, const StringData* name, PhysReg r) {
+  if (!name) {
+    emitImmReg(a, 0, r);
+    return;
+  }
+
   Class* cls = Unit::lookupClass(name);
-  if (classIsPersistent(cls)) {
+  if (classIsUniqueOrCtxParent(cls)) {
     emitImmReg(a, int64(cls), r);
   } else {
     TargetCache::CacheHandle ch = TargetCache::allocKnownClass(name);
@@ -9282,11 +9304,12 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
   ScratchReg cls(m_regMap);
   // Constraint may not be in the class-hierarchy of the method being traced,
   // look up the class handle and emit code to put the Class* into a reg.
+  bool isSelfOrParent = tc.isSelf() || tc.isParent();
   const Class* constraint = NULL;
-  if (!tc.isSelf() && !tc.isParent()) {
-    const StringData* clsName = tc.typeName();
+  const StringData* clsName;
+  if (!isSelfOrParent) {
+    clsName = tc.typeName();
     constraint = Unit::lookupClass(clsName);
-    emitClassToReg(a, tc.typeName(), *cls);
   } else {
     if (tc.isSelf()) {
       tc.selfToClass(curFunc(), &constraint);
@@ -9294,13 +9317,19 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
       ASSERT(tc.isParent());
       tc.parentToClass(curFunc(), &constraint);
     }
-    emitImmReg(a, uintptr_t(constraint), *cls);
+    clsName = constraint ? constraint->preClass()->name() : NULL;
+  }
+  Class::initInstanceBits();
+  bool haveBit = Class::haveInstanceBit(clsName);
+  // See the first big comment in emitInstanceCheck for the contract here
+  if (!haveBit || !classIsUniqueOrCtxParent(constraint)) {
+    emitClassToReg(a, clsName, *cls);
   }
 
-  if (classIsUniqueNormalClass(constraint)) {
+  if (haveBit || classIsUniqueNormalClass(constraint)) {
     LazyScratchReg dummy(m_regMap);
     Stats::emitInc(a, Stats::Tx64_VerifyParamTypeFast);
-    emitInstanceCheck(t, i, constraint, inCls, cls, dummy);
+    emitInstanceCheck(t, i, clsName, constraint, inCls, cls, dummy);
   } else {
     // Compare this class to the incoming object's class. If the typehint's
     // class is not present, can not be an instance: fail
@@ -9437,22 +9466,28 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     // maybeInterface is just used as a hint: If it's a trait/interface now but
     // a class at runtime, InstanceOfDSlowInterface will still do the right
     // thing but more slowly. fastPath is guaranteed to be correct.
-    bool maybeInterface = maybeCls &&
+    Class::initInstanceBits();
+    bool haveBit = Class::haveInstanceBit(clsName);
+    bool maybeInterface = maybeCls && !haveBit &&
       (maybeCls->attrs() & (AttrTrait | AttrInterface));
-    bool fastPath = !maybeInterface && classIsUniqueNormalClass(maybeCls);
+    bool fastPath = !maybeInterface &&
+      (classIsUniqueNormalClass(maybeCls) || haveBit);
     auto afterHelper = [&] {
       if (i.changesPC) fuseBranchAfterHelper(t, i);
       else emitMovRegReg(a, rax, *result);
     };
 
     ScratchReg cls(m_regMap);
-    emitClassToReg(a, clsName, *cls);
+    // See the first big comment in emitInstanceCheck for the contract here
+    if (!haveBit || !classIsUniqueOrCtxParent(maybeCls)) {
+      emitClassToReg(a, clsName, *cls);
+    }
     if (maybeInterface) {
       EMIT_CALL(a, InstanceOfDSlowInterface, R(*inCls), R(*cls));
       afterHelper();
     } else if (fastPath) {
       Stats::emitInc(a, Stats::Tx64_InstanceOfDFast);
-      emitInstanceCheck(t, i, maybeCls, inCls, cls, result);
+      emitInstanceCheck(t, i, clsName, maybeCls, inCls, cls, result);
     } else {
       EMIT_CALL(a, InstanceOfDSlow, R(*inCls), R(*cls));
       afterHelper();
@@ -9480,12 +9515,14 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
 void
 TranslatorX64::emitInstanceCheck(const Tracelet& t,
                                  const NormalizedInstruction& i,
+                                 const StringData* clsName,
                                  const Class* klass,
                                  const ScratchReg& inCls,
                                  const ScratchReg& cls,
                                  const LazyScratchReg& result) {
   LazyScratchReg one(m_regMap);
   bool verifying = i.op() == OpVerifyParamType;
+  bool haveBit = Class::haveInstanceBit(clsName);
   ASSERT(IMPLIES(verifying, !i.changesPC));
 
   TCA equalJe = NULL;
@@ -9501,8 +9538,24 @@ TranslatorX64::emitInstanceCheck(const Tracelet& t,
   std::unique_ptr<FreezeRegs> ice;
   if (!verifying) ice.reset(new FreezeRegs(m_regMap));
 
-  // Are the Class*s the exact same class?
-  a.      cmp_reg64_reg64(*inCls, *cls);
+  if (haveBit) {
+    Stats::emitInc(a, verifying ? Stats::Tx64_VerifyParamTypeBit
+                                : Stats::Tx64_InstanceOfDBit);
+    translatorAssert(a, CC_NZ, "Class instance bits must be initialized", [&]{
+      a.test_imm8_disp_reg8(0x1, Class::instanceBitsOff(), *inCls);
+    });
+  }
+
+  // Are the Class*s the exact same class? If we have a bit then this is the
+  // only part of the translation that needs a pointer to the class. If the
+  // class is also unique (or a parent class of the current context), we can
+  // burn its value into the translation, so it won't be in *cls and we use an
+  // immediate.
+  if (haveBit && classIsUniqueOrCtxParent(klass)) {
+    a.    cmp_imm64_reg64(int64(klass), *inCls);
+  } else {
+    a.    cmp_reg64_reg64(*inCls, *cls);
+  }
   {
     std::unique_ptr<IfElseBlock<CC_NE>> ifElse;
     if (verifying) {
@@ -9524,6 +9577,28 @@ TranslatorX64::emitInstanceCheck(const Tracelet& t,
       emitImmReg(a, 0, *result);
     }
 
+    int offset;
+    uint8 mask;
+    if (Class::getInstanceBitMask(clsName, offset, mask)) {
+      // We don't need to check that the parent class exists: if it doesn't
+      // exist then it's impossible for this object to be an instance of it,
+      // and the corresponding bit won't be set.
+      a.  test_imm8_disp_reg8((int64)(int8)mask, offset, *inCls);
+      if (verifying) {
+        {
+          UnlikelyIfBlock<CC_Z> fail(a, astubs);
+          EMIT_RCALL(astubs, i, VerifyParamTypeFail, IMM(i.imm[0].u_IVA));
+        }
+        a.patchJcc8(equalJe, a.code.frontier);
+      } else if (i.changesPC) {
+        fuseBranchAfterBool(t, i, CC_NZ);
+      } else {
+        a.cmov_reg64_reg64(CC_NZ, *one, *result);
+      }
+      return;
+    }
+
+    ASSERT(klass);
     // Is our inheritence hierarchy no shorter than the candidate?
     unsigned parentVecLen = klass->classVecLen();
     a.  cmp_imm32_disp_reg32(parentVecLen, Class::classVecLenOff(),
@@ -9533,8 +9608,8 @@ TranslatorX64::emitInstanceCheck(const Tracelet& t,
 
       // Is the spot in our inheritance hierarchy corresponding to the
       // candidate equal to the candidate? *cls might still be NULL here
-      // (meaning the class isn't defined yet) but that's ok: if it is null the
-      // cmp will always fail.
+      // (meaning the class isn't defined yet) but that's ok: if it is null
+      // the cmp will always fail.
       int offset = Class::classVecOff() + sizeof(Class*) * (parentVecLen-1);
       if (Class::alwaysLowMem()) {
         a.cmp_reg32_disp_reg64(*cls, offset, *inCls);
@@ -9576,6 +9651,25 @@ TranslatorX64::emitInstanceCheck(const Tracelet& t,
     a.patchJmp8(parentJmp, a.code.frontier);
     Stats::emitInc(a, Stats::Tx64_VerifyParamTypePass);
   }
+}
+
+static void translatorAssertFail(const char* msg) {
+  VMExecutionContext::PrintTCCallerInfo();
+  std::cerr << "Failed assertion in translated code: " << msg << std::endl;
+  not_reached();
+}
+
+template<typename L>
+void TranslatorX64::translatorAssert(X64Assembler& a, ConditionCode cc,
+                                     const char* msg, L setup) {
+  if (!debug) return;
+  setup();
+  TCA jmp = a.code.frontier;
+  a.jcc8(cc, jmp);
+  emitImmReg(a, int64(msg), rdi);
+  a.call((TCA)translatorAssertFail);
+  recordCall(a, *m_curNI);
+  a.patchJcc8(jmp, a.code.frontier);
 }
 
 void

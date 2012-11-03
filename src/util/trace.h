@@ -82,6 +82,7 @@ namespace Trace {
       TM(gc)          \
       TM(unlikely)    \
       TM(jcc)         \
+      TM(instancebits)\
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

@@ -54,6 +54,9 @@ enum Rank {
   RankStatCacheNode = RankFileRepo,
   RankFileMd5,
 
+  RankInstanceCounts,
+  RankInstanceBits = RankInstanceCounts,
+
   RankTreadmill,
 
   /*

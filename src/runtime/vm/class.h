@@ -17,6 +17,9 @@
 #ifndef incl_VM_CLASS_H_
 #define incl_VM_CLASS_H_
 
+#include <bitset>
+#include <tbb/concurrent_hash_map.h>
+
 #include <runtime/vm/core_types.h>
 #include <runtime/vm/repo_helpers.h>
 #include <runtime/base/array/hphp_array.h>
@@ -465,6 +468,7 @@ public:
   friend class ExecutionContext;
   friend class HPHP::ObjectData;
   friend class Instance;
+  friend class Unit;
 
   enum Avail {
     AvailFalse,
@@ -634,7 +638,7 @@ public:
    * and the dependencies are a bit hairy, it's defined in targetcache.cpp.
    */
   const Func* wouldCall(const Func* prev) const;
-  
+
   // Finds the base class defining the given method (NULL if none).
   // Note: for methods imported via traits, the base class is the one that
   // uses/imports the trait.
@@ -692,8 +696,26 @@ public:
 public:
   static hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
                        string_data_hash, string_data_isame> s_extClassHash;
+  static size_t instanceBitsOff() { return offsetof(Class, m_instanceBits); }
+  static void profileInstanceOf(const StringData* name);
+  static void initInstanceBits();
+  static bool haveInstanceBit(const StringData* name);
+  static bool getInstanceBitMask(const StringData* name,
+                                 int& offset, uint8& mask);
 
 private:
+  typedef tbb::concurrent_hash_map<
+    const StringData*, uint64, pointer_hash<StringData>> InstanceCounts;
+  typedef hphp_hash_map<const StringData*, unsigned,
+                        pointer_hash<StringData>> InstanceBitsMap;
+  typedef std::bitset<128> InstanceBits;
+  static const size_t kInstanceBits = sizeof(InstanceBits) * CHAR_BIT;
+  static InstanceCounts s_instanceCounts;
+  static ReadWriteMutex s_instanceCountsLock;
+  static InstanceBitsMap s_instanceBits;
+  static ReadWriteMutex s_instanceBitsLock;
+  static bool s_instanceBitsInit;
+
   struct TraitMethod {
     ClassPtr          m_trait;
     Func*             m_method;
@@ -762,6 +784,9 @@ private:
   void setInterfaces();
   void setClassVec();
   void setUsedTraits();
+  void setInstanceBits();
+  void setInstanceBitsAndParents();
+  template<bool setParents> void setInstanceBitsImpl();
 
   PreClassPtr m_preClass;
   ClassPtr m_parent;
@@ -836,10 +861,15 @@ private:
 public: // used in Unit
   Class* m_nextClass;
 private:
-  // Vector of Class pointers that encodes the inheritance hierarchy,
-  // including this Class as the last element. This vector enables
-  // fast type compatibility checks in translated code when accessing
-  // declared properties.
+  // m_instanceBits and m_classVec are both used for efficient
+  // instanceof checking in translated code.
+
+  // Bitmap of parent classes and implemented interfaces. Each bit corresponds
+  // to a commonly used class name, determined during the profiling warmup
+  // requests.
+  InstanceBits m_instanceBits;
+  // Vector of Class pointers that encodes the inheritance hierarchy, including
+  // this Class as the last element.
   Class* m_classVec[1]; // Dynamically sized; must come last.
 };
 

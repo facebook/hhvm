@@ -641,11 +641,14 @@ PSEUDOINSTRS
                                    const Func* func, const Class* cls,
                                    size_t clsOff, bool forward);
   void emitInstanceCheck(const Tracelet& t, const NormalizedInstruction& i,
+                         const StringData* clsName,
                          const Class* maybeCls,
                          const ScratchReg& inCls,
                          const ScratchReg& cls,
                          const LazyScratchReg& result);
-
+  template<typename L>
+  void translatorAssert(X64Assembler& a, ConditionCode cc,
+                        const char* msg, L setup);
 
   const Func* findCuf(const NormalizedInstruction& ni,
                       Class* &cls, StringData*& invName, bool& forward);

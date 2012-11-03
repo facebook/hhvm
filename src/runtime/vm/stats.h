@@ -75,6 +75,7 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_UnfusedTypeCheck) \
   STAT(Tx64_VerifyParamTypeSlow) \
   STAT(Tx64_VerifyParamTypeFast) \
+  STAT(Tx64_VerifyParamTypeBit) \
   STAT(Tx64_VerifyParamTypeSlowShortcut) \
   STAT(Tx64_VerifyParamTypePass) \
   STAT(Tx64_VerifyParamTypeEqual) \
@@ -83,6 +84,7 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_InstanceOfDInterface) \
   STAT(Tx64_InstanceOfDSlow) \
   STAT(Tx64_InstanceOfDFast) \
+  STAT(Tx64_InstanceOfDBit) \
   STAT(Tx64_InstanceOfDEqual) \
   STAT(Tx64_InstanceOfDFinalTrue) \
   STAT(Tx64_InstanceOfDFinalFalse) \

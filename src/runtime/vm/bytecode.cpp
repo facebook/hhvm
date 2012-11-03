@@ -4204,6 +4204,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopInstanceOf(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopInstanceOfD(PC& pc) {
   NEXT();
   DECODE(Id, id);
+  if (shouldProfile()) {
+    Class::profileInstanceOf(m_fp->m_func->unit()->lookupLitstrId(id));
+  }
   const NamedEntity* ne = m_fp->m_func->unit()->lookupNamedEntityId(id);
   Cell* c1 = m_stack.topC();
   bool r = cellInstanceOf(c1, ne);
@@ -7035,9 +7038,9 @@ void VMExecutionContext::PrintTCCallerInfo() {
   VMRegAnchor _;
   ActRec* fp = g_vmContext->getFP();
   Unit* u = fp->m_func->unit();
-  printf("Called from TC address %p\n",
-         TranslatorX64::Get()->getTranslatedCaller());
-  std::cout << u->filepath()->data() << ':'
+  fprintf(stderr, "Called from TC address %p\n",
+          TranslatorX64::Get()->getTranslatedCaller());
+  std::cerr << u->filepath()->data() << ':'
             << u->getLineNumber(u->offsetOf(g_vmContext->getPC())) << std::endl;
 }
 

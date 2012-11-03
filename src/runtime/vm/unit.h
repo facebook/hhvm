@@ -1003,6 +1003,8 @@ typedef AllFuncsImpl<Unit::MutableFuncRange, MutablePreClassMethodRanger> Mutabl
 class AllClasses {
 protected:
   NamedEntityMap::iterator m_next, m_end;
+  Class* m_current;
+  void next();
   void skip();
 public:
   AllClasses();

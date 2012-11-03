@@ -22,6 +22,7 @@
 #include <runtime/base/types.h>
 #include <util/case_insensitive.h>
 #include <runtime/vm/unit.h>
+#include <runtime/vm/type-profile.h>
 
 namespace HPHP {
 namespace VM {
@@ -96,7 +97,10 @@ public:
       if (!isObject()) return false;
       // Perfect match seems common enough to be worth skipping the hash
       // table lookup.
-      if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) return true;
+      if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
+        if (shouldProfile()) Class::profileInstanceOf(m_typeName);
+        return true;
+      }
       const Class *c = NULL;
       if (isSelf() || isParent()) {
         if (isSelf()) {
@@ -109,6 +113,9 @@ public:
         // to request.
         ASSERT(m_namedEntity);
         c = Unit::lookupClass(m_namedEntity);
+      }
+      if (shouldProfile() && c) {
+        Class::profileInstanceOf(c->preClass()->name());
       }
       return c && tv->m_data.pobj->instanceof(c);
     }

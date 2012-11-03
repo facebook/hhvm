@@ -110,18 +110,27 @@ Array Unit::getUserFunctions() {
 
 AllClasses::AllClasses()
   : m_next(s_namedDataMap->begin())
-  , m_end(s_namedDataMap->end()) {
-  skip();
+  , m_end(s_namedDataMap->end())
+  , m_current(m_next != m_end ? *m_next->second.clsList() : nullptr) {
+  if (!empty()) skip();
 }
 
 void AllClasses::skip() {
-  Class* cls;
-  while (!empty()) {
-    cls = *m_next->second.clsList();
-    if (cls) break;
+  if (!m_current) {
+    ASSERT(!empty());
     ++m_next;
+    while (!empty()) {
+      m_current = *m_next->second.clsList();
+      if (m_current) break;
+      ++m_next;
+    }
   }
   ASSERT(empty() || front());
+}
+
+void AllClasses::next() {
+  m_current = m_current->m_nextClass;
+  skip();
 }
 
 bool AllClasses::empty() const {
@@ -130,15 +139,13 @@ bool AllClasses::empty() const {
 
 Class* AllClasses::front() const {
   ASSERT(!empty());
-  Class* cls = *m_next->second.clsList();
-  ASSERT(cls);
-  return cls;
+  ASSERT(m_current);
+  return m_current;
 }
 
 Class* AllClasses::popFront() {
   Class* cls = front();
-  ++m_next;
-  skip();
+  next();
   return cls;
 }
 
@@ -474,8 +481,21 @@ Class* Unit::defClass(const PreClass* preClass,
         Transl::TargetCache::allocKnownClass(newClass.get());
     }
     newClass->m_nextClass = top;
-    Util::compiler_membar();
-    *const_cast<Class**>(clsList) = newClass.get();
+
+    if (atomic_acquire_load(&Class::s_instanceBitsInit)) {
+      // If the instance bitmap has already been set up, we can just initialize
+      // our new class's bits and add ourselves to the class list normally.
+      newClass->setInstanceBits();
+      atomic_release_store(const_cast<Class**>(clsList), newClass.get());
+    } else {
+      // Otherwise, we have to grab the read lock. If the map has been
+      // initialized since we checked, initialize the bits normally. If not, we
+      // must add the new class to the class list before dropping the lock to
+      // ensure its bits are initialized when the time comes.
+      ReadLock l(Class::s_instanceBitsLock);
+      if (Class::s_instanceBitsInit) newClass->setInstanceBits();
+      atomic_release_store(const_cast<Class**>(clsList), newClass.get());
+    }
     newClass.get()->incAtomicCount();
     newClass.get()->setCached();
     DEBUGGER_ATTACHED_ONLY(phpDefClassHook(newClass.get()));

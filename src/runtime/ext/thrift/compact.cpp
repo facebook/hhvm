@@ -525,7 +525,7 @@ class CompactReader {
       readStructBegin();
 
       while (true) {
-        uint16_t fieldNum;
+        int16_t fieldNum;
         TType fieldType;
         readFieldBegin(fieldNum, fieldType);
 
@@ -572,7 +572,7 @@ class CompactReader {
       structHistory.pop();
     }
 
-    void readFieldBegin(uint16_t &fieldNum, TType &fieldType) {
+    void readFieldBegin(int16_t &fieldNum, TType &fieldType) {
       uint8_t fieldTypeAndDelta = readUByte();
       int delta = fieldTypeAndDelta >> 4;
       CType fieldCType = (CType)(fieldTypeAndDelta & 0x0f);
@@ -697,7 +697,7 @@ class CompactReader {
             readStructBegin();
 
             while (true) {
-              uint16_t fieldNum;
+              int16_t fieldNum;
               TType fieldType;
               readFieldBegin(fieldNum, fieldType);
 

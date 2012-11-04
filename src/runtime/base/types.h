@@ -252,10 +252,11 @@ namespace VM {
 
 class RequestInjectionData {
 public:
-  static const ssize_t MemExceededFlag = 1;
-  static const ssize_t TimedOutFlag = 2;
-  static const ssize_t SignaledFlag = 4;
-  static const ssize_t EventHookFlag = 8;
+  static const ssize_t MemExceededFlag = 1 << 0;
+  static const ssize_t TimedOutFlag    = 1 << 1;
+  static const ssize_t SignaledFlag    = 1 << 2;
+  static const ssize_t EventHookFlag   = 1 << 3;
+  static const ssize_t LastFlag        = EventHookFlag;
 
   RequestInjectionData()
     : conditionFlags(0), surprisePage(NULL), started(0), timeoutSeconds(-1),

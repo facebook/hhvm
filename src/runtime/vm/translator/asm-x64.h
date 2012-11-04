@@ -700,6 +700,9 @@ public:
     unsigned char rex = 0;
     if ((op.flags & IF_NO_REXW) == 0 && opSz == sz::qword) rex |= 8;
     if (r & 8) rex |= 1;
+    if (opSz == sz::byte && r >= int(reg::rsp) && r <= int(reg::rdi)) {
+      rex |= 0x40;
+    }
     if (rex) byte(0x40 | rex);
     // Determine the size of the immediate
     int immSize;
@@ -1438,6 +1441,10 @@ public:
                                   register_name_t rdest) {
     emitIM8(instr_testb, rdest, reg::noreg, sz::byte, disp,
             safe_cast<int8_t>(imm));
+  }
+
+  inline void test_imm8_reg8(int64_t imm, register_name_t rdest) {
+    emitIR(instr_testb, rdest, safe_cast<int8_t>(imm), sz::byte);
   }
 
 #define SIMPLE_OP(name)                                                 \

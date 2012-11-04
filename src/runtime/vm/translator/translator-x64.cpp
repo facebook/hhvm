@@ -1368,8 +1368,9 @@ TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
 // before a jnz to surprise handling code.
 void
 TranslatorX64::emitTestSurpriseFlags() {
-  CT_ASSERT(sizeof(((RequestInjectionData*)0)->conditionFlags) == 8);
-  a.test_imm64_disp_reg64(-1, TargetCache::kConditionFlagsOff, rVmTl);
+  static_assert(RequestInjectionData::LastFlag < (1 << 8),
+                "Translator assumes RequestInjectionFlags fit in one byte");
+  a.test_imm8_disp_reg8((int8)0xff, TargetCache::kConditionFlagsOff, rVmTl);
 }
 
 void
@@ -2697,9 +2698,11 @@ TranslatorX64::checkRefs(X64Assembler& a,
 
         ifFewEnoughArgs.Else();
 
-        a.  test_imm32_disp_reg32(AttrVariadicByRef,
-                                  Func::attrsOff(),
-                                  *rFunc);
+        static_assert(AttrVariadicByRef == (1 << 15),
+                      "AttrVariadicByRef assumed to be 1 << 15 in translator");
+        uint8 mask = (1u << (15 % CHAR_BIT));
+        int offset = Func::attrsOff() + 15 / CHAR_BIT;
+        a.  test_imm8_disp_reg8((int8)mask, offset, *rFunc);
         {
           IfElseBlock<CC_NZ> ifNotWeirdBuiltin(a);
 
@@ -3974,7 +3977,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     if (i.changesPC) {
       fuseBranchSync(t, i);
       prepareForTestAndSmash(kTestImmRegLen, kJmpccLen + kJmpLen);
-      a.   test_imm32_reg32(1, rax);
+      a.   test_imm8_reg8(1, rax);
       fuseBranchAfterBool(t, i, ccNegate(ccBranch));
       return;
     }
@@ -5081,14 +5084,14 @@ TranslatorX64::translateCns(const Tracelet& t,
     m_regMap.allocOutputRegs(i);
     if (checkDefined) {
       size_t bit = allocCnsBit(name);
-      uint32 mask;
+      uint8 mask;
       CacheHandle ch = bitOffToHandleAndMask(bit, mask);
       // The 'test' instruction takes a signed immediate and the mask is
       // unsigned, but everything works out okay because the immediate is
       // the same size as the other operand. However, we have to sign-extend
       // the mask to 64 bits to make the assembler happy.
-      int64_t imm = (int64_t)(int32)mask;
-      a.test_imm32_disp_reg32(imm, ch, rVmTl);
+      int64_t imm = (int64_t)(int8)mask;
+      a.test_imm8_disp_reg8(imm, ch, rVmTl);
       {
         // If we get to the optimistic translation and the constant
         // isn't defined, our tracelet is ruined because the type may
@@ -5914,7 +5917,7 @@ void TranslatorX64::emitReturnVal(
     case OpBareThis: {
       ASSERT(curFunc()->cls());
       a.    mov_imm32_reg32(KindOfNull, scratch);
-      a.    test_imm64_disp_reg64(1, thisOffset, thisBase);
+      a.    test_imm8_disp_reg8(1, thisOffset, thisBase);
       {
         JccBlock<CC_NZ> noThis(a);
         a.  mov_imm32_reg32(KindOfObject, scratch);
@@ -6090,7 +6093,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
         if (i.guardedThis) {
           emitDecRef(i, *rTmp, KindOfObject);
         } else {
-          a.      test_imm32_reg64(1, *rTmp);
+          a.      test_imm8_reg8(1, *rTmp);
           {
             JccBlock<CC_NZ> ifZero(a);
             emitDecRef(i, *rTmp, KindOfObject); // this. decref it.
@@ -6740,7 +6743,7 @@ void TranslatorX64::emitContRaiseCheck(X64Assembler& a,
   const int contIdx = 0;
   ASSERT(i.inputs[contIdx]->location == Location(Location::Local, 0));
   PhysReg rCont = getReg(i.inputs[contIdx]->location);
-  a.    test_imm32_disp_reg32(0x1, CONTOFF(m_should_throw), rCont);
+  a.    test_imm8_disp_reg8(0x1, CONTOFF(m_should_throw), rCont);
   {
     UnlikelyIfBlock<CC_NZ> ifThrow(a, astubs);
     if (false) {
@@ -7512,19 +7515,19 @@ TranslatorX64::translateCheckTypeOp(const Tracelet& t,
     } else {
       if (ni.changesPC) {
         fuseBranchSync(t, ni);
-        a.   test_imm64_disp_reg64(1, AROFF(m_this), rVmFp);
+        a.   test_imm8_disp_reg8(1, AROFF(m_this), rVmFp);
         if (ni.prev->imm[0].u_OA) {
           UnlikelyIfBlock<CC_NZ> nullThis(a, astubs);
           EMIT_CALL(astubs, warnNullThis);
           recordReentrantStubCall(ni);
           nullThis.reconcileEarly();
-          astubs.test_imm64_disp_reg64(1, AROFF(m_this), rVmFp);
+          astubs.test_imm8_disp_reg8(1, AROFF(m_this), rVmFp);
         }
         fuseBranchAfterBool(t, ni, ni.invertCond ? CC_Z : CC_NZ);
       } else {
         m_regMap.allocOutputRegs(ni);
         PhysReg res = getReg(ni.outStack->location);
-        a.   test_imm64_disp_reg64(1, AROFF(m_this), rVmFp);
+        a.   test_imm8_disp_reg8(1, AROFF(m_this), rVmFp);
         a.   setcc(ni.invertCond ? CC_Z : CC_NZ, res);
         if (ni.prev->imm[0].u_OA) {
           UnlikelyIfBlock<CC_NZ> nullThis(a, astubs);
@@ -8257,7 +8260,7 @@ TranslatorX64::translateFPushClsMethodF(const Tracelet& t,
       // its class.
       PhysReg rCls = *rFunc; // no need to allocate another scratch
       a.    load_reg64_disp_reg64(rVmFp, AROFF(m_cls), rCls);
-      a.    test_imm32_reg64(1, rCls);
+      a.    test_imm8_reg8(1, rCls);
       {
         JccBlock<CC_NZ> ifThis(a);
         // rCls is holding $this. Should we pass it to the callee?
@@ -8500,7 +8503,9 @@ void TranslatorX64::translateFPushCtorD(const Tracelet& t,
   m_regMap.bind(rax, i.outStack->location, KindOfObject, RegInfo::DIRTY);
 }
 
-static void fatalNullThis() { raise_error(Strings::FATAL_NULL_THIS); }
+static void fatalNullThis() {
+  raise_error(Strings::FATAL_NULL_THIS);
+}
 
 void
 TranslatorX64::emitThisCheck(const NormalizedInstruction& i,
@@ -8510,7 +8515,7 @@ TranslatorX64::emitThisCheck(const NormalizedInstruction& i,
     a.jz(astubs.code.frontier); // jz if_null
   }
 
-  a.  test_imm32_reg64(1, reg);
+  a.  test_imm8_reg8(1, reg);
   {
     UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs);
     // if_null:
@@ -8557,7 +8562,7 @@ TranslatorX64::translateBareThis(const Tracelet &t,
     m_regMap.scrubLoc(i.outStack->location);
   }
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), out);
-  a.   test_imm32_reg64(1, out);
+  a.   test_imm8_reg8(1, out);
   DiamondReturn astubsRet;
   {
     UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs, &astubsRet);
@@ -8618,7 +8623,7 @@ TranslatorX64::translateInitThisLoc(const Tracelet& t,
   }
   // Ok, it's not NULL but it might be a Class which should be treated
   // equivalently
-  a.test_imm32_reg64(1, *thiz);
+  a.test_imm8_reg8(1, *thiz);
   a.jnz(astubs.code.frontier); // jnz if_null
 
   // We have a valid $this!
@@ -8794,7 +8799,7 @@ TranslatorX64::setupActRecClsForStaticCall(const NormalizedInstruction &i,
              curFunc()->cls()->classof(cls));
       /* the context is non-static, so we have to deal
          with passing in $this or getClass($this) */
-      a.    test_imm32_reg64(1, rCls);
+      a.    test_imm8_reg8(1, rCls);
       {
         JccBlock<CC_NZ> ifThis(a);
         // rCls is holding a real $this.
@@ -8818,7 +8823,7 @@ TranslatorX64::setupActRecClsForStaticCall(const NormalizedInstruction &i,
       ScratchReg rClsScratch(m_regMap);
       PhysReg rCls = *rClsScratch;
       a.    load_reg64_disp_reg64(rVmFp, AROFF(m_cls), rCls);
-      a.    test_imm32_reg64(1, rCls);
+      a.    test_imm8_reg8(1, rCls);
       {
         IfElseBlock<CC_NZ> ifThis(a);
         // rCls is holding $this. We should pass it to the callee
@@ -9402,7 +9407,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
         if (!i.changesPC) {
           retFromNullThis.reset(new DiamondReturn);
         }
-        a.  test_imm32_reg64(1, srcReg);
+        a.  test_imm8_reg8(1, srcReg);
         {
           UnlikelyIfBlock<CC_NZ> ifNull(a, astubs, retFromNullThis.get());
           EMIT_RCALL(astubs, i, warnNullThis);
@@ -9416,7 +9421,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
         if (!i.changesPC) {
           emitImmReg(a, false, *result);
         }
-        a.  test_imm32_reg64(1, srcReg);
+        a.  test_imm8_reg8(1, srcReg);
         if (i.changesPC) {
           JccBlock<CC_Z> ifNull(a);
           fuseBranchAfterStaticBool(a, t, i, false);
@@ -11047,7 +11052,7 @@ void TranslatorX64::addDbgGuardImpl(const SrcKey& sk, SrcRec& srcRec) {
   static COff dbgOff = offsetof(ThreadInfo, m_reqInjectionData) +
                        offsetof(RequestInjectionData, debugger);
   a.   load_reg64_disp_reg32(rScratch, dbgOff, rScratch);
-  a.   test_imm32_reg32(0xff, rScratch);
+  a.   test_imm8_reg8((int8)0xff, rScratch);
   // Branch to a special REQ_INTERPRET if attached
   {
     TCA fallback = emitServiceReq(REQ_INTERPRET, 2, uint64_t(sk.offset()), 0);

@@ -200,11 +200,11 @@ size_t allocCnsBit(const StringData* name) {
   return allocBitImpl(name, NSCnsBits);
 }
 
-Handle bitOffToHandleAndMask(size_t bit, uint32 &mask) {
-  CT_ASSERT(!(32 % CHAR_BIT));
-  mask = (uint32)1 << (bit % 32);
+Handle bitOffToHandleAndMask(size_t bit, uint8 &mask) {
+  CT_ASSERT(!(8 % CHAR_BIT));
+  mask = (uint8)1 << (bit % 8);
   size_t off = bit / CHAR_BIT;
-  off -= off % (32 / CHAR_BIT);
+  off -= off % (8 / CHAR_BIT);
   return off;
 }
 

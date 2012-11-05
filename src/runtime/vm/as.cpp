@@ -92,6 +92,8 @@
 #include "runtime/base/builtin_functions.h"
 #include "compiler/analysis/emitter.h"
 
+TRACE_SET_MOD(hhas);
+
 namespace HPHP { namespace VM {
 
 //////////////////////////////////////////////////////////////////////
@@ -323,9 +325,62 @@ private:
   int m_lineNumber;
 };
 
+struct StackDepth;
+
 struct FPIReg {
   Offset fpushOff;
+  StackDepth* stackDepth;
   int fpOff;
+};
+
+/**
+ * Tracks the depth of the stack in a given block of instructions.
+ *
+ * This structure is linked to a block of instructions (usually starting at a
+ * label), and tracks the current stack depth in this block. This tracking can
+ * take two forms:
+ * - Absolute depth: the depth of the stack is exactly known for this block
+ * - Relative depth: the depth of the stack is unknown for now. We keep track
+ *   of an offset, relative to the depth of the stack at the first instruction
+ *   of the block
+ */
+struct StackDepth {
+  int currentOffset;
+  int maxOffset;
+  int minOffset;
+  int minOffsetLine;
+  boost::optional<int> baseValue;
+
+  /**
+   * During the parsing process, when a Jmp instruction is encountered, the
+   * StackDepth structure for this jump becomes linked to the StackDepth
+   * structure of the label (which is added to the listeners list).
+   *
+   * Once the absolute depth at the jump becomes known, its StackDepth
+   * instance calls the setBase method of the StackDepth instance of the label.
+   * The absolute depth at the label can then be inferred from the
+   * absolute depth at the jump.
+   */
+  std::vector<std::pair<StackDepth*, int> > listeners;
+
+  StackDepth()
+    : currentOffset(0)
+    , maxOffset(0)
+    , minOffset(0)
+  {}
+
+  void adjust(AsmState& as, int delta);
+  void addListener(AsmState& as, StackDepth* target);
+  void setBase(AsmState& as, int stackDepth);
+
+  /**
+   * Sets the baseValue such as the current stack depth matches the
+   * parameter.
+   *
+   * If the base value is already known, it may conflict with the
+   * parameter of this function. In this case, an error will be raised.
+   */
+  void setCurrentAbsolute(AsmState& as, int stackDepth);
 };
 
 struct Label {
@@ -333,6 +388,7 @@ struct Label {
 
   bool bound;
   Offset target;
+  StackDepth stackDepth;
 
   /*
    * Each label source source has an Offset where the jmp should be
@@ -370,22 +426,44 @@ struct AsmState : private boost::noncopyable {
     , emittedPseudoMain(false)
     , fe(0)
     , numItersSet(false)
-    , stackDepth(0)
+    , currentStackDepth(&initStackDepth)
     , stackHighWater(0)
     , fdescDepth(0)
     , fdescHighWater(0)
-  {}
+  {
+    currentStackDepth->setBase(*this, 0);
+  }
 
   void error(const std::string& what) {
     throw Error(in.getLineNumber(), what);
   }
 
   void adjustStack(int delta) {
-    stackDepth += delta;
-    if (stackDepth < 0) {
-      error("opcode sequence caused stack depth to go negative");
+    if (currentStackDepth == nullptr) {
+      // Instruction is unreachable, nothing to do here!
+      return;
     }
-    stackHighWater = std::max(stackHighWater, stackDepth);
+
+    currentStackDepth->adjust(*this, delta);
+  }
+
+  void adjustStackHighwater(int depth) {
+    stackHighWater = std::max(stackHighWater, depth);
+  }
+
+  std::string displayStackDepth() {
+    std::ostringstream stack;
+
+    if (currentStackDepth == nullptr) {
+      stack << "/";
+    } else if(currentStackDepth->baseValue) {
+      stack << currentStackDepth->baseValue.get() +
+               currentStackDepth->currentOffset;
+    } else {
+      stack << "?" << currentStackDepth->currentOffset;
+    }
+
+    return stack.str();
   }
 
   void addLabelTarget(const std::string& name) {
@@ -395,32 +473,82 @@ struct AsmState : private boost::noncopyable {
     }
     label.bound = true;
     label.target = ue->bcPos();
+
+    StackDepth* newStack = &label.stackDepth;
+
+    if (currentStackDepth == nullptr) {
+      // Previous instruction was unreachable
+      currentStackDepth = newStack;
+      return;
+    }
+
+    // The stack depth at the label depends on the current depth
+    currentStackDepth->addListener(*this, newStack);
+    currentStackDepth = newStack;
   }
 
-  void addLabelJump(const std::string& name, Offset opcodeOff) {
-    labelMap[name].sources.push_back(
-      std::make_pair(ue->bcPos(), opcodeOff));
+  void addLabelJump(const std::string& name, Offset immOff, Offset opcodeOff) {
+    Label& label = labelMap[name];
+
+    if (currentStackDepth == nullptr) {
+      // Jump is unreachable, nothing to do here
+      return;
+    }
+
+    // The stack depth at the target must be the same as the current depth
+    // (whatever this may be: it may still be unknown)
+    currentStackDepth->addListener(*this, &label.stackDepth);
+
+    label.sources.push_back(std::make_pair(immOff, opcodeOff));
+  }
+
+  void enforceStackDepth(int stackDepth) {
+    if (currentStackDepth == nullptr) {
+      // Current instruction is unreachable, thus the constraint
+      // on the stack depth will never be violated
+      return;
+    }
+
+    currentStackDepth->setCurrentAbsolute(*this, stackDepth);
+  }
+
+  void enterUnreachableRegion() {
+    currentStackDepth = nullptr;
   }
 
   void addLabelDVInit(const std::string& name, int paramId) {
     labelMap[name].dvInits.push_back(paramId);
+
+    // Stack depth should be 0 when entering a DV init
+    labelMap[name].stackDepth.setBase(*this, 0);
   }
 
   void addLabelEHFault(const std::string& name, size_t ehIdx) {
     labelMap[name].ehFaults.push_back(ehIdx);
+
+    // Stack depth should be 0 when entering a fault funclet
+    labelMap[name].stackDepth.setBase(*this, 0);
   }
 
   void addLabelEHCatch(const std::string& what,
                        const std::string& label,
                        size_t ehIdx) {
     labelMap[label].ehCatches[what].push_back(ehIdx);
+
+    // Stack depth should be 0 when entering a catch block
+    labelMap[label].stackDepth.setBase(*this, 0);
   }
 
   void beginFpi() {
+    if (currentStackDepth == nullptr) {
+      error("beginFpi called from unreachable instruction");
+    }
+
     fpiRegs.push_back(FPIReg());
     FPIReg& fpi = fpiRegs.back();
     fpi.fpushOff = ue->bcPos();
-    fpi.fpOff = stackDepth;
+    fpi.stackDepth = currentStackDepth;
+    fpi.fpOff = currentStackDepth->currentOffset;
     fdescDepth += kNumActRecCells;
     fdescHighWater = std::max(fdescDepth, fdescHighWater);
   }
@@ -432,7 +560,15 @@ struct AsmState : private boost::noncopyable {
     FPIReg& reg = fpiRegs.back();
     ent.m_fpushOff = reg.fpushOff;
     ent.m_fcallOff = ue->bcPos();
+
     ent.m_fpOff = reg.fpOff;
+    if (reg.stackDepth->baseValue) {
+      ent.m_fpOff += reg.stackDepth->baseValue.get();
+    } else {
+      // base value still unknown, this will need to be updated later
+      fpiToUpdate.push_back(std::make_pair(&ent, reg.stackDepth));
+    }
+
     fpiRegs.pop_back();
     fdescDepth -= kNumActRecCells;
   }
@@ -488,9 +624,17 @@ struct AsmState : private boost::noncopyable {
       patchLabelOffsets(it->second);
     }
 
-    if (stackDepth != 0) {
-      error("end of function body has nonzero stack depth");
+    // Patch the FPI structures
+    for (auto& kv : fpiToUpdate) {
+      if (!kv.second->baseValue) {
+        error("created a FPI from an unreachable instruction");
+      }
+
+      kv.first->m_fpOff += kv.second->baseValue.get();
     }
+
+    // Stack depth should be 0 at the end of a function body
+    enforceStackDepth(0);
 
     fe->setMaxStackCells(stackHighWater + kNumActRecCells + fdescHighWater);
     fe->finish(ue->bcPos(), false);
@@ -500,10 +644,13 @@ struct AsmState : private boost::noncopyable {
     fpiRegs.clear();
     labelMap.clear();
     numItersSet = false;
-    stackDepth = 0;
+    initStackDepth = StackDepth();
+    initStackDepth.setBase(*this, 0);
+    currentStackDepth = &initStackDepth;
     stackHighWater = 0;
     fdescDepth = 0;
     fdescHighWater = 0;
+    fpiToUpdate.clear();
   }
 
   int getLocalId(const std::string& name) {
@@ -539,11 +686,73 @@ struct AsmState : private boost::noncopyable {
   typedef std::map<std::string,Label> LabelMap;
   std::map<std::string,Label> labelMap;
   bool numItersSet;
-  int stackDepth;
+  StackDepth initStackDepth;
+  StackDepth* currentStackDepth;
   int stackHighWater;
   int fdescDepth;
   int fdescHighWater;
+  std::vector<std::pair<FPIEnt*, StackDepth*> > fpiToUpdate;
 };
+
+
+void StackDepth::adjust(AsmState& as, int delta) {
+  currentOffset += delta;
+
+  if (!baseValue) {
+    // The absolute stack depth is unknown. We only store the min
+    // and max offsets, and we will take a decision later, when the
+    // base value will be known.
+    maxOffset = std::max(currentOffset, maxOffset);
+    if (currentOffset < minOffset) {
+      minOffsetLine = as.in.getLineNumber();
+      minOffset = currentOffset;
+    }
+    return;
+  }
+
+  if (*baseValue + currentOffset < 0) {
+    as.error("opcode sequence caused stack depth to go negative");
+  }
+
+  as.adjustStackHighwater(*baseValue + currentOffset);
+}
+
+void StackDepth::addListener(AsmState& as, StackDepth* target) {
+  if (baseValue) {
+    target->setBase(as, *baseValue + currentOffset);
+  } else {
+    listeners.push_back(std::make_pair(target, currentOffset));
+  }
+}
+
+void StackDepth::setBase(AsmState& as, int stackDepth) {
+  if (baseValue && stackDepth != *baseValue) {
+    as.error("stack depth do not match");
+  }
+
+  baseValue = stackDepth;
+
+  // We finally know the base value. Update AsmState accordingly.
+  if (*baseValue + minOffset < 0) {
+    throw Error(
+      minOffsetLine,
+      "opcode sequence caused stack depth to go negative"
+    );
+  }
+  as.adjustStackHighwater(*baseValue + maxOffset);
+
+  // Update the listeners
+  for (auto& kv : listeners) {
+    kv.first->setBase(as, *baseValue + kv.second);
+  }
+
+  // We won't need them anymore
+  listeners.clear();
+}
+
+void StackDepth::setCurrentAbsolute(AsmState& as, int stackDepth) {
+  setBase(as, stackDepth - currentOffset);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -730,13 +939,17 @@ OpcodeParserMap opcode_parsers;
   std::vector<std::string> vecImm = read_jmpvector(as); \
   as.ue->emitInt32(vecImm.size());                      \
   for (size_t i = 0; i < vecImm.size(); ++i) {          \
-    as.addLabelJump(vecImm[i], curOpcodeOff);           \
+    labelJumps.push_back(                               \
+      std::make_pair(vecImm[i], as.ue->bcPos()));       \
     as.ue->emitInt32(0); /* to be patched */            \
   }                                                     \
 } while (0)
 
 #define IMM_BA do {                                                 \
-  as.addLabelJump(read_opcode_arg<std::string>(as), curOpcodeOff);  \
+  labelJumps.push_back(std::make_pair(                              \
+    read_opcode_arg<std::string>(as),                               \
+    as.ue->bcPos()                                                  \
+  ));                                                               \
   as.ue->emitInt32(0);                                              \
 } while (0)
 
@@ -761,6 +974,15 @@ OpcodeParserMap opcode_parsers;
     UNUSED int64_t immIVA = -1;                                   \
     UNUSED const Opcode thisOpcode = Op##name;                    \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();            \
+    std::vector<std::pair<std::string, Offset> > labelJumps;      \
+                                                                  \
+    TRACE(                                                        \
+      4,                                                          \
+      "%d\t[%s] %s\n",                                            \
+      as.in.getLineNumber(),                                      \
+      as.displayStackDepth().c_str(),                             \
+      #name                                                       \
+    );                                                            \
                                                                   \
     if (isFPush(Op##name)) {                                      \
       as.beginFpi();                                              \
@@ -768,22 +990,23 @@ OpcodeParserMap opcode_parsers;
       as.endFpi();                                                \
     }                                                             \
     as.ue->emitOp(Op##name);                                      \
+                                                                  \
     IMM_##imm;                                                    \
-    if (instrFlags(thisOpcode) & TF) {                            \
-      as.adjustStack(-as.stackDepth);                             \
-    } else {                                                      \
-      int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;           \
-      as.adjustStack(stackDelta);                                 \
+                                                                  \
+    int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;             \
+    as.adjustStack(stackDelta);                                   \
+                                                                  \
+    for (auto& kv : labelJumps) {                                 \
+      as.addLabelJump(kv.first, kv.second, curOpcodeOff);         \
     }                                                             \
+                                                                  \
+    /* Stack depth should be 0 after RetC or RetV. */             \
     if (thisOpcode == OpRetC || thisOpcode == OpRetV) {           \
-      if (as.stackDepth != 0) {                                   \
-        /* Note: probably we'll want to remove this check
-           to allow writing tests that the verifier catches
-           these errors.  Until this is hooked up to that, though,
-          it's too easy to mess up without this check. */         \
-        as.error("stack depth must be exactly 1 before a "        \
-                 "RetC or RetV instruction");                     \
-      }                                                           \
+      as.enforceStackDepth(0);                                    \
+    }                                                             \
+                                                                  \
+    if (instrFlags(thisOpcode) & TF) {                            \
+      as.enterUnreachableRegion();                                \
     }                                                             \
   }
 

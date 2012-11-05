@@ -5,7 +5,6 @@
   FPushCtorD 0 "TestClass"
   FCall 0
   PopR
-  Dup
 
   FPushObjMethodD 0 "testwithctx"
   FCall 0

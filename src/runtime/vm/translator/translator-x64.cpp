@@ -1280,10 +1280,10 @@ TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
  * instruction written without any risk of cache-tearing.
  */
 bool
-TranslatorX64::isSmashable(Address frontier, int nBytes) {
+TranslatorX64::isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
   ASSERT(nBytes <= int(kX64CacheLineSize));
-  uintptr_t iFrontier = uintptr_t(frontier);
-  uintptr_t lastByte = iFrontier + nBytes - 1;
+  uintptr_t iFrontier = uintptr_t(frontier) + offset;
+  uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
   return (iFrontier & ~kX64CacheLineMask) == (lastByte & ~kX64CacheLineMask);
 }
 
@@ -1292,26 +1292,41 @@ TranslatorX64::isSmashable(Address frontier, int nBytes) {
  * writing a testBytes-long instruction, the frontier will be smashable.
  */
 void
-TranslatorX64::prepareForTestAndSmash(int testBytes, int jccBytes) {
-  uintptr_t afterTestFrontier = uintptr_t(a.code.frontier) + testBytes;
-  if (!isSmashable(a.code.frontier + testBytes, jccBytes)) {
-    int gapSize = kX64CacheLineSize - (afterTestFrontier & kX64CacheLineMask);
+TranslatorX64::prepareForTestAndSmash(int testBytes, TestAndSmashFlags flags) {
+  if (flags == kAlignJcc) {
+    prepareForSmash(testBytes + kJmpccLen, testBytes);
+    ASSERT(isSmashable(a.code.frontier + testBytes, kJmpccLen));
+  } else if (flags == kAlignJccImmediate) {
+    prepareForSmash(testBytes + kJmpccLen,
+                    testBytes + kJmpccLen - kJmpImmBytes);
+    ASSERT(isSmashable(a.code.frontier + testBytes, kJmpccLen,
+                       kJmpccLen - kJmpImmBytes));
+  } else if (flags == kAlignJccAndJmp) {
+    // Ensure that the entire jcc, and the entire jmp are smashable
+    // (but we dont need them both to be in the same cache line)
+    prepareForSmash(testBytes + kJmpccLen, testBytes);
+    prepareForSmash(testBytes + kJmpccLen + kJmpLen, testBytes + kJmpccLen);
+    ASSERT(isSmashable(a.code.frontier + testBytes, kJmpccLen));
+    ASSERT(isSmashable(a.code.frontier + testBytes + kJmpccLen, kJmpLen));
+  } else {
+    not_reached();
+  }
+}
+
+void
+TranslatorX64::prepareForSmash(X64Assembler& a, int nBytes,
+                               int offset /* = 0 */) {
+  if (!isSmashable(a.code.frontier, nBytes, offset)) {
+    int gapSize = (~(uintptr_t(a.code.frontier) + offset) &
+                   kX64CacheLineMask) + 1;
     a.emitNop(gapSize);
+    ASSERT(isSmashable(a.code.frontier, nBytes, offset));
   }
-  ASSERT(isSmashable(a.code.frontier + testBytes, jccBytes));
 }
 
 void
-TranslatorX64::prepareForSmash(X64Assembler& a, int nBytes) {
-  if (!isSmashable(a.code.frontier, nBytes)) {
-    moveToAlign(a, kX64CacheLineSize, false);
-  }
-  ASSERT(isSmashable(a.code.frontier, nBytes));
-}
-
-void
-TranslatorX64::prepareForSmash(int nBytes) {
-  prepareForSmash(a, nBytes);
+TranslatorX64::prepareForSmash(int nBytes, int offset /* = 0 */) {
+  prepareForSmash(a, nBytes, offset);
 }
 
 void
@@ -2208,11 +2223,9 @@ TranslatorX64::emitCondJmp(const SrcKey &skTaken, const SrcKey &skNotTaken,
   ASSERT(skTaken.m_funcId == skNotTaken.m_funcId);
 
   // reserve space for a smashable jnz/jmp pair; both initially point
-  // to our stub
-  prepareForSmash(kJmpLen + kJmpccLen);
+  // to our stub.
+  prepareForTestAndSmash(0, kAlignJccAndJmp);
   TCA old = a.code.frontier;
-
-  moveToAlign(astubs);
   TCA stub = astubs.code.frontier;
 
   // begin code for the stub
@@ -2570,13 +2583,12 @@ TranslatorX64::checkType(X64Assembler& a,
 
 void
 TranslatorX64::emitFallbackJmp(SrcRec& dest) {
-  prepareForSmash(kJmpccLen);
-  dest.emitFallbackJump(a, a.code.frontier, CC_NZ);
+  emitFallbackJmp(a, dest);
 }
 
 void
 TranslatorX64::emitFallbackJmp(Asm& as, SrcRec& dest) {
-  prepareForSmash(as, kJmpccLen);
+  prepareForSmash(as, kJmpccLen, kJmpccLen - kJmpImmBytes);
   dest.emitFallbackJump(as, as.code.frontier, CC_NZ);
 }
 
@@ -2708,7 +2720,7 @@ TranslatorX64::checkRefs(X64Assembler& a,
 
           // Other than these builtins, we need to have all by value
           // args in this case.
-          prepareForTestAndSmash(kTestRegRegLen, kJmpccLen);
+          prepareForTestAndSmash(kTestRegRegLen, kAlignJccImmediate);
           a.  test_reg64_reg64(*rExpectedBits, *rExpectedBits);
           emitFallbackJmp(fail);
 
@@ -3976,7 +3988,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     }
     if (i.changesPC) {
       fuseBranchSync(t, i);
-      prepareForTestAndSmash(kTestImmRegLen, kJmpccLen + kJmpLen);
+      prepareForTestAndSmash(kTestImmRegLen, kAlignJccAndJmp);
       a.   test_imm8_reg8(1, rax);
       fuseBranchAfterBool(t, i, ccNegate(ccBranch));
       return;
@@ -3997,7 +4009,7 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     fuseBranchSync(t, i);
   }
   if (IS_NULL_TYPE(leftType) || IS_NULL_TYPE(rightType)) {
-    prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
+    prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
     if (IS_NULL_TYPE(leftType)) {
       a.   test_reg64_reg64(srcdest, srcdest);
     } else {
@@ -4359,7 +4371,7 @@ TranslatorX64::translateBranchOp(const Tracelet& t,
     emitBindJmp(isZ ? taken : notTaken);
     return;
   }
-  prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
+  prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
   a.    test_reg64_reg64(src, src);
   branchWithFlagsSet(t, i, isZ ? CC_Z : CC_NZ);
 }
@@ -7099,7 +7111,7 @@ void TranslatorX64::translateClassExistsImpl(const Tracelet& t,
     if (i.changesPC) {
       fuseBranchSync(t, i);
     }
-    prepareForTestAndSmash(kTestImmRegLen, kJmpccLen + kJmpLen);
+    prepareForTestAndSmash(kTestImmRegLen, kAlignJccAndJmp);
     a.    test_imm32_reg32(isClass ? attrNotClass : typeAttr, *scratch);
     ConditionCode cc = isClass ? CC_Z : CC_NZ;
     if (i.changesPC) {
@@ -7715,7 +7727,7 @@ TranslatorX64::translateAKExists(const Tracelet& t,
     ScratchReg res(m_regMap, rax);
     if (ni.changesPC) {
       fuseBranchSync(t, ni);
-      prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
+      prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
       a.    test_reg64_reg64(*res, *res);
       fuseBranchAfterBool(t, ni, ni.invertCond ? CC_Z : CC_NZ);
     } else {
@@ -9723,7 +9735,7 @@ TranslatorX64::translateIterInit(const Tracelet& t,
   // the input. If a new iterator is not created, new_iter_* will decRef the
   // input for us.  new_iter_* returns 0 if an iterator was not created,
   // otherwise it returns 1.
-  prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
+  prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
   a.    test_reg64_reg64(rax, rax);
   emitCondJmp(taken, notTaken, CC_Z);
 }
@@ -9820,7 +9832,7 @@ TranslatorX64::translateIterNext(const Tracelet& t,
   SrcKey taken, notTaken;
   branchDests(t, i, &taken, &notTaken, 1 /* destImmIdx */);
 
-  prepareForTestAndSmash(kTestRegRegLen, kJmpccLen + kJmpLen);
+  prepareForTestAndSmash(kTestRegRegLen, kAlignJccAndJmp);
   a.   test_reg64_reg64(rax, rax);
   emitCondJmp(taken, notTaken, CC_NZ);
 }

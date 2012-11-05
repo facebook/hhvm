@@ -792,6 +792,7 @@ private:
   static const size_t kNonFallthroughAlign = 64;
   static const int kJmpLen = 5;
   static const int kJmpccLen = 6;
+  static const int kJmpImmBytes = 4;
   static const int kJcc8Len = 3;
   static const int kLeaRipLen = 7;
   static const int kTestRegRegLen = 3;
@@ -804,10 +805,15 @@ private:
  private:
   void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
                    const bool unreachable = true);
-  void prepareForTestAndSmash(int testBytes, int jccBytes);
-  void prepareForSmash(Asm &a, int nBytes);
-  void prepareForSmash(int nBytes);
-  static bool isSmashable(Address frontier, int nBytes);
+  enum TestAndSmashFlags {
+    kAlignJccImmediate,
+    kAlignJcc,
+    kAlignJccAndJmp
+  };
+  void prepareForTestAndSmash(int testBytes, TestAndSmashFlags flags);
+  void prepareForSmash(Asm &a, int nBytes, int offset = 0);
+  void prepareForSmash(int nBytes, int offset = 0);
+  static bool isSmashable(Address frontier, int nBytes, int offset = 0);
   static void smash(Asm &a, TCA src, TCA dest);
 
   TCA getTranslation(const SrcKey *sk, bool align, bool forceNoHHIR = false);

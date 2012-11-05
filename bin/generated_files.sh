@@ -41,7 +41,7 @@ fi
 
 if [ "$1" = "hhvm" -o "$1" = "all" ]; then
   cd $HPHP_HOME/src/runtime/ext
-  SOURCES=`ls ext_*.cpp | grep -v ext_hhvm | cut -d . -f 1` 
+  SOURCES=`find . -name '*.cpp' | grep -v ext_hhvm | grep -v sep | cut -c 3- | cut -d . -f 1`
   RUNTIME_BUILD=$HPHP_HOME/src/CMakeFiles/hphp_runtime_static.dir
   cd $HPHP_HOME/src/runtime/ext_hhvm
   if [ -z "$SOURCES" -a $VERBOSE -eq 1 ]; then

@@ -286,16 +286,6 @@ int string_natural_cmp(char const *a, size_t a_len,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char *string_to_lower(const char *s, int len) {
-  ASSERT(s);
-  char *ret = (char *)malloc(len + 1);
-  for (int i = 0; i < len; i++) {
-    ret[i] = tolower(s[i]);
-  }
-  ret[len] = '\0';
-  return ret;
-}
-
 char *string_to_upper(const char *s, int len) {
   ASSERT(s);
   char *ret = (char *)malloc(len + 1);

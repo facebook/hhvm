@@ -29,8 +29,12 @@ namespace HPHP {
 String StringUtil::ToLower(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_to_lower(input.data(), len);
-  return String(ret, len, AttachString);
+  String str(len, ReserveString);
+  char* out = str.mutableSlice().ptr;
+  for (const char *in = input.data(), *end = in + len; in < end; in++) {
+    *out++ = tolower(*in);
+  }
+  return str.setSize(len);
 }
 
 String StringUtil::ToUpper(CStrRef input, ToUpperType type /*= ToUpperAll */) {
@@ -208,18 +212,17 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
   int size = items.size();
   if (size == 0) return "";
 
-  vector<String> sitems;
-  sitems.reserve(size);
+  String* sitems = (String*)smart_malloc(size * sizeof(String));
   int len = 0;
   int lenDelim = delim.size();
+  int i = 0;
   for (ArrayIter iter(items); iter; ++iter) {
-    String item = iter.second().toString();
-    sitems.push_back(item);
-    len += lenDelim;
-    len += item.size();
+    new (&sitems[i]) String(iter.second().toString());
+    len += sitems[i].size() + lenDelim;
+    i++;
   }
   len -= lenDelim; // always one delimiter less than count of items
-  ASSERT((int)sitems.size() == size);
+  ASSERT(i == size);
 
   String s = String(len, ReserveString);
   char *buffer = s.mutableSlice().ptr;
@@ -236,7 +239,9 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
       memcpy(p, item.data(), lenItem);
       p += lenItem;
     }
+    sitems[i].~String();
   }
+  smart_free(sitems);
   ASSERT(p - buffer == len);
   return s.setSize(len);
 }

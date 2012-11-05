@@ -483,34 +483,6 @@ tv_release_ref(RefData* datum) {
   datum->release();
 }
 
-void
-frame_free_locals(ActRec* fp, int numLocals) {
-  ASSERT(Transl::tx64->stateIsDirty());
-  using namespace Transl;
-#ifdef DEBUG
-  VMRegAnchor _;
-  ASSERT(vmfp() == (Cell*)fp);
-#endif
-  // At return-time, we know that the eval stack is empty except
-  // for the return value.
-  TRACE(1, "frame_free_locals: updated fp to %p\n", fp);
-  frame_free_locals_inl(fp, numLocals);
-}
-
-void
-frame_free_locals_no_this(ActRec* fp, int numLocals) {
-  ASSERT(Transl::tx64->stateIsDirty());
-  using namespace Transl;
-#ifdef DEBUG
-  VMRegAnchor _;
-  ASSERT(vmfp() == (Cell*)fp);
-#endif
-  // At return-time, we know that the eval stack is empty except
-  // for the return value.
-  TRACE(1, "frame_free_locals_no_this: updated fp to %p\n", fp);
-  frame_free_locals_no_this_inl(fp, numLocals);
-}
-
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
                    const char* fname) {
   static CompileStringFn compileString =

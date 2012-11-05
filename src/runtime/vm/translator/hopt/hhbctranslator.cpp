@@ -1316,7 +1316,7 @@ void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace) {
     }
 
     // decref refcounted locals
-    for (int id = 0; id < curFunc->numLocals(); id++) {
+    for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
       m_tb.genDecRefLoc(id);
     }
 

@@ -3337,14 +3337,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 }
 
 bool freeLocalsInline() {
-  ActRec* ar = (ActRec*)vmfp();
-  /*
-   * If the current frame has a varEnv, we wont take the fast path
-   * anyway. Use the presence of a varEnv at translation time as a
-   * good guess.
-   */
-  return !ar->hasVarEnv() &&
-    (curFunc()->numLocals() <= Translator::kFewLocals);
+  return curFunc()->numLocals() <= Translator::kFewLocals;
 }
 
 } } }

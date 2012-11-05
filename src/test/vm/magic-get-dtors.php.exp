@@ -11,7 +11,7 @@ c 5 constructing
 c 4 destructing
 c 6 constructing
 Returning from main
-c 0 destructing
-c 5 destructing
 c 6 destructing
+c 5 destructing
+c 0 destructing
 Done

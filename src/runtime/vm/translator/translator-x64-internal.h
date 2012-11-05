@@ -433,6 +433,82 @@ inline void dumpJmpProfile() {
   dumpProfileImpl(Trace::jcc);
 }
 
+struct Label : private boost::noncopyable {
+  explicit Label()
+    : m_a(nullptr)
+    , m_address(nullptr)
+  {}
+
+  ~Label() {
+    if (!m_toPatch.empty()) {
+      ASSERT(m_a && m_address && "Label had jumps but was never set");
+    }
+    for (auto& ji : m_toPatch) {
+      switch (ji.type) {
+      case Branch::Jmp:   ji.a->patchJmp(ji.addr, m_address);  break;
+      case Branch::Jmp8:  ji.a->patchJmp8(ji.addr, m_address); break;
+      case Branch::Jcc:   ji.a->patchJcc(ji.addr, m_address);  break;
+      case Branch::Jcc8:  ji.a->patchJcc8(ji.addr, m_address); break;
+      }
+    }
+  }
+
+  void jmp(X64Assembler& a) {
+    addJump(&a, Branch::Jmp);
+    a.jmp(m_address ? m_address : a.code.frontier);
+  }
+
+  void jmp8(X64Assembler& a) {
+    addJump(&a, Branch::Jmp8);
+    a.jmp8(m_address ? m_address : a.code.frontier);
+  }
+
+  void jcc(X64Assembler& a, ConditionCode cc) {
+    addJump(&a, Branch::Jcc);
+    a.jcc(cc, m_address ? m_address : a.code.frontier);
+  }
+
+  void jcc8(X64Assembler& a, ConditionCode cc) {
+    addJump(&a, Branch::Jcc8);
+    a.jcc8(cc, m_address ? m_address : a.code.frontier);
+  }
+
+  friend void asm_label(X64Assembler& a, Label& l) {
+    ASSERT(!l.m_address && !l.m_a && "Label was already set");
+    l.m_a = &a;
+    l.m_address = a.code.frontier;
+  }
+
+private:
+  enum class Branch {
+    Jcc,
+    Jcc8,
+    Jmp,
+    Jmp8
+  };
+
+  struct JumpInfo {
+    Branch type;
+    X64Assembler* a;
+    TCA addr;
+  };
+
+private:
+  void addJump(X64Assembler* a, Branch type) {
+    if (m_address) return;
+    JumpInfo info;
+    info.type = type;
+    info.a = a;
+    info.addr = a->code.frontier;
+    m_toPatch.push_back(info);
+  }
+
+private:
+  X64Assembler* m_a;
+  TCA m_address;
+  std::vector<JumpInfo> m_toPatch;
+};
+
 // UnlikelyIfBlock:
 //
 //  Branch to distant code (that we presumably don't expect to
@@ -579,6 +655,23 @@ private:
   m_curFile = __FILE__; m_curFunc = __FUNCTION__; m_curLine = __LINE__; \
   JccBlock
 
+template<class Lambda>
+void guardDiamond(X64Assembler& a, Lambda body) {
+  DiamondGuard dg(a);
+  body();
+}
+
+template<ConditionCode Jcc, class Lambda>
+void jccBlock(X64Assembler& a, Lambda body) {
+  Label exit;
+
+  guardDiamond(a, [&] {
+    exit.jcc8(a, Jcc);
+    body();
+  });
+asm_label(a, exit);
+}
+
 /*
  * semiLikelyIfBlock is a conditional block of code that is expected
  * to be unlikely, but not so unlikely that we should shove it into
@@ -593,16 +686,17 @@ private:
  * });
  */
 template<class Lambda>
-void semiLikelyIfBlock(ConditionCode cc, X64Assembler& a, Lambda body) {
-  std::unique_ptr<DiamondGuard> dg(new DiamondGuard(a));
-  const TCA toPatch = a.code.frontier;
-  a.jcc8(cc, toPatch);
-  const TCA patchLikely = a.code.frontier;
-  a.jmp8(patchLikely);
-  a.patchJcc8(toPatch, a.code.frontier);
-  body();
-  dg.reset();
-  a.patchJmp8(patchLikely, a.code.frontier);
+void semiLikelyIfBlock(ConditionCode Jcc, X64Assembler& a, Lambda body) {
+  Label likely;
+  Label unlikely;
+
+  guardDiamond(a, [&] {
+    unlikely.jcc8(a, Jcc);
+    likely.jmp8(a);
+  asm_label(a, unlikely);
+    body();
+  });
+asm_label(a, likely);
 }
 
 // A CondBlock is an RAII structure for emitting conditional code. It

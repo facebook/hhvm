@@ -102,7 +102,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     ExtraArgs::deallocate(fp);
   }
   // Free locals
-  for (int i = 0; i < numLocals; i++) {
+  for (int i = numLocals - 1; i >= 0; --i) {
     TRACE_MOD(Trace::runtime, 5,
               "RetC: freeing %d'th local of %d\n", i,
               fp->m_func->numLocals());
@@ -122,17 +122,17 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
 
 inline void ALWAYS_INLINE
 frame_free_locals_inl(ActRec* fp, int numLocals) {
-  frame_free_locals_helper_inl(fp, numLocals);
-  // Destroying the locals may re-enter the VM and take a backtrace which
-  // accesses the 'this' field from this frame, so we need to destroy 'this'
-  // after destroying the locals.
   if (fp->hasThis()) {
     ObjectData* this_ = fp->getThis();
+    // If a destructor for a local calls debug_backtrace, it can read
+    // the m_this field from the ActRec, so we need to zero it to
+    // ensure they can't access a free'd object.
     fp->setThis(NULL);
-    if (this_->decRefCount() == 0) {
+    if (UNLIKELY(this_->decRefCount() == 0)) {
       this_->release();
     }
   }
+  frame_free_locals_helper_inl(fp, numLocals);
   EventHook::FunctionExit(fp);
 }
 
@@ -142,8 +142,6 @@ frame_free_locals_no_this_inl(ActRec* fp, int numLocals) {
   EventHook::FunctionExit(fp);
 }
 
-void frame_free_locals(ActRec* fp, int numLocals);
-void frame_free_locals_no_this(ActRec* fp, int numLocals);
 Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
 Unit* compile_string(const char* s, size_t sz);
 Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,

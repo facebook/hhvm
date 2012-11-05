@@ -171,10 +171,8 @@ SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i) {
 //   Used to emit a bunch of outlined code that is unconditionally jumped to.
 template <typename L>
 void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
-  std::unique_ptr<DiamondGuard> dg(new DiamondGuard(cold));
   hot.  jmp(cold.code.frontier);
-  body();
-  dg.reset();
+  guardDiamond(cold, body);
   cold. jmp(hot.code.frontier);
 }
 
@@ -1476,7 +1474,7 @@ TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
 // Tests the surprise flags for the current thread. Should be used
 // before a jnz to surprise handling code.
 void
-TranslatorX64::emitTestSurpriseFlags() {
+TranslatorX64::emitTestSurpriseFlags(Asm& a) {
   static_assert(RequestInjectionData::LastFlag < (1 << 8),
                 "Translator assumes RequestInjectionFlags fit in one byte");
   a.test_imm8_disp_reg8((int8)0xff, TargetCache::kConditionFlagsOff, rVmTl);
@@ -1485,7 +1483,7 @@ TranslatorX64::emitTestSurpriseFlags() {
 void
 TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
                                            Offset stackOff) {
-  emitTestSurpriseFlags();
+  emitTestSurpriseFlags(a);
   {
     UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
     if (false) { // typecheck
@@ -5825,7 +5823,7 @@ TranslatorX64::translateJmp(const Tracelet& t,
       recordStubCall(i);
       astubs.jmp(a.code.frontier);
     } else {
-      emitTestSurpriseFlags();
+      emitTestSurpriseFlags(a);
       {
         UnlikelyIfBlock ifSurprise(CC_NZ, a, astubs);
         astubs.call((TCA)&EventHook::CheckSurprise);
@@ -6115,42 +6113,16 @@ void TranslatorX64::emitReturnVal(
 
 }
 
-// translateRetC --
-//
-//   Return to caller with the current activation record replaced with the
-//   top-of-stack return value. Call with outputs sync'ed, so the code
-//   we're emmitting runs "in between" basic blocks.
+/*
+ * translateRetC --
+ *
+ *   Return to caller with the current activation record replaced with the
+ *   top-of-stack return value.
+ */
 void
 TranslatorX64::translateRetC(const Tracelet& t,
                              const NormalizedInstruction& i) {
   if (i.skipSync) ASSERT(i.grouped);
-
-  /*
-   * This method chooses one of two ways to generate machine code for RetC
-   * depending on whether we are generating a specialized return (where we
-   * free the locals inline when possible) or a generic return (where we call
-   * a helper function to free locals).
-   *
-   * For the specialized return, we emit the following flow:
-   *
-   *   Check if varenv is NULL
-   *   If it's not NULL, branch to label 2
-   *   Free each local variable
-   * 1:
-   *   Teleport the return value to appropriate memory location
-   *   Restore the old values for rVmFp and rVmSp, and
-   *   unconditionally transfer control back to the caller
-   * 2:
-   *   Call the frame_free_locals helper
-   *   Jump to label 1
-   *
-   * For a generic return, we emit the following flow:
-   *
-   *   Call the frame_free_locals helper
-   *   Teleport the return value to appropriate memory location
-   *   Restore the old values for rVmFp and rVmSp, and
-   *   unconditionally transfer control back to the caller
-   */
 
   int stackAdjustment = t.m_stackChange;
   if (i.skipSync) {
@@ -6205,46 +6177,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
   if (freeLocalsInline()) {
     SKTRACE(2, i.source, "emitting specialized inline return\n");
 
-    // Emit specialized code inline to clean up the locals
-    ASSERT(curFunc()->numLocals() == (int)i.inputs.size());
-
     ScratchReg rTmp(m_regMap);
-
-    /*
-     * If this function can possibly use variadic arguments or shared
-     * variable environment, we need to check for it and go to a
-     * generic return if so.
-     */
-    boost::scoped_ptr<DiamondReturn> mayUseVVRet;
-    if (mayUseVV) {
-      SKTRACE(2, i.source, "emitting mayUseVV in UnlikelyIf\n");
-
-      mayUseVVRet.reset(new DiamondReturn);
-      a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rTmp);
-      a.    test_reg64_reg64(*rTmp, *rTmp);
-      {
-        UnlikelyIfBlock varEnvCheck(CC_NZ, a, astubs, mayUseVVRet.get());
-
-        m_regMap.cleanAll();
-        if (i.grouped) {
-          ScratchReg s(m_regMap);
-          emitReturnVal(astubs, i,
-                        rVmSp, retvalSrcBase, rVmFp, AROFF(m_this), *s);
-        }
-        emitFrameRelease(astubs, i, noThis || mergedThis);
-      }
-    }
-
-    for (unsigned int k = 0; k < i.inputs.size(); ++k) {
-      // RetC's inputs should all be locals
-      ASSERT(i.inputs[k]->location.space == Location::Local);
-      DataType t = i.inputs[k]->outerType();
-      if (IS_REFCOUNTED_TYPE(t)) {
-        PhysReg reg = m_regMap.allocReg(i.inputs[k]->location, t,
-                                        RegInfo::CLEAN);
-        emitDecRef(i, reg, t);
-      }
-    }
 
     if (mergedThis) {
       // There is nothing to do, we're returning this,
@@ -6285,11 +6218,67 @@ TranslatorX64::translateRetC(const Tracelet& t,
       }
     }
 
+    /*
+     * If this function can possibly use variadic arguments or shared
+     * variable environment, we need to check for it and clear them if
+     * they exist.
+     */
+    boost::scoped_ptr<DiamondReturn> mayUseVVRet;
+    Label extraArgsReturn;
+    if (mayUseVV) {
+      SKTRACE(2, i.source, "emitting mayUseVV in UnlikelyIf\n");
+
+      mayUseVVRet.reset(new DiamondReturn);
+      a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rTmp);
+      a.    test_reg64_reg64(*rTmp, *rTmp);
+      {
+        // TODO: maybe this should be a semi-likely block when there
+        // is a varenv at translation time.
+        UnlikelyIfBlock varEnvCheck(CC_NZ, a, astubs, mayUseVVRet.get());
+        auto& a = astubs;
+
+        a.  test_imm32_reg32(ActRec::kExtraArgsBit, *rTmp);
+        jccBlock<CC_Z>(a, [&] {
+          guardDiamond(a, [&] {
+            EMIT_RCALL(
+              a, *m_curNI,
+              TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
+              R(rVmFp)
+            );
+          });
+          extraArgsReturn.jmp(a);
+        });
+
+        m_regMap.cleanAll();
+        EMIT_RCALL(
+          a, *m_curNI,
+          TCA(getMethodHardwarePtr(&VarEnv::detach)),
+          R(*rTmp),
+          R(rVmFp)
+        );
+      }
+    }
+
+  asm_label(a, extraArgsReturn);
+    ASSERT(curFunc()->numLocals() == (int)i.inputs.size());
+    for (int k = i.inputs.size() - 1; k >= 0; --k) {
+      // RetC's inputs should all be locals
+      ASSERT(i.inputs[k]->location.space == Location::Local);
+      DataType t = i.inputs[k]->outerType();
+      if (IS_REFCOUNTED_TYPE(t)) {
+        PhysReg reg = m_regMap.allocReg(i.inputs[k]->location, t,
+                                        RegInfo::CLEAN);
+        emitDecRef(i, reg, t);
+      }
+    }
+
     // Register map is officially out of commission now.
     m_regMap.scrubLoc(retValSrcLoc);
     m_regMap.smashRegs(kAllRegs);
 
-    emitTestSurpriseFlags();
+    mayUseVVRet.reset();
+
+    emitTestSurpriseFlags(a);
     {
       UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
       if (i.grouped) {
@@ -6336,8 +6325,14 @@ TranslatorX64::translateRetC(const Tracelet& t,
   RegSet scratchRegs = kScratchCrossTraceRegs;
   DumbScratchReg rRetAddr(scratchRegs);
 
-  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRip), *rRetAddr);
-  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
+  if (!freeLocalsInline()) {
+    // Compensate for rVmSp already being adjusted by the helper in
+    // emitFrameRelease.
+    retvalSrcBase -= sizeof(ActRec) +
+      cellsToBytes(nLocalCells - stackAdjustment);
+    retvalDestDisp = 0;
+  }
+
   /*
    * Having gotten everything we care about out of the current frame
    * pointer, smash the return address type and value over it. We don't
@@ -6359,12 +6354,16 @@ TranslatorX64::translateRetC(const Tracelet& t,
    * Stack pointer has to skip over all the locals as well as the
    * activation record.
    */
-  a.   add_imm64_reg64(sizeof(ActRec) +
-                       cellsToBytes(nLocalCells - stackAdjustment), rVmSp);
+  if (freeLocalsInline()) {
+    // If we're not freeing inline, the helper took care of this.
+    a.  lea_reg64_disp_reg64(rVmFp, AROFF(m_r), rVmSp);
+  }
+  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_savedRip), *rRetAddr);
+  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
   emitRB(a, RBTypeFuncExit, curFunc()->fullName()->data(), RegSet(*rRetAddr));
   // push the return address and do a ret
-  a.   pushr(*rRetAddr);
-  a.   ret();
+  a.    pushr(*rRetAddr);
+  a.    ret();
   translator_not_reached(a);
 }
 
@@ -6469,16 +6468,13 @@ void
 TranslatorX64::emitFrameRelease(X64Assembler& a,
                                 const NormalizedInstruction& i,
                                 bool noThis /*= false*/) {
-  if (false) { // typecheck
-    frame_free_locals(curFrame(), 0);
-  }
-  a.     mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+  // Custom calling convention: the argument is in r15.
   int numLocals = curFunc()->numLocals();
-  emitImmReg(a, numLocals, argNumToRegName[1]);
+  emitImmReg(a, numLocals - kFewLocals, r15);
   if (noThis) {
-    emitCall(a, (TCA)frame_free_locals_no_this);
+    emitCall(a, m_freeLocalsNoThisHelper);
   } else {
-    emitCall(a, (TCA)frame_free_locals);
+    emitCall(a, m_freeLocalsThisHelper);
   }
   recordReentrantCall(a, i);
 }
@@ -8284,7 +8280,7 @@ TranslatorX64::translateFPushClsMethodD(const Tracelet& t,
     Stats::emitInc(a, Stats::TgtCache_StaticMethodBypass);
     emitPushAR(i, func, 0 /*bytesPopped*/,
                false /* isCtor */, false /* clearThis */,
-               magicCall ? uintptr_t(meth) | 1 : 0 /* varEnvInvName */);
+               magicCall ? uintptr_t(meth) | ActRec::kInvNameBit : 0);
 
     setupActRecClsForStaticCall(i, func, baseClass, clsOff, false);
   } else {
@@ -9172,7 +9168,7 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
 
   emitPushAR(ni, cls ? func : NULL, numPopped * sizeof(Cell),
              false /* isCtor */, false /* clearThis */,
-             invName ? uintptr_t(invName) | 1 : 0 /* varEnvInvName */);
+             invName ? uintptr_t(invName) | ActRec::kInvNameBit : 0);
 
   bool safe = (ni.op() == OpFPushCufSafe);
   size_t clsOff  = AROFF(m_cls) + startOfActRec;
@@ -10772,6 +10768,137 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
   }
 }
 
+/*
+ * Defines functions called by emitFrameRelease.  Tightly coupled with
+ * translateRetC.
+ *
+ * The number of locals must be > kFewLocals.  NumLocals - kFewLocals
+ * is passed in r15.
+ */
+void TranslatorX64::emitFreeLocalsHelpers() {
+  auto const rNumExtraLocals = r15;
+
+  Label freeLocals;
+  Label varEnvOrEArgs;
+  Label surprise;
+  Label loopHead;
+  Label releaseThis;
+  Label finished;
+  Label afterThisCheck;
+
+  moveToAlign(a, kNonFallthroughAlign);
+  m_freeLocalsThisHelper = a.code.frontier;
+
+  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), rdi);
+  a.    test_reg64_reg64(rdi, rdi);
+  afterThisCheck.jcc8(a, CC_Z);
+  a.    test_imm32_reg64(0x1, rdi);
+  afterThisCheck.jcc8(a, CC_NZ);
+  a.    store_imm64_disp_reg64(0, AROFF(m_this), rVmFp);
+  a.    sub_imm32_disp_reg32(1, TVOFF(_count), rdi);
+  releaseThis.jcc(a, CC_Z);
+
+  moveToAlign(a, kJmpTargetAlign, false /* unreachable */);
+asm_label(a, afterThisCheck);
+  m_freeLocalsNoThisHelper = a.code.frontier;
+
+  // TODO: we could skip this check when there's no AttrMayUseVV.
+  auto const rVarEnv = argNumToRegName[0];
+  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), rVarEnv);
+  a.    test_reg64_reg64(rVarEnv, rVarEnv);
+  varEnvOrEArgs.jcc(a, CC_NZ);
+
+asm_label(a, freeLocals);
+  // TODO: we should be able to use rbx here since we do the rbx
+  // adjustment below.
+  auto const rIter = r14;
+  auto const rZero = r15;
+  auto const rFinished = r13;
+  static_assert(1 << 4 == sizeof(TypedValue), "");
+  a.    lea_reg64_disp_reg64(rVmFp,
+                             kFewLocals * -int(sizeof(TypedValue)),
+                             rFinished);
+  a.    mov_reg64_reg64(rFinished, rIter);
+  a.    shl_reg64(4, rNumExtraLocals);
+  a.    sub_reg64_reg64(rNumExtraLocals, rIter);
+  a.    xor_reg32_reg32(rZero, rZero);
+  static_assert(KindOfUninit == 0, "KindOfUninit must be zero");
+
+  // A frame is necessary for tvDecRefHelper, or other calls here (in
+  // the cold paths below) that may reenter and do fixups.  We've
+  // delayed creating it until here so we could use rVmFp above.
+  a.    pushr(rbp);
+  a.    mov_reg64_reg64(rsp, rbp);
+
+  auto emitDecLocal = [&] (PhysReg base, int num) {
+    auto disp = num * sizeof(TypedValue);
+
+    a.  load_reg64_disp_reg64(base, disp + TVOFF(m_type), rdi);
+    a.  cmp_imm32_reg32(KindOfRefCountThreshold, rdi);
+    jccBlock<CC_LE>(a, [&] {
+      a.load_reg64_disp_reg64(base, disp + TVOFF(m_data), rsi);
+      a.store_reg32_disp_reg64(rZero, disp + TVOFF(m_data), base);
+      a.call(TCA(tvDecRefHelper));
+    });
+  };
+
+  // Loop for the first few locals, but unroll the final kFewLocals.
+asm_label(a, loopHead);
+  emitDecLocal(rIter, 0);
+  a.    add_imm32_reg64(sizeof(TypedValue), rIter);
+  a.    cmp_reg64_reg64(rIter, rFinished);
+  loopHead.jcc8(a, CC_NZ);
+  for (int i = 0; i < kFewLocals; ++i) {
+    emitDecLocal(rFinished, i);
+  }
+
+asm_label(a, finished);
+  a.    popr(rbp);
+  a.    lea_reg64_disp_reg64(rVmFp, AROFF(m_r), rVmSp);
+  emitTestSurpriseFlags(a);
+  surprise.jcc8(a, CC_NZ);
+  a.    ret();
+
+  TRACE(1, "TCA freeLocals hot path: %zu (this), %zu (no this) bytes\n",
+        size_t(a.code.frontier - m_freeLocalsThisHelper),
+        size_t(a.code.frontier - m_freeLocalsNoThisHelper));
+
+asm_label(a, varEnvOrEArgs);
+  a.    test_imm32_reg64(ActRec::kExtraArgsBit, rVarEnv);
+  jccBlock<CC_Z>(a, [&] {
+    a.  mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+
+    a.  pushr(rbp);
+    a.  mov_reg64_reg64(rsp, rbp);
+    a.  call(TCA(static_cast<void (*)(ActRec*)>(&ExtraArgs::deallocate)));
+    a.  popr(rbp);
+
+    freeLocals.jmp(a);
+  });
+  a.    mov_reg64_reg64(rVmFp, argNumToRegName[1]);
+  a.    pushr(rbp);
+  a.    mov_reg64_reg64(rsp, rbp);
+  a.    call(TCA(getMethodHardwarePtr(&VarEnv::detach)));
+  finished.jmp8(a);
+
+asm_label(a, releaseThis);
+  a.    pushr(rbp);
+  a.    mov_reg64_reg64(rsp, rbp);
+  a.    call(TCA(getMethodHardwarePtr(&ObjectData::release)));
+  a.    popr(rbp);
+  afterThisCheck.jmp(a);
+
+asm_label(a, surprise);
+  a.    mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+  a.    jmp(TCA(EventHook::FunctionExit));
+
+  TRACE(1, "TCA freeLocals helpers (%p %p): %zu (this), %zu (nothis) bytes\n",
+           m_freeLocalsThisHelper,
+           m_freeLocalsNoThisHelper,
+           size_t(a.code.frontier - m_freeLocalsThisHelper),
+           size_t(a.code.frontier - m_freeLocalsNoThisHelper));
+}
+
 static const size_t kASize = 512 << 20;
 static const size_t kAStubsSize = 512 << 20;
 static const size_t kGDataSize = kASize / 4;
@@ -10911,6 +11038,8 @@ TranslatorX64::TranslatorX64()
   m_dtorStubs[KindOfRef]           = emitUnaryStub(a, Call(vp(getMethodHardwarePtr(&RefData::release))));
   m_dtorGenericStub                = genericRefCountStub(a);
   m_dtorGenericStubRegs            = genericRefCountStubRegs(a);
+
+  emitFreeLocalsHelpers();
 
   if (trustSigSegv) {
     // Install SIGSEGV handler for timeout exceptions

@@ -125,6 +125,8 @@ class TranslatorX64 : public Translator
   TCA                    m_interceptHelper;
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
+  TCA                    m_freeLocalsNoThisHelper;
+  TCA                    m_freeLocalsThisHelper;
   DataBlock              m_globalData;
   size_t                 m_irAUsage;
   size_t                 m_irAstubsUsage;
@@ -287,6 +289,7 @@ private:
   TCA emitUnaryStub(Asm& a, Call c);
   TCA genericRefCountStub(Asm& a);
   TCA genericRefCountStubRegs(Asm& a);
+  void emitFreeLocalsHelpers();
   TCA getCallArrayProlog(Func* func);
   TCA emitPrologueRedispatch(Asm &a);
   TCA emitFuncGuard(Asm& a, const Func *f);
@@ -881,7 +884,7 @@ private:
 
   void emitStackCheck(int funcDepth, Offset pc);
   void emitStackCheckDynamic(int numArgs, Offset pc);
-  void emitTestSurpriseFlags();
+  void emitTestSurpriseFlags(Asm& a);
   void emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
                                    Offset stackOff);
   TCA  emitTransCounterInc(Asm& a);

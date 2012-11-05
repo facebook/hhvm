@@ -2312,6 +2312,34 @@ Address CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
   return cgDecRefMem(type, fpReg, -((index + 1) * sizeof(Cell)), exit);
 }
 
+static void
+frame_free_locals(ActRec* fp, int numLocals) {
+  ASSERT(Transl::tx64->stateIsDirty());
+  using namespace Transl;
+#ifdef DEBUG
+  VMRegAnchor _;
+  ASSERT(vmfp() == (Cell*)fp);
+#endif
+  // At return-time, we know that the eval stack is empty except
+  // for the return value.
+  TRACE(1, "frame_free_locals: updated fp to %p\n", fp);
+  frame_free_locals_inl(fp, numLocals);
+}
+
+static void
+frame_free_locals_no_this(ActRec* fp, int numLocals) {
+  ASSERT(Transl::tx64->stateIsDirty());
+  using namespace Transl;
+#ifdef DEBUG
+  VMRegAnchor _;
+  ASSERT(vmfp() == (Cell*)fp);
+#endif
+  // At return-time, we know that the eval stack is empty except
+  // for the return value.
+  TRACE(1, "frame_free_locals_no_this: updated fp to %p\n", fp);
+  frame_free_locals_no_this_inl(fp, numLocals);
+}
+
 Address CodeGenerator::cgDecRefLocals(IRInstruction* inst) {
   SSATmp* fp = inst->getSrc(0);
   SSATmp* numLocals = inst->getSrc(1);
@@ -2771,10 +2799,12 @@ Address CodeGenerator::cgAllocActRec6(SSATmp* dst,
   }
   // actRec->m_invName
   ASSERT(magicName->isConst());
-  // ActRec::m_invName is encoded as a pointer with bottom bit set to 1
-  // to distinguish it from m_varEnv and m_extrArgs
-  uintptr_t invName = (magicName->getType() == Type::Null ?
-                       0 : (uintptr_t(magicName->getConstValAsStr()) | 1));
+  // ActRec::m_invName is encoded as a pointer with bit kInvNameBit
+  // set to distinguish it from m_varEnv and m_extrArgs
+  uintptr_t invName =
+    (magicName->getType() == Type::Null
+      ? 0
+      : (uintptr_t(magicName->getConstValAsStr()) | ActRec::kInvNameBit));
   m_as.store_imm64_disp_reg64(invName,
                               actRecAdjustment + AROFF(m_invName),
                               spReg);

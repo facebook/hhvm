@@ -2594,7 +2594,7 @@ void TranslatorX64::emitMPre(const Tracelet& t,
                              unsigned& mInd, unsigned& iInd,
                              LazyScratchReg& rBase) {
   if (!mInstrHasUnknownOffsets(ni) && !useTvResult(t, ni, mii) &&
-      ni.mInstrOp() == OpCGetM) {
+      (ni.mInstrOp() == OpCGetM || ni.mInstrOp() == OpSetM)) {
     m_vecState->setNoMIState();
   }
   SKTRACE(2, ni.source, "%s %#lx\n", __func__, long(a.code.frontier));

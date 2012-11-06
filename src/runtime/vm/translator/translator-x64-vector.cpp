@@ -89,7 +89,7 @@ static const PhysReg unsafe_rsp = rsp;
 // Takes a location and a condition. If the condition is true the value of the
 // location will be passed in a register
 #define VALML(dl, cond)                                                 \
-  IE(cond,                                                              \
+  IE((cond) && !dl.isVariant(),                                         \
      (Stats::emitInc(a, Stats::Tx64_MRegKey),                           \
       m_regMap.allocInputReg(dl),                                       \
       V(dl.location)),                                                  \
@@ -230,6 +230,11 @@ inline unsigned buildBitmask(T c, Args... args) {
 // both, respectively.
 static KeyType getKeyType(const DynLocation& dl, bool nonLitStr,
                           bool nonLitInt) {
+  if (dl.isVariant()) {
+    // Variants can change types at arbitrary times, so don't try to
+    // pass them in registers.
+    return AnyKey;
+  }
   if ((dl.isLiteral() || nonLitStr) && IS_STRING_TYPE(dl.valueType())) {
     return StrKey;
   } else if ((dl.isLiteral() || nonLitInt) && dl.valueType() == KindOfInt64) {

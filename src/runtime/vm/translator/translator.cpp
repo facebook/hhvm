@@ -1784,6 +1784,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     } else {
       push_stack();
     }
+    inputs.back().dontGuardInner = true;
   }
 
   if (trailingClassRef) {
@@ -2380,7 +2381,8 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
       if (!l.isLiteral()) {
         if (m_varEnvTaint && dl->isValue() && dl->isLocal()) {
           dl->rtt = RuntimeType(KindOfInvalid);
-        } else if (m_aliasTaint && dl->canBeAliased()) {
+        } else if ((m_aliasTaint && dl->canBeAliased()) ||
+                   (rtt.isValue() && rtt.isVariant() && ii.dontGuardInner)) {
           dl->rtt = rtt.setValueType(KindOfInvalid);
         }
         // Record that we depend on the live type of the specified location
@@ -2856,7 +2858,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
             // deref.
             throwUnknownInput();
           }
-          if (!ni->ignoreInnerType) {
+          if (!ni->ignoreInnerType && !ii.dontGuardInner) {
             if (rtt.isValue() && rtt.isVariant() &&
                 rtt.innerType() == KindOfInvalid) {
               throwUnknownInput();

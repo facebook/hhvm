@@ -646,6 +646,8 @@ PSEUDOINSTRS
                          const ScratchReg& inCls,
                          const ScratchReg& cls,
                          const LazyScratchReg& result);
+  void emitFPushCtorDFast(const NormalizedInstruction& i, Class* cls,
+                          int arOff);
   template<typename L>
   void translatorAssert(X64Assembler& a, ConditionCode cc,
                         const char* msg, L setup);

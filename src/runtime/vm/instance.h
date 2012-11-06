@@ -40,6 +40,9 @@ class Instance : public ObjectData {
     instanceInit(cls);
   }
 
+  enum NoInit { noinit };
+  explicit Instance(Class* cls, NoInit) : ObjectData(NULL, false, cls) {}
+
  public:
   // This constructor is used for all cppext classes (including resources)
   // and their descendents.
@@ -77,6 +80,11 @@ class Instance : public ObjectData {
     return obj;
   }
 
+  // Given a Class that is assumed to be a concrete, regular (not a
+  // trait or interface), pure PHP class, and an allocator index,
+  // return a new, uninitialized object of that class.
+  static Instance* newInstanceRaw(Class* cls, int idx);
+
  private:
   void instanceInit(Class* cls) {
     /*
@@ -100,15 +108,13 @@ class Instance : public ObjectData {
     }
     if (nProps > 0) {
       if (cls->pinitVec().size() > 0) {
-        // initialize() is not inlined because trying to use g_context here
-        // trips on a tangle of header dependencies.
-        initialize(nProps);
+        const Class::PropInitVec* propInitVec = m_cls->getPropData();
+        ASSERT(propInitVec != NULL);
+        ASSERT(nProps == propInitVec->size());
+        memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
       } else {
         ASSERT(nProps == cls->declPropInit().size());
-        TypedValue* propVec = (TypedValue *)((uintptr_t)this +
-                               sizeof(ObjectData) + builtinPropSize());
-        memcpy(propVec, &cls->declPropInit()[0],
-               nProps * sizeof(TypedValue));
+        memcpy(propVec(), &cls->declPropInit()[0], nProps * sizeof(TypedValue));
       }
     }
     if (UNLIKELY(cls->callsCustomInstanceInit())) {
@@ -117,12 +123,12 @@ class Instance : public ObjectData {
   }
 
  protected:
-  void initialize(Slot nProps);
-  void callCustomInstanceInit();
   TypedValue* propVec();
   const TypedValue* propVec() const;
 
  public:
+  Instance* callCustomInstanceInit();
+
   void operator delete(void* p) {
     Instance* this_ = (Instance*)p;
     Class* cls = this_->getVMClass();

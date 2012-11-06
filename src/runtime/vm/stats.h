@@ -117,6 +117,14 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_OneGuardLong) \
   STAT(Tx64_SideExit) \
   STAT(Tx64_SideExitClean) \
+  STAT(Tx64_NewInstancePropCheck) \
+  STAT(Tx64_NewInstancePropInit) \
+  STAT(Tx64_NewInstanceSPropCheck) \
+  STAT(Tx64_NewInstanceSPropInit) \
+  STAT(Tx64_NewInstanceNoCtorFast) \
+  STAT(Tx64_NewInstanceNoCtor) \
+  STAT(Tx64_NewInstanceFast) \
+  STAT(Tx64_NewInstanceGeneric) \
   /* Type prediction stats */ \
   STAT(TypePred_Insert) \
   STAT(TypePred_Evict) \

@@ -1965,10 +1965,32 @@ struct FindIndex<NumObjectSizeClasses> {
   }
 };
 
+template<int Idx>
+struct FindSize {
+  static int run(int idx) {
+    if (idx == Idx) {
+      return ObjectSizeTable<Idx>::value;
+    }
+    return FindSize<Idx + 1>::run(idx);
+  }
+};
+
+template<>
+struct FindSize<NumObjectSizeClasses> {
+  static int run(int) {
+    not_reached();
+  }
+};
+
 }
 
 int object_alloc_size_to_index(size_t size) {
   return FindIndex<0>::run(size);
+}
+
+// This returns the maximum size for the size class
+size_t object_alloc_index_to_size(int idx) {
+  return FindSize<0>::run(idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

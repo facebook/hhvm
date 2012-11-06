@@ -119,6 +119,7 @@ class ObjectData : public CountableNF {
     const_assert(hhvm);
     return offsetof(ObjectData, m_cls);
   }
+  static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
   HPHP::VM::Class* instanceof(const HPHP::VM::PreClass* pc) const;
   bool instanceof(const HPHP::VM::Class* c) const;
 

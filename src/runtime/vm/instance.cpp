@@ -52,14 +52,7 @@ const TypedValue* Instance::propVec() const {
   return const_cast<Instance*>(this)->propVec();
 }
 
-void Instance::initialize(Slot nProps) {
-  const Class::PropInitVec* propInitVec = m_cls->getPropData();
-  ASSERT(propInitVec != NULL);
-  ASSERT(nProps == propInitVec->size());
-  memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
-}
-
-void Instance::callCustomInstanceInit() {
+Instance* Instance::callCustomInstanceInit() {
   static StringData* sd_init = StringData::GetStaticString("__init__");
   const Func* init = m_cls->lookupMethod(sd_init);
   if (init != NULL) {
@@ -72,6 +65,14 @@ void Instance::callCustomInstanceInit() {
     decRefCount();
     ASSERT(!IS_REFCOUNTED_TYPE(tv.m_type));
   }
+  return this;
+}
+
+HOT_FUNC_VM
+Instance* Instance::newInstanceRaw(Class* cls, int idx) {
+  Instance* obj = (Instance*)ALLOCOBJIDX(idx);
+  new (obj) Instance(cls, noinit);
+  return obj;
 }
 
 void Instance::destructHard(const Func* meth) {

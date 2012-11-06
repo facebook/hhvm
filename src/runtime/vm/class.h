@@ -49,6 +49,9 @@ class Class;
 class Instance;
 class NamedEntity;
 class PreClass;
+namespace Transl {
+class TranslatorX64;
+}
 
 typedef hphp_hash_set<const StringData*, string_data_hash,
                       string_data_isame> TraitNameSet;
@@ -255,7 +258,7 @@ class PreClass : public AtomicCountable {
     return &m_properties[s];
   }
 
-  BuiltinCtorFunction instanceCtor() { return m_InstanceCtor; }
+  BuiltinCtorFunction instanceCtor() const { return m_InstanceCtor; }
   int builtinPropSize() { return m_builtinPropSize; }
 
   void prettyPrint(std::ostream& out) const;
@@ -509,6 +512,7 @@ public:
     const PropInitVec& operator=(const PropInitVec&);
     ~PropInitVec();
     static PropInitVec* allocInRequestArena(const PropInitVec& src);
+    static size_t dataOff() { return offsetof(PropInitVec, m_data); }
 
     typedef TypedValue* iterator;
     iterator begin() { return m_data; }
@@ -654,6 +658,12 @@ public:
   TypedValue* clsCnsGet(const StringData* clsCnsName) const;
   DataType clsCnsType(const StringData* clsCnsName) const;
   void initialize() const;
+  void initPropHandle() const;
+  unsigned propHandle() const { return m_propDataCache; }
+  void initSPropHandle() const;
+  unsigned sPropHandle() const { return m_propSDataCache; }
+  void initProps() const;
+  TypedValue* initSProps() const;
   Class* getCached() const;
   void setCached();
 
@@ -733,8 +743,8 @@ private:
 
   void initialize(TypedValue*& sPropData) const;
   HphpArray* initClsCnsData() const;
-  PropInitVec* initProps() const;
-  TypedValue* initSProps() const;
+  PropInitVec* initPropsImpl() const;
+  TypedValue* initSPropsImpl() const;
   void setPropData(PropInitVec* propData) const;
   void setSPropData(TypedValue* sPropData) const;
   TypedValue* getSPropData() const;
@@ -830,8 +840,8 @@ private:
   int m_builtinPropSize;
   int m_declPropNumAccessible;
   unsigned m_classVecLen;
-public: // used by Unit
-  unsigned m_cachedOffset;
+public:
+  unsigned m_cachedOffset; // used by Unit
 private:
   unsigned m_propDataCache;
   unsigned m_propSDataCache;

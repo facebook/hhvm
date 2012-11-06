@@ -325,6 +325,9 @@ class Profiler;
 class GlobalVariables;
 class CodeCoverage;
 
+int object_alloc_size_to_index(size_t);
+size_t object_alloc_index_to_size(int);
+
 // implemented in runtime/base/thread_info
 DECLARE_BOOST_TYPES(Array);
 class ThreadInfo {
@@ -380,9 +383,13 @@ public:
   void clearPendingException();
   ObjectAllocatorBase* instanceSizeAllocator(size_t size) {
     const_assert(hhvm);
-    extern int object_alloc_size_to_index(size_t);
     int index = object_alloc_size_to_index(size);
     ASSERT_NOT_IMPLEMENTED(index != -1);
+    return m_allocators[index];
+  }
+
+  ObjectAllocatorBase* instanceIdxAllocator(int index) {
+    const_assert(hhvm);
     return m_allocators[index];
   }
 

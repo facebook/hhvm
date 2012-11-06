@@ -247,6 +247,35 @@ struct IfCountNotStatic {
   }
 };
 
+inline static bool
+classIsPersistent(const Class* cls) {
+  return RuntimeOption::RepoAuthoritative &&
+    cls &&
+    TargetCache::isPersistentHandle(cls->m_cachedOffset);
+}
+
+inline static bool
+classIsUnique(const Class* cls) {
+  return RuntimeOption::RepoAuthoritative &&
+    cls &&
+    (cls->attrs() & AttrUnique);
+}
+
+inline static bool
+classIsUniqueOrCtxParent(const Class* cls) {
+  if (!cls) return false;
+  if (classIsUnique(cls)) return true;
+  Class* ctx = arGetContextClass(curFrame());
+  if (!ctx) return false;
+  return ctx->classof(cls);
+}
+
+inline static bool
+classIsUniqueNormalClass(const Class* cls) {
+  return classIsUnique(cls) &&
+    !(cls->attrs() & (AttrInterface | AttrTrait));
+}
+
 // Segfault handler: figure out if it's an intentional segfault
 // (timeout exception) and if so, act appropriately. Otherwise, pass
 // the signal on.
@@ -8502,15 +8531,6 @@ static inline ALWAYS_INLINE Class* getKnownClass(Class** classCache,
   return cls;
 }
 
-static Instance*
-HOT_FUNC_VM
-newInstanceHelperNoCtor(Class** classCache, const StringData* clsName) {
-  Class* cls = getKnownClass(classCache, clsName);
-  Instance* ret = newInstance(cls);
-  ret->incRefCount();
-  return ret;
-}
-
 Instance*
 HOT_FUNC_VM
 newInstanceHelper(Class* cls, int numArgs, ActRec* ar, ActRec* prevAr) {
@@ -8554,6 +8574,21 @@ void TranslatorX64::translateFPushCtor(const Tracelet& t,
   m_regMap.bind(rax, i.outStack->location, KindOfObject, RegInfo::DIRTY);
 }
 
+static Instance*
+HOT_FUNC_VM
+newInstanceHelperNoCtor(Class* cls) {
+  Instance* ret = newInstance(cls);
+  ret->incRefCount();
+  return ret;
+}
+
+static Instance*
+HOT_FUNC_VM
+newInstanceHelperNoCtorCached(Class** classCache, const StringData* clsName) {
+  Class* cls = getKnownClass(classCache, clsName);
+  return newInstanceHelperNoCtor(cls);
+}
+
 Instance*
 HOT_FUNC_VM
 newInstanceHelperCached(Class** classCache,
@@ -8568,31 +8603,158 @@ void TranslatorX64::translateFPushCtorD(const Tracelet& t,
   using namespace TargetCache;
   int numArgs = i.imm[0].u_IVA;
   const StringData* clsName = curUnit()->lookupLitstrId(i.imm[1].u_SA);
-  CacheHandle classCh = allocKnownClass(clsName);
-  ScratchReg scr(m_regMap);
-  a.   lea_reg64_disp_reg64(rVmTl, classCh, *scr);
-  // We first push the new object, then the actrec. Since we're going to
-  // need to call out, and possibly reenter in the course of all this,
-  // null out the object on the stack, in case we unwind before we're
-  // ready.
-  int arOff = vstackOffset(i, -int(sizeof(ActRec)) - cellsToBytes(1));
+  Class* cls = Unit::lookupClass(clsName);
+  bool fastPath = !RuntimeOption::EnableObjDestructCall &&
+    classIsPersistent(cls) &&
+    !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait)) &&
+    (cls->getCtor()->attrs() & AttrPublic);
+  int arOff = -int(sizeof(ActRec)) - cellsToBytes(1);
   m_regMap.scrubStackRange(i.stackOff, i.stackOff + kNumActRecCells + 1);
-  if (i.noCtor) {
-    EMIT_CALL(a, newInstanceHelperNoCtor,
-              R(*scr),
-              IMM(uintptr_t(clsName)));
+
+  LazyScratchReg clsCache(m_regMap);
+  if (fastPath) {
+    emitFPushCtorDFast(i, cls, arOff);
   } else {
-    EMIT_CALL(a, newInstanceHelperCached,
-              R(*scr),
-              IMM(uintptr_t(clsName)),
-              IMM(numArgs),
-              RPLUS(rVmSp, arOff),     // ActRec
-              R(rVmFp));               // prevAR
+    CacheHandle classCh = allocKnownClass(clsName);
+    clsCache.alloc();
+    a.   lea_reg64_disp_reg64(rVmTl, classCh, *clsCache);
+
+    if (i.noCtor) {
+      Stats::emitInc(a, Stats::Tx64_NewInstanceNoCtor);
+      EMIT_RCALL(a, i, newInstanceHelperNoCtorCached,
+                 R(*clsCache), IMM(uintptr_t(clsName)));
+    } else {
+      arOff = vstackOffset(i, arOff);
+      Stats::emitInc(a, Stats::Tx64_NewInstanceGeneric);
+      EMIT_RCALL(a, i, newInstanceHelperCached,
+                 R(*clsCache),
+                 IMM(uintptr_t(clsName)),
+                 IMM(numArgs),
+                 RPLUS(rVmSp, arOff),     // ActRec
+                 R(rVmFp));               // prevAR
+    }
   }
-  recordReentrantCall(i);
-  // The callee takes care of initializing the actRec, and returns the new
-  // object.
   m_regMap.bind(rax, i.outStack->location, KindOfObject, RegInfo::DIRTY);
+}
+
+void
+TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
+                                  Class* cls, int arOff) {
+  size_t size = Instance::sizeForNProps(cls->numDeclProperties());
+  int allocator = object_alloc_size_to_index(size);
+  if (i.noCtor) {
+    Stats::emitInc(a, Stats::Tx64_NewInstanceNoCtorFast);
+  } else {
+    Stats::emitInc(a, Stats::Tx64_NewInstanceFast);
+  }
+
+  if (cls->preClass()->instanceCtor()) {
+    EMIT_RCALL(a, i, cls->preClass()->instanceCtor(), IMM(int64(cls)));
+  } else {
+    // First, make sure our property init vectors are all set up
+    bool props = cls->pinitVec().size() > 0;
+    bool sprops = cls->numStaticProperties() > 0;
+    ASSERT((props || sprops) == cls->needInitialization());
+    if (cls->needInitialization()) {
+      if (props) {
+        cls->initPropHandle();
+        Stats::emitInc(a, Stats::Tx64_NewInstancePropCheck);
+        a.test_imm64_disp_reg64(-1, cls->propHandle(), rVmTl);
+        {
+          UnlikelyIfBlock<CC_Z> ifZero(a, astubs);
+          Stats::emitInc(a, Stats::Tx64_NewInstancePropInit);
+          EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initProps),
+                     IMM(int64(cls)));
+        }
+      }
+      if (sprops) {
+        cls->initSPropHandle();
+        Stats::emitInc(a, Stats::Tx64_NewInstanceSPropCheck);
+        a.test_imm64_disp_reg64(-1, cls->sPropHandle(), rVmTl);
+        {
+          UnlikelyIfBlock<CC_Z> ifZero(a, astubs);
+          Stats::emitInc(a, Stats::Tx64_NewInstanceSPropInit);
+          EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initSProps),
+                     IMM(int64(cls)));
+        }
+      }
+    }
+
+    // Next, call newInstanceRaw to allocate an object
+    ASSERT(allocator != -1);
+    EMIT_RCALL(a, i, getMethodHardwarePtr(&Instance::newInstanceRaw),
+               IMM(int64(cls)), IMM(allocator));
+    ScratchReg holdRax(m_regMap, rax);
+
+    // Set the attributes, if any
+    int odAttrs = cls->getODAttrs();
+    if (odAttrs) {
+      // o_attribute is 16 bits but the fact that we're or-ing a mask makes
+      // it ok
+      ASSERT(!(odAttrs & 0xffff0000));
+      a.or_imm32_disp_reg32(odAttrs, ObjectData::attributeOff(), rax);
+    }
+
+    // Initialize the properties
+    size_t nProps = cls->numDeclProperties();
+    if (nProps > 0) {
+      ScratchReg propVec(m_regMap);
+      a.lea_reg64_disp_reg64(rax,
+                             sizeof(ObjectData) + cls->builtinPropSize(),
+                             *propVec);
+      a.pushr(rax);
+      a.sub_imm32_reg64(8, rsp); // rsp alignment to keep memcpy happy
+      if (cls->pinitVec().size() == 0) {
+        // Fast case: copy from a known address in the Class
+        EMIT_CALL(a, memcpy,
+                  R(*propVec),
+                  IMM(int64(&cls->declPropInit()[0])),
+                  IMM(cellsToBytes(nProps)));
+      } else {
+        // Slower case: we have to load the src address from the targetcache
+        ScratchReg propData(m_regMap);
+        // Load the Class's propInitVec from the targetcache
+        a.load_reg64_disp_reg64(rVmTl, cls->propHandle(), *propData);
+        // propData holds the PropInitVec. We want &(*propData)[0]
+        a.load_reg64_disp_reg64(*propData, Class::PropInitVec::dataOff(),
+                                *propData);
+        EMIT_CALL(a, memcpy,
+                  R(*propVec),
+                  R(*propData),
+                  IMM(cellsToBytes(nProps)));
+      }
+      a.add_imm32_reg64(8, rsp);
+      a.popr(rax);
+    }
+    if (cls->callsCustomInstanceInit()) {
+      // callCustomInstanceInit returns the instance in rax
+      if (false) {
+        UNUSED Instance* ret = ret->callCustomInstanceInit();
+      }
+      EMIT_RCALL(a, i,
+                 getMethodHardwarePtr(&Instance::callCustomInstanceInit),
+                 R(rax));
+    }
+  }
+
+  // We're done with what Instance's constructor would've done. Set up the
+  // ActRec if needed.
+  if (i.noCtor) {
+    // If we're not running the constructor, just incref the object once and
+    // don't set up the ActRec.
+    a.add_imm32_disp_reg32(1, TVOFF(_count), rax);
+    return;
+  } else {
+    // Incref the object twice: once for the stack and once for $this in the
+    // ActRec.
+    a.add_imm32_disp_reg32(2, TVOFF(_count), rax);
+  }
+  emitVStackStore(a, i, rVmFp, arOff + AROFF(m_savedRbp));
+  emitVStackStoreImm(a, i, int64(cls->getCtor()), arOff + AROFF(m_func));
+  emitVStackStoreImm(a, i, ActRec::encodeNumArgs(i.imm[0].u_IVA, true),
+                     arOff + AROFF(m_numArgsAndCtorFlag), sz::dword);
+  emitVStackStoreImm(a, i, 0, arOff + AROFF(m_varEnv));
+  emitVStackStore(a, i, rax, arOff + AROFF(m_this));
 }
 
 static void fatalNullThis() {
@@ -9306,35 +9468,6 @@ TranslatorX64::analyzeVerifyParamType(Tracelet& t, NormalizedInstruction& i) {
                  (i.inputs[0]->isNull() && tc.nullable());
     i.m_txFlags = supportedPlan(trace);
   }
-}
-
-inline static bool
-classIsPersistent(const Class* cls) {
-  return RuntimeOption::RepoAuthoritative &&
-    cls &&
-    TargetCache::isPersistentHandle(cls->m_cachedOffset);
-}
-
-inline static bool
-classIsUnique(const Class* cls) {
-  return RuntimeOption::RepoAuthoritative &&
-    cls &&
-    (cls->attrs() & AttrUnique);
-}
-
-inline static bool
-classIsUniqueOrCtxParent(const Class* cls) {
-  if (!cls) return false;
-  if (classIsUnique(cls)) return true;
-  Class* ctx = arGetContextClass(curFrame());
-  if (!ctx) return false;
-  return ctx->classof(cls);
-}
-
-inline static bool
-classIsUniqueNormalClass(const Class* cls) {
-  return classIsUnique(cls) &&
-    !(cls->attrs() & (AttrInterface | AttrTrait));
 }
 
 /*

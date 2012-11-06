@@ -770,9 +770,7 @@ Class* Class::classof(const PreClass* preClass) const {
 void Class::initialize(TypedValue*& sProps) const {
   if (m_pinitVec.size() > 0) {
     if (getPropData() == NULL) {
-      // Initialization was not done, do so for the first time.
-      PropInitVec* props = initProps();
-      setPropData(props);
+      initProps();
     }
   }
   // The asymmetry between the logic around initProps() above and initSProps()
@@ -782,7 +780,6 @@ void Class::initialize(TypedValue*& sProps) const {
   if (numStaticProperties() > 0) {
     if ((sProps = getSPropData()) == NULL) {
       sProps = initSProps();
-      setSPropData(sProps);
     }
   } else {
     sProps = NULL;
@@ -794,8 +791,9 @@ void Class::initialize() const {
   initialize(sProps);
 }
 
-Class::PropInitVec* Class::initProps() const {
+Class::PropInitVec* Class::initPropsImpl() const {
   ASSERT(m_pinitVec.size() > 0);
+  ASSERT(getPropData() == NULL);
   // Copy initial values for properties to a new vector that can be used to
   // complete initialization for non-scalar properties via the iterative
   // 86pinit() calls below.  86pinit() takes a reference to an array that
@@ -960,8 +958,9 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
   return propInd;
 }
 
-TypedValue* Class::initSProps() const {
+TypedValue* Class::initSPropsImpl() const {
   ASSERT(numStaticProperties() > 0);
+  ASSERT(getSPropData() == NULL);
   // Create an array that is initially large enough to hold all static
   // properties.
   TypedValue* const spropTable =
@@ -2512,12 +2511,20 @@ const Class::PropInitVec* Class::getPropData() const {
   return handleToRef<PropInitVec*>(m_propDataCache);
 }
 
-void Class::setPropData(PropInitVec* propData) const {
-  ASSERT(getPropData() == NULL);
+void Class::initPropHandle() const {
   if (UNLIKELY(m_propDataCache == (unsigned)-1)) {
     const_cast<unsigned&>(m_propDataCache) =
       Transl::TargetCache::allocClassInitProp(name());
   }
+}
+
+void Class::initProps() const {
+  setPropData(initPropsImpl());
+}
+
+void Class::setPropData(PropInitVec* propData) const {
+  ASSERT(getPropData() == NULL);
+  initPropHandle();
   handleToRef<PropInitVec*>(m_propDataCache) = propData;
 }
 
@@ -2526,12 +2533,22 @@ TypedValue* Class::getSPropData() const {
   return handleToRef<TypedValue*>(m_propSDataCache);
 }
 
-void Class::setSPropData(TypedValue* sPropData) const {
-  ASSERT(getSPropData() == NULL);
+void Class::initSPropHandle() const {
   if (UNLIKELY(m_propSDataCache == (unsigned)-1)) {
     const_cast<unsigned&>(m_propSDataCache) =
       Transl::TargetCache::allocClassInitSProp(name());
   }
+}
+
+TypedValue* Class::initSProps() const {
+  TypedValue* sprops = initSPropsImpl();
+  setSPropData(sprops);
+  return sprops;
+}
+
+void Class::setSPropData(TypedValue* sPropData) const {
+  ASSERT(getSPropData() == NULL);
+  initSPropHandle();
   handleToRef<TypedValue*>(m_propSDataCache) = sPropData;
 }
 

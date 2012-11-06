@@ -549,25 +549,16 @@ ArrayData* ArrayData::nvSet(int64 ki, int64 vi, bool copy) {
   return set(ki, VarNR(vi), copy);
 }
 
-ArrayData* ArrayData::nvSet(int64 ki, const TypedValue* v, bool copy) {
-  return set(ki, tvAsCVarRef(v), copy);
+TypedValue* ArrayData::nvGetCell(int64 k) const {
+  TypedValue* tv = (TypedValue*)&get(k, false);
+  return LIKELY(tv != (TypedValue*)&null_variant) ? tvToCell(tv) :
+         nvGetNotFound(k);
 }
 
-ArrayData* ArrayData::nvSet(StringData* k, const TypedValue* v, bool copy) {
-  return set(StrNR(k), tvAsCVarRef(v), copy);
-}
-
-TypedValue* ArrayData::nvGetCell(int64 k, bool error) const {
-  return exists(k) ? get(k, false).getTypedAccessor() :
-         error ? nvGetNotFound(k) :
-         NULL;
-}
-
-TypedValue* ArrayData::nvGetCell(const StringData* key, bool error) const {
-  StrNR k(key);
-  return exists(k) ? get(k, false).getTypedAccessor() :
-         error ? nvGetNotFound(key) :
-         NULL;
+TypedValue* ArrayData::nvGetCell(const StringData* key) const {
+  TypedValue* tv = (TypedValue*)&get(StrNR(key), false);
+  return LIKELY(tv != (TypedValue*)&null_variant) ? tvToCell(tv) :
+         nvGetNotFound(key);
 }
 
 CVarRef ArrayData::getNotFound(int64 k) {
@@ -597,12 +588,12 @@ CVarRef ArrayData::getNotFound(CVarRef k) {
 
 TypedValue* ArrayData::nvGetNotFound(int64 k) {
   raise_notice("Undefined index: %lld", k);
-  return NULL;
+  return (TypedValue*)&init_null_variant;
 }
 
 TypedValue* ArrayData::nvGetNotFound(const StringData* k) {
   raise_notice("Undefined index: %s", k->data());
-  return NULL;
+  return (TypedValue*)&init_null_variant;
 }
 
 void ArrayData::dump() {

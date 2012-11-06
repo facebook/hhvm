@@ -115,8 +115,8 @@ public:
   TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos);
   TypedValue* nvGetValueRef(ssize_t pos);
-  TypedValue* nvGetCell(int64 ki, bool error) const;
-  TypedValue* nvGetCell(const StringData* k, bool error) const;
+  TypedValue* nvGetCell(int64 ki) const;
+  TypedValue* nvGetCell(const StringData* k) const;
 
   /**
    * Memory allocator methods.

@@ -195,12 +195,15 @@ inline void tvWriteUninit(TypedValue* tv) {
   TV_WRITE_UNINIT(tv);
 }
 
+// conditionally unbox tv
+inline TypedValue* tvToCell(TypedValue* tv) {
+  return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
+}
+
 template <bool respectRef>
 inline void tvSetImpl(const TypedValue* fr, TypedValue* to) {
   ASSERT(fr->m_type != KindOfRef);
-  if (respectRef && to->m_type == KindOfRef) {
-    to = to->m_data.pref->tv();
-  }
+  if (respectRef) to = tvToCell(to);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
   TV_DUP_CELL_NC(fr, to);

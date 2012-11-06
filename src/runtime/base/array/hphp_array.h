@@ -88,6 +88,7 @@ public:
   using ArrayData::add;
   using ArrayData::addLval;
   using ArrayData::remove;
+  using ArrayData::nvSet;
 
   // implements ArrayData
   ssize_t vsize() const;
@@ -178,24 +179,19 @@ public:
   // nvGet, nvSet and friends.
   // "nv" stands for non-variant. If we know the types of keys and values
   // through runtime and compile-time chicanery, we can directly call these
-  // methods. Note that they are not part of the ArrayData interface. Since
-  // they are by nature micro-optimizations, avoiding vtable indirection is
-  // worthwhile. So, their use is limited to situations where we know we are
-  // using a HphpArray.
+  // methods.
 
   // nvGet returns a pointer to the value if the specified key is in the
   // array, NULL otherwise.
   TypedValue* nvGet(int64 ki) const;
   TypedValue* nvGet(const StringData* k) const;
 
-  // nvGetCell works the same as nvGet, except that it will unwrap any
-  // value that is KindOfRef and return the inner cell.
-  TypedValue* nvGetCell(int64 ki, bool error=false) const;
-  TypedValue* nvGetCell(const StringData* k, bool error=false) const;
+  // nvGetCell is a variation of get, however it unwraps a KindOfRef,
+  // returns KindOfNull if the key doesn't exist, and always warns.
+  TypedValue* nvGetCell(int64 ki) const;
+  TypedValue* nvGetCell(const StringData* k) const;
 
   ArrayData* nvSet(int64 ki, int64 vi, bool copy);
-  ArrayData* nvSet(int64 ki, const TypedValue* v, bool copy);
-  ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
   void nvBind(int64 ki, const TypedValue* v) {
     updateRef(ki, tvAsCVarRef(v));
   }
@@ -203,7 +199,9 @@ public:
     updateRef(k, tvAsCVarRef(v));
   }
   ArrayData* nvAppend(const TypedValue* v, bool copy);
-  void nvAppendWithRef(const TypedValue* v);
+  void nvAppendWithRef(const TypedValue* v) {
+    nextInsertWithRef(tvAsCVarRef(v));
+  }
   ArrayData* nvNew(TypedValue*& v, bool copy);
   TypedValue* nvGetValueRef(ssize_t pos);
   void nvGetKey(TypedValue* out, ssize_t pos);

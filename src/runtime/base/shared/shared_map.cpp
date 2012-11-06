@@ -259,20 +259,16 @@ TypedValue* SharedMap::nvGetValueRef(ssize_t pos) {
   return const_cast<TypedValue*>(SharedMap::getValueRef(pos).asTypedValue());
 }
 
-TypedValue* SharedMap::nvGetCell(int64 k, bool error) const {
+TypedValue* SharedMap::nvGetCell(int64 k) const {
   int index = m_arr->getIndex(k);
-  if (index != -1) {
-    return getValueRef(index).getTypedAccessor();
-  }
-  return error ? nvGetNotFound(k) : NULL;
+  return index != -1 ? getValueRef(index).getTypedAccessor() :
+         nvGetNotFound(k);
 }
 
-TypedValue* SharedMap::nvGetCell(const StringData* key, bool error) const {
+TypedValue* SharedMap::nvGetCell(const StringData* key) const {
   int index = m_arr->getIndex(key);
-  if (index != -1) {
-    return getValueRef(index).getTypedAccessor();
-  }
-  return error ? nvGetNotFound(key) : NULL;
+  return index != -1 ? getValueRef(index).getTypedAccessor() :
+         nvGetNotFound(key);
 }
 
 ArrayData* SharedMap::escalateForSort() {

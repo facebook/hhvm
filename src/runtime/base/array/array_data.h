@@ -168,10 +168,8 @@ class ArrayData : public Countable {
   virtual void nvGetKey(TypedValue* out, ssize_t pos);
   virtual TypedValue* nvGetValueRef(ssize_t pos);
   virtual ArrayData* nvSet(int64 ki, int64 vi, bool copy);
-  virtual ArrayData* nvSet(int64 ki, const TypedValue* v, bool copy);
-  virtual ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
-  virtual TypedValue* nvGetCell(int64 ki, bool error) const;
-  virtual TypedValue* nvGetCell(const StringData* k, bool error) const;
+  virtual TypedValue* nvGetCell(int64 ki) const;
+  virtual TypedValue* nvGetCell(const StringData* k) const;
 
   /**
    * Get the numeric index for a key. Only these need to be
@@ -271,6 +269,12 @@ class ArrayData : public Countable {
   ArrayData *remove(litstr k, bool copy);
   ArrayData *remove(CStrRef k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
+
+  /*
+   * Inline wrappers that just use tvAsCVarRef on the value
+   */
+  ArrayData* nvSet(int64 ki, const TypedValue* v, bool copy);
+  ArrayData* nvSet(StringData* k, const TypedValue* v, bool copy);
 
   virtual ssize_t iter_begin() const;
   virtual ssize_t iter_end() const;

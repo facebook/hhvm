@@ -1067,6 +1067,7 @@ inline void HphpArray::addValWithRef(StringData* key, CVarRef data) {
   e->key->incRefCount();
 }
 
+inline INLINE_SINGLE_CALLER
 void HphpArray::update(int64 ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
@@ -1080,7 +1081,7 @@ void HphpArray::update(int64 ki, CVarRef data) {
   }
 }
 
-HOT_FUNC_VM
+inline INLINE_SINGLE_CALLER
 void HphpArray::update(StringData* key, CVarRef data) {
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
@@ -1402,31 +1403,16 @@ ArrayData* HphpArray::copyWithStrongIterators() const {
 //=============================================================================
 // non-variant interface
 
-TypedValue* HphpArray::nvGetCell(int64 ki, bool error /* = false */) const {
-  ElmInd pos = find(ki);
-  if (LIKELY(pos != ElmIndEmpty)) {
-    Elm* e = &m_data[pos];
-    TypedValue* tv = &e->data;
-    return (tv->m_type != KindOfRef) ? tv :
-           tv->m_data.pref->tv();
-  }
-  return error ? nvGetNotFound(ki) : NULL;
+TypedValue* HphpArray::nvGetCell(int64 k) const {
+  ElmInd pos = find(k);
+  return LIKELY(pos != ElmIndEmpty) ? tvToCell(&m_data[pos].data) :
+         nvGetNotFound(k);
 }
 
-inline TypedValue*
-HphpArray::nvGetCell(const StringData* k, bool error /* = false */) const {
+TypedValue* HphpArray::nvGetCell(const StringData* k) const {
   ElmInd pos = find(k, k->hash());
-  if (LIKELY(pos != ElmIndEmpty)) {
-    Elm* e = &m_data[pos];
-    TypedValue* tv = &e->data;
-    if (tv->m_type < KindOfRef) {
-      return tv;
-    }
-    if (LIKELY(tv->m_type == KindOfRef)) {
-      return tv->m_data.pref->tv();
-    }
-  }
-  return error ? nvGetNotFound(k) : NULL;
+  return LIKELY(pos != ElmIndEmpty) ? tvToCell(&m_data[pos].data) :
+         nvGetNotFound(k);
 }
 
 TypedValue* HphpArray::nvGet(int64 ki) const {
@@ -1457,26 +1443,6 @@ ArrayData* HphpArray::nvSet(int64 ki, int64 vi, bool copy) {
   return retval;
 }
 
-ArrayData* HphpArray::nvSet(int64 ki, const TypedValue* v, bool copy) {
-  HphpArray* a = this;
-  ArrayData* retval = NULL;
-  if (copy) {
-    retval = a = copyImpl();
-  }
-  a->update(ki, tvAsCVarRef(v));
-  return retval;
-}
-
-ArrayData* HphpArray::nvSet(StringData* k, const TypedValue* v, bool copy) {
-  HphpArray* a = this;
-  ArrayData* retval = NULL;
-  if (copy) {
-    retval = a = copyImpl();
-  }
-  a->update(k, tvAsCVarRef(v));
-  return retval;
-}
-
 ArrayData* HphpArray::nvAppend(const TypedValue* v, bool copy) {
   HphpArray* a = this;
   ArrayData* retval = NULL;
@@ -1485,10 +1451,6 @@ ArrayData* HphpArray::nvAppend(const TypedValue* v, bool copy) {
   }
   a->nextInsert(tvAsCVarRef(v));
   return retval;
-}
-
-void HphpArray::nvAppendWithRef(const TypedValue* v) {
-  nextInsertWithRef(tvAsCVarRef(v));
 }
 
 ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
@@ -2016,18 +1978,6 @@ ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
   return array_append<TypedValue*, true>(cell, ad, value);
 }
 
-
-// Helpers for getm and friends.
-inline TypedValue* nv_get_cell_with_integer_check(ArrayData* arr,
-                                                  StringData* key) {
-  int64 lval;
-  if (UNLIKELY(key->isStrictlyInteger(lval))) {
-    return arr->nvGetCell(lval, true /* error */);
-  } else {
-    return arr->nvGetCell(key, true /* error */);
-  }
-}
-
 /**
  * Array runtime helpers. For code-sharing purposes, all of these handle as
  * much ref-counting machinery as possible. They differ by -arity, type
@@ -2045,12 +1995,8 @@ array_getm_i(void* dptr, int64 key, TypedValue* out) {
   TRACE(2, "array_getm_ik1: (%p) <- %p[%lld]\n", out, dptr, key);
   // Ref-counting the value is the translator's responsibility. We know out
   // pointed to uninitialized memory, so no need to dec it.
-  TypedValue* ret = ad->nvGetCell(key, true /* error */);
-  if (UNLIKELY(!ret)) {
-    TV_WRITE_NULL(out);
-  } else {
-    tvDup(ret, out);
-  }
+  TypedValue* ret = ad->nvGetCell(key);
+  tvDup(ret, out);
   return ad;
 }
 
@@ -2066,13 +2012,11 @@ ArrayData* array_getm_impl(ArrayData* ad, StringData* sd,
                            int flags, TypedValue* out) {
   bool drKey = flags & DecRefKey;
   bool checkInts = flags & CheckInts;
-  TypedValue* ret = checkInts ? nv_get_cell_with_integer_check(ad, sd) :
-                    ad->nvGetCell(sd, true /*error*/);
-  if (UNLIKELY(!ret)) {
-    TV_WRITE_NULL(out);
-  } else {
-    tvDup((ret), (out));
-  }
+  int64 ikey;
+  TypedValue* ret = checkInts && UNLIKELY(sd->isStrictlyInteger(ikey)) ?
+                    ad->nvGetCell(ikey) :
+                    ad->nvGetCell(sd);
+  tvDup((ret), (out));
   if (drKey && sd->decRefCount() == 0) sd->release();
   TRACE(2, "%s: (%p) <- %p[\"%s\"@sd%p]\n", __FUNCTION__,
         out, ad, sd->data(), sd);
@@ -2143,11 +2087,8 @@ array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
 void
 array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
                    bool decRefKey) {
-  TypedValue* base2 = ad->nvGetCell(ik, true);
-  if (UNLIKELY(base2 == NULL || base2->m_type != KindOfArray)) {
-    if (base2 == NULL) {
-      base2 = (TypedValue*)&init_null_variant;
-    }
+  TypedValue* base2 = ad->nvGetCell(ik);
+  if (UNLIKELY(base2->m_type != KindOfArray)) {
     non_array_getm<KindOfString, false>(base2, (int64)sd, out);
   } else {
     ad = base2->m_data.parr;
@@ -2207,7 +2148,8 @@ uint64 array_issetm_s0_fast(const void* dptr, StringData* sd)
 
 uint64 array_issetm_i(const void* dptr, int64_t key) {
   ArrayData* ad = (ArrayData*)dptr;
-  TypedValue* ret = ad->nvGetCell(key, false /* error */);
+  TypedValue* ret = ad->nvGet(key);
+  // Variant.isNull unboxes ret if its KindOfRef.
   return ret && !tvAsCVarRef(ret).isNull();
 }
 

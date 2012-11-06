@@ -34,6 +34,7 @@ namespace HPHP { namespace Util {
 
 #define ALWAYS_INLINE  __attribute__((always_inline))
 #define NEVER_INLINE  __attribute__((noinline))
+#define INLINE_SINGLE_CALLER ALWAYS_INLINE
 #define LIKELY(pred)   __builtin_expect((pred), true)
 #define UNLIKELY(pred) __builtin_expect((pred), false)
 #define UNUSED         __attribute__((unused))

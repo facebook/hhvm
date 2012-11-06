@@ -1924,7 +1924,6 @@ bool outputDependsOnInput(const Opcode instr) {
     case OutClassRef:
     case OutPred:
     case OutCns:
-    case OutIncDec:
     case OutNone:
       return false;
     case OutFDesc:
@@ -1938,6 +1937,7 @@ bool outputDependsOnInput(const Opcode instr) {
     case OutArith:
     case OutBitOp:
     case OutSetOp:
+    case OutIncDec:
       return true;
   }
   not_reached();

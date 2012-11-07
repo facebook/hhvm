@@ -981,50 +981,6 @@ Address CodeGenerator::cgOpMul(IRInstruction* inst) {
   return start;
 }
 
-Address CodeGenerator::cgOpGt(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  UNUSED SSATmp* dst   = inst->getDst();
-  UNUSED SSATmp* src1  = inst->getSrc(0);
-  UNUSED SSATmp* src2  = inst->getSrc(1);
-
-  CG_PUNT(Gt);
-
-  return start;
-}
-
-Address CodeGenerator::cgOpGte(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  UNUSED SSATmp* dst   = inst->getDst();
-  UNUSED SSATmp* src1  = inst->getSrc(0);
-  UNUSED SSATmp* src2  = inst->getSrc(1);
-
-  CG_PUNT(Gte);
-
-  return start;
-}
-
-Address CodeGenerator::cgOpLt(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  UNUSED SSATmp* dst   = inst->getDst();
-  UNUSED SSATmp* src1  = inst->getSrc(0);
-  UNUSED SSATmp* src2  = inst->getSrc(1);
-
-  CG_PUNT(Lt);
-
-  return start;
-}
-
-Address CodeGenerator::cgOpLte(IRInstruction* inst) {
-  Address start = m_as.code.frontier;
-  UNUSED SSATmp* dst   = inst->getDst();
-  UNUSED SSATmp* src1  = inst->getSrc(0);
-  UNUSED SSATmp* src2  = inst->getSrc(1);
-
-  CG_PUNT(Lte);
-
-  return start;
-}
-
 // Runtime helpers
 int64 strToBoolHelper(const StringData *s) {
   return s->toBoolean();
@@ -1071,287 +1027,237 @@ const StringData* intToStringHelper(int64 n) {
   return s;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Comparison Operators
+///////////////////////////////////////////////////////////////////////////////
 
-int64 cgArrEqHelper(ArrayData* a1, ArrayData* a2) {
-  return equal(Array(a1), Array(a2));
+#define DISPATCHER(name)                                                      \
+  int64 ccmp_ ## name (StringData* a1, StringData* a2)                        \
+    { return name(a1, a2); }                                                  \
+  int64 ccmp_ ## name (StringData* a1, int64 a2)                              \
+    { return name(a1, a2); }                                                  \
+  int64 ccmp_ ## name (StringData* a1, ObjectData* a2)                        \
+    { return name(a1, Object(a2)); }                                          \
+  int64 ccmp_ ## name (ObjectData* a1, ObjectData* a2)                        \
+    { return name(Object(a1), Object(a2)); }                                  \
+  int64 ccmp_ ## name (ObjectData* a1, int64 a2)                              \
+    { return name(Object(a1), a2); }                                          \
+  int64 ccmp_ ## name (ArrayData* a1, ArrayData* a2)                          \
+    { return name(Array(a1), Array(a2)); }
+
+DISPATCHER(same)
+DISPATCHER(equal)
+DISPATCHER(more)
+DISPATCHER(less)
+
+#undef DISPATCHER
+
+template <typename A, typename B>
+inline int64 ccmp_nsame(A a, B b) { return !ccmp_same(a, b); }
+
+template <typename A, typename B>
+inline int64 ccmp_nequal(A a, B b) { return !ccmp_equal(a, b); }
+
+template <typename A, typename B>
+inline int64 ccmp_lte(A a, B b) { return !ccmp_more(a, b); }
+
+template <typename A, typename B>
+inline int64 ccmp_gte(A a, B b) { return !ccmp_less(a, b); }
+
+#define CG_OP_CMP(inst, setter, name)                                         \
+  cgOpCmpHelper(inst, &Asm:: setter, ccmp_ ## name, ccmp_ ## name,            \
+                ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
+
+// SRON - string, resource, object, or number
+static bool typeIsSRON(Type::Tag t) {
+  return Type::isString(t)
+      || t == Type::Obj // encompases object and resource
+      || t == Type::Int
+      || t == Type::Dbl
+      ;
 }
 
-int64 cgArrNeqHelper(ArrayData* a1, ArrayData* a2) {
-  return !cgArrEqHelper(a1, a2);
-}
-
-// eq - is it = or !=
-// same - is it == or ===
-template <bool eq, bool same>
-int64 cgStringEqHelper2(const StringData* s1, const StringData* s2) {
-  if (!same) {
-    int64 s1i, s2i;
-    double  s1d, s2d;
-    auto nt1 = s1->isNumericWithVal(s1i, s1d, false);
-    if (nt1 != KindOfNull) {
-      auto nt2 = s2->isNumericWithVal(s2i, s2d, false);
-      if (nt2 != KindOfNull) {
-        if (nt1 == KindOfInt64 && nt2 == KindOfInt64) {
-          return eq ? s1i == s2i : s1i != s2i;
-        } else if (nt1 == KindOfInt64) {
-          return eq ? s1i == s2d : s1i != s2d;
-        } else if (nt2 == KindOfInt64) {
-          return eq ? s1d == s2i : s1d != s2i;
-        }
-        return eq ? s1d == s2d : s1d != s2d;
-      }
-      return eq ? false : true;
-    }
-  }
-  bool ret = s1->same(s2);
-  return eq ? ret : !ret;
-}
-
-int64 cgStringEqHelper(const StringData* s1, const StringData* s2) {
-  return cgStringEqHelper2<true, false>(s1, s2);
-}
-
-int64 cgStringNeqHelper(const StringData* s1, const StringData* s2) {
-  return cgStringEqHelper2<false, false>(s1, s2);
-}
-
-int64 cgStringSameHelper(const StringData* s1, const StringData* s2) {
-  return cgStringEqHelper2<true, true>(s1, s2);
-}
-
-int64 cgStringNSameHelper(const StringData* s1, const StringData* s2) {
-  return cgStringEqHelper2<false, true>(s1, s2);
-}
-
-int64 cgIntEqStringHelper(const StringData* s, int64 i) {
-  int64 si;
-  double sd;
-  auto st = s->isNumericWithVal(si, sd, true);
-
-  if (st == KindOfDouble) {
-    return i == sd;
-  }
-  if (st == KindOfNull) si = 0;
-  return i == si;
-}
-
-int64 cgIntNeqStringHelper(const StringData* s, int64 i) {
-  return !cgIntEqStringHelper(s, i);
-}
-
-int64 cgObjEqObjHelper(ObjectData* o1, ObjectData* o2) {
-  return equal(Object(o1), Object(o2));
-}
-
-int64 cgObjNeqObjHelper(ObjectData* o1, ObjectData* o2) {
-  return !cgObjEqObjHelper(o1, o2);
-}
-
-Address CodeGenerator::cgOpEqHelper(IRInstruction* inst, bool eq) {
+Address CodeGenerator::cgOpCmpHelper(
+          IRInstruction* inst,
+          void (Asm::*setter)(register_name_t),
+          int64 (*str_cmp_str)(StringData*, StringData*),
+          int64 (*str_cmp_int)(StringData*, int64),
+          int64 (*str_cmp_obj)(StringData*, ObjectData*),
+          int64 (*obj_cmp_obj)(ObjectData*, ObjectData*),
+          int64 (*obj_cmp_int)(ObjectData*, int64),
+          int64 (*arr_cmp_arr)( ArrayData*, ArrayData*)
+        ) {
   Address start = m_as.code.frontier;
-  UNUSED SSATmp* dst   = inst->getDst();
-  UNUSED SSATmp* src1  = inst->getSrc(0);
-  UNUSED SSATmp* src2  = inst->getSrc(1);
+  SSATmp* dst   = inst->getDst();
+  SSATmp* src1  = inst->getSrc(0);
+  SSATmp* src2  = inst->getSrc(1);
 
   Type::Tag type1 = src1->getType();
   Type::Tag type2 = src2->getType();
 
-  register_name_t dstReg = dst->getAssignedLoc();
+  register_name_t src1Reg = src1->getAssignedLoc();
+  register_name_t src2Reg = src2->getAssignedLoc();
+  register_name_t dstReg  = dst ->getAssignedLoc();
 
-  if (type1 == type2 &&
-      (type1 == Type::Int ||
-       type1 == Type::Bool)) {
-    bool c1 = src1->isConst();
-    bool c2 = src2->isConst();
+  // It is possible that some pass has been done after simplification; if such
+  //  a pass invalidates out invatiants, then just punt.
 
-    if (c1 && c2) {
-      bool val = src1->getConstValAsRawInt() == src2->getConstValAsRawInt();
-      m_as.mov_imm64_reg(val == eq, dstReg);
-    } else {
-      bool dstRegIsBool = false;
-      if (c1 || c2) {
-        auto srcReg = c1 ? src2->getAssignedLoc() : src1->getAssignedLoc();
-        if (srcReg == dstReg && type1 == Type::Bool) dstRegIsBool = true;
-        auto imm = c1 ? src1->getConstValAsRawInt()
-                      : src2->getConstValAsRawInt();
-        m_as.cmp_imm64_reg64(imm, srcReg);
-      } else {
-        auto src1Reg = src1->getAssignedLoc();
-        auto src2Reg = src2->getAssignedLoc();
-        if ((src1Reg == dstReg || src2Reg == dstReg) &&
-            type1 == Type::Bool) {
-          dstRegIsBool = true;
-        }
-        m_as.cmp_reg64_reg64(src1Reg, src2Reg);
-      }
-      if (eq) m_as.sete (dstReg);
-      else    m_as.setne(dstReg);
-      if (!dstRegIsBool) m_as.and_imm64_reg64(0xff, dstReg);
-    }
-  } else if ((type1 == Type::Bool && type2 == Type::Int) ||
-             (type2 == Type::Bool && type1 == Type::Int)) {
-    if (type2 == Type::Bool && type1 == Type::Int) {
-      std::swap(src1, src2);
-      std::swap(type1, type2);
-    }
-    // type1 is bool and type2 is int
+  // SIMPLIFY_CMP has done const-const optimization
+  // if the types are the same and there is only one constant,
+  //  SIMPLIFY_CMP has moved it to the right
+  if (src1->isConst()) {
+    CG_PUNT(cgOpCmpHelper_const);
+  }
 
-    bool c1 = src1->isConst();
-    bool c2 = src2->isConst();
-
-    if (c1 && c2) {
-      bool val =
-        src1->getConstValAsBool() == (bool)src2->getConstValAsRawInt();
-      m_as.mov_imm64_reg(val == eq, dstReg);
-    } else if (c1) {
-      bool val = src1->getConstValAsBool();
-      auto src2Reg = src2->getAssignedLoc();
-      m_as.test_reg64_reg64(src2Reg, src2Reg);
-      if (eq == val) m_as.setnz(dstReg);
-      else           m_as.setz (dstReg);
-      m_as.and_imm64_reg64(0xff, dstReg);
-    } else if (c2) {
-      auto src1Reg = src1->getAssignedLoc();
-      auto val = src2->getConstValAsRawInt();
-
-      if (dstReg == src1Reg) {
-        if (eq == (bool)val) ; // do nothing
-        else m_as.xor_imm64_reg64(0x1, dstReg);
-      } else {
-        m_as.mov_reg64_reg64(src1Reg, dstReg);
-        if (eq != (bool)val) m_as.xor_imm64_reg64(0x1, dstReg);
-      }
-    } else {
-      auto src1Reg = src1->getAssignedLoc();
-      auto src2Reg = src2->getAssignedLoc();
-
-      if (dstReg == src1Reg) {
-        m_as.mov_reg64_reg64(src1Reg, reg::rScratch);
-        m_as.test_reg64_reg64(src2Reg, src2Reg);
-        if (eq) m_as.setz (dstReg);
-        else    m_as.setnz(dstReg);
-        m_as.xor_reg64_reg64(reg::rScratch, dstReg);
-      } else {
-        m_as.test_reg64_reg64(src2Reg, src2Reg);
-        if (eq) m_as.setz (dstReg);
-        else    m_as.setnz(dstReg);
-        m_as.xor_reg64_reg64(src1Reg, dstReg);
-        m_as.and_imm64_reg64(0xff, dstReg);
-      }
-    }
-  } else if (Type::isString(type1) && Type::isString(type2)) {
+  /////////////////////////////////////////////////////////////////////////////
+  // case 1: null/string cmp string
+  // SIMPLIFY_CMP has converted the null to ""
+  if (Type::isString(type1) && Type::isString(type2)) {
     ArgGroup args;
     args.ssa(src1).ssa(src2);
-    if (eq) cgCallHelper(m_as, (TCA)cgStringEqHelper,  dst, true, args);
-    else    cgCallHelper(m_as, (TCA)cgStringNeqHelper, dst, true, args);
-  } else if ((type1 == Type::Int && Type::isString(type2)) ||
-             (type2 == Type::Int && Type::isString(type1))) {
-    if (type1 == Type::Int) {
-      std::swap(type1, type2);
-      std::swap(src1, src2);
-      assert(false); // due to canonicalization, this should never happen
+    cgCallHelper(m_as, (TCA)str_cmp_str,  dst, true, args);
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // case 2: bool/null cmp anything
+  // SIMPLIFY_CMP has converted all args to bool
+  else if (type1 == Type::Bool && type2 == Type::Bool) {
+    if (src2->isConst()) {
+      m_as.cmp_imm64_reg64(src2->getConstValAsBool(), src1Reg);
+    } else {
+      m_as.cmp_reg64_reg64(src2Reg, src1Reg);
     }
-    // type1 is now String, type2 is Int
+    (m_as.*setter)(dstReg);
 
-    if (src1->isConst() && src2->isConst()) {
-      // this should be dealt with in the simplifier
-      if (eq) CG_PUNT(Eq_const_int_const_string);
-      else    CG_PUNT(Neq_const_int_const_string);
-    } else if (src1->isConst()) {
-      auto str = src1->getConstValAsStr();
-      int64 si;
-      double sd;
-      auto st = str->isNumericWithVal(si, sd, true);
+    // until bools are bytes, we need to mask the top bits
+    bool dstIsAlreadyBool = dstReg == src1Reg ||
+                           (dstReg == src2Reg && !src2->isConst());
+    if (!dstIsAlreadyBool) {
+      m_as.and_imm64_reg64(0xff, dstReg);
+    }
+  }
 
-      if (st == KindOfDouble) {
+  /////////////////////////////////////////////////////////////////////////////
+  // case 3, 4, and 7: string/resource/object/number (sron) cmp sron
+  // These cases must be amalgamated because Type::Obj can refer to an object
+  //  or to a resource.
+  // strings are canonicalized to the left, ints to the right
+  else if (typeIsSRON(type1) && typeIsSRON(type2)) {
+    // the common case: int cmp int
+    if (type1 == Type::Int && type2 == Type::Int) {
+      if (src2->isConst()) {
+        m_as.cmp_imm64_reg64(src2->getConstValAsInt(), src1Reg);
+      } else {
+        m_as.cmp_reg64_reg64(src2Reg, src1Reg);
+      }
+      (m_as.*setter)(dstReg);
+
+      // until bools are bytes, we need to mask the top bits
+      m_as.and_imm64_reg64(0xff, dstReg);
+    }
+
+    // doubles be damned!
+    else if (type1 == Type::Dbl || type2 == Type::Dbl) {
+      CG_PUNT(cgOpCmpHelper_Dbl);
+    }
+
+    // string
+    else if (Type::isString(type1)) {
+      // string cmp string is dealy with in case 1
+      // string cmp double is punted above
+
+      if (type2 == Type::Int) {
         ArgGroup args;
         args.ssa(src1).ssa(src2);
-
-        if (eq) cgCallHelper(m_as, (TCA)cgIntEqStringHelper,  dst, true, args);
-        else    cgCallHelper(m_as, (TCA)cgIntNeqStringHelper, dst, true, args);
+        cgCallHelper(m_as, (TCA)str_cmp_int,  dst, true, args);
+      } else if (type2 == Type::Obj) {
+        ArgGroup args;
+        args.ssa(src1).ssa(src2);
+        cgCallHelper(m_as, (TCA)str_cmp_obj,  dst, true, args);
       } else {
-        if (st == KindOfNull) {
-          si = 0;
-        }
-        m_as.cmp_imm64_reg64(si, src2->getAssignedLoc());
-        if (eq) m_as.setz (dstReg);
-        else    m_as.setnz(dstReg);
-        m_as.and_imm64_reg64(0xff, dstReg);
+        CG_PUNT(cgOpCmpHelper_sx);
       }
-    } else {
-      ArgGroup args;
-      args.ssa(src1).ssa(src2);
-
-      if (eq) cgCallHelper(m_as, (TCA)cgIntEqStringHelper,  dst, true, args);
-      else    cgCallHelper(m_as, (TCA)cgIntNeqStringHelper, dst, true, args);
     }
-  } else if (type1 == Type::Obj && type2 == Type::Obj) {
+
+    // object
+    else if (type1 == Type::Obj) {
+      // string cmp object/resource is dealt with above
+      // object cmp double is punted above
+
+      if (type2 == Type::Obj) {
+        ArgGroup args;
+        args.ssa(src1).ssa(src2);
+        cgCallHelper(m_as, (TCA)obj_cmp_obj,  dst, true, args);
+      } else if (type2 == Type::Int) {
+        ArgGroup args;
+        args.ssa(src1).ssa(src2);
+        cgCallHelper(m_as, (TCA)obj_cmp_int,  dst, true, args);
+      } else {
+        CG_PUNT(cgOpCmpHelper_ox);
+      }
+    }
+
+    // we should never get here
+    else {
+      CG_PUNT(cgOpCmpHelper_xx);
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // case 5: array cmp array
+  else if (type1 == Type::Arr && type2 == Type::Arr) {
     ArgGroup args;
     args.ssa(src1).ssa(src2);
+    cgCallHelper(m_as, (TCA)arr_cmp_arr,  dst, true, args);
+  }
 
-    if (eq) cgCallHelper(m_as, (TCA)cgObjEqObjHelper,  dst, true, args);
-    else    cgCallHelper(m_as, (TCA)cgObjNeqObjHelper, dst, true, args);
-  } else if (type1 == Type::Arr && type2 == Type::Arr) {
-    ArgGroup args;
-    args.ssa(src1).ssa(src2);
+  /////////////////////////////////////////////////////////////////////////////
+  // case 6: array cmp anything
+  // SIMPLIfY_CMP has already dealt with this case.
 
-    if (eq) cgCallHelper(m_as, (TCA)cgArrEqHelper,  dst, true, args);
-    else    cgCallHelper(m_as, (TCA)cgArrNeqHelper, dst, true, args);
-  } else {
-    if (eq) CG_PUNT(Eq);
-    else    CG_PUNT(Neq);
+  /////////////////////////////////////////////////////////////////////////////
+  else {
+    // We have a type which is not a common type. It might be a cell or a box.
+    CG_PUNT(cgOpCmpHelper_unimplemented);
   }
 
   return start;
 }
 
 Address CodeGenerator::cgOpEq(IRInstruction* inst) {
-  return cgOpEqHelper(inst, true);
+  return CG_OP_CMP(inst, sete, equal);
 }
 
 Address CodeGenerator::cgOpNeq(IRInstruction* inst) {
-  return cgOpEqHelper(inst, false);
-}
-
-Address CodeGenerator::cgOpSameHelper(IRInstruction* inst, bool eq) {
-  Address start = m_as.code.frontier;
-  UNUSED SSATmp* dst   = inst->getDst();
-  UNUSED SSATmp* src1  = inst->getSrc(0);
-  UNUSED SSATmp* src2  = inst->getSrc(1);
-
-  Type::Tag type1 = src1->getType();
-  Type::Tag type2 = src2->getType();
-
-
-  if (Type::isString(type1) && Type::isString(type2)) {
-    ArgGroup args;
-    args.ssa(src1).ssa(src2);
-    if (eq) cgCallHelper(m_as, (TCA)cgStringSameHelper,  dst, true, args);
-    else    cgCallHelper(m_as, (TCA)cgStringNSameHelper, dst, true, args);
-  } else if (type1 == Type::Obj && type2 == Type::Obj) {
-    register_name_t dstReg = dst->getAssignedLoc();
-    // Objects cannot be const
-    auto src1Reg = src1->getAssignedLoc();
-    auto src2Reg = src2->getAssignedLoc();
-    m_as.cmp_reg64_reg64(src1Reg, src2Reg);
-    if (eq) m_as.sete (dstReg);
-    else    m_as.setne(dstReg);
-    m_as.and_imm64_reg64(0xff, dstReg);
-  } else {
-    if (eq) CG_PUNT(Same);
-    else    CG_PUNT(NSame);
-  }
-
-  return start;
+  return CG_OP_CMP(inst, setne, nequal);
 }
 
 Address CodeGenerator::cgOpSame(IRInstruction* inst) {
-  return cgOpSameHelper(inst, true);
+  return CG_OP_CMP(inst, sete, same);
 }
 
 Address CodeGenerator::cgOpNSame(IRInstruction* inst) {
-  return cgOpSameHelper(inst, false);
+  return CG_OP_CMP(inst, setne, nsame);
 }
+
+Address CodeGenerator::cgOpLt(IRInstruction* inst) {
+  return CG_OP_CMP(inst, setl, less);
+}
+
+Address CodeGenerator::cgOpGt(IRInstruction* inst) {
+  return CG_OP_CMP(inst, setg, more);
+}
+
+Address CodeGenerator::cgOpLte(IRInstruction* inst) {
+  return CG_OP_CMP(inst, setle, lte);
+}
+
+Address CodeGenerator::cgOpGte(IRInstruction* inst) {
+  return CG_OP_CMP(inst, setge, gte);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 Address CodeGenerator::cgIsType(IRInstruction* inst) {
   Address start = m_as.code.frontier;

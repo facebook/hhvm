@@ -770,25 +770,28 @@ SSATmp* chaseIncRefs(SSATmp* tmp) {
     return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
   }                                                                           \
                                                                               \
+  /* ints get canonicalized to the right */                                   \
+  if (src1->getType() == Type::Int) {                                         \
+    return m_tb->genCmp(commuteQueryOp(NAME), src2, src1);                    \
+  }                                                                           \
+                                                                              \
   /* case 4: number/string/resource cmp. Convert to number (int OR double) */ \
-  /* NOTE: The following if-test only checks for the case when exactly     */ \
-  /*  one of the arguments is a string. Other cases (like string-string)   */ \
+  /* NOTE: The following if-test only checks for some of the SRON-SRON     */ \
+  /*  cases (specifically, string-int). Other cases (like string-string)   */ \
   /*  are dealt with earlier, while other cases (like number-resource)     */ \
   /*  are not caught at all (and end up exiting this macro at the bottom). */ \
-  if (Type::isString(src1->getType())) {                                      \
-    if (src1->isConst()) {                                                    \
-      auto str = src1->getConstValAsStr();                                    \
-      int64 si; double sd;                                                    \
-      auto st = str->isNumericWithVal(si, sd, true /* allow errors */);       \
-      if (st == KindOfDouble) {                                               \
-        return m_tb->genCmp(NAME, m_tb->genDefConst<double>(sd), src2);       \
-      }                                                                       \
-      if (st == KindOfNull) {                                                 \
-        si = 0;                                                               \
-      }                                                                       \
-      return m_tb->genCmp(NAME, m_tb->genDefConst<int64>(si), src2);          \
+  if (Type::isString(src1->getType()) && src1->isConst() &&                   \
+      src2->getType() == Type::Int) {                                         \
+    auto str = src1->getConstValAsStr();                                      \
+    int64 si; double sd;                                                      \
+    auto st = str->isNumericWithVal(si, sd, true /* allow errors */);         \
+    if (st == KindOfDouble) {                                                 \
+      return m_tb->genCmp(NAME, m_tb->genDefConst<double>(sd), src2);         \
     }                                                                         \
-    break;                                                                    \
+    if (st == KindOfNull) {                                                   \
+      si = 0;                                                                 \
+    }                                                                         \
+    return m_tb->genCmp(NAME, m_tb->genDefConst<int64>(si), src2);            \
   }                                                                           \
                                                                               \
   /* case 5: array cmp array. No juggling to do */                            \

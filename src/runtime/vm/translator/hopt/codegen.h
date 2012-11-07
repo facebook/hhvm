@@ -132,8 +132,15 @@ public:
   Address cgNegate(IRInstruction* inst); // helper
   Address cgJcc(IRInstruction* inst); // helper
   Address cgLabel(Opcode opc, LabelInstruction* label);
-  Address cgOpEqHelper(IRInstruction* inst, bool eq);
-  Address cgOpSameHelper(IRInstruction* inst, bool eq);
+  Address cgOpCmpHelper(
+            IRInstruction* inst,
+            void (Asm::*setter)(register_name_t),
+            int64 (*str_cmp_str)(StringData*, StringData*),
+            int64 (*str_cmp_int)(StringData*, int64),
+            int64 (*str_cmp_obj)(StringData*, ObjectData*),
+            int64 (*obj_cmp_obj)(ObjectData*, ObjectData*),
+            int64 (*obj_cmp_int)(ObjectData*, int64),
+            int64 (*arr_cmp_arr)(ArrayData*, ArrayData*));
   Address cgJmpZeroHelper(IRInstruction* inst, ConditionCode cc);
 
 

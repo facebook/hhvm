@@ -1359,6 +1359,7 @@ public:
   CC(p,   CC_P)         \
   CC(np,  CC_NP)        \
   CC(nge, CC_NGE)       \
+  CC(g,   CC_G)         \
   CC(l,   CC_L)         \
   CC(ge,  CC_GE)        \
   CC(nl,  CC_NL)        \

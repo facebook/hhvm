@@ -142,6 +142,7 @@ HphpArray::HphpArray(uint size, const TypedValue* values)
   m_hLoad = size;
   m_lastE = size - 1;
   m_nextKI = size;
+  if (size > 0) m_pos = 0;
 }
 
 HphpArray::HphpArray(EmptyMode)

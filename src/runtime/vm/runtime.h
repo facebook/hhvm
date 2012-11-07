@@ -26,7 +26,7 @@
 namespace HPHP {
 namespace VM {
 
-int64 new_iter_array(HPHP::VM::Iter* dest, HphpArray* arr);
+int64 new_iter_array(HPHP::VM::Iter* dest, ArrayData* arr);
 int64 new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx);
 int64 iter_next_array(HPHP::VM::Iter* dest);
 void iter_value_cell_array(HPHP::VM::Iter* iter, TypedValue* out);

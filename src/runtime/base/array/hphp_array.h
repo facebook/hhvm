@@ -318,6 +318,11 @@ public:
     ElmInd hash[SmallHashSize];
   };
 
+  ElmInd getLastE() const { return m_lastE; }
+  Elm*   getElm(ssize_t pos)  const {
+    ASSERT(unsigned(pos) <= unsigned(m_lastE));
+    return &m_data[pos];
+  }
 private:
   // Small: Array elements and the hash table are allocated inline.
   //
@@ -356,12 +361,12 @@ private:
   // m_hash --> |                    | 2^K hash table entries.
   //            +--------------------+
 
-  uint32  m_tableMask;   // Bitmask used when indexing into the hash table.
+  ElmInd  m_lastE;       // Index of last used element.
   Elm*    m_data;        // Contains elements and hash table.
   ElmInd* m_hash;        // Hash table.
   int64   m_nextKI;      // Next integer key to use for append.
+  uint32  m_tableMask;   // Bitmask used when indexing into the hash table.
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
-  ElmInd  m_lastE;       // Index of last used element.
   union {
     InlineSlots m_inline_data;
     ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];

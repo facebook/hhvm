@@ -67,7 +67,7 @@ void print_boolean(int64 val) {
  * iterator, it decRefs the array.
  */
 HOT_FUNC
-int64 new_iter_array(Iter* dest, HphpArray* arr) {
+int64 new_iter_array(Iter* dest, ArrayData* arr) {
   TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
   if (!arr->empty()) {
     // We are transferring ownership of the array to the iterator, therefore
@@ -132,8 +132,8 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx) {
  * If the iterator reaches the end, iter_next_array will free the iterator
  * and will decRef the array.
  */
-HOT_FUNC
-int64 iter_next_array(Iter* iter) {
+static NEVER_INLINE
+int64 iter_next_array_cold(Iter* iter) {
   TRACE(2, "iter_next_array: I %p\n", iter);
   ASSERT(iter->m_itype == Iter::TypeArray ||
          iter->m_itype == Iter::TypeIterator);
@@ -146,6 +146,39 @@ int64 iter_next_array(Iter* iter) {
     return 0;
   }
   return 1;
+}
+
+HOT_FUNC
+int64 iter_next_array(Iter* iter) {
+  ArrayIter* arrIter = &iter->arr();
+
+  if (UNLIKELY(!arrIter->hasArrayData())) {
+    goto cold;
+  }
+  {
+    const ArrayData* ad = arrIter->getArrayData();
+    if (UNLIKELY(!IsHphpArray(ad))) {
+      goto cold;
+    }
+    const HphpArray* arr = (HphpArray*)ad;
+    ssize_t pos = arrIter->getPos();
+    if (size_t(pos) >= size_t(arr->getLastE())) {
+      if (UNLIKELY(arr->getCount() == 1)) {
+        goto cold;
+      }
+      arr->decRefCount();
+      iter->m_itype = Iter::TypeUndefined;
+      return 0;
+    }
+    pos = pos + 1;
+    if (UNLIKELY(arr->getElm(pos)->data.m_type >= HphpArray::KindOfTombstone)) {
+      goto cold;
+    }
+    arrIter->setPos(pos);
+    return 1;
+  }
+cold:
+  return iter_next_array_cold(iter);
 }
 
 /**

@@ -106,7 +106,7 @@ inline void HphpArray::init(uint size) {
 }
 
 HphpArray::HphpArray(uint size) : ArrayData(kHphpArray),
-  m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty) {
+  m_lastE(ElmIndEmpty), m_data(NULL), m_nextKI(0), m_hLoad(0) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
@@ -116,8 +116,9 @@ HphpArray::HphpArray(uint size) : ArrayData(kHphpArray),
 }
 
 HphpArray::HphpArray(uint size, const TypedValue* values) :
-  ArrayData(kHphpArray), m_data(NULL), m_nextKI(0), m_hLoad(0),
-  m_lastE(ElmIndEmpty) {
+    ArrayData(kHphpArray), m_lastE(ElmIndEmpty), m_data(NULL),
+    m_nextKI(0), m_hLoad(0)
+  {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
@@ -145,7 +146,7 @@ HphpArray::HphpArray(uint size, const TypedValue* values) :
 }
 
 HphpArray::HphpArray(EmptyMode) : ArrayData(kHphpArray),
-  m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty) {
+  m_lastE(ElmIndEmpty), m_data(NULL), m_nextKI(0), m_hLoad(0) {
   init(0);
   setStatic();
 }

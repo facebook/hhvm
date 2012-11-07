@@ -111,7 +111,6 @@ public:
     return const_cast<ArrayData*>(ad)->nvGetValueRef(m_pos);
   }
 
-private:
   union {
     const ArrayData* m_data;
     ObjectData* m_obj;
@@ -119,9 +118,11 @@ private:
   ssize_t m_pos;
   int m_versionNumber;
 
+ public:
   bool hasArrayData() {
     return !((intptr_t)m_data & 1);
   }
+ private:
   bool hasVector() {
     return (!hasArrayData() &&
             getRawObject()->getCollectionType() == Collection::VectorType);
@@ -138,11 +139,18 @@ private:
     return (!hasArrayData() &&
             getRawObject()->getCollectionType() == Collection::InvalidType);
   }
-
+ public:
   const ArrayData* getArrayData() {
     ASSERT(hasArrayData());
     return m_data;
   }
+  ssize_t getPos() {
+    return m_pos;
+  }
+  void setPos(ssize_t newPos) {
+    m_pos = newPos;
+  }
+ private:
   c_Vector* getVector() {
     ASSERT(hasVector());
     return (c_Vector*)((intptr_t)m_obj & ~1);

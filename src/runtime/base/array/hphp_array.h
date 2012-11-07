@@ -429,11 +429,8 @@ private:
     size_t tableMask = m_tableMask;
     size_t probeIndex = h0 & tableMask;
     ElmInd* ei = &m_hash[probeIndex];
-    ssize_t /*ElmInd*/ pos = *ei;
-    if (LIKELY(!validElmInd(pos))) {
-      return ei;
-    }
-    return findForNewInsertLoop(tableMask, h0);
+    return !validElmInd(*ei) ? ei :
+           findForNewInsertLoop(tableMask, h0);
   }
 
   bool nextInsert(CVarRef data);

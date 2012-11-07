@@ -486,7 +486,7 @@ static bool hitIntKey(const HphpArray::Elm* e, int64 ki) {
   size_t probeIndex = size_t(h0) & tableMask; \
   Elm* elms = m_data; \
   ssize_t /*ElmInd*/ pos = m_hash[probeIndex]; \
-  if (LIKELY(pos == ssize_t(ElmIndEmpty) || (validElmInd(pos) && hit))) { \
+  if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) { \
     return pos; \
   } \
   /* Quadratic probe. */ \
@@ -495,7 +495,7 @@ static bool hitIntKey(const HphpArray::Elm* e, int64 ki) {
     probeIndex = (probeIndex + i) & tableMask; \
     ASSERT(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
     pos = m_hash[probeIndex]; \
-    if (pos == ssize_t(ElmIndEmpty) || (validElmInd(pos) && hit)) { \
+    if (validElmInd(pos) && hit || pos == ssize_t(ElmIndEmpty)) { \
       return pos; \
     } \
   }
@@ -533,7 +533,7 @@ ssize_t /*ElmInd*/ HphpArray::find(const StringData* s,
   Elm* elms = m_data; \
   ElmInd* ei = &m_hash[probeIndex]; \
   ssize_t /*ElmInd*/ pos = *ei; \
-  if (LIKELY(pos == ssize_t(ElmIndEmpty) || (validElmInd(pos) && hit))) { \
+  if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) { \
     return ei; \
   } \
   if (!validElmInd(pos)) ret = ei; \
@@ -550,13 +550,11 @@ ssize_t /*ElmInd*/ HphpArray::find(const StringData* s,
         return ei; \
       } \
     } else { \
-      if (ret == NULL) { \
-        ret = ei; \
-      } \
       if (pos == ElmIndEmpty) { \
         ASSERT(m_hLoad <= computeMaxElms(tableMask)); \
-        return ret; \
+        return ret ? ret : ei; \
       } \
+      if (!ret) ret = ei; \
     } \
   }
 
@@ -1014,8 +1012,10 @@ void HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
 }
 
 inline void HphpArray::addVal(int64 ki, CVarRef data) {
-  ElmInd* ei = findForInsert(ki);
-  Elm* e = newElm(ei, ki);
+  ASSERT(!exists(ki));
+  resizeIfNeeded();
+  ElmInd* ei = findForNewInsert(ki);
+  Elm* e = allocElm(ei);
   TypedValue* fr = (TypedValue*)(&data);
   TypedValue* to = (TypedValue*)(&e->data);
   elemConstruct(fr, to);
@@ -1026,9 +1026,11 @@ inline void HphpArray::addVal(int64 ki, CVarRef data) {
 }
 
 inline void HphpArray::addVal(StringData* key, CVarRef data) {
+  ASSERT(!exists(key));
+  resizeIfNeeded();
   strhash_t h = key->hash();
-  ElmInd* ei = findForInsert(key, h);
-  Elm *e = newElm(ei, h);
+  ElmInd* ei = findForNewInsert(h);
+  Elm *e = allocElm(ei);
   // Set the element
   TypedValue* to = (TypedValue*)(&e->data);
   TypedValue* fr = (TypedValue*)(&data);
@@ -1253,7 +1255,6 @@ ArrayData* HphpArray::setRef(StringData* k, CVarRef v, bool copy) {
 }
 
 ArrayData* HphpArray::add(int64 k, CVarRef v, bool copy) {
-  ASSERT(!exists(k));
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
   a->addVal(k, v);

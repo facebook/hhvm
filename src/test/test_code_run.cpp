@@ -24327,6 +24327,45 @@ bool TestCodeRun::TestYield() {
         "Finished!\n"
         "Returned from main safely\n");
 
+  MVCRO("<?php\n"
+        "class Foo implements Iterator {\n"
+        "  private $data = array(1, 2, 3);\n"
+        "\n"
+        "  public function current() {\n"
+        "    return current($this->data);\n"
+        "  }\n"
+        "  public function key() {\n"
+        "    return key($this->data);\n"
+        "  }\n"
+        "  public function next() {\n"
+        "    next($this->data);\n"
+        "  }\n"
+        "  public function rewind() {\n"
+        "    echo \"hagfish\\n\";\n"
+        "    reset($this->data);\n"
+        "  }\n"
+        "  public function valid() {\n"
+        "    return current($this->data);\n"
+        "  }\n"
+        "}\n"
+        "\n"
+        "function run_test() {\n"
+        "  $f = new Foo();\n"
+        "\n"
+        "  foreach ($f as $value) {\n"
+        "    echo $value . \"\\n\";\n"
+        "  }\n"
+        "\n"
+        "  yield 1230;\n"
+        "\n"
+        "  foreach($f as $value) {\n"
+        "    echo $value . \"\\n\";\n"
+        "  }\n"
+        "}\n"
+        "\n"
+        "foreach (run_test() as $_) {}\n",
+        "hagfish\n1\n2\n3\nhagfish\n1\n2\n3\n");
+
   return true;
 }
 

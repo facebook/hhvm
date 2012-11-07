@@ -417,7 +417,18 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
     Token lname;    lname.setText(loopvar);
     Token var;      _p->onSynthesizedVariable(var, lname);
     Token assign;   _p->onAssign(assign, var, call, false);
-    _p->onExprListElem(init, NULL, assign);
+
+    if (byRef) {
+      // hphp_get_mutable_iterator will reset the array's internal pointer.
+      _p->onExprListElem(init, NULL, assign);
+    } else {
+      // We have to reset the iterator's pointer ourselves.
+      Token rname;    rname.setText("rewind");
+      Token empty;    empty = 1;
+      Token rcall;    _p->onObjectMethodCall(rcall, assign, rname, empty);
+
+      _p->onExprListElem(init, NULL, rcall);
+    }
   }
 
   Token cond;

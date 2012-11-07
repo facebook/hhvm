@@ -1439,9 +1439,11 @@ void EmitterVisitor::visitIfCondition(
       if (localLabel.isUsed()) {
         localLabel.set(e);
       }
-      ExpressionPtr rhs = binOpNode->getExp2();
-      Emitter rhsEmitter(rhs, m_ue, *this);
-      visitIfCondition(rhs, rhsEmitter, tru, fals, truFallthrough);
+      if (currentPositionIsReachable()) {
+        ExpressionPtr rhs = binOpNode->getExp2();
+        Emitter rhsEmitter(rhs, m_ue, *this);
+        visitIfCondition(rhs, rhsEmitter, tru, fals, truFallthrough);
+      }
       return;
     }
   }
@@ -2667,10 +2669,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           Label tru, fls, done;
           visitIfCondition(b, e, tru, fls, false);
           if (fls.isUsed()) fls.set(e);
-          e.False();
-          e.Jmp(done);
-          tru.set(e);
-          e.True();
+          if (currentPositionIsReachable()) {
+            e.False();
+            e.Jmp(done);
+          }
+          if (tru.isUsed()) tru.set(e);
+          if (currentPositionIsReachable()) {
+            e.True();
+          }
           done.set(e);
           return true;
         }
@@ -3296,14 +3302,20 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (tru.isUsed()) {
             tru.set(e);
           }
-          visit(q->getYes());
-          emitConvertToCell(e);
-          e.Jmp(done);
-          fals.set(e);
-          visit(q->getNo());
-          emitConvertToCell(e);
-          done.set(e);
-          m_evalStack.cleanTopMeta();
+          if (currentPositionIsReachable()) {
+            visit(q->getYes());
+            emitConvertToCell(e);
+            e.Jmp(done);
+          }
+          if (fals.isUsed()) fals.set(e);
+          if (currentPositionIsReachable()) {
+            visit(q->getNo());
+            emitConvertToCell(e);
+          }
+          if (done.isUsed()) {
+            done.set(e);
+            m_evalStack.cleanTopMeta();
+          }
         } else {
           // <expr> ?: <expr>
           Label done;

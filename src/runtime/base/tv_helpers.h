@@ -94,10 +94,6 @@ inline void tvDecRefRef(TypedValue* tv) {
   tvDecRefRefInternal(tv->m_data.pref);
 }
 
-inline void tvReleaseHelper(DataType type, uint64_t datum) {
-  VM::tv_release_typed((RefData*)datum, type);
-}
-
 // Assumes 'tv' is live
 inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
   if (IS_REFCOUNTED_TYPE(type)) {

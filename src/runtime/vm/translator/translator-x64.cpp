@@ -10812,7 +10812,7 @@ TranslatorX64::TranslatorX64()
 
   // Call to exit with whatever value the program leaves on
   // the return stack.
-  m_callToExit = emitServiceReq(SRFlags::SRNone, REQ_EXIT, 0ull);
+  m_callToExit = emitServiceReq(SRFlags::SRAlign, REQ_EXIT, 0ull);
 
   m_retHelper = emitRetFromInterpretedFrame();
   m_genRetHelper = emitRetFromInterpretedGeneratorFrame();
@@ -10845,32 +10845,9 @@ TranslatorX64::TranslatorX64()
                               Stack::topOfStackOffset(), rEC);
   a.   jmp((TCA)defClsHelper);
 
-  moveToAlign(astubs);
-  m_stackOverflowHelper = astubs.code.frontier;
-  // We are called from emitStackCheck, with the new stack frame in
-  // rStashedAR. Get the caller's PC into rdi and save it off.
-  astubs.    load_reg64_disp_reg64(rVmFp, AROFF(m_func), rax);
-  astubs.    load_reg64_disp_reg32(rStashedAR, AROFF(m_soff), rdi);
-  astubs.    load_reg64_disp_reg64(rax, Func::sharedOffset(), rax);
-  astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
-  astubs.    add_reg32_reg32(rax, rdi);
-
-  emitEagerVMRegSave(astubs, SaveFP | SavePC);
-  emitServiceReq(SRFlags::SRInline, REQ_STACK_OVERFLOW, 0ull);
-
   // The decRef helper for when we bring the count down to zero. Callee needs to
   // bring the value into rdi. These can be burned in for all time, and for all
   // translations.
-  if (false) { // type-check
-    StringData* str = NULL;
-    ArrayData* arr = NULL;
-    ObjectData* obj = NULL;
-    RefData* ref = NULL;
-    tv_release_str(str);
-    tv_release_arr(arr);
-    tv_release_obj(obj);
-    tv_release_ref(ref);
-  }
   typedef void* vp;
   m_dtorStubs[BitwiseKindOfString] = emitUnaryStub(a,
                                                    Call(getMethodHardwarePtr(&StringData::release)));
@@ -10897,6 +10874,18 @@ TranslatorX64::TranslatorX64()
     m_segvChain = old_sa.sa_flags & SA_SIGINFO ?
       old_sa.sa_sigaction : (sigaction_t)old_sa.sa_handler;
   }
+
+  moveToAlign(astubs);
+  m_stackOverflowHelper = astubs.code.frontier;
+  // We are called from emitStackCheck, with the new stack frame in
+  // rStashedAR. Get the caller's PC into rdi and save it off.
+  astubs.    load_reg64_disp_reg64(rVmFp, AROFF(m_func), rax);
+  astubs.    load_reg64_disp_reg32(rStashedAR, AROFF(m_soff), rdi);
+  astubs.    load_reg64_disp_reg64(rax, Func::sharedOffset(), rax);
+  astubs.    load_reg64_disp_reg32(rax, Func::sharedBaseOffset(), rax);
+  astubs.    add_reg32_reg32(rax, rdi);
+  emitEagerVMRegSave(astubs, SaveFP | SavePC);
+  emitServiceReq(SRFlags::SRInline, REQ_STACK_OVERFLOW, 0ull);
 }
 
 // do gdb specific initialization. This has to happen after

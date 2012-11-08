@@ -172,7 +172,7 @@ class DiamondReturn : boost::noncopyable {
   TCA m_finishBranchFrontier;
 
 private:
-  template<ConditionCode> friend class UnlikelyIfBlock;
+  friend class UnlikelyIfBlock;
 
   void initBranch(X64Assembler* branchA, X64Assembler* mainA) {
     /*
@@ -451,7 +451,7 @@ inline void dumpJmpProfile() {
 //    a.   test_reg_reg(inputParam, inputParam);
 //    DiamondReturn retFromStubs;
 //    {
-//      UnlikelyIfBlock<CC_Z> ifNotRax(a, astubs, &retFromStubs);
+//      UnlikelyIfBlock ifNotRax(CC_Z, a, astubs, &retFromStubs);
 //      EMIT_CALL(a, TCA(launch_nuclear_missiles));
 //    }
 //    // The inputParam was non-zero, here is the likely branch:
@@ -469,7 +469,6 @@ inline void dumpJmpProfile() {
 // corresponding DiamondReturns are correctly destroyed in reverse
 // order.  But also note that this can lead to more jumps on the
 // unlikely branch (see ~DiamondReturn).
-template <ConditionCode Jcc>
 struct UnlikelyIfBlock {
   X64Assembler& m_likely;
   X64Assembler& m_unlikely;
@@ -479,7 +478,8 @@ struct UnlikelyIfBlock {
   bool m_externalDiamond;
   boost::optional<FreezeRegs> m_ice;
 
-  explicit UnlikelyIfBlock(X64Assembler& likely,
+  explicit UnlikelyIfBlock(ConditionCode cc,
+                           X64Assembler& likely,
                            X64Assembler& unlikely,
                            DiamondReturn* returnDiamond = 0)
     : m_likely(likely)
@@ -487,8 +487,8 @@ struct UnlikelyIfBlock {
     , m_returnDiamond(returnDiamond ? returnDiamond : new DiamondReturn())
     , m_externalDiamond(!!returnDiamond)
   {
-    emitJmpProfile<Trace::unlikely>(m_likely, Jcc);
-    m_likely.jcc(Jcc, m_unlikely.code.frontier);
+    emitJmpProfile<Trace::unlikely>(m_likely, cc);
+    m_likely.jcc(cc, m_unlikely.code.frontier);
     m_likelyPostBranch = m_likely.code.frontier;
     m_returnDiamond->initBranch(&unlikely, &likely);
     tx64->m_spillFillCode = &unlikely;
@@ -587,16 +587,16 @@ private:
  * Usage example:
  *
  * a. test_reg64_reg64(*rFoo, *rFoo);
- * semiLikelyIfBlock<CC_Z>(a, [&]{
+ * semiLikelyIfBlock(CC_Z, a, [&]{
  *   EMIT_CALL(a, some_helper);
  *   emitMovRegReg(a, rax, *rFoo);
  * });
  */
-template<int Jcc, class Lambda>
-void semiLikelyIfBlock(X64Assembler& a, Lambda body) {
+template<class Lambda>
+void semiLikelyIfBlock(ConditionCode cc, X64Assembler& a, Lambda body) {
   std::unique_ptr<DiamondGuard> dg(new DiamondGuard(a));
   const TCA toPatch = a.code.frontier;
-  a.jcc8(Jcc, toPatch);
+  a.jcc8(cc, toPatch);
   const TCA patchLikely = a.code.frontier;
   a.jmp8(patchLikely);
   a.patchJcc8(toPatch, a.code.frontier);

@@ -960,7 +960,7 @@ void TranslatorX64::emitDecRef(Asm& a,
       return;
     }
 
-    UnlikelyIfBlock<CC_Z> ifZero(this->a, astubs);
+    UnlikelyIfBlock ifZero(CC_Z, this->a, astubs);
 
     auto getPushSet = [&] {
       RegSet ret;
@@ -1074,10 +1074,10 @@ void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
   a.   cmp_imm32_reg32(KindOfRefCountThreshold, rType);
   if (op == OpSetM || op == OpContSend || op == OpSetG) {
     // Semi-likely cases
-    semiLikelyIfBlock<CC_A>(a, std::bind(body, std::ref(a)));
+    semiLikelyIfBlock(CC_A, a, std::bind(body, std::ref(a)));
   } else if (op == OpContNext) {
     // Unlikely cases
-    UnlikelyIfBlock<CC_A> counted(a, astubs);
+    UnlikelyIfBlock counted(CC_A, a, astubs);
     body(astubs);
   } else {
     JccBlock<CC_BE> ifRefCounted(a);
@@ -1108,7 +1108,7 @@ TCA TranslatorX64::genericRefCountStub(X64Assembler& a) {
     { // if !static
       IfCountNotStatic ins(a, rsi, KindOfInvalid);
       a.  sub_imm32_disp_reg32(1, TVOFF(_count), rsi);
-      semiLikelyIfBlock<CC_Z>(a, [&]{
+      semiLikelyIfBlock(CC_Z, a, [&]{
         RegSet s = kCallerSaved - (RegSet(rdi) | RegSet(rsi));
         PhysRegSaver prs(a, s);
         a.call(TCA(tv_release_generic));
@@ -1135,7 +1135,7 @@ TCA TranslatorX64::genericRefCountStubRegs(X64Assembler& a) {
   {
     IfCountNotStatic ins(a, rData, KindOfInvalid);
     a.  sub_imm32_disp_reg32(1, TVOFF(_count), rData);
-    semiLikelyIfBlock<CC_Z>(a, [&]{
+    semiLikelyIfBlock(CC_Z, a, [&]{
       // The arguments are already in the right registers.
       RegSet s = kCallerSaved - (RegSet(rData) | RegSet(rType));
       PhysRegSaverParity<1> saver(a, s);
@@ -1487,7 +1487,7 @@ TranslatorX64::emitCheckSurpriseFlagsEnter(bool inTracelet, Offset pcOff,
                                            Offset stackOff) {
   emitTestSurpriseFlags();
   {
-    UnlikelyIfBlock<CC_NZ> ifTracer(a, astubs);
+    UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
     if (false) { // typecheck
       const ActRec* ar = NULL;
       EventHook::FunctionEnter(ar, 0);
@@ -2063,7 +2063,7 @@ TranslatorX64::emitInterceptPrologue(Func* func) {
   TCA start = a.code.frontier;
   emitImmReg(a, int64(&func->maybeIntercepted()), rax);
   a.cmp_imm8_disp_reg8(0, 0, rax);
-  semiLikelyIfBlock<CC_NE>(a, [&]{
+  semiLikelyIfBlock(CC_NE, a, [&]{
     // Prologues are not really sites for function entry yet; we can get
     // here via an optimistic bindCall. Check that the func is as expected.
 
@@ -2590,15 +2590,11 @@ TranslatorX64::emitBindJmp(const SrcKey& dest) {
 
 void
 TranslatorX64::emitStringCheck(X64Assembler& _a,
-                               PhysReg base, int offset, PhysReg tmp) {
+                               PhysReg base, int offset) {
   // Treat KindOfString and KindOfStaticString identically; they
   // are bitwise identical. This is a port of our IS_STRING_TYPE
   // macro to assembly, and will have to change in sync with it.
-  static_assert(IS_STRING_TYPE(7) && IS_STRING_TYPE(6),
-                "Assembly version of IS_STRING_TYPE needs to be updated");
-  _a.   load_reg64_disp_reg32(base, offset, tmp);
-  _a.   and_imm32_reg32((signed char)(0xfe), tmp); // use 1-byte immediate
-  _a.   cmp_imm32_reg32(6, tmp);
+  _a.test_imm32_disp_reg32(KindOfStringBit, offset, base);
 }
 
 void
@@ -2626,21 +2622,8 @@ TranslatorX64::emitCheckUnboxedCounted(X64Assembler& a,
 void
 TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
                              PhysReg base, int offset,
-                             SrcRec* fail,
-                             PhysReg tmp/*= InvalidReg*/) {
+                             SrcRec* fail) {
   offset += TVOFF(m_type);
-  if (IS_STRING_TYPE(dt)) {
-    LazyScratchReg scr(m_regMap);
-    if (tmp == InvalidReg) {
-      scr.alloc();
-      tmp = *scr;
-    }
-    emitStringCheck(_a, base, offset, tmp);
-    if (fail) {
-      emitFallbackJmp(*fail);
-    }
-    return;
-  }
   switch (dt) {
     case KindOfAny:
       break;
@@ -2651,6 +2634,13 @@ TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
     case KindOfUnboxedCounted:
       ASSERT(fail);
       emitCheckUnboxedCounted(_a, base, offset, *fail);
+      break;
+    case BitwiseKindOfString:
+    case KindOfStaticString:
+      emitStringCheck(_a, base, offset);
+      if (fail) {
+        emitFallbackJmp(*fail, CC_Z);
+      }
       break;
     default:
       ASSERT(IS_REAL_TYPE(dt));
@@ -2695,7 +2685,7 @@ TranslatorX64::checkType(X64Assembler& a,
                               base);
     emitFallbackJmp(fail);
   } else {
-    emitTypeCheck(a, rtt.typeCheckValue(), base, disp, &fail, rax);
+    emitTypeCheck(a, rtt.typeCheckValue(), base, disp, &fail);
   }
 }
 
@@ -5284,7 +5274,7 @@ TranslatorX64::translateCns(const Tracelet& t,
         // could theoretically keep going here since that's the type
         // of an undefined constant expression, but it should be rare
         // enough that it's not worth the complexity.
-        UnlikelyIfBlock<CC_Z> ifZero(a, astubs);
+        UnlikelyIfBlock ifZero(CC_Z, a, astubs);
         Stats::emitInc(astubs, Stats::Tx64_CnsFast, -1);
         emitSideExit(astubs, i, false);
       }
@@ -5311,7 +5301,7 @@ TranslatorX64::translateCns(const Tracelet& t,
     // It's tempting to dedup these, but not obvious we really can;
     // at least stackDest and tmp are specific to the translation
     // context.
-    UnlikelyIfBlock<CC_Z> ifb(a, astubs, &astubsRet);
+    UnlikelyIfBlock ifb(CC_Z, a, astubs, &astubsRet);
     EMIT_CALL(astubs, undefCns, IMM((uintptr_t)name));
     recordReentrantStubCall(i);
     m_regMap.invalidate(i.outStack->location);
@@ -5413,7 +5403,7 @@ TranslatorX64::translateClsCnsD(const Tracelet& t,
   a.lea_reg64_disp_reg64(rVmTl, ch, *cns);
   a.cmp_imm32_disp_reg32(0, TVOFF(m_type), *cns);
   {
-    UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+    UnlikelyIfBlock ifNull(CC_Z, a, astubs);
 
     if (false) { // typecheck
       TypedValue* tv = NULL;
@@ -5754,10 +5744,9 @@ TranslatorX64::translateCastString(const Tracelet& t,
     PhysReg base;
     int disp;
     locToRegDisp(i.outStack->location, &base, &disp);
-    ScratchReg scratch(m_regMap);
-    emitStringCheck(a, base, disp + TVOFF(m_type), *scratch);
+    emitStringCheck(a, base, disp + TVOFF(m_type));
     {
-      UnlikelyIfBlock<CC_NZ> ifNotString(a, astubs);
+      UnlikelyIfBlock ifNotString(CC_Z, a, astubs);
       EMIT_CALL(astubs, toStringError, IMM(0));
       recordReentrantStubCall(i);
     }
@@ -5838,7 +5827,7 @@ TranslatorX64::translateJmp(const Tracelet& t,
     } else {
       emitTestSurpriseFlags();
       {
-        UnlikelyIfBlock<CC_NZ> ifSurprise(a, astubs);
+        UnlikelyIfBlock ifSurprise(CC_NZ, a, astubs);
         astubs.call((TCA)&EventHook::CheckSurprise);
         recordStubCall(i);
       }
@@ -6234,7 +6223,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
       a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rTmp);
       a.    test_reg64_reg64(*rTmp, *rTmp);
       {
-        UnlikelyIfBlock<CC_NZ> varEnvCheck(a, astubs, mayUseVVRet.get());
+        UnlikelyIfBlock varEnvCheck(CC_NZ, a, astubs, mayUseVVRet.get());
 
         m_regMap.cleanAll();
         if (i.grouped) {
@@ -6289,7 +6278,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
         FreezeRegs ice(m_regMap);
         {
           // tests for Not Zero and Not Carry
-          UnlikelyIfBlock<CC_NBE> ifRealThis(a, astubs);
+          UnlikelyIfBlock ifRealThis(CC_NBE, a, astubs);
           astubs.    shl_imm32_reg64(1, *rTmp);
           emitDecRef(astubs, i, *rTmp, KindOfObject);
         }
@@ -6302,7 +6291,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
 
     emitTestSurpriseFlags();
     {
-      UnlikelyIfBlock<CC_NZ> ifTracer(a, astubs);
+      UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
       if (i.grouped) {
         ScratchReg s(m_regMap);
         emitReturnVal(astubs, i,
@@ -6541,7 +6530,7 @@ TranslatorX64::emitKnownClassCheck(const NormalizedInstruction& i,
       a.          test_reg64_reg64(reg, reg);
     }
     {
-      UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+      UnlikelyIfBlock ifNull(CC_Z, a, astubs);
       ScratchReg clsPtr(m_regMap);
       astubs.   lea_reg64_disp_reg64(rVmTl, ch, *clsPtr);
       if (false) { // typecheck
@@ -6789,7 +6778,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
     a.  test_reg64_reg64(*rScratch, *rScratch);
     DiamondReturn astubsRet;
     {
-      UnlikelyIfBlock<CC_NZ> ifVarEnv(a, astubs, &astubsRet);
+      UnlikelyIfBlock ifVarEnv(CC_NZ, a, astubs, &astubsRet);
       Stats::emitInc(astubs, Stats::Tx64_ContCreateSlow);
       emitCallFillCont(astubs, origFunc, genFunc);
     }
@@ -6849,7 +6838,7 @@ void TranslatorX64::translateUnpackCont(const Tracelet& t,
   a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rScratch);
   a.    test_reg64_reg64(*rScratch, *rScratch);
   {
-    UnlikelyIfBlock<CC_NZ> hasVars(a, astubs);
+    UnlikelyIfBlock hasVars(CC_NZ, a, astubs);
     Stats::emitInc(astubs, Stats::Tx64_ContUnpackSlow);
     if (false) {
       ActRec* fp = NULL;
@@ -6891,7 +6880,7 @@ void TranslatorX64::translatePackCont(const Tracelet& t,
   {
     // TODO: Task #1132976: We can probably prove that this is impossible in
     // most cases using information from hphpc
-    UnlikelyIfBlock<CC_NZ> varEnv(a, astubs);
+    UnlikelyIfBlock varEnv(CC_NZ, a, astubs);
     Stats::emitInc(astubs, Stats::Tx64_ContPackSlow);
     emitCallPack(astubs, i);
   }
@@ -6921,7 +6910,7 @@ void TranslatorX64::emitContRaiseCheck(X64Assembler& a,
   PhysReg rCont = getReg(i.inputs[contIdx]->location);
   a.    test_imm8_disp_reg8(0x1, CONTOFF(m_should_throw), rCont);
   {
-    UnlikelyIfBlock<CC_NZ> ifThrow(a, astubs);
+    UnlikelyIfBlock ifThrow(CC_NZ, a, astubs);
     if (false) {
       c_Continuation* c = NULL;
       continuationRaiseHelper(c);
@@ -7010,7 +6999,7 @@ void TranslatorX64::emitContPreNext(const NormalizedInstruction& i,
   // Check m_done and m_running at the same time
   a.    test_imm32_disp_reg32(0x0101, doneOffset, *rCont);
   {
-    UnlikelyIfBlock<CC_NZ> ifThrow(a, astubs);
+    UnlikelyIfBlock ifThrow(CC_NZ, a, astubs);
     EMIT_CALL(astubs, contPreNextThrowHelper, R(*rCont));
     recordReentrantStubCall(i);
     translator_not_reached(astubs);
@@ -7042,7 +7031,7 @@ void TranslatorX64::emitContStartedCheck(const NormalizedInstruction& i,
   // if (m_index < 0)
   a.    cmp_imm64_disp_reg64(0, CONTOFF(m_index), *rCont);
   {
-    UnlikelyIfBlock<CC_L> whoops(a, astubs);
+    UnlikelyIfBlock whoops(CC_L, a, astubs);
     EMIT_CALL(astubs, contNextCheckThrowHelper, *rCont);
     recordReentrantStubCall(i);
     translator_not_reached(astubs);
@@ -7240,7 +7229,7 @@ void TranslatorX64::translateClassExistsImpl(const Tracelet& t,
       a.  load_reg64_disp_reg64(rVmTl, ch, *scratch);
       a.  test_reg64_reg64(*scratch, *scratch);
       if (autoload) {
-        UnlikelyIfBlock<CC_Z> ifNull(a, astubs, &astubsRet);
+        UnlikelyIfBlock ifNull(CC_Z, a, astubs, &astubsRet);
         if (false) {
           Class** c = NULL;
           UNUSED Class* ret = lookupKnownClass<true>(c, name, false);
@@ -7257,7 +7246,7 @@ void TranslatorX64::translateClassExistsImpl(const Tracelet& t,
         recordReentrantStubCall(i);
         emitMovRegReg(astubs, rax, *scratch);
       } else {
-        UnlikelyIfBlock<CC_Z> ifNull(a, astubs, &astubsRet);
+        UnlikelyIfBlock ifNull(CC_Z, a, astubs, &astubsRet);
         // This isn't really a traditional slow path, count as a hit
         Stats::emitInc(astubs, Stats::TgtCache_ClassExistsHit);
         // Provide flags so the check back in a fails
@@ -7353,7 +7342,7 @@ void TranslatorX64::emitStaticPropInlineLookup(const NormalizedInstruction& i,
 
   // Call the slow path.
   {
-    UnlikelyIfBlock<CC_Z> shucks(a, astubs);
+    UnlikelyIfBlock shucks(CC_Z, a, astubs);
 
     // Precondition for this lookup - we don't need to pass the preClass,
     // as we only translate in class lookups.
@@ -7554,7 +7543,7 @@ TranslatorX64::translateCGetG(const Tracelet& t,
   a.  test_reg64_reg64(rax, rax);
   DiamondReturn astubsRet;
   {
-    UnlikelyIfBlock<CC_Z> ifNotRax(a, astubs, &astubsRet);
+    UnlikelyIfBlock ifNotRax(CC_Z, a, astubs, &astubsRet);
     if (!i.inputs[0]->rtt.valueString()) {
       m_regMap.allocInputReg(i, 0);
       PhysReg reg = getReg(i.inputs[0]->location);
@@ -7693,7 +7682,7 @@ TranslatorX64::translateCheckTypeOp(const Tracelet& t,
         fuseBranchSync(t, ni);
         a.   test_imm8_disp_reg8(1, AROFF(m_this), rVmFp);
         if (ni.prev->imm[0].u_OA) {
-          UnlikelyIfBlock<CC_NZ> nullThis(a, astubs);
+          UnlikelyIfBlock nullThis(CC_NZ, a, astubs);
           EMIT_CALL(astubs, warnNullThis);
           recordReentrantStubCall(ni);
           nullThis.reconcileEarly();
@@ -7706,7 +7695,7 @@ TranslatorX64::translateCheckTypeOp(const Tracelet& t,
         a.   test_imm8_disp_reg8(1, AROFF(m_this), rVmFp);
         a.   setcc(ni.invertCond ? CC_Z : CC_NZ, res);
         if (ni.prev->imm[0].u_OA) {
-          UnlikelyIfBlock<CC_NZ> nullThis(a, astubs);
+          UnlikelyIfBlock nullThis(CC_NZ, a, astubs);
           EMIT_CALL(astubs, warnNullThis);
           recordReentrantStubCall(ni);
         }
@@ -8313,7 +8302,7 @@ TranslatorX64::translateFPushClsMethodD(const Tracelet& t,
     a.    load_reg64_disp_reg64(rVmTl, ch, *rFunc);
     a.    test_reg64_reg64(*rFunc, *rFunc);
     {
-      UnlikelyIfBlock<CC_Z> miss(a, astubs);
+      UnlikelyIfBlock miss(CC_Z, a, astubs);
       if (false) { // typecheck
         const UNUSED Func* f = StaticMethodCache::lookup(ch, np.second,
                                                          cls, meth);
@@ -8402,7 +8391,7 @@ TranslatorX64::translateFPushClsMethodF(const Tracelet& t,
     a.    load_reg64_disp_reg64(rVmTl, ch, *rFunc);
     a.    test_reg64_reg64(*rFunc, *rFunc);
     {
-      UnlikelyIfBlock<CC_Z> miss(a, astubs);
+      UnlikelyIfBlock miss(CC_Z, a, astubs);
       if (false) { // typecheck
         const UNUSED Func* f = StaticMethodFCache::lookup(ch, cls, name);
       }
@@ -8716,7 +8705,7 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
         Stats::emitInc(a, Stats::Tx64_NewInstancePropCheck);
         a.test_imm64_disp_reg64(-1, cls->propHandle(), rVmTl);
         {
-          UnlikelyIfBlock<CC_Z> ifZero(a, astubs);
+          UnlikelyIfBlock ifZero(CC_Z, a, astubs);
           Stats::emitInc(a, Stats::Tx64_NewInstancePropInit);
           EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initProps),
                      IMM(int64(cls)));
@@ -8727,7 +8716,7 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
         Stats::emitInc(a, Stats::Tx64_NewInstanceSPropCheck);
         a.test_imm64_disp_reg64(-1, cls->sPropHandle(), rVmTl);
         {
-          UnlikelyIfBlock<CC_Z> ifZero(a, astubs);
+          UnlikelyIfBlock ifZero(CC_Z, a, astubs);
           Stats::emitInc(a, Stats::Tx64_NewInstanceSPropInit);
           EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initSProps),
                      IMM(int64(cls)));
@@ -8826,7 +8815,7 @@ TranslatorX64::emitThisCheck(const NormalizedInstruction& i,
 
   a.  test_imm8_reg8(1, reg);
   {
-    UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs);
+    UnlikelyIfBlock ifThisNull(CC_NZ, a, astubs);
     // if_null:
     EMIT_CALL(astubs, fatalNullThis);
     recordReentrantStubCall(i);
@@ -8874,7 +8863,7 @@ TranslatorX64::translateBareThis(const Tracelet &t,
   a.   test_imm8_reg8(1, out);
   DiamondReturn astubsRet;
   {
-    UnlikelyIfBlock<CC_NZ> ifThisNull(a, astubs, &astubsRet);
+    UnlikelyIfBlock ifThisNull(CC_NZ, a, astubs, &astubsRet);
     astubs. store_imm32_disp_reg(KindOfNull, TVOFF(m_type) + offset, base);
     if (i.imm[0].u_OA) {
       EMIT_CALL(astubs, warnNullThis);
@@ -8994,7 +8983,7 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
     a.load_reg64_disp_reg64(rVmTl, funcCacheOff, *scratch);
     a.test_reg64_reg64(*scratch, *scratch);
     {
-      UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+      UnlikelyIfBlock ifNull(CC_Z, a, astubs);
 
       if (false) { // typecheck
         StringData sd("foo");
@@ -9199,7 +9188,7 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
     if (!TargetCache::isPersistentHandle(ch)) {
       a.          cmp_imm32_disp_reg32(0, ch, rVmTl);
       {
-        UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+        UnlikelyIfBlock ifNull(CC_Z, a, astubs);
         if (false) {
           checkClass<false>(0, NULL, NULL);
           checkClass<true>(0, NULL, NULL);
@@ -9225,7 +9214,7 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
       emitVStackStoreImm(a, ni, 0, clsOff, sz::qword, &m_regMap);
       a.          test_reg64_reg64(*funcReg, *funcReg);
       {
-        UnlikelyIfBlock<CC_Z> ifNull(a, astubs);
+        UnlikelyIfBlock ifNull(CC_Z, a, astubs);
         emitVStackStoreImm(astubs, ni,
                            uintptr_t(SystemLib::GetNullFunction()), funcOff);
         if (safe) {
@@ -9492,7 +9481,7 @@ TranslatorX64::translateStaticLocInit(const Tracelet& t,
     a.  load_reg64_disp_reg64(rVmTl, ch, *output);
     a.  test_reg64_reg64(*output, *output);
     {
-      UnlikelyIfBlock<CC_Z> fooey(a, astubs);
+      UnlikelyIfBlock fooey(CC_Z, a, astubs);
       emitCallStaticLocHelper(astubs, i, output, ch);
     }
   } else {
@@ -9696,7 +9685,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
         }
         a.  test_imm8_reg8(1, srcReg);
         {
-          UnlikelyIfBlock<CC_NZ> ifNull(a, astubs, retFromNullThis.get());
+          UnlikelyIfBlock ifNull(CC_NZ, a, astubs, retFromNullThis.get());
           EMIT_RCALL(astubs, i, warnNullThis);
           if (i.changesPC) {
             fuseBranchAfterStaticBool(astubs, t, i, false);
@@ -9878,7 +9867,7 @@ TranslatorX64::emitInstanceCheck(const Tracelet& t,
       a.  test_imm8_disp_reg8((int64)(int8)mask, offset, *inCls);
       if (verifying) {
         {
-          UnlikelyIfBlock<CC_Z> fail(a, astubs);
+          UnlikelyIfBlock fail(CC_Z, a, astubs);
           EMIT_RCALL(astubs, i, VerifyParamTypeFail, IMM(i.imm[0].u_IVA));
         }
         a.patchJcc8(equalJe, a.code.frontier);
@@ -10209,6 +10198,7 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
                                  TCA &sideExit) {
   bool isFirstInstr = (&i == t.m_instrStream.first);
   bool regsClean = !m_regMap.hasDirtyRegs(i.stackOff);
+  ConditionCode cc = IS_STRING_TYPE(type) ? CC_Z : CC_NZ;
   emitTypeCheck(a, type, reg, disp);
   if (isFirstInstr) {
     SrcRec& srcRec = *getSrcRec(t.m_sk);
@@ -10218,7 +10208,7 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
     // back to this check!
     //
     // We need to record this as a fallback branch.
-    emitFallbackJmp(srcRec);
+    emitFallbackJmp(srcRec, cc);
   } else if (!sideExit || regsClean) {
     if (regsClean) {
       // If we have no dirty regs and no stack offset at our destination, we
@@ -10227,20 +10217,20 @@ void TranslatorX64::emitOneGuard(const Tracelet& t,
       // in that case.
       if (i.stackOff == 0 && !lookupTranslation(i.source)) {
         Stats::emitInc(a, Stats::Tx64_OneGuardShort);
-        emitBindJcc(a, CC_NE, i.source, REQ_BIND_SIDE_EXIT);
+        emitBindJcc(a, cc, i.source, REQ_BIND_SIDE_EXIT);
       } else {
         Stats::emitInc(a, Stats::Tx64_OneGuardLong);
-        semiLikelyIfBlock<CC_NZ>(a, [&]{
-          emitSideExit(a, i, false /*next*/);
+        semiLikelyIfBlock(cc, a, [&]{
+            emitSideExit(a, i, false /*next*/);
         });
       }
     } else {
-      UnlikelyIfBlock<CC_NZ> ifFail(a, astubs);
+      UnlikelyIfBlock ifFail(cc, a, astubs);
       sideExit = astubs.code.frontier;
       emitSideExit(astubs, i, false /*next*/);
     }
   } else {
-    a.    jnz(sideExit);
+    a.jcc(cc, sideExit);
   }
 }
 
@@ -10374,9 +10364,11 @@ TranslatorX64::emitPredictionGuards(const NormalizedInstruction& i) {
   TRACE(1, "PREDGUARD: %p dt %d offset %d voffset %lld\n",
         a.code.frontier, i.outStack->outerType(), disp,
         i.outStack->location.offset);
-  emitTypeCheck(a, i.outStack->outerType(), rVmSp, disp);
+  DataType type = i.outStack->outerType();
+  emitTypeCheck(a, type, rVmSp, disp);
+  ConditionCode cc = IS_STRING_TYPE(type) ? CC_Z : CC_NZ;
   {
-    UnlikelyIfBlock<CC_NZ> branchToSideExit(a, astubs);
+    UnlikelyIfBlock branchToSideExit(cc, a, astubs);
     Stats::emitInc(astubs, Stats::TC_TypePredMiss);
     emitSideExit(astubs, i, true);
   }
@@ -10459,9 +10451,11 @@ TranslatorX64::translateInstr(const Tracelet& t,
         PhysReg base;
         int disp;
         locToRegDisp(dl->location, &base, &disp);
-        emitTypeCheck(a, dl->rtt.typeCheckValue(), base, disp);
+        DataType type = dl->rtt.typeCheckValue();
+        emitTypeCheck(a, type, base, disp);
+        ConditionCode cc = IS_STRING_TYPE(type) ? CC_Z : CC_NZ;
         {
-          UnlikelyIfBlock<CC_NZ> typePredFailed(a, astubs);
+          UnlikelyIfBlock typePredFailed(cc, a, astubs);
           EMIT_CALL(astubs, failedTypePred);
           recordReentrantStubCall(i);
         }

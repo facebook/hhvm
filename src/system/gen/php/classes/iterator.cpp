@@ -1796,7 +1796,7 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svi86af027e, 16LL),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x36439C61,0,0,16,65,9,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ss4152806c, "\000AppendIterator\000iterators") },
+  {0x36439C61,0,0,16,65,17,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ss4152806c, "\000AppendIterator\000iterators") },
 
   {0x41A4CD6D,0,1,0,100,3,0,&NAMSTR(s_sys_ss41a4cd6d, "ARRAY_AS_PROPS") },
   {0x200EBD6E,-1,2,0,100,3,0,&NAMSTR(s_sys_ss200ebd6e, "STD_PROP_LIST") },

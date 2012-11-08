@@ -1134,8 +1134,9 @@ Variant ClassPropTable::getInitVal(const ClassPropTableEntry *prop) const {
     }
 
     case 7:
-      return ClassPropTableEntry::GetVariant(DataType((id >> 4) & 15),
-                                             getInitP(id >> 32));
+      return
+        ClassPropTableEntry::GetVariant(DataType((id >> 4) & kDataTypeMask),
+                                        getInitP(id >> 32));
   }
   throw FatalErrorException("Failed to get init val");
 }

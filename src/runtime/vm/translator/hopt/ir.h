@@ -472,22 +472,41 @@ public:
 
   // translates a compiler Type::Type to a HPHP::DataType
   static inline DataType toDataType(Tag type) {
-    if (type == Type::ClassRef) {
-      return KindOfClass;
+    switch (type) {
+      case Type::None      : return KindOfInvalid;
+      case Type::Uninit    : return KindOfUninit;
+      case Type::Null      : return KindOfNull;
+      case Type::Bool      : return KindOfBoolean;
+      case Type::Int       : return KindOfInt64;
+      case Type::Dbl       : return KindOfDouble;
+      case Type::StaticStr : return KindOfStaticString;
+      case Type::Str       : return KindOfString;
+      case Type::Arr       : return KindOfArray;
+      case Type::Obj       : return KindOfObject;
+      case Type::ClassRef  : return KindOfClass;
+      default: {
+        ASSERT(isBoxed(type));
+        return KindOfRef;
+      }
     }
-    if (isBoxed(type)) {
-      return KindOfRef;
-    }
-    ASSERT(type < Type::Cell);
-    return (DataType)(type - 1);
   }
 
   static inline Tag fromDataType(DataType outerType, DataType innerType) {
     switch (outerType) {
-      case KindOfClass   : return Type::ClassRef;
-      case KindOfRef     : return getBoxedType(fromDataType(innerType,
-                                                            KindOfInvalid));
-      default            : return (Tag)(outerType + 1);
+      case KindOfInvalid      : return Type::None;
+      case KindOfUninit       : return Type::Uninit;
+      case KindOfNull         : return Type::Null;
+      case KindOfBoolean      : return Type::Bool;
+      case KindOfInt64        : return Type::Int;
+      case KindOfDouble       : return Type::Dbl;
+      case KindOfStaticString : return Type::StaticStr;
+      case KindOfString       : return Type::Str;
+      case KindOfArray        : return Type::Arr;
+      case KindOfObject       : return Type::Obj;
+      case KindOfClass        : return Type::ClassRef;
+      case KindOfRef          :
+        return getBoxedType(fromDataType(innerType, KindOfInvalid));
+      default                 : not_reached();
     }
   }
 

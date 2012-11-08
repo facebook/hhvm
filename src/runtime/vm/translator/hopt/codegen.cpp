@@ -3423,17 +3423,15 @@ Address CodeGenerator::cgLoad(Type::Tag type,
     // generate a guard for the type
     // see Translator.cpp checkType
     DataType dataType = Type::toDataType(type);
+    ConditionCode cc;
     if (IS_STRING_TYPE(dataType)) {
-      // Note: this assumes String and StaticString are types 6 and 7
-      m_as.load_reg64_disp_reg32(base,
-                                 off + TVOFF(m_type),
-                                 LinearScan::rScratch);
-      m_as.and_imm32_reg32((signed char)(0xfe), LinearScan::rScratch);
-      m_as.cmp_imm32_reg32(6, LinearScan::rScratch);
+      m_as.test_imm32_disp_reg32(KindOfStringBit, off + TVOFF(m_type), base);
+      cc = CC_Z;
     } else {
       m_as.cmp_imm32_disp_reg32(dataType, off + TVOFF(m_type), base);
+      cc = CC_NE;
     }
-    emitFwdJcc(CC_NE, label);
+    emitFwdJcc(cc, label);
   }
   if (type == Type::Uninit || type == Type::Null) {
     return start; // these are constants
@@ -3582,16 +3580,15 @@ Address CodeGenerator::cgGuardType(IRInstruction* inst) {
 
   // compare srcTypeReg with type
   DataType dataType = Type::toDataType(type);
+  ConditionCode cc;
   if (IS_STRING_TYPE(dataType)) {
-    // Note: this assumes String and StaticString are types 6 and 7
-    // TODO: Delete this mov if srcTypeReg is not live out
-    m_as.mov_reg64_reg64(srcTypeReg, LinearScan::rScratch);
-    m_as.and_imm32_reg32((signed char)(0xfe), LinearScan::rScratch);
-    m_as.cmp_imm32_reg32(6, LinearScan::rScratch);
+    m_as.test_imm32_reg32(KindOfStringBit, srcTypeReg);
+    cc = CC_Z;
   } else {
     m_as.cmp_imm32_reg32(dataType, srcTypeReg);
+    cc = CC_NE;
   }
-  emitFwdJcc(CC_NE, label);
+  emitFwdJcc(cc, label);
 
   if (srcValueReg != dstReg) {
     m_as.mov_reg64_reg64(srcValueReg, dstReg);

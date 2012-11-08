@@ -1072,7 +1072,7 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
     emitTypeCheck(a, KindOfObject, *rBase, 0);
     {
       nonObjectRet.reset(new DiamondReturn());
-      UnlikelyIfBlock<CC_NZ> ifNotObject(a, astubs, nonObjectRet.get());
+      UnlikelyIfBlock ifNotObject(CC_NZ, a, astubs, nonObjectRet.get());
       if (doWarn) {
         EMIT_RCALL(astubs, *m_curNI, raisePropertyOnNonObject);
       }
@@ -1116,7 +1116,7 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
   if (doWarn || doDefine) {
     a.  cmp_imm32_disp_reg32(KindOfUninit, TVOFF(m_type), *rScratch);
     {
-      UnlikelyIfBlock<CC_Z> ifUninit(a, astubs);
+      UnlikelyIfBlock ifUninit(CC_Z, a, astubs);
       if (doWarn) {
         EMIT_RCALL(
           astubs, *m_curNI, raiseUndefProp,
@@ -3038,7 +3038,7 @@ void TranslatorX64::translateCGetM_GE(const Tracelet& t,
   a.  test_reg64_reg64(rax, rax);
   DiamondReturn noGlobalRet;
   {
-    UnlikelyIfBlock<CC_Z> ifNoGlobal(a, astubs, &noGlobalRet);
+    UnlikelyIfBlock ifNoGlobal(CC_Z, a, astubs, &noGlobalRet);
     if (const StringData* name = i.inputs[nameIdx]->rtt.valueString()) {
       EMIT_CALL(astubs, raiseUndefVariable, IMM((uint64_t)name));
     } else {
@@ -3062,7 +3062,7 @@ void TranslatorX64::translateCGetM_GE(const Tracelet& t,
   a.    cmp_imm32_disp_reg32(KindOfArray, TVOFF(m_type), rax);
   DiamondReturn notArrayRet;
   {
-    UnlikelyIfBlock<CC_NZ> ifNotArray(a, astubs, &notArrayRet);
+    UnlikelyIfBlock ifNotArray(CC_NZ, a, astubs, &notArrayRet);
     ASSERT(key.isString() || key.isInt());
     void* fptr =
       key.isString() ? (void*)non_array_getm_s : (void*)non_array_getm_i;

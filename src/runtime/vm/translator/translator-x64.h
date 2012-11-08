@@ -92,7 +92,7 @@ class TranslatorX64 : public Translator
   template<int, int, int> friend class CondBlock;
   template<ConditionCode, typename smasher> friend class JccBlock;
   template<int> friend class IfElseBlock;
-  template<ConditionCode> friend class UnlikelyIfBlock;
+  friend class UnlikelyIfBlock;
   typedef HPHP::DataType DataType;
 
   typedef tbb::concurrent_hash_map<TCA, TCA> SignalStubMap;
@@ -766,11 +766,10 @@ private:
   bool irTranslateTracelet(const Tracelet& t,
                            const TCA       start,
                            const TCA       stubStart);
-  void emitStringCheck(Asm& _a, PhysReg base, int offset, PhysReg tmp);
+  void emitStringCheck(Asm& _a, PhysReg base, int offset);
   void emitTypeCheck(Asm& _a, DataType dt,
                      PhysReg base, int offset,
-                     SrcRec* fail = NULL,
-                     PhysReg tmp = InvalidReg);
+                     SrcRec* fail = NULL);
   void irAssertType(const Location& l, const RuntimeType& rtt);
   void checkType(Asm&, const Location& l, const RuntimeType& rtt,
     SrcRec& fail);

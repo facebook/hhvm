@@ -6242,7 +6242,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
        * OpBareThis, since we dont have to do any refCounting
        */
       ScratchReg s(m_regMap);
-      emitReturnVal(astubs, i,
+      emitReturnVal(a, i,
                     rVmSp, retvalSrcBase, rVmFp, AROFF(m_this), *s);
     }
     // If we are doing the generic return flow, we emit a call to

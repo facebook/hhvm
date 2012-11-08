@@ -2595,6 +2595,10 @@ void ClassScope::outputCPPDef(CodeGenerator &cg) {
                 name.c_str(),
                 Option::ClassStaticsCallbackPrefix,
                 getId().c_str());
+      cg_indentBegin("if (g->CDEC(%s)) {\n", name.c_str());
+      cg_printf("raise_error(\"Class already declared: %s\");\n",
+                getOriginalName().c_str());
+      cg_indentEnd("}\n");
     }
     cg_printf("g->CDEC(%s) = true;\n", name.c_str());
   }

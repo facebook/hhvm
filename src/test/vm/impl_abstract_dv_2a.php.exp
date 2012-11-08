@@ -1,1 +1,1 @@
-HipHop Fatal error: Declaration of C::foo() must be compatible with that of A::foo() in src/test/vm/impl_abstract_dv_2a.php on line 5
+HipHop Fatal error: Declaration of C::foo() must be compatible with that of A::foo() in src/test/vm/impl_abstract_dv_2a.php on line 7

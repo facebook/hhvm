@@ -1,0 +1,2 @@
+string(5) "hello"
+HipHop Fatal error: Class already declared: X in src/test/vm/redeclared_class2.php on line 3

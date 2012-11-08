@@ -5662,7 +5662,8 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
       }
     }
     if (hoistable == PreClass::NotHoistable) {
-      hoistable = PreClass::AlwaysHoistable;
+      hoistable = attr & AttrUnique ?
+        PreClass::AlwaysHoistable : PreClass::MaybeHoistable;
       m_hoistables.insert(cNode->getOriginalName());
     }
   }

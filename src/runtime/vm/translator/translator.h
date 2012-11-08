@@ -823,6 +823,9 @@ public:
   virtual TCA getRetFromInterpretedFrame() = 0;
   virtual void defineCns(StringData* name) = 0;
   virtual std::string getUsage() = 0;
+  virtual size_t getCodeSize() = 0;
+  virtual size_t getStubSize() = 0;
+  virtual size_t getTargetCacheSize() = 0;
   virtual bool dumpTC(bool ignoreLease = false) = 0;
   virtual bool dumpTCCode(const char *filename) = 0;
   virtual bool dumpTCData() = 0;

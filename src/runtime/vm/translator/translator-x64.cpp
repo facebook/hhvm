@@ -11062,6 +11062,18 @@ void TranslatorX64::defineCns(StringData* name) {
   TargetCache::fillConstant(name);
 }
 
+size_t TranslatorX64::getCodeSize() {
+  return a.code.frontier - a.code.base;
+}
+
+size_t TranslatorX64::getStubSize() {
+  return astubs.code.frontier - astubs.code.base;
+}
+
+size_t TranslatorX64::getTargetCacheSize() {
+  return TargetCache::s_frontier;
+}
+
 std::string TranslatorX64::getUsage() {
   std::string usage;
   size_t aUsage = a.code.frontier - a.code.base;

@@ -961,7 +961,10 @@ public:
   void defineCns(StringData* name);
 
   // Returns a string with cache usage information
-  std::string getUsage();
+  virtual std::string getUsage();
+  virtual size_t getCodeSize();
+  virtual size_t getStubSize();
+  virtual size_t getTargetCacheSize();
 
   // true iff calling thread is sole writer.
   static bool canWrite() {

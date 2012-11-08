@@ -133,6 +133,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/check-load:      how many threads are actively handling requests\n"
         "/check-queued:    how many http requests are queued waiting to be\n"
         "                  handled\n"
+        "/check-health:    return json containing basic load/usage stats\n"
         "/check-ev:        how many http requests are active by libevent\n"
         "/check-pl-load:   how many pagelet threads are actively handling\n"
         "                  requests\n"
@@ -572,6 +573,27 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
   if (cmd == "check-queued") {
     int count = HttpServer::Server->getPageServer()->getQueuedJobs();
     transport->sendString(lexical_cast<string>(count));
+    return true;
+  }
+  if (cmd == "check-health") {
+    std::stringstream out;
+    bool first = true;
+    out << "{" << endl;
+    auto appendStat = [&](const char* name, int64 value) {
+       out << (!first ? "," : "") << "  \"" << name << "\":" << value << endl;
+       first = false;
+    };
+    ServerPtr server = HttpServer::Server->getPageServer();
+    appendStat("load", server->getActiveWorker());
+    appendStat("queued", server->getQueuedJobs());
+    if (hhvm) {
+      VM::Transl::Translator* tx = VM::Transl::Translator::Get();
+      appendStat("tc-size", tx->getCodeSize());
+      appendStat("tc-stubsize", tx->getStubSize());
+      appendStat("targetcache", tx->getTargetCacheSize());
+    }
+    out << "}" << endl;
+    transport->sendString(out.str());
     return true;
   }
   if (cmd == "check-pl-load") {

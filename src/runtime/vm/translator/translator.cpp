@@ -1816,7 +1816,8 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 void Translator::getInputs(Tracelet& t,
                            NormalizedInstruction* ni,
                            int& currentStackOffset,
-                           InputInfos& inputs) { // out
+                           InputInfos& inputs,
+                           const TraceletContext& tas) {
 #ifdef USE_TRACE
   const SrcKey& sk = ni->source;
 #endif
@@ -1895,15 +1896,32 @@ void Translator::getInputs(Tracelet& t,
     if (input & DontGuardLocal) inputs.back().dontGuard = true;
     if (input & DontBreakLocal) inputs.back().dontBreak = true;
   }
-  if ((input & AllLocals) && freeLocalsInline()) {
+
+  const bool wantInlineReturn = [&] {
+    auto localCount = curFunc()->numLocals();
+    if (localCount <= kFewLocals) {
+      return true;
+    }
+    int numRefCounted = 0;
+    for (int i = 0; i < localCount; ++i) {
+      numRefCounted +=
+        tas.currentType(Location(Location::Local, i)).isRefCounted();
+    }
+    return numRefCounted <= kMaxInlineReturnDecRefs;
+  }();
+
+  if ((input & AllLocals) && wantInlineReturn) {
+    ni->inlineReturn = true;
     ni->ignoreInnerType = true;
     int n = curFunc()->numLocals();
     for (int i = 0; i < n; ++i) {
       inputs.push_back(Location(Location::Local, i));
     }
   }
+
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", currentStackOffset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());
+
   if (inputs.size() &&
       ((input & DontGuardAny) || dontGuardAnyInputs(ni->op()))) {
     for (int i = inputs.size(); i--; ) {
@@ -2321,6 +2339,17 @@ bool DynLocation::canBeAliased() const {
   return isValue() &&
     ((Translator::liveFrameIsPseudoMain() && isLocal()) ||
      isVariant());
+}
+
+// Test the type of a location without recording it as a read yet.
+RuntimeType TraceletContext::currentType(const Location& l) const {
+  DynLocation* dl;
+  if (!mapGet(m_currentMap, l, &dl)) {
+    ASSERT(!mapContains(m_deletedSet, l));
+    ASSERT(!mapContains(m_changeSet, l));
+    return Translator::liveType(l, *curUnit());
+  }
+  return dl->rtt;
 }
 
 DynLocation* TraceletContext::recordRead(const InputInfo& ii,
@@ -2789,7 +2818,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     // encounter an input that cannot be computed.
     try {
       InputInfos inputInfos;
-      getInputs(t, ni, stackFrameOffset, inputInfos);
+      getInputs(t, ni, stackFrameOffset, inputInfos, tas);
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
       if (noOp) {
         if (RuntimeOption::EvalJitUseIR) {
@@ -3344,10 +3373,6 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
     }
   }
   return func;
-}
-
-bool freeLocalsInline() {
-  return curFunc()->numLocals() <= Translator::kFewLocals;
 }
 
 } } }

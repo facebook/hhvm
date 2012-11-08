@@ -538,48 +538,22 @@ TranslatorX64::irTranslateSwitch(const Tracelet& t,
   HHIR_UNIMPLEMENTED(Switch);
 }
 
-// translateRetC --
-//
-//   Return to caller with the current activation record replaced with the
-//   top-of-stack return value. Call with outputs sync'ed, so the code
-//   we're emmitting runs "in between" basic blocks.
+/*
+ * translateRetC --
+ *
+ *   Return to caller with the current activation record replaced with the
+ *   top-of-stack return value.
+ */
 void
 TranslatorX64::irTranslateRetC(const Tracelet& t,
-                             const NormalizedInstruction& i) {
-  /**
-   * This method chooses one of two ways to generate machine code for RetC
-   * depending on whether we are generating a specialized return (where we
-   * free the locals inline when possible) or a generic return (where we call
-   * a helper function to free locals).
-   *
-   * For the specialized return, we emit the following flow:
-   *
-   *   Check if varenv is NULL
-   *   If it's not NULL, branch to label 2
-   *   Free each local variable
-   * 1:
-   *   Teleport the return value to appropriate memory location
-   *   Restore the old values for rVmFp and rVmSp, and
-   *   unconditionally transfer control back to the caller
-   * 2:
-   *   Call the frame_free_locals helper
-   *   Jump to label 1
-   *
-   * For a generic return, we emit the following flow:
-   *
-   *   Call the frame_free_locals helper
-   *   Teleport the return value to appropriate memory location
-   *   Restore the old values for rVmFp and rVmSp, and
-   *   unconditionally transfer control back to the caller
-   */
-
-  HHIR_EMIT(RetC);
+                               const NormalizedInstruction& i) {
+  HHIR_EMIT(RetC, i.inlineReturn);
 }
 
 void
 TranslatorX64::irTranslateRetV(const Tracelet& t,
-                             const NormalizedInstruction& i) {
-  HHIR_EMIT(RetV);
+                               const NormalizedInstruction& i) {
+  HHIR_EMIT(RetV, i.inlineReturn);
 }
 
 void

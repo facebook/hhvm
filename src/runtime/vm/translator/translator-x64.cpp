@@ -6211,7 +6211,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
   int retvalDestDisp = cellsToBytes(1 + nLocalCells - stackAdjustment) +
     AROFF(m_r);
 
-  if (freeLocalsInline()) {
+  if (m_curNI->inlineReturn) {
     SKTRACE(2, i.source, "emitting specialized inline return\n");
 
     ScratchReg rTmp(m_regMap);
@@ -6362,7 +6362,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
   RegSet scratchRegs = kScratchCrossTraceRegs;
   DumbScratchReg rRetAddr(scratchRegs);
 
-  if (!freeLocalsInline()) {
+  if (!m_curNI->inlineReturn) {
     // Compensate for rVmSp already being adjusted by the helper in
     // emitFrameRelease.
     retvalSrcBase -= sizeof(ActRec) +
@@ -6391,7 +6391,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
    * Stack pointer has to skip over all the locals as well as the
    * activation record.
    */
-  if (freeLocalsInline()) {
+  if (m_curNI->inlineReturn) {
     // If we're not freeing inline, the helper took care of this.
     a.  lea_reg64_disp_reg64(rVmFp, AROFF(m_r), rVmSp);
   }
@@ -6507,6 +6507,7 @@ TranslatorX64::emitFrameRelease(X64Assembler& a,
                                 bool noThis /*= false*/) {
   // Custom calling convention: the argument is in r15.
   int numLocals = curFunc()->numLocals();
+  ASSERT(numLocals > kFewLocals);
   emitImmReg(a, numLocals - kFewLocals, r15);
   if (noThis) {
     emitCall(a, m_freeLocalsNoThisHelper);
@@ -10809,8 +10810,8 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
  * Defines functions called by emitFrameRelease.  Tightly coupled with
  * translateRetC.
  *
- * The number of locals must be > kFewLocals.  NumLocals - kFewLocals
- * is passed in r15.
+ * The number of locals must be greater than kFewLocals.  The
+ * difference between NumLocals and kFewLocals is passed in r15.
  */
 void TranslatorX64::emitFreeLocalsHelpers() {
   auto const rNumExtraLocals = r15;
@@ -10852,9 +10853,10 @@ asm_label(a, freeLocals);
   auto const rZero = r15;
   auto const rFinished = r13;
   static_assert(1 << 4 == sizeof(TypedValue), "");
-  a.    lea_reg64_disp_reg64(rVmFp,
-                             kFewLocals * -int(sizeof(TypedValue)),
-                             rFinished);
+  a.    lea_reg64_disp_reg64(
+          rVmFp,
+          kFewLocals * -int(sizeof(TypedValue)),
+          rFinished);
   a.    mov_reg64_reg64(rFinished, rIter);
   a.    shl_reg64(4, rNumExtraLocals);
   a.    sub_reg64_reg64(rNumExtraLocals, rIter);

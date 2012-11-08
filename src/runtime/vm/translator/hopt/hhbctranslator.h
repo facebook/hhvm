@@ -234,8 +234,8 @@ public:
   void emitCastArray();
   void emitCastObject();
 
-  void emitRetC();
-  void emitRetV();
+  void emitRetC(bool freeInline);
+  void emitRetV(bool freeInline);
 
   void emitLateBoundCls(); // TODO: if this, then LdObjCls
 
@@ -323,7 +323,7 @@ private:
   void emitFCallAux(uint32 numParams,
                     uint32 returnBcOffset,
                     const Func* callee);
-  void emitRet(SSATmp* retVal, Trace* exitTrace);
+  void emitRet(SSATmp* retVal, Trace* exitTrace, bool freeInline);
   template<Type::Tag T> void emitIsTypeC();
   template<Type::Tag T> void emitIsTypeL(int id);
   void emitCmp(Opcode opc);

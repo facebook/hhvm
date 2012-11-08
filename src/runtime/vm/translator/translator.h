@@ -282,17 +282,18 @@ class NormalizedInstruction {
   // stack at tracelet entry.
   int stackOff;
   int sequenceNum;
-  unsigned hasConstImm:1;
-  unsigned startsBB:1;
-  unsigned breaksTracelet:1;
-  unsigned changesPC:1;
-  unsigned fuseBranch:1;
-  unsigned preppedByRef:1;    // For FPass*; indicates parameter reffiness
-  unsigned manuallyAllocInputs:1;
-  unsigned invertCond:1;
-  unsigned outputPredicted:1;
-  unsigned outputPredictionStatic:1;
-  unsigned ignoreInnerType:1;
+  bool hasConstImm:1;
+  bool startsBB:1;
+  bool breaksTracelet:1;
+  bool changesPC:1;
+  bool fuseBranch:1;
+  bool preppedByRef:1;    // For FPass*; indicates parameter reffiness
+  bool manuallyAllocInputs:1;
+  bool invertCond:1;
+  bool outputPredicted:1;
+  bool outputPredictionStatic:1;
+  bool ignoreInnerType:1;
+
   /*
    * skipSync indicates that a previous instruction that should have
    * adjusted the stack (eg FCall, Req*) didnt, because it could see
@@ -300,13 +301,15 @@ class NormalizedInstruction {
    * (ie at this point, rVmSp holds the "correct" value, rather
    *  than the value it had at the beginning of the tracelet)
    */
-  unsigned skipSync:1;
+  bool skipSync:1;
+
   /*
    * grouped indicates that the tracelet should not be broken
    * (eg by a side exit) between the preceding instruction and
    * this one
    */
-  unsigned grouped:1;
+  bool grouped:1;
+
   /*
    * guardedThis indicates that we know that ar->m_this is
    * a valid $this. eg:
@@ -315,28 +318,39 @@ class NormalizedInstruction {
    *   $this->bar = 2; # can skip the check
    *   return 5;       # can decRef ar->m_this unconditionally
    */
-  unsigned guardedThis:1;
+  bool guardedThis:1;
+
   /*
    * guardedCls indicates that we know the class exists
    */
-  unsigned guardedCls:1;
+  bool guardedCls:1;
+
   /*
    * dont check the surprise flag
    */
-  unsigned noSurprise:1;
+  bool noSurprise:1;
+
   /*
     noCtor is set on FPushCtorD to say that the ctor is
     going to be skipped (so dont setup an actrec)
   */
-  unsigned noCtor:1;
+  bool noCtor:1;
+
   /*
    * instruction is statically known to have no effect, e.g. unboxing a Cell
    */
-  unsigned noOp:1;
+  bool noOp:1;
+
   /*
    * This is an FPush* that will be directly bound to a Func*
    */
-  unsigned directCall:1;
+  bool directCall:1;
+
+  /*
+   * Indicates that a RetC/RetV should generate inlined return code
+   * rather than calling the shared stub.
+   */
+  bool inlineReturn:1;
 
   ArgUnion constImm;
   TXFlags m_txFlags;
@@ -369,6 +383,7 @@ class NormalizedInstruction {
     noCtor(false),
     noOp(false),
     directCall(false),
+    inlineReturn(false),
     m_txFlags(Interp) {
     memset(imm, 0, sizeof(imm));
   }
@@ -651,6 +666,7 @@ struct TraceletContext {
     , m_aliasTaint(false)
     , m_varEnvTaint(false)
   {}
+  RuntimeType currentType(const Location& l) const;
   DynLocation* recordRead(const InputInfo& l, bool useHHIR,
                           DataType staticType = KindOfInvalid);
   void recordWrite(DynLocation* dl, NormalizedInstruction* source);
@@ -747,9 +763,14 @@ class Translator {
   static const int MaxJmpsTracedThrough = 5;
 
 public:
-  // kFewLocals is a magic value used to decide whether or not to
-  // generate specialized code for RetC
+  // kFewLocals is the threshold for which can handle generic returns.
+  // There must be at least kFewLocals + 1 locals before we'll do a
+  // generic RetC.
   static const int kFewLocals = 4;
+
+  // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
+  // generate an inline return for.
+  static const int kMaxInlineReturnDecRefs = 1;
 
 private:
   friend struct TraceletContext;
@@ -764,7 +785,8 @@ private:
   void getInputs(Tracelet& t,
                  NormalizedInstruction* ni,
                  int& currentStackOffset,
-                 InputInfos& inputs);
+                 InputInfos& inputs,
+                 const TraceletContext& tas);
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,
@@ -1039,8 +1061,6 @@ bool outputDependsOnInput(const Opcode instr);
 extern bool tc_dump();
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup);
-
-bool freeLocalsInline();
 
 } } } // HPHP::VM::Transl
 

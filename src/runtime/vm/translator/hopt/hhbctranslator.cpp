@@ -1295,15 +1295,14 @@ void HhbcTranslator::emitFCallD(uint32 numParams,
 //    fp = FreeActRec
 //    RetCtrl retAddr
 
-void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace) {
+void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
+                             bool freeInline) {
   const Func* curFunc = getCurFunc();
   bool mayUseVV = (curFunc->attrs() & AttrMayUseVV);
   bool mayHaveThis = (curFunc->isPseudoMain() ||
                       (curFunc->isMethod() && !curFunc->isStatic()));
-  bool freeInline = freeLocalsInline();
 
   if (freeInline) {
-
     // If surprise flags are set, exit trace and handle surprise
     m_tb.genExitWhenSurprised(exitTrace);
 
@@ -1348,14 +1347,14 @@ void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace) {
   this->m_hasRet = true;
 }
 
-void HhbcTranslator::emitRetC() {
+void HhbcTranslator::emitRetC(bool freeInline) {
   Trace* exit = getExitSlowTrace();
-  emitRet(popC(), exit);
+  emitRet(popC(), exit, freeInline);
 }
 
-void HhbcTranslator::emitRetV() {
+void HhbcTranslator::emitRetV(bool freeInline) {
   Trace* exit = getExitSlowTrace();
-  emitRet(popV(), exit);
+  emitRet(popV(), exit, freeInline);
 }
 
 void HhbcTranslator::setThisAvailable() {

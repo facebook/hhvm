@@ -110,6 +110,28 @@ public:
   }
 };
 
+struct Call {
+  enum { Direct, Virtual } m_kind;
+  union {
+    void* m_fptr;
+    int   m_offset;
+  };
+
+  explicit Call(void *p) : m_kind(Direct), m_fptr(p) {}
+  explicit Call(int off) : m_kind(Virtual), m_offset(off) {}
+  Call(Call const&) = default;
+
+  void emit(X64Assembler& a, PhysReg scratch) const {
+    if (m_kind == Direct) {
+      a.    call(TCA(m_fptr));
+    } else {
+      a.    load_reg64_disp_reg64(rdi, 0, scratch);
+      a.    load_reg64_disp_reg64(scratch, m_offset, scratch);
+      a.    call_reg(scratch);
+    }
+  }
+};
+
 // DiamondGuard is a scoped way to protect register allocator state around
 // control flow. When we enter some optional code that may affect the state
 // of the register file, we copy the register file's state, and redirect any

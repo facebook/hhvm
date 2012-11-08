@@ -72,6 +72,8 @@ extern void* interpOneEntryPoints[];
 
 extern "C" TCA funcBodyHelper(ActRec* fp);
 
+struct Call;
+
 class TranslatorX64 : public Translator
                     , SpillFill
                     , boost::noncopyable {
@@ -281,16 +283,6 @@ private:
     return a.code.isValidAddress(tca) || astubs.code.isValidAddress(tca) ||
       atrampolines.code.isValidAddress(tca);
   }
-  struct Call {
-    enum { Direct, Virtual } m_kind;
-    union {
-      void* m_fptr;
-      int   m_offset;
-    };
-    explicit Call(void *p) : m_kind(Direct), m_fptr(p) {}
-    explicit Call(int off) : m_kind(Virtual), m_offset(off) {}
-    void emit(Asm& a, PhysReg scratch);
-  };
   template<int Arity> TCA emitNAryStub(Asm& a, Call c);
   TCA emitUnaryStub(Asm& a, Call c);
   TCA genericRefCountStub(Asm& a);

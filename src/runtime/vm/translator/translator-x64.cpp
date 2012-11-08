@@ -916,6 +916,22 @@ emitEagerVMRegSave(X64Assembler& a,
   return start;
 }
 
+static Call getDtorCall(DataType type) {
+  switch (type) {
+  case BitwiseKindOfString:
+    return Call(getMethodHardwarePtr(&StringData::release));
+  case KindOfArray:
+    return Call(getVTableOffset(&HphpArray::release));
+  case KindOfObject:
+    return Call(getMethodHardwarePtr(&ObjectData::release));
+  case KindOfRef:
+    return Call(getMethodHardwarePtr(&RefData::release));
+  default:
+    ASSERT(false);
+    NOT_REACHED();
+  }
+}
+
 /**
  * emitDecRef --
  *
@@ -932,8 +948,6 @@ void TranslatorX64::emitDecRef(Asm& a,
     return;
   }
 
-  ASSERT(!i.isNative());
-  ASSERT(!i.isSimple() || !typeReentersOnRelease(type));
   SpaceRecorder sr("_DecRef", a);
   { // if !static
     IfCountNotStatic ins(a, rDatum, type);
@@ -943,10 +957,55 @@ void TranslatorX64::emitDecRef(Asm& a,
     if (&a == &this->astubs) {
       JccBlock<CC_NZ> ifZero(a);
       callUnaryStub(a, i, m_dtorStubs[type], rDatum);
-    } else {
-      UnlikelyIfBlock<CC_Z> ifZero(this->a, astubs);
-      callUnaryStub(astubs, i, m_dtorStubs[type], rDatum);
+      return;
     }
+
+    UnlikelyIfBlock<CC_Z> ifZero(this->a, astubs);
+
+    auto getPushSet = [&] {
+      RegSet ret;
+      auto regs = kCallerSaved;
+      PhysReg reg;
+      while (regs.findFirst(reg)) {
+        regs.remove(reg);
+        auto* info = m_regMap.getInfo(reg);
+        if (info->m_state != RegInfo::FREE) {
+          if (info->m_cont.m_kind == RegContent::Int ||
+              info->m_cont.m_loc.isLiteral()) {
+            // RegAlloc::reconcile can rematerialize these, no need to
+            // push.  But get it out of the reg map so reconcile
+            // notices.
+            m_regMap.smashReg(reg);
+          } else {
+            ret.add(reg);
+          }
+        }
+      }
+      return ret;
+    };
+
+    const RegSet savedSet = getPushSet();
+    const RegAlloc saved = m_regMap;
+    {
+      PhysRegSaver saver(astubs, savedSet);
+
+      // Try to make it more likely we'll get a scratch from the set
+      // we just pushed by informing the register allocator about it.
+      m_regMap.scrubRegs(savedSet -
+        m_regMap.getRegsLike(RegInfo::SCRATCH).add(rDatum));
+      m_regMap.smashRegs(savedSet - RegSet(rDatum));
+
+      ScratchReg scratch(m_regMap);
+      ASSERT(rDatum != rsp && rDatum != rbx);
+      emitMovRegReg(astubs, rDatum, argNumToRegName[0]);
+      getDtorCall(type).emit(astubs, *scratch);
+      if (typeReentersOnRelease(type)) {
+        recordReentrantStubCall(*m_curNI);
+      } else {
+        recordStubCall(*m_curNI);
+      }
+    }
+    m_regMap = saved;
   } // endif
 }
 
@@ -10923,18 +10982,6 @@ TranslatorX64::Get() {
   }
   ASSERT(tx64);
   return tx64;
-}
-
-void
-TranslatorX64::Call::emit(Asm& a,
-                          PhysReg scratch) {
-  if (m_kind == Direct) {
-    a.    call(TCA(m_fptr));
-  } else {
-    a.    load_reg64_disp_reg64(rdi, 0, scratch);
-    a.    load_reg64_disp_reg64(scratch, m_offset, scratch);
-    a.    call_reg(scratch);
-  }
 }
 
 template<int Arity>

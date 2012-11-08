@@ -617,7 +617,32 @@ static int start_server(const std::string &username) {
   }
 #endif
 
+  // Create the HttpServer before any warmup requests to properly
+  // initialize the process
   HttpServer::Server = HttpServerPtr(new HttpServer(sslCTX));
+
+  // If we have any warmup requests, replay them before listening for
+  // real connections
+  for (auto& file : RuntimeOption::ServerWarmupRequests) {
+    HttpRequestHandler handler;
+    ReplayTransport rt;
+    timespec start;
+    gettime(CLOCK_MONOTONIC, &start);
+    std::string error;
+    Logger::Info("Replaying warmup request %s", file.c_str());
+    try {
+      rt.onRequestStart(start);
+      rt.replayInput(file);
+      handler.handleRequest(&rt);
+      Logger::Info("Finished successfully");
+    } catch (std::exception& e) {
+      error = e.what();
+    }
+    if (error.size()) {
+      Logger::Info("Got exception during warmup: %s", error.c_str());
+    }
+  }
+
   HttpServer::Server->run();
   return 0;
 }

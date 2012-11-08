@@ -27,6 +27,7 @@ class TestExtApc : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 
+  bool test_apc();
   bool test_apc_add();
   bool test_apc_store();
   bool test_apc_fetch();

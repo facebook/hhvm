@@ -16,6 +16,7 @@
 
 #include <test/test_ext_apc.h>
 #include <runtime/ext/ext_apc.h>
+#include <runtime/ext/ext_options.h>
 #include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/program_functions.h>
@@ -32,6 +33,7 @@ bool TestExtApc::RunTests(const std::string &which) {
   RuntimeOption::ApcTableType = RuntimeOption::ApcConcurrentTable;
   s_apc_store.reset();
   printf("\nNon shared-memory concurrent version:\n");
+  RUN_TEST(test_apc);
   RUN_TEST(test_apc_add);
   RUN_TEST(test_apc_store);
   RUN_TEST(test_apc_fetch);
@@ -57,6 +59,14 @@ bool TestExtApc::RunTests(const std::string &which) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool TestExtApc::test_apc() {
+  VS(f_ini_get("apc.enabled"), "1");
+  VS(f_ini_get("apc.enable_cli"), "1");
+  VS(f_ini_get("apc.stat"), (RuntimeOption::RepoAuthoritative || !hhvm)
+                            ? "0" : "1");
+  return Count(true);
+}
 
 bool TestExtApc::test_apc_add() {
   f_apc_add("ts", "TestString");

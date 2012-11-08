@@ -29,6 +29,7 @@
 #include <runtime/base/taint/taint_data.h>
 #include <runtime/base/taint/taint_trace.h>
 #include <util/alloc.h>
+#include <runtime/base/ini_setting.h>
 
 using HPHP::Util::ScopedMem;
 
@@ -39,6 +40,7 @@ static class apcExtension : public Extension {
 public:
   apcExtension() : Extension("apc") {}
   virtual void moduleInit() {
+    IniSetting::SetGlobalDefault("apc.enabled","true");
     if (RuntimeOption::ApcUseFileStorage) {
       s_apc_file_storage.enable(RuntimeOption::ApcFileStoragePrefix,
                                 RuntimeOption::ApcFileStorageChunkSize,

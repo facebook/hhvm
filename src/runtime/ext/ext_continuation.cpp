@@ -200,10 +200,15 @@ void c_Continuation::t_next() {
   nextImpl(fi);
 }
 
+static StaticString s_next("next");
 void c_Continuation::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::rewind);
-  throw_exception(Object(SystemLib::AllocExceptionObject(
-    "Cannot rewind on a Continuation object")));
+  if (m_index < 0LL) {
+    this->o_invoke(s_next, Array());
+  } else {
+    throw_exception(Object(SystemLib::AllocExceptionObject(
+      "Cannot rewind on a Continuation object")));
+  }
 }
 
 bool c_Continuation::t_valid() {

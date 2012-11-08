@@ -857,10 +857,6 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
                            CREATE_VECTOR1(ref(properties)));
     } else {
       if (obj->o_instanceof(s_Iterator)) {
-        // Queue up any continuations to the first element
-        if (obj->o_instanceof(c_Continuation::s_class_name)) {
-          obj->o_invoke(s_next, Array());
-        }
         return obj;
       }
       return create_object(c_ArrayIterator::s_class_name,

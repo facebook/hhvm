@@ -617,10 +617,6 @@ PSEUDOINSTRS
   void fuseBranchAfterHelper(const Tracelet& t,
                              const NormalizedInstruction& i);
   void translateSetMArray(const Tracelet &t, const NormalizedInstruction& i);
-  void emitPropGet(const NormalizedInstruction& i,
-                   const DynLocation& base,
-                   PhysReg fieldAddr,
-                   const Location& outLoc);
   void translateCGetM_LEE(const Tracelet &t, const NormalizedInstruction& i);
   void translateCGetM_GE(const Tracelet &t, const NormalizedInstruction& i);
   void emitGetGlobal(const NormalizedInstruction& i, int nameIdx,

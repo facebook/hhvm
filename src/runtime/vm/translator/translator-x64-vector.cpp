@@ -2908,30 +2908,6 @@ TranslatorX64::analyzeCGetM(Tracelet& t, NormalizedInstruction& ni) {
 }
 
 void
-TranslatorX64::emitPropGet(const NormalizedInstruction& i,
-                           const DynLocation& base,
-                           PhysReg fieldAddr,
-                           const Location& outLoc) {
-  ASSERT(outLoc.isStack());
-  PhysReg baseReg = getReg(base.location);
-
-  emitDerefIfVariant(a, fieldAddr);
-  // We may be creating a reference to the field.
-  emitIncRefGeneric(fieldAddr, 0);
-
-  PhysReg stackOutReg;
-  ScratchReg scratch(m_regMap);
-  int stackOutDisp;
-  locToRegDisp(outLoc, &stackOutReg, &stackOutDisp);
-  emitCopyTo(a, fieldAddr, 0, stackOutReg, stackOutDisp, *scratch);
-
-  if (base.isStack()) {
-    // Release the base
-    emitDecRef(i, baseReg, base.outerType());
-  }
-}
-
-void
 TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
                              const DynLocation* baseInput,
                              PhysReg baseReg,

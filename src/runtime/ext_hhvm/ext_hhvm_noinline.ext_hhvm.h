@@ -3122,14 +3122,15 @@ needle => rdx
 TypedValue* fh_strchr(TypedValue* _rv, Value* haystack, TypedValue* needle) asm("_ZN4HPHP10fni_strchrERKNS_6StringERKNS_7VariantE");
 
 /*
-long long HPHP::fni_strlen(HPHP::String const&)
-_ZN4HPHP10fni_strlenERKNS_6StringE
+HPHP::Variant HPHP::fni_strlen(HPHP::Variant const&)
+_ZN4HPHP10fni_strlenERKNS_7VariantE
 
 (return value) => rax
-str => rdi
+_rv => rdi
+str => rsi
 */
 
-long long fh_strlen(Value* str) asm("_ZN4HPHP10fni_strlenERKNS_6StringE");
+TypedValue* fh_strlen(TypedValue* _rv, TypedValue* str) asm("_ZN4HPHP10fni_strlenERKNS_7VariantE");
 
 /*
 long long HPHP::fni_levenshtein(HPHP::String const&, HPHP::String const&, int, int, int)

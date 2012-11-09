@@ -7227,16 +7227,15 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopStrlen(PC& pc) {
   NEXT();
   TypedValue* subj = m_stack.topTV();
-  int64 ans = 0;
   if (LIKELY(IS_STRING_TYPE(subj->m_type))) {
-    ans = subj->m_data.pstr->size();
+    int64 ans = subj->m_data.pstr->size();
+    tvRefcountedDecRef(subj);
+    subj->m_type = KindOfInt64;
+    subj->m_data.num = ans;
   } else {
-    ans = f_strlen(tvAsVariant(subj));
+    Variant ans = f_strlen(tvAsVariant(subj));
+    tvAsVariant(subj) = ans;
   }
-
-  tvRefcountedDecRef(subj);
-  subj->m_type = KindOfInt64;
-  subj->m_data.num = ans;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopIncStat(PC& pc) {

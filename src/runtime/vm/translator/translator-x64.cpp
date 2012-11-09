@@ -7555,8 +7555,6 @@ void TranslatorX64::analyzeStrlen(Tracelet& t,
       i.m_txFlags = Simple;
       break;
     case KindOfArray:
-      i.m_txFlags = Supported;
-      break;
     case KindOfInt64:
     case KindOfDouble:
     case KindOfObject:
@@ -7592,14 +7590,7 @@ void TranslatorX64::translateStrlen(const Tracelet& t,
       ASSERT(m_regMap.regIsFree(rInput));
       break;
     }
-    case KindOfArray: {
-      m_regMap.allocOutputRegs(i);
-      PhysReg rOutput = getReg(i.outStack->location);
-      emitDecRef(a, i, rInput, KindOfArray);
-      // You think I am kidding about this, but I am not. This is PHP.
-      a.  mov_imm32_reg32(strlen("Array"), rOutput);
-      break;
-    }
+    case KindOfArray:
     case KindOfInt64:
     case KindOfDouble:
     case KindOfObject:

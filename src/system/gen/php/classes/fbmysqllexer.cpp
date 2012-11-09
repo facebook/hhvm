@@ -216,8 +216,8 @@ void c_FB_MySQLLexer::t___construct(Variant v_string //  = NAMSTR(s_sys_ss000000
   ObjectData *obj_tmp UNUSED;
   m_string.assignVal(v_string);
   {
-    int64 tmp0((x_strlen(toString(v_string))));
-    m_stringLen = tmp0;
+    const Variant &tmp0((x_strlen(v_string)));
+    m_stringLen.assignVal(tmp0);
   }
   m_lookahead.assignVal(v_lookahead);
 }

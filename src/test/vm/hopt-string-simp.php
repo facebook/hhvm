@@ -57,6 +57,32 @@ function foo11() {
   return $x < "1";
 }
 
+function foo12() {
+  $x = Array();
+  return strlen($x);
+}
+
+class A {}
+
+function foo13() {
+  $x = new A();
+  return strlen($x);
+}
+
+class B { public function __toString() { return "B"; } }
+
+function foo14() {
+  $x = new B();
+  return strlen($x);
+}
+
+class C { public function __call($meth, $args) { return "C"; } }
+
+function foo15() {
+  $x = new C();
+  return strlen($x);
+}
+
 var_dump(foo1());
 var_dump(foo2());
 var_dump(foo3());
@@ -68,3 +94,7 @@ var_dump(foo8());
 var_dump(foo9());
 var_dump(foo10());
 var_dump(foo11());
+var_dump(foo12());
+var_dump(foo13());
+var_dump(foo14());
+var_dump(foo15());

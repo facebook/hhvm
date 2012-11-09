@@ -2331,13 +2331,13 @@ DefineFunction(
     'desc'   => "Returns the length of the given string.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int64,
+      'type'   => Variant,
       'desc'   => "The length of the string on success, and 0 if the string is empty.",
     ),
     'args'   => array(
       array(
         'name'   => "str",
-        'type'   => String,
+        'type'   => Variant,
         'desc'   => "The string being measured for length.",
       ),
     ),

@@ -1181,7 +1181,7 @@ Variant fni_strchr(String const& haystack, Variant const& needle) {
   return f_strchr(haystack, needle);
 }
 
-int64 fni_strlen(String const& str) {
+Variant fni_strlen(CVarRef str) {
   return f_strlen(str);
 }
 

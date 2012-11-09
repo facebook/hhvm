@@ -897,6 +897,7 @@ bool TestExtString::test_strcspn() {
 
 bool TestExtString::test_strlen() {
   VS(f_strlen("test"), 4);
+  VS(f_strlen(Variant(Array::Create())), null);
   return Count(true);
 }
 

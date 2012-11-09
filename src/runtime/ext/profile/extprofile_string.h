@@ -499,7 +499,7 @@ inline Variant x_strcspn(CStrRef str1, CStrRef str2, int start = 0, int length =
   return f_strcspn(str1, str2, start, length);
 }
 
-inline int64 x_strlen(CStrRef str) {
+inline Variant x_strlen(CVarRef str) {
   FUNCTION_INJECTION_BUILTIN(strlen);
   return f_strlen(str);
 }

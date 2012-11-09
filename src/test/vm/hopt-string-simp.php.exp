@@ -9,3 +9,10 @@ bool(true)
 bool(false)
 bool(true)
 bool(true)
+HipHop Warning:  strlen() expects parameter 1 to be string, array given in src/test/vm/hopt-string-simp.php on line 62
+NULL
+HipHop Warning:  strlen() expects parameter 1 to be string, object given in src/test/vm/hopt-string-simp.php on line 69
+NULL
+int(1)
+HipHop Warning:  strlen() expects parameter 1 to be string, object given in src/test/vm/hopt-string-simp.php on line 83
+NULL

@@ -24,6 +24,7 @@
 #include <runtime/base/zend/zend_html.h>
 #include <runtime/base/bstring.h>
 #include <langinfo.h>
+#include <runtime/ext/ext_class.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -325,8 +326,25 @@ Variant f_strspn(CStrRef str1, CStrRef str2, int start = 0,
                  int length = 0x7FFFFFFF);
 Variant f_strcspn(CStrRef str1, CStrRef str2, int start = 0,
                   int length = 0x7FFFFFFF);
-inline int64 f_strlen(CStrRef str) {
-  return str.size();
+
+inline Variant f_strlen(CVarRef vstr) {
+  Variant::TypedValueAccessor tva = vstr.getTypedAccessor();
+  switch (Variant::GetAccessorType(tva)) {
+  case KindOfString:
+  case KindOfStaticString:
+    return Variant(Variant::GetStringData(tva)->size());
+  case KindOfArray:
+    raise_warning("strlen() expects parameter 1 to be string, array given");
+    return null;
+  case KindOfObject:
+    if (!f_method_exists(vstr, "__toString")) {
+      raise_warning("strlen() expects parameter 1 to be string, object given");
+      return null;
+    } //else fallback to default
+  default:
+    CStrRef str = vstr.toString();
+    return Variant(str.size());
+  }
 }
 
 Variant f_count_chars(CStrRef str, int64 mode = 0);

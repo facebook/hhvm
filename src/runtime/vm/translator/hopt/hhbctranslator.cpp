@@ -728,14 +728,10 @@ void HhbcTranslator::emitStrlen() {
   } else if (inType == Type::Bool) {
     // strlen(true) == 1, strlen(false) == 0.
     push(m_tb.genConvToInt(popC()));
-  } else if (inType == Type::Arr) {
-    SSATmp* input = popC();
-    push(m_tb.genDefConst<int64>(strlen("Array")));
-    m_tb.genDecRef(input);
   } else {
     spillStack();
     popC();
-    emitInterpOneOrPunt(Type::Int);
+    emitInterpOneOrPunt(Type::Gen);
   }
 }
 

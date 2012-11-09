@@ -337,7 +337,9 @@ enum instrFlags {
   IF_RAX        = 0x0800, // instruction supports special rax encoding
   IF_XCHG       = 0x1000, // instruction is xchg
   IF_BYTEREG    = 0x2000, // instruction is movzbq, movsbq, setcc
-  IF_66PREFIXED = 0x4000, // instruction requires a 0x66 (operand size) prefix
+  IF_66PREFIXED = 0x4000, // instruction requires a manditory 0x66 prefix
+  IF_F3PREFIXED = 0x8000, // instruction requires a manditory 0xf3 prefix
+  IF_F2PREFIXED = 0x10000, // instruction requires a manditory 0xf2 prefix
 };
 
 /*
@@ -357,11 +359,13 @@ enum instrFlags {
 
 struct X64Instr {
   unsigned char table[6];
-  unsigned short flags;
+  unsigned long flags;
 };
 
 //                                    0    1    2    3    4    5     flags
 const X64Instr instr_movdqa =  { { 0x6F,0x7F,0xF1,0x00,0xF1,0xF1 }, 0x4102 };
+const X64Instr instr_movdqu =  { { 0x6F,0x7F,0xF1,0x00,0xF1,0xF1 }, 0x8102 };
+const X64Instr instr_lddqu =   { { 0xF0,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x10103 };
 const X64Instr instr_jmp =     { { 0xFF,0xF1,0xE9,0x04,0xE9,0xF1 }, 0x0910 };
 const X64Instr instr_call =    { { 0xFF,0xF1,0xE8,0x02,0xE8,0xF1 }, 0x0900 };
 const X64Instr instr_push =    { { 0xFF,0xF1,0x68,0x06,0xF1,0x50 }, 0x0510 };
@@ -899,11 +903,11 @@ public:
     int r = int(rName);
     int br = int(brName);
 
-    // When this is required it goes before the REX byte, if we end up
-    // needing one.
-    if (op.flags & IF_66PREFIXED) {
-      byte(0x66);
-    }
+    // When an instruction has a manditory prefix, it goes before the
+    // REX byte if we end up needing one.
+    if (op.flags & IF_66PREFIXED) byte(0x66);
+    if (op.flags & IF_F2PREFIXED) byte(0xF2);
+    if (op.flags & IF_F3PREFIXED) byte(0xF3);
 
     // Determine immSize from the 'hasImmediate' flag
     int immSize = sz::nosize;
@@ -1772,6 +1776,21 @@ public:
                                register_name_t rbase) {
     emitMR(instr_movdqa, rbase, reg::noreg, sz::byte, off,
            xmm_register_number(rsrc));
+  }
+
+  void load_movdqu(register_name_t rbase, int off, xmm_register rdest) {
+    emitRM(instr_movdqu, rbase, reg::noreg, sz::byte, off,
+           xmm_register_number(rdest));
+  }
+
+  void store_movdqu(xmm_register rsrc, int off, register_name_t rbase) {
+    emitMR(instr_movdqu, rbase, reg::noreg, sz::byte, off,
+           xmm_register_number(rsrc));
+  }
+
+  void lddqu(register_name_t rbase, int off, xmm_register rdest) {
+    emitMR(instr_lddqu, rbase, reg::noreg, sz::byte, off,
+           xmm_register_number(rdest));
   }
 };
 

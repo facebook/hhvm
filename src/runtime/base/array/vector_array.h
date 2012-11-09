@@ -132,12 +132,9 @@ public:
   DECLARE_SMART_ALLOCATION(VectorArray);
 
 private:
-  enum AllocMode { kInline, kSmart, kMalloc };
+  uint           m_capacity;
   TypedValue     m_fixed[FixedSize];
   TypedValue    *m_elems;
-  uint           m_capacity;
-  int8_t         m_allocMode; // AllocMode
-  const bool     m_nonsmart;
 
   ZendArray *escalateToNonEmptyZendArray() const NEVER_INLINE;
   ZendArray *escalateToZendArray() const NEVER_INLINE;

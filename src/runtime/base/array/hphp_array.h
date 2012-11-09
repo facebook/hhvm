@@ -29,7 +29,6 @@ class ArrayInit;
 
 class HphpArray : public ArrayData {
   enum CopyMode { kSmartCopy, kNonSmartCopy };
-  enum AllocMode { kInline, kSmart, kMalloc };
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 public:
   friend class ArrayInit;
@@ -43,10 +42,6 @@ public:
 public:
   static HphpArray* GetStaticEmptyArray() {
     return &s_theEmptyArray;
-  }
-
-  static inline const void** getVTablePtr() {
-    return (*(void const***)(&s_theEmptyArray));
   }
 
 private:
@@ -361,14 +356,12 @@ private:
   // m_hash --> |                    | 2^K hash table entries.
   //            +--------------------+
 
+  uint32  m_tableMask;   // Bitmask used when indexing into the hash table.
   Elm*    m_data;        // Contains elements and hash table.
   ElmInd* m_hash;        // Hash table.
   int64   m_nextKI;      // Next integer key to use for append.
-  uint32  m_tableMask;   // Bitmask used when indexing into the hash table.
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
   ElmInd  m_lastE;       // Index of last used element.
-  uint8_t m_allocMode;   // enum AllocMode
-  const bool m_nonsmart; // never use smartalloc to allocate Elms
   union {
     InlineSlots m_inline_data;
     ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
@@ -508,7 +501,7 @@ public:
 };
 
 inline bool IsHphpArray(const ArrayData* ad) {
-  return dynamic_cast<const HphpArray*>(ad) != 0;
+  return ad->kind() == ArrayData::kHphpArray;
 }
 
 //=============================================================================

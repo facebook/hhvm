@@ -745,8 +745,8 @@ void TranslatorX64::emitHphpArrayGetIntKey(const NormalizedInstruction& i,
     // Hold the register state steady; we might branch into bail.
     FreezeRegs brr(m_regMap);
     // Check that rBase is an HphpArray
-    a.    cmp_imm64_disp_reg64(uintptr_t(HphpArray::getVTablePtr()),
-                               0, rBase);
+    a.    cmp_imm8_disp_reg8(ArrayData::kHphpArray,
+                             ArrayData::getKindOff(), rBase);
     a.    jnz(bail);
     a.    load_reg64_disp_reg32(rBase, HphpArray::getMaskOff(), *mask);
     a.    load_reg64_disp_reg64(rBase, HphpArray::getHashOff(), *hash);

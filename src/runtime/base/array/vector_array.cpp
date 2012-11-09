@@ -151,8 +151,7 @@ void VectorArray::alloc(uint size) {
 }
 
 HOT_FUNC_HPHP
-VectorArray::VectorArray(uint capacity /* = 0 */) :
-    m_nonsmart(false) {
+VectorArray::VectorArray(uint capacity /* = 0 */) {
   m_size = 0;
   alloc(capacity);
   m_pos = ArrayData::invalid_index;
@@ -160,8 +159,7 @@ VectorArray::VectorArray(uint capacity /* = 0 */) :
 
 HOT_FUNC_HPHP
 VectorArray::VectorArray(const VectorArray *src, uint start /* = 0 */,
-  uint size /* = 0 */) :
-    ArrayData(src), m_nonsmart(false) {
+  uint size /* = 0 */) : ArrayData(src) {
   ASSERT(src);
   ASSERT(size == 0 || (size == src->m_size - 1L && size > 0));
   ASSERT(!src->strongIterators());
@@ -176,8 +174,7 @@ VectorArray::VectorArray(const VectorArray *src, uint start /* = 0 */,
 }
 
 HOT_FUNC_HPHP
-VectorArray::VectorArray(uint size, const Variant *values[]) :
-    m_nonsmart(false) {
+VectorArray::VectorArray(uint size, const Variant *values[]) {
   ASSERT(size > 0);
   m_size = size;
   alloc(size);
@@ -203,7 +200,7 @@ VectorArray::~VectorArray() {
 
 // This constructor is for nonSmartCopy()
 VectorArray::VectorArray(const VectorArray *src, bool sma /* ignored */) :
-    ArrayData(src), m_nonsmart(true) {
+    ArrayData(src, kArrayData, /*nonsmart*/true) {
   ASSERT(src);
   ASSERT(!src->strongIterators());
   m_size = src->m_size;

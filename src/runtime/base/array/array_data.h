@@ -38,10 +38,29 @@ class ArrayData : public Countable {
     Merge,
   };
 
+  // enum of possible array types, so we can guard nonvirtual
+  // fast paths in runtime code.
+  enum ArrayKind {
+    kArrayData,
+    kHphpArray
+  };
+
+ protected:
+  // used in subclasses but declared here.
+  enum AllocMode { kInline, kSmart, kMalloc };
+
+ public:
   static const ssize_t invalid_index = -1;
 
-  ArrayData() : m_size(-1), m_pos(0), m_strongIterators(0) {}
-  ArrayData(const ArrayData *src) : m_pos(src->m_pos), m_strongIterators(0) {}
+  ArrayData(ArrayKind kind = kArrayData, bool nonsmart = false) :
+    m_size(-1), m_pos(0), m_strongIterators(0), m_kind(kind),
+    m_nonsmart(nonsmart) {
+  }
+  ArrayData(const ArrayData *src, ArrayKind kind = kArrayData,
+            bool nonsmart = false) :
+    m_pos(src->m_pos), m_strongIterators(0), m_kind(kind),
+    m_nonsmart(nonsmart) {
+  }
   virtual ~ArrayData();
 
   /**
@@ -78,6 +97,13 @@ class ArrayData : public Countable {
    */
   bool empty() const {
     return size() == 0;
+  }
+
+  /**
+   * return the array kind for fast typechecks
+   */
+  ArrayKind kind() const {
+    return (ArrayKind)m_kind;
   }
 
   /**
@@ -421,6 +447,17 @@ class ArrayData : public Countable {
     FullPos* m_strongIterators; // head of linked list
     uintptr_t m_flags;
   };
+ protected:
+  const uint8_t m_kind;  // enum ArrayKind
+  const bool m_nonsmart; // never use smartalloc to allocate Elms
+  uint8_t m_allocMode;   // enum AllocMode
+  /* The 4 bytes of padding here are available to subclasses if their
+   * first field is also <= 4 bytes. */
+
+ public: // for the JIT
+  static uint32_t getKindOff() {
+    return (uintptr_t)&((ArrayData*)0)->m_kind;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

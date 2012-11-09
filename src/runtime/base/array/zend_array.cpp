@@ -116,7 +116,7 @@ void ZendArray::init(uint nSize) {
 
 HOT_FUNC_HPHP
 ZendArray::ZendArray(uint nSize, bool nonsmart) :
-  m_nonsmart(nonsmart), m_pListHead(NULL), m_pListTail(NULL),
+  ArrayData(kArrayData, nonsmart), m_pListHead(NULL), m_pListTail(NULL),
   m_nNextFreeElement(0) {
   m_size = 0;
   init(nSize);
@@ -124,8 +124,7 @@ ZendArray::ZendArray(uint nSize, bool nonsmart) :
 
 HOT_FUNC_HPHP
 ZendArray::ZendArray(uint nSize, int64 n, Bucket *bkts[]) :
-  m_nonsmart(false), m_pListHead(bkts[0]), m_pListTail(0),
-  m_nNextFreeElement(n) {
+  m_pListHead(bkts[0]), m_pListTail(0), m_nNextFreeElement(n) {
   m_pos = (ssize_t)(m_pListHead);
   m_size = nSize;
   init(nSize);

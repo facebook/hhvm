@@ -105,9 +105,8 @@ inline void HphpArray::init(uint size) {
   m_pos = ArrayData::invalid_index;
 }
 
-HphpArray::HphpArray(uint size)
-  : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_nonsmart(false) {
+HphpArray::HphpArray(uint size) : ArrayData(kHphpArray),
+  m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
@@ -116,9 +115,9 @@ HphpArray::HphpArray(uint size)
   init(size);
 }
 
-HphpArray::HphpArray(uint size, const TypedValue* values)
-  : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_nonsmart(false) {
+HphpArray::HphpArray(uint size, const TypedValue* values) :
+  ArrayData(kHphpArray), m_data(NULL), m_nextKI(0), m_hLoad(0),
+  m_lastE(ElmIndEmpty) {
 #ifdef PEDANTIC
   if (size > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
@@ -145,15 +144,15 @@ HphpArray::HphpArray(uint size, const TypedValue* values)
   if (size > 0) m_pos = 0;
 }
 
-HphpArray::HphpArray(EmptyMode)
-  : m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_nonsmart(false) {
+HphpArray::HphpArray(EmptyMode) : ArrayData(kHphpArray),
+  m_data(NULL), m_nextKI(0), m_hLoad(0), m_lastE(ElmIndEmpty) {
   init(0);
   setStatic();
 }
 
 // Empty constructor for internal use by nonSmartCopy() and copyImpl()
-HphpArray::HphpArray(CopyMode mode) : m_nonsmart(mode == kNonSmartCopy) {
+HphpArray::HphpArray(CopyMode mode) :
+  ArrayData(kHphpArray, /*nonsmart*/ mode == kNonSmartCopy) {
 }
 
 HOT_FUNC_VM

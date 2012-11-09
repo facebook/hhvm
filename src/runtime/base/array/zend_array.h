@@ -32,15 +32,14 @@ class ZendArray : public ArrayData {
   static const uint LgMinSize = 3;
   static const uint MinSize = 1 << LgMinSize;
   enum Flag { StrongIteratorPastEnd = 1 };
-  enum AllocMode { kInline, kSmart, kMalloc };
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 public:
   friend class ArrayInit;
   friend class VectorArray;
 
-  ZendArray() : m_arBuckets(m_inlineBuckets), m_nTableMask(MinSize - 1),
-    m_allocMode(kInline), m_nonsmart(false), m_pListHead(0), m_pListTail(0),
-    m_nNextFreeElement(0) {
+  ZendArray() : m_nTableMask(MinSize - 1), m_arBuckets(m_inlineBuckets),
+    m_pListHead(0), m_pListTail(0), m_nNextFreeElement(0) {
+    m_allocMode = kInline;
     m_size = 0;
     memset(m_inlineBuckets, 0, MinSize * sizeof(Bucket*));
   }
@@ -231,10 +230,8 @@ public:
   ZendArray(uint nSize, int64 n, Bucket *bkts[]);
 
 private:
-  Bucket         **m_arBuckets;
   uint             m_nTableMask;
-  uint8_t          m_allocMode;
-  const bool       m_nonsmart;
+  Bucket         **m_arBuckets;
   Bucket         * m_pListHead;
   Bucket          *m_inlineBuckets[MinSize];
   Bucket         * m_pListTail;

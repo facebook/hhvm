@@ -2721,11 +2721,8 @@ void TranslatorX64::emitMPost(const Tracelet& t,
   if (useTvResult(t, ni, mii)) {
     SKTRACE(2, ni.source, "%s %#lx copy tvResult\n",
             __func__, long(a.code.frontier));
-    ScratchReg rTvResult(m_regMap);
-    a.  lea_reg64_disp_reg64(mis_rsp, MISOFF(tvResult), *rTvResult);
-    ScratchReg rScratch(m_regMap);
-    emitCopyToStackRegSafe(a, ni, *rTvResult, mResultStackOffset(ni),
-                           *rScratch);
+    emitCopyToAligned(a, mis_rsp, MISOFF(tvResult),
+                      rVmSp, vstackOffset(ni, mResultStackOffset(ni)));
     invalidateOutStack(ni);
   }
   // Teleport val to final location if this instruction generates val.
@@ -2733,14 +2730,13 @@ void TranslatorX64::emitMPost(const Tracelet& t,
     ASSERT(!useTvResult(t, ni, mii));
     SKTRACE(2, ni.source, "%s %#lx teleport val\n",
             __func__, long(a.code.frontier));
-    ScratchReg rScratch(m_regMap);
     const DynLocation& val = *ni.inputs[0];
     m_regMap.cleanSmashLoc(val.location);
     PhysReg prVal;
     int dispVal;
     locToRegDisp(val.location, &prVal, &dispVal);
-    emitCopyTo(a, prVal, dispVal, rVmSp,
-               vstackOffset(ni, mResultStackOffset(ni)), *rScratch);
+    emitCopyToAligned(a, prVal, dispVal,
+                      rVmSp, vstackOffset(ni, mResultStackOffset(ni)));
     invalidateOutStack(ni);
   }
 }

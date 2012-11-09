@@ -257,7 +257,9 @@ String c_Continuation::t_getorigfuncname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::getorigfuncname);
   String called_class;
   if (hhvm) {
-    if (actRec()->hasClass()) {
+    if (actRec()->hasThis()) {
+      called_class = actRec()->getThis()->getVMClass()->name()->data();
+    } else if (actRec()->hasClass()) {
       called_class = actRec()->getClass()->name()->data();
     }
   } else {

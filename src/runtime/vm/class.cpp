@@ -142,6 +142,8 @@ PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
       m_name(n), m_parent(parent), m_docComment(docComment),
       m_InstanceCtor(NULL) {
   m_namedEntity = Unit::GetNamedEntity(n);
+  //XXX #1872530
+  m_attrs = (Attr)(m_attrs & ~AttrPersistent);
 }
 
 PreClass::~PreClass() {

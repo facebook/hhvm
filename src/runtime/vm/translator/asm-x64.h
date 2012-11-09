@@ -66,11 +66,8 @@ namespace Transl {
 
 #define TRACEMOD ::HPHP::Trace::asmx64
 
-#if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103
 enum class register_name_t : int {};
-#else
-typedef int register_name_t;
-#endif
+enum class xmm_register : int {};
 
 namespace sz {
   static const int nosize = 0;
@@ -278,6 +275,23 @@ namespace reg {
   const register_name_t r14 = register_name_t(14);
   const register_name_t r15 = register_name_t(15);
 
+  const xmm_register xmm0 = xmm_register(0);
+  const xmm_register xmm1 = xmm_register(1);
+  const xmm_register xmm2 = xmm_register(2);
+  const xmm_register xmm3 = xmm_register(3);
+  const xmm_register xmm4 = xmm_register(4);
+  const xmm_register xmm5 = xmm_register(5);
+  const xmm_register xmm6 = xmm_register(6);
+  const xmm_register xmm7 = xmm_register(7);
+  const xmm_register xmm8 = xmm_register(8);
+  const xmm_register xmm9 = xmm_register(9);
+  const xmm_register xmm10 = xmm_register(10);
+  const xmm_register xmm11 = xmm_register(11);
+  const xmm_register xmm12 = xmm_register(12);
+  const xmm_register xmm13 = xmm_register(13);
+  const xmm_register xmm14 = xmm_register(14);
+  const xmm_register xmm15 = xmm_register(15);
+
   const register_name_t fsPrefix = register_name_t(0x64);
   const register_name_t gsPrefix = register_name_t(0x65);
 
@@ -287,6 +301,12 @@ namespace reg {
    * 'noreg' distinction.
    */
   const register_name_t rFlag = register_name_t(0xff);
+}
+
+inline register_name_t xmm_register_number(xmm_register xmm) {
+  // The xmm registers have the same encoding numbers as the GPR guys
+  // for 0-15.
+  return register_name_t(int(xmm));
 }
 
 enum instrFlags {
@@ -317,6 +337,7 @@ enum instrFlags {
   IF_RAX        = 0x0800, // instruction supports special rax encoding
   IF_XCHG       = 0x1000, // instruction is xchg
   IF_BYTEREG    = 0x2000, // instruction is movzbq, movsbq, setcc
+  IF_66PREFIXED = 0x4000, // instruction requires a 0x66 (operand size) prefix
 };
 
 /*
@@ -330,6 +351,8 @@ enum instrFlags {
 
   (n) - for normal instructions only (IF_REVERSE flag is not set)
   (r) - for reverse instructions only (IF_REVERSE flag is set)
+
+  0xF1 is used to indicate invalid opcodes.
 */
 
 struct X64Instr {
@@ -338,6 +361,7 @@ struct X64Instr {
 };
 
 //                                    0    1    2    3    4    5     flags
+const X64Instr instr_movdqa =  { { 0x6F,0x7F,0xF1,0x00,0xF1,0xF1 }, 0x4102 };
 const X64Instr instr_jmp =     { { 0xFF,0xF1,0xE9,0x04,0xE9,0xF1 }, 0x0910 };
 const X64Instr instr_call =    { { 0xFF,0xF1,0xE8,0x02,0xE8,0xF1 }, 0x0900 };
 const X64Instr instr_push =    { { 0xFF,0xF1,0x68,0x06,0xF1,0x50 }, 0x0510 };
@@ -874,6 +898,12 @@ public:
     int ir = int(irName);
     int r = int(rName);
     int br = int(brName);
+
+    // When this is required it goes before the REX byte, if we end up
+    // needing one.
+    if (op.flags & IF_66PREFIXED) {
+      byte(0x66);
+    }
 
     // Determine immSize from the 'hasImmediate' flag
     int immSize = sz::nosize;
@@ -1634,7 +1664,9 @@ public:
   inline void xchg_reg32_reg32(register_name_t rsrc, register_name_t rdest) {
     emitRR32(instr_xchg, rsrc, rdest);
   }
-  inline int getDispSize(int disp) {
+
+private:
+  int getDispSize(int disp) {
     if (disp == 0) {
       return sz::nosize;
     }
@@ -1643,30 +1675,44 @@ public:
     }
     return sz::dword;
   }
-  inline int getModFromDisp(int disp) {
+
+  int getModFromDisp(int disp, register_name_t base) {
     switch (getDispSize(disp)) {
-      case sz::nosize: return 0;
-      case sz::byte:   return 1;
-      default:         return 2;
-    }
-  }
-  inline void emitDisp(int disp) {
-    int dispSize = getDispSize(disp);
-    if (dispSize == sz::dword) {
-      dword(disp);
-    } else if (dispSize == sz::byte) {
-      byte(disp & 0xff);
+    case sz::nosize: return (int(base) & 7) == 5 ? 1 : 0;
+    case sz::byte:   return 1;
+    default:         return 2;
     }
   }
 
-private:
-  inline void emitModrmDisp(int r, int disp, register_name_t base) {
-    emitModrm(getModFromDisp(disp), r, int(base));
-    emitDisp(disp);
+  void emitDisp(int disp, int mod, register_name_t base) {
+    switch (mod) {
+    case 0:
+      // unsupported: we must have a SIB byte.
+      ASSERT_NOT_IMPLEMENTED(base != reg::r12 && base != reg::rsp);
+      break;
+    case 1:
+      byte(disp & 0xff);
+      break;
+    case 2:
+      dword(disp);
+      break;
+    case 3:
+      // With emitModrmDisp we shouldn't ever use register-direct
+      // addressing.
+      ASSERT(false);
+    }
+  }
+
+  void emitModrmDisp(int r, int disp, register_name_t base) {
+    // XXX: this is wrong for r12 and rsp.  Should be converted to
+    // emitCMX.
+    auto mod = getModFromDisp(disp, base);
+    emitModrm(mod, r, int(base));
+    emitDisp(disp, mod, base);
   }
 
 public:
-  inline void cmp_imm8_disp_reg8(int8_t imm, int disp, register_name_t base) {
+  void cmp_imm8_disp_reg8(int8_t imm, int disp, register_name_t base) {
     if (int(base) & 8) {
       byte(0x41); // rex (base is an extended register)
     }
@@ -1712,6 +1758,20 @@ public:
     byte(0x0F);
     byte(0x7E);
     emitModrm(3, rsrc, rdst);
+  }
+
+  void load_reg64_disp_xmm128(register_name_t rbase,
+                              int off,
+                              xmm_register rdest) {
+    emitRM(instr_movdqa, rbase, reg::noreg, sz::byte, off,
+           xmm_register_number(rdest));
+  }
+
+  void store_xmm128_disp_reg64(xmm_register rsrc,
+                               int off,
+                               register_name_t rbase) {
+    emitMR(instr_movdqa, rbase, reg::noreg, sz::byte, off,
+           xmm_register_number(rsrc));
   }
 };
 

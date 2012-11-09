@@ -2910,7 +2910,7 @@ asm (
    */
 
   "sub $0x80, %rsp\n" // kReservedRSPScratchSpace
-  /* 
+  /*
    * If returning from a BIND_CALL then push the return IP saved in the
    * actrec pointed to by r15.
    * The 0x01 in the cmp instruction must be kept in sync with

@@ -342,6 +342,7 @@ private:
     // make a call into the tc, so this first element is padding for
     // the return address pushed by the call.
     uintptr_t returnAddress;
+    uintptr_t padding; // keep the following TV's SSE friendly.
     TypedValue tvScratch;
     TypedValue tvRef;
     TypedValue tvRef2;
@@ -350,6 +351,8 @@ private:
     bool baseStrOff;
     Class* ctx;
   } __attribute__((aligned(16)));
+  static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
+                "MInstrState members require 16-byte alignment for SSE");
   static_assert(sizeof(TranslatorX64::MInstrState)
                     - sizeof(uintptr_t) // return address
                   < kReservedRSPScratchSpace,

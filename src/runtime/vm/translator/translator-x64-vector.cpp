@@ -1380,8 +1380,7 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
       invalidateOutStack(ni);
     }
 
-    ScratchReg scratch(m_regMap);
-    emitCopyTo(a, *rBase, 0, stackOutReg, stackOutDisp, *scratch);
+    emitCopyToAligned(a, *rBase, 0, stackOutReg, stackOutDisp);
     return;
   }
 

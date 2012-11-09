@@ -635,8 +635,8 @@ PSEUDOINSTRS
                      PhysReg baseReg,
                      const DynLocation* keyIn,
                      const Location& outLoc);
-  void translateIssetMSimple(const Tracelet& t,
-                             const NormalizedInstruction& ni);
+  void translateIssetMFast(const Tracelet& t,
+                           const NormalizedInstruction& ni);
   void setupActRecClsForStaticCall(const NormalizedInstruction& i,
                                    const Func* func, const Class* cls,
                                    size_t clsOff, bool forward);

@@ -3152,35 +3152,31 @@ void TranslatorX64::translateVGetM(const Tracelet& t,
   TRANSLATE_MINSTR_GENERIC(VGet, t, ni);
 }
 
-void
-TranslatorX64::analyzeIssetM(Tracelet& t, NormalizedInstruction& ni) {
-  if (!RuntimeOption::EvalJitMGeneric) {
-    ni.m_txFlags = simplePlan(
-      ni.inputs.size() == 2 &&
-      ni.immVec.locationCode() == LL &&
-      ni.immVecM.size() == 1 &&
-      mcodeMaybeArrayKey(ni.immVecM[0]) &&
-      ni.inputs[0]->valueType() == KindOfArray &&
-      (ni.inputs[1]->isString() || ni.inputs[1]->isInt())
-    );
-    return;
-  }
-  ni.m_txFlags = simpleOrSupportedPlan(
-    ni.inputs.size() == 2 &&
+static bool isSupportedIssetMFast(const NormalizedInstruction& ni) {
+  return ni.inputs.size() == 2 &&
     ni.immVec.locationCode() == LL &&
     ni.immVecM.size() == 1 &&
     mcodeMaybeArrayKey(ni.immVecM[0]) &&
     ni.inputs[0]->valueType() == KindOfArray &&
-    (ni.inputs[1]->isString() || ni.inputs[1]->isInt())
-  );
-  if (!ni.isSimple()) {
+    (ni.inputs[1]->isString() || ni.inputs[1]->isInt());
+}
+
+void
+TranslatorX64::analyzeIssetM(Tracelet& t, NormalizedInstruction& ni) {
+  bool fast = isSupportedIssetMFast(ni);
+  if (!RuntimeOption::EvalJitMGeneric) {
+    ni.m_txFlags = supportedPlan(fast);
+    return;
+  }
+  ni.m_txFlags = Supported;
+  if (!fast) {
     ASSERT(ni.isSupported());
     ni.manuallyAllocInputs = true;
   }
 }
 
-void TranslatorX64::translateIssetMSimple(const Tracelet& t,
-                                          const NormalizedInstruction& ni) {
+void TranslatorX64::translateIssetMFast(const Tracelet& t,
+                                        const NormalizedInstruction& ni) {
   const DynLocation& base = *ni.inputs[0];
   const DynLocation& key  = *ni.inputs[1];
 
@@ -3210,7 +3206,7 @@ void TranslatorX64::translateIssetMSimple(const Tracelet& t,
   }
   ASSERT(helper);
   // The array helpers can reenter; need to sync state.
-  EMIT_CALL(a, helper, R(arrReg), V(key.location));
+  EMIT_RCALL(a, ni, helper, R(arrReg), V(key.location));
 
   // We didn't bother allocating the single output reg above;
   // it lives in rax now.
@@ -3222,8 +3218,8 @@ void TranslatorX64::translateIssetMSimple(const Tracelet& t,
 
 void TranslatorX64::translateIssetM(const Tracelet& t,
                                     const NormalizedInstruction& ni) {
-  if (ni.isSimple()) {
-    translateIssetMSimple(t, ni);
+  if (isSupportedIssetMFast(ni)) {
+    translateIssetMFast(t, ni);
   } else {
     ASSERT(ni.isSupported());
     TRANSLATE_MINSTR_GENERIC(Isset, t, ni);

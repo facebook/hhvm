@@ -801,13 +801,6 @@ emitStoreNull(X64Assembler& a, const Location& where) {
   emitStoreNull(a, disp, base);
 }
 
-/*
- * The 'zero' argument can be noreg, rFlag, or a normal register
- * name. If it's noreg, a 0 immediate will be stored to _count. If
- * it's rFlag, nothing will be stored to _count. If it's a normal
- * register name, the contents of that register (hopefully set to zero
- * by the caller) are stored to _count.
- */
 static inline void
 emitCopyTo(X64Assembler& a,
            PhysReg src,
@@ -822,6 +815,21 @@ emitCopyTo(X64Assembler& a,
   a.    store_reg64_disp_reg64(scratch, destOff + TVOFF(m_data), dest);
   a.    load_reg64_disp_reg32(src, srcOff + TVOFF(m_type), scratch);
   a.    store_reg32_disp_reg64(scratch, destOff + TVOFF(m_type), dest);
+}
+
+/*
+ * Version of emitCopyTo where both the source and dest are known to
+ * be 16-byte aligned.  In this case we can use xmm.
+ */
+inline void emitCopyToAligned(X64Assembler& a,
+                              PhysReg src,
+                              int srcOff,
+                              PhysReg dest,
+                              int destOff) {
+  static_assert(sizeof(TypedValue) == 16,
+                "emitCopyToAligned assumes sizeof(TypedValue) is 128 bits");
+  a.    load_reg64_disp_xmm128(src, srcOff, xmm0);
+  a.    store_xmm128_disp_reg64(xmm0, destOff, dest);
 }
 
 // ArgManager -- support for passing VM-level data to helper functions.

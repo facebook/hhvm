@@ -6302,11 +6302,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
                   rVmSp, retvalDestDisp - AROFF(m_r) + AROFF(m_this),
                   *s);
   } else {
-    ASSERT(sizeof(Cell) == 16);
-    a.   load_reg64_disp_reg64 (rVmSp,    retvalSrcBase,      rScratch);
-    a.   store_reg64_disp_reg64(rScratch, retvalDestDisp,     rVmSp);
-    a.   load_reg64_disp_reg64 (rVmSp,    retvalSrcBase + 8,  rScratch);
-    a.   store_reg64_disp_reg64(rScratch, retvalDestDisp + 8, rVmSp);
+    emitCopyToAligned(a, rVmSp, retvalSrcBase, rVmSp, retvalDestDisp);
   }
 
   /*

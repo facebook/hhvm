@@ -160,6 +160,7 @@ public:
   static void enableIntercepts();
   static void onDelete(PhpFile *f);
   static void forEachUnit(VM::UnitVisitor& uit);
+  static size_t getLoadedFiles();
 private:
   static ParsedFilesMap s_files;
   static UnitMd5Map s_unitMd5Map;

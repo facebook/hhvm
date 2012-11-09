@@ -138,6 +138,11 @@ void FileRepository::forEachUnit(VM::UnitVisitor& uit) {
   }
 }
 
+size_t FileRepository::getLoadedFiles() {
+  ReadLock lock(s_md5Lock);
+  return s_md5Files.size();
+}
+
 PhpFile *FileRepository::checkoutFile(StringData *rname,
                                       const struct stat &s) {
   FileInfo fileInfo;

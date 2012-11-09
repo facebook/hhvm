@@ -17,6 +17,7 @@
 #include <sstream>
 #include <iomanip>
 
+#include <runtime/eval/runtime/file_repository.h>
 #include <runtime/base/server/admin_request_handler.h>
 #include <runtime/base/server/http_server.h>
 #include <runtime/base/server/pagelet_server.h>
@@ -591,6 +592,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
       appendStat("tc-size", tx->getCodeSize());
       appendStat("tc-stubsize", tx->getStubSize());
       appendStat("targetcache", tx->getTargetCacheSize());
+      appendStat("units", Eval::FileRepository::getLoadedFiles());
     }
     out << "}" << endl;
     transport->sendString(out.str());

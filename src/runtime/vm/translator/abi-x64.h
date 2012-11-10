@@ -210,6 +210,7 @@ const PhysReg serviceReqArgRegs[] = {
    * to use HHIR.
    */ \
   REQ(RETRANSLATE_NO_IR) \
+  \
   /*
    * Resume restarts execution at the current PC.  This is used after
    * an interpOne of an instruction that changes the PC, and in some

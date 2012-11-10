@@ -53,7 +53,7 @@ void Lease::gremlinLock() {
 }
 
 void
-Lease::gremlinUnlock() {
+Lease::gremlinUnlockImpl() {
   if (m_held && m_owner == gremlinize_threadid(pthread_self())) {
     TRACE(2, "Lease: gremlin dropping lock\n ");
     pthread_mutex_unlock(&m_lock);

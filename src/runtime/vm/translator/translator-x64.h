@@ -73,6 +73,7 @@ extern void* interpOneEntryPoints[];
 extern "C" TCA funcBodyHelper(ActRec* fp);
 
 struct Call;
+struct TReqInfo;
 
 class TranslatorX64 : public Translator
                     , SpillFill
@@ -874,6 +875,7 @@ private:
                    ConditionCode cc);
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
   void enterTC(SrcKey sk);
+  void handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
   void recordGdbTranslation(const SrcKey& sk, const Unit* u,
                             const Asm& a,

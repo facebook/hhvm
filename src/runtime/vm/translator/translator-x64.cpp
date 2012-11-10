@@ -2883,7 +2883,6 @@ TranslatorX64::emitRetFromInterpretedGeneratorFrame() {
   return stub;
 }
 
-
 class FreeRequestStubTrigger : public Treadmill::WorkItem {
   TCA m_stub;
  public:
@@ -2898,6 +2897,23 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
     }
   }
 };
+
+#ifdef DEBUG
+
+struct DepthGuard {
+  static __thread int m_depth;
+  DepthGuard()  { m_depth++; TRACE(2, "DepthGuard: %d {\n", m_depth); }
+  ~DepthGuard() { TRACE(2, "DepthGuard: %d }\n", m_depth); m_depth--; }
+
+  bool depthOne() const { return m_depth == 1; }
+};
+__thread int DepthGuard::m_depth;
+
+#else
+
+struct DepthGuard { bool depthOne() const { return false; } };
+
+#endif
 
 /*
  * enterTCHelper
@@ -2928,6 +2944,7 @@ static_assert(REQ_BIND_CALL == 0x1,
 asm (
   ".byte 0\n"
   ".align 16\n"
+  ".section .text\n"
 "__enterTCHelper:\n"
   // Prologue
   ".cfi_startproc\n"
@@ -2957,11 +2974,11 @@ asm (
    */
 
   "sub $0x80, %rsp\n" // kReservedRSPScratchSpace
+
   /*
-   * If returning from a BIND_CALL then push the return IP saved in the
-   * actrec pointed to by r15.
-   * The 0x01 in the cmp instruction must be kept in sync with
-   * REQ_BIND_CALL in translator-x64.h
+   * If returning from a BIND_CALL request, push the return IP saved
+   * in the ActRec pointed to by r15.  The 0x1 in the cmp instruction
+   * must be kept in sync with REQ_BIND_CALL in abi-x64.h.
    */
   "cmp $0x1, 0x0(%rcx)\n"
   "jne .LenterTCHelper$jumpToTC\n"
@@ -3007,7 +3024,9 @@ struct TReqInfo {
 
   // Some TC registers need to be preserved across service requests.
   uintptr_t saved_rStashedAr;
-  uintptr_t stubAddr;
+
+  // Stub addresses are passed back to allow us to recycle used stubs.
+  TCA stubAddr;
 };
 
 void enterTCHelper(Cell* vm_sp,
@@ -3017,31 +3036,20 @@ void enterTCHelper(Cell* vm_sp,
                    ActRec* firstAR,
                    void* targetCacheBase) asm ("__enterTCHelper");
 
-struct DepthGuard {
-  static __thread int m_depth;
-  DepthGuard()  { m_depth++; TRACE(2, "DepthGuard: %d {\n", m_depth); }
-  ~DepthGuard() { TRACE(2, "DepthGuard: %d }\n", m_depth); m_depth--; }
-};
-__thread int DepthGuard::m_depth;
 void
 TranslatorX64::enterTC(SrcKey sk) {
   using namespace TargetCache;
-  TCA start = getTranslation(&sk, true);
 
   DepthGuard d;
   TReqInfo info;
   info.requestNum = -1;
   info.saved_rStashedAr = 0;
-  const uintptr_t& requestNum = info.requestNum;
-  bool smashed;
-  uintptr_t* args = info.args;
+  TCA start = getTranslation(&sk, true);
   for (;;) {
     ASSERT(sizeof(Cell) == 16);
     ASSERT(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
     ASSERT(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
-    TRACE(1, "enterTC: %p fp%p(%s) sp%p enter {\n", start,
-          vmfp(), ((ActRec*)vmfp())->m_func->name()->data(), vmsp());
     s_writeLease.gremlinUnlock();
     // Keep dispatching until we end up somewhere the translator
     // recognizes, or we luck out and the leaseholder exits.
@@ -3053,12 +3061,14 @@ TranslatorX64::enterTC(SrcKey sk) {
       sk = SrcKey(curFunc(), g_vmContext->getPC());
       start = getTranslation(&sk, true);
     }
-    ASSERT(start);
     ASSERT(isValidCodeAddress(start));
-    tl_regState = REGSTATE_DIRTY;
     ASSERT(!s_writeLease.amOwner());
     curFunc()->validate();
     INC_TPC(enter_tc);
+
+    TRACE(1, "enterTC: %p fp%p(%s) sp%p enter {\n", start,
+          vmfp(), ((ActRec*)vmfp())->m_func->name()->data(), vmsp());
+    tl_regState = REGSTATE_DIRTY;
 
     // The asm volatile here is to force C++ to spill anything that
     // might be in a callee-saved register (aside from rbp).
@@ -3069,220 +3079,229 @@ TranslatorX64::enterTC(SrcKey sk) {
     asm volatile("" : : : "rbx","r12","r13","r14","r15");
 
     tl_regState = REGSTATE_CLEAN; // Careful: pc isn't sync'ed yet.
-    // Debugging code: cede the write lease half the time.
-    if (debug && (RuntimeOption::EvalJitStressLease)) {
-      if (d.m_depth == 1 && (rand() % 2) == 0) {
-        s_writeLease.gremlinLock();
-      }
-    }
-
-    TRACE(4, "enterTC: %p fp%p sp%p } return\n", start,
+    TRACE(1, "enterTC: %p fp%p sp%p } return\n", start,
           vmfp(), vmsp());
-    TRACE(4, "enterTC: request(%s) args: %lx %lx %lx %lx %lx\n",
-          reqName(requestNum),
-          args[0], args[1], args[2], args[3], args[4]);
 
     if (debug) {
+      // Debugging code: cede the write lease half the time.
+      if (RuntimeOption::EvalJitStressLease) {
+        if (d.depthOne() == 1 && (rand() % 2) == 0) {
+          s_writeLease.gremlinLock();
+        }
+      }
       // Ensure that each case either returns, or drives start to a valid
       // value.
       start = TCA(0xbee5face);
     }
 
-    // The contract is that each case will either exit, by returning, or
-    // set sk to the place where execution should resume, and optionally
-    // set start to the hardware translation of the resumption point.
-    //
-    // start and sk might be subtly different; i.e., there are cases where
-    // start != NULL && start != getTranslation(sk). For instance,
-    // REQ_BIND_CALL has not finished executing the OpCall when it gets
-    // here, and has even done some work on its behalf. sk == OpFCall,
-    // while start == the point in the TC that's "half-way through" the
-    // Call instruction. If we punt to the interpreter, the interpreter
-    // will redo some of the work that the translator has already done.
-    INC_TPC(service_req);
-    smashed = false;
-    switch (requestNum) {
-      case REQ_EXIT: {
-        // fp is not valid anymore
-        vmfp() = NULL;
-        return;
-      }
+    TRACE(4, "enterTC: request(%s) args: %lx %lx %lx %lx %lx\n",
+          reqName(info.requestNum),
+          info.args[0], info.args[1], info.args[2], info.args[3],
+          info.args[4]);
 
-      case REQ_BIND_CALL: {
-        ReqBindCall* req = (ReqBindCall*)args[0];
-        ActRec* calleeFrame = (ActRec*)args[1];
-        TCA toSmash = req->m_toSmash;
-        Func *func = const_cast<Func*>(calleeFrame->m_func);
-        int nArgs = req->m_nArgs;
-        bool isImmutable = req->m_isImmutable;
-        TCA dest = tx64->funcPrologue(func, nArgs);
-        TRACE(2, "enterTC: bindCall %s -> %p\n", func->name()->data(), dest);
-        if (!isImmutable) {
-          // We dont know we're calling the right function, so adjust
-          // dest to point to the dynamic check of ar->m_func.
-          dest = funcPrologToGuard(dest, func);
-        } else {
-          TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
-                func->fullName()->data(), dest);
-        }
-        LeaseHolder writer(s_writeLease, NO_ACQUIRE);
-        if (dest && writer.acquire()) {
-          TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
-          smashCall(tx64->getAsmFor(toSmash), toSmash, dest);
-          smashed = true;
-          // sk: stale, but doesn't matter since we have a valid dest TCA.
-        } else {
-          // We need translator help; we're not at the callee yet, so
-          // roll back. The prelude has done some work already, but it
-          // should be safe to redo.
-          TRACE(2, "enterTC: bindCall rollback smash %p -> %p\n",
-                toSmash, dest);
-          sk = req->m_sourceInstr;
-        }
-        start = dest;
-        if (!start) {
-          // EnterTCHelper pushes the return ip onto the stack when the
-          // requestNum is REQ_BIND_CALL, but if start is NULL, it will
-          // interpret in doFCall, so we clear out the requestNum in this
-          // case to prevent enterTCHelper from pushing the return ip
-          // onto the stack.
-          info.requestNum = ~REQ_BIND_CALL;
-        }
-      } break;
-
-      case REQ_BIND_SIDE_EXIT:
-      case REQ_BIND_JMP:
-      case REQ_BIND_JCC:
-      case REQ_BIND_JMP_NO_IR:
-      case REQ_BIND_ADDR: {
-        TCA toSmash = (TCA)args[0];
-        Offset off = args[1];
-        sk = SrcKey(curFunc(), off);
-        if (requestNum == REQ_BIND_SIDE_EXIT) {
-          SKTRACE(3, sk, "side exit taken!\n");
-        }
-        start = bindJmp(toSmash, sk, (ServiceRequest)requestNum, smashed);
-      } break;
-
-      case REQ_BIND_JMPCC_FIRST: {
-        TCA toSmash = (TCA)args[0];
-        Offset offTaken = (Offset)args[1];
-        Offset offNotTaken = (Offset)args[2];
-        ConditionCode cc = ConditionCode(args[3]);
-        bool taken = int64(args[4]) & 1;
-        start = bindJmpccFirst(toSmash, offTaken, offNotTaken,
-                               taken, cc, smashed);
-        // SrcKey: we basically need to emulate the fail
-        sk = SrcKey(curFunc(), taken ? offTaken : offNotTaken);
-      } break;
-
-      case REQ_BIND_JMPCC_SECOND: {
-        TCA toSmash = (TCA)args[0];
-        Offset off = (Offset)args[1];
-        ConditionCode cc = ConditionCode(args[2]);
-        start = bindJmpccSecond(toSmash, off, cc, smashed);
-        sk = SrcKey(curFunc(), off);
-      } break;
-
-      case REQ_BIND_REQUIRE: {
-        ReqLitStaticArgs* rlsa = (ReqLitStaticArgs*)args[0];
-        sk = SrcKey((Func*)args[1], (Offset)args[2]);
-        start = getTranslation(&sk, true);
-        if (start) {
-          LeaseHolder writer(s_writeLease);
-          if (writer) {
-            smashed = true;
-            SrcRec* sr = getSrcRec(sk);
-            sr->chainFrom(a, IncomingBranch(&rlsa->m_pseudoMain));
-          }
-        }
-      } break;
-
-      case REQ_RETRANSLATE_NO_IR: {
-        TCA toSmash = (TCA)args[0];
-        sk = SrcKey(curFunc(), (Offset)args[1]);
-        start = retranslateAndPatchNoIR(sk, true, toSmash);
-        SKTRACE(2, sk, "retranslated (without IR) @%p\n", start);
-      } break;
-
-      case REQ_RETRANSLATE: {
-        INC_TPC(retranslate);
-        sk = SrcKey(curFunc(), (Offset)args[0]);
-        start = retranslate(sk, true, RuntimeOption::EvalJitUseIR);
-        SKTRACE(2, sk, "retranslated @%p\n", start);
-      } break;
-
-      case REQ_INTERPRET: {
-        Offset off = args[0];
-        int numInstrs = args[1];
-        g_vmContext->m_pc = curUnit()->at(off);
-        /*
-         * We know the compilation unit has not changed; basic blocks do
-         * not span files. I claim even exceptions do not violate this
-         * axiom.
-         */
-        ASSERT(numInstrs >= 0);
-        ONTRACE(5, SrcKey(curFunc(), off).trace("interp: enter\n"));
-        if (numInstrs) {
-          s_perfCounters[tpc_interp_instr] += numInstrs;
-          g_vmContext->dispatchN(numInstrs);
-        } else {
-          // numInstrs == 0 means it wants to dispatch until BB ends
-          INC_TPC(interp_bb);
-          g_vmContext->dispatchBB();
-        }
-        SrcKey newSk(curFunc(), g_vmContext->getPC());
-        SKTRACE(5, newSk, "interp: exit\n");
-        sk = newSk;
-        start = getTranslation(&newSk, true);
-      } break;
-
-      case REQ_POST_INTERP_RET: {
-        // This is only responsible for the control-flow aspect of the Ret:
-        // getting to the destination's translation, if any.
-        ActRec* ar = (ActRec*)args[0];
-        ActRec* caller = (ActRec*)args[1];
-        ASSERT((Cell*) caller == vmfp());
-        Unit* destUnit = caller->m_func->unit();
-        // Set PC so logging code in getTranslation doesn't get confused.
-        vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
-        SrcKey dest(caller->m_func, vmpc());
-        sk = dest;
-        start = getTranslation(&dest, true);
-        TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
-              ar->m_func->fullName()->data(),
-              caller->m_func->fullName()->data());
-      } break;
-
-      case REQ_RESUME: {
-        SrcKey dest(curFunc(), vmpc());
-        sk = dest;
-        start = getTranslation(&dest, true);
-      } break;
-
-      case REQ_STACK_OVERFLOW: {
-        /*
-         * we need to construct the pc of the fcall from the return
-         * address (which will be after the fcall). Because fcall is
-         * a variable length instruction, and because we sometimes
-         * delete instructions from the instruction stream, we
-         * need to use fpi regions to find the fcall.
-         */
-        const FPIEnt* fe = curFunc()->findPrecedingFPI(
-          curUnit()->offsetOf(vmpc()));
-        vmpc() = curUnit()->at(fe->m_fcallOff);
-        ASSERT(isFCallStar(*vmpc()));
-        raise_error("Stack overflow");
-        NOT_REACHED();
-      }
+    if (LIKELY(info.requestNum == REQ_EXIT)) {
+      vmfp() = nullptr;
+      return;
     }
-    const uintptr_t& stubAddr = info.stubAddr;
-    if (stubAddr != 0 && smashed) {
-      Treadmill::WorkItem::enqueue(
-        new FreeRequestStubTrigger((TCA)stubAddr));
-    }
+    handleServiceRequest(info, start, sk);
   }
-  NOT_REACHED();
+}
+
+/*
+ * The contract is that each case will set sk to the place where
+ * execution should resume, and optionally set start to the hardware
+ * translation of the resumption point (or otherwise set it to null).
+ *
+ * start and sk might be subtly different; i.e., there are cases where
+ * start != NULL && start != getTranslation(sk). For instance,
+ * REQ_BIND_CALL has not finished executing the OpCall when it gets
+ * here, and has even done some work on its behalf. sk == OpFCall,
+ * while start == the point in the TC that's "half-way through" the
+ * Call instruction. If we punt to the interpreter, the interpreter
+ * will redo some of the work that the translator has already done.
+ */
+void TranslatorX64::handleServiceRequest(TReqInfo& info,
+                                         TCA& start,
+                                         SrcKey& sk) {
+  const uintptr_t& requestNum = info.requestNum;
+  auto* const args = info.args;
+  ASSERT(requestNum != REQ_EXIT);
+  INC_TPC(service_req);
+
+  bool smashed = false;
+  switch (requestNum) {
+  case REQ_BIND_CALL: {
+    ReqBindCall* req = (ReqBindCall*)args[0];
+    ActRec* calleeFrame = (ActRec*)args[1];
+    TCA toSmash = req->m_toSmash;
+    Func *func = const_cast<Func*>(calleeFrame->m_func);
+    int nArgs = req->m_nArgs;
+    bool isImmutable = req->m_isImmutable;
+    TCA dest = tx64->funcPrologue(func, nArgs);
+    TRACE(2, "enterTC: bindCall %s -> %p\n", func->name()->data(), dest);
+    if (!isImmutable) {
+      // We dont know we're calling the right function, so adjust
+      // dest to point to the dynamic check of ar->m_func.
+      dest = funcPrologToGuard(dest, func);
+    } else {
+      TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
+            func->fullName()->data(), dest);
+    }
+    LeaseHolder writer(s_writeLease, NO_ACQUIRE);
+    if (dest && writer.acquire()) {
+      TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
+      smashCall(tx64->getAsmFor(toSmash), toSmash, dest);
+      smashed = true;
+      // sk: stale, but doesn't matter since we have a valid dest TCA.
+    } else {
+      // We need translator help; we're not at the callee yet, so
+      // roll back. The prelude has done some work already, but it
+      // should be safe to redo.
+      TRACE(2, "enterTC: bindCall rollback smash %p -> %p\n",
+            toSmash, dest);
+      sk = req->m_sourceInstr;
+    }
+    start = dest;
+    if (!start) {
+      // EnterTCHelper pushes the return ip onto the stack when the
+      // requestNum is REQ_BIND_CALL, but if start is NULL, it will
+      // interpret in doFCall, so we clear out the requestNum in this
+      // case to prevent enterTCHelper from pushing the return ip
+      // onto the stack.
+      info.requestNum = ~REQ_BIND_CALL;
+    }
+  } break;
+
+  case REQ_BIND_SIDE_EXIT:
+  case REQ_BIND_JMP:
+  case REQ_BIND_JCC:
+  case REQ_BIND_JMP_NO_IR:
+  case REQ_BIND_ADDR: {
+    TCA toSmash = (TCA)args[0];
+    Offset off = args[1];
+    sk = SrcKey(curFunc(), off);
+    if (requestNum == REQ_BIND_SIDE_EXIT) {
+      SKTRACE(3, sk, "side exit taken!\n");
+    }
+    start = bindJmp(toSmash, sk, (ServiceRequest)requestNum, smashed);
+  } break;
+
+  case REQ_BIND_JMPCC_FIRST: {
+    TCA toSmash = (TCA)args[0];
+    Offset offTaken = (Offset)args[1];
+    Offset offNotTaken = (Offset)args[2];
+    ConditionCode cc = ConditionCode(args[3]);
+    bool taken = int64(args[4]) & 1;
+    start = bindJmpccFirst(toSmash, offTaken, offNotTaken,
+                           taken, cc, smashed);
+    // SrcKey: we basically need to emulate the fail
+    sk = SrcKey(curFunc(), taken ? offTaken : offNotTaken);
+  } break;
+
+  case REQ_BIND_JMPCC_SECOND: {
+    TCA toSmash = (TCA)args[0];
+    Offset off = (Offset)args[1];
+    ConditionCode cc = ConditionCode(args[2]);
+    start = bindJmpccSecond(toSmash, off, cc, smashed);
+    sk = SrcKey(curFunc(), off);
+  } break;
+
+  case REQ_BIND_REQUIRE: {
+    ReqLitStaticArgs* rlsa = (ReqLitStaticArgs*)args[0];
+    sk = SrcKey((Func*)args[1], (Offset)args[2]);
+    start = getTranslation(&sk, true);
+    if (start) {
+      LeaseHolder writer(s_writeLease);
+      if (writer) {
+        smashed = true;
+        SrcRec* sr = getSrcRec(sk);
+        sr->chainFrom(a, IncomingBranch(&rlsa->m_pseudoMain));
+      }
+    }
+  } break;
+
+  case REQ_RETRANSLATE_NO_IR: {
+    TCA toSmash = (TCA)args[0];
+    sk = SrcKey(curFunc(), (Offset)args[1]);
+    start = retranslateAndPatchNoIR(sk, true, toSmash);
+    SKTRACE(2, sk, "retranslated (without IR) @%p\n", start);
+  } break;
+
+  case REQ_RETRANSLATE: {
+    INC_TPC(retranslate);
+    sk = SrcKey(curFunc(), (Offset)args[0]);
+    start = retranslate(sk, true, RuntimeOption::EvalJitUseIR);
+    SKTRACE(2, sk, "retranslated @%p\n", start);
+  } break;
+
+  case REQ_INTERPRET: {
+    Offset off = args[0];
+    int numInstrs = args[1];
+    g_vmContext->m_pc = curUnit()->at(off);
+    /*
+     * We know the compilation unit has not changed; basic blocks do
+     * not span files. I claim even exceptions do not violate this
+     * axiom.
+     */
+    ASSERT(numInstrs >= 0);
+    ONTRACE(5, SrcKey(curFunc(), off).trace("interp: enter\n"));
+    if (numInstrs) {
+      s_perfCounters[tpc_interp_instr] += numInstrs;
+      g_vmContext->dispatchN(numInstrs);
+    } else {
+      // numInstrs == 0 means it wants to dispatch until BB ends
+      INC_TPC(interp_bb);
+      g_vmContext->dispatchBB();
+    }
+    SrcKey newSk(curFunc(), g_vmContext->getPC());
+    SKTRACE(5, newSk, "interp: exit\n");
+    sk = newSk;
+    start = getTranslation(&newSk, true);
+  } break;
+
+  case REQ_POST_INTERP_RET: {
+    // This is only responsible for the control-flow aspect of the Ret:
+    // getting to the destination's translation, if any.
+    ActRec* ar = (ActRec*)args[0];
+    ActRec* caller = (ActRec*)args[1];
+    ASSERT((Cell*) caller == vmfp());
+    Unit* destUnit = caller->m_func->unit();
+    // Set PC so logging code in getTranslation doesn't get confused.
+    vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
+    SrcKey dest(caller->m_func, vmpc());
+    sk = dest;
+    start = getTranslation(&dest, true);
+    TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
+          ar->m_func->fullName()->data(),
+          caller->m_func->fullName()->data());
+  } break;
+
+  case REQ_RESUME: {
+    SrcKey dest(curFunc(), vmpc());
+    sk = dest;
+    start = getTranslation(&dest, true);
+  } break;
+
+  case REQ_STACK_OVERFLOW: {
+    /*
+     * we need to construct the pc of the fcall from the return
+     * address (which will be after the fcall). Because fcall is
+     * a variable length instruction, and because we sometimes
+     * delete instructions from the instruction stream, we
+     * need to use fpi regions to find the fcall.
+     */
+    const FPIEnt* fe = curFunc()->findPrecedingFPI(
+      curUnit()->offsetOf(vmpc()));
+    vmpc() = curUnit()->at(fe->m_fcallOff);
+    ASSERT(isFCallStar(*vmpc()));
+    raise_error("Stack overflow");
+    NOT_REACHED();
+  }
+  }
+
+  if (smashed && info.stubAddr) {
+    Treadmill::WorkItem::enqueue(new FreeRequestStubTrigger(info.stubAddr));
+  }
 }
 
 void TranslatorX64::resume(SrcKey sk) {

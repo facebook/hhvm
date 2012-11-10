@@ -61,7 +61,12 @@ struct Lease {
    * for debugging purposes.
    */
   void gremlinLock();
-  void gremlinUnlock();
+  void gremlinUnlock() {
+    if (debug) { gremlinUnlockImpl(); }
+  }
+
+private:
+  void gremlinUnlockImpl();
 };
 
 enum LeaseAcquire {

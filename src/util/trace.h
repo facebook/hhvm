@@ -28,11 +28,10 @@
  *
  * env TRACE=tx64:1,bcinterp:3,tmp0:1 ./hhvm/hhvm ...
  *
- * In a source file, select the compilation unit's module by setting the
- * TRACEMOD symbol to an appropriate member of the Module enumerator
- * in the file's *local* namespace. E.g.,
+ * In a source file, select the compilation unit's module by calling the
+ * TRACE_SET_MODE macro. E.g.,
  *
- *   static const Trace::Module TRACEMOD = Trace::tx64;
+ *   TRACE_SET_MOD(tx64);
  *
  *   ...
  *   TRACE(0, "See this for any trace-enabled build: %d\n", foo);

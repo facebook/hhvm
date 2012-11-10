@@ -10837,7 +10837,7 @@ asm_label(a, freeLocals);
     a.  cmp_imm32_reg32(KindOfRefCountThreshold, rdi);
     jccBlock<CC_LE>(a, [&] {
       a.load_reg64_disp_reg64(base, disp + TVOFF(m_data), rsi);
-      a.store_reg32_disp_reg64(rZero, disp + TVOFF(m_data), base);
+      a.store_reg32_disp_reg64(rZero, disp + TVOFF(m_type), base);
       a.call(TCA(tvDecRefHelper));
     });
   };

@@ -582,8 +582,9 @@ available at that given point in the bytecode. Likewise, the flavor descriptor
 of each slot on the evaluation stack must be compatible with the instruction's
 inputs' flavor descriptors.
 
-3) The evaluation stack must be empty at the beginning and end of each try
-region.
+3) The evaluation stack must be empty at the beginning and end of each
+try region.  The evaluation stack must also be empty at any offset
+listed as a catch entry point.
 
 4) If a given instruction is not the target of a forward branch and it follows
 a Jmp, Switch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or ContHandle

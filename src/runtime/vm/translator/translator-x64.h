@@ -786,8 +786,10 @@ private:
                    SrcRec& fail);
   void checkRefs(Asm&, const SrcKey&, const RefDeps&, SrcRec&);
 
-  void emitFrameRelease(Asm& a, const NormalizedInstruction& i,
-                        bool noThis = false);
+  void emitInlineReturn(bool noThis,
+                        Location retvalSrcLoc,
+                        int retvalSrcDisp);
+  void emitGenericReturn(bool noThis, int retvalSrcDisp);
   void dumpStack(const char* msg, int offset) const;
 
   static const size_t kJmpTargetAlign = 16;

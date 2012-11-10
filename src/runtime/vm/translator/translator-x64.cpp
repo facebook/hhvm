@@ -6205,12 +6205,163 @@ void TranslatorX64::emitReturnVal(
 
 }
 
-/*
- * translateRetC --
- *
- *   Return to caller with the current activation record replaced with the
- *   top-of-stack return value.
- */
+void TranslatorX64::emitInlineReturn(bool noThis,
+                                     Location retvalSrcLoc,
+                                     int retvalSrcDisp) {
+  SKTRACE(2, m_curNI->source, "emitting specialized inline return\n");
+
+  ScratchReg rTmp(m_regMap);
+
+  const bool mergedThis = m_curNI->wasGroupedWith(OpThis, OpBareThis);
+  if (mergedThis) {
+    // There is nothing to do, we're returning this, but we didnt
+    // incRef it, so we dont have to decRef here.
+  } else {
+    // If this is a instance method called on an object or if it is a
+    // pseudomain, we need to decRef $this (if there is one)
+    if (curFunc()->isMethod() && !curFunc()->isStatic()) {
+      // This assert is weaker than it looks; it only checks the invocation
+      // we happen to be translating for. The runtime "assert" is the
+      // unconditional dereference of m_this we emit; if the frame has
+      // neither this nor a class, then m_this will be null and we'll
+      // SEGV.
+      ASSERT(curFrame()->hasThis() || curFrame()->hasClass());
+      // m_this and m_cls share a slot in the ActRec, so we check the
+      // lowest bit (0 -> m_this, 1 -> m_cls)
+      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
+      if (m_curNI->guardedThis) {
+        emitDecRef(*m_curNI, *rTmp, KindOfObject);
+      } else {
+        a.      test_imm8_reg8(1, *rTmp);
+        {
+          JccBlock<CC_NZ> ifZero(a);
+          emitDecRef(*m_curNI, *rTmp, KindOfObject); // this. decref it.
+        }
+      }
+    } else if (curFunc()->isPseudoMain()) {
+      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
+      a.      shr_imm32_reg64(1, *rTmp); // sets c (from bit 0) and z
+      FreezeRegs ice(m_regMap);
+      {
+        // tests for Not Zero and Not Carry
+        UnlikelyIfBlock ifRealThis(CC_NBE, a, astubs);
+        astubs.    shl_imm32_reg64(1, *rTmp);
+        emitDecRef(astubs, *m_curNI, *rTmp, KindOfObject);
+      }
+    }
+  }
+
+  /*
+   * If this function can possibly use variadic arguments or shared
+   * variable environment, we need to check for it and clear them if
+   * they exist.
+   */
+  boost::scoped_ptr<DiamondReturn> mayUseVVRet;
+  Label extraArgsReturn;
+  if (curFunc()->attrs() & AttrMayUseVV) {
+    SKTRACE(2, m_curNI->source, "emitting mayUseVV in UnlikelyIf\n");
+
+    mayUseVVRet.reset(new DiamondReturn);
+    a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rTmp);
+    a.    test_reg64_reg64(*rTmp, *rTmp);
+    {
+      // TODO: maybe this should be a semi-likely block when there
+      // is a varenv at translation time.
+      UnlikelyIfBlock varEnvCheck(CC_NZ, a, astubs, mayUseVVRet.get());
+      auto& a = astubs;
+
+      a.  test_imm32_reg32(ActRec::kExtraArgsBit, *rTmp);
+      jccBlock<CC_Z>(a, [&] {
+        guardDiamond(a, [&] {
+          EMIT_RCALL(
+            a, *m_curNI,
+            TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
+            R(rVmFp)
+          );
+        });
+        extraArgsReturn.jmp(a);
+      });
+
+      m_regMap.cleanAll();
+      EMIT_RCALL(
+        a, *m_curNI,
+        TCA(getMethodHardwarePtr(&VarEnv::detach)),
+        R(*rTmp),
+        R(rVmFp)
+      );
+    }
+  }
+
+asm_label(a, extraArgsReturn);
+  ASSERT(curFunc()->numLocals() == (int)m_curNI->inputs.size());
+  for (int k = m_curNI->inputs.size() - 1; k >= 0; --k) {
+    ASSERT(m_curNI->inputs[k]->location.space == Location::Local);
+    DataType t = m_curNI->inputs[k]->outerType();
+    if (IS_REFCOUNTED_TYPE(t)) {
+      PhysReg reg = m_regMap.allocReg(m_curNI->inputs[k]->location, t,
+                                      RegInfo::CLEAN);
+      emitDecRef(*m_curNI, reg, t);
+    }
+  }
+
+  // Register map is officially out of commission now.
+  m_regMap.scrubLoc(retvalSrcLoc);
+  m_regMap.smashRegs(kAllRegs);
+
+  mayUseVVRet.reset();
+
+  emitTestSurpriseFlags(a);
+  {
+    UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
+    if (m_curNI->grouped) {
+      // We need to drop the return value on the stack for the event
+      // hook, same as in emitGenericReturn.
+      ScratchReg s(m_regMap);
+      emitReturnVal(astubs, *m_curNI,
+                    rVmSp, retvalSrcDisp, rVmFp, AROFF(m_this), *s);
+    }
+    astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+    emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
+    recordReentrantStubCall(*m_curNI);
+  }
+
+  // The register map on the main line better be empty (everything
+  // smashed) or some of the above DiamondReturns might generate
+  // reconciliation code.
+  ASSERT(m_regMap.empty());
+}
+
+void TranslatorX64::emitGenericReturn(bool noThis, int retvalSrcDisp) {
+  SKTRACE(2, m_curNI->source, "emitting generic return\n");
+  ASSERT(m_curNI->inputs.size() == 0);
+
+  m_regMap.cleanAll();
+  m_regMap.smashRegs(kAllRegs);
+
+  if (m_curNI->grouped) {
+    /*
+     * What a pain: EventHook::onFunctionExit needs access
+     * to the return value - so we have to write it to the
+     * stack anyway. We still win for OpThis, and
+     * OpBareThis, since we dont have to do any refCounting
+     */
+    ScratchReg s(m_regMap);
+    emitReturnVal(a, *m_curNI,
+                  rVmSp, retvalSrcDisp, rVmFp, AROFF(m_this), *s);
+  }
+
+  // Custom calling convention: the argument is in r15.
+  int numLocals = curFunc()->numLocals();
+  ASSERT(numLocals > kFewLocals);
+  emitImmReg(a, numLocals - kFewLocals, r15);
+  if (noThis || m_curNI->wasGroupedWith(OpThis, OpBareThis)) {
+    emitCall(a, m_freeLocalsNoThisHelper);
+  } else {
+    emitCall(a, m_freeLocalsThisHelper);
+  }
+  recordReentrantCall(a, *m_curNI);
+}
+
 void
 TranslatorX64::translateRetC(const Tracelet& t,
                              const NormalizedInstruction& i) {
@@ -6240,173 +6391,27 @@ TranslatorX64::translateRetC(const Tracelet& t,
     m_regMap.cleanAll(); // TODO(#1339331): don't.
   }
 
-  bool noThis = !curFunc()->isPseudoMain() &&
-    (!curFunc()->isMethod() || curFunc()->isStatic());
-  bool mayUseVV = (curFunc()->attrs() & AttrMayUseVV);
-  bool mergedThis = i.grouped && (i.prev->op() == OpThis ||
-                                  i.prev->op() == OpBareThis);
+  const bool noThis = !curFunc()->isPseudoMain() &&
+                      (!curFunc()->isMethod() || curFunc()->isStatic());
+
   /*
    * figure out where to put the return value, and where to get it from
    */
   ASSERT(i.stackOff == t.m_stackChange);
-  const Location retValSrcLoc(Location::Stack, stackAdjustment - 1);
+  const Location retvalSrcLoc(Location::Stack, stackAdjustment - 1);
 
   const Func *callee = curFunc();
   ASSERT(callee);
   int nLocalCells =
     callee == NULL ? 0 : // This happens for returns from pseudo-main.
     callee->numSlotsInFrame();
-  int retvalSrcBase = cellsToBytes(-stackAdjustment);
-
-  ASSERT(cellsToBytes(locPhysicalOffset(retValSrcLoc)) == retvalSrcBase);
-
-  /*
-   * The (1 + nLocalCells) skips 1 slot for the return value.
-   */
-  int retvalDestDisp = cellsToBytes(1 + nLocalCells - stackAdjustment) +
-    AROFF(m_r);
+  int retvalSrcDisp = cellsToBytes(-stackAdjustment);
+  ASSERT(cellsToBytes(locPhysicalOffset(retvalSrcLoc)) == retvalSrcDisp);
 
   if (m_curNI->inlineReturn) {
-    SKTRACE(2, i.source, "emitting specialized inline return\n");
-
-    ScratchReg rTmp(m_regMap);
-
-    if (mergedThis) {
-      // There is nothing to do, we're returning this,
-      // but we didnt incRef it, so we dont have to
-      // decRef here.
-    } else {
-      // If this is a instance method called on an object or if it is a
-      // pseudomain, we need to decRef $this (if there is one)
-      if (curFunc()->isMethod() && !curFunc()->isStatic()) {
-        // This assert is weaker than it looks; it only checks the invocation
-        // we happen to be translating for. The runtime "assert" is the
-        // unconditional dereference of m_this we emit; if the frame has
-        // neither this nor a class, then m_this will be null and we'll
-        // SEGV.
-        ASSERT(curFrame()->hasThis() || curFrame()->hasClass());
-        // m_this and m_cls share a slot in the ActRec, so we check the
-        // lowest bit (0 -> m_this, 1 -> m_cls)
-        a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
-        if (i.guardedThis) {
-          emitDecRef(i, *rTmp, KindOfObject);
-        } else {
-          a.      test_imm8_reg8(1, *rTmp);
-          {
-            JccBlock<CC_NZ> ifZero(a);
-            emitDecRef(i, *rTmp, KindOfObject); // this. decref it.
-          }
-        }
-      } else if (curFunc()->isPseudoMain()) {
-        a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
-        a.      shr_imm32_reg64(1, *rTmp); // sets c (from bit 0) and z
-        FreezeRegs ice(m_regMap);
-        {
-          // tests for Not Zero and Not Carry
-          UnlikelyIfBlock ifRealThis(CC_NBE, a, astubs);
-          astubs.    shl_imm32_reg64(1, *rTmp);
-          emitDecRef(astubs, i, *rTmp, KindOfObject);
-        }
-      }
-    }
-
-    /*
-     * If this function can possibly use variadic arguments or shared
-     * variable environment, we need to check for it and clear them if
-     * they exist.
-     */
-    boost::scoped_ptr<DiamondReturn> mayUseVVRet;
-    Label extraArgsReturn;
-    if (mayUseVV) {
-      SKTRACE(2, i.source, "emitting mayUseVV in UnlikelyIf\n");
-
-      mayUseVVRet.reset(new DiamondReturn);
-      a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rTmp);
-      a.    test_reg64_reg64(*rTmp, *rTmp);
-      {
-        // TODO: maybe this should be a semi-likely block when there
-        // is a varenv at translation time.
-        UnlikelyIfBlock varEnvCheck(CC_NZ, a, astubs, mayUseVVRet.get());
-        auto& a = astubs;
-
-        a.  test_imm32_reg32(ActRec::kExtraArgsBit, *rTmp);
-        jccBlock<CC_Z>(a, [&] {
-          guardDiamond(a, [&] {
-            EMIT_RCALL(
-              a, *m_curNI,
-              TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
-              R(rVmFp)
-            );
-          });
-          extraArgsReturn.jmp(a);
-        });
-
-        m_regMap.cleanAll();
-        EMIT_RCALL(
-          a, *m_curNI,
-          TCA(getMethodHardwarePtr(&VarEnv::detach)),
-          R(*rTmp),
-          R(rVmFp)
-        );
-      }
-    }
-
-  asm_label(a, extraArgsReturn);
-    ASSERT(curFunc()->numLocals() == (int)i.inputs.size());
-    for (int k = i.inputs.size() - 1; k >= 0; --k) {
-      // RetC's inputs should all be locals
-      ASSERT(i.inputs[k]->location.space == Location::Local);
-      DataType t = i.inputs[k]->outerType();
-      if (IS_REFCOUNTED_TYPE(t)) {
-        PhysReg reg = m_regMap.allocReg(i.inputs[k]->location, t,
-                                        RegInfo::CLEAN);
-        emitDecRef(i, reg, t);
-      }
-    }
-
-    // Register map is officially out of commission now.
-    m_regMap.scrubLoc(retValSrcLoc);
-    m_regMap.smashRegs(kAllRegs);
-
-    mayUseVVRet.reset();
-
-    emitTestSurpriseFlags(a);
-    {
-      UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
-      if (i.grouped) {
-        ScratchReg s(m_regMap);
-        emitReturnVal(astubs, i,
-                      rVmSp, retvalSrcBase, rVmFp, AROFF(m_this), *s);
-      }
-      astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-      emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
-      recordReentrantStubCall(i);
-    }
-
-    // The register map on the main line better be empty (everything
-    // smashed) or some of the above DiamondReturns might generate
-    // reconciliation code.
-    ASSERT(m_regMap.empty());
+    emitInlineReturn(noThis, retvalSrcLoc, retvalSrcDisp);
   } else {
-    SKTRACE(2, i.source, "emitting generic return\n");
-
-    m_regMap.cleanAll();
-    m_regMap.smashRegs(kAllRegs);
-    if (i.grouped) {
-      /*
-       * What a pain: EventHook::onFunctionExit needs access
-       * to the return value - so we have to write it to the
-       * stack anyway. We still win for OpThis, and
-       * OpBareThis, since we dont have to do any refCounting
-       */
-      ScratchReg s(m_regMap);
-      emitReturnVal(a, i,
-                    rVmSp, retvalSrcBase, rVmFp, AROFF(m_this), *s);
-    }
-    // If we are doing the generic return flow, we emit a call to
-    // frame_free_locals here
-    ASSERT(i.inputs.size() == 0);
-    emitFrameRelease(a, i, noThis || mergedThis);
+    emitGenericReturn(noThis, retvalSrcDisp);
   }
 
   /*
@@ -6417,10 +6422,14 @@ TranslatorX64::translateRetC(const Tracelet& t,
   RegSet scratchRegs = kScratchCrossTraceRegs;
   DumbScratchReg rRetAddr(scratchRegs);
 
+  // The (1 + nLocalCells) skips 1 slot for the return value.
+  int retvalDestDisp = cellsToBytes(1 + nLocalCells - stackAdjustment) +
+    AROFF(m_r);
+
   if (!m_curNI->inlineReturn) {
     // Compensate for rVmSp already being adjusted by the helper in
     // emitFrameRelease.
-    retvalSrcBase -= sizeof(ActRec) +
+    retvalSrcDisp -= sizeof(ActRec) +
       cellsToBytes(nLocalCells - stackAdjustment);
     retvalDestDisp = 0;
   }
@@ -6437,7 +6446,7 @@ TranslatorX64::translateRetC(const Tracelet& t,
                   rVmSp, retvalDestDisp - AROFF(m_r) + AROFF(m_this),
                   *s);
   } else {
-    emitCopyToAligned(a, rVmSp, retvalSrcBase, rVmSp, retvalDestDisp);
+    emitCopyToAligned(a, rVmSp, retvalSrcDisp, rVmSp, retvalDestDisp);
   }
 
   /*
@@ -6552,24 +6561,6 @@ TranslatorX64::translateNativeImpl(const Tracelet& t,
   ASSERT(ni.stackOff == 0);
   ASSERT(m_regMap.empty());
   emitNativeImpl(curFunc(), true);
-}
-
-// Warning: smashes rsi and rdi, and can't handle unclean registers.
-// Used between functions.
-void
-TranslatorX64::emitFrameRelease(X64Assembler& a,
-                                const NormalizedInstruction& i,
-                                bool noThis /*= false*/) {
-  // Custom calling convention: the argument is in r15.
-  int numLocals = curFunc()->numLocals();
-  ASSERT(numLocals > kFewLocals);
-  emitImmReg(a, numLocals - kFewLocals, r15);
-  if (noThis) {
-    emitCall(a, m_freeLocalsNoThisHelper);
-  } else {
-    emitCall(a, m_freeLocalsThisHelper);
-  }
-  recordReentrantCall(a, i);
 }
 
 // emitClsLocalIndex --
@@ -7762,7 +7753,7 @@ TranslatorX64::translateCheckTypeOp(const Tracelet& t,
 
   bool isType;
 
-  if (ni.grouped && (ni.prev->op() == OpThis || ni.prev->op() == OpBareThis)) {
+  if (ni.wasGroupedWith(OpThis, OpBareThis)) {
     ASSERT(ni.op() == OpIsNullC);
     if (ni.prev->op() == OpThis) {
       isType = false;
@@ -9765,7 +9756,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     Stats::emitInc(a, Stats::Tx64_InstanceOfDFused);
   }
 
-  if (i.grouped && (i.prev->op() == OpThis || i.prev->op() == OpBareThis)) {
+  if (i.wasGroupedWith(OpThis, OpBareThis)) {
     ASSERT(curFunc()->cls());
     srcScratch.alloc();
     srcReg = *srcScratch;
@@ -10868,8 +10859,7 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
 }
 
 /*
- * Defines functions called by emitFrameRelease.  Tightly coupled with
- * translateRetC.
+ * Defines functions called by emitGenericReturn.
  *
  * The number of locals must be greater than kFewLocals.  The
  * difference between NumLocals and kFewLocals is passed in r15.

@@ -413,6 +413,15 @@ class NormalizedInstruction {
     return i < 32 && ((checkedInputs >> i) & 1);
   }
 
+  bool wasGroupedWith(Op op) const {
+    return grouped && prev->op() == op;
+  }
+
+  template<class... OpTypes>
+  bool wasGroupedWith(Op op, OpTypes... ops) const {
+    return wasGroupedWith(op) || wasGroupedWith(ops...);
+  }
+
   enum OutputUse {
     OutputUsed,
     OutputUnused,

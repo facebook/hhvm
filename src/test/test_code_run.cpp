@@ -33387,6 +33387,46 @@ bool TestCodeRun::TestStrictMode() {
 
         "abcd");
 
+  MVCRO("<?hh\n"
+        "function f() {\n"
+        "  $x = new Foo<Bar>();\n"
+        "  $x = new Foo<Blah<Bar>>();\n"
+        "  $y = new Foo<array,int>();\n"
+        "  $z = new Foo<Blah<array>,Blah<int>>();\n"
+        "  yo<int>();\n"
+        "  yo<Blah<int>>();\n"
+        "  yo<string,:my:xhp:class>();\n"
+        "  yo<Blah<string>,Blah<:my:xhp:class>>();\n"
+        "  $x->baz<int>();\n"
+        "  $x->baz<Blah<int>>();\n"
+        "  $y->baz<string,:my:xhp:class>();\n"
+        "  $y->baz<Blah<string>,Blah<:my:xhp:class>>();\n"
+        "  Foo<Bar>::biz();\n"
+        "  Foo<Blah<Bar>>::biz();\n"
+        "  Foo<Bar>::biz<string>();\n"
+        "  Foo<Blah<Bar>>::biz<Blah<string>>();\n"
+        "  Foo<Bar>::biz<bool,:my:xhp:class>();\n"
+        "  Foo<Blah<Bar>>::biz<Blah<bool>,Blah<:my:xhp:class>>();\n"
+        "  Foo<array,int>::biz();\n"
+        "  Foo<Blah<array>,Blah<int>>::biz();\n"
+        "  Foo<array,int>::biz<string>();\n"
+        "  Foo<Blah<array>,Blah<int>>::biz<Blah<string>>();\n"
+        "  Foo<array,int>::biz<bool,:my:xhp:class>();\n"
+        "  Foo<Blah<array>,Blah<int>>::biz<Blah<bool>,Blah<:my:xhp:class>>();\n"
+        "  var_dump(Foo<Bar>::SOME_CONST);\n"
+        "  var_dump(Foo<Blah<Bar>>::SOME_CONST);\n"
+        "  var_dump(Foo<array,int>::SOME_CONST);\n"
+        "  var_dump(Foo<Blah<array>,Blah<int>>::SOME_CONST);\n"
+        "  var_dump(Foo<Bar>::$staticProp);\n"
+        "  var_dump(Foo<Blah<Bar>>::$staticProp);\n"
+        "  var_dump(Foo<array,int>::$staticProp);\n"
+        "  var_dump(Foo<Blah<array>,Blah<int>>::$staticProp);\n"
+        "}\n"
+        "echo \"Done\\n\";\n"
+        ,
+        "Done\n"
+        );
+
   return true;
 }
 

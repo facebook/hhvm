@@ -85,6 +85,84 @@ protected:
   bool m_check;
 };
 
+struct LookaheadToken {
+  ScannerToken token;
+  Location loc;
+  int t;
+};
+
+struct LookaheadSlab {
+  static const int SlabSize = 32;
+  LookaheadToken m_data[SlabSize];
+  int m_beginPos;
+  int m_endPos;
+  LookaheadSlab* m_next;
+};
+
+struct TokenStore {
+  LookaheadSlab* m_head;
+  LookaheadSlab* m_tail;
+  TokenStore() {
+    m_head = NULL;
+    m_tail = NULL;
+  }
+  ~TokenStore() {
+    LookaheadSlab* s = m_head;
+    LookaheadSlab* next;
+    while (s) {
+      next = m_head->m_next;
+      delete s;
+      s = next;
+    }
+  }
+  bool empty() {
+    return !m_head || (m_head->m_beginPos == m_head->m_endPos);
+  }
+  struct iterator {
+    LookaheadSlab* m_slab;
+    int m_pos;
+    const LookaheadToken& operator*() const {
+      return m_slab->m_data[m_pos];
+    }
+    LookaheadToken& operator*() {
+      return m_slab->m_data[m_pos];
+    }
+    const LookaheadToken* operator->() const {
+      return m_slab->m_data + m_pos;
+    }
+    LookaheadToken* operator->() {
+      return m_slab->m_data + m_pos;
+    }
+    void next() {
+      if (!m_slab) return;
+      ++m_pos;
+      if (m_pos < m_slab->m_endPos) return;
+      m_slab = m_slab->m_next;
+      if (!m_slab) return;
+      m_pos = m_slab->m_beginPos;
+      return;
+    }
+    iterator& operator++() {
+      next();
+      return *this;
+    }
+    iterator operator++(int) {
+      iterator it = *this;
+      next();
+      return it;
+    }
+    bool operator==(const iterator& it) const {
+      if (m_slab != it.m_slab) return false;
+      if (!m_slab) return true;
+      return (m_pos == it.m_pos);
+    }
+  };
+  iterator begin();
+  iterator end();
+  void popFront();
+  iterator appendNew();
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class Scanner {
@@ -108,11 +186,16 @@ public:
     return m_md5;
   }
 
+  int scanToken(ScannerToken &t, Location &l);
+  int fetchToken(ScannerToken &t, Location &l);
+  void nextLookahead(TokenStore::iterator& pos);
+  bool tryParseNSType(TokenStore::iterator& pos);
+  bool tryParseTypeList(TokenStore::iterator& pos);
+
   /**
    * Called by parser or tokenizer.
    */
   int getNextToken(ScannerToken &t, Location &l);
-  int peekNextToken();
   const std::string &getError() const { return m_error;}
   Location *getLocation() const { return m_loc;}
 
@@ -122,24 +205,6 @@ public:
   void init();
   void reset();
   int scan();
-
-  /**
-   * Setting scanner states by parser.
-   */
-  void xhpCloseTag();
-  void xhpChild();
-  void xhpAttribute();
-  void xhpStatement();
-  void xhpAttributeDecl();
-  void xhpReset();
-
-  void setXhpState(int state) { m_xhpState = state;}
-  int getXhpState() const { return m_xhpState;}
-  bool isXhpState() const { return m_xhpState != 0;}
-
-  bool hasGap() const { return m_gap;}
-  bool inScript() const { return m_inScript;}
-  void setInScript(bool inScript) { m_inScript = inScript;}
 
   /**
    * Called by lex.yy.cpp for YY_INPUT (see hphp.x)
@@ -183,6 +248,9 @@ public:
   void setDocComment(const char *ytext, int yleng) {
     m_docComment.assign(ytext, yleng);
   }
+  void setDocComment(const std::string& com) {
+    m_docComment = com;
+  }
   std::string detachDocComment() {
     std::string dc = m_docComment;
     m_docComment.clear();
@@ -213,6 +281,10 @@ public:
     return m_isStrictMode;
   }
 
+  int getLookaheadLtDepth() {
+    return m_lookaheadLtDepth;
+  }
+
 private:
   void computeMd5();
 
@@ -234,24 +306,24 @@ private:
 
   int m_type;
   void *m_yyscanner;
+
+  // These fields are used to temporarily hold pointers to token/location
+  // storage while the lexer is active to facilitate functions such as
+  // setToken() and incLoc()
   ScannerToken *m_token;
   Location *m_loc;
-  std::string m_error;
 
+  std::string m_error;
   std::string m_docComment;
   std::string m_heredocLabel;
 
   // fields for XHP parsing
   int m_lastToken;
-  bool m_gap;      // was whitespace token
-  bool m_inScript; // inside <script language="php"> </script>
-  int m_xhpState;
-  bool m_lookahead;
-  ScannerToken m_lookaheadToken;
-  Location m_lookaheadTokenLoc;
-  int m_lookaheadTokid;
   void incLoc(const char *rawText, int rawLeng);
   bool m_isStrictMode;
+
+  TokenStore m_lookahead;
+  int m_lookaheadLtDepth;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

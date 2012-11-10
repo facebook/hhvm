@@ -102,12 +102,6 @@ using namespace HPHP::HPHP_PARSER_NS;
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static void no_gap(Parser *_p) {
-  if (_p->scanner().hasGap()) {
-    HPHP_PARSER_ERROR("XHP: bad spacing", _p);
-  }
-}
-
 static void scalar_num(Parser *_p, Token &out, const char *num) {
   Token t;
   t.setText(num);
@@ -566,6 +560,65 @@ static void xhp_tag(Parser *_p, Token &out, Token &label, Token &body) {
 
 static void xhp_attribute(Parser *_p, Token &out, Token &type, Token &label,
                           Token &def, Token &req) {
+  /**
+   * The basic builtin types "bool", "int", "double", and "string" all map to
+   * T_STRING in the parser, and the parser uses always uses type code 5 for
+   * T_STRING. However, XHP uses different type codes for these basic builtin
+   * types, so we need to fix up the type code here to make XHP happy.
+   */
+  if (type.num() == 5 && type.text().size() >= 3 && type.text().size() <= 7) {
+    switch (type.text()[0]) {
+      case 'b':
+        if ((type.text().size() == 4 &&
+             strcasecmp(type.text().c_str(), "bool") == 0) ||
+            (type.text().size() == 7 &&
+             strcasecmp(type.text().c_str(), "boolean") == 0)) {
+          type.reset();
+          type.setNum(2);
+        }
+        break;
+      case 'd':
+        if (type.text().size() == 6 &&
+            strcasecmp(type.text().c_str(), "double") == 0) {
+          type.reset();
+          type.setNum(8);
+        }
+        break;
+      case 'f':
+        if (type.text().size() == 5 &&
+            strcasecmp(type.text().c_str(), "float") == 0) {
+          type.reset();
+          type.setNum(8);
+        }
+        break;
+      case 'i':
+        if ((type.text().size() == 3 &&
+             strcasecmp(type.text().c_str(), "int") == 0) ||
+            (type.text().size() == 7 &&
+             strcasecmp(type.text().c_str(), "integer") == 0)) {
+          type.reset();
+          type.setNum(3);
+        }
+        break;
+      case 'r':
+        if (type.text().size() == 4 &&
+            strcasecmp(type.text().c_str(), "real") == 0) {
+          type.reset();
+          type.setNum(8);
+        }
+        break;
+      case 's':
+        if (type.text().size() == 6 &&
+            strcasecmp(type.text().c_str(), "string") == 0) {
+          type.reset();
+          type.setNum(1);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
   Token num;  scalar_num(_p, num, type.num());
   Token arr1; _p->onArrayPair(arr1, 0, 0, num, 0);
 
@@ -992,10 +1045,14 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_TRAIT_C
 
 %token T_VARARG
-%token T_STRICT_INT_MAP
-%token T_STRICT_STR_MAP
 %token T_STRICT_ERROR
 %token T_FINALLY
+
+%token T_XHP_TAG_LT
+%token T_XHP_TAG_GT
+%token T_TYPELIST_LT
+%token T_TYPELIST_GT
+%token T_UNRESOLVED_LT
 
 %%
 
@@ -1027,6 +1084,15 @@ top_statement:
                                          _p->finishStatement($$, $1); $$ = 1;}
 ;
 
+ident:
+    T_STRING                           { $$ = $1;}
+  | T_XHP_ATTRIBUTE                    { $$ = $1;}
+  | T_XHP_CATEGORY                     { $$ = $1;}
+  | T_XHP_CHILDREN                     { $$ = $1;}
+  | T_XHP_REQUIRED                     { $$ = $1;}
+  | T_XHP_ENUM                         { $$ = $1;}
+;
+
 use_declarations:
     use_declarations ','
     use_declaration                    { }
@@ -1035,35 +1101,46 @@ use_declarations:
 use_declaration:
     namespace_name                     { _p->onUse($1.text(),"");}
   | T_NS_SEPARATOR namespace_name      { _p->onUse($2.text(),"");}
-  | namespace_name T_AS T_STRING       { _p->onUse($1.text(),$3.text());}
+  | namespace_name T_AS ident          { _p->onUse($1.text(),$3.text());}
   | T_NS_SEPARATOR namespace_name
-    T_AS T_STRING                      { _p->onUse($2.text(),$4.text());}
+    T_AS ident                         { _p->onUse($2.text(),$4.text());}
 ;
+
 namespace_name:
-    T_STRING                           { $$ = $1;}
+    ident                              { $$ = $1;}
   | namespace_name T_NS_SEPARATOR
-    T_STRING                           { $$ = $1 + $2 + $3;}
+    ident                              { $$ = $1 + $2 + $3;}
+;
+namespace_string_base:
+    namespace_name                     { $$ = $1; $$ = 1;}
+  | T_NS_SEPARATOR namespace_name      { $$ = $2; $$ = 0;}
+  | T_NAMESPACE T_NS_SEPARATOR
+    namespace_name                     { $$.setText(_p->nsDecl($3.text()));
+                                         $$ = 0;}
 ;
 namespace_string:
-    namespace_name                     { $$ = $1;
-                                         $$.setText(_p->resolve($$.text(),0));}
-  | T_NS_SEPARATOR namespace_name      { $$ = $2;}
-  | T_NAMESPACE T_NS_SEPARATOR
-    namespace_name                     { $$.setText(_p->nsDecl($3.text()));}
+    namespace_string_base              { if ($1.num())
+                                           $1.setText(_p->resolve($1.text(),0));
+                                         $$ = $1;}
 ;
-class_namespace_string:
-    namespace_name                     { $$ = $1;
-                                         $$.setText(_p->resolve($$.text(),1));}
-  | T_NS_SEPARATOR namespace_name      { $$ = $2;}
-  | T_NAMESPACE T_NS_SEPARATOR
-    namespace_name                     { $$.setText(_p->nsDecl($3.text()));}
+namespace_string_typeargs:
+    namespace_string_base
+    sm_typeargs_opt                    { if ($1.num())
+                                           $1.setText(_p->resolve($1.text(),0));
+                                         $$ = $1;}
+;
+class_namespace_string_typeargs:
+    namespace_string_base
+    sm_typeargs_opt                    { if ($1.num())
+                                           $1.setText(_p->resolve($1.text(),1));
+                                         $$ = $1;}
 ;
 constant_declaration:
     constant_declaration ','
     sm_name_with_type '=' static_scalar { $3.setText(_p->nsDecl($3.text()));
-                                         on_constant(_p,$$,&$1,$3,$5);}
+                                          on_constant(_p,$$,&$1,$3,$5);}
   | T_CONST sm_name_with_type '=' static_scalar { $2.setText(_p->nsDecl($2.text()));
-                                         on_constant(_p,$$,  0,$2,$4);}
+                                          on_constant(_p,$$,  0,$2,$4);}
 ;
 
 inner_statement_list:
@@ -1125,7 +1202,6 @@ statement:
                                          _p->pushLabelScope();}
     foreach_statement                  { _p->popLabelScope();
                                          _p->onForEach($$,$3,$5,$6,$9);}
-
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
   | T_TRY '{'
@@ -1140,12 +1216,12 @@ statement:
     inner_statement_list '}'
     finally                            { _p->onTry($$, $3, $5);}
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
-  | T_GOTO T_STRING ';'                { _p->onGoto($$, $2, true);
+  | T_GOTO ident ';'                   { _p->onGoto($$, $2, true);
                                          _p->addGoto($2.text(),
                                                      _p->getLocation(),
                                                      &$$); }
   | expr ';'                           { _p->onExpStatement($$, $1);}
-  | T_STRING ':'                       { _p->onLabel($$, $1);
+  | ident ':'                          { _p->onLabel($$, $1);
                                          _p->addLabel($1.text(),
                                                       _p->getLocation(),
                                                       &$$); }
@@ -1208,19 +1284,17 @@ class_declaration_statement:
     class_entry_type
     class_decl_name                    { $2.setText(_p->nsDecl($2.text()));
                                          _p->onClassStart($1.num(),$2);}
-    extends_from implements_list '{'   { if (_p->peekClass())
-                                           _p->scanner().xhpStatement();}
+    extends_from implements_list '{'
     class_statement_list '}'           { Token stmts;
                                          if (_p->peekClass()) {
-                                           xhp_collect_attributes(_p,stmts,$8);
+                                           xhp_collect_attributes(_p,stmts,$7);
                                          } else {
-                                           stmts = $8;
+                                           stmts = $7;
                                          }
                                          _p->onClass($$,$1.num(),$2,$4,$5,
                                                      stmts,0);
                                          if (_p->peekClass()) {
                                            _p->xhpResetAttributes();
-                                           _p->scanner().xhpReset();
                                          }
                                          _p->popClass();
                                          _p->popTypeScope();}
@@ -1228,19 +1302,17 @@ class_declaration_statement:
     class_entry_type
     class_decl_name                    { $3.setText(_p->nsDecl($3.text()));
                                          _p->onClassStart($2.num(),$3);}
-    extends_from implements_list '{'   { if (_p->peekClass())
-                                           _p->scanner().xhpStatement();}
+    extends_from implements_list '{'
     class_statement_list '}'           { Token stmts;
                                          if (_p->peekClass()) {
-                                           xhp_collect_attributes(_p,stmts,$9);
+                                           xhp_collect_attributes(_p,stmts,$8);
                                          } else {
-                                           stmts = $9;
+                                           stmts = $8;
                                          }
                                          _p->onClass($$,$2.num(),$3,$5,$6,
                                                      stmts,&$1);
                                          if (_p->peekClass()) {
                                            _p->xhpResetAttributes();
-                                           _p->scanner().xhpReset();
                                          }
                                          _p->popClass();
                                          _p->popTypeScope();}
@@ -1353,9 +1425,9 @@ declare_statement:
 ;
 
 declare_list:
-    T_STRING '=' static_scalar
+    ident '=' static_scalar
   | declare_list ','
-    T_STRING '=' static_scalar
+    ident '=' static_scalar
 ;
 
 switch_case_list:
@@ -1465,9 +1537,7 @@ static_var_list:
 
 class_statement_list:
     class_statement_list
-    class_statement                    { _p->onClassStatement($$, $1, $2);
-                                         if (_p->peekClass())
-                                           _p->scanner().xhpStatement();}
+    class_statement                    { _p->onClassStatement($$, $1, $2);}
   |                                    { $$.reset();}
 ;
 class_statement:
@@ -1503,8 +1573,8 @@ class_statement:
                                          _p->onMethod($$,$2,t,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
-  | T_XHP_ATTRIBUTE                    { _p->scanner().xhpAttributeDecl();}
-    xhp_attribute_stmt ';'             { _p->xhpSetAttributes($3);}
+  | T_XHP_ATTRIBUTE
+    xhp_attribute_stmt ';'             { _p->xhpSetAttributes($2);}
   | T_XHP_CATEGORY
     xhp_category_stmt ';'              { xhp_category_stmt(_p,$$,$2);}
   | T_XHP_CHILDREN
@@ -1520,14 +1590,14 @@ trait_rules:
   | /* empty */                        { $$.reset(); }
 ;
 trait_precedence_rule:
-    class_namespace_string
+    class_namespace_string_typeargs
     T_PAAMAYIM_NEKUDOTAYIM
-    T_STRING
-    T_INSTEADOF trait_list ';'         { _p->onTraitPrecRule($$,$1,$3,$5); }
+    ident
+    T_INSTEADOF trait_list ';'         { _p->onTraitPrecRule($$,$1,$3,$5);}
 ;
 trait_alias_rule:
     trait_alias_rule_method T_AS
-    method_modifiers T_STRING ';'      { _p->onTraitAliasRuleModify($$,$1,$3,
+    method_modifiers ident ';'         { _p->onTraitAliasRuleModify($$,$1,$3,
                                                                     $4);}
   | trait_alias_rule_method T_AS
     non_empty_member_modifiers ';'     { Token t; t.reset();
@@ -1535,17 +1605,18 @@ trait_alias_rule:
                                                                     t);}
 ;
 trait_alias_rule_method:
-    class_namespace_string
+    class_namespace_string_typeargs
     T_PAAMAYIM_NEKUDOTAYIM
-    T_STRING                           { _p->onTraitAliasRuleStart($$,$1,$3);}
-  | T_STRING                           { Token t; t.reset();
+    ident                              { _p->onTraitAliasRuleStart($$,$1,$3);}
+  | ident                              { Token t; t.reset();
                                          _p->onTraitAliasRuleStart($$,t,$1);}
 ;
+
 xhp_attribute_stmt:
     xhp_attribute_decl                 { xhp_attribute_list(_p,$$,
                                          _p->xhpGetAttributes(),$1);}
-  | xhp_attribute_stmt ','             { _p->scanner().xhpAttributeDecl();}
-    xhp_attribute_decl                 { xhp_attribute_list(_p,$$, &$1,$4);}
+  | xhp_attribute_stmt ','
+    xhp_attribute_decl                 { xhp_attribute_list(_p,$$, &$1,$3);}
 ;
 
 xhp_attribute_decl:
@@ -1558,15 +1629,16 @@ xhp_attribute_decl:
 ;
 
 xhp_attribute_decl_type:
-    T_STRING_CAST                      { $$ = 1;}
-  | T_BOOL_CAST                        { $$ = 2;}
-  | T_INT_CAST                         { $$ = 3;}
-  | T_ARRAY_CAST                       { $$ = 4;}
-  | fully_qualified_class_name         { $$ = 5; $$.setText($1);}
+    T_ARRAY                            { $$ = 4;}
+  | fully_qualified_class_name         { /* This case handles all types other
+                                            than "array", "var" and "enum".
+                                            For now we just use type code 5;
+                                            later xhp_attribute() will fix up
+                                            the type code as appropriate. */
+                                         $$ = 5; $$.setText($1);}
   | T_VAR                              { $$ = 6;}
   | T_XHP_ENUM '{'
     xhp_attribute_enum '}'             { $$ = $3; $$ = 7;}
-  | T_DOUBLE_CAST                      { $$ = 8;}
 ;
 
 xhp_attribute_enum:
@@ -1581,8 +1653,7 @@ xhp_attribute_default:
 ;
 
 xhp_attribute_is_required:
-    '@'                                { _p->scanner().xhpAttributeDecl();}
-    T_XHP_REQUIRED                     { scalar_num(_p, $$, "1");}
+    '@' T_XHP_REQUIRED                 { scalar_num(_p, $$, "1");}
   |                                    { scalar_num(_p, $$, "0");}
 ;
 
@@ -1601,7 +1672,7 @@ xhp_category_decl:
 
 xhp_children_stmt:
     xhp_children_paren_expr            { $$ = $1; $$ = 2;}
-  | T_STRING                           { $$ = -1;
+  | ident                              { $$ = -1;
                                          if ($1.same("any")) $$ = 1;}
   | T_EMPTY                            { $$ = 0;}
 ;
@@ -1626,7 +1697,7 @@ xhp_children_decl_expr:
 ;
 
 xhp_children_decl_tag:
-    T_STRING                           { $$ = -1;
+    ident                              { $$ = -1;
                                          if ($1.same("any")) $$ = 1; else
                                          if ($1.same("pcdata")) $$ = 2;}
   | T_XHP_LABEL                        { $1.xhpLabel();  $$ = $1; $$ = 3;}
@@ -1802,22 +1873,24 @@ lexical_var_list:
 ;
 
 xhp_tag:
-    '<' xhp_label xhp_tag_body '>'     { no_gap(_p); xhp_tag(_p,$$,$2,$3);}
+    T_XHP_TAG_LT
+    T_XHP_LABEL
+    xhp_tag_body
+    T_XHP_TAG_GT                       { xhp_tag(_p,$$,$2,$3);}
 ;
 xhp_tag_body:
-    xhp_attributes '/'                 { _p->scanner().xhpCloseTag();
-                                         Token t1; _p->onArray(t1,$1);
+    xhp_attributes '/'                 { Token t1; _p->onArray(t1,$1);
                                          Token t2; _p->onArray(t2,$2);
                                          _p->onCallParam($1,NULL,t1,0);
                                          _p->onCallParam($$, &$1,t2,0);
                                          $$.setText("");}
-  | xhp_attributes '>'                 { _p->scanner().xhpChild();}
-    xhp_children '<' '/'               { _p->scanner().xhpCloseTag();}
-    xhp_opt_end_label                  { _p->onArray($5,$1);
-                                         _p->onArray($6,$4);
-                                         _p->onCallParam($2,NULL,$5,0);
-                                         _p->onCallParam($$, &$2,$6,0);
-                                         $$.setText($8.text());}
+  | xhp_attributes T_XHP_TAG_GT
+    xhp_children T_XHP_TAG_LT '/'
+    xhp_opt_end_label                  { _p->onArray($4,$1);
+                                         _p->onArray($5,$3);
+                                         _p->onCallParam($2,NULL,$4,0);
+                                         _p->onCallParam($$, &$2,$5,0);
+                                         $$.setText($6.text());}
 ;
 xhp_opt_end_label:
                                        { $$.reset(); $$.setText("");}
@@ -1825,8 +1898,8 @@ xhp_opt_end_label:
 ;
 xhp_attributes:
     xhp_attributes
-    xhp_attribute_name '='             { _p->scanner().xhpAttribute();}
-    xhp_attribute_value                { _p->onArrayPair($$,&$1,&$2,$5,0);}
+    xhp_attribute_name '='
+    xhp_attribute_value                { _p->onArrayPair($$,&$1,&$2,$4,0);}
   |                                    { $$.reset();}
 ;
 xhp_children:
@@ -1834,7 +1907,7 @@ xhp_children:
   |                                    { $$.reset();}
 ;
 xhp_attribute_name:
-    xhp_label_ws                       { _p->onScalar($$,
+    T_XHP_LABEL                        { _p->onScalar($$,
                                          T_CONSTANT_ENCAPSED_STRING, $1);}
 ;
 xhp_attribute_value:
@@ -1851,25 +1924,19 @@ xhp_child:
                                            T_CONSTANT_ENCAPSED_STRING, $1);
                                          }
                                        }
-  | '{' expr '}'                       { $$ = $2; _p->scanner().xhpChild();}
-  | xhp_tag                            { $$ = $1; _p->scanner().xhpChild();}
+  | '{' expr '}'                       { $$ = $2; }
+  | xhp_tag                            { $$ = $1; }
 ;
-xhp_label:
-    xhp_bareword                       { $$ = $1; no_gap(_p);}
-  | xhp_label ':'                      { no_gap(_p);}
-    xhp_bareword                       { no_gap(_p); $$ = $1 + ":" + $4;}
-  | xhp_label '-'                      { no_gap(_p);}
-    xhp_bareword                       { no_gap(_p); $$ = $1 + "-" + $4;}
-;
+
 xhp_label_ws:
     xhp_bareword                       { $$ = $1;}
-  | xhp_label_ws ':'                   { no_gap(_p);}
-    xhp_bareword                       { no_gap(_p); $$ = $1 + ":" + $4;}
-  | xhp_label_ws '-'                   { no_gap(_p);}
-    xhp_bareword                       { no_gap(_p); $$ = $1 + "-" + $4;}
+  | xhp_label_ws ':'
+    xhp_bareword                       { $$ = $1 + ":" + $3;}
+  | xhp_label_ws '-'
+    xhp_bareword                       { $$ = $1 + "-" + $3;}
 ;
 xhp_bareword:
-    T_STRING                           { $$ = $1;}
+    ident                              { $$ = $1;}
   | T_EXIT                             { $$ = $1;}
   | T_FUNCTION                         { $$ = $1;}
   | T_CONST                            { $$ = $1;}
@@ -1945,36 +2012,24 @@ xhp_bareword:
 ;
 
 simple_function_call:
-    namespace_string '('
+    namespace_string_typeargs '('
     function_call_parameter_list ')'   { _p->onCall($$,0,$1,$3,NULL);}
 ;
 
+fully_qualified_class_name:
+    class_namespace_string_typeargs    { $$ = $1;}
+  | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1;}
+;
 static_class_name:
-    fully_qualified_class_name_no_typeargs
-                                       { _p->onName($$,$1,Parser::StringName);}
+    fully_qualified_class_name         { _p->onName($$,$1,Parser::StringName);}
   | T_STATIC                           { _p->onName($$,$1,Parser::StaticName);}
   | reference_variable                 { _p->onName($$,$1,
                                          Parser::StaticClassExprName);}
 ;
-fully_qualified_class_name:
-    class_namespace_string sm_typeargs_opt { $$ = $1;}
-  | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1;}
-;
-fully_qualified_class_name_no_typeargs:
-    class_namespace_string             { $$ = $1;}
-  | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1;}
-;
 class_name_reference:
-    variable_no_calls                  { _p->onName($$,$1,Parser::ExprName);}
+    fully_qualified_class_name         { _p->onName($$,$1,Parser::StringName);}
   | T_STATIC                           { _p->onName($$,$1,Parser::StaticName);}
-  | T_XHP_LABEL                        { $1.xhpLabel();
-                                         _p->onName($$,$1,Parser::StringName);}
-  | namespace_name                     { $1.setText(_p->resolve($1.text(),1));
-                                         _p->onName($$,$1,Parser::StringName);}
-  | T_NS_SEPARATOR namespace_name      { _p->onName($$,$2,Parser::StringName);}
-  | T_NAMESPACE T_NS_SEPARATOR
-    namespace_name                     { $3.setText(_p->nsDecl($3.text()));
-                                         _p->onName($$,$3,Parser::StringName);}
+  | variable_no_calls                  { _p->onName($$,$1,Parser::ExprName);}
 ;
 
 exit_expr:
@@ -2024,11 +2079,11 @@ static_scalar:
   | static_class_constant              { $$ = $1;}
 ;
 static_class_constant:
-    class_namespace_string
+    class_namespace_string_typeargs
     T_PAAMAYIM_NEKUDOTAYIM
-    T_STRING                           { _p->onClassConst($$, $1, $3, 1);}
+    ident                              { _p->onClassConst($$, $1, $3, 1);}
   | T_XHP_LABEL T_PAAMAYIM_NEKUDOTAYIM
-    T_STRING                           { $1.xhpLabel();
+    ident                              { $1.xhpLabel();
                                          _p->onClassConst($$, $1, $3, 1);}
 ;
 scalar:
@@ -2076,16 +2131,15 @@ common_scalar_ae:
 static_numeric_scalar_ae:
     T_LNUMBER                          { _p->onScalar($$,T_LNUMBER,$1);}
   | T_DNUMBER                          { _p->onScalar($$,T_DNUMBER,$1);}
-  | T_STRING                           { constant_ae(_p,$$,$1);}
+  | ident                              { constant_ae(_p,$$,$1);}
 ;
 static_scalar_ae:
     common_scalar_ae                   { $$ = $1;}
-  | T_STRING                           { constant_ae(_p,$$,$1);}
+  | ident                              { constant_ae(_p,$$,$1);}
   | '+' static_numeric_scalar_ae       { UEXP($$,$2,'+',1);}
   | '-' static_numeric_scalar_ae       { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
-  | '[' static_array_pair_list_ae ']'  { _p->onArray($$,$2,T_ARRAY);}
 ;
 static_array_pair_list_ae:
     non_empty_static_array_pair_list_ae
@@ -2119,9 +2173,9 @@ attribute_static_scalar_list:
 ;
 non_empty_user_attribute_list:
     non_empty_user_attribute_list
-    ',' T_STRING
+    ',' ident
     attribute_static_scalar_list       { _p->onUserAttribute($$,&$1,$3,$4);}
-  | T_STRING
+  | ident
     attribute_static_scalar_list       { _p->onUserAttribute($$,  0,$1,$2);}
 ;
 user_attribute_list:
@@ -2145,7 +2199,7 @@ variable:
     '[' dim_offset ']'                 { _p->onRefDim($$, $1, $3);}
   | dimmable_variable '{' expr '}'     { _p->onRefDim($$, $1, $3);}
   | variable T_OBJECT_OPERATOR
-    T_STRING                           { _p->onObjectProperty($$,$1,$3);}
+    ident                              { _p->onObjectProperty($$,$1,$3);}
   | variable T_OBJECT_OPERATOR
     variable_without_objects           { _p->onObjectProperty($$,$1,$3);}
   | variable T_OBJECT_OPERATOR
@@ -2166,7 +2220,7 @@ dimmable_variable:
     '[' dim_offset ']'                 { _p->onRefDim($$,$1,$3);}
   | dimmable_variable '{' expr '}'     { _p->onRefDim($$,$1,$3);}
   | variable T_OBJECT_OPERATOR
-    T_STRING                           { _p->onObjectProperty($$,$1,$3);}
+    ident                              { _p->onObjectProperty($$,$1,$3);}
   | variable T_OBJECT_OPERATOR
     '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
   | callable_variable '('
@@ -2184,8 +2238,8 @@ callable_variable:
 
 object_method_call:
     variable T_OBJECT_OPERATOR
-    T_STRING '('
-    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$3,$5);}
+    ident sm_typeargs_opt '('
+    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$3,$6);}
   | variable T_OBJECT_OPERATOR
     variable_without_objects '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$3,$5);}
@@ -2197,8 +2251,8 @@ object_method_call:
 class_method_call:
     static_class_name
     T_PAAMAYIM_NEKUDOTAYIM
-    T_STRING '('
-    function_call_parameter_list ')'   { _p->onCall($$,0,$3,$5,&$1);}
+    ident sm_typeargs_opt '('
+    function_call_parameter_list ')'   { _p->onCall($$,0,$3,$6,&$1);}
   | static_class_name
     T_PAAMAYIM_NEKUDOTAYIM
     variable_without_objects '('
@@ -2238,7 +2292,7 @@ variable_no_calls:
   | dimmable_variable_no_calls
     '{' expr '}'                       { _p->onRefDim($$, $1, $3);}
   | variable_no_calls T_OBJECT_OPERATOR
-    T_STRING                           { _p->onObjectProperty($$,$1,$3);}
+    ident                              { _p->onObjectProperty($$,$1,$3);}
   | variable_no_calls T_OBJECT_OPERATOR
     variable_without_objects           { _p->onObjectProperty($$,$1,$3);}
   | variable_no_calls T_OBJECT_OPERATOR
@@ -2255,7 +2309,7 @@ dimmable_variable_no_calls:
   | dimmable_variable_no_calls
     '{' expr '}'                       { _p->onRefDim($$, $1, $3);}
   | variable_no_calls T_OBJECT_OPERATOR
-    T_STRING                           { _p->onObjectProperty($$,$1,$3);}
+    ident                              { _p->onObjectProperty($$,$1,$3);}
   | variable_no_calls T_OBJECT_OPERATOR
     '{' expr '}'                       { _p->onObjectProperty($$,$1,$4);}
   | '(' variable ')'                   { $$ = $2;}
@@ -2306,7 +2360,7 @@ encaps_var:
   | T_VARIABLE '['
     encaps_var_offset ']'              { _p->encapRefDim($$, $1, $3);}
   | T_VARIABLE T_OBJECT_OPERATOR
-    T_STRING                           { _p->encapObjProp($$, $1, $3);}
+    ident                              { _p->encapObjProp($$, $1, $3);}
   | T_DOLLAR_OPEN_CURLY_BRACES
     expr '}'                           { _p->onDynamicVariable($$, $2, 1);}
   | T_DOLLAR_OPEN_CURLY_BRACES
@@ -2314,7 +2368,7 @@ encaps_var:
   | T_CURLY_OPEN variable '}'          { $$ = $2;}
 ;
 encaps_var_offset:
-    T_STRING                           { $$ = $1; $$ = T_STRING;}
+    ident                              { $$ = $1; $$ = T_STRING;}
   | T_NUM_STRING                       { $$ = $1; $$ = T_NUM_STRING;}
   | T_VARIABLE                         { $$ = $1; $$ = T_VARIABLE;}
 ;
@@ -2336,7 +2390,7 @@ variable_list:
 
 class_constant:
   static_class_name
-  T_PAAMAYIM_NEKUDOTAYIM T_STRING      { _p->onClassConst($$, $1, $3, 0);}
+  T_PAAMAYIM_NEKUDOTAYIM ident         { _p->onClassConst($$, $1, $3, 0);}
 ;
 
 /* strict-mode productions -- these allow some extra stuff in strict
@@ -2344,28 +2398,26 @@ class_constant:
  */
 
 sm_name_with_type:  /* foo -> int foo */
-    T_STRING                           { $$ = $1; }
-  | sm_type T_STRING                   { only_in_strict_mode(_p); $$ = $2; }
+    ident                              { $$ = $1; }
+  | sm_type ident                      { only_in_strict_mode(_p); $$ = $2; }
 ;
 
 sm_name_with_typevar:  /* foo -> foo<X,Y>; this adds a typevar scope
                         * and must be followed by a call to
                         * popTypeScope() */
-    T_STRING                           { _p->pushTypeScope(); $$ = $1; }
-  | T_STRING '<' sm_typevar_list '>'   { _p->pushTypeScope(); $$ = $1;
+    ident                              { _p->pushTypeScope(); $$ = $1; }
+  | ident
+    T_TYPELIST_LT
+    sm_typevar_list
+    T_TYPELIST_GT                      { _p->pushTypeScope(); $$ = $1;
                                          only_in_strict_mode(_p); }
 ;
 
-sm_typeargs_opt: /* -> <bar<baz>> */
-    '<' sm_type_list_gt                { only_in_strict_mode(_p); $$ = $2; }
+sm_typeargs_opt:
+    T_TYPELIST_LT
+    sm_type_list
+    T_TYPELIST_GT                      { only_in_strict_mode(_p); $$ = $2; }
   |                                    { $$.reset(); }
-;
-
-/* this is just  sm_type_list '>'  with a little hack to avoid adding more lexer state */
-sm_type_list_gt:
-    T_STRING '<' sm_type_list T_SR
-  | sm_type '>'
-  | sm_type ',' sm_type_list_gt
 ;
 
 sm_type_list:
@@ -2379,11 +2431,11 @@ sm_opt_return_type:
 ;
 
 sm_typevar_list:
-    T_STRING ',' sm_typevar_list       { _p->addTypeVar($1.text()); }
- |  T_STRING                           { _p->addTypeVar($1.text()); }
- |  T_STRING T_AS T_STRING ','
-    sm_typevar_list                    { _p->addTypeVar($1.text()); }
- |  T_STRING T_AS T_STRING             { _p->addTypeVar($1.text()); }
+    ident ',' sm_typevar_list       { _p->addTypeVar($1.text()); }
+ |  ident                           { _p->addTypeVar($1.text()); }
+ |  ident T_AS ident ','
+    sm_typevar_list                 { _p->addTypeVar($1.text()); }
+ |  ident T_AS ident                { _p->addTypeVar($1.text()); }
 
 ;
 
@@ -2393,7 +2445,7 @@ sm_type:
      * already allow plenty of nonsense types anyway */
     '?' sm_type                        { only_in_strict_mode(_p); $$.reset(); }
   | '@' sm_type                        { only_in_strict_mode(_p); $$.reset(); }
-  | T_STRING sm_typeargs_opt           { $$ = $1;
+  | ident sm_typeargs_opt              { $$ = $1;
                                          /* if the type annotation is a bound
                                             typevar we have to strip it */
                                          if (_p->scanner().isStrictMode() &&
@@ -2408,18 +2460,9 @@ sm_type:
   | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1; }
   | '(' T_FUNCTION '(' sm_type_list ')' ':' sm_type ')'
                                        { only_in_strict_mode(_p); $$.reset(); }
-  | '(' T_FUNCTION sm_cast_fix ':' sm_type ')'
-                                       { only_in_strict_mode(_p); $$.reset(); }
-  | '(' sm_type ',' sm_type_list ')'   { only_in_strict_mode(_p); $$.setText("array"); }
+  | '(' sm_type ',' sm_type_list ')'   { only_in_strict_mode(_p);
+                                         $$.setText("array"); }
 ;
-
-/* required, because (int) gets lexed as T_INT_CAST */
-sm_cast_fix:
-  T_BOOL_CAST                          { $$ = 1;}
-| T_INT_CAST                           { $$ = 1;}
-| T_DOUBLE_CAST                        { $$ = 1;}
-| T_ARRAY_CAST                         { $$ = 1;}
-| T_STRING_CAST                        { $$ = 1;}
 
 sm_type_opt:
     sm_type                            { $$ = $1; }

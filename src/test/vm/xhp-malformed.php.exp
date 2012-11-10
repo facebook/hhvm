@@ -1,1 +1,1 @@
-HipHop Fatal error: syntax error, unexpected T_XHP_LABEL, expecting '>' in src/test/vm/xhp-malformed.php on line 4
+HipHop Fatal error: syntax error, unexpected T_XHP_LABEL, expecting T_XHP_TAG_GT in src/test/vm/xhp-malformed.php on line 4

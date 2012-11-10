@@ -85,9 +85,7 @@ void ScannerToken::xhpDecode() {
 Scanner::Scanner(const char *filename, int type, bool md5 /* = false */)
     : m_filename(filename), m_stream(NULL), m_source(NULL), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
-      m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
-      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1),
-      m_isStrictMode(0) {
+      m_loc(NULL), m_lastToken(-1), m_isStrictMode(0), m_lookaheadLtDepth(0) {
   m_stream = new std::ifstream(filename);
   m_streamOwner = true;
   if (m_stream->fail()) {
@@ -111,9 +109,7 @@ Scanner::Scanner(std::istream &stream, int type,
                  bool md5 /* = false */)
     : m_filename(fileName), m_source(NULL), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
-      m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
-      m_xhpState(0), m_lookahead(false), m_lookaheadTokid(-1),
-      m_isStrictMode(0) {
+      m_loc(NULL), m_lastToken(-1), m_isStrictMode(0), m_lookaheadLtDepth(0) {
   m_stream = &stream;
   m_streamOwner = false;
   if (md5) computeMd5();
@@ -130,10 +126,8 @@ Scanner::Scanner(const char *source, int len, int type,
                  const char *fileName /* = "" */, bool md5 /* = false */)
     : m_filename(fileName), m_stream(NULL), m_source(source), m_len(len),
       m_pos(0), m_state(Start), m_type(type), m_yyscanner(NULL),
-      m_token(NULL), m_loc(NULL), m_lastToken(-1), m_gap(false),
-      m_inScript(false), m_xhpState(0), m_lookahead(false),
-      m_lookaheadTokid(-1),
-      m_isStrictMode(0) {
+      m_token(NULL), m_loc(NULL), m_lastToken(-1), m_isStrictMode(0),
+      m_lookaheadLtDepth(0) {
   ASSERT(m_source);
   m_streamOwner = false;
   if (md5 || type & PreprocessXHP) {
@@ -184,42 +178,204 @@ void Scanner::setHashBang(const char *rawText, int rawLeng) {
   }
 }
 
-int Scanner::peekNextToken() {
-  assert(!m_lookahead);
-  m_lookaheadTokid = getNextToken(m_lookaheadToken, m_lookaheadTokenLoc);
-  m_lookahead = true;
-  return m_lookaheadTokid;
-}
-
-int Scanner::getNextToken(ScannerToken &t, Location &l) {
-  if (m_lookahead) {
-    *m_token = m_lookaheadToken;
-    *m_loc = m_lookaheadTokenLoc;
-    m_lastToken = m_lookaheadTokid;
-    m_lookahead = false;
-    return m_lookaheadTokid;
-  }
+// scanToken() will always get a new token from the frontier
+// regardless of whether there are tokens in the lookahead store
+int Scanner::scanToken(ScannerToken &t, Location &l) {
   m_token = &t;
   m_loc = &l;
   int tokid;
-  bool done = false;
-  m_gap = false;
-  do {
+  for (;;) {
     tokid = scan();
     switch (tokid) {
-      case T_COMMENT:
       case T_DOC_COMMENT:
+        setDocComment(m_token->text());
+        /* fall through */
+      case T_COMMENT:
       case T_OPEN_TAG:
       case T_WHITESPACE:
-        m_gap = true;
+        if (m_type & ReturnAllTokens) {
+          // m_lastToken holds the last "signficant" token, so
+          // don't update it for comments or whitespace
+          return tokid;
+        }
         break;
       default:
-        done = true;
-        break;
+        m_lastToken = tokid;
+        return tokid;
     }
-  } while (!done && (m_type & ReturnAllTokens) == 0);
+  }
+}
 
-  m_lastToken = tokid;
+// fetchToken() will return the first token in the lookahead store (if the
+// lookahead store has tokens) or it will get a new token from the frontier
+int Scanner::fetchToken(ScannerToken &t, Location &l) {
+  m_token = &t;
+  m_loc = &l;
+  int tokid;
+  if (!m_lookahead.empty()) {
+    // If there is a lookahead token, return that. No need to perform
+    // special logic for "ReturnAllTokens", we already accounted for
+    // that when the tokens were inserted into m_lookahead
+    TokenStore::iterator it = m_lookahead.begin();
+    tokid = it->t;
+    *m_token = it->token;
+    *m_loc = it->loc;
+    return tokid;
+  }
+  return scanToken(t,l);
+}
+
+// nextLookahead() advances an iterator forward in the lookahead store.
+// If the end of the store is reached, a new token will be scanned from
+// the frontier. nextLookahead skips over whitespace and comments.
+void Scanner::nextLookahead(TokenStore::iterator& pos) {
+  for (;;) {
+    ++pos;
+    if (pos == m_lookahead.end()) {
+      pos = m_lookahead.appendNew();
+      pos->loc = *m_loc;
+      pos->t = scanToken(pos->token, pos->loc);
+    }
+    switch (pos->t) {
+      case T_DOC_COMMENT:
+      case T_COMMENT:
+      case T_OPEN_TAG:
+      case T_WHITESPACE:
+        break;
+      default:
+        return;
+    }
+  }
+}
+
+bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
+  for (;;) {
+    if (!tryParseNSType(pos)) return false;
+    if (pos->t == T_AS) {
+      nextLookahead(pos);
+      if (!tryParseNSType(pos)) return false;
+    }
+    if (pos->t != ',') return true;
+    nextLookahead(pos);
+  }
+}
+
+bool
+Scanner::tryParseNSType(TokenStore::iterator& pos) {
+  if (pos->t == '@') {
+    nextLookahead(pos);
+  }
+  if (pos->t == '?') {
+    nextLookahead(pos);
+  }
+  if (pos->t == '(') {
+    nextLookahead(pos);
+    if (pos->t == T_FUNCTION) {
+      nextLookahead(pos);
+      if (pos->t != '(') return false;
+      nextLookahead(pos);
+      if (!tryParseTypeList(pos) || pos->t != ')') return false;
+      nextLookahead(pos);
+      if (pos->t == ')') {
+        nextLookahead(pos);
+        return true;
+      }
+      if (pos->t != ':') return false;
+      nextLookahead(pos);
+      if (!tryParseNSType(pos) || pos->t != ')') return false;
+      nextLookahead(pos);
+      return true;
+    }
+    if (!tryParseTypeList(pos) || pos->t != ')') return false;
+    nextLookahead(pos);
+    return true;
+  } 
+  if (pos->t == T_NAMESPACE) {
+    nextLookahead(pos);
+    if (pos->t != T_NS_SEPARATOR) return false;
+    nextLookahead(pos);
+  } else if (pos->t == T_NS_SEPARATOR) {
+    nextLookahead(pos);
+  }
+  for (;;) {
+    switch (pos->t) {
+      case T_STRING:
+      case T_XHP_ATTRIBUTE:
+      case T_XHP_CATEGORY:
+      case T_XHP_CHILDREN:
+      case T_XHP_REQUIRED:
+      case T_XHP_ENUM:
+      case T_ARRAY:
+        nextLookahead(pos);
+        break;
+      case T_XHP_LABEL:
+        nextLookahead(pos);
+        return true; 
+      default:
+        return false;
+    }
+    if (pos->t == T_UNRESOLVED_LT) {
+      TokenStore::iterator ltPos = pos;
+      nextLookahead(pos);
+      ++m_lookaheadLtDepth;
+      bool isTypeList = tryParseTypeList(pos);
+      --m_lookaheadLtDepth;
+      if (!isTypeList || pos->t != '>') {
+        ltPos->t = '<';
+        return false;
+      }
+      ltPos->t = T_TYPELIST_LT;
+      pos->t = T_TYPELIST_GT;
+      nextLookahead(pos);
+      return true;
+    }
+    if (pos->t != T_NS_SEPARATOR) {
+      return true;
+    }
+    nextLookahead(pos);
+  }
+}
+
+int Scanner::getNextToken(ScannerToken &t, Location &l) {
+  int tokid;
+  bool la = !m_lookahead.empty();
+  tokid = fetchToken(t, l);
+  if (LIKELY(tokid != T_UNRESOLVED_LT)) {
+    // In the common case, we don't have to perform any resolution
+    // and we can just return the token
+    if (UNLIKELY(la)) {
+      // If we pulled a lookahead token, we need to remove it from
+      // the lookahead store
+      m_lookahead.popFront();
+    }
+    return tokid;
+  }
+  // We encountered a '<' character that needs to be resolved.
+  if (!la) {
+    // If this token didn't come from the lookahead store, we
+    // need to stash it there
+    TokenStore::iterator it = m_lookahead.appendNew();
+    LookaheadToken ltd = { t, l, tokid };
+    *it = ltd;
+  }
+  // Look at subsequent tokens to determine if the '<' character
+  // is the start of a type list
+  TokenStore::iterator pos = m_lookahead.begin();
+  TokenStore::iterator ltPos = pos;
+  nextLookahead(pos); 
+  ++m_lookaheadLtDepth;
+  bool isTypeList = tryParseTypeList(pos);
+  --m_lookaheadLtDepth;
+  if (!isTypeList || pos->t != '>') {
+    ltPos->t = '<';
+  } else {
+    ltPos->t = T_TYPELIST_LT;
+    pos->t = T_TYPELIST_GT;
+  }
+  tokid = fetchToken(t, l);
+  // We pulled a lookahead token, we need to remove it from the
+  // lookahead store
+  m_lookahead.popFront();
   return tokid;
 }
 
@@ -384,6 +540,64 @@ string Scanner::escape(char *str, int len, char quote_type) const {
     }
   }
   return output;
+}
+
+TokenStore::iterator TokenStore::begin() {
+  if (empty()) {
+    return end();
+  }
+  iterator it;
+  it.m_slab = m_head;
+  it.m_pos = m_head->m_beginPos;
+  return it;
+}
+
+TokenStore::iterator TokenStore::end() {
+  iterator it;
+  it.m_slab = NULL;
+  it.m_pos = 0;
+  return it;
+}
+
+void TokenStore::popFront() {
+  if (empty()) return;
+  ++m_head->m_beginPos;
+  if (m_head->m_beginPos < m_head->m_endPos) return;
+  LookaheadSlab* nextSlab = m_head->m_next;
+  if (!nextSlab) {
+    // We just removed the last token from the last slab. We hang on to the
+    // last slab instead of freeing it so that we don't keep allocating and
+    // freeing slabs in the common steady state.
+    m_head->m_beginPos = 0;
+    m_head->m_endPos = 0;
+    return;
+  }
+  delete m_head;
+  m_head = nextSlab;
+}
+
+TokenStore::iterator TokenStore::appendNew() {
+  iterator it;
+  if (m_tail && m_tail->m_endPos < LookaheadSlab::SlabSize) {
+    it.m_slab = m_tail;
+    it.m_pos = m_tail->m_endPos;
+    ++m_tail->m_endPos;
+    return it;
+  }
+  LookaheadSlab* newSlab = new LookaheadSlab;
+  newSlab->m_next = NULL;
+  newSlab->m_beginPos = 0;
+  newSlab->m_endPos = 0;
+  if (m_tail) {
+    m_tail->m_next = newSlab;
+    m_tail = m_tail->m_next;
+  } else {
+    m_head = m_tail = newSlab;
+  }
+  it.m_slab = m_tail;
+  it.m_pos = newSlab->m_endPos;
+  ++newSlab->m_endPos;
+  return it;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -545,10 +545,6 @@ TypedValue* ArrayData::nvGetValueRef(ssize_t pos) {
   return const_cast<TypedValue*>(getValueRef(pos).asTypedValue());
 }
 
-ArrayData* ArrayData::nvSet(int64 ki, int64 vi, bool copy) {
-  return set(ki, VarNR(vi), copy);
-}
-
 TypedValue* ArrayData::nvGetCell(int64 k) const {
   TypedValue* tv = (TypedValue*)&get(k, false);
   return LIKELY(tv != (TypedValue*)&null_variant) ? tvToCell(tv) :

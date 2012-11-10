@@ -193,7 +193,6 @@ class ArrayData : public Countable {
   virtual TypedValue* nvGet(const StringData* k) const;
   virtual void nvGetKey(TypedValue* out, ssize_t pos);
   virtual TypedValue* nvGetValueRef(ssize_t pos);
-  virtual ArrayData* nvSet(int64 ki, int64 vi, bool copy);
   virtual TypedValue* nvGetCell(int64 ki) const;
   virtual TypedValue* nvGetCell(const StringData* k) const;
 

@@ -1433,16 +1433,6 @@ TypedValue* HphpArray::nvGet(const StringData* k) const {
   return NULL;
 }
 
-ArrayData* HphpArray::nvSet(int64 ki, int64 vi, bool copy) {
-  HphpArray* a = this;
-  ArrayData* retval = NULL;
-  if (copy) {
-    retval = a = copyImpl();
-  }
-  a->nvUpdate(ki, vi);
-  return retval;
-}
-
 ArrayData* HphpArray::nvAppend(const TypedValue* v, bool copy) {
   HphpArray* a = this;
   ArrayData* retval = NULL;
@@ -1480,32 +1470,6 @@ void HphpArray::nvGetKey(TypedValue* out, ssize_t pos) {
   ASSERT(m_data[pos].data.m_type != KindOfTombstone);
   Elm* e = &m_data[/*(ElmInd)*/pos];
   getElmKey(e, out);
-}
-
-bool HphpArray::nvUpdate(int64 ki, int64 vi) {
-  ElmInd* ei = findForInsert(ki);
-  if (validElmInd(*ei)) {
-    Elm* e = &m_data[*ei];
-    TypedValue* to = (TypedValue*)(&e->data);
-    if (to->m_type == KindOfRef) to = to->m_data.pref->tv();
-    DataType oldType = to->m_type;
-    uint64_t oldDatum = to->m_data.num;
-    if (IS_REFCOUNTED_TYPE(oldType)) {
-      tvDecRefHelper(oldType, oldDatum);
-    }
-    to->m_data.num = vi;
-    to->m_type = KindOfInt64;
-    return true;
-  }
-  Elm* e = newElm(ei, ki);
-  TypedValue* to = (TypedValue*)(&e->data);
-  to->m_data.num = vi;
-  to->m_type = KindOfInt64;
-  e->setIntKey(ki);
-  if (ki >= m_nextKI && m_nextKI >= 0) {
-    m_nextKI = ki + 1;
-  }
-  return true;
 }
 
 /*
@@ -1844,21 +1808,12 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, Value value) {
 
 /**
  * Unary integer keys.
- *    array_setm_ik1_iv --
- *       Integer value.
- *
  *    array_setm_ik1_v --
  *       Polymorphic value.
  *
  *    array_setm_ik1_v0 --
  *       Don't count the array's reference to the polymorphic value.
  */
-ArrayData*
-array_setm_ik1_iv(TypedValue* cell, ArrayData* ad, int64 key, int64 value) {
-  return
-    array_setm<int64, int64, false, false, false>(cell, ad, key, value);
-}
-
 ArrayData*
 array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
                  TypedValue* value) {

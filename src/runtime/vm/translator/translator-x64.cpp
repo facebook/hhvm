@@ -5259,11 +5259,8 @@ TranslatorX64::translateAddElemC(const Tracelet& t,
   ASSERT(keyLoc.isStack());
   ASSERT(arrLoc.isStack());
 
-  // If either the key or the rhs is not Int64, we will need to pass the
-  // rhs by address, so we need to sync it back to memory
-  if (!key.rtt.isInt() || !val.rtt.isInt()) {
-    m_regMap.cleanLoc(valLoc);
-  }
+  // We will need to pass the rhs by address, so we need to sync it to memory
+  m_regMap.cleanLoc(valLoc);
 
   // The array_setm helpers will decRef any old value that is
   // overwritten if appropriate. If copy-on-write occurs, it will also
@@ -5271,45 +5268,27 @@ TranslatorX64::translateAddElemC(const Tracelet& t,
   // some of the array_setm helpers will decRef the key if it is a
   // string (for cases where the key is not a local), while others do
   // not (for cases where the key is a local).
-  void* fptr;
-  if (key.rtt.isInt() && val.rtt.isInt()) {
-    if (false) { // type-check
-      TypedValue* cell = NULL;
-      ArrayData* arr = NULL;
-      ArrayData* ret = array_setm_ik1_iv(cell, arr, 12, 3);
-      printf("%p", ret); // use ret
-    }
-    // If the rhs is Int64, we can use a specialized helper
-    EMIT_CALL(a, array_setm_ik1_iv,
-               IMM(0),
-               V(arrLoc),
-               V(keyLoc),
-               V(valLoc));
-    recordReentrantCall(i);
-  } else if (key.rtt.isInt() || key.rtt.isString()) {
-    if (false) { // type-check
-      TypedValue* cell = NULL;
-      TypedValue* rhs = NULL;
-      StringData* strkey = NULL;
-      ArrayData* arr = NULL;
-      ArrayData* ret;
-      ret = array_setm_ik1_v0(cell, arr, 12, rhs);
-      printf("%p", ret); // use ret
-      ret = array_setm_sk1_v0(cell, arr, strkey, rhs);
-      printf("%p", ret); // use ret
-    }
-    // Otherwise, we pass the rhs by address
-    fptr = key.rtt.isString() ? (void*)array_setm_sk1_v0 :
-      (void*)array_setm_ik1_v0;
-    EMIT_CALL(a, fptr,
-               IMM(0),
-               V(arrLoc),
-               V(keyLoc),
-               A(valLoc));
-    recordReentrantCall(i);
-  } else {
-    ASSERT(false);
+  ASSERT(key.rtt.isInt() || key.rtt.isString());
+  if (false) { // type-check
+    TypedValue* cell = NULL;
+    TypedValue* rhs = NULL;
+    StringData* strkey = NULL;
+    ArrayData* arr = NULL;
+    ArrayData* ret;
+    ret = array_setm_ik1_v0(cell, arr, 12, rhs);
+    printf("%p", ret); // use ret
+    ret = array_setm_sk1_v0(cell, arr, strkey, rhs);
+    printf("%p", ret); // use ret
   }
+  // Otherwise, we pass the rhs by address
+  void* fptr = key.rtt.isString() ? (void*)array_setm_sk1_v0 :
+               (void*)array_setm_ik1_v0;
+  EMIT_CALL(a, fptr,
+             IMM(0),
+             V(arrLoc),
+             V(keyLoc),
+             A(valLoc));
+  recordReentrantCall(i);
   // The array value may have changed, so we need to invalidate any
   // register we have associated with arrLoc
   m_regMap.invalidate(arrLoc);

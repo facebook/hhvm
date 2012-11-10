@@ -100,7 +100,6 @@ public:
   using ArrayData::add;
   using ArrayData::addLval;
   using ArrayData::remove;
-  using ArrayData::nvSet;
 
   // implements ArrayData
   ssize_t vsize() const;
@@ -188,7 +187,7 @@ public:
 
   // END overide/implements section
 
-  // nvGet, nvSet and friends.
+  // nvGet and friends.
   // "nv" stands for non-variant. If we know the types of keys and values
   // through runtime and compile-time chicanery, we can directly call these
   // methods.
@@ -203,7 +202,6 @@ public:
   TypedValue* nvGetCell(int64 ki) const;
   TypedValue* nvGetCell(const StringData* k) const;
 
-  ArrayData* nvSet(int64 ki, int64 vi, bool copy);
   void nvBind(int64 ki, const TypedValue* v) {
     updateRef(ki, tvAsCVarRef(v));
   }
@@ -455,9 +453,6 @@ private:
 
   void erase(ElmInd* ei, bool updateNext = false);
 
-  // nvUpdate: for internal use by the nv* methods.
-  bool nvUpdate(int64 ki, int64 vi);
-
   HphpArray* copyImpl(HphpArray* target) const;
   HphpArray* copyImpl() const;
 
@@ -555,8 +550,6 @@ enum ArrayGetFlags {
   CheckInts = 2
 };
 
-ArrayData* array_setm_ik1_iv(TypedValue* cell, ArrayData* ha, int64 key,
-                             int64 value);
 ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
                             TypedValue* value);
 ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64 key,

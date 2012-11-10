@@ -3230,7 +3230,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
     ArrayData* arr = NULL;
     TypedValue* rhs = NULL;
     StringData* strKey = NULL;
-    UNUSED ArrayData* ret = array_setm_ik1_iv(cell, arr, 12, 3);
+    UNUSED ArrayData* ret;
     ret = array_setm_ik1_v(cell, arr, 12, rhs);
     ret = array_setm_sk1_v(cell, arr, strKey, rhs);
     ret = array_setm_sk1_v0(cell, arr, strKey, rhs);
@@ -3239,49 +3239,41 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
     ret = array_setm_s0k1nc_v(cell, arr, strKey, rhs);
     ret = array_setm_s0k1nc_v0(cell, arr, strKey, rhs);
   }
-  bool isInt = key.isInt() && IS_INT_TYPE(val.rtt.valueType());
 
   /*
-   * The value can be passed as A, V or DEREF according to:
+   * The value can be passed as A or V according to:
    *
    *                       | val.isVariant() | !val.isVariant()
    * ----------------------+-----------------+-----------------------------
-   * int key + int value   | DEREF(valLoc)   | V(valLoc)
-   * everything else       | V(valLoc)       | A(valLoc)
+   * value                 | V(valLoc)       | A(valLoc)
    */
-  int deRefLevel = isInt + val.isVariant();
-
+  bool valIsVariant = val.isVariant();
   int args[3];
-  args[0] = deRefLevel == 1 ? 3 : deRefLevel == 2 ? ArgAnyReg : ArgDontAllocate;
+  args[0] = valIsVariant ? 3 : ArgDontAllocate;
   args[1] = useBoxedForm ? 0 : 1;
   args[2] = 2;
   allocInputsForCall(i, args);
 
-  if (isInt) {
-    // If the key and rhs are Int64, we can use a specialized helper
-    fptr = (void*)array_setm_ik1_iv;
-  } else {
-    bool decRefKey = key.rtt.isString() && keyLoc.isStack();
-    bool decRefValue = forceIncDec ||
-      (!i.outStack && !val.isLocal() &&
-       IS_REFCOUNTED_TYPE(val.rtt.valueType()));
-    fptr = decRefValue ?
-      (key.rtt.isString() ?
-       (decRefKey ? (void*)array_setm_sk1_v0 :
-        (i.hasConstImm ? (void*)array_setm_s0k1nc_v0 :
-         (void*)array_setm_s0k1_v0)) :
-       (void*)array_setm_ik1_v0) :
-      (key.rtt.isString() ?
-       (decRefKey ? (void*)array_setm_sk1_v :
-        (i.hasConstImm ? (void*)array_setm_s0k1nc_v :
-         (void*)array_setm_s0k1_v)) :
-       (void*)array_setm_ik1_v);
-  }
+  bool decRefKey = key.rtt.isString() && keyLoc.isStack();
+  bool decRefValue = forceIncDec ||
+    (!i.outStack && !val.isLocal() &&
+     IS_REFCOUNTED_TYPE(val.rtt.valueType()));
+  fptr = decRefValue ?
+    (key.rtt.isString() ?
+     (decRefKey ? (void*)array_setm_sk1_v0 :
+      (i.hasConstImm ? (void*)array_setm_s0k1nc_v0 :
+       (void*)array_setm_s0k1_v0)) :
+     (void*)array_setm_ik1_v0) :
+    (key.rtt.isString() ?
+     (decRefKey ? (void*)array_setm_sk1_v :
+      (i.hasConstImm ? (void*)array_setm_s0k1nc_v :
+       (void*)array_setm_s0k1_v)) :
+     (void*)array_setm_ik1_v);
 
   if (forceIncDec) {
     LazyScratchReg tmp(m_regMap);
     PhysReg rhsReg = getReg(valLoc);
-    if (val.isVariant()) {
+    if (valIsVariant) {
       tmp.alloc();
       emitDeref(a, rhsReg, r(tmp));
       rhsReg = r(tmp);
@@ -3292,8 +3284,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
             useBoxedForm ? V(arrLoc) : IMM(0),
             useBoxedForm ? DEREF(arrLoc) : V(arrLoc),
             V(keyLoc),
-            deRefLevel == 2 ? DEREF(valLoc) :
-            deRefLevel == 1 ? V(valLoc) : A(valLoc));
+            valIsVariant ? V(valLoc) : A(valLoc));
 
   recordReentrantCall(i);
   // If we did not used boxed form, we need to tell the register allocator

@@ -4059,15 +4059,8 @@ Address CodeGenerator::cgAddElem(IRInstruction* inst) {
   SSATmp* val   = inst->getSrc(2);
 
   Type::Tag keyType = key->getType();
-  Type::Tag valType = val->getType();
   // TODO: Double check that these helpers don't re-enter
-  if (keyType == Type::Int && valType == Type::Int) {
-    cgCallHelper(m_as, (TCA)array_setm_ik1_iv, dst, false,
-                 ArgGroup().imm(0)
-                           .ssa(arr)
-                           .ssa(key)
-                           .ssa(val));
-  } else if (keyType == Type::Int) {
+  if (keyType == Type::Int) {
     // decrefs the value but not the key
     cgCallHelper(m_as, (TCA)addElemIntKeyHelper, dst, false,
                  ArgGroup().ssa(arr)

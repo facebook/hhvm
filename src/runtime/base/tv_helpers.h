@@ -29,8 +29,6 @@ namespace HPHP {
 namespace VM {
 class Class;
 class Stack;
-void tv_release_generic(TypedValue* tv);
-void tv_release_typed(RefData*, DataType dt);
 }
 }
 
@@ -342,6 +340,8 @@ void tvCastToDoubleInPlace(TypedValue* tv);
 void tvCastToStringInPlace(TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);
 void tvCastToObjectInPlace(TypedValue* tv);
+
+extern void (*g_destructors[4])(RefData*);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

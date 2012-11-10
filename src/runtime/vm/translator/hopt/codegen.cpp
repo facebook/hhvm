@@ -2272,6 +2272,20 @@ Address CodeGenerator::getDtor(DataType type) {
   }
 }
 
+static void
+tv_release_generic(TypedValue* tv) {
+  ASSERT(VM::Transl::tx64->stateIsDirty());
+  ASSERT(tv->m_type >= KindOfString && tv->m_type <= KindOfRef);
+  g_destructors[tv->m_type - KindOfString](tv->m_data.pref);
+}
+
+static void
+tv_release_typed(RefData* pv, DataType dt) {
+  ASSERT(VM::Transl::tx64->stateIsDirty());
+  ASSERT(dt >= KindOfString && dt <= KindOfRef);
+  g_destructors[dt - KindOfString](pv);
+}
+
 Address CodeGenerator::getDtorGeneric() {
   return (Address)tv_release_generic;
 }

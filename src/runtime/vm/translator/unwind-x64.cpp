@@ -65,6 +65,10 @@ void sync_regstate(_Unwind_Context* context) {
    * fixupWork expects to be looking at the first frame that is out of
    * the TC.  We have RBP/RIP for the TC frame that called out here,
    * so we make a fake ActRec here to give it what it expects.
+   *
+   * Note: this doesn't work for IndirectFixup situations.  However,
+   * currently IndirectFixup is only used for destructors, which
+   * aren't allowed to throw, so this is ok.
    */
   ActRec fakeAr;
   fakeAr.m_savedRbp = frameRbp;

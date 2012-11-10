@@ -197,7 +197,7 @@ static void destructObject(RefData *p)  { ((ObjectData *)p)->release(); }
 HOT_FUNC
 static void destructRef(RefData *p)     { p->release(); }
 
-static void (*destructors[4])(RefData *) =
+void (*g_destructors[4])(RefData *) =
   {destructString, destructArray, destructObject, destructRef};
 
 inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
@@ -208,32 +208,12 @@ inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
             KindOfObject + 1 == KindOfRef);
   if (data->decRefCount() == 0) {
     ASSERT(t >= KindOfString && t <= KindOfRef);
-    destructors[t - KindOfString](data);
+    g_destructors[t - KindOfString](data);
   }
 }
 
 inline ALWAYS_INLINE void Variant::destructImpl() {
   destructDataImpl(m_data.pref, m_type);
-}
-
-namespace VM {
-
-HOT_FUNC_VM
-void
-tv_release_generic(TypedValue* tv) {
-  ASSERT(VM::Transl::tx64->stateIsDirty());
-  ASSERT(tv->m_type >= KindOfString && tv->m_type <= KindOfRef);
-  destructors[tv->m_type - KindOfString](tv->m_data.pref);
-}
-
-HOT_FUNC_VM
-void
-tv_release_typed(RefData* pv, DataType dt) {
-  ASSERT(VM::Transl::tx64->stateIsDirty());
-  ASSERT(dt >= KindOfString && dt <= KindOfRef);
-  destructors[dt - KindOfString](pv);
-}
-
 }
 
 HOT_FUNC_VM
@@ -243,7 +223,7 @@ void tvDecRefHelper(DataType type, uint64_t datum) {
             KindOfArray + 1 == KindOfObject &&
             KindOfObject + 1 == KindOfRef);
   if (((RefData*)datum)->decRefCount() == 0) {
-    destructors[type - KindOfString]((RefData*)datum);
+    g_destructors[type - KindOfString]((RefData*)datum);
   }
 }
 

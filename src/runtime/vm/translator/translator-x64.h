@@ -251,6 +251,7 @@ private:
                                 const NormalizedInstruction& i,
                                 Attr typeAttr);
   void recordSyncPoint(Asm& a, Offset pcOff, Offset spOff);
+  void recordIndirectFixup(CTCA addr, int dwordsPushed);
   template <bool reentrant>
   void recordCallImpl(Asm& a, const NormalizedInstruction& i,
                       bool advance = false);
@@ -292,6 +293,7 @@ private:
   TCA genericRefCountStub(Asm& a);
   TCA genericRefCountStubRegs(Asm& a);
   void emitFreeLocalsHelpers();
+  void emitGenericDecRefHelpers();
   TCA getCallArrayProlog(Func* func);
   TCA emitPrologueRedispatch(Asm &a);
   TCA emitFuncGuard(Asm& a, const Func *f);

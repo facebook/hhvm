@@ -79,6 +79,10 @@ public:
       sCopy.remove(reg);
     }
   }
+
+  int rspAdjustment() const {
+    return numElts + ((numElts & 1) == StackParity);
+  }
 };
 
 // In shared stubs, we've already made the stack odd by calling

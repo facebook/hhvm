@@ -57,7 +57,7 @@ void* FixupMapUnitTest::reader(void* that) {
     ar1.m_savedRbp = (uint64_t)&ar2;
     ar1.m_savedRip = i;
     FixupMap::VMRegs vmr = { 0, 0, 0 };
-    while (!m->getFrameRegs(&ar1, &vmr)) {
+    while (!m->getFrameRegs(&ar1, 0, &vmr)) {
       // Has to succeed eventually.
     }
     ASSERT(vmr.m_pc == u.entry() + i * kPcMul);

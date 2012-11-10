@@ -732,6 +732,12 @@ TranslatorX64::recordSyncPoint(X64Assembler& a, Offset pcOff, Offset spOff) {
 }
 
 void
+TranslatorX64::recordIndirectFixup(CTCA addr, int dwordsPushed) {
+  m_fixupMap.recordIndirectFixup(
+    a.code.frontier, IndirectFixup((2 + dwordsPushed) * 8));
+}
+
+void
 TranslatorX64::recordCall(Asm& a, const NormalizedInstruction& i) {
   recordCallImpl<false>(a, i);
 }
@@ -1065,7 +1071,12 @@ void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
   SpaceRecorder sr("_DecRefGeneric", a);
 
   auto body = [&](X64Assembler& a){
-    callBinaryStub(a, *m_curNI, m_dtorGenericStubRegs, rData, rType);
+    // Calling convention: m_data in rdi, m_type in r10.  (See
+    // emitGenericDecRefHelpers.)
+    ASSERT(rData != rScratch && rType != rScratch);
+    ASSERT(!kAllRegs.contains(rScratch));
+    a.    mov_reg32_reg32(rType, rScratch);
+    callUnaryReentrantStub(a, *m_curNI, m_dtorGenericStubRegs, rData);
   };
 
   Op op = m_curNI->op();
@@ -1083,70 +1094,76 @@ void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
   }
 }
 
-/**
- * genericRefCountStub --
+/*
+ * Emit a call to the appropriate destructor for a dynamically typed
+ * value.
  *
- *   Shared code to decRef the TypedValue* of unknown, but refcounted, type
- *   in rdi. Tightly coupled with emitDecRefGeneric.
+ * No registers are saved; most translated code should be using
+ * emitDecRefGeneric{Reg,} instead of this.
+ *
+ *   Inputs:
+ *
+ *     - typeReg is destroyed and may not be argNumToRegName[0].
+ *     - argNumToRegName[0] should contain the m_data for this value.
+ *     - scratch is destoyed.
  */
-TCA TranslatorX64::genericRefCountStub(X64Assembler& a) {
-  moveToAlign(a);
-  FreezeRegs brr(m_regMap);
-  TCA retval = a.code.frontier;
+static void callDestructor(X64Assembler& a,
+                           PhysReg typeReg,
+                           PhysReg scratch) {
+  ASSERT(typeReg != argNumToRegName[0]);
+  ASSERT(scratch != argNumToRegName[0]);
+  static_assert(BitwiseKindOfString + 1 == KindOfArray &&
+                KindOfArray + 1 == KindOfObject &&
+                KindOfObject + 1 == KindOfRef &&
+                BitwiseKindOfString == KindOfRefCountThreshold + 1,
+                "Destructor lookup logic depends exact numbers for KindOf*");
 
-  // Note we make a real frame here: this is necessary so that the
-  // fixup map can chase back to the caller of this stub if it needs
-  // to sync regs.
-  a.    pushr(rbp); // {
-  a.    mov_reg64_reg64(rsp, rbp);
-  {
-    PhysRegSaverStub prs(a, RegSet(rsi));
-    // We already know the type was refcounted if we got here.
-    a.    load_reg64_disp_reg64(rdi, TVOFF(m_data), rsi);
-    { // if !static
-      IfCountNotStatic ins(a, rsi, KindOfInvalid);
-      a.  sub_imm32_disp_reg32(1, TVOFF(_count), rsi);
-      semiLikelyIfBlock(CC_Z, a, [&]{
-        RegSet s = kCallerSaved - (RegSet(rdi) | RegSet(rsi));
-        PhysRegSaver prs(a, s);
-        a.call(TCA(tv_release_generic));
-      });
-    } // endif
-  }
-  a.    popr(rbp); // }
-  a.    ret();
-  return retval;
+  a.    sub_imm32_reg64(BitwiseKindOfString, typeReg);
+  a.    mov_imm64_reg(uintptr_t(&g_destructors), scratch);
+  a.    load_reg64_index_scale_disp_reg64(scratch,
+                                          typeReg,
+                                          sizeof(void(*)()),
+                                          0,
+                                          scratch);
+  a.    call_reg(scratch);
 }
 
-TCA TranslatorX64::genericRefCountStubRegs(X64Assembler& a) {
-  const PhysReg rData = argNumToRegName[0];
-  const PhysReg rType = argNumToRegName[1];
-
-  moveToAlign(a);
-  TCA retval = a.code.frontier;
+void TranslatorX64::emitGenericDecRefHelpers() {
   FreezeRegs brr(m_regMap);
+  Label release;
 
-  // The frame here is needed for the same reason as in
-  // genericRefCountStub.
-  a.    pushr(rbp); // {
-  a.    mov_reg64_reg64(rsp, rbp);
-  {
-    IfCountNotStatic ins(a, rData, KindOfInvalid);
-    a.  sub_imm32_disp_reg32(1, TVOFF(_count), rData);
-    semiLikelyIfBlock(CC_Z, a, [&]{
-      // The arguments are already in the right registers.
-      RegSet s = kCallerSaved - (RegSet(rData) | RegSet(rType));
-      PhysRegSaverParity<1> saver(a, s);
-      if (false) { // typecheck
-        RefData* vp = NULL; DataType dt = KindOfUninit;
-        (void)tv_release_typed(vp, dt);
-      }
-      a.call(TCA(tv_release_typed));
-    });
-  }
-  a.    popr(rbp); // }
+  // m_dtorGenericStub just takes a pointer to the TypedValue in rdi.
+  moveToAlign(a, kNonFallthroughAlign);
+  m_dtorGenericStub = a.code.frontier;
+  a.    load_reg64_disp_reg32(rdi, TVOFF(m_type), rScratch);
+  a.    load_reg64_disp_reg64(rdi, TVOFF(m_data), rdi);
+  // Fall through to the regs stub.
+
+  /*
+   * Custom calling convention: m_type goes in rScratch, m_data in
+   * rdi.  We don't ever store program locations in rScratch, so the
+   * caller didn't need to spill anything.  The assembler sometimes
+   * uses rScratch, but we know the stub won't need to and it makes it
+   * possible to share the code for both decref helpers.
+   */
+  m_dtorGenericStubRegs = a.code.frontier;
+  a.    cmp_imm32_disp_reg32(RefCountStaticValue, TVOFF(_count), rdi);
+  jccBlock<CC_Z>(a, [&] {
+    a.  sub_imm32_disp_reg32(1, TVOFF(_count), rdi);
+    release.jcc8(a, CC_Z);
+  });
   a.    ret();
-  return retval;
+
+asm_label(a, release);
+  {
+    PhysRegSaver prs(a, kCallerSaved - RegSet(rdi));
+    callDestructor(a, rScratch, rax);
+    recordIndirectFixup(a.code.frontier, prs.rspAdjustment());
+  }
+  a.    ret();
+
+  TRACE(1, "STUB total dtor generic stubs %zu bytes\n",
+        size_t(a.code.frontier - m_dtorGenericStub));
 }
 
 /*
@@ -3831,36 +3848,50 @@ OPCODES
 #undef O
 };
 
-void TranslatorX64::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
+void TranslatorX64::fixupWork(VMExecutionContext* ec,
+                              ActRec* rbp) const {
   ASSERT(RuntimeOption::EvalJit);
-  ActRec* nextAr = rbp;
+
+  TRACE_SET_MOD(fixup);
+  TRACE(1, "fixup(begin):\n");
+
+  void* const lowStack = ec->m_stack.getStackLowAddress();
+  void* const highStack = ec->m_stack.getStackHighAddress();
+  auto isVMFrame = [lowStack,highStack] (ActRec* ar) {
+    return (ar >= lowStack && ar < highStack) ||
+      // It might be a generator frame, away from the main stack.
+      (ar && *reinterpret_cast<int64_t*>(ar + 1) == c_Continuation::kMagic);
+  };
+
+  auto* nextRbp = rbp;
+  rbp = 0;
   do {
-    rbp = nextAr;
-    TRACE(10, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
+    auto* prevRbp = rbp;
+    rbp = nextRbp;
+    nextRbp = reinterpret_cast<ActRec*>(rbp->m_savedRbp);
+    TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
-    FixupMap::VMRegs regs;
-    nextAr = (ActRec*)rbp->m_savedRbp;
-    bool isValid = g_vmContext->m_stack.isValidAddress((uintptr_t)nextAr);
-    if (UNLIKELY(!isValid && nextAr)) {
-      // nextAr might be pointing to a generator's frame, away from the main
-      // stack. Check for the magic number.
-      int64* magicPtr = (int64*)(nextAr + 1);
-      isValid = (*magicPtr == c_Continuation::kMagic);
+    if (isVMFrame(nextRbp)) {
+      TRACE(2, "fixup checking vm frame %s\n",
+               nextRbp->m_func->name()->data());
+      FixupMap::VMRegs regs;
+      if (m_fixupMap.getFrameRegs(rbp, prevRbp, &regs)) {
+        TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
+              regs.m_fp->m_func->name()->data(),
+              regs.m_fp, regs.m_sp, regs.m_pc);
+        ec->m_fp = const_cast<ActRec*>(regs.m_fp);
+        ec->m_pc = regs.m_pc;
+        vmsp() = regs.m_sp;
+        return;
+      }
     }
 
-    if (isValid && m_fixupMap.getFrameRegs(rbp, &regs)) {
-      TRACE(10, "fixup func %s fp %p sp %p pc %p\n",
-            regs.m_fp->m_func->name()->data(),
-            regs.m_fp, regs.m_sp, regs.m_pc);
-      ec->m_fp = const_cast<ActRec*>(regs.m_fp);
-      ec->m_pc = regs.m_pc;
-      vmsp() = regs.m_sp;
-      return;
-    }
-  } while (rbp && rbp != nextAr);
-  // OK, we've exhausted the entire actRec chain.
-  // We are only invoking ::fixup() from contexts that were known
-  // to be called out of the TC, so this cannot happen.
+    prevRbp = rbp;
+  } while (rbp && rbp != nextRbp);
+
+  // OK, we've exhausted the entire actRec chain.  We are only
+  // invoking ::fixup() from contexts that were known to be called out
+  // of the TC, so this cannot happen.
   NOT_REACHED();
 }
 
@@ -10949,7 +10980,7 @@ asm_label(a, finished);
   surprise.jcc8(a, CC_NZ);
   a.    ret();
 
-  TRACE(1, "TCA freeLocals hot path: %zu (this), %zu (no this) bytes\n",
+  TRACE(1, "STUB freeLocals hot path: %zu (this), %zu (no this) bytes\n",
         size_t(a.code.frontier - m_freeLocalsThisHelper),
         size_t(a.code.frontier - m_freeLocalsNoThisHelper));
 
@@ -10982,9 +11013,7 @@ asm_label(a, surprise);
   a.    mov_reg64_reg64(rVmFp, argNumToRegName[0]);
   a.    jmp(TCA(EventHook::FunctionExit));
 
-  TRACE(1, "TCA freeLocals helpers (%p %p): %zu (this), %zu (nothis) bytes\n",
-           m_freeLocalsThisHelper,
-           m_freeLocalsNoThisHelper,
+  TRACE(1, "STUB freeLocals helpers: %zu (this), %zu (nothis) bytes\n",
            size_t(a.code.frontier - m_freeLocalsThisHelper),
            size_t(a.code.frontier - m_freeLocalsNoThisHelper));
 }
@@ -11126,9 +11155,7 @@ TranslatorX64::TranslatorX64()
   m_dtorStubs[KindOfObject]        = emitUnaryStub(a,
                                                    Call(getMethodHardwarePtr(&ObjectData::release)));
   m_dtorStubs[KindOfRef]           = emitUnaryStub(a, Call(vp(getMethodHardwarePtr(&RefData::release))));
-  m_dtorGenericStub                = genericRefCountStub(a);
-  m_dtorGenericStubRegs            = genericRefCountStubRegs(a);
-
+  emitGenericDecRefHelpers();
   emitFreeLocalsHelpers();
 
   if (trustSigSegv) {

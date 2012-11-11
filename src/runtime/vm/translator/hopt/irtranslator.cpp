@@ -1219,6 +1219,12 @@ TranslatorX64::irTranslateFPassR(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateFCallBuiltin(const Tracelet& t,
+                              const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(FCallBuiltin);
+}
+
+void
 TranslatorX64::irTranslateFCall(const Tracelet& t,
                               const NormalizedInstruction& i) {
   int numArgs = i.imm[0].u_IVA;

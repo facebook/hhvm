@@ -404,6 +404,8 @@ enum Operands {
   DontGuardAny    = 1 << 16, // Dont force a guard for any input
   This            = 1 << 17, // Input to CheckThis
   StackN          = 1 << 18, // pop N cells from stack; n = imm[0].u_IVA
+  BStackN         = 1 << 19, // consume N cells from stack for builtin call;
+                             // n = imm[0].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
   StackCufSafe = StackIns1 | FStack
@@ -1105,6 +1107,8 @@ static const struct {
   { OpFPassS,      {StackTop2|FuncdRef,
                                       Stack1,       OutUnknown,       -1 }},
   { OpFPassM,      {MVector|FuncdRef, Stack1,       OutUnknown,        1 }},
+  { OpBPassC,      {None,             None,         OutNull,           0 }},
+  { OpBPassV,      {None,             None,         OutNull,           0 }},
   /*
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.
@@ -1112,6 +1116,8 @@ static const struct {
   { OpFCall,       {FStack,           Stack1,       OutPred,           0 }},
   { OpFCallArray,  {FStack,           Stack1,       OutPred,
                                                    -(int)kNumActRecCells }},
+  // TODO: output type is known
+  { OpFCallBuiltin,{BStackN,          Stack1,       OutPred,          0 }},
   { OpCufSafeArray,{StackTop3|DontGuardAny,
                                       Stack1,       OutArray,         -2 }},
   { OpCufSafeReturn,{StackTop3|DontGuardAny,
@@ -1210,6 +1216,9 @@ int getStackDelta(const NormalizedInstruction& ni) {
   if (op == OpFCall) {
     int numArgs = ni.imm[0].u_IVA;
     return 1 - numArgs - kNumActRecCells;
+  }
+  if (op == OpFCallBuiltin) {
+    return 1 - ni.imm[0].u_IVA;
   }
   if (op == OpNewTuple) {
     return 1 - ni.imm[0].u_IVA;
@@ -1913,6 +1922,14 @@ void Translator::getInputs(Tracelet& t,
       inputs.push_back(Location(Location::Stack, --currentStackOffset));
       inputs.back().dontGuard = true;
       inputs.back().dontBreak = true;
+    }
+  }
+  if (input & BStackN) {
+    int numArgs = ni->imm[0].u_IVA;
+    SKTRACE(1, sk, "getInputs: BStackN %d %d\n", currentStackOffset - 1,
+            numArgs);
+    for (int i = 0; i < numArgs; i++) {
+      inputs.push_back(Location(Location::Stack, --currentStackOffset));
     }
   }
   if (input & MVector) {

@@ -319,6 +319,13 @@ function (the callee), transfers the parameters from the evaluation stack to
 the callee, pops the current FPI off of the FPI stack, and then invokes the
 dispatcher to call the function.
 
+Calls to buitin functions may be optimized to avoid pusing an ActRec on the
+FPI stack, if it is known that the builtin function does not need access
+to the call stack. In this case, the arguments to the builtin are passed
+with the BPass* instructions, and the builtin can be invoked with the
+FCallBuiltin instruction. Unless otherwise noted, subsequent references
+to FCall* instructions should be meant to refer to non-optimized FCall
+instructions, i.e. all FCall instructions other than FCallBuiltin.
 
 Calling convention
 ------------------
@@ -1727,7 +1734,7 @@ FCall <num params>    [F..F]  ->  [R]
   from the stack to the callee as parameters, pops the current FPI off of the
   FPI stack, and then invokes the dispatcher to call the callee. When the
   callee returns, it will transfer the return value onto the caller's
-  evaluation stack using the flavor determined by the callee.
+  evaluation stack using the R flavor.
 
 FCallArray    [F]  ->  [R]
 
@@ -1736,9 +1743,30 @@ FCallArray    [F]  ->  [R]
   elements of $1 (which must be an array) to the callee as parameters, pops
   the current FPI off of the FPI stack, and then invokes the dispatcher to
   call the callee. When the callee returns, it will transfer the return value
-  onto the caller's evaluation stack using the flavor determined by the
-  callee.
+  onto the caller's evaluation stack using the R flavor.
 
+BPassC <param id>    [C]  ->  [F]
+
+  Pass parameter to builtin call. This instruction pushes $1 onto the stack as
+  a cell regardless of whether parameter %1 is pass by value or pass by
+  reference.
+
+BPassV <param id>    [V]  ->  [F]
+
+  Pass parameter to builtin call. If parameter %1 is pass by value, this
+  instruction will unbox $1 and pussh it onto the stack as a cell. If
+  parameter %1 is pass by reference, this instruction will push $1 onto the
+  stack as a var.
+
+FCallBuiltin  <num params> <litstr id> [F..F]  -> [R]
+
+  Optimized builtin call without an ActRec. This instruction attempts to
+  lookup a builtin function named %2. If no function named %2 is defined,
+  this instruction throws a fatal error. Otherwise, this function gets
+  address of the builtin function named %2, transfers the top %1 values
+  from the stack to the callee as parameters, and then invokes the dispatcher
+  to call the callee. When the callee returns, it will transfer the return
+  value onto the caller's evaluation stack using the R flavor.
 
 9. Member operations
 --------------------

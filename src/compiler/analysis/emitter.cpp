@@ -1733,7 +1733,8 @@ static DataType getPredictedDataType(ExpressionPtr expr) {
   return act->getDataType();
 }
 
-void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn) {
+void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
+                                   bool isBuiltinCall) {
   int ref = -1;
   if (fn->hasAnyContext(Expression::RefValue |
                         Expression::DeepReference |
@@ -1776,7 +1777,20 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn) {
   } else if (!ref) {
     DataType dt = getPredictedDataType(fn);
     if (dt != KindOfUnknown) {
-      m_evalStack.setKnownType(dt, true /* predicted */);
+      if (isBuiltinCall) {
+        switch (dt) {
+          case KindOfBoolean:
+          case KindOfInt64:
+          case KindOfDouble: /* inferred */
+                             m_evalStack.setKnownType(dt, false);
+                             break;
+          default:           /* predicted */
+                             m_evalStack.setKnownType(dt, true);
+                             break;
+        }
+      } else {
+        m_evalStack.setKnownType(dt, true /* predicted */);
+      }
     }
     m_evalStack.setNotRef();
   }
@@ -4026,6 +4040,25 @@ static ssize_t getPassByRefKind(ExpressionPtr exp) {
   return PassByRefKind::ErrorOnCell;
 }
 
+void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
+                                         ExpressionPtr exp,
+                                         int paramId,
+                                         bool byRef) {
+  visit(exp);
+  if (checkIfStackEmpty("BPass*")) return;
+  if (byRef) {
+    emitVGet(e);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+    e.BPassV(paramId);
+  } else {
+    emitCGet(e);
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+    e.BPassC(paramId);
+  }
+  return;
+}
+
+
 void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                      ExpressionPtr exp,
                                      int paramId) {
@@ -5481,11 +5514,58 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
   return true;
 }
 
+static inline bool isCppRefType(DataType t) {
+  switch (t) {
+    case KindOfBoolean:
+    case KindOfInt64:   return false;
+    default:            return true;
+  }
+}
+
+bool EmitterVisitor::canEmitBuiltinCall(FunctionCallPtr fn,
+                                        const std::string& name,
+                                        int numParams) {
+  if (Option::JitEnableRenameFunction) {
+    return false;
+  }
+  if (Option::DynamicInvokeFunctions.size()) {
+    if (Option::DynamicInvokeFunctions.find(name) !=
+        Option::DynamicInvokeFunctions.end()) {
+      return false;
+    }
+  }
+  FunctionScopePtr func = fn->getFuncScope();
+  if (!func || numParams > kMaxBuiltinArgs) {
+    return false;
+  }
+  if (!func->isUserFunction() && !func->needsActRec()
+      && func->getMaxParamCount() == (uint)numParams) {
+    if (func->isVariableArgument() || func->isReferenceVariableArgument()
+                || func->isMixedVariableArgument()) {
+      return false;
+    }
+    TypePtr t = func->getReturnType();
+    if (!t || isCppRefType(t->getDataType())) {
+      return false;
+    }
+    for (int i = 0; i < func->getMaxParamCount(); i++) {
+      t = func->getParamType(i);
+      if (!t || t->getDataType() == KindOfDouble) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   ExpressionPtr nameExp = node->getNameExp();
   const std::string& nameStr = node->getOriginalName();
   ExpressionListPtr params(node->getParams());
   int numParams = params ? params->getCount() : 0;
+  bool isBuiltinCall = false;
+  StringData* nLiteral = NULL;
   Offset fpiStart;
   if (node->getClass() || !node->getClassName().empty()) {
     bool isSelfOrParent = node->isSelf() || node->isParent();
@@ -5523,9 +5603,11 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     }
   } else if (!nameStr.empty()) {
     // foo()
-    StringData* nLiteral = StringData::GetStaticString(nameStr);
+    nLiteral = StringData::GetStaticString(nameStr);
+    isBuiltinCall = canEmitBuiltinCall(node, nameStr, numParams);
 
-    if (!m_curFunc->isGenerator()) {
+    if (isBuiltinCall) {
+    } else if (!m_curFunc->isGenerator()) {
       fpiStart = m_ue.bcPos();
       e.FPushFuncD(numParams, nLiteral);
     } else {
@@ -5566,15 +5648,28 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     fpiStart = m_ue.bcPos();
     e.FPushFunc(numParams);
   }
-  {
-    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+  if (isBuiltinCall) {
+    FunctionScopePtr func = node->getFuncScope();
+    ASSERT(func);
+    ASSERT(numParams == func->getMaxParamCount());
     for (int i = 0; i < numParams; i++) {
-      emitFuncCallArg(e, (*params)[i], i);
+      // for builtin calls, since we don't push the ActRec, we
+      // must determine the reffiness statically
+      bool byRef = func->isRefParam(i);
+      emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
+    e.FCallBuiltin(numParams, nLiteral);
+  } else {
+    {
+      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+      for (int i = 0; i < numParams; i++) {
+        emitFuncCallArg(e, (*params)[i], i);
+      }
+    }
+    e.FCall(numParams);
   }
-  e.FCall(numParams);
   if (Option::WholeProgram) {
-    fixReturnType(e, node);
+    fixReturnType(e, node, isBuiltinCall);
   }
 }
 
@@ -6426,11 +6521,12 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   for (ssize_t i = 0LL; i < numBuiltinFuncs; ++i) {
     const HhbcExtFuncInfo* info = &builtinFuncs[i];
     StringData* name = StringData::GetStaticString(info->m_name);
-    BuiltinFunction bif = (BuiltinFunction)info->m_pGenericFunc;
+    BuiltinFunction bif = (BuiltinFunction)info->m_builtinFunc;
+    BuiltinFunction nif = (BuiltinFunction)info->m_nativeFunc;
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
     Offset base = ue->bcPos();
-    fe->setBuiltinFunc(mi, bif, base);
+    fe->setBuiltinFunc(mi, bif, nif, base);
     ue->emitOp(OpNativeImpl);
     fe->setMaxStackCells(kNumActRecCells + 1);
     fe->setAttrs(fe->attrs() | AttrUnique | AttrPersistent);
@@ -6627,7 +6723,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         const ClassInfo::MethodInfo* mi =
           e.ci->getMethodInfo(std::string(methodInfo->m_name));
         Offset base = ue->bcPos();
-        fe->setBuiltinFunc(mi, bcf, base);
+        fe->setBuiltinFunc(mi, bcf, NULL, base);
         ue->emitOp(OpNativeImpl);
       }
       Offset past = ue->bcPos();
@@ -6757,11 +6853,19 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
     Option::EnableHipHopSyntax = RuntimeOption::EnableHipHopSyntax;
+    Option::JitEnableRenameFunction =
+      RuntimeOption::EvalJitEnableRenameFunction;
+    for (auto& i : RuntimeOption::DynamicInvokeFunctions) {
+      Option::DynamicInvokeFunctions.insert(i);
+    }
     Option::OutputHHBC = true;
     Option::ParseTimeOpts = false;
     Option::WholeProgram = false;
     Type::InitTypeHintMap();
     BuiltinSymbols::LoadSuperGlobals();
+    AnalysisResultPtr ar(new AnalysisResult());
+    BuiltinSymbols::Load(ar, true);
+    BuiltinSymbols::NoSuperGlobals = false;
     TypeConstraint tc;
     return NULL;
   }
@@ -6793,6 +6897,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     FileScopePtr fsp = parser.getFileScope();
     fsp->setOuterScope(ar);
 
+    ar->loadBuiltins();
     ar->setPhase(AnalysisResult::AnalyzeAll);
     fsp->analyzeProgram(ar);
 

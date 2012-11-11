@@ -410,6 +410,7 @@ void
 emitLea(X64Assembler& a, PhysReg base, int disp, PhysReg dest) {
   if (!disp) {
     emitMovRegReg(a, base, dest);
+    return;
   }
   a.   lea_reg64_disp_reg64(base, disp, dest);
 }
@@ -9629,6 +9630,114 @@ void TranslatorX64::translateFCallArray(const Tracelet& t,
       a.    add_imm64_reg64(cellsToBytes(delta), rVmSp);
     }
   }
+}
+
+void TranslatorX64::analyzeFCallBuiltin(Tracelet& t,
+                                        NormalizedInstruction& i) {
+  Id funcId = i.imm[1].u_SA;
+  const NamedEntityPair nep = curUnit()->lookupNamedEntityPairId(funcId);
+  const Func* func = Unit::lookupFunc(nep.second, nep.first);
+  i.m_txFlags = supportedPlan(func != NULL);
+}
+
+void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
+                                          const NormalizedInstruction& ni) {
+  int numArgs = ni.imm[0].u_IVA;
+  Id funcId = ni.imm[1].u_SA;
+  const NamedEntityPair& nep = curUnit()->lookupNamedEntityPairId(funcId);
+  const StringData* name = nep.first;
+  const Func* func = Unit::lookupFunc(nep.second, name);
+  PhysReg base;
+  int disp;
+  ASSERT(ni.outStack);
+  ASSERT(numArgs == func->numParams());
+  ASSERT(numArgs <= kMaxBuiltinArgs);
+
+  func->validate();
+
+  // Sync all dirty registers
+  m_regMap.scrubStackEntries(ni.stackOff);
+  m_regMap.cleanAll();
+
+  // Emit typecasts if needed
+  for (int i = 0; i < numArgs; i++) {
+    const Func::ParamInfo& pi = func->params()[i];
+    const Location& in = ni.inputs[numArgs - i - 1]->location;
+    RuntimeType& rtt = ni.inputs[numArgs - i - 1]->rtt;
+
+#define CSE(type) case KindOf ## type : do { \
+  if (!rtt.is ## type ()) { \
+    EMIT_CALL(a, tvCastTo ## type ## InPlace, A(in)); \
+    recordCall(ni); \
+  } \
+} while(0); break;
+
+    switch (pi.builtinType()) {
+      CSE(Boolean)
+      case KindOfInt64 : {
+        if (!rtt.isInt()) {
+          EMIT_CALL(a, tvCastToInt64InPlace, A(in));
+          recordCall(ni);
+        }
+      } break;
+      CSE(Double)
+      CSE(Array)
+      CSE(Object)
+      case BitwiseKindOfString : {
+        if (!rtt.isString()) {
+          EMIT_CALL(a, tvCastToStringInPlace, A(in));
+          recordCall(ni);
+        }
+      } break;
+      case KindOfUnknown: break;
+      default:        not_reached();
+    }
+  }
+#undef CSE
+
+  // Load args into registers
+  for (int i = 0; i < numArgs; i++) {
+    const Func::ParamInfo& pi = func->params()[i];
+    locToRegDisp(ni.inputs[numArgs - i - 1]->location, &base, &disp);
+    switch (pi.builtinType()) {
+      case KindOfBoolean:
+      case KindOfInt64: {
+        a.   load_reg64_disp_reg64(base, disp + TVOFF(m_data.num),
+                                          argNumToRegName[i]);
+      } break;
+      case KindOfDouble:  ASSERT(false);
+      default: {
+        emitLea(a, base, disp, argNumToRegName[i]);
+      }
+    }
+  }
+  // Call builtin
+  BuiltinFunction nativeFuncPtr = func->nativeFuncPtr();
+  emitCall(a, (TCA)nativeFuncPtr, true);
+  recordReentrantCall(ni);
+
+  // Bind return value to a scratch reg so that decref helpers
+  // don't throw it away
+  ScratchReg ret(m_regMap, rax);
+
+  // Decref and free arguments
+  for (int i = 0; i < numArgs; i++) {
+    const Func::ParamInfo& pi = func->params()[i];
+    locToRegDisp(ni.inputs[numArgs - i - 1]->location, &base, &disp);
+    if (pi.builtinType() == KindOfUnknown) {
+      emitDecRefGeneric(ni, base, disp);
+    } else if (IS_REFCOUNTED_TYPE(pi.builtinType())) {
+      a.  load_reg64_disp_reg64(base, disp, rScratch);
+      emitDecRef(ni, rScratch, pi.builtinType());
+    }
+  }
+
+  // For bool return value, get the %al byte
+  if (func->returnType() == KindOfBoolean) {
+    a.  and_imm64_reg64(0xff, rax);
+  }
+  locToRegDisp(ni.outStack->location, &base, &disp);
+  emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
 }
 
 template <bool UseTC>

@@ -106,6 +106,14 @@ Add function/class prototypes to the IDL file. Follow existing ones for
 formats. Most of them are straightforward. Possible types are listed in
 idl/base.php.
 
+NOTE regarding the "NeedsActRec" flag:
+
+A function that examines the state of the current or previous
+frames in its call stack must have the "NeedsActRec" flag set
+in its "flags" field. Examples of use of the frame state include
+examining the arguments of the function, looking up the invocation
+context for the function (e.g., for permissions check), etc.
+
 3. Auto-generate files from IDL
 
 If it is a new IDL file, run

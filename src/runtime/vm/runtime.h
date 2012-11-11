@@ -142,6 +142,24 @@ frame_free_locals_no_this_inl(ActRec* fp, int numLocals) {
   EventHook::FunctionExit(fp);
 }
 
+inline void ALWAYS_INLINE
+frame_free_args(TypedValue* args, int count) {
+  for (int i = 0; i < count; i++) {
+    TypedValue* loc = args - i;
+    DataType t = loc->m_type;
+    if (IS_REFCOUNTED_TYPE(t)) {
+      uint64_t datum = loc->m_data.num;
+      // When destroying an array or object we can reenter the VM
+      // to call a __destruct method. Null out the local before
+      // calling the destructor so that stacktrace logic doesn't
+      // choke.
+      TV_WRITE_UNINIT(loc);
+      tvDecRefHelper(t, datum);
+    }
+  }
+
+}
+
 Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
 Unit* compile_string(const char* s, size_t sz);
 Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,

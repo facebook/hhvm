@@ -76,6 +76,10 @@ namespace VM {
 
 class Func;
 
+// max number of arguments for direct call to builtin
+static const int kMaxBuiltinArgs = 5;
+
+
 struct ExtraArgs : private boost::noncopyable {
   /*
    * Allocate an ExtraArgs structure, with arguments copied from the

@@ -558,6 +558,7 @@ MINSTRS
   CASE(InitThisLoc) \
   CASE(FCall) \
   CASE(FCallArray) \
+  CASE(FCallBuiltin) \
   CASE(VerifyParamType) \
   CASE(InstanceOfD) \
   CASE(StaticLocInit) \

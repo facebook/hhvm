@@ -364,7 +364,8 @@ bool Func::mustBeRef(int32 arg) const {
   return retval;
 }
 
-void Func::appendParam(bool ref, const Func::ParamInfo& info) {
+void Func::appendParam(bool ref, const Func::ParamInfo& info,
+                       std::vector<ParamInfo>& pBuilder) {
   int qword = m_numParams / kBitsPerQword;
   int bit   = m_numParams % kBitsPerQword;
   // Grow args, if necessary.
@@ -385,7 +386,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info) {
     !!(m_attrs & AttrVariadicByRef));
   shared()->m_refBitVec[qword] &= ~(1ull << bit);
   shared()->m_refBitVec[qword] |= uint64(ref) << bit;
-  shared()->m_params.push_back(info);
+  pBuilder.push_back(info);
 }
 
 Id Func::lookupVarId(const StringData* name) const {
@@ -616,18 +617,18 @@ const Func* Func::getGeneratorBody(const StringData* name) const {
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   : m_ue(ue), m_pce(NULL), m_sn(sn), m_id(id), m_name(n), m_numLocals(0),
     m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
-    m_nextFreeIterator(0), m_top(false), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false), m_info(NULL),
-    m_builtinFuncPtr(NULL) {
+    m_nextFreeIterator(0), m_returnType(KindOfInvalid), m_top(false),
+    m_isClosureBody(false), m_isGenerator(false),
+    m_isGeneratorFromClosure(false), m_info(NULL), m_builtinFuncPtr(NULL) {
 }
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
                          PreClassEmitter* pce)
   : m_ue(ue), m_pce(pce), m_sn(sn), m_name(n), m_numLocals(0),
     m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
-    m_nextFreeIterator(0), m_top(false), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false), m_info(NULL),
-    m_builtinFuncPtr(NULL) {
+    m_nextFreeIterator(0), m_returnType(KindOfInvalid), m_top(false),
+    m_isClosureBody(false), m_isGenerator(false),
+    m_isGeneratorFromClosure(false), m_info(NULL), m_builtinFuncPtr(NULL) {
 }
 
 FuncEmitter::~FuncEmitter() {
@@ -795,6 +796,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
                    m_past, m_name, attrs, m_top, m_docComment,
                    m_params.size());
   f->shared()->m_info = m_info;
+  f->shared()->m_returnType = m_returnType;
+  std::vector<Func::ParamInfo> pBuilder;
   for (unsigned i = 0; i < m_params.size(); ++i) {
     Func::ParamInfo pi;
     pi.setFuncletOff(m_params[i].funcletOff());
@@ -802,8 +805,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     pi.setPhpCode(m_params[i].phpCode());
     pi.setTypeConstraint(m_params[i].typeConstraint());
     pi.setUserAttributes(m_params[i].userAttributes());
-    f->appendParam(m_params[i].ref(), pi);
+    pi.setBuiltinType(m_params[i].builtinType());
+    f->appendParam(m_params[i].ref(), pi, pBuilder);
   }
+  f->shared()->m_params = pBuilder;
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
@@ -817,15 +822,18 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_isGeneratorFromClosure = m_isGeneratorFromClosure;
   f->shared()->m_userAttributes = m_userAttributes;
   f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
+  f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
   return f;
 }
 
 void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
-                                 BuiltinFunction funcPtr, Offset base) {
+                                 BuiltinFunction bif, BuiltinFunction nif,
+                                 Offset base) {
   ASSERT(info);
-  ASSERT(funcPtr);
+  ASSERT(bif);
   m_info = info;
-  m_builtinFuncPtr = funcPtr;
+  m_builtinFuncPtr = bif;
+  m_nativeFuncPtr = nif;
   m_base = base;
   m_top = true;
   m_docComment = StringData::GetStaticString(info->docComment);
@@ -864,10 +872,12 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
     }
   }
 
+  m_returnType = info->returnType;
   for (unsigned i = 0; i < info->parameters.size(); ++i) {
     // For builtin only, we use a dummy ParamInfo
     FuncEmitter::ParamInfo pi;
     pi.setRef((bool)(info->parameters[i]->attribute & ClassInfo::IsReference));
+    pi.setBuiltinType(info->parameters[i]->argType);
     appendParam(StringData::GetStaticString(info->parameters[i]->name), pi);
   }
 }
@@ -881,6 +891,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_base)
     (m_past)
     (m_attrs)
+    (m_returnType)
     (m_docComment)
     (m_numLocals)
     (m_numIterators)

@@ -39,6 +39,16 @@ if [ "$1" = "gen" -o "$1" = "all" ]; then
   check_err $? "Failed generating src/system/gen/*"
 fi
 
+# $1 - Binary to pull symbols from
+# $2 - .ext_hhvm.cpp file to build
+make_hhvm()
+{
+  [ ! -f "$1" ] && check_err 1 "No object file to generate $2 from, did you build first?"
+  [ $VERBOSE -eq 1 ] && echo "Generating $2"
+  $HHVM gen_ext_hhvm.php $2 . /dev/null /dev/null "" $1
+  check_err $? "Failed generating $2"
+}
+
 if [ "$1" = "hhvm" -o "$1" = "all" ]; then
   cd $HPHP_HOME/src/runtime/ext
   SOURCES=`find . -name '*.cpp' | grep -v ext_hhvm | grep -v sep | cut -c 3- | cut -d . -f 1`
@@ -48,18 +58,20 @@ if [ "$1" = "hhvm" -o "$1" = "all" ]; then
     echo "No extensions found while generating *.ext_hhvm.cpp"
   fi
   for i in $SOURCES; do
-    [ ! -f "$RUNTIME_BUILD/runtime/ext/$i.cpp.o" ] && \
-      check_err 1 "No object file to generate $i.ext_hhvm.cpp from, did you build first?"
-    [ $VERBOSE -eq 1 ] && echo "Generating src/runtime/ext/$i.ext_hhvm.cpp"
-    $HHVM gen_ext_hhvm.php ../ext/$i.ext_hhvm.cpp . \
-          /dev/null /dev/null "" \
-          $RUNTIME_BUILD/runtime/ext/$i.cpp.o
-    check_err $? "Failed generating src/runtime/ext/$i.ext_hhvm.cpp"
+    make_hhvm $RUNTIME_BUILD/runtime/ext/$i.cpp.o ../ext/$i.ext_hhvm.cpp
   done
+  make_hhvm $RUNTIME_BUILD/runtime/base/builtin_functions.cpp.o ../base/builtin_functions.ext_hhvm.cpp
+  EXTHHVM_BUILD=$HPHP_HOME/src/runtime/ext_hhvm/CMakeFiles/ext_hhvm_static.dir
+  make_hhvm $EXTHHVM_BUILD/ext_hhvm_noinline.cpp.o ext_hhvm_noinline.ext_hhvm.cpp
 fi
 
 if [ "$1" = "infotabs" -o "$1" = "all" ]; then
   cd $HPHP_HOME/src/runtime/ext_hhvm
+
+  SOURCES=`find ../ext -name '*.ext_hhvm.cpp'`
+  [ $VERBOSE -eq 1 ] && echo "Generating src/runtime/ext_hhvm/ext_hhvm_infotabs.h"
+  $HHVM gen_infotabs_header.php ext_hhvm_infotabs.h $SOURCES ../base/builtin_functions.ext_hhvm.cpp ext_hhvm_noinline.ext_hhvm.cpp
+
   [ $VERBOSE -eq 1 ] && echo "Generating src/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
   $HHVM gen_infotabs.php ext_hhvm_infotabs.cpp . "" "" ""
   check_err $? "Failed generating src/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"

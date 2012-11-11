@@ -58,6 +58,7 @@ public:
     ContainsGetDefinedVars    = 0x400, // need VariableTable with getDefinedVars
     MixedVariableArgument     = 0x800, // variable args, may or may not be ref'd
     IsFoldable                = 0x1000,// function can be constant folded
+    NeedsActRec               = 0x2000,// builtin function needs ActRec
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;

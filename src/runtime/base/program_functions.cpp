@@ -67,6 +67,7 @@
 #include <runtime/vm/runtime.h>
 #include <runtime/vm/repo.h>
 #include <runtime/vm/translator/translator.h>
+#include <compiler/builtin_symbols.h>
 
 using namespace boost::program_options;
 using std::cout;

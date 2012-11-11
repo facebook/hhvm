@@ -486,9 +486,11 @@ enum SetOpOp {
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), NF) \
   O(FPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
+  O(BPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCW,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCE,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassV,          ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
+  O(BPassV,          ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
   O(FPassR,          ONE(IVA),         ONE(RV),         ONE(FV),    FF) \
   O(FPassL,          TWO(IVA,HA),      NOV,             ONE(FV),    FF) \
   O(FPassN,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
@@ -497,6 +499,7 @@ enum SetOpOp {
   O(FPassM,          TWO(IVA,MA),      LMANY(),         ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
+  O(FCallBuiltin,    TWO(IVA, SA),     FMANY,           ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        TWO(IA,BA),       ONE(CV),         NOV,        CF) \

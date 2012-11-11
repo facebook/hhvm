@@ -702,12 +702,20 @@ function phase2() {
   $ext_hhvm_cpp_tempnam = null;
   $ext_hhvm_cpp = null;
 
+  $ext_hhvm_header_tempnam = null;
+  $ext_hhvm_header = null;
+
+  $output_file_header = substr($output_file, 0, -4) . ".h";
   try {
     $ext_hhvm_cpp_tempnam = tempnam('/tmp', 'ext_hhvm.cpp.tmp');
     $ext_hhvm_cpp = fopen($ext_hhvm_cpp_tempnam, 'w');
 
+    $ext_hhvm_header_tempnam = tempnam('/tmp', 'ext_hhvm.h.tmp');
+    $ext_hhvm_header = fopen($ext_hhvm_header_tempnam, 'w');
+
     emit_all_includes($ext_hhvm_cpp, $sepExtHeaders);
     fwrite($ext_hhvm_cpp, "namespace HPHP {\n\n");
+    fwrite($ext_hhvm_header, "namespace HPHP {\n\n");
 
     // Generate code for extension functions
     foreach ($ext_func_info as $obj) {
@@ -716,6 +724,7 @@ function phase2() {
       // Emit the fh_ function declaration
       $indent = '';
       emitRemappedFuncDecl($obj, $ext_hhvm_cpp, $indent, 'fh_', $mangleMap);
+      emitRemappedFuncDecl($obj, $ext_hhvm_header, $indent, 'fh_', $mangleMap);
       // Emit the fg1_ function if needed
       if ($obj->numTypeChecks > 0) {
         fwrite($ext_hhvm_cpp, "TypedValue * fg1_" . $obj->name .
@@ -950,6 +959,11 @@ function phase2() {
     fclose($ext_hhvm_cpp);
     $ext_hhvm_cpp = null;
     `mv -f $ext_hhvm_cpp_tempnam $output_file`;
+
+    fwrite($ext_hhvm_header, "\n} // !HPHP\n\n");
+    fclose($ext_hhvm_header);
+    $ext_hhvm_header = null;
+    `mv -f $ext_hhvm_header_tempnam $output_file_header`;
   } catch (Exception $e) {
     if ($ext_hhvm_cpp) fclose($ext_hhvm_cpp);
     if ($ext_hhvm_cpp_tempnam) `rm -rf $ext_hhvm_cpp_tempnam`;

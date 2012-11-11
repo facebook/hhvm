@@ -318,7 +318,8 @@ public:
   void visitKids(ConstructPtr c);
   void visit(FileScopePtr file);
   void assignLocalVariableIds(FunctionScopePtr fs);
-  void fixReturnType(Emitter& e, FunctionCallPtr fn);
+  void fixReturnType(Emitter& e, FunctionCallPtr fn,
+                     bool isBuiltinCall = false);
   typedef std::vector<int> IndexChain;
   void visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
@@ -581,8 +582,12 @@ public:
   };
 
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
+  bool canEmitBuiltinCall(FunctionCallPtr fn, const std::string& name,
+                          int numParams);
   void emitFuncCall(Emitter& e, FunctionCallPtr node);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
+  void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
+                         bool byRef);
   PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
                                 bool topLevel);
   void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,

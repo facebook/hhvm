@@ -321,6 +321,11 @@ bool FunctionScope::isMixedVariableArgument() const {
   return res;
 }
 
+bool FunctionScope::needsActRec() const {
+  bool res = (m_attribute & FileScope::NeedsActRec);
+  return res;
+}
+
 bool FunctionScope::isClosure() const {
   return ParserBase::IsClosureName(name());
 }
@@ -377,6 +382,10 @@ bool FunctionScope::isFoldable() const {
 
 void FunctionScope::setIsFoldable() {
   m_attribute |= FileScope::IsFoldable;
+}
+
+void FunctionScope::setNeedsActRec() {
+  m_attribute |= FileScope::NeedsActRec;
 }
 
 void FunctionScope::setHelperFunction() {
@@ -1922,6 +1931,9 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_method && isConstructor(getContainingClass())) {
     attribute |= ClassInfo::IsConstructor;
   }
+  if (needsActRec()) {
+    attribute |= ClassInfo::NeedsActRec;
+  }
 
   // Use the original cased name, for reflection to work correctly.
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\", (const char *)%d, "
@@ -1942,6 +1954,14 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("\"%s\",\n", dc.c_str());
   }
 
+  if (attribute & ClassInfo::IsSystem) {
+    if (m_returnType) {
+      cg_printf("(const char *)0x%x, ", m_returnType->getDataType());
+    } else {
+      cg_printf("(const char *)-1, ");
+    }
+  }
+
   Variant defArg;
   for (int i = 0; i < m_maxParam; i++) {
     int attr = ClassInfo::IsNothing;
@@ -1960,6 +1980,9 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       assert(param);
       cg_printf("\"%s\", ", param->hasTypeHint() ?
                             param->getOriginalTypeHint().c_str() : "");
+      if (attribute & ClassInfo::IsSystem) {
+        cg_printf("(const char *)-1, ");
+      }
       ExpressionPtr def = param->defaultValue();
       if (def) {
         std::string sdef = def->getText();
@@ -2002,6 +2025,9 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("NULL,\n");
     } else {
       cg_printf("\"\", ");
+      if (attribute & ClassInfo::IsSystem) {
+        cg_printf("(const char *)0x%x, ", m_paramTypes[i]->getDataType());
+      }
       std::string def = string_cplus_escape(m_paramDefaults[i].data(),
                                             m_paramDefaults[i].size());
       std::string defText = string_cplus_escape(m_paramDefaultTexts[i].data(),

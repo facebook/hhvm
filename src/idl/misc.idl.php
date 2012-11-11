@@ -149,7 +149,7 @@ DefineFunction(
   array(
     'name'   => "defined",
     'desc'   => "Checks whether the given constant exists and is defined.\n\nIf you want to see if a variable exists, use isset() as defined() only applies to constants. If you want to see if a function exists, use function_exists().",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NeedsActRec,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the named constant given by name has been defined, FALSE otherwise.",

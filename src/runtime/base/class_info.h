@@ -79,6 +79,7 @@ public:
     IsTrait                = (1 << 29), //    x
     UsesTraits             = (1 << 30), //    x
     HasAliasedMethods      = (1u << 31),//    x
+    NeedsActRec            = (1u << 31),//                  x      x
   };
 
   enum GetArrayKind {
@@ -125,8 +126,9 @@ public:
   struct ParameterInfo {
     ~ParameterInfo();
     Attribute attribute;
+    DataType argType;      // hinted arg type
     const char *name;
-    const char *type;      // hinted type
+    const char *type;      // hinted type string
     const char *value;     // serialized default value
     const char *valueText; // original PHP code
     std::vector<const UserAttributeInfo *> userAttrs;
@@ -149,6 +151,7 @@ public:
     const char *file;
     int line1;
     int line2;
+    DataType returnType;
   };
 
   class PropertyInfo {

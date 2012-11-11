@@ -317,6 +317,9 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   if (flags & ClassInfo::ContextSensitive) {
     f->setContextSensitive(true);
   }
+  if (flags & ClassInfo::NeedsActRec) {
+    f->setNeedsActRec();
+  }
   return f;
 }
 

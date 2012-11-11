@@ -206,6 +206,7 @@ std::string Option::PreprocessedPartitionConfig;
 bool Option::ParseTimeOpts = true;
 bool Option::OutputHHBC = false;
 bool Option::EnableHipHopSyntax = false;
+bool Option::JitEnableRenameFunction = false;
 bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
@@ -411,6 +412,7 @@ void Option::Load(Hdf &config) {
   }
 
   EnableHipHopSyntax = config["EnableHipHopSyntax"].getBool();
+  JitEnableRenameFunction = config["JitEnableRenameFunction"].getBool();
   EnableHipHopExperimentalSyntax =
     config["EnableHipHopExperimentalSyntax"].getBool();
   EnableShortTags = config["EnableShortTags"].getBool(true);

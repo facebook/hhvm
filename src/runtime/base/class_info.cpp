@@ -811,11 +811,17 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       docComment = *p++;
     }
 
+    if (attribute & IsSystem) {
+      returnType = (DataType)(int64)(*p++);
+    }
     while (*p) {
       ParameterInfo *parameter = new ParameterInfo();
       parameter->attribute = (Attribute)(int64)(*p++);
       parameter->name = *p++;
       parameter->type = *p++;
+      if (attribute & IsSystem) {
+        parameter->argType = (DataType)(int64)(*p++);
+      }
       parameter->value = *p++;
       parameter->valueText = *p++;
 

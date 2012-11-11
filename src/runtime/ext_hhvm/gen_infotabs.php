@@ -49,6 +49,7 @@ function main() {
 
     emit_include($outfile, "runtime/ext_hhvm/ext_hhvm.h");
     emit_include($outfile, "runtime/ext/ext.h");
+    fwrite($outfile, "#include \"ext_hhvm_infotabs.h\"\n");
     fwrite($outfile,
       "namespace HPHP {\n" .
       "  struct TypedValue;\n" .
@@ -83,7 +84,8 @@ function main() {
         fwrite($outfile, ",\n  ");
       }
       $firstParam = false;
-      fwrite($outfile, '{ "' . $obj->name . '", fg_' . $obj->name . ' }');
+      fwrite($outfile, '{ "' . $obj->name . '", fg_' . $obj->name);
+      fwrite($outfile, ', (void *)&fh_' . $obj->name . ' }');
     }
     fwrite($outfile, "\n};\n\n");
 

@@ -208,6 +208,13 @@ public:
    */
   bool isFoldable() const;
   void setIsFoldable();
+
+  /*
+   * If this is a builtin function and does not need an ActRec
+   */
+  bool needsActRec() const;
+  void setNeedsActRec();
+
   /**
    * Whether this function is a runtime helper function
    */

@@ -183,7 +183,7 @@ bool FuncChecker::checkOffsets() {
                        section_base, section_past);
   }
   // DV entry points must be in the primary function body
-  for (Range<vector<Func::ParamInfo> > p(m_func->params()); !p.empty(); ) {
+  for (Range<FixedVector<Func::ParamInfo> > p(m_func->params()); !p.empty(); ) {
     const Func::ParamInfo& param = p.popFront();
     if (param.hasDefaultValue()) {
       ok &= checkOffset("dv-entry", param.funcletOff(), "func body", base,
@@ -600,6 +600,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return vectorSig(pc, CV);
   case OpFCall:     // ONE(IVA),     FMANY,   ONE(RV)
   case OpFCallArray:// NA,           ONE(FV), ONE(RV)
+  case OpFCallBuiltin: //TWO(IVA, SA) FMANY,   ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }

@@ -90,7 +90,7 @@ DefineFunction(
   array(
     'name'   => "hphpd_break",
     'desc'   => "Sets a hard breakpoint. When a debugger is running, this line of code will break into debugger, if condition is met. If there is no debugger that's attached, it will not do anything.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific | NeedsActRec,
     'return' => array(
       'type'   => null,
     ),

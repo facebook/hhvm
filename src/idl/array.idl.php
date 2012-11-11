@@ -331,7 +331,7 @@ DefineFunction(
   array(
     'name'   => "array_filter",
     'desc'   => "Iterates over each value in the input array passing them to the callback function. If the callback function returns true, the current value from input is returned into the result array. Array keys are preserved.",
-    'flags'  =>  HasDocComment | FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable | NeedsActRec,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the filtered array.",
@@ -450,7 +450,7 @@ DefineFunction(
   array(
     'name'   => "array_map",
     'desc'   => "array_map() returns an array containing all the elements of arr1 after applying the callback function to each one. The number of parameters that the callback function accepts should match the number of arrays passed to the array_map()",
-    'flags'  =>  HasDocComment | VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments | NeedsActRec,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the elements of arr1 after applying the callback function to each one.",
@@ -685,7 +685,7 @@ DefineFunction(
   array(
     'name'   => "array_reduce",
     'desc'   => "array_reduce() applies iteratively the function function to the elements of the array input, so as to reduce the array to a single value.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NeedsActRec,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the resulting value.\n\nIf the array is empty and initial is not passed, array_reduce() returns NULL.",
@@ -948,7 +948,7 @@ DefineFunction(
   array(
     'name'   => "array_walk_recursive",
     'desc'   => "Applies the user-defined function funcname to each element of the input array. This function will recur into deeper arrays.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NeedsActRec,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -977,7 +977,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_walk",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NeedsActRec,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",

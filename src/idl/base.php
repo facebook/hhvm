@@ -140,6 +140,7 @@ define('AllowIntercept',                 1 << 24);
 define('NoProfile',                      1 << 25);
 define('ContextSensitive',               1 << 26);
 define('NoDefaultSweep',                 1 << 27);
+define('NeedsActRec',                    1 << 31);
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | RefVariableArguments |
                        MixedVariableArguments));
@@ -175,6 +176,7 @@ function get_flag_names($arr, $name, $global_func) {
   if ($flag & NoProfile             ) $ret .= ' | NoProfile'             ;
   if ($flag & ContextSensitive      ) $ret .= ' | ContextSensitive'      ;
   if ($flag & NoDefaultSweep        ) $ret .= ' | NoDefaultSweep'        ;
+  if ($flag & NeedsActRec           ) $ret .= ' | NeedsActRec'           ;
 
   if ($ret == '') {
     throw new Exception("invalid flag $flag");

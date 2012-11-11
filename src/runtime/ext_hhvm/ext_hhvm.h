@@ -28,7 +28,8 @@ namespace VM {
 
 struct HhbcExtFuncInfo {
   const char* m_name;
-  TypedValue* (*m_pGenericFunc)(HPHP::VM::ActRec* ar);
+  TypedValue* (*m_builtinFunc)(HPHP::VM::ActRec* ar);
+  void* m_nativeFunc;
 };
 
 struct HhbcExtMethodInfo {

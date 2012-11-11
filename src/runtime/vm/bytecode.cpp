@@ -5736,6 +5736,16 @@ static inline ActRec* arFromInstr(TypedValue* sp, const Opcode* pc) {
   return arFromSpOffset((ActRec*)sp, instrSpToArDelta(pc));
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopBPassC(PC& pc) {
+  NEXT();
+  DECODE_IVA(paramId);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopBPassV(PC& pc) {
+  NEXT();
+  DECODE_IVA(paramId);
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopFPassC(PC& pc) {
 #ifdef DEBUG
   ActRec* ar = arFromInstr(m_stack.top(), (Opcode*)pc);
@@ -5915,6 +5925,118 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
   ASSERT(numArgs == ar->numArgs());
   checkStack(m_stack, ar->m_func);
   doFCall<false>(ar, pc);
+}
+
+static inline bool isCppRefType(Func *func, int param) {
+  const Func::ParamInfo& pi = func->params()[param];
+  switch (pi.builtinType()) {
+    case KindOfBoolean:
+    case KindOfInt64:   return false;
+    case KindOfDouble:  ASSERT(false);
+    default:            return true;
+  }
+}
+
+typedef int64_t (*NativeFunction0) ();
+typedef int64_t (*NativeFunction1) (int64_t);
+typedef int64_t (*NativeFunction2) (int64_t, int64_t);
+typedef int64_t (*NativeFunction3) (int64_t, int64_t, int64_t);
+typedef int64_t (*NativeFunction4) (int64_t, int64_t, int64_t, int64_t);
+typedef int64_t (*NativeFunction5) (int64_t, int64_t, int64_t, int64_t,
+                                    int64_t);
+
+typedef bool (*NativeBFunction0) ();
+typedef bool (*NativeBFunction1) (int64_t);
+typedef bool (*NativeBFunction2) (int64_t, int64_t);
+typedef bool (*NativeBFunction3) (int64_t, int64_t, int64_t);
+typedef bool (*NativeBFunction4) (int64_t, int64_t, int64_t, int64_t);
+typedef bool (*NativeBFunction5) (int64_t, int64_t, int64_t, int64_t, int64_t);
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
+  NEXT();
+  DECODE_IVA(numArgs);
+  DECODE(Id, id);
+  const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
+  Func* func = Unit::lookupFunc(nep.second, nep.first);
+  if (func == NULL) {
+    raise_error("Undefined function: %s",
+                m_fp->m_func->unit()->lookupLitstrId(id)->data());
+  }
+  TypedValue* args = m_stack.indTV(numArgs-1);
+  ASSERT(numArgs == func->numParams());
+  for (int i = 0; i < numArgs; i++) {
+    const Func::ParamInfo& pi = func->params()[i];
+
+#define CASE(kind) case KindOf ## kind : do { \
+  tvCastTo ## kind ## InPlace(&args[-i]); break; \
+} while (0); break;
+
+    switch (pi.builtinType()) {
+      CASE(Boolean)
+      CASE(Int64)
+      CASE(Double)
+      CASE(String)
+      CASE(Array)
+      CASE(Object)
+      case KindOfUnknown:
+                break;
+      default:
+                not_reached();
+    }
+  }
+#undef CASE
+
+/* Currently we support upto 5 arguments for builtins. If
+ * there is a need for bultins with additional arguments,
+ * the macros below can be extended.
+ */
+#define NativeFuncArgs0()
+#define NativeFuncArgs1() (isCppRefType(func, 0) ? \
+                          (int64_t)(args) : (args->m_data.num))
+#define NativeFuncArgs2() NativeFuncArgs1(), (isCppRefType(func, 1) ? \
+                          (int64_t)(args-1) : ((args-1)->m_data.num))
+#define NativeFuncArgs3() NativeFuncArgs2(), (isCppRefType(func, 2) ? \
+                          (int64_t)(args-2) : ((args-2)->m_data.num))
+#define NativeFuncArgs4() NativeFuncArgs3(), (isCppRefType(func, 3) ? \
+                          (int64_t)(args-3) : ((args-3)->m_data.num))
+#define NativeFuncArgs5() NativeFuncArgs4(), (isCppRefType(func, 4) ? \
+                          (int64_t)(args-4) : ((args-4)->m_data.num))
+
+#define NativeCall(n) do {\
+  if (func->returnType() == KindOfBoolean) {\
+    NativeBFunction ## n nf = (NativeBFunction ## n)func->nativeFuncPtr(); \
+    result = nf(NativeFuncArgs ## n()) ? 1 : 0; \
+  } else { \
+    NativeFunction ## n nf = (NativeFunction ## n)func->nativeFuncPtr(); \
+    result = nf(NativeFuncArgs ## n()); \
+  } \
+} while(0); break;
+
+  int64_t result;
+
+  ASSERT(kMaxBuiltinArgs == 5);
+  switch (numArgs) {
+    case 0:  NativeCall(0);
+    case 1:  NativeCall(1);
+    case 2:  NativeCall(2);
+    case 3:  NativeCall(3);
+    case 4:  NativeCall(4);
+    case 5:  NativeCall(5);
+    default: not_reached();
+  }
+#undef NativeFuncArgs0
+#undef NativeFuncArgs1
+#undef NativeFuncArgs2
+#undef NativeFuncArgs3
+#undef NativeFuncArgs4
+#undef NativeFuncArgs5
+#undef NativeCall
+
+  frame_free_args(args, numArgs);
+  m_stack.ndiscard(numArgs - 1);
+
+  m_stack.top()->m_data.num = result;
+  m_stack.top()->m_type = func->returnType();
 }
 
 bool VMExecutionContext::prepareArrayArgs(ActRec* ar,

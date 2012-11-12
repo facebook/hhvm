@@ -21,16 +21,115 @@
 #include <boost/scoped_ptr.hpp>
 #include <unicode/rbbi.h>
 #include <unicode/translit.h>
+#include <unicode/uregex.h>
 #include <unicode/ustring.h>
 #include "icu/LifeEventTokenizer.h"
 #include "icu/ICUMatcher.h"
 #include "icu/ICUTransliterator.h"
 
-
 using namespace U_ICU_NAMESPACE;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+const int64 k_UREGEX_CASE_INSENSITIVE = UREGEX_CASE_INSENSITIVE;
+const int64 k_UREGEX_COMMENTS         = UREGEX_COMMENTS;
+const int64 k_UREGEX_DOTALL           = UREGEX_DOTALL;
+const int64 k_UREGEX_MULTILINE        = UREGEX_MULTILINE;
+const int64 k_UREGEX_UWORD            = UREGEX_UWORD;
+// Intentionally higher in case ICU adds more constants.
+const int64 k_UREGEX_OFFSET_CAPTURE   = 1LL<<32;
+
+///////////////////////////////////////////////////////////////////////////////
+typedef tbb::concurrent_hash_map<const StringData*,const RegexPattern*,
+                                StringDataHashCompare> PatternStringMap;
+
+static PatternStringMap s_patternCacheMap;
+
+Variant f_icu_match(CStrRef pattern, CStrRef subject,
+                    VRefParam matches /* = null */, int64 flags /* = 0 */) {
+  UErrorCode status = U_ZERO_ERROR;
+
+  if (matches.isReferenced()) {
+    matches = Array();
+  }
+
+  // Create hash map key by concatenating pattern and flags.
+  StringBuffer bpattern;
+  bpattern.append(pattern);
+  bpattern.append(':');
+  bpattern.append(flags);
+  String spattern = bpattern.detach();
+
+  // Find compiled pattern matcher in hash map or add it.
+  PatternStringMap::accessor accessor;
+  const RegexPattern* rpattern;
+  if (s_patternCacheMap.find(accessor, spattern.get())) {
+    rpattern = accessor->second;
+  } else {
+    // First 32 bits are reserved for ICU-specific flags.
+    rpattern = RegexPattern::compile(
+      UnicodeString::fromUTF8(pattern.data()), (flags & 0xFFFFFFFF), status);
+    if (U_FAILURE(status)) {
+      return false;
+    }
+
+    if (s_patternCacheMap.insert(
+      accessor, StringData::GetStaticString(spattern.get()))) {
+      accessor->second = rpattern;
+    } else {
+      delete rpattern;
+      rpattern = accessor->second;
+    }
+  }
+
+  // Build regex matcher from compiled pattern and passed-in subject.
+  UnicodeString usubject = UnicodeString::fromUTF8(subject.data());
+  boost::scoped_ptr<RegexMatcher> matcher(rpattern->matcher(usubject, status));
+  if (U_FAILURE(status)) {
+    return false;
+  }
+
+  // Return 0 or 1 depending on whether or not a match was found and
+  // (optionally), set matched (sub-)patterns for passed-in reference.
+  int matched = 0;
+  if (matcher->find()) {
+    matched = 1;
+
+    if (matches.isReferenced()) {
+      int32_t count = matcher->groupCount();
+
+      for (int32_t i = 0; i <= count; i++) {
+        UnicodeString ustring = matcher->group(i, status);
+        if (U_FAILURE(status)) {
+          return false;
+        }
+
+        // Convert UnicodeString back to UTF-8.
+        std::string string;
+        ustring.toUTF8String(string);
+        String match = String(string);
+
+        if (flags & k_UREGEX_OFFSET_CAPTURE) {
+          // start() returns the index in UnicodeString, which
+          // normally means the index into an array of 16-bit
+          // code "units" (not "points").
+          int32_t start = matcher->start(i, status);
+          if (U_FAILURE(status)) {
+            return false;
+          }
+
+          start = usubject.countChar32(0, start);
+          matches->append(CREATE_VECTOR2(match, start));
+        } else {
+          matches->append(match);
+        }
+      }
+    }
+  }
+
+  return matched;
+}
+
 
 // Need to have a valid installation of the transliteration data in /lib64.
 // Initialization will be taken care of by ext_array which also uses icu.
@@ -86,13 +185,10 @@ String f_icu_transliterate(CStrRef str, bool remove_accents) {
     s_transliterator->transliterate_with_accents(u_str);
   }
 
-  // Convert the UnicodeString back into a UTF8 String.
-  int32_t capacity = u_str.countChar32() * sizeof(UChar) + 1;
-  char* out = (char *)malloc(capacity);
-  CheckedArrayByteSink bs(out, capacity);
-  u_str.toUTF8(bs);
-
-  return String(out, AttachString);
+  // Convert UnicodeString back to UTF-8.
+  std::string string;
+  u_str.toUTF8String(string);
+  return String(string);
 }
 
 

@@ -30,6 +30,44 @@ CPP
 //   'note' => additional note about this constant's schema
 // )
 
+// For details on the meaning of these constants, see:
+// http://userguide.icu-project.org/strings/regexp#TOC-Flag-Options
+
+DefineConstant(
+  array(
+      'name' => 'UREGEX_CASE_INSENSITIVE',
+      'type' => Int64
+  ));
+
+DefineConstant(
+  array(
+      'name' => 'UREGEX_COMMENTS',
+      'type' => Int64
+  ));
+
+DefineConstant(
+  array(
+      'name' => 'UREGEX_DOTALL',
+      'type' => Int64
+  ));
+
+DefineConstant(
+  array(
+      'name' => 'UREGEX_MULTILINE',
+      'type' => Int64
+  ));
+
+DefineConstant(
+  array(
+      'name' => 'UREGEX_UWORD',
+      'type' => Int64
+  ));
+
+DefineConstant(
+  array(
+      'name' => 'UREGEX_OFFSET_CAPTURE',
+      'type' => Int64
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -53,6 +91,41 @@ CPP
 //        'desc'  => description of the argument
 //      )
 // )
+
+DefineFunction(
+  array(
+    'name'   => "icu_match",
+    'desc'   => "Searches subject for a match to the regular expression given in pattern. See http://userguide.icu-project.org/strings/regexp",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "icu_match() returns the number of times pattern matches. That will be either 0 times (no match) or 1 time because icu_match() will stop searching after the first match. icu_match() returns FALSE if an error occurred.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "pattern",
+        'type'   => String,
+        'desc'   => "The pattern to search for, as a string.",
+      ),
+      array(
+        'name'   => "subject",
+        'type'   => String,
+        'desc'   => "The input string.",
+      ),
+      array(
+        'name'   => "matches",
+        'type'   => Variant | Reference,
+        'value'  => "null",
+        'desc'   => "If matches is provided, then it is filled with the results of search. \$matches[0] will contain the text that matched the full pattern, \$matches[1] will have the text that matched the first captured parenthesized subpattern, and so on.",
+      ),
+      array(
+        'name'   => "flags",
+        'type'   => Int64,
+        'value'  => "0",
+        'desc'   => "OR together a combination of UREGEX_* constants."
+      ),
+    )
+  ));
 
 DefineFunction(
   array(

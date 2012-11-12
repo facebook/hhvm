@@ -2091,7 +2091,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2116];
+static hashNodeCon conBuckets[2122];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -3955,6 +3955,12 @@ void init_builtin_constant_table() {
       (const char *)"UPLOAD_ERR_NO_TMP_DIR", (const char *)-1, (const char *)32, (const char *)&k_UPLOAD_ERR_NO_TMP_DIR,
       (const char *)"UPLOAD_ERR_OK", (const char *)-1, (const char *)32, (const char *)&k_UPLOAD_ERR_OK,
       (const char *)"UPLOAD_ERR_PARTIAL", (const char *)-1, (const char *)32, (const char *)&k_UPLOAD_ERR_PARTIAL,
+      (const char *)"UREGEX_CASE_INSENSITIVE", (const char *)-1, (const char *)32, (const char *)&k_UREGEX_CASE_INSENSITIVE,
+      (const char *)"UREGEX_COMMENTS", (const char *)-1, (const char *)32, (const char *)&k_UREGEX_COMMENTS,
+      (const char *)"UREGEX_DOTALL", (const char *)-1, (const char *)32, (const char *)&k_UREGEX_DOTALL,
+      (const char *)"UREGEX_MULTILINE", (const char *)-1, (const char *)32, (const char *)&k_UREGEX_MULTILINE,
+      (const char *)"UREGEX_OFFSET_CAPTURE", (const char *)-1, (const char *)32, (const char *)&k_UREGEX_OFFSET_CAPTURE,
+      (const char *)"UREGEX_UWORD", (const char *)-1, (const char *)32, (const char *)&k_UREGEX_UWORD,
       (const char *)"U_AMBIGUOUS_ALIAS_WARNING", (const char *)-1, (const char *)32, (const char *)&k_U_AMBIGUOUS_ALIAS_WARNING,
       (const char *)"U_BAD_VARIABLE_DEFINITION", (const char *)-1, (const char *)32, (const char *)&k_U_BAD_VARIABLE_DEFINITION,
       (const char *)"U_BRK_ASSIGN_ERROR", (const char *)-1, (const char *)32, (const char *)&k_U_BRK_ASSIGN_ERROR,

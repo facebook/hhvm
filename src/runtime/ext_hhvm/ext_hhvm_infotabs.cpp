@@ -554,6 +554,7 @@ TypedValue* fg_iconv_strpos(VM::ActRec *ar);
 TypedValue* fg_iconv_strrpos(VM::ActRec *ar);
 TypedValue* fg_iconv_substr(VM::ActRec *ar);
 TypedValue* fg_ob_iconv_handler(VM::ActRec *ar);
+TypedValue* fg_icu_match(VM::ActRec *ar);
 TypedValue* fg_icu_transliterate(VM::ActRec *ar);
 TypedValue* fg_icu_tokenize(VM::ActRec *ar);
 TypedValue* fg_gd_info(VM::ActRec *ar);
@@ -2919,7 +2920,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2190;
+const long long hhbc_ext_funcs_count = 2191;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3452,6 +3453,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "iconv_strrpos", fg_iconv_strrpos, (void *)&fh_iconv_strrpos },
   { "iconv_substr", fg_iconv_substr, (void *)&fh_iconv_substr },
   { "ob_iconv_handler", fg_ob_iconv_handler, (void *)&fh_ob_iconv_handler },
+  { "icu_match", fg_icu_match, (void *)&fh_icu_match },
   { "icu_transliterate", fg_icu_transliterate, (void *)&fh_icu_transliterate },
   { "icu_tokenize", fg_icu_tokenize, (void *)&fh_icu_tokenize },
   { "gd_info", fg_gd_info, (void *)&fh_gd_info },

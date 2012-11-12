@@ -30,8 +30,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+Variant f_icu_match(CStrRef pattern, CStrRef subject,
+                    VRefParam matches = null, int64 flags = 0);
 String f_icu_transliterate(CStrRef str, bool remove_accents);
 Array f_icu_tokenize(CStrRef text);
+extern const int64 k_UREGEX_CASE_INSENSITIVE;
+extern const int64 k_UREGEX_COMMENTS;
+extern const int64 k_UREGEX_DOTALL;
+extern const int64 k_UREGEX_MULTILINE;
+extern const int64 k_UREGEX_UWORD;
+extern const int64 k_UREGEX_OFFSET_CAPTURE;
 
 void icu_get_checks();
 

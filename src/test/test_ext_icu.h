@@ -27,6 +27,7 @@ class TestExtIcu : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 
+  bool test_icu_match();
   bool test_icu_transliterate();
   bool test_icu_tokenize();
 };

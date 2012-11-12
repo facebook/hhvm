@@ -25,6 +25,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+inline Variant x_icu_match(CStrRef pattern, CStrRef subject,
+                           VRefParam matches = null, int64 flags = 0) {
+  FUNCTION_INJECTION_BUILTIN(icu_match);
+  return f_icu_match(pattern, subject, matches, flags);
+}
+
 inline String x_icu_transliterate(CStrRef str, bool remove_accents) {
   FUNCTION_INJECTION_BUILTIN(icu_transliterate);
   TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);

@@ -2590,15 +2590,20 @@ void ClassScope::outputCPPDef(CodeGenerator &cg) {
   if (isVolatile()) {
     string name = CodeGenerator::FormatLabel(m_name);
     if (isRedeclaring()) {
+      cg_indentBegin("if (g->CDEC(%s) && g->%s%s != &%s%s) {\n",
+                     name.c_str(),
+                     Option::ClassStaticsCallbackPrefix,
+                     name.c_str(),
+                     Option::ClassStaticsCallbackPrefix,
+                     getId().c_str());
+      cg_printf("raise_error(\"Class already declared: %s\");\n",
+                CodeGenerator::EscapeLabel(getOriginalName()).c_str());
+      cg_indentEnd("}\n");
       cg_printf("g->%s%s = &%s%s;\n",
                 Option::ClassStaticsCallbackPrefix,
                 name.c_str(),
                 Option::ClassStaticsCallbackPrefix,
                 getId().c_str());
-      cg_indentBegin("if (g->CDEC(%s)) {\n", name.c_str());
-      cg_printf("raise_error(\"Class already declared: %s\");\n",
-                getOriginalName().c_str());
-      cg_indentEnd("}\n");
     }
     cg_printf("g->CDEC(%s) = true;\n", name.c_str());
   }

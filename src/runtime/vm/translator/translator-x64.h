@@ -123,7 +123,7 @@ class TranslatorX64 : public Translator
   TCA                    m_stackOverflowHelper;
   TCA                    m_dtorGenericStub;
   TCA                    m_dtorGenericStubRegs;
-  TCA                    m_dtorStubs[MaxNumDataTypes];
+  TCA                    m_dtorStubs[kDestrTableSize];
   TCA                    m_interceptHelper;
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
@@ -871,15 +871,14 @@ private:
                       PhysReg = reg::r13,
                       PhysReg = reg::r14,
                       PhysReg = reg::rax);
-  void emitCheckUnboxedUncounted(X64Assembler& a,
-                                 PhysReg       baseReg,
-                                 int           offset,
-                                 SrcRec&       fail);
-  void emitCheckUnboxedCounted(X64Assembler& a,
-                               PhysReg       baseReg,
-                               int           offset,
-                               SrcRec&       fail);
-
+  void emitCheckUncounted(X64Assembler& a,
+                          PhysReg       baseReg,
+                          int           offset,
+                          SrcRec&       fail);
+  void emitCheckUncountedInit(X64Assembler& a,
+                              PhysReg       baseReg,
+                              int           offset,
+                              SrcRec&       fail);
 
   enum SRFlags {
     SRNone = 0,

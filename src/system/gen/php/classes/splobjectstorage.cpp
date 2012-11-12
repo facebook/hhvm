@@ -322,7 +322,7 @@ static const int64 cpt_static_inits[] = {
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
   {0x7B6B4E95,1,0,18,65,-1,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_storage),&NAMSTR(s_sys_ss7c4bb61c, "\000SplObjectStorage\000storage") },
-  {0x498C95A6,0,1,18,65,3,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ss6c63e9f2, "\000SplObjectStorage\000index") },
+  {0x498C95A6,0,1,18,65,10,GET_PROPERTY_OFFSET(c_SplObjectStorage, m_index),&NAMSTR(s_sys_ss6c63e9f2, "\000SplObjectStorage\000index") },
 
 };
 static const int cpt_hash_entries[] = {

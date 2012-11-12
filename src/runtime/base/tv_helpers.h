@@ -380,7 +380,7 @@ void tvCastToStringInPlace(TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);
 void tvCastToObjectInPlace(TypedValue* tv);
 
-extern void (*g_destructors[4])(RefData*);
+extern void (*g_destructors[kDestrTableSize])(RefData*);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -45,7 +45,7 @@ struct UnwindRegInfo {
   struct Data {
     bool     dirty     : 1;
     bool     exStack   : 1;  // false means a local
-    signed   dataType  : 6;  // DataType values
+    signed   dataType  : 8;  // DataType values
     unsigned reg       : 4;  // Register id
     int16_t  locOffset;
 

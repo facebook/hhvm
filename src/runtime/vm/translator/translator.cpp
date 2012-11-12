@@ -416,12 +416,7 @@ operator|(const Operands& l, const Operands& r) {
 }
 
 static int64 typeToMask(DataType t) {
-  // KindOfInvalid == -1, so we have to add 2 to make sure t is
-  // positive.
-  static_assert(KindOfInvalid == -1,
-                "assumption for KindOfInvalid value in typeToMask is wrong");
-  ASSERT((t+2) > 0 && (t+2) <= 63);
-  return (1 << (t+2));
+  return (t == KindOfInvalid) ? 1 : (1 << (1 + getDataTypeIndex(t)));
 }
 
 struct InferenceRule {
@@ -2648,21 +2643,21 @@ bool GuardType::isSpecific() const {
 bool GuardType::isRelaxed() const {
   switch (outerType) {
     case KindOfAny:
-    case KindOfUnboxedUncounted:
-    case KindOfUnboxedCounted:
-    case KindOfBoxedUncounted:
-    case KindOfBoxedCounted:
+    case KindOfUncounted:
+    case KindOfUncountedInit:
       return true;
     default:
       return false;
   }
 }
 
+bool GuardType::isGeneric() const {
+  return outerType == KindOfAny;
+}
+
 bool GuardType::isCounted() const {
   switch (outerType) {
     case KindOfAny:
-    case KindOfUnboxedCounted:
-    case KindOfBoxedCounted:
     case KindOfStaticString:
     case KindOfString:
     case KindOfArray:
@@ -2680,12 +2675,21 @@ bool GuardType::isMoreRefinedThan(const GuardType& other) const {
 
 DataTypeCategory GuardType::getCategory() const {
   switch (outerType) {
-    case KindOfAny:              return DataTypeGeneric;
-    case KindOfUnboxedUncounted:
-    case KindOfUnboxedCounted:
-    case KindOfBoxedUncounted:
-    case KindOfBoxedCounted:     return DataTypeCountness;
-    default:                     return DataTypeSpecific;
+    case KindOfAny:           return DataTypeGeneric;
+    case KindOfUncounted:     return DataTypeCountness;
+    case KindOfUncountedInit: return DataTypeCountnessInit;
+    default:                  return DataTypeSpecific;
+  }
+}
+
+bool GuardType::mayBeUninit() const {
+  switch (outerType) {
+    case KindOfAny:
+    case KindOfUncounted:
+    case KindOfUninit:
+      return true;
+    default:
+      return false;
   }
 }
 
@@ -2693,15 +2697,28 @@ GuardType GuardType::getCountness() const {
   // Note that translations need to be able to handle KindOfString and
   // KindOfStaticString interchangeably.  This implies that KindOfStaticString
   // needs to be treated as KindOfString, i.e. as possibly counted.
+  ASSERT(isSpecific());
   switch (outerType) {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
-    case KindOfDouble:  return GuardType(KindOfUnboxedUncounted);
+    case KindOfDouble:  return GuardType(KindOfUncounted);
     default:            return *this;
   }
 }
+
+GuardType GuardType::getCountnessInit() const {
+  ASSERT(isSpecific());
+  switch (outerType) {
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:  return GuardType(KindOfUncountedInit);
+    default:            return *this;
+  }
+}
+
 
 DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
                                               size_t opndIdx) {
@@ -2719,6 +2736,17 @@ DataTypeCategory getOperandConstraintCategory(NormalizedInstruction* instr,
         return DataTypeCountness;
       }
     }
+    case OpCGetL : {
+      if (!instr->outStack || (instr->outputIsUsed(instr->outStack) ==
+                               NormalizedInstruction::OutputUsed)) {
+        return DataTypeSpecific;
+      }
+      return DataTypeCountnessInit;
+    }
+    case OpRetC :
+    case OpRetV : {
+      return DataTypeCountness;
+    }
     default: return DataTypeSpecific;
   }
 }
@@ -2729,10 +2757,11 @@ GuardType getOperandConstraintType(NormalizedInstruction* instr,
                                    const GuardType&       specType) {
   DataTypeCategory dtCategory = getOperandConstraintCategory(instr, opndIdx);
   switch (dtCategory) {
-    case DataTypeGeneric:   return GuardType(KindOfAny);
-    case DataTypeCountness: return specType.getCountness();
+    case DataTypeGeneric:       return GuardType(KindOfAny);
+    case DataTypeCountness:     return specType.getCountness();
+    case DataTypeCountnessInit: return specType.getCountnessInit();
     case DataTypeSpecific:
-    default:                return specType;
+    default:                    return specType;
   }
 }
 
@@ -2743,7 +2772,10 @@ void constrainOperandType(GuardType&             relxType,
   if (relxType.isSpecific()) return; // Can't constrain any further
 
   switch (instr->op()) {
-    case OpSetL: {
+    case OpRetC :
+    case OpRetV :
+    case OpCGetL :
+    case OpSetL : {
       GuardType consType = getOperandConstraintType(instr, opndIdx, specType);
       if (consType.isMoreRefinedThan(relxType)) {
         relxType = consType;
@@ -2753,6 +2785,16 @@ void constrainOperandType(GuardType&             relxType,
     default: {
       relxType = specType;
       return;
+    }
+  }
+}
+
+void Translator::reanalizeConsumers(Tracelet& tclet, DynLocation* depDynLoc) {
+  for (auto& instr : tclet.m_instrs) {
+    for (size_t i = 0; i < instr.inputs.size(); i++) {
+      if (instr.inputs[i] == depDynLoc) {
+        analyzeInstr(tclet, instr);
+      }
     }
   }
 }
@@ -2803,8 +2845,10 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
             RuntimeType(relxType.getOuterType(),
                         relxType.getInnerType()).pretty().c_str());
       ASSERT(deps[loc->location] == loc);
+      ASSERT(relxType.getOuterType() != KindOfInvalid);
       deps[loc->location]->rtt = RuntimeType(relxType.getOuterType(),
                                              relxType.getInnerType());
+      reanalizeConsumers(tclet, loc);
     }
   }
 }

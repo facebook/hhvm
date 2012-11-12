@@ -954,7 +954,7 @@ void TranslatorX64::emitDecRef(Asm& a,
     ASSERT(type >= 0 && type < MaxNumDataTypes);
     if (&a == &this->astubs) {
       JccBlock<CC_NZ> ifZero(a);
-      callUnaryStub(a, i, m_dtorStubs[type], rDatum);
+      callUnaryStub(a, i, m_dtorStubs[typeToDestrIndex(type)], rDatum);
       return;
     }
 
@@ -1109,15 +1109,16 @@ static void lookupDestructor(X64Assembler& a,
                              PhysReg scratch) {
   ASSERT(typeReg != r32(argNumToRegName[0]));
   ASSERT(scratch != argNumToRegName[0]);
-  static_assert(BitwiseKindOfString + 1 == KindOfArray &&
-                KindOfArray + 1 == KindOfObject &&
-                KindOfObject + 1 == KindOfRef &&
-                BitwiseKindOfString == KindOfRefCountThreshold + 1,
-                "Destructor lookup logic depends exact numbers for KindOf*");
 
-  a.    subl   (BitwiseKindOfString, r32(typeReg));
-  a.    movq   (&g_destructors, scratch);
-  a.    loadq  (scratch[typeReg*8], scratch);
+  static_assert((BitwiseKindOfString >> kShiftDataTypeToDestrIndex == 0) &&
+                (KindOfArray         >> kShiftDataTypeToDestrIndex == 1) &&
+                (KindOfObject        >> kShiftDataTypeToDestrIndex == 2) &&
+                (KindOfRef           >> kShiftDataTypeToDestrIndex == 3),
+                "lookup of destructors depends on KindOf* values");
+
+  a.    shrl(kShiftDataTypeToDestrIndex, r32(typeReg));
+  a.    movq(&g_destructors, scratch);
+  a.    loadq(scratch[typeReg*8], scratch);
 }
 
 static void callDestructor(X64Assembler& a,
@@ -2622,25 +2623,21 @@ TranslatorX64::emitStringCheck(X64Assembler& _a,
 }
 
 void
-TranslatorX64::emitCheckUnboxedUncounted(X64Assembler& a,
-                                         PhysReg       baseReg,
-                                         int           offset,
-                                         SrcRec&       fail) {
+TranslatorX64::emitCheckUncounted(X64Assembler& a,
+                                  PhysReg       baseReg,
+                                  int           offset,
+                                  SrcRec&       fail) {
   a.cmp_imm32_disp_reg32(KindOfStaticString, offset, baseReg);
   emitFallbackJmp(a, fail, CC_G);
 }
 
 void
-TranslatorX64::emitCheckUnboxedCounted(X64Assembler& a,
-                                       PhysReg       baseReg,
-                                       int           offset,
-                                       SrcRec&       fail) {
-  ScratchReg rTmp(m_regMap);
-  a.load_reg64_disp_reg32(baseReg, offset, r(rTmp));
-  a.cmp_imm32_reg32(KindOfStaticString, r(rTmp));
-  emitFallbackJmp(a, fail, CC_LE);
-  a.cmp_imm32_reg32(KindOfRef, r(rTmp));
-  emitFallbackJmp(a, fail, CC_GE);
+TranslatorX64::emitCheckUncountedInit(X64Assembler& a,
+                                      PhysReg       baseReg,
+                                      int           offset,
+                                      SrcRec&       fail) {
+  a.test_imm32_disp_reg32(KindOfUncountedInitBit, offset, baseReg);
+  emitFallbackJmp(a, fail, CC_Z);
 }
 
 void
@@ -2652,13 +2649,13 @@ TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
     case KindOfAny:
     case KindOfClass:
       break;
-    case KindOfUnboxedUncounted:
+    case KindOfUncounted:
       ASSERT(fail);
-      emitCheckUnboxedUncounted(_a, base, offset, *fail);
+      emitCheckUncounted(_a, base, offset, *fail);
       break;
-    case KindOfUnboxedCounted:
+    case KindOfUncountedInit:
       ASSERT(fail);
-      emitCheckUnboxedCounted(_a, base, offset, *fail);
+      emitCheckUncountedInit(_a, base, offset, *fail);
       break;
     case BitwiseKindOfString:
     case KindOfStaticString:
@@ -4662,7 +4659,8 @@ void
 TranslatorX64::analyzeCGetL(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 1);
   const RuntimeType& type = i.inputs[0]->rtt;
-  i.m_txFlags = type.isUninit() ? Supported : Native;
+  i.m_txFlags = (type.isUninit() || GuardType(type).mayBeUninit()) ?
+    Supported : Native;
 }
 
 void
@@ -4673,8 +4671,26 @@ TranslatorX64::translateCGetL(const Tracelet& t,
   const vector<DynLocation*>& inputs = i.inputs;
   ASSERT(inputs.size() == 1);
   ASSERT(inputs[0]->isLocal());
-  DataType outType = i.inputs[0]->valueType();
+  DataType outType = inputs[0]->valueType();
   ASSERT(outType != KindOfInvalid);
+
+  if (GuardType(outType).isRelaxed()) {
+    ASSERT(outType == KindOfUncountedInit);
+    PhysReg locBase, stackBase;
+    int     locDisp, stackDisp;
+    locToRegDisp(inputs[0]->location, &locBase, &locDisp);
+    locToRegDisp(i.outStack->location, &stackBase, &stackDisp);
+    if (i.manuallyAllocInputs && !m_regMap.hasReg(inputs[0]->location)) {
+      emitCopyToAligned(a, locBase, locDisp, stackBase, stackDisp);
+    } else {
+      ScratchReg rTmp(m_regMap);
+      PhysReg localReg = getReg(inputs[0]->location);
+      a.store_reg64_disp_reg64(localReg, stackDisp + TVOFF(m_data), stackBase);
+      a.load_reg64_disp_reg32(locBase, locDisp + TVOFF(m_type), r(rTmp));
+      a.store_reg32_disp_reg64(r(rTmp), stackDisp + TVOFF(m_type), stackBase);
+    }
+    return;
+  }
 
   // Check for use of an undefined local.
   if (inputs[0]->rtt.isUninit()) {
@@ -6504,7 +6520,7 @@ void TranslatorX64::emitInlineReturn(Location retvalSrcLoc,
   for (int k = m_curNI->inputs.size() - 1; k >= 0; --k) {
     ASSERT(m_curNI->inputs[k]->location.space == Location::Local);
     DataType t = m_curNI->inputs[k]->outerType();
-    if (IS_REFCOUNTED_TYPE(t)) {
+    if (GuardType(t).isCounted()) {
       PhysReg reg = m_regMap.allocReg(m_curNI->inputs[k]->location, t,
                                       RegInfo::CLEAN);
       emitDecRef(*m_curNI, reg, t);
@@ -11390,13 +11406,18 @@ TranslatorX64::TranslatorX64()
   // bring the value into rdi. These can be burned in for all time, and for all
   // translations.
   typedef void* vp;
-  m_dtorStubs[BitwiseKindOfString] = emitUnaryStub(a,
-                                                   Call(getMethodHardwarePtr(&StringData::release)));
-  m_dtorStubs[KindOfArray]         = emitUnaryStub(a,
-                                                   Call(getVTableOffset(&HphpArray::release)));
-  m_dtorStubs[KindOfObject]        = emitUnaryStub(a,
-                                                   Call(getMethodHardwarePtr(&ObjectData::release)));
-  m_dtorStubs[KindOfRef]           = emitUnaryStub(a, Call(vp(getMethodHardwarePtr(&RefData::release))));
+
+  TCA strDtor, arrDtor, objDtor, refDtor;
+  strDtor = emitUnaryStub(a, Call(getMethodHardwarePtr(&StringData::release)));
+  arrDtor = emitUnaryStub(a, Call(getVTableOffset(&HphpArray::release)));
+  objDtor = emitUnaryStub(a, Call(getMethodHardwarePtr(&ObjectData::release)));
+  refDtor = emitUnaryStub(a, Call(vp(getMethodHardwarePtr(&RefData::release))));
+
+  m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)] = strDtor;
+  m_dtorStubs[typeToDestrIndex(KindOfArray)]         = arrDtor;
+  m_dtorStubs[typeToDestrIndex(KindOfObject)]        = objDtor;
+  m_dtorStubs[typeToDestrIndex(KindOfRef)]           = refDtor;
+
   emitGenericDecRefHelpers();
   emitFreeLocalsHelpers();
 
@@ -11444,8 +11465,9 @@ void TranslatorX64::initGdb() {
   recordGdbStub(astubs, m_retHelper - 1, "HHVM::retHelper");
   recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
   recordBCInstr(OpDefClsHelper, a, m_defClsHelper);
-  recordBCInstr(OpDtorStub, a, m_dtorStubs[BitwiseKindOfString]);
-  recordGdbStub(a, m_dtorStubs[BitwiseKindOfString],
+  recordBCInstr(OpDtorStub, a,
+                m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)]);
+  recordGdbStub(a, m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)],
                     "HHVM::destructorStub");
 }
 

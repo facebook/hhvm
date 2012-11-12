@@ -1043,6 +1043,8 @@ struct X64Assembler {
 
   void shlq  (Immed i, Reg64 r) { instrIR(instr_shl, i.b(), r); }
   void shrq  (Immed i, Reg64 r) { instrIR(instr_shr, i.b(), r); }
+  void shll  (Immed i, Reg32 r) { instrIR(instr_shl, i.b(), r); }
+  void shrl  (Immed i, Reg32 r) { instrIR(instr_shr, i.b(), r); }
 
   /*
    * Control-flow directives. The labeling/patching facilities

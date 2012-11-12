@@ -45,7 +45,7 @@ struct ValueProfile {
   uint32_t m_tag;
   // All of these saturate at 255.
   uint8_t  m_totalSamples;
-  uint8_t  m_samples[MaxNumDataTypes];
+  uint8_t  m_samples[MaxNumDataTypesIndex];
 };
 
 /*
@@ -234,8 +234,9 @@ void recordType(const TypeProfileKey& key, DataType dt) {
     prof->m_totalSamples++;
     // NB: we can't quite assert that we have fewer than UCHAR_MAX samples,
     // because other threads are updating this structure without locks.
-    if (prof->m_samples[dt] < UCHAR_MAX) {
-      prof->m_samples[dt]++;
+    int dtIndex = getDataTypeIndex(dt);
+    if (prof->m_samples[dtIndex] < UCHAR_MAX) {
+      prof->m_samples[dtIndex]++;
     }
   }
 }
@@ -261,11 +262,11 @@ std::pair<DataType, double> predictType(const TypeProfileKey& key) {
   DataType pred = KindOfUninit;
   // If we have fewer than kMinInstances predictions, consider it too
   // little data to be actionable.
-  for (int i = 0; i < MaxNumDataTypes; ++i) {
+  for (int i = 0; i < MaxNumDataTypesIndex; ++i) {
     double prob = (1.0 * prof->m_samples[i]) / total;
     if (prob > maxProb) {
       maxProb = prob;
-      pred = (DataType)i;
+      pred = getDataTypeValue(i);
     }
     if (prob >= 1.0) break;
   }

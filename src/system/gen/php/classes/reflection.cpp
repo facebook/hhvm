@@ -4912,38 +4912,38 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svi90d5f98c, 2LL),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x4C9B1319,1,0,0,100,3,0,&NAMSTR(s_sys_ss4c9b1319, "IS_IMPLICIT_ABSTRACT") },
-  {0x3CE2F8AB,1,1,0,100,3,0,&NAMSTR(s_sys_ss3ce2f8ab, "IS_EXPLICIT_ABSTRACT") },
-  {0x5493E55C,0,2,0,100,3,0,&NAMSTR(s_sys_ss5493e55c, "IS_FINAL") },
+  {0x4C9B1319,1,0,0,100,10,0,&NAMSTR(s_sys_ss4c9b1319, "IS_IMPLICIT_ABSTRACT") },
+  {0x3CE2F8AB,1,1,0,100,10,0,&NAMSTR(s_sys_ss3ce2f8ab, "IS_EXPLICIT_ABSTRACT") },
+  {0x5493E55C,0,2,0,100,10,0,&NAMSTR(s_sys_ss5493e55c, "IS_FINAL") },
 
-  {0x5F26E328,0,3,0,73,16,offsetof(SystemGlobals,s_ReflectionClass$$fetched),&NAMSTR(s_sys_ss4f957cf4, "fetched") },
+  {0x5F26E328,0,3,0,73,32,offsetof(SystemGlobals,s_ReflectionClass$$fetched),&NAMSTR(s_sys_ss4f957cf4, "fetched") },
 
   {0x2E73E24A,0,4,17,65,-1,GET_PROPERTY_OFFSET(c_ReflectionClass, m_info),&NAMSTR(s_sys_ss2c581df2, "\000ReflectionClass\000info") },
   {0x09D9DAE4,-1,4,0,68,-1,GET_PROPERTY_OFFSET(c_ReflectionClass, m_name),&NAMSTR(s_sys_ss7c08daeb, "name") },
 
-  {0x2E73E24A,0,4,21,65,16,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss03994a33, "\000ReflectionExtension\000info") },
+  {0x2E73E24A,0,4,21,65,32,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_info),&NAMSTR(s_sys_ss03994a33, "\000ReflectionExtension\000info") },
   {0x09D9DAE4,-1,4,21,65,-1,GET_PROPERTY_OFFSET(c_ReflectionExtension, m_name),&NAMSTR(s_sys_ss6c5fe95e, "\000ReflectionExtension\000name") },
 
-  {0x5F393A40,0,5,0,100,3,0,&NAMSTR(s_sys_ss5f393a40, "IS_DEPRECATED") },
+  {0x5F393A40,0,5,0,100,10,0,&NAMSTR(s_sys_ss5f393a40, "IS_DEPRECATED") },
 
   {0x2E73E24A,0,4,0,68,-1,GET_PROPERTY_OFFSET(c_ReflectionFunctionAbstract, m_info),&NAMSTR(s_sys_ss63d821d3, "info") },
 
-  {0x16536330,3,6,0,100,3,0,&NAMSTR(s_sys_ss16536330, "IS_STATIC") },
-  {0x08D30472,1,7,0,100,3,0,&NAMSTR(s_sys_ss08d30472, "IS_PROTECTED") },
-  {0x220B72E7,3,8,0,100,3,0,&NAMSTR(s_sys_ss220b72e7, "IS_PRIVATE") },
-  {0x6602CA38,-2,9,0,100,3,0,&NAMSTR(s_sys_ss6602ca38, "IS_PUBLIC") },
-  {0x5493E55C,0,10,0,100,3,0,&NAMSTR(s_sys_ss5493e55c, "IS_FINAL") },
-  {0x3B94D4AD,-1,11,0,100,3,0,&NAMSTR(s_sys_ss3b94d4ad, "IS_ABSTRACT") },
+  {0x16536330,3,6,0,100,10,0,&NAMSTR(s_sys_ss16536330, "IS_STATIC") },
+  {0x08D30472,1,7,0,100,10,0,&NAMSTR(s_sys_ss08d30472, "IS_PROTECTED") },
+  {0x220B72E7,3,8,0,100,10,0,&NAMSTR(s_sys_ss220b72e7, "IS_PRIVATE") },
+  {0x6602CA38,-2,9,0,100,10,0,&NAMSTR(s_sys_ss6602ca38, "IS_PUBLIC") },
+  {0x5493E55C,0,10,0,100,10,0,&NAMSTR(s_sys_ss5493e55c, "IS_FINAL") },
+  {0x3B94D4AD,-1,11,0,100,10,0,&NAMSTR(s_sys_ss3b94d4ad, "IS_ABSTRACT") },
 
   {0x09D9DAE4,1,4,0,68,-1,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_name),&NAMSTR(s_sys_ss7c08daeb, "name") },
   {0x4C94BA96,0,4,0,68,-1,GET_PROPERTY_OFFSET(c_ReflectionMethod, m_class),&NAMSTR(s_sys_ss59589f70, "class") },
 
   {0x2E73E24A,0,4,0,68,-1,GET_PROPERTY_OFFSET(c_ReflectionParameter, m_info),&NAMSTR(s_sys_ss63d821d3, "info") },
 
-  {0x16536330,1,6,0,36,3,0,&NAMSTR(s_sys_ss16536330, "IS_STATIC") },
-  {0x6602CA38,1,9,0,100,3,0,&NAMSTR(s_sys_ss6602ca38, "IS_PUBLIC") },
-  {0x08D30472,1,7,0,100,3,0,&NAMSTR(s_sys_ss08d30472, "IS_PROTECTED") },
-  {0x220B72E7,0,8,0,100,3,0,&NAMSTR(s_sys_ss220b72e7, "IS_PRIVATE") },
+  {0x16536330,1,6,0,36,10,0,&NAMSTR(s_sys_ss16536330, "IS_STATIC") },
+  {0x6602CA38,1,9,0,100,10,0,&NAMSTR(s_sys_ss6602ca38, "IS_PUBLIC") },
+  {0x08D30472,1,7,0,100,10,0,&NAMSTR(s_sys_ss08d30472, "IS_PROTECTED") },
+  {0x220B72E7,0,8,0,100,10,0,&NAMSTR(s_sys_ss220b72e7, "IS_PRIVATE") },
 
   {0x2E73E24A,1,4,0,68,-1,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_info),&NAMSTR(s_sys_ss63d821d3, "info") },
   {0x09D9DAE4,1,4,0,68,-1,GET_PROPERTY_OFFSET(c_ReflectionProperty, m_name),&NAMSTR(s_sys_ss7c08daeb, "name") },

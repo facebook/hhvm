@@ -1796,10 +1796,10 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svi86af027e, 16LL),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x36439C61,0,0,16,65,17,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ss4152806c, "\000AppendIterator\000iterators") },
+  {0x36439C61,0,0,16,65,64,GET_PROPERTY_OFFSET(c_AppendIterator, m_iterators),&NAMSTR(s_sys_ss4152806c, "\000AppendIterator\000iterators") },
 
-  {0x41A4CD6D,0,1,0,100,3,0,&NAMSTR(s_sys_ss41a4cd6d, "ARRAY_AS_PROPS") },
-  {0x200EBD6E,-1,2,0,100,3,0,&NAMSTR(s_sys_ss200ebd6e, "STD_PROP_LIST") },
+  {0x41A4CD6D,0,1,0,100,10,0,&NAMSTR(s_sys_ss41a4cd6d, "ARRAY_AS_PROPS") },
+  {0x200EBD6E,-1,2,0,100,10,0,&NAMSTR(s_sys_ss200ebd6e, "STD_PROP_LIST") },
 
   {0x7D8459B0,1,0,3,66,-1,GET_PROPERTY_OFFSET(c_ArrayIterator, m_arr),&NAMSTR(s_sys_ss4b63ab9f, "\000*\000arr") },
   {0x4997453D,0,0,3,66,-1,GET_PROPERTY_OFFSET(c_ArrayIterator, m_flags),&NAMSTR(s_sys_ss1c30fc04, "\000*\000flags") },
@@ -1808,10 +1808,10 @@ static const ClassPropTableEntry cpt_table_entries[] = {
 
   {0x5CB957E8,0,0,18,65,-1,GET_PROPERTY_OFFSET(c_IteratorIterator, m_iterator),&NAMSTR(s_sys_ss295951fc, "\000IteratorIterator\000iterator") },
 
-  {0x706602BD,2,3,0,36,3,0,&NAMSTR(s_sys_ss706602bd, "LEAVES_ONLY") },
-  {0x728A74B5,0,4,0,100,3,0,&NAMSTR(s_sys_ss728a74b5, "CATCH_GET_CHILD") },
-  {0x784A8BC6,1,2,0,100,3,0,&NAMSTR(s_sys_ss784a8bc6, "SELF_FIRST") },
-  {0x194BD51F,-2,1,0,100,3,0,&NAMSTR(s_sys_ss194bd51f, "CHILD_FIRST") },
+  {0x706602BD,2,3,0,36,10,0,&NAMSTR(s_sys_ss706602bd, "LEAVES_ONLY") },
+  {0x728A74B5,0,4,0,100,10,0,&NAMSTR(s_sys_ss728a74b5, "CATCH_GET_CHILD") },
+  {0x784A8BC6,1,2,0,100,10,0,&NAMSTR(s_sys_ss784a8bc6, "SELF_FIRST") },
+  {0x194BD51F,-2,1,0,100,10,0,&NAMSTR(s_sys_ss194bd51f, "CHILD_FIRST") },
 
   {0x64046A18,0,0,27,65,-1,GET_PROPERTY_OFFSET(c_RecursiveIteratorIterator, m_rsrc),&NAMSTR(s_sys_ss24f77622, "\000RecursiveIteratorIterator\000rsrc") },
 

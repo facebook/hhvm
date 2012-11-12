@@ -2295,14 +2295,14 @@ static void
 tv_release_generic(TypedValue* tv) {
   ASSERT(VM::Transl::tx64->stateIsDirty());
   ASSERT(tv->m_type >= KindOfString && tv->m_type <= KindOfRef);
-  g_destructors[tv->m_type - KindOfString](tv->m_data.pref);
+  g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
 }
 
 static void
 tv_release_typed(RefData* pv, DataType dt) {
   ASSERT(VM::Transl::tx64->stateIsDirty());
   ASSERT(dt >= KindOfString && dt <= KindOfRef);
-  g_destructors[dt - KindOfString](pv);
+  g_destructors[typeToDestrIndex(dt)](pv);
 }
 
 Address CodeGenerator::getDtorGeneric() {

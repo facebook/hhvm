@@ -474,9 +474,12 @@ class GuardType {
   const DataType   getInnerType() const;
   bool             isSpecific() const;
   bool             isRelaxed() const;
+  bool             isGeneric() const;
   bool             isCounted() const;
   bool             isMoreRefinedThan(const GuardType& other) const;
+  bool             mayBeUninit() const;
   GuardType        getCountness() const;
+  GuardType        getCountnessInit() const;
   DataTypeCategory getCategory() const;
 
  private:
@@ -805,6 +808,7 @@ private:
                   int& currentStackOffset,
                   bool& varEnvTaint);
   void relaxDeps(Tracelet& tclet, TraceletContext& tctxt);
+  void reanalizeConsumers(Tracelet& tclet, DynLocation* depDynLoc);
 
   static RuntimeType liveType(Location l, const Unit &u);
   static RuntimeType liveType(const Cell* outer, const Location& l);

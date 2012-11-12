@@ -565,12 +565,12 @@ static const int64 cpt_static_inits[] = {
   (int64)&NAMVAR(s_sys_svi6af020b2, 256LL),
 };
 static const ClassPropTableEntry cpt_table_entries[] = {
-  {0x652237E0,2,0,0,100,3,0,&NAMSTR(s_sys_ss652237e0, "CURRENT_AS_FILEINFO") },
-  {0x3F93C023,0,1,0,100,3,0,&NAMSTR(s_sys_ss3f93c023, "NEW_CURRENT_AND_KEY") },
-  {0x64734285,1,2,0,100,3,0,&NAMSTR(s_sys_ss64734285, "CURRENT_AS_PATHNAME") },
-  {0x78C836CD,2,3,0,100,3,0,&NAMSTR(s_sys_ss78c836cd, "KEY_AS_PATHNAME") },
-  {0x267DE57E,-4,3,0,36,3,0,&NAMSTR(s_sys_ss267de57e, "CURRENT_AS_SELF") },
-  {0x17340BAE,-4,4,0,100,3,0,&NAMSTR(s_sys_ss17340bae, "KEY_AS_FILENAME") },
+  {0x652237E0,2,0,0,100,10,0,&NAMSTR(s_sys_ss652237e0, "CURRENT_AS_FILEINFO") },
+  {0x3F93C023,0,1,0,100,10,0,&NAMSTR(s_sys_ss3f93c023, "NEW_CURRENT_AND_KEY") },
+  {0x64734285,1,2,0,100,10,0,&NAMSTR(s_sys_ss64734285, "CURRENT_AS_PATHNAME") },
+  {0x78C836CD,2,3,0,100,10,0,&NAMSTR(s_sys_ss78c836cd, "KEY_AS_PATHNAME") },
+  {0x267DE57E,-4,3,0,36,10,0,&NAMSTR(s_sys_ss267de57e, "CURRENT_AS_SELF") },
+  {0x17340BAE,-4,4,0,100,10,0,&NAMSTR(s_sys_ss17340bae, "KEY_AS_FILENAME") },
 
 };
 static const int cpt_hash_entries[] = {

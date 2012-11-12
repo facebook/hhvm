@@ -1169,7 +1169,7 @@ static const ClassPropTableEntry cpt_table_entries[] = {
   {0x564A3961,1,2,3,2,-1,GET_PROPERTY_OFFSET(c_Exception, m_message),&NAMSTR(s_sys_ss5db5fe40, "\000*\000message") },
   {0x5B87F3F1,4,3,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_code),&NAMSTR(s_sys_ss3930c807, "\000*\000code") },
   {0x40E3A0D4,1,0,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_trace),&NAMSTR(s_sys_ss2e844c00, "\000*\000trace") },
-  {0x41122457,0,1,11,65,2,GET_PROPERTY_OFFSET(c_Exception, m_inited),&NAMSTR(s_sys_ss0d46b021, "\000Exception\000inited") },
+  {0x41122457,0,1,11,65,9,GET_PROPERTY_OFFSET(c_Exception, m_inited),&NAMSTR(s_sys_ss0d46b021, "\000Exception\000inited") },
   {0x1497776A,2,0,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_file),&NAMSTR(s_sys_ss6fd67d3d, "\000*\000file") },
   {0x79AA5D3B,-1,0,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_previous),&NAMSTR(s_sys_ss0ec36d2b, "\000*\000previous") },
   {0x3CA59E7E,-4,0,3,66,-1,GET_PROPERTY_OFFSET(c_Exception, m_line),&NAMSTR(s_sys_ss30aaf1a1, "\000*\000line") },

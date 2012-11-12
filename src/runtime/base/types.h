@@ -127,19 +127,18 @@ class VariableUnserializer;
 enum DataType {
   // Self and Parent are defined here for use by class TypeConstraint.
   // KindOfSelf/Parent are not used by TypedValue
-  KindOfSelf             = -9,
-  KindOfParent           = -8,
+  KindOfSelf             = -15,
+  KindOfParent           = -14,
 
-  MinDataType            = -7,
+  MinDataType            = -13,
+
+  KindOfClass            = -13,
 
   // Values below zero are not PHP values, but runtime-internal.
-  KindOfAny              = -7,
-  KindOfUnboxedUncounted = -6,
-  KindOfUnboxedCounted   = -5,
-  KindOfBoxedUncounted   = -4,
-  KindOfBoxedCounted     = -3,
+  KindOfAny              = -8,
+  KindOfUncounted        = -7,
+  KindOfUncountedInit    = -6,
 
-  KindOfClass            = -2,
   KindOfInvalid          = -1,
   KindOfUnknown          = KindOfInvalid,
 
@@ -150,29 +149,34 @@ enum DataType {
    * in unwind-x64.h.)
    */
   KindOfUninit           = 0,
-  KindOfNull             = 1,
-  KindOfBoolean          = 2,
-  KindOfInt64            = 3,
-  KindOfDouble           = 4,
 
   // Note: KindOfStringBit must be set in KindOfStaticString and KindOfString,
   //       and it must be 0 in any other real DataType.
-  KindOfStringBit        = 8,
+  KindOfStringBit        = 4,
 
-  KindOfStaticString     = 14,
-  KindOfString           = 15,
+  // Note: KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double,
+  //       and StaticString, and it must be 0 for any other real DataType.
+  KindOfUncountedInitBit = 8,
 
-  KindOfArray            = 16,
-  KindOfObject           = 17,
-  KindOfRef              = 18,
-  KindOfIndirect         = 19,
+  KindOfNull             = 8,     //   0001000
+  KindOfBoolean          = 9,     //   0001001
+  KindOfInt64            = 10,    //   0001010
+  KindOfDouble           = 11,    //   0001011
 
-  MaxNumDataTypes        = 20, // marker, not a valid type
+  KindOfStaticString     = 12,    //   0001100
+  KindOfString           = 20,    //   0010100
+  KindOfArray            = 32,    //   0100000
+  KindOfObject           = 64,    //   1000000
+  KindOfRef              = 96,    //   1100000
+  KindOfIndirect         = 97,    //   1100001
 
+  MaxNumDataTypes        = KindOfIndirect + 1, // marker, not a valid type
+  MaxNumDataTypesIndex   = 11 + 1,  // 1 + the number of valid DataTypes above
 
   MaxDataType            = 0x7fffffff // Allow KindOf* > 11 in HphpArray.
 };
 BOOST_STATIC_ASSERT((sizeof(DataType) == 4));
+
 
 BOOST_STATIC_ASSERT(KindOfString       & KindOfStringBit);
 BOOST_STATIC_ASSERT(KindOfStaticString & KindOfStringBit);
@@ -185,8 +189,23 @@ BOOST_STATIC_ASSERT(!(KindOfArray      & KindOfStringBit));
 BOOST_STATIC_ASSERT(!(KindOfObject     & KindOfStringBit));
 BOOST_STATIC_ASSERT(!(KindOfRef        & KindOfStringBit));
 BOOST_STATIC_ASSERT(!(KindOfIndirect   & KindOfStringBit));
+BOOST_STATIC_ASSERT(!(KindOfClass      & KindOfStringBit));
 
-const unsigned int kDataTypeMask = 31;
+BOOST_STATIC_ASSERT(KindOfNull         & KindOfUncountedInitBit);
+BOOST_STATIC_ASSERT(KindOfBoolean      & KindOfUncountedInitBit);
+BOOST_STATIC_ASSERT(KindOfInt64        & KindOfUncountedInitBit);
+BOOST_STATIC_ASSERT(KindOfDouble       & KindOfUncountedInitBit);
+BOOST_STATIC_ASSERT(KindOfStaticString & KindOfUncountedInitBit);
+BOOST_STATIC_ASSERT(!(KindOfUninit     & KindOfUncountedInitBit));
+BOOST_STATIC_ASSERT(!(KindOfString     & KindOfUncountedInitBit));
+BOOST_STATIC_ASSERT(!(KindOfArray      & KindOfUncountedInitBit));
+BOOST_STATIC_ASSERT(!(KindOfObject     & KindOfUncountedInitBit));
+BOOST_STATIC_ASSERT(!(KindOfRef        & KindOfUncountedInitBit));
+BOOST_STATIC_ASSERT(!(KindOfIndirect   & KindOfUncountedInitBit));
+BOOST_STATIC_ASSERT(!(KindOfClass      & KindOfUncountedInitBit));
+
+const unsigned int kDataTypeMask = 0x7F;
+
 BOOST_STATIC_ASSERT(MaxNumDataTypes - 1 <= kDataTypeMask);
 
 // All DataTypes greater than this value are refcounted.
@@ -195,24 +214,65 @@ const DataType KindOfRefCountThreshold = KindOfStaticString;
 enum DataTypeCategory {
   DataTypeGeneric,
   DataTypeCountness,
+  DataTypeCountnessInit,
   DataTypeSpecific
 };
 
 std::string tname(DataType t);
 
-inline int getDataTypeIndex(DataType t) {
-  return t;
+inline int getDataTypeIndex(DataType type) {
+  switch (type) {
+    case KindOfUninit       : return 0;
+    case KindOfNull         : return 1;
+    case KindOfBoolean      : return 2;
+    case KindOfInt64        : return 3;
+    case KindOfDouble       : return 4;
+    case KindOfStaticString : return 5;
+    case KindOfString       : return 6;
+    case KindOfArray        : return 7;
+    case KindOfObject       : return 8;
+    case KindOfRef          : return 9;
+    case KindOfIndirect     : return 10;
+    default                 : not_reached();
+  }
 }
 
-// Assumption used in IS_STRING_TYPE below:
-BOOST_STATIC_ASSERT((KindOfString & ~1) == KindOfStaticString);
+inline DataType getDataTypeValue(unsigned index) {
+  switch (index) {
+    case 0  : return KindOfUninit;
+    case 1  : return KindOfNull;
+    case 2  : return KindOfBoolean;
+    case 3  : return KindOfInt64;
+    case 4  : return KindOfDouble;
+    case 5  : return KindOfStaticString;
+    case 6  : return KindOfString;
+    case 7  : return KindOfArray;
+    case 8  : return KindOfObject;
+    case 9  : return KindOfRef;
+    case 10 : return KindOfIndirect;
+    default : not_reached();
+  }
+}
+
+// These are used in type_variant.cpp and translator-x64.cpp
+const unsigned int kShiftDataTypeToDestrIndex = 5;
+const unsigned int kDestrTableSize = 4;
+
+#define TYPE_TO_DESTR_IDX(t) ((t) >> kShiftDataTypeToDestrIndex)
+
+static inline ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
+  ASSERT(t >= KindOfString && t <= KindOfRef);
+  return TYPE_TO_DESTR_IDX(t);
+}
 
 // Helper macro for checking if a given type is refcounted
 #define IS_REFCOUNTED_TYPE(t) ((t) > KindOfRefCountThreshold)
 // Helper macro for checking if a type is KindOfString or KindOfStaticString.
-#define IS_STRING_TYPE(t) (((t) & ~1) == KindOfStaticString)
+BOOST_STATIC_ASSERT(KindOfStaticString == 0x0C);
+BOOST_STATIC_ASSERT(KindOfString       == 0x14);
+#define IS_STRING_TYPE(t) (((t) & ~0x18) == KindOfStringBit)
 // Check if a type is KindOfUninit or KindOfNull
-#define IS_NULL_TYPE(t) (unsigned(t) <= 1)
+#define IS_NULL_TYPE(t) (unsigned(t) <= KindOfNull)
 // Other type check macros
 #define IS_INT_TYPE(t) ((t) == KindOfInt64)
 #define IS_ARRAY_TYPE(t) ((t) == KindOfArray)

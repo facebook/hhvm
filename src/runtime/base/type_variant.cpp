@@ -197,18 +197,25 @@ static void destructObject(RefData *p)  { ((ObjectData *)p)->release(); }
 HOT_FUNC
 static void destructRef(RefData *p)     { p->release(); }
 
-void (*g_destructors[4])(RefData *) =
-  {destructString, destructArray, destructObject, destructRef};
+static_assert(TYPE_TO_DESTR_IDX(KindOfString) == 0, "String destruct index");
+static_assert(TYPE_TO_DESTR_IDX(KindOfArray)  == 1,  "Array destruct index");
+static_assert(TYPE_TO_DESTR_IDX(KindOfObject) == 2, "Object destruct index");
+static_assert(TYPE_TO_DESTR_IDX(KindOfRef)    == 3,    "Ref destruct index");
+
+static_assert(kDestrTableSize == 4,
+              "size of g_destructors[] must be kDestrTableSize");
+
+void (*g_destructors[kDestrTableSize])(RefData *) = { destructString,
+                                                      destructArray,
+                                                      destructObject,
+                                                      destructRef };
 
 inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
   ASSERT(IS_REFCOUNTED_TYPE(t));
   ASSERT(IS_REAL_TYPE(t));
-  CT_ASSERT(KindOfString + 1 == KindOfArray &&
-            KindOfArray + 1 == KindOfObject &&
-            KindOfObject + 1 == KindOfRef);
   if (data->decRefCount() == 0) {
     ASSERT(t >= KindOfString && t <= KindOfRef);
-    g_destructors[t - KindOfString](data);
+    g_destructors[typeToDestrIndex(t)](data);
   }
 }
 
@@ -219,11 +226,8 @@ inline ALWAYS_INLINE void Variant::destructImpl() {
 HOT_FUNC_VM
 void tvDecRefHelper(DataType type, uint64_t datum) {
   ASSERT(type >= KindOfString && type <= KindOfRef);
-  CT_ASSERT(KindOfString + 1 == KindOfArray &&
-            KindOfArray + 1 == KindOfObject &&
-            KindOfObject + 1 == KindOfRef);
   if (((RefData*)datum)->decRefCount() == 0) {
-    g_destructors[type - KindOfString]((RefData*)datum);
+    g_destructors[typeToDestrIndex(type)]((RefData*)datum);
   }
 }
 

@@ -53,6 +53,10 @@ string tname(DataType t) {
     CS(Object)
     CS(Ref)
     CS(Class)
+    CS(Any)
+    CS(Uncounted)
+    CS(UncountedInit)
+
 #undef CS
     case KindOfInvalid: return string("Invalid");
 

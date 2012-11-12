@@ -187,12 +187,12 @@ bool UnwindRegInfo::empty() const {
 void UnwindRegInfo::add(RegNumber reg,
                         DataType type,
                         Location loc) {
-  ASSERT(type >= -32 && type <= 31 &&
-         "UnwindRegInfo has only 6-bits for DataType");
+  ASSERT(type >= -128 && type < 128 &&
+         "UnwindRegInfo has only 8 bits for DataType");
   ASSERT(loc.space == Location::Stack || loc.space == Location::Local);
   ASSERT(loc.offset >= std::numeric_limits<int16_t>::min() &&
          loc.offset <= std::numeric_limits<int16_t>::max() &&
-         "UnwindRegInfo only has 16-bits for location offsets");
+         "UnwindRegInfo only has 16 bits for location offsets");
 
   Data ent;
   ent.dirty = true;

@@ -789,10 +789,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   Func* f = (m_pce == NULL)
     ? m_ue.newFunc(this, unit, m_id, m_line1, m_line2, m_base,
-                   m_past, m_name, m_attrs, m_top, m_docComment,
+                   m_past, m_name, attrs, m_top, m_docComment,
                    m_params.size())
     : m_ue.newFunc(this, unit, preClass, m_line1, m_line2, m_base,
-                   m_past, m_name, m_attrs, m_top, m_docComment,
+                   m_past, m_name, attrs, m_top, m_docComment,
                    m_params.size());
   f->shared()->m_info = m_info;
   for (unsigned i = 0; i < m_params.size(); ++i) {

@@ -4936,7 +4936,7 @@ void EmitterVisitor::emitPostponedMeths() {
     if (Option::WholeProgram) {
       if (!funcScope->isRedeclaring()) {
         attrs = attrs | AttrUnique;
-        if (funcScope->isPersistent()) {
+        if (!funcScope->isVolatile() || funcScope->isPersistent()) {
           attrs = attrs | AttrPersistent;
         }
       }
@@ -5632,7 +5632,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     if (!cNode->isRedeclaring() &&
         !cNode->derivesFromRedeclaring()) {
       attr = attr | AttrUnique;
-      if (cNode->isPersistent()) {
+      if (!cNode->isVolatile()) {
         attr = attr | AttrPersistent;
       }
     }

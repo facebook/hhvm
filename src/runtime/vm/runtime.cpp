@@ -186,20 +186,39 @@ cold:
  * given by 'out'. iter_value_cell* will increment the refcount of the current
  * value if appropriate.
  */
+static NEVER_INLINE
+void iter_value_cell_cold(Iter* iter, TypedValue* out) {
+  ArrayIter& arr = iter->arr();
+  TypedValue* cur = tvToCell(arr.nvSecond());
+  TV_DUP_CELL_NC(cur, out);
+  return;
+}
+
+
 template <bool typeArray>
 static inline void iter_value_cell_impl(Iter* iter, TypedValue* out) {
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
   ASSERT((typeArray && iter->m_itype == Iter::TypeArray) ||
          (!typeArray && iter->m_itype == Iter::TypeIterator));
-  ArrayIter& arr = iter->arr();
+  ArrayIter& arrIter = iter->arr();
   if (typeArray) {
-    TypedValue* cur = arr.nvSecond();
-    if (UNLIKELY(cur->m_type == KindOfRef)) cur = cur->m_data.pref->tv();
+    if (UNLIKELY(!arrIter.hasArrayData())) {
+      iter_value_cell_cold(iter, out);
+      return;
+    }
+    const ArrayData* ad = arrIter.getArrayData();
+    if (UNLIKELY(!IsHphpArray(ad))) {
+      iter_value_cell_cold(iter, out);
+      return;
+    }
+    ssize_t pos = arrIter.getPos();
+    const HphpArray* arr = (HphpArray*)ad;
+    TypedValue* cur = tvToCell(&arr->getElm(pos)->data);
     TV_DUP_CELL_NC(cur, out);
     return;
   }
-  Variant val = arr.second();
+  Variant val = arrIter.second();
   ASSERT(val.getRawType() != KindOfRef);
   TV_DUP_CELL_NC((TypedValue*)&val, out);
 }

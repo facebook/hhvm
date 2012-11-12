@@ -503,6 +503,19 @@ static bool hitIntKey(const HphpArray::Elm* e, int64 ki) {
 
 NEVER_INLINE
 ssize_t /*ElmInd*/ HphpArray::find(int64 ki) const {
+  if (uint64_t(ki) < m_size) {
+    // Try to get at it without dirtying a data cache line.
+    Elm* e = m_data + uint64_t(ki);
+    if (e->data.m_type != HphpArray::KindOfTombstone && hitIntKey(e, ki)) {
+      VM::Stats::inc(VM::Stats::HA_FindIntFast);
+      ASSERT([&] {
+          // Our results had better match the other path
+          FIND_BODY(ki, hitIntKey(&elms[pos], ki));
+      }() == ki);
+      return ki;
+    }
+  }
+  VM::Stats::inc(VM::Stats::HA_FindIntSlow);
   FIND_BODY(ki, hitIntKey(&elms[pos], ki));
 }
 

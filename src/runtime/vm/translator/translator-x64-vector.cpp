@@ -707,103 +707,6 @@ static inline FuncType helperFromKey(const DynLocation& keyDl,
   return localHelper;
 }
 
-void TranslatorX64::emitHphpArrayGetIntKey(const NormalizedInstruction& i,
-                                           PhysReg rBase,
-                                           const DynLocation& keyLoc,
-                                           Location outLoc,
-                                           void* fallbackFunc) {
-  // We're just going to use a heck-ton of scratch regs here. There is
-  // a lot of state to carry around the loop.
-  ScratchReg mask(m_regMap);
-  ScratchReg hash(m_regMap);
-  ScratchReg count(m_regMap);
-  ScratchReg probe(m_regMap);
-  LazyScratchReg rDereffedKey(m_regMap);
-  PhysReg rKey = getReg(keyLoc.location);
-  if (keyLoc.isVariant()) {
-    rDereffedKey.alloc();
-    emitDeref(a, rKey, *rDereffedKey);
-    rKey = *rDereffedKey;
-  }
-  TCA bail = astubs.code.frontier;
-  {
-    // Failure path. A nasty subtelty is that we can't just use diamond
-    // guard here; the helper is going to mutate the stack location that
-    // backs rBase. The contract with the caller is that we're going to
-    // preserve rBase bitwise. So, push and pop rBase around the diamond
-    // guard.
-    PhysRegSaver prs(astubs, RegSet(rBase));
-    DiamondGuard dg(astubs);
-    Stats::emitInc(astubs, Stats::ElemAsm_GetIMiss);
-    EMIT_CALL(astubs, fallbackFunc,
-              R(rBase), V(keyLoc.location), A(outLoc));
-    recordReentrantStubCall(i);
-  }
-  TCA returnFromBail = astubs.code.frontier;
-  astubs.jmp(astubs.code.frontier);
-  {
-    // Hold the register state steady; we might branch into bail.
-    FreezeRegs brr(m_regMap);
-    // Check that rBase is an HphpArray
-    a.    cmp_imm8_disp_reg8(ArrayData::kHphpArray,
-                             ArrayData::getKindOff(), rBase);
-    a.    jnz(bail);
-    a.    load_reg64_disp_reg32(rBase, HphpArray::getMaskOff(), *mask);
-    a.    load_reg64_disp_reg64(rBase, HphpArray::getHashOff(), *hash);
-    // The probe will be a uint32, so just start w/ low-order bits.
-    a.    mov_reg32_reg32(rKey, *probe);
-    emitImmReg(a, 0, *count);
-
-    TCA loopHead = a.code.frontier; // loop:
-    // probe = probe + count
-    a.    lea_reg64_index_scale_disp_reg64(*count, *probe, 1, 0, *probe);
-    a.    and_reg32_reg32(*mask, *probe);
-    a.    load_reg64_index_scale_disp_reg32(*hash, *probe, 4, 0, *probe);
-    // "probe" is now the index
-    PhysReg index = *probe;
-    a.    test_reg32_reg32(index, index);
-    a.    js(bail);
-
-    ASSERT(HphpArray::getElmSize() == 24);
-    // index = index * 3; index = index * 8;
-    a.    lea_reg64_index_scale_disp_reg64(index, index, 2, 0, index);
-    a.    shl_imm32_reg32(3, index);
-
-    a.    add_disp_reg64_reg64(HphpArray::getDataOff(), rBase, index);
-    // index is now the elm pointer. Does the key look right?
-    PhysReg elmPtr = index;
-    a.    cmp_reg64_disp_reg64(rKey, HphpArray::getElmKeyOff(), elmPtr);
-    TCA continue0 = a.code.frontier;
-    a.    jcc8(CC_NZ, continue0); // Try again
-
-    // Is it an int or a string?
-    a.    cmp_imm32_disp_reg32(0, HphpArray::getElmHashOff(), elmPtr);
-    TCA successJmp = a.code.frontier;
-    a.    jcc8(CC_Z, successJmp);
-
-    // Try the loop again.
-    a.patchJcc8(continue0, a.code.frontier);
-    a.    add_imm32_reg32(1, *count);
-    a.    jmp8(loopHead);
-
-    a.patchJcc8(successJmp, a.code.frontier);
-    Stats::emitInc(a, Stats::ElemAsm_GetIHit);
-    if (HphpArray::getElmDataOff() != 0) {
-      a.  add_imm32_reg64(HphpArray::getElmDataOff(), elmPtr);
-    }
-    // Drat. Might be a Ref or a Indirect; for both, we should deref.
-    a.    cmp_imm32_disp_reg32(KindOfRef, TVOFF(m_type), elmPtr);
-    TCA skipDeref = a.code.frontier;
-    a.    jl(skipDeref);
-    emitDeref(a, elmPtr, elmPtr);
-    a.patchJcc(skipDeref, a.code.frontier);
-    // Copy to stack. We're done with mask, so reuse it as a scratch reg.
-    emitCopyToStackRegSafe(a, i, elmPtr, mResultStackOffset(i), *mask);
-    emitIncRefGenericRegSafe(elmPtr, 0, *mask);
-  }
-  astubs.patchJmp(returnFromBail, a.code.frontier);
-}
-
 template <KeyType keyType, bool unboxKey, bool warn, bool define, bool reffy,
           bool unset>
 static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
@@ -2909,7 +2812,6 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
                              PhysReg baseReg,
                              const DynLocation* keyIn,
                              const Location& outLoc) {
-  bool isInline = keyIn->isInt() && !baseInput->isVariant();
   // Let the array helpers handle refcounting logic: key down,
   // return value up.
   SKTRACE(1, i.source, "emitCGetM: committed to unary load\n");
@@ -2922,10 +2824,9 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
     if (isSupportedCGetM_GE(i)) {
       decRefReg = baseReg;
     } else if (baseInput->isVariant()) {
-      ASSERT(!isInline);
       decRefReg = getReg(baseInput->location);
     }
-    if (!isInline && decRefReg != noreg && kCallerSaved.contains(decRefReg)) {
+    if (decRefReg != noreg && kCallerSaved.contains(decRefReg)) {
       stackSavedDecRef = true;
       a.    pushr(decRefReg);
       a.    sub_imm32_reg64(8, unsafe_rsp);
@@ -2951,23 +2852,17 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
     array_getm_s(a, sd, &tv);
     array_getm_s0(a, sd, &tv);
   }
-  if (isInline) {
-    emitHphpArrayGetIntKey(i, baseReg, *keyIn, outLoc, fptr);
-  } else {
-    EMIT_CALL(a, fptr,R(baseReg), V(keyIn->location), A(outLoc));
-    recordReentrantCall(i);
-  }
+  EMIT_CALL(a, fptr,R(baseReg), V(keyIn->location), A(outLoc));
+  recordReentrantCall(i);
   m_regMap.invalidate(outLoc);
 
   if (decRefBase) {
-    // For convenience of decRefs, the helpers return the ArrayData*. The
-    // inline translation left baseReg intact.
-    PhysReg base = isInline ? baseReg : rax;
+    // For convenience of decRefs, the helpers return the ArrayData*.
+    PhysReg base = rax;
     // but if it was boxed or from a global, we need to get the
     // original address back...
     if (decRefReg != noreg) {
       if (stackSavedDecRef) {
-        ASSERT(!isInline);
         a.    add_imm32_reg64(8, unsafe_rsp);
         a.    popr(rax);
       } else {

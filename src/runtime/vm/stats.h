@@ -173,14 +173,15 @@ extern __thread uint64_t tl_tcInstrs;
     STAT(UnitMerge_mergeable_class) \
     STAT(UnitMerge_mergeable_require) \
     STAT(UnitMerge_redo_hoistable) \
-  STAT(ElemAsm_GetIHit) \
-  STAT(ElemAsm_GetIMiss) \
-  STAT(PropAsm_Generic) \
-  STAT(PropAsm_Specialized) \
-  STAT(PropAsm_GenFinal) \
-  /* astubs stats */ \
-  STAT(Astubs_New) \
-  STAT(Astubs_Reused)
+    STAT(PropAsm_Generic) \
+    STAT(PropAsm_Specialized) \
+    STAT(PropAsm_GenFinal) \
+    /* astubs stats */ \
+    STAT(Astubs_New) \
+    STAT(Astubs_Reused) \
+    /* HphpArray */ \
+    STAT(HA_FindIntFast) \
+    STAT(HA_FindIntSlow) \
 
 
 enum StatCounter {

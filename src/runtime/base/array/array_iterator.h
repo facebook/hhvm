@@ -48,7 +48,25 @@ public:
    */
   ArrayIter();
   ArrayIter(const ArrayData* data);
-  ArrayIter(const ArrayData* data, int);
+
+// Special constructor used by the VM. This constructor does not
+// increment the refcount of the specified array.
+  ArrayIter(const ArrayData* data, int) {
+    setArrayData(data);
+    if (data) {
+      m_pos = data->iter_begin();
+    } else {
+      m_pos = ArrayData::invalid_index;
+    }
+  }
+  // This is also a special constructor used by the VM. This
+  // constructor doesn't increment the array's refcount and assumes
+  // that the array is not empty.
+  ArrayIter(const HphpArray* data) {
+    ASSERT(data);
+    setArrayData(data);
+    m_pos = data->getIterBegin();
+  }
   ArrayIter(CArrRef array);
 private:
   template <bool incRef>

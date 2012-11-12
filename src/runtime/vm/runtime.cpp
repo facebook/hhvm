@@ -60,25 +60,57 @@ void print_boolean(int64 val) {
   }
 }
 
-/**
- * new_iter_array creates an iterator for the specified array iff the array is
- * not empty. If new_iter_array creates an iterator, it does not increment the
- * refcount of the specified array. If new_iter_array does not create an
- * iterator, it decRefs the array.
- */
-HOT_FUNC
-int64 new_iter_array(Iter* dest, ArrayData* arr) {
-  TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
-  if (!arr->empty()) {
+int64 new_iter_array_cold(Iter* dest, ArrayData* ad) {
+  if (!ad->empty()) {
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
-    (void) new (&dest->arr()) ArrayIter(arr, 0);
+    (void) new (&dest->arr()) ArrayIter(ad, 0);
     dest->m_itype = Iter::TypeArray;
     return 1LL;
   }
   // We did not transfer ownership of the array to an iterator, so we need
   // to decRef the array.
-  if (arr->decRefCount() == 0) arr->release();
+  if (ad->decRefCount() == 0) ad->release();
+  return 0LL;
+}
+
+/**
+ * new_iter_array creates an iterator for the specified array iff the array is
+ * not empty. If new_iter_array creates an iterator, it does not increment the
+ * refcount of the specified array. If new_iter_array does not create an
+ * iterator, it decRefs the array.
+ *
+ * This function has been split into hot and cold parts. The hot part has
+ * been carefully crafted so that it's a leaf function (after all functions
+ * it calls have been trivially inlined) that then tail calls a cold
+ * version of itself (new_iter_array_cold, defined above). The hot part
+ * should cover the common case, which occurs when the array parameter is
+ * a non-empty HphpArray.
+ * If you make any changes to this function, please keep the hot/cold
+ * splitting in mind, and disasemble the optimized version of the binary
+ * to make sure the hot part is a good-looking leaf function; otherwise,
+ * you're likely to get a performance regression.
+ */
+HOT_FUNC
+int64 new_iter_array(Iter* dest, ArrayData* ad) {
+  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+  if (UNLIKELY(!IsHphpArray(ad))) {
+    return new_iter_array_cold(dest, ad);
+  }
+  HphpArray* arr = (HphpArray*)ad;
+  if (LIKELY(arr->getSize() != 0)) {
+    // We are transferring ownership of the array to the iterator, therefore
+    // we do not need to adjust the refcount.
+    (void) new (&dest->arr()) ArrayIter(arr);
+    dest->m_itype = Iter::TypeArray;
+    return 1LL;
+  }
+  // We did not transfer ownership of the array to an iterator, so we need
+  // to decRef the array.
+  if (UNLIKELY(arr->getCount() == 1)) {
+    return new_iter_array_cold(dest, arr);
+  }
+  arr->decRefCount();
   return 0LL;
 }
 
@@ -131,6 +163,15 @@ int64 new_iter_object(Iter* dest, ObjectData* obj, Class* ctx) {
  * iter_next_array will advance the iterator to point to the next element.
  * If the iterator reaches the end, iter_next_array will free the iterator
  * and will decRef the array.
+ * This function has been split into hot and cold parts. The hot part has
+ * been carefully crafted so that it's a leaf function (after all functions
+ * it calls have been trivially inlined) that then tail calls a cold
+ * version of itself (iter_next_array_cold). The hot part should cover the
+ * common case, which occurs when the array parameter is an HphpArray.
+ * If you make any changes to this function, please keep the hot/cold
+ * splitting in mind, and disasemble the optimized version of the binary
+ * to make sure the hot part is a good-looking leaf function; otherwise,
+ * you're likely to get a performance regression.
  */
 static NEVER_INLINE
 int64 iter_next_array_cold(Iter* iter) {
@@ -185,6 +226,16 @@ cold:
  * iter_value_cell* will store a copy of the current value at the address
  * given by 'out'. iter_value_cell* will increment the refcount of the current
  * value if appropriate.
+ *
+ * This function has been split into hot and cold parts. The hot part has
+ * been carefully crafted so that it's a leaf function (after all functions
+ * it calls have been trivially inlined) that then tail calls a cold
+ * version of itself (new_value_cell_cold). The hot part should cover the
+ * common case, which occurs when the array parameter is an HphpArray.
+ * If you make any changes to this function, please keep the hot/cold
+ * splitting in mind, and disasemble the optimized version of the binary
+ * to make sure the hot part is a good-looking leaf function; otherwise,
+ * you're likely to get a performance regression.
  */
 static NEVER_INLINE
 void iter_value_cell_cold(Iter* iter, TypedValue* out) {

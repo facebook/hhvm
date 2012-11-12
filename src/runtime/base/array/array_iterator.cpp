@@ -51,17 +51,6 @@ ArrayIter::ArrayIter(const ArrayData *data) {
   }
 }
 
-// Special constructor used by the VM. This constructor does not
-// increment the refcount of the specified array.
-ArrayIter::ArrayIter(const ArrayData *data, int) : m_pos(0) {
-  setArrayData(data);
-  if (data) {
-    m_pos = data->iter_begin();
-  } else {
-    m_pos = ArrayData::invalid_index;
-  }
-}
-
 HOT_FUNC
 ArrayIter::ArrayIter(CArrRef array) : m_pos(0) {
   const ArrayData* ad = array.get();

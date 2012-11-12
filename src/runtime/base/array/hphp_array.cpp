@@ -243,19 +243,6 @@ void HphpArray::dumpDebugInfo() const {
 //=============================================================================
 // Iteration.
 
-inline /*ElmInd*/ ssize_t HphpArray::nextElm(Elm* elms,
-                                             /*ElmInd*/ ssize_t ei) const {
-  ASSERT(ei >= -1);
-  ssize_t lastE = m_lastE;
-  while (ei < lastE) {
-    ++ei;
-    if (elms[ei].data.m_type < KindOfTombstone) {
-      return ei;
-    }
-  }
-  return (ssize_t)ElmIndEmpty;
-}
-
 inline /*ElmInd*/ ssize_t HphpArray::prevElm(Elm* elms,
                                              /*ElmInd*/ ssize_t ei) const {
   ASSERT(ei <= (ssize_t)(m_lastE+1));

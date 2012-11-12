@@ -58,6 +58,23 @@ public:
 
   virtual ~HphpArray();
 
+  // unlike ArrayData::size(), this functions doesn't delegate
+  // to the virtual vsize() functions, so its more efficient to
+  // use this when you know you have an HphpArray.
+  ssize_t getSize() const {
+    return m_size;
+  }
+
+  // This behaves the same as iter_begin except that it assumes
+  // this array is not empty and its not virtual.
+  ssize_t getIterBegin() const {
+    ASSERT(!empty());
+    if (LIKELY((m_data[0].data.m_type < KindOfTombstone))) {
+      return 0;
+    }
+    return nextElm(m_data, 0);
+  }
+
   // dropContentsOnFloor twiddles the HphpArray's internal state such
   // that the destructor will do (almost) no work. Only call it if
   // you're 100% confident that the contents of this array are static
@@ -372,7 +389,17 @@ private:
     ElmInd m_inline_hash[sizeof(m_inline_data) / sizeof(ElmInd)];
   };
 
-  ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
+  ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const {
+    ASSERT(ei >= -1);
+    ssize_t lastE = m_lastE;
+    while (ei < lastE) {
+      ++ei;
+      if (elms[ei].data.m_type < KindOfTombstone) {
+        return ei;
+      }
+    }
+    return (ssize_t)ElmIndEmpty;
+  }
   ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
 
   ssize_t /*ElmInd*/ find(int64 ki) const;

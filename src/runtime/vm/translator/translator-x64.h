@@ -858,6 +858,7 @@ private:
     SRNone = 0,
     SRAlign = 1,
     SRInline = 2,
+    SRJmpInsteadOfRet = 4
   };
   TCA emitServiceReq(ServiceRequest, int numArgs, ...);
   TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);

@@ -2861,7 +2861,8 @@ TranslatorX64::emitRetFromInterpretedFrame() {
   // Marshall our own args by hand here.
   astubs.   lea_reg64_disp_reg64(rVmSp, -arBase, serviceReqArgRegs[0]);
   astubs.   mov_reg64_reg64(rVmFp, serviceReqArgRegs[1]);
-  (void) emitServiceReq(SRFlags::SRInline, REQ_POST_INTERP_RET, 0ull);
+  (void) emitServiceReq(SRFlags(SRInline | SRJmpInsteadOfRet),
+                        REQ_POST_INTERP_RET, 0ull);
   return stub;
 }
 
@@ -2881,7 +2882,8 @@ TranslatorX64::emitRetFromInterpretedGeneratorFrame() {
   astubs.    load_reg64_disp_reg64(rContAR, CONTOFF(m_arPtr), rContAR);
 
   astubs.    mov_reg64_reg64(rVmFp, serviceReqArgRegs[1]);
-  (void) emitServiceReq(SRFlags::SRInline, REQ_POST_INTERP_RET, 0ull);
+  (void) emitServiceReq(SRFlags(SRInline | SRJmpInsteadOfRet),
+                        REQ_POST_INTERP_RET, 0ull);
   return stub;
 }
 
@@ -3438,8 +3440,18 @@ TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
   emitImmReg(astubs, req, rdi);
   /*
    * Weird hand-shaking with enterTC: reverse-call a service routine.
+   *
+   * In the case of some special stubs (m_callToExit, m_retHelper), we
+   * have already unbalanced the return stack by doing a ret to
+   * something other than enterTCHelper.  In that case
+   * SRJmpInsteadOfRet indicates to fake the return.
    */
-  astubs.    ret();
+  if (flags & SRFlags::SRJmpInsteadOfRet) {
+    astubs.    popr(rax);
+    astubs.    jmp_reg(rax);
+  } else {
+    astubs.    ret();
+  }
   recordBCInstr(OpServiceRequest, astubs, retval);
   translator_not_reached(astubs);
   return retval;
@@ -11013,8 +11025,8 @@ TranslatorX64::TranslatorX64()
 
   // Call to exit with whatever value the program leaves on
   // the return stack.
-  m_callToExit = emitServiceReq(SRFlags::SRAlign, REQ_EXIT, 0ull);
-
+  m_callToExit = emitServiceReq(SRFlags(SRAlign | SRJmpInsteadOfRet),
+                                REQ_EXIT, 0ull);
   m_retHelper = emitRetFromInterpretedFrame();
   m_genRetHelper = emitRetFromInterpretedGeneratorFrame();
 

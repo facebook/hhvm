@@ -772,11 +772,6 @@ class Translator {
   static const int MaxJmpsTracedThrough = 5;
 
 public:
-  // kFewLocals is the threshold for which can handle generic returns.
-  // There must be at least kFewLocals + 1 locals before we'll do a
-  // generic RetC.
-  static const int kFewLocals = 4;
-
   // kMaxInlineReturnDecRefs is the maximum ref-counted locals to
   // generate an inline return for.
   static const int kMaxInlineReturnDecRefs = 1;

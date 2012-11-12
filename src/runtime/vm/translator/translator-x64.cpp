@@ -1095,8 +1095,10 @@ void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
 }
 
 /*
- * Emit a call to the appropriate destructor for a dynamically typed
- * value.
+ * callDestructor/jumpDestructor --
+ *
+ * Emit a call or jump to the appropriate destructor for a dynamically
+ * typed value.
  *
  * No registers are saved; most translated code should be using
  * emitDecRefGeneric{Reg,} instead of this.
@@ -1107,9 +1109,10 @@ void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
  *     - argNumToRegName[0] should contain the m_data for this value.
  *     - scratch is destoyed.
  */
-static void callDestructor(X64Assembler& a,
-                           PhysReg typeReg,
-                           PhysReg scratch) {
+
+static void lookupDestructor(X64Assembler& a,
+                             PhysReg typeReg,
+                             PhysReg scratch) {
   ASSERT(typeReg != argNumToRegName[0]);
   ASSERT(scratch != argNumToRegName[0]);
   static_assert(BitwiseKindOfString + 1 == KindOfArray &&
@@ -1125,7 +1128,20 @@ static void callDestructor(X64Assembler& a,
                                           sizeof(void(*)()),
                                           0,
                                           scratch);
+}
+
+static void callDestructor(X64Assembler& a,
+                           PhysReg typeReg,
+                           PhysReg scratch) {
+  lookupDestructor(a, typeReg, scratch);
   a.    call_reg(scratch);
+}
+
+static void jumpDestructor(X64Assembler& a,
+                           PhysReg typeReg,
+                           PhysReg scratch) {
+  lookupDestructor(a, typeReg, scratch);
+  a.   jmp_reg(scratch);
 }
 
 void TranslatorX64::emitGenericDecRefHelpers() {
@@ -6236,94 +6252,112 @@ void TranslatorX64::emitReturnVal(
 
 }
 
-void TranslatorX64::emitInlineReturn(bool noThis,
-                                     Location retvalSrcLoc,
-                                     int retvalSrcDisp) {
-  SKTRACE(2, m_curNI->source, "emitting specialized inline return\n");
-
-  ScratchReg rTmp(m_regMap);
-
+void TranslatorX64::emitDecRefThis(const ScratchReg& rTmp) {
+  // If we grouped a $this into the ret we're returning this, but we
+  // didn't incRef it, so we dont have to decRef here.
   const bool mergedThis = m_curNI->wasGroupedWith(OpThis, OpBareThis);
   if (mergedThis) {
-    // There is nothing to do, we're returning this, but we didnt
-    // incRef it, so we dont have to decRef here.
-  } else {
-    // If this is a instance method called on an object or if it is a
-    // pseudomain, we need to decRef $this (if there is one)
-    if (curFunc()->isMethod() && !curFunc()->isStatic()) {
-      // This assert is weaker than it looks; it only checks the invocation
-      // we happen to be translating for. The runtime "assert" is the
-      // unconditional dereference of m_this we emit; if the frame has
-      // neither this nor a class, then m_this will be null and we'll
-      // SEGV.
-      ASSERT(curFrame()->hasThis() || curFrame()->hasClass());
-      // m_this and m_cls share a slot in the ActRec, so we check the
-      // lowest bit (0 -> m_this, 1 -> m_cls)
-      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
-      if (m_curNI->guardedThis) {
-        emitDecRef(*m_curNI, *rTmp, KindOfObject);
-      } else {
-        a.      test_imm8_reg8(1, *rTmp);
-        {
-          JccBlock<CC_NZ> ifZero(a);
-          emitDecRef(*m_curNI, *rTmp, KindOfObject); // this. decref it.
-        }
-      }
-    } else if (curFunc()->isPseudoMain()) {
-      a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
-      a.      shr_imm32_reg64(1, *rTmp); // sets c (from bit 0) and z
-      FreezeRegs ice(m_regMap);
-      {
-        // tests for Not Zero and Not Carry
-        UnlikelyIfBlock ifRealThis(CC_NBE, a, astubs);
-        astubs.    shl_imm32_reg64(1, *rTmp);
-        emitDecRef(astubs, *m_curNI, *rTmp, KindOfObject);
-      }
-    }
+    return;
   }
 
   /*
-   * If this function can possibly use variadic arguments or shared
-   * variable environment, we need to check for it and clear them if
-   * they exist.
+   * In both of these cases we need to write back a null pointer to
+   * the this field in the ActRec, just for the case that a local
+   * might do debug_backtrace and access a freed object.
+   *
+   * In the case of mergedThis it's safe not to do this, because we
+   * are returning a reference on $this from the function so it will
+   * still be alive in any case.
    */
-  boost::scoped_ptr<DiamondReturn> mayUseVVRet;
-  Label extraArgsReturn;
-  if (curFunc()->attrs() & AttrMayUseVV) {
-    SKTRACE(2, m_curNI->source, "emitting mayUseVV in UnlikelyIf\n");
 
-    mayUseVVRet.reset(new DiamondReturn);
-    a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rTmp);
-    a.    test_reg64_reg64(*rTmp, *rTmp);
+  // If this is a instance method called on an object or if it is a
+  // pseudomain, we need to decRef $this (if there is one)
+  if (curFunc()->isMethod() && !curFunc()->isStatic()) {
+    // This assert is weaker than it looks; it only checks the invocation
+    // we happen to be translating for. The runtime "assert" is the
+    // unconditional dereference of m_this we emit; if the frame has
+    // neither this nor a class, then m_this will be null and we'll
+    // SEGV.
+    ASSERT(curFrame()->hasThis() || curFrame()->hasClass());
+    // m_this and m_cls share a slot in the ActRec, so we check the
+    // lowest bit (0 -> m_this, 1 -> m_cls)
+    a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
+    a.      store_imm64_disp_reg64(0, AROFF(m_this), rVmFp);
+    if (m_curNI->guardedThis) {
+      emitDecRef(*m_curNI, *rTmp, KindOfObject);
+    } else {
+      a.     test_imm8_reg8(1, *rTmp);
+      {
+        JccBlock<CC_NZ> ifZero(a);
+        emitDecRef(a, *m_curNI, *rTmp, KindOfObject);
+      }
+    }
+  } else if (curFunc()->isPseudoMain()) {
+    a.      load_reg64_disp_reg64(rVmFp, AROFF(m_this), *rTmp);
+    a.      store_imm64_disp_reg64(0, AROFF(m_this), rVmFp);
+    a.      shr_imm32_reg64(1, *rTmp); // sets c (from bit 0) and z
+    FreezeRegs ice(m_regMap);
     {
-      // TODO: maybe this should be a semi-likely block when there
-      // is a varenv at translation time.
-      UnlikelyIfBlock varEnvCheck(CC_NZ, a, astubs, mayUseVVRet.get());
-      auto& a = astubs;
-
-      a.  test_imm32_reg32(ActRec::kExtraArgsBit, *rTmp);
-      jccBlock<CC_Z>(a, [&] {
-        guardDiamond(a, [&] {
-          EMIT_RCALL(
-            a, *m_curNI,
-            TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
-            R(rVmFp)
-          );
-        });
-        extraArgsReturn.jmp(a);
-      });
-
-      m_regMap.cleanAll();
-      EMIT_RCALL(
-        a, *m_curNI,
-        TCA(getMethodHardwarePtr(&VarEnv::detach)),
-        R(*rTmp),
-        R(rVmFp)
-      );
+      // tests for Not Zero and Not Carry
+      UnlikelyIfBlock ifRealThis(CC_NBE, a, astubs);
+      astubs.    shl_imm32_reg64(1, *rTmp);
+      emitDecRef(astubs, *m_curNI, *rTmp, KindOfObject);
     }
   }
+}
 
-asm_label(a, extraArgsReturn);
+/*
+ * If this function can possibly use variadic arguments or shared
+ * variable environment, we need to check for it and clear them if
+ * they exist.
+ */
+void TranslatorX64::emitVVRet(const ScratchReg& rTmp,
+                              Label& extraArgsReturn,
+                              Label& varEnvReturn) {
+  if (!(curFunc()->attrs() & AttrMayUseVV)) return;
+  SKTRACE(2, m_curNI->source, "emitting mayUseVV in UnlikelyIf\n");
+
+  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), *rTmp);
+  a.    test_reg64_reg64(*rTmp, *rTmp);
+  {
+    // TODO: maybe this should be a semi-likely block when there
+    // is a varenv at translation time.
+    UnlikelyIfBlock varEnvCheck(CC_NZ, a, astubs);
+    auto& a = astubs;
+
+    a.  test_imm32_reg32(ActRec::kExtraArgsBit, *rTmp);
+    jccBlock<CC_Z>(a, [&] {
+      guardDiamond(a, [&] {
+        EMIT_RCALL(
+          a, *m_curNI,
+          TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
+          R(rVmFp)
+        );
+      });
+      extraArgsReturn.jmp(a);
+    });
+
+    m_regMap.cleanAll();
+    EMIT_RCALL(
+      a, *m_curNI,
+      TCA(getMethodHardwarePtr(&VarEnv::detach)),
+      R(*rTmp),
+      R(rVmFp)
+    );
+
+    if (!m_curNI->inlineReturn) {
+      // If it's not inline, the return we're about to jump to expects
+      // the helper has adjusted rVmSp already.
+      a.lea_reg64_disp_reg64(rVmFp, AROFF(m_r), rVmSp);
+    }
+    varEnvReturn.jmp(a);
+  }
+}
+
+void TranslatorX64::emitInlineReturn(Location retvalSrcLoc,
+                                     int retvalSrcDisp) {
+  SKTRACE(2, m_curNI->source, "emitting specialized inline return\n");
+
   ASSERT(curFunc()->numLocals() == (int)m_curNI->inputs.size());
   for (int k = m_curNI->inputs.size() - 1; k >= 0; --k) {
     ASSERT(m_curNI->inputs[k]->location.space == Location::Local);
@@ -6338,28 +6372,6 @@ asm_label(a, extraArgsReturn);
   // Register map is officially out of commission now.
   m_regMap.scrubLoc(retvalSrcLoc);
   m_regMap.smashRegs(kAllRegs);
-
-  mayUseVVRet.reset();
-
-  emitTestSurpriseFlags(a);
-  {
-    UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
-    if (m_curNI->grouped) {
-      // We need to drop the return value on the stack for the event
-      // hook, same as in emitGenericReturn.
-      ScratchReg s(m_regMap);
-      emitReturnVal(astubs, *m_curNI,
-                    rVmSp, retvalSrcDisp, rVmFp, AROFF(m_this), *s);
-    }
-    astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-    emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
-    recordReentrantStubCall(*m_curNI);
-  }
-
-  // The register map on the main line better be empty (everything
-  // smashed) or some of the above DiamondReturns might generate
-  // reconciliation code.
-  ASSERT(m_regMap.empty());
 }
 
 void TranslatorX64::emitGenericReturn(bool noThis, int retvalSrcDisp) {
@@ -6381,14 +6393,15 @@ void TranslatorX64::emitGenericReturn(bool noThis, int retvalSrcDisp) {
                   rVmSp, retvalSrcDisp, rVmFp, AROFF(m_this), *s);
   }
 
-  // Custom calling convention: the argument is in r15.
+  // Custom calling convention: the argument is in rVmSp.
   int numLocals = curFunc()->numLocals();
-  ASSERT(numLocals > kFewLocals);
-  emitImmReg(a, numLocals - kFewLocals, r15);
-  if (noThis || m_curNI->wasGroupedWith(OpThis, OpBareThis)) {
-    emitCall(a, m_freeLocalsNoThisHelper);
+  ASSERT(numLocals >= 1);
+  a.sub_imm32_reg64(0x8, rsp); // For parity.  Callee will do retq $0x8.
+  a.lea_reg64_disp_reg64(rVmFp, -numLocals * sizeof(TypedValue), rVmSp);
+  if (numLocals > kNumFreeLocalsHelpers) {
+    emitCall(a, m_freeManyLocalsHelper);
   } else {
-    emitCall(a, m_freeLocalsThisHelper);
+    emitCall(a, m_freeLocalsHelpers[numLocals - 1]);
   }
   recordReentrantCall(a, *m_curNI);
 }
@@ -6439,19 +6452,20 @@ TranslatorX64::translateRetC(const Tracelet& t,
   int retvalSrcDisp = cellsToBytes(-stackAdjustment);
   ASSERT(cellsToBytes(locPhysicalOffset(retvalSrcLoc)) == retvalSrcDisp);
 
+  Label varEnvReturn;
+  Label extraArgsReturn;
+  {
+    ScratchReg rTmp(m_regMap);
+    emitDecRefThis(rTmp);
+    emitVVRet(rTmp, extraArgsReturn, varEnvReturn);
+  }
+asm_label(a, extraArgsReturn);
   if (m_curNI->inlineReturn) {
-    emitInlineReturn(noThis, retvalSrcLoc, retvalSrcDisp);
+    emitInlineReturn(retvalSrcLoc, retvalSrcDisp);
   } else {
     emitGenericReturn(noThis, retvalSrcDisp);
   }
-
-  /*
-   * We're officially between tracelets now, and the normal register
-   * allocator is not being used.
-   */
   ASSERT(m_regMap.empty());
-  RegSet scratchRegs = kScratchCrossTraceRegs;
-  DumbScratchReg rRetAddr(scratchRegs);
 
   // The (1 + nLocalCells) skips 1 slot for the return value.
   int retvalDestDisp = cellsToBytes(1 + nLocalCells - stackAdjustment) +
@@ -6464,6 +6478,29 @@ TranslatorX64::translateRetC(const Tracelet& t,
       cellsToBytes(nLocalCells - stackAdjustment);
     retvalDestDisp = 0;
   }
+
+asm_label(a, varEnvReturn);
+  emitTestSurpriseFlags(a);
+  {
+    UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
+    if (m_curNI->grouped) {
+      // We need to drop the return value on the stack for the event
+      // hook, same as in emitGenericReturn.
+      ScratchReg s(m_regMap);
+      emitReturnVal(astubs, *m_curNI,
+                    rVmSp, retvalSrcDisp, rVmFp, AROFF(m_this), *s);
+    }
+    astubs.mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+    emitCall(astubs, (TCA)&EventHook::FunctionExit, true);
+    recordReentrantStubCall(*m_curNI);
+  }
+
+  /*
+   * We're officially between tracelets now, and the normal register
+   * allocator is not being used.
+   */
+  RegSet scratchRegs = kScratchCrossTraceRegs;
+  DumbScratchReg rRetAddr(scratchRegs);
 
   /*
    * Having gotten everything we care about out of the current frame
@@ -10891,131 +10928,72 @@ TranslatorX64::translateTracelet(const Tracelet& t) {
 
 /*
  * Defines functions called by emitGenericReturn.
- *
- * The number of locals must be greater than kFewLocals.  The
- * difference between NumLocals and kFewLocals is passed in r15.
  */
 void TranslatorX64::emitFreeLocalsHelpers() {
-  auto const rNumExtraLocals = r15;
-
-  Label freeLocals;
-  Label varEnvOrEArgs;
-  Label surprise;
+  Label doRelease;
+  Label release;
   Label loopHead;
-  Label releaseThis;
-  Label finished;
-  Label afterThisCheck;
+
+  auto const rIter = rbx;
+  auto const rFinished = r13;
+  auto const rType = rsi;
+  auto const rData = rdi;
 
   moveToAlign(a, kNonFallthroughAlign);
-  m_freeLocalsThisHelper = a.code.frontier;
+asm_label(a, release);
+  a.    load_reg64_disp_reg64(rIter, TVOFF(m_data), rData);
+  a.    cmp_imm32_disp_reg32(RefCountStaticValue, TVOFF(_count), rData);
+  jccBlock<CC_Z>(a, [&] {
+    a.  sub_imm32_disp_reg32(1, TVOFF(_count), rData);
+    doRelease.jcc8(a, CC_Z);
+  });
+  a.    ret();
+asm_label(a, doRelease);
+  a.    store_imm32_disp_reg(0, TVOFF(m_type), rIter);
+  jumpDestructor(a, rType, rax);
 
-  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), rdi);
-  a.    test_reg64_reg64(rdi, rdi);
-  afterThisCheck.jcc8(a, CC_Z);
-  a.    test_imm32_reg64(0x1, rdi);
-  afterThisCheck.jcc8(a, CC_NZ);
-  a.    store_imm64_disp_reg64(0, AROFF(m_this), rVmFp);
-  a.    sub_imm32_disp_reg32(1, TVOFF(_count), rdi);
-  releaseThis.jcc(a, CC_Z);
-
-  moveToAlign(a, kJmpTargetAlign, false /* unreachable */);
-asm_label(a, afterThisCheck);
-  m_freeLocalsNoThisHelper = a.code.frontier;
-
-  // TODO: we could skip this check when there's no AttrMayUseVV.
-  auto const rVarEnv = argNumToRegName[0];
-  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_varEnv), rVarEnv);
-  a.    test_reg64_reg64(rVarEnv, rVarEnv);
-  varEnvOrEArgs.jcc(a, CC_NZ);
-
-asm_label(a, freeLocals);
-  // TODO: we should be able to use rbx here since we do the rbx
-  // adjustment below.
-  auto const rIter = r14;
-  auto const rZero = r15;
-  auto const rFinished = r13;
-  static_assert(1 << 4 == sizeof(TypedValue), "");
+  a.    nop(); // makes loopHead jump-target aligned.
+  m_freeManyLocalsHelper = a.code.frontier;
   a.    lea_reg64_disp_reg64(
           rVmFp,
-          kFewLocals * -int(sizeof(TypedValue)),
+          kNumFreeLocalsHelpers * -int(sizeof(TypedValue)),
           rFinished);
-  a.    mov_reg64_reg64(rFinished, rIter);
-  a.    shl_reg64(4, rNumExtraLocals);
-  a.    sub_reg64_reg64(rNumExtraLocals, rIter);
-  a.    xor_reg32_reg32(rZero, rZero);
-  static_assert(KindOfUninit == 0, "KindOfUninit must be zero");
 
-  // A frame is necessary for tvDecRefHelper, or other calls here (in
-  // the cold paths below) that may reenter and do fixups.  We've
-  // delayed creating it until here so we could use rVmFp above.
-  a.    pushr(rbp);
-  a.    mov_reg64_reg64(rsp, rbp);
+  auto emitDecLocal = [&] {
+    Label skipDecRef;
 
-  auto emitDecLocal = [&] (PhysReg base, int num) {
-    auto disp = num * sizeof(TypedValue);
-
-    a.  load_reg64_disp_reg64(base, disp + TVOFF(m_type), rdi);
-    a.  cmp_imm32_reg32(KindOfRefCountThreshold, rdi);
-    jccBlock<CC_LE>(a, [&] {
-      a.load_reg64_disp_reg64(base, disp + TVOFF(m_data), rsi);
-      a.store_reg32_disp_reg64(rZero, disp + TVOFF(m_type), base);
-      a.call(TCA(tvDecRefHelper));
-    });
+    a.    load_reg64_disp_reg32(rIter, TVOFF(m_type), rType);
+    a.    cmp_imm32_reg32(KindOfRefCountThreshold, rType);
+    skipDecRef.jcc8(a, CC_LE);
+    release.call(a);
+    recordIndirectFixup(a.code.frontier, 0);
+  asm_label(a, skipDecRef);
   };
 
-  // Loop for the first few locals, but unroll the final kFewLocals.
+  // Loop for the first few locals, but unroll the final
+  // kNumFreeLocalsHelpers.
 asm_label(a, loopHead);
-  emitDecLocal(rIter, 0);
+  emitDecLocal();
   a.    add_imm32_reg64(sizeof(TypedValue), rIter);
   a.    cmp_reg64_reg64(rIter, rFinished);
   loopHead.jcc8(a, CC_NZ);
-  for (int i = 0; i < kFewLocals; ++i) {
-    emitDecLocal(rFinished, i);
+
+  for (int i = 0; i < kNumFreeLocalsHelpers; ++i) {
+    m_freeLocalsHelpers[kNumFreeLocalsHelpers - i - 1] = a.code.frontier;
+    TRACE(1, "STUB m_freeLocalsHelpers[%d] = %p\n",
+          kNumFreeLocalsHelpers - i - 1, a.code.frontier);
+    emitDecLocal();
+    if (i != kNumFreeLocalsHelpers - 1) {
+      a.add_imm32_reg64(sizeof(TypedValue), rIter);
+    }
   }
 
-asm_label(a, finished);
-  a.    popr(rbp);
-  a.    lea_reg64_disp_reg64(rVmFp, AROFF(m_r), rVmSp);
-  emitTestSurpriseFlags(a);
-  surprise.jcc8(a, CC_NZ);
-  a.    ret();
+  static_assert(rIter == rVmSp, "");
+  a.    add_imm32_reg64(AROFF(m_r) + sizeof(TypedValue), rVmSp);
+  a.    ret(8);
 
-  TRACE(1, "STUB freeLocals hot path: %zu (this), %zu (no this) bytes\n",
-        size_t(a.code.frontier - m_freeLocalsThisHelper),
-        size_t(a.code.frontier - m_freeLocalsNoThisHelper));
-
-asm_label(a, varEnvOrEArgs);
-  a.    test_imm32_reg64(ActRec::kExtraArgsBit, rVarEnv);
-  jccBlock<CC_Z>(a, [&] {
-    a.  mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-
-    a.  pushr(rbp);
-    a.  mov_reg64_reg64(rsp, rbp);
-    a.  call(TCA(static_cast<void (*)(ActRec*)>(&ExtraArgs::deallocate)));
-    a.  popr(rbp);
-
-    freeLocals.jmp(a);
-  });
-  a.    mov_reg64_reg64(rVmFp, argNumToRegName[1]);
-  a.    pushr(rbp);
-  a.    mov_reg64_reg64(rsp, rbp);
-  a.    call(TCA(getMethodHardwarePtr(&VarEnv::detach)));
-  finished.jmp8(a);
-
-asm_label(a, releaseThis);
-  a.    pushr(rbp);
-  a.    mov_reg64_reg64(rsp, rbp);
-  a.    call(TCA(getMethodHardwarePtr(&ObjectData::release)));
-  a.    popr(rbp);
-  afterThisCheck.jmp(a);
-
-asm_label(a, surprise);
-  a.    mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-  a.    jmp(TCA(EventHook::FunctionExit));
-
-  TRACE(1, "STUB freeLocals helpers: %zu (this), %zu (nothis) bytes\n",
-           size_t(a.code.frontier - m_freeLocalsThisHelper),
-           size_t(a.code.frontier - m_freeLocalsNoThisHelper));
+  TRACE(1, "STUB freeLocals helpers: %zu bytes\n",
+           size_t(a.code.frontier - m_freeManyLocalsHelper));
 }
 
 static const size_t kASize = 512 << 20;

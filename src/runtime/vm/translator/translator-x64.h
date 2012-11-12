@@ -74,6 +74,7 @@ extern "C" TCA funcBodyHelper(ActRec* fp);
 
 struct Call;
 struct TReqInfo;
+struct Label;
 
 class TranslatorX64 : public Translator
                     , SpillFill
@@ -126,8 +127,11 @@ class TranslatorX64 : public Translator
   TCA                    m_interceptHelper;
   TCA                    m_defClsHelper;
   TCA                    m_funcPrologueRedispatch;
-  TCA                    m_freeLocalsNoThisHelper;
-  TCA                    m_freeLocalsThisHelper;
+
+  static const int kNumFreeLocalsHelpers = 9;
+  TCA                    m_freeManyLocalsHelper;
+  TCA                    m_freeLocalsHelpers[kNumFreeLocalsHelpers];
+
   DataBlock              m_globalData;
   size_t                 m_irAUsage;
   size_t                 m_irAstubsUsage;
@@ -788,9 +792,10 @@ private:
                    SrcRec& fail);
   void checkRefs(Asm&, const SrcKey&, const RefDeps&, SrcRec&);
 
-  void emitInlineReturn(bool noThis,
-                        Location retvalSrcLoc,
-                        int retvalSrcDisp);
+  void emitDecRefThis(const ScratchReg& tmpReg);
+  void emitVVRet(const ScratchReg&, Label& extraArgsReturn,
+                 Label& varEnvReturn);
+  void emitInlineReturn(Location retvalSrcLoc, int retvalSrcDisp);
   void emitGenericReturn(bool noThis, int retvalSrcDisp);
   void dumpStack(const char* msg, int offset) const;
 

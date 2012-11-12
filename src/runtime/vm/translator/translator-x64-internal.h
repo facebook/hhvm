@@ -453,6 +453,7 @@ struct Label : private boost::noncopyable {
       case Branch::Jmp8:  ji.a->patchJmp8(ji.addr, m_address); break;
       case Branch::Jcc:   ji.a->patchJcc(ji.addr, m_address);  break;
       case Branch::Jcc8:  ji.a->patchJcc8(ji.addr, m_address); break;
+      case Branch::Call:  ji.a->patchCall(ji.addr, m_address); break;
       }
     }
   }
@@ -477,6 +478,31 @@ struct Label : private boost::noncopyable {
     a.jcc8(cc, m_address ? m_address : a.code.frontier);
   }
 
+  void call(X64Assembler& a) {
+    addJump(&a, Branch::Call);
+    a.call(m_address ? m_address : a.code.frontier);
+  }
+
+  void jmpAuto(X64Assembler& a) {
+    ASSERT(m_address);
+    auto delta = m_address - (a.code.frontier + 2);
+    if (deltaFits(delta, sz::byte)) {
+      jmp8(a);
+    } else {
+      jmp(a);
+    }
+  }
+
+  void jccAuto(X64Assembler& a, ConditionCode cc) {
+    ASSERT(m_address);
+    auto delta = m_address - (a.code.frontier + 2);
+    if (deltaFits(delta, sz::byte)) {
+      jcc8(a, cc);
+    } else {
+      jcc(a, cc);
+    }
+  }
+
   friend void asm_label(X64Assembler& a, Label& l) {
     ASSERT(!l.m_address && !l.m_a && "Label was already set");
     l.m_a = &a;
@@ -488,7 +514,8 @@ private:
     Jcc,
     Jcc8,
     Jmp,
-    Jmp8
+    Jmp8,
+    Call
   };
 
   struct JumpInfo {

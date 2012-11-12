@@ -1407,6 +1407,12 @@ public:
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
+  inline void patchCall(CodeAddress call, CodeAddress dest) {
+    ASSERT(call[0] == 0xE8);
+    ssize_t diff = dest - (call + 5);
+    *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
+  }
+
   inline void mov_reg8_reg64_unsigned(register_name_t rsrc,
                                       register_name_t rdest) {
     emitRR(instr_movzbq, rsrc, rdest);
@@ -1598,6 +1604,9 @@ public:
   }
   inline void ret() {
     emit(instr_ret);
+  }
+  void ret(int pop) {
+    emitI(instr_ret, pop, sz::word);
   }
   inline void nop() {
     emit(instr_nop);

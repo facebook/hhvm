@@ -1,0 +1,49 @@
+array(3) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+
+    ["line"]=>
+    int(8)
+    ["function"]=>
+
+    ["class"]=>
+
+    ["object"]=>
+    object(Tracer)#2 (0) {
+    }
+    ["type"]=>
+
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(6) {
+    ["file"]=>
+
+    ["line"]=>
+    int(18)
+    ["function"]=>
+
+    ["class"]=>
+
+    ["type"]=>
+
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+
+    ["line"]=>
+    int(20)
+    ["function"]=>
+
+    ["args"]=>
+    array(0) {
+    }
+  }
+}

@@ -1913,9 +1913,6 @@ void Translator::getInputs(Tracelet& t,
 
   const bool wantInlineReturn = [&] {
     auto localCount = curFunc()->numLocals();
-    if (localCount <= kFewLocals) {
-      return true;
-    }
     int numRefCounted = 0;
     for (int i = 0; i < localCount; ++i) {
       numRefCounted +=

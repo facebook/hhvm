@@ -343,45 +343,34 @@ void create_generator(Parser *_p, Token &out, Token &params,
 
 void transform_yield(Parser *_p, Token &stmts, int index,
                      Token *expr, bool assign) {
+  // hphp_pack_continuation(v___cont__, label, value)
   Token update;
   {
-    // hphp_pack_continuation(v___cont__, label, value)
-
     Token name;    name.setText(CONTINUATION_OBJECT_NAME);
     Token var;     _p->onSynthesizedVariable(var, name);
-    Token param1;  _p->onCallParam(param1, NULL, var, false);
+    Token param0;  _p->onCallParam(param0, NULL, var, false);
 
     Token snum;    snum.setText(boost::lexical_cast<std::string>(index));
     Token num;     _p->onScalar(num, T_LNUMBER, snum);
-                   _p->onCallParam(param1, &param1, num, false);
+    Token param1;  _p->onCallParam(param1, &param0, num, false);
 
-    if (expr) {
-      _p->onCallParam(param1, &param1, *expr, false);
-    } else {
-      Token tnull; scalar_null(_p, tnull);
-      _p->onCallParam(param1, &param1, tnull, false);
-    }
+    Token param2;  _p->onCallParam(param2, &param1, *expr, false);
 
     Token cname;   cname.setText("hphp_pack_continuation");
-    Token call;    _p->onCall(call, false, cname, param1, NULL, true);
+    Token call;    _p->onCall(call, false, cname, param2, NULL, true);
     _p->onExpStatement(update, call);
   }
 
+  // return
+  Token ret;     _p->onReturn(ret, NULL, false);
+
+  // __yield__N:
   Token lname;   lname.setText(YIELD_LABEL_PREFIX +
                                boost::lexical_cast<std::string>(index));
   Token label;   _p->onLabel(label, lname);
                  _p->addLabel(lname.text(), _p->getLocation(), &label);
 
   Token stmts0;  _p->onStatementListStart(stmts0);
-
-  if (!expr) {
-    Token mcall;   prepare_continuation_call(_p, mcall, "done");
-    Token sdone;   _p->onExpStatement(sdone, mcall);
-    Token tmp;     _p->addStatement(tmp, stmts0, sdone);
-    stmts0 = tmp;
-  }
-
-  Token ret;     _p->onReturn(ret, NULL, false);
   Token stmts1;  _p->addStatement(stmts1, stmts0, update);
   Token stmts2;  _p->addStatement(stmts2, stmts1, ret);
   Token stmts3;  _p->addStatement(stmts3, stmts2, label);
@@ -394,7 +383,20 @@ void transform_yield(Parser *_p, Token &stmts, int index,
     Token stmts4; _p->addStatement(stmts4, stmts3, fstmt);
     _p->finishStatement(stmts, stmts4); stmts = 1;
   }
+}
 
+void transform_yield_break(Parser *_p, Token &out) {
+  // hphp_continuation_done()
+  Token mcall;   prepare_continuation_call(_p, mcall, "done");
+  Token done;    _p->onExpStatement(done, mcall);
+
+  // return
+  Token ret;     _p->onReturn(ret, NULL, false);
+
+  Token stmts0;  _p->onStatementListStart(stmts0);
+  Token stmts1;  _p->addStatement(stmts1, stmts0, done);
+  Token stmts2;  _p->addStatement(stmts2, stmts1, ret);
+  _p->finishStatement(out, stmts2); out = 1;
 }
 
 // convert a foreach (by ref or not) to a normal for statement with
@@ -1103,7 +1105,7 @@ statement:
   | T_CONTINUE expr ';'                { _p->onContinue($$, &$2);}
   | T_RETURN ';'                       { _p->onReturn($$, NULL);}
   | T_RETURN expr ';'                  { _p->onReturn($$, &$2);}
-  | T_YIELD T_BREAK ';'                { _p->onYield($$, NULL, false);}
+  | T_YIELD T_BREAK ';'                { _p->onYieldBreak($$);}
   | T_YIELD expr ';'                   { _p->onYield($$, &$2, false);}
   | variable '=' T_YIELD expr ';'      { on_yield_assign(_p, $$, $1, &$4);}
   | T_LIST '(' assignment_list ')'

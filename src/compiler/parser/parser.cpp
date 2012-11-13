@@ -118,6 +118,7 @@ extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token *attr);
 extern void transform_yield(Parser *_p, Token &stmts, int index,
                             Token *expr, bool assign);
+extern void transform_yield_break(Parser *_p, Token &out);
 extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
                               Token &value, Token &stmt, int count,
                               bool hasValue, bool byRef);
@@ -723,8 +724,7 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
     pushComment();
   }
   newScope();
-  m_generators.push_back(0);
-  m_foreaches.push_back(0);
+  m_funcContexts.push_back(FunctionContext());
   m_prependingStatements.push_back(vector<StatementPtr>());
   m_funcName = name.text();
   m_hasCallToGetArgs.push_back(false);
@@ -781,10 +781,11 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   string comment = popComment();
   LocationPtr loc = popFuncLocation();
 
-  int yieldCount = m_generators.back();
-  m_generators.pop_back();
-  m_foreaches.pop_back();
+  FunctionContext funcContext = m_funcContexts.back();
+  m_funcContexts.pop_back();
   m_prependingStatements.pop_back();
+
+  ASSERT(!funcContext.isGenerator || !funcContext.isNotGenerator);
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -793,12 +794,12 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
 
   FunctionStatementPtr func;
 
-  if (yieldCount > 0) {
+  if (funcContext.isGenerator) {
     AnonFuncKind fKind = name->text().empty() ?
       ContinuationFromClosure : Continuation;
     const string &closureName = getAnonFuncName(fKind);
     Token new_params;
-    prepare_generator(this, stmt, new_params, yieldCount);
+    prepare_generator(this, stmt, new_params, funcContext.numYields);
 
     func = NEW_STMT(FunctionStatement, ref->num(), closureName,
                     dynamic_pointer_cast<ExpressionList>(new_params->exp),
@@ -1086,10 +1087,11 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   string comment = popComment();
   LocationPtr loc = popFuncLocation();
 
-  int yieldCount = m_generators.back();
-  m_generators.pop_back();
-  m_foreaches.pop_back();
+  FunctionContext funcContext = m_funcContexts.back();
+  m_funcContexts.pop_back();
   m_prependingStatements.pop_back();
+
+  ASSERT(!funcContext.isGenerator || !funcContext.isNotGenerator);
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -1097,10 +1099,10 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   fixStaticVars();
 
   MethodStatementPtr mth;
-  if (yieldCount > 0) {
+  if (funcContext.isGenerator) {
     const string &closureName = getAnonFuncName(ParserBase::Continuation);
     Token new_params;
-    prepare_generator(this, stmt, new_params, yieldCount);
+    prepare_generator(this, stmt, new_params, funcContext.numYields);
     ModifierExpressionPtr exp2 = Construct::Clone(exp);
     mth = NEW_STMT(MethodStatement, exp2, ref->num(), closureName,
                    dynamic_pointer_cast<ExpressionList>(new_params->exp),
@@ -1313,12 +1315,10 @@ void Parser::onContinue(Token &out, Token *expr) {
 
 void Parser::onReturn(Token &out, Token *expr, bool checkYield /* = true */) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
-  if (checkYield && !m_generators.empty()) {
-    if (m_generators.back() > 0) {
+  if (checkYield && !m_funcContexts.empty()) {
+    if (!m_funcContexts.back().setIsNotGenerator()) {
       if (!hhvm) Compiler::Error(InvalidYield, out->stmt);
       PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
-    } else {
-      m_generators.back() = -1;
     }
   }
 }
@@ -1332,28 +1332,31 @@ static void invalidYield(LocationPtr loc) {
   Compiler::Error(Compiler::InvalidYield, exp);
 }
 
-void Parser::onYield(Token &out, Token *expr, bool assign) {
+bool Parser::setIsGenerator() {
   if (!Option::EnableHipHopSyntax) {
     PARSE_ERROR("Yield is not enabled");
-    return;
-  }
-  if (m_generators.empty()) {
-    invalidYield(getLocation());
-    PARSE_ERROR("Yield can only be used inside a function");
-    return;
+    return false;
   }
 
-  if (m_generators.back() == -1) {
+  if (m_funcContexts.empty()) {
+    invalidYield(getLocation());
+    PARSE_ERROR("Yield can only be used inside a function");
+    return false;
+  }
+
+  if (!m_funcContexts.back().setIsGenerator()) {
     invalidYield(getLocation());
     PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
-    return;
+    return false;
   }
+
   if (!m_clsName.empty()) {
     if (strcasecmp(m_funcName.c_str(), m_clsName.c_str()) == 0) {
       invalidYield(getLocation());
       PARSE_ERROR("'yield' is not allowed in potential constructors");
-      return;
+      return false;
     }
+
     if (m_funcName[0] == '_' && m_funcName[1] == '_') {
       const char *fname = m_funcName.c_str() + 2;
       if (!strcasecmp(fname, "construct") ||
@@ -1368,17 +1371,29 @@ void Parser::onYield(Token &out, Token *expr, bool assign) {
         invalidYield(getLocation());
         PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
                     "magic methods");
-        return;
+        return false;
       }
     }
   }
-  int index = ++m_generators.back();
 
-  Token stmts;
-  transform_yield(this, stmts, index, expr, assign);
+  return true;
+}
 
-  out.reset();
-  out->stmt = stmts->stmt;
+void Parser::onYield(Token &out, Token *expr, bool assign) {
+  if (!setIsGenerator()) {
+    return;
+  }
+
+  int index = ++m_funcContexts.back().numYields;
+  transform_yield(this, out, index, expr, assign);
+}
+
+void Parser::onYieldBreak(Token &out) {
+  if (!setIsGenerator()) {
+    return;
+  }
+
+  transform_yield_break(this, out);
 }
 
 void Parser::onGlobal(Token &out, Token &expr) {
@@ -1450,8 +1465,8 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
   }
   checkAssignThis(name);
   checkAssignThis(value);
-  if (!m_generators.empty() && m_generators.back() > 0) {
-    int cnt = ++m_foreaches.back();
+  if (!m_funcContexts.empty() && m_funcContexts.back().isGenerator) {
+    int cnt = ++m_funcContexts.back().numForeaches;
     // TODO only transform foreach with yield in its body.
     transform_foreach(this, out, arr, name, value, stmt, cnt, value->exp,
                       value->exp ? value->num() == 1 : name->num() == 1);

@@ -23532,6 +23532,12 @@ bool TestCodeRun::TestYield() {
         "int(124)\n"
        );
 
+  MVCRO("<?php function fruit() { echo \"sadpanda, no fruit\"; yield break; } "
+        "foreach (fruit() as $fruit) { var_dump($fruit);} ",
+
+        "sadpanda, no fruit"
+       );
+
   MVCRO("<?php function fruit() { $a = 123; yield $a;yield break;yield ++$a;} "
         "foreach (fruit() as $fruit) { var_dump($fruit);} ",
 

@@ -207,6 +207,7 @@ public:
   void onContinue(Token &out, Token *expr);
   void onReturn(Token &out, Token *expr, bool checkYield = true);
   void onYield(Token &out, Token *expr, bool assign);
+  void onYieldBreak(Token &out);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
   void onStatic(Token &out, Token &expr);
@@ -235,13 +236,39 @@ public:
   virtual TStatementPtr extractStatement(ScannerToken *stmt);
 
   FileScopePtr getFileScope() { return m_file; }
+
 private:
+  struct FunctionContext {
+    FunctionContext()
+      : isNotGenerator(false)
+      , isGenerator(false)
+      , numYields(0)
+      , numForeaches(0)
+    {}
+
+    // mark this function as generator; returns true on success
+    bool setIsGenerator() {
+      if (!isNotGenerator) isGenerator = true;
+      return !isNotGenerator;
+    }
+
+    // mark this function as non-generator; returns true on success
+    bool setIsNotGenerator() {
+      if (!isGenerator) isNotGenerator = true;
+      return !isGenerator;
+    }
+
+    bool isNotGenerator;  // function determined to not be a generator
+    bool isGenerator;     // function determined to be a generator
+    int numYields;        // number of plain yield statements seen so far
+    int numForeaches;     // number of foreach statements seen so far
+ };
+
   AnalysisResultPtr m_ar;
   FileScopePtr m_file;
   std::vector<std::string> m_comments; // for docComment stack
   std::vector<BlockScopePtrVec> m_scopes;
-  std::vector<int> m_generators;
-  std::vector<int> m_foreaches;
+  std::vector<FunctionContext> m_funcContexts;
   std::vector<std::vector<StatementPtr> > m_prependingStatements;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;
@@ -262,6 +289,8 @@ private:
 
   void newScope();
   void completeScope(BlockScopePtr inner);
+
+  bool setIsGenerator();
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);

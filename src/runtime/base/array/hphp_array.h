@@ -540,6 +540,11 @@ inline bool IsHphpArray(const ArrayData* ad) {
 // VM runtime support functions.
 namespace VM {
 
+enum ArrayGetFlags {
+  DecRefKey = 1,
+  CheckInts = 2
+};
+
 ArrayData* array_setm_ik1_iv(TypedValue* cell, ArrayData* ha, int64 key,
                              int64 value);
 ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64 key,
@@ -562,16 +567,10 @@ ArrayData* array_setm_wk1_v(TypedValue* cell, ArrayData* ad,
                             TypedValue* value);
 ArrayData* array_setm_wk1_v0(TypedValue* cell, ArrayData* ad,
                              TypedValue* value);
-ArrayData* array_getm_i(void* hphpArray, int64 key, TypedValue* out)
-  FLATTEN;
-ArrayData* array_getm_s(void* hphpArray, StringData* sd, TypedValue* out)
-  FLATTEN;
-ArrayData* array_getm_s0(void* hphpArray, StringData* sd, TypedValue* out)
-  FLATTEN;
-ArrayData* array_getm_s_fast(void* hphpArray, StringData* sd, TypedValue* out)
-  FLATTEN;
-ArrayData* array_getm_s0_fast(void* hphpArray, StringData* sd, TypedValue* out)
-  FLATTEN;
+ArrayData* array_getm_i(void* hphpArray, int64 key, TypedValue* out);
+
+ArrayData* array_getm_s(ArrayData* a, StringData* key, TypedValue* out,
+                        int flags);
 void       non_array_getm_i(TypedValue* base, int64 key, TypedValue* out);
 void       non_array_getm_s(TypedValue* base, StringData* key, TypedValue* out);
 void       array_getm_is(ArrayData* ad, int64 ik, StringData* sd,

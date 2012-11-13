@@ -2833,26 +2833,25 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
     }
   }
 
-  void* fptr;
-  if (keyIn->isInt()) {
-    fptr = (void*)array_getm_i;
-  } else {
-    ASSERT(keyIn->isString());
-    bool decRefKey = keyIn->isStack();
-    bool doIntCheck = !i.hasConstImm;
-    fptr = (decRefKey ?
-            (doIntCheck ? (void*)array_getm_s : (void*)array_getm_s_fast) :
-            (doIntCheck ? (void*)array_getm_s0 : (void*)array_getm_s0_fast));
+  int flags = 0;
+  if (keyIn->isString()) {
+    if (keyIn->isStack()) flags |= DecRefKey;
+    if (!i.hasConstImm) flags |= CheckInts;
   }
   if (false) { // type-check
-    void *a = NULL;
+    ArrayData *a = NULL;
     TypedValue tv;
     array_getm_i(a, 1, &tv);
     StringData *sd = NULL;
-    array_getm_s(a, sd, &tv);
-    array_getm_s0(a, sd, &tv);
+    array_getm_s(a, sd, &tv, 0);
   }
-  EMIT_CALL(a, fptr,R(baseReg), V(keyIn->location), A(outLoc));
+  if (keyIn->isInt()) {
+    EMIT_CALL(a, (void*)array_getm_i, R(baseReg), V(keyIn->location),
+              A(outLoc));
+  } else {
+    EMIT_CALL(a, (void*)array_getm_s, R(baseReg), V(keyIn->location),
+              A(outLoc), IMM(flags));
+  }
   recordReentrantCall(i);
   m_regMap.invalidate(outLoc);
 

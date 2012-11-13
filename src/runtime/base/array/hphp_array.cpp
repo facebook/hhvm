@@ -2001,16 +2001,9 @@ array_getm_i(void* dptr, int64 key, TypedValue* out) {
   return ad;
 }
 
-enum GetFlags {
-  DecRefKey = 1,
-  CheckInts = 2,
-};
-
-static ArrayData*
-array_getm_impl(ArrayData* ad, StringData* sd, int flags, TypedValue* out)
-  NEVER_INLINE;
-ArrayData* array_getm_impl(ArrayData* ad, StringData* sd,
-                           int flags, TypedValue* out) {
+NEVER_INLINE
+ArrayData* array_getm_s(ArrayData* ad, StringData* sd, TypedValue* out,
+                           int flags) {
   bool drKey = flags & DecRefKey;
   bool checkInts = flags & CheckInts;
   int64 ikey;
@@ -2022,39 +2015,6 @@ ArrayData* array_getm_impl(ArrayData* ad, StringData* sd,
   TRACE(2, "%s: (%p) <- %p[\"%s\"@sd%p]\n", __FUNCTION__,
         out, ad, sd->data(), sd);
   return ad;
-}
-
-/**
- * array_getm_s: conservative unary string key.
- */
-ArrayData*
-array_getm_s(void* dptr, StringData* sd, TypedValue* out) {
-  return array_getm_impl((ArrayData*)dptr, sd, DecRefKey | CheckInts, out);
-}
-
-/**
- * array_getm_s0: unary string key where we know there is no need
- * to decRef the key.
- */
-ArrayData*
-array_getm_s0(void* dptr, StringData* sd, TypedValue* out) {
-  return array_getm_impl((ArrayData*)dptr, sd, CheckInts, out);
-}
-
-/**
- * array_getm_s_fast:
- * array_getm_s0:
- *
- *   array_getm_s[0] but without the integer check on the key
- */
-ArrayData*
-array_getm_s_fast(void* dptr, StringData* sd, TypedValue* out) {
-  return array_getm_impl((ArrayData*)dptr, sd, DecRefKey, out);
-}
-
-ArrayData*
-array_getm_s0_fast(void* dptr, StringData* sd, TypedValue* out) {
-  return array_getm_impl((ArrayData*)dptr, sd, 0, out);
 }
 
 template<DataType keyType, bool decRefBase>
@@ -2093,7 +2053,7 @@ array_getm_is_impl(ArrayData* ad, int64 ik, StringData* sd, TypedValue* out,
     non_array_getm<KindOfString, false>(base2, (int64)sd, out);
   } else {
     ad = base2->m_data.parr;
-    array_getm_impl(ad, sd, CheckInts | (decRefKey ? DecRefKey : 0), out);
+    array_getm_s(ad, sd, out, CheckInts | (decRefKey ? DecRefKey : 0));
   }
 }
 

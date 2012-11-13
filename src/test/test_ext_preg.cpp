@@ -211,6 +211,18 @@ bool TestExtPreg::test_preg_replace() {
        "The slow black bear jumped over the lazy dog.");
   }
   {
+    Array foos;
+    foos.set(0, "foo");
+    foos.set(1, "Foo");
+    foos.set(2, "FOO");
+    Array expFoo;
+    expFoo.set(0, "FOO");
+    expFoo.set(1, "FOO");
+    expFoo.set(2, "FOO");
+    VS(f_preg_replace("/some pattern/", "", Array::Create()), Array::Create());
+    VS(f_preg_replace("/foo/i", "FOO", foos), expFoo);
+  }
+  {
     Array patterns = CREATE_VECTOR2("/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
                                     "/^\\s*{(\\w+)}\\s*=/");
     Array replace = CREATE_VECTOR2("\\3/\\4/\\1\\2", "$\\1 =");

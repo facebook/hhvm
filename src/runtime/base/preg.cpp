@@ -1085,7 +1085,7 @@ Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
     return ret;
   }
 
-  Array return_value;
+  Array return_value = Array::Create();
   Array arrSubject = subject.toArray();
   for (ArrayIter iter(arrSubject); iter; ++iter) {
     String subject_entry = iter.second().toString();

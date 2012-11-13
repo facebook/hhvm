@@ -1837,7 +1837,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
       LIKELY(!DEBUGGER_FORCE_INTR)) {
     Transl::SrcKey sk(Transl::curFunc(), m_pc);
     (void) curUnit()->offsetOf(m_pc); /* assert */
-    tx64->resume(sk);
+    tx64->enterTC(sk);
   } else {
     dispatch();
   }

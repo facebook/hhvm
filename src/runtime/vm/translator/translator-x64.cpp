@@ -1293,20 +1293,24 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align,
           sk->offset());
   SKTRACE(2, *sk, "   funcId: %llx\n",
           curFunc()->getFuncId());
-  {
-    if (curFrame()->hasVarEnv() && curFrame()->getVarEnv()->isGlobalScope()) {
-      SKTRACE(2, *sk, "punting on pseudoMain\n");
-      return NULL;
-    }
-    if (const SrcRec* sr = m_srcDB.find(*sk)) {
-      TCA tca = sr->getTopTranslation();
-      if (tca) {
-        SKTRACE(2, *sk, "getTranslation: found %p\n", tca);
-        return tca;
-      }
+
+  if (curFrame()->hasVarEnv() && curFrame()->getVarEnv()->isGlobalScope()) {
+    SKTRACE(2, *sk, "punting on pseudoMain\n");
+    return NULL;
+  }
+  if (const SrcRec* sr = m_srcDB.find(*sk)) {
+    TCA tca = sr->getTopTranslation();
+    if (tca) {
+      SKTRACE(2, *sk, "getTranslation: found %p\n", tca);
+      return tca;
     }
   }
+  return createTranslation(sk, align, forceNoHHIR);
+}
 
+TCA
+TranslatorX64::createTranslation(const SrcKey* sk, bool align,
+                                 bool forceNoHHIR /* = false */) {
   /*
    * Try to become the writer. We delay this until we *know* we will have
    * a need to create new translations, instead of just trying to win the
@@ -1363,6 +1367,7 @@ TranslatorX64::lookupTranslation(const SrcKey& sk) const {
   }
   return NULL;
 }
+
 TCA
 TranslatorX64::translate(const SrcKey *sk, bool align, bool useHHIR) {
   INC_TPC(translate);
@@ -3027,10 +3032,10 @@ asm (
   "push %rax\n"
   "push 0x8(%r15)\n"
   "jmp *%rdx\n"
-  ".LenterTCHelper$jumpToTC:\n"
+".LenterTCHelper$jumpToTC:\n"
   // May need cfi_adjust_cfa_offset annotations: Task #1747813
   "call *%rdx\n"
-  ".LenterTCHelper$serviceReqLabel:\n"
+".LenterTCHelper$serviceReqLabel:\n"
 
   "add $0x80, %rsp\n"
   // Restore infoPtr into %rbx
@@ -3039,6 +3044,16 @@ asm (
 
   // Copy the values passed from jitted code into *infoPtr
   "mov %rdi, 0x0(%rbx)\n"
+  "test %rdi,%rdi\n"
+  "jnz .LenterTCHelper$copyReqArgs\n"
+  ".cfi_remember_state\n"
+  "pop %rbp\n"
+  ".cfi_restore rbp\n"
+  ".cfi_adjust_cfa_offset -8\n"
+  "ret\n"
+
+".LenterTCHelper$copyReqArgs:\n"
+  ".cfi_restore_state\n"
   "mov %rsi, 0x8(%rbx)\n"
   "mov %rdx, 0x10(%rbx)\n"
   "mov %rcx, 0x18(%rbx)\n"
@@ -3343,10 +3358,6 @@ void TranslatorX64::handleServiceRequest(TReqInfo& info,
   if (smashed && info.stubAddr) {
     Treadmill::WorkItem::enqueue(new FreeRequestStubTrigger(info.stubAddr));
   }
-}
-
-void TranslatorX64::resume(SrcKey sk) {
-  enterTC(sk);
 }
 
 TCA FreeStubList::maybePop() {

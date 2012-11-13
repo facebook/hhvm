@@ -870,14 +870,6 @@ public:
   virtual void unprotectCode() = 0;
   virtual bool isValidCodeAddress(TCA) const = 0;
 
-  /*
-   * Resume is the main entry point for the translator from the
-   * bytecode interpreter (see enterVMWork).  It operates on behalf of
-   * a given nested invocation of the intepreter (calling back into it
-   * as necessary for blocks that need to be interpreted).
-   */
-  virtual void resume(SrcKey sk) = 0;
-
   enum FuncPrologueFlags {
     FuncPrologueNormal      = 0,
     FuncPrologueMagicCall   = 1,

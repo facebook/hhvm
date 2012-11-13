@@ -835,8 +835,11 @@ private:
     smash(a, src, dest, true);
   }
 
-  TCA getTranslation(const SrcKey *sk, bool align, bool forceNoHHIR = false);
+  TCA getTranslation(const SrcKey* sk, bool align, bool forceNoHHIR = false);
+  TCA createTranslation(const SrcKey* sk, bool align,
+                        bool forceNoHHIR = false);
   TCA lookupTranslation(const SrcKey& sk) const;
+  TCA translate(const SrcKey *sk, bool align, bool useHHIR);
   TCA retranslate(SrcKey sk, bool align, bool useHHIR);
   TCA retranslateOpt(TransID transId, bool align);
   TCA retranslateAndPatchNoIR(SrcKey sk,
@@ -890,7 +893,6 @@ private:
   void emitCondJmp(const SrcKey &skTrue, const SrcKey &skFalse,
                    ConditionCode cc);
   void emitInterpOne(const Tracelet& t, const NormalizedInstruction& i);
-  void enterTC(SrcKey sk);
   void handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
   void recordGdbTranslation(const SrcKey& sk, const Unit* u,
@@ -954,9 +956,13 @@ private:
   static uint64_t packBitVec(const vector<bool>& bits, unsigned i);
 
 public:
-  void resume(SrcKey sk);
-
-  TCA translate(const SrcKey *sk, bool align, bool useHHIR);
+  /*
+   * enterTC is the main entry point for the translator from the
+   * bytecode interpreter (see enterVMWork).  It operates on behalf of
+   * a given nested invocation of the intepreter (calling back into it
+   * as necessary for blocks that need to be interpreted).
+   */
+  void enterTC(SrcKey sk);
 
   TranslatorX64();
   virtual ~TranslatorX64();

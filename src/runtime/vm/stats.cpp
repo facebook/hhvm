@@ -44,13 +44,13 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
   if (havecc) {
     jcc = a.code.frontier;
     a.  jcc8(ccNegate(cc), jcc);
-    a.  pushf();
   }
+  a.    pushf();
   emitImmReg(a, virtualAddress, reg::rScratch);
   a.    fs();
   a.    add_imm64_disp_reg64(n, 0, reg::rScratch);
+  a.    popf();
   if (havecc) {
-    a.  popf();
     a.  patchJcc8(jcc, a.code.frontier);
   }
 }

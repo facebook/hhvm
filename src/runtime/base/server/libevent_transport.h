@@ -50,6 +50,7 @@ public:
   virtual void sendImpl(const void *data, int size, int code, bool chunked);
   virtual void onSendEndImpl();
   virtual bool isServerStopping();
+  virtual int getRequestSize() const;
 
 private:
   LibEventServer *m_server;
@@ -66,6 +67,7 @@ private:
   HeaderMap m_requestHeaders;
   bool m_sendStarted;
   bool m_sendEnded;
+  int m_requestSize;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

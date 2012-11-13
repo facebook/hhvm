@@ -89,6 +89,8 @@ bool f_header_register_callback(CVarRef callback);
 
 void f_header_remove(CStrRef name = null_string);
 
+int f_get_http_request_size();
+
 bool f_setcookie(CStrRef name, CStrRef value = null_string, int64 expire = 0,
                  CStrRef path = null_string, CStrRef domain = null_string,
                  bool secure = false, bool httponly = false);

@@ -37,11 +37,11 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
   // HttpProtocol::PrepareSystemVariables needs this
   evbuffer *buf = m_request->input_buffer;
   ASSERT(buf);
-  int size = EVBUFFER_LENGTH(buf);
-  if (size) {
-    evbuffer_expand(buf, size + 1); // allowing NULL termination
+  m_requestSize = EVBUFFER_LENGTH(buf);
+  if (m_requestSize) {
+    evbuffer_expand(buf, m_requestSize + 1); // allowing NULL termination
     // EVBUFFER_DATA(buf) might change after evbuffer_expand
-    ((char*)EVBUFFER_DATA(buf))[size] = '\0';
+    ((char*)EVBUFFER_DATA(buf))[m_requestSize] = '\0';
   }
 
   m_remote_host = m_request->remote_host;
@@ -56,12 +56,15 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
   switch (m_request->type) {
   case EVHTTP_REQ_GET:
     m_method = Transport::GET;
+    m_requestSize += 3;
     break;
   case EVHTTP_REQ_POST:
     m_method = Transport::POST;
+    m_requestSize += 4;
     break;
   case EVHTTP_REQ_HEAD:
     m_method = Transport::HEAD;
+    m_requestSize += 4;
     break;
   default:
     ASSERT(false);
@@ -75,10 +78,15 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
        p = p->next.tqe_next) {
     if (p->key && p->value) {
       m_requestHeaders[p->key].push_back(p->value);
+      //key, value, ": " and CR/LF
+      m_requestSize += strlen(p->key) + strlen(p->value) + 4;
     }
   }
 
   m_url = m_request->uri;
+  m_requestSize += m_url.size();
+  m_requestSize += m_http_version.size(); //version number in "HTTP/x.y"
+  m_requestSize += 11; // HTTP/=5, 2 spaces for url, and CR/LF x2 (first+last)
 }
 
 const char *LibEventTransport::getUrl() {
@@ -175,6 +183,10 @@ const char *LibEventTransport::getExtendedMethod() {
 
 std::string LibEventTransport::getHTTPVersion() const {
   return m_http_version;
+}
+
+int LibEventTransport::getRequestSize() const {
+  return m_requestSize;
 }
 
 std::string LibEventTransport::getHeader(const char *name) {

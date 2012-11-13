@@ -501,6 +501,10 @@ std::string Transport::getHTTPVersion() const {
   return "1.1";
 }
 
+int Transport::getRequestSize() const {
+  return 0;
+}
+
 void Transport::setMimeType(CStrRef mimeType) {
   m_mimeType = mimeType.data();
 }

@@ -119,10 +119,16 @@ public:
   virtual std::string getHTTPVersion() const;
 
   /**
+   * Get http request size.
+   */
+  virtual int getRequestSize() const;
+
+  /**
    * Get request header(s).
    */
   virtual std::string getHeader(const char *name) = 0;
   virtual void getHeaders(HeaderMap &headers) = 0;
+
 
   /**
    * Get/set response headers.

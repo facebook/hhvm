@@ -959,6 +959,15 @@ void f_header_remove(CStrRef name /* = null_string */) {
   }
 }
 
+int f_get_http_request_size() {
+  Transport *transport = g_context->getTransport();
+  if (transport) {
+    return transport->getRequestSize();
+  } else {
+    return 0;
+  }
+}
+
 bool f_setcookie(CStrRef name, CStrRef value /* = null_string */,
                  int64 expire /* = 0 */, CStrRef path /* = null_string */,
                  CStrRef domain /* = null_string */, bool secure /* = false */,

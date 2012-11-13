@@ -579,6 +579,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "get_http_request_size",
+    'desc'   => "get_http_request_size() will return the size of the http request.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "Returns the size of the http request.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "headers_sent",
     'desc'   => "Checks if or where headers have been sent.\n\nYou can't add any more header lines using the header() function once the header block has already been sent. Using this function you can at least prevent getting HTTP header related error messages. Another option is to use Output Buffering.",
     'flags'  =>  HasDocComment,

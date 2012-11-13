@@ -1551,6 +1551,7 @@ TypedValue* fg_socket_set_blocking(VM::ActRec *ar);
 TypedValue* fg_socket_set_timeout(VM::ActRec *ar);
 TypedValue* fg_header(VM::ActRec *ar);
 TypedValue* fg_headers_list(VM::ActRec *ar);
+TypedValue* fg_get_http_request_size(VM::ActRec *ar);
 TypedValue* fg_headers_sent(VM::ActRec *ar);
 TypedValue* fg_header_register_callback(VM::ActRec *ar);
 TypedValue* fg_header_remove(VM::ActRec *ar);
@@ -2917,7 +2918,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2189;
+const long long hhbc_ext_funcs_count = 2190;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note },
   { "apache_request_headers", fg_apache_request_headers },
@@ -4448,6 +4449,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "socket_set_timeout", fg_socket_set_timeout },
   { "header", fg_header },
   { "headers_list", fg_headers_list },
+  { "get_http_request_size", fg_get_http_request_size },
   { "headers_sent", fg_headers_sent },
   { "header_register_callback", fg_header_register_callback },
   { "header_remove", fg_header_remove },

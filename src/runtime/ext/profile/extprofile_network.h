@@ -145,6 +145,11 @@ inline Array x_headers_list() {
   return f_headers_list();
 }
 
+inline int x_get_http_request_size() {
+  FUNCTION_INJECTION_BUILTIN(get_http_request_size);
+  return f_get_http_request_size();
+}
+
 inline bool x_headers_sent(VRefParam file = null, VRefParam line = null) {
   FUNCTION_INJECTION_BUILTIN(headers_sent);
   return f_headers_sent(file, line);

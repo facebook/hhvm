@@ -934,6 +934,40 @@ TypedValue* fg_headers_list(HPHP::VM::ActRec *ar) {
 
 
 /*
+int HPHP::f_get_http_request_size()
+_ZN4HPHP23f_get_http_request_sizeEv
+
+(return value) => rax
+*/
+
+int fh_get_http_request_size() asm("_ZN4HPHP23f_get_http_request_sizeEv");
+
+TypedValue* fg_get_http_request_size(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    long long count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv._count = 0;
+      rv.m_type = KindOfInt64;
+      rv.m_data.num = (long long)fh_get_http_request_size();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("get_http_request_size", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv._count = 0;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 bool HPHP::f_headers_sent(HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
 _ZN4HPHP14f_headers_sentERKNS_14VRefParamValueES2_
 

@@ -1304,17 +1304,21 @@ TranslatorX64::getTranslation(const SrcKey *sk, bool align,
   TCA astart = a.code.frontier;
   TCA stubstart = astubs.code.frontier;
   TCA req = emitServiceReq(SRFlags::SRNone, REQ_RETRANSLATE,
-                             1, uint64_t(sk->offset()));
+                           1, uint64_t(sk->offset()));
   SKTRACE(1, *sk, "inserting anchor translation for (%p,%d) at %p\n",
           curUnit(), sk->offset(), req);
   SrcRec* sr = m_srcDB.insert(*sk);
   sr->setFuncInfo(curFunc());
   sr->setAnchorTranslation(req);
 
-  addTranslation(TransRec(*sk, curUnit()->md5(), TransAnchor,
-                          astart, a.code.frontier - astart,
-                          stubstart, astubs.code.frontier - stubstart));
-  ASSERT(getTransRec(req)->kind == TransAnchor);
+  size_t asize = a.code.frontier - astart;
+  size_t stubsize = astubs.code.frontier - stubstart;
+  ASSERT(asize == 0);
+  if (stubsize) {
+    addTranslation(TransRec(*sk, curUnit()->md5(), TransAnchor,
+                            astart, asize, stubstart, stubsize));
+    ASSERT(getTransRec(stubstart)->kind == TransAnchor);
+  }
 
   return retranslate(*sk, align, RuntimeOption::EvalJitUseIR && !forceNoHHIR);
 }

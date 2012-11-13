@@ -19,6 +19,7 @@
 #include <runtime/ext/ext_apc.h>
 #include <util/logger.h>
 #include <util/timer.h>
+#include <mutex>
 
 using std::set;
 
@@ -33,13 +34,13 @@ static void log_apc(const string& name) {
   }
 }
 
-static void stats_on_get(StringData* key, SharedVariant* svar) {
+static void stats_on_get(StringData* key, const SharedVariant* svar) {
   if (RuntimeOption::EnableAPCSizeStats &&
       RuntimeOption::EnableAPCFetchStats) {
     SharedStoreStats::onGet(key, svar);
   }
 }
-static void stats_on_delete(StringData* key, StoreValue* sval, bool exp) {
+static void stats_on_delete(StringData* key, const StoreValue* sval, bool exp) {
   if (RuntimeOption::EnableAPCSizeStats) {
     SharedStoreStats::removeDirect(key->size(), sval->size, exp);
     if (RuntimeOption::EnableAPCSizeGroup ||
@@ -68,8 +69,8 @@ static bool check_noTTL(const char *key) {
 }
 
 // stats_on_update should be called before updating sval with new value
-static void stats_on_update(StringData* key, StoreValue* sval,
-                            SharedVariant* svar, int64 ttl) {
+static void stats_on_update(const StringData* key, const StoreValue* sval,
+                            const SharedVariant* svar, int64 ttl) {
   if (RuntimeOption::EnableAPCSizeStats && !check_skip(key->data())) {
     int32 newSize = svar->getSpaceUsage();
     SharedStoreStats::updateDirect(sval->size, newSize);
@@ -83,8 +84,8 @@ static void stats_on_update(StringData* key, StoreValue* sval,
   }
 }
 // stats_on_add should be called after writing sval with the value
-static void stats_on_add(StringData* key, StoreValue* sval, int64 ttl,
-                         bool prime, bool file) {
+static void stats_on_add(const StringData* key, const StoreValue* sval,
+                         int64 ttl, bool prime, bool file) {
   if (RuntimeOption::EnableAPCSizeStats && !check_skip(key->data())) {
     int32 size = sval->var->getSpaceUsage();
     SharedStoreStats::addDirect(key->size(), size, prime, file);
@@ -203,24 +204,6 @@ void ConcurrentTableSharedStore::addToExpirationQueue(const char* key, int64 eti
   m_expQueue.push(p);
 }
 
-bool ConcurrentTableSharedStore::handleUpdate(CStrRef key,
-                                              SharedVariant* svar) {
-  // Try to update the StoreValue
-  Map::accessor acc;
-  if (m_vars.find(acc, key.data()) && !acc->second.inMem()) {
-    // For now, we put no TTL for these keys, we may want to further
-    // optimize by actually putting a TTL
-    acc->second.var = svar;
-    ASSERT(acc->second.expiry == 0);
-    stats_on_add(key.get(), &acc->second, 0, true, true); // delayed prime
-    return true;
-  }
-  // Either the key is erased from the map or a SharedVariant is already
-  // inserted by another thread. Cleanup here.
-  svar->decRef();
-  return false;
-}
-
 bool ConcurrentTableSharedStore::handlePromoteObj(CStrRef key,
                                                   SharedVariant* svar,
                                                   CVarRef value) {
@@ -262,7 +245,6 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
   ConditionalReadLock l(m_lock, !RuntimeOption::ApcConcurrentTableLockFree ||
                                 m_lockingFlag);
   bool expired = false;
-  bool update = false;
   bool promoteObj = false;
   {
     Map::const_accessor acc;
@@ -277,14 +259,21 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
         expired = true;
       } else {
         if (!sval->inMem()) {
-          ASSERT(sval->inFile());
-          String s(sval->sAddr, sval->getSerializedSize(), AttachLiteral);
-          Variant v = apc_unserialize(s);
-          svar = SharedVariant::Create(v, sval->isSerializedObj());
-          update = true;
+          std::lock_guard<SmallLock> sval_lock(sval->lock);
+
+          if (!sval->inMem()) {
+              String s(sval->sAddr, sval->getSerializedSize(), AttachLiteral);
+              Variant v = apc_unserialize(s);
+              svar = SharedVariant::Create(v, sval->isSerializedObj());
+              sval->var = svar;
+              stats_on_add(key.get(), sval, 0, true, true); // delayed prime
+          } else {
+            svar = sval->var;
+          }
         } else {
           svar = sval->var;
         }
+
         if (RuntimeOption::ApcAllowObj && svar->is(KindOfObject)) {
           // Hold ref here for later promoting the object
           svar->incRef();
@@ -301,15 +290,6 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
     return false;
   }
   log_apc(std_apc_hit);
-
-  if (update) {
-    bool updated = handleUpdate(key, svar);
-    if (!updated && promoteObj) {
-      // We should only promote the SharedVariant we inserted in the map
-      promoteObj = false;
-      svar->decRef(); //drop the extra ref we hold for promoting
-    }
-  }
 
   if (promoteObj)  {
     handlePromoteObj(key, svar, value);

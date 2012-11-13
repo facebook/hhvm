@@ -20,6 +20,7 @@
 #include <runtime/base/types.h>
 #include <runtime/base/shared/shared_variant.h>
 #include <util/lock.h>
+#include <util/smalllocks.h>
 #include <runtime/base/complex_types.h>
 
 #define SHARED_STORE_APPLICATION_CACHE 0
@@ -32,14 +33,21 @@ namespace HPHP {
 class StoreValue {
 public:
   StoreValue() : var(NULL), sAddr(NULL), expiry(0), size(0), sSize(0) {}
+  StoreValue(const StoreValue& v) : var(v.var), sAddr(v.sAddr),
+                                    expiry(v.expiry), size(v.size),
+                                    sSize(v.sSize) {}
   void set(SharedVariant *v, int64 ttl);
   bool expired() const;
 
-  SharedVariant *var;
+  // Mutable fields here are so that we can deserialize the object from disk
+  // while holding a const pointer to the StoreValue. Mostly a hacky workaround
+  // for how we use TBB
+  mutable SharedVariant *var;
   char *sAddr; // For file storage
   int64 expiry;
-  int32 size;
+  mutable int32 size;
   int32 sSize; // For file storage, negative means serailized object
+  mutable SmallLock lock;
 
   bool inMem() const {
     return var != NULL;
@@ -47,6 +55,7 @@ public:
   bool inFile() const {
     return sAddr != NULL;
   }
+
   int32 getSerializedSize() const {
     return abs(sSize);
   }

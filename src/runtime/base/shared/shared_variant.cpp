@@ -354,7 +354,7 @@ SharedVariant* SharedVariant::convertObj(CVarRef var) {
   return tmp;
 }
 
-int32 SharedVariant::getSpaceUsage() {
+int32 SharedVariant::getSpaceUsage() const {
   int32 size = sizeof(SharedVariant);
   if (!IS_REFCOUNTED_TYPE(m_type)) return size;
   switch (m_type) {
@@ -390,7 +390,7 @@ int32 SharedVariant::getSpaceUsage() {
 }
 
 
-void SharedVariant::getStats(SharedVariantStats *stats) {
+void SharedVariant::getStats(SharedVariantStats *stats) const {
   stats->initStats();
   stats->variantCount = 1;
   switch (m_type) {

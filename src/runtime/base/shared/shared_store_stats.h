@@ -82,18 +82,18 @@ public:
     if (key) free(key);
   }
 
-  void calcInd(StringData *key, SharedVariant *var);
+  void calcInd(const StringData *key, const SharedVariant *var);
   void addToGroup(SharedValueProfile *ind);
   void removeFromGroup(SharedValueProfile *ind);
 };
 
 class SharedStoreStats {
 public:
-  static void onStore(StringData *key, SharedVariant *var, int64 ttl,
-                      bool prime);
-  static void onDelete(StringData *key, SharedVariant *var, bool replace,
-                       bool noTTL);
-  static void onGet(StringData *key, SharedVariant *var);
+  static void onStore(const StringData *key, const SharedVariant *var,
+                      int64 ttl, bool prime);
+  static void onDelete(const StringData *key, const SharedVariant *var,
+                       bool replace, bool noTTL);
+  static void onGet(const StringData *key, const SharedVariant *var);
 
   static std::string report_basic();
   static std::string report_basic_flat();

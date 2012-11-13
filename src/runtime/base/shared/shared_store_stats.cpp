@@ -197,7 +197,8 @@ static void normalizeKey(const char *key, char *normalizedKey, size_t outlen) {
 //////////////////////////////////////////////////////////////////////////////
 // Helpers to handle profile entry
 
-void SharedValueProfile::calcInd(StringData *key, SharedVariant *variant) {
+void SharedValueProfile::calcInd(const StringData *key,
+                                 const SharedVariant *variant) {
   keySize = key->size();
   variant->getStats(&var);
   totalSize = keySize + var.dataTotalSize;
@@ -418,7 +419,7 @@ void SharedStoreStats::addPurgingTime(int64 purgingTime) {
   atomic_add(s_purgingTime, purgingTime);
 }
 
-void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
+void SharedStoreStats::onDelete(const StringData *key, const SharedVariant *var,
                                 bool replace, bool noTTL) {
   char normalizedKey[MAX_KEY_LEN + 1];
 
@@ -456,7 +457,7 @@ void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
   }
 }
 
-void SharedStoreStats::onGet(StringData *key, SharedVariant *var) {
+void SharedStoreStats::onGet(const StringData *key, const SharedVariant *var) {
   ReadLock l(s_rwlock);
   StatsMap::const_accessor cacc;
   if (s_detailMap.find(cacc, (char*)key->data())) {
@@ -466,7 +467,7 @@ void SharedStoreStats::onGet(StringData *key, SharedVariant *var) {
   }
 }
 
-void SharedStoreStats::onStore(StringData *key, SharedVariant *var,
+void SharedStoreStats::onStore(const StringData *key, const SharedVariant *var,
                                int64 ttl, bool prime) {
   char normalizedKey[MAX_KEY_LEN + 1];
 

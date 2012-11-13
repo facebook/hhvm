@@ -116,8 +116,8 @@ public:
   // implementing LeakDetectable
   void dump(std::string &out);
 
-  void getStats(SharedVariantStats *stats);
-  int32 getSpaceUsage();
+  void getStats(SharedVariantStats *stats) const;
+  int32 getSpaceUsage() const;
 
   StringData *getStringData() const {
     ASSERT(is(KindOfString) || is(KindOfStaticString));

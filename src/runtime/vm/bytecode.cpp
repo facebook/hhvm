@@ -6943,6 +6943,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
   c_Continuation* cont = this_continuation(m_fp);
   cont->m_running = false;
   cont->m_done = true;
+  cont->m_value.setNull();
 
   Variant exn = tvAsVariant(m_stack.topTV());
   m_stack.popC();

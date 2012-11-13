@@ -7196,9 +7196,11 @@ void TranslatorX64::translateContExit(const Tracelet& t,
 
 void TranslatorX64::translateContDone(const Tracelet& t,
                                       const NormalizedInstruction& i) {
-  const int contIdx = 0;
-  a.    store_imm8_disp_reg(0x1, CONTOFF(m_done),
-                            getReg(i.inputs[contIdx]->location));
+  PhysReg contReg = getReg(i.inputs[0]->location);
+  a.    store_imm8_disp_reg(0x1, CONTOFF(m_done), contReg);
+
+  // m_value.setNull()
+  emitTvSet(i, reg::noreg, KindOfNull, contReg, CONTOFF(m_value), false);
 }
 
 static void contPreNextThrowHelper(c_Continuation* c) {
@@ -11748,7 +11750,6 @@ bool TranslatorX64::dumpTCData() {
   NATIVE_OP(Dup) \
   NATIVE_OP(ContEnter) \
   NATIVE_OP(ContExit) \
-  NATIVE_OP(ContDone) \
   NATIVE_OP(ContValid) \
   NATIVE_OP(ContStopped) \
   NATIVE_OP(IncStat) \
@@ -11774,6 +11775,7 @@ bool TranslatorX64::dumpTCData() {
   SUPPORTED_OP(BareThis) \
   SUPPORTED_OP(CheckThis) \
   SUPPORTED_OP(PackCont) \
+  SUPPORTED_OP(ContDone) \
   SUPPORTED_OP(ContReceive) \
   SUPPORTED_OP(ContRaised) \
   SUPPORTED_OP(ContNext) \

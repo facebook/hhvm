@@ -24463,6 +24463,47 @@ bool TestCodeRun::TestYield() {
         "foreach (run_test() as $_) {}\n",
         "hagfish\n1\n2\n3\nhagfish\n1\n2\n3\n");
 
+  MVCRO("<?php\n"
+        "function gen(int $mode) {\n"
+        "  yield $mode;\n"
+        "  switch ($mode) {\n"
+        "    case 0: break;\n"
+        "    case 1: yield break;\n"
+        "    case 2: throw new Exception();\n"
+        "  }\n"
+        "  yield 47;\n"
+        "}\n"
+        "\n"
+        "for ($mode = 0; $mode < 3; ++$mode) {\n"
+        "  echo \"Testing mode $mode:\\n\";\n"
+        "  $gen = gen($mode);\n"
+        "  try {\n"
+        "    $gen->next();\n"
+        "    while ($gen->valid()) {\n"
+        "      var_dump($gen->current());\n"
+        "      $gen->next();\n"
+        "    }\n"
+        "  } catch (Exception $ex) {\n"
+        "    echo \"EXCEPTION\\n\";\n"
+        "  }\n"
+        "  var_dump($gen->valid());\n"
+        "  var_dump($gen->current());\n"
+        "}\n",
+        "Testing mode 0:\n"
+        "int(0)\n"
+        "int(47)\n"
+        "bool(false)\n"
+        "NULL\n"
+        "Testing mode 1:\n"
+        "int(1)\n"
+        "bool(false)\n"
+        "NULL\n"
+        "Testing mode 2:\n"
+        "int(2)\n"
+        "EXCEPTION\n"
+        "bool(false)\n"
+        "NULL\n");
+
   return true;
 }
 

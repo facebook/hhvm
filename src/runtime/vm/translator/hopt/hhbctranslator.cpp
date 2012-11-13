@@ -648,6 +648,7 @@ void HhbcTranslator::emitContRaised() {
 void HhbcTranslator::emitContDone() {
   SSATmp* cont = m_tb.genLdLoc(0, Type::Obj, NULL);
   m_tb.genStRaw(cont, CONTOFF(m_done), m_tb.genDefConst<bool>(true));
+  m_tb.genSetPropCell(cont, CONTOFF(m_value), m_tb.genDefNull());
 }
 
 void HhbcTranslator::emitContNext() {

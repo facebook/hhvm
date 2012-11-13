@@ -138,35 +138,5 @@ array(13) {
   ["l"]=>
   int(12)
 }
-array(13) {
-  ["b"]=>
-  int(3735928559)
-  ["g"]=>
-  int(7)
-  ["f"]=>
-  int(6)
-  ["i"]=>
-  int(9)
-  ["d"]=>
-  int(3126047761)
-  ["e"]=>
-  int(3126047761)
-  ["__cont__"]=>
-  object(Continuation)#5 (0) {
-  }
-  ["c"]=>
-  object(Continuation)#5 (0) {
-  }
-  ["j"]=>
-  int(10)
-  ["h"]=>
-  int(8)
-  ["a"]=>
-  object(stdClass)#6 (0) {
-  }
-  ["k"]=>
-  int(11)
-  ["l"]=>
-  int(12)
-}
+NULL
 bool(false)

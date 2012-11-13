@@ -449,7 +449,8 @@ Class* Unit::defClass(const PreClass* preClass,
       tmp.m_savedRbp = (uint64_t)fp;
       tmp.m_savedRip = 0;
       tmp.m_func = preClass->unit()->getMain();
-      tmp.m_soff = preClass->getOffset() - tmp.m_func->base();
+      tmp.m_soff = !fp ? 0
+                       : fp->m_func->unit()->offsetOf(pc) - fp->m_func->base();
       tmp.setThis(NULL);
       tmp.m_varEnv = 0;
       tmp.initNumArgs(0);

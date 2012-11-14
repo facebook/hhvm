@@ -371,7 +371,7 @@ TranslatorX64::irTranslateNull(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateTrue(const Tracelet& t,
-                             const NormalizedInstruction& i) {
+                               const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 0);
   ASSERT(!i.outLocal);
 
@@ -380,7 +380,7 @@ TranslatorX64::irTranslateTrue(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateFalse(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+                                const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 0);
   ASSERT(!i.outLocal);
 
@@ -389,7 +389,7 @@ TranslatorX64::irTranslateFalse(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateInt(const Tracelet& t,
-                            const NormalizedInstruction& i) {
+                              const NormalizedInstruction& i) {
   ASSERT(i.inputs.size()  == 0);
   ASSERT(!i.outLocal);
 
@@ -397,8 +397,14 @@ TranslatorX64::irTranslateInt(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateDouble(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(Double);
+}
+
+void
 TranslatorX64::irTranslateString(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+                                 const NormalizedInstruction& i) {
   ASSERT(i.inputs.size()  == 0);
   ASSERT(!i.outLocal);
 
@@ -407,7 +413,7 @@ TranslatorX64::irTranslateString(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateArray(const Tracelet& t,
-                              const NormalizedInstruction& i) {
+                                const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 0);
   ASSERT(!i.outLocal);
 
@@ -416,25 +422,25 @@ TranslatorX64::irTranslateArray(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateNewArray(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+                                   const NormalizedInstruction& i) {
   HHIR_EMIT(NewArray);
 }
 
 void
 TranslatorX64::irTranslateNop(const Tracelet& t,
-                            const NormalizedInstruction& i) {
+                              const NormalizedInstruction& i) {
   HHIR_EMIT(Nop);
 }
 
 void
 TranslatorX64::irTranslateAddElemC(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
+                                   const NormalizedInstruction& i) {
   HHIR_EMIT(AddElemC);
 }
 
 void
 TranslatorX64::irTranslateAddNewElemC(const Tracelet& t,
-                                         const NormalizedInstruction& i) {
+                                      const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 2);
   ASSERT(i.outStack && !i.outLocal);
   ASSERT(i.inputs[0]->outerType() != KindOfRef);
@@ -447,7 +453,7 @@ TranslatorX64::irTranslateAddNewElemC(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateCns(const Tracelet& t,
-                            const NormalizedInstruction& i) {
+                              const NormalizedInstruction& i) {
   HHIR_EMIT(Cns, i.imm[0].u_SA);
 }
 

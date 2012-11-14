@@ -482,6 +482,7 @@ MINSTRS
   CASE(True) \
   CASE(False) \
   CASE(Int) \
+  CASE(Double) \
   CASE(String) \
   CASE(Array) \
   CASE(NewArray) \

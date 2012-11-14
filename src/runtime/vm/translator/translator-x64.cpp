@@ -4997,7 +4997,7 @@ TranslatorX64::translateFalse(const Tracelet& t,
 void
 TranslatorX64::translateInt(const Tracelet& t,
                             const NormalizedInstruction& i) {
-  ASSERT(i.inputs.size()  == 0);
+  ASSERT(i.inputs.size() == 0);
   ASSERT(!i.outLocal);
   if (i.outStack) {
     ASSERT(i.outStack->isInt());
@@ -5005,6 +5005,16 @@ TranslatorX64::translateInt(const Tracelet& t,
     PhysReg dest = getReg(i.outStack->location);
     uint64_t srcImm = i.imm[0].u_I64A;
     emitImmReg(a, srcImm, dest);
+  }
+}
+
+void
+TranslatorX64::translateDouble(const Tracelet& t,
+                               const NormalizedInstruction& i) {
+  if (i.outStack) {
+    ASSERT(i.outStack->isDouble());
+    m_regMap.allocOutputRegs(i);
+    emitImmReg(a, i.imm[0].u_I64A, getReg(i.outStack->location));
   }
 }
 
@@ -11659,6 +11669,7 @@ bool TranslatorX64::dumpTCData() {
   NATIVE_OP(True) \
   NATIVE_OP(False) \
   NATIVE_OP(Int) \
+  NATIVE_OP(Double) \
   NATIVE_OP(String) \
   NATIVE_OP(Array) \
   NATIVE_OP(NewArray) \

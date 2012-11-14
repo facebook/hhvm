@@ -338,7 +338,7 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
   size_t old_padbytes = n->padbytes;
   if (LIKELY(old_padbytes <= kMaxSmartSize)) {
     void* newmem = smartMalloc(nbytes);
-    memcpy(newmem, ptr, std::min(old_padbytes, nbytes));
+    memcpy(newmem, ptr, std::min(old_padbytes - sizeof(SmallNode), nbytes));
     smartFree(ptr);
     return newmem;
   }

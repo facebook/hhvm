@@ -16,13 +16,15 @@
 */
 
 abstract class :x:base {
-  abstract public function __construct();
+  abstract public function __construct($attributes, $children);
   abstract public function appendChild($child);
   abstract public function getAttribute($attr);
   abstract public function setAttribute($attr, $val);
   abstract public function categoryOf($cat);
   abstract public function __toString();
-  abstract protected static function &__xhpAttributeDeclaration();
+  // PHP Strict Standards define that static function should not be declared
+  // abstract.
+  // abstract protected static function &__xhpAttributeDeclaration();
   abstract protected function &__xhpCategoryDeclaration();
   abstract protected function &__xhpChildrenDeclaration();
 
@@ -201,6 +203,18 @@ abstract class :x:composable-element extends :x:base {
   final public function setAttribute($attr, $val) {
     $this->validateAttributeValue($attr, $val);
     $this->attributes[$attr] = $val;
+    return $this;
+  }
+  
+  /**
+   * Sets an attribute in this element's attribute store. Always foregoes
+   * validation.
+   *
+   * @param $attr      attribute to set
+   * @param $val       value
+   */
+  final public function forceAttribute($attr, $value) {
+    $this->attributes[$attr] = $value;
     return $this;
   }
 
@@ -555,7 +569,11 @@ abstract class :x:primitive extends :x:composable-element {
     // Validate our children
     $this->__flushElementChildren();
     if (:x:base::$ENABLE_VALIDATION) {
-      $this->validateChildren();
+      try {
+        $this->validateChildren();
+      } catch (Exception $e) {
+        trigger_error($e->getMessage(), E_USER_ERROR);
+      }
     }
 
     // Render to string
@@ -593,72 +611,6 @@ abstract class :x:element extends :x:composable-element {
     }
 
     return $that->__toString();
-  }
-}
-
-/**
- * :x:composite is a special class which allows you to pass around a node that
- * acts on another node, but any `appendChild()` calls will append to one of its
- * children.
- *
- * This can be useful if you want to pass around an object that will later be
- * wrapped on the inside.
- *
- * For instance, you can define an :x:composite like this:
- * $parent = <div><p>{$anchor = <span />}</p></div>;
- * $composite = new :x:composite($parent, $anchor);
- *
- * Then if another client wants to wrap the contents of your composite node,
- * he would do so by:
- * $composite->appendChild($anchor = <b />);
- * $composite = new :x:composite($composite, $anchor);
- *
- * Note that we create another composite from the old one so that later down the
- * line we can wrap again with another tag.
- *
- * IMPORTANT: I think this class is broken right now. If you want to use it you
- * should try to fix it.
- */
-class :x:composite extends :x:base {
-  private
-    $parent,
-    $anchor;
-
-  public function __construct(:x:base $parent, :x:base $anchor) {
-    $this->parent = $parent;
-    $this->anchor = $anchor;
-  }
-
-  public function appendChild($child) {
-    return $this->anchor->appendChild($child);
-  }
-
-  public function getAttribute($attr) {
-    return $this->parent->getAttribute($attr);
-  }
-
-  public function setAttribute($attr, $val) {
-    return $this->parent->setAttribute($attr, $val);
-  }
-
-  public function categoryOf($cat) {
-    return $this->parent->categoryOf($cat);
-  }
-
-  public function __toString() {
-    return $this->parent->__toString();
-  }
-
-  protected static function &__xhpAttributeDeclaration() {
-    return $this->parent->__xhpAttributeDeclaration();
-  }
-
-  protected function &__xhpCategoryDeclaration() {
-    return $this->parent->__xhpCategoryDeclaration();
-  }
-
-  protected function &__xhpChildrenDeclaration() {
-    return $this->parent->__xhpChildrenDeclaration();
   }
 }
 

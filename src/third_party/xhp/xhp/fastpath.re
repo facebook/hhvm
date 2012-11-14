@@ -71,7 +71,7 @@ bool xhp_fastpath(const char* yy, const size_t len, const xhp_flags_t &flags) {
       continue;
     }
 
-    <PHP> '?>'|'</script'WHITESPACE*'>' {
+    <PHP> '?>' {
       state = HTML;
       continue;
     }
@@ -98,6 +98,7 @@ bool xhp_fastpath(const char* yy, const size_t len, const xhp_flags_t &flags) {
     <PHP> '::' { continue; }
     <PHP> '</'|
           '/>'|
+          '<'[a-zA-Z0-9:_\-]+'>'|
           ':'[a-zA-Z0-9]|
           ')'WHITESPACE*'['|
           '&#' {

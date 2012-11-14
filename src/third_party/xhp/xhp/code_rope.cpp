@@ -14,8 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
-#include "code_rope.hpp"
 using namespace std;
+#include "code_rope.hpp"
 
 code_rope::code_rope(const _rope_t str, const size_t no /* = 0 */, const size_t lf /* = 0 */) : str(str), lf(lf), no(no) {}
 

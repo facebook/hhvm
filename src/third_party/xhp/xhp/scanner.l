@@ -3,7 +3,7 @@
   | XHP                                                                  |
   +----------------------------------------------------------------------+
   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
-  | Copyright (c) 2009 - 2010 Facebook, Inc. (http://www.facebook.com)          |
+  | Copyright (c) 2009 - 2010 Facebook, Inc. (http://www.facebook.com)   |
   +----------------------------------------------------------------------+
   | This source file is subject to version 2.00 of the Zend license,     |
   | that is bundled with this package in the file LICENSE.ZEND, and is   |
@@ -18,10 +18,19 @@
 %{
 #include "xhp.hpp"
 #include <string.h>
+
+// A PHP file is made of multiple languages, each with its own lexing rules.
+// The starting mode or state is the HTML state, then comes the PHP state, 
+// and with XHP there is even an XHP state. Certain tokens indicate a 
+// transition from one state to another and the macros below are used to 
+// manage this state.
 #define push_state(s) xhp_new_push_state(s, yyg)
 #define pop_state() xhp_new_pop_state(yyg)
 #define set_state(s) xhp_set_state(s, yyg)
-#define last_curly_token() (yyextra->curly_stack.empty() ? 0 : yyextra->curly_stack.top())
+
+// This is used to help contextual lexing. For instance 'attribute' is
+// considered a XHP keyword after a '{' of a class definition, 
+// but a regular identifier in other contexts.
 #define last_token() yyextra->last_token
 
 #define YY_USER_ACTION \
@@ -29,6 +38,7 @@
     return 0; \
   if (!yyg->yy_more_len) \
     yyextra->first_lineno = yyextra->lineno;
+
 #define tok(t) \
   if (yyextra->has_doc_block) { \
     *yylval = yyextra->doc_block + code_rope(yytext, yyextra->first_lineno, yyextra->lineno - yyextra->first_lineno); \
@@ -37,12 +47,14 @@
     *yylval = code_rope(yytext, yyextra->first_lineno, yyextra->lineno - yyextra->first_lineno); \
   } \
   return yy_token(t, yyg)
+
 #ifdef DEBUG
   static void yy_log_token(int tok);
   #define tokt(t) *yylval = t; push_state(XHP_AFTER_ENT); yy_log_token(T_XHP_TEXT); return yyextra->last_token = T_XHP_TEXT;
 #else
   #define tokt(t) *yylval = t; push_state(XHP_AFTER_ENT); return yyextra->last_token = T_XHP_TEXT;
 #endif
+
 #define YY_USER_INIT \
   if (yyextra->insert_token) { \
     yyg->yy_init = 0; \
@@ -86,6 +98,7 @@ static bool utf8ize(uint32_t v, char* buf /* [5] */) {
 
 %option prefix="xhp"
 %option reentrant
+ /* PHP allows IF or if */
 %option case-insensitive
 %option noyywrap nodefault
 %option stack
@@ -97,6 +110,8 @@ static bool utf8ize(uint32_t v, char* buf /* [5] */) {
   * someone tries adding -CF or whatever to the make flags. */
 %option interactive
 
+ /* The different lexing states. Note that the transitions are done either
+  * in the lex actions, or in a generic manner in yy_token(). */
 %s PHP
 %s PHP_COMMENT
 %s PHP_EOL_COMMENT
@@ -133,13 +148,13 @@ NEWLINE ("\r\n"|"\n"|"\r")
 %%
 
 <XHP_ATTR_TYPE_DECL>{
-  bool tok(T_XHP_BOOLEAN);
-  int tok(T_XHP_NUMBER);
-  float tok(T_XHP_FLOAT);
-  var tok(T_VAR);
-  array tok(T_XHP_ARRAY);
-  string tok(T_XHP_STRING);
-  enum tok(T_XHP_ENUM);
+  "bool"   tok(T_XHP_BOOLEAN);
+  "int"    tok(T_XHP_NUMBER);
+  "float"  tok(T_XHP_FLOAT);
+  "var"    tok(T_VAR);
+  "array"  tok(T_XHP_ARRAY);
+  "string" tok(T_XHP_STRING);
+  "enum"   tok(T_XHP_ENUM);
   @required tok(T_XHP_REQUIRED);
   "(" tok('(');
   ":" tok(T_XHP_COLON);
@@ -149,6 +164,7 @@ NEWLINE ("\r\n"|"\n"|"\r")
 <INITIAL>{
   "<?php"([ \t]|{NEWLINE}) {
     yy_scan_newlines(yytext + 5, yyg);
+    // the state transition will be done in yy_token()
     tok(T_OPEN_TAG);
   }
   "<?" {
@@ -313,6 +329,8 @@ NEWLINE ("\r\n"|"\n"|"\r")
   __namespace__ tok(T_NS_C);
   __dir__ tok(T_DIR);
   attribute {
+    // expecting_xhp_class_statements is set in some actions in the grammar.
+    // This means the lexer and parser are interdependent.
     if ((last_token() == '{' || last_token() == '}' || last_token() == ';') &&
         (yyextra->expecting_xhp_class_statements)) {
       tok(T_XHP_ATTRIBUTE);
@@ -368,7 +386,15 @@ NEWLINE ("\r\n"|"\n"|"\r")
   "::" tok(T_PAAMAYIM_NEKUDOTAYIM);
   "\\" tok(T_NS_SEPARATOR);
   ":" {
+    // A colon can either mean the start (or component) of an XHP class,
+    // a ternary expression (as in 1?false:null), the colon of a 'case', 
+    // or finally the start of a block in the old PHP syntax. The following
+    // disambiguate between the XHP case, which requires a special token,
+    // and the other cases.
     switch (yyextra->last_token) {
+      // In a ternary expression, the colon must follow a full-fledged
+      // expression so seeing for instance a binary operator means
+      // it must be an XHP class.
       case ',': case '=': case '|': case '^': case '&': case '<': case '>':
       case '+': case '-': case '%': case '!': case '~': case '[': case '(':
       case '{': case '.':
@@ -379,7 +405,10 @@ NEWLINE ("\r\n"|"\n"|"\r")
       case T_SL_EQUAL: case T_SR_EQUAL: case T_BOOLEAN_OR:
       case T_BOOLEAN_AND: case T_IS_EQUAL: case T_IS_NOT_EQUAL:
       case T_IS_IDENTICAL: case T_IS_NOT_IDENTICAL: case T_IS_SMALLER_OR_EQUAL:
-      case T_IS_GREATER_OR_EQUAL: case T_ECHO: case T_RETURN:
+      case T_IS_GREATER_OR_EQUAL:
+      // An XHP class can also occur after certain keywords. Not sure
+      // we got them all covered though.
+      case T_ECHO: case T_RETURN:
       case T_EXTENDS: case T_INSTANCEOF: case T_DOUBLE_ARROW:
       case T_XHP_ATTRIBUTE:
         tok(T_XHP_COLON);
@@ -551,6 +580,8 @@ NEWLINE ("\r\n"|"\n"|"\r")
   }
 }
 
+ /* Below we use tokt() (and not tok) which internally transits to
+  * the XHP_AFTER_ENT state. */
 <XHP_CHILD,XHP_AFTER_ENT,XHP_ATTR_VAL>{
   /* xml entities */
   (?-i:&quot;) tokt("\"");
@@ -1015,6 +1046,8 @@ static int yy_token(int tok, yyguts_t* yyg) {
       pop_state();
       return ';';
 
+    // In PHP it's ok to use keywords such as 'if' as field names
+    // or function names.
     case T_OBJECT_OPERATOR:
     case T_PAAMAYIM_NEKUDOTAYIM:
     case T_FUNCTION:
@@ -1022,6 +1055,7 @@ static int yy_token(int tok, yyguts_t* yyg) {
       break;
 
     case '{':
+      // not used anymore
       yyextra->curly_stack.push(tok);
       break;
   }

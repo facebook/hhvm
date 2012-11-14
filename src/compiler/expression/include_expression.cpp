@@ -322,13 +322,17 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
   if (!m_include.empty()) {
     FileScopePtr fs = ar->findFileScope(m_include);
     if (fs) {
-      if (!fs->needPseudoMainVariables()) {
-        vars = "NULL";
+      if (!fs->canUseDummyPseudoMain(ar)) {
+        if (!fs->needPseudoMainVariables()) {
+          vars = "NULL";
+        }
+        cg_printf("%s%s(%s, %s, %s)", Option::PseudoMainPrefix,
+                  fs->pseudoMainName().c_str(),
+                  once ? "true" : "false",
+                  vars, cg.getGlobals(ar));
+      } else {
+        cg_printf("true");
       }
-      cg_printf("%s%s(%s, %s, %s)", Option::PseudoMainPrefix,
-                fs->pseudoMainName().c_str(),
-                once ? "true" : "false",
-                vars, cg.getGlobals(ar));
       return;
     }
   }

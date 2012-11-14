@@ -25,6 +25,7 @@
 #include <map>
 #include <vector>
 #include <set>
+#include <boost/dynamic_bitset.hpp>
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <util/hash.h>
@@ -351,6 +352,11 @@ class NormalizedInstruction {
    * rather than calling the shared stub.
    */
   bool inlineReturn:1;
+
+  // For returns, this tracks local ids that are statically known not
+  // to be reference counted at this point (i.e. won't require guards
+  // or decrefs).
+  boost::dynamic_bitset<> nonRefCountedLocals;
 
   ArgUnion constImm;
   TXFlags m_txFlags;
@@ -782,6 +788,7 @@ private:
   int stackFrameOffset; // sp at current instr; used to normalize
 
   void analyzeSecondPass(Tracelet& t);
+  void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);
   bool applyInputMetaData(Unit::MetaHandle&,
                           NormalizedInstruction* ni,
                           TraceletContext& tas,

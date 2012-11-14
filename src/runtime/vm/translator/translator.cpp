@@ -1499,6 +1499,24 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
   return ni;
 }
 
+/*
+ * For MetaData information that affects whether we want to even put a
+ * value in the ni->inputs, we need to look at it before we call
+ * getInputs(), so this is separate from applyInputMetaData.
+ */
+void Translator::preInputApplyMetaData(Unit::MetaHandle metaHand,
+                                       NormalizedInstruction* ni) {
+  if (!metaHand.findMeta(ni->unit(), ni->offset())) return;
+
+  Unit::MetaInfo info;
+  while (metaHand.nextArg(info)) {
+    if (info.m_kind == Unit::MetaInfo::NonRefCounted) {
+      ni->nonRefCountedLocals.resize(curFunc()->numLocals());
+      ni->nonRefCountedLocals[info.m_data] = 1;
+    }
+  }
+}
+
 bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                                     NormalizedInstruction* ni,
                                     TraceletContext& tas,
@@ -1698,6 +1716,9 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         // NopOut should always be the first and only annotation
         // and was handled above.
         not_reached();
+
+      case Unit::MetaInfo::NonRefCounted:
+        // fallthrough
       case Unit::MetaInfo::None:
         break;
     }
@@ -1912,11 +1933,16 @@ void Translator::getInputs(Tracelet& t,
   }
 
   const bool wantInlineReturn = [&] {
-    auto localCount = curFunc()->numLocals();
+    int localCount = curFunc()->numLocals() -
+                     int(ni->nonRefCountedLocals.count());
+    ni->nonRefCountedLocals.resize(curFunc()->numLocals());
     int numRefCounted = 0;
     for (int i = 0; i < localCount; ++i) {
-      numRefCounted +=
-        tas.currentType(Location(Location::Local, i)).isRefCounted();
+      auto curType = tas.currentType(Location(Location::Local, i));
+      if (ni->nonRefCountedLocals[i]) {
+        ASSERT(!curType.isRefCounted() && "Static analysis was wrong");
+      }
+      numRefCounted += curType.isRefCounted();
     }
     return numRefCounted <= kMaxInlineReturnDecRefs;
   }();
@@ -1926,7 +1952,9 @@ void Translator::getInputs(Tracelet& t,
     ni->ignoreInnerType = true;
     int n = curFunc()->numLocals();
     for (int i = 0; i < n; ++i) {
-      inputs.push_back(Location(Location::Local, i));
+      if (!ni->nonRefCountedLocals[i]) {
+        inputs.push_back(Location(Location::Local, i));
+      }
     }
   }
 
@@ -2829,6 +2857,7 @@ void Translator::analyze(const SrcKey *csk, Tracelet& t) {
     // Translation could fail entirely (because of an unknown opcode), or
     // encounter an input that cannot be computed.
     try {
+      preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
       getInputs(t, ni, stackFrameOffset, inputInfos, tas);
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);

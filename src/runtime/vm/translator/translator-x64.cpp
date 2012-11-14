@@ -6358,7 +6358,8 @@ void TranslatorX64::emitInlineReturn(Location retvalSrcLoc,
                                      int retvalSrcDisp) {
   SKTRACE(2, m_curNI->source, "emitting specialized inline return\n");
 
-  ASSERT(curFunc()->numLocals() == (int)m_curNI->inputs.size());
+  ASSERT(int(m_curNI->inputs.size()) == curFunc()->numLocals() -
+    int(m_curNI->nonRefCountedLocals.count()));
   for (int k = m_curNI->inputs.size() - 1; k >= 0; --k) {
     ASSERT(m_curNI->inputs[k]->location.space == Location::Local);
     DataType t = m_curNI->inputs[k]->outerType();

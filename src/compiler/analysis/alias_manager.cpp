@@ -3558,6 +3558,24 @@ public:
         }
       }
     }
+
+    if (auto rs = dynamic_pointer_cast<ReturnStatement>(cp)) {
+      std::vector<std::string> lnames;
+      VariableTableConstPtr vars = cp->getFunctionScope()->getVariables();
+      vars->getLocalVariableNames(lnames);
+      for (auto& l : lnames) {
+        int id = m_gidMap["v:" + l];
+        if (id && !m_block->getBit(DataFlow::PInitOut, id)) {
+          rs->addNonRefcounted(l);
+        } else {
+          auto dt = vars->getFinalType(l)->getDataType();
+          if (!IS_REFCOUNTED_TYPE(dt) && dt != KindOfUnknown) {
+            rs->addNonRefcounted(l);
+          }
+        }
+      }
+    }
+
     return DataFlowWalker::after(cp);
   }
 private:

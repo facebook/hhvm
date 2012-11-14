@@ -3666,6 +3666,25 @@ setOpOpToOpcodeOp(SetOpOp soo) {
 }
 
 void
+TranslatorX64::binaryDoubleArith(const NormalizedInstruction& i,
+                                 Opcode op,
+                                 PhysReg srcReg,
+                                 PhysReg srcDestReg) {
+  a.   mov_reg64_xmm(srcReg, xmm1);
+  a.   mov_reg64_xmm(srcDestReg, xmm0);
+  switch(op) {
+#define CASEIMM(OpBc, x64op)                                       \
+    case OpBc:    a.  x64op ##sd_xmm_xmm(xmm1, xmm0); break
+    CASEIMM(OpAdd, add);
+    CASEIMM(OpSub, sub);
+    CASEIMM(OpMul, mul);
+#undef CASEIMM
+    default: not_reached();
+  }
+  a.   mov_xmm_reg64(xmm0, srcDestReg);
+}
+
+void
 TranslatorX64::binaryIntegerArith(const NormalizedInstruction& i,
                                   Opcode op,
                                   PhysReg srcReg,
@@ -3701,8 +3720,9 @@ void
 TranslatorX64::binaryArithCell(const NormalizedInstruction &i,
                                Opcode op, const DynLocation& in1,
                                const DynLocation& inout) {
-  ASSERT(in1.rtt.isInt());
-  ASSERT(inout.rtt.isInt());
+  ASSERT(in1.rtt.isInt() || in1.rtt.isDouble());
+  ASSERT(inout.rtt.isInt() || inout.rtt.isDouble());
+  ASSERT(IMPLIES(inout.rtt.isDouble(), in1.rtt.isDouble()));
   ASSERT(in1.outerType() != KindOfRef);
   ASSERT(in1.isStack());
   ASSERT(inout.outerType() != KindOfRef);
@@ -3710,7 +3730,11 @@ TranslatorX64::binaryArithCell(const NormalizedInstruction &i,
   m_regMap.allocOutputRegs(i);
   PhysReg     srcReg = m_regMap.getReg(in1.location);
   PhysReg srcDestReg = m_regMap.getReg(inout.location);
-  binaryIntegerArith(i, op, srcReg, srcDestReg);
+  if (in1.rtt.isInt()) {
+    binaryIntegerArith(i, op, srcReg, srcDestReg);
+  } else {
+    binaryDoubleArith(i, op, srcReg, srcDestReg);
+  }
 }
 
 void
@@ -3720,8 +3744,9 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
                                 const DynLocation& in2,
                                 const DynLocation& out) {
   // The caller must guarantee that these conditions hold
-  ASSERT(in1.rtt.isInt());
-  ASSERT(in2.rtt.isInt());
+  ASSERT(in1.rtt.isInt() || in1.rtt.isDouble());
+  ASSERT(in2.rtt.isInt() || in2.rtt.isDouble());
+  ASSERT(IMPLIES(in1.rtt.isDouble(), in2.rtt.isDouble()));
   ASSERT(in1.outerType() != KindOfRef);
   ASSERT(in1.isStack());
   ASSERT(in2.isLocal());
@@ -3730,11 +3755,18 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
   PhysReg srcReg = m_regMap.getReg(in1.location);
   PhysReg outReg = m_regMap.getReg(out.location);
   PhysReg localReg = m_regMap.getReg(in2.location);
+  auto emitBody = [&](PhysReg out) {
+    if (in1.rtt.isDouble()) {
+      binaryDoubleArith(i, op, srcReg, out);
+    } else {
+      binaryIntegerArith(i, op, srcReg, out);
+    }
+  };
   if (in2.outerType() != KindOfRef) {
     // The local is not a var, so we can operate directly on the
     // local's register. We will need to update outReg after the
     // operation.
-    binaryIntegerArith(i, op, srcReg, localReg);
+    emitBody(localReg);
     // We operated directly on the local's register, so we need to update
     // outReg
     emitMovRegReg(a, localReg, outReg);
@@ -3743,7 +3775,7 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
     // on operate on that. We will need to write the result back
     // to the local after the operation.
     emitDeref(a, localReg, outReg);
-    binaryIntegerArith(i, op, srcReg, outReg);
+    emitBody(outReg);
     // We operated on outReg, so we need to write the result back to the
     // local
     a.    store_reg64_disp_reg64(outReg, 0, localReg);
@@ -3920,6 +3952,10 @@ void raiseUndefVariable(StringData* nm) {
 static TXFlags
 planBinaryArithOp(const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 2);
+  if (i.inputs[0]->isDouble() && i.inputs[1]->isDouble()) {
+    auto op = i.op();
+    return nativePlan(op == OpMul || op == OpAdd || op == OpSub);
+  }
   return nativePlan(i.inputs[0]->isInt() && i.inputs[1]->isInt());
 }
 
@@ -5538,9 +5574,16 @@ planInstrAdd_Array(const NormalizedInstruction& i) {
                        i.inputs[1]->valueType() == KindOfArray);
 }
 
+TXFlags
+planInstrAdd_Double(const NormalizedInstruction& i) {
+  ASSERT(i.inputs.size() == 2);
+  return nativePlan(i.inputs[0]->isDouble() && i.inputs[1]->isDouble());
+}
+
 void
 TranslatorX64::analyzeAdd(Tracelet& t, NormalizedInstruction& i) {
-  i.m_txFlags = TXFlags(planInstrAdd_Int(i) | planInstrAdd_Array(i));
+  i.m_txFlags = TXFlags(planInstrAdd_Int(i) | planInstrAdd_Array(i) |
+                        planInstrAdd_Double(i));
 }
 
 void
@@ -5566,7 +5609,7 @@ TranslatorX64::translateAdd(const Tracelet& t,
     return;
   }
 
-  ASSERT(planInstrAdd_Int(i));
+  ASSERT(planInstrAdd_Int(i) | planInstrAdd_Double(i));
   binaryArithCell(i, OpAdd, *i.inputs[0], *i.outStack);
 }
 
@@ -7932,6 +7975,12 @@ TranslatorX64::analyzeSetOpL(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 2);
   const SetOpOp subOp = SetOpOp(i.imm[1].u_OA);
   Opcode arithOp = setOpOpToOpcodeOp(subOp);
+  if (i.inputs[0]->isDouble()) {
+    i.m_txFlags = nativePlan(i.inputs[1]->isDouble() &&
+                             arithOp == OpAdd || arithOp == OpSub ||
+                             arithOp == OpMul);
+    return;
+  }
   i.m_txFlags = nativePlan(i.inputs[0]->isInt() &&
                            i.inputs[1]->isInt() &&
                            (arithOp == OpAdd || arithOp == OpSub ||

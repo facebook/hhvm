@@ -365,6 +365,11 @@ struct X64Instr {
 //                                    0    1    2    3    4    5     flags
 const X64Instr instr_movdqa =  { { 0x6F,0x7F,0xF1,0x00,0xF1,0xF1 }, 0x4102 };
 const X64Instr instr_movdqu =  { { 0x6F,0x7F,0xF1,0x00,0xF1,0xF1 }, 0x8102 };
+const X64Instr instr_gpr2xmm = { { 0x6e,0x00,0x00,0x00,0x00,0x00 }, 0x4002 };
+const X64Instr instr_xmm2gpr = { { 0x7e,0x00,0x00,0x00,0x00,0x00 }, 0x4002 };
+const X64Instr instr_xmmsub =  { { 0x5c,0x00,0x00,0x00,0x00,0x00 }, 0x10102 };
+const X64Instr instr_xmmadd =  { { 0x58,0x00,0x00,0x00,0x00,0x00 }, 0x10102 };
+const X64Instr instr_xmmmul =  { { 0x59,0x00,0x00,0x00,0x00,0x00 }, 0x10102 };
 const X64Instr instr_lddqu =   { { 0xF0,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x10103 };
 const X64Instr instr_jmp =     { { 0xFF,0xF1,0xE9,0x04,0xE9,0xF1 }, 0x0910 };
 const X64Instr instr_call =    { { 0xFF,0xF1,0xE8,0x02,0xE8,0xF1 }, 0x0900 };
@@ -653,6 +658,7 @@ public:
     int r1 = int(rn1);
     int r2 = int(rn2);
     bool reverse = ((op.flags & IF_REVERSE) != 0);
+    prefixBytes(op.flags);
     // The xchg instruction is special
     if (op.flags & IF_XCHG) {
       if (r1 == int(reg::rax)) {
@@ -877,6 +883,12 @@ public:
     bytes(6, instr);
   }
 
+  void prefixBytes(unsigned long flags) {
+    if (flags & IF_66PREFIXED) byte(0x66);
+    if (flags & IF_F2PREFIXED) byte(0xF2);
+    if (flags & IF_F3PREFIXED) byte(0xF3);
+  }
+
   // op disp(%br,%ir,s)
   //   (for reverse == false, hasImmediate == false, r == reg::noreg)
   // op $imm, disp(%br,%ir,s)
@@ -905,9 +917,7 @@ public:
 
     // When an instruction has a manditory prefix, it goes before the
     // REX byte if we end up needing one.
-    if (op.flags & IF_66PREFIXED) byte(0x66);
-    if (op.flags & IF_F2PREFIXED) byte(0xF2);
-    if (op.flags & IF_F3PREFIXED) byte(0xF3);
+    prefixBytes(op.flags);
 
     // Determine immSize from the 'hasImmediate' flag
     int immSize = sz::nosize;
@@ -1792,6 +1802,26 @@ public:
   void lddqu(register_name_t rbase, int off, xmm_register rdest) {
     emitMR(instr_lddqu, rbase, reg::noreg, sz::byte, off,
            xmm_register_number(rdest));
+  }
+
+  void mov_reg64_xmm(register_name_t rSrc, xmm_register rdest) {
+    emitRR(instr_gpr2xmm, xmm_register_number(rdest), rSrc);
+  }
+  void mov_xmm_reg64(xmm_register rSrc, register_name_t rdest) {
+    emitRR(instr_xmm2gpr, xmm_register_number(rSrc), rdest);
+  }
+
+  void addsd_xmm_xmm(xmm_register src, xmm_register srcdest) {
+    emitRR(instr_xmmadd, xmm_register_number(srcdest),
+           xmm_register_number(src));
+  }
+  void mulsd_xmm_xmm(xmm_register src, xmm_register srcdest) {
+    emitRR(instr_xmmmul, xmm_register_number(srcdest),
+           xmm_register_number(src));
+  }
+  void subsd_xmm_xmm(xmm_register src, xmm_register srcdest) {
+    emitRR(instr_xmmsub, xmm_register_number(srcdest),
+           xmm_register_number(src));
   }
 };
 

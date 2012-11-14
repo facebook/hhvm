@@ -312,8 +312,11 @@ private:
 
   void binaryIntegerArith(const NormalizedInstruction &i,
                           Opcode op, PhysReg srcReg, PhysReg srcDestReg);
+  void binaryDoubleArith(const NormalizedInstruction &i,
+                         Opcode op, PhysReg srcReg, PhysReg srcDestReg);
   void binaryArithCell(const NormalizedInstruction &i,
-                       Opcode op, const DynLocation& in1,
+                       Opcode op, 
+                       const DynLocation& in1,
                        const DynLocation& inout);
   void binaryArithLocal(const NormalizedInstruction &i,
                         Opcode op,

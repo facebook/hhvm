@@ -540,6 +540,19 @@ predictOutputs(NormalizedInstruction* ni) {
     return DataType(dt);
   }
 
+  if (ni->op() == OpMod) {
+    // x % 0 returns boolean false, so we don't know for certain, but it's
+    // probably an int.
+    return KindOfInt64;
+  }
+
+  if (ni->op() == OpDiv) {
+    // Integers can produce integers if there's no residue, but $i / $j in
+    // general produces a double. $i / 0 produces boolean false, so we have
+    // actually check the result.
+    return KindOfDouble;
+  }
+
   if (ni->op() == OpClsCnsD) {
     const NamedEntityPair& cne =
       curFrame()->m_func->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);

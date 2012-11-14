@@ -41,8 +41,45 @@ static const int kMaxRegs = 64;
  * overheads per register, and a guarantee that any runnable code will
  * actually be able to allocate registers.
  */
-typedef register_name_t PhysReg;
-static const PhysReg InvalidReg = reg::noreg;
+
+/*
+ * PhysReg represents a physical machine register.  (Currently it only
+ * knows how to do GPRs.)
+ *
+ * To make it possible to use it with the assembler conveniently, it
+ * can be implicitly converted to and from a Reg64.  If you want to
+ * use it as a 32 bit register call r32(physReg).
+ *
+ * The implicit conversion to register_name_t is historical: it exists
+ * for backward-compatability with the old-style asm-x64.h api
+ * (e.g. store_reg##_disp_reg##).
+ */
+struct PhysReg {
+  explicit constexpr PhysReg(int n = -1) : n(n) {}
+  /* implicit */ constexpr PhysReg(Reg64 r) : n(int(r)) {}
+  explicit constexpr PhysReg(Reg32 r) : n(int(register_name_t(r))) {}
+
+  explicit constexpr PhysReg(register_name_t r) : n(int(r)) {}
+
+  constexpr operator Reg64() const { return Reg64(n); }
+  constexpr operator register_name_t() const { return register_name_t(n); }
+
+  explicit constexpr operator int() const { return n; }
+  constexpr bool operator==(PhysReg r) const { return n == r.n; }
+  constexpr bool operator!=(PhysReg r) const { return n != r.n; }
+  constexpr bool operator==(Reg64 r) const { return Reg64(n) == r; }
+  constexpr bool operator!=(Reg64 r) const { return Reg64(n) != r; }
+  constexpr bool operator==(Reg32 r) const { return Reg32(n) == r; }
+  constexpr bool operator!=(Reg32 r) const { return Reg32(n) != r; }
+
+  MemoryRef operator[](intptr_t p) const { return *(*this + p); }
+  IndexedMemoryRef operator[](ScaledIndex s) const { return *(*this + s); }
+
+private:
+  int n;
+};
+
+static const PhysReg InvalidReg;
 
 class RegSet {
   uint64_t m_bits;
@@ -245,7 +282,7 @@ struct RegInfo {
     };
     char buf[1024];
     sprintf(buf, "Reg:%02d:%s:%lld:Type:%d",
-            m_pReg, names[m_state], m_epoch, m_type);
+            int(m_pReg), names[m_state], m_epoch, m_type);
     return Trace::prettyNode(buf, m_cont);
   }
   RegInfo() : m_cont(), m_state(FREE) { }
@@ -528,6 +565,9 @@ class LazyScratchReg : boost::noncopyable {
   void realloc(PhysReg pr = InvalidReg);
 
   friend PhysReg r(const LazyScratchReg& l) { return l.m_reg; }
+  friend Reg8 rbyte(const LazyScratchReg& l) { return rbyte(l.m_reg); }
+  friend Reg32 r32(const LazyScratchReg& l) { return r32(l.m_reg); }
+  friend Reg64 r64(const LazyScratchReg& l) { return r64(l.m_reg); }
 };
 
 class ScratchReg : public LazyScratchReg {
@@ -553,6 +593,8 @@ struct DumbScratchReg : private boost::noncopyable {
   ~DumbScratchReg();
 
   friend PhysReg r(const DumbScratchReg& d) { return d.m_reg; }
+  friend Reg32 r32(const DumbScratchReg& d) { return r32(d.m_reg); }
+  friend Reg64 r64(const DumbScratchReg& d) { return r64(d.m_reg); }
 
 private:
   RegSet& m_regPool;

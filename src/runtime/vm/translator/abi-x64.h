@@ -43,19 +43,19 @@ namespace HPHP { namespace VM { namespace Transl {
  * Frame pointer.  When mid-trace, points to the ActRec for the
  * function currently executing.
  */
-const PhysReg rVmFp      = reg::rbp;
+constexpr PhysReg rVmFp      = reg::rbp;
 
 /*
  * Stack pointer.  When mid-trace, points to the top of the eval stack
  * (lowest valid address) at the start of the current tracelet.
  */
-const PhysReg rVmSp      = reg::rbx;
+constexpr PhysReg rVmSp      = reg::rbx;
 
 /*
  * Target cache pointer.  Always points to the base of the target
  * cache block for the current request.
  */
-const PhysReg rVmTl      = reg::r12;
+constexpr PhysReg rVmTl      = reg::r12;
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -101,7 +101,7 @@ const RegSet kAllRegs     = kCallerSaved | kCalleeSaved;
  * pointer (the new ActRec) is placed into this register.  rVmFp still
  * points to the caller's ActRec when the prologue is entered.
  */
-const PhysReg rStashedAR = reg::r15;
+constexpr PhysReg rStashedAR = reg::r15;
 
 /*
  * A set of all special cross-tracelet registers.
@@ -144,6 +144,8 @@ const PhysReg serviceReqArgRegs[] = {
   // rdi: contains request number
   reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
 };
+const int kNumServiceReqArgRegs =
+  sizeof(serviceReqArgRegs) / sizeof(PhysReg);
 
 #define SERVICE_REQUESTS \
   /*

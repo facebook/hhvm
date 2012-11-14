@@ -22,6 +22,26 @@ namespace JIT{
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::tx64;
 
+const register_name_t LinearScan::noReg = reg::noreg;
+const Reg64 LinearScan::rVmSP = reg::rbx;
+const Reg64 LinearScan::rSP = reg::rsp;
+const Reg64 LinearScan::rVmFP = reg::rbp;
+const Reg64 LinearScan::rScratch = reg::rScratch;
+const Reg64 LinearScan::rTlPtr = reg::r12;
+const Reg64 LinearScan::rStashedAR = reg::r15;
+
+const int LinearScan::CallerSavedRegMask  =
+                          REG_MASK(reg::rax) |
+                          REG_MASK(reg::rcx) |
+                          REG_MASK(reg::rdx) |
+                          REG_MASK(reg::rsi) |
+                          REG_MASK(reg::rdi) |
+                          REG_MASK(reg::r8)  |
+                          REG_MASK(reg::r9)  |
+                          REG_MASK(reg::r10) | // XXX:callee saved?
+                          REG_MASK(reg::r11);
+
+
 const char* LinearScan::RegNames[LinearScan::NumRegs] = {
   "rax", "rcx", "rdx",
   "rbx", // 3: rVmSP

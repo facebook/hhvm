@@ -57,25 +57,25 @@ public:
     numElts = 0;
     PhysReg reg;
     while (sCopy.findFirst(reg)) {
-      a.   pushr(reg);
+      a.    push (reg);
       sCopy.remove(reg);
       numElts++;
     }
     if ((numElts & 1) == StackParity) {
       // Maintain stack evenness for SIMD compatibility.
-      a.   sub_imm32_reg64(8, rsp);
+      a.    subq (8, rsp);
     }
   }
 
   ~PhysRegSaverParity() {
     if ((numElts & 1) == StackParity) {
       // See above; stack parity.
-      a.   add_imm32_reg64(8, rsp);
+      a.    addq (8, rsp);
     }
     RegSet sCopy = s;
     PhysReg reg;
     while (sCopy.findLast(reg)) {
-      a.   popr(reg);
+      a.    pop  (reg);
       sCopy.remove(reg);
     }
   }
@@ -127,11 +127,11 @@ struct Call {
 
   void emit(X64Assembler& a, PhysReg scratch) const {
     if (m_kind == Direct) {
-      a.    call(TCA(m_fptr));
+      a.    call (TCA(m_fptr));
     } else {
-      a.    load_reg64_disp_reg64(rdi, 0, scratch);
-      a.    load_reg64_disp_reg64(scratch, m_offset, scratch);
-      a.    call_reg(scratch);
+      a.    loadq  (*rdi, scratch);
+      a.    loadq  (scratch[m_offset], scratch);
+      a.    call   (scratch);
     }
   }
 };
@@ -366,8 +366,8 @@ void emitJmpProfile(X64Assembler& a, ConditionCode cc) {
   allRegs.remove(rsi);
 
   a.pushf();
-  a.pushr(rsi);
-  a.setcc(cc, rsi);
+  a.push(rsi);
+  a.setcc(cc, sil);
   a.mov_reg8_reg64_unsigned(rsi, rsi);
   {
     PhysRegSaver regs(a, allRegs);
@@ -377,7 +377,7 @@ void emitJmpProfile(X64Assembler& a, ConditionCode cc) {
     }
     a.call((TCA)recordJmpProfile<mod>);
   }
-  a.popr(rsi);
+  a.pop(rsi);
   a.popf();
 }
 
@@ -745,7 +745,7 @@ asm_label(a, likely);
 // a ref-counted cell.
 //
 // It's ok to do reconcilable register operations in the body.
-template<int FieldOffset, int FieldValue, int Jcc>
+template<int FieldOffset, int FieldValue, ConditionCode Jcc>
 struct CondBlock {
   X64Assembler& m_a;
   int m_off;
@@ -881,9 +881,8 @@ local_name(const Location& l) {
 //   Dereference the var in the cell whose address lives in src into
 //   dest.
 static void
-emitDispDeref(X64Assembler &a, PhysReg src, int disp,
-              PhysReg dest) {
-  a.    load_reg64_disp_reg64(src, disp + TVOFF(m_data), dest);
+emitDispDeref(X64Assembler &a, Reg64 src, int disp, Reg64 dest) {
+  a.    loadq (src[disp + TVOFF(m_data)], dest);
 }
 
 static void
@@ -918,10 +917,9 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
 
 static inline void
 emitStoreInvalid(X64Assembler& a, int disp, PhysReg dest) {
-  a.    store_imm64_disp_reg64(0xfacefacefacefaceULL, disp + TVOFF(m_data),
-                               dest);
-  a.    store_imm32_disp_reg(0xfacefaceU, disp + TVOFF(_count), dest);
-  a.    store_imm32_disp_reg(KindOfInvalid, disp + TVOFF(m_type), dest);
+  a.    storeq (0xfacefacefaceface,     dest[disp + TVOFF(m_data)]);
+  a.    storel ((signed int)0xfaceface, dest[disp + TVOFF(_count)]);
+  a.    storel (KindOfInvalid,          dest[disp + TVOFF(m_type)]);
 }
 
 static inline void
@@ -950,18 +948,20 @@ emitStoreNull(X64Assembler& a, const Location& where) {
 
 static inline void
 emitCopyTo(X64Assembler& a,
-           PhysReg src,
+           Reg64 src,
            int srcOff,
-           PhysReg dest,
+           Reg64 dest,
            int destOff,
            PhysReg scratch) {
   ASSERT(src != scratch);
   // This is roughly how gcc compiles this.
-  a.    load_reg64_disp_reg64(src, srcOff + TVOFF(m_data), scratch);
   // Blow off _count.
-  a.    store_reg64_disp_reg64(scratch, destOff + TVOFF(m_data), dest);
-  a.    load_reg64_disp_reg32(src, srcOff + TVOFF(m_type), scratch);
-  a.    store_reg32_disp_reg64(scratch, destOff + TVOFF(m_type), dest);
+  auto s64 = r64(scratch);
+  auto s32 = r32(scratch);
+  a.    loadq  (src[srcOff + TVOFF(m_data)], s64);
+  a.    storeq (s64, dest[destOff + TVOFF(m_data)]);
+  a.    loadl  (src[srcOff + TVOFF(m_type)], s32);
+  a.    storel (s32, dest[destOff + TVOFF(m_type)]);
 }
 
 /*
@@ -969,14 +969,14 @@ emitCopyTo(X64Assembler& a,
  * be 16-byte aligned.  In this case we can use xmm.
  */
 inline void emitCopyToAligned(X64Assembler& a,
-                              PhysReg src,
+                              Reg64 src,
                               int srcOff,
-                              PhysReg dest,
+                              Reg64 dest,
                               int destOff) {
   static_assert(sizeof(TypedValue) == 16,
                 "emitCopyToAligned assumes sizeof(TypedValue) is 128 bits");
-  a.    load_reg64_disp_xmm128(src, srcOff, xmm0);
-  a.    store_xmm128_disp_reg64(xmm0, destOff, dest);
+  a.    movdqa  (src[srcOff], xmm0);
+  a.    movdqa  (xmm0, dest[destOff]);
 }
 
 // ArgManager -- support for passing VM-level data to helper functions.
@@ -1005,13 +1005,13 @@ public:
 
   void addReg(PhysReg reg) {
     TRACE(6, "ArgManager: push arg %zd reg:r%d\n",
-          m_args.size(), reg);
+          m_args.size(), int(reg));
     m_args.push_back(ArgContent(ArgContent::ArgReg, reg, 0));
   }
 
   void addRegPlus(PhysReg reg, int32_t off) {
     TRACE(6, "ArgManager: push arg %zd regplus:r%d+%d\n",
-          m_args.size(), reg, off);
+          m_args.size(), int(reg), off);
     m_args.push_back(ArgContent(ArgContent::ArgRegPlus, reg, off));
   }
 

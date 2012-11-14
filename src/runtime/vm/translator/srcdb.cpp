@@ -104,7 +104,7 @@ void SrcRec::newTranslation(Asm& a, Asm &astubs, TCA newStart) {
    * translation possibly for this same situation.)
    */
   for (size_t i = 0; i < m_tailFallbackJumps.size(); ++i) {
-    Asm& as = Asm::Choose(a, astubs, m_tailFallbackJumps[i].m_src);
+    auto& as = asmChoose(m_tailFallbackJumps[i].m_src, a, astubs);
     patch(&as, m_tailFallbackJumps[i], newStart);
   }
 
@@ -146,7 +146,7 @@ void SrcRec::patchIncomingBranches(Asm& a, Asm &astubs, TCA newStart) {
     TRACE(1, "SrcRec(%p)::newTranslation rechaining @%p -> %p\n",
           this, change[i].m_src, newStart);
     Asm *as = change[i].m_type == IncomingBranch::ADDR ?
-      NULL : &Asm::Choose(a, astubs, change[i].m_src);
+      NULL : &asmChoose(change[i].m_src, a, astubs);
     patch(as, change[i], newStart);
   }
 }

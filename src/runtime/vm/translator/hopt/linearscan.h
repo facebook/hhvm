@@ -29,13 +29,13 @@ namespace JIT {
 class LinearScan {
 public:
   // TODO: remove these in favor of using the abi-x64.h constants.
-  const static register_name_t noReg = reg::noreg;
-  const static register_name_t rVmSP = Transl::rVmSp;
-  const static register_name_t rSP = reg::rsp;
-  const static register_name_t rVmFP = Transl::rVmFp;
-  const static register_name_t rScratch = reg::rScratch;
-  const static register_name_t rTlPtr = Transl::rVmTl;
-  const static register_name_t rStashedAR = Transl::rStashedAR;
+  const static register_name_t noReg;
+  const static Reg64 rVmSP;
+  const static Reg64 rSP;
+  const static Reg64 rVmFP;
+  const static Reg64 rScratch;
+  const static Reg64 rTlPtr;
+  const static Reg64 rStashedAR;
 
   static const int NumRegs = 16;
   static const int NumMmxRegs = 8;
@@ -54,18 +54,10 @@ public:
   // HHIR:TODO ideally wouldn't need to use ints, but very helpful for bit ops
   static int regNameAsInt(register_name_t r) { return (int)r; }
 
-#define REG_MASK(regNo) (1 << (uint)(regNo))
+  template<class T>
+  static inline uint REG_MASK(T regNo) { return 1 << uint(regNo); }
 
-  const static int CallerSavedRegMask =
-                              REG_MASK(reg::rax) |
-                              REG_MASK(reg::rcx) |
-                              REG_MASK(reg::rdx) |
-                              REG_MASK(reg::rsi) |
-                              REG_MASK(reg::rdi) |
-                              REG_MASK(reg::r8)  |
-                              REG_MASK(reg::r9)  |
-                              REG_MASK(reg::r10) |
-                              REG_MASK(reg::r11);
+  const static int CallerSavedRegMask;
 
   const static int NumCallerSavedRegs = 9;
   static inline register_name_t getCallerSavedReg(int i) {

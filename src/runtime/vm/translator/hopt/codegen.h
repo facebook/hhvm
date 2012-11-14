@@ -135,7 +135,7 @@ public:
   Address cgLabel(Opcode opc, LabelInstruction* label);
   Address cgOpCmpHelper(
             IRInstruction* inst,
-            void (Asm::*setter)(register_name_t),
+            void (Asm::*setter)(Reg8),
             int64 (*str_cmp_str)(StringData*, StringData*),
             int64 (*str_cmp_int)(StringData*, int64),
             int64 (*str_cmp_obj)(StringData*, ObjectData*),

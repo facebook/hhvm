@@ -91,9 +91,9 @@ class TranslatorX64 : public Translator
   friend class HPHP::VM::JIT::CodeGenerator;
   friend class HPHP::VM::JIT::HhbcTranslator; // packBitVec()
   friend TCA funcBodyHelper(ActRec* fp);
-  template<int, int, int> friend class CondBlock;
+  template<int, int, ConditionCode> friend class CondBlock;
   template<ConditionCode, typename smasher> friend class JccBlock;
-  template<int> friend class IfElseBlock;
+  template<ConditionCode> friend class IfElseBlock;
   friend class UnlikelyIfBlock;
   typedef HPHP::DataType DataType;
 
@@ -199,7 +199,7 @@ private:
     return m_regMap.getReg(dl.location);
   }
 
-  Asm &getAsmFor(TCA addr) { return Asm::Choose(a, astubs, addr); }
+  Asm& getAsmFor(TCA addr) { return asmChoose(addr, a, astubs); }
   void emitIncRef(PhysReg base, DataType);
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
   void emitIncRefGeneric(PhysReg base, int disp = 0);
@@ -318,7 +318,7 @@ private:
 
   void getInputsIntoXMMRegs(const NormalizedInstruction& ni,
                             PhysReg lr, PhysReg rr,
-                            xmm_register lxmm, xmm_register rxmm);
+                            RegXMM lxmm, RegXMM rxmm);
   void binaryIntegerArith(const NormalizedInstruction &i,
                           Opcode op, PhysReg srcReg, PhysReg srcDestReg);
   void binaryMixedArith(const NormalizedInstruction &i,

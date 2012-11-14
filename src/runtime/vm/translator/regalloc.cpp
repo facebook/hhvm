@@ -88,7 +88,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
              retval->m_state == RegInfo::DIRTY);
       ASSERT(retval->m_cont == cont);
       TRACE(1, "alloc (%s, %lld) t%d state %d hit r%d\n",
-            loc.spaceName(), loc.offset, type, state, retval->m_pReg);
+            loc.spaceName(), loc.offset, type, state, int(retval->m_pReg));
       needsFill = false;
     }
   }
@@ -103,7 +103,8 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
     }
     if (retval) {
       TRACE(1, "alloc (%s, %lld) found a free reg %d state %d\n",
-            loc.spaceName(), loc.offset, retval->m_pReg, retval->m_state);
+            loc.spaceName(), loc.offset, int(retval->m_pReg),
+            retval->m_state);
     }
   }
 
@@ -124,7 +125,7 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
     TRACE(1, "alloc (%s, %lld) found a %s victim reg r%d\n",
           loc.spaceName(), loc.offset,
           retval->m_state == RegInfo::CLEAN ? "clean" : "dirty",
-          retval->m_pReg);
+          int(retval->m_pReg));
 
     if (retval->m_state == RegInfo::DIRTY) {
       spill(retval);
@@ -142,7 +143,8 @@ RegAlloc::alloc(const Location& loc, DataType type, RegInfo::State state,
   ASSERT(retval);
   retval->m_epoch = m_epoch;
   TRACE(1, "alloc (%s, %lld) t%d state %d r%d fill? %d\n",
-        loc.spaceName(), loc.offset, type, state, retval->m_pReg, needsFill);
+        loc.spaceName(), loc.offset, type, state, int(retval->m_pReg),
+        needsFill);
   if (needsFill && !IS_NULL_TYPE(type)) {
     if (loc.isLiteral()) {
       m_spf->loadImm(immVal, retval->m_pReg);
@@ -492,7 +494,7 @@ void RegAlloc::spill(RegInfo *toSpill) {
   }
   TRACE(1, "spill: (%s, %lld) <- type %d, r%d\n",
         toSpill->m_cont.m_loc.spaceName(), toSpill->m_cont.m_loc.offset,
-        toSpill->m_type, toSpill->m_pReg);
+        toSpill->m_type, int(toSpill->m_pReg));
   m_spf->spill(toSpill->m_cont.m_loc, toSpill->m_type, toSpill->m_pReg, true);
   verify();
 }
@@ -505,7 +507,7 @@ void RegAlloc::smashRegImpl(RegInfo* r) {
     m_contToRegMap.erase(rmi);
   }
   // Smash scratch regs, too, if asked.
-  TRACE(3, "smashing %d\n", r->m_pReg);
+  TRACE(3, "smashing %d\n", int(r->m_pReg));
   stateTransition(r, RegInfo::FREE);
   r->m_cont = RegContent();
 }
@@ -699,10 +701,10 @@ void RegAlloc::stateTransition(RegInfo* r, RegInfo::State to) {
   ASSERT(r->m_state != RegInfo::SCRATCH || to == RegInfo::FREE);
   // No transitions from the data-bearing states to scratch.
   ASSERT(r->m_state == RegInfo::FREE || to != RegInfo::SCRATCH);
-  TRACE(2, "Reg %d from:\n   ", r->m_pReg);
+  TRACE(2, "Reg %d from:\n   ", int(r->m_pReg));
   TRACE(2, *r);
   r->m_state = to;
-  TRACE(2, "Reg %d to:\n   ", r->m_pReg);
+  TRACE(2, "Reg %d to:\n   ", int(r->m_pReg));
   TRACE(2, *r);
 }
 
@@ -736,7 +738,7 @@ RegAlloc::getImmReg(int64 immVal, bool allowAllocate /* = true */) {
 
   // Allocate freeReg, load it with immVal, and return it.
   TRACE(1, "allocImmReg (0x%llx) t%d state %d r%d\n",
-        immVal, type, state, freeReg->m_pReg);
+        immVal, type, state, int(freeReg->m_pReg));
   m_spf->loadImm(immVal, freeReg->m_pReg);
   assignRegInfo(freeReg, cont, state, type);
   verify();
@@ -806,7 +808,7 @@ void RegAlloc::scrubReg(PhysReg pr) {
   ASSERT(ri->m_state == RegInfo::CLEAN ||
          ri->m_state == RegInfo::DIRTY ||
          ri->m_state == RegInfo::FREE);
-  TRACE(1, "scrubbing register %d: %s\n", pr,
+  TRACE(1, "scrubbing register %d: %s\n", int(pr),
     ri->m_cont.isLoc()
       ? ri->m_cont.m_loc.pretty().c_str() :
     ri->m_cont.isInt()
@@ -932,7 +934,7 @@ RegAlloc::trace() {
 
 LazyScratchReg::LazyScratchReg(RegAlloc& regMap) :
   m_regMap(regMap),
-  m_reg(noreg) {
+  m_reg(InvalidReg) {
 }
 
 LazyScratchReg::~LazyScratchReg() {
@@ -941,24 +943,24 @@ LazyScratchReg::~LazyScratchReg() {
 
 void
 LazyScratchReg::alloc(PhysReg pr /* = InvalidReg */) {
-  ASSERT(m_reg == noreg);
+  ASSERT(m_reg == InvalidReg);
   if (pr != InvalidReg) {
     m_regMap.assertRegIsFree(pr);
   }
   m_reg = m_regMap.allocScratchReg(pr);
-  TRACE(1, "LazyScratchReg: alloc %d\n", m_reg);
+  TRACE(1, "LazyScratchReg: alloc %d\n", int(m_reg));
 }
 
 void LazyScratchReg::dealloc() {
-  if (m_reg != noreg) {
-    TRACE(1, "LazyScratchReg: free %d\n", m_reg);
+  if (m_reg != InvalidReg) {
+    TRACE(1, "LazyScratchReg: free %d\n", int(m_reg));
     m_regMap.freeScratchReg(m_reg);
-    m_reg = noreg;
+    m_reg = InvalidReg;
   }
 }
 
 void LazyScratchReg::realloc(PhysReg pr /* = InvalidReg */) {
-  ASSERT(m_reg != noreg);
+  ASSERT(m_reg != InvalidReg);
   dealloc();
   alloc(pr);
 }
@@ -971,7 +973,7 @@ ScratchReg::ScratchReg(RegAlloc& regMap) :
 ScratchReg::ScratchReg(RegAlloc& regMap, PhysReg reg) :
   LazyScratchReg(regMap) {
   alloc(reg);
-  TRACE(1, "ScratchReg: wired alloc %d\n", m_reg);
+  TRACE(1, "ScratchReg: wired alloc %d\n", int(m_reg));
 }
 
 static PhysReg getRegForDumb(RegSet& regs) {

@@ -39,10 +39,6 @@ using HPHP::DataType;
 using HPHP::TypedValue;
 using HPHP::VM::Transl::TCA;
 
-// from translator-x64.h
-typedef register_name_t PhysReg; // XXX; should use asm-x64.h version
-static const PhysReg InvalidReg = reg::noreg;
-
 // emitDispDeref --
 // emitDeref --
 //
@@ -252,7 +248,7 @@ Address ArgDesc::genCode(CodeGenerator::Asm& as) const {
       TRACE(3, "[counter] 1 reg move in ArgDesc::genCode\n");
       break;
     case Imm:
-      emitImmReg(as, m_imm, m_dstReg);
+      emitImmReg(as, m_imm, r64(m_dstReg));
       break;
     case Addr:
       as.lea_reg64_disp_reg64(m_srcReg, m_imm, m_dstReg);
@@ -519,7 +515,7 @@ Address CodeGenerator::cgJcc(IRInstruction* inst) {
     // Note the reverse syntax in the assembler.
     // This cmp will compute srcReg1 - srcReg2
     if (src1Type == Type::Bool) {
-      m_as.cmp_reg8_reg8(srcReg2, srcReg1);
+      m_as.    cmpb (Reg8(int(srcReg2)), Reg8(int(srcReg1)));
     } else {
       m_as.cmp_reg64_reg64(srcReg2, srcReg1);
     }
@@ -570,7 +566,7 @@ void saveLiveOutRegs(CodeGenerator::Asm& as, int regSaveMask) {
   for (int i = 0; i < LinearScan::NumCallerSavedRegs; i++) {
     register_name_t j = LinearScan::getCallerSavedReg(i);
     if (regSaveMask & LinearScan::getRegMask(j)) {
-      as.pushr(j);
+      as.push(r64(j));
     }
   }
   return;
@@ -590,13 +586,13 @@ bool saveLiveOutRegsAligned(CodeGenerator::Asm& as, int regSaveMask) {
   for (int i = 0; i < LinearScan::NumCallerSavedRegs; i++) {
     register_name_t j = LinearScan::getCallerSavedReg(i);
     if (regSaveMask & LinearScan::getRegMask(j)) {
-      as.pushr(j);
+      as.push(r64(j));
       ++count; lastSaved = j;
     }
   }
   bool extraPush = count & 0x1;
   if (extraPush) {
-    as.pushr(lastSaved);
+    as.push(r64(lastSaved));
   }
   return extraPush;
 }
@@ -609,7 +605,7 @@ void restoreLiveOutRegs(CodeGenerator::Asm& as, int regSaveMask) {
   for (int i = LinearScan::NumCallerSavedRegs-1; i >= 0; i--) {
     register_name_t j = LinearScan::getCallerSavedReg(i);
     if (regSaveMask & LinearScan::getRegMask(j)) {
-      as.popr(j);
+      as.pop(r64(j));
     }
   }
 }
@@ -625,10 +621,10 @@ void restoreLiveOutRegsAligned(CodeGenerator::Asm& as,
     register_name_t j = LinearScan::getCallerSavedReg(i);
     if (regSaveMask & LinearScan::getRegMask(j)) {
       if (extraPop) {
-        as.popr(j);
+        as.pop(r64(j));
         extraPop = false;
       }
-      as.popr(j);
+      as.pop(r64(j));
     }
   }
 }
@@ -785,7 +781,7 @@ Address CodeGenerator::cgMov(IRInstruction* inst) {
       TRACE(3, "[counter] 1 reg move in UNARY_INT_OP\n");               \
     }                                                                   \
   }                                                                     \
-  m_as. INSTR ## _reg64(dstReg);                                        \
+  m_as. INSTR (r64(dstReg));                                            \
 } while (0)
 
 Address CodeGenerator::cgNotWork(SSATmp* dst, SSATmp* src) {
@@ -1100,7 +1096,7 @@ static bool typeIsSRON(Type::Tag t) {
 
 Address CodeGenerator::cgOpCmpHelper(
           IRInstruction* inst,
-          void (Asm::*setter)(register_name_t),
+          void (Asm::*setter)(Reg8),
           int64 (*str_cmp_str)(StringData*, StringData*),
           int64 (*str_cmp_int)(StringData*, int64),
           int64 (*str_cmp_obj)(StringData*, ObjectData*),
@@ -1144,11 +1140,11 @@ Address CodeGenerator::cgOpCmpHelper(
   // SIMPLIFY_CMP has converted all args to bool
   else if (type1 == Type::Bool && type2 == Type::Bool) {
     if (src2->isConst()) {
-      m_as.cmp_imm8_reg8(src2->getConstValAsBool(), src1Reg);
+      m_as.    cmpb (src2->getConstValAsBool(), Reg8(int(src1Reg)));
     } else {
-      m_as.cmp_reg8_reg8(src2Reg, src1Reg);
+      m_as.    cmpb (Reg8(int(src2Reg)), Reg8(int(src1Reg)));
     }
-    (m_as.*setter)(dstReg);
+    (m_as.*setter)(rbyte(dstReg));
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1164,7 +1160,7 @@ Address CodeGenerator::cgOpCmpHelper(
       } else {
         m_as.cmp_reg64_reg64(src2Reg, src1Reg);
       }
-      (m_as.*setter)(dstReg);
+      (m_as.*setter)(rbyte(dstReg));
     }
 
     // doubles be damned!
@@ -1351,11 +1347,11 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
         }
       } else if (dstReg == srcReg) {
         m_as.test_reg64_reg64(dstReg, dstReg);
-        m_as.setne(dstReg);
+        m_as.setne(rbyte(dstReg));
       } else {
         m_as.xor_reg64_reg64(dstReg, dstReg);
         m_as.test_reg64_reg64(srcReg, srcReg);
-        m_as.setne(dstReg);
+        m_as.setne(rbyte(dstReg));
       }
     } else {
       TCA helper = NULL;
@@ -1391,7 +1387,7 @@ Address CodeGenerator::cgConv(IRInstruction* inst) {
       cgCallHelper(m_as, (TCA)intToStringHelper, dst, false, args);
     } else if (fromType == Type::Bool) {
       // Bool -> Str
-      m_as.test_reg8_reg8(srcReg, srcReg);
+      m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
       m_as.mov_imm64_reg((uint64)StringData::GetStaticString(""),
                          dstReg);
       m_as.mov_imm64_reg((uint64)StringData::GetStaticString("1"),
@@ -1433,7 +1429,7 @@ Address CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   if (srcReg != dstReg) {
     m_as.mov_reg64_reg64(srcReg, dstReg);
   }
-  emitDerefIfVariant(m_as, dstReg);
+  emitDerefIfVariant(m_as, PhysReg(dstReg));
   return start;
 }
 
@@ -1459,11 +1455,11 @@ Address CodeGenerator::cgUnbox(IRInstruction* inst) {
   register_name_t srcReg = src->getAssignedLoc();
   register_name_t dstReg = dst->getAssignedLoc();
   if (Type::isBoxed(srcType)) {
-    emitDeref(m_as, srcReg, dstReg);
+    emitDeref(m_as, PhysReg(srcReg), PhysReg(dstReg));
   } else if (srcType == Type::Gen) {
     CG_PUNT(Unbox);
     // XXX The following is wrong becuase it over-writes srcReg
-    emitDerefIfVariant(m_as, srcReg);
+    emitDerefIfVariant(m_as, PhysReg(srcReg));
     m_as.mov_reg64_reg64(srcReg, dstReg);
     if (m_curTrace->isMain()) {
       TRACE(3, "[counter] 1 reg move in cgUnbox\n");
@@ -1734,14 +1730,14 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
 
 void CodeGenerator::emitTraceRet(CodeGenerator::Asm& as,
                                  register_name_t retAddrReg) {
-  as.pushr(retAddrReg);
+  as.push(r64(retAddrReg));
   // call to a trace function
   as.mov_reg64_reg64(retAddrReg, reg::rdx);
   as.mov_reg64_reg64(rVmFp, reg::rdi);
   as.mov_reg64_reg64(rVmSp, reg::rsi);
   // do the call; may use a trampoline
   m_tx64->emitCall(as, (TCA)traceRet);
-  as.popr(retAddrReg);
+  as.pop(r64(retAddrReg));
 }
 
 Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
@@ -1769,7 +1765,7 @@ Address CodeGenerator::cgRetCtrl(IRInstruction* inst) {
 
   emitTraceRet(m_as, retAddrReg);
   // Return control to caller
-  m_as.jmp_reg(retAddrReg);
+  m_as.jmp(r64(retAddrReg));
   m_as.ud2();
   return start;
 }
@@ -1994,7 +1990,7 @@ Address CodeGenerator::cgExitTrace(IRInstruction* inst) {
         uint64_t     taken = pc->getConstValAsInt();
         uint64_t  notTaken = notTakenPC->getConstValAsInt();
 
-        m_astubs.setcc(cc, serviceReqArgRegs[4]);
+        m_astubs.setcc(cc, rbyte(serviceReqArgRegs[4]));
         m_tx64-> emitServiceReq(TranslatorX64::SRFlags::SRInline,
                                 REQ_BIND_JMPCC_FIRST,
                                 4ull,
@@ -3914,7 +3910,7 @@ Address CodeGenerator::cgJmpZeroHelper(IRInstruction* inst,
     return start;
   }
   if (src->getType() == Type::Bool) {
-    m_as.test_reg8_reg8(srcReg, srcReg);
+    m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
   } else {
     m_as.test_reg64_reg64(srcReg, srcReg);
   }
@@ -3963,7 +3959,6 @@ Address CodeGenerator::cgExitWhenSurprised(IRInstruction* inst) {
   Address start = m_as.code.frontier;
   LabelInstruction* label = inst->getLabel();
 
-  CT_ASSERT(LinearScan::rTlPtr == rVmTl);
   m_tx64->emitTestSurpriseFlags(m_as);
   emitFwdJcc(CC_NZ, label);
   return start;

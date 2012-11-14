@@ -2823,7 +2823,7 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
   // return value up.
   SKTRACE(1, i.source, "emitCGetM: committed to unary load\n");
   bool decRefBase = baseInput->isStack();
-  PhysReg decRefReg = noreg;
+  PhysReg decRefReg = InvalidReg;
   bool stackSavedDecRef = false;
   if (decRefBase) {
     // We'll need to decref the base after the call. Make sure we hold
@@ -2835,7 +2835,7 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
     }
     if (decRefReg != noreg && kCallerSaved.contains(decRefReg)) {
       stackSavedDecRef = true;
-      a.    pushr(decRefReg);
+      a.    push(decRefReg);
       a.    sub_imm32_reg64(8, unsafe_rsp);
     }
   }
@@ -2870,7 +2870,7 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
     if (decRefReg != noreg) {
       if (stackSavedDecRef) {
         a.    add_imm32_reg64(8, unsafe_rsp);
-        a.    popr(rax);
+        a.    pop(rax);
       } else {
         base = decRefReg;
       }

@@ -1556,15 +1556,8 @@ inline ALWAYS_INLINE HphpArray* HphpArray::copyImpl(HphpArray* target) const {
       if (e->data.m_type != KindOfTombstone) {
         te->hash = e->hash;
         te->key = e->key;
-        TypedValue* fr;
-        if (te->hasStrKey()) {
-          fr = &e->data;
-          te->key->incRefCount();
-        } else {
-          fr = &e->data;
-        }
-        TypedValue* to = &te->data;
-        TV_DUP_FLATTEN_VARS(fr, to, this);
+        if (te->hasStrKey()) te->key->incRefCount();
+        tvDupFlattenVars(&e->data, &te->data, this);
         te->hash = e->hash;
       } else {
         // Tombstone.

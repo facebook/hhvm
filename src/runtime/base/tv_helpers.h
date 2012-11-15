@@ -322,6 +322,20 @@ inline bool tvSame(const TypedValue* tv1, const TypedValue* tv2) {
   return tvAsCVarRef(tv1).same(tvAsCVarRef(tv2));
 }
 
+// Assumes 'fr' is live and 'to' is dead, and does not mutate to->_count
+inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
+                             const ArrayData* container) {
+  if (LIKELY(fr->m_type != KindOfRef)) {
+    TV_DUP_CELL_NC(fr, to);
+  } else if (fr->m_data.pref->_count <= 1 &&
+             (!container || fr->m_data.pref->tv()->m_data.parr != container)) {
+    fr = fr->m_data.pref->tv();
+    TV_DUP_CELL_NC(fr, to);
+  } else {
+    TV_DUP_VAR_NC(fr, to);
+  }
+}
+
 void tvCastToBooleanInPlace(TypedValue* tv);
 void tvCastToInt64InPlace(TypedValue* tv, int base = 10);
 void tvCastToDoubleInPlace(TypedValue* tv);

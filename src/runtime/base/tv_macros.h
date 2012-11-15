@@ -110,20 +110,6 @@
   TV_DUP_NC((fr), (to)) \
 }
 
-// Assumes 'fr' is live and 'to' is dead
-#define TV_DUP_FLATTEN_VARS(fr, to, container) { \
-  if (LIKELY(fr->m_type != KindOfRef)) { \
-    TV_DUP_CELL_NC(fr, to); \
-  } else if (fr->m_data.pref->_count <= 1 && \
-             ((container) == NULL || \
-              fr->m_data.pref->tv()->m_data.parr != container)) { \
-    fr = fr->m_data.pref->tv(); \
-    TV_DUP_CELL_NC(fr, to); \
-  } else { \
-    TV_DUP_VAR_NC(fr, to); \
-  } \
-}
-
 // Assumes 'tv' is dead
 #define TV_WRITE_NULL(tv) \
   (tv)->m_type = KindOfNull

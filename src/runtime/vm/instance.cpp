@@ -934,9 +934,7 @@ void Instance::cloneSet(ObjectData* clone) {
                                sizeof(ObjectData) + builtinPropSize());
   for (Slot i = 0; i < nProps; i++) {
     tvRefcountedDecRef(&iclonePropVec[i]);
-    TypedValue* fr = &propVec()[i];
-    TypedValue* to = &iclonePropVec[i];
-    TV_DUP_FLATTEN_VARS(fr, to, NULL);
+    tvDupFlattenVars(&propVec()[i], &iclonePropVec[i], NULL);
   }
   iclone->initDynProps();
   if (o_properties.get() != NULL) {
@@ -946,21 +944,10 @@ void Instance::cloneSet(ObjectData* clone) {
       TypedValue key;
       props->nvGetKey(&key, iter);
       TypedValue *val = props->nvGet(key.m_data.pstr);
-      // duplicate logic of TV_DUP_FLATTEN_VARS so that we
-      // can avoid setting _count, which holds data owned by the
-      // HphpArray.
+      TypedValue *retval;
       auto cloneProps = iclone->o_properties.get();
-      if (LIKELY(val->m_type != KindOfRef)) {
-        cloneProps->set(*(const String *)&key.m_data.pstr,
-                        tvAsCVarRef(val), false);
-      } else if (val->m_data.pref->_count <= 1) {
-        val = val->m_data.pref->tv();
-        cloneProps->set(*(const String *)&key.m_data.pstr,
-                        tvAsCVarRef(val), false);
-      } else {
-        cloneProps->setRef(*(const String *)&key.m_data.pstr,
-                           tvAsCVarRef(val), false);
-      }
+      cloneProps->lvalPtr(key.m_data.pstr, *(Variant**)&retval, false, true);
+      tvDupFlattenVars(val, retval, cloneProps);
       iter = o_properties.get()->iter_advance(iter);
     }
   }

@@ -526,7 +526,8 @@ class LazyScratchReg : boost::noncopyable {
   void alloc(PhysReg pr = InvalidReg);
   void dealloc();
   void realloc(PhysReg pr = InvalidReg);
-  PhysReg operator*() const;
+
+  friend PhysReg r(const LazyScratchReg& l) { return l.m_reg; }
 };
 
 class ScratchReg : public LazyScratchReg {
@@ -551,7 +552,7 @@ struct DumbScratchReg : private boost::noncopyable {
   explicit DumbScratchReg(RegSet& allocSet);
   ~DumbScratchReg();
 
-  PhysReg operator*() const;
+  friend PhysReg r(const DumbScratchReg& d) { return d.m_reg; }
 
 private:
   RegSet& m_regPool;

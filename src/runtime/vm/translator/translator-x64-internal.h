@@ -1015,6 +1015,11 @@ public:
     m_args.push_back(ArgContent(ArgContent::ArgRegPlus, reg, off));
   }
 
+  void addReg(const LazyScratchReg& l) { addReg(r(l)); }
+  void addRegPlus(const LazyScratchReg& l, int32_t off) {
+    addRegPlus(r(l), off);
+  }
+
   void addLocAddr(const Location &loc) {
     TRACE(6, "ArgManager: push arg %zd addr:(%s, %lld)\n",
           m_args.size(), loc.spaceName(), loc.offset);

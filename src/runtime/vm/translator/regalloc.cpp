@@ -768,8 +768,8 @@ void
 RegAlloc::bindScratch(LazyScratchReg& reg, const Location& loc, DataType t,
                       RegInfo::State state) {
   ASSERT(reg.isAllocated());
-  freeScratchReg(*reg);
-  bind(*reg, loc, t, state);
+  freeScratchReg(r(reg));
+  bind(r(reg), loc, t, state);
 }
 
 void
@@ -963,11 +963,6 @@ void LazyScratchReg::realloc(PhysReg pr /* = InvalidReg */) {
   alloc(pr);
 }
 
-PhysReg LazyScratchReg::operator*() const {
-  ASSERT(m_reg != noreg);
-  return m_reg;
-}
-
 ScratchReg::ScratchReg(RegAlloc& regMap) :
   LazyScratchReg(regMap) {
   alloc();
@@ -1007,10 +1002,6 @@ DumbScratchReg::~DumbScratchReg() {
   ASSERT(!m_regPool.contains(m_reg) &&
          "The register we thought we owned was already back in the pool");
   m_regPool.add(m_reg);
-}
-
-PhysReg DumbScratchReg::operator*() const {
-  return m_reg;
 }
 
 } } } // HPHP::VM::Transl

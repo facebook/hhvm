@@ -3743,10 +3743,10 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
                                 const DynLocation& in1,
                                 const DynLocation& in2,
                                 const DynLocation& out) {
-  // The caller must guarantee that these conditions hold
   ASSERT(in1.rtt.isInt() || in1.rtt.isDouble());
-  ASSERT(in2.rtt.isInt() || in2.rtt.isDouble());
-  ASSERT(IMPLIES(in1.rtt.isDouble(), in2.rtt.isDouble()));
+  ASSERT(in2.rtt.valueType() == KindOfInt64 ||
+         in2.rtt.valueType() == KindOfDouble);
+  ASSERT(IMPLIES(in1.rtt.isDouble(), in2.rtt.valueType() == KindOfDouble));
   ASSERT(in1.outerType() != KindOfRef);
   ASSERT(in1.isStack());
   ASSERT(in2.isLocal());
@@ -3771,14 +3771,16 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
     // outReg
     emitMovRegReg(a, localReg, outReg);
   } else {
+    ScratchReg scr(m_regMap);
     // The local is a var, so we have to read its value into outReg
     // on operate on that. We will need to write the result back
     // to the local after the operation.
-    emitDeref(a, localReg, outReg);
-    emitBody(outReg);
+    emitDeref(a, localReg, *scr);
+    emitBody(*scr);
     // We operated on outReg, so we need to write the result back to the
     // local
-    a.    store_reg64_disp_reg64(outReg, 0, localReg);
+    emitMovRegReg(a, *scr, outReg);
+    a.    store_reg64_disp_reg64(*scr, 0, localReg);
   }
 }
 
@@ -7987,12 +7989,12 @@ TranslatorX64::analyzeSetOpL(Tracelet& t, NormalizedInstruction& i) {
   Opcode arithOp = setOpOpToOpcodeOp(subOp);
   if (i.inputs[0]->isDouble()) {
     i.m_txFlags = nativePlan(i.inputs[1]->isDouble() &&
-                             arithOp == OpAdd || arithOp == OpSub ||
-                             arithOp == OpMul);
+                             (arithOp == OpAdd || arithOp == OpSub ||
+                              arithOp == OpMul));
     return;
   }
   i.m_txFlags = nativePlan(i.inputs[0]->isInt() &&
-                           i.inputs[1]->isInt() &&
+                           i.inputs[1]->valueType() == KindOfInt64 &&
                            (arithOp == OpAdd || arithOp == OpSub ||
                             arithOp == OpMul ||
                             arithOp == OpBitAnd || arithOp == OpBitOr ||

@@ -42,7 +42,7 @@ bool f_dangling_server_proxy_new_request(CStrRef host);
 bool f_pagelet_server_is_enabled();
 Object f_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string, CArrRef files = null_array);
 int64 f_pagelet_server_task_status(CObjRef task);
-String f_pagelet_server_task_result(CObjRef task, VRefParam headers, VRefParam code);
+String f_pagelet_server_task_result(CObjRef task, VRefParam headers, VRefParam code, int64 timeout_ms);
 void f_pagelet_server_flush();
 bool f_xbox_send_message(CStrRef msg, VRefParam ret, int64 timeout_ms, CStrRef host = "localhost");
 bool f_xbox_post_message(CStrRef msg, CStrRef host = "localhost");

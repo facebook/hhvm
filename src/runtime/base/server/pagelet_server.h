@@ -43,9 +43,13 @@ public:
   static int64 TaskStatus(CObjRef task);
 
   /**
-   * Get results of a task. This is blocking until task is finished.
+   * Get results of a task. This is blocking until task is finished or times
+   * out. The status code is set to -1 in the event of a timeout.
    */
-  static String TaskResult(CObjRef task, Array &headers, int &code);
+  static String TaskResult(CObjRef task,
+                           Array &headers,
+                           int &code,
+                           int64 timeout_ms);
 
   /**
    * Add a piece of response to the pipeline.

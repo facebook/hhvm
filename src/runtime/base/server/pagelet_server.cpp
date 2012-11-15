@@ -158,14 +158,27 @@ public:
     return m_pipeline.empty();
   }
 
-  String getResults(Array &headers, int &code) {
+  String getResults(Array &headers, int &code, int64 timeout_ms) {
     {
       Lock lock(this);
-      while (!m_done && m_pipeline.empty()) wait();
+      while (!m_done && m_pipeline.empty()) {
+        if (timeout_ms > 0) {
+          long seconds = timeout_ms / 1000;
+          long long nanosecs = (timeout_ms % 1000) * 1000000;
+          if (!wait(seconds, nanosecs)) {
+            code = -1;
+            return "";
+          }
+        } else {
+          wait();
+        }
+      }
+
       if (!m_pipeline.empty()) {
         // intermediate results do not have headers and code
         string ret = m_pipeline.front();
         m_pipeline.pop_front();
+        code = 0;
         return ret;
       }
     }
@@ -326,9 +339,10 @@ int64 PageletServer::TaskStatus(CObjRef task) {
   return PAGELET_NOT_READY;
 }
 
-String PageletServer::TaskResult(CObjRef task, Array &headers, int &code) {
+String PageletServer::TaskResult(CObjRef task, Array &headers, int &code,
+                                 int64 timeout_ms) {
   PageletTask *ptask = task.getTyped<PageletTask>();
-  return ptask->getJob()->getResults(headers, code);
+  return ptask->getJob()->getResults(headers, code, timeout_ms);
 }
 
 void PageletServer::AddToPipeline(const string &s) {

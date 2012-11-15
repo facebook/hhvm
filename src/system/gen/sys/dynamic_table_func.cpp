@@ -14007,11 +14007,13 @@ Variant i_magickposterizeimage(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_magickposterizeimage);
 }
 Variant ifa_pagelet_server_task_result(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (UNLIKELY(count != 3)) return throw_wrong_arguments("pagelet_server_task_result", count, 3, 3, 1);
+  if (UNLIKELY(count < 3 || count > 4)) return throw_wrong_arguments("pagelet_server_task_result", count, 3, 4, 1);
   CVarRef arg0(a0);
   VRefParam arg1(vref(a1));
   VRefParam arg2(vref(a2));
-  return (x_pagelet_server_task_result(arg0, arg1, arg2));
+  if (count <= 3) return (x_pagelet_server_task_result(arg0, arg1, arg2));
+  CVarRef arg3(a3);
+  return (x_pagelet_server_task_result(arg0, arg1, arg2, arg3));
 }
 Variant i_pagelet_server_task_result(void *extra, CArrRef params) {
   return invoke_func_few_handler(extra, params, &ifa_pagelet_server_task_result);
@@ -23225,7 +23227,7 @@ extern const CallInfo ci_imap_last_error = {(void*)&i_imap_last_error, (void*)&i
 extern const CallInfo ci_mb_decode_mimeheader = {(void*)&i_mb_decode_mimeheader, (void*)&ifa_mb_decode_mimeheader, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_memcache_close = {(void*)&i_memcache_close, (void*)&ifa_memcache_close, 1, 0, 0x0000000000000000LL};
 extern const CallInfo ci_magickposterizeimage = {(void*)&i_magickposterizeimage, (void*)&ifa_magickposterizeimage, 3, 0, 0x0000000000000000LL};
-extern const CallInfo ci_pagelet_server_task_result = {(void*)&i_pagelet_server_task_result, (void*)&ifa_pagelet_server_task_result, 3, 0, 0x0000000000000006LL};
+extern const CallInfo ci_pagelet_server_task_result = {(void*)&i_pagelet_server_task_result, (void*)&ifa_pagelet_server_task_result, 4, 0, 0x0000000000000006LL};
 extern const CallInfo ci_strrpos = {(void*)&i_strrpos, (void*)&ifa_strrpos, 3, 0, 0x0000000000000000LL};
 extern const CallInfo ci_imap_deletemailbox = {(void*)&i_imap_deletemailbox, (void*)&ifa_imap_deletemailbox, 2, 0, 0x0000000000000000LL};
 extern const CallInfo ci_dom_characterdata_substring_data = {(void*)&i_dom_characterdata_substring_data, (void*)&ifa_dom_characterdata_substring_data, 3, 0, 0x0000000000000000LL};

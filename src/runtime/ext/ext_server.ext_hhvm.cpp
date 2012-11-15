@@ -273,25 +273,36 @@ TypedValue* fg_pagelet_server_task_status(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::String HPHP::f_pagelet_server_task_result(HPHP::Object const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
-_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_
+HPHP::String HPHP::f_pagelet_server_task_result(HPHP::Object const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&, long long)
+_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_x
 
 (return value) => rax
 _rv => rdi
 task => rsi
 headers => rdx
 code => rcx
+timeout_ms => r8
 */
 
-Value* fh_pagelet_server_task_result(Value* _rv, Value* task, TypedValue* headers, TypedValue* code) asm("_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_");
+Value* fh_pagelet_server_task_result(Value* _rv, Value* task, TypedValue* headers, TypedValue* code, long long timeout_ms) asm("_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_x");
 
 TypedValue * fg1_pagelet_server_task_result(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) __attribute__((noinline,cold));
 TypedValue * fg1_pagelet_server_task_result(TypedValue* rv, HPHP::VM::ActRec* ar, long long count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->_count = 0;
   rv->m_type = KindOfString;
-  tvCastToObjectInPlace(args-0);
-  fh_pagelet_server_task_result((Value*)(rv), (Value*)(args-0), (args-1), (args-2));
+  switch (count) {
+  default: // count >= 4
+    if ((args-3)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-3);
+    }
+  case 3:
+    break;
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  fh_pagelet_server_task_result((Value*)(rv), (Value*)(args-0), (args-1), (args-2), (count > 3) ? (long long)(args[-3].m_data.num) : (long long)(0));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -300,28 +311,28 @@ TypedValue* fg_pagelet_server_task_result(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     long long count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 3LL) {
-      if ((args-0)->m_type == KindOfObject) {
+    if (count >= 3LL && count <= 4LL) {
+      if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
         rv._count = 0;
         rv.m_type = KindOfString;
-        fh_pagelet_server_task_result((Value*)(&(rv)), (Value*)(args-0), (args-1), (args-2));
+        fh_pagelet_server_task_result((Value*)(&(rv)), (Value*)(args-0), (args-1), (args-2), (count > 3) ? (long long)(args[-3].m_data.num) : (long long)(0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 3);
+        frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         fg1_pagelet_server_task_result(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 3);
+        frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("pagelet_server_task_result", count, 3, 3, 1);
+      throw_wrong_arguments_nr("pagelet_server_task_result", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
     rv._count = 0;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 3);
+    frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

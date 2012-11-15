@@ -164,7 +164,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pagelet_server_task_result",
-    'desc'   => "Block and wait until pagelet task finishes.",
+    'desc'   => "Block and wait until pagelet task finishes or times out.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
@@ -184,7 +184,13 @@ DefineFunction(
       array(
         'name'   => "code",
         'type'   => Variant | Reference,
-        'desc'   => "HTTP response code.",
+        'desc'   => "HTTP response code. Set to -1 in the event of a timeout.",
+      ),
+      array(
+        'name'   => "timeout_ms",
+        'type'   => Int64,
+        'value'  => "0",
+        'desc'   => "How many milliseconds to wait. A timeout of zero is interpreted as an infinite timeout.",
       ),
     ),
   ));

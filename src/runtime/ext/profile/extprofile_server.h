@@ -50,9 +50,9 @@ inline int64 x_pagelet_server_task_status(CObjRef task) {
   return f_pagelet_server_task_status(task);
 }
 
-inline String x_pagelet_server_task_result(CObjRef task, VRefParam headers, VRefParam code) {
+inline String x_pagelet_server_task_result(CObjRef task, VRefParam headers, VRefParam code, int64 timeout_ms = 0) {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_task_result);
-  return f_pagelet_server_task_result(task, headers, code);
+  return f_pagelet_server_task_result(task, headers, code, timeout_ms);
 }
 
 inline void x_pagelet_server_flush() {

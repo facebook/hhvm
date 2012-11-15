@@ -133,10 +133,11 @@ int64 f_pagelet_server_task_status(CObjRef task) {
 }
 
 String f_pagelet_server_task_result(CObjRef task, VRefParam headers,
-                                    VRefParam code) {
+                                    VRefParam code, int64 timeout_ms /* = 0 */) {
   Array rheaders;
   int rcode;
-  String response = PageletServer::TaskResult(task, rheaders, rcode);
+  String response = PageletServer::TaskResult(task, rheaders, rcode,
+                                              timeout_ms);
   headers = rheaders;
   code = rcode;
   return response;

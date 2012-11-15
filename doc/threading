@@ -21,9 +21,14 @@ server functions work like this:
   ...
   // Finally, we make a blocking call to wait for pagelet server's result,
   // which is the entire output of the web page, with response headers and
-  // status code.
+  // status code. The status code is set to 0 if a flushed partial response is
+  // successfully returned and the pagelet server is still active.
+  //
+  // A timeout of 0 is interpreted as an infinite timeout. The status code is
+  // set to -1 in the event of a timeout.
   $headers = array(); $code = 0;
-  $result = <b>pagelet_server_task_result</b>($task, $headers, $code);
+  $result = <b>pagelet_server_task_result</b>($task, $headers, $code,
+                                              $timeout_ms);
 
 2. Xbox Tasks
 

@@ -69,17 +69,18 @@ task => rdi
 long long fh_pagelet_server_task_status(Value* task) asm("_ZN4HPHP28f_pagelet_server_task_statusERKNS_6ObjectE");
 
 /*
-HPHP::String HPHP::f_pagelet_server_task_result(HPHP::Object const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
-_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_
+HPHP::String HPHP::f_pagelet_server_task_result(HPHP::Object const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&, long long)
+_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_x
 
 (return value) => rax
 _rv => rdi
 task => rsi
 headers => rdx
 code => rcx
+timeout_ms => r8
 */
 
-Value* fh_pagelet_server_task_result(Value* _rv, Value* task, TypedValue* headers, TypedValue* code) asm("_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_");
+Value* fh_pagelet_server_task_result(Value* _rv, Value* task, TypedValue* headers, TypedValue* code, long long timeout_ms) asm("_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_x");
 
 /*
 void HPHP::f_pagelet_server_flush()

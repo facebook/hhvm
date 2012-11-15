@@ -89,6 +89,13 @@ bool TestExtServer::test_pagelet_server_task_result() {
     f_pagelet_server_task_status(tasks[i]);
   }
 
+  // Calls that time out (try 1 ms) should return a status code of -1
+  for (int i = 0; i < TEST_SIZE; ++i) {
+    Variant code, headers;
+    VS("", f_pagelet_server_task_result(tasks[i], ref(headers), ref(code), 1));
+    VS(code, -1);
+  }
+
   for (int i = 0; i < TEST_SIZE; ++i)  {
     String expected = "pagelet postparam: postparam=";
     expected += String(i);
@@ -97,11 +104,16 @@ bool TestExtServer::test_pagelet_server_task_result() {
     expected += "pagelet header: ";
     expected += String(i);
 
+    // A timeout of 0 indicates an infinite timeout that blocks.
     Variant code, headers;
     VS(expected, f_pagelet_server_task_result(tasks[i], ref(headers),
-                                              ref(code)));
+                                              ref(code), 0));
     VS(code, 200);
     VS(headers[1], "ResponseHeader: okay");
+
+    VS(expected, f_pagelet_server_task_result(tasks[i], ref(headers),
+                                              ref(code), 1));
+    VS(code, 200);
   }
 
   return Count(true);

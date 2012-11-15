@@ -2006,10 +2006,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Statement::KindOfForEachStatement: {
         ForEachStatementPtr fe(static_pointer_cast<ForEachStatement>(node));
-        visit(node->getNthKid(ForEachStatement::ArrayExpr));
+        ExpressionPtr ae(static_pointer_cast<Expression>(
+                           node->getNthKid(ForEachStatement::ArrayExpr)));
+        visit(ae);
+        Iter::Type itype = Iter::TypeUndefined;
         if (fe->isStrong()) {
+          itype = Iter::TypeMutableArray;
           emitConvertToVar(e);
         } else {
+          if (ae->getActualType() &&
+              ae->getActualType()->is(Type::KindOfArray)) {
+            itype = Iter::TypeArray;
+          }
           emitConvertToCell(e);
         }
         ExpressionPtr val(static_pointer_cast<Expression>(
@@ -2018,7 +2026,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                              node->getNthKid(ForEachStatement::NameExpr)));
         StatementPtr body(static_pointer_cast<Statement>(
                             node->getNthKid(ForEachStatement::BodyStmt)));
-        emitForeach(e, val, name, body, fe->isStrong());
+        emitForeach(e, itype, val, name, body, fe->isStrong());
         return false;
       }
 
@@ -5905,6 +5913,7 @@ class ForeachIterGuard {
 };
 
 void EmitterVisitor::emitForeach(Emitter& e,
+                                 Iter::Type itype,
                                  ExpressionPtr val, ExpressionPtr key,
                                  StatementPtr body, bool strong) {
   Label exit;
@@ -5936,6 +5945,10 @@ void EmitterVisitor::emitForeach(Emitter& e,
       visit(key);
     }
     visit(val);
+    if (itype != Iter::TypeUndefined) {
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
+                     false, 0, itype);
+    }
     if (strong) {
       e.IterValueV(itId);
       emitBind(e);
@@ -5945,6 +5958,10 @@ void EmitterVisitor::emitForeach(Emitter& e,
     }
     emitPop(e);
     if (key) {
+      if (itype != Iter::TypeUndefined) {
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
+                       false, 0, itype);
+      }
       e.IterKey(itId);
       emitSet(e);
       emitPop(e);
@@ -5959,6 +5976,10 @@ void EmitterVisitor::emitForeach(Emitter& e,
       emitVirtualLocal(keyTempLocal);
     }
     emitVirtualLocal(valTempLocal);
+    if (itype != Iter::TypeUndefined) {
+      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
+                     false, 0, itype);
+    }
     if (strong) {
       e.IterValueV(itId);
       emitBind(e);
@@ -5969,6 +5990,10 @@ void EmitterVisitor::emitForeach(Emitter& e,
     emitPop(e);
     if (key) {
       // Evaluate IterKey and stash the result in keyTempLocal
+      if (itype != Iter::TypeUndefined) {
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
+                       false, 0, itype);
+      }
       e.IterKey(itId);
       emitSet(e);
       e.PopC();
@@ -6025,6 +6050,10 @@ void EmitterVisitor::emitForeach(Emitter& e,
   bool needBreakHandler = (brkHand.isUsed() || cntHand.isUsed());
   if (next.isUsed() || needBreakHandler) {
     next.set(e);
+  }
+  if (itype != Iter::TypeUndefined) {
+    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::IteratorType,
+                   false, 0, itype);
   }
   e.IterNext(itId, start);
   // Set up a fault region to free the iterator variable.

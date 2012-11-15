@@ -104,6 +104,11 @@ RuntimeType::RuntimeType(const Iter* it) :
   m_iter.type = it->m_itype;
 }
 
+RuntimeType::RuntimeType(Iter::Type type) :
+  m_kind(ITER) {
+  m_iter.type = type;
+}
+
 RuntimeType RuntimeType::box() const {
   ASSERT(m_kind == VALUE);
   if (m_value.outerType == KindOfRef) {

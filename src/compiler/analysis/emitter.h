@@ -582,8 +582,9 @@ public:
                                 bool topLevel);
   void emitBreakHandler(Emitter& e, Label& brkTarg, Label& cntTarg,
       Label& brkHand, Label& cntHand, Id iter = -1);
-  void emitForeach(Emitter& e, ExpressionPtr val, ExpressionPtr key,
-      StatementPtr body, bool strong);
+  void emitForeach(Emitter& e, Iter::Type itype,
+                   ExpressionPtr val, ExpressionPtr key,
+                   StatementPtr body, bool strong);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e, const std::string& message);
 

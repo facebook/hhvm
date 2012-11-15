@@ -1574,7 +1574,14 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       case Unit::MetaInfo::ArrayCapacity:
         ni->imm[0].u_IVA = info.m_data;
         break;
-
+      case Unit::MetaInfo::IteratorType:
+        if (!m_useHHIR) {
+          InputInfo& ii = inputInfos[arg];
+          ii.dontGuard = true;
+          DynLocation* dl = tas.recordRead(ii, m_useHHIR, KindOfInvalid);
+          dl->rtt = RuntimeType((Iter::Type)info.m_data);
+        }
+        break;
       case Unit::MetaInfo::DataTypePredicted: {
         // If the original type was invalid or predicted, then use the
         // prediction in the meta-data.

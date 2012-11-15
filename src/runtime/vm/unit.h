@@ -322,6 +322,7 @@ struct Unit {
       GuardedCls,
       NoSurprise,
       ArrayCapacity,
+      IteratorType,
 
       /*
        * Information about the known class of a property base in the

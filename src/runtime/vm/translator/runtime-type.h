@@ -241,6 +241,7 @@ class RuntimeType {
   RuntimeType(const RuntimeType& copy);
   RuntimeType();
   RuntimeType(const Iter* iter);
+  RuntimeType(Iter::Type type);
 
   static const int UnknownBool = -1;
 

@@ -1407,38 +1407,6 @@ public:
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  /*
-   * We do a lot of calls with constant arguments. Caller is responsible
-   * for saving registers, if necessary.
-   */
-  inline void call1(CodeAddress dest, uintptr_t a1) {
-    mov_imm64_reg(a1, reg::rdi);
-    call(dest);
-  }
-  inline void call2(CodeAddress dest, uintptr_t a1, uintptr_t a2) {
-    mov_imm64_reg(a2, reg::rsi);
-    call1(dest, a1);
-  }
-  inline void call3(CodeAddress dest, uintptr_t a1, uintptr_t a2, uintptr_t a3) {
-    mov_imm64_reg(a3, reg::rdx);
-    call2(dest, a1, a2);
-  }
-  inline void call4(CodeAddress dest, uintptr_t a1, uintptr_t a2, uintptr_t a3,
-                    uintptr_t a4) {
-    mov_imm64_reg(a4, reg::rcx);
-    call3(dest, a1, a2, a3);
-  }
-  inline void call5(CodeAddress dest, uintptr_t a1, uintptr_t a2, uintptr_t a3,
-                    uintptr_t a4, uintptr_t a5) {
-    mov_imm64_reg(a5, reg::r8);
-    call4(dest, a1, a2, a3, a4);
-  }
-  inline void call6(CodeAddress dest, uintptr_t a1, uintptr_t a2, uintptr_t a3,
-                    uintptr_t a4, uintptr_t a5, uintptr_t a6) {
-    mov_imm64_reg(a6, reg::r9);
-    call5(dest, a1, a2, a3, a4, a5);
-  }
-
   inline void mov_reg8_reg64_unsigned(register_name_t rsrc,
                                       register_name_t rdest) {
     emitRR(instr_movzbq, rsrc, rdest);

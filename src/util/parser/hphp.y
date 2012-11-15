@@ -1118,7 +1118,8 @@ statement:
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}
   | T_FOREACH '(' expr
     T_AS foreach_variable
-    foreach_optional_arg ')'           { _p->pushLabelScope();}
+    foreach_optional_arg ')'           { _p->onForEachStart();
+                                         _p->pushLabelScope();}
     foreach_statement                  { _p->popLabelScope();
                                          _p->onForEach($$,$3,$5,$6,$9);}
 

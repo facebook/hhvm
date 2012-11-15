@@ -785,7 +785,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   m_funcContexts.pop_back();
   m_prependingStatements.pop_back();
 
-  ASSERT(!funcContext.isGenerator || !funcContext.isNotGenerator);
+  funcContext.checkFinalAssertions();
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -1091,7 +1091,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   m_funcContexts.pop_back();
   m_prependingStatements.pop_back();
 
-  ASSERT(!funcContext.isGenerator || !funcContext.isNotGenerator);
+  funcContext.checkFinalAssertions();
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -1384,7 +1384,10 @@ void Parser::onYield(Token &out, Token *expr, bool assign) {
     return;
   }
 
-  int index = ++m_funcContexts.back().numYields;
+  FunctionContext &funcContext = m_funcContexts.back();
+  std::fill(funcContext.foreachHasYield.begin(),
+            funcContext.foreachHasYield.end(), true);
+  int index = ++funcContext.numYields;
   transform_yield(this, out, index, expr, assign);
 }
 
@@ -1457,6 +1460,12 @@ void Parser::onExpStatement(Token &out, Token &expr) {
   exp->onParse(m_ar, m_file);
 }
 
+void Parser::onForEachStart() {
+  if (!m_funcContexts.empty()) {
+    m_funcContexts.back().foreachHasYield.push_back(false);
+  }
+}
+
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt) {
   if (value->exp && name->num()) {
@@ -1465,12 +1474,16 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
   }
   checkAssignThis(name);
   checkAssignThis(value);
-  if (!m_funcContexts.empty() && m_funcContexts.back().isGenerator) {
-    int cnt = ++m_funcContexts.back().numForeaches;
-    // TODO only transform foreach with yield in its body.
-    transform_foreach(this, out, arr, name, value, stmt, cnt, value->exp,
-                      value->exp ? value->num() == 1 : name->num() == 1);
-    return;
+  if (!m_funcContexts.empty()) {
+    bool hasYield = m_funcContexts.back().foreachHasYield.back();
+    m_funcContexts.back().foreachHasYield.pop_back();
+
+    if (hasYield) {
+      int cnt = ++m_funcContexts.back().numForeaches;
+      transform_foreach(this, out, arr, name, value, stmt, cnt, value->exp,
+                        value->exp ? value->num() == 1 : name->num() == 1);
+      return;
+    }
   }
   if (stmt->stmt && stmt->stmt->is(Statement::KindOfStatementList)) {
     stmt->stmt = NEW_STMT(BlockStatement,

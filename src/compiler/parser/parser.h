@@ -214,6 +214,7 @@ public:
   void onEcho(Token &out, Token &expr, bool html);
   void onUnset(Token &out, Token &expr);
   void onExpStatement(Token &out, Token &expr);
+  void onForEachStart();
   void onForEach(Token &out, Token &arr, Token &name, Token &value,
                  Token &stmt);
   void onTry(Token &out, Token &tryStmt, Token &className, Token &var,
@@ -258,10 +259,16 @@ private:
       return !isGenerator;
     }
 
+    void checkFinalAssertions() {
+      ASSERT(!isGenerator || !isNotGenerator);
+      ASSERT(foreachHasYield.empty());
+    }
+
     bool isNotGenerator;  // function determined to not be a generator
     bool isGenerator;     // function determined to be a generator
     int numYields;        // number of plain yield statements seen so far
     int numForeaches;     // number of foreach statements seen so far
+    std::vector<bool> foreachHasYield;  // whether open foreach has yield
  };
 
   AnalysisResultPtr m_ar;

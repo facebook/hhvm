@@ -114,7 +114,9 @@ Object Instance::FromArray(ArrayData *properties) {
       props->nvSet(key.m_data.num, value, false);
     } else {
       ASSERT(IS_STRING_TYPE(key.m_type));
-      props->nvSet(key.m_data.pstr, value, false);
+      StringData* strKey = key.m_data.pstr;
+      props->nvSet(strKey, value, false);
+      decRefStr(strKey);
     }
   }
   return retval;
@@ -639,16 +641,18 @@ Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
         continue;
       }
 
+      StringData* strKey = key.m_data.pstr;
       TypedValue* val =
-        static_cast<HphpArray*>(o_properties.get())->nvGet(key.m_data.pstr);
+        static_cast<HphpArray*>(o_properties.get())->nvGet(strKey);
       if (getRef) {
         if (val->m_type != KindOfRef) {
           tvBox(val);
         }
-        retval->nvBind(key.m_data.pstr, val);
+        retval->nvBind(strKey, val);
       } else {
-        retval->nvSet(key.m_data.pstr, val, false);
+        retval->nvSet(strKey, val, false);
       }
+      decRefStr(strKey);
     }
   }
 
@@ -943,12 +947,15 @@ void Instance::cloneSet(ObjectData* clone) {
       auto props = static_cast<HphpArray*>(o_properties.get());
       TypedValue key;
       props->nvGetKey(&key, iter);
-      TypedValue *val = props->nvGet(key.m_data.pstr);
+      ASSERT(tvIsString(&key));
+      StringData* strKey = key.m_data.pstr;
+      TypedValue *val = props->nvGet(strKey);
       TypedValue *retval;
       auto cloneProps = iclone->o_properties.get();
-      cloneProps->lvalPtr(key.m_data.pstr, *(Variant**)&retval, false, true);
+      cloneProps->lvalPtr(strKey, *(Variant**)&retval, false, true);
       tvDupFlattenVars(val, retval, cloneProps);
       iter = o_properties.get()->iter_advance(iter);
+      decRefStr(strKey);
     }
   }
 }

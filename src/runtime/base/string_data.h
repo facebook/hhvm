@@ -441,6 +441,10 @@ public:
   }
 };
 
+inline void decRefStr(StringData* s) {
+  if (s->decRefCount() == 0) s->release();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

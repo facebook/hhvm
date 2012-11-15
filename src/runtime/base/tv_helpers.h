@@ -334,6 +334,10 @@ inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
   }
 }
 
+inline bool tvIsString(const TypedValue* tv) {
+  return (tv->m_type & KindOfStringBit) != 0;
+}
+
 void tvCastToBooleanInPlace(TypedValue* tv);
 void tvCastToInt64InPlace(TypedValue* tv, int base = 10);
 void tvCastToDoubleInPlace(TypedValue* tv);

@@ -945,6 +945,9 @@ OpcodeParserMap opcode_parsers;
   }                                                     \
 } while (0)
 
+// TODO: #1918751
+#define IMM_SLA not_implemented()
+
 #define IMM_BA do {                                                 \
   labelJumps.push_back(std::make_pair(                              \
     read_opcode_arg<std::string>(as),                               \
@@ -1020,7 +1023,8 @@ OPCODES
 #undef IMM_IVA
 #undef IMM_HA
 #undef IMM_BA
-#undef IMM_ILA
+#undef IMM_BLA
+#undef IMM_SLA
 #undef IMM_OA
 #undef IMM_MA
 #undef IMM_AA

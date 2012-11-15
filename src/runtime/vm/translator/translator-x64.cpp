@@ -6224,6 +6224,106 @@ TranslatorX64::translateSwitch(const Tracelet& t,
 }
 
 void
+TranslatorX64::analyzeSSwitch(Tracelet& t,
+                              NormalizedInstruction& i) {
+  i.m_txFlags = Supported;
+}
+
+static TCA sswitchHelperSlow(TypedValue* val, const StringData** strs,
+                             int cases, TCA* jmptab) {
+  if (val->m_type == KindOfRef) val = val->m_data.pref->tv();
+  for (int i = 0; i < cases; ++i) {
+    if (tvAsCVarRef(val).equal(strs[i])) return jmptab[i];
+  }
+  // default case
+  return jmptab[cases];
+}
+
+typedef FixedStringMap<TCA, true> SSwitchMap;
+
+HOT_FUNC_VM
+static TCA sswitchHelperFast(const StringData* val, SSwitchMap* table,
+                             TCA* def) {
+  TCA* dest = table->find(val);
+  if (dest) {
+    return *dest;
+  } else {
+    return *def;
+  }
+}
+
+void
+TranslatorX64::translateSSwitch(const Tracelet& t,
+                                const NormalizedInstruction& ni) {
+  DynLocation& input = *ni.inputs[0];
+  Location& inLoc = input.location;
+  const ImmVector& iv = ni.immVec;
+  const StrVecItem* strvec = iv.strvec();
+  int targets = iv.size();
+  ASSERT(targets > 1);
+  unsigned cases = targets - 1;
+  const Unit* u = curUnit();
+  std::vector<const StringData*> strings;
+  for (unsigned i = 0; i < cases; ++i) {
+    strings.push_back(u->lookupLitstrId(strvec[i].str));
+  }
+
+  // We support the fast path if the input is a string and none of the
+  // cases are numeric strings
+  bool fastPath = IS_STRING_TYPE(input.valueType());
+  for (auto s : strings) {
+    if (s->isNumeric()) {
+      fastPath = false;
+      break;
+    }
+  }
+
+  auto bindAddr = [&](TCA& dest, Offset o) {
+    SrcKey sk(curFunc(), ni.offset() + o);
+    dest = emitServiceReq(SRFlags::SRNone, REQ_BIND_ADDR, 2ull,
+                          &dest, uint64(sk.offset()));
+  };
+  if (fastPath) {
+    Stats::emitInc(a, Stats::Tx64_StringSwitchFast);
+
+    SSwitchMap* table = m_globalData.alloc<SSwitchMap>(kX64CacheLineSize);
+    table->init(cases);
+    TCA* def = m_globalData.alloc<TCA>(sizeof(TCA), 1);
+    for (unsigned i = 0; i < cases; ++i) {
+      table->add(strings[i], NULL);
+      TCA* addr = table->find(strings[i]);
+      ASSERT(addr && *addr == NULL);
+      bindAddr(*addr, strvec[i].dest);
+    }
+    bindAddr(*def, strvec[targets-1].dest);
+
+    EMIT_RCALL(a, ni, sswitchHelperFast,
+               input.isVariant() ? DEREF(inLoc) : V(inLoc),
+               IMM(int64(table)), IMM(int64(def)));
+  } else {
+    Stats::emitInc(a, Stats::Tx64_StringSwitchSlow);
+    const StringData** strtab = m_globalData.alloc<const StringData*>(
+      sizeof(const StringData*), cases);
+    memcpy(strtab, &strings[0], sizeof(const StringData*) * cases);
+
+    // Build the jump table.
+    TCA* jmptab = m_globalData.alloc<TCA>(sizeof(TCA), targets);
+    for (int i = 0; i < targets; ++i) {
+      bindAddr(jmptab[i], strvec[i].dest);
+    }
+
+    m_regMap.cleanLoc(inLoc);
+    EMIT_RCALL(a, ni, sswitchHelperSlow,
+               A(inLoc), IMM(int64(strtab)), IMM(cases), IMM(int64(jmptab)));
+  }
+  ScratchReg holdRax(m_regMap, rax);
+  m_regMap.allocInputReg(ni, 0);
+  emitDecRef(a, ni, getReg(inLoc), input.outerType());
+  syncOutputs(t);
+  a.jmp(rax);
+}
+
+void
 TranslatorX64::analyzeRetC(Tracelet& t,
                            NormalizedInstruction& i) {
   i.manuallyAllocInputs = true;
@@ -11640,17 +11740,20 @@ std::string TranslatorX64::getUsage() {
   std::string usage;
   size_t aUsage = a.code.frontier - a.code.base;
   size_t stubsUsage = astubs.code.frontier - astubs.code.base;
+  size_t dataUsage = m_globalData.frontier - m_globalData.base;
   size_t tcUsage = TargetCache::s_frontier;
   Util::string_printf(usage,
                       "tx64: %9zd bytes (%ld%%) in a.code\n"
                       "tx64: %9zd bytes (%ld%%) in astubs.code\n"
                       "tx64: %9zd bytes (%ld%%) in a.code from ir\n"
                       "tx64: %9zd bytes (%ld%%) in astubs.code from ir\n"
+                      "tx64: %9zd bytes (%ld%%) in m_globalData\n"
                       "tx64: %9zd bytes (%ld%%) in targetCache\n",
                       aUsage,     100 * aUsage / a.code.size,
                       stubsUsage, 100 * stubsUsage / astubs.code.size,
                       m_irAUsage,     100 * m_irAUsage / a.code.size,
                       m_irAstubsUsage, 100 * m_irAstubsUsage / astubs.code.size,
+                      dataUsage, 100 * dataUsage / m_globalData.size,
                       tcUsage,
                       100 * tcUsage / RuntimeOption::EvalJitTargetCacheSize);
   return usage;

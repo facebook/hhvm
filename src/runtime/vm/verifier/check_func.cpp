@@ -239,9 +239,9 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     if (!checkImmediates(name, i.front())) return false;
     PC pc = i.popFront();
     m_instrs.set(offset(pc) - m_func->base());
-    if (Op(*pc) == OpSwitch ||
+    if (isSwitch(*pc) ||
         instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
-      if (Op(*pc) == OpSwitch) {
+      if (*pc == OpSwitch) {
         int64 switchBase = getImm(pc, 1).u_I64A;
         int32_t len = getImmVector(pc).size();
         int64 limit = base + len - 2;
@@ -249,6 +249,10 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
           verify_error("Overflow in Switch bounds [%d:%d]\n",
                        base, past);
         }
+      } else if (*pc == OpSSwitch) {
+        foreachSwitchString((Opcode*)pc, [&](Id& id) {
+          ok &= checkString(pc, id);
+        });
       }
       branches.push_back(pc);
     }
@@ -277,13 +281,11 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   // within this region.
   for (Range<BranchList> i(branches); !i.empty();) {
     PC branch = i.popFront();
-    if (Op(*branch) == OpSwitch) {
-      ImmVector vec = getImmVector(branch);
-      const Offset* v = vec.vec32();
-      for (int i = 0, n = vec.size(); i < n; i++) {
-        Offset target = offset(branch + v[i]);
-        ok &= checkOffset("switch target", target, name, base, past);
-      }
+    if (isSwitch(*branch)) {
+      foreachSwitchTarget((Opcode*)branch, [&](Offset& o) {
+        ok &= checkOffset("switch target", offset(branch + o),
+                          name, base, past);
+      });
     } else {
       Offset target = instrJumpTarget(bc, offset(branch));
       ok &= checkOffset("branch target", target, name, base, past);
@@ -453,7 +455,8 @@ bool FuncChecker::checkImmediates(const char* name, const Opcode* instr) {
       }
       break;
     }
-    case BLA: { // vec of int32 for Switch
+    case BLA:
+    case SLA: { // vec of offsets for Switch/SSwitch
       int len = *(int*)pc;
       if (len < 1) {
         verify_error("invalid length of jump table %d at Offset %d\n",

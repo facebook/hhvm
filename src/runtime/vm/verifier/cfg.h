@@ -90,7 +90,7 @@ inline bool isTF(PC pc) {
 inline bool isCF(PC pc) {
   // exclude call-like opcodes marked with CF flag.
   return instrIsControlFlow(*pc) &&
-         (Op(*pc) == OpSwitch ||
+         (isSwitch(*pc) ||
           instrJumpOffset(const_cast<Opcode*>(pc)) != NULL);
 }
 

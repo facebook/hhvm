@@ -29,10 +29,15 @@ struct Unit;
 // examine its low-order bit. If it is zero, it's a 1-byte immediate; otherwise,
 // it's 4 bytes. The immediate has to be logical-shifted to the right by one to
 // get rid of the flag bit.
+
+// The types in this macro for MA, BLA, and SLA are meaningless since
+// they are never read out of ArgUnion (they use ImmVector and
+// ImmVectorO).
 #define ARGTYPES \
   ARGTYPE(NA,    void*)         /* unused */  \
   ARGTYPEVEC(MA, int32_t)       /* Member vector immediate */ \
   ARGTYPEVEC(BLA,Offset)        /* Bytecode address vector immediate */ \
+  ARGTYPEVEC(SLA,Id)            /* litstrid/offset pair vector */ \
   ARGTYPE(IVA,   int32_t)       /* variable size: 8 or 32-bit integer */  \
   ARGTYPE(I64A,  int64_t)       /* 64-bit Integer */ \
   ARGTYPE(HA,    int32_t)       /* Local variable ID: 8 or 32-bit int */  \
@@ -404,6 +409,7 @@ enum SetOpOp {
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
   O(Switch,          THREE(BLA,I64A,IVA),                               \
                                        ONE(CV),         NOV,        CF_TF) \
+  O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
   O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
   O(Unwind,          NA,               NOV,             NOV,        CF_TF) \
@@ -602,6 +608,11 @@ enum HighOp {
 #undef O
 };
 
+struct StrVecItem {
+  Id str;
+  Offset dest;
+};
+
 struct ImmVector {
   explicit ImmVector() : m_start(0) {}
 
@@ -640,11 +651,15 @@ struct ImmVector {
   const int32_t* vec32() const {
     return reinterpret_cast<const int32_t*>(m_start);
   }
+  const StrVecItem* strvec() const {
+    return reinterpret_cast<const StrVecItem*>(m_start);
+  }
 
   LocationCode locationCode() const { return LocationCode(*vec()); }
 
   /*
-   * Returns the length of the immediate vector in bytes.
+   * Returns the length of the immediate vector in bytes (for M
+   * vectors) or elements (for switch vectors)
    */
   int32_t size() const { return m_length; }
 
@@ -762,6 +777,32 @@ inline bool isFPush(Opcode opcode) {
 
 inline bool isFCallStar(Opcode opcode) {
   return opcode == OpFCall || opcode == OpFCallArray;
+}
+
+inline bool isSwitch(Opcode op) {
+  return op == OpSwitch || op == OpSSwitch;
+}
+
+template<typename L>
+void foreachSwitchTarget(Opcode* op, L func) {
+  ASSERT(isSwitch(*op));
+  bool isStr = readData<Opcode>(op) == OpSSwitch;
+  int32_t size = readData<int32_t>(op);
+  for (int i = 0; i < size; ++i) {
+    if (isStr) readData<Id>(op);
+    func(readData<Offset>(op));
+  }
+}
+
+template<typename L>
+void foreachSwitchString(Opcode* op, L func) {
+  ASSERT(*op == OpSSwitch);
+  readData<Opcode>(op);
+  int32_t size = readData<int32_t>(op) - 1; // the last item is the default
+  for (int i = 0; i < size; ++i) {
+    func(readData<Id>(op));
+    readData<Offset>(op);
+  }
 }
 
 int instrNumPops(const Opcode* opcode);

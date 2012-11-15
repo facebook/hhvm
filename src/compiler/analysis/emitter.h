@@ -89,6 +89,11 @@ public:
     }
   }
 
+  struct StrOff {
+    StrOff(Id s, Label* d) : str(s), dest(d) {}
+    Id str;
+    Label* dest;
+  };
 #define O(name, imm, pop, push, flags) \
   void name(imm);
 #define NA
@@ -100,6 +105,7 @@ public:
   typ1 a1, typ2 a2, typ3 a3
 #define MA std::vector<uchar>
 #define BLA std::vector<Label*>&
+#define SLA std::vector<StrOff>&
 #define IVA int32
 #define HA int32
 #define IA int32
@@ -116,6 +122,8 @@ public:
 #undef TWO
 #undef THREE
 #undef MA
+#undef BLA
+#undef SLA
 #undef IVA
 #undef HA
 #undef IA
@@ -468,6 +476,18 @@ private:
       Offset m_end;
       Offset m_fpOff;
   };
+  typedef std::pair<Id, int> StrCase;
+  struct SwitchState : private boost::noncopyable {
+    SwitchState() : nonZeroI(-1), defI(-1) {}
+    std::map<int64, int> cases; // a map from int (or litstr id) to case index
+    std::vector<StrCase> caseOrder; // for string switches, a list of the
+                                    // <litstr id, case index> in the order
+                                    // they appear in the source
+    int nonZeroI;
+    int defI;
+  };
+
+  static const size_t kMinStringSwitchCases = 8;
   UnitEmitter& m_ue;
   FuncEmitter* m_curFunc;
   FileScopePtr m_file;
@@ -542,8 +562,13 @@ public:
   void emitClsIfSPropBase(Emitter& e);
   Label* getContinuationGotoLabel(StatementPtr s);
   void emitContinuationSwitch(Emitter& e, SwitchStatementPtr s);
-  bool emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
-                         std::vector<Label>& caseLabels, Label& done);
+  DataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
+  void emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
+                         std::vector<Label>& caseLabels, Label& done,
+                         const SwitchState& state);
+  void emitStringSwitch(Emitter& e, SwitchStatementPtr s,
+                        std::vector<Label>& caseLabels, Label& done,
+                        const SwitchState& state);
 
   void markElem(Emitter& e);
   void markNewElem(Emitter& e);

@@ -119,13 +119,17 @@ int immSize(const Opcode* opcode, int idx) {
     if (idx >= 1) offset += immSize(opcode, 0);
     if (idx >= 2) offset += immSize(opcode, 1);
     int prefixes, vecElemSz;
-    if (immType(*opcode, idx) == MA) {
+    auto itype = immType(*opcode, idx);
+    if (itype == MA) {
       prefixes = 2;
       vecElemSz = sizeof(uint8_t);
-    } else {
-      ASSERT(immType(*opcode, idx) == BLA);
+    } else if (itype == BLA) {
       prefixes = 1;
       vecElemSz = sizeof(Offset);
+    } else {
+      ASSERT(itype == SLA);
+      prefixes = 1;
+      vecElemSz = sizeof(StrVecItem);
     }
     return prefixes * sizeof(int32_t) +
       vecElemSz * *(int32_t*)((int8_t*)opcode + offset);
@@ -137,7 +141,7 @@ int immSize(const Opcode* opcode, int idx) {
 
 bool immIsVector(Opcode opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return (type == MA || type == BLA);
+  return (type == MA || type == BLA || type == SLA);
 }
 
 bool hasImmVector(Opcode opcode) {
@@ -275,7 +279,7 @@ Offset* instrJumpOffset(Opcode* instr) {
 #undef O
   };
 
-  ASSERT(*instr != OpSwitch);
+  ASSERT(!isSwitch(*instr));
   int mask = jumpMask[*instr];
   if (mask == 0) {
     return NULL;
@@ -309,7 +313,9 @@ Offset instrJumpTarget(const Opcode* instrs, Offset pos) {
 int numSuccs(const Opcode* instr) {
   if (!instrIsControlFlow(*instr)) return 1;
   if ((instrFlags(*instr) & TF) != 0) {
-    if (Op(*instr) == OpSwitch) return *(int*)(instr + 1);
+    if (isSwitch(*instr)) {
+      return *(int*)(instr + 1);
+    }
     if (Op(*instr) == OpJmp) return 1;
     return 0;
   }
@@ -713,15 +719,31 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
   out << ">";                                                           \
 } while (false)
 
-#define READIVEC() do {                     \
-  int sz = *(int*)it;                       \
-  it += sizeof(int);                        \
+#define READLITSTR(sep) do {                                      \
+  Id id = readData<Id>(it);                                       \
+  if (id < 0) {                                                   \
+    ASSERT(op == OpSSwitch);                                      \
+    out << sep << "-";                                            \
+  } else if (u) {                                                 \
+    const StringData* sd = u->lookupLitstrId(id);                 \
+    out << sep << "\"" <<                                         \
+      Util::escapeStringForCPP(sd->data(), sd->size()) << "\"";   \
+  } else {                                                        \
+    out << sep << id;                                             \
+  }                                                               \
+} while (false)
+
+#define READSVEC() do {                     \
+  int sz = readData<int>(it);               \
   out << " <";                              \
-  std::string sep;                          \
+  const char* sep = "";                     \
   for (int i = 0; i < sz; ++i) {            \
-    Offset o = *(Offset*)it;                \
-    it += sizeof(Offset);                   \
     out << sep;                             \
+    if (op == OpSSwitch) {                  \
+      READLITSTR("");                       \
+      out << ":";                           \
+    }                                       \
+    Offset o = readData<Offset>(it);        \
     if (u != NULL) {                        \
       out << u->offsetOf(iStart + o);       \
     } else {                                \
@@ -731,12 +753,14 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
   }                                         \
   out << ">";                               \
 } while (false)
+
 #define ONE(a) H_##a
 #define TWO(a, b) H_##a; H_##b
 #define THREE(a, b, c) H_##a; H_##b; H_##c;
 #define NA
 #define H_MA READVEC()
-#define H_BLA READIVEC()
+#define H_BLA READSVEC()
+#define H_SLA READSVEC()
 #define H_IVA READIVA()
 #define H_I64A READ(int64)
 #define H_HA READV()
@@ -744,15 +768,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define H_DA READ(double)
 #define H_BA READOFF()
 #define H_OA READOA()
-#define H_SA                                                      \
-  if (u) {                                                        \
-    const StringData* sd = u->lookupLitstrId(*((Id*)it));         \
-    out << " \"" <<                                               \
-      Util::escapeStringForCPP(sd->data(), sd->size()) << "\"";   \
-  } else {                                                        \
-    out << " " << *((Id*)it);                                     \
-  }                                                               \
-  it += sizeof(Id)
+#define H_SA READLITSTR(" ")
 #define H_AA                                                  \
   if (u) {                                                    \
     out << " ";                                               \
@@ -776,6 +792,8 @@ OPCODES
 #undef THREE
 #undef NA
 #undef H_MA
+#undef H_BLA
+#undef H_SLA
 #undef H_IVA
 #undef H_I64A
 #undef H_HA
@@ -822,7 +840,7 @@ ImmVector getImmVector(const Opcode* opcode) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const uint8_t*>(vp));
-    } else if (t == BLA) {
+    } else if (t == BLA || t == SLA) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp));

@@ -126,6 +126,12 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(Tx64_NewInstanceNoCtor) \
   STAT(Tx64_NewInstanceFast) \
   STAT(Tx64_NewInstanceGeneric) \
+  STAT(Tx64_StringSwitchSlow) \
+  STAT(Tx64_StringSwitchFast) \
+  STAT(Tx64_StringSwitchHit) \
+  STAT(Tx64_StringSwitchChain) \
+  STAT(Tx64_StringSwitchFailFast) \
+  STAT(Tx64_StringSwitchFailSlow) \
   /* Type prediction stats */ \
   STAT(TypePred_Insert) \
   STAT(TypePred_Evict) \
@@ -184,6 +190,10 @@ extern __thread uint64_t tl_tcInstrs;
   /* HphpArray */ \
   STAT(HA_FindIntFast) \
   STAT(HA_FindIntSlow) \
+  /* Switches */ \
+  STAT(Switch_Generic) \
+  STAT(Switch_Integer) \
+  STAT(Switch_String) \
 
 enum StatCounter {
 #define STAT(name) \

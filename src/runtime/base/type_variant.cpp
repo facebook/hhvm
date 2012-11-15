@@ -3974,11 +3974,9 @@ const char *Variant::getTypeString(DataType type) {
   case KindOfArray:   return "KindOfArray";
   case KindOfObject:  return "KindOfObject";
   case KindOfRef: return "KindOfRef";
-  default:
-    ASSERT(false);
-    break;
+  case KindOfInvalid: return "KindOfInvalid";
+  default: not_reached();
   }
-  return "";
 }
 
 std::string Variant::getDebugDump() const {

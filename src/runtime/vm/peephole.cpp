@@ -105,13 +105,10 @@ Peephole::Peephole(UnitEmitter &ue, Compiler::MetaInfoBuilder& metaInfo)
     // Simplify jumps. Follow a jump's target until it lands on something that
     // isn't an unconditional jump. Then rewrite the offset to cut out any
     // intermediate jumps.
-    if (*prev == OpSwitch) {
-      Offset* cur = (Offset*)(prev + 1);
-      int32_t vecLen = *(int32_t*)cur;
-      cur++;
-      for (int i = 0; i < vecLen; ++i, ++cur) {
-        collapseJmp(cur, prev, start);
-      }
+    if (isSwitch(*prev)) {
+      foreachSwitchTarget(prev, [&](Offset& o) {
+        collapseJmp(&o, prev, start);
+      });
     } else {
       collapseJmp(instrJumpOffset(prev), prev, start);
     }
@@ -165,13 +162,11 @@ void Peephole::buildJumpTargets() {
   // all jump targets are targets
   for (Offset pos = 0; pos < (Offset)m_ue.m_bclen;
        pos += instrLen(&m_ue.m_bc[pos])) {
-    Opcode* absPos = (Opcode*)&m_ue.m_bc[pos];
-    if (*absPos == OpSwitch) {
-      int32_t* cur = (int32_t*)&m_ue.m_bc[pos+1];
-      int32_t vecLen = *cur++;
-      for (int i = 0; i < vecLen; ++i, ++cur) {
-        m_jumpTargets.insert((Offset)(intptr_t)(absPos + *cur));
-      }
+    Opcode* instr = &m_ue.m_bc[pos];
+    if (isSwitch(*instr)) {
+      foreachSwitchTarget(instr, [&](Offset& o) {
+        m_jumpTargets.insert(pos + o);
+      });
     } else {
       Offset target = instrJumpTarget(m_ue.m_bc, pos);
       if (target != InvalidAbsoluteOffset) {

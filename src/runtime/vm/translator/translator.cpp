@@ -975,6 +975,7 @@ static const struct {
   { OpJmpZ,        {Stack1,           None,         OutNone,          -1 }},
   { OpJmpNZ,       {Stack1,           None,         OutNone,          -1 }},
   { OpSwitch,      {Stack1,           None,         OutNone,          -1 }},
+  { OpSSwitch,     {Stack1,           None,         OutNone,          -1 }},
   /*
    * RetC and RetV are special. Their manipulation of the runtime stack are
    * outside the boundaries of the tracelet abstraction; since they always end

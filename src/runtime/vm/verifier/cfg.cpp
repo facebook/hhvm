@@ -58,10 +58,10 @@ void GraphBuilder::createBlocks() {
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
     PC pc = i.popFront();
     if (isCF(pc) && !i.empty()) createBlock(i.front());
-    if (Op(*pc) == OpSwitch) {
-      ImmVector vec = getImmVector(pc);
-      const int* v = vec.vec32();
-      for (int i = 0, n = vec.size(); i < n; i++) createBlock(pc + v[i]);
+    if (isSwitch(*pc)) {
+      foreachSwitchTarget((Opcode*)pc, [&](Offset& o) {
+        createBlock(pc + o);
+      });
     } else {
       Offset target = instrJumpTarget(bc, pc - bc);
       if (target != InvalidAbsoluteOffset) createBlock(target);
@@ -81,12 +81,11 @@ void GraphBuilder::linkBlocks() {
     PC pc = i.popFront();
     block->last = pc;
     if (isCF(pc)) {
-      if (Op(*pc) == OpSwitch) {
-        ImmVector vec = getImmVector(pc);
-        const int* v = vec.vec32();
-        for (int i = 0, n = vec.size(); i < n; i++) {
-          succs(block)[i] = at(pc + v[i]);
-        }
+      if (isSwitch(*pc)) {
+        int i = 0;
+        foreachSwitchTarget((Opcode*)pc, [&](Offset& o) {
+          succs(block)[i++] = at(pc + o);
+        });
       } else {
         Offset target = instrJumpTarget(bc, pc - bc);
         if (target != InvalidAbsoluteOffset) {

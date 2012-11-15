@@ -4354,7 +4354,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
   DECODE(int32_t, veclen);
   ASSERT(veclen > 0);
   Offset* jmptab = (Offset*)pc;
-  pc += veclen * sizeof(int32_t);
+  pc += veclen * sizeof(*jmptab);
   DECODE(int64, base);
   DECODE_IVA(bounded);
 
@@ -4449,6 +4449,33 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSwitch(PC& pc) {
       pc = origPC + jmptab[intval - base];
     }
   }
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopSSwitch(PC& pc) {
+  PC origPC = pc;
+  NEXT();
+  DECODE(int32, veclen);
+  ASSERT(veclen > 1);
+  unsigned cases = veclen - 1; // the last vector item is the default case
+  StrVecItem* jmptab = (StrVecItem*)pc;
+  pc += veclen * sizeof(*jmptab);
+
+  TypedValue* val = m_stack.topTV();
+  Unit* u = m_fp->m_func->unit();
+  unsigned i;
+  for (i = 0; i < cases; ++i) {
+    auto& item = jmptab[i];
+    const StringData* str = u->lookupLitstrId(item.str);
+    if (tvAsVariant(val).equal(str)) {
+      pc = origPC + item.dest;
+      break;
+    }
+  }
+  if (i == cases) {
+    // default case
+    pc = origPC + jmptab[veclen-1].dest;
+  }
+  m_stack.popC();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {

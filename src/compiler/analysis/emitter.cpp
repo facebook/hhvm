@@ -289,6 +289,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define NA
 #define DEC_MA std::vector<uchar>
 #define DEC_BLA std::vector<Label*>&
+#define DEC_SLA std::vector<StrOff>&
 #define DEC_IVA int32
 #define DEC_HA int32
 #define DEC_IA int32
@@ -342,6 +343,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_HA_NA
 #define POP_HA_MA(i)
 #define POP_HA_BLA(i)
+#define POP_HA_SLA(i)
 #define POP_HA_IVA(i)
 #define POP_HA_IA(i)
 #define POP_HA_I64A(i)
@@ -412,6 +414,18 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL1_BLA IMPL_BLA(a1)
 #define IMPL2_BLA IMPL_BLA(a2)
 #define IMPL3_BLA IMPL_BLA(a3)
+
+#define IMPL_SLA(var) do {                      \
+  auto& ue = getUnitEmitter();                  \
+  ue.emitInt32(var.size());                     \
+  for (auto& i : var) {                         \
+    ue.emitInt32(i.str);                        \
+    IMPL_BA(*i.dest);                           \
+  }                                             \
+} while (0)
+#define IMPL1_SLA IMPL_SLA(a1)
+#define IMPL2_SLA IMPL_SLA(a2)
+#define IMPL3_SLA IMPL_SLA(a3)
 
 #define IMPL_IVA(var) do { \
   getUnitEmitter().emitIVA(var); \
@@ -538,6 +552,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef IMPL1_BLA
 #undef IMPL2_BLA
 #undef IMPL3_BLA
+#undef IMPL_SLA
+#undef IMPL1_SLA
+#undef IMPL2_SLA
+#undef IMPL3_SLA
 #undef IMPL_IVA
 #undef IMPL1_IVA
 #undef IMPL2_IVA
@@ -2232,14 +2250,38 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         bool enabled = RuntimeOption::EnableEmitSwitch;
         SimpleFunctionCallPtr
           call(dynamic_pointer_cast<SimpleFunctionCall>(subject));
-        if (enabled && call &&
-            call->isCompilerCallToFunction("hphp_unpack_continuation")) {
+        bool isGenerator = call &&
+          call->isCompilerCallToFunction("hphp_unpack_continuation");
+        if (enabled && isGenerator) {
           emitContinuationSwitch(e, sw);
           return false;
         }
-        bool didIntSwitch =
-          enabled && emitIntegerSwitch(e, sw, caseLabels, done);
-        if (!didIntSwitch) {
+
+        SwitchState state;
+        bool didSwitch = false;
+        if (enabled) {
+          DataType stype = analyzeSwitch(sw, state);
+          if (stype != KindOfInvalid) {
+            e.incStat(stype == KindOfInt64 ? Stats::Switch_Integer
+                                           : Stats::Switch_String,
+                      1);
+            if (state.cases.empty()) {
+              // If there are no non-default cases, evaluate the subject for
+              // side effects and fall through. If there's a default case it
+              // will be emitted immediately after this.
+              visit(sw->getExp());
+              emitPop(e);
+            } else if (stype == KindOfInt64) {
+              emitIntegerSwitch(e, sw, caseLabels, done, state);
+            } else {
+              ASSERT(IS_STRING_TYPE(stype));
+              emitStringSwitch(e, sw, caseLabels, done, state);
+            }
+            didSwitch = true;
+          }
+        }
+        if (!didSwitch) {
+          e.incStat(Stats::Switch_Generic, 1);
           if (!simpleSubject) {
             // Evaluate the subject once and stash it in a local
             tempLocal = m_curFunc->allocUnnamedLocal();
@@ -2254,18 +2296,19 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           int defI = -1;
           for (uint i = 0; i < ncase; i++) {
             CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
-            if (c->getCondition()) {
+            ExpressionPtr condition = c->getCondition();
+            if (condition) {
               if (simpleSubject) {
                 // Evaluate the subject every time.
                 visit(subject);
                 emitConvertToCellOrLoc(e);
-                visit(c->getCondition());
+                visit(condition);
                 emitConvertToCell(e);
                 emitConvertSecondToCell(e);
               } else {
                 emitVirtualLocal(tempLocal);
                 emitCGet(e);
-                visit(c->getCondition());
+                visit(condition);
                 emitConvertToCell(e);
               }
               e.Eq();
@@ -2292,7 +2335,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitBreakHandler(e, done, done, brkHand, cntHand);
         }
         done.set(e);
-        if (!didIntSwitch && !simpleSubject) {
+        if (!didSwitch && !simpleSubject) {
           // Null out temp local, to invoke any needed refcounting
           ASSERT(tempLocal >= 0);
           ASSERT(start != InvalidAbsoluteOffset);
@@ -4603,63 +4646,90 @@ void EmitterVisitor::emitContinuationSwitch(Emitter& e,
   }
 }
 
-bool EmitterVisitor::emitIntegerSwitch(Emitter& e,
-                                       SwitchStatementPtr sw,
-                                       std::vector<Label>& caseLabels,
-                                       Label& done) {
+DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
+                                       SwitchState& state) {
+  auto& caseMap = state.cases;
+  DataType t = KindOfUninit;
   StatementListPtr cases(sw->getCases());
   const int ncase = cases->getCount();
-  int defI = -1;
-  int nonZeroI = -1;
-  // Map from case value to index in caseLabels
-  std::map<int64, int> caseMap;
 
-  // Bail if there are one or more non-integer cases
+  // Bail if the cases aren't homogeneous
   for (int i = 0; i < ncase; ++i) {
     CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
     ExpressionPtr condition = c->getCondition();
     if (condition) {
       Variant cval;
-      if (!(condition->getScalarValue(cval) && cval.getType() == KindOfInt64)) {
-        return false;
+      DataType caseType;
+      if (condition->getScalarValue(cval)) {
+        caseType = cval.getType();
+        if (caseType == KindOfStaticString) caseType = KindOfString;
+        if ((caseType != KindOfInt64 && caseType != KindOfString) ||
+            !IMPLIES(t != KindOfUninit, caseType == t)) {
+          return KindOfInvalid;
+        }
+        t = caseType;
+      } else {
+        return KindOfInvalid;
       }
-      int64 n = cval.asInt64Val();
+      int64 n;
+      bool isNonZero;
+      if (t == KindOfInt64) {
+        n = cval.asInt64Val();
+        isNonZero = n;
+      } else {
+        assert(t == KindOfString);
+        n = m_ue.mergeLitstr(cval.asStrRef().stringData());
+        isNonZero = false; // not used for string switches
+      }
       if (!mapContains(caseMap, n)) {
         // If 'case n:' appears multiple times, only the first will
         // ever match
         caseMap[n] = i;
+        if (t == KindOfString) {
+          // We have to preserve the original order of the cases for string
+          // switches because of insane things like 0 being equal to any string
+          // that is not a nonzero numeric string.
+          state.caseOrder.push_back(StrCase(safe_cast<Id>(n), i));
+        }
       }
-      if (nonZeroI == -1 && n != 0) {
+      if (state.nonZeroI == -1 && isNonZero) {
         // true is equal to any non-zero integer, so to preserve php's
         // switch semantics we have to remember the first non-zero
         // case to appear in the source text
-        nonZeroI = i;
+        state.nonZeroI = i;
       }
     } else {
       // Last 'default:' wins
-      defI = i;
+      state.defI = i;
     }
   }
 
-  if (caseMap.empty()) {
-    // If there are no non-default cases, evaluate the subject for
-    // side effects and fall through. If there's a default case it
-    // will be emitted immediately after this.
-    visit(sw->getExp());
-    emitPop(e);
-    return true;
+  if (t == KindOfInt64) {
+    int64 base = caseMap.begin()->first;
+    int64 nTargets = caseMap.rbegin()->first - base + 1;
+    // Fail if the cases are too sparse
+    if ((float)caseMap.size() / nTargets < 0.5) {
+      return KindOfInvalid;
+    }
+  } else if (t == KindOfString) {
+    if (caseMap.size() < kMinStringSwitchCases) {
+      return KindOfInvalid;
+    }
   }
 
+  return t;
+}
+
+void EmitterVisitor::emitIntegerSwitch(Emitter& e, SwitchStatementPtr sw,
+                                       std::vector<Label>& caseLabels,
+                                       Label& done, const SwitchState& state) {
+  auto& caseMap = state.cases;
   int64 base = caseMap.begin()->first;
   int64 nTargets = caseMap.rbegin()->first - base + 1;
-  // Fail if the cases are too sparse
-  if ((float)caseMap.size() / nTargets < 0.5) {
-    return false;
-  }
 
   // It's on. Map case values to Labels, filling in the blanks as
   // appropriate.
-  Label* defLabel = defI == -1 ? &done : &caseLabels[defI];
+  Label* defLabel = state.defI == -1 ? &done : &caseLabels[state.defI];
   std::vector<Label*> labels(nTargets + 2);
   for (int i = 0; i < nTargets; ++i) {
     int caseIdx;
@@ -4671,13 +4741,30 @@ bool EmitterVisitor::emitIntegerSwitch(Emitter& e,
   }
 
   // Fill in offsets for the first non-zero case and default
-  labels[labels.size() - 2] = nonZeroI == -1 ? defLabel : &caseLabels[nonZeroI];
+  labels[labels.size() - 2] =
+    state.nonZeroI == -1 ? defLabel : &caseLabels[state.nonZeroI];
   labels[labels.size() - 1] = defLabel;
 
   visit(sw->getExp());
   emitConvertToCell(e);
   e.Switch(labels, base, 1);
-  return true;
+}
+
+void EmitterVisitor::emitStringSwitch(Emitter& e, SwitchStatementPtr sw,
+                                      std::vector<Label>& caseLabels,
+                                      Label& done, const SwitchState& state) {
+  std::vector<Emitter::StrOff> labels;
+  for (auto& pair : state.caseOrder) {
+    labels.push_back(Emitter::StrOff(pair.first, &caseLabels[pair.second]));
+  }
+
+  // Default case comes last
+  Label* defLabel = state.defI == -1 ? &done : &caseLabels[state.defI];
+  labels.push_back(Emitter::StrOff(-1, defLabel));
+
+  visit(sw->getExp());
+  emitConvertToCell(e);
+  e.SSwitch(labels);
 }
 
 void EmitterVisitor::markElem(Emitter& e) {

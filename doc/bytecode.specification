@@ -594,9 +594,9 @@ try region.  The evaluation stack must also be empty at any offset
 listed as a catch entry point.
 
 4) If a given instruction is not the target of a forward branch and it follows
-a Jmp, Switch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or ContHandle
-instruction, the evaluation stack before executing the given instruction must
-be empty.
+a Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or
+ContHandle instruction, the evaluation stack before executing the given
+instruction must be empty.
 
 5) Before executing the RetC instruction, the evaluation stack must contain
 exactly one value and the flavor descriptor of the value must be cell.
@@ -613,7 +613,7 @@ for a funclet may not jump into the code for the primary function body or
 another funclet.
 
 7) The primary function body and each fault funclet must end with one of the
-following instructions: Jmp, Switch, RetC, RetV, Unwind, Fatal, Throw,
+following instructions: Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw,
 NativeImpl, or ContHandle. The primary function body may not contain the Unwind
 instruction. Also, fault funclets may not contain the Ret* instructions.
 
@@ -1132,6 +1132,15 @@ Switch  <offset vector> <base> <bounded>    [C]  ->  []
   transferred to the location specified by vector[$n - base]. Otherwise,
   control will be transferred to the location specified by
   vector[length(vector) - 1].
+
+SSwitch  <litstr id/offset vector>    [C]  ->  []
+
+  Switch over string case values. This instruction will search the
+  string/offset vector from the beginning until it finds a string that is equal
+  to $1. If one is found, control will be transferred to the location specified
+  by the offset corresponding to that string. If a matching string is not
+  found, control is transferred to the location specified by the final element
+  in the vector.
 
 RetC    [C]  ->  []
 RetV    [V]  ->  []

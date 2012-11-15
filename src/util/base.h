@@ -564,7 +564,14 @@ template<class T, size_t Sz>
 size_t array_size(T (&t)[Sz]) {
   return Sz;
 }
+
+template<typename Out, typename In>
+Out& readData(In*& it) {
+  Out& r = *(Out*)it;
+  (char*&)it += sizeof(Out);
+  return r;
 }
+} // namespace HPHP
 
 namespace boost {
 

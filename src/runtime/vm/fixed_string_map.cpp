@@ -44,6 +44,7 @@ void FixedStringMap<V, case_sensitive>::init(int num) {
     capac *= 2;
   }
   TRACE(1, "FixedStringMap::init: %d -> %d\n", num, capac);
+  ASSERT(!m_table);
   m_table = (Elm*)calloc(capac * sizeof(Elm), 1);
   ASSERT(m_table);
   m_mask = capac - 1;
@@ -83,6 +84,7 @@ template class FixedStringMap<Slot, true>;
 template class FixedStringMap<Id, false>;
 template class FixedStringMap<Id, true>;
 template class FixedStringMap<Func*, false>;
+template class FixedStringMap<unsigned char* /* TCA */, true>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

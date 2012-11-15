@@ -46,7 +46,9 @@ class UnitChecker {
 };
 
 bool checkUnit(const Unit* unit, bool verbose) {
-  verify_error("verifying unit from %s\n", unit->filepath()->data());
+  if (verbose) {
+    verify_error("verifying unit from %s\n", unit->filepath()->data());
+  }
   return UnitChecker(unit, verbose).verify();
 }
 

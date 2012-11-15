@@ -516,6 +516,7 @@ MINSTRS
   CASE(Print) \
   CASE(Jmp) \
   CASE(Switch) \
+  CASE(SSwitch) \
   CASE(RetC) \
   CASE(RetV) \
   CASE(NativeImpl) \

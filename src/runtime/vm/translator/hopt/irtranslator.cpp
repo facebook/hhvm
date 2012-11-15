@@ -569,6 +569,12 @@ TranslatorX64::irTranslateSwitch(const Tracelet& t,
   HHIR_UNIMPLEMENTED(Switch);
 }
 
+void
+TranslatorX64::irTranslateSSwitch(const Tracelet& t,
+                                  const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(SSwitch);
+}
+
 /*
  * translateRetC --
  *

@@ -873,6 +873,7 @@ int hhbcTarget(const ProgramOptions &po, AnalysisResultPtr ar,
   RuntimeOption::RepoLocalPath = ar->getOutputPath() + '/' + po.program;
   RuntimeOption::RepoLocalMode = "rw";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
+  RuntimeOption::RepoJournal = "memory";
 
   int formatCount = 0;
   const char *type = 0;

@@ -39,7 +39,7 @@ Timer::Timer(Type type, const char *name /* = NULL */, ReportType r)
   : m_type(type), m_report(r) {
   if (name) {
     m_name = name;
-    PRINT_MSG("%s...\n", name);
+    PRINT_MSG("%s...", name);
   }
   m_start = measure();
 }
@@ -57,7 +57,7 @@ int64 Timer::getMicroSeconds() const {
 void Timer::report() const {
   int64 ms = getMicroSeconds();
   int seconds = ms / 1000000;
-  PRINT_MSG("%s took %d'%02d\" (%lld us) %s\n", m_name.c_str(),
+  PRINT_MSG("%s took %d'%02d\" (%lld us) %s", m_name.c_str(),
             seconds / 60, seconds % 60, ms, getName());
 }
 

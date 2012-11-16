@@ -69,6 +69,13 @@ can be used to control repo behavior:
   central: Write eval units to the central repo.
   readonly: Do not write eval units to a repo, but still search for them in
             repos.
+* Repo.Journal: delete(*) or memory
+  delete: Delete the on-disk SQLite journal upon each successful transaction
+          commit.
+  memory: Store the SQLite journal in memory.  The hphp compiler uses this mode
+          when compiling because it is faster than delete mode (and safe under
+          such conditions), but it is unsafe to use under normal operating
+          conditions.
 * Repo.Commit: true(*) or false
   If true, commit newly emitted units to the repo.
 * Repo.DebugInfo: true(*) or false

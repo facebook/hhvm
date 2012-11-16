@@ -442,6 +442,7 @@ public:
   static std::string RepoLocalPath;
   static std::string RepoCentralPath;
   static std::string RepoEvalMode;
+  static std::string RepoJournal;
   static bool RepoCommit;
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;

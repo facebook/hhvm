@@ -433,6 +433,7 @@ std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
 std::string RuntimeOption::RepoCentralPath;
 std::string RuntimeOption::RepoEvalMode;
+std::string RuntimeOption::RepoJournal;
 bool RuntimeOption::RepoCommit = true;
 bool RuntimeOption::RepoDebugInfo = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
@@ -1285,6 +1286,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
         RepoEvalMode = "readonly";
       }
     }
+    RepoJournal = repo["Journal"].getString("delete");
     RepoCommit = repo["Commit"].getBool(true);
     RepoDebugInfo = repo["DebugInfo"].getBool(true);
     RepoAuthoritative = repo["Authoritative"].getBool(false);

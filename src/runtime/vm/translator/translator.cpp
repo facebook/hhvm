@@ -1503,6 +1503,9 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
  * For MetaData information that affects whether we want to even put a
  * value in the ni->inputs, we need to look at it before we call
  * getInputs(), so this is separate from applyInputMetaData.
+ *
+ * We also check GuardedThis here, since RetC is short-circuited in
+ * applyInputMetaData.
  */
 void Translator::preInputApplyMetaData(Unit::MetaHandle metaHand,
                                        NormalizedInstruction* ni) {
@@ -1510,9 +1513,16 @@ void Translator::preInputApplyMetaData(Unit::MetaHandle metaHand,
 
   Unit::MetaInfo info;
   while (metaHand.nextArg(info)) {
-    if (info.m_kind == Unit::MetaInfo::NonRefCounted) {
+    switch (info.m_kind) {
+    case Unit::MetaInfo::NonRefCounted:
       ni->nonRefCountedLocals.resize(curFunc()->numLocals());
       ni->nonRefCountedLocals[info.m_data] = 1;
+      break;
+    case Unit::MetaInfo::GuardedThis:
+      ni->guardedThis = true;
+      break;
+    default:
+      break;
     }
   }
 }
@@ -1567,9 +1577,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       case Unit::MetaInfo::GuardedCls:
         ni->guardedCls = true;
-        break;
-      case Unit::MetaInfo::GuardedThis:
-        ni->guardedThis = true;
         break;
       case Unit::MetaInfo::ArrayCapacity:
         ni->imm[0].u_IVA = info.m_data;
@@ -1724,8 +1731,9 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         // and was handled above.
         not_reached();
 
+      case Unit::MetaInfo::GuardedThis:
       case Unit::MetaInfo::NonRefCounted:
-        // fallthrough
+        // fallthrough; these are handled in preInputApplyMetaData.
       case Unit::MetaInfo::None:
         break;
     }

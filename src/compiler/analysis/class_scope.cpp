@@ -808,6 +808,14 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   }
   m_traitStatus = BEING_FLATTENED;
 
+  // First, make sure that parent classes have their traits imported
+  if (!m_parent.empty()) {
+    ClassScopePtr parent = ar->findClass(m_parent);
+    if (parent) {
+      parent->importUsedTraits(ar);
+    }
+  }
+
   // Find trait methods to be imported
   for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
     ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);

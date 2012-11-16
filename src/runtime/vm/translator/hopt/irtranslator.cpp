@@ -521,6 +521,12 @@ TranslatorX64::irTranslateCastInt(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateCastDouble(const Tracelet& t,
+                                     const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(CastDouble);
+}
+
+void
 TranslatorX64::irTranslateCastString(const Tracelet& t,
                                    const NormalizedInstruction& i) {
   HHIR_EMIT(CastString);

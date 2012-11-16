@@ -506,6 +506,7 @@ MINSTRS
   CASE(BitNot) \
   CASE(CastInt) \
   CASE(CastString) \
+  CASE(CastDouble) \
   CASE(Print) \
   CASE(Jmp) \
   CASE(Switch) \

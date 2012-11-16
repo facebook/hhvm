@@ -5893,6 +5893,17 @@ TranslatorX64::translateCastString(const Tracelet& t,
 }
 
 void
+TranslatorX64::analyzeCastDouble(Tracelet& t, NormalizedInstruction& i) {
+  i.m_txFlags = nativePlan(i.inputs[0]->valueType() == KindOfDouble);
+}
+
+void
+TranslatorX64::translateCastDouble(const Tracelet& t,
+                                   const NormalizedInstruction& i) {
+  // nop.
+}
+
+void
 TranslatorX64::analyzePrint(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 1);
   const RuntimeType& rtt = i.inputs[0]->rtt;

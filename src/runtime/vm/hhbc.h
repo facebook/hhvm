@@ -548,6 +548,7 @@ enum SetOpOp {
   O(ContStopped,     NA,               NOV,             NOV,        NF) \
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
+  O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF) \
 
 enum Op {

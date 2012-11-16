@@ -83,6 +83,11 @@ public:
   EmitterVisitor& getEmitterVisitor() { return m_ev; }
   void setTempLocation(LocationPtr loc) { m_tempLoc = loc; }
   LocationPtr getTempLocation() { return m_tempLoc; }
+  void incStat(int counter, int value) {
+    if (RuntimeOption::EnableEmitterStats) {
+      IncStat(counter, value);
+    }
+  }
 
 #define O(name, imm, pop, push, flags) \
   void name(imm);

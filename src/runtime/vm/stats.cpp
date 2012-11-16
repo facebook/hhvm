@@ -26,6 +26,13 @@ using namespace HPHP::VM::Transl;
 
 TRACE_SET_MOD(stats);
 
+const char* g_counterNames[] = {
+#include "runtime/vm/stats-opcodeDef.h"
+#define STAT(s) #s ,
+  STATS
+#undef STAT
+#undef O
+};
 __thread uint64_t tl_counters[kNumStatCounters];
 __thread uint64_t tl_helper_counters[kMaxNumTrampolines];
 

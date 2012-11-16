@@ -363,6 +363,7 @@ public:
   static bool EnableXHP;
   static bool EnableObjDestructCall;
   static bool EnableEmitSwitch;
+  static bool EnableEmitterStats;
   static bool EnableEvalOptimization;
   static int  EvalScalarValueExprLimit;
   static bool CheckSymLink;

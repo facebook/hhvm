@@ -159,30 +159,31 @@ extern __thread uint64_t tl_tcInstrs;
   STAT(TraceletGuard_enter) \
   STAT(TraceletGuard_branch) \
   STAT(TraceletGuard_execute) \
-    STAT(UnitMerge_hoistable) \
-    STAT(UnitMerge_hoistable_persistent) \
-    STAT(UnitMerge_hoistable_persistent_cache) \
-    STAT(UnitMerge_hoistable_persistent_parent) \
-    STAT(UnitMerge_hoistable_persistent_parent_cache) \
-    STAT(UnitMerge_mergeable) \
-    STAT(UnitMerge_mergeable_unique) \
-    STAT(UnitMerge_mergeable_unique_persistent) \
-    STAT(UnitMerge_mergeable_unique_persistent_cache) \
-    STAT(UnitMerge_mergeable_define) \
-    STAT(UnitMerge_mergeable_global) \
-    STAT(UnitMerge_mergeable_class) \
-    STAT(UnitMerge_mergeable_require) \
-    STAT(UnitMerge_redo_hoistable) \
-    STAT(PropAsm_Generic) \
-    STAT(PropAsm_Specialized) \
-    STAT(PropAsm_GenFinal) \
-    /* astubs stats */ \
-    STAT(Astubs_New) \
-    STAT(Astubs_Reused) \
-    /* HphpArray */ \
-    STAT(HA_FindIntFast) \
-    STAT(HA_FindIntSlow) \
-
+  /* Unit merging stats */ \
+  STAT(UnitMerge_hoistable) \
+  STAT(UnitMerge_hoistable_persistent) \
+  STAT(UnitMerge_hoistable_persistent_cache) \
+  STAT(UnitMerge_hoistable_persistent_parent) \
+  STAT(UnitMerge_hoistable_persistent_parent_cache) \
+  STAT(UnitMerge_mergeable) \
+  STAT(UnitMerge_mergeable_unique) \
+  STAT(UnitMerge_mergeable_unique_persistent) \
+  STAT(UnitMerge_mergeable_unique_persistent_cache) \
+  STAT(UnitMerge_mergeable_define) \
+  STAT(UnitMerge_mergeable_global) \
+  STAT(UnitMerge_mergeable_class) \
+  STAT(UnitMerge_mergeable_require) \
+  STAT(UnitMerge_redo_hoistable) \
+  /* property getter stats */ \
+  STAT(PropAsm_Generic) \
+  STAT(PropAsm_Specialized) \
+  STAT(PropAsm_GenFinal) \
+  /* astubs stats */ \
+  STAT(Astubs_New) \
+  STAT(Astubs_Reused) \
+  /* HphpArray */ \
+  STAT(HA_FindIntFast) \
+  STAT(HA_FindIntSlow) \
 
 enum StatCounter {
 #define STAT(name) \
@@ -193,6 +194,7 @@ enum StatCounter {
 };
 #undef O
 
+extern const char* g_counterNames[kNumStatCounters];
 extern __thread uint64_t tl_counters[kNumStatCounters];
 
 extern __thread uint64_t tl_helper_counters[];
@@ -207,7 +209,7 @@ static inline bool enableInstrCount() {
 }
 
 static inline void inc(StatCounter stat, int n = 1) {
-  if (Trace::moduleEnabled(Trace::stats, 1)) {
+  if (enabled()) {
     tl_counters[stat] += n;
   }
 }

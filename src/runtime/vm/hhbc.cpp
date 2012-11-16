@@ -17,6 +17,7 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/vm/hhbc.h>
 #include <runtime/vm/unit.h>
+#include <runtime/vm/stats.h>
 #include <sstream>
 
 namespace HPHP {
@@ -642,6 +643,17 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 
 #define READV() out << " " << decodeVariableSizeImm(&it);
 
+#define READIVA() do {                      \
+  out << " ";                               \
+  auto imm = decodeVariableSizeImm(&it);    \
+  if (op == OpIncStat && immIdx == 0) {     \
+    out << Stats::g_counterNames[imm];      \
+  } else {                                  \
+    out << imm;                             \
+  }                                         \
+  immIdx++;                                 \
+} while (false)
+
 #define READOA() do {                                             \
   int immVal = (int)*((uchar*)&*it);                              \
   it += sizeof(uchar);                                            \
@@ -725,7 +737,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define NA
 #define H_MA READVEC()
 #define H_BLA READIVEC()
-#define H_IVA READV()
+#define H_IVA READIVA()
 #define H_I64A READ(int64)
 #define H_HA READV()
 #define H_IA READV()
@@ -752,6 +764,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define O(name, imm, push, pop, flags)    \
   case Op##name: {                        \
     out << #name;                         \
+    UNUSED unsigned immIdx = 0;           \
     imm;                                  \
     break;                                \
   }

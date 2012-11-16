@@ -7384,6 +7384,13 @@ void TranslatorX64::translateStrlen(const Tracelet& t,
   }
 }
 
+void TranslatorX64::translateIncStat(const Tracelet& t,
+                                     const NormalizedInstruction& i) {
+  int32 counter = i.imm[0].u_IVA;
+  int32 value = i.imm[1].u_IVA;
+  Stats::emitInc(a, Stats::StatCounter(counter), value);
+}
+
 static void analyzeClassExistsImpl(NormalizedInstruction& i) {
   const int nameIdx = 1;
   const int autoIdx = 0;
@@ -11744,6 +11751,7 @@ bool TranslatorX64::dumpTCData() {
   NATIVE_OP(ContDone) \
   NATIVE_OP(ContValid) \
   NATIVE_OP(ContStopped) \
+  NATIVE_OP(IncStat) \
   /*
    * Translations with non-reentrant helpers.
    */ \

@@ -6965,6 +6965,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopStrlen(PC& pc) {
   subj->m_data.num = ans;
 }
 
+inline void OPTBLD_INLINE VMExecutionContext::iopIncStat(PC& pc) {
+  NEXT();
+  DECODE_IVA(counter);
+  DECODE_IVA(value);
+  Stats::inc(Stats::StatCounter(counter), value);
+}
+
 void VMExecutionContext::classExistsImpl(PC& pc, Attr typeAttr) {
   NEXT();
   TypedValue* aloadTV = m_stack.topTV();

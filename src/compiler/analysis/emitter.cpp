@@ -23,6 +23,7 @@
 #include <runtime/vm/peephole.h>
 #include <runtime/vm/repo.h>
 #include <runtime/vm/as.h>
+#include <runtime/vm/stats.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/type_conversions.h>

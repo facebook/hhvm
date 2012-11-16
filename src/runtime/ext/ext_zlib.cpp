@@ -486,23 +486,59 @@ Variant f_nzuncompress(CStrRef compressed) {
   return str.setSize(len);
 }
 
+// Varint helper functions for lz4
+int VarintSize(int val) {
+  int s = 1;
+  while (val >= 128) {
+    ++s;
+    val >>= 7;
+  }
+  return s;
+}
+
+void VarintEncode(int val, char** dest) {
+  char* p = *dest;
+  while (val >= 128) {
+    *p++ = 0x80 | (static_cast<char>(val) & 0x7f);
+    val >>= 7;
+  }
+  *p++ = static_cast<char>(val);
+  *dest = p;
+}
+
+int VarintDecode(const char** src, int max_size) {
+  const char* p = *src;
+  int val = 0;
+  int shift = 0;
+  while (*p & 0x80) {
+    if (max_size <= 1) { return -1; }
+    --max_size;
+    val |= static_cast<int>(*p++ & 0x7f) << shift;
+    shift += 7;
+  }
+  val |= static_cast<int>(*p++) << shift;
+  *src = p;
+  return val;
+}
+
 Variant f_lz4compress(CStrRef uncompressed) {
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
   }
-  bufsize += sizeof(int);  // for the header
+  int headerSize = VarintSize(uncompressed.size());
+  bufsize += headerSize;  // for the header
   String s = String(bufsize, ReserveString);
   char *compressed = s.mutableSlice().ptr;
 
-  *((int*)compressed) = uncompressed.size();  // write the header
+  VarintEncode(uncompressed.size(), &compressed);  // write the header
 
-  int csize = LZ4_compress(uncompressed.data(), compressed + sizeof(int),
+  int csize = LZ4_compress(uncompressed.data(), compressed,
       uncompressed.size());
   if (csize < 0) {
     return false;
   }
-  bufsize = csize + sizeof(int);
+  bufsize = csize + headerSize;
   s.shrink(bufsize);
   return s.setSize(bufsize);
 }
@@ -512,33 +548,32 @@ Variant f_lz4hccompress(CStrRef uncompressed) {
   if (bufsize < 0) {
     return false;
   }
-  bufsize += sizeof(int);  // for the header
+  int headerSize = VarintSize(uncompressed.size());
+  bufsize += headerSize;  // for the header
   String s = String(bufsize, ReserveString);
   char *compressed = s.mutableSlice().ptr;
 
-  *((int*)compressed) = uncompressed.size();  // write the header
+  VarintEncode(uncompressed.size(), &compressed);  // write the header
 
   int csize = LZ4_compressHC(uncompressed.data(),
-      compressed + sizeof(int), uncompressed.size());
+      compressed, uncompressed.size());
   if (csize < 0) {
     return false;
   }
-  bufsize = csize + sizeof(int);
+  bufsize = csize + headerSize;
   return s.shrink(bufsize);
 }
 
 Variant f_lz4uncompress(CStrRef compressed) {
-  if (compressed.size() < (ssize_t)sizeof(int)) {
-    return false;
-  }
-  int dsize = *((int*)compressed.data());
+  const char* compressed_ptr = compressed.data();
+  int dsize = VarintDecode(&compressed_ptr, compressed.size());
   if (dsize < 0) {
     return false;
   }
 
   String s = String(dsize, ReserveString);
   char *uncompressed = s.mutableSlice().ptr;
-  int ret = LZ4_uncompress(compressed.data() + sizeof(int), uncompressed, dsize);
+  int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
 
   if (ret <= 0) {
     return false;

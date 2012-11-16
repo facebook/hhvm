@@ -3720,6 +3720,10 @@ TranslatorX64::getInputsIntoXMMRegs(const NormalizedInstruction& ni,
   // Get the values into their appropriate xmm locations
   auto intoXmm = [&](const DynLocation& l, PhysReg src, xmm_register xmm) {
     if (l.isInt()) {
+      // cvtsi2sd doesn't modify the high bits of its target, which can
+      // cause false dependencies to prevent register renaming from kicking
+      // in. Break the dependency chain by zeroing out the destination reg.
+      a.  pxor_xmm_xmm(xmm, xmm);
       a.  cvtsi2sd_reg64_xmm(src, xmm);
     } else {
       a.  mov_reg64_xmm(src, xmm);

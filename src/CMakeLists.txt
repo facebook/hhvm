@@ -17,25 +17,27 @@
 
 include(HPHPSetup)
 
-# find all the source files
 if ("$ENV{USE_HHVM}" STREQUAL "1")
+	# HHVM Build
 	SET(USE_HHVM TRUE)
 	SET(ENV{HHVM} 1)
+	ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/src/hhvm/hhvm\\\"")
+	set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/ext_hhvm runtime/vm system/gen system/lib util)
+
+	if ("$ENV{USE_HPHPC}" STREQUAL "1")
+		message(FATAL_ERROR "Both USE_HHVM and USE_HPHPC are set, you may only select one")
+	endif()
 else()
+	# HPHPc Build
 	SET(USE_HHVM FALSE)
+	ADD_DEFINITIONS("-DHHVM_PATH=\"\"")
+	set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/vm system/gen system/lib util)
+
+	if (NOT "$ENV{USE_HPHPC}" STREQUAL "1")
+		message(FATAL_ERROR "You must select which version of HipHop to build by setting either USE_HHVM=1 or USE_HPHPC=1 in your environment")
+	endif()
 endif()
 
-if (USE_HHVM)
-	ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/src/hhvm/hhvm\\\"")
-else()
-	ADD_DEFINITIONS("-DHHVM_PATH=\"\"")
-endif(USE_HHVM)
-
-if (USE_HHVM)
-	set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/ext_hhvm runtime/vm system/gen system/lib util)
-else()
-	set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext runtime/vm system/gen system/lib util)
-endif(USE_HHVM)
 
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 

@@ -3710,12 +3710,30 @@ setOpOpToOpcodeOp(SetOpOp soo) {
 }
 
 void
-TranslatorX64::binaryDoubleArith(const NormalizedInstruction& i,
-                                 Opcode op,
-                                 PhysReg srcReg,
-                                 PhysReg srcDestReg) {
-  a.   mov_reg64_xmm(srcReg, xmm1);
-  a.   mov_reg64_xmm(srcDestReg, xmm0);
+TranslatorX64::getInputsIntoXMMRegs(const NormalizedInstruction& ni,
+                                    PhysReg lr, PhysReg rr,
+                                    xmm_register lxmm,
+                                    xmm_register rxmm) {
+  const DynLocation& l = *ni.inputs[0];
+  const DynLocation& r = *ni.inputs[1];
+  // Get the values into their appropriate xmm locations
+  auto intoXmm = [&](const DynLocation& l, PhysReg src, xmm_register xmm) {
+    if (l.isInt()) {
+      a.  cvtsi2sd_reg64_xmm(src, xmm);
+    } else {
+      a.  mov_reg64_xmm(src, xmm);
+    }
+  };
+  intoXmm(l, lr, lxmm);
+  intoXmm(r, rr, rxmm);
+}
+
+void
+TranslatorX64::binaryMixedArith(const NormalizedInstruction& i,
+                           Opcode op,
+                           PhysReg srcReg,
+                           PhysReg srcDestReg) {
+  getInputsIntoXMMRegs(i, srcReg, srcDestReg, xmm1, xmm0);
   switch(op) {
 #define CASEIMM(OpBc, x64op)                                       \
     case OpBc:    a.  x64op ##sd_xmm_xmm(xmm1, xmm0); break
@@ -3766,7 +3784,6 @@ TranslatorX64::binaryArithCell(const NormalizedInstruction &i,
                                const DynLocation& inout) {
   ASSERT(in1.rtt.isInt() || in1.rtt.isDouble());
   ASSERT(inout.rtt.isInt() || inout.rtt.isDouble());
-  ASSERT(IMPLIES(inout.rtt.isDouble(), in1.rtt.isDouble()));
   ASSERT(in1.outerType() != KindOfRef);
   ASSERT(in1.isStack());
   ASSERT(inout.outerType() != KindOfRef);
@@ -3774,10 +3791,10 @@ TranslatorX64::binaryArithCell(const NormalizedInstruction &i,
   m_regMap.allocOutputRegs(i);
   PhysReg     srcReg = m_regMap.getReg(in1.location);
   PhysReg srcDestReg = m_regMap.getReg(inout.location);
-  if (in1.rtt.isInt()) {
+  if (in1.rtt.isInt() && inout.rtt.isInt()) {
     binaryIntegerArith(i, op, srcReg, srcDestReg);
   } else {
-    binaryDoubleArith(i, op, srcReg, srcDestReg);
+    binaryMixedArith(i, op, srcReg, srcDestReg);
   }
 }
 
@@ -3790,7 +3807,6 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
   ASSERT(in1.rtt.isInt() || in1.rtt.isDouble());
   ASSERT(in2.rtt.valueType() == KindOfInt64 ||
          in2.rtt.valueType() == KindOfDouble);
-  ASSERT(IMPLIES(in1.rtt.isDouble(), in2.rtt.valueType() == KindOfDouble));
   ASSERT(in1.outerType() != KindOfRef);
   ASSERT(in1.isStack());
   ASSERT(in2.isLocal());
@@ -3800,8 +3816,8 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
   PhysReg outReg = m_regMap.getReg(out.location);
   PhysReg localReg = m_regMap.getReg(in2.location);
   auto emitBody = [&](PhysReg out) {
-    if (in1.rtt.isDouble()) {
-      binaryDoubleArith(i, op, srcReg, out);
+    if (in1.rtt.isDouble() || in1.rtt.isDouble()) {
+      binaryMixedArith(i, op, srcReg, out);
     } else {
       binaryIntegerArith(i, op, srcReg, out);
     }
@@ -4009,10 +4025,19 @@ void raiseUndefVariable(StringData* nm) {
   if (nm->decRefCount() == 0) { nm->release(); }
 }
 
+// This intentionally excludes Int/Int, which is handled separately
+// from cases involving the FPU.
+bool
+mathEquivTypes(RuntimeType lt, RuntimeType rt) {
+  return (lt.isDouble() && rt.isDouble()) ||
+   (lt.isInt() && rt.isDouble()) ||
+   (lt.isDouble() && rt.isInt());
+}
+
 static TXFlags
 planBinaryArithOp(const NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 2);
-  if (i.inputs[0]->isDouble() && i.inputs[1]->isDouble()) {
+  if (mathEquivTypes(i.inputs[0]->rtt, i.inputs[1]->rtt)) {
     auto op = i.op();
     return nativePlan(op == OpMul || op == OpAdd || op == OpSub);
   }
@@ -4163,11 +4188,27 @@ TranslatorX64::analyzeEqOp(Tracelet& t, NormalizedInstruction& i) {
   RuntimeType &rt = i.inputs[1]->rtt;
   i.m_txFlags = nativePlan(trivialEquivType(lt) &&
                            trivialEquivType(rt));
+  if (!i.m_txFlags) {
+    i.m_txFlags = nativePlan(mathEquivTypes(lt, rt));
+  }
   if (i.isNative() &&
       IS_NULL_TYPE(lt.outerType()) &&
       IS_NULL_TYPE(rt.outerType())) {
     i.manuallyAllocInputs = true;
   }
+}
+
+void
+TranslatorX64::fpEq(const NormalizedInstruction& ni,
+                    PhysReg lr, PhysReg rr) {
+  getInputsIntoXMMRegs(ni, lr, rr, xmm0, xmm1);
+  m_regMap.allocOutputRegs(ni);
+  a.      ucomisd_xmm_xmm(xmm0, xmm1);
+  semiLikelyIfBlock(CC_P, a, [&] {
+    // PF means unordered; treat it as !eq. Or 1 into anything at all
+    // to clear ZF.
+    a.    or_imm32_reg64(1, reg::rScratch);
+  });
 }
 
 void
@@ -4272,6 +4313,8 @@ TranslatorX64::translateEqOp(const Tracelet& t,
     if (rightType != KindOfBoolean)
       emitConvertToBool(a, srcdest, srcdest, false);
     a.   cmp_reg64_reg64(src, srcdest);
+  } else if (leftType == KindOfDouble || rightType == KindOfDouble) {
+    fpEq(i, src, srcdest);
   } else {
     a.   cmp_reg64_reg64(src, srcdest);
   }
@@ -8069,18 +8112,19 @@ TranslatorX64::analyzeSetOpL(Tracelet& t, NormalizedInstruction& i) {
   ASSERT(i.inputs.size() == 2);
   const SetOpOp subOp = SetOpOp(i.imm[1].u_OA);
   Opcode arithOp = setOpOpToOpcodeOp(subOp);
-  if (i.inputs[0]->isDouble()) {
-    i.m_txFlags = nativePlan(i.inputs[1]->isDouble() &&
-                             (arithOp == OpAdd || arithOp == OpSub ||
-                              arithOp == OpMul));
-    return;
-  }
   i.m_txFlags = nativePlan(i.inputs[0]->isInt() &&
                            i.inputs[1]->valueType() == KindOfInt64 &&
                            (arithOp == OpAdd || arithOp == OpSub ||
                             arithOp == OpMul ||
                             arithOp == OpBitAnd || arithOp == OpBitOr ||
                             arithOp == OpBitXor));
+  if (!i.m_txFlags) {
+    i.m_txFlags = nativePlan(mathEquivTypes(i.inputs[0]->rtt,
+                                            i.inputs[1]->rtt) &&
+                             (arithOp == OpAdd || arithOp == OpSub ||
+                              arithOp == OpMul));
+    return;
+  }
 }
 
 void

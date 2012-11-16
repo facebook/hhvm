@@ -316,9 +316,12 @@ private:
                       PhysReg arg1, PhysReg arg2);
   void emitDerefStoreToLoc(PhysReg srcReg, const Location& destLoc);
 
+  void getInputsIntoXMMRegs(const NormalizedInstruction& ni,
+                            PhysReg lr, PhysReg rr,
+                            xmm_register lxmm, xmm_register rxmm);
   void binaryIntegerArith(const NormalizedInstruction &i,
                           Opcode op, PhysReg srcReg, PhysReg srcDestReg);
-  void binaryDoubleArith(const NormalizedInstruction &i,
+  void binaryMixedArith(const NormalizedInstruction &i,
                          Opcode op, PhysReg srcReg, PhysReg srcDestReg);
   void binaryArithCell(const NormalizedInstruction &i,
                        Opcode op, 
@@ -329,6 +332,7 @@ private:
                         const DynLocation& in1,
                         const DynLocation& in2,
                         const DynLocation& out);
+  void fpEq(const NormalizedInstruction& i, PhysReg lr, PhysReg rr);
   void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
               RegSet toSave = RegSet());
   void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,

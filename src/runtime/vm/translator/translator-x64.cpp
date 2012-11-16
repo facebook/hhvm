@@ -3816,7 +3816,7 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
   PhysReg outReg = m_regMap.getReg(out.location);
   PhysReg localReg = m_regMap.getReg(in2.location);
   auto emitBody = [&](PhysReg out) {
-    if (in1.rtt.isDouble() || in1.rtt.isDouble()) {
+    if (in1.rtt.isDouble() || in2.rtt.isDouble()) {
       binaryMixedArith(i, op, srcReg, out);
     } else {
       binaryIntegerArith(i, op, srcReg, out);

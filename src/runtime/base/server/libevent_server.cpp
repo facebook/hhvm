@@ -155,7 +155,7 @@ LibEventServer::LibEventServer(const std::string &address, int port,
   : Server(address, port, thread),
     m_accept_sock(-1),
     m_accept_sock_ssl(-1),
-    m_timeoutThreadData(thread, timeoutSeconds),
+    m_timeoutThreadData(timeoutSeconds),
     m_timeoutThread(&m_timeoutThreadData, &TimeoutThread::run),
     m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
@@ -372,6 +372,11 @@ int LibEventServer::getAcceptSocketSSL() {
 
 void LibEventServer::onThreadEnter() {
   m_timeoutThreadData.registerRequestThread
+    (&ThreadInfo::s_threadInfo->m_reqInjectionData);
+}
+
+void LibEventServer::onThreadExit(RequestHandler *handler) {
+  m_timeoutThreadData.removeRequestThread
     (&ThreadInfo::s_threadInfo->m_reqInjectionData);
 }
 

@@ -48,14 +48,9 @@ void TimeoutThread::DeferTimeout(int seconds) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TimeoutThread::TimeoutThread(int timerCount, int timeoutSeconds)
-  : m_numWorkers(0), m_numTimers(0), m_stopped(false),
-    m_timeoutSeconds(timeoutSeconds) {
-  ASSERT(timerCount > 0);
-
+TimeoutThread::TimeoutThread(int timeoutSeconds)
+  : m_nextId(0), m_stopped(false), m_timeoutSeconds(timeoutSeconds) {
   m_eventBase = event_base_new();
-  m_eventTimeouts.resize(timerCount);
-  m_timeoutData.resize(timerCount);
 
   // We need to open the pipe here because worker threads can start
   // before the timeout thread starts
@@ -70,19 +65,29 @@ void TimeoutThread::registerRequestThread(RequestInjectionData* data) {
   ASSERT(data);
   data->timeoutSeconds = m_timeoutSeconds;
 
-  // Add the new worker to the timeout thread's list of workers
   {
-    Lock lock(this);
-    ASSERT(m_numWorkers < (int)m_timeoutData.size());
-    m_timeoutData[m_numWorkers++] = data;
+    Lock l(this);
+    int id = m_nextId++;
+    ASSERT(!mapContains(m_clients, id));
+    m_clients[id].data = data;
+    m_pendingIds.push(id);
   }
+  notifyPipe();
+}
 
-  // Write to the timeout thread's pipe so that it wakes up and
-  // creates a timer for the new worker
-  if (write(m_pipe.getIn(), "", 1) < 0) {
-    Logger::Warning("Error notifying the timeout thread that a new "
-                    "worker has started");
+void TimeoutThread::removeRequestThread(RequestInjectionData* data) {
+  ASSERT(data);
+  {
+    Lock l(this);
+    for (auto& pair : m_clients) {
+      if (pair.second.data == data) {
+        m_pendingIds.push(pair.first);
+        pair.second.data = nullptr;
+        break;
+      }
+    }
   }
+  notifyPipe();
 }
 
 void TimeoutThread::checkForNewWorkers() {
@@ -92,22 +97,31 @@ void TimeoutThread::checkForNewWorkers() {
   if (m_timeoutSeconds <= 0) {
     return;
   }
+
   Lock lock(this);
-  // If there are new workers, create timers for them
-  if (m_numWorkers > m_numTimers) {
-    struct timeval timeout;
-    timeout.tv_usec = 0;
-    // +2 to make sure when it times out, this equation always holds:
-    //   time(0) - RequestInjection::s_reqInjectionData->started >=
-    //     m_timeoutSeconds
-    timeout.tv_sec = m_timeoutSeconds + 2;
-    for (int i = m_numTimers; i < m_numWorkers; ++i) {
-      event *e = &m_eventTimeouts[i];
-      event_set(e, i, 0, on_timer, this);
-      event_base_set(m_eventBase, e);
-      event_add(e, &timeout);
+  for (; !m_pendingIds.empty(); m_pendingIds.pop()) {
+    int id = m_pendingIds.front();
+    ASSERT(mapContains(m_clients, id));
+    ClientThread& ct = m_clients[id];
+
+    if (ct.data != nullptr) {
+      // This is a new thread and we have to register its timeout event
+
+      struct timeval timeout;
+      timeout.tv_usec = 0;
+      // +2 to make sure when it times out, this equation always holds:
+      //   time(0) - RequestInjection::s_reqInjectionData->started >=
+      //     m_timeoutSeconds
+      timeout.tv_sec = m_timeoutSeconds + 2;
+
+      event_set(&ct.e, id, 0, on_timer, this);
+      event_base_set(m_eventBase, &ct.e);
+      event_add(&ct.e, &timeout);
+    } else {
+      // This was a deleted thread and we have to remove its timeout event
+      event_del(&ct.e);
+      m_clients.erase(id);
     }
-    m_numTimers = m_numWorkers;
   }
 }
 
@@ -118,6 +132,13 @@ void TimeoutThread::drainPipe() {
   while (poll(fdArray, 1, 0) > 0) {
     char buf[256];
     read(m_pipe.getOut(), buf, 256);
+  }
+}
+
+void TimeoutThread::notifyPipe() {
+  if (write(m_pipe.getIn(), "", 1) < 0) {
+    Logger::Warning("Error notifying the timeout thread that an event has "
+                    "happened");
   }
 }
 
@@ -133,26 +154,31 @@ void TimeoutThread::run() {
     drainPipe();
   }
 
-  for (int i = 0; i < m_numTimers; ++i) {
-    event_del(&m_eventTimeouts[i]);
+  for (auto& pair : m_clients) {
+    event_del(&pair.second.e);
   }
   event_del(&m_eventPipe);
 }
 
 void TimeoutThread::stop() {
   m_stopped = true;
-  if (write(m_pipe.getIn(), "", 1) < 0) {
-    // an error occured but we're in shutdown already, so ignore
-  }
+  notifyPipe();
 }
 
 void TimeoutThread::onTimer(int index) {
-  ASSERT(index >= 0 && index < (int)m_eventTimeouts.size());
+  Lock l(this);
+  ASSERT(mapContains(m_clients, index));
+  ClientThread& ct = m_clients[index];
+  if (ct.data == nullptr) {
+    // The thread has been deleted but we haven't processed it
+    // yet. This is ok: just do nothing.
+    return;
+  }
 
-  event *e = &m_eventTimeouts[index];
+  event *e = &ct.e;
   event_del(e);
 
-  RequestInjectionData *data = m_timeoutData[index];
+  RequestInjectionData *data = ct.data;
   ASSERT(data);
   struct timeval timeout;
   timeout.tv_usec = 0;

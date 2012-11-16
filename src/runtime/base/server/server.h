@@ -167,7 +167,7 @@ public:
    */
   virtual RequestHandler *createRequestHandler() = 0;
   virtual void releaseRequestHandler(RequestHandler *handler) = 0;
-  virtual void onThreadExit(RequestHandler *handler) = 0;
+  virtual void onThreadExit(RequestHandler *handler) {}
 
   /**
    * Overwrite for URL blocking.
@@ -212,6 +212,7 @@ public:
   }
 
   virtual void onThreadExit(RequestHandler *handler) {
+    TServer::onThreadExit(handler);
     delete handler;
   }
 };

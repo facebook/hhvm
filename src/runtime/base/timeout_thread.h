@@ -17,6 +17,8 @@
 #ifndef __TIMEOUT_THREAD_H__
 #define __TIMEOUT_THREAD_H__
 
+#include <queue>
+
 #include <runtime/base/types.h>
 #include <util/base.h>
 #include <util/process.h>
@@ -31,10 +33,11 @@ public:
   static void DeferTimeout(int seconds);
 
 public:
-  TimeoutThread(int timerCount, int timeoutSeconds);
+  TimeoutThread(int timeoutSeconds);
   ~TimeoutThread();
 
   void registerRequestThread(RequestInjectionData* data);
+  void removeRequestThread(RequestInjectionData* data);
   void run();
   void stop();
 
@@ -43,14 +46,21 @@ public:
 private:
   void checkForNewWorkers();
   void drainPipe();
+  void notifyPipe();
 
-  int m_numWorkers;
-  int m_numTimers;
+  int m_nextId;
+  // m_pendingIds contains ids of threads that were added or removed
+  // and need to be processed by the worker thread
+  std::queue<int> m_pendingIds;
   bool m_stopped;
 
   event_base *m_eventBase;
-  std::vector<event> m_eventTimeouts;
-  std::vector<RequestInjectionData*> m_timeoutData;
+
+  struct ClientThread {
+    RequestInjectionData* data;
+    event e;
+  };
+  std::map<int, ClientThread> m_clients;
   int m_timeoutSeconds;
 
   // signal to wake up the thread

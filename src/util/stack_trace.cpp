@@ -32,6 +32,7 @@
 #include <util/hash.h>
 
 #include <runtime/base/execution_context.h>
+#include <runtime/base/compiler_id.h>
 #include <runtime/ext/ext_error.h>
 
 namespace HPHP {
@@ -329,6 +330,8 @@ void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
   dprintf(fd, "ThreadPID: %u\n", Process::GetThreadPid());
   dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());
   dprintf(fd, "Type: %s\n", errorType ? errorType : "(unknown error)");
+  dprintf(fd, "Runtime: %s\n", hhvm ? "hhvm" : "hphp");
+  dprintf(fd, "Version: %s\n", COMPILER_ID);
   dprintf(fd, "\n");
 
   hphp_string_map<std::string> &extra = StackTraceLog::s_logData->data;

@@ -1315,11 +1315,6 @@ void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
       m_tb.genExitOnVarEnv(exitTrace);
     }
 
-    // decref refcounted locals
-    for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
-      m_tb.genDecRefLoc(id);
-    }
-
     // decref $this
     if (mayHaveThis) {
       // TODO: tx64 breaks apart the cases of (isMethod && !isStatic)
@@ -1327,8 +1322,11 @@ void HhbcTranslator::emitRet(SSATmp* retVal, Trace* exitTrace,
       m_tb.genDecRefThis();
     }
 
+    // decref refcounted locals
+    for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
+      m_tb.genDecRefLoc(id);
+    }
   } else {
-
     // Emit call to frame_free_locals / frame_free_locals_no_this helper
     // to free locals and This (if needed)
     if (mayHaveThis) {

@@ -2179,6 +2179,9 @@ Address CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 
   // Load AR->m_this into rScratch
   m_as.load_reg64_disp_reg64(fpReg, AROFF(m_this), scratchReg);
+  // Currently we need to store zero back to m_this in case a local
+  // destructor does debug_backtrace.
+  m_as.store_imm64_disp_reg64(0, AROFF(m_this), fpReg);
 
   // In pseudo-mains, emit check for presence of m_this
   TCA patch1 = NULL;

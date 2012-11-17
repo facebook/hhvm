@@ -31,7 +31,6 @@ extern bool has_eval_support;
 
 const String null_string = String();
 const StaticString empty_string("");
-StringData* empty_string_data(empty_string.get());
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics

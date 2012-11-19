@@ -55,9 +55,14 @@ ExpressionPtr SimpleVariable::clone() {
 
 void SimpleVariable::setContext(Context context) {
   m_context |= context;
-  if (m_this && context & (RefValue | RefAssignmentLHS)) {
-    if (FunctionScopePtr func = getFunctionScope()) {
-      func->setContainsBareThis(true, true);
+  if (m_this) {
+    bool ref = context & (RefValue | RefAssignmentLHS);
+    bool unset = ((context & Expression::UnsetContext) &&
+      (context & Expression::LValue));
+    if (ref || unset) {
+      if (FunctionScopePtr func = getFunctionScope()) {
+        func->setContainsBareThis(true, true);
+      }
     }
   }
 }
@@ -147,10 +152,11 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
         func->setContainsThis();
         m_this = true;
         if (!hasContext(ObjectContext)) {
+          bool unset = hasAllContext(UnsetContext | LValue);
           func->setContainsBareThis(
             true,
             hasAnyContext(RefValue | RefAssignmentLHS) ||
-            m_sym->isRefClosureVar());
+            m_sym->isRefClosureVar() || unset);
           if (variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
             ClassScopePtr cls = getClassScope();
             TypePtr t = !cls || cls->isRedeclaring() ?

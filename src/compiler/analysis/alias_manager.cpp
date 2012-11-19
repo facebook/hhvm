@@ -2274,10 +2274,12 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           if (ref) {
             sym->setReferenced();
           }
+          bool unset = ((context & Expression::UnsetContext) &&
+            (context & Expression::LValue));
           if (sv->isThis()) {
             sv->getFunctionScope()->setContainsThis();
             if (!e->hasContext(Expression::ObjectContext)) {
-              sv->getFunctionScope()->setContainsBareThis(true, ref);
+              sv->getFunctionScope()->setContainsBareThis(true, ref || unset);
             } else if (m_graph) {
               int &id = m_gidMap["v:this"];
               if (!id) id = m_gidMap.size();
@@ -2286,8 +2288,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           } else if (m_graph) {
             m_objMap[sym->getName()] = sv;
           }
-          if ((context & Expression::UnsetContext) &&
-              (context & Expression::LValue)) {
+          if (unset) {
             sym->setReseated();
           }
           if (!(context & (Expression::AssignmentLHS |

@@ -31,3 +31,11 @@ function f() {
   print ":".isset($$g).":\n";
 }
 f();
+
+class A {
+  public function foo() {
+    unset($this);
+  }
+}
+$obj = new A;
+$obj->foo();

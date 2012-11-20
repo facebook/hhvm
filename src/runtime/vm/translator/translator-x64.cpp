@@ -8922,93 +8922,93 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
     Stats::emitInc(a, Stats::Tx64_NewInstanceFast);
   }
 
-  if (cls->preClass()->instanceCtor()) {
-    EMIT_RCALL(a, i, cls->preClass()->instanceCtor(), IMM(int64(cls)));
-  } else {
-    // First, make sure our property init vectors are all set up
-    bool props = cls->pinitVec().size() > 0;
-    bool sprops = cls->numStaticProperties() > 0;
-    ASSERT((props || sprops) == cls->needInitialization());
-    if (cls->needInitialization()) {
-      if (props) {
-        cls->initPropHandle();
-        Stats::emitInc(a, Stats::Tx64_NewInstancePropCheck);
-        a.test_imm64_disp_reg64(-1, cls->propHandle(), rVmTl);
-        {
-          UnlikelyIfBlock ifZero(CC_Z, a, astubs);
-          Stats::emitInc(a, Stats::Tx64_NewInstancePropInit);
-          EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initProps),
-                     IMM(int64(cls)));
-        }
-      }
-      if (sprops) {
-        cls->initSPropHandle();
-        Stats::emitInc(a, Stats::Tx64_NewInstanceSPropCheck);
-        a.test_imm64_disp_reg64(-1, cls->sPropHandle(), rVmTl);
-        {
-          UnlikelyIfBlock ifZero(CC_Z, a, astubs);
-          Stats::emitInc(a, Stats::Tx64_NewInstanceSPropInit);
-          EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initSProps),
-                     IMM(int64(cls)));
-        }
+  // First, make sure our property init vectors are all set up
+  bool props = cls->pinitVec().size() > 0;
+  bool sprops = cls->numStaticProperties() > 0;
+  ASSERT((props || sprops) == cls->needInitialization());
+  if (cls->needInitialization()) {
+    if (props) {
+      cls->initPropHandle();
+      Stats::emitInc(a, Stats::Tx64_NewInstancePropCheck);
+      a.test_imm64_disp_reg64(-1, cls->propHandle(), rVmTl);
+      {
+        UnlikelyIfBlock ifZero(CC_Z, a, astubs);
+        Stats::emitInc(a, Stats::Tx64_NewInstancePropInit);
+        EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initProps),
+                   IMM(int64(cls)));
       }
     }
+    if (sprops) {
+      cls->initSPropHandle();
+      Stats::emitInc(a, Stats::Tx64_NewInstanceSPropCheck);
+      a.test_imm64_disp_reg64(-1, cls->sPropHandle(), rVmTl);
+      {
+        UnlikelyIfBlock ifZero(CC_Z, a, astubs);
+        Stats::emitInc(a, Stats::Tx64_NewInstanceSPropInit);
+        EMIT_RCALL(astubs, i, getMethodHardwarePtr(&Class::initSProps),
+                   IMM(int64(cls)));
+      }
+    }
+  }
 
-    // Next, call newInstanceRaw to allocate an object
+  // Next, allocate the object
+  if (cls->instanceCtor()) {
+    EMIT_RCALL(a, i, cls->instanceCtor(), IMM(int64(cls)));
+  } else {
     ASSERT(allocator != -1);
     EMIT_RCALL(a, i, getMethodHardwarePtr(&Instance::newInstanceRaw),
                IMM(int64(cls)), IMM(allocator));
-    ScratchReg holdRax(m_regMap, rax);
+  }
+  ScratchReg holdRax(m_regMap, rax);
 
-    // Set the attributes, if any
-    int odAttrs = cls->getODAttrs();
-    if (odAttrs) {
-      // o_attribute is 16 bits but the fact that we're or-ing a mask makes
-      // it ok
-      ASSERT(!(odAttrs & 0xffff0000));
-      a.or_imm32_disp_reg32(odAttrs, ObjectData::attributeOff(), rax);
-    }
+  // Set the attributes, if any
+  int odAttrs = cls->getODAttrs();
+  if (odAttrs) {
+    // o_attribute is 16 bits but the fact that we're or-ing a mask makes
+    // it ok
+    ASSERT(!(odAttrs & 0xffff0000));
+    a.or_imm32_disp_reg32(odAttrs, ObjectData::attributeOff(), rax);
+  }
 
-    // Initialize the properties
-    size_t nProps = cls->numDeclProperties();
-    if (nProps > 0) {
-      ScratchReg propVec(m_regMap);
-      a.lea_reg64_disp_reg64(rax,
-                             sizeof(ObjectData) + cls->builtinPropSize(),
-                             *propVec);
-      a.pushr(rax);
-      a.sub_imm32_reg64(8, rsp); // rsp alignment to keep memcpy happy
-      if (cls->pinitVec().size() == 0) {
-        // Fast case: copy from a known address in the Class
-        EMIT_CALL(a, memcpy,
-                  R(*propVec),
-                  IMM(int64(&cls->declPropInit()[0])),
-                  IMM(cellsToBytes(nProps)));
-      } else {
-        // Slower case: we have to load the src address from the targetcache
-        ScratchReg propData(m_regMap);
-        // Load the Class's propInitVec from the targetcache
-        a.load_reg64_disp_reg64(rVmTl, cls->propHandle(), *propData);
-        // propData holds the PropInitVec. We want &(*propData)[0]
-        a.load_reg64_disp_reg64(*propData, Class::PropInitVec::dataOff(),
-                                *propData);
-        EMIT_CALL(a, memcpy,
-                  R(*propVec),
-                  R(*propData),
-                  IMM(cellsToBytes(nProps)));
-      }
-      a.add_imm32_reg64(8, rsp);
-      a.popr(rax);
+  // Initialize the properties
+  size_t nProps = cls->numDeclProperties();
+  if (nProps > 0) {
+    ScratchReg propVec(m_regMap);
+    a.lea_reg64_disp_reg64(rax,
+                           sizeof(ObjectData) + cls->builtinPropSize(),
+                           *propVec);
+    a.pushr(rax);
+    a.sub_imm32_reg64(8, rsp); // rsp alignment to keep memcpy happy
+    if (cls->pinitVec().size() == 0) {
+      // Fast case: copy from a known address in the Class
+      EMIT_CALL(a, memcpy,
+                R(*propVec),
+                IMM(int64(&cls->declPropInit()[0])),
+                IMM(cellsToBytes(nProps)));
+    } else {
+      // Slower case: we have to load the src address from the targetcache
+      ScratchReg propData(m_regMap);
+      // Load the Class's propInitVec from the targetcache
+      a.load_reg64_disp_reg64(rVmTl, cls->propHandle(), *propData);
+      // propData holds the PropInitVec. We want &(*propData)[0]
+      a.load_reg64_disp_reg64(*propData, Class::PropInitVec::dataOff(),
+                              *propData);
+      EMIT_CALL(a, memcpy,
+                R(*propVec),
+                R(*propData),
+                IMM(cellsToBytes(nProps)));
     }
-    if (cls->callsCustomInstanceInit()) {
-      // callCustomInstanceInit returns the instance in rax
-      if (false) {
-        UNUSED Instance* ret = ret->callCustomInstanceInit();
-      }
-      EMIT_RCALL(a, i,
-                 getMethodHardwarePtr(&Instance::callCustomInstanceInit),
-                 R(rax));
+    a.add_imm32_reg64(8, rsp);
+    a.popr(rax);
+  }
+  if (cls->callsCustomInstanceInit()) {
+    // callCustomInstanceInit returns the instance in rax
+    if (false) {
+      UNUSED Instance* ret = ret->callCustomInstanceInit();
     }
+    EMIT_RCALL(a, i,
+               getMethodHardwarePtr(&Instance::callCustomInstanceInit),
+               R(rax));
   }
 
   // We're done with what Instance's constructor would've done. Set up the

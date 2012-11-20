@@ -628,6 +628,7 @@ public:
   int getODAttrs() const { return m_ODAttrs; }
 
   int builtinPropSize() { return m_builtinPropSize; }
+  BuiltinCtorFunction instanceCtor() { return m_InstanceCtor; }
 
   // Interfaces this class declares in its "implements" clause.
   const std::vector<ClassPtr>& declInterfaces() const {

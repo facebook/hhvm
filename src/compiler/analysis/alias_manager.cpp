@@ -2598,6 +2598,9 @@ private:
         new ExpressionList(
           CONSTRUCT_PARAMS(target),
           ExpressionList::ListKindComma));
+    if (target->isUnused()) {
+      el->setUnused(true);
+    }
     el->addElement(assertion);
     el->addElement(target);
     el->setNoRemove(); // since it contains an assertion

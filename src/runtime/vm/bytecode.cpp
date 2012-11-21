@@ -5927,30 +5927,54 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCall(PC& pc) {
   doFCall<false>(ar, pc);
 }
 
-static inline bool isCppRefType(Func *func, int param) {
-  const Func::ParamInfo& pi = func->params()[param];
-  switch (pi.builtinType()) {
-    case KindOfBoolean:
-    case KindOfInt64:   return false;
-    case KindOfDouble:  ASSERT(false);
-    default:            return true;
+// Return a function pointer type for calling a builtin with a given
+// return value and args.
+template<class Ret, class... Args> struct NativeFunction {
+  typedef Ret (*type)(Args...);
+};
+
+// Recursively pack all parameters up to call a native builtin.
+template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller;
+template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller {
+  template<class... Args>
+  static Ret call(const Func* func, TypedValue* tvs, Args... args) {
+    typedef NativeFuncCaller<Ret,NArgs - 1,CurArg + 1> NextArgT;
+    DataType type = func->params()[CurArg].builtinType();
+    if (type == KindOfDouble) {
+      // Doubles have a different calling convention.  So we need to
+      // tell the C++ type system about it.
+      return NextArgT::call(func, tvs - 1, args..., tvs->m_data.dbl);
+    } else {
+      uintptr_t newArg = (type == KindOfInt64 || type == KindOfBoolean)
+        ? tvs->m_data.num
+        : uintptr_t(tvs);
+      return NextArgT::call(func, tvs - 1, args..., newArg);
+    }
   }
+};
+template<class Ret, size_t CurArg> struct NativeFuncCaller<Ret,0,CurArg> {
+  template<class... Args>
+  static Ret call(const Func* f, TypedValue*, Args... args) {
+    typedef typename NativeFunction<Ret,Args...>::type FuncType;
+    return reinterpret_cast<FuncType>(f->nativeFuncPtr())(args...);
+  }
+};
+
+template<class Ret>
+static Ret makeNativeCall(const Func* f, TypedValue* args, size_t numArgs) {
+  static_assert(kMaxBuiltinArgs == 5,
+                "makeNativeCall needs updates for kMaxBuiltinArgs");
+  switch (numArgs) {
+  case 0: return NativeFuncCaller<Ret,0,0>::call(f, args);
+  case 1: return NativeFuncCaller<Ret,1,0>::call(f, args);
+  case 2: return NativeFuncCaller<Ret,2,0>::call(f, args);
+  case 3: return NativeFuncCaller<Ret,3,0>::call(f, args);
+  case 4: return NativeFuncCaller<Ret,4,0>::call(f, args);
+  case 5: return NativeFuncCaller<Ret,5,0>::call(f, args);
+  default: ASSERT(false);
+  }
+  not_reached();
 }
-
-typedef int64_t (*NativeFunction0) ();
-typedef int64_t (*NativeFunction1) (int64_t);
-typedef int64_t (*NativeFunction2) (int64_t, int64_t);
-typedef int64_t (*NativeFunction3) (int64_t, int64_t, int64_t);
-typedef int64_t (*NativeFunction4) (int64_t, int64_t, int64_t, int64_t);
-typedef int64_t (*NativeFunction5) (int64_t, int64_t, int64_t, int64_t,
-                                    int64_t);
-
-typedef bool (*NativeBFunction0) ();
-typedef bool (*NativeBFunction1) (int64_t);
-typedef bool (*NativeBFunction2) (int64_t, int64_t);
-typedef bool (*NativeBFunction3) (int64_t, int64_t, int64_t);
-typedef bool (*NativeBFunction4) (int64_t, int64_t, int64_t, int64_t);
-typedef bool (*NativeBFunction5) (int64_t, int64_t, int64_t, int64_t, int64_t);
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   NEXT();
@@ -5986,51 +6010,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
   }
 #undef CASE
 
-/* Currently we support upto 5 arguments for builtins. If
- * there is a need for bultins with additional arguments,
- * the macros below can be extended.
- */
-#define NativeFuncArgs0()
-#define NativeFuncArgs1() (isCppRefType(func, 0) ? \
-                          (int64_t)(args) : (args->m_data.num))
-#define NativeFuncArgs2() NativeFuncArgs1(), (isCppRefType(func, 1) ? \
-                          (int64_t)(args-1) : ((args-1)->m_data.num))
-#define NativeFuncArgs3() NativeFuncArgs2(), (isCppRefType(func, 2) ? \
-                          (int64_t)(args-2) : ((args-2)->m_data.num))
-#define NativeFuncArgs4() NativeFuncArgs3(), (isCppRefType(func, 3) ? \
-                          (int64_t)(args-3) : ((args-3)->m_data.num))
-#define NativeFuncArgs5() NativeFuncArgs4(), (isCppRefType(func, 4) ? \
-                          (int64_t)(args-4) : ((args-4)->m_data.num))
-
-#define NativeCall(n) do {\
-  if (func->returnType() == KindOfBoolean) {\
-    NativeBFunction ## n nf = (NativeBFunction ## n)func->nativeFuncPtr(); \
-    result = nf(NativeFuncArgs ## n()) ? 1 : 0; \
-  } else { \
-    NativeFunction ## n nf = (NativeFunction ## n)func->nativeFuncPtr(); \
-    result = nf(NativeFuncArgs ## n()); \
-  } \
-} while(0); break;
-
   int64_t result;
-
-  ASSERT(kMaxBuiltinArgs == 5);
-  switch (numArgs) {
-    case 0:  NativeCall(0);
-    case 1:  NativeCall(1);
-    case 2:  NativeCall(2);
-    case 3:  NativeCall(3);
-    case 4:  NativeCall(4);
-    case 5:  NativeCall(5);
-    default: not_reached();
+  switch (func->returnType()) {
+  case KindOfBoolean:
+    result = makeNativeCall<bool>(func, args, numArgs);
+    break;
+  case KindOfInt64:
+    result = makeNativeCall<int64_t>(func, args, numArgs);
+    break;
+  default:
+    ASSERT(false);
+    not_reached();
   }
-#undef NativeFuncArgs0
-#undef NativeFuncArgs1
-#undef NativeFuncArgs2
-#undef NativeFuncArgs3
-#undef NativeFuncArgs4
-#undef NativeFuncArgs5
-#undef NativeCall
 
   frame_free_args(args, numArgs);
   m_stack.ndiscard(numArgs - 1);
